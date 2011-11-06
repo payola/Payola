@@ -1,3 +1,11 @@
+# Compilation output and other temporary directories.
 target/
+logs/
+tmp/
+
+# Tools. Maybe enable them in the future, so we all use the same.
+Tools/
+
+# IntelliJ Idea files.
 Payola/.idea/workspace.xml
 Payola/.idea/*highlighting.xml

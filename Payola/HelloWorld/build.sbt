@@ -1,1 +1,0 @@
-unmanagedBase <<= baseDirectory { base => base / "../lib" }
