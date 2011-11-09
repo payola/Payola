@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/HelloWorld.iml" filepath="$PROJECT_DIR$/.idea_modules/HelloWorld.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/Payola.iml" filepath="$PROJECT_DIR$/.idea_modules/Payola.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/PlayBeta.iml" filepath="$PROJECT_DIR$/.idea_modules/PlayBeta.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea_modules/ScalaToJs.iml" filepath="$PROJECT_DIR$/.idea_modules/ScalaToJs.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/project.iml" filepath="$PROJECT_DIR$/.idea_modules/project.iml" />
     </modules>
   </component>

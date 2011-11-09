@@ -3,7 +3,7 @@ import Keys._
 import PlayProject._
 
 object PayolaBuild extends Build {
-    
+
     object BuildSettings {
         val organization = "Payola"
         val version = "0.1"
@@ -29,6 +29,17 @@ object PayolaBuild extends Build {
         )
     )
 
+    lazy val scalaToJsProject = Project(
+        "ScalaToJs",
+        file("PlayBeta/ScalaToJs"),
+        settings = buildSettings ++ Seq(
+            // Whole path to the compiler plugin needs to be added, because scala compiler looks for the plugins
+            // only in SCALA_HOME.
+            scalacOptions += "-Xplugin:" + file("PlayBeta/ScalaToJs/lib/s2js_2.9.0-0.1-SNAPSHOT.jar").getAbsolutePath,
+            scalacOptions += "-P:s2js:output:PlayBeta/public/javascripts"
+        )
+    )
+
     lazy val playBetaProject = PlayProject(
         "PlayBeta", // Name of the project.
         BuildSettings.version, // Version of the project.
@@ -37,7 +48,8 @@ object PayolaBuild extends Build {
     ).settings(
         defaultScalaSettings: _*
     ).dependsOn(
-        helloWorldProject
+        helloWorldProject,
+        scalaToJsProject
     )
 
     lazy val payolaProject = Project(
@@ -46,6 +58,7 @@ object PayolaBuild extends Build {
         settings = buildSettings
     ).aggregate(
         helloWorldProject,
+        scalaToJsProject,
         playBetaProject
     )
 }  

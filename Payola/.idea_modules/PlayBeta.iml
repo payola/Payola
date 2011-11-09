@@ -64,7 +64,9 @@
     <orderEntry type="library" name="dom4j_dom4j_1.6.1" level="project" />
     <orderEntry type="library" name="xml-apis_xml-apis_1.0.b2" level="project" />
     <orderEntry type="library" name="javax.servlet_javax.servlet-api_3.0.1" level="project" />
+    <orderEntry type="library" name="s2js_2.9.0-0.1-SNAPSHOT.jar" level="project" />
     <orderEntry type="module" module-name="HelloWorld" exported="" />
+    <orderEntry type="module" module-name="ScalaToJs" exported="" />
   </component>
 </module>
 
