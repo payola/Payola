@@ -9,23 +9,24 @@
     </facet>
   </component>
   <component name="NewModuleRootManager" inherit-compiler-output="false">
-    <output url="file://$MODULE_DIR$/../PlayBeta/ScalaToJs/target/scala-2.9.1/classes" />
-    <output-test url="file://$MODULE_DIR$/../PlayBeta/ScalaToJs/target/scala-2.9.1/test-classes" />
+    <output url="file://$MODULE_DIR$/../ScalaToJs/target/scala-2.9.1/classes" />
+    <output-test url="file://$MODULE_DIR$/../ScalaToJs/target/scala-2.9.1/test-classes" />
     <exclude-output />
-    <content url="file://$MODULE_DIR$/../PlayBeta/ScalaToJs">
-      <sourceFolder url="file://$MODULE_DIR$/../PlayBeta/ScalaToJs/src/main/scala" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/../PlayBeta/ScalaToJs/src/main/java" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/../PlayBeta/ScalaToJs" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/../PlayBeta/ScalaToJs/src/main/resources" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/../PlayBeta/ScalaToJs/src/test/scala" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/../PlayBeta/ScalaToJs/src/test/java" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/../PlayBeta/ScalaToJs/src/test/resources" isTestSource="true" />
-      <excludeFolder url="file://$MODULE_DIR$/../PlayBeta/ScalaToJs/target" />
+    <content url="file://$MODULE_DIR$/../ScalaToJs">
+      <sourceFolder url="file://$MODULE_DIR$/../ScalaToJs/src/main/scala" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../ScalaToJs/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../ScalaToJs/src/main/resources" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../ScalaToJs/src/test/scala" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../ScalaToJs/src/test/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../ScalaToJs/src/test/resources" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/../ScalaToJs/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="org.scala-lang_scala-library_2.9.1" level="project" />
-    <orderEntry type="library" name="s2js_2.9.0-0.1-SNAPSHOT.jar" level="project" />
+    <orderEntry type="library" name="org.scala-lang_scala-compiler_2.9.1" level="project" />
+    <orderEntry type="module" module-name="Adapters" exported="" />
+    <orderEntry type="module" module-name="Compiler" exported="" />
   </component>
 </module>
 

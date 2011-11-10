@@ -20,19 +20,17 @@
       <sourceFolder url="file://$MODULE_DIR$/../PlayBeta/src/test/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../PlayBeta/src/test/resources" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/../PlayBeta/target/scala-2.9.1/cache" />
-      <excludeFolder url="file://$MODULE_DIR$/../PlayBeta/target/scala-2.9.1/classes" />
-      <excludeFolder url="file://$MODULE_DIR$/../PlayBeta/target/scala-2.9.1/classes_managed" />
       <excludeFolder url="file://$MODULE_DIR$/../PlayBeta/target/streams" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="org.scala-lang_scala-library_2.9.1" level="project" />
+    <orderEntry type="library" name="org.scala-lang_scala-compiler_2.9.1" level="project" />
     <orderEntry type="library" name="play_play_2.9.1_2.0-beta" level="project" />
     <orderEntry type="library" name="play_templates_2.9.1_2.0-beta" level="project" />
     <orderEntry type="library" name="com.github.scala-incubator.io_scala-io-file_2.9.1_0.2.0" level="project" />
     <orderEntry type="library" name="com.github.scala-incubator.io_scala-io-core_2.9.1_0.2.0" level="project" />
     <orderEntry type="library" name="com.github.jsuereth.scala-arm_scala-arm_2.9.1_0.3" level="project" />
-    <orderEntry type="library" name="org.scala-lang_scala-compiler_2.9.1" level="project" />
     <orderEntry type="library" name="org.jboss.netty_netty_3.2.6.Final" level="project" />
     <orderEntry type="library" name="org.slf4j_slf4j-api_1.6.2" level="project" />
     <orderEntry type="library" name="org.slf4j_jul-to-slf4j_1.6.2" level="project" />
@@ -64,9 +62,9 @@
     <orderEntry type="library" name="dom4j_dom4j_1.6.1" level="project" />
     <orderEntry type="library" name="xml-apis_xml-apis_1.0.b2" level="project" />
     <orderEntry type="library" name="javax.servlet_javax.servlet-api_3.0.1" level="project" />
-    <orderEntry type="library" name="s2js_2.9.0-0.1-SNAPSHOT.jar" level="project" />
+    <orderEntry type="library" name="compiler_2.9.1-0.2.jar" level="project" />
+    <orderEntry type="module" module-name="Client" exported="" />
     <orderEntry type="module" module-name="HelloWorld" exported="" />
-    <orderEntry type="module" module-name="ScalaToJs" exported="" />
   </component>
 </module>
 
