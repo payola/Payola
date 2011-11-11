@@ -57,7 +57,7 @@ abstract class PrinterFixtureSpec extends Spec with BeforeAndAfterAll {
       }
     }
 
-    class S2JSParser(settings:Settings, reporter:Reporter) extends Global(settings, reporter) with ScalaToJsPrinter {
+    class S2JSParser(settings:Settings, reporter:Reporter) extends Global(settings, reporter) with ScalaToJsComponent {
 
         def this(settings:Settings) = this(settings, new ConsoleReporter(settings))
 
