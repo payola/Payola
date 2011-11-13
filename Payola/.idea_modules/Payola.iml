@@ -24,7 +24,9 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="org.scala-lang_scala-library_2.9.1" level="project" />
-    <orderEntry type="library" name="compiler_2.9.1-0.2.jar" level="project" />
+    <orderEntry type="library" name="s2js-adapters_2.9.1-0.2.jar" level="project" />
+    <orderEntry type="library" name="s2js-compiler_2.9.1-0.2.jar" level="project" />
+    <orderEntry type="library" name="scala-library-2.9.1.jar" level="project" />
     <orderEntry type="module" module-name="ScalaToJs" exported="" />
     <orderEntry type="module" module-name="HelloWorld" exported="" />
     <orderEntry type="module" module-name="PlayBeta" exported="" />

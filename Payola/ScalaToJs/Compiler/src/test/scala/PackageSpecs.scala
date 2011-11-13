@@ -3,13 +3,13 @@ package s2js
 import org.scalatest.fixture.FixtureSpec
 import org.scalatest.{ Spec, BeforeAndAfterAll }
 
-class PackageSpecs extends PrinterFixtureSpec {
+class PackageSpecs extends CompilerFixtureSpec {
 
   describe("classes") {
 
-    it("can be case classes") {
+    it("can be case classes") { configMap =>
 
-      parser expect {"""
+      expect {"""
       case class A(name:String)
       """} toBe {"""
       goog.provide('A');
@@ -40,9 +40,9 @@ class PackageSpecs extends PrinterFixtureSpec {
       """}
     }
 
-    it("can mixin traits") {
+    it("can mixin traits") { configMap =>
 
-      parser expect {"""
+      expect {"""
 
       package pkg
 
@@ -84,9 +84,9 @@ class PackageSpecs extends PrinterFixtureSpec {
       """}
     }
 
-    it("can have constructors arguments") {
+    it("can have constructors arguments") { configMap =>
 
-      parser expect {"""
+      expect {"""
 
       package $pkg {
         class A()
@@ -120,9 +120,9 @@ class PackageSpecs extends PrinterFixtureSpec {
       """}
     }
 
-    it("can have methods") {
+    it("can have methods") { configMap =>
 
-      parser expect {"""
+      expect {"""
 
       package $pkg {
         class A {
@@ -148,9 +148,9 @@ class PackageSpecs extends PrinterFixtureSpec {
       """}
     }
 
-    it("can have fields") {
+    it("can have fields") { configMap =>
 
-      parser expect {"""
+      expect {"""
 
       package $pkg {
         class A {
@@ -172,9 +172,9 @@ class PackageSpecs extends PrinterFixtureSpec {
       """}
     }
 
-    it("can inherit from another class") {
+    it("can inherit from another class") { configMap =>
 
-      parser expect {"""
+      expect {"""
 
       package $pkg {
         class A
@@ -210,9 +210,9 @@ class PackageSpecs extends PrinterFixtureSpec {
       """}
     }
 
-    it("can have default arguments for constructors") {
+    it("can have default arguments for constructors") { configMap =>
 
-      parser expect {"""
+      expect {"""
       package $pkg {
         class A(x:String = "")
         class B extends A
@@ -239,9 +239,9 @@ class PackageSpecs extends PrinterFixtureSpec {
 
     }
 
-    it("can have a constructor body") {
+    it("can have a constructor body") { configMap =>
 
-      parser expect {"""
+      expect {"""
 
       class A(x:String) {
         val y:String = ""
@@ -270,9 +270,9 @@ class PackageSpecs extends PrinterFixtureSpec {
 
   describe("objects") {
 
-    it("can have methods") {
+    it("can have methods") { configMap =>
 
-      parser expect {"""
+      expect {"""
       package $pkg {
         object a {
           def m1() {}
@@ -284,9 +284,9 @@ class PackageSpecs extends PrinterFixtureSpec {
       """}
     }
 
-    it("can have variables") {
+    it("can have variables") { configMap =>
 
-      parser expect {"""
+      expect {"""
       package $pkg {
         object a {
           val x = "foo"
@@ -298,9 +298,9 @@ class PackageSpecs extends PrinterFixtureSpec {
       """}
     }
 
-    it("can be package objects") {
+    it("can be package objects") { configMap =>
 
-      parser expect {"""
+      expect {"""
 
       package p1
 
@@ -323,9 +323,9 @@ class PackageSpecs extends PrinterFixtureSpec {
 
   describe("misc") {
 
-    it("println should convert to console log") {
+    it("println should convert to console log") { configMap =>
 
-      parser expect {"""
+      expect {"""
       object a {
         def m1() {
           println("f")
@@ -339,9 +339,9 @@ class PackageSpecs extends PrinterFixtureSpec {
     """}
   }
 
-  it("export functions that have been annotated") {
+  it("export functions that have been annotated") { configMap =>
 
-    parser expect {"""
+    expect {"""
     package $pkg
 
     object a {

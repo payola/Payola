@@ -39,7 +39,7 @@ object PayolaBuild extends Build {
 
     lazy val scalaToJsProject = Project(
         "ScalaToJs",
-        file("ScalaToJs"),
+        file("./ScalaToJs"),
         settings = scalaToJsSettings
     ).aggregate(
         scalaToJsAdaptersProject,
@@ -49,17 +49,25 @@ object PayolaBuild extends Build {
         scalaToJsCompilerProject
     )
 
+    val adaptersJarName = "adapters_" + PayolaSettings.scalaVersion + "-" + ScalaToJsSettings.version + ".jar";
+
     lazy val scalaToJsAdaptersProject = Project(
         "Adapters",
-        file("ScalaToJs/Adapters"),
-        settings = scalaToJsSettings
+        file("./ScalaToJs/Adapters"),
+        settings = scalaToJsSettings ++ Seq(
+            packageBin <<= (packageBin in Compile) map { (jarFile: File) =>
+                IO.copyFile(jarFile, file("./lib/s2js-" + adaptersJarName))
+                jarFile
+            },
+            compile <<= (compile in Compile).dependsOn(packageBin)
+        )
     )
 
     val compilerJarName = "compiler_" + PayolaSettings.scalaVersion + "-" + ScalaToJsSettings.version + ".jar";
 
     lazy val scalaToJsCompilerProject = Project(
         "Compiler",
-        file("ScalaToJs/Compiler"),
+        file("./ScalaToJs/Compiler"),
         settings = scalaToJsSettings ++ Seq(
             libraryDependencies := Seq(scalaTestDependency, scalaCompilerDependency),
             resolvers ++= Seq(DefaultMavenRepository),
@@ -68,15 +76,16 @@ object PayolaBuild extends Build {
             // on the compiler need the .jar package for their compilation. But it still doesen't work if you perform the
             // compile command anywhere outside of the compiler project.
             packageBin <<= (packageBin in Compile) map { (jarFile: File) =>
-                IO.copyFile(jarFile, file("lib/" + compilerJarName))
+                IO.copyFile(jarFile, file("./lib/s2js-" + compilerJarName))
                 jarFile
             },
             compile <<= (compile in Compile).dependsOn(packageBin),
 
-            // TODO make the tests work.
             testOptions ++= Seq(
-                Tests.Argument("-Doutput=" + file("ScalaToJs/Compiler/target/tests").absolutePath),
-                Tests.Argument("-Dcp=" + file("ScalaToJs/Compiler/target/scala-2.9.1/test-classes/s2js").absolutePath)
+                Tests.Argument("-Dwd=" + file("./ScalaToJs/Compiler/target/tests").absolutePath),
+                Tests.Argument("-Dcp=" +
+                    "./lib/scala-library-" + PayolaSettings.scalaVersion + ".jar;" +
+                    "./lib/s2js-" + adaptersJarName)
             )
         )
     ).dependsOn(
@@ -85,7 +94,7 @@ object PayolaBuild extends Build {
 
     lazy val helloWorldProject = Project(
         "HelloWorld",
-        file("HelloWorld"),
+        file("./HelloWorld"),
         settings = payolaSettings ++ Seq(
             libraryDependencies := Seq(scalaTestDependency),
             resolvers ++= Seq(DefaultMavenRepository)
@@ -96,7 +105,7 @@ object PayolaBuild extends Build {
         "PlayBeta", // Name of the project.
         PayolaSettings.version, // Version of the project.
         Nil, // Library dependencies.
-        file("PlayBeta") // Path to the project.
+        file("./PlayBeta") // Path to the project.
     ).settings(
         defaultScalaSettings: _*
     ).aggregate(
@@ -108,11 +117,11 @@ object PayolaBuild extends Build {
 
     lazy val clientProject = Project(
         "Client",
-        file("PlayBeta/Client"),
+        file("./PlayBeta/Client"),
         settings = payolaSettings ++ Seq(
             // Whole path to the compiler plugin needs to be added, because scala compiler looks for the plugins only in SCALA_HOME.
-            scalacOptions += "-Xplugin:" + file("lib/"+ compilerJarName).getAbsolutePath,
-            scalacOptions += "-P:s2js:output:" + file("PlayBeta/public/javascripts/client").absolutePath
+            scalacOptions += "-Xplugin:" + file("./lib/"+ compilerJarName).getAbsolutePath,
+            scalacOptions += "-P:s2js:output:" + file("./PlayBeta/public/javascripts/client").absolutePath
         )
     ).dependsOn(
         scalaToJsProject

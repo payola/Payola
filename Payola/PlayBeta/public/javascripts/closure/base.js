@@ -1463,7 +1463,7 @@ goog.inherits = function(childCtor, parentCtor) {
  * This function only works if you use goog.inherits to express
  * inheritance relationships between your classes.
  *
- * This function is a compiler primitive. At compile-time, the
+ * This function is a compiler primitive. At compileToJs-time, the
  * compiler will do macro expansion to remove a lot of
  * the extra overhead that this function introduces. The compiler
  * will also enforce a lot of the assumptions that this function
