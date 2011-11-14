@@ -2,15 +2,10 @@ package s2js
 
 import java.io._
 
-import org.scalatest.BeforeAndAfterAll
+import scala.io.Source
 
-import scala.tools.nsc.Settings
-import scala.tools.nsc.interactive.Global
-import scala.tools.nsc.util.BatchSourceFile
-import scala.tools.nsc.reporters.{ConsoleReporter, Reporter}
+import org.scalatest.BeforeAndAfterAll
 import org.scalatest.fixture.{ConfigMapFixture, FixtureSpec}
-import util.matching.Regex
-import io.Source
 
 abstract class CompilerFixtureSpec extends FixtureSpec with ConfigMapFixture with BeforeAndAfterAll
 {
@@ -44,12 +39,15 @@ abstract class CompilerFixtureSpec extends FixtureSpec with ConfigMapFixture wit
     class Expector(val actual: String)
     {
         def toBe(expected: String) {
+            println(normalizeWhiteSpace(expected))
+            println(normalizeWhiteSpace(actual))
+
             assert(normalizeWhiteSpace(actual) == normalizeWhiteSpace(expected))
         }
 
         private def normalizeWhiteSpace(text: String) = {
-            text.replaceAll("""^[ ]+""", "")
             text.replaceAll("""([ ]{2,}|[\n])""", "")
         }
     }
+
 }

@@ -2,6 +2,9 @@ package browser
 
 object `package` {
 	def alert (s:Any) {}
+
+    object window extends Window {}
+    object document extends Document {}
 }
 
 /*
@@ -16,16 +19,14 @@ class Window {
 		var href = ""
 	}
 	def focus () {}
-	
+
 	def setTimeout (fn:()=>Unit, milliseconds:Int) {}
 
     val sessionStorage:Storage = null
     val localStorage:Storage = null
 }
 
-object window extends Window {}
-
-class Node 
+class Node
 
 class Element extends Node {
 	val id :String = ""
@@ -55,8 +56,6 @@ class Document {
 	val body:Element = null
 	def execCommand(command:String, showDefaultUI:Boolean, value:String) {}
 }
-
-object document extends Document
 
 class Range {
 	def insertNode (n:Node) {}

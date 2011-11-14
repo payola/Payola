@@ -8,6 +8,7 @@ object Hello {
         alert(b.x(3))
         alert(b.y("123*"))
         alert("Hello world")
+        alert(window.location)
     }
 }
 

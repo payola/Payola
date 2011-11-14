@@ -120,7 +120,7 @@ object PayolaBuild extends Build {
         file("./PlayBeta/Client"),
         settings = payolaSettings ++ Seq(
             // Whole path to the compiler plugin needs to be added, because scala compiler looks for the plugins only in SCALA_HOME.
-            scalacOptions += "-Xplugin:" + file("./lib/"+ compilerJarName).getAbsolutePath,
+            scalacOptions += "-Xplugin:" + file("./lib/s2js-"+ compilerJarName).getAbsolutePath,
             scalacOptions += "-P:s2js:output:" + file("./PlayBeta/public/javascripts/client").absolutePath
         )
     ).dependsOn(

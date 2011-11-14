@@ -57,14 +57,14 @@ class MiscSpecs extends CompilerFixtureSpec
                   var self = this;
                   self.u = u;
                 };
-                HashMap.$apply = function(e) {
+                HashMap.appli = function(e) {
                   var self = this;
                   return new HashMap(e);
                 };
                 o.start = function() {
                   var self = this;
                   var m1 = new HashMap({'one':'foo','two':'bar'});
-                  var m2 = HashMap.$apply({'one':'foo','two':'bar'});
+                  var m2 = HashMap.appli({'one':'foo','two':'bar'});
                 };
                 """
             }
