@@ -1,6 +1,6 @@
 package goog.ui 
 
-import browser._
+import js.dom.Element
 import goog.dom.DomHelper
 
 class Button (content:AnyRef /* ControlContent*/, renderer:ButtonRenderer=null, domHelper:DomHelper=null) extends Control (content) {

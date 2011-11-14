@@ -39,10 +39,11 @@ abstract class CompilerFixtureSpec extends FixtureSpec with ConfigMapFixture wit
     class Expector(val actual: String)
     {
         def toBe(expected: String) {
-            println(normalizeWhiteSpace(expected))
-            println(normalizeWhiteSpace(actual))
-
-            assert(normalizeWhiteSpace(actual) == normalizeWhiteSpace(expected))
+            if (normalizeWhiteSpace(actual) != normalizeWhiteSpace(expected)) {
+                println("Expected: " + normalizeWhiteSpace(expected))
+                println("Compiled: " + normalizeWhiteSpace(actual))
+                assert(false)
+            }
         }
 
         private def normalizeWhiteSpace(text: String) = {

@@ -6,7 +6,6 @@ import collection.mutable.{LinkedHashSet, ListBuffer}
 import tools.nsc.io.AbstractFile
 import tools.nsc.Global
 
-
 trait TreeToJsCompiler
 {
     val global: Global
@@ -16,12 +15,10 @@ trait TreeToJsCompiler
     val nonDependencies = List(
         "$default$",
         "ClassManifest",
-        "browser",
         "java.lang",
-        "s2js.Html",
-        "s2js.JsObject",
+        "js.browser",
+        "js.dom",
         "scala.Any",
-        "scala.Array",
         "scala.Boolean",
         "scala.Equals",
         "scala.Function0",
@@ -38,10 +35,7 @@ trait TreeToJsCompiler
         "scala.runtime.AbstractFunction1",
         "scala.runtime.AbstractFunction2",
         "scala.runtime.AbstractFunction3",
-        "scala.xml",
-        "scalosure.JsArray",
-        "scalosure.JsObject",
-        "scalosure.script"
+        "scala.xml"
     )
 
     def compileToJs(tree: global.Tree): String = {
@@ -81,7 +75,12 @@ trait TreeToJsCompiler
         RichTree(tree)
     }
 
-    val cosmicNames = List("java.lang.Object", "scala.ScalaObject", "scala.Any", "scala.AnyRef", "scala.Product")
+    val cosmicNames = List(
+        "java.lang.Object",
+        "scala.ScalaObject",
+        "scala.Any",
+        "scala.AnyRef",
+        "scala.Product")
 
     def isCosmicType(x: global.Tree): Boolean = {
         cosmicNames.contains(x.symbol.fullName)
@@ -571,32 +570,9 @@ trait TreeToJsCompiler
                 } mkString("{", ",", "}")
             }
 
-            case x@Apply(Select(q, n), args) if q.toString.matches("scalosure.JsObject") => {
-                args.headOption match {
-                    case Some(Typed(expr, tpt)) if tpt.toString == "_*" => {
-                        expr.toString
-                    }
-                    case _ => {
-                        args map {
-                            buildObjectLiteral
-                        } mkString("{", ",", "}")
-                    }
-                }
-            }
-
-            case x@Apply(Select(q, n), args) if q.toString.matches("scalosure.JsArray") => {
-                args map {
-                    buildObjectLiteral
-                } mkString("[", ",", "]")
-            }
-
             case x@Apply(Select(qualifier, BinaryOperator(op)), args) => {
                 "(%s %s %s)".format(
                     buildTree(qualifier), op, args.map(buildTree).mkString)
-            }
-
-            case x@Apply(Select(qualifier, name), args) if name.toString.endsWith("s2js.Html") => {
-                "html"
             }
 
             case x: ApplyToImplicitArgs => {
@@ -626,19 +602,6 @@ trait TreeToJsCompiler
 
             case x@Apply(TypeApply(f, _), args) if (f.symbol.owner.nameString == "ArrowAssoc") => {
                 "{%s}".format(buildObjectLiteral(x))
-            }
-
-            case x@Apply(TypeApply(fun@Select(q, n), _), args) if fun.hasSymbol && fun.symbol.owner.nameString == "JsObject" => {
-                args.headOption match {
-                    case Some(Typed(expr, tpt)) if tpt.toString == "_*" => {
-                        expr.toString
-                    }
-                    case _ => {
-                        args map {
-                            buildObjectLiteral
-                        } mkString("{", ",", "}")
-                    }
-                }
             }
 
             case x@Apply(fun, args) => {
@@ -760,12 +723,6 @@ trait TreeToJsCompiler
                     case f@Select(q, n) if f.symbol.owner.fullName == "scala.Array" => {
                         tmp.format(buildTree(q), processedArgs.mkString(","))
                     }
-                    case f@Select(q, n) if f.symbol.owner.fullName == "scalosure.JsArray" && n.toString == "apply" => {
-                        tmp.format(buildTree(q), processedArgs.mkString(","))
-                    }
-                    case TypeApply(f@Select(q, n), _) if f.symbol.fullName == "scalosure.JsArray.empty" => {
-                        "[]"
-                    }
                     case y => {
                         buildApply(fun)
                     }
@@ -833,17 +790,14 @@ trait TreeToJsCompiler
 
             case x@Select(qualifier, name) => {
                 qualifier match {
-                    case y@New(tt) if tt.symbol.fullName == "scalosure.JsArray" => {
-                        "new Array"
-                    }
                     case y@New(tt) => {
-                        "new " + (if (tt.toString.startsWith("browser")) {
+                        "new " + (if (tt.toString.startsWith("js.browser")) {
                             tt.symbol.nameString
                         } else {
                             scala2scalosure(tt.symbol)
                         })
                     }
-                    case y@Ident(_) if (name.toString == "apply" && (x.symbol.owner.isSynthetic || x.symbol.owner.nameString == "JsObject")) => {
+                    case y@Ident(_) if (name.toString == "apply" && x.symbol.owner.isSynthetic) => {
                         "%s.appli".format(
                             if (y.symbol.isLocal) {
                                 y.symbol.nameString
@@ -851,7 +805,7 @@ trait TreeToJsCompiler
                                 y.symbol.fullName
                             })
                     }
-                    case y@Ident(_) if (y.name.toString == "browser") => {
+                    case y@Ident(_) if (y.name.toString == "js.browser") => {
                         name.toString
                     }
                     case y@Ident(_) if name.toString == "apply" && y.symbol.isModule => {
@@ -913,7 +867,7 @@ trait TreeToJsCompiler
                     }
                     case y => {
                         // The browser package is an implicit => there is no namespace needed in js.
-                        (if (y.symbol.fullName == "browser.package") "" else buildTree(y) + ".") + name
+                        (if (y.symbol.fullName == "js.browser.package") "" else buildTree(y) + ".") + name
                     }
                 }
             }
@@ -1093,6 +1047,7 @@ trait TreeToJsCompiler
                                 sb.append(
                                     tmp.format("typeof %s == 'string'".format(buildTree(selector)), "return function(%s) {%s}(%s)".format(n.toString, buildTheBody(body), buildTree(selector))))
                             }
+                            /*
                             case x@Bind(n, b) => {
                                 val bindList = buildMatchBindList(x)
                                 val bindListArgs = bindList.mkString(",")
@@ -1110,7 +1065,7 @@ trait TreeToJsCompiler
                                 } mkString (",")
                                 sb.append(
                                     tmp.format(processMatch(selector, x, guard, body, false), "return function(%s) {%s}(%s)".format(bindListArgs, buildTree(body), bindListValues)))
-                            }
+                            }*/
                             case x => {
                                 sb.append("f" + x.getClass)
                             }
@@ -1130,6 +1085,7 @@ trait TreeToJsCompiler
         "function() {%s}()".format(sb.toString)
     }
 
+    /*
     def classType(f: global.Tree) = {
         JsFunction(f.tpe.finalResultType.toString)
     }
@@ -1228,7 +1184,7 @@ trait TreeToJsCompiler
                 JsObject(Nil)
             }
         }
-    }
+    }*/
 
     def buildField(tree: ValDef, inPackageObject: Boolean = false): String = {
 
@@ -1548,33 +1504,6 @@ trait TreeToJsCompiler
             }
             case x => {
                 quote(x.toString)
-            }
-        }
-    }
-
-    def scala2js(obj: JsType): String = {
-        obj match {
-            case JsObject(items) => {
-                items map {
-                    x => "'%s':%s".format(x._1, scala2js(x._2))
-                } mkString("{", ",", "}")
-            }
-            case JsArray(items) => {
-                items map {
-                    scala2js
-                } mkString("[", ",", "]")
-            }
-            case JsString(value) => {
-                "'%s'".format(value)
-            }
-            case JsBoolean(value) => {
-                value.toString
-            }
-            case JsNumber(value) => {
-                value.toString
-            }
-            case JsFunction(value) => {
-                value.toString
             }
         }
     }

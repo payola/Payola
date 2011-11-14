@@ -80,7 +80,7 @@ class ImportSpecs extends CompilerFixtureSpec
                 expect {
                     """
                         object o1 {
-                            val f1 = <span>foo</span>
+                            val f1 = "aaaa"
                             def m1() {
                                 println(f1)
                             }
@@ -90,7 +90,7 @@ class ImportSpecs extends CompilerFixtureSpec
                     """
                         goog.provide('o1');
                         
-                        o1.f1 = goog.dom.createDom('span',{},['foo']);
+                        o1.f1 = 'aaaa';
                         o1.m1 = function() {
                             var self = this;
                             console.log(o1.f1);
@@ -103,7 +103,7 @@ class ImportSpecs extends CompilerFixtureSpec
             configMap =>
                 expect {
                     """
-                        import browser._
+                        import js.browser._
 
                         object o1 {
                             val f1 = window.location

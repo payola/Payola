@@ -1,8 +1,8 @@
 
 package goog 
 
-import browser._
-	
+import js.dom.Element
+
 
 object `package` {
 	def getCssName (className:String, modifier:String = ""):String = ""

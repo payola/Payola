@@ -1,6 +1,7 @@
 package goog.editor
 
-import browser._
+import js.dom.{Anchor, Element, Document}
+
 
 class Field (id:String, opt_doc:Document = null) {
 	val originalElement:Element = null
@@ -76,7 +77,7 @@ object node {
 	def isEditable (node:Element):Boolean = false
 }
 
-class Link (anchor:HTMLAnchorElement, isNew:Boolean) {
+class Link (anchor:Anchor, isNew:Boolean) {
 	def getCurrentText ():String = ""
 	def isNew () = false
 }

@@ -6,7 +6,7 @@ class XmlLiteralSpec extends CompilerFixtureSpec
 
     describe("xml literals") {
 
-        it("simple tags") {
+        ignore("simple tags") {
             configMap =>
 
                 expect {
@@ -23,7 +23,7 @@ class XmlLiteralSpec extends CompilerFixtureSpec
                 }
         }
 
-        it("can have literal tags") {
+        ignore("can have literal tags") {
             configMap =>
 
                 expect {
@@ -47,7 +47,7 @@ class XmlLiteralSpec extends CompilerFixtureSpec
                 }
         }
 
-        it("can have variable children") {
+        ignore("can have variable children") {
             configMap =>
 
                 expect {
@@ -72,7 +72,7 @@ class XmlLiteralSpec extends CompilerFixtureSpec
                 }
         }
 
-        it("can have variable attributes") {
+        ignore("can have variable attributes") {
             configMap =>
 
                 expect {
@@ -102,7 +102,7 @@ class XmlLiteralSpec extends CompilerFixtureSpec
                 }
         }
 
-        it("can have expresssions") {
+        ignore("can have expresssions") {
             configMap =>
 
                 expect {
@@ -121,7 +121,7 @@ class XmlLiteralSpec extends CompilerFixtureSpec
                 }
         }
 
-        it("can have function calls") {
+        ignore("can have function calls") {
             configMap =>
 
                 expect {

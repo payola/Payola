@@ -1,6 +1,6 @@
 package goog.ui.editor
 
-import browser._
+import js.dom.Element
 
 
 object DefaultToolbar {

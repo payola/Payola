@@ -7,7 +7,7 @@ class MapSpecs extends CompilerFixtureSpec {
 
     describe("maps") {
 
-        it("can have nested maps") { configMap =>
+        ignore("can have nested maps") { configMap =>
 
             expect {"""
                 object a {
@@ -27,7 +27,7 @@ class MapSpecs extends CompilerFixtureSpec {
             """}
         }
         
-        it("can have arrays of strings") { configMap =>
+        ignore("can have arrays of strings") { configMap =>
 
             expect {"""
                 object a {
@@ -44,7 +44,7 @@ class MapSpecs extends CompilerFixtureSpec {
             """}
         }
 
-        it("can have arrays of maps") { configMap =>
+        ignore("can have arrays of maps") { configMap =>
 
             expect {"""
                 object a {
@@ -66,7 +66,7 @@ class MapSpecs extends CompilerFixtureSpec {
 
         }
 
-        it("can access map items by key") { configMap =>
+        ignore("can access map items by key") { configMap =>
 
             expect {"""
 

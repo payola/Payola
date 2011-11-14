@@ -1,6 +1,7 @@
-
 package goog.fx
 
-class Dragger (el:browser.Element, el2:browser.Element){
+import js.dom.Element
+
+class Dragger (el:Element, el2:Element){
 	def dispose () {}
 }

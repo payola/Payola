@@ -1,12 +1,13 @@
-import browser._
-
 package goog {
 
-    class History(
+import js.dom.{Frame, Input}
+
+
+class History(
         opt_invisible:Boolean=false, 
         opt_blankPageUrl:String="", 
-        opt_input:HTMLInputElement=null, 
-        opt_iframe:HTMLFrameElement=null) extends goog.events.EventTarget {
+        opt_input:Input=null,
+        opt_iframe:Frame=null) extends goog.events.EventTarget {
         
         def setEnabled(enable:Boolean) {}
         def getToken():String = ""
@@ -17,7 +18,9 @@ package goog {
 
 package goog.history {
 
-    object EventType {
+import js.browser.Window
+
+object EventType {
         var NAVIGATE = "navigate" 
     }
 
@@ -41,5 +44,3 @@ package goog.history {
         def replaceToken(token:String, opt_title:String = "") {}
     }
 }
-
-// vim: set ts=4 sw=4 et:

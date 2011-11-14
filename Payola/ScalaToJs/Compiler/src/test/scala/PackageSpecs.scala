@@ -40,7 +40,7 @@ class PackageSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("can be package objects") {
+        ignore("can be package objects") {
             configMap =>
                 expect {
                     """
@@ -71,7 +71,7 @@ class PackageSpecs extends CompilerFixtureSpec
 
     describe("Classes") {
 
-        it("can be case classes") {
+        ignore("can be case classes") {
             configMap =>
 
                 expect {

@@ -1,6 +1,6 @@
 package goog.dom
 
-import browser._
+import js.browser.Window
 
 class ViewportSizeMonitor(opt_window:Window=null) extends goog.events.EventTarget {
     def getSize():goog.math.Size = null

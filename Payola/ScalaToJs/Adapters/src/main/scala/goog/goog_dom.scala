@@ -1,6 +1,7 @@
 package goog.dom
 
-import browser._
+import js.dom.{Element, Document, Node}
+import js.browser.Window
 
 object `package` {
 	def $ (id:String):Element = null
@@ -51,9 +52,9 @@ abstract class AbstractRange {
 }
 
 class TextRange extends AbstractRange {
-	def getTextRange (i:Int) :TextRange = null
+	def getTextRange (i:Int): goog.dom.TextRange = null
 	def isCollapsed () :Boolean = false
-	def getBrowserRangeObject ():browser.Range = null
+	def getBrowserRangeObject ():js.dom.Range = null
 }
 
 object TagName {

@@ -1,6 +1,6 @@
 package goog.editor.plugins
 
-import browser._
+import js.dom.Element
 
 abstract class AbstractBubblePlugin extends goog.editor.Plugin {
 	def getBubbleTargetFromSelection (selectedElement:Element):Element = null

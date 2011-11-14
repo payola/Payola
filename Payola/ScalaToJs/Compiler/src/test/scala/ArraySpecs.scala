@@ -41,7 +41,7 @@ class ArraySpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("can have strings") {
+        ignore("can have strings") {
             configMap =>
 
                 expect {
@@ -85,7 +85,7 @@ class ArraySpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("can have function call elements") {
+        ignore("can have function call elements") {
             configMap =>
 
                 expect {
