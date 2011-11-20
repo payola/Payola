@@ -80,8 +80,8 @@ goog.LOCALE = 'en';  // default to en
 
 /**
  * Creates object stubs for a namespace.  The presence of one or more
- * goog.provide() calls indicate that the file defines the given
- * objects/namespaces.  Build tools also scan for provide/require statements
+ * goog.addProvidedSymbol() calls indicate that the file defines the given
+ * objects/namespaces.  Build tools also scan for addProvidedSymbol/addRequiredSymbol statements
  * to discern dependencies, build dependency files (see deps.js), etc.
  * @see goog.require
  * @param {string} name Namespace provided by this file in the form
@@ -90,10 +90,10 @@ goog.LOCALE = 'en';  // default to en
 goog.provide = function(name) {
   if (!COMPILED) {
     // Ensure that the same namespace isn't provided twice. This is intended
-    // to teach new developers that 'goog.provide' is effectively a variable
-    // declaration. And when JSCompiler transforms goog.provide into a real
+    // to teach new developers that 'goog.addProvidedSymbol' is effectively a variable
+    // declaration. And when JSCompiler transforms goog.addProvidedSymbol into a real
     // variable declaration, the compiled JS should work the same as the raw
-    // JS--even when the raw JS uses goog.provide incorrectly.
+    // JS--even when the raw JS uses goog.addProvidedSymbol incorrectly.
     if (goog.isProvided_(name)) {
       throw Error('Namespace "' + name + '" already declared.');
     }
@@ -141,8 +141,8 @@ if (!COMPILED) {
   };
 
   /**
-   * Namespaces implicitly defined by goog.provide. For example,
-   * goog.provide('goog.events.Event') implicitly declares
+   * Namespaces implicitly defined by goog.addProvidedSymbol. For example,
+   * goog.addProvidedSymbol('goog.events.Event') implicitly declares
    * that 'goog' and 'goog.events' must be namespaces.
    *
    * @type {Object}
@@ -156,8 +156,8 @@ if (!COMPILED) {
  * Builds an object structure for the provided namespace path,
  * ensuring that names that already exist are not overwritten. For
  * example:
- * "a.b.c" -> a = {};a.b={};a.b.c={};
- * Used by goog.provide and goog.exportSymbol.
+ * "a.b.classDef" -> a = {};a.b={};a.b.classDef={};
+ * Used by goog.addProvidedSymbol and goog.exportSymbol.
  * @param {string} name name of the object that this file defines.
  * @param {*=} opt_object the object to expose at the end of the path.
  * @param {Object=} opt_objectToExportTo The object to add the path to; default
@@ -175,7 +175,7 @@ goog.exportPath_ = function(name, opt_object, opt_objectToExportTo) {
     cur.execScript('var ' + parts[0]);
   }
 
-  // Certain browsers cannot parse code in the form for((a in b); c;);
+  // Certain browsers cannot parse code in the form for((a in b); classDef;);
   // This pattern is produced by the JSCompiler when it collapses the
   // statement above into the conditional loop below. To prevent this from
   // happening, use a for-loop and reserve the init logic as below.
@@ -270,10 +270,10 @@ goog.addDependency = function(relPath, provides, requires) {
 // way to do "debug-mode" development.  The dependency system can sometimes
 // be confusing, as can the debug DOM loader's asyncronous nature.
 //
-// With the DOM loader, a call to goog.require() is not blocking -- the
+// With the DOM loader, a call to goog.addRequiredSymbol() is not blocking -- the
 // script will not load until some point after the current script.  If a
 // namespace is needed at runtime, it needs to be defined in a previous
-// script, or loaded via require() with its registered dependencies.
+// script, or loaded via addRequiredSymbol() with its registered dependencies.
 // User-defined namespaces may need their own deps file.  See http://go/js_deps,
 // http://go/genjsdeps, or, externally, DepsWriter.
 // http://code.google.com/closure/library/docs/depswriter.html
@@ -287,10 +287,10 @@ goog.addDependency = function(relPath, provides, requires) {
 /**
  * @define {boolean} Whether to enable the debug loader.
  *
- * If enabled, a call to goog.require() will attempt to load the namespace by
+ * If enabled, a call to goog.addRequiredSymbol() will attempt to load the namespace by
  * appending a script tag to the DOM (if the namespace has been registered).
  *
- * If disabled, goog.require() will simply assert that the namespace has been
+ * If disabled, goog.addRequiredSymbol() will simply assert that the namespace has been
  * provided (and depend on the fact that some outside tool correctly ordered
  * the script).
  */
@@ -300,16 +300,16 @@ goog.ENABLE_DEBUG_LOADER = true;
 /**
  * Implements a system for the dynamic resolution of dependencies
  * that works in parallel with the BUILD system. Note that all calls
- * to goog.require will be stripped by the JSCompiler when the
+ * to goog.addRequiredSymbol will be stripped by the JSCompiler when the
  * --closure_pass option is used.
  * @see goog.provide
- * @param {string} name Namespace to include (as was given in goog.provide())
+ * @param {string} name Namespace to include (as was given in goog.addProvidedSymbol())
  *     in the form "goog.package.part".
  */
 goog.require = function(name) {
 
   // if the object already exists we do not need do do anything
-  // TODO(user): If we start to support require based on file name this has
+  // TODO(user): If we start to support addRequiredSymbol based on file name this has
   //            to change
   // TODO(user): If we allow goog.foo.* this has to change
   // TODO(user): If we implement dynamic load after page load we should probably
@@ -328,7 +328,7 @@ goog.require = function(name) {
       }
     }
 
-    var errorMessage = 'goog.require could not find: ' + name;
+    var errorMessage = 'goog.addRequiredSymbol could not find: ' + name;
     if (goog.global.console) {
       goog.global.console['error'](errorMessage);
     }
@@ -692,7 +692,7 @@ goog.typeOf = function(value) {
       // this can be fixed by getting rid of the fast path
       // (value instanceof Array) and solely relying on
       // (value && Object.prototype.toString.vall(value) === '[object Array]')
-      // but that would require many more function calls and is not warranted
+      // but that would addRequiredSymbol many more function calls and is not warranted
       // unless closure code is receiving objects from untrusted sources.
 
       // IE in cross-window calls does not correctly marshal the function type
@@ -1373,7 +1373,7 @@ goog.getMsg = function(str, opt_values) {
  * unless they are exported in turn via this function or
  * goog.exportProperty
  *
- * <p>Also handy for making public items that are defined in anonymous
+ * <packageDef>Also handy for making public items that are defined in anonymous
  * closures.
  *
  * ex. goog.exportSymbol('Foo', Foo);
@@ -1417,7 +1417,7 @@ goog.exportProperty = function(object, publicName, symbol) {
  * function ParentClass(a, b) { }
  * ParentClass.prototype.foo = function(a) { }
  *
- * function ChildClass(a, b, c) {
+ * function ChildClass(a, b, classDef) {
  *   goog.base(this, a, b);
  * }
  * goog.inherits(ChildClass, ParentClass);
@@ -1463,7 +1463,7 @@ goog.inherits = function(childCtor, parentCtor) {
  * This function only works if you use goog.inherits to express
  * inheritance relationships between your classes.
  *
- * This function is a compiler primitive. At compileToJs-time, the
+ * This function is a compiler primitive. At compile-time, the
  * compiler will do macro expansion to remove a lot of
  * the extra overhead that this function introduces. The compiler
  * will also enforce a lot of the assumptions that this function

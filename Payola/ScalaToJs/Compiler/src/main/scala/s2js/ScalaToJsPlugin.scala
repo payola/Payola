@@ -14,12 +14,12 @@ class ScalaToJsPlugin(val global: Global) extends Plugin
     val description = "Scala to Javascript compiler plugin"
     val components = List[PluginComponent](Component)
 
-    /** The output directory where the compileToJs javascript files are stored. */
+    /** The output directory where the compile javascript files are stored. */
     var output = new File("")
 
     var ignorePackages = false
 
-    private object Component extends PluginComponent with TreeToJsCompiler
+    private object Component extends PluginComponent with PackageCompiler
     {
         val global = ScalaToJsPlugin.this.global
         import global._
@@ -44,9 +44,9 @@ class ScalaToJsPlugin(val global: Global) extends Plugin
                 val outputFile = new File(output.getAbsolutePath + "/" + packagePath + outputFileName)
                 outputFile.getParentFile.mkdirs()
 
-                // Compile the tree into js and write the result to the output file.
+                // Compile the ast into js and write the result to the output file.
                 val writer = new BufferedWriter(new FileWriter(outputFile))
-                writer.write(compileToJs(unit.body))
+                writer.write(compile(unit.body.asInstanceOf[PackageDef]))
                 writer.close()
             }
         }

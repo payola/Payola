@@ -1,222 +1,138 @@
 package s2js
 
-
 class FunctionSpecs extends CompilerFixtureSpec
 {
 
-    describe("functions") {
-
-        it("can be higher-orderd") {
+    describe("tests") {
+        it("test2") {
             configMap =>
-
                 expect {
                     """
+                        package p
 
-                    class F {
-                      val v1 = "v1"
-                      def f1(x:String) = v1 + x.toUpperCase
-                    }
+                        class A
 
-                    object o {
+                        class B(val b1: String, val b2: Int)
 
-                      def f2(f:(String) => String) {
-                        println(f("m1"))
-                      }
+                        class C extends A
 
-                      def f3(x:String) = "what"+x
+                        class D(val d1: String, val d2: Int) extends A
 
-                      def start() {
-                        val x = new F
-                        f2(x.f1)
-                        f2(f3)
-                        f2 { (x:String) => "no"+x }
-                      }
-                    }
+                        class E(b1: String, b2: Int) extends B(b1, b2)
 
+                        class F(b1: String, b2: Int, val f3: Boolean) extends B(b1, b2)
+
+                        class G extends B("test", 1234)
+
+                        class H(val h1: String = "default") extends A
+
+                        import js.browser._
+
+                        class I
+                        {
+                            window.alert("dasd dad as test")
+                            window.alert("dasd dad as test 2")
+                            window.alert("dasd dad as test 3")
+                            if ("str".contains("tr")) {
+                                window.alert("dasd dad as test 4")
+                            } else {
+                                window.alert("dasd dad as test 5")
+                            }
+                        }
+
+                        class J(val j1: String, j2: String) {
+                            val j3: String = "aaaaa"
+                        }
                     """
                 } toBe {
-                    """
-                    goog.provide('F');
-                    goog.provide('o');
-                    /** @constructor*/
-                    F = function() {
-                      var self = this;
-                      self.v1 = 'v1';
-                    };
-                    F.prototype.f1 = function(x) {
-                      var self = this;
-                      return (self.v1 + x.toUpperCase());
-                    };
-                    o.f2 = function(f) {
-                      var self = this;
-                      console.log(f('m1'));
-                    };
-                    o.f3 = function(x) {
-                      var self = this;
-                      return ('what' + x);
-                    };
-                    o.start = function() {
-                      var self = this;
-                      var x = new F();
-                      o.f2(function(_x_) {return x.f1(_x_)});
-                      o.f2(function(_x_) {return o.f3(_x_)});
-                      o.f2(function(x) {
-                        return ('no' + x);
-                      });
-                    };
-                    """
+                    ""
                 }
         }
 
-        it("can have a return value") {
-            configMap =>
 
+        /*it("test1") {
+            configMap =>
                 expect {
                     """
+                        package a
 
-                    object a {
-                      def m1() = {
-                        val x = "foo"
-                        x + "bar"
-                      }
-                      def m2() = {
-                        "foo"
-                      }
-                      def m3() = {
-                        "foo"+"bar"
-                      }
-                      def m4() {
-                        "foo"+"bar"
-                      }
-                    }
+                        import js.browser._
 
+                        object `package` extends Test("package") {
+                            def m1(x:String): Int = { window.alert(3); 5 }
+                            val aaa = "ahoj"
+                            var bbb = 123
+                            val ccc = new Test("labla")
+                        }
+
+                        class Test(val v1: String)
+                        object test extends Test("ahoj") {
+                            def callPackageMethod = {
+                                a.m1("calling")
+                            }
+                        }
+
+                        class Test2 extends C
+
+                        object test2 extends Test2 {
+                            class Test2Inner
+                        }
+
+                        object test3
+
+                        package b.c.d {
+                            class EEEE
+                        }
+
+                        package b {
+                            class EEEE
+                        }
+
+                        package b {
+                            trait A
+                            object B
+                            class C extends sub.B.AAAA with sub.B.BBBB
+
+                            package sub {
+                                trait A {
+                                    class AAAA extends BBBB
+                                    trait BBBB
+                                    object CCCC
+                                }
+                                object B {
+                                    class AAAA extends a.Test2 with a.b.A with a.b.sub.B.BBBB with a.c.d.e.A with a.A
+                                    trait BBBB
+                                    object CCCC
+                                }
+                                class C {
+                                    class AAAA
+                                    trait BBBB
+                                    object CCCC
+                                }
+                            }
+                        }
+
+                        package c.d.e {
+                            trait A
+                            object B
+                            class C
+
+                            package sub {
+                                trait A
+                                object B
+                                class C
+                            }
+                        }
+
+                        trait A
+                        object B
+                        class C
                     """
                 } toBe {
                     """
-                    goog.provide('a');
-                    a.m1 = function() {
-                      var self = this;
-                      var x = 'foo';
-                      return (x + 'bar');
-                    };
-                    a.m2 = function() {
-                      var self = this;
-                      return 'foo';
-                    };
-                    a.m3 = function() {
-                      var self = this;
-                      return 'foobar';
-                    };
-                    a.m4 = function() {
-                      var self = this;
-                      'foobar';
-                    };
+                    
                     """
                 }
-        }
-
-        it("can have arguments") {
-            configMap =>
-
-                expect {
-                    """
-                    object a {
-                      def m1(x:String) {}
-                      def m2(x:String, y:Int) {}
-                    }
-                    """
-                } toBe {
-                    """
-                    goog.provide('a');
-                    a.m1 = function(x) {var self = this;};
-                    a.m2 = function(x,y) {var self = this;};
-                    """
-                }
-        }
-    }
-
-    describe("class functions") {
-
-        it("override base class functions") {
-            configMap =>
-
-                expect {
-                    """
-                    package $pkg
-                    class a {
-                      def m1() {}
-                      def m2(x:String) {}
-                    }
-                    class b extends a {
-                      override def m1() {super.m1()}
-                      override def m2(x:String) {super.m2("foo")}
-                    }
-                    """
-                } toBe {
-                    """
-                    goog.provide('$pkg.a');
-                    goog.provide('$pkg.b');
-
-                    /** @constructor*/
-                    $pkg.a = function() {var self = this;};
-
-                    $pkg.a.prototype.m1 = function() {var self = this;};
-                    $pkg.a.prototype.m2 = function(x) {var self = this;};
-
-                    /** @constructor*/
-                    $pkg.b = function() {
-                      var self = this;
-                      $pkg.a.call(self);
-                    };
-                    goog.inherits($pkg.b, $pkg.a);
-
-                    $pkg.b.prototype.m1 = function() {var self = this;$pkg.b.superClass_.m1.call(self);};
-                    $pkg.b.prototype.m2 = function(x) {var self = this;$pkg.b.superClass_.m2.call(self,'foo');};
-                    """
-                }
-        }
-    }
-
-    describe("anon functions") {
-
-        it("can be assigned to variables") {
-            configMap =>
-
-                expect {
-                    """
-                    object a {
-                      val x = (y:String) => { println(y) }
-                    }
-                    """
-                } toBe {
-                    """
-                    goog.provide('a');
-                    a.x = function(y) {console.log(y);};
-                    """
-                }
-        }
-
-        it("can have multiple statements") {
-            configMap =>
-
-                expect {
-                    """
-                    object a {
-                      val x = (y:String) => {
-                        println("what")
-                        println(y)
-                      }
-                    }
-                    """
-                } toBe {
-                    """
-                    goog.provide('a');
-                    a.x = function(y) {
-                      console.log('what');
-                      console.log(y);
-                    };
-                    """
-                }
-        }
+        }*/
     }
 }

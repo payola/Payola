@@ -1,14 +1,14 @@
 package generated
 
-import browser._
+import js.browser._
 
 object Hello {
     def main() {
         val b = new B(4, "Ahoy")
-        alert(b.x(3))
-        alert(b.y("123*"))
-        alert("Hello world")
-        alert(window.location)
+        window.alert(b.x(3))
+        window.alert(b.y("123*"))
+        window.alert("Hello world")
+        window.alert(window.location)
     }
 }
 

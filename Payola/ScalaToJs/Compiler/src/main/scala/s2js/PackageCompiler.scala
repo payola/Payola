@@ -2,76 +2,486 @@ package s2js
 
 import scala.reflect.generic.Flags._
 
-import collection.mutable.{LinkedHashSet, ListBuffer}
-import tools.nsc.io.AbstractFile
 import tools.nsc.Global
+import collection.mutable.{HashMap, HashSet, ListBuffer}
 
-trait TreeToJsCompiler
+trait PackageCompiler
 {
     val global: Global
-
     import global._
 
-    val nonDependencies = List(
-        "$default$",
-        "ClassManifest",
-        "java.lang",
-        "js.browser",
-        "js.dom",
-        "scala.Any",
-        "scala.Boolean",
-        "scala.Equals",
-        "scala.Function0",
-        "scala.Function1",
-        "scala.Int",
-        "scala.Predef",
-        "scala.Product",
-        "scala.ScalaObject",
-        "scala.Tuple2",
-        "scala.Tuple3",
-        "scala.package",
-        "scala.reflect.Manifest",
-        "scala.runtime",
-        "scala.runtime.AbstractFunction1",
-        "scala.runtime.AbstractFunction2",
-        "scala.runtime.AbstractFunction3",
-        "scala.xml"
+    private val buffer = new ListBuffer[String]
+    private val packageDefMap = new HashMap[String, PackageDef]
+    private val classDefMap = new HashMap[String, ClassDefCompiler]
+    private val classDefDependencyGraph = new HashMap[String, HashSet[String]]
+    private val internalTypes = Array[String](
+        """^\$default\$$""",
+        """^ClassManifest$""",
+        """^java.lang$""",
+        """^java.lang.Object$""",
+        """^js.browser$""",
+        """^js.dom$""",
+        """^scala.Any$""",
+        """^scala.AnyRef""",
+        """^scala.Boolean$""",
+        """^scala.Equals$""",
+        """^scala.Function[0-9]+$""", // TODO maybe shoudn't be internal.
+        """^scala.Int$""",
+        """^scala.Predef$""",
+        """^scala.Product$""",
+        """^scala.ScalaObject$""",
+        """^scala.Tuple[0-9]+$""", // TODO maybe shoudn't be internal.
+        """^scala.package$""",
+        """^scala.reflect.Manifest$""",
+        """^scala.runtime$""",
+        """^scala.runtime.AbstractFunction[0-9]+$""",
+        """^scala.xml"""
     )
 
-    def compileToJs(tree: global.Tree): String = {
-        val buffer = new ListBuffer[String]
+    private def isInternalType(symbol: Symbol): Boolean = {
+        internalTypes.exists(symbol.fullName.matches(_))
+    }
 
-        // Identifying all the top-level members of the file, which translate to provide statements in closure.
-        tree.children.filter {
-            c =>
-                !c.symbol.isSynthetic &&
-                    (c.isInstanceOf[global.PackageDef] || c.isInstanceOf[global.ClassDef] || c.isInstanceOf[global.ModuleDef])
-        }.foreach {
-            c =>
-                buffer += "goog.provide('%s');\n".format(c.symbol.fullName)
-        }
+    private def isInternalTypeMember(symbol: Symbol): Boolean = {
+        isInternalType(symbol.enclClass)
+    }
 
-        // Find the necessary dependencies for requires statements.
-        findDependencies(tree).foreach {
-            d =>
-                buffer += "goog.require('%s');\n".format(d)
-        }
+    def compile(packageAst: PackageDef): String = {
+        retrievePackageStructure(packageAst)
+        compilePackageStructure()
+        compileClassDefs()
 
-        // this starts the big traverse
-        // TODO: should be able to do this in the buildTree function
-        buffer += tree.children.map(buildPackageLevelItem).mkString
+        /*
+        // First, the package structure has to be compiled so classes and objects may be put there.
+        compilePackageStructure(ast.asInstanceOf[PackageDef])
+
+        // The class/object dependency DAG has to be created so classes are compiled when all other classes, they depend
+        // on are already compiled.
+        compilePackageDef(ast.asInstanceOf[PackageDef])
+
+        println("Provides: " + DependencyManager.getProvides)
+        println("Requires: " + DependencyManager.getRequires)*/
 
         buffer.mkString
     }
 
-    case class RichTree(t: global.Tree)
+    private def retrieveStructure(ast: Tree) {
+        ast match {
+            case packageDef: PackageDef => retrievePackageStructure(packageDef)
+            case classDef: ClassDef => retrieveClassStructure(classDef)
+            case _ =>
+        }
+    }
+
+    private def retrievePackageStructure(packageDef: PackageDef) {
+        packageDefMap += packageDef.symbol.fullName -> packageDef
+
+        // Retrieve structure of child items.
+        packageDef.children.foreach(retrieveStructure)
+    }
+
+    private def retrieveClassStructure(classDef: ClassDef) {
+        val symbol = classDef.symbol
+        val name = symbol.fullName
+
+        // TODO maybe support of synthetic symbols will be needed
+        if (!symbol.isSynthetic) {
+            val classDefCompiler: ClassDefCompiler =
+                if (classDef.symbol.isPackageObjectClass) {
+                    new PackageObjectClassCompiler(classDef)
+                } else if (classDef.symbol.isModuleClass) {
+                    new ModuleClassCompiler(classDef)
+                } else {
+                    new ClassCompiler(classDef)
+                }
+            val dependencies = new HashSet[String]
+
+            classDefMap += name -> classDefCompiler
+            classDefDependencyGraph += name -> dependencies
+
+            // If a class is declared inside another class or object, then it depends on the another class/object.
+            if (!symbol.owner.isPackageClass) {
+                dependencies += symbol.owner.fullName
+            }
+
+            // The class depends on parent classes that are defined in the same file.
+            classDef.impl.parents.foreach {
+                parentClassAst =>
+                    val parentClassSymbol = parentClassAst.symbol
+                    if (!isInternalType(parentClassSymbol) && symbol.sourceFile.name == parentClassSymbol.sourceFile.name) {
+                        dependencies += parentClassSymbol.fullName
+                    }
+            }
+
+            // Retrieve structure of child items.
+            classDef.impl.body.foreach(retrieveStructure)
+        }
+    }
+
+    private def compilePackageStructure() {
+        // For packages in format "package p.q.r.s { ... }", all parent packages ("p", "p.q", "p.q.r") also have to be
+        // initialized if they aren't already defined.
+        val allPackagesNames = new HashSet[String]
+        packageDefMap.values.foreach {
+            packageDef =>
+                var packageSymbol = packageDef.symbol
+                while (packageSymbol.fullName != "package <root>") {
+                    allPackagesNames += packageSymbol.fullName
+                    packageSymbol = packageSymbol.owner
+                }
+        }
+
+        allPackagesNames.toArray.sortBy(packageName => packageName).foreach {
+            packageName =>
+                buffer += "if(typeof %s === 'undefined') %s = {};\n".format(packageName, packageName)
+        }
+    }
+
+    def compileClassDefs() {
+        while (!classDefDependencyGraph.isEmpty && !classDefDependencyGraphContainsCycle) {
+            val className = classDefDependencyGraph.toArray.filter(_._2.isEmpty).map(_._1).sortBy(name => name).head
+
+            // Compile the class.
+            classDefMap.get(className).get.compile()
+
+            // Remove the compiled class from dependencies of all classDefs, that aren't compiled yet. Also remove the
+            // compiled class from the working sets.
+            classDefDependencyGraph.foreach(_._2 -= className)
+            classDefDependencyGraph.remove(className)
+            classDefMap.remove(className)
+        }
+
+        // If there are some classDefs left, then there is a cyclic dependency.
+        if (!classDefDependencyGraph.isEmpty) {
+            error("Illegal cyclic dependency in the class/object declaration graph.")
+        }
+    }
+
+    def classDefDependencyGraphContainsCycle: Boolean = {
+        if (classDefDependencyGraph.isEmpty) {
+            false
+        } else {
+            // If there isn't a classDef without dependencies, then starting in any ClassDef, sooner or later we arrive
+            // to an already visited.
+            !classDefDependencyGraph.exists(_._2.isEmpty)
+        }
+    }
+
+    private abstract class ClassDefCompiler(val classDef: ClassDef)
+    {
+        val nameSymbol = classDef.symbol
+        val memberContainerName: String;
+        val parentClasses = classDef.impl.parents
+        val parentClass = parentClasses.head
+        val parentClassIsInternal = isInternalType(parentClass.symbol)
+        val inheritedTraits = parentClasses.tail
+
+        def compile() {
+            DependencyManager.addProvidedSymbol(nameSymbol)
+
+            compileConstructor()
+            compileInheritedTraitMembers()
+        }
+
+        def compileConstructor(): Unit
+
+        def compileInheritedTraitMembers() {
+            inheritedTraits.foreach {
+                traitAst =>
+                    traitAst.tpe.members.foreach {
+                        traitMemberSymbol =>
+                            if (!isIgnoredMember(traitMemberSymbol)) {
+                                buffer += "%s.%s = %s.prototype.%s;\n".format(
+                                    memberContainerName,
+                                    traitMemberSymbol.nameString,
+                                    traitAst.symbol.fullName,
+                                    traitMemberSymbol.nameString
+                                )
+                            }
+                    }
+            }
+        }
+
+        def compileMembers() {
+            compileValDefMembers()
+            compileDefDefMembers()
+        }
+
+        def compileValDefMembers() {
+            classDef.impl.body.filter(_.isInstanceOf[ValDef]).foreach(compileMember)
+        }
+
+        def compileDefDefMembers() {
+            classDef.impl.body.filter(_.isInstanceOf[DefDef]).foreach(compileMember)
+        }
+
+        def isIgnoredMember(member: Symbol): Boolean = {
+            isInternalTypeMember(member) ||
+            member.isConstructor ||
+            member.hasFlag(ACCESSOR) ||
+            member.nameString.contains("default$")
+        }
+
+        def compileMember(memberAst: Tree) {
+            if (memberAst.hasSymbol && !isIgnoredMember(memberAst.symbol)) {
+                memberAst match {
+                    case valDef: ValDef => compileValDef(valDef)
+                    case defDef: DefDef => compileDefDef(defDef)
+                    case _: ClassDef => // NOOP, wrapped classes are compiled separately
+                    case _ => {
+                        println("[s2js-warning] Unknown member %s of type %s".format(
+                            memberAst.toString,
+                            memberAst.getClass
+                        ))
+                    }
+                }
+            }
+        }
+
+        def compileValDef(valDef: ValDef, containerName: String = memberContainerName) {
+            buffer += "%s.%s = ".format(containerName, valDef.symbol.nameString)
+            compileAst(valDef.rhs)
+            buffer += ";\n"
+        }
+
+        def compileDefDef(defDef: DefDef) {
+            // TODO maybe transform name in special cases.
+            buffer += "%s.%s = function(%s) {\n".format(
+                memberContainerName,
+                defDef.symbol.nameString,
+                getDefDefCompiledParameters(defDef)
+            )
+            buffer += "var self = this;\n"
+
+            compileDefDefDefaultParameters(defDef)
+            compileDefDefBody(defDef);
+
+            buffer += "};\n"
+
+            /* TODO implement when needed
+            if (ts.symbol.annotations exists {
+                _.toString == "s2js.ExportSymbol"
+            }) {
+                l += "goog.exportSymbol('%1$s', %1$s);".format(ns + "." + name)
+            }*/
+        }
+
+        def getDefDefCompiledParameters(defDef: DefDef): String = {
+            defDef.vparamss.flatten.map(_.symbol.nameString).mkString(",")
+        }
+
+        def compileDefDefDefaultParameters(defDef: DefDef) {
+            defDef.vparamss.flatten.filter(_.symbol.hasDefault).foreach {
+                parameter =>
+                    buffer += "if (typeof(%1$s) === 'undefined') { %1$s = %2$s; };\n".format(
+                        parameter.nameString,
+                        buildTree(parameter.asInstanceOf[ValDef].rhs)
+                    )
+            }
+        }
+
+        def compileDefDefBody(defDef: DefDef) {
+            val preCompileBufferLength = buffer.length
+            val bodyAst = defDef.rhs
+
+            bodyAst match {
+                case blockBody: Block => compileBlock(blockBody)
+                case matchBody: Match => // compileMatch(y)
+                case _ => compileAst(defDef.rhs)
+            }
+
+            // If the function returns something and the body contains a statement, prepend the last statement with the
+            // "return" keyword.
+            if (defDef.tpt.symbol.nameString != "Unit" && preCompileBufferLength < buffer.length) {
+                val lastStatementIndex = buffer.length - 1
+                buffer.update(lastStatementIndex, "return " + buffer(lastStatementIndex));
+            }
+        }
+
+        def compileAst(ast: Tree) {
+            buffer += buildTree(ast)
+        }
+
+        def compileBlock(block: Block) {
+            block.stats.foreach(compileAst(_))
+            compileAst(block.expr)
+        }
+    }
+
+    private class ClassCompiler(classDef: ClassDef) extends ClassDefCompiler(classDef)
+    {
+        override lazy val memberContainerName = nameSymbol.fullName + ".prototype"
+        val initializedValDefSet = new HashSet[String]
+
+        override def compile() {
+            super.compile()
+
+            compileDefDefMembers()
+            /*
+            val caseMemberNames = List("productPrefix", "productArity", "productElement", "equals", "toString", "canEqual", "hashCode", "copy")
+
+            def isCaseMember(x: Tree): Boolean = {
+                caseMemberNames.exists(x.symbol.fullName.endsWith(_))
+            }
+
+            def isSynthetic(x: Tree): Boolean = {
+                x.symbol.isSynthetic
+            }
+
+            def isValidMember(x: Tree): Boolean = {
+                x.isInstanceOf[ValDef] || (x.hasSymbol && x.symbol.hasFlag(ACCESSOR))
+            }
+
+            if (t.symbol.hasFlag(CASE)) {
+                //lb ++= t.impl.body.filterNot(isCaseMember).map(buildPackageLevelItemMember)
+            } else if (t.symbol.isTrait) {
+                // lb ++= t.impl.body.map(buildPackageLevelItemMember)
+            } else {
+                // lb ++= t.impl.body.filterNot(isValidMember).map(buildPackageLevelItemMember)
+            }
+
+            return lb.mkString*/
+        }
+
+        def compileConstructor() {
+            val primaryConstructors = classDef.impl.body.filter(ast => ast.hasSymbol && ast.symbol.isPrimaryConstructor)
+            val hasConstructor = !primaryConstructors.isEmpty
+            val constructorDefDef = if (hasConstructor) primaryConstructors.head.asInstanceOf[DefDef] else null
+            val compiledParameters = if (hasConstructor) getDefDefCompiledParameters(constructorDefDef) else ""
+
+            buffer += "%s = function(%s) {\n".format(nameSymbol.fullName, compiledParameters)
+            buffer += "var self = this;\n"
+
+            if (hasConstructor) {
+                compileDefDefDefaultParameters(constructorDefDef)
+
+                // Initialize vals specified as the implicit constructor parameters.
+                constructorDefDef.vparamss.flatten.map(_.name.toString).foreach {
+                    parameterName =>
+                        initializedValDefSet += parameterName
+                        buffer += "self.%1$s = %1$s;\n".format(parameterName)
+                }
+            }
+
+            // Initialize vals that aren't implicit constructor parameters.
+            classDef.impl.foreach {
+                case valDef: ValDef if !initializedValDefSet.contains(valDef.symbol.nameString) => {
+                    compileValDef(valDef, "self")
+                }
+                case _ =>
+            }
+
+            // Call the parent class constructor.
+            if (!parentClassIsInternal) {
+                classDef.impl.foreach {
+                    case Apply(Select(Super(_, _), name), args) if (name.toString == "<init>") => {
+                        val parentClassParameters = args.filter(!_.toString.contains("$default$")).map(_.toString)
+                        buffer += "%s.call(self,%s);".format(
+                            parentClass.symbol.fullName,
+                            if (parentClassParameters.isEmpty) "undefined" else parentClassParameters.mkString(",")
+                        )
+                    }
+                    case _ =>
+                }
+            }
+
+            // Compile the constructor body.
+            classDef.impl.body.filter(!_.isInstanceOf[ValOrDefDef])foreach {
+                ast =>
+                    compileAst(ast)
+                    buffer += ";\n"
+            }
+
+            buffer += "};\n"
+
+            if (!parentClassIsInternal) {
+                buffer += "goog.inherits(%s, %s);\n".format(nameSymbol.fullName, parentClass.symbol.fullName)
+            }
+        }
+    }
+
+    private class TraitCompiler(classDef: ClassDef) extends ClassCompiler(classDef)
+    {
+        override def compileConstructor() {
+            buffer += "%s = function() {};\n".format(nameSymbol.fullName)
+        }
+    }
+
+    private class ModuleClassCompiler(classDef: ClassDef) extends ClassDefCompiler(classDef)
+    {
+        override lazy val memberContainerName = nameSymbol.fullName
+
+        override def compile() {
+            super.compile()
+
+            compileMembers()
+        }
+
+        def compileConstructor() {
+            if (!parentClassIsInternal) {
+                compileStaticConstructor()
+            } else {
+                buffer += "%s = {};\n".format(nameSymbol.fullName)
+            }
+        }
+
+        def compileStaticConstructor() {
+            buffer += "%s = %s;\n".format(nameSymbol.fullName, parentClassInstance)
+        }
+
+        def parentClassInstance: String = {
+            var instance = ""
+            classDef.impl.foreach {
+                case Apply(Select(Super(_, _), name), args) if (name.toString == "<init>") => {
+                    instance = "new %s(%s)".format(parentClass.symbol.fullName, compileArguments(args))
+                }
+                case _ =>
+            }
+
+            instance
+        }
+    }
+
+    private class PackageObjectClassCompiler(classDef: ClassDef) extends ModuleClassCompiler(classDef)
+    {
+        override val nameSymbol = classDef.symbol.owner
+
+        override def compileStaticConstructor() {
+            // The package object may be declared before or after some other members of the package were declared.
+            // If it's declared after, the previous declarations shouldn't be overriden.
+            buffer += "goog.object.extend(%s, %s);\n".format(nameSymbol.fullName, parentClassInstance)
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    def compileArguments(args: List[Tree]): String = {
+        args.map(buildTree).mkString(",")
+    }
+
+    case class RichTree(t: Tree)
     {
         val ownerName = t.symbol.owner.fullName
         val nameString = t.symbol.nameString
         val isModuleClass = t.symbol.owner.isModuleClass
     }
 
-    implicit def treeToRichTree(tree: global.Tree): RichTree = {
+    implicit def treeToRichTree(tree: Tree): RichTree = {
         RichTree(tree)
     }
 
@@ -82,7 +492,7 @@ trait TreeToJsCompiler
         "scala.AnyRef",
         "scala.Product")
 
-    def isCosmicType(x: global.Tree): Boolean = {
+    def isCosmicType(x: Tree): Boolean = {
         cosmicNames.contains(x.symbol.fullName)
     }
 
@@ -96,7 +506,7 @@ trait TreeToJsCompiler
 
     object BinaryOperator
     {
-        def unapply(name: global.Name): Option[String] = {
+        def unapply(name: Name): Option[String] = {
             Map(
                 "$eq$eq" -> "==",
                 "$bang$eq" -> "!=",
@@ -112,32 +522,9 @@ trait TreeToJsCompiler
         }
     }
 
-    def findDependencies(tree: global.Tree): Set[String] = {
-        val dependecyHashSet = new LinkedHashSet[String]
-        var currentFile: AbstractFile = null
-
-        def buildName(s: Symbol): String = {
-            s.fullName.replace("scala", "scalosure")
-        }
-
-        def traverse(t: global.Tree): Unit = {
+    /*def findDependencies(ast: Tree): HashSet[String] = {
+        def traverse(t: Tree): Unit = {
             t match {
-
-                // check the body of a class
-                case x@Template(parents, self, body) => {
-                    currentFile = x.symbol.sourceFile
-
-                    parents.foreach {
-                        y => if (!nonDependencies.exists(y.symbol.fullName.contains)) {
-                            if (currentFile != y.symbol.sourceFile) {
-                                dependecyHashSet += buildName(y.symbol)
-                            }
-                        }
-                    }
-
-                    body.foreach(traverse)
-                }
-
                 case x@ValDef(_, _, _, rhs) => {
                     rhs match {
                         case y@Block(stats, expr) => {
@@ -221,53 +608,22 @@ trait TreeToJsCompiler
             }
         }
 
-        traverse(tree)
+        traverse(ast)
 
         dependecyHashSet.toSet
-    }
+        new HashSet[String]()
+    }*/
 
-    def isDefaultThing(tree: global.Tree): Boolean = {
-        (tree.hasSymbol && tree.symbol.nameString.contains("$default$"))
-    }
-
-    def isAnIgnoredMember(tree: global.Tree): Boolean = {
+    def isAnIgnoredMember(tree: Tree): Boolean = {
         if (tree.hasSymbol) {
-            List("readResolve", "copy$default$1", "this").contains(tree.symbol.nameString) || isDefaultThing(tree)
+            false
+            //List("readResolve", "copy$default$1", "this").contains(tree.symbol.nameString) || isDefaultThing(tree)
         } else {
             false
         }
     }
 
-    def buildPackageLevelItem(t: global.Tree): String = {
-        t match {
-            case x@ClassDef(_, _, _, _) => {
-                if (x.symbol.isModuleClass) {
-                    buildModuleClass(x)
-                } else {
-                    buildClass(x)
-                }
-            }
-            // These two should be unnecessary since the refcheck eliminates module defs.
-            case x@ModuleDef(_, _, _) if (!x.symbol.hasFlag(SYNTHETIC)) => {
-                println("################################# ModuleDef")
-                ""
-                //buildModuleClass(x)
-            }
-            case x@ModuleDef(_, _, _) if (x.symbol.hasFlag(SYNTHETIC)) => {
-                println("################################# ModuleDef")
-                ""
-                //buildSyntheticModule(x)
-            }
-            case x@PackageDef(_, stats) => {
-                stats.map(buildPackageLevelItemMember).mkString
-            }
-            case x => {
-                ""
-            }
-        }
-    }
-
-    def buildSyntheticMember(t: global.Tree): String = {
+    def buildSyntheticMember(t: Tree): String = {
         t match {
             case x@DefDef(mods, _, _, _, _, rhs) => {
                 buildMethod(x, x.symbol.owner.isPackageObjectClass)
@@ -282,261 +638,22 @@ trait TreeToJsCompiler
         !(t.symbol.nameString.contains("default$") && t.rhs.toString == "null") && !t.mods.hasAccessorFlag && !t.symbol.isConstructor
     }
 
-    def buildPackageLevelItemMember(t: global.Tree): String = {
-        t match {
-            case x@DefDef(mods, _, _, _, _, rhs) if isDefaultNull(x) => {
-                buildMethod(x, x.symbol.owner.isPackageObjectClass)
-            }
-            case x@ValDef(_, _, _, _) => {
-                buildField(x, x.symbol.owner.isPackageObjectClass)
-            }
-            case x@ModuleDef(_, _, _) => {
-                buildPackageLevelItem(x)
-            }
-            case x => {
-                ""
-            }
-        }
-    }
-
     def buildSyntheticModule(moduleDef: ModuleDef): String = {
 
         val lb = new ListBuffer[String]
 
         val objectNAme = moduleDef.symbol.fullName
 
-        def neededSyntheticMember(x: global.Tree) = {
+        def neededSyntheticMember(x: Tree) = {
             x.hasSymbol && List("unapply", "apply").exists(x.symbol.fullName.endsWith(_))
         }
 
-        lb += moduleDef.impl.filter(neededSyntheticMember).map(buildPackageLevelItemMember).mkString
+        //lb += moduleDef.impl.filter(neededSyntheticMember).map(buildPackageLevelItemMember).mkString
 
         lb.mkString
     }
 
-    def buildModuleClass(moduleClassDef: ClassDef): String = {
-
-        val lb = new ListBuffer[String]
-
-        val objectName = moduleClassDef.symbol.fullName
-
-        val superClass = moduleClassDef.impl.parents filterNot {
-            x => List("java.lang.Object", "scala.ScalaObject").contains(x.symbol.fullName)
-        } headOption
-
-        moduleClassDef.impl.foreach {
-            case x@Apply(Select(Super(qual, mix), name), args) if (name.toString == "<init>") => {
-                superClass match {
-                    case Some(sc) => {
-                        lb += "%s = new %s(%s);\n".format(objectName, sc.symbol.fullName, args.map(buildTree).mkString(","))
-                    }
-                    case None =>
-                }
-            }
-            case _ =>
-        }
-
-        val superClasses = moduleClassDef.impl.parents filterNot {
-            x => List("java.lang.Object", "scala.ScalaObject").contains(x.symbol.fullName)
-        }
-
-        def isIgnoredMember(x: Symbol): Boolean = {
-            isCosmicMember(x) || x.isConstructor || x.hasFlag(ACCESSOR)
-        }
-
-        def buildMembersFromTrait(t: global.Tree) = {
-            t.tpe.members.filterNot(isIgnoredMember) map {
-                mem => "%s.%s = %s.prototype.%s;\n".format(objectName, mem.nameString, mem.owner.fullName, mem.nameString)
-            }
-        }
-
-        superClasses match {
-            case baseClass :: traits => {
-                traits foreach {
-                    t => lb += buildMembersFromTrait(t).mkString
-                }
-            }
-            case _ =>
-        }
-
-        lb += moduleClassDef.impl.body.filterNot(isDefaultThing).map(buildPackageLevelItemMember).mkString
-
-        lb.mkString
-    }
-
-    def buildClass(t: ClassDef): String = {
-
-        val lb = new ListBuffer[String]
-
-        val className = t.symbol.fullName
-        val isObject = t.symbol.isModuleClass
-
-        val superClassName = t.impl.parents filterNot {
-            isCosmicType
-        } headOption
-
-        def isIgnoredMember(x: Symbol): Boolean = {
-            isCosmicMember(x) || x.isConstructor || x.hasFlag(ACCESSOR)
-        }
-
-        if (t.symbol.isTrait) {
-
-            lb += "\n/** @constructor*/\n"
-            lb += "%s = function() {};\n".format(className)
-
-            // Do not create constructor for objects
-        } else {
-
-            val ctorDef = t.impl.body.filter {
-                x => x.isInstanceOf[DefDef] && x.symbol.isPrimaryConstructor
-            }.head.asInstanceOf[DefDef]
-
-            val ctorArgs = ctorDef.vparamss.flatten.map(_.symbol.nameString)
-
-            lb += "/** @constructor*/\n"
-            lb += "%s = function(%s) {\n".format(className, ctorArgs.mkString(","))
-
-            lb += "var self = this;\n"
-
-            // handle defaults in a javascript way
-            ctorDef.vparamss.flatten filter {
-                _.symbol.hasDefault
-            } foreach {
-                x => lb += "if (typeof(%1$s) === 'undefined') { %1$s = %2$s; };\n".format(x.nameString, buildTree(x.asInstanceOf[ValDef].rhs))
-            }
-
-            // superclass construction and field initialization
-            t.impl.foreach {
-                case x@Apply(Select(Super(qual, mix), name), args) if (name.toString == "<init>") => {
-                    superClassName match {
-                        case Some(y) => {
-                            val filteredArgs = args.filter(!_.toString.contains("$default$")).map(_.toString)
-                            lb += "%s.call(%s);\n".format(y.symbol.fullName, (List("self") ++ filteredArgs).mkString(","))
-                            ctorArgs.diff(filteredArgs).foreach {
-                                y => lb += "self.%1$s = %1$s;\n".format(y)
-                            }
-                        }
-                        case None => {
-                            ctorArgs.foreach {
-                                y => lb += "self.%1$s = %1$s;\n".format(y)
-                            }
-                        }
-                    }
-                }
-                case x =>
-            }
-
-            val tms = t.impl.parents.filter(_.symbol.isTrait).filterNot(x => isIgnoredMember(x.symbol)) map {
-                x => x.tpe.members filterNot {
-                    isIgnoredMember
-                } filter {
-                    x => !x.isMethod
-                } map {
-                    m => (m.owner.fullName, buildName(m))
-                }
-            }
-
-            tms.flatten foreach {
-                x => lb += "self.%s = %s.prototype.%s;\n".format(x._2, x._1, x._2)
-            }
-
-
-            t.impl.body filterNot {
-                isAnIgnoredMember
-            } foreach {
-                case x@Apply(fun, args) => {
-                    lb += buildTree(x) + ";\n"
-                }
-                case x@ClassDef(_, _, _, _) => {
-                    if (x.symbol.isModuleClass) {
-                        lb += buildModuleClass(x)
-                    } else {
-                        lb += buildClass(x)
-                    }
-                }
-                case x@ValDef(mods, name, tpt, rhs) if !x.symbol.isParamAccessor => {
-                    lb += "self.%s = %s;\n".format(name.toString.trim, buildTree(rhs))
-                }
-
-                // Build the object methods
-                case x@DefDef(mods, _, _, _, _, rhs) if isObject => {
-                    buildMethod(x, x.symbol.owner.isPackageObjectClass)
-                }
-                case x =>
-            }
-
-            lb += "};\n"
-        }
-
-
-        // TODO somehow handle object inheritance
-        if (!t.symbol.isModuleClass) {
-            superClassName.foreach {
-                x => lb += "goog.inherits(%s, %s);\n".format(className, if (x.symbol.isTrait) {
-                    "ScalosureObject"
-                } else {
-                    x.symbol.fullName
-                })
-            }
-        }
-
-        val traits = t.impl.parents filterNot {
-            isCosmicType
-        } filter {
-            _.symbol.isTrait
-        }
-
-        def isValDef(x: global.Tree): Boolean = {
-            x match {
-                case ValDef(_, _, _, _) => {
-                    true
-                }
-                case _ => {
-                    false
-                }
-            }
-        }
-
-        val traitMembers = traits map {
-            x => x.tpe.members filterNot {
-                isIgnoredMember
-            } filter {
-                _.isMethod
-            } map {
-                m => (m.owner.fullName, buildName(m))
-            }
-        }
-
-        traitMembers.flatten foreach {
-            x => lb += "%s.prototype.%s = %s.prototype.%s;\n".format(className, x._2, x._1, x._2)
-        }
-
-        val caseMemberNames = List("productPrefix", "productArity", "productElement", "equals", "toString", "canEqual", "hashCode", "copy")
-
-        def isCaseMember(x: global.Tree): Boolean = {
-            caseMemberNames.exists(x.symbol.fullName.endsWith(_))
-        }
-
-        def isSynthetic(x: global.Tree): Boolean = {
-            x.symbol.isSynthetic
-        }
-
-        def isValidMember(x: global.Tree): Boolean = {
-            x.isInstanceOf[ValDef] || (x.hasSymbol && x.symbol.hasFlag(ACCESSOR))
-        }
-
-        if (t.symbol.hasFlag(CASE)) {
-            lb ++= t.impl.body.filterNot(isCaseMember).map(buildPackageLevelItemMember)
-        } else if (t.symbol.isTrait) {
-            lb ++= t.impl.body.map(buildPackageLevelItemMember)
-        } else {
-            lb ++= t.impl.body.filterNot(isValidMember).map(buildPackageLevelItemMember)
-        }
-
-        return lb.mkString
-    }
-
-    def buildTree(t: global.Tree): String = {
+    def buildTree(t: Tree): String = {
         t match {
 
             case x@Literal(Constant(value)) => {
@@ -607,7 +724,7 @@ trait TreeToJsCompiler
             case x@Apply(fun, args) => {
                 val argumentList = x.symbol.paramss
 
-                def buildArgs(t: global.Tree): List[Tree] = {
+                def buildArgs(t: Tree): List[Tree] = {
                     t match {
                         case Apply(f, xs) => {
                             buildArgs(f) ++ xs
@@ -622,7 +739,7 @@ trait TreeToJsCompiler
                     _.toString.contains("$default$")
                 }
 
-                def buildAnArg(t: global.Tree): String = {
+                def buildAnArg(t: Tree): String = {
                     t match {
                         case x@Function(_, _) => {
                             buildTree(x)
@@ -643,7 +760,7 @@ trait TreeToJsCompiler
                     }
                 }
 
-                def ownerName(t: global.Tree) = {
+                def ownerName(t: Tree) = {
                     if (fun.hasSymbol) {
                         Some(fun.symbol.owner.nameString)
                     } else {
@@ -660,11 +777,11 @@ trait TreeToJsCompiler
                     }
                 }
 
-                def buildApply(f: global.Tree) = {
+                def buildApply(f: Tree) = {
                     tmp.format(buildTree(f), processedArgs.mkString(","))
                 }
 
-                def isVarArgs(t: global.Tree): Boolean = {
+                def isVarArgs(t: Tree): Boolean = {
                     t.tpe.params.headOption match {
                         case Some(firstParam) => {
                             firstParam.tpe.toString.matches("""\(String, [^)].*\)\*""")
@@ -675,7 +792,7 @@ trait TreeToJsCompiler
                     }
                 }
 
-                def isArrayArg(t: global.Tree): Boolean = {
+                def isArrayArg(t: Tree): Boolean = {
                     t.tpe.params.headOption match {
                         case Some(firstParam) => {
                             firstParam.tpe.toString.matches("""[a-zA-Z0-9]+\*""")
@@ -867,7 +984,11 @@ trait TreeToJsCompiler
                     }
                     case y => {
                         // The browser package is an implicit => there is no namespace needed in js.
-                        (if (y.symbol.fullName == "js.browser.package") "" else buildTree(y) + ".") + name
+                        (if (y.hasSymbol && y.symbol.fullName == "js.browser.package") {
+                            ""
+                        } else {
+                            buildTree(y) + "."
+                        }) + name
                     }
                 }
             }
@@ -934,7 +1055,7 @@ trait TreeToJsCompiler
         }
     }
 
-    def buildExpression(t: global.Tree, hasReturn: Boolean = true): String = {
+    def buildExpression(t: Tree, hasReturn: Boolean = true): String = {
         buildTree(t) match {
             case z if (t.tpe.toString == "Unit") => {
                 if (z == "") {
@@ -966,7 +1087,7 @@ trait TreeToJsCompiler
 
     def buildIf(t: If, hasReturn: Boolean): String = {
 
-        def buildTreeReturn(t2: global.Tree) = {
+        def buildTreeReturn(t2: Tree) = {
             if (hasReturn) {
                 "return %s".format(buildTree(t2))
             } else {
@@ -995,14 +1116,14 @@ trait TreeToJsCompiler
         "%s ? function() {\n%s}() : function() {\n%s}()".format(buildTree(t.cond), transformedThen, transformedElse)
     }
 
-    def buildSwitch(t: global.Tree): String = {
+    def buildSwitch(t: Tree): String = {
 
         val sb = new StringBuilder
 
         sb.append("\nvar matched;\n")
         val Match(selector, cases) = t
 
-        def buildTheBody(body: global.Tree) = {
+        def buildTheBody(body: Tree) = {
             "return %s".format(buildTree(body))
         }
 
@@ -1086,7 +1207,7 @@ trait TreeToJsCompiler
     }
 
     /*
-    def classType(f: global.Tree) = {
+    def classType(f: Tree) = {
         JsFunction(f.tpe.finalResultType.toString)
     }
 
@@ -1121,7 +1242,7 @@ trait TreeToJsCompiler
         }
     }
 
-    def processMatch(selector: global.Tree, pat: global.Tree, guard: global.Tree, body: global.Tree, isBound: Boolean): String = {
+    def processMatch(selector: Tree, pat: Tree, guard: Tree, body: Tree, isBound: Boolean): String = {
 
         val matchit = "matched = scalosure.matchit(%s,%s)".format(buildTree(selector), scala2js(processMatchPat(pat, isBound)))
 
@@ -1138,7 +1259,7 @@ trait TreeToJsCompiler
         }
     }
 
-    def buildMatchBindList(t: global.Tree, binds: List[String] = Nil): List[String] = {
+    def buildMatchBindList(t: Tree, binds: List[String] = Nil): List[String] = {
         t match {
             case x@Apply(f, xs) => {
                 xs.map {
@@ -1163,7 +1284,7 @@ trait TreeToJsCompiler
             }) :: Nil)
     }
 
-    def processMatchPat(t: global.Tree, isBound: Boolean): JsType = {
+    def processMatchPat(t: Tree, isBound: Boolean): JsType = {
         t match {
             case x@Apply(f, xs) => {
                 buildMetaType(classType(x), isBound, xs map {
@@ -1185,29 +1306,6 @@ trait TreeToJsCompiler
             }
         }
     }*/
-
-    def buildField(tree: ValDef, inPackageObject: Boolean = false): String = {
-
-        val className = trimNamespace(tree.ownerName)
-        val name = tree.nameString
-        val rhs = buildTree(tree.rhs)
-
-        if (tree.symbol.owner.isModuleClass) {
-            "%s.%s = %s;\n".format(className, buildName(tree.symbol), rhs)
-        } else if (tree.symbol.owner.isTrait) {
-            "%s.prototype.%s = %s;\n".format(className, buildName(tree.symbol), rhs)
-        } else {
-            ""
-        }
-    }
-
-    def trimNamespace(ns: String) = {
-        if (ns.endsWith(".package")) {
-            ns.stripSuffix(".package")
-        } else {
-            ns
-        }
-    }
 
     def translateName(s: Name): String = {
         s.toString match {
@@ -1241,67 +1339,7 @@ trait TreeToJsCompiler
         }
     }
 
-    def buildMethod(ts: DefDef, inPackageObject: Boolean = false): String = {
-
-        val ns = trimNamespace(ts.symbol.owner.fullName)
-        val name = ts.symbol.nameString
-        val args = ts.vparamss.flatten.map(_.symbol.nameString).mkString(",")
-
-        val l = new ListBuffer[String]
-
-        if (ts.symbol.owner.isModuleClass) {
-            l += "%s.%s = function(%s) {\n".format(ns, buildName(ts.symbol), args)
-        } else {
-            l += "%s.prototype.%s = function(%s) {\n".format(ns, buildName(ts.symbol), args)
-        }
-
-        // every method gets a self refrence
-        l += "var self = this;\n"
-
-        // handle defaults in a javascript way
-        ts.vparamss.flatten filter {
-            _.symbol.hasDefault
-        } foreach {
-            x => l += "if (typeof(%1$s) === 'undefined') { %1$s = %2$s; };\n".format(x.nameString, buildTree(x.asInstanceOf[ValDef].rhs))
-        }
-
-        val stats = ts.rhs match {
-            case y@Block(_, _) => {
-                buildBlock(y)
-            }
-            case y@Match(_, _) => {
-                "return " + buildSwitch(y)
-            }
-            case y => {
-                buildTree(y) match {
-                    case z if (ts.tpt.symbol.nameString == "Unit") => {
-                        if (z == "") {
-                            ""
-                        } else {
-                            "%s;\n".format(z)
-                        }
-                    }
-                    case z => {
-                        "return %s;\n".format(z)
-                    }
-                }
-            }
-        }
-
-        l += stats
-
-        l += "};\n"
-
-        if (ts.symbol.annotations exists {
-            _.toString == "s2js.ExportSymbol"
-        }) {
-            l += "goog.exportSymbol('%1$s', %1$s);\n".format(ns + "." + name)
-        }
-
-        l.mkString
-    }
-
-    def buildXmlLiteral(t: global.Tree): String = {
+    def buildXmlLiteral(t: Tree): String = {
         t match {
 
             case x@Block(_, inner@Block(stats, a@Apply(_, _))) => {
@@ -1380,7 +1418,7 @@ trait TreeToJsCompiler
         }
     }
 
-    def buildObjectLiteral(t: global.Tree): String = {
+    def buildObjectLiteral(t: Tree): String = {
         t match {
 
             case x@Literal(Constant(value)) => {
@@ -1507,4 +1545,34 @@ trait TreeToJsCompiler
             }
         }
     }
+
+    private object DependencyManager
+    {
+        val requireHashSet = new HashSet[String]
+        val provideHashSet = new HashSet[String]
+
+        def addProvidedSymbol(symbol: Symbol) {
+            if (!symbol.isSynthetic &&
+                symbol.fullName != "<empty>" &&
+                (symbol.isPackage || symbol.isClass || symbol.isModuleClass)) {
+                provideHashSet.add(symbol.fullName)
+            }
+        }
+
+        def addRequiredSymbol(symbol: Symbol) {
+            if (!isInternalType(symbol)) {
+                requireHashSet.add(symbol.fullName)
+            }
+        }
+
+        def getProvides: String = {
+            provideHashSet.toArray.map("goog.addProvidedSymbol('%s');\n".format(_)).mkString
+        }
+
+        def getRequires: String = {
+            val filteredLocal = requireHashSet.toArray.filter(r => !provideHashSet.contains(r))
+            filteredLocal.map("goog.addRequiredSymbol('%s');\n".format(_)).mkString
+        }
+    }
+
 }
