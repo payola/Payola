@@ -12,7 +12,7 @@ object PayolaBuild extends Build
         val scalaVersion = "2.9.1"
     }
 
-    object ScalaToJsSettings
+    object S2JsSettings
     {
         val version = "0.2"
     }
@@ -23,8 +23,8 @@ object PayolaBuild extends Build
         scalaVersion := PayolaSettings.scalaVersion
     )
 
-    val scalaToJsSettings = payolaSettings ++ Seq(
-        version := ScalaToJsSettings.version
+    val s2JsSettings = payolaSettings ++ Seq(
+        version := S2JsSettings.version
     )
 
     val scalaTestDependency = "org.scalatest" %% "scalatest" % "1.6.1" % "test"
@@ -35,29 +35,29 @@ object PayolaBuild extends Build
         file("."),
         settings = payolaSettings
     ).aggregate(
-        scalaToJsProject,
-        helloWorldProject,
-        playBetaProject
+        s2JsProject,
+        modelProject,
+        webProject
     )
 
-    lazy val scalaToJsProject = Project(
-        "ScalaToJs",
-        file("./ScalaToJs"),
-        settings = scalaToJsSettings
+    lazy val s2JsProject = Project(
+        "s2js",
+        file("./s2js"),
+        settings = s2JsSettings
     ).aggregate(
-        scalaToJsAdaptersProject,
-        scalaToJsCompilerProject
+        s2JsAdaptersProject,
+        s2JsCompilerProject
     ).dependsOn(
-        scalaToJsAdaptersProject,
-        scalaToJsCompilerProject
+        s2JsAdaptersProject,
+        s2JsCompilerProject
     )
 
-    val adaptersJarName = "adapters_" + PayolaSettings.scalaVersion + "-" + ScalaToJsSettings.version + ".jar";
+    val adaptersJarName = "adapters_" + PayolaSettings.scalaVersion + "-" + S2JsSettings.version + ".jar";
 
-    lazy val scalaToJsAdaptersProject = Project(
-        "Adapters",
-        file("./ScalaToJs/Adapters"),
-        settings = scalaToJsSettings ++ Seq(
+    lazy val s2JsAdaptersProject = Project(
+        "adapters",
+        file("./s2js/adapters"),
+        settings = s2JsSettings ++ Seq(
             packageBin <<= (packageBin in Compile) map {
                 (jarFile: File) =>
                     IO.copyFile(jarFile, file("./lib/s2js-" + adaptersJarName))
@@ -67,12 +67,12 @@ object PayolaBuild extends Build
         )
     )
 
-    val compilerJarName = "compiler_" + PayolaSettings.scalaVersion + "-" + ScalaToJsSettings.version + ".jar";
+    val compilerJarName = "compiler_" + PayolaSettings.scalaVersion + "-" + S2JsSettings.version + ".jar";
 
-    lazy val scalaToJsCompilerProject = Project(
-        "Compiler",
-        file("./ScalaToJs/Compiler"),
-        settings = scalaToJsSettings ++ Seq(
+    lazy val s2JsCompilerProject = Project(
+        "compiler",
+        file("./s2js/compiler"),
+        settings = s2JsSettings ++ Seq(
             libraryDependencies := Seq(scalaTestDependency, scalaCompilerDependency),
             resolvers ++= Seq(DefaultMavenRepository),
 
@@ -87,49 +87,48 @@ object PayolaBuild extends Build
             compile <<= (compile in Compile).dependsOn(packageBin),
 
             testOptions ++= Seq(
-                Tests.Argument("-Dwd=" + file("./ScalaToJs/Compiler/target/tests").absolutePath),
+                Tests.Argument("-Dwd=" + file("./s2js/compiler/target/tests").absolutePath),
                 Tests.Argument("-Dcp=" +
                     "./lib/scala-library-" + PayolaSettings.scalaVersion + ".jar;" +
                     "./lib/s2js-" + adaptersJarName)
             )
         )
     ).dependsOn(
-        scalaToJsAdaptersProject
+        s2JsAdaptersProject
     )
 
-    lazy val helloWorldProject = Project(
-        "HelloWorld",
-        file("./HelloWorld"),
+    lazy val modelProject = Project(
+        "model",
+        file("./model"),
         settings = payolaSettings ++ Seq(
             libraryDependencies := Seq(scalaTestDependency),
             resolvers ++= Seq(DefaultMavenRepository)
         )
     )
 
-    lazy val playBetaProject = PlayProject(
-        "PlayBeta", // Name of the project.
+    lazy val webProject = PlayProject(
+        "web", // Name of the project.
         PayolaSettings.version, // Version of the project.
         Nil, // Library dependencies.
-        file("./PlayBeta") // Path to the project.
+        file("./web") // Path to the project.
     ).settings(
         defaultScalaSettings: _*
     ).aggregate(
         clientProject
     ).dependsOn(
-        helloWorldProject,
-        clientProject
+        modelProject
     )
 
     lazy val clientProject = Project(
-        "Client",
-        file("./PlayBeta/Client"),
+        "client",
+        file("./web/client"),
         settings = payolaSettings ++ Seq(
             // Whole path to the compiler plugin needs to be added, because scala compiler looks for the plugins only
             // in SCALA_HOME.
             scalacOptions += "-Xplugin:" + file("./lib/s2js-" + compilerJarName).absolutePath,
-            scalacOptions += "-P:s2js:output:" + file("./PlayBeta/public/javascripts/client").absolutePath
+            scalacOptions += "-P:s2js:output:" + file("./web/public/javascripts").absolutePath
         )
     ).dependsOn(
-        scalaToJsProject
+        s2JsProject
     )
 }

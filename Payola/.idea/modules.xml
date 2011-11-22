@@ -2,14 +2,14 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea_modules/Adapters.iml" filepath="$PROJECT_DIR$/.idea_modules/Adapters.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea_modules/Client.iml" filepath="$PROJECT_DIR$/.idea_modules/Client.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea_modules/Compiler.iml" filepath="$PROJECT_DIR$/.idea_modules/Compiler.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea_modules/HelloWorld.iml" filepath="$PROJECT_DIR$/.idea_modules/HelloWorld.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/Payola.iml" filepath="$PROJECT_DIR$/.idea_modules/Payola.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea_modules/PlayBeta.iml" filepath="$PROJECT_DIR$/.idea_modules/PlayBeta.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea_modules/ScalaToJs.iml" filepath="$PROJECT_DIR$/.idea_modules/ScalaToJs.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea_modules/adapters.iml" filepath="$PROJECT_DIR$/.idea_modules/adapters.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea_modules/client.iml" filepath="$PROJECT_DIR$/.idea_modules/client.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea_modules/compiler.iml" filepath="$PROJECT_DIR$/.idea_modules/compiler.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea_modules/model.iml" filepath="$PROJECT_DIR$/.idea_modules/model.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/project.iml" filepath="$PROJECT_DIR$/.idea_modules/project.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea_modules/s2js.iml" filepath="$PROJECT_DIR$/.idea_modules/s2js.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea_modules/web.iml" filepath="$PROJECT_DIR$/.idea_modules/web.iml" />
     </modules>
   </component>
 </project>

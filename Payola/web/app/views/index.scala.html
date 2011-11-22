@@ -1,0 +1,14 @@
+@(message: String)
+
+@main("Home") {
+
+    <section>
+        <h1>@message</h1>
+    </section>
+    <script>
+        goog.require('client.Hello');
+    </script>
+    <script>
+        client.Hello.main();
+    </script>
+}
