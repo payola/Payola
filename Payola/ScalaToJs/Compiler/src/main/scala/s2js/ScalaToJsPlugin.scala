@@ -14,7 +14,7 @@ class ScalaToJsPlugin(val global: Global) extends Plugin
     val description = "Scala to Javascript compiler plugin"
     val components = List[PluginComponent](Component)
 
-    /** The output directory where the compile javascript files are stored. */
+    /**The output directory where the compile javascript files are stored. */
     var output = new File("")
 
     var ignorePackages = false
@@ -22,6 +22,7 @@ class ScalaToJsPlugin(val global: Global) extends Plugin
     private object Component extends PluginComponent with PackageCompiler
     {
         val global = ScalaToJsPlugin.this.global
+
         import global._
 
         val runsAfter = List[String]("refchecks");
@@ -50,6 +51,7 @@ class ScalaToJsPlugin(val global: Global) extends Plugin
                 writer.close()
             }
         }
+
     }
 
     override def processOptions(options: List[String], error: String => Unit) {
