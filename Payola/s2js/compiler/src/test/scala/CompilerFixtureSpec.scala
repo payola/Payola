@@ -44,6 +44,8 @@ abstract class CompilerFixtureSpec extends FixtureSpec with ConfigMapFixture wit
                 println(expected)
                 println("[s2js-test] Compiled:")
                 println(actual)
+                println(normalizeWhiteSpace(expected))
+                println(normalizeWhiteSpace(actual))
                 assert(false)
             }
         }

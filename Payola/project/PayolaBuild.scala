@@ -31,7 +31,7 @@ object PayolaBuild extends Build
     val scalaCompilerDependency = "org.scala-lang" % "scala-compiler" % PayolaSettings.scalaVersion
 
     lazy val payolaProject = Project(
-        "Payola",
+        "payola",
         file("."),
         settings = payolaSettings
     ).aggregate(

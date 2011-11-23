@@ -317,7 +317,7 @@ trait PackageCompiler
                     case typeApply: TypeApply => compileTypeApply(typeApply)
                     case assign: Assign => compileAssign(assign)
                     case ifStatement: If => compileIf(ifStatement)
-                    case label@LabelDef(name, _, _) if name.toString == "while" => compileWhile(label)
+                    case labelDef: LabelDef => compileLabelDef(labelDef)
                     case tryStatement: Try => // TODO
                     case matchStatement: Match => // TODO
                     case _ => {
@@ -381,7 +381,7 @@ trait PackageCompiler
             compileParameterDeclaration(function.vparams)
             buffer += ") { var self = this; "
             compileDefaultParameters(function.vparams)
-            compileAst(function.body, function.body.tpe != Unit)
+            compileAst(function.body, hasReturnValue(function.body.tpe.typeSymbol))
             buffer += "}"
         }
 
@@ -395,7 +395,9 @@ trait PackageCompiler
             val qualifier = select.qualifier
             val name = select.name.toString
 
-            if (!jsInternalPackages.contains(select.toString)) {
+            if (select.toString == "scala.this.Predef") {
+                buffer += "scala.Predef%s".format(subSelectToken)
+            } else if (!jsInternalPackages.contains(select.toString)) {
                 qualifier match {
                     case _ if name == "<init>" => {
                         compileAst(qualifier)
@@ -468,26 +470,41 @@ trait PackageCompiler
         def compileAssign(assign: Assign) {
             compileAst(assign.lhs)
             buffer += " = "
-            compileAstStatement(assign.rhs)
+            compileAst(assign.rhs)
         }
 
         def compileIf(condition: If) {
-            buffer += "(function() { if ("
+            buffer += "(function() {\nif ("
             compileAst(condition.cond)
-            buffer += ") { "
-            compileAst(condition.thenp, hasReturnValue(condition.tpe.typeSymbol))
-            buffer += " } else { "
-            compileAst(condition.elsep, hasReturnValue(condition.tpe.typeSymbol))
-            buffer += " }})()"
+            buffer += ") {\n"
+            compileAstStatement(condition.thenp, hasReturnValue(condition.tpe.typeSymbol))
+            buffer += "} else {\n"
+            compileAstStatement(condition.elsep, hasReturnValue(condition.tpe.typeSymbol))
+            buffer += "}})()"
         }
 
-        def compileWhile(whileStatement: LabelDef) {
-            val If(cond, thenp, _) = whileStatement.rhs
-            buffer += "while("
-            compileAst(cond)
-            buffer += ") {"
-            compileAstStatement(thenp)
-            buffer += "}\n"
+        def compileLabelDef(labelDef: LabelDef) {
+            labelDef.name match {
+                case name if name.toString.startsWith("while") => {
+                    // AST of a while cycle is transformed into a tail recursive function with AST similar to:
+                    // def while$1() {
+                    //     if([while-condition]) {
+                    //         [while-body];
+                    //         while$1()
+                    //     }
+                    // }
+                    val If(cond, Block(body, _), _) = labelDef.rhs
+                    buffer += "while("
+                    compileAst(cond)
+                    buffer += ") {\n"
+                    compileAstStatement(body.head)
+                    buffer += "}"
+                }
+                case _ => {
+                    buffer += "/* [s2js-warning] Unknown labelDef %s */".format(labelDef.toString)
+                }
+            }
+
         }
     }
 
