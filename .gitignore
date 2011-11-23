@@ -9,3 +9,6 @@ Tools/
 # IntelliJ Idea files.
 Payola/.idea/workspace.xml
 Payola/.idea/*highlighting.xml
+
+# OS X files
+.DS_Store
