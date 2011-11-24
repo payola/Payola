@@ -1,0 +1,1 @@
+goog.addDependency('../client/Hello.js', ['client.Hello'], []);
