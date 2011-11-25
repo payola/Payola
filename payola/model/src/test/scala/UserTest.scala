@@ -33,12 +33,10 @@ class UserTest extends FlatSpec with ShouldMatchers {
         evaluating(u.removeFromGroup(null)) should produce [AssertionError]
     }
 
-    "User" should "be a member and owner of group when added" in  {
+    "User" should "not be a member and should be an owner of group when added" in  {
         val u: User = new User("Franta")
         val g: Group = new Group("Grupa", u);
-        println("isMember: " + u.isMemberOfGroup(g))
-        println("isOwner : " + u.isOwnerOfGroup(g))
-        u.isMemberOfGroup(g) && u.isOwnerOfGroup(g)
+        !u.isMemberOfGroup(g) && u.isOwnerOfGroup(g)
     }
 
     "User" should "be a member but not an owner of group when added" in  {
@@ -73,6 +71,6 @@ class UserTest extends FlatSpec with ShouldMatchers {
         "owner of the group" in  {
         val u: User = new User("Franta")
         val g: Group = new Group("Monoid", u)
-        evaluating(u.removeFromGroup(g)) should produce [AssertionError]
+        evaluating(u.removeOwnedGroup(g)) should produce [AssertionError]
     }
 }

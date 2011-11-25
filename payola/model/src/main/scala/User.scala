@@ -8,19 +8,22 @@ package cz.payola.model
 
 import scala.collection.mutable._
 
-class User(val name: String) {
-    // The name mustn't be null and musn't be empty
-    // TODO: make sure it's unique system-wide?
-    assert(name != null && name != "")
+class User(n: String) {
+    private var _name: String = null
+    name = n
+
 
     // Possibly the following two fields should private and
     // we should return an immutable copy from a method below?
 
     // Analysis owned by the user or shared directly to him
     val _analyses: ArrayBuffer[Analysis] = new ArrayBuffer[Analysis]()
-    // Groups owned by the user or shared to him
-    // TODO: Rozdelit do dvou
-    val _groups: ArrayBuffer[Group] = new ArrayBuffer[Group]()
+
+
+    // Groups owned by the user
+    private val _ownedGroups: ArrayBuffer[Group] = new ArrayBuffer[Group]()
+    // Groups that the user is a member of
+    private val _memberGroups: ArrayBuffer[Group] = new ArrayBuffer[Group]()
 
 
    /** Adds the analysis to the analyses array. Does nothing if the analysis
@@ -29,26 +32,42 @@ class User(val name: String) {
      * @param a Analysis to be added.
      */
     def addAnalysis(a: Analysis) = {
-        if (_analyses.contains(a) == false)
+        if (!_analyses.contains(a))
             _analyses += a
     }
 
-   /** Adds the group to the group array. Does nothing if the group has
-     * already been added.
+   /** Adds the group to the member group array. Does nothing if the group has already been added.
      *
      * @note This method automatically adds the current user as a member
-     *       of the group.
+     *       of the group if the user isn't.
      *
      * @param g Group to be added.
+     *
+     * @throws AssertionError if the group is null.
      */
     def addToGroup(g: Group): Unit = {
         assert(g != null, "Group is NULL!")
 
         // Avoid double membership
-        if (_groups.contains(g) == false) {
-            _groups += g
+        if (!_memberGroups.contains(g)) {
+            _memberGroups += g
             g.addMember(this)
         }
+    }
+
+    /** Adds the group to the owned groups. The user '''must''' already be set as the group's owner.
+     *
+     * @param g Group to be added.
+     *
+     * @throws AssertionError if the group is null or the user isn't an owner of that group.
+     */
+    def addOwnedGroup(g: Group) = {
+        assert(g != null, "Group is NULL!")
+        assert(g.isOwnedByUser(this), "Group isn't owned by this user!")
+
+        // Avoid double membership
+        if (!_ownedGroups.contains(g))
+            _ownedGroups += g
     }
 
    /** Results in true if the user has access to that particular analysis.
@@ -63,7 +82,8 @@ class User(val name: String) {
         if (_analyses.contains(a)) {
             true
         } else {
-            _groups.exists(_.hasAccessToAnalysis(a))
+            _memberGroups.exists(_.hasAccessToAnalysis(a)) ||
+                _ownedGroups.exists(_.hasAccessToAnalysis(a))
         }
     }
 
@@ -73,7 +93,7 @@ class User(val name: String) {
      *
      * @return True or false.
      */
-    def isMemberOfGroup(g: Group): Boolean = _groups.contains(g)
+    def isMemberOfGroup(g: Group): Boolean = _memberGroups.contains(g)
 
     /** Results in true if the user is an owner of the analysis.
      *
@@ -91,14 +111,38 @@ class User(val name: String) {
      */
     def isOwnerOfGroup(g: Group): Boolean = g.isOwnedByUser(this)
 
-    /** Result is a new ArrayBuffer consisting of only groups that
+    /** Result is a new Array consisting of only groups that
+     *  the user is a member of.
+     *
+     *  @return New Array with groups that the user is a member of.
+     */
+    def memberGroups: Array[Group] = _memberGroups.toArray
+
+    /** Returns the user's name.
+     *
+     * @return User's name.
+     */
+    def name: String = _name
+
+    /** Sets the user's name.
+     *
+     * @param n New name.
+     *
+     * @throws AssertionError if the new name is null or empty.
+     */
+    def name_=(n: String) = {
+        // The name mustn't be null and mustn't be empty
+        assert(n != null && n != "")
+
+        _name = n
+    }
+
+    /** Result is a new Array consisting of only groups that
      *  are owned by the user.
      *
-     *  @return New ArrayBuffer with groups owned by the user.
+     *  @return New Array with groups owned by the user.
      */
-    def ownedGroups: ArrayBuffer[Group] = {
-        _groups.filter(_.isOwnedByUser(this))
-    }
+    def ownedGroups: Array[Group] = _ownedGroups.toArray
 
     /** Removes the passed analysis from the users analyses array.
      *
@@ -108,27 +152,48 @@ class User(val name: String) {
 
     /** Removes the user from the group.
      *
-     *  '''Note:''' 1) Will result in exception if you're removing the owner.
-     *          To remove an owner, first change the owner to someone else.
-     *       2) This also removes the user from the group's member array.
+     *  '''Note:''' This also removes the user from the group's member array.
      *
      *  @param g Group to be removed.
      *
      *  @return Nothing, needs to have a declared return type because it calls
      *          removeMember on the group which then may call back removeFromGroup
      *          back on the user.
+     *
+     *  @throws AssertionError if the group is null.
      */
     def removeFromGroup(g: Group): Unit = {
         assert(g != null, "Group is NULL!")
-        assert(!g.isOwnedByUser(this), "Group is owned by this user!")
-        
+
         // Need to make this check, otherwise we'd
         // get in to an infinite cycle
-        if (_groups.contains(g)){
-            _groups -= g
+        if (_memberGroups.contains(g)){
+            _memberGroups -= g
             g.removeMember(this)
         }
     }
+
+    /** Removes the group from the user's list of owned groups. The user '''mustn't''' be the
+     * group's owner anymore.
+     *
+     * @param g Group to be removed.
+     *
+     * @throws AssertionError if the group is null or the user is still owner of the group.
+     */
+    def removeOwnedGroup(g: Group) = {
+        assert(g != null, "Group is NULL!")
+        assert(!g.isOwnedByUser(this), "Group is still owned by this user!")
+
+        _ownedGroups -= g
+    }
+
+    /** Convenience method that just calls name_=.
+     *
+     * @param n The new user's name.
+     *
+     * @throws AssertionError if the new name is null or empty.
+     */
+    def setName(n: String) = name_=(n);
 
 
 

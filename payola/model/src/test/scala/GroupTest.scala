@@ -64,13 +64,5 @@ class GroupTest extends FlatSpec with ShouldMatchers {
         !g.hasMember(u2)
     }
 
-    "Group" should "not allow removing the owner" in {
-        val u: User = new User("Franta")
-        val g: Group = new Group("Monoid", u)
-
-        evaluating(g.removeMember(u)) should  produce [AssertionError]
-    }
-
-
 }
 

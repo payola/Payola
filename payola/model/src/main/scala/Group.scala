@@ -13,12 +13,17 @@ class Group (nameStr: String, user: User){
     
     // Shared members. Add the owner to members automatically
     private val _members: ArrayBuffer[User] = new ArrayBuffer[User]()
-    
+
+    // Group owner
     private var _owner: User = null
     owner = user
 
+    // Group name
     private var _name: String = null
     name = nameStr
+
+    user.addOwnedGroup(this)
+
 
     /** Adds a member to the group. Does nothing if already a member.
      *
@@ -103,28 +108,30 @@ class Group (nameStr: String, user: User){
      *
      * @throws AssertionError if the new user is null.
      */
-    private def owner_=(u: User) = {
+    def owner_=(u: User) = {
         // Owner mustn't be null
         assert(u != null)
 
+        val oldOwner = _owner
         _owner = u
-        this.addMember(u)
+
+        // Update relations
+        u.addOwnedGroup(this)
+        if (oldOwner != null)
+            oldOwner.removeOwnedGroup(this)
     }
 
 
 
     /** Removes user from members.<br/>
      * <br/>
-     * <strong>Note:</strong> 1) Will result in exception if you're removing the owner.
-     *          To remove an owner, first change the owner to someone else.<br/>
-     *       2) Automatically removes the group from the user's groups.
+     * <strong>Note:</strong> Automatically removes the group from the user's groups.
      *
      *  @param u The user to be removed.
      *
      *  @throws AssertionError if the user is null or owner.
      */
     def removeMember(u: User) = {
-        assert(u != _owner, "Removing owner!")
         assert(u != null, "User is NULL!")
         
         // Need to make this check, otherwise we'd
