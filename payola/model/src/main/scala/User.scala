@@ -16,8 +16,10 @@ class User(n: String) {
     // Possibly the following two fields should private and
     // we should return an immutable copy from a method below?
 
-    // Analysis owned by the user or shared directly to him
-    val _analyses: ArrayBuffer[Analysis] = new ArrayBuffer[Analysis]()
+    // Analysis owned by the user
+    private val _ownedAnalyses: ArrayBuffer[Analysis] = new ArrayBuffer[Analysis]()
+    // Analysis shared to the user
+    private val _sharedAnalyses: ArrayBuffer[AnalysisShare] = new ArrayBuffer[AnalysisShare]()
 
 
     // Groups owned by the user
@@ -27,13 +29,29 @@ class User(n: String) {
 
 
    /** Adds the analysis to the analyses array. Does nothing if the analysis
-     * has been already added.
+     * has been already added. The Analysis has to be owned by the user.
      *
      * @param a Analysis to be added.
+    *
+    *  @throws AssertionError if the analysis is null or the user isn't an owner of it.
      */
     def addAnalysis(a: Analysis) = {
-        if (!_analyses.contains(a))
-            _analyses += a
+        assert(a != null, "Analysis mustn't be null")
+        assert(isOwnerOfAnalysis(a), "User must be owner of the analysis")
+        if (!_ownedAnalyses.contains(a))
+            _ownedAnalyses += a
+    }
+
+    /** Adds an analysis share to the user.
+     *
+     * @param a The share.
+     *
+     * @throws AssertionError if the analysis share is null.
+     */
+    def addAnalysisShare(a: AnalysisShare) = {
+        assert(a != null, "Cannot share null analysis share")
+        if (!_sharedAnalyses.contains(a))
+            _sharedAnalyses += a
     }
 
    /** Adds the group to the member group array. Does nothing if the group has already been added.
@@ -71,15 +89,15 @@ class User(n: String) {
     }
 
    /** Results in true if the user has access to that particular analysis.
-     * Both the user's analysis array and each group's analysis array are
-     * checked.
+     * This method checks analyses owned by the user, analyses shared to him
+     * as well as analyses shared to the groups he's a member or owner of.
      *
      * @param a The analysis about which we want to get the access privileges.
      *
      * @return True or false.
      */
     def hasAccessToAnalysis(a: Analysis): Boolean = {
-        if (_analyses.contains(a)) {
+        if (_ownedAnalyses.contains(a) || _sharedAnalyses.exists(_.analysis == a)) {
             true
         } else {
             _memberGroups.exists(_.hasAccessToAnalysis(a)) ||
@@ -101,7 +119,7 @@ class User(n: String) {
      *
      * @return True or false.
      */
-    def isOwnerOfAnalysis(a: Analysis): Boolean = a.isOwnedByUser(this)
+    def isOwnerOfAnalysis(a: Analysis): Boolean = _ownedAnalyses.contains(a)
 
     /** Results in true is the user is an owner of the group.
      *
@@ -144,11 +162,27 @@ class User(n: String) {
      */
     def ownedGroups: Array[Group] = _ownedGroups.toArray
 
-    /** Removes the passed analysis from the users analyses array.
+    /** Removes the passed analysis from the analyses owned by the user.
      *
      * @param a Analysis to be removed.
+     *
+     * @throws AssertionError if the analysis is null.
      */
-    def removeAnalysis(a: Analysis) = _analyses -= a
+    def removeAnalysis(a: Analysis) = {
+        assert(a != null, "Cannot remove null analysis!")
+        _ownedAnalyses -= a
+    }
+
+    /** Removes the passed analysis from the analyses shared to the user.
+     *
+     * @param a Analysis share to be removed.
+     *
+     * @throws AssertionError if the analysis share is null.
+     */
+    def removeAnalysisShare(a: AnalysisShare) = {
+        assert(a != null, "Cannot remove null analysis!")
+        _sharedAnalyses -= a
+    }
 
     /** Removes the user from the group.
      *

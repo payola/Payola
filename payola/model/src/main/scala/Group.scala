@@ -9,7 +9,7 @@ import collection.mutable._
  */
 class Group (nameStr: String, user: User){
     // Shared analysis
-    private val _sharedAnalyses: ArrayBuffer[Analysis] = new ArrayBuffer[Analysis]()
+    private val _sharedAnalyses: ArrayBuffer[AnalysisShare] = new ArrayBuffer[AnalysisShare]()
     
     // Shared members. Add the owner to members automatically
     private val _members: ArrayBuffer[User] = new ArrayBuffer[User]()
@@ -45,7 +45,15 @@ class Group (nameStr: String, user: User){
      *
      * @return An immutable array of analysis shared with this group.
      */
-    def analyses: Array[Analysis] = _sharedAnalyses.toArray
+    def analyses: Array[AnalysisShare] = _sharedAnalyses.toArray
+
+    /** Returns true if this particular share has been shared with this group.
+     *
+     * @param share The share.
+     * 
+     * @return Returns true if this particular share has been shared with this group.
+     */
+    def containsAnalysisShare(share: AnalysisShare): Boolean = _sharedAnalyses.contains(share)
 
     /** Results in true if this group has the analysis shared.
      *
@@ -53,7 +61,7 @@ class Group (nameStr: String, user: User){
      *
      * @return True or false.
      */
-    def hasAccessToAnalysis(a: Analysis): Boolean = _sharedAnalyses.contains(a)
+    def hasAccessToAnalysis(a: Analysis): Boolean = _sharedAnalyses.exists(_.analysis == a)
 
     /** Results in true if the user is a member.
      *

@@ -64,5 +64,12 @@ class GroupTest extends FlatSpec with ShouldMatchers {
         !g.hasMember(u2)
     }
 
+    "User" should "not be renamed to null or empty string" in  {
+        val u: User = new User("Franta")
+        val g: Group = new Group("Pologrupa", u)
+        evaluating(g.setName(null)) should produce [AssertionError]
+        evaluating(g.setName("")) should produce [AssertionError]
+    }
+
 }
 

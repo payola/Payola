@@ -73,4 +73,10 @@ class UserTest extends FlatSpec with ShouldMatchers {
         val g: Group = new Group("Monoid", u)
         evaluating(u.removeOwnedGroup(g)) should produce [AssertionError]
     }
+
+    "User" should "not be renamed to null or empty string" in  {
+        val u: User = new User("Franta")
+        evaluating(u.setName(null)) should produce [AssertionError]
+        evaluating(u.setName("")) should produce [AssertionError]
+    }
 }
