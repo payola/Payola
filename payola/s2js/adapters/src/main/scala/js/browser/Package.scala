@@ -2,8 +2,7 @@ package s2js.adapters.js.browser
 
 import s2js.adapters.js.dom.Document
 
-object `package`
-{
+object `package` {
 
     object JSON extends Json
 
