@@ -23,17 +23,63 @@ class MethodSpecs extends CompilerFixtureSpec {
                         o1 = {};
                         o1.m1 = function(v1, v2) {
                             var self = this;
-                            if (typeof(v2) === 'undefined') { v2 = ''; };
+                            if (typeof(v2) === 'undefined') { v2 = ''; }
                         };
                         o1.m2 = function(v1, v2) {
                             var self = this;
-                            if (typeof(v2) === 'undefined') { v2 = null; };
+                            if (typeof(v2) === 'undefined') { v2 = null; }
                         };
                         o1.m3 = function() {
                             var self = this;
                             self.m1('foo');
                             self.m1('foo', 'bar');
                             self.m2('foo');
+                        };
+                    """
+                }
+        }
+
+        it("can have a return value") {
+            configMap =>
+                expect {
+                    """
+                        object a {
+                            def m1() = {
+                                val x = "foo"
+                                x + "bar"
+                            }
+                            def m2() = {
+                                "foo"
+                            }
+                            def m3() = {
+                                "foo" + "bar"
+                            }
+                            def m4() {
+                                "foo" + "bar"
+                            }
+                        }
+                    """
+                } toBe {
+                    """
+                        goog.provide('a');
+
+                        a = {};
+                        a.m1 = function() {
+                            var self = this;
+                            var x = 'foo';
+                            return (x + 'bar');
+                        };
+                        a.m2 = function() {
+                            var self = this;
+                            return 'foo';
+                        };
+                        a.m3 = function() {
+                            var self = this;
+                            return 'foobar';
+                        };
+                        a.m4 = function() {
+                            var self = this;
+                            'foobar';
                         };
                     """
                 }
@@ -129,14 +175,14 @@ class MethodSpecs extends CompilerFixtureSpec {
                 }
         }
 
-        ignore("can have multiple parameter lists") {
+        it("can have multiple parameter lists") {
             configMap =>
                 expect {
                 """
                     import s2js.adapters.js.browser._
 
                     object o1 {
-                        def m1(name:String)(fn: (String) => Unit) {
+                        def m1(name: String)(fn: (String) => Unit) {
                             fn(name)
                         }
                         def m3() {
@@ -158,14 +204,13 @@ class MethodSpecs extends CompilerFixtureSpec {
 
                     o1.m3 = function() {
                         var self = this;
-                        o1.m1('foo', function(x) {window.alert(x);});
+                        self.m1('foo', function(x) { window.alert(x); });
                     };
                 """
                 }
         }
 
-
-        ignore("support methods as parameters") {
+        it("support methods as parameters") {
             configMap =>
                 expect {
                     """
@@ -216,7 +261,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                         };
                         C2.prototype.m1 = function(v1) {
                             var self = this;
-                            console.log((v1 + self.f1));
+                            window.alert((v1 + self.f1));
                         };
 
                         o1 = {};
@@ -224,7 +269,54 @@ class MethodSpecs extends CompilerFixtureSpec {
                             var self = this;
                             var c1 = new C1();
                             var c2 = new C2();
-                            c1.m1(c2.m1);
+                            c1.m1(function(v1_s2js) { c2.m1(v1_s2js); });
+                        };
+                    """
+                }
+        }
+
+        it("override base class functions") {
+            configMap =>
+                expect {
+                    """
+                        package $pkg
+
+                        class a {
+                            def m1() {}
+                            def m2(x:String) {}
+                        }
+                        class b extends a {
+                            override def m1() { super.m1() }
+                            override def m2(x:String) { super.m2("foo") }
+                        }
+                    """
+                } toBe {
+                    """
+                        goog.provide('$pkg.a');
+                        goog.provide('$pkg.b');
+
+                        $pkg.a = function() {
+                            var self = this;
+                        };
+                        $pkg.a.prototype.m1 = function() {
+                            var self = this;
+                        };
+                        $pkg.a.prototype.m2 = function(x) {
+                            var self = this;
+                        };
+
+                        $pkg.b = function() {
+                            var self = this;
+                            $pkg.a.call(self);
+                        };
+                        goog.inherits($pkg.b, $pkg.a);
+                        $pkg.b.prototype.m1 = function() {
+                            var self = this;
+                            $pkg.b.superClass_.m1.call(self);
+                        };
+                        $pkg.b.prototype.m2 = function(x) {
+                            var self = this;
+                            $pkg.b.superClass_.m2.call(self, 'foo');
                         };
                     """
                 }

@@ -70,7 +70,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
 
                         pkg.A = function(v1, v2, v3, v4) {
                             var self = this;
-                            if (typeof(v3) === 'undefined') { v3 = true; };
+                            if (typeof(v3) === 'undefined') { v3 = true; }
                             self.v1 = v1;
                             self.v2 = v2;
                             self.v3 = v3;
