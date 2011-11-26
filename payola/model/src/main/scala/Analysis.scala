@@ -1,25 +1,84 @@
-
 package cz.payola.model
-
-/**
- * Created by IntelliJ IDEA.
- * User: Krystof Vasa
- * Date: 21.11.11
- * Time: 11:02
- * To change this template use File | Settings | File Templates.
- */
 
 import scala.collection.mutable._
 
-class Analysis (u: User) {
+class Analysis (n: String, u: User) {
+    // Analysis owner
     private var _owner: User = null
     setOwner(u)
 
+    // Name of the analysis.
+    private var _name: String = null;
+    setName(n)
 
+    // Plugin instances that this analysis consists of.
+    private val _pluginInstances: ArrayBuffer[PluginInstance] = new ArrayBuffer[PluginInstance]()
+
+    /** Adds a new plugin instance to the plugin instances array.
+     *
+     * @param instance The plugin instance.
+     *
+     * @throws AssertionError if the plugin instance is null.
+     */
+    def appendPluginInstance(instance: PluginInstance) = {
+        assert(instance != null, "Cannot append null plugin instance!")
+
+        if (!_pluginInstances.contains(instance))
+            _pluginInstances += instance
+    }
+
+    /** Returns whether that particular plugin instance is contained in the plugin instances array.
+     *
+     * @param instance The plugin instance.
+     *
+     * @throws AssertionError if the plugin instance is null.
+     */
+    def containsPluginInstance(instance: PluginInstance) = {
+        assert(instance != null, "Cannot query about null plugin instance!")
+
+        _pluginInstances.contains()
+    }
+
+    /** Returns whether the user is an owner of this analysis.
+     *
+     * @param u User.
+     *
+     * @return True or false.
+     */
     def isOwnedByUser(u: User): Boolean = owner == u
+
+    /** Name getter.
+     *
+     * @return The name.
+     */
+    def name: String = _name
+
+    /** Name setter. The name mustn't be null or empty.
+     *
+     * @param n The new name.
+     *
+     * @throws AssertionError if the new name is null.
+     */
+    def name_=(n: String) = {
+        assert(n != null && n != "", "Analysis has to have a valid name!")
+
+        _name = n
+    }
+
+    /** Owner getter.
+     *
+     * @return The owner.
+     */
     def owner: User = _owner
+
+    /** Owner setter. Mustn't be null.
+     *
+     * @param New owner.
+     *
+     * @throws AssertionError if the new user is null.
+     */
     def owner_=(u: User) = {
-        assert(u != null, "Analysis has to have an owner!")
+        assert(u != null, "Analysis has to have a non-null owner!")
         val oldOwner = _owner
 
         _owner = u
@@ -28,6 +87,59 @@ class Analysis (u: User) {
         if (oldOwner != null)
             oldOwner.removeAnalysis(this)
     }
+
+    /** Returns an immutable copy of the plugin instances array.
+     *
+     * @return An immutable copy of the plugin instances array.
+     */
+    def pluginInstances: Array[PluginInstance] = _pluginInstances.toArray
+
+    /** Removes all items in the plugin instances array by the array passed as argument.
+     *
+     * @param instances The array of instances.
+     *
+     * @throws AssertionError if the array is null.
+     */
+    def pluginInstances_=(instances: Array[PluginInstance]) = {
+        assert(instances != null, "Cannot assign a null array!")
+
+        _pluginInstances.clear()
+        instances.foreach(_pluginInstances += _)
+    }
+
+    /** Removes a plugin instance from the plugin instances array.
+     *
+     * @param instance The plugin instance to be removed.
+     *
+     * @throws AssertionError if the plugin instance is null.
+     */
+    def removePluginInstance(instance: PluginInstance) = {
+        assert(instance != null, "Cannot remove null plugin instance!")
+
+        _pluginInstances -= instance
+    }
+
+    /** Convenience method that just calls name_=.
+     *
+     * @param n The new name.
+     *
+     * @throws AssertionError if the name is null.
+     */
+    def setName(n: String) = name_=(n)
+
+    /** Convenience method that just calls owner_=.
+     *
+     * @param u The new owner.
+     *
+     * @throws AssertionError if the user is null.
+     */
     def setOwner(u: User) = owner_=(u)
 
+    /** Convenience method that just calls pluginInstances_=.
+     *
+     * @param instances The instance array.
+     *
+     * @throws AssertionError if the array is null.
+     */
+    def setPluginInstances(instances: Array[PluginInstance]) = pluginInstances_=(instances)
 }

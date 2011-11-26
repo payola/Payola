@@ -4,22 +4,13 @@ import cz.payola.model._
 import org.scalatest.FlatSpec
 import org.scalatest.matchers._
 
-/**
- * User: Krystof Vasa
- * Date: 23.11.11
- * Time: 16:19
- */
-
 class UserTest extends FlatSpec with ShouldMatchers {
-    "User" should "have name Franta" in {
+    "User" should "retain values passed in the constructor" in {
         new User("Franta").name == "Franta"
     }
 
-    "User" should "throw exception being null-initiated" in {
+    "User" should "not be initialized with null or empty string" in {
         evaluating(new User(null)) should produce [AssertionError]
-    }
-
-    "User" should "throw exception being empty-string-initiated" in {
         evaluating(new User("")) should produce [AssertionError]
     }
 
@@ -47,24 +38,23 @@ class UserTest extends FlatSpec with ShouldMatchers {
         u2.isMemberOfGroup(g) && !u2.isOwnerOfGroup(g)
     }
 
-    "User" should "not be a member of group after removing" in  {
+    "User" should "update its group ownerships" in  {
         val u: User = new User("Franta")
+        u.ownedGroups.size should be (0)
+
         val u2: User = new User("Pepa")
         val g: Group = new Group("Monoid", u);
+        u.ownedGroups.size should be (1)
+
+        u2.memberGroups.size should be (0)
+
         u2.addToGroup(g)
+        u2.memberGroups.size should be (1)
+
         u2.removeFromGroup(g)
+        u2.memberGroups.size should be (0)
+
         !u.isMemberOfGroup(g)
-    }
-
-    "User" should "be an owner of 0 groups" in  {
-        val u: User = new User("Franta")
-        u.ownedGroups.size == 0
-    }
-
-    "User" should "be an owner of 1 group" in  {
-        val u: User = new User("Franta")
-        val g: Group = new Group("Monoid", u)
-        u.ownedGroups.size == 1
     }
 
     "User" should "not be removed from the group while still being an " +

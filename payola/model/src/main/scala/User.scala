@@ -1,18 +1,11 @@
 package cz.payola.model
 
-/**
- * User: Krystof Vasa
- * Date: 21.11.11
- * Time: 10:57
- */
-
 import scala.collection.mutable._
 
 class User(n: String) {
     private var _name: String = null
-    name = n
-
-
+    setName(n)
+    
     // Possibly the following two fields should private and
     // we should return an immutable copy from a method below?
 
@@ -119,7 +112,7 @@ class User(n: String) {
      *
      * @return True or false.
      */
-    def isOwnerOfAnalysis(a: Analysis): Boolean = _ownedAnalyses.contains(a)
+    def isOwnerOfAnalysis(a: Analysis): Boolean = a.owner == this
 
     /** Results in true is the user is an owner of the group.
      *

@@ -2,11 +2,6 @@ package cz.payola.model
 
 import collection.mutable._
 
-/**
- * User: Krystof Vasa
- * Date: 21.11.11
- * Time: 11:01
- */
 class Group (nameStr: String, user: User){
     // Shared analysis
     private val _sharedAnalyses: ArrayBuffer[AnalysisShare] = new ArrayBuffer[AnalysisShare]()
@@ -16,11 +11,11 @@ class Group (nameStr: String, user: User){
 
     // Group owner
     private var _owner: User = null
-    owner = user
+    setOwner(user)
 
     // Group name
     private var _name: String = null
-    name = nameStr
+    setName(nameStr)
 
     user.addOwnedGroup(this)
 

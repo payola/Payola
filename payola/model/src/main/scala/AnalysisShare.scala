@@ -1,11 +1,5 @@
 package cz.payola.model
 
-/**
- * User: Krystof Vasa
- * Date: 25.11.11
- * Time: 17:02
- */
-
 object SharePrivilege extends Enumeration {
     type SharePrivilege = Value
     val SharePrivilegeResultOnly, SharePrivilegeIncludingData = Value
