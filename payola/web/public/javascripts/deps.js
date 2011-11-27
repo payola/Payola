@@ -1,1 +1,1 @@
-goog.addDependency('../client/Hello.js', ['client.Hello'], []);
+goog.addDependency('../client/Index.js', ['client.Index'], []);
