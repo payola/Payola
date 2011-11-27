@@ -22,7 +22,7 @@ class StatementSpecs extends CompilerFixtureSpec
                     """
                         goog.provide('a');
 
-                        a = {};
+                        if (typeof(a) === 'undefined') { a = {}; }
                         a.m1 = function() {
                             var self = this;
                             var x = 'bar';
@@ -89,10 +89,10 @@ class StatementSpecs extends CompilerFixtureSpec
                             self.x = '';
                         };
 
-                        a = {};
+                        if (typeof(a) === 'undefined') { a = {}; }
                         a.x = 'bar';
 
-                        c = {};
+                        if (typeof(c) === 'undefined') { c = {}; }
                         c.x = 'foo';
 
                         c.m1 = function(param) {
@@ -146,7 +146,7 @@ class StatementSpecs extends CompilerFixtureSpec
                     """
                         goog.provide('o');
 
-                        o = {};
+                        if (typeof(o) === 'undefined') { o = {}; }
                         o.m1 = function() {
                             var self = this;
                             return true;

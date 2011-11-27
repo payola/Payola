@@ -20,7 +20,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                     """
                         goog.provide('o1');
 
-                        o1 = {};
+                        if (typeof(o1) === 'undefined') { o1 = {}; }
                         o1.m1 = function(v1, v2) {
                             var self = this;
                             if (typeof(v2) === 'undefined') { v2 = ''; }
@@ -63,7 +63,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                     """
                         goog.provide('a');
 
-                        a = {};
+                        if (typeof(a) === 'undefined') { a = {}; }
                         a.m1 = function() {
                             var self = this;
                             var x = 'foo';
@@ -100,7 +100,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                     """
                         goog.provide('a');
 
-                        a = {};
+                        if (typeof(a) === 'undefined') { a = {}; }
                         a.m1 = function(t) {
                             var self = this;
                         };
@@ -116,19 +116,19 @@ class MethodSpecs extends CompilerFixtureSpec {
             configMap =>
                 expect {
                     """
-                        package s2js.adapters.goog
+                        package s2js.adapters.goog.events
 
                         object a {
-                            val x = css.getCssName("foo")
+                            val x = Event.preventDefault(null)
                         }
                     """
                 } toBe {
                     """
-                        goog.provide('goog.a');
-                        goog.require('goog.css');
+                        goog.provide('goog.events.a');
+                        goog.require('goog.events.Event');
 
-                        goog.a = {};
-                        goog.a.x = goog.css.getCssName('foo');
+                        if (typeof(goog.events.a) === 'undefined') { goog.events.a = {}; }
+                        goog.events.a.x = goog.events.Event.preventDefault(null);
                     """
                 }
         }
@@ -162,7 +162,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                             return ('foo' + x);
                         };
 
-                        b = {};
+                        if (typeof(b) === 'undefined') { b = {}; }
                         b.m1 = function() {
                             var self = this;
                             return new A();
@@ -196,7 +196,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                 """
                     goog.provide('o1');
 
-                    o1 = {};
+                    if (typeof(o1) === 'undefined') { o1 = {}; }
                     o1.m1 = function(name, fn) {
                         var self = this;
                         fn(name);
@@ -264,7 +264,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                             window.alert((v1 + self.f1));
                         };
 
-                        o1 = {};
+                        if (typeof(o1) === 'undefined') { o1 = {}; }
                         o1.m1 = function() {
                             var self = this;
                             var c1 = new C1();

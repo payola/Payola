@@ -18,7 +18,7 @@ class DependencySpecs extends CompilerFixtureSpec
                     """
                         goog.provide('a.b.c.d');
 
-                        a.b.c.d = {};
+                        if (typeof(a.b.c.d) === 'undefined') { a.b.c.d = {}; }
                         a.b.c.d.m1 = function() {
                             var self = this;
                         };
@@ -51,32 +51,13 @@ class DependencySpecs extends CompilerFixtureSpec
                         goog.require('java.util.Date');
                         goog.require('java.util.Random');
 
-                        foo.a = {};
+                        if (typeof(foo.a) === 'undefined') { foo.a = {}; }
                         foo.a.x = new java.util.Date();
 
                         foo.a.m1 = function() {var self = this;
                             var y = new java.util.Random();
                             var z = new java.util.ArrayList();
                         };
-                    """
-                }
-        }
-
-        it("add require for a package object's owner") {
-            configMap =>
-                expect {
-                    """
-                        object a {
-                            val x = s2js.adapters.goog.dom.getElement("foo")
-                        }
-                    """
-                } toBe {
-                    """
-                        goog.provide('a');
-                        goog.require('goog.dom');
-
-                        a = {};
-                        a.x = goog.dom.getElement('foo');
                     """
                 }
         }
@@ -98,7 +79,7 @@ class DependencySpecs extends CompilerFixtureSpec
                     """
                         goog.provide('o1');
 
-                        o1 = {};
+                        if (typeof(o1) === 'undefined') { o1 = {}; }
                         o1.f1 = 'aaaa';
                         o1.m1 = function() {
                             var self = this;
@@ -122,7 +103,7 @@ class DependencySpecs extends CompilerFixtureSpec
                     """
                         goog.provide('o1');
 
-                        o1 = {};
+                        if (typeof(o1) === 'undefined') { o1 = {}; }
                         o1.f1 = window.location;
                     """
                 }
@@ -132,10 +113,10 @@ class DependencySpecs extends CompilerFixtureSpec
             configMap =>
                 expect {
                     """
-                        import s2js.adapters.goog.dom.TagName._
+                        import s2js.adapters.goog.events.EventType._
 
                         object a {
-                            val x = SPAN
+                            val x = CLICK
                         }
 
                     """
@@ -143,10 +124,10 @@ class DependencySpecs extends CompilerFixtureSpec
                     """
                         goog.provide('a');
 
-                        goog.require('goog.dom.TagName');
+                        goog.require('goog.events.EventType');
 
-                        a = {};
-                        a.x = goog.dom.TagName.SPAN;
+                        if (typeof(a) === 'undefined') { a = {}; }
+                        a.x = goog.events.EventType.CLICK;
                     """
                 }
         }

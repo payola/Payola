@@ -24,7 +24,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                         goog.provide('a');
 
-                        a = {};
+                        if (typeof(a) === 'undefined') { a = {}; }
                         a.m1 = function() {
                             var self = this;
                             var x = 0;
@@ -55,7 +55,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                         goog.provide('a');
 
-                        a = {};
+                        if (typeof(a) === 'undefined') { a = {}; }
                         a.m1 = function() {
                             var self = this;
                             scala.Predef.intWrapper(0).to(2).foreach(function(x) { window.alert(('foo' + x)); });
@@ -85,7 +85,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                         goog.provide('o1');
 
-                        o1 = {};
+                        if (typeof(o1) === 'undefined') { o1 = {}; }
                         o1.m1 = function() {
                             var self = this;
                             var x = '';
@@ -124,7 +124,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                         goog.provide('o1');
 
-                        o1 = {};
+                        if (typeof(o1) === 'undefined') { o1 = {}; }
                         o1.m1 = function() {
                             var self = this;
                             return 'fooy';
@@ -167,7 +167,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                         goog.provide('o1');
 
-                        o1 = {};
+                        if (typeof(o1) === 'undefined') { o1 = {}; }
                         o1.m = function(x) {
                             var self = this;
                             return (function() {

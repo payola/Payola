@@ -19,6 +19,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                     """
                         goog.provide('p');
 
+                        if (typeof(p) === 'undefined') { p = {}; }
                         p.a = function() {
                             var self = this;
                             null;
@@ -43,6 +44,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                     """
                         goog.provide('p');
 
+                        if (typeof(p) === 'undefined') { p = {}; }
                         p.a = function() {
                             var self = this;
                             true;
@@ -71,6 +73,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                     """
                         goog.provide('p');
 
+                        if (typeof(p) === 'undefined') { p = {}; }
                         p.a = function() {
                             var self = this;
                             1234;
@@ -98,6 +101,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                     """
                         goog.provide('p');
 
+                        if (typeof(p) === 'undefined') { p = {}; }
                         p.a = function() {
                             var self = this;
                             'x';
@@ -124,6 +128,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                     """
                         goog.provide('p');
 
+                        if (typeof(p) === 'undefined') { p = {}; }
                         p.a = function() {
                             var self = this;
                             'asdfghjkl';

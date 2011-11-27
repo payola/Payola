@@ -236,7 +236,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                         goog.provide('pkg.o');
 
-                        pkg.o = {};
+                        if (typeof(pkg.o) === 'undefined') { pkg.o = {}; }
                         pkg.o.v1 = 'test';
                         pkg.o.v2 = 12345;
                         pkg.o.m1 = function() {
@@ -303,9 +303,47 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             var self = this;
                         };
 
-                        pkg.o = new pkg.A();
+                        if (typeof(pkg.o) === 'undefined') { pkg.o = {}; }
+                        goog.object.extend(pkg.o, new pkg.A());
                         goog.object.extend(pkg.o, new pkg.T1());
                         goog.object.extend(pkg.o, new pkg.T2());
+                    """
+                }
+        }
+
+        it("companion objects are supported") {
+            configMap =>
+                expect {
+                    """
+                        class A(val x: String, val y: Int) {
+                            override def clone: A = {
+                                A(x, y)
+                            }
+                        }
+
+                        object A {
+                            def apply(x: String, y: Int): A = new A(x, y)
+                        }
+                    """
+                } toBe {
+                    """
+                        goog.provide('A');
+
+                        A = function(x, y) {
+                            var self = this;
+                            self.x = x;
+                            self.y = y;
+                        };
+                        A.prototype.clone = function() {
+                            var self = this;
+                            return A.apply_s2js(self.x, self.y);
+                        };
+
+                        if (typeof(A) === 'undefined') { A = {}; }
+                        A.apply_s2js = function(x, y) {
+                            var self = this;
+                            return new A(x, y);
+                        };
                     """
                 }
         }
@@ -324,6 +362,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                         goog.provide('po');
 
+                        if (typeof(po) === 'undefined') { po = {}; }
                         po.m = function() {
                             var self = this;
                         };
@@ -345,6 +384,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                         goog.provide('pkg');
 
+                        if (typeof(pkg) === 'undefined') { pkg = {}; }
                         pkg.m = function() {
                             var self = this;
                         };
@@ -375,6 +415,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         pkg.B = function() {
                             var self = this;
                         };
+                        if (typeof(pkg) === 'undefined') { pkg = {}; }
                         goog.object.extend(pkg, new pkg.A());
                     """
                 }

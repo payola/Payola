@@ -44,7 +44,7 @@ class FunctionSpecs extends CompilerFixtureSpec
                             return (self.v1 + x.toUpperCase());
                         };
 
-                        o = {};
+                        if (typeof(o) === 'undefined') { o = {}; }
                         o.f2 = function(f) {
                             var self = this;
                              window.alert(f('m1'));
@@ -78,7 +78,7 @@ class FunctionSpecs extends CompilerFixtureSpec
                     """
                         goog.provide('a');
 
-                        a = {};
+                        if (typeof(a) === 'undefined') { a = {}; }
                         a.x = function(y) { window.alert(y); };
                     """
                 }
