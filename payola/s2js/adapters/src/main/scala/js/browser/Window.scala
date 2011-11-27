@@ -5,6 +5,9 @@ class Window
     val sessionStorage: Storage = null
     val localStorage: Storage = null
 
+    val innerWidth: Int = 0
+    val innerHeight: Int = 0
+
     def get(key: String) = ""
 
     def focus() {}

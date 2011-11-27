@@ -10,8 +10,8 @@ object Index {
 
     def init() {
         canvas = document.createElement("canvas").asInstanceOf[Canvas]
-        canvas.width = 100
-        canvas.height = 200
+        canvas.width = window.innerWidth
+        canvas.height = window.innerHeight
         context = canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D]
         document.getElementById("canvas-holder").appendChild(canvas)
     }
