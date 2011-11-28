@@ -27,7 +27,8 @@ class AnalysisTest extends FlatSpec with ShouldMatchers {
         val a: Analysis = new Analysis(name, u)
         a.pluginInstances.size should equal (0)
 
-        val instance1: PluginInstance = new PluginInstance()
+        val plugin: Plugin = new Plugin()
+        val instance1: PluginInstance = new PluginInstance(plugin)
         a.appendPluginInstance(instance1)
         a.pluginInstances.size should equal (1)
 

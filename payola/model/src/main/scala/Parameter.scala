@@ -52,9 +52,13 @@ object ParameterConstrains {
 
 import ParameterConstrains._
 
-class Parameter {
+class Parameter(n: String) {
     /** Value constrains. Used by ParameterInstance to check the values passed in the setters.  */
     private var _constrains: Int = 0
+
+    /** Parameter name. */
+    private var _name: String = null
+    setName(n)
 
     /** Adds a constrain to the constrains.
      *
@@ -104,7 +108,24 @@ class Parameter {
      *
      *  @return True or false.
      */
-    def isConstrained:Boolean = _constrains == ParameterConstrainNone
+    def isConstrained: Boolean = _constrains == ParameterConstrainNone
+
+    /** Name getter.
+     *
+     * @return Name of the parameter.
+     */
+    def name: String = _name
+
+    /** Name setter.
+     *
+     * @param newName New name.
+     *
+     * @throws AssertionError if newName is null or empty.
+     */
+    def name_=(newName: String) = {
+        assert(newName != null && newName != "", "Cannot set null or empty name!")
+        _name = newName
+    }
 
     /** Removes a constrain from the constrains.
      *
@@ -117,7 +138,17 @@ class Parameter {
         _constrains &= ~constrain
     }
 
+    /** Convenience method that just calls name_=()
+     *
+     * @param newName New name.
+     *
+     * @throws AssertionError if newName is null or empty.
+     */
+    def setName(newName: String) = name_=(newName)
+
     /** Convenience method that just calls constrains_=()
+     *
+     * @param newConstrains New constrains.
      *
      * @throws AssertionError if the constrains aren't valid.
      */
