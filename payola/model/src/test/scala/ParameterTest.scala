@@ -37,6 +37,7 @@ class ParameterTest extends FlatSpec with ShouldMatchers {
         p.addConstrain(validConstrain)
         assume(p.hasValueConstrain(validConstrain))
         p.removeConstrain(validConstrain)
+        println("Trouble")
         assume(!p.hasValueConstrain(validConstrain))
 
         p.setValueConstrains(validConstrains)

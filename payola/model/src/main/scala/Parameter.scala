@@ -1,8 +1,8 @@
 package cz.payola.model
 
 object ParameterConstrains {
-    // Any object is valid
-    val ParameterConstrainNone = 0
+    // No object is valid
+    val ParameterConstrainNull = 0
     // Only Int
     val ParameterConstrainInt = 1 << 0
     // Only Bool
@@ -19,6 +19,10 @@ object ParameterConstrains {
     // Int and float
     val ParameterConstrainNumeric = (ParameterConstrainInt | ParameterConstrainFloat)
 
+    // Any object
+    val ParameterConstrainAny = ParameterConstrainBool | ParameterConstrainNumeric | ParameterConstrainString |
+                                    ParameterConstrainCustomObject
+
     /** Takes a look if the constrains passed don't have some bits set that aren't used by the constrains defined
      *  above.
      *
@@ -27,10 +31,7 @@ object ParameterConstrains {
      * @return Whether the constrains are valid or not.
      */
     def areValidConstrains(constrains: Int): Boolean = {
-        if (constrains == ParameterConstrainNone)
-            true
-        else
-            (constrains & ~(ParameterConstrainInt | ParameterConstrainBool | ParameterConstrainString |
+        (constrains & ~(ParameterConstrainInt | ParameterConstrainBool | ParameterConstrainString |
                 ParameterConstrainFloat | ParameterConstrainCustomObject)) == 0
     }
 
@@ -41,7 +42,7 @@ object ParameterConstrains {
      * @return True or false.
      */
     def isValidConstrain(constrain: Int): Boolean = {
-        constrain == ParameterConstrainNone ||
+        constrain == ParameterConstrainNull ||
         constrain == ParameterConstrainInt ||
         constrain == ParameterConstrainBool ||
         constrain == ParameterConstrainString ||
@@ -54,7 +55,7 @@ import ParameterConstrains._
 
 class Parameter(n: String) {
     /** Value constrains. Used by ParameterInstance to check the values passed in the setters.  */
-    private var _constrains: Int = 0
+    private var _constrains: Int = ParameterConstrainNull
 
     /** Parameter name. */
     private var _name: String = null
@@ -101,6 +102,8 @@ class Parameter(n: String) {
     def hasValueConstrain(constrain: Int): Boolean = {
         assert(ParameterConstrains.isValidConstrain(constrain), "Passed constrain is not valid (" + constrain + ")")
 
+        println("Testing constain " + constrain + " against " + _constrains + " = " + (_constrains & constrain))
+
         (_constrains & constrain) != 0
     }
 
@@ -108,7 +111,7 @@ class Parameter(n: String) {
      *
      *  @return True or false.
      */
-    def isConstrained: Boolean = _constrains == ParameterConstrainNone
+    def isConstrained: Boolean = _constrains != ParameterConstrainAny
 
     /** Name getter.
      *

@@ -1,5 +1,7 @@
 package cz.payola.model
 
-class Plugin {
+import collection.mutable.ArrayBuffer
 
+class Plugin {
+    val parameters: ArrayBuffer[Parameter] = new ArrayBuffer[Parameter]()
 }
