@@ -336,11 +336,11 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         };
                         A.prototype.clone = function() {
                             var self = this;
-                            return A.apply_s2js(self.x, self.y);
+                            return A.s2js_apply(self.x, self.y);
                         };
 
                         if (typeof(A) === 'undefined') { A = {}; }
-                        A.apply_s2js = function(x, y) {
+                        A.s2js_apply = function(x, y) {
                             var self = this;
                             return new A(x, y);
                         };

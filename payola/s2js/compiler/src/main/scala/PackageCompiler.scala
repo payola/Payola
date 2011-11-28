@@ -57,8 +57,8 @@ trait PackageCompiler {
     )
 
     private val jsDefaultMembers = Array(
-        "constructor", "hasOwnProperty", "isPrototypeOf", "propertyIsEnumerable", "toLocaleString", "valueOf", "apply",
-        "arguments", "call", "caller", "length", "prototype", "superClass_"
+        "constructor", "hasOwnProperty", "isPrototypeOf", "propertyIsEnumerable", "apply", "arguments", "call",
+        "prototype", "superClass_"
     )
 
     private val operatorTokenMap = Map(
@@ -111,17 +111,18 @@ trait PackageCompiler {
         getLocalJsName(symbol.nameString, symbol.isSynthetic)
     }
 
-    private def getLocalJsName(name: String, forceSuffix: Boolean = false): String = {
-        // Synthetic symbols get a suffix to avoid name collision with other symbols. Also if the symbol name is a js
-        // keyword then it gets the suffix.
-        if (forceSuffix || jsKeywords.contains(name) || jsDefaultMembers.contains(name)) {
-            name + "_s2js"
+    private def getLocalJsName(name: String, forcePrefix: Boolean = false): String = {
+        // Synthetic symbols get a prefix to avoid name collision with other symbols. Also if the symbol name is a js
+        // keyword then it gets the prefix.
+        if (forcePrefix || jsKeywords.contains(name) || jsDefaultMembers.contains(name)) {
+            "s2js_" + name
         } else {
             name
         }
     }
 
     def compile(packageAst: PackageDef): String = {
+        println(packageAst.toString)
         retrievePackageStructure(packageAst)
         compileClassDefs()
         compileDependencies()
@@ -221,51 +222,69 @@ trait PackageCompiler {
         }
     }
 
+    private def bufferAppendNativeCodeOr(symbol: Symbol, otherwise: () => Unit) = {
+        val nativeAnnotationInfo = symbol.annotations.find(_.atp.toString == "s2js.compiler.Native")
+        if (nativeAnnotationInfo.isDefined) {
+            nativeAnnotationInfo.get.args.head match {
+                case Literal(Constant(value: String)) => buffer += value
+                case _ => otherwise()
+            }
+        } else {
+            otherwise()
+        }
+    }
+
     private abstract class ClassDefCompiler(val classDef: ClassDef) {
-        val fullNameSymbol = classDef.symbol
+        protected val fullNameSymbol = classDef.symbol
 
-        lazy val fullName = getFullJsName(fullNameSymbol)
+        protected lazy val fullName = getFullJsName(fullNameSymbol)
 
-        lazy val memberContainerName = fullName;
+        protected lazy val memberContainerName = fullName;
 
-        val parentClasses = classDef.impl.parents
+        protected val parentClasses = classDef.impl.parents
 
-        val parentClass = parentClasses.head
+        protected val parentClass = parentClasses.head
 
-        val parentClassIsInternal = isInternalType(parentClass.symbol)
+        protected val parentClassIsInternal = isInternalType(parentClass.symbol)
 
-        val inheritedTraits = parentClasses.tail
+        protected val inheritedTraits = parentClasses.tail
 
         def compile() {
-            compileConstructor()
-
             addProvidedSymbol(fullNameSymbol)
+
+            bufferAppendNativeCodeOr(classDef.symbol, () => internalCompile())
         }
 
-        def compileConstructor()
+        protected def internalCompile() {
+            compileConstructor()
+        }
 
-        def compileInheritedTraits(extendedObject: String) {
+        protected def compileConstructor()
+
+        protected def compileInheritedTraits(extendedObject: String) {
             inheritedTraits.filter(traitAst => !isInternalType(traitAst.symbol)).foreach {
                 traitAst =>
-                    buffer += "goog.object.extend(%s, new %s());\n"
-                        .format(extendedObject, getFullJsName(traitAst.symbol))
+                    buffer += "goog.object.extend(%s, new %s());\n".format(
+                        extendedObject,
+                        getFullJsName(traitAst.symbol)
+                    )
             }
         }
 
-        def compileMembers() {
+        protected def compileMembers() {
             compileValDefMembers()
             compileDefDefMembers()
         }
 
-        def compileValDefMembers() {
+        protected def compileValDefMembers() {
             classDef.impl.body.filter(_.isInstanceOf[ValDef]).foreach(compileMember(_))
         }
 
-        def compileDefDefMembers() {
+        protected def compileDefDefMembers() {
             classDef.impl.body.filter(_.isInstanceOf[DefDef]).foreach(compileMember(_))
         }
 
-        def compileMember(memberAst: Tree, containerName: String = memberContainerName) {
+        protected def compileMember(memberAst: Tree, containerName: String = memberContainerName) {
             if (memberAst.hasSymbolWhich(!isIgnoredMember(_))) {
                 memberAst match {
                     case valDef: ValDef => {
@@ -285,7 +304,7 @@ trait PackageCompiler {
             }
         }
 
-        def isIgnoredMember(member: Symbol): Boolean = {
+        protected def isIgnoredMember(member: Symbol): Boolean = {
             isInternalTypeMember(member) || // A member inherited from an internal Type
                 member.owner != classDef.symbol || // A member that isn't directly owned by the class
                 member.isSynthetic || // An artificial member that was created by the compiler
@@ -295,21 +314,23 @@ trait PackageCompiler {
                 member.hasAccessorFlag // A generated accessor method
         }
 
-        def compileValDef(valDef: ValDef, containerName: String = memberContainerName) {
+        protected def compileValDef(valDef: ValDef, containerName: String = memberContainerName) {
             buffer += "%s.%s = ".format(containerName, getLocalJsName(valDef.symbol))
-            compileAstStatement(valDef.rhs)
+            bufferAppendNativeCodeOr(valDef.symbol, () => compileAst(valDef.rhs))
+            buffer += ";"
         }
 
-        def compileDefDef(defDef: DefDef, containerName: String = memberContainerName) {
+        protected def compileDefDef(defDef: DefDef, containerName: String = memberContainerName) {
             buffer += "%s.%s = function(".format(containerName, getLocalJsName(defDef.symbol))
             compileParameterDeclaration(defDef.vparamss.flatten)
             buffer += ") {\nvar self = this;\n"
             compileDefaultParameters(defDef.vparamss.flatten)
-            compileAstStatement(defDef.rhs, hasReturnValue(defDef.tpt.symbol))
+            val hasReturn = hasReturnValue(defDef.tpt.symbol)
+            bufferAppendNativeCodeOr(defDef.symbol, () => compileAstStatement(defDef.rhs, hasReturn))
             buffer += "};\n"
         }
 
-        def compileSelfCall(parameters: List[Tree]) {
+        protected def compileSelfCall(parameters: List[Tree]) {
             buffer += "call(self"
             if (!parameters.isEmpty) {
                 buffer += ", "
@@ -318,11 +339,11 @@ trait PackageCompiler {
             buffer += ")"
         }
 
-        def compileParameterDeclaration(parameters: List[ValDef]) {
+        protected def compileParameterDeclaration(parameters: List[ValDef]) {
             buffer += parameters.map(parameter => getLocalJsName(parameter.symbol)).mkString(", ")
         }
 
-        def compileDefaultParameters(parameters: List[ValDef]) {
+        protected def compileDefaultParameters(parameters: List[ValDef]) {
             parameters.filter(_.symbol.hasDefault).foreach {
                 parameter =>
                     buffer += "if (typeof(%1$s) === 'undefined') { %1$s = ".format(getLocalJsName(parameter.symbol))
@@ -331,7 +352,7 @@ trait PackageCompiler {
             }
         }
 
-        def compileParameterValues(parameterValues: List[Tree], withParentheses: Boolean = true) {
+        protected def compileParameterValues(parameterValues: List[Tree], withParentheses: Boolean = true) {
             if (withParentheses) {
                 buffer += "("
             }
@@ -354,7 +375,7 @@ trait PackageCompiler {
             }
         }
 
-        def compileAst(ast: Tree, hasReturnValue: Boolean = false) {
+        protected def compileAst(ast: Tree, hasReturnValue: Boolean = false) {
             // A Block handles the return value itself so it has to be compiled besides all other ast types.
             if (ast.isInstanceOf[Block]) {
                 compileBlock(ast.asInstanceOf[Block], hasReturnValue)
@@ -393,7 +414,7 @@ trait PackageCompiler {
             }
         }
 
-        def compileAstStatement(ast: Tree, hasReturnValue: Boolean = false) {
+        protected def compileAstStatement(ast: Tree, hasReturnValue: Boolean = false) {
             val previousBufferLength = buffer.length
 
             compileAst(ast, hasReturnValue)
@@ -403,12 +424,12 @@ trait PackageCompiler {
             }
         }
 
-        def compileBlock(block: Block, hasReturnValue: Boolean = false) {
+        protected def compileBlock(block: Block, hasReturnValue: Boolean = false) {
             block.stats.foreach(compileAstStatement(_))
             compileAstStatement(block.expr, hasReturnValue)
         }
 
-        def compileLiteral(literal: Literal) {
+        protected def compileLiteral(literal: Literal) {
             literal match {
                 case Literal(Constant(value)) => {
                     value match {
@@ -424,7 +445,7 @@ trait PackageCompiler {
             }
         }
 
-        def compileIdentifier(identifier: Ident) {
+        protected def compileIdentifier(identifier: Ident) {
             buffer += (
                 if (identifier.symbol.isLocal) {
                     getLocalJsName(identifier.symbol)
@@ -433,12 +454,12 @@ trait PackageCompiler {
                 })
         }
 
-        def compileLocalValDef(localValDef: ValDef) {
+        protected def compileLocalValDef(localValDef: ValDef) {
             buffer += "var %s = ".format(getLocalJsName(localValDef.symbol))
             compileAst(localValDef.rhs)
         }
 
-        def compileFunction(function: Function) {
+        protected def compileFunction(function: Function) {
             // TODO maybe somehow merge it with defdef compilation.
             buffer += "function("
             compileParameterDeclaration(function.vparams)
@@ -448,12 +469,12 @@ trait PackageCompiler {
             buffer += " }"
         }
 
-        def compileNew(constructorCall: New) {
+        protected def compileNew(constructorCall: New) {
             buffer += "new %s".format(getFullJsName(constructorCall.tpt.symbol))
             addRequiredSymbol(constructorCall.tpt.symbol)
         }
 
-        def compileSelect(select: Select, isSubSelect: Boolean = false) {
+        protected def compileSelect(select: Select, isSubSelect: Boolean = false) {
             val subSelectToken = if (isSubSelect) "." else ""
 
             if (!jsAdapterPackages.contains(select.toString)) {
@@ -491,13 +512,13 @@ trait PackageCompiler {
             }
         }
 
-        def compileSubSelect(subSelect: Select) {
+        protected def compileSubSelect(subSelect: Select) {
             if (!jsAdapterPackages.contains(subSelect.toString)) {
                 compileSelect(subSelect)
             }
         }
 
-        def compileApply(apply: Apply) {
+        protected def compileApply(apply: Apply) {
             apply match {
                 case Apply(Select(qualifier, name), args) if operatorTokenMap.contains(name.toString) => {
                     compileOperator(qualifier, Some(args.head), name.toString)
@@ -532,7 +553,7 @@ trait PackageCompiler {
             }
         }
 
-        def compileOperator(firstOperand: Tree, secondOperand: Option[Tree], name: String) {
+        protected def compileOperator(firstOperand: Tree, secondOperand: Option[Tree], name: String) {
             buffer += "("
             if (name.startsWith("unary_")) {
                 buffer += operatorTokenMap(name) + " "
@@ -545,7 +566,7 @@ trait PackageCompiler {
             buffer += ")"
         }
 
-        def compileTypeApply(typeApply: TypeApply) {
+        protected def compileTypeApply(typeApply: TypeApply) {
             typeApply.fun match {
                 case Select(qualifier, name) if name.toString == "asInstanceOf" => {
                     compileAst(qualifier)
@@ -556,17 +577,17 @@ trait PackageCompiler {
             }
         }
 
-        def compileAssign(assign: Assign) {
+        protected def compileAssign(assign: Assign) {
             compileAssign(assign.lhs, assign.rhs)
         }
 
-        def compileAssign(assignee: Tree, value: Tree) {
+        protected def compileAssign(assignee: Tree, value: Tree) {
             compileAst(assignee)
             buffer += " = "
             compileAst(value)
         }
 
-        def compileIf(condition: If) {
+        protected def compileIf(condition: If) {
             buffer += "(function() {\nif ("
             compileAst(condition.cond)
             buffer += ") {\n"
@@ -576,7 +597,7 @@ trait PackageCompiler {
             buffer += "}})()"
         }
 
-        def compileLabelDef(labelDef: LabelDef) {
+        protected def compileLabelDef(labelDef: LabelDef) {
             labelDef.name match {
                 case name if name.toString.startsWith("while") => {
                     // AST of a while cycle is transformed into a tail recursive function with AST similar to:
@@ -605,13 +626,13 @@ trait PackageCompiler {
 
         val initializedValDefSet = new HashSet[String]
 
-        override def compile() {
-            super.compile()
+        override protected def internalCompile() {
+            super.internalCompile()
 
             compileDefDefMembers()
         }
 
-        def compileConstructor() {
+        protected def compileConstructor() {
             val primaryConstructors = classDef.impl.body.filter(ast => ast.hasSymbolWhich(_.isPrimaryConstructor))
             val hasConstructor = !primaryConstructors.isEmpty
             val constructorDefDef = if (hasConstructor) primaryConstructors.head.asInstanceOf[DefDef] else null
@@ -669,13 +690,13 @@ trait PackageCompiler {
     }
 
     private class ModuleClassCompiler(classDef: ClassDef) extends ClassDefCompiler(classDef) {
-        override def compile() {
-            super.compile()
+        override protected def internalCompile() {
+            super.internalCompile()
 
             compileMembers()
         }
 
-        def compileConstructor() {
+        protected def compileConstructor() {
             // Define the object if it isn't already defined.
             buffer += "if (typeof(%1$s) === 'undefined') { %1$s = {}; }\n".format(fullName)
 

@@ -27,7 +27,7 @@ object PayolaBuild extends Build
         scalaVersion := PayolaSettings.scalaVersion
     )
 
-    val s2JsSettings = payolaSettings ++ Seq(
+    val s2jsSettings = payolaSettings ++ Seq(
         version := S2JsSettings.version
     )
 
@@ -39,27 +39,25 @@ object PayolaBuild extends Build
         file("."),
         settings = payolaSettings
     ).aggregate(
-        s2JsProject,
+        s2jsProject,
         modelProject,
         webProject
     )
 
-    lazy val s2JsProject = Project(
+    lazy val s2jsProject = Project(
         "s2js",
         file("./s2js"),
-        settings = s2JsSettings
+        settings = s2jsSettings
     ).aggregate(
-        s2JsAdaptersProject,
-        s2JsCompilerProject
-    ).dependsOn(
-        s2JsAdaptersProject,
-        s2JsCompilerProject
+        s2jsAdaptersProject,
+        s2jsCompilerProject,
+        s2jsRuntimeProject
     )
 
-    lazy val s2JsAdaptersProject = Project(
+    lazy val s2jsAdaptersProject = Project(
         "adapters",
         file("./s2js/adapters"),
-        settings = s2JsSettings ++ Seq(
+        settings = s2jsSettings ++ Seq(
             packageBin <<= (packageBin in Compile).map {
                 jarFile =>
                     IO.copyFile(jarFile, S2JsSettings.adaptersJar)
@@ -69,10 +67,10 @@ object PayolaBuild extends Build
         )
     )
 
-    lazy val s2JsCompilerProject = Project(
+    lazy val s2jsCompilerProject = Project(
         "compiler",
         file("./s2js/compiler"),
-        settings = s2JsSettings ++ Seq(
+        settings = s2jsSettings ++ Seq(
             libraryDependencies := Seq(scalaTestDependency, scalaCompilerDependency),
             resolvers ++= Seq(DefaultMavenRepository),
 
@@ -94,7 +92,18 @@ object PayolaBuild extends Build
             )
         )
     ).dependsOn(
-        s2JsAdaptersProject
+        s2jsAdaptersProject
+    )
+
+    lazy val s2jsRuntimeProject = Project(
+        "runtime",
+        file("./s2js/runtime"),
+        settings = s2jsSettings ++ Seq(
+            scalacOptions += "-Xplugin:" + S2JsSettings.compilerJar.getAbsolutePath,
+            scalacOptions += "-P:s2js:output:" + file("./s2js/runtime/js").getAbsolutePath
+        )
+    ).dependsOn(
+        s2jsCompilerProject
     )
 
     lazy val modelProject = Project(
@@ -123,12 +132,11 @@ object PayolaBuild extends Build
         "client",
         file("./web/client"),
         settings = payolaSettings ++ Seq(
-            // Whole path to the compiler plugin needs to be added, because scala compiler looks for the plugins only
-            // in SCALA_HOME.
             scalacOptions += "-Xplugin:" + S2JsSettings.compilerJar.getAbsolutePath,
             scalacOptions += "-P:s2js:output:" + file("./web/public/javascripts").getAbsolutePath
         )
     ).dependsOn(
-        s2JsProject
+        s2jsAdaptersProject,
+        s2jsCompilerProject
     )
 }

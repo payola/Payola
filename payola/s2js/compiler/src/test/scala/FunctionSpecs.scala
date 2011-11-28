@@ -56,8 +56,8 @@ class FunctionSpecs extends CompilerFixtureSpec
                         o.start = function() {
                             var self = this;
                             var x = new F();
-                            self.f2(function(x_s2js) { return x.f1(x_s2js); });
-                            self.f2(function(x_s2js) { return self.f3(x_s2js); });
+                            self.f2(function(s2js_x) { return x.f1(s2js_x); });
+                            self.f2(function(s2js_x) { return self.f3(s2js_x); });
                             self.f2(function(x) { return ('no' + x); });
                         };
                     """

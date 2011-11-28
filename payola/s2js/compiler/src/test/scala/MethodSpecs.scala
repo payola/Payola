@@ -269,7 +269,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                             var self = this;
                             var c1 = new C1();
                             var c2 = new C2();
-                            c1.m1(function(v1_s2js) { c2.m1(v1_s2js); });
+                            c1.m1(function(s2js_v1) { c2.m1(s2js_v1); });
                         };
                     """
                 }
