@@ -102,8 +102,6 @@ class Parameter(n: String) {
     def hasValueConstrain(constrain: Int): Boolean = {
         assert(ParameterConstrains.isValidConstrain(constrain), "Passed constrain is not valid (" + constrain + ")")
 
-        println("Testing constain " + constrain + " against " + _constrains + " = " + (_constrains & constrain))
-
         (_constrains & constrain) != 0
     }
 
