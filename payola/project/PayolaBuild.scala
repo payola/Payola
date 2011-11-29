@@ -36,6 +36,7 @@ object PayolaBuild extends Build
         settings = payolaSettings
     ).aggregate(
         s2JsProject,
+        dataProject,
         modelProject,
         webProject
     )
@@ -97,6 +98,15 @@ object PayolaBuild extends Build
         s2JsAdaptersProject
     )
 
+    lazy val dataProject = Project(
+        "data",
+        file("./data"),
+        settings = payolaSettings ++ Seq(
+            libraryDependencies := Seq(scalaTestDependency),
+            resolvers ++= Seq(DefaultMavenRepository)
+        )
+    )
+
     lazy val modelProject = Project(
         "model",
         file("./model"),
@@ -104,6 +114,8 @@ object PayolaBuild extends Build
             libraryDependencies := Seq(scalaTestDependency),
             resolvers ++= Seq(DefaultMavenRepository)
         )
+    ).dependsOn(
+        dataProject
     )
 
     lazy val webProject = PlayProject(
