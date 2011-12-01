@@ -194,5 +194,33 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                 }
         }
     }
+
+    describe("Exceptions") {
+        it("can be thrown") {
+            configMap =>
+                expect {
+                    """
+                        class A {
+                            def m() {
+                                throw new Exception("something bad happened")
+                            }
+                        }
+                    """
+                } toBe {
+                    """
+                        goog.provide('A');
+                        goog.require('scala.Exception');
+
+                        A = function() {
+                            var self = this;
+                        };
+                        A.prototype.m = function() {
+                            var self = this;
+                            throw new scala.Exception('something bad happened');
+                        };
+                    """
+                }
+        }
+    }
 }
 

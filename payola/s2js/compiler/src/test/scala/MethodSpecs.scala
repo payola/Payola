@@ -210,7 +210,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                 }
         }
 
-        it("support methods as parameters") {
+        it("methods can have other methods as parameters") {
             configMap =>
                 expect {
                     """
@@ -275,7 +275,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                 }
         }
 
-        it("override base class functions") {
+        it("can override base class methods") {
             configMap =>
                 expect {
                     """
@@ -307,16 +307,76 @@ class MethodSpecs extends CompilerFixtureSpec {
 
                         $pkg.b = function() {
                             var self = this;
-                            $pkg.a.call(self);
+                            goog.base(self);
                         };
                         goog.inherits($pkg.b, $pkg.a);
                         $pkg.b.prototype.m1 = function() {
                             var self = this;
-                            $pkg.b.superClass_.m1.call(self);
+                            goog.base(self, 'm1');
                         };
                         $pkg.b.prototype.m2 = function(x) {
                             var self = this;
-                            $pkg.b.superClass_.m2.call(self, 'foo');
+                            goog.base(self, 'm2', 'foo');
+                        };
+                    """
+                }
+        }
+
+        it("variadic methods are supported") {
+            configMap =>
+                expect {
+                    """
+                        import s2js.adapters.js.browser._
+
+                        object o {
+                            def m1(x: Int*) {
+                                for (i <- x) {
+                                    window.alert(i)
+                                }
+                            }
+
+                            def m2(a: String, b: Int, x: Int*) {
+                                for (i <- x) {
+                                    window.alert(a + (b + i))
+                                }
+                            }
+
+                            def test() {
+                                m1()
+                                m1(1)
+                                m1(1, 2)
+                                m1(1, 2, 3, 4, 5, 6, 7)
+                                m2("test", 5)
+                                m2("test", 5, 6)
+                                m2("test", 5, 6, 7, 8)
+                            }
+                        }
+                    """
+                } toBe {
+                    """
+                        goog.provide('o');
+                        goog.require('scala.Array');
+
+                        if (typeof(o) === 'undefined') { o = {}; }
+                        o.m1 = function() {
+                            var self = this;
+                            var x = scala.Array.fromNative([].splice.call(arguments, 0, arguments.length - 0));
+                            x.foreach(function(i) { window.alert(i); });
+                        };
+                        o.m2 = function(a, b) {
+                            var self = this;
+                            var x = scala.Array.fromNative([].splice.call(arguments, 2, arguments.length - 2));
+                            x.foreach(function(i) { window.alert((a + (b + i))); });
+                        };
+                        o.test = function() {
+                            var self = this;
+                            self.m1();
+                            self.m1(1);
+                            self.m1(1, 2);
+                            self.m1(1, 2, 3, 4, 5, 6, 7);
+                            self.m2('test', 5);
+                            self.m2('test', 5, 6);
+                            self.m2('test', 5, 6, 7, 8);
                         };
                     """
                 }

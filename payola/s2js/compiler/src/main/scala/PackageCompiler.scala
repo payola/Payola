@@ -2,11 +2,14 @@ package s2js.compiler
 
 import tools.nsc.Global
 import collection.mutable.{HashMap, HashSet, ListBuffer}
+import tools.nsc.io.AbstractFile
 
 trait PackageCompiler {
     val global: Global
 
     import global._
+
+    private var sourceFile: AbstractFile = null
 
     private val buffer = new ListBuffer[String]
 
@@ -111,6 +114,10 @@ trait PackageCompiler {
         getLocalJsName(symbol.nameString, symbol.isSynthetic)
     }
 
+    private def isFromSourceFile(symbol: Symbol): Boolean = {
+        symbol.sourceFile != null && symbol.sourceFile.name == sourceFile.name
+    }
+
     private def getLocalJsName(name: String, forcePrefix: Boolean = false): String = {
         // Synthetic symbols get a prefix to avoid name collision with other symbols. Also if the symbol name is a js
         // keyword then it gets the prefix.
@@ -121,8 +128,14 @@ trait PackageCompiler {
         }
     }
 
-    def compile(packageAst: PackageDef): String = {
-        println(packageAst.toString)
+    def compile(compiledSourceFile: AbstractFile, packageAst: PackageDef): String = {
+        sourceFile = compiledSourceFile
+        buffer.clear()
+        classDefMap.clear()
+        classDefDependencyGraph.clear()
+        requireHashSet.clear()
+        provideHashSet.clear()
+
         retrievePackageStructure(packageAst)
         compileClassDefs()
         compileDependencies()
@@ -150,7 +163,7 @@ trait PackageCompiler {
     private def retrieveClassStructure(classDef: ClassDef) {
         val symbol = classDef.symbol
 
-        if (!symbol.isSynthetic) {
+        if (!symbol.isSynthetic && isFromSourceFile(symbol)) {
             val classDefCompiler: ClassDefCompiler =
                 if (classDef.symbol.isPackageObjectClass) {
                     new PackageObjectClassCompiler(classDef)
@@ -175,7 +188,7 @@ trait PackageCompiler {
                 parentClassAst =>
                     val parentClassSymbol = parentClassAst.symbol
                     if (!isInternalType(parentClassSymbol)) {
-                        if (symbol.sourceFile.name == parentClassSymbol.sourceFile.name) {
+                        if (isFromSourceFile(symbol)) {
                             dependencies += getClassDefStructureName(parentClassSymbol)
                         } else {
                             addRequiredSymbol(parentClassAst.symbol)
@@ -264,6 +277,7 @@ trait PackageCompiler {
         protected def compileInheritedTraits(extendedObject: String) {
             inheritedTraits.filter(traitAst => !isInternalType(traitAst.symbol)).foreach {
                 traitAst =>
+                    addRequiredSymbol("goog.object");
                     buffer += "goog.object.extend(%s, new %s());\n".format(
                         extendedObject,
                         getFullJsName(traitAst.symbol)
@@ -311,7 +325,7 @@ trait PackageCompiler {
                 member.isDeferred || // An abstract member without implementation
                 member.isConstructor || // TODO support multiple constructors
                 member.isParameter || // A parameter of a member method
-                member.hasAccessorFlag // A generated accessor method
+                member.hasAccessorFlag // A generated accesor method
         }
 
         protected def compileValDef(valDef: ValDef, containerName: String = memberContainerName) {
@@ -324,14 +338,17 @@ trait PackageCompiler {
             buffer += "%s.%s = function(".format(containerName, getLocalJsName(defDef.symbol))
             compileParameterDeclaration(defDef.vparamss.flatten)
             buffer += ") {\nvar self = this;\n"
-            compileDefaultParameters(defDef.vparamss.flatten)
+            compileParameterInitialization(defDef.vparamss.flatten)
             val hasReturn = hasReturnValue(defDef.tpt.symbol)
             bufferAppendNativeCodeOr(defDef.symbol, () => compileAstStatement(defDef.rhs, hasReturn))
             buffer += "};\n"
         }
 
-        protected def compileSelfCall(parameters: List[Tree]) {
-            buffer += "call(self"
+        protected def compileParentCall(parameters: List[Tree], methodName: Option[Name] = None) {
+            buffer += "goog.base(self"
+            if (methodName.isDefined) {
+                buffer += ", '" + getLocalJsName(methodName.get.toString) + "'"
+            }
             if (!parameters.isEmpty) {
                 buffer += ", "
                 compileParameterValues(parameters, false)
@@ -340,15 +357,33 @@ trait PackageCompiler {
         }
 
         protected def compileParameterDeclaration(parameters: List[ValDef]) {
-            buffer += parameters.map(parameter => getLocalJsName(parameter.symbol)).mkString(", ")
+            buffer += parameters.filter(p => !isVariadicType(p.tpt)).map(p => getLocalJsName(p.symbol)).mkString(", ")
         }
 
-        protected def compileDefaultParameters(parameters: List[ValDef]) {
+        protected def isVariadicType(typeAst: Tree): Boolean = {
+            typeAst.toString.endsWith("*")
+        }
+
+        protected def compileParameterInitialization(parameters: List[ValDef]) {
+            // Parameters with default values.
             parameters.filter(_.symbol.hasDefault).foreach {
                 parameter =>
                     buffer += "if (typeof(%1$s) === 'undefined') { %1$s = ".format(getLocalJsName(parameter.symbol))
                     compileAst(parameter.asInstanceOf[ValDef].rhs)
                     buffer += "; }\n"
+            }
+
+            // Variadic parameter.
+            parameters.filter(p => isVariadicType(p.tpt)).foreach {
+                parameter => // TODO rather use Seq instead of array
+                    addRequiredSymbol("scala.Array");
+                    buffer += "var %s = scala.Array.fromNative(".format(getLocalJsName(parameter.symbol));
+
+                    // In fact, the "arguments" JS variable only behaves like an array, but isn't an array. The
+                    // following trick described on http://www.mennovanslooten.nl/blog/post/59 is used to turn it
+                    // into an array that doesn't contain the normal named parameters.
+                    buffer += "[].splice.call(arguments, %1$s, arguments.length - %1$s)".format(parameters.length - 1)
+                    buffer += ");\n";
             }
         }
 
@@ -395,10 +430,11 @@ trait PackageCompiler {
                     case apply: Apply => compileApply(apply)
                     case typeApply: TypeApply => compileTypeApply(typeApply)
                     case assign: Assign => compileAssign(assign)
-                    case ifStatement: If => compileIf(ifStatement)
+                    case ifAst: If => compileIf(ifAst)
                     case labelDef: LabelDef => compileLabelDef(labelDef)
-                    case tryStatement: Try => // TODO
-                    case matchStatement: Match => // TODO
+                    case tryAst: Try => // TODO
+                    case throwAst: Throw => compileThrow(throwAst)
+                    case matchAst: Match => // TODO
                     case _ => {
                         buffer += "/* [s2js-warning] Not implemented AST of type %s: %s */".format(
                             ast.getClass,
@@ -464,7 +500,7 @@ trait PackageCompiler {
             buffer += "function("
             compileParameterDeclaration(function.vparams)
             buffer += ") { "
-            compileDefaultParameters(function.vparams)
+            compileParameterInitialization(function.vparams)
             compileAstStatement(function.body, hasReturnValue(function.body.tpe.typeSymbol))
             buffer += " }"
         }
@@ -527,8 +563,7 @@ trait PackageCompiler {
                     compileAssign(select, args.head)
                 }
                 case Apply(Select(superClass: Super, name), _) => {
-                    buffer += getFullJsName(superClass.symbol) + ".superClass_." + getLocalJsName(name.toString) + "."
-                    compileSelfCall(apply.args)
+                    compileParentCall(apply.args, Some(name))
                 }
                 case Apply(Select(qual, name), _) if name.toString == "apply" && qual.symbol.owner.isMethod => {
                     compileAst(qual)
@@ -619,6 +654,11 @@ trait PackageCompiler {
                 }
             }
         }
+
+        protected def compileThrow(throwAst: Throw) {
+            buffer += "throw "
+            compileAst(throwAst.expr)
+        }
     }
 
     private class ClassCompiler(classDef: ClassDef) extends ClassDefCompiler(classDef) {
@@ -642,7 +682,7 @@ trait PackageCompiler {
             buffer += ") {\nvar self = this;\n"
 
             if (hasConstructor) {
-                compileDefaultParameters(constructorDefDef.vparamss.flatten)
+                compileParameterInitialization(constructorDefDef.vparamss.flatten)
 
                 // Initialize vals specified as the implicit constructor parameters.
                 constructorDefDef.vparamss.flatten.map(p => getLocalJsName(p.name.toString)).foreach {
@@ -664,9 +704,8 @@ trait PackageCompiler {
             if (!parentClassIsInternal) {
                 classDef.impl.foreach {
                     case Apply(Select(Super(_, _), name), parameters) if (name.toString == "<init>") => {
-                        buffer += "%s.".format(getFullJsName(parentClass.symbol))
-                        compileSelfCall(parameters)
-                        buffer += ";\n"
+                        compileParentCall(parameters)
+                        buffer += ";"
                     }
                     case _ =>
                 }
@@ -703,6 +742,7 @@ trait PackageCompiler {
             if (!parentClassIsInternal) {
                 // Because the object may be a package object or a companion object, the members that already exist
                 // there need to be preserved.
+                addRequiredSymbol("goog.object");
                 buffer += "goog.object.extend(%s, ".format(fullName)
                 classDef.impl.foreach {
                     case Apply(Select(Super(_, _), name), args) if (name.toString == "<init>") => {
@@ -735,7 +775,11 @@ trait PackageCompiler {
 
     private def addRequiredSymbol(symbol: Symbol) {
         if (!isInternalType(symbol)) {
-            requireHashSet.add(getFullJsName(symbol))
+            addRequiredSymbol(getFullJsName(symbol))
         }
+    }
+
+    private def addRequiredSymbol(symbolFullName: String) {
+        requireHashSet.add(symbolFullName)
     }
 }

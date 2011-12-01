@@ -138,6 +138,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         goog.provide('pkg.C');
                         goog.provide('pkg.T1');
                         goog.provide('pkg.T2');
+                        goog.require('goog.object');
 
                         pkg.A = function() {
                             var self = this;
@@ -147,7 +148,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             var self = this;
                             self.v1 = v1;
                             self.v2 = v2;
-                            pkg.A.call(self);
+                            goog.base(self);
                         };
                         goog.inherits(pkg.C, pkg.A);
 
@@ -169,7 +170,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
 
                         pkg.B = function() {
                             var self = this;
-                            pkg.A.call(self);
+                            goog.base(self);
                             goog.object.extend(self, new pkg.T1());
                             goog.object.extend(self, new pkg.T2());
                         };
@@ -203,14 +204,14 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         };
                         pkg.B = function() {
                             var self = this;
-                            pkg.A.call(self, 'test', 123);
+                            goog.base(self, 'test', 123);
                         };
                         goog.inherits(pkg.B, pkg.A);
                         pkg.C = function(v1, v2) {
                             var self = this;
                             self.v1 = v1;
                             self.v2 = v2;
-                            pkg.A.call(self, v1, v2);
+                            goog.base(self, v1, v2);
                         };
                         goog.inherits(pkg.C, pkg.A);
                     """
@@ -278,6 +279,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         goog.provide('pkg.T1');
                         goog.provide('pkg.T2');
                         goog.provide('pkg.o');
+                        goog.require('goog.object');
 
                         pkg.A = function() {
                             var self = this;
@@ -408,6 +410,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         goog.provide('pkg');
                         goog.provide('pkg.A');
                         goog.provide('pkg.B');
+                        goog.require('goog.object');
 
                         pkg.A = function() {
                             var self = this;
