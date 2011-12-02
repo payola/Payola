@@ -66,7 +66,7 @@ class StringParameter(private val n: String, private val defaultValue: String) e
          *
          *  @return String value, or "" if the value is null.
          */
-        def stringValue: String = value
+        override def stringValue: String = value
     }
 
     /** Returns a new StringParameterInstance instance with the value passed as a parameter of this method.

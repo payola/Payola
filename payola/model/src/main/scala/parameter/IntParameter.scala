@@ -64,7 +64,7 @@ class IntParameter(private val n: String, private val defaultValue: Int) extends
          *
          *  @return String value, or "" if the value is null.
          */
-        def stringValue: String = value.toString
+        override def stringValue: String = value.toString
     }
 
     /** Returns a new BooleanParameterInstance instance with the value passed as a parameter of this method.

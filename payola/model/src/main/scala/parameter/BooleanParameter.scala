@@ -70,7 +70,7 @@ class BooleanParameter(private val n: String, private val defaultValue: Boolean)
          *
          *  @return String value, or "" if the value is null.
          */
-        def stringValue: String = {
+        override def stringValue: String = {
             if (value)
                 "true"
             else
