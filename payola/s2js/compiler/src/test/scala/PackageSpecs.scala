@@ -19,6 +19,7 @@ class PackageSpecs extends CompilerFixtureSpec
                         pkg.A = function() {
                             var self = this;
                         };
+                        pkg.A.prototype.metaClass_ = new s2js.MetaClass('pkg.A', []);
                     """
                 }
         }
@@ -40,6 +41,7 @@ class PackageSpecs extends CompilerFixtureSpec
                         pkg.sub.nested.A = function() {
                             var self = this;
                         };
+                        pkg.sub.nested.A.prototype.metaClass_ = new s2js.MetaClass('pkg.sub.nested.A', []);
                     """
                 }
         }
@@ -63,6 +65,7 @@ class PackageSpecs extends CompilerFixtureSpec
                         pkg.sub.nested.A = function() {
                             var self = this;
                         };
+                        pkg.sub.nested.A.prototype.metaClass_ = new s2js.MetaClass('pkg.sub.nested.A', []);
                     """
                 }
         }
@@ -82,6 +85,7 @@ class PackageSpecs extends CompilerFixtureSpec
                         pkg.sub.nested.A = function() {
                             var self = this;
                         };
+                        pkg.sub.nested.A.prototype.metaClass_ = new s2js.MetaClass('pkg.sub.nested.A', []);
                     """
                 }
         }
@@ -113,15 +117,19 @@ class PackageSpecs extends CompilerFixtureSpec
                         pkg.A = function() {
                             var self = this;
                         };
+                        pkg.A.prototype.metaClass_ = new s2js.MetaClass('pkg.A', []);
                         pkg.B = function() {
                             var self = this;
                         };
+                        pkg.B.prototype.metaClass_ = new s2js.MetaClass('pkg.B', []);
                         pkg.sub1.X = function() {
                             var self = this;
                         };
+                        pkg.sub1.X.prototype.metaClass_ = new s2js.MetaClass('pkg.sub1.X', []);
                         pkg.sub2.Y = function() {
                             var self = this;
                         };
+                        pkg.sub2.Y.prototype.metaClass_ = new s2js.MetaClass('pkg.sub2.Y', []);
                     """
                 }
         }

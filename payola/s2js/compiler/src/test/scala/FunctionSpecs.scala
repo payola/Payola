@@ -43,6 +43,7 @@ class FunctionSpecs extends CompilerFixtureSpec
                             var self = this;
                             return (self.v1 + x.toUpperCase());
                         };
+                        F.prototype.metaClass_ = new s2js.MetaClass('F', []);
 
                         if (typeof(o) === 'undefined') { o = {}; }
                         o.f2 = function(f) {
@@ -60,6 +61,7 @@ class FunctionSpecs extends CompilerFixtureSpec
                             self.f2(function(s2js_x) { return self.f3(s2js_x); });
                             self.f2(function(x) { return ('no' + x); });
                         };
+                        o.metaClass_ = new s2js.MetaClass('o', []);
                     """
                 }
         }
@@ -80,6 +82,7 @@ class FunctionSpecs extends CompilerFixtureSpec
 
                         if (typeof(a) === 'undefined') { a = {}; }
                         a.x = function(y) { window.alert(y); };
+                        a.metaClass_ = new s2js.MetaClass('a', []);
                     """
                 }
         }

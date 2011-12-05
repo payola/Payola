@@ -61,7 +61,7 @@ trait PackageCompiler {
 
     private val jsDefaultMembers = Array(
         "constructor", "hasOwnProperty", "isPrototypeOf", "propertyIsEnumerable", "apply", "arguments", "call",
-        "prototype", "superClass_"
+        "prototype", "superClass_", "metaClass_"
     )
 
     private val operatorTokenMap = Map(
@@ -270,6 +270,8 @@ trait PackageCompiler {
 
         protected def internalCompile() {
             compileConstructor()
+            compileMembers()
+            compileMetaClass()
         }
 
         protected def compileConstructor()
@@ -277,7 +279,6 @@ trait PackageCompiler {
         protected def compileInheritedTraits(extendedObject: String) {
             inheritedTraits.filter(traitAst => !isInternalType(traitAst.symbol)).foreach {
                 traitAst =>
-                    addRequiredSymbol("goog.object");
                     buffer += "goog.object.extend(%s, new %s());\n".format(
                         extendedObject,
                         getFullJsName(traitAst.symbol)
@@ -309,10 +310,7 @@ trait PackageCompiler {
                     }
                     case _: ClassDef => // NOOP, wrapped classes are compiled separately
                     case _ => {
-                        buffer += "/* [s2js-warning] Unknown member %s of type %s */".format(
-                            memberAst.toString,
-                            memberAst.getClass
-                        )
+                        error("Unknown member %s of type %s".format(memberAst.toString, memberAst.getClass))
                     }
                 }
             }
@@ -435,12 +433,7 @@ trait PackageCompiler {
                     case tryAst: Try => // TODO
                     case throwAst: Throw => compileThrow(throwAst)
                     case matchAst: Match => // TODO
-                    case _ => {
-                        buffer += "/* [s2js-warning] Not implemented AST of type %s: %s */".format(
-                            ast.getClass,
-                            ast.toString
-                        )
-                    }
+                    case _ => error("Not implemented AST of type %s: %s".format(ast.getClass, ast.toString))
                 }
 
                 // If the last statement should be returned, prepend it with the "return" keyword.
@@ -476,7 +469,7 @@ trait PackageCompiler {
                     }
                 }
                 case _ => {
-                    buffer += "/* [s2js-warning] Non-constant literal %s */".format(literal.toString)
+                    error("Non-constant literal " + literal.toString)
                 }
             }
         }
@@ -603,6 +596,17 @@ trait PackageCompiler {
 
         protected def compileTypeApply(typeApply: TypeApply) {
             typeApply.fun match {
+                case Select(qualifier, name) if name.toString == "isInstanceOf" => {
+                    val typeParameter = typeApply.args.head;
+                    buffer += "s2js.isInstanceOf("
+                    compileAst(qualifier)
+                    buffer += ", '%s')".format(
+                        typeParameter.tpe match {
+                            case uniqueTypeRef: UniqueTypeRef => getFullJsName(uniqueTypeRef.sym)
+                            case _ => error("Unsupported type conversion: " + typeParameter.tpe.toString)
+                        }
+                    )
+                }
                 case Select(qualifier, name) if name.toString == "asInstanceOf" => {
                     compileAst(qualifier)
                 }
@@ -650,7 +654,7 @@ trait PackageCompiler {
                     buffer += "}"
                 }
                 case _ => {
-                    buffer += "/* [s2js-warning] Unknown labelDef %s */".format(labelDef.toString)
+                    error("Unknown labelDef: " + labelDef.toString)
                 }
             }
         }
@@ -659,6 +663,14 @@ trait PackageCompiler {
             buffer += "throw "
             compileAst(throwAst.expr)
         }
+
+        protected def compileMetaClass() {
+            buffer += "%s.metaClass_ = new s2js.MetaClass('%s', [%s]);\n".format(
+                memberContainerName,
+                fullName,
+                parentClasses.filter(c => !isInternalType(c.symbol)).map(p => getFullJsName(p.symbol)).mkString(", ")
+            )
+        }
     }
 
     private class ClassCompiler(classDef: ClassDef) extends ClassDefCompiler(classDef) {
@@ -666,25 +678,20 @@ trait PackageCompiler {
 
         val initializedValDefSet = new HashSet[String]
 
-        override protected def internalCompile() {
-            super.internalCompile()
-
-            compileDefDefMembers()
-        }
-
         protected def compileConstructor() {
             val primaryConstructors = classDef.impl.body.filter(ast => ast.hasSymbolWhich(_.isPrimaryConstructor))
             val hasConstructor = !primaryConstructors.isEmpty
             val constructorDefDef = if (hasConstructor) primaryConstructors.head.asInstanceOf[DefDef] else null
 
-            buffer += "%s = function(".format(fullName);
+            buffer += fullName + " = function(";
             compileParameterDeclaration(constructorDefDef.vparamss.flatten)
-            buffer += ") {\nvar self = this;\n"
+            buffer += ") {\n"
+            buffer += "var self = this;\n"
 
             if (hasConstructor) {
                 compileParameterInitialization(constructorDefDef.vparamss.flatten)
 
-                // Initialize vals specified as the implicit constructor parameters.
+                // Initialize fields specified as the implicit constructor parameters.
                 constructorDefDef.vparamss.flatten.map(p => getLocalJsName(p.name.toString)).foreach {
                     parameterName =>
                         initializedValDefSet += parameterName
@@ -692,7 +699,7 @@ trait PackageCompiler {
                 }
             }
 
-            // Initialize vals that aren't implicit constructor parameters.
+            // Initialize fields that aren't implicit constructor parameters.
             classDef.impl.foreach {
                 case valDef: ValDef if !initializedValDefSet.contains(getLocalJsName(valDef.symbol)) => {
                     compileMember(valDef, "self")
@@ -726,15 +733,13 @@ trait PackageCompiler {
                 buffer += "goog.inherits(%s, %s);\n".format(fullName, getFullJsName(parentClass.symbol))
             }
         }
+
+        override protected def compileValDefMembers() {
+            // NOOP, the fields are assigned in the constructor.
+        }
     }
 
     private class ModuleClassCompiler(classDef: ClassDef) extends ClassDefCompiler(classDef) {
-        override protected def internalCompile() {
-            super.internalCompile()
-
-            compileMembers()
-        }
-
         protected def compileConstructor() {
             // Define the object if it isn't already defined.
             buffer += "if (typeof(%1$s) === 'undefined') { %1$s = {}; }\n".format(fullName)
@@ -742,7 +747,6 @@ trait PackageCompiler {
             if (!parentClassIsInternal) {
                 // Because the object may be a package object or a companion object, the members that already exist
                 // there need to be preserved.
-                addRequiredSymbol("goog.object");
                 buffer += "goog.object.extend(%s, ".format(fullName)
                 classDef.impl.foreach {
                     case Apply(Select(Super(_, _), name), args) if (name.toString == "<init>") => {

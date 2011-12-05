@@ -53,6 +53,7 @@ class AnnotationSpecs extends CompilerFixtureSpec {
                             var self = this;
                             console.log(self.x + self.y.toString + x);
                         };
+                        A.prototype.metaClass_ = new s2js.MetaClass('A', []);
                     """
                 }
         }
@@ -74,6 +75,7 @@ class AnnotationSpecs extends CompilerFixtureSpec {
                             var self = this;
                             self.x = [1, 2, 3];
                         };
+                        A.prototype.metaClass_ = new s2js.MetaClass('A', []);
                     """
                 }
         }

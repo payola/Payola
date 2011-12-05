@@ -26,6 +26,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         pkg.A.prototype.m1 = function() {
                             var self = this;
                         };
+                        pkg.A.prototype.metaClass_ = new s2js.MetaClass('pkg.A', []);
                     """
                 }
         }
@@ -47,6 +48,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         pkg.A = function() {
                             var self = this;
                         };
+                        pkg.A.prototype.metaClass_ = new s2js.MetaClass('pkg.A', []);
                     """
                 }
         }
@@ -80,6 +82,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             self.v7 = self.v1;
                             self.v8 = self.v4;
                         };
+                        pkg.A.prototype.metaClass_ = new s2js.MetaClass('pkg.A', []);
                     """
                 }
         }
@@ -105,6 +108,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             self.v1 = v1;
                             window.alert(self.v1.toString());
                         };
+                        pkg.A.prototype.metaClass_ = new s2js.MetaClass('pkg.A', []);
                     """
                 }
         }
@@ -138,11 +142,11 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         goog.provide('pkg.C');
                         goog.provide('pkg.T1');
                         goog.provide('pkg.T2');
-                        goog.require('goog.object');
 
                         pkg.A = function() {
                             var self = this;
                         };
+                        pkg.A.prototype.metaClass_ = new s2js.MetaClass('pkg.A', []);
 
                         pkg.C = function(v1, v2) {
                             var self = this;
@@ -151,6 +155,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             goog.base(self);
                         };
                         goog.inherits(pkg.C, pkg.A);
+                        pkg.C.prototype.metaClass_ = new s2js.MetaClass('pkg.C', [pkg.A]);
 
                         pkg.T1 = function() {
                             var self = this;
@@ -159,6 +164,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         pkg.T1.prototype.m1 = function() {
                             var self = this;
                         };
+                        pkg.T1.prototype.metaClass_ = new s2js.MetaClass('pkg.T1', []);
 
                         pkg.T2 = function() {
                             var self = this;
@@ -167,6 +173,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         pkg.T2.prototype.m2 = function() {
                             var self = this;
                         };
+                        pkg.T2.prototype.metaClass_ = new s2js.MetaClass('pkg.T2', []);
 
                         pkg.B = function() {
                             var self = this;
@@ -175,6 +182,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             goog.object.extend(self, new pkg.T2());
                         };
                         goog.inherits(pkg.B, pkg.A);
+                        pkg.B.prototype.metaClass_ = new s2js.MetaClass('pkg.B', [pkg.A, pkg.T1, pkg.T2]);
                     """
                 }
         }
@@ -202,11 +210,15 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             self.v1 = v1;
                             self.v2 = v2;
                         };
+                        pkg.A.prototype.metaClass_ = new s2js.MetaClass('pkg.A', []);
+
                         pkg.B = function() {
                             var self = this;
                             goog.base(self, 'test', 123);
                         };
                         goog.inherits(pkg.B, pkg.A);
+                        pkg.B.prototype.metaClass_ = new s2js.MetaClass('pkg.B', [pkg.A]);
+
                         pkg.C = function(v1, v2) {
                             var self = this;
                             self.v1 = v1;
@@ -214,6 +226,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             goog.base(self, v1, v2);
                         };
                         goog.inherits(pkg.C, pkg.A);
+                        pkg.C.prototype.metaClass_ = new s2js.MetaClass('pkg.C', [pkg.A]);
                     """
                 }
         }
@@ -246,6 +259,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         pkg.o.m2 = function() {
                             var self = this;
                         };
+                        pkg.o.metaClass_ = new s2js.MetaClass('pkg.o', []);
                     """
                 }
         }
@@ -279,8 +293,6 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         goog.provide('pkg.T1');
                         goog.provide('pkg.T2');
                         goog.provide('pkg.o');
-                        goog.require('goog.object');
-
                         pkg.A = function() {
                             var self = this;
                             self.v = 123;
@@ -288,6 +300,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         pkg.A.prototype.m = function() {
                             var self = this;
                         };
+                        pkg.A.prototype.metaClass_ = new s2js.MetaClass('pkg.A', []);
 
                         pkg.T1 = function() {
                             var self = this;
@@ -296,6 +309,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         pkg.T1.prototype.m1 = function() {
                             var self = this;
                         };
+                        pkg.T1.prototype.metaClass_ = new s2js.MetaClass('pkg.T1', []);
 
                         pkg.T2 = function() {
                             var self = this;
@@ -304,11 +318,13 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         pkg.T2.prototype.m2 = function() {
                             var self = this;
                         };
+                        pkg.T2.prototype.metaClass_ = new s2js.MetaClass('pkg.T2', []);
 
                         if (typeof(pkg.o) === 'undefined') { pkg.o = {}; }
                         goog.object.extend(pkg.o, new pkg.A());
                         goog.object.extend(pkg.o, new pkg.T1());
                         goog.object.extend(pkg.o, new pkg.T2());
+                        pkg.o.metaClass_ = new s2js.MetaClass('pkg.o', [pkg.A, pkg.T1, pkg.T2]);
                     """
                 }
         }
@@ -340,12 +356,14 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             var self = this;
                             return A.s2js_apply(self.x, self.y);
                         };
+                        A.prototype.metaClass_ = new s2js.MetaClass('A', []);
 
                         if (typeof(A) === 'undefined') { A = {}; }
                         A.s2js_apply = function(x, y) {
                             var self = this;
                             return new A(x, y);
                         };
+                        A.metaClass_ = new s2js.MetaClass('A', []);
                     """
                 }
         }
@@ -368,6 +386,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         po.m = function() {
                             var self = this;
                         };
+                        po.metaClass_ = new s2js.MetaClass('po', []);
                     """
                 }
         }
@@ -390,6 +409,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         pkg.m = function() {
                             var self = this;
                         };
+                        pkg.metaClass_ = new s2js.MetaClass('pkg', []);
                     """
                 }
         }
@@ -410,16 +430,20 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         goog.provide('pkg');
                         goog.provide('pkg.A');
                         goog.provide('pkg.B');
-                        goog.require('goog.object');
 
                         pkg.A = function() {
                             var self = this;
                         };
+                        pkg.A.prototype.metaClass_ = new s2js.MetaClass('pkg.A', []);
+
                         pkg.B = function() {
                             var self = this;
                         };
+                        pkg.B.prototype.metaClass_ = new s2js.MetaClass('pkg.B', []);
+
                         if (typeof(pkg) === 'undefined') { pkg = {}; }
                         goog.object.extend(pkg, new pkg.A());
+                        pkg.metaClass_ = new s2js.MetaClass('pkg', [pkg.A]);
                     """
                 }
         }

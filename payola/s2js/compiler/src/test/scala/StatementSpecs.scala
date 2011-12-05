@@ -29,6 +29,7 @@ class StatementSpecs extends CompilerFixtureSpec
                             var y = (x + 'foo');
                             window.alert(y);
                         };
+                        a.metaClass_ = new s2js.MetaClass('a', []);
                     """
                 }
         }
@@ -88,9 +89,11 @@ class StatementSpecs extends CompilerFixtureSpec
                             var self = this;
                             self.x = '';
                         };
+                        B.prototype.metaClass_ = new s2js.MetaClass('B', []);
 
                         if (typeof(a) === 'undefined') { a = {}; }
                         a.x = 'bar';
+                        a.metaClass_ = new s2js.MetaClass('a', []);
 
                         if (typeof(c) === 'undefined') { c = {}; }
                         c.x = 'foo';
@@ -125,6 +128,7 @@ class StatementSpecs extends CompilerFixtureSpec
                             self.x = a.x;
                             self.x = b.x;
                         };
+                        c.metaClass_ = new s2js.MetaClass('c', []);
                     """
                 }
         }
@@ -157,6 +161,7 @@ class StatementSpecs extends CompilerFixtureSpec
                             var v2 = (! v1);
                             var v3 = (! self.m1());
                         };
+                        o.metaClass_ = new s2js.MetaClass('o', []);
                     """
                 }
         }

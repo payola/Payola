@@ -24,6 +24,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                             var self = this;
                             null;
                         };
+                        p.metaClass_ = new s2js.MetaClass('p', []);
                     """
                 }
         }
@@ -50,6 +51,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                             true;
                             false;
                         };
+                        p.metaClass_ = new s2js.MetaClass('p', []);
                     """
                 }
         }
@@ -82,6 +84,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                             -5;
                             -424.45;
                         };
+                        p.metaClass_ = new s2js.MetaClass('p', []);
                     """
                 }
         }
@@ -106,6 +109,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                             var self = this;
                             'x';
                         };
+                        p.metaClass_ = new s2js.MetaClass('p', []);
                     """
                 }
         }
@@ -136,6 +140,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                             '\\';
                             '\\\'';
                         };
+                        p.metaClass_ = new s2js.MetaClass('p', []);
                     """
                 }
         }

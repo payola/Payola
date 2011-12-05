@@ -33,6 +33,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 window.alert(x);
                             };
                         };
+                        a.metaClass_ = new s2js.MetaClass('a', []);
                     """
                 }
         }
@@ -60,6 +61,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                             var self = this;
                             scala.Predef.intWrapper(0).to(2).foreach(function(x) { window.alert(('foo' + x)); });
                         };
+                        a.metaClass_ = new s2js.MetaClass('a', []);
                     """
                 }
         }
@@ -97,6 +99,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 }
                             })();
                         };
+                       o1.metaClass_ = new s2js.MetaClass('o1', []);
                     """
                 }
         }
@@ -141,6 +144,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 }
                             })();
                         };
+                        o1.metaClass_ = new s2js.MetaClass('o1', []);
                     """
                 }
         }
@@ -190,6 +194,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 }
                             })();
                         };
+                        o1.metaClass_ = new s2js.MetaClass('o1', []);
                     """
                 }
         }
@@ -218,6 +223,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                             var self = this;
                             throw new scala.Exception('something bad happened');
                         };
+                        A.prototype.metaClass_ = new s2js.MetaClass('A', []);
                     """
                 }
         }

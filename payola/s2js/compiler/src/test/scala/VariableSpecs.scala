@@ -34,6 +34,7 @@ class VariableSpecs extends CompilerFixtureSpec
                             var c = true;
                             var d = 1.0;
                         };
+                        foo.A.prototype.metaClass_ = new s2js.MetaClass('foo.A', []);
                     """
                 }
         }
@@ -64,10 +65,12 @@ class VariableSpecs extends CompilerFixtureSpec
                             var self = this;
                             var a = new foo.B();
                         };
+                        foo.A.prototype.metaClass_ = new s2js.MetaClass('foo.A', []);
                         
                         foo.B = function() {
                             var self = this;
                         };
+                        foo.B.prototype.metaClass_ = new s2js.MetaClass('foo.B', []);
                     """
                 }
         }
@@ -95,6 +98,7 @@ class VariableSpecs extends CompilerFixtureSpec
                             var self = this;
                             var a = y;
                         };
+                        foo.A.prototype.metaClass_ = new s2js.MetaClass('foo.A', []);
                     """
                 }
         }
@@ -127,6 +131,7 @@ class VariableSpecs extends CompilerFixtureSpec
                             var self = this;
                             var a = self.m1();
                         };
+                        foo.A.prototype.metaClass_ = new s2js.MetaClass('foo.A', []);
                     """
                 }
         }
@@ -158,6 +163,7 @@ class VariableSpecs extends CompilerFixtureSpec
                             var b = (x == 5);
                             var c = ((9 * a) / (2 + a));
                         };
+                        foo.A.prototype.metaClass_ = new s2js.MetaClass('foo.A', []);
                     """
                 }
         }
@@ -185,6 +191,7 @@ class VariableSpecs extends CompilerFixtureSpec
                             var self = this;
                             var a = function(b) { return ('foo' + b); };
                         };
+                        foo.A.prototype.metaClass_ = new s2js.MetaClass('foo.A', []);
                     """
                 }
         }
