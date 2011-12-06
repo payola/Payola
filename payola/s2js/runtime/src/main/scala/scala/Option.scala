@@ -1,4 +1,4 @@
-package scala
+package s2js.runtime.scala
 
 object Option {
     def apply[A](x: A): Option[A] = if (x == null) None else Some(x)

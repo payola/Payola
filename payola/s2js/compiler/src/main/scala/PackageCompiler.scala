@@ -47,7 +47,8 @@ trait PackageCompiler {
     private val jsAdapterPackages = Array(
         "s2js.adapters",
         "s2js.adapters.js.browser",
-        "s2js.adapters.js.dom"
+        "s2js.adapters.js.dom",
+        "s2js.runtime"
     )
 
     private val jsKeywords = Array(
@@ -412,7 +413,8 @@ trait PackageCompiler {
             // A Block handles the return value itself so it has to be compiled besides all other ast types.
             if (ast.isInstanceOf[Block]) {
                 compileBlock(ast.asInstanceOf[Block], hasReturnValue)
-                // Other ast types don't handle return value themselves.
+
+            // Other ast types don't handle return value themselves.
             } else {
                 val compiledAstIndex = buffer.length;
                 ast match {
@@ -432,7 +434,7 @@ trait PackageCompiler {
                     case labelDef: LabelDef => compileLabelDef(labelDef)
                     case tryAst: Try => // TODO
                     case throwAst: Throw => compileThrow(throwAst)
-                    case matchAst: Match => // TODO
+                    case matchAst: Match => compileMatch(matchAst)
                     case _ => error("Not implemented AST of type %s: %s".format(ast.getClass, ast.toString))
                 }
 
@@ -596,23 +598,18 @@ trait PackageCompiler {
 
         protected def compileTypeApply(typeApply: TypeApply) {
             typeApply.fun match {
-                case Select(qualifier, name) if name.toString == "isInstanceOf" => {
-                    val typeParameter = typeApply.args.head;
-                    buffer += "s2js.isInstanceOf("
+                case Select(qualifier, name) if name.toString == "isInstanceOf" || name.toString == "asInstanceOf" => {
+                    buffer += "types.object%s(".format(name.toString.capitalize)
                     compileAst(qualifier)
+
                     buffer += ", '%s')".format(
-                        typeParameter.tpe match {
+                        typeApply.args.head.tpe match {
                             case uniqueTypeRef: UniqueTypeRef => getFullJsName(uniqueTypeRef.sym)
-                            case _ => error("Unsupported type conversion: " + typeParameter.tpe.toString)
+                            case tpe => error("Unsupported type check/conversion: " + tpe.toString)
                         }
                     )
                 }
-                case Select(qualifier, name) if name.toString == "asInstanceOf" => {
-                    compileAst(qualifier)
-                }
-                case fun => {
-                    compileAst(fun)
-                }
+                case fun => compileAst(fun)
             }
         }
 
@@ -639,13 +636,15 @@ trait PackageCompiler {
         protected def compileLabelDef(labelDef: LabelDef) {
             labelDef.name match {
                 case name if name.toString.startsWith("while") => {
-                    // AST of a while cycle is transformed into a tail recursive function with AST similar to:
-                    // def while$1() {
-                    //     if([while-condition]) {
-                    //         [while-body];
-                    //         while$1()
-                    //     }
-                    // }
+                    /*
+                        AST of a while cycle is transformed into a tail recursive function with AST similar to:
+                        def while$1() {
+                            if([while-condition]) {
+                               [while-body];
+                                while$1()
+                            }
+                        }
+                    */
                     val If(cond, Block(body, _), _) = labelDef.rhs
                     buffer += "while("
                     compileAst(cond)
@@ -662,6 +661,10 @@ trait PackageCompiler {
         protected def compileThrow(throwAst: Throw) {
             buffer += "throw "
             compileAst(throwAst.expr)
+        }
+
+        protected def compileMatch(matchAst: Match) {
+            buffer += "matching!!!!!! "
         }
 
         protected def compileMetaClass() {

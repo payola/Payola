@@ -103,6 +103,7 @@ object PayolaBuild extends Build
             scalacOptions += "-P:s2js:output:" + file("./s2js/runtime/js").getAbsolutePath
         )
     ).dependsOn(
+        s2jsAdaptersProject,
         s2jsCompilerProject
     )
 
