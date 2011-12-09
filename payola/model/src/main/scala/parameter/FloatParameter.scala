@@ -69,7 +69,7 @@ class FloatParameter(private val n: String, private val defaultValue: Float) ext
 
     /** Returns a new BooleanParameterInstance instance with the value passed as a parameter of this method.
      *
-     * @parameter value The value.
+     * @param value The value.
      *
      * @return New BooleanParameterInstance instance.
      */

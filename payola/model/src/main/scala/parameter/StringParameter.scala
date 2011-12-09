@@ -18,8 +18,15 @@ class StringParameter(private val n: String, private val defaultValue: String) e
         override def floatValue: Float = {
             if (value == null)
                 0.0.toFloat
-            else
-                value.toFloat
+            else{
+                // strval.toFloat might end up throwing an exception. Anything that cannot be parsed will be converted
+                // to zero.
+                try {
+                    value.toFloat
+                } catch {
+                    case e: Exception => 0.0f
+                }
+            }
         }
 
         /** Gets an int value of the parameter.
@@ -29,8 +36,15 @@ class StringParameter(private val n: String, private val defaultValue: String) e
         override def intValue: Int = {
             if (value == null)
                 0
-            else
-                value.toInt
+            else{
+                // strval.toInt might end up throwing an exception. Anything that cannot be parsed will be converted
+                // to zero.
+                try {
+                    value.toInt
+                } catch {
+                    case e: Exception => 0
+                }
+            }
         }
 
         /** Boolean value setter.
@@ -71,7 +85,7 @@ class StringParameter(private val n: String, private val defaultValue: String) e
 
     /** Returns a new StringParameterInstance instance with the value passed as a parameter of this method.
      *
-     * @parameter value The value.
+     * @param value The value.
      *
      * @return New StringParameterInstance instance.
      */

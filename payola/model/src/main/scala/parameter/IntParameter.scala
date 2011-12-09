@@ -69,7 +69,7 @@ class IntParameter(private val n: String, private val defaultValue: Int) extends
 
     /** Returns a new BooleanParameterInstance instance with the value passed as a parameter of this method.
      *
-     * @parameter value The value.
+     * @param value The value.
      *
      * @return New BooleanParameterInstance instance.
      */

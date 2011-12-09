@@ -80,7 +80,7 @@ class BooleanParameter(private val n: String, private val defaultValue: Boolean)
 
     /** Returns a new BooleanParameterInstance instance with the value passed as a parameter of this method.
      *
-     * @parameter value The value.
+     * @param value The value.
      *
      * @return New BooleanParameterInstance instance.
      */

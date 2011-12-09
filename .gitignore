@@ -13,3 +13,5 @@ payola/.idea/*highlighting.xml
 
 # OS X files
 .DS_Store
+
+payola/.idea/misc.xml

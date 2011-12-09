@@ -5,8 +5,8 @@ abstract  class Parameter[T](private val n: String, private val defaultValue: T)
     private var _name: String = null
     setName(n)
 
-    def createInstance(value: Option[T]) = {
-        if (value.isEmpty)
+    def createInstance(value: Option[T] = null) = {
+        if (value == null || value.isEmpty)
             instanceWithValue(defaultValue)
         else
             instanceWithValue(value.get)
@@ -15,7 +15,7 @@ abstract  class Parameter[T](private val n: String, private val defaultValue: T)
     /** Returns a new ParameterInstance instance (of its subclass, to be precise) with the value passed
      * as a parameter of this method.
      *
-     * @parameter value The value.
+     * @param value The value.
      *
      * @return New ParameterInstance instance.
      */
