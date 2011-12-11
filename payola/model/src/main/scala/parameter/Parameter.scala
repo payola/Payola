@@ -31,10 +31,10 @@ abstract  class Parameter[T](private val n: String, private val defaultValue: T)
      *
      * @param newName New name.
      *
-     * @throws AssertionError if newName is null or empty.
+     * @throws IllegalArgumentException if newName is null or empty.
      */
     def name_=(newName: String) = {
-        assert(newName != null && newName != "", "Cannot set null or empty name!")
+        require(newName != null && newName != "", "Cannot set null or empty name!")
         _name = newName
     }
 
@@ -42,7 +42,7 @@ abstract  class Parameter[T](private val n: String, private val defaultValue: T)
      *
      * @param newName New name.
      *
-     * @throws AssertionError if newName is null or empty.
+     * @throws IllegalArgumentException if newName is null or empty.
      */
     def setName(newName: String) = name_=(newName)
 

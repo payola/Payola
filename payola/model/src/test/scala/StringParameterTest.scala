@@ -6,17 +6,17 @@ import org.scalatest.matchers.ShouldMatchers
 
 class StringParameterTest extends FlatSpec with ShouldMatchers {
     "StringParameter" should "not get initialized with null or an empty string" in {
-        evaluating(new StringParameter(null, "Help")) should produce [AssertionError]
-        evaluating(new StringParameter("", "Help")) should produce [AssertionError]
+        evaluating(new StringParameter(null, "Help")) should produce [IllegalArgumentException]
+        evaluating(new StringParameter("", "Help")) should produce [IllegalArgumentException]
     }
 
     "StringParameter" should "not allow setting empty or null name" in {
         val sp: StringParameter = new StringParameter("Test", "Help")
-        evaluating(sp.setName("")) should produce [AssertionError]
-        evaluating(sp.setName(null)) should produce [AssertionError]
+        evaluating(sp.setName("")) should produce [IllegalArgumentException]
+        evaluating(sp.setName(null)) should produce [IllegalArgumentException]
 
-        evaluating(sp.name = "") should produce [AssertionError]
-        evaluating(sp.name = null) should produce [AssertionError]
+        evaluating(sp.name = "") should produce [IllegalArgumentException]
+        evaluating(sp.name = null) should produce [IllegalArgumentException]
     }
 
     "StringParameter" should "return instance with default value when passing no params" in {

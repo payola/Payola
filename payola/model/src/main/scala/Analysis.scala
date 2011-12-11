@@ -18,10 +18,10 @@ class Analysis (n: String, u: User) {
      *
      * @param instance The plugin instance.
      *
-     * @throws AssertionError if the plugin instance is null.
+     * @throws IllegalArgumentException if the plugin instance is null.
      */
     def appendPluginInstance(instance: PluginInstance) = {
-        assert(instance != null, "Cannot append null plugin instance!")
+        require(instance != null, "Cannot append null plugin instance!")
 
         if (!_pluginInstances.contains(instance))
             _pluginInstances += instance
@@ -31,10 +31,10 @@ class Analysis (n: String, u: User) {
      *
      * @param instance The plugin instance.
      *
-     * @throws AssertionError if the plugin instance is null.
+     * @throws IllegalArgumentException if the plugin instance is null.
      */
     def containsPluginInstance(instance: PluginInstance) = {
-        assert(instance != null, "Cannot query about null plugin instance!")
+        require(instance != null, "Cannot query about null plugin instance!")
 
         _pluginInstances.contains()
     }
@@ -57,10 +57,10 @@ class Analysis (n: String, u: User) {
      *
      * @param n The new name.
      *
-     * @throws AssertionError if the new name is null.
+     * @throws IllegalArgumentException if the new name is null.
      */
     def name_=(n: String) = {
-        assert(n != null && n != "", "Analysis has to have a valid name!")
+        require(n != null && n != "", "Analysis has to have a valid name!")
 
         _name = n
     }
@@ -75,10 +75,10 @@ class Analysis (n: String, u: User) {
      *
      * @param New owner.
      *
-     * @throws AssertionError if the new user is null.
+     * @throws IllegalArgumentException if the new user is null.
      */
     def owner_=(u: User) = {
-        assert(u != null, "Analysis has to have a non-null owner!")
+        require(u != null, "Analysis has to have a non-null owner!")
         val oldOwner = _owner
 
         _owner = u
@@ -98,10 +98,10 @@ class Analysis (n: String, u: User) {
      *
      * @param instances The array of instances.
      *
-     * @throws AssertionError if the array is null.
+     * @throws IllegalArgumentException if the array is null.
      */
     def pluginInstances_=(instances: Array[PluginInstance]) = {
-        assert(instances != null, "Cannot assign a null array!")
+        require(instances != null, "Cannot assign a null array!")
 
         _pluginInstances.clear()
         instances.foreach(_pluginInstances += _)
@@ -111,10 +111,10 @@ class Analysis (n: String, u: User) {
      *
      * @param instance The plugin instance to be removed.
      *
-     * @throws AssertionError if the plugin instance is null.
+     * @throws IllegalArgumentException if the plugin instance is null.
      */
     def removePluginInstance(instance: PluginInstance) = {
-        assert(instance != null, "Cannot remove null plugin instance!")
+        require(instance != null, "Cannot remove null plugin instance!")
 
         _pluginInstances -= instance
     }
@@ -123,7 +123,7 @@ class Analysis (n: String, u: User) {
      *
      * @param n The new name.
      *
-     * @throws AssertionError if the name is null.
+     * @throws IllegalArgumentException if the name is null.
      */
     def setName(n: String) = name_=(n)
 
@@ -131,7 +131,7 @@ class Analysis (n: String, u: User) {
      *
      * @param u The new owner.
      *
-     * @throws AssertionError if the user is null.
+     * @throws IllegalArgumentException if the user is null.
      */
     def setOwner(u: User) = owner_=(u)
 
@@ -139,7 +139,7 @@ class Analysis (n: String, u: User) {
      *
      * @param instances The instance array.
      *
-     * @throws AssertionError if the array is null.
+     * @throws IllegalArgumentException if the array is null.
      */
     def setPluginInstances(instances: Array[PluginInstance]) = pluginInstances_=(instances)
 }

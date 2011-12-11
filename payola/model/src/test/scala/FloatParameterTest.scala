@@ -6,17 +6,17 @@ import org.scalatest.matchers.ShouldMatchers
 
 class FloatParameterTest extends FlatSpec with ShouldMatchers {
     "FloatParameter" should "not get initialized with null or an empty string" in {
-        evaluating(new FloatParameter(null, 1.0f)) should produce [AssertionError]
-        evaluating(new FloatParameter("", 1.0f)) should produce [AssertionError]
+        evaluating(new FloatParameter(null, 1.0f)) should produce [IllegalArgumentException]
+        evaluating(new FloatParameter("", 1.0f)) should produce [IllegalArgumentException]
     }
 
     "FloatParameter" should "not allow setting empty or null name" in {
         val fp: FloatParameter = new FloatParameter("Test", 1.0f)
-        evaluating(fp.setName("")) should produce [AssertionError]
-        evaluating(fp.setName(null)) should produce [AssertionError]
+        evaluating(fp.setName("")) should produce [IllegalArgumentException]
+        evaluating(fp.setName(null)) should produce [IllegalArgumentException]
 
-        evaluating(fp.name = "") should produce [AssertionError]
-        evaluating(fp.name = null) should produce [AssertionError]
+        evaluating(fp.name = "") should produce [IllegalArgumentException]
+        evaluating(fp.name = null) should produce [IllegalArgumentException]
     }
 
     "FloatParameter" should "return instance with default value when passing no params" in {

@@ -6,17 +6,17 @@ import org.scalatest.matchers.ShouldMatchers
 
 class BooleanParameterTest extends FlatSpec with ShouldMatchers {
     "BooleanParameter" should "not get initialized with null or an empty string" in {
-        evaluating(new BooleanParameter(null, true)) should produce [AssertionError]
-        evaluating(new BooleanParameter("", true)) should produce [AssertionError]
+        evaluating(new BooleanParameter(null, true)) should produce [IllegalArgumentException]
+        evaluating(new BooleanParameter("", true)) should produce [IllegalArgumentException]
     }
 
     "BooleanParameter" should "not allow setting empty or null name" in {
         val bp: BooleanParameter = new BooleanParameter("Test", true)
-        evaluating(bp.setName("")) should produce [AssertionError]
-        evaluating(bp.setName(null)) should produce [AssertionError]
+        evaluating(bp.setName("")) should produce [IllegalArgumentException]
+        evaluating(bp.setName(null)) should produce [IllegalArgumentException]
 
-        evaluating(bp.name = "") should produce [AssertionError]
-        evaluating(bp.name = null) should produce [AssertionError]
+        evaluating(bp.name = "") should produce [IllegalArgumentException]
+        evaluating(bp.name = null) should produce [IllegalArgumentException]
     }
     
     "BooleanParameter" should "return instance with default value when passing no params" in {

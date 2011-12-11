@@ -26,10 +26,10 @@ class Group (nameStr: String, user: User){
      *
      * @param u The user to be added.
      *
-     * @throws AssertionError if the user is null.
+     * @throws IllegalArgumentException if the user is null.
      */
     def addMember(u: User) = {
-        assert(u != null, "User is NULL!")
+        require(u != null, "User is NULL!")
         if (!_members.contains(u)){
             _members += u
             u.addToGroup(this)
@@ -90,11 +90,11 @@ class Group (nameStr: String, user: User){
      *
      * @param The new name.
      *
-     * @throws AssertionError if the new name is null or empty.
+     * @throws IllegalArgumentException if the new name is null or empty.
      */
     def name_=(n: String) = {
         // Name mustn't be null or empty
-        assert(n != null && n != "")
+        require(n != null && n != "")
 
         _name = n
     }
@@ -109,11 +109,11 @@ class Group (nameStr: String, user: User){
      *
      * @param u The owner.
      *
-     * @throws AssertionError if the new user is null.
+     * @throws IllegalArgumentException if the new user is null.
      */
     def owner_=(u: User) = {
         // Owner mustn't be null
-        assert(u != null)
+        require(u != null)
 
         val oldOwner = _owner
         _owner = u
@@ -132,10 +132,10 @@ class Group (nameStr: String, user: User){
      *
      *  @param u The user to be removed.
      *
-     *  @throws AssertionError if the user is null or owner.
+     *  @throws IllegalArgumentException if the user is null or owner.
      */
     def removeMember(u: User) = {
-        assert(u != null, "User is NULL!")
+        require(u != null, "User is NULL!")
         
         // Need to make this check, otherwise we'd
         // get in to an infinite cycle
@@ -149,7 +149,7 @@ class Group (nameStr: String, user: User){
      *
      * @param n The new group name.
      *
-     * @throws AssertionError if the new name is null or empty.
+     * @throws IllegalArgumentException if the new name is null or empty.
      */
     def setName(n: String) = name_=(n);
 
@@ -157,7 +157,7 @@ class Group (nameStr: String, user: User){
      *
      * @param u The new owner.
      *
-     * @throws AssertionError if the user is null.
+     * @throws IllegalArgumentException if the user is null.
      */
     private def setOwner(u: User) = owner_=(u);
 }

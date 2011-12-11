@@ -6,17 +6,17 @@ import org.scalatest.matchers.ShouldMatchers
 
 class IntParameterTest extends FlatSpec with ShouldMatchers {
     "IntParameter" should "not get initialized with null or an empty string" in {
-        evaluating(new IntParameter(null, 1)) should produce [AssertionError]
-        evaluating(new IntParameter("", 1)) should produce [AssertionError]
+        evaluating(new IntParameter(null, 1)) should produce [IllegalArgumentException]
+        evaluating(new IntParameter("", 1)) should produce [IllegalArgumentException]
     }
 
     "IntParameter" should "not allow setting empty or null name" in {
         val ip: IntParameter = new IntParameter("Test", 1)
-        evaluating(ip.setName("")) should produce [AssertionError]
-        evaluating(ip.setName(null)) should produce [AssertionError]
+        evaluating(ip.setName("")) should produce [IllegalArgumentException]
+        evaluating(ip.setName(null)) should produce [IllegalArgumentException]
 
-        evaluating(ip.name = "") should produce [AssertionError]
-        evaluating(ip.name = null) should produce [AssertionError]
+        evaluating(ip.name = "") should produce [IllegalArgumentException]
+        evaluating(ip.name = null) should produce [IllegalArgumentException]
     }
 
     "IntParameter" should "return instance with default value when passing no params" in {

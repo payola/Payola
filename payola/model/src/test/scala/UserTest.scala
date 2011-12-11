@@ -10,18 +10,18 @@ class UserTest extends FlatSpec with ShouldMatchers {
     }
 
     "User" should "not be initialized with null or empty string" in {
-        evaluating(new User(null)) should produce [AssertionError]
-        evaluating(new User("")) should produce [AssertionError]
+        evaluating(new User(null)) should produce [IllegalArgumentException]
+        evaluating(new User("")) should produce [IllegalArgumentException]
     }
 
     "User" should "not add null Group" in  {
         val u: User = new User("Franta")
-        evaluating(u.addToGroup(null)) should produce [AssertionError]
+        evaluating(u.addToGroup(null)) should produce [IllegalArgumentException]
     }
 
     "User" should "not be removed from null Group" in  {
         val u: User = new User("Franta")
-        evaluating(u.removeFromGroup(null)) should produce [AssertionError]
+        evaluating(u.removeFromGroup(null)) should produce [IllegalArgumentException]
     }
 
     "User" should "not be a member and should be an owner of group when added" in  {
@@ -61,12 +61,12 @@ class UserTest extends FlatSpec with ShouldMatchers {
         "owner of the group" in  {
         val u: User = new User("Franta")
         val g: Group = new Group("Monoid", u)
-        evaluating(u.removeOwnedGroup(g)) should produce [AssertionError]
+        evaluating(u.removeOwnedGroup(g)) should produce [IllegalArgumentException]
     }
 
     "User" should "not be renamed to null or empty string" in  {
         val u: User = new User("Franta")
-        evaluating(u.setName(null)) should produce [AssertionError]
-        evaluating(u.setName("")) should produce [AssertionError]
+        evaluating(u.setName(null)) should produce [IllegalArgumentException]
+        evaluating(u.setName("")) should produce [IllegalArgumentException]
     }
 }

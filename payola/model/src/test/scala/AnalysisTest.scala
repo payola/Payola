@@ -7,10 +7,10 @@ import cz.payola.model._
 class AnalysisTest extends FlatSpec with ShouldMatchers {
     "Analysis" should "not be initialized with null user or name" in {
         val u: User = new User("Franta")
-        evaluating(new Analysis(null, null)) should produce [AssertionError]
-        evaluating(new Analysis("HelloWorld", null)) should produce [AssertionError]
-        evaluating(new Analysis(null, u)) should produce [AssertionError]
-        evaluating(new Analysis("", u)) should produce [AssertionError]
+        evaluating(new Analysis(null, null)) should produce [IllegalArgumentException]
+        evaluating(new Analysis("HelloWorld", null)) should produce [IllegalArgumentException]
+        evaluating(new Analysis(null, u)) should produce [IllegalArgumentException]
+        evaluating(new Analysis("", u)) should produce [IllegalArgumentException]
     }
 
     "Analysis" should "retain attributes passed in the constructor" in {
@@ -27,7 +27,7 @@ class AnalysisTest extends FlatSpec with ShouldMatchers {
         val a: Analysis = new Analysis(name, u)
         a.pluginInstances.size should equal (0)
 
-        val plugin: Plugin = new Plugin()
+        val plugin: Plugin = new Plugin("MyPlugin")
         val instance1: PluginInstance = new PluginInstance(plugin)
         a.appendPluginInstance(instance1)
         a.pluginInstances.size should equal (1)

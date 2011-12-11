@@ -6,9 +6,9 @@ import org.scalatest.matchers.ShouldMatchers
 
 class GroupTest extends FlatSpec with ShouldMatchers {
     "Group" should "not be initialized with null or empty values" in {
-        evaluating(new Group(null, null)) should produce [AssertionError]
-        evaluating(new Group("", null)) should produce [AssertionError]
-        evaluating(new Group("Monoid", null)) should produce [AssertionError]
+        evaluating(new Group(null, null)) should produce [IllegalArgumentException]
+        evaluating(new Group("", null)) should produce [IllegalArgumentException]
+        evaluating(new Group("Monoid", null)) should produce [IllegalArgumentException]
     }
 
     "Group" should "retain values passed in the constructor" in {
@@ -27,8 +27,8 @@ class GroupTest extends FlatSpec with ShouldMatchers {
     "Group" should "not add nor remove a null user" in  {
         val u: User = new User("Franta")
         val g: Group = new Group("Grupa", u)
-        evaluating(g.addMember(null)) should produce [AssertionError]
-        evaluating(g.removeMember(null)) should produce [AssertionError]
+        evaluating(g.addMember(null)) should produce [IllegalArgumentException]
+        evaluating(g.removeMember(null)) should produce [IllegalArgumentException]
     }
 
     "Group" should "contain the user after being added" in {
@@ -51,8 +51,8 @@ class GroupTest extends FlatSpec with ShouldMatchers {
     "User" should "not be renamed to null or empty string" in  {
         val u: User = new User("Franta")
         val g: Group = new Group("Pologrupa", u)
-        evaluating(g.setName(null)) should produce [AssertionError]
-        evaluating(g.setName("")) should produce [AssertionError]
+        evaluating(g.setName(null)) should produce [IllegalArgumentException]
+        evaluating(g.setName("")) should produce [IllegalArgumentException]
     }
 
 }

@@ -26,11 +26,11 @@ class User(n: String) {
      *
      * @param a Analysis to be added.
     *
-    *  @throws AssertionError if the analysis is null or the user isn't an owner of it.
+    *  @throws IllegalArgumentException if the analysis is null or the user isn't an owner of it.
      */
     def addAnalysis(a: Analysis) = {
-        assert(a != null, "Analysis mustn't be null")
-        assert(isOwnerOfAnalysis(a), "User must be owner of the analysis")
+        require(a != null, "Analysis mustn't be null")
+        require(isOwnerOfAnalysis(a), "User must be owner of the analysis")
         if (!_ownedAnalyses.contains(a))
             _ownedAnalyses += a
     }
@@ -39,10 +39,10 @@ class User(n: String) {
      *
      * @param a The share.
      *
-     * @throws AssertionError if the analysis share is null.
+     * @throws IllegalArgumentException if the analysis share is null.
      */
     def addAnalysisShare(a: AnalysisShare) = {
-        assert(a != null, "Cannot share null analysis share")
+        require(a != null, "Cannot share null analysis share")
         if (!_sharedAnalyses.contains(a))
             _sharedAnalyses += a
     }
@@ -54,10 +54,10 @@ class User(n: String) {
      *
      * @param g Group to be added.
      *
-     * @throws AssertionError if the group is null.
+     * @throws IllegalArgumentException if the group is null.
      */
     def addToGroup(g: Group): Unit = {
-        assert(g != null, "Group is NULL!")
+        require(g != null, "Group is NULL!")
 
         // Avoid double membership
         if (!_memberGroups.contains(g)) {
@@ -70,11 +70,11 @@ class User(n: String) {
      *
      * @param g Group to be added.
      *
-     * @throws AssertionError if the group is null or the user isn't an owner of that group.
+     * @throws IllegalArgumentException if the group is null or the user isn't an owner of that group.
      */
     def addOwnedGroup(g: Group) = {
-        assert(g != null, "Group is NULL!")
-        assert(g.isOwnedByUser(this), "Group isn't owned by this user!")
+        require(g != null, "Group is NULL!")
+        require(g.isOwnedByUser(this), "Group isn't owned by this user!")
 
         // Avoid double membership
         if (!_ownedGroups.contains(g))
@@ -139,11 +139,11 @@ class User(n: String) {
      *
      * @param n New name.
      *
-     * @throws AssertionError if the new name is null or empty.
+     * @throws IllegalArgumentException if the new name is null or empty.
      */
     def name_=(n: String) = {
         // The name mustn't be null and mustn't be empty
-        assert(n != null && n != "")
+        require(n != null && n != "")
 
         _name = n
     }
@@ -159,10 +159,10 @@ class User(n: String) {
      *
      * @param a Analysis to be removed.
      *
-     * @throws AssertionError if the analysis is null.
+     * @throws IllegalArgumentException if the analysis is null.
      */
     def removeAnalysis(a: Analysis) = {
-        assert(a != null, "Cannot remove null analysis!")
+        require(a != null, "Cannot remove null analysis!")
         _ownedAnalyses -= a
     }
 
@@ -170,10 +170,10 @@ class User(n: String) {
      *
      * @param a Analysis share to be removed.
      *
-     * @throws AssertionError if the analysis share is null.
+     * @throws IllegalArgumentException if the analysis share is null.
      */
     def removeAnalysisShare(a: AnalysisShare) = {
-        assert(a != null, "Cannot remove null analysis!")
+        require(a != null, "Cannot remove null analysis!")
         _sharedAnalyses -= a
     }
 
@@ -187,10 +187,10 @@ class User(n: String) {
      *          removeMember on the group which then may call back removeFromGroup
      *          back on the user.
      *
-     *  @throws AssertionError if the group is null.
+     *  @throws IllegalArgumentException if the group is null.
      */
     def removeFromGroup(g: Group): Unit = {
-        assert(g != null, "Group is NULL!")
+        require(g != null, "Group is NULL!")
 
         // Need to make this check, otherwise we'd
         // get in to an infinite cycle
@@ -205,11 +205,11 @@ class User(n: String) {
      *
      * @param g Group to be removed.
      *
-     * @throws AssertionError if the group is null or the user is still owner of the group.
+     * @throws IllegalArgumentException if the group is null or the user is still owner of the group.
      */
     def removeOwnedGroup(g: Group) = {
-        assert(g != null, "Group is NULL!")
-        assert(!g.isOwnedByUser(this), "Group is still owned by this user!")
+        require(g != null, "Group is NULL!")
+        require(!g.isOwnedByUser(this), "Group is still owned by this user!")
 
         _ownedGroups -= g
     }
@@ -218,7 +218,7 @@ class User(n: String) {
      *
      * @param n The new user's name.
      *
-     * @throws AssertionError if the new name is null or empty.
+     * @throws IllegalArgumentException if the new name is null or empty.
      */
     def setName(n: String) = name_=(n);
 

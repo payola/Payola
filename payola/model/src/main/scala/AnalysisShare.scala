@@ -8,8 +8,8 @@ object SharePrivilege extends Enumeration {
 import SharePrivilege._
 
 class AnalysisShare (var analysis: Analysis, var privilege: SharePrivilege) {
-    assert(analysis != null, "Analysis cannot be null!")
-    assert(privilege != null, "Privilige cannot be null!")
+    require(analysis != null, "Analysis cannot be null!")
+    require(privilege != null, "Privilige cannot be null!")
 
     /** Creates a new AnalysisShare with SharePrivilegeResultOnly SharePrivilege.
      *
