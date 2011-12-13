@@ -21,7 +21,7 @@ abstract class CompilerFixtureSpec extends FixtureSpec with ConfigMapFixture wit
         compiler = new ScalaToJsCompiler(configMap("cp").toString, workingDirectory.getAbsolutePath, true)
     }
 
-    def expect(scalaSource: String): Expector = {
+    def scalaCode(scalaSource: String): Expector = {
         // Compile the scala source.
         val scalaFile = new File(workingDirectory.getAbsolutePath + "/Test" + testId + ".scala")
         val writer = new FileWriter(scalaFile)
@@ -38,7 +38,7 @@ abstract class CompilerFixtureSpec extends FixtureSpec with ConfigMapFixture wit
 
     class Expector(val actual: String)
     {
-        def toBe(expected: String) {
+        def shouldCompileTo(expected: String) {
             if (normalizeWhiteSpace(actual) != normalizeWhiteSpace(expected)) {
                 println(normalizeWhiteSpace(expected))
                 println(normalizeWhiteSpace(actual))

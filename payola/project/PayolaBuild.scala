@@ -84,6 +84,7 @@ object PayolaBuild extends Build
             },
             compile <<= (compile in Compile).dependsOn(packageBin),
 
+            scalacOptions ++= Seq("-unchecked", "-deprecation"),
             testOptions ++= Seq(
                 Tests.Argument("-Dwd=" + S2JsSettings.compilerTestsTarget.absolutePath),
                 Tests.Argument("-Dcp=" +

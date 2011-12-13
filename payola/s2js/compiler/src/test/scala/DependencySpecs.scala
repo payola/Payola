@@ -6,7 +6,7 @@ class DependencySpecs extends CompilerFixtureSpec
     describe("Requires") {
         it("avoid requiring deep packages") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package a.b.c {
                             object d {
@@ -14,11 +14,10 @@ class DependencySpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('a.b.c.d');
 
-                        if (typeof(a.b.c.d) === 'undefined') { a.b.c.d = {}; }
                         a.b.c.d.m1 = function() {
                             var self = this;
                         };
@@ -29,7 +28,7 @@ class DependencySpecs extends CompilerFixtureSpec
 
         it("add require for used classes") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package foo {
                             import java.util.ArrayList
@@ -44,7 +43,7 @@ class DependencySpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('foo.a');
 
@@ -52,7 +51,6 @@ class DependencySpecs extends CompilerFixtureSpec
                         goog.require('java.util.Date');
                         goog.require('java.util.Random');
 
-                        if (typeof(foo.a) === 'undefined') { foo.a = {}; }
                         foo.a.x = new java.util.Date();
 
                         foo.a.m1 = function() {var self = this;
@@ -66,7 +64,7 @@ class DependencySpecs extends CompilerFixtureSpec
 
         it("ignore implicit browser imports") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         import s2js.adapters.js.browser._
 
@@ -77,11 +75,10 @@ class DependencySpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('o1');
 
-                        if (typeof(o1) === 'undefined') { o1 = {}; }
                         o1.f1 = 'aaaa';
                         o1.m1 = function() {
                             var self = this;
@@ -94,7 +91,7 @@ class DependencySpecs extends CompilerFixtureSpec
 
         it("ignore explicit browser imports") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         import s2js.adapters.js.browser._
 
@@ -102,11 +99,10 @@ class DependencySpecs extends CompilerFixtureSpec
                             val f1 = window.location
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('o1');
 
-                        if (typeof(o1) === 'undefined') { o1 = {}; }
                         o1.f1 = window.location;
                         o1.metaClass_ = new s2js.MetaClass('o1', []);
                     """
@@ -115,7 +111,7 @@ class DependencySpecs extends CompilerFixtureSpec
 
         it("add require for used object members") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         import s2js.adapters.goog.events.EventType._
 
@@ -124,13 +120,12 @@ class DependencySpecs extends CompilerFixtureSpec
                         }
 
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('a');
 
                         goog.require('goog.events.EventType');
 
-                        if (typeof(a) === 'undefined') { a = {}; }
                         a.x = goog.events.EventType.CLICK;
                         a.metaClass_ = new s2js.MetaClass('a', []);
                     """

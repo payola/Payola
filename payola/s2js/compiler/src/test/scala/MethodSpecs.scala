@@ -2,9 +2,9 @@ package s2js.compiler
 
 class MethodSpecs extends CompilerFixtureSpec {
     describe("Method calls") {
-        it("default arguments are supported") {
+        it("default parameters are supported") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         object o1 {
                             def m1(v1:String, v2:String = "") {}
@@ -16,11 +16,10 @@ class MethodSpecs extends CompilerFixtureSpec {
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('o1');
 
-                        if (typeof(o1) === 'undefined') { o1 = {}; }
                         o1.m1 = function(v1, v2) {
                             var self = this;
                             if (typeof(v2) === 'undefined') { v2 = ''; }
@@ -40,9 +39,43 @@ class MethodSpecs extends CompilerFixtureSpec {
                 }
         }
 
+        it("default parameters can reference fields") {
+            configMap =>
+                scalaCode {
+                    """
+                        object o1 {
+                            val x = "o1"
+                        }
+
+                        object o2 {
+                            val x = "o2";
+
+                            def m(a: String = x, x: String = x, y: String = o1.x) {}
+                        }
+                    """
+                } shouldCompileTo {
+                    """
+                        goog.provide('o1');
+                        goog.provide('o2');
+
+                        o1.x = 'o1';
+                        o1.metaClass_ = new s2js.MetaClass('o1', []);
+
+                        o2.x = 'o2';
+                        o2.m = function(a, x, y) {
+                            var self = this;
+                            if (typeof(a) === 'undefined') { a = self.x; }
+                            if (typeof(x) === 'undefined') { x = self.x; }
+                            if (typeof(y) === 'undefined') { y = o1.x; }
+                        };
+                        o2.metaClass_ = new s2js.MetaClass('o2', []);
+                    """
+                }
+        }
+
         it("can have a return value") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         object a {
                             def m1() = {
@@ -60,11 +93,10 @@ class MethodSpecs extends CompilerFixtureSpec {
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('a');
 
-                        if (typeof(a) === 'undefined') { a = {}; }
                         a.m1 = function() {
                             var self = this;
                             var x = 'foo';
@@ -89,7 +121,7 @@ class MethodSpecs extends CompilerFixtureSpec {
 
         it("generic methods can be called") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         object a {
                             def m1[T](t: T) {}
@@ -98,11 +130,10 @@ class MethodSpecs extends CompilerFixtureSpec {
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('a');
 
-                        if (typeof(a) === 'undefined') { a = {}; }
                         a.m1 = function(t) {
                             var self = this;
                         };
@@ -117,7 +148,7 @@ class MethodSpecs extends CompilerFixtureSpec {
 
         it("methods from same package should be fully qualified") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package s2js.adapters.goog.events
 
@@ -125,12 +156,11 @@ class MethodSpecs extends CompilerFixtureSpec {
                             val x = Event.preventDefault(null)
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('goog.events.a');
                         goog.require('goog.events.Event');
 
-                        if (typeof(goog.events.a) === 'undefined') { goog.events.a = {}; }
                         goog.events.a.x = goog.events.Event.preventDefault(null);
                         goog.events.a.metaClass_ = new s2js.MetaClass('goog.events.a', []);
                     """
@@ -139,7 +169,7 @@ class MethodSpecs extends CompilerFixtureSpec {
 
          it("can call a method of returned object") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         class A {
                             def go(x:String) = "foo" + x
@@ -152,7 +182,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('A');
                         goog.provide('b');
@@ -166,7 +196,6 @@ class MethodSpecs extends CompilerFixtureSpec {
                         };
                         A.prototype.metaClass_ = new s2js.MetaClass('A', []);
 
-                        if (typeof(b) === 'undefined') { b = {}; }
                         b.m1 = function() {
                             var self = this;
                             return new A();
@@ -182,7 +211,7 @@ class MethodSpecs extends CompilerFixtureSpec {
 
         it("can have multiple parameter lists") {
             configMap =>
-                expect {
+                scalaCode {
                 """
                     import s2js.adapters.js.browser._
 
@@ -197,11 +226,10 @@ class MethodSpecs extends CompilerFixtureSpec {
                         }
                     }
                 """
-                } toBe {
+                } shouldCompileTo {
                 """
                     goog.provide('o1');
 
-                    if (typeof(o1) === 'undefined') { o1 = {}; }
                     o1.m1 = function(name, fn) {
                         var self = this;
                         fn(name);
@@ -218,7 +246,7 @@ class MethodSpecs extends CompilerFixtureSpec {
 
         it("methods can have other methods as parameters") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         import s2js.adapters.js.browser._
 
@@ -245,7 +273,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('C1');
                         goog.provide('C2');
@@ -272,12 +300,11 @@ class MethodSpecs extends CompilerFixtureSpec {
                         };
                         C2.prototype.metaClass_ = new s2js.MetaClass('C2', []);
 
-                        if (typeof(o1) === 'undefined') { o1 = {}; }
                         o1.m1 = function() {
                             var self = this;
                             var c1 = new C1();
                             var c2 = new C2();
-                            c1.m1(function(s2js_v1) { c2.m1(s2js_v1); });
+                            c1.m1(function($v1) { c2.m1($v1); });
                         };
                         o1.metaClass_ = new s2js.MetaClass('o1', []);
                     """
@@ -286,7 +313,7 @@ class MethodSpecs extends CompilerFixtureSpec {
 
         it("can override base class methods") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package $pkg
 
@@ -299,7 +326,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                             override def m2(x:String) { super.m2("foo") }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('$pkg.a');
                         goog.provide('$pkg.b');
@@ -335,7 +362,7 @@ class MethodSpecs extends CompilerFixtureSpec {
 
         it("variadic methods are supported") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         import s2js.adapters.js.browser._
 
@@ -363,12 +390,11 @@ class MethodSpecs extends CompilerFixtureSpec {
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('o');
                         goog.require('scala.Array');
 
-                        if (typeof(o) === 'undefined') { o = {}; }
                         o.m1 = function() {
                             var self = this;
                             var x = scala.Array.fromNative([].splice.call(arguments, 0, arguments.length - 0));

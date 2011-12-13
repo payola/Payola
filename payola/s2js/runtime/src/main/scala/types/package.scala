@@ -1,28 +1,27 @@
 package s2js.runtime.types
 
-import s2js.compiler.Native
+import s2js.compiler.NativeJs
 import s2js.adapters.goog
 
 object `package` {
     private def isInstanceOf(anObject: Any, className: String): Boolean = {
-        val jsType = goog.typeOf(anObject)
         val classNameIsAny = className == "Any"
         val classNameIsAnyOrVal = classNameIsAny || className == "AnyVal"
         val classNameIsAnyOrRef = classNameIsAny || className == "AnyRef"
-        jsType match {
+        goog.typeOf(anObject) match {
             case "undefined" | "null" => false
             case "number" => {
                 className match {
-                    case "Byte" | "Short" | "Integer" | "Long" => isInteger(anObject)
-                    case "Float" | "Double" => true
+                    case "scala.Byte" | "scala.Short" | "scala.Int" | "scala.Long" => isInteger(anObject)
+                    case "scala.Float" | "scala.Double" => true
                     case _ => classNameIsAnyOrVal
                 }
             }
-            case "boolean" => classNameIsAnyOrVal || className == "Boolean"
+            case "boolean" => classNameIsAnyOrVal || className == "scala.Boolean"
             case "string" => {
                 className match {
-                    case "Char" => isChar(anObject)
-                    case "String" => true
+                    case "scala.Char" => isChar(anObject)
+                    case "java.lang.String" => true
                     case _ => classNameIsAnyOrRef
                 }
             }
@@ -42,16 +41,16 @@ object `package` {
         }
     }
 
-    @Native("return anObject % 1 === 0;")
+    @NativeJs("return anObject % 1 === 0;")
     private def isInteger(anObject: Any): Boolean = false
 
-    @Native("return anObject.length === 1;")
+    @NativeJs("return anObject.length === 1;")
     private def isChar(anObject: Any): Boolean = false
 
-    @Native("return anObject.metaClass_;")
+    @NativeJs("return anObject.metaClass_;")
     def getObjectMetaClass(anObject: Any): MetaClass = null
 
-    @Native("""
+    @NativeJs("""
         for (var i in rootMetaClass.parentClasses) {
             if (predicate(self.getMetaClass(rootMetaClass.parentClasses[i].prototype)) {
                 return true;

@@ -6,7 +6,7 @@ class LiteralSpecs extends CompilerFixtureSpec
     describe("Literals") {
         it("null supported") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package p
                         object `package`  {
@@ -15,11 +15,10 @@ class LiteralSpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('p');
 
-                        if (typeof(p) === 'undefined') { p = {}; }
                         p.a = function() {
                             var self = this;
                             null;
@@ -31,7 +30,7 @@ class LiteralSpecs extends CompilerFixtureSpec
 
         it("booleans supported") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package p
                         object `package` {
@@ -41,11 +40,10 @@ class LiteralSpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('p');
 
-                        if (typeof(p) === 'undefined') { p = {}; }
                         p.a = function() {
                             var self = this;
                             true;
@@ -58,7 +56,7 @@ class LiteralSpecs extends CompilerFixtureSpec
 
         it("numbers supported") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package p
                         object `package` {
@@ -71,11 +69,10 @@ class LiteralSpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('p');
 
-                        if (typeof(p) === 'undefined') { p = {}; }
                         p.a = function() {
                             var self = this;
                             1234;
@@ -91,7 +88,7 @@ class LiteralSpecs extends CompilerFixtureSpec
 
         it("chars supported") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package p
                         object `package` {
@@ -100,11 +97,10 @@ class LiteralSpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('p');
 
-                        if (typeof(p) === 'undefined') { p = {}; }
                         p.a = function() {
                             var self = this;
                             'x';
@@ -116,7 +112,7 @@ class LiteralSpecs extends CompilerFixtureSpec
 
         it("strings supported") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package p
                         object `package` {
@@ -128,11 +124,10 @@ class LiteralSpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('p');
 
-                        if (typeof(p) === 'undefined') { p = {}; }
                         p.a = function() {
                             var self = this;
                             'asdfghjkl';

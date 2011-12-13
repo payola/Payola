@@ -1,9 +1,9 @@
 package s2js.runtime.scala
 
-import s2js.compiler.Native
+import s2js.compiler.NativeJs
 
 object Array {
-    @Native("""
+    @NativeJs("""
         var a = new scala.Array(jsArray.length);
         a.internalArray = jsArray;
         return a;
@@ -22,15 +22,15 @@ object Array {
 }
 
 class Array(val length: Int) {
-    @Native("[]")
+    @NativeJs("[]")
     var internalArray = null
 
-    @Native("return self.internalArray[i];")
+    @NativeJs("return self.internalArray[i];")
     def apply(i: Int): Any = null
 
-    @Native("return self.internalArray.slice(0);")
+    @NativeJs("return self.internalArray.slice(0);")
     override def clone(): Array = null
 
-    @Native("self.internalArray[i] = x;")
+    @NativeJs("self.internalArray[i] = x;")
     def update(i: Int, x: Any): Unit = ()
 }

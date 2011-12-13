@@ -6,7 +6,7 @@ class VariableSpecs extends CompilerFixtureSpec
     describe("Variables") {
         it("can have literal values") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package foo
 
@@ -19,7 +19,7 @@ class VariableSpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('foo.A');
 
@@ -41,7 +41,7 @@ class VariableSpecs extends CompilerFixtureSpec
 
         it("can have instance values") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package foo {
                             class A {
@@ -53,7 +53,7 @@ class VariableSpecs extends CompilerFixtureSpec
                             class B
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('foo.A');
                         goog.provide('foo.B');
@@ -77,7 +77,7 @@ class VariableSpecs extends CompilerFixtureSpec
 
         it("can have parameter values") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package foo {
                             class A {
@@ -87,7 +87,7 @@ class VariableSpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('foo.A');
 
@@ -105,7 +105,7 @@ class VariableSpecs extends CompilerFixtureSpec
 
         it("can have function return values") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package foo {
                             class A {
@@ -116,7 +116,7 @@ class VariableSpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('foo.A');
 
@@ -138,7 +138,7 @@ class VariableSpecs extends CompilerFixtureSpec
 
         it("can have expression values") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package foo {
                             class A {
@@ -150,7 +150,7 @@ class VariableSpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('foo.A');
 
@@ -170,7 +170,7 @@ class VariableSpecs extends CompilerFixtureSpec
 
         it("can have function values") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package foo {
                             class A {
@@ -180,7 +180,7 @@ class VariableSpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('foo.A');
 

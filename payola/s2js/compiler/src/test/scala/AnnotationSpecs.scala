@@ -4,9 +4,9 @@ class AnnotationSpecs extends CompilerFixtureSpec {
     describe("Annotations") {
         it("native class implementation is supported") {
             configMap =>
-                expect {
+                scalaCode {
                     """
-                        @s2js.compiler.Native(""" + "\"\"\"" + """
+                        @s2js.compiler.NativeJs(""" + "\"\"\"" + """
                             A = function() {
                                 this.x = 'foo';
                                 window.alert('a created');
@@ -14,7 +14,7 @@ class AnnotationSpecs extends CompilerFixtureSpec {
                         """ + "\"\"\"" + """)
                         class A
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('A');
 
@@ -28,19 +28,17 @@ class AnnotationSpecs extends CompilerFixtureSpec {
 
         it("native method implementation is supported") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         class A {
                             val x = "foo"
                             val y = 123
 
-                            @s2js.compiler.Native(""" + "\"\"\"" + """
-                                console.log(self.x + self.y.toString + x);
-                            """ + "\"\"\"" + """)
+                            @s2js.compiler.NativeJs("console.log(self.x + self.y.toString + x);")
                             def m(x: String) {}
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('A');
 
@@ -60,14 +58,14 @@ class AnnotationSpecs extends CompilerFixtureSpec {
 
         it("native val value is supported") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         class A {
-                            @s2js.compiler.Native("[1, 2, 3]")
+                            @s2js.compiler.NativeJs("[1, 2, 3]")
                             val x = ""
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('A');
 

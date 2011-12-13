@@ -6,13 +6,13 @@ class PackageSpecs extends CompilerFixtureSpec
     describe("Packages") {
         it("can be used") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package pkg
 
                         class A
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('pkg.A');
 
@@ -26,7 +26,7 @@ class PackageSpecs extends CompilerFixtureSpec
 
         it("can be nested using multiple package statements") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package pkg
                         package sub
@@ -34,7 +34,7 @@ class PackageSpecs extends CompilerFixtureSpec
 
                         class A
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('pkg.sub.nested.A');
 
@@ -48,7 +48,7 @@ class PackageSpecs extends CompilerFixtureSpec
 
         it("can be nested using encapsulation") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package pkg {
                             package sub {
@@ -58,7 +58,7 @@ class PackageSpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('pkg.sub.nested.A');
 
@@ -72,13 +72,13 @@ class PackageSpecs extends CompilerFixtureSpec
 
         it("can be nested using package name with '.' separators") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package pkg.sub.nested {
                             class A
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('pkg.sub.nested.A');
 
@@ -92,7 +92,7 @@ class PackageSpecs extends CompilerFixtureSpec
 
         it("can be declared multiple times") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package pkg.sub1 {
                             class X
@@ -107,7 +107,7 @@ class PackageSpecs extends CompilerFixtureSpec
                             class Y
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('pkg.A');
                         goog.provide('pkg.B');
