@@ -6,7 +6,7 @@ class DependencySpecs extends CompilerFixtureSpec
     describe("Requires") {
         it("avoid requiring deep packages") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package a.b.c {
                             object d {
@@ -14,21 +14,21 @@ class DependencySpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('a.b.c.d');
 
-                        a.b.c.d = {};
                         a.b.c.d.m1 = function() {
                             var self = this;
                         };
+                        a.b.c.d.metaClass_ = new s2js.MetaClass('a.b.c.d', []);
                     """
                 }
         }
 
         it("add require for used classes") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package foo {
                             import java.util.ArrayList
@@ -43,7 +43,7 @@ class DependencySpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('foo.a');
 
@@ -51,39 +51,20 @@ class DependencySpecs extends CompilerFixtureSpec
                         goog.require('java.util.Date');
                         goog.require('java.util.Random');
 
-                        foo.a = {};
                         foo.a.x = new java.util.Date();
 
                         foo.a.m1 = function() {var self = this;
                             var y = new java.util.Random();
                             var z = new java.util.ArrayList();
                         };
-                    """
-                }
-        }
-
-        it("add require for a package object's owner") {
-            configMap =>
-                expect {
-                    """
-                        object a {
-                            val x = s2js.adapters.goog.dom.getElement("foo")
-                        }
-                    """
-                } toBe {
-                    """
-                        goog.provide('a');
-                        goog.require('goog.dom');
-
-                        a = {};
-                        a.x = goog.dom.getElement('foo');
+                        foo.a.metaClass_ = new s2js.MetaClass('foo.a', []);
                     """
                 }
         }
 
         it("ignore implicit browser imports") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         import s2js.adapters.js.browser._
 
@@ -94,23 +75,23 @@ class DependencySpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('o1');
 
-                        o1 = {};
                         o1.f1 = 'aaaa';
                         o1.m1 = function() {
                             var self = this;
                             window.alert(self.f1);
                         };
+                        o1.metaClass_ = new s2js.MetaClass('o1', []);
                     """
                 }
         }
 
         it("ignore explicit browser imports") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         import s2js.adapters.js.browser._
 
@@ -118,35 +99,35 @@ class DependencySpecs extends CompilerFixtureSpec
                             val f1 = window.location
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('o1');
 
-                        o1 = {};
                         o1.f1 = window.location;
+                        o1.metaClass_ = new s2js.MetaClass('o1', []);
                     """
                 }
         }
 
         it("add require for used object members") {
             configMap =>
-                expect {
+                scalaCode {
                     """
-                        import s2js.adapters.goog.dom.TagName._
+                        import s2js.adapters.goog.events.EventType._
 
                         object a {
-                            val x = SPAN
+                            val x = CLICK
                         }
 
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('a');
 
-                        goog.require('goog.dom.TagName');
+                        goog.require('goog.events.EventType');
 
-                        a = {};
-                        a.x = goog.dom.TagName.SPAN;
+                        a.x = goog.events.EventType.CLICK;
+                        a.metaClass_ = new s2js.MetaClass('a', []);
                     """
                 }
         }

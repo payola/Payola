@@ -6,7 +6,7 @@ class LiteralSpecs extends CompilerFixtureSpec
     describe("Literals") {
         it("null supported") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package p
                         object `package`  {
@@ -15,7 +15,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('p');
 
@@ -23,13 +23,14 @@ class LiteralSpecs extends CompilerFixtureSpec
                             var self = this;
                             null;
                         };
+                        p.metaClass_ = new s2js.MetaClass('p', []);
                     """
                 }
         }
 
         it("booleans supported") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package p
                         object `package` {
@@ -39,7 +40,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('p');
 
@@ -48,13 +49,14 @@ class LiteralSpecs extends CompilerFixtureSpec
                             true;
                             false;
                         };
+                        p.metaClass_ = new s2js.MetaClass('p', []);
                     """
                 }
         }
 
         it("numbers supported") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package p
                         object `package` {
@@ -67,7 +69,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('p');
 
@@ -79,13 +81,14 @@ class LiteralSpecs extends CompilerFixtureSpec
                             -5;
                             -424.45;
                         };
+                        p.metaClass_ = new s2js.MetaClass('p', []);
                     """
                 }
         }
 
         it("chars supported") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package p
                         object `package` {
@@ -94,7 +97,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('p');
 
@@ -102,13 +105,14 @@ class LiteralSpecs extends CompilerFixtureSpec
                             var self = this;
                             'x';
                         };
+                        p.metaClass_ = new s2js.MetaClass('p', []);
                     """
                 }
         }
 
         it("strings supported") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package p
                         object `package` {
@@ -120,7 +124,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('p');
 
@@ -131,6 +135,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                             '\\';
                             '\\\'';
                         };
+                        p.metaClass_ = new s2js.MetaClass('p', []);
                     """
                 }
         }

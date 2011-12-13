@@ -45,7 +45,7 @@ class ScalaToJsPlugin(val global: Global) extends Plugin {
 
                 // Compile the ast into js and write the result to the output file.
                 val writer = new BufferedWriter(new FileWriter(outputFile))
-                writer.write(compile(unit.body.asInstanceOf[PackageDef]))
+                writer.write(compile(unit.source.file, unit.body.asInstanceOf[PackageDef]))
                 writer.close()
             }
         }

@@ -1,12 +1,10 @@
 package s2js.compiler
 
-
-class ControlFlowSpecs extends CompilerFixtureSpec
-{
+class ControlFlowSpecs extends CompilerFixtureSpec {
     describe("Loop statements") {
         it("while is supported") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         import s2js.adapters.js.browser._
 
@@ -20,11 +18,10 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('a');
 
-                        a = {};
                         a.m1 = function() {
                             var self = this;
                             var x = 0;
@@ -33,13 +30,14 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 window.alert(x);
                             };
                         };
+                        a.metaClass_ = new s2js.MetaClass('a', []);
                     """
                 }
         }
 
         it("for is supported") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         import s2js.adapters.js.browser._
 
@@ -51,15 +49,15 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('a');
 
-                        a = {};
                         a.m1 = function() {
                             var self = this;
                             scala.Predef.intWrapper(0).to(2).foreach(function(x) { window.alert(('foo' + x)); });
                         };
+                        a.metaClass_ = new s2js.MetaClass('a', []);
                     """
                 }
         }
@@ -68,7 +66,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
     describe("If statements") {
         it("can contain assignments") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         object o1 {
                             def m1() {
@@ -81,11 +79,10 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('o1');
 
-                        o1 = {};
                         o1.m1 = function() {
                             var self = this;
                             var x = '';
@@ -97,13 +94,14 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 }
                             })();
                         };
+                       o1.metaClass_ = new s2js.MetaClass('o1', []);
                     """
                 }
         }
 
         it("can return values") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         import s2js.adapters.js.browser._
 
@@ -120,11 +118,10 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('o1');
 
-                        o1 = {};
                         o1.m1 = function() {
                             var self = this;
                             return 'fooy';
@@ -141,13 +138,14 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 }
                             })();
                         };
+                        o1.metaClass_ = new s2js.MetaClass('o1', []);
                     """
                 }
         }
 
         it("can have else if statements") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         object o1 {
                             def m(x: String): String = {
@@ -163,11 +161,10 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('o1');
 
-                        o1 = {};
                         o1.m = function(x) {
                             var self = this;
                             return (function() {
@@ -190,6 +187,306 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 }
                             })();
                         };
+                        o1.metaClass_ = new s2js.MetaClass('o1', []);
+                    """
+                }
+        }
+    }
+
+    describe("Exceptions") {
+        it("can be thrown") {
+            configMap =>
+                scalaCode {
+                    """
+                        class A {
+                            def m() {
+                                throw new Exception("something bad happened")
+                            }
+                        }
+                    """
+                } shouldCompileTo {
+                    """
+                        goog.provide('A');
+                        goog.require('scala.Exception');
+
+                        A = function() {
+                            var self = this;
+                        };
+                        A.prototype.m = function() {
+                            var self = this;
+                            (function() {throw new scala.Exception('something bad happened');})();
+                        };
+                        A.prototype.metaClass_ = new s2js.MetaClass('A', []);
+                    """
+                }
+        }
+    }
+
+    describe("Match statements") {
+        it("are supported") {
+            configMap =>
+                scalaCode {
+                    """
+                        object o {
+                            def m() {
+                                "abc" match {
+                                    case "a" => 1
+                                    case "b" => 2
+                                    case _ => 3
+                                }
+                            }
+                        }
+                    """
+                } shouldCompileTo {
+                    """
+                        goog.provide('o');
+
+                        o.m = function() {
+                            var self = this;
+                            (function($selector_1) {
+                                if ($selector_1 === 'a') {
+                                    1;
+                                    return;
+                                }
+                                if ($selector_1 === 'b') {
+                                    2;
+                                    return;
+                                }
+                                if (true) {
+                                    3;
+                                    return;
+                                }
+                            })('abc');
+                        };
+                        o.metaClass_ = new s2js.MetaClass('o', []);
+                    """
+                }
+        }
+
+        it("can return value") {
+            configMap =>
+                scalaCode {
+                    """
+                        object o {
+                            def m(): Int = {
+                                "abc" match {
+                                    case "a" => 123
+                                    case _ => 0
+                                }
+                            }
+                        }
+                    """
+                } shouldCompileTo {
+                    """
+                        goog.provide('o');
+
+                        o.m = function() {
+                            var self = this;
+                            return (function($selector_1) {
+                                if ($selector_1 === 'a') {
+                                    return 123;
+                                }
+                                if (true) {
+                                    return 0;
+                                }
+                            })('abc');
+                        };
+                        o.metaClass_ = new s2js.MetaClass('o', []);
+                    """
+                }
+        }
+
+        it("can have alternative patterns") {
+            configMap =>
+                scalaCode {
+                    """
+                        object o {
+                            def m(): Int = {
+                                "abc" match {
+                                    case "a" | "b" | "c" => 123
+                                    case _ => 0
+                                }
+                            }
+                        }
+                    """
+                } shouldCompileTo {
+                    """
+                        goog.provide('o');
+
+                        o.m = function() {
+                            var self = this;
+                            return (function($selector_1) {
+                                if (($selector_1 === 'a') || ($selector_1 === 'b') || ($selector_1 === 'c')) {
+                                    return 123;
+                                }
+                                if (true) {
+                                    return 0;
+                                }
+                            })('abc');
+                        };
+                        o.metaClass_ = new s2js.MetaClass('o', []);
+                    """
+                }
+        }
+
+        it("can have guards") {
+            configMap =>
+                scalaCode {
+                    """
+                        object o {
+                            def m(): Int = {
+                                val x = false
+                                "abc" match {
+                                    case "a" if x == true => 123
+                                    case _ => 0
+                                }
+                            }
+                        }
+                    """
+                } shouldCompileTo {
+                    """
+                        goog.provide('o');
+
+                        o.m = function() {
+                            var self = this;
+                            var x = false;
+                            return (function($selector_1) {
+                                if ($selector_1 === 'a') {
+                                    if ((x == true)) {
+                                        return 123;
+                                    }
+                                }
+                                if (true) {
+                                    return 0;
+                                }
+                            })('abc');
+                        };
+                        o.metaClass_ = new s2js.MetaClass('o', []);
+                    """
+                }
+        }
+
+        it("typed patterns are supported") {
+            configMap =>
+                scalaCode {
+                    """
+                        object o {
+                            def m(p: Any): Int = {
+                                p match {
+                                    case _: String => 123
+                                    case _: Int => 456
+                                    case _ => 0
+                                }
+                            }
+                        }
+                    """
+                } shouldCompileTo {
+                    """
+                        goog.provide('o');
+
+                        o.m = function(p) {
+                            var self = this;
+                            return (function($selector_1) {
+                                if (types.isInstanceOf($selector_1, 'java.lang.String')) {
+                                    return 123;
+                                }
+                                if (types.isInstanceOf($selector_1, 'scala.Int')) {
+                                    return 456;
+                                }
+                                if (true) {
+                                    return 0;
+                                }
+                            })(p);
+                        };
+                        o.metaClass_ = new s2js.MetaClass('o', []);
+                    """
+                }
+        }
+
+        it("basic binding is supported") {
+            configMap =>
+                scalaCode {
+                    """
+                        object o {
+                            def m(p: Any): Int = {
+                                p match {
+                                    case x: String => 123
+                                    case y @ (_: Int) => 456
+                                    case _ => 0
+                                }
+                            }
+                        }
+                    """
+                } shouldCompileTo {
+                    """
+                        goog.provide('o');
+
+                        o.m = function(p) {
+                            var self = this;
+                            return (function($selector_1) {
+                                if (types.isInstanceOf($selector_1, 'java.lang.String')) {
+                                    var x = $selector_1;
+                                    return 123;
+                                }
+                                if (types.isInstanceOf($selector_1, 'scala.Int')) {
+                                    var y = $selector_1;
+                                    return 456;
+                                }
+                                if (true) {
+                                    return 0;
+                                }
+                            })(p);
+                        };
+                        o.metaClass_ = new s2js.MetaClass('o', []);
+                    """
+                }
+        }
+
+        it("case class binding is supported") {
+            configMap =>
+                scalaCode {
+                    """
+                        object o {
+                            def m(p: Any): Int = {
+                                p match {
+                                    case (_, _, (_, (bound1: Int, bound2@ _))) => 123
+                                    case Some((_, Some((_, _, q, _, _)))) => 456
+                                    case _ => 0
+                                }
+                            }
+                        }
+                    """
+                } shouldCompileTo {
+                    """
+                        goog.provide('o');
+
+                        o.m = function(p) {
+                            var self = this;
+                            return (function($selector_1) {
+                                if (types.isInstanceOf($selector_1, 'scala.Tuple3') && (true) && (true) && (
+                                    types.isInstanceOf($selector_1.productElement(2), 'scala.Tuple2') && (true) && (
+                                    types.isInstanceOf($selector_1.productElement(2).productElement(1), 'scala.Tuple2') && (
+                                    types.isInstanceOf($selector_1.productElement(2).productElement(1).productElement(0), 'scala.Int')) && (true)))
+                                ) {
+                                    var bound1 = $selector_1.productElement(2).productElement(1).productElement(0);
+                                    var bound2 = $selector_1.productElement(2).productElement(1).productElement(1);
+                                    return 123;
+                                }
+                                if (types.isInstanceOf($selector_1, 'scala.Some') && (
+                                   types.isInstanceOf($selector_1.productElement(0), 'scala.Tuple2') && (true) && (
+                                   types.isInstanceOf($selector_1.productElement(0).productElement(1), 'scala.Some') && (
+                                   types.isInstanceOf($selector_1.productElement(0).productElement(1).productElement(0), 'scala.Tuple5') && (
+                                   true) && (true) && (true) && (true) && (true))))
+                                ) {
+                                    var q = $selector_1.productElement(0).productElement(1).productElement(0).productElement(2);
+                                    return 456;
+                                }
+                                if (true) {
+                                    return 0;
+                                }
+                            })(p);
+                        };
+                        o.metaClass_ = new s2js.MetaClass('o', []);
                     """
                 }
         }

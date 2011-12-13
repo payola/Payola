@@ -6,7 +6,7 @@ class FunctionSpecs extends CompilerFixtureSpec
     describe("Functions") {
         it("can be higher-orderd") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         import s2js.adapters.js.browser._
 
@@ -30,7 +30,7 @@ class FunctionSpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('F');
                         goog.provide('o');
@@ -43,8 +43,8 @@ class FunctionSpecs extends CompilerFixtureSpec
                             var self = this;
                             return (self.v1 + x.toUpperCase());
                         };
+                        F.prototype.metaClass_ = new s2js.MetaClass('F', []);
 
-                        o = {};
                         o.f2 = function(f) {
                             var self = this;
                              window.alert(f('m1'));
@@ -56,17 +56,18 @@ class FunctionSpecs extends CompilerFixtureSpec
                         o.start = function() {
                             var self = this;
                             var x = new F();
-                            self.f2(function(x_s2js) { return x.f1(x_s2js); });
-                            self.f2(function(x_s2js) { return self.f3(x_s2js); });
+                            self.f2(function($x) { return x.f1($x); });
+                            self.f2(function($x) { return self.f3($x); });
                             self.f2(function(x) { return ('no' + x); });
                         };
+                        o.metaClass_ = new s2js.MetaClass('o', []);
                     """
                 }
         }
 
         it("anonymous functions can be assigned to variables") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         import s2js.adapters.js.browser._
 
@@ -74,12 +75,12 @@ class FunctionSpecs extends CompilerFixtureSpec
                             val x = (y: String) => { window.alert(y) }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('a');
 
-                        a = {};
                         a.x = function(y) { window.alert(y); };
+                        a.metaClass_ = new s2js.MetaClass('a', []);
                     """
                 }
         }
