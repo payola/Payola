@@ -1,23 +1,27 @@
 package s2js.compiler
 
-import scala.reflect.generic.Flags._
 import tools.nsc.Global
-import collection.mutable.{HashMap, HashSet, ListBuffer}
+import collection.mutable
+import tools.nsc.io.AbstractFile
 
 trait PackageCompiler {
     val global: Global
 
     import global._
 
-    private val buffer = new ListBuffer[String]
+    private var sourceFile: AbstractFile = null
 
-    private val classDefMap = new HashMap[String, ClassDefCompiler]
+    private val buffer = new mutable.ListBuffer[String]
 
-    private val classDefDependencyGraph = new HashMap[String, HashSet[String]]
+    private val classDefMap = new mutable.HashMap[String, ClassDefCompiler]
 
-    private val requireHashSet = new HashSet[String]
+    private val classDefDependencyGraph = new mutable.HashMap[String, mutable.HashSet[String]]
 
-    private val provideHashSet = new HashSet[String]
+    private val requireHashSet = new mutable.HashSet[String]
+
+    private val provideHashSet = new mutable.HashSet[String]
+
+    private var uniqueId = 0
 
     private val internalTypes = Array(
         """^java\.lang$""",
@@ -31,8 +35,8 @@ trait PackageCompiler {
         """^scala\.Function[0-9]+$""", // TODO maybe shoudn't be internal.
         """^scala\.Int$""",
         """^scala\.Predef$""",
-        """^scala\.Product$""",
         """^scala\.ScalaObject$""",
+        """^scala\.Serializable""", // TODO maybe shoudn't be internal.
         """^scala\.Tuple[0-9]+$""", // TODO maybe shoudn't be internal.
         """^scala\.package$""",
         """^scala\.reflect\.Manifest$""",
@@ -41,13 +45,37 @@ trait PackageCompiler {
         """^scala\.xml"""
     )
 
-    private val jsInternalPackages = Array(
+    private val internalMembers = Array(
+        "hashCode",
+        "toString",
+        "equals",
+        "canEqual",
+        "readResolve"
+    )
+
+    private val jsAdapterPackages = Array(
         "s2js.adapters",
         "s2js.adapters.js.browser",
-        "s2js.adapters.js.dom"
+        "s2js.adapters.js.dom",
+        "s2js.runtime"
+    )
+
+    private val jsKeywords = Array(
+        "abstract", "boolean", "break", "byte", "case", "catch", "char", "class", "const", "continue", "debugger",
+        "default", "delete", "do", "double", "else", "enum", "export", "extends", "false", "final", "finally", "float",
+        "for", "function", "goto", "if", "implements", "import", "in", "instanceof", "int", "interface", "long",
+        "native", "new", "null", "package", "private", "protected", "public", "return", "short", "static", "super",
+        "switch", "synchronized", "this", "throw", "throws", "transient", "true", "try", "typeof", "var", "void",
+        "volatile", "while", "with"
+    )
+
+    private val jsDefaultMembers = Array(
+        "constructor", "hasOwnProperty", "isPrototypeOf", "propertyIsEnumerable", "apply", "arguments", "call",
+        "prototype", "superClass_", "metaClass_"
     )
 
     private val operatorTokenMap = Map(
+        "eq" -> "===",
         "$eq$eq" -> "==",
         "$bang$eq" -> "!=",
         "$greater" -> ">",
@@ -63,6 +91,11 @@ trait PackageCompiler {
         "$bar$bar" -> "||",
         "unary_$bang" -> "!"
     )
+
+    private def getUniqueId(): Int = {
+        uniqueId += 1
+        uniqueId
+    }
 
     private def isInternalType(symbol: Symbol): Boolean = {
         internalTypes.exists(symbol.fullName.matches(_))
@@ -80,11 +113,11 @@ trait PackageCompiler {
         "'" + value.replace("\\", "\\\\").replace("'", "\\'") + "'"
     }
 
-    private def getJsName(symbol: Symbol): String = {
+    private def getFullJsName(symbol: Symbol): String = {
         var name = symbol.fullName;
 
         // Drop the internal namespace name.
-        val jsInternalNamespace = jsInternalPackages.find(name.startsWith(_))
+        val jsInternalNamespace = jsAdapterPackages.find(name.startsWith(_))
         if (jsInternalNamespace.isDefined) {
             name = name.stripPrefix(jsInternalNamespace.get + ".")
         }
@@ -93,7 +126,37 @@ trait PackageCompiler {
         name.replace(".package", "")
     }
 
-    def compile(packageAst: PackageDef): String = {
+    private def getJsName(symbol: Symbol): String = {
+        if (symbol.isLocal) getLocalJsName(symbol) else getFullJsName(symbol)
+    }
+
+    private def getLocalJsName(symbol: Symbol): String = {
+        getLocalJsName(symbol.nameString, !symbol.isMethod && symbol.isSynthetic)
+    }
+
+    private def isFromSourceFile(symbol: Symbol): Boolean = {
+        symbol.sourceFile != null && symbol.sourceFile.name == sourceFile.name
+    }
+
+    private def getLocalJsName(name: String, forcePrefix: Boolean = false): String = {
+        // Synthetic symbols get a prefix to avoid name collision with other symbols. Also if the symbol name is a js
+        // keyword then it gets the prefix.
+        if (forcePrefix || jsKeywords.contains(name) || jsDefaultMembers.contains(name)) {
+            "$" + name
+        } else {
+            name
+        }
+    }
+
+    def compile(compiledSourceFile: AbstractFile, packageAst: PackageDef): String = {
+        sourceFile = compiledSourceFile
+        buffer.clear()
+        classDefMap.clear()
+        classDefDependencyGraph.clear()
+        requireHashSet.clear()
+        provideHashSet.clear()
+        uniqueId = 0;
+
         retrievePackageStructure(packageAst)
         compileClassDefs()
         compileDependencies()
@@ -120,10 +183,8 @@ trait PackageCompiler {
 
     private def retrieveClassStructure(classDef: ClassDef) {
         val symbol = classDef.symbol
-        val name = symbol.fullName
 
-        // TODO maybe support of synthetic symbols will be needed
-        if (!symbol.isSynthetic) {
+        if (isFromSourceFile(symbol)) {
             val classDefCompiler: ClassDefCompiler =
                 if (classDef.symbol.isPackageObjectClass) {
                     new PackageObjectClassCompiler(classDef)
@@ -132,7 +193,8 @@ trait PackageCompiler {
                 } else {
                     new ClassCompiler(classDef)
                 }
-            val dependencies = new HashSet[String]
+            val name = getClassDefStructureName(classDef.symbol)
+            val dependencies = new mutable.HashSet[String]
 
             classDefMap += name -> classDefCompiler
             classDefDependencyGraph += name -> dependencies
@@ -147,8 +209,8 @@ trait PackageCompiler {
                 parentClassAst =>
                     val parentClassSymbol = parentClassAst.symbol
                     if (!isInternalType(parentClassSymbol)) {
-                        if (symbol.sourceFile.name == parentClassSymbol.sourceFile.name) {
-                            dependencies += parentClassSymbol.fullName
+                        if (isFromSourceFile(parentClassSymbol)) {
+                            dependencies += getClassDefStructureName(parentClassSymbol)
                         } else {
                             addRequiredSymbol(parentClassAst.symbol)
                         }
@@ -160,22 +222,26 @@ trait PackageCompiler {
         }
     }
 
+    private def getClassDefStructureName(classDefSymbol: Symbol): String = {
+        (if (classDefSymbol.isModuleClass) "object" else "class") + " " + classDefSymbol.fullName
+    }
+
     private def compileClassDefs() {
-        while (!classDefDependencyGraph.isEmpty && !classDefDependencyGraphContainsCycle) {
-            val className = classDefDependencyGraph.toArray.filter(_._2.isEmpty).map(_._1).sortBy(name => name).head
+        while (classDefDependencyGraph.nonEmpty && !classDefDependencyGraphContainsCycle) {
+            val classDefStructName = classDefDependencyGraph.toArray.filter(_._2.isEmpty).map(_._1).sortBy(n => n).head
 
             // Compile the class.
-            classDefMap.get(className).get.compile()
+            classDefMap.get(classDefStructName).get.compile()
 
             // Remove the compiled class from dependencies of all classDefs, that aren't compiled yet. Also remove the
             // compiled class from the working sets.
-            classDefDependencyGraph.foreach(_._2 -= className)
-            classDefDependencyGraph.remove(className)
-            classDefMap.remove(className)
+            classDefDependencyGraph.foreach(_._2 -= classDefStructName)
+            classDefDependencyGraph.remove(classDefStructName)
+            classDefMap.remove(classDefStructName)
         }
 
         // If there are some classDefs left, then there is a cyclic dependency.
-        if (!classDefDependencyGraph.isEmpty) {
+        if (classDefDependencyGraph.nonEmpty) {
             error("Illegal cyclic dependency in the class/object declaration graph.")
         }
     }
@@ -190,50 +256,72 @@ trait PackageCompiler {
         }
     }
 
+    private def bufferAppendNativeCodeOr(symbol: Symbol, otherwise: () => Unit) = {
+        val nativeAnnotationInfo = symbol.annotations.find(_.atp.toString == "s2js.compiler.NativeJs")
+        if (nativeAnnotationInfo.isDefined) {
+            nativeAnnotationInfo.get.args.head match {
+                case Literal(Constant(value: String)) => buffer += value
+                case _ => otherwise()
+            }
+        } else {
+            otherwise()
+        }
+    }
+
     private abstract class ClassDefCompiler(val classDef: ClassDef) {
-        val nameSymbol = classDef.symbol
+        protected val fullNameSymbol = classDef.symbol
 
-        lazy val name = getJsName(nameSymbol)
+        protected lazy val fullName = getFullJsName(fullNameSymbol)
 
-        lazy val memberContainerName = name;
+        protected lazy val memberContainerName = fullName;
 
-        val parentClasses = classDef.impl.parents
+        protected val parentClasses = classDef.impl.parents
 
-        val parentClass = parentClasses.head
+        protected val parentClass = parentClasses.head
 
-        val parentClassIsInternal = isInternalType(parentClass.symbol)
+        protected val parentClassIsInternal = isInternalType(parentClass.symbol)
 
-        val inheritedTraits = parentClasses.tail
+        protected val inheritedTraits = parentClasses.tail
 
         def compile() {
-            compileConstructor()
+            addProvidedSymbol(fullNameSymbol)
 
-            addProvidedSymbol(nameSymbol)
+            bufferAppendNativeCodeOr(classDef.symbol, () => internalCompile())
         }
 
-        def compileConstructor()
+        protected def internalCompile() {
+            compileConstructor()
+            compileMembers()
+            compileMetaClass()
+        }
 
-        def compileInheritedTraits(extendedObject: String) {
-            inheritedTraits.filter(traitAst => !isInternalType(traitAst.symbol)).foreach {
+        protected def compileConstructor()
+
+        protected def compileInheritedTraits(extendedObject: String) {
+            // Traits should be compiled in reverse order as mentioned in the specification of stackable modifications.
+            inheritedTraits.filter(traitAst => !isInternalType(traitAst.symbol)).reverse.foreach {
                 traitAst =>
-                    buffer += "goog.object.extend(%s, new %s());\n".format(extendedObject, getJsName(traitAst.symbol))
+                    buffer += "goog.object.extend(%s, new %s());\n".format(
+                        extendedObject,
+                        getFullJsName(traitAst.symbol)
+                    )
             }
         }
 
-        def compileMembers() {
+        protected def compileMembers() {
             compileValDefMembers()
             compileDefDefMembers()
         }
 
-        def compileValDefMembers() {
+        protected def compileValDefMembers() {
             classDef.impl.body.filter(_.isInstanceOf[ValDef]).foreach(compileMember(_))
         }
 
-        def compileDefDefMembers() {
+        protected def compileDefDefMembers() {
             classDef.impl.body.filter(_.isInstanceOf[DefDef]).foreach(compileMember(_))
         }
 
-        def compileMember(memberAst: Tree, containerName: String = memberContainerName) {
+        protected def compileMember(memberAst: Tree, containerName: String = memberContainerName) {
             if (memberAst.hasSymbolWhich(!isIgnoredMember(_))) {
                 memberAst match {
                     case valDef: ValDef => {
@@ -244,77 +332,114 @@ trait PackageCompiler {
                     }
                     case _: ClassDef => // NOOP, wrapped classes are compiled separately
                     case _ => {
-                        buffer += "/* [s2js-warning] Unknown member %s of type %s */".format(
-                            memberAst.toString,
-                            memberAst.getClass
-                        )
+                        error("Unknown member %s of type %s".format(memberAst.toString, memberAst.getClass))
                     }
                 }
             }
         }
 
-        def isIgnoredMember(member: Symbol): Boolean = {
-            isInternalTypeMember(member) || // A member inherited from an internal Type
+        protected def isIgnoredMember(member: Symbol): Boolean = {
+            internalMembers.contains(member.nameString) || // An internal member
+                isInternalTypeMember(member) || // A member inherited from an internal Type
                 member.owner != classDef.symbol || // A member that isn't directly owned by the class
-                member.isSynthetic || // An artificial member that was created by the compiler
+                member.isDeferred || // An abstract member without implementation
                 member.isConstructor || // TODO support multiple constructors
                 member.isParameter || // A parameter of a member method
-                member.hasFlag(ACCESSOR) // A generated accessor method
+                member.hasAccessorFlag || // A generated accesor method
+                member.nameString.matches("""^.*\$default\$[0-9]+$""") // A member generated for default parameter value
         }
 
-        def compileValDef(valDef: ValDef, containerName: String = memberContainerName) {
-            buffer += "%s.%s = ".format(containerName, valDef.symbol.nameString)
-            compileAstStatement(valDef.rhs)
+        protected def compileValDef(valDef: ValDef, containerName: String = memberContainerName) {
+            buffer += "%s.%s = ".format(containerName, getLocalJsName(valDef.symbol))
+            bufferAppendNativeCodeOr(valDef.symbol, () => compileAst(valDef.rhs))
+            buffer += ";"
         }
 
-        def compileDefDef(defDef: DefDef, containerName: String = memberContainerName) {
-            buffer += "%s.%s = function(".format(containerName, defDef.symbol.nameString)
+        protected def compileDefDef(defDef: DefDef, containerName: String = memberContainerName) {
+            buffer += "%s.%s = function(".format(containerName, getLocalJsName(defDef.symbol))
             compileParameterDeclaration(defDef.vparamss.flatten)
             buffer += ") {\nvar self = this;\n"
-            compileDefaultParameters(defDef.vparamss.flatten)
-            compileAstStatement(defDef.rhs, hasReturnValue(defDef.tpt.symbol))
+            compileParameterInitialization(defDef.vparamss.flatten)
+            val hasReturn = hasReturnValue(defDef.tpt.symbol)
+            bufferAppendNativeCodeOr(defDef.symbol, () => compileAstStatement(defDef.rhs, hasReturn))
             buffer += "};\n"
         }
 
-        def compileSelfCall(parameters: List[Tree]) {
-            buffer += "call(self"
-            if (!parameters.isEmpty) {
+        protected def compileParentCall(parameters: List[Tree], methodName: Option[Name] = None) {
+            buffer += "goog.base(self"
+            if (methodName.isDefined) {
+                buffer += ", '" + getLocalJsName(methodName.get.toString) + "'"
+            }
+            if (parameters.nonEmpty) {
                 buffer += ", "
-                compileParameterValues(parameters)
+                compileParameterValues(parameters, false)
             }
             buffer += ")"
         }
 
-        def compileParameterDeclaration(parameters: List[ValDef]) {
-            buffer += parameters.map(_.symbol.nameString).mkString(", ")
+        protected def compileParameterDeclaration(parameters: List[ValDef]) {
+            buffer += parameters.filter(p => !isVariadicType(p.tpt)).map(p => getLocalJsName(p.symbol)).mkString(", ")
         }
 
-        def compileDefaultParameters(parameters: List[ValDef]) {
+        protected def isVariadicType(typeAst: Tree): Boolean = {
+            typeAst.toString.endsWith("*")
+        }
+
+        protected def compileParameterInitialization(parameters: List[ValDef]) {
+            // Parameters with default values.
             parameters.filter(_.symbol.hasDefault).foreach {
                 parameter =>
-                    buffer += "if (typeof(%1$s) === 'undefined') { %1$s = ".format(parameter.symbol.nameString)
-                    compileAst(parameter.asInstanceOf[ValDef].rhs)
-                    buffer += "; };\n"
-            }
-        }
-
-        def compileParameterValues(parameterValues: List[Tree]) {
-            if (!parameterValues.isEmpty) {
-                parameterValues.foreach {
-                    parameterValue =>
-                        if (!parameterValue.hasSymbolWhich(_.name.toString.contains("$default$"))) {
-                            compileAst(parameterValue)
-                            buffer += ", "
+                    buffer += "if (typeof(%1$s) === 'undefined') { %1$s = ".format(getLocalJsName(parameter.symbol))
+                    parameter.asInstanceOf[ValDef].rhs match {
+                        case ident: Ident if ident.symbol.owner == parameter.symbol.owner => {
+                            buffer += "self.%s".format(ident.symbol.nameString)
                         }
-                }
-                buffer.update(buffer.length - 1, buffer.last.dropRight(2))
+                        case x => compileAst(x)
+                    }
+                    buffer += "; }\n"
+            }
+
+            // Variadic parameter.
+            parameters.filter(p => isVariadicType(p.tpt)).foreach {
+                parameter => // TODO rather use Seq instead of array
+                    addRequiredSymbol("scala.Array");
+                    buffer += "var %s = scala.Array.fromNative(".format(getLocalJsName(parameter.symbol));
+
+                    // In fact, the "arguments" JS variable only behaves like an array, but isn't an array. The
+                    // following trick described on http://www.mennovanslooten.nl/blog/post/59 is used to turn it
+                    // into an array that doesn't contain the normal named parameters.
+                    buffer += "[].splice.call(arguments, %1$s, arguments.length - %1$s)".format(parameters.length - 1)
+                    buffer += ");\n";
             }
         }
 
-        def compileAst(ast: Tree, hasReturnValue: Boolean = false) {
+        protected def compileParameterValues(parameterValues: List[Tree], withParentheses: Boolean = true) {
+            if (withParentheses) {
+                buffer += "("
+            }
+            if (parameterValues.nonEmpty) {
+                parameterValues.foreach {parameterValue =>
+                // Default parameters are handled in the function body.
+                    if (!parameterValue.hasSymbolWhich(_.name.toString.contains("$default$"))) {
+                        parameterValue match {
+                            case Block(_, expr) => compileAst(expr)
+                            case _ => compileAst(parameterValue)
+                        }
+                        buffer += ", "
+                    }
+                }
+                buffer.remove(buffer.length - 1)
+            }
+            if (withParentheses) {
+                buffer += ")"
+            }
+        }
+
+        protected def compileAst(ast: Tree, hasReturnValue: Boolean = false) {
             // A Block handles the return value itself so it has to be compiled besides all other ast types.
             if (ast.isInstanceOf[Block]) {
                 compileBlock(ast.asInstanceOf[Block], hasReturnValue)
+
                 // Other ast types don't handle return value themselves.
             } else {
                 val compiledAstIndex = buffer.length;
@@ -331,16 +456,12 @@ trait PackageCompiler {
                     case apply: Apply => compileApply(apply)
                     case typeApply: TypeApply => compileTypeApply(typeApply)
                     case assign: Assign => compileAssign(assign)
-                    case ifStatement: If => compileIf(ifStatement)
+                    case ifAst: If => compileIf(ifAst)
                     case labelDef: LabelDef => compileLabelDef(labelDef)
-                    case tryStatement: Try => // TODO
-                    case matchStatement: Match => // TODO
-                    case _ => {
-                        buffer += "/* [s2js-warning] Not implemented AST of type %s: %s */".format(
-                            ast.getClass,
-                            ast.toString
-                        )
-                    }
+                    case tryAst: Try => // TODO
+                    case throwAst: Throw => compileThrow(throwAst)
+                    case matchAst: Match => compileMatch(matchAst)
+                    case _ => error("Not implemented AST of type %s: %s".format(ast.getClass, ast.toString))
                 }
 
                 // If the last statement should be returned, prepend it with the "return" keyword.
@@ -350,7 +471,7 @@ trait PackageCompiler {
             }
         }
 
-        def compileAstStatement(ast: Tree, hasReturnValue: Boolean = false) {
+        protected def compileAstStatement(ast: Tree, hasReturnValue: Boolean = false) {
             val previousBufferLength = buffer.length
 
             compileAst(ast, hasReturnValue)
@@ -360,12 +481,12 @@ trait PackageCompiler {
             }
         }
 
-        def compileBlock(block: Block, hasReturnValue: Boolean = false) {
+        protected def compileBlock(block: Block, hasReturnValue: Boolean = false) {
             block.stats.foreach(compileAstStatement(_))
             compileAstStatement(block.expr, hasReturnValue)
         }
 
-        def compileLiteral(literal: Literal) {
+        protected def compileLiteral(literal: Literal) {
             literal match {
                 case Literal(Constant(value)) => {
                     value match {
@@ -376,85 +497,84 @@ trait PackageCompiler {
                     }
                 }
                 case _ => {
-                    buffer += "/* [s2js-warning] Non-constant literal %s */".format(literal.toString)
+                    error("Non-constant literal " + literal.toString)
                 }
             }
         }
 
-        def compileIdentifier(identifier: Ident) {
-            buffer += (
-                if (identifier.symbol.isLocal) {
-                    identifier.symbol.nameString
-                } else {
-                    getJsName(identifier.symbol)
-                })
+        protected def compileIdentifier(identifier: Ident) {
+            buffer += getJsName(identifier.symbol)
         }
 
-        def compileLocalValDef(localValDef: ValDef) {
-            buffer += "var %s = ".format(localValDef.symbol.nameString)
+        protected def compileLocalValDef(localValDef: ValDef) {
+            buffer += "var %s = ".format(getLocalJsName(localValDef.symbol))
             compileAst(localValDef.rhs)
         }
 
-        def compileFunction(function: Function) {
+        protected def compileFunction(function: Function) {
             // TODO maybe somehow merge it with defdef compilation.
             buffer += "function("
             compileParameterDeclaration(function.vparams)
             buffer += ") { "
-            compileDefaultParameters(function.vparams)
+            compileParameterInitialization(function.vparams)
             compileAstStatement(function.body, hasReturnValue(function.body.tpe.typeSymbol))
             buffer += " }"
         }
 
-        def compileNew(constructorCall: New) {
-            buffer += "new %s".format(getJsName(constructorCall.tpt.symbol))
+        protected def compileNew(constructorCall: New) {
+            buffer += "new %s".format(getFullJsName(constructorCall.tpt.symbol))
             addRequiredSymbol(constructorCall.tpt.symbol)
         }
 
-        def compileSelect(select: Select, isSubSelect: Boolean = false) {
+        protected def compileSelect(select: Select, isSubSelect: Boolean = false, isInsideApply: Boolean = false) {
             val subSelectToken = if (isSubSelect) "." else ""
 
-            if (!jsInternalPackages.contains(select.toString)) {
-                val nameString = select.name.toString
+            if (!jsAdapterPackages.contains(select.toString)) {
+                val nameString = getLocalJsName(select.name.toString)
                 val name = if (nameString.endsWith("_$eq")) nameString.stripSuffix("_$eq") else nameString
 
                 select match {
-                    case _ if select.toString == "scala.this.Predef" => {
-                        buffer += "scala.Predef" + subSelectToken
+                    case _ if select.qualifier.toString == "scala.this" => {
+                        buffer += "scala." + name + subSelectToken
                     }
-                    case Select(qualifier, _) if name == "<init>" => {
+                    case Select(qualifier, _) if select.name.toString == "<init>" => {
                         compileAst(qualifier)
                     }
-                    case Select(subSelect: Select, _) if name == "package" => {
+                    case Select(subSelect: Select, _) if select.name.toString == "package" => {
                         // Delegate the compilation to the subSelect and don't do anything with the subSelectToken.
                         compileSelect(subSelect, isSubSelect)
                     }
-                    case Select(qualifier, name) if operatorTokenMap.contains(name.toString) => {
-                        compileOperator(qualifier, None, name.toString)
-                    }
-                    case Select(subSelect: Select, _) => {
-                        compileSelect(subSelect, true)
-                        buffer += name + subSelectToken
+                    case Select(qualifier, _) if operatorTokenMap.contains(name) => {
+                        compileOperator(qualifier, None, name)
                     }
                     case Select(qualifier, _) => {
-                        compileAst(qualifier)
-                        buffer += "." + name + subSelectToken
+                        qualifier match {
+                            case subSelect: Select => compileSelect(subSelect, true)
+                            case _ => {
+                                compileAst(qualifier)
+                                buffer += "."
+                            }
+                        }
+
+                        // If the select is actually a method call, parentheses has to be added after the name.
+                        buffer += name
+                        if (!isInsideApply && select.hasSymbolWhich(s => s.isMethod && !s.isGetter)) {
+                            buffer += "()"
+                        }
+                        buffer += subSelectToken
                     }
                 }
 
                 // TODO find better way how to determine whether the qualifier is an object
-                if (select.qualifier.hasSymbolWhich(_.toString.startsWith("object "))) {
-                    addRequiredSymbol(select.qualifier.symbol)
+                Array(select, select.qualifier).foreach { ast =>
+                    if (ast.hasSymbolWhich(_.toString.startsWith("object "))) {
+                        addRequiredSymbol(ast.symbol)
+                    }
                 }
             }
         }
 
-        def compileSubSelect(subSelect: Select) {
-            if (!jsInternalPackages.contains(subSelect.toString)) {
-                compileSelect(subSelect)
-            }
-        }
-
-        def compileApply(apply: Apply) {
+        protected def compileApply(apply: Apply) {
             apply match {
                 case Apply(Select(qualifier, name), args) if operatorTokenMap.contains(name.toString) => {
                     compileOperator(qualifier, Some(args.head), name.toString)
@@ -463,20 +583,37 @@ trait PackageCompiler {
                     compileAssign(select, args.head)
                 }
                 case Apply(Select(superClass: Super, name), _) => {
-                    "%s.superClass_.%s." format(getJsName(superClass.symbol), name.toString)
-                    compileSelfCall(apply.args)
-                    buffer += ";\n"
+                    compileParentCall(apply.args, Some(name))
+                }
+                case Apply(Select(qual, name), _) if name.toString == "apply" && qual.symbol.owner.isMethod => {
+                    compileAst(qual)
+                    compileParameterValues(apply.args)
+                }
+                case Apply(subApply: Apply, args) => {
+                    // Apply of a function with multiple parameter lists.
+                    // TODO maybe use cleaner way without altering the buffer.
+                    compileApply(subApply);
+
+                    // Add the additional parameters to the subApply method call.
+                    if (args.nonEmpty) {
+                        buffer.update(buffer.length - 1, buffer.last.dropRight(1))
+                        buffer += ", "
+                        compileParameterValues(args, false)
+                        buffer += ")"
+                    }
+                }
+                case Apply(select: Select, _) if select.hasSymbolWhich(_.isMethod) => {
+                    compileSelect(select, isInsideApply = true)
+                    compileParameterValues(apply.args)
                 }
                 case _ => {
                     compileAst(apply.fun)
-                    buffer += "("
                     compileParameterValues(apply.args)
-                    buffer += ")"
                 }
             }
         }
 
-        def compileOperator(firstOperand: Tree, secondOperand: Option[Tree], name: String) {
+        protected def compileOperator(firstOperand: Tree, secondOperand: Option[Tree], name: String) {
             buffer += "("
             if (name.startsWith("unary_")) {
                 buffer += operatorTokenMap(name) + " "
@@ -489,28 +626,42 @@ trait PackageCompiler {
             buffer += ")"
         }
 
-        def compileTypeApply(typeApply: TypeApply) {
+        protected def compileTypeApply(typeApply: TypeApply) {
             typeApply.fun match {
-                case Select(qualifier, name) if name.toString == "asInstanceOf" => {
-                    compileAst(qualifier)
+                case Select(qualifier, name) if name.toString == "isInstanceOf" || name.toString == "asInstanceOf" => {
+                    typeApply.args.head.tpe match {
+                        case uniqueTypeRef: UniqueTypeRef => {
+                            val typeApplyType = name.toString.take(2)
+                            compileInstanceOf(() => compileAst(qualifier), uniqueTypeRef.typeSymbol, typeApplyType)
+                        }
+                        case tpe => error("Unsupported type check/conversion: " + tpe.toString)
+                    }
                 }
-                case fun => {
-                    compileAst(fun)
-                }
+                case select: Select => compileSelect(select, isInsideApply = true)
+                case fun => compileAst(fun)
             }
         }
 
-        def compileAssign(assign: Assign) {
+        protected def compileInstanceOf(objectQualifierCompiler: () => Unit, classSymbol: Symbol, prefix: String) {
+            buffer += "types.%sInstanceOf(".format(prefix)
+            objectQualifierCompiler()
+            buffer += ", '%s')".format(getFullJsName(classSymbol))
+        }
+
+        protected def compileAssign(assign: Assign) {
             compileAssign(assign.lhs, assign.rhs)
         }
 
-        def compileAssign(assignee: Tree, value: Tree) {
-            compileAst(assignee)
+        protected def compileAssign(assignee: Tree, value: Tree) {
+            assignee match {
+                case select: Select => compileSelect(select, isInsideApply = true)
+                case _ => compileAst(assignee)
+            }
             buffer += " = "
             compileAst(value)
         }
 
-        def compileIf(condition: If) {
+        protected def compileIf(condition: If) {
             buffer += "(function() {\nif ("
             compileAst(condition.cond)
             buffer += ") {\n"
@@ -520,16 +671,18 @@ trait PackageCompiler {
             buffer += "}})()"
         }
 
-        def compileLabelDef(labelDef: LabelDef) {
+        protected def compileLabelDef(labelDef: LabelDef) {
             labelDef.name match {
                 case name if name.toString.startsWith("while") => {
-                    // AST of a while cycle is transformed into a tail recursive function with AST similar to:
-                    // def while$1() {
-                    //     if([while-condition]) {
-                    //         [while-body];
-                    //         while$1()
-                    //     }
-                    // }
+                    /*
+                        AST of a while cycle is transformed into a tail recursive function with AST similar to:
+                        def while$1() {
+                            if([while-condition]) {
+                               [while-body];
+                                while$1()
+                            }
+                        }
+                    */
                     val If(cond, Block(body, _), _) = labelDef.rhs
                     buffer += "while("
                     compileAst(cond)
@@ -538,46 +691,161 @@ trait PackageCompiler {
                     buffer += "}"
                 }
                 case _ => {
-                    buffer += "/* [s2js-warning] Unknown labelDef %s */".format(labelDef.toString)
+                    error("Unknown labelDef: " + labelDef.toString)
                 }
             }
+        }
+
+        protected def compileThrow(throwAst: Throw) {
+            buffer += "(function() {\nthrow "
+            compileAstStatement(throwAst.expr)
+            buffer += "})()"
+        }
+
+        protected def compileMatch(matchAst: Match) {
+            val selectorName = getLocalJsName("selector_" + getUniqueId(), true)
+            val hasReturn = hasReturnValue(matchAst.tpe.typeSymbol)
+            buffer += "(function(%s) {\n".format(selectorName)
+            matchAst.cases.foreach(caseDef => compileCase(caseDef, selectorName, hasReturn))
+            buffer += "})("
+            compileAst(matchAst.selector)
+            buffer += ")"
+        }
+
+        protected def compileCase(caseDef: CaseDef, selectorName: String, hasReturn: Boolean) {
+            buffer += "if ("
+            compilePattern(caseDef.pat, selectorName)
+            buffer += ") {\n"
+
+            compileBindings(caseDef.pat, selectorName)
+
+            val hasGuard = !caseDef.guard.isEmpty
+            if (hasGuard) {
+                buffer += "if ("
+                compileAst(caseDef.guard)
+                buffer += ") {\n"
+            }
+
+            compileAstStatement(caseDef.body, hasReturn)
+            if (!hasReturn) {
+                // If the execution gets here, the match function has to be terminated using "return" keyword even
+                // though it shouldn't return anything. Because this case matches the selector, no other case should be
+                // evaluated.
+                buffer += "return;\n"
+            }
+
+            if (hasGuard) {
+                buffer += "}\n"
+            }
+            buffer += "}\n"
+        }
+
+        protected def compilePattern(patternAst: Tree, selectorName: String) {
+            patternAst match {
+                case Ident(name) if name.toString == "_" => buffer += "true"
+                case literal: Literal => compileLiteralPattern(literal, selectorName)
+                case typed: Typed => compileTypedPattern(typed, selectorName)
+                case bind: Bind => compilePattern(bind.body, selectorName)
+                case select: Select => compileSelectPattern(select, selectorName)
+                case apply: Apply => compileApplyPattern(apply, selectorName)
+                case alternative: Alternative => compileAlternativePattern(alternative, selectorName)
+                case _ => error("Not implemented pattern in case: %s".format(patternAst.toString))
+            }
+        }
+
+        protected def compileLiteralPattern(literal: Literal, selectorName: String) {
+            buffer += "%s === ".format(selectorName)
+            compileLiteral(literal)
+        }
+
+        protected def compileTypedPattern(typed: Typed, selectorName: String) {
+            compileInstanceOf(() => buffer += selectorName, typed.tpt.symbol, "is")
+        }
+
+        protected def compileSelectPattern(select: Select, selectorName: String) {
+            buffer += "%s === ".format(selectorName)
+            compileAst(select)
+        }
+
+        protected def compileApplyPattern(apply: Apply, selectorName: String) {
+            compileInstanceOf(() => buffer += selectorName, apply.tpe.typeSymbol, "is")
+            buffer += " && "
+
+            apply.args.zipWithIndex.foreach {
+                case (argAst, index) =>
+                    buffer += "("
+                    compilePattern(argAst, "%s.productElement(%s)".format(selectorName, index))
+                    buffer += ")"
+                    buffer += " && "
+            }
+            buffer.remove(buffer.length - 1)
+        }
+
+        protected def compileAlternativePattern(alternative: Alternative, selectorName: String) {
+            alternative.trees.foreach {subPatternAst =>
+                buffer += "("
+                compilePattern(subPatternAst, selectorName)
+                buffer += ")"
+                buffer += " || "
+            }
+            buffer.remove(buffer.length - 1)
+        }
+
+        protected def compileBindings(patternAst: Tree, selectorName: String) {
+            patternAst match {
+                case bind: Bind => {
+                    buffer += "var %s = %s;\n".format(getLocalJsName(bind.name.toString), selectorName)
+                }
+                case apply: Apply => {
+                    apply.args.zipWithIndex.foreach {
+                        case (argAst, index) =>
+                            compileBindings(argAst, "%s.productElement(%s)".format(selectorName, index))
+                    }
+                }
+                case _ =>
+            }
+        }
+
+        protected def compileMetaClass() {
+            buffer += "%s.metaClass_ = new s2js.MetaClass('%s', [%s]);\n".format(
+                memberContainerName,
+                fullName,
+                parentClasses.filter(c => !isInternalType(c.symbol)).map(p => getFullJsName(p.symbol)).mkString(", ")
+            )
         }
     }
 
     private class ClassCompiler(classDef: ClassDef) extends ClassDefCompiler(classDef) {
-        override lazy val memberContainerName = name + ".prototype"
+        override lazy val memberContainerName = fullName + ".prototype"
 
-        val initializedValDefSet = new HashSet[String]
+        val initializedValDefSet = new mutable.HashSet[String]
 
-        override def compile() {
-            super.compile()
-
-            compileDefDefMembers()
-        }
-
-        def compileConstructor() {
+        protected def compileConstructor() {
             val primaryConstructors = classDef.impl.body.filter(ast => ast.hasSymbolWhich(_.isPrimaryConstructor))
-            val hasConstructor = !primaryConstructors.isEmpty
-            val constructorDefDef = if (hasConstructor) primaryConstructors.head.asInstanceOf[DefDef] else null
+            val hasConstructor = primaryConstructors.nonEmpty
+            val constructorDefDef = if (hasConstructor) Some(primaryConstructors.head.asInstanceOf[DefDef]) else None
 
-            buffer += "%s = function(".format(name);
-            compileParameterDeclaration(constructorDefDef.vparamss.flatten)
-            buffer += ") {\nvar self = this;\n"
+            buffer += fullName + " = function(";
+            if (constructorDefDef.nonEmpty) {
+                compileParameterDeclaration(constructorDefDef.get.vparamss.flatten)
+            }
+            buffer += ") {\n"
+            buffer += "var self = this;\n"
 
-            if (hasConstructor) {
-                compileDefaultParameters(constructorDefDef.vparamss.flatten)
+            if (constructorDefDef.nonEmpty) {
+                compileParameterInitialization(constructorDefDef.get.vparamss.flatten)
 
-                // Initialize vals specified as the implicit constructor parameters.
-                constructorDefDef.vparamss.flatten.map(_.name.toString).foreach {
+                // Initialize fields specified as the implicit constructor parameters.
+                constructorDefDef.get.vparamss.flatten.map(p => getLocalJsName(p.name.toString)).foreach {
                     parameterName =>
                         initializedValDefSet += parameterName
                         buffer += "self.%1$s = %1$s;\n".format(parameterName)
                 }
             }
 
-            // Initialize vals that aren't implicit constructor parameters.
+            // Initialize fields that aren't implicit constructor parameters.
             classDef.impl.foreach {
-                case valDef: ValDef if !initializedValDefSet.contains(valDef.symbol.nameString) => {
+                case valDef: ValDef if !initializedValDefSet.contains(getLocalJsName(valDef.symbol)) => {
                     compileMember(valDef, "self")
                 }
                 case _ =>
@@ -587,9 +855,8 @@ trait PackageCompiler {
             if (!parentClassIsInternal) {
                 classDef.impl.foreach {
                     case Apply(Select(Super(_, _), name), parameters) if (name.toString == "<init>") => {
-                        buffer += "%s.".format(getJsName(parentClass.symbol))
-                        compileSelfCall(parameters)
-                        buffer += ";\n"
+                        compileParentCall(parameters)
+                        buffer += ";"
                     }
                     case _ =>
                 }
@@ -607,58 +874,49 @@ trait PackageCompiler {
             buffer += "};\n"
 
             if (!parentClassIsInternal) {
-                buffer += "goog.inherits(%s, %s);\n".format(name, getJsName(parentClass.symbol))
+                buffer += "goog.inherits(%s, %s);\n".format(fullName, getFullJsName(parentClass.symbol))
             }
+        }
+
+        override protected def compileValDefMembers() {
+            // NOOP, the fields are assigned in the constructor.
         }
     }
 
     private class ModuleClassCompiler(classDef: ClassDef) extends ClassDefCompiler(classDef) {
         override def compile() {
-            super.compile()
-
-            compileMembers()
-        }
-
-        def compileConstructor() {
-            if (!parentClassIsInternal) {
-                buffer += "%s = ".format(name)
-                compileParentClassInstance()
-                buffer += ";\n"
-            } else {
-                buffer += "%s = {};\n".format(name)
+            val compilableMembers = classDef.impl.body.filter {m =>
+                (m.isInstanceOf[ValDef] || m.isInstanceOf[DefDef]) && m.hasSymbolWhich(!isIgnoredMember(_))
             }
 
-            // Inherit the traits.
-            compileInheritedTraits(name);
+            // A synthetic singleton object is compiled only if it has some members that should be compiled.
+            if (!classDef.symbol.isSynthetic || compilableMembers.nonEmpty) {
+                super.compile()
+            }
         }
 
-        def compileParentClassInstance() {
-            classDef.impl.foreach {
-                case Apply(Select(Super(_, _), name), args) if (name.toString == "<init>") => {
-                    buffer += "new %s(".format(getJsName(parentClass.symbol))
-                    compileParameterValues(args)
-                    buffer += ")"
+        protected def compileConstructor() {
+            if (!parentClassIsInternal) {
+                // Because the object may be a package object or a companion object, the members that already exist
+                // there need to be preserved.
+                buffer += "goog.object.extend(%s, ".format(fullName)
+                classDef.impl.foreach {
+                    case Apply(Select(Super(_, _), name), args) if (name.toString == "<init>") => {
+                        buffer += "new " + getFullJsName(parentClass.symbol)
+                        compileParameterValues(args)
+                    }
+                    case _ =>
                 }
-                case _ =>
-            }
-        }
-    }
-
-    private class PackageObjectClassCompiler(classDef: ClassDef) extends ModuleClassCompiler(classDef) {
-        override val nameSymbol = classDef.symbol.owner
-
-        override def compileConstructor() {
-            if (!parentClassIsInternal) {
-                // Because some other package members may be already defined, the package js object has to be extended
-                // instead of assigned, so the already defined members are preserved.
-                buffer += "goog.object.extend(%s, ".format(name)
-                compileParentClassInstance()
                 buffer += ");\n"
             }
 
             // Inherit the traits.
-            compileInheritedTraits(name);
+            compileInheritedTraits(fullName);
         }
+    }
+
+    private class PackageObjectClassCompiler(classDef: ClassDef) extends ModuleClassCompiler(classDef) {
+        override val fullNameSymbol = classDef.symbol.owner
     }
 
     private def compileDependencies() {
@@ -668,12 +926,16 @@ trait PackageCompiler {
     }
 
     private def addProvidedSymbol(symbol: Symbol) {
-        provideHashSet.add(getJsName(symbol))
+        provideHashSet.add(getFullJsName(symbol))
     }
 
     private def addRequiredSymbol(symbol: Symbol) {
         if (!isInternalType(symbol)) {
-            requireHashSet.add(getJsName(symbol))
+            addRequiredSymbol(getFullJsName(symbol))
         }
+    }
+
+    private def addRequiredSymbol(symbolFullName: String) {
+        requireHashSet.add(symbolFullName)
     }
 }

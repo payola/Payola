@@ -7,6 +7,8 @@ tmp/
 Tools/
 
 # IntelliJ Idea files.
+Payola/.idea/ant.xml
+Payola/.idea/uiDesigner.xml
 Payola/.idea/workspace.xml
 Payola/.idea/*highlighting.xml
 

@@ -6,7 +6,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
     describe("Traits") {
         it("can be declared") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package pkg
 
@@ -15,7 +15,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             def m1() { }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('pkg.A');
 
@@ -26,6 +26,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         pkg.A.prototype.m1 = function() {
                             var self = this;
                         };
+                        pkg.A.prototype.metaClass_ = new s2js.MetaClass('pkg.A', []);
                     """
                 }
         }
@@ -34,26 +35,27 @@ class ClassDefSpecs extends CompilerFixtureSpec
     describe("Classes") {
         it("can be declared") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package pkg
 
                         class A
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('pkg.A');
 
                         pkg.A = function() {
                             var self = this;
                         };
+                        pkg.A.prototype.metaClass_ = new s2js.MetaClass('pkg.A', []);
                     """
                 }
         }
 
         it("can have implicit constructor") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package pkg
 
@@ -64,13 +66,13 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             val v8 = v4
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('pkg.A');
 
                         pkg.A = function(v1, v2, v3, v4) {
                             var self = this;
-                            if (typeof(v3) === 'undefined') { v3 = true; };
+                            if (typeof(v3) === 'undefined') { v3 = true; }
                             self.v1 = v1;
                             self.v2 = v2;
                             self.v3 = v3;
@@ -80,13 +82,14 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             self.v7 = self.v1;
                             self.v8 = self.v4;
                         };
+                        pkg.A.prototype.metaClass_ = new s2js.MetaClass('pkg.A', []);
                     """
                 }
         }
 
         it("constructor can have body") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package pkg
 
@@ -96,7 +99,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             window.alert(v1.toString)
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('pkg.A');
 
@@ -105,13 +108,14 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             self.v1 = v1;
                             window.alert(self.v1.toString());
                         };
+                        pkg.A.prototype.metaClass_ = new s2js.MetaClass('pkg.A', []);
                     """
                 }
         }
 
         it("can inherit from classes nad traits") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package pkg
 
@@ -131,7 +135,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
 
                         class C(val v1: String, val v2: Int) extends A
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('pkg.A');
                         goog.provide('pkg.B');
@@ -142,14 +146,16 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         pkg.A = function() {
                             var self = this;
                         };
+                        pkg.A.prototype.metaClass_ = new s2js.MetaClass('pkg.A', []);
 
                         pkg.C = function(v1, v2) {
                             var self = this;
                             self.v1 = v1;
                             self.v2 = v2;
-                            pkg.A.call(self);
+                            goog.base(self);
                         };
                         goog.inherits(pkg.C, pkg.A);
+                        pkg.C.prototype.metaClass_ = new s2js.MetaClass('pkg.C', [pkg.A]);
 
                         pkg.T1 = function() {
                             var self = this;
@@ -158,6 +164,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         pkg.T1.prototype.m1 = function() {
                             var self = this;
                         };
+                        pkg.T1.prototype.metaClass_ = new s2js.MetaClass('pkg.T1', []);
 
                         pkg.T2 = function() {
                             var self = this;
@@ -166,21 +173,23 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         pkg.T2.prototype.m2 = function() {
                             var self = this;
                         };
+                        pkg.T2.prototype.metaClass_ = new s2js.MetaClass('pkg.T2', []);
 
                         pkg.B = function() {
                             var self = this;
-                            pkg.A.call(self);
-                            goog.object.extend(self, new pkg.T1());
+                            goog.base(self);
                             goog.object.extend(self, new pkg.T2());
+                            goog.object.extend(self, new pkg.T1());
                         };
                         goog.inherits(pkg.B, pkg.A);
+                        pkg.B.prototype.metaClass_ = new s2js.MetaClass('pkg.B', [pkg.A, pkg.T1, pkg.T2]);
                     """
                 }
         }
 
         it("parent constructor gets called properly") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package pkg
 
@@ -190,7 +199,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
 
                         class C(v1: String, v2: Int) extends A(v1, v2)
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('pkg.A');
                         goog.provide('pkg.B');
@@ -201,18 +210,98 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             self.v1 = v1;
                             self.v2 = v2;
                         };
+                        pkg.A.prototype.metaClass_ = new s2js.MetaClass('pkg.A', []);
+
                         pkg.B = function() {
                             var self = this;
-                            pkg.A.call(self, 'test', 123);
+                            goog.base(self, 'test', 123);
                         };
                         goog.inherits(pkg.B, pkg.A);
+                        pkg.B.prototype.metaClass_ = new s2js.MetaClass('pkg.B', [pkg.A]);
+
                         pkg.C = function(v1, v2) {
                             var self = this;
                             self.v1 = v1;
                             self.v2 = v2;
-                            pkg.A.call(self, v1, v2);
+                            goog.base(self, v1, v2);
                         };
                         goog.inherits(pkg.C, pkg.A);
+                        pkg.C.prototype.metaClass_ = new s2js.MetaClass('pkg.C', [pkg.A]);
+                    """
+                }
+        }
+
+        it("case classes are supported") {
+            configMap =>
+                scalaCode {
+                    """
+                        case class A(x: String, y: Int, z: Boolean)
+                    """
+                } shouldCompileTo {
+                    """
+                        goog.provide('A');
+                        goog.require('java.lang.IndexOutOfBoundsException');
+                        goog.require('scala.None');
+                        goog.require('scala.Product');
+                        goog.require('scala.Some');
+
+                        A = function(x, y, z) {
+                            var self = this;
+                            self.x = x;
+                            self.y = y;
+                            self.z = z;
+                            goog.object.extend(self, new scala.Product());
+                        };
+                        A.prototype.copy = function(x, y, z) {
+                            var self = this;
+                            if (typeof(x) === 'undefined') { x = self.x; }
+                            if (typeof(y) === 'undefined') { y = self.y; }
+                            if (typeof(z) === 'undefined') { z = self.z; }
+                            return new A(x, y, z);
+                        };
+                        A.prototype.productPrefix = function() {
+                            var self = this;
+                            return 'A';
+                        };
+                        A.prototype.productArity = function() {
+                            var self = this;
+                            return 3;
+                        };
+                        A.prototype.productElement = function($x$1) {
+                            var self = this;
+                            return (function($selector_1) {
+                                if ($selector_1 === 0) {
+                                    return A.x;
+                                }
+                                if ($selector_1 === 1) {
+                                    return A.y;
+                                }
+                                if ($selector_1 === 2) {
+                                    return A.z;
+                                }
+                                if (true) {
+                                    return (function() {
+                                        throw new java.lang.IndexOutOfBoundsException($x$1.toString());
+                                     })();
+                                }
+                            })($x$1);
+                        };
+                        A.prototype.metaClass_ = new s2js.MetaClass('A', [scala.Product]);
+                        A.unapply = function(x$0) {
+                            var self = this;
+                            return (function() {
+                                if ((x$0 == null)) {
+                                    return scala.None;
+                                } else {
+                                    return new scala.Some(new scala.Tuple3(x$0.x, x$0.y, x$0.z));
+                                }
+                            })();
+                        };
+                        A.$apply = function(x, y, z) {
+                            var self = this;
+                            return new A(x, y, z);
+                        };
+                        A.metaClass_ = new s2js.MetaClass('A', []);
                     """
                 }
         }
@@ -221,7 +310,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
     describe("Objects") {
         it("can be declared") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package pkg
 
@@ -232,11 +321,10 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             def m2() { }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('pkg.o');
 
-                        pkg.o = {};
                         pkg.o.v1 = 'test';
                         pkg.o.v2 = 12345;
                         pkg.o.m1 = function() {
@@ -245,13 +333,14 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         pkg.o.m2 = function() {
                             var self = this;
                         };
+                        pkg.o.metaClass_ = new s2js.MetaClass('pkg.o', []);
                     """
                 }
         }
 
         it("can inherit from classes and traits") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package pkg
 
@@ -272,13 +361,12 @@ class ClassDefSpecs extends CompilerFixtureSpec
 
                         object o extends A with T1 with T2
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('pkg.A');
                         goog.provide('pkg.T1');
                         goog.provide('pkg.T2');
                         goog.provide('pkg.o');
-
                         pkg.A = function() {
                             var self = this;
                             self.v = 123;
@@ -286,6 +374,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         pkg.A.prototype.m = function() {
                             var self = this;
                         };
+                        pkg.A.prototype.metaClass_ = new s2js.MetaClass('pkg.A', []);
 
                         pkg.T1 = function() {
                             var self = this;
@@ -294,6 +383,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         pkg.T1.prototype.m1 = function() {
                             var self = this;
                         };
+                        pkg.T1.prototype.metaClass_ = new s2js.MetaClass('pkg.T1', []);
 
                         pkg.T2 = function() {
                             var self = this;
@@ -302,10 +392,50 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         pkg.T2.prototype.m2 = function() {
                             var self = this;
                         };
+                        pkg.T2.prototype.metaClass_ = new s2js.MetaClass('pkg.T2', []);
 
-                        pkg.o = new pkg.A();
-                        goog.object.extend(pkg.o, new pkg.T1());
+                        goog.object.extend(pkg.o, new pkg.A());
                         goog.object.extend(pkg.o, new pkg.T2());
+                        goog.object.extend(pkg.o, new pkg.T1());
+                        pkg.o.metaClass_ = new s2js.MetaClass('pkg.o', [pkg.A, pkg.T1, pkg.T2]);
+                    """
+                }
+        }
+
+        it("companion objects are supported") {
+            configMap =>
+                scalaCode {
+                    """
+                        class A(val x: String, val y: Int) {
+                            override def clone: A = {
+                                A(x, y)
+                            }
+                        }
+
+                        object A {
+                            def apply(x: String, y: Int): A = new A(x, y)
+                        }
+                    """
+                } shouldCompileTo {
+                    """
+                        goog.provide('A');
+
+                        A = function(x, y) {
+                            var self = this;
+                            self.x = x;
+                            self.y = y;
+                        };
+                        A.prototype.clone = function() {
+                            var self = this;
+                            return A.$apply(self.x, self.y);
+                        };
+                        A.prototype.metaClass_ = new s2js.MetaClass('A', []);
+
+                        A.$apply = function(x, y) {
+                            var self = this;
+                            return new A(x, y);
+                        };
+                        A.metaClass_ = new s2js.MetaClass('A', []);
                     """
                 }
         }
@@ -314,26 +444,27 @@ class ClassDefSpecs extends CompilerFixtureSpec
     describe("Package objects") {
         it("can be declared using 'package object'") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package object po {
                             def m() { }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('po');
 
                         po.m = function() {
                             var self = this;
                         };
+                        po.metaClass_ = new s2js.MetaClass('po', []);
                     """
                 }
         }
 
         it("can be declared using '`package`' object name") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package pkg
 
@@ -341,20 +472,21 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             def m() { }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('pkg');
 
                         pkg.m = function() {
                             var self = this;
                         };
+                        pkg.metaClass_ = new s2js.MetaClass('pkg', []);
                     """
                 }
         }
 
         it("don't override the package") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package pkg
 
@@ -363,7 +495,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
 
                         object `package` extends A
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('pkg');
                         goog.provide('pkg.A');
@@ -372,10 +504,15 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         pkg.A = function() {
                             var self = this;
                         };
+                        pkg.A.prototype.metaClass_ = new s2js.MetaClass('pkg.A', []);
+
                         pkg.B = function() {
                             var self = this;
                         };
+                        pkg.B.prototype.metaClass_ = new s2js.MetaClass('pkg.B', []);
+
                         goog.object.extend(pkg, new pkg.A());
+                        pkg.metaClass_ = new s2js.MetaClass('pkg', [pkg.A]);
                     """
                 }
         }

@@ -6,26 +6,27 @@ class PackageSpecs extends CompilerFixtureSpec
     describe("Packages") {
         it("can be used") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package pkg
 
                         class A
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('pkg.A');
 
                         pkg.A = function() {
                             var self = this;
                         };
+                        pkg.A.prototype.metaClass_ = new s2js.MetaClass('pkg.A', []);
                     """
                 }
         }
 
         it("can be nested using multiple package statements") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package pkg
                         package sub
@@ -33,20 +34,21 @@ class PackageSpecs extends CompilerFixtureSpec
 
                         class A
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('pkg.sub.nested.A');
 
                         pkg.sub.nested.A = function() {
                             var self = this;
                         };
+                        pkg.sub.nested.A.prototype.metaClass_ = new s2js.MetaClass('pkg.sub.nested.A', []);
                     """
                 }
         }
 
         it("can be nested using encapsulation") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package pkg {
                             package sub {
@@ -56,39 +58,41 @@ class PackageSpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('pkg.sub.nested.A');
 
                         pkg.sub.nested.A = function() {
                             var self = this;
                         };
+                        pkg.sub.nested.A.prototype.metaClass_ = new s2js.MetaClass('pkg.sub.nested.A', []);
                     """
                 }
         }
 
         it("can be nested using package name with '.' separators") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package pkg.sub.nested {
                             class A
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('pkg.sub.nested.A');
 
                         pkg.sub.nested.A = function() {
                             var self = this;
                         };
+                        pkg.sub.nested.A.prototype.metaClass_ = new s2js.MetaClass('pkg.sub.nested.A', []);
                     """
                 }
         }
 
         it("can be declared multiple times") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         package pkg.sub1 {
                             class X
@@ -103,7 +107,7 @@ class PackageSpecs extends CompilerFixtureSpec
                             class Y
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('pkg.A');
                         goog.provide('pkg.B');
@@ -113,15 +117,19 @@ class PackageSpecs extends CompilerFixtureSpec
                         pkg.A = function() {
                             var self = this;
                         };
+                        pkg.A.prototype.metaClass_ = new s2js.MetaClass('pkg.A', []);
                         pkg.B = function() {
                             var self = this;
                         };
+                        pkg.B.prototype.metaClass_ = new s2js.MetaClass('pkg.B', []);
                         pkg.sub1.X = function() {
                             var self = this;
                         };
+                        pkg.sub1.X.prototype.metaClass_ = new s2js.MetaClass('pkg.sub1.X', []);
                         pkg.sub2.Y = function() {
                             var self = this;
                         };
+                        pkg.sub2.Y.prototype.metaClass_ = new s2js.MetaClass('pkg.sub2.Y', []);
                     """
                 }
         }

@@ -6,7 +6,7 @@ class StatementSpecs extends CompilerFixtureSpec
     describe("Statements") {
         it("are terminated by semicolons") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         import s2js.adapters.js.browser._
 
@@ -18,24 +18,24 @@ class StatementSpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('a');
 
-                        a = {};
                         a.m1 = function() {
                             var self = this;
                             var x = 'bar';
                             var y = (x + 'foo');
                             window.alert(y);
                         };
+                        a.metaClass_ = new s2js.MetaClass('a', []);
                     """
                 }
         }
 
         it("assignments are supported") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         object a {
                             var x = "bar"
@@ -78,7 +78,7 @@ class StatementSpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('B');
                         goog.provide('a');
@@ -88,11 +88,11 @@ class StatementSpecs extends CompilerFixtureSpec
                             var self = this;
                             self.x = '';
                         };
+                        B.prototype.metaClass_ = new s2js.MetaClass('B', []);
 
-                        a = {};
                         a.x = 'bar';
+                        a.metaClass_ = new s2js.MetaClass('a', []);
 
-                        c = {};
                         c.x = 'foo';
 
                         c.m1 = function(param) {
@@ -125,13 +125,14 @@ class StatementSpecs extends CompilerFixtureSpec
                             self.x = a.x;
                             self.x = b.x;
                         };
+                        c.metaClass_ = new s2js.MetaClass('c', []);
                     """
                 }
         }
 
         it("not operator is supported") {
             configMap =>
-                expect {
+                scalaCode {
                     """
                         object o {
                             def m1() = true
@@ -142,11 +143,10 @@ class StatementSpecs extends CompilerFixtureSpec
                             }
                         }
                     """
-                } toBe {
+                } shouldCompileTo {
                     """
                         goog.provide('o');
 
-                        o = {};
                         o.m1 = function() {
                             var self = this;
                             return true;
@@ -157,6 +157,7 @@ class StatementSpecs extends CompilerFixtureSpec
                             var v2 = (! v1);
                             var v3 = (! self.m1());
                         };
+                        o.metaClass_ = new s2js.MetaClass('o', []);
                     """
                 }
         }

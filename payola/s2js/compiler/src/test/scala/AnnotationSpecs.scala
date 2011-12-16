@@ -1,0 +1,81 @@
+package s2js.compiler
+
+class AnnotationSpecs extends CompilerFixtureSpec {
+    describe("Annotations") {
+        it("native class implementation is supported") {
+            configMap =>
+                scalaCode {
+                    """
+                        @s2js.compiler.NativeJs(""" + "\"\"\"" + """
+                            A = function() {
+                                this.x = 'foo';
+                                window.alert('a created');
+                            }
+                        """ + "\"\"\"" + """)
+                        class A
+                    """
+                } shouldCompileTo {
+                    """
+                        goog.provide('A');
+
+                        A = function() {
+                            this.x = 'foo';
+                            window.alert('a created');
+                        }
+                    """
+                }
+        }
+
+        it("native method implementation is supported") {
+            configMap =>
+                scalaCode {
+                    """
+                        class A {
+                            val x = "foo"
+                            val y = 123
+
+                            @s2js.compiler.NativeJs("console.log(self.x + self.y.toString + x);")
+                            def m(x: String) {}
+                        }
+                    """
+                } shouldCompileTo {
+                    """
+                        goog.provide('A');
+
+                        A = function() {
+                            var self = this;
+                            self.x = 'foo';
+                            self.y = 123;
+                        };
+                        A.prototype.m = function(x) {
+                            var self = this;
+                            console.log(self.x + self.y.toString + x);
+                        };
+                        A.prototype.metaClass_ = new s2js.MetaClass('A', []);
+                    """
+                }
+        }
+
+        it("native val value is supported") {
+            configMap =>
+                scalaCode {
+                    """
+                        class A {
+                            @s2js.compiler.NativeJs("[1, 2, 3]")
+                            val x = ""
+                        }
+                    """
+                } shouldCompileTo {
+                    """
+                        goog.provide('A');
+
+                        A = function() {
+                            var self = this;
+                            self.x = [1, 2, 3];
+                        };
+                        A.prototype.metaClass_ = new s2js.MetaClass('A', []);
+                    """
+                }
+        }
+    }
+}
