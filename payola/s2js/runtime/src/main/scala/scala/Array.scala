@@ -4,21 +4,14 @@ import s2js.compiler.NativeJs
 
 object Array {
     @NativeJs("""
-        var a = new scala.Array(jsArray.length);
-        a.internalArray = jsArray;
+        var a = new scala.Array(nativeArray.length);
+        a.internalArray = nativeArray;
         return a;
     """)
-    def fromNative(jsArray: AnyRef): Array = null
+    def fromNative(nativeArray: AnyRef): Array = null
 
-    def apply(xs: Any*): Array = {
-        val array = new Array(xs.length)
-        var i = 0
-        for (x <- xs.iterator) {
-            array(i) = x;
-            i += 1
-        }
-        array
-    }
+    @NativeJs("return self.fromNative(xs.internalArray);")
+    def apply(xs: Any*): Array = null
 }
 
 class Array(val length: Int) {
@@ -32,5 +25,8 @@ class Array(val length: Int) {
     override def clone(): Array = null
 
     @NativeJs("self.internalArray[i] = x;")
-    def update(i: Int, x: Any): Unit = ()
+    def update(i: Int, x: Any) {}
+
+    @NativeJs("""self.internalArray.forEach(f);""")
+    def foreach(f: Any => Unit) {}
 }

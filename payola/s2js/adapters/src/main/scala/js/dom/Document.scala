@@ -5,7 +5,8 @@ abstract class Document {
 
     def execCommand(command: String, showDefaultUI: Boolean, value: String) {}
 
-    def getElementById(id: String): Element = { null }
+    def getElementById(id: String): Element = null
 
-    def createElement(name: String): Element = { null }
+    // Definition of the function is there only for compilation purposes, bacause it can't be null.
+    def createElement[A <: Element](name: String): A = body.asInstanceOf[A]
 }

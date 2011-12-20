@@ -240,10 +240,11 @@ class ClassDefSpecs extends CompilerFixtureSpec
                 } shouldCompileTo {
                     """
                         goog.provide('A');
-                        goog.require('java.lang.IndexOutOfBoundsException');
+                        goog.require('scala.IndexOutOfBoundsException');
                         goog.require('scala.None');
                         goog.require('scala.Product');
                         goog.require('scala.Some');
+                        goog.require('scala.Tuple3');
 
                         A = function(x, y, z) {
                             var self = this;
@@ -281,7 +282,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                                 }
                                 if (true) {
                                     return (function() {
-                                        throw new java.lang.IndexOutOfBoundsException($x$1.toString());
+                                        throw new scala.IndexOutOfBoundsException($x$1.toString());
                                      })();
                                 }
                             })($x$1);

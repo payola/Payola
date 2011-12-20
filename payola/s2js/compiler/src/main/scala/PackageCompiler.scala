@@ -36,13 +36,23 @@ trait PackageCompiler {
         """^scala\.Int$""",
         """^scala\.Predef$""",
         """^scala\.ScalaObject$""",
-        """^scala\.Serializable""", // TODO maybe shoudn't be internal.
-        """^scala\.Tuple[0-9]+$""", // TODO maybe shoudn't be internal.
-        """^scala\.package$""",
+        """^scala\.Serializable$""", // TODO maybe shoudn't be internal.
+        """^scala\.package.*""",
+        """^scala\.reflect\.ClassManifest$""",
         """^scala\.reflect\.Manifest$""",
         """^scala\.runtime$""",
         """^scala\.runtime\.AbstractFunction[0-9]+$""",
         """^scala\.xml"""
+    )
+
+    // Ordered by transformation priority (if one is a prefix of another, then the longer should be first).
+    private val namespaceTransformationMap = Map(
+        "java.lang" -> "scala",
+        "scala.this" -> "scala",
+        "s2js.adapters.js.browser" -> "",
+        "s2js.adapters.js.dom" -> "",
+        "s2js.adapters" -> "",
+        "s2js.runtime" -> ""
     )
 
     private val internalMembers = Array(
@@ -51,13 +61,6 @@ trait PackageCompiler {
         "equals",
         "canEqual",
         "readResolve"
-    )
-
-    private val jsAdapterPackages = Array(
-        "s2js.adapters",
-        "s2js.adapters.js.browser",
-        "s2js.adapters.js.dom",
-        "s2js.runtime"
     )
 
     private val jsKeywords = Array(
@@ -116,10 +119,16 @@ trait PackageCompiler {
     private def getFullJsName(symbol: Symbol): String = {
         var name = symbol.fullName;
 
-        // Drop the internal namespace name.
-        val jsInternalNamespace = jsAdapterPackages.find(name.startsWith(_))
-        if (jsInternalNamespace.isDefined) {
-            name = name.stripPrefix(jsInternalNamespace.get + ".")
+        // Perform the namespace transformation (use the longest matching namespace).
+        val namespace = namespaceTransformationMap.keys.find(name.startsWith(_))
+        if (namespace.nonEmpty) {
+            name = name.stripPrefix(namespace.get)
+
+            val newNamespace: String = namespaceTransformationMap.get(namespace.get).get
+            if (newNamespace.isEmpty && name.startsWith(".")) {
+                name = name.drop(1)
+            }
+            name = newNamespace + name
         }
 
         // Drop the "package" package that isn't used in JS.
@@ -349,13 +358,13 @@ trait PackageCompiler {
                 member.nameString.matches("""^.*\$default\$[0-9]+$""") // A member generated for default parameter value
         }
 
-        protected def compileValDef(valDef: ValDef, containerName: String = memberContainerName) {
-            buffer += "%s.%s = ".format(containerName, getLocalJsName(valDef.symbol))
-            bufferAppendNativeCodeOr(valDef.symbol, () => compileAst(valDef.rhs))
-            buffer += ";"
-        }
+    protected def compileValDef(valDef: ValDef, containerName: String = memberContainerName) {
+        buffer += "%s.%s = ".format(containerName, getLocalJsName(valDef.symbol))
+        bufferAppendNativeCodeOr(valDef.symbol, () => compileAst(valDef.rhs))
+        buffer += ";\n"
+    }
 
-        protected def compileDefDef(defDef: DefDef, containerName: String = memberContainerName) {
+    protected def compileDefDef(defDef: DefDef, containerName: String = memberContainerName) {
             buffer += "%s.%s = function(".format(containerName, getLocalJsName(defDef.symbol))
             compileParameterDeclaration(defDef.vparamss.flatten)
             buffer += ") {\nvar self = this;\n"
@@ -528,48 +537,48 @@ trait PackageCompiler {
 
         protected def compileSelect(select: Select, isSubSelect: Boolean = false, isInsideApply: Boolean = false) {
             val subSelectToken = if (isSubSelect) "." else ""
+            val nameString = getLocalJsName(select.name.toString)
+            val name = if (nameString.endsWith("_$eq")) nameString.stripSuffix("_$eq") else nameString
 
-            if (!jsAdapterPackages.contains(select.toString)) {
-                val nameString = getLocalJsName(select.name.toString)
-                val name = if (nameString.endsWith("_$eq")) nameString.stripSuffix("_$eq") else nameString
-
-                select match {
-                    case _ if select.qualifier.toString == "scala.this" => {
-                        buffer += "scala." + name + subSelectToken
-                    }
-                    case Select(qualifier, _) if select.name.toString == "<init>" => {
-                        compileAst(qualifier)
-                    }
-                    case Select(subSelect: Select, _) if select.name.toString == "package" => {
-                        // Delegate the compilation to the subSelect and don't do anything with the subSelectToken.
-                        compileSelect(subSelect, isSubSelect)
-                    }
-                    case Select(qualifier, _) if operatorTokenMap.contains(name) => {
-                        compileOperator(qualifier, None, name)
-                    }
-                    case Select(qualifier, _) => {
-                        qualifier match {
-                            case subSelect: Select => compileSelect(subSelect, true)
-                            case _ => {
-                                compileAst(qualifier)
-                                buffer += "."
-                            }
-                        }
-
-                        // If the select is actually a method call, parentheses has to be added after the name.
-                        buffer += name
-                        if (!isInsideApply && select.hasSymbolWhich(s => s.isMethod && !s.isGetter)) {
-                            buffer += "()"
-                        }
-                        buffer += subSelectToken
-                    }
+            select match {
+                case Select(qualifier, _) if select.name.toString == "<init>" => {
+                    compileAst(qualifier)
                 }
-
-                // TODO find better way how to determine whether the qualifier is an object
-                Array(select, select.qualifier).foreach { ast =>
-                    if (ast.hasSymbolWhich(_.toString.startsWith("object "))) {
-                        addRequiredSymbol(ast.symbol)
+                case Select(subSelect: Select, _) if select.name.toString == "package" => {
+                    // Delegate the compilation to the subSelect and don't do anything with the subSelectToken.
+                    compileSelect(subSelect, isSubSelect)
+                }
+                case Select(qualifier, _) if operatorTokenMap.contains(name) => {
+                    compileOperator(qualifier, None, name)
+                }
+                case _ if namespaceTransformationMap.contains(select.toString) ||
+                    namespaceTransformationMap.contains(select.qualifier.toString) => {
+                    // It's just a sequence of packages (selects), so getFullJsName may be used.
+                    val name = getFullJsName(select.symbol)
+                    buffer += name + (if (name.isEmpty) "" else subSelectToken)
+                }
+                case Select(qualifier, _) => {
+                    qualifier match {
+                        case subSelect: Select => compileSelect(subSelect, true)
+                        case _ => {
+                            compileAst(qualifier)
+                            buffer += "."
+                        }
                     }
+
+                    // If the select is actually a method call, parentheses has to be added after the name.
+                    buffer += name
+                    if (!isInsideApply && select.hasSymbolWhich(s => s.isMethod && !s.isGetter)) {
+                        buffer += "()"
+                    }
+                    buffer += subSelectToken
+                }
+            }
+
+            // TODO find better way how to determine whether the qualifier is an object
+            Array(select, select.qualifier).foreach { ast =>
+                if (ast.hasSymbolWhich(_.toString.startsWith("object "))) {
+                    addRequiredSymbol(ast.symbol)
                 }
             }
         }
@@ -595,7 +604,9 @@ trait PackageCompiler {
                     compileApply(subApply);
 
                     // Add the additional parameters to the subApply method call.
-                    if (args.nonEmpty) {
+                    // TODO introduce some non-ad-hoc solution for the ClassManifest problem.
+                    val ignoreApply = args.isEmpty || args.head.toString.startsWith("reflect.this.ClassManifest")
+                    if (!ignoreApply) {
                         buffer.update(buffer.length - 1, buffer.last.dropRight(1))
                         buffer += ", "
                         compileParameterValues(args, false)
@@ -643,7 +654,7 @@ trait PackageCompiler {
         }
 
         protected def compileInstanceOf(objectQualifierCompiler: () => Unit, classSymbol: Symbol, prefix: String) {
-            buffer += "types.%sInstanceOf(".format(prefix)
+            buffer += "s2js.%sInstanceOf(".format(prefix)
             objectQualifierCompiler()
             buffer += ", '%s')".format(getFullJsName(classSymbol))
         }

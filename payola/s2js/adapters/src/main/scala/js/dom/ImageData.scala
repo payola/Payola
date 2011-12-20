@@ -1,10 +1,10 @@
 package s2js.adapters.js.dom
 
-
-class ImageData {
-
+abstract class ImageData {
     //TODO: unsigned long
-    val width: Long = 0
-    val height: Long = 0
-    val data: CanvasPixelArray = null
+    val width: Long
+
+    val height: Long
+
+    val data: CanvasPixelArray
 }

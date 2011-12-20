@@ -5,5 +5,5 @@ abstract class Canvas extends Element {
 
     var width = 0
 
-    def getContext(contextId: String): CanvasContext
+    def getContext[A <: CanvasContext](contextId: String): A
 }

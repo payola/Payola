@@ -1,18 +1,16 @@
 @(message: String)
 
 @main("Home") {
-
     <div id="page">
         <div id="canvas-holder"></div>
         <div id="controls">
             <h1>Payola</h1>
-
         </div>
     </div>
     <script>
-        goog.require('client.Index');
+        goog.require('cz.payola.web.client.Index');
     </script>
     <script>
-        client.Index.init();
+        cz.payola.web.client.Index.init();
     </script>
 }

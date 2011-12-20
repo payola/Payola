@@ -15,7 +15,6 @@
     <content url="file://$MODULE_DIR$/../web/client">
       <sourceFolder url="file://$MODULE_DIR$/../web/client/src/main/scala" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../web/client/src/main/java" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/../web/client" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../web/client/src/main/resources" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../web/client/src/test/scala" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../web/client/src/test/java" isTestSource="true" />
@@ -26,8 +25,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="org.scala-lang_scala-library_2.9.1" level="project" />
     <orderEntry type="library" name="org.scala-lang_scala-compiler_2.9.1" level="project" />
-    <orderEntry type="module" module-name="adapters" exported="" />
-    <orderEntry type="module" module-name="compiler" exported="" />
+    <orderEntry type="module" module-name="runtime" exported="" />
   </component>
 </module>
 

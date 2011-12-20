@@ -387,10 +387,10 @@ class ControlFlowSpecs extends CompilerFixtureSpec {
                         o.m = function(p) {
                             var self = this;
                             return (function($selector_1) {
-                                if (types.isInstanceOf($selector_1, 'java.lang.String')) {
+                                if (s2js.isInstanceOf($selector_1, 'scala.String')) {
                                     return 123;
                                 }
-                                if (types.isInstanceOf($selector_1, 'scala.Int')) {
+                                if (s2js.isInstanceOf($selector_1, 'scala.Int')) {
                                     return 456;
                                 }
                                 if (true) {
@@ -424,11 +424,11 @@ class ControlFlowSpecs extends CompilerFixtureSpec {
                         o.m = function(p) {
                             var self = this;
                             return (function($selector_1) {
-                                if (types.isInstanceOf($selector_1, 'java.lang.String')) {
+                                if (s2js.isInstanceOf($selector_1, 'scala.String')) {
                                     var x = $selector_1;
                                     return 123;
                                 }
-                                if (types.isInstanceOf($selector_1, 'scala.Int')) {
+                                if (s2js.isInstanceOf($selector_1, 'scala.Int')) {
                                     var y = $selector_1;
                                     return 456;
                                 }
@@ -463,19 +463,19 @@ class ControlFlowSpecs extends CompilerFixtureSpec {
                         o.m = function(p) {
                             var self = this;
                             return (function($selector_1) {
-                                if (types.isInstanceOf($selector_1, 'scala.Tuple3') && (true) && (true) && (
-                                    types.isInstanceOf($selector_1.productElement(2), 'scala.Tuple2') && (true) && (
-                                    types.isInstanceOf($selector_1.productElement(2).productElement(1), 'scala.Tuple2') && (
-                                    types.isInstanceOf($selector_1.productElement(2).productElement(1).productElement(0), 'scala.Int')) && (true)))
+                                if (s2js.isInstanceOf($selector_1, 'scala.Tuple3') && (true) && (true) && (
+                                    s2js.isInstanceOf($selector_1.productElement(2), 'scala.Tuple2') && (true) && (
+                                    s2js.isInstanceOf($selector_1.productElement(2).productElement(1), 'scala.Tuple2') && (
+                                    s2js.isInstanceOf($selector_1.productElement(2).productElement(1).productElement(0), 'scala.Int')) && (true)))
                                 ) {
                                     var bound1 = $selector_1.productElement(2).productElement(1).productElement(0);
                                     var bound2 = $selector_1.productElement(2).productElement(1).productElement(1);
                                     return 123;
                                 }
-                                if (types.isInstanceOf($selector_1, 'scala.Some') && (
-                                   types.isInstanceOf($selector_1.productElement(0), 'scala.Tuple2') && (true) && (
-                                   types.isInstanceOf($selector_1.productElement(0).productElement(1), 'scala.Some') && (
-                                   types.isInstanceOf($selector_1.productElement(0).productElement(1).productElement(0), 'scala.Tuple5') && (
+                                if (s2js.isInstanceOf($selector_1, 'scala.Some') && (
+                                   s2js.isInstanceOf($selector_1.productElement(0), 'scala.Tuple2') && (true) && (
+                                   s2js.isInstanceOf($selector_1.productElement(0).productElement(1), 'scala.Some') && (
+                                   s2js.isInstanceOf($selector_1.productElement(0).productElement(1).productElement(0), 'scala.Tuple5') && (
                                    true) && (true) && (true) && (true) && (true))))
                                 ) {
                                     var q = $selector_1.productElement(0).productElement(1).productElement(0).productElement(2);

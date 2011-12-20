@@ -2,8 +2,7 @@ package s2js.adapters.goog.events
 
 import s2js.adapters.js.dom.Node
 
-class BrowserEvent(e: s2js.adapters.js.browser.Event = null, currentTarget: Node = null)
-    extends Event("") {
+class BrowserEvent(e: s2js.adapters.js.browser.Event = null, currentTarget: Node = null) extends Event("") {
     def isMouseActionButton: Boolean = false
 
     val altKey: Boolean = false

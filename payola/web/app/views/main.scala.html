@@ -1,20 +1,18 @@
 @(title: String)(content: Html)
 
 <!DOCTYPE html>
-
 <html>
-<head>
-    <title>@title</title>
-
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
-    <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
-
-    <script type="text/javascript">
-        var CLOSURE_NO_DEPS = true;
-    </script>
-    <script src="assets/javascripts/closure/base.js" type="text/javascript"></script>
-    <script src="assets/javascripts/deps.js" type="text/javascript"></script>
-</head>
+    <head>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")"/>
+        <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")"/>
+        <script type="text/javascript">
+            var CLOSURE_NO_DEPS = true;
+        </script>
+        <script src="assets/javascripts/goog/base.js" type="text/javascript"></script>
+        <script src="assets/javascripts/deps.js" type="text/javascript"></script>
+        <script src="assets/javascripts/implicitRequires.js" type="text/javascript"></script>
+        <title>@title</title>
+    </head>
         <body>
             @content
         </body>
