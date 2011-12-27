@@ -245,6 +245,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         goog.require('scala.Product');
                         goog.require('scala.Some');
                         goog.require('scala.Tuple3');
+                        goog.require('scala.runtime.ScalaRunTime');
 
                         A = function(x, y, z) {
                             var self = this;
@@ -259,6 +260,10 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             if (typeof(y) === 'undefined') { y = self.y; }
                             if (typeof(z) === 'undefined') { z = self.z; }
                             return new A(x, y, z);
+                        };
+                        A.prototype.toString = function() {
+                            var self = this;
+                            return scala.runtime.ScalaRunTime._toString(self);
                         };
                         A.prototype.productPrefix = function() {
                             var self = this;
@@ -288,6 +293,10 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             })($x$1);
                         };
                         A.prototype.metaClass_ = new s2js.MetaClass('A', [scala.Product]);
+                        A.toString = function() {
+                            var self = this;
+                            return 'A';
+                        };
                         A.unapply = function(x$0) {
                             var self = this;
                             return (function() {

@@ -3,7 +3,7 @@ scala.math.E = Math.E;
 scala.math.Pi = Math.PI;
 scala.math.abs = function(x) {
 var self = this;
-return Math.Abs(x);};
+return Math.abs(x);};
 scala.math.acos = function(x) {
 var self = this;
 return Math.acos(x);};

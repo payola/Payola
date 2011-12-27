@@ -57,7 +57,6 @@ trait PackageCompiler {
 
     private val internalMembers = Array(
         "hashCode",
-        "toString",
         "equals",
         "canEqual",
         "readResolve"
@@ -454,7 +453,7 @@ trait PackageCompiler {
                 val compiledAstIndex = buffer.length;
                 ast match {
                     case EmptyTree => buffer += "undefined"
-                    case This(_) => buffer += "self"
+                    case thisAst: This => compileThis(thisAst)
                     case Return(expr) => compileAst(expr)
                     case literal: Literal => compileLiteral(literal)
                     case identifier: Ident => compileIdentifier(identifier)
@@ -511,6 +510,14 @@ trait PackageCompiler {
             }
         }
 
+        protected def compileThis(thisAst: This) {
+            if (thisAst.hasSymbolWhich(_.fullName.toString.startsWith("scala"))) {
+                buffer += thisAst.symbol.fullName.toString
+            } else {
+                buffer += "self"
+            }
+        }
+
         protected def compileIdentifier(identifier: Ident) {
             buffer += getJsName(identifier.symbol)
         }
@@ -531,8 +538,8 @@ trait PackageCompiler {
         }
 
         protected def compileNew(constructorCall: New) {
-            buffer += "new %s".format(getFullJsName(constructorCall.tpt.symbol))
-            addRequiredSymbol(constructorCall.tpt.symbol)
+            buffer += "new %s".format(getFullJsName(constructorCall.tpe.typeSymbol))
+            addRequiredSymbol(constructorCall.tpe.typeSymbol)
         }
 
         protected def compileSelect(select: Select, isSubSelect: Boolean = false, isInsideApply: Boolean = false) {
@@ -770,7 +777,7 @@ trait PackageCompiler {
         }
 
         protected def compileTypedPattern(typed: Typed, selectorName: String) {
-            compileInstanceOf(() => buffer += selectorName, typed.tpt.symbol, "is")
+            compileInstanceOf(() => buffer += selectorName, typed.tpe.typeSymbol, "is")
         }
 
         protected def compileSelectPattern(select: Select, selectorName: String) {

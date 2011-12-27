@@ -4,6 +4,6 @@ package cz.payola.web.client.graph
 class Color(val red: Int, val green: Int, val blue: Int, val alpha: Double = 1) {
     override def toString: String = {
         // TODO use String.format when it's supported by the js runtime.
-        "rgb(" + red + ", " + green + ", " +  blue + ", " + alpha + ")";
+        "rgba(" + red + ", " + green + ", " +  blue + ", " + alpha + ")";
     }
 }

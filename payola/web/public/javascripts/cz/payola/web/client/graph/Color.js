@@ -7,4 +7,8 @@ self.green = green;
 self.blue = blue;
 self.alpha = alpha;
 };
+cz.payola.web.client.graph.Color.prototype.toString = function() {
+var self = this;
+return (((((((('rgba(' + self.red) + ', ') + self.green) + ', ') + self.blue) + ', ') + self.alpha) + ')');
+};
 cz.payola.web.client.graph.Color.prototype.metaClass_ = new s2js.MetaClass('cz.payola.web.client.graph.Color', []);

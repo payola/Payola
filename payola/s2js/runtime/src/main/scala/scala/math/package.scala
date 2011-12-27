@@ -9,7 +9,7 @@ object `package` {
     @NativeJs("Math.PI")
     val Pi: Double = 0
 
-    @NativeJs("return Math.Abs(x);")
+    @NativeJs("return Math.abs(x);")
     def abs(x: AnyVal): Double = 0
 
     @NativeJs("return Math.acos(x);")

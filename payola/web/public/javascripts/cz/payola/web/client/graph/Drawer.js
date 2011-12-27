@@ -102,14 +102,10 @@ self.context.quadraticCurveTo(aX, aY, (aX - cz.payola.web.client.graph.Constants
 self.context.closePath();
 self.context.fillStyle = colorToUse.toString();
 self.context.fill();
-(function() {
-if ((! text.isEmpty())) {
 self.context.fillStyle = cz.payola.web.client.graph.Constants.COLOR_TEXT.toString();
 self.context.font = '18px Sans';
 self.context.textAlign = 'center';
 self.context.fillText(text, (vertex.x + cz.payola.web.client.graph.Constants.TEXT_COORD_CORRECTION_X), (vertex.y + cz.payola.web.client.graph.Constants.TEXT_COORD_CORRECTION_Y));
-} else {
-}})();
 };
 cz.payola.web.client.graph.Drawer.prototype.drawSelectionByRect = function(x1, y1, x2, y2, colorToUse) {
 var self = this;
@@ -126,59 +122,36 @@ self.context.stroke();
 };
 cz.payola.web.client.graph.Drawer.prototype.drawGraph = function(graph) {
 var self = this;
-var somethingSelected = false;
-scala.Predef.refArrayOps(graph).foreach(function(vertexA) { (function() {
-if (vertexA.selected) {
-somethingSelected = true;
-} else {
-}})();
-(function() {
-if (scala.Predef.refArrayOps(vertexA.neighbours).isEmpty()) {
-} else {
-}})();
-scala.Predef.refArrayOps(graph).foreach(function(vertexB) { scala.Predef.refArrayOps(vertexA.neighbours).foreach(function(vertexNeighbour) { (function() {
-if ((vertexB.id == vertexNeighbour.id)) {
-(function() {
-if ((vertexA.id < vertexB.id)) {
-self.drawEdge(vertexA, vertexB, (function() {
-if ((vertexA.selected || vertexB.selected)) {
+graph.foreach(function(vertex) { vertex.neighbours.foreach(function(neighbourVertex) { (function() {
+if ((vertex.id < neighbourVertex.id)) {
+var edgeColor = (function() {
+if ((vertex.selected || neighbourVertex.selected)) {
 return cz.payola.web.client.graph.Constants.COLOR_EDGE_SELECT;
 } else {
 return cz.payola.web.client.graph.Constants.COLOR_EDGE;
-}})());
-} else {
 }})();
-} else {
-}})();
- });
- });
- });
-var neighbourSelected = false;
-scala.Predef.refArrayOps(graph).foreach(function(vertexA) { neighbourSelected = false;
-scala.Predef.refArrayOps(graph).foreach(function(vertexB) { scala.Predef.refArrayOps(vertexA.neighbours).foreach(function(vertexNeighbour) { (function() {
-if (((vertexB.id == vertexNeighbour.id) && vertexB.selected)) {
-neighbourSelected = true;
+self.drawEdge(vertex, neighbourVertex, edgeColor);
 } else {
 }})();
  });
+ });
+var somethingSelected = graph.exists(function($x$1) { return $x$1.selected;
+ });
+graph.foreach(function(vertex) { var neighbourSelected = vertex.neighbours.exists(function($x$2) { return $x$2.selected;
+ });
+(function() {
+if (vertex.selected) {
+self.drawVertex(vertex, vertex.text, cz.payola.web.client.graph.Constants.COLOR_VERTEX_HIGH);
+} else {
 (function() {
 if (neighbourSelected) {
-} else {
-}})();
- });
-(function() {
-if (vertexA.selected) {
-self.drawVertex(vertexA, vertexA.text, cz.payola.web.client.graph.Constants.COLOR_VERTEX_HIGH);
+self.drawVertex(vertex, '', cz.payola.web.client.graph.Constants.COLOR_VERTEX_MEDIUM);
 } else {
 (function() {
 if ((! somethingSelected)) {
-self.drawVertex(vertexA, vertexA.text, cz.payola.web.client.graph.Constants.COLOR_VERTEX);
+self.drawVertex(vertex, vertex.text, cz.payola.web.client.graph.Constants.COLOR_VERTEX);
 } else {
-(function() {
-if (neighbourSelected) {
-self.drawVertex(vertexA, '', cz.payola.web.client.graph.Constants.COLOR_VERTEX_MEDIUM);
-} else {
-self.drawVertex(vertexA, '', cz.payola.web.client.graph.Constants.COLOR_VERTEX_LOW);
+self.drawVertex(vertex, '', cz.payola.web.client.graph.Constants.COLOR_VERTEX_LOW);
 }})();
 }})();
 }})();

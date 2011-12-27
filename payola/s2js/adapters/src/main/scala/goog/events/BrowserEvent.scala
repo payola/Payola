@@ -9,9 +9,9 @@ class BrowserEvent(e: s2js.adapters.js.browser.Event = null, currentTarget: Node
 
     val button: Int = 0
 
-    val clientX: Int = 0
+    val clientX: Double = 0
 
-    val clientY: Int = 0
+    val clientY: Double = 0
 
     val ctrlKey: Boolean = false
 

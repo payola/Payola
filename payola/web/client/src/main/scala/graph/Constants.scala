@@ -1,8 +1,10 @@
 package cz.payola.web.client.graph
 
-// TODO maybe consider moving these constants to classes/companion object somehow related to them. For example Color
-// object.
+// TODO maybe consider moving these constants to classes/companion object somehow related to them. I think that
+// Color.Black, Color.Red etc. are OK to be placed to the Color companion object. On the other hand COLOR_VERTEX should
+// be placed in the Drawer class.
 object Constants {
+    // TODO constant names should probably be in "PascalCase", for example "ColorEdge"
     val COLOR_EDGE = new Color(150, 150, 150, 0.5);
 
     val COLOR_EDGE_SELECT = new Color(50, 50, 50, 1);
@@ -15,7 +17,7 @@ object Constants {
 
     val COLOR_VERTEX = new Color(0, 180, 0, 0.8);
 
-    val COLOR_TEXT = new Color(150, 150, 150, 0.5);
+    val COLOR_TEXT = new Color(150, 150, 150, 1);
 
     val COLOR_SELECTION_RECT = new Color(150, 150, 150, 0.5);
 
