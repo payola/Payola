@@ -1,5 +1,6 @@
 goog.provide('s2js');
 goog.require('goog');
+goog.require('scala.RuntimeException');
 s2js.isInstanceOf = function(anObject, className) {
 var self = this;
 var classNameIsAny = (className == 'Any');

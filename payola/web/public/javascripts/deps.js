@@ -1,5 +1,7 @@
-goog.addDependency('../implicitRequires.js', [], ['s2js.MetaClass', 's2js']);
-goog.addDependency('../cz/payola/web/client/Index.js', ['cz.payola.web.client.Index'], ['cz.payola.web.client.graph.Constants', 'cz.payola.web.client.graph.Drawer', 'cz.payola.web.client.graph.Vertex', 'goog.events', 'goog.events.EventType', 'scala.collection.immutable.List']);
+goog.addDependency('../implicitRequires.js', [], ['s2js.MetaClass', 's2js', 'goog.object']);
+goog.addDependency('../cz/payola/web/client/Index.js', ['cz.payola.web.client.Index'], ['cz.payola.web.client.Point', 'cz.payola.web.client.Vector', 'cz.payola.web.client.graph.Constants', 'cz.payola.web.client.graph.Drawer', 'cz.payola.web.client.graph.Vertex', 'goog.events', 'goog.events.EventType', 'scala.None', 'scala.Some', 'scala.collection.immutable.List']);
+goog.addDependency('../cz/payola/web/client/Point.js', ['cz.payola.web.client.Point'], ['cz.payola.web.client.Vector', 'scala.IndexOutOfBoundsException', 'scala.None', 'scala.Product', 'scala.Some', 'scala.Tuple2', 'scala.runtime.ScalaRunTime']);
+goog.addDependency('../cz/payola/web/client/Vector.js', ['cz.payola.web.client.Vector'], ['scala.IndexOutOfBoundsException', 'scala.None', 'scala.Product', 'scala.Some', 'scala.Tuple2', 'scala.runtime.ScalaRunTime']);
 goog.addDependency('../cz/payola/web/client/graph/Color.js', ['cz.payola.web.client.graph.Color'], []);
 goog.addDependency('../cz/payola/web/client/graph/Constants.js', ['cz.payola.web.client.graph.Constants'], ['cz.payola.web.client.graph.Color']);
 goog.addDependency('../cz/payola/web/client/graph/Drawer.js', ['cz.payola.web.client.graph.Drawer'], ['cz.payola.web.client.graph.Constants', 'scala.math']);
@@ -70,12 +72,12 @@ goog.addDependency('../goog/useragent/product.js', ['goog.userAgent.product'], [
 goog.addDependency('../goog/useragent/product_isversion.js', ['goog.userAgent.product.isVersion'], ['goog.userAgent.product']);
 goog.addDependency('../goog/useragent/useragent.js', ['goog.userAgent'], ['goog.string']);
 goog.addDependency('../s2js/runtime/s2js/MetaClass.js', ['s2js.MetaClass'], []);
-goog.addDependency('../s2js/runtime/s2js/package.js', ['s2js'], ['goog']);
+goog.addDependency('../s2js/runtime/s2js/package.js', ['s2js'], ['goog', 'scala.RuntimeException']);
 goog.addDependency('../s2js/runtime/scala/Array.js', ['scala.Array'], []);
 goog.addDependency('../s2js/runtime/scala/Exception.js', ['scala.Exception'], []);
 goog.addDependency('../s2js/runtime/scala/IndexOutOfBoundsException.js', ['scala.IndexOutOfBoundsException'], ['scala.RuntimeException']);
 goog.addDependency('../s2js/runtime/scala/NoSuchElementException.js', ['scala.NoSuchElementException'], ['scala.RuntimeException']);
-goog.addDependency('../s2js/runtime/scala/Option.js', ['scala.None', 'scala.Option', 'scala.Some'], ['scala.IndexOutOfBoundsException', 'scala.NoSuchElementException', 'scala.Product']);
+goog.addDependency('../s2js/runtime/scala/Option.js', ['scala.None', 'scala.Option', 'scala.Some'], ['scala.IndexOutOfBoundsException', 'scala.NoSuchElementException', 'scala.Product', 'scala.runtime.ScalaRunTime']);
 goog.addDependency('../s2js/runtime/scala/Product.js', ['scala.Product'], []);
 goog.addDependency('../s2js/runtime/scala/Product1.js', ['scala.Product1'], ['scala.IndexOutOfBoundsException', 'scala.Product', 'scala.Some']);
 goog.addDependency('../s2js/runtime/scala/Product10.js', ['scala.Product10'], ['scala.IndexOutOfBoundsException', 'scala.Product', 'scala.Some']);
@@ -102,5 +104,6 @@ goog.addDependency('../s2js/runtime/scala/Tuple9.js', ['scala.Tuple9'], ['scala.
 goog.addDependency('../s2js/runtime/scala/collection/Traversable.js', [], []);
 goog.addDependency('../s2js/runtime/scala/collection/immutable/List.js', ['scala.collection.immutable.List'], ['scala.Array', 'scala.Option']);
 goog.addDependency('../s2js/runtime/scala/math/package.js', ['scala.math'], []);
+goog.addDependency('../s2js/runtime/scala/runtime/ScalaRunTime.js', ['scala.runtime.ScalaRunTime'], []);
 goog.addDependency('../s2js/runtime/types/MetaClass.js', ['types.MetaClass'], []);
 goog.addDependency('../s2js/runtime/types/package.js', ['types'], ['goog', 'scala.RuntimeException']);

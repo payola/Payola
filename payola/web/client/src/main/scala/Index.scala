@@ -17,6 +17,8 @@ object Index {
     var drawer: Drawer = null;
 
     var selectedVertexCount = 0
+    var selectionStart: Option[Point] = None
+    var moveStart: Option[Point] = None
 
     def init() {
         // Initialize the canvas and drawer
@@ -29,6 +31,8 @@ object Index {
 
         // Attach events to the canvas.
         listen[BrowserEvent](canvas, EventType.MOUSEDOWN, onMouseDown _)
+        listen[BrowserEvent](canvas, EventType.MOUSEMOVE, onMouseMove _)
+        listen[BrowserEvent](canvas, EventType.MOUSEUP, onMouseUp _)
 
         // Initialize the graph.
         graph = getGraph
@@ -37,26 +41,26 @@ object Index {
     }
 
     private def getGraph: List[Vertex] = {
-        val v0 = new Vertex(0, 15, 15, "0", null)
-        val v1 = new Vertex(1, 120, 40, "1", null)
-        val v2 = new Vertex(2, 50, 120, "2", null)
-        val v3 = new Vertex(3, 180, 60, "3", null)
-        val v4 = new Vertex(4, 240, 110, "4", null)
-        val v5 = new Vertex(5, 160, 160, "5", null)
-        val v6 = new Vertex(6, 240, 240, "6", null)
-        val v7 = new Vertex(7, 270, 320, "7", null)
-        val v8 = new Vertex(8, 160, 240, "8", null)
-        val v9 = new Vertex(9, 120, 400, "9", null)
-        val v10 = new Vertex(10, 300, 80, "10", null)
-        val v11 = new Vertex(11, 320, 30, "11", null)
-        val v12 = new Vertex(12, 300, 200, "12", null)
-        val v13 = new Vertex(13, 350, 210, "13", null)
-        val v14 = new Vertex(14, 300, 400, "14", null)
-        val v15 = new Vertex(15, 80, 310, "15", null)
-        val v16 = new Vertex(16, 15, 240, "16", null)
-        val v17 = new Vertex(17, 15, 300, "17", null)
-        val v18 = new Vertex(18, 400, 15, "18", null)
-        val v19 = new Vertex(19, 400, 120, "19", null)
+        val v0 = new Vertex(0, Point(15, 15), "0", null)
+        val v1 = new Vertex(1, Point(120, 40), "1", null)
+        val v2 = new Vertex(2, Point(50, 120), "2", null)
+        val v3 = new Vertex(3, Point(180, 60), "3", null)
+        val v4 = new Vertex(4, Point(240, 110), "4", null)
+        val v5 = new Vertex(5, Point(160, 160), "5", null)
+        val v6 = new Vertex(6, Point(240, 240), "6", null)
+        val v7 = new Vertex(7, Point(270, 320), "7", null)
+        val v8 = new Vertex(8, Point(160, 240), "8", null)
+        val v9 = new Vertex(9, Point(120, 400), "9", null)
+        val v10 = new Vertex(10, Point(300, 80), "10", null)
+        val v11 = new Vertex(11, Point(320, 30), "11", null)
+        val v12 = new Vertex(12, Point(300, 200), "12", null)
+        val v13 = new Vertex(13, Point(350, 210), "13", null)
+        val v14 = new Vertex(14, Point(300, 400), "14", null)
+        val v15 = new Vertex(15, Point(80, 310), "15", null)
+        val v16 = new Vertex(16, Point(15, 240), "16", null)
+        val v17 = new Vertex(17, Point(15, 300), "17", null)
+        val v18 = new Vertex(18, Point(400, 15), "18", null)
+        val v19 = new Vertex(19, Point(400, 120), "19", null)
 
         v0.neighbours = List(v1, v2, v9, v11, v16)
         v1.neighbours = List(v0, v5, v6)
@@ -83,58 +87,89 @@ object Index {
     }
 
     def onMouseDown(e: BrowserEvent) {
+        val position = Point(e.clientX, e.clientY)
+        val vertex = getTouchedVertex(position)
         var needsToRedraw = false;
-        val touchedVertex = getTouchedVertex(e.clientX, e.clientY)
 
-        if (!e.shiftKey) {
-            needsToRedraw = deselectAll(graph)
-        }
-
-        if (touchedVertex.isDefined) {
+        // Mouse down near a vertex.
+        if (vertex.isDefined) {
             if (e.shiftKey) {
-                needsToRedraw = invertVertexSelection(touchedVertex.get);
+                needsToRedraw = invertVertexSelection(vertex.get) || needsToRedraw
             } else {
-                needsToRedraw = selectVertex(touchedVertex.get)
+                if (!vertex.get.selected) {
+                    needsToRedraw = deselectAll(graph)
+                }
+                moveStart = Some(position)
+                needsToRedraw = selectVertex(vertex.get) || needsToRedraw
             }
+
+        // Mouse down somewhere in the inter-vertex space.
+        } else {
+            if (!e.shiftKey) {
+                needsToRedraw = deselectAll(graph)
+            }
+            selectionStart = Some(position)
         }
 
         if (needsToRedraw) {
             drawer.redraw(graph)
         }
+    }
 
-        /*mouse_useToleration = true
-        mouse_buttonDownMove = false
-        mouse_buttonDown = true
-        mouse_x = e.clientX
-        mouse_y = e.clientY
-        select_touchedSelected = false
-        select_VsLastTime = Array[Vertex]()*/
-/*
-        var needsToRedraw = false
-
-        if (touchedVertex != null) {
-
-        } else {
-
-            if (!keyboard_shiftDown) {
-                needsToRedraw = deselectAll(graph)
+    def onMouseMove(e: BrowserEvent) {
+        if (selectionStart.isDefined) {
+            /*
+            if(scala.math.abs(select_rectOriginX - e.clientX) > mouse_moveToleration ||
+                scala.math.abs(select_rectOriginY - e.clientY) > mouse_moveToleration) {
+                mouse_useToleration = false
             }
-            select_rect = true
-            select_rectOriginX = mouse_x
-            select_rectOriginY = mouse_y
-        }
+            selectionByRect(e, graph)
+            */
 
-        }*/
+            /*
+            val start = selectionStart.get
+            drawer.redraw(graph)
+            drawer.drawSelectionByRect(start.x, start.y, e.clientX, e.clientY, COLOR_SELECTION_RECT)*/
+        } else if (moveStart.isDefined) {
+            val end = Point(e.clientX, e.clientY)
+            val difference = end.subtract(moveStart.get)
+            
+            graph.foreach { vertex =>
+                if(vertex.selected) {
+                    vertex.position = vertex.position.add(difference)
+
+                    /*
+                    resultX = diffX + vertex.X
+                    vertex.X = if(resultX < 0) { 0 } else { if(resultX > canvas_width) { canvas_width } else {
+                        resultX }}
+
+                    resultY = diffY + vertex.Y
+                    vertex.Y = if(resultY < 0) { 0 } else { if(resultY > canvas_height) { canvas_height } else {
+                        resultY }}*/
+                }
+            }
+            
+            moveStart = Some(end)
+            drawer.redraw(graph)
+        }
+    }
+    
+    def onMouseUp(e: BrowserEvent) {
+        selectionStart = None
+        moveStart = None
+        drawer.redraw(graph)
     }
 
-    def getTouchedVertex(x: Double, y: Double): Option[Vertex] = {
+    def getTouchedVertex(p: Point): Option[Vertex] = {
+        val bottomRight = Vector(VERTEX_WIDTH / 2, VERTEX_HEIGHT / 2)
+        val topLeft = bottomRight.multiply(-1)
         graph.find {vertex =>
-            isPointInRect(x, y, vertex.x - VERTEX_WIDTH / 2, vertex.y - VERTEX_HEIGHT / 2, VERTEX_WIDTH, VERTEX_HEIGHT)
+            isPointInRect(p, vertex.position.add(topLeft), vertex.position.add(bottomRight))
         }
     }
 
-    def isPointInRect(x: Double, y: Double, rectX: Double, rectY: Double, rectW: Double, rectH: Double): Boolean = {
-        x >= rectX && x <= (rectX + rectW) && y >= rectY && y <= (rectY + rectH)
+    def isPointInRect(p: Point, topLeft: Point, bottomRight: Point): Boolean = {
+        p.x >= topLeft.x && p.x <= bottomRight.x && p.y >= topLeft.y && p.y <= bottomRight.y
     }
     
     def setVertexSelection(vertex: Vertex, selected: Boolean): Boolean = {
@@ -199,79 +234,6 @@ object Index {
     /////////////////////////////////////////////////////////////////////////////
     //vertex processing
     /////////////////////////////////////////////////////////////////////////////
-
-    //boolean coordinates function
-    def isPointInRect(pointX: Int, pointY: Int,
-        rectLeft: Int, rectUp: Int, rectRight: Int, rectDown: Int): Boolean ={
-
-        (pointX >= rectLeft) && (pointX <= rectRight) &&
-            (pointY >= rectUp) && (pointY <= rectDown)
-    }
-
-    def deselectAll(graph: Array[Vertex]): Boolean = {
-
-        var smthChanged = false
-
-        if(select_Vs > 0){
-            graph.foreach((vertex: Vertex) =>
-                if(vertex.selected) {
-                    deselectVertex(vertex)
-                    smthChanged = true
-                }
-            )
-        }
-
-        smthChanged
-    }
-
-    //changes state of the input vertex to "selected" increases count of sjelected vertices
-    def selectVertex(vertex: Vertex): Boolean = {
-
-        if(!vertex.selected) {
-            select_Vs += 1
-            vertex.selected = true
-        }
-
-        vertex.selected
-    }
-
-    //changes state of the input vertex to "not selected" decreases count of selected vertices
-    def deselectVertex(vertex: Vertex): Boolean = {
-
-        if(vertex.selected) {
-            select_Vs -= 1
-            vertex.selected = false
-        }
-
-        vertex.selected
-    }
-
-    def changeSelection(vertex: Vertex): Boolean = {
-
-        if(vertex.selected) {
-            deselectVertex(vertex)
-        } else {
-            selectVertex(vertex)
-        }
-    }
-
-    def getTouchedVertex(mouseX: Int, mouseY: Int, graph: Array[Vertex]): Vertex = {
-
-        graph.foreach {
-            (vertex: Vertex) =>
-
-                if(isPointInRect(mouseX, mouseY,
-                    vertex.X - VERTEX_WIDTH / 2, vertex.Y - VERTEX_HEIGHT / 2,
-                    vertex.X + VERTEX_WIDTH / 2, vertex.Y + VERTEX_HEIGHT / 2)) {
-
-                    return vertex
-                }
-        }
-
-        null
-    }
-
-
 
     //changes coordinates of all selected vertices according to difference between canvas.mouseX/Y and e.clientX/Y
     values

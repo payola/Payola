@@ -12,6 +12,10 @@ self._4 = _4;
 goog.object.extend(self, new scala.Product());
 goog.object.extend(self, new scala.Product4());
 };
+scala.Tuple4.prototype.toString = function() {
+var self = this;
+return (((((((('(' + self._1) + ',') + self._2) + ',') + self._3) + ',') + self._4) + ')');
+};
 scala.Tuple4.prototype.copy = function(_1, _2, _3, _4) {
 var self = this;
 if (typeof(_1) === 'undefined') { _1 = self._1; }
@@ -25,6 +29,10 @@ var self = this;
 return 'Tuple4';
 };
 scala.Tuple4.prototype.metaClass_ = new s2js.MetaClass('scala.Tuple4', [scala.Product4, scala.Product]);
+scala.Tuple4.toString = function() {
+var self = this;
+return 'Tuple4';
+};
 scala.Tuple4.unapply = function(x$0) {
 var self = this;
 return (function() {

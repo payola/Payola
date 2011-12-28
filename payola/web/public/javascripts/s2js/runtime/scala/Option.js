@@ -4,6 +4,7 @@ goog.provide('scala.Some');
 goog.require('scala.IndexOutOfBoundsException');
 goog.require('scala.NoSuchElementException');
 goog.require('scala.Product');
+goog.require('scala.runtime.ScalaRunTime');
 scala.Option = function() {
 var self = this;
 self.$self = undefined;
@@ -125,6 +126,10 @@ var self = this;
 if (typeof(x) === 'undefined') { x = self.x; }
 return new scala.Some(x);
 };
+scala.Some.prototype.toString = function() {
+var self = this;
+return scala.runtime.ScalaRunTime._toString(self);
+};
 scala.Some.prototype.productPrefix = function() {
 var self = this;
 return 'Some';
@@ -158,6 +163,10 @@ var self = this;
 return (function() {
 throw new scala.NoSuchElementException('None.get');
 })();
+};
+scala.None.toString = function() {
+var self = this;
+return 'None';
 };
 scala.None.productPrefix = function() {
 var self = this;
@@ -196,6 +205,10 @@ var self = this;
 return scala.None;
 };
 scala.Option.metaClass_ = new s2js.MetaClass('scala.Option', []);
+scala.Some.toString = function() {
+var self = this;
+return 'Some';
+};
 scala.Some.unapply = function(x$0) {
 var self = this;
 return (function() {

@@ -17,6 +17,10 @@ self._9 = _9;
 goog.object.extend(self, new scala.Product());
 goog.object.extend(self, new scala.Product9());
 };
+scala.Tuple9.prototype.toString = function() {
+var self = this;
+return (((((((((((((((((('(' + self._1) + ',') + self._2) + ',') + self._3) + ',') + self._4) + ',') + self._5) + ',') + self._6) + ',') + self._7) + ',') + self._8) + ',') + self._9) + ')');
+};
 scala.Tuple9.prototype.copy = function(_1, _2, _3, _4, _5, _6, _7, _8, _9) {
 var self = this;
 if (typeof(_1) === 'undefined') { _1 = self._1; }
@@ -35,6 +39,10 @@ var self = this;
 return 'Tuple9';
 };
 scala.Tuple9.prototype.metaClass_ = new s2js.MetaClass('scala.Tuple9', [scala.Product9, scala.Product]);
+scala.Tuple9.toString = function() {
+var self = this;
+return 'Tuple9';
+};
 scala.Tuple9.unapply = function(x$0) {
 var self = this;
 return (function() {

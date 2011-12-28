@@ -10,6 +10,10 @@ self._2 = _2;
 goog.object.extend(self, new scala.Product());
 goog.object.extend(self, new scala.Product2());
 };
+scala.Tuple2.prototype.toString = function() {
+var self = this;
+return (((('(' + self._1) + ',') + self._2) + ')');
+};
 scala.Tuple2.prototype.copy = function(_1, _2) {
 var self = this;
 if (typeof(_1) === 'undefined') { _1 = self._1; }
@@ -21,6 +25,10 @@ var self = this;
 return 'Tuple2';
 };
 scala.Tuple2.prototype.metaClass_ = new s2js.MetaClass('scala.Tuple2', [scala.Product2, scala.Product]);
+scala.Tuple2.toString = function() {
+var self = this;
+return 'Tuple2';
+};
 scala.Tuple2.unapply = function(x$0) {
 var self = this;
 return (function() {

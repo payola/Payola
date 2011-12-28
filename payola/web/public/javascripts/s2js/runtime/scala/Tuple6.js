@@ -14,6 +14,10 @@ self._6 = _6;
 goog.object.extend(self, new scala.Product());
 goog.object.extend(self, new scala.Product6());
 };
+scala.Tuple6.prototype.toString = function() {
+var self = this;
+return (((((((((((('(' + self._1) + ',') + self._2) + ',') + self._3) + ',') + self._4) + ',') + self._5) + ',') + self._6) + ')');
+};
 scala.Tuple6.prototype.copy = function(_1, _2, _3, _4, _5, _6) {
 var self = this;
 if (typeof(_1) === 'undefined') { _1 = self._1; }
@@ -29,6 +33,10 @@ var self = this;
 return 'Tuple6';
 };
 scala.Tuple6.prototype.metaClass_ = new s2js.MetaClass('scala.Tuple6', [scala.Product6, scala.Product]);
+scala.Tuple6.toString = function() {
+var self = this;
+return 'Tuple6';
+};
 scala.Tuple6.unapply = function(x$0) {
 var self = this;
 return (function() {
