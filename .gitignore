@@ -7,10 +7,11 @@ tmp/
 Tools/
 
 # IntelliJ Idea files.
-Payola/.idea/ant.xml
-Payola/.idea/uiDesigner.xml
-Payola/.idea/workspace.xml
-Payola/.idea/*highlighting.xml
+payola/.idea/uiDesigner.xml
+payola/.idea/workspace.xml
+payola/.idea/*highlighting.xml
 
 # OS X files
 .DS_Store
+
+payola/.idea/misc.xml
