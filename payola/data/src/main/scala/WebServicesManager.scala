@@ -1,13 +1,15 @@
-package cz.payola.data;
+package cz.payola.data
+
+import scala.collection.mutable
 
 /**
  * Manages communication with web services - with all payola web services and local web service.
  *
- * User: Ondra Heřmánek
+ * User: Ondřej Heřmánek
  * Date: 15.12.11, 19:21
  */
-class WebServicesManager extends IPayolaWebService with ILocalWebService {
-    var webServices = List[IPayolaWebService](new FakeWebService());
+class WebServicesManager {
+    var webServices = mutable.Set[IPayolaWebService]();
 
     /**
      * Evaluates given SPARQL query.
@@ -16,44 +18,42 @@ class WebServicesManager extends IPayolaWebService with ILocalWebService {
      *
      * @return returns result in String.
      */
-    def evaluateSparqlQuery(query: String) : String = {
+    def evaluateSparqlQuery(query: String): QueryResult = {
         val result = new StringBuilder();
 
-        for(val service <- this.webServices){
+        // Get result from every initialized web service
+        for (val service <- this.webServices) {
             result.append(service.evaluateSparqlQuery(query));
         }
 
-        return result.toString();
+        return new QueryResult(result.toString());
     }
 
     /**
      * Gets items related to given item by specified relation type.
      *
-     * @param id - ID of item to search related items for
+     * @param id - ID of item to search for related items
      * @param relationType - relation type of related items
      *
      * @return returns result in String
      */
-    def getRelatedItems(id: String, relationType: String) : String = {
+    def getRelatedItems(id: String, relationType: String): QueryResult = {
         val result = new StringBuilder();
 
-        for(val service <- this.webServices){
-            result.append(service.getRelatedItems("", relationType));
+        // TODO:
+        val query = id + relationType;
+
+        for (val service <- this.webServices) {
+            result.append(service.evaluateSparqlQuery(query));
         }
 
-        return result.toString();
+        return new QueryResult(result.toString());
     }
 
     /**
-     * Expects text to be a XML file content and its nodes are RDF triples.
-     *
-     * @param text - text with XML file content
-     *
-     * @return returns list of nodes. if text has no XML nodes, returns empty list.
+     *  Fills webServices member with available web services
      */
-    def spiltQueryResultToTriples(text: String): List[String] = {
-        val xmlText = xml.XML.loadString(text);
-        
-
+    def initWebServices() = {
+        this.webServices += new FakeWebService();
     }
 }

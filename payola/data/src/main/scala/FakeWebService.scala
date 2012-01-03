@@ -1,15 +1,16 @@
-package cz.payola.data;
+package cz.payola.data
+
+import scala.io.Source
 
 class FakeWebService extends IPayolaWebService {
     def evaluateSparqlQuery(query: String): String = {
-        val result = xml.XML.loadFile("data.xml").toString();
+        val source = Source.fromURL(getClass.getResource("/data.xml"));
+        val result = new StringBuilder();
 
-        print(result);
+        for (val line <- source.getLines()) {
+            result.append(line);
+        }
 
-        return result;
-    }
-
-    def getRelatedItems(id: String, relationType: String): String = {
-        return xml.XML.loadFile("data.xml").toString();
+        return result.toString();
     }
 }
