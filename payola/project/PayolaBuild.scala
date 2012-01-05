@@ -121,7 +121,7 @@ object PayolaBuild extends Build {
         file("s2js/runtime"),
         settings = s2jsSettings ++ Seq(
             scalacOptions += "-Xplugin:" + S2JsSettings.compilerJar.absolutePath,
-            scalacOptions += "-P:s2js:output:" + WebSettings.javascriptsTarget.absolutePath
+            scalacOptions += "-P:s2js:outputDirectory:" + WebSettings.javascriptsTarget.absolutePath
         )
     ).dependsOn(
         s2jsAdaptersProject,
@@ -166,7 +166,7 @@ object PayolaBuild extends Build {
         file("web/client"),
         settings = payolaSettings ++ Seq(
             scalacOptions += "-Xplugin:" + S2JsSettings.compilerJar.absolutePath,
-            scalacOptions += "-P:s2js:output:" + WebSettings.javascriptsTarget.absolutePath,
+            scalacOptions += "-P:s2js:outputDirectory:" + WebSettings.javascriptsTarget.absolutePath,
 
             // Delete the generated directories and js files, but not the internal libraries.
             cleanGen := {

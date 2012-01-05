@@ -4,8 +4,8 @@ goog.require('scala.Product');
 goog.require('scala.Some');
 scala.Product6 = function() {
 var self = this;
-goog.object.extend(self, new scala.Product());
 };
+goog.inherits(scala.Product6, scala.Product);
 scala.Product6.prototype.productArity = function() {
 var self = this;
 return 6;

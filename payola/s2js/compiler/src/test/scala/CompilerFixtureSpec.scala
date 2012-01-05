@@ -1,16 +1,17 @@
 package s2js.compiler
 
-import java.io._
-
-import scala.io.Source
-
+import java.io.File
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.fixture.{ConfigMapFixture, FixtureSpec}
+import scala.tools.nsc.io
+import scala.io.Source
 
 abstract class CompilerFixtureSpec extends FixtureSpec with ConfigMapFixture with BeforeAndAfterAll
 {
     var compiler: ScalaToJsCompiler = null
-    var workingDirectory: File = new File("")
+
+    var workingDirectory = new File("")
+
     var testId = 0
 
     override def beforeAll(configMap: Map[String, Any]) {
@@ -18,21 +19,20 @@ abstract class CompilerFixtureSpec extends FixtureSpec with ConfigMapFixture wit
         workingDirectory.mkdirs()
 
         // The packages should be ignored so we know exactly, where the js file will be placed.
-        compiler = new ScalaToJsCompiler(configMap("cp").toString, workingDirectory.getAbsolutePath, true)
+        compiler = new ScalaToJsCompiler(configMap("cp").toString, workingDirectory.getAbsolutePath, false)
     }
 
     def scalaCode(scalaSource: String): Expector = {
+        val fileName = workingDirectory.getAbsolutePath + "/Test" + testId
+        testId += 1
+
         // Compile the scala source.
-        val scalaFile = new File(workingDirectory.getAbsolutePath + "/Test" + testId + ".scala")
-        val writer = new FileWriter(scalaFile)
-        writer.write(scalaSource)
-        writer.close()
+        val scalaFile = new File(fileName + ".scala")
+        io.File(scalaFile).writeAll(scalaSource)
         compiler.compileFiles(List(scalaFile.getAbsolutePath))
 
         // Retrieve content of the javascript file.
-        val compiled = Source.fromFile(workingDirectory.getAbsolutePath + "/Test" + testId + ".js").mkString
-        testId += 1
-
+        val compiled = Source.fromFile(fileName + ".js").mkString
         new Expector(compiled)
     }
 

@@ -9,8 +9,8 @@ cz.payola.web.client.Vector = function(x, y) {
 var self = this;
 self.x = x;
 self.y = y;
-goog.object.extend(self, new scala.Product());
-};
+goog.base(self);};
+goog.inherits(cz.payola.web.client.Vector, scala.Product);
 cz.payola.web.client.Vector.prototype.add = function(v) {
 var self = this;
 return new cz.payola.web.client.Vector((self.x + v.x), (self.y + v.y));

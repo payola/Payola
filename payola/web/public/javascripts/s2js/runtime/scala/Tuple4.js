@@ -9,9 +9,9 @@ self._1 = _1;
 self._2 = _2;
 self._3 = _3;
 self._4 = _4;
-goog.object.extend(self, new scala.Product());
-goog.object.extend(self, new scala.Product4());
+goog.base(self);goog.object.extend(self, new scala.Product());
 };
+goog.inherits(scala.Tuple4, scala.Product4);
 scala.Tuple4.prototype.toString = function() {
 var self = this;
 return (((((((('(' + self._1) + ',') + self._2) + ',') + self._3) + ',') + self._4) + ')');

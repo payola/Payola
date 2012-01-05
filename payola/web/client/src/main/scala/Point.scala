@@ -1,7 +1,7 @@
 package cz.payola.web.client
 
-case class Point(x: Double, y: Double) {
-    // TODO add support for overriden opertators like "+" to compiler.
+case class Point(var x: Double, var y: Double) {
+    // TODO add support for overridden operators like "+" to compiler.
     def add(v: Vector): Point = {
         Point(x + v.x, y + v.y)
     }

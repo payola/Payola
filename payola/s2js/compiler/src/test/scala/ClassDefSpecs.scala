@@ -252,8 +252,9 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             self.x = x;
                             self.y = y;
                             self.z = z;
-                            goog.object.extend(self, new scala.Product());
+                            goog.base(self);
                         };
+                        goog.inherits(A, scala.Product);
                         A.prototype.copy = function(x, y, z) {
                             var self = this;
                             if (typeof(x) === 'undefined') { x = self.x; }

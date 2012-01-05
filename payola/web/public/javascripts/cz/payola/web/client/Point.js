@@ -10,8 +10,8 @@ cz.payola.web.client.Point = function(x, y) {
 var self = this;
 self.x = x;
 self.y = y;
-goog.object.extend(self, new scala.Product());
-};
+goog.base(self);};
+goog.inherits(cz.payola.web.client.Point, scala.Product);
 cz.payola.web.client.Point.prototype.add = function(v) {
 var self = this;
 return new cz.payola.web.client.Point((self.x + v.x), (self.y + v.y));

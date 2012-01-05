@@ -1,12 +1,14 @@
 package s2js.adapters.js.browser
 
-class Window {
+class Window
+{
     val sessionStorage: Storage = null
 
     val localStorage: Storage = null
 
-    val innerWidth: Int = 0
-    val innerHeight: Int = 0
+    val innerWidth: Double = 0
+
+    val innerHeight: Double = 0
 
     def get(key: String) = ""
 
@@ -16,11 +18,13 @@ class Window {
 
     def setTimeout(fn: () => Unit, milliseconds: Int) {}
 
-    object location {
+    object location
+    {
         var href = ""
     }
 
-    object history {
+    object history
+    {
         // TODO
     }
 

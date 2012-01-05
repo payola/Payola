@@ -1,10 +1,12 @@
 goog.addDependency('../implicitRequires.js', [], ['s2js.MetaClass', 's2js', 'goog.object']);
-goog.addDependency('../cz/payola/web/client/Index.js', ['cz.payola.web.client.Index'], ['cz.payola.web.client.Point', 'cz.payola.web.client.Vector', 'cz.payola.web.client.graph.Constants', 'cz.payola.web.client.graph.Drawer', 'cz.payola.web.client.graph.Vertex', 'goog.events', 'goog.events.EventType', 'scala.None', 'scala.Some', 'scala.collection.immutable.List']);
+goog.addDependency('../cz/payola/web/client/Index.js', ['cz.payola.web.client.Index'], ['cz.payola.web.client.Layer', 'cz.payola.web.client.Point', 'cz.payola.web.client.graph.Drawer', 'cz.payola.web.client.graph.Graph', 'goog.events', 'goog.events.EventType', 'scala.None', 'scala.Some']);
+goog.addDependency('../cz/payola/web/client/Layer.js', ['cz.payola.web.client.Layer'], []);
 goog.addDependency('../cz/payola/web/client/Point.js', ['cz.payola.web.client.Point'], ['cz.payola.web.client.Vector', 'scala.IndexOutOfBoundsException', 'scala.None', 'scala.Product', 'scala.Some', 'scala.Tuple2', 'scala.runtime.ScalaRunTime']);
 goog.addDependency('../cz/payola/web/client/Vector.js', ['cz.payola.web.client.Vector'], ['scala.IndexOutOfBoundsException', 'scala.None', 'scala.Product', 'scala.Some', 'scala.Tuple2', 'scala.runtime.ScalaRunTime']);
 goog.addDependency('../cz/payola/web/client/graph/Color.js', ['cz.payola.web.client.graph.Color'], []);
 goog.addDependency('../cz/payola/web/client/graph/Constants.js', ['cz.payola.web.client.graph.Constants'], ['cz.payola.web.client.graph.Color']);
-goog.addDependency('../cz/payola/web/client/graph/Drawer.js', ['cz.payola.web.client.graph.Drawer'], ['cz.payola.web.client.graph.Constants', 'scala.math']);
+goog.addDependency('../cz/payola/web/client/graph/Drawer.js', ['cz.payola.web.client.graph.Drawer', 'cz.payola.web.client.graph.Quadrant'], ['cz.payola.web.client.Point', 'cz.payola.web.client.Vector', 'cz.payola.web.client.graph.Constants', 'scala.math']);
+goog.addDependency('../cz/payola/web/client/graph/Graph.js', ['cz.payola.web.client.graph.Graph'], ['cz.payola.web.client.Point', 'cz.payola.web.client.Vector', 'cz.payola.web.client.graph.Constants', 'cz.payola.web.client.graph.Vertex', 'scala.collection.immutable.List']);
 goog.addDependency('../cz/payola/web/client/graph/Vertex.js', ['cz.payola.web.client.graph.Vertex'], []);
 goog.addDependency('../goog/base.js', [], []);
 goog.addDependency('../goog/array/array.js', ['goog.array', 'goog.array.ArrayLike'], ['goog.asserts']);
@@ -90,7 +92,6 @@ goog.addDependency('../s2js/runtime/scala/Product7.js', ['scala.Product7'], ['sc
 goog.addDependency('../s2js/runtime/scala/Product8.js', ['scala.Product8'], ['scala.IndexOutOfBoundsException', 'scala.Product', 'scala.Some']);
 goog.addDependency('../s2js/runtime/scala/Product9.js', ['scala.Product9'], ['scala.IndexOutOfBoundsException', 'scala.Product', 'scala.Some']);
 goog.addDependency('../s2js/runtime/scala/RuntimeException.js', ['scala.RuntimeException'], ['scala.Exception']);
-goog.addDependency('../s2js/runtime/scala/Throwable.js', ['scala.Throwable'], []);
 goog.addDependency('../s2js/runtime/scala/Tuple1.js', ['scala.Tuple1'], ['scala.None', 'scala.Product', 'scala.Product1', 'scala.Some']);
 goog.addDependency('../s2js/runtime/scala/Tuple10.js', ['scala.Tuple10'], ['scala.None', 'scala.Product', 'scala.Product10', 'scala.Some']);
 goog.addDependency('../s2js/runtime/scala/Tuple2.js', ['scala.Tuple2'], ['scala.None', 'scala.Product', 'scala.Product2', 'scala.Some']);
@@ -105,5 +106,3 @@ goog.addDependency('../s2js/runtime/scala/collection/Traversable.js', [], []);
 goog.addDependency('../s2js/runtime/scala/collection/immutable/List.js', ['scala.collection.immutable.List'], ['scala.Array', 'scala.Option']);
 goog.addDependency('../s2js/runtime/scala/math/package.js', ['scala.math'], []);
 goog.addDependency('../s2js/runtime/scala/runtime/ScalaRunTime.js', ['scala.runtime.ScalaRunTime'], []);
-goog.addDependency('../s2js/runtime/types/MetaClass.js', ['types.MetaClass'], []);
-goog.addDependency('../s2js/runtime/types/package.js', ['types'], ['goog', 'scala.RuntimeException']);

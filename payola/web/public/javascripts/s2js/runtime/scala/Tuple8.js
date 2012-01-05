@@ -13,9 +13,9 @@ self._5 = _5;
 self._6 = _6;
 self._7 = _7;
 self._8 = _8;
-goog.object.extend(self, new scala.Product());
-goog.object.extend(self, new scala.Product8());
+goog.base(self);goog.object.extend(self, new scala.Product());
 };
+goog.inherits(scala.Tuple8, scala.Product8);
 scala.Tuple8.prototype.toString = function() {
 var self = this;
 return (((((((((((((((('(' + self._1) + ',') + self._2) + ',') + self._3) + ',') + self._4) + ',') + self._5) + ',') + self._6) + ',') + self._7) + ',') + self._8) + ')');

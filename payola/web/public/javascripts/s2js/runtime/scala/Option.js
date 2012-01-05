@@ -7,9 +7,8 @@ goog.require('scala.Product');
 goog.require('scala.runtime.ScalaRunTime');
 scala.Option = function() {
 var self = this;
-self.$self = undefined;
-goog.object.extend(self, new scala.Product());
-};
+goog.base(self);};
+goog.inherits(scala.Option, scala.Product);
 scala.Option.prototype.isDefined = function() {
 var self = this;
 return (! self.isEmpty());
@@ -178,7 +177,7 @@ return 0;
 };
 scala.None.productElement = function($x$1) {
 var self = this;
-return (function($selector_2) {
+return (function($selector_1) {
 if (true) {
 return (function() {
 throw new scala.IndexOutOfBoundsException($x$1.toString());
