@@ -1,77 +1,102 @@
 package s2js.compiler
 
-import scala.tools.nsc.Global
-import scala.tools.nsc.Phase
-import scala.tools.nsc.plugins.Plugin
-import scala.tools.nsc.plugins.PluginComponent
-import java.io.{FileWriter, BufferedWriter, File}
+import java.io.File
+import s2js.compiler.components.PackageDefCompiler
+import scala.collection.mutable
+import tools.nsc.plugins.{PluginComponent, Plugin}
+import tools.nsc.io
+import tools.nsc.{Phase, Global}
 
-class ScalaToJsPlugin(val global: Global) extends Plugin {
+/** A Scala to JavaScript compiler plugin. */
+class ScalaToJsPlugin(val global: Global) extends Plugin
+{
+    /** The name of this plugin. */
     val name = "s2js"
 
+    /** A one-line description of the plugin. */
     val description = "Scala to Javascript compiler plugin"
 
-    val components = List[PluginComponent](Component)
+    /** The components that this phase defines. */
+    val components = List[PluginComponent](ScalaToJsComponent)
 
-    /**The output directory where the compile javascript files are stored. */
-    var output = new File("")
+    /** The output directory where the compiled javascript files are stored. */
+    private var outputDirectory = new File(".")
 
-    var ignorePackages = false
+    /** Whether the output directory structure should correspond to the packages or not. */
+    private var createPackageStructure = true
 
-    private object Component extends PluginComponent with PackageCompiler {
+    /** A component that is part of the ScalaToJsPlugin. */
+    private object ScalaToJsComponent extends PluginComponent
+    {
+        /** The global environment; overridden by instantiation in Global. */
         val global = ScalaToJsPlugin.this.global
 
-        import global._
-
+        /** List of phase names, this phase should run after.  */
         val runsAfter = List[String]("refchecks");
 
-        val phaseName = ScalaToJsPlugin.this.name
+        /** The name of the phase. */
+        val phaseName = "s2js-phase"
 
-        def newPhase(prev: Phase): Phase = {
-            new ScalaToJsPhase(prev)
-        }
+        /** A Scala to JavaScript plugin phase. */
+        private class ScalaToJsPhase(prev: Phase) extends StdPhase(prev)
+        {
+            /**
+              * Executes the phase on the specified CompilationUnit.
+              * @param unit The CompilationUnit to execute the phase on.
+              */
+            def apply(unit: global.CompilationUnit) {
+                try {
+                    if (unit.body.isInstanceOf[Global#PackageDef]) {
+                        val packageDef = unit.body.asInstanceOf[Global#PackageDef]
+                        val packageName = packageDef.symbol.fullName
+                        val packagePath = if (createPackageStructure) packageName.replace('.', '/') else "."
+                        val fileName = unit.source.file.name.replace(".scala", ".js")
+                        val outputFile = new File(outputDirectory.getAbsolutePath + "/" + packagePath + "/" + fileName)
+                        outputFile.getParentFile.mkdirs()
 
-        class ScalaToJsPhase(prev: Phase) extends StdPhase(prev) {
-            override def name = {
-                ScalaToJsPlugin.this.name
-            }
-
-            def apply(unit: CompilationUnit) {
-                // Prepare the output file.
-                val packagePath = if (ignorePackages) "" else unit.body.symbol.fullName.replace('.', '/') + "/"
-                val outputFileName = unit.source.file.name.replace(".scala", ".js")
-                val outputFile = new File(output.getAbsolutePath + "/" + packagePath + outputFileName)
-                outputFile.getParentFile.mkdirs()
-
-                // Compile the ast into js and write the result to the output file.
-                val writer = new BufferedWriter(new FileWriter(outputFile))
-                writer.write(compile(unit.source.file, unit.body.asInstanceOf[PackageDef]))
-                writer.close()
-            }
-        }
-
-    }
-
-    override def processOptions(options: List[String], error: String => Unit) {
-        val optionsMap = options.foldLeft(Map.empty[String, String]) {
-            (map, option) => {
-                val index = option.indexOf(":")
-                if (index > 0) {
-                    map ++ Map(option.substring(0, index) -> option.slice(index + 1, option.length))
-                } else {
-                    map ++ Map(option -> "")
+                        val compiler = new PackageDefCompiler(global, unit.source.file, packageDef)
+                        io.File(outputFile).writeAll(compiler.compile())
+                    } else {
+                        throw new ScalaToJsException(
+                            "The %s source file must contain a package definition.".format(unit.source.file.name)
+                        )
+                    }
+                } catch {
+                    case e: ScalaToJsException => global.error(e.errorMsg)
                 }
             }
         }
 
-        if (!optionsMap.contains("output")) {
-            error("You must provide an [output] option")
+        /**
+          * The phase factory.
+          * @param prev The previous phase.
+          * @return The created phase.
+          */
+        def newPhase(prev: Phase): Phase = {
+            new ScalaToJsPhase(prev)
         }
-        output = new File(optionsMap.getOrElse("output", ""))
+    }
 
-        if (optionsMap.contains("ignorePackages")) {
-            ignorePackages = true
+    /**
+      * Handles all plugin-specific options.
+      * @param options The options passed to the plugin.
+      */
+    override def processOptions(options: List[String], error: String => Unit) {
+        val optionsMap = new mutable.HashMap[String, String]
+        options.foreach {option =>
+            val index = option.indexOf(":")
+            if (index > 0) {
+                optionsMap += option.take(index) -> option.drop(index + 1)
+            } else {
+                optionsMap += option -> ""
+            }
+        }
+
+        if (optionsMap.contains("outputDirectory")) {
+            outputDirectory = new File(optionsMap.getOrElse("outputDirectory", ""))
+        }
+        if (optionsMap.contains("createPackageStructure")) {
+            createPackageStructure = optionsMap.getOrElse("createPackageStructure", "true") == "true"
         }
     }
 }
-

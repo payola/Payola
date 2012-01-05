@@ -6,4 +6,6 @@ abstract class Element extends Node {
     var innerHTML = ""
 
     var className = ""
+
+    def appendChild(e: Element) {}
 }

@@ -2,20 +2,20 @@
 <project version="4">
   <component name="JavadocGenerationManager">
     <option name="OUTPUT_DIRECTORY" />
-    <option name="OPTION_SCOPE" value="protected" />
-    <option name="OPTION_HIERARCHY" value="true" />
-    <option name="OPTION_NAVIGATOR" value="true" />
-    <option name="OPTION_INDEX" value="true" />
-    <option name="OPTION_SEPARATE_INDEX" value="true" />
-    <option name="OPTION_DOCUMENT_TAG_USE" value="false" />
-    <option name="OPTION_DOCUMENT_TAG_AUTHOR" value="false" />
-    <option name="OPTION_DOCUMENT_TAG_VERSION" value="false" />
-    <option name="OPTION_DOCUMENT_TAG_DEPRECATED" value="true" />
-    <option name="OPTION_DEPRECATED_LIST" value="true" />
-    <option name="OTHER_OPTIONS" value="" />
+    <option value="protected" name="OPTION_SCOPE" />
+    <option value="true" name="OPTION_HIERARCHY" />
+    <option value="true" name="OPTION_NAVIGATOR" />
+    <option value="true" name="OPTION_INDEX" />
+    <option value="true" name="OPTION_SEPARATE_INDEX" />
+    <option value="false" name="OPTION_DOCUMENT_TAG_USE" />
+    <option value="false" name="OPTION_DOCUMENT_TAG_AUTHOR" />
+    <option value="false" name="OPTION_DOCUMENT_TAG_VERSION" />
+    <option value="true" name="OPTION_DOCUMENT_TAG_DEPRECATED" />
+    <option value="true" name="OPTION_DEPRECATED_LIST" />
+    <option value="" name="OTHER_OPTIONS" />
     <option name="HEAP_SIZE" />
     <option name="LOCALE" />
-    <option name="OPEN_IN_BROWSER" value="true" />
+    <option value="true" name="OPEN_IN_BROWSER" />
   </component>
   <component name="ProjectResources">
     <default-html-doctype>http://www.w3.org/1999/xhtml</default-html-doctype>

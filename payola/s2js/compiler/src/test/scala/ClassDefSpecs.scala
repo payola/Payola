@@ -240,24 +240,31 @@ class ClassDefSpecs extends CompilerFixtureSpec
                 } shouldCompileTo {
                     """
                         goog.provide('A');
-                        goog.require('java.lang.IndexOutOfBoundsException');
+                        goog.require('scala.IndexOutOfBoundsException');
                         goog.require('scala.None');
                         goog.require('scala.Product');
                         goog.require('scala.Some');
+                        goog.require('scala.Tuple3');
+                        goog.require('scala.runtime.ScalaRunTime');
 
                         A = function(x, y, z) {
                             var self = this;
                             self.x = x;
                             self.y = y;
                             self.z = z;
-                            goog.object.extend(self, new scala.Product());
+                            goog.base(self);
                         };
+                        goog.inherits(A, scala.Product);
                         A.prototype.copy = function(x, y, z) {
                             var self = this;
                             if (typeof(x) === 'undefined') { x = self.x; }
                             if (typeof(y) === 'undefined') { y = self.y; }
                             if (typeof(z) === 'undefined') { z = self.z; }
                             return new A(x, y, z);
+                        };
+                        A.prototype.toString = function() {
+                            var self = this;
+                            return scala.runtime.ScalaRunTime._toString(self);
                         };
                         A.prototype.productPrefix = function() {
                             var self = this;
@@ -281,12 +288,16 @@ class ClassDefSpecs extends CompilerFixtureSpec
                                 }
                                 if (true) {
                                     return (function() {
-                                        throw new java.lang.IndexOutOfBoundsException($x$1.toString());
+                                        throw new scala.IndexOutOfBoundsException($x$1.toString());
                                      })();
                                 }
                             })($x$1);
                         };
                         A.prototype.metaClass_ = new s2js.MetaClass('A', [scala.Product]);
+                        A.toString = function() {
+                            var self = this;
+                            return 'A';
+                        };
                         A.unapply = function(x$0) {
                             var self = this;
                             return (function() {
