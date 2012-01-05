@@ -159,8 +159,7 @@ self.drawVertex(vertex, '', cz.payola.web.client.graph.Constants.ColorVertexLow)
 };
 cz.payola.web.client.graph.Drawer.prototype.clear = function(context, x, y, width, height) {
 var self = this;
-context.fillStyle = cz.payola.web.client.graph.Constants.ColorBackground.toString();
-context.fillRect(x, y, width, height);
+context.clearRect(x, y, width, height);
 };
 cz.payola.web.client.graph.Drawer.prototype.redraw = function(graph) {
 var self = this;

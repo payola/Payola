@@ -195,8 +195,7 @@ class Drawer(val layerEdges: Layer, val layerVertices: Layer, val layerText: Lay
     }
 
     def clear(context: CanvasRenderingContext2D, x: Double, y: Double, width: Double, height: Double) {
-        context.fillStyle = ColorBackground.toString
-        context.fillRect(x, y, width, height)
+        context.clearRect(x, y, width, height)
     }
 
     def redraw(graph: Graph) {
