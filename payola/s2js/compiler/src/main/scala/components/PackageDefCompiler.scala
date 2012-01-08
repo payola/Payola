@@ -13,19 +13,6 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
     val dependencyManager = new DependencyManager(this)
 
     /**
-      * Map of package fully qualified name replacements. Ordered by transformation priority (if A is a prefix of B,
-      * then the A should be first).
-      */
-    private val packageReplacementMap = LinkedHashMap(
-        "java.lang" -> "scala",
-        "scala.this" -> "scala",
-        "s2js.adapters.js.browser" -> "",
-        "s2js.adapters.js.dom" -> "",
-        "s2js.adapters" -> "",
-        "s2js.runtime" -> ""
-    )
-
-    /**
       * Returns whether the specified symbol is an internal symbol that mustn't be used in the JavaScript.
       * @param symbol The symbol to check.
       * @return True if the symbol is internal, false otherwise.
@@ -70,6 +57,16 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
       * @return The replacement Some(oldPackage, newPackage) if such was found, None oterwise.
       */
     def symbolPackageReplacement(symbol: Global#Symbol): Option[(String, String)] = {
+        // Ordered by transformation priority (if A is a prefix of B, then the A should be first).
+        val packageReplacementMap = LinkedHashMap(
+            "java.lang" -> "scala",
+            "scala.this" -> "scala",
+            "s2js.adapters.js.browser" -> "",
+            "s2js.adapters.js.dom" -> "",
+            "s2js.adapters" -> "",
+            "s2js.runtime" -> ""
+        )
+
         packageReplacementMap.find(r => symbol.fullName.startsWith(r._1))
     }
 
