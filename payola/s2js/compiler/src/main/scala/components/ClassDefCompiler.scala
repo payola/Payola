@@ -66,6 +66,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     /** Map of operators indexed by the corresponding method name. */
     private val operatorTokenMap = Map(
         "eq" -> "===",
+        "ne" -> "!==",
         "$eq$eq" -> "==",
         "$bang$eq" -> "!=",
         "$greater" -> ">",
@@ -89,8 +90,9 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
       */
     private def symbolIsOperator(symbol: Symbol): Boolean = {
         val symbolName = symbol.name.toString
+        val anyRefOperators = Set("eq", "ne", "$eq$eq", "$bang$eq")
         operatorTokenMap.contains(symbolName) &&
-            (typeIsPrimitive(symbol.owner.tpe) || symbolName == "eq" || symbolName == "$eq$eq")
+            (typeIsPrimitive(symbol.owner.tpe) || anyRefOperators.contains(symbolName))
     }
 
     /**

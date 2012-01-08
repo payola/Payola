@@ -39,7 +39,7 @@ class MiscellaneousSpecs extends CompilerFixtureSpec
             }
     }
 	
-	it("Custom operators are supported.") {
+	it("Custom operators are supported and default operators are not overriden.") {
 		configMap =>
 			scalaCode {
 				"""
@@ -54,6 +54,10 @@ class MiscellaneousSpecs extends CompilerFixtureSpec
 						def m() {
 							val a = new A() + new A() - new A() * new A()
 							val b = ! new A()
+							val c = a eq b
+							val d = a ne b
+							val e = a == b
+							val f = a != b
 						}
 					}
 				"""
@@ -75,6 +79,10 @@ class MiscellaneousSpecs extends CompilerFixtureSpec
 						var self = this;
 						var a = new A().$plus(new A()).$minus(new A().$times(new A()));
 						var b = new A().unary_$bang();
+						var c = (a === b);
+						var d = (a !== b);
+						var e = (a == b);
+						var f = (a != b);
 					};
 					o.metaClass_ = new s2js.MetaClass('o', []);
 				"""
