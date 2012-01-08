@@ -4,11 +4,11 @@ import graph.{Vertex, Graph, Drawer}
 import s2js.adapters.js.browser._
 import s2js.adapters.js.dom._
 import s2js.adapters.goog.events._
-import s2js.adapters.goog.events.{EventType, BrowserEvent, EventHandler}
+import s2js.adapters.goog.events.{EventType, BrowserEvent}
 
 object Index {
     // TODO will be model
-    var graph: Graph = new Graph(null);
+    var graph: Graph = new Graph(null, null);
 
     // TODO will be view.
     var layerVertices: Layer = null;
@@ -105,7 +105,7 @@ object Index {
             val end = Point(event.clientX, event.clientY)
             val difference = end.subtract(moveStart.get)
             
-            graph.getGraph.foreach { vertex =>
+            graph.getVertices.foreach { vertex =>
                 if(vertex.selected) {
                     vertex.position = vertex.position.add(difference)
 

@@ -20,8 +20,6 @@ object Constants {
 
     val ColorSelectionRect = new Color(150, 150, 150, 0.5);
 
-    val ColorBackground = new Color(255, 200, 200, 1); //TODO alpha should be 0
-
     val EdgeWidth: Double = 1;
 
     //the higher, the more are edges straight
@@ -35,8 +33,4 @@ object Constants {
     val VertexCornerRadius: Double = 5;
 
     val SelectLineWidth: Double = 1;
-
-    val TextCoordCorrectionX = -1;
-
-    val TextCoordCorrectionY = 6;
 }
