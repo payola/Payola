@@ -60,31 +60,10 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     /** The first and currently the only used constructor. TODO support multiple constructors. */
     protected val constructorDefDef = constructors.headOption.map(_.asInstanceOf[Global#DefDef])
 
-    private var uniqueId = 0
-
+    /** Buffer containing the compiled JavaScript code. */
     protected var buffer: mutable.ListBuffer[String] = null
 
-    private val internalMembers = Array(
-        "hashCode",
-        "equals",
-        "canEqual",
-        "readResolve"
-    )
-
-    private val jsKeywords = Array(
-        "abstract", "boolean", "break", "byte", "case", "catch", "char", "class", "const", "continue", "debugger",
-        "default", "delete", "do", "double", "else", "enum", "export", "extends", "false", "final", "finally", "float",
-        "for", "function", "goto", "if", "implements", "import", "in", "instanceof", "int", "interface", "long",
-        "native", "new", "null", "package", "private", "protected", "public", "return", "short", "static", "super",
-        "switch", "synchronized", "this", "throw", "throws", "transient", "true", "try", "typeof", "var", "void",
-        "volatile", "while", "with"
-    )
-
-    private val jsDefaultMembers = Array(
-        "constructor", "hasOwnProperty", "isPrototypeOf", "propertyIsEnumerable", "apply", "arguments", "call",
-        "prototype", "superClass_", "metaClass_"
-    )
-
+    /** Map of operators indexed by the corresponding method name. */
     private val operatorTokenMap = Map(
         "eq" -> "===",
         "$eq$eq" -> "==",
@@ -103,23 +82,33 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         "unary_$bang" -> "!"
     )
 
+    /**
+      * Returns whether the specified symbol corresponds to a JavaScript operator.
+      * @param symbol The symbol to check.
+      * @return True if the symbol corresponds to an operator, false otherwise.
+      */
     private def symbolIsOperator(symbol: Symbol): Boolean = {
         val symbolName = symbol.name.toString
         operatorTokenMap.contains(symbolName) &&
             (typeIsPrimitive(symbol.owner.tpe) || symbolName == "eq" || symbolName == "$eq$eq")
     }
 
-    private def getUniqueId(): Int = {
-        uniqueId += 1
-        uniqueId
-    }
-
-    private def isInternalTypeMember(symbol: Global#Symbol): Boolean = {
+    /**
+      * Returns whether the symbol is a member of an internal type.
+      * @param symbol The symbol to check.
+      * @return True if the symbol belongs to an internal type, false otherwise.
+      */
+    private def symbolIsInternalMember(symbol: Global#Symbol): Boolean = {
         packageDefCompiler.symbolIsInternal(symbol.enclClass)
     }
 
-    private def hasReturnValue(symbol: Global#Symbol): Boolean = {
-        symbol.nameString != "Unit"
+    /**
+      * Returns true if the type is the NoType or the Unit.
+      * @param tpe The type to check.
+      * @return True if the type is empty, false otherwise.
+      */
+    private def typeIsEmpty(tpe: Global#Type): Boolean = {
+        tpe == NoType || tpe.typeSymbol.fullName == "scala.Unit"
     }
 
     private def getJsString(value: String): String = {
@@ -134,7 +123,27 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         getLocalJsName(symbol.name.toString.trim, !symbol.isMethod && symbol.isSynthetic)
     }
 
+    private var uniqueId = 0
+
+    private def getUniqueId(): Int = {
+        uniqueId += 1
+        uniqueId
+    }
+
     private def getLocalJsName(name: String, forcePrefix: Boolean = false): String = {
+        val jsKeywords = List(
+            "abstract", "boolean", "break", "byte", "case", "catch", "char", "class", "const", "continue", "debugger",
+            "default", "delete", "do", "double", "else", "enum", "export", "extends", "false", "final", "finally",
+            "float", "for", "function", "goto", "if", "implements", "import", "in", "instanceof", "int", "interface",
+            "long", "native", "new", "null", "package", "private", "protected", "public", "return", "short", "static",
+            "super", "switch", "synchronized", "this", "throw", "throws", "transient", "true", "try", "typeof", "var",
+            "void", "volatile", "while", "with"
+        )
+        val jsDefaultMembers = List(
+            "constructor", "hasOwnProperty", "isPrototypeOf", "propertyIsEnumerable", "apply", "arguments", "call",
+            "prototype", "superClass_", "metaClass_"
+        )
+
         // Synthetic symbols get a prefix to avoid name collision with other symbols. Also if the symbol name is a js
         // keyword then it gets the prefix.
         if (forcePrefix || jsKeywords.contains(name) || jsDefaultMembers.contains(name)) {
@@ -205,8 +214,15 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     protected def isIgnoredMember(member: Global#Symbol): Boolean = {
+        val internalMembers = List(
+            "hashCode",
+            "equals",
+            "canEqual",
+            "readResolve"
+        )
+
         internalMembers.contains(member.nameString) || // An internal member
-            isInternalTypeMember(member) || // A member inherited from an internal Type
+            symbolIsInternalMember(member) || // A member inherited from an internal Type
             member.owner != classDef.symbol || // A member that isn't directly owned by the class
             member.isDeferred || // An abstract member without implementation
             member.isConstructor || // TODO support multiple constructors
@@ -227,7 +243,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         compileParameterDeclaration(defDef.vparamss.flatten)
         buffer += ") {\nvar self = this;\n"
         compileParameterInitialization(defDef.vparamss.flatten)
-        val hasReturn = hasReturnValue(defDef.tpt.symbol)
+        val hasReturn = !typeIsEmpty(defDef.tpt.tpe)
         bufferAppendNativeCodeOr(defDef.symbol, () => compileAstStatement(defDef.rhs, hasReturn))
         buffer += "};\n"
     }
@@ -391,7 +407,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         compileParameterDeclaration(function.vparams)
         buffer += ") { "
         compileParameterInitialization(function.vparams)
-        compileAstStatement(function.body, hasReturnValue(function.body.tpe.typeSymbol))
+        compileAstStatement(function.body, !typeIsEmpty(function.body.tpe))
         buffer += " }"
     }
 
@@ -461,7 +477,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         }
 
         // TODO find better way how to determine whether the qualifier is an object
-        Array(select, select.qualifier).foreach {ast =>
+        List(select, select.qualifier).foreach {ast =>
             if (ast.hasSymbolWhich(_.toString.startsWith("object "))) {
                 packageDefCompiler.dependencyManager.addRequiredSymbol(ast.symbol)
             }
@@ -562,9 +578,9 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         buffer += "(function() {\nif ("
         compileAst(condition.cond)
         buffer += ") {\n"
-        compileAstStatement(condition.thenp, hasReturnValue(condition.tpe.typeSymbol))
+        compileAstStatement(condition.thenp, !typeIsEmpty(condition.tpe))
         buffer += "} else {\n"
-        compileAstStatement(condition.elsep, hasReturnValue(condition.tpe.typeSymbol))
+        compileAstStatement(condition.elsep, !typeIsEmpty(condition.tpe))
         buffer += "}})()"
     }
 
@@ -601,7 +617,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
 
     protected def compileMatch(matchAst: Global#Match) {
         val selectorName = getLocalJsName("selector_" + getUniqueId(), true)
-        val hasReturn = hasReturnValue(matchAst.tpe.typeSymbol)
+        val hasReturn = !typeIsEmpty(matchAst.tpe)
         buffer += "(function(%s) {\n".format(selectorName)
         matchAst.cases.foreach(caseDef => compileCase(caseDef, selectorName, hasReturn))
         buffer += "})("
