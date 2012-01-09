@@ -2,8 +2,11 @@ package cz.payola.web.client.graph
 
 import cz.payola.web.client.{Layer, Vector, Point}
 import s2js.adapters.js.dom.CanvasRenderingContext2D
+import Constants._
 
-class Drawer(val layerEdges: Layer, val layerVertices: Layer, val layerText: Layer) {
+class Drawer(val layerEdges: Layer, val layerVertices: Layer, val layerText: Layer)
+{
+    val layers = List(layerEdges, layerVertices, layerText)
 
     /*def drawSelectionByRect(origin: Point, direction: Point, colorToUse: Color) {
         layerEdges.context.strokeStyle = colorToUse.toString
@@ -16,15 +19,24 @@ class Drawer(val layerEdges: Layer, val layerVertices: Layer, val layerText: Lay
     }*/
 
     def drawGraph(graph: Graph) {
+        graph.vertices.foreach { vertex =>
+            val color =
+                if (vertex.selected) {
+                    ColorVertexHigh
+                } else if (graph.edges.exists(e =>
+                    (e.vertexA.eq(vertex) && e.vertexB.selected) || (e.vertexB.eq(vertex) && e.vertexA.selected))) {
+                    ColorVertexMedium
+                } else if (graph.containsSelectedVertex) {
+                    ColorVertexDefault
+                } else {
+                    ColorVertexLow
+                }
 
-        graph.getVertices.foreach { vertex =>
-            vertex.draw(layerVertices.context)
+            vertex.draw(layerVertices.context, color)
             vertex.information.draw(layerText.context)
         }
 
-        graph.getEdges.foreach { edge =>
-            edge.draw(layerEdges.context)
-        }
+        graph.edges.foreach(_.draw(layerEdges.context))
 
 
         /*
@@ -55,15 +67,14 @@ class Drawer(val layerEdges: Layer, val layerVertices: Layer, val layerText: Lay
         }*/
     }
 
-    def clear(context: CanvasRenderingContext2D, x: Double, y: Double, width: Double, height: Double) {
-        context.clearRect(x, y, width, height)
+    def clear(context: CanvasRenderingContext2D, topLeft: Point, size: Vector) {
+        val bottomRight = topLeft + size
+        context.clearRect(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
     }
 
     def redraw(graph: Graph) {
-        //TODO conditional redrawing of "redraw-required-sections"
-        clear(layerEdges.context, 0, 0, layerEdges.getWidth, layerEdges.getHeight)
-        clear(layerVertices.context, 0, 0, layerVertices.getWidth, layerVertices.getHeight)
-        clear(layerText.context, 0, 0, layerText.getWidth, layerText.getWidth)
+        // TODO conditional redrawing of "redraw-required-sections"
+        layers.foreach(layer => clear(layer.context, Point.Zero, layer.getSize))
         drawGraph(graph)
     }
 }

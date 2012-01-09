@@ -12,13 +12,21 @@ self.x = x;
 self.y = y;
 goog.base(self);};
 goog.inherits(cz.payola.web.client.Point, scala.Product);
-cz.payola.web.client.Point.prototype.add = function(v) {
+cz.payola.web.client.Point.prototype.$plus = function(v) {
 var self = this;
 return new cz.payola.web.client.Point((self.x + v.x), (self.y + v.y));
 };
-cz.payola.web.client.Point.prototype.subtract = function(p) {
+cz.payola.web.client.Point.prototype.$minus = function(p) {
 var self = this;
 return new cz.payola.web.client.Vector((self.x - p.x), (self.y - p.y));
+};
+cz.payola.web.client.Point.prototype.$less$eq = function(p) {
+var self = this;
+return ((self.x <= p.x) && (self.y <= p.y));
+};
+cz.payola.web.client.Point.prototype.$greater$eq = function(p) {
+var self = this;
+return ((self.x >= p.x) && (self.y >= p.y));
 };
 cz.payola.web.client.Point.prototype.toVector = function() {
 var self = this;

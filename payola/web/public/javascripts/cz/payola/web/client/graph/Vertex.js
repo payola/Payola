@@ -1,18 +1,41 @@
 goog.provide('cz.payola.web.client.graph.Vertex');
-cz.payola.web.client.graph.Vertex = function(id, position, text, neighbours) {
+goog.require('cz.payola.web.client.graph.Constants');
+goog.require('cz.payola.web.client.graph.Information');
+cz.payola.web.client.graph.Vertex = function(id, position, text) {
 var self = this;
 self.id = id;
 self.position = position;
 self.text = text;
-self.neighbours = neighbours;
 self.selected = false;
+self.information = new cz.payola.web.client.graph.Information(self.text, self.position);
 };
-cz.payola.web.client.graph.Vertex.prototype.x = function() {
+cz.payola.web.client.graph.Vertex.prototype.draw = function(context, color) {
 var self = this;
-return self.position.x;
+self.drawRoundedRectangle(context, self.position.$plus(cz.payola.web.client.graph.Constants.VertexSize.$div(-2.0)), cz.payola.web.client.graph.Constants.VertexSize, cz.payola.web.client.graph.Constants.VertexCornerRadius);
+context.fillStyle = color.toString();
+context.fill();
 };
-cz.payola.web.client.graph.Vertex.prototype.y = function() {
+cz.payola.web.client.graph.Vertex.prototype.drawRoundedRectangle = function(context, position, size, radius) {
 var self = this;
-return self.position.y;
+context.beginPath();
+var aX = (position.x + radius);
+var aY = position.y;
+context.moveTo(aX, aY);
+aX = position.x;
+aY = position.y;
+context.quadraticCurveTo(aX, aY, aX, (aY + radius));
+aX = position.x;
+aY = (position.y + size.y);
+context.lineTo(aX, (aY - radius));
+context.quadraticCurveTo(aX, aY, (aX + radius), aY);
+aX = (position.x + size.x);
+aY = (position.y + size.y);
+context.lineTo((aX - radius), aY);
+context.quadraticCurveTo(aX, aY, aX, (aY - radius));
+aX = (position.x + size.x);
+aY = position.y;
+context.lineTo(aX, (aY + radius));
+context.quadraticCurveTo(aX, aY, (aX - radius), aY);
+context.closePath();
 };
 cz.payola.web.client.graph.Vertex.prototype.metaClass_ = new s2js.MetaClass('cz.payola.web.client.graph.Vertex', []);

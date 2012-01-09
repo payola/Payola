@@ -4,6 +4,7 @@ goog.require('scala.None');
 goog.require('scala.Product');
 goog.require('scala.Some');
 goog.require('scala.Tuple2');
+goog.require('scala.math');
 goog.require('scala.runtime.ScalaRunTime');
 cz.payola.web.client.Vector = function(x, y) {
 var self = this;
@@ -11,13 +12,25 @@ self.x = x;
 self.y = y;
 goog.base(self);};
 goog.inherits(cz.payola.web.client.Vector, scala.Product);
-cz.payola.web.client.Vector.prototype.add = function(v) {
+cz.payola.web.client.Vector.prototype.$plus = function(v) {
 var self = this;
 return new cz.payola.web.client.Vector((self.x + v.x), (self.y + v.y));
 };
-cz.payola.web.client.Vector.prototype.multiply = function(d) {
+cz.payola.web.client.Vector.prototype.unary_$minus = function() {
+var self = this;
+return new cz.payola.web.client.Vector(self.x.unary_$minus(), self.y.unary_$minus());
+};
+cz.payola.web.client.Vector.prototype.$times = function(d) {
 var self = this;
 return new cz.payola.web.client.Vector((self.x * d), (self.y * d));
+};
+cz.payola.web.client.Vector.prototype.$div = function(d) {
+var self = this;
+return new cz.payola.web.client.Vector((self.x / d), (self.y / d));
+};
+cz.payola.web.client.Vector.prototype.length = function() {
+var self = this;
+return scala.math.sqrt((scala.math.pow(self.x, 2.0) + scala.math.pow(self.y, 2.0)));
 };
 cz.payola.web.client.Vector.prototype.copy = function(x, y) {
 var self = this;

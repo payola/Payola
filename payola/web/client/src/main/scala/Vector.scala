@@ -1,12 +1,25 @@
 package cz.payola.web.client
 
+import scala.math._
+
 case class Vector(x: Double, y: Double) {
-    // TODO add support for overridden operators like "+" to compiler.
-    def add(v: Vector): Vector = {
+    def +(v: Vector): Vector = {
         Vector(x + v.x, y + v.y)
     }
     
-    def multiply(d: Double): Vector = {
+    def unary_-(): Vector = {
+        Vector(-x, -y)
+    }
+    
+    def *(d: Double): Vector = {
         Vector(x * d, y * d)
+    }
+
+    def /(d: Double): Vector = {
+        Vector(x / d, y / d)
+    }
+    
+    def length: Double = {
+        sqrt(pow(x, 2) + pow (y, 2))
     }
 }

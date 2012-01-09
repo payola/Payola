@@ -1,6 +1,6 @@
 package cz.payola.web.client
 
-import graph.{Vertex, Graph, Drawer}
+import graph.{Edge, Vertex, Graph, Drawer}
 import s2js.adapters.js.browser._
 import s2js.adapters.js.dom._
 import s2js.adapters.goog.events._
@@ -8,53 +8,88 @@ import s2js.adapters.goog.events.{EventType, BrowserEvent}
 
 object Index {
     // TODO will be model
-    var graph: Graph = new Graph(null, null);
+    var graph: Graph = null;
 
     // TODO will be view.
-    var layerVertices: Layer = null;
-    var layerEdges: Layer = null;
-    var layerText: Layer = null;
     var drawer: Drawer = null;
 
     var selectionStart: Option[Point] = None
+
     var moveStart: Option[Point] = None
 
     def init() {
-        // Initialize the canvas and drawer
+        // Initialize the drawer
+        val edgesLayer = createLayer()
+        val verticesLayer = createLayer()
+        val textLayer = createLayer()
+        drawer = new Drawer(edgesLayer, verticesLayer, textLayer);
 
-        //TODO position the canvases
-        //edges are the lowest layer
-        val canvasEdges = document.createElement[Canvas]("canvas")
-        val contextEdges = canvasEdges.getContext[CanvasRenderingContext2D]("2d")
-        layerEdges = new Layer(canvasEdges, contextEdges)
-        layerEdges.setWidth(window.innerWidth)
-        layerEdges.setHeight(window.innerHeight)
-        document.getElementById("canvas-holder").appendChild(canvasEdges)
+        // Attach events to the canvas.
+        val mouseLayer = createLayer()
+        listen[BrowserEvent](mouseLayer.canvas, EventType.MOUSEDOWN, onMouseDown _)
+        listen[BrowserEvent](mouseLayer.canvas, EventType.MOUSEMOVE, onMouseMove _)
+        listen[BrowserEvent](mouseLayer.canvas, EventType.MOUSEUP, onMouseUp _)
 
-        //vertices are over edges
-        val canvasVertices = document.createElement[Canvas]("canvas")
-        val contextVertices = canvasVertices.getContext[CanvasRenderingContext2D]("2d")
-        layerVertices = new Layer(canvasVertices, contextVertices)
-        layerVertices.setWidth(window.innerWidth)
-        layerVertices.setHeight(window.innerHeight)
-        document.getElementById("canvas-holder").appendChild(canvasVertices)
-
-        //text is on top
-        val canvasText = document.createElement[Canvas]("canvas")
-        val contextText = canvasText.getContext[CanvasRenderingContext2D]("2d")
-        layerText = new Layer(canvasText, contextText)
-        layerText.setWidth(window.innerWidth)
-        layerText.setHeight(window.innerHeight)
-        document.getElementById("canvas-holder").appendChild(canvasText)
-
-        drawer = new Drawer(layerEdges, layerVertices, layerText);
-
-        // Attach events to the canvas. //TODO may be required to attach to all canvases
-        listen[BrowserEvent](canvasText, EventType.MOUSEDOWN, onMouseDown _)
-        listen[BrowserEvent](canvasText, EventType.MOUSEMOVE, onMouseMove _)
-        listen[BrowserEvent](canvasText, EventType.MOUSEUP, onMouseUp _)
-        
+        // Initialize the graph and draw it.
+        initGraph()
         drawer.redraw(graph)
+    }
+
+    def createLayer(): Layer = {
+        val canvas = document.createElement[Canvas]("canvas")
+        val context = canvas.getContext[CanvasRenderingContext2D]("2d")
+        val layer = new Layer(canvas, context)
+
+        document.getElementById("canvas-holder").appendChild(canvas)
+        layer.setSize(Vector(window.innerWidth, window.innerHeight))
+        layer
+    }
+
+    def initGraph() {
+        val v0 = new Vertex(0, Point(15, 15), "0")
+        val v1 = new Vertex(1, Point(120, 40), "1")
+        val v2 = new Vertex(2, Point(50, 120), "2")
+        val v3 = new Vertex(3, Point(180, 60), "3")
+        val v4 = new Vertex(4, Point(240, 110), "4")
+        val v5 = new Vertex(5, Point(160, 160), "5")
+        val v6 = new Vertex(6, Point(240, 240), "6")
+        val v7 = new Vertex(7, Point(270, 320), "7")
+        val v8 = new Vertex(8, Point(160, 240), "8")
+        val v9 = new Vertex(9, Point(120, 400), "9")
+        val v10 = new Vertex(10, Point(300, 80), "10")
+        val v11 = new Vertex(11, Point(320, 30), "11")
+        val v12 = new Vertex(12, Point(300, 200), "12")
+        val v13 = new Vertex(13, Point(350, 210), "13")
+        val v14 = new Vertex(14, Point(300, 400), "14")
+        val v15 = new Vertex(15, Point(80, 310), "15")
+        val v16 = new Vertex(16, Point(15, 240), "16")
+        val v17 = new Vertex(17, Point(15, 300), "17")
+        val v18 = new Vertex(18, Point(400, 15), "18")
+        val v19 = new Vertex(19, Point(400, 120), "19")
+        
+        val vertices = List[Vertex](
+            v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19
+        )
+        val edges = List[Edge](
+            new Edge(v0, v1), new Edge(v0, v2), new Edge(v0, v9), new Edge(v0, v11), new Edge(v0, v16),
+            new Edge(v1, v5), new Edge(v1, v6),
+            new Edge(v2, v3), new Edge(v2, v5), new Edge(v2, v6), new Edge(v2, v8),
+            new Edge(v3, v4), new Edge(v3, v5), new Edge(v3, v11),
+            new Edge(v4, v7), new Edge(v4, v8), new Edge(v4, v11),
+            new Edge(v5, v6), new Edge(v5, v12),
+            new Edge(v6, v7), new Edge(v6, v9),
+            new Edge(v7, v9),
+            new Edge(v8, v9), new Edge(v8, v16),
+            new Edge(v9, v10), new Edge(v9, v13), new Edge(v9, v15),
+            new Edge(v10, v11), new Edge(v10, v12),
+            new Edge(v11, v13), new Edge(v11, v18), new Edge(v11, v19),
+            new Edge(v12, v13),
+            new Edge(v13, v14), new Edge(v13, v19),
+            new Edge(v15, v16), new Edge(v15, v17),
+            new Edge(v16, v17)
+        )
+        
+        graph = new Graph(vertices, edges)
     }
 
     def onMouseDown(event: BrowserEvent) {
@@ -103,20 +138,11 @@ object Index {
             drawer.drawSelectionByRect(start.x, start.y, event.clientX, event.clientY, COLOR_SELECTION_RECT)*/
         } else if (moveStart.isDefined) {
             val end = Point(event.clientX, event.clientY)
-            val difference = end.subtract(moveStart.get)
+            val difference = end - moveStart.get
             
-            graph.getVertices.foreach { vertex =>
+            graph.vertices.foreach { vertex =>
                 if(vertex.selected) {
-                    vertex.position = vertex.position.add(difference)
-
-                    /*
-                    resultX = diffX + vertex.X
-                    vertex.X = if(resultX < 0) { 0 } else { if(resultX > canvas_width) { canvas_width } else {
-                        resultX }}
-
-                    resultY = diffY + vertex.Y
-                    vertex.Y = if(resultY < 0) { 0 } else { if(resultY > canvas_height) { canvas_height } else {
-                        resultY }}*/
+                    vertex.position += difference
                 }
             }
             
