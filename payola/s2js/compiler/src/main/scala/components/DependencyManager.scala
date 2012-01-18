@@ -30,7 +30,7 @@ class DependencyManager(private val packageDefCompiler: PackageDefCompiler)
       * @param symbol The symbol to add.
       */
     def addProvidedSymbol(symbol: Global#Symbol) {
-        provideHashSet += packageDefCompiler.getSymbolJsFullName(symbol)
+        provideHashSet += packageDefCompiler.getSymbolFullJsName(symbol)
     }
 
     /**
@@ -39,7 +39,7 @@ class DependencyManager(private val packageDefCompiler: PackageDefCompiler)
       */
     def addRequiredSymbol(symbol: Global#Symbol) {
         if (!packageDefCompiler.symbolIsInternal(symbol)) {
-            addRequiredSymbol(packageDefCompiler.getSymbolJsFullName(symbol))
+            addRequiredSymbol(packageDefCompiler.getSymbolFullJsName(symbol))
         }
     }
 

@@ -18,7 +18,10 @@ class ObjectCompiler(packageDefCompiler: PackageDefCompiler, classDef: Global#Cl
         if (parentClass.isDefined && parentConstructorCall.isDefined) {
             // Because the object may be a package object or a companion object, the members that already exist
             // there need to be preserved.
-            buffer += "goog.object.extend(%s, new %s".format(fullJsName, getJsName(parentClass.get.symbol))
+            buffer += "goog.object.extend(%s, new %s".format(
+                fullJsName,
+                packageDefCompiler.getSymbolJsName(parentClass.get.symbol)
+            )
             compileParameterValues(parentConstructorCall.get.args)
             buffer += ");\n"
         }

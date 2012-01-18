@@ -71,11 +71,21 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
     }
 
     /**
+      * Returns JavaScript name of a symbol. If the symbol is local, then local JavaScript name is returned. Otherwise
+      * fully qualified JavaScript name is returned.
+      * @param symbol The symbol whose name should be returned.
+      * @return The name.
+      */
+    def getSymbolJsName(symbol: Global#Symbol): String = {
+        if (symbol.isLocal) getSymbolLocalJsName(symbol) else getSymbolFullJsName(symbol)
+    }
+
+    /**
       * Returns fully qualified JavaScript name of a symbol.
       * @param symbol The symbol whose name should be returned.
       * @return The name.
       */
-    def getSymbolJsFullName(symbol: Global#Symbol): String = {
+    def getSymbolFullJsName(symbol: Global#Symbol): String = {
         var name = symbol.fullName;
 
         // Perform the namespace transformation (use the longest matching namespace).
@@ -92,6 +102,44 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
 
         // Drop the "package" package that isn't used in the JavaScript.
         name.replace(".package", "")
+    }
+
+    /**
+      * Returns JavaScript name of a symbol that should be used in a local scope.
+      * @param symbol The symbol whose name should be returned.
+      * @return The name.
+      */
+    def getSymbolLocalJsName(symbol: Global#Symbol): String = {
+        getLocalJsName(symbol.name.toString.trim, !symbol.isMethod && symbol.isSynthetic)
+    }
+
+    /**
+      * Returns JavaScript name corresponding to the specified scala name.
+      * @param name The scala name that should be converted.
+      * @param forcePrefix Whether the name prefix is enforced. Default false.
+      * @return The name.
+      */
+    def getLocalJsName(name: String, forcePrefix: Boolean = false): String = {
+        val jsKeywords = List(
+            "abstract", "boolean", "break", "byte", "case", "catch", "char", "class", "const", "continue", "debugger",
+            "default", "delete", "do", "double", "else", "enum", "export", "extends", "false", "final", "finally",
+            "float", "for", "function", "goto", "if", "implements", "import", "in", "instanceof", "int", "interface",
+            "long", "native", "new", "null", "package", "private", "private", "public", "return", "short", "static",
+            "super", "switch", "synchronized", "this", "throw", "throws", "transient", "true", "try", "typeof", "var",
+            "void", "volatile", "while", "with"
+        )
+        val jsDefaultMembers = List(
+            "constructor", "hasOwnProperty", "isPrototypeOf", "propertyIsEnumerable", "apply", "arguments", "call",
+            "prototype", "superClass_", "metaClass_"
+        )
+
+        // Synthetic symbols get a prefix to avoid name collision with other symbols. Also if the symbol name is a js
+        // keyword then it gets the prefix.
+        if (forcePrefix || jsKeywords.contains(name) || jsDefaultMembers.contains(name)) {
+            "$" + name
+        } else {
+            name
+        }
     }
 
     /**
