@@ -2,7 +2,8 @@ package cz.payola.web.client.graph
 
 import cz.payola.web.client.{Layer, Vector, Point}
 import s2js.adapters.js.dom.CanvasRenderingContext2D
-import Constants._
+import cz.payola.web.client.graph.Constants._
+import cz.payola.web.client.graph.views.GraphView
 
 class Drawer(val layerEdges: Layer, val layerVertices: Layer, val layerText: Layer)
 {
@@ -18,7 +19,7 @@ class Drawer(val layerEdges: Layer, val layerVertices: Layer, val layerText: Lay
         layerEdges.context.stroke()
     }*/
 
-    def drawGraph(graph: Graph) {
+    def drawGraph(graph: GraphView) {
         graph.vertices.foreach { vertex =>
             val color =
                 if (vertex.selected) {
@@ -41,7 +42,7 @@ class Drawer(val layerEdges: Layer, val layerVertices: Layer, val layerText: Lay
 
         /*
         // Need to draw edges first, so that edges would not be drawn "over" vertices.
-        graph.getVertices.foreach { (vertex: Vertex) =>
+        graph.getVertices.foreach { (vertex: VertexView) =>
             vertex.neighbours.foreach { neighbourVertex =>
                 // If the edge isn't already drawn, then draw it.
                 if (vertex.id < neighbourVertex.id) {
@@ -52,7 +53,7 @@ class Drawer(val layerEdges: Layer, val layerVertices: Layer, val layerText: Lay
         }
 
         val somethingSelected = graph.getVertices.exists(_.selected)
-        graph.getVertices.foreach { vertex: Vertex =>
+        graph.getVertices.foreach { vertex: VertexView =>
             val neighbourSelected = vertex.neighbours.exists(_.selected);
             if (vertex.selected) {
                 drawVertex(vertex, vertex.text, ColorVertexHigh)
@@ -72,7 +73,7 @@ class Drawer(val layerEdges: Layer, val layerVertices: Layer, val layerText: Lay
         context.clearRect(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
     }
 
-    def redraw(graph: Graph) {
+    def redraw(graph: GraphView) {
         // TODO conditional redrawing of "redraw-required-sections"
         layers.foreach(layer => clear(layer.context, Point.Zero, layer.getSize))
         drawGraph(graph)
