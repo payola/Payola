@@ -1,13 +1,12 @@
 package cz.payola.web.client.views.graph
 
 import s2js.adapters.js.dom.CanvasRenderingContext2D
-import cz.payola.web.client.views.Point
 import cz.payola.web.client.views.Constants._
 import cz.payola.web.client.model.graph.Edge
+import cz.payola.web.client.views.{Color, Point}
 
 private object Quadrant
 {
-    //TODO is this correct enumeration?!?!
     val RightBottom = 1
 
     val LeftBottom = 2
@@ -17,9 +16,11 @@ private object Quadrant
     val RightTop = 4
 }
 
-class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationView: VertexView)
-{
-    def draw(context: CanvasRenderingContext2D) {
+class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationView: VertexView) extends View {
+
+    val information: InformationView = InformationView(edgeModel)
+
+    def draw(context: CanvasRenderingContext2D, color: Color, positionCorrection: Point) {
         val A = originView.position
         val B = destinationView.position
 
@@ -80,16 +81,26 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
             }
         }
 
-        if (originView.selected || destinationView.selected) {
+        if(color != null) {
+            context.strokeStyle = color.toString
+        } else if (originView.selected || destinationView.selected) {
             context.strokeStyle = ColorEdgeSelect.toString
         } else {
             context.strokeStyle = ColorEdge.toString
         }
         context.lineWidth = EdgeWidth
+        
+        val correction = if(positionCorrection != null) {
+            positionCorrection
+        } else {
+            Point(0,0)
+        }
+        
         context.beginPath()
-        context.moveTo(A.x, A.y)
-        context.bezierCurveTo(ctrl1.x, ctrl1.y, ctrl2.x, ctrl2.y, B.x, B.y)
-        //layerEdges.context.lineTo(B.x, B.y)
+        context.moveTo(A.x + correction.x, A.y + correction.y)
+        context.bezierCurveTo(ctrl1.x + correction.x, ctrl1.y + correction.y,
+            ctrl2.x + correction.x, ctrl2.y + correction.y, B.x + correction.x, B.y + correction.y)
+        //layerEdges.context.lineTo(B.x + correctionX, B.y + correctionY)
         context.stroke()
     }
 }

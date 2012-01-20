@@ -1,40 +1,31 @@
 goog.provide('cz.payola.web.client.views.graph.VertexView');
 goog.require('cz.payola.web.client.views.Constants');
+goog.require('cz.payola.web.client.views.Point');
 goog.require('cz.payola.web.client.views.graph.InformationView');
+goog.require('cz.payola.web.client.views.graph.View');
 cz.payola.web.client.views.graph.VertexView = function(vertexModel, position) {
 var self = this;
 self.vertexModel = vertexModel;
 self.position = position;
 self.selected = false;
-self.information = new cz.payola.web.client.views.graph.InformationView(self.vertexModel, self.position);
-};
-cz.payola.web.client.views.graph.VertexView.prototype.draw = function(context, color) {
+self.information = new cz.payola.web.client.views.graph.InformationView(self.vertexModel);
+goog.base(self);};
+goog.inherits(cz.payola.web.client.views.graph.VertexView, cz.payola.web.client.views.graph.View);
+cz.payola.web.client.views.graph.VertexView.prototype.draw = function(context, color, positionCorrection) {
 var self = this;
-self.drawRoundedRectangle(context, self.position.$plus(cz.payola.web.client.views.Constants.VertexSize.$div(-2.0)), cz.payola.web.client.views.Constants.VertexSize, cz.payola.web.client.views.Constants.VertexCornerRadius);
-context.fillStyle = color.toString();
+var correction = (function() {
+if ((positionCorrection != null)) {
+return positionCorrection.toVector();
+} else {
+return cz.payola.web.client.views.Point.Zero.toVector();
+}})();
+self.drawRoundedRectangle(context, self.position.$plus(cz.payola.web.client.views.Constants.VertexSize.$div(-2.0)).$plus(correction), cz.payola.web.client.views.Constants.VertexSize, cz.payola.web.client.views.Constants.VertexCornerRadius);
+context.fillStyle = (function() {
+if ((color != null)) {
+return color.toString();
+} else {
+return cz.payola.web.client.views.Constants.ColorVertexDefault.toString();
+}})();
 context.fill();
 };
-cz.payola.web.client.views.graph.VertexView.prototype.drawRoundedRectangle = function(context, position, size, radius) {
-var self = this;
-context.beginPath();
-var aX = (position.x + radius);
-var aY = position.y;
-context.moveTo(aX, aY);
-aX = position.x;
-aY = position.y;
-context.quadraticCurveTo(aX, aY, aX, (aY + radius));
-aX = position.x;
-aY = (position.y + size.y);
-context.lineTo(aX, (aY - radius));
-context.quadraticCurveTo(aX, aY, (aX + radius), aY);
-aX = (position.x + size.x);
-aY = (position.y + size.y);
-context.lineTo((aX - radius), aY);
-context.quadraticCurveTo(aX, aY, aX, (aY - radius));
-aX = (position.x + size.x);
-aY = position.y;
-context.lineTo(aX, (aY + radius));
-context.quadraticCurveTo(aX, aY, (aX - radius), aY);
-context.closePath();
-};
-cz.payola.web.client.views.graph.VertexView.prototype.metaClass_ = new s2js.MetaClass('cz.payola.web.client.views.graph.VertexView', []);
+cz.payola.web.client.views.graph.VertexView.prototype.metaClass_ = new s2js.MetaClass('cz.payola.web.client.views.graph.VertexView', [cz.payola.web.client.views.graph.View]);

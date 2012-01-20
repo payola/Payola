@@ -2,8 +2,8 @@ package cz.payola.web.client.presenters
 
 import s2js.adapters.js.browser._
 import cz.payola.web.client.views.graph.GraphView
-import cz.payola.web.client.views.Point
 import cz.payola.web.client.model.graph.{Edge, Vertex, Graph}
+import s2js.adapters.goog.events.{EventType, BrowserEvent}
 
 class Index
 {
@@ -11,17 +11,9 @@ class Index
 
     val graphView = new GraphView(graphModel, document.getElementById("canvas-holder"))
 
-    var selectionStart: Option[Point] = None
-
-    var moveStart: Option[Point] = None
 
     def init() {
-        // Attach events to the canvas.
-        /*val mouseLayer = createLayer()
-        listen[BrowserEvent](mouseLayer.canvas, EventType.MOUSEDOWN, onMouseDown _)
-        listen[BrowserEvent](mouseLayer.canvas, EventType.MOUSEMOVE, onMouseMove _)
-        listen[BrowserEvent](mouseLayer.canvas, EventType.MOUSEUP, onMouseUp _)*/
-
+        graphView.initControls()
         graphView.redraw();
     }
 
@@ -72,59 +64,4 @@ class Index
 
         new Graph(vertices, edges)
     }
-
-    /*def onMouseDown(event: BrowserEvent) {
-        val position = Point(event.clientX, event.clientY)
-        val vertex = graph.getTouchedVertex(position)
-        var needsToRedraw = false;
-
-        // Mouse down near a vertex.
-        if (vertex.isDefined) {
-            if (event.shiftKey) {
-                needsToRedraw = graph.invertVertexSelection(vertex.get) || needsToRedraw
-            } else {
-                if (!vertex.get.selected) {
-                    needsToRedraw = graph.deselectAll(graph)
-                }
-                moveStart = Some(position)
-                needsToRedraw = graph.selectVertex(vertex.get) || needsToRedraw
-            }
-
-            // Mouse down somewhere in the inter-vertex space.
-        } else {
-            if (!event.shiftKey) {
-                needsToRedraw = graph.deselectAll(graph)
-            }
-            selectionStart = Some(position)
-        }
-
-        if (needsToRedraw) {
-            drawer.redraw(graph)
-        }
-    }*/
-
-    /*def onMouseMove(event: BrowserEvent) {
-        if (selectionStart.isDefined) {
-            //TODO place to write "rectangle selection" code
-
-        } else if (moveStart.isDefined) {
-            val end = Point(event.clientX, event.clientY)
-            val difference = end - moveStart.get
-
-            graph.vertices.foreach { vertex =>
-                if(vertex.selected) {
-                    vertex.position += difference
-                }
-            }
-
-            moveStart = Some(end)
-            drawer.redraw(graph)
-        }
-    }*/
-
-    /*def onMouseUp(event: BrowserEvent) {
-        selectionStart = None
-        moveStart = None
-        drawer.redraw(graph)
-    }*/
 }

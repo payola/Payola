@@ -1,20 +1,20 @@
 package cz.payola.web.client.views.graph
 
 import s2js.adapters.js.dom.CanvasRenderingContext2D
-import cz.payola.web.client.views.{Point, Vector}
-import cz.payola.web.client.views.Constants._
-import cz.payola.web.client.model.graph.Vertex
+import cz.payola.web.client.views.{Constants, Color, Point}
+import cz.payola.web.client.model.graph.ModelObject
 
-case class InformationView(val vertexModel: Vertex, var position: Point)
-{
-    private val positionCorrection = Vector(0, 4)
+case class InformationView(modelObject: ModelObject) extends View {
 
-    def draw(context: CanvasRenderingContext2D) {
-        context.fillStyle = ColorText.toString
+    def draw(context: CanvasRenderingContext2D, color: Color, position: Point) {
+        context.fillStyle = if(color != null) {
+            color.toString
+        } else {
+            Constants.ColorText.toString
+        }
         context.font = "12px Sans"
         context.textAlign = "center"
 
-        val correctedPosition = position + positionCorrection
-        context.fillText(vertexModel.uri, correctedPosition.x, correctedPosition.y)
+        context.fillText(modelObject.uri, position.x, position.y)
     }
 }

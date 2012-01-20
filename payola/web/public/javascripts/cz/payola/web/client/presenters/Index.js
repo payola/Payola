@@ -3,17 +3,15 @@ goog.require('cz.payola.web.client.model.graph.Edge');
 goog.require('cz.payola.web.client.model.graph.Graph');
 goog.require('cz.payola.web.client.model.graph.Vertex');
 goog.require('cz.payola.web.client.views.graph.GraphView');
-goog.require('scala.None');
 goog.require('scala.collection.immutable.List');
 cz.payola.web.client.presenters.Index = function() {
 var self = this;
 self.graphModel = self.initGraph();
 self.graphView = new cz.payola.web.client.views.graph.GraphView(self.graphModel, document.getElementById('canvas-holder'));
-self.selectionStart = scala.None;
-self.moveStart = scala.None;
 };
 cz.payola.web.client.presenters.Index.prototype.init = function() {
 var self = this;
+self.graphView.initControls();
 self.graphView.redraw();
 };
 cz.payola.web.client.presenters.Index.prototype.initGraph = function() {

@@ -4,7 +4,7 @@ package cz.payola.web.client.views
 // Color.Black, Color.Red etc. are OK to be placed to the Color companion object. On the other hand COLOR_VERTEX should
 // be placed in the Drawer class.
 object Constants {
-    val ColorEdge = new Color(150, 150, 150, 0.5)
+    val ColorEdge = new Color(200, 200, 200, 0.5)
 
     val ColorEdgeSelect = new Color(50, 50, 50, 1)
 
@@ -16,7 +16,7 @@ object Constants {
 
     val ColorVertexDefault = new Color(0, 180, 0, 0.8)
 
-    val ColorText = new Color(150, 150, 150, 1)
+    val ColorText = new Color(50, 50, 50, 1)
 
     val ColorSelectionRect = new Color(150, 150, 150, 0.5)
 
