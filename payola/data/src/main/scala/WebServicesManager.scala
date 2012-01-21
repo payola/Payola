@@ -2,13 +2,7 @@ package cz.payola.data
 
 import scala.collection.mutable
 
-/**
- * Manages communication with web services - with all payola web services and local web service.
- *
- * User: Ondřej Heřmánek
- * Date: 15.12.11, 19:21
- */
-class WebServicesManager {
+class WebServicesManager extends IWebServiceManager {
     var webServices = mutable.Set[IPayolaWebService]();
 
     /**
@@ -19,14 +13,28 @@ class WebServicesManager {
      * @return returns result in String.
      */
     def evaluateSparqlQuery(query: String): QueryResult = {
-        val result = new StringBuilder();
+        val rdfResult = new StringBuilder();
+        val ttlResult = new StringBuilder();
 
         // Get result from every initialized web service
-        for (val service <- this.webServices) {
-            result.append(service.evaluateSparqlQuery(query));
-        }
+        // TODO: asynchronously?
+        webServices.foreach(
+            service =>
+            {
+                val response = service.evaluateSparqlQuery(query);
 
-        return new QueryResult(result.toString());
+                // TODO: there must be a better way to do this
+                // There is a different handling of ttl and rdf response
+                if (response != null && response.size >= 0){
+                    if (response.startsWith("<?xml"))
+                        rdfResult.append(response);
+                    else
+                        ttlResult.append(response)
+                }
+            }
+        );
+
+        return new QueryResult(rdfResult.toString(), ttlResult.toString());
     }
 
     /**
@@ -43,17 +51,14 @@ class WebServicesManager {
         // TODO:
         val query = id + relationType;
 
-        for (val service <- this.webServices) {
-            result.append(service.evaluateSparqlQuery(query));
-        }
-
-        return new QueryResult(result.toString());
+        return evaluateSparqlQuery(query);
     }
 
     /**
      *  Fills webServices member with available web services
      */
     def initWebServices() = {
-        this.webServices += new FakeWebService();
+        webServices += new FakeRdfWebService();
+        webServices += new FakeTtlWebService();
     }
 }

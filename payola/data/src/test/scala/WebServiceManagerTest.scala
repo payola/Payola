@@ -3,11 +3,6 @@ package cz.payola.data
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 
-/**
- * User: Ondřej Heřmánek
- * Date: 3.1.12, 14:48
- */
-
 class WebServiceManagerTest  extends FlatSpec with ShouldMatchers {
     val manager = new WebServicesManager();
 
@@ -24,9 +19,13 @@ class WebServiceManagerTest  extends FlatSpec with ShouldMatchers {
         queryResult should not be null;
 
         // Validate result
-        val result = queryResult.getResult();
-        result should not be null;
-        result.size should not be (0);
+        val rdf = queryResult.getRdf();
+        rdf should not be null;
+        rdf.size should not be (0);
+
+        val ttl = queryResult.getTtl();
+        ttl should not be null;
+        ttl.size should not be (0);
     }
 
     "WebServicesManager" should "parse query result into nodes properly." in {

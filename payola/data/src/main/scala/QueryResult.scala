@@ -1,21 +1,15 @@
 package cz.payola.data
 
-/**
- * Class represents result of Sparql query.
- *
- * User: Ondřej Heřmánek
- * Date: 3.1.12, 13:14
- */
-class QueryResult(result: String) {
-    /**
-     * Gets whole query result in XML format as String.
-     *
-     * @return returns query result
-     */
-    def getResult(): String = {
-        return this.result;
+class QueryResult(rdf: String, ttl: String) {
+    
+    def getRdf(): String = {
+        return rdf;
     }
 
+    def getTtl(): String = {
+        return ttl;
+    }
+    
     /**
      * Gets query result splitted into XML nodes. Each node represents one RDF triple.
      *
@@ -31,7 +25,7 @@ class QueryResult(result: String) {
      * @return returns list of nodes, if text has no XML nodes, returns empty list.
      */
     private def spiltQueryResultToTriples(): List[String] = {
-        val xmlText = xml.XML.loadString(result);
+        val xmlText = xml.XML.loadString("");
 
         return null;
     }

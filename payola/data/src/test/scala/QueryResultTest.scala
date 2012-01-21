@@ -3,18 +3,15 @@ package cz.payola.data
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 
-/**
- * User: Ondřej Heřmánek
- * Date: 3.1.12, 14:44
- */
-
 class QueryResultTest  extends FlatSpec with ShouldMatchers {
     "QueryResult" should "return result passed in constructor." in {
-        val result = "Hello, world";
+        val rdf = "RDF: Hello, world";
+        val ttl = "TTL: Hello, world";
 
-        val queryResult = new QueryResult(result);
+        val queryResult = new QueryResult(rdf, ttl);
 
-        queryResult.getResult() should equal (result);
+        queryResult.getRdf() should equal (rdf);
+        queryResult.getTtl() should equal (ttl);
     }
 
     "QueryResult" should "properly parse result into nodes." in {

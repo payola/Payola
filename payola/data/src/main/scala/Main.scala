@@ -18,6 +18,7 @@ object Main {
 
         val result = manager.evaluateSparqlQuery("");
 
-        println(result.getResult());
+        println(result.getRdf());
+        println(result.getTtl());
     }
 }

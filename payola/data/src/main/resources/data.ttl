@@ -1,0 +1,168 @@
+@prefix dc:      <http://purl.org/dc/terms/> .
+@prefix :        <http://purl.org/procurement#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix foaf:    <http://xmlns.com/foaf/0.1/> .
+@prefix pccz:    <http://purl.org/procurement/czech#> .
+@prefix pc:      <http://purl.org/procurement#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix gr:      <http://purl.org/goodrelations/v1#> .
+@prefix br:      <http://purl.org/business-register#> .
+@prefix vcard:   <http://www.w3.org/2006/vcard/ns#> .
+
+[]    a       pc:Contract ;
+      rdfs:label "\"VTP Ostrava, MFB V\"- DSP"^^<http://www.w3.org/2001/XMLSchema#string> ;
+      dc:description "Zpracování projektové dokumentace, která se předkládá ke stavebnímu řízení, stavby \"VTP Ostrava, MFB V\""^^<http://www.w3.org/2001/XMLSchema#string> ;
+      dc:title "\"VTP Ostrava, MFB V\"- DSP"^^<http://www.w3.org/2001/XMLSchema#string> ;
+      pc:actualPrice
+              [ a       gr:PriceSpecification ;
+                gr:hasCurrency <http://gd.projekty.ms.mff.cuni.cz:2020/resource/CZK> ;
+                gr:hasCurrencyValue "1750000"^^<http://www.w3.org/2001/XMLSchema#double>
+              ] ;
+      pc:awardCriteriaType
+              pc:LowestPrice ;
+      pc:awardedTender
+              [ pc:offeredPrice
+                        [ gr:hasCurrency <http://gd.projekty.ms.mff.cuni.cz:2020/resource/CZK> ;
+                          gr:hasCurrencyValue "1750000"^^<http://www.w3.org/2001/XMLSchema#double>
+                        ] ;
+                pc:supplier
+                        [ a       gr:BusinessEntity ;
+                          br:hasSecretShares "false"^^<http://www.w3.org/2001/XMLSchema#boolean> ;
+                          br:officialNumber "15502309" ;
+                          gr:legalName "Ateliér IDEA, spol. s r.o."^^<http://www.w3.org/2001/XMLSchema#string> ;
+                          pc:contact
+                                  [ vcard:adr
+                                            [ vcard:locality "Ostrava-Mar. Hory" ;
+                                              vcard:postal-code "70900" ;
+                                              vcard:street-address
+                                                      "Strmá 12 1195/36"
+                                            ] ;
+                                    vcard:url <http://wwwinfo.mfcr.cz/cgi-bin/ares/darv_or.cgi?ico=15502309&xml=1> , <http://wwwinfo.mfcr.cz/cgi-bin/ares/darv_or.cgi?ico=15502309>
+                                  ]
+                        ]
+              ] ;
+      pc:contractingAuthority
+              [ a       gr:BusinessEntity ;
+                br:officialNumber "25379631" ;
+                gr:legalName "Vědecko-technologický park Ostrava, a.s."^^<http://www.w3.org/2001/XMLSchema#string> ;
+                pc:contact
+                        [ vcard:adr
+                                  [ vcard:locality "Ostrava" ;
+                                    vcard:postal-code "70800" ;
+                                    vcard:street-address
+                                            "Technologická 372/2"
+                                  ] ;
+                          vcard:url <http://wwwinfo.mfcr.cz/cgi-bin/ares/darv_or.cgi?ico=25379631> , <http://wwwinfo.mfcr.cz/cgi-bin/ares/darv_or.cgi?ico=25379631&xml=1>
+                        ]
+              ] ;
+      pc:estimatedPrice
+              [ gr:hasCurrency "CZK" ;
+                gr:hasCurrencyValue "2000000"^^<http://www.w3.org/2001/XMLSchema#double> ;
+                gr:valueAddedTaxIncluded
+                        "false"
+              ] ;
+      pc:kind pc:Services ;
+      pc:mainContact
+              [ vcard:adr
+                        [ vcard:locality "Ostrava" ;
+                          vcard:postal-code "70800" ;
+                          vcard:street-address
+                                  "Technologická 372/2"
+                        ] ;
+                vcard:email "radim.david@vtpo.cz"^^<http://www.w3.org/2001/XMLSchema#string> ;
+                vcard:fax "+420597325800"^^<http://www.w3.org/2001/XMLSchema#string> ;
+                vcard:url <http://www.isvzus.cz/usisvz/usisvz01007Prepare.do?znackaForm=6000175603001&navi=2> ;
+                vcard:workTel "+420597325804"^^<http://www.w3.org/2001/XMLSchema#string>
+              ] ;
+      pc:mainObject <http://purl.org/procurement/cpv/2008/74200000-1> ;
+      pc:numberOfTenders "3"^^<http://www.w3.org/2001/XMLSchema#int> ;
+      pc:procedureType pc:Negotiated ;
+      pc:publicationDate "2006-09-29"^^<http://www.w3.org/2001/XMLSchema#date> ;
+      pccz:limit pccz:UnderLimit .
+
+[]    a       pc:Contract ;
+      rdfs:label "Nájem tiskových strojů pro OPF v Karviné"^^<http://www.w3.org/2001/XMLSchema#string> ;
+      dc:description "Předmětem veřejné zakázky Nájem tiskových strojů pro OPF v karviné je poskytnutí služeb spočívajících v nájmu 11 ks tiskových zařízení za účelemkopírování a tiskových výstupů v celkovém množství 70 tis. výstupů formátu za jeden vměsíc."^^<http://www.w3.org/2001/XMLSchema#string> ;
+      dc:title "Nájem tiskových strojů pro OPF v Karviné"^^<http://www.w3.org/2001/XMLSchema#string> ;
+      pc:actualPrice
+              [ a       gr:PriceSpecification ;
+                gr:hasCurrency <http://gd.projekty.ms.mff.cuni.cz:2020/resource/CZK> ;
+                gr:hasCurrencyValue "3198720"^^<http://www.w3.org/2001/XMLSchema#double>
+              ] ;
+      pc:awardCriteria
+              [ pc:criteria "4  čas serv. zákroku v hodinách"^^<http://www.w3.org/2001/XMLSchema#string> ;
+                pc:criteriaWeight "5"^^<http://www.w3.org/2001/XMLSchema#int>
+              ] ;
+      pc:awardCriteria
+              [ pc:criteria "2  cena 1 ks. tisk. výst. A4"^^<http://www.w3.org/2001/XMLSchema#string> ;
+                pc:criteriaWeight "20"^^<http://www.w3.org/2001/XMLSchema#int>
+              ] ;
+      pc:awardCriteria
+              [ pc:criteria "3  počet tisk. výst. v měs. paušálu"^^<http://www.w3.org/2001/XMLSchema#string> ;
+                pc:criteriaWeight "10"^^<http://www.w3.org/2001/XMLSchema#int>
+              ] ;
+      pc:awardCriteria
+              [ pc:criteria "1  nabídková cena za 1 měsíc"^^<http://www.w3.org/2001/XMLSchema#string> ;
+                pc:criteriaWeight "65"^^<http://www.w3.org/2001/XMLSchema#int>
+              ] ;
+      pc:awardCriteriaType
+              pc:EconomicallyMostAdvantageous ;
+      pc:awardedTender
+              [ pc:offeredPrice
+                        [ gr:hasCurrency <http://gd.projekty.ms.mff.cuni.cz:2020/resource/CZK> ;
+                          gr:hasCurrencyValue "66640"^^<http://www.w3.org/2001/XMLSchema#double>
+                        ] ;
+                pc:supplier
+                        [ a       gr:BusinessEntity ;
+                          br:hasSecretShares "false"^^<http://www.w3.org/2001/XMLSchema#boolean> ;
+                          br:officialNumber "64086925" ;
+                          gr:legalName "SHARP CENTRUM Ostrava s.r.o."^^<http://www.w3.org/2001/XMLSchema#string> ;
+                          pc:contact
+                                  [ vcard:adr
+                                            [ vcard:locality "Ostrava" ;
+                                              vcard:postal-code "70200" ;
+                                              vcard:street-address
+                                                      "Chocholouškova 1238/9"
+                                            ] ;
+                                    vcard:url <http://wwwinfo.mfcr.cz/cgi-bin/ares/darv_or.cgi?ico=64086925> , <http://wwwinfo.mfcr.cz/cgi-bin/ares/darv_or.cgi?ico=64086925&xml=1>
+                                  ]
+                        ]
+              ] ;
+      pc:contractingAuthority
+              [ a       gr:BusinessEntity ;
+                br:officialNumber "47813059" ;
+                gr:legalName "Slezská univerzita v Opavě"^^<http://www.w3.org/2001/XMLSchema#string> ;
+                pc:contact
+                        [ vcard:adr
+                                  [ vcard:locality "Opava" ;
+                                    vcard:postal-code "74601" ;
+                                    vcard:street-address
+                                            "Na Rybníčku 626/1"
+                                  ] ;
+                          vcard:url <http://wwwinfo.mfcr.cz/cgi-bin/ares/darv_std.cgi?ico=47813059&xml=1> , <http://wwwinfo.mfcr.cz/cgi-bin/ares/darv_std.cgi?ico=47813059>
+                        ]
+              ] ;
+      pc:estimatedPrice
+              [ gr:hasCurrency "CZK" ;
+                gr:hasCurrencyValue "72917"^^<http://www.w3.org/2001/XMLSchema#double> ;
+                gr:valueAddedTaxIncluded
+                        "false"
+              ] ;
+      pc:kind pc:Services ;
+      pc:mainContact
+              [ vcard:adr
+                        [ vcard:locality "Opava" ;
+                          vcard:postal-code "74601" ;
+                          vcard:street-address
+                                  "Na Rybníčku 626/1"
+                        ] ;
+                vcard:email "tomas.kolarcik@slu.cz"^^<http://www.w3.org/2001/XMLSchema#string> ;
+                vcard:fax "553684618"^^<http://www.w3.org/2001/XMLSchema#string> ;
+                vcard:url <http://www.isvzus.cz/usisvz/usisvz01007Prepare.do?znackaForm=5001426203001&navi=2> ;
+                vcard:workTel "553684640"^^<http://www.w3.org/2001/XMLSchema#string>
+              ] ;
+      pc:mainObject <http://purl.org/procurement/cpv/2008/72000000-5> ;
+      pc:numberOfTenders "5"^^<http://www.w3.org/2001/XMLSchema#int> ;
+      pc:procedureType pc:Open ;
+      pc:publicationDate "2006-09-18"^^<http://www.w3.org/2001/XMLSchema#date> ;
+      pccz:limit pccz:UnderLimit .
