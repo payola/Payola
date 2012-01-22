@@ -13,6 +13,10 @@ self.destinationView = destinationView;
 self.information = new cz.payola.web.client.views.graph.InformationView(self.edgeModel);
 goog.base(self);};
 goog.inherits(cz.payola.web.client.views.graph.EdgeView, cz.payola.web.client.views.graph.View);
+cz.payola.web.client.views.graph.EdgeView.prototype.isSelected = function() {
+var self = this;
+return (self.originView.selected || self.destinationView.selected);
+};
 cz.payola.web.client.views.graph.EdgeView.prototype.draw = function(context, color, positionCorrection) {
 var self = this;
 var A = self.originView.position;
@@ -72,28 +76,24 @@ return;
 }
 })(quadrant);
 }})();
-(function() {
+var colorToUse = (function() {
 if ((color != null)) {
-context.strokeStyle = color.toString();
+return color;
 } else {
-(function() {
-if ((self.originView.selected || self.destinationView.selected)) {
-context.strokeStyle = cz.payola.web.client.views.Constants.ColorEdgeSelect.toString();
+return (function() {
+if (self.isSelected()) {
+return cz.payola.web.client.views.Constants.ColorEdgeSelect;
 } else {
-context.strokeStyle = cz.payola.web.client.views.Constants.ColorEdge.toString();
+return cz.payola.web.client.views.Constants.ColorEdge;
 }})();
 }})();
-context.lineWidth = cz.payola.web.client.views.Constants.EdgeWidth;
 var correction = (function() {
 if ((positionCorrection != null)) {
-return positionCorrection;
+return positionCorrection.toVector();
 } else {
-return new cz.payola.web.client.views.Point(0.0, 0.0);
+return new cz.payola.web.client.views.Point(0.0, 0.0).toVector();
 }})();
-context.beginPath();
-context.moveTo((A.x + correction.x), (A.y + correction.y));
-context.bezierCurveTo((ctrl1.x + correction.x), (ctrl1.y + correction.y), (ctrl2.x + correction.x), (ctrl2.y + correction.y), (B.x + correction.x), (B.y + correction.y));
-context.stroke();
+self.drawBezierCurve(context, ctrl1.$plus(correction), ctrl2.$plus(correction), A.$plus(correction), B.$plus(correction), cz.payola.web.client.views.Constants.EdgeWidth, colorToUse);
 };
 cz.payola.web.client.views.graph.EdgeView.prototype.metaClass_ = new s2js.MetaClass('cz.payola.web.client.views.graph.EdgeView', [cz.payola.web.client.views.graph.View]);
 cz.payola.web.client.views.graph.Quadrant.RightBottom = 1;

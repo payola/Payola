@@ -12,7 +12,7 @@ self.graphView = new cz.payola.web.client.views.graph.GraphView(self.graphModel,
 cz.payola.web.client.presenters.Index.prototype.init = function() {
 var self = this;
 self.graphView.initControls();
-self.graphView.redraw();
+self.graphView.redrawAll();
 };
 cz.payola.web.client.presenters.Index.prototype.initGraph = function() {
 var self = this;

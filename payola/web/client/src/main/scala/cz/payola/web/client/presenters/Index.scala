@@ -14,7 +14,7 @@ class Index
 
     def init() {
         graphView.initControls()
-        graphView.redraw();
+        graphView.redrawAll();
     }
 
     def initGraph(): Graph = {

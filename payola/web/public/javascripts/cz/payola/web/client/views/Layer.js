@@ -4,6 +4,7 @@ cz.payola.web.client.views.Layer = function(canvas, context) {
 var self = this;
 self.canvas = canvas;
 self.context = context;
+self.cleared = true;
 };
 cz.payola.web.client.views.Layer.prototype.setSize = function(size) {
 var self = this;

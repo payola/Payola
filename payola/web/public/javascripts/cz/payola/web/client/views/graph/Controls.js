@@ -1,6 +1,7 @@
 goog.provide('cz.payola.web.client.views.graph.Controls');
 goog.require('cz.payola.web.client.views.Constants');
 goog.require('cz.payola.web.client.views.Point');
+goog.require('cz.payola.web.client.views.graph.RedrawOperation');
 goog.require('goog.events');
 goog.require('goog.events.EventType');
 goog.require('scala.None');
@@ -51,15 +52,12 @@ self.selectionStart = new scala.Some(position);
 }})();
 (function() {
 if (needsToRedraw) {
-self.graphView.redraw();
+self.graphView.redraw(cz.payola.web.client.views.graph.RedrawOperation.Selection);
 } else {
 }})();
 };
 cz.payola.web.client.views.graph.Controls.prototype.onMouseMove = function(event) {
 var self = this;
-(function() {
-if (self.selectionStart.isDefined()) {
-} else {
 (function() {
 if (self.moveStart.isDefined()) {
 var end = new cz.payola.web.client.views.Point(event.clientX, event.clientY);
@@ -71,16 +69,14 @@ vertex.position = vertex.position.$plus(difference);
 }})();
  });
 self.moveStart = new scala.Some(end);
-self.graphView.redraw();
+self.graphView.redraw(cz.payola.web.client.views.graph.RedrawOperation.Movement);
 } else {
-}})();
 }})();
 };
 cz.payola.web.client.views.graph.Controls.prototype.onMouseUp = function(event) {
 var self = this;
 self.selectionStart = scala.None;
 self.moveStart = scala.None;
-self.graphView.redraw();
 };
 cz.payola.web.client.views.graph.Controls.prototype.getTouchedVertex = function(p) {
 var self = this;

@@ -14,15 +14,13 @@ goog.base(self);goog.object.extend(self, new scala.Product());
 goog.inherits(cz.payola.web.client.views.graph.InformationView, cz.payola.web.client.views.graph.View);
 cz.payola.web.client.views.graph.InformationView.prototype.draw = function(context, color, position) {
 var self = this;
-context.fillStyle = (function() {
+var colorToUse = (function() {
 if ((color != null)) {
-return color.toString();
+return color;
 } else {
-return cz.payola.web.client.views.Constants.ColorText.toString();
+return cz.payola.web.client.views.Constants.ColorText;
 }})();
-context.font = '12px Sans';
-context.textAlign = 'center';
-context.fillText(self.modelObject.uri, position.x, position.y);
+self.drawText(context, self.modelObject.uri, position, colorToUse, '12px Sans', 'center');
 };
 cz.payola.web.client.views.graph.InformationView.prototype.copy = function(modelObject) {
 var self = this;

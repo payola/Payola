@@ -20,12 +20,12 @@ return positionCorrection.toVector();
 return cz.payola.web.client.views.Point.Zero.toVector();
 }})();
 self.drawRoundedRectangle(context, self.position.$plus(cz.payola.web.client.views.Constants.VertexSize.$div(-2.0)).$plus(correction), cz.payola.web.client.views.Constants.VertexSize, cz.payola.web.client.views.Constants.VertexCornerRadius);
-context.fillStyle = (function() {
+var colorToUse = (function() {
 if ((color != null)) {
-return color.toString();
+return color;
 } else {
-return cz.payola.web.client.views.Constants.ColorVertexDefault.toString();
+return cz.payola.web.client.views.Constants.ColorVertexDefault;
 }})();
-context.fill();
+self.fillCurrentSpace(context, colorToUse);
 };
 cz.payola.web.client.views.graph.VertexView.prototype.metaClass_ = new s2js.MetaClass('cz.payola.web.client.views.graph.VertexView', [cz.payola.web.client.views.graph.View]);

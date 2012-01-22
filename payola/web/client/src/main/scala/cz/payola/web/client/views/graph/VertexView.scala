@@ -19,11 +19,12 @@ class VertexView(val vertexModel: Vertex, var position: Point) extends View {
 
         drawRoundedRectangle(context, this.position + (VertexSize / -2) + correction, VertexSize, VertexCornerRadius)
 
-        context.fillStyle = if(color != null) {
-            color.toString
+        val colorToUse = if(color != null) {
+            color
         } else {
-            ColorVertexDefault.toString
+            ColorVertexDefault
         }
-        context.fill()
+
+        fillCurrentSpace(context, colorToUse)
     }
 }

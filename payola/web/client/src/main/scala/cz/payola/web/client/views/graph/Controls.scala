@@ -2,7 +2,7 @@ package cz.payola.web.client.views.graph
 
 import s2js.adapters.goog.events._
 import s2js.adapters.goog.events.{EventType, BrowserEvent}
-import cz.payola.web.client.views.{Constants, Layer, Point}
+import cz.payola.web.client.views.{Layer, Point}
 
 class Controls(val graphView: GraphView, val layer: Layer) {
 
@@ -20,6 +20,8 @@ class Controls(val graphView: GraphView, val layer: Layer) {
     }
 
     private def onMouseDown(event: BrowserEvent) {
+        /*TODO this does NOT work correctly, if the window is even slightly scrolled;
+        the returned position of event clienX/Y is absolute to the window location, NOT the canvas element*/
         val position = Point(event.clientX, event.clientY)
         val vertex = getTouchedVertex(position)
         var needsToRedraw = false;
@@ -45,15 +47,15 @@ class Controls(val graphView: GraphView, val layer: Layer) {
         }
 
         if (needsToRedraw) {
-            graphView.redraw()
+            graphView.redraw(RedrawOperation.Selection)
         }
     }
 
     private def onMouseMove(event: BrowserEvent) {
-        if (selectionStart.isDefined) {
+        /*if (selectionStart.isDefined) {
             //TODO place to write "rectangle selection" code
 
-        } else if (moveStart.isDefined) {
+        } else*/ if (moveStart.isDefined) {
             val end = Point(event.clientX, event.clientY)
             val difference = end - moveStart.get
 
@@ -64,14 +66,14 @@ class Controls(val graphView: GraphView, val layer: Layer) {
             }
 
             moveStart = Some(end)
-            graphView.redraw()
+            graphView.redraw(RedrawOperation.Movement)
         }
     }
 
     private def onMouseUp(event: BrowserEvent) {
         selectionStart = None
         moveStart = None
-        graphView.redraw()
+        //graphView.redraw(RedrawOperation.Movement)
     }
 
     def getTouchedVertex(p: Point): Option[VertexView] = {

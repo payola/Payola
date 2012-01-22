@@ -19,7 +19,10 @@ private object Quadrant
 class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationView: VertexView) extends View {
 
     val information: InformationView = InformationView(edgeModel)
-
+    
+    def isSelected: Boolean = {
+        originView.selected || destinationView.selected
+    }
     def draw(context: CanvasRenderingContext2D, color: Color, positionCorrection: Point) {
         val A = originView.position
         val B = destinationView.position
@@ -81,26 +84,21 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
             }
         }
 
-        if(color != null) {
-            context.strokeStyle = color.toString
-        } else if (originView.selected || destinationView.selected) {
-            context.strokeStyle = ColorEdgeSelect.toString
+        val colorToUse = if(color != null) {
+            color
+        } else if (isSelected) {
+            ColorEdgeSelect
         } else {
-            context.strokeStyle = ColorEdge.toString
+            ColorEdge
         }
-        context.lineWidth = EdgeWidth
         
         val correction = if(positionCorrection != null) {
-            positionCorrection
+            positionCorrection.toVector
         } else {
-            Point(0,0)
+            Point(0,0).toVector
         }
         
-        context.beginPath()
-        context.moveTo(A.x + correction.x, A.y + correction.y)
-        context.bezierCurveTo(ctrl1.x + correction.x, ctrl1.y + correction.y,
-            ctrl2.x + correction.x, ctrl2.y + correction.y, B.x + correction.x, B.y + correction.y)
-        //layerEdges.context.lineTo(B.x + correctionX, B.y + correctionY)
-        context.stroke()
+        drawBezierCurve(context, ctrl1 + correction, ctrl2 + correction, A + correction, B + correction,
+            EdgeWidth, colorToUse)
     }
 }
