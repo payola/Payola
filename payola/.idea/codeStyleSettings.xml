@@ -27,6 +27,8 @@
         <ScalaCodeStyleSettings>
           <option name="PLACE_CLOSURE_PARAMETERS_ON_NEW_LINE" value="false" />
           <option name="USE_SCALADOC2_FORMATTING" value="true" />
+          <option name="FINALLY_BRACE_FORCE" value="3" />
+          <option name="TRY_BRACE_FORCE" value="3" />
         </ScalaCodeStyleSettings>
         <XML>
           <option name="XML_LEGACY_SETTINGS_IMPORTED" value="true" />
