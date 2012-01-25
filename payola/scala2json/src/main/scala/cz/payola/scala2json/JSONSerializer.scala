@@ -18,12 +18,19 @@ object JSONSerializerOptions {
 }
 
 import JSONSerializerOptions._
+import cz.payola.scala2json.annotations.JSONTransient
+
 import scala.collection.mutable.StringBuilder
 import java.lang.reflect.Field
 
 // TODO: Keep track of already serialized objects to avoid cycles
 
 class JSONSerializer(val obj: Any) {
+
+    private def _isFieldTransient(f: Field): Boolean = {
+        val annot = f.getAnnotation(classOf[JSONTransient])
+        annot != null
+    }
 
     /** Serializes an Array[_]
      *
@@ -122,6 +129,10 @@ class JSONSerializer(val obj: Any) {
         // This is why Map **needs** to be matched first before Iterable.
         obj match {
             case _: String => JSONUtilities.escapedString(obj.asInstanceOf[String])
+            case _: java.lang.Number => obj.toString
+            case _: java.lang.Boolean => if (obj.asInstanceOf[java.lang.Boolean].booleanValue) "true"
+                                         else "false"
+            case _: java.lang.Character => JSONUtilities.escapedChar(obj.asInstanceOf[java.lang.Character].charValue())
             case _: Map[_,_] => _serializeMap(options)
             case _: Iterable[_] => _serializeIterable(options)
             case _: Array[_] => _serializeArray(options)
@@ -142,15 +153,17 @@ class JSONSerializer(val obj: Any) {
         println("Got class " + c + " and " + fields.length)
 
         for (i: Int <- 0 until fields.length) {
-            if (i != 0)
-                builder.append(',')
-
             val f: Field = fields(i)
             f.setAccessible(true)
-            builder.append(f.getName)
-            builder.append(':')
-            val serializer: JSONSerializer =  new JSONSerializer(f.get(obj.asInstanceOf[AnyRef]))
-            builder.append(serializer.stringValue(options))
+            
+            if (!_isFieldTransient(f)){
+                if (i != 0)
+                    builder.append(',')
+                builder.append(f.getName)
+                builder.append(':')
+                val serializer: JSONSerializer =  new JSONSerializer(f.get(obj.asInstanceOf[AnyRef]))
+                builder.append(serializer.stringValue(options))
+            }
         }
 
         builder.append('}')
@@ -182,7 +195,10 @@ class JSONSerializer(val obj: Any) {
        // We need to distinguish several cases:
        // a) obj is a collection -> create an array
        // b) obj is a hash map or similar -> create a dictionary
-       // c) obj is a regular object -> use reflection to create a dictionary
+       // c) obj is a string -> just escape it
+       // d) obj is a scala.lang.Array -> create an array
+       // e) obj is a primitive type -> convert it
+       // f) obj is a regular object -> use reflection to create a dictionary
        //
        // Also have in mind that we support a special value handling
        // if the object implements some of the abstract traits in package
