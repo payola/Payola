@@ -59,7 +59,8 @@ object PayolaBuild extends Build {
         dataProject,
         modelProject,
         rdf2scalaProject,
-        webProject
+        webProject,
+        scala2jsonProject
     )
 
     lazy val s2jsProject = Project(
@@ -171,6 +172,15 @@ object PayolaBuild extends Build {
         clientProject
     ).dependsOn(
         modelProject
+    )
+
+    lazy val scala2jsonProject = Project(
+        "scala2json",
+        file("./scala2json"),
+        settings = payolaSettings ++ Seq(
+            libraryDependencies := Seq(scalaTestDependency),
+            resolvers ++= Seq(DefaultMavenRepository)
+        )
     )
 
     lazy val clientProject = Project(

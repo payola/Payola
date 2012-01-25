@@ -12,6 +12,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/rdf2scala.iml" filepath="$PROJECT_DIR$/.idea_modules/rdf2scala.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/runtime.iml" filepath="$PROJECT_DIR$/.idea_modules/runtime.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/s2js.iml" filepath="$PROJECT_DIR$/.idea_modules/s2js.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea_modules/scala2json.iml" filepath="$PROJECT_DIR$/.idea_modules/scala2json.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/web.iml" filepath="$PROJECT_DIR$/.idea_modules/web.iml" />
     </modules>
   </component>
