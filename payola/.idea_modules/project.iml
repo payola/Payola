@@ -39,6 +39,7 @@
           <root url="jar://$USER_HOME$/.sbt/boot/scala-2.9.1/org.scala-tools.sbt/sbt/0.11.0/discovery_2.9.1-0.11.0.jar!/" />
           <root url="jar://$USER_HOME$/.ivy2/cache/ch.qos.logback/logback-core/jars/logback-core-0.9.30.jar!/" />
           <root url="jar://$USER_HOME$/.sbt/boot/scala-2.9.1/org.scala-tools.sbt/sbt/0.11.0/jline-0.9.94.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.scala-lang/scalap/jars/scalap-2.9.1.jar!/" />
           <root url="jar://$USER_HOME$/.ivy2/cache/com.h2database/h2/jars/h2-1.3.158.jar!/" />
           <root url="jar://$USER_HOME$/.sbt/boot/scala-2.9.1/org.scala-tools.sbt/sbt/0.11.0/commons-logging-1.0.4.jar!/" />
           <root url="jar://$USER_HOME$/.ivy2/cache/com.github.jsuereth.scala-arm/scala-arm_2.9.1/jars/scala-arm_2.9.1-0.3.jar!/" />
@@ -50,6 +51,7 @@
           <root url="jar://$USER_HOME$/.ivy2/cache/org.hibernate/hibernate-validator/jars/hibernate-validator-4.2.0.Final.jar!/" />
           <root url="jar://$USER_HOME$/.ivy2/cache/org.avaje/ebean/jars/ebean-2.7.1.jar!/" />
           <root url="jar://$USER_HOME$/.ivy2/cache/commons-lang/commons-lang/jars/commons-lang-2.6.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/play/anorm_2.9.1/jars/anorm_2.9.1-2.0-beta.jar!/" />
           <root url="jar://$USER_HOME$/.ivy2/cache/org.slf4j/slf4j-api/jars/slf4j-api-1.6.2.jar!/" />
           <root url="jar://$USER_HOME$/.ivy2/cache/joda-time/joda-time/jars/joda-time-2.0.jar!/" />
           <root url="jar://$USER_HOME$/.sbt/boot/scala-2.9.1/org.scala-tools.sbt/sbt/0.11.0/actions_2.9.1-0.11.0.jar!/" />
@@ -89,6 +91,7 @@
           <root url="jar://$USER_HOME$/.sbt/boot/scala-2.9.1/lib/jline.jar!/" />
           <root url="jar://$USER_HOME$/.ivy2/cache/org.scalatest/scalatest_2.9.1/jars/scalatest_2.9.1-1.6.1.jar!/" />
           <root url="jar://$USER_HOME$/.ivy2/cache/mysql/mysql-connector-java/jars/mysql-connector-java-5.1.17.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/com.ning/async-http-client/jars/async-http-client-1.6.5.jar!/" />
           <root url="jar://$USER_HOME$/.sbt/boot/scala-2.9.1/org.scala-tools.sbt/sbt/0.11.0/process_2.9.1-0.11.0.jar!/" />
           <root url="jar://$USER_HOME$/.sbt/boot/scala-2.9.1/org.scala-tools.sbt/sbt/0.11.0/sbinary_2.9.0-0.4.0.jar!/" />
           <root url="jar://$USER_HOME$/.sbt/boot/scala-2.9.1/org.scala-tools.sbt/sbt/0.11.0/tasks_2.9.1-0.11.0.jar!/" />

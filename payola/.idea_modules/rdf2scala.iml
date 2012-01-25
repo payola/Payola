@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="scala" name="Scala">
+      <configuration>
+        <option name="compilerLibraryLevel" value="Project" />
+        <option name="compilerLibraryName" value="scala-2.9.1" />
+      </configuration>
+    </facet>
+  </component>
+  <component name="NewModuleRootManager" inherit-compiler-output="false">
+    <output url="file://$MODULE_DIR$/../rdf2scala/target/scala-2.9.1/classes" />
+    <output-test url="file://$MODULE_DIR$/../rdf2scala/target/scala-2.9.1/test-classes" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$/../rdf2scala">
+      <sourceFolder url="file://$MODULE_DIR$/../rdf2scala/src/main/scala" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../rdf2scala/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../rdf2scala/src/main/resources" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../rdf2scala/src/test/scala" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../rdf2scala/src/test/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../rdf2scala/src/test/resources" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/../rdf2scala/target" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" scope="TEST" name="org.scalatest_scalatest_2.9.1_1.6.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="org.scala-lang_scala-library_2.9.1" level="project" />
+    <orderEntry type="library" name="joda-time-2.0.jar" level="project" />
+    <orderEntry type="library" name="scardf_trunk.jar" level="project" />
+  </component>
+</module>
+

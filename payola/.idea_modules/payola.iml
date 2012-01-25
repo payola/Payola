@@ -30,6 +30,7 @@
     <orderEntry type="module" module-name="s2js" exported="" />
     <orderEntry type="module" module-name="data" exported="" />
     <orderEntry type="module" module-name="model" exported="" />
+    <orderEntry type="module" module-name="rdf2scala" exported="" />
     <orderEntry type="module" module-name="web" exported="" />
   </component>
 </module>

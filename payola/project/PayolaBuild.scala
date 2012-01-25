@@ -32,6 +32,7 @@ object PayolaBuild extends Build {
         val googleClosureDeps = javascriptsTarget / "deps.js"
     }
 
+
     val payolaSettings = Defaults.defaultSettings ++ Seq(
         organization := PayolaSettings.organization,
         version := PayolaSettings.version,
@@ -45,6 +46,7 @@ object PayolaBuild extends Build {
     val scalaTestDependency = "org.scalatest" %% "scalatest" % "1.6.1" % "test"
 
     val scalaCompilerDependency = "org.scala-lang" % "scala-compiler" % PayolaSettings.scalaVersion
+    
 
     val cleanGen = TaskKey[Unit]("clean-gen", "Deletes generated javascript sources.")
 
@@ -56,6 +58,7 @@ object PayolaBuild extends Build {
         s2jsProject,
         dataProject,
         modelProject,
+        rdf2scalaProject,
         webProject
     )
 
@@ -146,6 +149,15 @@ object PayolaBuild extends Build {
         )
     ).dependsOn(
         dataProject
+    )
+
+    lazy val rdf2scalaProject = Project(
+        "rdf2scala",
+        file("./rdf2scala"),
+        settings = payolaSettings ++ Seq(
+            libraryDependencies := Seq(scalaTestDependency),
+            resolvers ++= Seq(DefaultMavenRepository)
+        )
     )
 
     lazy val webProject = PlayProject(
