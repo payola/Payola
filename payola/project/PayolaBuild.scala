@@ -182,7 +182,7 @@ object PayolaBuild extends Build {
 
                 // Generate the the google closure dependency file. Doesn't have to be done for google closure library.
                 val buffer = new ListBuffer[String]()
-                new io.Directory(target).deepFiles.filter(_.extension == "js")foreach {file =>
+                new io.Directory(target).deepFiles.filter(_.extension == "js").foreach {file =>
                     val fileContent = Source.fromFile(file.path.toString).getLines.mkString
                     val pathRelativeToBase = ".." + file.path.stripPrefix(targetPath).replace("\\", "/")
                     buffer += "goog.addDependency('%s', [".format(pathRelativeToBase)

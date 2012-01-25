@@ -1,5 +1,4 @@
 goog.provide('cz.payola.web.client.views.graph.GraphView');
-goog.provide('cz.payola.web.client.views.graph.RedrawOperation');
 goog.require('cz.payola.web.client.views.Constants');
 goog.require('cz.payola.web.client.views.Layer');
 goog.require('cz.payola.web.client.views.Point');
@@ -7,7 +6,9 @@ goog.require('cz.payola.web.client.views.Vector');
 goog.require('cz.payola.web.client.views.graph.Controls');
 goog.require('cz.payola.web.client.views.graph.EdgeView');
 goog.require('cz.payola.web.client.views.graph.LocationDescriptor');
+goog.require('cz.payola.web.client.views.graph.RedrawOperation');
 goog.require('cz.payola.web.client.views.graph.VertexView');
+goog.require('cz.payola.web.client.views.graph.View');
 goog.require('scala.collection.immutable.List');
 goog.require('scala.collection.mutable.ListBuffer');
 goog.require('scala.math');
@@ -28,7 +29,8 @@ self.layers = scala.collection.immutable.List.$apply(self.edgesDeselectedLayer, 
 self.controlsLayer = new cz.payola.web.client.views.graph.Controls(self, self.topBlankLayer);
 self.vertexViews = self.createVertexViews();
 self.edgeViews = self.createEdges();
-};
+goog.base(self);};
+goog.inherits(cz.payola.web.client.views.graph.GraphView, cz.payola.web.client.views.graph.View);
 cz.payola.web.client.views.graph.GraphView.prototype.initControls = function() {
 var self = this;
 self.controlsLayer.init();
@@ -198,7 +200,4 @@ container.appendChild(canvas);
 layer.setSize(new cz.payola.web.client.views.Vector(600.0, 500.0));
 return layer;
 };
-cz.payola.web.client.views.graph.GraphView.prototype.metaClass_ = new s2js.MetaClass('cz.payola.web.client.views.graph.GraphView', []);
-cz.payola.web.client.views.graph.RedrawOperation.Selection = 0;
-cz.payola.web.client.views.graph.RedrawOperation.Movement = 1;
-cz.payola.web.client.views.graph.RedrawOperation.metaClass_ = new s2js.MetaClass('cz.payola.web.client.views.graph.RedrawOperation', []);
+cz.payola.web.client.views.graph.GraphView.prototype.metaClass_ = new s2js.MetaClass('cz.payola.web.client.views.graph.GraphView', [cz.payola.web.client.views.graph.View]);

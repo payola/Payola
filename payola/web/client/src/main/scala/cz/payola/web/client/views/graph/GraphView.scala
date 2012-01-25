@@ -7,12 +7,7 @@ import s2js.adapters.js.dom.{Canvas, Element, CanvasRenderingContext2D}
 import s2js.adapters.js.browser.document
 import cz.payola.web.client.views.{Vector, Layer, Color, Point}
 
-object RedrawOperation {
-    val Selection = 0
-    val Movement = 1
-
-}
-class GraphView(val graphModel: Graph, val container: Element) /*extends View*/ {
+class GraphView(val graphModel: Graph, val container: Element) extends View {
 
     /*The order in which are layers created determines their "z coordinate"
     (first created layer is on the bottom and last created one covers all the others).*/
