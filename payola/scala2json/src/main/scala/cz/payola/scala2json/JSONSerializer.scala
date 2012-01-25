@@ -34,8 +34,7 @@ class JSONSerializer(val obj: Any) {
      * @return True or false.
      */
     private def _isFieldTransient(f: Field): Boolean = {
-        val annot = f.getAnnotation(classOf[JSONTransient])
-        annot != null
+        f.getAnnotation(classOf[JSONTransient]) != null
     }
 
     /** Returns the field's name - if it has a JSONFieldName annotation,
