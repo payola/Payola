@@ -13,12 +13,13 @@ object JSONSerializerOptions {
      */
 
     val JSONSerializerDefaultOptions = JSONSerializerOptionCondensedPrinting
-    val JSONSerializerOptionCondensedPrinting = 1 << 0
-    val JSONSerializerOptionPrettyPrinting = 1 << 1
+    val JSONSerializerOptionCondensedPrinting = 0 << 0
+    val JSONSerializerOptionPrettyPrinting = 1 << 0
 }
 
 import JSONSerializerOptions._
 import scala.collection.mutable.StringBuilder
+import java.lang.reflect.Field
 
 // TODO: Keep track of already serialized objects to avoid cycles
 
@@ -36,15 +37,15 @@ class JSONSerializer(val obj: Any) {
         // We know it is an Array[_]
         val arr: Array[_] = obj.asInstanceOf[Array[_]]
 
-        for (i: Int <- 0 until  arr.length) {
+        for (i: Int <- 0 until arr.length) {
             if (i != 0)
-                builder.append(",")
+                builder.append(',')
 
             val serializer: JSONSerializer =  new JSONSerializer(arr(i))
             builder.append(serializer.stringValue(options))
         }
 
-        builder.append("]")
+        builder.append(']')
         builder.toString
     }
 
@@ -66,14 +67,14 @@ class JSONSerializer(val obj: Any) {
         var index: Int = 0
         coll foreach { item => {
             if (index != 0)
-                builder.append(",")
+                builder.append(',')
             index += 1
 
             val serializer: JSONSerializer =  new JSONSerializer(item)
             builder.append(serializer.stringValue(options))
         }}
 
-        builder.append("]")
+        builder.append(']')
         builder.toString
     }
 
@@ -95,7 +96,7 @@ class JSONSerializer(val obj: Any) {
         var index: Int = 0
         map foreach {case (key, value) => {
             if (index != 0)
-                builder.append(",")
+                builder.append(',')
             index += 1
 
             val keySerializer: JSONSerializer =  new JSONSerializer(key)
@@ -105,7 +106,7 @@ class JSONSerializer(val obj: Any) {
             builder.append(valueSerializer.stringValue(options))
         }}
 
-        builder.append("}")
+        builder.append('}')
         builder.toString
     }
 
@@ -120,6 +121,7 @@ class JSONSerializer(val obj: Any) {
         // one-member dictionaries, rather make it a dictionary as a whole.
         // This is why Map **needs** to be matched first before Iterable.
         obj match {
+            case _: String => JSONUtilities.escapedString(obj.asInstanceOf[String])
             case _: Map[_,_] => _serializeMap(options)
             case _: Iterable[_] => _serializeIterable(options)
             case _: Array[_] => _serializeArray(options)
@@ -129,13 +131,37 @@ class JSONSerializer(val obj: Any) {
     }
 
     private def _serializePlainObject(options: Int): String = {
-        ""
+        // Now we're dealing with some kind of an object,
+        // we'll use Java's reflection to serialize it
+        val builder: StringBuilder = new StringBuilder("{")
+
+        // Get object's fields:
+        val c: Class[_] = obj.getClass
+        val fields: Array[Field] = c.getDeclaredFields
+
+        println("Got class " + c + " and " + fields.length)
+
+        for (i: Int <- 0 until fields.length) {
+            if (i != 0)
+                builder.append(',')
+
+            val f: Field = fields(i)
+            f.setAccessible(true)
+            builder.append(f.getName)
+            builder.append(':')
+            val serializer: JSONSerializer =  new JSONSerializer(f.get(obj.asInstanceOf[AnyRef]))
+            builder.append(serializer.stringValue(options))
+        }
+
+        builder.append('}')
+        builder.toString
     }
 
 
     private def _serializePrimitiveType(options: Int): String = {
         obj match {
             case _: Boolean => if (obj.asInstanceOf[Boolean]) "true" else "false"
+            case _: Char => JSONUtilities.escapedChar(obj.asInstanceOf[Char])
             case _: Unit => throw new JSONSerializationException("Cannot serialize Unit.")
             case _ => obj.toString
         }
@@ -143,14 +169,14 @@ class JSONSerializer(val obj: Any) {
 
     /** Serializes @obj to a JSON string.
      *
-     * @param options OR'ed options defined by enum JSONSerializerOptions.
+     * @param options OR'ed options defined in JSONSerializerOptions.
      *
      * @return JSON representation of obj.
      */
    def stringValue(options: Int = JSONSerializerDefaultOptions): String = {
-       // If obj is null, return an empty array
+       // If obj is null, return "null" - as defined at http://www.json.org/
        if (obj == null){
-           "[]"
+           "null"
        }
 
        // We need to distinguish several cases:
