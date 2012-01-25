@@ -1,6 +1,6 @@
 package cz.payola.scala2json
 
-object JSONSerializerOptions extends Enumeration {
+object JSONSerializerOptions {
     /** Default options are condensed printing.
      *
      * Condensed printing removes all unnecessary white space, which results in
@@ -12,7 +12,6 @@ object JSONSerializerOptions extends Enumeration {
      * No other options available currently.
      */
 
-    type JSONSerializerOptions = Value
     val JSONSerializerDefaultOptions = JSONSerializerOptionCondensedPrinting
     val JSONSerializerOptionCondensedPrinting = 1 << 0
     val JSONSerializerOptionPrettyPrinting = 1 << 1
@@ -31,7 +30,7 @@ class JSONSerializer(val obj: Any) {
      *
      * @return JSON representation of obj.
      */
-    private def _serializeArray(options: JSONSerializerOptions): String = {
+    private def _serializeArray(options: Int): String = {
         val builder: StringBuilder = new StringBuilder("[")
 
         // We know it is an Array[_]
@@ -56,7 +55,7 @@ class JSONSerializer(val obj: Any) {
      *
      * @return JSON representation of obj.
      */
-    private def _serializeIterable(options: JSONSerializerOptions): String = {
+    private def _serializeIterable(options: Int): String = {
         val builder: StringBuilder = new StringBuilder("[")
 
         // We know it is Iterable
@@ -85,7 +84,7 @@ class JSONSerializer(val obj: Any) {
      *
      * @return JSON representation of obj.
      */
-    private def _serializeMap(options: JSONSerializerOptions): String = {
+    private def _serializeMap(options: Int): String = {
         val builder: StringBuilder = new StringBuilder("{")
 
         // We know it is a Map
@@ -116,7 +115,7 @@ class JSONSerializer(val obj: Any) {
      *
      * @return JSON representation of obj.
      */
-    private def _serializeObject(options: JSONSerializerOptions): String = {
+    private def _serializeObject(options: Int): String = {
         // *** Map is Iterable as well, but we shouldn't make it an array of
         // one-member dictionaries, rather make it a dictionary as a whole.
         // This is why Map **needs** to be matched first before Iterable.
@@ -129,12 +128,12 @@ class JSONSerializer(val obj: Any) {
         }
     }
 
-    private def _serializePlainObject(options: JSONSerializerOptions): String = {
+    private def _serializePlainObject(options: Int): String = {
         ""
     }
 
 
-    private def _serializePrimitiveType(options: JSONSerializerOptions): String = {
+    private def _serializePrimitiveType(options: Int): String = {
         obj match {
             case _: Boolean => if (obj.asInstanceOf[Boolean]) "true" else "false"
             case _: Unit => throw new JSONSerializationException("Cannot serialize Unit.")
@@ -148,7 +147,7 @@ class JSONSerializer(val obj: Any) {
      *
      * @return JSON representation of obj.
      */
-   def stringValue(options: JSONSerializerOptions = JSONSerializerDefaultOptions): String = {
+   def stringValue(options: Int = JSONSerializerDefaultOptions): String = {
        // If obj is null, return an empty array
        if (obj == null){
            "[]"
