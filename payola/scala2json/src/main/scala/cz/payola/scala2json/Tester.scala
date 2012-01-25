@@ -1,12 +1,12 @@
 package cz.payola.scala2json
 
-import annotations.JSONTransient
-import annotation.target.field
+import annotations._
 
 class TestObjectClass(var str: String, i: Int) {
     var smth: String = "help"
 
-    @JSONTransient @field var transient: Int = 33
+    @JSONFieldName(name = "heaven") var hell: Double = 33.0d
+    @JSONTransient var transient: Int = 33
 }
 
 object Tester {

@@ -17,6 +17,7 @@ object JSONSerializerOptions {
     val JSONSerializerOptionPrettyPrinting = 1 << 0
 }
 
+import annotations.JSONFieldName
 import JSONSerializerOptions._
 import cz.payola.scala2json.annotations.JSONTransient
 
@@ -26,10 +27,30 @@ import java.lang.reflect.Field
 // TODO: Keep track of already serialized objects to avoid cycles
 
 class JSONSerializer(val obj: Any) {
-
+    /** Returns whether @f has a JSONTransient annotation.
+     *
+     * @param f The field.
+     *
+     * @return True or false.
+     */
     private def _isFieldTransient(f: Field): Boolean = {
         val annot = f.getAnnotation(classOf[JSONTransient])
         annot != null
+    }
+
+    /** Returns the field's name - if it has a JSONFieldName annotation,
+     *  it uses that.
+     *
+     *  @param f The field.
+     *
+     *  @return The field's name, considering annotations.
+     */
+    private def _nameOfField(f: Field): String = {
+        val nameAnot = f.getAnnotation(classOf[JSONFieldName])
+        if (nameAnot == null)
+            f.getName
+        else
+            nameAnot.name // TODO name validation
     }
 
     /** Serializes an Array[_]
@@ -159,7 +180,7 @@ class JSONSerializer(val obj: Any) {
             if (!_isFieldTransient(f)){
                 if (i != 0)
                     builder.append(',')
-                builder.append(f.getName)
+                builder.append(_nameOfField(f))
                 builder.append(':')
                 val serializer: JSONSerializer =  new JSONSerializer(f.get(obj.asInstanceOf[AnyRef]))
                 builder.append(serializer.stringValue(options))
