@@ -36,7 +36,8 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
 
     val prettyPrint: Boolean = (options & JSONSerializerOptionPrettyPrinting) != 0
     val ignoreNullValues: Boolean = (options & JSONSerializerOptionIgnoreNullValues) != 0
-    
+
+    // Cycle detection
     if (obj != null){
         if (processedObjects.contains(obj))
             throw new JSONSerializationException("Cycle detected on object " + obj + ".")
@@ -75,7 +76,15 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
             }
         }
     }
-    
+
+    /** Appends "key: value" to @builder, preceded by comma, unless @isFirst is true.
+      *
+      * @param key The key.
+      * @param value The value.
+      * @param builder The builder.
+      * @param isFirst If true, comma preceding the field is left out.
+      *
+      */
     private def _appendKeyValueToStringBuilder(key: String, value: Any,  builder: StringBuilder, isFirst: Boolean) = {
         if (!isFirst){
             builder.append(',')
