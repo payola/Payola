@@ -274,7 +274,6 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
             case _: java.lang.Character => JSONUtilities.escapedChar(obj.asInstanceOf[java.lang.Character].charValue())
             case _: scala.collection.immutable.Map[String, _] => _serializeMap
             case _: scala.collection.mutable.Map[String, _] => _serializeMap
-            case _: Map[_,_] => throw new JSONSerializationException("Cannot serialize another maps than [String, _] - " + obj)
             case _: Iterable[_] => _serializeIterable
             case _: Array[_] => _serializeArray
             case _: AnyRef => _serializePlainObject
