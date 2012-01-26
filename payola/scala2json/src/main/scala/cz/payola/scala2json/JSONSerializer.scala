@@ -12,9 +12,12 @@ object JSONSerializerOptions {
      * No other options available currently.
      */
 
-    val JSONSerializerDefaultOptions = JSONSerializerOptionCondensedPrinting
     val JSONSerializerOptionCondensedPrinting = 0 << 0
     val JSONSerializerOptionPrettyPrinting = 1 << 0
+    val JSONSerializerOptionIgnoreNullValues = 1 << 1
+
+    val JSONSerializerDefaultOptions = (JSONSerializerOptionCondensedPrinting |
+        JSONSerializerOptionIgnoreNullValues)
 }
 
 import annotations.JSONFieldName
@@ -25,8 +28,34 @@ import scala.collection.mutable.StringBuilder
 import java.lang.reflect.Field
 
 // TODO: Keep track of already serialized objects to avoid cycles
+// TODO: Pretty printing
+// TODO: Name annotation name validation
 
 class JSONSerializer(val obj: Any) {
+
+    private def _appendFieldToStringBuilder(f: Field, options: Int, builder: StringBuilder,  isFirst: Boolean): Boolean = {
+        f.setAccessible(true)
+
+        if (_isFieldTransient(f)){
+            false
+        }else{
+            val fieldName = _nameOfField(f)
+            val fieldValue = f.get(obj.asInstanceOf[AnyRef])
+            if (fieldValue == null && (options & JSONSerializerOptionIgnoreNullValues) != 0){
+                false
+            }else{
+                if (!isFirst)
+                    builder.append(',')
+                builder.append(fieldName)
+                builder.append(':')
+                val serializer: JSONSerializer =  new JSONSerializer(fieldValue)
+                builder.append(serializer.stringValue(options))
+                true
+            }
+        }
+    }
+    
+    
     /** Returns whether @f has a JSONTransient annotation.
      *
      * @param f The field.
@@ -104,6 +133,7 @@ class JSONSerializer(val obj: Any) {
         builder.append(']')
         builder.toString
     }
+    
 
     /** Serializes an object that implements
      *  the Map trait, yet isn't a map.
@@ -172,17 +202,10 @@ class JSONSerializer(val obj: Any) {
 
         println("Got class " + c + " and " + fields.length)
 
+        var haveProcessedField: Boolean = false
         for (i: Int <- 0 until fields.length) {
-            val f: Field = fields(i)
-            f.setAccessible(true)
-            
-            if (!_isFieldTransient(f)){
-                if (i != 0)
-                    builder.append(',')
-                builder.append(_nameOfField(f))
-                builder.append(':')
-                val serializer: JSONSerializer =  new JSONSerializer(f.get(obj.asInstanceOf[AnyRef]))
-                builder.append(serializer.stringValue(options))
+            if (_appendFieldToStringBuilder(fields(i), options, builder, i == 0)){
+                haveProcessedField = true
             }
         }
 
@@ -190,7 +213,7 @@ class JSONSerializer(val obj: Any) {
         builder.toString
     }
 
-
+    
     private def _serializePrimitiveType(options: Int): String = {
         obj match {
             case _: Boolean => if (obj.asInstanceOf[Boolean]) "true" else "false"
@@ -208,22 +231,25 @@ class JSONSerializer(val obj: Any) {
      */
    def stringValue(options: Int = JSONSerializerDefaultOptions): String = {
        // If obj is null, return "null" - as defined at http://www.json.org/
+       // We can't simply ignore it, even though the options would have us
+       // ignore null values - this needs to be eliminated earlier in the chain
        if (obj == null){
            "null"
-       }
+       }else{
 
-       // We need to distinguish several cases:
-       // a) obj is a collection -> create an array
-       // b) obj is a hash map or similar -> create a dictionary
-       // c) obj is a string -> just escape it
-       // d) obj is a scala.lang.Array -> create an array
-       // e) obj is a primitive type -> convert it
-       // f) obj is a regular object -> use reflection to create a dictionary
-       //
-       // Also have in mind that we support a special value handling
-       // if the object implements some of the abstract traits in package
-       // cz.payola.scala2json.traits
-       _serializeObject(options)
+           // We need to distinguish several cases:
+           // a) obj is a collection -> create an array
+           // b) obj is a hash map or similar -> create a dictionary
+           // c) obj is a string -> just escape it
+           // d) obj is a scala.lang.Array -> create an array
+           // e) obj is a primitive type -> convert it
+           // f) obj is a regular object -> use reflection to create a dictionary
+           //
+           // Also have in mind that we support a special value handling
+           // if the object implements some of the abstract traits in package
+           // cz.payola.scala2json.traits
+           _serializeObject(options)
+       }
    }
 
 }

@@ -3,6 +3,7 @@ package cz.payola.scala2json
 import annotations._
 
 class TestObjectClass(var str: String, i: Int) {
+    var firstNull = null
     var smth: String = "help"
 
     @JSONFieldName(name = "heaven") var hell: Double = 33.0d
@@ -14,7 +15,7 @@ object Tester {
         val t: TestObjectClass = new TestObjectClass("Hello", 22)
         val s2json: JSONSerializer = new JSONSerializer(t)
 
-        println(s2json.stringValue())
+        println(s2json.stringValue(JSONSerializerOptions.JSONSerializerDefaultOptions))
         
     }
 }
