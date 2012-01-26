@@ -26,16 +26,39 @@ import cz.payola.scala2json.annotations.JSONTransient
 
 import scala.collection.mutable.StringBuilder
 import java.lang.reflect.Field
+import collection.mutable.ArrayBuffer
 
-// TODO: Keep track of already serialized objects to avoid cycles
-// TODO: Pretty printing
-// TODO: Name annotation name validation
+// TODO: Traits
+// TODO: decide what to do with generic maps.
 
-class JSONSerializer(val obj: Any, options: Int = JSONSerializerDefaultOptions) {
+class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptions, 
+                            val processedObjects: ArrayBuffer[Any] = new ArrayBuffer[Any]()) {
 
     val prettyPrint: Boolean = (options & JSONSerializerOptionPrettyPrinting) != 0
     val ignoreNullValues: Boolean = (options & JSONSerializerOptionIgnoreNullValues) != 0
+    
+    if (obj != null){
+        if (processedObjects.contains(obj))
+            throw new JSONSerializationException("Cycle detected on object " + obj + ".")
+        else
+            // Do not detect cycles on primitive types
+            if (obj.isInstanceOf[AnyRef]
+            && !obj.isInstanceOf[String]
+            && !obj.isInstanceOf[java.lang.Number]
+            && !obj.isInstanceOf[java.lang.Boolean]
+            && !obj.isInstanceOf[java.lang.Character])
+                processedObjects += obj
+    }
 
+
+    /** Appends a field to string builder.
+      *
+      * @param f The field
+      * @param builder The builder
+      * @param isFirst Whether the field is first - if it is, the comma separator is left out.
+      *
+      * @return False if the field has been skipped.
+      */
     private def _appendFieldToStringBuilder(f: Field, builder: StringBuilder, isFirst: Boolean): Boolean = {
         f.setAccessible(true)
 
@@ -47,28 +70,36 @@ class JSONSerializer(val obj: Any, options: Int = JSONSerializerDefaultOptions) 
             if (fieldValue == null && ignoreNullValues){
                 false
             }else{
-                if (!isFirst){
-                    builder.append(',')
-                    if (prettyPrint){
-                        builder.append('\n')
-                    }
-                }
-                
-                if (prettyPrint){
-                    builder.append('\t')
-                }
-                
-                builder.append(fieldName)
-                builder.append(':')
-                if (prettyPrint){
-                    builder.append(' ')
-                }
-
-                val serializer: JSONSerializer =  new JSONSerializer(fieldValue, options)
-                builder.append(serializer.stringValue)
+                _appendKeyValueToStringBuilder(fieldName, fieldValue, builder, isFirst)
                 true
             }
         }
+    }
+    
+    private def _appendKeyValueToStringBuilder(key: String, value: Any,  builder: StringBuilder, isFirst: Boolean) = {
+        if (!isFirst){
+            builder.append(',')
+            if (prettyPrint){
+                builder.append('\n')
+            }
+        }
+
+        if (prettyPrint){
+            builder.append('\t')
+        }
+
+        builder.append(key)
+        builder.append(':')
+        if (prettyPrint){
+            builder.append(' ')
+        }
+
+        val serializer: JSONSerializer =  new JSONSerializer(value, options, processedObjects.clone.clone)
+        val serializedObj: String = serializer.stringValue
+        if (prettyPrint)
+            builder.append(serializedObj.replaceAllLiterally("\n", "\n\t"))
+        else
+            builder.append(serializedObj)
     }
     
     
@@ -94,7 +125,10 @@ class JSONSerializer(val obj: Any, options: Int = JSONSerializerDefaultOptions) 
         if (nameAnot == null)
             f.getName
         else
-            nameAnot.name // TODO name validation
+            if (_validateFieldName(nameAnot.name))
+                nameAnot.name
+            else
+                throw new JSONSerializationException("Name annotation isn't valid for '" + nameAnot.name + "'")
     }
 
     /** Serializes an Array[_]
@@ -105,18 +139,33 @@ class JSONSerializer(val obj: Any, options: Int = JSONSerializerDefaultOptions) 
      */
     private def _serializeArray: String = {
         val builder: StringBuilder = new StringBuilder("[")
-
+        if (prettyPrint)
+            builder.append('\n')
+        
         // We know it is an Array[_]
         val arr: Array[_] = obj.asInstanceOf[Array[_]]
 
         for (i: Int <- 0 until arr.length) {
-            if (i != 0)
+            if (i != 0){
                 builder.append(',')
+                if (prettyPrint)
+                    builder.append('\n')
+            }
 
-            val serializer: JSONSerializer =  new JSONSerializer(arr(i), options)
-            builder.append(serializer.stringValue)
+            if (prettyPrint)
+                builder.append('\t')
+            
+            val serializer: JSONSerializer =  new JSONSerializer(arr(i), options, processedObjects.clone)
+            val serializedObj: String = serializer.stringValue
+            if (prettyPrint)
+                builder.append(serializedObj.replaceAllLiterally("\n", "\n\t"))
+            else
+                builder.append(serializedObj)
         }
 
+        if (prettyPrint)
+            builder.append('\n')
+        
         builder.append(']')
         builder.toString
     }
@@ -130,7 +179,9 @@ class JSONSerializer(val obj: Any, options: Int = JSONSerializerDefaultOptions) 
      */
     private def _serializeIterable: String = {
         val builder: StringBuilder = new StringBuilder("[")
-
+        if (prettyPrint)
+            builder.append('\n')
+        
         // We know it is Iterable
         val coll: Iterable[_] = obj.asInstanceOf[Iterable[_]]
 
@@ -138,14 +189,27 @@ class JSONSerializer(val obj: Any, options: Int = JSONSerializerDefaultOptions) 
         // we don't add a comma after the first iteration
         var index: Int = 0
         coll foreach { item => {
-            if (index != 0)
+            if (index != 0){
                 builder.append(',')
+                if (prettyPrint)
+                    builder.append('\n')
+            }
             index += 1
 
-            val serializer: JSONSerializer =  new JSONSerializer(item, options)
-            builder.append(serializer.stringValue)
+            if (prettyPrint)
+                builder.append('\t')
+
+            val serializer: JSONSerializer =  new JSONSerializer(item, options, processedObjects.clone)
+            val serializedObj: String = serializer.stringValue
+            if (prettyPrint)
+                builder.append(serializedObj.replaceAllLiterally("\n", "\n\t"))
+            else
+                builder.append(serializedObj)
         }}
 
+        if (prettyPrint)
+            builder.append('\n')
+            
         builder.append(']')
         builder.toString
     }
@@ -160,25 +224,25 @@ class JSONSerializer(val obj: Any, options: Int = JSONSerializerDefaultOptions) 
      */
     private def _serializeMap: String = {
         val builder: StringBuilder = new StringBuilder("{")
-
-        // We know it is a Map
-        val map: Map[_,_] = obj.asInstanceOf[Map[_,_]]
+        if (prettyPrint)
+            builder.append('\n')
+        
+        // We know it is a Map[String, _]
+        val map: Iterable[(String, _)] = obj.asInstanceOf[Iterable[(String, _)]]
 
         // Need to keep track of index so that
         // we don't add a comma after the first iteration
         var index: Int = 0
         map foreach {case (key, value) => {
-            if (index != 0)
-                builder.append(',')
+            if (!_validateFieldName(key))
+                throw new JSONSerializationException("Cannot use key named '" + key + "' in a map (" + map + ")")
+            _appendKeyValueToStringBuilder(key, value, builder, index == 0)
             index += 1
-
-            val keySerializer: JSONSerializer =  new JSONSerializer(key, options)
-            val valueSerializer: JSONSerializer =  new JSONSerializer(value, options)
-            builder.append(keySerializer.stringValue)
-            builder.append(":")
-            builder.append(valueSerializer.stringValue)
         }}
 
+        if (prettyPrint)
+            builder.append('\n')
+        
         builder.append('}')
         builder.toString
     }
@@ -199,7 +263,9 @@ class JSONSerializer(val obj: Any, options: Int = JSONSerializerDefaultOptions) 
             case _: java.lang.Boolean => if (obj.asInstanceOf[java.lang.Boolean].booleanValue) "true"
                                          else "false"
             case _: java.lang.Character => JSONUtilities.escapedChar(obj.asInstanceOf[java.lang.Character].charValue())
-            case _: Map[_,_] => _serializeMap
+            case _: scala.collection.immutable.Map[String, _] => _serializeMap
+            case _: scala.collection.mutable.Map[String, _] => _serializeMap
+            case _: Map[_,_] => throw new JSONSerializationException("Cannot serialize another maps than [String, _] - " + obj)
             case _: Iterable[_] => _serializeIterable
             case _: Array[_] => _serializeArray
             case _: AnyRef => _serializePlainObject
@@ -226,8 +292,6 @@ class JSONSerializer(val obj: Any, options: Int = JSONSerializerDefaultOptions) 
         // Get object's fields:
         val c: Class[_] = obj.getClass
         val fields: Array[Field] = c.getDeclaredFields
-
-        println("Got class " + c + " and " + fields.length)
 
         var haveProcessedField: Boolean = false
         for (i: Int <- 0 until fields.length) {
@@ -258,6 +322,17 @@ class JSONSerializer(val obj: Any, options: Int = JSONSerializerDefaultOptions) 
             case _: Unit => throw new JSONSerializationException("Cannot serialize Unit.")
             case _ => obj.toString
         }
+    }
+
+    /** The field name in JSON mustn't have spaces, etc. - just as a variable name
+      * in scala or C.
+      *
+      *  @param name Field name.
+      *
+      *  @return True or false.
+      */
+    private def _validateFieldName(name: String): Boolean = {
+        name.matches("[a-zA-Z0-9_]+")
     }
 
     /** Serializes @obj to a JSON string.
