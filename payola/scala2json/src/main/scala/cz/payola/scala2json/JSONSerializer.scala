@@ -29,7 +29,6 @@ import java.lang.reflect.Field
 import collection.mutable.ArrayBuffer
 
 // TODO: Traits
-// TODO: decide what to do with generic maps.
 
 class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptions, 
                             val processedObjects: ArrayBuffer[Any] = new ArrayBuffer[Any]()) {
@@ -51,6 +50,35 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
                 processedObjects += obj
     }
 
+    /** Appends an array item to string builder.
+      *
+      * @param item The item.
+      * @param builder The builder
+      * @param isFirst Whether the field is first - if it is, the comma separator is left out.
+      *
+      * @return False if the field has been skipped.
+      */
+    private def _appendStringArrayItemToStringBuilder(item: String, builder: StringBuilder, isFirst: Boolean) = {
+        if (!isFirst){
+            builder.append(',')
+            if (prettyPrint){
+                builder.append('\n')
+            }
+        }
+
+        if (prettyPrint){
+            builder.append('\t')
+        }
+
+        builder.append(item)
+    }
+    private def _appendArrayItemToStringBuilder(item: Any, builder: StringBuilder, isFirst: Boolean) = {
+        val serializer: JSONSerializer =  new JSONSerializer(item, options, processedObjects.clone)
+        var serializedObj: String = serializer.stringValue
+        if (prettyPrint)
+            serializedObj = serializedObj.replaceAllLiterally("\n", "\n\t")
+        _appendStringArrayItemToStringBuilder(serializedObj, builder, isFirst)
+    }
 
     /** Appends a field to string builder.
       *
@@ -86,29 +114,15 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
       *
       */
     private def _appendKeyValueToStringBuilder(key: String, value: Any,  builder: StringBuilder, isFirst: Boolean) = {
-        if (!isFirst){
-            builder.append(',')
-            if (prettyPrint){
-                builder.append('\n')
-            }
-        }
-
-        if (prettyPrint){
-            builder.append('\t')
-        }
-
-        builder.append(key)
-        builder.append(':')
-        if (prettyPrint){
-            builder.append(' ')
-        }
-
-        val serializer: JSONSerializer =  new JSONSerializer(value, options, processedObjects.clone.clone)
-        val serializedObj: String = serializer.stringValue
+        var separator: String = ":"
         if (prettyPrint)
-            builder.append(serializedObj.replaceAllLiterally("\n", "\n\t"))
-        else
-            builder.append(serializedObj)
+            separator = ": "
+
+        val serializer: JSONSerializer =  new JSONSerializer(value, options, processedObjects.clone)
+        var serializedObj: String = serializer.stringValue
+        if (prettyPrint)
+            serializedObj = serializedObj.replaceAllLiterally("\n", "\n\t")
+        _appendStringArrayItemToStringBuilder(key + separator + serializedObj, builder, isFirst)
     }
     
     
@@ -142,8 +156,6 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
 
     /** Serializes an Array[_]
      *
-     * @param options See stringValue
-     *
      * @return JSON representation of obj.
      */
     private def _serializeArray: String = {
@@ -155,21 +167,7 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
         val arr: Array[_] = obj.asInstanceOf[Array[_]]
 
         for (i: Int <- 0 until arr.length) {
-            if (i != 0){
-                builder.append(',')
-                if (prettyPrint)
-                    builder.append('\n')
-            }
-
-            if (prettyPrint)
-                builder.append('\t')
-            
-            val serializer: JSONSerializer =  new JSONSerializer(arr(i), options, processedObjects.clone)
-            val serializedObj: String = serializer.stringValue
-            if (prettyPrint)
-                builder.append(serializedObj.replaceAllLiterally("\n", "\n\t"))
-            else
-                builder.append(serializedObj)
+            _appendArrayItemToStringBuilder(arr(i), builder, i == 0)
         }
 
         if (prettyPrint)
@@ -181,8 +179,6 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
 
     /** Serializes an "array" - i.e. an object that implements
      *  the Iterable trait, yet isn't a map.
-     *
-     * @param options See stringValue
      *
      * @return JSON representation of obj.
      */
@@ -198,22 +194,8 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
         // we don't add a comma after the first iteration
         var index: Int = 0
         coll foreach { item => {
-            if (index != 0){
-                builder.append(',')
-                if (prettyPrint)
-                    builder.append('\n')
-            }
+            _appendArrayItemToStringBuilder(item, builder, index == 0)
             index += 1
-
-            if (prettyPrint)
-                builder.append('\t')
-
-            val serializer: JSONSerializer =  new JSONSerializer(item, options, processedObjects.clone)
-            val serializedObj: String = serializer.stringValue
-            if (prettyPrint)
-                builder.append(serializedObj.replaceAllLiterally("\n", "\n\t"))
-            else
-                builder.append(serializedObj)
         }}
 
         if (prettyPrint)
@@ -226,8 +208,6 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
 
     /** Serializes an object that implements
      *  the Map trait, yet isn't a map.
-     *
-     * @param options See stringValue
      *
      * @return JSON representation of obj.
      */
@@ -257,8 +237,6 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
     }
 
     /** Matches the @obj's type and calls the appropriate method.
-     *
-     * @param options See stringValue
      *
      * @return JSON representation of obj.
      */
@@ -303,7 +281,7 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
 
         var haveProcessedField: Boolean = false
         for (i: Int <- 0 until fields.length) {
-            if (_appendFieldToStringBuilder(fields(i), builder, i == 0)){
+            if (_appendFieldToStringBuilder(fields(i), builder, !haveProcessedField)){
                 haveProcessedField = true
             }
         }
@@ -319,7 +297,7 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
       *
       * For most types, just calls obj.toString, the exception is
       * Boolean, which is converted to 'true' or 'false', Char is converted
-      * to String. When Unit is encountred, an exception is raised.
+      * to String. When Unit is encountered, an exception is raised.
       *
       * @return JSON value.
       */
@@ -333,7 +311,7 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
     }
 
     /** The field name in JSON mustn't have spaces, etc. - just as a variable name
-      * in scala or C.
+      * in Scala or C.
       *
       *  @param name Field name.
       *
