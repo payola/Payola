@@ -17,7 +17,7 @@ object JSONSerializerOptions {
     val JSONSerializerOptionIgnoreNullValues = 1 << 1
 
     val JSONSerializerDefaultOptions = (JSONSerializerOptionCondensedPrinting |
-        JSONSerializerOptionIgnoreNullValues)
+                                                                 JSONSerializerOptionIgnoreNullValues)
 }
 
 import annotations.JSONFieldName
@@ -31,9 +31,12 @@ import java.lang.reflect.Field
 // TODO: Pretty printing
 // TODO: Name annotation name validation
 
-class JSONSerializer(val obj: Any) {
+class JSONSerializer(val obj: Any, options: Int = JSONSerializerDefaultOptions) {
 
-    private def _appendFieldToStringBuilder(f: Field, options: Int, builder: StringBuilder,  isFirst: Boolean): Boolean = {
+    val prettyPrint: Boolean = (options & JSONSerializerOptionPrettyPrinting) != 0
+    val ignoreNullValues: Boolean = (options & JSONSerializerOptionIgnoreNullValues) != 0
+
+    private def _appendFieldToStringBuilder(f: Field, builder: StringBuilder, isFirst: Boolean): Boolean = {
         f.setAccessible(true)
 
         if (_isFieldTransient(f)){
@@ -41,15 +44,28 @@ class JSONSerializer(val obj: Any) {
         }else{
             val fieldName = _nameOfField(f)
             val fieldValue = f.get(obj.asInstanceOf[AnyRef])
-            if (fieldValue == null && (options & JSONSerializerOptionIgnoreNullValues) != 0){
+            if (fieldValue == null && ignoreNullValues){
                 false
             }else{
-                if (!isFirst)
+                if (!isFirst){
                     builder.append(',')
+                    if (prettyPrint){
+                        builder.append('\n')
+                    }
+                }
+                
+                if (prettyPrint){
+                    builder.append('\t')
+                }
+                
                 builder.append(fieldName)
                 builder.append(':')
-                val serializer: JSONSerializer =  new JSONSerializer(fieldValue)
-                builder.append(serializer.stringValue(options))
+                if (prettyPrint){
+                    builder.append(' ')
+                }
+
+                val serializer: JSONSerializer =  new JSONSerializer(fieldValue, options)
+                builder.append(serializer.stringValue)
                 true
             }
         }
@@ -87,7 +103,7 @@ class JSONSerializer(val obj: Any) {
      *
      * @return JSON representation of obj.
      */
-    private def _serializeArray(options: Int): String = {
+    private def _serializeArray: String = {
         val builder: StringBuilder = new StringBuilder("[")
 
         // We know it is an Array[_]
@@ -97,8 +113,8 @@ class JSONSerializer(val obj: Any) {
             if (i != 0)
                 builder.append(',')
 
-            val serializer: JSONSerializer =  new JSONSerializer(arr(i))
-            builder.append(serializer.stringValue(options))
+            val serializer: JSONSerializer =  new JSONSerializer(arr(i), options)
+            builder.append(serializer.stringValue)
         }
 
         builder.append(']')
@@ -112,7 +128,7 @@ class JSONSerializer(val obj: Any) {
      *
      * @return JSON representation of obj.
      */
-    private def _serializeIterable(options: Int): String = {
+    private def _serializeIterable: String = {
         val builder: StringBuilder = new StringBuilder("[")
 
         // We know it is Iterable
@@ -126,8 +142,8 @@ class JSONSerializer(val obj: Any) {
                 builder.append(',')
             index += 1
 
-            val serializer: JSONSerializer =  new JSONSerializer(item)
-            builder.append(serializer.stringValue(options))
+            val serializer: JSONSerializer =  new JSONSerializer(item, options)
+            builder.append(serializer.stringValue)
         }}
 
         builder.append(']')
@@ -142,7 +158,7 @@ class JSONSerializer(val obj: Any) {
      *
      * @return JSON representation of obj.
      */
-    private def _serializeMap(options: Int): String = {
+    private def _serializeMap: String = {
         val builder: StringBuilder = new StringBuilder("{")
 
         // We know it is a Map
@@ -156,11 +172,11 @@ class JSONSerializer(val obj: Any) {
                 builder.append(',')
             index += 1
 
-            val keySerializer: JSONSerializer =  new JSONSerializer(key)
-            val valueSerializer: JSONSerializer =  new JSONSerializer(value)
-            builder.append(keySerializer.stringValue(options))
+            val keySerializer: JSONSerializer =  new JSONSerializer(key, options)
+            val valueSerializer: JSONSerializer =  new JSONSerializer(value, options)
+            builder.append(keySerializer.stringValue)
             builder.append(":")
-            builder.append(valueSerializer.stringValue(options))
+            builder.append(valueSerializer.stringValue)
         }}
 
         builder.append('}')
@@ -173,7 +189,7 @@ class JSONSerializer(val obj: Any) {
      *
      * @return JSON representation of obj.
      */
-    private def _serializeObject(options: Int): String = {
+    private def _serializeObject: String = {
         // *** Map is Iterable as well, but we shouldn't make it an array of
         // one-member dictionaries, rather make it a dictionary as a whole.
         // This is why Map **needs** to be matched first before Iterable.
@@ -183,19 +199,30 @@ class JSONSerializer(val obj: Any) {
             case _: java.lang.Boolean => if (obj.asInstanceOf[java.lang.Boolean].booleanValue) "true"
                                          else "false"
             case _: java.lang.Character => JSONUtilities.escapedChar(obj.asInstanceOf[java.lang.Character].charValue())
-            case _: Map[_,_] => _serializeMap(options)
-            case _: Iterable[_] => _serializeIterable(options)
-            case _: Array[_] => _serializeArray(options)
-            case _: AnyRef => _serializePlainObject(options)
-            case _ => _serializePrimitiveType(options)
+            case _: Map[_,_] => _serializeMap
+            case _: Iterable[_] => _serializeIterable
+            case _: Array[_] => _serializeArray
+            case _: AnyRef => _serializePlainObject
+            case _ => _serializePrimitiveType
         }
     }
 
-    private def _serializePlainObject(options: Int): String = {
+    /** Serializes an object - generally AnyRef 
+      *
+      * For most types, just calls obj.toString, the exception is
+      * Boolean, which is converted to 'true' or 'false', Char is converted
+      * to String. When Unit is encountred, an exception is raised.
+      *
+      * @return JSON value.
+      */
+    private def _serializePlainObject: String = {
         // Now we're dealing with some kind of an object,
         // we'll use Java's reflection to serialize it
         val builder: StringBuilder = new StringBuilder("{")
 
+        if (prettyPrint)
+            builder.append('\n')
+            
         // Get object's fields:
         val c: Class[_] = obj.getClass
         val fields: Array[Field] = c.getDeclaredFields
@@ -204,17 +231,27 @@ class JSONSerializer(val obj: Any) {
 
         var haveProcessedField: Boolean = false
         for (i: Int <- 0 until fields.length) {
-            if (_appendFieldToStringBuilder(fields(i), options, builder, i == 0)){
+            if (_appendFieldToStringBuilder(fields(i), builder, i == 0)){
                 haveProcessedField = true
             }
         }
 
+        if (prettyPrint)
+            builder.append('\n')
+        
         builder.append('}')
         builder.toString
     }
 
-    
-    private def _serializePrimitiveType(options: Int): String = {
+    /** Serializes a primitive type.
+      *
+      * For most types, just calls obj.toString, the exception is
+      * Boolean, which is converted to 'true' or 'false', Char is converted
+      * to String. When Unit is encountred, an exception is raised.
+      *
+      * @return JSON value.
+      */
+    private def _serializePrimitiveType: String = {
         obj match {
             case _: Boolean => if (obj.asInstanceOf[Boolean]) "true" else "false"
             case _: Char => JSONUtilities.escapedChar(obj.asInstanceOf[Char])
@@ -225,11 +262,9 @@ class JSONSerializer(val obj: Any) {
 
     /** Serializes @obj to a JSON string.
      *
-     * @param options OR'ed options defined in JSONSerializerOptions.
-     *
      * @return JSON representation of obj.
      */
-   def stringValue(options: Int = JSONSerializerDefaultOptions): String = {
+   def stringValue: String = {
        // If obj is null, return "null" - as defined at http://www.json.org/
        // We can't simply ignore it, even though the options would have us
        // ignore null values - this needs to be eliminated earlier in the chain
@@ -248,7 +283,7 @@ class JSONSerializer(val obj: Any) {
            // Also have in mind that we support a special value handling
            // if the object implements some of the abstract traits in package
            // cz.payola.scala2json.traits
-           _serializeObject(options)
+           _serializeObject
        }
    }
 

@@ -10,12 +10,14 @@ class TestObjectClass(var str: String, i: Int) {
     @JSONTransient var transient: Int = 33
 }
 
+import JSONSerializerOptions._
+
 object Tester {
     def main(args: Array[String]){
         val t: TestObjectClass = new TestObjectClass("Hello", 22)
-        val s2json: JSONSerializer = new JSONSerializer(t)
+        val s2json: JSONSerializer = new JSONSerializer(t, JSONSerializerOptionPrettyPrinting | JSONSerializerOptionIgnoreNullValues)
 
-        println(s2json.stringValue(JSONSerializerOptions.JSONSerializerDefaultOptions))
+        println(s2json.stringValue)
         
     }
 }
