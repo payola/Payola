@@ -2,6 +2,7 @@ package cz.payola.scala2json
 
 import annotations._
 import collection.mutable.{HashMap, ArrayBuffer}
+import traits._
 
 class TestObjectClass(var str: String, val i: Int) {
     var firstNull = null
@@ -11,9 +12,50 @@ class TestObjectClass(var str: String, val i: Int) {
     var hash: HashMap[String,  Int] = null
     var smth: String = "help"
     var obj: TestObjectClass = null
+    val customized: FullyCustomizedClass = new FullyCustomizedClass("any string")
+    val additionalFields = new AdditionalFieldsClass(333)
+    val customFileds = new CustomFieldsClass(222)
 
     @JSONFieldName(name = "heaven") var hell: Double = 33.0d
     @JSONTransient var transient: Int = 33
+}
+
+class FullyCustomizedClass(var str: String) extends JSONSerializationFullyCustomized {
+    def JSONValue(options: Int) = {
+        if ((options & JSONSerializerOptions.JSONSerializerOptionPrettyPrinting) != 0){
+            "{\n\tid: 123\n}"
+        }else{
+            "{id:123}"
+        }
+    }
+}
+
+class AdditionalFieldsClass(val int: Int) extends JSONSerializationAdditionalFields {
+    def additionalFieldsForJSONSerialization: scala.collection.mutable.Map[String, Any] = {
+        val map = new scala.collection.mutable.HashMap[String, Any]()
+        map.put("newField", 666)
+        map
+    }
+}
+
+class CustomFieldsClass(val int: Int) extends  JSONSerializationCustomFields {
+    def fieldNamesForJSONSerialization: scala.collection.mutable.Iterable[String] = {
+        val keys = new ArrayBuffer[String]()
+        keys += "field0"
+        keys += "field1"
+
+        keys
+    }
+
+    
+    def fieldValueForKey(key: String): Any = {
+        if (key == "field0")
+            333
+        else if (key == "field1")
+            "Jell-O, Cocaine and Silicon-titted Marilyn Monroe"
+        else
+            null
+    }
 }
 
 import JSONSerializerOptions._
@@ -33,7 +75,8 @@ object Tester {
         t.hash.put("five", 5)
         t.hash.put("six", 6)
         
-        val s2json: JSONSerializer = new JSONSerializer(t, JSONSerializerOptionPrettyPrinting | JSONSerializerOptionIgnoreNullValues)
+        val s2json: JSONSerializer = new JSONSerializer(t, JSONSerializerOptionPrettyPrinting |
+                                                            JSONSerializerOptionIgnoreNullValues)
 
         println(s2json.stringValue)
         

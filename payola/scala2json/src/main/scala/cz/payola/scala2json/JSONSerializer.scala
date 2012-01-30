@@ -20,13 +20,14 @@ object JSONSerializerOptions {
                                                                  JSONSerializerOptionIgnoreNullValues)
 }
 
-import annotations.JSONFieldName
+import cz.payola.scala2json.annotations._
+import cz.payola.scala2json.traits._
 import JSONSerializerOptions._
-import cz.payola.scala2json.annotations.JSONTransient
 
-import scala.collection.mutable.StringBuilder
 import java.lang.reflect.Field
-import collection.mutable.ArrayBuffer
+import scala.collection.mutable._
+
+
 
 // TODO: Traits
 
@@ -177,6 +178,33 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
         builder.toString
     }
 
+    /** Serializes an object that implements JSONSerializationCustomFields trait.
+     *
+     * @return JSON representation of obj.
+     */
+    private def _serializeCustomObject: String = {
+        val builder: StringBuilder = new StringBuilder("{")
+        if (prettyPrint)
+            builder.append('\n')
+
+        // We know it implements JSONSerializationCustomFields
+        val customObj: JSONSerializationCustomFields = obj.asInstanceOf[JSONSerializationCustomFields]
+
+        // Need to keep track of index so that
+        // we don't add a comma after the first iteration
+        var index: Int = 0
+        customObj.fieldNamesForJSONSerialization foreach { key => {
+            _appendKeyValueToStringBuilder(key, customObj.fieldValueForKey(key), builder, index == 0)
+            index += 1
+        }}
+
+        if (prettyPrint)
+            builder.append('\n')
+
+        builder.append('}')
+        builder.toString
+    }
+
     /** Serializes an "array" - i.e. an object that implements
      *  the Iterable trait, yet isn't a map.
      *
@@ -245,6 +273,8 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
         // one-member dictionaries, rather make it a dictionary as a whole.
         // This is why Map **needs** to be matched first before Iterable.
         obj match {
+            case fullyCustomized: JSONSerializationFullyCustomized => fullyCustomized.JSONValue(options)
+            case _: JSONSerializationCustomFields => _serializeCustomObject
             case _: String => JSONUtilities.escapedString(obj.asInstanceOf[String])
             case _: java.lang.Number => obj.toString
             case _: java.lang.Boolean => if (obj.asInstanceOf[java.lang.Boolean].booleanValue) "true"
@@ -285,6 +315,26 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
                 haveProcessedField = true
             }
         }
+
+        if (obj.isInstanceOf[JSONSerializationAdditionalFields]){
+            // Additional fields for the object
+            val map: Map[String, Any]
+                    = obj.asInstanceOf[JSONSerializationAdditionalFields].additionalFieldsForJSONSerialization
+            if (map.size != 0)
+                if (fields.size != 0)
+                    builder.append(',')
+                builder.append('\n')
+
+            var index: Int = 0
+            map foreach {case (key, value) => {
+                if (!_validateFieldName(key))
+                    throw new JSONSerializationException("Cannot use key named '" + key + "' in a map (" + map + ")")
+                _appendKeyValueToStringBuilder(key, value, builder, index == 0)
+                index += 1
+            }}
+
+        }
+
 
         if (prettyPrint)
             builder.append('\n')
