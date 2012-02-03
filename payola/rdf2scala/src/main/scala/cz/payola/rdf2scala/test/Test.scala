@@ -1,9 +1,10 @@
 package cz.payola.rdf2scala.test
 
-import org.scardf._
-import org.joda.time.LocalDate
-import org.joda._
+import cz.payola.data._
+import cz.payola.rdf2scala.RDFDocument
+import cz.payola.scala2json._
 
+/*
 object PeopleVocabulary extends Vocabulary( "http://person.eg#" ) {
   val Person = uriref( "Person" )
   val Hobby = uriref( "Hobby" )
@@ -16,10 +17,19 @@ object PeopleVocabulary extends Vocabulary( "http://person.eg#" ) {
 }
 
 import PeopleVocabulary._
+*/
 
 object RDF2ScalaTest {
     def main(args: Array[String]){
-        val john = UriRef( "http://doe.eg#john" )
+        val manager: WebServicesManager = new WebServicesManager()
+        manager.initWebServices()
+        val queryResult: QueryResult = manager.evaluateSparqlQuery("")
+        val rdfDoc = RDFDocument(queryResult.getRdf)
+        val serializer = new JSONSerializer(rdfDoc, JSONSerializerOptions.JSONSerializerOptionPrettyPrinting)
+        println(serializer.stringValue)
+        
+        // Old example demonstrating scardf library
+        /*val john = UriRef( "http://doe.eg#john" )
         val g = Graph.build( john -(
             RDF.Type -> Person,
             isMale -> true,
@@ -31,7 +41,7 @@ object RDF2ScalaTest {
         println(g.rend)
 
         val node: GraphNode = g/likes/asString
-        println(node.toString())
+        println(node.toString())*/
 
 
     }
