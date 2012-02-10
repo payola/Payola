@@ -109,6 +109,7 @@ scala.Option.prototype.metaClass_ = new s2js.MetaClass('scala.Option', [scala.Pr
 scala.Some = function(x) {
 var self = this;
 self.x = x;
+self.x = undefined;
 goog.base(self);goog.object.extend(self, new scala.Product());
 };
 goog.inherits(scala.Some, scala.Option);

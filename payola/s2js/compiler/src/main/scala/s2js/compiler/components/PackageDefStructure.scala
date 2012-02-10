@@ -3,7 +3,7 @@ package s2js.compiler.components
 import collection.mutable
 import scala.tools.nsc.Global
 
-/** A structure of a PackageDef nested packages and classes. */
+/** A structure of PackageDef nested packages and classes. */
 class PackageDefStructure
 {
     /** Map of ClassDefs indexed by their fully qualified names. */

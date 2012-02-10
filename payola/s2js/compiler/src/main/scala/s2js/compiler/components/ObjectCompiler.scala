@@ -1,15 +1,15 @@
 package s2js.compiler.components
 
 import tools.nsc.Global
-import reflect.{Super, Select, Apply}
 import collection.mutable
 
+/** A compiler of a ClassDef that corresponds to a singleton object. */
 class ObjectCompiler(packageDefCompiler: PackageDefCompiler, classDef: Global#ClassDef)
     extends ClassDefCompiler(packageDefCompiler, classDef)
 {
     override def compile(buffer: mutable.ListBuffer[String]) {
         // A synthetic object is compiled only if it has some members that should be compiled.
-        if (!classDef.symbol.isSynthetic || valOrDefDefs.exists(_.hasSymbolWhich(!isIgnoredMember(_)))) {
+        if (!classDef.symbol.isSynthetic || valOrDefDefs.exists(_.hasSymbolWhich(!symbolIsIgnoredMember(_)))) {
             super.compile(buffer)
         }
     }
@@ -25,8 +25,5 @@ class ObjectCompiler(packageDefCompiler: PackageDefCompiler, classDef: Global#Cl
             compileParameterValues(parentConstructorCall.get.args)
             buffer += ");\n"
         }
-
-        // Inherit the traits.
-        compileInheritedTraits(fullJsName);
     }
 }

@@ -5,6 +5,10 @@ self.id = id;
 self.position = position;
 self.text = text;
 self.neighbours = neighbours;
+self.id = undefined;
+self.position = undefined;
+self.text = undefined;
+self.neighbours = undefined;
 self.selected = false;
 };
 cz.payola.web.client.graph.Vertex.prototype.x = function() {

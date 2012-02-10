@@ -9,6 +9,9 @@ var self = this;
 self.layerEdges = layerEdges;
 self.layerVertices = layerVertices;
 self.layerText = layerText;
+self.layerEdges = undefined;
+self.layerVertices = undefined;
+self.layerText = undefined;
 };
 cz.payola.web.client.graph.Drawer.prototype.drawEdge = function(vertexA, vertexB, colorToUse) {
 var self = this;

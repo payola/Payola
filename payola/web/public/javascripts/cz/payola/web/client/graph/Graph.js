@@ -7,6 +7,7 @@ goog.require('scala.collection.immutable.List');
 cz.payola.web.client.graph.Graph = function(vertices) {
 var self = this;
 self.vertices = vertices;
+self.vertices = undefined;
 self.selectedVertexCount = 0;
 };
 cz.payola.web.client.graph.Graph.prototype.init = function() {

@@ -7,6 +7,8 @@ scala.Tuple2 = function(_1, _2) {
 var self = this;
 self._1 = _1;
 self._2 = _2;
+self._1 = undefined;
+self._2 = undefined;
 goog.base(self);goog.object.extend(self, new scala.Product());
 };
 goog.inherits(scala.Tuple2, scala.Product2);

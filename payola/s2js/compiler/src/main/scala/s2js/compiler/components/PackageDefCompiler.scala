@@ -12,6 +12,9 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
     /** The dependency manager. */
     val dependencyManager = new DependencyManager(this)
 
+    /** An unique id generator. */
+    private var uniqueId = 0;
+
     /**
       * Returns whether the specified symbol is an internal symbol that mustn't be used in the JavaScript.
       * @param symbol The symbol to check.
@@ -173,12 +176,23 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
 
         // If there are some ClassDef objects left, then there is a cyclic dependency.
         if (graph.nonEmpty) {
-            throw new ScalaToJsException("Illegal cyclic dependency in the class/object dependency graph.")
+            throw new ScalaToJsException("Cyclic dependency in the class/object dependency graph involving %s.".format(
+                graph.head._1
+            ))
         }
 
         // Compile the dependencies
         dependencyManager.compileDependencies(buffer)
 
         buffer.mkString
+    }
+
+    /**
+      * Returns an unique id (unique within the packageDef compilation)
+      * @return The unique id.
+      */
+    def getUniqueId(): Int = {
+        uniqueId += 1
+        uniqueId
     }
 }

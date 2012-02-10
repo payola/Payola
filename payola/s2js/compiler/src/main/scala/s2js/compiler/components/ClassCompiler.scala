@@ -2,8 +2,8 @@ package s2js.compiler.components
 
 import collection.mutable
 import tools.nsc.Global
-import reflect.{Apply, Select, Super}
 
+/** A compiler of a ClassDef that corresponds to a class or trait. */
 class ClassCompiler(packageDefCompiler: PackageDefCompiler, classDef: Global#ClassDef)
     extends ClassDefCompiler(packageDefCompiler, classDef)
 {
@@ -20,28 +20,27 @@ class ClassCompiler(packageDefCompiler: PackageDefCompiler, classDef: Global#Cla
             compileParameterInitialization(constructorParameters)
 
             // Initialize fields specified as the implicit constructor parameters.
-            constructorParameters.get.map(p => packageDefCompiler.getSymbolJsName(p.symbol)).foreach {parameter =>
-                initializedValDefs += parameter
-                buffer += "self.%1$s = %1$s;\n".format(parameter)
+            constructorParameters.get.foreach {parameter =>
+                initializedValDefs += packageDefCompiler.getSymbolFullJsName(parameter.symbol)
+                buffer += "self.%1$s = %1$s;\n".format(packageDefCompiler.getSymbolJsName(parameter.symbol))
             }
         }
 
         // Initialize fields that aren't implicit constructor parameters.
-        valDefs.filter(v => !initializedValDefs.contains(packageDefCompiler.getSymbolJsName(v.symbol))).foreach(compileMember(_, "self"))
+        valDefs.filter(v => !initializedValDefs.contains(packageDefCompiler.getSymbolFullJsName(v.symbol))).foreach(
+            compileMember(_, "self"))
 
-        // Call the parent class constructor and inherit the traits.
+        // Call the parent class constructor.
         if (parentClass.isDefined && parentConstructorCall.isDefined) {
             compileParentCall(parentConstructorCall.get.args)
             buffer += ";"
         }
-        compileInheritedTraits("self");
 
         // Compile the constructor body.
         classDef.impl.body.filter(!_.isInstanceOf[Global#ValOrDefDef]).foreach {ast =>
             compileAst(ast)
             buffer += ";\n"
         }
-
         buffer += "};\n"
 
         if (parentClass.isDefined) {

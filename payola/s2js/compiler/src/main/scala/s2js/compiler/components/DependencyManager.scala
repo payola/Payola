@@ -3,13 +3,13 @@ package s2js.compiler.components
 import collection.mutable
 import tools.nsc.Global
 
-/** A manager of dependencies in a PackageDef object */
+/** A manager of dependencies in a PackageDef object. */
 class DependencyManager(private val packageDefCompiler: PackageDefCompiler)
 {
-    /** Set of fully qualified names of required classes/objects */
+    /** Set of fully qualified names of required classes/objects. */
     private val requireHashSet = new mutable.HashSet[String]
 
-    /** Set of fully qualified names of provided classes/objects */
+    /** Set of fully qualified names of provided classes/objects. */
     private val provideHashSet = new mutable.HashSet[String]
 
     /** Structure of the PackageDef object. */

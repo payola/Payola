@@ -3,6 +3,8 @@ cz.payola.web.client.Layer = function(canvas, context) {
 var self = this;
 self.canvas = canvas;
 self.context = context;
+self.canvas = undefined;
+self.context = undefined;
 };
 cz.payola.web.client.Layer.prototype.setWidth = function(newWidth) {
 var self = this;

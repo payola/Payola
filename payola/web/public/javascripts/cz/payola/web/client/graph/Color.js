@@ -6,6 +6,10 @@ self.red = red;
 self.green = green;
 self.blue = blue;
 self.alpha = alpha;
+self.red = undefined;
+self.green = undefined;
+self.blue = undefined;
+self.alpha = undefined;
 };
 cz.payola.web.client.graph.Color.prototype.toString = function() {
 var self = this;

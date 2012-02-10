@@ -2,6 +2,7 @@ goog.provide('scala.Array');
 scala.Array = function(length) {
 var self = this;
 self.length = length;
+self.length = undefined;
 self.internalArray = [];
 };
 scala.Array.prototype.$apply = function(i) {
