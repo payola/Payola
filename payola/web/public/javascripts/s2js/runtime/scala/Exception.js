@@ -5,7 +5,5 @@ if (typeof(message) === 'undefined') { message = ''; }
 if (typeof(cause) === 'undefined') { cause = null; }
 self.message = message;
 self.cause = cause;
-self.message = undefined;
-self.cause = undefined;
 };
 scala.Exception.prototype.metaClass_ = new s2js.MetaClass('scala.Exception', []);

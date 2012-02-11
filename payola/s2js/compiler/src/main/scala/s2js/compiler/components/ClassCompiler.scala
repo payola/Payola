@@ -21,13 +21,13 @@ class ClassCompiler(packageDefCompiler: PackageDefCompiler, classDef: Global#Cla
 
             // Initialize fields specified as the implicit constructor parameters.
             constructorParameters.get.foreach {parameter =>
-                initializedValDefs += packageDefCompiler.getSymbolFullJsName(parameter.symbol)
+                initializedValDefs += packageDefCompiler.getSymbolLocalJsName(parameter.symbol)
                 buffer += "self.%1$s = %1$s;\n".format(packageDefCompiler.getSymbolJsName(parameter.symbol))
             }
         }
 
         // Initialize fields that aren't implicit constructor parameters.
-        valDefs.filter(v => !initializedValDefs.contains(packageDefCompiler.getSymbolFullJsName(v.symbol))).foreach(
+        valDefs.filter(v => !initializedValDefs.contains(packageDefCompiler.getSymbolLocalJsName(v.symbol))).foreach(
             compileMember(_, "self"))
 
         // Call the parent class constructor.
