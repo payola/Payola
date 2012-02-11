@@ -1,215 +1,199 @@
-import collection.mutable.ListBuffer
+import scala.collection.mutable.ListBuffer
+import scala.io.Source
+import scala.tools.nsc.io
+import scala.util.matching.Regex
 import sbt._
 import Keys._
 import PlayProject._
-import scala.io.Source
-import scala.tools.nsc.io
-import util.matching.Regex
 
-object PayolaBuild extends Build {
+object PayolaBuild extends Build
+{
+    val compileAndPackage = TaskKey[File]("cp", "Compiles and packages the project in one step.")
 
-    object PayolaSettings {
-        val organization = "Payola"
+    val cleanBeforeTests = TaskKey[Unit]("clean-before-tests", "Cleans the test target directories.")
 
-        val version = "0.1"
-
+    /** Common settings of all projects. */
+    object Settings
+    {
         val scalaVersion = "2.9.1"
     }
 
-    object S2JsSettings {
+    /** Common settings of the S2Js projects. */
+    object S2JsSettings
+    {
         val version = "0.2"
 
-        val adaptersJar = file("lib/s2js-adapters_" + PayolaSettings.scalaVersion + "-" + version + ".jar")
+        val compilerJarName = "s2js-compiler_%s-%s.jar".format(Settings.scalaVersion, version)
 
-        val compilerJar = file("lib/s2js-compiler_" + PayolaSettings.scalaVersion + "-" + version + ".jar")
+        val adaptersJarName = "s2js-adapters_%s-%s.jar".format(Settings.scalaVersion, version)
 
         val compilerTestsTarget = file("s2js/compiler/target/tests")
     }
 
-    object WebSettings {
-        val javascriptsTarget = file("web/public/javascripts")
+    /** Common settings of the Payola projects. */
+    object PayolaSettings
+    {
+        val version = "0.1"
 
-        val googleClosureDeps = javascriptsTarget / "deps.js"
+        val organization = "Payola"
+        
+        val libDir = file("lib")
     }
 
+    /** Settings of the web project. */
+    object WebSettings
+    {
+        val javascriptsTargetDir = file("web/server/public/javascripts")
 
-    val payolaSettings = Defaults.defaultSettings ++ Seq(
-        organization := PayolaSettings.organization,
-        version := PayolaSettings.version,
-        scalaVersion := PayolaSettings.scalaVersion
+        val googleClosureDepsFile = javascriptsTargetDir / "deps.js"
+    }
+
+    /** Common default settings of all projects. */
+    val defaultSettings = Defaults.defaultSettings ++ Seq(
+        scalaVersion := Settings.scalaVersion,
+        scalacOptions ++= Seq(
+            "-deprecation",
+            "-unchecked",
+            "-encoding", "utf8"
+        ),
+        libraryDependencies ++= Seq(
+            "org.scalatest" %% "scalatest" % "1.6.1" % "test"
+        ),
+        resolvers ++= Seq(
+            DefaultMavenRepository
+        ),
+        compileAndPackage <<= (packageBin in Compile),
+        (test in Test) <<= (test in Test).dependsOn(compileAndPackage)
     )
 
-    val s2jsSettings = payolaSettings ++ Seq(
+    /** Common default settings of the S2Js projects. */
+    val s2JsSettings = defaultSettings ++ Seq(
         version := S2JsSettings.version
     )
 
-    val scalaTestDependency = "org.scalatest" %% "scalatest" % "1.6.1" % "test"
+    /** Common settings of the Payola projects. */
+    val payolaSettings = defaultSettings ++ Seq(
+        version := PayolaSettings.version,
+        organization := PayolaSettings.organization
+    )
 
-    val scalaCompilerDependency = "org.scala-lang" % "scala-compiler" % PayolaSettings.scalaVersion
-    
-
-    val cleanGen = TaskKey[Unit]("clean-gen", "Deletes generated javascript sources.")
-
+    /**
+      * The Payola solution. All projects have to be listed in the aggregate method.
+      */
     lazy val payolaProject = Project(
-        "payola",
-        file("."),
-        settings = payolaSettings
+        "payola", file("."), settings = payolaSettings
     ).aggregate(
-        s2jsProject,
-        dataProject,
-        modelProject,
-        rdf2scalaProject,
-        webProject,
-        scala2jsonProject
+        s2JsProject, scala2JsonProject, dataProject, modelProject, webProject
     )
 
-    lazy val s2jsProject = Project(
-        "s2js",
-        file("./s2js"),
-        settings = s2jsSettings
+    lazy val s2JsProject = Project(
+        "s2js", file("s2js"), settings = s2JsSettings
     ).aggregate(
-        s2jsAdaptersProject,
-        s2jsCompilerProject,
-        s2jsRuntimeProject
+        s2JsAdaptersProject, s2JsCompilerProject, s2JsRuntimeProject
     )
 
-    lazy val s2jsAdaptersProject = Project(
-        "adapters",
-        file("s2js/adapters"),
-        settings = s2jsSettings ++ Seq(
-            packageBin <<= (packageBin in Compile).map {jarFile =>
-                IO.copyFile(jarFile, S2JsSettings.adaptersJar)
+    lazy val s2JsAdaptersProject = Project(
+        "adapters", file("s2js/adapters"),
+        settings = s2JsSettings ++ Seq(
+            compileAndPackage <<= compileAndPackage.map {jarFile: File =>
+                IO.copyFile(jarFile, PayolaSettings.libDir / S2JsSettings.adaptersJarName)
                 jarFile
-            },
-            compile <<= (compile in Compile).dependsOn(packageBin)
+            }
         )
     )
 
-    lazy val s2jsCompilerProject = Project(
-        "compiler",
-        file("s2js/compiler"),
-        settings = s2jsSettings ++ Seq(
-            libraryDependencies := Seq(scalaTestDependency, scalaCompilerDependency),
-            resolvers ++= Seq(DefaultMavenRepository),
-
-            scalacOptions ++= Seq("-unchecked", "-deprecation"),
+    lazy val s2JsCompilerProject = Project(
+        "compiler", file("s2js/compiler"),
+        settings = s2JsSettings ++ Seq(
+            libraryDependencies ++= Seq(
+                "org.scala-lang" % "scala-compiler" % Settings.scalaVersion
+            ),
             testOptions ++= Seq(
                 Tests.Argument("-Dwd=" + S2JsSettings.compilerTestsTarget.absolutePath),
-                Tests.Argument("-Dcp=" + new io.Directory(file("lib")).files.map(_.path).mkString(";"))
+                Tests.Argument("-Dcp=" + new io.Directory(PayolaSettings.libDir).files.map(_.path).mkString(";"))
             ),
-
-            // Delete the generated test files.
-            cleanGen := {
+            cleanBeforeTests := {
                 new io.Directory(S2JsSettings.compilerTestsTarget).list.foreach(_.deleteRecursively())
             },
-
-            clean <<= clean.dependsOn(cleanGen),
-
-            // The compiler needs to be packaged immediately after the compilation, because other projects that depend
-            // on the compiler need the .jar package for their compilation. But it still doesen't work if you perform
-            // the compile command anywhere outside of the compiler project.
-            packageBin <<= (packageBin in Compile).map {jarFile =>
-                IO.copyFile(jarFile, S2JsSettings.compilerJar)
+            compileAndPackage <<= compileAndPackage.map {jarFile: File =>
+                IO.copyFile(jarFile, PayolaSettings.libDir / S2JsSettings.compilerJarName)
                 jarFile
             },
-
-            compile <<= (compile in Compile).dependsOn(packageBin),
-            (compile in Test) <<= (compile in Test).dependsOn(cleanGen)
+            (test in Test) <<= (test in Test).dependsOn(cleanBeforeTests)
         )
     ).dependsOn(
-        s2jsAdaptersProject
+        s2JsAdaptersProject
     )
 
-    lazy val s2jsRuntimeProject = Project(
-        "runtime",
-        file("s2js/runtime"),
-        settings = s2jsSettings ++ Seq(
-            scalacOptions += "-Xplugin:" + S2JsSettings.compilerJar.absolutePath,
-            scalacOptions += "-P:s2js:outputDirectory:" + WebSettings.javascriptsTarget.absolutePath
-        )
-    ).dependsOn(
-        s2jsAdaptersProject,
-        s2jsCompilerProject
+    /** A project that is compiled to JavaScript using Scala to JavaScript compiler (beside standard compilation). */
+    object ScalaToJsProject
+    {
+        val compilerJar = file("lib/" + S2JsSettings.compilerJarName)
+
+        val adaptersJar = file("lib/" + S2JsSettings.adaptersJarName)
+
+        def apply(name: String, path: File, outputDir: File, projectSettings: Seq[Project.Setting[_]]) = {
+            Project(
+                name, path,
+                settings = projectSettings ++ Seq(
+                    scalacOptions ++= Seq(
+                        "-Xplugin:" + compilerJar.absolutePath,
+                        "-P:s2js:outputDirectory:" + outputDir.absolutePath
+                    )
+                )
+            ).dependsOn(
+                s2JsAdaptersProject, s2JsCompilerProject
+            )
+        }
+    }
+
+    lazy val s2JsRuntimeProject = ScalaToJsProject(
+        "runtime", file("s2js/runtime"), WebSettings.javascriptsTargetDir, s2JsSettings
+    )
+
+    lazy val scala2JsonProject = Project(
+        "scala2json", file("scala2json"), settings = payolaSettings
     )
 
     lazy val dataProject = Project(
-        "data",
-        file("data"),
-        settings = payolaSettings ++ Seq(
-            libraryDependencies := Seq(scalaTestDependency),
-            resolvers ++= Seq(DefaultMavenRepository)
-        )
+        "data", file("data"), settings = payolaSettings
     )
 
     lazy val modelProject = Project(
-        "model",
-        file("model"),
-        settings = payolaSettings ++ Seq(
-            libraryDependencies := Seq(scalaTestDependency),
-            resolvers ++= Seq(DefaultMavenRepository)
-        )
+        "model", file("model"), settings = payolaSettings
     ).dependsOn(
-        dataProject
+        scala2JsonProject, dataProject
     )
 
-    lazy val scala2jsonProject = Project(
-        "scala2json",
-        file("./scala2json"),
-        settings = payolaSettings ++ Seq(
-            libraryDependencies := Seq(scalaTestDependency),
-            resolvers ++= Seq(DefaultMavenRepository)
-        )
-    )
-
-    lazy val rdf2scalaProject = Project(
-        "rdf2scala",
-        file("./rdf2scala"),
-        settings = payolaSettings ++ Seq(
-            libraryDependencies := Seq(scalaTestDependency),
-            resolvers ++= Seq(DefaultMavenRepository)
-        )
-    ).dependsOn(
-        dataProject,
-        scala2jsonProject
-    )
-
-    lazy val webProject = PlayProject(
-        "web", // Name of the project.
-        PayolaSettings.version, // Version of the project.
-        Nil, // Library dependencies.
-        file("web") // Path to the project.
-    ).settings(
-        defaultScalaSettings: _*
+    lazy val webProject = Project(
+        "web", file("web"), settings = payolaSettings
     ).aggregate(
-        clientProject
-    ).dependsOn(
-        modelProject
+        webSharedProject, webClientProject
     )
 
-    lazy val clientProject = Project(
-        "client",
-        file("web/client"),
-        settings = payolaSettings ++ Seq(
-            scalacOptions += "-Xplugin:" + S2JsSettings.compilerJar.absolutePath,
-            scalacOptions += "-P:s2js:outputDirectory:" + WebSettings.javascriptsTarget.absolutePath,
+    lazy val webSharedProject = ScalaToJsProject(
+        "shared", file("web/shared"), WebSettings.javascriptsTargetDir, payolaSettings
+    )
 
-            // Delete the generated directories and js files, but not the internal libraries.
-            cleanGen := {
-                new io.Directory(WebSettings.javascriptsTarget / "cz").deleteRecursively()
-                WebSettings.googleClosureDeps.delete()
-            },
+    lazy val webServerProject = PlayProject(
+        "server", PayolaSettings.version, Nil, file("web/server")
+    ).settings(
+        (defaultScalaSettings ++ payolaSettings): _*
+    ).dependsOn(
+        modelProject, webSharedProject
+    )
 
-            clean <<= clean.dependsOn(cleanGen),
-
-            compile <<= (compile in Compile).dependsOn(clean).map {analysis =>
-                val target = WebSettings.javascriptsTarget
-                val targetPath = new io.File(target).path
+    lazy val webClientProject = ScalaToJsProject(
+        "client", file("web/client"), WebSettings.javascriptsTargetDir,
+        payolaSettings ++ Seq(
+            compileAndPackage <<= compileAndPackage.dependsOn(clean).map {jarFile: File =>
+                val targetDirectory = new io.Directory(WebSettings.javascriptsTargetDir)
 
                 // Generate the the google closure dependency file. Doesn't have to be done for google closure library.
                 val buffer = new ListBuffer[String]()
-                new io.Directory(target).deepFiles.filter(_.extension == "js")foreach {file =>
+                targetDirectory.deepFiles.filter(_.extension == "js").foreach {file =>
                     val fileContent = Source.fromFile(file.path.toString).getLines.mkString
-                    val pathRelativeToBase = ".." + file.path.stripPrefix(targetPath).replace("\\", "/")
+                    val pathRelativeToBase = ".." + file.path.stripPrefix(targetDirectory.path).replace("\\", "/")
                     buffer += "goog.addDependency('%s', [".format(pathRelativeToBase)
 
                     // Finds all occurances of the regex in the text and produces string in format 'o1', 'o2', ...
@@ -224,12 +208,12 @@ object PayolaBuild extends Build {
                     buffer += matchedGroupsToString("""goog\.require\(\s*['\"]([^'\"]+)['\"]\s*\);""".r, fileContent)
                     buffer += "]);\n"
                 }
-                new io.File(WebSettings.googleClosureDeps).writeAll(buffer.mkString)
+                new io.File(WebSettings.googleClosureDepsFile).writeAll(buffer.mkString)
 
-                analysis
+                jarFile
             }
         )
     ).dependsOn(
-        s2jsAdaptersProject
+        webSharedProject
     )
 }

@@ -26,8 +26,8 @@
     <orderEntry type="library" name="org.scala-lang_scala-library_2.9.1" level="project" />
     <orderEntry type="library" name="org.scala-lang_scala-compiler_2.9.1" level="project" />
     <orderEntry type="library" scope="TEST" name="org.scalatest_scalatest_2.9.1_1.6.1" level="project" />
-    <orderEntry type="module" module-name="adapters" exported="" />
-    <orderEntry type="module" module-name="compiler" exported="" />
+    <orderEntry type="module" module-name="s2js-adapters" exported="" />
+    <orderEntry type="module" module-name="s2js-compiler" exported="" />
   </component>
 </module>
 
