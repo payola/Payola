@@ -25,6 +25,8 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="org.scala-lang_scala-library_2.9.1" level="project" />
     <orderEntry type="library" scope="TEST" name="org.scalatest_scalatest_2.9.1_1.6.1" level="project" />
+    <orderEntry type="library" name="joda-time-2.0.jar" level="project" />
+    <orderEntry type="library" name="scardf_trunk.jar" level="project" />
     <orderEntry type="module" module-name="scala2json" exported="" />
     <orderEntry type="module" module-name="data" exported="" />
   </component>

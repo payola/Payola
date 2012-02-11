@@ -1,4 +1,4 @@
-package cz.payola.rdf2scala
+package cz.payola.data
 
 import com.hp.hpl.jena.rdf.model.{StmtIterator, Resource}
 import cz.payola.scala2json.traits._
