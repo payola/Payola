@@ -1,7 +1,6 @@
-package cz.payola.rdf2scala.test
+package cz.payola.data.test
 
 import cz.payola.data._
-import cz.payola.rdf2scala.RDFDocument
 import cz.payola.scala2json._
 
 /*

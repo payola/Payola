@@ -1,4 +1,4 @@
-package cz.payola.rdf2scala
+package cz.payola.data
 
 import cz.payola.scala2json._
 import cz.payola.scala2json.traits.JSONSerializationFullyCustomized

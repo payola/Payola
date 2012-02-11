@@ -91,6 +91,8 @@
     <orderEntry type="library" scope="TEST" name="net.sourceforge.cssparser_cssparser_0.9.5" level="project" />
     <orderEntry type="library" scope="TEST" name="org.w3c.css_sac_1.3" level="project" />
     <orderEntry type="library" scope="TEST" name="commons-io_commons-io_2.0.1" level="project" />
+    <orderEntry type="library" name="joda-time-2.0.jar" level="project" />
+    <orderEntry type="library" name="scardf_trunk.jar" level="project" />
     <orderEntry type="module" module-name="client" exported="" />
     <orderEntry type="module" module-name="model" exported="" />
   </component>
