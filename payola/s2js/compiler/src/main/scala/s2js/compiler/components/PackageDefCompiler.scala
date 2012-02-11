@@ -12,18 +12,8 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
     /** The dependency manager. */
     val dependencyManager = new DependencyManager(this)
 
-    /**
-      * Map of package fully qualified name replacements. Ordered by transformation priority (if A is a prefix of B,
-      * then the A should be first).
-      */
-    private val packageReplacementMap = LinkedHashMap(
-        "java.lang" -> "scala",
-        "scala.this" -> "scala",
-        "s2js.adapters.js.browser" -> "",
-        "s2js.adapters.js.dom" -> "",
-        "s2js.adapters" -> "",
-        "s2js.runtime" -> ""
-    )
+    /** An unique id generator. */
+    private var uniqueId = 0;
 
     /**
       * Returns whether the specified symbol is an internal symbol that mustn't be used in the JavaScript.
@@ -70,7 +60,27 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
       * @return The replacement Some(oldPackage, newPackage) if such was found, None oterwise.
       */
     def symbolPackageReplacement(symbol: Global#Symbol): Option[(String, String)] = {
+        // Ordered by transformation priority (if A is a prefix of B, then the A should be first).
+        val packageReplacementMap = LinkedHashMap(
+            "java.lang" -> "scala",
+            "scala.this" -> "scala",
+            "s2js.adapters.js.browser" -> "",
+            "s2js.adapters.js.dom" -> "",
+            "s2js.adapters" -> "",
+            "s2js.runtime" -> ""
+        )
+
         packageReplacementMap.find(r => symbol.fullName.startsWith(r._1))
+    }
+
+    /**
+      * Returns JavaScript name of a symbol. If the symbol is local, then local JavaScript name is returned. Otherwise
+      * fully qualified JavaScript name is returned.
+      * @param symbol The symbol whose name should be returned.
+      * @return The name.
+      */
+    def getSymbolJsName(symbol: Global#Symbol): String = {
+        if (symbol.isLocal) getSymbolLocalJsName(symbol) else getSymbolFullJsName(symbol)
     }
 
     /**
@@ -78,7 +88,7 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
       * @param symbol The symbol whose name should be returned.
       * @return The name.
       */
-    def getSymbolJsFullName(symbol: Global#Symbol): String = {
+    def getSymbolFullJsName(symbol: Global#Symbol): String = {
         var name = symbol.fullName;
 
         // Perform the namespace transformation (use the longest matching namespace).
@@ -95,6 +105,44 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
 
         // Drop the "package" package that isn't used in the JavaScript.
         name.replace(".package", "")
+    }
+
+    /**
+      * Returns JavaScript name of a symbol that should be used in a local scope.
+      * @param symbol The symbol whose name should be returned.
+      * @return The name.
+      */
+    def getSymbolLocalJsName(symbol: Global#Symbol): String = {
+        getLocalJsName(symbol.name.toString.trim, !symbol.isMethod && symbol.isSynthetic)
+    }
+
+    /**
+      * Returns JavaScript name corresponding to the specified scala name.
+      * @param name The scala name that should be converted.
+      * @param forcePrefix Whether the name prefix is enforced. Default false.
+      * @return The name.
+      */
+    def getLocalJsName(name: String, forcePrefix: Boolean = false): String = {
+        val jsKeywords = List(
+            "abstract", "boolean", "break", "byte", "case", "catch", "char", "class", "const", "continue", "debugger",
+            "default", "delete", "do", "double", "else", "enum", "export", "extends", "false", "final", "finally",
+            "float", "for", "function", "goto", "if", "implements", "import", "in", "instanceof", "int", "interface",
+            "long", "native", "new", "null", "package", "private", "private", "public", "return", "short", "static",
+            "super", "switch", "synchronized", "this", "throw", "throws", "transient", "true", "try", "typeof", "var",
+            "void", "volatile", "while", "with"
+        )
+        val jsDefaultMembers = List(
+            "constructor", "hasOwnProperty", "isPrototypeOf", "propertyIsEnumerable", "apply", "arguments", "call",
+            "prototype", "superClass_", "metaClass_"
+        )
+
+        // Synthetic symbols get a prefix to avoid name collision with other symbols. Also if the symbol name is a js
+        // keyword then it gets the prefix.
+        if (forcePrefix || jsKeywords.contains(name) || jsDefaultMembers.contains(name)) {
+            "$" + name
+        } else {
+            name
+        }
     }
 
     /**
@@ -128,12 +176,23 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
 
         // If there are some ClassDef objects left, then there is a cyclic dependency.
         if (graph.nonEmpty) {
-            throw new ScalaToJsException("Illegal cyclic dependency in the class/object dependency graph.")
+            throw new ScalaToJsException("Cyclic dependency in the class/object dependency graph involving %s.".format(
+                graph.head._1
+            ))
         }
 
         // Compile the dependencies
         dependencyManager.compileDependencies(buffer)
 
         buffer.mkString
+    }
+
+    /**
+      * Returns an unique id (unique within the packageDef compilation)
+      * @return The unique id.
+      */
+    def getUniqueId(): Int = {
+        uniqueId += 1
+        uniqueId
     }
 }

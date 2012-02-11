@@ -10,9 +10,9 @@ self._2 = _2;
 self._3 = _3;
 self._4 = _4;
 self._5 = _5;
-goog.base(self);goog.object.extend(self, new scala.Product());
-};
+goog.base(self);};
 goog.inherits(scala.Tuple5, scala.Product5);
+goog.object.extend(scala.Tuple5.prototype, new scala.Product());
 scala.Tuple5.prototype.toString = function() {
 var self = this;
 return (((((((((('(' + self._1) + ',') + self._2) + ',') + self._3) + ',') + self._4) + ',') + self._5) + ')');

@@ -64,7 +64,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec {
     }
 
     describe("If statements") {
-        it("can contain assignments") {
+        it("are supported") {
             configMap =>
                 scalaCode {
                     """
@@ -76,6 +76,10 @@ class ControlFlowSpecs extends CompilerFixtureSpec {
                                 } else {
                                     x = "non-default"
                                 }
+
+                                if(x == "default") {
+                                    x = "defaultconfirmed"
+                                }
                             }
                         }
                     """
@@ -86,13 +90,15 @@ class ControlFlowSpecs extends CompilerFixtureSpec {
                         o1.m1 = function() {
                             var self = this;
                             var x = '';
-                            (function() {
-                                if ((x == '')) {
-                                    x = 'default';
-                                } else {
-                                    x = 'non-default';
-                                }
-                            })();
+                            if ((x == '')) {
+                                x = 'default';
+                            } else {
+                                x = 'non-default';
+                            }
+
+                            if ((x == 'default')) {
+                                x = 'defaultconfirmed';
+                            }
                         };
                        o1.metaClass_ = new s2js.MetaClass('o1', []);
                     """
@@ -243,12 +249,12 @@ class ControlFlowSpecs extends CompilerFixtureSpec {
 
                         o.m = function() {
                             var self = this;
-                            (function($selector_1) {
-                                if ($selector_1 === 'a') {
+                            (function($selector$1) {
+                                if ($selector$1 === 'a') {
                                     1;
                                     return;
                                 }
-                                if ($selector_1 === 'b') {
+                                if ($selector$1 === 'b') {
                                     2;
                                     return;
                                 }
@@ -282,8 +288,8 @@ class ControlFlowSpecs extends CompilerFixtureSpec {
 
                         o.m = function() {
                             var self = this;
-                            return (function($selector_1) {
-                                if ($selector_1 === 'a') {
+                            return (function($selector$1) {
+                                if ($selector$1 === 'a') {
                                     return 123;
                                 }
                                 if (true) {
@@ -315,8 +321,8 @@ class ControlFlowSpecs extends CompilerFixtureSpec {
 
                         o.m = function() {
                             var self = this;
-                            return (function($selector_1) {
-                                if (($selector_1 === 'a') || ($selector_1 === 'b') || ($selector_1 === 'c')) {
+                            return (function($selector$1) {
+                                if (($selector$1 === 'a') || ($selector$1 === 'b') || ($selector$1 === 'c')) {
                                     return 123;
                                 }
                                 if (true) {
@@ -350,8 +356,8 @@ class ControlFlowSpecs extends CompilerFixtureSpec {
                         o.m = function() {
                             var self = this;
                             var x = false;
-                            return (function($selector_1) {
-                                if ($selector_1 === 'a') {
+                            return (function($selector$1) {
+                                if ($selector$1 === 'a') {
                                     if ((x == true)) {
                                         return 123;
                                     }
@@ -386,11 +392,11 @@ class ControlFlowSpecs extends CompilerFixtureSpec {
 
                         o.m = function(p) {
                             var self = this;
-                            return (function($selector_1) {
-                                if (s2js.isInstanceOf($selector_1, 'scala.String')) {
+                            return (function($selector$1) {
+                                if (s2js.isInstanceOf($selector$1, 'scala.String')) {
                                     return 123;
                                 }
-                                if (s2js.isInstanceOf($selector_1, 'scala.Int')) {
+                                if (s2js.isInstanceOf($selector$1, 'scala.Int')) {
                                     return 456;
                                 }
                                 if (true) {
@@ -423,13 +429,13 @@ class ControlFlowSpecs extends CompilerFixtureSpec {
 
                         o.m = function(p) {
                             var self = this;
-                            return (function($selector_1) {
-                                if (s2js.isInstanceOf($selector_1, 'scala.String')) {
-                                    var x = $selector_1;
+                            return (function($selector$1) {
+                                if (s2js.isInstanceOf($selector$1, 'scala.String')) {
+                                    var x = $selector$1;
                                     return 123;
                                 }
-                                if (s2js.isInstanceOf($selector_1, 'scala.Int')) {
-                                    var y = $selector_1;
+                                if (s2js.isInstanceOf($selector$1, 'scala.Int')) {
+                                    var y = $selector$1;
                                     return 456;
                                 }
                                 if (true) {
@@ -462,23 +468,23 @@ class ControlFlowSpecs extends CompilerFixtureSpec {
 
                         o.m = function(p) {
                             var self = this;
-                            return (function($selector_1) {
-                                if (s2js.isInstanceOf($selector_1, 'scala.Tuple3') && (true) && (true) && (
-                                    s2js.isInstanceOf($selector_1.productElement(2), 'scala.Tuple2') && (true) && (
-                                    s2js.isInstanceOf($selector_1.productElement(2).productElement(1), 'scala.Tuple2') && (
-                                    s2js.isInstanceOf($selector_1.productElement(2).productElement(1).productElement(0), 'scala.Int')) && (true)))
+                            return (function($selector$1) {
+                                if (s2js.isInstanceOf($selector$1, 'scala.Tuple3') && (true) && (true) && (
+                                    s2js.isInstanceOf($selector$1.productElement(2), 'scala.Tuple2') && (true) && (
+                                    s2js.isInstanceOf($selector$1.productElement(2).productElement(1), 'scala.Tuple2') && (
+                                    s2js.isInstanceOf($selector$1.productElement(2).productElement(1).productElement(0), 'scala.Int')) && (true)))
                                 ) {
-                                    var bound1 = $selector_1.productElement(2).productElement(1).productElement(0);
-                                    var bound2 = $selector_1.productElement(2).productElement(1).productElement(1);
+                                    var bound1 = $selector$1.productElement(2).productElement(1).productElement(0);
+                                    var bound2 = $selector$1.productElement(2).productElement(1).productElement(1);
                                     return 123;
                                 }
-                                if (s2js.isInstanceOf($selector_1, 'scala.Some') && (
-                                   s2js.isInstanceOf($selector_1.productElement(0), 'scala.Tuple2') && (true) && (
-                                   s2js.isInstanceOf($selector_1.productElement(0).productElement(1), 'scala.Some') && (
-                                   s2js.isInstanceOf($selector_1.productElement(0).productElement(1).productElement(0), 'scala.Tuple5') && (
+                                if (s2js.isInstanceOf($selector$1, 'scala.Some') && (
+                                   s2js.isInstanceOf($selector$1.productElement(0), 'scala.Tuple2') && (true) && (
+                                   s2js.isInstanceOf($selector$1.productElement(0).productElement(1), 'scala.Some') && (
+                                   s2js.isInstanceOf($selector$1.productElement(0).productElement(1).productElement(0), 'scala.Tuple5') && (
                                    true) && (true) && (true) && (true) && (true))))
                                 ) {
-                                    var q = $selector_1.productElement(0).productElement(1).productElement(0).productElement(2);
+                                    var q = $selector$1.productElement(0).productElement(1).productElement(0).productElement(2);
                                     return 456;
                                 }
                                 if (true) {

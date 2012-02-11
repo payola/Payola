@@ -12,8 +12,8 @@ return 1;
 };
 scala.Product1.prototype.productElement = function(n) {
 var self = this;
-return (function($selector_1) {
-if ($selector_1 === 0) {
+return (function($selector$1) {
+if ($selector$1 === 0) {
 return self._1();
 }
 if (true) {

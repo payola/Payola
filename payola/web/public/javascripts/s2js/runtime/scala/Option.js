@@ -81,11 +81,11 @@ return ((! self.isEmpty()) && p(self.get()));
 };
 scala.Option.prototype.foreach = function(f) {
 var self = this;
-(function() {
 if ((! self.isEmpty())) {
 f(self.get());
-} else {
-}})();
+
+
+}
 };
 scala.Option.prototype.collect = function(pf) {
 var self = this;
@@ -109,9 +109,9 @@ scala.Option.prototype.metaClass_ = new s2js.MetaClass('scala.Option', [scala.Pr
 scala.Some = function(x) {
 var self = this;
 self.x = x;
-goog.base(self);goog.object.extend(self, new scala.Product());
-};
+goog.base(self);};
 goog.inherits(scala.Some, scala.Option);
+goog.object.extend(scala.Some.prototype, new scala.Product());
 scala.Some.prototype.isEmpty = function() {
 var self = this;
 return false;
@@ -139,8 +139,8 @@ return 1;
 };
 scala.Some.prototype.productElement = function($x$1) {
 var self = this;
-return (function($selector_1) {
-if ($selector_1 === 0) {
+return (function($selector$1) {
+if ($selector$1 === 0) {
 return scala.Some.x;
 }
 if (true) {
@@ -177,7 +177,7 @@ return 0;
 };
 scala.None.productElement = function($x$1) {
 var self = this;
-return (function($selector_1) {
+return (function($selector$2) {
 if (true) {
 return (function() {
 throw new scala.IndexOutOfBoundsException($x$1.toString());

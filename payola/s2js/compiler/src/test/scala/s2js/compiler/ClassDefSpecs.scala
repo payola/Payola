@@ -178,10 +178,10 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         pkg.B = function() {
                             var self = this;
                             goog.base(self);
-                            goog.object.extend(self, new pkg.T2());
-                            goog.object.extend(self, new pkg.T1());
                         };
                         goog.inherits(pkg.B, pkg.A);
+                        goog.object.extend(pkg.B.prototype, new pkg.T2());
+                        goog.object.extend(pkg.B.prototype, new pkg.T1());
                         pkg.B.prototype.metaClass_ = new s2js.MetaClass('pkg.B', [pkg.A, pkg.T1, pkg.T2]);
                     """
                 }
@@ -276,14 +276,14 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         };
                         A.prototype.productElement = function($x$1) {
                             var self = this;
-                            return (function($selector_1) {
-                                if ($selector_1 === 0) {
+                            return (function($selector$1) {
+                                if ($selector$1 === 0) {
                                     return A.x;
                                 }
-                                if ($selector_1 === 1) {
+                                if ($selector$1 === 1) {
                                     return A.y;
                                 }
-                                if ($selector_1 === 2) {
+                                if ($selector$1 === 2) {
                                     return A.z;
                                 }
                                 if (true) {

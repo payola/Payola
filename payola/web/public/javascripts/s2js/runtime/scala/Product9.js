@@ -12,32 +12,32 @@ return 9;
 };
 scala.Product9.prototype.productElement = function(n) {
 var self = this;
-return (function($selector_1) {
-if ($selector_1 === 0) {
+return (function($selector$1) {
+if ($selector$1 === 0) {
 return self._1();
 }
-if ($selector_1 === 1) {
+if ($selector$1 === 1) {
 return self._2();
 }
-if ($selector_1 === 2) {
+if ($selector$1 === 2) {
 return self._3();
 }
-if ($selector_1 === 3) {
+if ($selector$1 === 3) {
 return self._4();
 }
-if ($selector_1 === 4) {
+if ($selector$1 === 4) {
 return self._5();
 }
-if ($selector_1 === 5) {
+if ($selector$1 === 5) {
 return self._6();
 }
-if ($selector_1 === 6) {
+if ($selector$1 === 6) {
 return self._7();
 }
-if ($selector_1 === 7) {
+if ($selector$1 === 7) {
 return self._8();
 }
-if ($selector_1 === 8) {
+if ($selector$1 === 8) {
 return self._9();
 }
 if (true) {
