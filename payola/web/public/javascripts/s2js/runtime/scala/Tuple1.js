@@ -6,10 +6,9 @@ goog.require('scala.Some');
 scala.Tuple1 = function(_1) {
 var self = this;
 self._1 = _1;
-self._1 = undefined;
-goog.base(self);goog.object.extend(self, new scala.Product());
-};
+goog.base(self);};
 goog.inherits(scala.Tuple1, scala.Product1);
+goog.object.extend(scala.Tuple1.prototype, new scala.Product());
 scala.Tuple1.prototype.toString = function() {
 var self = this;
 return (('(' + self._1) + ')');

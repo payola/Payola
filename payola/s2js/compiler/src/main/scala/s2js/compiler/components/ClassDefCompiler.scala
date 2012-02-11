@@ -211,7 +211,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         }
         compileParameterInitialization(parameters)
         compileBody
-        buffer += "}\n"
+        buffer += "}"
     }
 
     /**

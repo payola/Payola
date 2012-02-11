@@ -21,8 +21,7 @@ goog.object.extend(scala.Tuple10.prototype, new scala.Product());
 scala.Tuple10.prototype.toString = function() {
 var self = this;
 return (((((((((((((((((((('(' + self._1) + ',') + self._2) + ',') + self._3) + ',') + self._4) + ',') + self._5) + ',') + self._6) + ',') + self._7) + ',') + self._8) + ',') + self._9) + ',') + self._10) + ')');
-}
-;
+};
 scala.Tuple10.prototype.copy = function(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10) {
 var self = this;
 if (typeof(_1) === 'undefined') { _1 = self._1; }
@@ -36,19 +35,16 @@ if (typeof(_8) === 'undefined') { _8 = self._8; }
 if (typeof(_9) === 'undefined') { _9 = self._9; }
 if (typeof(_10) === 'undefined') { _10 = self._10; }
 return new scala.Tuple10(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10);
-}
-;
+};
 scala.Tuple10.prototype.productPrefix = function() {
 var self = this;
 return 'Tuple10';
-}
-;
+};
 scala.Tuple10.prototype.metaClass_ = new s2js.MetaClass('scala.Tuple10', [scala.Product10, scala.Product]);
 scala.Tuple10.toString = function() {
 var self = this;
 return 'Tuple10';
-}
-;
+};
 scala.Tuple10.unapply = function(x$0) {
 var self = this;
 return (function() {
@@ -57,11 +53,9 @@ return scala.None;
 } else {
 return new scala.Some(new scala.Tuple10(x$0._1, x$0._2, x$0._3, x$0._4, x$0._5, x$0._6, x$0._7, x$0._8, x$0._9, x$0._10));
 }})();
-}
-;
+};
 scala.Tuple10.$apply = function(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10) {
 var self = this;
 return new scala.Tuple10(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10);
-}
-;
+};
 scala.Tuple10.metaClass_ = new s2js.MetaClass('scala.Tuple10', []);

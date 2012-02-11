@@ -52,8 +52,7 @@ return self.isInMetaClassHierarchy(self.getObjectMetaClass(anObject), className)
 }
 })(goog.typeOf(anObject));
 
-}
-;
+};
 s2js.isInMetaClassHierarchy = function(rootMetaClass, metaClassName) {
 var self = this;
 return (function() {
@@ -68,24 +67,19 @@ return true;
 } else {
 return self.existsParentMetaClass(rootMetaClass, function(pmc) {
 return self.isInMetaClassHierarchy(pmc, metaClassName);
-}
-);
+});
 }})();
 }})();
-}
-;
+};
 s2js.isInteger = function(anObject) {
 var self = this;
-return anObject % 1 === 0;}
-;
+return anObject % 1 === 0;};
 s2js.isChar = function(anObject) {
 var self = this;
-return anObject.length === 1;}
-;
+return anObject.length === 1;};
 s2js.getObjectMetaClass = function(anObject) {
 var self = this;
-return anObject.metaClass_;}
-;
+return anObject.metaClass_;};
 s2js.existsParentMetaClass = function(rootMetaClass, predicate) {
 var self = this;
 
@@ -95,8 +89,7 @@ var self = this;
             }
         }
         return false;
-    }
-;
+    };
 s2js.asInstanceOf = function(anObject, className) {
 var self = this;
 if ((! self.isInstanceOf(anObject, className))) {
@@ -106,6 +99,5 @@ throw new scala.RuntimeException();
 }
 return anObject;
 
-}
-;
+};
 s2js.metaClass_ = new s2js.MetaClass('s2js', []);

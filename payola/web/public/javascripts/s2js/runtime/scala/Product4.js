@@ -9,8 +9,7 @@ goog.inherits(scala.Product4, scala.Product);
 scala.Product4.prototype.productArity = function() {
 var self = this;
 return 4;
-}
-;
+};
 scala.Product4.prototype.productElement = function(n) {
 var self = this;
 return (function($selector$1) {
@@ -32,12 +31,10 @@ throw new scala.IndexOutOfBoundsException(n.toString());
 })();
 }
 })(n);
-}
-;
+};
 scala.Product4.prototype.metaClass_ = new s2js.MetaClass('scala.Product4', [scala.Product]);
 scala.Product4.unapply = function(x) {
 var self = this;
 return new scala.Some(x);
-}
-;
+};
 scala.Product4.metaClass_ = new s2js.MetaClass('scala.Product4', []);
