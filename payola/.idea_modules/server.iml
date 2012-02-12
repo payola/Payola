@@ -24,12 +24,12 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="org.scala-lang_scala-library_2.9.1" level="project" />
+    <orderEntry type="library" name="org.scala-lang_scala-compiler_2.9.1" level="project" />
     <orderEntry type="library" name="play_play_2.9.1_2.0-RC1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="play_templates_2.9.1_2.0-RC1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="com.github.scala-incubator.io_scala-io-file_2.9.1_0.2.0" level="project" />
     <orderEntry type="library" name="com.github.scala-incubator.io_scala-io-core_2.9.1_0.2.0" level="project" />
     <orderEntry type="library" name="com.github.jsuereth.scala-arm_scala-arm_2.9.1_0.3" level="project" />
-    <orderEntry type="library" name="org.scala-lang_scala-compiler_2.9.1" level="project" />
     <orderEntry type="library" name="play_anorm_2.9.1_2.0-RC1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="io.netty_netty_3.3.0.Final" level="project" />
     <orderEntry type="library" name="org.slf4j_slf4j-api_1.6.4" level="project" />

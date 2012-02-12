@@ -1,7 +1,7 @@
 package cz.payola.data.test
 
 import cz.payola.data._
-import cz.payola.scala2json._
+import cz.payola.scala2json.{JSONSerializerOptions, JSONSerializer}
 
 /*
 object PeopleVocabulary extends Vocabulary( "http://person.eg#" ) {
@@ -18,15 +18,16 @@ object PeopleVocabulary extends Vocabulary( "http://person.eg#" ) {
 import PeopleVocabulary._
 */
 
-object RDF2ScalaTest {
-    def main(args: Array[String]){
+object RDF2ScalaTest
+{
+    def main(args: Array[String]) {
         val manager: WebServicesManager = new WebServicesManager()
         manager.initWebServices()
         val queryResult: QueryResult = manager.evaluateSparqlQuery("")
         val rdfDoc = RDFDocument(queryResult.getRdf)
         val serializer = new JSONSerializer(rdfDoc, JSONSerializerOptions.JSONSerializerOptionPrettyPrinting)
         println(serializer.stringValue)
-        
+
         // Old example demonstrating scardf library
         /*val john = UriRef( "http://doe.eg#john" )
         val g = Graph.build( john -(
@@ -41,8 +42,6 @@ object RDF2ScalaTest {
 
         val node: GraphNode = g/likes/asString
         println(node.toString())*/
-
-
     }
 }
 

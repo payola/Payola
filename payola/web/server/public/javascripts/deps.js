@@ -1,3 +1,4 @@
+goog.addDependency('../deps.js', [], []);
 goog.addDependency('../implicitRequires.js', [], ['s2js.MetaClass', 's2js', 'goog.object']);
 goog.addDependency('../cz/payola/web/client/Index.js', ['cz.payola.web.client.Index'], ['cz.payola.web.client.Layer', 'cz.payola.web.client.Point', 'cz.payola.web.client.graph.Drawer', 'cz.payola.web.client.graph.Graph', 'goog.events', 'goog.events.EventType', 'scala.None', 'scala.Some']);
 goog.addDependency('../cz/payola/web/client/Layer.js', ['cz.payola.web.client.Layer'], []);
@@ -8,6 +9,24 @@ goog.addDependency('../cz/payola/web/client/graph/Constants.js', ['cz.payola.web
 goog.addDependency('../cz/payola/web/client/graph/Drawer.js', ['cz.payola.web.client.graph.Drawer', 'cz.payola.web.client.graph.Quadrant'], ['cz.payola.web.client.Point', 'cz.payola.web.client.Vector', 'cz.payola.web.client.graph.Constants', 'scala.math']);
 goog.addDependency('../cz/payola/web/client/graph/Graph.js', ['cz.payola.web.client.graph.Graph'], ['cz.payola.web.client.Point', 'cz.payola.web.client.Vector', 'cz.payola.web.client.graph.Constants', 'cz.payola.web.client.graph.Vertex', 'scala.collection.immutable.List']);
 goog.addDependency('../cz/payola/web/client/graph/Vertex.js', ['cz.payola.web.client.graph.Vertex'], []);
+goog.addDependency('../cz/payola/web/client/model/graph/Edge.js', ['cz.payola.web.client.model.graph.Edge'], ['cz.payola.web.client.model.graph.ModelObject']);
+goog.addDependency('../cz/payola/web/client/model/graph/Graph.js', ['cz.payola.web.client.model.graph.Graph'], []);
+goog.addDependency('../cz/payola/web/client/model/graph/ModelObject.js', ['cz.payola.web.client.model.graph.ModelObject'], []);
+goog.addDependency('../cz/payola/web/client/model/graph/Vertex.js', ['cz.payola.web.client.model.graph.Vertex'], ['cz.payola.web.client.model.graph.ModelObject']);
+goog.addDependency('../cz/payola/web/client/presenters/Index.js', ['cz.payola.web.client.presenters.Index'], ['cz.payola.web.client.model.graph.Edge', 'cz.payola.web.client.model.graph.Graph', 'cz.payola.web.client.model.graph.Vertex', 'cz.payola.web.client.views.graph.GraphView', 'scala.collection.immutable.List']);
+goog.addDependency('../cz/payola/web/client/views/Color.js', ['cz.payola.web.client.views.Color'], ['scala.IndexOutOfBoundsException', 'scala.None', 'scala.Product', 'scala.Some', 'scala.Tuple4']);
+goog.addDependency('../cz/payola/web/client/views/Constants.js', ['cz.payola.web.client.views.Constants'], ['cz.payola.web.client.views.Color', 'cz.payola.web.client.views.Vector']);
+goog.addDependency('../cz/payola/web/client/views/Layer.js', ['cz.payola.web.client.views.Layer'], ['cz.payola.web.client.views.Vector']);
+goog.addDependency('../cz/payola/web/client/views/Point.js', ['cz.payola.web.client.views.Point'], ['cz.payola.web.client.views.Vector', 'scala.IndexOutOfBoundsException', 'scala.None', 'scala.Product', 'scala.Some', 'scala.Tuple2', 'scala.runtime.ScalaRunTime']);
+goog.addDependency('../cz/payola/web/client/views/Vector.js', ['cz.payola.web.client.views.Vector'], ['scala.IndexOutOfBoundsException', 'scala.None', 'scala.Product', 'scala.Some', 'scala.Tuple2', 'scala.math', 'scala.runtime.ScalaRunTime']);
+goog.addDependency('../cz/payola/web/client/views/graph/Controls.js', ['cz.payola.web.client.views.graph.Controls'], ['cz.payola.web.client.views.Constants', 'cz.payola.web.client.views.Point', 'cz.payola.web.client.views.graph.RedrawOperation', 'goog.events', 'goog.events.EventType', 'scala.None', 'scala.Some']);
+goog.addDependency('../cz/payola/web/client/views/graph/EdgeView.js', ['cz.payola.web.client.views.graph.EdgeView', 'cz.payola.web.client.views.graph.Quadrant'], ['cz.payola.web.client.views.Constants', 'cz.payola.web.client.views.Point', 'cz.payola.web.client.views.graph.InformationView', 'cz.payola.web.client.views.graph.View', 'scala.math']);
+goog.addDependency('../cz/payola/web/client/views/graph/GraphView.js', ['cz.payola.web.client.views.graph.GraphView'], ['cz.payola.web.client.views.Constants', 'cz.payola.web.client.views.Layer', 'cz.payola.web.client.views.Point', 'cz.payola.web.client.views.Vector', 'cz.payola.web.client.views.graph.Controls', 'cz.payola.web.client.views.graph.EdgeView', 'cz.payola.web.client.views.graph.LocationDescriptor', 'cz.payola.web.client.views.graph.RedrawOperation', 'cz.payola.web.client.views.graph.VertexView', 'cz.payola.web.client.views.graph.View', 'scala.collection.immutable.List', 'scala.collection.mutable.ListBuffer', 'scala.math']);
+goog.addDependency('../cz/payola/web/client/views/graph/InformationView.js', ['cz.payola.web.client.views.graph.InformationView'], ['cz.payola.web.client.views.Constants', 'cz.payola.web.client.views.graph.View', 'scala.IndexOutOfBoundsException', 'scala.None', 'scala.Product', 'scala.Some', 'scala.runtime.ScalaRunTime']);
+goog.addDependency('../cz/payola/web/client/views/graph/LocationDescriptor.js', ['cz.payola.web.client.views.graph.LocationDescriptor'], ['cz.payola.web.client.views.Point', 'cz.payola.web.client.views.Vector']);
+goog.addDependency('../cz/payola/web/client/views/graph/RedrawOperation.js', ['cz.payola.web.client.views.graph.RedrawOperation'], []);
+goog.addDependency('../cz/payola/web/client/views/graph/VertexView.js', ['cz.payola.web.client.views.graph.VertexView'], ['cz.payola.web.client.views.Constants', 'cz.payola.web.client.views.Point', 'cz.payola.web.client.views.graph.InformationView', 'cz.payola.web.client.views.graph.View']);
+goog.addDependency('../cz/payola/web/client/views/graph/View.js', ['cz.payola.web.client.views.graph.View'], []);
 goog.addDependency('../goog/base.js', [], []);
 goog.addDependency('../goog/array/array.js', ['goog.array', 'goog.array.ArrayLike'], ['goog.asserts']);
 goog.addDependency('../goog/asserts/asserts.js', ['goog.asserts', 'goog.asserts.AssertionError'], ['goog.debug.Error', 'goog.string']);
@@ -102,6 +121,8 @@ goog.addDependency('../s2js/runtime/scala/Tuple6.js', ['scala.Tuple6'], ['scala.
 goog.addDependency('../s2js/runtime/scala/Tuple7.js', ['scala.Tuple7'], ['scala.None', 'scala.Product', 'scala.Product7', 'scala.Some']);
 goog.addDependency('../s2js/runtime/scala/Tuple8.js', ['scala.Tuple8'], ['scala.None', 'scala.Product', 'scala.Product8', 'scala.Some']);
 goog.addDependency('../s2js/runtime/scala/Tuple9.js', ['scala.Tuple9'], ['scala.None', 'scala.Product', 'scala.Product9', 'scala.Some']);
+goog.addDependency('../s2js/runtime/scala/collection/Traversable.js', [], []);
 goog.addDependency('../s2js/runtime/scala/collection/immutable/List.js', ['scala.collection.immutable.List'], ['scala.Array', 'scala.Option']);
+goog.addDependency('../s2js/runtime/scala/collection/mutable/ListBuffer.js', ['scala.collection.mutable.ListBuffer'], ['scala.Array', 'scala.Option']);
 goog.addDependency('../s2js/runtime/scala/math/package.js', ['scala.math'], []);
 goog.addDependency('../s2js/runtime/scala/runtime/ScalaRunTime.js', ['scala.runtime.ScalaRunTime'], []);

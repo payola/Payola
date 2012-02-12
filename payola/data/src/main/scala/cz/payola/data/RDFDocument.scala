@@ -1,13 +1,13 @@
 package cz.payola.data
 
-import cz.payola.scala2json._
 import cz.payola.scala2json.traits.JSONSerializationFullyCustomized
-
 import collection.mutable.ArrayBuffer
 import java.io.StringReader
 import com.hp.hpl.jena.rdf.model.{ModelFactory, ResIterator, Resource}
+import cz.payola.scala2json.JSONSerializer
 
-object RDFDocument {
+object RDFDocument
+{
     def apply(rdfString: String): RDFDocument = {
         val reader = new StringReader(rdfString)
 
@@ -17,7 +17,7 @@ object RDFDocument {
 
         val doc = new RDFDocument()
         val resIterator: ResIterator = model.listSubjects
-        while (resIterator.hasNext){
+        while (resIterator.hasNext) {
             val res: Resource = resIterator.nextResource
             doc.addNode(RDFNode(res))
         }
@@ -26,28 +26,28 @@ object RDFDocument {
     }
 }
 
-class RDFDocument extends JSONSerializationFullyCustomized {
+class RDFDocument extends JSONSerializationFullyCustomized
+{
     private val _nodes: ArrayBuffer[RDFNode] = new ArrayBuffer[RDFNode]()
 
     /** Adds a new RDFNode to _nodes.
-     *
-     * @param node The node.
-     */
-     private def addNode(node: RDFNode) = _nodes += node
+      *
+      * @param node The node.
+      */
+    private def addNode(node: RDFNode) = _nodes += node
 
     /** Returns an immutable copy of nodes.
-     *
-     * @return Nodes.
-     */
+      *
+      * @return Nodes.
+      */
     def getNodes: Array[RDFNode] = _nodes.toArray
 
     /** @see JSONSerializationFullyCustomized
-     *
-     * @return JSON value.
-     */
+      *
+      * @return JSON value.
+      */
     def JSONValue(options: Int): String = {
         val serializer = new JSONSerializer(_nodes, options)
         serializer.stringValue
     }
-
 }

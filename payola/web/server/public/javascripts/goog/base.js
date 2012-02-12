@@ -540,7 +540,7 @@ if (!COMPILED && goog.ENABLE_DEBUG_LOADER) {
     var deps = goog.dependencies_;
 
     function visitNode(path) {
-      if (path in deps.written) {
+      if ((goog.basePath + path) in deps.written) {
         return;
       }
 
@@ -577,7 +577,7 @@ if (!COMPILED && goog.ENABLE_DEBUG_LOADER) {
     }
 
     for (var path in goog.included_) {
-      if (!deps.written[path]) {
+      if (!deps.written[goog.basePath + path]) {
         visitNode(path);
       }
     }

@@ -156,7 +156,15 @@ object PayolaBuild extends Build
     )
 
     lazy val dataProject = Project(
-        "data", file("data"), settings = payolaSettings
+        "data", file("data"),
+        settings = payolaSettings ++ Seq(
+            libraryDependencies ++= Seq(
+                "joda-time" % "joda-time" % "2.0",
+                "com.hp.hpl.jena" % "jena" % "2.6.4"
+            )
+        )
+    ).dependsOn(
+        scala2JsonProject
     )
 
     lazy val modelProject = Project(
@@ -176,9 +184,9 @@ object PayolaBuild extends Build
     )
 
     lazy val webServerProject = PlayProject(
-        "server", PayolaSettings.version, Nil, file("web/server")
+        "server", PayolaSettings.version, Nil, file("web/server"), SCALA
     ).settings(
-        (defaultScalaSettings ++ payolaSettings): _*
+        //payolaSettings: _*
     ).dependsOn(
         modelProject, webSharedProject
     )
