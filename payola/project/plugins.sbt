@@ -1,3 +1,5 @@
+logLevel := Level.Warn
+
 resolvers ++= Seq(
     DefaultMavenRepository,
     "sbt-idea-repo" at "http://mpeltonen.github.com/maven/",

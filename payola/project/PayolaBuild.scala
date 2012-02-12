@@ -160,7 +160,8 @@ object PayolaBuild extends Build
         settings = payolaSettings ++ Seq(
             libraryDependencies ++= Seq(
                 "joda-time" % "joda-time" % "2.0",
-                "com.hp.hpl.jena" % "jena" % "2.6.4"
+                "org.apache.jena" % "jena-core" % "2.7.0-incubating"
+                //"com.hp.hpl.jena" % "jena" % "2.6.4"
             )
         )
     ).dependsOn(
@@ -188,7 +189,7 @@ object PayolaBuild extends Build
     ).settings(
         //payolaSettings: _*
     ).dependsOn(
-        modelProject, webSharedProject
+        //webSharedProject
     )
 
     lazy val webClientProject = ScalaToJsProject(
