@@ -3,11 +3,11 @@ package cz.payola.scala2json.annotations;
 import java.lang.annotation.*;
 
 /**
- * Allows the field to be ignored by the JSON serialization process.
+ * Allows the class to skip the __class__ field during the serialization.
  */
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface JSONTransient {
+public @interface JSONUnnamedClass {
 
 }

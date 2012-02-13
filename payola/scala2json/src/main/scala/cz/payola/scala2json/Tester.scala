@@ -14,7 +14,7 @@ class TestObjectClass(var str: String, val i: Int) {
     var obj: TestObjectClass = null
     val customized: FullyCustomizedClass = new FullyCustomizedClass("any string")
     val additionalFields = new AdditionalFieldsClass(333)
-    val customFileds = new CustomFieldsClass(222)
+    val customFields = new CustomFieldsClass(222)
 
     @JSONFieldName(name = "heaven") var hell: Double = 33.0d
     @JSONTransient var transient: Int = 33
@@ -30,7 +30,7 @@ class FullyCustomizedClass(var str: String) extends JSONSerializationFullyCustom
     }
 }
 
-class AdditionalFieldsClass(val int: Int) extends JSONSerializationAdditionalFields {
+@JSONPoseableClass(otherClassName = "xxx.animalfarm.Horse") class AdditionalFieldsClass(val int: Int) extends JSONSerializationAdditionalFields {
     def additionalFieldsForJSONSerialization: scala.collection.mutable.Map[String, Any] = {
         val map = new scala.collection.mutable.HashMap[String, Any]()
         map.put("newField", 666)
@@ -38,7 +38,7 @@ class AdditionalFieldsClass(val int: Int) extends JSONSerializationAdditionalFie
     }
 }
 
-class CustomFieldsClass(val int: Int) extends  JSONSerializationCustomFields {
+@JSONUnnamedClass class CustomFieldsClass(val int: Int) extends  JSONSerializationCustomFields {
     def fieldNamesForJSONSerialization: scala.collection.mutable.Iterable[String] = {
         val keys = new ArrayBuffer[String]()
         keys += "field0"

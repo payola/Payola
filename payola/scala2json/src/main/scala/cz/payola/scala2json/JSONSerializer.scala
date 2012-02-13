@@ -28,10 +28,7 @@ import java.lang.reflect.Field
 import scala.collection.mutable._
 
 
-
-// TODO: Traits
-
-class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptions, 
+class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptions,
                             val processedObjects: ArrayBuffer[Any] = new ArrayBuffer[Any]()) {
 
     val prettyPrint: Boolean = (options & JSONSerializerOptionPrettyPrinting) != 0
@@ -123,7 +120,7 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
         var serializedObj: String = serializer.stringValue
         if (prettyPrint)
             serializedObj = serializedObj.replaceAllLiterally("\n", "\n\t")
-        _appendStringArrayItemToStringBuilder(key + separator + serializedObj, builder, isFirst)
+        _appendStringArrayItemToStringBuilder("\"" + key + "\"" + separator + serializedObj, builder, isFirst)
     }
     
     
@@ -149,10 +146,25 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
         if (nameAnot == null)
             f.getName
         else
-            if (_validateFieldName(nameAnot.name))
-                nameAnot.name
-            else
-                throw new JSONSerializationException("Name annotation isn't valid for '" + nameAnot.name + "'")
+            nameAnot.name
+    }
+
+    /** Returns the object's class name. Takes into consideration JSONUnnamedClass
+      *  and JSONPoseableClass annotations.
+      *
+      * @return The object's class name or null if the object's class is annotated
+      *                 with JSONUnnamedClass.
+      */
+    private def _objectsClassName: String = {
+        val cl: Class[_] = obj.getClass
+        if (cl.getAnnotation(classOf[JSONUnnamedClass]) != null){
+            null
+        }else if (cl.getAnnotation(classOf[JSONPoseableClass]) != null){
+            val nameAnot: JSONPoseableClass = cl.getAnnotation(classOf[JSONPoseableClass])
+            nameAnot.otherClassName
+        }else{
+            cl.getCanonicalName
+        }
     }
 
     /** Serializes an Array[_]
@@ -251,8 +263,6 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
         // we don't add a comma after the first iteration
         var index: Int = 0
         map foreach {case (key, value) => {
-            if (!_validateFieldName(key))
-                throw new JSONSerializationException("Cannot use key named '" + key + "' in a map (" + map + ")")
             _appendKeyValueToStringBuilder(key, value, builder, index == 0)
             index += 1
         }}
@@ -310,6 +320,13 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
         val fields: Array[Field] = c.getDeclaredFields
 
         var haveProcessedField: Boolean = false
+        
+        val className: String = _objectsClassName
+        if (className != null) {
+            _appendKeyValueToStringBuilder("__class__", className, builder, true)
+            haveProcessedField = true
+        }
+        
         for (i: Int <- 0 until fields.length) {
             if (_appendFieldToStringBuilder(fields(i), builder, !haveProcessedField)){
                 haveProcessedField = true
@@ -327,8 +344,6 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
 
             var index: Int = 0
             map foreach {case (key, value) => {
-                if (!_validateFieldName(key))
-                    throw new JSONSerializationException("Cannot use key named '" + key + "' in a map (" + map + ")")
                 _appendKeyValueToStringBuilder(key, value, builder, index == 0)
                 index += 1
             }}
@@ -358,17 +373,6 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
             case _: Unit => throw new JSONSerializationException("Cannot serialize Unit.")
             case _ => obj.toString
         }
-    }
-
-    /** The field name in JSON mustn't have spaces, etc. - just as a variable name
-      * in Scala or C.
-      *
-      *  @param name Field name.
-      *
-      *  @return True or false.
-      */
-    private def _validateFieldName(name: String): Boolean = {
-        name.matches("[a-zA-Z0-9_]+")
     }
 
     /** Serializes @obj to a JSON string.

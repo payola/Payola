@@ -22,7 +22,7 @@ trait JSONSerializationCustomFields {
      *
      * @return Iterable collection for the field names.
      */
-    def fieldNamesForJSONSerialization: Iterable[String]
+    def fieldNamesForJSONSerialization: scala.collection.Iterable[String]
 
     /** Return the value for the field named @key.
      *

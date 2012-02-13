@@ -1,7 +1,8 @@
-package cz.payola.data.test
+package cz.payola.data.model.graph.test
 
 import cz.payola.data._
 import cz.payola.scala2json.{JSONSerializerOptions, JSONSerializer}
+import model.graph.RDFGraph
 
 /*
 object PeopleVocabulary extends Vocabulary( "http://person.eg#" ) {
@@ -18,14 +19,13 @@ object PeopleVocabulary extends Vocabulary( "http://person.eg#" ) {
 import PeopleVocabulary._
 */
 
-object RDF2ScalaTest
-{
+object RDF2ScalaTest {
     def main(args: Array[String]) {
         val manager: WebServicesManager = new WebServicesManager()
         manager.initWebServices()
         val queryResult: QueryResult = manager.evaluateSparqlQuery("")
-        val rdfDoc = RDFDocument(queryResult.getRdf)
-        val serializer = new JSONSerializer(rdfDoc, JSONSerializerOptions.JSONSerializerOptionPrettyPrinting)
+        val rdfDoc = RDFGraph(queryResult.getRdf)
+        val serializer = new JSONSerializer(rdfDoc, JSONSerializerOptions.JSONSerializerOptionCondensedPrinting | JSONSerializerOptions.JSONSerializerOptionIgnoreNullValues)
         println(serializer.stringValue)
 
         // Old example demonstrating scardf library
