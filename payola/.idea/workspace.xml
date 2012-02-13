@@ -58,82 +58,19 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="QueryResultTest.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/data/src/test/scala/QueryResultTest.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="5" column="6" selection-start="106" selection-end="106" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="WebServiceManagerTest.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/data/src/test/scala/WebServiceManagerTest.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="20" column="26" selection-start="687" selection-end="687" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PayolaBuild.scala" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="PayolaBuild.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/project/PayolaBuild.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="191" column="10" selection-start="6246" selection-end="6246" vertical-scroll-proportion="0.0">
+            <state line="5" column="13" selection-start="133" selection-end="133" vertical-scroll-proportion="0.13513513">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="application.conf" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/web/server/conf/application.conf">
+      <file leaf-file-name="PlayProject.class" pinned="false" current="false" current-in-tab="false">
+        <entry file="jar://$USER_HOME$/.ivy2/cache/scala_2.9.1/sbt_0.11.2/play/sbt-plugin/jars/sbt-plugin-2.0-RC1-SNAPSHOT.jar!/sbt/PlayProject.class">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="24" column="0" selection-start="723" selection-end="723" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="routes" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/web/server/conf/routes">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="7" column="0" selection-start="170" selection-end="170" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="index.scala.html" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/web/server/app/views/index.scala.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="-0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="main.scala.html" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/web/server/app/views/main.scala.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="17" column="15" selection-start="703" selection-end="703" vertical-scroll-proportion="0.49571183">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Application.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/web/server/app/controllers/Application.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="7" column="28" selection-start="137" selection-end="137" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="RDFProperty.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/data/src/main/scala/cz/payola/data/RDFProperty.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="2" column="23" selection-start="31" selection-end="47" vertical-scroll-proportion="0.0">
+            <state line="2" column="6" selection-start="211" selection-end="211" vertical-scroll-proportion="-1.36">
               <folding />
             </state>
           </provider>
@@ -154,22 +91,22 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/s2js/project/Build.scala" />
-        <option value="$PROJECT_DIR$/s2js/project/PayolaBuild.scala" />
-        <option value="$PROJECT_DIR$/s2js/project/plugins.sbt" />
-        <option value="$PROJECT_DIR$/s2js/project/S2JsBuild.scala" />
-        <option value="$PROJECT_DIR$/project/build.properties" />
-        <option value="$PROJECT_DIR$/s2js/compiler/src/main/scala/s2js/compiler/ScalaToJsPlugin.scala" />
         <option value="$PROJECT_DIR$/data/src/main/scala/cz/payola/data/RDFDocument.scala" />
         <option value="$PROJECT_DIR$/data/src/main/scala/cz/payola/data/test/Test.scala" />
         <option value="$PROJECT_DIR$/data/src/main/scala/cz/payola/data/RDFNode.scala" />
         <option value="$PROJECT_DIR$/web/server/conf/application.conf" />
-        <option value="$PROJECT_DIR$/project/plugins.sbt" />
-        <option value="$PROJECT_DIR$/project/PayolaBuild.scala" />
-        <option value="$PROJECT_DIR$/web/server/app/views/index.scala.html" />
         <option value="$PROJECT_DIR$/web/server/app/controllers/Application.scala" />
-        <option value="$PROJECT_DIR$/web/server/conf/routes" />
+        <option value="$PROJECT_DIR$/web/server/public/javascripts/goog/base.js" />
+        <option value="$PROJECT_DIR$/web/server/public/javascripts/bootstrap/bootstrap.js" />
+        <option value="$PROJECT_DIR$/web/server/public/javascripts/bootstrap/s2js.MetaClass.js" />
+        <option value="$PROJECT_DIR$/web/server/public/javascripts/bootstrap.js" />
+        <option value="$PROJECT_DIR$/web/server/public/javascripts/cz.payola.web.client.presenters.Index.js" />
         <option value="$PROJECT_DIR$/web/server/app/views/main.scala.html" />
+        <option value="$PROJECT_DIR$/web/server/conf/routes" />
+        <option value="$PROJECT_DIR$/project/plugins.sbt" />
+        <option value="$PROJECT_DIR$/web/server/app/views/index.scala.html" />
+        <option value="$PROJECT_DIR$/web/server/project/Build.scala" />
+        <option value="$PROJECT_DIR$/project/PayolaBuild.scala" />
       </list>
     </option>
   </component>
@@ -206,7 +143,7 @@
     <ConfirmationsSetting value="0" id="Remove" />
   </component>
   <component name="ProjectReloadState">
-    <option name="STATE" value="0" />
+    <option name="STATE" value="2" />
   </component>
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1" splitterProportion="0.5">
@@ -221,6 +158,27 @@
       <sortByType />
     </navigator>
     <panes>
+      <pane id="Scope" />
+      <pane id="ProjectPane">
+        <subPane>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="payola" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="payola" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="payola" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
+      </pane>
       <pane id="PackagesPane">
         <subPane>
           <PATH>
@@ -255,143 +213,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
-      <pane id="ProjectPane">
-        <subPane>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="payola" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="payola" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="payola" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="web" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="payola" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="payola" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="web" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="server" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="payola" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="payola" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="web" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="server" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="conf" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="payola" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="payola" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="web" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="server" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="app" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="views" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="payola" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="payola" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="web" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="server" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="app" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="payola" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="payola" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="payola" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="payola" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="project" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-        </subPane>
-      </pane>
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -413,10 +234,11 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Develop\Payola\payola\web\server\public\javascripts\bootstrap" />
       <recent name="C:\Develop\Payola\payola\s2js\project" />
     </key>
   </component>
-  <component name="RunManager" selected="Scala Script.Compile via SBT">
+  <component name="RunManager" selected="Remote.Remote">
     <configuration default="true" type="ScalaScriptConsoleRunConfiguration" factoryName="Scala Console">
       <module name="" />
       <setting name="vmparams4" value="-Djline.terminal=NONE" />
@@ -605,7 +427,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1296" height="786" extended-state="6" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -684,100 +506,58 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/data/src/test/scala/FakeTtlWebServiceTest.scala">
+    <entry file="file://$PROJECT_DIR$/s2js/compiler/src/main/scala/s2js/compiler/components/PackageDefCompiler.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="5" column="6" selection-start="106" selection-end="106" vertical-scroll-proportion="0.0" />
+        <state line="9" column="6" selection-start="268" selection-end="268" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/data/src/test/scala/FakeRdfWebServiceTest.scala">
+    <entry file="file://$PROJECT_DIR$/s2js/compiler/src/main/scala/s2js/compiler/components/DependencyManager.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="5" column="6" selection-start="107" selection-end="107" vertical-scroll-proportion="0.13513513" />
+        <state line="6" column="6" selection-start="148" selection-end="148" vertical-scroll-proportion="-0.5492611">
+          <folding />
+        </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/data/src/main/scala/cz/payola/data/RDFDocument.scala">
+    <entry file="jar://$USER_HOME$/.sbt/boot/scala-2.9.1/lib/scala-library.jar!/scala/Tuple2.class">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="9" column="1" selection-start="293" selection-end="293" vertical-scroll-proportion="0.24324325" />
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/.ivy2/cache/scala_2.9.1/sbt_0.11.2/play/sbt-plugin/jars/sbt-plugin-2.0-RC1-SNAPSHOT.jar!/sbt/PlayProject.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="2" column="6" selection-start="211" selection-end="211" vertical-scroll-proportion="0.09770115" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/data/src/test/scala/QueryResultTest.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="5" column="6" selection-start="106" selection-end="106" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/data/src/test/scala/WebServiceManagerTest.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="20" column="26" selection-start="687" selection-end="687" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/data/src/main/scala/cz/payola/data/RDFProperty.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="2" column="23" selection-start="31" selection-end="47" vertical-scroll-proportion="0.0" />
+        <state line="9" column="31" selection-start="1313" selection-end="1313" vertical-scroll-proportion="0.38931298">
+          <folding />
+        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/project/plugins.sbt">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="22" selection-start="22" selection-end="22" vertical-scroll-proportion="0.0">
+        <state line="16" column="0" selection-start="579" selection-end="579" vertical-scroll-proportion="0.43243244">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="jar://$USER_HOME$/.ivy2/cache/scala_2.9.1/sbt_0.11.2/play/sbt-plugin/jars/sbt-plugin-2.0-RC1-SNAPSHOT.jar!/sbt/PlayReloader.class">
+    <entry file="file://$PROJECT_DIR$/data/src/main/scala/cz/payola/data/RDFProperty.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="16" column="0" selection-start="1089" selection-end="1089" vertical-scroll-proportion="0.73913044">
+        <state line="2" column="23" selection-start="31" selection-end="47" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/web/server/logs/application.log">
+    <entry file="jar://$USER_HOME$/.sbt/boot/scala-2.9.1/org.scala-tools.sbt/sbt/0.11.2/main_2.9.1-0.11.2.jar!/sbt/Keys.class">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="6" column="0" selection-start="186" selection-end="186" vertical-scroll-proportion="0.25123152">
+        <state line="40" column="6" selection-start="3373" selection-end="3373" vertical-scroll-proportion="0.3468697">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/.ivy2/cache/scala_2.9.1/sbt_0.11.2/play/sbt-plugin/jars/sbt-plugin-2.0-RC1-SNAPSHOT.jar!/sbt/PlayProject.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="2" column="6" selection-start="211" selection-end="211" vertical-scroll-proportion="-1.36">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/project/PayolaBuild.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="191" column="10" selection-start="6246" selection-end="6246" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/web/server/conf/application.conf">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="24" column="0" selection-start="723" selection-end="723" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/web/server/app/views/index.scala.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/web/server/app/controllers/Application.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="28" selection-start="137" selection-end="137" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/web/server/conf/routes">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="0" selection-start="170" selection-end="170" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/web/server/app/views/main.scala.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="17" column="15" selection-start="703" selection-end="703" vertical-scroll-proportion="0.49571183">
+        <state line="5" column="13" selection-start="133" selection-end="133" vertical-scroll-proportion="0.13513513">
           <folding />
         </state>
       </provider>

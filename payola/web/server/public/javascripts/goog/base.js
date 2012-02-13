@@ -21,12 +21,11 @@
  *
  */
 
-
 /**
  * @define {boolean} Overridden to true by the compiler when --closure_pass
  *     or --mark_as_compiled is specified.
  */
-var COMPILED = false;
+var COMPILED = true;
 
 
 /**
@@ -1520,4 +1519,4 @@ goog.scope = function(fn) {
   fn.call(goog.global);
 };
 
-
+goog.provide('goog');

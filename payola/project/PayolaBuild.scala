@@ -1,7 +1,7 @@
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable
+import mutable.ListBuffer
 import scala.io.Source
 import scala.tools.nsc.io
-import scala.util.matching.Regex
 import sbt._
 import Keys._
 import PlayProject._
@@ -36,16 +36,16 @@ object PayolaBuild extends Build
         val version = "0.1"
 
         val organization = "Payola"
-        
+
         val libDir = file("lib")
     }
 
     /** Settings of the web project. */
     object WebSettings
     {
-        val javascriptsTargetDir = file("web/server/public/javascripts")
+        val serverBaseDir = file("web/server")
 
-        val googleClosureDepsFile = javascriptsTargetDir / "deps.js"
+        val javascriptsDir = serverBaseDir / "public/javascripts"
     }
 
     /** Common default settings of all projects. */
@@ -113,7 +113,7 @@ object PayolaBuild extends Build
                 Tests.Argument("-Dcp=" + new io.Directory(PayolaSettings.libDir).files.map(_.path).mkString(";"))
             ),
             cleanBeforeTests := {
-                new io.Directory(S2JsSettings.compilerTestsTarget).list.foreach(_.deleteRecursively())
+                new io.Directory(S2JsSettings.compilerTestsTarget).deleteRecursively()
             },
             compileAndPackage <<= compileAndPackage.map {jarFile: File =>
                 IO.copyFile(jarFile, PayolaSettings.libDir / S2JsSettings.compilerJarName)
@@ -139,7 +139,10 @@ object PayolaBuild extends Build
                     scalacOptions ++= Seq(
                         "-Xplugin:" + compilerJar.absolutePath,
                         "-P:s2js:outputDirectory:" + outputDir.absolutePath
-                    )
+                    ),
+                    clean <<= clean.map {_ =>
+                        new io.Directory(outputDir).deleteRecursively()
+                    }
                 )
             ).dependsOn(
                 s2JsAdaptersProject, s2JsCompilerProject
@@ -148,7 +151,7 @@ object PayolaBuild extends Build
     }
 
     lazy val s2JsRuntimeProject = ScalaToJsProject(
-        "runtime", file("s2js/runtime"), WebSettings.javascriptsTargetDir, s2JsSettings
+        "runtime", file("s2js/runtime"), WebSettings.javascriptsDir / "runtime", s2JsSettings
     )
 
     lazy val scala2JsonProject = Project(
@@ -177,52 +180,96 @@ object PayolaBuild extends Build
     lazy val webProject = Project(
         "web", file("web"), settings = payolaSettings
     ).aggregate(
-        webSharedProject, webClientProject
+        webSharedProject, webClientProject, webServerProject
     )
 
     lazy val webSharedProject = ScalaToJsProject(
-        "shared", file("web/shared"), WebSettings.javascriptsTargetDir, payolaSettings
-    )
-
-    lazy val webServerProject = PlayProject(
-        "server", PayolaSettings.version, Nil, file("web/server"), SCALA
-    ).settings(
-        //payolaSettings: _*
-    ).dependsOn(
-        //webSharedProject
+        "shared", file("web/shared"), WebSettings.javascriptsDir / "shared", payolaSettings
     )
 
     lazy val webClientProject = ScalaToJsProject(
-        "client", file("web/client"), WebSettings.javascriptsTargetDir,
-        payolaSettings ++ Seq(
-            compileAndPackage <<= compileAndPackage.dependsOn(clean).map {jarFile: File =>
-                val targetDirectory = new io.Directory(WebSettings.javascriptsTargetDir)
-
-                // Generate the the google closure dependency file. Doesn't have to be done for google closure library.
-                val buffer = new ListBuffer[String]()
-                targetDirectory.deepFiles.filter(_.extension == "js").foreach {file =>
-                    val fileContent = Source.fromFile(file.path.toString).getLines.mkString
-                    val pathRelativeToBase = ".." + file.path.stripPrefix(targetDirectory.path).replace("\\", "/")
-                    buffer += "goog.addDependency('%s', [".format(pathRelativeToBase)
-
-                    // Finds all occurances of the regex in the text and produces string in format 'o1', 'o2', ...
-                    // where oi is value of the first regex group in the i-th match.
-                    def matchedGroupsToString(regex: Regex, text: String): String = {
-                        regex.findAllIn(fileContent).matchData.map(m => "'%s'".format(m.group(1))).mkString(", ")
-                    }
-
-                    // Provides and requires.
-                    buffer += matchedGroupsToString("""goog\.provide\(\s*['\"]([^'\"]+)['\"]\s*\);""".r, fileContent)
-                    buffer += "], ["
-                    buffer += matchedGroupsToString("""goog\.require\(\s*['\"]([^'\"]+)['\"]\s*\);""".r, fileContent)
-                    buffer += "]);\n"
-                }
-                new io.File(WebSettings.googleClosureDepsFile).writeAll(buffer.mkString)
-
-                jarFile
-            }
-        )
+        "client", file("web/client"), WebSettings.javascriptsDir / "client", payolaSettings
     ).dependsOn(
         webSharedProject
+    )
+
+    lazy val webServerProject = PlayProject(
+        "server", PayolaSettings.version, Nil, path = file("web/server"), mainLang = SCALA
+    ).settings(
+        compileAndPackage <<= (packageBin in Compile).map {jarFile: File =>
+            // Retrieve the dependencies.
+            val files = new io.Directory(WebSettings.javascriptsDir).deepFiles.filter(_.extension == "js")
+            val providedSymbolFiles = new mutable.HashMap[String, String]
+            val fileRequiredSymbols = new mutable.HashMap[String, mutable.ArrayBuffer[String]]
+            files.foreach {file =>
+                val path = file.toAbsolute.path.toString
+                fileRequiredSymbols += path -> new mutable.ArrayBuffer[String]
+
+                val fileContent = Source.fromFile(path).getLines.mkString
+                """goog\.provide\(\s*['\"]([^'\"]+)['\"]\s*\);""".r.findAllIn(fileContent).matchData.foreach {m =>
+                    providedSymbolFiles += m.group(1) -> path
+                }
+                """goog\.require\(\s*['\"]([^'\"]+)['\"]\s*\);""".r.findAllIn(fileContent).matchData.foreach {m =>
+                    fileRequiredSymbols(path) += m.group(1)
+                }
+            }
+            
+            // Check whether all required symbols are provided.
+            val errorFile = fileRequiredSymbols.find(_._2.exists(file => !providedSymbolFiles.contains(file)))
+            if (errorFile.isDefined) {
+                throw new Exception("Dependency '%s' declared in te file '%s' wasn't found.".format(
+                    errorFile.get._2.find(file => !providedSymbolFiles.contains(file)).get.toString,
+                    errorFile.get._1.toString
+                ))
+            }
+
+            // Construct the file dependency graph from the symbol dependency graph.
+            val fileDependencyGraph = fileRequiredSymbols.mapValues(_.map(o => providedSymbolFiles(o)))
+
+            /**
+              * Creates a single JavaScript file containing all required dependencies for the specified entry point.
+              * @param entryPointSymbol The symbol that will be used in the html page as an entry point to the
+              *     JavaScript application.
+              */
+            def glueScript(entryPointSymbol: String) {
+                if (!providedSymbolFiles.contains(entryPointSymbol)) {
+                    throw new Exception("The entry point '%s' wasn't found.".format(entryPointSymbol))
+                }
+                val processedFiles = new mutable.HashSet[String]
+                val visitedFiles = new mutable.HashSet[String]
+                val buffer = new ListBuffer[String]
+
+                def processFile(file: String) {
+                    if (!processedFiles.contains(file)) {
+                        if (visitedFiles.contains(file)) {
+                            throw new Exception("A cycle in JavaScript file dependencies detected. " +
+                                "Check the file '%s'.".format(file))
+                        }
+                        visitedFiles += file
+
+                        fileDependencyGraph(file).foreach(processFile(_))
+
+                        buffer += "////////////////////////////////////////////////////////////////////////////////"
+                        buffer += "// %s".format(file)
+                        buffer += "////////////////////////////////////////////////////////////////////////////////"
+                        buffer ++= Source.fromFile(file).getLines
+                        buffer += "\n\n"
+                        
+                        visitedFiles -= file
+                        processedFiles += file
+                    }
+                }
+                
+                // Load the necessary libraries.
+                processFile((WebSettings.javascriptsDir / "bootstrap.js").absolutePath.toString)
+                processFile(providedSymbolFiles(entryPointSymbol))
+                new io.File(WebSettings.javascriptsDir / (entryPointSymbol + ".js")).writeAll(buffer.mkString("\n"))
+            }
+            
+            glueScript("cz.payola.web.client.presenters.Index")
+            jarFile
+        }
+    ).dependsOn(
+        webSharedProject, webClientProject
     )
 }
