@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/goog/base.js
+// /goog/base.js
 ////////////////////////////////////////////////////////////////////////////////
 // Copyright 2006 The Closure Library Authors. All Rights Reserved.
 //
@@ -1527,7 +1527,7 @@ goog.provide('goog');
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/goog/object/object.js
+// /goog/object/object.js
 ////////////////////////////////////////////////////////////////////////////////
 // Copyright 2006 The Closure Library Authors. All Rights Reserved.
 //
@@ -2117,7 +2117,7 @@ goog.object.createSet = function(var_args) {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/runtime/s2js/runtime/s2js/MetaClass.js
+// /runtime/s2js/runtime/s2js/MetaClass.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('s2js.MetaClass');
 s2js.MetaClass = function(fullName, parentClasses) {
@@ -2130,7 +2130,7 @@ s2js.MetaClass.prototype.metaClass_ = new s2js.MetaClass('s2js.MetaClass', []);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/runtime/s2js/runtime/scala/Exception.js
+// /runtime/s2js/runtime/scala/Exception.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('scala.Exception');
 scala.Exception = function(message, cause) {
@@ -2145,7 +2145,7 @@ scala.Exception.prototype.metaClass_ = new s2js.MetaClass('scala.Exception', [])
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/runtime/s2js/runtime/scala/RuntimeException.js
+// /runtime/s2js/runtime/scala/RuntimeException.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('scala.RuntimeException');
 goog.require('scala.Exception');
@@ -2162,7 +2162,7 @@ scala.RuntimeException.prototype.metaClass_ = new s2js.MetaClass('scala.RuntimeE
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/runtime/s2js/runtime/s2js/package.js
+// /runtime/s2js/runtime/s2js/package.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('s2js');
 goog.require('goog');
@@ -2271,7 +2271,7 @@ s2js.metaClass_ = new s2js.MetaClass('s2js', []);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/bootstrap.js
+// /bootstrap.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.require("goog");
 goog.require("goog.object");
@@ -2281,7 +2281,7 @@ goog.require("s2js");
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/client/cz/payola/web/client/model/graph/ModelObject.js
+// /client/cz/payola/web/client/model/graph/ModelObject.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('cz.payola.web.client.model.graph.ModelObject');
 cz.payola.web.client.model.graph.ModelObject = function() {
@@ -2292,7 +2292,7 @@ cz.payola.web.client.model.graph.ModelObject.prototype.metaClass_ = new s2js.Met
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/client/cz/payola/web/client/model/graph/Edge.js
+// /client/cz/payola/web/client/model/graph/Edge.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('cz.payola.web.client.model.graph.Edge');
 goog.require('cz.payola.web.client.model.graph.ModelObject');
@@ -2308,7 +2308,7 @@ cz.payola.web.client.model.graph.Edge.prototype.metaClass_ = new s2js.MetaClass(
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/client/cz/payola/web/client/model/graph/Graph.js
+// /client/cz/payola/web/client/model/graph/Graph.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('cz.payola.web.client.model.graph.Graph');
 cz.payola.web.client.model.graph.Graph = function(vertices, edges) {
@@ -2321,7 +2321,7 @@ cz.payola.web.client.model.graph.Graph.prototype.metaClass_ = new s2js.MetaClass
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/client/cz/payola/web/client/model/graph/Vertex.js
+// /client/cz/payola/web/client/model/graph/Vertex.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('cz.payola.web.client.model.graph.Vertex');
 goog.require('cz.payola.web.client.model.graph.ModelObject');
@@ -2335,7 +2335,7 @@ cz.payola.web.client.model.graph.Vertex.prototype.metaClass_ = new s2js.MetaClas
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/runtime/s2js/runtime/scala/IndexOutOfBoundsException.js
+// /runtime/s2js/runtime/scala/IndexOutOfBoundsException.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('scala.IndexOutOfBoundsException');
 goog.require('scala.RuntimeException');
@@ -2352,7 +2352,7 @@ scala.IndexOutOfBoundsException.prototype.metaClass_ = new s2js.MetaClass('scala
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/runtime/s2js/runtime/scala/NoSuchElementException.js
+// /runtime/s2js/runtime/scala/NoSuchElementException.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('scala.NoSuchElementException');
 goog.require('scala.RuntimeException');
@@ -2369,7 +2369,7 @@ scala.NoSuchElementException.prototype.metaClass_ = new s2js.MetaClass('scala.No
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/runtime/s2js/runtime/scala/Product.js
+// /runtime/s2js/runtime/scala/Product.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('scala.Product');
 scala.Product = function() {
@@ -2384,7 +2384,7 @@ scala.Product.prototype.metaClass_ = new s2js.MetaClass('scala.Product', []);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/runtime/s2js/runtime/scala/runtime/ScalaRunTime.js
+// /runtime/s2js/runtime/scala/runtime/ScalaRunTime.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('scala.runtime.ScalaRunTime');
 scala.runtime.ScalaRunTime = function() {
@@ -2399,7 +2399,7 @@ scala.runtime.ScalaRunTime.prototype.metaClass_ = new s2js.MetaClass('scala.runt
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/runtime/s2js/runtime/scala/Option.js
+// /runtime/s2js/runtime/scala/Option.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('scala.None');
 goog.provide('scala.Option');
@@ -2629,7 +2629,7 @@ scala.Some.metaClass_ = new s2js.MetaClass('scala.Some', []);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/runtime/s2js/runtime/scala/Product4.js
+// /runtime/s2js/runtime/scala/Product4.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('scala.Product4');
 goog.require('scala.IndexOutOfBoundsException');
@@ -2675,7 +2675,7 @@ scala.Product4.metaClass_ = new s2js.MetaClass('scala.Product4', []);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/runtime/s2js/runtime/scala/Tuple4.js
+// /runtime/s2js/runtime/scala/Tuple4.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('scala.Tuple4');
 goog.require('scala.None');
@@ -2730,7 +2730,7 @@ scala.Tuple4.metaClass_ = new s2js.MetaClass('scala.Tuple4', []);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/client/cz/payola/web/client/views/Color.js
+// /client/cz/payola/web/client/views/Color.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('cz.payola.web.client.views.Color');
 goog.require('scala.IndexOutOfBoundsException');
@@ -2813,7 +2813,7 @@ cz.payola.web.client.views.Color.metaClass_ = new s2js.MetaClass('cz.payola.web.
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/runtime/s2js/runtime/scala/Product2.js
+// /runtime/s2js/runtime/scala/Product2.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('scala.Product2');
 goog.require('scala.IndexOutOfBoundsException');
@@ -2853,7 +2853,7 @@ scala.Product2.metaClass_ = new s2js.MetaClass('scala.Product2', []);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/runtime/s2js/runtime/scala/Tuple2.js
+// /runtime/s2js/runtime/scala/Tuple2.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('scala.Tuple2');
 goog.require('scala.None');
@@ -2904,7 +2904,7 @@ scala.Tuple2.metaClass_ = new s2js.MetaClass('scala.Tuple2', []);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/runtime/s2js/runtime/scala/math/package.js
+// /runtime/s2js/runtime/scala/math/package.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('scala.math');
 scala.math.E = Math.E;
@@ -2965,7 +2965,7 @@ scala.math.metaClass_ = new s2js.MetaClass('scala.math', []);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/client/cz/payola/web/client/views/Vector.js
+// /client/cz/payola/web/client/views/Vector.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('cz.payola.web.client.views.Vector');
 goog.require('scala.IndexOutOfBoundsException');
@@ -3058,7 +3058,7 @@ cz.payola.web.client.views.Vector.metaClass_ = new s2js.MetaClass('cz.payola.web
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/client/cz/payola/web/client/views/Constants.js
+// /client/cz/payola/web/client/views/Constants.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('cz.payola.web.client.views.Constants');
 goog.require('cz.payola.web.client.views.Color');
@@ -3081,7 +3081,7 @@ cz.payola.web.client.views.Constants.metaClass_ = new s2js.MetaClass('cz.payola.
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/client/cz/payola/web/client/views/Layer.js
+// /client/cz/payola/web/client/views/Layer.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('cz.payola.web.client.views.Layer');
 goog.require('cz.payola.web.client.views.Vector');
@@ -3106,7 +3106,7 @@ cz.payola.web.client.views.Layer.prototype.metaClass_ = new s2js.MetaClass('cz.p
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/client/cz/payola/web/client/views/Point.js
+// /client/cz/payola/web/client/views/Point.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('cz.payola.web.client.views.Point');
 goog.require('cz.payola.web.client.views.Vector');
@@ -3196,7 +3196,7 @@ cz.payola.web.client.views.Point.metaClass_ = new s2js.MetaClass('cz.payola.web.
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/client/cz/payola/web/client/views/graph/RedrawOperation.js
+// /client/cz/payola/web/client/views/graph/RedrawOperation.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('cz.payola.web.client.views.graph.RedrawOperation');
 cz.payola.web.client.views.graph.RedrawOperation.Selection = 0;
@@ -3206,7 +3206,7 @@ cz.payola.web.client.views.graph.RedrawOperation.metaClass_ = new s2js.MetaClass
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/goog/debug/error.js
+// /goog/debug/error.js
 ////////////////////////////////////////////////////////////////////////////////
 // Copyright 2009 The Closure Library Authors. All Rights Reserved.
 //
@@ -3259,7 +3259,7 @@ goog.debug.Error.prototype.name = 'CustomError';
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/goog/string/string.js
+// /goog/string/string.js
 ////////////////////////////////////////////////////////////////////////////////
 // Copyright 2006 The Closure Library Authors. All Rights Reserved.
 //
@@ -4519,7 +4519,7 @@ goog.string.toSelectorCase = function(str) {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/goog/asserts/asserts.js
+// /goog/asserts/asserts.js
 ////////////////////////////////////////////////////////////////////////////////
 // Copyright 2008 The Closure Library Authors. All Rights Reserved.
 //
@@ -4802,7 +4802,7 @@ goog.asserts.assertInstanceof = function(value, type, opt_message, var_args) {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/goog/array/array.js
+// /goog/array/array.js
 ////////////////////////////////////////////////////////////////////////////////
 // Copyright 2006 The Closure Library Authors. All Rights Reserved.
 //
@@ -6156,7 +6156,7 @@ goog.array.shuffle = function(arr, opt_randFn) {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/goog/debug/entrypointregistry.js
+// /goog/debug/entrypointregistry.js
 ////////////////////////////////////////////////////////////////////////////////
 // Copyright 2010 The Closure Library Authors. All Rights Reserved.
 //
@@ -6320,7 +6320,7 @@ goog.debug.entryPointRegistry.unmonitorAllIfPossible = function(monitor) {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/goog/debug/errorhandlerweakdep.js
+// /goog/debug/errorhandlerweakdep.js
 ////////////////////////////////////////////////////////////////////////////////
 // Copyright 2008 The Closure Library Authors. All Rights Reserved.
 //
@@ -6364,7 +6364,7 @@ goog.debug.errorHandlerWeakDep = {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/goog/useragent/useragent.js
+// /goog/useragent/useragent.js
 ////////////////////////////////////////////////////////////////////////////////
 // Copyright 2006 The Closure Library Authors. All Rights Reserved.
 //
@@ -6869,7 +6869,7 @@ goog.userAgent.isDocumentMode = function(documentMode) {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/goog/events/browserfeature.js
+// /goog/events/browserfeature.js
 ////////////////////////////////////////////////////////////////////////////////
 // Copyright 2010 The Closure Library Authors. All Rights Reserved.
 //
@@ -6944,7 +6944,7 @@ goog.events.BrowserFeature = {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/goog/disposable/idisposable.js
+// /goog/disposable/idisposable.js
 ////////////////////////////////////////////////////////////////////////////////
 // Copyright 2011 The Closure Library Authors. All Rights Reserved.
 //
@@ -6994,7 +6994,7 @@ goog.disposable.IDisposable.prototype.isDisposed;
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/goog/disposable/disposable.js
+// /goog/disposable/disposable.js
 ////////////////////////////////////////////////////////////////////////////////
 // Copyright 2005 The Closure Library Authors. All Rights Reserved.
 //
@@ -7218,7 +7218,7 @@ goog.disposeAll = function(var_args) {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/goog/events/event.js
+// /goog/events/event.js
 ////////////////////////////////////////////////////////////////////////////////
 // Copyright 2005 The Closure Library Authors. All Rights Reserved.
 //
@@ -7347,7 +7347,7 @@ goog.events.Event.preventDefault = function(e) {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/goog/events/eventtype.js
+// /goog/events/eventtype.js
 ////////////////////////////////////////////////////////////////////////////////
 // Copyright 2010 The Closure Library Authors. All Rights Reserved.
 //
@@ -7473,7 +7473,7 @@ goog.events.EventType = {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/goog/reflect/reflect.js
+// /goog/reflect/reflect.js
 ////////////////////////////////////////////////////////////////////////////////
 // Copyright 2009 The Closure Library Authors. All Rights Reserved.
 //
@@ -7556,7 +7556,7 @@ goog.reflect.canAccessProperty = function(obj, prop) {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/goog/events/browserevent.js
+// /goog/events/browserevent.js
 ////////////////////////////////////////////////////////////////////////////////
 // Copyright 2005 The Closure Library Authors. All Rights Reserved.
 //
@@ -7974,7 +7974,7 @@ goog.events.BrowserEvent.prototype.disposeInternal = function() {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/goog/events/eventwrapper.js
+// /goog/events/eventwrapper.js
 ////////////////////////////////////////////////////////////////////////////////
 // Copyright 2009 The Closure Library Authors. All Rights Reserved.
 //
@@ -8048,7 +8048,7 @@ goog.events.EventWrapper.prototype.unlisten = function(src, listener, opt_capt,
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/goog/events/listener.js
+// /goog/events/listener.js
 ////////////////////////////////////////////////////////////////////////////////
 // Copyright 2005 The Closure Library Authors. All Rights Reserved.
 //
@@ -8214,7 +8214,7 @@ goog.events.Listener.prototype.handleEvent = function(eventObject) {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/goog/events/events.js
+// /goog/events/events.js
 ////////////////////////////////////////////////////////////////////////////////
 // Copyright 2005 The Closure Library Authors. All Rights Reserved.
 //
@@ -9316,7 +9316,7 @@ goog.debug.entryPointRegistry.register(
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/client/cz/payola/web/client/views/graph/Controls.js
+// /client/cz/payola/web/client/views/graph/Controls.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('cz.payola.web.client.views.graph.Controls');
 goog.require('cz.payola.web.client.views.Constants');
@@ -9454,7 +9454,7 @@ cz.payola.web.client.views.graph.Controls.prototype.metaClass_ = new s2js.MetaCl
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/client/cz/payola/web/client/views/graph/View.js
+// /client/cz/payola/web/client/views/graph/View.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('cz.payola.web.client.views.graph.View');
 cz.payola.web.client.views.graph.View = function() {
@@ -9523,7 +9523,7 @@ cz.payola.web.client.views.graph.View.prototype.metaClass_ = new s2js.MetaClass(
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/client/cz/payola/web/client/views/graph/InformationView.js
+// /client/cz/payola/web/client/views/graph/InformationView.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('cz.payola.web.client.views.graph.InformationView');
 goog.require('cz.payola.web.client.views.Constants');
@@ -9603,7 +9603,7 @@ cz.payola.web.client.views.graph.InformationView.metaClass_ = new s2js.MetaClass
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/client/cz/payola/web/client/views/graph/EdgeView.js
+// /client/cz/payola/web/client/views/graph/EdgeView.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('cz.payola.web.client.views.graph.EdgeView');
 goog.provide('cz.payola.web.client.views.graph.Quadrant');
@@ -9716,7 +9716,7 @@ cz.payola.web.client.views.graph.Quadrant.metaClass_ = new s2js.MetaClass('cz.pa
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/client/cz/payola/web/client/views/graph/LocationDescriptor.js
+// /client/cz/payola/web/client/views/graph/LocationDescriptor.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('cz.payola.web.client.views.graph.LocationDescriptor');
 goog.require('cz.payola.web.client.views.Point');
@@ -9738,7 +9738,7 @@ cz.payola.web.client.views.graph.LocationDescriptor.metaClass_ = new s2js.MetaCl
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/client/cz/payola/web/client/views/graph/VertexView.js
+// /client/cz/payola/web/client/views/graph/VertexView.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('cz.payola.web.client.views.graph.VertexView');
 goog.require('cz.payola.web.client.views.Constants');
@@ -9776,7 +9776,7 @@ cz.payola.web.client.views.graph.VertexView.prototype.metaClass_ = new s2js.Meta
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/runtime/s2js/runtime/scala/Array.js
+// /runtime/s2js/runtime/scala/Array.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('scala.Array');
 scala.Array = function(length) {
@@ -9813,7 +9813,7 @@ scala.Array.metaClass_ = new s2js.MetaClass('scala.Array', []);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/runtime/s2js/runtime/scala/collection/immutable/List.js
+// /runtime/s2js/runtime/scala/collection/immutable/List.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('scala.collection.immutable.List');
 goog.require('scala.Array');
@@ -9860,7 +9860,7 @@ scala.collection.immutable.List.metaClass_ = new s2js.MetaClass('scala.collectio
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/runtime/s2js/runtime/scala/collection/mutable/ListBuffer.js
+// /runtime/s2js/runtime/scala/collection/mutable/ListBuffer.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('scala.collection.mutable.ListBuffer');
 goog.require('scala.Array');
@@ -9918,7 +9918,7 @@ scala.collection.mutable.ListBuffer.metaClass_ = new s2js.MetaClass('scala.colle
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/client/cz/payola/web/client/views/graph/GraphView.js
+// /client/cz/payola/web/client/views/graph/GraphView.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('cz.payola.web.client.views.graph.GraphView');
 goog.require('cz.payola.web.client.views.Constants');
@@ -10132,7 +10132,7 @@ cz.payola.web.client.views.graph.GraphView.prototype.metaClass_ = new s2js.MetaC
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// /Users/jirihelmich/dev/Payola/payola/web/server/public/javascripts/client/cz/payola/web/client/presenters/Index.js
+// /client/cz/payola/web/client/presenters/Index.js
 ////////////////////////////////////////////////////////////////////////////////
 goog.provide('cz.payola.web.client.presenters.Index');
 goog.require('cz.payola.web.client.model.graph.Edge');

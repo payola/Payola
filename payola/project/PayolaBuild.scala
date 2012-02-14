@@ -249,8 +249,9 @@ object PayolaBuild extends Build
 
                         fileDependencyGraph(file).foreach(processFile(_))
 
+                        val name = file.stripPrefix(WebSettings.javascriptsDir.absolutePath.toString).replace("\\", "/")
                         buffer += "////////////////////////////////////////////////////////////////////////////////"
-                        buffer += "// %s".format(file)
+                        buffer += "// %s".format(name)
                         buffer += "////////////////////////////////////////////////////////////////////////////////"
                         buffer ++= Source.fromFile(file).getLines
                         buffer += "\n\n"
