@@ -55,6 +55,16 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
     }
 
     /**
+      * Returns the specified annotation info if the specified symbol is annotated with it.
+      * @param symbol The symbol which should be annotated.
+      * @param annotationTypeName Name of the annotation type.
+      * @return The annotation info if the specified symbol is annotated with it.
+      */
+    def getSymbolAnnotation(symbol: Global#Symbol, annotationTypeName: String): Option[Global#AnnotationInfo] = {
+        symbol.annotations.find(_.atp.toString == annotationTypeName)
+    }
+
+    /**
       * Finds possible package replacement in the symbol full name.
       * @param symbol The symbol in whose name to search for the replacement.
       * @return The replacement Some(oldPackage, newPackage) if such was found, None oterwise.

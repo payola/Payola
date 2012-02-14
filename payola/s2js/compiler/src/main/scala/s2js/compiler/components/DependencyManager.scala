@@ -78,32 +78,35 @@ class DependencyManager(private val packageDefCompiler: PackageDefCompiler)
       * @param classDef The ClassDef whose structure should be retrieved.
       */
     private def retrieveClassDefStructure(classDef: Global#ClassDef) {
-        val name = getStructureKey(classDef.symbol)
-        val dependencies = new mutable.HashSet[String]
+        // Remote objects aren't compiled
+        if (packageDefCompiler.getSymbolAnnotation(classDef.symbol, "remote").isEmpty) {
+            val name = getStructureKey(classDef.symbol)
+            val dependencies = new mutable.HashSet[String]
 
-        packageDefStructure.classDefMap += name -> classDef
-        packageDefStructure.classDefDependencyGraph += name -> dependencies
+            packageDefStructure.classDefMap += name -> classDef
+            packageDefStructure.classDefDependencyGraph += name -> dependencies
 
-        // If a class is declared inside another class or object, then it depends on the another class/object.
-        if (!classDef.symbol.owner.isPackageClass) {
-            dependencies += getStructureKey(classDef.symbol.owner)
-        }
+            // If a class is declared inside another class or object, then it depends on the another class/object.
+            if (!classDef.symbol.owner.isPackageClass) {
+                dependencies += getStructureKey(classDef.symbol.owner)
+            }
 
-        // Resolve the dependencies. The class depends on parent classes that are currently compiled and requires the
-        // other parent classes.
-        addProvidedSymbol(classDef.symbol)
-        classDef.impl.parents.foreach {parentClass =>
-            if (!packageDefCompiler.symbolIsInternal(parentClass.symbol)) {
-                if (packageDefCompiler.symbolIsCompiled(parentClass.symbol)) {
-                    dependencies += getStructureKey(parentClass.symbol)
-                } else {
-                    addRequiredSymbol(parentClass.symbol)
+            // Resolve the dependencies. The class depends on parent classes that are currently compiled and requires
+            // the other parent classes.
+            addProvidedSymbol(classDef.symbol)
+            classDef.impl.parents.foreach {parentClass =>
+                if (!packageDefCompiler.symbolIsInternal(parentClass.symbol)) {
+                    if (packageDefCompiler.symbolIsCompiled(parentClass.symbol)) {
+                        dependencies += getStructureKey(parentClass.symbol)
+                    } else {
+                        addRequiredSymbol(parentClass.symbol)
+                    }
                 }
             }
-        }
 
-        // Retrieve structure of child items.
-        classDef.impl.body.foreach(retrieveStructure)
+            // Retrieve structure of child items.
+            classDef.impl.body.foreach(retrieveStructure)
+        }
     }
 
     /**

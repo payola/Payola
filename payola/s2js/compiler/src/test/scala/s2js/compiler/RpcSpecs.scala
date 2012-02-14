@@ -17,7 +17,7 @@ class RpcSpecs extends CompilerFixtureSpec {
             }
     }
 
-    it("method call gets translated into an rpc call") {
+    it("method call gets translated into a rpc call") {
         configMap =>
             scalaCode {
                 """
@@ -36,7 +36,14 @@ class RpcSpecs extends CompilerFixtureSpec {
                 """
             } shouldCompileTo {
                 """
+                    goog.provide('client');
+                    goog.require('s2js.runtime.Rpc');
 
+                    client.main = function() {
+                        var self = this;
+                        var fooValue = s2js.runtime.Rpc.callSync('server.o.foo', [2, 'xyz']);
+                    };
+                    client.metaClass_ = news2js.MetaClass('client', []);
                 """
             }
     }

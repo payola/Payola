@@ -25,7 +25,7 @@ object Rpc
     @NativeJs("""
         TODO
     """)
-    def callSync(procedureName: String, parameters: Any): Any = Nothing
+    def callSync(procedureName: String, parameters: Any): Any = ()
 
 
     @NativeJs("""

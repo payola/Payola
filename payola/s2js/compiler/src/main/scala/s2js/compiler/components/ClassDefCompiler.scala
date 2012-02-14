@@ -251,7 +251,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         }
         if (parameters.nonEmpty) {
             buffer += ", "
-            compileParameterValues(parameters, false)
+            compileParameterValues(parameters, withParentheses = false)
         }
         buffer += ")"
     }
@@ -323,10 +323,12 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
       * Compiles parameter values passed to a method call or a function call.
       * @param parameterValues List of parameter value ASTs.
       * @param withParentheses Whether the compiled parameter values should be enclosed in parentheses.
+      * @param asArray Whether the parameters should be compiled as an array.
       */
-    protected def compileParameterValues(parameterValues: List[Global#Tree], withParentheses: Boolean = true) {
-        if (withParentheses) {
-            buffer += "("
+    protected def compileParameterValues(parameterValues: List[Global#Tree], withParentheses: Boolean = true,
+        asArray: Boolean = false) {
+        if (withParentheses || asArray) {
+            buffer += (if (asArray) "[" else "(")
         }
         if (parameterValues.nonEmpty) {
             // Default parameter values are handled in the function body so they are ignored.
@@ -341,8 +343,8 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
             }
             buffer.remove(buffer.length - 1)
         }
-        if (withParentheses) {
-            buffer += ")"
+        if (withParentheses || asArray) {
+            buffer += (if (asArray) "]" else ")")
         }
     }
 
@@ -563,19 +565,42 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
                 if (!ignoreApply) {
                     buffer.update(buffer.length - 1, buffer.last.dropRight(1))
                     buffer += ", "
-                    compileParameterValues(args, false)
+                    compileParameterValues(args, withParentheses = false)
                     buffer += ")"
                 }
             }
             case Apply(select@Select(_, _), _) if select.hasSymbolWhich(_.isMethod) => {
-                compileSelect(select, isInsideApply = true)
-                compileParameterValues(apply.args)
+                if (select.qualifier.hasSymbolWhich(packageDefCompiler.getSymbolAnnotation(_, "remote").isDefined)) {
+                    compileRpcCall(select, apply)
+                } else {
+                    compileSelect(select, isInsideApply = true)
+                    compileParameterValues(apply.args)
+                }
             }
             case _ => {
                 compileAst(apply.fun)
                 compileParameterValues(apply.args)
             }
         }
+    }
+
+    /**
+      * Compiles a RPC call (instead of method call).
+      * @param select The method selection from the remote object.
+      * @param apply The method application.
+      */
+    private def compileRpcCall (select: Global#Select, apply: Global#Apply) {
+        // Add the required dependencies.
+        packageDefCompiler.dependencyManager.addRequiredSymbol("s2js.Rpc")
+        if (!typeIsPrimitive(apply.tpe)) {
+            packageDefCompiler.dependencyManager.addRequiredSymbol(packageDefCompiler.getSymbolFullJsName(
+                apply.tpe.typeSymbol))
+        }
+
+        // Compile the call itself.
+        buffer += "s2js.Rpc.callSync('%s',".format(select.toString)
+        compileParameterValues(apply.args, asArray = true);
+        buffer += ")"
     }
 
     /**
@@ -980,7 +1005,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
       *     annotation. Typically the action invokes direct compilation of the symbol.
       */
     private def compileSymbol(symbol: Global#Symbol)(ifNotNativeAction: => Unit) {
-        val nativeAnnotationInfo = symbol.annotations.find(_.atp.toString == "s2js.compiler.NativeJs")
+        val nativeAnnotationInfo = packageDefCompiler.getSymbolAnnotation(symbol, "s2js.compiler.NativeJs")
         if (nativeAnnotationInfo.isDefined) {
             nativeAnnotationInfo.get.args.head match {
                 case Literal(Constant(value: String)) => buffer += value
