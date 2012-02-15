@@ -200,23 +200,22 @@ object PayolaBuild extends Build
             val files = new io.Directory(WebSettings.javascriptsDir).deepFiles.filter(_.extension == "js")
             val providedSymbolFiles = new mutable.HashMap[String, String]
             val fileRequiredSymbols = new mutable.HashMap[String, mutable.ArrayBuffer[String]]
+
+            val provideRegex = """goog\.provide\(\s*['\"]([^'\"]+)['\"]\s*\);""".r
+            val requireRegex = """goog\.require\(\s*['\"]([^'\"]+)['\"]\s*\);""".r
             files.foreach {file =>
                 val path = file.toAbsolute.path.toString
                 fileRequiredSymbols += path -> new mutable.ArrayBuffer[String]
 
                 val fileContent = Source.fromFile(path).getLines.mkString
-                """goog\.provide\(\s*['\"]([^'\"]+)['\"]\s*\);""".r.findAllIn(fileContent).matchData.foreach {m =>
-                    providedSymbolFiles += m.group(1) -> path
-                }
-                """goog\.require\(\s*['\"]([^'\"]+)['\"]\s*\);""".r.findAllIn(fileContent).matchData.foreach {m =>
-                    fileRequiredSymbols(path) += m.group(1)
-                }
+                provideRegex.findAllIn(fileContent).matchData.foreach(providedSymbolFiles += _.group(1) -> path)
+                requireRegex.findAllIn(fileContent).matchData.foreach(fileRequiredSymbols(path) += _.group(1))
             }
             
             // Check whether all required symbols are provided.
             val errorFile = fileRequiredSymbols.find(_._2.exists(file => !providedSymbolFiles.contains(file)))
             if (errorFile.isDefined) {
-                throw new Exception("Dependency '%s' declared in te file '%s' wasn't found.".format(
+                throw new Exception("Dependency '%s' declared in the file '%s' wasn't found.".format(
                     errorFile.get._2.find(file => !providedSymbolFiles.contains(file)).get.toString,
                     errorFile.get._1.toString
                 ))
@@ -248,8 +247,9 @@ object PayolaBuild extends Build
 
                         fileDependencyGraph(file).foreach(processFile(_))
 
+                        val name = file.stripPrefix(WebSettings.javascriptsDir.absolutePath.toString).replace("\\", "/")
                         buffer += "////////////////////////////////////////////////////////////////////////////////"
-                        buffer += "// %s".format(file)
+                        buffer += "// %s".format(name)
                         buffer += "////////////////////////////////////////////////////////////////////////////////"
                         buffer ++= Source.fromFile(file).getLines
                         buffer += "\n\n"
@@ -262,10 +262,13 @@ object PayolaBuild extends Build
                 // Load the necessary libraries.
                 processFile((WebSettings.javascriptsDir / "bootstrap.js").absolutePath.toString)
                 processFile(providedSymbolFiles(entryPointSymbol))
-                new io.File(WebSettings.javascriptsDir / (entryPointSymbol + ".js")).writeAll(buffer.mkString("\n"))
+
+                // Strip the requires which are no more needed.
+                val gluedScript = requireRegex.replaceAllIn(buffer.mkString("\n"), "")
+                new io.File(WebSettings.javascriptsDir / (entryPointSymbol + ".js")).writeAll(gluedScript)
             }
             
-            glueScript("cz.payola.web.client.presenters.Index")
+            glueScript("cz.payola.web.client.RpcTestClient")
             jarFile
         }
     ).dependsOn(
