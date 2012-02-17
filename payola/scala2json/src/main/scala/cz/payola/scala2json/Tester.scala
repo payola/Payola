@@ -58,6 +58,14 @@ class FullyCustomizedClass(var str: String) extends JSONSerializationFullyCustom
     }
 }
 
+class User(val name: String){
+    val groups = new ArrayBuffer[Group]()
+}
+
+class Group(val name: String){
+    val users = new ArrayBuffer[User]()
+}
+
 import JSONSerializerOptions._
 
 object Tester {
@@ -78,7 +86,17 @@ object Tester {
         val s2json: JSONSerializer = new JSONSerializer(t, JSONSerializerOptionPrettyPrinting |
                                                             JSONSerializerOptionIgnoreNullValues)
 
-        println(s2json.stringValue)
+        //println(s2json.stringValue)
+
+        val u: User = new User("Franta")
+        val g: Group = new Group("My group")
+        u.groups += g
+        g.users += u
+
+        val cycleJSON: JSONSerializer = new JSONSerializer(u, JSONSerializerOptionPrettyPrinting |
+            JSONSerializerOptionIgnoreNullValues)
+
+        println(cycleJSON.stringValue)
         
     }
 }

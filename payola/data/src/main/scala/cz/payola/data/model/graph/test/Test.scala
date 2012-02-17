@@ -25,7 +25,9 @@ object RDF2ScalaTest {
         manager.initWebServices()
         val queryResult: QueryResult = manager.evaluateSparqlQuery("")
         val rdfDoc = RDFGraph(queryResult.getRdf)
-        val serializer = new JSONSerializer(rdfDoc, JSONSerializerOptions.JSONSerializerOptionCondensedPrinting | JSONSerializerOptions.JSONSerializerOptionIgnoreNullValues)
+        val serializer = new JSONSerializer(rdfDoc, JSONSerializerOptions.JSONSerializerOptionPrettyPrinting
+            | JSONSerializerOptions.JSONSerializerOptionIgnoreNullValues
+            | JSONSerializerOptions.JSONSerializerOptionSkipObjectIDs)
         println(serializer.stringValue)
 
         // Old example demonstrating scardf library
