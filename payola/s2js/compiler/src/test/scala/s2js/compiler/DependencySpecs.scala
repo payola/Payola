@@ -21,7 +21,7 @@ class DependencySpecs extends CompilerFixtureSpec
                         a.b.c.d.m1 = function() {
                             var self = this;
                         };
-                        a.b.c.d.metaClass_ = new s2js.MetaClass('a.b.c.d', []);
+                        a.b.c.d.__class__ = new s2js.Class('a.b.c.d', []);
                     """
                 }
         }
@@ -53,11 +53,12 @@ class DependencySpecs extends CompilerFixtureSpec
 
                         foo.a.x = new java.util.Date();
 
-                        foo.a.m1 = function() {var self = this;
+                        foo.a.m1 = function() {
+                            var self = this;
                             var y = new java.util.Random();
                             var z = new java.util.ArrayList();
                         };
-                        foo.a.metaClass_ = new s2js.MetaClass('foo.a', []);
+                        foo.a.__class__ = new s2js.Class('foo.a', []);
                     """
                 }
         }
@@ -84,7 +85,7 @@ class DependencySpecs extends CompilerFixtureSpec
                             var self = this;
                             window.alert(self.f1);
                         };
-                        o1.metaClass_ = new s2js.MetaClass('o1', []);
+                        o1.__class__ = new s2js.Class('o1', []);
                     """
                 }
         }
@@ -104,7 +105,7 @@ class DependencySpecs extends CompilerFixtureSpec
                         goog.provide('o1');
 
                         o1.f1 = window.location;
-                        o1.metaClass_ = new s2js.MetaClass('o1', []);
+                        o1.__class__ = new s2js.Class('o1', []);
                     """
                 }
         }
@@ -127,7 +128,7 @@ class DependencySpecs extends CompilerFixtureSpec
                         goog.require('goog.events.EventType');
 
                         a.x = goog.events.EventType.CLICK;
-                        a.metaClass_ = new s2js.MetaClass('a', []);
+                        a.__class__ = new s2js.Class('a', []);
                     """
                 }
         }

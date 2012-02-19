@@ -209,7 +209,7 @@ goog.events.PasteHandler.prototype.logger_ =
 
 /** @override */
 goog.events.PasteHandler.prototype.disposeInternal = function() {
-  goog.events.PasteHandler.superClass_.disposeInternal.call(this);
+  goog.events.PasteHandler.__base__.disposeInternal.call(this);
   this.eventHandler_.dispose();
   this.eventHandler_ = null;
   this.delay_.dispose();

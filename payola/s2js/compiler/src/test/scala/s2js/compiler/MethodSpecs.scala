@@ -34,7 +34,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                             self.m1('foo', 'bar');
                             self.m2('foo');
                         };
-                        o1.metaClass_ = new s2js.MetaClass('o1', []);
+                        o1.__class__ = new s2js.Class('o1', []);
                     """
                 }
         }
@@ -59,7 +59,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                         goog.provide('o2');
 
                         o1.x = 'o1';
-                        o1.metaClass_ = new s2js.MetaClass('o1', []);
+                        o1.__class__ = new s2js.Class('o1', []);
 
                         o2.x = 'o2';
                         o2.m = function(a, x, y) {
@@ -68,7 +68,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                             if (typeof(x) === 'undefined') { x = self.x; }
                             if (typeof(y) === 'undefined') { y = o1.x; }
                         };
-                        o2.metaClass_ = new s2js.MetaClass('o2', []);
+                        o2.__class__ = new s2js.Class('o2', []);
                     """
                 }
         }
@@ -114,7 +114,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                             var self = this;
                             'foobar';
                         };
-                        a.metaClass_ = new s2js.MetaClass('a', []);
+                        a.__class__ = new s2js.Class('a', []);
                     """
                 }
         }
@@ -141,7 +141,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                             var self = this;
                             self.m1('foo');
                         };
-                        a.metaClass_ = new s2js.MetaClass('a', []);
+                        a.__class__ = new s2js.Class('a', []);
                     """
                 }
         }
@@ -162,7 +162,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                         goog.require('goog.events.Event');
 
                         goog.events.a.x = goog.events.Event.preventDefault(null);
-                        goog.events.a.metaClass_ = new s2js.MetaClass('goog.events.a', []);
+                        goog.events.a.__class__ = new s2js.Class('goog.events.a', []);
                     """
                 }
         }
@@ -194,7 +194,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                             var self = this;
                             return ('foo' + x);
                         };
-                        A.prototype.metaClass_ = new s2js.MetaClass('A', []);
+                        A.prototype.__class__ = new s2js.Class('A', []);
 
                         b.m1 = function() {
                             var self = this;
@@ -204,7 +204,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                             var self = this;
                             var x = self.m1().go('bar').toString();
                         };
-                        b.metaClass_ = new s2js.MetaClass('b', []);
+                        b.__class__ = new s2js.Class('b', []);
                     """
                 }
         }
@@ -239,7 +239,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                         var self = this;
                         self.m1('foo', function(x) { window.alert(x); });
                     };
-                    o1.metaClass_ = new s2js.MetaClass('o1', []);
+                    o1.__class__ = new s2js.Class('o1', []);
                 """
                 }
         }
@@ -288,7 +288,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                             window.alert(self.f1);
                             fn(self.f1);
                         };
-                        C1.prototype.metaClass_ = new s2js.MetaClass('C1', []);
+                        C1.prototype.__class__ = new s2js.Class('C1', []);
 
                         C2 = function() {
                             var self = this;
@@ -298,7 +298,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                             var self = this;
                             window.alert((v1 + self.f1));
                         };
-                        C2.prototype.metaClass_ = new s2js.MetaClass('C2', []);
+                        C2.prototype.__class__ = new s2js.Class('C2', []);
 
                         o1.m1 = function() {
                             var self = this;
@@ -306,7 +306,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                             var c2 = new C2();
                             c1.m1(function($v1) { c2.m1($v1); });
                         };
-                        o1.metaClass_ = new s2js.MetaClass('o1', []);
+                        o1.__class__ = new s2js.Class('o1', []);
                     """
                 }
         }
@@ -340,7 +340,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                         $pkg.a.prototype.m2 = function(x) {
                             var self = this;
                         };
-                        $pkg.a.prototype.metaClass_ = new s2js.MetaClass('$pkg.a', []);
+                        $pkg.a.prototype.__class__ = new s2js.Class('$pkg.a', []);
 
                         $pkg.b = function() {
                             var self = this;
@@ -355,7 +355,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                             var self = this;
                             goog.base(self, 'm2', 'foo');
                         };
-                        $pkg.b.prototype.metaClass_ = new s2js.MetaClass('$pkg.b', [$pkg.a]);
+                        $pkg.b.prototype.__class__ = new s2js.Class('$pkg.b', [$pkg.a]);
                     """
                 }
         }
@@ -393,16 +393,16 @@ class MethodSpecs extends CompilerFixtureSpec {
                 } shouldCompileTo {
                     """
                         goog.provide('o');
-                        goog.require('scala.Array');
+                        goog.require('scala.collection.immutable.List');
 
                         o.m1 = function() {
                             var self = this;
-                            var x = scala.Array.fromNative([].splice.call(arguments, 0, arguments.length - 0));
+                            var x = scala.collection.immutable.List.fromJsArray([].splice.call(arguments, 0, arguments.length - 0));
                             x.foreach(function(i) { window.alert(i); });
                         };
                         o.m2 = function(a, b) {
                             var self = this;
-                            var x = scala.Array.fromNative([].splice.call(arguments, 2, arguments.length - 2));
+                            var x = scala.collection.immutable.List.fromJsArray([].splice.call(arguments, 2, arguments.length - 2));
                             x.foreach(function(i) { window.alert((a + (b + i))); });
                         };
                         o.test = function() {
@@ -415,7 +415,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                             self.m2('test', 5, 6);
                             self.m2('test', 5, 6, 7, 8);
                         };
-                        o.metaClass_ = new s2js.MetaClass('o', []);
+                        o.__class__ = new s2js.Class('o', []);
                     """
                 }
         }

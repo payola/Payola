@@ -480,7 +480,7 @@ goog.events.KeyHandler.prototype.detach = function() {
 
 /** @override */
 goog.events.KeyHandler.prototype.disposeInternal = function() {
-  goog.events.KeyHandler.superClass_.disposeInternal.call(this);
+  goog.events.KeyHandler.__base__.disposeInternal.call(this);
   this.detach();
 };
 

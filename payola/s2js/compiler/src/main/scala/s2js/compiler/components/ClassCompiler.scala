@@ -33,7 +33,7 @@ class ClassCompiler(packageDefCompiler: PackageDefCompiler, classDef: Global#Cla
         // Call the parent class constructor.
         if (parentClass.isDefined && parentConstructorCall.isDefined) {
             compileParentCall(parentConstructorCall.get.args)
-            buffer += ";"
+            buffer += ";\n"
         }
 
         // Compile the constructor body.

@@ -225,7 +225,7 @@ goog.Timer.prototype.stop = function() {
 
 /** @override */
 goog.Timer.prototype.disposeInternal = function() {
-  goog.Timer.superClass_.disposeInternal.call(this);
+  goog.Timer.__base__.disposeInternal.call(this);
   this.stop();
   delete this.timerObject_;
 };

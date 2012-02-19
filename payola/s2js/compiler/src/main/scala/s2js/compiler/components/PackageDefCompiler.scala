@@ -30,6 +30,7 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
             "scala.Any",
             "scala.AnyRef",
             "scala.Equals",
+            "scala.Throwable",
             "scala.package.Throwable",
             "scala.Predef",
             "scala.ScalaObject",
@@ -143,7 +144,7 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
         )
         val jsDefaultMembers = List(
             "constructor", "hasOwnProperty", "isPrototypeOf", "propertyIsEnumerable", "apply", "arguments", "call",
-            "prototype", "superClass_", "metaClass_"
+            "prototype", "__class__", "__base__"
         )
 
         // Synthetic symbols get a prefix to avoid name collision with other symbols. Also if the symbol name is a js
@@ -153,6 +154,15 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
         } else {
             name
         }
+    }
+
+    /**
+      * Returns an unique local name with the specified name prefix.
+      * @param namePrefix Prefix of the unique name.
+      * @return The name.
+      */
+    def getUniqueLocalName(namePrefix: String) = {
+        getLocalJsName(namePrefix + "$" + getUniqueId(), true)
     }
 
     /**
@@ -201,7 +211,7 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
       * Returns an unique id (unique within the packageDef compilation)
       * @return The unique id.
       */
-    def getUniqueId(): Int = {
+    private def getUniqueId(): Int = {
         uniqueId += 1
         uniqueId
     }

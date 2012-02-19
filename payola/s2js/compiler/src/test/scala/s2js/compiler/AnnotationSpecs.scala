@@ -34,7 +34,9 @@ class AnnotationSpecs extends CompilerFixtureSpec {
                             val x = "foo"
                             val y = 123
 
-                            @s2js.compiler.NativeJs("console.log(self.x + self.y.toString + x);")
+                            @s2js.compiler.NativeJs(""" + "\"\"\"" + """
+                                console.log(self.x + self.y.toString + x);
+                            """ + "\"\"\"" + """)
                             def m(x: String) {}
                         }
                     """
@@ -51,7 +53,7 @@ class AnnotationSpecs extends CompilerFixtureSpec {
                             var self = this;
                             console.log(self.x + self.y.toString + x);
                         };
-                        A.prototype.metaClass_ = new s2js.MetaClass('A', []);
+                        A.prototype.__class__ = new s2js.Class('A', []);
                     """
                 }
         }
@@ -73,7 +75,7 @@ class AnnotationSpecs extends CompilerFixtureSpec {
                             var self = this;
                             self.x = [1, 2, 3];
                         };
-                        A.prototype.metaClass_ = new s2js.MetaClass('A', []);
+                        A.prototype.__class__ = new s2js.Class('A', []);
                     """
                 }
         }

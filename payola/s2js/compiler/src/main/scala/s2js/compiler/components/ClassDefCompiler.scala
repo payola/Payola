@@ -117,7 +117,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         compileConstructor(parentConstructorCall)
         compileInheritedTraits()
         compileMembers()
-        instantiateMetaClass()
+        instantiateClass()
     }
 
     /**
@@ -148,10 +148,10 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-      * Creates an instance of the MetaClass corresponding to the ClassDef.
+      * Creates an instance of the Class corresponding to the ClassDef.
       */
-    private def instantiateMetaClass() {
-        buffer += "%s.metaClass_ = new s2js.MetaClass('%s', [%s]);\n".format(
+    private def instantiateClass() {
+        buffer += "%s.__class__ = new s2js.Class('%s', [%s]);\n".format(
             memberContainerName,
             fullJsName,
             predecessors.map(c => packageDefCompiler.getSymbolJsName(c.symbol)).mkString(", ")
@@ -305,8 +305,8 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
 
             // Variadic parameter.
             parameters.get.filter(p => typeIsVariadic(p.tpt)).foreach {parameter =>
-                packageDefCompiler.dependencyManager.addRequiredSymbol("scala.Array"); // TODO use Seq
-                buffer += "var %s = scala.Array.fromNative(".format(
+                packageDefCompiler.dependencyManager.addRequiredSymbol("scala.collection.immutable.List");
+                buffer += "var %s = scala.collection.immutable.List.fromJsArray(".format(
                     packageDefCompiler.getSymbolLocalJsName(parameter.symbol)
                 );
 
@@ -375,7 +375,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
                 case assign: Global#Assign => compileAssign(assign)
                 case ifAst: Global#If => compileIf(ifAst)
                 case labelDef: Global#LabelDef => compileLabelDef(labelDef)
-                case tryAst: Global#Try => // TODO
+                case tryAst: Global#Try => compileTry(tryAst)
                 case throwAst: Global#Throw => compileThrow(throwAst)
                 case matchAst: Global#Match => compileMatch(matchAst)
                 case _ => throw new ScalaToJsException("Not implemented AST of type %s: %s".format(
@@ -403,6 +403,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         val somethingWasCompiled = buffer.length > previousBufferLength
         val terminateWithSemicolon = ast match {
             case _: Global#Block => false
+            case _: Global#Try => false
             case _: Global#If => hasReturnValue
             case _ => true
         }
@@ -598,7 +599,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         }
 
         // Compile the call itself.
-        buffer += "s2js.Rpc.callSync('%s',".format(select.toString)
+        buffer += "s2js.Rpc.callSync('%s', ".format(select.toString)
         compileParameterValues(apply.args, asArray = true);
         buffer += ")"
     }
@@ -702,7 +703,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
             }
         }
 
-        buffer += "}";
+        buffer += "}\n";
         if (hasReturn) {
             buffer += "})()"
         }
@@ -736,6 +737,31 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
+      * Compiles a try-catch-finally statement.
+      * @param tryAst The Try to compile.
+      */
+    private def compileTry(tryAst: Global#Try) {
+        if (!tryAst.finalizer.isEmpty) {
+            throw new ScalaToJsException("The finally statement in try-catch-finally isn't supported.")
+        }
+
+        // Try.
+        buffer += "try {\n"
+        compileAstStatement(tryAst.block);
+
+        // Catch.
+        val exceptionName = packageDefCompiler.getUniqueLocalName("ex")
+        buffer += "} catch (%s) {\n".format(exceptionName)
+        buffer += "(function() {\n"
+        tryAst.catches.foreach(c => compileCase(c, exceptionName, false))
+
+        // If no one of the catch cases matched the exception, then the exception should be propagated further.
+        buffer += "throw %s;\n".format(exceptionName)
+        buffer += "})();\n"
+        buffer += "}\n"
+    }
+
+    /**
       * Compiles a throw statement.
       * @param throwAst The Throw to compile.
       */
@@ -751,7 +777,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
       * @param matchAst the Match to compile.
       */
     private def compileMatch(matchAst: Global#Match) {
-        val selectorName = packageDefCompiler.getLocalJsName("selector$" + packageDefCompiler.getUniqueId(), true)
+        val selectorName = packageDefCompiler.getUniqueLocalName("selector")
         val hasReturn = !typeIsEmpty(matchAst.tpe)
         buffer += "(function(%s) {\n".format(selectorName)
         matchAst.cases.foreach(compileCase(_, selectorName, hasReturn))
@@ -1007,12 +1033,19 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     private def compileSymbol(symbol: Global#Symbol)(ifNotNativeAction: => Unit) {
         val nativeAnnotationInfo = packageDefCompiler.getSymbolAnnotation(symbol, "s2js.compiler.NativeJs")
         if (nativeAnnotationInfo.isDefined) {
-            nativeAnnotationInfo.get.args.head match {
+            nativeAnnotationInfo.get.args.foreach {
                 case Literal(Constant(value: String)) => buffer += value
-                case _ => ifNotNativeAction
             }
         } else {
             ifNotNativeAction
+        }
+
+        // Check for the NativeJsDependency annotation.
+        val annotation = packageDefCompiler.getSymbolAnnotation(symbol, "s2js.compiler.NativeJsDependency")
+        if (annotation.isDefined) {
+            annotation.get.args.foreach {
+                case Literal(Constant(d: String)) => packageDefCompiler.dependencyManager.addRequiredSymbol(d)
+            }
         }
     }
 }

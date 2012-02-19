@@ -103,7 +103,7 @@ goog.events.FocusHandler.prototype.handleEvent = function(e) {
 
 /** @override */
 goog.events.FocusHandler.prototype.disposeInternal = function() {
-  goog.events.FocusHandler.superClass_.disposeInternal.call(this);
+  goog.events.FocusHandler.__base__.disposeInternal.call(this);
   goog.events.unlistenByKey(this.listenKeyIn_);
   goog.events.unlistenByKey(this.listenKeyOut_);
   delete this.element_;

@@ -1430,7 +1430,7 @@ goog.exportProperty = function(object, publicName, symbol) {
  *
  * <pre>
  * ChildClass.prototype.foo = function(a) {
- *   ChildClass.superClass_.foo.call(this, a);
+ *   ChildClass.__base__.foo.call(this, a);
  *   // other code
  * };
  * </pre>
@@ -1442,7 +1442,7 @@ goog.inherits = function(childCtor, parentCtor) {
   /** @constructor */
   function tempCtor() {};
   tempCtor.prototype = parentCtor.prototype;
-  childCtor.superClass_ = parentCtor.prototype;
+  childCtor.__base__ = parentCtor.prototype;
   childCtor.prototype = new tempCtor();
   childCtor.prototype.constructor = childCtor;
 };
@@ -1475,16 +1475,16 @@ goog.inherits = function(childCtor, parentCtor) {
  */
 goog.base = function(me, opt_methodName, var_args) {
   var caller = arguments.callee.caller;
-  if (caller.superClass_) {
+  if (caller.__base__) {
     // This is a constructor. Call the superclass constructor.
-    return caller.superClass_.constructor.apply(
+    return caller.__base__.constructor.apply(
         me, Array.prototype.slice.call(arguments, 1));
   }
 
   var args = Array.prototype.slice.call(arguments, 2);
   var foundCaller = false;
   for (var ctor = me.constructor;
-       ctor; ctor = ctor.superClass_ && ctor.superClass_.constructor) {
+       ctor; ctor = ctor.__base__ && ctor.__base__.constructor) {
     if (ctor.prototype[opt_methodName] === caller) {
       foundCaller = true;
     } else if (foundCaller) {

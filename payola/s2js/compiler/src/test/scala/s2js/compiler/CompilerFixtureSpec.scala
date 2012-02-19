@@ -47,7 +47,7 @@ abstract class CompilerFixtureSpec extends FixtureSpec with ConfigMapFixture wit
         }
 
         private def normalizeWhiteSpace(text: String) = {
-            text.replaceAll("""([ ]+|[\n\r\t])""", "")
+            text.replaceAll("""([ ]+|[\n\r\t])""", " ").replaceAll("""[ ]+""", " ").replaceAll("""^[ ]""", "")
         }
     }
 

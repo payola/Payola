@@ -45,7 +45,23 @@ object PayolaBuild extends Build
     {
         val serverBaseDir = file("web/server")
 
-        val javascriptsDir = serverBaseDir / "public/javascripts"
+        val javaScriptsDir = serverBaseDir / "public/javascripts"
+
+        val compiledJavaScriptsDir = javaScriptsDir / "compiled"
+
+        val scriptEntryPoints = Set(
+            "cz.payola.web.client.presenters.Index",
+            "cz.payola.web.client.RpcTestClient"
+        )
+
+        /**
+          * Returns a file corresponding to the specified entry point.
+          * @param entryPoint The entry point.
+          * @return The file.
+          */
+        def getEntryPointFile(entryPoint: String): io.File = {
+            new io.File(compiledJavaScriptsDir / (entryPoint + ".js"))
+        }
     }
 
     /** Common default settings of all projects. */
@@ -151,7 +167,7 @@ object PayolaBuild extends Build
     }
 
     lazy val s2JsRuntimeProject = ScalaToJsProject(
-        "runtime", file("s2js/runtime"), WebSettings.javascriptsDir / "runtime", s2JsSettings
+        "runtime", file("s2js/runtime"), WebSettings.javaScriptsDir / "runtime", s2JsSettings
     )
 
     lazy val scala2JsonProject = Project(
@@ -183,11 +199,11 @@ object PayolaBuild extends Build
     )
 
     lazy val webSharedProject = ScalaToJsProject(
-        "shared", file("web/shared"), WebSettings.javascriptsDir / "shared", payolaSettings
+        "shared", file("web/shared"), WebSettings.javaScriptsDir / "shared", payolaSettings
     )
 
     lazy val webClientProject = ScalaToJsProject(
-        "client", file("web/client"), WebSettings.javascriptsDir / "client", payolaSettings
+        "client", file("web/client"), WebSettings.javaScriptsDir / "client", payolaSettings
     ).dependsOn(
         webSharedProject
     )
@@ -195,9 +211,9 @@ object PayolaBuild extends Build
     lazy val webServerProject = PlayProject(
         "server", PayolaSettings.version, Nil, path = file("web/server"), mainLang = SCALA
     ).settings(
-        compileAndPackage <<= (packageBin in Compile).map {jarFile: File =>
+        compileAndPackage <<= (packageBin in Compile).dependsOn(clean).map {jarFile: File =>
             // Retrieve the dependencies.
-            val files = new io.Directory(WebSettings.javascriptsDir).deepFiles.filter(_.extension == "js")
+            val files = new io.Directory(WebSettings.javaScriptsDir).deepFiles.filter(_.extension == "js")
             val providedSymbolFiles = new mutable.HashMap[String, String]
             val fileRequiredSymbols = new mutable.HashMap[String, mutable.ArrayBuffer[String]]
 
@@ -229,7 +245,7 @@ object PayolaBuild extends Build
               * @param entryPointSymbol The symbol that will be used in the html page as an entry point to the
               *     JavaScript application.
               */
-            def glueScript(entryPointSymbol: String) {
+            def compileScript(entryPointSymbol: String) {
                 if (!providedSymbolFiles.contains(entryPointSymbol)) {
                     throw new Exception("The entry point '%s' wasn't found.".format(entryPointSymbol))
                 }
@@ -247,7 +263,7 @@ object PayolaBuild extends Build
 
                         fileDependencyGraph(file).foreach(processFile(_))
 
-                        val name = file.stripPrefix(WebSettings.javascriptsDir.absolutePath.toString).replace("\\", "/")
+                        val name = file.stripPrefix(WebSettings.javaScriptsDir.absolutePath.toString).replace("\\", "/")
                         buffer += "////////////////////////////////////////////////////////////////////////////////"
                         buffer += "// %s".format(name)
                         buffer += "////////////////////////////////////////////////////////////////////////////////"
@@ -260,16 +276,22 @@ object PayolaBuild extends Build
                 }
                 
                 // Load the necessary libraries.
-                processFile((WebSettings.javascriptsDir / "bootstrap.js").absolutePath.toString)
+                processFile((WebSettings.javaScriptsDir / "bootstrap.js").absolutePath.toString)
                 processFile(providedSymbolFiles(entryPointSymbol))
 
                 // Strip the requires which are no more needed.
-                val gluedScript = requireRegex.replaceAllIn(buffer.mkString("\n"), "")
-                new io.File(WebSettings.javascriptsDir / (entryPointSymbol + ".js")).writeAll(gluedScript)
+                val compiledScript = requireRegex.replaceAllIn(buffer.mkString("\n"), "")
+                WebSettings.getEntryPointFile(entryPointSymbol).writeAll(compiledScript)
             }
-            
-            glueScript("cz.payola.web.client.RpcTestClient")
+
+            // Compile the scripts for all entry points.
+            WebSettings.scriptEntryPoints.foreach(compileScript(_))
+
             jarFile
+        },
+        clean <<= clean.map {_ =>
+            // Delete all compiled scripts.
+            WebSettings.scriptEntryPoints.foreach(WebSettings.getEntryPointFile(_).delete())
         }
     ).dependsOn(
         webSharedProject, webClientProject

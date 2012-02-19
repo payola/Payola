@@ -223,7 +223,7 @@ goog.events.MouseWheelHandler.smartScale_ = function(mouseWheelDelta,
 
 /** @override */
 goog.events.MouseWheelHandler.prototype.disposeInternal = function() {
-  goog.events.MouseWheelHandler.superClass_.disposeInternal.call(this);
+  goog.events.MouseWheelHandler.__base__.disposeInternal.call(this);
   goog.events.unlistenByKey(this.listenKey_);
   delete this.listenKey_;
 };

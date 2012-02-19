@@ -101,7 +101,7 @@ goog.async.Delay.prototype.id_ = 0;
  * @protected
  */
 goog.async.Delay.prototype.disposeInternal = function() {
-  goog.async.Delay.superClass_.disposeInternal.call(this);
+  goog.async.Delay.__base__.disposeInternal.call(this);
   this.stop();
   delete this.listener_;
   delete this.handler_;

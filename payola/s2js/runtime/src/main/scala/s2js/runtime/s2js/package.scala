@@ -2,69 +2,60 @@ package s2js.runtime.s2js
 
 import s2js.compiler.NativeJs
 import s2js.adapters.goog
+import s2js.runtime.scala.NotImplementedException
 
-object `package` {
-    private def isInstanceOf(anObject: Any, className: String): Boolean = {
-        val classNameIsAny = className == "Any"
-        val classNameIsAnyOrVal = classNameIsAny || className == "AnyVal"
-        val classNameIsAnyOrRef = classNameIsAny || className == "AnyRef"
+object `package`
+{
+    @NativeJs("""
+        if (!s2js.isUndefined(anObject.__class__)) {
+            return anObject.__class__;
+        }
+        return null;
+    """)
+    def classOf(anObject: Any): Class = null
+
+    private def isInstanceOf(anObject: Any, classFullName: String): Boolean = {
+        val classNameIsAny = classFullName == "Any"
+        val classNameIsAnyOrAnyVal = classNameIsAny || classFullName == "AnyVal"
+        val classNameIsAnyOrAnyRef = classNameIsAny || classFullName == "AnyRef"
         goog.typeOf(anObject) match {
             case "undefined" | "null" => false
             case "number" => {
-                className match {
+                classFullName match {
                     case "scala.Byte" | "scala.Short" | "scala.Int" | "scala.Long" => isInteger(anObject)
                     case "scala.Float" | "scala.Double" => true
-                    case _ => classNameIsAnyOrVal
+                    case _ => classNameIsAnyOrAnyVal
                 }
             }
-            case "boolean" => classNameIsAnyOrVal || className == "scala.Boolean"
+            case "boolean" => classNameIsAnyOrAnyVal || classFullName == "scala.Boolean"
             case "string" => {
-                className match {
+                classFullName match {
                     case "scala.Char" => isChar(anObject)
                     case "scala.String" => true
-                    case _ => classNameIsAnyOrRef
+                    case _ => classNameIsAnyOrAnyRef
                 }
             }
-            case "object" if classNameIsAnyOrRef => true
-            case "function" => false // TODO
-            case _ => isInMetaClassHierarchy(getObjectMetaClass(anObject), className)
+            case "function" => throw new NotImplementedException("Type check of a function isn't supported.")
+            case "object" if classNameIsAnyOrAnyRef => true
+            case _ if classOf(anObject) != null => classOf(anObject).isSubClassOrEqual(classFullName)
+            case _ => throw new RuntimeException("Can't determine the type of the object '" + anObject.toString + ".")
         }
     }
 
-    private def isInMetaClassHierarchy(rootMetaClass: MetaClass, metaClassName: String): Boolean = {
-        if (goog.typeOf(rootMetaClass) != "object") {
-            throw new RuntimeException // TODO message and proper type
-        } else if (metaClassName == rootMetaClass.fullName) {
-            true
-        } else {
-            existsParentMetaClass(rootMetaClass, pmc => isInMetaClassHierarchy(pmc, metaClassName))
+    private def asInstanceOf(anObject: Any, className: String): Any = {
+        // Just check if the conversion is possible. Nothing has to be done with the object.
+        if (!isInstanceOf(anObject, className)) {
+            throw new ClassCastException("The object '" + anObject.toString + "' can't be casted to " + className + ".")
         }
+        anObject
     }
+
+    @NativeJs("return goog.typeOf(anObject) === 'undefined';")
+    def isUndefined(anObject: Any): Boolean = false
 
     @NativeJs("return anObject % 1 === 0;")
     private def isInteger(anObject: Any): Boolean = false
 
     @NativeJs("return anObject.length === 1;")
     private def isChar(anObject: Any): Boolean = false
-
-    @NativeJs("return anObject.metaClass_;")
-    def getObjectMetaClass(anObject: Any): MetaClass = null
-
-    @NativeJs("""
-        for (var i in rootMetaClass.parentClasses) {
-            if (predicate(self.getMetaClass(rootMetaClass.parentClasses[i].prototype))) {
-                return true;
-            }
-        }
-        return false;
-    """)
-    private def existsParentMetaClass(rootMetaClass: MetaClass, predicate: MetaClass => Boolean): Boolean = false
-
-    private def asInstanceOf(anObject: Any, className: String): Any = {
-        // Just check if the conversion is possible. Nothing has to be done with the object.
-        if (!isInstanceOf(anObject, className)) {
-            throw new RuntimeException // TODO message and proper type
-        }
-        anObject
-    }
 }

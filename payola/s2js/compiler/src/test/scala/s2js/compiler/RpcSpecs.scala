@@ -37,13 +37,13 @@ class RpcSpecs extends CompilerFixtureSpec {
             } shouldCompileTo {
                 """
                     goog.provide('client');
-                    goog.require('s2js.runtime.Rpc');
+                    goog.require('s2js.Rpc');
 
                     client.main = function() {
                         var self = this;
-                        var fooValue = s2js.runtime.Rpc.callSync('server.o.foo', [2, 'xyz']);
+                        var fooValue = s2js.Rpc.callSync('server.o.foo', [2, 'xyz']);
                     };
-                    client.metaClass_ = news2js.MetaClass('client', []);
+                    client.__class__ = new s2js.Class('client', []);
                 """
             }
     }

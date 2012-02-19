@@ -188,7 +188,7 @@ goog.events.EventTarget.prototype.dispatchEvent = function(e) {
  * and additional listeners, it should be something like this:
  * <pre>
  * MyClass.prototype.disposeInternal = function() {
- *   MyClass.superClass_.disposeInternal.call(this);
+ *   MyClass.__base__.disposeInternal.call(this);
  *   // Dispose logic for MyClass
  * };
  * </pre>
@@ -196,7 +196,7 @@ goog.events.EventTarget.prototype.dispatchEvent = function(e) {
  * @protected
  */
 goog.events.EventTarget.prototype.disposeInternal = function() {
-  goog.events.EventTarget.superClass_.disposeInternal.call(this);
+  goog.events.EventTarget.__base__.disposeInternal.call(this);
   goog.events.removeAll(this);
   this.parentEventTarget_ = null;
 };

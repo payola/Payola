@@ -128,7 +128,7 @@ goog.async.ConditionalDelay.prototype.disposeInternal = function() {
   this.delay_.dispose();
   delete this.listener_;
   delete this.handler_;
-  goog.async.ConditionalDelay.superClass_.disposeInternal.call(this);
+  goog.async.ConditionalDelay.__base__.disposeInternal.call(this);
 };
 
 

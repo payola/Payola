@@ -263,7 +263,7 @@ goog.events.EventHandler.prototype.removeAll = function() {
  * @protected
  */
 goog.events.EventHandler.prototype.disposeInternal = function() {
-  goog.events.EventHandler.superClass_.disposeInternal.call(this);
+  goog.events.EventHandler.__base__.disposeInternal.call(this);
   this.removeAll();
 };
 

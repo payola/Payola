@@ -159,7 +159,7 @@ goog.events.OnlineHandler.prototype.handleChange_ = function(e) {
 
 /** @override */
 goog.events.OnlineHandler.prototype.disposeInternal = function() {
-  goog.events.OnlineHandler.superClass_.disposeInternal.call(this);
+  goog.events.OnlineHandler.__base__.disposeInternal.call(this);
   this.eventHandler_.dispose();
   delete this.eventHandler_;
   if (this.timer_) {

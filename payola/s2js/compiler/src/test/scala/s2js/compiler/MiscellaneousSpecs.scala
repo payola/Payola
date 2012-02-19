@@ -34,7 +34,7 @@ class MiscellaneousSpecs extends CompilerFixtureSpec
                         var x5 = self.c;
                         var x6 = self.c;
                     };
-                    o.metaClass_ = new s2js.MetaClass('o', []);
+                    o.__class__ = new s2js.Class('o', []);
                 """
             }
     }
@@ -69,11 +69,23 @@ class MiscellaneousSpecs extends CompilerFixtureSpec
 					A = function() {
 						var self = this;
 					};
-					A.prototype.$plus = function(x) {var self = this;return new A();};
-					A.prototype.$minus = function(x) {var self = this;return new A();};
-					A.prototype.$times = function(x) {var self = this;return new A();};
-					A.prototype.unary_$bang = function() {var self = this;return new A();};
-					A.prototype.metaClass_ = new s2js.MetaClass('A', []);
+					A.prototype.$plus = function(x) {
+                        var self = this;
+                        return new A();
+					};
+					A.prototype.$minus = function(x) {
+					    var self = this;
+					    return new A();
+                    };
+					A.prototype.$times = function(x) {
+					    var self = this;
+					    return new A();
+                    };
+					A.prototype.unary_$bang = function() {
+					    var self = this;
+					    return new A();
+                    };
+					A.prototype.__class__ = new s2js.Class('A', []);
 					
 					o.m = function() {
 						var self = this;
@@ -84,7 +96,7 @@ class MiscellaneousSpecs extends CompilerFixtureSpec
 						var e = (a == b);
 						var f = (a != b);
 					};
-					o.metaClass_ = new s2js.MetaClass('o', []);
+					o.__class__ = new s2js.Class('o', []);
 				"""
 			}
 	}

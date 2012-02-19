@@ -210,7 +210,7 @@ goog.events.InputHandler.prototype.dispatchAndDisposeEvent_ = function(event) {
 
 /** @override */
 goog.events.InputHandler.prototype.disposeInternal = function() {
-  goog.events.InputHandler.superClass_.disposeInternal.call(this);
+  goog.events.InputHandler.__base__.disposeInternal.call(this);
   this.eventHandler_.dispose();
   this.cancelTimerIfSet_();
   delete this.element_;

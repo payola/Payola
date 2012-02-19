@@ -119,7 +119,7 @@ goog.events.FileDropHandler.EventType = {
 
 /** @override */
 goog.events.FileDropHandler.prototype.disposeInternal = function() {
-  goog.events.FileDropHandler.superClass_.disposeInternal.call(this);
+  goog.events.FileDropHandler.__base__.disposeInternal.call(this);
   this.eventHandler_.dispose();
 };
 
