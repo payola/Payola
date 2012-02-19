@@ -15,6 +15,7 @@ object JSONSerializerOptions {
     val JSONSerializerOptionCondensedPrinting = 0 << 0
     val JSONSerializerOptionPrettyPrinting = 1 << 0
     val JSONSerializerOptionIgnoreNullValues = 1 << 1
+    val JSONSerializerOptionSkipObjectIDs = 1 << 2
 
     val JSONSerializerDefaultOptions = (JSONSerializerOptionCondensedPrinting |
                                                                  JSONSerializerOptionIgnoreNullValues)
@@ -31,22 +32,38 @@ import scala.collection.mutable._
 class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptions,
                             val processedObjects: ArrayBuffer[Any] = new ArrayBuffer[Any]()) {
 
-    val prettyPrint: Boolean = (options & JSONSerializerOptionPrettyPrinting) != 0
-    val ignoreNullValues: Boolean = (options & JSONSerializerOptionIgnoreNullValues) != 0
+    private val prettyPrint: Boolean = (options & JSONSerializerOptionPrettyPrinting) != 0
+    private val ignoreNullValues: Boolean = (options & JSONSerializerOptionIgnoreNullValues) != 0
+    private val skipObjectIDs: Boolean = (options & JSONSerializerOptionSkipObjectIDs) != 0
+
+    // The object ID is set correctly below
+    private var objectID: Int = 0
+
+    // If this is a second encounter of the object, just serialize it as a reference
+    private var serializeObjectAsReference: Boolean = false
 
     // Cycle detection
     if (obj != null){
-        if (processedObjects.contains(obj))
-            throw new JSONSerializationException("Cycle detected on object " + obj + ".")
-        else
-            // Do not detect cycles on primitive types
-            if (obj.isInstanceOf[AnyRef]
+        if (processedObjects.contains(obj)){
+            if (skipObjectIDs){
+                // Skipping IDs -> can't serialize a cycle
+                throw new JSONSerializationException("Cycle detected on object " + obj + ".")
+            }else{
+                // Otherwise, fetch the objectID and serialize it as a reference
+                objectID = processedObjects.indexOf(obj)
+                serializeObjectAsReference = true
+            }
+        }else if (obj.isInstanceOf[AnyRef]
             && !obj.isInstanceOf[String]
             && !obj.isInstanceOf[java.lang.Number]
             && !obj.isInstanceOf[java.lang.Boolean]
-            && !obj.isInstanceOf[java.lang.Character])
-                processedObjects += obj
+            && !obj.isInstanceOf[java.lang.Character]){
+            // Do not detect cycles on primitive types
+            objectID = processedObjects.size // The index will be at the size of the array
+            processedObjects += obj
+        }
     }
+
 
     /** Appends an array item to string builder.
       *
@@ -71,7 +88,17 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
         builder.append(item)
     }
     private def _appendArrayItemToStringBuilder(item: Any, builder: StringBuilder, isFirst: Boolean) = {
-        val serializer: JSONSerializer =  new JSONSerializer(item, options, processedObjects.clone)
+        var serializer: JSONSerializer = null
+        if (skipObjectIDs){
+            // If skipping object IDs, need to clone the array, otherwise we could detect
+            // a cycle that's not really there
+            serializer = new JSONSerializer(item, options, processedObjects.clone)
+        }else{
+            // Do not clone the processedObjects as it will save space
+            serializer = new JSONSerializer(item, options, processedObjects)
+        }
+
+
         var serializedObj: String = serializer.stringValue
         if (prettyPrint)
             serializedObj = serializedObj.replaceAllLiterally("\n", "\n\t")
@@ -116,7 +143,15 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
         if (prettyPrint)
             separator = ": "
 
-        val serializer: JSONSerializer =  new JSONSerializer(value, options, processedObjects.clone)
+        var serializer: JSONSerializer = null
+        if (skipObjectIDs){
+            // If skipping object IDs, need to clone the array, otherwise we could detect
+            // a cycle that's not really there
+            serializer = new JSONSerializer(value, options, processedObjects.clone)
+        }else{
+            // Do not clone the processedObjects as it will save space
+            serializer = new JSONSerializer(value, options, processedObjects)
+        }
         var serializedObj: String = serializer.stringValue
         if (prettyPrint)
             serializedObj = serializedObj.replaceAllLiterally("\n", "\n\t")
@@ -299,6 +334,62 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
         }
     }
 
+    /** obj has already been encountered - serialize it just as a reference - use objectID.
+      * 
+      * @return obj serialized as an object reference.
+      */
+    private def _serializeObjectAsReference: String = {
+        val builder: StringBuilder = new StringBuilder("")
+        _appendKeyValueToStringBuilder("__ref__", objectID, builder, true)
+        builder.toString
+    }
+    
+    private def _serializeObjectAsValue: String = {
+        val builder: StringBuilder = new StringBuilder("")
+
+        // Get object's fields:
+        val c: Class[_] = obj.getClass
+        val fields: Array[Field] = c.getDeclaredFields
+
+        var haveProcessedField: Boolean = false
+
+        val className: String = _objectsClassName
+        if (className != null) {
+            _appendKeyValueToStringBuilder("__class__", className, builder, !haveProcessedField)
+            haveProcessedField = true
+        }
+
+        if (!skipObjectIDs){
+            _appendKeyValueToStringBuilder("__objectID__", objectID, builder, !haveProcessedField)
+            haveProcessedField = true
+        }
+
+        for (i: Int <- 0 until fields.length) {
+            if (_appendFieldToStringBuilder(fields(i), builder, !haveProcessedField)){
+                haveProcessedField = true
+            }
+        }
+
+        if (obj.isInstanceOf[JSONSerializationAdditionalFields]){
+            // Additional fields for the object
+            val map: Map[String, Any]
+            = obj.asInstanceOf[JSONSerializationAdditionalFields].additionalFieldsForJSONSerialization
+            if (map.size != 0)
+                if (fields.size != 0)
+                    builder.append(',')
+            builder.append('\n')
+
+            var index: Int = 0
+            map foreach {case (key, value) => {
+                _appendKeyValueToStringBuilder(key, value, builder, index == 0)
+                index += 1
+            }}
+
+        }
+
+        builder.toString
+    }
+
     /** Serializes an object - generally AnyRef 
       *
       * For most types, just calls obj.toString, the exception is
@@ -314,42 +405,12 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
 
         if (prettyPrint)
             builder.append('\n')
-            
-        // Get object's fields:
-        val c: Class[_] = obj.getClass
-        val fields: Array[Field] = c.getDeclaredFields
-
-        var haveProcessedField: Boolean = false
         
-        val className: String = _objectsClassName
-        if (className != null) {
-            _appendKeyValueToStringBuilder("__class__", className, builder, true)
-            haveProcessedField = true
+        if (serializeObjectAsReference){
+           builder.append(_serializeObjectAsReference)
+        }else{
+            builder.append(_serializeObjectAsValue)
         }
-        
-        for (i: Int <- 0 until fields.length) {
-            if (_appendFieldToStringBuilder(fields(i), builder, !haveProcessedField)){
-                haveProcessedField = true
-            }
-        }
-
-        if (obj.isInstanceOf[JSONSerializationAdditionalFields]){
-            // Additional fields for the object
-            val map: Map[String, Any]
-                    = obj.asInstanceOf[JSONSerializationAdditionalFields].additionalFieldsForJSONSerialization
-            if (map.size != 0)
-                if (fields.size != 0)
-                    builder.append(',')
-                builder.append('\n')
-
-            var index: Int = 0
-            map foreach {case (key, value) => {
-                _appendKeyValueToStringBuilder(key, value, builder, index == 0)
-                index += 1
-            }}
-
-        }
-
 
         if (prettyPrint)
             builder.append('\n')
