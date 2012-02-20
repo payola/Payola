@@ -5,6 +5,15 @@ import scala.collection.mutable
 class WebServicesManager extends IWebServiceManager {
     var webServices = mutable.Set[IPayolaWebService]();
 
+    var queryResult : QueryResult = new QueryResult("","");
+
+    /*
+    def WebServicesManager() = {
+        // Start actor
+        start();
+    }
+    */
+
     /**
      * Evaluates given SPARQL query.
      *
@@ -13,6 +22,20 @@ class WebServicesManager extends IWebServiceManager {
      * @return returns result in String.
      */
     def evaluateSparqlQuery(query: String): QueryResult = {
+        /*
+        webServices.foreach(
+            service =>
+            {
+                service.start();
+                service ! "Hello, actor";
+            }
+        );
+
+        Thread.sleep(3000);
+
+        return queryResult;
+        */
+
         val rdfResult = new StringBuilder();
         val ttlResult = new StringBuilder();
 
@@ -60,5 +83,15 @@ class WebServicesManager extends IWebServiceManager {
     def initWebServices() = {
         webServices += new FakeRdfWebService();
         webServices += new FakeTtlWebService();
+        webServices += new VirtuosoWebService();
+
+        webServices.foreach(service => service.initialize());
+    }
+
+    def act() = {
+        react {
+            case msg =>
+                queryResult.appendRdf(msg + "");
+        }
     }
 }

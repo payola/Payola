@@ -6,8 +6,7 @@ import java.util.{Calendar, Date}
 
 class FakeRdfWebService extends IPayolaWebService {
     def evaluateSparqlQuery(query: String): String = {
-        val calendar: Calendar = Calendar.getInstance()
-        val generator: Random = new Random(calendar.getTimeInMillis)
+        val generator: Random = new Random(Calendar.getInstance().getTimeInMillis)
 
         val sourcePaths: Array[String] = Array("/data.xml", "/data2.xml")
         
@@ -15,8 +14,15 @@ class FakeRdfWebService extends IPayolaWebService {
         val source = Source.fromURL(getClass.getResource(sourcePath));
         val result = new StringBuilder();
 
-        source.foreach(line => result.append(line));
+        source.foreach(char => result.append(char));
 
         return result.toString();
+    }
+
+    def initialize() = {
+
+    }
+
+    def act() = {
     }
 }

@@ -7,8 +7,15 @@ class FakeTtlWebService extends IPayolaWebService {
         val source = Source.fromURL(getClass.getResource("/data.ttl"));
         val result = new StringBuilder();
 
-        source.foreach(line => result.append(line));
+        source.foreach(char => result.append(char));
 
         return result.toString();
+    }
+
+    def initialize() = {
+
+    }
+
+    def act() = {
     }
 }

@@ -1,6 +1,6 @@
 package cz.payola.data
 
-class QueryResult(rdf: String, ttl: String) {
+class QueryResult(var rdf: String, var ttl: String) {
     
     def getRdf(): String = {
         return rdf;
@@ -17,6 +17,14 @@ class QueryResult(rdf: String, ttl: String) {
      */
     def getResultInNodes(): List[String] = {
         return spiltQueryResultToTriples();
+    }
+
+    def appendRdf(result : String) = {
+        rdf = result;
+    }
+
+    def appendTtl(result : String) = {
+        ttl = result;
     }
 
     /**
