@@ -281,7 +281,11 @@ object PayolaBuild extends Build
 
                 // Strip the requires which are no more needed.
                 val compiledScript = requireRegex.replaceAllIn(buffer.mkString("\n"), "")
-                WebSettings.getEntryPointFile(entryPointSymbol).writeAll(compiledScript)
+
+                // Create the output file.
+                val entryPointFile = WebSettings.getEntryPointFile(entryPointSymbol)
+                entryPointFile.parent.jfile.mkdirs()
+                entryPointFile.writeAll(compiledScript)
             }
 
             // Compile the scripts for all entry points.
