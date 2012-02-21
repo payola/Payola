@@ -294,6 +294,6 @@ object PayolaBuild extends Build
             WebSettings.scriptEntryPoints.foreach(WebSettings.getEntryPointFile(_).delete())
         }
     ).dependsOn(
-        webSharedProject, webClientProject
+        webSharedProject, webClientProject, scala2JsonProject
     )
 }

@@ -4,6 +4,7 @@ import play.api.mvc._
 import cz.payola.web.shared._
 import java.lang.reflect.Method
 import collection.mutable.ListBuffer
+import cz.payola.scala2json.JSONSerializer
 
 object RPC extends Controller
 {
@@ -48,6 +49,9 @@ object RPC extends Controller
         }
 
         val runnableObj = obj.getField("MODULE$").get(objectName)
-        methodToRun.invoke(runnableObj, Array(new Integer(2), "foo"):_*).toString
+        val result = methodToRun.invoke(runnableObj, Array(new Integer(2), "foo"):_*)
+
+        val serializer = new JSONSerializer(result)
+        serializer.stringValue
     }
 }
