@@ -7,19 +7,6 @@
     </div>
     <script src="assets/javascripts/compiled/cz.payola.web.client.presenters.Index.js" type="text/javascript"></script>
     <script>
-        var url = "/RPC";
-        var params = "parameter1=123&parameter2=foo";
-        var request = new XMLHttpRequest();
-        request.open("POST", url, false);
-
-        //Send the proper header information along with the request
-        request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        request.setRequestHeader("Content-length", params.length);
-        request.setRequestHeader("Connection", "close");
-
-        request.send(params);
-        window.alert(request.responseText);
-
-        //new cz.payola.web.client.presenters.Index ().init();
+        new cz.payola.web.client.presenters.Index ().init();
     </script>
 }

@@ -62,6 +62,15 @@ object PayolaBuild extends Build
         def getEntryPointFile(entryPoint: String): io.File = {
             new io.File(compiledJavaScriptsDir / (entryPoint + ".js"))
         }
+
+        /**
+          * Returns a file corresponding to the specified entry point dependencies.
+          * @param entryPoint The entry point.
+          * @return The dependency file.
+          */
+        def getEntryPointDependencyFile(entryPoint: String): io.File = {
+            new io.File(compiledJavaScriptsDir / (entryPoint + ".deps.js"))
+        }
     }
 
     /** Common default settings of all projects. */
@@ -214,31 +223,36 @@ object PayolaBuild extends Build
         compileAndPackage <<= (packageBin in Compile).dependsOn(clean).map {jarFile: File =>
             // Retrieve the dependencies.
             val files = new io.Directory(WebSettings.javaScriptsDir).deepFiles.filter(_.extension == "js")
-            val providedSymbolFiles = new mutable.HashMap[String, String]
+            val symbolFiles = new mutable.HashMap[String, String]
+            val fileProvidedSymbols = new mutable.HashMap[String, mutable.ArrayBuffer[String]]
             val fileRequiredSymbols = new mutable.HashMap[String, mutable.ArrayBuffer[String]]
 
             val provideRegex = """goog\.provide\(\s*['\"]([^'\"]+)['\"]\s*\);""".r
             val requireRegex = """goog\.require\(\s*['\"]([^'\"]+)['\"]\s*\);""".r
             files.foreach {file =>
                 val path = file.toAbsolute.path.toString
+                fileProvidedSymbols += path -> new mutable.ArrayBuffer[String]
                 fileRequiredSymbols += path -> new mutable.ArrayBuffer[String]
 
                 val fileContent = Source.fromFile(path).getLines.mkString
-                provideRegex.findAllIn(fileContent).matchData.foreach(providedSymbolFiles += _.group(1) -> path)
+                provideRegex.findAllIn(fileContent).matchData.foreach {m =>
+                    fileProvidedSymbols(path) += m.group(1)
+                    symbolFiles += m.group(1) -> path
+                }
                 requireRegex.findAllIn(fileContent).matchData.foreach(fileRequiredSymbols(path) += _.group(1))
             }
             
             // Check whether all required symbols are provided.
-            val errorFile = fileRequiredSymbols.find(_._2.exists(file => !providedSymbolFiles.contains(file)))
+            val errorFile = fileRequiredSymbols.find(_._2.exists(file => !symbolFiles.contains(file)))
             if (errorFile.isDefined) {
                 throw new Exception("Dependency '%s' declared in the file '%s' wasn't found.".format(
-                    errorFile.get._2.find(file => !providedSymbolFiles.contains(file)).get.toString,
+                    errorFile.get._2.find(file => !symbolFiles.contains(file)).get.toString,
                     errorFile.get._1.toString
                 ))
             }
 
             // Construct the file dependency graph from the symbol dependency graph.
-            val fileDependencyGraph = fileRequiredSymbols.mapValues(_.map(o => providedSymbolFiles(o)))
+            val fileDependencyGraph = fileRequiredSymbols.mapValues(_.map(o => symbolFiles(o)))
 
             /**
               * Creates a single JavaScript file containing all required dependencies for the specified entry point.
@@ -246,12 +260,12 @@ object PayolaBuild extends Build
               *     JavaScript application.
               */
             def compileScript(entryPointSymbol: String) {
-                if (!providedSymbolFiles.contains(entryPointSymbol)) {
+                if (!symbolFiles.contains(entryPointSymbol)) {
                     throw new Exception("The entry point '%s' wasn't found.".format(entryPointSymbol))
                 }
                 val processedFiles = new mutable.HashSet[String]
                 val visitedFiles = new mutable.HashSet[String]
-                val buffer = new ListBuffer[String]
+                var buffer = new ListBuffer[String]
 
                 def processFile(file: String) {
                     if (!processedFiles.contains(file)) {
@@ -277,15 +291,31 @@ object PayolaBuild extends Build
                 
                 // Load the necessary libraries.
                 processFile((WebSettings.javaScriptsDir / "bootstrap.js").absolutePath.toString)
-                processFile(providedSymbolFiles(entryPointSymbol))
+                processFile(symbolFiles(entryPointSymbol))
 
                 // Strip the requires which are no more needed.
                 val compiledScript = requireRegex.replaceAllIn(buffer.mkString("\n"), "")
+                buffer = new ListBuffer[String]
+                buffer += compiledScript
+
+                // Require dependencies that aren't included in the compiled file.
+                buffer += "////////////////////////////////////////////////////////////////////////////////"
+                buffer += "// Dependencies"
+                buffer += "////////////////////////////////////////////////////////////////////////////////"
+                fileProvidedSymbols.filter(p => !processedFiles.contains(p._1)).foreach {case (path, provided) =>
+                    val required = fileRequiredSymbols(path).filter(s => !processedFiles.contains(symbolFiles(s)))
+                    val relativePath = path.stripPrefix(WebSettings.javaScriptsDir.absolutePath).replace("\\", "/")
+                    buffer += "goog.addDependency('%s%s', [".format("assets/javascripts", relativePath)
+                    buffer += provided.map("'" + _ + "'").mkString(", ")
+                    buffer += "], ["
+                    buffer += required.map("'" + _ + "'").mkString(", ")
+                    buffer += "]);\n"
+                }
 
                 // Create the output file.
                 val entryPointFile = WebSettings.getEntryPointFile(entryPointSymbol)
                 entryPointFile.parent.jfile.mkdirs()
-                entryPointFile.writeAll(compiledScript)
+                entryPointFile.writeAll(buffer.mkString)
             }
 
             // Compile the scripts for all entry points.
