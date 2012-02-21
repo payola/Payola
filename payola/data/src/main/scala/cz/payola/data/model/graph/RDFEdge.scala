@@ -19,14 +19,14 @@ object RDFEdge {
 
         // We need to distinguish two cases - the node is a literal, or a reference
         // to another node (resource)
-       var edge: RDFEdge = null
-        if (rdfNode.isLiteral){
+        var edge: RDFEdge = null
+        if (rdfNode.isLiteral) {
             edge = new RDFLiteralEdge(graph, predicate.getNameSpace, predicate.getLocalName, rdfNode.asLiteral.getValue)
-        }else{
-            edge = new RDFReferenceEdge(graph, predicate.getNameSpace, predicate.getLocalName, rdfNode.asResource.getURI)
+        } else {
+            edge = new RDFReferenceEdge(graph, predicate.getNameSpace, predicate.getLocalName,
+                rdfNode.asResource.getURI)
         }
         edge
-
     }
 }
 

@@ -11,7 +11,6 @@ class Index
 
     val graphView = new GraphView(graphModel, document.getElementById("canvas-holder"))
 
-
     def init() {
         graphView.init()
         graphView.redrawAll();
