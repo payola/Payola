@@ -1,6 +1,6 @@
 package cz.payola.web.client.views.graph
 
-import algorithms.{CirclePathModel}
+import algorithms.{GravityModel, CirclePathModel}
 import cz.payola.web.client.views.Constants._
 import collection.mutable.ListBuffer
 import cz.payola.web.client.model.graph.{Vertex, Graph}
@@ -38,7 +38,7 @@ class GraphView(val graphModel: Graph, val container: Element) extends View {
 
     def init() {
         controlsLayer.init()
-        val model = new CirclePathModel()
+        val model = new GravityModel()
         model.perform(vertexViews, edgeViews)
     }
     /**
