@@ -1,6 +1,7 @@
 package cz.payola.web.client.presenters
 
 import s2js.adapters.js.browser._
+import cz.payola.web.client.RpcTestClient
 import cz.payola.web.client.views.graph.GraphView
 import cz.payola.web.client.model.graph.{Edge, Vertex, Graph}
 import s2js.adapters.goog.events.{EventType, BrowserEvent}
@@ -13,6 +14,9 @@ class Index
 
 
     def init() {
+
+        RpcTestClient.test()
+
         graphView.initControls()
         graphView.redrawAll();
     }

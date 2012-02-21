@@ -1,6 +1,6 @@
 package s2js.runtime.s2js
 
-import s2js.compiler.NativeJs
+import s2js.compiler.{NativeJs,NativeJsDependency}
 
 object Rpc
 {
@@ -22,12 +22,29 @@ object Rpc
     //              a callSync v idealnim pripade vyhodit stejnou (asi otestovat, jestli typ vyjimky je v js definovan
     //              a pokud ne tak holt vyhodit generickou).
     //
+    //@NativeJsDependency("s2js.runtime.s2js.RPCException")
     @NativeJs("""
-        TODO
+
+        var url = "/RPC";
+        var params = this.buildHttpQuery(parameters);
+
+        var request = XMLHttpRequest  ? new XMLHttpRequest : new ActiveXObject('Msxml2.XMLHTTP');
+        request.open("POST", url, false);
+
+        //Send the proper header information along with the request
+        request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+        request.send("method="+procedureName+"&"+params);
+        if (request.readyState==4 && request.status==200)
+        {
+            return request.responseText;
+        }else{
+            //throw new s2js.runtime.s2js.RPCException("RPC call exited with status code "+request.status);
+        }
     """)
     def callSync(procedureName: String, parameters: Any): Any = ()
 
-
+            /*
     @NativeJs("""
         var xmlhttp = XMLHttpRequest  ? new XMLHttpRequest : new ActiveXObject('Msxml2.XMLHTTP');
 
@@ -60,48 +77,11 @@ object Rpc
         {
             xmlhttp.send();
         }
-    """)
-    def CallRPC(callback: String => Unit, faultCallback: => Unit, procedureName: String, params: Map[String, Object],
-        requestType: String = "GET"): Unit = null
-
-    @NativeJs("""
-        var xmlhttp = XMLHttpRequest  ? new XMLHttpRequest : new ActiveXObject('Msxml2.XMLHTTP');
-
-        var data = null;
-
-        xmlhttp.onreadystatechange=function()
-        {
-            if (xmlhttp.readyState==4 && xmlhttp.status==200)
-            {
-                data = xmlhttp.responseText;
-            }
-        }
-
-        var url = "/RPC";
-        var encodedData = buildHttpQuery(params);
-
-        if (requestType.toUpperCase() == "GET")
-        {
-            url += "?"+encodedData;
-        }
-
-        xmlhttp.open(requestType,url,false);
-
-        if (requestType.toUpperCase() == "POST")
-        {
-            xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-            xmlhttp.send(encodedData);
-        }else
-        {
-            xmlhttp.send();
-        }
-        return data;
-    """)
-    def CallRPCSync(procedureName: String, params: Map[String, Object], requestType: String = "GET"): Unit = null
+    """)                         */
 
     @NativeJs("""
         var args = '';
-        if (Object.prototype.toString.call(params) === '[object Object]') {
+        if (Object.prototype.toString.call(params) === '[object Array]') {
                 var arr = [];
                 for (arg in params) {
                         arr.push(encodeURIComponent(arg) + '=' + encodeURIComponent(params[arg]));
@@ -111,5 +91,5 @@ object Rpc
 
         return args;
     """)
-    private def buildHttpQuery(params: Map[String, Object]): String = null
+    def buildHttpQuery(params: Map[String, Object]): String = null
 }
