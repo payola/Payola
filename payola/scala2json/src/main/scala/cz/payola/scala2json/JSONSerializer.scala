@@ -9,7 +9,14 @@ object JSONSerializerOptions {
      * Pretty printing option adds tabs to make the output readable, which can
      * be used for debugging.
      *
-     * No other options available currently.
+     * Ignoring null values will skip fields that have a null value, otherwise 'null'
+     * would be written to output.
+     *
+     * By default, JSONSerializer assigns all objects an object ID (as an __objectID__
+     * field) in order to deal with cyclic dependencies and reducing the output size
+     * by referencing objects it's already encountered. This may be an undesired
+     * behavior, for example for the RDF graph serialization. Hence the skip object
+     * IDs option.
      */
 
     val JSONSerializerOptionCondensedPrinting = 0 << 0
