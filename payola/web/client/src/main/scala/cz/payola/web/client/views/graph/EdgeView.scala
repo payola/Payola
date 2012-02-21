@@ -19,7 +19,7 @@ private object Quadrant
 class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationView: VertexView) extends View {
 
     val information: InformationView = InformationView(edgeModel)
-    
+
     def isSelected: Boolean = {
         originView.selected || destinationView.selected
     }
@@ -91,14 +91,15 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
         } else {
             ColorEdge
         }
-        
+
         val correction = if(positionCorrection != null) {
             positionCorrection.toVector
         } else {
             Point(0,0).toVector
         }
-        
-        drawBezierCurve(context, ctrl1 + correction, ctrl2 + correction, A + correction, B + correction,
-            EdgeWidth, colorToUse)
+
+        drawStraightLine(context, A + correction, B + correction, EdgeWidth, colorToUse)
+        /*drawBezierCurve(context, ctrl1 + correction, ctrl2 + correction, A + correction, B + correction,
+            EdgeWidth, colorToUse)*/
     }
 }
