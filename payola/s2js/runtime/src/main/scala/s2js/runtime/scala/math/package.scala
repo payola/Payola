@@ -48,6 +48,9 @@ object `package` {
     @NativeJs("return Math.pow(x, y);")
     def pow(x: AnyVal, y: AnyVal): Double = 0
 
+    @NativeJs("return Math.sqrt(x);")
+    def sqrt(x: AnyVal): Double = 0
+
     @NativeJs("return Math.random();")
     def random(): Double = 0
 

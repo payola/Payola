@@ -47,6 +47,14 @@ trait Seq extends Iterable
 
     def length: Int = size
 
+    @NativeJs("""
+        if (index < 0 || self.size() <= index) {
+            throw new scala.NoSuchElementException('An item with index ' + n + ' is not present.');
+        }
+        self.internalJsArray.splice(index, 1);
+    """)
+    def remove(index: Int) {}
+
     @NativeJs("""self.internalJsArray.splice(0, 0, x);""")
     def prepend(x: Any) {}
 
