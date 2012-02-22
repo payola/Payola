@@ -1,15 +1,20 @@
 package cz.payola.common.rdf.generic
 
 import cz.payola.common.rdf
-import cz.payola.common.rdf.{Vertex}
+import rdf.{IdentifiedVertex, Vertex}
 
 /**
   * An edge between two vertices in a RDF graph.
-  * @tparam A Type of the vertices, the edge is between.
   */
-trait Edge[+A <: Vertex] extends rdf.Edge
+trait Edge extends rdf.Edge
 {
-    override val origin: A
+    /** Type of the vertices, the edge is between. */
+    type VertexType <: Vertex
 
-    override val destination: A
+    /** Type of the vertices, the edge can originate in. */
+    type IdentifiedVertexType <: IdentifiedVertex
+
+    val origin: IdentifiedVertexType
+
+    val destination: VertexType
 }

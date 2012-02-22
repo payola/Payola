@@ -26,6 +26,11 @@ trait Graph
       * @return The edges.
       */
     def getIncomingEdges(vertexUri: String): immutable.Seq[Edge] = {
-        edges.filter(_.destination.uri == vertexUri)
+        edges.filter {e=>
+            e.destination match {
+                case v: IdentifiedVertex => v.uri == vertexUri
+                case _ => false
+            }
+        }
     }
 }

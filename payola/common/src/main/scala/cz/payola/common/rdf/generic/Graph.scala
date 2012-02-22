@@ -2,16 +2,17 @@ package cz.payola.common.rdf.generic
 
 import scala.collection.immutable
 import cz.payola.common.rdf
-import cz.payola.common.rdf.Vertex
+import rdf.{IdentifiedVertex, Vertex}
 
 /**
   * A RDF graph.
-  * @tparam A Type of the vertices, the graph consists of.
-  * @tparam B Type of the edges, that are between the vertices.
   */
-trait Graph[+A <: Vertex, +B <: Edge[A]] extends rdf.Graph
+trait Graph extends rdf.Graph
 {
-    override val vertices: immutable.Seq[A]
+    /** Type of the edges, that are between the vertices. */
+    type EdgeType <: Edge
 
-    override val edges: immutable.Seq[B]
+    val vertices: immutable.Seq[EdgeType#VertexType]
+
+    val edges: immutable.Seq[EdgeType]
 }
