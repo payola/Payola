@@ -2,8 +2,8 @@ package cz.payola.web.client.views.graph
 
 import s2js.adapters.js.dom.CanvasRenderingContext2D
 import cz.payola.web.client.views.Constants._
-import cz.payola.web.client.model.graph.Edge
 import cz.payola.web.client.views.{Color, Point}
+import cz.payola.common.rdf.Edge
 
 private object Quadrant
 {
@@ -16,13 +16,14 @@ private object Quadrant
     val RightTop = 4
 }
 
-class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationView: VertexView) extends View {
-
+class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationView: VertexView) extends View
+{
     val information: InformationView = InformationView(edgeModel)
-    
+
     def isSelected: Boolean = {
         originView.selected || destinationView.selected
     }
+
     def draw(context: CanvasRenderingContext2D, color: Color, positionCorrection: Point) {
         val A = originView.position
         val B = destinationView.position
@@ -84,21 +85,22 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
             }
         }
 
-        val colorToUse = if(color != null) {
+        val colorToUse = if (color != null) {
             color
         } else if (isSelected) {
             ColorEdgeSelect
         } else {
             ColorEdge
         }
-        
-        val correction = if(positionCorrection != null) {
+
+        val correction = if (positionCorrection != null) {
             positionCorrection.toVector
         } else {
-            Point(0,0).toVector
+            Point(0, 0).toVector
         }
-        
-        drawBezierCurve(context, ctrl1 + correction, ctrl2 + correction, A + correction, B + correction,
-            EdgeWidth, colorToUse)
+
+        drawStraightLine(context, A + correction, B + correction, EdgeWidth, colorToUse)
+        /*drawBezierCurve(context, ctrl1 + correction, ctrl2 + correction, A + correction, B + correction,
+            EdgeWidth, colorToUse)*/
     }
 }

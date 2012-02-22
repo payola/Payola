@@ -27,6 +27,7 @@
     <orderEntry type="library" scope="TEST" name="org.scalatest_scalatest_2.9.1_1.6.1" level="project" />
     <orderEntry type="module" module-name="shared" exported="" />
     <orderEntry type="module" module-name="client" exported="" />
+    <orderEntry type="module" module-name="server" exported="" />
   </component>
 </module>
 

@@ -1,5 +1,6 @@
 package s2js.runtime.scala.collection
 
+import s2js.runtime.scala.util.control.Breaks._
 import s2js.compiler.NativeJs
 
 trait Seq extends Iterable
@@ -47,6 +48,14 @@ trait Seq extends Iterable
 
     def length: Int = size
 
+    @NativeJs("""
+        if (index < 0 || self.size() <= index) {
+            throw new scala.NoSuchElementException('An item with index ' + n + ' is not present.');
+        }
+        self.internalJsArray.splice(index, 1);
+    """)
+    def remove(index: Int) {}
+
     @NativeJs("""self.internalJsArray.splice(0, 0, x);""")
     def prepend(x: Any) {}
 
@@ -57,6 +66,22 @@ trait Seq extends Iterable
         }
     """)
     def -=(x: Double) {}
+
+    // From SeqLike
+    def indexWhere(p: Double => Boolean, from: Int = 0): Int = {
+        var i = from
+        breakable {() =>
+            drop(from).foreach{x =>
+                if (p(x)) {
+                    break
+                } else {
+                    i += 1
+                }
+            }
+            i = -1
+        }
+        i
+    }
 }
 
 

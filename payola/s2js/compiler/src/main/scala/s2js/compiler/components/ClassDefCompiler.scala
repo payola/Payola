@@ -551,7 +551,8 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
             case Apply(Select(_: Super, name), _) => {
                 compileParentCall(apply.args, Some(name))
             }
-            case Apply(Select(qual, name), _) if name.toString == "apply" && qual.symbol.owner.isMethod => {
+            case Apply(Select(qual, name), _)
+                if name.toString == "apply" && symbolIsCallable(qual.symbol.tpe.typeSymbol) => {
                 compileAst(qual)
                 compileParameterValues(apply.args)
             }
@@ -935,6 +936,20 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         val symbolName = symbol.name.toString
         operatorTokenMap.contains(symbolName) &&
             (typeIsPrimitive(symbol.owner.tpe) || anyRefOperators.contains(symbolName))
+    }
+
+    /**
+      * Returns whether the specified symbol is a method or an anonymous function.
+      * @param symbol The symbol to check.
+      * @return True if the symbol is a method or an anonymous function.
+      */
+    private def symbolIsCallable(symbol: Symbol): Boolean = {
+        val isScalaFunctionObject = symbol.fullName.matches("""scala\.Function[0-9]+""")
+
+        symbol.isMethod ||
+            symbol.isAnonymousFunction ||
+            symbol.isLiftedMethod ||
+            isScalaFunctionObject
     }
 
     /**

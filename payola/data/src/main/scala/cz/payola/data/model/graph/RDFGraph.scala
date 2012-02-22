@@ -85,6 +85,7 @@ class RDFGraph {
       */
     def addNode(node: RDFNode) = nodes += node
 
+
     /** Returns the hashed namespace. This method is used in RDFEdge classes
       * during serialization.
       *
