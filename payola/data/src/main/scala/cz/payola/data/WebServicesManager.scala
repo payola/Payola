@@ -106,11 +106,11 @@ class WebServicesManager extends IWebServiceManager {
     def act() = {
         loop {
             react {
-                case x : mutable.ArrayBuffer[String] =>
+                case x : mutable.ArrayBuffer[_] =>
                     println ("Manager (AB): " + x.size);
                     if (x.size == 2) {
-                        val action = x(0);
-                        val parameter = x(1);
+                        val action = x(0).toString();
+                        val parameter = x(1).toString();
 
                         // Switch by action
                         action match {

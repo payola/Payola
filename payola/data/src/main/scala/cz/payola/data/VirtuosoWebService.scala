@@ -5,7 +5,7 @@ import scala.io.Source
 import java.util.Properties
 import util.control.Exception
 
-class VirtuosoWebService(manager : WebServicesManager) extends IPayolaWebService {
+class VirtuosoWebService(manager : WebServicesManager) extends WebServiceBase(manager) {
     val request : String = "{protocol}://{host}/sparql?{defaultUri}&{namedUri}&{query}&{format}&save=display";
     val protocol : String = "http";
     var host : String = "";
@@ -14,9 +14,9 @@ class VirtuosoWebService(manager : WebServicesManager) extends IPayolaWebService
     val queryFormat : String = "query={query}";
     val format : String = "format=application%2Frdf%2Bxml"
 
-    def initialize() = {
+    override def initialize() = {
         // Start actor for parallel query processing
-        start();
+        super.initialize();
 
         // Read ini file with properties
         val prop : Properties = new Properties();
@@ -32,7 +32,7 @@ class VirtuosoWebService(manager : WebServicesManager) extends IPayolaWebService
             host = h;
     }
 
-    def evaluateSparqlQuery(query: String): String = {
+    override def evaluateSparqlQuery(query: String): String = {
         val result = new StringBuilder();
 
         // Query is composed and URL Coded
@@ -66,33 +66,5 @@ class VirtuosoWebService(manager : WebServicesManager) extends IPayolaWebService
                     .replaceAllLiterally("{namedUri}", namedUri)
                         .replaceAllLiterally("{query}", q)
                             .replaceAllLiterally("{format}", format);
-    }
-
-    def act() = {
-        receive {
-            case x : mutable.ArrayBuffer[String] =>
-                println ("Virtuoso (AB): " + x.size);
-                if (x.size == 2) {
-                    val action = x(0);
-                    val parameter = x(1);
-
-                    // Switch by action
-                    action match {
-                        case "QUERY" =>
-                            // Evaluate query
-                            val result = mutable.ArrayBuffer[String]();
-                            result += "RESULT";
-                            result += evaluateSparqlQuery(parameter);
-
-                            // Send result
-                            manager ! result;
-                    }
-                }
-
-            case msg =>
-                println("Virtuoso: (invalid)" + msg);
-                manager ! msg;
-                //manager ! msg;
-        }
     }
 }
