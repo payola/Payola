@@ -367,6 +367,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
                 case literal: Global#Literal => compileLiteral(literal)
                 case identifier: Global#Ident => compileIdentifier(identifier)
                 case valDef: Global#ValDef if valDef.symbol.isLocal => compileLocalValDef(valDef)
+                case _: Global#TypeDef => // NOOP
                 case function: Global#Function => compileAnonymousFunction(function)
                 case constructorCall: Global#New => compileNew(constructorCall)
                 case select: Global#Select => compileSelect(select)
@@ -403,6 +404,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         val somethingWasCompiled = buffer.length > previousBufferLength
         val terminateWithSemicolon = ast match {
             case _: Global#Block => false
+            case _: Global#TypeDef => false
             case _: Global#Try => false
             case _: Global#If => hasReturnValue
             case _ => true

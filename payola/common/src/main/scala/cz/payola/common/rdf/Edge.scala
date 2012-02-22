@@ -5,7 +5,7 @@ package cz.payola.common.rdf
   */
 trait Edge extends IdentifiedObject
 {
-    val origin: Vertex
+    val origin: IdentifiedVertex
 
     val destination: Vertex
 }

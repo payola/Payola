@@ -4,7 +4,7 @@ import s2js.adapters.js.browser._
 import cz.payola.web.client.views.graph.GraphView
 import cz.payola.common.rdf.Graph
 import cz.payola.web.shared.GraphFetcher
-import cz.payola.web.client.model.graph.{SimpleGraph, SimpleEdge, SimpleVertex}
+import cz.payola.web.client.model.graph.{SimpleGraph, SimpleEdge, SimpleIdentifiedVertex}
 
 class Index
 {
@@ -21,26 +21,26 @@ class Index
         // TODO retrieve the graph from the server using following call when RPC and server side is done.
         // GraphFetcher.getInitialGraph
 
-        val v0 = new SimpleVertex("0")
-        val v1 = new SimpleVertex("1")
-        val v2 = new SimpleVertex("2")
-        val v3 = new SimpleVertex("3")
-        val v4 = new SimpleVertex("4")
-        val v5 = new SimpleVertex("5")
-        val v6 = new SimpleVertex("6")
-        /*val v7 = new SimpleVertex("7")
-        val v8 = new SimpleVertex("8")
-        val v9 = new SimpleVertex("9")
-        val v10 = new SimpleVertex("10")
-        val v11 = new SimpleVertex("11")
-        val v12 = new SimpleVertex("12")
-        val v13 = new SimpleVertex("13")
-        val v14 = new SimpleVertex("14")
-        val v15 = new SimpleVertex("15")
-        val v16 = new SimpleVertex("16")
-        val v17 = new SimpleVertex("17")
-        val v18 = new SimpleVertex("18")
-        val v19 = new SimpleVertex("19")*/
+        val v0 = new SimpleIdentifiedVertex("0")
+        val v1 = new SimpleIdentifiedVertex("1")
+        val v2 = new SimpleIdentifiedVertex("2")
+        val v3 = new SimpleIdentifiedVertex("3")
+        val v4 = new SimpleIdentifiedVertex("4")
+        val v5 = new SimpleIdentifiedVertex("5")
+        val v6 = new SimpleIdentifiedVertex("6")
+        /*val v7 = new SimpleIdentifiedVertex("7")
+        val v8 = new SimpleIdentifiedVertex("8")
+        val v9 = new SimpleIdentifiedVertex("9")
+        val v10 = new SimpleIdentifiedVertex("10")
+        val v11 = new SimpleIdentifiedVertex("11")
+        val v12 = new SimpleIdentifiedVertex("12")
+        val v13 = new SimpleIdentifiedVertex("13")
+        val v14 = new SimpleIdentifiedVertex("14")
+        val v15 = new SimpleIdentifiedVertex("15")
+        val v16 = new SimpleIdentifiedVertex("16")
+        val v17 = new SimpleIdentifiedVertex("17")
+        val v18 = new SimpleIdentifiedVertex("18")
+        val v19 = new SimpleIdentifiedVertex("19")*/
 
         /*val e0 = new SimpleEdge("0", v0, v1)
         val e1= new SimpleEdge("1", v0, v2)
