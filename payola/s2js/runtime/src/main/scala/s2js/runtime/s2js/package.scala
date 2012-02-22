@@ -38,7 +38,7 @@ object `package`
             case "function" => throw new NotImplementedException("Type check of a function isn't supported.")
             case "object" if classNameIsAnyOrAnyRef => true
             case _ if classOf(anObject) != null => classOf(anObject).isSubClassOrEqual(classFullName)
-            case _ => false
+            case _ => false // TODO
         }
     }
 

@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/adapters.iml" filepath="$PROJECT_DIR$/.idea_modules/adapters.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/client.iml" filepath="$PROJECT_DIR$/.idea_modules/client.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea_modules/common.iml" filepath="$PROJECT_DIR$/.idea_modules/common.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/compiler.iml" filepath="$PROJECT_DIR$/.idea_modules/compiler.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/data.iml" filepath="$PROJECT_DIR$/.idea_modules/data.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/model.iml" filepath="$PROJECT_DIR$/.idea_modules/model.iml" />

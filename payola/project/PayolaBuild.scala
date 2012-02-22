@@ -49,6 +49,7 @@ object PayolaBuild extends Build
 
         val compiledJavaScriptsDir = javaScriptsDir / "compiled"
 
+        /** Symbols used as entry points to the javascript application among all pages. */
         val scriptEntryPoints = Set(
             "cz.payola.web.client.presenters.Index",
             "cz.payola.web.client.RpcTestClient"
@@ -108,7 +109,7 @@ object PayolaBuild extends Build
     lazy val payolaProject = Project(
         "payola", file("."), settings = payolaSettings
     ).aggregate(
-        s2JsProject, scala2JsonProject, dataProject, modelProject, webProject
+        s2JsProject, scala2JsonProject, commonProject, dataProject, modelProject, webProject
     )
 
     lazy val s2JsProject = Project(
@@ -163,10 +164,10 @@ object PayolaBuild extends Build
                 settings = projectSettings ++ Seq(
                     scalacOptions ++= Seq(
                         "-Xplugin:" + compilerJar.absolutePath,
-                        "-P:s2js:outputDirectory:" + outputDir.absolutePath
+                        "-P:s2js:outputDirectory:" + (outputDir / name).absolutePath
                     ),
                     clean <<= clean.map {_ =>
-                        new io.Directory(outputDir).deleteRecursively()
+                        new io.Directory(outputDir / name).deleteRecursively()
                     }
                 )
             ).dependsOn(
@@ -176,11 +177,15 @@ object PayolaBuild extends Build
     }
 
     lazy val s2JsRuntimeProject = ScalaToJsProject(
-        "runtime", file("s2js/runtime"), WebSettings.javaScriptsDir / "runtime", s2JsSettings
+        "runtime", file("s2js/runtime"), WebSettings.javaScriptsDir, s2JsSettings
     )
 
     lazy val scala2JsonProject = Project(
         "scala2json", file("scala2json"), settings = payolaSettings
+    )
+
+    lazy val commonProject = ScalaToJsProject(
+        "common", file("common"), WebSettings.javaScriptsDir, payolaSettings
     )
 
     lazy val dataProject = Project(
@@ -192,13 +197,13 @@ object PayolaBuild extends Build
             )
         )
     ).dependsOn(
-        scala2JsonProject
+        scala2JsonProject, commonProject
     )
 
     lazy val modelProject = Project(
         "model", file("model"), settings = payolaSettings
     ).dependsOn(
-        scala2JsonProject, dataProject
+        scala2JsonProject, commonProject, dataProject
     )
 
     lazy val webProject = Project(
@@ -208,13 +213,15 @@ object PayolaBuild extends Build
     )
 
     lazy val webSharedProject = ScalaToJsProject(
-        "shared", file("web/shared"), WebSettings.javaScriptsDir / "shared", payolaSettings
+        "shared", file("web/shared"), WebSettings.javaScriptsDir, payolaSettings
+    ).dependsOn(
+        commonProject
     )
 
     lazy val webClientProject = ScalaToJsProject(
-        "client", file("web/client"), WebSettings.javaScriptsDir / "client", payolaSettings
+        "client", file("web/client"), WebSettings.javaScriptsDir, payolaSettings
     ).dependsOn(
-        webSharedProject
+        commonProject, webSharedProject
     )
 
     lazy val webServerProject = PlayProject(
@@ -328,6 +335,6 @@ object PayolaBuild extends Build
             WebSettings.scriptEntryPoints.foreach(WebSettings.getEntryPointFile(_).delete())
         }
     ).dependsOn(
-        webSharedProject, webClientProject
+        commonProject, webSharedProject, webClientProject
     )
 }

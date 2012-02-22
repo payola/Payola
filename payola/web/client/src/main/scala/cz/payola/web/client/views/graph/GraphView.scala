@@ -1,26 +1,30 @@
 package cz.payola.web.client.views.graph
 
-import algorithms.{CirclePathModel}
+import algorithms.{GravityModel, CirclePathModel}
 import cz.payola.web.client.views.Constants._
 import collection.mutable.ListBuffer
-import cz.payola.web.client.model.graph.{Vertex, Graph}
 import s2js.adapters.js.dom.{Element, CanvasRenderingContext2D}
 import cz.payola.web.client.views.{Color, Point}
+import cz.payola.common.rdf.{Vertex, Graph}
 
-class GraphView(val graphModel: Graph, val container: Element) extends View {
-
+class GraphView(val graphModel: Graph, val container: Element) extends View
+{
     /*The order in which are layers created determines their "z coordinate"
-    (first created layer is on the bottom and last created one covers all the others).*/
+(first created layer is on the bottom and last created one covers all the others).*/
     private val edgesDeselectedLayer = createLayer(container)
+
     private val edgesDeselectedTextLayer = createLayer(container)
 
     private val edgesSelectedLayer = createLayer(container)
+
     private val edgesSelectedTextLayer = createLayer(container)
 
     private val verticesDeselectedLayer = createLayer(container)
+
     private val verticesDeselectedTextLayer = createLayer(container)
 
     private val verticesSelectedLayer = createLayer(container)
+
     private val verticesSelectedTextLayer = createLayer(container)
 
     private val topBlankLayer = createLayer(container)
@@ -38,20 +42,20 @@ class GraphView(val graphModel: Graph, val container: Element) extends View {
 
     def init() {
         controlsLayer.init()
-        val model = new CirclePathModel()
+        val model = new GravityModel()
         model.perform(vertexViews, edgeViews)
     }
+
     /**
       * Constructs a list of vertexViews based on the graphModel parameter.
       */
     def createVertexViews(): ListBuffer[VertexView] = {
-
         val buffer = ListBuffer[VertexView]()
         var counter = 0
 
-        graphModel.vertices.foreach { vertexModel =>
+        graphModel.vertices.foreach {vertexModel =>
 
-            buffer += new VertexView(vertexModel, Point(0,0))
+            buffer += new VertexView(vertexModel, Point(0, 0))
             counter += 1
         }
         buffer
@@ -66,7 +70,7 @@ class GraphView(val graphModel: Graph, val container: Element) extends View {
             buffer += new EdgeView(edgeModel, findVertexView(edgeModel.origin), findVertexView(edgeModel.destination))
         }
 
-        vertexViews.foreach{ vertexView: VertexView =>
+        vertexViews.foreach {vertexView: VertexView =>
             vertexView.edges = getEdgesOfVertex(vertexView, buffer)
         }
 
@@ -76,8 +80,8 @@ class GraphView(val graphModel: Graph, val container: Element) extends View {
     def getEdgesOfVertex(vertexView: VertexView, _edgeViews: ListBuffer[EdgeView]): ListBuffer[EdgeView] = {
         var edgeViewsBuffer = ListBuffer[EdgeView]()
         var i = 0
-        _edgeViews.foreach{ _edgeView: EdgeView =>
-            if(_edgeView.originView.vertexModel.uri == vertexView.vertexModel.uri ||
+        _edgeViews.foreach {_edgeView: EdgeView =>
+            if (_edgeView.originView.vertexModel.uri == vertexView.vertexModel.uri ||
                 _edgeView.destinationView.vertexModel.uri == vertexView.vertexModel.uri) {
 
                 edgeViewsBuffer += _edgeView
@@ -92,14 +96,13 @@ class GraphView(val graphModel: Graph, val container: Element) extends View {
     }
 
     def draw(context: CanvasRenderingContext2D, color: Color, position: Point) {
-
         val positionCorrection = if (position != null) {
             position.toVector
         } else {
             Point.Zero.toVector
         }
 
-        vertexViews.foreach { vertexView =>
+        vertexViews.foreach {vertexView =>
             var colorToUseVertex = Color.Black
             var colorToUseText = Color.Black
             if (color != null) {
@@ -139,7 +142,7 @@ class GraphView(val graphModel: Graph, val container: Element) extends View {
             }
         }
 
-        edgeViews.foreach { edgeView =>
+        edgeViews.foreach {edgeView =>
 
             val positionToUse = LocationDescriptor.getEdgeInformationPosition(
                 edgeView.originView.position, edgeView.destinationView.position) + positionCorrection
@@ -202,8 +205,9 @@ class GraphView(val graphModel: Graph, val container: Element) extends View {
                 redrawAll()
         }
     }
+
     def redrawAll() {
-        layers.foreach { layer =>
+        layers.foreach {layer =>
             clear(layer.context, Point.Zero, layer.getSize)
             layer.cleared = true
         }

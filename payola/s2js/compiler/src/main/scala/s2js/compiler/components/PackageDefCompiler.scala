@@ -52,7 +52,7 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
       * @return True if the symbol is compiled, false otherwise.
       */
     def symbolIsCompiled(symbol: Global#Symbol): Boolean = {
-        symbol.sourceFile != null && symbol.sourceFile.name == sourceFile.name
+        symbol.sourceFile != null && symbol.sourceFile.path == sourceFile.path
     }
 
     /**
