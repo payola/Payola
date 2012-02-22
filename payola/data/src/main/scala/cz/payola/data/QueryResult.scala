@@ -20,11 +20,11 @@ class QueryResult(var rdf: String, var ttl: String) {
     }
 
     def appendRdf(result : String) = {
-        rdf = result;
+        rdf += result;
     }
 
     def appendTtl(result : String) = {
-        ttl = result;
+        ttl += result;
     }
 
     /**

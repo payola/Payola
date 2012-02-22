@@ -8,7 +8,7 @@ import actors.Actor
  * User: Ondra Heřmánek
  * Date: 15.12.11, 19:13
  */
-trait IPayolaWebService /*extends Actor*/ {
+trait IPayolaWebService extends Actor {
     /**
      * Evaluate given Sparql query.
      *

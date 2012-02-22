@@ -14,11 +14,14 @@ object Main {
         val manager = new WebServicesManager();
 
         // Load available webs services
-        manager.initWebServices();
+        manager.initialize();
 
-        val result = manager.evaluateSparqlQuery("");
+        val query = "select distinct ?Concept where {[] a ?Concept} LIMIT 100";
+        val result = manager.evaluateSparqlQuery(query);
 
-        println(result.getRdf());
-        println(result.getTtl());
+        println("RDF: " + result.getRdf());
+        println("TTL: " + result.getTtl());
+
+        //sys.exit(0);
     }
 }

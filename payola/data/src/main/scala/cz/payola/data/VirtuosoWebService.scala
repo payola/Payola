@@ -1,10 +1,11 @@
 package cz.payola.data
 
+import scala.collection.mutable
 import scala.io.Source
 import java.util.Properties
-import scala.actors.Actor
+import util.control.Exception
 
-class VirtuosoWebService extends IPayolaWebService {
+class VirtuosoWebService(manager : WebServicesManager) extends IPayolaWebService {
     val request : String = "{protocol}://{host}/sparql?{defaultUri}&{namedUri}&{query}&{format}&save=display";
     val protocol : String = "http";
     var host : String = "";
@@ -12,33 +13,52 @@ class VirtuosoWebService extends IPayolaWebService {
     val namedUri : String = "named-graph-uri=";
     val queryFormat : String = "query={query}";
     val format : String = "format=application%2Frdf%2Bxml"
-    val defaultQuery :String = "select+distinct+%3FConcept+where+%7B%5B%5D+a+%3FConcept%7D+LIMIT+100";
 
     def initialize() = {
+        // Start actor for parallel query processing
+        start();
+
         // Read ini file with properties
         val prop : Properties = new Properties();
         prop.load(getClass.getResource("/virtuoso.ini").openStream());
 
-        // Host is composed from ini file values
-        host = prop.getProperty("host") + ":" + prop.getProperty("port");
+        val h : String = prop.getProperty("host");
+        val p : String = prop.getProperty("port");
+
+        // Host is composed from ini file values (port may be undefined)
+        if (p != null && p.size > 0)
+            host = h + ":" + p;
+        else
+            host = h;
     }
 
     def evaluateSparqlQuery(query: String): String = {
         val result = new StringBuilder();
 
         // Query is composed and URL Coded
-        val request = composeQueryRequest(defaultQuery);
+        val request = composeQueryRequest(query);
 
         // Read query result
-        val source = Source.fromURL(request);
-        source.foreach(char => result.append(char));
+        try
+        {
+            val source = Source.fromURL(request);
+            source.foreach(char => result.append(char));
+            // Log error
+        } catch {
+            case ex : Exception =>
+                manager.logError("Virtuoso service error for query:" + query);
+        }
 
+        // Return query result
         return result.toString();
     }
     
     private def composeQueryRequest (query: String) : String = {
-        // TODO: make sure that query is URL coded
-        var q : String = queryFormat.replaceAllLiterally("{query}",query);
+        val q : String =
+            queryFormat.replaceAllLiterally(
+                "{query}",
+                java.net.URLEncoder.encode(query, "UTF-8")
+        );
         
         return request.replaceAllLiterally("{protocol}", protocol)
             .replaceAllLiterally("{host}", host)
@@ -49,5 +69,30 @@ class VirtuosoWebService extends IPayolaWebService {
     }
 
     def act() = {
+        receive {
+            case x : mutable.ArrayBuffer[String] =>
+                println ("Virtuoso (AB): " + x.size);
+                if (x.size == 2) {
+                    val action = x(0);
+                    val parameter = x(1);
+
+                    // Switch by action
+                    action match {
+                        case "QUERY" =>
+                            // Evaluate query
+                            val result = mutable.ArrayBuffer[String]();
+                            result += "RESULT";
+                            result += evaluateSparqlQuery(parameter);
+
+                            // Send result
+                            manager ! result;
+                    }
+                }
+
+            case msg =>
+                println("Virtuoso: (invalid)" + msg);
+                manager ! msg;
+                //manager ! msg;
+        }
     }
 }

@@ -7,13 +7,6 @@ class WebServicesManager extends IWebServiceManager {
 
     var queryResult : QueryResult = new QueryResult("","");
 
-    /*
-    def WebServicesManager() = {
-        // Start actor
-        start();
-    }
-    */
-
     /**
      * Evaluates given SPARQL query.
      *
@@ -22,20 +15,29 @@ class WebServicesManager extends IWebServiceManager {
      * @return returns result in String.
      */
     def evaluateSparqlQuery(query: String): QueryResult = {
-        /*
+        ///*
+        // Compose message
+        val message = mutable.ArrayBuffer[String]();
+        message += "QUERY";
+        message += query;
+
+        // Asynchronously ask services for query result
         webServices.foreach(
             service =>
             {
-                service.start();
-                service ! "Hello, actor";
+                service ! message;
             }
         );
 
         Thread.sleep(3000);
 
-        return queryResult;
-        */
+        // Stop all actors
+        //stop();
+        println("Query executed.");
+        return new QueryResult(queryResult.getRdf(), queryResult.getTtl());
+        // */
 
+        /*
         val rdfResult = new StringBuilder();
         val ttlResult = new StringBuilder();
 
@@ -58,6 +60,7 @@ class WebServicesManager extends IWebServiceManager {
         );
 
         return new QueryResult(rdfResult.toString(), ttlResult.toString());
+        // */
     }
 
     /**
@@ -78,20 +81,66 @@ class WebServicesManager extends IWebServiceManager {
     }
 
     /**
+      *  Initializes web services
+      */
+    def initialize() = {
+        // Start actor to process query result from webservices
+        start();
+
+        // Load available services list
+        initWebServices();
+    }
+
+    /**
      *  Fills webServices member with available web services
      */
-    def initWebServices() = {
-        webServices += new FakeRdfWebService();
-        webServices += new FakeTtlWebService();
-        webServices += new VirtuosoWebService();
+    private def initWebServices() = {
+        webServices += new FakeRdfWebService(this);
+        webServices += new FakeTtlWebService(this);
+        webServices += new VirtuosoWebService(this);
 
+        // Start all services actors
         webServices.foreach(service => service.initialize());
     }
 
     def act() = {
-        react {
-            case msg =>
-                queryResult.appendRdf(msg + "");
+        loop {
+            react {
+                case x : mutable.ArrayBuffer[String] =>
+                    println ("Manager (AB): " + x.size);
+                    if (x.size == 2) {
+                        val action = x(0);
+                        val parameter = x(1);
+
+                        // Switch by action
+                        action match {
+                            case "RESULT" =>
+                                // Save query result
+                                if (parameter != null && parameter.size >= 0){
+                                    if (parameter.startsWith("<?xml") || parameter.startsWith("<rdf"))
+                                        queryResult.appendRdf(parameter);
+                                    else
+                                        queryResult.appendTtl(parameter);
+                                }
+                        }
+                    }
+
+                case msg =>
+                    println("Manager (invalid):" + msg);
+
+            }
         }
+    }
+
+    def stop() = {
+        // Stop actor
+        exit();
+
+        // Stop all services actors
+        //webServices.foreach(service => service.exit());
+    }
+
+    def logError(message:String) = {
+        println(message);
     }
 }

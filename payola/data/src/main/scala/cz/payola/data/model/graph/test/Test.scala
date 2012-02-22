@@ -22,7 +22,7 @@ import PeopleVocabulary._
 object RDF2ScalaTest {
     def main(args: Array[String]) {
         val manager: WebServicesManager = new WebServicesManager()
-        manager.initWebServices()
+        manager.initialize()
         val queryResult: QueryResult = manager.evaluateSparqlQuery("")
         val rdfDoc = RDFGraph(queryResult.getRdf)
         val serializer = new JSONSerializer(rdfDoc, JSONSerializerOptions.JSONSerializerOptionPrettyPrinting
