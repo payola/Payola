@@ -2,7 +2,7 @@ package cz.payola.web.client.views.graph
 
 import s2js.adapters.js.dom.CanvasRenderingContext2D
 import cz.payola.web.client.views.Constants._
-import cz.payola.web.client.views.{Vector, Color, Point}
+import cz.payola.web.client.views.{Color, Point, Vector}
 import collection.mutable.ListBuffer
 import cz.payola.common.rdf.Vertex
 
@@ -11,6 +11,7 @@ class VertexView(val vertexModel: Vertex, var position: Point) extends View
     var selected = false
 
     var force = Vector(0, 0) //required by the gravity model calculations
+
     var velocity = Vector(0, 0)
 
     var edges = ListBuffer[EdgeView]()
