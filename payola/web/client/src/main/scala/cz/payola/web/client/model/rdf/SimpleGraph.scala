@@ -11,7 +11,7 @@ class SimpleVertex extends Vertex
 
 class SimpleIdentifiedVertex(val uri: String) extends SimpleVertex with IdentifiedVertex
 
-class SimpleEdge(val uri: String, val origin: SimpleEdge#IdentifiedVertexType, val destination: SimpleEdge#VertexType)
+class SimpleEdge(val uri: String, val origin: SimpleIdentifiedVertex, val destination: SimpleVertex)
     extends Edge
 {
     type VertexType = SimpleVertex
@@ -19,8 +19,8 @@ class SimpleEdge(val uri: String, val origin: SimpleEdge#IdentifiedVertexType, v
     type IdentifiedVertexType = SimpleIdentifiedVertex
 }
 
-class SimpleGraph(val vertices: immutable.List[SimpleVertex],
-    val edges: immutable.List[SimpleEdge]) extends Graph
+class SimpleGraph(val vertices: immutable.List[SimpleVertex], val edges: immutable.List[SimpleEdge])
+    extends Graph
 {
     type EdgeType = SimpleEdge
 }
