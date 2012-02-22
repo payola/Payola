@@ -1,11 +1,13 @@
 package cz.payola.data.model.graph
 
-import scala.collection.mutable.{HashMap, ArrayBuffer}
+import scala.collection.mutable.{HashMap, ListBuffer}
+import collection.immutable
+
 import java.io.StringReader
 import java.security.MessageDigest
-import com.hp.hpl.jena.rdf.model.{Resource, ResIterator, ModelFactory}
-
 import cz.payola.scala2json.annotations._
+import cz.payola.common._
+import com.hp.hpl.jena.rdf.model.{StmtIterator, Resource, ResIterator, ModelFactory, Property}
 
 object RDFGraph {
 
@@ -35,12 +37,58 @@ object RDFGraph {
         model.read(reader, null, inputType)
 
         // List the graph nodes and build the graph
-        val graph = new RDFGraph()
+        val nodes: HashMap[String, RDFIdentifiedNode] = new HashMap[String, RDFIdentifiedNode]()
+        val edges: ListBuffer[RDFEdge] = new ListBuffer[RDFEdge]()
+
         val resIterator: ResIterator = model.listSubjects
         while (resIterator.hasNext) {
             val res: Resource = resIterator.nextResource
-            graph.addNode(RDFNode(graph, res))
+            
+            val URI = res.getURI
+            var node: RDFIdentifiedNode = null
+            if (!nodes.get(URI).isEmpty){
+                node = nodes.get(URI).get
+            }else{
+                node = new RDFIdentifiedNode(URI)
+                nodes.put(URI, node)
+            }
+
+            // Look for edges and add them
+            val iterator: StmtIterator = res.listProperties
+            while (iterator.hasNext) {
+                val statement = iterator.nextStatement
+
+                val predicate: Property = statement.getPredicate
+                val rdfNode: com.hp.hpl.jena.rdf.model.RDFNode = statement.getObject
+                val namespace = predicate.getNameSpace
+                val localName = predicate.getLocalName
+
+                // We need to distinguish two cases - the node is a literal, or a reference
+                // to another node (resource)
+                var edge: RDFEdge = null
+                if (rdfNode.isLiteral) {
+                    var language = statement.getLanguage
+                    if (language == "")
+                        language = null
+                    edge = new RDFEdge(node, new RDFLiteralNode(rdfNode.asLiteral.getValue, Option(language)), namespace, localName)
+                } else {
+                    val asResource = rdfNode.asResource
+                    val destinationURI = asResource.getURI
+                    var destination: RDFIdentifiedNode = null
+                    if (nodes.get(destinationURI).isEmpty){
+                        destination = new RDFIdentifiedNode(URI)
+                        nodes.put(destinationURI, destination)
+                    }else{
+                        destination = nodes.get(destinationURI).get
+                    }
+                    edge = new RDFEdge(node, destination, namespace, localName)
+                }
+
+                edges += edge
+            }
         }
+
+        val graph = new RDFGraph(nodes.values.toList, edges.toList)
 
         // Returning the graph
         graph
@@ -49,10 +97,13 @@ object RDFGraph {
 
 import RDFGraph._
 
-class RDFGraph {
+@JSONPoseableClass(otherClassName = "cz.payola.common.rdf.generic.Graph")
+class RDFGraph(val vertices: immutable.List[RDFNode], val edges: immutable.List[RDFEdge]) extends rdf.generic.Graph {
 
-    // Contains an array of RDFNode objects representing nodes of the graph.
-    private val nodes: ArrayBuffer[RDFNode] = new ArrayBuffer[RDFNode]()
+    type EdgeType = RDFEdge
+
+    //  Contains an array of RDFNode objects representing nodes of the graph.
+    // private val nodes: ArrayBuffer[RDFNode] = new ArrayBuffer[RDFNode]()
 
     /** _namespaces is a hash map that contains pairs [namespace, MD5-hash].
       * This field is transient because we need inverted hash map. For the ease of adding
@@ -64,7 +115,7 @@ class RDFGraph {
     /** _invertedNamespaces is a hash map that contains pairs [MD5-hash, namespace].
       * This field is serialized as 'namespaces'.
       */
-    @JSONFieldName(name = "namespaces") private val _invertedNamespaces: HashMap[String, String] = new HashMap[String, String]()
+    @JSONTransient @JSONFieldName(name = "namespaces") private val _invertedNamespaces: HashMap[String, String] = new HashMap[String, String]()
 
     /** Computes a MD5 hash of a string.
       * 
@@ -78,12 +129,6 @@ class RDFGraph {
         md5.update(bytes)
         md5.digest().map(0xFF & _).map { "%02x".format(_) }.foldLeft(""){_ + _}
     }
-
-    /** Adds a node to the nodes ArrayBuffer.
-      *
-      * @param node The node to be added.
-      */
-    def addNode(node: RDFNode) = nodes += node
 
 
     /** Returns the hashed namespace. This method is used in RDFEdge classes

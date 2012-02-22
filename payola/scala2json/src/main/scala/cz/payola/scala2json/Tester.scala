@@ -117,6 +117,10 @@ object Tester {
 
         serializer = new JSONSerializer(u, prettyOptions)
         println(serializer.stringValue)
+
+        // Test a simple value only
+        serializer = new JSONSerializer(1, prettyOptions)
+        println(serializer.stringValue)
         
     }
 }
