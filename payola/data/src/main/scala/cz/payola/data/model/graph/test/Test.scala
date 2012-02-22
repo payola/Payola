@@ -24,8 +24,7 @@ object RDF2ScalaTest {
         // WARNING: you *need* to use the JSONSerializerOptions.JSONSerializerOptionSkipObjectIDs
         // option, otherwise the JSONSerializer would add objectIDs automatically
         val serializer = new JSONSerializer(rdfDoc, JSONSerializerOptions.JSONSerializerOptionPrettyPrinting
-            | JSONSerializerOptions.JSONSerializerOptionIgnoreNullValues
-            | JSONSerializerOptions.JSONSerializerOptionSkipObjectIDs)
+            | JSONSerializerOptions.JSONSerializerOptionIgnoreNullValues)
         println(serializer.stringValue)
     }
 
