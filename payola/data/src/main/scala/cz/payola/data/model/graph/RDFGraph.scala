@@ -70,7 +70,7 @@ object RDFGraph {
                     var language = statement.getLanguage
                     if (language == "")
                         language = null
-                    edge = new RDFEdge(node, new RDFLiteralNode(rdfNode.asLiteral.getValue, Option(language)), localName)
+                    edge = new RDFEdge(node, new RDFLiteralNode(rdfNode.asLiteral.getValue, Option(language)), predicate.getURI)
                 } else {
                     val asResource = rdfNode.asResource
                     val destinationURI = asResource.getURI
@@ -81,7 +81,7 @@ object RDFGraph {
                     }else{
                         destination = nodes.get(destinationURI).get
                     }
-                    edge = new RDFEdge(node, destination, localName)
+                    edge = new RDFEdge(node, destination, predicate.getURI)
                 }
 
                 edges += edge
