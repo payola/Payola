@@ -44,7 +44,7 @@ class GraphView(val graphModel: Graph, val container: Element) extends View
 
     def init() {
         controlsLayer.init()
-        val model = new GravityModel()
+        val model = new CirclePathModel()
         model.perform(vertexViews, edgeViews)
     }
 
@@ -97,19 +97,19 @@ class GraphView(val graphModel: Graph, val container: Element) extends View
         vertexViews.find(_.vertexModel.eq(vertexModel)).get
     }
 
-    def draw(context: CanvasRenderingContext2D, color: Color, position: Point) {
-        val positionCorrection = if (position != null) {
-            position.toVector
-        } else {
-            Point.Zero.toVector
+    def draw(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point]) {
+        val positionCorrection = position match {
+            case None => Point.Zero
+            case _ => position.get
         }
 
         vertexViews.foreach {vertexView =>
+
             var colorToUseVertex = Color.Black
             var colorToUseText = Color.Black
-            if (color != null) {
-                colorToUseVertex = color
-                colorToUseText = color
+            if (color != None) {
+                colorToUseVertex = color.get
+                colorToUseText = color.get
             } else if (vertexView.selected) {
                 colorToUseVertex = ColorVertexHigh
                 colorToUseText = ColorTextHigh
@@ -125,21 +125,24 @@ class GraphView(val graphModel: Graph, val container: Element) extends View
                 colorToUseVertex = ColorVertexLow
                 colorToUseText = Color.Transparent
             }
+
             if (vertexView.selected) {
                 if (verticesSelectedLayer.cleared) {
-                    vertexView.draw(verticesSelectedLayer.context, colorToUseVertex, position)
+                    vertexView.draw(verticesSelectedLayer.context, Some(colorToUseVertex), Some(positionCorrection))
                 }
-                if (verticesSelectedTextLayer.cleared) {
-                    vertexView.information.draw(verticesSelectedTextLayer.context, colorToUseText,
-                        LocationDescriptor.getVertexInformationPosition(vertexView.position) + positionCorrection)
+                if (verticesSelectedTextLayer.cleared && vertexView.information != None) {
+                    vertexView.information.get.draw(verticesSelectedTextLayer.context, Some(colorToUseText),
+                        Some(LocationDescriptor.getVertexInformationPosition(vertexView.position) +
+                            positionCorrection.toVector))
                 }
             } else {
                 if (verticesDeselectedLayer.cleared) {
-                    vertexView.draw(verticesDeselectedLayer.context, colorToUseVertex, position)
+                    vertexView.draw(verticesDeselectedLayer.context, Some(colorToUseVertex), Some(positionCorrection))
                 }
-                if (verticesDeselectedTextLayer.cleared) {
-                    vertexView.information.draw(verticesDeselectedTextLayer.context, colorToUseText,
-                        LocationDescriptor.getVertexInformationPosition(vertexView.position) + positionCorrection)
+                if (verticesDeselectedTextLayer.cleared && vertexView.information != None) {
+                    vertexView.information.get.draw(verticesDeselectedTextLayer.context, Some(colorToUseText),
+                        Some(LocationDescriptor.getVertexInformationPosition(vertexView.position) +
+                            positionCorrection.toVector))
                 }
             }
         }
@@ -147,16 +150,16 @@ class GraphView(val graphModel: Graph, val container: Element) extends View
         edgeViews.foreach {edgeView =>
 
             val positionToUse = LocationDescriptor.getEdgeInformationPosition(
-                edgeView.originView.position, edgeView.destinationView.position) + positionCorrection
-            val colorToUseEdge = if (color != null) {
-                color
+                edgeView.originView.position, edgeView.destinationView.position) + positionCorrection.toVector
+            val colorToUseEdge = if (color != None) {
+                color.get
             } else if (edgeView.isSelected) {
                 ColorEdgeSelect
             } else {
                 ColorEdge
             }
-            val colorToUseText = if (color != null) {
-                color
+            val colorToUseText = if (color != None) {
+                color.get
             } else if (edgeView.isSelected) {
                 ColorTextHigh
             } else {
@@ -164,25 +167,25 @@ class GraphView(val graphModel: Graph, val container: Element) extends View
             }
 
 
-            edgeView.information.selected = edgeView.isSelected
+            if(edgeView.isSelected) {
+                edgeView.information.setSelectedForDrawing()
+            }
 
             if (edgeView.isSelected) {
                 if (edgesSelectedLayer.cleared) {
-                    edgeView.draw(edgesSelectedLayer.context, colorToUseEdge, position)
+                    edgeView.draw(edgesSelectedLayer.context, Some(colorToUseEdge), Some(positionCorrection))
                 }
                 if (edgesSelectedTextLayer.cleared) {
-                    edgeView.information.draw(edgesSelectedTextLayer.context, colorToUseText, positionToUse)
+                    edgeView.information.draw(edgesSelectedTextLayer.context, Some(colorToUseText), Some(positionToUse))
                 }
             } else {
                 if (edgesDeselectedLayer.cleared) {
-                    edgeView.draw(edgesDeselectedLayer.context, colorToUseEdge, position)
+                    edgeView.draw(edgesDeselectedLayer.context, Some(colorToUseEdge), Some(positionCorrection))
                 }
                 if (edgesDeselectedTextLayer.cleared) {
-                    edgeView.information.draw(edgesDeselectedTextLayer.context, colorToUseText, positionToUse)
+                    edgeView.information.draw(edgesDeselectedTextLayer.context, Some(colorToUseText), Some(positionToUse))
                 }
             }
-
-            edgeView.information.selected = false
         }
 
         layers.foreach(layer => layer.cleared = false)
@@ -200,7 +203,8 @@ class GraphView(val graphModel: Graph, val container: Element) extends View
                 clear(verticesSelectedTextLayer.context, Point.Zero, verticesSelectedTextLayer.getSize)
                 verticesSelectedTextLayer.cleared = true
 
-                draw(null, null, null)
+                draw(null, None, None)
+                //^because elements are drawn into separate layers, redraw(..) does not know to which context to draw
             case RedrawOperation.Selection =>
                 redrawAll()
             case _ =>
@@ -213,6 +217,7 @@ class GraphView(val graphModel: Graph, val container: Element) extends View
             clear(layer.context, Point.Zero, layer.getSize)
             layer.cleared = true
         }
-        draw(null, null, null)
+        draw(null, None, None)
+        //^because elements are drawn into separate layers, redraw(..) does not know to which context to draw
     }
 }

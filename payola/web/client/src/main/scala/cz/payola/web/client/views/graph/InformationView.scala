@@ -5,25 +5,36 @@ import cz.payola.web.client.views.{Vector, Constants, Color, Point}
 import cz.payola.common.rdf.IdentifiedObject
 
 case class InformationView(identifiedObject: IdentifiedObject) extends View {
-    var selected = false
+    private var selected = false
 
-    def draw(context: CanvasRenderingContext2D, color: Color, position: Point) {
+    def setSelectedForDrawing() {
+        selected = true
+    }
+    def draw(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point]) {
+        
+        if(position != None) {
+            performDrawing(context, color, position.get)
+        }
+        
+        selected = false
+    }
+    
+    def performDrawing(context: CanvasRenderingContext2D, color: Option[Color], position: Point) {
         if(selected) {
-            /*val colorToUseBackgroung = if(color != null) {
-                color.inverse()
-            } else {
-                Constants.ColorTextBackground
+            /*val colorToUseBackground = color match {
+                case None => Constants.ColorTextBackground
+                case _ => color
             }*/
 
             drawCircle(context, position + Vector(1, -5), 10, Constants.EdgeWidth, Constants.ColorTextBackground)
             fillCurrentSpace(context, Constants.ColorTextBackground)
         }
 
-        val colorToUse = if(color != null) {
-            color
-        } else {
-            Constants.ColorText
+        val colorToUse = color match {
+            case None => Constants.ColorText
+            case _ => color.get
         }
+
         drawText(context, identifiedObject.uri, position, colorToUse, "12px Sans", "center")
     }
 }

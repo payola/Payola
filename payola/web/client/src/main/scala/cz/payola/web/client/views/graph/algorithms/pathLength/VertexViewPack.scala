@@ -3,7 +3,8 @@ package cz.payola.web.client.views.graph.algorithms.pathLength
 import cz.payola.web.client.views.graph.VertexView
 import collection.mutable.ListBuffer
 
-class VertexViewPack(var value: VertexView, var children: ListBuffer[VertexViewPack], var parent: VertexViewPack) {
+class VertexViewPack(var value: VertexView, var children: ListBuffer[VertexViewPack],
+    var parent: Option[VertexViewPack]) {
 
     private var childrenRotated = 0 //count of rotations performed on the children list
 
@@ -22,7 +23,7 @@ class VertexViewPack(var value: VertexView, var children: ListBuffer[VertexViewP
 
             if (childrenRotated == children.length) {
                 childrenRotated = 0
-                rotatedCircle = this.parent != null //if this does have parent continue with rotations
+                rotatedCircle = this.parent != None //if this does have parent continue with rotations
             }
         }
 
@@ -38,12 +39,12 @@ class VertexViewPack(var value: VertexView, var children: ListBuffer[VertexViewP
 
         //find topmost parent
         var topmostParent = this
-        while(topmostParent.parent != null) {
-            topmostParent = topmostParent.parent
+        while(topmostParent.parent != None) {
+            topmostParent = topmostParent.parent.get
         }
 
         //first get the last level of parents in the structure
-        var levelPrevious: ListBuffer[VertexViewPack] = null
+        var levelPrevious = ListBuffer[VertexViewPack]()
         var level = topmostParent.getLevelSimple(0)
         var levelNext = topmostParent.getLevelSimple(1)
         var levelNumber = 2
@@ -89,8 +90,8 @@ class VertexViewPack(var value: VertexView, var children: ListBuffer[VertexViewP
 
         //find topmost parent
         var topmostParent = this
-        while(topmostParent.parent != null) {
-            topmostParent = topmostParent.parent
+        while(topmostParent.parent != None) {
+            topmostParent = topmostParent.parent.get
         }
 
         //find the level in which this vertexViewPack is and return the previous element
@@ -134,7 +135,7 @@ class VertexViewPack(var value: VertexView, var children: ListBuffer[VertexViewP
       * @return
       */
     override def clone(): VertexViewPack = {
-        val root = new VertexViewPack(value, ListBuffer[VertexViewPack](), null)
+        val root = new VertexViewPack(value, ListBuffer[VertexViewPack](), None)
         var level1New = ListBuffer[VertexViewPack](root)
         var level1This = ListBuffer[VertexViewPack](this)
         var level2New = ListBuffer[VertexViewPack]()
@@ -149,7 +150,7 @@ class VertexViewPack(var value: VertexView, var children: ListBuffer[VertexViewP
                 val actParentThis = level1This.apply(pointerParent)
                 actParentThis.children.foreach {childThis =>
 
-                    val childNew = new VertexViewPack(childThis.value, ListBuffer[VertexViewPack](), actParentNew)
+                    val childNew = new VertexViewPack(childThis.value, ListBuffer[VertexViewPack](), Some(actParentNew))
                     actParentNew.children += childNew
 
                     level2New += childNew

@@ -19,11 +19,8 @@ class PathLengthModel extends AlgorithmBase {
       * @return
       */
     private def buildUtilityStructure(rootVertexView: VertexView): VertexViewPack = {
-        if (rootVertexView == null) {
-            return null
-        }
 
-        val structureRoot = new VertexViewPack(rootVertexView, null, null)
+        val structureRoot = new VertexViewPack(rootVertexView, ListBuffer[VertexViewPack](), None)
         var level = ListBuffer[ListBuffer[VertexViewPack]](
             ListBuffer[VertexViewPack](structureRoot))
         var levelNext = ListBuffer[ListBuffer[VertexViewPack]]()
@@ -48,7 +45,7 @@ class PathLengthModel extends AlgorithmBase {
                         }
                         if (alreadyProcessed.find(element => element.vertexModel eq child.vertexModel) == None) {
 
-                            children += new VertexViewPack(child, null, parent)
+                            children += new VertexViewPack(child, ListBuffer[VertexViewPack](), Some(parent))
                         }
                     }
 
@@ -104,10 +101,10 @@ class PathLengthModel extends AlgorithmBase {
                 }
 
                 //if a grandparent exist and an edge to it in parent.edges container it is also added
-                if(parent.parent != null) {
+                if(parent.parent != None) {
                     val edgeToGrandParent = parent.value.edges.find{ element =>
-                        (element.originView.vertexModel eq parent.parent.value.vertexModel) ||
-                            (element.destinationView.vertexModel eq parent.parent.value.vertexModel)
+                        (element.originView.vertexModel eq parent.parent.get.value.vertexModel) ||
+                            (element.destinationView.vertexModel eq parent.parent.get.value.vertexModel)
                     }
                     if(edgeToGrandParent != None) {
                         orderedEdges += edgeToGrandParent.get
@@ -133,7 +130,7 @@ class PathLengthModel extends AlgorithmBase {
     private def minimizeEdgeCrossing(vertexViews: ListBuffer[VertexView]) {
         val originalStructure = buildUtilityStructure(vertexViews.head)
         var minCrossings = Double.MaxValue
-        var memory: VertexViewPack = null //best drawing so far
+        var memory: VertexViewPack = originalStructure.clone() //best drawing so far
         val currentStructure = originalStructure.clone() //structure of a curret iteration
         var compute = true //iteration works until all possible rotations are tested or found drawing has zero crossings
 
@@ -204,7 +201,7 @@ class PathLengthModel extends AlgorithmBase {
         if (lastParent.rotateChildren()) {
             var previousBrother = lastParent.getPreviousBrotherWithChildren()
 
-            while (previousBrother != null && previousBrother.rotateChildren()) {
+            while (previousBrother.rotateChildren()) {
                 previousBrother = previousBrother.getPreviousBrotherWithChildren()
             }
         }

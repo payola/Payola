@@ -31,13 +31,11 @@ class CirclePathModel extends AlgorithmBase
                         if (!existsVertex(e.destinationView, alreadyOut)
                             && !existsVertex(e.destinationView, level2) && !existsVertex(e.destinationView, level1)) {
                             level2 += e.destinationView
-                            val i = 0 //TODO bez nejakeho blabolu v podmince jeste s += to po prekladu nefunguje
                         }
                     } else {
                         if (!existsVertex(e.originView, alreadyOut)
                             && !existsVertex(e.originView, level2) && !existsVertex(e.originView, level1)) {
                             level2 += e.originView
-                            val i = 0
                         }
                     }
                 }

@@ -24,7 +24,7 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
         originView.selected || destinationView.selected
     }
 
-    def draw(context: CanvasRenderingContext2D, color: Color, positionCorrection: Point) {
+    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
         val A = originView.position
         val B = destinationView.position
 
@@ -85,18 +85,18 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
             }
         }
 
-        val colorToUse = if (color != null) {
-            color
-        } else if (isSelected) {
-            ColorEdgeSelect
-        } else {
-            ColorEdge
+        val colorToUse = color match {
+            case None =>
+                isSelected match {
+                    case true => ColorEdgeSelect
+                    case false => ColorEdge
+                }
+            case _ => color.get
         }
 
-        val correction = if (positionCorrection != null) {
-            positionCorrection.toVector
-        } else {
-            Point(0, 0).toVector
+        val correction = positionCorrection match {
+            case None => Point(0, 0).toVector
+            case _ => positionCorrection.get.toVector
         }
 
         drawStraightLine(context, A + correction, B + correction, EdgeWidth, colorToUse)

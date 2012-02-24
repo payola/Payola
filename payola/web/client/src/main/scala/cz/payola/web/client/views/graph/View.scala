@@ -5,7 +5,7 @@ import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom.{Element, Canvas, CanvasRenderingContext2D}
 
 trait View {
-    def draw(context: CanvasRenderingContext2D, color: Color, position: Point)
+    def draw(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point])
 
     /**
       * Draws a rectangle with rounded corners, depending on the radius parameter to the input canvas context.
