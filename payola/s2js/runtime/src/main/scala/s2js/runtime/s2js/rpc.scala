@@ -37,47 +37,12 @@ object Rpc
         request.send("method="+procedureName+"&"+params);
         if (request.readyState==4 && request.status==200)
         {
-            return request.responseText;
+            return this.deserialize(eval("("+request.responseText+")"));
         }else{
             //throw new s2js.runtime.s2js.RPCException("RPC call exited with status code "+request.status);
         }
     """)
     def callSync(procedureName: String, parameters: Any): Any = ()
-
-            /*
-    @NativeJs("""
-        var xmlhttp = XMLHttpRequest  ? new XMLHttpRequest : new ActiveXObject('Msxml2.XMLHTTP');
-
-        xmlhttp.onreadystatechange=function()
-        {
-            if (xmlhttp.readyState==4 && xmlhttp.status==200)
-            {
-                callback(xmlhttp.responseText);
-            }else
-            {
-                faultCallback();
-            }
-        }
-
-        var url = "/RPC";
-        var encodedData = buildHttpQuery(params);
-
-        if (requestType.toUpperCase() == "GET")
-        {
-            url += "?"+encodedData;
-        }
-
-        xmlhttp.open(requestType,url,false);
-
-        if (requestType.toUpperCase() == "POST" || request)
-        {
-            xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-            xmlhttp.send(encodedData);
-        }else
-        {
-            xmlhttp.send();
-        }
-    """)                         */
 
     @NativeJs("""
         var args = '';
@@ -92,4 +57,33 @@ object Rpc
         return args;
     """)
     def buildHttpQuery(params: Map[String, Object]): String = null
+
+    @NativeJs("""
+        if (Object.prototype.toString.call(obj) !== '[object Object]')
+        {
+            return obj;
+        }
+
+        var class = obj.__class__;
+        if (typeof(class) === 'undefined')
+        {
+            return obj;
+        }
+
+        if (eval("typeof(class)") === 'undefined')
+        {
+            goog.load(class);
+        }
+
+        var result = eval("new "+class+"()");
+
+        for (var key in obj)
+        {
+            result[key] = this.deserialize(obj[key]);
+        }
+
+        return result;
+
+    """)
+    def deserialize(obj: Object): Object = null
 }
