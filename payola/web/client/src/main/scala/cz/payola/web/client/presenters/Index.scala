@@ -3,7 +3,6 @@ package cz.payola.web.client.presenters
 import s2js.adapters.js.browser._
 import cz.payola.web.client.views.graph.GraphView
 import cz.payola.common.rdf.Graph
-import cz.payola.web.shared.GraphFetcher
 import cz.payola.web.client.model.graph.{SimpleGraph, SimpleEdge, SimpleIdentifiedVertex}
 
 class Index
@@ -28,7 +27,7 @@ class Index
         val v4 = new SimpleIdentifiedVertex("4")
         val v5 = new SimpleIdentifiedVertex("5")
         val v6 = new SimpleIdentifiedVertex("6")
-        /*val v7 = new SimpleIdentifiedVertex("7")
+        val v7 = new SimpleIdentifiedVertex("7")
         val v8 = new SimpleIdentifiedVertex("8")
         val v9 = new SimpleIdentifiedVertex("9")
         val v10 = new SimpleIdentifiedVertex("10")
@@ -40,7 +39,7 @@ class Index
         val v16 = new SimpleIdentifiedVertex("16")
         val v17 = new SimpleIdentifiedVertex("17")
         val v18 = new SimpleIdentifiedVertex("18")
-        val v19 = new SimpleIdentifiedVertex("19")*/
+        val v19 = new SimpleIdentifiedVertex("19")
 
         /*val e0 = new SimpleEdge("0", v0, v1)
         val e1= new SimpleEdge("1", v0, v2)
@@ -51,14 +50,16 @@ class Index
         val e6 = new SimpleEdge("6", v0, v4)
         val e7 = new SimpleEdge("7", v0, v5)
         val e8 = new SimpleEdge("8", v1, v6)*/
-        val e0 = new SimpleEdge("0", v0, v1)
+
+        /*val e0 = new SimpleEdge("0", v0, v1)
         val e1 = new SimpleEdge("1", v0, v2)
         val e2 = new SimpleEdge("2", v1, v3)
         val e3 = new SimpleEdge("3", v1, v4)
         val e4 = new SimpleEdge("4", v1, v5)
         val e5 = new SimpleEdge("5", v2, v4)
-        val e6 = new SimpleEdge("6", v2, v6)
-        /*val e0 = new SimpleEdge("0", v0, v1)
+        val e6 = new SimpleEdge("6", v2, v6)*/
+
+        val e0 = new SimpleEdge("0", v0, v1)
         val e1 = new SimpleEdge("1", v0, v2)
         val e2 = new SimpleEdge("2", v0, v9)
         val e3 = new SimpleEdge("3", v0, v11)
@@ -95,15 +96,15 @@ class Index
         val e34 = new SimpleEdge("34", v13, v19)
         val e35 = new SimpleEdge("35", v15, v16)
         val e36 = new SimpleEdge("36", v15, v17)
-        val e37 = new SimpleEdge("37", v16, v17)*/
+        val e37 = new SimpleEdge("37", v16, v17)
 
         new SimpleGraph(
             List(
-                v0, v1, v2, v3, v4, v5, v6 //, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19
+                v0, v1, v2, v3, v4, v5, v6 , v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19
             ),
             List(
-                e0, e1, e2, e3, e4, e5, e6 /*, e7, e8, e9, e10, e11, e12, e13, e14, e15, e16, e17, e18, e19, e20, e21,
-                e22, e23, e24, e25, e26, e27, e28, e29, e30, e31, e32, e33, e34, e35, e36, e37*/
+                e0, e1, e2, e3, e4, e5, e6 , e7, e8, e9, e10, e11, e12, e13, e14, e15, e16, e17, e18, e19, e20, e21,
+                e22, e23, e24, e25, e26, e27, e28, e29, e30, e31, e32, e33, e34, e35, e36, e37
             )
         )
     }

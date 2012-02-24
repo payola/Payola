@@ -1,6 +1,8 @@
 package cz.payola.web.client.views.graph
 
-import algorithms.{GravityModel, CirclePathModel}
+import algorithms.circlePath.CirclePathModel
+import algorithms.gravity.GravityModel
+import algorithms.pathLength.PathLengthModel
 import cz.payola.web.client.views.Constants._
 import collection.mutable.ListBuffer
 import s2js.adapters.js.dom.{Element, CanvasRenderingContext2D}
@@ -81,8 +83,8 @@ class GraphView(val graphModel: Graph, val container: Element) extends View
         var edgeViewsBuffer = ListBuffer[EdgeView]()
         var i = 0
         _edgeViews.foreach {_edgeView: EdgeView =>
-            if (_edgeView.originView.vertexModel.uri == vertexView.vertexModel.uri ||
-                _edgeView.destinationView.vertexModel.uri == vertexView.vertexModel.uri) {
+            if ((_edgeView.originView.vertexModel eq vertexView.vertexModel) ||
+                (_edgeView.destinationView.vertexModel eq vertexView.vertexModel)) {
 
                 edgeViewsBuffer += _edgeView
                 i += 1

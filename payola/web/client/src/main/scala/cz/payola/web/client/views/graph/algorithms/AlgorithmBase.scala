@@ -4,7 +4,7 @@ import collection.mutable.ListBuffer
 import cz.payola.web.client.views.graph.{EdgeView, VertexView}
 import cz.payola.web.client.views.{Vector, Point}
 
-trait AlgoBase {
+trait AlgorithmBase {
 
     def perform(vertexViews: ListBuffer[VertexView], edgeViews: ListBuffer[EdgeView])
 
@@ -40,44 +40,57 @@ trait AlgoBase {
       * @param vViews
       */
     protected def treeLikeVerticesPositioning(vViews: ListBuffer[VertexView]) {
-        val spaceBetweenVertices = 50
-        var level1 = ListBuffer[VertexView]()
-        var level2 = ListBuffer[VertexView]()
+        var levels = ListBuffer[ListBuffer[VertexView]]()
+        var level = ListBuffer[VertexView]()
+        var levelNext = ListBuffer[VertexView]()
         var alreadyOut = ListBuffer[VertexView]()
-        var levelNum = 0
-        var vertexNumInLevel = 0
 
-        level1 += vViews.head
+        level += vViews.head
 
-        while(level1.length != 0) {
-            vertexNumInLevel = 0
+        while(level.length != 0) {
 
-            level1.foreach{ l1: VertexView =>
+            level.foreach{ l1: VertexView =>
                 l1.edges.foreach{ e: EdgeView =>
-                    if(e.originView.vertexModel.uri == l1.vertexModel.uri) {
+                    if(e.originView.vertexModel eq l1.vertexModel) {
                         if(!existsVertex(e.destinationView, alreadyOut)
-                            && !existsVertex(e.destinationView, level2) && !existsVertex(e.destinationView, level1)) {
-                            level2 += e.destinationView
+                            && !existsVertex(e.destinationView, levelNext) && !existsVertex(e.destinationView, level)) {
+                            levelNext += e.destinationView
                             val i = 0
                         }
                     } else {
                         if(!existsVertex(e.originView, alreadyOut)
-                            && !existsVertex(e.originView, level2) && !existsVertex(e.originView, level1)) {
-                            level2 += e.originView
+                            && !existsVertex(e.originView, levelNext) && !existsVertex(e.originView, level)) {
+                            levelNext += e.originView
                             val i = 0
                         }
                     }
                 }
-
-                l1.position = Point(scala.math.random/10 + (vertexNumInLevel * spaceBetweenVertices),
-                    scala.math.random/10 + (levelNum * spaceBetweenVertices))
                 alreadyOut += l1
-                vertexNumInLevel += 1
             }
 
-            level1 = ListBuffer[VertexView]()
-            level1 = level2
-            level2 = ListBuffer[VertexView]()
+            levels += level
+            level = ListBuffer[VertexView]()
+            level = levelNext
+            levelNext = ListBuffer[VertexView]()
+        }
+
+
+
+        val distance = 70
+        var levelNum = 0
+        var vertexNumInLevel = 0
+        val lastLevelSize = levels.last.length
+        levels.foreach{ elements =>
+
+            vertexNumInLevel = 0
+            val currentLevelSize = elements.length
+            elements.foreach{ element =>
+
+                element.position = Point(
+                    scala.math.random/10 + (vertexNumInLevel * distance) + distance*(lastLevelSize - currentLevelSize)/2,
+                    scala.math.random/10 + (levelNum * distance))
+                vertexNumInLevel += 1
+            }
             levelNum += 1
         }
     }
@@ -115,7 +128,8 @@ trait AlgoBase {
         }
     }
 
+    //TODO remove
     def existsVertex(whatToCheck: VertexView, whereToCheck: ListBuffer[VertexView]): Boolean = {
-        whereToCheck.exists(element => element.vertexModel.uri == whatToCheck.vertexModel.uri)
+        whereToCheck.exists(element => element.vertexModel eq whatToCheck.vertexModel)
     }
 }

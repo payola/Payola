@@ -52,7 +52,9 @@ trait Seq extends Iterable
         if (index < 0 || self.size() <= index) {
             throw new scala.NoSuchElementException('An item with index ' + n + ' is not present.');
         }
+        var removed = self.internalJsArray[index];
         self.internalJsArray.splice(index, 1);
+        return removed;
     """)
     def remove(index: Int) {}
 
