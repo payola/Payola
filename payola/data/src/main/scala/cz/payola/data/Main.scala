@@ -19,9 +19,7 @@ object Main {
         val query = "select distinct ?Concept where {[] a ?Concept} LIMIT 100";
         val result = manager.evaluateSparqlQuery(query);
 
-        println("RDF: " + result.getRdf());
-        println("TTL: " + result.getTtl());
-
-        //sys.exit(0);
+        println("RDF: " + result.rdf);
+        println("TTL: " + result.ttl);
     }
 }
