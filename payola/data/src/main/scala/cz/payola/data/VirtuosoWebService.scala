@@ -43,8 +43,8 @@ class VirtuosoWebService(manager : WebServicesManager) extends WebServiceBase(ma
         {
             val source = Source.fromURL(request);
             source.foreach(char => result.append(char));
-            // Log error
         } catch {
+            // Log error
             case ex : Exception =>
                 manager.logError("Virtuoso service error for query:" + query);
         }

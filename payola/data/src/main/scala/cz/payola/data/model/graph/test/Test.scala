@@ -18,7 +18,7 @@ object RDF2ScalaTest {
         val queryResult: QueryResult = manager.evaluateSparqlQuery("")
 
         // Create an RDF graph from the query result
-        val rdfDoc = RDFGraph(queryResult.getRdf)
+        val rdfDoc = RDFGraph(queryResult.rdf)
 
         // Serialize it.
         // WARNING: you *need* to use the JSONSerializerOptions.JSONSerializerOptionSkipObjectIDs

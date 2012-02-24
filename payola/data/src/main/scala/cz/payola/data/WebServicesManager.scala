@@ -1,5 +1,6 @@
 package cz.payola.data
 
+import messages._
 import scala.collection.mutable
 
 class WebServicesManager extends IWebServiceManager {
@@ -17,9 +18,7 @@ class WebServicesManager extends IWebServiceManager {
     def evaluateSparqlQuery(query: String): QueryResult = {
         ///*
         // Compose message
-        val message = mutable.ArrayBuffer[String]();
-        message += "QUERY";
-        message += query;
+        val message = new QueryMessage(query);
 
         // Asynchronously ask services for query result
         webServices.foreach(
@@ -31,35 +30,9 @@ class WebServicesManager extends IWebServiceManager {
 
         Thread.sleep(3000);
 
-        // Stop all actors
-        //stop();
+        // Will be modified
         println("Query executed.");
-        return new QueryResult(queryResult.getRdf(), queryResult.getTtl());
-        // */
-
-        /*
-        val rdfResult = new StringBuilder();
-        val ttlResult = new StringBuilder();
-
-        // Get result from every initialized web service
-        // TODO: asynchronously?
-        webServices.foreach(
-            service =>
-            {
-                val response = service.evaluateSparqlQuery(query);
-
-                // TODO: there must be a better way to do this
-                // There is a different handling of ttl and rdf response
-                if (response != null && response.size >= 0){
-                    if (response.startsWith("<?xml"))
-                        rdfResult.append(response);
-                    else
-                        ttlResult.append(response)
-                }
-            }
-        );
-
-        return new QueryResult(rdfResult.toString(), ttlResult.toString());
+        return new QueryResult(queryResult.rdf, queryResult.ttl);
         // */
     }
 
@@ -106,38 +79,16 @@ class WebServicesManager extends IWebServiceManager {
     def act() = {
         loop {
             react {
-                case x : mutable.ArrayBuffer[_] =>
-                    println ("Manager (AB): " + x.size);
-                    if (x.size == 2) {
-                        val action = x(0).toString();
-                        val parameter = x(1).toString();
+                case x : QueryMessage =>
+                    println ("Manager (QM): ");
 
-                        // Switch by action
-                        action match {
-                            case "RESULT" =>
-                                // Save query result
-                                if (parameter != null && parameter.size >= 0){
-                                    if (parameter.startsWith("<?xml") || parameter.startsWith("<rdf"))
-                                        queryResult.appendRdf(parameter);
-                                    else
-                                        queryResult.appendTtl(parameter);
-                                }
-                        }
-                    }
-
-                case msg =>
-                    println("Manager (invalid):" + msg);
-
+                case x : ResultMessage =>
+                    if (x.result.startsWith("<?xml") || x.result.startsWith("<rdf"))
+                        queryResult.appendRdf(x.result);
+                    else
+                        queryResult.appendTtl(x.result);
             }
         }
-    }
-
-    def stop() = {
-        // Stop actor
-        exit();
-
-        // Stop all services actors
-        //webServices.foreach(service => service.exit());
     }
 
     def logError(message:String) = {

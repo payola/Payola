@@ -21,11 +21,11 @@ class WebServiceManagerTest extends FlatSpec with ShouldMatchers
         queryResult should not be null;
 
         // Validate result
-        val rdf = queryResult.getRdf();
+        val rdf = queryResult.rdf;
         rdf should not be null;
         rdf.size should not be (0);
 
-        val ttl = queryResult.getTtl();
+        val ttl = queryResult.ttl;
         ttl should not be null;
         ttl.size should not be (0);
     }

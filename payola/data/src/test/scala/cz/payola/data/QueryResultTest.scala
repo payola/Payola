@@ -11,8 +11,8 @@ class QueryResultTest extends FlatSpec with ShouldMatchers
 
         val queryResult = new QueryResult(rdf, ttl);
 
-        queryResult.getRdf() should equal(rdf);
-        queryResult.getTtl() should equal(ttl);
+        queryResult.rdf should equal(rdf);
+        queryResult.ttl should equal(ttl);
     }
 
     "QueryResult" should "properly parse result into nodes." in {

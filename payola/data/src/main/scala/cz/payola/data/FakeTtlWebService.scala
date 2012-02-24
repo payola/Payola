@@ -1,7 +1,6 @@
 package cz.payola.data
 
 import scala.io.Source
-import collection.mutable
 
 class FakeTtlWebService(manager : WebServicesManager) extends WebServiceBase(manager) {
     override def evaluateSparqlQuery(query: String): String = {

@@ -1,17 +1,11 @@
 package cz.payola.data
 
 import collection.mutable
+import cz.payola.data.messages._
 
-/**
-  * User: Ondřej Heřmánek
-  * Date: 22.2.12, 15:52
-  */
+abstract class WebServiceBase(manager : WebServicesManager) extends IPayolaWebService {
 
-class WebServiceBase(manager : WebServicesManager) extends IPayolaWebService {
-
-    def evaluateSparqlQuery(query: String): String = {
-        throw new Exception("This method must be overriden!");
-    }
+    def evaluateSparqlQuery(query: String): String;
 
     def initialize() = {
         // Start web service actor
@@ -20,23 +14,9 @@ class WebServiceBase(manager : WebServicesManager) extends IPayolaWebService {
 
     def act() = {
         receive {
-            case x : mutable.ArrayBuffer[_] =>
-                if (x.size == 2) {
-                    val action = x(0).toString();
-                    val parameter = x(1).toString();
-
-                    // Switch by action
-                    action match {
-                        case "QUERY" =>
-                            // Evaluate query
-                            val result = mutable.ArrayBuffer[String]();
-                            result += "RESULT";
-                            result += evaluateSparqlQuery(parameter);
-
-                            // Send result
-                            manager ! result;
-                    }
-                }
+            case x : QueryMessage =>
+                // Evaluate query and send result to the manager
+                manager ! new ResultMessage(evaluateSparqlQuery(x.query));
 
             case msg =>
                 println("Service: (invalid)" + msg);
