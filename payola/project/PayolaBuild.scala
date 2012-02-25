@@ -200,6 +200,8 @@ object PayolaBuild extends Build
 
     lazy val webSharedProject = ScalaToJsProject(
         "shared", file("web/shared"), WebSettings.javaScriptsDir / "shared", payolaSettings
+    ).dependsOn(
+        dataProject
     )
 
     lazy val webClientProject = ScalaToJsProject(

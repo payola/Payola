@@ -64,23 +64,26 @@ object Rpc
             return obj;
         }
 
-        var class = obj.__class__;
-        if (typeof(class) === 'undefined')
+        var clazz = obj.__class__;
+        if (typeof(clazz) === 'undefined')
         {
             return obj;
         }
 
-        if (eval("typeof(class)") === 'undefined')
+        if (eval("typeof(clazz)") === 'undefined')
         {
-            goog.load(class);
+            window.alert("Should load "+clazz);
+            //goog.load(class);
         }
 
-        var result = eval("new "+class+"()");
+        var result = eval("new "+clazz+"()");
 
         for (var key in obj)
         {
             result[key] = this.deserialize(obj[key]);
         }
+
+        console.log(result);
 
         return result;
 
