@@ -1,16 +1,19 @@
-package cz.payola.web.client.views.graph.algorithms.pathLength
+package cz.payola.web.client.views.visualPlugin.graph.algorithms.pathLength
 
 import collection.mutable.ListBuffer
-import cz.payola.web.client.views.graph.{EdgeView, VertexView}
-import cz.payola.web.client.views.graph.algorithms.AlgorithmBase
+import cz.payola.web.client.views.visualPlugin.graph.{EdgeView, VertexView}
+import cz.payola.web.client.views.visualPlugin.drawingModels.ModelBase
+import s2js.adapters.js.dom.Element
+import cz.payola.common.rdf.Graph
 
-class PathLengthModel extends AlgorithmBase {
+class PathLengthModel(graph: Graph, element: Element) extends ModelBase(graph, element)
+{
 
     //TODO add some computation branch cutting...this algorithm is quite complex
-    def perform(vertexViews: ListBuffer[VertexView], edgeViews: ListBuffer[EdgeView]) {
-        minimizeEdgeCrossing(vertexViews)
-        treeLikeVerticesPositioning(vertexViews)
-        moveGraphToUpperLeftCorner(vertexViews)
+    def performModel() {
+        minimizeEdgeCrossing(graphView.vertexViews)
+        basicTreeStructure(graphView.vertexViews)
+        moveGraphToUpperLeftCorner(graphView.vertexViews)
     }
 
     /**

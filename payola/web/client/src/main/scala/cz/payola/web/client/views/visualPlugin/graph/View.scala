@@ -1,6 +1,6 @@
-package cz.payola.web.client.views.graph
+package cz.payola.web.client.views.visualPlugin.graph
 
-import cz.payola.web.client.views.{Layer, Color, Vector, Point}
+import cz.payola.web.client.views.visualPlugin.{Layer, Color, Vector, Point}
 import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom.{Element, Canvas, CanvasRenderingContext2D}
 
@@ -106,6 +106,10 @@ trait View {
     protected def clear(context: CanvasRenderingContext2D, topLeft: Point, size: Vector) {
         val bottomRight = topLeft + size
         context.clearRect(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
+    }
+
+    protected def isPointInRect(p: Point, topLeft: Point, bottomRight: Point): Boolean = {
+        p >= topLeft && p <= bottomRight
     }
 
     protected def createLayer(container: Element): Layer = {

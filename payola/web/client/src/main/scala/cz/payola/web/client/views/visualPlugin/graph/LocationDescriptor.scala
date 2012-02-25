@@ -1,6 +1,6 @@
-package cz.payola.web.client.views.graph
+package cz.payola.web.client.views.visualPlugin.graph
 
-import cz.payola.web.client.views.{Vector, Point}
+import cz.payola.web.client.views.visualPlugin.{Point, Vector}
 
 object LocationDescriptor {
 

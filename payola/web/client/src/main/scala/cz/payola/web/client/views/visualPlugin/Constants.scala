@@ -1,9 +1,10 @@
-package cz.payola.web.client.views
+package cz.payola.web.client.views.visualPlugin
 
 // TODO maybe consider moving these constants to classes/companion object somehow related to them. I think that
 // Color.Black, Color.Red etc. are OK to be placed to the Color companion object. On the other hand COLOR_VERTEX should
 // be placed in the Drawer class.
-object Constants {
+object Constants
+{
     val ColorEdge = new Color(150, 150, 150, 0.5)
 
     val ColorEdgeSelect = new Color(50, 50, 50, 1)

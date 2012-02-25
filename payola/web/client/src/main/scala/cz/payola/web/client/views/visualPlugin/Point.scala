@@ -1,6 +1,7 @@
-package cz.payola.web.client.views
+package cz.payola.web.client.views.visualPlugin
 
-case class Point(var x: Double, var y: Double) {
+case class Point(var x: Double, var y: Double)
+{
     def +(v: Vector): Point = {
         Point(x + v.x, y + v.y)
     }
@@ -8,7 +9,7 @@ case class Point(var x: Double, var y: Double) {
     def -(p: Point): Vector = {
         Vector(x - p.x, y - p.y)
     }
-    
+
     def <=(p: Point): Boolean = {
         x <= p.x && y <= p.y
     }
@@ -22,6 +23,7 @@ case class Point(var x: Double, var y: Double) {
     }
 }
 
-object Point {
+object Point
+{
     val Zero = Point(0, 0)
 }

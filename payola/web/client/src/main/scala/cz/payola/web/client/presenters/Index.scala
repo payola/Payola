@@ -1,19 +1,20 @@
 package cz.payola.web.client.presenters
 
 import s2js.adapters.js.browser._
-import cz.payola.web.client.views.graph.GraphView
 import cz.payola.common.rdf.Graph
 import cz.payola.web.client.model.graph.{SimpleGraph, SimpleEdge, SimpleIdentifiedVertex}
+import cz.payola.web.client.views.visualPlugin.drawingModels.treePath.TreePathModel
 
 class Index
 {
     val graphModel = initGraph()
 
-    val graphView = new GraphView(graphModel, document.getElementById("canvas-holder"))
+    val treePathModel = new TreePathModel(graphModel, document.getElementById("canvas-holder"))
 
     def init() {
-        graphView.init()
-        graphView.redrawAll();
+        treePathModel.init()
+        treePathModel.performModel()
+        treePathModel.redraw()
     }
 
     def initGraph(): Graph = {
