@@ -1,14 +1,6 @@
 package cz.payola.data
 
-class QueryResult(rdf: String, ttl: String) {
-    
-    def getRdf(): String = {
-        return rdf;
-    }
-
-    def getTtl(): String = {
-        return ttl;
-    }
+class QueryResult(var rdf: String, var ttl: String) {
     
     /**
      * Gets query result splitted into XML nodes. Each node represents one RDF triple.
@@ -17,6 +9,14 @@ class QueryResult(rdf: String, ttl: String) {
      */
     def getResultInNodes(): List[String] = {
         return spiltQueryResultToTriples();
+    }
+
+    def appendRdf(result : String) = {
+        rdf += result;
+    }
+
+    def appendTtl(result : String) = {
+        ttl += result;
     }
 
     /**

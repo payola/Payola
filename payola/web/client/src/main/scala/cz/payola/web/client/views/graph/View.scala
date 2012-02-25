@@ -5,7 +5,7 @@ import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom.{Element, Canvas, CanvasRenderingContext2D}
 
 trait View {
-    def draw(context: CanvasRenderingContext2D, color: Color, position: Point)
+    def draw(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point])
 
     /**
       * Draws a rectangle with rounded corners, depending on the radius parameter to the input canvas context.
@@ -51,7 +51,7 @@ trait View {
 
         context.closePath()
     }
-    
+
     protected def drawBezierCurve(context: CanvasRenderingContext2D, control1: Point, control2: Point,
         origin: Point, destination: Point, lineWidth: Double, color: Color) {
 
@@ -76,6 +76,17 @@ trait View {
         context.stroke()
     }
 
+    protected def drawCircle(context: CanvasRenderingContext2D, center: Point, radius: Double,
+        lineWidth: Double, color: Color) {
+
+        context.lineWidth = lineWidth
+        context.strokeStyle = color.toString
+
+        context.beginPath()
+        context.arc(center.x, center.y, radius, 0, scala.math.Pi*2, true)
+        context.stroke()
+    }
+
     protected def drawText(context: CanvasRenderingContext2D, text: String,  origin: Point,
         color: Color, font: String, align: String) {
 
@@ -90,5 +101,20 @@ trait View {
 
         context.fillStyle = color.toString
         context.fill()
+    }
+
+    protected def clear(context: CanvasRenderingContext2D, topLeft: Point, size: Vector) {
+        val bottomRight = topLeft + size
+        context.clearRect(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
+    }
+
+    protected def createLayer(container: Element): Layer = {
+        val canvas = document.createElement[Canvas]("canvas")
+        val context = canvas.getContext[CanvasRenderingContext2D]("2d")
+        val layer = new Layer(canvas, context)
+
+        container.appendChild(canvas)
+        layer.setSize(Vector(1500, 1500)) //TODO take it from the "created element"
+        layer
     }
 }

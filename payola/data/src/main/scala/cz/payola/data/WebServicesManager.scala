@@ -1,9 +1,12 @@
 package cz.payola.data
 
+import messages._
 import scala.collection.mutable
 
 class WebServicesManager extends IWebServiceManager {
     var webServices = mutable.Set[IPayolaWebService]();
+
+    var queryResult : QueryResult = new QueryResult("","");
 
     /**
      * Evaluates given SPARQL query.
@@ -13,28 +16,24 @@ class WebServicesManager extends IWebServiceManager {
      * @return returns result in String.
      */
     def evaluateSparqlQuery(query: String): QueryResult = {
-        val rdfResult = new StringBuilder();
-        val ttlResult = new StringBuilder();
+        ///*
+        // Compose message
+        val message = new QueryMessage(query);
 
-        // Get result from every initialized web service
-        // TODO: asynchronously?
+        // Asynchronously ask services for query result
         webServices.foreach(
             service =>
             {
-                val response = service.evaluateSparqlQuery(query);
-
-                // TODO: there must be a better way to do this
-                // There is a different handling of ttl and rdf response
-                if (response != null && response.size >= 0){
-                    if (response.startsWith("<?xml"))
-                        rdfResult.append(response);
-                    else
-                        ttlResult.append(response)
-                }
+                service ! message;
             }
         );
 
-        return new QueryResult(rdfResult.toString(), ttlResult.toString());
+        Thread.sleep(3000);
+
+        // Will be modified
+        println("Query executed.");
+        return new QueryResult(queryResult.rdf, queryResult.ttl);
+        // */
     }
 
     /**
@@ -55,10 +54,44 @@ class WebServicesManager extends IWebServiceManager {
     }
 
     /**
+      *  Initializes web services
+      */
+    def initialize() = {
+        // Start actor to process query result from webservices
+        start();
+
+        // Load available services list
+        initWebServices();
+    }
+
+    /**
      *  Fills webServices member with available web services
      */
-    def initWebServices() = {
-        webServices += new FakeRdfWebService();
-        webServices += new FakeTtlWebService();
+    private def initWebServices() = {
+        webServices += new FakeRdfWebService(this);
+        webServices += new FakeTtlWebService(this);
+        webServices += new VirtuosoWebService(this);
+
+        // Start all services actors
+        webServices.foreach(service => service.initialize());
+    }
+
+    def act() = {
+        loop {
+            react {
+                case x : QueryMessage =>
+                    println ("Manager (QM): ");
+
+                case x : ResultMessage =>
+                    if (x.result.startsWith("<?xml") || x.result.startsWith("<rdf"))
+                        queryResult.appendRdf(x.result);
+                    else
+                        queryResult.appendTtl(x.result);
+            }
+        }
+    }
+
+    def logError(message:String) = {
+        println(message);
     }
 }

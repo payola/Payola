@@ -9,7 +9,14 @@ object JSONSerializerOptions {
      * Pretty printing option adds tabs to make the output readable, which can
      * be used for debugging.
      *
-     * No other options available currently.
+     * Ignoring null values will skip fields that have a null value, otherwise 'null'
+     * would be written to output.
+     *
+     * By default, JSONSerializer assigns all objects an object ID (as an __objectID__
+     * field) in order to deal with cyclic dependencies and reducing the output size
+     * by referencing objects it's already encountered. This may be an undesired
+     * behavior, for example for the RDF graph serialization. Hence the skip object
+     * IDs option.
      */
 
     val JSONSerializerOptionCondensedPrinting = 0 << 0
@@ -252,35 +259,6 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
         builder.toString
     }
 
-    /** Serializes an "array" - i.e. an object that implements
-     *  the Iterable trait, yet isn't a map.
-     *
-     * @return JSON representation of obj.
-     */
-    private def _serializeIterable: String = {
-        val builder: StringBuilder = new StringBuilder("[")
-        if (prettyPrint)
-            builder.append('\n')
-        
-        // We know it is Iterable
-        val coll: Iterable[_] = obj.asInstanceOf[Iterable[_]]
-
-        // Need to keep track of index so that
-        // we don't add a comma after the first iteration
-        var index: Int = 0
-        coll foreach { item => {
-            _appendArrayItemToStringBuilder(item, builder, index == 0)
-            index += 1
-        }}
-
-        if (prettyPrint)
-            builder.append('\n')
-            
-        builder.append(']')
-        builder.toString
-    }
-    
-
     /** Serializes an object that implements
      *  the Map trait, yet isn't a map.
      *
@@ -292,7 +270,7 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
             builder.append('\n')
         
         // We know it is a Map[String, _]
-        val map: Iterable[(String, _)] = obj.asInstanceOf[Iterable[(String, _)]]
+        val map: scala.collection.Iterable[(String, _)] = obj.asInstanceOf[scala.collection.Iterable[(String, _)]]
 
         // Need to keep track of index so that
         // we don't add a comma after the first iteration
@@ -325,9 +303,9 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
             case _: java.lang.Boolean => if (obj.asInstanceOf[java.lang.Boolean].booleanValue) "true"
                                          else "false"
             case _: java.lang.Character => JSONUtilities.escapedChar(obj.asInstanceOf[java.lang.Character].charValue())
-            case _: scala.collection.immutable.Map[String, _] => _serializeMap
-            case _: scala.collection.mutable.Map[String, _] => _serializeMap
-            case _: Iterable[_] => _serializeIterable
+            case _: Option[_] => _serializeOption
+            case _: scala.collection.Map[String, _] => _serializeMap
+            case _: scala.collection.Traversable[_] => _serializeTraversable
             case _: Array[_] => _serializeArray
             case _: AnyRef => _serializePlainObject
             case _ => _serializePrimitiveType
@@ -343,7 +321,11 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
         _appendKeyValueToStringBuilder("__ref__", objectID, builder, true)
         builder.toString
     }
-    
+
+    /** The opposite of _serializeObjectAsReference.
+      * 
+      * @return obj serialized as value.
+      */
     private def _serializeObjectAsValue: String = {
         val builder: StringBuilder = new StringBuilder("")
 
@@ -372,8 +354,7 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
 
         if (obj.isInstanceOf[JSONSerializationAdditionalFields]){
             // Additional fields for the object
-            val map: Map[String, Any]
-            = obj.asInstanceOf[JSONSerializationAdditionalFields].additionalFieldsForJSONSerialization
+            val map: Map[String, Any] = obj.asInstanceOf[JSONSerializationAdditionalFields].additionalFieldsForJSONSerialization
             if (map.size != 0)
                 if (fields.size != 0)
                     builder.append(',')
@@ -388,6 +369,17 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
         }
 
         builder.toString
+    }
+    
+    
+    private def _serializeOption: String = {
+        val opt: Option[_] = obj.asInstanceOf[Option[_]]
+        if (opt.isEmpty){
+            "null"
+        }else{
+            val serializer = new JSONSerializer(opt.get, options, processedObjects)
+            serializer.stringValue
+        }
     }
 
     /** Serializes an object - generally AnyRef 
@@ -436,6 +428,34 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
         }
     }
 
+    /** Serializes an "array" - i.e. an object that implements
+      *  the Traversable trait, yet isn't a map.
+      *
+      * @return JSON representation of obj.
+      */
+    private def _serializeTraversable: String = {
+        val builder: StringBuilder = new StringBuilder("[")
+        if (prettyPrint)
+            builder.append('\n')
+
+        // We know it is Traversable
+        val coll: scala.collection.Traversable[_] = obj.asInstanceOf[scala.collection.Traversable[_]]
+
+        // Need to keep track of index so that
+        // we don't add a comma after the first iteration
+        var index: Int = 0
+        coll foreach { item => {
+            _appendArrayItemToStringBuilder(item, builder, index == 0)
+            index += 1
+        }}
+
+        if (prettyPrint)
+            builder.append('\n')
+
+        builder.append(']')
+        builder.toString
+    }
+    
     /** Serializes @obj to a JSON string.
      *
      * @return JSON representation of obj.

@@ -1,11 +1,12 @@
-package cz.payola.data;
+package cz.payola.data
 
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 
-class FakeRdfWebServiceTest extends FlatSpec with ShouldMatchers {
+class FakeRdfWebServiceTest extends FlatSpec with ShouldMatchers
+{
     "Fake webservice" should "return content from resources/data.xml file as query result." in {
-        val fakeWS = new FakeRdfWebService();
+        val fakeWS = new FakeRdfWebService(new WebServicesManager());
 
         val result = fakeWS.evaluateSparqlQuery("");
 

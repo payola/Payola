@@ -25,7 +25,7 @@
  * @define {boolean} Overridden to true by the compiler when --closure_pass
  *     or --mark_as_compiled is specified.
  */
-var COMPILED = true;
+var COMPILED = false;
 
 
 /**
@@ -87,7 +87,7 @@ goog.LOCALE = 'en';  // default to en
  *     "goog.package.part".
  */
 goog.provide = function(name) {
-  if (!COMPILED) {
+  if (!COMPILED && name !== 'goog') {
     // Ensure that the same namespace isn't provided twice. This is intended
     // to teach new developers that 'goog.provide' is effectively a variable
     // declaration. And when JSCompiler transforms goog.provide into a real
@@ -358,7 +358,7 @@ goog.global.CLOSURE_BASE_PATH;
  * the deps are written.
  * @type {boolean|undefined}
  */
-goog.global.CLOSURE_NO_DEPS;
+goog.global.CLOSURE_NO_DEPS = true;
 
 
 /**
