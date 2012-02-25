@@ -15,7 +15,8 @@ class Class(val fullName: String, val parentClassesJsArray: Any)
             return true;
         }
         for (var i in self.parentClassesJsArray) {
-            if (isSubClassOrEqual(s2js.classOf(parentClassesJsArray.parentClasses[i].prototype))) {
+            var parentClass = s2js.classOf(self.parentClassesJsArray[i].prototype)
+            if (parentClass.isSubClassOrEqual(classFullName)) {
                 return true;
             }
         }
