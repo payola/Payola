@@ -1,8 +1,9 @@
-package cz.payola.web.client.views
+package cz.payola.web.client.views.visualPlugin
 
 import scala.math._
 
-case class Vector(x: Double, y: Double) {
+case class Vector(x: Double, y: Double)
+{
     def +(v: Vector): Vector = {
         Vector(x + v.x, y + v.y)
     }
@@ -24,6 +25,6 @@ case class Vector(x: Double, y: Double) {
     }
 
     def length: Double = {
-        sqrt(pow(x, 2) + pow (y, 2))
+        sqrt(pow(x, 2) + pow(y, 2))
     }
 }

@@ -6,7 +6,7 @@ import java.util.{Calendar, Date}
 
 class FakeRdfWebService(manager : WebServicesManager) extends WebServiceBase(manager) {
     override def evaluateSparqlQuery(query: String): String = {
-        val generator: Random = new Random(Calendar.getInstance().getTimeInMillis)
+        val generator: Random = new Random(Calendar.getInstance().getTimeInMillis())
 
         val sourcePaths: Array[String] = Array("/data.xml", "/data2.xml")
         

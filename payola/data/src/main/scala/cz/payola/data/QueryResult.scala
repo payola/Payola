@@ -1,6 +1,6 @@
 package cz.payola.data
 
-class QueryResult(var rdf: String, var ttl: String) {
+class QueryResult(var rdf: String = "", var ttl: String = "") {
     
     /**
      * Gets query result splitted into XML nodes. Each node represents one RDF triple.

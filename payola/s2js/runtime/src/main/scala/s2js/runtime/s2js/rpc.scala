@@ -97,13 +97,12 @@ object Rpc
 
         for (var key in obj)
         {
+            if (key == "__class__") continue;
             result[key] = this.deserialize(obj[key]);
         }
-
-        console.log(result);
 
         return result;
 
     """)
-    def deserialize(obj: Object, desiredType: String = null): Object = null
+    def deserialize(obj: Object): Object = null
 }

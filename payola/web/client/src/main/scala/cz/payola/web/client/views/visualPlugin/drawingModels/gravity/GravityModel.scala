@@ -1,11 +1,13 @@
-package cz.payola.web.client.views.graph.algorithms.gravity
+package cz.payola.web.client.views.visualPlugin.graph.algorithms.gravity
 
 import collection.mutable.ListBuffer
-import cz.payola.web.client.views.graph.{EdgeView, VertexView}
-import cz.payola.web.client.views.Vector
-import cz.payola.web.client.views.graph.algorithms.AlgorithmBase
+import cz.payola.web.client.views.visualPlugin.graph.{EdgeView, VertexView}
+import cz.payola.web.client.views.visualPlugin.drawingModels.ModelBase
+import s2js.adapters.js.dom.Element
+import cz.payola.common.rdf.Graph
+import cz.payola.web.client.views.visualPlugin.Vector
 
-class GravityModel extends AlgorithmBase
+class GravityModel(graph: Graph, element: Element) extends ModelBase(graph, element)
 {
     /**
       * How much vertices push away each other
@@ -17,13 +19,13 @@ class GravityModel extends AlgorithmBase
       */
     private val attraction: Double = 0.05
 
-    def perform(vertexViews: ListBuffer[VertexView], edgeViews: ListBuffer[EdgeView]) {
-        treeLikeVerticesPositioning(vertexViews)
-        val vertexViewPacks = buildVertexViewsWorkingStructure(vertexViews)
-        val edgeViewPacks = buildEdgeViewsWorkingStructure(vertexViewPacks, edgeViews)
+    def performModel() {
+        basicTreeStructure(graphView.vertexViews)
+        val vertexViewPacks = buildVertexViewsWorkingStructure(graphView.vertexViews)
+        val edgeViewPacks = buildEdgeViewsWorkingStructure(vertexViewPacks, graphView.edgeViews)
         run(vertexViewPacks, edgeViewPacks)
-        moveGraphToUpperLeftCorner(vertexViews)
-        flip(vertexViews)
+        moveGraphToUpperLeftCorner(graphView.vertexViews)
+        flip(graphView.vertexViews)
     }
 
     private def buildVertexViewsWorkingStructure(vertexViews: ListBuffer[VertexView]): ListBuffer[VertexViewPack] = {

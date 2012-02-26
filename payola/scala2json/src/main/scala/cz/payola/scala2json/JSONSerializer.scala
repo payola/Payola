@@ -35,10 +35,14 @@ import JSONSerializerOptions._
 import java.lang.reflect.Field
 import scala.collection.mutable._
 
+@JSONUnnamedClass private class ConcreteArrayClassHolder {
+    @JSONFieldName(name = "__arrayClass__") var arrayClass: String = null
+    @JSONFieldName(name = "__value__") var value: scala.collection.Traversable[_] = null
+}
 
 class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptions,
                             val processedObjects: ArrayBuffer[Any] = new ArrayBuffer[Any]()) {
-
+    
     private val prettyPrint: Boolean = (options & JSONSerializerOptionPrettyPrinting) != 0
     private val ignoreNullValues: Boolean = (options & JSONSerializerOptionIgnoreNullValues) != 0
     private val skipObjectIDs: Boolean = (options & JSONSerializerOptionSkipObjectIDs) != 0
@@ -131,7 +135,21 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
             if (fieldValue == null && ignoreNullValues){
                 false
             }else{
-                _appendKeyValueToStringBuilder(fieldName, fieldValue, builder, isFirst)
+                val isConcreteArrayClass = _isConcreteArrayClassField(f)
+                val isTraversable = fieldValue.isInstanceOf[scala.collection.Traversable[_]]
+
+                if (isConcreteArrayClass && isTraversable){
+                    val holder = new ConcreteArrayClassHolder()
+                    holder.arrayClass = f.getAnnotation(classOf[JSONConcreteArrayClass]).className
+                    holder.value = fieldValue.asInstanceOf[scala.collection.Traversable[_]]
+                    val serializer = new JSONSerializer(holder, options, processedObjects)
+                    val separatorString = if (prettyPrint) " " else ""
+                    val fieldString = "\"" +fieldName + "\":" + separatorString + serializer.stringValue
+                    _appendStringArrayItemToStringBuilder(fieldString, builder, isFirst)
+                    
+                }else{
+                    _appendKeyValueToStringBuilder(fieldName, fieldValue, builder, isFirst)
+                }
                 true
             }
         }
@@ -164,7 +182,16 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
             serializedObj = serializedObj.replaceAllLiterally("\n", "\n\t")
         _appendStringArrayItemToStringBuilder("\"" + key + "\"" + separator + serializedObj, builder, isFirst)
     }
-    
+
+    /** Returns whether @f has a JSONConcreteArrayClass annotation.
+      *
+      * @param f The field.
+      *
+      * @return True or false.
+      */
+    private def _isConcreteArrayClassField(f: Field): Boolean = {
+        f.getAnnotation(classOf[JSONConcreteArrayClass]) != null
+    }
     
     /** Returns whether @f has a JSONTransient annotation.
      *

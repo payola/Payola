@@ -1,15 +1,12 @@
-package cz.payola.web.client.views.graph
+package cz.payola.web.client.views.visualPlugin.graph
 
-import algorithms.circlePath.CirclePathModel
-import algorithms.gravity.GravityModel
-import algorithms.pathLength.PathLengthModel
-import cz.payola.web.client.views.Constants._
 import collection.mutable.ListBuffer
 import s2js.adapters.js.dom.{Element, CanvasRenderingContext2D}
-import cz.payola.web.client.views.{Color, Point}
 import cz.payola.common.rdf.{Vertex, Graph}
+import cz.payola.web.client.views.visualPlugin.{Vector, RedrawOperation, Color, Point}
+import cz.payola.web.client.views.visualPlugin.Constants._
 
-class GraphView(val graphModel: Graph, val container: Element) extends View
+class GraphView(val graphModel: Graph, container: Element) extends View
 {
     /*The order in which are layers created determines their "z coordinate"
 (first created layer is on the bottom and last created one covers all the others).*/
@@ -29,24 +26,18 @@ class GraphView(val graphModel: Graph, val container: Element) extends View
 
     private val verticesSelectedTextLayer = createLayer(container)
 
-    private val topBlankLayer = createLayer(container)
+    val controlsLayer = createLayer(container)
 
     private val layers = List(
         edgesDeselectedLayer, edgesDeselectedTextLayer, edgesSelectedLayer, edgesSelectedTextLayer,
         verticesDeselectedLayer, verticesDeselectedTextLayer, verticesSelectedLayer, verticesSelectedTextLayer,
-        topBlankLayer)
-
-    private val controlsLayer = new Controls(this, topBlankLayer)
+        controlsLayer)
 
     val vertexViews = createVertexViews()
 
     val edgeViews = createEdges()
 
-    def init() {
-        controlsLayer.init()
-        val model = new CirclePathModel()
-        model.perform(vertexViews, edgeViews)
-    }
+    private var selectedCount = 0
 
     /**
       * Constructs a list of vertexViews based on the graphModel parameter.
@@ -93,15 +84,59 @@ class GraphView(val graphModel: Graph, val container: Element) extends View
         edgeViewsBuffer
     }
 
+
+    def moveAllSelectedVetrtices(difference: Vector) {
+        vertexViews.foreach { vertex =>
+            if(vertex.selected) {
+                vertex.position += difference
+            }
+        }
+    }
+
+    def deselectAll(): Boolean = {
+        var somethingChanged = false
+        if (selectedCount > 0) {
+            vertexViews.foreach {vertex =>
+                somethingChanged = deselectVertex(vertex) || somethingChanged
+            }
+            selectedCount = 0
+        }
+        somethingChanged
+    }
+
+    def deselectVertex(vertex: VertexView): Boolean = {
+        setVertexSelection(vertex, false)
+    }
+
+    def selectVertex(vertex: VertexView): Boolean = {
+        setVertexSelection(vertex, true)
+    }
+
+    def invertVertexSelection(vertex: VertexView): Boolean = {
+        setVertexSelection(vertex, !vertex.selected)
+    }
+
+    def setVertexSelection(vertex: VertexView, selected: Boolean): Boolean = {
+        if (vertex.selected != selected) {
+            selectedCount += (if (selected) 1 else -1)
+            vertex.selected = selected
+            true
+        } else {
+            false
+        }
+    }
+
+    def getTouchedVertex(point: Point): Option[VertexView] = {
+        vertexViews.find(v =>
+            isPointInRect(point, v.position + (VertexSize / -2), v.position + (VertexSize / 2)))
+    }
+
     private def findVertexView(vertexModel: Vertex): VertexView = {
         vertexViews.find(_.vertexModel.eq(vertexModel)).get
     }
 
     def draw(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point]) {
-        val positionCorrection = position match {
-            case None => Point.Zero
-            case _ => position.get
-        }
+        val positionCorrection = position.getOrElse(Point.Zero)
 
         vertexViews.foreach {vertexView =>
 
@@ -118,7 +153,7 @@ class GraphView(val graphModel: Graph, val container: Element) extends View
                     (edgeView.destinationView.eq(vertexView) && edgeView.originView.selected))) {
                 colorToUseVertex = ColorVertexMedium
                 colorToUseText = ColorTextHigh
-            } else if (controlsLayer.selectedCount == 0) {
+            } else if (selectedCount == 0) {
                 colorToUseVertex = ColorVertexDefault
                 colorToUseText = ColorTextHigh
             } else {
