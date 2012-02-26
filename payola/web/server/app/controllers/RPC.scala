@@ -16,7 +16,7 @@ object RPC extends Controller
         };
 
         params.toList.sortBy{_._2.head}
-        val paramList = params.values
+        val paramList = params.-("method").values
 
         val fqdn = params.get("method").getOrElse(null).head
 
@@ -49,7 +49,7 @@ object RPC extends Controller
         }
 
         val runnableObj = obj.getField("MODULE$").get(objectName)
-        val result = methodToRun.invoke(runnableObj, Array(new Integer(2), "foo"):_*)
+        val result = methodToRun.invoke(runnableObj, params.toArray:_*)
 
         val serializer = new JSONSerializer(result)
         serializer.stringValue

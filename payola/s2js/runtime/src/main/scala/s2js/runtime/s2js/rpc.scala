@@ -26,7 +26,6 @@ object Rpc
     @NativeJs("""
 
         var url = "/RPC";
-        var params = this.buildHttpQuery(parameters);
 
         var request = XMLHttpRequest  ? new XMLHttpRequest : new ActiveXObject('Msxml2.XMLHTTP');
         request.open("POST", url, false);
@@ -34,7 +33,14 @@ object Rpc
         //Send the proper header information along with the request
         request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
-        request.send("method="+procedureName+"&"+params);
+        if (parameters.length > 0)
+        {
+            var params = this.buildHttpQuery(parameters);
+            request.send("method="+procedureName+"&"+params);
+        }else{
+            request.send("method="+procedureName);
+        }
+
         if (request.readyState==4 && request.status==200)
         {
             return this.deserialize(eval("("+request.responseText+")"));
@@ -59,6 +65,17 @@ object Rpc
     def buildHttpQuery(params: Map[String, Object]): String = null
 
     @NativeJs("""
+
+        if (typeof(obj.__arrayClass__) !== "undefined")
+        {
+            var instance = eval("new "+(obj.__arrayClass__)+"()");
+            instance.internalJsArray = obj.__value__;
+            for(var k in instance.internalJsArray)
+            {
+                instance.internalJsArray[k] = this.deserialize(instance.internalJsArray[k]);
+            }
+        }
+
         if (Object.prototype.toString.call(obj) !== '[object Object]')
         {
             return obj;
@@ -88,5 +105,5 @@ object Rpc
         return result;
 
     """)
-    def deserialize(obj: Object): Object = null
+    def deserialize(obj: Object, desiredType: String = null): Object = null
 }

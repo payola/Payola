@@ -2,7 +2,7 @@ package cz.payola.web.client
 
 import s2js.adapters.js.browser._
 import cz.payola.web.shared.RpcTestRemote
-import cz.payola.common.rdf.{Graph}
+import cz.payola.common.rdf.Graph
 
 object RpcTestClient
 {
@@ -10,7 +10,7 @@ object RpcTestClient
         window.alert(RpcTestRemote.foo(123, "xyz"))
     }
 
-    def getRandomGraph:Graph = {
+    def getGraph: Graph = {
         RpcTestRemote.getRandomGraph
     }
 }

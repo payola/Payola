@@ -30,9 +30,6 @@
     <orderEntry type="library" name="com.hp.hpl.jena_iri_0.8" level="project" />
     <orderEntry type="library" name="com.ibm.icu_icu4j_3.4.4" level="project" />
     <orderEntry type="library" name="xerces_xercesImpl_2.7.1" level="project" />
-    <orderEntry type="library" name="org.slf4j_slf4j-api_1.5.8" level="project" />
-    <orderEntry type="library" name="org.slf4j_slf4j-log4j12_1.5.8" level="project" />
-    <orderEntry type="library" name="log4j_log4j_1.2.13" level="project" />
     <orderEntry type="library" scope="TEST" name="org.scalatest_scalatest_2.9.1_1.6.1" level="project" />
     <orderEntry type="module" module-name="scala2json" exported="" />
     <orderEntry type="module" module-name="common" exported="" />

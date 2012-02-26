@@ -109,5 +109,7 @@ class Index
                 e22, e23, e24, e25, e26, e27, e28, e29, e30, e31, e32, e33, e34, e35, e36, e37
             )
         )
+
+        RpcTestClient.getGraph
     }
 }
