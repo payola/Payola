@@ -1,4 +1,6 @@
 package cz.payola.data.messages
 
-class ResultMessage(val result : String) {
+import cz.payola.data.QueryResult
+
+class ResultMessage(val result : QueryResult, val id : Int) {
 }

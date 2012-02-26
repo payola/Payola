@@ -4,6 +4,7 @@ import collection.mutable
 import cz.payola.data.messages._
 
 abstract class WebServiceBase(manager : WebServicesManager) extends IPayolaWebService {
+    require(manager != null, "Web service manager should be specified!");
 
     def evaluateSparqlQuery(query: String): String;
 
@@ -13,14 +14,21 @@ abstract class WebServiceBase(manager : WebServicesManager) extends IPayolaWebSe
     }
 
     def act() = {
-        receive {
-            case x : QueryMessage =>
-                // Evaluate query and send result to the manager
-                manager ! new ResultMessage(evaluateSparqlQuery(x.query));
+        loop {
+            react {
+                case x : QueryMessage =>
+                    //println("Web service evaluates query with id:" + x.id);
+                    
+                    // Evaluate query and send result to the manager
+                    manager ! new ResultMessageFromWebService(evaluateSparqlQuery(x.query), x.id);
 
-            case msg =>
-                println("Service: (invalid)" + msg);
-                manager ! msg;
+                case x : StopMessage =>
+                    exit();
+
+                case msg =>
+                    println("Service: (invalid)" + msg);
+                    manager ! msg;
+            }
         }
     }
 }
