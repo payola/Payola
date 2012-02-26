@@ -1,9 +1,9 @@
-package cz.payola.web.client.views.graph
+package cz.payola.web.client.views.visualPlugin.graph
 
 import s2js.adapters.js.dom.CanvasRenderingContext2D
-import cz.payola.web.client.views.Constants._
-import cz.payola.web.client.views.{Color, Point}
+import cz.payola.web.client.views.visualPlugin.{Color, Point}
 import cz.payola.common.rdf.Edge
+import cz.payola.web.client.views.visualPlugin.Constants._
 
 private object Quadrant
 {
@@ -86,18 +86,11 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
         }
 
         val colorToUse = color match {
-            case None =>
-                isSelected match {
-                    case true => ColorEdgeSelect
-                    case false => ColorEdge
-                }
+            case None => if(isSelected) ColorEdgeSelect else  ColorEdge
             case _ => color.get
         }
 
-        val correction = positionCorrection match {
-            case None => Point(0, 0).toVector
-            case _ => positionCorrection.get.toVector
-        }
+        val correction = positionCorrection.getOrElse(Point.Zero).toVector
 
         drawStraightLine(context, A + correction, B + correction, EdgeWidth, colorToUse)
         /*drawBezierCurve(context, ctrl1 + correction, ctrl2 + correction, A + correction, B + correction,
