@@ -8,6 +8,7 @@ import java.security.MessageDigest
 import cz.payola.scala2json.annotations._
 import cz.payola.common._
 import com.hp.hpl.jena.rdf.model.{StmtIterator, Resource, ResIterator, ModelFactory, Property}
+import annotation.target.field
 
 object RDFGraph {
 
@@ -98,7 +99,8 @@ object RDFGraph {
 import RDFGraph._
 
 @JSONPoseableClass(otherClassName = "cz.payola.common.rdf.generic.Graph")
-class RDFGraph(val vertices: immutable.List[RDFNode], val edges: immutable.List[RDFEdge]) extends rdf.generic.Graph {
+class RDFGraph(@(JSONConcreteArrayClass @field)(className = "scala.collection.immutable.List") val vertices: immutable.List[RDFNode],
+    @(JSONConcreteArrayClass @field)(className = "scala.collection.immutable.List") val edges: immutable.List[RDFEdge]) extends rdf.generic.Graph {
 
     type EdgeType = RDFEdge
 
