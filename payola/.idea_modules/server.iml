@@ -19,8 +19,6 @@
       <sourceFolder url="file://$MODULE_DIR$/../web/server/test" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../web/server/test/resources" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/../web/server/target/scala-2.9.1/cache" />
-      <excludeFolder url="file://$MODULE_DIR$/../web/server/target/scala-2.9.1/classes" />
-      <excludeFolder url="file://$MODULE_DIR$/../web/server/target/scala-2.9.1/classes_managed" />
       <excludeFolder url="file://$MODULE_DIR$/../web/server/target/streams" />
     </content>
     <orderEntry type="inheritedJdk" />
@@ -62,8 +60,8 @@
     <orderEntry type="library" name="oauth.signpost_signpost-core_1.2.1.1" level="project" />
     <orderEntry type="library" name="commons-codec_commons-codec_1.3" level="project" />
     <orderEntry type="library" name="com.codahale_jerkson_2.9.1_0.5.0" level="project" />
-    <orderEntry type="library" name="org.codehaus.jackson_jackson-core-asl_1.9.4" level="project" />
-    <orderEntry type="library" name="org.codehaus.jackson_jackson-mapper-asl_1.9.4" level="project" />
+    <orderEntry type="library" name="org.codehaus.jackson_jackson-core-asl_1.9.5" level="project" />
+    <orderEntry type="library" name="org.codehaus.jackson_jackson-mapper-asl_1.9.5" level="project" />
     <orderEntry type="library" name="org.reflections_reflections_0.9.6" level="project" />
     <orderEntry type="library" name="com.google.guava_guava_10.0" level="project" />
     <orderEntry type="library" name="com.google.code.findbugs_jsr305_1.3.9" level="project" />
