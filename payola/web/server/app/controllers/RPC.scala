@@ -48,10 +48,31 @@ object RPC extends Controller
             throw new Exception
         }
 
+        val paramArray = new Array[java.lang.Object](params.size)
+        val types = methodToRun.getParameterTypes
+
+        var i = 0
+        params.foreach(x => {
+            paramArray.update(i, parseParam(x, types.apply(i)))
+            i = i+1
+        })
+
+
         val runnableObj = obj.getField("MODULE$").get(objectName)
-        val result = methodToRun.invoke(runnableObj, params.toArray:_*)
+        val result = methodToRun.invoke(runnableObj, paramArray:_*)
 
         val serializer = new JSONSerializer(result)
         serializer.stringValue
+    }
+
+    private def parseParam(input: Seq[String], paramType: Class[_]) : java.lang.Object = {
+
+        paramType.getName match {
+            case "Boolean" => java.lang.Boolean.parseBoolean(input.head) : java.lang.Boolean
+            case "java.lang.Boolean" => java.lang.Boolean.parseBoolean(input.head) : java.lang.Boolean
+            case "boolean" => java.lang.Boolean.parseBoolean(input.head) : java.lang.Boolean
+            case "Int" => java.lang.Integer.parseInt(input.head) : java.lang.Integer
+            case _ => input.head.toString : java.lang.String
+        }
     }
 }
