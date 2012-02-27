@@ -43,7 +43,18 @@ object Rpc
 
         if (request.readyState==4 && request.status==200)
         {
-            return this.deserialize(eval("("+request.responseText+")"));
+            var refQueue = [];
+            var objectRegistry = {};
+            var instance = this.deserialize(eval("("+request.responseText+")"), objectRegistry, refQueue);
+
+console.log(objectRegistry);
+
+            for (var k in refQueue)
+            {
+                refQueue[k].obj[refQueue[k].key] = objectRegistry[refQueue[k].refID];
+            }
+
+            return instance;
         }else{
             //throw new s2js.runtime.s2js.RPCException("RPC call exited with status code "+request.status);
         }
@@ -66,24 +77,30 @@ object Rpc
 
     @NativeJs("""
 
+        if (Object.prototype.toString.call(obj) !== '[object Object]')
+        {
+            return obj;
+        }
+
+        objectRegistry = objectRegistry || {};
+        var hash = obj.__objectID__;
+
         if (typeof(obj.__arrayClass__) !== "undefined")
         {
             var instance = eval("new "+(obj.__arrayClass__)+"()");
             instance.internalJsArray = obj.__value__;
             for(var k in instance.internalJsArray)
             {
-                instance.internalJsArray[k] = this.deserialize(instance.internalJsArray[k]);
+                instance.internalJsArray[k] = this.deserialize(instance.internalJsArray[k], objectRegistry, refQueue);
             }
-        }
-
-        if (Object.prototype.toString.call(obj) !== '[object Object]')
-        {
-            return obj;
+            objectRegistry[hash] = instance;
+            return instance;
         }
 
         var clazz = obj.__class__;
         if (typeof(clazz) === 'undefined')
         {
+            objectRegistry[hash] = obj;
             return obj;
         }
 
@@ -97,12 +114,22 @@ object Rpc
 
         for (var key in obj)
         {
-            if (key == "__class__") continue;
-            result[key] = this.deserialize(obj[key]);
+            if ((Object.prototype.toString.call(obj[key]) === '[object Object]') && (typeof(obj[key].__ref__) !== "undefined"))
+            {
+                refQueue.push({
+                    "obj": result,
+                    "key": key,
+                    "refID": obj[key].__ref__
+                });
+                continue;
+            }
+            if (key.match(/^__/)) continue;
+            result[key] = this.deserialize(obj[key], objectRegistry, refQueue);
         }
 
+        objectRegistry[hash] = result;
         return result;
 
     """)
-    def deserialize(obj: Object): Object = null
+    def deserialize(obj: Object, objectRegistry: Object = null, refQueue: Object = null): Object = null
 }

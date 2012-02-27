@@ -1,7 +1,7 @@
 package cz.payola.web.client.presenters
 
 import s2js.adapters.js.browser._
-import cz.payola.common.rdf.Graph
+import cz.payola.common.rdf.{ListItem, Graph}
 import cz.payola.web.client.model.graph.{SimpleGraph, SimpleEdge, SimpleIdentifiedVertex}
 import cz.payola.web.client.views.visualPlugin.drawingModels.treePath.TreePathModel
 import cz.payola.web.client.RpcTestClient
@@ -110,6 +110,26 @@ class Index
                 e22, e23, e24, e25, e26, e27, e28, e29, e30, e31, e32, e33, e34, e35, e36, e37
             )
         )
+
+        var listItem = RpcTestClient.getList
+
+   /*     while (listItem != null)
+        {
+            if (listItem.prev != null)
+            {
+                if (listItem.value != 2*(listItem.prev.value))
+                {
+                    window.alert("fail")
+                }
+            }
+
+            if (listItem.next != null)
+            {
+                listItem.next.value = 2*(listItem.value)
+            }
+
+            listItem = listItem.next
+        }              */
 
         RpcTestClient.getGraph
     }
