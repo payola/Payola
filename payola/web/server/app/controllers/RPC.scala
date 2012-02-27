@@ -72,6 +72,7 @@ object RPC extends Controller
             case "java.lang.Boolean" => java.lang.Boolean.parseBoolean(input.head) : java.lang.Boolean
             case "boolean" => java.lang.Boolean.parseBoolean(input.head) : java.lang.Boolean
             case "Int" => java.lang.Integer.parseInt(input.head) : java.lang.Integer
+            case "int" => java.lang.Integer.parseInt(input.head) : java.lang.Integer
             case _ => input.head.toString : java.lang.String
         }
     }
