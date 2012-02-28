@@ -220,7 +220,7 @@ object PayolaBuild extends Build
     lazy val webClientProject = ScalaToJsProject(
         "client", file("web/client"), WebSettings.javaScriptsDir, payolaSettings
     ).dependsOn(
-        commonProject, webSharedProject
+        commonProject, webSharedProject, s2JsRuntimeProject
     )
 
     lazy val webServerProject = PlayProject(

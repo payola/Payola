@@ -28,6 +28,14 @@ class Index
     }
 
     def initGraph(): Graph = {
-        GraphFetcher.getInitialGraph
+        /*try
+        { */
+            GraphFetcher.getInitialGraph
+        /*}catch {
+            case s2js.RPCException => {
+                window.alert("Failed to call RPC.")
+                null
+            }
+        }*/
     }
 }

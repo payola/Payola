@@ -1,6 +1,6 @@
 package s2js.runtime.s2js
 
-import s2js.compiler.{NativeJs}
+import s2js.compiler.{NativeJsDependency, NativeJs}
 
 object Rpc
 {
@@ -10,7 +10,8 @@ object Rpc
     //              a callSync v idealnim pripade vyhodit stejnou (asi otestovat, jestli typ vyjimky je v js definovan
     //              a pokud ne tak holt vyhodit generickou).
     //
-    //@NativeJsDependency("s2js.runtime.s2js.RPCException")
+
+    @NativeJsDependency("s2js.RPCException")
     @NativeJs("""
 
         var url = "/RPC";
@@ -42,7 +43,7 @@ object Rpc
 
             return instance;
         }else{
-            //throw new s2js.runtime.s2js.RPCException("RPC call exited with status code "+request.status);
+            throw new s2js.RPCException("RPC call exited with status code "+request.status);
         }
     """)
     def callSync(procedureName: String, parameters: Any): Any = ()
@@ -157,13 +158,26 @@ object Rpc
     def deserializeArrayClass(obj: Object, objectRegistry: Object = null, refQueue: Object = null): Object = null
 
     @NativeJs("""
-        // check if the type is already loaded
-        if (eval("typeof("+className+")") === 'undefined')
+
+        var namespaces = className.split(".");
+        var fqdn = "";
+
+        for (var k in namespaces)
         {
-            // if not, load it
-            //TODO
-            window.alert("Should load "+clazz);
-            return null;s
+            if (k > 0){
+                fqdn += ".";
+            }
+
+            fqdn += namespaces[k];
+
+            // check if the type is already loaded
+            if (eval("typeof("+fqdn+")") === 'undefined')
+            {
+                // if not, load it
+                //TODO
+                window.alert("Should load "+className+" (undefined "+ fqdn+")");
+                return null;
+            }
         }
 
         // make an instance of the desired type
