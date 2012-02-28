@@ -73,9 +73,20 @@ object RPC extends Controller
             case "boolean" => java.lang.Boolean.parseBoolean(input.head) : java.lang.Boolean
             case "Int" => java.lang.Integer.parseInt(input.head) : java.lang.Integer
             case "int" => java.lang.Integer.parseInt(input.head) : java.lang.Integer
-            case "char" => input.head.charAt(0)
-            case "Char" => input.head.charAt(0)
-            case "java.lang.Character" => input.head.charAt(0)
+            case "char" => input.head.charAt(0) : java.lang.Character
+            case "Char" => input.head.charAt(0) : java.lang.Character
+            case "java.lang.Character" => input.head.charAt(0) : java.lang.Character
+            case "Double" => java.lang.Double.parseDouble(input.head) : java.lang.Double
+            case "double" => java.lang.Double.parseDouble(input.head) : java.lang.Double
+            case "Double" => java.lang.Double.parseDouble(input.head) : java.lang.Double
+            case "Float" => java.lang.Float.parseFloat(input.head) : java.lang.Float
+            case "float" => java.lang.Float.parseFloat(input.head) : java.lang.Float
+            case "java.lang.Float" => java.lang.Float.parseFloat(input.head) : java.lang.Float
+            case "Array" =>  {
+                input.map(item => {
+                    parseParam(item, paramType.getTypeParameters.head)
+                })
+            }
             case _ => input.head.toString : java.lang.String
         }
     }
