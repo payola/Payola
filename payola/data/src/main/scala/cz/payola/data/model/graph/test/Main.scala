@@ -1,7 +1,8 @@
 package cz.payola.data.model.graph.test
 
-import actors.Actor
+/*import actors.Actor
 import cz.payola.data.WebServicesManager
+import cz.payola.data.rdf.messages.ResultMessage
 import cz.payola.data.messages.{StopMessage, ResultMessage}
 
 object Main extends Actor
@@ -47,4 +48,4 @@ object Main extends Actor
             }
         }
     }
-}
+}*/

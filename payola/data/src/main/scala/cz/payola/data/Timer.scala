@@ -2,7 +2,6 @@ package cz.payola.data
 
 import actors.Actor
 import actors.Actor._
-import messages.{StopMessage, TimerMessage}
 
 class Timer(receiver : Actor) extends Actor{
     def initialize() = {
@@ -10,6 +9,7 @@ class Timer(receiver : Actor) extends Actor{
     }
 
     def act() = {
+        /*
         receive {
             case x : TimerMessage =>
                 // Wait for given timeout (comes in seconds)
@@ -25,5 +25,6 @@ class Timer(receiver : Actor) extends Actor{
                 println("Timer: (invalid)" + msg);
                 receiver ! msg;
         }
+        */
     }
 }

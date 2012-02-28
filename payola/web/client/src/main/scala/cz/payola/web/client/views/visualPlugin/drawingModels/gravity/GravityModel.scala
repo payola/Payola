@@ -7,7 +7,7 @@ import s2js.adapters.js.dom.Element
 import cz.payola.common.rdf.Graph
 import cz.payola.web.client.views.visualPlugin.Vector
 
-class GravityModel(graph: Graph, element: Element) extends ModelBase(graph, element)
+class GravityModel extends ModelBase
 {
     /**
       * How much vertices push away each other
@@ -20,12 +20,12 @@ class GravityModel(graph: Graph, element: Element) extends ModelBase(graph, elem
     private val attraction: Double = 0.05
 
     def performModel() {
-        basicTreeStructure(graphView.vertexViews)
-        val vertexViewPacks = buildVertexViewsWorkingStructure(graphView.vertexViews)
-        val edgeViewPacks = buildEdgeViewsWorkingStructure(vertexViewPacks, graphView.edgeViews)
+        basicTreeStructure(graphView.get.vertexViews)
+        val vertexViewPacks = buildVertexViewsWorkingStructure(graphView.get.vertexViews)
+        val edgeViewPacks = buildEdgeViewsWorkingStructure(vertexViewPacks, graphView.get.edgeViews)
         run(vertexViewPacks, edgeViewPacks)
-        moveGraphToUpperLeftCorner(graphView.vertexViews)
-        flip(graphView.vertexViews)
+        moveGraphToUpperLeftCorner(graphView.get.vertexViews)
+        flip(graphView.get.vertexViews)
     }
 
     private def buildVertexViewsWorkingStructure(vertexViews: ListBuffer[VertexView]): ListBuffer[VertexViewPack] = {

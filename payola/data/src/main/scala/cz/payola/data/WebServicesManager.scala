@@ -1,10 +1,12 @@
 package cz.payola.data
-
+/*
 import messages._
 import scala.collection.mutable
 import actors.Actor
+import sparql.messages.ResultMessage
 
-class WebServicesManager(receiver : Actor) extends IWebServiceManager {
+class WebServicesManager(receiver : Actor) {
+
     require(receiver != null, "Web service manager should have receiver!");
 
     /**
@@ -157,11 +159,12 @@ class WebServicesManager(receiver : Actor) extends IWebServiceManager {
       *  Fills webServices member with available web services
       */
     private def initWebServices() = {
-        webServices += new FakeRdfWebService(this);
-        webServices += new FakeTtlWebService(this);
-        webServices += new VirtuosoWebService(this);
+        webServices += new FakeRdfDataSource(this);
+        webServices += new FakeTtlDataSource(this);
+        webServices += new VirtuosoDataSource(this);
 
         // Start all services actors
         webServices.foreach(service => service.initialize());
     }
 }
+*/

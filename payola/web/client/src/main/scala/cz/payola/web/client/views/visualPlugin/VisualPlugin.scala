@@ -6,19 +6,20 @@ import s2js.adapters.js.dom.Element
 import s2js.adapters.goog.events._
 import cz.payola.common.rdf.{Graph, Edge, Vertex}
 
-abstract class VisualPlugin(graph: Graph, element: Element) extends Plugin
+abstract class VisualPlugin extends Plugin
 {
     private var moveStart: Option[Point] = None
     
-    protected val graphView = new GraphView(graph, element)
+    var graphView: Option[GraphView] = None
 
-    def init() {
-        listen[BrowserEvent](graphView.controlsLayer.canvas, EventType.MOUSEDOWN, onMouseDown _)
-        listen[BrowserEvent](graphView.controlsLayer.canvas, EventType.MOUSEMOVE, onMouseMove _)
-        listen[BrowserEvent](graphView.controlsLayer.canvas, EventType.MOUSEUP, onMouseUp _)
+    def init(graph: Graph, container: Element) {
+        graphView = Some(new GraphView(graph, container))
+        listen[BrowserEvent](graphView.get.controlsLayer.canvas, EventType.MOUSEDOWN, onMouseDown _)
+        listen[BrowserEvent](graphView.get.controlsLayer.canvas, EventType.MOUSEMOVE, onMouseMove _)
+        listen[BrowserEvent](graphView.get.controlsLayer.canvas, EventType.MOUSEUP, onMouseUp _)
     }
 
-    def update(vertices: Seq[Vertex], edges: Seq[Edge]) {
+    def update(graph: Graph) {
 
     }
     
@@ -27,35 +28,35 @@ abstract class VisualPlugin(graph: Graph, element: Element) extends Plugin
     }
 
     def redraw() {
-        graphView.redrawAll()
+        graphView.get.redrawAll()
     }
 
     private def onMouseDown(event: BrowserEvent) {
         val position = Point(event.clientX, event.clientY)
-        val vertex = graphView.getTouchedVertex(position)
+        val vertex = graphView.get.getTouchedVertex(position)
         var needsToRedraw = false;
 
         // Mouse down near a vertex.
         if (vertex.isDefined) {
             if (event.shiftKey) {
-                needsToRedraw = graphView.invertVertexSelection(vertex.get) || needsToRedraw
+                needsToRedraw = graphView.get.invertVertexSelection(vertex.get) || needsToRedraw
             } else {
                 if (!vertex.get.selected) {
-                    needsToRedraw = graphView.deselectAll()
+                    needsToRedraw = graphView.get.deselectAll()
                 }
                 moveStart = Some(position)
-                needsToRedraw = graphView.selectVertex(vertex.get) || needsToRedraw
+                needsToRedraw = graphView.get.selectVertex(vertex.get) || needsToRedraw
             }
 
             // Mouse down somewhere in the inter-vertex space.
         } else {
             if (!event.shiftKey) {
-                needsToRedraw = graphView.deselectAll()
+                needsToRedraw = graphView.get.deselectAll()
             }
         }
 
         if (needsToRedraw) {
-            graphView.redraw(RedrawOperation.Selection)
+            graphView.get.redraw(RedrawOperation.Selection)
         }
     }
 
@@ -64,10 +65,10 @@ abstract class VisualPlugin(graph: Graph, element: Element) extends Plugin
             val end = Point(event.clientX, event.clientY)
             val difference = end - moveStart.get
 
-            graphView.moveAllSelectedVetrtices(difference)
+            graphView.get.moveAllSelectedVetrtices(difference)
 
             moveStart = Some(end)
-            graphView.redraw(RedrawOperation.Movement)
+            graphView.get.redraw(RedrawOperation.Movement)
         }
     }
 

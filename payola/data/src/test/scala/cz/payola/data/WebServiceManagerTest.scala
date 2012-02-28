@@ -3,6 +3,7 @@ package cz.payola.data
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 
+/*
 class WebServiceManagerTest extends FlatSpec with ShouldMatchers
 {
     val manager = new WebServicesManager();
@@ -34,3 +35,4 @@ class WebServiceManagerTest extends FlatSpec with ShouldMatchers
         // TODO:
     }
 }
+*/

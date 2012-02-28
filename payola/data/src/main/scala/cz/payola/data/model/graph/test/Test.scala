@@ -1,8 +1,8 @@
 package cz.payola.data.model.graph.test
-
+/*
 import cz.payola.data._
 import cz.payola.scala2json.{JSONSerializerOptions, JSONSerializer}
-import messages.{StopMessage, ResultMessage}
+import sparql.messages.ResultMessage
 import model.graph.RDFGraph
 import actors.Actor._
 import actors.Actor
@@ -49,4 +49,5 @@ object RDF2ScalaTest extends Actor {
         }
     }
 }
+*/
 

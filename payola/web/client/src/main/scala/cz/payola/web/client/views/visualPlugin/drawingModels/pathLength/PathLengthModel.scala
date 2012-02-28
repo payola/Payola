@@ -6,14 +6,14 @@ import cz.payola.web.client.views.visualPlugin.drawingModels.ModelBase
 import s2js.adapters.js.dom.Element
 import cz.payola.common.rdf.Graph
 
-class PathLengthModel(graph: Graph, element: Element) extends ModelBase(graph, element)
+class PathLengthModel extends ModelBase
 {
 
     //TODO add some computation branch cutting...this algorithm is quite complex
     def performModel() {
-        minimizeEdgeCrossing(graphView.vertexViews)
-        basicTreeStructure(graphView.vertexViews)
-        moveGraphToUpperLeftCorner(graphView.vertexViews)
+        minimizeEdgeCrossing(graphView.get.vertexViews)
+        basicTreeStructure(graphView.get.vertexViews)
+        moveGraphToUpperLeftCorner(graphView.get.vertexViews)
     }
 
     /**
