@@ -1,8 +1,9 @@
 package cz.payola.data.sparql
 
+import cz.payola.data.Timer
 import actors.Actor
 import collection.mutable.ListBuffer
-import messages.{ErrorMessage, ResultMessage}
+import messages.{TimeoutMessage, ErrorMessage, ResultMessage}
 
 class SparqlQueryExecutor(val query: String, val dataProvider: RdfDataProvider) extends Actor
 {
@@ -10,6 +11,10 @@ class SparqlQueryExecutor(val query: String, val dataProvider: RdfDataProvider) 
         val expectedResultCount = dataProvider.executeSparqlQuery(query, this)
         val results = new ListBuffer[String]
         var errors = new ListBuffer[Throwable]
+
+        // Create and start timer (20 sec.) for this query execution
+        val timer = new Timer(20000, this);
+        timer.start();
 
         loop {
             react {
@@ -21,14 +26,27 @@ class SparqlQueryExecutor(val query: String, val dataProvider: RdfDataProvider) 
                     errors += e
                     checkResult()
                 }
+                case TimeoutMessage => {
+                    println("Timeout!")
+                    sendResult()
+                }
+                case _ => {
+                    println("Invalid message.")
+                }
+                    
             }
         }
 
         def checkResult() {
             if (results.length + errors.length == expectedResultCount) {
-                println("Done with %s results and %s errors.".format(results.length, errors.length))
-                exit()
+                sendResult()
             }
+        }
+
+        def sendResult() {
+            println("Done with %s results and %s errors. Expected %s results"
+                .format(results.length, errors.length, expectedResultCount))
+            exit()
         }
     }
 }
