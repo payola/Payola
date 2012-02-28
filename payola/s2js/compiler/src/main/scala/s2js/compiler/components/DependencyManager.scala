@@ -79,7 +79,7 @@ class DependencyManager(private val packageDefCompiler: PackageDefCompiler)
       */
     private def retrieveClassDefStructure(classDef: Global#ClassDef) {
         // Remote objects aren't compiled
-        if (packageDefCompiler.getSymbolAnnotation(classDef.symbol, "remote").isEmpty) {
+        if (packageDefCompiler.getSymbolAnnotations(classDef.symbol, "remote").isEmpty) {
             val name = getStructureKey(classDef.symbol)
             val dependencies = new mutable.HashSet[String]
 

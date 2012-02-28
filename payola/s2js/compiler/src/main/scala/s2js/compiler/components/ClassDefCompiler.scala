@@ -574,7 +574,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
                 }
             }
             case Apply(select@Select(_, _), _) if select.hasSymbolWhich(_.isMethod) => {
-                if (select.qualifier.hasSymbolWhich(packageDefCompiler.getSymbolAnnotation(_, "remote").isDefined)) {
+                if (select.qualifier.hasSymbolWhich(packageDefCompiler.getSymbolAnnotations(_, "remote").nonEmpty)) {
                     compileRpcCall(select, apply)
                 } else {
                     compileSelect(select, isInsideApply = true)
@@ -1048,9 +1048,9 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
       *     annotation. Typically the action invokes direct compilation of the symbol.
       */
     private def compileSymbol(symbol: Global#Symbol)(ifNotNativeAction: => Unit) {
-        val nativeAnnotationInfo = packageDefCompiler.getSymbolAnnotation(symbol, "s2js.compiler.NativeJs")
-        if (nativeAnnotationInfo.isDefined) {
-            nativeAnnotationInfo.get.args.foreach {
+        val nativeAnnotations = packageDefCompiler.getSymbolAnnotations(symbol, "s2js.compiler.NativeJs")
+        if (nativeAnnotations.nonEmpty) {
+            nativeAnnotations.head.args.foreach {
                 case Literal(Constant(value: String)) => buffer += value
             }
         } else {
@@ -1058,9 +1058,9 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         }
 
         // Check for the NativeJsDependency annotation.
-        val annotation = packageDefCompiler.getSymbolAnnotation(symbol, "s2js.compiler.NativeJsDependency")
-        if (annotation.isDefined) {
-            annotation.get.args.foreach {
+        val dependencyAnnotations = packageDefCompiler.getSymbolAnnotations(symbol, "s2js.compiler.NativeJsDependency")
+        dependencyAnnotations.foreach{annotationInfo =>
+            annotationInfo.args.foreach {
                 case Literal(Constant(d: String)) => packageDefCompiler.dependencyManager.addRequiredSymbol(d)
             }
         }

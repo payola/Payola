@@ -56,13 +56,13 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
     }
 
     /**
-      * Returns the specified annotation info if the specified symbol is annotated with it.
+      * Returns a list of the specified annotation infos if the specified symbol is annotated with them.
       * @param symbol The symbol which should be annotated.
       * @param annotationTypeName Name of the annotation type.
-      * @return The annotation info if the specified symbol is annotated with it.
+      * @return The annotation infos.
       */
-    def getSymbolAnnotation(symbol: Global#Symbol, annotationTypeName: String): Option[Global#AnnotationInfo] = {
-        symbol.annotations.find(_.atp.toString == annotationTypeName)
+    def getSymbolAnnotations(symbol: Global#Symbol, annotationTypeName: String): List[Global#AnnotationInfo] = {
+        symbol.annotations.filter(_.atp.toString == annotationTypeName)
     }
 
     /**
