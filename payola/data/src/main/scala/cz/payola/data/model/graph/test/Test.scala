@@ -2,7 +2,8 @@ package cz.payola.data.model.graph.test
 
 import cz.payola.data._
 import cz.payola.scala2json.{JSONSerializerOptions, JSONSerializer}
-import messages.{StopMessage, ResultMessage}
+import rdf.messages.ResultMessage
+//import messages.{StopMessage, ResultMessage}
 import model.graph.RDFGraph
 import actors.Actor._
 import actors.Actor
@@ -10,7 +11,7 @@ import actors.Actor
 /**
   * This tester demonstrates RDF graph serialization to JSON.
   */
-object RDF2ScalaTest extends Actor {
+/*object RDF2ScalaTest extends Actor {
     val manager: WebServicesManager = new WebServicesManager(this);
 
     def main(args: Array[String]) {
@@ -48,5 +49,5 @@ object RDF2ScalaTest extends Actor {
                 println("Invalid message: " + msg);
         }
     }
-}
+}*/
 

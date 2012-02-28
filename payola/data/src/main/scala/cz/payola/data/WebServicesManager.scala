@@ -1,10 +1,12 @@
 package cz.payola.data
 
 import messages._
+import rdf.messages.ResultMessage
+import rdf.WebServiceManager
 import scala.collection.mutable
 import actors.Actor
 
-class WebServicesManager(receiver : Actor) extends IWebServiceManager {
+class WebServicesManager(receiver : Actor) extends WebServiceManager {
     require(receiver != null, "Web service manager should have receiver!");
 
     /**
