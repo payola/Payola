@@ -6,20 +6,15 @@ import cz.payola.web.client.views.Plugin
 import cz.payola.web.client.views.visualPlugin.drawingModels.treePath.TreePathModel
 import cz.payola.web.shared.GraphFetcher
 import s2js.compiler.NativeJsDependency
+import s2js.runtime.s2js.RPCException
 
+// TODO remove after classloading is done
+@NativeJsDependency("cz.payola.common.rdf.IdentifiedVertex")
+@NativeJsDependency("cz.payola.common.rdf.generic.Graph")
+@NativeJsDependency("cz.payola.common.rdf.generic.Edge")
 class Index
 {
-
-    //TODO (remove after #9 is done)
-    @NativeJsDependency("cz.payola.common.rdf.IdentifiedVertex")
-    val ___a = null
-    @NativeJsDependency("cz.payola.common.rdf.generic.Graph")
-    val ___b = null
-    @NativeJsDependency("cz.payola.common.rdf.generic.Edge")
-    val ___c = null
-
     var graphModel = initGraph()
-
 
     // TODO rename canvas-holder to something else.
     val pluginContainer = document.getElementById("canvas-holder")
@@ -30,7 +25,6 @@ class Index
     )
     
     var currentPlugin: Option[Plugin] = None
-
 
     def init() {
         changePlugin(plugins.head)
@@ -46,14 +40,17 @@ class Index
     }
 
     def initGraph(): Graph = {
-        /*try
-        { */
-            GraphFetcher.getInitialGraph
-        /*}catch {
-            case s2js.RPCException => {
-                window.alert("Failed to call RPC.")
+        try {
+            GraphFetcher.getInitialGraph()
+        } catch {
+            case e: RPCException => {
+                window.alert("Failed to call RPC. " + e.message)
                 null
             }
-        }*/
+            case e => {
+                window.alert("Graph fetch exception. " + e.toString)
+                null
+            }
+        }
     }
 }
