@@ -24,8 +24,7 @@ object JSONSerializerOptions {
     val JSONSerializerOptionIgnoreNullValues = 1 << 1
     val JSONSerializerOptionSkipObjectIDs = 1 << 2
 
-    val JSONSerializerDefaultOptions = (JSONSerializerOptionCondensedPrinting |
-                                                                 JSONSerializerOptionIgnoreNullValues)
+    val JSONSerializerDefaultOptions = JSONSerializerOptionCondensedPrinting
 }
 
 import cz.payola.scala2json.annotations._

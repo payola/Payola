@@ -192,8 +192,7 @@ object PayolaBuild extends Build
         "data", file("data"),
         settings = payolaSettings ++ Seq(
             libraryDependencies ++= Seq(
-                "joda-time" % "joda-time" % "2.0",
-                "com.hp.hpl.jena" % "jena" % "2.6.4"
+                "org.apache.jena" % "jena-core" % "2.7.0-incubating"
             )
         )
     ).dependsOn(
@@ -335,6 +334,6 @@ object PayolaBuild extends Build
             WebSettings.scriptEntryPoints.foreach(WebSettings.getEntryPointFile(_).delete())
         }
     ).dependsOn(
-        commonProject, webSharedProject, webClientProject, scala2JsonProject
+        commonProject, webSharedProject, webClientProject, scala2JsonProject, dataProject
     )
 }

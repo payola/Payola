@@ -1,13 +1,8 @@
 package s2js.runtime.scala
 
-import s2js.compiler.NativeJs
+object Int
+{
+    final val MinValue = -2147483648
 
-object Int {
-    @NativeJs("Math.pow(2, 53)")
-    final val MinValue = 0
-
-    @NativeJs("-Math.pow(2, 53)")
-    final val MaxValue = 1
-
-    override def toString = "object scala.Int"
+    final val MaxValue = 2147483647
 }

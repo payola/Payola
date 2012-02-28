@@ -29,7 +29,6 @@
           <root url="jar://$USER_HOME$/.ivy2/cache/javassist/javassist/jars/javassist-3.12.1.GA.jar!/" />
           <root url="jar://$USER_HOME$/.sbt/boot/scala-2.9.1/org.scala-tools.sbt/sbt/0.11.2/commons-httpclient-3.1.jar!/" />
           <root url="jar://$USER_HOME$/.ivy2/cache/org.scala-tools/scala-stm_2.9.1/jars/scala-stm_2.9.1-0.4.jar!/" />
-          <root url="jar://$USER_HOME$/.ivy2/cache/org.codehaus.jackson/jackson-core-asl/jars/jackson-core-asl-1.9.4.jar!/" />
           <root url="jar://$USER_HOME$/.ivy2/cache/com.google.guava/guava/jars/guava-10.0.1.jar!/" />
           <root url="jar://$USER_HOME$/.sbt/boot/scala-2.9.1/org.scala-tools.sbt/sbt/0.11.2/classfile_2.9.1-0.11.2.jar!/" />
           <root url="jar://$USER_HOME$/.ivy2/cache/commons-codec/commons-codec/jars/commons-codec-1.3.jar!/" />
@@ -42,7 +41,6 @@
           <root url="jar://$USER_HOME$/.ivy2/cache/org.slf4j/slf4j-api/jars/slf4j-api-1.6.4.jar!/" />
           <root url="jar://$USER_HOME$/.ivy2/cache/oauth.signpost/signpost-core/jars/signpost-core-1.2.1.1.jar!/" />
           <root url="jar://$USER_HOME$/.sbt/boot/scala-2.9.1/org.scala-tools.sbt/sbt/0.11.2/compile_2.9.1-0.11.2.jar!/" />
-          <root url="jar://$USER_HOME$/.ivy2/cache/org.codehaus.jackson/jackson-mapper-asl/jars/jackson-mapper-asl-1.9.4.jar!/" />
           <root url="jar://$USER_HOME$/.sbt/boot/scala-2.9.1/org.scala-tools.sbt/sbt/0.11.2/jline-0.9.94.jar!/" />
           <root url="jar://$USER_HOME$/.sbt/boot/scala-2.9.1/org.scala-tools.sbt/sbt/0.11.2/persist_2.9.1-0.11.2.jar!/" />
           <root url="jar://$USER_HOME$/.sbt/boot/scala-2.9.1/org.scala-tools.sbt/sbt/0.11.2/logging_2.9.1-0.11.2.jar!/" />
@@ -60,6 +58,7 @@
           <root url="jar://$USER_HOME$/.sbt/boot/scala-2.9.1/org.scala-tools.sbt/sbt/0.11.2/completion_2.9.1-0.11.2.jar!/" />
           <root url="jar://$USER_HOME$/.ivy2/cache/org.hibernate/hibernate-validator/jars/hibernate-validator-4.2.0.Final.jar!/" />
           <root url="jar://$USER_HOME$/.ivy2/cache/commons-lang/commons-lang/jars/commons-lang-2.6.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.codehaus.jackson/jackson-core-asl/jars/jackson-core-asl-1.9.5.jar!/" />
           <root url="jar://$USER_HOME$/.ivy2/cache/asm/asm-util/jars/asm-util-3.3.1.jar!/" />
           <root url="jar://$USER_HOME$/.ivy2/cache/joda-time/joda-time/jars/joda-time-2.0.jar!/" />
           <root url="jar://$USER_HOME$/.ivy2/cache/rhino/js/jars/js-1.7R2.jar!/" />
@@ -80,6 +79,7 @@
           <root url="jar://$USER_HOME$/.ivy2/cache/org.scalaz/scalaz-core_2.9.1/jars/scalaz-core_2.9.1-6.0.3.jar!/" />
           <root url="jar://$USER_HOME$/.ivy2/cache/javax.servlet/javax.servlet-api/jars/javax.servlet-api-3.0.1.jar!/" />
           <root url="jar://$USER_HOME$/.ivy2/cache/org.jboss.netty/netty/bundles/netty-3.2.7.Final.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.codehaus.jackson/jackson-mapper-asl/jars/jackson-mapper-asl-1.9.5.jar!/" />
           <root url="jar://$USER_HOME$/.sbt/boot/scala-2.9.1/org.scala-tools.sbt/sbt/0.11.2/tracking_2.9.1-0.11.2.jar!/" />
           <root url="jar://$USER_HOME$/.ivy2/cache/com.typesafe.akka/akka-slf4j/jars/akka-slf4j-2.0-M2.jar!/" />
           <root url="jar://$USER_HOME$/.sbt/boot/scala-2.9.1/org.scala-tools.sbt/sbt/0.11.2/process_2.9.1-0.11.2.jar!/" />
