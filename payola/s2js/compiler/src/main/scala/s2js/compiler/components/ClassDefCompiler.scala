@@ -595,14 +595,14 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
       */
     private def compileRpcCall (select: Global#Select, apply: Global#Apply) {
         // Add the required dependencies.
-        packageDefCompiler.dependencyManager.addRequiredSymbol("s2js.Rpc")
+        packageDefCompiler.dependencyManager.addRequiredSymbol("s2js.RPCWrapper")
         if (!typeIsPrimitive(apply.tpe)) {
             packageDefCompiler.dependencyManager.addRequiredSymbol(packageDefCompiler.getSymbolFullJsName(
                 apply.tpe.typeSymbol))
         }
 
         // Compile the call itself.
-        buffer += "s2js.Rpc.callSync('%s', ".format(select.toString)
+        buffer += "s2js.RPCWrapper.callSync('%s', ".format(select.toString)
         compileParameterValues(apply.args, asArray = true);
         buffer += ")"
     }
