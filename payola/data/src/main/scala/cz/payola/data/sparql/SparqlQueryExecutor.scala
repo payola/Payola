@@ -1,4 +1,4 @@
-package cz.payola.data.rdf
+package cz.payola.data.sparql
 
 import actors.Actor
 import collection.mutable.ListBuffer

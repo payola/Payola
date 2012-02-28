@@ -1,6 +1,6 @@
-package cz.payola.data.rdf.providers
+package cz.payola.data.sparql.providers
 
-import cz.payola.data.rdf.{SparqlQueryExecutor, RdfDataProvider}
+import cz.payola.data.sparql.{SparqlQueryExecutor, RdfDataProvider}
 
 class AggregateRdfDataProvider(val subProviders: List[RdfDataProvider]) extends RdfDataProvider
 {

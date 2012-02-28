@@ -1,3 +1,3 @@
-package cz.payola.data.rdf.messages
+package cz.payola.data.sparql.messages
 
 case class ErrorMessage(exception: Throwable)

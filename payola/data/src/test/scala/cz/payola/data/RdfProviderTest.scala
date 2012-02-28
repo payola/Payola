@@ -2,8 +2,8 @@ package cz.payola.data
 
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
-import rdf.providers.{AggregateRdfDataProvider, SingleSourceRdfDataProvider}
-import rdf.SparqlQueryExecutor
+import sparql.providers.{AggregateRdfDataProvider, SingleSourceRdfDataProvider}
+import sparql.SparqlQueryExecutor
 
 class RdfProviderTest extends FlatSpec with ShouldMatchers
 {

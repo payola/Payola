@@ -1,7 +1,7 @@
-package cz.payola.data.rdf.providers
+package cz.payola.data.sparql.providers
 
-import cz.payola.data.rdf.{SparqlQueryExecutor, RdfDataProvider}
-import cz.payola.data.rdf.messages.{ErrorMessage, ResultMessage}
+import cz.payola.data.sparql.{SparqlQueryExecutor, RdfDataProvider}
+import cz.payola.data.sparql.messages.{ErrorMessage, ResultMessage}
 
 trait SingleSourceRdfDataProvider extends RdfDataProvider
 {
