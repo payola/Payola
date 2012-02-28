@@ -1,13 +1,22 @@
 package cz.payola.web.client.presenters
 
 import s2js.adapters.js.browser._
-import cz.payola.common.rdf.{ListItem, Graph}
-import cz.payola.web.client.model.graph.{SimpleGraph, SimpleEdge, SimpleIdentifiedVertex}
+import cz.payola.common.rdf.Graph
 import cz.payola.web.client.views.visualPlugin.drawingModels.treePath.TreePathModel
-import cz.payola.web.client.RpcTestClient
+import cz.payola.web.shared.GraphFetcher
+import s2js.compiler.NativeJsDependency
 
 class Index
 {
+
+    //TODO (remove after #9 is done)
+    @NativeJsDependency("cz.payola.common.rdf.IdentifiedVertex")
+    val ___a = null
+    @NativeJsDependency("cz.payola.common.rdf.generic.Graph")
+    val ___b = null
+    @NativeJsDependency("cz.payola.common.rdf.generic.Edge")
+    val ___c = null
+
     val graphModel = initGraph()
 
     val treePathModel = new TreePathModel(graphModel, document.getElementById("canvas-holder"))
@@ -19,8 +28,6 @@ class Index
     }
 
     def initGraph(): Graph = {
-        // TODO retrieve the graph from the server using following call when RPC and server side is done.
-        // GraphFetcher.getInitialGraph
-        RpcTestClient.getGraph
+        GraphFetcher.getInitialGraph
     }
 }

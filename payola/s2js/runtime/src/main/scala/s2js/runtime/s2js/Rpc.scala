@@ -4,18 +4,6 @@ import s2js.compiler.{NativeJs}
 
 object Rpc
 {
-    // Do kompilatoru budu pridavat podporu pro takovyhle rozhrani:
-    //     procedureName jak jsme se bavili - plne kvalifikovane jmeno metody (napr. 'pkg.subpkg.o.foo')
-    //     parameters - Javasript object, napr. { foo: 1234, bar: "fsdsdfsd" }
-    //                  (spravne by typ parametru 'parameters' mel bejt neco jako JsObject, ale ten ani neplanuju
-    //                  implementovat, takze na miste, kde metodam predavam raw javascriptovej object nebo pole
-    //                  pouzivam Any. Map[String, Object] se nehodi, protoze na javascriptovym objektu nemuzes a ani
-    //                  bys nemel volat napr. filter(), kterej na Map zavolat jde.
-    //     navratova hodnota - navratova hodnota funkce deserializovana z jsonu.
-    //                       pro primitivni typy vratit primo je, pro objekty se musi konstruovat objektovej graf, coz
-    //                       bude hodne zalezet na charliem, jak bude resit reference apod. To jeste budeme muset
-    //                       probrat.
-    //                       - typ je opet Any, protoze to muze bejt cokoli. Kdyz nevraci nic, tak vracet undefined.
     //     vyjimky - pokud se neco nezdari, tak by to melo vyhazovat vyjimku. Zadefinuj si nejakou podobne
     //              jako je definovana s2js.runtime.scala.RuntimeExeption.
     //             - pokud invokovana metoda na serveru vyhodi vyjimku, tak by ji rpc controller mel nejak zabalit
@@ -47,8 +35,6 @@ object Rpc
             var objectRegistry = {};
             var instance = this.deserialize(eval("("+request.responseText+")"), objectRegistry, refQueue);
 
-console.log(objectRegistry);
-
             for (var k in refQueue)
             {
                 refQueue[k].obj[refQueue[k].key] = objectRegistry[refQueue[k].refID];
@@ -77,45 +63,57 @@ console.log(objectRegistry);
 
     @NativeJs("""
 
+        // check if the deserialized object is of type Object
         if (Object.prototype.toString.call(obj) !== '[object Object]')
         {
+            // if not, it is a scalar or an array, so return it
             return obj;
         }
 
+        // init object reference registry (reuse or create)
         objectRegistry = objectRegistry || {};
-        var hash = obj.__objectID__;
 
+        // handle collections carefully
         if (typeof(obj.__arrayClass__) !== "undefined")
         {
-            var instance = eval("new "+(obj.__arrayClass__)+"()");
-            instance.internalJsArray = obj.__value__;
-            for(var k in instance.internalJsArray)
-            {
-                instance.internalJsArray[k] = this.deserialize(instance.internalJsArray[k], objectRegistry, refQueue);
-            }
-            objectRegistry[hash] = instance;
-            return instance;
+            return this.deserializeArrayClass(obj, objectRegistry, refQueue);
         }
 
+        // a "typical" object, get its className
         var clazz = obj.__class__;
+
+        // if it doesn't have a className set, it is a anonymous object (or bug in serialization)
         if (typeof(clazz) === 'undefined')
         {
-            objectRegistry[hash] = obj;
+            // registrer based on objectID into the registry and return
+            objectRegistry[obj.__objectID__] = obj;
             return obj;
         }
 
-        if (eval("typeof(clazz)") === 'undefined')
+        var result = this.checkDefinedAndMakeInstance(clazz);
+        if (result == null)
         {
-            window.alert("Should load "+clazz);
-            //goog.load(class);
+            return obj;
         }
 
-        var result = eval("new "+clazz+"()");
+        this.deserializeProperties(obj, result, objectRegistry, refQueue);
 
+        // assign into the registry
+        objectRegistry[obj.__objectID__] = result;
+        return result;
+
+    """)
+    def deserialize(obj: Object, objectRegistry: Object = null, refQueue: Object = null): Object = null
+
+    @NativeJs("""
+        // deserialize via recursion, but be aware of references, which are probably not yet created,
+        // so add the "set reference" request into a queue to make it later
         for (var key in obj)
         {
+            // is it a reference?
             if ((Object.prototype.toString.call(obj[key]) === '[object Object]') && (typeof(obj[key].__ref__) !== "undefined"))
             {
+                // push the setRef task into the queue
                 refQueue.push({
                     "obj": result,
                     "key": key,
@@ -123,13 +121,54 @@ console.log(objectRegistry);
                 });
                 continue;
             }
+
+            // skip properties beginning with "__"
             if (key.match(/^__/)) continue;
+
+            // deserialize the object right now
             result[key] = this.deserialize(obj[key], objectRegistry, refQueue);
         }
-
-        objectRegistry[hash] = result;
-        return result;
-
     """)
-    def deserialize(obj: Object, objectRegistry: Object = null, refQueue: Object = null): Object = null
+    def deserializeProperties(obj: Object, result: Object, objectRegistry: Object, refQueue: Object) = null
+
+    @NativeJs("""
+        // create an instance of the collection class
+        var instance = this.checkDefinedAndMakeInstance(obj.__arrayClass__);
+        if (instance == null)
+        {
+            return obj;
+        }
+
+        // set the contents of the collection properly to the desired property
+        instance.internalJsArray = obj.__value__;
+
+        // deserialize members of the collection
+        for(var k in instance.internalJsArray)
+        {
+            instance.internalJsArray[k] = this.deserialize(instance.internalJsArray[k], objectRegistry, refQueue);
+        }
+
+        // register the object into the registry
+        objectRegistry[obj.__objectID__] = instance;
+
+        // done
+        return instance;
+    """)
+    def deserializeArrayClass(obj: Object, objectRegistry: Object = null, refQueue: Object = null): Object = null
+
+    @NativeJs("""
+        // check if the type is already loaded
+        if (eval("typeof("+className+")") === 'undefined')
+        {
+            // if not, load it
+            //TODO
+            window.alert("Should load "+clazz);
+            return null;s
+        }
+
+        // make an instance of the desired type
+        var result = eval("new "+className+"()");
+        return result;
+    """)
+    def checkDefinedAndMakeInstance(className: String) : Object = null
 }
