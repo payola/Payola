@@ -1,9 +1,7 @@
 package controllers
 
 import play.api.mvc._
-import cz.payola.web.shared._
 import java.lang.reflect.Method
-import collection.mutable.ListBuffer
 import cz.payola.scala2json.JSONSerializer
 
 object RPC extends Controller

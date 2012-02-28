@@ -51,8 +51,7 @@ object PayolaBuild extends Build
 
         /** Symbols used as entry points to the javascript application among all pages. */
         val scriptEntryPoints = Set(
-            "cz.payola.web.client.presenters.Index",
-            "cz.payola.web.client.RpcTestClient"
+            "cz.payola.web.client.presenters.Index"
         )
 
         /**
