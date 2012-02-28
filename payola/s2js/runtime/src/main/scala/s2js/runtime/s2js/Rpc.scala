@@ -1,6 +1,6 @@
 package s2js.runtime.s2js
 
-import s2js.compiler.{NativeJs,NativeJsDependency}
+import s2js.compiler.{NativeJs}
 
 object Rpc
 {
