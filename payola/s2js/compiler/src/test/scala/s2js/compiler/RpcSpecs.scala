@@ -1,6 +1,7 @@
 package s2js.compiler
 
-class RpcSpecs extends CompilerFixtureSpec {
+class RpcSpecs extends CompilerFixtureSpec
+{
     it("remote objects aren't compiled") {
         configMap =>
             scalaCode {

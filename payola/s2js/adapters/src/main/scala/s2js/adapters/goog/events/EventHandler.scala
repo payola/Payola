@@ -2,7 +2,8 @@ package s2js.adapters.goog.events
 
 import s2js.adapters.goog.Disposable
 
-class EventHandler(handler: AnyRef = null) extends Disposable {
+class EventHandler(handler: AnyRef = null) extends Disposable
+{
     def getListenerCount: Int = 0
 
     def handleEvent(e: Event) {}

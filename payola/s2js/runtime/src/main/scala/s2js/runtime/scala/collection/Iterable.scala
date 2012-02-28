@@ -2,7 +2,6 @@ package s2js.runtime.scala.collection
 
 import s2js.runtime.scala.util.control.Breaks._
 import s2js.runtime.scala.NotImplementedException
-import s2js.compiler.NativeJs
 
 // Type of the item doesn't need to be specified as it's compiled to JavaScript and erased by the compiler. In order to
 // easily support min, max etc. functions, the type Double is used as an item type.
@@ -111,7 +110,8 @@ trait Iterable
     def fold(z: Double)(op: (Double, Double) => Double): Double = foldLeft(z)(op)
 
     // From TraversableOnce
-    def aggregate(z: Double)(seqop: (Double, Double) => Double, combop: (Double, Double) => Double): Double = foldLeft(z)(seqop)
+    def aggregate(z: Double)(seqop: (Double, Double) => Double, combop: (Double, Double) => Double): Double = foldLeft(
+        z)(seqop)
 
     // From TraversableOnce
     def sum: Double = foldLeft(0)((x, y) => x + y)
@@ -167,7 +167,7 @@ trait Iterable
         } else if (!s2js.runtime.s2js.isUndefined(start)) {
             separator = start
         }
-        
+
         var first = true
         for (x <- this) {
             if (!first) {
@@ -374,7 +374,6 @@ trait Iterable
             sliceWithKnownDelta(n, Int.MaxValue, -n)
         }
     }
-
 
     // From TraversableLike
     def slice(from: Int, until: Int): Iterable = {

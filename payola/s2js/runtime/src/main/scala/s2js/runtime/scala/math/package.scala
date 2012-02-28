@@ -2,7 +2,8 @@ package s2js.runtime.scala.math
 
 import s2js.compiler.NativeJs
 
-object `package` {
+object `package`
+{
     @NativeJs("Math.E")
     val E: Double = 0
 

@@ -1,6 +1,5 @@
 package s2js.compiler
 
-
 class LiteralSpecs extends CompilerFixtureSpec
 {
     describe("Literals") {

@@ -1,6 +1,5 @@
 package s2js.compiler
 
-
 class DependencySpecs extends CompilerFixtureSpec
 {
     describe("Requires") {

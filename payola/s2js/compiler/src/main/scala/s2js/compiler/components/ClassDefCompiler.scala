@@ -506,26 +506,32 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
             case select@Select(qualifier, _) if symbolIsOperator(select.symbol) => {
                 compileOperator(qualifier, None, name)
             }
-            case s if selectIsPackageSelectChain(s) && packageDefCompiler.symbolPackageReplacement(s.symbol)
-                .isDefined => {
+            case select if selectIsPackageSelectChain(select) &&
+                packageDefCompiler.symbolPackageReplacement(select.symbol).isDefined => {
                 val name = packageDefCompiler.getSymbolJsName(select.symbol)
                 buffer += name + (if (name.isEmpty) "" else subSelectToken)
             }
             case Select(qualifier, _) => {
-                qualifier match {
-                    case subSelect@Select(_, _) => compileSelect(subSelect, true)
-                    case _ => {
-                        compileAst(qualifier)
-                        buffer += "."
+                val isMethodCall = !isInsideApply && select.hasSymbolWhich(s => s.isMethod && !s.isGetter)
+                if (isMethodCall && selectIsOnRemote(select)) {
+                    compileRpcCall(select, select.tpe, Nil)
+                } else {
+                    qualifier match {
+                        case subSelect@Select(_, _) => compileSelect(subSelect, true)
+                        case _ => {
+                            compileAst(qualifier)
+                            buffer += "."
+                        }
                     }
-                }
+                    buffer += name
 
-                // If the select is actually a method call, parentheses has to be added after the name.
-                buffer += name
-                if (!isInsideApply && select.hasSymbolWhich(s => s.isMethod && !s.isGetter)) {
-                    buffer += "()"
+                    // If the select is actually a method call, parentheses has to be added after the name.
+                    if (isMethodCall) {
+                        buffer += "()"
+                    }
+
+                    buffer += subSelectToken
                 }
-                buffer += subSelectToken
             }
         }
 
@@ -574,8 +580,8 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
                 }
             }
             case Apply(select@Select(_, _), _) if select.hasSymbolWhich(_.isMethod) => {
-                if (select.qualifier.hasSymbolWhich(packageDefCompiler.getSymbolAnnotations(_, "remote").nonEmpty)) {
-                    compileRpcCall(select, apply)
+                if (selectIsOnRemote(select)) {
+                    compileRpcCall(select, apply.tpe, apply.args)
                 } else {
                     compileSelect(select, isInsideApply = true)
                     compileParameterValues(apply.args)
@@ -589,21 +595,22 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-      * Compiles a RPC call (instead of method call).
+      * Compiles a RPC call (instead of a method call).
       * @param select The method selection from the remote object.
-      * @param apply The method application.
+      * @param returnType Return type of the RPC call.
+      * @param parameters The parameters.
       */
-    private def compileRpcCall (select: Global#Select, apply: Global#Apply) {
+    private def compileRpcCall(select: Global#Select, returnType: Global#Type, parameters: List[Global#Tree]) {
         // Add the required dependencies.
         packageDefCompiler.dependencyManager.addRequiredSymbol("s2js.RPCWrapper")
-        if (!typeIsPrimitive(apply.tpe)) {
+        if (!typeIsPrimitive(returnType)) {
             packageDefCompiler.dependencyManager.addRequiredSymbol(packageDefCompiler.getSymbolFullJsName(
-                apply.tpe.typeSymbol))
+                returnType.typeSymbol))
         }
 
         // Compile the call itself.
         buffer += "s2js.RPCWrapper.callSync('%s', ".format(select.toString)
-        compileParameterValues(apply.args, asArray = true);
+        compileParameterValues(parameters, asArray = true);
         buffer += ")"
     }
 
@@ -1020,8 +1027,9 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-      * Return whether the select is a chain of package selections (for example "pkgA.pkgB.pkgC").
+      * Returns whether the select is a chain of package selections (for example "pkgA.pkgB.pkgC").
       * @param select The select to check.
+      * @return True if the select is a chain of package selections, false otherwise.
       */
     private def selectIsPackageSelectChain(select: Global#Select): Boolean = {
         select.symbol.isPackage && (select.qualifier match {
@@ -1029,6 +1037,15 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
             case identifier: Global#Ident => identifier.symbol.isPackage
             case _ => false
         })
+    }
+
+    /**
+      * Returns whether the select is invoked on a remote object.
+      * @param select The select to check.
+      * @return True if the select is invoked on a remote object.
+      */
+    private def selectIsOnRemote(select: Global#Select): Boolean = {
+        select.qualifier.hasSymbolWhich(packageDefCompiler.getSymbolAnnotations(_, "remote").nonEmpty)
     }
 
     /**
@@ -1059,7 +1076,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
 
         // Check for the NativeJsDependency annotation.
         val dependencyAnnotations = packageDefCompiler.getSymbolAnnotations(symbol, "s2js.compiler.NativeJsDependency")
-        dependencyAnnotations.foreach{annotationInfo =>
+        dependencyAnnotations.foreach {annotationInfo =>
             annotationInfo.args.foreach {
                 case Literal(Constant(d: String)) => packageDefCompiler.dependencyManager.addRequiredSymbol(d)
             }

@@ -1,6 +1,7 @@
 package s2js.compiler
 
-class AnnotationSpecs extends CompilerFixtureSpec {
+class AnnotationSpecs extends CompilerFixtureSpec
+{
     describe("Annotations") {
         it("native class implementation is supported") {
             configMap =>

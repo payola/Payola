@@ -14,43 +14,41 @@ import s2js.runtime.s2js.RPCException
 @NativeJsDependency("cz.payola.common.rdf.generic.Edge")
 class Index
 {
-    var graphModel = initGraph()
-
-    // TODO rename canvas-holder to something else.
-    val pluginContainer = document.getElementById("canvas-holder")
+    var graph: Option[Graph] = None
 
     val plugins = List[Plugin](
         new TreePathModel()
         // ...
     )
-    
+
     var currentPlugin: Option[Plugin] = None
 
     def init() {
+        try {
+            graph = Option(GraphFetcher.getInitialGraph)
+        } catch {
+            case e: RPCException => {
+                window.alert("Failed to call RPC. " + e.message)
+                graph = None
+            }
+            case e => {
+                window.alert("Graph fetch exception. " + e.toString)
+                graph = None
+            }
+        }
+
         changePlugin(plugins.head)
     }
-    
+
     def changePlugin(plugin: Plugin) {
         currentPlugin.foreach(_.clean())
 
         // Switch to the new one.
         currentPlugin = Some(plugin)
-        plugin.init(graphModel, pluginContainer)
+        // TODO rename canvas-holder to something else.
+        // TODO don't init the plugin with the graph. Rather init it blank (so it may show something like
+        // "loading graph") and when the graph is successfully fetched, call update on the plugin.
+        plugin.init(graph.get, document.getElementById("canvas-holder"))
         plugin.redraw()
-    }
-
-    def initGraph(): Graph = {
-        try {
-            GraphFetcher.getInitialGraph()
-        } catch {
-            case e: RPCException => {
-                window.alert("Failed to call RPC. " + e.message)
-                null
-            }
-            case e => {
-                window.alert("Graph fetch exception. " + e.toString)
-                null
-            }
-        }
     }
 }

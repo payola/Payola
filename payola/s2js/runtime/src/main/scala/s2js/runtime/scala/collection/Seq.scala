@@ -73,7 +73,7 @@ trait Seq extends Iterable
     def indexWhere(p: Double => Boolean, from: Int = 0): Int = {
         var i = from
         breakable {() =>
-            drop(from).foreach{x =>
+            drop(from).foreach {x =>
                 if (p(x)) {
                     break
                 } else {

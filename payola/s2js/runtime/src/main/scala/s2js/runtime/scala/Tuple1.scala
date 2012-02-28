@@ -9,15 +9,13 @@
 
 package s2js.runtime.scala
 
-
 /** A tuple of 1 elements; the canonical representation of a [[scala.Product1]].
- *
- *  @constructor  Create a new tuple with 1 elements.
- *  @param  _1   Element 1 of this Tuple1
- */
+  *
+  * @constructor  Create a new tuple with 1 elements.
+  * @param _1   Element 1 of this Tuple1
+  */
 case class Tuple1[+T1](_1: T1)
-  extends Product1[T1]
+    extends Product1[T1]
 {
-  override def toString() = "(" + _1 + ")"
-
+    override def toString() = "(" + _1 + ")"
 }

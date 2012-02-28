@@ -1,6 +1,5 @@
 package s2js.compiler
 
-
 class FunctionSpecs extends CompilerFixtureSpec
 {
     describe("Functions") {

@@ -1,6 +1,7 @@
 package s2js.adapters.js.browser
 
-class Storage {
+class Storage
+{
     val length: Long = 0
 
     def key(index: Long): String = ""

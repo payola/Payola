@@ -2,7 +2,8 @@ package s2js.adapters.js.dom
 
 import s2js.adapters.js.browser.Window
 
-abstract class CanvasRenderingContext2D extends CanvasContext {
+abstract class CanvasRenderingContext2D extends CanvasContext
+{
     val canvas: Canvas
 
     var fillStyle: Any

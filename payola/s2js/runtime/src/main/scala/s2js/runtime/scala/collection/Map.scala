@@ -21,7 +21,7 @@ trait Map[A, B] extends Iterable
 
     @NativeJs("self.internalJsObject[x._1] = x._2;")
     def +=(x: Any) {}
-    
+
     def prepend(x: Any) {
         throw new s2js.runtime.scala.UnsupportedOperationException("Can't prepend to a Map.")
     }

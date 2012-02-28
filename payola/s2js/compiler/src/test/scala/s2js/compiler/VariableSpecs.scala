@@ -1,6 +1,5 @@
 package s2js.compiler
 
-
 class VariableSpecs extends CompilerFixtureSpec
 {
     describe("Variables") {

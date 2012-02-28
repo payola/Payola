@@ -1,6 +1,7 @@
 package s2js.adapters.goog.events
 
-object `package` {
+object `package`
+{
     def listen(src: AnyRef, eventType: String, fn: () => Any) {}
 
     def listen(src: AnyRef, eventTypes: List[String], fn: () => Any) {}

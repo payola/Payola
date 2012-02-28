@@ -1,6 +1,7 @@
 package s2js.adapters.goog.events
 
-object KeyCodes {
+object KeyCodes
+{
     val MAC_ENTER = 3
 
     val BACKSPACE = 8

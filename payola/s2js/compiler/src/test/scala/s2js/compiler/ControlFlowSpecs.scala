@@ -1,6 +1,7 @@
 package s2js.compiler
 
-class ControlFlowSpecs extends CompilerFixtureSpec {
+class ControlFlowSpecs extends CompilerFixtureSpec
+{
     describe("Loop statements") {
         it("while is supported") {
             configMap =>
@@ -563,8 +564,10 @@ class ControlFlowSpecs extends CompilerFixtureSpec {
                             return (function($selector$1) {
                                 if (s2js.isInstanceOf($selector$1, 'scala.Tuple3') && (true) && (true) &&
                                     (s2js.isInstanceOf($selector$1.productElement(2), 'scala.Tuple2') && (true) &&
-                                    (s2js.isInstanceOf($selector$1.productElement(2).productElement(1), 'scala.Tuple2') &&
-                                    (s2js.isInstanceOf($selector$1.productElement(2).productElement(1).productElement(0), 'scala.Int')) && (true)))) {
+                                    (s2js.isInstanceOf($selector$1.productElement(2).productElement(1),
+                                    'scala.Tuple2') &&
+                                    (s2js.isInstanceOf($selector$1.productElement(2).productElement(1).productElement
+                                    (0), 'scala.Int')) && (true)))) {
                                     var bound1 = $selector$1.productElement(2).productElement(1).productElement(0);
                                     var bound2 = $selector$1.productElement(2).productElement(1).productElement(1);
                                     return 123;
@@ -572,9 +575,11 @@ class ControlFlowSpecs extends CompilerFixtureSpec {
                                 if (s2js.isInstanceOf($selector$1, 'scala.Some') &&
                                     (s2js.isInstanceOf($selector$1.productElement(0), 'scala.Tuple2') && (true) &&
                                     (s2js.isInstanceOf($selector$1.productElement(0).productElement(1), 'scala.Some') &&
-                                    (s2js.isInstanceOf($selector$1.productElement(0).productElement(1).productElement(0), 'scala.Tuple5') &&
+                                    (s2js.isInstanceOf($selector$1.productElement(0).productElement(1).productElement
+                                    (0), 'scala.Tuple5') &&
                                     (true) && (true) && (true) && (true) && (true))))) {
-                                    var q = $selector$1.productElement(0).productElement(1).productElement(0).productElement(2);
+                                    var q = $selector$1.productElement(0).productElement(1).productElement(0)
+                                    .productElement(2);
                                     return 456;
                                 }
                                 if (true) {

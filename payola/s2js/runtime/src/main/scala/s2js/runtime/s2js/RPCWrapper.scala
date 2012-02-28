@@ -112,7 +112,8 @@ object RPCWrapper
         for (var key in obj)
         {
             // is it a reference?
-            if ((Object.prototype.toString.call(obj[key]) === '[object Object]') && (typeof(obj[key].__ref__) !== "undefined"))
+            if ((Object.prototype.toString.call(obj[key]) === '[object Object]') && (typeof(obj[key].__ref__) !==
+            "undefined"))
             {
                 // push the setRef task into the queue
                 refQueue.push({
@@ -184,5 +185,5 @@ object RPCWrapper
         var result = eval("new "+className+"()");
         return result;
     """)
-    def checkDefinedAndMakeInstance(className: String) : Object = null
+    def checkDefinedAndMakeInstance(className: String): Object = null
 }

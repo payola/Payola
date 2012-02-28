@@ -1,6 +1,7 @@
 package s2js.adapters.js.dom
 
-abstract class ImageData {
+abstract class ImageData
+{
     //TODO: unsigned long
     val width: Long
 

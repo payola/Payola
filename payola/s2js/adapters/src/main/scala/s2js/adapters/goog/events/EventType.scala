@@ -1,6 +1,7 @@
 package s2js.adapters.goog.events
 
-object EventType {
+object EventType
+{
     val CLICK = "click"
 
     val DBLCLICK = "dblclick"

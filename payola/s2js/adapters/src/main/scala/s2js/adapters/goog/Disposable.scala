@@ -1,6 +1,7 @@
 package s2js.adapters.goog
 
-class Disposable {
+class Disposable
+{
     def dispose() {}
 
     def isDisposed: Boolean = false

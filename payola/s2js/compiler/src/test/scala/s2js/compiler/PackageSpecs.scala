@@ -1,6 +1,5 @@
 package s2js.compiler
 
-
 class PackageSpecs extends CompilerFixtureSpec
 {
     describe("Packages") {

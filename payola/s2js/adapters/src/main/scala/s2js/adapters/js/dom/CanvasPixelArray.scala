@@ -1,6 +1,7 @@
 package s2js.adapters.js.dom
 
-abstract class CanvasPixelArray {
+abstract class CanvasPixelArray
+{
     val length: Long
 
     // TODO: octet retval

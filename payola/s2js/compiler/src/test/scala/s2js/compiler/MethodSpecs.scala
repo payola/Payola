@@ -1,7 +1,55 @@
 package s2js.compiler
 
-class MethodSpecs extends CompilerFixtureSpec {
+class MethodSpecs extends CompilerFixtureSpec
+{
     describe("Method calls") {
+        it("parentheses can be omitted") {
+            configMap =>
+                scalaCode {
+                    """
+                        object o1 {
+                            def m: String = "foo"
+                        }
+
+                        object o2 {
+                            def m: String = "bar"
+                            def n {}
+                            def m3() {
+                                n
+                                val x = m
+                                val y = o1.m
+                                val z = o1.m.length
+                            }
+                        }
+                    """
+                } shouldCompileTo {
+                    """
+                        goog.provide('o1');
+                        goog.provide('o2');
+
+                        o1.m = function() {
+                            var self = this;
+                            return 'foo';
+                        };
+                        o1.__class__ = new s2js.Class('o1', []);
+
+                        o2.m = function() {
+                            var self = this;
+                            return 'bar';
+                        };
+                        o2.n = function() { var self = this; };
+                        o2.m3 = function() {
+                            var self = this;
+                            self.n();
+                            var x = self.m();
+                            var y = o1.m();
+                            var z = o1.m().length();
+                        };
+                        o2.__class__ = new s2js.Class('o2', []);
+                    """
+                }
+        }
+
         it("default parameters are supported") {
             configMap =>
                 scalaCode {
@@ -167,7 +215,7 @@ class MethodSpecs extends CompilerFixtureSpec {
                 }
         }
 
-         it("can call a method of returned object") {
+        it("can call a method of returned object") {
             configMap =>
                 scalaCode {
                     """
@@ -212,35 +260,35 @@ class MethodSpecs extends CompilerFixtureSpec {
         it("can have multiple parameter lists") {
             configMap =>
                 scalaCode {
-                """
-                    import s2js.adapters.js.browser._
+                    """
+                        import s2js.adapters.js.browser._
 
-                    object o1 {
-                        def m1(name: String)(fn: (String) => Unit) {
-                            fn(name)
-                        }
-                        def m3() {
-                            m1("foo") {
-                                x => window.alert(x)
+                        object o1 {
+                            def m1(name: String)(fn: (String) => Unit) {
+                                fn(name)
+                            }
+                            def m3() {
+                                m1("foo") {
+                                    x => window.alert(x)
+                                }
                             }
                         }
-                    }
-                """
+                    """
                 } shouldCompileTo {
-                """
-                    goog.provide('o1');
+                    """
+                        goog.provide('o1');
 
-                    o1.m1 = function(name, fn) {
-                        var self = this;
-                        fn(name);
-                    };
+                        o1.m1 = function(name, fn) {
+                            var self = this;
+                            fn(name);
+                        };
 
-                    o1.m3 = function() {
-                        var self = this;
-                        self.m1('foo', function(x) { window.alert(x); });
-                    };
-                    o1.__class__ = new s2js.Class('o1', []);
-                """
+                        o1.m3 = function() {
+                            var self = this;
+                            self.m1('foo', function(x) { window.alert(x); });
+                        };
+                        o1.__class__ = new s2js.Class('o1', []);
+                    """
                 }
         }
 
@@ -397,12 +445,14 @@ class MethodSpecs extends CompilerFixtureSpec {
 
                         o.m1 = function() {
                             var self = this;
-                            var x = scala.collection.immutable.List.fromJsArray([].splice.call(arguments, 0, arguments.length - 0));
+                            var x = scala.collection.immutable.List.fromJsArray([].splice.call(arguments, 0,
+                            arguments.length - 0));
                             x.foreach(function(i) { window.alert(i); });
                         };
                         o.m2 = function(a, b) {
                             var self = this;
-                            var x = scala.collection.immutable.List.fromJsArray([].splice.call(arguments, 2, arguments.length - 2));
+                            var x = scala.collection.immutable.List.fromJsArray([].splice.call(arguments, 2,
+                            arguments.length - 2));
                             x.foreach(function(i) { window.alert((a + (b + i))); });
                         };
                         o.test = function() {

@@ -15,8 +15,11 @@ class List extends s2js.runtime.scala.collection.Seq
     def newInstance = List.empty
 }
 
-object Nil extends List {
+object Nil extends List
+{
     override def isEmpty = true
+
     override def head: Nothing = throw new s2js.runtime.scala.NoSuchElementException("head of empty list")
+
     override def tail: List = throw new s2js.runtime.scala.UnsupportedOperationException("tail of empty list")
 }

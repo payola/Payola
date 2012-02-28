@@ -1,5 +1,6 @@
 package s2js.adapters.goog
 
-object `package` {
+object `package`
+{
     def typeOf(anObject: Any): String = ""
 }

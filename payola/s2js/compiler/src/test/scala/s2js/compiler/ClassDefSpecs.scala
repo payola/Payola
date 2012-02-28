@@ -1,6 +1,5 @@
 package s2js.compiler
 
-
 class ClassDefSpecs extends CompilerFixtureSpec
 {
     describe("Traits") {

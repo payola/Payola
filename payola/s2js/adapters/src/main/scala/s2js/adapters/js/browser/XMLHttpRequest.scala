@@ -1,6 +1,7 @@
 package s2js.adapters.js.browser
 
-class XMLHttpRequest {
+class XMLHttpRequest
+{
     var readyState: Int = 0
 
     var responseText: String = ""

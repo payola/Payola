@@ -2,7 +2,8 @@ package s2js.runtime.scala
 
 import s2js.compiler.NativeJs
 
-object Double {
+object Double
+{
     @NativeJs("Number.MIN_VALUE")
     final val MinPositiveValue = java.lang.Double.MIN_VALUE
 

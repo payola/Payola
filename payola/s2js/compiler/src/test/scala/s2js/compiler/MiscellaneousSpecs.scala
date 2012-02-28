@@ -1,6 +1,5 @@
 package s2js.compiler
 
-
 class MiscellaneousSpecs extends CompilerFixtureSpec
 {
     it("conversion methods between numeric types are ignored") {
@@ -38,66 +37,66 @@ class MiscellaneousSpecs extends CompilerFixtureSpec
                 """
             }
     }
-	
-	it("Custom operators are supported and default operators are not overriden.") {
-		configMap =>
-			scalaCode {
-				"""
-					class A {
-						def +(x: A): A = new A
-						def -(x: A): A = new A
-						def *(x: A): A = new A
-						def unary_!(): A = new A
-					}
 
-					object o {
-						def m() {
-							val a = new A() + new A() - new A() * new A()
-							val b = ! new A()
-							val c = a eq b
-							val d = a ne b
-							val e = a == b
-							val f = a != b
-						}
-					}
-				"""
-			} shouldCompileTo {
-				"""
-					goog.provide('A');
-					goog.provide('o');
-					
-					A = function() {
-						var self = this;
-					};
-					A.prototype.$plus = function(x) {
-                        var self = this;
-                        return new A();
-					};
-					A.prototype.$minus = function(x) {
-					    var self = this;
-					    return new A();
-                    };
-					A.prototype.$times = function(x) {
-					    var self = this;
-					    return new A();
-                    };
-					A.prototype.unary_$bang = function() {
-					    var self = this;
-					    return new A();
-                    };
-					A.prototype.__class__ = new s2js.Class('A', []);
-					
-					o.m = function() {
-						var self = this;
-						var a = new A().$plus(new A()).$minus(new A().$times(new A()));
-						var b = new A().unary_$bang();
-						var c = (a === b);
-						var d = (a !== b);
-						var e = (a == b);
-						var f = (a != b);
-					};
-					o.__class__ = new s2js.Class('o', []);
-				"""
-			}
-	}
+    it("Custom operators are supported and default operators are not overriden.") {
+        configMap =>
+            scalaCode {
+                """
+                        class A {
+                            def +(x: A): A = new A
+                            def -(x: A): A = new A
+                            def *(x: A): A = new A
+                            def unary_!(): A = new A
+                        }
+
+                        object o {
+                            def m() {
+                                val a = new A() + new A() - new A() * new A()
+                                val b = ! new A()
+                                val c = a eq b
+                                val d = a ne b
+                                val e = a == b
+                                val f = a != b
+                            }
+                        }
+                    """
+            } shouldCompileTo {
+                """
+                        goog.provide('A');
+                        goog.provide('o');
+
+                        A = function() {
+                            var self = this;
+                        };
+                        A.prototype.$plus = function(x) {
+                            var self = this;
+                            return new A();
+                        };
+                        A.prototype.$minus = function(x) {
+                            var self = this;
+                            return new A();
+                        };
+                        A.prototype.$times = function(x) {
+                            var self = this;
+                            return new A();
+                        };
+                        A.prototype.unary_$bang = function() {
+                            var self = this;
+                            return new A();
+                        };
+                        A.prototype.__class__ = new s2js.Class('A', []);
+
+                        o.m = function() {
+                            var self = this;
+                            var a = new A().$plus(new A()).$minus(new A().$times(new A()));
+                            var b = new A().unary_$bang();
+                            var c = (a === b);
+                            var d = (a !== b);
+                            var e = (a == b);
+                            var f = (a != b);
+                        };
+                        o.__class__ = new s2js.Class('o', []);
+                    """
+            }
+    }
 }

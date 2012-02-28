@@ -2,7 +2,8 @@ package s2js.adapters.goog
 
 import s2js.adapters.goog.events.EventTarget
 
-class Timer(interval: Int, timerObject: AnyRef = null) extends EventTarget {
+class Timer(interval: Int, timerObject: AnyRef = null) extends EventTarget
+{
     val enabled: Boolean = false
 
     def dispatchTick() {}
@@ -16,7 +17,8 @@ class Timer(interval: Int, timerObject: AnyRef = null) extends EventTarget {
     def stop() {}
 }
 
-object Timer {
+object Timer
+{
     val intervalScale = 0.8
 
     val TICK = "tick"

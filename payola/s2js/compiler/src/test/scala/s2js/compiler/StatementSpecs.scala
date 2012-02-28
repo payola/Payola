@@ -1,6 +1,5 @@
 package s2js.compiler
 
-
 class StatementSpecs extends CompilerFixtureSpec
 {
     describe("Statements") {
