@@ -4,11 +4,11 @@ import cz.payola.web.client.views.visualPlugin.drawingModels.ModelBase
 import s2js.adapters.js.dom.Element
 import cz.payola.common.rdf.Graph
 
-class CirclePathModel(graph: Graph, element: Element) extends ModelBase(graph, element)
+class CirclePathModel extends ModelBase
 {
     def performModel() {
-        basicTreeCircledStructure(graphView.vertexViews)
-        moveGraphToUpperLeftCorner(graphView.vertexViews)
-        flip(graphView.vertexViews)
+        basicTreeCircledStructure(graphView.get.vertexViews)
+        moveGraphToUpperLeftCorner(graphView.get.vertexViews)
+        flip(graphView.get.vertexViews)
     }
 }

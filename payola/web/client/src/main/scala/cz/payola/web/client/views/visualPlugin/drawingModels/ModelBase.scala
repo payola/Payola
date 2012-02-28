@@ -6,7 +6,7 @@ import s2js.adapters.js.dom.Element
 import cz.payola.common.rdf.Graph
 import cz.payola.web.client.views.visualPlugin.graph.{EdgeView, VertexView}
 
-abstract class ModelBase(graph: Graph, element: Element) extends VisualPlugin(graph, element)
+abstract class ModelBase extends VisualPlugin
 {
     def performModel()
 

@@ -3,18 +3,36 @@ package cz.payola.web.client.presenters
 import s2js.adapters.js.browser._
 import cz.payola.common.rdf.Graph
 import cz.payola.web.client.model.graph.{SimpleGraph, SimpleEdge, SimpleIdentifiedVertex}
+import cz.payola.web.client.views.Plugin
 import cz.payola.web.client.views.visualPlugin.drawingModels.treePath.TreePathModel
 
 class Index
 {
-    val graphModel = initGraph()
+    var graphModel = initGraph()
 
-    val treePathModel = new TreePathModel(graphModel, document.getElementById("canvas-holder"))
+
+    // TODO rename canvas-holder to something else.
+    val pluginContainer = document.getElementById("canvas-holder")
+
+    val plugins = List[Plugin](
+        new TreePathModel()
+        // ...
+    )
+    
+    var currentPlugin: Option[Plugin] = None
+
 
     def init() {
-        treePathModel.init()
-        treePathModel.performModel()
-        treePathModel.redraw()
+        changePlugin(plugins.head)
+    }
+    
+    def changePlugin(plugin: Plugin) {
+        currentPlugin.foreach(_.clean())
+
+        // Switch to the new one.
+        currentPlugin = Some(plugin)
+        plugin.init(graphModel, pluginContainer)
+        plugin.redraw()
     }
 
     def initGraph(): Graph = {

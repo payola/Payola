@@ -1,13 +1,13 @@
 package cz.payola.web.client.views
 
-import cz.payola.common.rdf.{Vertex, Edge}
+import cz.payola.common.rdf.Graph
+import s2js.adapters.js.dom.Element
 
 trait Plugin
 {
+    def init(graph: Graph, container: Element)
 
-    def init()
-
-    def update(vertices: Seq[Vertex], edges: Seq[Edge])
+    def update(graph: Graph)
 
     def redraw()
 
