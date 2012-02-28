@@ -39,10 +39,10 @@ abstract class ModelBase extends VisualPlugin
       * @param vViews
       */
     protected def flip(vViews: ListBuffer[VertexView]) {
-        var maxX: Double = Double.MinValue
-        var minX: Double = Double.MaxValue
-        var maxY: Double = Double.MinValue
-        var minY: Double = Double.MaxValue
+        var maxX: Double = 5.0//Double.MinValue
+        var minX: Double = 5.0//Double.MaxValue
+        var maxY: Double = 5.0//Double.MinValue
+        var minY: Double = 5.0//Double.MaxValue
 
         vViews.foreach {v: VertexView =>
             if (v.position.x > maxX) {

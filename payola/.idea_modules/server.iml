@@ -119,6 +119,7 @@
     <orderEntry type="module" module-name="common" exported="" />
     <orderEntry type="module" module-name="shared" exported="" />
     <orderEntry type="module" module-name="client" exported="" />
+    <orderEntry type="module" module-name="scala2json" exported="" />
     <orderEntry type="module" module-name="data" exported="" />
   </component>
 </module>
