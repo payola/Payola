@@ -2,6 +2,7 @@ package cz.payola.web.shared
 
 import cz.payola.common.rdf.Graph
 
+@scala.remote
 object GraphFetcher
 {
     def getInitialGraph: Graph = {
