@@ -53,6 +53,7 @@ object RDFGraph {
             }else{
                 node = new RDFIdentifiedNode(URI)
                 identifiedNodes.put(URI, node)
+                allNodes += node
             }
 
             // Look for edges and add them

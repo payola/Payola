@@ -5,6 +5,7 @@ import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import sparql.providers.AggregateDataProvider
 import sparql.QueryExecutor
+import cz.payola.scala2json.{JSONSerializerOptions, JSONSerializer}
 
 class FailingParserTest extends FlatSpec with ShouldMatchers
 {
@@ -24,6 +25,10 @@ class FailingParserTest extends FlatSpec with ShouldMatchers
             </rdf:RDF>
         """
         val graph = RDFGraph(rdf)
+
+       // val serializor = new JSONSerializer(graph, JSONSerializerOptions.JSONSerializerOptionPrettyPrinting)
+        //println(serializor.stringValue)
+
         graph.edges.foreach {e=>
             print("edge " + e.uri + " - ")
             if (!graph.vertices.exists(_ eq e.origin)) {
