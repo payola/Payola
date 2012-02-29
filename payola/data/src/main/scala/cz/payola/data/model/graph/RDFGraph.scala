@@ -38,7 +38,8 @@ object RDFGraph {
         model.read(reader, null, inputType)
 
         // List the graph nodes and build the graph
-        val nodes: HashMap[String, RDFIdentifiedNode] = new HashMap[String, RDFIdentifiedNode]()
+        val identifiedNodes: HashMap[String, RDFIdentifiedNode] = new HashMap[String, RDFIdentifiedNode]()
+        val allNodes: ListBuffer[RDFNode] = new ListBuffer[RDFNode]()
         val edges: ListBuffer[RDFEdge] = new ListBuffer[RDFEdge]()
 
         val resIterator: ResIterator = model.listSubjects
@@ -47,11 +48,11 @@ object RDFGraph {
             
             val URI = res.getURI
             var node: RDFIdentifiedNode = null
-            if (!nodes.get(URI).isEmpty){
-                node = nodes.get(URI).get
+            if (!identifiedNodes.get(URI).isEmpty){
+                node = identifiedNodes.get(URI).get
             }else{
                 node = new RDFIdentifiedNode(URI)
-                nodes.put(URI, node)
+                identifiedNodes.put(URI, node)
             }
 
             // Look for edges and add them
@@ -71,16 +72,19 @@ object RDFGraph {
                     var language = statement.getLanguage
                     if (language == "")
                         language = null
-                    edge = new RDFEdge(node, new RDFLiteralNode(rdfNode.asLiteral.getValue, Option(language)), predicate.getURI)
+                    val literalNode = new RDFLiteralNode(rdfNode.asLiteral.getValue, Option(language))
+                    allNodes += literalNode
+                    edge = new RDFEdge(node, literalNode, predicate.getURI)
                 } else {
                     val asResource = rdfNode.asResource
                     val destinationURI = asResource.getURI
                     var destination: RDFIdentifiedNode = null
-                    if (nodes.get(destinationURI).isEmpty){
+                    if (identifiedNodes.get(destinationURI).isEmpty){
                         destination = new RDFIdentifiedNode(URI)
-                        nodes.put(destinationURI, destination)
+                        identifiedNodes.put(destinationURI, destination)
+                        allNodes += destination
                     }else{
-                        destination = nodes.get(destinationURI).get
+                        destination = identifiedNodes.get(destinationURI).get
                     }
                     edge = new RDFEdge(node, destination, predicate.getURI)
                 }
@@ -89,7 +93,7 @@ object RDFGraph {
             }
         }
 
-        val graph = new RDFGraph(nodes.values.toList, edges.toList)
+        val graph = new RDFGraph(allNodes.toList, edges.toList)
 
         // Returning the graph
         graph
