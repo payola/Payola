@@ -24,6 +24,15 @@ class FailingParserTest extends FlatSpec with ShouldMatchers
             </rdf:RDF>
         """
         val graph = RDFGraph(rdf)
-        println(graph.vertices.length) // Prints 2, but there are obviously more than two vertices.
+        graph.edges.foreach {e=>
+            print("edge " + e.uri + " - ")
+            if (!graph.vertices.exists(_ eq e.origin)) {
+                println("!!! origin not found in vertices !!!")
+            } else if (!graph.vertices.exists(_ eq e.destination)) {
+                println("!!! destination not found in vetices !!!")
+            } else {
+                println("ok")
+            }
+        }
     }
 }
