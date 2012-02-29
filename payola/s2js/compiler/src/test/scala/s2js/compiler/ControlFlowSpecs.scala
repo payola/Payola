@@ -563,23 +563,21 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                             var self = this;
                             return (function($selector$1) {
                                 if (s2js.isInstanceOf($selector$1, 'scala.Tuple3') && (true) && (true) &&
-                                    (s2js.isInstanceOf($selector$1.productElement(2), 'scala.Tuple2') && (true) &&
-                                    (s2js.isInstanceOf($selector$1.productElement(2).productElement(1),
-                                    'scala.Tuple2') &&
-                                    (s2js.isInstanceOf($selector$1.productElement(2).productElement(1).productElement
-                                    (0), 'scala.Int')) && (true)))) {
+                                (s2js.isInstanceOf($selector$1.productElement(2), 'scala.Tuple2') && (true) &&
+                                (s2js.isInstanceOf($selector$1.productElement(2).productElement(1), 'scala.Tuple2') &&
+                                (s2js.isInstanceOf($selector$1.productElement(2).productElement(1).productElement(0),
+                                'scala.Int')) && (true)))) {
                                     var bound1 = $selector$1.productElement(2).productElement(1).productElement(0);
                                     var bound2 = $selector$1.productElement(2).productElement(1).productElement(1);
                                     return 123;
                                 }
                                 if (s2js.isInstanceOf($selector$1, 'scala.Some') &&
-                                    (s2js.isInstanceOf($selector$1.productElement(0), 'scala.Tuple2') && (true) &&
-                                    (s2js.isInstanceOf($selector$1.productElement(0).productElement(1), 'scala.Some') &&
-                                    (s2js.isInstanceOf($selector$1.productElement(0).productElement(1).productElement
-                                    (0), 'scala.Tuple5') &&
-                                    (true) && (true) && (true) && (true) && (true))))) {
-                                    var q = $selector$1.productElement(0).productElement(1).productElement(0)
-                                    .productElement(2);
+                                (s2js.isInstanceOf($selector$1.productElement(0), 'scala.Tuple2') && (true) &&
+                                (s2js.isInstanceOf($selector$1.productElement(0).productElement(1), 'scala.Some') &&
+                                (s2js.isInstanceOf($selector$1.productElement(0).productElement(1).productElement(0),
+                                'scala.Tuple5') && (true) && (true) && (true) && (true) && (true))))) {
+
+                            var q = $selector$1.productElement(0).productElement(1).productElement(0).productElement(2);
                                     return 456;
                                 }
                                 if (true) {

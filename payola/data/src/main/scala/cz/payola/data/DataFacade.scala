@@ -1,11 +1,32 @@
 package cz.payola.data
 
 import cz.payola.common.rdf.Graph
-import model.graph.{RDFGraph, RDFIdentifiedNode, RDFEdge}
+import model.graph.{RDFEdge, RDFIdentifiedNode, RDFGraph}
+import sparql.providers.AggregateDataProvider
+import sparql.QueryExecutor
 
-class DataFacade {
+class DataFacade
+{
+    val dataProvider = new AggregateDataProvider(List(
+        new VirtuosoDataProvider()
+    ))
 
-    def getGraph(uri: String) : Graph = {
+    def getGraph(uri: String): Graph = {
+        /*val query = """
+            PREFIX gn: <http://www.geonames.org/ontology#>
+
+            SELECT ?n1 ?p1 ?n2 ?p2 ?n3
+            FROM <http://opendata.cz/data/test/wb>
+            WHERE {
+                ?n1 ?p1 ?n2 .
+                ?n2 ?p2 ?n3 .
+                ?n1 gn:name "Czech Republic" 
+            }    
+        """
+        
+        val result = QueryExecutor.executeQuery(dataProvider, query)
+        println(result.data.head)
+        RDFGraph(result.data.head)*/
 
         val vPayola = new RDFIdentifiedNode("http://payola.cz")
         val vOndraH = new RDFIdentifiedNode("http://payola.cz/coders/OndraHermanek")
@@ -21,10 +42,8 @@ class DataFacade {
         val e5 = new RDFEdge(vPayola, vJirka, "http://payola.cz/codedBy")
 
         new RDFGraph(
-            List(vPayola,vOndraH,vOndraK,vHonza,vKrystof,vJirka),
-            List(e1,e2,e3,e4,e5)
+            List(vPayola, vOndraH, vOndraK, vHonza, vKrystof, vJirka),
+            List(e1, e2, e3, e4, e5)
         )
-
     }
-
 }
