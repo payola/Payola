@@ -15,8 +15,10 @@ class DataFacade
         /*val query = """
             PREFIX gn: <http://www.geonames.org/ontology#>
 
-            SELECT ?n1 ?p1 ?n2 ?p2 ?n3
-            FROM <http://opendata.cz/data/test/wb>
+            CONSTRUCT {
+                ?n1 ?p1 ?n2 .
+                ?n2 ?p2 ?n3 .
+            }
             WHERE {
                 ?n1 ?p1 ?n2 .
                 ?n2 ?p2 ?n3 .
@@ -25,7 +27,6 @@ class DataFacade
         """
         
         val result = QueryExecutor.executeQuery(dataProvider, query)
-        println(result.data.head)
         RDFGraph(result.data.head)*/
 
         val vPayola = new RDFIdentifiedNode("http://payola.cz")

@@ -10,6 +10,7 @@ import s2js.runtime.s2js.RPCException
 
 // TODO remove after classloading is done
 @NativeJsDependency("cz.payola.common.rdf.IdentifiedVertex")
+@NativeJsDependency("cz.payola.common.rdf.LiteralVertex")
 @NativeJsDependency("cz.payola.common.rdf.generic.Graph")
 @NativeJsDependency("cz.payola.common.rdf.generic.Edge")
 class Index
