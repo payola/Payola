@@ -1,10 +1,10 @@
-package cz.payola.web.client.views.visualPlugin.graph
+package cz.payola.web.client.views.plugins.visual.graph
 
 import collection.mutable.ListBuffer
 import s2js.adapters.js.dom.{Element, CanvasRenderingContext2D}
 import cz.payola.common.rdf.{Vertex, Graph}
-import cz.payola.web.client.views.visualPlugin.{Vector, RedrawOperation, Color, Point}
-import cz.payola.web.client.views.visualPlugin.Constants._
+import cz.payola.web.client.views.plugins.visual.{Vector, RedrawOperation, Color, Point}
+import cz.payola.web.client.views.plugins.visual.Constants._
 
 class GraphView(val graphModel: Graph, container: Element) extends View
 {

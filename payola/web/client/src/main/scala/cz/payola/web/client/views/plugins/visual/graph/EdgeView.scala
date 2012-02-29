@@ -1,9 +1,9 @@
-package cz.payola.web.client.views.visualPlugin.graph
+package cz.payola.web.client.views.plugins.visual.graph
 
 import s2js.adapters.js.dom.CanvasRenderingContext2D
-import cz.payola.web.client.views.visualPlugin.{Color, Point}
+import cz.payola.web.client.views.plugins.visual.{Color, Point}
 import cz.payola.common.rdf.Edge
-import cz.payola.web.client.views.visualPlugin.Constants._
+import cz.payola.web.client.views.plugins.visual.Constants._
 
 private object Quadrant
 {
@@ -18,7 +18,7 @@ private object Quadrant
 
 class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationView: VertexView) extends View
 {
-    val information: InformationView = InformationView(edgeModel)
+    val information: InformationView = InformationView(edgeModel.uri)
 
     def isSelected: Boolean = {
         originView.selected || destinationView.selected

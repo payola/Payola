@@ -2,11 +2,14 @@ package cz.payola.web.client.presenters
 
 import s2js.adapters.js.browser._
 import cz.payola.common.rdf.Graph
-import cz.payola.web.client.views.Plugin
-import cz.payola.web.client.views.visualPlugin.drawingModels.treePath.TreePathModel
+import cz.payola.web.client.views.plugins.Plugin
+import cz.payola.web.client.views.plugins.visual.techniques.tree.TreeTechnique
 import cz.payola.web.shared.GraphFetcher
 import s2js.compiler.NativeJsDependency
 import s2js.runtime.s2js.RPCException
+import cz.payola.web.client.views.plugins.visual.techniques.circle.CircleTechnique
+import cz.payola.web.client.views.plugins.visual.techniques.gravity.GravityTechnique
+import cz.payola.web.client.views.plugins.visual.techniques.minimalization.MinimalizationTechnique
 
 // TODO remove after classloading is done
 @NativeJsDependency("cz.payola.common.rdf.IdentifiedVertex")
@@ -18,7 +21,10 @@ class Index
     var graph: Option[Graph] = None
 
     val plugins = List[Plugin](
-        new TreePathModel()
+        new TreeTechnique(),
+        new MinimalizationTechnique(),
+        new GravityTechnique(),
+        new CircleTechnique()
         // ...
     )
 

@@ -1,4 +1,4 @@
-package cz.payola.web.client.views.visualPlugin
+package cz.payola.web.client.views.plugins.visual
 
 case class Point(var x: Double, var y: Double)
 {

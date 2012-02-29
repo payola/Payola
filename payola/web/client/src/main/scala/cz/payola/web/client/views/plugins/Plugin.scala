@@ -1,4 +1,4 @@
-package cz.payola.web.client.views
+package cz.payola.web.client.views.plugins
 
 import cz.payola.common.rdf.Graph
 import s2js.adapters.js.dom.Element

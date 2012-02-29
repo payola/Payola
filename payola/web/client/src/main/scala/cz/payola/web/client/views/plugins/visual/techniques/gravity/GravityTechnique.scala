@@ -1,13 +1,11 @@
-package cz.payola.web.client.views.visualPlugin.graph.algorithms.gravity
+package cz.payola.web.client.views.plugins.visual.techniques.gravity
 
 import collection.mutable.ListBuffer
-import cz.payola.web.client.views.visualPlugin.graph.{EdgeView, VertexView}
-import cz.payola.web.client.views.visualPlugin.drawingModels.ModelBase
-import s2js.adapters.js.dom.Element
-import cz.payola.common.rdf.Graph
-import cz.payola.web.client.views.visualPlugin.Vector
+import cz.payola.web.client.views.plugins.visual.graph.{EdgeView, VertexView}
+import cz.payola.web.client.views.plugins.visual.techniques.BaseTechnique
+import cz.payola.web.client.views.plugins.visual.Vector
 
-class GravityModel extends ModelBase
+class GravityTechnique extends BaseTechnique
 {
     /**
       * How much vertices push away each other

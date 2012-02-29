@@ -1,12 +1,10 @@
-package cz.payola.web.client.views.visualPlugin.drawingModels
+package cz.payola.web.client.views.plugins.visual.techniques
 
 import collection.mutable.ListBuffer
-import cz.payola.web.client.views.visualPlugin.{VisualPlugin, Point, Vector}
-import s2js.adapters.js.dom.Element
-import cz.payola.common.rdf.Graph
-import cz.payola.web.client.views.visualPlugin.graph.{EdgeView, VertexView}
+import cz.payola.web.client.views.plugins.visual.{VisualPlugin, Point, Vector}
+import cz.payola.web.client.views.plugins.visual.graph.{EdgeView, VertexView}
 
-abstract class ModelBase extends VisualPlugin
+abstract class BaseTechnique extends VisualPlugin
 {
     def performModel()
 

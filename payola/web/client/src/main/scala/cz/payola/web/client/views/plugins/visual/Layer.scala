@@ -1,4 +1,4 @@
-package cz.payola.web.client.views.visualPlugin
+package cz.payola.web.client.views.plugins.visual
 
 import s2js.adapters.js.dom.{CanvasRenderingContext2D, Canvas}
 

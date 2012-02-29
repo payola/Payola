@@ -1,10 +1,10 @@
-package cz.payola.web.client.views.visualPlugin
+package cz.payola.web.client.views.plugins.visual
 
-import cz.payola.web.client.views.Plugin
+import cz.payola.web.client.views.plugins.Plugin
 import graph.GraphView
 import s2js.adapters.js.dom.Element
 import s2js.adapters.goog.events._
-import cz.payola.common.rdf.{Graph, Edge, Vertex}
+import cz.payola.common.rdf.Graph
 
 abstract class VisualPlugin extends Plugin
 {

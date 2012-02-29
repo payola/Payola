@@ -1,12 +1,10 @@
-package cz.payola.web.client.views.visualPlugin.graph.algorithms.pathLength
+package cz.payola.web.client.views.plugins.visual.techniques.minimalization
 
 import collection.mutable.ListBuffer
-import cz.payola.web.client.views.visualPlugin.graph.{EdgeView, VertexView}
-import cz.payola.web.client.views.visualPlugin.drawingModels.ModelBase
-import s2js.adapters.js.dom.Element
-import cz.payola.common.rdf.Graph
+import cz.payola.web.client.views.plugins.visual.graph.{EdgeView, VertexView}
+import cz.payola.web.client.views.plugins.visual.techniques.BaseTechnique
 
-class PathLengthModel extends ModelBase
+class MinimalizationTechnique extends BaseTechnique
 {
 
     //TODO add some computation branch cutting...this algorithm is quite complex

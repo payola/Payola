@@ -1,6 +1,6 @@
-package cz.payola.web.client.views.visualPlugin.graph.algorithms.pathLength
+package cz.payola.web.client.views.plugins.visual.techniques.minimalization
 
-import cz.payola.web.client.views.visualPlugin.graph.VertexView
+import cz.payola.web.client.views.plugins.visual.graph.VertexView
 import collection.mutable.ListBuffer
 
 class VertexViewPack(var value: VertexView, var children: ListBuffer[VertexViewPack],

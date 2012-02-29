@@ -1,4 +1,4 @@
-package cz.payola.web.client.views.visualPlugin
+package cz.payola.web.client.views.plugins.visual
 
 // TODO byte would be better, but it isn't that simple, to make it work...
 case class Color(red: Int, green: Int, blue: Int, alpha: Double = 1)

@@ -1,6 +1,6 @@
-package cz.payola.web.client.views.textPlugin
+package cz.payola.web.client.views.plugins.textual
 
-import cz.payola.web.client.views.Plugin
+import cz.payola.web.client.views.plugins.Plugin
 import cz.payola.common.rdf.{Vertex, Edge}
 
 abstract class TextPlugin extends Plugin

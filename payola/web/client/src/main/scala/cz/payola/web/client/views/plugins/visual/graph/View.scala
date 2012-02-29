@@ -1,6 +1,6 @@
-package cz.payola.web.client.views.visualPlugin.graph
+package cz.payola.web.client.views.plugins.visual.graph
 
-import cz.payola.web.client.views.visualPlugin.{Layer, Color, Vector, Point}
+import cz.payola.web.client.views.plugins.visual.{Layer, Color, Vector, Point}
 import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom.{Element, Canvas, CanvasRenderingContext2D}
 

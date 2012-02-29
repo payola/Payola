@@ -1,4 +1,4 @@
-package cz.payola.web.client.views.visualPlugin
+package cz.payola.web.client.views.plugins.visual
 
 // TODO maybe consider moving these constants to classes/companion object somehow related to them. I think that
 // Color.Black, Color.Red etc. are OK to be placed to the Color companion object. On the other hand COLOR_VERTEX should
