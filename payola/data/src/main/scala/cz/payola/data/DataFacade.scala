@@ -12,7 +12,7 @@ class DataFacade
     ))
 
     def getGraph(uri: String): Graph = {
-        /*val query = """
+        val query = """
             PREFIX gn: <http://www.geonames.org/ontology#>
 
             CONSTRUCT {
@@ -25,26 +25,24 @@ class DataFacade
                 ?n1 gn:name "Czech Republic" 
             }    
         """
-        
         val result = QueryExecutor.executeQuery(dataProvider, query)
-        RDFGraph(result.data.head)*/
 
-        val vPayola = new RDFIdentifiedNode("http://payola.cz")
-        val vOndraH = new RDFIdentifiedNode("http://payola.cz/coders/OndraHermanek")
-        val vOndraK = new RDFIdentifiedNode("http://payola.cz/coders/OndraKudlacek")
-        val vHonza = new RDFIdentifiedNode("http://payola.cz/coders/HonzaSiroky")
-        val vKrystof = new RDFIdentifiedNode("http://payola.cz/coders/KrystofVasa")
-        val vJirka = new RDFIdentifiedNode("http://payola.cz/coders/JirkaHelmich")
+        // If the Virtuoso doesn't work.
+        val rdf = """<?xml version="1.0" encoding="utf-8" ?>
+            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+            <rdf:Description rdf:about="http://dbpedia.org/resource/Czech_Republic"><rdfs:label xml:lang="en">Czech Republic</rdfs:label></rdf:Description>
+            <rdf:Description rdf:about="http://dbpedia.org/resource/Czech_Republic"><geo:lat xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#" rdf:datatype="http://www.w3.org/2001/XMLSchema#float">50.08333206176758</geo:lat></rdf:Description>
+            <rdf:Description rdf:about="http://dbpedia.org/resource/Czech_Republic"><geo:long xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#" rdf:datatype="http://www.w3.org/2001/XMLSchema#float">14.46666622161865</geo:long></rdf:Description>
+            <rdf:Description rdf:about="http://opendata.cz/data/test/wb/CZE"><owl:sameAs xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:resource="http://dbpedia.org/resource/Czech_Republic"/></rdf:Description>
+            <rdf:Description rdf:about="http://dbpedia.org/resource/Czech_Republic"><geo:lat xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#" rdf:datatype="http://www.w3.org/2001/XMLSchema#float">49.75</geo:lat></rdf:Description>
+            <rdf:Description rdf:about="http://dbpedia.org/resource/Czech_Republic"><n0pred:populationDensity xmlns:n0pred="http://dbpedia.org/ontology/" rdf:datatype="http://www.w3.org/2001/XMLSchema#double">131.6608360629741</n0pred:populationDensity></rdf:Description>
+            <rdf:Description rdf:about="http://dbpedia.org/resource/Czech_Republic"><n0pred:populationDensity xmlns:n0pred="http://dbpedia.org/ontology/" rdf:datatype="http://www.w3.org/2001/XMLSchema#double">133</n0pred:populationDensity></rdf:Description>
+            <rdf:Description rdf:about="http://dbpedia.org/resource/Czech_Republic"><n0pred:areaTotal xmlns:n0pred="http://dbpedia.org/ontology/" rdf:datatype="http://www.w3.org/2001/XMLSchema#double">78865137959.7312</n0pred:areaTotal></rdf:Description>
+            <rdf:Description rdf:about="http://dbpedia.org/resource/Czech_Republic"><geo:long xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#" rdf:datatype="http://www.w3.org/2001/XMLSchema#float">15.75</geo:long></rdf:Description>
+            <rdf:Description rdf:about="http://dbpedia.org/resource/Czech_Republic"><n0pred:areaTotal xmlns:n0pred="http://dbpedia.org/ontology/" rdf:datatype="http://www.w3.org/2001/XMLSchema#double">78866000000</n0pred:areaTotal></rdf:Description>
+            </rdf:RDF>
+        """
 
-        val e1 = new RDFEdge(vPayola, vOndraH, "http://payola.cz/codedBy")
-        val e2 = new RDFEdge(vPayola, vOndraK, "http://payola.cz/codedBy")
-        val e3 = new RDFEdge(vPayola, vHonza, "http://payola.cz/codedBy")
-        val e4 = new RDFEdge(vPayola, vKrystof, "http://payola.cz/codedBy")
-        val e5 = new RDFEdge(vPayola, vJirka, "http://payola.cz/codedBy")
-
-        new RDFGraph(
-            List(vPayola, vOndraH, vOndraK, vHonza, vKrystof, vJirka),
-            List(e1, e2, e3, e4, e5)
-        )
+        RDFGraph(result.data.headOption.getOrElse(rdf))
     }
 }
