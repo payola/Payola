@@ -48,8 +48,8 @@ class VirtuosoDataProvider extends sparql.providers.SingleDataProvider {
         val prop : Properties = new Properties();
         prop.load(getClass.getResource("/virtuoso.ini").openStream());
 
-        val h : String = "gd.projekty.ms.mff.cuni.cz" //prop.getProperty("host");
-        val p : String = "8893" // prop.getProperty("port");
+        val h : String = prop.getProperty("host");
+        val p : String = prop.getProperty("port");
 
         // Host is composed from ini file values (port may be undefined)
         if (p != null && p.size > 0)
