@@ -33,7 +33,7 @@ class Index
 
     def init() {
         try {
-            graph = Option(initGraph())//GraphFetcher.getInitialGraph)
+            graph = Option(GraphFetcher.getInitialGraph)
         } catch {
             case e: RPCException => {
                 window.alert("Failed to call RPC. " + e.message)
@@ -60,6 +60,8 @@ class Index
         plugin.redraw()
     }
 
+
+    /*DO NOT REMOVE PLEASE*/
     def initGraph(): Graph = {
         // TODO retrieve the graph from the server using following call when RPC and server side is done.
         // GraphFetcher.getInitialGraph
