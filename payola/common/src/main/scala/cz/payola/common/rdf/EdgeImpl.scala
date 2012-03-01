@@ -8,5 +8,4 @@ class EdgeImpl(override val origin: IdentifiedVertexImpl, override val destinati
 
     type VertexType = IdentifiedVertexImpl
     type IdentifiedVertexType = IdentifiedVertexImpl
-
 }

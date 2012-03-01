@@ -3,7 +3,7 @@ package cz.payola.web.client.views.plugins.visual.graph
 import s2js.adapters.js.dom.CanvasRenderingContext2D
 import cz.payola.web.client.views.plugins.visual.{Vector, Constants, Color, Point}
 
-case class InformationView(data: String) extends View {
+case class InformationView(data: Any) extends View {
     private var selected = false
 
     def setSelectedForDrawing() {
@@ -18,7 +18,7 @@ case class InformationView(data: String) extends View {
         selected = false
     }
     
-    def performDrawing(context: CanvasRenderingContext2D, color: Option[Color], position: Point) {
+    private def performDrawing(context: CanvasRenderingContext2D, color: Option[Color], position: Point) {
         if(selected) {
             /*val colorToUseBackground = color.getOrElse(Constants.ColorTextBackground)*/
 
@@ -28,6 +28,6 @@ case class InformationView(data: String) extends View {
 
         val colorToUse = color.getOrElse(Constants.ColorText)
 
-        drawText(context, data, position, colorToUse, "12px Sans", "center")
+        drawText(context, data.toString, position, colorToUse, "12px Sans", "center")
     }
 }

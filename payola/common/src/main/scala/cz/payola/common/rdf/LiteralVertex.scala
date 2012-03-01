@@ -11,4 +11,10 @@ trait LiteralVertex extends Vertex
     /** Optional language of the literal. */
     val language: Option[String]
 
+    /**
+      * @return value.toString
+      */
+    override def toString(): String = {
+        value.toString
+    }
 }

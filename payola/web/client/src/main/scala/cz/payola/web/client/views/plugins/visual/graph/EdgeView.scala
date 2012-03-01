@@ -18,10 +18,10 @@ private object Quadrant
 
 class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationView: VertexView) extends View
 {
-    val information: InformationView = InformationView(edgeModel.uri)
+    val information: InformationView = InformationView(edgeModel)
 
     def isSelected: Boolean = {
-        originView.selected || destinationView.selected
+        originView.selected && destinationView.selected
     }
 
     def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {

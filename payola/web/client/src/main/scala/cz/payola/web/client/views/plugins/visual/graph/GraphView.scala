@@ -38,6 +38,10 @@ class GraphView(val graphModel: Graph, container: Element) extends View
     val edgeViews = createEdges()
 
     private var selectedCount = 0
+    
+    def isEmpty: Boolean = {
+        vertexViews.length == 0
+    }
 
     /**
       * Constructs a list of vertexViews based on the graphModel parameter.
@@ -59,12 +63,14 @@ class GraphView(val graphModel: Graph, container: Element) extends View
       */
     def createEdges(): ListBuffer[EdgeView] = {
         val buffer = ListBuffer[EdgeView]()
-        graphModel.edges.foreach {edgeModel =>
-            buffer += new EdgeView(edgeModel, findVertexView(edgeModel.origin), findVertexView(edgeModel.destination))
-        }
+        if(vertexViews.length != 0) {
+            graphModel.edges.foreach {edgeModel =>
+                buffer += new EdgeView(edgeModel, findVertexView(edgeModel.origin), findVertexView(edgeModel.destination))
+            }
 
-        vertexViews.foreach {vertexView: VertexView =>
-            vertexView.edges = getEdgesOfVertex(vertexView, buffer)
+            vertexViews.foreach {vertexView: VertexView =>
+                vertexView.edges = getEdgesOfVertex(vertexView, buffer)
+            }
         }
 
         buffer
@@ -210,14 +216,14 @@ class GraphView(val graphModel: Graph, container: Element) extends View
                 if (edgesSelectedLayer.cleared) {
                     edgeView.draw(edgesSelectedLayer.context, Some(colorToUseEdge), Some(positionCorrection))
                 }
-                if (edgesSelectedTextLayer.cleared) {
+                if (edgesSelectedTextLayer.cleared && edgeView.isSelected) {
                     edgeView.information.draw(edgesSelectedTextLayer.context, Some(colorToUseText), Some(positionToUse))
                 }
             } else {
                 if (edgesDeselectedLayer.cleared) {
                     edgeView.draw(edgesDeselectedLayer.context, Some(colorToUseEdge), Some(positionCorrection))
                 }
-                if (edgesDeselectedTextLayer.cleared) {
+                if (edgesDeselectedTextLayer.cleared && edgeView.isSelected) {
                     edgeView.information.draw(edgesDeselectedTextLayer.context, Some(colorToUseText), Some(positionToUse))
                 }
             }

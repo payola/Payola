@@ -6,6 +6,8 @@ import cz.payola.web.client.views.plugins.visual.graph.{EdgeView, VertexView}
 
 abstract class BaseTechnique extends VisualPlugin
 {
+    private val distance = 100
+
     def performTechnique()
 
     /**
@@ -110,8 +112,6 @@ abstract class BaseTechnique extends VisualPlugin
         }
 
 
-
-        val distance = 70
         var levelNum = 0
         var vertexNumInLevel = 0
         val lastLevelSize = levels.last.length
