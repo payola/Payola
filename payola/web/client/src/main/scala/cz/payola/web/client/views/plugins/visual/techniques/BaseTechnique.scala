@@ -6,7 +6,9 @@ import cz.payola.web.client.views.plugins.visual.graph.{EdgeView, VertexView}
 
 abstract class BaseTechnique extends VisualPlugin
 {
-    private val distance = 100
+    private val treeVerticesDistance = 100
+
+    private val circleLevelsDistance = 150
 
     def performTechnique()
 
@@ -122,8 +124,8 @@ abstract class BaseTechnique extends VisualPlugin
             elements.foreach {element =>
 
                 element.position = Point(scala.math.random / 10 +
-                        (vertexNumInLevel * distance) + distance * (lastLevelSize - currentLevelSize) / 2,
-                    scala.math.random / 10 + (levelNum * distance))
+                        (vertexNumInLevel * treeVerticesDistance) + treeVerticesDistance * (lastLevelSize - currentLevelSize) / 2,
+                    scala.math.random / 10 + (levelNum * treeVerticesDistance))
                 vertexNumInLevel += 1
             }
             levelNum += 1
@@ -140,7 +142,7 @@ abstract class BaseTechnique extends VisualPlugin
 
         while (level1.length != 0) {
 
-            placeVerticesOnCircle(levelNum * 3, levelNum * 100, vertexViews.head.position, level1)
+            placeVerticesOnCircle(levelNum * 3, levelNum * circleLevelsDistance, vertexViews.head.position, level1)
 
             level1.foreach {l1: VertexView =>
                 l1.edges.foreach {e: EdgeView =>
