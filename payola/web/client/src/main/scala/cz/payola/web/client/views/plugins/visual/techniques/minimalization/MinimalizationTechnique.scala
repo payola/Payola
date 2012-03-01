@@ -3,12 +3,20 @@ package cz.payola.web.client.views.plugins.visual.techniques.minimalization
 import collection.mutable.ListBuffer
 import cz.payola.web.client.views.plugins.visual.graph.{EdgeView, VertexView}
 import cz.payola.web.client.views.plugins.visual.techniques.BaseTechnique
+import cz.payola.common.rdf.Graph
+import s2js.adapters.js.dom.Element
 
 class MinimalizationTechnique extends BaseTechnique
 {
+    override def init(graph: Graph, container: Element) {
+        super.init(graph, container)
+        if(!graphView.get.isEmpty) { // graphView != None because this call is after init(..)
+            performTechnique()
+        }
+    }
 
     //TODO add some computation branch cutting...this algorithm is quite complex
-    def performModel() {
+    def performTechnique() {
         minimizeEdgeCrossing(graphView.get.vertexViews)
         basicTreeStructure(graphView.get.vertexViews)
         moveGraphToUpperLeftCorner(graphView.get.vertexViews)

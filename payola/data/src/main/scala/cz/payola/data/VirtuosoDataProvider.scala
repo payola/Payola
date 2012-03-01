@@ -30,7 +30,7 @@ class VirtuosoDataProvider extends sparql.providers.SingleDataProvider {
                 "{query}",
                 java.net.URLEncoder.encode(query, "UTF-8")
         );
-        
+
         return request.replaceAllLiterally("{protocol}", protocol)
             .replaceAllLiterally("{host}", getHost())
                 .replaceAllLiterally("{defaultUri}", defaultUri)

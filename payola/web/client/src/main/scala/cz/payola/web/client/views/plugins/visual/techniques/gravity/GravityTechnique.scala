@@ -4,6 +4,8 @@ import collection.mutable.ListBuffer
 import cz.payola.web.client.views.plugins.visual.graph.{EdgeView, VertexView}
 import cz.payola.web.client.views.plugins.visual.techniques.BaseTechnique
 import cz.payola.web.client.views.plugins.visual.Vector
+import cz.payola.common.rdf.Graph
+import s2js.adapters.js.dom.Element
 
 class GravityTechnique extends BaseTechnique
 {
@@ -17,7 +19,14 @@ class GravityTechnique extends BaseTechnique
       */
     private val attraction: Double = 0.05
 
-    def performModel() {
+    override def init(graph: Graph, container: Element) {
+        super.init(graph, container)
+        if(!graphView.get.isEmpty) { // graphView != None because this call is after init(..)
+            performTechnique()
+        }
+    }
+
+    def performTechnique() {
         basicTreeStructure(graphView.get.vertexViews)
         val vertexViewPacks = buildVertexViewsWorkingStructure(graphView.get.vertexViews)
         val edgeViewPacks = buildEdgeViewsWorkingStructure(vertexViewPacks, graphView.get.edgeViews)

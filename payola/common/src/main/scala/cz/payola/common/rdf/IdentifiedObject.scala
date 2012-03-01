@@ -6,4 +6,8 @@ package cz.payola.common.rdf
 trait IdentifiedObject
 {
     val uri: String
+
+    override def toString(): String = {
+        uri
+    }
 }

@@ -12,12 +12,8 @@ class VertexView(val vertexModel: Vertex, var position: Point) extends View {
     var edges = ListBuffer[EdgeView]()
 
     val information: Option[InformationView] = vertexModel match {
-        case i: LiteralVertex =>
-            i.value match {
-                case j: String => Some(new InformationView(j))
-                case _ => None
-            }
-        case i: IdentifiedVertex => Some(new InformationView(i.uri))
+        case i: LiteralVertex => Some(new InformationView(i))
+        case i: IdentifiedVertex => Some(new InformationView(i))
         case _ => None
     }
 

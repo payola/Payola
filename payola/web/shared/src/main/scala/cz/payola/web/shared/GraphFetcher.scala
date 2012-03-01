@@ -6,7 +6,7 @@ import cz.payola.data.DataFacade
 @scala.remote
 object GraphFetcher
 {
-    def getInitialGraph: Graph = {
+    def getInitialGraph(): Graph = {
         (new DataFacade).getGraph("http://payola.cz")
     }
 
