@@ -208,7 +208,7 @@ class GraphView(val graphModel: Graph, container: Element) extends View
             }
 
 
-            if(edgeView.isSelected) {
+            if(edgeView.areBothVerticesSelected) {
                 edgeView.information.setSelectedForDrawing()
             }
 
@@ -216,14 +216,14 @@ class GraphView(val graphModel: Graph, container: Element) extends View
                 if (edgesSelectedLayer.cleared) {
                     edgeView.draw(edgesSelectedLayer.context, Some(colorToUseEdge), Some(positionCorrection))
                 }
-                if (edgesSelectedTextLayer.cleared && edgeView.isSelected) {
+                if (edgesSelectedTextLayer.cleared && edgeView.areBothVerticesSelected) {
                     edgeView.information.draw(edgesSelectedTextLayer.context, Some(colorToUseText), Some(positionToUse))
                 }
             } else {
                 if (edgesDeselectedLayer.cleared) {
                     edgeView.draw(edgesDeselectedLayer.context, Some(colorToUseEdge), Some(positionCorrection))
                 }
-                if (edgesDeselectedTextLayer.cleared && edgeView.isSelected) {
+                if (edgesDeselectedTextLayer.cleared && edgeView.areBothVerticesSelected) {
                     edgeView.information.draw(edgesDeselectedTextLayer.context, Some(colorToUseText), Some(positionToUse))
                 }
             }

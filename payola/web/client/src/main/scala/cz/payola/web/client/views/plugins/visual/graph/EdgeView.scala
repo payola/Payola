@@ -21,6 +21,10 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
     val information: InformationView = InformationView(edgeModel)
 
     def isSelected: Boolean = {
+        originView.selected || destinationView.selected
+    }
+    
+    def areBothVerticesSelected: Boolean = {
         originView.selected && destinationView.selected
     }
 
