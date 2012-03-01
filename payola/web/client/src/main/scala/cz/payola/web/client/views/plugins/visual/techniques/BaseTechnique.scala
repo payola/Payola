@@ -6,7 +6,7 @@ import cz.payola.web.client.views.plugins.visual.graph.{EdgeView, VertexView}
 
 abstract class BaseTechnique extends VisualPlugin
 {
-    def performModel()
+    def performTechnique()
 
     /**
       * Moves whole graph closer to the [0,0] coordinate, that it won't float somewhere away and makes it visible.
