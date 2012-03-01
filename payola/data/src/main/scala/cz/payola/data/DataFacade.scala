@@ -12,20 +12,15 @@ class DataFacade
     ))
 
     def getGraph(uri: String): Graph = {
-        val query = """
-            PREFIX vCard: <http://www.w3.org/2001/vcard-rdf/3.0#>
-            PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-            CONSTRUCT {
-              ?X vCard:FN ?name .
-              ?X vCard:URL ?url .
-              ?X vCard:TITLE ?title .
-            }
-            FROM <http://dig.csail.mit.edu/2008/webdav/timbl/foaf.rdf>
-            WHERE {
-              OPTIONAL { ?X foaf:name ?name . FILTER isLiteral(?name) . }
-              OPTIONAL { ?X foaf:homepage ?url . FILTER isURI(?url) . }
-              OPTIONAL { ?X foaf:title ?title . FILTER isLiteral(?title) . }
-            }
+        val query = """CONSTRUCT {
+                            <http://dbpedia.org/resource/Prague> ?p1 ?n1 .
+                            ?n1 ?p2 ?n2 .
+                        }
+                        WHERE {
+                            <http://dbpedia.org/resource/Prague> ?p1 ?n1 .
+                            OPTIONAL { ?n1 ?p2 ?n2 }
+                        }
+                        LIMIT 40
         """
         val result = QueryExecutor.executeQuery(dataProvider, query)
 
