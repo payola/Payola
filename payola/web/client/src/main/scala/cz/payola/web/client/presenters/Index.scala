@@ -22,10 +22,11 @@ class Index
     var graph: Option[Graph] = None
 
     val plugins = List[Plugin](
+        new CircleTechnique(),
         new TreeTechnique(),
         new MinimalizationTechnique(),
-        new GravityTechnique(),
-        new CircleTechnique()
+        new GravityTechnique()
+
         // ...
     )
 
