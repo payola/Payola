@@ -22,6 +22,7 @@ class VirtuosoDataProvider extends sparql.providers.SingleDataProvider {
 
         // Read query result
         val source = Source.fromURL(request);
+        println(source.mkString)
         source.foreach(char => result.append(char));
 
         // Return query result
@@ -34,7 +35,7 @@ class VirtuosoDataProvider extends sparql.providers.SingleDataProvider {
                 "{query}",
                 java.net.URLEncoder.encode(query, "UTF-8")
         );
-        
+
         return request.replaceAllLiterally("{protocol}", protocol)
             .replaceAllLiterally("{host}", getHost())
                 .replaceAllLiterally("{defaultUri}", defaultUri)
