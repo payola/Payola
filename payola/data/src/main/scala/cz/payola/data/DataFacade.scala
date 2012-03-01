@@ -13,17 +13,19 @@ class DataFacade
 
     def getGraph(uri: String): Graph = {
         val query = """
-            PREFIX gn: <http://www.geonames.org/ontology#>
-
+            PREFIX vCard: <http://www.w3.org/2001/vcard-rdf/3.0#>
+            PREFIX foaf: <http://xmlns.com/foaf/0.1/>
             CONSTRUCT {
-                ?n1 ?p1 ?n2 .
-                ?n2 ?p2 ?n3 .
+              ?X vCard:FN ?name .
+              ?X vCard:URL ?url .
+              ?X vCard:TITLE ?title .
             }
+            FROM <http://dig.csail.mit.edu/2008/webdav/timbl/foaf.rdf>
             WHERE {
-                ?n1 ?p1 ?n2 .
-                ?n2 ?p2 ?n3 .
-                ?n1 gn:name "Czech Republic" 
-            }    
+              OPTIONAL { ?X foaf:name ?name . FILTER isLiteral(?name) . }
+              OPTIONAL { ?X foaf:homepage ?url . FILTER isURI(?url) . }
+              OPTIONAL { ?X foaf:title ?title . FILTER isLiteral(?title) . }
+            }
         """
         val result = QueryExecutor.executeQuery(dataProvider, query)
 
