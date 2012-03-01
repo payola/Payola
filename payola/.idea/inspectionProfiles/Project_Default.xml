@@ -226,6 +226,9 @@
     <inspection_tool class="NonFinalGuard" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="NonFinalStaticVariableUsedInClassInitialization" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="NonSerializableFieldInSerializableClass" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignorableAnnotations">
+        <value />
+      </option>
       <option name="ignoreAnonymousInnerClasses" value="false" />
       <option name="superClassString" value="" />
     </inspection_tool>
@@ -270,12 +273,18 @@
     </inspection_tool>
     <inspection_tool class="PublicField" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoreEnums" value="false" />
+      <option name="ignorableAnnotations">
+        <value />
+      </option>
     </inspection_tool>
     <inspection_tool class="PublicInnerClass" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoreEnums" value="false" />
     </inspection_tool>
     <inspection_tool class="PublicMethodNotExposedInInterface" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="onlyWarnIfContainingClassImplementsAnInterface" value="false" />
+      <option name="ignorableAnnotations">
+        <value />
+      </option>
     </inspection_tool>
     <inspection_tool class="PublicMethodWithoutLogging" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="loggerClassName" value="java.util.logging.Logger" />

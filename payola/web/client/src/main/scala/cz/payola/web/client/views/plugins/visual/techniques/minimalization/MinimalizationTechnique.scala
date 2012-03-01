@@ -10,7 +10,9 @@ class MinimalizationTechnique extends BaseTechnique
 {
     override def init(graph: Graph, container: Element) {
         super.init(graph, container)
-        performTechnique()
+        if(!graphView.get.isEmpty) { // graphView != None because this call is after init(..)
+            performTechnique()
+        }
     }
 
     //TODO add some computation branch cutting...this algorithm is quite complex

@@ -8,7 +8,9 @@ class TreeTechnique extends BaseTechnique
 {
     override def init(graph: Graph, container: Element) {
         super.init(graph, container)
-        performTechnique()
+        if(!graphView.get.isEmpty) { // graphView != None because this call is after init(..)
+            performTechnique()
+        }
     }
 
     def performTechnique() {
