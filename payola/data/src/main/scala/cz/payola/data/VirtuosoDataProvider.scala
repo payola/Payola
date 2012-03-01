@@ -20,12 +20,8 @@ class VirtuosoDataProvider extends sparql.providers.SingleDataProvider {
         // Query is composed and URL Coded
         val request = composeQueryRequest(query);
 
-        // Read query result
-        val source = Source.fromURL(request);
-        source.foreach(char => result.append(char));
-
         // Return query result
-        return result.toString();
+        Source.fromURL(request, "UTF-8").mkString
     }
     
     private def composeQueryRequest (query: String) : String = {
@@ -52,8 +48,8 @@ class VirtuosoDataProvider extends sparql.providers.SingleDataProvider {
         val prop : Properties = new Properties();
         prop.load(getClass.getResource("/virtuoso.ini").openStream());
 
-        val h : String = prop.getProperty("host");
-        val p : String = prop.getProperty("port");
+        val h : String = "gd.projekty.ms.mff.cuni.cz" //prop.getProperty("host");
+        val p : String = "8893" // prop.getProperty("port");
 
         // Host is composed from ini file values (port may be undefined)
         if (p != null && p.size > 0)

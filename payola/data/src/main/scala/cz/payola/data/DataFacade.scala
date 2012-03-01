@@ -13,17 +13,15 @@ class DataFacade
 
     def getGraph(uri: String): Graph = {
         val query = """
-            PREFIX gn: <http://www.geonames.org/ontology#>
-
             CONSTRUCT {
-                ?n1 ?p1 ?n2 .
-                ?n2 ?p2 ?n3 .
+                <http://dbpedia.org/resource/Prague> ?p1 ?n1 .
+                ?n1 ?p2 ?n2 .
             }
             WHERE {
-                ?n1 ?p1 ?n2 .
-                ?n2 ?p2 ?n3 .
-                ?n1 gn:name "Czech Republic" 
-            }    
+                <http://dbpedia.org/resource/Prague> ?p1 ?n1 .
+                OPTIONAL { ?n1 ?p2 ?n2 }
+            }
+            LIMIT 40
         """
         val result = QueryExecutor.executeQuery(dataProvider, query)
 
