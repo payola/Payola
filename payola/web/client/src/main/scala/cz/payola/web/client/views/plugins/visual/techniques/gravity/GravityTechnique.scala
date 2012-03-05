@@ -4,9 +4,15 @@ import collection.mutable.ListBuffer
 import cz.payola.web.client.views.plugins.visual.graph.{EdgeView, VertexView}
 import cz.payola.web.client.views.plugins.visual.techniques.BaseTechnique
 import cz.payola.web.client.views.plugins.visual.Vector
-import cz.payola.common.rdf.Graph
-import s2js.adapters.js.dom.Element
 
+/**
+  * Visual plug-in technique that places the vertices based on their edges.
+  * Every vertex causes a negative force on every other vertex, that makes
+  * vertices push each other away. Every edge causes a positive force on
+  * both vertices, that share the edge, that makes vertices push each other
+  * closer. The final positions of the vertices is reached when all vertices
+  * have "small enough" velocity.
+  */
 class GravityTechnique extends BaseTechnique
 {
     /**
@@ -19,12 +25,12 @@ class GravityTechnique extends BaseTechnique
       */
     private val attraction: Double = 0.05
 
-    override def init(graph: Graph, container: Element) {
-        super.init(graph, container)
-        if(!graphView.get.isEmpty) { // graphView != None because this call is after init(..)
-            performTechnique()
-        }
-    }
+    /**
+      * The "small enough" constant. The computation ends when
+      * Sum(vertexViewPacks.velocities) is less than this number.
+      * 0.5 is well tested, change it carefully.
+      */
+    private val velocitiesStabilization = 0.5
 
     def performTechnique() {
         basicTreeStructure(graphView.get.vertexViews)
@@ -35,6 +41,11 @@ class GravityTechnique extends BaseTechnique
         flip(graphView.get.vertexViews)
     }
 
+    /**
+      * Constructus a structure of vertexViewPacks, that the gravity algorithm works with.
+      * @param vertexViews to create vertexViewPacks from
+      * @return created vertexViewPacks
+      */
     private def buildVertexViewsWorkingStructure(vertexViews: ListBuffer[VertexView]): ListBuffer[VertexViewPack] = {
         var workingStructure = ListBuffer[VertexViewPack]()
 
@@ -45,6 +56,12 @@ class GravityTechnique extends BaseTechnique
         workingStructure
     }
 
+    /**
+      * Constructs a structure of edgeViewPacks, that the gravity algorithm works with.
+      * @param vertexViewPacks to search for connected vertices
+      * @param edgeViews to create edgeViewPacks from
+      * @return created edgeViewPacks
+      */
     private def buildEdgeViewsWorkingStructure(vertexViewPacks: ListBuffer[VertexViewPack],
         edgeViews: ListBuffer[EdgeView]): ListBuffer[EdgeViewPack] = {
         var workingStructure = ListBuffer[EdgeViewPack]()
@@ -63,8 +80,8 @@ class GravityTechnique extends BaseTechnique
 
     /**
       * Gravity model algorithm. Use it carefully, the computation complexity is quite high
-      * (vertices^2 + edges + vertices) * "something strange". The main loop ends if sum of velocities of
-      * vertices is less than 0.5. The inner loops compute forces effecting vertices. Vertices push away
+      * (vertices^2 + edges + vertices) * "something strange".
+      * The main loop ends if sum of velocities of vertices is less than 0.5. The inner loops compute forces effecting vertices. Vertices push away
       * each other and their edges push them together. In the first loop are computed repulsions. In the
       * second are computed attractions. And in the last loop are the forces applied.
       * @param vertexViewPacks
@@ -117,7 +134,7 @@ class GravityTechnique extends BaseTechnique
                     moved.value.position = moved.value.position + moved.velocity
                 }
             }
-            repeat = stabilization >= 0.5;
+            repeat = stabilization >= velocitiesStabilization;
         }
     }
 }

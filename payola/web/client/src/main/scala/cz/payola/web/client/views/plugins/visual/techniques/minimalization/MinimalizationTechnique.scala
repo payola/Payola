@@ -3,18 +3,9 @@ package cz.payola.web.client.views.plugins.visual.techniques.minimalization
 import collection.mutable.ListBuffer
 import cz.payola.web.client.views.plugins.visual.graph.{EdgeView, VertexView}
 import cz.payola.web.client.views.plugins.visual.techniques.BaseTechnique
-import cz.payola.common.rdf.Graph
-import s2js.adapters.js.dom.Element
 
 class MinimalizationTechnique extends BaseTechnique
 {
-    override def init(graph: Graph, container: Element) {
-        super.init(graph, container)
-        if(!graphView.get.isEmpty) { // graphView != None because this call is after init(..)
-            performTechnique()
-        }
-    }
-
     //TODO add some computation branch cutting...this algorithm is quite complex
     def performTechnique() {
         minimizeEdgeCrossing(graphView.get.vertexViews)
@@ -144,6 +135,7 @@ class MinimalizationTechnique extends BaseTechnique
         var compute = true //iteration works until all possible rotations are tested or found drawing has zero crossings
 
         while (compute) {
+
             var actCrossings: Double = 0
             var level = currentStructure.getLevel(0)
             var levelNum = 1
@@ -164,33 +156,6 @@ class MinimalizationTechnique extends BaseTechnique
         sortEdgeViewLists(memory)
     }
 
-
-    /**
-      * level 0 means children of the root
-      * @param root
-      * @param levelNum
-      * @return
-      */
-    private def getLevel(root: VertexViewPack, levelNum: Int): ListBuffer[ListBuffer[VertexViewPack]] = {
-        var level1 = ListBuffer[ListBuffer[VertexViewPack]](root.children)
-        var level2 = ListBuffer[ListBuffer[VertexViewPack]]()
-
-        var currentLevel = 0
-        while (currentLevel != levelNum) {
-            level1.foreach {listOfElements =>
-                listOfElements.foreach {element =>
-                    level2 += element.children
-                }
-            }
-
-            level1 = level2
-            level2 = ListBuffer[ListBuffer[VertexViewPack]]()
-            currentLevel += 1
-        }
-
-        level1
-    }
-
     /**
       * Finds parent of children, that do not have any further children (by vertexViewPack.getLastParent)
       * and rotates the children list (by vertexViewPack.rotateChildren). If the returned value is true
@@ -208,10 +173,11 @@ class MinimalizationTechnique extends BaseTechnique
         }
 
         if (lastParent.rotateChildren()) {
-            var previousBrother = lastParent.getPreviousBrotherWithChildren()
+            var brother = lastParent.getPreviousBrotherWithChildren()
 
-            while (previousBrother.rotateChildren()) {
-                previousBrother = previousBrother.getPreviousBrotherWithChildren()
+            while (brother.rotateChildren() && brother.parent != None) {
+                //if brother.parent == None pak jsem dosel do korene struktury a vsechny rotace byly vyzkouseny
+                brother = brother.getPreviousBrotherWithChildren()
             }
         }
     }
