@@ -3,6 +3,8 @@ package cz.payola.web.client.views.plugins.visual.techniques
 import collection.mutable.ListBuffer
 import cz.payola.web.client.views.plugins.visual.{VisualPlugin, Point, Vector}
 import cz.payola.web.client.views.plugins.visual.graph.{EdgeView, VertexView}
+import cz.payola.common.rdf.Graph
+import s2js.adapters.js.dom.Element
 
 abstract class BaseTechnique extends VisualPlugin
 {
@@ -10,11 +12,27 @@ abstract class BaseTechnique extends VisualPlugin
 
     private val circleLevelsDistance = 150
 
+    /**
+      * Calls initialization of the parent class and if the graph is not empty performs the
+      * vertex positioning technique.
+      * @param graph to visualise
+      * @param container where to visualise
+      */
+    override def init(graph: Graph, container: Element) {
+        super.init(graph, container)
+        if(!graphView.get.isEmpty) { // graphView != None because this call is after init(..)
+            performTechnique()
+        }
+    }
+
+    /**
+      * Runs the vertex positioning algorithm and moves the vertices to "more suitable" positions.
+      */
     def performTechnique()
 
     /**
-      * Moves whole graph closer to the [0,0] coordinate, that it won't float somewhere away and makes it visible.
-      * @param vViews
+      * Moves all vertices of the graph visible quadrant of coordinates and closer to the [0, 0] point.
+      * @param vViews vertices to move
       */
     protected def moveGraphToUpperLeftCorner(vViews: ListBuffer[VertexView]) {
         var vector = Vector(Double.MaxValue, Double.MaxValue)
@@ -37,8 +55,8 @@ abstract class BaseTechnique extends VisualPlugin
     }
 
     /**
-      * Rotates the whole graph around line x=y if the height of the graph if bigger than width
-      * @param vViews
+      * Rotates all vertices around function x=y if the height of the graph if bigger than width
+      * @param vViews vertices to rotate
       */
     protected def flip(vViews: ListBuffer[VertexView]) {
         var maxX: Double = 5.0//Double.MinValue
@@ -73,8 +91,9 @@ abstract class BaseTechnique extends VisualPlugin
       * Moves the vertices to a tree like structure. The first element of input is placed in the root located
       * in coordinates [0, 0]. All children of the root are vertices connected via an edge to the root. Every
       * level of the "tree" are vertices connected by one edge to a vertex in the previous level. Vertices
-      * once placed to the structure are ignored for next levels construction.
-      * @param vViews
+      * in next level have set higher number to the y-coordinate. Vertices in a level have set x-coordinate
+      * to appear in a line next to each other. Placed vertices are ignored for next levels construction.
+      * @param vViews vertices to place in the "tree" structure
       */
     protected def basicTreeStructure(vViews: ListBuffer[VertexView]) {
         var levels = ListBuffer[ListBuffer[VertexView]]()
@@ -124,7 +143,7 @@ abstract class BaseTechnique extends VisualPlugin
             elements.foreach {element =>
 
                 element.position = Point(scala.math.random / 10 +
-                        (vertexNumInLevel * treeVerticesDistance) + treeVerticesDistance * (lastLevelSize - currentLevelSize) / 2,
+                    (vertexNumInLevel * treeVerticesDistance) + treeVerticesDistance * (lastLevelSize - currentLevelSize) / 2,
                     scala.math.random / 10 + (levelNum * treeVerticesDistance))
                 vertexNumInLevel += 1
             }
@@ -132,6 +151,15 @@ abstract class BaseTechnique extends VisualPlugin
         }
     }
 
+    /**
+      * Moves the vertices to a tree like structure. The first element of input is placed in the root located
+      * in coordinates [0, 0]. All children of the root are vertices connected via an edge to the root. Every
+      * level of the "tree" are vertices connected by one edge to a vertex in the previous level. Vertices
+      * in next level are placed to a circle with a bigger diameter than the vertices in the previous level.
+      * Vertices are placed in the circle regularly, that the vertices have the same distances between each other.
+      * Placed vertices are ignored for next levels construction.
+      * @param vertexViews
+      */
     protected def basicTreeCircledStructure(vertexViews: ListBuffer[VertexView]) {
         var level1 = ListBuffer[VertexView]()
         var level2 = ListBuffer[VertexView]()
@@ -168,6 +196,15 @@ abstract class BaseTechnique extends VisualPlugin
         }
     }
 
+    /**
+      * Support method for basicTreeCircledStructure(..). This method takes all vertices in the vertexViews
+      * container and puts them into one circle.
+      * @param rotation modifies angle of the first placed vertex. This is an angle thats is between
+      * vertexViews.head.point, [0, 0] and [1, 0].
+      * @param radius distance of the vertices from center
+      * @param center of the circle
+      * @param vertexViews container of the vertices, that are placed to a circle
+      */
     private def placeVerticesOnCircle(rotation: Double, radius: Double, center: Point,
         vertexViews: ListBuffer[VertexView]) {
         val angle = 360 / vertexViews.length
@@ -207,6 +244,12 @@ abstract class BaseTechnique extends VisualPlugin
         }
     }
 
+    /**
+      * Function for checking whether a vertex exists in a container
+      * @param whatToCheck vertex to search for
+      * @param whereToCheck container to search in
+      * @return true if the vertex is present in the container
+      */
     def existsVertex(whatToCheck: VertexView, whereToCheck: ListBuffer[VertexView]): Boolean = {
         whereToCheck.exists(element => element.vertexModel eq whatToCheck.vertexModel)
     }

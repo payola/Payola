@@ -375,6 +375,15 @@ trait Iterable
         }
     }
 
+    def dropRight(n: Int): Iterable = {
+        if (n <= 0) {
+            val b = newInstance
+            b
+        } else {
+            sliceWithKnownDelta(0, n, -n)
+        }
+    }
+
     // From TraversableLike
     def slice(from: Int, until: Int): Iterable = {
         sliceWithKnownBound(math.max(from, 0), until)

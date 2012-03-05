@@ -6,10 +6,19 @@ import s2js.adapters.js.dom.Element
 import s2js.adapters.goog.events._
 import cz.payola.common.rdf.Graph
 
+/**
+  * Representation of visual based output drawing plugin
+  */
 abstract class VisualPlugin extends Plugin
 {
+    /**
+      * Variable helping during movement of vertices. Contains position where the movement of a vertex tarted.
+      */
     private var moveStart: Option[Point] = None
-    
+
+    /**
+      * Contained graph in visualisation packing.
+      */
     var graphView: Option[GraphView] = None
 
     def init(graph: Graph, container: Element) {
@@ -22,15 +31,19 @@ abstract class VisualPlugin extends Plugin
     def update(graph: Graph) {
 
     }
-    
+
     def clean() {
-        
+
     }
 
     def redraw() {
         graphView.get.redrawAll()
     }
 
+    /**
+      * Description of mouse-button-down event. Is called from the layer (canvas) binded to it in the initialization.
+      * @param event
+      */
     private def onMouseDown(event: BrowserEvent) {
         val position = Point(event.clientX, event.clientY)
         val vertex = graphView.get.getTouchedVertex(position)
@@ -60,6 +73,10 @@ abstract class VisualPlugin extends Plugin
         }
     }
 
+    /**
+      * Description of mouse-move event. Is called from the layer (canvas) binded to it in the initialization.
+      * @param event
+      */
     private def onMouseMove(event: BrowserEvent) {
         if (moveStart.isDefined) {
             val end = Point(event.clientX, event.clientY)
@@ -72,6 +89,10 @@ abstract class VisualPlugin extends Plugin
         }
     }
 
+    /**
+      * Description of mouse-button-up event. Is called from the layer (canvas) binded to it in the initialization.
+      * @param event
+      */
     private def onMouseUp(event: BrowserEvent) {
         moveStart = None
     }

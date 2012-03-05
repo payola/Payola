@@ -5,10 +5,20 @@ import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom.{Element, Canvas, CanvasRenderingContext2D}
 
 trait View {
+    /**
+      * Routine for drawing the graphical representation of graphs objects.
+      * @param context to which container to draw
+      * @param color which color to use
+      * @param position to which location to draw
+      */
     def draw(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point])
 
     /**
       * Draws a rectangle with rounded corners, depending on the radius parameter to the input canvas context.
+      * @param context to which to draw
+      * @param position to which location to draw
+      * @param size of the drawn "rounded rectangle"
+      * @param radius of the corners of the rectangle
       */
     protected def drawRoundedRectangle(context: CanvasRenderingContext2D, position: Point, size: Vector, radius: Double) {
         //theory:
@@ -52,6 +62,16 @@ trait View {
         context.closePath()
     }
 
+    /**
+      * Draws a bezier curve based on the parameters.
+      * @param context to which to draw
+      * @param control1 first point of bending the line
+      * @param control2 second point of bending the line
+      * @param origin where to start the line
+      * @param destination where to end the line
+      * @param lineWidth width of the line
+      * @param color of the line
+      */
     protected def drawBezierCurve(context: CanvasRenderingContext2D, control1: Point, control2: Point,
         origin: Point, destination: Point, lineWidth: Double, color: Color) {
 
@@ -64,6 +84,14 @@ trait View {
         context.stroke()
     }
 
+    /**
+      * Draws a straight line based on the parameters.
+      * @param context to which to draw
+      * @param origin where to start the line
+      * @param destination where to end the line
+      * @param lineWidth width of the line
+      * @param color of the line
+      */
     protected def drawStraightLine(context: CanvasRenderingContext2D, origin: Point, destination: Point,
         lineWidth: Double, color: Color) {
 
@@ -76,6 +104,14 @@ trait View {
         context.stroke()
     }
 
+    /**
+      * Draws a circle based on the parameters.
+      * @param context to which to draw
+      * @param center of the drawn circle
+      * @param radius of the drawn circle
+      * @param lineWidth width of the line of the circle
+      * @param color of the line of the circle
+      */
     protected def drawCircle(context: CanvasRenderingContext2D, center: Point, radius: Double,
         lineWidth: Double, color: Color) {
 
@@ -87,6 +123,15 @@ trait View {
         context.stroke()
     }
 
+    /**
+      * Draws text based on the parametes.
+      * @param context to which to draw
+      * @param text which to draw
+      * @param origin where to start drawing
+      * @param color of the text
+      * @param font of the text
+      * @param align of the text
+      */
     protected def drawText(context: CanvasRenderingContext2D, text: String,  origin: Point,
         color: Color, font: String, align: String) {
 
@@ -97,21 +142,44 @@ trait View {
         context.fillText(text, origin.x, origin.y)
     }
 
+    /**
+      * Fills the last drawn object with color.
+      * @param context where in to fill a space
+      * @param color of the filling
+      */
     protected def fillCurrentSpace(context: CanvasRenderingContext2D, color: Color) {
 
         context.fillStyle = color.toString
         context.fill()
     }
 
+    /**
+      * Clears the specified area from all drawn elements
+      * @param context where in to clear
+      * @param topLeft corner of the cleared rectangle
+      * @param size of the cleared rectangle
+      */
     protected def clear(context: CanvasRenderingContext2D, topLeft: Point, size: Vector) {
         val bottomRight = topLeft + size
         context.clearRect(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
     }
 
-    protected def isPointInRect(p: Point, topLeft: Point, bottomRight: Point): Boolean = {
-        p >= topLeft && p <= bottomRight
+    /**
+      * Indicator if the point is inside of the rectangle.
+      * @param point to ask for location
+      * @param topLeft point of the rectangle
+      * @param bottomRight point of the rectangle
+      * @return true if the point is inside the rectangle
+      */
+    protected def isPointInRect(point: Point, topLeft: Point, bottomRight: Point): Boolean = {
+        point >= topLeft && point <= bottomRight
     }
 
+    /**
+      * Constructs a canvas context element as a child of the input container Element object.
+      * @param container parent of the created canvas context
+      * @return Layer object with a new canvas context
+      */
     protected def createLayer(container: Element): Layer = {
         val canvas = document.createElement[Canvas]("canvas")
         val context = canvas.getContext[CanvasRenderingContext2D]("2d")
