@@ -14,7 +14,9 @@ class RpcSpecs extends CompilerFixtureSpec
                     }
                 """
             } shouldCompileTo {
-                ""
+                """
+                    goog.provide('server.o');
+                """
             }
     }
 
@@ -38,6 +40,7 @@ class RpcSpecs extends CompilerFixtureSpec
             } shouldCompileTo {
                 """
                     goog.provide('client');
+                    goog.provide('server.o');
                     goog.require('s2js.RPCWrapper');
 
                     client.main = function() {
