@@ -48,7 +48,7 @@ object RDFGraph {
             
             val URI = res.getURI
             var node: RDFIdentifiedNode = null
-            if (!identifiedNodes.get(URI).isEmpty){
+            if (identifiedNodes.get(URI).isDefined){
                 node = identifiedNodes.get(URI).get
             }else{
                 node = new RDFIdentifiedNode(URI)
@@ -71,8 +71,9 @@ object RDFGraph {
                 var edge: RDFEdge = null
                 if (rdfNode.isLiteral) {
                     var language = statement.getLanguage
-                    if (language == "")
+                    if (language == ""){
                         language = null
+                    }
                     val literalNode = new RDFLiteralNode(rdfNode.asLiteral.getValue, Option(language))
                     allNodes += literalNode
                     edge = new RDFEdge(node, literalNode, predicate.getURI)
@@ -81,7 +82,7 @@ object RDFGraph {
                     val destinationURI = asResource.getURI
                     var destination: RDFIdentifiedNode = null
                     if (identifiedNodes.get(destinationURI).isEmpty){
-                        destination = new RDFIdentifiedNode(URI)
+                        destination = new RDFIdentifiedNode(destinationURI)
                         identifiedNodes.put(destinationURI, destination)
                         allNodes += destination
                     }else{
