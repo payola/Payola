@@ -1,6 +1,6 @@
 package s2js.runtime.s2js
 
-import s2js.compiler.NativeJs
+import s2js.compiler.javascript
 
 /**
   * A class representing a Class.
@@ -10,7 +10,7 @@ import s2js.compiler.NativeJs
   */
 class Class(val fullName: String, val parentClassesJsArray: Any)
 {
-    @NativeJs("""
+    @javascript("""
         if (self.fullName === classFullName) {
             return true;
         }

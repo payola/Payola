@@ -1,6 +1,6 @@
 package s2js.runtime.s2js
 
-import s2js.compiler.{NativeJsDependency, NativeJs}
+import s2js.compiler.{dependency, javascript}
 
 object RPCWrapper
 {
@@ -11,8 +11,8 @@ object RPCWrapper
     //              a pokud ne tak holt vyhodit generickou).
     //
 
-    @NativeJsDependency("s2js.RPCException")
-    @NativeJs("""
+    @dependency("s2js.RPCException")
+    @javascript("""
 
         var url = "/RPC";
 
@@ -48,7 +48,7 @@ object RPCWrapper
     """)
     def callSync(procedureName: String, parameters: Any): Any = ()
 
-    @NativeJs("""
+    @javascript("""
         var args = '';
         if (Object.prototype.toString.call(params) === '[object Array]') {
                 var arr = [];
@@ -62,7 +62,7 @@ object RPCWrapper
     """)
     def buildHttpQuery(params: Map[String, Object]): String = null
 
-    @NativeJs("""
+    @javascript("""
 
         // check if the deserialized object is of type Object
         if (Object.prototype.toString.call(obj) !== '[object Object]')
@@ -106,7 +106,7 @@ object RPCWrapper
     """)
     def deserialize(obj: Object, objectRegistry: Object = null, refQueue: Object = null): Object = null
 
-    @NativeJs("""
+    @javascript("""
         // deserialize via recursion, but be aware of references, which are probably not yet created,
         // so add the "set reference" request into a queue to make it later
         for (var key in obj)
@@ -133,7 +133,7 @@ object RPCWrapper
     """)
     def deserializeProperties(obj: Object, result: Object, objectRegistry: Object, refQueue: Object) = null
 
-    @NativeJs("""
+    @javascript("""
         // create an instance of the collection class
         var instance = this.checkDefinedAndMakeInstance(obj.__arrayClass__);
         if (instance == null)
@@ -158,7 +158,7 @@ object RPCWrapper
     """)
     def deserializeArrayClass(obj: Object, objectRegistry: Object = null, refQueue: Object = null): Object = null
 
-    @NativeJs("""
+    @javascript("""
 
         var namespaces = className.split(".");
         var fqdn = "";
