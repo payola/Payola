@@ -3,6 +3,7 @@ package s2js.compiler.components
 import s2js.compiler.ScalaToJsException
 import scala.tools.nsc.Global
 import scala.collection.mutable
+import mutable.ListBuffer
 
 /** A factory for ClassDefCompiler objects. */
 object ClassDefCompiler
@@ -564,6 +565,15 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
                 compileAst(qual)
                 compileParameterValues(apply.args)
             }
+            case apply@Apply(Apply(Apply(select@Select(_, _), p), s), e) if (selectIsOnRemote(select)) => {
+                compileRpcCall(select, apply.tpe, p ::: s ::: e)
+            }
+            case apply@Apply(Apply(select@Select(_, _), p), e) if (selectIsOnRemote(select)) => {
+                compileRpcCall(select, apply.tpe, p ::: e)
+            }
+            case apply@Apply(select@Select(_, _), p) if (selectIsOnRemote(select)) => {
+                compileRpcCall(select, apply.tpe, p)
+            }
             case Apply(subApply@Apply(_, _), args) => {
                 // Apply of a function with multiple parameter lists.
                 compileApply(subApply);
@@ -580,12 +590,8 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
                 }
             }
             case Apply(select@Select(_, _), _) if select.hasSymbolWhich(_.isMethod) => {
-                if (selectIsOnRemote(select)) {
-                    compileRpcCall(select, apply.tpe, apply.args)
-                } else {
-                    compileSelect(select, isInsideApply = true)
-                    compileParameterValues(apply.args)
-                }
+                compileSelect(select, isInsideApply = true)
+                compileParameterValues(apply.args)
             }
             case _ => {
                 compileAst(apply.fun)
@@ -595,22 +601,65 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-      * Compiles a RPC call (instead of a method call).
+      * Compiles a synchronous RPC call (instead of a method call).
       * @param select The method selection from the remote object.
       * @param returnType Return type of the RPC call.
       * @param parameters The parameters.
       */
     private def compileRpcCall(select: Global#Select, returnType: Global#Type, parameters: List[Global#Tree]) {
+        val requiredTypes = ListBuffer[Global#Type](returnType)
+        val isAsync = packageDefCompiler.getSymbolAnnotations(select.symbol, "s2js.compiler.async").nonEmpty
+
+        var realParameters = parameters
+        var successCallback: Option[Global#Tree] = None
+        var errorCallback: Option[Global#Tree] = None
+        
+        // Check the parameter values.
+        if (isAsync) {
+            val errorPrefix = "The asynchronous remote method %s ".format(select.toString)
+            if (parameters.length < 2) {
+                throw new ScalaToJsException(errorPrefix + "must have at least two parameters")
+            }
+            if (!typeIsEmpty(returnType)) {
+                throw new ScalaToJsException(errorPrefix + "mustn't return anything (the return type must be Unit).")
+            }
+
+            val callbacks = parameters.takeRight(2)
+            successCallback = Some(callbacks.head)
+            errorCallback = Some(callbacks.last)
+            if (!typeIsFunction1(successCallback.get.tpe) || !typeIsFunction1(errorCallback.get.tpe)) {
+                throw new ScalaToJsException(errorPrefix + 
+                    " must have declared success callback function and error callback function parameters.")
+            }
+
+            val errorCallbackParameterTypeName = errorCallback.get.tpe.typeArgs.head.typeSymbol.fullName
+            if (errorCallbackParameterTypeName != "java.lang.Throwable") {
+                throw new ScalaToJsException(errorPrefix +
+                    " must have an error callback whose first parameter is of type Throwable.")
+            }
+
+            requiredTypes += successCallback.get.tpe.typeArgs.head
+            realParameters = parameters.dropRight(2)
+        }
+        
         // Add the required dependencies.
         packageDefCompiler.dependencyManager.addRequiredSymbol("s2js.RPCWrapper")
-        if (!typeIsPrimitive(returnType)) {
-            packageDefCompiler.dependencyManager.addRequiredSymbol(packageDefCompiler.getSymbolFullJsName(
-                returnType.typeSymbol))
+        requiredTypes.foreach {tpe =>
+            if (!typeIsPrimitive(tpe)) {
+                packageDefCompiler.dependencyManager.addRequiredSymbol(packageDefCompiler.getSymbolFullJsName(
+                    tpe.typeSymbol))
+            }
         }
 
         // Compile the call itself.
-        buffer += "s2js.RPCWrapper.callSync('%s', ".format(select.toString)
-        compileParameterValues(parameters, asArray = true);
+        buffer += "s2js.RPCWrapper.call%s('%s', ".format(if (isAsync) "Async" else "Sync", select.toString)
+        compileParameterValues(realParameters, asArray = true);
+        if (isAsync) {
+            buffer += ", "
+            compileAst(successCallback.get)
+            buffer += ", "
+            compileAst(errorCallback.get)
+        }
         buffer += ")"
     }
 
@@ -1000,14 +1049,25 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     /**
       * Returns whether the type is a primitive type (either scala.AnyVal or java.lang.String).
       * @param tpe the type to check.
+      * @return True if the type is primitive, false otherwise.
       */
     private def typeIsPrimitive(tpe: Global#Type): Boolean = {
         tpe.typeSymbol.fullName == "java.lang.String" || tpe.baseClasses.exists(_.fullName.toString == "scala.AnyVal")
     }
 
     /**
+      * Returns whether the type is a Function1 (a function with one parameter).
+      * @param tpe the type to check.
+      * @return True if the type is a function with one parameter, false otherwise.
+      */
+    private def typeIsFunction1(tpe: Global#Type): Boolean = {
+        tpe.typeSymbol.fullName == "scala.Function1"
+    }
+
+    /**
       * Returns whether the type is a variadic parameter type.
       * @param typeAst The type AST.
+      * @return True if the type is variadic parameter type, false otherwise.
       */
     private def typeIsVariadic(typeAst: Global#Tree): Boolean = {
         typeAst.toString.endsWith("*")
@@ -1016,6 +1076,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     /**
       * Returns whether the select should be ignored during compilation.
       * @param select The select to check.
+      * @return True if the select should be ignored, false otherwise.
       */
     private def selectIsIgnored(select: Global#Select): Boolean = {
         val ignoredNames = Set("<init>")
@@ -1058,14 +1119,14 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-      * Compiles the specified symbol. If the symbol has a s2js.compiler.NativeJs annotation, then the native JavaScript
+      * Compiles the specified symbol. If the symbol has a s2js.compiler.javascript annotation, then the native JavaScript
       * code from the annotation is used. Otherwise compiles the symbol using the specified action.
       * @param symbol The symbol to compile.
-      * @param ifNotNativeAction The action that is invoked the symbol isn't annotated with the s2js.compiler.NativeJs
+      * @param ifNotNativeAction The action that is invoked the symbol isn't annotated with the s2js.compiler.javascript
       *     annotation. Typically the action invokes direct compilation of the symbol.
       */
     private def compileSymbol(symbol: Global#Symbol)(ifNotNativeAction: => Unit) {
-        val nativeAnnotations = packageDefCompiler.getSymbolAnnotations(symbol, "s2js.compiler.NativeJs")
+        val nativeAnnotations = packageDefCompiler.getSymbolAnnotations(symbol, "s2js.compiler.javascript")
         if (nativeAnnotations.nonEmpty) {
             nativeAnnotations.head.args.foreach {
                 case Literal(Constant(value: String)) => buffer += value
@@ -1074,8 +1135,8 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
             ifNotNativeAction
         }
 
-        // Check for the NativeJsDependency annotation.
-        val dependencyAnnotations = packageDefCompiler.getSymbolAnnotations(symbol, "s2js.compiler.NativeJsDependency")
+        // Check for the dependency annotation.
+        val dependencyAnnotations = packageDefCompiler.getSymbolAnnotations(symbol, "s2js.compiler.dependency")
         dependencyAnnotations.foreach {annotationInfo =>
             annotationInfo.args.foreach {
                 case Literal(Constant(d: String)) => packageDefCompiler.dependencyManager.addRequiredSymbol(d)

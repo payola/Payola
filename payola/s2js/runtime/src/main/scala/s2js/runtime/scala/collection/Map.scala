@@ -1,16 +1,16 @@
 package s2js.runtime.scala.collection
 
 import mutable.ListBuffer
-import s2js.compiler.{NativeJsDependency, NativeJs}
+import s2js.compiler.{dependency, javascript}
 
-@NativeJsDependency("scala.Tuple2")
-@NativeJsDependency("scala.Option")
+@dependency("scala.Tuple2")
+@dependency("scala.Option")
 trait Map[A, B] extends Iterable
 {
-    @NativeJs("{}")
+    @javascript("{}")
     var internalJsObject = null
 
-    @NativeJs("""
+    @javascript("""
         for (var key in self.internalJsObject) {
             if (self.internalJsObject.hasOwnProperty(key)) {
                 f(new scala.Tuple2(key, self.internalJsObject[key]))
@@ -19,7 +19,7 @@ trait Map[A, B] extends Iterable
     """)
     def foreach[U](f: Double => U) {}
 
-    @NativeJs("self.internalJsObject[x._1] = x._2;")
+    @javascript("self.internalJsObject[x._1] = x._2;")
     def +=(x: Any) {}
 
     def prepend(x: Any) {
@@ -31,10 +31,10 @@ trait Map[A, B] extends Iterable
         (ListBuffer.empty ++ this).reversed
     }
 
-    @NativeJs("delete self.internalJsObject[x];")
+    @javascript("delete self.internalJsObject[x];")
     def -=(x: Any) {}
 
-    @NativeJs("""
+    @javascript("""
         if (s2js.isUndefined(self.internalJsObject[key])) {
             return scala.None;
         } else {
