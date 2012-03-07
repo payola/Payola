@@ -23,6 +23,7 @@ object JSONSerializerOptions {
     val JSONSerializerOptionPrettyPrinting = 1 << 0
     val JSONSerializerOptionIgnoreNullValues = 1 << 1
     val JSONSerializerOptionSkipObjectIDs = 1 << 2
+    val JSONSerializerOptionDisableCustomSerialization = 1 << 3
 
     val JSONSerializerDefaultOptions = JSONSerializerOptionCondensedPrinting
 }
@@ -43,6 +44,7 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
                             val processedObjects: ArrayBuffer[Any] = new ArrayBuffer[Any]()) {
     
     private val prettyPrint: Boolean = (options & JSONSerializerOptionPrettyPrinting) != 0
+    private val disableCustomSerialization = (options & JSONSerializerOptionDisableCustomSerialization) != 0
     private val ignoreNullValues: Boolean = (options & JSONSerializerOptionIgnoreNullValues) != 0
     private val skipObjectIDs: Boolean = (options & JSONSerializerOptionSkipObjectIDs) != 0
 
@@ -321,20 +323,36 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
         // *** Map is Iterable as well, but we shouldn't make it an array of
         // one-member dictionaries, rather make it a dictionary as a whole.
         // This is why Map **needs** to be matched first before Iterable.
-        obj match {
-            case fullyCustomized: JSONSerializationFullyCustomized => fullyCustomized.JSONValue(options)
-            case _: JSONSerializationCustomFields => _serializeCustomObject
-            case _: String => JSONUtilities.escapedString(obj.asInstanceOf[String])
-            case _: java.lang.Number => obj.toString
-            case _: java.lang.Boolean => if (obj.asInstanceOf[java.lang.Boolean].booleanValue) "true"
-                                         else "false"
-            case _: java.lang.Character => JSONUtilities.escapedChar(obj.asInstanceOf[java.lang.Character].charValue())
-            case _: Option[_] => _serializeOption
-            case _: scala.collection.Map[String, _] => _serializeMap
-            case _: scala.collection.Traversable[_] => _serializeTraversable
-            case _: Array[_] => _serializeArray
-            case _: AnyRef => _serializePlainObject
-            case _ => _serializePrimitiveType
+        
+        var matched: Boolean = false
+        var serializedString: String = ""
+        if (!disableCustomSerialization){
+            // If the custom serialization isn't disabled, we need to try to match the traits
+            if (obj.isInstanceOf[JSONSerializationFullyCustomized]) {
+                matched = true
+                serializedString = obj.asInstanceOf[JSONSerializationFullyCustomized].JSONValue(options)
+            }else if (obj.isInstanceOf[JSONSerializationCustomFields]){
+                matched = true
+                serializedString = _serializeCustomObject
+            }
+        }
+
+        if (!matched) {
+            obj match {
+                case _: String => JSONUtilities.escapedString(obj.asInstanceOf[String])
+                case _: java.lang.Number => obj.toString
+                case _: java.lang.Boolean => if (obj.asInstanceOf[java.lang.Boolean].booleanValue) "true"
+                else "false"
+                case _: java.lang.Character => JSONUtilities.escapedChar(obj.asInstanceOf[java.lang.Character].charValue())
+                case _: Option[_] => _serializeOption
+                case _: scala.collection.Map[String, _] => _serializeMap
+                case _: scala.collection.Traversable[_] => _serializeTraversable
+                case _: Array[_] => _serializeArray
+                case _: AnyRef => _serializePlainObject
+                case _ => _serializePrimitiveType
+            }
+        }else{
+            serializedString
         }
     }
 
@@ -378,7 +396,7 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
             }
         }
 
-        if (obj.isInstanceOf[JSONSerializationAdditionalFields]){
+        if (obj.isInstanceOf[JSONSerializationAdditionalFields] && !disableCustomSerialization){
             // Additional fields for the object
             val map: Map[String, Any] = obj.asInstanceOf[JSONSerializationAdditionalFields].additionalFieldsForJSONSerialization
             if (map.size != 0)

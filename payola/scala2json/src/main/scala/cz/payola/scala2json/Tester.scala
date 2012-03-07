@@ -103,7 +103,7 @@ object Tester {
         t.hash.put("six", 6)
 
 
-        val prettyOptions = JSONSerializerOptionPrettyPrinting | JSONSerializerOptionIgnoreNullValues
+        val prettyOptions = JSONSerializerOptionPrettyPrinting | JSONSerializerOptionIgnoreNullValues | JSONSerializerOptionDisableCustomSerialization
         var serializer: JSONSerializer = new JSONSerializer(t, prettyOptions)
         println(serializer.stringValue)
 
