@@ -1,13 +1,9 @@
 package cz.payola.model
 
-object SharePrivilege extends Enumeration {
-    type SharePrivilege = Value
-    val SharePrivilegeResultOnly, SharePrivilegeIncludingData = Value
-}
+import generic.ConcreteModelObject
+import cz.payola.common.model.SharePrivilege._
 
-import SharePrivilege._
-
-class AnalysisShare (var analysis: Analysis, var privilege: SharePrivilege) {
+class AnalysisShare (var analysis: Analysis, var privilege: SharePrivilege) extends ConcreteModelObject with cz.payola.common.model.AnalysisShare {
     require(analysis != null, "Analysis cannot be null!")
     require(privilege != null, "Privilige cannot be null!")
 
@@ -16,4 +12,5 @@ class AnalysisShare (var analysis: Analysis, var privilege: SharePrivilege) {
      *  @param a The analysis to be shared.
      */
     def this(a: Analysis) = this(a, SharePrivilegeResultOnly)
+
 }

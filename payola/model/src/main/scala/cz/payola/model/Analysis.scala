@@ -1,15 +1,11 @@
 package cz.payola.model
 
+import generic.ConcreteNamedModelObject
 import scala.collection.mutable._
 
-class Analysis (n: String, u: User) {
-    // Analysis owner
-    private var _owner: User = null
-    setOwner(u)
+class Analysis (n: String, u: User) extends ConcreteNamedModelObject(n) with cz.payola.common.model.Analysis {
 
-    // Name of the analysis.
-    private var _name: String = null;
-    setName(n)
+    setOwner(u)
 
     // Plugin instances that this analysis consists of.
     private val _pluginInstances: ArrayBuffer[PluginInstance] = new ArrayBuffer[PluginInstance]()
@@ -37,55 +33,6 @@ class Analysis (n: String, u: User) {
         require(instance != null, "Cannot query about null plugin instance!")
 
         _pluginInstances.contains()
-    }
-
-    /** Returns whether the user is an owner of this analysis.
-     *
-     * @param u User.
-     *
-     * @return True or false.
-     */
-    def isOwnedByUser(u: User): Boolean = owner == u
-
-    /** Name getter.
-     *
-     * @return The name.
-     */
-    def name: String = _name
-
-    /** Name setter. The name mustn't be null or empty.
-     *
-     * @param n The new name.
-     *
-     * @throws IllegalArgumentException if the new name is null.
-     */
-    def name_=(n: String) = {
-        require(n != null && n != "", "Analysis has to have a valid name!")
-
-        _name = n
-    }
-
-    /** Owner getter.
-     *
-     * @return The owner.
-     */
-    def owner: User = _owner
-
-    /** Owner setter. Mustn't be null.
-     *
-     * @param New owner.
-     *
-     * @throws IllegalArgumentException if the new user is null.
-     */
-    def owner_=(u: User) = {
-        require(u != null, "Analysis has to have a non-null owner!")
-        val oldOwner = _owner
-
-        _owner = u
-        _owner.addAnalysis(this)
-        
-        if (oldOwner != null)
-            oldOwner.removeAnalysis(this)
     }
 
     /** Returns an immutable copy of the plugin instances array.
@@ -118,22 +65,6 @@ class Analysis (n: String, u: User) {
 
         _pluginInstances -= instance
     }
-
-    /** Convenience method that just calls name_=.
-     *
-     * @param n The new name.
-     *
-     * @throws IllegalArgumentException if the name is null.
-     */
-    def setName(n: String) = name_=(n)
-
-    /** Convenience method that just calls owner_=.
-     *
-     * @param u The new owner.
-     *
-     * @throws IllegalArgumentException if the user is null.
-     */
-    def setOwner(u: User) = owner_=(u)
 
     /** Convenience method that just calls pluginInstances_=.
      *
