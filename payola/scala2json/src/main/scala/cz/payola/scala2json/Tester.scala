@@ -44,7 +44,7 @@ class FullyCustomizedClass(var str: String) extends JSONSerializationFullyCustom
 // This is an example of a class that uses the poseable annotation
 // which lets it use a different class's name
 // Moreover this class demonstrates the additional fields trait
-@JSONPoseableClass(otherClassName = "xxx.animalfarm.Horse") class AdditionalFieldsClass(val int: Int) extends JSONSerializationAdditionalFields {
+@JSONPoseableClass(otherClass = classOf[cz.payola.scala2json.JSONSerializationException]) class AdditionalFieldsClass(val int: Int) extends JSONSerializationAdditionalFields {
     def additionalFieldsForJSONSerialization: scala.collection.mutable.Map[String, Any] = {
         val map = new scala.collection.mutable.HashMap[String, Any]()
         map.put("newField", 666)

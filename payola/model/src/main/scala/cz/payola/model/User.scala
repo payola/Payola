@@ -1,26 +1,46 @@
 package cz.payola.model
 
+import generic.ConcreteNamedModelObject
 import scala.collection.mutable._
 
-class User(n: String) {
-    private var _name: String = null
-    setName(n)
-    
-    // Possibly the following two fields should private and
-    // we should return an immutable copy from a method below?
+class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.model.User {
 
+    var email: String = ""
+    var password: String = ""
+    
     // Analysis owned by the user
     private val _ownedAnalyses: ArrayBuffer[Analysis] = new ArrayBuffer[Analysis]()
     // Analysis shared to the user
     private val _sharedAnalyses: ArrayBuffer[AnalysisShare] = new ArrayBuffer[AnalysisShare]()
 
 
-    // Groups owned by the user
-    private val _ownedGroups: ArrayBuffer[Group] = new ArrayBuffer[Group]()
-    // Groups that the user is a member of
-    private val _memberGroups: ArrayBuffer[Group] = new ArrayBuffer[Group]()
+    // Groups owned by the user and groups the user is a member in
+    // To support lazy-loading, only GroupIDs are filled at first and when requesting
+    // a particular group, it is loaded and stored in the HashMap cache.
+    private val _ownedGroupIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
+    private val _memberGroupIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
+    private val _cachedGroups: HashMap[String, Group] = new HashMap[String,Group]()
 
 
+    /** Internal method which creates List of groups from IDs. It uses the user's cache
+      * as well as loading from the data layer if the group hasn't been cached yet.
+      *
+      * @param ids An array of group IDs.
+      * @return List of groups.
+      */
+    private def _groupsWithIDs(ids: ArrayBuffer[String]): List[Group] = {
+        var groups = List[Group]()
+        ids foreach { groupID =>
+            val g: Option[Group] = _cachedGroups.get(groupID)
+            if (g.isEmpty){
+                // TODO loading from DB
+            }else{
+                groups :: g.get
+            }
+        }
+        groups
+    }
+    
    /** Adds the analysis to the analyses array. Does nothing if the analysis
      * has been already added. The Analysis has to be owned by the user.
      *
@@ -57,11 +77,14 @@ class User(n: String) {
      * @throws IllegalArgumentException if the group is null.
      */
     def addToGroup(g: Group): Unit = {
-        require(g != null, "Group is NULL!")
+        require(g != null, "Cannot add a user to a null group!")
 
         // Avoid double membership
-        if (!_memberGroups.contains(g)) {
-            _memberGroups += g
+        if (!_memberGroupIDs.contains(g.objectID)) {
+            _memberGroupIDs += g.objectID
+            _cachedGroups.put(g.objectID, g)
+
+            // Automatically add self to the group as well
             g.addMember(this)
         }
     }
@@ -77,8 +100,11 @@ class User(n: String) {
         require(g.isOwnedByUser(this), "Group isn't owned by this user!")
 
         // Avoid double membership
-        if (!_ownedGroups.contains(g))
-            _ownedGroups += g
+        if (!_ownedGroupIDs.contains(g.objectID)){
+            _ownedGroupIDs += g.objectID
+            _cachedGroups.put(g.objectID, g)
+        }
+
     }
 
    /** Results in true if the user has access to that particular analysis.
@@ -98,13 +124,7 @@ class User(n: String) {
         }
     }
 
-   /** Results in true if the user is a member of the group.
-     *
-     * @param g The group.
-     *
-     * @return True or false.
-     */
-    def isMemberOfGroup(g: Group): Boolean = _memberGroups.contains(g)
+
 
     /** Results in true if the user is an owner of the analysis.
      *
@@ -114,46 +134,65 @@ class User(n: String) {
      */
     def isOwnerOfAnalysis(a: Analysis): Boolean = a.owner == this
 
-    /** Results in true is the user is an owner of the group.
-     *
-     * @param g The group.
-     *
-     * @return True or false.
-     */
-    def isOwnerOfGroup(g: Group): Boolean = g.isOwnedByUser(this)
-
-    /** Result is a new Array consisting of only groups that
+    /** Returns a group at index. Will raise an exception if the index is out of bounds.
+      * The group will be loaded from DB if necessary.
+      *
+      * @param index Index of the group (according to the GroupIDs).
+      * @return The group.
+      */
+    def memberGroupAtIndex(index: Int): Group = {
+        require(index >= 0 && index < numberOfMemberGroups, "Member group index out of bounds - " + index)
+        val opt: Option[Group] = _cachedGroups.get(_memberGroupIDs(index)) 
+        if (opt.isEmpty){
+            // TODO Load from DB
+            null
+        }else{
+            opt.get
+        }
+    }
+    
+    /** Result is a new List consisting of only groups that
      *  the user is a member of.
      *
-     *  @return New Array with groups that the user is a member of.
+     *  @return New List with groups that the user is a member of.
      */
-    def memberGroups: Array[Group] = _memberGroups.toArray
+    def memberGroups: List[Group] = _groupsWithIDs(_memberGroupIDs)
 
-    /** Returns the user's name.
-     *
-     * @return User's name.
-     */
-    def name: String = _name
+    /** Number of member groups.
+      *
+      * @return Number of member groups
+      */
+    def numberOfMemberGroups: Int = _memberGroupIDs.size
 
-    /** Sets the user's name.
-     *
-     * @param n New name.
-     *
-     * @throws IllegalArgumentException if the new name is null or empty.
-     */
-    def name_=(n: String) = {
-        // The name mustn't be null and mustn't be empty
-        require(n != null && n != "")
+    /** Number of owned groups.
+      *
+      * @return Number of owned groups
+      */
+    def numberOfOwnedGroups: Int = _ownedGroupIDs.size
 
-        _name = n
+    /** Returns a group at index. Will raise an exception if the index is out of bounds.
+      * The group will be loaded from DB if necessary.
+      *
+      * @param index Index of the group (according to the GroupIDs).
+      * @return The group.
+      */
+    def ownedGroupAtIndex(index: Int): Group = {
+        require(index >= 0 && index < numberOfOwnedGroups, "Owned group index out of bounds - " + index)
+        val opt: Option[Group] = _cachedGroups.get(_ownedGroupIDs(index))
+        if (opt.isEmpty){
+            // TODO Load from DB
+            null
+        }else{
+            opt.get
+        }
     }
 
-    /** Result is a new Array consisting of only groups that
+    /** Result is a new List consisting of only groups that
      *  are owned by the user.
      *
-     *  @return New Array with groups owned by the user.
+     *  @return New List with groups owned by the user.
      */
-    def ownedGroups: Array[Group] = _ownedGroups.toArray
+    def ownedGroups: List[Group] = _groupsWithIDs(_ownedGroupIDs)
 
     /** Removes the passed analysis from the analyses owned by the user.
      *
@@ -194,8 +233,9 @@ class User(n: String) {
 
         // Need to make this check, otherwise we'd
         // get in to an infinite cycle
-        if (_memberGroups.contains(g)){
-            _memberGroups -= g
+        if (_memberGroupIDs.contains(g.objectID)){
+            _memberGroupIDs -= g.objectID
+            _cachedGroups.remove(g.objectID)
             g.removeMember(this)
         }
     }
@@ -211,16 +251,11 @@ class User(n: String) {
         require(g != null, "Group is NULL!")
         require(!g.isOwnedByUser(this), "Group is still owned by this user!")
 
-        _ownedGroups -= g
+        _ownedGroupIDs -= g.objectID
+        _cachedGroups.remove(g.objectID)
     }
 
-    /** Convenience method that just calls name_=.
-     *
-     * @param n The new user's name.
-     *
-     * @throws IllegalArgumentException if the new name is null or empty.
-     */
-    def setName(n: String) = name_=(n);
+
 
 
 
