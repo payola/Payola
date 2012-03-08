@@ -7,7 +7,7 @@ object ListBuffer extends s2js.runtime.scala.collection.SeqCompanion
     def empty = new ListBuffer
 
     @javascript("return self.fromJsArray(xs.internalJsArray);")
-    def apply(xs: Any*): s2js.runtime.scala.collection.Seq = null
+    def apply(xs: Any*): Any = null
 }
 
 class ListBuffer extends s2js.runtime.scala.collection.Seq
