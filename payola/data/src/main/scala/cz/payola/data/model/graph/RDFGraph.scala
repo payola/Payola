@@ -9,6 +9,8 @@ import cz.payola.scala2json.annotations._
 import cz.payola.common._
 import com.hp.hpl.jena.rdf.model.{StmtIterator, Resource, ResIterator, ModelFactory, Property}
 import annotation.target.field
+import cz.payola.scala2json.traits.JSONSerializationCustomFields
+import cz.payola.scala2json.{JSONSerializerOptions, JSONSerializer}
 
 object RDFGraph {
 
@@ -106,7 +108,8 @@ import RDFGraph._
 
 @JSONPoseableClass(otherClass = classOf[cz.payola.common.rdf.generic.Graph])
 class RDFGraph(@(JSONConcreteArrayClass @field)(arrayClass = classOf[scala.collection.immutable.List[_]]) val vertices: immutable.List[RDFNode],
-    @(JSONConcreteArrayClass @field)(arrayClass = classOf[scala.collection.immutable.List[_]]) val edges: immutable.List[RDFEdge]) extends rdf.generic.Graph {
+    @(JSONConcreteArrayClass @field)(arrayClass = classOf[scala.collection.immutable.List[_]]) val edges: immutable.List[RDFEdge]) extends rdf.generic.Graph
+    with JSONSerializationCustomFields {
 
     type EdgeType = RDFEdge
 
@@ -138,6 +141,52 @@ class RDFGraph(@(JSONConcreteArrayClass @field)(arrayClass = classOf[scala.colle
         md5.digest().map(0xFF & _).map { "%02x".format(_) }.foldLeft(""){_ + _}
     }
 
+    /** Return the names of the fields.
+      *
+      * @return Iterable collection for the field names.
+      */
+    def fieldNamesForJSONSerialization(ctx: Any): scala.collection.Iterable[String] = {
+        List[String]("vertices", "edges", "namespaces").toIterable
+    }
+
+    /** Return the value for the field named @key.
+      *
+      * @param key Value for the field called @key.
+      *
+      * @return The value.
+      */
+    def fieldValueForKey(ctx: Any, key: String): Any = {
+        key match {
+            case "vertices" => vertices
+            case "edges" => edges
+            case "namespaces" => _invertedNamespaces
+            case _ => null
+        }
+    }
+
+    /** Returns a JSON representation of the graph automatically using the
+      *
+      * @return
+      */
+    def serializedGraph(options: Int = JSONSerializerOptions.JSONSerializerDefaultOptions,
+                                shortenNamespaces: Boolean = false): String = {
+        var realOptions = options
+
+        // We need to set the right options
+        if (shortenNamespaces) {
+            // Must use custom serialization => make sure it's not set
+            realOptions = realOptions & (~JSONSerializerOptions.JSONSerializerOptionDisableCustomSerialization)
+        }else{
+            // Mustn't use custom serialization
+            realOptions = realOptions | JSONSerializerOptions.JSONSerializerOptionDisableCustomSerialization
+        }
+        
+        val serializer = new JSONSerializer(this, realOptions)
+        serializer.context = this
+
+        serializer.stringValue
+    }
+
 
     /** Returns the hashed namespace. This method is used in RDFEdge classes
       * during serialization.
@@ -150,24 +199,28 @@ class RDFGraph(@(JSONConcreteArrayClass @field)(arrayClass = classOf[scala.colle
       * @return MD5-hash (or sub-hash) of the namespace.
       */
     def shortenedNamespace(ns: String) = {
-        val short: Option[String] = _namespaces.get(ns)
-        if (short.isEmpty){
-            // Never seen this namespace before
-            // Compute MD5 and use the shortest unique prefix
-            val md5 = _md5String(ns)
-            var actualHash = md5.substring(0, kRDFGraphMinimalNamespaceHashLength)
-            var len = kRDFGraphMinimalNamespaceHashLength
-
-            while (_invertedNamespaces.contains(actualHash) && len < md5.length) {
-                len += 1
-                actualHash = md5.substring(0, len)
-            }
-            
-            _namespaces.put(ns, actualHash)
-            _invertedNamespaces.put(actualHash, ns)
-            actualHash
+        if (ns == null){
+            ""
         }else{
-            short.get
+            val short: Option[String] = _namespaces.get(ns)
+            if (short.isEmpty){
+                // Never seen this namespace before
+                // Compute MD5 and use the shortest unique prefix
+                val md5 = _md5String(ns)
+                var actualHash = md5.substring(0, kRDFGraphMinimalNamespaceHashLength)
+                var len = kRDFGraphMinimalNamespaceHashLength
+
+                while (_invertedNamespaces.contains(actualHash) && len < md5.length) {
+                    len += 1
+                    actualHash = md5.substring(0, len)
+                }
+
+                _namespaces.put(ns, actualHash)
+                _invertedNamespaces.put(actualHash, ns)
+                actualHash
+            }else{
+                short.get
+            }
         }
     }
 

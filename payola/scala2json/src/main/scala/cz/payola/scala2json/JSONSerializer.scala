@@ -54,6 +54,11 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
     // If this is a second encounter of the object, just serialize it as a reference
     private var serializeObjectAsReference: Boolean = false
 
+    // A user-assignable field which allows easily to pass a context to all serialized objects.
+    // As an example, the RDFGraph uses the context to pass a HashMap of shortened URIs
+    // to vertices, edges, etc.
+    var context: Any = null
+
     // Cycle detection
     if (obj != null){
         if (processedObjects.contains(obj)){
@@ -105,9 +110,11 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
             // If skipping object IDs, need to clone the array, otherwise we could detect
             // a cycle that's not really there
             serializer = new JSONSerializer(item, options, processedObjects.clone)
+            serializer.context = context
         }else{
             // Do not clone the processedObjects as it will save space
             serializer = new JSONSerializer(item, options, processedObjects)
+            serializer.context = context
         }
 
 
@@ -144,6 +151,7 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
                     holder.arrayClass = f.getAnnotation(classOf[JSONConcreteArrayClass]).arrayClass.getName
                     holder.value = fieldValue.asInstanceOf[scala.collection.Traversable[_]]
                     val serializer = new JSONSerializer(holder, options, processedObjects)
+                    serializer.context = context
                     val separatorString = if (prettyPrint) " " else ""
                     val fieldString = "\"" +fieldName + "\":" + separatorString + serializer.stringValue
                     _appendStringArrayItemToStringBuilder(fieldString, builder, isFirst)
@@ -174,9 +182,11 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
             // If skipping object IDs, need to clone the array, otherwise we could detect
             // a cycle that's not really there
             serializer = new JSONSerializer(value, options, processedObjects.clone)
+            serializer.context = context
         }else{
             // Do not clone the processedObjects as it will save space
             serializer = new JSONSerializer(value, options, processedObjects)
+            serializer.context = context
         }
         var serializedObj: String = serializer.stringValue
         if (prettyPrint)
@@ -227,7 +237,7 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
       */
     private def _objectsClassName: String = {
         val cl: Class[_] = obj.getClass
-        if (cl.getAnnotation(classOf[JSONUnnamedClass]) != null){
+        if (cl.getAnnotation(classOf[JSONUnnamedClass]) != null && !disableCustomSerialization){
             null
         }else if (cl.getAnnotation(classOf[JSONPoseableClass]) != null){
             val nameAnot: JSONPoseableClass = cl.getAnnotation(classOf[JSONPoseableClass])
@@ -275,8 +285,8 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
         // Need to keep track of index so that
         // we don't add a comma after the first iteration
         var index: Int = 0
-        customObj.fieldNamesForJSONSerialization foreach { key => {
-            _appendKeyValueToStringBuilder(key, customObj.fieldValueForKey(key), builder, index == 0)
+        customObj.fieldNamesForJSONSerialization(context) foreach { key => {
+            _appendKeyValueToStringBuilder(key, customObj.fieldValueForKey(context, key), builder, index == 0)
             index += 1
         }}
 
@@ -330,7 +340,7 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
             // If the custom serialization isn't disabled, we need to try to match the traits
             if (obj.isInstanceOf[JSONSerializationFullyCustomized]) {
                 matched = true
-                serializedString = obj.asInstanceOf[JSONSerializationFullyCustomized].JSONValue(options)
+                serializedString = obj.asInstanceOf[JSONSerializationFullyCustomized].JSONValue(context, options)
             }else if (obj.isInstanceOf[JSONSerializationCustomFields]){
                 matched = true
                 serializedString = _serializeCustomObject
@@ -398,7 +408,7 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
 
         if (obj.isInstanceOf[JSONSerializationAdditionalFields] && !disableCustomSerialization){
             // Additional fields for the object
-            val map: Map[String, Any] = obj.asInstanceOf[JSONSerializationAdditionalFields].additionalFieldsForJSONSerialization
+            val map: Map[String, Any] = obj.asInstanceOf[JSONSerializationAdditionalFields].additionalFieldsForJSONSerialization(context)
             if (map.size != 0)
                 if (fields.size != 0)
                     builder.append(',')
@@ -422,6 +432,7 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
             "null"
         }else{
             val serializer = new JSONSerializer(opt.get, options, processedObjects)
+            serializer.context = context
             serializer.stringValue
         }
     }

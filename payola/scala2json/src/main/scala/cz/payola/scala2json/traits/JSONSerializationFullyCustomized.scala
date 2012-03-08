@@ -18,6 +18,6 @@ trait JSONSerializationFullyCustomized {
      *
      * @return JSON representation of the object.
      */
-    def JSONValue(options: Int): String
+    def JSONValue(ctx: Any, options: Int): String
 
 }

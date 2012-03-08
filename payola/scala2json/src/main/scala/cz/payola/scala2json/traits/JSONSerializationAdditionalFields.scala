@@ -23,6 +23,6 @@ trait JSONSerializationAdditionalFields {
      *
      *  @return Map with the fields.
      */
-    def additionalFieldsForJSONSerialization: Map[String, Any]
+    def additionalFieldsForJSONSerialization(ctx: Any): Map[String, Any]
 
 }
