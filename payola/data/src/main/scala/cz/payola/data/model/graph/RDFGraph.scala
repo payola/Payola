@@ -104,9 +104,9 @@ object RDFGraph {
 
 import RDFGraph._
 
-@JSONPoseableClass(otherClassName = "cz.payola.common.rdf.generic.Graph")
-class RDFGraph(@(JSONConcreteArrayClass @field)(className = "scala.collection.immutable.List") val vertices: immutable.List[RDFNode],
-    @(JSONConcreteArrayClass @field)(className = "scala.collection.immutable.List") val edges: immutable.List[RDFEdge]) extends rdf.generic.Graph {
+@JSONPoseableClass(otherClass = classOf[cz.payola.common.rdf.generic.Graph])
+class RDFGraph(@(JSONConcreteArrayClass @field)(arrayClass = classOf[scala.collection.immutable.List[_]]) val vertices: immutable.List[RDFNode],
+    @(JSONConcreteArrayClass @field)(arrayClass = classOf[scala.collection.immutable.List[_]]) val edges: immutable.List[RDFEdge]) extends rdf.generic.Graph {
 
     type EdgeType = RDFEdge
 

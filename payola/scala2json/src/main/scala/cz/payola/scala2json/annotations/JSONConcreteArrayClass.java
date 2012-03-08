@@ -10,5 +10,5 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface JSONConcreteArrayClass {
-    public String className();
+    public Class arrayClass();
 }

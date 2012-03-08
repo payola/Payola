@@ -141,7 +141,7 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
 
                 if (isConcreteArrayClass && isTraversable){
                     val holder = new ConcreteArrayClassHolder()
-                    holder.arrayClass = f.getAnnotation(classOf[JSONConcreteArrayClass]).className
+                    holder.arrayClass = f.getAnnotation(classOf[JSONConcreteArrayClass]).arrayClass.getName
                     holder.value = fieldValue.asInstanceOf[scala.collection.Traversable[_]]
                     val serializer = new JSONSerializer(holder, options, processedObjects)
                     val separatorString = if (prettyPrint) " " else ""
@@ -231,7 +231,7 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
             null
         }else if (cl.getAnnotation(classOf[JSONPoseableClass]) != null){
             val nameAnot: JSONPoseableClass = cl.getAnnotation(classOf[JSONPoseableClass])
-            nameAnot.otherClassName
+            nameAnot.otherClass.getName
         }else{
             cl.getCanonicalName
         }
@@ -345,7 +345,7 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
                 else "false"
                 case _: java.lang.Character => JSONUtilities.escapedChar(obj.asInstanceOf[java.lang.Character].charValue())
                 case _: Option[_] => _serializeOption
-                case _: scala.collection.Map[String, _] => _serializeMap
+                case _: scala.collection.Map[_, _] => _serializeMap
                 case _: scala.collection.Traversable[_] => _serializeTraversable
                 case _: Array[_] => _serializeArray
                 case _: AnyRef => _serializePlainObject

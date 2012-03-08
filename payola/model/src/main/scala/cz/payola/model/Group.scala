@@ -1,21 +1,20 @@
 package cz.payola.model
 
 import collection.mutable._
+import generic.ConcreteNamedModelObject
 
-class Group (nameStr: String, user: User){
+class Group (nameStr: String, user: User) extends ConcreteNamedModelObject(nameStr) with cz.payola.common.model.Group{
     // Shared analysis
     private val _sharedAnalyses: ArrayBuffer[AnalysisShare] = new ArrayBuffer[AnalysisShare]()
     
-    // Shared members. Add the owner to members automatically
-    private val _members: ArrayBuffer[User] = new ArrayBuffer[User]()
+    // Members. Initially only IDs are loaded, actual members are loaded from the
+    // data layer as needed
+    private val _memberIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
+    private val _members: HashMap[String, User] = new HashMap[String, User]()
 
     // Group owner
     private var _owner: User = null
     setOwner(user)
-
-    // Group name
-    private var _name: String = null
-    setName(nameStr)
 
     user.addOwnedGroup(this)
 
@@ -30,8 +29,11 @@ class Group (nameStr: String, user: User){
      */
     def addMember(u: User) = {
         require(u != null, "User is NULL!")
-        if (!_members.contains(u)){
-            _members += u
+
+        if (!_memberIDs.contains(u.objectID)){
+            _memberIDs += u.objectID
+            _members.put(u.objectID, u)
+
             u.addToGroup(this)
         }
     }
@@ -64,7 +66,7 @@ class Group (nameStr: String, user: User){
      *
      * @return True or false.
      */
-    def hasMember(u: User): Boolean = _members.contains(u)
+    def hasMember(u: User): Boolean = _memberIDs.contains(u.objectID)
 
     /** Results in true if the user is this group's owner.
      *
@@ -74,29 +76,44 @@ class Group (nameStr: String, user: User){
      */
     def isOwnedByUser(u: User): Boolean = _owner == u
 
+    /** Returns a user at index. Will raise an exception if the index is out of bounds.
+      * The user will be loaded from DB if necessary.
+      *
+      * @param index Index of the user (according to the MemberIDs).
+      * @return The group.
+      */
+    def memberAtIndex(index: Int): User = {
+        require(index >= 0 && index < numberOfMembers, "Member index out of bounds - " + index)
+        val opt: Option[User] = _members.get(_memberIDs(index))
+        if (opt.isEmpty){
+            // TODO Load from DB
+            null
+        }else{
+            opt.get
+        }
+    }
+
+    /** Returns number of members. Doesn't include the owner.
+      *
+      * @return Number of members.
+      */
+    def numberOfMembers: Int = _memberIDs.size
+
     /** Returns an immutable array of group members.
      *
      * @return An immutable array of group members.
      */
-    def members: Array[User] = _members.toArray
-
-    /** Returns the name of the group.
-     *
-     * @return Group name.
-     */
-    def name: String = _name
-
-    /** Sets the group's name.
-     *
-     * @param The new name.
-     *
-     * @throws IllegalArgumentException if the new name is null or empty.
-     */
-    def name_=(n: String) = {
-        // Name mustn't be null or empty
-        require(n != null && n != "")
-
-        _name = n
+    def members: List[User] = {
+        var users = List[User]()
+        _memberIDs foreach { userID =>
+            val u: Option[User] = _members.get(userID)
+            if (u.isEmpty){
+                // TODO loading from DB
+            }else{
+                users :: u.get
+            }
+        }
+        users
     }
 
     /** Returns the owner.
@@ -120,11 +137,10 @@ class Group (nameStr: String, user: User){
 
         // Update relations
         u.addOwnedGroup(this)
-        if (oldOwner != null)
+        if (oldOwner != null) {
             oldOwner.removeOwnedGroup(this)
+        }
     }
-
-
 
     /** Removes user from members.<br/>
      * <br/>
@@ -139,19 +155,13 @@ class Group (nameStr: String, user: User){
         
         // Need to make this check, otherwise we'd
         // get in to an infinite cycle
-        if (_members.contains(u)){
+        if (_memberIDs.contains(u.objectID)){
             u.removeFromGroup(this)
-            _members -= u
+
+            _memberIDs -= u.objectID
+            _members.remove(u.objectID)
         }
     }
-
-    /** Convenience method that just calls name_=.
-     *
-     * @param n The new group name.
-     *
-     * @throws IllegalArgumentException if the new name is null or empty.
-     */
-    def setName(n: String) = name_=(n);
 
     /** Convenience method that just calls owner_=.
      *
@@ -159,6 +169,6 @@ class Group (nameStr: String, user: User){
      *
      * @throws IllegalArgumentException if the user is null.
      */
-    private def setOwner(u: User) = owner_=(u);
+     def setOwner(u: User) = owner_=(u);
 }
 
