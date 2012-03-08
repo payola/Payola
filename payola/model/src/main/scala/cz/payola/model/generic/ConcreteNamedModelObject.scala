@@ -4,7 +4,7 @@ import cz.payola.common.model.NamedModelObject
 
 class ConcreteNamedModelObject(var n: String) extends ConcreteModelObject with NamedModelObject
 {
-    private var _name: String = null
+    protected var _name: String = null
 
     setName(n)
 

@@ -8,10 +8,13 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
     var email: String = ""
     var password: String = ""
     
-    // Analysis owned by the user
-    private val _ownedAnalyses: ArrayBuffer[Analysis] = new ArrayBuffer[Analysis]()
-    // Analysis shared to the user
-    private val _sharedAnalyses: ArrayBuffer[AnalysisShare] = new ArrayBuffer[AnalysisShare]()
+    // Analysis owned by the user and analysis that are shared directly to the user
+    // To support lazy-loading, only AnalysesIDs are filled at first and when requesting
+    // a particular analysis, it is loaded and stored in the HashMap cache.
+    private val _ownedAnalysesIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
+    private val _sharedAnalysisSharesIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
+    private val _cachedAnalyses: HashMap[String, Analysis] = new HashMap[String,Analysis]()
+    private val _cachedAnalysisShares: HashMap[String, AnalysisShare] = new HashMap[String, AnalysisShare]()
 
 
     // Groups owned by the user and groups the user is a member in
@@ -29,16 +32,16 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
       * @return List of groups.
       */
     private def _groupsWithIDs(ids: ArrayBuffer[String]): List[Group] = {
-        var groups = List[Group]()
+        val groups = List[Group]()
         ids foreach { groupID =>
             val g: Option[Group] = _cachedGroups.get(groupID)
             if (g.isEmpty){
                 // TODO loading from DB
             }else{
-                groups :: g.get
+                g.get :: groups
             }
         }
-        groups
+        groups.reverse
     }
     
    /** Adds the analysis to the analyses array. Does nothing if the analysis
@@ -51,8 +54,10 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
     def addAnalysis(a: Analysis) = {
         require(a != null, "Analysis mustn't be null")
         require(isOwnerOfAnalysis(a), "User must be owner of the analysis")
-        if (!_ownedAnalyses.contains(a))
-            _ownedAnalyses += a
+        if (!_ownedAnalysesIDs.contains(a.objectID)){
+            _ownedAnalysesIDs += a.objectID
+            _cachedAnalyses.put(a.objectID, a)
+        }
     }
 
     /** Adds an analysis share to the user.
@@ -63,8 +68,10 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
      */
     def addAnalysisShare(a: AnalysisShare) = {
         require(a != null, "Cannot share null analysis share")
-        if (!_sharedAnalyses.contains(a))
-            _sharedAnalyses += a
+        if (!_sharedAnalysisSharesIDs.contains(a.objectID)){
+            _sharedAnalysisSharesIDs += a.objectID
+            _cachedAnalysisShares.put(a.objectID, a)
+        }
     }
 
    /** Adds the group to the member group array. Does nothing if the group has already been added.
@@ -116,23 +123,13 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
      * @return True or false.
      */
     def hasAccessToAnalysis(a: Analysis): Boolean = {
-        if (_ownedAnalyses.contains(a) || _sharedAnalyses.exists(_.analysis == a)) {
+        if (_ownedAnalysesIDs.contains(a.objectID) || sharedAnalyses.exists(_.analysis.objectID == a.objectID)) {
             true
         } else {
-            _memberGroups.exists(_.hasAccessToAnalysis(a)) ||
-                _ownedGroups.exists(_.hasAccessToAnalysis(a))
+            memberGroups.exists(_.hasAccessToAnalysis(a)) ||
+                ownedGroups.exists(_.hasAccessToAnalysis(a))
         }
     }
-
-
-
-    /** Results in true if the user is an owner of the analysis.
-     *
-     * @param a The analysis.
-     *
-     * @return True or false.
-     */
-    def isOwnerOfAnalysis(a: Analysis): Boolean = a.owner == this
 
     /** Returns a group at index. Will raise an exception if the index is out of bounds.
       * The group will be loaded from DB if necessary.
@@ -164,11 +161,58 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
       */
     def numberOfMemberGroups: Int = _memberGroupIDs.size
 
+    /** Number of owned analyses.
+      *
+      * @return Number of owned analyses.
+      */
+    def numberOfOwnedAnalyses: Int = _ownedAnalysesIDs.size
+
     /** Number of owned groups.
       *
       * @return Number of owned groups
       */
     def numberOfOwnedGroups: Int = _ownedGroupIDs.size
+
+    /** Number of shared analyses.
+      *
+      * @return Number of shared analyses.
+      */
+    def numberOfSharedAnalyses: Int = _sharedAnalysisSharesIDs.size
+
+    /** Returns a list of analyses owned by this user. Analyses will
+      * be fetched from DB if necessary.
+      *
+      * @return List of owned analyses.
+      */
+    def ownedAnalyses: List[Analysis] = {
+        val analyses = List[Analysis]()
+        _ownedAnalysesIDs foreach { analysisID: String =>
+            val a: Option[Analysis] = _cachedAnalyses.get(analysisID)
+            if (a.isEmpty){
+                // TODO loading from DB
+            }else{
+                a.get :: analyses
+            }
+        }
+        analyses.reverse
+    }
+
+    /** Returns an analysis at index. Will raise an exception if the index is out of bounds.
+      * The analysis will be loaded from DB if necessary.
+      *
+      * @param index Index of the analysis (according to the AnalysesIDs).
+      * @return The analysis.
+      */
+    def ownedAnalysisAtIndex(index: Int): Analysis = {
+        require(index >= 0 && index < numberOfOwnedAnalyses, "Owned analysis index out of bounds - " + index)
+        val opt: Option[Analysis] = _cachedAnalyses.get(_ownedAnalysesIDs(index))
+        if (opt.isEmpty){
+            // TODO Load from DB
+            null
+        }else{
+            opt.get
+        }
+    }
 
     /** Returns a group at index. Will raise an exception if the index is out of bounds.
       * The group will be loaded from DB if necessary.
@@ -202,7 +246,9 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
      */
     def removeAnalysis(a: Analysis) = {
         require(a != null, "Cannot remove null analysis!")
-        _ownedAnalyses -= a
+
+        _ownedAnalysesIDs -= a.objectID
+        _cachedAnalyses.remove(a.objectID)
     }
 
     /** Removes the passed analysis from the analyses shared to the user.
@@ -213,7 +259,8 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
      */
     def removeAnalysisShare(a: AnalysisShare) = {
         require(a != null, "Cannot remove null analysis!")
-        _sharedAnalyses -= a
+        _sharedAnalysisSharesIDs -= a.objectID
+        _cachedAnalysisShares.remove(a.objectID)
     }
 
     /** Removes the user from the group.
@@ -255,8 +302,39 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
         _cachedGroups.remove(g.objectID)
     }
 
+    /** Returns a list of analysis shares. Objects will be fetched from DB if necessary.
+      *
+      * @return List of analysis shares.
+      */
+    def sharedAnalyses: List[AnalysisShare] = {
+        val analyses = List[AnalysisShare]()
+        _sharedAnalysisSharesIDs foreach { shareID: String =>
+            val a: Option[AnalysisShare] = _cachedAnalysisShares.get(shareID)
+            if (a.isEmpty){
+                // TODO loading from DB
+            }else{
+                a.get :: analyses
+            }
+        }
+        analyses.reverse
+    }
 
-
+    /** Returns an analysis share at index. Will raise an exception if the index is out of bounds.
+      * The analysis share will be loaded from DB if necessary.
+      *
+      * @param index Index of the analysis share (according to the AnalysesIDs).
+      * @return The analysis share.
+      */
+    def sharedAnalysisAtIndex(index: Int): AnalysisShare = {
+        require(index >= 0 && index < numberOfSharedAnalyses, "Shared analysis index out of bounds - " + index)
+        val opt: Option[AnalysisShare] = _cachedAnalysisShares.get(_sharedAnalysisSharesIDs(index))
+        if (opt.isEmpty){
+            // TODO Load from DB
+            null
+        }else{
+            opt.get
+        }
+    }
 
 
 }
