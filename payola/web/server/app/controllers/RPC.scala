@@ -61,8 +61,9 @@ object RPC extends Controller
         val result = methodToRun.invoke(runnableObj, paramArray:_*)
 
         val serializer = new JSONSerializer(result, JSONSerializerOptionDisableCustomSerialization)
-        serializer.context = result
-        serializer.stringValue
+        val m = serializer.stringValue
+        // println(m)
+        m
     }
 
     private def parseParam(input: Seq[String], paramType: Class[_]) : java.lang.Object = {

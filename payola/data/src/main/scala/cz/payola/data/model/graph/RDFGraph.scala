@@ -9,8 +9,8 @@ import cz.payola.scala2json.annotations._
 import cz.payola.common._
 import com.hp.hpl.jena.rdf.model.{StmtIterator, Resource, ResIterator, ModelFactory, Property}
 import annotation.target.field
-import cz.payola.scala2json.traits.JSONSerializationCustomFields
 import cz.payola.scala2json.{JSONSerializerOptions, JSONSerializer}
+import cz.payola.scala2json.traits.{JSONSerializationFullyCustomized, JSONSerializationCustomFields}
 
 object RDFGraph {
 
@@ -43,6 +43,7 @@ object RDFGraph {
         val identifiedNodes: HashMap[String, RDFIdentifiedNode] = new HashMap[String, RDFIdentifiedNode]()
         val allNodes: ListBuffer[RDFNode] = new ListBuffer[RDFNode]()
         val edges: ListBuffer[RDFEdge] = new ListBuffer[RDFEdge]()
+        var objectIDCounter: Int = 0
 
         val resIterator: ResIterator = model.listSubjects
         while (resIterator.hasNext) {
@@ -54,6 +55,8 @@ object RDFGraph {
                 node = identifiedNodes.get(URI).get
             }else{
                 node = new RDFIdentifiedNode(URI)
+                node.objectID = objectIDCounter
+                objectIDCounter += 1
                 identifiedNodes.put(URI, node)
                 allNodes += node
             }
@@ -77,6 +80,8 @@ object RDFGraph {
                         language = null
                     }
                     val literalNode = new RDFLiteralNode(rdfNode.asLiteral.getValue, Option(language))
+                    literalNode.objectID = objectIDCounter
+                    objectIDCounter += 1
                     allNodes += literalNode
                     edge = new RDFEdge(node, literalNode, predicate.getURI)
                 } else {
@@ -85,6 +90,8 @@ object RDFGraph {
                     var destination: RDFIdentifiedNode = null
                     if (identifiedNodes.get(destinationURI).isEmpty){
                         destination = new RDFIdentifiedNode(destinationURI)
+                        destination.objectID = objectIDCounter
+                        objectIDCounter += 1
                         identifiedNodes.put(destinationURI, destination)
                         allNodes += destination
                     }else{
@@ -109,7 +116,7 @@ import RDFGraph._
 @JSONPoseableClass(otherClass = classOf[cz.payola.common.rdf.generic.Graph])
 class RDFGraph(@(JSONConcreteArrayClass @field)(arrayClass = classOf[scala.collection.immutable.List[_]]) val vertices: immutable.List[RDFNode],
     @(JSONConcreteArrayClass @field)(arrayClass = classOf[scala.collection.immutable.List[_]]) val edges: immutable.List[RDFEdge]) extends rdf.generic.Graph
-    with JSONSerializationCustomFields {
+    with JSONSerializationFullyCustomized {
 
     type EdgeType = RDFEdge
 
@@ -140,53 +147,46 @@ class RDFGraph(@(JSONConcreteArrayClass @field)(arrayClass = classOf[scala.colle
         md5.update(bytes)
         md5.digest().map(0xFF & _).map { "%02x".format(_) }.foldLeft(""){_ + _}
     }
-
-    /** Return the names of the fields.
-      *
-      * @return Iterable collection for the field names.
-      */
-    def fieldNamesForJSONSerialization(ctx: Any): scala.collection.Iterable[String] = {
-        List[String]("vertices", "edges", "namespaces").toIterable
-    }
-
-    /** Return the value for the field named @key.
-      *
-      * @param key Value for the field called @key.
-      *
-      * @return The value.
-      */
-    def fieldValueForKey(ctx: Any, key: String): Any = {
-        key match {
-            case "vertices" => vertices
-            case "edges" => edges
-            case "namespaces" => _invertedNamespaces
-            case _ => null
-        }
-    }
-
-    /** Returns a JSON representation of the graph automatically using the
-      *
-      * @return
-      */
-    def serializedGraph(options: Int = JSONSerializerOptions.JSONSerializerDefaultOptions,
-                                shortenNamespaces: Boolean = false): String = {
-        var realOptions = options
-
-        // We need to set the right options
-        if (shortenNamespaces) {
-            // Must use custom serialization => make sure it's not set
-            realOptions = realOptions & (~JSONSerializerOptions.JSONSerializerOptionDisableCustomSerialization)
-        }else{
-            // Mustn't use custom serialization
-            realOptions = realOptions | JSONSerializerOptions.JSONSerializerOptionDisableCustomSerialization
+    
+    private def _populateNamespaces = {
+        vertices foreach { vertex: RDFNode =>
+            if (vertex.isInstanceOf[RDFIdentifiedNode]){
+                val uri = vertex.asInstanceOf[RDFIdentifiedNode].uri
+                if (uri != null){
+                    shortenedNamespace(uri)
+                }
+            }
         }
         
-        val serializer = new JSONSerializer(this, realOptions)
-        serializer.context = this
-
-        serializer.stringValue
+        edges foreach { edge: RDFEdge =>
+            if (edge.uri != null){
+                shortenedNamespace(edge.uri)
+            }
+        }
     }
 
+
+    /** Should return JSON representation of the object.
+      *
+      * @param options Options for the serialization. @see JSONSerializerOptions
+      *
+      * @return JSON representation of the object.
+      */
+    def JSONValue(ctx: Any, options: Int): String = {
+        _populateNamespaces
+        
+        val hash: HashMap[String, Any] = new HashMap[String, Any]()
+        hash.put("__class__", this.getClass.getCanonicalName)
+        
+        hash.put("vertices", vertices)
+        hash.put("edges", edges)
+        hash.put("namespaces", _invertedNamespaces)
+
+        val serializer = new JSONSerializer(hash, options)
+        serializer.context = this
+        serializer.stringValue
+    }
+    
 
     /** Returns the hashed namespace. This method is used in RDFEdge classes
       * during serialization.
