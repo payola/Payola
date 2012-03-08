@@ -1,33 +1,31 @@
 package cz.payola.data.model.graph
 
 import cz.payola.scala2json.annotations.JSONPoseableClass
-import cz.payola.scala2json.traits.JSONSerializationCustomFields
+import cz.payola.scala2json.traits.JSONSerializationFullyCustomized
+import collection.mutable.HashMap
+import cz.payola.scala2json.JSONSerializer
 
 @JSONPoseableClass(otherClass = classOf[cz.payola.common.rdf.IdentifiedVertex])
 class RDFIdentifiedNode(override val uri: String) extends RDFNode with cz.payola.common.rdf.IdentifiedVertex
-    with JSONSerializationCustomFields {
+    with JSONSerializationFullyCustomized {
 
-    /** @see JSONSerializationCustomFields
+    /** Should return JSON representation of the object.
       *
-      * @return Iterable collection for the field names.
+      * @param options Options for the serialization. @see JSONSerializerOptions
+      *
+      * @return JSON representation of the object.
       */
-    override def fieldNamesForJSONSerialization(ctx: Any) = List("uri")
+    def JSONValue(ctx: Any, options: Int): String = {
+        require(ctx.isInstanceOf[RDFGraph], "Context not RDFGraph instance - " + ctx)
+        val graph = ctx.asInstanceOf[RDFGraph]
+        val hash: HashMap[String, Any] = new HashMap[String, Any]()
 
-    /** Return the value for the field named @key.
-      *
-      * @param key Value for the field called @key.
-      *
-      * @return The value.
-      */
-    def fieldValueForKey(ctx: Any, key: String): Any = {
-        key match {
-            case "uri" => {
-                require(ctx.isInstanceOf[RDFGraph], "Context isn't an RDFGraph (in RDFIdentifiedNode")
-                val graph = ctx.asInstanceOf[RDFGraph]
-                graph.shortenedNamespace(uri)
-            }
-            case _ => null
-        }
+        hash.put("__objectID__", objectID)
+        hash.put("uri", graph.shortenedNamespace(uri))
+
+        val serializer = new JSONSerializer(hash, options)
+        serializer.context = ctx
+        serializer.stringValue
     }
 
 }
