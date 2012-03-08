@@ -79,7 +79,8 @@ object RPC extends Controller
         val runnableObj = obj.getField("MODULE$").get(objectName)
         val result = methodToRun.invoke(runnableObj, paramArray:_*)
 
-        val serializer = new JSONSerializer(result, JSONSerializerOptionDisableCustomSerialization)
+        val serializer = new JSONSerializer(result)
+        serializer.context = result
         serializer.stringValue
     }
 
