@@ -1,21 +1,23 @@
 package cz.payola.model
 
 import collection.mutable._
+import cz.payola._
 import generic.ConcreteNamedModelObject
 
-class Group (nameStr: String, user: User) extends ConcreteNamedModelObject(nameStr) with cz.payola.common.model.Group {
+class Group (nameStr: String, user: common.model.User) extends cz.payola.common.model.Group with ConcreteNamedModelObject {
 
+    setName(nameStr)
     setOwner(user)
 
     // Shared analysis. Initially only IDs are loaded, actual shares are loaded from the
     // data layer as needed
     private val _sharedAnalysesIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
-    private val _cachedAnalysisShares: HashMap[String, AnalysisShare] = new HashMap[String, AnalysisShare]()
+    private val _cachedAnalysisShares: HashMap[String, common.model.AnalysisShare] = new HashMap[String, common.model.AnalysisShare]()
     
     // Members. Initially only IDs are loaded, actual members are loaded from the
     // data layer as needed
     private val _memberIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
-    private val _members: HashMap[String, User] = new HashMap[String, User]()
+    private val _members: HashMap[String, common.model.User] = new HashMap[String, common.model.User]()
 
     user.addOwnedGroup(this)
 
@@ -26,7 +28,7 @@ class Group (nameStr: String, user: User) extends ConcreteNamedModelObject(nameS
       *
       * @throws IllegalArgumentException if the analysis share is null.
       */
-    def addAnalysis(a: AnalysisShare) = {
+    def addAnalysis(a: common.model.AnalysisShare) = {
         require(a != null, "Cannot share null analysis share")
         if (!_sharedAnalysesIDs.contains(a.objectID)){
             _sharedAnalysesIDs += a.objectID
@@ -42,7 +44,7 @@ class Group (nameStr: String, user: User) extends ConcreteNamedModelObject(nameS
      *
      * @throws IllegalArgumentException if the user is null.
      */
-    def addMember(u: User) = {
+    def addMember(u: common.model.User) = {
         require(u != null, "User is NULL!")
 
         if (!_memberIDs.contains(u.objectID)){
@@ -57,10 +59,10 @@ class Group (nameStr: String, user: User) extends ConcreteNamedModelObject(nameS
      *
      * @return An immutable array of analysis shared with this group.
      */
-    def analyses: List[AnalysisShare] = {
-        val analyses = List[AnalysisShare]()
+    def analyses: List[common.model.AnalysisShare] = {
+        val analyses = List[common.model.AnalysisShare]()
         _sharedAnalysesIDs foreach { shareID: String =>
-            val a: Option[AnalysisShare] = _cachedAnalysisShares.get(shareID)
+            val a: Option[common.model.AnalysisShare] = _cachedAnalysisShares.get(shareID)
             if (a.isEmpty){
                 // TODO loading from DB
             }else{
@@ -76,9 +78,9 @@ class Group (nameStr: String, user: User) extends ConcreteNamedModelObject(nameS
       * @param index Index of the analysis share (according to the AnalysesIDs).
       * @return The analysis share.
       */
-    def analysisAtIndex(index: Int): AnalysisShare = {
+    def analysisAtIndex(index: Int): common.model.AnalysisShare = {
         require(index >= 0 && index < numberOfAnalysis, "Shared analysis index out of bounds - " + index)
-        val opt: Option[AnalysisShare] = _cachedAnalysisShares.get(_sharedAnalysesIDs(index))
+        val opt: Option[common.model.AnalysisShare] = _cachedAnalysisShares.get(_sharedAnalysesIDs(index))
         if (opt.isEmpty){
             // TODO Load from DB
             null
@@ -93,7 +95,7 @@ class Group (nameStr: String, user: User) extends ConcreteNamedModelObject(nameS
      * 
      * @return Returns true if this particular share has been shared with this group.
      */
-    def containsAnalysisShare(share: AnalysisShare): Boolean = _sharedAnalysesIDs.contains(share.objectID)
+    def containsAnalysisShare(share: common.model.AnalysisShare): Boolean = _sharedAnalysesIDs.contains(share.objectID)
 
     /** Results in true if this group has the analysis shared.
      *
@@ -101,7 +103,7 @@ class Group (nameStr: String, user: User) extends ConcreteNamedModelObject(nameS
      *
      * @return True or false.
      */
-    def hasAccessToAnalysis(a: Analysis): Boolean = analyses.exists(_.analysis == a)
+    def hasAccessToAnalysis(a: common.model.Analysis): Boolean = analyses.exists(_.analysis == a)
 
     /** Results in true if the user is a member.
      *
@@ -109,7 +111,7 @@ class Group (nameStr: String, user: User) extends ConcreteNamedModelObject(nameS
      *
      * @return True or false.
      */
-    def hasMember(u: User): Boolean = _memberIDs.contains(u.objectID)
+    def hasMember(u: common.model.User): Boolean = _memberIDs.contains(u.objectID)
 
 
     /** Returns a user at index. Will raise an exception if the index is out of bounds.
@@ -118,9 +120,9 @@ class Group (nameStr: String, user: User) extends ConcreteNamedModelObject(nameS
       * @param index Index of the user (according to the MemberIDs).
       * @return The group.
       */
-    def memberAtIndex(index: Int): User = {
+    def memberAtIndex(index: Int): common.model.User = {
         require(index >= 0 && index < numberOfMembers, "Member index out of bounds - " + index)
-        val opt: Option[User] = _members.get(_memberIDs(index))
+        val opt: Option[common.model.User] = _members.get(_memberIDs(index))
         if (opt.isEmpty){
             // TODO Load from DB
             null
@@ -139,10 +141,10 @@ class Group (nameStr: String, user: User) extends ConcreteNamedModelObject(nameS
      *
      * @return An immutable array of group members.
      */
-    def members: List[User] = {
-        var users = List[User]()
+    def members: List[common.model.User] = {
+        var users = List[common.model.User]()
         _memberIDs foreach { userID =>
-            val u: Option[User] = _members.get(userID)
+            val u: Option[common.model.User] = _members.get(userID)
             if (u.isEmpty){
                 // TODO loading from DB
             }else{
@@ -164,7 +166,7 @@ class Group (nameStr: String, user: User) extends ConcreteNamedModelObject(nameS
      *
      * @throws IllegalArgumentException if the new user is null.
      */
-    def owner_=(u: User) = {
+    override def owner_=(u: common.model.User) = {
         // Owner mustn't be null
         require(u != null)
 
@@ -184,7 +186,7 @@ class Group (nameStr: String, user: User) extends ConcreteNamedModelObject(nameS
       *
       * @throws IllegalArgumentException if the analysis is null.
       */
-    def removeAnalysis(a: Analysis) = {
+    def removeAnalysis(a: common.model.Analysis) = {
         require(a != null, "Cannot remove null analysis!")
 
         _sharedAnalysesIDs -= a.objectID
@@ -199,7 +201,7 @@ class Group (nameStr: String, user: User) extends ConcreteNamedModelObject(nameS
      *
      *  @throws IllegalArgumentException if the user is null or owner.
      */
-    def removeMember(u: User) = {
+    def removeMember(u: common.model.User) = {
         require(u != null, "User is NULL!")
         
         // Need to make this check, otherwise we'd

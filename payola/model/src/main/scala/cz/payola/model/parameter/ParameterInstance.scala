@@ -1,11 +1,12 @@
 package cz.payola.model.parameter
 
+import cz.payola._
 import sun.reflect.generics.reflectiveObjects.NotImplementedException
 
 /** A protected class that represents the parameter instance with an actual value. As this,
  * it is abstract, see subclasses.
  */
-abstract class ParameterInstance[T](protected var _value: T){
+abstract class ParameterInstance[A](protected var _value: A) extends common.model.ParameterInstance[A] with model.generic.ConcreteModelObject {
 
     /** Gets a boolean value of the parameter.
      *
@@ -63,12 +64,6 @@ abstract class ParameterInstance[T](protected var _value: T){
         throw new NotImplementedException()
     }
 
-    /** Only a convenience method that calls value_=().
-     *
-     *  @param newVal The new value.
-     */
-    def setValue(newVal: T) = value_=(newVal)
-
     /** Gets a string value of the parameter.
      *
      *  @return String value, or "" if the value is null.
@@ -81,13 +76,13 @@ abstract class ParameterInstance[T](protected var _value: T){
      *
      * @return The value.
      */
-    def value: T = _value
+    def value: A = _value
 
     /** Value setter.
      *
      * @param newVal The new value.
      */
-    def value_=(newVal: T) = {
+    def value_=(newVal: A) = {
         _value = newVal
     }
 }

@@ -2,11 +2,9 @@ package cz.payola.model.generic
 
 import cz.payola.common.model.NamedModelObject
 
-class ConcreteNamedModelObject(var n: String) extends ConcreteModelObject with NamedModelObject
+trait ConcreteNamedModelObject extends ConcreteModelObject with NamedModelObject
 {
     protected var _name: String = null
-
-    setName(n)
 
     /** Returns the object's name.
       *

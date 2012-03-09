@@ -3,8 +3,9 @@ package cz.payola.model
 import generic.ConcreteNamedModelObject
 import scala.collection.mutable._
 
-class Analysis (n: String, u: User) extends ConcreteNamedModelObject(n) with cz.payola.common.model.Analysis {
+class Analysis(n: String, u: User) extends cz.payola.common.model.Analysis with ConcreteNamedModelObject {
 
+    setName(n)
     setOwner(u)
 
     // Plugin instances that this analysis consists of.
