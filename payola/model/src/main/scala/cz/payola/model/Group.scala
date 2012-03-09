@@ -69,7 +69,7 @@ class Group (nameStr: String, user: common.model.User) extends cz.payola.common.
      *
      * @return True or false.
      */
-    def hasAccessToSharedAnalysis(a: common.model.Analysis): Boolean = analyses.exists(_.analysis == a)
+    def hasAccessToSharedAnalysis(a: common.model.Analysis): Boolean = sharedAnalyses.exists(_.analysis == a)
 
     /** Results in true if the user is a member.
      *
@@ -204,7 +204,7 @@ class Group (nameStr: String, user: common.model.User) extends cz.payola.common.
       * @return The analysis share.
       */
     def sharedAnalysisAtIndex(index: Int): common.model.AnalysisShare = {
-        require(index >= 0 && index < numberOfAnalysis, "Shared analysis index out of bounds - " + index)
+        require(index >= 0 && index < numberOfSharedAnalyses, "Shared analysis index out of bounds - " + index)
         val opt: Option[common.model.AnalysisShare] = _cachedAnalysisShares.get(_sharedAnalysesIDs(index))
         if (opt.isEmpty){
             // TODO Load from DB
