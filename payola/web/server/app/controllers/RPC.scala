@@ -7,7 +7,16 @@ import cz.payola.scala2json.JSONSerializer
 object RPC extends Controller
 {
     def index() = Action {request =>
+        val response = readRequestAndRespond(request)
+        Ok(response)
+    }
 
+    def async() = Action {request =>
+        val response = readRequestAndRespond(request, true)
+        Ok(response)
+    }
+
+    private def readRequestAndRespond(request: Request[AnyContent], asynchronous: Boolean = false) : String = {
         val params = request.body match {
             case AnyContentAsFormUrlEncoded(data) => data
             case _ => Map.empty[String, Seq[String]]
@@ -24,7 +33,17 @@ object RPC extends Controller
         }
 
         val fqdnParts = fqdn.splitAt(fqdn.lastIndexOf("."))
-        Ok(invoke(fqdnParts._1, fqdnParts._2.stripPrefix("."), paramList))
+
+        val result = asynchronous match {
+            case true => invokeAsync(fqdnParts._1, fqdnParts._2.stripPrefix("."), paramList)
+            case false => invoke(fqdnParts._1, fqdnParts._2.stripPrefix("."), paramList)
+        }
+
+        result
+    }
+
+    private def invokeAsync(objectName: String, methodName: String, params: Iterable[Seq[String]]) : String = {
+        "TODO"
     }
 
     private def invoke(objectName: String, methodName: String, params: Iterable[Seq[String]]) : String = {

@@ -48,6 +48,45 @@ object RPCWrapper
     """)
     def callSync(procedureName: String, parameters: Any): Any = ()
 
+    @NativeJsDependency("s2js.RPCException")
+    @NativeJs("""
+
+        var url = "/RPC/async";
+
+        var request = XMLHttpRequest  ? new XMLHttpRequest : new ActiveXObject('Msxml2.XMLHTTP');
+        request.open("POST", url, true); //ASYNC!
+
+        //Send the proper header information along with the request
+        request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+        request.onreadystatechange = function(){
+            if (request.readyState==4 && request.status==200)
+            {
+                var refQueue = [];
+                var objectRegistry = {};
+                var instance = this.deserialize(eval("("+request.responseText+")"), objectRegistry, refQueue);
+
+                for (var k in refQueue)
+                {
+                    refQueue[k].obj[refQueue[k].key] = objectRegistry[refQueue[k].refID];
+                }
+
+                successCallback(instance);
+            }else{
+                failCallback(new s2js.RPCException("RPC call exited with status code "+request.status));
+            }
+        }
+
+        if (parameters.length > 0)
+        {
+            var params = this.buildHttpQuery(parameters);
+            request.send("method="+procedureName+"&"+params);
+        }else{
+            request.send("method="+procedureName);
+        }
+    """)
+    def callAsync(procedureName: String, parameters: Any, successCallback: Function1[Any, Unit], failCallback: Function1[Throwable, Unit]) {}
+
     @NativeJs("""
         var args = '';
         if (Object.prototype.toString.call(params) === '[object Array]') {
