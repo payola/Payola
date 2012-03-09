@@ -11,9 +11,9 @@ trait Group extends NamedModelObject with OwnedObject {
     def hasMember(u: User): Boolean
     def isOwnedByUser(u: User): Boolean = owner == u
     def memberAtIndex(index: Int): User
-    def numberOfSharedAnalysis: Int
+    def numberOfSharedAnalyses: Int
     def numberOfMembers: Int
-    def removeSharedAnalyses(a: Analysis)
+    def removeSharedAnalysis(a: Analysis)
     def removeMember(u: User)
     def sharedAnalysisAtIndex(index: Int): AnalysisShare
 

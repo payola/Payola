@@ -129,8 +129,8 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedMode
         if (_ownedAnalysesIDs.contains(a.objectID) || sharedAnalyses.exists(_.analysis.objectID == a.objectID)) {
             true
         } else {
-            memberGroups.exists(_.hasAccessToAnalysis(a)) ||
-                ownedGroups.exists(_.hasAccessToAnalysis(a))
+            memberGroups.exists(_.hasAccessToSharedAnalysis(a)) ||
+                ownedGroups.exists(_.hasAccessToSharedAnalysis(a))
         }
     }
 
