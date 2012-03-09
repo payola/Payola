@@ -11,6 +11,8 @@ import cz.payola.web.client.views.plugins.visual.techniques.circle.CircleTechniq
 import cz.payola.web.client.views.plugins.visual.techniques.gravity.GravityTechnique
 import cz.payola.web.client.views.plugins.visual.techniques.minimalization.MinimalizationTechnique
 import cz.payola.web.client.model.graph.{SimpleIdentifiedVertex, SimpleEdge, SimpleGraph}
+import cz.payola.web.client.views.plugins.textual.techniques.table.TableTechnique
+import s2js.adapters.js.dom.Element
 
 // TODO remove after classloading is done
 @NativeJsDependency("cz.payola.common.rdf.IdentifiedVertex")
@@ -22,6 +24,7 @@ class Index
     var graph: Option[Graph] = None
 
     val plugins = List[Plugin](
+        new TableTechnique(),
         new CircleTechnique(),
         new TreeTechnique(),
         new MinimalizationTechnique(),
@@ -34,7 +37,12 @@ class Index
 
     def init() {
         try {
+            //TODO show "asking the server for the data"
             graph = Option(GraphFetcher.getInitialGraph)
+            //TODO show "preparing visualisation"
+            changePlugin(plugins.head)
+            buildControls()
+            //TODO hide info
         } catch {
             case e: RPCException => {
                 window.alert("Failed to call RPC. " + e.message)
@@ -44,28 +52,47 @@ class Index
                 window.alert("Graph fetch exception. " + e.toString)
                 graph = None
             }
-        }
 
-        changePlugin(plugins.head)
+            //TODO show error
+        }
     }
 
+    def buildControls() {
+        val controlsArea = document.getElementById("controls")
+        val controlTable = document.createElement[Element]("table")
+        controlsArea.appendChild(controlTable)
+
+        var counter = 0
+        plugins.foreach{ plugin =>
+            val line = document.createElement[Element]("tr")
+            controlTable.appendChild(line)
+            val record = document.createElement[Element]("td")
+            line.appendChild(record)
+            record.innerHTML = "<a class=\"controls plugin switch button\" onClick=\"a.changePluginByNumber(" +
+                counter+")\"> " + plugin.getName + " </a>"
+            counter += 1
+        }
+    }
+
+    def changePluginByNumber(number: Int) {
+        if(0 <= number && number < plugins.length) {
+            changePlugin(plugins(number))
+        }
+    }
     def changePlugin(plugin: Plugin) {
         currentPlugin.foreach(_.clean())
 
         // Switch to the new one.
         currentPlugin = Some(plugin)
         // TODO rename canvas-holder to something else.
-        // TODO don't init the plugin with the graph. Rather init it blank (so it may show something like
-        // "loading graph") and when the graph is successfully fetched, call update on the plugin.
-        plugin.init(graph.get, document.getElementById("canvas-holder"))
+        plugin.init(document.getElementById("graph-plugin-draw-space"))
+        plugin.update(graph.get)
         plugin.redraw()
     }
 
 
     /*DO NOT REMOVE PLEASE*/
     def initGraph(): Graph = {
-        // TODO retrieve the graph from the server using following call when RPC and server side is done.
-        // GraphFetcher.getInitialGraph
 
         val v0 = new SimpleIdentifiedVertex("0")
         val v1 = new SimpleIdentifiedVertex("1")

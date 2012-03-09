@@ -10,10 +10,9 @@ trait Plugin
 {
     /**
       * Prepares the contents for proper drawing and data visualisation.
-      * @param graph to visualise
       * @param container where to visualise
       */
-    def init(graph: Graph, container: Element)
+    def init(container: Element)
 
     /**
       * Add a graph to the visualised structure.
@@ -30,4 +29,9 @@ trait Plugin
       * Purges the contained graph and contents of this plugin.
       */
     def clean()
+
+    /**
+      * Short description name of this plugin
+      */
+    def getName: String
 }

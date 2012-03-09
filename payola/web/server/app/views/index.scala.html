@@ -1,12 +1,13 @@
 @main {
     <div id="page">
-        <div id="canvas-holder"></div>
+        <div id="graph-plugin-draw-space"></div>
         <div id="controls">
             <h1>Payola</h1>
         </div>
     </div>
     <script src="assets/javascripts/compiled/cz.payola.web.client.presenters.Index.js" type="text/javascript"></script>
     <script>
-        new cz.payola.web.client.presenters.Index ().init();
+        var a = new cz.payola.web.client.presenters.Index ();
+        a.init();
     </script>
 }

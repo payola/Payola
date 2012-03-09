@@ -9,9 +9,22 @@ import s2js.adapters.js.dom.Element
   */
 abstract class TextPlugin extends Plugin
 {
-    def init(graph: Graph, container: Element)
+    protected var parentElement: Option[Element] = None
+    
+    protected var graphModel: Option[Graph] = None
+    
+    def init(container: Element) {
+        parentElement = Some(container)
+    }
 
-    def update(graph: Graph)
+    def update(graph: Graph) {
+        if(graphModel == None) {
+            graphModel = Some(graph)
+        } else {
+            //TODO do some updating if needed
+            //graphModel = updateGraph(graphModel, graph)
+        }
+    }
 
     def redraw()
 

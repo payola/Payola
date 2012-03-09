@@ -11,4 +11,12 @@ class TreeTechnique extends BaseTechnique
         basicTreeStructure(graphView.get.vertexViews)
         moveGraphToUpperLeftCorner(graphView.get.vertexViews)
     }
+
+    override def clean() {
+        super.clean()
+    }
+
+    def getName:String = {
+        "tree visualisation"
+    }
 }

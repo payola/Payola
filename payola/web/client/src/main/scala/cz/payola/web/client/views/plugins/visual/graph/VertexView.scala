@@ -25,7 +25,8 @@ class VertexView(val vertexModel: Vertex, var position: Point) extends View {
     /**
       * Default color of a vertex.
       */
-    private val defColor = new Color(0, 180, 0, 0.8)
+    private val defColor1 = new Color(0, 180, 0, 0.8)
+    private val defColor2 = new Color(0, 0, 200, 0.8)
 
     /**
       * Indicator of isSelected attribute. Does not effect inner mechanics.
@@ -57,7 +58,16 @@ class VertexView(val vertexModel: Vertex, var position: Point) extends View {
 
         drawRoundedRectangle(context, this.position + (defVertexSize / -2) + correction, defVertexSize, defVertexCornerRadius)
 
-        val colorToUse = color.getOrElse(defColor)
+
+        val colorToUse = if(!selected) {
+            vertexModel match {
+                case i: LiteralVertex => defColor1
+                case i: IdentifiedVertex => defColor2
+                case _ => color.getOrElse(defColor1)
+            }
+        } else {
+            color.getOrElse(defColor1)
+        }
 
         fillCurrentSpace(context, colorToUse)
     }

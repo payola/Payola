@@ -21,23 +21,29 @@ abstract class VisualPlugin extends Plugin
       */
     var graphView: Option[GraphView] = None
 
-    def init(graph: Graph, container: Element) {
-        graphView = Some(new GraphView(graph, container))
+    def init(container: Element) {
+        graphView = Some(new GraphView(container))
         listen[BrowserEvent](graphView.get.controlsLayer.canvas, EventType.MOUSEDOWN, onMouseDown _)
         listen[BrowserEvent](graphView.get.controlsLayer.canvas, EventType.MOUSEMOVE, onMouseMove _)
         listen[BrowserEvent](graphView.get.controlsLayer.canvas, EventType.MOUSEUP, onMouseUp _)
     }
 
     def update(graph: Graph) {
-
+        graphView.get.update(graph)
     }
 
     def clean() {
-
+        if(graphView.isDefined) {
+            graphView.get.clean()
+            graphView = None
+            moveStart = None
+        }
     }
 
     def redraw() {
-        graphView.get.redrawAll()
+        if(!graphView.isEmpty) {
+            graphView.get.redrawAll()
+        }
     }
 
     /**
@@ -82,7 +88,7 @@ abstract class VisualPlugin extends Plugin
             val end = Point(event.clientX, event.clientY)
             val difference = end - moveStart.get
 
-            graphView.get.moveAllSelectedVetrtices(difference)
+            graphView.get.moveAllSelectedVertices(difference)
 
             moveStart = Some(end)
             graphView.get.redraw(RedrawOperation.Movement)

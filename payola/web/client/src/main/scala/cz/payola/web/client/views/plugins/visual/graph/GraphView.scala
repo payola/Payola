@@ -4,13 +4,13 @@ import collection.mutable.ListBuffer
 import s2js.adapters.js.dom.{Element, CanvasRenderingContext2D}
 import cz.payola.common.rdf.{Vertex, Graph}
 import cz.payola.web.client.views.plugins.visual.{Vector, RedrawOperation, Color, Point}
+import s2js.compiler.NativeJs
 
 /**
   * Graphical representation of Graph object.
-  * @param graphModel the graph object from the model
   * @param container the space where the graph should be visualised
   */
-class GraphView(val graphModel: Graph, container: Element) extends View
+class GraphView(val container: Element) extends View
 {
     private val ColorVertexHigh = new Color(200, 0, 0, 1)
 
@@ -51,14 +51,28 @@ class GraphView(val graphModel: Graph, container: Element) extends View
     /**
       * List of currently visualised vertices of the graph.
       */
-    val vertexViews = createVertexViews()
+    var vertexViews = ListBuffer[VertexView]()
 
     /**
       * List of currently visualised edges of the graph
       */
-    val edgeViews = createEdges(vertexViews)
+    var edgeViews = ListBuffer[EdgeView]()
 
     private var selectedCount = 0
+
+    def update(graph: Graph) {
+        vertexViews = createVertexViews(graph)
+        edgeViews = createEdgeViews(graph, vertexViews)
+
+        //TODO add some graph updating
+        /*if(vertexViews.isEmpty) {
+            vertexViews = createVertexViews(graph)
+            edgeViews = createEdgeView(graph, vertexViews)
+        } else {
+            vertexViews = updateVertexViews(vetexViews, graph)
+            edgeViews = updateEdgeViews(edgeViews, vetexViews, graph)
+        }*/
+    }
 
     /**
       * Empty graph indication function.
@@ -69,14 +83,15 @@ class GraphView(val graphModel: Graph, container: Element) extends View
     }
 
     /**
-      * Constructs a list of vertexViews based on the graphModel variable.
+      * Constructs a list of vertexViews based on the _graphModel parameter.
+      * @param _graphModel to build from
       * @return container with packed Vertex objects in VertexView objects
       */
-    def createVertexViews(): ListBuffer[VertexView] = {
+    def createVertexViews(_graphModel: Graph): ListBuffer[VertexView] = {
         val buffer = ListBuffer[VertexView]()
         var counter = 0
 
-        graphModel.vertices.foreach {vertexModel =>
+        _graphModel.vertices.foreach {vertexModel =>
 
             buffer += new VertexView(vertexModel, Point(0, 0))
             counter += 1
@@ -85,17 +100,18 @@ class GraphView(val graphModel: Graph, container: Element) extends View
     }
 
     /**
-      * Constructs a list of edgeViews based on the graphModel and verticesView variables.
+      * Constructs a list of edgeViews based on the _graphModel and verticesView variables.
       * Also modifies the vertexViews and sets the constructed edges to their vertexView.edges
       * attributes.
+      * @param _graphModel to build from
       * @param _vertexViews list of vertexViews in which to search for vertexViews,
       * that are supposed to be connected by the created edgeViews
       * @return container with packed
       */
-    def createEdges(_vertexViews: ListBuffer[VertexView]): ListBuffer[EdgeView] = {
+    def createEdgeViews(_graphModel: Graph, _vertexViews: ListBuffer[VertexView]): ListBuffer[EdgeView] = {
         val buffer = ListBuffer[EdgeView]()
         if(_vertexViews.length != 0) {
-            graphModel.edges.foreach {edgeModel =>
+            _graphModel.edges.foreach {edgeModel =>
                 buffer += new EdgeView(edgeModel, findVertexView(edgeModel.origin), findVertexView(edgeModel.destination))
             }
 
@@ -133,7 +149,7 @@ class GraphView(val graphModel: Graph, container: Element) extends View
       * Adds the input vector to positions of all vertices in this graph visualisation.
       * @param difference to move the vertices
       */
-    def moveAllSelectedVetrtices(difference: Vector) {
+    def moveAllSelectedVertices(difference: Vector) {
         vertexViews.foreach { vertex =>
             if(vertex.selected) {
                 vertex.position += difference
@@ -340,5 +356,15 @@ class GraphView(val graphModel: Graph, container: Element) extends View
         }
         draw(null, None, None)
         //^because elements are drawn into separate layers, redraw(..) does not know to which context to draw
+    }
+
+    @NativeJs("" +
+        "while(self.container.childNodes.length > 0) {" +
+        "   self.container.removeChild(self.container.firstChild);" +
+        "}")
+    def clean() {
+        /*while(!container.childNodes.isEmpty) {
+            container.removeChild(container.firstChild)
+        }*/
     }
 }

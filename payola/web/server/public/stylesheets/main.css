@@ -65,8 +65,55 @@ h1 {
 
 canvas
 {
-    border: 1px solid black;
+    /*border: 1px solid black;*/
     position: absolute;
     top: 0;
     left: 0;
+}
+
+/**************************/
+
+.controls.plugin.switch.button
+{
+    color: rgb(0, 0, 255);
+}
+.controls.plugin.switch.button:hover
+{
+    background-color: rgb(250, 250, 250);
+    color: rgb(255, 0, 0);
+}
+
+.tableTechnique
+{
+    text-align: left;
+    vertical-align: top;
+}
+.tableTechnique.table
+{
+    width: 75%;
+}
+
+.tableTechnique.header
+{
+    font-weight: bold;
+}
+
+.tableTechnique.line.odd
+{
+    background-color: rgb(240, 255, 240);
+}
+
+.tableTechnique.line.even
+{
+    background-color: rgb(255, 255, 255);
+}
+
+.tableTechnique.element
+{
+    padding: 2px 20px 2px 2px;
+}
+
+.tableTechnique.list.element
+{
+    list-style-type: square;
 }

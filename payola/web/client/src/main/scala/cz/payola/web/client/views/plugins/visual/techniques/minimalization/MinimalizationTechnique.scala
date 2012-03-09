@@ -13,6 +13,14 @@ class MinimalizationTechnique extends BaseTechnique
         moveGraphToUpperLeftCorner(graphView.get.vertexViews)
     }
 
+    override def clean() {
+        super.clean()
+    }
+
+    def getName:String = {
+        "tree ECM visualisation"
+    }
+
     /**
       * Builds structure for easier vertexViews handling
       * @param rootVertexView

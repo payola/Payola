@@ -15,11 +15,14 @@ abstract class BaseTechnique extends VisualPlugin
     /**
       * Calls initialization of the parent class and if the graph is not empty performs the
       * vertex positioning technique.
-      * @param graph to visualise
       * @param container where to visualise
       */
-    override def init(graph: Graph, container: Element) {
-        super.init(graph, container)
+    override def init(container: Element) {
+        super.init(container)
+    }
+    
+    override def update(graph: Graph) {
+        super.update(graph)
         if(!graphView.get.isEmpty) { // graphView != None because this call is after init(..)
             performTechnique()
         }

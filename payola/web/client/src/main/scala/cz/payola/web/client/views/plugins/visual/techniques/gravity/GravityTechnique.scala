@@ -32,6 +32,14 @@ class GravityTechnique extends BaseTechnique
       */
     private val velocitiesStabilization = 0.5
 
+    override def clean() {
+        super.clean()
+    }
+
+    def getName:String = {
+        "gravity visualisation"
+    }
+
     def performTechnique() {
         basicTreeStructure(graphView.get.vertexViews)
         val vertexViewPacks = buildVertexViewsWorkingStructure(graphView.get.vertexViews)

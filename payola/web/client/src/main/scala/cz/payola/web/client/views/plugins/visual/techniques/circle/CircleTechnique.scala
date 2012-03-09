@@ -12,4 +12,12 @@ class CircleTechnique extends BaseTechnique
         moveGraphToUpperLeftCorner(graphView.get.vertexViews)
         flip(graphView.get.vertexViews)
     }
+
+    override def clean() {
+        super.clean()
+    }
+
+    def getName:String = {
+        "circle visualisation"
+    }
 }
