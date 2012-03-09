@@ -9,5 +9,5 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface JSONPoseableClass {
-    public String otherClassName();
+    public Class otherClass();
 }

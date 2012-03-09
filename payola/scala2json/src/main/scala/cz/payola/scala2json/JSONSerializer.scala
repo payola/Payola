@@ -23,6 +23,7 @@ object JSONSerializerOptions {
     val JSONSerializerOptionPrettyPrinting = 1 << 0
     val JSONSerializerOptionIgnoreNullValues = 1 << 1
     val JSONSerializerOptionSkipObjectIDs = 1 << 2
+    val JSONSerializerOptionDisableCustomSerialization = 1 << 3
 
     val JSONSerializerDefaultOptions = JSONSerializerOptionCondensedPrinting
 }
@@ -43,6 +44,7 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
                             val processedObjects: ArrayBuffer[Any] = new ArrayBuffer[Any]()) {
     
     private val prettyPrint: Boolean = (options & JSONSerializerOptionPrettyPrinting) != 0
+    private val disableCustomSerialization = (options & JSONSerializerOptionDisableCustomSerialization) != 0
     private val ignoreNullValues: Boolean = (options & JSONSerializerOptionIgnoreNullValues) != 0
     private val skipObjectIDs: Boolean = (options & JSONSerializerOptionSkipObjectIDs) != 0
 
@@ -51,6 +53,11 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
 
     // If this is a second encounter of the object, just serialize it as a reference
     private var serializeObjectAsReference: Boolean = false
+
+    // A user-assignable field which allows easily to pass a context to all serialized objects.
+    // As an example, the RDFGraph uses the context to pass a HashMap of shortened URIs
+    // to vertices, edges, etc.
+    var context: Any = null
 
     // Cycle detection
     if (obj != null){
@@ -103,9 +110,11 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
             // If skipping object IDs, need to clone the array, otherwise we could detect
             // a cycle that's not really there
             serializer = new JSONSerializer(item, options, processedObjects.clone)
+            serializer.context = context
         }else{
             // Do not clone the processedObjects as it will save space
             serializer = new JSONSerializer(item, options, processedObjects)
+            serializer.context = context
         }
 
 
@@ -139,9 +148,10 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
 
                 if (isConcreteArrayClass && isTraversable){
                     val holder = new ConcreteArrayClassHolder()
-                    holder.arrayClass = f.getAnnotation(classOf[JSONConcreteArrayClass]).className
+                    holder.arrayClass = f.getAnnotation(classOf[JSONConcreteArrayClass]).arrayClass.getName
                     holder.value = fieldValue.asInstanceOf[scala.collection.Traversable[_]]
                     val serializer = new JSONSerializer(holder, options, processedObjects)
+                    serializer.context = context
                     val separatorString = if (prettyPrint) " " else ""
                     val fieldString = "\"" +fieldName + "\":" + separatorString + serializer.stringValue
                     _appendStringArrayItemToStringBuilder(fieldString, builder, isFirst)
@@ -172,9 +182,11 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
             // If skipping object IDs, need to clone the array, otherwise we could detect
             // a cycle that's not really there
             serializer = new JSONSerializer(value, options, processedObjects.clone)
+            serializer.context = context
         }else{
             // Do not clone the processedObjects as it will save space
             serializer = new JSONSerializer(value, options, processedObjects)
+            serializer.context = context
         }
         var serializedObj: String = serializer.stringValue
         if (prettyPrint)
@@ -225,11 +237,11 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
       */
     private def _objectsClassName: String = {
         val cl: Class[_] = obj.getClass
-        if (cl.getAnnotation(classOf[JSONUnnamedClass]) != null){
+        if (cl.getAnnotation(classOf[JSONUnnamedClass]) != null && !disableCustomSerialization){
             null
         }else if (cl.getAnnotation(classOf[JSONPoseableClass]) != null){
             val nameAnot: JSONPoseableClass = cl.getAnnotation(classOf[JSONPoseableClass])
-            nameAnot.otherClassName
+            nameAnot.otherClass.getName
         }else{
             cl.getCanonicalName
         }
@@ -273,8 +285,8 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
         // Need to keep track of index so that
         // we don't add a comma after the first iteration
         var index: Int = 0
-        customObj.fieldNamesForJSONSerialization foreach { key => {
-            _appendKeyValueToStringBuilder(key, customObj.fieldValueForKey(key), builder, index == 0)
+        customObj.fieldNamesForJSONSerialization(context) foreach { key => {
+            _appendKeyValueToStringBuilder(key, customObj.fieldValueForKey(context, key), builder, index == 0)
             index += 1
         }}
 
@@ -321,20 +333,36 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
         // *** Map is Iterable as well, but we shouldn't make it an array of
         // one-member dictionaries, rather make it a dictionary as a whole.
         // This is why Map **needs** to be matched first before Iterable.
-        obj match {
-            case fullyCustomized: JSONSerializationFullyCustomized => fullyCustomized.JSONValue(options)
-            case _: JSONSerializationCustomFields => _serializeCustomObject
-            case _: String => JSONUtilities.escapedString(obj.asInstanceOf[String])
-            case _: java.lang.Number => obj.toString
-            case _: java.lang.Boolean => if (obj.asInstanceOf[java.lang.Boolean].booleanValue) "true"
-                                         else "false"
-            case _: java.lang.Character => JSONUtilities.escapedChar(obj.asInstanceOf[java.lang.Character].charValue())
-            case _: Option[_] => _serializeOption
-            case _: scala.collection.Map[String, _] => _serializeMap
-            case _: scala.collection.Traversable[_] => _serializeTraversable
-            case _: Array[_] => _serializeArray
-            case _: AnyRef => _serializePlainObject
-            case _ => _serializePrimitiveType
+        
+        var matched: Boolean = false
+        var serializedString: String = ""
+        if (!disableCustomSerialization){
+            // If the custom serialization isn't disabled, we need to try to match the traits
+            if (obj.isInstanceOf[JSONSerializationFullyCustomized]) {
+                matched = true
+                serializedString = obj.asInstanceOf[JSONSerializationFullyCustomized].JSONValue(context, options)
+            }else if (obj.isInstanceOf[JSONSerializationCustomFields]){
+                matched = true
+                serializedString = _serializeCustomObject
+            }
+        }
+
+        if (!matched) {
+            obj match {
+                case _: String => JSONUtilities.escapedString(obj.asInstanceOf[String])
+                case _: java.lang.Number => obj.toString
+                case _: java.lang.Boolean => if (obj.asInstanceOf[java.lang.Boolean].booleanValue) "true"
+                else "false"
+                case _: java.lang.Character => JSONUtilities.escapedChar(obj.asInstanceOf[java.lang.Character].charValue())
+                case _: Option[_] => _serializeOption
+                case _: scala.collection.Map[_, _] => _serializeMap
+                case _: scala.collection.Traversable[_] => _serializeTraversable
+                case _: Array[_] => _serializeArray
+                case _: AnyRef => _serializePlainObject
+                case _ => _serializePrimitiveType
+            }
+        }else{
+            serializedString
         }
     }
 
@@ -378,9 +406,9 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
             }
         }
 
-        if (obj.isInstanceOf[JSONSerializationAdditionalFields]){
+        if (obj.isInstanceOf[JSONSerializationAdditionalFields] && !disableCustomSerialization){
             // Additional fields for the object
-            val map: Map[String, Any] = obj.asInstanceOf[JSONSerializationAdditionalFields].additionalFieldsForJSONSerialization
+            val map: Map[String, Any] = obj.asInstanceOf[JSONSerializationAdditionalFields].additionalFieldsForJSONSerialization(context)
             if (map.size != 0)
                 if (fields.size != 0)
                     builder.append(',')
@@ -404,6 +432,7 @@ class JSONSerializer(val obj: Any, val options: Int = JSONSerializerDefaultOptio
             "null"
         }else{
             val serializer = new JSONSerializer(opt.get, options, processedObjects)
+            serializer.context = context
             serializer.stringValue
         }
     }

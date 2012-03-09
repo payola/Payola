@@ -1,24 +1,40 @@
 package cz.payola.model
 
 import collection.mutable._
+import cz.payola._
+import generic.ConcreteNamedModelObject
 
-class Group (nameStr: String, user: User){
-    // Shared analysis
-    private val _sharedAnalyses: ArrayBuffer[AnalysisShare] = new ArrayBuffer[AnalysisShare]()
-    
-    // Shared members. Add the owner to members automatically
-    private val _members: ArrayBuffer[User] = new ArrayBuffer[User]()
+class Group (nameStr: String, user: common.model.User) extends cz.payola.common.model.Group with ConcreteNamedModelObject {
 
-    // Group owner
-    private var _owner: User = null
+    setName(nameStr)
     setOwner(user)
 
-    // Group name
-    private var _name: String = null
-    setName(nameStr)
+    // Shared analysis. Initially only IDs are loaded, actual shares are loaded from the
+    // data layer as needed
+    private val _sharedAnalysesIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
+    private val _cachedAnalysisShares: HashMap[String, common.model.AnalysisShare] = new HashMap[String, common.model.AnalysisShare]()
+    
+    // Members. Initially only IDs are loaded, actual members are loaded from the
+    // data layer as needed
+    private val _memberIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
+    private val _members: HashMap[String, common.model.User] = new HashMap[String, common.model.User]()
 
     user.addOwnedGroup(this)
 
+
+    /** Adds an analysis share to the group.
+      *
+      * @param a The share.
+      *
+      * @throws IllegalArgumentException if the analysis share is null.
+      */
+    def addAnalysis(a: common.model.AnalysisShare) = {
+        require(a != null, "Cannot share null analysis share")
+        if (!_sharedAnalysesIDs.contains(a.objectID)){
+            _sharedAnalysesIDs += a.objectID
+            _cachedAnalysisShares.put(a.objectID, a)
+        }
+    }
 
     /** Adds a member to the group. Does nothing if already a member.
      *
@@ -28,10 +44,13 @@ class Group (nameStr: String, user: User){
      *
      * @throws IllegalArgumentException if the user is null.
      */
-    def addMember(u: User) = {
+    def addMember(u: common.model.User) = {
         require(u != null, "User is NULL!")
-        if (!_members.contains(u)){
-            _members += u
+
+        if (!_memberIDs.contains(u.objectID)){
+            _memberIDs += u.objectID
+            _members.put(u.objectID, u)
+
             u.addToGroup(this)
         }
     }
@@ -40,7 +59,35 @@ class Group (nameStr: String, user: User){
      *
      * @return An immutable array of analysis shared with this group.
      */
-    def analyses: Array[AnalysisShare] = _sharedAnalyses.toArray
+    def analyses: List[common.model.AnalysisShare] = {
+        val analyses = List[common.model.AnalysisShare]()
+        _sharedAnalysesIDs foreach { shareID: String =>
+            val a: Option[common.model.AnalysisShare] = _cachedAnalysisShares.get(shareID)
+            if (a.isEmpty){
+                // TODO loading from DB
+            }else{
+                a.get :: analyses
+            }
+        }
+        analyses.reverse
+    }
+
+    /** Returns an analysis share at index. Will raise an exception if the index is out of bounds.
+      * The analysis share will be loaded from DB if necessary.
+      *
+      * @param index Index of the analysis share (according to the AnalysesIDs).
+      * @return The analysis share.
+      */
+    def analysisAtIndex(index: Int): common.model.AnalysisShare = {
+        require(index >= 0 && index < numberOfAnalysis, "Shared analysis index out of bounds - " + index)
+        val opt: Option[common.model.AnalysisShare] = _cachedAnalysisShares.get(_sharedAnalysesIDs(index))
+        if (opt.isEmpty){
+            // TODO Load from DB
+            null
+        }else{
+            opt.get
+        }
+    }
 
     /** Returns true if this particular share has been shared with this group.
      *
@@ -48,7 +95,7 @@ class Group (nameStr: String, user: User){
      * 
      * @return Returns true if this particular share has been shared with this group.
      */
-    def containsAnalysisShare(share: AnalysisShare): Boolean = _sharedAnalyses.contains(share)
+    def containsAnalysisShare(share: common.model.AnalysisShare): Boolean = _sharedAnalysesIDs.contains(share.objectID)
 
     /** Results in true if this group has the analysis shared.
      *
@@ -56,7 +103,7 @@ class Group (nameStr: String, user: User){
      *
      * @return True or false.
      */
-    def hasAccessToAnalysis(a: Analysis): Boolean = _sharedAnalyses.exists(_.analysis == a)
+    def hasAccessToAnalysis(a: common.model.Analysis): Boolean = analyses.exists(_.analysis == a)
 
     /** Results in true if the user is a member.
      *
@@ -64,46 +111,54 @@ class Group (nameStr: String, user: User){
      *
      * @return True or false.
      */
-    def hasMember(u: User): Boolean = _members.contains(u)
+    def hasMember(u: common.model.User): Boolean = _memberIDs.contains(u.objectID)
 
-    /** Results in true if the user is this group's owner.
-     *
-     * @param u The user.
-     *
-     * @return True or false.
-     */
-    def isOwnedByUser(u: User): Boolean = _owner == u
+
+    /** Returns a user at index. Will raise an exception if the index is out of bounds.
+      * The user will be loaded from DB if necessary.
+      *
+      * @param index Index of the user (according to the MemberIDs).
+      * @return The group.
+      */
+    def memberAtIndex(index: Int): common.model.User = {
+        require(index >= 0 && index < numberOfMembers, "Member index out of bounds - " + index)
+        val opt: Option[common.model.User] = _members.get(_memberIDs(index))
+        if (opt.isEmpty){
+            // TODO Load from DB
+            null
+        }else{
+            opt.get
+        }
+    }
+
+    /** Returns number of members. Doesn't include the owner.
+      *
+      * @return Number of members.
+      */
+    def numberOfMembers: Int = _memberIDs.size
 
     /** Returns an immutable array of group members.
      *
      * @return An immutable array of group members.
      */
-    def members: Array[User] = _members.toArray
-
-    /** Returns the name of the group.
-     *
-     * @return Group name.
-     */
-    def name: String = _name
-
-    /** Sets the group's name.
-     *
-     * @param The new name.
-     *
-     * @throws IllegalArgumentException if the new name is null or empty.
-     */
-    def name_=(n: String) = {
-        // Name mustn't be null or empty
-        require(n != null && n != "")
-
-        _name = n
+    def members: List[common.model.User] = {
+        var users = List[common.model.User]()
+        _memberIDs foreach { userID =>
+            val u: Option[common.model.User] = _members.get(userID)
+            if (u.isEmpty){
+                // TODO loading from DB
+            }else{
+                u.get :: users
+            }
+        }
+        users.reverse
     }
 
-    /** Returns the owner.
-     * 
-     *  @return Group owner.
-     */
-    def owner: User = _owner
+    /** Number of shared analyses.
+      *
+      * @return Number of shared analyses.
+      */
+    def numberOfAnalysis: Int = _sharedAnalysesIDs.size
 
     /** Sets the owner.
      *
@@ -111,20 +166,32 @@ class Group (nameStr: String, user: User){
      *
      * @throws IllegalArgumentException if the new user is null.
      */
-    def owner_=(u: User) = {
+    override def owner_=(u: common.model.User) = {
         // Owner mustn't be null
         require(u != null)
 
-        val oldOwner = _owner
+        val oldOwner = owner
         _owner = u
 
         // Update relations
         u.addOwnedGroup(this)
-        if (oldOwner != null)
+        if (oldOwner != null) {
             oldOwner.removeOwnedGroup(this)
+        }
     }
 
+    /** Removes the passed analysis share from the group's analysis shares.
+      *
+      * @param a Analysis share to be removed.
+      *
+      * @throws IllegalArgumentException if the analysis is null.
+      */
+    def removeAnalysis(a: common.model.Analysis) = {
+        require(a != null, "Cannot remove null analysis!")
 
+        _sharedAnalysesIDs -= a.objectID
+        _cachedAnalysisShares.remove(a.objectID)
+    }
 
     /** Removes user from members.<br/>
      * <br/>
@@ -134,31 +201,18 @@ class Group (nameStr: String, user: User){
      *
      *  @throws IllegalArgumentException if the user is null or owner.
      */
-    def removeMember(u: User) = {
+    def removeMember(u: common.model.User) = {
         require(u != null, "User is NULL!")
         
         // Need to make this check, otherwise we'd
         // get in to an infinite cycle
-        if (_members.contains(u)){
+        if (_memberIDs.contains(u.objectID)){
             u.removeFromGroup(this)
-            _members -= u
+
+            _memberIDs -= u.objectID
+            _members.remove(u.objectID)
         }
     }
 
-    /** Convenience method that just calls name_=.
-     *
-     * @param n The new group name.
-     *
-     * @throws IllegalArgumentException if the new name is null or empty.
-     */
-    def setName(n: String) = name_=(n);
-
-    /** Convenience method that just calls owner_=.
-     *
-     * @param u The new owner.
-     *
-     * @throws IllegalArgumentException if the user is null.
-     */
-    private def setOwner(u: User) = owner_=(u);
 }
 

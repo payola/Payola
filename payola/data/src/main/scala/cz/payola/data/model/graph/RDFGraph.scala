@@ -9,6 +9,8 @@ import cz.payola.scala2json.annotations._
 import cz.payola.common._
 import com.hp.hpl.jena.rdf.model.{StmtIterator, Resource, ResIterator, ModelFactory, Property}
 import annotation.target.field
+import cz.payola.scala2json.{JSONSerializerOptions, JSONSerializer}
+import cz.payola.scala2json.traits.{JSONSerializationFullyCustomized, JSONSerializationCustomFields}
 
 object RDFGraph {
 
@@ -41,6 +43,7 @@ object RDFGraph {
         val identifiedNodes: HashMap[String, RDFIdentifiedNode] = new HashMap[String, RDFIdentifiedNode]()
         val allNodes: ListBuffer[RDFNode] = new ListBuffer[RDFNode]()
         val edges: ListBuffer[RDFEdge] = new ListBuffer[RDFEdge]()
+        var objectIDCounter: Int = 0
 
         val resIterator: ResIterator = model.listSubjects
         while (resIterator.hasNext) {
@@ -52,6 +55,8 @@ object RDFGraph {
                 node = identifiedNodes.get(URI).get
             }else{
                 node = new RDFIdentifiedNode(URI)
+                node.objectID = objectIDCounter
+                objectIDCounter += 1
                 identifiedNodes.put(URI, node)
                 allNodes += node
             }
@@ -75,6 +80,8 @@ object RDFGraph {
                         language = null
                     }
                     val literalNode = new RDFLiteralNode(rdfNode.asLiteral.getValue, Option(language))
+                    literalNode.objectID = objectIDCounter
+                    objectIDCounter += 1
                     allNodes += literalNode
                     edge = new RDFEdge(node, literalNode, predicate.getURI)
                 } else {
@@ -83,6 +90,8 @@ object RDFGraph {
                     var destination: RDFIdentifiedNode = null
                     if (identifiedNodes.get(destinationURI).isEmpty){
                         destination = new RDFIdentifiedNode(destinationURI)
+                        destination.objectID = objectIDCounter
+                        objectIDCounter += 1
                         identifiedNodes.put(destinationURI, destination)
                         allNodes += destination
                     }else{
@@ -104,9 +113,10 @@ object RDFGraph {
 
 import RDFGraph._
 
-@JSONPoseableClass(otherClassName = "cz.payola.common.rdf.generic.Graph")
-class RDFGraph(@(JSONConcreteArrayClass @field)(className = "scala.collection.immutable.List") val vertices: immutable.List[RDFNode],
-    @(JSONConcreteArrayClass @field)(className = "scala.collection.immutable.List") val edges: immutable.List[RDFEdge]) extends rdf.generic.Graph {
+@JSONPoseableClass(otherClass = classOf[cz.payola.common.rdf.generic.Graph])
+class RDFGraph(@(JSONConcreteArrayClass @field)(arrayClass = classOf[scala.collection.immutable.List[_]]) val vertices: immutable.List[RDFNode],
+    @(JSONConcreteArrayClass @field)(arrayClass = classOf[scala.collection.immutable.List[_]]) val edges: immutable.List[RDFEdge]) extends rdf.generic.Graph
+    with JSONSerializationFullyCustomized {
 
     type EdgeType = RDFEdge
 
@@ -137,7 +147,46 @@ class RDFGraph(@(JSONConcreteArrayClass @field)(className = "scala.collection.im
         md5.update(bytes)
         md5.digest().map(0xFF & _).map { "%02x".format(_) }.foldLeft(""){_ + _}
     }
+    
+    private def _populateNamespaces = {
+        vertices foreach { vertex: RDFNode =>
+            if (vertex.isInstanceOf[RDFIdentifiedNode]){
+                val uri = vertex.asInstanceOf[RDFIdentifiedNode].uri
+                if (uri != null){
+                    shortenedNamespace(uri)
+                }
+            }
+        }
+        
+        edges foreach { edge: RDFEdge =>
+            if (edge.uri != null){
+                shortenedNamespace(edge.uri)
+            }
+        }
+    }
 
+
+    /** Should return JSON representation of the object.
+      *
+      * @param options Options for the serialization. @see JSONSerializerOptions
+      *
+      * @return JSON representation of the object.
+      */
+    def JSONValue(ctx: Any, options: Int): String = {
+        _populateNamespaces
+        
+        val hash: HashMap[String, Any] = new HashMap[String, Any]()
+        hash.put("__class__", this.getClass.getCanonicalName)
+        
+        hash.put("vertices", vertices)
+        hash.put("edges", edges)
+        hash.put("namespaces", _invertedNamespaces)
+
+        val serializer = new JSONSerializer(hash, options)
+        serializer.context = this
+        serializer.stringValue
+    }
+    
 
     /** Returns the hashed namespace. This method is used in RDFEdge classes
       * during serialization.
@@ -150,24 +199,28 @@ class RDFGraph(@(JSONConcreteArrayClass @field)(className = "scala.collection.im
       * @return MD5-hash (or sub-hash) of the namespace.
       */
     def shortenedNamespace(ns: String) = {
-        val short: Option[String] = _namespaces.get(ns)
-        if (short.isEmpty){
-            // Never seen this namespace before
-            // Compute MD5 and use the shortest unique prefix
-            val md5 = _md5String(ns)
-            var actualHash = md5.substring(0, kRDFGraphMinimalNamespaceHashLength)
-            var len = kRDFGraphMinimalNamespaceHashLength
-
-            while (_invertedNamespaces.contains(actualHash) && len < md5.length) {
-                len += 1
-                actualHash = md5.substring(0, len)
-            }
-            
-            _namespaces.put(ns, actualHash)
-            _invertedNamespaces.put(actualHash, ns)
-            actualHash
+        if (ns == null){
+            ""
         }else{
-            short.get
+            val short: Option[String] = _namespaces.get(ns)
+            if (short.isEmpty){
+                // Never seen this namespace before
+                // Compute MD5 and use the shortest unique prefix
+                val md5 = _md5String(ns)
+                var actualHash = md5.substring(0, kRDFGraphMinimalNamespaceHashLength)
+                var len = kRDFGraphMinimalNamespaceHashLength
+
+                while (_invertedNamespaces.contains(actualHash) && len < md5.length) {
+                    len += 1
+                    actualHash = md5.substring(0, len)
+                }
+
+                _namespaces.put(ns, actualHash)
+                _invertedNamespaces.put(actualHash, ns)
+                actualHash
+            }else{
+                short.get
+            }
         }
     }
 
