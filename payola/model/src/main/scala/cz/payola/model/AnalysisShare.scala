@@ -3,7 +3,7 @@ package cz.payola.model
 import generic.ConcreteModelObject
 import cz.payola.common.model.SharePrivilege._
 
-class AnalysisShare (var analysis: Analysis, var privilege: SharePrivilege) extends ConcreteModelObject with cz.payola.common.model.AnalysisShare {
+class AnalysisShare (var analysis: Analysis, var privilege: SharePrivilege) extends cz.payola.common.model.AnalysisShare with ConcreteModelObject {
     require(analysis != null, "Analysis cannot be null!")
     require(privilege != null, "Privilige cannot be null!")
 

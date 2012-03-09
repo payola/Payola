@@ -1,9 +1,12 @@
 package cz.payola.model
 
+import cz.payola._
 import generic.ConcreteNamedModelObject
 import scala.collection.mutable._
 
-class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.model.User {
+class User(n: String) extends cz.payola.common.model.User with ConcreteNamedModelObject  {
+
+    setName(n)
 
     var email: String = ""
     var password: String = ""
@@ -13,8 +16,8 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
     // a particular analysis, it is loaded and stored in the HashMap cache.
     private val _ownedAnalysesIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
     private val _sharedAnalysisSharesIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
-    private val _cachedAnalyses: HashMap[String, Analysis] = new HashMap[String,Analysis]()
-    private val _cachedAnalysisShares: HashMap[String, AnalysisShare] = new HashMap[String, AnalysisShare]()
+    private val _cachedAnalyses: HashMap[String, common.model.Analysis] = new HashMap[String,common.model.Analysis]()
+    private val _cachedAnalysisShares: HashMap[String, common.model.AnalysisShare] = new HashMap[String, common.model.AnalysisShare]()
 
 
     // Groups owned by the user and groups the user is a member in
@@ -22,7 +25,7 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
     // a particular group, it is loaded and stored in the HashMap cache.
     private val _ownedGroupIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
     private val _memberGroupIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
-    private val _cachedGroups: HashMap[String, Group] = new HashMap[String,Group]()
+    private val _cachedGroups: HashMap[String, common.model.Group] = new HashMap[String,common.model.Group]()
 
 
     /** Internal method which creates List of groups from IDs. It uses the user's cache
@@ -31,10 +34,10 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
       * @param ids An array of group IDs.
       * @return List of groups.
       */
-    private def _groupsWithIDs(ids: ArrayBuffer[String]): List[Group] = {
-        val groups = List[Group]()
+    private def _groupsWithIDs(ids: ArrayBuffer[String]): List[common.model.Group] = {
+        val groups = List[common.model.Group]()
         ids foreach { groupID =>
-            val g: Option[Group] = _cachedGroups.get(groupID)
+            val g: Option[common.model.Group] = _cachedGroups.get(groupID)
             if (g.isEmpty){
                 // TODO loading from DB
             }else{
@@ -51,7 +54,7 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
     *
     *  @throws IllegalArgumentException if the analysis is null or the user isn't an owner of it.
      */
-    def addAnalysis(a: Analysis) = {
+    def addAnalysis(a: common.model.Analysis) = {
         require(a != null, "Analysis mustn't be null")
         require(isOwnerOfAnalysis(a), "User must be owner of the analysis")
         if (!_ownedAnalysesIDs.contains(a.objectID)){
@@ -66,7 +69,7 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
      *
      * @throws IllegalArgumentException if the analysis share is null.
      */
-    def addAnalysisShare(a: AnalysisShare) = {
+    def addAnalysisShare(a: common.model.AnalysisShare) = {
         require(a != null, "Cannot share null analysis share")
         if (!_sharedAnalysisSharesIDs.contains(a.objectID)){
             _sharedAnalysisSharesIDs += a.objectID
@@ -83,7 +86,7 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
      *
      * @throws IllegalArgumentException if the group is null.
      */
-    def addToGroup(g: Group): Unit = {
+    def addToGroup(g: common.model.Group): Unit = {
         require(g != null, "Cannot add a user to a null group!")
 
         // Avoid double membership
@@ -102,7 +105,7 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
      *
      * @throws IllegalArgumentException if the group is null or the user isn't an owner of that group.
      */
-    def addOwnedGroup(g: Group) = {
+    def addOwnedGroup(g: common.model.Group) = {
         require(g != null, "Group is NULL!")
         require(g.isOwnedByUser(this), "Group isn't owned by this user!")
 
@@ -122,7 +125,7 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
      *
      * @return True or false.
      */
-    def hasAccessToAnalysis(a: Analysis): Boolean = {
+    def hasAccessToAnalysis(a: common.model.Analysis): Boolean = {
         if (_ownedAnalysesIDs.contains(a.objectID) || sharedAnalyses.exists(_.analysis.objectID == a.objectID)) {
             true
         } else {
@@ -137,9 +140,9 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
       * @param index Index of the group (according to the GroupIDs).
       * @return The group.
       */
-    def memberGroupAtIndex(index: Int): Group = {
+    def memberGroupAtIndex(index: Int): common.model.Group = {
         require(index >= 0 && index < numberOfMemberGroups, "Member group index out of bounds - " + index)
-        val opt: Option[Group] = _cachedGroups.get(_memberGroupIDs(index)) 
+        val opt: Option[common.model.Group] = _cachedGroups.get(_memberGroupIDs(index))
         if (opt.isEmpty){
             // TODO Load from DB
             null
@@ -153,7 +156,7 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
      *
      *  @return New List with groups that the user is a member of.
      */
-    def memberGroups: List[Group] = _groupsWithIDs(_memberGroupIDs)
+    def memberGroups: List[common.model.Group] = _groupsWithIDs(_memberGroupIDs)
 
     /** Number of member groups.
       *
@@ -184,10 +187,10 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
       *
       * @return List of owned analyses.
       */
-    def ownedAnalyses: List[Analysis] = {
-        val analyses = List[Analysis]()
+    def ownedAnalyses: List[common.model.Analysis] = {
+        val analyses = List[common.model.Analysis]()
         _ownedAnalysesIDs foreach { analysisID: String =>
-            val a: Option[Analysis] = _cachedAnalyses.get(analysisID)
+            val a: Option[common.model.Analysis] = _cachedAnalyses.get(analysisID)
             if (a.isEmpty){
                 // TODO loading from DB
             }else{
@@ -203,9 +206,9 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
       * @param index Index of the analysis (according to the AnalysesIDs).
       * @return The analysis.
       */
-    def ownedAnalysisAtIndex(index: Int): Analysis = {
+    def ownedAnalysisAtIndex(index: Int): common.model.Analysis = {
         require(index >= 0 && index < numberOfOwnedAnalyses, "Owned analysis index out of bounds - " + index)
-        val opt: Option[Analysis] = _cachedAnalyses.get(_ownedAnalysesIDs(index))
+        val opt: Option[common.model.Analysis] = _cachedAnalyses.get(_ownedAnalysesIDs(index))
         if (opt.isEmpty){
             // TODO Load from DB
             null
@@ -220,9 +223,9 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
       * @param index Index of the group (according to the GroupIDs).
       * @return The group.
       */
-    def ownedGroupAtIndex(index: Int): Group = {
+    def ownedGroupAtIndex(index: Int): common.model.Group = {
         require(index >= 0 && index < numberOfOwnedGroups, "Owned group index out of bounds - " + index)
-        val opt: Option[Group] = _cachedGroups.get(_ownedGroupIDs(index))
+        val opt: Option[common.model.Group] = _cachedGroups.get(_ownedGroupIDs(index))
         if (opt.isEmpty){
             // TODO Load from DB
             null
@@ -236,7 +239,7 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
      *
      *  @return New List with groups owned by the user.
      */
-    def ownedGroups: List[Group] = _groupsWithIDs(_ownedGroupIDs)
+    def ownedGroups: List[common.model.Group] = _groupsWithIDs(_ownedGroupIDs)
 
     /** Removes the passed analysis from the analyses owned by the user.
      *
@@ -244,7 +247,7 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
      *
      * @throws IllegalArgumentException if the analysis is null.
      */
-    def removeAnalysis(a: Analysis) = {
+    def removeAnalysis(a: common.model.Analysis) = {
         require(a != null, "Cannot remove null analysis!")
 
         _ownedAnalysesIDs -= a.objectID
@@ -257,7 +260,7 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
      *
      * @throws IllegalArgumentException if the analysis share is null.
      */
-    def removeAnalysisShare(a: AnalysisShare) = {
+    def removeAnalysisShare(a: common.model.AnalysisShare) = {
         require(a != null, "Cannot remove null analysis!")
         _sharedAnalysisSharesIDs -= a.objectID
         _cachedAnalysisShares.remove(a.objectID)
@@ -275,7 +278,7 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
      *
      *  @throws IllegalArgumentException if the group is null.
      */
-    def removeFromGroup(g: Group): Unit = {
+    def removeFromGroup(g: common.model.Group): Unit = {
         require(g != null, "Group is NULL!")
 
         // Need to make this check, otherwise we'd
@@ -294,7 +297,7 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
      *
      * @throws IllegalArgumentException if the group is null or the user is still owner of the group.
      */
-    def removeOwnedGroup(g: Group) = {
+    def removeOwnedGroup(g: common.model.Group) = {
         require(g != null, "Group is NULL!")
         require(!g.isOwnedByUser(this), "Group is still owned by this user!")
 
@@ -306,10 +309,10 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
       *
       * @return List of analysis shares.
       */
-    def sharedAnalyses: List[AnalysisShare] = {
-        val analyses = List[AnalysisShare]()
+    def sharedAnalyses: List[common.model.AnalysisShare] = {
+        val analyses = List[common.model.AnalysisShare]()
         _sharedAnalysisSharesIDs foreach { shareID: String =>
-            val a: Option[AnalysisShare] = _cachedAnalysisShares.get(shareID)
+            val a: Option[common.model.AnalysisShare] = _cachedAnalysisShares.get(shareID)
             if (a.isEmpty){
                 // TODO loading from DB
             }else{
@@ -325,9 +328,9 @@ class User(n: String) extends ConcreteNamedModelObject(n) with cz.payola.common.
       * @param index Index of the analysis share (according to the AnalysesIDs).
       * @return The analysis share.
       */
-    def sharedAnalysisAtIndex(index: Int): AnalysisShare = {
+    def sharedAnalysisAtIndex(index: Int): common.model.AnalysisShare = {
         require(index >= 0 && index < numberOfSharedAnalyses, "Shared analysis index out of bounds - " + index)
-        val opt: Option[AnalysisShare] = _cachedAnalysisShares.get(_sharedAnalysisSharesIDs(index))
+        val opt: Option[common.model.AnalysisShare] = _cachedAnalysisShares.get(_sharedAnalysisSharesIDs(index))
         if (opt.isEmpty){
             // TODO Load from DB
             null
