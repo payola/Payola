@@ -241,30 +241,6 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedMode
      */
     def ownedGroups: List[common.model.Group] = _groupsWithIDs(_ownedGroupIDs)
 
-    /** Removes the passed analysis from the analyses owned by the user.
-     *
-     * @param a Analysis to be removed.
-     *
-     * @throws IllegalArgumentException if the analysis is null.
-     */
-    def removeAnalysis(a: common.model.Analysis) = {
-        require(a != null, "Cannot remove null analysis!")
-
-        _ownedAnalysesIDs -= a.objectID
-        _cachedAnalyses.remove(a.objectID)
-    }
-
-    /** Removes the passed analysis from the analyses shared to the user.
-     *
-     * @param a Analysis share to be removed.
-     *
-     * @throws IllegalArgumentException if the analysis share is null.
-     */
-    def removeAnalysisShare(a: common.model.AnalysisShare) = {
-        require(a != null, "Cannot remove null analysis!")
-        _sharedAnalysisSharesIDs -= a.objectID
-        _cachedAnalysisShares.remove(a.objectID)
-    }
 
     /** Removes the user from the group.
      *
@@ -290,6 +266,19 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedMode
         }
     }
 
+    /** Removes the passed analysis from the analyses owned by the user.
+      *
+      * @param a Analysis to be removed.
+      *
+      * @throws IllegalArgumentException if the analysis is null.
+      */
+    def removeOwnedAnalysis(a: common.model.Analysis) = {
+        require(a != null, "Cannot remove null analysis!")
+
+        _ownedAnalysesIDs -= a.objectID
+        _cachedAnalyses.remove(a.objectID)
+    }
+
     /** Removes the group from the user's list of owned groups. The user '''mustn't''' be the
      * group's owner anymore.
      *
@@ -303,6 +292,18 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedMode
 
         _ownedGroupIDs -= g.objectID
         _cachedGroups.remove(g.objectID)
+    }
+
+    /** Removes the passed analysis from the analyses shared to the user.
+      *
+      * @param a Analysis share to be removed.
+      *
+      * @throws IllegalArgumentException if the analysis share is null.
+      */
+    def removeSharedAnalysis(a: common.model.AnalysisShare) = {
+        require(a != null, "Cannot remove null analysis!")
+        _sharedAnalysisSharesIDs -= a.objectID
+        _cachedAnalysisShares.remove(a.objectID)
     }
 
     /** Returns a list of analysis shares. Objects will be fetched from DB if necessary.
