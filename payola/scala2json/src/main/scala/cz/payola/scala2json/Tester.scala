@@ -32,7 +32,7 @@ class TestObjectClass(var str: String, val i: Int) {
 
 // This is an example of a fully customized class serialization
 class FullyCustomizedClass(var str: String) extends JSONSerializationFullyCustomized {
-    def JSONValue(options: Int) = {
+    def JSONValue(ctx: Any, options: Int) = {
         if ((options & JSONSerializerOptions.JSONSerializerOptionPrettyPrinting) != 0){
             "{\n\tid: 123\n}"
         }else{
@@ -44,8 +44,8 @@ class FullyCustomizedClass(var str: String) extends JSONSerializationFullyCustom
 // This is an example of a class that uses the poseable annotation
 // which lets it use a different class's name
 // Moreover this class demonstrates the additional fields trait
-@JSONPoseableClass(otherClassName = "xxx.animalfarm.Horse") class AdditionalFieldsClass(val int: Int) extends JSONSerializationAdditionalFields {
-    def additionalFieldsForJSONSerialization: scala.collection.mutable.Map[String, Any] = {
+@JSONPoseableClass(otherClass = classOf[cz.payola.scala2json.JSONSerializationException]) class AdditionalFieldsClass(val int: Int) extends JSONSerializationAdditionalFields {
+    def additionalFieldsForJSONSerialization(ctx: Any): scala.collection.mutable.Map[String, Any] = {
         val map = new scala.collection.mutable.HashMap[String, Any]()
         map.put("newField", 666)
         map
@@ -54,7 +54,7 @@ class FullyCustomizedClass(var str: String) extends JSONSerializationFullyCustom
 
 // This example demonstrates custom fields trait as well as the unnamed-class annotation
 @JSONUnnamedClass class CustomFieldsClass(val int: Int) extends  JSONSerializationCustomFields {
-    def fieldNamesForJSONSerialization: scala.collection.mutable.Iterable[String] = {
+    def fieldNamesForJSONSerialization(ctx: Any): scala.collection.mutable.Iterable[String] = {
         val keys = new ArrayBuffer[String]()
         keys += "field0"
         keys += "field1"
@@ -63,7 +63,7 @@ class FullyCustomizedClass(var str: String) extends JSONSerializationFullyCustom
     }
 
     
-    def fieldValueForKey(key: String): Any = {
+    def fieldValueForKey(ctx: Any, key: String): Any = {
         key match {
             case "field0" => 333
             case "field1" => "Jell-O, Cocaine and Silicon-titted Marilyn Monroe"
