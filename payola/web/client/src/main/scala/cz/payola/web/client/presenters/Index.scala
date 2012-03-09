@@ -5,7 +5,7 @@ import cz.payola.common.rdf.Graph
 import cz.payola.web.client.views.plugins.Plugin
 import cz.payola.web.client.views.plugins.visual.techniques.tree.TreeTechnique
 import cz.payola.web.shared.GraphFetcher
-import s2js.compiler.NativeJsDependency
+import s2js.compiler.dependency
 import s2js.runtime.s2js.RPCException
 import cz.payola.web.client.views.plugins.visual.techniques.circle.CircleTechnique
 import cz.payola.web.client.views.plugins.visual.techniques.gravity.GravityTechnique
@@ -13,10 +13,10 @@ import cz.payola.web.client.views.plugins.visual.techniques.minimalization.Minim
 import cz.payola.web.client.model.graph.{SimpleIdentifiedVertex, SimpleEdge, SimpleGraph}
 
 // TODO remove after classloading is done
-@NativeJsDependency("cz.payola.common.rdf.IdentifiedVertex")
-@NativeJsDependency("cz.payola.common.rdf.LiteralVertex")
-@NativeJsDependency("cz.payola.common.rdf.generic.Graph")
-@NativeJsDependency("cz.payola.common.rdf.generic.Edge")
+@dependency("cz.payola.common.rdf.IdentifiedVertex")
+@dependency("cz.payola.common.rdf.LiteralVertex")
+@dependency("cz.payola.common.rdf.generic.Graph")
+@dependency("cz.payola.common.rdf.generic.Edge")
 class Index
 {
     var graph: Option[Graph] = None

@@ -1,13 +1,13 @@
 package s2js.runtime.scala.collection.immutable
 
-import s2js.compiler.NativeJs
+import s2js.compiler.javascript
 
 object List extends s2js.runtime.scala.collection.SeqCompanion
 {
     def empty = new List
 
-    @NativeJs("return self.fromJsArray(xs.internalJsArray);")
-    def apply(xs: Any*): s2js.runtime.scala.collection.Seq = null
+    @javascript("return self.fromJsArray(xs.internalJsArray);")
+    def apply(xs: Any*): Any = null
 }
 
 class List extends s2js.runtime.scala.collection.Seq

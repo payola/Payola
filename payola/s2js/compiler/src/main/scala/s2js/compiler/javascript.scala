@@ -5,4 +5,4 @@ package s2js.compiler
   * code. If it annotates a method, jsCode should be just the method body. If it annotates a val, then the jsCode
   * would be put on the right side of the assignment to the field.
   */
-class NativeJs(val jsCode: String) extends scala.annotation.StaticAnnotation
+class javascript(val jsCode: String) extends scala.annotation.StaticAnnotation
