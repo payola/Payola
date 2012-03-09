@@ -22,20 +22,6 @@ class Group (nameStr: String, user: common.model.User) extends cz.payola.common.
     user.addOwnedGroup(this)
 
 
-    /** Adds an analysis share to the group.
-      *
-      * @param a The share.
-      *
-      * @throws IllegalArgumentException if the analysis share is null.
-      */
-    def addAnalysis(a: common.model.AnalysisShare) = {
-        require(a != null, "Cannot share null analysis share")
-        if (!_sharedAnalysesIDs.contains(a.objectID)){
-            _sharedAnalysesIDs += a.objectID
-            _cachedAnalysisShares.put(a.objectID, a)
-        }
-    }
-
     /** Adds a member to the group. Does nothing if already a member.
      *
      * '''Note''': Automatically adds this group to the user's groups.
@@ -55,37 +41,17 @@ class Group (nameStr: String, user: common.model.User) extends cz.payola.common.
         }
     }
 
-    /** Returns an immutable array of analysis shared with this group.
-     *
-     * @return An immutable array of analysis shared with this group.
-     */
-    def analyses: List[common.model.AnalysisShare] = {
-        val analyses = List[common.model.AnalysisShare]()
-        _sharedAnalysesIDs foreach { shareID: String =>
-            val a: Option[common.model.AnalysisShare] = _cachedAnalysisShares.get(shareID)
-            if (a.isEmpty){
-                // TODO loading from DB
-            }else{
-                a.get :: analyses
-            }
-        }
-        analyses.reverse
-    }
-
-    /** Returns an analysis share at index. Will raise an exception if the index is out of bounds.
-      * The analysis share will be loaded from DB if necessary.
+    /** Adds an analysis share to the group.
       *
-      * @param index Index of the analysis share (according to the AnalysesIDs).
-      * @return The analysis share.
+      * @param a The share.
+      *
+      * @throws IllegalArgumentException if the analysis share is null.
       */
-    def analysisAtIndex(index: Int): common.model.AnalysisShare = {
-        require(index >= 0 && index < numberOfAnalysis, "Shared analysis index out of bounds - " + index)
-        val opt: Option[common.model.AnalysisShare] = _cachedAnalysisShares.get(_sharedAnalysesIDs(index))
-        if (opt.isEmpty){
-            // TODO Load from DB
-            null
-        }else{
-            opt.get
+    def addSharedAnalysis(a: common.model.AnalysisShare) = {
+        require(a != null, "Cannot share null analysis share")
+        if (!_sharedAnalysesIDs.contains(a.objectID)){
+            _sharedAnalysesIDs += a.objectID
+            _cachedAnalysisShares.put(a.objectID, a)
         }
     }
 
@@ -95,7 +61,7 @@ class Group (nameStr: String, user: common.model.User) extends cz.payola.common.
      * 
      * @return Returns true if this particular share has been shared with this group.
      */
-    def containsAnalysisShare(share: common.model.AnalysisShare): Boolean = _sharedAnalysesIDs.contains(share.objectID)
+    def containsSharedAnalysis(share: common.model.AnalysisShare): Boolean = _sharedAnalysesIDs.contains(share.objectID)
 
     /** Results in true if this group has the analysis shared.
      *
@@ -103,7 +69,7 @@ class Group (nameStr: String, user: common.model.User) extends cz.payola.common.
      *
      * @return True or false.
      */
-    def hasAccessToAnalysis(a: common.model.Analysis): Boolean = analyses.exists(_.analysis == a)
+    def hasAccessToSharedAnalysis(a: common.model.Analysis): Boolean = analyses.exists(_.analysis == a)
 
     /** Results in true if the user is a member.
      *
@@ -142,7 +108,7 @@ class Group (nameStr: String, user: common.model.User) extends cz.payola.common.
      * @return An immutable array of group members.
      */
     def members: List[common.model.User] = {
-        var users = List[common.model.User]()
+        val users = List[common.model.User]()
         _memberIDs foreach { userID =>
             val u: Option[common.model.User] = _members.get(userID)
             if (u.isEmpty){
@@ -158,7 +124,7 @@ class Group (nameStr: String, user: common.model.User) extends cz.payola.common.
       *
       * @return Number of shared analyses.
       */
-    def numberOfAnalysis: Int = _sharedAnalysesIDs.size
+    def numberOfSharedAnalyses: Int = _sharedAnalysesIDs.size
 
     /** Sets the owner.
      *
@@ -180,19 +146,6 @@ class Group (nameStr: String, user: common.model.User) extends cz.payola.common.
         }
     }
 
-    /** Removes the passed analysis share from the group's analysis shares.
-      *
-      * @param a Analysis share to be removed.
-      *
-      * @throws IllegalArgumentException if the analysis is null.
-      */
-    def removeAnalysis(a: common.model.Analysis) = {
-        require(a != null, "Cannot remove null analysis!")
-
-        _sharedAnalysesIDs -= a.objectID
-        _cachedAnalysisShares.remove(a.objectID)
-    }
-
     /** Removes user from members.<br/>
      * <br/>
      * <strong>Note:</strong> Automatically removes the group from the user's groups.
@@ -211,6 +164,53 @@ class Group (nameStr: String, user: common.model.User) extends cz.payola.common.
 
             _memberIDs -= u.objectID
             _members.remove(u.objectID)
+        }
+    }
+
+    /** Removes the passed analysis share from the group's analysis shares.
+      *
+      * @param a Analysis share to be removed.
+      *
+      * @throws IllegalArgumentException if the analysis is null.
+      */
+    def removeSharedAnalysis(a: common.model.Analysis) = {
+        require(a != null, "Cannot remove null analysis!")
+
+        _sharedAnalysesIDs -= a.objectID
+        _cachedAnalysisShares.remove(a.objectID)
+    }
+
+    /** Returns an immutable array of analysis shared with this group.
+      *
+      * @return An immutable array of analysis shared with this group.
+      */
+    def sharedAnalyses: List[common.model.AnalysisShare] = {
+        val analyses = List[common.model.AnalysisShare]()
+        _sharedAnalysesIDs foreach { shareID: String =>
+            val a: Option[common.model.AnalysisShare] = _cachedAnalysisShares.get(shareID)
+            if (a.isEmpty){
+                // TODO loading from DB
+            }else{
+                a.get :: analyses
+            }
+        }
+        analyses.reverse
+    }
+
+    /** Returns an analysis share at index. Will raise an exception if the index is out of bounds.
+      * The analysis share will be loaded from DB if necessary.
+      *
+      * @param index Index of the analysis share (according to the AnalysesIDs).
+      * @return The analysis share.
+      */
+    def sharedAnalysisAtIndex(index: Int): common.model.AnalysisShare = {
+        require(index >= 0 && index < numberOfAnalysis, "Shared analysis index out of bounds - " + index)
+        val opt: Option[common.model.AnalysisShare] = _cachedAnalysisShares.get(_sharedAnalysesIDs(index))
+        if (opt.isEmpty){
+            // TODO Load from DB
+            null
+        }else{
+            opt.get
         }
     }
 

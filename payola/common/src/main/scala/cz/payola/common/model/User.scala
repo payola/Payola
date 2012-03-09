@@ -4,8 +4,8 @@ trait User extends NamedModelObject {
     var email: String
     var password: String
 
-    def memberGroups: List[Group] // Unordered
-    def ownedGroups: List[Group] // Unordered
+    def memberGroups: List[Group]
+    def ownedGroups: List[Group]
 
     def ownedAnalyses: List[Analysis]
     def sharedAnalyses: List[AnalysisShare]
@@ -26,10 +26,10 @@ trait User extends NamedModelObject {
     def numberOfSharedAnalyses: Int
     def ownedAnalysisAtIndex(index: Int): Analysis
     def ownedGroupAtIndex(index: Int): Group
-    def removeAnalysis(a: Analysis)
-    def removeAnalysisShare(a: AnalysisShare)
     def removeFromGroup(g: Group): Unit // As a member
+    def removeOwnedAnalysis(a: Analysis)
     def removeOwnedGroup(g: Group) // As an owner
+    def removeSharedAnalysis(a: AnalysisShare)
     def sharedAnalysisAtIndex(index: Int): AnalysisShare
     
 }
