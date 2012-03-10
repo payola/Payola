@@ -1,12 +1,9 @@
 package cz.payola.common.model
 
-trait Plugin extends NamedModelObject {
+trait Plugin extends NamedEntity
+{
+    /** Type of the parameters of the plugin */
+    type ParameterType <: Parameter[_]
 
-    def addParameter(p: Parameter[_])
-    def containsParameter(p: Parameter[_]): Boolean
-    def numberOfParameters: Int
-    def parameterAtIndex(index: Int): Parameter[_]
-    def parameters: List[Parameter[_]]
-    def removeParameter(p: Parameter[_])
-
+    def parameters: Seq[ParameterType]
 }

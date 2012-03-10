@@ -1,10 +1,13 @@
 package cz.payola.model.parameter
 
-class FloatParameter(private val n: String, private val defaultValue: Float) extends
-                                                                            Parameter[Float](n, defaultValue) {
+import cz.payola.common
 
-    protected class FloatParameterInstance(protected val floatVal: Float) extends
-                                                                            ParameterInstance[Float](floatVal){
+class FloatParameter(private val n: String, private val defaultValue: Float) extends
+    Parameter[Float](n, defaultValue) with common.model.parameters.FloatParameter
+{
+    protected class FloatParameterInstance(parameter: FloatParameter, value: Float) extends
+        ParameterInstance[Float](parameter, value)
+    {
         /** Gets a boolean value of the parameter.
          *
          *  @return Boolean value, or false if the value is null.
@@ -74,6 +77,6 @@ class FloatParameter(private val n: String, private val defaultValue: Float) ext
      * @return New BooleanParameterInstance instance.
      */
     override def instanceWithValue(newValue: Float): ParameterInstance[Float] = {
-        new FloatParameterInstance(newValue)
+        new FloatParameterInstance(this, newValue)
     }
 }

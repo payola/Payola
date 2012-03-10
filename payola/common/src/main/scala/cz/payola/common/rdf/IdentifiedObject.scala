@@ -7,7 +7,5 @@ trait IdentifiedObject
 {
     val uri: String
 
-    override def toString(): String = {
-        uri
-    }
+    override def toString: String = uri
 }

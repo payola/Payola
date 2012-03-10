@@ -4,10 +4,11 @@ import cz.payola.scala2json.traits.JSONSerializationFullyCustomized
 import collection.mutable.HashMap
 import cz.payola.scala2json.JSONSerializer
 import cz.payola.scala2json.annotations.{JSONTransient, JSONPoseableClass}
+import cz.payola.common.rdf.Edge
 
-@JSONPoseableClass(otherClass = classOf[cz.payola.common.rdf.generic.Edge])
-class RDFEdge(override val origin: RDFIdentifiedNode, override val destination: RDFNode, val uri: String)
-    extends cz.payola.common.rdf.generic.Edge with JSONSerializationFullyCustomized {
+@JSONPoseableClass(otherClass = classOf[Edge])
+class RDFEdge(val origin: RDFIdentifiedNode, val destination: RDFNode, val uri: String) extends Edge
+    with JSONSerializationFullyCustomized {
 
     type VertexType = RDFNode
     type IdentifiedVertexType = RDFIdentifiedNode

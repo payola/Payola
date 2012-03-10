@@ -1,7 +1,7 @@
 package cz.payola.web.client.model.graph
 
 import scala.collection.immutable
-import cz.payola.common.rdf.generic.{Graph, Edge}
+import cz.payola.common.rdf.{Graph, Edge}
 import cz.payola.common.rdf.{LiteralVertex, IdentifiedVertex, Vertex}
 
 // TODO just temporary definition until the server side starts sending us instances of the Vertex, Edge and Graph

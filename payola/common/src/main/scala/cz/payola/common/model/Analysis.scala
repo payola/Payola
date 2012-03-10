@@ -1,8 +1,9 @@
 package cz.payola.common.model
 
-trait Analysis extends NamedModelObject with OwnedObject {
-    // Analysis consists of chained PluginInstances
-    // TODO
+trait Analysis extends NamedEntity with OwnedEntity
+{
+    /** Type of the plugin instances the analysis consists of. */
+    type PluginInstanceType <: PluginInstance
 
-    def isOwnedByUser(u: User): Boolean = owner == u
+    def pluginInstances: Seq[PluginInstanceType]
 }

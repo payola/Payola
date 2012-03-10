@@ -1,11 +1,14 @@
 package cz.payola.common.model
 
-trait PluginInstance extends ModelObject {
-    val plugin: Plugin
+trait PluginInstance extends Entity
+{
+    /** Type of the plugin the current object is instance of. */
+    type PluginType <: Plugin
 
-    def allValues: List[ParameterInstance[_]]
-    def hasSetValueForParameter(p: Parameter[_]): Boolean
-    def setValueForParameter(p: Parameter[_], v: ParameterInstance[_])
-    def valueForParameter(p: Parameter[_]): Option[ParameterInstance[_]]
+    /** Type of the parameter instances the plugin instance. */
+    type ParameterInstanceType <: ParameterInstance[_]
+    
+    def plugin: PluginType
 
+    def parameterInstances: Seq[ParameterInstanceType]
 }

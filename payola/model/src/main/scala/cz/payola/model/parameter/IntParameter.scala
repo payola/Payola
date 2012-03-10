@@ -1,10 +1,13 @@
 package cz.payola.model.parameter
 
-class IntParameter(private val n: String, private val defaultValue: Int) extends
-                                                                            Parameter[Int](n, defaultValue) {
+import cz.payola.common
 
-    protected class IntParameterInstance(protected val intVal: Int) extends
-                                                                            ParameterInstance[Int](intVal){
+class IntParameter(private val n: String, private val defaultValue: Int) extends
+    Parameter[Int](n, defaultValue) with common.model.parameters.IntParameter
+{
+    protected class IntParameterInstance(parameter: IntParameter, value: Int) extends
+        ParameterInstance[Int](parameter, value)
+    {
         /** Gets a boolean value of the parameter.
          *
          *  @return Boolean value, or false if the value is null.
@@ -74,6 +77,6 @@ class IntParameter(private val n: String, private val defaultValue: Int) extends
      * @return New BooleanParameterInstance instance.
      */
     override def instanceWithValue(newValue: Int): ParameterInstance[Int] = {
-        new IntParameterInstance(newValue)
+        new IntParameterInstance(this, newValue)
     }
 }
