@@ -1,16 +1,17 @@
 package cz.payola.model
 
-import generic.ConcreteModelObject
-import cz.payola.common.model.SharePriviledges._
+import generic.ConcreteEntity
+import cz.payola.common
+import cz.payola.common.model.SharePrivilege
 
-class AnalysisShare (var analysis: Analysis, var privilege: Int) extends cz.payola.common.model.AnalysisShare with ConcreteModelObject {
+class AnalysisShare (val analysis: Analysis, var privilege: Int) extends common.model.AnalysisShare with ConcreteEntity {
     require(analysis != null, "Analysis cannot be null!")
-    require(privilege == SharePrivilegeIncludingData || privilege == SharePrivilegeResultOnly, "Privilige unknown!")
+    require(privilege == SharePrivilege.IncludingData || privilege == SharePrivilege.ResultOnly, "Privilige unknown!")
 
     /** Creates a new AnalysisShare with SharePrivilegeResultOnly SharePrivilege.
      *
      *  @param a The analysis to be shared.
      */
-    def this(a: Analysis) = this(a, SharePrivilegeResultOnly)
+    def this(a: Analysis) = this(a, SharePrivilege.ResultOnly)
 
 }

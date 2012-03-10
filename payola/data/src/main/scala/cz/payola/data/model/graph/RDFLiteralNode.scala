@@ -4,11 +4,12 @@ import cz.payola.scala2json.annotations.JSONPoseableClass
 import cz.payola.scala2json.traits.JSONSerializationFullyCustomized
 import collection.mutable.HashMap
 import cz.payola.scala2json.JSONSerializer
+import cz.payola.common.rdf.LiteralVertex
 
-@JSONPoseableClass(otherClass = classOf[cz.payola.common.rdf.LiteralVertex])
-class RDFLiteralNode(override val value: Any, override val language: Option[String] = Option.empty[String])
-    extends RDFNode with cz.payola.common.rdf.LiteralVertex with JSONSerializationFullyCustomized {
-
+@JSONPoseableClass(otherClass = classOf[LiteralVertex])
+class RDFLiteralNode(val value: Any, val language: Option[String] = None) extends RDFNode with LiteralVertex
+    with JSONSerializationFullyCustomized
+{
     /** Should return JSON representation of the object.
       *
       * @param options Options for the serialization. @see JSONSerializerOptions

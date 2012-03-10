@@ -4,18 +4,22 @@ import cz.payola.model.parameter._
 import cz.payola._
 import collection.mutable._
 
-class PluginInstance(val plugin: common.model.Plugin) extends common.model.PluginInstance with model.generic.ConcreteModelObject {
+class PluginInstance(val plugin: Plugin) extends common.model.PluginInstance with model.generic.ConcreteEntity
+{
     require(plugin != null, "Cannot create a plugin instance of a null plugin!")
 
+    type PluginType = Plugin
+
+    type ParameterInstanceType = ParameterInstance[_]
+
     // A hash map matching parameters -> values
-    private val _parameterValues: HashMap[common.model.Parameter[_], common.model.ParameterInstance[_]] =
-                                        new HashMap[common.model.Parameter[_], common.model.ParameterInstance[_]]()
+    private val _parameterInstances = new HashMap[Parameter[_], ParameterInstance[_]]()
 
     /** Returns an array of parameter instances.
      *
      * @return An array of parameter instances.
      */
-    def allValues: List[common.model.ParameterInstance[_]] = _parameterValues.values.toList
+    def parameterInstances = _parameterInstances.values.toList
 
     /** Returns whether a value for that particular parameter has been set or not.
      *
@@ -25,10 +29,10 @@ class PluginInstance(val plugin: common.model.Plugin) extends common.model.Plugi
      *
      * @throws IllegalArgumentException if p is null or if the plugin doesn't contain such a parameter.
      */
-    def hasSetValueForParameter(p: common.model.Parameter[_]): Boolean = {
+    def hasSetValueForParameter(p: Parameter[_]): Boolean = {
         require(p != null, "Cannot ask about null parameter!")
         require(plugin.containsParameter(p), "The plugin doesn't contain such a parameter")
-        !_parameterValues.get(p).isEmpty
+        !_parameterInstances.get(p).isEmpty
     }
 
     /** Sets a parameter instance for parameter.
@@ -39,12 +43,12 @@ class PluginInstance(val plugin: common.model.Plugin) extends common.model.Plugi
      * @throws IllegalArgumentException if either of the parameter is null or if the plugin doesn't contain such
      *          a parameter.
      */
-    def setValueForParameter(p: common.model.Parameter[_], v: common.model.ParameterInstance[_]) = {
+    def setValueForParameter(p: Parameter[_], v: ParameterInstance[_]) = {
         require(p != null, "Cannot set null parameter")
         require(plugin.containsParameter(p), "The plugin doesn't contain such a parameter")
         require(v != null, "Cannot set null value")
 
-        _parameterValues.put(p, v)
+        _parameterInstances.put(p, v)
     }
 
     /** Gets a parameter instance for that particular parameter.
@@ -55,10 +59,10 @@ class PluginInstance(val plugin: common.model.Plugin) extends common.model.Plugi
      *
      * @throws IllegalArgumentException if the parameter is null or if the plugin doesn't contain such a parameter.
      */
-    def valueForParameter(p: common.model.Parameter[_]): Option[common.model.ParameterInstance[_]] = {
+    def valueForParameter(p: Parameter[_]): Option[ParameterInstance[_]] = {
         require(p != null, "Cannot ask for null parameter's value!")
         require(plugin.containsParameter(p), "The parameter must be contained by the plugin!")
 
-        _parameterValues.get(p)
+        _parameterInstances.get(p)
     }
 }

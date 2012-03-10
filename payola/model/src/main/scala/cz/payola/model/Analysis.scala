@@ -1,12 +1,15 @@
 package cz.payola.model
 
-import generic.ConcreteNamedModelObject
+import cz.payola.common
+import generic.{ConcreteOwnedEntity, ConcreteNamedEntity}
 import scala.collection.mutable._
 
-class Analysis(n: String, u: User) extends cz.payola.common.model.Analysis with ConcreteNamedModelObject {
-
+class Analysis(n: String, u: User) extends common.model.Analysis with ConcreteNamedEntity with ConcreteOwnedEntity
+{
     setName(n)
     setOwner(u)
+
+    type PluginInstanceType = PluginInstance
 
     // Plugin instances that this analysis consists of.
     private val _pluginInstances: ArrayBuffer[PluginInstance] = new ArrayBuffer[PluginInstance]()
@@ -40,7 +43,7 @@ class Analysis(n: String, u: User) extends cz.payola.common.model.Analysis with 
      *
      * @return An immutable copy of the plugin instances array.
      */
-    def pluginInstances: Array[PluginInstance] = _pluginInstances.toArray
+    def pluginInstances = _pluginInstances
 
     /** Removes all items in the plugin instances array by the array passed as argument.
      *
@@ -48,8 +51,8 @@ class Analysis(n: String, u: User) extends cz.payola.common.model.Analysis with 
      *
      * @throws IllegalArgumentException if the array is null.
      */
-    def pluginInstances_=(instances: Array[PluginInstance]) = {
-        require(instances != null, "Cannot assign a null array!")
+    def pluginInstances_=(instances: Seq[PluginInstance]) = {
+        require(pluginInstances != null, "Cannot assign a null array!")
 
         _pluginInstances.clear()
         instances.foreach(_pluginInstances += _)

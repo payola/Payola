@@ -1,10 +1,13 @@
 package cz.payola.model.parameter
 
-class StringParameter(private val n: String, private val defaultValue: String) extends
-                                                                            Parameter[String](n, defaultValue) {
+import cz.payola.common
 
-    protected class StringParameterInstance(protected val strVal: String) extends
-                                                                            ParameterInstance[String](strVal){
+class StringParameter(private val n: String, private val defaultValue: String) extends
+    Parameter[String](n, defaultValue) with common.model.parameters.StringParameter
+{
+    protected class StringParameterInstance(parameter: StringParameter, value: String) extends
+        ParameterInstance[String](parameter, value)
+    {
         /** Gets a boolean value of the parameter.
          *
          *  @return Boolean value, or false if the value is null.
@@ -90,6 +93,6 @@ class StringParameter(private val n: String, private val defaultValue: String) e
      * @return New StringParameterInstance instance.
      */
     override def instanceWithValue(newValue: String): ParameterInstance[String] = {
-        new StringParameterInstance(newValue)
+        new StringParameterInstance(this, newValue)
     }
 }

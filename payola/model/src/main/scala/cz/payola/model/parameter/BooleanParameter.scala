@@ -1,10 +1,13 @@
 package cz.payola.model.parameter
 
-class BooleanParameter(private val n: String, private val defaultValue: Boolean) extends
-                                                                            Parameter[Boolean](n, defaultValue) {
+import cz.payola.common
 
-    protected class BooleanParameterInstance(protected val boolVal: Boolean) extends
-                                                                            ParameterInstance[Boolean](boolVal){
+class BooleanParameter(private val n: String, private val defaultValue: Boolean) extends
+    Parameter[Boolean](n, defaultValue) with common.model.parameters.BooleanParameter
+{
+    protected class BooleanParameterInstance(parameter: BooleanParameter, value: Boolean) extends
+        ParameterInstance[Boolean](parameter, value)
+    {
         /** Gets a boolean value of the parameter.
          *
          *  @return Boolean value, or false if the value is null.
@@ -85,6 +88,6 @@ class BooleanParameter(private val n: String, private val defaultValue: Boolean)
      * @return New BooleanParameterInstance instance.
      */
     override def instanceWithValue(newValue: Boolean): ParameterInstance[Boolean] = {
-        new BooleanParameterInstance(newValue)
+        new BooleanParameterInstance(this, newValue)
     }
 }

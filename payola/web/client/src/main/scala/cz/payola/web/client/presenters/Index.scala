@@ -15,8 +15,8 @@ import cz.payola.web.client.model.graph.{SimpleIdentifiedVertex, SimpleEdge, Sim
 // TODO remove after classloading is done
 @dependency("cz.payola.common.rdf.IdentifiedVertex")
 @dependency("cz.payola.common.rdf.LiteralVertex")
-@dependency("cz.payola.common.rdf.generic.Graph")
-@dependency("cz.payola.common.rdf.generic.Edge")
+@dependency("cz.payola.common.rdf.Graph")
+@dependency("cz.payola.common.rdf.Edge")
 class Index
 {
     var graph: Option[Graph] = None

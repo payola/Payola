@@ -1,12 +1,16 @@
 package cz.payola.model.parameter
 
 import cz.payola._
+import model.generic.ConcreteEntity
 import sun.reflect.generics.reflectiveObjects.NotImplementedException
 
 /** A protected class that represents the parameter instance with an actual value. As this,
  * it is abstract, see subclasses.
  */
-abstract class ParameterInstance[A](protected var _value: A) extends common.model.ParameterInstance[A] with model.generic.ConcreteModelObject {
+abstract class ParameterInstance[A](val parameter: Parameter[A], var value: A) extends common.model.ParameterInstance[A]
+    with ConcreteEntity
+{
+    type ParameterType = Parameter[A]
 
     /** Gets a boolean value of the parameter.
      *
@@ -72,18 +76,10 @@ abstract class ParameterInstance[A](protected var _value: A) extends common.mode
         throw new NotImplementedException()
     }
 
-    /** Value getter.
-     *
-     * @return The value.
-     */
-    def value: A = _value
-
-    /** Value setter.
-     *
-     * @param newVal The new value.
-     */
-    def value_=(newVal: A) = {
-        _value = newVal
-    }
+    /** Only a convenience method that calls value_=().
+      *
+      * @param newVal The new value.
+      */
+    def setValue(newVal: A) = value = newVal
 }
 

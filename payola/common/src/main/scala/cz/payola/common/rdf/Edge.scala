@@ -5,7 +5,13 @@ package cz.payola.common.rdf
   */
 trait Edge extends IdentifiedObject
 {
-    val origin: IdentifiedVertex
+    /** Type of the vertices, the edge is between. */
+    type VertexType <: Vertex
 
-    val destination: Vertex
+    /** Type of the vertices, the edge can originate in. */
+    type IdentifiedVertexType <: IdentifiedVertex
+
+    val origin: IdentifiedVertexType
+
+    val destination: VertexType
 }

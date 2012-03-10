@@ -1,8 +1,8 @@
 package cz.payola.model.generic
 
-import cz.payola.common.model.NamedModelObject
+import cz.payola.common.model.NamedEntity
 
-trait ConcreteNamedModelObject extends ConcreteModelObject with NamedModelObject
+trait ConcreteNamedEntity extends ConcreteEntity with NamedEntity
 {
     protected var _name: String = null
 
