@@ -21,7 +21,7 @@ class Plugin(n: String) extends common.model.Plugin with ConcreteNamedEntity
      *
      * @throws IllegalArgumentException if the parameter is null.
      */
-    def addParameter(p: Parameter[_]) = {
+    def addParameter(p: ParameterType) = {
         require(p != null, "Cannot add null parameter!")
         if (!containsParameter(p)){
             _parameterIDs += p.id
@@ -35,21 +35,15 @@ class Plugin(n: String) extends common.model.Plugin with ConcreteNamedEntity
      *
      * @return True or false.
      */
-    def containsParameter(p: Parameter[_]): Boolean = _parameterIDs.contains(p.id)
-
-    /** Returns number of parameters.
-      *
-      * @return Number of parameters.
-      */
-    def numberOfParameters: Int = _parameterIDs.size
+    def containsParameter(p: ParameterType): Boolean = _parameterIDs.contains(p.id)
 
     /** Returns a parameter at index.
       *
       * @param index Index of the parameter.
       * @return Parameter at index.
       */
-    def parameterAtIndex(index: Int): Parameter[_] = {
-        require(index >= 0 && index < numberOfParameters, "Parameter index out of bounds - " + index)
+    def parameterAtIndex(index: Int): ParameterType = {
+        require(index >= 0 && index < parameterCount, "Parameter index out of bounds - " + index)
         val opt: Option[Parameter[_]] = _cachedParameters.get(_parameterIDs(index))
         if (opt.isEmpty){
             // TODO Load from DB
@@ -58,15 +52,21 @@ class Plugin(n: String) extends common.model.Plugin with ConcreteNamedEntity
             opt.get
         }
     }
+
+    /** Returns number of parameters.
+      *
+      * @return Number of parameters.
+      */
+    def parameterCount: Int = _parameterIDs.size
     
     /** Returns an immutable copy of the parameter array.
      *
      * @return Immutable copy of the parameter array.
      */
     def parameters = {
-        val params = List[Parameter[_]]()
+        val params = List[ParameterType]()
         _parameterIDs foreach { paramID: String =>
-            val p: Option[Parameter[_]] = _cachedParameters.get(paramID)
+            val p: Option[ParameterType] = _cachedParameters.get(paramID)
             if (p.isEmpty){
                 // TODO loading from DB
             }else{
@@ -83,7 +83,7 @@ class Plugin(n: String) extends common.model.Plugin with ConcreteNamedEntity
      * @throws IllegalArgumentException if the plugin's parameter array
      *             doesn't contain this parameter.
      */
-    def removeParameter(p: Parameter[_]) = {
+    def removeParameter(p: ParameterType) = {
         require(containsParameter(p), "Cannot remove a parameter that isn't a member of this plugin!")
         _parameterIDs -= p.id
         _cachedParameters.remove(p.id)
