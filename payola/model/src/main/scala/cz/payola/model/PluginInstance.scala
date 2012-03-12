@@ -9,17 +9,10 @@ class PluginInstance(val plugin: Plugin) extends common.model.PluginInstance wit
     require(plugin != null, "Cannot create a plugin instance of a null plugin!")
 
     type PluginType = Plugin
-
     type ParameterInstanceType = ParameterInstance[_]
 
     // A hash map matching parameters -> values
-    private val _parameterInstances = new HashMap[Parameter[_], ParameterInstance[_]]()
-
-    /** Returns an array of parameter instances.
-     *
-     * @return An array of parameter instances.
-     */
-    def parameterInstances = _parameterInstances.values.toList
+    private val _parameterInstances = new HashMap[Parameter[_], ParameterInstanceType]()
 
     /** Returns whether a value for that particular parameter has been set or not.
      *
@@ -35,6 +28,12 @@ class PluginInstance(val plugin: Plugin) extends common.model.PluginInstance wit
         !_parameterInstances.get(p).isEmpty
     }
 
+    /** Returns an array of parameter instances.
+      *
+      * @return An array of parameter instances.
+      */
+    def parameterInstances = _parameterInstances.values.toList
+
     /** Sets a parameter instance for parameter.
      *
      * @param p The parameter.
@@ -43,7 +42,7 @@ class PluginInstance(val plugin: Plugin) extends common.model.PluginInstance wit
      * @throws IllegalArgumentException if either of the parameter is null or if the plugin doesn't contain such
      *          a parameter.
      */
-    def setValueForParameter(p: Parameter[_], v: ParameterInstance[_]) = {
+    def setValueForParameter(p: Parameter[_], v: ParameterInstanceType) = {
         require(p != null, "Cannot set null parameter")
         require(plugin.containsParameter(p), "The plugin doesn't contain such a parameter")
         require(v != null, "Cannot set null value")
@@ -59,7 +58,7 @@ class PluginInstance(val plugin: Plugin) extends common.model.PluginInstance wit
      *
      * @throws IllegalArgumentException if the parameter is null or if the plugin doesn't contain such a parameter.
      */
-    def valueForParameter(p: Parameter[_]): Option[ParameterInstance[_]] = {
+    def valueForParameter(p: Parameter[_]): Option[ParameterInstanceType] = {
         require(p != null, "Cannot ask for null parameter's value!")
         require(plugin.containsParameter(p), "The parameter must be contained by the plugin!")
 

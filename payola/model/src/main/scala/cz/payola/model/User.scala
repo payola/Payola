@@ -1,16 +1,14 @@
 package cz.payola.model
 
 import cz.payola._
-import generic.ConcreteNamedEntity
+import generic.{SharedAnalysesOwner, ConcreteNamedEntity}
 import scala.collection.mutable._
 
-class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEntity  {
+class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEntity with SharedAnalysesOwner {
     setName(n)
 
     type GroupType = Group
-
     type AnalysisType = Analysis
-
     type AnalysisShareType = AnalysisShare
 
     var email: String = ""
@@ -21,8 +19,8 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEnti
     // a particular analysis, it is loaded and stored in the HashMap cache.
     private val _ownedAnalysesIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
     private val _sharedAnalysisSharesIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
-    private val _cachedAnalyses: HashMap[String, Analysis] = new HashMap[String,Analysis]()
-    private val _cachedAnalysisShares: HashMap[String, AnalysisShare] = new HashMap[String, AnalysisShare]()
+    private val _cachedAnalyses: HashMap[String, AnalysisType] = new HashMap[String,AnalysisType]()
+    private val _cachedAnalysisShares: HashMap[String, AnalysisShareType] = new HashMap[String, AnalysisShareType]()
 
 
     // Groups owned by the user and groups the user is a member in
@@ -33,7 +31,7 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEnti
     private val _cachedGroups: HashMap[String, Group] = new HashMap[String,Group]()
 
     def isMemberOfGroup(g: Group): Boolean = g.hasMember(this)
-    def isOwnerOfAnalysis(a: Analysis): Boolean = a.owner == this
+    def isOwnerOfAnalysis(a: AnalysisType): Boolean = a.owner == this
     def isOwnerOfGroup(g: Group): Boolean = g.owner == this
 
     /** Internal method which creates List of groups from IDs. It uses the user's cache
@@ -62,7 +60,7 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEnti
     *
     *  @throws IllegalArgumentException if the analysis is null or the user isn't an owner of it.
      */
-    def addAnalysis(a: Analysis) = {
+    def addAnalysis(a: AnalysisType) = {
         require(a != null, "Analysis mustn't be null")
         require(isOwnerOfAnalysis(a), "User must be owner of the analysis")
         if (!_ownedAnalysesIDs.contains(a.id)){
@@ -77,7 +75,7 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEnti
      *
      * @throws IllegalArgumentException if the analysis share is null.
      */
-    def addAnalysisShare(a: AnalysisShare) = {
+    def addAnalysisShare(a: AnalysisShareType) = {
         require(a != null, "Cannot share null analysis share")
         if (!_sharedAnalysisSharesIDs.contains(a.id)){
             _sharedAnalysisSharesIDs += a.id
@@ -133,7 +131,7 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEnti
      *
      * @return True or false.
      */
-    def hasAccessToAnalysis(a: Analysis): Boolean = {
+    def hasAccessToAnalysis(a: AnalysisType): Boolean = {
         if (_ownedAnalysesIDs.contains(a.id) || sharedAnalyses.exists(_.analysis.id == a.id)) {
             true
         } else {
@@ -149,7 +147,7 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEnti
       * @return The group.
       */
     def memberGroupAtIndex(index: Int): Group = {
-        require(index >= 0 && index < numberOfMemberGroups, "Member group index out of bounds - " + index)
+        require(index >= 0 && index < memberGroupCount, "Member group index out of bounds - " + index)
         val opt: Option[Group] = _cachedGroups.get(_memberGroupIDs(index))
         if (opt.isEmpty){
             // TODO Load from DB
@@ -158,7 +156,13 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEnti
             opt.get
         }
     }
-    
+
+    /** Number of member groups.
+      *
+      * @return Number of member groups
+      */
+    def memberGroupCount: Int = _memberGroupIDs.size
+
     /** Result is a new List consisting of only groups that
      *  the user is a member of.
      *
@@ -166,39 +170,15 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEnti
      */
     def memberGroups = _groupsWithIDs(_memberGroupIDs)
 
-    /** Number of member groups.
-      *
-      * @return Number of member groups
-      */
-    def numberOfMemberGroups: Int = _memberGroupIDs.size
-
-    /** Number of owned analyses.
-      *
-      * @return Number of owned analyses.
-      */
-    def numberOfOwnedAnalyses: Int = _ownedAnalysesIDs.size
-
-    /** Number of owned groups.
-      *
-      * @return Number of owned groups
-      */
-    def numberOfOwnedGroups: Int = _ownedGroupIDs.size
-
-    /** Number of shared analyses.
-      *
-      * @return Number of shared analyses.
-      */
-    def numberOfSharedAnalyses: Int = _sharedAnalysisSharesIDs.size
-
     /** Returns a list of analyses owned by this user. Analyses will
       * be fetched from DB if necessary.
       *
       * @return List of owned analyses.
       */
     def ownedAnalyses = {
-        val analyses = List[Analysis]()
+        val analyses = List[AnalysisType]()
         _ownedAnalysesIDs foreach { analysisID: String =>
-            val a: Option[Analysis] = _cachedAnalyses.get(analysisID)
+            val a: Option[AnalysisType] = _cachedAnalyses.get(analysisID)
             if (a.isEmpty){
                 // TODO loading from DB
             }else{
@@ -214,9 +194,9 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEnti
       * @param index Index of the analysis (according to the AnalysesIDs).
       * @return The analysis.
       */
-    def ownedAnalysisAtIndex(index: Int): Analysis = {
-        require(index >= 0 && index < numberOfOwnedAnalyses, "Owned analysis index out of bounds - " + index)
-        val opt: Option[Analysis] = _cachedAnalyses.get(_ownedAnalysesIDs(index))
+    def ownedAnalysisAtIndex(index: Int): AnalysisType = {
+        require(index >= 0 && index < ownedAnalysisCount, "Owned analysis index out of bounds - " + index)
+        val opt: Option[AnalysisType] = _cachedAnalyses.get(_ownedAnalysesIDs(index))
         if (opt.isEmpty){
             // TODO Load from DB
             null
@@ -225,6 +205,12 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEnti
         }
     }
 
+    /** Number of owned analyses.
+      *
+      * @return Number of owned analyses.
+      */
+    def ownedAnalysisCount: Int = _ownedAnalysesIDs.size
+
     /** Returns a group at index. Will raise an exception if the index is out of bounds.
       * The group will be loaded from DB if necessary.
       *
@@ -232,7 +218,7 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEnti
       * @return The group.
       */
     def ownedGroupAtIndex(index: Int): Group = {
-        require(index >= 0 && index < numberOfOwnedGroups, "Owned group index out of bounds - " + index)
+        require(index >= 0 && index < ownedGroupCount, "Owned group index out of bounds - " + index)
         val opt: Option[Group] = _cachedGroups.get(_ownedGroupIDs(index))
         if (opt.isEmpty){
             // TODO Load from DB
@@ -241,6 +227,12 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEnti
             opt.get
         }
     }
+
+    /** Number of owned groups.
+      *
+      * @return Number of owned groups
+      */
+    def ownedGroupCount: Int = _ownedGroupIDs.size
 
     /** Result is a new List consisting of only groups that
      *  are owned by the user.
@@ -280,7 +272,7 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEnti
       *
       * @throws IllegalArgumentException if the analysis is null.
       */
-    def removeOwnedAnalysis(a: Analysis) = {
+    def removeOwnedAnalysis(a: AnalysisType) = {
         require(a != null, "Cannot remove null analysis!")
 
         _ownedAnalysesIDs -= a.id
@@ -308,7 +300,7 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEnti
       *
       * @throws IllegalArgumentException if the analysis share is null.
       */
-    def removeSharedAnalysis(a: AnalysisShare) = {
+    def removeSharedAnalysis(a: AnalysisShareType) = {
         require(a != null, "Cannot remove null analysis!")
         _sharedAnalysisSharesIDs -= a.id
         _cachedAnalysisShares.remove(a.id)
@@ -319,9 +311,9 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEnti
       * @return List of analysis shares.
       */
     def sharedAnalyses = {
-        val analyses = List[AnalysisShare]()
+        val analyses = List[AnalysisShareType]()
         _sharedAnalysisSharesIDs foreach { shareID: String =>
-            val a: Option[AnalysisShare] = _cachedAnalysisShares.get(shareID)
+            val a: Option[AnalysisShareType] = _cachedAnalysisShares.get(shareID)
             if (a.isEmpty){
                 // TODO loading from DB
             }else{
@@ -337,9 +329,9 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEnti
       * @param index Index of the analysis share (according to the AnalysesIDs).
       * @return The analysis share.
       */
-    def sharedAnalysisAtIndex(index: Int): AnalysisShare = {
-        require(index >= 0 && index < numberOfSharedAnalyses, "Shared analysis index out of bounds - " + index)
-        val opt: Option[AnalysisShare] = _cachedAnalysisShares.get(_sharedAnalysisSharesIDs(index))
+    def sharedAnalysisAtIndex(index: Int): AnalysisShareType = {
+        require(index >= 0 && index < sharedAnalysisCount, "Shared analysis index out of bounds - " + index)
+        val opt: Option[AnalysisShareType] = _cachedAnalysisShares.get(_sharedAnalysisSharesIDs(index))
         if (opt.isEmpty){
             // TODO Load from DB
             null
@@ -348,5 +340,10 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEnti
         }
     }
 
+    /** Number of shared analyses.
+      *
+      * @return Number of shared analyses.
+      */
+    def sharedAnalysisCount: Int = _sharedAnalysisSharesIDs.size
 
 }
