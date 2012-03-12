@@ -5,7 +5,7 @@ import cz.payola.common.model.Entity
 
 trait ConcreteEntity extends Entity
 {
-    // Lazy objectID creation TODO why lazy?
+    // Lazy objectID creation
     var _id: Option[String] = None
 
     def id = {

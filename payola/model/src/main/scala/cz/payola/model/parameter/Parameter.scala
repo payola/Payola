@@ -2,7 +2,9 @@ package cz.payola.model.parameter
 
 import cz.payola._
 import model.generic.ConcreteNamedEntity
+import scala2json.annotations.JSONUnnamedClass
 
+@JSONUnnamedClass
 abstract class Parameter[A](n: String, private val defaultValue: A) extends common.model.Parameter[A]
     with ConcreteNamedEntity
 {
