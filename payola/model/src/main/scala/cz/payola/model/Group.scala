@@ -1,9 +1,11 @@
 package cz.payola.model
 
 import collection.mutable._
-import cz.payola.common
+import cz.payola._
 import generic.{SharedAnalysesOwner, ConcreteOwnedEntity, ConcreteNamedEntity}
+import cz.payola.scala2json.annotations._
 
+@JSONUnnamedClass
 class Group (nameStr: String, user: User) extends common.model.Group with ConcreteNamedEntity with ConcreteOwnedEntity with SharedAnalysesOwner
 {
     setName(nameStr)
@@ -13,8 +15,8 @@ class Group (nameStr: String, user: User) extends common.model.Group with Concre
 
     // Members. Initially only IDs are loaded, actual members are loaded from the
     // data layer as needed
-    private val _memberIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
-    private val _members: HashMap[String, User] = new HashMap[String, User]()
+    @JSONFieldName(name = "members") private val _memberIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
+    @JSONTransient private val _members: HashMap[String, User] = new HashMap[String, User]()
 
     user.addOwnedGroup(this)
 
@@ -53,7 +55,7 @@ class Group (nameStr: String, user: User) extends common.model.Group with Concre
       * @return The group.
       */
     def memberAtIndex(index: Int): User = {
-        require(index >= 0 && index < numberOfMembers, "Member index out of bounds - " + index)
+        require(index >= 0 && index < memberCount, "Member index out of bounds - " + index)
         val opt: Option[User] = _members.get(_memberIDs(index))
         if (opt.isEmpty){
             // TODO Load from DB
@@ -67,7 +69,7 @@ class Group (nameStr: String, user: User) extends common.model.Group with Concre
       *
       * @return Number of members.
       */
-    def numberOfMembers: Int = _memberIDs.size
+    def memberCount: Int = _memberIDs.size
 
     /** Returns an immutable array of group members.
      *
@@ -98,6 +100,7 @@ class Group (nameStr: String, user: User) extends common.model.Group with Concre
 
         val oldOwner = owner
         _owner = u
+        _ownerID = u.id
 
         // Update relations
         u.addOwnedGroup(this)
@@ -106,9 +109,9 @@ class Group (nameStr: String, user: User) extends common.model.Group with Concre
         }
     }
 
-    /** Removes user from members.<br/>
-     * <br/>
-     * <strong>Note:</strong> Automatically removes the group from the user's groups.
+    /** Removes user from members.
+     *
+     * Note: Automatically removes the group from the user's groups.
      *
      *  @param u The user to be removed.
      *

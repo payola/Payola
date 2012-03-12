@@ -2,12 +2,14 @@ package cz.payola.model.generic
 
 import cz.payola.model
 import cz.payola.common.model.OwnedEntity
+import cz.payola.scala2json.annotations._
 
 trait ConcreteOwnedEntity extends ConcreteEntity with OwnedEntity
 {
     type UserType = model.User
 
-    protected var _owner: UserType = null
+    @JSONFieldName(name = "owner") protected var _ownerID: String = ""
+    @JSONTransient protected var _owner: UserType = null
 
     /** Returns the owner.
       *
@@ -15,7 +17,7 @@ trait ConcreteOwnedEntity extends ConcreteEntity with OwnedEntity
       */
     def owner = _owner
 
-    def isOwnedByUser(u: UserType): Boolean = owner == u
+    def isOwnedByUser(u: UserType): Boolean = _ownerID == u.id
 
     /** Sets the owner.
       *
@@ -28,6 +30,7 @@ trait ConcreteOwnedEntity extends ConcreteEntity with OwnedEntity
         require(u != null)
 
         _owner = u
+        _ownerID = u.id
     }
 
     /** Convenience method that just calls owner_=.
@@ -36,5 +39,5 @@ trait ConcreteOwnedEntity extends ConcreteEntity with OwnedEntity
       *
       * @throws IllegalArgumentException if the user is null.
       */
-    def setOwner(u: UserType) = owner_=(u);
+    def setOwner(u: UserType) = owner_=(u)
 }

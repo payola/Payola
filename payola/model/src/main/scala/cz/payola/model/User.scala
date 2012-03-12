@@ -1,9 +1,10 @@
 package cz.payola.model
 
-import cz.payola._
 import generic.{SharedAnalysesOwner, ConcreteNamedEntity}
 import scala.collection.mutable._
+import cz.payola.scala2json.annotations._
 
+@JSONUnnamedClass
 class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEntity with SharedAnalysesOwner {
     setName(n)
 
@@ -17,22 +18,16 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEnti
     // Analysis owned by the user and analysis that are shared directly to the user
     // To support lazy-loading, only AnalysesIDs are filled at first and when requesting
     // a particular analysis, it is loaded and stored in the HashMap cache.
-    private val _ownedAnalysesIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
-    private val _sharedAnalysisSharesIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
-    private val _cachedAnalyses: HashMap[String, AnalysisType] = new HashMap[String,AnalysisType]()
-    private val _cachedAnalysisShares: HashMap[String, AnalysisShareType] = new HashMap[String, AnalysisShareType]()
+    @JSONFieldName( name = "ownedAnalyses" )  val _ownedAnalysesIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
+    @JSONTransient private val _cachedAnalyses: HashMap[String, AnalysisType] = new HashMap[String,AnalysisType]()
 
 
     // Groups owned by the user and groups the user is a member in
     // To support lazy-loading, only GroupIDs are filled at first and when requesting
     // a particular group, it is loaded and stored in the HashMap cache.
-    private val _ownedGroupIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
-    private val _memberGroupIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
-    private val _cachedGroups: HashMap[String, Group] = new HashMap[String,Group]()
-
-    def isMemberOfGroup(g: Group): Boolean = g.hasMember(this)
-    def isOwnerOfAnalysis(a: AnalysisType): Boolean = a.owner == this
-    def isOwnerOfGroup(g: Group): Boolean = g.owner == this
+    @JSONFieldName( name = "ownedGroups" ) private val _ownedGroupIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
+    @JSONFieldName( name = "memberGroups" ) private val _memberGroupIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
+    @JSONTransient private val _cachedGroups: HashMap[String, Group] = new HashMap[String,Group]()
 
     /** Internal method which creates List of groups from IDs. It uses the user's cache
       * as well as loading from the data layer if the group hasn't been cached yet.
@@ -66,20 +61,6 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEnti
         if (!_ownedAnalysesIDs.contains(a.id)){
             _ownedAnalysesIDs += a.id
             _cachedAnalyses.put(a.id, a)
-        }
-    }
-
-    /** Adds an analysis share to the user.
-     *
-     * @param a The share.
-     *
-     * @throws IllegalArgumentException if the analysis share is null.
-     */
-    def addAnalysisShare(a: AnalysisShareType) = {
-        require(a != null, "Cannot share null analysis share")
-        if (!_sharedAnalysisSharesIDs.contains(a.id)){
-            _sharedAnalysisSharesIDs += a.id
-            _cachedAnalysisShares.put(a.id, a)
         }
     }
 
@@ -139,6 +120,10 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEnti
                 ownedGroups.exists(_.hasAccessToSharedAnalysis(a))
         }
     }
+
+    def isMemberOfGroup(g: Group): Boolean = g.hasMember(this)
+    def isOwnerOfAnalysis(a: AnalysisType): Boolean = a.owner.id == this.id
+    def isOwnerOfGroup(g: Group): Boolean = g.owner.id == this.id
 
     /** Returns a group at index. Will raise an exception if the index is out of bounds.
       * The group will be loaded from DB if necessary.
@@ -293,57 +278,5 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEnti
         _ownedGroupIDs -= g.id
         _cachedGroups.remove(g.id)
     }
-
-    /** Removes the passed analysis from the analyses shared to the user.
-      *
-      * @param a Analysis share to be removed.
-      *
-      * @throws IllegalArgumentException if the analysis share is null.
-      */
-    def removeSharedAnalysis(a: AnalysisShareType) = {
-        require(a != null, "Cannot remove null analysis!")
-        _sharedAnalysisSharesIDs -= a.id
-        _cachedAnalysisShares.remove(a.id)
-    }
-
-    /** Returns a list of analysis shares. Objects will be fetched from DB if necessary.
-      *
-      * @return List of analysis shares.
-      */
-    def sharedAnalyses = {
-        val analyses = List[AnalysisShareType]()
-        _sharedAnalysisSharesIDs foreach { shareID: String =>
-            val a: Option[AnalysisShareType] = _cachedAnalysisShares.get(shareID)
-            if (a.isEmpty){
-                // TODO loading from DB
-            }else{
-                a.get :: analyses
-            }
-        }
-        analyses.reverse
-    }
-
-    /** Returns an analysis share at index. Will raise an exception if the index is out of bounds.
-      * The analysis share will be loaded from DB if necessary.
-      *
-      * @param index Index of the analysis share (according to the AnalysesIDs).
-      * @return The analysis share.
-      */
-    def sharedAnalysisAtIndex(index: Int): AnalysisShareType = {
-        require(index >= 0 && index < sharedAnalysisCount, "Shared analysis index out of bounds - " + index)
-        val opt: Option[AnalysisShareType] = _cachedAnalysisShares.get(_sharedAnalysisSharesIDs(index))
-        if (opt.isEmpty){
-            // TODO Load from DB
-            null
-        }else{
-            opt.get
-        }
-    }
-
-    /** Number of shared analyses.
-      *
-      * @return Number of shared analyses.
-      */
-    def sharedAnalysisCount: Int = _sharedAnalysisSharesIDs.size
 
 }

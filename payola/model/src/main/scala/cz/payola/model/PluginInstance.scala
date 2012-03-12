@@ -3,7 +3,9 @@ package cz.payola.model
 import cz.payola.model.parameter._
 import cz.payola._
 import collection.mutable._
+import scala2json.annotations.{JSONUnnamedClass, JSONTransient}
 
+@JSONUnnamedClass
 class PluginInstance(val plugin: Plugin) extends common.model.PluginInstance with model.generic.ConcreteEntity
 {
     require(plugin != null, "Cannot create a plugin instance of a null plugin!")
@@ -12,7 +14,8 @@ class PluginInstance(val plugin: Plugin) extends common.model.PluginInstance wit
     type ParameterInstanceType = ParameterInstance[_]
 
     // A hash map matching parameters -> values
-    private val _parameterInstances = new HashMap[Parameter[_], ParameterInstanceType]()
+
+    @JSONTransient private val _parameterInstances = new HashMap[Parameter[_], ParameterInstanceType]()
 
     /** Returns whether a value for that particular parameter has been set or not.
      *
