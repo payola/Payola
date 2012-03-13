@@ -493,7 +493,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
       */
     private def compileSelect(select: Global#Select, isSubSelect: Boolean = false, isInsideApply: Boolean = false) {
         val subSelectToken = if (isSubSelect) "." else ""
-        val nameString = packageDefCompiler.getLocalJsName(select.name.toString)
+        val nameString = packageDefCompiler.getSymbolLocalJsName(select.symbol)
         val name = if (nameString.endsWith("_$eq")) nameString.stripSuffix("_$eq") else nameString
 
         select match {

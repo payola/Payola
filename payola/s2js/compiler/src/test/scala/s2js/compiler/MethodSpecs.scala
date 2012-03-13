@@ -43,7 +43,7 @@ class MethodSpecs extends CompilerFixtureSpec
                             self.n();
                             var x = self.m();
                             var y = o1.m();
-                            var z = o1.m().length();
+                            var z = o1.m().$length();
                         };
                         o2.__class__ = new s2js.Class('o2', []);
                     """
