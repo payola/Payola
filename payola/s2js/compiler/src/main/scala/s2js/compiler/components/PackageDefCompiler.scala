@@ -124,7 +124,12 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
       * @return The name.
       */
     def getSymbolLocalJsName(symbol: Global#Symbol): String = {
-        getLocalJsName(symbol.name.toString.trim, !symbol.isMethod && symbol.isSynthetic)
+        val name = symbol.name.toString.trim
+        if (symbol.owner.fullName.startsWith("s2js.adapters")) {
+            name
+        } else {
+            getLocalJsName(name, !symbol.isMethod && symbol.isSynthetic)
+        }
     }
 
     /**
