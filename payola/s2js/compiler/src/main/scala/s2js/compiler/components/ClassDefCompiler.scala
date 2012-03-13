@@ -632,8 +632,14 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
                     " must have declared success callback function and error callback function parameters.")
             }
 
-            val errorCallbackParameterTypeName = errorCallback.get.tpe.typeArgs.head.typeSymbol.fullName
-            if (errorCallbackParameterTypeName != "java.lang.Throwable") {
+            var parameterTypeName = successCallback.get.tpe.typeArgs.head.typeSymbol.fullName
+            if (parameterTypeName == "scala.Any" || parameterTypeName == "java.lang.Object" ) {
+                throw new ScalaToJsException(errorPrefix +
+                    " must have a success callback whose first parameter is of a specified type (not Any or AnyRef).")
+            }
+
+            parameterTypeName = errorCallback.get.tpe.typeArgs.head.typeSymbol.fullName
+            if (parameterTypeName != "java.lang.Throwable") {
                 throw new ScalaToJsException(errorPrefix +
                     " must have an error callback whose first parameter is of type Throwable.")
             }
