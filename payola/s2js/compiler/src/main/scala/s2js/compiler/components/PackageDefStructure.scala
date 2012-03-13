@@ -11,4 +11,7 @@ class PackageDefStructure
 
     /** Graph of dependencies among the ClassDef objects in the PackageDef. */
     val classDefDependencyGraph = new mutable.HashMap[String, mutable.HashSet[String]]
+
+    /** The remote objects. */
+    val remoteObjects = new mutable.ListBuffer[Global#ClassDef]
 }
