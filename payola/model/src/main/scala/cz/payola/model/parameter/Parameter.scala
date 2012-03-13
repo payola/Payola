@@ -1,9 +1,13 @@
 package cz.payola.model.parameter
 
 import cz.payola._
+import model.generic.ConcreteNamedEntity
+import scala2json.annotations.JSONUnnamedClass
 
-abstract class Parameter[A](n: String, private val defaultValue: A) extends common.model.Parameter[A] with model.generic.ConcreteNamedModelObject {
-
+@JSONUnnamedClass
+abstract class Parameter[A](n: String, private val defaultValue: A) extends common.model.Parameter[A]
+    with ConcreteNamedEntity
+{
     setName(n)
 
     /** Creates a new instance of the particular parameter with value @value or
@@ -19,4 +23,12 @@ abstract class Parameter[A](n: String, private val defaultValue: A) extends comm
             instanceWithValue(value.get)
     }
 
+    /** Returns a new ParameterInstance instance (of its subclass, to be precise) with the value passed
+      * as a parameter of this method.
+      *
+      * @param value The value.
+      *
+      * @return New ParameterInstance instance.
+      */
+    protected def instanceWithValue(value: A): ParameterInstance[A]
 }

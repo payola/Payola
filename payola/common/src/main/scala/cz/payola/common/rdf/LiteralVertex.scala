@@ -14,7 +14,5 @@ trait LiteralVertex extends Vertex
     /**
       * @return value.toString
       */
-    override def toString(): String = {
-        value.toString
-    }
+    override def toString = value.toString
 }

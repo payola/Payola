@@ -11,6 +11,7 @@ import com.hp.hpl.jena.rdf.model.{StmtIterator, Resource, ResIterator, ModelFact
 import annotation.target.field
 import cz.payola.scala2json.{JSONSerializerOptions, JSONSerializer}
 import cz.payola.scala2json.traits.{JSONSerializationFullyCustomized, JSONSerializationCustomFields}
+import rdf.Graph
 
 object RDFGraph {
 
@@ -113,10 +114,12 @@ object RDFGraph {
 
 import RDFGraph._
 
-@JSONPoseableClass(otherClass = classOf[cz.payola.common.rdf.generic.Graph])
-class RDFGraph(@(JSONConcreteArrayClass @field)(arrayClass = classOf[scala.collection.immutable.List[_]]) val vertices: immutable.List[RDFNode],
-    @(JSONConcreteArrayClass @field)(arrayClass = classOf[scala.collection.immutable.List[_]]) val edges: immutable.List[RDFEdge]) extends rdf.generic.Graph
-    with JSONSerializationFullyCustomized {
+@JSONPoseableClass(otherClass = classOf[Graph])
+class RDFGraph(
+    @(JSONConcreteArrayClass @field)(arrayClass = classOf[immutable.List[_]]) val vertices: List[RDFNode],
+    @(JSONConcreteArrayClass @field)(arrayClass = classOf[immutable.List[_]]) val edges: List[RDFEdge])
+    extends Graph with JSONSerializationFullyCustomized
+{
 
     type EdgeType = RDFEdge
 

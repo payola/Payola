@@ -1,22 +1,23 @@
 package cz.payola.common.rdf
 
-import scala.collection.immutable
-
 /**
   * A RDF graph.
   */
 trait Graph
 {
-    val vertices: immutable.Seq[Vertex]
+    /** Type of the edges, that are between the vertices. */
+    type EdgeType <: Edge
 
-    val edges: immutable.Seq[Edge]
+    val vertices: Seq[EdgeType#VertexType]
+
+    val edges: Seq[EdgeType]
 
     /**
       * Returns all edges that go from the specified vertex (i.e. the vertex is a subject in the relation).
       * @param vertexURI URI of the vertex whose edges to retrieve.
       * @return The edges.
       */
-    def getOutgoingEdges(vertexURI: String): immutable.Seq[Edge] = {
+    def getOutgoingEdges(vertexURI: String): Seq[Edge] = {
         edges.filter(_.origin.uri == vertexURI)
     }
 
@@ -25,7 +26,7 @@ trait Graph
       * @param vertexURI URI of the vertex whose edges to retrieve.
       * @return The edges.
       */
-    def getIncomingEdges(vertexURI: String): immutable.Seq[Edge] = {
+    def getIncomingEdges(vertexURI: String): Seq[Edge] = {
         edges.filter {e=>
             e.destination match {
                 case v: IdentifiedVertex => v.uri == vertexURI

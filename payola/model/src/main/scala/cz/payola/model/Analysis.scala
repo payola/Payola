@@ -1,15 +1,21 @@
 package cz.payola.model
 
-import generic.ConcreteNamedModelObject
+import cz.payola.common
+import generic.{ConcreteOwnedEntity, ConcreteNamedEntity}
 import scala.collection.mutable._
+import cz.payola.scala2json.annotations.{JSONUnnamedClass, JSONTransient, JSONFieldName}
 
-class Analysis(n: String, u: User) extends cz.payola.common.model.Analysis with ConcreteNamedModelObject {
-
+@JSONUnnamedClass
+class Analysis(n: String, u: User) extends common.model.Analysis with ConcreteNamedEntity with ConcreteOwnedEntity
+{
     setName(n)
     setOwner(u)
 
+    type PluginInstanceType = PluginInstance
+
     // Plugin instances that this analysis consists of.
-    private val _pluginInstances: ArrayBuffer[PluginInstance] = new ArrayBuffer[PluginInstance]()
+    @JSONFieldName(name = "pluginInstances") private val _pluginInstanceIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
+    @JSONTransient val _pluginInstances: HashMap[String, PluginInstance] = new HashMap[String, PluginInstance]()
 
     /** Adds a new plugin instance to the plugin instances array.
      *
@@ -20,8 +26,10 @@ class Analysis(n: String, u: User) extends cz.payola.common.model.Analysis with 
     def appendPluginInstance(instance: PluginInstance) = {
         require(instance != null, "Cannot append null plugin instance!")
 
-        if (!_pluginInstances.contains(instance))
-            _pluginInstances += instance
+        if (!_pluginInstanceIDs.contains(instance.id)){
+            _pluginInstanceIDs += instance.id
+            _pluginInstances.put(instance.id,  instance)
+        }
     }
 
     /** Returns whether that particular plugin instance is contained in the plugin instances array.
@@ -33,14 +41,25 @@ class Analysis(n: String, u: User) extends cz.payola.common.model.Analysis with 
     def containsPluginInstance(instance: PluginInstance) = {
         require(instance != null, "Cannot query about null plugin instance!")
 
-        _pluginInstances.contains()
+        _pluginInstanceIDs.contains(instance.id)
     }
 
     /** Returns an immutable copy of the plugin instances array.
      *
      * @return An immutable copy of the plugin instances array.
      */
-    def pluginInstances: Array[PluginInstance] = _pluginInstances.toArray
+    def pluginInstances = {
+        val instances = List[PluginInstanceType]()
+        _pluginInstanceIDs foreach { instanceID: String =>
+            val inst: Option[PluginInstanceType] = _pluginInstances.get(instanceID)
+            if (inst.isEmpty){
+                // TODO loading from DB
+            }else{
+                inst.get :: instances
+            }
+        }
+        instances.reverse
+    }
 
     /** Removes all items in the plugin instances array by the array passed as argument.
      *
@@ -48,11 +67,15 @@ class Analysis(n: String, u: User) extends cz.payola.common.model.Analysis with 
      *
      * @throws IllegalArgumentException if the array is null.
      */
-    def pluginInstances_=(instances: Array[PluginInstance]) = {
-        require(instances != null, "Cannot assign a null array!")
+    def pluginInstances_=(instances: Seq[PluginInstance]) = {
+        require(pluginInstances != null, "Cannot assign a null array!")
 
+        _pluginInstanceIDs.clear()
         _pluginInstances.clear()
-        instances.foreach(_pluginInstances += _)
+        instances foreach{ instance =>
+            _pluginInstanceIDs += instance.id
+            _pluginInstances.put(instance.id, instance)
+        }
     }
 
     /** Removes a plugin instance from the plugin instances array.
@@ -64,7 +87,8 @@ class Analysis(n: String, u: User) extends cz.payola.common.model.Analysis with 
     def removePluginInstance(instance: PluginInstance) = {
         require(instance != null, "Cannot remove null plugin instance!")
 
-        _pluginInstances -= instance
+        _pluginInstanceIDs -= instance.id
+        _pluginInstances.remove(instance.id)
     }
 
     /** Convenience method that just calls pluginInstances_=.

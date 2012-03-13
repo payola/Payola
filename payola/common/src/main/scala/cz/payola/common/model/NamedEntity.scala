@@ -1,5 +1,6 @@
 package cz.payola.common.model
 
-trait NamedModelObject extends ModelObject {
+trait NamedEntity extends Entity
+{
     var name: String
 }
