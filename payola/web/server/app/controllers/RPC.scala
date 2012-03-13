@@ -3,6 +3,7 @@ package controllers
 import play.api.mvc._
 import java.lang.reflect.Method
 import cz.payola.scala2json.JSONSerializer
+import cz.payola.scala2json.JSONSerializerOptions._
 
 object RPC extends Controller
 {
@@ -59,8 +60,10 @@ object RPC extends Controller
         val runnableObj = obj.getField("MODULE$").get(objectName)
         val result = methodToRun.invoke(runnableObj, paramArray:_*)
 
-        val serializer = new JSONSerializer(result)
-        serializer.stringValue
+        val serializer = new JSONSerializer(result, JSONSerializerOptionDisableCustomSerialization)
+        val m = serializer.stringValue
+        // println(m)
+        m
     }
 
     private def parseParam(input: Seq[String], paramType: Class[_]) : java.lang.Object = {

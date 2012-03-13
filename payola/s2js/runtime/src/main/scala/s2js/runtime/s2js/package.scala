@@ -1,12 +1,12 @@
 package s2js.runtime.s2js
 
-import s2js.compiler.NativeJs
+import s2js.compiler.javascript
 import s2js.adapters.goog
 import s2js.runtime.scala.NotImplementedException
 
 object `package`
 {
-    @NativeJs("""
+    @javascript("""
         if (!s2js.isUndefined(anObject.__class__)) {
             return anObject.__class__;
         }
@@ -50,12 +50,12 @@ object `package`
         anObject
     }
 
-    @NativeJs("return goog.typeOf(anObject) === 'undefined';")
+    @javascript("return goog.typeOf(anObject) === 'undefined';")
     def isUndefined(anObject: Any): Boolean = false
 
-    @NativeJs("return anObject % 1 === 0;")
+    @javascript("return anObject % 1 === 0;")
     private def isInteger(anObject: Any): Boolean = false
 
-    @NativeJs("return anObject.length === 1;")
+    @javascript("return anObject.length === 1;")
     private def isChar(anObject: Any): Boolean = false
 }

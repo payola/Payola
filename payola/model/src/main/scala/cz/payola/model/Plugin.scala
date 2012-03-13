@@ -1,15 +1,20 @@
 package cz.payola.model
 
+import cz.payola._
 import cz.payola.model.parameter._
-import collection.mutable.ArrayBuffer
+import collection.mutable.{HashMap, ArrayBuffer}
+import generic.ConcreteNamedEntity
+import scala2json.annotations.{JSONUnnamedClass, JSONFieldName, JSONTransient}
 
-class Plugin (val n: String, val params: ArrayBuffer[Parameter[_]] = new ArrayBuffer[Parameter[_]]()) {
+@JSONUnnamedClass
+class Plugin(n: String) extends common.model.Plugin with ConcreteNamedEntity
+{
+    type ParameterType = Parameter[_]
+
     // Parameters. Doesn't need a setter as all we need to check is that it's not null
-    private val _parameters: ArrayBuffer[Parameter[_]] = params
-    require(params != null, "Cannot pass null params array to Plugin's constructor!")
+    @JSONFieldName(name = "parameters") private val _parameterIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
+    @JSONTransient private val _cachedParameters: HashMap[String, Parameter[_]] = new HashMap[String, Parameter[_]]()
 
-    // Plugin's name. Mustn't be null or empty
-    private var _name: String = null
     setName(n)
 
     /** Adds a new parameter to the parameter list.
@@ -18,10 +23,12 @@ class Plugin (val n: String, val params: ArrayBuffer[Parameter[_]] = new ArrayBu
      *
      * @throws IllegalArgumentException if the parameter is null.
      */
-    def addParameter(p: Parameter[_]) = {
+    def addParameter(p: ParameterType) = {
         require(p != null, "Cannot add null parameter!")
-        if (!containsParameter(p))
-            _parameters += p
+        if (!containsParameter(p)){
+            _parameterIDs += p.id
+            _cachedParameters.put(p.id, p)
+        }
     }
 
     /** Checks whether the parameter is in the parameter list or not.
@@ -30,32 +37,46 @@ class Plugin (val n: String, val params: ArrayBuffer[Parameter[_]] = new ArrayBu
      *
      * @return True or false.
      */
-    def containsParameter(p: Parameter[_]): Boolean = _parameters.contains(p)
+    def containsParameter(p: ParameterType): Boolean = _parameterIDs.contains(p.id)
 
-    /** Returns the plugin's name.
-     *
-     * @return Plugin's name.
-     */
-    def name: String = _name
-
-    /** Sets the plugin name.
-     *
-     * @param newName New name.
-     *
-     * @throws IllegalArgumentException if the new name is null or empty.
-     */
-    def name_=(newName: String) = {
-        require(newName != null, "Cannot set plugin's name to null!")
-        require(newName != "", "Cannot set plugin's name to empty string!")
-
-        _name = newName
+    /** Returns a parameter at index.
+      *
+      * @param index Index of the parameter.
+      * @return Parameter at index.
+      */
+    def parameterAtIndex(index: Int): ParameterType = {
+        require(index >= 0 && index < parameterCount, "Parameter index out of bounds - " + index)
+        val opt: Option[Parameter[_]] = _cachedParameters.get(_parameterIDs(index))
+        if (opt.isEmpty){
+            // TODO Load from DB
+            null
+        }else{
+            opt.get
+        }
     }
 
+    /** Returns number of parameters.
+      *
+      * @return Number of parameters.
+      */
+    def parameterCount: Int = _parameterIDs.size
+    
     /** Returns an immutable copy of the parameter array.
      *
      * @return Immutable copy of the parameter array.
      */
-    def parameters: Array[Parameter[_]] = params.toArray
+    def parameters = {
+        val params = List[ParameterType]()
+        _parameterIDs foreach { paramID: String =>
+            val p: Option[ParameterType] = _cachedParameters.get(paramID)
+            if (p.isEmpty){
+                // TODO loading from DB
+            }else{
+                p.get :: params
+            }
+        }
+        params.reverse
+    }
 
     /** Removes a parameter from the parameter list.
      *
@@ -64,17 +85,10 @@ class Plugin (val n: String, val params: ArrayBuffer[Parameter[_]] = new ArrayBu
      * @throws IllegalArgumentException if the plugin's parameter array
      *             doesn't contain this parameter.
      */
-    def removeParameter(p: Parameter[_]) = {
-        require(_parameters.contains(p), "Cannot remove a parameter that isn't a member of this plugin!")
-        _parameters -= p
+    def removeParameter(p: ParameterType) = {
+        require(containsParameter(p), "Cannot remove a parameter that isn't a member of this plugin!")
+        _parameterIDs -= p.id
+        _cachedParameters.remove(p.id)
     }
-
-    /** Convenience method that just calls name_=.
-     *
-     * @param n The new user's name.
-     *
-     * @throws IllegalArgumentException if the new name is null or empty.
-     */
-    def setName(newName: String) = name_=(newName)
 
 }

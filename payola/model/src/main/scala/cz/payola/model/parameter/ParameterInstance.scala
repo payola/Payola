@@ -1,11 +1,20 @@
 package cz.payola.model.parameter
 
+import cz.payola._
+import model.generic.ConcreteEntity
+import scala2json.annotations.JSONUnnamedClass
+import scala2json.traits.JSONSerializationCustomFields
 import sun.reflect.generics.reflectiveObjects.NotImplementedException
 
 /** A protected class that represents the parameter instance with an actual value. As this,
  * it is abstract, see subclasses.
  */
-abstract class ParameterInstance[T](protected var _value: T){
+
+@JSONUnnamedClass
+abstract class ParameterInstance[A](val parameter: Parameter[A], var value: A) extends common.model.ParameterInstance[A]
+    with ConcreteEntity with JSONSerializationCustomFields
+{
+    type ParameterType = Parameter[A]
 
     /** Gets a boolean value of the parameter.
      *
@@ -13,6 +22,28 @@ abstract class ParameterInstance[T](protected var _value: T){
      */
     def booleanValue: Boolean = {
         throw new NotImplementedException()
+    }
+
+    /** Return the names of the fields.
+      *
+      * @return Iterable collection for the field names.
+      */
+    def fieldNamesForJSONSerialization(ctx: Any): scala.collection.Iterable[String] = {
+        return List("parameter", "value")
+    }
+
+    /** Return the value for the field named @key.
+      *
+      * @param key Value for the field called @key.
+      *
+      * @return The value.
+      */
+    def fieldValueForKey(ctx: Any, key: String): Any = {
+        key match {
+            case "parameter" => parameter.id
+            case "value" => value
+            case _ => null
+        }
     }
 
     /** Gets a float value of the parameter.
@@ -63,12 +94,6 @@ abstract class ParameterInstance[T](protected var _value: T){
         throw new NotImplementedException()
     }
 
-    /** Only a convenience method that calls value_=().
-     *
-     *  @param newVal The new value.
-     */
-    def setValue(newVal: T) = value_=(newVal)
-
     /** Gets a string value of the parameter.
      *
      *  @return String value, or "" if the value is null.
@@ -77,18 +102,10 @@ abstract class ParameterInstance[T](protected var _value: T){
         throw new NotImplementedException()
     }
 
-    /** Value getter.
-     *
-     * @return The value.
-     */
-    def value: T = _value
-
-    /** Value setter.
-     *
-     * @param newVal The new value.
-     */
-    def value_=(newVal: T) = {
-        _value = newVal
-    }
+    /** Only a convenience method that calls value_=().
+      *
+      * @param newVal The new value.
+      */
+    def setValue(newVal: A) = value = newVal
 }
 

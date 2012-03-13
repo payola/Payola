@@ -1,11 +1,22 @@
 package cz.payola.model.parameter
 
-abstract  class Parameter[T](private val n: String, private val defaultValue: T) {
-    /** Parameter name. */
-    private var _name: String = null
+import cz.payola._
+import model.generic.ConcreteNamedEntity
+import scala2json.annotations.JSONUnnamedClass
+
+@JSONUnnamedClass
+abstract class Parameter[A](n: String, private val defaultValue: A) extends common.model.Parameter[A]
+    with ConcreteNamedEntity
+{
     setName(n)
 
-    def createInstance(value: Option[T] = null) = {
+    /** Creates a new instance of the particular parameter with value @value or
+      * defaultValue if value is empty or null
+      *
+      * @param value Value. Can be omitted, then default value is used.
+      * @return Instance of this parameter.
+      */
+    def createInstance(value: Option[A] = null) = {
         if (value == null || value.isEmpty)
             instanceWithValue(defaultValue)
         else
@@ -13,38 +24,11 @@ abstract  class Parameter[T](private val n: String, private val defaultValue: T)
     }
 
     /** Returns a new ParameterInstance instance (of its subclass, to be precise) with the value passed
-     * as a parameter of this method.
-     *
-     * @param value The value.
-     *
-     * @return New ParameterInstance instance.
-     */
-    protected def instanceWithValue(value: T): ParameterInstance[T]
-
-    /** Name getter.
-     *
-     * @return Name of the parameter.
-     */
-    def name: String = _name
-
-    /** Name setter.
-     *
-     * @param newName New name.
-     *
-     * @throws IllegalArgumentException if newName is null or empty.
-     */
-    def name_=(newName: String) = {
-        require(newName != null && newName != "", "Cannot set null or empty name!")
-        _name = newName
-    }
-
-    /** Convenience method that just calls name_=()
-     *
-     * @param newName New name.
-     *
-     * @throws IllegalArgumentException if newName is null or empty.
-     */
-    def setName(newName: String) = name_=(newName)
-
-
+      * as a parameter of this method.
+      *
+      * @param value The value.
+      *
+      * @return New ParameterInstance instance.
+      */
+    protected def instanceWithValue(value: A): ParameterInstance[A]
 }

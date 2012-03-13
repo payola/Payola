@@ -1,12 +1,12 @@
 package s2js.runtime.scala.collection
 
-import s2js.compiler.NativeJs
+import s2js.compiler.javascript
 
 trait SeqCompanion
 {
     def empty: Seq
 
-    @NativeJs("""
+    @javascript("""
         var a = self.empty();
         a.internalJsArray = jsArray;
         return a;

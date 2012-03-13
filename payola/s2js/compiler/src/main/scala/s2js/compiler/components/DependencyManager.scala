@@ -78,6 +78,8 @@ class DependencyManager(private val packageDefCompiler: PackageDefCompiler)
       * @param classDef The ClassDef whose structure should be retrieved.
       */
     private def retrieveClassDefStructure(classDef: Global#ClassDef) {
+        addProvidedSymbol(classDef.symbol)
+
         // Remote objects aren't compiled
         if (packageDefCompiler.getSymbolAnnotations(classDef.symbol, "remote").isEmpty) {
             val name = getStructureKey(classDef.symbol)
@@ -93,7 +95,6 @@ class DependencyManager(private val packageDefCompiler: PackageDefCompiler)
 
             // Resolve the dependencies. The class depends on parent classes that are currently compiled and requires
             // the other parent classes.
-            addProvidedSymbol(classDef.symbol)
             classDef.impl.parents.foreach {parentClass =>
                 if (!packageDefCompiler.symbolIsInternal(parentClass.symbol)) {
                     if (packageDefCompiler.symbolIsCompiled(parentClass.symbol)) {
