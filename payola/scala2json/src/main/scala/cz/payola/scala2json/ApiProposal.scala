@@ -29,16 +29,19 @@ abstract class SerializationRule
 /**
   *
   * @param serializeAsClass The class that should be used to obtain the field names from.
-  * @param transientFields The fields that are skipped during the serialization.
   * @param fieldAliases Allows fields to use different names.
+  * @param transientFields The fields that are skipped during the serialization.
+  * @param additionalFields The additional fields and their getters. The getter is a function taking the object that is
+  *     being serialized and returning the value the additional field is supposed to have.
   */
 case class BasicSerializationRule(
     serializeAsClass: Option[Class[_]] = None,
-    transientFields: Option[Seq[String]] = None,
-    fieldAliases: Option[Map[String, String]] = None
+    fieldAliases: Map[String, String] = Map.empty[String, String],
+    transientFields: Seq[String] = Seq.empty[String],
+    additionalFields: Map[String, Any => Any] = Map.empty[String, Any => Any]
 ) extends SerializationRule
 
-case class CustomSerializationRule(customSerializer: ((Serializer, Any) => String))
+case class CustomSerializationRule(customSerializer: ((Serializer, Any) => String)) extends SerializationRule
 
 
 
@@ -52,7 +55,7 @@ abstract class SerializationClass
   * Represents class of non-generic objects (User, Group...)
   * @param objectClass Class of the object.
   */
-case class SimpleSerializationClass(objectClass: Class[_])
+case class SimpleSerializationClass(objectClass: Class[_]) extends SerializationClass
 {
     def isClassOf(anObject: Any): Boolean = {
         // anObject.getclass <: objectClass
@@ -66,6 +69,7 @@ case class SimpleSerializationClass(objectClass: Class[_])
   * @param itemSerializationClass Serialization class of the items.
   */
 case class SeqSerializationClass(seqClass: Class[_], itemSerializationClass: SerializationClass)
+    extends SerializationClass
 {
     def isClassOf(anObject: Any): Boolean = {
         // anObject.getclass <: seqClass
@@ -80,7 +84,9 @@ case class SeqSerializationClass(seqClass: Class[_], itemSerializationClass: Ser
   * @param keySerializationClass Serialization class of the keys.
   * @param valueSerializationClass Serialization class of the values.
   */
-case class MapSerializationClass(mapClass: Class[_], keySerializationClass: SerializationClass, valueSerializationClass: SerializationClass)
+case class MapSerializationClass(
+    mapClass: Class[_], keySerializationClass: SerializationClass, valueSerializationClass: SerializationClass)
+    extends SerializationClass
 {
     def isClassOf(anObject: Any): Boolean = {
         // anObject.getclass <: seqClass
