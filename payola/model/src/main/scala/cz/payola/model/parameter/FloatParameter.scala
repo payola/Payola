@@ -1,9 +1,7 @@
 package cz.payola.model.parameter
 
 import cz.payola.common
-import cz.payola.scala2json.annotations.JSONUnnamedClass
 
-@JSONUnnamedClass
 protected class FloatParameterInstance(parameter: FloatParameter, value: Float) extends
 ParameterInstance[Float](parameter, value)
 {
@@ -69,7 +67,6 @@ ParameterInstance[Float](parameter, value)
     override def stringValue: String = value.toString
 }
 
-@JSONUnnamedClass
 class FloatParameter(n: String, defaultValue: Float) extends
     Parameter[Float](n, defaultValue) with common.model.parameters.FloatParameter
 {

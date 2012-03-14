@@ -5,12 +5,9 @@ import collection.immutable
 
 import java.io.StringReader
 import java.security.MessageDigest
-import cz.payola.scala2json.annotations._
 import cz.payola.common._
 import com.hp.hpl.jena.rdf.model.{StmtIterator, Resource, ResIterator, ModelFactory, Property}
 import annotation.target.field
-import cz.payola.scala2json.{JSONSerializerOptions, JSONSerializer}
-import cz.payola.scala2json.traits.{JSONSerializationFullyCustomized, JSONSerializationCustomFields}
 import rdf.Graph
 
 object RDFGraph {
@@ -114,11 +111,10 @@ object RDFGraph {
 
 import RDFGraph._
 
-@JSONPoseableClass(otherClass = classOf[Graph])
 class RDFGraph(
-    @(JSONConcreteArrayClass @field)(arrayClass = classOf[immutable.List[_]]) val vertices: List[RDFNode],
-    @(JSONConcreteArrayClass @field)(arrayClass = classOf[immutable.List[_]]) val edges: List[RDFEdge])
-    extends Graph with JSONSerializationFullyCustomized
+    val vertices: List[RDFNode],
+    val edges: List[RDFEdge])
+    extends Graph
 {
 
     type EdgeType = RDFEdge
@@ -130,13 +126,13 @@ class RDFGraph(
       * This field is transient because we need inverted hash map. For the ease of adding
       * namespaces, two hash maps are kept - _namespaces and _invertedNamespaces.
       */
-    @JSONTransient private val _namespaces: HashMap[String, String] = new HashMap[String, String]()
+    private val _namespaces: HashMap[String, String] = new HashMap[String, String]()
 
 
     /** _invertedNamespaces is a hash map that contains pairs [MD5-hash, namespace].
       * This field is serialized as 'namespaces'.
       */
-    @JSONTransient @JSONFieldName(name = "namespaces") private val _invertedNamespaces: HashMap[String, String] = new HashMap[String, String]()
+    private val _invertedNamespaces: HashMap[String, String] = new HashMap[String, String]()
 
     /** Computes a MD5 hash of a string.
       * 
@@ -167,29 +163,6 @@ class RDFGraph(
             }
         }
     }
-
-
-    /** Should return JSON representation of the object.
-      *
-      * @param options Options for the serialization. @see JSONSerializerOptions
-      *
-      * @return JSON representation of the object.
-      */
-    def JSONValue(ctx: Any, options: Int): String = {
-        _populateNamespaces
-        
-        val hash: HashMap[String, Any] = new HashMap[String, Any]()
-        hash.put("__class__", this.getClass.getCanonicalName)
-        
-        hash.put("vertices", vertices)
-        hash.put("edges", edges)
-        hash.put("namespaces", _invertedNamespaces)
-
-        val serializer = new JSONSerializer(hash, options)
-        serializer.context = this
-        serializer.stringValue
-    }
-    
 
     /** Returns the hashed namespace. This method is used in RDFEdge classes
       * during serialization.

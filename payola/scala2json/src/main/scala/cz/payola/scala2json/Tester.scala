@@ -35,10 +35,6 @@ class Group(val name: String){
 
 
 object Tester {
-    def ancestry(clazz : Class[_]) : List[Class[_]] =
-        if (clazz == classOf[AnyRef] || !classOf[AnyRef].isAssignableFrom(clazz)) List(clazz)
-        else clazz :: ancestry(clazz.getSuperclass);
-    
     def main(args: Array[String]){
         // Test cycles
         val u: User = new User("Franta")
@@ -46,14 +42,14 @@ object Tester {
         u.groups += g
         g.users += u
 
-        val originalClass: Class[_] = Class.forName("GroupTrait$class")
+        val originalClass: Class[_] = classOf[GroupTrait]
         val originalFields: Array[Field] = originalClass.getDeclaredFields
         println(originalFields.length)
         originalFields foreach { f: Field =>
             println(f.getName)
         }
         
-        println(ancestry(originalClass))
+        println(originalClass)
 
 
         // Create the test object and serialize it

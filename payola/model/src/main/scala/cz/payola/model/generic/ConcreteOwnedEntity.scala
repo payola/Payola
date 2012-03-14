@@ -2,14 +2,13 @@ package cz.payola.model.generic
 
 import cz.payola.model
 import cz.payola.common.model.OwnedEntity
-import cz.payola.scala2json.annotations._
 
 trait ConcreteOwnedEntity extends ConcreteEntity with OwnedEntity
 {
     type UserType = model.User
 
-    @JSONFieldName(name = "owner") protected var _ownerID: String = ""
-    @JSONTransient protected var _owner: UserType = null
+    protected var _ownerID: String = ""
+    protected var _owner: UserType = null
 
     /** Returns the owner.
       *

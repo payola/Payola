@@ -3,9 +3,7 @@ package cz.payola.model
 import cz.payola.common
 import generic.{ConcreteOwnedEntity, ConcreteNamedEntity}
 import scala.collection.mutable._
-import cz.payola.scala2json.annotations.{JSONUnnamedClass, JSONTransient, JSONFieldName}
 
-@JSONUnnamedClass
 class Analysis(n: String, u: User) extends common.model.Analysis with ConcreteNamedEntity with ConcreteOwnedEntity
 {
     setName(n)
@@ -14,8 +12,8 @@ class Analysis(n: String, u: User) extends common.model.Analysis with ConcreteNa
     type PluginInstanceType = PluginInstance
 
     // Plugin instances that this analysis consists of.
-    @JSONFieldName(name = "pluginInstances") private val _pluginInstanceIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
-    @JSONTransient val _pluginInstances: HashMap[String, PluginInstance] = new HashMap[String, PluginInstance]()
+    private val _pluginInstanceIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
+    val _pluginInstances: HashMap[String, PluginInstance] = new HashMap[String, PluginInstance]()
 
     /** Adds a new plugin instance to the plugin instances array.
      *

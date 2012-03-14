@@ -1,6 +1,6 @@
 package cz.payola.model
 
-import cz.payola.scala2json.{JSONSerializer, JSONSerializerOptions}
+import cz.payola.scala2json.JSONSerializer
 
 object Test {
     def main(args: Array[String]){
@@ -11,10 +11,8 @@ object Test {
         val member: User = new User("member")
         g.addMember(member)
         
-        val serializer = new JSONSerializer(u, JSONSerializerOptions.JSONSerializerOptionSkipObjectIDs | JSONSerializerOptions.JSONSerializerOptionPrettyPrinting)
-        println(serializer.stringValue)
-
-        val groupSerializer = new JSONSerializer(g, JSONSerializerOptions.JSONSerializerOptionSkipObjectIDs | JSONSerializerOptions.JSONSerializerOptionPrettyPrinting)
-        println(groupSerializer.stringValue)
+        val serializer = new JSONSerializer()
+        println(serializer.serialize(u))
+        println(serializer.serialize(g))
     }
 }

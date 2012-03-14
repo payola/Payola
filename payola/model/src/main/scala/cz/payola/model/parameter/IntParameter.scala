@@ -1,9 +1,7 @@
 package cz.payola.model.parameter
 
 import cz.payola.common
-import cz.payola.scala2json.annotations.JSONUnnamedClass
 
-@JSONUnnamedClass
 protected class IntParameterInstance(parameter: IntParameter, value: Int) extends
 ParameterInstance[Int](parameter, value)
 {
@@ -69,7 +67,6 @@ ParameterInstance[Int](parameter, value)
     override def stringValue: String = value.toString
 }
 
-@JSONUnnamedClass
 class IntParameter(n: String, defaultValue: Int) extends
     Parameter[Int](n, defaultValue) with common.model.parameters.IntParameter
 {

@@ -4,16 +4,14 @@ import cz.payola._
 import cz.payola.model.parameter._
 import collection.mutable.{HashMap, ArrayBuffer}
 import generic.ConcreteNamedEntity
-import scala2json.annotations.{JSONUnnamedClass, JSONFieldName, JSONTransient}
 
-@JSONUnnamedClass
 class Plugin(n: String) extends common.model.Plugin with ConcreteNamedEntity
 {
     type ParameterType = Parameter[_]
 
     // Parameters. Doesn't need a setter as all we need to check is that it's not null
-    @JSONFieldName(name = "parameters") private val _parameterIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
-    @JSONTransient private val _cachedParameters: HashMap[String, Parameter[_]] = new HashMap[String, Parameter[_]]()
+    private val _parameterIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
+    private val _cachedParameters: HashMap[String, Parameter[_]] = new HashMap[String, Parameter[_]]()
 
     setName(n)
 

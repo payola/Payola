@@ -2,9 +2,7 @@ package cz.payola.model
 
 import generic.{SharedAnalysesOwner, ConcreteNamedEntity}
 import scala.collection.mutable._
-import cz.payola.scala2json.annotations._
 
-@JSONUnnamedClass
 class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEntity with SharedAnalysesOwner {
     setName(n)
 
@@ -18,16 +16,16 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEnti
     // Analysis owned by the user and analysis that are shared directly to the user
     // To support lazy-loading, only AnalysesIDs are filled at first and when requesting
     // a particular analysis, it is loaded and stored in the HashMap cache.
-    @JSONFieldName( name = "ownedAnalyses" )  val _ownedAnalysesIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
-    @JSONTransient private val _cachedAnalyses: HashMap[String, AnalysisType] = new HashMap[String,AnalysisType]()
+    val _ownedAnalysesIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
+    private val _cachedAnalyses: HashMap[String, AnalysisType] = new HashMap[String,AnalysisType]()
 
 
     // Groups owned by the user and groups the user is a member in
     // To support lazy-loading, only GroupIDs are filled at first and when requesting
     // a particular group, it is loaded and stored in the HashMap cache.
-    @JSONFieldName( name = "ownedGroups" ) private val _ownedGroupIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
-    @JSONFieldName( name = "memberGroups" ) private val _memberGroupIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
-    @JSONTransient private val _cachedGroups: HashMap[String, Group] = new HashMap[String,Group]()
+    private val _ownedGroupIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
+    private val _memberGroupIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
+    private val _cachedGroups: HashMap[String, Group] = new HashMap[String,Group]()
 
     /** Internal method which creates List of groups from IDs. It uses the user's cache
       * as well as loading from the data layer if the group hasn't been cached yet.

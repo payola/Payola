@@ -1,11 +1,10 @@
 package cz.payola.model.generic
 
 import cz.payola.common.model.NamedEntity
-import cz.payola.scala2json.annotations.JSONFieldName
 
 trait ConcreteNamedEntity extends ConcreteEntity with NamedEntity
 {
-    @JSONFieldName(name = "name") protected var _name: String = null
+    protected var _name: String = null
 
     /** Returns the object's name.
       *

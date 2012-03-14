@@ -3,9 +3,7 @@ package cz.payola.model
 import collection.mutable._
 import cz.payola._
 import generic.{SharedAnalysesOwner, ConcreteOwnedEntity, ConcreteNamedEntity}
-import cz.payola.scala2json.annotations._
 
-@JSONUnnamedClass
 class Group (nameStr: String, user: User) extends common.model.Group with ConcreteNamedEntity with ConcreteOwnedEntity with SharedAnalysesOwner
 {
     setName(nameStr)
@@ -15,8 +13,8 @@ class Group (nameStr: String, user: User) extends common.model.Group with Concre
 
     // Members. Initially only IDs are loaded, actual members are loaded from the
     // data layer as needed
-    @JSONFieldName(name = "members") private val _memberIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
-    @JSONTransient private val _members: HashMap[String, User] = new HashMap[String, User]()
+    private val _memberIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
+    private val _members: HashMap[String, User] = new HashMap[String, User]()
 
     user.addOwnedGroup(this)
 

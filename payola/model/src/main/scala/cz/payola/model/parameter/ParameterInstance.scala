@@ -2,17 +2,14 @@ package cz.payola.model.parameter
 
 import cz.payola._
 import model.generic.ConcreteEntity
-import scala2json.annotations.JSONUnnamedClass
-import scala2json.traits.JSONSerializationCustomFields
 import sun.reflect.generics.reflectiveObjects.NotImplementedException
 
 /** A protected class that represents the parameter instance with an actual value. As this,
  * it is abstract, see subclasses.
  */
 
-@JSONUnnamedClass
 abstract class ParameterInstance[A](val parameter: Parameter[A], var value: A) extends common.model.ParameterInstance[A]
-    with ConcreteEntity with JSONSerializationCustomFields
+    with ConcreteEntity
 {
     type ParameterType = Parameter[A]
 
@@ -22,28 +19,6 @@ abstract class ParameterInstance[A](val parameter: Parameter[A], var value: A) e
      */
     def booleanValue: Boolean = {
         throw new NotImplementedException()
-    }
-
-    /** Return the names of the fields.
-      *
-      * @return Iterable collection for the field names.
-      */
-    def fieldNamesForJSONSerialization(ctx: Any): scala.collection.Iterable[String] = {
-        return List("parameter", "value")
-    }
-
-    /** Return the value for the field named @key.
-      *
-      * @param key Value for the field called @key.
-      *
-      * @return The value.
-      */
-    def fieldValueForKey(ctx: Any, key: String): Any = {
-        key match {
-            case "parameter" => parameter.id
-            case "value" => value
-            case _ => null
-        }
     }
 
     /** Gets a float value of the parameter.

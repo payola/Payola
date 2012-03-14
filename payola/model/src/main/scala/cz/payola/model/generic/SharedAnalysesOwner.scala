@@ -8,8 +8,8 @@ trait SharedAnalysesOwner{
 
     // Shared analysis. Initially only IDs are loaded, actual shares are loaded from the
     // data layer as needed
-    @JSONFieldName( name = "sharedAnalyses" ) private val _sharedAnalysesIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
-    @JSONTransient private val _cachedAnalysisShares: HashMap[String, AnalysisShare] = new HashMap[String, AnalysisShare]()
+    private val _sharedAnalysesIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
+    private val _cachedAnalysisShares: HashMap[String, AnalysisShare] = new HashMap[String, AnalysisShare]()
 
 
     /** Adds an analysis share to the group.

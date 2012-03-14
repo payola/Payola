@@ -1,9 +1,7 @@
 package cz.payola.model.parameter
 
 import cz.payola.common
-import cz.payola.scala2json.annotations.JSONUnnamedClass
 
-@JSONUnnamedClass
 protected class BooleanParameterInstance(parameter: BooleanParameter, value: Boolean) extends
 ParameterInstance[Boolean](parameter, value)
 {
@@ -80,7 +78,6 @@ ParameterInstance[Boolean](parameter, value)
     }
 }
 
-@JSONUnnamedClass
 class BooleanParameter(n: String, defaultValue: Boolean) extends
     Parameter[Boolean](n, defaultValue) with common.model.parameters.BooleanParameter
 {
