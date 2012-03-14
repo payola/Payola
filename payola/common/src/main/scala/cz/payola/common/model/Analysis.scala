@@ -5,5 +5,7 @@ trait Analysis extends NamedEntity with OwnedEntity
     /** Type of the plugin instances the analysis consists of. */
     type PluginInstanceType <: PluginInstance
 
-    def pluginInstances: Seq[PluginInstanceType]
+    protected var _pluginInstances: Seq[PluginInstanceType]
+
+    def pluginInstances = _pluginInstances
 }

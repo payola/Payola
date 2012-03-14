@@ -5,5 +5,7 @@ trait OwnedEntity extends Entity
     /** Type of the user who owns the entity. */
     type UserType <: User
 
-    def owner: UserType
+    protected val _owner: UserType
+    
+    def owner = _owner
 }

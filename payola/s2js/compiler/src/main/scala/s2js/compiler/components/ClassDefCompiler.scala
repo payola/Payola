@@ -493,8 +493,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
       */
     private def compileSelect(select: Global#Select, isSubSelect: Boolean = false, isInsideApply: Boolean = false) {
         val subSelectToken = if (isSubSelect) "." else ""
-        val nameString = packageDefCompiler.getSymbolLocalJsName(select.symbol)
-        val name = if (nameString.endsWith("_$eq")) nameString.stripSuffix("_$eq") else nameString
+        var name = packageDefCompiler.getSymbolLocalJsName(select.symbol)
 
         select match {
             case Select(qualifier, _) if selectIsIgnored(select) => {
@@ -507,32 +506,30 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
             case select@Select(qualifier, _) if symbolIsOperator(select.symbol) => {
                 compileOperator(qualifier, None, name)
             }
-            case select if selectIsPackageSelectChain(select) &&
+            case _ if selectIsPackageSelectChain(select) &&
                 packageDefCompiler.symbolPackageReplacement(select.symbol).isDefined => {
                 val name = packageDefCompiler.getSymbolJsName(select.symbol)
                 buffer += name + (if (name.isEmpty) "" else subSelectToken)
             }
+            case _ if selectIsOnRemote(select) && select.hasSymbolWhich(s => s.isMethod) => {
+                compileRpcCall(select, select.tpe, Nil)
+            }
             case Select(qualifier, _) => {
-                val isMethodCall = !isInsideApply && select.hasSymbolWhich(s => s.isMethod && !s.isGetter)
-                if (isMethodCall && selectIsOnRemote(select)) {
-                    compileRpcCall(select, select.tpe, Nil)
-                } else {
-                    qualifier match {
-                        case subSelect@Select(_, _) => compileSelect(subSelect, true)
-                        case _ => {
-                            compileAst(qualifier)
-                            buffer += "."
-                        }
+                qualifier match {
+                    case subSelect@Select(_, _) => compileSelect(subSelect, true)
+                    case _ => {
+                        compileAst(qualifier)
+                        buffer += "."
                     }
-                    buffer += name
-
-                    // If the select is actually a method call, parentheses has to be added after the name.
-                    if (isMethodCall) {
-                        buffer += "()"
-                    }
-
-                    buffer += subSelectToken
                 }
+                buffer += (if (select.hasSymbolWhich(s => s.isSetter)) name.stripSuffix("_$eq") else name)
+
+                // If the select is actually a method call, parentheses has to be added after the name.
+                if (!isInsideApply && select.hasSymbolWhich(s => s.isMethod && !s.isGetter)) {
+                    buffer += "()"
+                }
+
+                buffer += subSelectToken
             }
         }
 
@@ -553,8 +550,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
             case Apply(s@Select(q, name), args) if symbolIsOperator(s.symbol) => {
                 compileOperator(q, Some(args.head), name.toString)
             }
-            case Apply(select@Select(qualifier, name), args) if name.toString.endsWith("_$eq") => {
-                // TODO support getters and setters.
+            case Apply(select@Select(_, _), args) if select.symbol.isSetter => {
                 compileAssign(select, args.head)
             }
             case Apply(Select(_: Super, name), _) => {
@@ -613,7 +609,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         var realParameters = parameters
         var successCallback: Option[Global#Tree] = None
         var errorCallback: Option[Global#Tree] = None
-        
+
         // Check the parameter values.
         if (isAsync) {
             val callbacks = parameters.takeRight(2)
@@ -622,7 +618,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
             requiredTypes += successCallback.get.tpe.typeArgs.head
             realParameters = parameters.dropRight(2)
         }
-        
+
         // Add the required dependencies.
         packageDefCompiler.dependencyManager.addRequiredSymbol("s2js.RPCWrapper")
         requiredTypes.foreach {tpe =>
@@ -1017,8 +1013,6 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
             member.hasAccessorFlag || // A generated accesor method
             member.nameString.matches("""^.*\$default\$[0-9]+$""") // A member generated for default parameter value
     }
-
-
 
     /**
       * Returns whether the type is a primitive type (either scala.AnyVal or java.lang.String).

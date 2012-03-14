@@ -11,15 +11,35 @@ trait User extends NamedEntity
     /** Type of the analysis shares that are associated with the user. */
     type AnalysisShareType <: AnalysisShare
 
-    var email: String
+    protected var _email: String
 
-    var password: String
+    protected var _password: String
 
-    def ownedGroups: Seq[GroupType]
+    protected var _ownedGroups: Seq[GroupType]
 
-    def memberGroups: Seq[GroupType]
+    protected var _memberGroups: Seq[GroupType]
 
-    def ownedAnalyses: Seq[AnalysisType]
+    protected var _ownedAnalyses: Seq[AnalysisType]
 
-    def sharedAnalyses: Seq[AnalysisShareType]
+    protected var _sharedAnalyses: Seq[AnalysisShareType]
+
+    def email = _email
+
+    def email_=(value: String) {
+        _email = value
+    }
+
+    def password = _password
+
+    def password_=(value: String) {
+        _password = value
+    }
+
+    def ownedGroups = _ownedGroups
+
+    def memberGroups = _memberGroups
+
+    def ownedAnalyses = _ownedAnalyses
+
+    def sharedAnalyses = _sharedAnalyses
 }

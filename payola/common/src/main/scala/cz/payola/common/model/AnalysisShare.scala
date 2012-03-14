@@ -12,7 +12,15 @@ trait AnalysisShare extends Entity
     /** Type of the analysis that is being share. */
     type AnalysisType <: Analysis
 
-    def analysis: Analysis
+    protected val _analysis: Analysis
 
-    var privilege: Int
+    protected var _privilege: Int
+
+    def analysis = _analysis
+
+    def privilege = _privilege
+
+    def privilege_=(value: Int) {
+        _privilege = value
+    }
 }
