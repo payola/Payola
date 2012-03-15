@@ -7,8 +7,12 @@ trait PluginInstance extends Entity
 
     /** Type of the parameter instances the plugin instance. */
     type ParameterInstanceType <: ParameterInstance[_]
-    
-    def plugin: PluginType
 
-    def parameterInstances: Seq[ParameterInstanceType]
+    protected val _plugin: PluginType
+
+    protected var _parameterInstances: Seq[ParameterInstanceType]
+    
+    def plugin = _plugin
+
+    def parameterInstances = _parameterInstances
 }

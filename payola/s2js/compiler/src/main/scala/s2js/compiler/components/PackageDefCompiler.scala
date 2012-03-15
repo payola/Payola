@@ -5,6 +5,7 @@ import scala.tools.nsc.Global
 import scala.collection.mutable
 import scala.collection.mutable.LinkedHashMap
 import scala.tools.nsc.io.AbstractFile
+import reflect.NoType
 
 /** A compiler of PackageDef objects */
 class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFile, val packageDef: Global#PackageDef)
@@ -14,6 +15,65 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
 
     /** An unique id generator. */
     private var uniqueId = 0;
+
+    /**
+      * Compiles the PackageDef.
+      * @return The compiled JavaScript source.
+      */
+    def compile(): String = {
+        val buffer = new mutable.ListBuffer[String]
+
+        // Retrieve the PackageDef structure.
+        val structure = dependencyManager.getPackageDefStructure
+
+        // Check the structure.
+        checkPackageDefStructure(structure)
+
+        // Compile the ClassDef object in the topological order.
+        val graph = structure.classDefDependencyGraph
+        while (graph.nonEmpty && graph.exists(_._2.isEmpty)) {
+            // Sort the compilable ClassDef objects by their keys, so the result is "deterministic".
+            val classDefKey = graph.toArray.filter(_._2.isEmpty).map(_._1).sortBy(x => x).head
+
+            // Compile the ClassDef.
+            val classDef = structure.classDefMap.get(classDefKey).get
+            if (symbolIsCompiled(classDef.symbol)) {
+                ClassDefCompiler(this, classDef).compile(buffer)
+            }
+
+            // Remove the compiled ClassDef from dependencies of all ClassDef objects, that aren't compiled yet. Also 
+            // remove it from the working sets.
+            graph.foreach(_._2 -= classDefKey)
+            graph -= classDefKey
+            structure.classDefMap -= classDefKey
+        }
+
+        // If there are some ClassDef objects left, then there is a cyclic dependency.
+        if (graph.nonEmpty) {
+            throw new ScalaToJsException("Cyclic dependency in the class/object dependency graph involving %s.".format(
+                graph.head._1
+            ))
+        }
+
+        // Compile the dependencies
+        dependencyManager.compileDependencies(buffer)
+
+        buffer.mkString
+    }
+
+    /**
+      * Checks whether the package structure doesn't violate any preconditions.
+      * @param structure The structure to check.
+      */
+    def checkPackageDefStructure(structure: PackageDefStructure) {
+        // Check whether the async methods on remote objects are declared properly.
+        structure.remoteObjects.foreach {classDef =>
+            val methods = classDef.impl.body.collect { case defDef: Global#DefDef => defDef }
+            methods.filter(v => symbolHasAnnotation(v.symbol, "s2js.compiler.async")).foreach {defDef =>
+                checkAsyncMethod(defDef)
+            }
+        }
+    }
 
     /**
       * Returns whether the specified symbol is an internal symbol that mustn't be used in the JavaScript.
@@ -63,6 +123,16 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
       */
     def getSymbolAnnotations(symbol: Global#Symbol, annotationTypeName: String): List[Global#AnnotationInfo] = {
         symbol.annotations.filter(_.atp.toString == annotationTypeName)
+    }
+
+    /**
+      * Returns whether the symbol has the specified annotation.
+      * @param symbol The symbol to check.
+      * @param annotationTypeName Name of the annotation type.
+      * @return True if the symbol has the specified annotation.
+      */
+    def symbolHasAnnotation(symbol: Global#Symbol, annotationTypeName: String): Boolean = {
+        getSymbolAnnotations(symbol, annotationTypeName).nonEmpty
     }
 
     /**
@@ -124,7 +194,12 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
       * @return The name.
       */
     def getSymbolLocalJsName(symbol: Global#Symbol): String = {
-        getLocalJsName(symbol.name.toString.trim, !symbol.isMethod && symbol.isSynthetic)
+        val name = symbol.name.toString.trim
+        if (symbol.owner.fullName.startsWith("s2js.adapters")) {
+            name
+        } else {
+            getLocalJsName(name, !symbol.isMethod && symbol.isSynthetic)
+        }
     }
 
     /**
@@ -166,45 +241,57 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
     }
 
     /**
-      * Compiles the PackageDef.
-      * @return The compiled JavaScript source.
+      * Returns true if the type is the NoType or the Unit.
+      * @param tpe The type to check.
+      * @return True if the type is empty, false otherwise.
       */
-    def compile(): String = {
-        val buffer = new mutable.ListBuffer[String]
+    def typeIsEmpty(tpe: Global#Type): Boolean = {
+        tpe == NoType || tpe.typeSymbol.fullName == "scala.Unit"
+    }
 
-        // Retrieve the PackageDef structure.
-        val structure = dependencyManager.getPackageDefStructure
-        val graph = structure.classDefDependencyGraph
+    /**
+      * Returns whether the type is a Function1 (a function with one parameter).
+      * @param tpe the type to check.
+      * @return True if the type is a function with one parameter, false otherwise.
+      */
+    def typeIsFunction1(tpe: Global#Type): Boolean = {
+        tpe.typeSymbol.fullName == "scala.Function1"
+    }
 
-        // Compile the ClassDef object in the topological order.
-        while (graph.nonEmpty && graph.exists(_._2.isEmpty)) {
-            // Sort the compilable ClassDef objects by their keys, so the result is "deterministic".
-            val classDefKey = graph.toArray.filter(_._2.isEmpty).map(_._1).sortBy(x => x).head
+    /**
+      * Checks whether the specified async method is valid.
+      * @param defDef The method to check.
+      */
+    private def checkAsyncMethod(defDef: Global#DefDef) {
+        val parameters = defDef.symbol.paramss.flatten
 
-            // Compile the ClassDef.
-            val classDef = structure.classDefMap.get(classDefKey).get
-            if (symbolIsCompiled(classDef.symbol)) {
-                ClassDefCompiler(this, classDef).compile(buffer)
-            }
-
-            // Remove the compiled ClassDef from dependencies of all ClassDef objects, that aren't compiled yet. Also 
-            // remove it from the working sets.
-            graph.foreach(_._2 -= classDefKey)
-            graph -= classDefKey
-            structure.classDefMap -= classDefKey
+        val errorPrefix = "The asynchronous remote method %s ".format(defDef.symbol.fullName.toString)
+        if (parameters.length < 2) {
+            throw new ScalaToJsException(errorPrefix + "must have at least two parameters.")
+        }
+        if (!typeIsEmpty(defDef.tpt.tpe)) {
+            throw new ScalaToJsException(errorPrefix + "mustn't return anything (the return type must be Unit).")
         }
 
-        // If there are some ClassDef objects left, then there is a cyclic dependency.
-        if (graph.nonEmpty) {
-            throw new ScalaToJsException("Cyclic dependency in the class/object dependency graph involving %s.".format(
-                graph.head._1
-            ))
+        val callbacks = parameters.takeRight(2)
+        val successCallback = callbacks.head
+        val errorCallback = callbacks.last
+        if (!typeIsFunction1(successCallback.tpe) || !typeIsFunction1(errorCallback.tpe)) {
+            throw new ScalaToJsException(errorPrefix +
+                " must have declared success callback function and error callback function parameters.")
         }
 
-        // Compile the dependencies
-        dependencyManager.compileDependencies(buffer)
+        var parameterTypeName = successCallback.tpe.typeArgs.head.typeSymbol.fullName
+        if (parameterTypeName == "scala.Any" || parameterTypeName == "java.lang.Object" ) {
+            throw new ScalaToJsException(errorPrefix +
+                " must have a success callback whose first parameter is of a specified type (not Any or AnyRef).")
+        }
 
-        buffer.mkString
+        parameterTypeName = errorCallback.tpe.typeArgs.head.typeSymbol.fullName
+        if (parameterTypeName != "java.lang.Throwable") {
+            throw new ScalaToJsException(errorPrefix +
+                " must have an error callback whose first parameter is of type Throwable.")
+        }
     }
 
     /**

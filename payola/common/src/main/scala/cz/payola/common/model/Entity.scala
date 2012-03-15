@@ -2,5 +2,7 @@ package cz.payola.common.model
 
 trait Entity
 {
-    def id: String
+    protected val _id: String
+    
+    def id = _id
 }

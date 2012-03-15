@@ -8,9 +8,13 @@ trait Graph
     /** Type of the edges, that are between the vertices. */
     type EdgeType <: Edge
 
-    val vertices: Seq[EdgeType#VertexType]
+    protected val _vertices: Seq[EdgeType#VertexType]
 
-    val edges: Seq[EdgeType]
+    protected val _edges: Seq[EdgeType]
+
+    def vertices = _vertices
+
+    def edges = _edges
 
     /**
       * Returns all edges that go from the specified vertex (i.e. the vertex is a subject in the relation).

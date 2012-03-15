@@ -5,11 +5,15 @@ package cz.payola.common.rdf
   */
 trait LiteralVertex extends Vertex
 {
+    protected val _value: Any
+
+    protected val _language: Option[String]
+
     /** Value of the literal vertex. */
-    val value: Any
+    def value = _value
 
     /** Optional language of the literal. */
-    val language: Option[String]
+    def language = _language
 
     /**
       * @return value.toString
