@@ -3,20 +3,19 @@ package cz.payola.model
 import generic.{SharedAnalysesOwner, ConcreteNamedEntity}
 import scala.collection.mutable._
 
-class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEntity with SharedAnalysesOwner {
-    setName(n)
+class User(protected var _name: String) extends cz.payola.common.model.User with ConcreteNamedEntity with SharedAnalysesOwner {
 
     type GroupType = Group
     type AnalysisType = Analysis
     type AnalysisShareType = AnalysisShare
 
-    var email: String = ""
-    var password: String = ""
+    protected var _email: String = ""
+    protected var _password: String = ""
     
     // Analysis owned by the user and analysis that are shared directly to the user
     // To support lazy-loading, only AnalysesIDs are filled at first and when requesting
     // a particular analysis, it is loaded and stored in the HashMap cache.
-    val _ownedAnalysesIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
+    private val _ownedAnalysesIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
     private val _cachedAnalyses: HashMap[String, AnalysisType] = new HashMap[String,AnalysisType]()
 
 
@@ -26,6 +25,11 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEnti
     private val _ownedGroupIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
     private val _memberGroupIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
     private val _cachedGroups: HashMap[String, Group] = new HashMap[String,Group]()
+
+    protected val _ownedGroups: Seq[GroupType] = new ArrayBuffer[GroupType]()
+    protected val _memberGroups: Seq[GroupType ]= new ArrayBuffer[GroupType]()
+    protected val _ownedAnalyses: Seq[AnalysisType] = new ArrayBuffer[AnalysisType]()
+
 
     /** Internal method which creates List of groups from IDs. It uses the user's cache
       * as well as loading from the data layer if the group hasn't been cached yet.
@@ -151,14 +155,14 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEnti
      *
      *  @return New List with groups that the user is a member of.
      */
-    def memberGroups = _groupsWithIDs(_memberGroupIDs)
+    //def memberGroups = _groupsWithIDs(_memberGroupIDs)
 
     /** Returns a list of analyses owned by this user. Analyses will
       * be fetched from DB if necessary.
       *
       * @return List of owned analyses.
       */
-    def ownedAnalyses = {
+    /*def ownedAnalyses = {
         val analyses = List[AnalysisType]()
         _ownedAnalysesIDs foreach { analysisID: String =>
             val a: Option[AnalysisType] = _cachedAnalyses.get(analysisID)
@@ -169,7 +173,7 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEnti
             }
         }
         analyses.reverse
-    }
+    }*/
 
     /** Returns an analysis at index. Will raise an exception if the index is out of bounds.
       * The analysis will be loaded from DB if necessary.
@@ -222,7 +226,7 @@ class User(n: String) extends cz.payola.common.model.User with ConcreteNamedEnti
      *
      *  @return New List with groups owned by the user.
      */
-    def ownedGroups = _groupsWithIDs(_ownedGroupIDs)
+    //def ownedGroups = _groupsWithIDs(_ownedGroupIDs)
 
 
     /** Removes the user from the group.

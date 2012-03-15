@@ -4,16 +4,13 @@ import cz.payola.common
 import generic.{ConcreteOwnedEntity, ConcreteNamedEntity}
 import scala.collection.mutable._
 
-class Analysis(n: String, u: User) extends common.model.Analysis with ConcreteNamedEntity with ConcreteOwnedEntity
-{
-    setName(n)
-    setOwner(u)
+class Analysis(protected var _name: String, protected val _owner: User) extends common.model.Analysis with ConcreteNamedEntity with ConcreteOwnedEntity{
 
     type PluginInstanceType = PluginInstance
 
     // Plugin instances that this analysis consists of.
     private val _pluginInstanceIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
-    val _pluginInstances: HashMap[String, PluginInstance] = new HashMap[String, PluginInstance]()
+    protected val _pluginInstances: ArrayBuffer[PluginInstanceType] = new ArrayBuffer[PluginInstanceType]()
 
     /** Adds a new plugin instance to the plugin instances array.
      *
@@ -26,7 +23,7 @@ class Analysis(n: String, u: User) extends common.model.Analysis with ConcreteNa
 
         if (!_pluginInstanceIDs.contains(instance.id)){
             _pluginInstanceIDs += instance.id
-            _pluginInstances.put(instance.id,  instance)
+            _pluginInstances += instance
         }
     }
 
@@ -46,7 +43,7 @@ class Analysis(n: String, u: User) extends common.model.Analysis with ConcreteNa
      *
      * @return An immutable copy of the plugin instances array.
      */
-    def pluginInstances = {
+    /*def pluginInstances = {
         val instances = List[PluginInstanceType]()
         _pluginInstanceIDs foreach { instanceID: String =>
             val inst: Option[PluginInstanceType] = _pluginInstances.get(instanceID)
@@ -57,7 +54,7 @@ class Analysis(n: String, u: User) extends common.model.Analysis with ConcreteNa
             }
         }
         instances.reverse
-    }
+    }*/
 
     /** Removes all items in the plugin instances array by the array passed as argument.
      *
@@ -72,7 +69,7 @@ class Analysis(n: String, u: User) extends common.model.Analysis with ConcreteNa
         _pluginInstances.clear()
         instances foreach{ instance =>
             _pluginInstanceIDs += instance.id
-            _pluginInstances.put(instance.id, instance)
+            _pluginInstances += instance
         }
     }
 
@@ -86,7 +83,7 @@ class Analysis(n: String, u: User) extends common.model.Analysis with ConcreteNa
         require(instance != null, "Cannot remove null plugin instance!")
 
         _pluginInstanceIDs -= instance.id
-        _pluginInstances.remove(instance.id)
+        _pluginInstances -= instance
     }
 
     /** Convenience method that just calls pluginInstances_=.

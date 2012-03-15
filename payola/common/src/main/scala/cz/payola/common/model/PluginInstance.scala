@@ -10,7 +10,7 @@ trait PluginInstance extends Entity
 
     protected val _plugin: PluginType
 
-    protected var _parameterInstances: Seq[ParameterInstanceType]
+    protected val _parameterInstances: Seq[ParameterInstanceType]
     
     def plugin = _plugin
 

@@ -8,7 +8,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException
  * it is abstract, see subclasses.
  */
 
-abstract class ParameterInstance[A](val parameter: Parameter[A], var value: A) extends common.model.ParameterInstance[A]
+abstract class ParameterInstance[A](protected val _parameter: Parameter[A], protected var _value: A) extends common.model.ParameterInstance[A]
     with ConcreteEntity
 {
     type ParameterType = Parameter[A]

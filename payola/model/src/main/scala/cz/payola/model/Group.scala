@@ -4,19 +4,17 @@ import collection.mutable._
 import cz.payola._
 import generic.{SharedAnalysesOwner, ConcreteOwnedEntity, ConcreteNamedEntity}
 
-class Group (nameStr: String, user: User) extends common.model.Group with ConcreteNamedEntity with ConcreteOwnedEntity with SharedAnalysesOwner
+class Group (protected var _name: String, protected val _owner: User) extends common.model.Group with ConcreteNamedEntity with ConcreteOwnedEntity with SharedAnalysesOwner
 {
-    setName(nameStr)
-    setOwner(user)
 
     type AnalysisShareType = AnalysisShare
 
     // Members. Initially only IDs are loaded, actual members are loaded from the
     // data layer as needed
     private val _memberIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
-    private val _members: HashMap[String, User] = new HashMap[String, User]()
+    protected val _members: ArrayBuffer[UserType] = new ArrayBuffer[UserType]()
 
-    user.addOwnedGroup(this)
+    _owner.addOwnedGroup(this)
 
     /** Adds a member to the group. Does nothing if already a member.
      *
@@ -31,7 +29,7 @@ class Group (nameStr: String, user: User) extends common.model.Group with Concre
 
         if (!_memberIDs.contains(u.id)){
             _memberIDs += u.id
-            _members.put(u.id, u)
+            _members += u
 
             u.addToGroup(this)
         }
@@ -54,13 +52,7 @@ class Group (nameStr: String, user: User) extends common.model.Group with Concre
       */
     def memberAtIndex(index: Int): User = {
         require(index >= 0 && index < memberCount, "Member index out of bounds - " + index)
-        val opt: Option[User] = _members.get(_memberIDs(index))
-        if (opt.isEmpty){
-            // TODO Load from DB
-            null
-        }else{
-            opt.get
-        }
+        _members(index)
     }
 
     /** Returns number of members. Doesn't include the owner.
@@ -73,7 +65,7 @@ class Group (nameStr: String, user: User) extends common.model.Group with Concre
      *
      * @return An immutable array of group members.
      */
-    def members = {
+    /*def members = {
         val users = List[User]()
         _memberIDs foreach { userID =>
             val u: Option[User] = _members.get(userID)
@@ -84,28 +76,7 @@ class Group (nameStr: String, user: User) extends common.model.Group with Concre
             }
         }
         users.reverse
-    }
-
-    /** Sets the owner.
-     *
-     * @param u The owner.
-     *
-     * @throws IllegalArgumentException if the new user is null.
-     */
-    override def owner_=(u: User) = {
-        // Owner mustn't be null
-        require(u != null)
-
-        val oldOwner = owner
-        _owner = u
-        _ownerID = u.id
-
-        // Update relations
-        u.addOwnedGroup(this)
-        if (oldOwner != null) {
-            oldOwner.removeOwnedGroup(this)
-        }
-    }
+    }*/
 
     /** Removes user from members.
      *
@@ -124,7 +95,7 @@ class Group (nameStr: String, user: User) extends common.model.Group with Concre
             u.removeFromGroup(this)
 
             _memberIDs -= u.id
-            _members.remove(u.id)
+            _members -= u
         }
     }
 

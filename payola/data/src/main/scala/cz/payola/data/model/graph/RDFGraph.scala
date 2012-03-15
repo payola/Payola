@@ -112,8 +112,8 @@ object RDFGraph {
 import RDFGraph._
 
 class RDFGraph(
-    val vertices: List[RDFNode],
-    val edges: List[RDFEdge])
+    protected val _vertices: List[RDFNode],
+    protected val _edges: List[RDFEdge])
     extends Graph
 {
 

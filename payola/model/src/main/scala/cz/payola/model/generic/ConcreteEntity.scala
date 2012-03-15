@@ -6,15 +6,16 @@ import cz.payola.common.model.Entity
 trait ConcreteEntity extends Entity
 {
     // Lazy objectID creation
-    var _id: Option[String] = None
+    val _id: String = UUID.randomUUID.toString
 
-    def id = {
+    // TODO move to data?
+   /* override def id = {
         _id.getOrElse {
             _id = Some(UUID.randomUUID.toString)
             _id.get
         }
-    }
+    }*/
 
-    def id_=(objID: String) = _id = Some(objID)
+
 }
 

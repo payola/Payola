@@ -1,14 +1,14 @@
 package cz.payola.model.generic
 
-import collection.mutable.{HashMap, ArrayBuffer}
+import collection.mutable.{Seq, ArrayBuffer}
 import cz.payola.model.{Analysis, AnalysisShare}
 
 trait SharedAnalysesOwner{
 
     // Shared analysis. Initially only IDs are loaded, actual shares are loaded from the
     // data layer as needed
+    protected val _sharedAnalyses: ArrayBuffer[AnalysisShare] = new ArrayBuffer[AnalysisShare]()
     private val _sharedAnalysesIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
-    private val _cachedAnalysisShares: HashMap[String, AnalysisShare] = new HashMap[String, AnalysisShare]()
 
 
     /** Adds an analysis share to the group.
@@ -21,7 +21,7 @@ trait SharedAnalysesOwner{
         require(a != null, "Cannot share null analysis share")
         if (!_sharedAnalysesIDs.contains(a.id)){
             _sharedAnalysesIDs += a.id
-            _cachedAnalysisShares.put(a.id, a)
+            _sharedAnalyses += a
         }
     }
 
@@ -39,7 +39,7 @@ trait SharedAnalysesOwner{
       *
       * @return True or false.
       */
-    def hasAccessToSharedAnalysis(a: Analysis): Boolean = sharedAnalyses.exists(_.analysis == a)
+    def hasAccessToSharedAnalysis(a: Analysis): Boolean = _sharedAnalyses.exists(_.analysis == a)
 
     /** Removes the passed analysis share from the group's analysis shares.
       *
@@ -47,18 +47,18 @@ trait SharedAnalysesOwner{
       *
       * @throws IllegalArgumentException if the analysis is null.
       */
-    def removeSharedAnalysis(a: Analysis) = {
+    def removeSharedAnalysis(a: AnalysisShare) = {
         require(a != null, "Cannot remove null analysis!")
 
         _sharedAnalysesIDs -= a.id
-        _cachedAnalysisShares.remove(a.id)
+        _sharedAnalyses -= a
     }
 
     /** Returns an immutable array of analysis shared with this group.
       *
       * @return An immutable array of analysis shared with this group.
       */
-    def sharedAnalyses = {
+    /*def sharedAnalyses = {
         val analyses = List[AnalysisShare]()
         _sharedAnalysesIDs foreach { shareID: String =>
             val a: Option[AnalysisShare] = _cachedAnalysisShares.get(shareID)
@@ -69,7 +69,7 @@ trait SharedAnalysesOwner{
             }
         }
         analyses.reverse
-    }
+    }*/
 
     /** Returns an analysis share at index. Will raise an exception if the index is out of bounds.
       * The analysis share will be loaded from DB if necessary.
@@ -79,13 +79,7 @@ trait SharedAnalysesOwner{
       */
     def sharedAnalysisAtIndex(index: Int): AnalysisShare = {
         require(index >= 0 && index < sharedAnalysisCount, "Shared analysis index out of bounds - " + index)
-        val opt: Option[AnalysisShare] = _cachedAnalysisShares.get(_sharedAnalysesIDs(index))
-        if (opt.isEmpty){
-            // TODO Load from DB
-            null
-        }else{
-            opt.get
-        }
+        _sharedAnalyses(index)
     }
 
     /** Number of shared analyses.

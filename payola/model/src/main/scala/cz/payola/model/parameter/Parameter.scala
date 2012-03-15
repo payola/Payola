@@ -3,11 +3,9 @@ package cz.payola.model.parameter
 import cz.payola._
 import model.generic.ConcreteNamedEntity
 
-abstract class Parameter[A](n: String, private val defaultValue: A) extends common.model.Parameter[A]
+abstract class Parameter[A](protected var _name: String, private val defaultValue: A) extends common.model.Parameter[A]
     with ConcreteNamedEntity
 {
-    setName(n)
-
     /** Creates a new instance of the particular parameter with value @value or
       * defaultValue if value is empty or null
       *

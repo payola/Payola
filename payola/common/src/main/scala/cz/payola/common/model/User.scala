@@ -1,5 +1,7 @@
 package cz.payola.common.model
 
+import scala.collection.mutable.Seq
+
 trait User extends NamedEntity
 {
     /** Type of the groups that the user can own or be member of. */
@@ -15,13 +17,13 @@ trait User extends NamedEntity
 
     protected var _password: String
 
-    protected var _ownedGroups: Seq[GroupType]
+    protected val _ownedGroups: Seq[GroupType]
 
-    protected var _memberGroups: Seq[GroupType]
+    protected val _memberGroups: Seq[GroupType]
 
-    protected var _ownedAnalyses: Seq[AnalysisType]
+    protected val _ownedAnalyses: Seq[AnalysisType]
 
-    protected var _sharedAnalyses: Seq[AnalysisShareType]
+    protected val _sharedAnalyses: Seq[AnalysisShareType]
 
     def email = _email
 

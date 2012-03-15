@@ -2,8 +2,8 @@ package cz.payola.model.parameter
 
 import cz.payola.common
 
-protected class StringParameterInstance(parameter: StringParameter, value: String) extends
-ParameterInstance[String](parameter, value)
+protected class StringParameterInstance(p: StringParameter, v: String) extends
+ParameterInstance[String](p, v)
 {
     /** Gets a boolean value of the parameter.
       *

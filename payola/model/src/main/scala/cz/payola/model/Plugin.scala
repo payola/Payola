@@ -2,18 +2,16 @@ package cz.payola.model
 
 import cz.payola._
 import cz.payola.model.parameter._
-import collection.mutable.{HashMap, ArrayBuffer}
+import collection.mutable.{Seq, ArrayBuffer}
 import generic.ConcreteNamedEntity
 
-class Plugin(n: String) extends common.model.Plugin with ConcreteNamedEntity
+class Plugin(protected var _name: String) extends common.model.Plugin with ConcreteNamedEntity
 {
     type ParameterType = Parameter[_]
 
     // Parameters. Doesn't need a setter as all we need to check is that it's not null
     private val _parameterIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
-    private val _cachedParameters: HashMap[String, Parameter[_]] = new HashMap[String, Parameter[_]]()
-
-    setName(n)
+    protected val _parameters: ArrayBuffer[ParameterType] = new ArrayBuffer[ParameterType]()
 
     /** Adds a new parameter to the parameter list.
      *
@@ -25,7 +23,7 @@ class Plugin(n: String) extends common.model.Plugin with ConcreteNamedEntity
         require(p != null, "Cannot add null parameter!")
         if (!containsParameter(p)){
             _parameterIDs += p.id
-            _cachedParameters.put(p.id, p)
+            _parameters += p
         }
     }
 
@@ -44,13 +42,7 @@ class Plugin(n: String) extends common.model.Plugin with ConcreteNamedEntity
       */
     def parameterAtIndex(index: Int): ParameterType = {
         require(index >= 0 && index < parameterCount, "Parameter index out of bounds - " + index)
-        val opt: Option[Parameter[_]] = _cachedParameters.get(_parameterIDs(index))
-        if (opt.isEmpty){
-            // TODO Load from DB
-            null
-        }else{
-            opt.get
-        }
+        _parameters(index)
     }
 
     /** Returns number of parameters.
@@ -63,7 +55,7 @@ class Plugin(n: String) extends common.model.Plugin with ConcreteNamedEntity
      *
      * @return Immutable copy of the parameter array.
      */
-    def parameters = {
+    /*def parameters = {
         val params = List[ParameterType]()
         _parameterIDs foreach { paramID: String =>
             val p: Option[ParameterType] = _cachedParameters.get(paramID)
@@ -74,7 +66,7 @@ class Plugin(n: String) extends common.model.Plugin with ConcreteNamedEntity
             }
         }
         params.reverse
-    }
+    }*/
 
     /** Removes a parameter from the parameter list.
      *
@@ -86,7 +78,7 @@ class Plugin(n: String) extends common.model.Plugin with ConcreteNamedEntity
     def removeParameter(p: ParameterType) = {
         require(containsParameter(p), "Cannot remove a parameter that isn't a member of this plugin!")
         _parameterIDs -= p.id
-        _cachedParameters.remove(p.id)
+        _parameters -= p
     }
 
 }
