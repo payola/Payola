@@ -88,6 +88,11 @@ class JSONSerializer {
                     (m.getName == fName && (paramTypes.length == 0 || (paramTypes.length == 1 && paramTypes(0) == cl)))
                 }
             }
+            
+            if (!found){
+                // There's one more place the field can be hiding - interfaces that this interface extends
+                found = cl.getInterfaces.exists { intCl: Class[_] => _classHasField(intCl,  fName) }
+            }
             found
         }else{
             // Acutal object class
@@ -292,7 +297,6 @@ class JSONSerializer {
     }
 
     def _serializeObjectPosingAsClass(obj: AnyRef,  objectID: Int, targetClass: Class[_], transientFields: Option[collection.Seq[String]], fieldAliases: Option[collection.Map[String, String]]): String = {
-        println("Posing as " + targetClass)
         val builder: StringBuilder = new StringBuilder("")
 
         // Get object's fields:

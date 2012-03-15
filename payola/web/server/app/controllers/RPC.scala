@@ -3,9 +3,34 @@ package controllers
 import play.api.mvc._
 import java.lang.reflect.Method
 import cz.payola.scala2json.JSONSerializer
+import cz.payola.scala2json.classes.SimpleSerializationClass
+import cz.payola.scala2json.rules.BasicSerializationRule
 
 object RPC extends Controller
 {
+    val jsonSerializer = new JSONSerializer()
+    
+    /** Graph rules **/
+    _loadGraphSerializationRules
+    
+    def _loadGraphSerializationRules = {
+        val graphClass = new SimpleSerializationClass(classOf[cz.payola.data.model.graph.RDFGraph])
+        val graphRule = new BasicSerializationRule(Some(classOf[cz.payola.common.rdf.Graph]))
+        jsonSerializer.addSerializationRule(graphClass, graphRule)
+
+        val edgeClass = new SimpleSerializationClass(classOf[cz.payola.data.model.graph.RDFEdge])
+        val edgeRule = new BasicSerializationRule(Some(classOf[cz.payola.common.rdf.Edge]))
+        jsonSerializer.addSerializationRule(edgeClass, edgeRule)
+
+        val literalNodeClass = new SimpleSerializationClass(classOf[cz.payola.data.model.graph.RDFLiteralNode])
+        val literalNodeRule = new BasicSerializationRule(Some(classOf[cz.payola.common.rdf.LiteralVertex]))
+        jsonSerializer.addSerializationRule(literalNodeClass, literalNodeRule)
+
+        val identifiedNodeClass = new SimpleSerializationClass(classOf[cz.payola.data.model.graph.RDFIdentifiedNode])
+        val identifiedNodeRule = new BasicSerializationRule(Some(classOf[cz.payola.common.rdf.IdentifiedVertex]))
+        jsonSerializer.addSerializationRule(identifiedNodeClass, identifiedNodeRule)
+    }
+    
     def index() = Action {request =>
 
         val params = request.body match {
@@ -59,9 +84,8 @@ object RPC extends Controller
         val runnableObj = obj.getField("MODULE$").get(objectName)
         val result = methodToRun.invoke(runnableObj, paramArray:_*)
 
-        val serializer = new JSONSerializer()
-        val m = serializer.serialize(result)
-        println(m)
+        val m = jsonSerializer.serialize(result)
+        // println(m)
         m
     }
 
