@@ -21,7 +21,7 @@ class JSONSerializer {
     var serializeInDepth = false
 
     private val _processedObjects = new ArrayBuffer[Any]()
-    private val _rules = new HashMap[SerializationClass, SerializationRule]()
+    private val _rules = new ArrayBuffer[(SerializationClass, SerializationRule)]()
 
     /** Appends an array item to string builder.
       *
@@ -470,7 +470,7 @@ class JSONSerializer {
         builder.toString
     }
 
-    def addSerializationRule(forClass: SerializationClass, rule: SerializationRule) = _rules.put(forClass, rule)
+    def addSerializationRule(forClass: SerializationClass, rule: SerializationRule) = _rules += ((forClass, rule))
 
     /** Serializes @obj to a JSON string.
       *
