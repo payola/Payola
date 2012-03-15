@@ -61,7 +61,7 @@ object RPC extends Controller
 
         val serializer = new JSONSerializer()
         val m = serializer.serialize(result)
-        // println(m)
+        println(m)
         m
     }
 

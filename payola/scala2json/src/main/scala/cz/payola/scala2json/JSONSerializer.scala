@@ -100,7 +100,10 @@ class JSONSerializer {
       * @return The object's class name.
       */
     private def _objectsClassName(obj: AnyRef): String = {
-        obj.getClass.getCanonicalName
+        obj match {
+            case _: scala.collection.immutable.List[_] => "scala.collection.immutable.List"
+            case _ => obj.getClass.getCanonicalName
+        }
     }
 
     private def _prettyPrint: Boolean = outputFormat == OutputFormat.PrettyPrinted
@@ -189,8 +192,11 @@ class JSONSerializer {
 
         var result = ""
         // Skip custom serialization if serializing as reference
-        if (serializeObjectAsReference){
-            println("Serializing " + obj + " as reference")
+        if (serializeObjectAsReference
+            && !obj.isInstanceOf[Option[_]]
+            && !obj.isInstanceOf[collection.Map[_, _]]
+            && !obj.isInstanceOf[collection.Traversable[_]]
+            && !obj.isInstanceOf[Array[_]]){
             // Must be AnyRef, otherwise it wouldn't get into the processedObjects array
             result = _serializePlainObject(obj.asInstanceOf[AnyRef], serializeObjectAsReference, objectID)
         }else if (serializationClass.isDefined){
@@ -241,8 +247,6 @@ class JSONSerializer {
       * @return obj serialized as value.
       */
     private def _serializeObjectAsValue(obj: AnyRef, objectID: Int, transientFields: Option[collection.Seq[String]] = None, fieldAliases: Option[collection.Map[String, String]] = None): String = {
-        println("As value")
-
         val builder: StringBuilder = new StringBuilder("")
 
         // Get object's fields:
