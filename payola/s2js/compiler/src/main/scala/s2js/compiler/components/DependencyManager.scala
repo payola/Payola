@@ -2,6 +2,7 @@ package s2js.compiler.components
 
 import collection.mutable
 import tools.nsc.Global
+import s2js.compiler.ScalaToJsException
 
 /** A manager of dependencies in a PackageDef object. */
 class DependencyManager(private val packageDefCompiler: PackageDefCompiler)
@@ -80,8 +81,12 @@ class DependencyManager(private val packageDefCompiler: PackageDefCompiler)
     private def retrieveClassDefStructure(classDef: Global#ClassDef) {
         addProvidedSymbol(classDef.symbol)
 
-        // Remote objects aren't compiled
-        if (packageDefCompiler.getSymbolAnnotations(classDef.symbol, "remote").isEmpty) {
+        // Remote objects aren't compiled.
+        if (packageDefCompiler.getSymbolAnnotations(classDef.symbol, "remote").nonEmpty) {
+            packageDefStructure.remoteObjects += classDef
+
+        // Non-remote object should be added into the dependency graph.
+        } else {
             val name = getStructureKey(classDef.symbol)
             val dependencies = new mutable.HashSet[String]
 

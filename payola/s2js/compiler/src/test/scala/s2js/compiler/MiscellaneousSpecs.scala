@@ -99,4 +99,31 @@ class MiscellaneousSpecs extends CompilerFixtureSpec
                     """
             }
     }
+
+    it("field and method names of adapter objects are preserved") {
+        configMap =>
+            scalaCode {
+                """
+                    import s2js.adapters.js
+
+                    object o {
+                        def foo() {
+                            val e = js.browser.document.createElement[js.dom.Element]("div")
+                            val l = e.childNodes.length
+                        }
+                    }
+                """
+            } shouldCompileTo {
+                """
+                    goog.provide('o');
+
+                    o.foo = function() {
+                        var self = this;
+                        var e = document.createElement('div');
+                        var l = e.childNodes.length;
+                    };
+                    o.__class__ = new s2js.Class('o', []);
+                """
+            }
+    }
 }
