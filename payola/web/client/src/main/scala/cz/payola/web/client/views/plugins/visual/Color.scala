@@ -34,7 +34,13 @@ object Color
 {
     val Black = Color(0, 0, 0, 1)
 
-    val Transparent = Color(0, 0, 0, 0)
-
     val White = Color(255, 255, 255, 1)
+    
+    val Red = Color(255, 0, 0, 1)
+    
+    val Green = Color(0, 255, 0, 1)
+    
+    val Blue = Color(0, 0, 255, 1)
+
+    val Transparent = Color(0, 0, 0, 0)
 }

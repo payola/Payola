@@ -1,5 +1,7 @@
 package s2js.adapters.js.dom
 
+import collection.mutable.ListBuffer
+
 abstract class ImageData
 {
     //TODO: unsigned long
@@ -7,5 +9,5 @@ abstract class ImageData
 
     val height: Long
 
-    val data: CanvasPixelArray
+    val data: ListBuffer[Long]//CanvasPixelArray
 }

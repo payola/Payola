@@ -1,8 +1,8 @@
 package cz.payola.web.client.views.plugins.visual.graph
 
 import cz.payola.web.client.views.plugins.visual.{Layer, Color, Vector, Point}
-import s2js.adapters.js.browser.document
-import s2js.adapters.js.dom.{Element, Canvas, CanvasRenderingContext2D}
+import s2js.adapters.js.browser._
+import s2js.adapters.js.dom._
 
 trait View {
     /**
@@ -151,6 +151,49 @@ trait View {
 
         context.fillStyle = color.toString
         context.fill()
+    }
+
+    /**
+      * Draws the image to the specified position and resizes it to the specified dimensions.
+      * @param context to where to draw
+      * @param image to draw
+      * @param location of drawing
+      * @param dimensions to stretch the image to
+      */
+    protected def drawImage(context: CanvasRenderingContext2D, image: Element, location: Point, dimensions: Vector) {
+
+        context.drawImage(image, location.x, location.y, dimensions.x, dimensions.y)
+    }
+
+    protected def prepareImage(colorToUse: Color, imagePath: String): Canvas = {
+        val canvas = document.createElement[Canvas]("canvas")
+        canvas.width = 20
+        canvas.height = 20
+        val context = canvas.getContext[CanvasRenderingContext2D]("2d")
+
+        //nakreslim do lokalniho canvasu
+        val imageElement = document.createElement[Image]("img")
+        imageElement.src = imagePath
+
+        drawStraightLine(context, Point(1, 1), Point(20, 20), 4, Color.Green)
+        drawImage(context, imageElement, Point(1, 1), Vector(20, 20))
+
+        //nakreslim do globalniho canvasu lokalni canvas
+        val imgd = context.getImageData(0, 0, 20, 20);
+        val pix = imgd.data;
+        var pixelPointer = 0
+        
+        //window.alert("pix length: "+pix.length)
+        while(pixelPointer < pix.length) {
+
+            pix(pixelPointer) = 255   // red
+            pix(pixelPointer + 1) = 255   // green
+            pix(pixelPointer + 2) = 255   // blue
+            // alpha
+            pixelPointer += 4
+        }
+        context.putImageData(imgd, 0, 0);
+        canvas
     }
 
     /**

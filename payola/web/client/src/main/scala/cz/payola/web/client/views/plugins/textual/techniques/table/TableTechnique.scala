@@ -4,7 +4,6 @@ import cz.payola.web.client.views.plugins.textual.techniques.BaseTechnique
 import s2js.adapters.js.dom.Element
 import collection.mutable.ListBuffer
 import s2js.adapters.js.browser._
-import s2js.compiler.NativeJs
 import cz.payola.common.rdf.{LiteralVertex, IdentifiedVertex, Edge}
 
 
@@ -146,19 +145,14 @@ class TableTechnique extends BaseTechnique
         }
     }
 
-    //TODO add removeChild; firstChild; childNodes to s2js.adapters.js.dom.Element
-    @NativeJs("" +
-        "if(self.parentElement.isDefined()){" +
-        "   while(self.parentElement.get().childNodes.length > 0) {" +
-        "       self.parentElement.get().removeChild(self.parentElement.get().firstChild);" +
-        "   }" +
-        "}")
     override def clean() {
-        /*if(parentElement.isDefined) {
-            while(!parentElement.get.childNodes.isEmpty) {
-                parentElement.get.removeChild(parentElement.get.firstChild)
+        if(parentElement.isDefined) {
+            val element = parentElement.get
+            window.alert("pocet potomku tabulky: "+element.childNodes.length)
+            while(element.childNodes.length > 0) {
+                element.removeChild(element.firstChild)
             }
-        }*/
+        }
     }
 
     def getName:String = {

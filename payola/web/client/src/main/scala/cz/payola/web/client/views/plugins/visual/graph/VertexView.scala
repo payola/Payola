@@ -1,9 +1,9 @@
 package cz.payola.web.client.views.plugins.visual.graph
 
-import s2js.adapters.js.dom.CanvasRenderingContext2D
 import collection.mutable.ListBuffer
 import cz.payola.common.rdf.{LiteralVertex, IdentifiedVertex, Vertex}
 import cz.payola.web.client.views.plugins.visual.{Vector, Color, Point}
+import s2js.adapters.js.dom.CanvasRenderingContext2D
 
 /**
   * Graphical representation of Vertex object in the drawn graph.
@@ -28,6 +28,17 @@ class VertexView(val vertexModel: Vertex, var position: Point) extends View {
     private val defColor1 = new Color(0, 180, 0, 0.8)
     private val defColor2 = new Color(0, 0, 200, 0.8)
 
+    private val literalIcon = "/assets/images/book-icon_01.png"
+    private val identifiedIcon = "/assets/images/view-eye-icon.png"
+    private val unknownIcon = "/assets/images/question-mark-icon.png"
+    
+    private val image = prepareImage( Color.Black, vertexModel match {
+        case i: LiteralVertex => literalIcon
+        case i: IdentifiedVertex => identifiedIcon
+        case _ => unknownIcon
+    }
+    )
+
     /**
       * Indicator of isSelected attribute. Does not effect inner mechanics.
       */
@@ -38,7 +49,8 @@ class VertexView(val vertexModel: Vertex, var position: Point) extends View {
       * of the graph.
       */
     var edges = ListBuffer[EdgeView]()
-
+    
+    
     /**
       * Textual data that should be visualised with this vertex ("over this vertex").
       */
@@ -53,10 +65,9 @@ class VertexView(val vertexModel: Vertex, var position: Point) extends View {
     }
 
     def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
+        val correctedPosition = this.position + (defVertexSize / -2) + positionCorrection.getOrElse(Point.Zero).toVector
 
-        val correction = positionCorrection.getOrElse(Point.Zero).toVector
-
-        drawRoundedRectangle(context, this.position + (defVertexSize / -2) + correction, defVertexSize, defVertexCornerRadius)
+        drawRoundedRectangle(context, correctedPosition, defVertexSize, defVertexCornerRadius)
 
 
         val colorToUse = if(!selected) {
@@ -69,6 +80,9 @@ class VertexView(val vertexModel: Vertex, var position: Point) extends View {
             color.getOrElse(defColor1)
         }
 
-        fillCurrentSpace(context, colorToUse)
+        drawImage(context, prepareImage(colorToUse, literalIcon), position + Vector(-10, -10)/*correctedPosition*/, Vector(20, 20))
+
+        /*TODO drawing the image straight out works, but is slow during redrawing...might be useful to contain it in
+        a separate canvas and when necessary draw the canvas*/
     }
 }

@@ -4,7 +4,7 @@ import collection.mutable.ListBuffer
 import s2js.adapters.js.dom.{Element, CanvasRenderingContext2D}
 import cz.payola.common.rdf.{Vertex, Graph}
 import cz.payola.web.client.views.plugins.visual.{Vector, RedrawOperation, Color, Point}
-import s2js.compiler.NativeJs
+import s2js.adapters.js.browser._
 
 /**
   * Graphical representation of Graph object.
@@ -358,13 +358,10 @@ class GraphView(val container: Element) extends View
         //^because elements are drawn into separate layers, redraw(..) does not know to which context to draw
     }
 
-    @NativeJs("" +
-        "while(self.container.childNodes.length > 0) {" +
-        "   self.container.removeChild(self.container.firstChild);" +
-        "}")
     def clean() {
-        /*while(!container.childNodes.isEmpty) {
+        window.alert("pocet potomku tabulky: "+container.childNodes.length)
+        while(container.childNodes.length > 0) {
             container.removeChild(container.firstChild)
-        }*/
+        }
     }
 }

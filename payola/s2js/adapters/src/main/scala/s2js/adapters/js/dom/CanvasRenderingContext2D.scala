@@ -100,7 +100,7 @@ abstract class CanvasRenderingContext2D extends CanvasContext
 
     def moveTo(x: Double, y: Double)
 
-    def putImageData()
+    def putImageData(imageData: ImageData, dx: Double, dy: Double)
 
     def quadraticCurveTo(cpx: Double, cpy: Double, x: Double, y: Double)
 
