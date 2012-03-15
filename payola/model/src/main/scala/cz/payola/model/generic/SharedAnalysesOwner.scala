@@ -2,7 +2,6 @@ package cz.payola.model.generic
 
 import collection.mutable.{HashMap, ArrayBuffer}
 import cz.payola.model.{Analysis, AnalysisShare}
-import cz.payola.scala2json.annotations._
 
 trait SharedAnalysesOwner{
 

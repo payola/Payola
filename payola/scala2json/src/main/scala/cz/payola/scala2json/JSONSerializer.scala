@@ -1,7 +1,6 @@
 package cz.payola.scala2json
 
 import classes.SerializationClass
-import cz.payola.scala2json.annotations._
 import java.lang.reflect.{Field, Method}
 import rules.{CustomSerializationRule, BasicSerializationRule, SerializationRule}
 import scala.collection.mutable.{ArrayBuffer, HashMap}
