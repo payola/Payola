@@ -2,7 +2,7 @@ package cz.payola.scala2json
 
 import classes.SerializationClass
 import cz.payola.scala2json.annotations._
-import java.lang.reflect.Field
+import java.lang.reflect.{Field, Method}
 import rules.{CustomSerializationRule, BasicSerializationRule, SerializationRule}
 import scala.collection.mutable.{ArrayBuffer, HashMap}
 
@@ -22,7 +22,7 @@ class JSONSerializer {
 
     private val _processedObjects = new ArrayBuffer[Any]()
     private val _rules = new HashMap[SerializationClass, SerializationRule]()
-    
+
     /** Appends an array item to string builder.
       *
       * @param item The item.
@@ -76,6 +76,26 @@ class JSONSerializer {
         _appendStringArrayItemToStringBuilder(field, builder, isFirst)
     }
 
+    private def _classHasField(cl: Class[_], fName: String): Boolean = {
+        if (cl.isInterface){
+            // I.e. a trait, treat it differently
+            // Maybe, there is a field, so let's try finding it just to be sure
+            var found = cl.getDeclaredFields.exists { f: Field => f.getName == fName }
+            if (!found){
+                // Otherwise, we need a little magic - find a method whose name is the same
+                // and take one parameter of type cl
+                found = cl.getDeclaredMethods.exists { m: Method =>
+                    val paramTypes: Array[Class[_]] = m.getParameterTypes
+                    (m.getName == fName && (paramTypes.length == 0 || (paramTypes.length == 1 && paramTypes(0) == cl)))
+                }
+            }
+            found
+        }else{
+            // Acutal object class
+            cl.getDeclaredFields.exists { f: Field => f.getName == fName }
+        }
+    }
+
     /** Returns the object's class name.
       *
       * @return The object's class name.
@@ -87,9 +107,9 @@ class JSONSerializer {
     private def _prettyPrint: Boolean = outputFormat == OutputFormat.PrettyPrinted
 
     /** Serializes an Array[_]
-     *
-     * @return JSON representation of obj.
-     */
+      *
+      * @return JSON representation of obj.
+      */
     private def _serializeArray(arr: Array[_]): String = {
         val builder: StringBuilder = new StringBuilder("[")
         if (_prettyPrint)
@@ -101,22 +121,22 @@ class JSONSerializer {
 
         if (_prettyPrint)
             builder.append('\n')
-        
+
         builder.append(']')
         builder.toString
     }
 
     /** Serializes an object that implements
-     *  the Map trait, yet isn't a map.
-     *
-     * @return JSON representation of obj.
-     */
+      *  the Map trait, yet isn't a map.
+      *
+      * @return JSON representation of obj.
+      */
     private def _serializeMap(map: scala.collection.Map[_, _]): String = {
         val builder: StringBuilder = new StringBuilder("{")
         if (_prettyPrint){
             builder.append('\n')
         }
-        
+
         // We know it is a Map[String, _]
         val mapIt: scala.collection.Iterable[(String, _)] = map.asInstanceOf[scala.collection.Iterable[(String, _)]]
 
@@ -131,15 +151,15 @@ class JSONSerializer {
         if (_prettyPrint){
             builder.append('\n')
         }
-        
+
         builder.append('}')
         builder.toString
     }
 
     /** Matches the @obj's type and calls the appropriate method.
-     *
-     * @return JSON representation of obj.
-     */
+      *
+      * @return JSON representation of obj.
+      */
     private def _serializeObject(obj: Any): String = {
 
         var objectID: Int = 0
@@ -171,8 +191,9 @@ class JSONSerializer {
         var result = ""
         // Skip custom serialization if serializing as reference
         if (serializeObjectAsReference){
+            println("Serializing " + obj + " as reference")
             // Must be AnyRef, otherwise it wouldn't get into the processedObjects array
-            _serializePlainObject(obj.asInstanceOf[AnyRef], serializeObjectAsReference, objectID)
+            result = _serializePlainObject(obj.asInstanceOf[AnyRef], serializeObjectAsReference, objectID)
         }else if (serializationClass.isDefined){
             val rule = serializationClass.get._2
             result = rule match {
@@ -207,7 +228,7 @@ class JSONSerializer {
     }
 
     /** obj has already been encountered - serialize it just as a reference - use objectID.
-      * 
+      *
       * @return obj serialized as an object reference.
       */
     private def _serializeObjectAsReference(obj: AnyRef, objectID: Int): String = {
@@ -217,7 +238,7 @@ class JSONSerializer {
     }
 
     /** The opposite of _serializeObjectAsReference.
-      * 
+      *
       * @return obj serialized as value.
       */
     private def _serializeObjectAsValue(obj: AnyRef, objectID: Int, transientFields: Option[collection.Seq[String]] = None, fieldAliases: Option[collection.Map[String, String]] = None): String = {
@@ -266,7 +287,7 @@ class JSONSerializer {
 
         builder.toString
     }
-    
+
     def _serializeObjectPosingAsClass(obj: AnyRef,  objectID: Int, targetClass: Class[_], transientFields: Option[collection.Seq[String]], fieldAliases: Option[collection.Map[String, String]]): String = {
         println("Posing as " + targetClass)
         val builder: StringBuilder = new StringBuilder("")
@@ -274,7 +295,6 @@ class JSONSerializer {
         // Get object's fields:
         val originalClass: Class[_] = obj.getClass
         val originalFields: Array[Field] = originalClass.getDeclaredFields
-        val targetFields: Array[Field] = targetClass.getDeclaredFields
 
         var haveProcessedField: Boolean = false
 
@@ -292,26 +312,26 @@ class JSONSerializer {
         }
 
         // Process all fields
-        for (i: Int <- 0 until targetFields.length) {
-            val targetField: Field = targetFields(i)
-            targetField.setAccessible(true)
-            var targetFieldName: String = targetField.getName
-            val originalField: Option[Field] = originalFields find {f: Field => f.getName == targetFieldName}
-            require(originalField.isDefined, "Cannot find field " + targetFieldName + " in object " + obj)
-            originalField.get.setAccessible(true)
+        for (i: Int <- 0 until originalFields.length) {
+            val originalField: Field = originalFields(i)
+            originalField.setAccessible(true)
+            var originalFieldName: String = originalField.getName
 
-            if (transientFields.isEmpty || !transientFields.get.contains(targetFieldName)){
-                if (fieldAliases.isDefined && fieldAliases.get.contains(targetFieldName)){
-                    targetFieldName = fieldAliases.get.get(targetFieldName).get
+            if (transientFields.isEmpty || !transientFields.get.contains(originalFieldName)){
+                if (fieldAliases.isDefined && fieldAliases.get.contains(originalFieldName)){
+                    originalFieldName = fieldAliases.get.get(originalFieldName).get
                 }
 
-                val fieldValue = originalField.get.get(obj)
-                if (fieldValue == null){
-                    _appendKeySerializedValueToStringBuilder(targetFieldName, "null", builder, !haveProcessedField)
-                }else{
-                    _appendKeyValueToStringBuilder(targetFieldName, fieldValue, builder, !haveProcessedField)
+                // Check is the class has this field as well
+                if (_classHasField(targetClass, originalFieldName)){
+                    val fieldValue = originalField.get(obj)
+                    if (fieldValue == null){
+                        _appendKeySerializedValueToStringBuilder(originalFieldName, "null", builder, !haveProcessedField)
+                    }else{
+                        _appendKeyValueToStringBuilder(originalFieldName, fieldValue, builder, !haveProcessedField)
+                    }
+                    haveProcessedField = true
                 }
-                haveProcessedField = true
             }
         }
 
@@ -346,16 +366,16 @@ class JSONSerializer {
 
         if (_prettyPrint)
             builder.append('\n')
-        
+
         if (serializeObjectAsReference){
-           builder.append(_serializeObjectAsReference(obj, objectID))
+            builder.append(_serializeObjectAsReference(obj, objectID))
         }else{
             builder.append(_serializeObjectAsValue(obj, objectID))
         }
 
         if (_prettyPrint)
             builder.append('\n')
-        
+
         builder.append('}')
         builder.toString
     }
@@ -390,7 +410,7 @@ class JSONSerializer {
             }
 
             _appendKeyValueToStringBuilder("__arrayClass__", _objectsClassName(coll), builder, true)
-            
+
             var serializedValue = _serializeTraversableValue(coll)
             if (_prettyPrint){
                 serializedValue = serializedValue.replaceAllLiterally("\n", "\n\t")
@@ -407,7 +427,7 @@ class JSONSerializer {
             _serializeTraversableValue(coll)
         }
     }
-    
+
     private def _serializeTraversableValue(coll: scala.collection.Traversable[_]): String = {
         val builder: StringBuilder = new StringBuilder("[")
         if (_prettyPrint)
@@ -434,7 +454,7 @@ class JSONSerializer {
         if (_prettyPrint){
             builder.append('\n')
         }
-        
+
         if (rule.serializeAsClass.isEmpty){
             builder.append(_serializeObjectAsValue(obj, objectID, rule.transientFields, rule.fieldAliases))
         }else{
@@ -451,21 +471,21 @@ class JSONSerializer {
     }
 
     def addSerializationRule(forClass: SerializationClass, rule: SerializationRule) = _rules.put(forClass, rule)
-    
+
     /** Serializes @obj to a JSON string.
-     *
-     * @return JSON representation of obj.
-     */
-   def serialize(obj: Any): String = {
-       // If obj is null, return "null" - as defined at http://www.json.org/
-       if (obj == null){
-           "null"
-       }else{
-           val result = _serializeObject(obj)
-           // Need to clear processed objects for next use
-           _processedObjects.clear
-           result
-       }
-   }
+      *
+      * @return JSON representation of obj.
+      */
+    def serialize(obj: Any): String = {
+        // If obj is null, return "null" - as defined at http://www.json.org/
+        if (obj == null){
+            "null"
+        }else{
+            val result = _serializeObject(obj)
+            // Need to clear processed objects for next use
+            _processedObjects.clear
+            result
+        }
+    }
 
 }
