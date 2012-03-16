@@ -22,7 +22,9 @@ abstract class VisualPlugin extends Plugin
     var graphView: Option[GraphView] = None
 
     def init(container: Element) {
+
         graphView = Some(new GraphView(container))
+
         listen[BrowserEvent](graphView.get.controlsLayer.canvas, EventType.MOUSEDOWN, onMouseDown _)
         listen[BrowserEvent](graphView.get.controlsLayer.canvas, EventType.MOUSEMOVE, onMouseMove _)
         listen[BrowserEvent](graphView.get.controlsLayer.canvas, EventType.MOUSEUP, onMouseUp _)

@@ -1,10 +1,10 @@
 package cz.payola.web.client.views.plugins.visual.graph
 
-import cz.payola.web.client.views.plugins.visual.{Layer, Color, Vector, Point}
 import s2js.adapters.js.browser._
 import s2js.adapters.js.dom._
+import cz.payola.web.client.views.plugins.visual._
 
-trait View {
+trait View extends SetupLoader{
     /**
       * Routine for drawing the graphical representation of graphs objects.
       * @param context to which container to draw
@@ -12,6 +12,9 @@ trait View {
       * @param position to which location to draw
       */
     def draw(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point])
+
+
+    def updateSettings(settings: Element)
 
     /**
       * Draws a rectangle with rounded corners, depending on the radius parameter to the input canvas context.
@@ -180,19 +183,19 @@ trait View {
         drawImage(context, imageElement, Point(0, 0), imageSize)
 
         //nakreslim do globalniho canvasu lokalni canvas
-        val imgd = context.getImageData(0, 0, imageSize.x, imageSize.y);
-        /*val pix = imgd.data;
+        /*val imgd = context.getImageData(0, 0, imageSize.x, imageSize.y);
+        val pix = imgd.data;
         var pixelPointer = 0
 
         while(pixelPointer < pix.length) { //TODO recoloring of the icon
 
-            pix[pixelPointer] = 255   // red
-            pix[pixelPointer + 1] = 255   // green
-            pix[pixelPointer + 2] = 255   // blue
+            pix.setter(pixelPointer, 255)// = 255   // red
+            pix.setter(pixelPointer + 1, 255)// = 255   // green
+            pix.setter(pixelPointer + 2, 255)// = 255   // blue
             // alpha
             pixelPointer += 4
-        }*/
-        context.putImageData(imgd, 0, 0);
+        }
+        context.putImageData(imgd, 0, 0);*/
         canvas
     }
 

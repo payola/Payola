@@ -3,22 +3,20 @@ package cz.payola.web.client.views.plugins.visual.graph
 import collection.mutable.ListBuffer
 import s2js.adapters.js.dom.{Element, CanvasRenderingContext2D}
 import cz.payola.common.rdf.{Vertex, Graph}
-import cz.payola.web.client.views.plugins.visual.{Vector, RedrawOperation, Color, Point}
-import s2js.adapters.js.browser._
+import cz.payola.web.client.views.plugins.visual._
 
 /**
   * Graphical representation of Graph object.
   * @param container the space where the graph should be visualised
   */
-class GraphView(val container: Element) extends View
-{
-    private val ColorVertexHigh = new Color(200, 0, 0, 1)
+class GraphView(val container: Element) extends View {
+    private var ColorVertexHigh = new Color(200, 0, 0, 1)
 
-    private val ColorVertexMedium = new Color(0, 180, 0, 0.9)
+    private var ColorVertexMedium = new Color(0, 180, 0, 0.9)
 
-    private val ColorVertexLow = new Color(180, 180, 180, 0.3)
+    private var ColorVertexLow = new Color(180, 180, 180, 0.3)
 
-    private val ColorTextHigh = new Color(50, 50, 50, 1)
+    private var ColorTextDefault = new Color(50, 50, 50, 1)
 
     /*The order in which are layers created determines their "z coordinate"
 (first created layer is on the bottom and last created one covers all the others).*/
@@ -112,7 +110,8 @@ class GraphView(val container: Element) extends View
         val buffer = ListBuffer[EdgeView]()
         if(_vertexViews.length != 0) {
             _graphModel.edges.foreach {edgeModel =>
-                buffer += new EdgeView(edgeModel, findVertexView(edgeModel.origin), findVertexView(edgeModel.destination))
+                buffer += new EdgeView(edgeModel, findVertexView(edgeModel.origin),
+                    findVertexView(edgeModel.destination))
             }
 
             _vertexViews.foreach {vertexView: VertexView =>
@@ -246,15 +245,15 @@ class GraphView(val container: Element) extends View
                 colorToUseText = Some(color.get)
             } else if (vertexView.selected) {
                 colorToUseVertex = Some(ColorVertexHigh)
-                colorToUseText = Some(ColorTextHigh)
+                colorToUseText = Some(ColorTextDefault)
             } else if (edgeViews.exists(edgeView =>
                 (edgeView.originView.eq(vertexView) && edgeView.destinationView.selected) ||
                     (edgeView.destinationView.eq(vertexView) && edgeView.originView.selected))) {
                 colorToUseVertex = Some(ColorVertexMedium)
-                colorToUseText = Some(ColorTextHigh)
+                colorToUseText = Some(ColorTextDefault)
             } else if (selectedCount == 0) {
                 colorToUseVertex = None
-                colorToUseText = Some(ColorTextHigh)
+                colorToUseText = Some(ColorTextDefault)
             } else {
                 colorToUseVertex = Some(ColorVertexLow)
                 colorToUseText = Some(Color.Transparent)
@@ -289,7 +288,7 @@ class GraphView(val container: Element) extends View
             val colorToUseText = if (color != None) {
                 color
             } else if (edgeView.isSelected) {
-                Some(ColorTextHigh)
+                Some(ColorTextDefault)
             } else {
                 None
             }
@@ -362,5 +361,40 @@ class GraphView(val container: Element) extends View
         while(container.childNodes.length > 0) {
             container.removeChild(container.firstChild)
         }
+    }
+
+    def updateSettings(settings: Element) {
+
+        val setupNodeCVH = getNodeByPath(settings, "setup.vertex.colors.selected")
+        val resultCVH = if(setupNodeCVH.isDefined) {
+            createColor(setupNodeCVH.get)
+        } else {
+            None
+        }
+        ColorVertexHigh = resultCVH.getOrElse(ColorVertexHigh)
+
+        val setupNodeCVM = getNodeByPath(settings, "setup.vertex.colors.default")
+        val resultCVM = if(setupNodeCVM.isDefined) {
+            createColor(setupNodeCVM.get)
+        } else {
+            None
+        }
+        ColorVertexMedium = resultCVM.getOrElse(ColorVertexMedium)
+
+        val setupNodeCVL = getNodeByPath(settings, "setup.vertex.colors.hidden")
+        val resultCVL = if(setupNodeCVL.isDefined) {
+            createColor(setupNodeCVL.get)
+        } else {
+            None
+        }
+        ColorVertexLow = resultCVL.getOrElse(ColorVertexLow)
+
+        val setupNodeCTD = getNodeByPath(settings, "setup.text.default")
+        val resultCTD = if(setupNodeCTD.isDefined) {
+            createColor(setupNodeCTD.get)
+        } else {
+            None
+        }
+        ColorTextDefault = resultCTD.getOrElse(ColorTextDefault)
     }
 }

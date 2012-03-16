@@ -1,7 +1,7 @@
 package cz.payola.web.client.views.plugins.visual.graph
 
-import s2js.adapters.js.dom.CanvasRenderingContext2D
 import cz.payola.web.client.views.plugins.visual.{Vector, Color, Point}
+import s2js.adapters.js.dom.{Element, CanvasRenderingContext2D}
 
 /**
   * Graphical representation of textual data in the drawn graph.
@@ -11,12 +11,12 @@ case class InformationView(data: Any) extends View {
     /**
       * Default color of text.
       */
-    private val defColor = new Color(200, 200, 200, 1)
+    private var defColor = new Color(200, 200, 200, 1)
 
     /**
       * Default color of background behind text.
       */
-    private val defColorBackground = new Color(255, 255, 255, 0.5)
+    private var defColorBackground = new Color(255, 255, 255, 0.5)
 
     /**
       * Default width of line (used in background drawing).
@@ -62,5 +62,19 @@ case class InformationView(data: Any) extends View {
         val colorToUse = color.getOrElse(defColor)
 
         drawText(context, data.toString, position, colorToUse, "12px Sans", "center")
+    }
+    
+    def updateSettings(settings: Element) {
+
+        val setupNode = getNodeByPath(settings, "setup.text.colors.default")
+        val result = if(setupNode.isDefined) {
+            createColor(setupNode.get)
+        } else {
+            None
+        }
+        defColor = result.getOrElse(defColor)
+
+
+        defColorBackground = new Color(255, 255, 255, 0.5)
     }
 }

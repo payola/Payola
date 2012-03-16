@@ -14,6 +14,8 @@ import cz.payola.web.client.model.graph.{SimpleIdentifiedVertex, SimpleEdge, Sim
 import cz.payola.web.client.views.plugins.textual.techniques.table.TableTechnique
 import s2js.adapters.js.dom.Element
 
+import s2js.compiler.javascript
+
 // TODO remove after classloading is done
 @dependency("cz.payola.common.rdf.IdentifiedVertex")
 @dependency("cz.payola.common.rdf.LiteralVertex")
@@ -32,6 +34,7 @@ class Index
 
         // ...
     )
+
 
     var currentPlugin: Option[Plugin] = None
 
@@ -89,7 +92,6 @@ class Index
         plugin.update(graph.get)
         plugin.redraw()
     }
-
 
     /*DO NOT REMOVE PLEASE*/
     def initGraph(): Graph = {

@@ -1,8 +1,8 @@
 package cz.payola.web.client.views.plugins.visual.graph
 
-import s2js.adapters.js.dom.CanvasRenderingContext2D
-import cz.payola.web.client.views.plugins.visual.{Color, Point}
 import cz.payola.common.rdf.Edge
+import cz.payola.web.client.views.plugins.visual.{Color, Point}
+import s2js.adapters.js.dom.{Element, CanvasRenderingContext2D}
 
 /**
   * Structure used during draw function of EdgeView. Helps to indicate position of vertices to each other.
@@ -24,27 +24,27 @@ private object Quadrant
   * @param originView the vertex object representing origin of this edge
   * @param destinationView of this graphical representation in drawing space
   */
-class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationView: VertexView) extends View
-{
+class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationView: VertexView)
+    extends View {
     /**
       * Default color of an edge.
       */
-    private val defColor = new Color(150, 150, 150, 0.5)
+    private var defColor = new Color(150, 150, 150, 0.5)
 
     /**
       * Default color of a selected edge.
       */
-    private val defColorSelect = new Color(50, 50, 50, 1)
+    private var defColorSelect = new Color(50, 50, 50, 1)
 
     /**
       * Default width of drawn line.
       */
-    private val defLineWidth: Double = 1
+    private var defLineWidth: Double = 1
 
     /**
       * The higher, the more are edges straight
       */
-    private val straightenIndex = 2
+    private var straightenIndex = 2
 
     /**
       * Textual data that should be visualised with this edge ("over this edge").
@@ -137,5 +137,28 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
         drawStraightLine(context, A + correction, B + correction, defLineWidth, colorToUse)
         /*drawBezierCurve(context, ctrl1 + correction, ctrl2 + correction, A + correction, B + correction,
             defLineWidth, colorToUse)*/
+    }
+    
+    def updateSettings(settings: Element) {
+
+        val setupNodeDC = getNodeByPath(settings, "setup.edge.colors.default")
+        val resultDC = if(setupNodeDC.isDefined) {
+            createColor(setupNodeDC.get)
+        } else {
+            None
+        }
+        defColor = resultDC.getOrElse(defColor)
+
+        val setupNodeDCS = getNodeByPath(settings, "setup.edge.colors.selected")
+        val resultDCS = if(setupNodeDCS.isDefined) {
+            createColor(setupNodeDCS.get)
+        } else {
+            None
+        }
+        defColorSelect = resultDCS.getOrElse(defColorSelect)
+
+        defLineWidth = 1
+
+        straightenIndex = 2
     }
 }
