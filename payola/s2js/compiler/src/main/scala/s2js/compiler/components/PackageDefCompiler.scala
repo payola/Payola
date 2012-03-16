@@ -219,7 +219,8 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
         )
         val jsDefaultMembers = List(
             "constructor", "hasOwnProperty", "isPrototypeOf", "propertyIsEnumerable", "apply", "arguments", "call",
-            "prototype", "__class__", "__base__", "length", "charAt"
+            "prototype", "__class__", "__base__", "length", "charAt", "concat", "indexOf", "join", "pop", "push",
+            "reverse", "shift", "slice", "sort", "splice", "unshift", "valueOf"
         )
 
         // Synthetic symbols get a prefix to avoid name collision with other symbols. Also if the symbol name is a js

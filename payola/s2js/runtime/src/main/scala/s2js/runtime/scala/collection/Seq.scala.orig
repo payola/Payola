@@ -32,8 +32,12 @@ trait Seq extends Iterable
         }
         elems
     }
+<<<<<<< HEAD
+    @javascript("return self.internalJsArray.length;")
+=======
 
     @javascript("return self.getInternalJsArray().length;")
+>>>>>>> develop
     override def size: Int = 0
 
     @javascript("""
