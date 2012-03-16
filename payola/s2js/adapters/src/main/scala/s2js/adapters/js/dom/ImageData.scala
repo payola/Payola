@@ -9,5 +9,5 @@ abstract class ImageData
 
     val height: Long
 
-    val data: ListBuffer[Long]//CanvasPixelArray
+    val data: CanvasPixelArray
 }

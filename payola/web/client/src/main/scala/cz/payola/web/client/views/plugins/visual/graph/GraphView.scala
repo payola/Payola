@@ -359,7 +359,6 @@ class GraphView(val container: Element) extends View
     }
 
     def clean() {
-        window.alert("pocet potomku tabulky: "+container.childNodes.length)
         while(container.childNodes.length > 0) {
             container.removeChild(container.firstChild)
         }

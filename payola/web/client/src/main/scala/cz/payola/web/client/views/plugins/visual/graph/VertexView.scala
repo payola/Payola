@@ -3,7 +3,7 @@ package cz.payola.web.client.views.plugins.visual.graph
 import collection.mutable.ListBuffer
 import cz.payola.common.rdf.{LiteralVertex, IdentifiedVertex, Vertex}
 import cz.payola.web.client.views.plugins.visual.{Vector, Color, Point}
-import s2js.adapters.js.dom.CanvasRenderingContext2D
+import s2js.adapters.js.dom.{Canvas, CanvasRenderingContext2D}
 
 /**
   * Graphical representation of Vertex object in the drawn graph.
@@ -28,16 +28,12 @@ class VertexView(val vertexModel: Vertex, var position: Point) extends View {
     private val defColor1 = new Color(0, 180, 0, 0.8)
     private val defColor2 = new Color(0, 0, 200, 0.8)
 
-    private val literalIcon = "/assets/images/book-icon_01.png"
+    private val literalIcon = "/assets/images/book-icon.png"
     private val identifiedIcon = "/assets/images/view-eye-icon.png"
     private val unknownIcon = "/assets/images/question-mark-icon.png"
     
-    private val image = prepareImage( Color.Black, vertexModel match {
-        case i: LiteralVertex => literalIcon
-        case i: IdentifiedVertex => identifiedIcon
-        case _ => unknownIcon
-    }
-    )
+    private var image: Option[Canvas] = None
+    private var previousColor: Option[Color] = None
 
     /**
       * Indicator of isSelected attribute. Does not effect inner mechanics.
@@ -45,7 +41,7 @@ class VertexView(val vertexModel: Vertex, var position: Point) extends View {
     var selected = false
 
     /**
-      * List of edges that this vertex representation has. Allows to Iterate throught the graphical representation
+      * List of edges that this vertex representation has. Allows to Iterate through the graphical representation
       * of the graph.
       */
     var edges = ListBuffer[EdgeView]()
@@ -65,10 +61,7 @@ class VertexView(val vertexModel: Vertex, var position: Point) extends View {
     }
 
     def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
-        val correctedPosition = this.position + (defVertexSize / -2) + positionCorrection.getOrElse(Point.Zero).toVector
-
-        drawRoundedRectangle(context, correctedPosition, defVertexSize, defVertexCornerRadius)
-
+        //TODO might look good to draw the rectangle gray and red when selected, the icon should be in color of the "type"
 
         val colorToUse = if(!selected) {
             vertexModel match {
@@ -80,9 +73,22 @@ class VertexView(val vertexModel: Vertex, var position: Point) extends View {
             color.getOrElse(defColor1)
         }
 
-        drawImage(context, prepareImage(colorToUse, literalIcon), position + Vector(-10, -10)/*correctedPosition*/, Vector(20, 20))
+        val correctedPosition = this.position + (defVertexSize / -2) + positionCorrection.getOrElse(Point.Zero).toVector
 
-        /*TODO drawing the image straight out works, but is slow during redrawing...might be useful to contain it in
-        a separate canvas and when necessary draw the canvas*/
+        drawRoundedRectangle(context, correctedPosition, defVertexSize, defVertexCornerRadius)
+        fillCurrentSpace(context, colorToUse)
+
+        if((image.isEmpty && previousColor.isEmpty) || (previousColor.get != colorToUse)) {
+            previousColor = Some(colorToUse)
+            image = Some(prepareImage(colorToUse, vertexModel match {
+                case i: LiteralVertex => literalIcon
+                case i: IdentifiedVertex => identifiedIcon
+                case _ => unknownIcon
+            }
+            ))
+        }
+        drawImage(context, image.get, position + Vector(-10, -10), Vector(20, 20))
+
+        /*TODO drawing is successful only on the second redraw...why!?*/
     }
 }

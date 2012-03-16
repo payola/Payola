@@ -166,32 +166,32 @@ trait View {
     }
 
     protected def prepareImage(colorToUse: Color, imagePath: String): Canvas = {
+
+        val imageSize = Vector(20, 20)
         val canvas = document.createElement[Canvas]("canvas")
-        canvas.width = 20
-        canvas.height = 20
+        canvas.width = imageSize.x
+        canvas.height = imageSize.y
         val context = canvas.getContext[CanvasRenderingContext2D]("2d")
 
         //nakreslim do lokalniho canvasu
         val imageElement = document.createElement[Image]("img")
         imageElement.src = imagePath
 
-        drawStraightLine(context, Point(1, 1), Point(20, 20), 4, Color.Green)
-        drawImage(context, imageElement, Point(1, 1), Vector(20, 20))
+        drawImage(context, imageElement, Point(0, 0), imageSize)
 
         //nakreslim do globalniho canvasu lokalni canvas
-        val imgd = context.getImageData(0, 0, 20, 20);
-        val pix = imgd.data;
+        val imgd = context.getImageData(0, 0, imageSize.x, imageSize.y);
+        /*val pix = imgd.data;
         var pixelPointer = 0
-        
-        //window.alert("pix length: "+pix.length)
-        while(pixelPointer < pix.length) {
 
-            pix(pixelPointer) = 255   // red
-            pix(pixelPointer + 1) = 255   // green
-            pix(pixelPointer + 2) = 255   // blue
+        while(pixelPointer < pix.length) { //TODO recoloring of the icon
+
+            pix[pixelPointer] = 255   // red
+            pix[pixelPointer + 1] = 255   // green
+            pix[pixelPointer + 2] = 255   // blue
             // alpha
             pixelPointer += 4
-        }
+        }*/
         context.putImageData(imgd, 0, 0);
         canvas
     }

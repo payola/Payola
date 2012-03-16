@@ -26,7 +26,6 @@ trait Seq extends Iterable
         }
         elems
     }
-
     @javascript("return self.internalJsArray.length;")
     override def size: Int = 0
 
@@ -46,7 +45,7 @@ trait Seq extends Iterable
     """)
     def update(n: Int, newelem: Any) {}
 
-    def length: Int = size
+    def length(): Int = size
 
     @javascript("""
         if (index < 0 || self.size() <= index) {

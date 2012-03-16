@@ -148,7 +148,6 @@ class TableTechnique extends BaseTechnique
     override def clean() {
         if(parentElement.isDefined) {
             val element = parentElement.get
-            window.alert("pocet potomku tabulky: "+element.childNodes.length)
             while(element.childNodes.length > 0) {
                 element.removeChild(element.firstChild)
             }
