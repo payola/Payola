@@ -183,19 +183,19 @@ trait View extends SetupLoader{
         drawImage(context, imageElement, Point(0, 0), imageSize)
 
         //nakreslim do globalniho canvasu lokalni canvas
-        /*val imgd = context.getImageData(0, 0, imageSize.x, imageSize.y);
-        val pix = imgd.data;
+        val imageData = context.getImageData(0, 0, imageSize.x, imageSize.y);
+        val canvasPixelArray = imageData.data;
+
         var pixelPointer = 0
+        while(pixelPointer < canvasPixelArray.length) { //TODO recoloring of the icon
 
-        while(pixelPointer < pix.length) { //TODO recoloring of the icon
-
-            pix.setter(pixelPointer, 255)// = 255   // red
-            pix.setter(pixelPointer + 1, 255)// = 255   // green
-            pix.setter(pixelPointer + 2, 255)// = 255   // blue
+            canvasPixelArray(pixelPointer) = 255 // = 255   // red
+            canvasPixelArray(pixelPointer + 1) = 255 // = 255   // green
+            canvasPixelArray(pixelPointer + 2) = 255 // = 255   // blue
             // alpha
             pixelPointer += 4
         }
-        context.putImageData(imgd, 0, 0);*/
+        context.putImageData(imageData, 0, 0);
         canvas
     }
 
