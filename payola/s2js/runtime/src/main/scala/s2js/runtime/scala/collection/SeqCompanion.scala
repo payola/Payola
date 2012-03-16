@@ -8,7 +8,7 @@ trait SeqCompanion
 
     @javascript("""
         var a = self.empty();
-        a.internalJsArray = jsArray;
+        a.setInternalJsArray(jsArray);
         return a;
     """)
     def fromJsArray(jsArray: Any): Seq = null

@@ -180,13 +180,9 @@ object RPCWrapper
             return obj;
         }
 
-        // set the contents of the collection properly to the desired property
-        instance.internalJsArray = obj.__value__;
-
-        // deserialize members of the collection
-        for(var k in instance.internalJsArray)
-        {
-            instance.internalJsArray[k] = this.deserialize(instance.internalJsArray[k], objectRegistry, refQueue);
+        // deserialize members of the collection and add them to the instance
+        for (var i = 0; i < obj.__value__.length; i++) {
+            instance.$plus$eq(this.deserialize(obj.__value__[i], objectRegistry, refQueue));
         }
 
         // register the object into the registry
