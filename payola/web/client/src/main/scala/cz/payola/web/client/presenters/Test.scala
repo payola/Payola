@@ -16,15 +16,15 @@ class Test
         assert(RPCTester.testParamBoolean(false))
         assert(RPCTester.testParamChar('A') == 'A')
         assert(RPCTester.testParamInt(2) == 4)
-        assert(RPCTester.testParamDouble(2.1111111) = 2.111111)
-        
+        assert(RPCTester.testParamDouble(2.1111111) == 2.111111)
+        /*
         try {
             RPCTester.testException
         } catch {
             case e: RPCException => {
                 window.alert("Failed to call RPC. " + e.message)
             }
-        }
+        } */
         
     }
 }

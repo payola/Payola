@@ -19,12 +19,9 @@ class VirtuosoDataProvider extends sparql.providers.SingleDataProvider {
 
         // Query is composed and URL Coded
         val request = composeQueryRequest(query);
-        // Read query result
-        val source = Source.fromURL(request);
-        source.foreach(char => result.append(char));
 
         // Return query result
-        return result.toString();
+        Source.fromURL(request, "UTF-8").mkString
     }
     
     private def composeQueryRequest (query: String) : String = {

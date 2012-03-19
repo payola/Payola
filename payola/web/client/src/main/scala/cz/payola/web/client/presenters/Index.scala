@@ -10,7 +10,7 @@ import cz.payola.web.client.views.plugins.visual.techniques.circle.CircleTechniq
 import cz.payola.web.client.views.plugins.visual.techniques.gravity.GravityTechnique
 import cz.payola.web.client.views.plugins.visual.techniques.minimalization.MinimalizationTechnique
 import cz.payola.web.client.model.graph.{SimpleIdentifiedVertex, SimpleEdge, SimpleGraph}
-import cz.payola.web.shared.{AsyncTest, GraphFetcher}
+import cz.payola.web.shared.GraphFetcher
 
 // TODO remove after classloading is done
 @dependency("cz.payola.common.rdf.IdentifiedVertex")
@@ -64,13 +64,6 @@ class Index
 
     /*DO NOT REMOVE PLEASE*/
     def initGraph(): Graph = {
-
-        AsyncTest.giveMeNiceNumber({
-            result =>
-                window.alert(result)
-        },{
-            err =>
-        })
 
         // TODO retrieve the graph from the server using following call when RPC and server side is done.
         // GraphFetcher.getInitialGraph

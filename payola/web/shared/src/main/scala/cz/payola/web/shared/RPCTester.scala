@@ -1,6 +1,8 @@
 package cz.payola.web.shared
 
-import s2js.runtime.s2js.RPCException
+//import s2js.RPCException
+import cz.payola.common.rdf.Graph
+import cz.payola.data.DataFacade
 
 /**
   *
@@ -52,9 +54,9 @@ object RPCTester
         param.sum
     }
     
-    def testException : Int = {
+    /*def testException : Int = {
         throw new RPCException()
-    }
+    } */
 
     def testGraph : Graph = {
         (new DataFacade).getGraph("http://payola.cz")

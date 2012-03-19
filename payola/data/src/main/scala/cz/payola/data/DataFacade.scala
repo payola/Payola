@@ -12,15 +12,16 @@ class DataFacade
     ))
 
     def getGraph(uri: String): Graph = {
-        val query = """CONSTRUCT {
-                            <http://dbpedia.org/resource/Prague> ?p1 ?n1 .
-                            ?n1 ?p2 ?n2 .
-                        }
-                        WHERE {
-                            <http://dbpedia.org/resource/Prague> ?p1 ?n1 .
-                            OPTIONAL { ?n1 ?p2 ?n2 }
-                        }
-                        LIMIT 40
+        val query = """
+            CONSTRUCT {
+                <http://dbpedia.org/resource/Prague> ?p1 ?n1 .
+                ?n1 ?p2 ?n2 .
+            }
+            WHERE {
+                <http://dbpedia.org/resource/Prague> ?p1 ?n1 .
+                OPTIONAL { ?n1 ?p2 ?n2 }
+            }
+            LIMIT 40
         """
         val result = QueryExecutor.executeQuery(dataProvider, query)
 
