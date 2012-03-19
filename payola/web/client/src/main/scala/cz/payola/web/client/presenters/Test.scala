@@ -6,25 +6,39 @@ import cz.payola.web.shared.RPCTester
 
 class Test
 {
-
     def init() {
-        assert(RPCTester.procedure == 1)
-        assert(RPCTester.testBoolean)
-        assert(RPCTester.testString == "test")
-        assert(RPCTester.testParamArray(Array(1,2,3)) == 6)
-        assert(RPCTester.testParamString("abcd efgh") == "hgfe dcba")
-        assert(RPCTester.testParamBoolean(false))
-        assert(RPCTester.testParamChar('A') == 'A')
-        assert(RPCTester.testParamInt(2) == 4)
-        assert(RPCTester.testParamDouble(2.1111111) == 2.111111)
+        if (!(RPCTester.procedure == 1)) {
+            window.alert("fail test 1");
+        }
+        if (!(RPCTester.testBoolean)) {
+            window.alert("fail test 2");
+        }
+        if (!(RPCTester.testString == "test")) {
+            window.alert("fail test 3");
+        }
+        //assert(RPCTester.testParamArray(Array(1,2,3)) == 6)
+        if (!(RPCTester.testParamString("abcd efgh") == "hgfe dcba")) {
+            window.alert("fail test 4");
+        }
+        if (!(RPCTester.testParamBoolean(false))) {
+            window.alert("fail test 5");
+        }
+        if (!(RPCTester.testParamChar('A') == 'A')) {
+            window.alert("fail test 6");
+        }
+        if (!(RPCTester.testParamInt(2) == 4)) {
+            window.alert("fail test 7");
+        }
+        if (!(RPCTester.testParamDouble(2.0) == 2.0)) {
+            window.alert("fail test 8");
+        }
         /*
-        try {
-            RPCTester.testException
-        } catch {
-            case e: RPCException => {
-                window.alert("Failed to call RPC. " + e.message)
-            }
-        } */
-        
+       try {
+           RPCTester.testException
+       } catch {
+           case e: RPCException => {
+               window.alert("Failed to call RPC. " + e.message)
+           }
+       } */
     }
 }
