@@ -224,7 +224,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         buffer += "%s.%s = ".format(containerName, packageDefCompiler.getSymbolLocalJsName(defDef.symbol))
         compileFunction(defDef.vparamss.flatten, true) {
             compileSymbol(defDef.symbol) {
-                compileAstStatement(defDef.rhs, !typeIsEmpty(defDef.tpt.tpe))
+                compileAstStatement(defDef.rhs, !packageDefCompiler.typeIsEmpty(defDef.tpt.tpe))
             }
         }
         buffer += ";\n"
@@ -236,7 +236,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
       */
     private def compileAnonymousFunction(function: Global#Function) {
         compileFunction(function.vparams, false) {
-            compileAstStatement(function.body, !typeIsEmpty(function.body.tpe))
+            compileAstStatement(function.body, !packageDefCompiler.typeIsEmpty(function.body.tpe))
         }
     }
 
@@ -493,7 +493,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
       */
     private def compileSelect(select: Global#Select, isSubSelect: Boolean = false, isInsideApply: Boolean = false) {
         val subSelectToken = if (isSubSelect) "." else ""
-        val nameString = packageDefCompiler.getLocalJsName(select.name.toString)
+        val nameString = packageDefCompiler.getSymbolLocalJsName(select.symbol)
         val name = if (nameString.endsWith("_$eq")) nameString.stripSuffix("_$eq") else nameString
 
         select match {
@@ -608,7 +608,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
       */
     private def compileRpcCall(select: Global#Select, returnType: Global#Type, parameters: List[Global#Tree]) {
         val requiredTypes = ListBuffer[Global#Type](returnType)
-        val isAsync = packageDefCompiler.getSymbolAnnotations(select.symbol, "s2js.compiler.async").nonEmpty
+        val isAsync = packageDefCompiler.symbolHasAnnotation(select.symbol, "s2js.compiler.async")
 
         var realParameters = parameters
         var successCallback: Option[Global#Tree] = None
@@ -616,28 +616,9 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         
         // Check the parameter values.
         if (isAsync) {
-            val errorPrefix = "The asynchronous remote method %s ".format(select.toString)
-            if (parameters.length < 2) {
-                throw new ScalaToJsException(errorPrefix + "must have at least two parameters")
-            }
-            if (!typeIsEmpty(returnType)) {
-                throw new ScalaToJsException(errorPrefix + "mustn't return anything (the return type must be Unit).")
-            }
-
             val callbacks = parameters.takeRight(2)
             successCallback = Some(callbacks.head)
             errorCallback = Some(callbacks.last)
-            if (!typeIsFunction1(successCallback.get.tpe) || !typeIsFunction1(errorCallback.get.tpe)) {
-                throw new ScalaToJsException(errorPrefix + 
-                    " must have declared success callback function and error callback function parameters.")
-            }
-
-            val errorCallbackParameterTypeName = errorCallback.get.tpe.typeArgs.head.typeSymbol.fullName
-            if (errorCallbackParameterTypeName != "java.lang.Throwable") {
-                throw new ScalaToJsException(errorPrefix +
-                    " must have an error callback whose first parameter is of type Throwable.")
-            }
-
             requiredTypes += successCallback.get.tpe.typeArgs.head
             realParameters = parameters.dropRight(2)
         }
@@ -742,7 +723,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
       * @param condition The If statement to compile.
       */
     private def compileIf(condition: Global#If) {
-        val hasReturn = !typeIsEmpty(condition.tpe);
+        val hasReturn = !packageDefCompiler.typeIsEmpty(condition.tpe);
         if (hasReturn) {
             buffer += "(function() {\n"
         }
@@ -837,7 +818,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
       */
     private def compileMatch(matchAst: Global#Match) {
         val selectorName = packageDefCompiler.getUniqueLocalName("selector")
-        val hasReturn = !typeIsEmpty(matchAst.tpe)
+        val hasReturn = !packageDefCompiler.typeIsEmpty(matchAst.tpe)
         buffer += "(function(%s) {\n".format(selectorName)
         matchAst.cases.foreach(compileCase(_, selectorName, hasReturn))
         buffer += "})("
@@ -1037,14 +1018,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
             member.nameString.matches("""^.*\$default\$[0-9]+$""") // A member generated for default parameter value
     }
 
-    /**
-      * Returns true if the type is the NoType or the Unit.
-      * @param tpe The type to check.
-      * @return True if the type is empty, false otherwise.
-      */
-    private def typeIsEmpty(tpe: Global#Type): Boolean = {
-        tpe == NoType || tpe.typeSymbol.fullName == "scala.Unit"
-    }
+
 
     /**
       * Returns whether the type is a primitive type (either scala.AnyVal or java.lang.String).
@@ -1053,15 +1027,6 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
       */
     private def typeIsPrimitive(tpe: Global#Type): Boolean = {
         tpe.typeSymbol.fullName == "java.lang.String" || tpe.baseClasses.exists(_.fullName.toString == "scala.AnyVal")
-    }
-
-    /**
-      * Returns whether the type is a Function1 (a function with one parameter).
-      * @param tpe the type to check.
-      * @return True if the type is a function with one parameter, false otherwise.
-      */
-    private def typeIsFunction1(tpe: Global#Type): Boolean = {
-        tpe.typeSymbol.fullName == "scala.Function1"
     }
 
     /**
@@ -1106,7 +1071,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
       * @return True if the select is invoked on a remote object.
       */
     private def selectIsOnRemote(select: Global#Select): Boolean = {
-        select.qualifier.hasSymbolWhich(packageDefCompiler.getSymbolAnnotations(_, "remote").nonEmpty)
+        select.qualifier.hasSymbolWhich(packageDefCompiler.symbolHasAnnotation(_, "remote"))
     }
 
     /**

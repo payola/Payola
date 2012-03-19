@@ -6,7 +6,7 @@ object StringOps extends s2js.runtime.scala.collection.SeqCompanion
 {
     def empty = new StringOps("")
 
-    @javascript("return self.fromJsArray(xs.internalJsArray);")
+    @javascript("return self.fromJsArray(xs.getInternalJsArray());")
     def apply(xs: Any*): Any = null
 }
 
@@ -16,10 +16,10 @@ class StringOps(x: String) extends s2js.runtime.scala.collection.Seq
 
     def newInstance = StringOps.empty
 
-    @javascript("self.internalJsArray = value.split('')")
+    @javascript("self.setInternalJsArray(value.split(''))")
     def initializeInternalJsArray(value: String) {}
 
-    @javascript("return self.internalJsArray.join();")
+    @javascript("return self.getInternalJsArray().join();")
     def repr: String = ""
 
     override def toString = mkString("", "", "")

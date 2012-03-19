@@ -6,7 +6,7 @@ object ArrayBuffer extends s2js.runtime.scala.collection.SeqCompanion
 {
     def empty = new ArrayBuffer
 
-    @javascript("return self.fromJsArray(xs.internalJsArray);")
+    @javascript("return self.fromJsArray(xs.getInternalJsArray());")
     def apply(xs: Any*): Any = null
 }
 

@@ -6,16 +6,22 @@ import s2js.compiler.javascript
 trait Seq extends Iterable
 {
     @javascript("[]")
-    var internalJsArray = null
+    var internalJsArray: AnyRef = null
+
+    def getInternalJsArray = internalJsArray
+
+    def setInternalJsArray(value: AnyRef) {
+        internalJsArray = value
+    }
 
     @javascript("""
-        for (var i in self.internalJsArray) {
-            f(self.internalJsArray[i]);
+        for (var i in self.getInternalJsArray()) {
+            f(self.getInternalJsArray()[i]);
         }
     """)
     def foreach[U](f: Double => U) {}
 
-    @javascript("self.internalJsArray.push(x);")
+    @javascript("self.getInternalJsArray().push(x);")
     def +=(x: Any) {}
 
     // From TraversableLike
@@ -27,14 +33,14 @@ trait Seq extends Iterable
         elems
     }
 
-    @javascript("return self.internalJsArray.length;")
+    @javascript("return self.getInternalJsArray().length;")
     override def size: Int = 0
 
     @javascript("""
-        if (s2js.isUndefined(self.internalJsArray[n])) {
+        if (s2js.isUndefined(self.getInternalJsArray()[n])) {
             throw new scala.NoSuchElementException('An item with index ' + n + ' is not present.');
         }
-        return self.internalJsArray[n];
+        return self.getInternalJsArray()[n];
     """)
     def apply(n: Int): Any = null
 
@@ -42,7 +48,7 @@ trait Seq extends Iterable
         if (self.size() <= n) {
             throw new scala.NoSuchElementException('An item with index ' + n + ' is not present.');
         }
-        self.internalJsArray[n] = newelem;
+        self.getInternalJsArray()[n] = newelem;
     """)
     def update(n: Int, newelem: Any) {}
 
@@ -52,19 +58,19 @@ trait Seq extends Iterable
         if (index < 0 || self.size() <= index) {
             throw new scala.NoSuchElementException('An item with index ' + n + ' is not present.');
         }
-        var removed = self.internalJsArray[index];
-        self.internalJsArray.splice(index, 1);
+        var removed = self.getInternalJsArray()[index];
+        self.getInternalJsArray().splice(index, 1);
         return removed;
     """)
     def remove(index: Int) {}
 
-    @javascript("""self.internalJsArray.splice(0, 0, x);""")
+    @javascript("""self.getInternalJsArray().splice(0, 0, x);""")
     def prepend(x: Any) {}
 
     @javascript("""
-        var index = self.internalJsArray.indexOf(x);
+        var index = self.getInternalJsArray().indexOf(x);
         if (index != -1) {
-            self.internalJsArray.splice(index, 1);
+            self.getInternalJsArray().splice(index, 1);
         }
     """)
     def -=(x: Double) {}
