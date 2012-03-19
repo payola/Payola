@@ -7,7 +7,7 @@ class AnnotationSpecs extends CompilerFixtureSpec
             configMap =>
                 scalaCode {
                     """
-                        @s2js.compiler.NativeJs(""" + "\"\"\"" + """
+                        @s2js.compiler.javascript(""" + "\"\"\"" + """
                             A = function() {
                                 this.x = 'foo';
                                 window.alert('a created');
@@ -35,7 +35,7 @@ class AnnotationSpecs extends CompilerFixtureSpec
                             val x = "foo"
                             val y = 123
 
-                            @s2js.compiler.NativeJs(""" + "\"\"\"" + """
+                            @s2js.compiler.javascript(""" + "\"\"\"" + """
                                 console.log(self.x + self.y.toString + x);
                             """ + "\"\"\"" + """)
                             def m(x: String) {}
@@ -64,7 +64,7 @@ class AnnotationSpecs extends CompilerFixtureSpec
                 scalaCode {
                     """
                         class A {
-                            @s2js.compiler.NativeJs("[1, 2, 3]")
+                            @s2js.compiler.javascript("[1, 2, 3]")
                             val x = ""
                         }
                     """

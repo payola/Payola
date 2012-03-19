@@ -1,21 +1,21 @@
 package s2js.runtime.scala.collection
 
 import s2js.runtime.scala.util.control.Breaks._
-import s2js.compiler.NativeJs
+import s2js.compiler.javascript
 
 trait Seq extends Iterable
 {
-    @NativeJs("[]")
+    @javascript("[]")
     var internalJsArray = null
 
-    @NativeJs("""
+    @javascript("""
         for (var i in self.internalJsArray) {
             f(self.internalJsArray[i]);
         }
     """)
     def foreach[U](f: Double => U) {}
 
-    @NativeJs("self.internalJsArray.push(x);")
+    @javascript("self.internalJsArray.push(x);")
     def +=(x: Any) {}
 
     // From TraversableLike
@@ -27,10 +27,10 @@ trait Seq extends Iterable
         elems
     }
 
-    @NativeJs("return self.internalJsArray.length;")
+    @javascript("return self.internalJsArray.length;")
     override def size: Int = 0
 
-    @NativeJs("""
+    @javascript("""
         if (s2js.isUndefined(self.internalJsArray[n])) {
             throw new scala.NoSuchElementException('An item with index ' + n + ' is not present.');
         }
@@ -38,7 +38,7 @@ trait Seq extends Iterable
     """)
     def apply(n: Int): Any = null
 
-    @NativeJs("""
+    @javascript("""
         if (self.size() <= n) {
             throw new scala.NoSuchElementException('An item with index ' + n + ' is not present.');
         }
@@ -48,7 +48,7 @@ trait Seq extends Iterable
 
     def length: Int = size
 
-    @NativeJs("""
+    @javascript("""
         if (index < 0 || self.size() <= index) {
             throw new scala.NoSuchElementException('An item with index ' + n + ' is not present.');
         }
@@ -58,10 +58,10 @@ trait Seq extends Iterable
     """)
     def remove(index: Int) {}
 
-    @NativeJs("""self.internalJsArray.splice(0, 0, x);""")
+    @javascript("""self.internalJsArray.splice(0, 0, x);""")
     def prepend(x: Any) {}
 
-    @NativeJs("""
+    @javascript("""
         var index = self.internalJsArray.indexOf(x);
         if (index != -1) {
             self.internalJsArray.splice(index, 1);
