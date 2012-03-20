@@ -12,7 +12,7 @@ trait Group extends NamedEntity with OwnedEntity
 
     protected val _sharedAnalyses: mutable.Seq[AnalysisShareType]
 
-    def members: immutable.Seq[UserType] = _members
+    def members: immutable.Seq[UserType] = _members.toList
 
-    def sharedAnalyses: immutable.Seq[AnalysisShareType] = _sharedAnalyses
+    def sharedAnalyses: immutable.Seq[AnalysisShareType] = _sharedAnalyses.toList
 }

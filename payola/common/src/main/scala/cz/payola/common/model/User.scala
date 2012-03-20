@@ -38,11 +38,11 @@ trait User extends NamedEntity
         _password = value
     }
 
-    def ownedGroups: immutable.Seq[GroupType] = _ownedGroups
+    def ownedGroups: immutable.Seq[GroupType] = _ownedGroups.toList
 
-    def memberGroups: immutable.Seq[GroupType] = _memberGroups
+    def memberGroups: immutable.Seq[GroupType] = _memberGroups.toList
 
-    def ownedAnalyses: immutable.Seq[AnalysisType] = _ownedAnalyses
+    def ownedAnalyses: immutable.Seq[AnalysisType] = _ownedAnalyses.toList
 
-    def sharedAnalyses: immutable.Seq[AnalysisShareType] = _sharedAnalyses
+    def sharedAnalyses: immutable.Seq[AnalysisShareType] = _sharedAnalyses.toList
 }

@@ -17,5 +17,5 @@ trait PluginInstance extends Entity
     
     def plugin = _plugin
 
-    def parameterInstances: immutable.Seq[ParameterInstanceType] = _parameterInstances
+    def parameterInstances: immutable.Seq[ParameterInstanceType] = _parameterInstances.toList
 }

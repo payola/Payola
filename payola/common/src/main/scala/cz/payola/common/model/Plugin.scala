@@ -10,5 +10,5 @@ trait Plugin extends NamedEntity
 
     protected val _parameters: mutable.Seq[ParameterType]
 
-    def parameters: immutable.Seq[ParameterType] = _parameters
+    def parameters: immutable.Seq[ParameterType] = _parameters.toList
 }

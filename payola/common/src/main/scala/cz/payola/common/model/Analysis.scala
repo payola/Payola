@@ -10,5 +10,5 @@ trait Analysis extends NamedEntity with OwnedEntity
 
     protected val _pluginInstances: mutable.Seq[PluginInstanceType]
 
-    def pluginInstances: immutable.Seq[PluginInstanceType] = _pluginInstances
+    def pluginInstances: immutable.Seq[PluginInstanceType] = _pluginInstances.toList
 }
