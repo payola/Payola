@@ -22,9 +22,8 @@ ParameterInstance[String](p, v)
         else {
             // strval.toFloat might end up throwing an exception. Anything that cannot be parsed will be converted
             // to zero.
-            try { {
+            try {
                 value.toFloat
-            }
             } catch {
                 case e: Exception => 0.0f
             }
@@ -42,9 +41,8 @@ ParameterInstance[String](p, v)
         else {
             // strval.toInt might end up throwing an exception. Anything that cannot be parsed will be converted
             // to zero.
-            try { {
+            try {
                 value.toInt
-            }
             } catch {
                 case e: Exception => 0
             }

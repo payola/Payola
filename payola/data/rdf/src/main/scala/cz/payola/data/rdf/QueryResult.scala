@@ -1,4 +1,4 @@
-package cz.payola.data.sparql
+package cz.payola.data.rdf
 
 object QueryResult
 {

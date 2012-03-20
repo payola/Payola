@@ -1,7 +1,6 @@
-package cz.payola.data
+package cz.payola.data.rdf.providers
 
 import scala.io.Source
-import sparql.providers.SingleDataProvider
 
 class FakeTtlDataProvider extends SingleDataProvider
 {

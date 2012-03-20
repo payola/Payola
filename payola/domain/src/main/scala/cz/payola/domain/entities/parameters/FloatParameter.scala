@@ -55,9 +55,8 @@ protected class FloatParameterInstance(parameter: FloatParameter, value: Float) 
     override def setStringValue(strval: String) = {
         // strval.toFloat might end up throwing an exception. Anything that cannot be parsed will be converted
         // to zero.
-        try { {
+        try {
             setFloatValue(strval.toFloat)
-        }
         } catch {
             case e: Exception => setFloatValue(0.0f)
         }

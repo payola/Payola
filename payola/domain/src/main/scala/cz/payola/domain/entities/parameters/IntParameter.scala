@@ -55,9 +55,8 @@ ParameterInstance[Int](parameter, value)
     override def setStringValue(strval: String) = {
         // strval.toInt might end up throwing an exception. Anything that cannot be parsed will be converted
         // to zero.
-        try { {
+        try {
             setIntValue(strval.toInt)
-        }
         } catch {
             case e: Exception => setIntValue(0)
         }

@@ -1,3 +1,3 @@
-package cz.payola.data.sparql.messages
+package cz.payola.data.rdf.messages
 
 case class ErrorMessage(exception: Throwable) extends DataProviderResultMessage

@@ -1,7 +1,7 @@
-package cz.payola.data.sparql.providers
+package cz.payola.data.rdf.providers
 
-import cz.payola.data.sparql.{QueryExecutor, DataProvider}
-import cz.payola.data.sparql.messages.{DataMessage, ErrorMessage}
+import cz.payola.data.rdf.{QueryExecutor, DataProvider}
+import cz.payola.data.rdf.messages.{ErrorMessage, DataMessage}
 
 trait SingleDataProvider extends DataProvider
 {

@@ -1,4 +1,4 @@
-package cz.payola.data.sparql
+package cz.payola.data.rdf
 
 import actors.{TIMEOUT, Actor}
 import messages.TimeoutMessage
