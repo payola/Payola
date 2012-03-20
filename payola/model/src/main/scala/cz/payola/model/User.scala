@@ -9,8 +9,6 @@ class User(protected var _name: String) extends cz.payola.common.model.User with
 
     type AnalysisType = Analysis
 
-    type AnalysisShareType = AnalysisShare
-
     protected var _email: String = ""
 
     protected var _password: String = ""
@@ -119,14 +117,14 @@ class User(protected var _name: String) extends cz.payola.common.model.User with
       *
       * @return True or false.
       */
-    def hasAccessToAnalysis(a: AnalysisType): Boolean = {
+    /*def hasAccessToAnalysis(a: AnalysisType): Boolean = {
         if (_ownedAnalysesIDs.contains(a.id) || sharedAnalyses.exists(_.analysis.id == a.id)) {
             true
         } else {
             memberGroups.exists(_.hasAccessToSharedAnalysis(a)) ||
                 ownedGroups.exists(_.hasAccessToSharedAnalysis(a))
         }
-    }
+    }*/
 
     def isMemberOfGroup(g: Group): Boolean = g.hasMember(this)
 

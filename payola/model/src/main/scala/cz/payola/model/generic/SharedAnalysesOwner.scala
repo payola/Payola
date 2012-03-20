@@ -1,13 +1,13 @@
 package cz.payola.model.generic
 
 import collection.mutable.{Seq, ArrayBuffer}
-import cz.payola.model.{Analysis, AnalysisShare}
+import cz.payola.model.{Analysis}
 
 trait SharedAnalysesOwner{
 
     // Shared analysis. Initially only IDs are loaded, actual shares are loaded from the
     // data layer as needed
-    protected val _sharedAnalyses: ArrayBuffer[AnalysisShare] = new ArrayBuffer[AnalysisShare]()
+    /*protected val _sharedAnalyses: ArrayBuffer[AnalysisShare] = new ArrayBuffer[AnalysisShare]()
     private val _sharedAnalysesIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
 
 
@@ -86,6 +86,6 @@ trait SharedAnalysesOwner{
       *
       * @return Number of shared analyses.
       */
-    def sharedAnalysisCount: Int = _sharedAnalysesIDs.size
+    def sharedAnalysisCount: Int = _sharedAnalysesIDs.size*/
 
 }

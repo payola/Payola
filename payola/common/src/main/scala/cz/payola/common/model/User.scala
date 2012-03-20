@@ -11,20 +11,13 @@ trait User extends NamedEntity
     /** Type of the analyses that the user can own. */
     type AnalysisType <: Analysis
 
-    /** Type of the analysis shares that are associated with the user. */
-    type AnalysisShareType <: AnalysisShare
-
     protected var _email: String
 
     protected var _password: String
 
     protected val _ownedGroups: mutable.Seq[GroupType]
 
-    protected val _memberGroups: mutable.Seq[GroupType]
-
     protected val _ownedAnalyses: mutable.Seq[AnalysisType]
-
-    protected val _sharedAnalyses: mutable.Seq[AnalysisShareType]
 
     def email = _email
 
@@ -40,9 +33,5 @@ trait User extends NamedEntity
 
     def ownedGroups: immutable.Seq[GroupType] = _ownedGroups.toList
 
-    def memberGroups: immutable.Seq[GroupType] = _memberGroups.toList
-
     def ownedAnalyses: immutable.Seq[AnalysisType] = _ownedAnalyses.toList
-
-    def sharedAnalyses: immutable.Seq[AnalysisShareType] = _sharedAnalyses.toList
 }

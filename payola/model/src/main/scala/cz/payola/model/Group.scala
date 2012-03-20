@@ -7,8 +7,6 @@ import generic.{SharedAnalysesOwner, ConcreteOwnedEntity, ConcreteNamedEntity}
 class Group (protected var _name: String, protected val _owner: User) extends common.model.Group with ConcreteNamedEntity with ConcreteOwnedEntity with SharedAnalysesOwner
 {
 
-    type AnalysisShareType = AnalysisShare
-
     // Members. Initially only IDs are loaded, actual members are loaded from the
     // data layer as needed
     private val _memberIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
