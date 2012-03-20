@@ -5,7 +5,8 @@ package cz.payola.scala2json.classes
   * @param seqClass Class of the sequence.
   * @param itemSerializationClass Serialization class of the items.
   */
-case class SeqSerializationClass(seqClass: Class[_], itemSerializationClass: SerializationClass) extends SerializationClass
+case class SeqSerializationClass(seqClass: Class[_], itemSerializationClass: SerializationClass)
+    extends SerializationClass
 {
     def isClassOf(anObject: Any): Boolean = {
         // TODO: Check all items for type?

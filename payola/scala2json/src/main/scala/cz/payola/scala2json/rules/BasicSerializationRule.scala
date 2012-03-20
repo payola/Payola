@@ -9,5 +9,4 @@ package cz.payola.scala2json.rules
 case class BasicSerializationRule(
     serializeAsClass: Option[Class[_]] = None,
     transientFields: Option[collection.Seq[String]] = None,
-    fieldAliases: Option[collection.Map[String, String]] = None
-    ) extends SerializationRule
+    fieldAliases: Option[collection.Map[String, String]] = None) extends SerializationRule

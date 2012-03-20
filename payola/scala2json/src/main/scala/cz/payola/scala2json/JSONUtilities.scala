@@ -1,25 +1,27 @@
 package cz.payola.scala2json
 
-object JSONUtilities {
-
+object JSONUtilities
+{
     /** Returns a char escaped so that it can
-     *  be used in the JSON output right away.
-     *
-     * @param c Char to be escaped.
-     *
-     * @return Escaped char.
-     */
+      *  be used in the JSON output right away.
+      *
+      * @param c Char to be escaped.
+      *
+      * @return Escaped char.
+      */
+    // TODO try to use verbs for method names (escapeChar).
     def escapedChar(c: Char): String = {
         escapedString(c.toString)
     }
 
     /** Returns a string escaped and wrapped in quotes so that it can
-     *  be used in the JSON output right away.
-     *
-     * @param str String to be escaped.
-     *
-     * @return Escaped string.
-     */
+      *  be used in the JSON output right away.
+      *
+      * @param str String to be escaped.
+      *
+      * @return Escaped string.
+      */
+    // TODO try to use verbs for method names (escapeString).
     def escapedString(str: String): String = {
         val builder: StringBuilder = new StringBuilder(str)
 

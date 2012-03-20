@@ -6,7 +6,8 @@ package cz.payola.scala2json.classes
   * @param keySerializationClass Serialization class of the keys.
   * @param valueSerializationClass Serialization class of the values.
   */
-case class MapSerializationClass(mapClass: Class[_], keySerializationClass: SerializationClass, valueSerializationClass: SerializationClass) extends SerializationClass
+case class MapSerializationClass(mapClass: Class[_], keySerializationClass: SerializationClass,
+    valueSerializationClass: SerializationClass) extends SerializationClass
 {
     def isClassOf(anObject: Any): Boolean = {
         // ??? Maybe also check whether for each key -> value:
