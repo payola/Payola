@@ -5,8 +5,8 @@ import java.lang.reflect.{Field, Method}
 import rules.{CustomSerializationRule, BasicSerializationRule, SerializationRule}
 import scala.collection.mutable.ArrayBuffer
 
-object OutputFormat extends Enumeration
-{
+object OutputFormat extends Enumeration {
+
     type OutputFormat = Value
 
     val PrettyPrinted = Value

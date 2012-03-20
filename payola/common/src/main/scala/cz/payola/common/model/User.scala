@@ -1,6 +1,7 @@
 package cz.payola.common.model
 
-import scala.collection.mutable.Seq
+import scala.collection.mutable
+import scala.collection.immutable
 
 trait User extends NamedEntity
 {
@@ -17,13 +18,13 @@ trait User extends NamedEntity
 
     protected var _password: String
 
-    protected val _ownedGroups: Seq[GroupType]
+    protected val _ownedGroups: mutable.Seq[GroupType]
 
-    protected val _memberGroups: Seq[GroupType]
+    protected val _memberGroups: mutable.Seq[GroupType]
 
-    protected val _ownedAnalyses: Seq[AnalysisType]
+    protected val _ownedAnalyses: mutable.Seq[AnalysisType]
 
-    protected val _sharedAnalyses: Seq[AnalysisShareType]
+    protected val _sharedAnalyses: mutable.Seq[AnalysisShareType]
 
     def email = _email
 
@@ -37,11 +38,11 @@ trait User extends NamedEntity
         _password = value
     }
 
-    def ownedGroups = _ownedGroups
+    def ownedGroups: immutable.Seq[GroupType] = _ownedGroups
 
-    def memberGroups = _memberGroups
+    def memberGroups: immutable.Seq[GroupType] = _memberGroups
 
-    def ownedAnalyses = _ownedAnalyses
+    def ownedAnalyses: immutable.Seq[AnalysisType] = _ownedAnalyses
 
-    def sharedAnalyses = _sharedAnalyses
+    def sharedAnalyses: immutable.Seq[AnalysisShareType] = _sharedAnalyses
 }

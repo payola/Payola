@@ -1,5 +1,8 @@
 package cz.payola.common.model
 
+import scala.collection.mutable
+import scala.collection.immutable
+
 trait PluginInstance extends Entity
 {
     /** Type of the plugin the current object is instance of. */
@@ -10,9 +13,9 @@ trait PluginInstance extends Entity
 
     protected val _plugin: PluginType
 
-    protected val _parameterInstances: Seq[ParameterInstanceType]
+    protected val _parameterInstances: mutable.Seq[ParameterInstanceType]
     
     def plugin = _plugin
 
-    def parameterInstances = _parameterInstances
+    def parameterInstances: immutable.Seq[ParameterInstanceType] = _parameterInstances
 }
