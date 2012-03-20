@@ -19,8 +19,6 @@
       <sourceFolder url="file://$MODULE_DIR$/../src/test/scala" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../src/test/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../src/test/resources" isTestSource="true" />
-      <excludeFolder url="file://$MODULE_DIR$/../.idea" />
-      <excludeFolder url="file://$MODULE_DIR$" />
       <excludeFolder url="file://$MODULE_DIR$/../target" />
     </content>
     <orderEntry type="inheritedJdk" />
@@ -33,6 +31,7 @@
     <orderEntry type="module" module-name="s2js" exported="" />
     <orderEntry type="module" module-name="scala2json" exported="" />
     <orderEntry type="module" module-name="common" exported="" />
+    <orderEntry type="module" module-name="domain" exported="" />
     <orderEntry type="module" module-name="data" exported="" />
     <orderEntry type="module" module-name="model" exported="" />
     <orderEntry type="module" module-name="web" exported="" />

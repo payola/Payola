@@ -108,7 +108,7 @@ object PayolaBuild extends Build
     lazy val payolaProject = Project(
         "payola", file("."), settings = payolaSettings
     ).aggregate(
-        s2JsProject, scala2JsonProject, commonProject, dataProject, modelProject, webProject
+        s2JsProject, scala2JsonProject, commonProject, domainProject, dataProject, modelProject, webProject
     )
 
     lazy val s2JsProject = Project(
@@ -187,21 +187,39 @@ object PayolaBuild extends Build
         "common", file("common"), WebSettings.javaScriptsDir, payolaSettings
     ).dependsOn(scala2JsonProject)
 
-    lazy val dataProject = Project(
-        "data", file("data"),
+    lazy val domainProject = Project(
+        "domain", file("domain"),
         settings = payolaSettings ++ Seq(
             libraryDependencies ++= Seq(
                 "org.apache.jena" % "jena-core" % "2.7.0-incubating"
             )
         )
     ).dependsOn(
-        scala2JsonProject, commonProject
+        commonProject
+    )
+
+    lazy val dataProject = Project(
+        "data", file("data"), settings = payolaSettings
+    ).aggregate(
+        dataRdfProject, dataEntitiesProject
+    )
+
+    lazy val dataRdfProject = Project(
+        "rdf", file("data/rdf"), settings = payolaSettings
+    ).dependsOn(
+        commonProject, domainProject, scala2JsonProject
+    )
+
+    lazy val dataEntitiesProject = Project(
+        "entities", file("data/entities"), settings = payolaSettings
+    ).dependsOn(
+        commonProject, domainProject
     )
 
     lazy val modelProject = Project(
         "model", file("model"), settings = payolaSettings
     ).dependsOn(
-        scala2JsonProject, commonProject, dataProject
+        commonProject, domainProject, dataProject
     )
 
     lazy val webProject = Project(

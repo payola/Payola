@@ -5,6 +5,7 @@ import java.lang.reflect.Method
 import cz.payola.scala2json.JSONSerializer
 import cz.payola.scala2json.classes.SimpleSerializationClass
 import cz.payola.scala2json.rules.BasicSerializationRule
+import cz.payola.domain.rdf.{RDFEdge, RDFGraph, RDFIdentifiedNode, RDFLiteralNode}
 
 object RPC extends Controller
 {
