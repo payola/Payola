@@ -7,7 +7,7 @@ resolvers ++= Seq(
     Resolver.url("Play", url("http://download.playframework.org/ivy-releases/"))(Resolver.ivyStylePatterns)
 )
 
-addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "0.11.0")
+addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.0.0")
 
 addSbtPlugin("play" % "sbt-plugin" % "2.0")
 
