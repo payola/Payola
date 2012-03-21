@@ -9,9 +9,8 @@ object JSONUtilities
       *
       * @return Escaped char.
       */
-    // TODO try to use verbs for method names (escapeChar).
-    def escapedChar(c: Char): String = {
-        escapedString(c.toString)
+    def escapeChar(c: Char): String = {
+        escapeString(c.toString)
     }
 
     /** Returns a string escaped and wrapped in quotes so that it can
@@ -21,8 +20,7 @@ object JSONUtilities
       *
       * @return Escaped string.
       */
-    // TODO try to use verbs for method names (escapeString).
-    def escapedString(str: String): String = {
+    def escapeString(str: String): String = {
         val builder: StringBuilder = new StringBuilder(str)
 
         // Replace all invalid chars, see http://www.json.org/
