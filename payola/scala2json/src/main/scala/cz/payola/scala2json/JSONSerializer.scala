@@ -2,7 +2,7 @@ package cz.payola.scala2json
 
 import classes.SerializationClass
 import java.lang.reflect.{Field, Method}
-import rules.{CustomSerializationRule, BasicSerializationRule, SerializationRule}
+import rules.{CustomValueSerializationRule, CustomSerializationRule, BasicSerializationRule, SerializationRule}
 import scala.collection.mutable.ArrayBuffer
 
 object OutputFormat extends Enumeration {
@@ -26,63 +26,9 @@ class JSONSerializer
 
     private val _rules = new ArrayBuffer[(SerializationClass, SerializationRule)]()
 
-    /** Appends an array item to string builder.
-      *
-      * @param item The item.
-      * @param builder The builder
-      * @param isFirst Whether the field is first - if it is, the comma separator is left out.
-      *
-      * @return False if the field has been skipped.
-      */
-    // TODO I suggest not prepending private method names with underscores. Also all _append*ToStringBuilder could be
-    // TODO extracted into a custom subclass of stringbuilder (maybe JSONStringBuilder).
-    private def _appendStringArrayItemToStringBuilder(item: String, builder: StringBuilder, isFirst: Boolean) = {
-        if (!isFirst) {
-            builder.append(',')
-            if (_prettyPrint) {
-                builder.append('\n')
-            }
-        }
+    def addSerializationRule(forClass: SerializationClass, rule: SerializationRule) = _rules += ((forClass, rule))
 
-        if (_prettyPrint) {
-            builder.append('\t')
-        }
-
-        builder.append(item)
-    }
-
-    private def _appendArrayItemToStringBuilder(item: Any, builder: StringBuilder, isFirst: Boolean) = {
-        var serializedObj: String = _serializeObject(item)
-        if (_prettyPrint) {
-            serializedObj = serializedObj.replaceAllLiterally("\n", "\n\t")
-        }
-        _appendStringArrayItemToStringBuilder(serializedObj, builder, isFirst)
-    }
-
-    /** Appends "key: value" to @builder, preceded by comma, unless @isFirst is true.
-      *
-      * @param key The key.
-      * @param value The value.
-      * @param builder The builder.
-      * @param isFirst If true, comma preceding the field is left out.
-      *
-      */
-    private def _appendKeyValueToStringBuilder(key: String, value: Any, builder: StringBuilder, isFirst: Boolean) = {
-        var serializedObj: String = _serializeObject(value)
-        if (_prettyPrint) {
-            serializedObj = serializedObj.replaceAllLiterally("\n", "\n\t")
-        }
-        _appendKeySerializedValueToStringBuilder(key, serializedObj, builder, isFirst)
-    }
-
-    private def _appendKeySerializedValueToStringBuilder(key: String, value: String, builder: StringBuilder,
-        isFirst: Boolean) = {
-        val separator: String = if (_prettyPrint) ": " else ":"
-        val field: String = "\"" + key + "\"" + separator + value
-        _appendStringArrayItemToStringBuilder(field, builder, isFirst)
-    }
-
-    private def _classHasField(cl: Class[_], fName: String): Boolean = {
+    private def classHasField(cl: Class[_], fName: String): Boolean = {
         if (cl.isInterface) {
             // I.e. a trait, treat it differently
             // Maybe, there is a field, so let's try finding it just to be sure
@@ -98,7 +44,7 @@ class JSONSerializer
 
             if (!found) {
                 // There's one more place the field can be hiding - interfaces that this interface extends
-                found = cl.getInterfaces.exists {intCl: Class[_] => _classHasField(intCl, fName)}
+                found = cl.getInterfaces.exists {intCl: Class[_] => classHasField(intCl, fName)}
             }
             found
         } else {
@@ -111,30 +57,47 @@ class JSONSerializer
       *
       * @return The object's class name.
       */
-    private def _objectsClassName(obj: AnyRef): String = {
+    private def objectsClassName(obj: AnyRef): String = {
         obj match {
             case _: scala.collection.immutable.List[_] => "scala.collection.immutable.List"
             case _ => obj.getClass.getCanonicalName
         }
     }
 
-    private def _prettyPrint: Boolean = outputFormat == OutputFormat.PrettyPrinted
+    private def prettyPrint: Boolean = outputFormat == OutputFormat.PrettyPrinted
+
+    /** Serializes @obj to a JSON string.
+      *
+      * @return JSON representation of obj.
+      */
+    def serialize(obj: Any): String = {
+        // If obj is null, return "null" - as defined at http://www.json.org/
+        if (obj == null) {
+            "null"
+        } else {
+            val result = serializeObject(obj)
+            // Need to clear processed objects for next use
+            _processedObjects.clear
+            result
+        }
+    }
 
     /** Serializes an Array[_]
       *
       * @return JSON representation of obj.
       */
-    private def _serializeArray(arr: Array[_]): String = {
-        val builder: StringBuilder = new StringBuilder("[")
-        if (_prettyPrint) {
+    private def serializeArray(arr: Array[_]): String = {
+        val jsonBuilder: JSONStringBuilder = new JSONStringBuilder(this, prettyPrint, "[")
+        val builder = jsonBuilder.stringBuilder
+        if (prettyPrint) {
             builder.append('\n')
         }
 
         for (i: Int <- 0 until arr.length) {
-            _appendArrayItemToStringBuilder(arr(i), builder, i == 0)
+            jsonBuilder.appendArrayItem(arr(i), i == 0)
         }
 
-        if (_prettyPrint) {
+        if (prettyPrint) {
             builder.append('\n')
         }
 
@@ -147,9 +110,10 @@ class JSONSerializer
       *
       * @return JSON representation of obj.
       */
-    private def _serializeMap(map: scala.collection.Map[_, _]): String = {
-        val builder: StringBuilder = new StringBuilder("{")
-        if (_prettyPrint) {
+    private def serializeMap(map: scala.collection.Map[_, _]): String = {
+        val jsonBuilder: JSONStringBuilder = new JSONStringBuilder(this, prettyPrint, "{")
+        val builder = jsonBuilder.stringBuilder
+        if (prettyPrint) {
             builder.append('\n')
         }
 
@@ -161,12 +125,12 @@ class JSONSerializer
         var index: Int = 0
         mapIt foreach {
             case (key, value) => {
-                _appendKeyValueToStringBuilder(key, value, builder, index == 0)
+                jsonBuilder.appendKeyValue(key, value, index == 0)
                 index += 1
             }
         }
 
-        if (_prettyPrint) {
+        if (prettyPrint) {
             builder.append('\n')
         }
 
@@ -178,7 +142,7 @@ class JSONSerializer
       *
       * @return JSON representation of obj.
       */
-    private def _serializeObject(obj: Any): String = {
+    private[scala2json] def serializeObject(obj: Any): String = {
         var objectID: Int = 0
         var serializeObjectAsReference: Boolean = false
 
@@ -214,11 +178,11 @@ class JSONSerializer
             && !obj.isInstanceOf[collection.Traversable[_]]
             && !obj.isInstanceOf[Array[_]]) {
             // Must be AnyRef, otherwise it wouldn't get into the processedObjects array
-            result = _serializePlainObject(obj.asInstanceOf[AnyRef], serializeObjectAsReference, objectID)
+            result = serializePlainObject(obj.asInstanceOf[AnyRef], serializeObjectAsReference, objectID)
         } else if (serializationClass.isDefined) {
             val rule = serializationClass.get._2
             result = rule match {
-                case basic: BasicSerializationRule => _serializeWithRule(obj.asInstanceOf[AnyRef], basic, objectID)
+                case basic: BasicSerializationRule => serializeWithRule(obj.asInstanceOf[AnyRef], basic, objectID)
                 case custom: CustomSerializationRule => custom.customSerializer(this, obj, objectID)
                 case _ => {
                     println("Unknown rule type - " + rule)
@@ -227,17 +191,17 @@ class JSONSerializer
             }
         } else {
             result = obj match {
-                case _: String => JSONUtilities.escapedString(obj.asInstanceOf[String])
+                case _: String => JSONUtilities.escapeString(obj.asInstanceOf[String])
                 case _: java.lang.Number => obj.asInstanceOf[java.lang.Number].toString
                 case _: java.lang.Boolean => if (obj.asInstanceOf[java.lang.Boolean].booleanValue) "true" else "false"
                 case _: java.lang.Character => JSONUtilities
-                    .escapedChar(obj.asInstanceOf[java.lang.Character].charValue())
-                case opt: Option[_] => _serializeOption(opt)
-                case map: scala.collection.Map[_, _] => _serializeMap(map)
-                case trav: scala.collection.Traversable[_] => _serializeTraversable(trav)
-                case arr: Array[_] => _serializeArray(arr)
-                case ref: AnyRef => _serializePlainObject(ref, serializeObjectAsReference, objectID)
-                case rest => _serializePrimitiveType(rest)
+                    .escapeChar(obj.asInstanceOf[java.lang.Character].charValue())
+                case opt: Option[_] => serializeOption(opt)
+                case map: scala.collection.Map[_, _] => serializeMap(map)
+                case trav: scala.collection.Traversable[_] => serializeTraversable(trav)
+                case arr: Array[_] => serializeArray(arr)
+                case ref: AnyRef => serializePlainObject(ref, serializeObjectAsReference, objectID)
+                case rest => serializePrimitiveType(rest)
             }
         }
 
@@ -253,20 +217,22 @@ class JSONSerializer
       *
       * @return obj serialized as an object reference.
       */
-    private def _serializeObjectAsReference(obj: AnyRef, objectID: Int): String = {
-        val builder: StringBuilder = new StringBuilder("")
-        _appendKeyValueToStringBuilder("__ref__", objectID, builder, true)
+    private def serializeObjectAsReference(obj: AnyRef, objectID: Int): String = {
+        val jsonBuilder: JSONStringBuilder = new JSONStringBuilder(this, prettyPrint, "")
+        val builder = jsonBuilder.stringBuilder
+        jsonBuilder.appendKeyValue("__ref__", objectID, true)
         builder.toString
     }
 
-    /** The opposite of _serializeObjectAsReference.
+    /** The opposite of serializeObjectAsReference.
       *
       * @return obj serialized as value.
       */
-    private def _serializeObjectAsValue(obj: AnyRef, objectID: Int,
+    private def serializeObjectAsValue(obj: AnyRef, objectID: Int,
         transientFields: Option[collection.Seq[String]] = None,
         fieldAliases: Option[collection.Map[String, String]] = None): String = {
-        val builder: StringBuilder = new StringBuilder("")
+        val jsonBuilder: JSONStringBuilder = new JSONStringBuilder(this, prettyPrint, "")
+        val builder = jsonBuilder.stringBuilder
 
         // Get object's fields:
         val c: Class[_] = obj.getClass
@@ -276,14 +242,14 @@ class JSONSerializer
 
         if (includeClassFields) {
             // => include __class__ field
-            val className: String = _objectsClassName(obj)
-            _appendKeyValueToStringBuilder("__class__", className, builder, !haveProcessedField)
+            val className: String = objectsClassName(obj)
+            jsonBuilder.appendKeyValue("__class__", className, !haveProcessedField)
             haveProcessedField = true
         }
 
         if (!serializeInDepth) {
             // => include __objectID__field
-            _appendKeyValueToStringBuilder("__objectID__", objectID, builder, !haveProcessedField)
+            jsonBuilder.appendKeyValue("__objectID__", objectID, !haveProcessedField)
             haveProcessedField = true
         }
 
@@ -299,10 +265,18 @@ class JSONSerializer
 
                 val fValue = f.get(obj)
                 if (fValue == null) {
-                    _appendKeySerializedValueToStringBuilder(fName, "null", builder, !haveProcessedField)
+                    jsonBuilder.appendKeySerializedValue(fName, "null", !haveProcessedField)
                 } else {
-                    _appendKeyValueToStringBuilder(fName, fValue, builder, !haveProcessedField)
+                    jsonBuilder.appendKeyValue(fName, fValue, !haveProcessedField)
                 }
+                haveProcessedField = true
+            }
+        }
+        
+        _rules foreach { item: (SerializationClass, SerializationRule) =>
+            if (item._1.isClassOf(obj) && item._2.isInstanceOf[CustomValueSerializationRule[_]]){
+                val rule: CustomValueSerializationRule[AnyRef] = item._2.asInstanceOf[CustomValueSerializationRule[AnyRef]]
+                jsonBuilder.appendKeyValue(rule.fieldName, rule.definingFunction(this, obj), !haveProcessedField)
                 haveProcessedField = true
             }
         }
@@ -310,10 +284,11 @@ class JSONSerializer
         builder.toString
     }
 
-    def _serializeObjectPosingAsClass(obj: AnyRef, objectID: Int, targetClass: Class[_],
+    def serializeObjectPosingAsClass(obj: AnyRef, objectID: Int, targetClass: Class[_],
         transientFields: Option[collection.Seq[String]],
         fieldAliases: Option[collection.Map[String, String]]): String = {
-        val builder: StringBuilder = new StringBuilder("")
+        val jsonBuilder: JSONStringBuilder = new JSONStringBuilder(this, prettyPrint, "")
+        val builder = jsonBuilder.stringBuilder
 
         // Get object's fields:
         val originalClass: Class[_] = obj.getClass
@@ -324,13 +299,13 @@ class JSONSerializer
         if (includeClassFields) {
             // => include __class__ field
             val className: String = targetClass.getCanonicalName
-            _appendKeyValueToStringBuilder("__class__", className, builder, !haveProcessedField)
+            jsonBuilder.appendKeyValue("__class__", className, !haveProcessedField)
             haveProcessedField = true
         }
 
         if (!serializeInDepth) {
             // => include __objectID__field
-            _appendKeyValueToStringBuilder("__objectID__", objectID, builder, !haveProcessedField)
+            jsonBuilder.appendKeyValue("__objectID__", objectID, !haveProcessedField)
             haveProcessedField = true
         }
 
@@ -346,16 +321,23 @@ class JSONSerializer
                 }
 
                 // Check is the class has this field as well
-                if (_classHasField(targetClass, originalFieldName)) {
+                if (classHasField(targetClass, originalFieldName)) {
                     val fieldValue = originalField.get(obj)
                     if (fieldValue == null) {
-                        _appendKeySerializedValueToStringBuilder(originalFieldName, "null", builder,
-                            !haveProcessedField)
+                        jsonBuilder.appendKeySerializedValue(originalFieldName, "null", !haveProcessedField)
                     } else {
-                        _appendKeyValueToStringBuilder(originalFieldName, fieldValue, builder, !haveProcessedField)
+                        jsonBuilder.appendKeyValue(originalFieldName, fieldValue, !haveProcessedField)
                     }
                     haveProcessedField = true
                 }
+            }
+        }
+
+        _rules foreach { item: (SerializationClass, SerializationRule) =>
+            if (item._1.isClassOf(obj) && item._2.isInstanceOf[CustomValueSerializationRule[_]]){
+                val rule: CustomValueSerializationRule[AnyRef] = item._2.asInstanceOf[CustomValueSerializationRule[AnyRef]]
+                jsonBuilder.appendKeyValue(rule.fieldName, rule.definingFunction(this, obj), !haveProcessedField)
+                haveProcessedField = true
             }
         }
 
@@ -367,11 +349,11 @@ class JSONSerializer
       * @param opt
       * @return
       */
-    private def _serializeOption(opt: Option[_]): String = {
+    private def serializeOption(opt: Option[_]): String = {
         if (opt.isEmpty) {
             "null"
         } else {
-            _serializeObject(opt.get)
+            serializeObject(opt.get)
         }
     }
 
@@ -383,22 +365,22 @@ class JSONSerializer
       *
       * @return JSON value.
       */
-    private def _serializePlainObject(obj: AnyRef, serializeObjectAsReference: Boolean, objectID: Int): String = {
+    private def serializePlainObject(obj: AnyRef, asReference: Boolean, objectID: Int): String = {
         // Now we're dealing with some kind of an object,
         // we'll use Java's reflection to serialize it
         val builder: StringBuilder = new StringBuilder("{")
 
-        if (_prettyPrint) {
+        if (prettyPrint) {
             builder.append('\n')
         }
 
-        if (serializeObjectAsReference) {
-            builder.append(_serializeObjectAsReference(obj, objectID))
+        if (asReference) {
+            builder.append(serializeObjectAsReference(obj, objectID))
         } else {
-            builder.append(_serializeObjectAsValue(obj, objectID))
+            builder.append(serializeObjectAsValue(obj, objectID))
         }
 
-        if (_prettyPrint) {
+        if (prettyPrint) {
             builder.append('\n')
         }
 
@@ -414,10 +396,10 @@ class JSONSerializer
       *
       * @return JSON value.
       */
-    private def _serializePrimitiveType(obj: Any): String = {
+    private def serializePrimitiveType(obj: Any): String = {
         obj match {
             case _: Boolean => if (obj.asInstanceOf[Boolean]) "true" else "false"
-            case _: Char => JSONUtilities.escapedChar(obj.asInstanceOf[Char])
+            case _: Char => JSONUtilities.escapeChar(obj.asInstanceOf[Char])
             case _: Unit => throw new JSONSerializationException("Cannot serialize Unit.")
             case _ => obj.toString
         }
@@ -429,35 +411,37 @@ class JSONSerializer
       * @return JSON representation of obj.
       */
 
-    private def _serializeTraversable(coll: scala.collection.Traversable[_]): String = {
+    private def serializeTraversable(coll: scala.collection.Traversable[_]): String = {
         if (includeClassFields) {
-            val builder: StringBuilder = new StringBuilder("{")
-            if (_prettyPrint) {
+            val jsonBuilder: JSONStringBuilder = new JSONStringBuilder(this, prettyPrint, "{")
+            val builder = jsonBuilder.stringBuilder
+            if (prettyPrint) {
                 builder.append('\n')
             }
 
-            _appendKeyValueToStringBuilder("__arrayClass__", _objectsClassName(coll), builder, true)
+            jsonBuilder.appendKeyValue("__arrayClass__", objectsClassName(coll), true)
 
-            var serializedValue = _serializeTraversableValue(coll)
-            if (_prettyPrint) {
+            var serializedValue = serializeTraversableValue(coll)
+            if (prettyPrint) {
                 serializedValue = serializedValue.replaceAllLiterally("\n", "\n\t")
             }
-            _appendKeySerializedValueToStringBuilder("__value__", serializedValue, builder, false)
+            jsonBuilder.appendKeySerializedValue("__value__", serializedValue, false)
 
-            if (_prettyPrint) {
+            if (prettyPrint) {
                 builder.append('\n')
             }
 
             builder.append('}')
             builder.toString
         } else {
-            _serializeTraversableValue(coll)
+            serializeTraversableValue(coll)
         }
     }
 
-    private def _serializeTraversableValue(coll: scala.collection.Traversable[_]): String = {
-        val builder: StringBuilder = new StringBuilder("[")
-        if (_prettyPrint) {
+    private def serializeTraversableValue(coll: scala.collection.Traversable[_]): String = {
+        val jsonBuilder: JSONStringBuilder = new JSONStringBuilder(this, prettyPrint, "[")
+        val builder = jsonBuilder.stringBuilder
+        if (prettyPrint) {
             builder.append('\n')
         }
 
@@ -465,12 +449,12 @@ class JSONSerializer
         // we don't add a comma after the first iteration
         var index: Int = 0
         coll foreach {item => {
-            _appendArrayItemToStringBuilder(item, builder, index == 0)
+            jsonBuilder.appendArrayItem(item, index == 0)
             index += 1
         }
         }
 
-        if (_prettyPrint) {
+        if (prettyPrint) {
             builder.append('\n')
         }
 
@@ -478,21 +462,21 @@ class JSONSerializer
         builder.toString
     }
 
-    private def _serializeWithRule(obj: AnyRef, rule: BasicSerializationRule, objectID: Int): String = {
+    private def serializeWithRule(obj: AnyRef, rule: BasicSerializationRule, objectID: Int): String = {
         val builder: StringBuilder = new StringBuilder("{")
-        if (_prettyPrint) {
+        if (prettyPrint) {
             builder.append('\n')
         }
 
         if (rule.serializeAsClass.isEmpty) {
-            builder.append(_serializeObjectAsValue(obj, objectID, rule.transientFields, rule.fieldAliases))
+            builder.append(serializeObjectAsValue(obj, objectID, rule.transientFields, rule.fieldAliases))
         } else {
             // Custom
-            builder.append(_serializeObjectPosingAsClass(obj, objectID, rule.serializeAsClass.get, rule.transientFields,
+            builder.append(serializeObjectPosingAsClass(obj, objectID, rule.serializeAsClass.get, rule.transientFields,
                 rule.fieldAliases))
         }
 
-        if (_prettyPrint) {
+        if (prettyPrint) {
             builder.append('\n')
         }
 
@@ -500,21 +484,4 @@ class JSONSerializer
         builder.toString
     }
 
-    def addSerializationRule(forClass: SerializationClass, rule: SerializationRule) = _rules += ((forClass, rule))
-
-    /** Serializes @obj to a JSON string.
-      *
-      * @return JSON representation of obj.
-      */
-    def serialize(obj: Any): String = {
-        // If obj is null, return "null" - as defined at http://www.json.org/
-        if (obj == null) {
-            "null"
-        } else {
-            val result = _serializeObject(obj)
-            // Need to clear processed objects for next use
-            _processedObjects.clear
-            result
-        }
-    }
 }
