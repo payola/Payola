@@ -1,3 +1,4 @@
 package s2js.runtime.scala
 
-class Exception(val message: String = "", val cause: Exception = null) extends Throwable
+class Exception(val message: java.lang.String = "", val cause: Exception = null)
+    extends Throwable

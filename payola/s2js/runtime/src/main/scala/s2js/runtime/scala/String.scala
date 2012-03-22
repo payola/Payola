@@ -1,4 +1,4 @@
-package s2js.runtime.java.lang
+package s2js.runtime.scala
 
 import s2js.compiler.javascript
 

@@ -1,3 +1,4 @@
 package s2js.runtime.scala
 
-class NotImplementedException(message: String = "", cause: Exception = null) extends RuntimeException(message, cause)
+class NotImplementedException(message: java.lang.String = "", cause: Exception = null)
+    extends RuntimeException(message, cause)
