@@ -1,10 +1,13 @@
 package cz.payola.web.shared
 
-import cz.payola.common.rdf.Graph
-import cz.payola.model.DataFacade
-import cz.payola.data.rdf.DataFacade
-import cz.payola.data.DataFacade
+// TODO Dependencies
 
+import cz.payola.common.rdf.Graph
+//import cz.payola.model.DataFacade
+//import cz.payola.data.rdf.DataFacade
+//import cz.payola.data.DataFacade
+
+/*
 @scala.remote
 object GraphFetcher
 {
@@ -17,3 +20,4 @@ object GraphFetcher
         null
     }
 }
+*/

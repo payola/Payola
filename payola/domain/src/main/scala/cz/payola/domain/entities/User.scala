@@ -1,8 +1,10 @@
 package cz.payola.domain.entities
 
 import generic.{SharedAnalysesOwner, ConcreteNamedEntity}
+import permissions.privilege.PublicPrivilege
 import scala.collection.mutable._
 import cz.payola.domain.entities.generic.{SharedAnalysesOwner, ConcreteNamedEntity}
+import cz.payola.domain.permission.privilege.{GroupPrivilege, AnalysisPrivilege, Privilege}
 
 class User(protected var _name: String) extends cz.payola.common.entities.User with ConcreteNamedEntity with
 SharedAnalysesOwner
@@ -10,6 +12,8 @@ SharedAnalysesOwner
     type GroupType = Group
 
     type AnalysisType = Analysis
+    
+    type PrivilegeType = Privilege[_ ,_]
 
     protected var _email: String = ""
 
@@ -33,9 +37,9 @@ SharedAnalysesOwner
 
     protected val _ownedGroups: Seq[GroupType] = new ArrayBuffer[GroupType]()
 
-    protected val _memberGroups: Seq[GroupType] = new ArrayBuffer[GroupType]()
-
     protected val _ownedAnalyses: Seq[AnalysisType] = new ArrayBuffer[AnalysisType]()
+    
+    protected val _privileges: Seq[PrivilegeType] = new ArrayBuffer[PrivilegeType]()
 
     /** Internal method which creates List of groups from IDs. It uses the user's cache
       * as well as loading from the data layer if the group hasn't been cached yet.
@@ -54,6 +58,24 @@ SharedAnalysesOwner
             }
         }
         groups.reverse
+    }
+
+    /** Goes through privileges and returns a sequence of Analysis objects to which
+      * the user has some kind of access.
+      *
+      * @return Analysis with access.
+      */
+    def accessibleAnalyses: collection.Seq[AnalysisType] = {
+        val as: ArrayBuffer[AnalysisType] = new ArrayBuffer[AnalysisType]()
+        _privileges foreach { p: PrivilegeType =>
+            if (p.isInstanceOf[AnalysisPrivilege[_]]){
+                val a: AnalysisType = p.asInstanceOf[AnalysisPrivilege[_]]._object
+                if (!as.contains(a)){
+                    as += a
+                }
+            }
+        }
+        as
     }
 
     /** Adds the analysis to the analyses array. Does nothing if the analysis
@@ -162,7 +184,18 @@ SharedAnalysesOwner
       *
       * @return New List with groups that the user is a member of.
       */
-    //def memberGroups = _groupsWithIDs(_memberGroupIDs)
+    def memberGroups = {
+        val gs: ArrayBuffer[GroupType] = new ArrayBuffer[GroupType]()
+        _privileges foreach { p: PrivilegeType =>
+            if (p.isInstanceOf[GroupPrivilege[_]]){
+                val g: GroupType = p.asInstanceOf[GroupPrivilege[_]]._object
+                if (!gs.contains(g)){
+                    gs += g
+                }
+            }
+        }
+        gs
+    }
 
     /** Returns a list of analyses owned by this user. Analyses will
       * be fetched from DB if necessary.
@@ -228,6 +261,12 @@ SharedAnalysesOwner
       */
     def ownedGroupCount: Int = _ownedGroupIDs.size
 
+    /** Privileges. Only returns public ones.
+      *
+      * @return Public privileges.
+      */
+    def privileges: collection.Seq[PrivilegeType] = _privileges filter { p: Privilege[_, _] => p.isInstanceOf[PublicPrivilege] }
+    
     /** Result is a new List consisting of only groups that
       *  are owned by the user.
       *
