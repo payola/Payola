@@ -160,10 +160,13 @@ trait Iterable
         var result = ""
         var separator = ""
         var suffix = ""
-        if (!s2js.runtime.s2js.isUndefined(start)) {
+        if (!s2js.runtime.s2js.isUndefined(end)) {
             result = start
             separator = sep
             suffix = end
+        } else if (!s2js.runtime.s2js.isUndefined(sep)) {
+            result = start
+            separator = start
         } else if (!s2js.runtime.s2js.isUndefined(start)) {
             separator = start
         }
@@ -482,11 +485,11 @@ trait Iterable
     // From TraversableLike
     def stringPrefix: String = {
         var str = s2js.runtime.s2js.classOf(this).fullName
-        val idx1 = str.lastIndexOf('.')
+        val idx1 = str.lastIndexOf(".")
         if (idx1 != -1) {
             str = str.substring(idx1 + 1)
         }
-        val idx2 = str.indexOf('$')
+        val idx2 = str.indexOf("$")
         if (idx2 != -1) {
             str = str.substring(0, idx2)
         }
