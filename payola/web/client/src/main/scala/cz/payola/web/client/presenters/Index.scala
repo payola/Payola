@@ -45,6 +45,7 @@ class Index
             //TODO show "preparing visualisation"
             changePlugin(plugins.head)
             buildControls()
+            buildSetupScript()
             //TODO hide info
         } catch {
             case e: RPCException => {
@@ -75,6 +76,59 @@ class Index
                 counter+")\"> " + plugin.getName + " </a>"
             counter += 1
         }
+    }
+
+    def buildSetupScript() {
+        val controlsArea = document.getElementById("controls")
+
+
+        controlsArea.appendChild(document.createElement[Element]("br"))
+        controlsArea.appendChild(document.createElement[Element]("br"))
+
+        val settingsHideButton = document.createElement[Element]("button")
+        controlsArea.appendChild(settingsHideButton)
+        settingsHideButton.setAttribute("type", "button")
+        settingsHideButton.setAttribute("value", "Hide/show the settings, baby!")
+        settingsHideButton.setAttribute("onclick", "el = document.getElementById(\"visualPluginSettings\");" +
+            "el.style.visibility = (el.style.visibility == \"visible\") ? \"hidden\" : \"visible\";")
+
+        controlsArea.appendChild(document.createElement[Element]("br"))
+
+        val settingsDiv = document.createElement[Element]("div")
+        controlsArea.appendChild(settingsDiv)
+        settingsDiv.setAttribute("id", "visualPluginSettings")
+
+        val settingsForm = document.createElement[Element]("form")
+        settingsDiv.appendChild(settingsForm)
+
+        val vertexSection = document.createElement[Element]("label")
+        settingsForm.appendChild(vertexSection)
+        vertexSection.innerHTML = "Vertex"
+
+        settingsForm.appendChild(document.createElement[Element]("br"))
+
+        val vertexCornerRadius = document.createElement[Element]("input")
+        settingsForm.appendChild(vertexCornerRadius)
+        vertexCornerRadius.setAttribute("type", "text")
+        vertexCornerRadius.setAttribute("name", "vertexCornerRadius")
+        vertexCornerRadius.setAttribute("value", "5")
+
+        settingsForm.appendChild(document.createElement[Element]("br"))
+
+        val submitButton = document.createElement[Element]("button")
+        settingsForm.appendChild(submitButton)
+        submitButton.setAttribute("type", "button")
+        submitButton.setAttribute("value", "Yeah, I like this way, honey!")
+        submitButton.setAttribute("onclick", "alert(\"ble\")")
+
+
+        //TODO
+        /*
+        udelat cudlik do ovladaci oblasti pri jehoz stisknuti se vyvola dialog s kolonkama pro nastaveni
+        visualnich pluginu
+         */
+
+        //TODO hezka featura - kdyz neni vybran visual plugin cudlik disabled...
     }
 
     def changePluginByNumber(number: Int) {

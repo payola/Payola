@@ -1,7 +1,7 @@
 package cz.payola.web.client.views.plugins.visual.graph
 
 import cz.payola.web.client.views.plugins.visual.{Vector, Color, Point}
-import s2js.adapters.js.dom.{Element, CanvasRenderingContext2D}
+import s2js.adapters.js.dom.CanvasRenderingContext2D
 
 /**
   * Graphical representation of textual data in the drawn graph.
@@ -11,12 +11,12 @@ case class InformationView(data: Any) extends View {
     /**
       * Default color of text.
       */
-    private var defColor = new Color(200, 200, 200, 1)
+    private var textColor = new Color(200, 200, 200, 1)
 
     /**
       * Default color of background behind text.
       */
-    private var defColorBackground = new Color(255, 255, 255, 0.5)
+    private var backgroundColor = new Color(255, 255, 255, 0.5)
 
     /**
       * Default width of line (used in background drawing).
@@ -54,27 +54,28 @@ case class InformationView(data: Any) extends View {
     private def performDrawing(context: CanvasRenderingContext2D, color: Option[Color], position: Point) {
         if(selected) {
             /*val colorToUseBackground = color.getOrElse(defColorBackground)*/
-
-            drawCircle(context, position + Vector(1, -5), 10, lineWidth, defColorBackground)
-            fillCurrentSpace(context, defColorBackground)
+            //TODO draw a rounded rectangle behind the text...the size should depend on the length of the text
+            drawCircle(context, position + Vector(1, -5), 10, lineWidth, backgroundColor)
+            fillCurrentSpace(context, backgroundColor)
         }
 
-        val colorToUse = color.getOrElse(defColor)
+        val colorToUse = color.getOrElse(textColor)
 
         drawText(context, data.toString, position, colorToUse, "12px Sans", "center")
     }
-    
-    def updateSettings(settings: Element) {
 
-        val setupNode = getNodeByPath(settings, "setup.text.colors.default")
-        val result = if(setupNode.isDefined) {
-            createColor(setupNode.get)
-        } else {
-            None
-        }
-        defColor = result.getOrElse(defColor)
+    private def updateTextColor() {
+        textColor = createColor("setup.text.colors.default").getOrElse(textColor)
+    }
 
+    private  def updateBackgroundColor() {
+        backgroundColor = createColor("setup.text.colors.background").getOrElse(backgroundColor)
+    }
 
-        defColorBackground = new Color(255, 255, 255, 0.5)
+    def updateSettings() {
+
+        updateTextColor()
+
+        updateBackgroundColor()
     }
 }

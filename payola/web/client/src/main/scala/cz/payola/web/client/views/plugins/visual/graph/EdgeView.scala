@@ -1,14 +1,15 @@
 package cz.payola.web.client.views.plugins.visual.graph
 
 import cz.payola.common.rdf.Edge
-import cz.payola.web.client.views.plugins.visual.{Color, Point}
-import s2js.adapters.js.dom.{Element, CanvasRenderingContext2D}
+import cz.payola.web.client.views.plugins.visual.{Color, Point, Vector}
+import s2js.adapters.js.dom.CanvasRenderingContext2D
 
 /**
   * Structure used during draw function of EdgeView. Helps to indicate position of vertices to each other.
   */
 private object Quadrant
 {
+    //TODO correct to real enum
     val RightBottom = 1
 
     val LeftBottom = 2
@@ -29,23 +30,29 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
     /**
       * Default color of an edge.
       */
-    private var defColor = new Color(150, 150, 150, 0.5)
+    private var colorBase = new Color(150, 150, 150, 0.5)
 
     /**
       * Default color of a selected edge.
       */
-    private var defColorSelect = new Color(50, 50, 50, 1)
+    private var colorSelection = new Color(50, 50, 50, 1)
 
     /**
       * Default width of drawn line.
       */
-    private var defLineWidth: Double = 1
+    private var lineWidth: Double = 1
 
     /**
-      * The higher, the more are edges straight
+      * The higher, the more are edges straight.
+      * During update if the new value is < 0 or >= 6 drawStraight is set to true.
       */
     private var straightenIndex = 2
 
+    /**
+      * If true, the drawn edge is straight, else is bezier curve
+      */
+    private var drawStraight = true
+    
     /**
       * Textual data that should be visualised with this edge ("over this edge").
       */
@@ -67,7 +74,8 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
         originView.selected && destinationView.selected
     }
 
-    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
+    private def prepareBezierCurve(context: CanvasRenderingContext2D, color: Color, correction: Vector) {
+
         val A = originView.position
         val B = destinationView.position
 
@@ -127,38 +135,85 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
                     ctrl2.y = B.y + diff.y / straightenIndex
             }
         }
+        
+        drawBezierCurve(context, ctrl1 + correction, ctrl2 + correction, A + correction, B + correction,
+            lineWidth, color)
+    }
+    
+    private def prepareStraight(context: CanvasRenderingContext2D, color: Color, correction: Vector) {
+        
+        drawStraightLine(context,
+            destinationView.position + correction, originView.position + correction,
+            lineWidth, color)
+    }
+    
+    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
 
         val colorToUse = color.getOrElse(
-            if(isSelected) defColorSelect else  defColor
+            if(isSelected) colorSelection else  colorBase
         )
 
         val correction = positionCorrection.getOrElse(Point.Zero).toVector
 
-        drawStraightLine(context, A + correction, B + correction, defLineWidth, colorToUse)
-        /*drawBezierCurve(context, ctrl1 + correction, ctrl2 + correction, A + correction, B + correction,
-            defLineWidth, colorToUse)*/
+        if(drawStraight) {
+            prepareStraight(context, colorToUse, correction)
+        } else {
+            prepareBezierCurve(context, colorToUse, correction)
+        }
+
     }
     
-    def updateSettings(settings: Element) {
+    private def updateColorBase() {
+        colorBase = createColor("setup.edge.colors.default").getOrElse(colorBase)
+    }
+    
+    private def updateColorSelection() {
+        colorSelection = createColor("setup.edge.colors.selected").getOrElse(colorSelection)
+    }
 
-        val setupNodeDC = getNodeByPath(settings, "setup.edge.colors.default")
-        val resultDC = if(setupNodeDC.isDefined) {
-            createColor(setupNodeDC.get)
+    private def updateLineWidth() {
+        val loadedValue = getValue("setup.edge.dimensions.width")
+
+        lineWidth = if(loadedValue.isDefined) {
+            val newWidth = loadedValue.get.toInt
+            
+            if(0 < newWidth && newWidth < 10) {
+                newWidth
+            } else {
+                lineWidth
+            }
         } else {
-            None
+            lineWidth
         }
-        defColor = resultDC.getOrElse(defColor)
+    }
+    
+    private def updateStraightenIndex() {
+        val loadedValue = getValue("setup.edge.dimensions.width")
 
-        val setupNodeDCS = getNodeByPath(settings, "setup.edge.colors.selected")
-        val resultDCS = if(setupNodeDCS.isDefined) {
-            createColor(setupNodeDCS.get)
+        straightenIndex = if(loadedValue.isDefined) {
+            val newStrIndex = loadedValue.get.toInt
+
+            if(0 < newStrIndex && newStrIndex < 6) {
+                drawStraight = false
+                newStrIndex
+            } else {
+                drawStraight = true
+                straightenIndex
+
+            }
         } else {
-            None
+            straightenIndex
         }
-        defColorSelect = resultDCS.getOrElse(defColorSelect)
+    }
+    
+    def updateSettings() {
 
-        defLineWidth = 1
+        updateColorBase()
+        
+        updateColorSelection()
 
-        straightenIndex = 2
+        updateLineWidth()
+
+        updateStraightenIndex()
     }
 }

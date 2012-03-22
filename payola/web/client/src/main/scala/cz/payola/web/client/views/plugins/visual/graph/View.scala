@@ -13,8 +13,9 @@ trait View extends SetupLoader{
       */
     def draw(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point])
 
+    //TODO create here function for creating Color out of 4 maybe empty Strings
 
-    def updateSettings(settings: Element)
+    def updateSettings()
 
     /**
       * Draws a rectangle with rounded corners, depending on the radius parameter to the input canvas context.
@@ -187,12 +188,12 @@ trait View extends SetupLoader{
         val canvasPixelArray = imageData.data;
 
         var pixelPointer = 0
-        while(pixelPointer < canvasPixelArray.length) { //TODO recoloring of the icon
+        while(pixelPointer < canvasPixelArray.length) {
 
-            canvasPixelArray(pixelPointer) = 255 // = 255   // red
-            canvasPixelArray(pixelPointer + 1) = 255 // = 255   // green
-            canvasPixelArray(pixelPointer + 2) = 255 // = 255   // blue
-            // alpha
+            canvasPixelArray(pixelPointer) = colorToUse.red
+            canvasPixelArray(pixelPointer + 1) = colorToUse.green
+            canvasPixelArray(pixelPointer + 2) = colorToUse.blue
+            // alpha is unchanged to keep the shape of the image
             pixelPointer += 4
         }
         context.putImageData(imageData, 0, 0);

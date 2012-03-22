@@ -10,13 +10,13 @@ import cz.payola.web.client.views.plugins.visual._
   * @param container the space where the graph should be visualised
   */
 class GraphView(val container: Element) extends View {
-    private var ColorVertexHigh = new Color(200, 0, 0, 1)
+    private var colorVertexHigh = new Color(240, 180, 180, 1)
 
-    private var ColorVertexMedium = new Color(0, 180, 0, 0.9)
+    private var colorVertexMedium = new Color(180, 240, 180, 0.9)
 
-    private var ColorVertexLow = new Color(180, 180, 180, 0.3)
+    private var colorVertexLow = new Color(180, 180, 180, 0.3)
 
-    private var ColorTextDefault = new Color(50, 50, 50, 1)
+    private var colorTextDefault = new Color(50, 50, 50, 1)
 
     /*The order in which are layers created determines their "z coordinate"
 (first created layer is on the bottom and last created one covers all the others).*/
@@ -244,18 +244,18 @@ class GraphView(val container: Element) extends View {
                 colorToUseVertex = Some(color.get)
                 colorToUseText = Some(color.get)
             } else if (vertexView.selected) {
-                colorToUseVertex = Some(ColorVertexHigh)
-                colorToUseText = Some(ColorTextDefault)
+                colorToUseVertex = Some(colorVertexHigh)
+                colorToUseText = Some(colorTextDefault)
             } else if (edgeViews.exists(edgeView =>
                 (edgeView.originView.eq(vertexView) && edgeView.destinationView.selected) ||
                     (edgeView.destinationView.eq(vertexView) && edgeView.originView.selected))) {
-                colorToUseVertex = Some(ColorVertexMedium)
-                colorToUseText = Some(ColorTextDefault)
+                colorToUseVertex = Some(colorVertexMedium)
+                colorToUseText = Some(colorTextDefault)
             } else if (selectedCount == 0) {
                 colorToUseVertex = None
-                colorToUseText = Some(ColorTextDefault)
+                colorToUseText = Some(colorTextDefault)
             } else {
-                colorToUseVertex = Some(ColorVertexLow)
+                colorToUseVertex = Some(colorVertexLow)
                 colorToUseText = Some(Color.Transparent)
             }
 
@@ -263,8 +263,8 @@ class GraphView(val container: Element) extends View {
                 if (verticesSelectedLayer.cleared) {
                     vertexView.draw(verticesSelectedLayer.context, colorToUseVertex, Some(positionCorrection))
                 }
-                if (verticesSelectedTextLayer.cleared && vertexView.information != None) {
-                    vertexView.information.get.draw(verticesSelectedTextLayer.context, colorToUseText,
+                if (verticesSelectedTextLayer.cleared) {
+                    vertexView.drawInformation(verticesSelectedTextLayer.context, colorToUseText,
                         Some(LocationDescriptor.getVertexInformationPosition(vertexView.position) +
                             positionCorrection.toVector))
                 }
@@ -272,8 +272,8 @@ class GraphView(val container: Element) extends View {
                 if (verticesDeselectedLayer.cleared) {
                     vertexView.draw(verticesDeselectedLayer.context, colorToUseVertex, Some(positionCorrection))
                 }
-                if (verticesDeselectedTextLayer.cleared && vertexView.information != None) {
-                    vertexView.information.get.draw(verticesDeselectedTextLayer.context, colorToUseText,
+                if (verticesDeselectedTextLayer.cleared) {
+                    vertexView.drawInformation(verticesDeselectedTextLayer.context, colorToUseText,
                         Some(LocationDescriptor.getVertexInformationPosition(vertexView.position) +
                             positionCorrection.toVector))
                 }
@@ -288,7 +288,7 @@ class GraphView(val container: Element) extends View {
             val colorToUseText = if (color != None) {
                 color
             } else if (edgeView.isSelected) {
-                Some(ColorTextDefault)
+                Some(colorTextDefault)
             } else {
                 None
             }
@@ -363,38 +363,30 @@ class GraphView(val container: Element) extends View {
         }
     }
 
-    def updateSettings(settings: Element) {
+    private def updateMediumVertexColor() {
+        colorVertexMedium = createColor("setup.vertex.colors.default").getOrElse(colorVertexMedium)
+    }
 
-        val setupNodeCVH = getNodeByPath(settings, "setup.vertex.colors.selected")
-        val resultCVH = if(setupNodeCVH.isDefined) {
-            createColor(setupNodeCVH.get)
-        } else {
-            None
-        }
-        ColorVertexHigh = resultCVH.getOrElse(ColorVertexHigh)
+    private def updateHighVertexColor() {
+        colorVertexHigh = createColor("setup.vertex.colors.selected").getOrElse(colorVertexHigh)
+    }
 
-        val setupNodeCVM = getNodeByPath(settings, "setup.vertex.colors.default")
-        val resultCVM = if(setupNodeCVM.isDefined) {
-            createColor(setupNodeCVM.get)
-        } else {
-            None
-        }
-        ColorVertexMedium = resultCVM.getOrElse(ColorVertexMedium)
+    private def updateLowVertexColor() {
+        colorVertexLow = createColor("setup.vertex.colors.hidden").getOrElse(colorVertexLow)
+    }
 
-        val setupNodeCVL = getNodeByPath(settings, "setup.vertex.colors.hidden")
-        val resultCVL = if(setupNodeCVL.isDefined) {
-            createColor(setupNodeCVL.get)
-        } else {
-            None
-        }
-        ColorVertexLow = resultCVL.getOrElse(ColorVertexLow)
+    private def updateTextDefault() {
+        colorTextDefault = createColor("setup.text.colors.default").getOrElse(colorTextDefault)
+    }
 
-        val setupNodeCTD = getNodeByPath(settings, "setup.text.default")
-        val resultCTD = if(setupNodeCTD.isDefined) {
-            createColor(setupNodeCTD.get)
-        } else {
-            None
-        }
-        ColorTextDefault = resultCTD.getOrElse(ColorTextDefault)
+    def updateSettings() {
+
+        updateLowVertexColor()
+
+        updateMediumVertexColor()
+
+        updateHighVertexColor()
+
+        updateTextDefault()
     }
 }

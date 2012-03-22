@@ -67,7 +67,7 @@ trait  SetupLoader
 
         //setup -> vertex -> icons
         val vertexIcons = document.createElement[Element]("icons")
-        vertexColors.appendChild(vertexIcons)
+        vertexSetup.appendChild(vertexIcons)
 
         //setup -> vertex -> icons -> literal vertex icon
         val vertexLiteralIcon = document.createElement[Element]("literal")
@@ -85,8 +85,28 @@ trait  SetupLoader
         vertexUnknownIcon.setAttribute("value", "/assets/images/question-mark-icon.png")
 
 
+        //setup -> vertex -> dimensions
+        val vertexDimensions = document.createElement[Element]("dimensions")
+        vertexSetup.appendChild(vertexDimensions)
 
-        //setup -> edge
+        //setup -> vertex -> dimensions -> corner radius
+        val vertexDimensionCornerRadius = document.createElement[Element]("corner-radius")
+        vertexDimensions.appendChild(vertexDimensionCornerRadius)
+        vertexDimensionCornerRadius.setAttribute("value", "5")
+
+        //setup -> vertex -> dimensions -> width
+        val vertexDimensionWidth = document.createElement[Element]("width")
+        vertexDimensions.appendChild(vertexDimensionWidth)
+        vertexDimensionWidth.setAttribute("value", "30")
+
+        //setup -> vertex -> dimensions -> height
+        val vertexDimensionHeight = document.createElement[Element]("height")
+        vertexDimensions.appendChild(vertexDimensionHeight)
+        vertexDimensionHeight.setAttribute("value", "24")
+
+
+
+        //setup -> edge ###########################################################################
         val edgeSetup = document.createElement[Element]("edge")
         setup.appendChild(edgeSetup)
 
@@ -94,25 +114,38 @@ trait  SetupLoader
         val edgeColors = document.createElement[Element]("colors")
         edgeSetup.appendChild(edgeColors)
 
-        //setup -> vertex -> colors -> selected edge color
+        //setup -> edge -> colors -> selected edge color
         val edgeSelectedColor = document.createElement[Element]("selected")
-        vertexColors.appendChild(edgeSelectedColor)
+        edgeColors.appendChild(edgeSelectedColor)
         edgeSelectedColor.setAttribute("red", "0")
         edgeSelectedColor.setAttribute("green", "0")
         edgeSelectedColor.setAttribute("blue", "0")
         edgeSelectedColor.setAttribute("alpha", "1")
 
-        //setup -> vertex -> colors -> default edge color
+        //setup -> edge -> colors -> default edge color
         val edgeDefaultColor = document.createElement[Element]("default")
-        vertexColors.appendChild(edgeDefaultColor)
+        edgeColors.appendChild(edgeDefaultColor)
         edgeDefaultColor.setAttribute("red", "50")
         edgeDefaultColor.setAttribute("green", "50")
         edgeDefaultColor.setAttribute("blue", "50")
         edgeDefaultColor.setAttribute("alpha", "0.7")
 
+        //setup -> edge -> dimensions
+        val edgeDimensions = document.createElement[Element]("dimensions")
+        edgeSetup.appendChild(edgeDimensions)
+
+        //setup -> edge -> dimensions ->  line width
+        val edgeLineWidth = document.createElement[Element]("width")
+        edgeDimensions.appendChild(edgeLineWidth)
+        edgeLineWidth.setAttribute("value", "1")
+
+        //setup -> edge -> dimensions ->  straight index
+        val edgeStraightIndex = document.createElement[Element]("straight-index")
+        edgeDimensions.appendChild(edgeStraightIndex)
+        edgeStraightIndex.setAttribute("value", "2")
 
 
-        //setup -> text
+        //setup -> text ###########################################################################
         val textSetup = document.createElement[Element]("text")
         setup.appendChild(textSetup)
 
@@ -122,55 +155,46 @@ trait  SetupLoader
 
         //setup -> text -> colors -> default text color
         val textDefaultColor = document.createElement[Element]("default")
-        textDefaultColor.appendChild(textDefaultColor)
+        textColors.appendChild(textDefaultColor)
         textDefaultColor.setAttribute("red", "0")
         textDefaultColor.setAttribute("green", "0")
         textDefaultColor.setAttribute("blue", "0")
         textDefaultColor.setAttribute("alpha", "1")
 
+        //setup -> text -> colors -> background text color
+        val textBackgroundColor = document.createElement[Element]("background")
+        textColors.appendChild(textBackgroundColor)
+        textBackgroundColor.setAttribute("red", "0")
+        textBackgroundColor.setAttribute("green", "0")
+        textBackgroundColor.setAttribute("blue", "0")
+        textBackgroundColor.setAttribute("alpha", "1")
+
+
         setup
     }
     
-    protected def getNodeByPath(parent: Element, path: String): Option[Element] = {
-        val nodeNames = path.split('.')
-        var currentElement: Option[Element] = Some(parent)
-        nodeNames.foreach{ nodeName =>
-            if(currentElement.isDefined) {
-                currentElement = getChildByName(currentElement.get, nodeName)
-            }
-        }
+    protected def createColor(localStorageKey: String): Option[Color] = {
+        val red = window.localStorage.getItem(localStorageKey + ".red")
+        val green = window.localStorage.getItem(localStorageKey + ".green")
+        val blue = window.localStorage.getItem(localStorageKey + ".blue")
+        val alpha = window.localStorage.getItem(localStorageKey + ".alpha")
 
-        currentElement
+        window.alert("red: "+ red+" green: "+green+" blue: "+ blue+ " alpha: "+alpha)
+        //TODO if correct create new color nebo new Color(200, 0, 0, 1)
+        if(red.isEmpty || green.isEmpty || blue.isEmpty || alpha.isEmpty) {
+            None
+        } else {
+            Some(new Color(red.toInt, green.toInt, blue.toInt, alpha.toDouble))
+        }
     }
-
-    private def getChildByName(parent: Element, name: String): Option[Element] = {
-        
-        var result: Option[Element] = None
-        var pointer = 0
-        while(result.isEmpty && pointer < parent.childNodes.length) {
-            if(parent.childNodes.item(pointer).nodeName == name) {
-                result = Some(parent.childNodes.item(pointer).asInstanceOf[Element])
-            }
-            pointer += 1
+    
+    protected def getValue(localStorageKey: String): Option[String] = {
+        val value = window.localStorage.getItem(localStorageKey)
+        window.alert("value: "+value)
+        if(value.isEmpty) { //TODO is this a valid check?
+            None
+        } else {
+            Some(value)
         }
-        
-        result
-    }
-
-    protected def createColor(setupElement: Element): Option[Color] = {
-        var result: Option[Color] = None
-        
-        if(setupElement.hasAttribute("red") && setupElement.hasAttribute("green") &&
-            setupElement.hasAttribute("blue") && setupElement.hasAttribute("alpha")) {
-            
-            val red = setupElement.getAttribute("red").toInt
-            val green = setupElement.getAttribute("green").toInt
-            val blue = setupElement.getAttribute("blue").toInt
-            val alpha = setupElement.getAttribute("alpha").toInt
-            
-            result = Some(new Color(red, green, blue, alpha))
-        }
-        
-        result
     }
 }
