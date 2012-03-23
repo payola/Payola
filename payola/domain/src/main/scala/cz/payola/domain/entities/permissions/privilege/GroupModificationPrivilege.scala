@@ -1,8 +1,9 @@
-package cz.payola.domain.permission.privilege
+package cz.payola.domain.entities.permissions.privilege
 
 import cz.payola.domain.entities.Group
-import cz.payola.domain.permission.action.GroupModificationAction
+import cz.payola.domain.entities.permissions.action.GroupModificationAction
 
-class GroupModificationPrivilege(g: Group) extends GroupPrivilege[GroupModificationAction](g)
+class GroupModificationPrivilege(g: Group) extends GroupPrivilege(g)
 {
+    type ActionType = GroupModificationAction
 }

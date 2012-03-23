@@ -1,14 +1,10 @@
-package cz.payola.domain.permission.privilege
+package cz.payola.domain.entities.permissions.privilege
 
 import cz.payola.common
-import common.entities.Entity
 import cz.payola.domain.entities.generic.ConcreteEntity
-import cz.payola.domain.permission.action.Action
+import cz.payola.domain.entities.permissions.action.Action
 
-abstract class Privilege[ActionType, EntityType](val _object: EntityType) extends common.entities.permissions.privilege.Privilege[ActionType, EntityType]
+abstract class Privilege[T <: Action[U], U <: ConcreteEntity](val obj: U) extends common.entities.permissions.privilege.Privilege[T, U]
 {
-    type ActionType = Action[_]
-    type EntityType = ConcreteEntity
-
-    def canPerformAction(action: ActionType): Boolean = action.subject == _object
+    def canPerformAction(action: T): Boolean = action.subject.id == obj.id
 }

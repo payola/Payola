@@ -1,6 +1,8 @@
-package cz.payola.domain.permission.privilege
+package cz.payola.domain.entities.permissions.privilege
 
 import cz.payola.domain.entities.User
-import cz.payola.domain.permission.action.Action
+import cz.payola.domain.entities.permissions.action.Action
 
-abstract class UserPrivilege[T <: Action[_]](o: User) extends Privilege[T, User](o)
+abstract class UserPrivilege[T <: Action[User]](o: User) extends Privilege[T,  User](o) {
+
+}

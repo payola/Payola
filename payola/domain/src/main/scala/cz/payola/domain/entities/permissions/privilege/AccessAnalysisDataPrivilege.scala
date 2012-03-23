@@ -1,7 +1,7 @@
-package cz.payola.domain.permission.privilege
+package cz.payola.domain.entities.permissions.privilege
 
 import cz.payola.domain.entities.Analysis
-import cz.payola.domain.permission.action.AccessAnalysisDataAction
+import cz.payola.domain.entities.permissions.action.AccessAnalysisDataAction
 
 class AccessAnalysisDataPrivilege(a: Analysis) extends AnalysisPrivilege[AccessAnalysisDataAction](a)
 {

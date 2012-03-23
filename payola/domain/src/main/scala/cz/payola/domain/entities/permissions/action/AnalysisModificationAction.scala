@@ -1,4 +1,4 @@
-package cz.payola.domain.permission.action
+package cz.payola.domain.entities.permissions.action
 
 import cz.payola.domain.entities.Analysis
 
@@ -10,6 +10,6 @@ object AnalysisModificationActionType extends Enumeration
 }
 
 class AnalysisModificationAction(a: Analysis, val actionType: AnalysisModificationActionType.Value,
-    val newValue: Any) extends Action[Analysis](a)
+    val newValue: Any) extends AnalysisAction(a)
 {
 }

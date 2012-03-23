@@ -1,10 +1,9 @@
 package cz.payola.domain.entities
 
-import generic.{SharedAnalysesOwner, ConcreteNamedEntity}
 import permissions.privilege.PublicPrivilege
 import scala.collection.mutable._
 import cz.payola.domain.entities.generic.{SharedAnalysesOwner, ConcreteNamedEntity}
-import cz.payola.domain.permission.privilege.{GroupPrivilege, AnalysisPrivilege, Privilege}
+import cz.payola.domain.entities.permissions.privilege.{GroupPrivilege, AnalysisPrivilege, Privilege}
 
 class User(protected var _name: String) extends cz.payola.common.entities.User with ConcreteNamedEntity with
 SharedAnalysesOwner
@@ -13,7 +12,7 @@ SharedAnalysesOwner
 
     type AnalysisType = Analysis
     
-    type PrivilegeType = Privilege[_ ,_]
+    type PrivilegeType = Privilege[_,_]
 
     protected var _email: String = ""
 
@@ -69,7 +68,7 @@ SharedAnalysesOwner
         val as: ArrayBuffer[AnalysisType] = new ArrayBuffer[AnalysisType]()
         _privileges foreach { p: PrivilegeType =>
             if (p.isInstanceOf[AnalysisPrivilege[_]]){
-                val a: AnalysisType = p.asInstanceOf[AnalysisPrivilege[_]]._object
+                val a: AnalysisType = p.asInstanceOf[AnalysisPrivilege[_]].obj
                 if (!as.contains(a)){
                     as += a
                 }
@@ -188,7 +187,7 @@ SharedAnalysesOwner
         val gs: ArrayBuffer[GroupType] = new ArrayBuffer[GroupType]()
         _privileges foreach { p: PrivilegeType =>
             if (p.isInstanceOf[GroupPrivilege[_]]){
-                val g: GroupType = p.asInstanceOf[GroupPrivilege[_]]._object
+                val g: GroupType = p.asInstanceOf[GroupPrivilege[_]].obj
                 if (!gs.contains(g)){
                     gs += g
                 }
@@ -265,7 +264,7 @@ SharedAnalysesOwner
       *
       * @return Public privileges.
       */
-    def privileges: collection.Seq[PrivilegeType] = _privileges filter { p: Privilege[_, _] => p.isInstanceOf[PublicPrivilege] }
+    def privileges: collection.Seq[PrivilegeType] = _privileges filter { p: Privilege[_,_] => p.isInstanceOf[PublicPrivilege] }
     
     /** Result is a new List consisting of only groups that
       *  are owned by the user.

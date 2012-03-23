@@ -1,7 +1,7 @@
-package cz.payola.domain.permission.privilege
+package cz.payola.domain.entities.permissions.privilege
 
-import cz.payola.domain.permission.action.UserModificationAction
 import cz.payola.domain.entities.User
+import cz.payola.domain.entities.permissions.action.UserModificationAction
 
 class UserModificationPrivilege(o: User) extends UserPrivilege[UserModificationAction](o)
 {

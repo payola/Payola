@@ -13,7 +13,7 @@ trait User extends NamedEntity
     type AnalysisType <: Analysis
 
     /** Type of the privileges. */
-    type PrivilegeType <: Privilege[_, _]
+    type PrivilegeType <: Privilege[_,_]
 
     protected var _email: String
 

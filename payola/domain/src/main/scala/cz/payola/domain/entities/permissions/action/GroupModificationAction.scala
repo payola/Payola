@@ -1,4 +1,4 @@
-package cz.payola.domain.permission.action
+package cz.payola.domain.entities.permissions.action
 
 import cz.payola.domain.entities.Group
 
