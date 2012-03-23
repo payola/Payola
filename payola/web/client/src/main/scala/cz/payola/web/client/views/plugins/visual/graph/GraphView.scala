@@ -12,7 +12,7 @@ import cz.payola.web.client.views.plugins.visual._
 class GraphView(val container: Element) extends View {
     private var colorVertexHigh = new Color(240, 180, 180, 1)
 
-    private var colorVertexMedium = new Color(180, 240, 180, 0.9)
+    private var colorVertexMedium = new Color(180, 240, 180, 0.8)
 
     private var colorVertexLow = new Color(180, 180, 180, 0.3)
 
@@ -363,30 +363,39 @@ class GraphView(val container: Element) extends View {
         }
     }
 
-    private def updateMediumVertexColor() {
-        colorVertexMedium = createColor("setup.vertex.colors.default").getOrElse(colorVertexMedium)
+    private def updateMediumVertexColor(loader: SetupLoader) {
+        colorVertexMedium = loader.createColor(loader.VertexColorMedium).getOrElse(colorVertexMedium)
     }
 
-    private def updateHighVertexColor() {
-        colorVertexHigh = createColor("setup.vertex.colors.selected").getOrElse(colorVertexHigh)
+    private def updateHighVertexColor(loader: SetupLoader) {
+        colorVertexHigh = loader.createColor(loader.VertexColorHigh).getOrElse(colorVertexHigh)
     }
 
-    private def updateLowVertexColor() {
-        colorVertexLow = createColor("setup.vertex.colors.hidden").getOrElse(colorVertexLow)
+    private def updateLowVertexColor(loader: SetupLoader) {
+        colorVertexLow = loader.createColor(loader.VertexColorLow).getOrElse(colorVertexLow)
     }
 
-    private def updateTextDefault() {
-        colorTextDefault = createColor("setup.text.colors.default").getOrElse(colorTextDefault)
+    private def updateTextDefault(loader: SetupLoader) {
+        colorTextDefault = loader.createColor(loader.TextColorMedium).getOrElse(colorTextDefault)
     }
 
-    def updateSettings() {
+    def updateSettings(loader: SetupLoader) {
 
-        updateLowVertexColor()
+        updateLowVertexColor(loader)
 
-        updateMediumVertexColor()
+        updateMediumVertexColor(loader)
 
-        updateHighVertexColor()
+        updateHighVertexColor(loader)
 
-        updateTextDefault()
+        updateTextDefault(loader)
+        
+        vertexViews.foreach{ vertexView =>
+            vertexView.updateSettings(loader)
+        }
+
+        edgeViews.foreach{ edgeView =>
+            edgeView.updateSettings(loader)
+        }
+        
     }
 }

@@ -1,7 +1,7 @@
 package cz.payola.web.client.views.plugins.visual.graph
 
-import cz.payola.web.client.views.plugins.visual.{Vector, Color, Point}
 import s2js.adapters.js.dom.CanvasRenderingContext2D
+import cz.payola.web.client.views.plugins.visual.{SetupLoader, Vector, Color, Point}
 
 /**
   * Graphical representation of textual data in the drawn graph.
@@ -64,18 +64,18 @@ case class InformationView(data: Any) extends View {
         drawText(context, data.toString, position, colorToUse, "12px Sans", "center")
     }
 
-    private def updateTextColor() {
-        textColor = createColor("setup.text.colors.default").getOrElse(textColor)
+    private def updateTextColor(loader: SetupLoader) {
+        textColor = loader.createColor(loader.TextColorMedium).getOrElse(textColor)
     }
 
-    private  def updateBackgroundColor() {
-        backgroundColor = createColor("setup.text.colors.background").getOrElse(backgroundColor)
+    private  def updateBackgroundColor(loader: SetupLoader) {
+        backgroundColor = loader.createColor(loader.TextColorBackground).getOrElse(backgroundColor)
     }
 
-    def updateSettings() {
+    def updateSettings(loader: SetupLoader) {
 
-        updateTextColor()
+        updateTextColor(loader)
 
-        updateBackgroundColor()
+        updateBackgroundColor(loader)
     }
 }

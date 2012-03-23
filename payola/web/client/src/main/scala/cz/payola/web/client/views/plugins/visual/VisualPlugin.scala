@@ -30,6 +30,13 @@ abstract class VisualPlugin extends Plugin
         listen[BrowserEvent](graphView.get.controlsLayer.canvas, EventType.MOUSEUP, onMouseUp _)
     }
 
+    def updateSettings(loader: SetupLoader) {
+        if(graphView.isDefined) {
+            graphView.get.updateSettings(loader)
+            redraw()
+        }
+    }
+    
     def update(graph: Graph) {
         graphView.get.update(graph)
     }

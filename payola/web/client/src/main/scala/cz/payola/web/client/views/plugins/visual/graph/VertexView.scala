@@ -2,8 +2,8 @@ package cz.payola.web.client.views.plugins.visual.graph
 
 import collection.mutable.ListBuffer
 import cz.payola.common.rdf.{LiteralVertex, IdentifiedVertex, Vertex}
-import cz.payola.web.client.views.plugins.visual.{Vector, Color, Point}
-import s2js.adapters.js.dom.{Element, CanvasRenderingContext2D}
+import s2js.adapters.js.dom.CanvasRenderingContext2D
+import cz.payola.web.client.views.plugins.visual.{SetupLoader, Vector, Color, Point}
 
 /**
   * Graphical representation of Vertex object in the drawn graph.
@@ -66,7 +66,7 @@ class VertexView(val vertexModel: Vertex, var position: Point) extends View {
     def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
 
         val colorToUseOnBox = color.getOrElse(rectangleColor)
-        val correctedPosition = this.position + (rectangleSize / -2) + positionCorrection.getOrElse(Point.Zero).toVector
+        val correctedPosition = this.position + (rectangleSize / -2) + positionCorrection.getOrElse(Point(0,0)).toVector
 
         drawRoundedRectangle(context, correctedPosition, rectangleSize, rectangleCornerRadius)
         fillCurrentSpace(context, colorToUseOnBox)
@@ -85,9 +85,9 @@ class VertexView(val vertexModel: Vertex, var position: Point) extends View {
         }
     }
     
-    private def updateSize() {
+    private def updateSize(loader: SetupLoader) {
 
-        val newValueWidth = getValue("setup.vertex.dimensions.width")
+        val newValueWidth = loader.getValue(loader.VertexDimensionWidth)
         var newWidth = if(newValueWidth.isDefined) { newValueWidth.get.toInt } else { rectangleSize.x }
         newWidth = if(10 <= newWidth && newWidth <= 100) { //TODO constants
             newWidth
@@ -95,7 +95,7 @@ class VertexView(val vertexModel: Vertex, var position: Point) extends View {
             rectangleSize.x
         }
 
-        val newValueHeight = getValue("setup.vertex.dimensions.height")
+        val newValueHeight = loader.getValue(loader.VertexDimensionHeight)
         var newHeight = if(newValueHeight.isDefined) { newValueHeight.get.toInt } else { rectangleSize.y }
         newHeight = if(10 <= newHeight && newHeight <= 100) { //TODO constants
             newHeight
@@ -106,73 +106,77 @@ class VertexView(val vertexModel: Vertex, var position: Point) extends View {
         rectangleSize = Vector(newWidth, newHeight)
     }
     
-    private def updateCornerRadius() {
+    private def updateCornerRadius(loader: SetupLoader) {
 
-        val newValue = getValue("setup.vertex.dimensions.corner-radius")
+        val newValue = loader.getValue(loader.VertexDimensionCornerRadius)
         val newCornerRadius = if(newValue.isDefined) { newValue.get.toInt } else { rectangleCornerRadius }
 
         rectangleCornerRadius = if(0 <= newCornerRadius && newCornerRadius <=
             scala.math.min(rectangleSize.x, rectangleSize.y)/2) {
             newCornerRadius
-        } else {   
+        } else {
             scala.math.min(rectangleSize.x, rectangleSize.y)/2
         }
     }
     
-    private def updateRectangleColor() {
-        rectangleColor = createColor("setup.vertex.colors.default").getOrElse(rectangleColor)
+    private def updateRectangleColor(loader: SetupLoader) {
+        rectangleColor = loader.createColor(loader.VertexColorMedium).getOrElse(rectangleColor)
     }
 
-    private def getLiteralIconColor: Color = {
-        createColor("setup.vertex.colors.literal").getOrElse(new Color(200, 0, 0, 1))
+    private def getLiteralIconColor(loader: SetupLoader): Color = {
+        loader.createColor(loader.VertexColorLiteral).getOrElse(new Color(200, 0, 0, 1))
     }
     
-    private def getIdentifiedIconColor: Color = {
-        createColor("setup.vertex.colors.identified").getOrElse(new Color(0, 200, 0, 1))
+    private def getIdentifiedIconColor(loader: SetupLoader): Color = {
+        loader.createColor(loader.VertexColorIdentified).getOrElse(new Color(0, 200, 0, 1))
     }
 
-    private def getUnknownIconColor: Color = {
-        createColor("setup.vertex.colors.unknown").getOrElse(new Color(0, 0, 200, 1))
+    private def getUnknownIconColor(loader: SetupLoader): Color = {
+        loader.createColor(loader.VertexColorUnknown).getOrElse(new Color(0, 0, 200, 1))
     }
 
-    private def getLiteralIcon: String = {
-        getValue("setup.vertex.icons.literal").getOrElse("/assets/images/book-icon.png")
+    private def getLiteralIcon(loader: SetupLoader): String = {
+        loader.getValue(loader.VertexIconLiteral).getOrElse("/assets/images/book-icon.png")
     }
     
-    private def getIdentifiedIcon: String = {
-        getValue("setup.vertex.icons.identified").getOrElse("/assets/images/view-eye-icon.png")
+    private def getIdentifiedIcon(loader: SetupLoader): String = {
+        loader.getValue(loader.VertexIconIdentified).getOrElse("/assets/images/view-eye-icon.png")
     }
 
-    private def getUnknownIcon: String = {
-        getValue("setup.vertex.icons.unknown").getOrElse("/assets/images/question-mark-icon.png")
+    private def getUnknownIcon(loader: SetupLoader): String = {
+        loader.getValue(loader.VertexIconUnknown).getOrElse("/assets/images/question-mark-icon.png")
     }
     
     
-    private def updateImage() {
+    private def updateImage(loader: SetupLoader) {
 
         val icon = vertexModel match {
-            case i: LiteralVertex => getLiteralIcon
-            case i: IdentifiedVertex => getIdentifiedIcon
-            case _ => getUnknownIcon
+            case i: LiteralVertex => getLiteralIcon(loader)
+            case i: IdentifiedVertex => getIdentifiedIcon(loader)
+            case _ => getUnknownIcon(loader)
         }
         val iconColor = vertexModel match {
-            case i: LiteralVertex => getLiteralIconColor
-            case i: IdentifiedVertex => getIdentifiedIconColor
-            case _ => getUnknownIconColor
+            case i: LiteralVertex => getLiteralIconColor(loader)
+            case i: IdentifiedVertex => getIdentifiedIconColor(loader)
+            case _ => getUnknownIconColor(loader)
                 
         }
 
         image = prepareImage(iconColor, icon)
     }
     
-    def updateSettings() {
-        
-        updateSize()//WARNING updateCornerRadius has to be called AFTER (!!!!) updateSize to correct its value
-        
-        updateCornerRadius()
+    def updateSettings(loader: SetupLoader) {
 
-        updateRectangleColor()
+        updateSize(loader)//WARNING updateCornerRadius has to be called AFTER (!!!!) updateSize to correct its value
 
-        updateImage()
+        updateCornerRadius(loader)
+
+        updateRectangleColor(loader)
+
+        updateImage(loader)
+
+        if(information.isDefined) {
+            information.get.updateSettings(loader)
+        }
     }
 }

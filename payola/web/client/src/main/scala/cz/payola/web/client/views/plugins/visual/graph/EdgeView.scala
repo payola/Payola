@@ -1,8 +1,8 @@
 package cz.payola.web.client.views.plugins.visual.graph
 
 import cz.payola.common.rdf.Edge
-import cz.payola.web.client.views.plugins.visual.{Color, Point, Vector}
 import s2js.adapters.js.dom.CanvasRenderingContext2D
+import cz.payola.web.client.views.plugins.visual.{SetupLoader, Color, Point, Vector}
 
 /**
   * Structure used during draw function of EdgeView. Helps to indicate position of vertices to each other.
@@ -30,12 +30,12 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
     /**
       * Default color of an edge.
       */
-    private var colorBase = new Color(150, 150, 150, 0.5)
+    private var colorMedium = new Color(150, 150, 150, 0.5)
 
     /**
       * Default color of a selected edge.
       */
-    private var colorSelection = new Color(50, 50, 50, 1)
+    private var colorHigh = new Color(50, 50, 50, 1)
 
     /**
       * Default width of drawn line.
@@ -46,7 +46,7 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
       * The higher, the more are edges straight.
       * During update if the new value is < 0 or >= 6 drawStraight is set to true.
       */
-    private var straightenIndex = 2
+    private var straightenIndex = -1
 
     /**
       * If true, the drawn edge is straight, else is bezier curve
@@ -150,7 +150,7 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
     def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
 
         val colorToUse = color.getOrElse(
-            if(isSelected) colorSelection else  colorBase
+            if(isSelected) colorHigh else  colorMedium
         )
 
         val correction = positionCorrection.getOrElse(Point.Zero).toVector
@@ -163,16 +163,16 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
 
     }
     
-    private def updateColorBase() {
-        colorBase = createColor("setup.edge.colors.default").getOrElse(colorBase)
+    private def updateColorBase(loader: SetupLoader) {
+        colorMedium = loader.createColor(loader.EdgeColorMedium).getOrElse(colorMedium)
     }
     
-    private def updateColorSelection() {
-        colorSelection = createColor("setup.edge.colors.selected").getOrElse(colorSelection)
+    private def updateColorSelection(loader: SetupLoader) {
+        colorHigh = loader.createColor(loader.EdgeColorHigh).getOrElse(colorHigh)
     }
 
-    private def updateLineWidth() {
-        val loadedValue = getValue("setup.edge.dimensions.width")
+    private def updateLineWidth(loader: SetupLoader) {
+        val loadedValue = loader.getValue(loader.EdgeDimensionWidth)
 
         lineWidth = if(loadedValue.isDefined) {
             val newWidth = loadedValue.get.toInt
@@ -187,8 +187,8 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
         }
     }
     
-    private def updateStraightenIndex() {
-        val loadedValue = getValue("setup.edge.dimensions.width")
+    private def updateStraightenIndex(loader: SetupLoader) {
+        val loadedValue = loader.getValue(loader.EdgeDimensionStraightIndex)
 
         straightenIndex = if(loadedValue.isDefined) {
             val newStrIndex = loadedValue.get.toInt
@@ -206,14 +206,16 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
         }
     }
     
-    def updateSettings() {
+    def updateSettings(loader: SetupLoader) {
 
-        updateColorBase()
+        updateColorBase(loader)
         
-        updateColorSelection()
+        updateColorSelection(loader)
 
-        updateLineWidth()
+        updateLineWidth(loader)
 
-        updateStraightenIndex()
+        updateStraightenIndex(loader)
+
+        information.updateSettings(loader)
     }
 }

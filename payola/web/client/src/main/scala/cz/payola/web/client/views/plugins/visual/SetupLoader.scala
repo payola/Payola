@@ -3,198 +3,375 @@ package cz.payola.web.client.views.plugins.visual
 import s2js.adapters.js.browser._
 import s2js.adapters.js.dom.Element
 
-trait  SetupLoader
+class  SetupLoader
 {
-    def createDefaultSetup(): Element = {
-        val setup = document.createElement[Element]("setup")
+    val VertexColorHigh = "setup.vertex.colors.selected"
+    private val VertexColorHighRed = "setup.vertex.colors.selected.red"
+    private val VertexColorHighGreen = "setup.vertex.colors.selected.green"
+    private val VertexColorHighBlue = "setup.vertex.colors.selected.blue"
+    private val VertexColorHighAlpha = "setup.vertex.colors.selected.alpha"
 
-        //setup -> vertex
-        val vertexSetup = document.createElement[Element]("vertex")
-        setup.appendChild(vertexSetup)
+    val VertexColorLow = "setup.vertex.colors.hidden"
+    private val VertexColorLowRed = "setup.vertex.colors.hidden.red"
+    private val VertexColorLowGreen = "setup.vertex.colors.hidden.green"
+    private val VertexColorLowBlue = "setup.vertex.colors.hidden.blue"
+    private val VertexColorLowAlpha = "setup.vertex.colors.hidden.alpha"
 
-        //setup -> vertex -> colors
-        val vertexColors = document.createElement[Element]("colors")
-        vertexSetup.appendChild(vertexColors)
+    val VertexColorMedium = "setup.vertex.colors.default"
+    private val VertexColorMediumRed = "setup.vertex.colors.default.red"
+    private val VertexColorMediumGreen = "setup.vertex.colors.default.green"
+    private val VertexColorMediumBlue = "setup.vertex.colors.default.blue"
+    private val VertexColorMediumAlpha = "setup.vertex.colors.default.alpha"
 
-        //setup -> vertex -> colors -> default color
-        val vertexColorDefault = document.createElement[Element]("default")
-        vertexColors.appendChild(vertexColorDefault)
-        vertexColorDefault.setAttribute("red", "100")
-        vertexColorDefault.setAttribute("green", "100")
-        vertexColorDefault.setAttribute("blue", "100")
-        vertexColorDefault.setAttribute("alpha", "0.8")
+    val VertexColorLiteral = "setup.vertex.colors.literal"
+    private val VertexColorLiteralRed = "setup.vertex.colors.literal.red"
+    private val VertexColorLiteralGreen = "setup.vertex.colors.literal.green"
+    private val VertexColorLiteralBlue = "setup.vertex.colors.literal.blue"
+    private val VertexColorLiteralAlpha = "setup.vertex.colors.literal.alpha"
 
-        //setup -> vertex -> colors -> selected color
-        val vertexColorSelected = document.createElement[Element]("selected")
-        vertexColors.appendChild(vertexColorSelected)
-        vertexColorSelected.setAttribute("red", "255")
-        vertexColorSelected.setAttribute("green", "0")
-        vertexColorSelected.setAttribute("blue", "0")
-        vertexColorSelected.setAttribute("alpha", "1")
+    val VertexColorIdentified = "setup.vertex.colors.identified"
+    private val VertexColorIdentifiedRed = "setup.vertex.colors.identified.red"
+    private val VertexColorIdentifiedGreen = "setup.vertex.colors.identified.green"
+    private val VertexColorIdentifiedBlue = "setup.vertex.colors.identified.blue"
+    private val VertexColorIdentifiedAlpha = "setup.vertex.colors.identified.alpha"
 
-        //setup -> vertex -> colors -> hidden color
-        val vertexColorHidden = document.createElement[Element]("hidden")
-        vertexColors.appendChild(vertexColorHidden)
-        vertexColorHidden.setAttribute("red", "240")
-        vertexColorHidden.setAttribute("green", "240")
-        vertexColorHidden.setAttribute("blue", "240")
-        vertexColorHidden.setAttribute("alpha", "0.5")
+    val VertexColorUnknown = "setup.vertex.colors.unknown"
+    private val VertexColorUnknownRed = "setup.vertex.colors.unknown.red"
+    private val VertexColorUnknownGreen = "setup.vertex.colors.unknown.green"
+    private val VertexColorUnknownBlue = "setup.vertex.colors.unknown.blue"
+    private val VertexColorUnknownAlpha = "setup.vertex.colors.unknown.alpha"
+
+    val VertexIconLiteral = "setup.vertex.icons.literal"
+    val VertexIconIdentified = "setup.vertex.icons.identified"
+    val VertexIconUnknown = "setup.vertex.icons.unknown"
+
+    val VertexDimensionCornerRadius = "setup.vertex.dimensions.corner-radius"
+    val VertexDimensionWidth = "setup.vertex.dimensions.width"
+    val VertexDimensionHeight = "setup.vertex.dimensions.height"
+
+
+    val EdgeColorHigh = "setup.edge.colors.high"
+    private val EdgeColorHighRed = "setup.edge.colors.high.red"
+    private val EdgeColorHighGreen = "setup.edge.colors.high.green"
+    private val EdgeColorHighBlue = "setup.edge.colors.high.blue"
+    private val EdgeColorHighAlpha = "setup.edge.colors.high.alpha"
+
+    val EdgeColorMedium = "setup.edge.colors.medium"
+    private val EdgeColorMediumRed = "setup.edge.colors.medium.red"
+    private val EdgeColorMediumGreen = "setup.edge.colors.medium.green"
+    private val EdgeColorMediumBlue = "setup.edge.colors.medium.blue"
+    private val EdgeColorMediumAlpha = "setup.edge.colors.medium.alpha"
+    
+    val EdgeDimensionStraightIndex = "setup.edge.dimensions.straight-index"
+    val EdgeDimensionWidth = "setup.edge.dimensions.width"
+
+
+    val TextColorMedium = "setup.text.colors.medium"
+    private val TextColorMediumRed = "setup.text.colors.medium.red"
+    private val TextColorMediumGreen = "setup.text.colors.medium.green"
+    private val TextColorMediumBlue = "setup.text.colors.medium.blue"
+    private val TextColorMediumAlpha = "setup.text.colors.medium.alpha"
+
+    val TextColorBackground = "setup.text.colors.background"
+    private val TextColorBackgroundRed = "setup.text.colors.background.red"
+    private val TextColorBackgroundGreen = "setup.text.colors.background.green"
+    private val TextColorBackgroundBlue = "setup.text.colors.background.blue"
+    private val TextColorBackgroundAlpha = "setup.text.colors.background.alpha"
+
+    
+    def createDefaultSetup() {
+
+        //setup -> vertex -> colors -> medium color
+        setItem(VertexColorMediumRed, "180")
+        setItem(VertexColorMediumGreen, "240")
+        setItem(VertexColorMediumBlue, "180")
+        setItem(VertexColorMediumAlpha, "0.8")
+
+        //setup -> vertex -> colors -> high color
+        setItem(VertexColorHighRed, "240")
+        setItem(VertexColorHighGreen, "180")
+        setItem(VertexColorHighBlue, "180")
+        setItem(VertexColorHighAlpha, "1")
+
+        //setup -> vertex -> colors -> low color
+        setItem(VertexColorLowRed, "180")
+        setItem(VertexColorLowGreen, "180")
+        setItem(VertexColorLowBlue, "180")
+        setItem(VertexColorLowAlpha, "0.3")
 
         //setup -> vertex -> colors -> literal vertex color
-        val vertexLiteralColor = document.createElement[Element]("literal")
-        vertexColors.appendChild(vertexLiteralColor)
-        vertexLiteralColor.setAttribute("red", "240")
-        vertexLiteralColor.setAttribute("green", "0")
-        vertexLiteralColor.setAttribute("blue", "0")
-        vertexLiteralColor.setAttribute("alpha", "1")
+        setItem(VertexColorLiteralRed, "200")
+        setItem(VertexColorLiteralGreen, "150")
+        setItem(VertexColorLiteralBlue, "0")
+        setItem(VertexColorLiteralAlpha, "1")
 
         //setup -> vertex -> colors -> identified vertex color
-        val vertexIdentifiedColor = document.createElement[Element]("identified")
-        vertexColors.appendChild(vertexIdentifiedColor)
-        vertexIdentifiedColor.setAttribute("red", "0")
-        vertexIdentifiedColor.setAttribute("green", "240")
-        vertexIdentifiedColor.setAttribute("blue", "0")
-        vertexIdentifiedColor.setAttribute("alpha", "1")
+        setItem(VertexColorIdentifiedRed, "0")
+        setItem(VertexColorIdentifiedGreen, "200")
+        setItem(VertexColorIdentifiedBlue, "150")
+        setItem(VertexColorIdentifiedAlpha, "1")
 
         //setup -> vertex -> colors -> unknown vertex color
-        val vertexUnknownColor = document.createElement[Element]("unknown")
-        vertexColors.appendChild(vertexUnknownColor)
-        vertexUnknownColor.setAttribute("red", "0")
-        vertexUnknownColor.setAttribute("green", "0")
-        vertexUnknownColor.setAttribute("blue", "0")
-        vertexUnknownColor.setAttribute("alpha", "1")
-
-
-        //setup -> vertex -> icons
-        val vertexIcons = document.createElement[Element]("icons")
-        vertexSetup.appendChild(vertexIcons)
+        setItem(VertexColorUnknownRed, "150")
+        setItem(VertexColorUnknownGreen, "0")
+        setItem(VertexColorUnknownBlue, "200")
+        setItem(VertexColorUnknownAlpha, "1")
 
         //setup -> vertex -> icons -> literal vertex icon
-        val vertexLiteralIcon = document.createElement[Element]("literal")
-        vertexIcons.appendChild(vertexLiteralIcon)
-        vertexLiteralIcon.setAttribute("value", "/assets/images/book-icon.png")
+        setItem(VertexIconLiteral, "/assets/images/book-icon.png")
 
         //setup -> vertex -> icons -> identified vertex icon
-        val vertexIdentifiedIcon = document.createElement[Element]("identified")
-        vertexIcons.appendChild(vertexIdentifiedIcon)
-        vertexIdentifiedIcon.setAttribute("value", "/assets/images/view-eye-icon.png")
+        setItem(VertexIconIdentified, "/assets/images/view-eye-icon.png")
 
         //setup -> vertex -> icons -> unknown vertex icon
-        val vertexUnknownIcon = document.createElement[Element]("identified")
-        vertexIcons.appendChild(vertexUnknownIcon)
-        vertexUnknownIcon.setAttribute("value", "/assets/images/question-mark-icon.png")
-
-
-        //setup -> vertex -> dimensions
-        val vertexDimensions = document.createElement[Element]("dimensions")
-        vertexSetup.appendChild(vertexDimensions)
+        setItem(VertexIconUnknown, "/assets/images/question-mark-icon.png")
 
         //setup -> vertex -> dimensions -> corner radius
-        val vertexDimensionCornerRadius = document.createElement[Element]("corner-radius")
-        vertexDimensions.appendChild(vertexDimensionCornerRadius)
-        vertexDimensionCornerRadius.setAttribute("value", "5")
+        setItem(VertexDimensionCornerRadius, "5")
 
         //setup -> vertex -> dimensions -> width
-        val vertexDimensionWidth = document.createElement[Element]("width")
-        vertexDimensions.appendChild(vertexDimensionWidth)
-        vertexDimensionWidth.setAttribute("value", "30")
+        setItem(VertexDimensionWidth, "30")
 
         //setup -> vertex -> dimensions -> height
-        val vertexDimensionHeight = document.createElement[Element]("height")
-        vertexDimensions.appendChild(vertexDimensionHeight)
-        vertexDimensionHeight.setAttribute("value", "24")
+        setItem(VertexDimensionHeight, "24")
 
 
 
-        //setup -> edge ###########################################################################
-        val edgeSetup = document.createElement[Element]("edge")
-        setup.appendChild(edgeSetup)
-
-        //setup -> edge -> colors
-        val edgeColors = document.createElement[Element]("colors")
-        edgeSetup.appendChild(edgeColors)
-
-        //setup -> edge -> colors -> selected edge color
-        val edgeSelectedColor = document.createElement[Element]("selected")
-        edgeColors.appendChild(edgeSelectedColor)
-        edgeSelectedColor.setAttribute("red", "0")
-        edgeSelectedColor.setAttribute("green", "0")
-        edgeSelectedColor.setAttribute("blue", "0")
-        edgeSelectedColor.setAttribute("alpha", "1")
-
-        //setup -> edge -> colors -> default edge color
-        val edgeDefaultColor = document.createElement[Element]("default")
-        edgeColors.appendChild(edgeDefaultColor)
-        edgeDefaultColor.setAttribute("red", "50")
-        edgeDefaultColor.setAttribute("green", "50")
-        edgeDefaultColor.setAttribute("blue", "50")
-        edgeDefaultColor.setAttribute("alpha", "0.7")
-
-        //setup -> edge -> dimensions
-        val edgeDimensions = document.createElement[Element]("dimensions")
-        edgeSetup.appendChild(edgeDimensions)
+        //setup -> edge -> colors -> selected edge color ##########################################
+        setItem(EdgeColorHighRed, "50")
+        setItem(EdgeColorHighGreen, "50")
+        setItem(EdgeColorHighBlue, "50")
+        setItem(EdgeColorHighAlpha, "1")
+        
+        //setup -> edge -> colors -> medium edge color
+        setItem(EdgeColorMediumRed, "150")
+        setItem(EdgeColorMediumGreen, "150")
+        setItem(EdgeColorMediumBlue, "150")
+        setItem(EdgeColorMediumAlpha, "0.5")
 
         //setup -> edge -> dimensions ->  line width
-        val edgeLineWidth = document.createElement[Element]("width")
-        edgeDimensions.appendChild(edgeLineWidth)
-        edgeLineWidth.setAttribute("value", "1")
+        setItem(EdgeDimensionWidth, "1")
 
         //setup -> edge -> dimensions ->  straight index
-        val edgeStraightIndex = document.createElement[Element]("straight-index")
-        edgeDimensions.appendChild(edgeStraightIndex)
-        edgeStraightIndex.setAttribute("value", "2")
+        setItem(EdgeDimensionStraightIndex, "-1")
 
 
-        //setup -> text ###########################################################################
-        val textSetup = document.createElement[Element]("text")
-        setup.appendChild(textSetup)
-
-        //setup -> text -> colors
-        val textColors = document.createElement[Element]("colors")
-        textSetup.appendChild(textColors)
-
-        //setup -> text -> colors -> default text color
-        val textDefaultColor = document.createElement[Element]("default")
-        textColors.appendChild(textDefaultColor)
-        textDefaultColor.setAttribute("red", "0")
-        textDefaultColor.setAttribute("green", "0")
-        textDefaultColor.setAttribute("blue", "0")
-        textDefaultColor.setAttribute("alpha", "1")
+        //setup -> text -> colors -> default text color ###########################################
+        setItem(TextColorMediumRed, "50")
+        setItem(TextColorMediumGreen, "50")
+        setItem(TextColorMediumBlue, "50")
+        setItem(TextColorMediumAlpha, "1")
 
         //setup -> text -> colors -> background text color
-        val textBackgroundColor = document.createElement[Element]("background")
-        textColors.appendChild(textBackgroundColor)
-        textBackgroundColor.setAttribute("red", "0")
-        textBackgroundColor.setAttribute("green", "0")
-        textBackgroundColor.setAttribute("blue", "0")
-        textBackgroundColor.setAttribute("alpha", "1")
-
-
-        setup
+        setItem(TextColorBackgroundRed, "255")
+        setItem(TextColorBackgroundGreen, "255")
+        setItem(TextColorBackgroundBlue, "255")
+        setItem(TextColorBackgroundAlpha, "0.5")
     }
     
-    protected def createColor(localStorageKey: String): Option[Color] = {
-        val red = window.localStorage.getItem(localStorageKey + ".red")
-        val green = window.localStorage.getItem(localStorageKey + ".green")
-        val blue = window.localStorage.getItem(localStorageKey + ".blue")
-        val alpha = window.localStorage.getItem(localStorageKey + ".alpha")
+    private def setItem(where: String, what: String) {
+        if(window.localStorage.getItem(where) == null) {
+            window.localStorage.setItem(where, what)
+        }
+    }
+    
+    private def getItem(where: String): String = {
+        window.localStorage.getItem(where)
+    }
+        
+    
+    def createColor(localStorageKey: String): Option[Color] = {
+        val red = getItem(localStorageKey + ".red")
+        val green = getItem(localStorageKey + ".green")
+        val blue = getItem(localStorageKey + ".blue")
+        val alpha = getItem(localStorageKey + ".alpha")
 
-        window.alert("red: "+ red+" green: "+green+" blue: "+ blue+ " alpha: "+alpha)
         //TODO if correct create new color nebo new Color(200, 0, 0, 1)
-        if(red.isEmpty || green.isEmpty || blue.isEmpty || alpha.isEmpty) {
+        if(red == null || green == null || blue == null || alpha == null) {
             None
         } else {
             Some(new Color(red.toInt, green.toInt, blue.toInt, alpha.toDouble))
         }
     }
     
-    protected def getValue(localStorageKey: String): Option[String] = {
-        val value = window.localStorage.getItem(localStorageKey)
-        window.alert("value: "+value)
-        if(value.isEmpty) { //TODO is this a valid check?
+    def getValue(localStorageKey: String): Option[String] = {
+        val value = getItem(localStorageKey)
+        if(value == null) { //TODO is this a valid check?
             None
         } else {
             Some(value)
         }
+    }
+
+
+
+
+    def buildSetupArea() {
+        val controlsArea = document.getElementById("controls")
+
+
+        controlsArea.appendChild(document.createElement[Element]("br"))
+        controlsArea.appendChild(document.createElement[Element]("br"))
+
+        val settingsHideButton = document.createElement[Element]("button")
+        controlsArea.appendChild(settingsHideButton)
+        settingsHideButton.setAttribute("type", "button")
+        settingsHideButton.setAttribute("id", "settingsHideButton")
+        settingsHideButton.innerHTML = "Hide/show all your settings, baby!"
+        settingsHideButton.setAttribute("onclick", "el = document.getElementById(\"visualPluginSettings\");" +
+            "el.style.visibility = (el.style.visibility == \"visible\") ? \"hidden\" : \"visible\";")
+
+        controlsArea.appendChild(document.createElement[Element]("br"))
+
+        val settingsDiv = document.createElement[Element]("div")
+        controlsArea.appendChild(settingsDiv)
+        settingsDiv.setAttribute("id", "visualPluginSettings")
+
+        val settingsForm = document.createElement[Element]("form")
+        settingsDiv.appendChild(settingsForm)
+
+        //Vertex settings #########################################################################
+        buildVertexSettings(settingsForm)
+
+        settingsForm.appendChild(document.createElement[Element]("br"))
+        settingsForm.appendChild(document.createElement[Element]("br"))
+
+        //Edge settings ###########################################################################
+        buildEdgeSettings(settingsForm)
+
+        //Text setttings ##########################################################################
+        buildTextSettings(settingsForm)
+
+        settingsForm.appendChild(document.createElement[Element]("br"))
+
+        val submitButton = document.createElement[Element]("button")
+        settingsForm.appendChild(submitButton)
+        submitButton.setAttribute("type", "button")
+        submitButton.innerHTML = "Yeah, I like this way, honey!"
+        submitButton.setAttribute("onclick", "a.updateSettings()")
+    }
+
+    private def buildTextSettings(parent: Element) {
+        val section = document.createElement[Element]("label")
+        parent.appendChild(section)
+        section.innerHTML = "Text"
+
+        parent.appendChild(document.createElement[Element]("br"))
+        buildColorSetup(parent, "color", TextColorMedium)
+
+        parent.appendChild(document.createElement[Element]("br"))
+        buildColorSetup(parent, "color", TextColorBackground)
+    }
+
+    private def buildVertexSettings(parent: Element) {
+        val vertexSection = document.createElement[Element]("label")
+        parent.appendChild(vertexSection)
+        vertexSection.innerHTML = "Vertex"
+
+        parent.appendChild(document.createElement[Element]("br"))
+        buildInput(parent, "corner radius", VertexDimensionCornerRadius)
+
+        parent.appendChild(document.createElement[Element]("br"))
+        buildInput(parent, "width", VertexDimensionWidth)
+
+        parent.appendChild(document.createElement[Element]("br"))
+        buildInput(parent, "height", VertexDimensionHeight)
+
+        parent.appendChild(document.createElement[Element]("br"))
+        buildColorSetup(parent, "low", VertexColorLow)
+
+        parent.appendChild(document.createElement[Element]("br"))
+        buildColorSetup(parent, "mediu", VertexColorMedium)
+
+        parent.appendChild(document.createElement[Element]("br"))
+        buildColorSetup(parent, "high", VertexColorHigh)
+
+        parent.appendChild(document.createElement[Element]("br"))
+        buildColorSetup(parent, "literal", VertexColorLiteral)
+
+        parent.appendChild(document.createElement[Element]("br"))
+        buildColorSetup(parent, "identif", VertexColorIdentified)
+
+        parent.appendChild(document.createElement[Element]("br"))
+        buildColorSetup(parent, "unkn", VertexColorUnknown)
+
+        parent.appendChild(document.createElement[Element]("br"))
+        buildInput(parent, "lit Icon", VertexIconLiteral).setAttribute("disabled", "disabled")
+
+        parent.appendChild(document.createElement[Element]("br"))
+        buildInput(parent, "ident Icon", VertexIconIdentified).setAttribute("disabled", "disabled")
+
+        parent.appendChild(document.createElement[Element]("br"))
+        buildInput(parent, "unkn Icon", VertexIconUnknown).setAttribute("disabled", "disabled")
+    }
+
+    private def buildEdgeSettings(parent: Element) {
+        val edgeSection = document.createElement[Element]("label")
+        parent.appendChild(edgeSection)
+        edgeSection.innerHTML = "Edge"
+
+        parent.appendChild(document.createElement[Element]("br"))
+        buildInput(parent, "width", EdgeDimensionWidth)
+
+        parent.appendChild(document.createElement[Element]("br"))
+        buildInput(parent, "straigthten index", EdgeDimensionStraightIndex)
+
+        parent.appendChild(document.createElement[Element]("br"))
+        buildColorSetup(parent, "select", EdgeColorHigh)
+
+        parent.appendChild(document.createElement[Element]("br"))
+        buildColorSetup(parent, "base", EdgeColorMedium)
+    }
+
+    private def buildColorSetup(parent: Element, labelText: String, location: String) {
+
+        val edgeColorHighLabel = document.createElement[Element]("label")
+        parent.appendChild(edgeColorHighLabel)
+        edgeColorHighLabel.innerHTML = labelText
+
+        val spacer1 = document.createElement[Element]("label")
+        parent.appendChild(spacer1)
+        spacer1.innerHTML = " "
+
+        //red
+        buildInput(parent, "R", location+".red")
+        val spacer2 = document.createElement[Element]("label")
+        parent.appendChild(spacer2)
+        spacer2.innerHTML = " "
+
+        //green
+        buildInput(parent, "G", location +".green")
+        val spacer3 = document.createElement[Element]("label")
+        parent.appendChild(spacer3)
+        spacer3.innerHTML = " "
+
+        //blue
+        buildInput(parent, "B", location+".blue")
+        val spacer4 = document.createElement[Element]("label")
+        parent.appendChild(spacer4)
+        spacer4.innerHTML = " "
+
+        //alpha
+        buildInput(parent, "A", location+".alpha")
+    }
+
+    private def buildInput(parent: Element, labelText: String, bindToLocation: String): Element = {
+
+        val label = document.createElement[Element]("label")
+        parent.appendChild(label)
+        label.innerHTML = labelText
+
+        val spacer = document.createElement[Element]("label")
+        parent.appendChild(spacer)
+        spacer.innerHTML = " "
+
+        val inputField = document.createElement[Element]("input")
+        parent.appendChild(inputField)
+        inputField.setAttribute("size", "3")
+        inputField.setAttribute("type", "text")
+        inputField.setAttribute("onChange", "window.localStorage.setItem(\""+bindToLocation+"\", this.value)")
+        inputField.setAttribute("value", getValue(bindToLocation).getOrElse(""))
+
+        inputField
     }
 }

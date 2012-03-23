@@ -15,6 +15,8 @@ import cz.payola.web.client.views.plugins.textual.techniques.table.TableTechniqu
 import s2js.adapters.js.dom.Element
 
 import s2js.compiler.javascript
+import cz.payola.web.client.views.plugins.textual.TextPlugin
+import cz.payola.web.client.views.plugins.visual.{SetupLoader, VisualPlugin}
 
 // TODO remove after classloading is done
 @dependency("cz.payola.common.rdf.IdentifiedVertex")
@@ -35,17 +37,20 @@ class Index
         // ...
     )
 
+    val visualPluginSetup = new SetupLoader()
+
 
     var currentPlugin: Option[Plugin] = None
 
     def init() {
         try {
+            visualPluginSetup.createDefaultSetup()
+            buildControls()
+            visualPluginSetup.buildSetupArea()
             //TODO show "asking the server for the data"
             graph = Option(GraphFetcher.getInitialGraph)
             //TODO show "preparing visualisation"
             changePlugin(plugins.head)
-            buildControls()
-            buildSetupScript()
             //TODO hide info
         } catch {
             case e: RPCException => {
@@ -78,59 +83,14 @@ class Index
         }
     }
 
-    def buildSetupScript() {
-        val controlsArea = document.getElementById("controls")
 
-
-        controlsArea.appendChild(document.createElement[Element]("br"))
-        controlsArea.appendChild(document.createElement[Element]("br"))
-
-        val settingsHideButton = document.createElement[Element]("button")
-        controlsArea.appendChild(settingsHideButton)
-        settingsHideButton.setAttribute("type", "button")
-        settingsHideButton.setAttribute("value", "Hide/show the settings, baby!")
-        settingsHideButton.setAttribute("onclick", "el = document.getElementById(\"visualPluginSettings\");" +
-            "el.style.visibility = (el.style.visibility == \"visible\") ? \"hidden\" : \"visible\";")
-
-        controlsArea.appendChild(document.createElement[Element]("br"))
-
-        val settingsDiv = document.createElement[Element]("div")
-        controlsArea.appendChild(settingsDiv)
-        settingsDiv.setAttribute("id", "visualPluginSettings")
-
-        val settingsForm = document.createElement[Element]("form")
-        settingsDiv.appendChild(settingsForm)
-
-        val vertexSection = document.createElement[Element]("label")
-        settingsForm.appendChild(vertexSection)
-        vertexSection.innerHTML = "Vertex"
-
-        settingsForm.appendChild(document.createElement[Element]("br"))
-
-        val vertexCornerRadius = document.createElement[Element]("input")
-        settingsForm.appendChild(vertexCornerRadius)
-        vertexCornerRadius.setAttribute("type", "text")
-        vertexCornerRadius.setAttribute("name", "vertexCornerRadius")
-        vertexCornerRadius.setAttribute("value", "5")
-
-        settingsForm.appendChild(document.createElement[Element]("br"))
-
-        val submitButton = document.createElement[Element]("button")
-        settingsForm.appendChild(submitButton)
-        submitButton.setAttribute("type", "button")
-        submitButton.setAttribute("value", "Yeah, I like this way, honey!")
-        submitButton.setAttribute("onclick", "alert(\"ble\")")
-
-
-        //TODO
-        /*
-        udelat cudlik do ovladaci oblasti pri jehoz stisknuti se vyvola dialog s kolonkama pro nastaveni
-        visualnich pluginu
-         */
-
-        //TODO hezka featura - kdyz neni vybran visual plugin cudlik disabled...
+    def updateSettings() {
+        currentPlugin.get match {
+            case i: VisualPlugin =>
+                i.updateSettings(visualPluginSetup)
+        }
     }
-
+    
     def changePluginByNumber(number: Int) {
         if(0 <= number && number < plugins.length) {
             changePlugin(plugins(number))
@@ -141,10 +101,19 @@ class Index
 
         // Switch to the new one.
         currentPlugin = Some(plugin)
+        
+        currentPlugin.get match {
+            case i: VisualPlugin =>
+                document.getElementById("settingsHideButton").removeAttribute("disabled")
+            case i: TextPlugin =>
+                document.getElementById("settingsHideButton").setAttribute("disabled", "disabled")
+                document.getElementById("visualPluginSettings").setAttribute("style", "visibility:hidden")
+        }
         // TODO rename canvas-holder to something else.
         plugin.init(document.getElementById("graph-plugin-draw-space"))
         plugin.update(graph.get)
-        plugin.redraw()
+
+        updateSettings()
     }
 
     /*DO NOT REMOVE PLEASE*/

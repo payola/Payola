@@ -4,7 +4,7 @@ import s2js.adapters.js.browser._
 import s2js.adapters.js.dom._
 import cz.payola.web.client.views.plugins.visual._
 
-trait View extends SetupLoader{
+trait View {
     /**
       * Routine for drawing the graphical representation of graphs objects.
       * @param context to which container to draw
@@ -13,9 +13,7 @@ trait View extends SetupLoader{
       */
     def draw(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point])
 
-    //TODO create here function for creating Color out of 4 maybe empty Strings
-
-    def updateSettings()
+    def updateSettings(loader: SetupLoader)
 
     /**
       * Draws a rectangle with rounded corners, depending on the radius parameter to the input canvas context.
@@ -39,29 +37,20 @@ trait View extends SetupLoader{
 
         context.beginPath()
 
-        var aX = position.x + radius
-        var aY = position.y
-        context.moveTo(aX, aY)
+        val a = position
+        context.moveTo(a.x + radius, a.y)
 
-        aX = position.x
-        aY = position.y
-        context.quadraticCurveTo(aX, aY, aX, aY + radius) //upper left corner
+        context.quadraticCurveTo(a.x, a.y, a.x, a.y + radius) //upper left corner
 
-        aX = position.x
-        aY = position.y + size.y
-        context.lineTo(aX, aY - radius)
-        context.quadraticCurveTo(aX, aY, aX + radius, aY) //lower left corner
+        context.lineTo(a.x, a.y + size.y - radius)
+        context.quadraticCurveTo(a.x, a.y + size.y, a.x + radius, a.y + size.y) //lower left corner
 
 
-        aX = position.x + size.x
-        aY = position.y + size.y
-        context.lineTo(aX - radius, aY)
-        context.quadraticCurveTo(aX, aY, aX, aY - radius) //lower right corner
+        context.lineTo(a.x + size.x - radius, a.y + size.y)
+        context.quadraticCurveTo(a.x + size.x, a.y + size.y, a.x + size.x, a.y + size.y - radius) //lower right corner
 
-        aX = position.x + size.x
-        aY = position.y
-        context.lineTo(aX, aY + radius)
-        context.quadraticCurveTo(aX, aY, aX - radius, aY) //upper right corner
+        context.lineTo(a.x + size.x, a.y + radius)
+        context.quadraticCurveTo(a.x + size.x, a.y, a.x + size.x - radius, a.y) //upper right corner
 
         context.closePath()
     }
