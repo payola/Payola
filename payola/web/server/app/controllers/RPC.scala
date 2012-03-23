@@ -5,6 +5,7 @@ import play.api.mvc._
 import java.lang.reflect.Method
 import cz.payola.scala2json.JSONSerializer
 import cz.payola.scala2json.JSONSerializerOptions._
+import scala.collection.mutable.Seq
 
 /**
   * The only controller which handles requests from the client side. It receives a POST request with the following
@@ -246,53 +247,36 @@ object RPC extends Controller
       * @return typed parameter
       */
     private def parseParam(input: Seq[String], paramType: Class[_]): java.lang.Object = {
-        input.head match {
-            // is array class (has field __values__)
-            case "__arrayClass__" => {
-                // parse object. can return array or Any
-                val parsedCollection = util.parsing.json.JSON.parseFull(input.head)
-                // we would like to have map - that represents object - propertyName :: value
-                parsedCollection.isInstanceOf[Map[_,_]] match {
-                    case true => {
-                        val values = parsedCollection.getOrElse[Any]("__values__",List())
-                        values.isInstanceOf[Seq[_]] match {
-                            case true => {
-                                values.asInstanceOf[Seq[_]].map(item => parseParam(List(item.asInstanceOf[String]),paramType.getTypeParameters.head.getClass))
-                            }
-                            case false => parsedCollection
-                        }
-                    }
-                    case false => parsedCollection
-                }
-            }
-            case "__class__" => {
-                util.parsing.json.JSON.parseFull(input.head)
-            }
-            case _ => {
-                if (paramType.isInstanceOf[Seq[_]]){
-                    input.map(item => {
-                        parseParam(List(item), paramType.getTypeParameters.head.getClass)
-                    })
-                }else{
-                    paramType.getName match {
-                        case "Boolean" => java.lang.Boolean.parseBoolean(input.head): java.lang.Boolean
-                        case "java.lang.Boolean" => java.lang.Boolean.parseBoolean(input.head): java.lang.Boolean
-                        case "boolean" => java.lang.Boolean.parseBoolean(input.head): java.lang.Boolean
-                        case "Int" => java.lang.Integer.parseInt(input.head): java.lang.Integer
-                        case "int" => java.lang.Integer.parseInt(input.head): java.lang.Integer
-                        case "char" => input.head.charAt(0): java.lang.Character
-                        case "Char" => input.head.charAt(0): java.lang.Character
-                        case "java.lang.Character" => input.head.charAt(0): java.lang.Character
-                        case "Double" => java.lang.Double.parseDouble(input.head): java.lang.Double
-                        case "double" => java.lang.Double.parseDouble(input.head): java.lang.Double
-                        case "java.lang.Double" => java.lang.Double.parseDouble(input.head): java.lang.Double
-                        case "Float" => java.lang.Float.parseFloat(input.head): java.lang.Float
-                        case "float" => java.lang.Float.parseFloat(input.head): java.lang.Float
-                        case "java.lang.Float" => java.lang.Float.parseFloat(input.head): java.lang.Float
-                        case _ => input.head.toString: java.lang.String
-                    }
-                }
+
+        if (paramType.isInstanceOf[Class[Seq[_]]])
+        {
+            parseSequence(input, paramType.getTypeParameter.head)
+        }else{
+            paramType.getName match {
+                case "Boolean" => java.lang.Boolean.parseBoolean(input.head): java.lang.Boolean
+                case "java.lang.Boolean" => java.lang.Boolean.parseBoolean(input.head): java.lang.Boolean
+                case "boolean" => java.lang.Boolean.parseBoolean(input.head): java.lang.Boolean
+                case "Int" => java.lang.Integer.parseInt(input.head): java.lang.Integer
+                case "int" => java.lang.Integer.parseInt(input.head): java.lang.Integer
+                case "char" => input.head.charAt(0): java.lang.Character
+                case "Char" => input.head.charAt(0): java.lang.Character
+                case "java.lang.Character" => input.head.charAt(0): java.lang.Character
+                case "Double" => java.lang.Double.parseDouble(input.head): java.lang.Double
+                case "double" => java.lang.Double.parseDouble(input.head): java.lang.Double
+                case "java.lang.Double" => java.lang.Double.parseDouble(input.head): java.lang.Double
+                case "Float" => java.lang.Float.parseFloat(input.head): java.lang.Float
+                case "float" => java.lang.Float.parseFloat(input.head): java.lang.Float
+                case "java.lang.Float" => java.lang.Float.parseFloat(input.head): java.lang.Float
+                case _ => input.head.toString: java.lang.String
             }
         }
+    }
+
+    private def parseSequence(input: Seq[String], paramType: Class[_]) = {
+        val seqString = input.head
+
+        val parsedArray = util.parsing.json.JSON.parseFull(seqString)
+
+        parsedArray.foreach(x => {})
     }
 }
