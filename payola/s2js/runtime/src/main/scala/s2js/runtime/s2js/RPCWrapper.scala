@@ -1,6 +1,7 @@
 package s2js.runtime.s2js
 
-import s2js.compiler.{dependency, javascript}
+import s2js.compiler.{javascript, dependency}
+import collection.mutable.ArrayBuffer
 
 object RPCWrapper
 {
@@ -87,19 +88,22 @@ object RPCWrapper
     """)
     def callAsync(procedureName: String, parameters: Any, successCallback: Function1[Any, Unit], failCallback: Function1[Throwable, Unit]) {}
 
-    @javascript("""
-        var args = '';
-        if (Object.prototype.toString.call(params) === '[object Array]') {
-                var arr = [];
-                for (arg in params) {
-                        arr.push(encodeURIComponent(arg) + '=' + encodeURIComponent(params[arg]));
-                }
-                args = arr.join('&');
+    @javascript("return encodeURIComponent(s);")
+    def encodeURIComponent(s: String): String = ""
+    
+    def buildHttpQuery(params: ArrayBuffer[Any]): String = {
+        var index = -1
+        val paramStrings = params.map {param =>
+            val paramString = param match {
+                case p: String => p
+                case p: Seq[_] => p.mkString(",")
+                case p => p.toString
+            }
+            index += 1
+            index + "=" + encodeURIComponent(paramString)
         }
-
-        return args;
-    """)
-    def buildHttpQuery(params: Map[String, Object]): String = null
+        paramStrings.mkString("&")
+    }
 
     @javascript("""
 

@@ -10,7 +10,7 @@ object StringOps extends s2js.runtime.scala.collection.SeqCompanion
     def apply(xs: Any*): Any = null
 }
 
-class StringOps(x: String) extends s2js.runtime.scala.collection.Seq
+class StringOps(x: java.lang.String) extends s2js.runtime.scala.collection.Seq
 {
     initializeInternalJsArray(x)
 
