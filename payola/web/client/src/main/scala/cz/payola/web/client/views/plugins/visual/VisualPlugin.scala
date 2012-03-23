@@ -33,7 +33,6 @@ abstract class VisualPlugin extends Plugin
     def updateSettings(loader: SetupLoader) {
         if(graphView.isDefined) {
             graphView.get.updateSettings(loader)
-            redraw()
         }
     }
     

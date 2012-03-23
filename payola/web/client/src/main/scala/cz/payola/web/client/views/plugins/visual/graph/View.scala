@@ -167,6 +167,7 @@ trait View {
         val context = canvas.getContext[CanvasRenderingContext2D]("2d")
 
         //nakreslim do lokalniho canvasu
+
         val imageElement = document.createElement[Image]("img")
         imageElement.src = imagePath
 

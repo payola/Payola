@@ -12,11 +12,9 @@ import cz.payola.web.client.views.plugins.visual.techniques.gravity.GravityTechn
 import cz.payola.web.client.views.plugins.visual.techniques.minimalization.MinimalizationTechnique
 import cz.payola.web.client.model.graph.{SimpleIdentifiedVertex, SimpleEdge, SimpleGraph}
 import cz.payola.web.client.views.plugins.textual.techniques.table.TableTechnique
-import s2js.adapters.js.dom.Element
-
-import s2js.compiler.javascript
 import cz.payola.web.client.views.plugins.textual.TextPlugin
 import cz.payola.web.client.views.plugins.visual.{SetupLoader, VisualPlugin}
+import s2js.adapters.js.dom.{Image, Element}
 
 // TODO remove after classloading is done
 @dependency("cz.payola.common.rdf.IdentifiedVertex")
@@ -45,7 +43,7 @@ class Index
     def init() {
         try {
             visualPluginSetup.createDefaultSetup()
-            buildControls()
+            buildPluginSwitch()
             visualPluginSetup.buildSetupArea()
             //TODO show "asking the server for the data"
             graph = Option(GraphFetcher.getInitialGraph)
@@ -66,7 +64,16 @@ class Index
         }
     }
 
-    def buildControls() {
+    def preloadImages() {
+        val imgLoaderElement = document.createElement[Image]("img")
+        imgLoaderElement.src = visualPluginSetup.getValue(visualPluginSetup.VertexIconIdentified).getOrElse("")
+
+        imgLoaderElement.src = visualPluginSetup.getValue(visualPluginSetup.VertexIconLiteral).getOrElse("")
+
+        imgLoaderElement.src = visualPluginSetup.getValue(visualPluginSetup.VertexIconUnknown).getOrElse("")
+    }
+
+    def buildPluginSwitch() {
         val controlsArea = document.getElementById("controls")
         val controlTable = document.createElement[Element]("table")
         controlsArea.appendChild(controlTable)
@@ -77,17 +84,18 @@ class Index
             controlTable.appendChild(line)
             val record = document.createElement[Element]("td")
             line.appendChild(record)
-            record.innerHTML = "<a class=\"controls plugin switch button\" onClick=\"a.changePluginByNumber(" +
+            record.innerHTML = "<a class=\"controls plugin switch button\" onClick=\"presenterIndex.changePluginByNumber(" +
                 counter+")\"> " + plugin.getName + " </a>"
             counter += 1
         }
     }
 
 
-    def updateSettings() {
+    def updateSettings(needToRedraw: Boolean) {
         currentPlugin.get match {
             case i: VisualPlugin =>
                 i.updateSettings(visualPluginSetup)
+                if(needToRedraw) { currentPlugin.get.redraw() }
         }
     }
     
@@ -105,6 +113,7 @@ class Index
         currentPlugin.get match {
             case i: VisualPlugin =>
                 document.getElementById("settingsHideButton").removeAttribute("disabled")
+                updateSettings(false)
             case i: TextPlugin =>
                 document.getElementById("settingsHideButton").setAttribute("disabled", "disabled")
                 document.getElementById("visualPluginSettings").setAttribute("style", "visibility:hidden")
@@ -112,8 +121,8 @@ class Index
         // TODO rename canvas-holder to something else.
         plugin.init(document.getElementById("graph-plugin-draw-space"))
         plugin.update(graph.get)
-
-        updateSettings()
+        
+        plugin.redraw()
     }
 
     /*DO NOT REMOVE PLEASE*/

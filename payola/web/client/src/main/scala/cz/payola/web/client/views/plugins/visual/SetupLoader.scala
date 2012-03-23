@@ -248,7 +248,7 @@ class  SetupLoader
         settingsForm.appendChild(submitButton)
         submitButton.setAttribute("type", "button")
         submitButton.innerHTML = "Yeah, I like this way, honey!"
-        submitButton.setAttribute("onclick", "a.updateSettings()")
+        submitButton.setAttribute("onclick", "presenterIndex.updateSettings(true)")
     }
 
     private def buildTextSettings(parent: Element) {
