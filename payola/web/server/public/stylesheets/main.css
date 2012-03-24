@@ -117,3 +117,9 @@ canvas
 {
     list-style-type: square;
 }
+
+/***************************/
+.visualPluginSettings.textField
+{
+    width: 30px;
+}

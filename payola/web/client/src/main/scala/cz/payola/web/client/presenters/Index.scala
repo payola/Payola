@@ -44,7 +44,7 @@ class Index
         try {
             visualPluginSetup.createDefaultSetup()
             buildPluginSwitch()
-            visualPluginSetup.buildSetupArea()
+            visualPluginSetup.buildSetupArea(plugins.head.isInstanceOf[VisualPlugin])
             //TODO show "asking the server for the data"
             graph = Option(GraphFetcher.getInitialGraph)
             //TODO show "preparing visualisation"

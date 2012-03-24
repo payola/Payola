@@ -206,7 +206,7 @@ class  SetupLoader
 
 
 
-    def buildSetupArea() {
+    def buildSetupArea(visible: Boolean) {
         val controlsArea = document.getElementById("controls")
 
 
@@ -222,10 +222,16 @@ class  SetupLoader
             "el.style.visibility = (el.style.visibility == \"visible\") ? \"hidden\" : \"visible\";")
 
         controlsArea.appendChild(document.createElement[Element]("br"))
+        controlsArea.appendChild(document.createElement[Element]("br"))
 
         val settingsDiv = document.createElement[Element]("div")
         controlsArea.appendChild(settingsDiv)
         settingsDiv.setAttribute("id", "visualPluginSettings")
+        if(visible) {
+            settingsDiv.setAttribute("style", "visibility: visible;")
+        } else {
+            settingsDiv.setAttribute("style", "visibility: hidden;")
+        }
 
         val settingsForm = document.createElement[Element]("form")
         settingsDiv.appendChild(settingsForm)
@@ -239,11 +245,16 @@ class  SetupLoader
         //Edge settings ###########################################################################
         buildEdgeSettings(settingsForm)
 
+        settingsForm.appendChild(document.createElement[Element]("br"))
+        settingsForm.appendChild(document.createElement[Element]("br"))
+
         //Text setttings ##########################################################################
         buildTextSettings(settingsForm)
 
         settingsForm.appendChild(document.createElement[Element]("br"))
+        settingsForm.appendChild(document.createElement[Element]("br"))
 
+        //submit button ###########################################################################
         val submitButton = document.createElement[Element]("button")
         settingsForm.appendChild(submitButton)
         submitButton.setAttribute("type", "button")
@@ -287,13 +298,13 @@ class  SetupLoader
         buildColorSetup(parent, "high", VertexColorHigh)
 
         parent.appendChild(document.createElement[Element]("br"))
-        buildColorSetup(parent, "literal", VertexColorLiteral)
+        buildColorSetup(parent, "literal", VertexColorLiteral).setAttribute("disabled", "disabled")
 
         parent.appendChild(document.createElement[Element]("br"))
-        buildColorSetup(parent, "identif", VertexColorIdentified)
+        buildColorSetup(parent, "identif", VertexColorIdentified).setAttribute("disabled", "disabled")
 
         parent.appendChild(document.createElement[Element]("br"))
-        buildColorSetup(parent, "unkn", VertexColorUnknown)
+        buildColorSetup(parent, "unkn", VertexColorUnknown).setAttribute("disabled", "disabled")
 
         parent.appendChild(document.createElement[Element]("br"))
         buildInput(parent, "lit Icon", VertexIconLiteral).setAttribute("disabled", "disabled")
@@ -323,7 +334,7 @@ class  SetupLoader
         buildColorSetup(parent, "base", EdgeColorMedium)
     }
 
-    private def buildColorSetup(parent: Element, labelText: String, location: String) {
+    private def buildColorSetup(parent: Element, labelText: String, location: String): Element = {
 
         val edgeColorHighLabel = document.createElement[Element]("label")
         parent.appendChild(edgeColorHighLabel)
@@ -367,7 +378,7 @@ class  SetupLoader
 
         val inputField = document.createElement[Element]("input")
         parent.appendChild(inputField)
-        inputField.setAttribute("size", "3")
+        inputField.className = "visualPluginSettings textField"
         inputField.setAttribute("type", "text")
         inputField.setAttribute("onChange", "window.localStorage.setItem(\""+bindToLocation+"\", this.value)")
         inputField.setAttribute("value", getValue(bindToLocation).getOrElse(""))
