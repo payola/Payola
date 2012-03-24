@@ -96,7 +96,7 @@ object RPCWrapper
         val paramStrings = params.map {param =>
             val paramString = param match {
                 case p: String => p
-                case p: Seq[_] => p.mkString(",")
+                case p: Seq[_] => p.mkString("[",",","]")
                 case p => p.toString
             }
             index += 1

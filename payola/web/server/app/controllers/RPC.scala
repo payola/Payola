@@ -5,7 +5,6 @@ import play.api.mvc._
 import java.lang.reflect.Method
 import cz.payola.scala2json.JSONSerializer
 import cz.payola.scala2json.JSONSerializerOptions._
-import scala.collection.mutable.Seq
 
 /**
   * The only controller which handles requests from the client side. It receives a POST request with the following
@@ -248,9 +247,9 @@ object RPC extends Controller
       */
     private def parseParam(input: Seq[String], paramType: Class[_]): java.lang.Object = {
 
-        if (paramType.isInstanceOf[Class[Seq[_]]])
+        if (paramType.getName.startsWith("scala.collection"))
         {
-            parseSequence(input, paramType.getTypeParameter.head)
+            parseSequence(input, paramType)
         }else{
             paramType.getName match {
                 case "Boolean" => java.lang.Boolean.parseBoolean(input.head): java.lang.Boolean
@@ -272,11 +271,11 @@ object RPC extends Controller
         }
     }
 
-    private def parseSequence(input: Seq[String], paramType: Class[_]) = {
+    private def parseSequence(input: Seq[String], paramType: Class[_]) : java.lang.Object = {
         val seqString = input.head
 
-        val parsedArray = util.parsing.json.JSON.parseFull(seqString)
+        val collection = util.parsing.json.JSON.parseFull(seqString).get.asInstanceOf[Seq[AnyVal]]
 
-        parsedArray.foreach(x => {})
+        collection
     }
 }

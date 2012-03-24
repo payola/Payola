@@ -34,6 +34,8 @@ class Test
         }
         if (!(RPCTester.testParamArray(List(1,2,3)) == 6)){
             window.alert("fail test 9")
+        }else{
+            window.alert(6)
         }
 
         try
