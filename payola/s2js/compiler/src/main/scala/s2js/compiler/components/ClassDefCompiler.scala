@@ -35,7 +35,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     protected lazy val fullJsName = packageDefCompiler.getSymbolJsName(classDef.symbol)
 
     /** Full name of the JavaScript object that should contains members (fields, methods) of the ClassDef. */
-    protected val memberContainerName = fullJsName;
+    protected val memberContainerName = fullJsName
 
     /** Parent class and inherited traits (doesn't contain internal classes). */
     protected val predecessors = classDef.impl.parents.filter(c => !packageDefCompiler.symbolIsInternal(c.symbol))
@@ -202,7 +202,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
       */
     private def compileFunction(parameters: List[Global#ValDef], declareSelf: Boolean)(compileBody: => Unit) {
         // Function header.
-        buffer += "function(";
+        buffer += "function("
         compileParameterDeclaration(parameters)
         buffer += ") {\n"
 
@@ -306,16 +306,16 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
 
             // Variadic parameter.
             parameters.get.filter(p => typeIsVariadic(p.tpt)).foreach {parameter =>
-                packageDefCompiler.dependencyManager.addRequiredSymbol("scala.collection.immutable.List");
+                packageDefCompiler.dependencyManager.addRequiredSymbol("scala.collection.immutable.List")
                 buffer += "var %s = scala.collection.immutable.List.fromJsArray(".format(
                     packageDefCompiler.getSymbolLocalJsName(parameter.symbol)
-                );
+                )
 
                 // In fact, the "arguments" JS variable only behaves like an array, but isn't an array. The
                 // following trick described on http://www.mennovanslooten.nl/blog/post/59 is used to turn it
                 // into an array that doesn't contain the normal named parameters.
                 buffer += "[].splice.call(arguments, %1$s, arguments.length - %1$s)".format(parameters.get.length - 1)
-                buffer += ");\n";
+                buffer += ");\n"
             }
         }
     }
@@ -350,6 +350,19 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
+      * Compiles parameter types as a comma separated sequence of their fully qualified names.
+      * @param parameterValues List of parameter value ASTs.
+      */
+    protected def compileParameterTypeNames(parameterValues: List[Global#Tree]) {
+        def typeToFullName(tpe: Global#Type): String = {
+            val typeArguments = tpe.typeArgs.map(typeToFullName)
+            tpe.typeSymbol.fullName + (if (typeArguments.isEmpty) "" else typeArguments.mkString("[", ", ", "]"))
+        }
+
+        buffer += parameterValues.map(p => "'%s'".format(typeToFullName(p.tpe))).mkString(", ")
+    }
+
+    /**
       * Compiles an AST.
       * @param ast The AST to compile.
       * @param hasReturnValue Whether the last statement of the AST should be prepended with "return" keyword in the
@@ -360,7 +373,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         if (ast.isInstanceOf[Global#Block]) {
             compileBlock(ast.asInstanceOf[Global#Block], hasReturnValue)
         } else {
-            val compiledAstIndex = buffer.length;
+            val compiledAstIndex = buffer.length
             ast match {
                 case EmptyTree => buffer += "undefined"
                 case thisAst: Global#This => compileThis(thisAst)
@@ -388,7 +401,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
 
             // If the last statement should be returned, prepend it with the "return" keyword.
             if (hasReturnValue) {
-                buffer.update(compiledAstIndex, "return " + buffer(compiledAstIndex));
+                buffer.update(compiledAstIndex, "return " + buffer(compiledAstIndex))
             }
         }
     }
@@ -576,7 +589,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
             }
             case Apply(subApply@Apply(_, _), args) => {
                 // Apply of a function with multiple parameter lists.
-                compileApply(subApply);
+                compileApply(subApply)
 
                 // TODO non ad-hoc solution for the ClassManifest problem.
                 val ignoreApply = args.isEmpty || args.head.toString.startsWith("reflect.this.ClassManifest")
@@ -634,7 +647,10 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
 
         // Compile the call itself.
         buffer += "s2js.RPCWrapper.call%s('%s', ".format(if (isAsync) "Async" else "Sync", select.toString)
-        compileParameterValues(realParameters, asArray = true);
+        compileParameterValues(realParameters, asArray = true)
+        buffer += ", ["
+        compileParameterTypeNames(realParameters)
+        buffer += "]"
         if (isAsync) {
             buffer += ", "
             compileAst(successCallback.get)
@@ -723,7 +739,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
       * @param condition The If statement to compile.
       */
     private def compileIf(condition: Global#If) {
-        val hasReturn = !packageDefCompiler.typeIsEmpty(condition.tpe);
+        val hasReturn = !packageDefCompiler.typeIsEmpty(condition.tpe)
         if (hasReturn) {
             buffer += "(function() {\n"
         }
@@ -743,7 +759,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
             }
         }
 
-        buffer += "}\n";
+        buffer += "}\n"
         if (hasReturn) {
             buffer += "})()"
         }
@@ -759,7 +775,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
                 // A while cycle is transformed into a tail recursive function with AST similar to:
                 //     def while$1() {
                 //         if([while-condition]) {
-                //            [while-body];
+                //            [while-body]
                 //            while$1()
                 //         }
                 //     }
@@ -787,7 +803,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
 
         // Try.
         buffer += "try {\n"
-        compileAstStatement(tryAst.block);
+        compileAstStatement(tryAst.block)
 
         // Catch.
         val exceptionName = packageDefCompiler.getUniqueLocalName("ex")

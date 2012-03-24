@@ -4,7 +4,7 @@ import s2js.runtime.scala.collection.immutable.StringOps
 
 object Predef
 {
-    def augmentString(x: String): StringOps = new StringOps(x)
+    def augmentString(x: java.lang.String): StringOps = new StringOps(x)
 
-    def unaugmentString(x: StringOps): String = x.repr
+    def unaugmentString(x: StringOps): java.lang.String = x.repr
 }
