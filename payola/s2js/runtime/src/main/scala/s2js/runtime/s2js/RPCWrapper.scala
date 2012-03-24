@@ -47,7 +47,7 @@ object RPCWrapper
             throw new s2js.RPCException("RPC call exited with status code "+request.status);
         }
     """)
-    def callSync(procedureName: String, parameters: Any): Any = ()
+    def callSync(procedureName: String, parameters: Any, parameterTypes: Any): Any = ()
 
     @dependency("s2js.RPCException")
     @javascript("""
