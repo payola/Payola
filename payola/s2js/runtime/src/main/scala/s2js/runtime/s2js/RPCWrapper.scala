@@ -26,6 +26,7 @@ object RPCWrapper
         if (parameters.length > 0)
         {
             var params = this.buildHttpQuery(parameters);
+            params += "&paramTypes="+this.serializeParamTypes(parameterTypes);
             request.send("method="+procedureName+"&"+params);
         }else{
             request.send("method="+procedureName);
@@ -81,12 +82,17 @@ object RPCWrapper
         if (parameters.length > 0)
         {
             var params = this.buildHttpQuery(parameters);
+            params += "&paramTypes="+this.serializeParamTypes(parameterTypes);
             request.send("method="+procedureName+"&"+params);
         }else{
             request.send("method="+procedureName);
         }
     """)
-    def callAsync(procedureName: String, parameters: Any, successCallback: Function1[Any, Unit], failCallback: Function1[Throwable, Unit]) {}
+    def callAsync(procedureName: String, parameters: Any, parameterTypes: Any, successCallback: Function1[Any, Unit], failCallback: Function1[Throwable, Unit]) {}
+    
+    def serializeParamTypes(parameterTypes: Seq[String]) : String = {
+        parameterTypes.mkString("[\"","\",\"","\"]")
+    }
 
     @javascript("return encodeURIComponent(s);")
     def encodeURIComponent(s: String): String = ""

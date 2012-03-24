@@ -109,9 +109,11 @@ object RPC extends Controller
         params.toList.sortBy {
             _._2.head
         }
+        val paramTypesJson = params.getOrElse("paramTypes",List("[]")).head
+        val paramTypes = util.parsing.json.JSON.parseFull(paramTypesJson)
 
         // the map keys are now irellevant, continue with values only
-        val paramList = params.-("method").values
+        val paramList = params.-("method").-("paramTypes").values
 
         // split the method names with "." to get package name and the name of the method without package
         // beware of the leading dot
@@ -119,8 +121,8 @@ object RPC extends Controller
 
         // call the remote method synchronously or asynchronously - depends on the asynchronous parameter
         val result = asynchronous match {
-            case true => invokeAsync(fqdnParts._1, fqdnParts._2.stripPrefix("."), paramList)
-            case false => invoke(fqdnParts._1, fqdnParts._2.stripPrefix("."), paramList)
+            case true => invokeAsync(fqdnParts._1, fqdnParts._2.stripPrefix("."), paramList, paramTypes.get.asInstanceOf[Seq[String]])
+            case false => invoke(fqdnParts._1, fqdnParts._2.stripPrefix("."), paramList, paramTypes.get.asInstanceOf[Seq[String]])
         }
 
         // return remote method call result
@@ -144,7 +146,7 @@ object RPC extends Controller
       * @param params List of parameters - Sequences of Strings
       * @return Response encoded into JSON string
       */
-    private def invokeAsync(objectName: String, methodName: String, params: Iterable[Seq[String]]): String = {
+    private def invokeAsync(objectName: String, methodName: String, params: Iterable[Seq[String]], paramTypes: Seq[String]): String = {
         // while objects are not really a Java thing, they are compiled into static classes named with trailing $ sign
         val obj = Class.forName(objectName + "$"); // TODO: use Scala reflection when released
 
@@ -169,7 +171,7 @@ object RPC extends Controller
         // update each parameter and replace it with its properly typed representation
         var i = 0
         params.foreach(x => {
-            paramArray.update(i, parseParam(x, types.apply(i)))
+            paramArray.update(i, parseParam(x, types.apply(i), paramTypes.apply(i)))
             i = i + 1
         })
 
@@ -199,7 +201,7 @@ object RPC extends Controller
       * @param params List of parameters - Sequences of Strings
       * @return Response encoded into JSON string
       */
-    private def invoke(objectName: String, methodName: String, params: Iterable[Seq[String]]): String = {
+    private def invoke(objectName: String, methodName: String, params: Iterable[Seq[String]], paramTypes: Seq[String]): String = {
         // while objects are not really a Java thing, they are compiled into static classes named with trailing $ sign
         val obj = Class.forName(objectName + "$");
 
@@ -222,7 +224,7 @@ object RPC extends Controller
         // update each parameter and replace it with its properly typed representation
         var i = 0
         params.foreach(x => {
-            paramArray.update(i, parseParam(x, types.apply(i)))
+            paramArray.update(i, parseParam(x, types.apply(i), paramTypes.apply(i)))
             i = i + 1
         })
 
@@ -245,11 +247,11 @@ object RPC extends Controller
       * @param paramType Type of the parsed parameter
       * @return typed parameter
       */
-    private def parseParam(input: Seq[String], paramType: Class[_]): java.lang.Object = {
+    private def parseParam(input: Seq[String], paramType: Class[_], paramTypeClient: String): java.lang.Object = {
 
         if (paramType.getName.startsWith("scala.collection"))
         {
-            parseSequence(input, paramType)
+            parseSequence(input, paramType, paramTypeClient)
         }else{
             paramType.getName match {
                 case "Boolean" => java.lang.Boolean.parseBoolean(input.head): java.lang.Boolean
@@ -271,8 +273,22 @@ object RPC extends Controller
         }
     }
 
-    private def parseSequence(input: Seq[String], paramType: Class[_]) : java.lang.Object = {
+    private def parseSequence(input: Seq[String], paramType: Class[_], paramTypeClient: String) : java.lang.Object = {
         val seqString = input.head
+
+        if (paramTypeClient.endsWith("[scala.Int]"))
+        {
+            util.parsing.json.JSON.perThreadNumberParser = {input : String => input.toInt}
+        }else if (paramTypeClient.endsWith("[scala.Float]"))
+        {
+            util.parsing.json.JSON.perThreadNumberParser = {input : String => input.toFloat}
+        }else if (paramTypeClient.endsWith("[scala.Short]"))
+        {
+            util.parsing.json.JSON.perThreadNumberParser = {input : String => input.toShort}
+        }else if (paramTypeClient.endsWith("[scala.Double]"))
+        {
+            util.parsing.json.JSON.perThreadNumberParser = {input : String => input.toDouble}
+        }
 
         val collection = util.parsing.json.JSON.parseFull(seqString).get.asInstanceOf[Seq[AnyVal]]
 
