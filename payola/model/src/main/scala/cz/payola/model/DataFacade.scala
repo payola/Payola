@@ -1,22 +1,17 @@
 package cz.payola.model
 
 import cz.payola.common.rdf.Graph
-import cz.payola.domain.rdf.{RDFEdge, RDFGraph, RDFIdentifiedNode}
-import model.graph.{RDFEdge, RDFIdentifiedNode, RDFGraph}
-import providers.VirtuosoDataProvider
-import sparql.providers.AggregateDataProvider
+import cz.payola.domain.rdf.RDFGraph   // TODO: Is this the one?
 import cz.payola.data.rdf.QueryExecutor
-import sparql.QueryExecutor
-import cz.payola.data.rdf.sparql.providers.AggregateDataProvider
-import cz.payola.data.rdf.providers.VirtuosoDataProvider
+import cz.payola.data.rdf.providers.configurations.SparqlEndpointConfiguration
+import java.util.Properties
 
 class DataFacade
 {
-    val dataProvider = new AggregateDataProvider(List(
-        new VirtuosoDataProvider()
-    ))
-
     def getGraph(uri: String): Graph = {
+        val dbPedia = getDbPediaRequest()
+        val configurations = List(new SparqlEndpointConfiguration(dbPedia))
+
         val query = """
             CONSTRUCT {
                 <http://dbpedia.org/resource/Prague> ?p1 ?n1 .
@@ -28,7 +23,7 @@ class DataFacade
             }
             LIMIT 40
         """
-        val result = QueryExecutor.executeQuery(dataProvider, query)
+        val result = QueryExecutor.executeQuery(configurations, query)
 
         // If the Virtuoso doesn't work.
         val rdf = """<?xml version="1.0" encoding="utf-8" ?>
@@ -66,5 +61,17 @@ class DataFacade
         """
 
         RDFGraph(result.data.headOption.getOrElse(rdf))
+    }
+
+    private def getDbPediaRequest() : String = {
+        val prop: Properties = new Properties()
+        prop.load(getClass.getResource("/sparql.ini").openStream())
+
+        val request = prop.getProperty("request.dbpedia")
+
+        if (request != null && request.size > 0)
+            return request
+
+        "http://dbpedia.org/sparql?default-graph-uri=http%3A%2F%2Fdbpedia.org&format=application%2Frdf%2Bxml&save=display"
     }
 }

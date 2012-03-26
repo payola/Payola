@@ -4,7 +4,7 @@ import s2js.adapters.js.browser._
 import cz.payola.common.rdf.Graph
 import cz.payola.web.client.views.plugins.Plugin
 import cz.payola.web.client.views.plugins.visual.techniques.tree.TreeTechnique
-import cz.payola.web.shared.GraphFetcher
+//import cz.payola.web.shared.GraphFetcher
 import s2js.compiler.dependency
 import s2js.runtime.s2js.RPCException
 import cz.payola.web.client.views.plugins.visual.techniques.circle.CircleTechnique
@@ -34,7 +34,7 @@ class Index
 
     def init() {
         try {
-            graph = Option(GraphFetcher.getInitialGraph)
+            graph = Option(cz.payola.web.shared.GraphFetcher.getInitialGraph)
         } catch {
             case e: RPCException => {
                 window.alert("Failed to call RPC. " + e.message)

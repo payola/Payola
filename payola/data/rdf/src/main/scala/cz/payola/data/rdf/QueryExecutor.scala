@@ -3,21 +3,33 @@ package cz.payola.data.rdf
 import actors.Actor
 import collection.mutable.ListBuffer
 import messages._
+import providers.configurations.{SparqlEndpointConfiguration, ProviderConfiguration}
+import providers.{FakeTtlDataProvider, SparqlDataProvider}
 
 object QueryExecutor
 {
-    def executeQuery(dataProvider: DataProvider, query: String, timeout: Long = 20000): QueryResult = {
-        // Start the executor.
-        val executor = new QueryExecutor(dataProvider, timeout)
-        executor.start()
+    def executeQuery(configurations : List[ProviderConfiguration], query: String, timeout: Long = 20000): QueryResult = {
+            // Start the executor.
+            val executor = new QueryExecutor(createAggregateProvider(configurations), timeout)
+            executor.start()
 
-        // Execute the query.
-        val result = executor !? QueryMessage(query)
-        result match {
-            case r: QueryResult => r
-            case _ => QueryResult.empty
+            // Execute the query.
+            val result = executor !? QueryMessage(query)
+            result match {
+                case r: QueryResult => r
+                case _ => QueryResult.empty
+            }
         }
-    }
+
+        private def createAggregateProvider(configurations : List[ProviderConfiguration]) : DataProvider = {
+            val subProviders : List[DataProvider] =
+                configurations.collect{
+                        case c : SparqlEndpointConfiguration => new SparqlDataProvider(c)
+                        case _ : ProviderConfiguration => new FakeTtlDataProvider() //TODO: temporary
+                }
+
+            new providers.AggregateDataProvider(subProviders)
+        }
 }
 
 class QueryExecutor(val dataProvider: DataProvider, val timeout: Long) extends Actor
