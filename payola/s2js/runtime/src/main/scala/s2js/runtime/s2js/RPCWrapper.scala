@@ -121,10 +121,10 @@ object RPCWrapper
 
     def isNumericCollection(paramType: String) : Boolean = {
         if(
-            paramType.contains("[scala.Int]")
-            || paramType.contains("[scala.Double]")
-            || paramType.contains("[scala.Float]")
-            ||  paramType.contains("[scala.Short]")
+            paramType.endsWith("[scala.Int]")
+            || paramType.endsWith("[scala.Double]")
+            || paramType.endsWith("[scala.Float]")
+            ||  paramType.endsWith("[scala.Short]")
         ){
             true
         }else{
