@@ -18,12 +18,8 @@ abstract class TextPlugin extends Plugin
     }
 
     def update(graph: Graph) {
-        if(graphModel == None) {
-            graphModel = Some(graph)
-        } else {
-            //TODO do some updating if needed
-            //graphModel = updateGraph(graphModel, graph)
-        }
+
+        graphModel = Some(graph)
     }
 
     def redraw()

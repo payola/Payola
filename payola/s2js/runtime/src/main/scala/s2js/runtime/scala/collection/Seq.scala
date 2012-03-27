@@ -90,6 +90,13 @@ trait Seq extends Iterable
         }
         i
     }
+
+    @javascript("""
+        return self.getInternalJsArray().filter(function(i) {
+            return !(that.getInternalJsArray().indexOf(i) > -1);
+        });
+        """)
+    def diff(that: Seq): Seq = null
 }
 
 

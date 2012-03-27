@@ -17,7 +17,7 @@ case class InformationView(data: Any) extends View {
     /**
       * Default color of background behind text.
       */
-    private var backgroundColor = new Color(0, 0, 0, 0.5)
+    private var backgroundColor = new Color(255, 255, 255, 0.5)
 
     /**
       * Default width of line (used in background drawing).
@@ -55,9 +55,7 @@ case class InformationView(data: Any) extends View {
     private def performDrawing(context: CanvasRenderingContext2D, color: Color, position: Point) {
         if(selected) {
             val textWidth = context.measureText(data.toString).width
-            //window.alert("text: "+data.toString+" length: "+textWidth)
             drawRoundedRectangle(context, position + Vector(-textWidth/2, -15), Vector(textWidth, 20), 4)
-            //drawCircle(context, position + Vector(1, -5), 10, lineWidth, backgroundColor)
             fillCurrentSpace(context, backgroundColor)
             //todo how come, that the measureText returns different size on the first run??
         }

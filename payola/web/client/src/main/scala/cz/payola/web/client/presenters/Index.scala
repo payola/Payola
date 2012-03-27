@@ -46,7 +46,6 @@ class Index
         try {
             visualPluginSetup.prepare()
             buildPluginSwitch()
-            //TODO load prepared setup
             visualPluginSetup.buildSetupArea(plugins.head.isInstanceOf[VisualPlugin])
             //TODO show "asking the server for the data"
             graph = Option(GraphFetcher.getInitialGraph)
@@ -123,7 +122,6 @@ class Index
     }
     
     def changePluginByNumber(number: Int) {
-        window.alert("weee: "+number)
         if(0 <= number && number < plugins.length) {
             changePlugin(plugins(number))
         }
@@ -133,7 +131,6 @@ class Index
 
         // Switch to the new one.
         currentPlugin = Some(plugin)
-        // TODO rename canvas-holder to something else.
         plugin.init(document.getElementById("graph-plugin-draw-space"))
         plugin.update(graph.get)
 

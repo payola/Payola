@@ -58,18 +58,21 @@ class GraphView(val container: Element) extends View {
 
     private var selectedCount = 0
 
+    /**
+      * Replaces the current graph with new one and marks all new vertices as selected.
+      * @param graph to replace the current graph representation with
+      */
     def update(graph: Graph) {
+
+        val vertexViewsCache = vertexViews
         vertexViews = createVertexViews(graph)
         edgeViews = createEdgeViews(graph, vertexViews)
 
-        //TODO add some graph updating
-        /*if(vertexViews.isEmpty) {
-            vertexViews = createVertexViews(graph)
-            edgeViews = createEdgeView(graph, vertexViews)
-        } else {
-            vertexViews = updateVertexViews(vetexViews, graph)
-            edgeViews = updateEdgeViews(edgeViews, vetexViews, graph)
-        }*/
+        if(!vertexViewsCache.isEmpty) {
+            vertexViews.diff(vertexViewsCache).foreach{ vertexView =>
+                setVertexSelection(vertexView, true)
+            }
+        }
     }
 
     /**
