@@ -32,10 +32,14 @@ class Test
         if (!(RPCTester.testParamDouble(2.0) == 2.0)) {
             window.alert("fail test 8");
         }
+        if (!(RPCTester.testParamArrayString(List("ab","cd","ef")) == "abcdef")){
+            window.alert("fail test 9")
+        }
         if (!(RPCTester.testParamArray(List(1,2,3)) == 6)){
             window.alert("fail test 9")
-        }else{
-            window.alert(6)
+        }
+        if (!(RPCTester.testParamArrayDouble(List(1.1,2.2,3.3)) == 6.6)){
+            window.alert("fail test 9")
         }
 
         try

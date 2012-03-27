@@ -52,6 +52,14 @@ object RPCTester
     def testParamArray (param: List[Int]): Int = {
         param.sum
     }
+
+    def testParamArrayDouble (param: List[Double]): Double = {
+        param.sum
+    }
+
+    def testParamArrayString (param: List[String]): String = {
+        param.mkString("")
+    }
     
     def testException : Int = {
         7

@@ -192,6 +192,7 @@ object PayolaBuild extends Build
         "data", file("data"),
         settings = payolaSettings ++ Seq(
             libraryDependencies ++= Seq(
+                "org.squeryl" %% "squeryl" % "0.9.5-RC1",
                 "org.apache.jena" % "jena-core" % "2.7.0-incubating"
             )
         )

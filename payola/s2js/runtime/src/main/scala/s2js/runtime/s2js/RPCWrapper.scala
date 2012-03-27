@@ -25,7 +25,7 @@ object RPCWrapper
 
         if (parameters.length > 0)
         {
-            var params = this.buildHttpQuery(parameters);
+            var params = this.buildHttpQuery(parameters, parameterTypes);
             params += "&paramTypes="+this.serializeParamTypes(parameterTypes);
             request.send("method="+procedureName+"&"+params);
         }else{
@@ -81,7 +81,7 @@ object RPCWrapper
 
         if (parameters.length > 0)
         {
-            var params = this.buildHttpQuery(parameters);
+            var params = this.buildHttpQuery(parameters, parameterTypes);
             params += "&paramTypes="+this.serializeParamTypes(parameterTypes);
             request.send("method="+procedureName+"&"+params);
         }else{
@@ -97,18 +97,39 @@ object RPCWrapper
     @javascript("return encodeURIComponent(s);")
     def encodeURIComponent(s: String): String = ""
     
-    def buildHttpQuery(params: ArrayBuffer[Any]): String = {
+    def buildHttpQuery(params: ArrayBuffer[Any], paramTypes: ArrayBuffer[String]): String = {
         var index = -1
         val paramStrings = params.map {param =>
             val paramString = param match {
                 case p: String => p
-                case p: Seq[_] => p.mkString("[",",","]")
+                case p: Seq[_] => {
+                    if (isNumericCollection(paramTypes.apply(index+1)))
+                    {
+                        p.mkString("[",",","]")
+                    }else
+                    {
+                        p.mkString("[\"","\",\"","\"]")
+                    }
+                }
                 case p => p.toString
             }
             index += 1
             index + "=" + encodeURIComponent(paramString)
         }
         paramStrings.mkString("&")
+    }
+
+    def isNumericCollection(paramType: String) : Boolean = {
+        if(
+            paramType.contains("[scala.Int]")
+            || paramType.contains("[scala.Double]")
+            || paramType.contains("[scala.Float]")
+            ||  paramType.contains("[scala.Short]")
+        ){
+            true
+        }else{
+            false
+        }
     }
 
     @javascript("""
