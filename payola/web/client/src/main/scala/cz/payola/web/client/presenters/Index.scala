@@ -14,7 +14,9 @@ import cz.payola.web.client.model.graph.{SimpleIdentifiedVertex, SimpleEdge, Sim
 import cz.payola.web.client.views.plugins.textual.techniques.table.TableTechnique
 import cz.payola.web.client.views.plugins.textual.TextPlugin
 import cz.payola.web.client.views.plugins.visual.{SetupLoader, VisualPlugin}
-import s2js.adapters.js.dom.{Image, Element}
+import s2js.adapters.js.dom.{Anchor, Image, Element}
+import s2js.adapters.goog
+import goog.events.BrowserEvent
 
 // TODO remove after classloading is done
 @dependency("cz.payola.common.rdf.IdentifiedVertex")
@@ -84,9 +86,19 @@ class Index
             controlTable.appendChild(line)
             val record = document.createElement[Element]("td")
             line.appendChild(record)
-            record.innerHTML = "<a class=\"controls plugin switch button\" onClick=\"presenterIndex.changePluginByNumber(" +
-                counter+")\"> " + plugin.getName + " </a>"
+
+            var link = document.createElement[Anchor]("a");
+            link.setAttribute("class","controls plugin switch button")
+            link.nodeValue = plugin.getName
+
+            val presenterIndex = this
+            
+            goog.events.listen[BrowserEvent](link,"click", (evt: BrowserEvent) => {
+                presenterIndex.changePluginByNumber(counter)
+            })
+
             counter += 1
+            
         }
     }
 
