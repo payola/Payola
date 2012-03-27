@@ -81,24 +81,25 @@ class Index
         val controlTable = document.createElement[Element]("table")
         controlsArea.appendChild(controlTable)
 
-        var counter = 0
         plugins.foreach{ plugin =>
             val line = document.createElement[Element]("tr")
             controlTable.appendChild(line)
             val record = document.createElement[Element]("td")
             line.appendChild(record)
 
-            var link = document.createElement[Anchor]("a");
+            val link = document.createElement[Anchor]("a");
+            link.innerHTML = plugin.getName
             link.setAttribute("class","controls plugin switch button")
-            link.nodeValue = plugin.getName
+            record.appendChild(link)
 
             val presenterIndex = this
             
             goog.events.listen[BrowserEvent](link,"click", (evt: BrowserEvent) => {
-                presenterIndex.changePluginByNumber(counter)
+                val pluginOp = plugins.find(_.getName == plugin.getName)
+                if(pluginOp.isDefined) {
+                    presenterIndex.changePlugin(pluginOp.get)
+                }
             })
-
-            counter += 1
             
         }
     }
@@ -122,6 +123,7 @@ class Index
     }
     
     def changePluginByNumber(number: Int) {
+        window.alert("weee: "+number)
         if(0 <= number && number < plugins.length) {
             changePlugin(plugins(number))
         }

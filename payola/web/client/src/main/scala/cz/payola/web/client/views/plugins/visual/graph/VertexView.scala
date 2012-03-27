@@ -73,7 +73,7 @@ class VertexView(val vertexModel: Vertex, var position: Point) extends View {
 
         drawImage(context, image, position + Vector(-10, -10), Vector(20, 20))
 
-        /*TODO drawing is successful only on the second redraw...why!?*/
+        /*TODO drawing of images is successful only on the second redraw...why!?*/
     }
     
     def drawInformation(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
