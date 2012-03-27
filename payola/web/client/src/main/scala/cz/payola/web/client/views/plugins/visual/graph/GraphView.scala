@@ -130,18 +130,11 @@ class GraphView(val container: Element) extends View {
       * @return container fith found edges
       */
     private def getEdgesOfVertex(vertexView: VertexView, _edgeViews: ListBuffer[EdgeView]): ListBuffer[EdgeView] = {
-        var edgeViewsBuffer = ListBuffer[EdgeView]()
-        var i = 0
-        //TODO may be used ...filter ?
-        _edgeViews.foreach {_edgeView: EdgeView =>
-            if ((_edgeView.originView.vertexModel eq vertexView.vertexModel) ||
-                (_edgeView.destinationView.vertexModel eq vertexView.vertexModel)) {
 
-                edgeViewsBuffer += _edgeView
-                i += 1
-            }
+        _edgeViews.filter { _edgeView: EdgeView =>
+            ((_edgeView.originView.vertexModel eq vertexView.vertexModel) ||
+                (_edgeView.destinationView.vertexModel eq vertexView.vertexModel))
         }
-        edgeViewsBuffer
     }
 
     /**
