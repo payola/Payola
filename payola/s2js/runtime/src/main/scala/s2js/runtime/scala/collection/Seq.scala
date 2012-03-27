@@ -81,7 +81,7 @@ trait Seq extends Iterable
         breakable {() =>
             drop(from).foreach {x =>
                 if (p(x)) {
-                    break
+                    break()
                 } else {
                     i += 1
                 }
@@ -89,6 +89,28 @@ trait Seq extends Iterable
             i = -1
         }
         i
+    }
+
+    def endsWith(suffix: Seq): Boolean = {
+        suffix.length match {
+            case suffixLength if suffixLength > length => false
+            case 0 => true
+            case suffixLength => {
+                var result = true
+                breakable {() =>
+                    val startIndex = length - suffixLength
+                    var index = 0
+                    suffix.foreach {item =>
+                        if (item != this(startIndex + index)) {
+                            result = false
+                            break()
+                        }
+                        index += 1
+                    }
+                }
+                result
+            }
+        }
     }
 }
 
