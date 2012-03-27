@@ -61,12 +61,14 @@ object RPCWrapper
         //Send the proper header information along with the request
         request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
+        var serializer = this;
+
         request.onreadystatechange = function(){
             if (request.readyState==4 && request.status==200)
             {
                 var refQueue = [];
                 var objectRegistry = {};
-                var instance = this.deserialize(eval("("+request.responseText+")"), objectRegistry, refQueue);
+                var instance = serializer.deserialize(eval("("+request.responseText+")"), objectRegistry, refQueue);
 
                 for (var k in refQueue)
                 {
@@ -74,7 +76,7 @@ object RPCWrapper
                 }
 
                 successCallback(instance);
-            }else{
+            }else if (request.readyState==4){
                 failCallback(new s2js.RPCException("RPC call exited with status code "+request.status));
             }
         }

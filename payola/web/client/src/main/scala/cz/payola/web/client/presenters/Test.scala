@@ -32,22 +32,33 @@ class Test
         if (!(RPCTester.testParamDouble(2.0) == 2.0)) {
             window.alert("fail test 8");
         }
-        if (!(RPCTester.testParamArrayString(List("ab","cd","ef")) == "abcdef")){
-            window.alert("fail test 9")
-        }
         if (!(RPCTester.testParamArray(List(1,2,3)) == 6)){
             window.alert("fail test 9")
         }
+        RPCTester.testParamArrayAsync(List(1,2,3))
+        {x =>
+            if (x != 6)
+            {
+                window.alert("fail test 9.5 (a)")
+            }
+        }
+        {e => window.alert("fail test 9.5 (b)") }
+
         if (!(RPCTester.testParamArrayDouble(List(1.1,2.2,3.3)) == 6.6)){
-            window.alert("fail test 9")
+            window.alert("fail test 10")
+        }
+
+        if (!(RPCTester.testParamArrayString(List("ab","cd","ef")) == "abcdef")){
+            window.alert("fail test 11")
         }
 
         try
         {
             testException
+            window.alert("Exception was expected to be caught!")
         }catch{
             case e: RPCException => {
-                window.alert("Exception successfully caught: "+e.message)
+
             }
         }
     }

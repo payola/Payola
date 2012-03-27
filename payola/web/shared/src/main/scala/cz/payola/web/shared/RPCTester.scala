@@ -2,6 +2,7 @@ package cz.payola.web.shared
 
 import cz.payola.common.rdf.Graph
 import cz.payola.data.DataFacade
+import s2js.compiler.async
 
 /**
   *
@@ -51,6 +52,11 @@ object RPCTester
 
     def testParamArray (param: List[Int]): Int = {
         param.sum
+    }
+
+    @async
+    def testParamArrayAsync (param: List[Int])(successCallback: (Int => Unit))(failCallback: (Throwable => Unit)) = {
+        successCallback(param.sum)
     }
 
     def testParamArrayDouble (param: List[Double]): Double = {
