@@ -42,8 +42,9 @@ class Index
 
     def init() {
         try {
-            visualPluginSetup.createDefaultSetup()
+            visualPluginSetup.prepare()
             buildPluginSwitch()
+            //TODO load prepared setup
             visualPluginSetup.buildSetupArea(plugins.head.isInstanceOf[VisualPlugin])
             //TODO show "asking the server for the data"
             graph = Option(GraphFetcher.getInitialGraph)
@@ -91,11 +92,20 @@ class Index
     }
 
 
-    def updateSettings(needToRedraw: Boolean) {
+    def updateSettings() {
         currentPlugin.get match {
             case i: VisualPlugin =>
                 i.updateSettings(visualPluginSetup)
-                if(needToRedraw) { currentPlugin.get.redraw() }
+                currentPlugin.get.redraw()
+        }
+    }
+    
+    def resetSettings() {
+        visualPluginSetup.reset()
+        currentPlugin.get match {
+            case i: VisualPlugin =>
+                i.updateSettings(visualPluginSetup)
+                currentPlugin.get.redraw()
         }
     }
     
@@ -109,19 +119,21 @@ class Index
 
         // Switch to the new one.
         currentPlugin = Some(plugin)
-        
+        // TODO rename canvas-holder to something else.
+        plugin.init(document.getElementById("graph-plugin-draw-space"))
+        plugin.update(graph.get)
+
+
         currentPlugin.get match {
             case i: VisualPlugin =>
                 document.getElementById("settingsHideButton").removeAttribute("disabled")
-                updateSettings(false)
+                i.updateSettings(visualPluginSetup)
             case i: TextPlugin =>
                 document.getElementById("settingsHideButton").setAttribute("disabled", "disabled")
                 document.getElementById("visualPluginSettings").setAttribute("style", "visibility:hidden")
         }
-        // TODO rename canvas-holder to something else.
-        plugin.init(document.getElementById("graph-plugin-draw-space"))
-        plugin.update(graph.get)
-        
+
+
         plugin.redraw()
     }
 

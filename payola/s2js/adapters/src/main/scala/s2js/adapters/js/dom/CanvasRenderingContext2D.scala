@@ -125,4 +125,6 @@ abstract class CanvasRenderingContext2D extends CanvasContext
     def strokeText(text: String, x: Double, y: Double, maxWidth: Double)
 
     def translate(x: Double, y: Double)
+
+    def measureText(text: String): TextMetrics
 }

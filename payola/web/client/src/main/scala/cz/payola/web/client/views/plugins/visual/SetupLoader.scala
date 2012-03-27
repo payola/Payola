@@ -78,128 +78,140 @@ class  SetupLoader
     private val TextColorBackgroundBlue = "setup.text.colors.background.blue"
     private val TextColorBackgroundAlpha = "setup.text.colors.background.alpha"
 
-    
-    def createDefaultSetup() {
+
+    def prepare() {
+        buildSetup(false)
+    }
+
+    def reset() {
+        buildSetup(true)
+    }
+
+    private def buildSetup(reset: Boolean) {
 
         //setup -> vertex -> colors -> medium color
-        setItem(VertexColorMediumRed, "180")
-        setItem(VertexColorMediumGreen, "240")
-        setItem(VertexColorMediumBlue, "180")
-        setItem(VertexColorMediumAlpha, "0.8")
+        setItem(VertexColorMediumRed, "200", reset)
+        setItem(VertexColorMediumGreen, "240", reset)
+        setItem(VertexColorMediumBlue, "200", reset)
+        setItem(VertexColorMediumAlpha, "0.8", reset)
 
         //setup -> vertex -> colors -> high color
-        setItem(VertexColorHighRed, "240")
-        setItem(VertexColorHighGreen, "180")
-        setItem(VertexColorHighBlue, "180")
-        setItem(VertexColorHighAlpha, "1")
+        setItem(VertexColorHighRed, "240", reset)
+        setItem(VertexColorHighGreen, "240", reset)
+        setItem(VertexColorHighBlue, "150", reset)
+        setItem(VertexColorHighAlpha, "1", reset)
 
         //setup -> vertex -> colors -> low color
-        setItem(VertexColorLowRed, "180")
-        setItem(VertexColorLowGreen, "180")
-        setItem(VertexColorLowBlue, "180")
-        setItem(VertexColorLowAlpha, "0.3")
+        setItem(VertexColorLowRed, "180", reset)
+        setItem(VertexColorLowGreen, "180", reset)
+        setItem(VertexColorLowBlue, "180", reset)
+        setItem(VertexColorLowAlpha, "0.3", reset)
 
         //setup -> vertex -> colors -> literal vertex color
-        setItem(VertexColorLiteralRed, "200")
-        setItem(VertexColorLiteralGreen, "150")
-        setItem(VertexColorLiteralBlue, "0")
-        setItem(VertexColorLiteralAlpha, "1")
+        setItem(VertexColorLiteralRed, "180", reset)
+        setItem(VertexColorLiteralGreen, "50", reset)
+        setItem(VertexColorLiteralBlue, "50", reset)
+        setItem(VertexColorLiteralAlpha, "1", reset)
 
         //setup -> vertex -> colors -> identified vertex color
-        setItem(VertexColorIdentifiedRed, "0")
-        setItem(VertexColorIdentifiedGreen, "200")
-        setItem(VertexColorIdentifiedBlue, "150")
-        setItem(VertexColorIdentifiedAlpha, "1")
+        setItem(VertexColorIdentifiedRed, "50", reset)
+        setItem(VertexColorIdentifiedGreen, "180", reset)
+        setItem(VertexColorIdentifiedBlue, "50", reset)
+        setItem(VertexColorIdentifiedAlpha, "1", reset)
 
         //setup -> vertex -> colors -> unknown vertex color
-        setItem(VertexColorUnknownRed, "150")
-        setItem(VertexColorUnknownGreen, "0")
-        setItem(VertexColorUnknownBlue, "200")
-        setItem(VertexColorUnknownAlpha, "1")
+        setItem(VertexColorUnknownRed, "0", reset)
+        setItem(VertexColorUnknownGreen, "0", reset)
+        setItem(VertexColorUnknownBlue, "0", reset)
+        setItem(VertexColorUnknownAlpha, "1", reset)
 
         //setup -> vertex -> icons -> literal vertex icon
-        setItem(VertexIconLiteral, "/assets/images/book-icon.png")
+        setItem(VertexIconLiteral, "/assets/images/book-icon.png", reset)
 
         //setup -> vertex -> icons -> identified vertex icon
-        setItem(VertexIconIdentified, "/assets/images/view-eye-icon.png")
+        setItem(VertexIconIdentified, "/assets/images/view-eye-icon.png", reset)
 
         //setup -> vertex -> icons -> unknown vertex icon
-        setItem(VertexIconUnknown, "/assets/images/question-mark-icon.png")
+        setItem(VertexIconUnknown, "/assets/images/question-mark-icon.png", reset)
 
         //setup -> vertex -> dimensions -> corner radius
-        setItem(VertexDimensionCornerRadius, "5")
+        setItem(VertexDimensionCornerRadius, "5", reset)
 
         //setup -> vertex -> dimensions -> width
-        setItem(VertexDimensionWidth, "30")
+        setItem(VertexDimensionWidth, "30", reset)
 
         //setup -> vertex -> dimensions -> height
-        setItem(VertexDimensionHeight, "24")
+        setItem(VertexDimensionHeight, "24", reset)
 
 
 
         //setup -> edge -> colors -> selected edge color ##########################################
-        setItem(EdgeColorHighRed, "50")
-        setItem(EdgeColorHighGreen, "50")
-        setItem(EdgeColorHighBlue, "50")
-        setItem(EdgeColorHighAlpha, "1")
+        setItem(EdgeColorHighRed, "50", reset)
+        setItem(EdgeColorHighGreen, "50", reset)
+        setItem(EdgeColorHighBlue, "50", reset)
+        setItem(EdgeColorHighAlpha, "1", reset)
         
         //setup -> edge -> colors -> medium edge color
-        setItem(EdgeColorMediumRed, "150")
-        setItem(EdgeColorMediumGreen, "150")
-        setItem(EdgeColorMediumBlue, "150")
-        setItem(EdgeColorMediumAlpha, "0.5")
+        setItem(EdgeColorMediumRed, "150", reset)
+        setItem(EdgeColorMediumGreen, "150", reset)
+        setItem(EdgeColorMediumBlue, "150", reset)
+        setItem(EdgeColorMediumAlpha, "0.5", reset)
 
         //setup -> edge -> dimensions ->  line width
-        setItem(EdgeDimensionWidth, "1")
+        setItem(EdgeDimensionWidth, "1", reset)
 
         //setup -> edge -> dimensions ->  straight index
-        setItem(EdgeDimensionStraightIndex, "-1")
+        setItem(EdgeDimensionStraightIndex, "-1", reset)
 
 
         //setup -> text -> colors -> default text color ###########################################
-        setItem(TextColorMediumRed, "50")
-        setItem(TextColorMediumGreen, "50")
-        setItem(TextColorMediumBlue, "50")
-        setItem(TextColorMediumAlpha, "1")
+        setItem(TextColorMediumRed, "50", reset)
+        setItem(TextColorMediumGreen, "50", reset)
+        setItem(TextColorMediumBlue, "50", reset)
+        setItem(TextColorMediumAlpha, "1", reset)
 
         //setup -> text -> colors -> background text color
-        setItem(TextColorBackgroundRed, "255")
-        setItem(TextColorBackgroundGreen, "255")
-        setItem(TextColorBackgroundBlue, "255")
-        setItem(TextColorBackgroundAlpha, "0.5")
+        setItem(TextColorBackgroundRed, "255", reset)
+        setItem(TextColorBackgroundGreen, "255", reset)
+        setItem(TextColorBackgroundBlue, "255", reset)
+        setItem(TextColorBackgroundAlpha, "0.5", reset)
     }
     
-    private def setItem(where: String, what: String) {
-        if(window.localStorage.getItem(where) == null) {
+    private def setItem(where: String, what: String, reset: Boolean) {
+        if(reset || getItem(where).isEmpty) {
             window.localStorage.setItem(where, what)
         }
     }
     
-    private def getItem(where: String): String = {
-        window.localStorage.getItem(where)
+    private def getItem(where: String): Option[String] = {
+        val gotFromMemory = window.localStorage.getItem(where)
+        if(gotFromMemory == null) {
+            None
+        } else {
+            Some(gotFromMemory)
+        }
     }
         
     
-    def createColor(localStorageKey: String): Option[Color] = {
-        val red = getItem(localStorageKey + ".red")
-        val green = getItem(localStorageKey + ".green")
-        val blue = getItem(localStorageKey + ".blue")
-        val alpha = getItem(localStorageKey + ".alpha")
+    def createColor(keyName: String): Option[Color] = {
+        val red = getItem(keyName + ".red")
+        val green = getItem(keyName + ".green")
+        val blue = getItem(keyName + ".blue")
+        val alpha = getItem(keyName + ".alpha")
 
-        //TODO if correct create new color nebo new Color(200, 0, 0, 1)
-        if(red == null || green == null || blue == null || alpha == null) {
+        if(red.isEmpty || green.isEmpty || blue.isEmpty || alpha.isEmpty) {
             None
         } else {
-            Some(new Color(red.toInt, green.toInt, blue.toInt, alpha.toDouble))
+            Some(new Color(red.get.toInt, green.get.toInt, blue.get.toInt, alpha.get.toDouble))
         }
     }
     
     def getValue(localStorageKey: String): Option[String] = {
         val value = getItem(localStorageKey)
-        if(value == null) { //TODO is this a valid check?
+        if(value.isEmpty) {
             None
         } else {
-            Some(value)
+            value
         }
     }
 
@@ -217,7 +229,7 @@ class  SetupLoader
         controlsArea.appendChild(settingsHideButton)
         settingsHideButton.setAttribute("type", "button")
         settingsHideButton.setAttribute("id", "settingsHideButton")
-        settingsHideButton.innerHTML = "Hide/show all your settings, baby!"
+        settingsHideButton.innerHTML = "Hide/show all your settings"
         settingsHideButton.setAttribute("onclick", "el = document.getElementById(\"visualPluginSettings\");" +
             "el.style.visibility = (el.style.visibility == \"visible\") ? \"hidden\" : \"visible\";")
 
@@ -258,8 +270,15 @@ class  SetupLoader
         val submitButton = document.createElement[Element]("button")
         settingsForm.appendChild(submitButton)
         submitButton.setAttribute("type", "button")
-        submitButton.innerHTML = "Yeah, I like this way, honey!"
+        submitButton.innerHTML = "Yeah, I like this way"
         submitButton.setAttribute("onclick", "presenterIndex.updateSettings(true)")
+
+        //reset button ############################################################################
+        val resetButton = document.createElement[Element]("button")
+        settingsForm.appendChild(resetButton)
+        resetButton.setAttribute("type", "button")
+        resetButton.innerHTML = "I want it all at default"
+        resetButton.setAttribute("onclick", "presenterIndex.resetSettings(true)")
     }
 
     private def buildTextSettings(parent: Element) {
@@ -268,10 +287,10 @@ class  SetupLoader
         section.innerHTML = "Text"
 
         parent.appendChild(document.createElement[Element]("br"))
-        buildColorSetup(parent, "color", TextColorMedium)
+        buildColorSetup(parent, "medium", TextColorMedium)
 
         parent.appendChild(document.createElement[Element]("br"))
-        buildColorSetup(parent, "color", TextColorBackground)
+        buildColorSetup(parent, "backg", TextColorBackground)
     }
 
     private def buildVertexSettings(parent: Element) {

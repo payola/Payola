@@ -2,6 +2,7 @@ package cz.payola.web.client.views.plugins.visual.graph
 
 import s2js.adapters.js.dom.CanvasRenderingContext2D
 import cz.payola.web.client.views.plugins.visual.{SetupLoader, Vector, Color, Point}
+import s2js.adapters.js.browser.window;
 
 /**
   * Graphical representation of textual data in the drawn graph.
@@ -16,7 +17,7 @@ case class InformationView(data: Any) extends View {
     /**
       * Default color of background behind text.
       */
-    private var backgroundColor = new Color(255, 255, 255, 0.5)
+    private var backgroundColor = new Color(0, 0, 0, 0.5)
 
     /**
       * Default width of line (used in background drawing).
@@ -39,7 +40,7 @@ case class InformationView(data: Any) extends View {
     def draw(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point]) {
 
         if(position != None) {
-            performDrawing(context, color, position.get)
+            performDrawing(context, color.getOrElse(textColor), position.get)
         }
 
         selected = false
@@ -51,15 +52,17 @@ case class InformationView(data: Any) extends View {
       * @param color in which the text is draw
       * @param position where the text is drawn
       */
-    private def performDrawing(context: CanvasRenderingContext2D, color: Option[Color], position: Point) {
+    private def performDrawing(context: CanvasRenderingContext2D, color: Color, position: Point) {
         if(selected) {
-            /*val colorToUseBackground = color.getOrElse(defColorBackground)*/
-            //TODO draw a rounded rectangle behind the text...the size should depend on the length of the text
-            drawCircle(context, position + Vector(1, -5), 10, lineWidth, backgroundColor)
+            val textWidth = context.measureText(data.toString).width
+            //window.alert("text: "+data.toString+" length: "+textWidth)
+            drawRoundedRectangle(context, position + Vector(-textWidth/2, -15), Vector(textWidth, 20), 4)
+            //drawCircle(context, position + Vector(1, -5), 10, lineWidth, backgroundColor)
             fillCurrentSpace(context, backgroundColor)
+            //todo how come, that the measureText returns different size on the first run??
         }
 
-        val colorToUse = color.getOrElse(textColor)
+        val colorToUse = color
 
         drawText(context, data.toString, position, colorToUse, "12px Sans", "center")
     }
