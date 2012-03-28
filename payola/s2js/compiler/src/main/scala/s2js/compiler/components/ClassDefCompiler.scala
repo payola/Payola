@@ -152,7 +152,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
       * Creates an instance of the Class corresponding to the ClassDef.
       */
     private def instantiateClass() {
-        buffer += "%s.__class__ = new s2js.Class('%s', [%s]);\n".format(
+        buffer += "%s.__class__ = new s2js.runtime.client.Class('%s', [%s]);\n".format(
             memberContainerName,
             fullJsName,
             predecessors.map(c => packageDefCompiler.getSymbolJsName(c.symbol)).mkString(", ")
@@ -637,7 +637,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         }
         
         // Add the required dependencies.
-        packageDefCompiler.dependencyManager.addRequiredSymbol("s2js.RPCWrapper")
+        packageDefCompiler.dependencyManager.addRequiredSymbol("s2js.runtime.client.RPCWrapper")
         requiredTypes.foreach {tpe =>
             if (!typeIsPrimitive(tpe)) {
                 packageDefCompiler.dependencyManager.addRequiredSymbol(packageDefCompiler.getSymbolFullJsName(
@@ -646,7 +646,10 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         }
 
         // Compile the call itself.
-        buffer += "s2js.RPCWrapper.call%s('%s', ".format(if (isAsync) "Async" else "Sync", select.toString)
+        buffer += "s2js.runtime.client.RPCWrapper.call%s('%s', ".format(
+            if (isAsync) "Async" else "Sync",
+            select.toString
+        )
         compileParameterValues(realParameters, asArray = true)
         buffer += ", ["
         compileParameterTypeNames(realParameters)
@@ -707,7 +710,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
       * @param compileQualifier An action that compiles the target object qualifier.
       */
     private def compileInstanceOf(typeSymbol: Global#Symbol, isTypeCheck: Boolean)(compileQualifier: => Unit) {
-        buffer += "s2js.%sInstanceOf(".format(if (isTypeCheck) "is" else "as")
+        buffer += "s2js.runtime.client.%sInstanceOf(".format(if (isTypeCheck) "is" else "as")
         compileQualifier
         buffer += ", '%s')".format(packageDefCompiler.getSymbolJsName(typeSymbol))
     }

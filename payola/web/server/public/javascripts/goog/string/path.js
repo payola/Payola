@@ -17,10 +17,10 @@
  * Python's os.path and posixpath.
  */
 
-s2js.ClassLoader.provide('goog.string.path');
+s2js.runtime.client.ClassLoader.provide('goog.string.path');
 
-s2js.ClassLoader.require('goog.array');
-s2js.ClassLoader.require('goog.string');
+s2js.runtime.client.ClassLoader.require('goog.array');
+s2js.runtime.client.ClassLoader.require('goog.string');
 
 
 /**

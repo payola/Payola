@@ -13,12 +13,12 @@ class PackageSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.ClassLoader.provide('pkg.A');
+                        s2js.runtime.client.ClassLoader.provide('pkg.A');
 
                         pkg.A = function() {
                             var self = this;
                         };
-                        pkg.A.prototype.__class__ = new s2js.Class('pkg.A', []);
+                        pkg.A.prototype.__class__ = new s2js.runtime.client.Class('pkg.A', []);
                     """
                 }
         }
@@ -35,12 +35,12 @@ class PackageSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.ClassLoader.provide('pkg.sub.nested.A');
+                        s2js.runtime.client.ClassLoader.provide('pkg.sub.nested.A');
 
                         pkg.sub.nested.A = function() {
                             var self = this;
                         };
-                        pkg.sub.nested.A.prototype.__class__ = new s2js.Class('pkg.sub.nested.A', []);
+                        pkg.sub.nested.A.prototype.__class__ = new s2js.runtime.client.Class('pkg.sub.nested.A', []);
                     """
                 }
         }
@@ -59,12 +59,12 @@ class PackageSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.ClassLoader.provide('pkg.sub.nested.A');
+                        s2js.runtime.client.ClassLoader.provide('pkg.sub.nested.A');
 
                         pkg.sub.nested.A = function() {
                             var self = this;
                         };
-                        pkg.sub.nested.A.prototype.__class__ = new s2js.Class('pkg.sub.nested.A', []);
+                        pkg.sub.nested.A.prototype.__class__ = new s2js.runtime.client.Class('pkg.sub.nested.A', []);
                     """
                 }
         }
@@ -79,12 +79,12 @@ class PackageSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.ClassLoader.provide('pkg.sub.nested.A');
+                        s2js.runtime.client.ClassLoader.provide('pkg.sub.nested.A');
 
                         pkg.sub.nested.A = function() {
                             var self = this;
                         };
-                        pkg.sub.nested.A.prototype.__class__ = new s2js.Class('pkg.sub.nested.A', []);
+                        pkg.sub.nested.A.prototype.__class__ = new s2js.runtime.client.Class('pkg.sub.nested.A', []);
                     """
                 }
         }
@@ -108,27 +108,27 @@ class PackageSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.ClassLoader.provide('pkg.A');
-                        s2js.ClassLoader.provide('pkg.B');
-                        s2js.ClassLoader.provide('pkg.sub1.X');
-                        s2js.ClassLoader.provide('pkg.sub2.Y');
+                        s2js.runtime.client.ClassLoader.provide('pkg.A');
+                        s2js.runtime.client.ClassLoader.provide('pkg.B');
+                        s2js.runtime.client.ClassLoader.provide('pkg.sub1.X');
+                        s2js.runtime.client.ClassLoader.provide('pkg.sub2.Y');
 
                         pkg.A = function() {
                             var self = this;
                         };
-                        pkg.A.prototype.__class__ = new s2js.Class('pkg.A', []);
+                        pkg.A.prototype.__class__ = new s2js.runtime.client.Class('pkg.A', []);
                         pkg.B = function() {
                             var self = this;
                         };
-                        pkg.B.prototype.__class__ = new s2js.Class('pkg.B', []);
+                        pkg.B.prototype.__class__ = new s2js.runtime.client.Class('pkg.B', []);
                         pkg.sub1.X = function() {
                             var self = this;
                         };
-                        pkg.sub1.X.prototype.__class__ = new s2js.Class('pkg.sub1.X', []);
+                        pkg.sub1.X.prototype.__class__ = new s2js.runtime.client.Class('pkg.sub1.X', []);
                         pkg.sub2.Y = function() {
                             var self = this;
                         };
-                        pkg.sub2.Y.prototype.__class__ = new s2js.Class('pkg.sub2.Y', []);
+                        pkg.sub2.Y.prototype.__class__ = new s2js.runtime.client.Class('pkg.sub2.Y', []);
                     """
                 }
         }

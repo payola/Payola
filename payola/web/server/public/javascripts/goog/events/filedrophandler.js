@@ -19,17 +19,17 @@
  * @see ../demos/filedrophandler.html
  */
 
-s2js.ClassLoader.provide('goog.events.FileDropHandler');
-s2js.ClassLoader.provide('goog.events.FileDropHandler.EventType');
+s2js.runtime.client.ClassLoader.provide('goog.events.FileDropHandler');
+s2js.runtime.client.ClassLoader.provide('goog.events.FileDropHandler.EventType');
 
-s2js.ClassLoader.require('goog.array');
-s2js.ClassLoader.require('goog.debug.Logger');
-s2js.ClassLoader.require('goog.dom');
-s2js.ClassLoader.require('goog.events');
-s2js.ClassLoader.require('goog.events.BrowserEvent');
-s2js.ClassLoader.require('goog.events.EventHandler');
-s2js.ClassLoader.require('goog.events.EventTarget');
-s2js.ClassLoader.require('goog.events.EventType');
+s2js.runtime.client.ClassLoader.require('goog.array');
+s2js.runtime.client.ClassLoader.require('goog.debug.Logger');
+s2js.runtime.client.ClassLoader.require('goog.dom');
+s2js.runtime.client.ClassLoader.require('goog.events');
+s2js.runtime.client.ClassLoader.require('goog.events.BrowserEvent');
+s2js.runtime.client.ClassLoader.require('goog.events.EventHandler');
+s2js.runtime.client.ClassLoader.require('goog.events.EventTarget');
+s2js.runtime.client.ClassLoader.require('goog.events.EventType');
 
 
 

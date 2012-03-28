@@ -19,10 +19,10 @@
  */
 
 
-s2js.ClassLoader.provide('goog.Disposable');
-s2js.ClassLoader.provide('goog.dispose');
+s2js.runtime.client.ClassLoader.provide('goog.Disposable');
+s2js.runtime.client.ClassLoader.provide('goog.dispose');
 
-s2js.ClassLoader.require('goog.disposable.IDisposable');
+s2js.runtime.client.ClassLoader.require('goog.disposable.IDisposable');
 
 
 

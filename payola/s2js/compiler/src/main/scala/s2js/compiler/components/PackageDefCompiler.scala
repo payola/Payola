@@ -148,7 +148,7 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
             "s2js.adapters.js.browser" -> "",
             "s2js.adapters.js.dom" -> "",
             "s2js.adapters" -> "",
-            "s2js.runtime" -> ""
+            "s2js.runtime.client.scala" -> "scala"
         )
 
         packageReplacementMap.find(r => symbol.fullName.startsWith(r._1))

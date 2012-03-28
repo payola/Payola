@@ -18,12 +18,12 @@
  */
 
 
-s2js.ClassLoader.provide('goog.iter');
-s2js.ClassLoader.provide('goog.iter.Iterator');
-s2js.ClassLoader.provide('goog.iter.StopIteration');
+s2js.runtime.client.ClassLoader.provide('goog.iter');
+s2js.runtime.client.ClassLoader.provide('goog.iter.Iterator');
+s2js.runtime.client.ClassLoader.provide('goog.iter.StopIteration');
 
-s2js.ClassLoader.require('goog.array');
-s2js.ClassLoader.require('goog.asserts');
+s2js.runtime.client.ClassLoader.require('goog.array');
+s2js.runtime.client.ClassLoader.require('goog.asserts');
 
 
 // TODO(user): Add more functions from Python's itertools.

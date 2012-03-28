@@ -29,9 +29,8 @@ TemporaryClassLoader = {
     require: function(className) { }
 }
 
-s2js = {
-    ClassLoader: TemporaryClassLoader
-};
+Utils.declareNamespace('s2js.runtime.client');
+s2js.runtime.client.ClassLoader = TemporaryClassLoader
 
 // The provide has to be used after the class loader is declared.
-s2js.ClassLoader.provide('Utils');
+s2js.runtime.client.ClassLoader.provide('Utils');

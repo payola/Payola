@@ -1,9 +1,9 @@
 package cz.payola.web.client.presenters
 
 import s2js.adapters.js.browser._
-import s2js.runtime.s2js.RPCException
 import cz.payola.web.shared.RPCTester
 import s2js.compiler.javascript
+import s2js.runtime.client.RPCException
 
 class Test
 {

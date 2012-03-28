@@ -39,17 +39,17 @@
  *
  */
 
-s2js.ClassLoader.provide('goog.events.ImeHandler');
-s2js.ClassLoader.provide('goog.events.ImeHandler.Event');
-s2js.ClassLoader.provide('goog.events.ImeHandler.EventType');
+s2js.runtime.client.ClassLoader.provide('goog.events.ImeHandler');
+s2js.runtime.client.ClassLoader.provide('goog.events.ImeHandler.Event');
+s2js.runtime.client.ClassLoader.provide('goog.events.ImeHandler.EventType');
 
-s2js.ClassLoader.require('goog.events.Event');
-s2js.ClassLoader.require('goog.events.EventHandler');
-s2js.ClassLoader.require('goog.events.EventTarget');
-s2js.ClassLoader.require('goog.events.EventType');
-s2js.ClassLoader.require('goog.events.KeyCodes');
-s2js.ClassLoader.require('goog.userAgent');
-s2js.ClassLoader.require('goog.userAgent.product');
+s2js.runtime.client.ClassLoader.require('goog.events.Event');
+s2js.runtime.client.ClassLoader.require('goog.events.EventHandler');
+s2js.runtime.client.ClassLoader.require('goog.events.EventTarget');
+s2js.runtime.client.ClassLoader.require('goog.events.EventType');
+s2js.runtime.client.ClassLoader.require('goog.events.KeyCodes');
+s2js.runtime.client.ClassLoader.require('goog.userAgent');
+s2js.runtime.client.ClassLoader.require('goog.userAgent.product');
 
 
 

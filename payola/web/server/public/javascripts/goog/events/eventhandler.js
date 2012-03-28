@@ -55,12 +55,12 @@
  *
  */
 
-s2js.ClassLoader.provide('goog.events.EventHandler');
+s2js.runtime.client.ClassLoader.provide('goog.events.EventHandler');
 
-s2js.ClassLoader.require('goog.Disposable');
-s2js.ClassLoader.require('goog.array');
-s2js.ClassLoader.require('goog.events');
-s2js.ClassLoader.require('goog.events.EventWrapper');
+s2js.runtime.client.ClassLoader.require('goog.Disposable');
+s2js.runtime.client.ClassLoader.require('goog.array');
+s2js.runtime.client.ClassLoader.require('goog.events');
+s2js.runtime.client.ClassLoader.require('goog.events.EventWrapper');
 
 
 

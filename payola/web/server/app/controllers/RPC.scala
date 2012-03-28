@@ -118,11 +118,12 @@ object RPC extends Controller
         // split the method names with "." to get package name and the name of the method without package
         // beware of the leading dot
         val fqdnParts = fqdn.splitAt(fqdn.lastIndexOf("."))
+        val objectName = fqdnParts._1;
 
         // call the remote method synchronously or asynchronously - depends on the asynchronous parameter
         val result = asynchronous match {
-            case true => invokeAsync(fqdnParts._1, fqdnParts._2.stripPrefix("."), paramList, paramTypes.get.asInstanceOf[Seq[String]])
-            case false => invoke(fqdnParts._1, fqdnParts._2.stripPrefix("."), paramList, paramTypes.get.asInstanceOf[Seq[String]])
+            case true => invokeAsync(objectName, fqdnParts._2.stripPrefix("."), paramList, paramTypes.get.asInstanceOf[Seq[String]])
+            case false => invoke(objectName, fqdnParts._2.stripPrefix("."), paramList, paramTypes.get.asInstanceOf[Seq[String]])
         }
 
         // return remote method call result

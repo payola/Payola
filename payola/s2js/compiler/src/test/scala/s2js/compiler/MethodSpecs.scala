@@ -24,14 +24,14 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.ClassLoader.provide('o1');
-                        s2js.ClassLoader.provide('o2');
+                        s2js.runtime.client.ClassLoader.provide('o1');
+                        s2js.runtime.client.ClassLoader.provide('o2');
 
                         o1.m = function() {
                             var self = this;
                             return 'foo';
                         };
-                        o1.__class__ = new s2js.Class('o1', []);
+                        o1.__class__ = new s2js.runtime.client.Class('o1', []);
 
                         o2.m = function() {
                             var self = this;
@@ -45,7 +45,7 @@ class MethodSpecs extends CompilerFixtureSpec
                             var y = o1.m();
                             var z = o1.m().$length();
                         };
-                        o2.__class__ = new s2js.Class('o2', []);
+                        o2.__class__ = new s2js.runtime.client.Class('o2', []);
                     """
                 }
         }
@@ -66,7 +66,7 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.ClassLoader.provide('o1');
+                        s2js.runtime.client.ClassLoader.provide('o1');
 
                         o1.m1 = function(v1, v2) {
                             var self = this;
@@ -82,7 +82,7 @@ class MethodSpecs extends CompilerFixtureSpec
                             self.m1('foo', 'bar');
                             self.m2('foo');
                         };
-                        o1.__class__ = new s2js.Class('o1', []);
+                        o1.__class__ = new s2js.runtime.client.Class('o1', []);
                     """
                 }
         }
@@ -103,11 +103,11 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.ClassLoader.provide('o1');
-                        s2js.ClassLoader.provide('o2');
+                        s2js.runtime.client.ClassLoader.provide('o1');
+                        s2js.runtime.client.ClassLoader.provide('o2');
 
                         o1.x = 'o1';
-                        o1.__class__ = new s2js.Class('o1', []);
+                        o1.__class__ = new s2js.runtime.client.Class('o1', []);
 
                         o2.x = 'o2';
                         o2.m = function(a, x, y) {
@@ -116,7 +116,7 @@ class MethodSpecs extends CompilerFixtureSpec
                             if (typeof(x) === 'undefined') { x = self.x; }
                             if (typeof(y) === 'undefined') { y = o1.x; }
                         };
-                        o2.__class__ = new s2js.Class('o2', []);
+                        o2.__class__ = new s2js.runtime.client.Class('o2', []);
                     """
                 }
         }
@@ -143,7 +143,7 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.ClassLoader.provide('a');
+                        s2js.runtime.client.ClassLoader.provide('a');
 
                         a.m1 = function() {
                             var self = this;
@@ -162,7 +162,7 @@ class MethodSpecs extends CompilerFixtureSpec
                             var self = this;
                             'foobar';
                         };
-                        a.__class__ = new s2js.Class('a', []);
+                        a.__class__ = new s2js.runtime.client.Class('a', []);
                     """
                 }
         }
@@ -180,7 +180,7 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.ClassLoader.provide('a');
+                        s2js.runtime.client.ClassLoader.provide('a');
 
                         a.m1 = function(t) {
                             var self = this;
@@ -189,7 +189,7 @@ class MethodSpecs extends CompilerFixtureSpec
                             var self = this;
                             self.m1('foo');
                         };
-                        a.__class__ = new s2js.Class('a', []);
+                        a.__class__ = new s2js.runtime.client.Class('a', []);
                     """
                 }
         }
@@ -206,11 +206,11 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.ClassLoader.provide('goog.events.a');
-                        s2js.ClassLoader.require('goog.events.Event');
+                        s2js.runtime.client.ClassLoader.provide('goog.events.a');
+                        s2js.runtime.client.ClassLoader.require('goog.events.Event');
 
                         goog.events.a.x = goog.events.Event.preventDefault(null);
-                        goog.events.a.__class__ = new s2js.Class('goog.events.a', []);
+                        goog.events.a.__class__ = new s2js.runtime.client.Class('goog.events.a', []);
                     """
                 }
         }
@@ -232,8 +232,8 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.ClassLoader.provide('A');
-                        s2js.ClassLoader.provide('b');
+                        s2js.runtime.client.ClassLoader.provide('A');
+                        s2js.runtime.client.ClassLoader.provide('b');
 
                         A = function() {
                             var self = this;
@@ -242,7 +242,7 @@ class MethodSpecs extends CompilerFixtureSpec
                             var self = this;
                             return ('foo' + x);
                         };
-                        A.prototype.__class__ = new s2js.Class('A', []);
+                        A.prototype.__class__ = new s2js.runtime.client.Class('A', []);
 
                         b.m1 = function() {
                             var self = this;
@@ -252,7 +252,7 @@ class MethodSpecs extends CompilerFixtureSpec
                             var self = this;
                             var x = self.m1().go('bar').toString();
                         };
-                        b.__class__ = new s2js.Class('b', []);
+                        b.__class__ = new s2js.runtime.client.Class('b', []);
                     """
                 }
         }
@@ -276,7 +276,7 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.ClassLoader.provide('o1');
+                        s2js.runtime.client.ClassLoader.provide('o1');
 
                         o1.m1 = function(name, fn) {
                             var self = this;
@@ -287,7 +287,7 @@ class MethodSpecs extends CompilerFixtureSpec
                             var self = this;
                             self.m1('foo', function(x) { window.alert(x); });
                         };
-                        o1.__class__ = new s2js.Class('o1', []);
+                        o1.__class__ = new s2js.runtime.client.Class('o1', []);
                     """
                 }
         }
@@ -323,9 +323,9 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.ClassLoader.provide('C1');
-                        s2js.ClassLoader.provide('C2');
-                        s2js.ClassLoader.provide('o1');
+                        s2js.runtime.client.ClassLoader.provide('C1');
+                        s2js.runtime.client.ClassLoader.provide('C2');
+                        s2js.runtime.client.ClassLoader.provide('o1');
 
                         C1 = function() {
                             var self = this;
@@ -336,7 +336,7 @@ class MethodSpecs extends CompilerFixtureSpec
                             window.alert(self.f1);
                             fn(self.f1);
                         };
-                        C1.prototype.__class__ = new s2js.Class('C1', []);
+                        C1.prototype.__class__ = new s2js.runtime.client.Class('C1', []);
 
                         C2 = function() {
                             var self = this;
@@ -346,7 +346,7 @@ class MethodSpecs extends CompilerFixtureSpec
                             var self = this;
                             window.alert((v1 + self.f1));
                         };
-                        C2.prototype.__class__ = new s2js.Class('C2', []);
+                        C2.prototype.__class__ = new s2js.runtime.client.Class('C2', []);
 
                         o1.m1 = function() {
                             var self = this;
@@ -354,7 +354,7 @@ class MethodSpecs extends CompilerFixtureSpec
                             var c2 = new C2();
                             c1.m1(function($v1) { c2.m1($v1); });
                         };
-                        o1.__class__ = new s2js.Class('o1', []);
+                        o1.__class__ = new s2js.runtime.client.Class('o1', []);
                     """
                 }
         }
@@ -376,8 +376,8 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.ClassLoader.provide('$pkg.a');
-                        s2js.ClassLoader.provide('$pkg.b');
+                        s2js.runtime.client.ClassLoader.provide('$pkg.a');
+                        s2js.runtime.client.ClassLoader.provide('$pkg.b');
 
                         $pkg.a = function() {
                             var self = this;
@@ -388,7 +388,7 @@ class MethodSpecs extends CompilerFixtureSpec
                         $pkg.a.prototype.m2 = function(x) {
                             var self = this;
                         };
-                        $pkg.a.prototype.__class__ = new s2js.Class('$pkg.a', []);
+                        $pkg.a.prototype.__class__ = new s2js.runtime.client.Class('$pkg.a', []);
 
                         $pkg.b = function() {
                             var self = this;
@@ -403,7 +403,7 @@ class MethodSpecs extends CompilerFixtureSpec
                             var self = this;
                             goog.base(self, 'm2', 'foo');
                         };
-                        $pkg.b.prototype.__class__ = new s2js.Class('$pkg.b', [$pkg.a]);
+                        $pkg.b.prototype.__class__ = new s2js.runtime.client.Class('$pkg.b', [$pkg.a]);
                     """
                 }
         }
@@ -440,8 +440,8 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.ClassLoader.provide('o');
-                        s2js.ClassLoader.require('scala.collection.immutable.List');
+                        s2js.runtime.client.ClassLoader.provide('o');
+                        s2js.runtime.client.ClassLoader.require('scala.collection.immutable.List');
 
                         o.m1 = function() {
                             var self = this;
@@ -465,7 +465,7 @@ class MethodSpecs extends CompilerFixtureSpec
                             self.m2('test', 5, 6);
                             self.m2('test', 5, 6, 7, 8);
                         };
-                        o.__class__ = new s2js.Class('o', []);
+                        o.__class__ = new s2js.runtime.client.Class('o', []);
                     """
                 }
         }

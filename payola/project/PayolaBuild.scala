@@ -139,6 +139,12 @@ object PayolaBuild extends Build
         val adaptersJar = file("lib/" + S2JsSettings.adaptersJarName)
 
         def apply(name: String, path: File, outputDir: File, projectSettings: Seq[Project.Setting[_]]) = {
+            raw(name, path, outputDir, projectSettings).dependsOn(
+                s2JsRuntimeClientProject
+            )
+        }
+
+        def raw(name: String, path: File, outputDir: File, projectSettings: Seq[Project.Setting[_]]) = {
             Project(
                 name, path,
                 settings = projectSettings ++ Seq(
@@ -156,8 +162,20 @@ object PayolaBuild extends Build
         }
     }
 
-    lazy val s2JsRuntimeProject = ScalaToJsProject(
-        "runtime", file("s2js/runtime"), WebSettings.javaScriptsDir, s2JsSettings
+    lazy val s2JsRuntimeProject = Project(
+        "runtime", file("s2js/runtime"), settings = s2JsSettings
+    ).aggregate(
+        s2JsRuntimeSharedProject, s2JsRuntimeClientProject
+    )
+
+    lazy val s2JsRuntimeSharedProject = ScalaToJsProject.raw(
+        "runtime-shared", file("s2js/runtime/shared"), WebSettings.javaScriptsDir, s2JsSettings
+    )
+
+    lazy val s2JsRuntimeClientProject = ScalaToJsProject.raw(
+        "runtime-client", file("s2js/runtime/client"), WebSettings.javaScriptsDir, s2JsSettings
+    ).dependsOn(
+        s2JsRuntimeSharedProject
     )
 
     lazy val scala2JsonProject = Project(
@@ -214,8 +232,8 @@ object PayolaBuild extends Build
             val fileProvidedSymbols = new mutable.HashMap[String, mutable.ArrayBuffer[String]]
             val fileRequiredSymbols = new mutable.HashMap[String, mutable.ArrayBuffer[String]]
 
-            val provideRegex = """s2js\.ClassLoader\.provide\(\s*['\"]([^'\"]+)['\"]\s*\);""".r
-            val requireRegex = """s2js\.ClassLoader\.require\(\s*['\"]([^'\"]+)['\"]\s*\);""".r
+            val provideRegex = """s2js\.runtime\.client\.ClassLoader\.provide\(\s*['\"]([^'\"]+)['\"]\s*\);""".r
+            val requireRegex = """s2js\.runtime\.client\.ClassLoader\.require\(\s*['\"]([^'\"]+)['\"]\s*\);""".r
             files.foreach {file =>
                 val path = file.toAbsolute.path.toString
                 fileProvidedSymbols += path -> new mutable.ArrayBuffer[String]
@@ -291,6 +309,6 @@ object PayolaBuild extends Build
             new io.File(WebSettings.dependencyFile).delete()
         }
     ).dependsOn(
-        commonProject, webSharedProject, webClientProject, scala2JsonProject, dataProject
+        commonProject, webSharedProject, webClientProject, scala2JsonProject, dataProject, s2JsRuntimeSharedProject
     )
 }

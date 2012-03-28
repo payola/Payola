@@ -28,15 +28,15 @@
  * @see ../demos/mousewheelhandler.html
  */
 
-s2js.ClassLoader.provide('goog.events.MouseWheelEvent');
-s2js.ClassLoader.provide('goog.events.MouseWheelHandler');
-s2js.ClassLoader.provide('goog.events.MouseWheelHandler.EventType');
+s2js.runtime.client.ClassLoader.provide('goog.events.MouseWheelEvent');
+s2js.runtime.client.ClassLoader.provide('goog.events.MouseWheelHandler');
+s2js.runtime.client.ClassLoader.provide('goog.events.MouseWheelHandler.EventType');
 
-s2js.ClassLoader.require('goog.events');
-s2js.ClassLoader.require('goog.events.BrowserEvent');
-s2js.ClassLoader.require('goog.events.EventTarget');
-s2js.ClassLoader.require('goog.math');
-s2js.ClassLoader.require('goog.userAgent');
+s2js.runtime.client.ClassLoader.require('goog.events');
+s2js.runtime.client.ClassLoader.require('goog.events.BrowserEvent');
+s2js.runtime.client.ClassLoader.require('goog.events.EventTarget');
+s2js.runtime.client.ClassLoader.require('goog.math');
+s2js.runtime.client.ClassLoader.require('goog.userAgent');
 
 
 

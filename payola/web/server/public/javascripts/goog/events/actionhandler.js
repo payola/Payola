@@ -31,17 +31,17 @@
  *
  */
 
-s2js.ClassLoader.provide('goog.events.ActionEvent');
-s2js.ClassLoader.provide('goog.events.ActionHandler');
-s2js.ClassLoader.provide('goog.events.ActionHandler.EventType');
-s2js.ClassLoader.provide('goog.events.BeforeActionEvent');
+s2js.runtime.client.ClassLoader.provide('goog.events.ActionEvent');
+s2js.runtime.client.ClassLoader.provide('goog.events.ActionHandler');
+s2js.runtime.client.ClassLoader.provide('goog.events.ActionHandler.EventType');
+s2js.runtime.client.ClassLoader.provide('goog.events.BeforeActionEvent');
 
-s2js.ClassLoader.require('goog.events');
-s2js.ClassLoader.require('goog.events.BrowserEvent');
-s2js.ClassLoader.require('goog.events.EventTarget');
-s2js.ClassLoader.require('goog.events.EventType');
-s2js.ClassLoader.require('goog.events.KeyCodes');
-s2js.ClassLoader.require('goog.userAgent');
+s2js.runtime.client.ClassLoader.require('goog.events');
+s2js.runtime.client.ClassLoader.require('goog.events.BrowserEvent');
+s2js.runtime.client.ClassLoader.require('goog.events.EventTarget');
+s2js.runtime.client.ClassLoader.require('goog.events.EventType');
+s2js.runtime.client.ClassLoader.require('goog.events.KeyCodes');
+s2js.runtime.client.ClassLoader.require('goog.userAgent');
 
 
 

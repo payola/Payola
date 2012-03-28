@@ -120,6 +120,7 @@
     <orderEntry type="module" module-name="client" exported="" />
     <orderEntry type="module" module-name="scala2json" exported="" />
     <orderEntry type="module" module-name="data" exported="" />
+    <orderEntry type="module" module-name="runtime-shared" exported="" />
   </component>
 </module>
 

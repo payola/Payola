@@ -21,7 +21,7 @@
 /**
  * Namespace for events
  */
-s2js.ClassLoader.provide('goog.events.Listener');
+s2js.runtime.client.ClassLoader.provide('goog.events.Listener');
 
 
 

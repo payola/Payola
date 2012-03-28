@@ -19,12 +19,12 @@
  * @see ../demos/debug.html
  */
 
-s2js.ClassLoader.provide('goog.debug');
+s2js.runtime.client.ClassLoader.provide('goog.debug');
 
-s2js.ClassLoader.require('goog.array');
-s2js.ClassLoader.require('goog.string');
-s2js.ClassLoader.require('goog.structs.Set');
-s2js.ClassLoader.require('goog.userAgent');
+s2js.runtime.client.ClassLoader.require('goog.array');
+s2js.runtime.client.ClassLoader.require('goog.string');
+s2js.runtime.client.ClassLoader.require('goog.structs.Set');
+s2js.runtime.client.ClassLoader.require('goog.userAgent');
 
 
 /**

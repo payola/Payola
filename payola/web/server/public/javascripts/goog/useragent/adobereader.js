@@ -20,10 +20,10 @@
  */
 
 
-s2js.ClassLoader.provide('goog.userAgent.adobeReader');
+s2js.runtime.client.ClassLoader.provide('goog.userAgent.adobeReader');
 
-s2js.ClassLoader.require('goog.string');
-s2js.ClassLoader.require('goog.userAgent');
+s2js.runtime.client.ClassLoader.require('goog.string');
+s2js.runtime.client.ClassLoader.require('goog.userAgent');
 
 
 (function() {

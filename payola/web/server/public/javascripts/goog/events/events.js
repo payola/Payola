@@ -53,18 +53,18 @@
 // sources_: src uid -> [Listener]
 
 
-s2js.ClassLoader.provide('goog.events');
+s2js.runtime.client.ClassLoader.provide('goog.events');
 
-s2js.ClassLoader.require('goog.array');
-s2js.ClassLoader.require('goog.debug.entryPointRegistry');
-s2js.ClassLoader.require('goog.debug.errorHandlerWeakDep');
-s2js.ClassLoader.require('goog.events.BrowserEvent');
-s2js.ClassLoader.require('goog.events.BrowserFeature');
-s2js.ClassLoader.require('goog.events.Event');
-s2js.ClassLoader.require('goog.events.EventWrapper');
-s2js.ClassLoader.require('goog.events.Listener');
-s2js.ClassLoader.require('goog.object');
-s2js.ClassLoader.require('goog.userAgent');
+s2js.runtime.client.ClassLoader.require('goog.array');
+s2js.runtime.client.ClassLoader.require('goog.debug.entryPointRegistry');
+s2js.runtime.client.ClassLoader.require('goog.debug.errorHandlerWeakDep');
+s2js.runtime.client.ClassLoader.require('goog.events.BrowserEvent');
+s2js.runtime.client.ClassLoader.require('goog.events.BrowserFeature');
+s2js.runtime.client.ClassLoader.require('goog.events.Event');
+s2js.runtime.client.ClassLoader.require('goog.events.EventWrapper');
+s2js.runtime.client.ClassLoader.require('goog.events.Listener');
+s2js.runtime.client.ClassLoader.require('goog.object');
+s2js.runtime.client.ClassLoader.require('goog.userAgent');
 
 
 /**

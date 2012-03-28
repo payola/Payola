@@ -28,19 +28,19 @@
 // getInnerText (or getText) which tries to return the visible text, innerText.
 
 
-s2js.ClassLoader.provide('goog.dom');
-s2js.ClassLoader.provide('goog.dom.DomHelper');
-s2js.ClassLoader.provide('goog.dom.NodeType');
+s2js.runtime.client.ClassLoader.provide('goog.dom');
+s2js.runtime.client.ClassLoader.provide('goog.dom.DomHelper');
+s2js.runtime.client.ClassLoader.provide('goog.dom.NodeType');
 
-s2js.ClassLoader.require('goog.array');
-s2js.ClassLoader.require('goog.dom.BrowserFeature');
-s2js.ClassLoader.require('goog.dom.TagName');
-s2js.ClassLoader.require('goog.dom.classes');
-s2js.ClassLoader.require('goog.math.Coordinate');
-s2js.ClassLoader.require('goog.math.Size');
-s2js.ClassLoader.require('goog.object');
-s2js.ClassLoader.require('goog.string');
-s2js.ClassLoader.require('goog.userAgent');
+s2js.runtime.client.ClassLoader.require('goog.array');
+s2js.runtime.client.ClassLoader.require('goog.dom.BrowserFeature');
+s2js.runtime.client.ClassLoader.require('goog.dom.TagName');
+s2js.runtime.client.ClassLoader.require('goog.dom.classes');
+s2js.runtime.client.ClassLoader.require('goog.math.Coordinate');
+s2js.runtime.client.ClassLoader.require('goog.math.Size');
+s2js.runtime.client.ClassLoader.require('goog.object');
+s2js.runtime.client.ClassLoader.require('goog.string');
+s2js.runtime.client.ClassLoader.require('goog.userAgent');
 
 
 /**

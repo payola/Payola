@@ -21,8 +21,10 @@ class DependencyManager(private val packageDefCompiler: PackageDefCompiler)
       */
     def compileDependencies(buffer: mutable.ListBuffer[String]) {
         val nonLocalRequires = requireHashSet.toArray.filter(!provideHashSet.contains(_))
-        val provided = provideHashSet.toArray.sortBy(x => x).map("s2js.ClassLoader.provide('%s');\n".format(_))
-        val required = nonLocalRequires.sortBy(x => x).map("s2js.ClassLoader.require('%s');\n".format(_))
+        val provided = provideHashSet.toArray.sortBy(x => x).map(
+            "s2js.runtime.client.ClassLoader.provide('%s');\n".format(_))
+        val required = nonLocalRequires.sortBy(x => x).map(
+            "s2js.runtime.client.ClassLoader.require('%s');\n".format(_))
         buffer.insert(0, provided.mkString)
         buffer.insert(1, required.mkString)
     }

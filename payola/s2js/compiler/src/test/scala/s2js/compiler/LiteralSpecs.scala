@@ -16,13 +16,13 @@ class LiteralSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.ClassLoader.provide('p');
+                        s2js.runtime.client.ClassLoader.provide('p');
 
                         p.a = function() {
                             var self = this;
                             null;
                         };
-                        p.__class__ = new s2js.Class('p', []);
+                        p.__class__ = new s2js.runtime.client.Class('p', []);
                     """
                 }
         }
@@ -41,14 +41,14 @@ class LiteralSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.ClassLoader.provide('p');
+                        s2js.runtime.client.ClassLoader.provide('p');
 
                         p.a = function() {
                             var self = this;
                             true;
                             false;
                         };
-                        p.__class__ = new s2js.Class('p', []);
+                        p.__class__ = new s2js.runtime.client.Class('p', []);
                     """
                 }
         }
@@ -70,7 +70,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.ClassLoader.provide('p');
+                        s2js.runtime.client.ClassLoader.provide('p');
 
                         p.a = function() {
                             var self = this;
@@ -80,7 +80,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                             -5;
                             -424.45;
                         };
-                        p.__class__ = new s2js.Class('p', []);
+                        p.__class__ = new s2js.runtime.client.Class('p', []);
                     """
                 }
         }
@@ -98,13 +98,13 @@ class LiteralSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.ClassLoader.provide('p');
+                        s2js.runtime.client.ClassLoader.provide('p');
 
                         p.a = function() {
                             var self = this;
                             'x';
                         };
-                        p.__class__ = new s2js.Class('p', []);
+                        p.__class__ = new s2js.runtime.client.Class('p', []);
                     """
                 }
         }
@@ -125,7 +125,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.ClassLoader.provide('p');
+                        s2js.runtime.client.ClassLoader.provide('p');
 
                         p.a = function() {
                             var self = this;
@@ -134,7 +134,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                             '\\';
                             '\\\'';
                         };
-                        p.__class__ = new s2js.Class('p', []);
+                        p.__class__ = new s2js.runtime.client.Class('p', []);
                     """
                 }
         }

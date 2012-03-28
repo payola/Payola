@@ -19,7 +19,7 @@ class StatementSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.ClassLoader.provide('a');
+                        s2js.runtime.client.ClassLoader.provide('a');
 
                         a.m1 = function() {
                             var self = this;
@@ -27,7 +27,7 @@ class StatementSpecs extends CompilerFixtureSpec
                             var y = (x + 'foo');
                             window.alert(y);
                         };
-                        a.__class__ = new s2js.Class('a', []);
+                        a.__class__ = new s2js.runtime.client.Class('a', []);
                     """
                 }
         }
@@ -79,18 +79,18 @@ class StatementSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.ClassLoader.provide('B');
-                        s2js.ClassLoader.provide('a');
-                        s2js.ClassLoader.provide('c');
+                        s2js.runtime.client.ClassLoader.provide('B');
+                        s2js.runtime.client.ClassLoader.provide('a');
+                        s2js.runtime.client.ClassLoader.provide('c');
 
                         B = function() {
                             var self = this;
                             self.x = '';
                         };
-                        B.prototype.__class__ = new s2js.Class('B', []);
+                        B.prototype.__class__ = new s2js.runtime.client.Class('B', []);
 
                         a.x = 'bar';
-                        a.__class__ = new s2js.Class('a', []);
+                        a.__class__ = new s2js.runtime.client.Class('a', []);
 
                         c.x = 'foo';
 
@@ -124,7 +124,7 @@ class StatementSpecs extends CompilerFixtureSpec
                             self.x = a.x;
                             self.x = b.x;
                         };
-                        c.__class__ = new s2js.Class('c', []);
+                        c.__class__ = new s2js.runtime.client.Class('c', []);
                     """
                 }
         }
@@ -144,7 +144,7 @@ class StatementSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.ClassLoader.provide('o');
+                        s2js.runtime.client.ClassLoader.provide('o');
 
                         o.m1 = function() {
                             var self = this;
@@ -156,7 +156,7 @@ class StatementSpecs extends CompilerFixtureSpec
                             var v2 = (! v1);
                             var v3 = (! self.m1());
                         };
-                        o.__class__ = new s2js.Class('o', []);
+                        o.__class__ = new s2js.runtime.client.Class('o', []);
                     """
                 }
         }

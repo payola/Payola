@@ -25,11 +25,11 @@
  */
 
 
-s2js.ClassLoader.provide('goog.structs.Set');
+s2js.runtime.client.ClassLoader.provide('goog.structs.Set');
 
-s2js.ClassLoader.require('goog.structs');
-s2js.ClassLoader.require('goog.structs.Collection');
-s2js.ClassLoader.require('goog.structs.Map');
+s2js.runtime.client.ClassLoader.require('goog.structs');
+s2js.runtime.client.ClassLoader.require('goog.structs.Collection');
+s2js.runtime.client.ClassLoader.require('goog.structs.Map');
 
 
 

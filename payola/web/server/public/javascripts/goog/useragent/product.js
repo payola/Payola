@@ -17,9 +17,9 @@
  *
  */
 
-s2js.ClassLoader.provide('goog.userAgent.product');
+s2js.runtime.client.ClassLoader.provide('goog.userAgent.product');
 
-s2js.ClassLoader.require('goog.userAgent');
+s2js.runtime.client.ClassLoader.require('goog.userAgent');
 
 
 /**

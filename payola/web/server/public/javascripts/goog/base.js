@@ -1,4 +1,4 @@
-s2js.ClassLoader.provide('goog');
+s2js.runtime.client.ClassLoader.provide('goog');
 
 // Copyright 2006 The Closure Library Authors. All Rights Reserved.
 //

@@ -19,7 +19,7 @@
  *
  */
 
-s2js.ClassLoader.provide('goog.debug.LogRecord');
+s2js.runtime.client.ClassLoader.provide('goog.debug.LogRecord');
 
 
 
