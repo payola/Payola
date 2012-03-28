@@ -1,5 +1,6 @@
 package cz.payola.scala2json
 
+import collection.mutable.ArrayBuffer
 
 class JSONStringBuilder(serializer: JSONSerializer, prettyPrint: Boolean, initialValue: String){
     val stringBuilder: StringBuilder = new StringBuilder(initialValue)
@@ -26,8 +27,8 @@ class JSONStringBuilder(serializer: JSONSerializer, prettyPrint: Boolean, initia
         stringBuilder.append(item)
     }
 
-    def appendArrayItem(item: Any, isFirst: Boolean) = {
-        var serializedObj: String = serializer.serializeObject(item)
+    def appendArrayItem(item: Any, isFirst: Boolean, processedObjects: ArrayBuffer[Any]) = {
+        var serializedObj: String = serializer.serializeObject(item, processedObjects)
         if (prettyPrint) {
             serializedObj = serializedObj.replaceAllLiterally("\n", "\n\t")
         }
@@ -41,8 +42,8 @@ class JSONStringBuilder(serializer: JSONSerializer, prettyPrint: Boolean, initia
       * @param isFirst If true, comma preceding the field is left out.
       *
       */
-    def appendKeyValue(key: String, value: Any, isFirst: Boolean) = {
-        var serializedObj: String = serializer.serializeObject(value)
+    def appendKeyValue(key: String, value: Any, isFirst: Boolean, processedObjects: ArrayBuffer[Any]) = {
+        var serializedObj: String = serializer.serializeObject(value, processedObjects)
         if (prettyPrint) {
             serializedObj = serializedObj.replaceAllLiterally("\n", "\n\t")
         }

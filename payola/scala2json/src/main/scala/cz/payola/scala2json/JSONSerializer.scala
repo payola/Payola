@@ -14,6 +14,13 @@ object OutputFormat extends Enumeration {
     val Condensed = Value
 }
 
+/** Scala object -> JSON serializer.
+  *
+  * Thread-safety: Serialization of objects is generally thread-safe, however,
+  * you should not be modifying the rules and settings (i.e. "includeClassFields",
+  * "outputFormat", "serializeInDepth" options) while the serializer is serializing
+  * an object.
+  */
 class JSONSerializer
 {
     var outputFormat = OutputFormat.Condensed
@@ -21,8 +28,6 @@ class JSONSerializer
     var includeClassFields = true
 
     var serializeInDepth = false
-
-    private val _processedObjects = new ArrayBuffer[Any]()
 
     private val _rules = new ArrayBuffer[(SerializationClass, SerializationRule)]()
 
@@ -75,10 +80,7 @@ class JSONSerializer
         if (obj == null) {
             "null"
         } else {
-            val result = serializeObject(obj)
-            // Need to clear processed objects for next use
-            _processedObjects.clear
-            result
+            serializeObject(obj, new ArrayBuffer[Any]())
         }
     }
 
@@ -86,7 +88,7 @@ class JSONSerializer
       *
       * @return JSON representation of obj.
       */
-    private def serializeArray(arr: Array[_]): String = {
+    private def serializeArray(arr: Array[_], processedObjects: ArrayBuffer[Any]): String = {
         val jsonBuilder: JSONStringBuilder = new JSONStringBuilder(this, prettyPrint, "[")
         val builder = jsonBuilder.stringBuilder
         if (prettyPrint) {
@@ -94,7 +96,7 @@ class JSONSerializer
         }
 
         for (i: Int <- 0 until arr.length) {
-            jsonBuilder.appendArrayItem(arr(i), i == 0)
+            jsonBuilder.appendArrayItem(arr(i), i == 0, processedObjects)
         }
 
         if (prettyPrint) {
@@ -110,7 +112,7 @@ class JSONSerializer
       *
       * @return JSON representation of obj.
       */
-    private def serializeMap(map: scala.collection.Map[_, _]): String = {
+    private def serializeMap(map: scala.collection.Map[_, _], processedObjects: ArrayBuffer[Any]): String = {
         val jsonBuilder: JSONStringBuilder = new JSONStringBuilder(this, prettyPrint, "{")
         val builder = jsonBuilder.stringBuilder
         if (prettyPrint) {
@@ -125,7 +127,7 @@ class JSONSerializer
         var index: Int = 0
         mapIt foreach {
             case (key, value) => {
-                jsonBuilder.appendKeyValue(key, value, index == 0)
+                jsonBuilder.appendKeyValue(key, value, index == 0, processedObjects)
                 index += 1
             }
         }
@@ -142,17 +144,17 @@ class JSONSerializer
       *
       * @return JSON representation of obj.
       */
-    private[scala2json] def serializeObject(obj: Any): String = {
+    private[scala2json] def serializeObject(obj: Any, processedObjects: ArrayBuffer[Any]): String = {
         var objectID: Int = 0
         var serializeObjectAsReference: Boolean = false
 
-        if (_processedObjects.contains(obj)) {
+        if (processedObjects.contains(obj)) {
             if (serializeInDepth) {
                 // Skipping IDs -> can't serialize a cycle
                 throw new JSONSerializationException("Cycle detected on object " + obj + ".")
             } else {
                 // Otherwise, fetch the objectID and serialize it as a reference
-                objectID = _processedObjects.indexOf(obj)
+                objectID = processedObjects.indexOf(obj)
                 serializeObjectAsReference = true
             }
         } else if (obj.isInstanceOf[AnyRef]
@@ -161,8 +163,8 @@ class JSONSerializer
             && !obj.isInstanceOf[java.lang.Boolean]
             && !obj.isInstanceOf[java.lang.Character]) {
             // Do not detect cycles on primitive types
-            objectID = _processedObjects.size // The index will be at the size of the array
-            _processedObjects += obj
+            objectID = processedObjects.size // The index will be at the size of the array
+            processedObjects += obj
         }
 
         val serializationClass = _rules find {
@@ -178,11 +180,11 @@ class JSONSerializer
             && !obj.isInstanceOf[collection.Traversable[_]]
             && !obj.isInstanceOf[Array[_]]) {
             // Must be AnyRef, otherwise it wouldn't get into the processedObjects array
-            result = serializePlainObject(obj.asInstanceOf[AnyRef], serializeObjectAsReference, objectID)
+            result = serializePlainObject(obj.asInstanceOf[AnyRef], serializeObjectAsReference, objectID, processedObjects)
         } else if (serializationClass.isDefined) {
             val rule = serializationClass.get._2
             result = rule match {
-                case basic: BasicSerializationRule => serializeWithRule(obj.asInstanceOf[AnyRef], basic, objectID)
+                case basic: BasicSerializationRule => serializeWithRule(obj.asInstanceOf[AnyRef], basic, objectID, processedObjects)
                 case custom: CustomSerializationRule => custom.customSerializer(this, obj, objectID)
                 case _ => {
                     println("Unknown rule type - " + rule)
@@ -196,18 +198,18 @@ class JSONSerializer
                 case _: java.lang.Boolean => if (obj.asInstanceOf[java.lang.Boolean].booleanValue) "true" else "false"
                 case _: java.lang.Character => JSONUtilities
                     .escapeChar(obj.asInstanceOf[java.lang.Character].charValue())
-                case opt: Option[_] => serializeOption(opt)
-                case map: scala.collection.Map[_, _] => serializeMap(map)
-                case trav: scala.collection.Traversable[_] => serializeTraversable(trav)
-                case arr: Array[_] => serializeArray(arr)
-                case ref: AnyRef => serializePlainObject(ref, serializeObjectAsReference, objectID)
+                case opt: Option[_] => serializeOption(opt, processedObjects)
+                case map: scala.collection.Map[_, _] => serializeMap(map, processedObjects)
+                case trav: scala.collection.Traversable[_] => serializeTraversable(trav, processedObjects)
+                case arr: Array[_] => serializeArray(arr, processedObjects)
+                case ref: AnyRef => serializePlainObject(ref, serializeObjectAsReference, objectID, processedObjects)
                 case rest => serializePrimitiveType(rest)
             }
         }
 
         if (serializeInDepth) {
             // We're going back in the tree
-            _processedObjects -= obj
+            processedObjects -= obj
         }
 
         result
@@ -217,10 +219,10 @@ class JSONSerializer
       *
       * @return obj serialized as an object reference.
       */
-    private def serializeObjectAsReference(obj: AnyRef, objectID: Int): String = {
+    private def serializeObjectAsReference(obj: AnyRef, objectID: Int, processedObjects: ArrayBuffer[Any]): String = {
         val jsonBuilder: JSONStringBuilder = new JSONStringBuilder(this, prettyPrint, "")
         val builder = jsonBuilder.stringBuilder
-        jsonBuilder.appendKeyValue("__ref__", objectID, true)
+        jsonBuilder.appendKeyValue("__ref__", objectID, true, processedObjects)
         builder.toString
     }
 
@@ -230,7 +232,8 @@ class JSONSerializer
       */
     private def serializeObjectAsValue(obj: AnyRef, objectID: Int,
         transientFields: Option[collection.Seq[String]] = None,
-        fieldAliases: Option[collection.Map[String, String]] = None): String = {
+        fieldAliases: Option[collection.Map[String, String]] = None,
+        processedObjects: ArrayBuffer[Any]): String = {
         val jsonBuilder: JSONStringBuilder = new JSONStringBuilder(this, prettyPrint, "")
         val builder = jsonBuilder.stringBuilder
 
@@ -243,13 +246,13 @@ class JSONSerializer
         if (includeClassFields) {
             // => include __class__ field
             val className: String = objectsClassName(obj)
-            jsonBuilder.appendKeyValue("__class__", className, !haveProcessedField)
+            jsonBuilder.appendKeyValue("__class__", className, !haveProcessedField, processedObjects)
             haveProcessedField = true
         }
 
         if (!serializeInDepth) {
             // => include __objectID__field
-            jsonBuilder.appendKeyValue("__objectID__", objectID, !haveProcessedField)
+            jsonBuilder.appendKeyValue("__objectID__", objectID, !haveProcessedField, processedObjects)
             haveProcessedField = true
         }
 
@@ -267,7 +270,7 @@ class JSONSerializer
                 if (fValue == null) {
                     jsonBuilder.appendKeySerializedValue(fName, "null", !haveProcessedField)
                 } else {
-                    jsonBuilder.appendKeyValue(fName, fValue, !haveProcessedField)
+                    jsonBuilder.appendKeyValue(fName, fValue, !haveProcessedField, processedObjects)
                 }
                 haveProcessedField = true
             }
@@ -276,7 +279,7 @@ class JSONSerializer
         _rules foreach { item: (SerializationClass, SerializationRule) =>
             if (item._1.isClassOf(obj) && item._2.isInstanceOf[CustomValueSerializationRule[_]]){
                 val rule: CustomValueSerializationRule[AnyRef] = item._2.asInstanceOf[CustomValueSerializationRule[AnyRef]]
-                jsonBuilder.appendKeyValue(rule.fieldName, rule.definingFunction(this, obj), !haveProcessedField)
+                jsonBuilder.appendKeyValue(rule.fieldName, rule.definingFunction(this, obj), !haveProcessedField, processedObjects)
                 haveProcessedField = true
             }
         }
@@ -286,7 +289,8 @@ class JSONSerializer
 
     def serializeObjectPosingAsClass(obj: AnyRef, objectID: Int, targetClass: Class[_],
         transientFields: Option[collection.Seq[String]],
-        fieldAliases: Option[collection.Map[String, String]]): String = {
+        fieldAliases: Option[collection.Map[String, String]],
+        processedObjects: ArrayBuffer[Any]): String = {
         val jsonBuilder: JSONStringBuilder = new JSONStringBuilder(this, prettyPrint, "")
         val builder = jsonBuilder.stringBuilder
 
@@ -299,13 +303,13 @@ class JSONSerializer
         if (includeClassFields) {
             // => include __class__ field
             val className: String = targetClass.getCanonicalName
-            jsonBuilder.appendKeyValue("__class__", className, !haveProcessedField)
+            jsonBuilder.appendKeyValue("__class__", className, !haveProcessedField, processedObjects)
             haveProcessedField = true
         }
 
         if (!serializeInDepth) {
             // => include __objectID__field
-            jsonBuilder.appendKeyValue("__objectID__", objectID, !haveProcessedField)
+            jsonBuilder.appendKeyValue("__objectID__", objectID, !haveProcessedField, processedObjects)
             haveProcessedField = true
         }
 
@@ -326,7 +330,7 @@ class JSONSerializer
                     if (fieldValue == null) {
                         jsonBuilder.appendKeySerializedValue(originalFieldName, "null", !haveProcessedField)
                     } else {
-                        jsonBuilder.appendKeyValue(originalFieldName, fieldValue, !haveProcessedField)
+                        jsonBuilder.appendKeyValue(originalFieldName, fieldValue, !haveProcessedField, processedObjects)
                     }
                     haveProcessedField = true
                 }
@@ -336,7 +340,7 @@ class JSONSerializer
         _rules foreach { item: (SerializationClass, SerializationRule) =>
             if (item._1.isClassOf(obj) && item._2.isInstanceOf[CustomValueSerializationRule[_]]){
                 val rule: CustomValueSerializationRule[AnyRef] = item._2.asInstanceOf[CustomValueSerializationRule[AnyRef]]
-                jsonBuilder.appendKeyValue(rule.fieldName, rule.definingFunction(this, obj), !haveProcessedField)
+                jsonBuilder.appendKeyValue(rule.fieldName, rule.definingFunction(this, obj), !haveProcessedField, processedObjects)
                 haveProcessedField = true
             }
         }
@@ -349,11 +353,11 @@ class JSONSerializer
       * @param opt
       * @return
       */
-    private def serializeOption(opt: Option[_]): String = {
+    private def serializeOption(opt: Option[_], processedObjects: ArrayBuffer[Any]): String = {
         if (opt.isEmpty) {
             "null"
         } else {
-            serializeObject(opt.get)
+            serializeObject(opt.get, processedObjects)
         }
     }
 
@@ -365,7 +369,7 @@ class JSONSerializer
       *
       * @return JSON value.
       */
-    private def serializePlainObject(obj: AnyRef, asReference: Boolean, objectID: Int): String = {
+    private def serializePlainObject(obj: AnyRef, asReference: Boolean, objectID: Int, processedObjects: ArrayBuffer[Any]): String = {
         // Now we're dealing with some kind of an object,
         // we'll use Java's reflection to serialize it
         val builder: StringBuilder = new StringBuilder("{")
@@ -375,9 +379,9 @@ class JSONSerializer
         }
 
         if (asReference) {
-            builder.append(serializeObjectAsReference(obj, objectID))
+            builder.append(serializeObjectAsReference(obj, objectID, processedObjects))
         } else {
-            builder.append(serializeObjectAsValue(obj, objectID))
+            builder.append(serializeObjectAsValue(obj, objectID, processedObjects = processedObjects))
         }
 
         if (prettyPrint) {
@@ -411,7 +415,7 @@ class JSONSerializer
       * @return JSON representation of obj.
       */
 
-    private def serializeTraversable(coll: scala.collection.Traversable[_]): String = {
+    private def serializeTraversable(coll: scala.collection.Traversable[_], processedObjects: ArrayBuffer[Any]): String = {
         if (includeClassFields) {
             val jsonBuilder: JSONStringBuilder = new JSONStringBuilder(this, prettyPrint, "{")
             val builder = jsonBuilder.stringBuilder
@@ -419,9 +423,9 @@ class JSONSerializer
                 builder.append('\n')
             }
 
-            jsonBuilder.appendKeyValue("__arrayClass__", objectsClassName(coll), true)
+            jsonBuilder.appendKeyValue("__arrayClass__", objectsClassName(coll), true, processedObjects)
 
-            var serializedValue = serializeTraversableValue(coll)
+            var serializedValue = serializeTraversableValue(coll, processedObjects)
             if (prettyPrint) {
                 serializedValue = serializedValue.replaceAllLiterally("\n", "\n\t")
             }
@@ -434,11 +438,11 @@ class JSONSerializer
             builder.append('}')
             builder.toString
         } else {
-            serializeTraversableValue(coll)
+            serializeTraversableValue(coll, processedObjects)
         }
     }
 
-    private def serializeTraversableValue(coll: scala.collection.Traversable[_]): String = {
+    private def serializeTraversableValue(coll: scala.collection.Traversable[_], processedObjects: ArrayBuffer[Any]): String = {
         val jsonBuilder: JSONStringBuilder = new JSONStringBuilder(this, prettyPrint, "[")
         val builder = jsonBuilder.stringBuilder
         if (prettyPrint) {
@@ -449,7 +453,7 @@ class JSONSerializer
         // we don't add a comma after the first iteration
         var index: Int = 0
         coll foreach {item => {
-            jsonBuilder.appendArrayItem(item, index == 0)
+            jsonBuilder.appendArrayItem(item, index == 0, processedObjects)
             index += 1
         }
         }
@@ -462,18 +466,18 @@ class JSONSerializer
         builder.toString
     }
 
-    private def serializeWithRule(obj: AnyRef, rule: BasicSerializationRule, objectID: Int): String = {
+    private def serializeWithRule(obj: AnyRef, rule: BasicSerializationRule, objectID: Int, processedObjects: ArrayBuffer[Any]): String = {
         val builder: StringBuilder = new StringBuilder("{")
         if (prettyPrint) {
             builder.append('\n')
         }
 
         if (rule.serializeAsClass.isEmpty) {
-            builder.append(serializeObjectAsValue(obj, objectID, rule.transientFields, rule.fieldAliases))
+            builder.append(serializeObjectAsValue(obj, objectID, rule.transientFields, rule.fieldAliases, processedObjects))
         } else {
             // Custom
             builder.append(serializeObjectPosingAsClass(obj, objectID, rule.serializeAsClass.get, rule.transientFields,
-                rule.fieldAliases))
+                rule.fieldAliases, processedObjects))
         }
 
         if (prettyPrint) {
