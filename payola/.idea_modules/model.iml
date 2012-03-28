@@ -25,6 +25,8 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="org.scala-lang_scala-library_2.9.1" level="project" />
     <orderEntry type="library" name="org.scala-lang_scala-compiler_2.9.1" level="project" />
+    <orderEntry type="library" name="org.squeryl_squeryl_2.9.1_0.9.5-RC1" level="project" />
+    <orderEntry type="library" name="cglib_cglib-nodep_2.2" level="project" />
     <orderEntry type="library" name="org.apache.jena_jena-core_2.7.0-incubating" level="project" />
     <orderEntry type="library" name="org.apache.jena_jena-iri_0.9.0-incubating" level="project" />
     <orderEntry type="library" name="com.ibm.icu_icu4j_3.4.4" level="project" />

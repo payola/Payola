@@ -19,14 +19,14 @@
       <sourceFolder url="file://$MODULE_DIR$/../web/server/test" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../web/server/test/resources" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/../web/server/target/scala-2.9.1/cache" />
-      <excludeFolder url="file://$MODULE_DIR$/../web/server/target/scala-2.9.1/classes" />
-      <excludeFolder url="file://$MODULE_DIR$/../web/server/target/scala-2.9.1/classes_managed" />
       <excludeFolder url="file://$MODULE_DIR$/../web/server/target/streams" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="org.scala-lang_scala-library_2.9.1" level="project" />
     <orderEntry type="library" name="org.scala-lang_scala-compiler_2.9.1" level="project" />
+    <orderEntry type="library" name="org.squeryl_squeryl_2.9.1_0.9.5-RC1" level="project" />
+    <orderEntry type="library" name="cglib_cglib-nodep_2.2" level="project" />
     <orderEntry type="library" name="org.apache.jena_jena-core_2.7.0-incubating" level="project" />
     <orderEntry type="library" name="org.apache.jena_jena-iri_0.9.0-incubating" level="project" />
     <orderEntry type="library" name="com.ibm.icu_icu4j_3.4.4" level="project" />
@@ -69,8 +69,8 @@
     <orderEntry type="library" name="oauth.signpost_signpost-core_1.2.1.1" level="project" />
     <orderEntry type="library" name="commons-codec_commons-codec_1.3" level="project" />
     <orderEntry type="library" name="com.codahale_jerkson_2.9.1_0.5.0" level="project" />
-    <orderEntry type="library" name="org.codehaus.jackson_jackson-core-asl_1.9.5" level="project" />
-    <orderEntry type="library" name="org.codehaus.jackson_jackson-mapper-asl_1.9.5" level="project" />
+    <orderEntry type="library" name="org.codehaus.jackson_jackson-core-asl_1.9.6" level="project" />
+    <orderEntry type="library" name="org.codehaus.jackson_jackson-mapper-asl_1.9.6" level="project" />
     <orderEntry type="library" name="org.reflections_reflections_0.9.6" level="project" />
     <orderEntry type="library" name="com.google.guava_guava_10.0" level="project" />
     <orderEntry type="library" name="com.google.code.findbugs_jsr305_1.3.9" level="project" />
@@ -91,7 +91,6 @@
     <orderEntry type="library" scope="TEST" name="org.seleniumhq.selenium_selenium-java_2.12.0" level="project" />
     <orderEntry type="library" scope="TEST" name="org.seleniumhq.selenium_selenium-android-driver_2.12.0" level="project" />
     <orderEntry type="library" scope="TEST" name="org.seleniumhq.selenium_selenium-remote-driver_2.12.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="cglib_cglib-nodep_2.1_3" level="project" />
     <orderEntry type="library" scope="TEST" name="org.json_json_20080701" level="project" />
     <orderEntry type="library" scope="TEST" name="org.seleniumhq.selenium_selenium-api_2.12.0" level="project" />
     <orderEntry type="library" scope="TEST" name="org.apache.httpcomponents_httpclient_4.1.2" level="project" />

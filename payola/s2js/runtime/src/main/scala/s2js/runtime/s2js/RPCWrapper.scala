@@ -1,6 +1,7 @@
 package s2js.runtime.s2js
 
-import s2js.compiler.{dependency, javascript}
+import s2js.compiler.{javascript, dependency}
+import collection.mutable.ArrayBuffer
 
 object RPCWrapper
 {
@@ -24,7 +25,8 @@ object RPCWrapper
 
         if (parameters.length > 0)
         {
-            var params = this.buildHttpQuery(parameters);
+            var params = this.buildHttpQuery(parameters, parameterTypes);
+            params += "&paramTypes="+this.serializeParamTypes(parameterTypes);
             request.send("method="+procedureName+"&"+params);
         }else{
             request.send("method="+procedureName);
@@ -48,19 +50,89 @@ object RPCWrapper
     """)
     def callSync(procedureName: String, parameters: Any, parameterTypes: Any): Any = ()
 
+    @dependency("s2js.RPCException")
     @javascript("""
-        var args = '';
-        if (Object.prototype.toString.call(params) === '[object Array]') {
-                var arr = [];
-                for (arg in params) {
-                        arr.push(encodeURIComponent(arg) + '=' + encodeURIComponent(params[arg]));
+
+        var url = "/RPC/async";
+
+        var request = XMLHttpRequest  ? new XMLHttpRequest : new ActiveXObject('Msxml2.XMLHTTP');
+        request.open("POST", url, true); //ASYNC!
+
+        //Send the proper header information along with the request
+        request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+        var serializer = this;
+
+        request.onreadystatechange = function(){
+            if (request.readyState==4 && request.status==200)
+            {
+                var refQueue = [];
+                var objectRegistry = {};
+                var instance = serializer.deserialize(eval("("+request.responseText+")"), objectRegistry, refQueue);
+
+                for (var k in refQueue)
+                {
+                    refQueue[k].obj[refQueue[k].key] = objectRegistry[refQueue[k].refID];
                 }
-                args = arr.join('&');
+
+                successCallback(instance);
+            }else if (request.readyState==4){
+                failCallback(new s2js.RPCException("RPC call exited with status code "+request.status));
+            }
         }
 
-        return args;
+        if (parameters.length > 0)
+        {
+            var params = this.buildHttpQuery(parameters, parameterTypes);
+            params += "&paramTypes="+this.serializeParamTypes(parameterTypes);
+            request.send("method="+procedureName+"&"+params);
+        }else{
+            request.send("method="+procedureName);
+        }
     """)
-    def buildHttpQuery(params: Map[String, Object]): String = null
+    def callAsync(procedureName: String, parameters: Any, parameterTypes: Any, successCallback: Function1[Any, Unit], failCallback: Function1[Throwable, Unit]) {}
+    
+    def serializeParamTypes(parameterTypes: Seq[String]) : String = {
+        parameterTypes.mkString("[\"","\",\"","\"]")
+    }
+
+    @javascript("return encodeURIComponent(s);")
+    def encodeURIComponent(s: String): String = ""
+    
+    def buildHttpQuery(params: ArrayBuffer[Any], paramTypes: ArrayBuffer[String]): String = {
+        var index = -1
+        val paramStrings = params.map {param =>
+            val paramString = param match {
+                case p: String => p
+                case p: Seq[_] => {
+                    if (isNumericCollection(paramTypes.apply(index+1)))
+                    {
+                        p.mkString("[",",","]")
+                    }else
+                    {
+                        p.mkString("[\"","\",\"","\"]")
+                    }
+                }
+                case p => p.toString
+            }
+            index += 1
+            index + "=" + encodeURIComponent(paramString)
+        }
+        paramStrings.mkString("&")
+    }
+
+    def isNumericCollection(paramType: String) : Boolean = {
+        if(
+            paramType.endsWith("[scala.Int]")
+            || paramType.endsWith("[scala.Double]")
+            || paramType.endsWith("[scala.Float]")
+            ||  paramType.endsWith("[scala.Short]")
+        ){
+            true
+        }else{
+            false
+        }
+    }
 
     @javascript("""
 
