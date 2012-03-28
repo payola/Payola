@@ -19,7 +19,7 @@ class StatementSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('a');
+                        s2js.ClassLoader.provide('a');
 
                         a.m1 = function() {
                             var self = this;
@@ -79,9 +79,9 @@ class StatementSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('B');
-                        goog.provide('a');
-                        goog.provide('c');
+                        s2js.ClassLoader.provide('B');
+                        s2js.ClassLoader.provide('a');
+                        s2js.ClassLoader.provide('c');
 
                         B = function() {
                             var self = this;
@@ -144,7 +144,7 @@ class StatementSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o');
+                        s2js.ClassLoader.provide('o');
 
                         o.m1 = function() {
                             var self = this;

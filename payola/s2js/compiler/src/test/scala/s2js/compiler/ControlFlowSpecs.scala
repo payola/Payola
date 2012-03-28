@@ -21,7 +21,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('a');
+                        s2js.ClassLoader.provide('a');
 
                         a.m1 = function() {
                             var self = this;
@@ -52,7 +52,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('a');
+                        s2js.ClassLoader.provide('a');
 
                         a.m1 = function() {
                             var self = this;
@@ -86,7 +86,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o1');
+                        s2js.ClassLoader.provide('o1');
 
                         o1.m1 = function() {
                             var self = this;
@@ -127,7 +127,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o1');
+                        s2js.ClassLoader.provide('o1');
 
                         o1.m1 = function() {
                             var self = this;
@@ -170,7 +170,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o1');
+                        s2js.ClassLoader.provide('o1');
 
                         o1.m = function(x) {
                             var self = this;
@@ -213,8 +213,8 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('A');
-                        goog.require('scala.Exception');
+                        s2js.ClassLoader.provide('A');
+                        s2js.ClassLoader.require('scala.Exception');
 
                         A = function() {
                             var self = this;
@@ -244,8 +244,8 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('A');
-                        goog.require('scala.Exception');
+                        s2js.ClassLoader.provide('A');
+                        s2js.ClassLoader.require('scala.Exception');
 
                         A = function() { var self = this; };
                         A.prototype.m = function() {
@@ -284,8 +284,8 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('A');
-                        goog.require('scala.Exception');
+                        s2js.ClassLoader.provide('A');
+                        s2js.ClassLoader.require('scala.Exception');
 
                         A = function() {
                             var self = this;
@@ -338,7 +338,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o');
+                        s2js.ClassLoader.provide('o');
 
                         o.m = function() {
                             var self = this;
@@ -377,7 +377,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o');
+                        s2js.ClassLoader.provide('o');
 
                         o.m = function() {
                             var self = this;
@@ -410,7 +410,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o');
+                        s2js.ClassLoader.provide('o');
 
                         o.m = function() {
                             var self = this;
@@ -444,7 +444,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o');
+                        s2js.ClassLoader.provide('o');
 
                         o.m = function() {
                             var self = this;
@@ -481,7 +481,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o');
+                        s2js.ClassLoader.provide('o');
 
                         o.m = function(p) {
                             var self = this;
@@ -518,7 +518,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o');
+                        s2js.ClassLoader.provide('o');
 
                         o.m = function(p) {
                             var self = this;
@@ -557,7 +557,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o');
+                        s2js.ClassLoader.provide('o');
 
                         o.m = function(p) {
                             var self = this;

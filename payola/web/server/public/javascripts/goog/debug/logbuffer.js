@@ -22,10 +22,10 @@
  * @author agrieve@google.com (Andrew Grieve)
  */
 
-goog.provide('goog.debug.LogBuffer');
+s2js.ClassLoader.provide('goog.debug.LogBuffer');
 
-goog.require('goog.asserts');
-goog.require('goog.debug.LogRecord');
+s2js.ClassLoader.require('goog.asserts');
+s2js.ClassLoader.require('goog.debug.LogRecord');
 
 
 

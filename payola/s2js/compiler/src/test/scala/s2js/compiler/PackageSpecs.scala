@@ -13,7 +13,7 @@ class PackageSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('pkg.A');
+                        s2js.ClassLoader.provide('pkg.A');
 
                         pkg.A = function() {
                             var self = this;
@@ -35,7 +35,7 @@ class PackageSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('pkg.sub.nested.A');
+                        s2js.ClassLoader.provide('pkg.sub.nested.A');
 
                         pkg.sub.nested.A = function() {
                             var self = this;
@@ -59,7 +59,7 @@ class PackageSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('pkg.sub.nested.A');
+                        s2js.ClassLoader.provide('pkg.sub.nested.A');
 
                         pkg.sub.nested.A = function() {
                             var self = this;
@@ -79,7 +79,7 @@ class PackageSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('pkg.sub.nested.A');
+                        s2js.ClassLoader.provide('pkg.sub.nested.A');
 
                         pkg.sub.nested.A = function() {
                             var self = this;
@@ -108,10 +108,10 @@ class PackageSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('pkg.A');
-                        goog.provide('pkg.B');
-                        goog.provide('pkg.sub1.X');
-                        goog.provide('pkg.sub2.Y');
+                        s2js.ClassLoader.provide('pkg.A');
+                        s2js.ClassLoader.provide('pkg.B');
+                        s2js.ClassLoader.provide('pkg.sub1.X');
+                        s2js.ClassLoader.provide('pkg.sub2.Y');
 
                         pkg.A = function() {
                             var self = this;

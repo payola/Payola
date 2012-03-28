@@ -21,11 +21,11 @@
  */
 
 
-goog.provide('goog.Delay');
-goog.provide('goog.async.Delay');
+s2js.ClassLoader.provide('goog.Delay');
+s2js.ClassLoader.provide('goog.async.Delay');
 
-goog.require('goog.Disposable');
-goog.require('goog.Timer');
+s2js.ClassLoader.require('goog.Disposable');
+s2js.ClassLoader.require('goog.Timer');
 
 
 

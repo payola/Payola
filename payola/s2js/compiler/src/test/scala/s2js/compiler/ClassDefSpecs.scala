@@ -16,7 +16,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('pkg.A');
+                        s2js.ClassLoader.provide('pkg.A');
 
                         pkg.A = function() {
                             var self = this;
@@ -42,7 +42,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('pkg.A');
+                        s2js.ClassLoader.provide('pkg.A');
 
                         pkg.A = function() {
                             var self = this;
@@ -67,7 +67,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('pkg.A');
+                        s2js.ClassLoader.provide('pkg.A');
 
                         pkg.A = function(v1, v2, v3, v4) {
                             var self = this;
@@ -100,7 +100,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('pkg.A');
+                        s2js.ClassLoader.provide('pkg.A');
 
                         pkg.A = function(v1) {
                             var self = this;
@@ -136,11 +136,11 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('pkg.A');
-                        goog.provide('pkg.B');
-                        goog.provide('pkg.C');
-                        goog.provide('pkg.T1');
-                        goog.provide('pkg.T2');
+                        s2js.ClassLoader.provide('pkg.A');
+                        s2js.ClassLoader.provide('pkg.B');
+                        s2js.ClassLoader.provide('pkg.C');
+                        s2js.ClassLoader.provide('pkg.T1');
+                        s2js.ClassLoader.provide('pkg.T2');
 
                         pkg.A = function() {
                             var self = this;
@@ -200,9 +200,9 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('pkg.A');
-                        goog.provide('pkg.B');
-                        goog.provide('pkg.C');
+                        s2js.ClassLoader.provide('pkg.A');
+                        s2js.ClassLoader.provide('pkg.B');
+                        s2js.ClassLoader.provide('pkg.C');
 
                         pkg.A = function(v1, v2) {
                             var self = this;
@@ -238,13 +238,13 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('A');
-                        goog.require('scala.IndexOutOfBoundsException');
-                        goog.require('scala.None');
-                        goog.require('scala.Product');
-                        goog.require('scala.Some');
-                        goog.require('scala.Tuple3');
-                        goog.require('scala.runtime.ScalaRunTime');
+                        s2js.ClassLoader.provide('A');
+                        s2js.ClassLoader.require('scala.IndexOutOfBoundsException');
+                        s2js.ClassLoader.require('scala.None');
+                        s2js.ClassLoader.require('scala.Product');
+                        s2js.ClassLoader.require('scala.Some');
+                        s2js.ClassLoader.require('scala.Tuple3');
+                        s2js.ClassLoader.require('scala.runtime.ScalaRunTime');
 
                         A = function(x, y, z) {
                             var self = this;
@@ -333,7 +333,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('pkg.o');
+                        s2js.ClassLoader.provide('pkg.o');
 
                         pkg.o.v1 = 'test';
                         pkg.o.v2 = 12345;
@@ -373,10 +373,10 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('pkg.A');
-                        goog.provide('pkg.T1');
-                        goog.provide('pkg.T2');
-                        goog.provide('pkg.o');
+                        s2js.ClassLoader.provide('pkg.A');
+                        s2js.ClassLoader.provide('pkg.T1');
+                        s2js.ClassLoader.provide('pkg.T2');
+                        s2js.ClassLoader.provide('pkg.o');
                         pkg.A = function() {
                             var self = this;
                             self.v = 123;
@@ -428,7 +428,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('A');
+                        s2js.ClassLoader.provide('A');
 
                         A = function(x, y) {
                             var self = this;
@@ -462,7 +462,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('po');
+                        s2js.ClassLoader.provide('po');
 
                         po.m = function() {
                             var self = this;
@@ -484,7 +484,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('pkg');
+                        s2js.ClassLoader.provide('pkg');
 
                         pkg.m = function() {
                             var self = this;
@@ -507,9 +507,9 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('pkg');
-                        goog.provide('pkg.A');
-                        goog.provide('pkg.B');
+                        s2js.ClassLoader.provide('pkg');
+                        s2js.ClassLoader.provide('pkg.A');
+                        s2js.ClassLoader.provide('pkg.B');
 
                         pkg.A = function() {
                             var self = this;

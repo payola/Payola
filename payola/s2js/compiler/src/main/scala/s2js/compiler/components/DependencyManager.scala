@@ -2,7 +2,6 @@ package s2js.compiler.components
 
 import collection.mutable
 import tools.nsc.Global
-import s2js.compiler.ScalaToJsException
 
 /** A manager of dependencies in a PackageDef object. */
 class DependencyManager(private val packageDefCompiler: PackageDefCompiler)
@@ -17,13 +16,15 @@ class DependencyManager(private val packageDefCompiler: PackageDefCompiler)
     private var packageDefStructure: PackageDefStructure = null
 
     /**
-      * Compiles the dependencies into a sequence of goog.provide and goog.require statements.
+      * Compiles the dependencies into a sequence of s2js.ClassLoader.provide and s2js.ClassLoader.require statements.
       * @param buffer Buffer where the sequence is inserted.
       */
     def compileDependencies(buffer: mutable.ListBuffer[String]) {
         val nonLocalRequires = requireHashSet.toArray.filter(!provideHashSet.contains(_))
-        buffer.insert(0, provideHashSet.toArray.sortBy(x => x).map("goog.provide('%s');\n".format(_)).mkString)
-        buffer.insert(1, nonLocalRequires.sortBy(x => x).map("goog.require('%s');\n".format(_)).mkString)
+        val provided = provideHashSet.toArray.sortBy(x => x).map("s2js.ClassLoader.provide('%s');\n".format(_))
+        val required = nonLocalRequires.sortBy(x => x).map("s2js.ClassLoader.require('%s');\n".format(_))
+        buffer.insert(0, provided.mkString)
+        buffer.insert(1, required.mkString)
     }
 
     /**
@@ -85,7 +86,7 @@ class DependencyManager(private val packageDefCompiler: PackageDefCompiler)
         if (packageDefCompiler.getSymbolAnnotations(classDef.symbol, "remote").nonEmpty) {
             packageDefStructure.remoteObjects += classDef
 
-        // Non-remote object should be added into the dependency graph.
+            // Non-remote object should be added into the dependency graph.
         } else {
             val name = getStructureKey(classDef.symbol)
             val dependencies = new mutable.HashSet[String]

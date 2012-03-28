@@ -16,7 +16,7 @@
  * @fileoverview Utilities for manipulating objects/maps/hashes.
  */
 
-goog.provide('goog.object');
+s2js.ClassLoader.provide('goog.object');
 
 
 /**

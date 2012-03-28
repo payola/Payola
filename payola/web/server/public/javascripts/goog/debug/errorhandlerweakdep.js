@@ -19,7 +19,7 @@
  *
  */
 
-goog.provide('goog.debug.errorHandlerWeakDep');
+s2js.ClassLoader.provide('goog.debug.errorHandlerWeakDep');
 
 
 /**

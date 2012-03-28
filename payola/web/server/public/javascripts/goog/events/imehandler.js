@@ -39,17 +39,17 @@
  *
  */
 
-goog.provide('goog.events.ImeHandler');
-goog.provide('goog.events.ImeHandler.Event');
-goog.provide('goog.events.ImeHandler.EventType');
+s2js.ClassLoader.provide('goog.events.ImeHandler');
+s2js.ClassLoader.provide('goog.events.ImeHandler.Event');
+s2js.ClassLoader.provide('goog.events.ImeHandler.EventType');
 
-goog.require('goog.events.Event');
-goog.require('goog.events.EventHandler');
-goog.require('goog.events.EventTarget');
-goog.require('goog.events.EventType');
-goog.require('goog.events.KeyCodes');
-goog.require('goog.userAgent');
-goog.require('goog.userAgent.product');
+s2js.ClassLoader.require('goog.events.Event');
+s2js.ClassLoader.require('goog.events.EventHandler');
+s2js.ClassLoader.require('goog.events.EventTarget');
+s2js.ClassLoader.require('goog.events.EventType');
+s2js.ClassLoader.require('goog.events.KeyCodes');
+s2js.ClassLoader.require('goog.userAgent');
+s2js.ClassLoader.require('goog.userAgent.product');
 
 
 

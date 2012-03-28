@@ -21,7 +21,7 @@ class MiscellaneousSpecs extends CompilerFixtureSpec
                 """
             } shouldCompileTo {
                 """
-                    goog.provide('o');
+                    s2js.ClassLoader.provide('o');
 
                     o.c = 1;
                     o.x6 = function() {
@@ -62,8 +62,8 @@ class MiscellaneousSpecs extends CompilerFixtureSpec
                     """
             } shouldCompileTo {
                 """
-                        goog.provide('A');
-                        goog.provide('o');
+                        s2js.ClassLoader.provide('A');
+                        s2js.ClassLoader.provide('o');
 
                         A = function() {
                             var self = this;
@@ -115,7 +115,7 @@ class MiscellaneousSpecs extends CompilerFixtureSpec
                 """
             } shouldCompileTo {
                 """
-                    goog.provide('o');
+                    s2js.ClassLoader.provide('o');
 
                     o.foo = function() {
                         var self = this;

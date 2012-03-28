@@ -1,42 +1,24 @@
-goog.require("goog");
-goog.require("goog.object");
-goog.require("s2js.Class");
-goog.require("s2js");
+s2js.ClassLoader.provide('bootstrap');
 
-goog.require("scala.Predef");
-goog.require("scala.collection.mutable.ArrayBuffer");
-goog.require("scala.String");
+// The utils have to be required first because the temporary class loader is declared there and it's necessary for all
+// the following requirements.
+s2js.ClassLoader.require('Utils');
 
-// Extend the JavaScript String prototype with methods of scala.String.
-goog.object.extend(String.prototype, scala.String.prototype);
+// Base Google Closure library files that declare additional methods (object extension, type checks) that are used in
+// the compiled JavaScript code.
+s2js.ClassLoader.require('goog');
+s2js.ClassLoader.require('goog.object');
 
-// Extend the JavaScript Arrays with the methods of scala.collection.mutable.ArrayBuffer.
-function extendJsArrayToArrayBuffer(jsArrayPrototype) {
-    var arrayBufferPrototype = scala.collection.mutable.ArrayBuffer.prototype;
-    for (var propertyName in arrayBufferPrototype) {
-        var propertyValue = arrayBufferPrototype[propertyName];
+// The following files are all compiled from Scala to JavaScript. The Class has to be required first because all class
+// declarations create an instance of the Class class.
+s2js.ClassLoader.require('s2js.Class');
+s2js.ClassLoader.require('s2js');
 
-        if (propertyName !== 'constructor' && typeof(propertyValue) === 'function') {
-            Object.defineProperty(jsArrayPrototype, propertyName, {
-                value: propertyValue,
-                writable: true,
-                configurable: true
-            });
-        }
-    }
+// Implicit requirements that are imported to scala programs by default.
+s2js.ClassLoader.require('scala.Predef');
 
-    // The JavaScript Array itself should behave as the internal JavaScript Array of the scala ArrayBuffer.
-    Object.defineProperty(jsArrayPrototype, 'getInternalJsArray', {
-        value: function() { return this; },
-        writable: true,
-        configurable: true
-    });
-}
+// Bootstrap the type system.
+s2js.ClassLoader.require('bootstrap.TypeSystem');
 
-extendJsArrayToArrayBuffer(Array.prototype);
-
-var pixelArrayPrototype = document.createElement('canvas').getContext('2d').getImageData(0, 0, 1, 1).data.__proto__;
-if (window.CanvasPixelArray) {
-    pixelArrayPrototype = CanvasPixelArray.prototype;
-}
-extendJsArrayToArrayBuffer(pixelArrayPrototype);
+// Bootstrap the class loader.
+s2js.ClassLoader.require('bootstrap.ClassLoader');

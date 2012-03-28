@@ -19,9 +19,9 @@
  */
 
 
-goog.provide('goog.userAgent.jscript');
+s2js.ClassLoader.provide('goog.userAgent.jscript');
 
-goog.require('goog.string');
+s2js.ClassLoader.require('goog.string');
 
 
 /**

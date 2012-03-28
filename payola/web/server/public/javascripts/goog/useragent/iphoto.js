@@ -20,10 +20,10 @@
  */
 
 
-goog.provide('goog.userAgent.iphoto');
+s2js.ClassLoader.provide('goog.userAgent.iphoto');
 
-goog.require('goog.string');
-goog.require('goog.userAgent');
+s2js.ClassLoader.require('goog.string');
+s2js.ClassLoader.require('goog.userAgent');
 
 
 (function() {

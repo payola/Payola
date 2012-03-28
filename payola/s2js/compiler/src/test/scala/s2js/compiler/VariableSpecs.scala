@@ -20,7 +20,7 @@ class VariableSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('foo.A');
+                        s2js.ClassLoader.provide('foo.A');
 
                         foo.A = function() {
                             var self = this;
@@ -54,8 +54,8 @@ class VariableSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('foo.A');
-                        goog.provide('foo.B');
+                        s2js.ClassLoader.provide('foo.A');
+                        s2js.ClassLoader.provide('foo.B');
 
                         foo.A = function() {
                             var self = this;
@@ -88,7 +88,7 @@ class VariableSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('foo.A');
+                        s2js.ClassLoader.provide('foo.A');
 
                         foo.A = function() {
                             var self = this;
@@ -117,7 +117,7 @@ class VariableSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('foo.A');
+                        s2js.ClassLoader.provide('foo.A');
 
                         foo.A = function() {
                             var self = this;
@@ -151,7 +151,7 @@ class VariableSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('foo.A');
+                        s2js.ClassLoader.provide('foo.A');
 
                         foo.A = function() {
                             var self = this;
@@ -181,7 +181,7 @@ class VariableSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('foo.A');
+                        s2js.ClassLoader.provide('foo.A');
 
                         foo.A = function() {
                             var self = this;

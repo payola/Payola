@@ -22,13 +22,13 @@
  * @see ../demos/focushandler.html
  */
 
-goog.provide('goog.events.FocusHandler');
-goog.provide('goog.events.FocusHandler.EventType');
+s2js.ClassLoader.provide('goog.events.FocusHandler');
+s2js.ClassLoader.provide('goog.events.FocusHandler.EventType');
 
-goog.require('goog.events');
-goog.require('goog.events.BrowserEvent');
-goog.require('goog.events.EventTarget');
-goog.require('goog.userAgent');
+s2js.ClassLoader.require('goog.events');
+s2js.ClassLoader.require('goog.events.BrowserEvent');
+s2js.ClassLoader.require('goog.events.EventTarget');
+s2js.ClassLoader.require('goog.userAgent');
 
 
 

@@ -16,7 +16,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('p');
+                        s2js.ClassLoader.provide('p');
 
                         p.a = function() {
                             var self = this;
@@ -41,7 +41,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('p');
+                        s2js.ClassLoader.provide('p');
 
                         p.a = function() {
                             var self = this;
@@ -70,7 +70,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('p');
+                        s2js.ClassLoader.provide('p');
 
                         p.a = function() {
                             var self = this;
@@ -98,7 +98,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('p');
+                        s2js.ClassLoader.provide('p');
 
                         p.a = function() {
                             var self = this;
@@ -125,7 +125,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('p');
+                        s2js.ClassLoader.provide('p');
 
                         p.a = function() {
                             var self = this;

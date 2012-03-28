@@ -18,8 +18,8 @@
  * this functionality actually get it, without having to rely on the compiler
  * to strip out unneeded pieces.
  */
-goog.provide('goog.userAgent.product.isVersion');
-goog.require('goog.userAgent.product');
+s2js.ClassLoader.provide('goog.userAgent.product.isVersion');
+s2js.ClassLoader.require('goog.userAgent.product');
 
 
 /**

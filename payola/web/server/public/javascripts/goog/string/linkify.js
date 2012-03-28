@@ -17,9 +17,9 @@
  * @author bolinfest@google.com (Michael Bolin)
  */
 
-goog.provide('goog.string.linkify');
+s2js.ClassLoader.provide('goog.string.linkify');
 
-goog.require('goog.string');
+s2js.ClassLoader.require('goog.string');
 
 
 /**

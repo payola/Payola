@@ -47,30 +47,11 @@ object PayolaBuild extends Build
 
         val javaScriptsDir = serverBaseDir / "public/javascripts"
 
+        val dependencyFile = javaScriptsDir / "dependencies"
+
         val compiledJavaScriptsDir = javaScriptsDir / "compiled"
 
-        /** Symbols used as entry points to the javascript application among all pages. */
-        val scriptEntryPoints = Set(
-            "cz.payola.web.client.presenters.Index"
-        )
-
-        /**
-          * Returns a file corresponding to the specified entry point.
-          * @param entryPoint The entry point.
-          * @return The file.
-          */
-        def getEntryPointFile(entryPoint: String): io.File = {
-            new io.File(compiledJavaScriptsDir / (entryPoint + ".js"))
-        }
-
-        /**
-          * Returns a file corresponding to the specified entry point dependencies.
-          * @param entryPoint The entry point.
-          * @return The dependency file.
-          */
-        def getEntryPointDependencyFile(entryPoint: String): io.File = {
-            new io.File(compiledJavaScriptsDir / (entryPoint + ".deps.js"))
-        }
+        val bootstrapFileName = "bootstrap.js"
     }
 
     /** Common default settings of all projects. */
@@ -232,8 +213,8 @@ object PayolaBuild extends Build
             val fileProvidedSymbols = new mutable.HashMap[String, mutable.ArrayBuffer[String]]
             val fileRequiredSymbols = new mutable.HashMap[String, mutable.ArrayBuffer[String]]
 
-            val provideRegex = """goog\.provide\(\s*['\"]([^'\"]+)['\"]\s*\);""".r
-            val requireRegex = """goog\.require\(\s*['\"]([^'\"]+)['\"]\s*\);""".r
+            val provideRegex = """s2js\.ClassLoader\.provide\(\s*['\"]([^'\"]+)['\"]\s*\);""".r
+            val requireRegex = """s2js\.ClassLoader\.require\(\s*['\"]([^'\"]+)['\"]\s*\);""".r
             files.foreach {file =>
                 val path = file.toAbsolute.path.toString
                 fileProvidedSymbols += path -> new mutable.ArrayBuffer[String]
@@ -256,81 +237,57 @@ object PayolaBuild extends Build
                 ))
             }
 
+            // Create the dependency file.
+            val dependencyFile = WebSettings.dependencyFile
+            val dependencyBuffer = ListBuffer.empty[String]
+            fileProvidedSymbols.keys.foreach{file =>
+                dependencyBuffer += "'%s': [".format(file)
+                dependencyBuffer += fileProvidedSymbols(file).mkString(",")
+                dependencyBuffer += "] ["
+                dependencyBuffer += fileRequiredSymbols(file).mkString(",")
+                dependencyBuffer += "]\n"
+            }
+            new io.File(dependencyFile).writeAll(dependencyBuffer.mkString)
+
             // Construct the file dependency graph from the symbol dependency graph.
             val fileDependencyGraph = fileRequiredSymbols.mapValues(_.map(o => symbolFiles(o)))
-
-            /**
-              * Creates a single JavaScript file containing all required dependencies for the specified entry point.
-              * @param entryPointSymbol The symbol that will be used in the html page as an entry point to the
-              *     JavaScript application.
-              */
-            def compileScript(entryPointSymbol: String) {
-                if (!symbolFiles.contains(entryPointSymbol)) {
-                    throw new Exception("The entry point '%s' wasn't found.".format(entryPointSymbol))
-                }
-                val processedFiles = new mutable.HashSet[String]
-                val visitedFiles = new mutable.HashSet[String]
-                var buffer = new ListBuffer[String]
-
-                def processFile(file: String) {
-                    if (!processedFiles.contains(file)) {
-                        if (visitedFiles.contains(file)) {
-                            throw new Exception("A cycle in JavaScript file dependencies detected. " +
-                                "Check the file '%s'.".format(file))
-                        }
-                        visitedFiles += file
-
-                        fileDependencyGraph(file).foreach(processFile(_))
-
-                        val name = file.stripPrefix(WebSettings.javaScriptsDir.absolutePath.toString).replace("\\", "/")
-                        buffer += "////////////////////////////////////////////////////////////////////////////////"
-                        buffer += "// %s".format(name)
-                        buffer += "////////////////////////////////////////////////////////////////////////////////"
-                        buffer ++= Source.fromFile(file).getLines
-                        buffer += "\n\n"
-                        
-                        visitedFiles -= file
-                        processedFiles += file
+            
+            // Compile the bootstrap file.
+            val processedFiles = new mutable.HashSet[String]
+            val visitedFiles = new mutable.HashSet[String]
+            var buffer = new ListBuffer[String]
+            def processFile(file: String) {
+                if (!processedFiles.contains(file)) {
+                    if (visitedFiles.contains(file)) {
+                        throw new Exception("A cycle in JavaScript file dependencies detected. " +
+                            "Check the file '%s'.".format(file))
                     }
+                    visitedFiles += file
+
+                    fileDependencyGraph(file).foreach(processFile(_))
+
+                    val name = file.stripPrefix(WebSettings.javaScriptsDir.absolutePath.toString).replace("\\", "/")
+                    buffer ++= Source.fromFile(file).getLines
+                    buffer += "\n\n"
+
+                    visitedFiles -= file
+                    processedFiles += file
                 }
-                
-                // Load the necessary libraries.
-                processFile((WebSettings.javaScriptsDir / "bootstrap.js").absolutePath.toString)
-                processFile(symbolFiles(entryPointSymbol))
-
-                // Strip the requires which are no more needed.
-                val compiledScript = requireRegex.replaceAllIn(buffer.mkString("\n"), "")
-                buffer = new ListBuffer[String]
-                buffer += compiledScript
-
-                // Require dependencies that aren't included in the compiled file.
-                buffer += "////////////////////////////////////////////////////////////////////////////////"
-                buffer += "// Dependencies"
-                buffer += "////////////////////////////////////////////////////////////////////////////////"
-                fileProvidedSymbols.filter(p => !processedFiles.contains(p._1)).foreach {case (path, provided) =>
-                    val required = fileRequiredSymbols(path).filter(s => !processedFiles.contains(symbolFiles(s)))
-                    val relativePath = path.stripPrefix(WebSettings.javaScriptsDir.absolutePath).replace("\\", "/")
-                    buffer += "goog.addDependency('%s%s', [".format("assets/javascripts", relativePath)
-                    buffer += provided.map("'" + _ + "'").mkString(", ")
-                    buffer += "], ["
-                    buffer += required.map("'" + _ + "'").mkString(", ")
-                    buffer += "]);\n"
-                }
-
-                // Create the output file.
-                val entryPointFile = WebSettings.getEntryPointFile(entryPointSymbol)
-                entryPointFile.parent.jfile.mkdirs()
-                entryPointFile.writeAll(buffer.mkString)
             }
 
-            // Compile the scripts for all entry points.
-            WebSettings.scriptEntryPoints.foreach(compileScript(_))
+            val compiledBootstrapFile = new io.File(WebSettings.compiledJavaScriptsDir / WebSettings.bootstrapFileName)
+            processFile((WebSettings.javaScriptsDir / WebSettings.bootstrapFileName).absolutePath.toString)
+            compiledBootstrapFile.parent.jfile.mkdirs()
+            compiledBootstrapFile.writeAll(buffer.mkString("\n"))
 
             jarFile
         },
         clean <<= clean.map {_ =>
             // Delete all compiled scripts.
-            WebSettings.scriptEntryPoints.foreach(WebSettings.getEntryPointFile(_).delete())
+            new io.Directory(WebSettings.compiledJavaScriptsDir).deleteRecursively()
+
+            // Delete the dependency file.
+            new io.File(WebSettings.dependencyFile).delete()
         }
     ).dependsOn(
         commonProject, webSharedProject, webClientProject, scala2JsonProject, dataProject

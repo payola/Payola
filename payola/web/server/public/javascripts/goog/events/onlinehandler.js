@@ -31,14 +31,14 @@
 // a poll for changes event handler that can be used to fire events when a state
 // changes.
 
-goog.provide('goog.events.OnlineHandler');
-goog.provide('goog.events.OnlineHandler.EventType');
+s2js.ClassLoader.provide('goog.events.OnlineHandler');
+s2js.ClassLoader.provide('goog.events.OnlineHandler.EventType');
 
-goog.require('goog.Timer');
-goog.require('goog.events.BrowserFeature');
-goog.require('goog.events.EventHandler');
-goog.require('goog.events.EventTarget');
-goog.require('goog.userAgent');
+s2js.ClassLoader.require('goog.Timer');
+s2js.ClassLoader.require('goog.events.BrowserFeature');
+s2js.ClassLoader.require('goog.events.EventHandler');
+s2js.ClassLoader.require('goog.events.EventTarget');
+s2js.ClassLoader.require('goog.userAgent');
 
 
 

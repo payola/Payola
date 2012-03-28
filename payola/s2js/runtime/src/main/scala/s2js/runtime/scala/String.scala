@@ -7,6 +7,12 @@ class String
     @javascript("return self.length;")
     def length = 0
 
+    @javascript("return self.indexOf(c);")
+    def indexOf(c: Char): Int = -1
+
+    @javascript("return self.lastIndexOf(c);")
+    def lastIndexOf(c: Char): Int = -1
+
     @dependency("scala.collection.immutable.StringOps")
     @javascript("""
         var o = new scala.collection.immutable.StringOps(self);

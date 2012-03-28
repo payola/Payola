@@ -16,9 +16,9 @@
  * @fileoverview Additional mathematical functions.
  */
 
-goog.provide('goog.math');
+s2js.ClassLoader.provide('goog.math');
 
-goog.require('goog.array');
+s2js.ClassLoader.require('goog.array');
 
 
 /**

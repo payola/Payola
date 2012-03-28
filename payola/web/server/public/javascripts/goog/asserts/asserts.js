@@ -33,11 +33,11 @@
  *
  */
 
-goog.provide('goog.asserts');
-goog.provide('goog.asserts.AssertionError');
+s2js.ClassLoader.provide('goog.asserts');
+s2js.ClassLoader.provide('goog.asserts.AssertionError');
 
-goog.require('goog.debug.Error');
-goog.require('goog.string');
+s2js.ClassLoader.require('goog.debug.Error');
+s2js.ClassLoader.require('goog.string');
 
 
 /**

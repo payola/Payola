@@ -14,7 +14,7 @@ class RpcSpecs extends CompilerFixtureSpec
                 """
             } shouldCompileTo {
                 """
-                    goog.provide('server.o');
+                    s2js.ClassLoader.provide('server.o');
                 """
             }
     }
@@ -37,9 +37,9 @@ class RpcSpecs extends CompilerFixtureSpec
                 """
             } shouldCompileTo {
                 """
-                    goog.provide('client');
-                    goog.provide('server.o');
-                    goog.require('s2js.RPCWrapper');
+                    s2js.ClassLoader.provide('client');
+                    s2js.ClassLoader.provide('server.o');
+                    s2js.ClassLoader.require('s2js.RPCWrapper');
 
                     client.main = function() {
                         var self = this;
@@ -71,10 +71,10 @@ class RpcSpecs extends CompilerFixtureSpec
                 """
             } shouldCompileTo {
                 """
-                    goog.provide('client');
-                    goog.provide('server.o');
-                    goog.require('s2js.RPCWrapper');
-                    goog.require('scala.collection.immutable.List');
+                    s2js.ClassLoader.provide('client');
+                    s2js.ClassLoader.provide('server.o');
+                    s2js.ClassLoader.require('s2js.RPCWrapper');
+                    s2js.ClassLoader.require('scala.collection.immutable.List');
 
                     client.main = function() {
                         var self = this;
@@ -114,9 +114,9 @@ class RpcSpecs extends CompilerFixtureSpec
                 """
             } shouldCompileTo {
                 """
-                    goog.provide('client');
-                    goog.provide('server.o');
-                    goog.require('s2js.RPCWrapper');
+                    s2js.ClassLoader.provide('client');
+                    s2js.ClassLoader.provide('server.o');
+                    s2js.ClassLoader.require('s2js.RPCWrapper');
 
                     client.main = function() {
                         var self = this;

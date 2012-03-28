@@ -43,10 +43,10 @@
  */
 
 
-goog.provide('goog.async.ConditionalDelay');
+s2js.ClassLoader.provide('goog.async.ConditionalDelay');
 
-goog.require('goog.Disposable');
-goog.require('goog.async.Delay');
+s2js.ClassLoader.require('goog.Disposable');
+s2js.ClassLoader.require('goog.async.Delay');
 
 
 

@@ -18,9 +18,9 @@
  */
 
 
-goog.provide('goog.events.BrowserFeature');
+s2js.ClassLoader.provide('goog.events.BrowserFeature');
 
-goog.require('goog.userAgent');
+s2js.ClassLoader.require('goog.userAgent');
 
 
 /**

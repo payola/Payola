@@ -91,6 +91,11 @@ trait Seq extends Iterable
         i
     }
 
+    // From SeqLike
+    def contains(x: Double): Boolean = {
+        exists(_ == x)
+    }
+
     def endsWith(suffix: Seq): Boolean = {
         suffix.length match {
             case suffixLength if suffixLength > length => false

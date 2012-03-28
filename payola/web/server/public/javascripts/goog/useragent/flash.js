@@ -17,9 +17,9 @@
  * @see ../demos/useragent.html
  */
 
-goog.provide('goog.userAgent.flash');
+s2js.ClassLoader.provide('goog.userAgent.flash');
 
-goog.require('goog.string');
+s2js.ClassLoader.require('goog.string');
 
 (function() {
   /**

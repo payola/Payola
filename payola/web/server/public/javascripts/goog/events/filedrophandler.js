@@ -19,17 +19,17 @@
  * @see ../demos/filedrophandler.html
  */
 
-goog.provide('goog.events.FileDropHandler');
-goog.provide('goog.events.FileDropHandler.EventType');
+s2js.ClassLoader.provide('goog.events.FileDropHandler');
+s2js.ClassLoader.provide('goog.events.FileDropHandler.EventType');
 
-goog.require('goog.array');
-goog.require('goog.debug.Logger');
-goog.require('goog.dom');
-goog.require('goog.events');
-goog.require('goog.events.BrowserEvent');
-goog.require('goog.events.EventHandler');
-goog.require('goog.events.EventTarget');
-goog.require('goog.events.EventType');
+s2js.ClassLoader.require('goog.array');
+s2js.ClassLoader.require('goog.debug.Logger');
+s2js.ClassLoader.require('goog.dom');
+s2js.ClassLoader.require('goog.events');
+s2js.ClassLoader.require('goog.events.BrowserEvent');
+s2js.ClassLoader.require('goog.events.EventHandler');
+s2js.ClassLoader.require('goog.events.EventTarget');
+s2js.ClassLoader.require('goog.events.EventType');
 
 
 

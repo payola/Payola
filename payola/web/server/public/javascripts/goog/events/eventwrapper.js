@@ -18,7 +18,7 @@
  * @author eae@google.com (Emil A Eklund)
  */
 
-goog.provide('goog.events.EventWrapper');
+s2js.ClassLoader.provide('goog.events.EventWrapper');
 
 
 

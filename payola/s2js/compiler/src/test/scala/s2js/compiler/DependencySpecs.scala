@@ -15,7 +15,7 @@ class DependencySpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('a.b.c.d');
+                        s2js.ClassLoader.provide('a.b.c.d');
 
                         a.b.c.d.m1 = function() {
                             var self = this;
@@ -44,11 +44,11 @@ class DependencySpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('foo.a');
+                        s2js.ClassLoader.provide('foo.a');
 
-                        goog.require('java.util.ArrayList');
-                        goog.require('java.util.Date');
-                        goog.require('java.util.Random');
+                        s2js.ClassLoader.require('java.util.ArrayList');
+                        s2js.ClassLoader.require('java.util.Date');
+                        s2js.ClassLoader.require('java.util.Random');
 
                         foo.a.x = new java.util.Date();
 
@@ -77,7 +77,7 @@ class DependencySpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o1');
+                        s2js.ClassLoader.provide('o1');
 
                         o1.f1 = 'aaaa';
                         o1.m1 = function() {
@@ -101,7 +101,7 @@ class DependencySpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o1');
+                        s2js.ClassLoader.provide('o1');
 
                         o1.f1 = window.location;
                         o1.__class__ = new s2js.Class('o1', []);
@@ -122,9 +122,9 @@ class DependencySpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('a');
+                        s2js.ClassLoader.provide('a');
 
-                        goog.require('goog.events.EventType');
+                        s2js.ClassLoader.require('goog.events.EventType');
 
                         a.x = goog.events.EventType.CLICK;
                         a.__class__ = new s2js.Class('a', []);

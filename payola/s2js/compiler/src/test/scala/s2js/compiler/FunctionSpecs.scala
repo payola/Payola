@@ -31,8 +31,8 @@ class FunctionSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('F');
-                        goog.provide('o');
+                        s2js.ClassLoader.provide('F');
+                        s2js.ClassLoader.provide('o');
 
                         F = function() {
                             var self = this;
@@ -76,7 +76,7 @@ class FunctionSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('a');
+                        s2js.ClassLoader.provide('a');
 
                         a.x = function(y) { window.alert(y); };
                         a.__class__ = new s2js.Class('a', []);

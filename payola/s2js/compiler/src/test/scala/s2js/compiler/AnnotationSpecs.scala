@@ -17,7 +17,7 @@ class AnnotationSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('A');
+                        s2js.ClassLoader.provide('A');
 
                         A = function() {
                             this.x = 'foo';
@@ -43,7 +43,7 @@ class AnnotationSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('A');
+                        s2js.ClassLoader.provide('A');
 
                         A = function() {
                             var self = this;
@@ -70,7 +70,7 @@ class AnnotationSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('A');
+                        s2js.ClassLoader.provide('A');
 
                         A = function() {
                             var self = this;

@@ -104,16 +104,16 @@
  * @see ../demos/keyhandler.html
  */
 
-goog.provide('goog.events.KeyEvent');
-goog.provide('goog.events.KeyHandler');
-goog.provide('goog.events.KeyHandler.EventType');
+s2js.ClassLoader.provide('goog.events.KeyEvent');
+s2js.ClassLoader.provide('goog.events.KeyHandler');
+s2js.ClassLoader.provide('goog.events.KeyHandler.EventType');
 
-goog.require('goog.events');
-goog.require('goog.events.BrowserEvent');
-goog.require('goog.events.EventTarget');
-goog.require('goog.events.EventType');
-goog.require('goog.events.KeyCodes');
-goog.require('goog.userAgent');
+s2js.ClassLoader.require('goog.events');
+s2js.ClassLoader.require('goog.events.BrowserEvent');
+s2js.ClassLoader.require('goog.events.EventTarget');
+s2js.ClassLoader.require('goog.events.EventType');
+s2js.ClassLoader.require('goog.events.KeyCodes');
+s2js.ClassLoader.require('goog.userAgent');
 
 
 

@@ -32,18 +32,18 @@
  * @see ../demos/pastehandler.html
  */
 
-goog.provide('goog.events.PasteHandler');
-goog.provide('goog.events.PasteHandler.EventType');
-goog.provide('goog.events.PasteHandler.State');
+s2js.ClassLoader.provide('goog.events.PasteHandler');
+s2js.ClassLoader.provide('goog.events.PasteHandler.EventType');
+s2js.ClassLoader.provide('goog.events.PasteHandler.State');
 
-goog.require('goog.Timer');
-goog.require('goog.async.ConditionalDelay');
-goog.require('goog.debug.Logger');
-goog.require('goog.events.BrowserEvent');
-goog.require('goog.events.EventHandler');
-goog.require('goog.events.EventTarget');
-goog.require('goog.events.EventType');
-goog.require('goog.events.KeyCodes');
+s2js.ClassLoader.require('goog.Timer');
+s2js.ClassLoader.require('goog.async.ConditionalDelay');
+s2js.ClassLoader.require('goog.debug.Logger');
+s2js.ClassLoader.require('goog.events.BrowserEvent');
+s2js.ClassLoader.require('goog.events.EventHandler');
+s2js.ClassLoader.require('goog.events.EventTarget');
+s2js.ClassLoader.require('goog.events.EventType');
+s2js.ClassLoader.require('goog.events.KeyCodes');
 
 
 

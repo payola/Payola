@@ -24,8 +24,8 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o1');
-                        goog.provide('o2');
+                        s2js.ClassLoader.provide('o1');
+                        s2js.ClassLoader.provide('o2');
 
                         o1.m = function() {
                             var self = this;
@@ -66,7 +66,7 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o1');
+                        s2js.ClassLoader.provide('o1');
 
                         o1.m1 = function(v1, v2) {
                             var self = this;
@@ -103,8 +103,8 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o1');
-                        goog.provide('o2');
+                        s2js.ClassLoader.provide('o1');
+                        s2js.ClassLoader.provide('o2');
 
                         o1.x = 'o1';
                         o1.__class__ = new s2js.Class('o1', []);
@@ -143,7 +143,7 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('a');
+                        s2js.ClassLoader.provide('a');
 
                         a.m1 = function() {
                             var self = this;
@@ -180,7 +180,7 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('a');
+                        s2js.ClassLoader.provide('a');
 
                         a.m1 = function(t) {
                             var self = this;
@@ -206,8 +206,8 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('goog.events.a');
-                        goog.require('goog.events.Event');
+                        s2js.ClassLoader.provide('goog.events.a');
+                        s2js.ClassLoader.require('goog.events.Event');
 
                         goog.events.a.x = goog.events.Event.preventDefault(null);
                         goog.events.a.__class__ = new s2js.Class('goog.events.a', []);
@@ -232,8 +232,8 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('A');
-                        goog.provide('b');
+                        s2js.ClassLoader.provide('A');
+                        s2js.ClassLoader.provide('b');
 
                         A = function() {
                             var self = this;
@@ -276,7 +276,7 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o1');
+                        s2js.ClassLoader.provide('o1');
 
                         o1.m1 = function(name, fn) {
                             var self = this;
@@ -323,9 +323,9 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('C1');
-                        goog.provide('C2');
-                        goog.provide('o1');
+                        s2js.ClassLoader.provide('C1');
+                        s2js.ClassLoader.provide('C2');
+                        s2js.ClassLoader.provide('o1');
 
                         C1 = function() {
                             var self = this;
@@ -376,8 +376,8 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('$pkg.a');
-                        goog.provide('$pkg.b');
+                        s2js.ClassLoader.provide('$pkg.a');
+                        s2js.ClassLoader.provide('$pkg.b');
 
                         $pkg.a = function() {
                             var self = this;
@@ -440,8 +440,8 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o');
-                        goog.require('scala.collection.immutable.List');
+                        s2js.ClassLoader.provide('o');
+                        s2js.ClassLoader.require('scala.collection.immutable.List');
 
                         o.m1 = function() {
                             var self = this;

@@ -19,9 +19,9 @@
  * @see ../demos/timers.html
  */
 
-goog.provide('goog.Timer');
+s2js.ClassLoader.provide('goog.Timer');
 
-goog.require('goog.events.EventTarget');
+s2js.ClassLoader.require('goog.events.EventTarget');
 
 
 

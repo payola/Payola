@@ -17,7 +17,7 @@
  */
 
 
-goog.provide('goog.math.Size');
+s2js.ClassLoader.provide('goog.math.Size');
 
 
 

@@ -10,7 +10,7 @@ import cz.payola.web.client.views.plugins.visual.techniques.circle.CircleTechniq
 import cz.payola.web.client.views.plugins.visual.techniques.gravity.GravityTechnique
 import cz.payola.web.client.views.plugins.visual.techniques.minimalization.MinimalizationTechnique
 import cz.payola.web.client.model.graph.{SimpleIdentifiedVertex, SimpleEdge, SimpleGraph}
-import cz.payola.web.shared.{AsyncTest, GraphFetcher}
+import cz.payola.web.shared.GraphFetcher
 
 // TODO remove after classloading is done
 @dependency("cz.payola.common.rdf.IdentifiedVertex")
@@ -61,17 +61,8 @@ class Index
         plugin.redraw()
     }
 
-
     /*DO NOT REMOVE PLEASE*/
     def initGraph(): Graph = {
-
-        AsyncTest.giveMeNiceNumber({
-            result =>
-                window.alert(result)
-        },{
-            err =>
-        })
-
         // TODO retrieve the graph from the server using following call when RPC and server side is done.
         // GraphFetcher.getInitialGraph
 
@@ -95,7 +86,6 @@ class Index
         val v17 = new SimpleIdentifiedVertex("17")
         val v18 = new SimpleIdentifiedVertex("18")
         val v19 = new SimpleIdentifiedVertex("19")*/
-
 
         val e0 = new SimpleEdge("0", v0, v1)
         val e1 = new SimpleEdge("1", v0, v2)
@@ -157,10 +147,10 @@ class Index
 
         new SimpleGraph(
             List(
-                v0, v1, v2, v3, v4, v5, v6 , v7, v8, v9, v10//, v11, v12, v13, v14, v15, v16, v17, v18, v19
+                v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10 //, v11, v12, v13, v14, v15, v16, v17, v18, v19
             ),
             List(
-                e0, e1, e2, e3, e4, e5, e6 , e7, e8, e9, e10, e11, e12, e13, e14, e15, e16/*, e17, e18, e19, e20, e21,
+                e0, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12, e13, e14, e15, e16 /*, e17, e18, e19, e20, e21,
                 e22, e23, e24, e25, e26, e27, e28, e29, e30, e31, e32, e33, e34, e35, e36, e37*/
             )
         )

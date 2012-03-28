@@ -20,9 +20,9 @@
  * @see ../demos/useragent.html
  */
 
-goog.provide('goog.userAgent');
+s2js.ClassLoader.provide('goog.userAgent');
 
-goog.require('goog.string');
+s2js.ClassLoader.require('goog.string');
 
 
 /**

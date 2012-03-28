@@ -21,7 +21,7 @@
  *
  */
 
-goog.provide('goog.debug.Error');
+s2js.ClassLoader.provide('goog.debug.Error');
 
 
 

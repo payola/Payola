@@ -1,3 +1,5 @@
+s2js.ClassLoader.provide('goog');
+
 // Copyright 2006 The Closure Library Authors. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1518,5 +1520,3 @@ goog.base = function(me, opt_methodName, var_args) {
 goog.scope = function(fn) {
   fn.call(goog.global);
 };
-
-goog.provide('goog');
