@@ -8,6 +8,7 @@ import configurations.SparqlEndpointConfiguration
 
 class QueryExecutorSpecs extends FlatSpec with ShouldMatchers
 {
+    /*
     // Sparql provider with default configuration = DBPedia
     val sparqlProvider = new SparqlDataProvider(new SparqlEndpointConfiguration())
     val fakeProvider = new FakeDataProvider
@@ -116,4 +117,5 @@ class QueryExecutorSpecs extends FlatSpec with ShouldMatchers
         assert(r.data.length == 2)
         assert(r.errors.length == 1)
     }
+    */
 }
