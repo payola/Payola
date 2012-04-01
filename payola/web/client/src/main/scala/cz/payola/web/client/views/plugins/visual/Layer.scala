@@ -12,7 +12,7 @@ class Layer(val canvas: Canvas, val context: CanvasRenderingContext2D)
     /**
       * Indicator whether is the layer ready for drawing into.
       */
-    var cleared = true
+    var cleared = false
 
     /**
       * Setter of canvas dimensions.

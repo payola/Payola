@@ -12,11 +12,11 @@ import cz.payola.web.client.views.plugins.visual.techniques.gravity.GravityTechn
 import cz.payola.web.client.views.plugins.visual.techniques.minimalization.MinimalizationTechnique
 import cz.payola.web.client.model.graph.{SimpleIdentifiedVertex, SimpleEdge, SimpleGraph}
 import cz.payola.web.client.views.plugins.textual.techniques.table.TableTechnique
-import cz.payola.web.client.views.plugins.textual.TextPlugin
 import cz.payola.web.client.views.plugins.visual.{SetupLoader, VisualPlugin}
 import s2js.adapters.js.dom.{Anchor, Image, Element}
 import s2js.adapters.goog
 import goog.events.BrowserEvent
+import cz.payola.web.client.views.plugins.textual.TextPlugin
 
 // TODO remove after classloading is done
 @dependency("cz.payola.common.rdf.IdentifiedVertex")
@@ -142,10 +142,8 @@ class Index
             case i: TextPlugin =>
                 document.getElementById("settingsHideButton").setAttribute("disabled", "disabled")
                 document.getElementById("visualPluginSettings").setAttribute("style", "visibility:hidden")
+                i.redraw()
         }
-
-
-        plugin.redraw()
     }
 
     /*DO NOT REMOVE PLEASE*/

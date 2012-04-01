@@ -5,12 +5,17 @@ import graph.GraphView
 import s2js.adapters.js.dom.Element
 import s2js.adapters.goog.events._
 import cz.payola.common.rdf.Graph
+import s2js.adapters.js.browser.window
+import s2js.compiler.javascript
 
 /**
   * Representation of visual based output drawing plugin
   */
 abstract class VisualPlugin extends Plugin
 {
+
+    private var animationInterval = 0
+
     /**
       * Variable helping during movement of vertices. Contains position where the movement of a vertex tarted.
       */
@@ -48,6 +53,12 @@ abstract class VisualPlugin extends Plugin
         }
     }
 
+    protected def redrawQuick() { //TODO rename or move somewhere else
+        if(!graphView.isEmpty) {
+            graphView.get.redraw(RedrawOperation.Animation)
+        }
+    }
+    
     def redraw() {
         if(!graphView.isEmpty) {
             graphView.get.redrawAll()

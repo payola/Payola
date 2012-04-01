@@ -2,8 +2,8 @@ package cz.payola.web.client.views.plugins.visual.techniques.gravity
 
 import collection.mutable.ListBuffer
 import cz.payola.web.client.views.plugins.visual.graph.{EdgeView, VertexView}
-import cz.payola.web.client.views.plugins.visual.techniques.BaseTechnique
-import cz.payola.web.client.views.plugins.visual.Vector
+import cz.payola.web.client.views.plugins.visual.techniques._
+import cz.payola.web.client.views.plugins.visual.{Point, Vector}
 
 /**
   * Visual plug-in technique that places the vertices based on their edges.
@@ -39,14 +39,22 @@ class GravityTechnique extends BaseTechnique
     def getName:String = {
         "gravity visualisation"
     }
-
+    
     def performTechnique() {
-        basicTreeStructure(graphView.get.vertexViews)
         val vertexViewPacks = buildVertexViewsWorkingStructure(graphView.get.vertexViews)
         val edgeViewPacks = buildEdgeViewsWorkingStructure(vertexViewPacks, graphView.get.edgeViews)
-        run(vertexViewPacks, edgeViewPacks)
-        moveGraphToUpperLeftCorner(graphView.get.vertexViews)
-        flip(graphView.get.vertexViews)
+        basicTreeStructure(graphView.get.vertexViews)
+
+        val moveToCorner = new Animation(Animation.moveGraphToUpperLeftCorner, graphView.get.vertexViews,
+            None, redrawQuick, redraw)
+        val flip = new Animation(Animation.flipGraph, graphView.get.vertexViews,
+            Some(moveToCorner), redrawQuick, redraw)
+
+        vertexViewPacks.foreach{ vPack =>
+            vPack.currentPosition = vPack.value.position
+        }
+
+        run(vertexViewPacks, edgeViewPacks, Some(flip))
     }
 
     /**
@@ -55,6 +63,7 @@ class GravityTechnique extends BaseTechnique
       * @return created vertexViewPacks
       */
     private def buildVertexViewsWorkingStructure(vertexViews: ListBuffer[VertexView]): ListBuffer[VertexViewPack] = {
+
         var workingStructure = ListBuffer[VertexViewPack]()
 
         vertexViews.foreach {view =>
@@ -95,14 +104,12 @@ class GravityTechnique extends BaseTechnique
       * @param vertexViewPacks
       * @param edgeViewPacks
       */
-    def run(vertexViewPacks: ListBuffer[VertexViewPack], edgeViewPacks: ListBuffer[EdgeViewPack]) {
+    private def run(vertexViewPacks: ListBuffer[VertexViewPack], edgeViewPacks: ListBuffer[EdgeViewPack],
+        followingAnimation: Option[Animation]) {
+
         var repeat = true
-        var stabilization: Double = 0;
-
-        while (repeat) {
-
+            while(repeat) {
             vertexViewPacks.foreach {pushed =>
-
                 pushed.force = Vector(0, 0)
 
                 //set repulsion by all other vertices
@@ -111,10 +118,10 @@ class GravityTechnique extends BaseTechnique
 
                         //minus repulsion of vertices
                         val forceElimination = repulsion / (
-                            scala.math.pow(pushed.value.position.x - pushing.value.position.x, 2) +
-                                scala.math.pow(pushed.value.position.y - pushing.value.position.y, 2))
+                            scala.math.pow(pushed.currentPosition.x - pushing.currentPosition.x, 2) +
+                                scala.math.pow(pushed.currentPosition.y - pushing.currentPosition.y, 2))
                         pushed.force = pushed.force +
-                            (pushed.value.position.toVector - pushing.value.position.toVector) * forceElimination
+                            (pushed.currentPosition.toVector - pushing.currentPosition.toVector) * forceElimination
                     }
                 }
             }
@@ -125,24 +132,29 @@ class GravityTechnique extends BaseTechnique
                 val destination = edgeViewPack.destinationVertexViewPack
 
                 origin.force = origin.force +
-                    (destination.value.position.toVector - origin.value.position.toVector) * attraction
+                    (destination.currentPosition.toVector - origin.currentPosition.toVector) * attraction
                 destination.force = destination.force +
-                    (origin.value.position.toVector - destination.value.position.toVector) * attraction
+                    (origin.currentPosition.toVector - destination.currentPosition.toVector) * attraction
             }
 
-            stabilization = 0
+            var stabilization: Double = 0
 
             //move vertices by the calculated vertices
             vertexViewPacks.foreach {moved =>
                 if (!moved.value.selected) {
+                    moved.velocity = (moved.force + moved.velocity) / (vertexViewPacks.length - moved.value.edges.length)
 
-                    moved.velocity = (moved.force + moved.velocity) / (vertexViewPacks.length - moved.value.edges
-                        .length)
                     stabilization += scala.math.abs(moved.velocity.x) + scala.math.abs(moved.velocity.y)
-                    moved.value.position = moved.value.position + moved.velocity
+                    moved.currentPosition = moved.currentPosition + moved.velocity
                 }
             }
             repeat = stabilization >= velocitiesStabilization;
         }
+
+        val toMove = ListBuffer[(VertexView, Point)]()
+        vertexViewPacks.foreach{ vPack =>
+            toMove += ((vPack.value, vPack.currentPosition))
+        }
+        Animation.moveVertices(toMove, followingAnimation, redrawQuick, redraw)
     }
 }

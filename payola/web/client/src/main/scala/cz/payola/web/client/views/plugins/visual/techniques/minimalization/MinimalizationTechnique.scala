@@ -2,7 +2,7 @@ package cz.payola.web.client.views.plugins.visual.techniques.minimalization
 
 import collection.mutable.ListBuffer
 import cz.payola.web.client.views.plugins.visual.graph.{EdgeView, VertexView}
-import cz.payola.web.client.views.plugins.visual.techniques.BaseTechnique
+import cz.payola.web.client.views.plugins.visual.techniques.{Animation, BaseTechnique}
 
 class MinimalizationTechnique extends BaseTechnique
 {
@@ -10,7 +10,16 @@ class MinimalizationTechnique extends BaseTechnique
     def performTechnique() {
         minimizeEdgeCrossing(graphView.get.vertexViews)
         basicTreeStructure(graphView.get.vertexViews)
-        moveGraphToUpperLeftCorner(graphView.get.vertexViews)
+
+
+        val moveToCorner2 = new Animation(Animation.moveGraphToUpperLeftCorner, graphView.get.vertexViews,
+            None, redrawQuick, redraw)
+        val flip = new Animation(Animation.flipGraph, graphView.get.vertexViews, Some(moveToCorner2),
+            redrawQuick, redraw)
+        val moveToCorner1 = new Animation(Animation.moveGraphToUpperLeftCorner, graphView.get.vertexViews,
+            Some(flip), redrawQuick, redraw)
+
+        moveToCorner1.run()
     }
 
     override def clean() {

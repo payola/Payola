@@ -4,15 +4,16 @@ import collection.mutable.ListBuffer
 import s2js.adapters.js.dom.{Element, CanvasRenderingContext2D}
 import cz.payola.common.rdf.{Vertex, Graph}
 import cz.payola.web.client.views.plugins.visual._
+import s2js.adapters.js.browser._
 
 /**
   * Graphical representation of Graph object.
   * @param container the space where the graph should be visualised
   */
 class GraphView(val container: Element) extends View {
-    private var colorVertexHigh = new Color(240, 180, 180, 1)
+    private var colorVertexHigh = new Color(240, 240, 150, 1)
 
-    private var colorVertexMedium = new Color(180, 240, 180, 0.8)
+    private var colorVertexMedium = new Color(200, 240, 200, 0.8)
 
     private var colorVertexLow = new Color(180, 180, 180, 0.3)
 
@@ -333,9 +334,20 @@ class GraphView(val container: Element) extends View {
                 verticesSelectedTextLayer.cleared = true
 
                 draw(null, None, None)
-            //^because elements are drawn into separate layers, redraw(..) does not know to which context to draw
+                //^because elements are drawn into separate layers, redraw(..) does not know to which context to draw
+
             case RedrawOperation.Selection =>
                 redrawAll()
+
+            case RedrawOperation.Animation =>
+                layers.foreach {layer =>
+                    clear(layer.context, Point.Zero, layer.getSize)
+                }
+                edgesDeselectedLayer.cleared = true
+                verticesDeselectedLayer.cleared = true
+
+                draw(null, None, None)
+
             case _ =>
                 redrawAll()
         }

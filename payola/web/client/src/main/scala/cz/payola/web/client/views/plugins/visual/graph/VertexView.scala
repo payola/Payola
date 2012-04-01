@@ -25,13 +25,13 @@ class VertexView(val vertexModel: Vertex, var position: Point) extends View {
     /**
       * Default color of a vertex.
       */
-    private var rectangleColor = new Color(180, 240, 180, 0.8)
+    private var rectangleColor = new Color(200, 240, 200, 0.8)
     
     private var image = prepareImage(
         vertexModel match {
-            case i: LiteralVertex => new Color(200, 150, 0, 1)
-            case i: IdentifiedVertex => new Color(0, 200, 150, 1)
-            case _ => new Color(150, 0, 200, 1)
+            case i: LiteralVertex => new Color(180, 50, 50, 1)
+            case i: IdentifiedVertex => new Color(50, 180, 50, 1)
+            case _ => new Color(0, 0, 0, 1)
         }, vertexModel match {
             case i: LiteralVertex => "/assets/images/book-icon.png"
             case i: IdentifiedVertex => "/assets/images/view-eye-icon.png"
@@ -70,13 +70,11 @@ class VertexView(val vertexModel: Vertex, var position: Point) extends View {
 
         drawRoundedRectangle(context, correctedPosition, rectangleSize, rectangleCornerRadius)
         fillCurrentSpace(context, colorToUseOnBox)
-
-        drawImage(context, image, position + Vector(-10, -10), Vector(20, 20))
-
-        /*TODO drawing of images is successful only on the second redraw...why!?*/
     }
     
     def drawInformation(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
+
+        drawImage(context, image, position + Vector(-10, -10), Vector(20, 20))
         if(information.isDefined) {
             vertexModel match {
                 case i: IdentifiedVertex => information.get.draw(context, color, positionCorrection)

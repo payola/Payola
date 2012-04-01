@@ -12,7 +12,7 @@ case class InformationView(data: Any) extends View {
     /**
       * Default color of text.
       */
-    private var textColor = new Color(200, 200, 200, 1)
+    private var textColor = new Color(50, 50, 50, 1)
 
     /**
       * Default color of background behind text.

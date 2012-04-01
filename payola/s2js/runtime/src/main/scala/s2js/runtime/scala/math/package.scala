@@ -63,4 +63,7 @@ object `package`
 
     @javascript("return Math.tan(x);")
     def tan(x: AnyVal): Double = 0
+
+    @javascript("if(x > 0) { return 1; } else if(x == 0) { return 0; } else { return -1; }")
+    def signum(x: AnyVal): Int = 0
 }

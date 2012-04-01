@@ -34,63 +34,6 @@ abstract class BaseTechnique extends VisualPlugin
     def performTechnique()
 
     /**
-      * Moves all vertices of the graph visible quadrant of coordinates and closer to the [0, 0] point.
-      * @param vViews vertices to move
-      */
-    protected def moveGraphToUpperLeftCorner(vViews: ListBuffer[VertexView]) {
-        var vector = Vector(Double.MaxValue, Double.MaxValue)
-        //search for the minimum
-        vViews.foreach {v: VertexView =>
-            if (v.position.x < vector.x) {
-                vector = Vector(v.position.x, vector.y)
-            }
-            if (v.position.y < vector.y) {
-                vector = Vector(vector.x, v.position.y)
-            }
-        }
-
-        //move the graph...actually to the [50,50] coordinate, that no vertices are cut off by the screen edge
-        vector = (vector) * (-1) + Vector(50, 50)
-
-        vViews.foreach {v: VertexView =>
-            v.position = v.position + vector
-        }
-    }
-
-    /**
-      * Rotates all vertices around function x=y if the height of the graph if bigger than width
-      * @param vViews vertices to rotate
-      */
-    protected def flip(vViews: ListBuffer[VertexView]) {
-        var maxX: Double = 5.0//Double.MinValue
-        var minX: Double = 5.0//Double.MaxValue
-        var maxY: Double = 5.0//Double.MinValue
-        var minY: Double = 5.0//Double.MaxValue
-
-        vViews.foreach {v: VertexView =>
-            if (v.position.x > maxX) {
-                maxX = v.position.x
-            } else if (v.position.x < minX) {
-                minX = v.position.x
-            }
-
-            if (v.position.y > maxY) {
-                maxY = v.position.y
-            } else if (v.position.y < minY) {
-                minY = v.position.y
-            }
-        }
-
-        if (maxX - minX < maxY - minY) {
-            vViews.foreach {v: VertexView =>
-                v.position = Point(v.position.y, v.position.x)
-            }
-
-            moveGraphToUpperLeftCorner(vViews)
-        }
-    }
-
-    /**
       * Moves the vertices to a tree like structure. The first element of input is placed in the root located
       * in coordinates [0, 0]. All children of the root are vertices connected via an edge to the root. Every
       * level of the "tree" are vertices connected by one edge to a vertex in the previous level. Vertices
@@ -255,5 +198,62 @@ abstract class BaseTechnique extends VisualPlugin
       */
     def existsVertex(whatToCheck: VertexView, whereToCheck: ListBuffer[VertexView]): Boolean = {
         whereToCheck.exists(element => element.vertexModel eq whatToCheck.vertexModel)
+    }
+
+    /**
+      * Moves all vertices of the graph visible quadrant of coordinates and closer to the [0, 0] point.
+      * @param vViews vertices to move
+      */
+    protected def moveGraphToUpperLeftCorner(vViews: ListBuffer[VertexView]) {
+        var vector = Vector(Double.MaxValue, Double.MaxValue)
+        //search for the minimum
+        vViews.foreach {v: VertexView =>
+            if (v.position.x < vector.x) {
+                vector = Vector(v.position.x, vector.y)
+            }
+            if (v.position.y < vector.y) {
+                vector = Vector(vector.x, v.position.y)
+            }
+        }
+
+        //move the graph...actually to the [50,50] coordinate, that no vertices are cut off by the screen edge
+        vector = (vector) * (-1) + Vector(50, 50)
+
+        vViews.foreach {v: VertexView =>
+            v.position = v.position + vector
+        }
+    }
+
+    /**
+      * Rotates all vertices around function x=y if the height of the graph if bigger than width
+      * @param vViews vertices to rotate
+      */
+    protected def flipGraph(vViews: ListBuffer[VertexView]) {
+        var maxX: Double = 5.0//Double.MinValue
+        var minX: Double = 5.0//Double.MaxValue
+        var maxY: Double = 5.0//Double.MinValue
+        var minY: Double = 5.0//Double.MaxValue
+
+        vViews.foreach {v: VertexView =>
+            if (v.position.x > maxX) {
+                maxX = v.position.x
+            } else if (v.position.x < minX) {
+                minX = v.position.x
+            }
+
+            if (v.position.y > maxY) {
+                maxY = v.position.y
+            } else if (v.position.y < minY) {
+                minY = v.position.y
+            }
+        }
+
+        if (maxX - minX < maxY - minY) {
+            vViews.foreach {v: VertexView =>
+                v.position = Point(v.position.y, v.position.x)
+            }
+
+            moveGraphToUpperLeftCorner(vViews)
+        }
     }
 }
