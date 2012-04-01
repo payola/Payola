@@ -21,21 +21,28 @@ object JSONUtilities {
      * @return Escaped string.
      */
     def escapedString(str: String): String = {
-        val builder: StringBuilder = new StringBuilder(str)
+        val builder: StringBuilder = new StringBuilder
 
-        // Replace all invalid chars, see http://www.json.org/
-        builder.replaceAllLiterally("\\", "\\\\")
-        builder.replaceAllLiterally("\"", "\\\"")
-        builder.replaceAllLiterally("/", "\\/")
-        builder.replaceAllLiterally("\b", "\\b")
-        builder.replaceAllLiterally("\f", "\\f")
-        builder.replaceAllLiterally("\n", "\\n")
-        builder.replaceAllLiterally("\r", "\\r")
-        builder.replaceAllLiterally("\t", "\\t")
+        builder.append('"')
+        for (i: Int <- 0 until str.length) {
+            val c: Char = str(i)
 
-        // Insert quotes around the string
-        builder.insert(0, '"')
-        builder.append("\"")
+            c match {
+                case '\\' => builder.append("\\\\")
+                case '"' => builder.append("\\\"")
+                case '/' => builder.append("\\/")
+                case '\b' => builder.append("\\b")
+                case '\f' => builder.append("\\b")
+                case '\n' => builder.append("\\b")
+                case '\r' => builder.append("\\b")
+                case '\t' => builder.append("\\b")
+
+                case any => builder.append(any)
+            }
+        }
+
+        builder.append('"')
+
         builder.toString
     }
 }
