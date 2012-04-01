@@ -19,7 +19,7 @@ object RPCTester
     }
     
     def testString : String = {
-        "test"
+        """te"st"""
     }
 
     def testBoolean : Boolean = {

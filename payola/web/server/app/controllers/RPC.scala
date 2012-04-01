@@ -189,9 +189,16 @@ object RPC extends Controller
         // invoke the remote method (!? for synchronous behaviour)
         val result = executor !? RPCActionMessage(methodToRun, runnableObj, paramArray)
 
+        val isString = result.isInstanceOf[String];
+
         // while the result is returned synchronously, serialize it into the JSON and return
         val serializer = new JSONSerializer(result, JSONSerializerOptionDisableCustomSerialization)
-        serializer.stringValue
+
+        isString match {
+            case true => serializer.stringValue.replaceAllLiterally(""""""", """\"""")
+            case false => serializer.stringValue
+        }
+
     }
 
     /**
@@ -231,9 +238,15 @@ object RPC extends Controller
         // invoke the remote method (!? for synchronous behaviour)
         val result = methodToRun.invoke(runnableObj, paramArray: _*)
 
+        val isString = result.isInstanceOf[String];
+
         // while the result is returned synchronously, serialize it into the JSON and return
         val serializer = new JSONSerializer(result, JSONSerializerOptionDisableCustomSerialization)
-        serializer.stringValue
+
+        isString match {
+            case true => serializer.stringValue.replaceAllLiterally(""""""", """\"""")
+            case false => serializer.stringValue
+        }
     }
     
     /**
