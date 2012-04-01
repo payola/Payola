@@ -32,10 +32,10 @@ object JSONUtilities {
                 case '"' => builder.append("\\\"")
                 case '/' => builder.append("\\/")
                 case '\b' => builder.append("\\b")
-                case '\f' => builder.append("\\b")
-                case '\n' => builder.append("\\b")
-                case '\r' => builder.append("\\b")
-                case '\t' => builder.append("\\b")
+                case '\f' => builder.append("\\f")
+                case '\n' => builder.append("\\n")
+                case '\r' => builder.append("\\r")
+                case '\t' => builder.append("\\t")
 
                 case any => builder.append(any)
             }
