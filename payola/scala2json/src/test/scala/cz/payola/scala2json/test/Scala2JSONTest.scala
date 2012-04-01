@@ -66,4 +66,8 @@ class Scala2JSONTest extends FlatSpec with ShouldMatchers {
         serializer.serialize(g) should equal ("""{"__class__":"cz.payola.scala2json.test.GroupTrait","__objectID__":0,"name":"My group","users":{"__arrayClass__":"scala.collection.mutable.ArrayBuffer","__value__":[{"__class__":"cz.payola.scala2json.test.User","__objectID__":2,"name":"Franta","groups":{"__arrayClass__":"scala.collection.mutable.ArrayBuffer","__value__":[{"__ref__":0}]}}]}}""")
     }
 
+    "escapeString" should "escape string" in {
+        JSONUtilities.escapeString("\"jame\"go\"\"to hess\"\"") should equal ("\"\\\"jame\\\"go\\\"\\\"to hess\\\"\\\"\"")
+    }
+
 }
