@@ -12,7 +12,11 @@ object PayolaDB extends Schema
     val databaseConnection = "jdbc:h2:tcp://localhost/~/h2/payola"
 
     val users = table[User]("users")
-    //val groups = table[Group]("groups")
+    val groups = table[Group]("groups")
+
+    val groupOwners =
+        oneToManyRelation(users, groups)
+            .via((u, g) => u.id === g.ownerId)
 
     def startDatabaseSession():Unit = {
         Class.forName("org.h2.Driver");
@@ -28,12 +32,12 @@ object PayolaDB extends Schema
             user.name is (unique)
         ))
 
-        /*
+        ///*
         on(groups)(group => declare(
             group.id is (primaryKey),
             group.name is (unique)
         ))
-        */
+        //*/
 
         transaction {
             drop
@@ -51,14 +55,14 @@ object PayolaDB extends Schema
                 update(users)(u =>
                   where(u.id === user.id)
                   set(u.name := user.name,
-                      u.password := user.password,
+                      //TODO: u.password := user.password,
                       u.email := user.email)
                 )
             }
         }
     }
 
-    /*
+    ///*
     def save(group: Group) = {
         transaction {
             if (groups.where(g => g.id === group.id).size == 0) {
@@ -71,11 +75,24 @@ object PayolaDB extends Schema
                 )
             }
         }
-    }*/
+    }
+    //*/
 
-    def getById(id: String) : Option[User] = {
+    def getUserById(id: String) : Option[User] = {
         transaction {
             val result = users.where(u => u.id === id)
+            if (result.size == 0) {
+                None
+            }
+            else {
+                Some(result.single)
+            }
+        }
+    }
+
+    def getGroupById(id: String) : Option[Group] = {
+        transaction {
+            val result = groups.where(g => g.id === id)
             if (result.size == 0) {
                 None
             }

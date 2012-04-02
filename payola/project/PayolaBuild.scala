@@ -210,8 +210,18 @@ object PayolaBuild extends Build
         commonProject, domainProject, scala2JsonProject
     )
 
+
     lazy val dataEntitiesProject = Project(
-        "entities", file("data/entities"), settings = payolaSettings
+        "entities", file("data/entities"),
+        settings = payolaSettings ++ Seq(
+            libraryDependencies ++= Seq(
+                "org.squeryl" % "squeryl_2.9.0-1" % "0.9.5",
+                "com.h2database" % "h2" % "1.3.165",
+                "mysql" % "mysql-connector-java" % "5.1.18",
+                "postgresql" % "postgresql" % "9.1-901.jdbc4",
+                "org.apache.derby" % "derby" % "10.8.2.2"
+            )
+        )
     ).dependsOn(
         commonProject, domainProject
     )

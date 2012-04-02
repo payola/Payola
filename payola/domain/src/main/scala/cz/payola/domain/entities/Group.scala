@@ -13,7 +13,10 @@ ConcreteNamedEntity with ConcreteOwnedEntity with SharedAnalysesOwner
 
     protected val _members: ArrayBuffer[UserType] = new ArrayBuffer[UserType]()
 
-    _owner.addOwnedGroup(this)
+    //TODO: _owner can be null when creating instance without parameters
+    if (_owner != null) {
+        _owner.addOwnedGroup(this)
+    }
 
     /** Adds a member to the group. Does nothing if already a member.
       *
