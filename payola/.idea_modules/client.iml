@@ -41,7 +41,6 @@
     <orderEntry type="module" module-name="runtime-client" exported="" />
     <orderEntry type="module" module-name="common" exported="" />
     <orderEntry type="module" module-name="shared" exported="" />
-    <orderEntry type="module" module-name="runtime" exported="" />
   </component>
 </module>
 
