@@ -365,7 +365,7 @@ class JSONSerializer
             jsonBuilder.appendKeySerializedValue("__value__", "null", false)
         }else{
             jsonBuilder.appendKeySerializedValue("__class__", "Some", true)
-            jsonBuilder.appendKeyValue("__value__", opt.get, false)
+            jsonBuilder.appendKeyValue("__value__", opt.get, false, processedObjects)
         }
 
         if (prettyPrint) {
