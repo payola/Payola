@@ -11,7 +11,11 @@ trait Edge extends IdentifiedObject
     /** Type of the vertices, the edge can originate in. */
     type IdentifiedVertexType <: IdentifiedVertex
 
-    val origin: IdentifiedVertexType
+    protected val _origin: IdentifiedVertexType
 
-    val destination: VertexType
+    protected val _destination: VertexType
+
+    def origin = _origin
+
+    def destination = _destination
 }

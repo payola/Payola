@@ -4,7 +4,9 @@ import helpers.{RPCActionMessage, RPCReply, RPCActionExecutor}
 import play.api.mvc._
 import java.lang.reflect.Method
 import cz.payola.scala2json.JSONSerializer
-import cz.payola.scala2json.JSONSerializerOptions._
+import cz.payola.scala2json.classes.SimpleSerializationClass
+import cz.payola.scala2json.rules.BasicSerializationRule
+import cz.payola.domain.rdf.{RDFEdge, RDFGraph, RDFIdentifiedNode, RDFLiteralNode}
 
 /**
   * The only controller which handles requests from the client side. It receives a POST request with the following
@@ -59,10 +61,29 @@ import cz.payola.scala2json.JSONSerializerOptions._
   */
 object RPC extends Controller
 {
-    /**
-      * Endpoint of the synchronous RPC call (mapped on /rpc)
-      * @return
-      */
+    val jsonSerializer = new JSONSerializer()
+    
+    /** Graph rules **/
+    _loadGraphSerializationRules
+    
+    def _loadGraphSerializationRules = {
+        val graphClass = new SimpleSerializationClass(classOf[cz.payola.common.rdf.Graph])
+        val graphRule = new BasicSerializationRule(Some(classOf[cz.payola.common.rdf.Graph]))
+        jsonSerializer.addSerializationRule(graphClass, graphRule)
+
+        val edgeClass = new SimpleSerializationClass(classOf[cz.payola.common.rdf.Edge])
+        val edgeRule = new BasicSerializationRule(Some(classOf[cz.payola.common.rdf.Edge]))
+        jsonSerializer.addSerializationRule(edgeClass, edgeRule)
+
+        val literalNodeClass = new SimpleSerializationClass(classOf[cz.payola.common.rdf.LiteralVertex])
+        val literalNodeRule = new BasicSerializationRule(Some(classOf[cz.payola.common.rdf.LiteralVertex]))
+        jsonSerializer.addSerializationRule(literalNodeClass, literalNodeRule)
+
+        val identifiedNodeClass = new SimpleSerializationClass(classOf[cz.payola.common.rdf.IdentifiedVertex])
+        val identifiedNodeRule = new BasicSerializationRule(Some(classOf[cz.payola.common.rdf.IdentifiedVertex]))
+        jsonSerializer.addSerializationRule(identifiedNodeClass, identifiedNodeRule)
+    }
+
     def index() = Action {request =>
         val response = readRequestAndRespond(request)
         Ok(response)
@@ -190,9 +211,8 @@ object RPC extends Controller
         // invoke the remote method (!? for synchronous behaviour)
         val result = executor !? RPCActionMessage(methodToRun, runnableObj, paramArray)
 
-        // while the result is returned synchronously, serialize it into the JSON and return
-        val serializer = new JSONSerializer(result, JSONSerializerOptionDisableCustomSerialization)
-        serializer.stringValue
+        val m = jsonSerializer.serialize(result)
+        m
     }
 
     /**
@@ -232,9 +252,9 @@ object RPC extends Controller
         // invoke the remote method (!? for synchronous behaviour)
         val result = methodToRun.invoke(runnableObj, paramArray: _*)
 
-        // while the result is returned synchronously, serialize it into the JSON and return
-        val serializer = new JSONSerializer(result, JSONSerializerOptionDisableCustomSerialization)
-        serializer.stringValue
+        val m = jsonSerializer.serialize(result)
+        // println(m)
+        m
     }
     
     /**

@@ -105,8 +105,6 @@
           <option name="ALIGN_MULTILINE_PARAMETERS" value="false" />
           <option name="CALL_PARAMETERS_WRAP" value="1" />
           <option name="METHOD_PARAMETERS_WRAP" value="1" />
-          <option name="EXTENDS_LIST_WRAP" value="1" />
-          <option name="METHOD_CALL_CHAIN_WRAP" value="1" />
           <option name="FOR_STATEMENT_WRAP" value="1" />
           <option name="IF_BRACE_FORCE" value="1" />
           <option name="PARENT_SETTINGS_INSTALLED" value="true" />

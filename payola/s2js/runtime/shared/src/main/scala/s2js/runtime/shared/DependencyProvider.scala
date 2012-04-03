@@ -35,9 +35,7 @@ import tools.nsc.io
 
                     // Required symbols, but add only those that shouldn't be ignored
                     fileRequiredSymbols += path -> new mutable.ArrayBuffer[String]
-                    println ("file requires " + path)
                     m.group(3).split(",").filter(!symbolsToIgnore.contains(_)).filter(_ != "").foreach {symbol =>
-                        println (" - " + symbol)
                         fileRequiredSymbols(path) += symbol
                     }
                 }
@@ -47,23 +45,21 @@ import tools.nsc.io
             val fileDependencyGraph = fileRequiredSymbols.mapValues(_.map(symbol => symbolFiles(symbol)))
 
             // Compile the package.
-            val processedSymbols = new mutable.ListBuffer[String]
+            val processedSymbols = new mutable.ArrayBuffer[String]
             val processedFiles = new mutable.HashSet[String]
             val visitedFiles = new mutable.HashSet[String]
             val javaScriptBuffer = new mutable.ListBuffer[String]
             val cssBuffer = new mutable.ListBuffer[String]
 
             def processFile(path: String) {
-                println("processing file: " + path)
                 if (!processedFiles.contains(path)) {
                     if (visitedFiles.contains(path)) {
                         throw new Exception("A cycle in file dependencies detected. Check the file '%s'.".format(path))
                     }
                     visitedFiles += path
-                    
+
                     // Process the files, that the currently processed file requires first.
-                    fileDependencyGraph(path).foreach{path=>
-                        println("  dependency: " + path)
+                    fileDependencyGraph(path).foreach {path =>
                         processFile(path)
                     }
 

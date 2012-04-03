@@ -184,22 +184,48 @@ object PayolaBuild extends Build
         "common", file("common"), WebSettings.javaScriptsDir, payolaSettings
     ).dependsOn(scala2JsonProject)
 
-    lazy val dataProject = Project(
-        "data", file("data"),
+    lazy val domainProject = Project(
+        "domain", file("domain"),
         settings = payolaSettings ++ Seq(
             libraryDependencies ++= Seq(
-                "org.squeryl" %% "squeryl" % "0.9.5-RC1",
                 "org.apache.jena" % "jena-core" % "2.7.0-incubating"
             )
         )
     ).dependsOn(
-        scala2JsonProject, commonProject
+        commonProject
+    )
+
+    lazy val dataProject = Project(
+        "data", file("data"), settings = payolaSettings
+    ).aggregate(
+        dataRdfProject, dataEntitiesProject
+    )
+
+    lazy val dataRdfProject = Project(
+        "rdf", file("data/rdf"), settings = payolaSettings
+    ).dependsOn(
+        commonProject, domainProject, scala2JsonProject
+    )
+
+    lazy val dataEntitiesProject = Project(
+        "entities", file("data/entities"),
+        settings = payolaSettings ++ Seq(
+            libraryDependencies ++= Seq(
+                "org.squeryl" % "squeryl_2.9.0-1" % "0.9.5",
+                "com.h2database" % "h2" % "1.3.165",
+                "mysql" % "mysql-connector-java" % "5.1.18",
+                "postgresql" % "postgresql" % "9.1-901.jdbc4",
+                "org.apache.derby" % "derby" % "10.8.2.2"
+            )
+        )
+    ).dependsOn(
+        commonProject, domainProject
     )
 
     lazy val modelProject = Project(
         "model", file("model"), settings = payolaSettings
     ).dependsOn(
-        scala2JsonProject, commonProject, dataProject
+        commonProject, domainProject, dataRdfProject, dataEntitiesProject
     )
 
     lazy val webProject = Project(
@@ -211,7 +237,7 @@ object PayolaBuild extends Build
     lazy val webSharedProject = ScalaToJsProject(
         "shared", file("web/shared"), WebSettings.javaScriptsDir / "shared", payolaSettings
     ).dependsOn(
-        commonProject, dataProject
+        commonProject, modelProject
     )
 
     lazy val webClientProject = ScalaToJsProject(
@@ -276,6 +302,6 @@ object PayolaBuild extends Build
             new io.File(WebSettings.dependencyFile).delete()
         }
     ).dependsOn(
-        commonProject, dataProject, scala2JsonProject, webSharedProject, webClientProject
+        commonProject, modelProject, scala2JsonProject, webSharedProject, webClientProject
     )
 }

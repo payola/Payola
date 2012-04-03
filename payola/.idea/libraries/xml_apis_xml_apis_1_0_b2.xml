@@ -4,8 +4,6 @@
       <root url="jar://$USER_HOME$/.ivy2/cache/xml-apis/xml-apis/jars/xml-apis-1.0.b2.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES>
-      <root url="jar://$USER_HOME$/.ivy2/cache/xml-apis/xml-apis/srcs/xml-apis-1.0.b2-sources.jar!/" />
-    </SOURCES>
+    <SOURCES />
   </library>
 </component>

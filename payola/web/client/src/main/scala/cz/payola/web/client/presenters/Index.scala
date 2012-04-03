@@ -13,6 +13,7 @@ import cz.payola.web.client.model.graph.{SimpleIdentifiedVertex, SimpleEdge, Sim
 import cz.payola.web.shared.GraphFetcher
 
 // TODO remove after classloading is done
+@dependency("scala.collection.mutable.ListBuffer")
 @dependency("cz.payola.common.rdf.IdentifiedVertex")
 @dependency("cz.payola.common.rdf.LiteralVertex")
 @dependency("cz.payola.common.rdf.Graph")
@@ -34,7 +35,7 @@ class Index
 
     def init() {
         try {
-            graph = Option(GraphFetcher.getInitialGraph)
+            graph = Some(cz.payola.web.shared.GraphFetcher.getInitialGraph)
         } catch {
             case e: RPCException => {
                 window.alert("Failed to call RPC. " + e.message)

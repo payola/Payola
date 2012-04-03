@@ -151,11 +151,14 @@ object RPCWrapper
         var clazz = obj.__class__;
 
         // if it doesn't have a className set, it is a anonymous object (or bug in serialization)
-        if (typeof(clazz) === 'undefined')
-        {
+        if (typeof(clazz) === 'undefined') {
             // registrer based on objectID into the registry and return
             objectRegistry[obj.__objectID__] = obj;
             return obj;
+        } else if (clazz === 'scala.None') {
+            return scala.None;
+        } else if (clazz === 'scala.Some') {
+            return new scala.Some(obj.__value__);
         }
 
         var result = this.checkDefinedAndMakeInstance(clazz);

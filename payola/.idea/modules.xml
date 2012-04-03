@@ -7,9 +7,12 @@
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/common.iml" filepath="$PROJECT_DIR$/.idea_modules/common.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/compiler.iml" filepath="$PROJECT_DIR$/.idea_modules/compiler.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/data.iml" filepath="$PROJECT_DIR$/.idea_modules/data.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea_modules/domain.iml" filepath="$PROJECT_DIR$/.idea_modules/domain.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea_modules/entities.iml" filepath="$PROJECT_DIR$/.idea_modules/entities.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/model.iml" filepath="$PROJECT_DIR$/.idea_modules/model.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/payola.iml" filepath="$PROJECT_DIR$/.idea_modules/payola.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/project.iml" filepath="$PROJECT_DIR$/.idea_modules/project.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea_modules/rdf.iml" filepath="$PROJECT_DIR$/.idea_modules/rdf.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/runtime.iml" filepath="$PROJECT_DIR$/.idea_modules/runtime.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/runtime-client.iml" filepath="$PROJECT_DIR$/.idea_modules/runtime-client.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/runtime-shared.iml" filepath="$PROJECT_DIR$/.idea_modules/runtime-shared.iml" />

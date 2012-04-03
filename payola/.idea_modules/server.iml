@@ -5,6 +5,7 @@
       <configuration>
         <option name="compilerLibraryLevel" value="Project" />
         <option name="compilerLibraryName" value="scala-2.9.1" />
+        <option name="fsc" value="true" />
       </configuration>
     </facet>
   </component>
@@ -19,6 +20,8 @@
       <sourceFolder url="file://$MODULE_DIR$/../web/server/test" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../web/server/test/resources" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/../web/server/target/scala-2.9.1/cache" />
+      <excludeFolder url="file://$MODULE_DIR$/../web/server/target/scala-2.9.1/classes" />
+      <excludeFolder url="file://$MODULE_DIR$/../web/server/target/scala-2.9.1/classes_managed" />
       <excludeFolder url="file://$MODULE_DIR$/../web/server/target/streams" />
     </content>
     <orderEntry type="inheritedJdk" />
@@ -35,23 +38,28 @@
     <orderEntry type="library" name="org.slf4j_slf4j-api_1.6.4" level="project" />
     <orderEntry type="library" name="org.slf4j_slf4j-log4j12_1.6.4" level="project" />
     <orderEntry type="library" name="log4j_log4j_1.2.16" level="project" />
-    <orderEntry type="library" name="play_play_2.9.1_2.0-RC1-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="play_templates_2.9.1_2.0-RC1-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="org.squeryl_squeryl_2.9.0-1_0.9.5" level="project" />
+    <orderEntry type="library" name="com.h2database_h2_1.3.165" level="project" />
+    <orderEntry type="library" name="mysql_mysql-connector-java_5.1.18" level="project" />
+    <orderEntry type="library" name="postgresql_postgresql_9.1-901.jdbc4" level="project" />
+    <orderEntry type="library" name="org.apache.derby_derby_10.8.2.2" level="project" />
+    <orderEntry type="library" name="play_play_2.9.1_2.0" level="project" />
+    <orderEntry type="library" name="play_templates_2.9.1_2.0" level="project" />
     <orderEntry type="library" name="com.github.scala-incubator.io_scala-io-file_2.9.1_0.2.0" level="project" />
     <orderEntry type="library" name="com.github.scala-incubator.io_scala-io-core_2.9.1_0.2.0" level="project" />
     <orderEntry type="library" name="com.github.jsuereth.scala-arm_scala-arm_2.9.1_0.3" level="project" />
-    <orderEntry type="library" name="play_anorm_2.9.1_2.0-RC1-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="play_anorm_2.9.1_2.0" level="project" />
     <orderEntry type="library" name="io.netty_netty_3.3.0.Final" level="project" />
     <orderEntry type="library" name="org.slf4j_jul-to-slf4j_1.6.4" level="project" />
     <orderEntry type="library" name="org.slf4j_jcl-over-slf4j_1.6.4" level="project" />
     <orderEntry type="library" name="ch.qos.logback_logback-core_1.0.0" level="project" />
     <orderEntry type="library" name="ch.qos.logback_logback-classic_1.0.0" level="project" />
-    <orderEntry type="library" name="com.typesafe.akka_akka-actor_2.0-M2" level="project" />
-    <orderEntry type="library" name="com.typesafe.akka_akka-slf4j_2.0-M2" level="project" />
-    <orderEntry type="library" name="com.typesafe.config_config_0.2.1" level="project" />
+    <orderEntry type="library" name="com.typesafe.akka_akka-actor_2.0" level="project" />
+    <orderEntry type="library" name="com.typesafe.akka_akka-slf4j_2.0" level="project" />
+    <orderEntry type="library" name="com.google.guava_guava_10.0.1" level="project" />
+    <orderEntry type="library" name="com.google.code.findbugs_jsr305_1.3.9" level="project" />
     <orderEntry type="library" name="org.avaje_ebean_2.7.3" level="project" />
     <orderEntry type="library" name="org.hibernate.javax.persistence_hibernate-jpa-2.0-api_1.0.1.Final" level="project" />
-    <orderEntry type="library" name="com.h2database_h2_1.3.158" level="project" />
     <orderEntry type="library" name="org.scala-tools_scala-stm_2.9.1_0.4" level="project" />
     <orderEntry type="library" name="com.jolbox_bonecp_0.7.1.RELEASE" level="project" />
     <orderEntry type="library" name="org.yaml_snakeyaml_1.9" level="project" />
@@ -65,39 +73,39 @@
     <orderEntry type="library" name="javassist_javassist_3.12.1.GA" level="project" />
     <orderEntry type="library" name="commons-lang_commons-lang_2.6" level="project" />
     <orderEntry type="library" name="com.ning_async-http-client_1.7.0" level="project" />
-    <orderEntry type="library" name="org.jboss.netty_netty_3.2.7.Final" level="project" />
     <orderEntry type="library" name="oauth.signpost_signpost-core_1.2.1.1" level="project" />
     <orderEntry type="library" name="commons-codec_commons-codec_1.3" level="project" />
     <orderEntry type="library" name="com.codahale_jerkson_2.9.1_0.5.0" level="project" />
     <orderEntry type="library" name="org.codehaus.jackson_jackson-core-asl_1.9.6" level="project" />
     <orderEntry type="library" name="org.codehaus.jackson_jackson-mapper-asl_1.9.6" level="project" />
     <orderEntry type="library" name="org.reflections_reflections_0.9.6" level="project" />
-    <orderEntry type="library" name="com.google.guava_guava_10.0" level="project" />
-    <orderEntry type="library" name="com.google.code.findbugs_jsr305_1.3.9" level="project" />
     <orderEntry type="library" name="dom4j_dom4j_1.6.1" level="project" />
     <orderEntry type="library" name="javax.servlet_javax.servlet-api_3.0.1" level="project" />
     <orderEntry type="library" name="javax.transaction_jta_1.1" level="project" />
     <orderEntry type="library" name="tyrex_tyrex_1.0.1" level="project" />
+    <orderEntry type="library" name="jaxen_jaxen_1.1.3" level="project" />
     <orderEntry type="library" name="net.sf.ehcache_ehcache-core_2.5.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="play_play-test_2.9.1_2.0-RC1-SNAPSHOT" level="project" />
+    <orderEntry type="library" scope="TEST" name="play_play-test_2.9.1_2.0" level="project" />
     <orderEntry type="library" scope="TEST" name="org.specs2_specs2_2.9.1_1.7.1" level="project" />
     <orderEntry type="library" scope="TEST" name="org.specs2_specs2-scalaz-core_2.9.1_6.0.1" level="project" />
     <orderEntry type="library" scope="TEST" name="com.novocode_junit-interface_0.8" level="project" />
     <orderEntry type="library" scope="TEST" name="junit_junit_4.8.2" level="project" />
     <orderEntry type="library" scope="TEST" name="org.scala-tools.testing_test-interface_0.5" level="project" />
-    <orderEntry type="library" scope="TEST" name="fr.javafreelance.fluentlenium_fluentlenium_0.5.3" level="project" />
-    <orderEntry type="library" scope="TEST" name="fr.javafreelance.fluentlenium_fluentlenium-festassert_0.5.3" level="project" />
-    <orderEntry type="library" scope="TEST" name="fr.javafreelance.fluentlenium_fluentlenium-core_0.5.3" level="project" />
-    <orderEntry type="library" scope="TEST" name="org.seleniumhq.selenium_selenium-java_2.12.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="org.seleniumhq.selenium_selenium-android-driver_2.12.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="org.seleniumhq.selenium_selenium-remote-driver_2.12.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="org.fluentlenium_fluentlenium-festassert_0.5.6" level="project" />
+    <orderEntry type="library" scope="TEST" name="org.fluentlenium_fluentlenium-core_0.5.6" level="project" />
+    <orderEntry type="library" scope="TEST" name="org.seleniumhq.selenium_selenium-java_2.16.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="org.seleniumhq.selenium_selenium-android-driver_2.16.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="org.seleniumhq.selenium_selenium-remote-driver_2.16.1" level="project" />
     <orderEntry type="library" scope="TEST" name="org.json_json_20080701" level="project" />
-    <orderEntry type="library" scope="TEST" name="org.seleniumhq.selenium_selenium-api_2.12.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="org.seleniumhq.selenium_selenium-api_2.16.1" level="project" />
     <orderEntry type="library" scope="TEST" name="org.apache.httpcomponents_httpclient_4.1.2" level="project" />
     <orderEntry type="library" scope="TEST" name="org.apache.httpcomponents_httpcore_4.1.3" level="project" />
     <orderEntry type="library" scope="TEST" name="commons-logging_commons-logging_1.1.1" level="project" />
-    <orderEntry type="library" scope="TEST" name="org.seleniumhq.selenium_selenium-chrome-driver_2.12.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="org.seleniumhq.selenium_selenium-htmlunit-driver_2.12.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="org.apache.commons_commons-exec_1.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="net.java.dev.jna_jna_3.4.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="net.java.dev.jna_platform_3.4.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="org.seleniumhq.selenium_selenium-chrome-driver_2.16.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="org.seleniumhq.selenium_selenium-htmlunit-driver_2.16.1" level="project" />
     <orderEntry type="library" scope="TEST" name="net.sourceforge.htmlunit_htmlunit_2.9" level="project" />
     <orderEntry type="library" scope="TEST" name="xalan_xalan_2.7.1" level="project" />
     <orderEntry type="library" scope="TEST" name="xalan_serializer_2.7.1" level="project" />
@@ -108,11 +116,10 @@
     <orderEntry type="library" scope="TEST" name="net.sourceforge.cssparser_cssparser_0.9.5" level="project" />
     <orderEntry type="library" scope="TEST" name="org.w3c.css_sac_1.3" level="project" />
     <orderEntry type="library" scope="TEST" name="commons-io_commons-io_2.0.1" level="project" />
-    <orderEntry type="library" scope="TEST" name="org.seleniumhq.selenium_selenium-firefox-driver_2.12.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="org.seleniumhq.selenium_selenium-ie-driver_2.12.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="net.java.dev.jna_jna_3.3.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="org.seleniumhq.selenium_selenium-iphone-driver_2.12.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="org.seleniumhq.selenium_selenium-support_2.12.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="org.seleniumhq.selenium_selenium-firefox-driver_2.16.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="org.seleniumhq.selenium_selenium-ie-driver_2.16.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="org.seleniumhq.selenium_selenium-iphone-driver_2.16.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="org.seleniumhq.selenium_selenium-support_2.16.1" level="project" />
     <orderEntry type="library" scope="TEST" name="org.easytesting_fest-assert_1.4" level="project" />
     <orderEntry type="library" scope="TEST" name="org.easytesting_fest-util_1.1.6" level="project" />
     <orderEntry type="module" module-name="common" exported="" />

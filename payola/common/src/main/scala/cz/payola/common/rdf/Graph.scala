@@ -1,5 +1,7 @@
 package cz.payola.common.rdf
 
+import scala.collection.immutable
+
 /**
   * A RDF graph.
   */
@@ -8,9 +10,13 @@ trait Graph
     /** Type of the edges, that are between the vertices. */
     type EdgeType <: Edge
 
-    val vertices: Seq[EdgeType#VertexType]
+    protected val _vertices: immutable.Seq[EdgeType#VertexType]
 
-    val edges: Seq[EdgeType]
+    protected val _edges: immutable.Seq[EdgeType]
+
+    def vertices: immutable.Seq[EdgeType#VertexType] = _vertices
+
+    def edges: immutable.Seq[EdgeType] = _edges
 
     /**
       * Returns all edges that go from the specified vertex (i.e. the vertex is a subject in the relation).

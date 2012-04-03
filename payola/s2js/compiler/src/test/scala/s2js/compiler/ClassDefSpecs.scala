@@ -52,6 +52,68 @@ class ClassDefSpecs extends CompilerFixtureSpec
                 }
         }
 
+        it("can have getters and setters") {
+            configMap =>
+                scalaCode {
+                    """
+                        package pkg
+
+                        class A
+                        {
+                            protected var _x: String = ""
+                            var y = ""
+
+                            def x = _x
+
+                            def x_=(value: String) {
+                                _x = value
+                            }
+                        }
+
+                        object t
+                        {
+                            def test() {
+                                val a = new A
+                                val x = a.x
+                                val y = a.y
+                                a.x = "new x"
+                                a.y = "new y"
+                            }
+                        }
+                    """
+                } shouldCompileTo {
+                    """
+                        goog.provide('pkg.A');
+                        goog.provide('pkg.t');
+
+                        pkg.A = function() {
+                            var self = this;
+                            self._x = '';
+                            self.y = '';
+                        };
+                        pkg.A.prototype.x = function() {
+                            var self = this;
+                            return self._x;
+                        };
+                        pkg.A.prototype.x_$eq = function(value) {
+                            var self = this;
+                            self._x = value;
+                        };
+                        pkg.A.prototype.__class__ = new s2js.Class('pkg.A', []);
+
+                        pkg.t.test = function() {
+                            var self = this;
+                            var a = new pkg.A();
+                            var x = a.x();
+                            var y = a.y;
+                            a.x_$eq('new x');
+                            a.y = 'new y';
+                        };
+                        pkg.t.__class__ = new s2js.Class('pkg.t', []);
+                    """
+                }
+        }
+
         it("can have implicit constructor") {
             configMap =>
                 scalaCode {
