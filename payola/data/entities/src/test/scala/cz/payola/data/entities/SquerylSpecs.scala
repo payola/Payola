@@ -2,6 +2,7 @@ package cz.payola.data.entities
 
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
+import org.squeryl.PrimitiveTypeMode._
 
 class SquerylSpecs extends FlatSpec with ShouldMatchers
 {
@@ -20,14 +21,13 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
         assert (u != None)
         assert (u.get.id == user.id)
         assert (u.get.name == user.name)
-//        assert (u.get.password == user.password)
+        assert (u.get.password == user.password)
         assert (u.get.email == user.email)
 
         val u2 = PayolaDB.getUserById("")
         assert (u2 == None)
     }
 
-    ///*
     "2) Group" should "be persisted" in {
         val user = PayolaDB.getUserById("1").get
 
@@ -35,9 +35,15 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
 
         PayolaDB.save(group)
 
-        println(user.ownedGroups2)
+        transaction {
+            assert(user.ownedGroups2.single.name == group.name)
+
+            user.memberedGroups.associate(group)
+
+            assert(group.members2.single.name == user.name)
+        }
+
     }
-    //*/
 
 
 }

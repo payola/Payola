@@ -2,10 +2,13 @@ package cz.payola.domain.entities
 
 import cz.payola._
 import collection.mutable.ArrayBuffer
-import generic.ConcreteNamedEntity
+import generic.{ConcreteEntity, ConcreteNamedEntity}
 import parameters.Parameter
 
-class Plugin(protected var _name: String) extends common.entities.Plugin with ConcreteNamedEntity
+class Plugin(protected var _name: String)
+    extends ConcreteEntity
+    with common.entities.Plugin
+    with ConcreteNamedEntity
 {
     type ParameterType = Parameter[_]
 

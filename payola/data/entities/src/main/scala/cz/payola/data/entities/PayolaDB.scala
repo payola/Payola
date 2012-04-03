@@ -1,9 +1,10 @@
 package cz.payola.data.entities
 
-import org.squeryl.{Session, SessionFactory, Schema}
 import org.squeryl.adapters.H2Adapter
 import org.squeryl.PrimitiveTypeMode._
 import java.lang.Class
+import org.squeryl.{KeyedEntity, Session, SessionFactory, Schema}
+import org.squeryl.dsl.CompositeKey2
 
 object PayolaDB extends Schema
 {
@@ -13,8 +14,23 @@ object PayolaDB extends Schema
 
     val users = table[User]("users")
     val groups = table[Group]("groups")
+    private val members = table[GroupMembership]
 
-    val groupOwners =
+    on(users)(user => declare(
+        user.id is (primaryKey),
+        user.name is (unique)
+    ))
+
+    on(groups)(group => declare(
+        group.id is (primaryKey),
+        group.name is (unique)
+    ))
+
+    lazy val groupMembership =
+        manyToManyRelation(users, groups)
+            .via[GroupMembership]((u,g,gm) => (gm.memberId === u.id, g.id === gm.groupId))
+
+    lazy val groupOwnership =
         oneToManyRelation(users, groups)
             .via((u, g) => u.id === g.ownerId)
 
@@ -27,26 +43,16 @@ object PayolaDB extends Schema
     }
 
     def createSchema() = {
-        on(users)(user => declare(
-            user.id is (primaryKey),
-            user.name is (unique)
-        ))
-
-        ///*
-        on(groups)(group => declare(
-            group.id is (primaryKey),
-            group.name is (unique)
-        ))
-        //*/
 
         transaction {
             drop
             create
-            println(printDdl)
+            //println(printDdl)
         }
     }
 
     def save(user: User) = {
+
         transaction {
             if (users.where(u => u.id === user.id).size == 0) {
                 users.insert(user)
@@ -62,8 +68,8 @@ object PayolaDB extends Schema
         }
     }
 
-    ///*
     def save(group: Group) = {
+
         transaction {
             if (groups.where(g => g.id === group.id).size == 0) {
                 groups.insert(group)
@@ -76,9 +82,9 @@ object PayolaDB extends Schema
             }
         }
     }
-    //*/
 
     def getUserById(id: String) : Option[User] = {
+
         transaction {
             val result = users.where(u => u.id === id)
             if (result.size == 0) {
@@ -91,6 +97,7 @@ object PayolaDB extends Schema
     }
 
     def getGroupById(id: String) : Option[Group] = {
+
         transaction {
             val result = groups.where(g => g.id === id)
             if (result.size == 0) {
@@ -101,4 +108,9 @@ object PayolaDB extends Schema
             }
         }
     }
+}
+
+class GroupMembership(val memberId: String, val groupId: String)
+    extends KeyedEntity[CompositeKey2[String,String]] {
+  def id = compositeKey(memberId, groupId)
 }

@@ -2,10 +2,12 @@ package cz.payola.domain.entities
 
 import cz.payola._
 import collection.mutable._
+import generic.ConcreteEntity
 import parameters.{Parameter, ParameterInstance}
 
-class PluginInstance(protected val _plugin: Plugin) extends common.entities.PluginInstance with
-domain.entities.generic.ConcreteEntity
+class PluginInstance(protected val _plugin: Plugin)
+    extends ConcreteEntity
+    with common.entities.PluginInstance
 {
     require(plugin != null, "Cannot create a plugin instance of a null plugin!")
 
