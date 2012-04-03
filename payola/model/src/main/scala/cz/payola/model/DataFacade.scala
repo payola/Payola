@@ -7,7 +7,7 @@ import cz.payola.domain.rdf.RDFGraph
 
 class DataFacade
 {
-    def getGraph(uri: String): Option[Graph] = {
+    def getGraph(uri: String): Graph = {
         val dbPediaEndpointUrl = "http://dbpedia.org/sparql" +
             "?default-graph-uri=http%3A%2F%2Fdbpedia.org" +
             "&format=application%2Frdf%2Bxml" +
@@ -25,7 +25,8 @@ class DataFacade
             }
             LIMIT 40
         """.format(uri, uri)
-       
-        QueryExecutor.executeQuery(configurations, query).data.headOption.map(rdf => RDFGraph(rdf))
+
+        val result = QueryExecutor.executeQuery(configurations, query)
+        result.data.headOption.map(rdf => RDFGraph(rdf)).getOrElse(RDFGraph(""))
     }
 }

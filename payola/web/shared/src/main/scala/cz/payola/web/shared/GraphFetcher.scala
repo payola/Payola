@@ -5,8 +5,8 @@ import cz.payola.model.DataFacade
 
 @remote object GraphFetcher
 {
-    def getInitialGraph: Option[Graph] = {
-        (new DataFacade).getGraph("http://payola.cz")
+    def getInitialGraph: Graph = {
+        (new DataFacade).getGraph("http://dbpedia.org/resource/Prague")
     }
 
     def getNeighborhoodOfVertex(vertexUri: String): Graph = {
