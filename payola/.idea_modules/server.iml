@@ -19,6 +19,7 @@
       <sourceFolder url="file://$MODULE_DIR$/../web/server/test" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../web/server/test/resources" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/../web/server/target/scala-2.9.1/cache" />
+      <excludeFolder url="file://$MODULE_DIR$/../web/server/target/scala-2.9.1/classes" />
       <excludeFolder url="file://$MODULE_DIR$/../web/server/target/streams" />
     </content>
     <orderEntry type="inheritedJdk" />

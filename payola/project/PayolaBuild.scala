@@ -45,13 +45,11 @@ object PayolaBuild extends Build
     {
         val serverBaseDir = file("web/server")
 
-        val javaScriptsDir = serverBaseDir / "public/javascripts"
+        val dependencyDir = serverBaseDir / "public"
 
-        val dependencyFile = javaScriptsDir / "dependencies"
+        val dependencyFile = dependencyDir / "dependencies"
 
-        val compiledJavaScriptsDir = javaScriptsDir / "compiled"
-
-        val bootstrapFileName = "bootstrap.js"
+        val javaScriptsDir = dependencyDir / "javascripts"
     }
 
     /** Common default settings of all projects. */
@@ -219,7 +217,7 @@ object PayolaBuild extends Build
     lazy val webClientProject = ScalaToJsProject(
         "client", file("web/client"), WebSettings.javaScriptsDir, payolaSettings
     ).dependsOn(
-        commonProject, webSharedProject, s2JsRuntimeProject
+        commonProject, webSharedProject
     )
 
     lazy val webServerProject = PlayProject(
@@ -227,15 +225,18 @@ object PayolaBuild extends Build
     ).settings(
         compileAndPackage <<= (packageBin in Compile).dependsOn(clean).map {jarFile: File =>
             // Retrieve the dependencies.
-            val files = new io.Directory(WebSettings.javaScriptsDir).deepFiles.filter(_.extension == "js")
+            val dependencyExtensions = List("js", "css")
+            val dependencyDirectory = new io.Directory(WebSettings.dependencyDir)
+            val files = dependencyDirectory.deepFiles.filter(f => dependencyExtensions.contains(f.extension))
+
             val symbolFiles = new mutable.HashMap[String, String]
             val fileProvidedSymbols = new mutable.HashMap[String, mutable.ArrayBuffer[String]]
             val fileRequiredSymbols = new mutable.HashMap[String, mutable.ArrayBuffer[String]]
-
             val provideRegex = """s2js\.runtime\.client\.ClassLoader\.provide\(\s*['\"]([^'\"]+)['\"]\s*\);""".r
             val requireRegex = """s2js\.runtime\.client\.ClassLoader\.require\(\s*['\"]([^'\"]+)['\"]\s*\);""".r
+
             files.foreach {file =>
-                val path = file.toAbsolute.path.toString
+                val path = file.toAbsolute.path.toString.replace("\\", "/")
                 fileProvidedSymbols += path -> new mutable.ArrayBuffer[String]
                 fileRequiredSymbols += path -> new mutable.ArrayBuffer[String]
 
@@ -268,47 +269,13 @@ object PayolaBuild extends Build
             }
             new io.File(dependencyFile).writeAll(dependencyBuffer.mkString)
 
-            // Construct the file dependency graph from the symbol dependency graph.
-            val fileDependencyGraph = fileRequiredSymbols.mapValues(_.map(o => symbolFiles(o)))
-            
-            // Compile the bootstrap file.
-            val processedFiles = new mutable.HashSet[String]
-            val visitedFiles = new mutable.HashSet[String]
-            var buffer = new ListBuffer[String]
-            def processFile(file: String) {
-                if (!processedFiles.contains(file)) {
-                    if (visitedFiles.contains(file)) {
-                        throw new Exception("A cycle in JavaScript file dependencies detected. " +
-                            "Check the file '%s'.".format(file))
-                    }
-                    visitedFiles += file
-
-                    fileDependencyGraph(file).foreach(processFile(_))
-
-                    val name = file.stripPrefix(WebSettings.javaScriptsDir.absolutePath.toString).replace("\\", "/")
-                    buffer ++= Source.fromFile(file).getLines
-                    buffer += "\n\n"
-
-                    visitedFiles -= file
-                    processedFiles += file
-                }
-            }
-
-            val compiledBootstrapFile = new io.File(WebSettings.compiledJavaScriptsDir / WebSettings.bootstrapFileName)
-            processFile((WebSettings.javaScriptsDir / WebSettings.bootstrapFileName).absolutePath.toString)
-            compiledBootstrapFile.parent.jfile.mkdirs()
-            compiledBootstrapFile.writeAll(buffer.mkString("\n"))
-
             jarFile
         },
         clean <<= clean.map {_ =>
-            // Delete all compiled scripts.
-            new io.Directory(WebSettings.compiledJavaScriptsDir).deleteRecursively()
-
             // Delete the dependency file.
             new io.File(WebSettings.dependencyFile).delete()
         }
     ).dependsOn(
-        commonProject, webSharedProject, webClientProject, scala2JsonProject, dataProject, s2JsRuntimeSharedProject
+        commonProject, dataProject, scala2JsonProject, webSharedProject, webClientProject
     )
 }

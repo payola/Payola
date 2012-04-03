@@ -2,7 +2,8 @@ package s2js.runtime.client
 
 import collection.mutable.ArrayBuffer
 import s2js.compiler.javascript
-import s2js.runtime.shared.ClassProvider
+import s2js.adapters.js.browser._
+import s2js.runtime.shared.DependencyProvider
 
 object ClassLoader
 {
@@ -10,8 +11,16 @@ object ClassLoader
 
     def load(classNames: Seq[String]) {
         val classesToLoad = classNames.filter(!loadedClasses.contains(_))
-        val classDeclaration = ClassProvider.get(classesToLoad, loadedClasses)
-        evaluateJs(classDeclaration)
+        val dependencyPackage = DependencyProvider.get(classesToLoad, loadedClasses)
+        
+        // Process the dependency package.
+        dependencyPackage.providedSymbols.foreach(provide(_))
+        if (dependencyPackage.javaScript != "") {
+            evaluateJs(dependencyPackage.javaScript)
+        }
+        if (dependencyPackage.css != "") {
+            evaluateCss(dependencyPackage.css)
+        }
     }
 
     def isLoaded(className: String): Boolean = {
@@ -31,8 +40,23 @@ object ClassLoader
         declareNamespace(className)
     }
 
-    @javascript("eval (classDeclaration);")
-    private def evaluateJs(classDeclaration: String) {}
+    @javascript("eval (javascript);")
+    private def evaluateJs(javascript: String) {}
+
+    @javascript("""
+        var head = document.getElementsByTagName('head')[0];
+        var style = document.createElement('style');
+        var rules = document.createTextNode(css);
+
+        style.type = 'text/css';
+        if (style.styleSheet) {
+            style.styleSheet.cssText = rules.nodeValue;
+        } else {
+            style.appendChild(rules);
+        }
+        head.appendChild(style);
+    """)
+    private def evaluateCss(css: String) {}
 
     @javascript("Utils.declareNamespace(namespace);")
     private def declareNamespace(namespace: String) {}

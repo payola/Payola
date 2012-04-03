@@ -10,7 +10,7 @@ payola/web/server/public/javascripts/runtime-client/
 payola/web/server/public/javascripts/common/
 payola/web/server/public/javascripts/shared/
 payola/web/server/public/javascripts/client/
-payola/web/server/public/javascripts/dependencies
+payola/web/server/public/dependencies
 
 # Tools. Maybe enable them in the future, so we all use the same.
 Tools/
