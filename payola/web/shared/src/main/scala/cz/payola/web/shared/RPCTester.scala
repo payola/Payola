@@ -1,7 +1,7 @@
 package cz.payola.web.shared
 
 import cz.payola.common.rdf.Graph
-import cz.payola.data.DataFacade
+import cz.payola.model.DataFacade
 import s2js.compiler.async
 
 /**
