@@ -1,17 +1,11 @@
 package cz.payola.web.shared
 
-// TODO Dependencies
-
 import cz.payola.common.rdf.Graph
-//import cz.payola.model.DataFacade
-//import cz.payola.data.rdf.DataFacade
-//import cz.payola.data.DataFacade
+import cz.payola.model.DataFacade
 
-/*
-@scala.remote
-object GraphFetcher
+@remote object GraphFetcher
 {
-    def getInitialGraph: Graph = {
+    def getInitialGraph: Option[Graph] = {
         (new DataFacade).getGraph("http://payola.cz")
     }
 
@@ -20,4 +14,3 @@ object GraphFetcher
         null
     }
 }
-*/

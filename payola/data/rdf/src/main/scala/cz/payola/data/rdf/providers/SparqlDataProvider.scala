@@ -1,27 +1,19 @@
 package cz.payola.data.rdf.providers
 
-import configurations.SparqlEndpointConfiguration
 import scala.io.Source
 
-class SparqlDataProvider(configuration: SparqlEndpointConfiguration) extends SingleDataProvider
+class SparqlDataProvider(val endpointUrl: String) extends SingleDataProvider
 {
     override protected def executeQuery(query: String): String = {
-        // Query is composed and URL Coded
-        val request = composeQueryRequest(query);
-
-        // Return query result
-        Source.fromURL(request, "UTF-8").mkString
+        Source.fromURL(getQueryRequestUrl(query), "UTF-8").mkString
     }
 
-    private def composeQueryRequest(query: String): String = {
-        // Request already contains query param -> fill value
-        if (configuration.url.contains("query=")) {
-            configuration.url.replaceAllLiterally(
-                "query=",
-                "query=" + java.net.URLEncoder.encode(query, "UTF-8"))
-        }
-
-        // Append query to the end of pre-configured request
-        configuration.url + "&query=" + java.net.URLEncoder.encode(query, "UTF-8")
+    /**
+      * Appends the query parameter to the endpoint url.
+      * @param query The query.
+      * @return The request URL containing the query.
+      */
+    private def getQueryRequestUrl(query: String): String = {
+        endpointUrl + "&query=" + java.net.URLEncoder.encode(query, "UTF-8")
     }
 }

@@ -34,7 +34,7 @@ class Index
 
     def init() {
         try {
-            graph = Option(cz.payola.web.shared.GraphFetcher.getInitialGraph)
+            graph = cz.payola.web.shared.GraphFetcher.getInitialGraph
         } catch {
             case e: RPCException => {
                 window.alert("Failed to call RPC. " + e.message)

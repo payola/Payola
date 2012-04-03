@@ -210,7 +210,6 @@ object PayolaBuild extends Build
         commonProject, domainProject, scala2JsonProject
     )
 
-
     lazy val dataEntitiesProject = Project(
         "entities", file("data/entities"),
         settings = payolaSettings ++ Seq(
@@ -229,7 +228,7 @@ object PayolaBuild extends Build
     lazy val modelProject = Project(
         "model", file("model"), settings = payolaSettings
     ).dependsOn(
-        commonProject, domainProject, dataProject
+        commonProject, domainProject, dataRdfProject, dataEntitiesProject
     )
 
     lazy val webProject = Project(
@@ -241,7 +240,7 @@ object PayolaBuild extends Build
     lazy val webSharedProject = ScalaToJsProject(
         "shared", file("web/shared"), WebSettings.javaScriptsDir / "shared", payolaSettings
     ).dependsOn(
-        commonProject, dataProject
+        modelProject
     )
 
     lazy val webClientProject = ScalaToJsProject(

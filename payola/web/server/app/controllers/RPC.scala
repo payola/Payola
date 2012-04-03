@@ -15,19 +15,19 @@ object RPC extends Controller
     _loadGraphSerializationRules
     
     def _loadGraphSerializationRules = {
-        val graphClass = new SimpleSerializationClass(classOf[cz.payola.data.model.graph.RDFGraph])
+        val graphClass = new SimpleSerializationClass(classOf[cz.payola.common.rdf.Graph])
         val graphRule = new BasicSerializationRule(Some(classOf[cz.payola.common.rdf.Graph]))
         jsonSerializer.addSerializationRule(graphClass, graphRule)
 
-        val edgeClass = new SimpleSerializationClass(classOf[cz.payola.data.model.graph.RDFEdge])
+        val edgeClass = new SimpleSerializationClass(classOf[cz.payola.common.rdf.Edge])
         val edgeRule = new BasicSerializationRule(Some(classOf[cz.payola.common.rdf.Edge]))
         jsonSerializer.addSerializationRule(edgeClass, edgeRule)
 
-        val literalNodeClass = new SimpleSerializationClass(classOf[cz.payola.data.model.graph.RDFLiteralNode])
+        val literalNodeClass = new SimpleSerializationClass(classOf[cz.payola.common.rdf.LiteralVertex])
         val literalNodeRule = new BasicSerializationRule(Some(classOf[cz.payola.common.rdf.LiteralVertex]))
         jsonSerializer.addSerializationRule(literalNodeClass, literalNodeRule)
 
-        val identifiedNodeClass = new SimpleSerializationClass(classOf[cz.payola.data.model.graph.RDFIdentifiedNode])
+        val identifiedNodeClass = new SimpleSerializationClass(classOf[cz.payola.common.rdf.IdentifiedVertex])
         val identifiedNodeRule = new BasicSerializationRule(Some(classOf[cz.payola.common.rdf.IdentifiedVertex]))
         jsonSerializer.addSerializationRule(identifiedNodeClass, identifiedNodeRule)
     }
