@@ -354,11 +354,26 @@ class JSONSerializer
       * @return
       */
     private def serializeOption(opt: Option[_], processedObjects: ArrayBuffer[Any]): String = {
-        if (opt.isEmpty) {
-            "null"
-        } else {
-            serializeObject(opt.get, processedObjects)
+        val jsonBuilder: JSONStringBuilder = new JSONStringBuilder(this, prettyPrint, "{")
+        val builder = jsonBuilder.stringBuilder
+        if (prettyPrint) {
+            builder.append('\n')
         }
+
+        if (opt.isEmpty){
+            jsonBuilder.appendKeySerializedValue("__class__", "None", true)
+            jsonBuilder.appendKeySerializedValue("__value__", "null", false)
+        }else{
+            jsonBuilder.appendKeySerializedValue("__class__", "Some", true)
+            jsonBuilder.appendKeyValue("__value__", opt.get, false)
+        }
+
+        if (prettyPrint) {
+            builder.append('\n')
+        }
+
+        builder.append('}')
+        builder.toString
     }
 
     /** Serializes an object - generally AnyRef 
