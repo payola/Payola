@@ -14,5 +14,5 @@ class Group(id: String = "", name: String = "", owner: User = null)
 */
 class Group(val id: String = "", val name: String = "", val owner: User = null)
 {
-    def ownerId: String = if (owner == null) "" else owner.id
+    val ownerId: String = if (owner == null) "" else owner.id
 }
