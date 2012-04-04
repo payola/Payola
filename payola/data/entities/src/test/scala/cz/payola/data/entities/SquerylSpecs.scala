@@ -36,11 +36,11 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
         PayolaDB.save(group)
 
         transaction {
-            assert(user.ownedGroups2.single.name == group.name)
+            assert(user.ownedGroups2.single.name == group.name, "Invalid group owner")
 
             user.memberedGroups.associate(group)
 
-            assert(group.members2.single.name == user.name)
+            assert(group.members2.single.name == user.name, "Invalid group member")
         }
 
     }

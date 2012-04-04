@@ -4,8 +4,8 @@ import collection.mutable._
 import cz.payola._
 import generic.{ConcreteEntity, SharedAnalysesOwner, ConcreteOwnedEntity, ConcreteNamedEntity}
 
-class Group(protected var _name: String, protected val _owner: User)
-    extends ConcreteEntity
+class Group(id:String, protected var _name: String, protected val _owner: User)
+    extends ConcreteEntity(id)
     with common.entities.Group
     with ConcreteNamedEntity
     with ConcreteOwnedEntity

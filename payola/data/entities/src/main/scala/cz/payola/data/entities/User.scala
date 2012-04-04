@@ -4,16 +4,15 @@ import org.squeryl.dsl.OneToMany
 import org.squeryl.KeyedEntity
 
 class User(
-        i: String,
+        id: String,
         name: String,
         pwd: String,
         email: String)
-    extends cz.payola.domain.entities.User(name)
+    extends cz.payola.domain.entities.User(id, name)
     with KeyedEntity[String]
 {
-    override val id: String = i
-    _password = pwd
-    _email = email
+    password_=(pwd)
+    email_=(email)
 
     lazy val ownedGroups2: OneToMany[Group] = PayolaDB.groupOwnership.left(this)
 

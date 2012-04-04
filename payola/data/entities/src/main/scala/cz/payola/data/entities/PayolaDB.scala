@@ -3,7 +3,7 @@ package cz.payola.data.entities
 import org.squeryl.adapters.H2Adapter
 import org.squeryl.PrimitiveTypeMode._
 import java.lang.Class
-import org.squeryl.{KeyedEntity, Session, SessionFactory, Schema}
+import org.squeryl.{KeyedEntity, Session, SessionFactory, Schema, Table}
 import org.squeryl.dsl.CompositeKey2
 
 object PayolaDB extends Schema
@@ -51,61 +51,63 @@ object PayolaDB extends Schema
         }
     }
 
-    def save(user: User) = {
+    def save(entity: cz.payola.common.entities.Entity) = {
 
         transaction {
-            if (users.where(u => u.id === user.id).size == 0) {
-                users.insert(user)
+            // Get properly typed entity
+            // (properly means that can be persisted)
+            val e = entity match {
+                case x: User => entity.asInstanceOf[User]
+                case x: Group => entity.asInstanceOf[Group]
+                case _ => throw new Exception("Unpersistable entity type")
+            }
+
+            if (e.isPersisted) {
+                e.update
+                println("updated")
             }
             else {
-                update(users)(u =>
-                  where(u.id === user.id)
-                  set(u.name := user.name,
-                      //TODO: u.password := user.password,
-                      u.email := user.email)
-                )
+                // TODO: method is called and finishes, but doesnt save any data in DB
+                // result is None
+                val result = e.save
+                println("saved")
             }
-        }
-    }
+ /*
+            val table = entity match {
+                case x: User => users
+                case x: Group => groups
+                case _ => throw new Exception("Unpersistable entity type")
+            }
 
-    def save(group: Group) = {
 
-        transaction {
-            if (groups.where(g => g.id === group.id).size == 0) {
-                groups.insert(group)
-            }
-            else {
-                update(groups)(g =>
-                  where(g.id === group.id)
-                  set(g.name := group.name)
-                )
-            }
+            if (table.where(x => x.id === x.id).size == 0) {
+                table.insert(e)
+            } */
         }
     }
 
     def getUserById(id: String) : Option[User] = {
-
-        transaction {
-            val result = users.where(u => u.id === id)
-            if (result.size == 0) {
-                None
-            }
-            else {
-                Some(result.single)
-            }
-        }
+        _getByID(users, id)
     }
 
     def getGroupById(id: String) : Option[Group] = {
+        _getByID(groups, id)
+    }
 
-        transaction {
-            val result = groups.where(g => g.id === id)
-            if (result.size == 0) {
-                None
+    private def _getByID[A <: cz.payola.common.entities.Entity](table: Table[A], id: String): Option[A] = {
+        try {
+            transaction {
+                val result = table.where(e => e.id === id)
+                if (result.size == 0) {
+                    None
+                }
+                else {
+                    Some(result.single)
+                }
             }
-            else {
-                Some(result.single)
-            }
+        }
+        catch {
+            case _ => None
         }
     }
 }
