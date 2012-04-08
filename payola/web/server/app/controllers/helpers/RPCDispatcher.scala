@@ -2,9 +2,10 @@ package controllers.helpers
 
 import play.api.mvc.Request
 import cz.payola.scala2json.JSONSerializer
-import controllers.ReflectionDTO
+import controllers.InvocationInfo
 import cz.payola.scala2json.classes.SimpleSerializationClass
 import cz.payola.scala2json.rules.BasicSerializationRule
+import s2js.runtime.s2js.RPCException
 
 /**
   *
@@ -37,11 +38,7 @@ class RPCDispatcher(jsonSerializer: JSONSerializer)
 
         // get the name of the method
         // when empty, throw an exception
-        val fqdn = params.get("method").getOrElse(null).head
-
-        if (fqdn == null) {
-            throw new Exception
-        }
+        val fqdn = params.get("method").flatMap(_.headOption).getOrElse(throw new Exception("TODO"))
 
         // sort the params list with the parameter name (presumably a ordering-index - 1,2,3,...)
         params.toList.sortBy {
@@ -115,12 +112,17 @@ class RPCDispatcher(jsonSerializer: JSONSerializer)
 
         // update each parameter and replace it with its properly typed representation
         val paramArray = constructParamArray(params.size, 0, params, dto.methodToRun, paramTypes)
+        try
+        {
+            // invoke the remote method (!? for synchronous behaviour)
+            val result = dto.methodToRun.invoke(dto.runnableObj, paramArray: _*)
 
-        // invoke the remote method (!? for synchronous behaviour)
-        val result = dto.methodToRun.invoke(dto.runnableObj, paramArray: _*)
-
-        val serialized = jsonSerializer.serialize(result)
-        serialized
+            val serialized = jsonSerializer.serialize(result)
+            serialized
+        }catch {
+            case e: RPCException => jsonSerializer.serialize(e)
+            case e: Exception => jsonSerializer.serialize(new RPCException(e.getMessage))
+        }
     }
 
     private def constructParamArray(paramsSize: Int, extraSpace: Int, params: Iterable[Seq[String]],
@@ -153,11 +155,11 @@ class RPCDispatcher(jsonSerializer: JSONSerializer)
         val methodToRun: java.lang.reflect.Method = methodOption.getOrElse(null)
         val runnableObj = clazz.getField("MODULE$").get(objectName)
 
-        val dto = new ReflectionDTO(methodToRun, clazz, runnableObj)
+        val dto = new InvocationInfo(methodToRun, clazz, runnableObj)
         dto
     }
 
-    private def executeWithActors(paramArray: Array[java.lang.Object], paramsSize: Int, dto: ReflectionDTO) = {
+    private def executeWithActors(paramArray: Array[java.lang.Object], paramsSize: Int, dto: InvocationInfo) = {
         // create and start the actor
         val executor = new RPCActionExecutor()
         executor.start()

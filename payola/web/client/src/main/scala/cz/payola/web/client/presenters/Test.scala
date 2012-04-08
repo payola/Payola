@@ -54,6 +54,16 @@ class Test
 
         try
         {
+            RPCTester.throwException
+            window.alert("Exception was expected to be caught!")
+        }catch{
+            case e: RPCException => {
+                window.alert("Yay!")
+            }
+        }
+
+        try
+        {
             testException
             window.alert("Exception was expected to be caught!")
         }catch{
