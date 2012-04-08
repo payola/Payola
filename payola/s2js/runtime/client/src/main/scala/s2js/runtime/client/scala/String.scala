@@ -1,6 +1,7 @@
 package s2js.runtime.client.scala
 
-import s2js.compiler.{dependency, javascript}
+import s2js.compiler.javascript
+import s2js.runtime.client.scala.collection.immutable.StringOps
 
 class String
 {
@@ -13,10 +14,10 @@ class String
     @javascript("return self.lastIndexOf(c);")
     def lastIndexOf(c: Char): Int = -1
 
-    @dependency("scala.collection.immutable.StringOps")
-    @javascript("""
-        var o = new scala.collection.immutable.StringOps(self);
-        return o.endsWith(new scala.collection.immutable.StringOps(that));
-    """)
-    def endsWith(that: String): Boolean = false
+    def startsWith(that: String): Boolean = asStringOps.startsWith(that.asStringOps)
+
+    def endsWith(that: String): Boolean = asStringOps.endsWith(that.asStringOps)
+
+    @javascript("return new scala.collection.immutable.StringOps(self);")
+    def asStringOps: StringOps = null
 }

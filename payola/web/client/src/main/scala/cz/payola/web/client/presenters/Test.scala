@@ -3,7 +3,7 @@ package cz.payola.web.client.presenters
 import s2js.adapters.js.browser._
 import cz.payola.web.shared.RPCTester
 import s2js.compiler.javascript
-import s2js.runtime.client.RPCException
+import s2js.runtime.client.rpc
 
 class Test
 {
@@ -35,14 +35,12 @@ class Test
         if (!(RPCTester.testParamArray(List(1,2,3)) == 6)){
             window.alert("fail test 9")
         }
-        RPCTester.testParamArrayAsync(List(1,2,3))
-        {x =>
-            if (x != 6)
-            {
-                window.alert("fail test 9.5 (a)")
-            }
+        RPCTester.testParamArrayAsync(List(1,2,3)) {
+            case 6 => // NOOP, success
+            case _ => window.alert("fail test 9.5 (a)")
+        } {throwable =>
+            window.alert("fail test 9.5 (b)")
         }
-        {e => window.alert("fail test 9.5 (b)") }
 
         if (!(RPCTester.testParamArrayDouble(List(1.1,2.2,3.3)) == 6.6)){
             window.alert("fail test 10")
@@ -52,19 +50,17 @@ class Test
             window.alert("fail test 11")
         }
 
-        try
-        {
+        try {
             testException
             window.alert("Exception was expected to be caught!")
-        }catch{
-            case e: RPCException => {
-
-            }
+        } catch {
+            case e: rpc.Exception => // NOOP, success
+            case _ => window.alert("Wrong type of exception caught!")
         }
     }
 
     @javascript("""
-        s2js.RPCWrapper.callSync("hello",[])
+        s2js.runtime.client.rpc.Wrapper.callSync("hello", [], [])
     """)
     def testException = None
 }

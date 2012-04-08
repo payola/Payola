@@ -1,16 +1,23 @@
 package s2js.runtime.client.scala.collection
 
+import mutable.ArrayBuffer
 import s2js.runtime.client.scala.util.control.Breaks._
 import s2js.compiler.javascript
+
+object Seq
+{
+    // TODO just a hack to make the map function work.
+    def canBuildFrom: Boolean = true
+}
 
 trait Seq extends Iterable
 {
     @javascript("[]")
-    var internalJsArray: AnyRef = null
+    var internalJsArray: ArrayBuffer = null
 
     def getInternalJsArray = internalJsArray
 
-    def setInternalJsArray(value: AnyRef) {
+    def setInternalJsArray(value: ArrayBuffer) {
         internalJsArray = value
     }
 
@@ -22,7 +29,11 @@ trait Seq extends Iterable
     def foreach[U](f: Double => U) {}
 
     @javascript("self.getInternalJsArray().push(x);")
-    def +=(x: Any) {}
+    def append(x: Any) {}
+
+    def +=(x: Any) {
+        append(x)
+    }
 
     // From TraversableLike
     def reversed: Iterable = {
@@ -37,7 +48,7 @@ trait Seq extends Iterable
     override def size: Int = 0
 
     @javascript("""
-        if (s2js.runtime.client.isUndefined(self.getInternalJsArray()[n])) {
+        if (s2js.runtime.client.js.isUndefined(self.getInternalJsArray()[n])) {
             throw new scala.NoSuchElementException('An item with index ' + n + ' is not present.');
         }
         return self.getInternalJsArray()[n];
@@ -96,6 +107,27 @@ trait Seq extends Iterable
         exists(_ == x)
     }
 
+    def startsWith(prefix: Seq): Boolean = {
+        prefix.length match {
+            case prefixLength if prefixLength > length => false
+            case 0 => true
+            case prefixLength => {
+                var result = true
+                breakable {() =>
+                    var index = 0
+                    prefix.foreach {item =>
+                        if (item != this(index)) {
+                            result = false
+                            break()
+                        }
+                        index += 1
+                    }
+                }
+                result
+            }
+        }
+    }
+
     def endsWith(suffix: Seq): Boolean = {
         suffix.length match {
             case suffixLength if suffixLength > length => false
@@ -117,6 +149,10 @@ trait Seq extends Iterable
             }
         }
     }
+
+    def toArray: ArrayBuffer = getInternalJsArray
+
+    def toBuffer: ArrayBuffer = getInternalJsArray
 }
 
 

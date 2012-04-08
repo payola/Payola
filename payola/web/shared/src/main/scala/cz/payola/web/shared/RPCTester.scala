@@ -31,7 +31,7 @@ object RPCTester
     }
 
     def testParamString (param: String): String = {
-        param.reverse
+         param.reverse
     }
 
     def testParamChar (param: Char): Char = {

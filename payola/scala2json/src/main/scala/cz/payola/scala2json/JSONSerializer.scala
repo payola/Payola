@@ -175,7 +175,7 @@ class JSONSerializer
         var result = ""
         // Skip custom serialization if serializing as reference
         if (serializeObjectAsReference
-            && !obj.isInstanceOf[Option[_]]
+            && obj != None
             && !obj.isInstanceOf[collection.Map[_, _]]
             && !obj.isInstanceOf[collection.Traversable[_]]
             && !obj.isInstanceOf[Array[_]]) {
@@ -198,7 +198,7 @@ class JSONSerializer
                 case _: java.lang.Boolean => if (obj.asInstanceOf[java.lang.Boolean].booleanValue) "true" else "false"
                 case _: java.lang.Character => JSONUtilities
                     .escapeChar(obj.asInstanceOf[java.lang.Character].charValue())
-                case opt: Option[_] => serializeOption(opt, processedObjects)
+                case None => "scala.None"
                 case map: scala.collection.Map[_, _] => serializeMap(map, processedObjects)
                 case trav: scala.collection.Traversable[_] => serializeTraversable(trav, processedObjects)
                 case arr: Array[_] => serializeArray(arr, processedObjects)
@@ -348,34 +348,7 @@ class JSONSerializer
         builder.toString
     }
 
-    /**
-      *
-      * @param opt
-      * @return
-      */
-    private def serializeOption(opt: Option[_], processedObjects: ArrayBuffer[Any]): String = {
-        val jsonBuilder: JSONStringBuilder = new JSONStringBuilder(this, prettyPrint, "{")
-        val builder = jsonBuilder.stringBuilder
-        if (prettyPrint) {
-            builder.append('\n')
-        }
-
-        if (opt.isEmpty){
-            jsonBuilder.appendKeySerializedValue("__class__", "'scala.None'", true)
-        }else{
-            jsonBuilder.appendKeySerializedValue("__class__", "'scala.Some'", true)
-            jsonBuilder.appendKeyValue("__value__", opt.get, false, processedObjects)
-        }
-
-        if (prettyPrint) {
-            builder.append('\n')
-        }
-
-        builder.append('}')
-        builder.toString
-    }
-
-    /** Serializes an object - generally AnyRef 
+    /** Serializes an object - generally AnyRef
       *
       * For most types, just calls obj.toString, the exception is
       * Boolean, which is converted to 'true' or 'false', Char is converted

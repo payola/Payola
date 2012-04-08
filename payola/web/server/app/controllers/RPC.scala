@@ -100,7 +100,7 @@ object RPC extends Controller
 
     /**
       * Processes the given HTTP request and returns a response. The expected result is a serialized JSON object. See
-      * s2js.runtime.s2js.RPCWrapper to see, how a object is deserialized to a JSON string and for more information
+      * s2js.runtime.client.rpc.Wrapper to see, how a object is deserialized to a JSON string and for more information
       * on a possibility of a custom deserialisation (currently not available).
       *
       * It expects a classic form/www-data POST request with a mandatory field named "method". It maps the request to
@@ -120,11 +120,7 @@ object RPC extends Controller
 
         // get the name of the method
         // when empty, throw an exception
-        val fqdn = params.get("method").getOrElse(null).head
-
-        if (fqdn == null) {
-            throw new Exception
-        }
+        val fqdn = params.get("method").flatMap(_.headOption).getOrElse(throw new Exception)
 
         // sort the params list with the parameter name (presumably a ordering-index - 1,2,3,...)
         params.toList.sortBy {

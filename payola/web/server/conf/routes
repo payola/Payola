@@ -4,7 +4,7 @@
 
 # Home page
 GET     /                           controllers.Application.index()
-GET     /bootstrap.js               controllers.Application.javaScriptBootstrap()
+GET     /javaScriptPackage/:symbol  controllers.Application.javaScriptPackage(symbol: String)
 POST    /RPC                        controllers.RPC.index()
 GET     /test/RPC                   controllers.Application.rpcTest()
 POST    /RPC/async                  controllers.RPC.async()

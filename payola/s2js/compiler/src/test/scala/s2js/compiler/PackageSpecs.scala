@@ -132,5 +132,38 @@ class PackageSpecs extends CompilerFixtureSpec
                     """
                 }
         }
+
+        it("package objects accessed from within the package are properly qulified") {
+            configMap =>
+                scalaCode {
+                    """
+                        package a.b.c
+
+                        object `package` {
+                            def foo() {}
+                        }
+
+                        object bar {
+                            def bar() {
+                                foo()
+                            }
+                        }
+                    """
+                } shouldCompileTo {
+                    """
+                        s2js.runtime.client.ClassLoader.provide('a.b.c');
+                        s2js.runtime.client.ClassLoader.provide('a.b.c.bar');
+
+                        a.b.c.bar.bar = function() {
+                            var self = this;
+                            a.b.c.foo();
+                        };
+                        a.b.c.bar.__class__ = new s2js.runtime.client.Class('a.b.c.bar', []);
+
+                        a.b.c.foo = function() { var self = this; };
+                        a.b.c.__class__ = new s2js.runtime.client.Class('a.b.c', []);
+                    """
+                }
+        }
     }
 }

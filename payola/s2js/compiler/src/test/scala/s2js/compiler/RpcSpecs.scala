@@ -39,11 +39,10 @@ class RpcSpecs extends CompilerFixtureSpec
                 """
                     s2js.runtime.client.ClassLoader.provide('client');
                     s2js.runtime.client.ClassLoader.provide('server.o');
-                    s2js.runtime.client.ClassLoader.require('s2js.runtime.client.RPCWrapper');
 
                     client.main = function() {
                         var self = this;
-                        var fooValue = s2js.runtime.client.RPCWrapper.callSync('server.o.foo', [2, 'xyz'],
+                        var fooValue = s2js.runtime.client.rpc.Wrapper.callSync('server.o.foo', [2, 'xyz'],
                             ['scala.Int', 'java.lang.String']);
                     };
                     client.__class__ = new s2js.runtime.client.Class('client', []);
@@ -73,12 +72,11 @@ class RpcSpecs extends CompilerFixtureSpec
                 """
                     s2js.runtime.client.ClassLoader.provide('client');
                     s2js.runtime.client.ClassLoader.provide('server.o');
-                    s2js.runtime.client.ClassLoader.require('s2js.runtime.client.RPCWrapper');
                     s2js.runtime.client.ClassLoader.require('scala.collection.immutable.List');
 
                     client.main = function() {
                         var self = this;
-                        var fooValue = s2js.runtime.client.RPCWrapper.callSync('server.o.foo',
+                        var fooValue = s2js.runtime.client.rpc.Wrapper.callSync('server.o.foo',
                             [scala.collection.immutable.List.$apply(1, 2, 3),
                             scala.collection.immutable.List.$apply('aaa', 'bbb', 'ccc'),
                             scala.collection.immutable.List.$apply(1.1, 2.2, 3.0)],
@@ -116,12 +114,11 @@ class RpcSpecs extends CompilerFixtureSpec
                 """
                     s2js.runtime.client.ClassLoader.provide('client');
                     s2js.runtime.client.ClassLoader.provide('server.o');
-                    s2js.runtime.client.ClassLoader.require('s2js.runtime.client.RPCWrapper');
 
                     client.main = function() {
                         var self = this;
                         var x = 0;
-                        s2js.runtime.client.RPCWrapper.callAsync('server.o.foo', ['xyz'], ['java.lang.String'],
+                        s2js.runtime.client.rpc.Wrapper.callAsync('server.o.foo', ['xyz'], ['java.lang.String'],
                             function(i) { x = i; }, function(e) { x = -1; });
                     };
                     client.__class__ = new s2js.runtime.client.Class('client', []);

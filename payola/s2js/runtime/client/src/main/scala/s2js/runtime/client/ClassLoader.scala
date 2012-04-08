@@ -2,7 +2,6 @@ package s2js.runtime.client
 
 import collection.mutable.ArrayBuffer
 import s2js.compiler.javascript
-import s2js.adapters.js.browser._
 import s2js.runtime.shared.DependencyProvider
 
 object ClassLoader
@@ -11,15 +10,17 @@ object ClassLoader
 
     def load(classNames: Seq[String]) {
         val classesToLoad = classNames.filter(!loadedClasses.contains(_))
-        val dependencyPackage = DependencyProvider.get(classesToLoad, loadedClasses)
-        
-        // Process the dependency package.
-        dependencyPackage.providedSymbols.foreach(provide(_))
-        if (dependencyPackage.javaScript != "") {
-            evaluateJs(dependencyPackage.javaScript)
-        }
-        if (dependencyPackage.css != "") {
-            evaluateCss(dependencyPackage.css)
+        if (classesToLoad.nonEmpty) {
+            val dependencyPackage = DependencyProvider.get(classesToLoad, loadedClasses)
+
+            // Process the dependency package.
+            dependencyPackage.providedSymbols.foreach(provide(_))
+            if (dependencyPackage.javaScript != "") {
+                s2js.adapters.js.browser.eval(dependencyPackage.javaScript)
+            }
+            if (dependencyPackage.css != "") {
+                evaluateCss(dependencyPackage.css)
+            }
         }
     }
 
@@ -39,9 +40,6 @@ object ClassLoader
         }
         declareNamespace(className)
     }
-
-    @javascript("eval (javascript);")
-    private def evaluateJs(javascript: String) {}
 
     @javascript("""
         var head = document.getElementsByTagName('head')[0];

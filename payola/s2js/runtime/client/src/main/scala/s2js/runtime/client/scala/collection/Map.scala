@@ -35,7 +35,7 @@ trait Map[A, B] extends Iterable
     def -=(x: Any) {}
 
     @javascript("""
-        if (s2js.runtime.client.isUndefined(self.internalJsObject[key])) {
+        if (s2js.runtime.client.js.isUndefined(self.internalJsObject[key])) {
             return scala.None;
         } else {
             return new scala.Some(self.internalJsObject[key]);
