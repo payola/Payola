@@ -7,47 +7,59 @@ import s2js.runtime.client.rpc
 
 class Test
 {
+
+    def failTest(index: Int, description: String, reason: String) = {
+        //TODO: implement String.format in JS
+        //val failString = String.format("Test no. %d failed:\n[%s]\n\nReason: %s",index.toString(),description, reason)
+        val failString = "Test no. "+index+" failed:\\n["+description+"]\\n\\nReason: "+reason
+        window.alert(failString)
+    }
+
     def init() {
+
         if (!(RPCTester.procedure == 1)) {
-            window.alert("fail test 1");
+            failTest(1, "Basic test on calling RPC without any parameter.", "Result is not equal to 1.")
         }
         if (!(RPCTester.testBoolean)) {
-            window.alert("fail test 2");
+            failTest(2, "Basic test expecting Boolean as result.", "Result is not true.")
         }
-        if (!(RPCTester.testString == "test")) {
-            window.alert("fail test 3");
+        if (!(RPCTester.testString == "te\"st")) {
+            failTest(3, "A parameterless call, String expected as result. The result contains quote to test escaping", "Result is not equal to te&quote;st.")
         }
         if (!(RPCTester.testParamString("abcd efgh") == "hgfe dcba")) {
-            window.alert("fail test 4");
+            failTest(4, "A test with a String parameter. It expects a string to be returned, moreover, it should be the parameter, but reversed.", "Result is not equal to 'hgfe dcba'.")
         }
         if (!(RPCTester.testParamBoolean(false))) {
-            window.alert("fail test 5");
+            failTest(5, "A test with a Boolean parameter. It expects a Boolean to be returned, moreover, it should be the negation of the parameter - true.", "Result is not true.")
         }
         if (!(RPCTester.testParamChar('A') == 'A')) {
-            window.alert("fail test 6");
+            failTest(6, "Char echo.", "Result is not 'A'.")
         }
         if (!(RPCTester.testParamInt(2) == 4)) {
-            window.alert("fail test 7");
+            failTest(7, "A test with a Int parameter. The expected result is the parameter doubled by 2.", "Result is not 4.")
         }
         if (!(RPCTester.testParamDouble(2.0) == 2.0)) {
-            window.alert("fail test 8");
+            failTest(8, "A test with a Double parameter to examine the deserialization hell. The expected result is the parameter itself.", "Result is not 2.0.")
         }
         if (!(RPCTester.testParamArray(List(1,2,3)) == 6)){
-            window.alert("fail test 9")
+            failTest(9, "A test with a List as a parameter. The expected result is a sum of the values in the list.", "Result is not 6.")
         }
+
+        val test10Desc = "A test with a List as parameter. But ASYNC. The expected result is a sum of the values in the list."
+
         RPCTester.testParamArrayAsync(List(1,2,3)) {
             case 6 => // NOOP, success
-            case _ => window.alert("fail test 9.5 (a)")
+            case _ => failTest(10, test10Desc, "Result is not 6.")
         } {throwable =>
-            window.alert("fail test 9.5 (b)")
+            failTest(10, test10Desc, "Something went wrong on the server.")
         }
 
         if (!(RPCTester.testParamArrayDouble(List(1.1,2.2,3.3)) == 6.6)){
-            window.alert("fail test 10")
+            failTest(11, "Trying to get a sum on a List[Double]", "Result is not 6.6.")
         }
 
         if (!(RPCTester.testParamArrayString(List("ab","cd","ef")) == "abcdef")){
-            window.alert("fail test 11")
+            failTest(12, "Running a test with a list of Strings. Expecting to retreive concat.", "Result is not equal to 'abcdef'.")
         }
 /*
         try
@@ -60,13 +72,15 @@ class Test
             }
         }*/
 
+        val test13Desc = "Testing a rpc.Exception throw on a bad RPC call."
+
         try
         {
             testException
-            window.alert("Exception was expected to be caught!")
+            failTest(13, test13Desc, "Exception was not thrown.")
         } catch {
-            case e: rpc.Exception => // NOOP, success
-            case _ => window.alert("Wrong type of exception caught!")
+            case e: rpc.Exception => window.alert("YES!")// NOOP, success
+            case _ => failTest(13, test13Desc, "Exception was thrown, but is not of type rpc.Exception")
         }
     }
 

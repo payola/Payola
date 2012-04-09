@@ -81,7 +81,7 @@ object RPC extends Controller
     def dispatchRequest(request: Request[AnyContent], async: Boolean) = {
         try {
             val params = parseParams(request)
-            val response = dispatcher.dispatchRequest(params, true)
+            val response = dispatcher.dispatchRequest(params, async)
             Ok(response)
         } catch {
             case e: Exception => InternalServerError(jsonSerializer.serialize(e))
