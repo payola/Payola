@@ -9,6 +9,7 @@ private object Wrapper
     val deserializer = new Deserializer()
 
     val parameterSeparator = "&"
+    val requestStatusDone = 4
 
     def callSync(procedureName: String, parameters: ArrayBuffer[Any], parameterTypes: ArrayBuffer[String]): Any = {
         val request = createXmlHttpRequest("/RPC", isAsync = false)
@@ -43,9 +44,12 @@ private object Wrapper
     private def processRequestResult(request: XMLHttpRequest, onSuccess: (Any => Unit),
         onException: (Throwable => Unit)): Any = {
 
-        val result = if (request.readyState == 4 && request.status == 200) {
+        val result = if (request.readyState == requestStatusDone && request.status == 200) {
             deserializer.deserialize(eval("(" + request.responseText + ")"))
-        } else {
+        } else if ((request.readyState == requestStatusDone) && (request.status == 500)) {
+            //TODO: one should decide whether the returned JSON is an Exception?
+            deserializer.deserialize(request.responseText)
+        } else if (request.readyState == requestStatusDone) {
             new Exception("RPC call exited with status code " + request.status + ".")
         }
 

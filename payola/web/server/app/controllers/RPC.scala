@@ -57,27 +57,43 @@ import cz.payola.scala2json.JSONSerializer
   */
 object RPC extends Controller
 {
-    val dispatcher = new RPCDispatcher(new JSONSerializer)
+    val jsonSerializer = new JSONSerializer
+    val dispatcher = new RPCDispatcher(jsonSerializer)
 
     /**
       * Endpoint of the synchronous RPC call (mapped on /rpc)
       * @return
       */
-    def index() = Action {request =>
-        val params = parseParams(request)
-        val response = dispatcher.dispatchRequest(params)
-        Ok(response)
-    }
+    def index() = Action {request => dispatchRequest(request, false)}
 
     /**
       * Endpoint of the asynchronous RPC call (maped on /rpc/async)
       * @return
       */
-    def async() = Action {request =>
-        val params = parseParams(request)
-        val response = dispatcher.dispatchRequest(params, true)
-        Ok(response)
+    def async() = Action {request => dispatchRequest(request, true)}
+
+    /**
+      *
+      * @param request
+      * @param async
+      * @return
+      */
+    def dispatchRequest(request: Request[AnyContent], async: Boolean) = {
+        try {
+            val params = parseParams(request)
+            val response = dispatcher.dispatchRequest(params, true)
+            Ok(response)
+        } catch {
+            case e: Exception => InternalServerError(jsonSerializer.serialize(e))
+            //case e: rpc.Exception => InternalServerError(jsonSerializer.serialize(e))
+        }
     }
+
+    /**
+      *
+      * @param request
+      * @return
+      */
     def parseParams(request: Request[AnyContent]) = {
         request.body match {
             case AnyContentAsFormUrlEncoded(data) => data

@@ -4,13 +4,6 @@ import cz.payola.common.rdf.Graph
 import cz.payola.model.DataFacade
 import s2js.compiler.async
 
-/**
-  *
-  * @author jirihelmich
-  * @created 3/19/12 5:49 PM
-  * @package cz.payola.web.shared
-  */
-
 @remote
 object RPCTester
 {
@@ -66,10 +59,14 @@ object RPCTester
     def testParamArrayString (param: List[String]): String = {
         param.mkString("")
     }
-          /*
+
     def throwException : Graph = {
-        throw new RPCException("Was lazy to do this.")
-    }   */
+        throw new Exception("Was lazy to do this.")
+    }
+
+    def throwCustomException : Graph = {
+        throw new RPCTestException()
+    }
 
     def testGraph : Graph = {
         (new DataFacade).getGraph("http://payola.cz")

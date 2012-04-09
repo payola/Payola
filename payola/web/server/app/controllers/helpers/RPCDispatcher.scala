@@ -7,13 +7,6 @@ import cz.payola.scala2json.classes.SimpleSerializationClass
 import cz.payola.scala2json.rules.BasicSerializationRule
 import s2js.runtime.client.rpc
 
-/**
-  *
-  * @author jirihelmich
-  * @created 4/3/12 5:49 PM
-  * @package controllers.helpers
-  */
-
 class RPCDispatcher(jsonSerializer: JSONSerializer)
 {
 
@@ -112,17 +105,12 @@ class RPCDispatcher(jsonSerializer: JSONSerializer)
 
         // update each parameter and replace it with its properly typed representation
         val paramArray = constructParamArray(params.size, 0, params, dto.methodToRun, paramTypes)
-        try
-        {
-            // invoke the remote method (!? for synchronous behaviour)
-            val result = dto.methodToRun.invoke(dto.runnableObj, paramArray: _*)
 
-            val serialized = jsonSerializer.serialize(result)
-            serialized
-        }catch {
-            case e: rpc.Exception => jsonSerializer.serialize(e)
-            //case e: Exception => jsonSerializer.serialize(new RPCException(e.getMessage))
-        }
+        // invoke the remote method (!? for synchronous behaviour)
+        val result = dto.methodToRun.invoke(dto.runnableObj, paramArray: _*)
+
+        val serialized = jsonSerializer.serialize(result)
+        serialized
     }
 
     private def constructParamArray(paramsSize: Int, extraSpace: Int, params: Iterable[Seq[String]],
