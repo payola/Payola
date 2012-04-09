@@ -19,6 +19,7 @@ class MethodSpecs extends CompilerFixtureSpec
                                 val x = m
                                 val y = o1.m
                                 val z = o1.m.length
+                                val emptyList = scala.collection.immutable.List.empty[String]
                             }
                         }
                     """
@@ -26,6 +27,7 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                         s2js.runtime.client.ClassLoader.provide('o1');
                         s2js.runtime.client.ClassLoader.provide('o2');
+                        s2js.runtime.client.ClassLoader.require('scala.collection.immutable.List');
 
                         o1.m = function() {
                             var self = this;
@@ -44,6 +46,7 @@ class MethodSpecs extends CompilerFixtureSpec
                             var x = self.m();
                             var y = o1.m();
                             var z = o1.m().$length();
+                            var emptyList = scala.collection.immutable.List.empty();
                         };
                         o2.__class__ = new s2js.runtime.client.Class('o2', []);
                     """

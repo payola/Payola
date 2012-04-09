@@ -83,8 +83,8 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('pkg.A');
-                        goog.provide('pkg.t');
+                        s2js.runtime.client.ClassLoader.provide('pkg.A');
+                        s2js.runtime.client.ClassLoader.provide('pkg.t');
 
                         pkg.A = function() {
                             var self = this;
@@ -99,7 +99,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             var self = this;
                             self._x = value;
                         };
-                        pkg.A.prototype.__class__ = new s2js.Class('pkg.A', []);
+                        pkg.A.prototype.__class__ = new s2js.runtime.client.Class('pkg.A', []);
 
                         pkg.t.test = function() {
                             var self = this;
@@ -109,7 +109,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             a.x_$eq('new x');
                             a.y = 'new y';
                         };
-                        pkg.t.__class__ = new s2js.Class('pkg.t', []);
+                        pkg.t.__class__ = new s2js.runtime.client.Class('pkg.t', []);
                     """
                 }
         }
@@ -339,13 +339,13 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             var self = this;
                             return (function($selector$1) {
                                 if ($selector$1 === 0) {
-                                    return A.x;
+                                    return self.x;
                                 }
                                 if ($selector$1 === 1) {
-                                    return A.y;
+                                    return self.y;
                                 }
                                 if ($selector$1 === 2) {
-                                    return A.z;
+                                    return self.z;
                                 }
                                 if (true) {
                                     return (function() {

@@ -2,27 +2,31 @@ package s2js.runtime.client
 
 import s2js.compiler.javascript
 import s2js.adapters.goog
-import s2js.runtime.client.scala.NotImplementedException
 
 object `package`
 {
     @javascript("""
-        if (!s2js.runtime.client.isUndefined(anObject.__class__)) {
+        if (s2js.runtime.client.js.isDefined(anObject.__class__) && anObject.__class__ != null) {
             return anObject.__class__;
+        } else {
+            throw new scala.RuntimeException('The object has no class specified.');
         }
-        return null;
     """)
     def classOf(anObject: Any): Class = null
 
+    def isClassDefined(className: String): Boolean = {
+        s2js.runtime.client.js.isDefined(s2js.adapters.js.browser.eval(className))
+    }
+
     private def isInstanceOf(anObject: Any, classFullName: String): Boolean = {
-        val classNameIsAny = classFullName == "Any"
-        val classNameIsAnyOrAnyVal = classNameIsAny || classFullName == "AnyVal"
-        val classNameIsAnyOrAnyRef = classNameIsAny || classFullName == "AnyRef"
+        val classNameIsAny = classFullName == "scala.Any"
+        val classNameIsAnyOrAnyVal = classNameIsAny || classFullName == "scala.AnyVal"
+        val classNameIsAnyOrAnyRef = classNameIsAny || classFullName == "scala.AnyRef"
         goog.typeOf(anObject) match {
             case "undefined" | "null" => false
             case "number" => {
                 classFullName match {
-                    case "scala.Byte" | "scala.Short" | "scala.Int" | "scala.Long" => isInteger(anObject)
+                    case "scala.Byte" | "scala.Short" | "scala.Int" | "scala.Long" => js.isInteger(anObject)
                     case "scala.Float" | "scala.Double" => true
                     case _ => classNameIsAnyOrAnyVal
                 }
@@ -30,15 +34,14 @@ object `package`
             case "boolean" => classNameIsAnyOrAnyVal || classFullName == "scala.Boolean"
             case "string" => {
                 classFullName match {
-                    case "scala.Char" => isChar(anObject)
+                    case "scala.Char" => js.isChar(anObject)
                     case "scala.String" => true
                     case _ => classNameIsAnyOrAnyRef
                 }
             }
-            case "function" => throw new NotImplementedException("Type check of a function isn't supported.")
+            case "function" => throw new RuntimeException("Type check of a function isn't supported.")
             case "object" if classNameIsAnyOrAnyRef => true
-            case _ if classOf(anObject) != null => classOf(anObject).isSubClassOrEqual(classFullName)
-            case _ => false // TODO
+            case _ => classOf(anObject).isSubClassOrEqual(classFullName)
         }
     }
 
@@ -50,12 +53,4 @@ object `package`
         anObject
     }
 
-    @javascript("return goog.typeOf(anObject) === 'undefined';")
-    def isUndefined(anObject: Any): Boolean = false
-
-    @javascript("return anObject % 1 === 0;")
-    private def isInteger(anObject: Any): Boolean = false
-
-    @javascript("return anObject.length === 1;")
-    private def isChar(anObject: Any): Boolean = false
 }

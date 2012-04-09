@@ -160,14 +160,14 @@ trait Iterable
         var result = ""
         var separator = ""
         var suffix = ""
-        if (!s2js.runtime.client.isUndefined(end)) {
+        if (s2js.runtime.client.js.isDefined(end)) {
             result = start
             separator = sep
             suffix = end
-        } else if (!s2js.runtime.client.isUndefined(sep)) {
+        } else if (s2js.runtime.client.js.isDefined(sep)) {
             result = start
             separator = start
-        } else if (!s2js.runtime.client.isUndefined(start)) {
+        } else if (s2js.runtime.client.js.isDefined(start)) {
             separator = start
         }
 

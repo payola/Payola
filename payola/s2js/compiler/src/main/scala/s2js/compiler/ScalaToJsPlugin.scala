@@ -54,8 +54,16 @@ class ScalaToJsPlugin(val global: Global) extends Plugin
                         val outputFile = new File(outputDirectory.getAbsolutePath + "/" + packagePath + "/" + fileName)
                         outputFile.getParentFile.mkdirs()
 
-                        val compiler = new PackageDefCompiler(global, unit.source.file, packageDef)
-                        io.File(outputFile).writeAll(compiler.compile())
+                        try {
+                            val compiler = new PackageDefCompiler(global, unit.source.file, packageDef)
+                            io.File(outputFile).writeAll(compiler.compile())
+                        } catch {
+                            case e: Exception => {
+                                println(e)
+                                throw e
+                            }
+                        }
+
                     } else {
                         throw new ScalaToJsException(
                             "The %s source file must contain a package definition.".format(unit.source.file.name)

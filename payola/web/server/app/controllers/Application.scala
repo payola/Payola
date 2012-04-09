@@ -11,8 +11,8 @@ object Application extends Controller
     def rpcTest = Action {
         Ok(views.html.test())
     }
-    def javaScriptBootstrap = Action {
-        val javaScript = DependencyProvider.get(List("bootstrap"), Nil).javaScript
+    def javaScriptPackage(symbol: String) = Action {
+        val javaScript = DependencyProvider.get(List("bootstrap", symbol), Nil).javaScript
         Ok(javaScript)
     }
 }

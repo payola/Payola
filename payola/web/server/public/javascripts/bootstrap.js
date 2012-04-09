@@ -22,3 +22,6 @@ s2js.runtime.client.ClassLoader.require('bootstrap.TypeSystem');
 
 // Bootstrap the class loader.
 s2js.runtime.client.ClassLoader.require('bootstrap.ClassLoader');
+
+// Bootstrap the RPC.
+s2js.runtime.client.ClassLoader.require('s2js.runtime.client.rpc.Wrapper');

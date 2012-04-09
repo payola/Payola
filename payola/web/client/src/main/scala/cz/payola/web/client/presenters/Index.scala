@@ -4,20 +4,13 @@ import s2js.adapters.js.browser._
 import cz.payola.common.rdf.Graph
 import cz.payola.web.client.views.plugins.Plugin
 import cz.payola.web.client.views.plugins.visual.techniques.tree.TreeTechnique
-import s2js.compiler.dependency
-import s2js.runtime.client.RPCException
+import s2js.runtime.client.rpc
 import cz.payola.web.client.views.plugins.visual.techniques.circle.CircleTechnique
 import cz.payola.web.client.views.plugins.visual.techniques.gravity.GravityTechnique
 import cz.payola.web.client.views.plugins.visual.techniques.minimalization.MinimalizationTechnique
 import cz.payola.web.client.model.graph.{SimpleIdentifiedVertex, SimpleEdge, SimpleGraph}
 import cz.payola.web.shared.GraphFetcher
 
-// TODO remove after classloading is done
-@dependency("scala.collection.mutable.ListBuffer")
-@dependency("cz.payola.common.rdf.IdentifiedVertex")
-@dependency("cz.payola.common.rdf.LiteralVertex")
-@dependency("cz.payola.common.rdf.Graph")
-@dependency("cz.payola.common.rdf.Edge")
 class Index
 {
     var graph: Option[Graph] = None
@@ -37,7 +30,7 @@ class Index
         try {
             graph = Some(cz.payola.web.shared.GraphFetcher.getInitialGraph)
         } catch {
-            case e: RPCException => {
+            case e: rpc.Exception => {
                 window.alert("Failed to call RPC. " + e.message)
                 graph = None
             }

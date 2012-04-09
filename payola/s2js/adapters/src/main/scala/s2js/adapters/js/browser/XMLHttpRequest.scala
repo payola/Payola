@@ -16,14 +16,14 @@ class XMLHttpRequest
 
     var onerror: () => Unit = null
 
-    def abort(): Unit = {}
+    def abort() {}
 
     def getResponseHeader(header: String): String = ""
 
     def open(method: String, url: String, async: Boolean = true, username: String = "",
-        password: String = ""): Unit = {}
+        password: String = "") {}
 
-    def send(data: String = ""): Unit = {}
+    def send(data: String = "") {}
 
-    def setRequestHeader(header: String, value: String): Unit = {}
+    def setRequestHeader(header: String, value: String) {}
 }

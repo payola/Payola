@@ -2,7 +2,7 @@ package s2js.runtime.client.scala.collection.mutable
 
 import s2js.compiler.javascript
 
-object ListBuffer extends s2js.runtime.client.scala.collection.SeqCompanion
+object ListBuffer extends s2js.runtime.client.scala.collection.SeqCompanion[ListBuffer]
 {
     def empty = new ListBuffer
 

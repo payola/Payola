@@ -2,7 +2,7 @@ package s2js.runtime.client.scala.collection.immutable
 
 import s2js.compiler.javascript
 
-object StringOps extends s2js.runtime.client.scala.collection.SeqCompanion
+object StringOps extends s2js.runtime.client.scala.collection.SeqCompanion[StringOps]
 {
     def empty = new StringOps("")
 
