@@ -13,7 +13,7 @@ import cz.payola.web.shared.GraphFetcher
 
 class Index
 {
-    var graph: Option[Graph] = None
+    var graph: Graph = null
 
     val plugins = List[Plugin](
         new CircleTechnique(),
@@ -28,15 +28,15 @@ class Index
 
     def init() {
         try {
-            graph = Some(cz.payola.web.shared.GraphFetcher.getInitialGraph)
+            graph = cz.payola.web.shared.GraphFetcher.getInitialGraph
         } catch {
             case e: rpc.Exception => {
                 window.alert("Failed to call RPC. " + e.message)
-                graph = None
+                graph = cz.payola.web.shared.GraphFetcher.getInitialGraph
             }
             case e => {
                 window.alert("Graph fetch exception. " + e.toString)
-                graph = None
+                graph = cz.payola.web.shared.GraphFetcher.getInitialGraph
             }
         }
 
@@ -51,7 +51,7 @@ class Index
         // TODO rename canvas-holder to something else.
         // TODO don't init the plugin with the graph. Rather init it blank (so it may show something like
         // "loading graph") and when the graph is successfully fetched, call update on the plugin.
-        plugin.init(graph.get, document.getElementById("canvas-holder"))
+        plugin.init(graph, document.getElementById("canvas-holder"))
         plugin.redraw()
     }
 

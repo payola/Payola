@@ -49,8 +49,19 @@ class Test
         if (!(RPCTester.testParamArrayString(List("ab","cd","ef")) == "abcdef")){
             window.alert("fail test 11")
         }
+/*
+        try
+        {
+            RPCTester.throwException
+            window.alert("Exception was expected to be caught!")
+        }catch{
+            case e: RPCException => {
+                window.alert("Yay!")
+            }
+        }*/
 
-        try {
+        try
+        {
             testException
             window.alert("Exception was expected to be caught!")
         } catch {

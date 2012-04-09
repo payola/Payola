@@ -1,8 +1,8 @@
 package cz.payola.web.shared
 
 import cz.payola.common.rdf.Graph
-import s2js.compiler.async
 import cz.payola.model.DataFacade
+import s2js.compiler.async
 
 /**
   *
@@ -19,7 +19,7 @@ object RPCTester
     }
     
     def testString : String = {
-        "test"
+        """te"st"""
     }
 
     def testBoolean : Boolean = {
@@ -66,12 +66,16 @@ object RPCTester
     def testParamArrayString (param: List[String]): String = {
         param.mkString("")
     }
-    
-    def testException : Int = {
-        7
-    }
+          /*
+    def throwException : Graph = {
+        throw new RPCException("Was lazy to do this.")
+    }   */
 
     def testGraph : Graph = {
         (new DataFacade).getGraph("http://payola.cz")
+    }
+    
+    def testException : Int = {
+        7
     }
 }
