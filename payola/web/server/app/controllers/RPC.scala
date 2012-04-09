@@ -3,6 +3,7 @@ package controllers
 import helpers.RPCDispatcher
 import play.api.mvc._
 import cz.payola.scala2json.JSONSerializer
+import s2js.runtime.client.rpc
 
 /**
   * The only controller which handles requests from the client side. It receives a POST request with the following
@@ -84,10 +85,13 @@ object RPC extends Controller
             val response = dispatcher.dispatchRequest(params, async)
             Ok(response)
         } catch {
-            case e: Exception => InternalServerError(jsonSerializer.serialize(e))
+            case e: java.lang.ClassNotFoundException => raiseError(new rpc.Exception("Invalid remote object name."))
+            case e: Exception => raiseError(e)
             //case e: rpc.Exception => InternalServerError(jsonSerializer.serialize(e))
         }
     }
+
+    def raiseError(e: Exception) = { InternalServerError(jsonSerializer.serialize()) }
 
     /**
       *
