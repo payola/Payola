@@ -28,8 +28,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="org.scala-lang_scala-library_2.9.1" level="project" />
     <orderEntry type="library" name="org.scala-lang_scala-compiler_2.9.1" level="project" />
-    <orderEntry type="library" name="org.squeryl_squeryl_2.9.1_0.9.5-RC1" level="project" />
-    <orderEntry type="library" name="cglib_cglib-nodep_2.2" level="project" />
     <orderEntry type="library" name="org.apache.jena_jena-core_2.7.0-incubating" level="project" />
     <orderEntry type="library" name="org.apache.jena_jena-iri_0.9.0-incubating" level="project" />
     <orderEntry type="library" name="com.ibm.icu_icu4j_3.4.4" level="project" />
@@ -39,6 +37,7 @@
     <orderEntry type="library" name="org.slf4j_slf4j-log4j12_1.6.4" level="project" />
     <orderEntry type="library" name="log4j_log4j_1.2.16" level="project" />
     <orderEntry type="library" name="org.squeryl_squeryl_2.9.0-1_0.9.5" level="project" />
+    <orderEntry type="library" name="cglib_cglib-nodep_2.2" level="project" />
     <orderEntry type="library" name="com.h2database_h2_1.3.165" level="project" />
     <orderEntry type="library" name="mysql_mysql-connector-java_5.1.18" level="project" />
     <orderEntry type="library" name="postgresql_postgresql_9.1-901.jdbc4" level="project" />
@@ -123,7 +122,7 @@
     <orderEntry type="library" scope="TEST" name="org.easytesting_fest-assert_1.4" level="project" />
     <orderEntry type="library" scope="TEST" name="org.easytesting_fest-util_1.1.6" level="project" />
     <orderEntry type="module" module-name="common" exported="" />
-    <orderEntry type="module" module-name="data" exported="" />
+    <orderEntry type="module" module-name="model" exported="" />
     <orderEntry type="module" module-name="scala2json" exported="" />
     <orderEntry type="module" module-name="shared" exported="" />
     <orderEntry type="module" module-name="client" exported="" />

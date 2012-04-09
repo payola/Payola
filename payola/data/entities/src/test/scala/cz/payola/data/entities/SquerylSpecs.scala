@@ -2,7 +2,7 @@ package cz.payola.data.entities
 
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
-import org.squeryl.PrimitiveTypeMode._
+import PayolaDB._
 
 class SquerylSpecs extends FlatSpec with ShouldMatchers
 {
@@ -15,7 +15,10 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
 
     "1) User" should "be persited" in {
         val user = new User("1", "name1", "pwd1", "email1")
-        PayolaDB.save(user);
+        //PayolaDB.save(user);
+        user.save
+        user.name += "1"
+        user.update
 
         val u = PayolaDB.getUserById(user.id)
         assert (u != None)
@@ -32,8 +35,8 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
         val user = PayolaDB.getUserById("1").get
 
         val group = new Group("1", "group1", user)
-
-        PayolaDB.save(group)
+        group.save
+        //PayolaDB.save(group)
 
         transaction {
             assert(user.ownedGroups2.single.name == group.name, "Invalid group owner")

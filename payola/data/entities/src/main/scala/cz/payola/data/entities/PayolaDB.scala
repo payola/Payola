@@ -2,40 +2,37 @@ package cz.payola.data.entities
 
 import org.squeryl.adapters.H2Adapter
 import org.squeryl.PrimitiveTypeMode._
-import java.lang.Class
 import org.squeryl.{KeyedEntity, Session, SessionFactory, Schema, Table}
 import org.squeryl.dsl.CompositeKey2
 
 object PayolaDB extends Schema
 {
-    val databaseUsername = "sa"
-    val databasePassword = ""
-    val databaseConnection = "jdbc:h2:tcp://localhost/~/h2/payola"
+    private val databaseUsername = "sa"
+    private val databasePassword = ""
+    private val databaseConnection = "jdbc:h2:tcp://localhost/~/h2/payola"
 
     val users = table[User]("users")
     val groups = table[Group]("groups")
-    private val members = table[GroupMembership]
+    val analyses = table[Analysis]("analyses")
+    val plugins = table[Plugin]("plugins")
+    val pluginInstances = table[PluginInstance]("pluginInstances")
 
-    on(users)(user => declare(
-        user.id is (primaryKey),
-        user.name is (unique)
-    ))
+    private val members = table[GroupMembership]("groups_members")
 
-    on(groups)(group => declare(
-        group.id is (primaryKey),
-        group.name is (unique)
-    ))
-
-    lazy val groupMembership =
+    val groupMembership =
         manyToManyRelation(users, groups)
             .via[GroupMembership]((u,g,gm) => (gm.memberId === u.id, g.id === gm.groupId))
 
-    lazy val groupOwnership =
+    val groupOwnership =
         oneToManyRelation(users, groups)
             .via((u, g) => u.id === g.ownerId)
 
+    val analysisOwnership =
+            oneToManyRelation(users, analyses)
+                .via((u, a) => u.id === a.ownerId)
+
     def startDatabaseSession():Unit = {
-        Class.forName("org.h2.Driver");
+        java.lang.Class.forName("org.h2.Driver");
         SessionFactory.concreteFactory = Some(() => Session.create(
             java.sql.DriverManager.getConnection(databaseConnection, databaseUsername, databasePassword),
             new H2Adapter)
@@ -43,6 +40,30 @@ object PayolaDB extends Schema
     }
 
     def createSchema() = {
+        on(users)(user => declare(
+            user.id is (primaryKey),
+            user.name is (unique)
+        ))
+
+        on(groups)(group => declare(
+            group.id is (primaryKey),
+            group.name is (unique)
+        ))
+
+        on(analyses)(analysis => declare(
+            analysis.id is (primaryKey),
+            analysis.name is (unique)
+        ))
+
+        on(plugins)(plugin => declare(
+            plugin.id is (primaryKey),
+            plugin.name is (unique)
+        ))
+
+        on(pluginInstances)(instance => declare(
+            instance.id is (primaryKey)
+        ))
+
 
         transaction {
             drop
@@ -67,7 +88,7 @@ object PayolaDB extends Schema
                 println("updated")
             }
             else {
-                // TODO: method is called and finishes, but doesnt save any data in DB
+                // TODO: method is called and finishes, but doesn't save any data in DB
                 // result is None
                 val result = e.save
                 println("saved")
@@ -92,6 +113,18 @@ object PayolaDB extends Schema
 
     def getGroupById(id: String) : Option[Group] = {
         _getByID(groups, id)
+    }
+
+    def getAnalysisById(id: String) : Option[Analysis] = {
+        _getByID(analyses, id)
+    }
+
+    def getPluginById(id: String) : Option[Plugin] = {
+        _getByID(plugins, id)
+    }
+
+    def getPluginInstanceById(id: String) : Option[PluginInstance] = {
+        _getByID(pluginInstances, id)
     }
 
     private def _getByID[A <: cz.payola.common.entities.Entity](table: Table[A], id: String): Option[A] = {

@@ -1,15 +1,15 @@
 package cz.payola.domain.entities
 
-import cz.payola._
 import collection.mutable._
 import generic.ConcreteEntity
 import parameters.{Parameter, ParameterInstance}
 
-class PluginInstance(protected val _plugin: Plugin)
-    extends ConcreteEntity
-    with common.entities.PluginInstance
+class PluginInstance(id:String, protected val _plugin: Plugin)
+    extends ConcreteEntity(id)
+    with cz.payola.common.entities.PluginInstance
 {
-    require(plugin != null, "Cannot create a plugin instance of a null plugin!")
+    //TODO: cannot create DB Schema with this check
+    //require(plugin != null, "Cannot create a plugin instance of a null plugin!")
 
     type PluginType = Plugin
 
@@ -21,7 +21,6 @@ class PluginInstance(protected val _plugin: Plugin)
 
     /** Sets a parameter instance for parameter.
       *
-      * @param p The parameter.
       * @param v The parameter instance.
       *
       * @throws IllegalArgumentException if either of the parameter is null or if the plugin doesn't contain such
