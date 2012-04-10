@@ -3,11 +3,11 @@ package cz.payola.domain.entities.generic
 import cz.payola.common.entities.OwnedEntity
 import cz.payola.domain.entities.User
 
-trait ConcreteOwnedEntity extends ConcreteEntity with OwnedEntity
+trait ConcreteOwnedEntity extends OwnedEntity
 {
     type UserType = User
 
-    protected val _ownerID: String = ""
+    protected val _owner: UserType
 
-    def isOwnedByUser(u: UserType): Boolean = _ownerID == u.id
+    def isOwnedByUser(u: UserType): Boolean = _owner.id == u.id
 }

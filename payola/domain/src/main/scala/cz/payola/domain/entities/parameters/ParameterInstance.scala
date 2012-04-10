@@ -1,16 +1,18 @@
 package cz.payola.domain.entities.parameters
 
 import cz.payola._
-import domain.entities.generic.ConcreteEntity
+import domain.entities.generic.{ConcreteNamedEntity, ConcreteEntity}
 import sun.reflect.generics.reflectiveObjects.NotImplementedException
 
 /** A protected class that represents the parameter instance with an actual value. As this,
   * it is abstract, see subclasses.
   */
 
-abstract class ParameterInstance[A](protected val _parameter: Parameter[A],
-    protected var _value: A) extends common.entities.ParameterInstance[A]
-    with ConcreteEntity
+abstract class ParameterInstance[A](
+        protected val _parameter: Parameter[A],
+        protected var _value: A)
+    extends ConcreteEntity
+    with common.entities.ParameterInstance[A]
 {
     type ParameterType = Parameter[A]
 

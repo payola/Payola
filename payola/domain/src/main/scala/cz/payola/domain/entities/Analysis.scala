@@ -1,11 +1,13 @@
 package cz.payola.domain.entities
 
-import cz.payola.common
+import generic.{ConcreteEntity, ConcreteOwnedEntity, ConcreteNamedEntity}
 import scala.collection.mutable._
-import cz.payola.domain.entities.generic.{ConcreteOwnedEntity, ConcreteNamedEntity}
 
-class Analysis(protected var _name: String, protected val _owner: User) extends common.entities.Analysis with
-ConcreteNamedEntity with ConcreteOwnedEntity
+class Analysis(id:String, protected var _name: String, protected val _owner: User)
+    extends ConcreteEntity(id)
+    with ConcreteNamedEntity
+    with ConcreteOwnedEntity
+    with cz.payola.common.entities.Analysis
 {
     type PluginInstanceType = PluginInstance
 

@@ -1,12 +1,14 @@
 package cz.payola.domain.entities
 
+import generic.{ConcreteEntity, SharedAnalysesOwner}
 import permissions.privilege.PublicPrivilege
 import scala.collection.mutable._
-import cz.payola.domain.entities.generic.{SharedAnalysesOwner, ConcreteNamedEntity}
 import cz.payola.domain.entities.permissions.privilege.{GroupPrivilege, AnalysisPrivilege, Privilege}
 
-class User(protected var _name: String) extends cz.payola.common.entities.User with ConcreteNamedEntity with
-SharedAnalysesOwner
+class User(id: String, protected var _name: String)
+    extends ConcreteEntity(id)
+    with cz.payola.common.entities.User
+    with SharedAnalysesOwner
 {
     type GroupType = Group
 
