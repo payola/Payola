@@ -25,7 +25,10 @@
         <option name="IF_BRACE_FORCE" value="1" />
         <option name="WRAP_LONG_LINES" value="true" />
         <ScalaCodeStyleSettings>
+          <option name="FINALLY_BRACE_FORCE" value="3" />
+          <option name="TRY_BRACE_FORCE" value="3" />
           <option name="PLACE_CLOSURE_PARAMETERS_ON_NEW_LINE" value="false" />
+          <option name="USE_SCALADOC2_FORMATTING" value="true" />
         </ScalaCodeStyleSettings>
         <XML>
           <option name="XML_LEGACY_SETTINGS_IMPORTED" value="true" />
@@ -84,18 +87,6 @@
         </codeStyleSettings>
         <codeStyleSettings language="JavaScript">
           <option name="KEEP_BLANK_LINES_IN_CODE" value="1" />
-          <option name="ALIGN_MULTILINE_PARAMETERS" value="false" />
-          <option name="CALL_PARAMETERS_WRAP" value="1" />
-          <option name="METHOD_PARAMETERS_WRAP" value="1" />
-          <option name="FOR_STATEMENT_WRAP" value="1" />
-          <option name="IF_BRACE_FORCE" value="1" />
-          <option name="PARENT_SETTINGS_INSTALLED" value="true" />
-        </codeStyleSettings>
-        <codeStyleSettings language="PHP">
-          <option name="KEEP_BLANK_LINES_IN_DECLARATIONS" value="0" />
-          <option name="KEEP_BLANK_LINES_IN_CODE" value="1" />
-          <option name="KEEP_BLANK_LINES_BEFORE_RBRACE" value="0" />
-          <option name="BLANK_LINES_AROUND_FIELD" value="1" />
           <option name="ALIGN_MULTILINE_PARAMETERS" value="false" />
           <option name="CALL_PARAMETERS_WRAP" value="1" />
           <option name="METHOD_PARAMETERS_WRAP" value="1" />

@@ -5,6 +5,7 @@ tmp/
 payola/lib/s2js-adapters_2.9.1-0.2.jar
 payola/lib/s2js-compiler_2.9.1-0.2.jar
 payola/web/server/public/javascripts/compiled/
+payola/web/server/public/javascripts/runtime/
 payola/web/server/public/javascripts/runtime-shared/
 payola/web/server/public/javascripts/runtime-client/
 payola/web/server/public/javascripts/common/

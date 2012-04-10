@@ -4,16 +4,16 @@ import s2js.adapters.js.browser._
 import cz.payola.common.rdf.Graph
 import cz.payola.web.client.views.plugins.Plugin
 import cz.payola.web.client.views.plugins.visual.techniques.tree.TreeTechnique
-import s2js.runtime.client.rpc
 import cz.payola.web.client.views.plugins.visual.techniques.circle.CircleTechnique
 import cz.payola.web.client.views.plugins.visual.techniques.gravity.GravityTechnique
 import cz.payola.web.client.views.plugins.visual.techniques.minimalization.MinimalizationTechnique
 import cz.payola.web.client.model.graph.{SimpleIdentifiedVertex, SimpleEdge, SimpleGraph}
 import cz.payola.web.shared.GraphFetcher
+import s2js.runtime.shared.rpc
 
 class Index
 {
-    var graph: Option[Graph] = None
+    var graph: Graph = null
 
     val plugins = List[Plugin](
         new CircleTechnique(),
@@ -28,15 +28,15 @@ class Index
 
     def init() {
         try {
-            graph = Some(cz.payola.web.shared.GraphFetcher.getInitialGraph)
+            graph = GraphFetcher.getInitialGraph
         } catch {
             case e: rpc.Exception => {
                 window.alert("Failed to call RPC. " + e.message)
-                graph = None
+                graph = GraphFetcher.getInitialGraph
             }
             case e => {
                 window.alert("Graph fetch exception. " + e.toString)
-                graph = None
+                graph = GraphFetcher.getInitialGraph
             }
         }
 
@@ -51,7 +51,7 @@ class Index
         // TODO rename canvas-holder to something else.
         // TODO don't init the plugin with the graph. Rather init it blank (so it may show something like
         // "loading graph") and when the graph is successfully fetched, call update on the plugin.
-        plugin.init(graph.get, document.getElementById("canvas-holder"))
+        plugin.init(graph, document.getElementById("canvas-holder"))
         plugin.redraw()
     }
 
