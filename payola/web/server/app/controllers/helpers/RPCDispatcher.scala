@@ -1,11 +1,7 @@
 package controllers.helpers
 
-import play.api.mvc.Request
-import cz.payola.scala2json.JSONSerializer
 import controllers.InvocationInfo
-import cz.payola.scala2json.classes.SimpleSerializationClass
-import cz.payola.scala2json.rules.BasicSerializationRule
-import s2js.runtime.client.rpc
+import s2js.runtime.shared.rpc
 
 class RPCDispatcher(jsonSerializer: GraphSerializer)
 {
@@ -108,6 +104,15 @@ class RPCDispatcher(jsonSerializer: GraphSerializer)
         serialized
     }
 
+    /**
+      *
+      * @param paramsSize
+      * @param extraSpace
+      * @param params
+      * @param methodToRun
+      * @param paramTypes
+      * @return
+      */
     private def constructParamArray(paramsSize: Int, extraSpace: Int, params: Iterable[Seq[String]],
         methodToRun: java.lang.reflect.Method, paramTypes: Seq[String]) = {
         val paramArray = new Array[java.lang.Object](paramsSize + extraSpace)
@@ -122,26 +127,43 @@ class RPCDispatcher(jsonSerializer: GraphSerializer)
         paramArray
     }
 
+    /**
+      *
+      * @param objectName
+      * @param methodName
+      * @return
+      */
     private def getReflectionObjects(objectName: String, methodName: String) = {
         // while objects are not really a Java thing, they are compiled into static classes named with trailing $ sign
-        val clazz = Class.forName(objectName + "$"); // TODO: use Scala reflection when released
+        try{
+            val clazz = Class.forName(objectName + "$"); // TODO: use Scala reflection when released
 
-        // get the desired method on the object
-        val methodOption = clazz.getMethods.find(_.getName == methodName)
-        // if the method is not defined, throw an Exception
-        if (!methodOption.isDefined) {
-            throw new Exception
+            // get the desired method on the object
+            val methodOption = clazz.getMethods.find(_.getName == methodName)
+            // if the method is not defined, throw an Exception
+            if (!methodOption.isDefined) {
+                throw new Exception
+            }
+
+            // "objectify" the desired mezhod to be able to invoke it later
+            // this is a very ugly Java stuff, but Scala is not able to do this at the time
+            val methodToRun: java.lang.reflect.Method = methodOption.getOrElse(null)
+            val runnableObj = clazz.getField("MODULE$").get(objectName)
+
+            val dto = new InvocationInfo(methodToRun, clazz, runnableObj)
+            dto
+        }catch{
+            case e: java.lang.ClassNotFoundException => throw new rpc.Exception("Invalid remote object name.")
         }
-
-        // "objectify" the desired mezhod to be able to invoke it later
-        // this is a very ugly Java stuff, but Scala is not able to do this at the time
-        val methodToRun: java.lang.reflect.Method = methodOption.getOrElse(null)
-        val runnableObj = clazz.getField("MODULE$").get(objectName)
-
-        val dto = new InvocationInfo(methodToRun, clazz, runnableObj)
-        dto
     }
 
+    /**
+      *
+      * @param paramArray
+      * @param paramsSize
+      * @param dto
+      * @return
+      */
     private def executeWithActors(paramArray: Array[java.lang.Object], paramsSize: Int, dto: InvocationInfo) = {
         // create and start the actor
         val executor = new RPCActionExecutor()
@@ -192,6 +214,13 @@ class RPCDispatcher(jsonSerializer: GraphSerializer)
         }
     }
 
+    /**
+      *
+      * @param input
+      * @param paramType
+      * @param paramTypeClient
+      * @return
+      */
     private def parseSequence(input: Seq[String], paramType: Class[_], paramTypeClient: String): java.lang.Object = {
         val seqString = input.head
 
