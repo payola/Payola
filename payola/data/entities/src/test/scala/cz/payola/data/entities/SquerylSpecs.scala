@@ -2,6 +2,7 @@ package cz.payola.data.entities
 
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
+import schema.PayolaDB
 import PayolaDB._
 
 class SquerylSpecs extends FlatSpec with ShouldMatchers
