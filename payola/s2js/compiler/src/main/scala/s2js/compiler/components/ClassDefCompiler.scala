@@ -3,7 +3,7 @@ package s2js.compiler.components
 import s2js.compiler.ScalaToJsException
 import scala.tools.nsc.Global
 import scala.collection.mutable
-import mutable.ListBuffer
+import collection.mutable.{LinkedHashMap, ListBuffer}
 
 /**A factory for ClassDefCompiler objects. */
 object ClassDefCompiler
@@ -90,6 +90,18 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         "$amp$amp" -> "&&",
         "$bar$bar" -> "||",
         "unary_$bang" -> "!"
+    )
+
+    /**The special JavaScript characters and their escape sequences. */
+    private val stringEscapeMap = LinkedHashMap[String, String](
+        "\\" -> """\\""",
+        "\b" -> """\b""",
+        "\f" -> """\f""",
+        "\n" -> """\n""",
+        "\r" -> """\r""",
+        "\t" -> """\t""",
+        "'" -> """\'""",
+        "\"" -> """\""""
     )
 
     /**
@@ -1120,7 +1132,8 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
      * @return The JavaScript string.
      */
     private def toJsString(value: String): String = {
-        "'" + value.replace("\\", "\\\\").replace("'", "\\'") + "'"
+        val r = "'" + stringEscapeMap.foldLeft(value)((z, escape) => z.replace(escape._1, escape._2)) + "'"
+        r
     }
 
     /**
