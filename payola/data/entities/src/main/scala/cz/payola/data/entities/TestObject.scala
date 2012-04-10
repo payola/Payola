@@ -1,12 +1,16 @@
 package cz.payola.data.entities
 
-import dao.UserDAO
+import dao._
 import org.squeryl.PrimitiveTypeMode._
-import PayolaDB._
+import schema.PayolaDB
 
 object TestObject
 {
     val userDao = new UserDAO()
+    val groupDao = new GroupDAO()
+    val analysisDao = new AnalysisDAO()
+    val pluginDao = new PluginDAO
+    val piDao = new PluginInstanceDAO()
 
     def main(args: Array[String]) = {
         println("1")
@@ -17,73 +21,73 @@ object TestObject
 
         println("3")
         val user = new User("u1", "name1", "pwd1", "email1")
-
-        //PayolaDB.save(user);
-        //userDao.persist(user)
-        user.persist
+        userDao.persist(user)
 
         user.name += "1"
-        user.persist
+        userDao.persist(user)
 
         println("4")
         val group = new Group("g1", "group1", user)
-        //PayolaDB.save(group)
-        group.persist
+        groupDao.persist(group)
 
         val group2 = new Group("g2", "group2", user)
-        //PayolaDB.save(group2)
-        //group2.save
-        group2.persist
+        groupDao.persist(group2)
 
         val analysis = new Analysis("a1", "an1", user)
-        analysis.save
+        analysisDao.persist(analysis)
 
         val plugin = new Plugin("p1", "plugin1")
-        plugin.save
+        pluginDao.persist(plugin)
 
         val pluginInstance = new PluginInstance("pi1", plugin)
-        pluginInstance.save
+        piDao.persist(pluginInstance)
 
-        transaction {
-            user.memberedGroups.associate(group)
-            user.memberedGroups.associate(group2)
+        user.becomeMemberOf(group)
+        group2.addMember(user)
 
-            for (g <- user.ownedGroups2) {
-                println(g.name)
-            }
-
-            for (a <- user.ownedAnalyses2) {
-                println(a.name)
-            }
-
-            // Validate saved values
-            assert(user.memberedGroups.size == 2)
-            assert(user.ownedGroups2.size == 2)
-            assert(user.ownedAnalyses2.size == 1)
-
-            assert(group.members2.single.name == user.name, "Invalid group owner")
-            assert(group2.members2.single.name == user.name, "Invalid group2 owner")
-
-            val u = userDao.getById(user.id)
-            assert(u != None)
-            assert(u.get.name == user.name)
-
-            /*
-            val g = PayolaDB.getGroupById(group.id)
-            assert(g != None)
-            assert(g.get.name == group.name)
-
-            val a = PayolaDB.getAnalysisById(analysis.id)
-            assert(a != None)
-            assert(a.get.name == analysis.name)
-
-            val p = PayolaDB.getPluginById(plugin.id)
-            assert(p != None)
-            assert(p.get.name == plugin.name)
-
-            val pi = PayolaDB.getPluginInstanceById(pluginInstance.id)
-            assert(pi != None)
-            */
+        for (a <- user.memberedGroups2) {
+            println(a.name)
         }
+
+        for (g <- user.ownedGroups2) {
+            println(g.name)
+        }
+
+        for (a <- user.ownedAnalyses2) {
+            println(a.name)
+        }
+
+        // Validate saved values
+        assert(user.memberedGroups2.size == 2)
+        assert(user.ownedGroups2.size == 2)
+        assert(user.ownedAnalyses2.size == 1)
+
+        assert(group.groupMembers2(0).name == user.name, "Invalid group owner")
+        assert(group2.groupMembers2(0).name == user.name, "Invalid group2 owner")
+
+        val u = userDao.getById(user.id)
+        assert(u != None)
+        assert(u.get.name == user.name)
+
+        val g = groupDao.getById(group.id)
+        assert(g != None)
+        assert(g.get.name == group.name)
+
+        val a = analysisDao.getById(analysis.id)
+        assert(a != None)
+        assert(a.get.name == analysis.name)
+
+        val p = pluginDao.getById(plugin.id)
+        assert(p != None)
+        assert(p.get.name == plugin.name)
+
+        val pi = piDao.getById(pluginInstance.id)
+        assert(pi != None)
+
+        // Test userDao
+        assert(userDao.findByUsername(user.name, 0, 1)(0).id == user.id)
+        assert(userDao.findByUsername("invalid name").size == 0)
+        assert(userDao.getUserByCredentials(user.name, user.password).get.id == user.id)
+        assert(userDao.getUserByCredentials("invalid", "credientals") == None)
     }
 }
