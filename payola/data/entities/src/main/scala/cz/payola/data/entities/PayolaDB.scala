@@ -72,7 +72,15 @@ object PayolaDB extends Schema
         }
     }
 
-    def save(entity: cz.payola.common.entities.Entity) = {
+    def persist(persistable: PersistableEntity) {
+        if (persistable.isPersisted) {
+            persistable.update
+        } else {
+            persistable.save
+        }
+    }
+
+    /*def save(entity: cz.payola.common.entities.Entity) = {
 
         transaction {
             // Get properly typed entity
@@ -105,7 +113,7 @@ object PayolaDB extends Schema
                 table.insert(e)
             } */
         }
-    }
+    }*/
 
     def getUserById(id: String) : Option[User] = {
         _getByID(users, id)
