@@ -5,7 +5,6 @@ import cz.payola.web.client.views.plugins.visual.{VisualPlugin, Point, Vector}
 import cz.payola.web.client.views.plugins.visual.graph.{EdgeView, VertexView}
 import cz.payola.common.rdf.Graph
 import s2js.adapters.js.dom.Element
-import s2js.adapters.js.browser.window
 
 abstract class BaseTechnique extends VisualPlugin
 {

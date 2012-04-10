@@ -267,12 +267,6 @@ class Date
     def toUTCString(): String = ""
 
     /**
-     * Returns the number of milliseconds in a date string since midnight of January 1, 1970, according to universal time
-     * @return
-     */
-    def UTC(): Double = 0
-
-    /**
      * Returns the primitive value of a Date object
      * @return
      */

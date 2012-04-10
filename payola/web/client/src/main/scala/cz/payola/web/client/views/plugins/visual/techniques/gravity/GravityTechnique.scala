@@ -4,7 +4,6 @@ import collection.mutable.ListBuffer
 import cz.payola.web.client.views.plugins.visual.graph.{EdgeView, VertexView}
 import cz.payola.web.client.views.plugins.visual.techniques._
 import cz.payola.web.client.views.plugins.visual.{Point, Vector}
-import s2js.adapters.js.browser.window
 import s2js.adapters.js.dom.Date
 
 /**
@@ -32,7 +31,7 @@ class GravityTechnique extends BaseTechnique
       * Sum(vertexViewPacks.velocities) is less than this number.
       * 0.5 is well tested, change it carefully.
       */
-    private val velocitiesStabilization = 0.5
+    private val velocitiesStabilization = 0.8
 
     override def clean() {
         super.clean()
@@ -51,7 +50,7 @@ class GravityTechnique extends BaseTechnique
 
 
         val animationOfThis = new Animation(runningAnimation,
-            graphView.get.vertexViews, Some(flip), redrawQuick, redrawQuick, Some(10))
+            graphView.get.vertexViews, Some(flip), redrawQuick, redrawQuick, Some(50))
 
         basicTreeStructure(graphView.get.vertexViews, true, Some(animationOfThis))
     }
@@ -69,15 +68,17 @@ class GravityTechnique extends BaseTechnique
 
 
         var needToContinue = true
-        val currentTime = new Date()
+        val compStartTime = new Date()
+        var currentTime = new Date()
 
         //run the calculation for the specified time in miliseconds or just run it at once
         while((runDuration.isDefined && needToContinue &&
-            currentTime.getMilliseconds() + runDuration.get > (new Date()).getMilliseconds())
+            compStartTime.getTime() + runDuration.get > currentTime.getTime())
             ||
             (runDuration.isEmpty && needToContinue)) {
 
             needToContinue = run(vertexViewPacks, edgeViewPacks)
+            currentTime = new Date()
         }
 
         val toMove = ListBuffer[(VertexView, Point)]()
