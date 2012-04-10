@@ -87,9 +87,7 @@ object RPC extends Controller
             val response = dispatcher.dispatchRequest(params, async)
             Ok(response)
         } catch {
-            case e: java.lang.ClassNotFoundException => raiseError(new rpc.Exception("Invalid remote object name."))
             case e: Exception => raiseError(e)
-            //case e: rpc.Exception => InternalServerError(jsonSerializer.serialize(e))
         }
     }
 
