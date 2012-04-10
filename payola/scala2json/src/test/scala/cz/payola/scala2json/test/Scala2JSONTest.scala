@@ -38,6 +38,9 @@ class Group(val name: String)
     val thisIsNotInTrait = null
 }
 
+class Exception1(val message: String = "", val cause: Exception = null) extends RuntimeException
+class Exception2(override val message: String = "", cause: Exception = null) extends Exception1(message, cause)
+
 class Scala2JSONTest extends FlatSpec with ShouldMatchers {
     "JSONSerializer" should "handle cyclic dependencies and a BasicSerializationRule." in {
         val u: User = new User("Franta")
@@ -68,6 +71,16 @@ class Scala2JSONTest extends FlatSpec with ShouldMatchers {
 
     "escapeString" should "escape string" in {
         JSONUtilities.escapeString("\"jame\"go\"\"to hess\"\"") should equal ("\"\\\"jame\\\"go\\\"\\\"to hess\\\"\\\"\"")
+    }
+
+    "exception" should "have a message field serialized" in {
+        val serializer: JSONSerializer = new JSONSerializer()
+        val exc = new Exception2("Hello")
+
+        val rule = new CustomValueSerializationRule[Exception2]("message", { (_, exc) => exc.message })
+        serializer.addSerializationRule(new SimpleSerializationClass(classOf[Exception2]), rule)
+
+        assume(serializer.serialize(exc).contains("Hello"))
     }
 
 }
