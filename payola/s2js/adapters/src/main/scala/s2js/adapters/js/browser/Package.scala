@@ -10,6 +10,8 @@ object `package`
 
     object document extends Document
 
+    object console extends Console
+
     val Infinity: Any = null
 
     val NaN: Any = null
