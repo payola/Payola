@@ -4,10 +4,45 @@
 <html>
     <head>
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")"/>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/bootstrap.css")"/>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/bootstrap-responsive.css")"/>
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")"/>
         <title>Payola</title>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+        <script type="text/javascript" src="@routes.Assets.at("javascripts/twitter.bootstrap/bootstrap.js")"></script>
     </head>
         <body>
+            <div class="navbar navbar-fixed-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="@routes.Application.index">Payola</a>
+                        <div class="nav-collapse">
+                            <ul class="nav">
+                                <li class="active"><a href="@routes.Application.index">Home</a></li>
+                                <li><a href="@routes.Application.dashboard">Dashboard</a></li>
+                                <li><a href="@routes.Application.login">Login</a></li>
+                                <li class="dropdown">
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                        Profile<b class="caret"></b>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="@routes.Profile.view("jiri@helmich.cz")">View</a></li>
+                                        <li><a href="@routes.Profile.edit("jiri@helmich.cz")">Edit</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                            <p class="navbar-text pull-right">Logged in as <a href="#">username</a></p>
+                        </div><!--/.nav-collapse -->
+                    </div>
+                </div>
+            </div>
+
             @content
+
         </body>
 </html>
