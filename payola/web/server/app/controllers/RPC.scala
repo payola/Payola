@@ -1,11 +1,8 @@
 package controllers
 
-import helpers.{GraphSerializer, RPCDispatcher}
+import helpers.{ExceptionSerializer, GraphSerializer, RPCDispatcher}
 import play.api.mvc._
-import cz.payola.scala2json.JSONSerializer
-import s2js.runtime.client.rpc
-import cz.payola.scala2json.rules.CustomValueSerializationRule
-import cz.payola.scala2json.classes.SimpleSerializationClass
+import s2js.runtime.shared.rpc
 
 /**
   * The only controller which handles requests from the client side. It receives a POST request with the following
@@ -60,7 +57,7 @@ import cz.payola.scala2json.classes.SimpleSerializationClass
   */
 object RPC extends Controller
 {
-    val exceptionSerializer = new Exception
+    val exceptionSerializer = new ExceptionSerializer
 
     val jsonSerializer = new GraphSerializer
 

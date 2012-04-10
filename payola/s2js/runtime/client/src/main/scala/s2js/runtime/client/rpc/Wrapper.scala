@@ -3,6 +3,7 @@ package s2js.runtime.client.rpc
 import collection.mutable.ArrayBuffer
 import s2js.compiler.javascript
 import s2js.adapters.js.browser._
+import s2js.runtime.shared.rpc.Exception
 
 private object Wrapper
 {

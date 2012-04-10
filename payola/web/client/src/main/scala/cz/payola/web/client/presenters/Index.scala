@@ -4,12 +4,12 @@ import s2js.adapters.js.browser._
 import cz.payola.common.rdf.Graph
 import cz.payola.web.client.views.plugins.Plugin
 import cz.payola.web.client.views.plugins.visual.techniques.tree.TreeTechnique
-import s2js.runtime.client.rpc
 import cz.payola.web.client.views.plugins.visual.techniques.circle.CircleTechnique
 import cz.payola.web.client.views.plugins.visual.techniques.gravity.GravityTechnique
 import cz.payola.web.client.views.plugins.visual.techniques.minimalization.MinimalizationTechnique
 import cz.payola.web.client.model.graph.{SimpleIdentifiedVertex, SimpleEdge, SimpleGraph}
 import cz.payola.web.shared.GraphFetcher
+import s2js.runtime.shared.rpc
 
 class Index
 {
@@ -28,15 +28,15 @@ class Index
 
     def init() {
         try {
-            graph = cz.payola.web.shared.GraphFetcher.getInitialGraph
+            graph = GraphFetcher.getInitialGraph
         } catch {
             case e: rpc.Exception => {
                 window.alert("Failed to call RPC. " + e.message)
-                graph = cz.payola.web.shared.GraphFetcher.getInitialGraph
+                graph = GraphFetcher.getInitialGraph
             }
             case e => {
                 window.alert("Graph fetch exception. " + e.toString)
-                graph = cz.payola.web.shared.GraphFetcher.getInitialGraph
+                graph = GraphFetcher.getInitialGraph
             }
         }
 
