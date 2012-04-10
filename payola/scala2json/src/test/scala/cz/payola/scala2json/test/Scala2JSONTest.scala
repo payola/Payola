@@ -7,6 +7,10 @@ import classes._
 import rules._
 import collection.mutable.{HashMap, ArrayBuffer}
 
+
+class FirstException(val message: String = "", val cause: Exception = null) extends RuntimeException
+class SecondException(override val message: String = "", cause: Exception = null) extends FirstException(message, cause)
+
 /**
   * This test shows some basic capabilities of the JSONSerializer
   */
@@ -70,4 +74,15 @@ class Scala2JSONTest extends FlatSpec with ShouldMatchers {
         JSONUtilities.escapeString("\"jame\"go\"\"to hess\"\"") should equal ("\"\\\"jame\\\"go\\\"\\\"to hess\\\"\\\"\"")
     }
 
-}
+    "exception" should "have a serialized field message" in {
+        val serializer: JSONSerializer = new JSONSerializer()
+        val exc = new SecondException("Hello")
+
+        val rule = new CustomValueSerializationRule[SecondException]("message", { (_, exc) => exc.message })
+        serializer.addSerializationRule(new SimpleSerializationClass(classOf[SecondException]), rule)
+
+        println(serializer.serialize(exc))
+        assume(serializer.serialize(exc).contains("Hello"))
+    }
+
+    }
