@@ -8,6 +8,7 @@ class Group(
         owner: User)
     extends cz.payola.domain.entities.Group(id, name, owner)
     with KeyedEntity[String]
+    with PersistableEntity
 {
     val ownerId: String = if (owner == null) "" else owner.id
 

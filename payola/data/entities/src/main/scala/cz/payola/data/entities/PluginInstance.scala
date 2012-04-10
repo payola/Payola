@@ -7,5 +7,6 @@ class PluginInstance(
         plugin: Plugin)
     extends cz.payola.domain.entities.PluginInstance(id, plugin)
     with KeyedEntity[String]
+    with PersistableEntity
 {
 }
