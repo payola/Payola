@@ -181,7 +181,7 @@ class JSONSerializer
             && !obj.isInstanceOf[Array[_]]) {
             // Must be AnyRef, otherwise it wouldn't get into the processedObjects array
             result = serializePlainObject(obj.asInstanceOf[AnyRef], serializeObjectAsReference, objectID, processedObjects)
-        } else if (serializationClass.isDefined && !serializationClass.get._2.isInstanceOf[CustomValueSerializationRule[_]]) {
+        } else if (serializationClass.isDefined) {
             val rule = serializationClass.get._2
             result = rule match {
                 case basic: BasicSerializationRule => serializeWithRule(obj.asInstanceOf[AnyRef], basic, objectID, processedObjects)
