@@ -7,13 +7,8 @@ import cz.payola.scala2json.classes.SimpleSerializationClass
 import cz.payola.scala2json.rules.BasicSerializationRule
 import s2js.runtime.client.rpc
 
-class RPCDispatcher(jsonSerializer: JSONSerializer)
+class RPCDispatcher(jsonSerializer: GraphSerializer)
 {
-
-    /** Graph rules **/
-    loadGraphSerializationRules
-
-
     /**
       * Processes the given HTTP request and returns a response. The expected result is a serialized JSON object. See
       * s2js.runtime.s2js.RPCWrapper to see, how a object is deserialized to a JSON string and for more information
@@ -213,23 +208,5 @@ class RPCDispatcher(jsonSerializer: JSONSerializer)
         val collection = util.parsing.json.JSON.parseFull(seqString).get.asInstanceOf[Seq[AnyVal]]
 
         collection
-    }
-
-    private def loadGraphSerializationRules = {
-        val graphClass = new SimpleSerializationClass(classOf[cz.payola.common.rdf.Graph])
-        val graphRule = new BasicSerializationRule(Some(classOf[cz.payola.common.rdf.Graph]))
-        jsonSerializer.addSerializationRule(graphClass, graphRule)
-
-        val edgeClass = new SimpleSerializationClass(classOf[cz.payola.common.rdf.Edge])
-        val edgeRule = new BasicSerializationRule(Some(classOf[cz.payola.common.rdf.Edge]))
-        jsonSerializer.addSerializationRule(edgeClass, edgeRule)
-
-        val literalNodeClass = new SimpleSerializationClass(classOf[cz.payola.common.rdf.LiteralVertex])
-        val literalNodeRule = new BasicSerializationRule(Some(classOf[cz.payola.common.rdf.LiteralVertex]))
-        jsonSerializer.addSerializationRule(literalNodeClass, literalNodeRule)
-
-        val identifiedNodeClass = new SimpleSerializationClass(classOf[cz.payola.common.rdf.IdentifiedVertex])
-        val identifiedNodeRule = new BasicSerializationRule(Some(classOf[cz.payola.common.rdf.IdentifiedVertex]))
-        jsonSerializer.addSerializationRule(identifiedNodeClass, identifiedNodeRule)
     }
 }

@@ -44,17 +44,14 @@ private object Wrapper
     private def processRequestResult(request: XMLHttpRequest, onSuccess: (Any => Unit),
         onException: (Throwable => Unit)): Any = {
 
-        val result = if (request.readyState == requestStatusDone && request.status == 200) {
-            deserializer.deserialize(eval("(" + request.responseText + ")"))
-        } else if ((request.readyState == requestStatusDone) && (request.status == 500)) {
-            //TODO: one should decide whether the returned JSON is an Exception?
+        val result = if (request.readyState == requestStatusDone && (request.status == 200 || request.status == 500)) {
             deserializer.deserialize(eval("(" + request.responseText + ")"))
         } else if (request.readyState == requestStatusDone) {
             new Exception("RPC call exited with status code " + request.status + ".")
         }
 
         result match {
-            case throwable: Throwable => {
+            case throwable: Exception => {
                 onException(throwable)
                 throwable
             }

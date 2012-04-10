@@ -11,7 +11,7 @@ class Test
     def failTest(index: Int, description: String, reason: String) = {
         //TODO: implement String.format in JS
         //val failString = String.format("Test no. %d failed:\n[%s]\n\nReason: %s",index.toString(),description, reason)
-        val failString = "Test no. "+index+" failed:\\n["+description+"]\\n\\nReason: "+reason
+        val failString = "Test no. "+index+" failed:\n["+description+"]\n\nReason: "+reason
         window.alert(failString)
     }
 
