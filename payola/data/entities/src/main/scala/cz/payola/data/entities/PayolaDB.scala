@@ -70,6 +70,14 @@ object PayolaDB extends Schema
             //println(printDdl)
         }
     }
+
+    def persist(persistable: PersistableEntity) {
+        if (persistable.isPersisted) {
+            persistable.update
+        } else {
+            persistable.save
+        }
+    }
 }
 
 class GroupMembership(val memberId: String, val groupId: String)

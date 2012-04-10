@@ -19,12 +19,11 @@ object TestObject
         val user = new User("u1", "name1", "pwd1", "email1")
 
         //PayolaDB.save(user);
-        userDao.persist(user)
-        user.save
+        //userDao.persist(user)
+        user.persist
 
         user.name += "1"
-        userDao.persist(user)
-        user.update
+        user.persist
 
         println("4")
         val group = new Group("g1", "group1", user)

@@ -25,7 +25,8 @@ abstract class EntityDAO[A <: KeyedEntity[_]](protected val table: Table[A])
         */
         None
     }
-    
+
+    /*
     def persist(entity: A) = {
         if (entity.isPersisted) {
             entity.update
@@ -34,4 +35,5 @@ abstract class EntityDAO[A <: KeyedEntity[_]](protected val table: Table[A])
             entity.save
         }
     }
+    */
 }
