@@ -2,6 +2,7 @@ package s2js.runtime.client.rpc
 
 import s2js.runtime.client.ClassLoader
 import s2js.runtime.client.js.JsObject
+import s2js.runtime.shared.rpc.Exception
 
 class Deserializer extends RpcResultTraverser[Any]
 {

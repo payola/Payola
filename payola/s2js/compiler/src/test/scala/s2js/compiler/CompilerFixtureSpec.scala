@@ -40,8 +40,16 @@ abstract class CompilerFixtureSpec extends FixtureSpec with ConfigMapFixture wit
     {
         def shouldCompileTo(expected: String) {
             if (normalizeWhiteSpace(actual) != normalizeWhiteSpace(expected)) {
-                println(normalizeWhiteSpace(expected))
-                println(normalizeWhiteSpace(actual))
+                println(">>>EXPECTED>>>" + normalizeWhiteSpace(expected) + "<<<")
+                println(">>>ACTUAL  >>>" + normalizeWhiteSpace(actual) + "<<<")
+                assert(false)
+            }
+        }
+
+        def shouldExactlyCompileTo(expected: String) {
+            if (actual != expected) {
+                println(">>>EXPECTED>>>" + expected + "<<<")
+                println(">>>ACTUAL  >>>" + actual + "<<<")
                 assert(false)
             }
         }

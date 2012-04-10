@@ -4,7 +4,9 @@ import collection.mutable.ArrayBuffer
 import generic.{ConcreteEntity, ConcreteNamedEntity}
 import parameters.Parameter
 
-class Plugin(id: String,  protected var _name: String)
+class Plugin(
+        id: String = java.util.UUID.randomUUID.toString,
+        protected var _name: String)
     extends ConcreteEntity(id)
     with ConcreteNamedEntity
     with cz.payola.common.entities.Plugin
