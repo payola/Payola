@@ -90,8 +90,6 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
             "scala.Any",
             "scala.AnyRef",
             "scala.Equals",
-            "scala.Throwable",
-            "scala.package.Throwable",
             "scala.Predef",
             "scala.ScalaObject",
             "scala.Serializable"
