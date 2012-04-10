@@ -40,4 +40,8 @@ abstract class Element extends Node
     def setAttribute(name: String, value: String)
 
     def setAttributeNS(ns: String, name: String, value: String)
+
+    val scrollLeft: Int
+
+    val scrollTop: Int
 }

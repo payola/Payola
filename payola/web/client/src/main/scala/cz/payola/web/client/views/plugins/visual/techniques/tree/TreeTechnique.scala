@@ -8,16 +8,15 @@ import cz.payola.web.client.views.plugins.visual.techniques.{Animation, BaseTech
 class TreeTechnique extends BaseTechnique
 {
     def performTechnique() {
-        basicTreeStructure(graphView.get.vertexViews)
 
         val moveToCorner2 = new Animation(Animation.moveGraphToUpperLeftCorner, graphView.get.vertexViews,
-            None, redrawQuick, redraw)
+            None, redrawQuick, redraw, None)
         val flip = new Animation(Animation.flipGraph, graphView.get.vertexViews, Some(moveToCorner2),
-            redrawQuick, redraw)
+            redrawQuick, redraw, None)
         val moveToCorner1 = new Animation(Animation.moveGraphToUpperLeftCorner, graphView.get.vertexViews,
-            Some(flip), redrawQuick, redraw)
+            Some(flip), redrawQuick, redraw, None)
 
-        moveToCorner1.run()
+        basicTreeStructure(graphView.get.vertexViews, true, Some(moveToCorner1))
     }
 
     override def clean() {

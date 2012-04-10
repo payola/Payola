@@ -223,7 +223,7 @@ trait View {
         val layer = new Layer(canvas, context)
 
         container.appendChild(canvas)
-        layer.setSize(Vector(1500, 1500)) //TODO take it from the "created element"
+        layer.setSize(Vector(1500, 1000)) //TODO take it from the "created element"
         layer
     }
 }

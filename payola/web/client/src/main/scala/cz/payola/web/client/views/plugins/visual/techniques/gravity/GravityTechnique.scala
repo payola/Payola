@@ -4,6 +4,8 @@ import collection.mutable.ListBuffer
 import cz.payola.web.client.views.plugins.visual.graph.{EdgeView, VertexView}
 import cz.payola.web.client.views.plugins.visual.techniques._
 import cz.payola.web.client.views.plugins.visual.{Point, Vector}
+import s2js.adapters.js.browser.window
+import s2js.adapters.js.dom.Date
 
 /**
   * Visual plug-in technique that places the vertices based on their edges.
@@ -39,22 +41,58 @@ class GravityTechnique extends BaseTechnique
     def getName:String = {
         "gravity visualisation"
     }
-    
+
     def performTechnique() {
-        val vertexViewPacks = buildVertexViewsWorkingStructure(graphView.get.vertexViews)
-        val edgeViewPacks = buildEdgeViewsWorkingStructure(vertexViewPacks, graphView.get.edgeViews)
-        basicTreeStructure(graphView.get.vertexViews)
 
         val moveToCorner = new Animation(Animation.moveGraphToUpperLeftCorner, graphView.get.vertexViews,
-            None, redrawQuick, redraw)
+            None, redrawQuick, redraw, None)
         val flip = new Animation(Animation.flipGraph, graphView.get.vertexViews,
-            Some(moveToCorner), redrawQuick, redraw)
+            Some(moveToCorner), redrawQuick, redraw, None)
+
+
+        val animationOfThis = new Animation(runningAnimation,
+            graphView.get.vertexViews, Some(flip), redrawQuick, redrawQuick, Some(10))
+
+        basicTreeStructure(graphView.get.vertexViews, true, Some(animationOfThis))
+    }
+    
+    private def runningAnimation(vertexViewsToAnimate: ListBuffer[VertexView], followingAnimation: Option[Animation],
+        redrawQuick: () => Unit, redrawFinal: () => Unit, runDuration: Option[Int]) {
+
+
+        val vertexViewPacks = buildVertexViewsWorkingStructure(graphView.get.vertexViews)
+        val edgeViewPacks = buildEdgeViewsWorkingStructure(vertexViewPacks, graphView.get.edgeViews)
 
         vertexViewPacks.foreach{ vPack =>
             vPack.currentPosition = vPack.value.position
         }
 
-        run(vertexViewPacks, edgeViewPacks, Some(flip))
+
+        var needToContinue = true
+        val currentTime = new Date()
+
+        //run the calculation for the specified time in miliseconds or just run it at once
+        while((runDuration.isDefined && needToContinue &&
+            currentTime.getMilliseconds() + runDuration.get > (new Date()).getMilliseconds())
+            ||
+            (runDuration.isEmpty && needToContinue)) {
+
+            needToContinue = run(vertexViewPacks, edgeViewPacks)
+        }
+
+        val toMove = ListBuffer[(VertexView, Point)]()
+        vertexViewPacks.foreach{ vVPack =>
+            toMove += ((vVPack.value, vVPack.currentPosition))
+        }
+
+        if(needToContinue) { //if the calculation is not finished yet
+            val nextRoundAnimation = new Animation(runningAnimation, graphView.get.vertexViews, followingAnimation,
+                redrawQuick, redrawQuick, runDuration)
+            Animation.moveVertices(toMove, Some(nextRoundAnimation), redrawQuick, redrawQuick)
+
+        } else {
+            Animation.moveVertices(toMove, followingAnimation, redrawQuick, redrawQuick)
+        }
     }
 
     /**
@@ -104,11 +142,11 @@ class GravityTechnique extends BaseTechnique
       * @param vertexViewPacks
       * @param edgeViewPacks
       */
-    private def run(vertexViewPacks: ListBuffer[VertexViewPack], edgeViewPacks: ListBuffer[EdgeViewPack],
-        followingAnimation: Option[Animation]) {
+    private def run(vertexViewPacks: ListBuffer[VertexViewPack], edgeViewPacks: ListBuffer[EdgeViewPack]): Boolean = {
 
         var repeat = true
-            while(repeat) {
+        //while(repeat) {
+
             vertexViewPacks.foreach {pushed =>
                 pushed.force = Vector(0, 0)
 
@@ -140,7 +178,7 @@ class GravityTechnique extends BaseTechnique
             var stabilization: Double = 0
 
             //move vertices by the calculated vertices
-            vertexViewPacks.foreach {moved =>
+            vertexViewPacks.foreach { moved =>
                 if (!moved.value.selected) {
                     moved.velocity = (moved.force + moved.velocity) / (vertexViewPacks.length - moved.value.edges.length)
 
@@ -148,13 +186,8 @@ class GravityTechnique extends BaseTechnique
                     moved.currentPosition = moved.currentPosition + moved.velocity
                 }
             }
-            repeat = stabilization >= velocitiesStabilization;
-        }
-
-        val toMove = ListBuffer[(VertexView, Point)]()
-        vertexViewPacks.foreach{ vPack =>
-            toMove += ((vPack.value, vPack.currentPosition))
-        }
-        Animation.moveVertices(toMove, followingAnimation, redrawQuick, redraw)
+            repeat = stabilization >= velocitiesStabilization
+        repeat
+        //}
     }
 }

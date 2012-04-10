@@ -3,33 +3,38 @@ package cz.payola.web.client.views.plugins.visual.techniques
 import collection.mutable.ListBuffer
 import cz.payola.web.client.views.plugins.visual.{Vector, Point}
 import s2js.adapters.js.browser.window
-import cz.payola.web.client.views.plugins.visual.graph.{EdgeView, VertexView}
+import cz.payola.web.client.views.plugins.visual.graph.VertexView
 
-class Animation(animationFunction: (ListBuffer[VertexView], Option[Animation],
-    () => Unit, () => Unit) => Unit,
-    verticesToAnimate: ListBuffer[VertexView],
-    followingAnimation: Option[Animation], quickDraw: () => Unit,  finalDraw: () => Unit) {
+class Animation(
+    animationFunction: (ListBuffer[VertexView], Option[Animation], () => Unit, () => Unit, Option[Int]) => Unit,
+    verticesToAnimate: ListBuffer[VertexView], var followingAnimation: Option[Animation], quickDraw: () => Unit,
+    finalDraw: () => Unit, animationLength: Option[Int]) {
 
     def run() {
-        animationFunction(verticesToAnimate, followingAnimation, quickDraw, finalDraw)
+        animationFunction(verticesToAnimate, followingAnimation, quickDraw, finalDraw, animationLength)
     }
 
+    def setFollowingAnimation(newFollowingAnimation: Animation) {
+        followingAnimation = Some(newFollowingAnimation)
+    }
 }
 
 object Animation {
+
     def moveVertices(verticesToMove: ListBuffer[(VertexView, Point)], nextAnimation: Option[Animation],
         quickDraw: () => Unit, finalDraw: () => Unit) {
+
 
         val animationVViews = ListBuffer[AnimationVertexView]()
         verticesToMove.foreach{ vToMove =>
             val translation = vToMove._1.position.createVector(vToMove._2)
             animationVViews += new AnimationVertexView(vToMove._1, translation, Vector.One)
         }
-        animateTranslation(animationVViews, nextAnimation, quickDraw, finalDraw)
+        animateTranslation(animationVViews, nextAnimation, quickDraw, finalDraw, None)
     }
 
-    def moveGraphToUpperLeftCorner(vViews: ListBuffer[VertexView],
-        nextAnimation: Option[Animation], quickDraw: () => Unit, finalDraw: () => Unit) {
+    def moveGraphToUpperLeftCorner(vViews: ListBuffer[VertexView], nextAnimation: Option[Animation],
+        quickDraw: () => Unit, finalDraw: () => Unit, animationLength: Option[Int]) {
 
             var vector = Vector(Double.MaxValue, Double.MaxValue)
             //search for the minimum
@@ -48,11 +53,11 @@ object Animation {
             vViews.foreach{ vView =>
                 animationVViews += new AnimationVertexView(vView, vector, Vector.One)
             }
-            animateTranslation(animationVViews, nextAnimation, quickDraw, finalDraw)
+            animateTranslation(animationVViews, nextAnimation, quickDraw, finalDraw, None)
         }
 
-    def flipGraph(vViews: ListBuffer[VertexView],
-        nextAnimation: Option[Animation], quickDraw: () => Unit, finalDraw: () => Unit) {
+    def flipGraph(vViews: ListBuffer[VertexView], nextAnimation: Option[Animation], quickDraw: () => Unit,
+        finalDraw: () => Unit, animationLength: Option[Int]) {
         
         var maxX: Double = Double.MinValue
         var minX: Double = Double.MaxValue
@@ -83,7 +88,7 @@ object Animation {
                     vView.position.createVector(Point(vView.position.y, vView.position.x)), Vector.One)
             }
             
-            animateTranslation(animationVViews, nextAnimation, quickDraw, finalDraw)
+            animateTranslation(animationVViews, nextAnimation, quickDraw, finalDraw, None)
         } else {
             if(nextAnimation.isDefined) {
                 nextAnimation.get.run()
@@ -100,7 +105,7 @@ object Animation {
     }*/
 
     private def animateTranslation(animVViews: ListBuffer[AnimationVertexView], nextAnimation: Option[Animation],
-        quickDraw: () => Unit, finalDraw: () => Unit) {
+        quickDraw: () => Unit, finalDraw: () => Unit, animationLength: Option[Int]) {
 
         var translationFinished = true
 
@@ -129,7 +134,7 @@ object Animation {
             }
         } else {
             quickDraw()
-            setTimeout(() => animateTranslation(animVViews, nextAnimation, quickDraw, finalDraw), 5)
+            setTimeout(() => animateTranslation(animVViews, nextAnimation, quickDraw, finalDraw, None), 5)
         }
     }
 

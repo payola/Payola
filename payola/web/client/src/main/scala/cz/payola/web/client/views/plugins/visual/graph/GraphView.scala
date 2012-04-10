@@ -95,7 +95,7 @@ class GraphView(val container: Element) extends View {
 
         _graphModel.vertices.foreach {vertexModel =>
 
-            buffer += new VertexView(vertexModel, Point(0, 0))
+            buffer += new VertexView(vertexModel, Point(controlsLayer.getSize.x / 2 , controlsLayer.getSize.y / 2))
             counter += 1
         }
         buffer

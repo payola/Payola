@@ -5,7 +5,7 @@ import graph.GraphView
 import s2js.adapters.js.dom.Element
 import s2js.adapters.goog.events._
 import cz.payola.common.rdf.Graph
-import s2js.adapters.js.browser.window
+import s2js.adapters.js.browser.document
 import s2js.compiler.javascript
 
 /**
@@ -13,8 +13,6 @@ import s2js.compiler.javascript
   */
 abstract class VisualPlugin extends Plugin
 {
-
-    private var animationInterval = 0
 
     /**
       * Variable helping during movement of vertices. Contains position where the movement of a vertex tarted.
@@ -70,7 +68,9 @@ abstract class VisualPlugin extends Plugin
       * @param event
       */
     private def onMouseDown(event: BrowserEvent) {
-        val position = Point(event.clientX, event.clientY)
+
+        val position = getPosition(event)
+
         val vertex = graphView.get.getTouchedVertex(position)
         var needsToRedraw = false;
 
@@ -104,7 +104,7 @@ abstract class VisualPlugin extends Plugin
       */
     private def onMouseMove(event: BrowserEvent) {
         if (moveStart.isDefined) {
-            val end = Point(event.clientX, event.clientY)
+            val end = getPosition(event)
             val difference = end - moveStart.get
 
             graphView.get.moveAllSelectedVertices(difference)
@@ -121,4 +121,22 @@ abstract class VisualPlugin extends Plugin
     private def onMouseUp(event: BrowserEvent) {
         moveStart = None
     }
+
+    private def getPosition(event: BrowserEvent): Point = {
+
+        if (isDefined(event.pageX) || isDefined(event.pageY)) {
+            Point(event.pageX, event.pageY)
+        }
+        else {
+            Point(event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft,
+                event.clientY + document.body.scrollTop + document.documentElement.scrollTop)
+        }
+        //x -= gCanvasElement.offsetLeft; //TODO it is expected, that the origin of the canvas element is at [0, 0]
+        //y -= gCanvasElement.offsetTop;
+    }
+
+    @javascript("""
+        return value
+    """)
+    private def isDefined(value: Any): Boolean = false
 }
