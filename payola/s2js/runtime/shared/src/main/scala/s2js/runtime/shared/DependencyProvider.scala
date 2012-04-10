@@ -75,7 +75,7 @@ import tools.nsc.io
             }
 
             // Process the files corresponding to the required symbols and create the dependency package.
-            symbols.foreach(symbol => processFile(symbolFiles(symbol)))
+            symbols.flatMap(symbolFiles.get(_)).foreach(processFile(_))
             val javaScript = javaScriptBuffer.mkString("\n")
             val css = provideRegex.replaceAllIn(cssBuffer.mkString("\n"), "")
             dependencyPackage = new DependencyPackage(javaScript, css, processedSymbols);
