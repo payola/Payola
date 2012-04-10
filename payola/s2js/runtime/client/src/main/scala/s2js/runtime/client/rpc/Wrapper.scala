@@ -48,12 +48,7 @@ private object Wrapper
             deserializer.deserialize(eval("(" + request.responseText + ")"))
         } else if ((request.readyState == requestStatusDone) && (request.status == 500)) {
             //TODO: one should decide whether the returned JSON is an Exception?
-            val possibleEx = deserializer.deserialize(eval("(" + request.responseText + ")"))
-
-            possibleEx match {
-                case p: scala.Throwable => throw possibleEx.asInstanceOf[scala.Throwable]
-                case _ => possibleEx
-            }
+            deserializer.deserialize(eval("(" + request.responseText + ")"))
         } else if (request.readyState == requestStatusDone) {
             new Exception("RPC call exited with status code " + request.status + ".")
         }

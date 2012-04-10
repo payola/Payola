@@ -91,7 +91,7 @@ object RPC extends Controller
         }
     }
 
-    def raiseError(e: Exception) = { InternalServerError(jsonSerializer.serialize()) }
+    def raiseError(e: Exception) = { InternalServerError(jsonSerializer.serialize(e)) }
 
     /**
       *
