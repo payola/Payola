@@ -3,7 +3,10 @@ package cz.payola.domain.entities
 import generic.{ConcreteEntity, ConcreteOwnedEntity, ConcreteNamedEntity}
 import scala.collection.mutable._
 
-class Analysis(id:String, protected var _name: String, protected val _owner: User)
+class Analysis(
+        id:String = java.util.UUID.randomUUID.toString,
+        protected var _name: String,
+        protected val _owner: User)
     extends ConcreteEntity(id)
     with ConcreteNamedEntity
     with ConcreteOwnedEntity

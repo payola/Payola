@@ -2,8 +2,11 @@ package cz.payola.domain.entities.parameters
 
 import cz.payola.common
 
-protected class BooleanParameterInstance(parameter: BooleanParameter, value: Boolean) extends
-ParameterInstance[Boolean](parameter, value)
+protected class BooleanParameterInstance(
+        id: String  = java.util.UUID.randomUUID.toString,
+        parameter: BooleanParameter,
+        value: Boolean)
+    extends ParameterInstance[Boolean](id, parameter, value)
 {
     /** Gets a boolean value of the parameter.
       *
@@ -85,8 +88,12 @@ ParameterInstance[Boolean](parameter, value)
     }
 }
 
-class BooleanParameter(n: String, defaultValue: Boolean) extends
-Parameter[Boolean](n, defaultValue) with common.entities.parameters.BooleanParameter
+class BooleanParameter(
+        id: String  = java.util.UUID.randomUUID.toString,
+        n: String,
+        defaultValue: Boolean)
+    extends Parameter[Boolean](id, n, defaultValue)
+    with common.entities.parameters.BooleanParameter
 {
     /** Returns a new BooleanParameterInstance instance with the value passed as a parameter of this method.
       *
@@ -95,6 +102,6 @@ Parameter[Boolean](n, defaultValue) with common.entities.parameters.BooleanParam
       * @return New BooleanParameterInstance instance.
       */
     override def instanceWithValue(newValue: Boolean): ParameterInstance[Boolean] = {
-        new BooleanParameterInstance(this, newValue)
+        new BooleanParameterInstance(parameter = this, value = newValue)
     }
 }

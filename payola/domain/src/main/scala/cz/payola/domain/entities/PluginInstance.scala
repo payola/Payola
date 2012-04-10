@@ -4,7 +4,9 @@ import collection.mutable._
 import generic.ConcreteEntity
 import parameters.{Parameter, ParameterInstance}
 
-class PluginInstance(id:String, protected val _plugin: Plugin)
+class PluginInstance(
+        id:String = java.util.UUID.randomUUID.toString,
+        protected val _plugin: Plugin)
     extends ConcreteEntity(id)
     with cz.payola.common.entities.PluginInstance
 {

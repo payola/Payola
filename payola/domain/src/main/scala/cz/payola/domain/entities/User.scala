@@ -5,7 +5,9 @@ import permissions.privilege.PublicPrivilege
 import scala.collection.mutable._
 import cz.payola.domain.entities.permissions.privilege.{GroupPrivilege, AnalysisPrivilege, Privilege}
 
-class User(id: String, protected var _name: String)
+class User(
+        id: String = java.util.UUID.randomUUID.toString,
+        protected var _name: String)
     extends ConcreteEntity(id)
     with cz.payola.common.entities.User
     with SharedAnalysesOwner
