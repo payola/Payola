@@ -52,7 +52,7 @@ private object Wrapper
         }
 
         result match {
-            case throwable: Exception => {
+            case throwable: Throwable => {
                 onException(throwable)
                 throwable
             }
