@@ -1,5 +1,7 @@
 package s2js.runtime.client.rpc
 
+import s2js.runtime.shared.rpc.Exception
+
 class ReferenceToResolve(val reference: Reference, val sourceObject: Any, val propertyName: String)
 {
     def resolve(context: DeserializationContext) {
