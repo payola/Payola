@@ -2,7 +2,7 @@ package cz.payola.domain.entities.parameters
 
 import cz.payola.common
 
-protected class FloatParameterInstance(
+class FloatParameterInstance(
         id: String  = java.util.UUID.randomUUID.toString,
         parameter: FloatParameter,
         value: Float)

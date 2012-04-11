@@ -24,6 +24,22 @@ object PayolaDB extends Schema
 
     val pluginInstances = table[PluginInstance]("pluginInstances")
 
+    val booleanParameters = table[BooleanParameter]("booleanParameters")
+
+    val booleanParameterInstances = table[BooleanParameterInstance]("booleanParameterInstances")
+
+    val floatParameters = table[FloatParameter]("floatParameters")
+
+    val floatParameterInstances = table[FloatParameterInstance]("floatParameterInstances")
+
+    val intParameters = table[IntParameter]("intParameters")
+
+    val intParameterInstances = table[IntParameterInstance]("intParameterInstances")
+
+    val stringParameters = table[StringParameter]("stringParameters")
+
+    val stringParameterInstances = table[StringParameterInstance]("stringParameterInstances")
+
     val groupMembership =
         manyToManyRelation(users, groups)
             .via[GroupMembership]((u, g, gm) => (gm.memberId === u.id, g.id === gm.groupId))
@@ -73,6 +89,50 @@ object PayolaDB extends Schema
         on(pluginInstances)(instance =>
             declare(
                 instance.id is (primaryKey)
+            ))
+
+        on(booleanParameters)(param =>
+            declare(
+                param.id is (primaryKey),
+                param.name is (unique)
+            ))
+
+        on(booleanParameterInstances)(param =>
+            declare(
+                param.id is (primaryKey)
+            ))
+
+        on(floatParameters)(param =>
+            declare(
+                param.id is (primaryKey),
+                param.name is (unique)
+            ))
+
+        on(floatParameterInstances)(param =>
+            declare(
+                param.id is (primaryKey)
+            ))
+
+        on(intParameters)(param =>
+            declare(
+                param.id is (primaryKey),
+                param.name is (unique)
+            ))
+
+        on(intParameterInstances)(param =>
+            declare(
+                param.id is (primaryKey)
+            ))
+
+        on(stringParameters)(param =>
+            declare(
+                param.id is (primaryKey),
+                param.name is (unique)
+            ))
+
+        on(stringParameterInstances)(param =>
+            declare(
+                param.id is (primaryKey)
             ))
 
         transaction {

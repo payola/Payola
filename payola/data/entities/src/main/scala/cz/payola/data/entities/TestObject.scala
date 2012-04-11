@@ -11,6 +11,14 @@ object TestObject
     val analysisDao = new AnalysisDAO()
     val pluginDao = new PluginDAO
     val piDao = new PluginInstanceDAO()
+    val bParDao = new BooleanParameterDAO()
+    val bParInstDao = new BooleanParameterInstanceDAO()
+    val fParDao = new FloatParameterDAO()
+    val fParInstDao = new FloatParameterInstanceDAO()
+    val iParDao = new IntParameterDAO()
+    val iParInstDao = new IntParameterInstanceDAO()
+    val sParDao = new StringParameterDAO()
+    val SParInstDao = new StringParameterInstanceDAO()
 
     def main(args: Array[String]) = {
         println("1")
@@ -58,6 +66,13 @@ object TestObject
         }
 
         // Validate saved values
+
+        // Test userDao
+        assert(userDao.findByUsername(user.name, 0, 1)(0).id == user.id)
+        assert(userDao.findByUsername("invalid name").size == 0)
+        assert(userDao.getUserByCredentials(user.name, user.password).get.id == user.id)
+        assert(userDao.getUserByCredentials("invalid", "credientals") == None)
+
         assert(user.memberedGroups2.size == 2)
         assert(user.ownedGroups2.size == 2)
         assert(user.ownedAnalyses2.size == 1)
@@ -83,11 +98,5 @@ object TestObject
 
         val pi = piDao.getById(pluginInstance.id)
         assert(pi != None)
-
-        // Test userDao
-        assert(userDao.findByUsername(user.name, 0, 1)(0).id == user.id)
-        assert(userDao.findByUsername("invalid name").size == 0)
-        assert(userDao.getUserByCredentials(user.name, user.password).get.id == user.id)
-        assert(userDao.getUserByCredentials("invalid", "credientals") == None)
     }
 }
