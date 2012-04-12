@@ -19,14 +19,22 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
     val iParDao = new IntParameterDAO()
     val iParInstDao = new IntParameterInstanceDAO()
     val sParDao = new StringParameterDAO()
-    val SParInstDao = new StringParameterInstanceDAO()
+    val sParInstDao = new StringParameterInstanceDAO()
 
     val user = new User("u1", "name", "pwd1", "email1")
     val group1 = new Group("g1", "group", user)
     val group2 = new Group("g2", "group2", user)
-    val analysis = new Analysis("a1", "an1", user)
-    val plugin = new Plugin("p1", "plugin1")
+    val analysis = new Analysis("a1", "an", user)
+    val plugin = new Plugin("p1", "plugin")
     val pluginInstance = new PluginInstance("pi1", plugin)
+    val bPar = new BooleanParameter("b1", "bPar", true)
+    val bParInst = new BooleanParameterInstance("bi1", bPar, false)
+    val fPar = new FloatParameter("b1", "fPar", -1.0f)
+    val fParInst = new FloatParameterInstance("fi1", fPar, 1.0f)
+    val iPar = new IntParameter("b1", "iPar", -1)
+    val iParInst = new IntParameterInstance("ii1", iPar, 1)
+    val sPar = new StringParameter("b1", "sPar", "empty")
+    val sParInst = new StringParameterInstance("si1", sPar, "string")
 
     // Init
     PayolaDB.startDatabaseSession()
@@ -60,6 +68,7 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
         groupDao.persist(group1)
         groupDao.persist(group2)
 
+        // Update test
         group1.name += "1"
         groupDao.persist(group1)
         
@@ -84,6 +93,10 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
     "4) Analyses" should "be persited, loaded and managed by AnalysesDAO" in {
         analysisDao.persist(analysis)
 
+        // Update test
+        analysis.name += "1"
+        analysisDao.persist(analysis)
+
         assert(user.ownedAnalyses2.size == 1)
 
         val a = analysisDao.getById(analysis.id)
@@ -95,6 +108,10 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
     }
 
     "5) Plugins" should "be persited, loaded and managed by PluginsDAO" in {
+        pluginDao.persist(plugin)
+
+        // Update test
+        plugin.name += "1"
         pluginDao.persist(plugin)
 
         val p = pluginDao.getById(plugin.id)
@@ -118,8 +135,106 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
     }
 
     "7) BooleanParameters" should "be persited, loaded and managed by BooleanParameterDAO" in {
+        bParDao.persist(bPar)
+
+        // Update test
+        bPar.name += "1"
+        bParDao.persist(bPar)
+        
+        val p = bParDao.getById(bPar.id)
+        assert (p != None)
+        assert (p.get.id == bPar.id)
+
+        val x = bParDao.getById("")
+        assert (x == None)
     }
 
     "8) BooleanParameterInstances" should "be persited, loaded and managed by BooleanParameterInstanceDAO" in {
+        bParInstDao.persist(bParInst)
+
+        val p = bParInstDao.getById(bParInst.id)
+        assert (p != None)
+        assert (p.get.id == bParInst.id)
+
+        val x = bParInstDao.getById("")
+        assert (x == None)
+    }
+
+    "9) FloatParameters" should "be persited, loaded and managed by FloatParameterDAO" in {
+        fParDao.persist(fPar)
+
+        // Update test
+        fPar.name += "1"
+        fParDao.persist(fPar)
+
+        val p = fParDao.getById(fPar.id)
+        assert (p != None)
+        assert (p.get.id == fPar.id)
+
+        val x = fParDao.getById("")
+        assert (x == None)
+    }
+
+    "10) FloatParameterInstances" should "be persited, loaded and managed by FloatParameterInstanceDAO" in {
+        fParInstDao.persist(fParInst)
+
+        val p = fParInstDao.getById(fParInst.id)
+        assert (p != None)
+        assert (p.get.id == fParInst.id)
+
+        val x = fParInstDao.getById("")
+        assert (x == None)
+    }
+
+    "11) IntParameters" should "be persited, loaded and managed by IntParameterDAO" in {
+        iParDao.persist(iPar)
+
+        // Update test
+        iPar.name += "1"
+        iParDao.persist(iPar)
+
+        val p = iParDao.getById(iPar.id)
+        assert (p != None)
+        assert (p.get.id == iPar.id)
+
+        val x = iParDao.getById("")
+        assert (x == None)
+    }
+
+    "12) IntParameterInstances" should "be persited, loaded and managed by IntParameterInstanceDAO" in {
+        iParInstDao.persist(iParInst)
+
+        val p = iParInstDao.getById(iParInst.id)
+        assert (p != None)
+        assert (p.get.id == iParInst.id)
+
+        val x = iParInstDao.getById("")
+        assert (x == None)
+    }
+
+    "13) StringParameters" should "be persited, loaded and managed by StringParameterDAO" in {
+        bParDao.persist(bPar)
+
+        // Update test
+        bPar.name += "1"
+        bParDao.persist(bPar)
+
+        val p = bParDao.getById(bPar.id)
+        assert (p != None)
+        assert (p.get.id == bPar.id)
+
+        val x = bParDao.getById("")
+        assert (x == None)
+    }
+
+    "14) StringParameterInstances" should "be persited, loaded and managed by StringParameterInstanceDAO" in {
+        sParInstDao.persist(sParInst)
+
+        val p = sParInstDao.getById(sParInst.id)
+        assert (p != None)
+        assert (p.get.id == sParInst.id)
+
+        val x = sParInstDao.getById("")
+        assert (x == None)
     }
 }
