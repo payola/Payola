@@ -1,35 +1,67 @@
 package cz.payola.data.entities
 
-import java.util.UUID
 import org.squeryl.dsl.OneToMany
 import org.squeryl.KeyedEntity
-import tools.nsc.util.TableDef.Column
+import schema.PayolaDB
+import org.squeryl.PrimitiveTypeMode._
+import collection.mutable.ArrayBuffer
 
-/*
-class User(id: String = "", name: String = "", pwd: String = "", email: String = "")
-    extends cz.payola.domain.entities.User(name)
+class User(
+        id: String,
+        name: String,
+        pwd: String,
+        email: String)
+    extends cz.payola.domain.entities.User(id, name)
     with KeyedEntity[String]
 {
-    override val _id: String = id
-    _password = pwd
-    _email = email
+    password_=(pwd)
+    email_=(email)
 
-    lazy val _ownedGroups2: OneToMany[Group] =
-        PayolaDB.groupOwners.left(this)
+    private lazy val _ownedGroups2: OneToMany[Group] = PayolaDB.groupOwnership.left(this)
 
-    def ownedGroups2 = _ownedGroups2    
-}
-*/
-class User(
-        val id: String,
-        val name: String,
-        val pwd: String,
-        val email: String)
-    extends KeyedEntity[String]
-{
-    lazy val _ownedGroups2: OneToMany[Group] =
-        PayolaDB.groupOwners.left(this)
+    private lazy val _ownedAnalyses2: OneToMany[Analysis] = PayolaDB.analysisOwnership.left(this)
 
-    def ownedGroups2 = _ownedGroups2
-    //def id: String = id
+    private lazy val _memberedGroups2 = PayolaDB.groupMembership.left(this)
+
+    def ownedGroups2: Seq[Group]= {
+        transaction {
+            val groups: ArrayBuffer[Group] = new ArrayBuffer[Group]()
+
+            for (g <- _ownedGroups2) {
+                groups += g
+            }
+
+            groups.toSeq
+        }
+    }
+
+    def memberedGroups2: Seq[Group]= {
+        transaction {
+            val groups: ArrayBuffer[Group] = new ArrayBuffer[Group]()
+
+            for (g <- _memberedGroups2) {
+                groups += g
+            }
+
+            groups.toSeq
+        }
+    }
+
+    def ownedAnalyses2: Seq[Analysis]= {
+        transaction {
+            val analyses: ArrayBuffer[Analysis] = new ArrayBuffer[Analysis]()
+
+            for (a <- _ownedAnalyses2) {
+                analyses += a
+            }
+
+            analyses.toSeq
+        }
+    }
+
+    def becomeMemberOf(group: Group) = {
+        transaction {
+            _memberedGroups2.associate(group)
+        }
+    }
 }

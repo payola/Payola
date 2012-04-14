@@ -1,18 +1,36 @@
 package cz.payola.data.entities
 
-/*
-class Group(id: String = "", name: String = "", owner: User = null)
-    extends cz.payola.domain.entities.Group(name, owner)
-{
-    override val _id: String = id
+import org.squeryl.KeyedEntity
+import schema.PayolaDB
+import org.squeryl.PrimitiveTypeMode._
+import collection.mutable.ArrayBuffer
 
-    //TODO: owner can be null when creating instance without parameters
-    override val _ownerID: String = if (owner == null) "" else owner.id
-
-    def ownerId: String = _ownerID
-}
-*/
-class Group(val id: String = "", val name: String = "", val owner: User = null)
+class Group(
+        id: String,
+        name: String,
+        owner: User)
+    extends cz.payola.domain.entities.Group(id, name, owner)
+    with KeyedEntity[String]
 {
     val ownerId: String = if (owner == null) "" else owner.id
+
+    private lazy val _groupMembers2 = PayolaDB.groupMembership.right(this)
+    
+    def groupMembers2 : Seq[User]= {
+        transaction {
+            val users: ArrayBuffer[User] = new ArrayBuffer[User]()
+
+            for (u <- _groupMembers2) {
+                users += u
+            }
+
+            users.toSeq
+        }
+    }
+
+    def addMember(user: User) = {
+        transaction {
+            _groupMembers2.associate(user)
+        }
+    }
 }

@@ -1,10 +1,15 @@
 package cz.payola.domain.entities.parameters
 
 import cz.payola._
-import domain.entities.generic.ConcreteNamedEntity
+import domain.entities.generic.{ConcreteEntity, ConcreteNamedEntity}
 
-abstract class Parameter[A](protected var _name: String, private val defaultValue: A) extends common.entities.Parameter[A]
-with ConcreteNamedEntity
+abstract class Parameter[A](
+        id: String  = java.util.UUID.randomUUID.toString,
+        protected var _name: String,
+        private val defaultValue: A)
+    extends ConcreteEntity(id)
+    with ConcreteNamedEntity
+    with common.entities.Parameter[A]
 {
     /** Creates a new instance of the particular parameter with value @value or
       * defaultValue if value is empty or null

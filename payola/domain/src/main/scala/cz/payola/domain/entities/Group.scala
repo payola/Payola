@@ -2,10 +2,17 @@ package cz.payola.domain.entities
 
 import collection.mutable._
 import cz.payola._
-import domain.entities.generic.{SharedAnalysesOwner, ConcreteOwnedEntity, ConcreteNamedEntity}
+import generic.{ConcreteEntity, SharedAnalysesOwner, ConcreteOwnedEntity, ConcreteNamedEntity}
 
-class Group(protected var _name: String, protected val _owner: User) extends common.entities.Group with
-ConcreteNamedEntity with ConcreteOwnedEntity with SharedAnalysesOwner
+class Group(
+        id:String = java.util.UUID.randomUUID.toString,
+        protected var _name: String,
+        protected val _owner: User)
+    extends ConcreteEntity(id)
+    with common.entities.Group
+    with ConcreteNamedEntity
+    with ConcreteOwnedEntity
+    with SharedAnalysesOwner
 {
     // Members. Initially only IDs are loaded, actual members are loaded from the
     // data layer as needed
@@ -13,10 +20,11 @@ ConcreteNamedEntity with ConcreteOwnedEntity with SharedAnalysesOwner
 
     protected val _members: ArrayBuffer[UserType] = new ArrayBuffer[UserType]()
 
-    //TODO: _owner can be null when creating instance without parameters
+    /*TODO: _owner can be null when creating instance without parameters
     if (_owner != null) {
         _owner.addOwnedGroup(this)
     }
+    */
 
     /** Adds a member to the group. Does nothing if already a member.
       *
