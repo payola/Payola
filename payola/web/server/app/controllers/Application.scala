@@ -6,8 +6,9 @@ import play.api.data._
 import play.api.data.Forms._
 import views._
 
-object Application extends Controller
+object Application extends PayolaController
 {
+
     def index = Action {
         Ok(views.html.index())
     }
@@ -33,8 +34,9 @@ object Application extends Controller
             "password" -> text
         ) verifying("Invalid email or password", result =>
             result match {
-                case (email, password) => true //TODO: User.authenticate(email, password).isDefined
-            })
+                case (email, password) => df.getUserByCredentials(email, password).isDefined
+            }
+        )
     )
 
     /**
@@ -67,16 +69,26 @@ object Application extends Controller
         tuple(
             "email" -> text,
             "password" -> text
+        ) verifying("Username already taken.", result =>
+            result match {
+                case (email, password) => !df.getUserByUsername(email).isDefined
+            }
         )
     )
 
     def signup = Action {implicit request =>
+        Ok(html.application.signup(signupForm))
+    }
+
+    /**
+      * Handle login form submission.
+      */
+    def register = Action {implicit request =>
         signupForm.bindFromRequest.fold(
             formWithErrors => BadRequest(html.application.signup(formWithErrors)),
-            user => {
-
-                Redirect(routes.Application.dashboard).withSession("email" -> user._1)
-            }
+            user =>
+            {   df.register(user._1, user._2)
+                Redirect(routes.Application.dashboard).withSession("email" -> user._1) }
         )
     }
 }

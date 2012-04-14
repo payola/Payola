@@ -1,3 +1,61 @@
+@(user: cz.payola.common.entities.User)
+@import tags._
+
 @main("User profile") {
-User profile
+<div class="container">
+    <div class="hero-unit">
+        <div class="row-fluid">
+            <span class="span3">
+                <img src="http://www.gravatar.com/avatar/@md5(user.email)?s=200" />
+            </span>
+            <h1>@user.name</h1>
+            <p><i class="icon-envelope"></i>@user.email</p>
+        </div>
+    </div>
+
+    <div class="row-fluid">
+        <div class="span6">
+            <h2>Analysis shared by user</h2>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Analysis name</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Kalousek friends</td>
+                    <td><a href="" class="btn btn-primary"><i class="icon-zoom-in icon-white"></i> View</a></td>
+                </tr>
+                <tr>
+                    <td>Who to pay to be famous</td>
+                    <td><a href="" class="btn btn-primary"><i class="icon-zoom-in icon-white"></i> View</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="span6">
+            <h2>Groups owned by the user</h2>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Group name</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>MFF Students</td>
+                    <td><a href="" class="btn btn-success"><i class="icon-plus icon-white"></i> Request membership</a></td>
+                </tr>
+                <tr>
+                    <td>PSP CR Members</td>
+                    <td><a href="" class="btn btn-danger"><i class="icon-minus icon-white"></i> Leave</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 }
