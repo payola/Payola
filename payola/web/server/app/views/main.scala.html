@@ -1,4 +1,4 @@
-@(content: Html)
+@(title: String)(content: Html)
 
 <!DOCTYPE html>
 <html>
@@ -7,7 +7,7 @@
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/bootstrap.css")"/>
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/bootstrap-responsive.css")"/>
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")"/>
-        <title>Payola</title>
+        <title>@title</title>
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
         <script type="text/javascript" src="@routes.Assets.at("javascripts/twitter.bootstrap/bootstrap.js")"></script>
     </head>
@@ -20,7 +20,7 @@
                             <span class="icon-bar"></span>
                             <span class="icon-bar"></span>
                         </a>
-                        <a class="brand" href="@routes.Application.index">Payola</a>
+                        <a class="brand" href="@routes.Application.index"><img src="@routes.Assets.at("img/payola-logo-small.png")" /></a>
                         <div class="nav-collapse">
                             <ul class="nav">
                                 <li class="active"><a href="@routes.Application.index">Home</a></li>

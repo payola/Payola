@@ -5,6 +5,7 @@
 # Home page
 GET     /                           controllers.Application.index()
 GET     /login                      controllers.Application.login()
+GET     /signup                     controllers.Application.signup()
 GET     /authenticate               controllers.Application.authenticate()
 GET     /logout                     controllers.Application.logout()
 GET     /javaScriptPackage/:symbol  controllers.Application.javaScriptPackage(symbol: String)

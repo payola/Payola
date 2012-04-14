@@ -18,7 +18,7 @@ object Application extends Controller
 
     def javaScriptPackage(symbol: String) = Action {
         val javaScript = DependencyProvider.get(List("bootstrap", symbol), Nil).javaScript
-        Ok(javaScript)
+        Ok(javaScript).as("text/javascript")
     }
 
     def dashboard = Action{
@@ -60,6 +60,23 @@ object Application extends Controller
     def logout = Action {
         Redirect(routes.Application.login).withNewSession.flashing(
             "success" -> "You've been logged out"
+        )
+    }
+
+    val signupForm = Form(
+        tuple(
+            "email" -> text,
+            "password" -> text
+        )
+    )
+
+    def signup = Action {implicit request =>
+        signupForm.bindFromRequest.fold(
+            formWithErrors => BadRequest(html.application.signup(formWithErrors)),
+            user => {
+
+                Redirect(routes.Application.dashboard).withSession("email" -> user._1)
+            }
         )
     }
 }
