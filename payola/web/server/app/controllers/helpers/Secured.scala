@@ -27,4 +27,11 @@ trait Secured {
         Action(request => f(user)(request))
     }
 
+    /**
+    * Action for authenticated users.
+    */
+    def IsAuthenticatedWithFallback(f: => String => Request[AnyContent] => Result, unauthorized: RequestHeader => Result) = Security.Authenticated(username, unauthorized) { user =>
+        Action(request => f(user)(request))
+    }
+
 }

@@ -5,13 +5,16 @@ import play.api.mvc._
 import play.api.data._
 import play.api.data.Forms._
 import views._
+import helpers.Secured
 
-object Application extends PayolaController
+object Application extends PayolaController with Secured
 {
 
-    def index = Action {
-        Ok(views.html.index())
-    }
+    def index = IsAuthenticatedWithFallback ({ username => rh =>
+        Ok(views.html.application.index(getUser(rh)))
+    }, {  _ =>
+        Ok(views.html.application.index(None))
+    })
 
     def rpcTest = Action {
         Ok(views.html.test())
@@ -22,9 +25,11 @@ object Application extends PayolaController
         Ok(javaScript).as("text/javascript")
     }
 
-    def dashboard = Action{
-        Ok(views.html.dashboard())
-    }
+    def dashboard = IsAuthenticatedWithFallback ({ username => rh =>
+        Ok(views.html.application.dashboard(getUser(rh)))
+    }, {  _ =>
+        Ok(views.html.application.dashboard(None))
+    })
 
     // -- Authentication
 

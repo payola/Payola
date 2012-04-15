@@ -9,13 +9,19 @@ import views._
 
 object Profile extends PayolaController with Secured
 {
-    def view(username: String) = Action {
+    def index(username: String) = IsAuthenticatedWithFallback ({ loggedUsername => rh =>
         val u = df.getUserByUsername(username)
         u.isDefined match {
-            case true => Ok(views.html.userProfile.index(u.get))
+            case true => Ok(views.html.userProfile.index(getUser(rh), u.get))
             case false => NotFound(views.html.errors.err404("The user does not exist."))
         }
-    }
+    }, {  _ =>
+        val u = df.getUserByUsername(username)
+        u.isDefined match {
+            case true => Ok(views.html.userProfile.index(None, u.get))
+            case false => NotFound(views.html.errors.err404("The user does not exist."))
+        }
+    })
 
     val profileForm = Form(
         tuple(

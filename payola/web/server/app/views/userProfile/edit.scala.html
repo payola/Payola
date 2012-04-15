@@ -1,6 +1,6 @@
 @(user: cz.payola.data.entities.User, form: Form[(String,String)])
 
-@main("Payola login page") {
+@main(Some(user), "Payola login page") {
 <div class="container">
     @helper.form(routes.Profile.save(user.email)) {
 

@@ -1,4 +1,6 @@
-@main("Dashboard") {
+@(user: Option[cz.payola.data.entities.User])
+
+@main(user, "Dashboard") {
     <div class="container-fluid">
         <div class="row-fluid">
             <div class="well">
@@ -33,23 +35,30 @@
                     <p><a class="btn btn-primary" href="#">View more &raquo;</a></p>
                 </div>
             </div><!--/row-->
-            <div class="row-fluid">
-                <div class="span4">
-                    <h2>My analyses</h2>
-                    <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-                    <p><a class="btn" href="#">View details &raquo;</a></p>
-                </div><!--/span-->
-                <div class="span4">
-                    <h2>My groups</h2>
-                    <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-                    <p><a class="btn" href="#">View details &raquo;</a></p>
-                </div><!--/span-->
-                <div class="span4">
-                    <h2>Recent actions</h2>
-                    <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-                    <p><a class="btn" href="#">View details &raquo;</a></p>
-                </div><!--/span-->
-            </div><!--/row-->
+            @if(user.isDefined){
+                <div class="row-fluid">
+                    <div class="span4">
+                        <h2>My analyses</h2>
+                        <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+                        <p><a class="btn" href="#">View details &raquo;</a></p>
+                    </div><!--/span-->
+                    <div class="span4">
+                        <h2>My groups</h2>
+                        <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+                        <p><a class="btn" href="#">View details &raquo;</a></p>
+                    </div><!--/span-->
+                    <div class="span4">
+                        <h2>Recent actions</h2>
+                        <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+                        <p><a class="btn" href="#">View details &raquo;</a></p>
+                    </div><!--/span-->
+                </div><!--/row-->
+            }else{
+                <div class="well hero-unit">
+                    <h2>There's more!</h2>
+                    <p><a href="@routes.Application.login" class="btn btn-primary">Login</a> to see your top content here!</p>
+                </div>
+            }
         </div><!--/row-->
     </div><!-- /.container-fluid -->
 }

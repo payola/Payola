@@ -1,4 +1,4 @@
-@(title: String)(content: Html)
+@(user: Option[cz.payola.data.entities.User], title: String)(content: Html)
 
 <!DOCTYPE html>
 <html>
@@ -25,21 +25,30 @@
                             <ul class="nav">
                                 <li class="active"><a href="@routes.Application.index">Home</a></li>
                                 <li><a href="@routes.Application.dashboard">Dashboard</a></li>
-                                <li><a href="@routes.Application.login">Login</a></li>
-                                <li class="dropdown">
-                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                        Profile<b class="caret"></b>
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="@routes.Profile.view("jiri@helmich.cz")">View</a></li>
-                                        <li><a href="@routes.Profile.edit("jiri@helmich.cz")">Edit</a></li>
-                                        <li class="divider"></li>
-                                        <li><a href="@routes.Profile.edit("jiri@helmich.cz")">My groups</a></li>
-                                        <li><a href="@routes.Profile.edit("jiri@helmich.cz")">My analyses</a></li>
-                                    </ul>
-                                </li>
+                                @if(user.isDefined){
+                                    <li class="dropdown">
+                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                            Profile<b class="caret"></b>
+                                        </a>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="@routes.Profile.index(user.get.email)">View</a></li>
+                                            <li><a href="@routes.Profile.edit(user.get.email)">Edit</a></li>
+                                            <li class="divider"></li>
+                                            <li><a href="@routes.Profile.edit(user.get.email)">My groups</a></li>
+                                            <li><a href="@routes.Profile.edit(user.get.email)">My analyses</a></li>
+                                        </ul>
+                                    </li>
+                                }
                             </ul>
-                            <p class="navbar-text pull-right">Logged in as <a href="#">jiri@@helmich.cz</a></p>
+
+                            <p class="navbar-text pull-right">
+                                @if(user.isDefined){
+                                    Logged in as <a href="@routes.Profile.index(user.get.email)">@user.get.name</a>
+                                    (<a href="@routes.Application.logout">Logout</a>)
+                                }else{
+                                    <a href="@routes.Application.login">Login</a>
+                                }
+                            </p>
                         </div><!--/.nav-collapse -->
                     </div>
                 </div>

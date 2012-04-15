@@ -1,4 +1,6 @@
-@main("Payola!") {
+@(user: Option[cz.payola.data.entities.User])
+
+@main(user, "Payola!") {
 
     <div class="container-fluid">
         <div class="row-fluid">

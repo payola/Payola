@@ -1,6 +1,6 @@
 @(form: Form[(String,String)])(implicit flash: Flash)
 
-@main("Payola login page") {
+@main(None, "Payola login page") {
     <div class="container">
         @helper.form(routes.Application.authenticate) {
 
