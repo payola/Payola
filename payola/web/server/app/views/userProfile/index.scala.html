@@ -1,4 +1,4 @@
-@(user: Option[cz.payola.data.entities.User], owner: cz.payola.data.entities.User)
+@(user: Option[cz.payola.data.entities.User], owner: cz.payola.data.entities.User, publicGroups: Seq[cz.payola.data.entities.Group])
 @import tags._
 
 @main(user, "User profile") {
@@ -45,26 +45,18 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr>
-                    <td>MFF Students</td>
-                    <td>
-                        @if(user.isDefined && (user.get == owner)){
-                            <a href="" class="btn btn-primary"><i class="icon-cog icon-white"></i> Administer</a>
-                        }else{
-                            <a href="" class="btn btn-success"><i class="icon-plus icon-white"></i> Request membership</a>
-                        }
-                    </td>
-                </tr>
-                <tr>
-                    <td>PSP CR Members</td>
-                    <td>
-                        @if(user.isDefined && (user.get == owner)){
-                            <a href="" class="btn btn-primary"><i class="icon-cog icon-white"></i> Administer</a>
-                        }else{
-                            <a href="" class="btn btn-danger"><i class="icon-minus icon-white"></i> Leave</a>
-                        }
-                    </td>
-                </tr>
+                @publicGroups.map{ group =>
+                    <tr>
+                        <td>@group.name</td>
+                        <td>
+                            @if(user.isDefined && (user.get == owner)){
+                                <a href="" class="btn btn-primary"><i class="icon-cog icon-white"></i> Administer</a>
+                            }else{
+                                <a href="" class="btn btn-success"><i class="icon-plus icon-white"></i> Request membership</a>
+                            }
+                        </td>
+                    </tr>
+                }
                 </tbody>
             </table>
         </div>
