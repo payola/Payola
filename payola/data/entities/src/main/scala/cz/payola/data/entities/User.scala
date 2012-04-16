@@ -1,6 +1,6 @@
 package cz.payola.data.entities
 
-import org.squeryl.dsl.OneToMany
+import org.squeryl.dsl.{OneToMany, ManyToMany}
 import org.squeryl.KeyedEntity
 import schema.PayolaDB
 import org.squeryl.PrimitiveTypeMode._
@@ -17,51 +17,81 @@ class User(
     password_=(pwd)
     email_=(email)
 
-    private lazy val _ownedGroups2: OneToMany[Group] = PayolaDB.groupOwnership.left(this)
+    private lazy val _ownedGroupsQuery: OneToMany[Group] = PayolaDB.groupOwnership.left(this)
 
-    private lazy val _ownedAnalyses2: OneToMany[Analysis] = PayolaDB.analysisOwnership.left(this)
+    private lazy val _ownedAnalysesQuery: OneToMany[Analysis] = PayolaDB.analysisOwnership.left(this)
 
-    private lazy val _memberedGroups2 = PayolaDB.groupMembership.left(this)
+    private lazy val _memberGroupsQuery = PayolaDB.groupMembership.left(this)
 
-    def ownedGroups2: Seq[Group]= {
+    override def ownedGroups: ArrayBuffer[GroupType] = {
         transaction {
-            val groups: ArrayBuffer[Group] = new ArrayBuffer[Group]()
+            val groups: ArrayBuffer[GroupType] = new ArrayBuffer[GroupType]()
 
-            for (g <- _ownedGroups2) {
-                groups += g
+            for (g <- _ownedGroupsQuery) {
+                groups += g.asInstanceOf[Group]
             }
 
-            groups.toSeq
+            groups
         }
     }
 
-    def memberedGroups2: Seq[Group]= {
+    override def ownedAnalyses: ArrayBuffer[AnalysisType] = {
         transaction {
-            val groups: ArrayBuffer[Group] = new ArrayBuffer[Group]()
+            val analyses: ArrayBuffer[AnalysisType] = new ArrayBuffer[AnalysisType]()
 
-            for (g <- _memberedGroups2) {
-                groups += g
-            }
-
-            groups.toSeq
-        }
-    }
-
-    def ownedAnalyses2: Seq[Analysis]= {
-        transaction {
-            val analyses: ArrayBuffer[Analysis] = new ArrayBuffer[Analysis]()
-
-            for (a <- _ownedAnalyses2) {
+            for (a <- _ownedAnalysesQuery) {
                 analyses += a
             }
 
-            analyses.toSeq
+            analyses
         }
     }
 
-    def becomeMemberOf(group: Group) = {
+    override def memberGroups: ArrayBuffer[GroupType]= {
         transaction {
-            _memberedGroups2.associate(group)
+            val groups: ArrayBuffer[GroupType] = new ArrayBuffer[GroupType]()
+
+            for (g  <- _memberGroupsQuery) {
+                groups += g
+            }
+
+            groups
         }
     }
+
+    override def addToGroup(g: cz.payola.domain.entities.Group) = {
+        super.addToGroup(g);
+
+        if (g.isInstanceOf[Group]) {
+            transaction {
+                if (_memberGroupsQuery.find(group => g.id == group.id) == None) {
+                    _memberGroupsQuery.associate(g.asInstanceOf[Group])
+                }
+            }
+        }
+    }
+
+    override def removeFromGroup(g: cz.payola.domain.entities.Group) = {
+        super.removeFromGroup(g)
+
+        if (g.isInstanceOf[Group]) {
+            transaction(
+                if (_memberGroupsQuery.find(group => g.id == group.id) != None) {
+                    _memberGroupsQuery.dissociate(g.asInstanceOf[Group])
+                }
+            )
+        }
+    }
+
+
+
+    /* TODO: how to handle managing owned entities (depends on field owner on entity)
+    override def removeOwnedGroup(a: AnalysisType) = null
+
+    override def removeOwnedGroup(g: cz.payola.domain.entities.Group) {}
+
+    override def addAnalysis(a: cz.payola.domain.entities.AnalysisType) = null
+
+    override def addOwnedGroup(g: cz.payola.domain.entities.Group) = null
+    */
 }

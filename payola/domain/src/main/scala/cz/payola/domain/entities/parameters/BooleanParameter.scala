@@ -2,7 +2,7 @@ package cz.payola.domain.entities.parameters
 
 import cz.payola.common
 
-protected class BooleanParameterInstance(
+class BooleanParameterInstance(
         id: String  = java.util.UUID.randomUUID.toString,
         parameter: BooleanParameter,
         value: Boolean)

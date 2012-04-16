@@ -2,7 +2,7 @@ package cz.payola.domain.entities.parameters
 
 import cz.payola.common
 
-protected class StringParameterInstance(
+class StringParameterInstance(
         id: String  = java.util.UUID.randomUUID.toString,
         p: StringParameter,
         v: String)

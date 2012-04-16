@@ -14,23 +14,41 @@ class Group(
 {
     val ownerId: String = if (owner == null) "" else owner.id
 
-    private lazy val _groupMembers2 = PayolaDB.groupMembership.right(this)
-    
-    def groupMembers2 : Seq[User]= {
-        transaction {
-            val users: ArrayBuffer[User] = new ArrayBuffer[User]()
+    private lazy val _groupMembersQuery = PayolaDB.groupMembership.right(this)
 
-            for (u <- _groupMembers2) {
+    override def members : ArrayBuffer[UserType] = {
+        transaction {
+            val users: ArrayBuffer[UserType] = new ArrayBuffer[UserType]()
+
+            for (u <- _groupMembersQuery) {
                 users += u
             }
 
-            users.toSeq
+            users
         }
     }
 
-    def addMember(user: User) = {
-        transaction {
-            _groupMembers2.associate(user)
+    override def addMember(u: cz.payola.domain.entities.User) = {
+        super.addMember(u)
+
+        if (u.isInstanceOf[User]) {
+            transaction {
+                if (_groupMembersQuery.find(user => u.id == user.id) == None) {
+                    _groupMembersQuery.associate(u.asInstanceOf[User])
+                }
+            }
+        }
+    }
+
+    override def removeMember(u: cz.payola.domain.entities.User) = {
+        super.removeMember(u)
+
+        if (u.isInstanceOf[User]) {
+            transaction {
+                if (_groupMembersQuery.find(user => u.id == user.id) != None) {
+                    _groupMembersQuery.dissociate(u.asInstanceOf[User])
+                }
+            }
         }
     }
 }
