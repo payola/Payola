@@ -46,12 +46,16 @@ class UserDAO extends EntityDAO[User](PayolaDB.users)
     def getUserByCredentials(username: String, password: String): Option[User] = {
         val query = table.where(u => u.name === username and u.password === password)
 
+        evaluateSingleResultQuery(query);
+
+        /*
         transaction {
             query.size match {
                 case 0 => None
                 case _ => Some(query.single)
             }
         }
+        */
     }
 
 

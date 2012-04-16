@@ -11,6 +11,14 @@ object TestObject
     val analysisDao = new AnalysisDAO()
     val pluginDao = new PluginDAO
     val piDao = new PluginInstanceDAO()
+    val bParDao = new BooleanParameterDAO()
+    val bParInstDao = new BooleanParameterInstanceDAO()
+    val fParDao = new FloatParameterDAO()
+    val fParInstDao = new FloatParameterInstanceDAO()
+    val iParDao = new IntParameterDAO()
+    val iParInstDao = new IntParameterInstanceDAO()
+    val sParDao = new StringParameterDAO()
+    val SParInstDao = new StringParameterInstanceDAO()
 
     def main(args: Array[String]) = {
         println("1")
@@ -21,10 +29,10 @@ object TestObject
 
         println("3")
         val user = new User("u1", "name1", "pwd1", "email1")
-        userDao.persist(user)
+        var result = userDao.persist(user)
 
         user.name += "1"
-        userDao.persist(user)
+        result = userDao.persist(user)
 
         println("4")
         val group = new Group("g1", "group1", user)
@@ -42,28 +50,35 @@ object TestObject
         val pluginInstance = new PluginInstance("pi1", plugin)
         piDao.persist(pluginInstance)
 
-        user.becomeMemberOf(group)
+        user.addToGroup(group)
         group2.addMember(user)
 
-        for (a <- user.memberedGroups2) {
+        for (a <- user.memberGroups) {
             println(a.name)
         }
 
-        for (g <- user.ownedGroups2) {
+        for (g <- user.ownedGroups) {
             println(g.name)
         }
 
-        for (a <- user.ownedAnalyses2) {
+        for (a <- user.ownedAnalyses) {
             println(a.name)
         }
 
         // Validate saved values
-        assert(user.memberedGroups2.size == 2)
-        assert(user.ownedGroups2.size == 2)
-        assert(user.ownedAnalyses2.size == 1)
 
-        assert(group.groupMembers2(0).name == user.name, "Invalid group owner")
-        assert(group2.groupMembers2(0).name == user.name, "Invalid group2 owner")
+        // Test userDao
+        assert(userDao.findByUsername(user.name, 0, 1)(0).id == user.id)
+        assert(userDao.findByUsername("invalid name").size == 0)
+        assert(userDao.getUserByCredentials(user.name, user.password).get.id == user.id)
+        assert(userDao.getUserByCredentials("invalid", "credientals") == None)
+
+        assert(user.memberGroups.size == 2)
+        assert(user.ownedGroups.size == 2)
+        assert(user.ownedAnalyses.size == 1)
+
+        assert(group.members(0).name == user.name, "Invalid group owner")
+        assert(group2.members(0).name == user.name, "Invalid group2 owner")
 
         val u = userDao.getById(user.id)
         assert(u != None)
@@ -83,11 +98,5 @@ object TestObject
 
         val pi = piDao.getById(pluginInstance.id)
         assert(pi != None)
-
-        // Test userDao
-        assert(userDao.findByUsername(user.name, 0, 1)(0).id == user.id)
-        assert(userDao.findByUsername("invalid name").size == 0)
-        assert(userDao.getUserByCredentials(user.name, user.password).get.id == user.id)
-        assert(userDao.getUserByCredentials("invalid", "credientals") == None)
     }
 }
