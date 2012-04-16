@@ -76,18 +76,18 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
         assert(g != None)
         assert(g.get.id == group1.id)
         assert(g.get.name == group1.name)
-        //TOOD: assert(g.get.ownerId == user.id)
+        assert(g.get.ownerId == user.id)
     }
 
     "3) Members of groups" should "be persisted" in {
-        user.becomeMemberOf(group1)
+        user.addToGroup(group1)
         group2.addMember(user)
 
-        assert(user.memberedGroups2.size == 2)
-        assert(user.ownedGroups2.size == 2)
+        assert(user.memberGroups.size == 2)
+        assert(user.ownedGroups.size == 2)
 
-        assert(group1.groupMembers2(0).name == user.name, "Invalid group owner")
-        assert(group2.groupMembers2(0).name == user.name, "Invalid group2 owner")
+        assert(group1.members(0).name == user.name, "Invalid group owner")
+        assert(group2.members(0).name == user.name, "Invalid group2 owner")
     }
 
     "4) Analyses" should "be persited, loaded and managed by AnalysesDAO" in {
@@ -97,7 +97,7 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
         analysis.name += "1"
         analysisDao.persist(analysis)
 
-        assert(user.ownedAnalyses2.size == 1)
+        assert(user.ownedAnalyses.size == 1)
 
         val a = analysisDao.getById(analysis.id)
         assert (a != None)
@@ -236,5 +236,13 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
 
         val x = sParInstDao.getById("")
         assert (x == None)
+    }
+
+    "DAOs" should "paginate properly" in {
+        assert(userDao.getAll().size == 1)
+        assert(groupDao.getAll().size == 2)
+        assert(groupDao.getAll(1,2).size == 1)
+        assert(groupDao.getAll(2,5).size == 0)
+        assert(groupDao.getAll(1,0).size == 0)
     }
 }

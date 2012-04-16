@@ -52,8 +52,18 @@ object PayolaDB extends Schema
         oneToManyRelation(users, analyses)
             .via((u, a) => u.id === a.ownerId)
 
+    val analysesPluginInstances =
+        manyToManyRelation(analyses, pluginInstances)
+            .via[AnalysesVsPluginAnalyses]((a, pi, api) => (a.id === api.analysisId, pi.id === api.pluginInstanceId))
+
+    val pluginsPluginInstances =
+        oneToManyRelation(plugins, pluginInstances)
+            .via((p, pi) => p.id === pi.pluginId)
+
     def startDatabaseSession(): Unit = {
         java.lang.Class.forName("org.h2.Driver");
+
+        // TODO: Read values from some config file
         SessionFactory.concreteFactory = Some(() =>
             Session.create(
                 java.sql.DriverManager.getConnection(databaseConnection, databaseUsername, databasePassword),
@@ -146,5 +156,11 @@ object PayolaDB extends Schema
         extends KeyedEntity[CompositeKey2[String, String]]
     {
         def id = compositeKey(memberId, groupId)
+    }
+
+    class AnalysesVsPluginAnalyses(val analysisId: String, val pluginInstanceId: String)
+        extends KeyedEntity[CompositeKey2[String, String]]
+    {
+        def id = compositeKey(analysisId, pluginInstanceId)
     }
 }
