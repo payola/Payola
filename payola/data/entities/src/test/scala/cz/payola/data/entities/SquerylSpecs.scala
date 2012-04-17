@@ -58,6 +58,9 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
         assert (u.get.email == user.email)
 
         // Test userDao
+        assert(userDao.findByUsername("n", 0, 1)(0).id == user.id)
+        assert(userDao.findByUsername("a", 0, 1)(0).id == user.id)
+        assert(userDao.findByUsername("1", 0, 1)(0).id == user.id)
         assert(userDao.findByUsername(user.name, 0, 1)(0).id == user.id)
         assert(userDao.findByUsername("invalid name").size == 0)
         assert(userDao.getUserByCredentials(user.name, user.password).get.id == user.id)

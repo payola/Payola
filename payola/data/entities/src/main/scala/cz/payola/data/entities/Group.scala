@@ -10,22 +10,14 @@ class Group(
         name: String,
         owner: User)
     extends cz.payola.domain.entities.Group(id, name, owner)
-    with KeyedEntity[String]
+    with PersistableEntity
 {
     val ownerId: String = if (owner == null) "" else owner.id
 
     private lazy val _groupMembersQuery = PayolaDB.groupMembership.right(this)
 
-    override def members : ArrayBuffer[UserType] = {
-        transaction {
-            val users: ArrayBuffer[UserType] = new ArrayBuffer[UserType]()
-
-            for (u <- _groupMembersQuery) {
-                users += u
-            }
-
-            users
-        }
+    override def members : collection.Seq[UserType] = {
+        evaluateCollection(_groupMembersQuery)
     }
 
     override def addMember(u: cz.payola.domain.entities.User) = {
