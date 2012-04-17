@@ -1,4 +1,4 @@
-@(user: Option[cz.payola.data.entities.User], owner: cz.payola.data.entities.User, publicGroups: Seq[cz.payola.data.entities.Group])
+@(user: Option[cz.payola.data.entities.User], owner: cz.payola.data.entities.User, analyses: Seq[cz.payola.data.entities.Analysis])
 @import tags._
 
 @main(user, "User profile") {
@@ -24,14 +24,17 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr>
-                    <td>Kalousek friends</td>
-                    <td><a href="" class="btn btn-primary"><i class="icon-zoom-in icon-white"></i> View</a></td>
-                </tr>
-                <tr>
-                    <td>Who to pay to be famous</td>
-                    <td><a href="" class="btn btn-primary"><i class="icon-zoom-in icon-white"></i> View</a></td>
-                </tr>
+                @analyses.map{analysis =>
+                    <tr>
+                        <td>@analysis.name</td>
+                        <td><a href="" class="btn btn-primary"><i class="icon-zoom-in icon-white"></i> View</a></td>
+                    </tr>
+                }
+                @if(analyses.isEmpty){
+                    <tr>
+                        <td class="alert alert-info" colspan="2">No analyses.</td>
+                    </tr>
+                }
                 </tbody>
             </table>
         </div>
@@ -45,7 +48,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                @publicGroups.map{ group =>
+                @owner.ownedGroups.map{ group =>
                     <tr>
                         <td>@group.name</td>
                         <td>
@@ -55,6 +58,11 @@
                                 <a href="" class="btn btn-success"><i class="icon-plus icon-white"></i> Request membership</a>
                             }
                         </td>
+                    </tr>
+                }
+                @if(owner.ownedGroups.isEmpty){
+                    <tr>
+                        <td colspan="2" class="alert alert-info">No groups.</td>
                     </tr>
                 }
                 </tbody>

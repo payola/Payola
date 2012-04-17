@@ -4,14 +4,15 @@ import cz.payola.common.rdf.Graph
 import cz.payola.data.rdf.configurations.SparqlEndpointConfiguration
 import cz.payola.data.rdf.QueryExecutor
 import cz.payola.domain.rdf.RDFGraph
-import cz.payola.data.entities.dao.UserDAO
 import cz.payola.data.entities.User
 import collection.mutable.Seq
 import collection.Seq
+import cz.payola.data.entities.dao.{AnalysisDAO, UserDAO}
 
 class DataFacade
 {
     val userDAO = new UserDAO
+    val analysisDAO = new AnalysisDAO
 
     def getGraph(uri: String): Graph = {
         val dbPediaEndpointUrl = "http://dbpedia.org/sparql" +
@@ -50,6 +51,10 @@ class DataFacade
             case user:User => true
             case _ => false //TODO decide what to do here when the user is not inserted but updated (Unit returned)
         }
+    }
+
+    def getPublicAnalysesByOwner(o: User) = {
+        analysisDAO.getPublicAnalysesByOwner(o)
     }
 
     private def cryptPassword(password: String, method: String = "SHA-1") : String = {
