@@ -1,10 +1,14 @@
 package cz.payola.web.client.views.plugins.visual
 
+import components.visualsetup.ViewModel
 import s2js.adapters.js.browser._
 import s2js.adapters.js.dom.Element
 
 class  SetupLoader
 {
+
+    new ViewModel()
+
     val VertexColorHigh = "setup.vertex.colors.selected"
     private val VertexColorHighRed = "setup.vertex.colors.selected.red"
     private val VertexColorHighGreen = "setup.vertex.colors.selected.green"
