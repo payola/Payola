@@ -17,13 +17,13 @@
  * @author eae@google.com (Emil A Eklund)
  */
 
-goog.provide('goog.events.actionEventWrapper');
+s2js.runtime.client.ClassLoader.provide('goog.events.actionEventWrapper');
 
-goog.require('goog.events');
-goog.require('goog.events.EventHandler');
-goog.require('goog.events.EventType');
-goog.require('goog.events.EventWrapper');
-goog.require('goog.events.KeyCodes');
+s2js.runtime.client.ClassLoader.require('goog.events');
+s2js.runtime.client.ClassLoader.require('goog.events.EventHandler');
+s2js.runtime.client.ClassLoader.require('goog.events.EventType');
+s2js.runtime.client.ClassLoader.require('goog.events.EventWrapper');
+s2js.runtime.client.ClassLoader.require('goog.events.KeyCodes');
 
 
 

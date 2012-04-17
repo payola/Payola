@@ -18,7 +18,7 @@
  * @author eae@google.com (Emil A Eklund)
  */
 
-goog.provide('goog.events.KeyNames');
+s2js.runtime.client.ClassLoader.provide('goog.events.KeyNames');
 
 
 /**

@@ -149,6 +149,11 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
     
     def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
 
+        drawQuick(context, color, positionCorrection)
+    }
+
+    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
+
         val colorToUse = color.getOrElse(
             if(isSelected) colorHigh else  colorMedium
         )
@@ -160,7 +165,6 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
         } else {
             prepareBezierCurve(context, colorToUse, correction)
         }
-
     }
     
     private def updateColorBase(loader: SetupLoader) {

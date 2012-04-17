@@ -45,32 +45,11 @@ object PayolaBuild extends Build
     {
         val serverBaseDir = file("web/server")
 
-        val javaScriptsDir = serverBaseDir / "public/javascripts"
+        val dependencyDir = serverBaseDir / "public"
 
-        val compiledJavaScriptsDir = javaScriptsDir / "compiled"
+        val dependencyFile = dependencyDir / "dependencies"
 
-        /** Symbols used as entry points to the javascript application among all pages. */
-        val scriptEntryPoints = Set(
-            "cz.payola.web.client.presenters.Index"
-        )
-
-        /**
-          * Returns a file corresponding to the specified entry point.
-          * @param entryPoint The entry point.
-          * @return The file.
-          */
-        def getEntryPointFile(entryPoint: String): io.File = {
-            new io.File(compiledJavaScriptsDir / (entryPoint + ".js"))
-        }
-
-        /**
-          * Returns a file corresponding to the specified entry point dependencies.
-          * @param entryPoint The entry point.
-          * @return The dependency file.
-          */
-        def getEntryPointDependencyFile(entryPoint: String): io.File = {
-            new io.File(compiledJavaScriptsDir / (entryPoint + ".deps.js"))
-        }
+        val javaScriptsDir = dependencyDir / "javascripts"
     }
 
     /** Common default settings of all projects. */
@@ -158,6 +137,12 @@ object PayolaBuild extends Build
         val adaptersJar = file("lib/" + S2JsSettings.adaptersJarName)
 
         def apply(name: String, path: File, outputDir: File, projectSettings: Seq[Project.Setting[_]]) = {
+            raw(name, path, outputDir, projectSettings).dependsOn(
+                s2JsRuntimeClientProject
+            )
+        }
+
+        def raw(name: String, path: File, outputDir: File, projectSettings: Seq[Project.Setting[_]]) = {
             Project(
                 name, path,
                 settings = projectSettings ++ Seq(
@@ -175,8 +160,20 @@ object PayolaBuild extends Build
         }
     }
 
-    lazy val s2JsRuntimeProject = ScalaToJsProject(
-        "runtime", file("s2js/runtime"), WebSettings.javaScriptsDir, s2JsSettings
+    lazy val s2JsRuntimeProject = Project(
+        "runtime", file("s2js/runtime"), settings = s2JsSettings
+    ).aggregate(
+        s2JsRuntimeSharedProject, s2JsRuntimeClientProject
+    )
+
+    lazy val s2JsRuntimeSharedProject = ScalaToJsProject.raw(
+        "runtime-shared", file("s2js/runtime/shared"), WebSettings.javaScriptsDir, s2JsSettings
+    )
+
+    lazy val s2JsRuntimeClientProject = ScalaToJsProject.raw(
+        "runtime-client", file("s2js/runtime/client"), WebSettings.javaScriptsDir, s2JsSettings
+    ).dependsOn(
+        s2JsRuntimeSharedProject
     )
 
     lazy val scala2JsonProject = Project(
@@ -187,21 +184,48 @@ object PayolaBuild extends Build
         "common", file("common"), WebSettings.javaScriptsDir, payolaSettings
     ).dependsOn(scala2JsonProject)
 
-    lazy val dataProject = Project(
-        "data", file("data"),
+    lazy val domainProject = Project(
+        "domain", file("domain"),
         settings = payolaSettings ++ Seq(
             libraryDependencies ++= Seq(
                 "org.apache.jena" % "jena-core" % "2.7.0-incubating"
             )
         )
     ).dependsOn(
-        scala2JsonProject, commonProject
+        commonProject
+    )
+
+    lazy val dataProject = Project(
+        "data", file("data"), settings = payolaSettings
+    ).aggregate(
+        dataRdfProject, dataEntitiesProject
+    )
+
+    lazy val dataRdfProject = Project(
+        "rdf", file("data/rdf"), settings = payolaSettings
+    ).dependsOn(
+        commonProject, domainProject, scala2JsonProject
+    )
+
+    lazy val dataEntitiesProject = Project(
+        "entities", file("data/entities"),
+        settings = payolaSettings ++ Seq(
+            libraryDependencies ++= Seq(
+                "org.squeryl" % "squeryl_2.9.0-1" % "0.9.5",
+                "com.h2database" % "h2" % "1.3.165",
+                "mysql" % "mysql-connector-java" % "5.1.18",
+                "postgresql" % "postgresql" % "9.1-901.jdbc4",
+                "org.apache.derby" % "derby" % "10.8.2.2"
+            )
+        )
+    ).dependsOn(
+        commonProject, domainProject
     )
 
     lazy val modelProject = Project(
         "model", file("model"), settings = payolaSettings
     ).dependsOn(
-        scala2JsonProject, commonProject, dataProject
+        commonProject, domainProject, dataRdfProject, dataEntitiesProject
     )
 
     lazy val webProject = Project(
@@ -213,13 +237,13 @@ object PayolaBuild extends Build
     lazy val webSharedProject = ScalaToJsProject(
         "shared", file("web/shared"), WebSettings.javaScriptsDir / "shared", payolaSettings
     ).dependsOn(
-        commonProject, dataProject
+        commonProject, modelProject
     )
 
     lazy val webClientProject = ScalaToJsProject(
         "client", file("web/client"), WebSettings.javaScriptsDir, payolaSettings
     ).dependsOn(
-        commonProject, webSharedProject, s2JsRuntimeProject
+        commonProject, webSharedProject
     )
 
     lazy val webServerProject = PlayProject(
@@ -227,15 +251,18 @@ object PayolaBuild extends Build
     ).settings(
         compileAndPackage <<= (packageBin in Compile).dependsOn(clean).map {jarFile: File =>
             // Retrieve the dependencies.
-            val files = new io.Directory(WebSettings.javaScriptsDir).deepFiles.filter(_.extension == "js")
+            val dependencyExtensions = List("js", "css")
+            val dependencyDirectory = new io.Directory(WebSettings.dependencyDir)
+            val files = dependencyDirectory.deepFiles.filter(f => dependencyExtensions.contains(f.extension))
+
             val symbolFiles = new mutable.HashMap[String, String]
             val fileProvidedSymbols = new mutable.HashMap[String, mutable.ArrayBuffer[String]]
             val fileRequiredSymbols = new mutable.HashMap[String, mutable.ArrayBuffer[String]]
+            val provideRegex = """s2js\.runtime\.client\.ClassLoader\.provide\(\s*['\"]([^'\"]+)['\"]\s*\);""".r
+            val requireRegex = """s2js\.runtime\.client\.ClassLoader\.require\(\s*['\"]([^'\"]+)['\"]\s*\);""".r
 
-            val provideRegex = """goog\.provide\(\s*['\"]([^'\"]+)['\"]\s*\);""".r
-            val requireRegex = """goog\.require\(\s*['\"]([^'\"]+)['\"]\s*\);""".r
             files.foreach {file =>
-                val path = file.toAbsolute.path.toString
+                val path = file.toAbsolute.path.toString.replace("\\", "/")
                 fileProvidedSymbols += path -> new mutable.ArrayBuffer[String]
                 fileRequiredSymbols += path -> new mutable.ArrayBuffer[String]
 
@@ -256,83 +283,25 @@ object PayolaBuild extends Build
                 ))
             }
 
-            // Construct the file dependency graph from the symbol dependency graph.
-            val fileDependencyGraph = fileRequiredSymbols.mapValues(_.map(o => symbolFiles(o)))
-
-            /**
-              * Creates a single JavaScript file containing all required dependencies for the specified entry point.
-              * @param entryPointSymbol The symbol that will be used in the html page as an entry point to the
-              *     JavaScript application.
-              */
-            def compileScript(entryPointSymbol: String) {
-                if (!symbolFiles.contains(entryPointSymbol)) {
-                    throw new Exception("The entry point '%s' wasn't found.".format(entryPointSymbol))
-                }
-                val processedFiles = new mutable.HashSet[String]
-                val visitedFiles = new mutable.HashSet[String]
-                var buffer = new ListBuffer[String]
-
-                def processFile(file: String) {
-                    if (!processedFiles.contains(file)) {
-                        if (visitedFiles.contains(file)) {
-                            throw new Exception("A cycle in JavaScript file dependencies detected. " +
-                                "Check the file '%s'.".format(file))
-                        }
-                        visitedFiles += file
-
-                        fileDependencyGraph(file).foreach(processFile(_))
-
-                        val name = file.stripPrefix(WebSettings.javaScriptsDir.absolutePath.toString).replace("\\", "/")
-                        buffer += "////////////////////////////////////////////////////////////////////////////////"
-                        buffer += "// %s".format(name)
-                        buffer += "////////////////////////////////////////////////////////////////////////////////"
-                        buffer ++= Source.fromFile(file).getLines
-                        buffer += "\n\n"
-                        
-                        visitedFiles -= file
-                        processedFiles += file
-                    }
-                }
-                
-                // Load the necessary libraries.
-                processFile((WebSettings.javaScriptsDir / "bootstrap.js").absolutePath.toString)
-                processFile(symbolFiles(entryPointSymbol))
-
-                // Strip the requires which are no more needed.
-                val compiledScript = requireRegex.replaceAllIn(buffer.mkString("\n"), "")
-                buffer = new ListBuffer[String]
-                buffer += compiledScript
-
-                // Require dependencies that aren't included in the compiled file.
-                buffer += "////////////////////////////////////////////////////////////////////////////////"
-                buffer += "// Dependencies"
-                buffer += "////////////////////////////////////////////////////////////////////////////////"
-                fileProvidedSymbols.filter(p => !processedFiles.contains(p._1)).foreach {case (path, provided) =>
-                    val required = fileRequiredSymbols(path).filter(s => !processedFiles.contains(symbolFiles(s)))
-                    val relativePath = path.stripPrefix(WebSettings.javaScriptsDir.absolutePath).replace("\\", "/")
-                    buffer += "goog.addDependency('%s%s', [".format("assets/javascripts", relativePath)
-                    buffer += provided.map("'" + _ + "'").mkString(", ")
-                    buffer += "], ["
-                    buffer += required.map("'" + _ + "'").mkString(", ")
-                    buffer += "]);\n"
-                }
-
-                // Create the output file.
-                val entryPointFile = WebSettings.getEntryPointFile(entryPointSymbol)
-                entryPointFile.parent.jfile.mkdirs()
-                entryPointFile.writeAll(buffer.mkString)
+            // Create the dependency file.
+            val dependencyFile = WebSettings.dependencyFile
+            val dependencyBuffer = ListBuffer.empty[String]
+            fileProvidedSymbols.keys.foreach{file =>
+                dependencyBuffer += "'%s': [".format(file)
+                dependencyBuffer += fileProvidedSymbols(file).mkString(",")
+                dependencyBuffer += "] ["
+                dependencyBuffer += fileRequiredSymbols(file).mkString(",")
+                dependencyBuffer += "]\n"
             }
-
-            // Compile the scripts for all entry points.
-            WebSettings.scriptEntryPoints.foreach(compileScript(_))
+            new io.File(dependencyFile).writeAll(dependencyBuffer.mkString)
 
             jarFile
         },
         clean <<= clean.map {_ =>
-            // Delete all compiled scripts.
-            WebSettings.scriptEntryPoints.foreach(WebSettings.getEntryPointFile(_).delete())
+            // Delete the dependency file.
+            new io.File(WebSettings.dependencyFile).delete()
         }
     ).dependsOn(
-        commonProject, webSharedProject, webClientProject, scala2JsonProject, dataProject
+        commonProject, modelProject, scala2JsonProject, webSharedProject, webClientProject
     )
 }

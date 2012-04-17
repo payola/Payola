@@ -21,7 +21,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('a');
+                        s2js.runtime.client.ClassLoader.provide('a');
 
                         a.m1 = function() {
                             var self = this;
@@ -31,7 +31,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 window.alert(x);
                             };
                         };
-                        a.__class__ = new s2js.Class('a', []);
+                        a.__class__ = new s2js.runtime.client.Class('a', []);
                     """
                 }
         }
@@ -52,13 +52,13 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('a');
+                        s2js.runtime.client.ClassLoader.provide('a');
 
                         a.m1 = function() {
                             var self = this;
                             scala.Predef.intWrapper(0).to(2).foreach(function(x) { window.alert(('foo' + x)); });
                         };
-                        a.__class__ = new s2js.Class('a', []);
+                        a.__class__ = new s2js.runtime.client.Class('a', []);
                     """
                 }
         }
@@ -86,7 +86,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o1');
+                        s2js.runtime.client.ClassLoader.provide('o1');
 
                         o1.m1 = function() {
                             var self = this;
@@ -101,7 +101,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 x = 'defaultconfirmed';
                             }
                         };
-                       o1.__class__ = new s2js.Class('o1', []);
+                       o1.__class__ = new s2js.runtime.client.Class('o1', []);
                     """
                 }
         }
@@ -127,7 +127,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o1');
+                        s2js.runtime.client.ClassLoader.provide('o1');
 
                         o1.m1 = function() {
                             var self = this;
@@ -145,7 +145,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 }
                             })();
                         };
-                        o1.__class__ = new s2js.Class('o1', []);
+                        o1.__class__ = new s2js.runtime.client.Class('o1', []);
                     """
                 }
         }
@@ -170,7 +170,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o1');
+                        s2js.runtime.client.ClassLoader.provide('o1');
 
                         o1.m = function(x) {
                             var self = this;
@@ -194,7 +194,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 }
                             })();
                         };
-                        o1.__class__ = new s2js.Class('o1', []);
+                        o1.__class__ = new s2js.runtime.client.Class('o1', []);
                     """
                 }
         }
@@ -213,8 +213,8 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('A');
-                        goog.require('scala.Exception');
+                        s2js.runtime.client.ClassLoader.provide('A');
+                        s2js.runtime.client.ClassLoader.require('scala.Exception');
 
                         A = function() {
                             var self = this;
@@ -225,7 +225,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 throw new scala.Exception('something bad happened');
                             })();
                         };
-                        A.prototype.__class__ = new s2js.Class('A', []);
+                        A.prototype.__class__ = new s2js.runtime.client.Class('A', []);
                     """
                 }
         }
@@ -244,8 +244,8 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('A');
-                        goog.require('scala.Exception');
+                        s2js.runtime.client.ClassLoader.provide('A');
+                        s2js.runtime.client.ClassLoader.require('scala.Exception');
 
                         A = function() { var self = this; };
                         A.prototype.m = function() {
@@ -260,7 +260,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 })();
                             }
                         };
-                        A.prototype.__class__ = new s2js.Class('A', []);
+                        A.prototype.__class__ = new s2js.runtime.client.Class('A', []);
                     """
                 }
         }
@@ -284,8 +284,8 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('A');
-                        goog.require('scala.Exception');
+                        s2js.runtime.client.ClassLoader.provide('A');
+                        s2js.runtime.client.ClassLoader.require('scala.Exception');
 
                         A = function() {
                             var self = this;
@@ -299,11 +299,11 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 })();
                             } catch ($ex$1) {
                                 (function() {
-                                    if (s2js.isInstanceOf($ex$1, 'scala.RuntimeException')) {
+                                    if (s2js.runtime.client.isInstanceOf($ex$1, 'scala.RuntimeException')) {
                                         x = 'runtime exception';
                                         return;
                                     }
-                                    if (s2js.isInstanceOf($ex$1, 'scala.Exception')) {
+                                    if (s2js.runtime.client.isInstanceOf($ex$1, 'scala.Exception')) {
                                         x = 'exeption';
                                         return;
                                     }
@@ -315,7 +315,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 })();
                             }
                         };
-                        A.prototype.__class__ = new s2js.Class('A', []);
+                        A.prototype.__class__ = new s2js.runtime.client.Class('A', []);
                     """
                 }
         }
@@ -338,7 +338,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o');
+                        s2js.runtime.client.ClassLoader.provide('o');
 
                         o.m = function() {
                             var self = this;
@@ -357,7 +357,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 }
                             })('abc');
                         };
-                        o.__class__ = new s2js.Class('o', []);
+                        o.__class__ = new s2js.runtime.client.Class('o', []);
                     """
                 }
         }
@@ -377,7 +377,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o');
+                        s2js.runtime.client.ClassLoader.provide('o');
 
                         o.m = function() {
                             var self = this;
@@ -390,7 +390,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 }
                             })('abc');
                         };
-                        o.__class__ = new s2js.Class('o', []);
+                        o.__class__ = new s2js.runtime.client.Class('o', []);
                     """
                 }
         }
@@ -410,7 +410,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o');
+                        s2js.runtime.client.ClassLoader.provide('o');
 
                         o.m = function() {
                             var self = this;
@@ -423,7 +423,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 }
                             })('abc');
                         };
-                        o.__class__ = new s2js.Class('o', []);
+                        o.__class__ = new s2js.runtime.client.Class('o', []);
                     """
                 }
         }
@@ -444,7 +444,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o');
+                        s2js.runtime.client.ClassLoader.provide('o');
 
                         o.m = function() {
                             var self = this;
@@ -460,7 +460,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 }
                             })('abc');
                         };
-                        o.__class__ = new s2js.Class('o', []);
+                        o.__class__ = new s2js.runtime.client.Class('o', []);
                     """
                 }
         }
@@ -481,15 +481,15 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o');
+                        s2js.runtime.client.ClassLoader.provide('o');
 
                         o.m = function(p) {
                             var self = this;
                             return (function($selector$1) {
-                                if (s2js.isInstanceOf($selector$1, 'scala.String')) {
+                                if (s2js.runtime.client.isInstanceOf($selector$1, 'scala.String')) {
                                     return 123;
                                 }
-                                if (s2js.isInstanceOf($selector$1, 'scala.Int')) {
+                                if (s2js.runtime.client.isInstanceOf($selector$1, 'scala.Int')) {
                                     return 456;
                                 }
                                 if (true) {
@@ -497,7 +497,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 }
                             })(p);
                         };
-                        o.__class__ = new s2js.Class('o', []);
+                        o.__class__ = new s2js.runtime.client.Class('o', []);
                     """
                 }
         }
@@ -518,16 +518,16 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o');
+                        s2js.runtime.client.ClassLoader.provide('o');
 
                         o.m = function(p) {
                             var self = this;
                             return (function($selector$1) {
-                                if (s2js.isInstanceOf($selector$1, 'scala.String')) {
+                                if (s2js.runtime.client.isInstanceOf($selector$1, 'scala.String')) {
                                     var x = $selector$1;
                                     return 123;
                                 }
-                                if (s2js.isInstanceOf($selector$1, 'scala.Int')) {
+                                if (s2js.runtime.client.isInstanceOf($selector$1, 'scala.Int')) {
                                     var y = $selector$1;
                                     return 456;
                                 }
@@ -536,7 +536,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 }
                             })(p);
                         };
-                        o.__class__ = new s2js.Class('o', []);
+                        o.__class__ = new s2js.runtime.client.Class('o', []);
                     """
                 }
         }
@@ -557,24 +557,24 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o');
+                        s2js.runtime.client.ClassLoader.provide('o');
 
                         o.m = function(p) {
                             var self = this;
                             return (function($selector$1) {
-                                if (s2js.isInstanceOf($selector$1, 'scala.Tuple3') && (true) && (true) &&
-                                (s2js.isInstanceOf($selector$1.productElement(2), 'scala.Tuple2') && (true) &&
-                                (s2js.isInstanceOf($selector$1.productElement(2).productElement(1), 'scala.Tuple2') &&
-                                (s2js.isInstanceOf($selector$1.productElement(2).productElement(1).productElement(0),
+                                if (s2js.runtime.client.isInstanceOf($selector$1, 'scala.Tuple3') && (true) && (true) &&
+                                (s2js.runtime.client.isInstanceOf($selector$1.productElement(2), 'scala.Tuple2') && (true) &&
+                                (s2js.runtime.client.isInstanceOf($selector$1.productElement(2).productElement(1), 'scala.Tuple2') &&
+                                (s2js.runtime.client.isInstanceOf($selector$1.productElement(2).productElement(1).productElement(0),
                                 'scala.Int')) && (true)))) {
                                     var bound1 = $selector$1.productElement(2).productElement(1).productElement(0);
                                     var bound2 = $selector$1.productElement(2).productElement(1).productElement(1);
                                     return 123;
                                 }
-                                if (s2js.isInstanceOf($selector$1, 'scala.Some') &&
-                                (s2js.isInstanceOf($selector$1.productElement(0), 'scala.Tuple2') && (true) &&
-                                (s2js.isInstanceOf($selector$1.productElement(0).productElement(1), 'scala.Some') &&
-                                (s2js.isInstanceOf($selector$1.productElement(0).productElement(1).productElement(0),
+                                if (s2js.runtime.client.isInstanceOf($selector$1, 'scala.Some') &&
+                                (s2js.runtime.client.isInstanceOf($selector$1.productElement(0), 'scala.Tuple2') && (true) &&
+                                (s2js.runtime.client.isInstanceOf($selector$1.productElement(0).productElement(1), 'scala.Some') &&
+                                (s2js.runtime.client.isInstanceOf($selector$1.productElement(0).productElement(1).productElement(0),
                                 'scala.Tuple5') && (true) && (true) && (true) && (true) && (true))))) {
 
                             var q = $selector$1.productElement(0).productElement(1).productElement(0).productElement(2);
@@ -585,7 +585,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 }
                             })(p);
                         };
-                        o.__class__ = new s2js.Class('o', []);
+                        o.__class__ = new s2js.runtime.client.Class('o', []);
                     """
                 }
         }

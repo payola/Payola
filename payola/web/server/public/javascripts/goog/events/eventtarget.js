@@ -24,10 +24,10 @@
 /**
  * Namespace for events
  */
-goog.provide('goog.events.EventTarget');
+s2js.runtime.client.ClassLoader.provide('goog.events.EventTarget');
 
-goog.require('goog.Disposable');
-goog.require('goog.events');
+s2js.runtime.client.ClassLoader.require('goog.Disposable');
+s2js.runtime.client.ClassLoader.require('goog.events');
 
 
 

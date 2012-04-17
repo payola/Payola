@@ -73,6 +73,8 @@ class GraphView(val container: Element) extends View {
             vertexViews.diff(vertexViewsCache).foreach{ vertexView =>
                 setVertexSelection(vertexView, true)
             }
+        } else {
+            selectVertex(vertexViews.head)
         }
     }
 
@@ -95,9 +97,10 @@ class GraphView(val container: Element) extends View {
 
         _graphModel.vertices.foreach {vertexModel =>
 
-            buffer += new VertexView(vertexModel, Point(controlsLayer.getSize.x / 2 , controlsLayer.getSize.y / 2))
+            buffer += new VertexView(vertexModel, Point(300, 300)) //TODO should be center of the canvas or something like that
             counter += 1
         }
+
         buffer
     }
 
@@ -155,17 +158,25 @@ class GraphView(val container: Element) extends View {
 
     /**
       * Marks all verices in this graph graphical representation as NOT selected.
-      * @return true if a change of the selection status was changed on some vertex
+      * @return list of deselected vertices if some were deselected, else None
       */
-    def deselectAll(): Boolean = {
-        var somethingChanged = false
+    def deselectAll(): Option[ListBuffer[VertexView]] = {
+
+        val deselected = ListBuffer[VertexView]()
         if (selectedCount > 0) {
             vertexViews.foreach {vertex =>
-                somethingChanged = deselectVertex(vertex) || somethingChanged
+                if(deselectVertex(vertex)) {
+                    deselected += vertex
+                }
             }
             selectedCount = 0
         }
-        somethingChanged
+
+        if(deselected.isEmpty) {
+            None
+        } else {
+            Some(deselected)
+        }
     }
 
     /**
@@ -269,11 +280,6 @@ class GraphView(val container: Element) extends View {
                 if (verticesDeselectedLayer.cleared) {
                     vertexView.draw(verticesDeselectedLayer.context, colorToUseVertex, Some(positionCorrection))
                 }
-                if (verticesDeselectedTextLayer.cleared) {
-                    vertexView.drawInformation(verticesDeselectedTextLayer.context, colorToUseText,
-                        Some(LocationDescriptor.getVertexInformationPosition(vertexView.position) +
-                            positionCorrection.toVector))
-                }
             }
         }
 
@@ -315,6 +321,48 @@ class GraphView(val container: Element) extends View {
         layers.foreach(layer => layer.cleared = false)
     }
 
+    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point]) {
+        val positionCorrection = position.getOrElse(Point.Zero)
+
+        vertexViews.foreach { vertexView =>
+
+            val colorToUseVertex = if (color != None) {
+                Some(color.get)
+            } else if (vertexView.selected) {
+                Some(colorVertexHigh)
+            } else {
+                Some(colorVertexMedium)
+            }
+
+            if(vertexView.selected) {
+                if(verticesSelectedLayer.cleared) {
+                    vertexView.drawQuick(verticesSelectedLayer.context, colorToUseVertex, Some(positionCorrection))
+                }
+            } else {
+                if(verticesDeselectedLayer.cleared) {
+                    vertexView.drawQuick(verticesDeselectedLayer.context, colorToUseVertex, Some(positionCorrection))
+                }
+            }
+        }
+
+        edgeViews.foreach {edgeView =>
+
+            val colorToUseEdge = color
+
+            if (edgeView.isSelected) {
+                if (edgesSelectedLayer.cleared) {
+                    edgeView.draw(edgesSelectedLayer.context, colorToUseEdge, Some(positionCorrection))
+                }
+            } else {
+                if (edgesDeselectedLayer.cleared) {
+                    edgeView.draw(edgesDeselectedLayer.context, colorToUseEdge, Some(positionCorrection))
+                }
+            }
+        }
+
+        layers.foreach(layer => layer.cleared = false)
+    }
+
     /**
       * Prepares the layers for drawing and calls the draw routine of this graph based on the graphOperation parameter.
       * If the Movement operation is used only layers for selected objects are redrawn. If the selection operation
@@ -342,11 +390,10 @@ class GraphView(val container: Element) extends View {
             case RedrawOperation.Animation =>
                 layers.foreach {layer =>
                     clear(layer.context, Point.Zero, layer.getSize)
+                    layer.cleared = true
                 }
-                edgesDeselectedLayer.cleared = true
-                verticesDeselectedLayer.cleared = true
 
-                draw(null, None, None)
+                drawQuick(null, None, None)
 
             case _ =>
                 redrawAll()

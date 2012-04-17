@@ -25,12 +25,12 @@
  */
 
 
-goog.provide('goog.structs.Map');
+s2js.runtime.client.ClassLoader.provide('goog.structs.Map');
 
-goog.require('goog.iter.Iterator');
-goog.require('goog.iter.StopIteration');
-goog.require('goog.object');
-goog.require('goog.structs');
+s2js.runtime.client.ClassLoader.require('goog.iter.Iterator');
+s2js.runtime.client.ClassLoader.require('goog.iter.StopIteration');
+s2js.runtime.client.ClassLoader.require('goog.object');
+s2js.runtime.client.ClassLoader.require('goog.structs');
 
 
 

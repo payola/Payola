@@ -7,10 +7,12 @@ resolvers ++= Seq(
     Resolver.url("Play", url("http://download.playframework.org/ivy-releases/"))(Resolver.ivyStylePatterns)
 )
 
-addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "0.11.0")
+addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.0.0")
 
-addSbtPlugin("play" % "sbt-plugin" % "2.0-RC1-SNAPSHOT")
+addSbtPlugin("com.typesafe.sbteclipse" % "sbteclipse-plugin" % "2.0.0")
 
-libraryDependencies += "play" %% "play" % "2.0-RC1-SNAPSHOT"
+addSbtPlugin("play" % "sbt-plugin" % "2.0")
+
+libraryDependencies += "play" %% "play" % "2.0"
 
 libraryDependencies += "com.google.javascript" % "closure-compiler" % "r1741"

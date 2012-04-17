@@ -28,10 +28,10 @@
  */
 
 
-goog.provide('goog.userAgent.picasa');
+s2js.runtime.client.ClassLoader.provide('goog.userAgent.picasa');
 
-goog.require('goog.string');
-goog.require('goog.userAgent');
+s2js.runtime.client.ClassLoader.require('goog.string');
+s2js.runtime.client.ClassLoader.require('goog.userAgent');
 
 
 /**

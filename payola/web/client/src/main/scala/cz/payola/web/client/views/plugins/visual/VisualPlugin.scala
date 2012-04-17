@@ -1,12 +1,14 @@
 package cz.payola.web.client.views.plugins.visual
 
+import animation.Animation
 import cz.payola.web.client.views.plugins.Plugin
-import graph.GraphView
+import graph.{InformationView, VertexView, GraphView}
 import s2js.adapters.js.dom.Element
 import s2js.adapters.goog.events._
 import cz.payola.common.rdf.Graph
 import s2js.adapters.js.browser.document
-import s2js.compiler.javascript
+import s2js.adapters.goog._
+import collection.mutable.ListBuffer
 
 /**
   * Representation of visual based output drawing plugin
@@ -23,6 +25,10 @@ abstract class VisualPlugin extends Plugin
       * Contained graph in visualisation packing.
       */
     var graphView: Option[GraphView] = None
+
+    var animation: Option[Animation[VertexView]] = None
+
+    var animationNumber = -1
 
     def init(container: Element) {
 
@@ -63,6 +69,12 @@ abstract class VisualPlugin extends Plugin
         }
     }
 
+    def redrawSelection() {
+        if(graphView.isDefined) {
+            graphView.get.redraw(RedrawOperation.Selection)
+        }
+    }
+
     /**
       * Description of mouse-button-down event. Is called from the layer (canvas) binded to it in the initialization.
       * @param event
@@ -71,31 +83,68 @@ abstract class VisualPlugin extends Plugin
 
         val position = getPosition(event)
 
-        val vertex = graphView.get.getTouchedVertex(position)
-        var needsToRedraw = false;
+        var resultedAnimation: Option[Animation[InformationView]] = None
 
-        // Mouse down near a vertex.
-        if (vertex.isDefined) {
-            if (event.shiftKey) {
-                needsToRedraw = graphView.get.invertVertexSelection(vertex.get) || needsToRedraw
-            } else {
+        val vertex = graphView.get.getTouchedVertex(position)
+
+        if (vertex.isDefined) { // Mouse down near a vertex.
+            if (event.shiftKey) { //change selection of the pressed one
+                graphView.get.invertVertexSelection(vertex.get)
+                if(vertex.get.selected) {
+                    val toAnimate = ListBuffer[InformationView]()
+                    if(vertex.get.information.isDefined) {
+                        toAnimate += vertex.get.information.get
+                    }
+                    toAnimate ++= getEdgesInformations(vertex.get)
+                    resultedAnimation = Some(new Animation(Animation.showText, toAnimate, None,
+                        redrawSelection, redrawSelection, None))
+                } else {
+                    redrawSelection()
+                }
+            } else { //deselect all and select the pressed one
                 if (!vertex.get.selected) {
-                    needsToRedraw = graphView.get.deselectAll()
+                    graphView.get.deselectAll()
                 }
                 moveStart = Some(position)
-                needsToRedraw = graphView.get.selectVertex(vertex.get) || needsToRedraw
+                if(graphView.get.selectVertex(vertex.get)) {
+                    val toAnimate = ListBuffer[InformationView]()
+                    if(vertex.get.information.isDefined) {
+                        toAnimate += vertex.get.information.get
+                    }
+                    toAnimate ++= getEdgesInformations(vertex.get)
+                    resultedAnimation = Some(new Animation(Animation.showText, toAnimate, None,
+                        redrawSelection, redrawSelection, None))
+                } else {
+                    redrawSelection()
+                }
             }
 
-            // Mouse down somewhere in the inter-vertex space.
-        } else {
-            if (!event.shiftKey) {
-                needsToRedraw = graphView.get.deselectAll()
+        } else { // Mouse down somewhere between-vertex space.
+            if (!event.shiftKey) { //deselect all
+                graphView.get.deselectAll()
+                redrawSelection()
             }
         }
 
-        if (needsToRedraw) {
-            graphView.get.redraw(RedrawOperation.Selection)
+        if(resultedAnimation.isDefined) {
+            resultedAnimation.get.run()
         }
+    }
+
+    /**
+     * goes through all edges of the vertex and returns informations of those,
+     * which have selected both of their vertices
+     * @param vertexView
+     * @return
+     */
+    private def getEdgesInformations(vertexView: VertexView): ListBuffer[InformationView] = {
+        val result = ListBuffer[InformationView]()
+        vertexView.edges.foreach{ edgeView =>
+            if(edgeView.originView.selected && edgeView.destinationView.selected) {
+                result += edgeView.information
+            }
+        }
+        result
     }
 
     /**
@@ -103,7 +152,8 @@ abstract class VisualPlugin extends Plugin
       * @param event
       */
     private def onMouseMove(event: BrowserEvent) {
-        if (moveStart.isDefined) {
+        if (moveStart.isDefined) { //mouse drag
+            Animation.clearCurrentTimeout()
             val end = getPosition(event)
             val difference = end - moveStart.get
 
@@ -124,19 +174,16 @@ abstract class VisualPlugin extends Plugin
 
     private def getPosition(event: BrowserEvent): Point = {
 
-        if (isDefined(event.pageX) || isDefined(event.pageY)) {
-            Point(event.pageX, event.pageY)
+        val positionCorrection =
+            Vector(graphView.get.controlsLayer.canvas.offsetLeft, graphView.get.controlsLayer.canvas.offsetTop)
+
+        if (typeOf(event.pageX) != "undefined" && typeOf(event.pageY) != "undefined") {
+            Point(event.pageX, event.pageY) + positionCorrection
         }
         else {
             Point(event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft,
-                event.clientY + document.body.scrollTop + document.documentElement.scrollTop)
+                event.clientY + document.body.scrollTop + document.documentElement.scrollTop) +
+            positionCorrection
         }
-        //x -= gCanvasElement.offsetLeft; //TODO it is expected, that the origin of the canvas element is at [0, 0]
-        //y -= gCanvasElement.offsetTop;
     }
-
-    @javascript("""
-        return value
-    """)
-    private def isDefined(value: Any): Boolean = false
 }

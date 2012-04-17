@@ -17,7 +17,7 @@
  *
  */
 
-goog.provide('goog.reflect');
+s2js.runtime.client.ClassLoader.provide('goog.reflect');
 
 
 /**

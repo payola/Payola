@@ -20,9 +20,9 @@
  */
 
 
-goog.provide('goog.events.EventType');
+s2js.runtime.client.ClassLoader.provide('goog.events.EventType');
 
-goog.require('goog.userAgent');
+s2js.runtime.client.ClassLoader.require('goog.userAgent');
 
 
 /**

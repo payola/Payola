@@ -18,10 +18,10 @@
  */
 
 
-goog.provide('goog.array');
-goog.provide('goog.array.ArrayLike');
+s2js.runtime.client.ClassLoader.provide('goog.array');
+s2js.runtime.client.ClassLoader.provide('goog.array.ArrayLike');
 
-goog.require('goog.asserts');
+s2js.runtime.client.ClassLoader.require('goog.asserts');
 
 
 /**

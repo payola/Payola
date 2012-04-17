@@ -19,9 +19,9 @@
  * @see ../demos/keyhandler.html
  */
 
-goog.provide('goog.events.KeyCodes');
+s2js.runtime.client.ClassLoader.provide('goog.events.KeyCodes');
 
-goog.require('goog.userAgent');
+s2js.runtime.client.ClassLoader.require('goog.userAgent');
 
 
 /**

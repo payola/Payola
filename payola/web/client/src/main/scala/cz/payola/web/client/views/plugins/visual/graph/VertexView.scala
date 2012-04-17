@@ -65,6 +65,12 @@ class VertexView(val vertexModel: Vertex, var position: Point) extends View {
 
     def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
 
+        drawQuick(context, color, positionCorrection)
+        drawImage(context, image, position + Vector(-10, -10), Vector(20, 20))
+    }
+
+    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
+
         val colorToUseOnBox = color.getOrElse(rectangleColor)
         val correctedPosition = this.position + (rectangleSize / -2) + positionCorrection.getOrElse(Point(0,0)).toVector
 
@@ -74,7 +80,6 @@ class VertexView(val vertexModel: Vertex, var position: Point) extends View {
     
     def drawInformation(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
 
-        drawImage(context, image, position + Vector(-10, -10), Vector(20, 20))
         if(information.isDefined) {
             vertexModel match {
                 case i: IdentifiedVertex => information.get.draw(context, color, positionCorrection)

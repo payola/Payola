@@ -22,9 +22,9 @@
  * at the tests.
  */
 
-goog.provide('goog.string.format');
+s2js.runtime.client.ClassLoader.provide('goog.string.format');
 
-goog.require('goog.string');
+s2js.runtime.client.ClassLoader.require('goog.string');
 
 
 /**

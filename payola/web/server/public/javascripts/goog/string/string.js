@@ -20,8 +20,8 @@
 /**
  * Namespace for string utilities
  */
-goog.provide('goog.string');
-goog.provide('goog.string.Unicode');
+s2js.runtime.client.ClassLoader.provide('goog.string');
+s2js.runtime.client.ClassLoader.provide('goog.string.Unicode');
 
 
 /**

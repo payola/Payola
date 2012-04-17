@@ -18,9 +18,9 @@
  */
 
 
-goog.provide('goog.events.Event');
+s2js.runtime.client.ClassLoader.provide('goog.events.Event');
 
-goog.require('goog.Disposable');
+s2js.runtime.client.ClassLoader.require('goog.Disposable');
 
 
 

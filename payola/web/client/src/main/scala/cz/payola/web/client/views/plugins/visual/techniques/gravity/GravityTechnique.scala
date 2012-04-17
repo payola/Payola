@@ -5,6 +5,7 @@ import cz.payola.web.client.views.plugins.visual.graph.{EdgeView, VertexView}
 import cz.payola.web.client.views.plugins.visual.techniques._
 import cz.payola.web.client.views.plugins.visual.{Point, Vector}
 import s2js.adapters.js.dom.Date
+import cz.payola.web.client.views.plugins.visual.animation.Animation
 
 /**
   * Visual plug-in technique that places the vertices based on their edges.
@@ -31,7 +32,7 @@ class GravityTechnique extends BaseTechnique
       * Sum(vertexViewPacks.velocities) is less than this number.
       * 0.5 is well tested, change it carefully.
       */
-    private val velocitiesStabilization = 0.8
+    private val velocitiesStabilization = 3
 
     override def clean() {
         super.clean()
@@ -43,19 +44,20 @@ class GravityTechnique extends BaseTechnique
 
     def performTechnique() {
 
-        val moveToCorner = new Animation(Animation.moveGraphToUpperLeftCorner, graphView.get.vertexViews,
+        val moveToCorner = new Animation[VertexView](Animation.moveGraphToUpperLeftCorner, graphView.get.vertexViews,
             None, redrawQuick, redraw, None)
-        val flip = new Animation(Animation.flipGraph, graphView.get.vertexViews,
+        val flip = new Animation[VertexView](Animation.flipGraph, graphView.get.vertexViews,
             Some(moveToCorner), redrawQuick, redraw, None)
 
 
-        val animationOfThis = new Animation(runningAnimation,
-            graphView.get.vertexViews, Some(flip), redrawQuick, redrawQuick, Some(50))
+
+        val animationOfThis = new Animation[VertexView](runningAnimation,
+            graphView.get.vertexViews, Some(flip), redrawQuick, redrawQuick, Some(70))
 
         basicTreeStructure(graphView.get.vertexViews, true, Some(animationOfThis))
     }
     
-    private def runningAnimation(vertexViewsToAnimate: ListBuffer[VertexView], followingAnimation: Option[Animation],
+    private def runningAnimation(vertexViewsToAnimate: ListBuffer[VertexView], followingAnimation: Option[Animation[_]],
         redrawQuick: () => Unit, redrawFinal: () => Unit, runDuration: Option[Int]) {
 
 
@@ -86,13 +88,17 @@ class GravityTechnique extends BaseTechnique
             toMove += ((vVPack.value, vVPack.currentPosition))
         }
 
+        val a = new Animation(Animation.moveVertices, toMove, followingAnimation, redrawQuick, redrawQuick,
+            None)
         if(needToContinue) { //if the calculation is not finished yet
+
             val nextRoundAnimation = new Animation(runningAnimation, graphView.get.vertexViews, followingAnimation,
                 redrawQuick, redrawQuick, runDuration)
-            Animation.moveVertices(toMove, Some(nextRoundAnimation), redrawQuick, redrawQuick)
-
+            a.setFollowingAnimation(nextRoundAnimation)
+            a.run()
         } else {
-            Animation.moveVertices(toMove, followingAnimation, redrawQuick, redrawQuick)
+
+            a.run()
         }
     }
 
@@ -145,50 +151,45 @@ class GravityTechnique extends BaseTechnique
       */
     private def run(vertexViewPacks: ListBuffer[VertexViewPack], edgeViewPacks: ListBuffer[EdgeViewPack]): Boolean = {
 
-        var repeat = true
-        //while(repeat) {
+        vertexViewPacks.foreach {pushed =>
+            pushed.force = Vector(0, 0)
 
-            vertexViewPacks.foreach {pushed =>
-                pushed.force = Vector(0, 0)
+            //set repulsion by all other vertices
+            vertexViewPacks.foreach {pushing =>
+                if (pushed.value.vertexModel ne pushing.value.vertexModel) {
 
-                //set repulsion by all other vertices
-                vertexViewPacks.foreach {pushing =>
-                    if (pushed.value.vertexModel ne pushing.value.vertexModel) {
-
-                        //minus repulsion of vertices
-                        val forceElimination = repulsion / (
-                            scala.math.pow(pushed.currentPosition.x - pushing.currentPosition.x, 2) +
-                                scala.math.pow(pushed.currentPosition.y - pushing.currentPosition.y, 2))
-                        pushed.force = pushed.force +
-                            (pushed.currentPosition.toVector - pushing.currentPosition.toVector) * forceElimination
-                    }
+                    //minus repulsion of vertices
+                    val forceElimination = repulsion / (
+                        scala.math.pow(pushed.currentPosition.x - pushing.currentPosition.x, 2) +
+                            scala.math.pow(pushed.currentPosition.y - pushing.currentPosition.y, 2))
+                    pushed.force = pushed.force +
+                        (pushed.currentPosition.toVector - pushing.currentPosition.toVector) * forceElimination
                 }
             }
+        }
 
-            //set attraction by edges
-            edgeViewPacks.foreach {edgeViewPack =>
-                val origin = edgeViewPack.originVertexViewPack
-                val destination = edgeViewPack.destinationVertexViewPack
+        //set attraction by edges
+        edgeViewPacks.foreach {edgeViewPack =>
+            val origin = edgeViewPack.originVertexViewPack
+            val destination = edgeViewPack.destinationVertexViewPack
 
-                origin.force = origin.force +
-                    (destination.currentPosition.toVector - origin.currentPosition.toVector) * attraction
-                destination.force = destination.force +
-                    (origin.currentPosition.toVector - destination.currentPosition.toVector) * attraction
+            origin.force = origin.force +
+                (destination.currentPosition.toVector - origin.currentPosition.toVector) * attraction
+            destination.force = destination.force +
+                (origin.currentPosition.toVector - destination.currentPosition.toVector) * attraction
+        }
+
+        var stabilization: Double = 0
+
+        //move vertices by the calculated vertices
+        vertexViewPacks.foreach { moved =>
+            if (!moved.value.selected) {
+                moved.velocity = (moved.force + moved.velocity) / (vertexViewPacks.length - moved.value.edges.length)
+
+                stabilization += scala.math.abs(moved.velocity.x) + scala.math.abs(moved.velocity.y)
+                moved.currentPosition = moved.currentPosition + moved.velocity
             }
-
-            var stabilization: Double = 0
-
-            //move vertices by the calculated vertices
-            vertexViewPacks.foreach { moved =>
-                if (!moved.value.selected) {
-                    moved.velocity = (moved.force + moved.velocity) / (vertexViewPacks.length - moved.value.edges.length)
-
-                    stabilization += scala.math.abs(moved.velocity.x) + scala.math.abs(moved.velocity.y)
-                    moved.currentPosition = moved.currentPosition + moved.velocity
-                }
-            }
-            repeat = stabilization >= velocitiesStabilization
-        repeat
-        //}
+        }
+        stabilization >= velocitiesStabilization
     }
 }

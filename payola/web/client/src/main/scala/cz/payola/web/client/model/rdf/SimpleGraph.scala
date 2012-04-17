@@ -9,9 +9,9 @@ import cz.payola.common.rdf.{LiteralVertex, IdentifiedVertex, Vertex}
 
 class SimpleVertex extends Vertex
 
-class SimpleIdentifiedVertex(val uri: String) extends SimpleVertex with IdentifiedVertex
+class SimpleIdentifiedVertex(protected val _uri: String) extends SimpleVertex with IdentifiedVertex
 
-class SimpleEdge(val uri: String, val origin: SimpleIdentifiedVertex, val destination: SimpleVertex)
+class SimpleEdge(protected val _uri: String, protected val _origin: SimpleIdentifiedVertex, protected val _destination: SimpleVertex)
     extends Edge
 {
     type VertexType = SimpleVertex
@@ -19,7 +19,7 @@ class SimpleEdge(val uri: String, val origin: SimpleIdentifiedVertex, val destin
     type IdentifiedVertexType = SimpleIdentifiedVertex
 }
 
-class SimpleGraph(val vertices: immutable.List[SimpleVertex], val edges: immutable.List[SimpleEdge])
+class SimpleGraph(protected val _vertices: immutable.List[SimpleVertex], protected val _edges: immutable.List[SimpleEdge])
     extends Graph
 {
     type EdgeType = SimpleEdge
