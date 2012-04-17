@@ -4,7 +4,9 @@ import collection.mutable._
 import generic.ConcreteEntity
 import parameters.{Parameter, ParameterInstance}
 
-class PluginInstance(id:String, protected val _plugin: Plugin)
+class PluginInstance(
+        id:String = java.util.UUID.randomUUID.toString,
+        protected val _plugin: Plugin)
     extends ConcreteEntity(id)
     with cz.payola.common.entities.PluginInstance
 {
@@ -14,8 +16,6 @@ class PluginInstance(id:String, protected val _plugin: Plugin)
     type PluginType = Plugin
 
     type ParameterInstanceType = ParameterInstance[_]
-
-    // A hash map matching parameters -> values
 
     protected val _parameterInstances = new ArrayBuffer[ParameterInstanceType]()
 
@@ -47,11 +47,6 @@ class PluginInstance(id:String, protected val _plugin: Plugin)
         _parameterInstances exists {par: ParameterInstanceType => par.parameter == p}
     }
 
-    /** Returns an array of parameter instances.
-      *
-      * @return An array of parameter instances.
-      */
-    //def parameterInstances = _parameterInstances.values.toList
 
     /** Gets a parameter instance for that particular parameter.
       *

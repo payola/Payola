@@ -9,9 +9,10 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException
   */
 
 abstract class ParameterInstance[A](
+        id: String  = java.util.UUID.randomUUID.toString,
         protected val _parameter: Parameter[A],
         protected var _value: A)
-    extends ConcreteEntity
+    extends ConcreteEntity(id)
     with common.entities.ParameterInstance[A]
 {
     type ParameterType = Parameter[A]

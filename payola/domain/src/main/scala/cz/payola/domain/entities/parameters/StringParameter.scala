@@ -2,8 +2,11 @@ package cz.payola.domain.entities.parameters
 
 import cz.payola.common
 
-protected class StringParameterInstance(p: StringParameter, v: String) extends
-ParameterInstance[String](p, v)
+class StringParameterInstance(
+        id: String  = java.util.UUID.randomUUID.toString,
+        p: StringParameter,
+        v: String)
+    extends ParameterInstance[String](id, p, v)
 {
     /** Gets a boolean value of the parameter.
       *
@@ -87,8 +90,12 @@ ParameterInstance[String](p, v)
     override def stringValue: String = value
 }
 
-class StringParameter(n: String, defaultValue: String) extends
-Parameter[String](n, defaultValue) with common.entities.parameters.StringParameter
+class StringParameter(
+        id: String  = java.util.UUID.randomUUID.toString,
+        n: String,
+        defaultValue: String)
+    extends Parameter[String](id, n, defaultValue)
+    with common.entities.parameters.StringParameter
 {
     /** Returns a new StringParameterInstance instance with the value passed as a parameter of this method.
       *
@@ -97,6 +104,6 @@ Parameter[String](n, defaultValue) with common.entities.parameters.StringParamet
       * @return New StringParameterInstance instance.
       */
     override def instanceWithValue(newValue: String): ParameterInstance[String] = {
-        new StringParameterInstance(this, newValue)
+        new StringParameterInstance(p = this, v = newValue)
     }
 }

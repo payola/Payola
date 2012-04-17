@@ -2,8 +2,11 @@ package cz.payola.domain.entities.parameters
 
 import cz.payola.common
 
-protected class FloatParameterInstance(parameter: FloatParameter, value: Float) extends
-    ParameterInstance[Float](parameter, value)
+class FloatParameterInstance(
+        id: String  = java.util.UUID.randomUUID.toString,
+        parameter: FloatParameter,
+        value: Float)
+    extends ParameterInstance[Float](id, parameter, value)
 {
     /** Gets a boolean value of the parameter.
       *
@@ -69,8 +72,12 @@ protected class FloatParameterInstance(parameter: FloatParameter, value: Float) 
     override def stringValue: String = value.toString
 }
 
-class FloatParameter(n: String, defaultValue: Float) extends
-Parameter[Float](n, defaultValue) with common.entities.parameters.FloatParameter
+class FloatParameter(
+        id: String  = java.util.UUID.randomUUID.toString,
+        n: String,
+        defaultValue: Float)
+    extends Parameter[Float](id, n, defaultValue)
+    with common.entities.parameters.FloatParameter
 {
     /** Returns a new BooleanParameterInstance instance with the value passed as a parameter of this method.
       *
@@ -79,6 +86,6 @@ Parameter[Float](n, defaultValue) with common.entities.parameters.FloatParameter
       * @return New BooleanParameterInstance instance.
       */
     override def instanceWithValue(newValue: Float): ParameterInstance[Float] = {
-        new FloatParameterInstance(this, newValue)
+        new FloatParameterInstance(parameter = this, value = newValue)
     }
 }
