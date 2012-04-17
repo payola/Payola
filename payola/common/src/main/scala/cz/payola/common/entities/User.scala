@@ -34,7 +34,7 @@ trait User extends NamedEntity
         _email = value
     }
 
-    def memberGroups: mutable.Seq[GroupType]
+    def memberGroups: collection.Seq[GroupType]
 
     def password = _password
 

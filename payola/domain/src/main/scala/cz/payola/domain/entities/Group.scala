@@ -7,7 +7,8 @@ import generic.{ConcreteEntity, SharedAnalysesOwner, ConcreteOwnedEntity, Concre
 class Group(
         id:String = java.util.UUID.randomUUID.toString,
         protected var _name: String,
-        protected val _owner: User)
+        protected val _owner: User,
+        validate: Boolean = true)
     extends ConcreteEntity(id)
     with common.entities.Group
     with ConcreteNamedEntity
@@ -21,6 +22,8 @@ class Group(
     // We need to be able to create a new instance of Group with no parameters.
     // Hence if both _name and _owner are null, let it slip. If one of them is null
     // and the other isn't, something went wrong.
+
+    /* Squeril is BIT*CH
     if (_name != null && _owner == null){
         throw new IllegalArgumentException("Group needs and owner!")
     }else if (_name == null && _owner != null){
@@ -30,6 +33,7 @@ class Group(
     if (_owner != null) {
         _owner.addOwnedGroup(this)
     }
+    */
 
     /** Adds a member to the group. Does nothing if already a member.
       *

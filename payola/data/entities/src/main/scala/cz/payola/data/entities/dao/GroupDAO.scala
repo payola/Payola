@@ -5,4 +5,5 @@ import cz.payola.data.entities.{User, Group}
 
 class GroupDAO extends EntityDAO[Group](PayolaDB.groups)
 {
+
 }

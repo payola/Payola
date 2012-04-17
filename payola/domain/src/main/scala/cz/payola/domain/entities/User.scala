@@ -126,7 +126,7 @@ class User(
       *
       * @return New List with groups that the user is a member of.
       */
-    def memberGroups = {
+    def memberGroups : collection.Seq[GroupType] = {
         val gs: ArrayBuffer[GroupType] = new ArrayBuffer[GroupType]()
         _privileges foreach { p: PrivilegeType =>
             if (p.isInstanceOf[GroupPrivilege]){

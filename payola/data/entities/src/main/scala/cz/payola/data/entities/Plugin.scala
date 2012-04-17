@@ -10,19 +10,11 @@ class Plugin(
         id: String,
         name: String)
     extends cz.payola.domain.entities.Plugin(id, name)
-    with KeyedEntity[String]
+    with PersistableEntity
 {
     private lazy val _pluginInstancesQuery =  PayolaDB.pluginsPluginInstances.left(this)
 
-    def pluginInstances : ArrayBuffer[PluginInstance] = {
-        transaction {
-            val instances: ArrayBuffer[PluginInstance] = new ArrayBuffer[PluginInstance]()
-
-            for (u <- _pluginInstancesQuery) {
-                instances += u
-            }
-
-            instances
-        }
+    def pluginInstances : collection.Seq[PluginInstance] = {
+        evaluateCollection(_pluginInstancesQuery)
     }
 }

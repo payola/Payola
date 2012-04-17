@@ -7,6 +7,6 @@ class StringParameterInstance(
         parameter: StringParameter,
         value: String)
     extends cz.payola.domain.entities.parameters.StringParameterInstance(id, parameter, value)
-    with KeyedEntity[String]
+    with PersistableEntity
 {
 }

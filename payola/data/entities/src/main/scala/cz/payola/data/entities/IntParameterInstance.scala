@@ -7,6 +7,6 @@ class IntParameterInstance(
         parameter: IntParameter,
         value: Int)
     extends cz.payola.domain.entities.parameters.IntParameterInstance(id, parameter, value)
-    with KeyedEntity[String]
+    with PersistableEntity
 {
 }

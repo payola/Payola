@@ -7,7 +7,7 @@ class BooleanParameter(
         name: String,
         defaultValue: Boolean)
     extends cz.payola.domain.entities.parameters.BooleanParameter(id, name, defaultValue)
-    with KeyedEntity[String]
+    with PersistableEntity
 {
 }
 

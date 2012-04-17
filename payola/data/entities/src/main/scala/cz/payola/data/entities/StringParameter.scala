@@ -7,7 +7,7 @@ class StringParameter(
         name: String,
         defaultValue: String)
     extends cz.payola.domain.entities.parameters.StringParameter(id, name, defaultValue)
-    with KeyedEntity[String]
+    with PersistableEntity
 {
 }
 
