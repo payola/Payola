@@ -1,94 +1,114 @@
 package controllers
 
+import helpers.{ExceptionSerializer, GraphSerializer, RPCDispatcher}
 import play.api.mvc._
-import java.lang.reflect.Method
-import cz.payola.scala2json.JSONSerializer
-import cz.payola.scala2json.JSONSerializerOptions._
+import s2js.runtime.shared.rpc
 
+/**
+  * The only controller which handles requests from the client side. It receives a POST request with the following
+  * contents:
+  *
+  * - method FQDN - eg. cz.payola.web.shared.RemoteObject.RemoteMethod - in the field named "method"
+  * - map of parameters of the method - only simple types are allowed! - see further docs. to learn which types and
+  * how this works
+  *
+  * All the requests are handled synchronously from the user's point of view. When one calls a remote method, it is
+  * called on the server and the result is given back in the response. But from the client's point of view, one
+  * distinguishes two types of request - synchronous and asynchronous.
+  *
+  * In both cases the result of the request is written into the body of the response. Those two types differs in
+  * how they get processed on the client and/or server side:
+  *
+  * Synchrnous call would be called like
+  *
+  * val myResult = RemoteObj.remoteMethod(param1,param2,param3)
+  *
+  * Notice, that the thread which interprets the JS is blocked by waiting for the server to return the response. That's
+  * why this technique is not very suitable for long-running tasks on the server-side. The whole UI gets frozen. One can
+  * also see that it is pretty straightforward, you code as there is no client/server side of the application.
+  *
+  * In the case of asynchronous call, the two last parameters are callbacks. The first one, succesCallback is triggered
+  * when the call was successful, the other one, failCallback, if there occured a problem, while the request was
+  * dispatched.
+  *
+  * The typical usage would be
+  *
+  * RemoteObj.remoteMethod(param1, param2, successCallback (Any => Unit), failCallback (Throwable => Unit))
+  *
+  * The call of the remoteMethod returns immediately, so that interpreting of the JavaScript code below this line may
+  * continue. When the call is done (response loaded), one of the callbacks is triggered. Keep this in mind while
+  * using the mechanism. The typical use case would be loading a large graph structure from the server. One would
+  * show a "loading" animation to the user to keep him noticed that something is happening on the background. After
+  * the graph arrives to the client side of the application, the graph could be rendered using one of the visualisation
+  * plugins.
+  *
+  * The asynchronous version of the RPC call uses the Actors framework on the server side to guarantee the synchronous
+  * processing of the call. That is useful in the situations when the remotely called method runs a new thread. One can
+  * call the success/fail callback in the nested thread. Using the scala actors FW, it is guaranteed that this bahaviour
+  * works well. In the case of the synchronous call, one has to handle this on his own - it is your choice, what and
+  * when return something.
+  *
+  * While using the RPC, your objects from the cz.payola.web.common a cz.payola.web.shared are serialized using the
+  * internal JsonSerializer to a JSON String. The serialized string is returned.
+  *
+  * You should never override your remote methods. The first override is always called to avoid paramTypes matching
+  * (the params are given as strings, so if the number of parameters matches, we are not able to decide which one is
+  * the right one for the call. If you do, feel free to set up a pull request :).
+  */
 object RPC extends Controller
 {
-    def index() = Action {request =>
+    val exceptionSerializer = new ExceptionSerializer
 
-        val params = request.body match {
+    val jsonSerializer = new GraphSerializer
+
+    val dispatcher = new RPCDispatcher(jsonSerializer)
+
+    /**
+      * Endpoint of the synchronous RPC call (mapped on /rpc)
+      * @return
+      */
+    def index() = Action {request => dispatchRequest(request, false)}
+
+    /**
+      * Endpoint of the asynchronous RPC call (maped on /rpc/async)
+      * @return
+      */
+    def async() = Action {request => dispatchRequest(request, true)}
+
+    /**
+      *
+      * @param request
+      * @param async
+      * @return
+      */
+    def dispatchRequest(request: Request[AnyContent], async: Boolean) = {
+        try {
+            val params = parseParams(request)
+            val response = dispatcher.dispatchRequest(params, async)
+            Ok(response)
+        } catch {
+            case e: Exception => raiseError(e)
+        }
+    }
+
+    /**
+      *
+      * @param e
+      * @return
+      */
+    def raiseError(e: Exception) = {
+        InternalServerError(exceptionSerializer.serialize(e))
+    }
+
+    /**
+      *
+      * @param request
+      * @return
+      */
+    def parseParams(request: Request[AnyContent]) = {
+        request.body match {
             case AnyContentAsFormUrlEncoded(data) => data
             case _ => Map.empty[String, Seq[String]]
         };
-
-        params.toList.sortBy{_._2.head}
-        val paramList = params.-("method").values
-
-        val fqdn = params.get("method").getOrElse(null).head
-
-        if (fqdn == null)
-        {
-            throw new Exception
-        }
-
-        val fqdnParts = fqdn.splitAt(fqdn.lastIndexOf("."))
-        Ok(invoke(fqdnParts._1, fqdnParts._2.stripPrefix("."), paramList))
-    }
-
-    private def invoke(objectName: String, methodName: String, params: Iterable[Seq[String]]) : String = {
-        val obj = Class.forName(objectName+"$");
-
-        var methodToRun: Method = null
-
-        obj.getMethods.foreach(method => {
-
-          val currentMethodName = method.getName
-          if (currentMethodName == methodName)
-          {
-              methodToRun = method
-          }
-        })
-
-        if (methodToRun == null)
-        {
-            throw new Exception
-        }
-
-        val paramArray = new Array[java.lang.Object](params.size)
-        val types = methodToRun.getParameterTypes
-
-        var i = 0
-        params.foreach(x => {
-            paramArray.update(i, parseParam(x, types.apply(i)))
-            i = i+1
-        })
-
-
-        val runnableObj = obj.getField("MODULE$").get(objectName)
-        val result = methodToRun.invoke(runnableObj, paramArray:_*)
-
-        val serializer = new JSONSerializer(result, JSONSerializerOptionDisableCustomSerialization)
-        val m = serializer.stringValue
-        // println(m)
-        m
-    }
-
-    private def parseParam(input: Seq[String], paramType: Class[_]) : java.lang.Object = {
-
-        paramType.getName match {
-            case "Boolean" => java.lang.Boolean.parseBoolean(input.head) : java.lang.Boolean
-            case "java.lang.Boolean" => java.lang.Boolean.parseBoolean(input.head) : java.lang.Boolean
-            case "boolean" => java.lang.Boolean.parseBoolean(input.head) : java.lang.Boolean
-            case "Int" => java.lang.Integer.parseInt(input.head) : java.lang.Integer
-            case "int" => java.lang.Integer.parseInt(input.head) : java.lang.Integer
-            case "char" => input.head.charAt(0) : java.lang.Character
-            case "Char" => input.head.charAt(0) : java.lang.Character
-            case "java.lang.Character" => input.head.charAt(0) : java.lang.Character
-            case "Double" => java.lang.Double.parseDouble(input.head) : java.lang.Double
-            case "double" => java.lang.Double.parseDouble(input.head) : java.lang.Double
-            case "java.lang.Double" => java.lang.Double.parseDouble(input.head) : java.lang.Double
-            case "Float" => java.lang.Float.parseFloat(input.head) : java.lang.Float
-            case "float" => java.lang.Float.parseFloat(input.head) : java.lang.Float
-            case "java.lang.Float" => java.lang.Float.parseFloat(input.head) : java.lang.Float
-            case "Array" =>  {
-                input.map(item => {
-                    parseParam(List(item), paramType.getTypeParameters.head.getClass)
-                })
-            }
-            case _ => input.head.toString : java.lang.String
-        }
     }
 }

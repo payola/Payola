@@ -16,7 +16,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('pkg.A');
+                        s2js.runtime.client.ClassLoader.provide('pkg.A');
 
                         pkg.A = function() {
                             var self = this;
@@ -25,7 +25,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         pkg.A.prototype.m1 = function() {
                             var self = this;
                         };
-                        pkg.A.prototype.__class__ = new s2js.Class('pkg.A', []);
+                        pkg.A.prototype.__class__ = new s2js.runtime.client.Class('pkg.A', []);
                     """
                 }
         }
@@ -42,12 +42,74 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('pkg.A');
+                        s2js.runtime.client.ClassLoader.provide('pkg.A');
 
                         pkg.A = function() {
                             var self = this;
                         };
-                        pkg.A.prototype.__class__ = new s2js.Class('pkg.A', []);
+                        pkg.A.prototype.__class__ = new s2js.runtime.client.Class('pkg.A', []);
+                    """
+                }
+        }
+
+        it("can have getters and setters") {
+            configMap =>
+                scalaCode {
+                    """
+                        package pkg
+
+                        class A
+                        {
+                            protected var _x: String = ""
+                            var y = ""
+
+                            def x = _x
+
+                            def x_=(value: String) {
+                                _x = value
+                            }
+                        }
+
+                        object t
+                        {
+                            def test() {
+                                val a = new A
+                                val x = a.x
+                                val y = a.y
+                                a.x = "new x"
+                                a.y = "new y"
+                            }
+                        }
+                    """
+                } shouldCompileTo {
+                    """
+                        s2js.runtime.client.ClassLoader.provide('pkg.A');
+                        s2js.runtime.client.ClassLoader.provide('pkg.t');
+
+                        pkg.A = function() {
+                            var self = this;
+                            self._x = '';
+                            self.y = '';
+                        };
+                        pkg.A.prototype.x = function() {
+                            var self = this;
+                            return self._x;
+                        };
+                        pkg.A.prototype.x_$eq = function(value) {
+                            var self = this;
+                            self._x = value;
+                        };
+                        pkg.A.prototype.__class__ = new s2js.runtime.client.Class('pkg.A', []);
+
+                        pkg.t.test = function() {
+                            var self = this;
+                            var a = new pkg.A();
+                            var x = a.x();
+                            var y = a.y;
+                            a.x_$eq('new x');
+                            a.y = 'new y';
+                        };
+                        pkg.t.__class__ = new s2js.runtime.client.Class('pkg.t', []);
                     """
                 }
         }
@@ -67,7 +129,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('pkg.A');
+                        s2js.runtime.client.ClassLoader.provide('pkg.A');
 
                         pkg.A = function(v1, v2, v3, v4) {
                             var self = this;
@@ -81,7 +143,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             self.v7 = self.v1;
                             self.v8 = self.v4;
                         };
-                        pkg.A.prototype.__class__ = new s2js.Class('pkg.A', []);
+                        pkg.A.prototype.__class__ = new s2js.runtime.client.Class('pkg.A', []);
                     """
                 }
         }
@@ -100,14 +162,14 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('pkg.A');
+                        s2js.runtime.client.ClassLoader.provide('pkg.A');
 
                         pkg.A = function(v1) {
                             var self = this;
                             self.v1 = v1;
                             window.alert(self.v1.toString());
                         };
-                        pkg.A.prototype.__class__ = new s2js.Class('pkg.A', []);
+                        pkg.A.prototype.__class__ = new s2js.runtime.client.Class('pkg.A', []);
                     """
                 }
         }
@@ -136,16 +198,16 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('pkg.A');
-                        goog.provide('pkg.B');
-                        goog.provide('pkg.C');
-                        goog.provide('pkg.T1');
-                        goog.provide('pkg.T2');
+                        s2js.runtime.client.ClassLoader.provide('pkg.A');
+                        s2js.runtime.client.ClassLoader.provide('pkg.B');
+                        s2js.runtime.client.ClassLoader.provide('pkg.C');
+                        s2js.runtime.client.ClassLoader.provide('pkg.T1');
+                        s2js.runtime.client.ClassLoader.provide('pkg.T2');
 
                         pkg.A = function() {
                             var self = this;
                         };
-                        pkg.A.prototype.__class__ = new s2js.Class('pkg.A', []);
+                        pkg.A.prototype.__class__ = new s2js.runtime.client.Class('pkg.A', []);
 
                         pkg.C = function(v1, v2) {
                             var self = this;
@@ -154,7 +216,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             goog.base(self);
                         };
                         goog.inherits(pkg.C, pkg.A);
-                        pkg.C.prototype.__class__ = new s2js.Class('pkg.C', [pkg.A]);
+                        pkg.C.prototype.__class__ = new s2js.runtime.client.Class('pkg.C', [pkg.A]);
 
                         pkg.T1 = function() {
                             var self = this;
@@ -163,7 +225,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         pkg.T1.prototype.m1 = function() {
                             var self = this;
                         };
-                        pkg.T1.prototype.__class__ = new s2js.Class('pkg.T1', []);
+                        pkg.T1.prototype.__class__ = new s2js.runtime.client.Class('pkg.T1', []);
 
                         pkg.T2 = function() {
                             var self = this;
@@ -172,7 +234,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         pkg.T2.prototype.m2 = function() {
                             var self = this;
                         };
-                        pkg.T2.prototype.__class__ = new s2js.Class('pkg.T2', []);
+                        pkg.T2.prototype.__class__ = new s2js.runtime.client.Class('pkg.T2', []);
 
                         pkg.B = function() {
                             var self = this;
@@ -181,7 +243,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         goog.inherits(pkg.B, pkg.A);
                         goog.object.extend(pkg.B.prototype, new pkg.T2());
                         goog.object.extend(pkg.B.prototype, new pkg.T1());
-                        pkg.B.prototype.__class__ = new s2js.Class('pkg.B', [pkg.A, pkg.T1, pkg.T2]);
+                        pkg.B.prototype.__class__ = new s2js.runtime.client.Class('pkg.B', [pkg.A, pkg.T1, pkg.T2]);
                     """
                 }
         }
@@ -200,23 +262,23 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('pkg.A');
-                        goog.provide('pkg.B');
-                        goog.provide('pkg.C');
+                        s2js.runtime.client.ClassLoader.provide('pkg.A');
+                        s2js.runtime.client.ClassLoader.provide('pkg.B');
+                        s2js.runtime.client.ClassLoader.provide('pkg.C');
 
                         pkg.A = function(v1, v2) {
                             var self = this;
                             self.v1 = v1;
                             self.v2 = v2;
                         };
-                        pkg.A.prototype.__class__ = new s2js.Class('pkg.A', []);
+                        pkg.A.prototype.__class__ = new s2js.runtime.client.Class('pkg.A', []);
 
                         pkg.B = function() {
                             var self = this;
                             goog.base(self, 'test', 123);
                         };
                         goog.inherits(pkg.B, pkg.A);
-                        pkg.B.prototype.__class__ = new s2js.Class('pkg.B', [pkg.A]);
+                        pkg.B.prototype.__class__ = new s2js.runtime.client.Class('pkg.B', [pkg.A]);
 
                         pkg.C = function(v1, v2) {
                             var self = this;
@@ -225,7 +287,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             goog.base(self, v1, v2);
                         };
                         goog.inherits(pkg.C, pkg.A);
-                        pkg.C.prototype.__class__ = new s2js.Class('pkg.C', [pkg.A]);
+                        pkg.C.prototype.__class__ = new s2js.runtime.client.Class('pkg.C', [pkg.A]);
                     """
                 }
         }
@@ -238,13 +300,13 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('A');
-                        goog.require('scala.IndexOutOfBoundsException');
-                        goog.require('scala.None');
-                        goog.require('scala.Product');
-                        goog.require('scala.Some');
-                        goog.require('scala.Tuple3');
-                        goog.require('scala.runtime.ScalaRunTime');
+                        s2js.runtime.client.ClassLoader.provide('A');
+                        s2js.runtime.client.ClassLoader.require('scala.IndexOutOfBoundsException');
+                        s2js.runtime.client.ClassLoader.require('scala.None');
+                        s2js.runtime.client.ClassLoader.require('scala.Product');
+                        s2js.runtime.client.ClassLoader.require('scala.Some');
+                        s2js.runtime.client.ClassLoader.require('scala.Tuple3');
+                        s2js.runtime.client.ClassLoader.require('scala.runtime.ScalaRunTime');
 
                         A = function(x, y, z) {
                             var self = this;
@@ -277,13 +339,13 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             var self = this;
                             return (function($selector$1) {
                                 if ($selector$1 === 0) {
-                                    return A.x;
+                                    return self.x;
                                 }
                                 if ($selector$1 === 1) {
-                                    return A.y;
+                                    return self.y;
                                 }
                                 if ($selector$1 === 2) {
-                                    return A.z;
+                                    return self.z;
                                 }
                                 if (true) {
                                     return (function() {
@@ -292,7 +354,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                                 }
                             })($x$1);
                         };
-                        A.prototype.__class__ = new s2js.Class('A', [scala.Product]);
+                        A.prototype.__class__ = new s2js.runtime.client.Class('A', [scala.Product]);
                         A.toString = function() {
                             var self = this;
                             return 'A';
@@ -311,7 +373,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             var self = this;
                             return new A(x, y, z);
                         };
-                        A.__class__ = new s2js.Class('A', []);
+                        A.__class__ = new s2js.runtime.client.Class('A', []);
                     """
                 }
         }
@@ -333,7 +395,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('pkg.o');
+                        s2js.runtime.client.ClassLoader.provide('pkg.o');
 
                         pkg.o.v1 = 'test';
                         pkg.o.v2 = 12345;
@@ -343,7 +405,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         pkg.o.m2 = function() {
                             var self = this;
                         };
-                        pkg.o.__class__ = new s2js.Class('pkg.o', []);
+                        pkg.o.__class__ = new s2js.runtime.client.Class('pkg.o', []);
                     """
                 }
         }
@@ -373,10 +435,10 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('pkg.A');
-                        goog.provide('pkg.T1');
-                        goog.provide('pkg.T2');
-                        goog.provide('pkg.o');
+                        s2js.runtime.client.ClassLoader.provide('pkg.A');
+                        s2js.runtime.client.ClassLoader.provide('pkg.T1');
+                        s2js.runtime.client.ClassLoader.provide('pkg.T2');
+                        s2js.runtime.client.ClassLoader.provide('pkg.o');
                         pkg.A = function() {
                             var self = this;
                             self.v = 123;
@@ -384,7 +446,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         pkg.A.prototype.m = function() {
                             var self = this;
                         };
-                        pkg.A.prototype.__class__ = new s2js.Class('pkg.A', []);
+                        pkg.A.prototype.__class__ = new s2js.runtime.client.Class('pkg.A', []);
 
                         pkg.T1 = function() {
                             var self = this;
@@ -393,7 +455,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         pkg.T1.prototype.m1 = function() {
                             var self = this;
                         };
-                        pkg.T1.prototype.__class__ = new s2js.Class('pkg.T1', []);
+                        pkg.T1.prototype.__class__ = new s2js.runtime.client.Class('pkg.T1', []);
 
                         pkg.T2 = function() {
                             var self = this;
@@ -402,12 +464,12 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         pkg.T2.prototype.m2 = function() {
                             var self = this;
                         };
-                        pkg.T2.prototype.__class__ = new s2js.Class('pkg.T2', []);
+                        pkg.T2.prototype.__class__ = new s2js.runtime.client.Class('pkg.T2', []);
 
                         goog.object.extend(pkg.o, new pkg.A());
                         goog.object.extend(pkg.o, new pkg.T2());
                         goog.object.extend(pkg.o, new pkg.T1());
-                        pkg.o.__class__ = new s2js.Class('pkg.o', [pkg.A, pkg.T1, pkg.T2]);
+                        pkg.o.__class__ = new s2js.runtime.client.Class('pkg.o', [pkg.A, pkg.T1, pkg.T2]);
                     """
                 }
         }
@@ -428,7 +490,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('A');
+                        s2js.runtime.client.ClassLoader.provide('A');
 
                         A = function(x, y) {
                             var self = this;
@@ -439,13 +501,13 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             var self = this;
                             return A.$apply(self.x, self.y);
                         };
-                        A.prototype.__class__ = new s2js.Class('A', []);
+                        A.prototype.__class__ = new s2js.runtime.client.Class('A', []);
 
                         A.$apply = function(x, y) {
                             var self = this;
                             return new A(x, y);
                         };
-                        A.__class__ = new s2js.Class('A', []);
+                        A.__class__ = new s2js.runtime.client.Class('A', []);
                     """
                 }
         }
@@ -462,12 +524,12 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('po');
+                        s2js.runtime.client.ClassLoader.provide('po');
 
                         po.m = function() {
                             var self = this;
                         };
-                        po.__class__ = new s2js.Class('po', []);
+                        po.__class__ = new s2js.runtime.client.Class('po', []);
                     """
                 }
         }
@@ -484,12 +546,12 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('pkg');
+                        s2js.runtime.client.ClassLoader.provide('pkg');
 
                         pkg.m = function() {
                             var self = this;
                         };
-                        pkg.__class__ = new s2js.Class('pkg', []);
+                        pkg.__class__ = new s2js.runtime.client.Class('pkg', []);
                     """
                 }
         }
@@ -507,22 +569,22 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('pkg');
-                        goog.provide('pkg.A');
-                        goog.provide('pkg.B');
+                        s2js.runtime.client.ClassLoader.provide('pkg');
+                        s2js.runtime.client.ClassLoader.provide('pkg.A');
+                        s2js.runtime.client.ClassLoader.provide('pkg.B');
 
                         pkg.A = function() {
                             var self = this;
                         };
-                        pkg.A.prototype.__class__ = new s2js.Class('pkg.A', []);
+                        pkg.A.prototype.__class__ = new s2js.runtime.client.Class('pkg.A', []);
 
                         pkg.B = function() {
                             var self = this;
                         };
-                        pkg.B.prototype.__class__ = new s2js.Class('pkg.B', []);
+                        pkg.B.prototype.__class__ = new s2js.runtime.client.Class('pkg.B', []);
 
                         goog.object.extend(pkg, new pkg.A());
-                        pkg.__class__ = new s2js.Class('pkg', [pkg.A]);
+                        pkg.__class__ = new s2js.runtime.client.Class('pkg', [pkg.A]);
                     """
                 }
         }

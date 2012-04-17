@@ -18,7 +18,7 @@
  */
 
 
-goog.provide('goog.disposable.IDisposable');
+s2js.runtime.client.ClassLoader.provide('goog.disposable.IDisposable');
 
 
 

@@ -20,15 +20,15 @@
  * @see ../demos/debug.html
  */
 
-goog.provide('goog.debug.LogManager');
-goog.provide('goog.debug.Logger');
-goog.provide('goog.debug.Logger.Level');
+s2js.runtime.client.ClassLoader.provide('goog.debug.LogManager');
+s2js.runtime.client.ClassLoader.provide('goog.debug.Logger');
+s2js.runtime.client.ClassLoader.provide('goog.debug.Logger.Level');
 
-goog.require('goog.array');
-goog.require('goog.asserts');
-goog.require('goog.debug');
-goog.require('goog.debug.LogBuffer');
-goog.require('goog.debug.LogRecord');
+s2js.runtime.client.ClassLoader.require('goog.array');
+s2js.runtime.client.ClassLoader.require('goog.asserts');
+s2js.runtime.client.ClassLoader.require('goog.debug');
+s2js.runtime.client.ClassLoader.require('goog.debug.LogBuffer');
+s2js.runtime.client.ClassLoader.require('goog.debug.LogRecord');
 
 
 

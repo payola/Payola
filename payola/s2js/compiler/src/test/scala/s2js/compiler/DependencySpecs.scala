@@ -15,12 +15,12 @@ class DependencySpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('a.b.c.d');
+                        s2js.runtime.client.ClassLoader.provide('a.b.c.d');
 
                         a.b.c.d.m1 = function() {
                             var self = this;
                         };
-                        a.b.c.d.__class__ = new s2js.Class('a.b.c.d', []);
+                        a.b.c.d.__class__ = new s2js.runtime.client.Class('a.b.c.d', []);
                     """
                 }
         }
@@ -44,11 +44,11 @@ class DependencySpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('foo.a');
+                        s2js.runtime.client.ClassLoader.provide('foo.a');
 
-                        goog.require('java.util.ArrayList');
-                        goog.require('java.util.Date');
-                        goog.require('java.util.Random');
+                        s2js.runtime.client.ClassLoader.require('java.util.ArrayList');
+                        s2js.runtime.client.ClassLoader.require('java.util.Date');
+                        s2js.runtime.client.ClassLoader.require('java.util.Random');
 
                         foo.a.x = new java.util.Date();
 
@@ -57,7 +57,7 @@ class DependencySpecs extends CompilerFixtureSpec
                             var y = new java.util.Random();
                             var z = new java.util.ArrayList();
                         };
-                        foo.a.__class__ = new s2js.Class('foo.a', []);
+                        foo.a.__class__ = new s2js.runtime.client.Class('foo.a', []);
                     """
                 }
         }
@@ -77,14 +77,14 @@ class DependencySpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o1');
+                        s2js.runtime.client.ClassLoader.provide('o1');
 
                         o1.f1 = 'aaaa';
                         o1.m1 = function() {
                             var self = this;
                             window.alert(self.f1);
                         };
-                        o1.__class__ = new s2js.Class('o1', []);
+                        o1.__class__ = new s2js.runtime.client.Class('o1', []);
                     """
                 }
         }
@@ -101,10 +101,10 @@ class DependencySpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('o1');
+                        s2js.runtime.client.ClassLoader.provide('o1');
 
                         o1.f1 = window.location;
-                        o1.__class__ = new s2js.Class('o1', []);
+                        o1.__class__ = new s2js.runtime.client.Class('o1', []);
                     """
                 }
         }
@@ -122,12 +122,12 @@ class DependencySpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('a');
+                        s2js.runtime.client.ClassLoader.provide('a');
 
-                        goog.require('goog.events.EventType');
+                        s2js.runtime.client.ClassLoader.require('goog.events.EventType');
 
                         a.x = goog.events.EventType.CLICK;
-                        a.__class__ = new s2js.Class('a', []);
+                        a.__class__ = new s2js.runtime.client.Class('a', []);
                     """
                 }
         }

@@ -17,7 +17,7 @@
  */
 
 
-goog.provide('goog.math.Coordinate');
+s2js.runtime.client.ClassLoader.provide('goog.math.Coordinate');
 
 
 

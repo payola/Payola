@@ -2,7 +2,8 @@ package cz.payola.web.client.views.plugins.visual.techniques.minimalization
 
 import collection.mutable.ListBuffer
 import cz.payola.web.client.views.plugins.visual.graph.{EdgeView, VertexView}
-import cz.payola.web.client.views.plugins.visual.techniques.{Animation, BaseTechnique}
+import cz.payola.web.client.views.plugins.visual.animation.Animation
+import cz.payola.web.client.views.plugins.visual.techniques.BaseTechnique
 
 class MinimalizationTechnique extends BaseTechnique
 {
@@ -10,11 +11,11 @@ class MinimalizationTechnique extends BaseTechnique
     def performTechnique() {
         minimizeEdgeCrossing(graphView.get.vertexViews)
 
-        val moveToCorner2 = new Animation(Animation.moveGraphToUpperLeftCorner, graphView.get.vertexViews,
+        val moveToCorner2 = new Animation[VertexView](Animation.moveGraphToUpperLeftCorner, graphView.get.vertexViews,
             None, redrawQuick, redraw, None)
-        val flip = new Animation(Animation.flipGraph, graphView.get.vertexViews, Some(moveToCorner2),
+        val flip = new Animation[VertexView](Animation.flipGraph, graphView.get.vertexViews, Some(moveToCorner2),
             redrawQuick, redraw, None)
-        val moveToCorner1 = new Animation(Animation.moveGraphToUpperLeftCorner, graphView.get.vertexViews,
+        val moveToCorner1 = new Animation[VertexView](Animation.moveGraphToUpperLeftCorner, graphView.get.vertexViews,
             Some(flip), redrawQuick, redraw, None)
 
         basicTreeStructure(graphView.get.vertexViews, true, Some(moveToCorner1))

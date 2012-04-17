@@ -90,8 +90,6 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
             "scala.Any",
             "scala.AnyRef",
             "scala.Equals",
-            "scala.Throwable",
-            "scala.package.Throwable",
             "scala.Predef",
             "scala.ScalaObject",
             "scala.Serializable"
@@ -148,7 +146,7 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
             "s2js.adapters.js.browser" -> "",
             "s2js.adapters.js.dom" -> "",
             "s2js.adapters" -> "",
-            "s2js.runtime" -> ""
+            "s2js.runtime.client.scala" -> "scala"
         )
 
         packageReplacementMap.find(r => symbol.fullName.startsWith(r._1))
@@ -219,8 +217,8 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
         )
         val jsDefaultMembers = List(
             "constructor", "hasOwnProperty", "isPrototypeOf", "propertyIsEnumerable", "apply", "arguments", "call",
-            "prototype", "__class__", "__base__", "length", "charAt", "concat", "indexOf", "join", "pop", "push",
-            "reverse", "shift", "slice", "sort", "splice", "unshift", "valueOf"
+            "prototype", "__class__", "__base__", "length", "charAt", "concat", "indexOf", "lastIndexOf", "join", "pop",
+            "push", "reverse", "shift", "slice", "sort", "splice", "unshift", "valueOf"
         )
 
         // Synthetic symbols get a prefix to avoid name collision with other symbols. Also if the symbol name is a js

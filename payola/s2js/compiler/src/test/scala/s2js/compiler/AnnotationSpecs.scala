@@ -17,7 +17,7 @@ class AnnotationSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('A');
+                        s2js.runtime.client.ClassLoader.provide('A');
 
                         A = function() {
                             this.x = 'foo';
@@ -43,7 +43,7 @@ class AnnotationSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('A');
+                        s2js.runtime.client.ClassLoader.provide('A');
 
                         A = function() {
                             var self = this;
@@ -54,7 +54,7 @@ class AnnotationSpecs extends CompilerFixtureSpec
                             var self = this;
                             console.log(self.x + self.y.toString + x);
                         };
-                        A.prototype.__class__ = new s2js.Class('A', []);
+                        A.prototype.__class__ = new s2js.runtime.client.Class('A', []);
                     """
                 }
         }
@@ -70,13 +70,13 @@ class AnnotationSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('A');
+                        s2js.runtime.client.ClassLoader.provide('A');
 
                         A = function() {
                             var self = this;
                             self.x = [1, 2, 3];
                         };
-                        A.prototype.__class__ = new s2js.Class('A', []);
+                        A.prototype.__class__ = new s2js.runtime.client.Class('A', []);
                     """
                 }
         }

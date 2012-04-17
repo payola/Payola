@@ -5,6 +5,10 @@ package s2js.adapters.js.dom
   */
 abstract class Element extends Node
 {
+    var offsetTop: Double
+
+    var offsetLeft: Double
+
     val attributes: NamedNodeMap
 
     val tagName: String

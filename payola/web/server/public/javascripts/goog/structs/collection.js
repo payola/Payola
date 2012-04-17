@@ -17,7 +17,7 @@
  *
  */
 
-goog.provide('goog.structs.Collection');
+s2js.runtime.client.ClassLoader.provide('goog.structs.Collection');
 
 
 

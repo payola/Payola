@@ -31,17 +31,17 @@
  *
  */
 
-goog.provide('goog.events.ActionEvent');
-goog.provide('goog.events.ActionHandler');
-goog.provide('goog.events.ActionHandler.EventType');
-goog.provide('goog.events.BeforeActionEvent');
+s2js.runtime.client.ClassLoader.provide('goog.events.ActionEvent');
+s2js.runtime.client.ClassLoader.provide('goog.events.ActionHandler');
+s2js.runtime.client.ClassLoader.provide('goog.events.ActionHandler.EventType');
+s2js.runtime.client.ClassLoader.provide('goog.events.BeforeActionEvent');
 
-goog.require('goog.events');
-goog.require('goog.events.BrowserEvent');
-goog.require('goog.events.EventTarget');
-goog.require('goog.events.EventType');
-goog.require('goog.events.KeyCodes');
-goog.require('goog.userAgent');
+s2js.runtime.client.ClassLoader.require('goog.events');
+s2js.runtime.client.ClassLoader.require('goog.events.BrowserEvent');
+s2js.runtime.client.ClassLoader.require('goog.events.EventTarget');
+s2js.runtime.client.ClassLoader.require('goog.events.EventType');
+s2js.runtime.client.ClassLoader.require('goog.events.KeyCodes');
+s2js.runtime.client.ClassLoader.require('goog.userAgent');
 
 
 

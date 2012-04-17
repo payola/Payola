@@ -16,9 +16,9 @@
  * @fileoverview Utility for fast string concatenation.
  */
 
-goog.provide('goog.string.StringBuffer');
+s2js.runtime.client.ClassLoader.provide('goog.string.StringBuffer');
 
-goog.require('goog.userAgent.jscript');
+s2js.runtime.client.ClassLoader.require('goog.userAgent.jscript');
 
 
 

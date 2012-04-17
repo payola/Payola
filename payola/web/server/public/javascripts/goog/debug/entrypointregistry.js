@@ -25,10 +25,10 @@
  * @author nicksantos@google.com (Nick Santos)
  */
 
-goog.provide('goog.debug.EntryPointMonitor');
-goog.provide('goog.debug.entryPointRegistry');
+s2js.runtime.client.ClassLoader.provide('goog.debug.EntryPointMonitor');
+s2js.runtime.client.ClassLoader.provide('goog.debug.entryPointRegistry');
 
-goog.require('goog.asserts');
+s2js.runtime.client.ClassLoader.require('goog.asserts');
 
 
 

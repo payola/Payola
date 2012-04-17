@@ -5,7 +5,7 @@ import cz.payola.web.client.views.plugins.visual.{VisualPlugin, Point, Vector}
 import cz.payola.web.client.views.plugins.visual.graph.{EdgeView, VertexView}
 import cz.payola.common.rdf.Graph
 import s2js.adapters.js.dom.Element
-import s2js.adapters.js.browser.window
+import cz.payola.web.client.views.plugins.visual.animation.Animation
 
 abstract class BaseTechnique extends VisualPlugin
 {
@@ -45,7 +45,7 @@ abstract class BaseTechnique extends VisualPlugin
       * @param followingAnimation that will be launched after this operation is performed
       */
     protected def basicTreeStructure(vViews: ListBuffer[VertexView], animate: Boolean,
-        followingAnimation: Option[Animation]) {
+        followingAnimation: Option[Animation[_]]) {
 
         var levels = ListBuffer[ListBuffer[VertexView]]()
         var level = ListBuffer[VertexView]()
@@ -105,7 +105,8 @@ abstract class BaseTechnique extends VisualPlugin
         }
 
         if(animate) { //if animation requested
-            Animation.moveVertices(toMove, followingAnimation, redrawQuick, redraw)
+            new Animation(Animation.moveVertices, toMove, followingAnimation, redrawQuick, redraw, None).run()
+
         } else { //if not set calculated positions
             toMove.foreach{ obj =>
                 obj._1.position = obj._2
@@ -128,7 +129,7 @@ abstract class BaseTechnique extends VisualPlugin
       * @param followingAnimation that will be launched after this operation is performed
       */
     protected def basicTreeCircledStructure(vertexViews: ListBuffer[VertexView], animate: Boolean,
-        followingAnimation: Option[Animation]) {
+        followingAnimation: Option[Animation[_]]) {
 
         var level1 = ListBuffer[(VertexView, Point)]()
         var level2 = ListBuffer[(VertexView, Point)]()
@@ -175,7 +176,7 @@ abstract class BaseTechnique extends VisualPlugin
         }
 
         if(animate) {
-            Animation.moveVertices(toMove, followingAnimation, redrawQuick, redraw)
+            new Animation(Animation.moveVertices, toMove, followingAnimation, redrawQuick, redraw, None).run()
         } else {
 
             toMove.foreach{ vVObject =>

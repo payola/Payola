@@ -20,7 +20,7 @@ class VariableSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('foo.A');
+                        s2js.runtime.client.ClassLoader.provide('foo.A');
 
                         foo.A = function() {
                             var self = this;
@@ -33,7 +33,7 @@ class VariableSpecs extends CompilerFixtureSpec
                             var c = true;
                             var d = 1.0;
                         };
-                        foo.A.prototype.__class__ = new s2js.Class('foo.A', []);
+                        foo.A.prototype.__class__ = new s2js.runtime.client.Class('foo.A', []);
                     """
                 }
         }
@@ -54,8 +54,8 @@ class VariableSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('foo.A');
-                        goog.provide('foo.B');
+                        s2js.runtime.client.ClassLoader.provide('foo.A');
+                        s2js.runtime.client.ClassLoader.provide('foo.B');
 
                         foo.A = function() {
                             var self = this;
@@ -64,12 +64,12 @@ class VariableSpecs extends CompilerFixtureSpec
                             var self = this;
                             var a = new foo.B();
                         };
-                        foo.A.prototype.__class__ = new s2js.Class('foo.A', []);
+                        foo.A.prototype.__class__ = new s2js.runtime.client.Class('foo.A', []);
                         
                         foo.B = function() {
                             var self = this;
                         };
-                        foo.B.prototype.__class__ = new s2js.Class('foo.B', []);
+                        foo.B.prototype.__class__ = new s2js.runtime.client.Class('foo.B', []);
                     """
                 }
         }
@@ -88,7 +88,7 @@ class VariableSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('foo.A');
+                        s2js.runtime.client.ClassLoader.provide('foo.A');
 
                         foo.A = function() {
                             var self = this;
@@ -97,7 +97,7 @@ class VariableSpecs extends CompilerFixtureSpec
                             var self = this;
                             var a = y;
                         };
-                        foo.A.prototype.__class__ = new s2js.Class('foo.A', []);
+                        foo.A.prototype.__class__ = new s2js.runtime.client.Class('foo.A', []);
                     """
                 }
         }
@@ -117,7 +117,7 @@ class VariableSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('foo.A');
+                        s2js.runtime.client.ClassLoader.provide('foo.A');
 
                         foo.A = function() {
                             var self = this;
@@ -130,7 +130,7 @@ class VariableSpecs extends CompilerFixtureSpec
                             var self = this;
                             var a = self.m1();
                         };
-                        foo.A.prototype.__class__ = new s2js.Class('foo.A', []);
+                        foo.A.prototype.__class__ = new s2js.runtime.client.Class('foo.A', []);
                     """
                 }
         }
@@ -151,7 +151,7 @@ class VariableSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('foo.A');
+                        s2js.runtime.client.ClassLoader.provide('foo.A');
 
                         foo.A = function() {
                             var self = this;
@@ -162,7 +162,7 @@ class VariableSpecs extends CompilerFixtureSpec
                             var b = (x == 5);
                             var c = ((9 * a) / (2 + a));
                         };
-                        foo.A.prototype.__class__ = new s2js.Class('foo.A', []);
+                        foo.A.prototype.__class__ = new s2js.runtime.client.Class('foo.A', []);
                     """
                 }
         }
@@ -181,7 +181,7 @@ class VariableSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        goog.provide('foo.A');
+                        s2js.runtime.client.ClassLoader.provide('foo.A');
 
                         foo.A = function() {
                             var self = this;
@@ -190,7 +190,7 @@ class VariableSpecs extends CompilerFixtureSpec
                             var self = this;
                             var a = function(b) { return ('foo' + b); };
                         };
-                        foo.A.prototype.__class__ = new s2js.Class('foo.A', []);
+                        foo.A.prototype.__class__ = new s2js.runtime.client.Class('foo.A', []);
                     """
                 }
         }

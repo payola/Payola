@@ -35,17 +35,17 @@
  * @see ../demos/inputhandler.html
  */
 
-goog.provide('goog.events.InputHandler');
-goog.provide('goog.events.InputHandler.EventType');
+s2js.runtime.client.ClassLoader.provide('goog.events.InputHandler');
+s2js.runtime.client.ClassLoader.provide('goog.events.InputHandler.EventType');
 
-goog.require('goog.Timer');
-goog.require('goog.dom');
-goog.require('goog.events');
-goog.require('goog.events.BrowserEvent');
-goog.require('goog.events.EventHandler');
-goog.require('goog.events.EventTarget');
-goog.require('goog.events.KeyCodes');
-goog.require('goog.userAgent');
+s2js.runtime.client.ClassLoader.require('goog.Timer');
+s2js.runtime.client.ClassLoader.require('goog.dom');
+s2js.runtime.client.ClassLoader.require('goog.events');
+s2js.runtime.client.ClassLoader.require('goog.events.BrowserEvent');
+s2js.runtime.client.ClassLoader.require('goog.events.EventHandler');
+s2js.runtime.client.ClassLoader.require('goog.events.EventTarget');
+s2js.runtime.client.ClassLoader.require('goog.events.KeyCodes');
+s2js.runtime.client.ClassLoader.require('goog.userAgent');
 
 
 

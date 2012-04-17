@@ -42,14 +42,14 @@
  *
  */
 
-goog.provide('goog.events.BrowserEvent');
-goog.provide('goog.events.BrowserEvent.MouseButton');
+s2js.runtime.client.ClassLoader.provide('goog.events.BrowserEvent');
+s2js.runtime.client.ClassLoader.provide('goog.events.BrowserEvent.MouseButton');
 
-goog.require('goog.events.BrowserFeature');
-goog.require('goog.events.Event');
-goog.require('goog.events.EventType');
-goog.require('goog.reflect');
-goog.require('goog.userAgent');
+s2js.runtime.client.ClassLoader.require('goog.events.BrowserFeature');
+s2js.runtime.client.ClassLoader.require('goog.events.Event');
+s2js.runtime.client.ClassLoader.require('goog.events.EventType');
+s2js.runtime.client.ClassLoader.require('goog.reflect');
+s2js.runtime.client.ClassLoader.require('goog.userAgent');
 
 
 

@@ -16,9 +16,9 @@
  * @fileoverview Utilities for getting details about the user's platform.
  */
 
-goog.provide('goog.userAgent.platform');
+s2js.runtime.client.ClassLoader.provide('goog.userAgent.platform');
 
-goog.require('goog.userAgent');
+s2js.runtime.client.ClassLoader.require('goog.userAgent');
 
 
 /**

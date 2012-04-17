@@ -24,11 +24,17 @@ case class InformationView(data: Any) extends View {
       */
     private val lineWidth: Double = 1
 
+    private var textAlpha: Double = 1
+
     /**
       * Indicator of isSelected attribute. If is selected, the text is drawn with a small background white
       * see-through circle.
       */
     private var selected = false
+
+    def setTextVisibility(newAlpha: Double) {
+        textAlpha = newAlpha
+    }
 
     /**
       * Sets the selected attribute to true. After drawing of this object the attribute is set back to false.
@@ -39,8 +45,19 @@ case class InformationView(data: Any) extends View {
 
     def draw(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point]) {
 
+        drawQuick(context, color, position)
+    }
+
+    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point]) {
+
+        val colorToUse = if(color.isDefined) {
+            Color(color.get.red, color.get.green, color.get.blue, textAlpha)
+        } else {
+            Color(textColor.red, textColor.green, textColor.blue, textAlpha)
+        }
+
         if(position != None) {
-            performDrawing(context, color.getOrElse(textColor), position.get)
+            performDrawing(context, colorToUse, position.get)
         }
 
         selected = false
@@ -60,9 +77,7 @@ case class InformationView(data: Any) extends View {
             //todo how come, that the measureText returns different size on the first run??
         }
 
-        val colorToUse = color
-
-        drawText(context, data.toString, position, colorToUse, "12px Sans", "center")
+        drawText(context, data.toString, position, color, "12px Sans", "center")
     }
 
     private def updateTextColor(loader: SetupLoader) {

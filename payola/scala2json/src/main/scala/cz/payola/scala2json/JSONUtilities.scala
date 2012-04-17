@@ -1,41 +1,46 @@
 package cz.payola.scala2json
 
-object JSONUtilities {
-
+object JSONUtilities
+{
     /** Returns a char escaped so that it can
-     *  be used in the JSON output right away.
-     *
-     * @param c Char to be escaped.
-     *
-     * @return Escaped char.
-     */
-    def escapedChar(c: Char): String = {
-        escapedString(c.toString)
+      *  be used in the JSON output right away.
+      *
+      * @param c Char to be escaped.
+      *
+      * @return Escaped char.
+      */
+    def escapeChar(c: Char): String = {
+        escapeString(c.toString)
     }
 
     /** Returns a string escaped and wrapped in quotes so that it can
-     *  be used in the JSON output right away.
-     *
-     * @param str String to be escaped.
-     *
-     * @return Escaped string.
-     */
-    def escapedString(str: String): String = {
-        val builder: StringBuilder = new StringBuilder(str)
+      *  be used in the JSON output right away.
+      *
+      * @param str String to be escaped.
+      *
+      * @return Escaped string.
+      */
+    def escapeString(str: String): String = {
+        val builder: StringBuilder = new StringBuilder
 
-        // Replace all invalid chars, see http://www.json.org/
-        builder.replaceAllLiterally("\\", "\\\\")
-        builder.replaceAllLiterally("\"", "\\\"")
-        builder.replaceAllLiterally("/", "\\/")
-        builder.replaceAllLiterally("\b", "\\b")
-        builder.replaceAllLiterally("\f", "\\f")
-        builder.replaceAllLiterally("\n", "\\n")
-        builder.replaceAllLiterally("\r", "\\r")
-        builder.replaceAllLiterally("\t", "\\t")
+        builder.append('"')
+        for (i: Int <- 0 until str.length) {
+            val c: Char = str(i)
+            c match {
+                case '\\' => builder.append("\\\\")
+                case '"' => builder.append("\\\"")
+                case '/' => builder.append("\\/")
+                case '\b' => builder.append("\\b")
+                case '\f' => builder.append("\\f")
+                case '\n' => builder.append("\\n")
+                case '\r' => builder.append("\\r")
+                case '\t' => builder.append("\\t")
+                case c => builder.append(c)
+            }
+        }
 
-        // Insert quotes around the string
-        builder.insert(0, '"')
-        builder.append("\"")
+        builder.append('"')
+
         builder.toString
     }
 }

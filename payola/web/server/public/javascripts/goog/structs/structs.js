@@ -23,10 +23,10 @@
  */
 
 
-goog.provide('goog.structs');
+s2js.runtime.client.ClassLoader.provide('goog.structs');
 
-goog.require('goog.array');
-goog.require('goog.object');
+s2js.runtime.client.ClassLoader.require('goog.array');
+s2js.runtime.client.ClassLoader.require('goog.object');
 
 
 // We treat an object as a dictionary if it has getKeys or it is an object that

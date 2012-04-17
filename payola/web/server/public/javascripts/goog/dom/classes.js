@@ -18,9 +18,9 @@
  */
 
 
-goog.provide('goog.dom.classes');
+s2js.runtime.client.ClassLoader.provide('goog.dom.classes');
 
-goog.require('goog.array');
+s2js.runtime.client.ClassLoader.require('goog.array');
 
 
 /**

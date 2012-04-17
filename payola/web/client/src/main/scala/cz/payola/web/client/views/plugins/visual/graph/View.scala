@@ -13,6 +13,14 @@ trait View {
       */
     def draw(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point])
 
+    /**
+     * Routine for fast drawing of the graphical representation of graphs objects. Should be used for animation
+     * @param context to which container to draw
+     * @param color which color to use
+     * @param position to which location to draw
+     */
+    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point])
+
     def updateSettings(loader: SetupLoader)
 
     /**
@@ -223,7 +231,7 @@ trait View {
         val layer = new Layer(canvas, context)
 
         container.appendChild(canvas)
-        layer.setSize(Vector(1500, 1000)) //TODO take it from the "created element"
+        layer.setSize(Vector(2000, 2000)) //TODO take it from the "created element"
         layer
     }
 }
