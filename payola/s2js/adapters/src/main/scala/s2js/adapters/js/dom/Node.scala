@@ -35,7 +35,7 @@ abstract class Node
 
     var textContent: String
 
-    val text: String
+    var text: String
 
     var xml: String
 
