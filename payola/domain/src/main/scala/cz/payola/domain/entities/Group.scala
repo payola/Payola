@@ -7,13 +7,19 @@ import domain.entities.generic.{SharedAnalysesOwner, ConcreteOwnedEntity, Concre
 class Group(protected var _name: String, protected val _owner: User) extends common.entities.Group with
 ConcreteNamedEntity with ConcreteOwnedEntity with SharedAnalysesOwner
 {
-    // Members. Initially only IDs are loaded, actual members are loaded from the
-    // data layer as needed
-    private val _memberIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
+    def this() = this(null, null)
 
     protected val _members: ArrayBuffer[UserType] = new ArrayBuffer[UserType]()
 
-    //TODO: _owner can be null when creating instance without parameters
+    // We need to be able to create a new instance of Group with no parameters.
+    // Hence if both _name and _owner are null, let it slip. If one of them is null
+    // and the other isn't, something went wrong.
+    if (_name != null && _owner == null){
+        throw new IllegalArgumentException("Group needs and owner!")
+    }else if (_name == null && _owner != null){
+        throw new IllegalArgumentException("Group needs a name!")
+    }
+
     if (_owner != null) {
         _owner.addOwnedGroup(this)
     }
@@ -29,8 +35,7 @@ ConcreteNamedEntity with ConcreteOwnedEntity with SharedAnalysesOwner
     def addMember(u: User) = {
         require(u != null, "User is NULL!")
 
-        if (!_memberIDs.contains(u.id)) {
-            _memberIDs += u.id
+        if (!_members.contains(u)) {
             _members += u
 
             u.addToGroup(this)
@@ -43,7 +48,7 @@ ConcreteNamedEntity with ConcreteOwnedEntity with SharedAnalysesOwner
       *
       * @return True or false.
       */
-    def hasMember(u: User): Boolean = _memberIDs.contains(u.id)
+    def hasMember(u: User): Boolean = _members.contains(u)
 
     /** Returns a user at index. Will raise an exception if the index is out of bounds.
       * The user will be loaded from DB if necessary.
@@ -60,24 +65,7 @@ ConcreteNamedEntity with ConcreteOwnedEntity with SharedAnalysesOwner
       *
       * @return Number of members.
       */
-    def memberCount: Int = _memberIDs.size
-
-    /** Returns an immutable array of group members.
-      *
-      * @return An immutable array of group members.
-      */
-    /*def members = {
-        val users = List[User]()
-        _memberIDs foreach { userID =>
-            val u: Option[User] = _members.get(userID)
-            if (u.isEmpty){
-                // TODO loading from DB
-            }else{
-                u.get :: users
-            }
-        }
-        users.reverse
-    }*/
+    def memberCount: Int = _members.size
 
     /** Removes user from members.
       *
@@ -92,10 +80,9 @@ ConcreteNamedEntity with ConcreteOwnedEntity with SharedAnalysesOwner
 
         // Need to make this check, otherwise we'd
         // get in to an infinite cycle
-        if (_memberIDs.contains(u.id)) {
+        if (_members.contains(u)) {
             u.removeFromGroup(this)
 
-            _memberIDs -= u.id
             _members -= u
         }
     }

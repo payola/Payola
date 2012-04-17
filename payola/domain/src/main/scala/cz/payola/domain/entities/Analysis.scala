@@ -10,8 +10,6 @@ ConcreteNamedEntity with ConcreteOwnedEntity
     type PluginInstanceType = PluginInstance
 
     // Plugin instances that this analysis consists of.
-    private val _pluginInstanceIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
-
     protected val _pluginInstances: ArrayBuffer[PluginInstanceType] = new ArrayBuffer[PluginInstanceType]()
 
     /** Adds a new plugin instance to the plugin instances array.
@@ -23,8 +21,7 @@ ConcreteNamedEntity with ConcreteOwnedEntity
     def appendPluginInstance(instance: PluginInstance) = {
         require(instance != null, "Cannot append null plugin instance!")
 
-        if (!_pluginInstanceIDs.contains(instance.id)) {
-            _pluginInstanceIDs += instance.id
+        if (!_pluginInstances.contains(instance)) {
             _pluginInstances += instance
         }
     }
@@ -38,25 +35,8 @@ ConcreteNamedEntity with ConcreteOwnedEntity
     def containsPluginInstance(instance: PluginInstance) = {
         require(instance != null, "Cannot query about null plugin instance!")
 
-        _pluginInstanceIDs.contains(instance.id)
+        _pluginInstances.contains(instance)
     }
-
-    /** Returns an immutable copy of the plugin instances array.
-      *
-      * @return An immutable copy of the plugin instances array.
-      */
-    /*def pluginInstances = {
-        val instances = List[PluginInstanceType]()
-        _pluginInstanceIDs foreach { instanceID: String =>
-            val inst: Option[PluginInstanceType] = _pluginInstances.get(instanceID)
-            if (inst.isEmpty){
-                // TODO loading from DB
-            }else{
-                inst.get :: instances
-            }
-        }
-        instances.reverse
-    }*/
 
     /** Removes all items in the plugin instances array by the array passed as argument.
       *
@@ -67,12 +47,8 @@ ConcreteNamedEntity with ConcreteOwnedEntity
     def pluginInstances_=(instances: Seq[PluginInstance]) = {
         require(pluginInstances != null, "Cannot assign a null array!")
 
-        _pluginInstanceIDs.clear()
         _pluginInstances.clear()
-        instances foreach {instance =>
-            _pluginInstanceIDs += instance.id
-            _pluginInstances += instance
-        }
+        _pluginInstances ++= instances
     }
 
     /** Removes a plugin instance from the plugin instances array.
@@ -84,7 +60,6 @@ ConcreteNamedEntity with ConcreteOwnedEntity
     def removePluginInstance(instance: PluginInstance) = {
         require(instance != null, "Cannot remove null plugin instance!")
 
-        _pluginInstanceIDs -= instance.id
         _pluginInstances -= instance
     }
 

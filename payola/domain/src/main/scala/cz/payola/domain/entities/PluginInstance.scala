@@ -13,13 +13,10 @@ domain.entities.generic.ConcreteEntity
 
     type ParameterInstanceType = ParameterInstance[_]
 
-    // A hash map matching parameters -> values
-
     protected val _parameterInstances = new ArrayBuffer[ParameterInstanceType]()
 
     /** Sets a parameter instance for parameter.
       *
-      * @param p The parameter.
       * @param v The parameter instance.
       *
       * @throws IllegalArgumentException if either of the parameter is null or if the plugin doesn't contain such
@@ -46,11 +43,6 @@ domain.entities.generic.ConcreteEntity
         _parameterInstances exists {par: ParameterInstanceType => par.parameter == p}
     }
 
-    /** Returns an array of parameter instances.
-      *
-      * @return An array of parameter instances.
-      */
-    //def parameterInstances = _parameterInstances.values.toList
 
     /** Gets a parameter instance for that particular parameter.
       *
