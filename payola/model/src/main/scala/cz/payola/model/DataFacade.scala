@@ -26,7 +26,6 @@ class DataFacade
             LIMIT 40
         """.format(uri, uri)
 
-        val result = QueryExecutor.executeQuery(configurations, query)
-        result.data.headOption.map(rdf => RDFGraph(rdf)).getOrElse(RDFGraph(""))
+        QueryExecutor.executeQuery(configurations, query).data.headOption.map(rdf => RDFGraph(rdf)).get
     }
 }
