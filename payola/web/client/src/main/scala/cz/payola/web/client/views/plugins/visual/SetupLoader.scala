@@ -1,14 +1,11 @@
 package cz.payola.web.client.views.plugins.visual
 
-import components.visualsetup.ViewModel
+import components.visualsetup.InputViewModel
 import s2js.adapters.js.browser._
 import s2js.adapters.js.dom.Element
 
 class  SetupLoader
 {
-
-    new ViewModel()
-
     val VertexColorHigh = "setup.vertex.colors.selected"
     private val VertexColorHighRed = "setup.vertex.colors.selected.red"
     private val VertexColorHighGreen = "setup.vertex.colors.selected.green"
@@ -321,22 +318,22 @@ class  SetupLoader
         buildColorSetup(parent, "high", VertexColorHigh)
 
         parent.appendChild(document.createElement[Element]("br"))
-        buildColorSetup(parent, "literal", VertexColorLiteral).setAttribute("disabled", "disabled")
+        buildColorSetup(parent, "literal", VertexColorLiteral)
 
         parent.appendChild(document.createElement[Element]("br"))
-        buildColorSetup(parent, "identif", VertexColorIdentified).setAttribute("disabled", "disabled")
+        buildColorSetup(parent, "identif", VertexColorIdentified)
 
         parent.appendChild(document.createElement[Element]("br"))
-        buildColorSetup(parent, "unkn", VertexColorUnknown).setAttribute("disabled", "disabled")
+        buildColorSetup(parent, "unkn", VertexColorUnknown)
 
         parent.appendChild(document.createElement[Element]("br"))
-        buildInput(parent, "lit Icon", VertexIconLiteral).setAttribute("disabled", "disabled")
+        buildInput(parent, "lit Icon", VertexIconLiteral)
 
         parent.appendChild(document.createElement[Element]("br"))
-        buildInput(parent, "ident Icon", VertexIconIdentified).setAttribute("disabled", "disabled")
+        buildInput(parent, "ident Icon", VertexIconIdentified)
 
         parent.appendChild(document.createElement[Element]("br"))
-        buildInput(parent, "unkn Icon", VertexIconUnknown).setAttribute("disabled", "disabled")
+        buildInput(parent, "unkn Icon", VertexIconUnknown)
     }
 
     private def buildEdgeSettings(parent: Element) {
@@ -357,7 +354,7 @@ class  SetupLoader
         buildColorSetup(parent, "base", EdgeColorMedium)
     }
 
-    private def buildColorSetup(parent: Element, labelText: String, location: String): Element = {
+    private def buildColorSetup(parent: Element, labelText: String, location: String) {
 
         val edgeColorHighLabel = document.createElement[Element]("label")
         parent.appendChild(edgeColorHighLabel)
@@ -389,7 +386,7 @@ class  SetupLoader
         buildInput(parent, "A", location+".alpha")
     }
 
-    private def buildInput(parent: Element, labelText: String, bindToLocation: String): Element = {
+    private def buildInput(parent: Element, labelText: String, bindToLocation: String) {
 
         val label = document.createElement[Element]("label")
         parent.appendChild(label)
@@ -399,13 +396,12 @@ class  SetupLoader
         parent.appendChild(spacer)
         spacer.innerHTML = " "
 
-        val inputField = document.createElement[Element]("input")
-        parent.appendChild(inputField)
+        new InputViewModel(parent, "input", getValue(bindToLocation).getOrElse(""), bindToLocation) //TODO type avare?
+
+        /*parent.appendChild(inputField)
         inputField.className = "visualPluginSettings textField"
         inputField.setAttribute("type", "text")
         inputField.setAttribute("onChange", "window.localStorage.setItem(\""+bindToLocation+"\", this.value)")
-        inputField.setAttribute("value", getValue(bindToLocation).getOrElse(""))
-
-        inputField
+        inputField.setAttribute("value", getValue(bindToLocation).getOrElse(""))*/
     }
 }

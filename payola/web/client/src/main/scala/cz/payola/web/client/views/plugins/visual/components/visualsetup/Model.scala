@@ -9,6 +9,6 @@ import cz.payola.web.client.views.plugins.visual.Color
  * @package cz.payola.web.client.views.plugins.visual.components.visualsetup
  */
 
-class Model(nodeColor: Color)
+class Model[T](nodeValue: T)
 {
 }

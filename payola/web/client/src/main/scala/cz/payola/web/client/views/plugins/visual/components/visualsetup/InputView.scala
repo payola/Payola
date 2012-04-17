@@ -13,9 +13,9 @@ import s2js.adapters.js.browser.document
  * @package cz.payola.web.client.views.plugins.visual.components.visualsetup
  */
 
-class View extends Component
+class InputView(name: String, whereToBind: String, value: String) extends Component
 {
-    private val textBox = new Input("color")
+    private val textBox = new Input(name, value)
 
     setEventHandlers()
 
@@ -23,12 +23,13 @@ class View extends Component
         textBox.render(parent)
     }
 
-    private def setEventHandlers() = {
+    private def setEventHandlers() = { //TODO shouldn't be the handlers setted from the outside (as a construction parameter or via a add method)?
         textBox.changed += {
-            e => window.alert(e.target.getText)
+            e => window.localStorage.setItem(whereToBind, e.target.getText)
+            //this.valuewindow.alert(e.target.getText)
         }
-        textBox.clicked += {
+        /*textBox.clicked += {
             e => window.alert(e.target.getText)
-        }
+        }*/
     }
 }

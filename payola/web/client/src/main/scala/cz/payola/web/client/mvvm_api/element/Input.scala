@@ -15,7 +15,7 @@ import cz.payola.web.client.events.{ClickedEvent, ChangedEvent}
  * @package cz.payola.web.client.mvvm_api.element
  */
 
-class Input(val name: String, val value: String = "", val addClass: String = "") extends Component
+class Input(val name: String, val value: String, val addClass: String = "") extends Component
 {
     //require(document.getElementById(name) == null)
 
