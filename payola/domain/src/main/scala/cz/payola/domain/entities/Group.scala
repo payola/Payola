@@ -14,7 +14,7 @@ class Group(
     with ConcreteOwnedEntity
     with SharedAnalysesOwner
 {
-    def this() = this(null, null)
+    def this() = this(null, null, null)
 
     protected val _members: ArrayBuffer[UserType] = new ArrayBuffer[UserType]()
 
