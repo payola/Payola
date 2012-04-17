@@ -27,5 +27,8 @@ class View extends Component
         textBox.changed += {
             e => window.alert(e.target.getText)
         }
+        textBox.clicked += {
+            e => window.alert(e.target.getText)
+        }
     }
 }
