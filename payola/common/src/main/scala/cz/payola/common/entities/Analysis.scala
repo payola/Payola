@@ -3,7 +3,7 @@ package cz.payola.common.entities
 import scala.collection
 import scala.collection.mutable
 
-trait Analysis extends NamedEntity with OwnedEntity
+trait Analysis extends NamedEntity with OptionallyOwnedEntity with ShareableEntity
 {
     /** Type of the plugin instances the analysis consists of. */
     type PluginInstanceType <: PluginInstance

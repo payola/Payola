@@ -12,6 +12,9 @@ trait User extends NamedEntity
     /** Type of the analyses that the user can own. */
     type AnalysisType <: Analysis
 
+    /** Type of the data sources that the user can own. */
+    type DataSourceType <: DataSource
+
     /** Type of the privileges. */
     type PrivilegeType <: Privilege[_,_]
 
@@ -22,18 +25,16 @@ trait User extends NamedEntity
     protected val _ownedGroups: mutable.Seq[GroupType]
 
     protected val _ownedAnalyses: mutable.Seq[AnalysisType]
+
+    protected val _ownedDataSources: mutable.Seq[DataSourceType]
     
     protected val _privileges: mutable.Seq[PrivilegeType]
 
-    def accessibleAnalyses: collection.Seq[AnalysisType]
-    
     def email = _email
 
     def email_=(value: String) {
         _email = value
     }
-    
-    def memberGroups: mutable.Seq[GroupType]
 
     def password = _password
 
@@ -44,6 +45,8 @@ trait User extends NamedEntity
     def ownedGroups: collection.Seq[GroupType] = _ownedGroups
 
     def ownedAnalyses: collection.Seq[AnalysisType] = _ownedAnalyses
+
+    def ownedDataSources: collection.Seq[DataSource] = _ownedDataSources
     
-    def privileges: collection.Seq[PrivilegeType]
+    def privileges: collection.Seq[PrivilegeType] = _privileges
 }

@@ -1,21 +1,13 @@
 package cz.payola.domain.entities
 
-import collection.mutable._
-import cz.payola._
-import generic.{ConcreteEntity, SharedAnalysesOwner, ConcreteOwnedEntity, ConcreteNamedEntity}
+import scala.collection.mutable
 
-class Group(id:String, protected var _name: String, protected val _owner: User)
-    extends ConcreteEntity(id)
-    with common.entities.Group
-    with ConcreteNamedEntity
-    with ConcreteOwnedEntity
-    with SharedAnalysesOwner
+class Group(protected var _name: String, protected val _owner: User)
+    extends Entity with NamedEntity with cz.payola.common.entities.Group
 {
-    // Members. Initially only IDs are loaded, actual members are loaded from the
-    // data layer as needed
-    private val _memberIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
+    type UserType = User
 
-    protected val _members: ArrayBuffer[UserType] = new ArrayBuffer[UserType]()
+    protected val _members = new mutable.ArrayBuffer[UserType]()
 
     /*TODO: _owner can be null when creating instance without parameters
     if (_owner != null) {
@@ -31,7 +23,7 @@ class Group(id:String, protected var _name: String, protected val _owner: User)
       *
       * @throws IllegalArgumentException if the user is null.
       */
-    def addMember(u: User) = {
+    /*def addMember(u: User) = {
         require(u != null, "User is NULL!")
 
         if (!_memberIDs.contains(u.id)) {
@@ -103,6 +95,6 @@ class Group(id:String, protected var _name: String, protected val _owner: User)
             _memberIDs -= u.id
             _members -= u
         }
-    }
+    }*/
 }
 

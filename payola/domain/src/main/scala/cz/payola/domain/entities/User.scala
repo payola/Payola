@@ -1,48 +1,32 @@
 package cz.payola.domain.entities
 
-import generic.{ConcreteEntity, SharedAnalysesOwner}
-import permissions.privilege.PublicPrivilege
-import scala.collection.mutable._
-import cz.payola.domain.entities.permissions.privilege.{GroupPrivilege, AnalysisPrivilege, Privilege}
+import permissions.privilege.Privilege
+import scala.collection.mutable
 
-class User(id: String, protected var _name: String)
-    extends ConcreteEntity(id)
-    with cz.payola.common.entities.User
-    with SharedAnalysesOwner
+class User(protected var _name: String)
+    extends Entity with cz.payola.common.entities.User
 {
     type GroupType = Group
 
     type AnalysisType = Analysis
-    
-    type PrivilegeType = Privilege[_,_]
+
+    type DataSourceType = DataSource
+
+    type PrivilegeType = Privilege[_, _]
 
     protected var _email: String = ""
 
     protected var _password: String = ""
 
-    // Analysis owned by the user and analysis that are shared directly to the user
-    // To support lazy-loading, only AnalysesIDs are filled at first and when requesting
-    // a particular analysis, it is loaded and stored in the HashMap cache.
-    private val _ownedAnalysesIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
+    protected val _ownedGroups = new mutable.ArrayBuffer[GroupType]()
 
-    private val _cachedAnalyses: HashMap[String, AnalysisType] = new HashMap[String, AnalysisType]()
+    protected val _ownedAnalyses = new mutable.ArrayBuffer[AnalysisType]()
 
-    // Groups owned by the user and groups the user is a member in
-    // To support lazy-loading, only GroupIDs are filled at first and when requesting
-    // a particular group, it is loaded and stored in the HashMap cache.
-    private val _ownedGroupIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
+    protected val _ownedDataSources = new mutable.ArrayBuffer[DataSource]()
 
-    private val _memberGroupIDs: ArrayBuffer[String] = new ArrayBuffer[String]()
+    protected val _privileges = new mutable.ArrayBuffer[PrivilegeType]()
 
-    private val _cachedGroups: HashMap[String, Group] = new HashMap[String, Group]()
-
-    protected val _ownedGroups: Seq[GroupType] = new ArrayBuffer[GroupType]()
-
-    protected val _ownedAnalyses: Seq[AnalysisType] = new ArrayBuffer[AnalysisType]()
-    
-    protected val _privileges: Seq[PrivilegeType] = new ArrayBuffer[PrivilegeType]()
-
-    /** Internal method which creates List of groups from IDs. It uses the user's cache
+    /*/** Internal method which creates List of groups from IDs. It uses the user's cache
       * as well as loading from the data layer if the group hasn't been cached yet.
       *
       * @param ids An array of group IDs.
@@ -68,10 +52,10 @@ class User(id: String, protected var _name: String)
       */
     def accessibleAnalyses: collection.Seq[AnalysisType] = {
         val as: ArrayBuffer[AnalysisType] = new ArrayBuffer[AnalysisType]()
-        _privileges foreach { p: PrivilegeType =>
-            if (p.isInstanceOf[AnalysisPrivilege[_]]){
+        _privileges foreach {p: PrivilegeType =>
+            if (p.isInstanceOf[AnalysisPrivilege[_]]) {
                 val a: AnalysisType = p.asInstanceOf[AnalysisPrivilege[_]].obj
-                if (!as.contains(a)){
+                if (!as.contains(a)) {
                     as += a
                 }
             }
@@ -181,16 +165,16 @@ class User(id: String, protected var _name: String)
     def memberGroupCount: Int = _memberGroupIDs.size
 
     /** Result is a new List consisting of only groups that
-      *  the user is a member of.
+      * the user is a member of.
       *
       * @return New List with groups that the user is a member of.
       */
     def memberGroups = {
         val gs: ArrayBuffer[GroupType] = new ArrayBuffer[GroupType]()
-        _privileges foreach { p: PrivilegeType =>
-            if (p.isInstanceOf[GroupPrivilege[_]]){
+        _privileges foreach {p: PrivilegeType =>
+            if (p.isInstanceOf[GroupPrivilege[_]]) {
                 val g: GroupType = p.asInstanceOf[GroupPrivilege[_]].obj
-                if (!gs.contains(g)){
+                if (!gs.contains(g)) {
                     gs += g
                 }
             }
@@ -266,10 +250,13 @@ class User(id: String, protected var _name: String)
       *
       * @return Public privileges.
       */
-    def privileges: collection.Seq[PrivilegeType] = _privileges filter { p: Privilege[_,_] => p.isInstanceOf[PublicPrivilege] }
-    
+    def privileges: collection.Seq[PrivilegeType] = _privileges filter {p: Privilege[_, _] =>
+        p
+            .isInstanceOf[PublicPrivilege]
+    }
+
     /** Result is a new List consisting of only groups that
-      *  are owned by the user.
+      * are owned by the user.
       *
       * @return New List with groups owned by the user.
       */
@@ -282,8 +269,8 @@ class User(id: String, protected var _name: String)
       * @param g Group to be removed.
       *
       * @return Nothing, needs to have a declared return type because it calls
-      *          removeMember on the group which then may call back removeFromGroup
-      *          back on the user.
+      *         removeMember on the group which then may call back removeFromGroup
+      *         back on the user.
       *
       * @throws IllegalArgumentException if the group is null.
       */
@@ -325,5 +312,5 @@ class User(id: String, protected var _name: String)
 
         _ownedGroupIDs -= g.id
         _cachedGroups.remove(g.id)
-    }
+    }*/
 }

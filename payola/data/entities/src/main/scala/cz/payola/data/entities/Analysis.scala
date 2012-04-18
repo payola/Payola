@@ -2,13 +2,8 @@ package cz.payola.data.entities
 
 import org.squeryl.KeyedEntity
 
-class Analysis(
-        id: String,
-        name: String,
-        owner: User)
-    extends cz.payola.domain.entities.Analysis(id, name, owner)
-    with KeyedEntity[String]
-    with PersistableEntity
+class Analysis(name: String, owner: Option[User])
+    extends cz.payola.domain.entities.Analysis(name, owner) with KeyedEntity[String] with PersistableEntity
 {
-    val ownerId: String = if (owner == null) "" else owner.id
+    val ownerId: Option[String] = owner.map(_.id)
 }

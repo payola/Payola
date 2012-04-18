@@ -9,7 +9,7 @@ object TestObject
     val userDao = new UserDAO()
 
     def main(args: Array[String]) = {
-        println("1")
+        /*println("1")
         PayolaDB.startDatabaseSession()
 
         println("2")
@@ -84,6 +84,6 @@ object TestObject
             val pi = PayolaDB.getPluginInstanceById(pluginInstance.id)
             assert(pi != None)
             */
-        }
+        }*/
     }
 }

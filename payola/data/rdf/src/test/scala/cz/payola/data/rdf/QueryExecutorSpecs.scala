@@ -5,6 +5,8 @@ import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import providers._
 import configurations.SparqlEndpointConfiguration
+import cz.payola.domain.entities.analyses.messages.{QueryExecutionResult, QueryMessage}
+import cz.payola.domain.entities.analyses.QueryResult
 
 class QueryExecutorSpecs extends FlatSpec with ShouldMatchers
 {
@@ -12,14 +14,14 @@ class QueryExecutorSpecs extends FlatSpec with ShouldMatchers
     val sparqlProvider = new SparqlEndpointConfiguration().createProvider
     val fakeProvider = new FakeDataProvider
     val fakeTtlProvider = new FakeTtlDataProvider
-    val exceptionProvider = new SingleDataProvider
+    val exceptionProvider = new SingleQueryExecutor
     {
         protected def executeQuery(sparqlQuery: String): String = {
             Thread.sleep(1000)
             throw new Exception
         }
     }
-    val simpleProvider = new SingleDataProvider
+    val simpleProvider = new SingleQueryExecutor
     {
         protected def executeQuery(sparqlQuery: String): String = {
             Thread.sleep(3000)
@@ -32,8 +34,8 @@ class QueryExecutorSpecs extends FlatSpec with ShouldMatchers
     val query = "select distinct ?Concept where {[] a ?Concept} LIMIT 100";
 
     "Query executor" should "execute query on simple single data provider" in {
-        val agregateProvider = new AggregateDataProvider(List(simpleProvider))
-        val executor = new QueryExecutor(agregateProvider, timeout)
+        val agregateProvider = new AggregateQueryExecutor(List(simpleProvider))
+        val executor = new DataProvider(agregateProvider, timeout)
         executor.start()
 
         // Execute the query.
@@ -49,8 +51,8 @@ class QueryExecutorSpecs extends FlatSpec with ShouldMatchers
     }
 
     it should "execute query on remote single data provider" in {
-        val agregateProvider = new AggregateDataProvider(List(sparqlProvider))
-        val executor = new QueryExecutor(agregateProvider, timeout)
+        val agregateProvider = new AggregateQueryExecutor(List(sparqlProvider))
+        val executor = new DataProvider(agregateProvider, timeout)
         executor.start()
 
         // Execute the query.
@@ -66,8 +68,8 @@ class QueryExecutorSpecs extends FlatSpec with ShouldMatchers
     }
 
     it should "handle exception in simple single data provider" in {
-        val agregateProvider = new AggregateDataProvider(List(exceptionProvider))
-        val executor = new QueryExecutor(agregateProvider, timeout)
+        val agregateProvider = new AggregateQueryExecutor(List(exceptionProvider))
+        val executor = new DataProvider(agregateProvider, timeout)
         executor.start()
 
         // Execute the query.
@@ -83,8 +85,8 @@ class QueryExecutorSpecs extends FlatSpec with ShouldMatchers
     }
 
     it should "support query timeout" in {
-        val agregateProvider = new AggregateDataProvider(List(simpleProvider))
-        val executor = new QueryExecutor(agregateProvider, 2000)
+        val agregateProvider = new AggregateQueryExecutor(List(simpleProvider))
+        val executor = new DataProvider(agregateProvider, 2000)
         executor.start()
 
         // Execute the query.
@@ -101,8 +103,8 @@ class QueryExecutorSpecs extends FlatSpec with ShouldMatchers
 
     it should "execute query on simple aggregate data provider" in {
         val providers = List(simpleProvider, fakeProvider, fakeTtlProvider, exceptionProvider)
-        val agregateProvider = new AggregateDataProvider(providers)
-        val executor = new QueryExecutor(agregateProvider, 2000)
+        val agregateProvider = new AggregateQueryExecutor(providers)
+        val executor = new DataProvider(agregateProvider, 2000)
         executor.start()
 
         // Execute the query.

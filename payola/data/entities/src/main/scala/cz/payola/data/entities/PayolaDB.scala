@@ -29,7 +29,7 @@ object PayolaDB extends Schema
 
     val analysisOwnership =
             oneToManyRelation(users, analyses)
-                .via((u, a) => u.id === a.ownerId)
+                .via((u, a) => u.id === a.ownerId.getOrElse(null))
 
     def startDatabaseSession():Unit = {
         java.lang.Class.forName("org.h2.Driver");

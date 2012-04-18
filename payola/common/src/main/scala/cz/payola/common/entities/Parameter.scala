@@ -1,3 +1,6 @@
 package cz.payola.common.entities
 
-trait Parameter[A] extends NamedEntity
+trait Parameter[A]
+{
+    val name: String
+}

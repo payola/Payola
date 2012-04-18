@@ -3,10 +3,9 @@ package cz.payola.data.entities
 import org.squeryl.KeyedEntity
 
 class Group(
-        id: String,
         name: String,
         owner: User)
-    extends cz.payola.domain.entities.Group(id, name, owner)
+    extends cz.payola.domain.entities.Group(name, owner)
     with KeyedEntity[String]
     with PersistableEntity
 {

@@ -1,14 +1,13 @@
 package cz.payola.common.entities
 
-import scala.collection
-import scala.collection.mutable
+import scala.collection.immutable
 
-trait Plugin extends NamedEntity
+trait Plugin extends NamedEntity with ShareableEntity
 {
     /** Type of the parameters of the plugin */
     type ParameterType <: Parameter[_]
 
-    protected val _parameters: mutable.Seq[ParameterType]
+    protected val _parameters: immutable.Seq[ParameterType]
 
-    def parameters: collection.Seq[ParameterType] = _parameters
+    def parameters: immutable.Seq[ParameterType] = _parameters
 }

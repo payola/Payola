@@ -2,11 +2,5 @@ package cz.payola.data.entities
 
 import org.squeryl.KeyedEntity
 
-class Plugin(
-        id: String,
-        name: String)
-    extends cz.payola.domain.entities.Plugin(id, name)
-    with KeyedEntity[String]
-    with PersistableEntity
-{
-}
+class Plugin(name: String)
+    extends cz.payola.domain.entities.Plugin(name, Nil) with KeyedEntity[String] with PersistableEntity

@@ -25,9 +25,15 @@
         <option name="IF_BRACE_FORCE" value="1" />
         <option name="WRAP_LONG_LINES" value="true" />
         <ScalaCodeStyleSettings>
+          <option name="ADD_UNAMBIGIOUS_IMPORTS_ON_THE_FLY" value="true" />
+          <option name="ADD_FULL_QUALIFIED_IMPORTS" value="true" />
+          <option name="SHOW_ARGUMENTS_TO_BY_NAME_PARAMETERS" value="true" />
+          <option name="INCLUDE_BLOCK_EXPRESSIONS" value="true" />
+          <option name="INCLUDE_LITERALS" value="true" />
           <option name="FINALLY_BRACE_FORCE" value="3" />
           <option name="TRY_BRACE_FORCE" value="3" />
           <option name="PLACE_CLOSURE_PARAMETERS_ON_NEW_LINE" value="false" />
+          <option name="PLACE_SELF_TYPE_ON_NEW_LINE" value="false" />
           <option name="USE_SCALADOC2_FORMATTING" value="true" />
         </ScalaCodeStyleSettings>
         <XML>

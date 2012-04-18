@@ -3,14 +3,8 @@ package cz.payola.data.entities
 import org.squeryl.dsl.OneToMany
 import org.squeryl.KeyedEntity
 
-class User(
-        id: String,
-        name: String,
-        pwd: String,
-        email: String)
-    extends cz.payola.domain.entities.User(id, name)
-    with KeyedEntity[String]
-    with PersistableEntity
+class User(name: String, pwd: String, email: String)
+    extends cz.payola.domain.entities.User(name) with KeyedEntity[String] with PersistableEntity
 {
     password_=(pwd)
     email_=(email)

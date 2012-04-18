@@ -1,12 +1,11 @@
 package cz.payola.data.entities
 
 import org.squeryl.KeyedEntity
+import cz.payola.domain.entities.ParameterInstance
+import cz.payola.domain.entities.parameters.ParameterInstance
+import collection.immutable
 
-class PluginInstance(
-        id: String,
-        plugin: Plugin)
-    extends cz.payola.domain.entities.PluginInstance(id, plugin)
+class PluginInstance(plugin: Plugin, parameterInstances: immutable.Seq[ParameterInstance[_]])
+    extends cz.payola.domain.entities.PluginInstance(plugin, parameterInstances)
     with KeyedEntity[String]
     with PersistableEntity
-{
-}
