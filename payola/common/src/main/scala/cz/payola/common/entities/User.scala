@@ -13,7 +13,8 @@ trait User extends NamedEntity
     type AnalysisType <: Analysis
 
     /** Type of the privileges. */
-    type PrivilegeType <: Privilege[_,_]
+    type PrivilegeType <: Privilege[_]
+
 
     protected var _email: String
 
@@ -32,7 +33,7 @@ trait User extends NamedEntity
     def email_=(value: String) {
         _email = value
     }
-    
+
     def memberGroups: collection.Seq[GroupType]
 
     def password = _password
@@ -44,6 +45,6 @@ trait User extends NamedEntity
     def ownedGroups: collection.Seq[GroupType] = _ownedGroups
 
     def ownedAnalyses: collection.Seq[AnalysisType] = _ownedAnalyses
-    
+
     def privileges: collection.Seq[PrivilegeType]
 }

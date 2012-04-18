@@ -7,6 +7,6 @@ class BooleanParameterInstance(
         parameter: BooleanParameter,
         value: Boolean)
     extends cz.payola.domain.entities.parameters.BooleanParameterInstance(id, parameter, value)
-    with KeyedEntity[String]
+    with PersistableEntity
 {
 }

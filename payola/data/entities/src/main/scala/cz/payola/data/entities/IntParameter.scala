@@ -7,7 +7,7 @@ class IntParameter(
         name: String,
         defaultValue: Int)
     extends cz.payola.domain.entities.parameters.IntParameter(id, name, defaultValue)
-    with KeyedEntity[String]
+    with PersistableEntity
 {
 }
 

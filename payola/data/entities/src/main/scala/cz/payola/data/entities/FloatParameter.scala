@@ -7,7 +7,7 @@ class FloatParameter(
         name: String,
         defaultValue: Float)
     extends cz.payola.domain.entities.parameters.FloatParameter(id, name, defaultValue)
-    with KeyedEntity[String]
+    with PersistableEntity
 {
 }
 

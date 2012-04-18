@@ -17,8 +17,6 @@ class PluginInstance(
 
     type ParameterInstanceType = ParameterInstance[_]
 
-    // A hash map matching parameters -> values
-
     protected val _parameterInstances = new ArrayBuffer[ParameterInstanceType]()
 
     /** Sets a parameter instance for parameter.
@@ -49,11 +47,6 @@ class PluginInstance(
         _parameterInstances exists {par: ParameterInstanceType => par.parameter == p}
     }
 
-    /** Returns an array of parameter instances.
-      *
-      * @return An array of parameter instances.
-      */
-    //def parameterInstances = _parameterInstances.values.toList
 
     /** Gets a parameter instance for that particular parameter.
       *
