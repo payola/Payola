@@ -3,6 +3,14 @@ package cz.payola.domain.entities
 import generic.{ConcreteEntity, ConcreteOwnedEntity, ConcreteNamedEntity}
 import scala.collection.mutable._
 
+/** Analysis entity at the domain level.
+  *
+  * Contains a list of plugin instances.
+  *
+  * @param id Analysis ID.
+  * @param _name Name of the analysis.
+  * @param _owner Owner of the analysis.
+  */
 class Analysis(
         id:String = java.util.UUID.randomUUID.toString,
         protected var _name: String,

@@ -5,6 +5,13 @@ import permissions.privilege.PublicPrivilege
 import scala.collection.mutable._
 import cz.payola.domain.entities.permissions.privilege.{GroupPrivilege, AnalysisPrivilege, Privilege}
 
+/** User entity at the domain level.
+  *
+  * Contains owned analyses and groups, member groups and privileges.
+  *
+  * @param id ID of the user.
+  * @param _name Name of the user.
+  */
 class User(
         id: String = java.util.UUID.randomUUID.toString,
         protected var _name: String)

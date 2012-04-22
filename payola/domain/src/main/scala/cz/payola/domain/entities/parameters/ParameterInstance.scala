@@ -6,8 +6,12 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException
 
 /** A protected class that represents the parameter instance with an actual value. As this,
   * it is abstract, see subclasses.
+  *
+  * @param id Entity ID.
+  * @param _parameter Parameter of which this is an instance.
+  * @param _value Value of the parameter.
+  * @tparam A Type of the value.
   */
-
 abstract class ParameterInstance[A](
         id: String  = java.util.UUID.randomUUID.toString,
         protected val _parameter: Parameter[A],

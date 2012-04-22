@@ -4,6 +4,13 @@ import collection.mutable._
 import generic.ConcreteEntity
 import parameters.{Parameter, ParameterInstance}
 
+/** A plugin instance entity at the domain level.
+  *
+  * Contains a list of parameter instances.
+  *
+  * @param id ID of the plugin instance.
+  * @param _plugin Plugin of which this is an instance.
+  */
 class PluginInstance(
         id:String = java.util.UUID.randomUUID.toString,
         protected val _plugin: Plugin)

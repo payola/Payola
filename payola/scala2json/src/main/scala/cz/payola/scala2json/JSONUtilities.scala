@@ -1,5 +1,8 @@
 package cz.payola.scala2json
 
+/** A few helper methods that are used by the JSONSerializer for escaping strings
+  * or characters,
+  */
 object JSONUtilities
 {
     /** Returns a char escaped so that it can

@@ -6,6 +6,14 @@ import java.io.StringReader
 import java.security.MessageDigest
 import cz.payola.common.rdf.Graph
 
+/** A companion object to the RDFGraph class. Using the apply method defined
+  * on it is a preferred way of creating an RDFGraph instance from data received in
+  * XML or TTL formats.
+  *
+  * You can supply a string of either RDF/XML or TURTLE and the method will parse
+  * the input into a graph.
+  *
+  */
 object RDFGraph
 {
     // Minimal length of the hash used for space-saving during serialization
@@ -107,6 +115,11 @@ object RDFGraph
 
 import RDFGraph._
 
+/** RDF Graph.
+  *
+  * @param _vertices Vertices of the graph.
+  * @param _edges Edges of the graph.
+  */
 class RDFGraph(
     protected val _vertices: List[RDFNode],
     protected val _edges: List[RDFEdge]) extends Graph
