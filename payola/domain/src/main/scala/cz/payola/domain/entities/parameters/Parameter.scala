@@ -3,6 +3,13 @@ package cz.payola.domain.entities.parameters
 import cz.payola._
 import domain.entities.generic.{ConcreteEntity, ConcreteNamedEntity}
 
+/** A parameter entity at the domain level. All parameters need to be subclasses.
+  *
+  * @param id Entity ID.
+  * @param _name Name of the parameter.
+  * @param defaultValue Default value of the parameter.
+  * @tparam A Type of the value.
+  */
 abstract class Parameter[A](
         id: String  = java.util.UUID.randomUUID.toString,
         protected var _name: String,

@@ -4,6 +4,15 @@ import collection.mutable._
 import cz.payola._
 import generic.{ConcreteEntity, SharedAnalysesOwner, ConcreteOwnedEntity, ConcreteNamedEntity}
 
+/** Group entity at the domain level.
+  *
+  * Contains a list of members, shared analyses.
+  *
+  * @param id ID of the group.
+  * @param _name Name of the group.
+  * @param _owner Owner of the group.
+  * @param validate ???
+  */
 class Group(
         id:String = java.util.UUID.randomUUID.toString,
         protected var _name: String,

@@ -4,6 +4,13 @@ import collection.mutable.ArrayBuffer
 import generic.{ConcreteEntity, ConcreteNamedEntity}
 import parameters.Parameter
 
+/** Plugin entity at the domain level.
+  *
+  * Contains a list of parameters.
+  *
+  * @param id ID of the plugin.
+  * @param _name Name of the plugin.
+  */
 class Plugin(
         id: String = java.util.UUID.randomUUID.toString,
         protected var _name: String)

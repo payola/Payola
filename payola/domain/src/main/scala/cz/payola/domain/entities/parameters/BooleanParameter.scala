@@ -2,6 +2,12 @@ package cz.payola.domain.entities.parameters
 
 import cz.payola.common
 
+/** Boolean parameter instance.
+  *
+  * @param id Entity ID.
+  * @param parameter The parameter.
+  * @param value Value.
+  */
 class BooleanParameterInstance(
         id: String  = java.util.UUID.randomUUID.toString,
         parameter: BooleanParameter,
@@ -88,6 +94,12 @@ class BooleanParameterInstance(
     }
 }
 
+/** Boolean parameter.
+  *
+  * @param id Entity ID.
+  * @param n Name of the parameter.
+  * @param defaultValue Default value of the parameter.
+  */
 class BooleanParameter(
         id: String  = java.util.UUID.randomUUID.toString,
         n: String,

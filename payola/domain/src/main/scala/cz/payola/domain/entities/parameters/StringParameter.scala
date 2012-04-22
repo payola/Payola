@@ -2,6 +2,12 @@ package cz.payola.domain.entities.parameters
 
 import cz.payola.common
 
+/** String parameter instance.
+  *
+  * @param id Entity ID.
+  * @param p Parameter.
+  * @param v Value.
+  */
 class StringParameterInstance(
         id: String  = java.util.UUID.randomUUID.toString,
         p: StringParameter,
@@ -90,6 +96,12 @@ class StringParameterInstance(
     override def stringValue: String = value
 }
 
+/** String parameter.
+  *
+  * @param id Entity ID.
+  * @param n Name.
+  * @param defaultValue Default value of the parameter.
+  */
 class StringParameter(
         id: String  = java.util.UUID.randomUUID.toString,
         n: String,

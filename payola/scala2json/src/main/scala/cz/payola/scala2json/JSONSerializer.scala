@@ -5,6 +5,14 @@ import java.lang.reflect.{Field, Method}
 import rules.{CustomValueSerializationRule, CustomSerializationRule, BasicSerializationRule, SerializationRule}
 import scala.collection.mutable.ArrayBuffer
 
+/** This enumeration defines output format for the serializer.
+  *
+  * PrettyPrinted option creates a white-space-formatted output with new lines
+  *     and tab-indented lines.
+  * Condensed option, on the other hand, creates a compressed output,
+  *     optimized for size - hence reduces network traffic when transmitting
+  *     serialized objects.
+  */
 object OutputFormat extends Enumeration {
 
     type OutputFormat = Value
@@ -16,10 +24,54 @@ object OutputFormat extends Enumeration {
 
 /** Scala object -> JSON serializer.
   *
+  * Serializes any object to JSON. Uses several techniques for obtaining class fields:
+  * - for regular objects without any rules, JSONSerializer uses Java reflection to obtain
+  *     fields and lists them.
+  * - this behavior can be modified using rules for particular classes:
+  *     - CustomSerializationRule allows you to control the object serialization completely.
+  *     - CustomValueSerializationRule lets you add additional field to the class.
+  *     - BasicSerializationRule can be used to serialize just fields that are common with
+  *         another class or a trait, skip some fields or rename the fields.
+  *
+  * In addition to this, each object is by default enriched by a "__class__" field, which
+  * contains the name of the object's class, or the name of a class that the object is being
+  * serialized as if defined so in a BasicSerializationRule.
+  *
+  * Each object is assigned an "__objectID__" field as well, which contains a number
+  * that is unique within that particular serialization. If the serializer runs into the same
+  * object for the second time, it is not serialized again, but a JSON object like the following
+  * is entered:
+  *
+  * {
+  *     "__ref__": 4
+  * }
+  *
+  * i.e. it's a reference to an already-encountered object with __objectID__ 4.
+  *
+  * This behavior can be modified by setting the serializeInDepth option to true.
+  * Then, objects are not assigned an __objectID__ and are serialized again at each
+  * encounter. JSONSerializer will also detect any object cycles - upon discovering
+  * such a cycle, an exception is raised.
+  *
+  * Collections: JSONSerializer can serialize any of the Scala collections. To be able to
+  * deserialize the collection on the other end, however, a simple JSON array cannot be
+  * used (it's used only for the generic Array[_] type). Instead, the collection is serialized
+  * as a JSON object with two fields: __arrayClass__ and __value__. __arrayClass__
+  * determines of which class the collection is and the __value__ field contains the actual
+  * contents of the collection, now as a plain JSON array. Collections that inherit
+  * from the scala.collection.Map are treated differently - they are simply serialized as
+  * a plain JSON object.
+  *
   * Thread-safety: Serialization of objects is generally thread-safe, however,
   * you should not be modifying the rules and settings (i.e. "includeClassFields",
   * "outputFormat", "serializeInDepth" options) while the serializer is serializing
   * an object.
+  *
+  * To use the serializer, simply create a new instance, set up all the rules and parameters
+  * of the serialization and call the serialize method. An example follows:
+  *
+  * val serializer = new JSONSerializer()
+  * println(serializer.serialize(myObject)
   */
 class JSONSerializer
 {
@@ -287,7 +339,7 @@ class JSONSerializer
         builder.toString
     }
 
-    def serializeObjectPosingAsClass(obj: AnyRef, objectID: Int, targetClass: Class[_],
+    private def serializeObjectPosingAsClass(obj: AnyRef, objectID: Int, targetClass: Class[_],
         transientFields: Option[collection.Seq[String]],
         fieldAliases: Option[collection.Map[String, String]],
         processedObjects: ArrayBuffer[Any]): String = {

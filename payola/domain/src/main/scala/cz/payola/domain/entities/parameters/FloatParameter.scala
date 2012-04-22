@@ -2,6 +2,12 @@ package cz.payola.domain.entities.parameters
 
 import cz.payola.common
 
+/** Float parameter instance.
+  *
+  * @param id Entity ID.
+  * @param parameter Parameter.
+  * @param value Value.
+  */
 class FloatParameterInstance(
         id: String  = java.util.UUID.randomUUID.toString,
         parameter: FloatParameter,
@@ -72,6 +78,12 @@ class FloatParameterInstance(
     override def stringValue: String = value.toString
 }
 
+/** Float parameter.
+  *
+  * @param id Entity ID.
+  * @param n Name.
+  * @param defaultValue Default value of the parameter.
+  */
 class FloatParameter(
         id: String  = java.util.UUID.randomUUID.toString,
         n: String,
