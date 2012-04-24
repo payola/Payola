@@ -18,19 +18,19 @@ class FloatParameterInstance(
       *
       * @return Boolean value, or false if the value is null.
       */
-    override def booleanValue: Boolean = value > 0.0f
+    override def booleanValue: Boolean = _value > 0.0f
 
     /** Gets a float value of the parameter.
       *
       * @return Float value, or 0.0 if the value is null.
       */
-    override def floatValue: Float = value
+    override def floatValue: Float = _value
 
     /** Gets an int value of the parameter.
       *
       * @return Int value, or 0 if the value is null.
       */
-    override def intValue: Int = value.toInt
+    override def intValue: Int = _value.toInt
 
     /** Boolean value setter.
       *
@@ -75,7 +75,7 @@ class FloatParameterInstance(
       *
       * @return String value, or "" if the value is null.
       */
-    override def stringValue: String = value.toString
+    override def stringValue: String = _value.toString
 }
 
 /** Float parameter.

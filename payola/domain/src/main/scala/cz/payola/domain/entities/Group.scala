@@ -31,18 +31,15 @@ class Group(
     // We need to be able to create a new instance of Group with no parameters.
     // Hence if both _name and _owner are null, let it slip. If one of them is null
     // and the other isn't, something went wrong.
-
-    /* Squeril is BIT*CH
-    if (_name != null && _owner == null){
+    if (!(_name == null || _name == "") && _owner == null){
         throw new IllegalArgumentException("Group needs and owner!")
-    }else if (_name == null && _owner != null){
+    }else if ((_name == null || _name == "") && _owner != null){
         throw new IllegalArgumentException("Group needs a name!")
     }
 
-    if (_owner != null) {
+    if (_owner != null){
         _owner.addOwnedGroup(this)
     }
-    */
 
     /** Adds a member to the group. Does nothing if already a member.
       *

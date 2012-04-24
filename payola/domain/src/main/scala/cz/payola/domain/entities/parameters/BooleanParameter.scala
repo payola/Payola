@@ -18,7 +18,7 @@ class BooleanParameterInstance(
       *
       * @return Boolean value, or false if the value is null.
       */
-    override def booleanValue: Boolean = value
+    override def booleanValue: Boolean = _value
 
     /** Gets a float value of the parameter.
       *
@@ -26,7 +26,7 @@ class BooleanParameterInstance(
       */
     override def floatValue: Float = {
         // No need to compare to null
-        if (value == false) {
+        if (_value == false) {
             0.0.toFloat
         }
         else {
@@ -40,7 +40,7 @@ class BooleanParameterInstance(
       */
     override def intValue: Int = {
         // No need to compare to null
-        if (value == false) {
+        if (_value == false) {
             0
         }
         else {
@@ -85,7 +85,7 @@ class BooleanParameterInstance(
       * @return String value, or "" if the value is null.
       */
     override def stringValue: String = {
-        if (value) {
+        if (_value) {
             "true"
         }
         else {

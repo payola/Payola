@@ -18,19 +18,19 @@ class IntParameterInstance(
       *
       * @return Boolean value, or false if the value is null.
       */
-    override def booleanValue: Boolean = value > 0
+    override def booleanValue: Boolean = _value > 0
 
     /** Gets a float value of the parameter.
       *
       * @return Float value, or 0.0 if the value is null.
       */
-    override def floatValue: Float = value.toFloat
+    override def floatValue: Float = _value.toFloat
 
     /** Gets an int value of the parameter.
       *
       * @return Int value, or 0 if the value is null.
       */
-    override def intValue: Int = value
+    override def intValue: Int = _value
 
     /** Boolean value setter.
       *
@@ -75,7 +75,7 @@ class IntParameterInstance(
       *
       * @return String value, or "" if the value is null.
       */
-    override def stringValue: String = value.toString
+    override def stringValue: String = _value.toString
 }
 
 /** Int parameter.

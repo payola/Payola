@@ -18,7 +18,7 @@ class StringParameterInstance(
       *
       * @return Boolean value, or false if the value is null.
       */
-    override def booleanValue: Boolean = value == "true"
+    override def booleanValue: Boolean = _value == "true"
 
     /** Gets a float value of the parameter.
       *
@@ -32,7 +32,7 @@ class StringParameterInstance(
             // strval.toFloat might end up throwing an exception. Anything that cannot be parsed will be converted
             // to zero.
             try {
-                value.toFloat
+                _value.toFloat
             } catch {
                 case e: Exception => 0.0f
             }
@@ -51,7 +51,7 @@ class StringParameterInstance(
             // strval.toInt might end up throwing an exception. Anything that cannot be parsed will be converted
             // to zero.
             try {
-                value.toInt
+                _value.toInt
             } catch {
                 case e: Exception => 0
             }
@@ -93,7 +93,7 @@ class StringParameterInstance(
       *
       * @return String value, or "" if the value is null.
       */
-    override def stringValue: String = value
+    override def stringValue: String = _value
 }
 
 /** String parameter.

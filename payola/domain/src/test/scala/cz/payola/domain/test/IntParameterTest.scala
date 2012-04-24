@@ -1,36 +1,36 @@
 package cz.payola.domain.test
 
-import cz.payola.domain.parameter._
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
+import cz.payola.domain.entities.parameters.{ParameterInstance, IntParameter}
 
 class IntParameterTest extends FlatSpec with ShouldMatchers {
-    "IntParameter" should "not get initialized with null or an empty string" in {
-        evaluating(new IntParameter(null, 1)) should produce [IllegalArgumentException]
-        evaluating(new IntParameter("", 1)) should produce [IllegalArgumentException]
+/*    "IntParameter" should "not get initialized with null or an empty string" in {
+        evaluating(new IntParameter(n = "", defaultValue = 1)) should produce [IllegalArgumentException]
     }
+*/
 
     "IntParameter" should "not allow setting empty or null name" in {
-        val ip: IntParameter = new IntParameter("Test", 1)
-        evaluating(ip.setName("")) should produce [IllegalArgumentException]
-        evaluating(ip.setName(null)) should produce [IllegalArgumentException]
+        val ip: IntParameter = new IntParameter(n = "Test", defaultValue = 1)
+        evaluating(ip.name_=("")) should produce [IllegalArgumentException]
+        evaluating(ip.name_=(null)) should produce [IllegalArgumentException]
 
         evaluating(ip.name = "") should produce [IllegalArgumentException]
         evaluating(ip.name = null) should produce [IllegalArgumentException]
     }
 
     "IntParameter" should "return instance with default value when passing no params" in {
-        val ip: IntParameter = new IntParameter("Test", 1)
+        val ip: IntParameter = new IntParameter(n = "Test", defaultValue = 1)
         val ipVal: ParameterInstance[Int] = ip.createInstance()
         ipVal.intValue should equal (1)
 
-        val ip2: IntParameter = new IntParameter("Test", 5)
+        val ip2: IntParameter = new IntParameter(n = "Test", defaultValue = 5)
         val ipVal2: ParameterInstance[Int] = ip2.createInstance()
         ipVal2.intValue should equal (5)
     }
 
     "IntParameterValue" should "return valid values" in {
-        val ip: IntParameter = new IntParameter("Test", 1)
+        val ip: IntParameter = new IntParameter(n = "Test", defaultValue = 1)
         val ipVal: ParameterInstance[Int] = ip.createInstance()
 
         ipVal.booleanValue should equal (true)
@@ -48,7 +48,7 @@ class IntParameterTest extends FlatSpec with ShouldMatchers {
     "IntParameterValue" should "allow setting valid values and" +
         " handle the invalid ones gracefully" in {
 
-        val ip: IntParameter = new IntParameter("Test", 1)
+        val ip: IntParameter = new IntParameter(n = "Test", defaultValue = 1)
         val ipVal: ParameterInstance[Int] = ip.createInstance()
 
         ipVal.setBooleanValue(false)

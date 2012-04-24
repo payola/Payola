@@ -54,7 +54,6 @@ class PluginInstance(
         _parameterInstances exists {par: ParameterInstanceType => par.parameter == p}
     }
 
-
     /** Gets a parameter instance for that particular parameter.
       *
       * @param p The parameter.

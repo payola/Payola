@@ -89,6 +89,6 @@ abstract class ParameterInstance[A](
       *
       * @param newVal The new value.
       */
-    def setValue(newVal: A) = value = newVal
+    def setValue(newVal: A) = _value = newVal
 }
 

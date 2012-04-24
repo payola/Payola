@@ -1,36 +1,37 @@
 package cz.payola.domain.test
 
-import cz.payola.domain.parameter._
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
+import cz.payola.domain.entities.parameters._
 
 class FloatParameterTest extends FlatSpec with ShouldMatchers {
-    "FloatParameter" should "not get initialized with null or an empty string" in {
-        evaluating(new FloatParameter(null, 1.0f)) should produce [IllegalArgumentException]
-        evaluating(new FloatParameter("", 1.0f)) should produce [IllegalArgumentException]
+/*    "FloatParameter" should "not get initialized with null or an empty string" in {
+        evaluating(new FloatParameter(n = null, defaultValue = 1.0f)) should produce [IllegalArgumentException]
+        evaluating(new FloatParameter(n = "", defaultValue = 1.0f)) should produce [IllegalArgumentException]
     }
+    */
 
     "FloatParameter" should "not allow setting empty or null name" in {
-        val fp: FloatParameter = new FloatParameter("Test", 1.0f)
-        evaluating(fp.setName("")) should produce [IllegalArgumentException]
-        evaluating(fp.setName(null)) should produce [IllegalArgumentException]
+        val fp: FloatParameter = new FloatParameter(n = "Test", defaultValue = 1.0f)
+        evaluating(fp.name_=("")) should produce [IllegalArgumentException]
+        evaluating(fp.name_=(null)) should produce [IllegalArgumentException]
 
         evaluating(fp.name = "") should produce [IllegalArgumentException]
         evaluating(fp.name = null) should produce [IllegalArgumentException]
     }
 
     "FloatParameter" should "return instance with default value when passing no params" in {
-        val fp: FloatParameter = new FloatParameter("Test", 1.0f)
+        val fp: FloatParameter = new FloatParameter(n = "Test", defaultValue = 1.0f)
         val fpVal: ParameterInstance[Float] = fp.createInstance()
         fpVal.floatValue should equal (1.0f)
 
-        val fp2: FloatParameter = new FloatParameter("Test", 5.0f)
+        val fp2: FloatParameter = new FloatParameter(n = "Test", defaultValue = 5.0f)
         val fpVal2: ParameterInstance[Float] = fp2.createInstance()
         fpVal2.intValue should equal (5.0f)
     }
 
     "FloatParameterValue" should "return valid values" in {
-        val fp: FloatParameter = new FloatParameter("Test", 1.0f)
+        val fp: FloatParameter = new FloatParameter(n = "Test", defaultValue = 1.0f)
         val fpVal: ParameterInstance[Float] = fp.createInstance()
 
         fpVal.booleanValue should equal (true)
@@ -48,7 +49,7 @@ class FloatParameterTest extends FlatSpec with ShouldMatchers {
     "FloatParameterValue" should "allow setting valid values and" +
         " handle the invalid ones gracefully" in {
 
-        val fp: FloatParameter = new FloatParameter("Test", 1.0f)
+        val fp: FloatParameter = new FloatParameter(n = "Test", defaultValue = 1.0f)
         val fpVal: ParameterInstance[Float] = fp.createInstance()
 
         fpVal.setBooleanValue(false)

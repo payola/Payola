@@ -1,7 +1,7 @@
 package cz.payola.domain.test
 
 import cz.payola.domain._
-import cz.payola.domain.parameter._
+import entities.parameters.{StringParameter, Parameter}
 import entities.Plugin
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
@@ -9,17 +9,16 @@ import collection.mutable.ArrayBuffer
 
 class PluginTest extends FlatSpec with ShouldMatchers {
     "Plugin" should "not get initialized with null or an empty string or a null array" in {
-        evaluating(new Plugin(null)) should produce [IllegalArgumentException]
-        evaluating(new Plugin("")) should produce [IllegalArgumentException]
-        evaluating(new Plugin("Something", null)) should produce [IllegalArgumentException]
+//        evaluating(new Plugin(_name = null)) should produce [IllegalArgumentException]
+//        evaluating(new Plugin(_name = "")) should produce [IllegalArgumentException]
 
         // Shouldn't produce an exception
-        new Plugin("Something", new ArrayBuffer[Parameter[_]])
+        new Plugin(_name = "Something")
     }
 
     "Plugin" should "have sane getters and setters" in {
-        val p: Plugin = new Plugin("MyPlugin", new ArrayBuffer[Parameter[_]]())
-        val param: StringParameter = new StringParameter("Hello", "")
+        val p: Plugin = new Plugin(_name = "MyPlugin")
+        val param: StringParameter = new StringParameter(n = "Hello", defaultValue = "")
 
         p.containsParameter(param) should be (false)
 
@@ -31,10 +30,10 @@ class PluginTest extends FlatSpec with ShouldMatchers {
         // second removal should produce an exception
         evaluating(p.removeParameter(param)) should produce[IllegalArgumentException]
 
-        evaluating(p.setName(null)) should produce[IllegalArgumentException]
-        evaluating(p.setName("")) should produce[IllegalArgumentException]
+        evaluating(p.name_=(null)) should produce[IllegalArgumentException]
+        evaluating(p.name_=("")) should produce[IllegalArgumentException]
 
-        p.setName("NewName")
+        p.name_=("NewName")
         p.name should be ("NewName")
     }
 
