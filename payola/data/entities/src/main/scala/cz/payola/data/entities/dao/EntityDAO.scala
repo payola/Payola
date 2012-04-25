@@ -12,12 +12,28 @@ abstract class EntityDAO[A <: KeyedEntity[String]](protected val table: Table[A]
         evaluateSingleResultQuery(table.where(e => e.id === id))
     }
 
+    def removeById(id: String) {
+        try
+        {
+            transaction {
+                val result = table.deleteWhere(e => id === e.id)
+
+                // TODO:
+                println("delete result " + result)
+            }
+        }
+        catch {
+            //TODO: Handle exceptions
+            case e : Exception => println("Removing error: " + e)
+        }
+    }
+
     def getAll(offset: Int = 0, count: Int = 0): Seq[A] = {
         // Get all entities from table (paginated)
         evaluateCollectionResultQuery(table, offset, count)
     }
 
-    def persist(entity: A) =  {
+    def persist(entity: A) {
         try {
             // Insert or update entity
             transaction {
@@ -83,4 +99,6 @@ abstract class EntityDAO[A <: KeyedEntity[String]](protected val table: Table[A]
             Seq()
         }
     }
+
+
 }

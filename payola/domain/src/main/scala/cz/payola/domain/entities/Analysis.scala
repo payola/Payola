@@ -31,7 +31,7 @@ class Analysis(
       *
       * @throws IllegalArgumentException if the plugin instance is null.
       */
-    def appendPluginInstance(instance: PluginInstance) = {
+    def appendPluginInstance(instance: PluginInstance) {
         require(instance != null, "Cannot append null plugin instance!")
 
         if (!_pluginInstances.contains(instance)) {
@@ -57,7 +57,7 @@ class Analysis(
       *
       * @throws IllegalArgumentException if the array is null.
       */
-    def pluginInstances_=(instances: Seq[PluginInstance]) = {
+    def pluginInstances_=(instances: Seq[PluginInstance]) {
         require(pluginInstances != null, "Cannot assign a null array!")
 
         _pluginInstances.clear()
@@ -70,7 +70,7 @@ class Analysis(
       *
       * @throws IllegalArgumentException if the plugin instance is null.
       */
-    def removePluginInstance(instance: PluginInstance) = {
+    def removePluginInstance(instance: PluginInstance) {
         require(instance != null, "Cannot remove null plugin instance!")
 
         _pluginInstances -= instance
