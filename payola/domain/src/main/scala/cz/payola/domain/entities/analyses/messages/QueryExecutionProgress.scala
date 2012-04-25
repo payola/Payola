@@ -2,8 +2,8 @@ package cz.payola.domain.entities.analyses.messages
 
 import cz.payola.domain.entities.DataSource
 
-case class QueryExecutionProgress(successDataSources: collection.Seq[DataSource],
-    errorDataSources: collection.Seq[DataSource], unfinishedDataSources: collection.Seq[DataSource])
+case class QueryExecutionProgress(successResults: Seq[DataSourceQuerySuccess], errorResults: Seq[DataSourceQueryError],
+    unfinishedDataSources: Seq[DataSource])
 {
     def isFinished: Boolean = unfinishedDataSources.isEmpty
 
@@ -11,7 +11,7 @@ case class QueryExecutionProgress(successDataSources: collection.Seq[DataSource]
         if (unfinishedDataSources.isEmpty) {
             1
         } else {
-            (successDataSources.length + errorDataSources.length) / unfinishedDataSources.length
+            (successResults.length + errorResults.length) / unfinishedDataSources.length
         }
     }
 }

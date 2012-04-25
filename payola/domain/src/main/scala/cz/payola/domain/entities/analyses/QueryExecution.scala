@@ -8,13 +8,12 @@ import scala.collection.mutable
 import actors.{TIMEOUT, Actor}
 
 /**
-  * An actor encapsulating parallel execution of a SPARQL query above multiple data sources.
+  * An execution of a sparql query above multiple data sources.
   * @param querier The actor that should be notified about the execution progress and result.
   * @param dataSources The data sources to execute the query on.
   * @param query The query to execute.
   */
-class QueryExecution(private val querier: Actor, private val dataSources: collection.Seq[DataSource], query: String)
-    extends Actor
+class QueryExecution(private val querier: Actor, private val dataSources: Seq[DataSource], query: String) extends Actor
 {
     /**
       * The successful results obtained during the query execution.
@@ -36,7 +35,7 @@ class QueryExecution(private val querier: Actor, private val dataSources: collec
     def act() {
         val expectedResultCount = queryExecutor.executeQuery(query, this)
 
-        // Wait for the expectedResultCount number of data or error messages. In case of timeout, send
+        // Wait for the expectedResultCount number of data or error messages.
         loop {
             react {
                 case m: DataSourceQueryResult => {
@@ -44,7 +43,7 @@ class QueryExecution(private val querier: Actor, private val dataSources: collec
                         case s: DataSourceQuerySuccess => successResults += s
                         case e: DataSourceQueryError => errorResults += e
                     }
-                    reportProgressToQuerier()
+                    sendProgressToQuerier()
                     if (successResults.length + errorResults.length == expectedResultCount) {
                         sendResultToQuerier()
                     }
@@ -55,11 +54,14 @@ class QueryExecution(private val querier: Actor, private val dataSources: collec
         }
     }
 
-    private def reportProgressToQuerier() {
+    /**
+      * Notifies the querier about the query execution current progress.
+      */
+    private def sendProgressToQuerier() {
         val successDataSources = successResults.map(_.dataSource)
         val errorDataSources = errorResults.map(_.dataSource)
         val unfinishedDataSources = dataSources.diff(successDataSources.union(errorDataSources))
-        querier ! QueryExecutionProgress(successDataSources, errorDataSources, unfinishedDataSources)
+        querier ! QueryExecutionProgress(successResults, errorResults, unfinishedDataSources)
     }
 
     /**

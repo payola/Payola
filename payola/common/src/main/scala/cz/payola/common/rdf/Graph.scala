@@ -33,7 +33,7 @@ trait Graph
       * @return The edges.
       */
     def getIncomingEdges(vertexURI: String): Seq[Edge] = {
-        edges.filter {e=>
+        edges.filter {e =>
             e.destination match {
                 case v: IdentifiedVertex => v.uri == vertexURI
                 case _ => false

@@ -7,6 +7,7 @@ import providers._
 import configurations.SparqlEndpointConfiguration
 import cz.payola.domain.entities.analyses.messages.{QueryExecutionResult, QueryMessage}
 import cz.payola.domain.entities.analyses.QueryResult
+import cz.payola.domain.entities.analyses.executors.{AggregateQueryExecutor, SingleQueryExecutor}
 
 class QueryExecutorSpecs extends FlatSpec with ShouldMatchers
 {

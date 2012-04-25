@@ -1,20 +1,19 @@
 package cz.payola.domain.entities.analyses.executors
 
-import scala.io.Source
 import cz.payola.domain.entities.sources.SparqlEndpointDataSource
+import scala.io.Source
+import java.net.URL
 
 class SparqlEndpointQueryExecutor(dataSource: SparqlEndpointDataSource) extends SingleQueryExecutor(dataSource)
 {
     override protected def executeQuery(query: String): String = {
-        Source.fromURL(getQueryRequestUrl(query), "UTF-8").mkString
-    }
+        val url = dataSource.endpointUrl + "?query=" + java.net.URLEncoder.encode(query, "UTF-8")
+        val connection = new URL(url).openConnection()
+        val requestProperties = Map(
+            "Accept" -> "application/rdf+xml"
+        )
 
-    /**
-      * Appends the query parameter to the endpoint url.
-      * @param query The query.
-      * @return The request URL containing the query.
-      */
-    private def getQueryRequestUrl(query: String): String = {
-        dataSource.endpointUrl + "&query=" + java.net.URLEncoder.encode(query, "UTF-8")
+        requestProperties.foreach(p => connection.setRequestProperty(p._1, p._2))
+        Source.fromInputStream(connection.getInputStream, "UTF-8").mkString
     }
 }

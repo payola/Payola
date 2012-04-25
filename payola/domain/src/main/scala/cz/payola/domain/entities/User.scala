@@ -50,7 +50,7 @@ class User(protected var _name: String)
       *
       * @return Analysis with access.
       */
-    def accessibleAnalyses: collection.Seq[AnalysisType] = {
+    def accessibleAnalyses: Seq[AnalysisType] = {
         val as: ArrayBuffer[AnalysisType] = new ArrayBuffer[AnalysisType]()
         _privileges foreach {p: PrivilegeType =>
             if (p.isInstanceOf[AnalysisPrivilege[_]]) {
@@ -250,7 +250,7 @@ class User(protected var _name: String)
       *
       * @return Public privileges.
       */
-    def privileges: collection.Seq[PrivilegeType] = _privileges filter {p: Privilege[_, _] =>
+    def privileges: Seq[PrivilegeType] = _privileges filter {p: Privilege[_, _] =>
         p
             .isInstanceOf[PublicPrivilege]
     }

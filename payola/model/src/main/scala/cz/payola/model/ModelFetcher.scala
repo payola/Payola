@@ -2,6 +2,7 @@ package cz.payola.model
 
 import cz.payola.common.entities._
 import analysis.PluginInstance
+import cz.payola.common.entities.analyses.{Parameter, PluginInstance, Plugin}
 
 abstract class ModelFetcher
 {
@@ -11,9 +12,9 @@ abstract class ModelFetcher
 
     def parametersWithIDs(ids: List[String]): List[Parameter[_]]
 
-    def pluginWithIDs(ids: List[String]): List[Plugin]
+    def pluginWithIDs(ids: List[String]): List[AnalyticalPlugin]
 
-    def pluginInstancesWithIDs(ids: List[String]): List[PluginInstance]
+    def pluginInstancesWithIDs(ids: List[String]): List[AnalyticalPluginInstance]
 
     def usersWithIDs(ids: List[String]): List[User]
 }

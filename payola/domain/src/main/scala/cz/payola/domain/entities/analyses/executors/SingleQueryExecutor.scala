@@ -11,17 +11,20 @@ abstract class SingleQueryExecutor[A <: DataSource](private val dataSource: A) e
 {
     def executeQuery(query: String, execution: QueryExecution): Int = {
         // TODO investigate possibility of a Thread pool that would be provided to the SingleQueryExecutor.
-        val worker = new Runnable {
+        val worker = new Runnable
+        {
             def run() {
                 try {
                     val data = executeQuery(query)
-                    execution ! DataSourceQuerySuccess(dataSource, data);
+                    execution ! DataSourceQuerySuccess(dataSource, data)
                 } catch {
-                    case e => execution ! DataSourceQueryError(dataSource, e)
+                    case e => {
+                        execution ! DataSourceQueryError(dataSource, e)
+                    }
                 }
             }
         }
-        new Thread(worker).start();
+        new Thread(worker).start()
 
         // The expected number of results.
         1

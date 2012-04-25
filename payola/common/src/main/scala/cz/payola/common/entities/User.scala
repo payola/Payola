@@ -1,9 +1,11 @@
 package cz.payola.common.entities
 
 import permissions.privilege.Privilege
-import scala.collection
 import scala.collection.mutable
 
+/**
+  * A user of the application.
+  */
 trait User extends NamedEntity
 {
     /** Type of the groups that the user can own or be member of. */
@@ -16,7 +18,7 @@ trait User extends NamedEntity
     type DataSourceType <: DataSource
 
     /** Type of the privileges. */
-    type PrivilegeType <: Privilege[_,_]
+    type PrivilegeType <: Privilege[_, _]
 
     protected var _email: String
 
@@ -27,26 +29,40 @@ trait User extends NamedEntity
     protected val _ownedAnalyses: mutable.Seq[AnalysisType]
 
     protected val _ownedDataSources: mutable.Seq[DataSourceType]
-    
+
     protected val _privileges: mutable.Seq[PrivilegeType]
 
+    /** Email of the user. */
     def email = _email
 
+    /**
+      * Sets the email of the user.
+      * @param value The new value of the users email.
+      */
     def email_=(value: String) {
         _email = value
     }
 
+    /** Password of the user required when logging into the application. */
     def password = _password
 
+    /**
+      * Sets the password of the user.
+      * @param value The new value of the password.
+      */
     def password_=(value: String) {
         _password = value
     }
-    
-    def ownedGroups: collection.Seq[GroupType] = _ownedGroups
 
-    def ownedAnalyses: collection.Seq[AnalysisType] = _ownedAnalyses
+    /** The groups that are owned by the user. */
+    def ownedGroups: Seq[GroupType] = _ownedGroups
 
-    def ownedDataSources: collection.Seq[DataSource] = _ownedDataSources
-    
-    def privileges: collection.Seq[PrivilegeType] = _privileges
+    /** The analyses that are owned by the user. */
+    def ownedAnalyses: Seq[AnalysisType] = _ownedAnalyses
+
+    /** The data sources that are owned by the user. */
+    def ownedDataSources: Seq[DataSource] = _ownedDataSources
+
+    /** Privileges of the user. */
+    def privileges: Seq[PrivilegeType] = _privileges
 }

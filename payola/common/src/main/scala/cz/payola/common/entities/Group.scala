@@ -1,8 +1,10 @@
 package cz.payola.common.entities
 
-import scala.collection
 import scala.collection.mutable
 
+/**
+  * A group of users.
+  */
 trait Group extends NamedEntity
 {
     type UserType <: User
@@ -11,7 +13,9 @@ trait Group extends NamedEntity
 
     protected val _members: mutable.Seq[UserType]
 
+    /** Owner of the group. */
     def owner = _owner
 
-    def members: collection.Seq[UserType] = _members
+    /** Members of the group. */
+    def members: Seq[UserType] = _members
 }
