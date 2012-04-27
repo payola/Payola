@@ -198,7 +198,7 @@ class JSONSerializer
                 case _: java.lang.Boolean => if (obj.asInstanceOf[java.lang.Boolean].booleanValue) "true" else "false"
                 case _: java.lang.Character => JSONUtilities
                     .escapeChar(obj.asInstanceOf[java.lang.Character].charValue())
-                case None => "scala.None"
+                case None => "\"scala.None\""
                 case map: scala.collection.Map[_, _] => serializeMap(map, processedObjects)
                 case trav: scala.collection.Traversable[_] => serializeTraversable(trav, processedObjects)
                 case arr: Array[_] => serializeArray(arr, processedObjects)

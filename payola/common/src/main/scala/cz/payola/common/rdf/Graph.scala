@@ -10,13 +10,13 @@ trait Graph
     /** Type of the edges, that are between the vertices. */
     type EdgeType <: Edge
 
-    protected val _vertices: immutable.Seq[EdgeType#VertexType]
+    protected val _vertices: collection.Seq[EdgeType#VertexType]
 
-    protected val _edges: immutable.Seq[EdgeType]
+    protected val _edges: collection.Seq[EdgeType]
 
-    def vertices: immutable.Seq[EdgeType#VertexType] = _vertices
+    def vertices: collection.Seq[EdgeType#VertexType] = _vertices
 
-    def edges: immutable.Seq[EdgeType] = _edges
+    def edges: collection.Seq[EdgeType] = _edges
 
     /**
       * Returns all edges that go from the specified vertex (i.e. the vertex is a subject in the relation).
