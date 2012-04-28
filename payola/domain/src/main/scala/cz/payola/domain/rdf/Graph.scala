@@ -34,8 +34,8 @@ object Graph
 
         // List the graph nodes and build the graph
         val identifiedNodes: HashMap[String, IdentifiedNode] = new HashMap[String, IdentifiedNode]()
-        val allNodes: ArrayBuffer[Node] = new ArrayBuffer[Node]()
-        val edges: ArrayBuffer[Edge] = new ArrayBuffer[Edge]()
+        val allNodes: ListBuffer[Node] = new ListBuffer[Node]()
+        val edges: ListBuffer[Edge] = new ListBuffer[Edge]()
         var objectIDCounter: Int = 0
 
         val resIterator: ResIterator = model.listSubjects
@@ -102,15 +102,192 @@ object Graph
         // Returning the graph
         graph
     }
+
+    /** Creates a new graph merged from graphs represented by RDF strings passed
+      * as argument.
+      *
+      * @param rdfStrings XML or TTL representations of RDF graphs.
+      * @return New graph instance.
+      */
+    def apply(rdfStrings: String*): Graph = {
+        var g: Graph = null
+        rdfStrings.foreach({ s: String =>
+            if (g == null) {
+                g = Graph(s)
+            }else{
+                g = g + Graph(s)
+            }
+        })
+
+        g
+    }
+
+    /** Returns whether collection c contains an edge between these two nodes with
+      * such an URI.
+      *
+      * @param c Collection.
+      * @param origin Origin.
+      * @param destination Destination.
+      * @param edgeURI Edge URI.
+      * @return True of false.
+      */
+    def collectionContainsEdgeBetweenNodes(c: Traversable[Edge], origin: IdentifiedNode, destination: Node, edgeURI: String): Boolean = {
+        c.find({ e: Edge =>
+            e.origin == origin && e.destination == destination && e.uri == edgeURI
+        }).isDefined
+    }
+
+    /** Returns whether collection c contains a vertex with such properties.
+      *
+      * @param c Collection.
+      * @param value Value.
+      * @param language Language.
+      * @return True or false.
+      */
+    def collectionContainsLiteralVertexWithValue(c: Traversable[Node], value: Any, language: Option[String] = None): Boolean = {
+        getLiteralVertexWithValueFromCollection(c, value, language).isDefined
+    }
+
+    /** Returns whether collection c contains a vertex with such properties.
+      *
+      * @param c Collection.
+      * @param vertexURI URI.
+      * @return True or false.
+      */
+    def collectionContainsVertexWithURI(c: Traversable[Node], vertexURI: String): Boolean = {
+        getVertexWithURIFromCollection(c, vertexURI).isDefined
+    }
+
+    /** Looks for a vertex with such properties in collection c.
+      *
+      * @param c Collection.
+      * @param value Value.
+      * @param language Language.
+      * @return Vertex or None.
+      */
+    def getLiteralVertexWithValueFromCollection(c: Traversable[Node], value: Any, language: Option[String] = None): Option[LiteralNode] = {
+        c.find({ n: Node =>
+            if (n.isInstanceOf[LiteralNode]){
+                val litNode = n.asInstanceOf[LiteralNode]
+                if (litNode.value == value &&
+                    ((language == None && litNode.language == None) || (language.get == litNode.language.get))){
+                    true
+                }else{
+                    false
+                }
+            }else{
+                false
+            }
+        }).asInstanceOf[Option[LiteralNode]]
+    }
+
+    /** Looks for a vertex with such URI in collection c.
+      *
+      * @param c Collection.
+      * @param vertexURI URI of the vertex.
+      * @return Vertex or None.
+      */
+    def getVertexWithURIFromCollection(c: Traversable[Node], vertexURI: String): Option[IdentifiedNode] = {
+        c.find({ n: Node =>
+            if (n.isInstanceOf[IdentifiedNode] &&
+                n.asInstanceOf[IdentifiedNode].uri == vertexURI){
+                true
+            }else{
+                false
+            }
+        }).asInstanceOf[Option[IdentifiedNode]]
+    }
+
+    /** Merges two graphs into a new one. Equivalent to g1 + g2.
+      *
+      * @param g1 First graph.
+      * @param g2 Second graph.
+      * @return New instance with merged vertices and edges.
+      */
+    def merge(g1: Graph, g2: Graph): Graph = {
+        val vs: ListBuffer[Node] = new ListBuffer[Node]()
+        val es: ListBuffer[Edge] = new ListBuffer[Edge]()
+
+        // Copy over all vertices and edges from the first graph
+        vs ++= g1.vertices
+        es ++= g1.edges
+
+        // Now begin the merge
+        g2.vertices foreach({ n: Node =>
+            mergeNodeToNodesAndEdges(n, vs, es)
+        })
+
+        g2.edges foreach({ e: Edge =>
+            mergeEdgeToNodesAndEdges(e, vs, es)
+        })
+
+
+        val g = new Graph(vs, es)
+        g
+    }
+
+    /** Merges in an edge. Both vertices or their equivalents must be included in
+      * vs collection.
+      *
+      * @param e Edge to be merged in.
+      * @param vs Vertices.
+      * @param es Edges.
+      */
+    private def mergeEdgeToNodesAndEdges(e: Edge, vs: ListBuffer[Node], es: ListBuffer[Edge]) {
+        val origin: Option[IdentifiedNode] = getVertexWithURIFromCollection(vs, e.origin.uri)
+        val destination: Option[Node] = if (e.destination.isInstanceOf[IdentifiedNode]) {
+            getVertexWithURIFromCollection(vs, e.destination.asInstanceOf[IdentifiedNode].uri)
+        }else{
+            val d = e.destination.asInstanceOf[LiteralNode]
+            getLiteralVertexWithValueFromCollection(vs, d.value, d.language)
+        }
+
+        assert(origin.isDefined && destination.isDefined, "Trying to merge an edge that " +
+            "doesn't have both vertices in this graph (" + origin + " -> " + destination + ")")
+
+        if (!collectionContainsEdgeBetweenNodes(es, origin.get, destination.get, e.uri)) {
+            es += new Edge(origin.get, destination.get, e.uri)
+        }
+    }
+
+    /** Merges in a node n. If an equivalent node is already
+      * among vertices of this graph, this method does nothing.
+      *
+      * @param n Node to be merged in.
+      * @param vs Vertices.
+      * @param es Edges.
+      */
+    private def mergeNodeToNodesAndEdges(n: Node, vs: ListBuffer[Node], es: ListBuffer[Edge]) {
+        n match {
+            case identifiedNode: IdentifiedNode => {
+                if (!collectionContainsVertexWithURI(vs, identifiedNode.uri)){
+                    // This vertex is not in this graph, let's add it
+                    vs += n
+                }
+            }
+            case literalNode: LiteralNode => {
+                if (!collectionContainsLiteralVertexWithValue(vs, literalNode.value, literalNode.language)){
+                    vs += n
+                }
+            }
+            case _ => throw new IllegalArgumentException("Unknown RDF graph node class - " + n)
+        }
+    }
+
 }
 
 import Graph._
 
-class Graph(protected val _vertices: ArrayBuffer[Node], protected val _edges: ArrayBuffer[Edge])
+class Graph(protected val _vertices: List[Node], protected val _edges: List[Edge])
     extends cz.payola.common.rdf.Graph
 {
-
-    def this(verts: List[Node], es: List[Edge]) = this(new ArrayBuffer[Node]() ++ verts, new ArrayBuffer[Edge]() ++ es)
+    /** A secondary constructor which converts any other collection to list.
+      *
+      * @param verts Vertices.
+      * @param es Edges.
+      * @return New graph instance.
+      */
+    def this(verts: Traversable[Node], es: Traversable[Edge]) = this(verts.toList, es.toList)
 
     type EdgeType = Edge
 
@@ -169,29 +346,9 @@ class Graph(protected val _vertices: ArrayBuffer[Node], protected val _edges: Ar
       */
     def +(otherGraph: Graph): Graph = {
         // Create an empty graph and merge this and otherGraph into it
-        val g: Graph = new Graph(new ArrayBuffer[Node](), new ArrayBuffer[Edge]())
-        g += this
-        g += otherGraph
-        g
+        Graph.merge(this, otherGraph)
     }
 
-
-    /** This method merges the otherGraph into this one.
-      *
-      * @param otherGraph Graph to be merged into this one.
-      */
-    def +=(otherGraph: Graph) {
-        // First, merge in the vertices, then edges:
-
-        otherGraph.vertices foreach { n: Node =>
-            mergeInNode(n)
-        }
-
-        otherGraph.edges foreach { e: Edge =>
-            mergeInEdge(e)
-        }
-
-    }
 
     /** Returns whether this graph contains an edge that goes between the two
       * nodes.
@@ -202,9 +359,7 @@ class Graph(protected val _vertices: ArrayBuffer[Node], protected val _edges: Ar
       * @return True if there is such an edge.
       */
     def containsEdgeBetweenNodes(origin: IdentifiedNode, destination: Node, edgeURI: String): Boolean = {
-        _edges.find({ e: Edge =>
-            e.origin == origin && e.destination == destination && e.uri == edgeURI
-        }).isDefined
+        Graph.collectionContainsEdgeBetweenNodes(_edges, origin, destination, edgeURI)
     }
 
     /** Returns whether this graph contains a vertex with these properties.
@@ -233,19 +388,7 @@ class Graph(protected val _vertices: ArrayBuffer[Node], protected val _edges: Ar
       * @return Vertex or None if there isn't one with such properties.
       */
     def getLiteralVertexWithValue(value: Any, language: Option[String] = None): Option[LiteralNode] = {
-        _vertices.find({ n: Node =>
-            if (n.isInstanceOf[LiteralNode]){
-                val litNode = n.asInstanceOf[LiteralNode]
-                if (litNode.value == value &&
-                    ((language == None && litNode.language == None) || (language.get == litNode.language.get))){
-                    true
-                }else{
-                    false
-                }
-            }else{
-                false
-            }
-        }).asInstanceOf[Option[LiteralNode]]
+        Graph.getLiteralVertexWithValueFromCollection(_vertices, value, language)
     }
 
     /** Returns a vertex with these properties or None if there is no such node.
@@ -254,59 +397,10 @@ class Graph(protected val _vertices: ArrayBuffer[Node], protected val _edges: Ar
       * @return Vertex or None if there isn't one with such properties.
       */
     def getVertexWithURI(vertexURI: String): Option[IdentifiedNode] = {
-        _vertices.find({ n: Node =>
-            if (n.isInstanceOf[IdentifiedNode] &&
-                n.asInstanceOf[IdentifiedNode].uri == vertexURI){
-                true
-            }else{
-                false
-            }
-        }).asInstanceOf[Option[IdentifiedNode]]
+        Graph.getVertexWithURIFromCollection(_vertices, vertexURI)
     }
 
-    /** Merges an edge from another graph into this one. Both vertices must be
-      * included in this graph, or have an equivalent (i.e. the same URI or values).
-      *
-      * @param e Edge to be merged in.
-      */
-    private def mergeInEdge(e: Edge) {
-        val origin: Option[IdentifiedNode] = getVertexWithURI(e.origin.uri)
-        val destination: Option[Node] = if (e.destination.isInstanceOf[IdentifiedNode]) {
-            getVertexWithURI(e.destination.asInstanceOf[IdentifiedNode].uri)
-        }else{
-            val d = e.destination.asInstanceOf[LiteralNode]
-            getLiteralVertexWithValue(d.value, d.language)
-        }
 
-        assert(origin.isDefined && destination.isDefined, "Trying to merge an edge that " +
-            "doesn't have both vertices in this graph (" + origin + " -> " + destination + ")")
-
-        if (!containsEdgeBetweenNodes(origin.get, destination.get, e.uri)) {
-            _edges += new Edge(origin.get, destination.get, e.uri)
-        }
-    }
-
-    /** Merges in a node from another graph. If an equivalent node is already
-      * among vertices of this graph, this method does nothing.
-      *
-      * @param n Node to be merged in.
-      */
-    private def mergeInNode(n: Node) {
-        n match {
-            case identifiedNode: IdentifiedNode => {
-                if (!this.containsVertexWithURI(identifiedNode.uri)){
-                    // This vertex is not in this graph, let's add it
-                    _vertices += n
-                }
-            }
-            case literalNode: LiteralNode => {
-                if (!this.containsLiteralVertexWithValue(literalNode.value, literalNode.language)){
-                    _vertices += n
-                }
-            }
-            case _ => throw new IllegalArgumentException("Unknown RDF graph node class - " + n)
-        }
-    }
 
 
 
