@@ -4,34 +4,14 @@ import com.hp.hpl.jena.rdf.model._
 import java.io.StringReader
 import java.security.MessageDigest
 import collection.mutable.{ArrayBuffer, HashMap, ListBuffer}
+import com.hp.hpl.jena.datatypes.RDFDatatype
 
 object Graph
 {
     // Minimal length of the hash used for space-saving during serialization
     private val kRDFGraphMinimalNamespaceHashLength = 1
 
-    /** Takes a XML or TTL string representing an RDF graph and returns an instance
-      * of Graph representing that particular graph.
-      *
-      * @param rdfString XML or TTL representation of the graph.
-      * @return The graph.
-      */
-    def apply(rdfString: String): Graph = {
-        val reader = new StringReader(rdfString)
-
-        // Guess the input language. By default, Jena assumes it's
-        // RDF/XML - would fail if the input was Turtle. So, we use
-        // (at the moment) very primitive heuristic that XML files
-        // begin (or they should) with a '<' char.
-        var inputType = "RDF/XML"
-        if (!rdfString.startsWith("<")) {
-            inputType = "TURTLE"
-        }
-
-        // Create a model and read it from the input string
-        val model = ModelFactory.createDefaultModel
-        model.read(reader, null, inputType)
-
+    def apply(model: Model): Graph = {
         // List the graph nodes and build the graph
         val identifiedNodes: HashMap[String, IdentifiedNode] = new HashMap[String, IdentifiedNode]()
         val allNodes: ListBuffer[Node] = new ListBuffer[Node]()
@@ -61,8 +41,6 @@ object Graph
 
                 val predicate: Property = statement.getPredicate
                 val rdfNode: com.hp.hpl.jena.rdf.model.RDFNode = statement.getObject
-                val namespace = predicate.getNameSpace
-                val localName = predicate.getLocalName
 
                 // We need to distinguish two cases - the node is a literal, or a reference
                 // to another node (resource)
@@ -101,6 +79,31 @@ object Graph
 
         // Returning the graph
         graph
+    }
+
+    /** Takes a XML or TTL string representing an RDF graph and returns an instance
+      * of Graph representing that particular graph.
+      *
+      * @param rdfString XML or TTL representation of the graph.
+      * @return The graph.
+      */
+    def apply(rdfString: String): Graph = {
+        val reader = new StringReader(rdfString)
+
+        // Guess the input language. By default, Jena assumes it's
+        // RDF/XML - would fail if the input was Turtle. So, we use
+        // (at the moment) very primitive heuristic that XML files
+        // begin (or they should) with a '<' char.
+        var inputType = "RDF/XML"
+        if (!rdfString.startsWith("<")) {
+            inputType = "TURTLE"
+        }
+
+        // Create a model and read it from the input string
+        val model = ModelFactory.createDefaultModel
+        model.read(reader, null, inputType)
+
+        apply(model)
     }
 
     /** Creates a new graph merged from graphs represented by RDF strings passed
@@ -220,7 +223,6 @@ object Graph
         g2.edges foreach({ e: Edge =>
             mergeEdgeToNodesAndEdges(e, vs, es)
         })
-
 
         val g = new Graph(vs, es)
         g
@@ -400,11 +402,6 @@ class Graph(protected val _vertices: List[Node], protected val _edges: List[Edge
         Graph.getVertexWithURIFromCollection(_vertices, vertexURI)
     }
 
-
-
-
-
-
     /** Returns the hashed namespace. This method is used in Edge classes
       * during serialization.
       *
@@ -440,4 +437,74 @@ class Graph(protected val _vertices: List[Node], protected val _edges: List[Edge
             }
         }
     }
+
+
+    def getModel: Model = {
+        /*val jenaGraph: com.hp.hpl.jena.graph.Graph = com.hp.hpl.jena.graph.Graph.emptyGraph
+
+        _edges foreach { e: Edge =>
+            val origin = com.hp.hpl.jena.graph.Node.createURI(e.origin.uri)
+            val edge = com.hp.hpl.jena.graph.Node.createURI(e.uri)
+            val destination = e.destination match {
+                case identifiedNode: IdentifiedNode => com.hp.hpl.jena.graph.Node.createURI(identifiedNode.uri)
+                case literalNode: LiteralNode => com.hp.hpl.jena.graph.Node.createLiteral(literalNode.value.toString, literalNode.language.getOrElse(""), true)
+                case _ => throw new IllegalArgumentException("Unknown node type " + e.destination)
+            }
+
+            jenaGraph.add(new com.hp.hpl.jena.graph.Triple(origin, edge, destination))
+        }
+
+        ModelFactory.createModelForGraph(jenaGraph)*/
+
+
+
+        val model: Model = ModelFactory.createDefaultModel()
+
+        // A hash map URI -> Resource
+        val hashMap = new HashMap[String, Resource]()
+        _vertices foreach { n: Node =>
+            // Only take identified nodes, ignore literal nodes, they will be added when
+            // going through edges.
+            if (n.isInstanceOf[IdentifiedNode]) {
+                val identifiedNode: IdentifiedNode = n.asInstanceOf[IdentifiedNode]
+                val res: Resource = hashMap.get(identifiedNode.uri).getOrElse({
+                    val r = model.createResource(identifiedNode.uri)
+                    hashMap.put(identifiedNode.uri, r)
+                    r
+                })
+
+                // Add all the edges
+                _edges foreach { e: Edge =>
+                    if (e.origin.uri == identifiedNode.uri) {
+                        val prop = ResourceFactory.createProperty(e.uri)
+                        val destination = e.destination
+                        val statement: Statement = if (destination.isInstanceOf[IdentifiedNode]) {
+                            // Identified node
+                            val identDest = destination.asInstanceOf[IdentifiedNode]
+                            val destRes = hashMap.get(identDest.uri).getOrElse({
+                                val r = model.createResource(identDest.uri)
+                                hashMap.put(identDest.uri, r)
+                                r
+                            })
+                            res.addProperty(prop, destRes)
+                            model.createStatement(res, prop, destRes)
+                        }else{
+                            // Literal node
+                            val litDest = destination.asInstanceOf[LiteralNode]
+                            //val litRes: Literal = model.createTypedLiteral(litDest.value)
+                            //res.addProperty(prop, litRes)
+                            
+                            model.createStatement(res, prop, litDest.value.toString, litDest.language.getOrElse(""))
+                        }
+                        model.add(statement)
+                    }
+
+                }
+
+            }
+        }
+
+        model
+    }
+
 }
