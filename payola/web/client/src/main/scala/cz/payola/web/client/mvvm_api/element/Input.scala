@@ -19,8 +19,8 @@ class Input(val name: String, val value: String, val addClass: String = "") exte
 {
     //require(document.getElementById(name) == null)
 
-    val changed = new ArrayBuffer[ChangedEvent[Input] => Unit]()
-    val clicked = new ArrayBuffer[ClickedEvent[Input] => Unit]()
+    val changed = new ArrayBuffer[ChangedEvent[Input] => Boolean]()
+    val clicked = new ArrayBuffer[ClickedEvent[Input] => Boolean]()
 
     //val label = document.createElement[Label]()
     val field = document.createElement[dom.Input]("input")

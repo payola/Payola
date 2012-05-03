@@ -1,6 +1,6 @@
 package cz.payola.web.client.views.plugins.visual
 
-import components.visualsetup.InputViewModel
+import components.visualsetup.{ColorPane, InputViewModel}
 import s2js.adapters.js.browser._
 import s2js.adapters.js.dom.Element
 
@@ -220,7 +220,7 @@ class  SetupLoader
 
 
     def buildSetupArea(visible: Boolean) {
-        val controlsArea = document.getElementById("controls")
+        val controlsArea = document.getElementById("settings")
 
 
         controlsArea.appendChild(document.createElement[Element]("br"))
@@ -356,34 +356,12 @@ class  SetupLoader
 
     private def buildColorSetup(parent: Element, labelText: String, location: String) {
 
-        val edgeColorHighLabel = document.createElement[Element]("label")
-        parent.appendChild(edgeColorHighLabel)
-        edgeColorHighLabel.innerHTML = labelText
+        val colorPane = new ColorPane(location, Color.Black)
+        colorPane.changed += {
+            event => true
+        }
 
-        val spacer1 = document.createElement[Element]("label")
-        parent.appendChild(spacer1)
-        spacer1.innerHTML = " "
-
-        //red
-        buildInput(parent, "R", location+".red")
-        val spacer2 = document.createElement[Element]("label")
-        parent.appendChild(spacer2)
-        spacer2.innerHTML = " "
-
-        //green
-        buildInput(parent, "G", location +".green")
-        val spacer3 = document.createElement[Element]("label")
-        parent.appendChild(spacer3)
-        spacer3.innerHTML = " "
-
-        //blue
-        buildInput(parent, "B", location+".blue")
-        val spacer4 = document.createElement[Element]("label")
-        parent.appendChild(spacer4)
-        spacer4.innerHTML = " "
-
-        //alpha
-        buildInput(parent, "A", location+".alpha")
+        colorPane.render(parent)
     }
 
     private def buildInput(parent: Element, labelText: String, bindToLocation: String) {

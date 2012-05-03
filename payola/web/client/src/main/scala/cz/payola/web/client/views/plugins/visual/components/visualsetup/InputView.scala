@@ -27,6 +27,7 @@ class InputView(name: String, whereToBind: String, value: String) extends Compon
         textBox.changed += {
             e => window.localStorage.setItem(whereToBind, e.target.getText)
             //this.valuewindow.alert(e.target.getText)
+                true
         }
         /*textBox.clicked += {
             e => window.alert(e.target.getText)

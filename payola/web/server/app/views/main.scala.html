@@ -10,8 +10,9 @@
         <title>@title</title>
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
         <script type="text/javascript" src="@routes.Assets.at("javascripts/twitter.bootstrap/bootstrap.js")"></script>
+        <script type="text/javascript" src="http://www.eyecon.ro/bootstrap-colorpicker/js/bootstrap-colorpicker.js"></script>
     </head>
-        <body onload="presenterIndex.preloadImages(); presenterIndex.init();">
+        <body onload="$('.colorpicker').colorpicker(); presenterIndex.preloadImages(); presenterIndex.init();">
             <div class="navbar navbar-fixed-top">
                 <div class="navbar-inner">
                     <div class="container-fluid">

@@ -17,7 +17,7 @@ trait Component
 {
     def render(parent: Node = document.body)
 
-    protected def notify[T <: Event[Component]](handlers: Seq[T => Unit], event: T) {
-        handlers.foreach(_(event))
+    protected def notify[T <: Event[Component]](handlers: Seq[T => Boolean], event: T) {
+        handlers.map(_(event)).fold(false)(_ || _)
     }
 }
