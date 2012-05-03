@@ -4,10 +4,21 @@
 
 # Home page
 GET     /                           controllers.Application.index()
+GET     /login                      controllers.Application.login()
+GET     /signup                     controllers.Application.signup()
+POST    /authenticate               controllers.Application.authenticate()
+POST    /register                   controllers.Application.register()
+GET     /logout                     controllers.Application.logout()
+
 GET     /javaScriptPackage/:symbol  controllers.Application.javaScriptPackage(symbol: String)
 POST    /RPC                        controllers.RPC.index()
 GET     /test/RPC                   controllers.Application.rpcTest()
 POST    /RPC/async                  controllers.RPC.async()
+
+GET     /dashboard                  controllers.Application.dashboard()
+GET     /profile/:username          controllers.Profile.index(username)
+GET     /profile/:username/edit     controllers.Profile.edit(username)
+POST    /saveprofile/:username      controllers.Profile.save(username)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
