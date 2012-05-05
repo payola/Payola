@@ -359,11 +359,10 @@ class PluginTester extends FlatSpec with ShouldMatchers
 </rdf:RDF>
 """
 
-    val selectQuery = """PREFIX foaf:  <http://xmlns.com/foaf/0.1/>
-SELECT ?name
-WHERE {
-    ?person foaf:name ?name .
-}"""
+    val selectQuery = """PREFIX foaf:    <http://xmlns.com/foaf/0.1/>
+PREFIX vcard:   <http://www.w3.org/2001/vcard-rdf/3.0#>
+CONSTRUCT   { <http://example.org/person#Alice> vcard:FN ?name }
+WHERE       { ?x foaf:name ?name }"""
 
     "SPARQL query plugin" should "return valid graph" in {
         // Create the analysis

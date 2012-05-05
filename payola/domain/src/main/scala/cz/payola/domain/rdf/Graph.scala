@@ -1,10 +1,11 @@
 package cz.payola.domain.rdf
 
 import com.hp.hpl.jena.rdf.model._
-import java.io.StringReader
 import java.security.MessageDigest
 import collection.mutable.{ArrayBuffer, HashMap, ListBuffer}
 import com.hp.hpl.jena.datatypes.RDFDatatype
+import java.io.{ByteArrayOutputStream, StringReader}
+import com.hp.hpl.jena.query._
 
 object Graph
 {
@@ -381,6 +382,46 @@ class Graph(protected val _vertices: List[Node], protected val _edges: List[Edge
       */
     def containsVertexWithURI(vertexURI: String): Boolean = {
         getVertexWithURI(vertexURI).isDefined
+    }
+
+    /** Executes a construct SPARQL query on this graph and returns a new graph instance
+      * that consists of only the nodes that are in the query result.
+      *
+      * @param queryString SPARQL query string - mustn't be null.
+      * @return New instance of graph with vertices that are in the query result.
+      */
+    def executeConstructSPARQLQuery(queryString: String): Graph = {
+        require(queryString != null && queryString != "", "Empty or NULL SPARQL query.")
+
+        val query = QueryFactory.create(queryString)
+        val model: Model = this.getModel
+
+        val execution: QueryExecution = QueryExecutionFactory.create(query, model)
+        Graph(execution.execConstruct)
+    }
+
+    /** Executes a select SPARQL query on this graph and returns a new graph instance
+      * that consists of only the nodes that are in the query result.
+      *
+      * @param queryString SPARQL query string - mustn't be null.
+      * @return New instance of graph with vertices that are in the query result.
+      */
+    def executeSelectSPARQLQuery(queryString: String): Graph = {
+        require(queryString != null && queryString != "", "Empty or NULL SPARQL query.")
+
+        val query = QueryFactory.create(queryString)
+        val model: Model = this.getModel
+
+        val execution: QueryExecution = QueryExecutionFactory.create(query, model)
+        val results: ResultSet = execution.execSelect
+
+        val output: ByteArrayOutputStream = new ByteArrayOutputStream()
+
+        ResultSetFormatter.outputAsRDF(output, "", results);
+        execution.close
+
+        val resultingGraphXML: String = new String(output.toByteArray)
+        Graph(resultingGraphXML)
     }
 
     /** Returns a vertex with these properties or None if there is no such node.

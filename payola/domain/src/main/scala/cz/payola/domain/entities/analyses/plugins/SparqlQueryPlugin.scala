@@ -12,36 +12,25 @@ sealed class SparqlQueryPlugin extends Plugin("Sparql query", List(new StringPar
 {
     def queryParameter: StringParameter = parameters.head.asInstanceOf[StringParameter]
 
+    protected def queryString(parameterValues: Seq[ParameterValueType]): String = {
+        parameterValues.head.asInstanceOf[StringParameterValue].value
+    }
+
     def evaluate(inputGraph: Graph, parameterValues: Seq[ParameterValueType], progressReporter: Double => Unit) = {
-        progressReporter(0.0)
+        val qs = this.queryString
 
-        val queryString: String = parameterValues.head.asInstanceOf[StringParameterValue].value
+        /** Unfortunately because of the the way Jena returns results,
+          *  it is necessary to distinguish each query type.
+          */
 
-        require(queryString != null && queryString != "", "Empty or NULL SPARQL query.")
-
-        val query = QueryFactory.create(queryString)
-        val model: Model = inputGraph.getModel
-
-        progressReporter(0.33)
-
-        val execution: QueryExecution = QueryExecutionFactory.create(query, model)
-        val results: ResultSet = execution.execSelect
-
-        val output: ByteArrayOutputStream = new ByteArrayOutputStream()
-
-        ResultSetFormatter.outputAsRDF(output, "", results);
-        execution.close
-
-        val resultingGraphXML: String = new String(output.toByteArray)
-
-        println(resultingGraphXML)
-
-        progressReporter(0.66)
-
-        val g = Graph(resultingGraphXML)
-
-        progressReporter(1.0)
-
-        g
+        // TODO smarter matching
+        if (qs.contains("SELECT")){
+            inputGraph.executeSelectSPARQLQuery(qs)
+        }else if (qs.contains("CONSTRUCT")) {
+            inputGraph.executeConstructSPARQLQuery(qs)
+        }else{
+            // TODO ASK and possibly DESCRIBE?
+            throw new IllegalArgumentException("Unknown SPARQL query type (" + qs + ")")
+        }
     }
 }
