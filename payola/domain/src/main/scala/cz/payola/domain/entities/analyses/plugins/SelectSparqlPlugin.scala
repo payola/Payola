@@ -20,7 +20,7 @@ class SelectSparqlPlugin
 
 
     protected def getPropertyNames(parameterValues: Seq[ParameterValueType]) = {
-        getStringParameterValueNamed("PropertyNames")
+        getStringParameterValueNamed(parameterValues, "PropertyNames")
     }
 
     protected def queryString(parameterValues: Seq[ParameterValueType]): String = {
@@ -30,7 +30,7 @@ class SelectSparqlPlugin
     }
 
     def evaluate(inputGraph: Graph, parameterValues: Seq[ParameterValueType], progressReporter: Double => Unit) = {
-        val qs = this.queryString
+        val qs = this.queryString(parameterValues)
         inputGraph.executeSelectSPARQLQuery(qs)
     }
 

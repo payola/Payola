@@ -21,15 +21,15 @@ class ConstructSparqlQueryPlugin
 
 
     protected def getURI(parameterValues: Seq[ParameterValueType]) = {
-        getStringParameterValueNamed("URI")
+        getStringParameterValueNamed(parameterValues, "URI")
     }
 
     protected def getOperator(parameterValues: Seq[ParameterValueType]) = {
-        getStringParameterValueNamed("Operator")
+        getStringParameterValueNamed(parameterValues, "Operator")
     }
 
     protected def getValue(parameterValues: Seq[ParameterValueType]) = {
-        getStringParameterValueNamed("Value")
+        getStringParameterValueNamed(parameterValues, "Value")
     }
 
     protected def queryString(parameterValues: Seq[ParameterValueType]): String = {
@@ -39,7 +39,7 @@ class ConstructSparqlQueryPlugin
     }
 
     def evaluate(inputGraph: Graph, parameterValues: Seq[ParameterValueType], progressReporter: Double => Unit) = {
-        val qs = this.queryString
+        val qs = this.queryString(parameterValues)
         inputGraph.executeConstructSPARQLQuery(qs)
     }
 

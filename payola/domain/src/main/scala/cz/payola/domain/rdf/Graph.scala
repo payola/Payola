@@ -115,10 +115,10 @@ object Graph
       */
     def apply(rdfStrings: String*): Graph = {
         var g: Graph = null
-        rdfStrings.foreach({ s: String =>
+        rdfStrings.foreach({s: String =>
             if (g == null) {
                 g = Graph(s)
-            }else{
+            } else {
                 g = g + Graph(s)
             }
         })
@@ -135,8 +135,9 @@ object Graph
       * @param edgeURI Edge URI.
       * @return True of false.
       */
-    def collectionContainsEdgeBetweenNodes(c: Traversable[Edge], origin: IdentifiedNode, destination: Node, edgeURI: String): Boolean = {
-        c.find({ e: Edge =>
+    def collectionContainsEdgeBetweenNodes(c: Traversable[Edge], origin: IdentifiedNode, destination: Node,
+        edgeURI: String): Boolean = {
+        c.find({e: Edge =>
             e.origin == origin && e.destination == destination && e.uri == edgeURI
         }).isDefined
     }
@@ -148,7 +149,8 @@ object Graph
       * @param language Language.
       * @return True or false.
       */
-    def collectionContainsLiteralVertexWithValue(c: Traversable[Node], value: Any, language: Option[String] = None): Boolean = {
+    def collectionContainsLiteralVertexWithValue(c: Traversable[Node], value: Any,
+        language: Option[String] = None): Boolean = {
         getLiteralVertexWithValueFromCollection(c, value, language).isDefined
     }
 
@@ -169,17 +171,18 @@ object Graph
       * @param language Language.
       * @return Vertex or None.
       */
-    def getLiteralVertexWithValueFromCollection(c: Traversable[Node], value: Any, language: Option[String] = None): Option[LiteralNode] = {
-        c.find({ n: Node =>
-            if (n.isInstanceOf[LiteralNode]){
+    def getLiteralVertexWithValueFromCollection(c: Traversable[Node], value: Any,
+        language: Option[String] = None): Option[LiteralNode] = {
+        c.find({n: Node =>
+            if (n.isInstanceOf[LiteralNode]) {
                 val litNode = n.asInstanceOf[LiteralNode]
                 if (litNode.value == value &&
-                    ((language == None && litNode.language == None) || (language.get == litNode.language.get))){
+                    ((language == None && litNode.language == None) || (language.get == litNode.language.get))) {
                     true
-                }else{
+                } else {
                     false
                 }
-            }else{
+            } else {
                 false
             }
         }).asInstanceOf[Option[LiteralNode]]
@@ -192,11 +195,11 @@ object Graph
       * @return Vertex or None.
       */
     def getVertexWithURIFromCollection(c: Traversable[Node], vertexURI: String): Option[IdentifiedNode] = {
-        c.find({ n: Node =>
+        c.find({n: Node =>
             if (n.isInstanceOf[IdentifiedNode] &&
-                n.asInstanceOf[IdentifiedNode].uri == vertexURI){
+                n.asInstanceOf[IdentifiedNode].uri == vertexURI) {
                 true
-            }else{
+            } else {
                 false
             }
         }).asInstanceOf[Option[IdentifiedNode]]
@@ -217,11 +220,11 @@ object Graph
         es ++= g1.edges
 
         // Now begin the merge
-        g2.vertices foreach({ n: Node =>
+        g2.vertices foreach ({n: Node =>
             mergeNodeToNodesAndEdges(n, vs, es)
         })
 
-        g2.edges foreach({ e: Edge =>
+        g2.edges foreach ({e: Edge =>
             mergeEdgeToNodesAndEdges(e, vs, es)
         })
 
@@ -240,7 +243,7 @@ object Graph
         val origin: Option[IdentifiedNode] = getVertexWithURIFromCollection(vs, e.origin.uri)
         val destination: Option[Node] = if (e.destination.isInstanceOf[IdentifiedNode]) {
             getVertexWithURIFromCollection(vs, e.destination.asInstanceOf[IdentifiedNode].uri)
-        }else{
+        } else {
             val d = e.destination.asInstanceOf[LiteralNode]
             getLiteralVertexWithValueFromCollection(vs, d.value, d.language)
         }
@@ -263,20 +266,19 @@ object Graph
     private def mergeNodeToNodesAndEdges(n: Node, vs: ListBuffer[Node], es: ListBuffer[Edge]) {
         n match {
             case identifiedNode: IdentifiedNode => {
-                if (!collectionContainsVertexWithURI(vs, identifiedNode.uri)){
+                if (!collectionContainsVertexWithURI(vs, identifiedNode.uri)) {
                     // This vertex is not in this graph, let's add it
                     vs += n
                 }
             }
             case literalNode: LiteralNode => {
-                if (!collectionContainsLiteralVertexWithValue(vs, literalNode.value, literalNode.language)){
+                if (!collectionContainsLiteralVertexWithValue(vs, literalNode.value, literalNode.language)) {
                     vs += n
                 }
             }
             case _ => throw new IllegalArgumentException("Unknown RDF graph node class - " + n)
         }
     }
-
 }
 
 import Graph._
@@ -351,7 +353,6 @@ class Graph(protected val _vertices: List[Node], protected val _edges: List[Edge
         // Create an empty graph and merge this and otherGraph into it
         Graph.merge(this, otherGraph)
     }
-
 
     /** Returns whether this graph contains an edge that goes between the two
       * nodes.
@@ -434,6 +435,47 @@ class Graph(protected val _vertices: List[Node], protected val _edges: List[Edge
         Graph.getLiteralVertexWithValueFromCollection(_vertices, value, language)
     }
 
+    /** Creates a Jena model out of itself.
+      *
+      * @return Model representing this graph.
+      */
+    def getModel: Model = {
+        val model: Model = ModelFactory.createDefaultModel()
+
+        // A hash map URI -> Resource
+        val hashMap = new HashMap[String, Resource]()
+
+        // Go through all edges and add unknown vertices on the fly
+        _edges foreach {e: Edge =>
+            val prop = ResourceFactory.createProperty(e.uri)
+            val destination = e.destination
+            val res = hashMap.get(e.origin.uri).getOrElse({
+                val r = model.createResource(e.origin.uri)
+                hashMap.put(e.origin.uri, r)
+                r
+            })
+
+            val statement: Statement = if (destination.isInstanceOf[IdentifiedNode]) {
+                // Identified node
+                val identDest = destination.asInstanceOf[IdentifiedNode]
+                val destRes = hashMap.get(identDest.uri).getOrElse({
+                    val r = model.createResource(identDest.uri)
+                    hashMap.put(identDest.uri, r)
+                    r
+                })
+                res.addProperty(prop, destRes)
+                model.createStatement(res, prop, destRes)
+            } else {
+                // Literal node
+                val litDest = destination.asInstanceOf[LiteralNode]
+                model.createStatement(res, prop, litDest.value.toString, litDest.language.getOrElse(""))
+            }
+            model.add(statement)
+        }
+
+        model
+    }
+
     /** Returns a vertex with these properties or None if there is no such node.
       *
       * @param vertexURI URI of the vertex.
@@ -478,74 +520,4 @@ class Graph(protected val _vertices: List[Node], protected val _edges: List[Edge
             }
         }
     }
-
-
-    def getModel: Model = {
-        /*val jenaGraph: com.hp.hpl.jena.graph.Graph = com.hp.hpl.jena.graph.Graph.emptyGraph
-
-        _edges foreach { e: Edge =>
-            val origin = com.hp.hpl.jena.graph.Node.createURI(e.origin.uri)
-            val edge = com.hp.hpl.jena.graph.Node.createURI(e.uri)
-            val destination = e.destination match {
-                case identifiedNode: IdentifiedNode => com.hp.hpl.jena.graph.Node.createURI(identifiedNode.uri)
-                case literalNode: LiteralNode => com.hp.hpl.jena.graph.Node.createLiteral(literalNode.value.toString, literalNode.language.getOrElse(""), true)
-                case _ => throw new IllegalArgumentException("Unknown node type " + e.destination)
-            }
-
-            jenaGraph.add(new com.hp.hpl.jena.graph.Triple(origin, edge, destination))
-        }
-
-        ModelFactory.createModelForGraph(jenaGraph)*/
-
-
-
-        val model: Model = ModelFactory.createDefaultModel()
-
-        // A hash map URI -> Resource
-        val hashMap = new HashMap[String, Resource]()
-        _vertices foreach { n: Node =>
-            // Only take identified nodes, ignore literal nodes, they will be added when
-            // going through edges.
-            if (n.isInstanceOf[IdentifiedNode]) {
-                val identifiedNode: IdentifiedNode = n.asInstanceOf[IdentifiedNode]
-                val res: Resource = hashMap.get(identifiedNode.uri).getOrElse({
-                    val r = model.createResource(identifiedNode.uri)
-                    hashMap.put(identifiedNode.uri, r)
-                    r
-                })
-
-                // Add all the edges
-                _edges foreach { e: Edge =>
-                    if (e.origin.uri == identifiedNode.uri) {
-                        val prop = ResourceFactory.createProperty(e.uri)
-                        val destination = e.destination
-                        val statement: Statement = if (destination.isInstanceOf[IdentifiedNode]) {
-                            // Identified node
-                            val identDest = destination.asInstanceOf[IdentifiedNode]
-                            val destRes = hashMap.get(identDest.uri).getOrElse({
-                                val r = model.createResource(identDest.uri)
-                                hashMap.put(identDest.uri, r)
-                                r
-                            })
-                            res.addProperty(prop, destRes)
-                            model.createStatement(res, prop, destRes)
-                        }else{
-                            // Literal node
-                            val litDest = destination.asInstanceOf[LiteralNode]
-                            //val litRes: Literal = model.createTypedLiteral(litDest.value)
-                            //res.addProperty(prop, litRes)
-                            
-                            model.createStatement(res, prop, litDest.value.toString, litDest.language.getOrElse(""))
-                        }
-                        model.add(statement)
-                    }
-
-                }
-
-            }
-        }
-
-        model
-    }
-
 }

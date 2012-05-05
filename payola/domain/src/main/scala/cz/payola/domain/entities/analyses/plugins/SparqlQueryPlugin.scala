@@ -17,7 +17,7 @@ sealed class SparqlQueryPlugin extends Plugin("Sparql query", List(new StringPar
     }
 
     def evaluate(inputGraph: Graph, parameterValues: Seq[ParameterValueType], progressReporter: Double => Unit) = {
-        val qs = this.queryString
+        val qs = this.queryString(parameterValues)
 
         /** Unfortunately because of the the way Jena returns results,
           *  it is necessary to distinguish each query type.
