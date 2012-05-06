@@ -37,13 +37,13 @@ case class Color(var red: Int, var green: Int, var blue: Int, var alpha: Double 
     def setByHexString(hexString: String)
     {
         red = hex2dec(hexString.substring(0,2))
-        green = hex2dec(hexString.substring(0,2))
-        blue = hex2dec(hexString.substring(0,2))
-        alpha = hex2dec(hexString.substring(0,2))/255.0
+        green = hex2dec(hexString.substring(2,2))
+        blue = hex2dec(hexString.substring(4,2))
+        alpha = hex2dec(hexString.substring(6,2))/255.0
     }
 
     private def dec2hex(n: Int) : String = {
-        convertDecToHex(n/16)+convertDecToHex(n%16)
+        "#"+convertDecToHex(n/16)+convertDecToHex(n%16)
     }
 
     private def hex2dec(hex: String) : Int = {

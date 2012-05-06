@@ -1,12 +1,12 @@
 package cz.payola.web.client.mvvm_api.element
 
 import s2js.adapters.js.browser.document
-import s2js.adapters.js.dom.Node
 import s2js.adapters.js.dom
 import cz.payola.web.client.mvvm_api.Component
 import collection.mutable.ArrayBuffer
+import dom.{Element, Node}
 import s2js.adapters.js.browser.window
-import cz.payola.web.client.events.{ClickedEvent, ChangedEvent}
+import cz.payola.web.client.events._
 
 /**
  *
@@ -19,8 +19,8 @@ class Input(val name: String, val value: String, val addClass: String = "") exte
 {
     //require(document.getElementById(name) == null)
 
-    val changed = new ArrayBuffer[ChangedEvent[Input] => Boolean]()
-    val clicked = new ArrayBuffer[ClickedEvent[Input] => Boolean]()
+    val changed = new ChangedEvent[Input]
+    val clicked = new ClickedEvent[Input]
 
     //val label = document.createElement[Label]()
     val field = document.createElement[dom.Input]("input")
@@ -31,11 +31,11 @@ class Input(val name: String, val value: String, val addClass: String = "") exte
     field.value = value
 
     field.onkeyup = {
-        event => notify(changed, new ChangedEvent[Input](this))
+        event => changed.trigger(new ChangedEventArgs(this))
     }
 
     field.onclick = {
-        event => notify(clicked, new ClickedEvent[Input](this))
+        event => clicked.trigger(new ClickedEventArgs(this))
     }
 
     def setMaxLength(length: Int) {
@@ -46,7 +46,7 @@ class Input(val name: String, val value: String, val addClass: String = "") exte
         field.getAttribute("maxlength").toInt
     }
 
-    def render(parent: Node) {
+    def render(parent: Element) {
         //TODO: also consider using the twitter-bootstrap wrapHTML
         //parent.appendChild(label)
         parent.appendChild(field)
@@ -59,6 +59,6 @@ class Input(val name: String, val value: String, val addClass: String = "") exte
     def setText(value : String) {
         field.value = value
 
-        notify(changed, new ChangedEvent[Input](this))
+        changed.trigger(new ChangedEventArgs(this))
     }
 }

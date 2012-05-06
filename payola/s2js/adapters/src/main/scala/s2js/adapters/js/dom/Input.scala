@@ -8,7 +8,7 @@ abstract class Input extends Element
 
     var value: String
 
-    var onchange: (Event => Unit)
-    var onkeyup: (Event => Unit)
-    var onclick: (Event => Unit)
+    var onchange: (Event => Boolean)
+    var onkeyup: (Event => Boolean)
+    var onclick: (Event => Boolean)
 }

@@ -1,6 +1,6 @@
 package cz.payola.web.client.views.plugins.visual
 
-import components.visualsetup.{ColorPane, InputViewModel}
+import components.visualsetup.{VisualSetup, ColorPane}
 import s2js.adapters.js.browser._
 import s2js.adapters.js.dom.Element
 
@@ -62,7 +62,7 @@ class  SetupLoader
     private val EdgeColorMediumGreen = "setup.edge.colors.medium.green"
     private val EdgeColorMediumBlue = "setup.edge.colors.medium.blue"
     private val EdgeColorMediumAlpha = "setup.edge.colors.medium.alpha"
-    
+
     val EdgeDimensionStraightIndex = "setup.edge.dimensions.straight-index"
     val EdgeDimensionWidth = "setup.edge.dimensions.width"
 
@@ -151,7 +151,7 @@ class  SetupLoader
         setItem(EdgeColorHighGreen, "50", reset)
         setItem(EdgeColorHighBlue, "50", reset)
         setItem(EdgeColorHighAlpha, "1", reset)
-        
+
         //setup -> edge -> colors -> medium edge color
         setItem(EdgeColorMediumRed, "150", reset)
         setItem(EdgeColorMediumGreen, "150", reset)
@@ -177,13 +177,13 @@ class  SetupLoader
         setItem(TextColorBackgroundBlue, "255", reset)
         setItem(TextColorBackgroundAlpha, "0.5", reset)
     }
-    
+
     private def setItem(where: String, what: String, reset: Boolean) {
         if(reset || getItem(where).isEmpty) {
             window.localStorage.setItem(where, what)
         }
     }
-    
+
     private def getItem(where: String): Option[String] = {
         val gotFromMemory = window.localStorage.getItem(where)
         if(gotFromMemory == null) {
@@ -192,8 +192,8 @@ class  SetupLoader
             Some(gotFromMemory)
         }
     }
-        
-    
+
+
     def createColor(keyName: String): Option[Color] = {
         val red = getItem(keyName + ".red")
         val green = getItem(keyName + ".green")
@@ -206,7 +206,7 @@ class  SetupLoader
             Some(new Color(red.get.toInt, green.get.toInt, blue.get.toInt, alpha.get.toDouble))
         }
     }
-    
+
     def getValue(localStorageKey: String): Option[String] = {
         val value = getItem(localStorageKey)
         if(value.isEmpty) {
@@ -220,77 +220,11 @@ class  SetupLoader
 
 
     def buildSetupArea(visible: Boolean) {
-        val controlsArea = document.getElementById("settings")
 
-
-        controlsArea.appendChild(document.createElement[Element]("br"))
-        controlsArea.appendChild(document.createElement[Element]("br"))
-
-        val settingsHideButton = document.createElement[Element]("button")
-        controlsArea.appendChild(settingsHideButton)
-        settingsHideButton.setAttribute("type", "button")
-        settingsHideButton.setAttribute("id", "settingsHideButton")
-        settingsHideButton.innerHTML = "Hide/show all your settings"
-        settingsHideButton.setAttribute("onclick", "el = document.getElementById(\"visualPluginSettings\");" +
-            "el.style.visibility = (el.style.visibility == \"visible\") ? \"hidden\" : \"visible\";")
-
-        controlsArea.appendChild(document.createElement[Element]("br"))
-        controlsArea.appendChild(document.createElement[Element]("br"))
-
-        val settingsDiv = document.createElement[Element]("div")
-        controlsArea.appendChild(settingsDiv)
-        settingsDiv.setAttribute("id", "visualPluginSettings")
-        if(visible) {
-            settingsDiv.setAttribute("style", "visibility: visible;")
-        } else {
-            settingsDiv.setAttribute("style", "visibility: hidden;")
-        }
-
-        val settingsForm = document.createElement[Element]("form")
-        settingsDiv.appendChild(settingsForm)
-
-        //Vertex settings #########################################################################
-        buildVertexSettings(settingsForm)
-
-        settingsForm.appendChild(document.createElement[Element]("br"))
-        settingsForm.appendChild(document.createElement[Element]("br"))
-
-        //Edge settings ###########################################################################
-        buildEdgeSettings(settingsForm)
-
-        settingsForm.appendChild(document.createElement[Element]("br"))
-        settingsForm.appendChild(document.createElement[Element]("br"))
-
-        //Text setttings ##########################################################################
-        buildTextSettings(settingsForm)
-
-        settingsForm.appendChild(document.createElement[Element]("br"))
-        settingsForm.appendChild(document.createElement[Element]("br"))
-
-        //submit button ###########################################################################
-        val submitButton = document.createElement[Element]("button")
-        settingsForm.appendChild(submitButton)
-        submitButton.setAttribute("type", "button")
-        submitButton.innerHTML = "Yeah, I like this way"
-        submitButton.setAttribute("onclick", "presenterIndex.updateSettings(true)")
-
-        //reset button ############################################################################
-        val resetButton = document.createElement[Element]("button")
-        settingsForm.appendChild(resetButton)
-        resetButton.setAttribute("type", "button")
-        resetButton.innerHTML = "I want it all at default"
-        resetButton.setAttribute("onclick", "presenterIndex.resetSettings(true)")
     }
 
     private def buildTextSettings(parent: Element) {
-        val section = document.createElement[Element]("label")
-        parent.appendChild(section)
-        section.innerHTML = "Text"
-
-        parent.appendChild(document.createElement[Element]("br"))
         buildColorSetup(parent, "medium", TextColorMedium)
-
-        parent.appendChild(document.createElement[Element]("br"))
         buildColorSetup(parent, "backg", TextColorBackground)
     }
 
@@ -299,58 +233,35 @@ class  SetupLoader
         parent.appendChild(vertexSection)
         vertexSection.innerHTML = "Vertex"
 
-        parent.appendChild(document.createElement[Element]("br"))
         buildInput(parent, "corner radius", VertexDimensionCornerRadius)
 
-        parent.appendChild(document.createElement[Element]("br"))
         buildInput(parent, "width", VertexDimensionWidth)
 
-        parent.appendChild(document.createElement[Element]("br"))
         buildInput(parent, "height", VertexDimensionHeight)
 
-        parent.appendChild(document.createElement[Element]("br"))
         buildColorSetup(parent, "low", VertexColorLow)
 
-        parent.appendChild(document.createElement[Element]("br"))
         buildColorSetup(parent, "mediu", VertexColorMedium)
 
-        parent.appendChild(document.createElement[Element]("br"))
         buildColorSetup(parent, "high", VertexColorHigh)
 
-        parent.appendChild(document.createElement[Element]("br"))
         buildColorSetup(parent, "literal", VertexColorLiteral)
 
-        parent.appendChild(document.createElement[Element]("br"))
         buildColorSetup(parent, "identif", VertexColorIdentified)
 
-        parent.appendChild(document.createElement[Element]("br"))
         buildColorSetup(parent, "unkn", VertexColorUnknown)
 
-        parent.appendChild(document.createElement[Element]("br"))
         buildInput(parent, "lit Icon", VertexIconLiteral)
 
-        parent.appendChild(document.createElement[Element]("br"))
         buildInput(parent, "ident Icon", VertexIconIdentified)
 
-        parent.appendChild(document.createElement[Element]("br"))
         buildInput(parent, "unkn Icon", VertexIconUnknown)
     }
 
     private def buildEdgeSettings(parent: Element) {
-        val edgeSection = document.createElement[Element]("label")
-        parent.appendChild(edgeSection)
-        edgeSection.innerHTML = "Edge"
-
-        parent.appendChild(document.createElement[Element]("br"))
         buildInput(parent, "width", EdgeDimensionWidth)
-
-        parent.appendChild(document.createElement[Element]("br"))
         buildInput(parent, "straigthten index", EdgeDimensionStraightIndex)
-
-        parent.appendChild(document.createElement[Element]("br"))
         buildColorSetup(parent, "select", EdgeColorHigh)
-
-        parent.appendChild(document.createElement[Element]("br"))
         buildColorSetup(parent, "base", EdgeColorMedium)
     }
 
@@ -374,7 +285,7 @@ class  SetupLoader
         parent.appendChild(spacer)
         spacer.innerHTML = " "
 
-        new InputViewModel(parent, "input", getValue(bindToLocation).getOrElse(""), bindToLocation) //TODO type avare?
+//        new InputViewModel(parent, "input", getValue(bindToLocation).getOrElse(""), bindToLocation) //TODO type aware?
 
         /*parent.appendChild(inputField)
         inputField.className = "visualPluginSettings textField"

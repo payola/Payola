@@ -1,15 +1,27 @@
 package cz.payola.web.client.events
 
-import cz.payola.web.client.mvvm_api.Component
+import collection.mutable.ArrayBuffer
 
-/**
- *
- * @author jirihelmich
- * @created 4/17/12 2:08 PM
- * @package cz.payola.web.client.events
- */
-
-class Event[+A <: Component](val target: A)
+abstract class Event[A, B <: EventArgs[A], C]
 {
 
+    private type EventHandler = B => C
+
+    private val handlers = new ArrayBuffer[EventHandler]()
+
+    protected def handlerResultsFolder(stackTop: C, currentHandlerResult: C) : C
+
+    protected def resultsFolderInitializer : C
+
+    def trigger(eventArgs: B) : C = {
+        handlers.map(_(eventArgs)).fold(resultsFolderInitializer)(handlerResultsFolder _)
+    }
+
+    def +=(handler: EventHandler) = {
+        handlers += handler
+    }
+
+    def -=(handler: EventHandler) = {
+        handlers -= handler
+    }
 }

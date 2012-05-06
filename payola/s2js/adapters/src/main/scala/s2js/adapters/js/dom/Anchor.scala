@@ -1,3 +1,8 @@
 package s2js.adapters.js.dom
 
-abstract class Anchor extends Element
+import s2js.adapters.js.browser.Event
+
+abstract class Anchor extends Element {
+
+    var onclick: (Event => Boolean)
+}

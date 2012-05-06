@@ -16,6 +16,7 @@ import s2js.adapters.js.dom.{Anchor, Image, Element}
 import s2js.adapters.goog
 import goog.events.BrowserEvent
 import cz.payola.web.client.views.plugins.textual.TextPlugin
+import cz.payola.web.client.views.plugins.visual.components.visualsetup.VisualSetup
 
 // TODO remove after classloading is done
 @dependency("cz.payola.common.rdf.IdentifiedVertex")
@@ -36,20 +37,23 @@ class Index
         // ...
     )
 
+    var currentPlugin: Option[Plugin] = None
+
+    val visualSetup = new VisualSetup(plugins)
     val visualPluginSetup = new SetupLoader()
 
-
-    var currentPlugin: Option[Plugin] = None
+    visualSetup.pluginChanged += {
+        event => changePlugin(event.target.currentPlugin)
+            false
+    }
 
     def init() {
         try {
-            visualPluginSetup.prepare()
-            buildPluginSwitch()
-            visualPluginSetup.buildSetupArea(plugins.head.isInstanceOf[VisualPlugin])
+            visualSetup.render(document.getElementById("settings"))
             //TODO show "asking the server for the data"
             graph = Option(GraphFetcher.getInitialGraph)
             //TODO show "preparing visualisation"
-            changePlugin(plugins.head)
+            changePlugin(visualSetup.currentPlugin)
             //TODO hide info
         } catch {
             case e: Exception => {
@@ -75,31 +79,7 @@ class Index
     }
 
     def buildPluginSwitch() {
-        val controlsArea = document.getElementById("controls")
-        val controlTable = document.createElement[Element]("table")
-        controlsArea.appendChild(controlTable)
 
-        plugins.foreach{ plugin =>
-            val line = document.createElement[Element]("tr")
-            controlTable.appendChild(line)
-            val record = document.createElement[Element]("td")
-            line.appendChild(record)
-
-            val link = document.createElement[Anchor]("a");
-            link.innerHTML = plugin.getName
-            link.setAttribute("class","controls plugin switch button")
-            record.appendChild(link)
-
-            val presenterIndex = this
-            
-            goog.events.listen[BrowserEvent](link,"click", (evt: BrowserEvent) => {
-                val pluginOp = plugins.find(_.getName == plugin.getName)
-                if(pluginOp.isDefined) {
-                    presenterIndex.changePlugin(pluginOp.get)
-                }
-            })
-            
-        }
     }
 
 

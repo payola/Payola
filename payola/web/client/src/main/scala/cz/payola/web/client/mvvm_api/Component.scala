@@ -1,10 +1,10 @@
 package cz.payola.web.client.mvvm_api
 
-import s2js.adapters.js.dom.Node
 import s2js.adapters.js.browser
 import s2js.adapters.js.browser.document
 import collection.mutable.ArrayBuffer
-import cz.payola.web.client.events.{ClickedEvent, Event}
+import cz.payola.web.client.events.{ClickedEventArgs, EventArgs}
+import s2js.adapters.js.dom.{Element, Node}
 
 /**
  *
@@ -15,9 +15,6 @@ import cz.payola.web.client.events.{ClickedEvent, Event}
 
 trait Component
 {
-    def render(parent: Node = document.body)
+    def render(parent: Element = document.body)
 
-    protected def notify[T <: Event[Component]](handlers: Seq[T => Boolean], event: T) {
-        handlers.map(_(event)).fold(false)(_ || _)
-    }
 }
