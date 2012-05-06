@@ -10,6 +10,7 @@ class Anchor(val innerElements: Seq[Component], val href: String, val addClass: 
 {
     val a = document.createElement[dom.Anchor]("a")
     a.setAttribute("href",href)
+    a.setAttribute("class", addClass)
 
     val clicked = new ClickedEvent[Anchor]()
 

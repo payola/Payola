@@ -2,13 +2,11 @@ package cz.payola.web.client.views.plugins.visual.components.visualsetup
 
 import cz.payola.web.client.mvvm_api.Component
 import s2js.adapters.js.browser.document
-import cz.payola.web.client.mvvm_api.element.{Anchor, Li, Text}
-import s2js.adapters.js.dom.{Element, Node}
+import s2js.adapters.js.dom.{Element}
 import cz.payola.web.client.views.plugins.Plugin
-import s2js.adapters.goog
-import goog.events.BrowserEvent
 import cz.payola.web.client.events.{ChangedEventArgs, ChangedEvent}
-import cz.payola.web.client.views.plugins.visual.VertexSettingsModel
+import cz.payola.web.client.views.plugins.visual.{EdgeSettingsModel, TextSettingsModel, VertexSettingsModel}
+import cz.payola.web.client.mvvm_api.element.{Anchor, Li, Text}
 
 /**
  *
@@ -53,6 +51,30 @@ class VisualSetup(plugins: List[Plugin]) extends Component
         new Li(List(text)).render(parent)
 
         val vertexSettings = new VertexModal(new VertexSettingsModel)
-        vertexSettings.render()
+        vertexSettings.render(document.body)
+
+        val edgesSettings = new EdgeModal(new EdgeSettingsModel)
+        edgesSettings.render(document.body)
+
+        val textSettings = new TextModal(new TextSettingsModel)
+        textSettings.render(document.body)
+
+        vertex.clicked += {
+            event =>
+                vertexSettings.show
+                false
+        }
+
+        edges.clicked += {
+            event =>
+                edgesSettings.show
+                false
+        }
+
+        text.clicked += {
+            event =>
+                textSettings.show
+                false
+        }
     }
 }
