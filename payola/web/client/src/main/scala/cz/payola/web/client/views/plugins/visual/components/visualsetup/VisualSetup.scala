@@ -15,29 +15,10 @@ import cz.payola.web.client.mvvm_api.element.{Anchor, Li, Text}
  * @package cz.payola.web.client.views.plugins.visual.components.visualsetup
  */
 
-class VisualSetup(plugins: List[Plugin]) extends Component
+class VisualSetup(var vertexModel: VertexSettingsModel, var edgesModel: EdgeSettingsModel, var textModel: TextSettingsModel) extends Component
 {
-    val pluginChanged = new ChangedEvent[VisualSetup]
-
-    var currentPlugin = plugins.head
 
     def render(parent: Element = document.body) = {
-
-        plugins.foreach{ plugin =>
-
-            val pluginBtn = new Anchor(List(new Text(plugin.getName)), "#")
-            new Li(List(pluginBtn)).render(parent)
-
-            pluginBtn.clicked += {
-                event =>
-                    val pluginOp = plugins.find(_.getName == plugin.getName)
-                    if(pluginOp.isDefined) {
-                        currentPlugin = pluginOp.get
-                        pluginChanged.trigger(new ChangedEventArgs(this))
-                    }
-                    false
-            }
-        }
 
         new Li(List(), "divider").render(parent)
 
@@ -50,13 +31,13 @@ class VisualSetup(plugins: List[Plugin]) extends Component
         val text = new Anchor(List(new Text("Text style")), "#")
         new Li(List(text)).render(parent)
 
-        val vertexSettings = new VertexModal(new VertexSettingsModel)
+        val vertexSettings = new VertexModal(vertexModel)
         vertexSettings.render(document.body)
 
-        val edgesSettings = new EdgeModal(new EdgeSettingsModel)
+        val edgesSettings = new EdgeModal(edgesModel)
         edgesSettings.render(document.body)
 
-        val textSettings = new TextModal(new TextSettingsModel)
+        val textSettings = new TextModal(textModel)
         textSettings.render(document.body)
 
         vertex.clicked += {
@@ -75,6 +56,14 @@ class VisualSetup(plugins: List[Plugin]) extends Component
             event =>
                 textSettings.show
                 false
+        }
+    }
+
+    private def constraintSize(size: Int, min: Int, max: Int, default: Int): Int = {
+        if (min <= size && size <= max) {
+            size
+        } else {
+            default
         }
     }
 }

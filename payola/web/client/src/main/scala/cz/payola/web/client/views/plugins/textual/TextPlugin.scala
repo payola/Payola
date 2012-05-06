@@ -3,11 +3,12 @@ package cz.payola.web.client.views.plugins.textual
 import cz.payola.web.client.views.plugins.Plugin
 import cz.payola.common.rdf.Graph
 import s2js.adapters.js.dom.Element
+import cz.payola.web.client.views.plugins.visual.components.visualsetup.VisualSetup
 
 /**
   * Representation of text based output drawing plugin
   */
-abstract class TextPlugin extends Plugin
+abstract class TextPlugin(settings: VisualSetup) extends Plugin
 {
     protected var parentElement: Option[Element] = None
     

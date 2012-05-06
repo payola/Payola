@@ -2,7 +2,7 @@ package cz.payola.web.client.views.plugins.visual.graph
 
 import cz.payola.common.rdf.Edge
 import s2js.adapters.js.dom.CanvasRenderingContext2D
-import cz.payola.web.client.views.plugins.visual.{SetupLoader, Color, Point, Vector}
+import cz.payola.web.client.views.plugins.visual._
 
 /**
   * Structure used during draw function of EdgeView. Helps to indicate position of vertices to each other.
@@ -25,28 +25,8 @@ private object Quadrant
   * @param originView the vertex object representing origin of this edge
   * @param destinationView of this graphical representation in drawing space
   */
-class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationView: VertexView)
+class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationView: VertexView, var settings: EdgeSettingsModel)
     extends View {
-    /**
-      * Default color of an edge.
-      */
-    private var colorMedium = new Color(150, 150, 150, 0.5)
-
-    /**
-      * Default color of a selected edge.
-      */
-    private var colorHigh = new Color(50, 50, 50, 1)
-
-    /**
-      * Default width of drawn line.
-      */
-    private var lineWidth: Double = 1
-
-    /**
-      * The higher, the more are edges straight.
-      * During update if the new value is < 0 or >= 6 drawStraight is set to true.
-      */
-    private var straightenIndex = -1
 
     /**
       * If true, the drawn edge is straight, else is bezier curve
@@ -107,15 +87,15 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
             quadrant match {
                 case Quadrant.RightBottom | Quadrant.RightTop =>
                     //we are in (0, pi/4] or in (pi7/4, 2pi]
-                    ctrl1.x = A.x + diff.x / straightenIndex
+                    ctrl1.x = A.x + diff.x / settings.straightenIndex
                     ctrl1.y = A.y
-                    ctrl2.x = B.x - diff.x / straightenIndex
+                    ctrl2.x = B.x - diff.x / settings.straightenIndex
                     ctrl2.y = B.y
                 case Quadrant.LeftBottom | Quadrant.LeftTop =>
                     //we are in (pi3/4, pi] or in (pi, pi5/4]
-                    ctrl1.x = A.x - diff.x / straightenIndex
+                    ctrl1.x = A.x - diff.x / settings.straightenIndex
                     ctrl1.y = A.y
-                    ctrl2.x = B.x + diff.x / straightenIndex
+                    ctrl2.x = B.x + diff.x / settings.straightenIndex
                     ctrl2.y = B.y
             }
         } else {
@@ -124,27 +104,27 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
                 case Quadrant.RightBottom | Quadrant.LeftBottom =>
                     //we are in (pi/4, pi/2] or in (pi/2, pi3/4]
                     ctrl1.x = A.x
-                    ctrl1.y = A.y + diff.y / straightenIndex
+                    ctrl1.y = A.y + diff.y / settings.straightenIndex
                     ctrl2.x = B.x
-                    ctrl2.y = B.y - diff.y / straightenIndex
+                    ctrl2.y = B.y - diff.y / settings.straightenIndex
                 case Quadrant.RightTop | Quadrant.LeftTop =>
                     //we are in (pi5/4, pi3/2] or in (pi3/2, pi7/4]
                     ctrl1.x = A.x
-                    ctrl1.y = A.y - diff.y / straightenIndex
+                    ctrl1.y = A.y - diff.y / settings.straightenIndex
                     ctrl2.x = B.x
-                    ctrl2.y = B.y + diff.y / straightenIndex
+                    ctrl2.y = B.y + diff.y / settings.straightenIndex
             }
         }
         
         drawBezierCurve(context, ctrl1 + correction, ctrl2 + correction, A + correction, B + correction,
-            lineWidth, color)
+            settings.width, color)
     }
     
     private def prepareStraight(context: CanvasRenderingContext2D, color: Color, correction: Vector) {
         
         drawStraightLine(context,
             destinationView.position + correction, originView.position + correction,
-            lineWidth, color)
+            settings.width, color)
     }
     
     def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
@@ -155,7 +135,7 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
     def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
 
         val colorToUse = color.getOrElse(
-            if(isSelected) colorHigh else  colorMedium
+            if(isSelected) settings.colorSelected else settings.color
         )
 
         val correction = positionCorrection.getOrElse(Point.Zero).toVector
@@ -165,61 +145,5 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
         } else {
             prepareBezierCurve(context, colorToUse, correction)
         }
-    }
-    
-    private def updateColorBase(loader: SetupLoader) {
-        colorMedium = loader.createColor(loader.EdgeColorMedium).getOrElse(colorMedium)
-    }
-    
-    private def updateColorSelection(loader: SetupLoader) {
-        colorHigh = loader.createColor(loader.EdgeColorHigh).getOrElse(colorHigh)
-    }
-
-    private def updateLineWidth(loader: SetupLoader) {
-        val loadedValue = loader.getValue(loader.EdgeDimensionWidth)
-
-        lineWidth = if(loadedValue.isDefined) {
-            val newWidth = loadedValue.get.toInt
-            
-            if(0 < newWidth && newWidth < 10) {
-                newWidth
-            } else {
-                lineWidth
-            }
-        } else {
-            lineWidth
-        }
-    }
-    
-    private def updateStraightenIndex(loader: SetupLoader) {
-        val loadedValue = loader.getValue(loader.EdgeDimensionStraightIndex)
-
-        straightenIndex = if(loadedValue.isDefined) {
-            val newStrIndex = loadedValue.get.toInt
-
-            if(0 < newStrIndex && newStrIndex < 6) {
-                drawStraight = false
-                newStrIndex
-            } else {
-                drawStraight = true
-                straightenIndex
-
-            }
-        } else {
-            straightenIndex
-        }
-    }
-    
-    def updateSettings(loader: SetupLoader) {
-
-        updateColorBase(loader)
-        
-        updateColorSelection(loader)
-
-        updateLineWidth(loader)
-
-        updateStraightenIndex(loader)
-
-        information.updateSettings(loader)
     }
 }

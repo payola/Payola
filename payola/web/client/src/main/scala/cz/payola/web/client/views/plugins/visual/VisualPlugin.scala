@@ -1,6 +1,7 @@
 package cz.payola.web.client.views.plugins.visual
 
 import animation.Animation
+import components.visualsetup.VisualSetup
 import cz.payola.web.client.views.plugins.Plugin
 import graph.{InformationView, VertexView, GraphView}
 import s2js.adapters.js.dom.Element
@@ -13,7 +14,7 @@ import collection.mutable.ListBuffer
 /**
   * Representation of visual based output drawing plugin
   */
-abstract class VisualPlugin extends Plugin
+abstract class VisualPlugin(settings: VisualSetup) extends Plugin
 {
 
     /**
@@ -32,17 +33,11 @@ abstract class VisualPlugin extends Plugin
 
     def init(container: Element) {
 
-        graphView = Some(new GraphView(container))
+        graphView = Some(new GraphView(container, settings))
 
         listen[BrowserEvent](graphView.get.controlsLayer.canvas, EventType.MOUSEDOWN, onMouseDown _)
         listen[BrowserEvent](graphView.get.controlsLayer.canvas, EventType.MOUSEMOVE, onMouseMove _)
         listen[BrowserEvent](graphView.get.controlsLayer.canvas, EventType.MOUSEUP, onMouseUp _)
-    }
-
-    def updateSettings(loader: SetupLoader) {
-        if(graphView.isDefined) {
-            graphView.get.updateSettings(loader)
-        }
     }
     
     def update(graph: Graph) {

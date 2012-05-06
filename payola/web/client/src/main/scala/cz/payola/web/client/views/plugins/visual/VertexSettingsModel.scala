@@ -2,6 +2,10 @@ package cz.payola.web.client.views.plugins.visual
 
 class VertexSettingsModel
 {
+    def getSize : Vector = {
+        Vector(width, height)
+    }
+
     var cornerRadius = 5
 
     var width = 30

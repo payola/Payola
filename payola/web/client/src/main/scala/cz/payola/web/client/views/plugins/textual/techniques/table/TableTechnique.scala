@@ -5,9 +5,9 @@ import s2js.adapters.js.dom.Element
 import collection.mutable.ListBuffer
 import s2js.adapters.js.browser._
 import cz.payola.common.rdf.{LiteralVertex, IdentifiedVertex, Edge}
+import cz.payola.web.client.views.plugins.visual.components.visualsetup.VisualSetup
 
-
-class TableTechnique extends BaseTechnique
+class TableTechnique(settings: VisualSetup) extends BaseTechnique(settings)
 {
     
     private val class_table = "tableTechnique table"

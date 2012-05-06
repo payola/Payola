@@ -6,6 +6,7 @@ import cz.payola.web.client.views.plugins.visual.techniques._
 import cz.payola.web.client.views.plugins.visual.{Point, Vector}
 import s2js.adapters.js.dom.Date
 import cz.payola.web.client.views.plugins.visual.animation.Animation
+import cz.payola.web.client.views.plugins.visual.components.visualsetup.VisualSetup
 
 /**
   * Visual plug-in technique that places the vertices based on their edges.
@@ -15,7 +16,7 @@ import cz.payola.web.client.views.plugins.visual.animation.Animation
   * closer. The final positions of the vertices is reached when all vertices
   * have "small enough" velocity.
   */
-class GravityTechnique extends BaseTechnique
+class GravityTechnique(settings: VisualSetup) extends BaseTechnique(settings)
 {
     /**
       * How much vertices push away each other

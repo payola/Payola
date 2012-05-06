@@ -11,12 +11,13 @@ import cz.payola.web.client.views.plugins.visual.techniques.circle.CircleTechniq
 import cz.payola.web.client.views.plugins.visual.techniques.gravity.GravityTechnique
 import cz.payola.web.client.views.plugins.visual.techniques.minimalization.MinimalizationTechnique
 import cz.payola.web.client.views.plugins.textual.techniques.table.TableTechnique
-import cz.payola.web.client.views.plugins.visual.{SetupLoader, VisualPlugin}
-import s2js.adapters.js.dom.{Anchor, Image, Element}
 import s2js.adapters.goog
 import goog.events.BrowserEvent
 import cz.payola.web.client.views.plugins.textual.TextPlugin
 import cz.payola.web.client.views.plugins.visual.components.visualsetup.VisualSetup
+import cz.payola.web.client.views.plugins.visual._
+import cz.payola.web.client.events.ChangedEventArgs
+import cz.payola.web.client.mvvm_api.element.{Anchor, Li, Text}
 
 // TODO remove after classloading is done
 @dependency("cz.payola.common.rdf.IdentifiedVertex")
@@ -27,24 +28,36 @@ class Index
 {
     var graph: Option[Graph] = None
 
-    val plugins = List[Plugin](
-        new CircleTechnique(),
-        new TableTechnique(),
-        new TreeTechnique(),
-        new MinimalizationTechnique(),
-        new GravityTechnique()
+    val vertexSettings = new VertexSettingsModel
+    val edgesSettings = new EdgeSettingsModel
+    val textSettings = new TextSettingsModel
 
-        // ...
+    val visualSetup = new VisualSetup(vertexSettings, edgesSettings, textSettings)
+
+    val plugins = List[Plugin](
+        new CircleTechnique(visualSetup),
+        new TableTechnique(visualSetup),
+        new TreeTechnique(visualSetup),
+        new MinimalizationTechnique(visualSetup),
+        new GravityTechnique(visualSetup)
     )
 
     var currentPlugin: Option[Plugin] = None
 
-    val visualSetup = new VisualSetup(plugins)
-    val visualPluginSetup = new SetupLoader()
+    plugins.foreach{ plugin =>
 
-    visualSetup.pluginChanged += {
-        event => changePlugin(event.target.currentPlugin)
-            false
+        val pluginBtn = new Anchor(List(new Text(plugin.getName)), "#")
+        new Li(List(pluginBtn)).render(document.getElementById("settings"))
+
+        pluginBtn.clicked += {
+            event =>
+                val pluginOp = plugins.find(_.getName == plugin.getName)
+                if(pluginOp.isDefined) {
+                    currentPlugin = pluginOp
+                    changePlugin(currentPlugin.get)
+                }
+                false
+        }
     }
 
     def init() {
@@ -53,7 +66,7 @@ class Index
             //TODO show "asking the server for the data"
             graph = Option(GraphFetcher.getInitialGraph)
             //TODO show "preparing visualisation"
-            changePlugin(visualSetup.currentPlugin)
+            changePlugin(plugins.head)
             //TODO hide info
         } catch {
             case e: Exception => {
@@ -70,32 +83,24 @@ class Index
     }
 
     def preloadImages() {
-        val imgLoaderElement = document.createElement[Image]("img")
+/*        val imgLoaderElement = document.createElement[Image]("img")
         imgLoaderElement.src = visualPluginSetup.getValue(visualPluginSetup.VertexIconIdentified).getOrElse("")
-
         imgLoaderElement.src = visualPluginSetup.getValue(visualPluginSetup.VertexIconLiteral).getOrElse("")
-
-        imgLoaderElement.src = visualPluginSetup.getValue(visualPluginSetup.VertexIconUnknown).getOrElse("")
+        imgLoaderElement.src = visualPluginSetup.getValue(visualPluginSetup.VertexIconUnknown).getOrElse("")*/
     }
-
-    def buildPluginSwitch() {
-
-    }
-
 
     def updateSettings() {
         currentPlugin.get match {
             case i: VisualPlugin =>
-                i.updateSettings(visualPluginSetup)
+//                i.updateSettings(visualSetup)
                 currentPlugin.get.redraw()
         }
     }
     
     def resetSettings() {
-        visualPluginSetup.reset()
+        //visualPluginSetup.reset()
         currentPlugin.get match {
             case i: VisualPlugin =>
-                i.updateSettings(visualPluginSetup)
                 currentPlugin.get.redraw()
         }
     }
@@ -105,6 +110,7 @@ class Index
             changePlugin(plugins(number))
         }
     }
+
     def changePlugin(plugin: Plugin) {
         currentPlugin.foreach(_.clean())
 
@@ -115,12 +121,7 @@ class Index
 
 
         currentPlugin.get match {
-            case i: VisualPlugin =>
-                document.getElementById("settingsHideButton").removeAttribute("disabled")
-                i.updateSettings(visualPluginSetup)
             case i: TextPlugin =>
-                document.getElementById("settingsHideButton").setAttribute("disabled", "disabled")
-                document.getElementById("visualPluginSettings").setAttribute("style", "visibility:hidden")
                 i.redraw()
         }
     }

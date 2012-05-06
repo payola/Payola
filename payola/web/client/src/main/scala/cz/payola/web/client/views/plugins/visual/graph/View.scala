@@ -21,8 +21,6 @@ trait View {
      */
     def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point])
 
-    def updateSettings(loader: SetupLoader)
-
     /**
       * Draws a rectangle with rounded corners, depending on the radius parameter to the input canvas context.
       * @param context to which to draw
