@@ -39,7 +39,7 @@ class VertexModal(model: VertexSettingsModel) extends Component
         List(cornerRadius, width, height, colorLow, colorMed, colorHigh, colorLiteral, colorIdentifier, colorUnknown,
             literalIcon, identifierIcon, unknownIcon))
 
-    val modal = new Modal("Vertex settings", List(wrapper))
+    private val modal = new Modal("Vertex settings", List(wrapper))
 
     modal.saved += {
         event => settingsChanged.trigger(new EventArgs[VertexModal](this))
@@ -47,5 +47,13 @@ class VertexModal(model: VertexSettingsModel) extends Component
 
     def render(parent: Element = document.body) = {
         modal.render(parent)
+    }
+
+    def show {
+        modal.show
+    }
+
+    def hide {
+        modal.hide
     }
 }

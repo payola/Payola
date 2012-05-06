@@ -3,15 +3,9 @@ package cz.payola.web.client.views.plugins.visual.components.visualsetup
 import s2js.adapters.js.browser.document
 import cz.payola.web.client.mvvm_api.Component
 import s2js.adapters.js.dom.{Element}
-import cz.payola.web.client.events.{EventArgs, ComponentEvent, Event}
+import cz.payola.web.client.events.{EventArgs, ComponentEvent}
 import cz.payola.web.client.mvvm_api.element.{Text, Anchor}
-
-/**
- *
- * @author jirihelmich
- * @created 5/5/12 7:43 PM
- * @package cz.payola.web.client.views.plugins.visual.components.visualsetup
- */
+import s2js.compiler.javascript
 
 class Modal(title: String, body: Seq[Component]) extends Component
 {
@@ -20,6 +14,7 @@ class Modal(title: String, body: Seq[Component]) extends Component
 
     val modalDiv = document.createElement[Element]("div")
     modalDiv.setAttribute("class","modal")
+    modalDiv.setAttribute("style","display: none")
 
     val modalHeader = document.createElement[Element]("div")
     modalHeader.setAttribute("class","modal-header")
@@ -42,11 +37,19 @@ class Modal(title: String, body: Seq[Component]) extends Component
     val saveA = new Anchor(List(new Text("Save changes")),"#","btn btn-primary")
 
     saveA.clicked += {
-        event => saved.trigger(new EventArgs(this))
+        event =>
+            if(saved.trigger(new EventArgs(this))){
+                hide
+                true
+            }else false
     }
 
     closeA.clicked += {
-        event => closed.trigger(new EventArgs(this))
+        event =>
+            if(closed.trigger(new EventArgs(this))){
+                hide
+                true
+            }else false
     }
 
     def render(parent: Element = document.body) = {
@@ -60,5 +63,16 @@ class Modal(title: String, body: Seq[Component]) extends Component
         saveA.render(footer)
 
         parent.appendChild(modalDiv)
+
+        init
     }
+
+    @javascript("jQuery(self.modalDiv).modal('show')")
+    def show = Nil
+
+    @javascript("jQuery(self.modalDiv).modal('hide')")
+    def hide = Nil
+
+    @javascript("$(self.modalDiv).modal({show: false})")
+    def init = Nil
 }
