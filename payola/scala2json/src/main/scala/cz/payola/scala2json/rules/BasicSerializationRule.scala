@@ -1,6 +1,8 @@
 package cz.payola.scala2json.rules
 
-/**
+/** BasicSerializationRule allows you to modify JSONSerializer's behavior. You can
+  * define a class or a trait that should be used for obtaining a field list, list of fields to
+  * skip and a map of aliases - to rename the fields.
   *
   * @param serializeAsClass The class that should be used to obtain the field names from.
   * @param transientFields The fields that are skipped during the serialization.

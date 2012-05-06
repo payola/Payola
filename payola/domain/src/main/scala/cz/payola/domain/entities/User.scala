@@ -1,8 +1,14 @@
 package cz.payola.domain.entities
 
-import permissions.privilege.Privilege
+import permissions.privilege.{PublicPrivilege, GroupPrivilege, AnalysisPrivilege, Privilege}
 import scala.collection.mutable
 
+/** User entity at the domain level.
+  *
+  * Contains owned analyses and groups, member groups and privileges.
+  *
+  * @param _name Name of the user.
+  */
 class User(protected var _name: String)
     extends Entity with cz.payola.common.entities.User
 {
@@ -12,7 +18,7 @@ class User(protected var _name: String)
 
     type DataSourceType = DataSource
 
-    type PrivilegeType = Privilege[_, _]
+    type PrivilegeType = Privilege[_]
 
     protected var _email: String = ""
 
@@ -26,41 +32,13 @@ class User(protected var _name: String)
 
     protected val _privileges = new mutable.ArrayBuffer[PrivilegeType]()
 
-    /*/** Internal method which creates List of groups from IDs. It uses the user's cache
-      * as well as loading from the data layer if the group hasn't been cached yet.
-      *
-      * @param ids An array of group IDs.
-      * @return List of groups.
-      */
-    private def _groupsWithIDs(ids: ArrayBuffer[String]): List[Group] = {
-        val groups = List[Group]()
-        ids foreach {groupID =>
-            val g: Option[Group] = _cachedGroups.get(groupID)
-            if (g.isEmpty) {
-                // TODO loading from DB
-            } else {
-                g.get :: groups
-            }
-        }
-        groups.reverse
-    }
-
     /** Goes through privileges and returns a sequence of Analysis objects to which
       * the user has some kind of access.
       *
       * @return Analysis with access.
       */
     def accessibleAnalyses: Seq[AnalysisType] = {
-        val as: ArrayBuffer[AnalysisType] = new ArrayBuffer[AnalysisType]()
-        _privileges foreach {p: PrivilegeType =>
-            if (p.isInstanceOf[AnalysisPrivilege[_]]) {
-                val a: AnalysisType = p.asInstanceOf[AnalysisPrivilege[_]].obj
-                if (!as.contains(a)) {
-                    as += a
-                }
-            }
-        }
-        as
+        privileges.collect { case p: AnalysisPrivilege => p.obj }.distinct
     }
 
     /** Adds the analysis to the analyses array. Does nothing if the analysis
@@ -72,32 +50,10 @@ class User(protected var _name: String)
       */
     def addAnalysis(a: AnalysisType) = {
         require(a != null, "Analysis mustn't be null")
-        require(isOwnerOfAnalysis(a), "User must be owner of the analysis")
-        if (!_ownedAnalysesIDs.contains(a.id)) {
-            _ownedAnalysesIDs += a.id
-            _cachedAnalyses.put(a.id, a)
-        }
-    }
+        require(a.owner.exists(_ == this), "User must be owner of the analysis")
 
-    /** Adds the group to the member group array. Does nothing if the group has already been added.
-      *
-      * @note This method automatically adds the current user as a member
-      *       of the group if the user isn't.
-      *
-      * @param g Group to be added.
-      *
-      * @throws IllegalArgumentException if the group is null.
-      */
-    def addToGroup(g: Group): Unit = {
-        require(g != null, "Cannot add a user to a null group!")
-
-        // Avoid double membership
-        if (!_memberGroupIDs.contains(g.id)) {
-            _memberGroupIDs += g.id
-            _cachedGroups.put(g.id, g)
-
-            // Automatically add self to the group as well
-            g.addMember(this)
+        if (!_ownedAnalyses.contains(a)) {
+            _ownedAnalyses += a
         }
     }
 
@@ -109,96 +65,24 @@ class User(protected var _name: String)
       */
     def addOwnedGroup(g: Group) = {
         require(g != null, "Group is NULL!")
-        require(g.isOwnedByUser(this), "Group isn't owned by this user!")
+        require(g.owner == this, "Group isn't owned by this user!")
 
         // Avoid double membership
-        if (!_ownedGroupIDs.contains(g.id)) {
-            _ownedGroupIDs += g.id
-            _cachedGroups.put(g.id, g)
+        if (!_ownedGroups.contains(g)) {
+            _ownedGroups += g
         }
     }
-
-    /** Results in true if the user has access to that particular analysis.
-      * This method checks analyses owned by the user, analyses shared to him
-      * as well as analyses shared to the groups he's a member or owner of.
-      *
-      * @param a The analysis about which we want to get the access privileges.
-      *
-      * @return True or false.
-      */
-    /*def hasAccessToAnalysis(a: AnalysisType): Boolean = {
-        if (_ownedAnalysesIDs.contains(a.id) || sharedAnalyses.exists(_.analysis.id == a.id)) {
-            true
-        } else {
-            memberGroups.exists(_.hasAccessToSharedAnalysis(a)) ||
-                ownedGroups.exists(_.hasAccessToSharedAnalysis(a))
-        }
-    }*/
 
     def isMemberOfGroup(g: Group): Boolean = g.hasMember(this)
-
-    def isOwnerOfAnalysis(a: AnalysisType): Boolean = a.owner.id == this.id
-
-    def isOwnerOfGroup(g: Group): Boolean = g.owner.id == this.id
-
-    /** Returns a group at index. Will raise an exception if the index is out of bounds.
-      * The group will be loaded from DB if necessary.
-      *
-      * @param index Index of the group (according to the GroupIDs).
-      * @return The group.
-      */
-    def memberGroupAtIndex(index: Int): Group = {
-        require(index >= 0 && index < memberGroupCount, "Member group index out of bounds - " + index)
-        val opt: Option[Group] = _cachedGroups.get(_memberGroupIDs(index))
-        if (opt.isEmpty) {
-            // TODO Load from DB
-            null
-        } else {
-            opt.get
-        }
-    }
-
-    /** Number of member groups.
-      *
-      * @return Number of member groups
-      */
-    def memberGroupCount: Int = _memberGroupIDs.size
 
     /** Result is a new List consisting of only groups that
       * the user is a member of.
       *
       * @return New List with groups that the user is a member of.
       */
-    def memberGroups = {
-        val gs: ArrayBuffer[GroupType] = new ArrayBuffer[GroupType]()
-        _privileges foreach {p: PrivilegeType =>
-            if (p.isInstanceOf[GroupPrivilege[_]]) {
-                val g: GroupType = p.asInstanceOf[GroupPrivilege[_]].obj
-                if (!gs.contains(g)) {
-                    gs += g
-                }
-            }
-        }
-        gs
+    def memberGroups: collection.Seq[GroupType] = {
+        privileges.collect { case p: GroupPrivilege => p.obj }.distinct
     }
-
-    /** Returns a list of analyses owned by this user. Analyses will
-      * be fetched from DB if necessary.
-      *
-      * @return List of owned analyses.
-      */
-    /*def ownedAnalyses = {
-        val analyses = List[AnalysisType]()
-        _ownedAnalysesIDs foreach { analysisID: String =>
-            val a: Option[AnalysisType] = _cachedAnalyses.get(analysisID)
-            if (a.isEmpty){
-                // TODO loading from DB
-            }else{
-                a.get :: analyses
-            }
-        }
-        analyses.reverse
-    }*/
 
     /** Returns an analysis at index. Will raise an exception if the index is out of bounds.
       * The analysis will be loaded from DB if necessary.
@@ -208,20 +92,14 @@ class User(protected var _name: String)
       */
     def ownedAnalysisAtIndex(index: Int): AnalysisType = {
         require(index >= 0 && index < ownedAnalysisCount, "Owned analysis index out of bounds - " + index)
-        val opt: Option[AnalysisType] = _cachedAnalyses.get(_ownedAnalysesIDs(index))
-        if (opt.isEmpty) {
-            // TODO Load from DB
-            null
-        } else {
-            opt.get
-        }
+        _ownedAnalyses(index)
     }
 
     /** Number of owned analyses.
       *
       * @return Number of owned analyses.
       */
-    def ownedAnalysisCount: Int = _ownedAnalysesIDs.size
+    def ownedAnalysisCount: Int = _ownedAnalyses.size
 
     /** Returns a group at index. Will raise an exception if the index is out of bounds.
       * The group will be loaded from DB if necessary.
@@ -231,59 +109,21 @@ class User(protected var _name: String)
       */
     def ownedGroupAtIndex(index: Int): Group = {
         require(index >= 0 && index < ownedGroupCount, "Owned group index out of bounds - " + index)
-        val opt: Option[Group] = _cachedGroups.get(_ownedGroupIDs(index))
-        if (opt.isEmpty) {
-            // TODO Load from DB
-            null
-        } else {
-            opt.get
-        }
+        _ownedGroups(index)
     }
 
     /** Number of owned groups.
       *
       * @return Number of owned groups
       */
-    def ownedGroupCount: Int = _ownedGroupIDs.size
+    def ownedGroupCount: Int = _ownedGroups.size
 
     /** Privileges. Only returns public ones.
       *
       * @return Public privileges.
       */
-    def privileges: Seq[PrivilegeType] = _privileges filter {p: Privilege[_, _] =>
-        p
-            .isInstanceOf[PublicPrivilege]
-    }
-
-    /** Result is a new List consisting of only groups that
-      * are owned by the user.
-      *
-      * @return New List with groups owned by the user.
-      */
-    //def ownedGroups = _groupsWithIDs(_ownedGroupIDs)
-
-    /** Removes the user from the group.
-      *
-      * '''Note:''' This also removes the user from the group's member array.
-      *
-      * @param g Group to be removed.
-      *
-      * @return Nothing, needs to have a declared return type because it calls
-      *         removeMember on the group which then may call back removeFromGroup
-      *         back on the user.
-      *
-      * @throws IllegalArgumentException if the group is null.
-      */
-    def removeFromGroup(g: Group): Unit = {
-        require(g != null, "Group is NULL!")
-
-        // Need to make this check, otherwise we'd
-        // get in to an infinite cycle
-        if (_memberGroupIDs.contains(g.id)) {
-            _memberGroupIDs -= g.id
-            _cachedGroups.remove(g.id)
-            g.removeMember(this)
-        }
+    def publicPrivileges: Seq[PrivilegeType] = {
+        _privileges.collect { case p: PublicPrivilege => p }
     }
 
     /** Removes the passed analysis from the analyses owned by the user.
@@ -295,8 +135,7 @@ class User(protected var _name: String)
     def removeOwnedAnalysis(a: AnalysisType) = {
         require(a != null, "Cannot remove null analysis!")
 
-        _ownedAnalysesIDs -= a.id
-        _cachedAnalyses.remove(a.id)
+        _ownedAnalyses -= a
     }
 
     /** Removes the group from the user's list of owned groups. The user '''mustn't''' be the
@@ -308,9 +147,8 @@ class User(protected var _name: String)
       */
     def removeOwnedGroup(g: Group) = {
         require(g != null, "Group is NULL!")
-        require(!g.isOwnedByUser(this), "Group is still owned by this user!")
+        require(g.owner != this, "Group is still owned by this user!")
 
-        _ownedGroupIDs -= g.id
-        _cachedGroups.remove(g.id)
-    }*/
+        _ownedGroups -= g
+    }
 }

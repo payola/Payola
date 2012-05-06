@@ -18,7 +18,7 @@ trait User extends NamedEntity
     type DataSourceType <: DataSource
 
     /** Type of the privileges. */
-    type PrivilegeType <: Privilege[_, _]
+    type PrivilegeType <: Privilege[_]
 
     protected var _email: String
 

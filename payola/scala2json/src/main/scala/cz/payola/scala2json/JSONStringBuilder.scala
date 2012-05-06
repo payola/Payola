@@ -2,6 +2,16 @@ package cz.payola.scala2json
 
 import collection.mutable.ArrayBuffer
 
+/** This class introduces some helper methods for the JSONSerializer in order to append
+  * fields to JSON objects/dictionaries or arrays.
+  *
+  * As the StringBuilder class is defined final, the JSONStringBuilder can't extend it,
+  * hence only acts as a wrapper around the actual StringBuilder.
+  *
+  * @param serializer The serializer that is being used.
+  * @param prettyPrint Use the PrettyPrint output format?
+  * @param initialValue A value to initialize the inner StringBuilder with. E.g. "{" or "[".
+  */
 class JSONStringBuilder(serializer: JSONSerializer, prettyPrint: Boolean, initialValue: String){
     val stringBuilder: StringBuilder = new StringBuilder(initialValue)
 

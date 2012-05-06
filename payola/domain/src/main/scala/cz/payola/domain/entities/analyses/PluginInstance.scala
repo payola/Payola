@@ -88,13 +88,6 @@ class PluginInstance(protected val _plugin: Plugin,
     }
 
     /**
-      * Starts evaluation of the analysis.
-      * @param dataSources The data sources used to provider the initial rdf data.
-      * @param timeout Maximal execution time.
-      * @return An instance of the [[cz.payola.domain.entities.analyses.AnalysisEvaluation]] which can be queried about
-      *         analysis evaluation progress and result.
-      */
-    /**
       * Starts evaluation of the plugin instance.
       * @param invoker The invoker of the evaluation.
       * @param inputGraph The input graph.

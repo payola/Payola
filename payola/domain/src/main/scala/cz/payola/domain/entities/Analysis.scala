@@ -4,6 +4,13 @@ import scala.collection.mutable
 import cz.payola.domain.entities.analyses.plugins.SparqlQueryPlugin
 import cz.payola.domain.entities.analyses._
 
+/** Analysis entity at the domain level.
+  *
+  * Contains a list of plugin instances.
+  *
+  * @param name Name of the analysis.
+  * @param owner Owner of the analysis.
+  */
 class Analysis(name: String, owner: Option[User], val initialPluginInstance: PluginInstance)
     extends Entity
     with NamedEntity
