@@ -4,7 +4,7 @@ import org.squeryl.adapters.H2Adapter
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.dsl.CompositeKey2
 import cz.payola.data.entities._
-import org.squeryl.{Session, SessionFactory, KeyedEntity, Schema}
+import org.squeryl._
 
 object PayolaDB extends Schema
 {
@@ -52,21 +52,95 @@ object PayolaDB extends Schema
         oneToManyRelation(users, analyses)
             .via((u, a) => u.id === a.ownerId)
 
-    val analysesPluginInstances =
-        manyToManyRelation(analyses, pluginInstances)
-            .via[AnalysesVsPluginAnalyses]((a, pi, api) => (a.id === api.analysisId, pi.id === api.pluginInstanceId))
-
     val pluginsPluginInstances =
         oneToManyRelation(plugins, pluginInstances)
             .via((p, pi) => p.id === pi.pluginId)
 
-    def startDatabaseSession(): Unit = {
+    val analysesPluginInstances =
+        oneToManyRelation(analyses, pluginInstances)
+            .via((a, pi) => (a.id === pi.analysisId))
+
+    val instancesOfBooleanParameters =
+        oneToManyRelation(booleanParameters, booleanParameterInstances)
+            .via((p, pi) => p.id === pi.parameterId)
+
+    val instancesOfFloatParameters =
+        oneToManyRelation(floatParameters, floatParameterInstances)
+            .via((p, pi) => p.id === pi.parameterId)
+
+    val instancesOfIntParameters =
+        oneToManyRelation(intParameters, intParameterInstances)
+            .via((p, pi) => p.id === pi.parameterId)
+
+    val instancesOfStringParameters =
+        oneToManyRelation(stringParameters, stringParameterInstances)
+            .via((p, pi) => p.id === pi.parameterId)
+
+    val booleanParametersOfPlugins =
+        oneToManyRelation(plugins, booleanParameters)
+            .via((p, bp) => p.id === bp.pluginId)
+
+    val floatParametersOfPlugins =
+        oneToManyRelation(plugins, floatParameters)
+            .via((p, fp) => p.id === fp.pluginId)
+
+    val intParametersOfPlugins =
+        oneToManyRelation(plugins, intParameters)
+            .via((p, ip) => p.id === ip.pluginId)
+
+    val stringParametersOfPlugins =
+        oneToManyRelation(plugins, stringParameters)
+            .via((p, sp) => p.id === sp.pluginId)        
+
+    val booleanParameterInstancesOfPluginInstances =
+        oneToManyRelation(pluginInstances, booleanParameterInstances)
+            .via((p, bpi) => p.id === bpi.pluginInstanceId)
+
+    val floatParameterInstancesOfPluginInstances =
+        oneToManyRelation(pluginInstances, floatParameterInstances)
+            .via((p, fpi) => p.id === fpi.pluginInstanceId)
+
+    val intParameterInstancesOfPluginInstances =
+        oneToManyRelation(pluginInstances, intParameterInstances)
+            .via((p, ipi) => p.id === ipi.pluginInstanceId)
+
+    val stringParameterInstancesOfPluginInstances =
+        oneToManyRelation(pluginInstances, stringParameterInstances)
+            .via((p, spi) => p.id === spi.pluginInstanceId)
+
+    // The default constraint for all foreign keys in this schema :
+    override def applyDefaultForeignKeyPolicy(foreignKeyDeclaration: ForeignKeyDeclaration) =
+        foreignKeyDeclaration.constrainReference
+
+    def connect(): Boolean = {
+        // TODO: Read from config file
+        val databaseLocation: String = "jdbc:h2:tcp://localhost/~/h2/payola"
+        val userName: String = "sa"
+        val password: String = ""
+
+        try {
+            startDatabaseSession(databaseLocation, userName, password, "")
+
+            true
+        }
+        catch {
+            case e: Exception => println("Failed to connect. " + e)
+
+            false
+        }
+    }
+
+    private def startDatabaseSession(
+            database: String = "jdbc:h2:tcp://localhost/~/h2/payola",
+            userName: String = "sa",
+            password: String = "",
+            databaseType: String = "") {
+        // TODO: add database specific code
         java.lang.Class.forName("org.h2.Driver");
 
-        // TODO: Read values from some config file
         SessionFactory.concreteFactory = Some(() =>
             Session.create(
-                java.sql.DriverManager.getConnection(databaseConnection, databaseUsername, databasePassword),
+                java.sql.DriverManager.getConnection(database, userName, password),
                 new H2Adapter)
         )
     }
@@ -145,6 +219,8 @@ object PayolaDB extends Schema
                 param.id is (primaryKey)
             ))
 
+        defineForeignKeyPolicy()
+
         transaction {
             drop
             create
@@ -152,15 +228,35 @@ object PayolaDB extends Schema
         }
     }
 
+    private def defineForeignKeyPolicy() {
+        // When a Plugin is deleted, all of the its instances will get deleted :
+        pluginsPluginInstances.foreignKeyDeclaration.constrainReference(onDelete cascade)
+
+        // When an Analysis is deleted, all of the its plugin instances will get deleted :
+        analysesPluginInstances.foreignKeyDeclaration.constrainReference(onDelete cascade)
+
+        // When a Parameter is deleted, all of the its instances will get deleted :
+        instancesOfBooleanParameters.foreignKeyDeclaration.constrainReference(onDelete cascade)
+        instancesOfFloatParameters.foreignKeyDeclaration.constrainReference(onDelete cascade)
+        instancesOfIntParameters.foreignKeyDeclaration.constrainReference(onDelete cascade)
+        instancesOfStringParameters.foreignKeyDeclaration.constrainReference(onDelete cascade)
+
+        // When a Plugin is deleted, all of the its Parameters will get deleted :
+        booleanParametersOfPlugins.foreignKeyDeclaration.constrainReference(onDelete cascade)
+        floatParametersOfPlugins.foreignKeyDeclaration.constrainReference(onDelete cascade)
+        intParametersOfPlugins.foreignKeyDeclaration.constrainReference(onDelete cascade)
+        stringParametersOfPlugins.foreignKeyDeclaration.constrainReference(onDelete cascade)
+
+        // When a PluginInstance is deleted, all of the its ParameterInstances will get deleted :
+        booleanParameterInstancesOfPluginInstances.foreignKeyDeclaration.constrainReference(onDelete cascade)
+        floatParameterInstancesOfPluginInstances.foreignKeyDeclaration.constrainReference(onDelete cascade)
+        intParameterInstancesOfPluginInstances.foreignKeyDeclaration.constrainReference(onDelete cascade)
+        stringParameterInstancesOfPluginInstances.foreignKeyDeclaration.constrainReference(onDelete cascade)
+    }
+
     class GroupMembership(val memberId: String, val groupId: String)
         extends KeyedEntity[CompositeKey2[String, String]]
     {
         def id = compositeKey(memberId, groupId)
-    }
-
-    class AnalysesVsPluginAnalyses(val analysisId: String, val pluginInstanceId: String)
-        extends KeyedEntity[CompositeKey2[String, String]]
-    {
-        def id = compositeKey(analysisId, pluginInstanceId)
     }
 }

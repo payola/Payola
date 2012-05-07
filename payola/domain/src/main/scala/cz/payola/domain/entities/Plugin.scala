@@ -29,7 +29,7 @@ class Plugin(
       *
       * @throws IllegalArgumentException if the parameter is null.
       */
-    def addParameter(p: ParameterType) = {
+    def addParameter(p: ParameterType) {
         require(p != null, "Cannot add null parameter!")
         if (!containsParameter(p)) {
             _parameters += p
@@ -67,7 +67,7 @@ class Plugin(
       * @throws IllegalArgumentException if the plugin's parameter array
       *             doesn't contain this parameter.
       */
-    def removeParameter(p: ParameterType) = {
+    def removeParameter(p: ParameterType) {
         require(containsParameter(p), "Cannot remove a parameter that isn't a member of this plugin!")
         _parameters -= p
     }

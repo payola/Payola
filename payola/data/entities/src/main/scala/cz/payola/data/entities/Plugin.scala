@@ -1,10 +1,6 @@
 package cz.payola.data.entities
 
-import org.squeryl.KeyedEntity
 import schema.PayolaDB
-import collection.mutable.ArrayBuffer
-import cz.payola.domain.entities.Analysis._
-import org.squeryl.PrimitiveTypeMode._
 
 class Plugin(
         id: String,
@@ -14,7 +10,41 @@ class Plugin(
 {
     private lazy val _pluginInstancesQuery =  PayolaDB.pluginsPluginInstances.left(this)
 
-    def pluginInstances : collection.Seq[PluginInstance] = {
+    private lazy val _booleanParameters = PayolaDB.booleanParametersOfPlugins.left(this)
+
+    private lazy val _floatParameters = PayolaDB.floatParametersOfPlugins.left(this)
+
+    private lazy val _intParameters = PayolaDB.intParametersOfPlugins.left(this)
+
+    private lazy val _stringParameters = PayolaDB.stringParametersOfPlugins.left(this)
+
+    def pluginInstances: collection.Seq[PluginInstance] = {
         evaluateCollection(_pluginInstancesQuery)
+    }
+
+    override def parameters: collection.Seq[ParameterType] = {
+        List(
+            evaluateCollection(_booleanParameters),
+            evaluateCollection(_floatParameters),
+            evaluateCollection(_intParameters),
+            evaluateCollection(_stringParameters)
+        ).flatten.toSeq
+    }
+
+    override def addParameter(p: cz.payola.domain.entities.parameters.Parameter[_]) {
+        super.addParameter(p)
+        
+        if (p.isInstanceOf[BooleanParameter]) {
+            associate(p.asInstanceOf[BooleanParameter], _booleanParameters)
+        }
+        else if (p.isInstanceOf[FloatParameter]) {
+            associate(p.asInstanceOf[FloatParameter], _floatParameters)
+        }
+        else if (p.isInstanceOf[IntParameter]) {
+            associate(p.asInstanceOf[IntParameter], _intParameters)
+        }
+        else if (p.isInstanceOf[StringParameter]) {
+            associate(p.asInstanceOf[StringParameter], _stringParameters)
+        }
     }
 }

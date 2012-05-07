@@ -1,8 +1,6 @@
 package cz.payola.data.entities
 
-import org.squeryl.dsl.OneToMany
 import schema.PayolaDB
-import org.squeryl.PrimitiveTypeMode._
 
 class User(
         id: String,
@@ -15,9 +13,9 @@ class User(
     password_=(pwd)
     email_=(email)
 
-    private lazy val _ownedGroupsQuery: OneToMany[Group] = PayolaDB.groupOwnership.left(this)
+    private lazy val _ownedGroupsQuery = PayolaDB.groupOwnership.left(this)
 
-    private lazy val _ownedAnalysesQuery: OneToMany[Analysis] = PayolaDB.analysisOwnership.left(this)
+    private lazy val _ownedAnalysesQuery = PayolaDB.analysisOwnership.left(this)
 
     private lazy val _memberGroupsQuery = PayolaDB.groupMembership.left(this)
 
@@ -37,11 +35,7 @@ class User(
         super.addToGroup(g);
 
         if (g.isInstanceOf[Group]) {
-            transaction {
-                if (_memberGroupsQuery.find(group => g.id == group.id) == None) {
-                    _memberGroupsQuery.associate(g.asInstanceOf[Group])
-                }
-            }
+            associate(g.asInstanceOf[Group], _memberGroupsQuery)
         }
     }
 
@@ -49,11 +43,7 @@ class User(
         super.removeFromGroup(g)
 
         if (g.isInstanceOf[Group]) {
-            transaction(
-                if (_memberGroupsQuery.find(group => g.id == group.id) != None) {
-                    _memberGroupsQuery.dissociate(g.asInstanceOf[Group])
-                }
-            )
+            dissociate(g.asInstanceOf[Group], _memberGroupsQuery)
         }
     }
 

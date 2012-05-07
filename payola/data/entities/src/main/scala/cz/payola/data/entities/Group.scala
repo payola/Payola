@@ -1,9 +1,6 @@
 package cz.payola.data.entities
 
-import org.squeryl.KeyedEntity
 import schema.PayolaDB
-import org.squeryl.PrimitiveTypeMode._
-import collection.mutable.ArrayBuffer
 
 class Group(
         id: String,
@@ -24,11 +21,7 @@ class Group(
         super.addMember(u)
 
         if (u.isInstanceOf[User]) {
-            transaction {
-                if (_groupMembersQuery.find(user => u.id == user.id) == None) {
-                    _groupMembersQuery.associate(u.asInstanceOf[User])
-                }
-            }
+            associate(u.asInstanceOf[User], _groupMembersQuery)
         }
     }
 
@@ -36,11 +29,7 @@ class Group(
         super.removeMember(u)
 
         if (u.isInstanceOf[User]) {
-            transaction {
-                if (_groupMembersQuery.find(user => u.id == user.id) != None) {
-                    _groupMembersQuery.dissociate(u.asInstanceOf[User])
-                }
-            }
+            dissociate(u.asInstanceOf[User], _groupMembersQuery)
         }
     }
 }

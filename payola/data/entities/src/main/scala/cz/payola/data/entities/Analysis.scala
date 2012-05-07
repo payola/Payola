@@ -1,9 +1,6 @@
 package cz.payola.data.entities
 
-import org.squeryl.KeyedEntity
 import schema.PayolaDB
-import collection.mutable.ArrayBuffer
-import org.squeryl.PrimitiveTypeMode._
 
 class Analysis(
         id: String,
@@ -18,5 +15,13 @@ class Analysis(
 
     override def pluginInstances : collection.Seq[PluginInstanceType] = {
         evaluateCollection(_pluginInstancesQuery)
+    }
+
+    override def appendPluginInstance(instance: cz.payola.domain.entities.PluginInstance) {
+        super.appendPluginInstance(instance)
+
+        if(instance.isInstanceOf[PluginInstance]) {
+            associate(instance.asInstanceOf[PluginInstance], _pluginInstancesQuery)
+        }
     }
 }

@@ -33,7 +33,7 @@ class PluginInstance(
       * @throws IllegalArgumentException if either of the parameter is null or if the plugin doesn't contain such
       *          a parameter.
       */
-    def addParameterInstance(v: ParameterInstanceType) = {
+    def addParameterInstance(v: ParameterInstanceType) {
         require(plugin.containsParameter(v.parameter), "The plugin doesn't contain such a parameter")
         require(v != null, "Cannot set null value")
 

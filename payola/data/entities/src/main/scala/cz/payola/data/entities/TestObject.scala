@@ -1,7 +1,6 @@
 package cz.payola.data.entities
 
 import dao._
-import org.squeryl.PrimitiveTypeMode._
 import schema.PayolaDB
 
 object TestObject
@@ -22,7 +21,7 @@ object TestObject
 
     def main(args: Array[String]) = {
         println("1")
-        PayolaDB.startDatabaseSession()
+        PayolaDB.connect()
 
         println("2")
         PayolaDB.createSchema()
@@ -47,7 +46,7 @@ object TestObject
         val plugin = new Plugin("p1", "plugin1")
         pluginDao.persist(plugin)
 
-        val pluginInstance = new PluginInstance("pi1", plugin)
+        val pluginInstance = new PluginInstance("pi1", plugin, analysis)
         piDao.persist(pluginInstance)
 
         user.addToGroup(group)
