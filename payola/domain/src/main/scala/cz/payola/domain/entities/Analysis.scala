@@ -1,27 +1,19 @@
 package cz.payola.domain.entities
 
 import scala.collection.mutable
-import cz.payola.domain.entities.analyses.plugins.SparqlQueryPlugin
+import cz.payola.domain.entities.analyses.plugins.SparqlQuery
 import cz.payola.domain.entities.analyses._
 
-/** Analysis entity at the domain level.
-  *
-  * Contains a list of plugin instances.
-  *
-  * @param name Name of the analysis.
-  * @param owner Owner of the analysis.
-  */
-class Analysis(name: String, owner: Option[User], val initialPluginInstance: PluginInstance)
+class Analysis(name: String, owner: Option[User])
     extends Entity
     with NamedEntity
     with OptionallyOwnedEntity
     with ShareableEntity
     with cz.payola.common.entities.Analysis
 {
-    require(initialPluginInstance.plugin.isInstanceOf[SparqlQueryPlugin],
-        "The initial plugin instance has to correspond to a sparql query plugin.")
-
     type PluginInstanceType = PluginInstance
+
+    type PluginInstanceBindingType = PluginInstanceBinding
 
     protected var _name = name
 
@@ -29,31 +21,31 @@ class Analysis(name: String, owner: Option[User], val initialPluginInstance: Plu
 
     protected var _isPublic = false
 
-    /**
-      * The plugin instances. Note that order of the instances in the collection matters, because during evaluation
-      * of the analysis, the plugins are executed in that order.
-      */
-    protected val _pluginInstances = mutable.ArrayBuffer[PluginInstanceType](initialPluginInstance)
+    protected val _pluginInstances = mutable.ArrayBuffer[PluginInstanceType]()
 
-    /**
-      * The initial sparql query plugin whose query is executed on all data sources.
-      */
-    private val initialPlugin = initialPluginInstance.plugin.asInstanceOf[SparqlQueryPlugin]
+    protected val _pluginInstanceBindings = mutable.ArrayBuffer[PluginInstanceBindingType]()
 
     /**
       * Adds a new plugin instance to the analysis.
       * @param instance The plugin instance to add.
-      * @param atIndex Index the added plugin should be added at. Has to be grater or equal to one.
-      * @return The added plugin instance.
-      * @throws IllegalArgumentException if the plugin instance is null or the atIndex is invalid.
       */
-    def addPluginInstance(instance: PluginInstanceType, atIndex: Option[Int] = None): Option[PluginInstanceType] = {
-        val index = atIndex.getOrElse(pluginInstances.length)
-        require(instance != null, "Cannot add null plugin instance.")
-        require(index >= 1 && index <= pluginInstances.length, "The atIndex is invalid.")
+    def addPluginInstance(instance: PluginInstanceType) {
+        require(!_pluginInstances.contains(instance), "The instance is already present in the analysis.")
+        _pluginInstances += instance
+    }
 
-        if (!_pluginInstances.contains(instance)) {
-            _pluginInstances.insert(index, instance)
+    /**
+      * Removes the specified plugin instance and all bindings connected to it from the analysis.
+      * @param instance The plugin instance to be removed.
+      * @return The removed plugin instance.
+      */
+    def removePluginInstance(instance: PluginInstanceType): Option[PluginInstanceType] = {
+        val index = _pluginInstances.indexOf(instance)
+        if (index > 0) {
+            _pluginInstances -= instance
+            _pluginInstanceBindings --= _pluginInstanceBindings.filter {binding: PluginInstanceBindingType =>
+                binding.sourcePluginInstance == instance || binding.targetPluginInstance == instance
+            }
             Some(instance)
         } else {
             None
@@ -61,17 +53,29 @@ class Analysis(name: String, owner: Option[User], val initialPluginInstance: Plu
     }
 
     /**
-      * Removes the specified plugin instance from the analysis. The initial plugin instance cannot be removed.
-      * @param instance The plugin instance to be removed.
-      * @return The removed plugin instance.
+      * Adds a new plugin instance binding to the analysis.
+      * @param binding The plugin instance binding to add.
       */
-    def removePluginInstance(instance: PluginInstanceType): Option[PluginInstanceType] = {
-        require(instance != initialPluginInstance, "Cannot remove the initial plugin instance.")
+    def addBinding(binding: PluginInstanceBindingType) {
+        require(!_pluginInstanceBindings.contains(binding), "The binding is already present in the analysis.")
+        require(_pluginInstances.contains(binding.sourcePluginInstance),
+            "The source plugin instance has to be present in the analysis.")
+        require(_pluginInstances.contains(binding.targetPluginInstance),
+            "The target plugin instance has to be present in the analysis.")
 
-        val index = _pluginInstances.indexOf(instance)
+        _pluginInstanceBindings += binding
+    }
+
+    /**
+      * Removes the specified plugin instance binding from the analysis.
+      * @param binding The plugin instance binding to be removed.
+      * @return The removed plugin instance binding.
+      */
+    def removeBinding(binding: PluginInstanceBindingType): Option[PluginInstanceBindingType] = {
+        val index = _pluginInstanceBindings.indexOf(binding)
         if (index > 0) {
-            _pluginInstances -= instance
-            Some(instance)
+            _pluginInstanceBindings -= binding
+            Some(binding)
         } else {
             None
         }
@@ -84,25 +88,9 @@ class Analysis(name: String, owner: Option[User], val initialPluginInstance: Plu
       * @return An instance of the [[cz.payola.domain.entities.analyses.AnalysisEvaluation]] which can be queried about
       *         analysis evaluation progress and result.
       */
-    def evaluate(dataSources: Seq[DataSource], timeout: Option[Long] = None): AnalysisEvaluation = {
+    /*def evaluate(dataSources: Seq[DataSource], timeout: Option[Long] = None): AnalysisEvaluation = {
         val evaluation = new AnalysisEvaluation(this, dataSources, timeout)
         evaluation.start()
         evaluation
-    }
-
-    /**
-      * Returns the initial query that should be executed on all data sources, which is encapsulated in the first
-      * sparql query plugin instance.
-      */
-    private[entities] def initialQuery: String = {
-        val defaultQueryValue = initialPlugin.queryParameter.defaultValue
-        initialPluginInstance.getStringParameter(initialPlugin.queryParameter.name).getOrElse(defaultQueryValue)
-    }
-
-    /**
-      * Returns all plugin instances except for the initial sparql query plugin instance.
-      */
-    private[entities] def nonInitialPluginInstances: Seq[PluginInstanceType] = {
-        pluginInstances.tail
-    }
+    }*/
 }

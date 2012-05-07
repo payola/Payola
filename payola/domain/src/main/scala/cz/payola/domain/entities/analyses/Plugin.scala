@@ -4,13 +4,15 @@ import collection.immutable
 import cz.payola.domain.rdf.Graph
 import cz.payola.domain.entities.{ShareableEntity, NamedEntity, Entity}
 
-abstract class Plugin(protected var _name: String,
+abstract class Plugin(protected var _name: String, protected val _inputCount: Int,
     protected val _parameters: immutable.Seq[Plugin#ParameterType])
     extends Entity with NamedEntity with ShareableEntity with cz.payola.common.entities.analyses.Plugin
 {
     type ParameterType = Parameter[_]
 
     type ParameterValueType = ParameterValue[_]
+
+    type ProgressReporter = Unit => Double
 
     protected var _isPublic = false
 
@@ -31,11 +33,11 @@ abstract class Plugin(protected var _name: String,
 
     /**
       * Evaluates the plugin.
-      * @param inputGraph The input graph.
-      * @param parameterValues Values of the parameters.
+      * @param instance The corresponding instance.
+      * @param inputs The input graphs.
       * @param progressReporter A method that can be used to report plugin evaluation progress (which has to be within
       *                         the [0.0, 1.0] interval).
       * @return The output graph.
       */
-    def evaluate(inputGraph: Graph, parameterValues: Seq[ParameterValueType], progressReporter: Double => Unit): Graph
+    def evaluate(instance: PluginInstance, inputs: IndexedSeq[Graph], progressReporter: ProgressReporter): Graph
 }

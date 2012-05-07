@@ -6,7 +6,7 @@ import cz.payola.domain.entities.sources.SparqlEndpointDataSource
 import scala.actors.Actor
 import scala.collection.mutable.Queue
 import cz.payola.domain.entities.{Analysis, DataSource}
-import cz.payola.domain.entities.analyses.plugins.SparqlQueryPlugin
+import cz.payola.domain.entities.analyses.plugins.SparqlQuery
 import cz.payola.domain.entities.analyses.messages._
 import cz.payola.domain.entities.analyses._
 import cz.payola.domain.rdf._
@@ -111,7 +111,7 @@ class AnalysisEvaluationSpecs extends FlatSpec with ShouldMatchers
 
     "Analysis execution" should "work with initial setup" in {
         // Create the analysis
-        val initialPlugin = new SparqlQueryPlugin()
+        val initialPlugin = new SparqlQuery()
         val initialPluginInstance = initialPlugin.createInstance()
         val analysis = new Analysis("Test analysis", None, initialPluginInstance)
 
@@ -173,7 +173,7 @@ class AnalysisEvaluationSpecs extends FlatSpec with ShouldMatchers
     }
 
     private def createMultiplePluginAnalysis(): Analysis = {
-        val initialPlugin = new SparqlQueryPlugin()
+        val initialPlugin = new SparqlQuery()
         val initialPluginInstance = initialPlugin.createInstance()
         val nodeCounter = new NodeCounter()
         val intDoubler = new IntDoubler()

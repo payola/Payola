@@ -2,11 +2,12 @@ package cz.payola.domain.test
 
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
-import cz.payola.domain.entities.analyses.plugins.SparqlQueryPlugin
+import cz.payola.domain.entities.analyses.plugins.SparqlQuery
 import cz.payola.domain.entities.sources.SparqlEndpointDataSource
 import cz.payola.domain.rdf.Graph
+import cz.payola.domain.entities.analyses.evaluation.SparqlEndpointQueryExecutor
+import cz.payola.domain.entities.analyses.{SparqlEndpointQueryExecutor, QueryExecution}
 import cz.payola.domain.entities.analyses.executors.SparqlEndpointQueryExecutor
-import cz.payola.domain.entities.analyses.QueryExecution
 import cz.payola.domain.entities.analyses.messages.QueryExecutionResult
 import cz.payola.scala2json.JSONSerializer
 
@@ -366,7 +367,7 @@ WHERE       { ?x foaf:name ?name }"""
 
     "SPARQL query plugin" should "return valid graph" in {
         // Create the analysis
-        val initialPlugin = new SparqlQueryPlugin()
+        val initialPlugin = new SparqlQuery()
         val graph: Graph = Graph(testRDF)
 
         val param = initialPlugin.queryParameter.createValue(selectQuery)

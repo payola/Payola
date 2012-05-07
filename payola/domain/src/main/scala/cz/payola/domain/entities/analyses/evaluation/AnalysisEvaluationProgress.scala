@@ -1,4 +1,4 @@
-package cz.payola.domain.entities.analyses
+package cz.payola.domain.entities.analyses.evaluation
 
 /**
   * Progress of an analysis evaluation
@@ -7,7 +7,7 @@ package cz.payola.domain.entities.analyses
   * @param currentPluginInstanceProgress Progress of the current plugin instance evaluation.
   * @param unfinishedPluginInstances The plugin instances that haven't been evaluated yet.
   */
-case class AnalysisEvaluationProgress(
+/*case class AnalysisEvaluationProgress(
     evaluatedPluginInstances: Seq[PluginInstance],
     currentPluginInstance: Option[PluginInstance],
     currentPluginInstanceProgress: Option[Double],
@@ -48,3 +48,4 @@ case class AnalysisEvaluationProgress(
         AnalysisEvaluationProgress(evaluated, current, None, unfinished)
     }
 }
+*/

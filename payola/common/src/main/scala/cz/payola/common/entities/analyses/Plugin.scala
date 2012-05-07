@@ -15,7 +15,12 @@ trait Plugin extends NamedEntity with ShareableEntity
     /** Type of the parameter values of the plugin instances. */
     type ParameterValueType <: ParameterValue[_]
 
+    protected val _inputCount: Int
+
     protected val _parameters: immutable.Seq[ParameterType]
+
+    /** Count of the plugin inputs. */
+    def inputCount: Int = inputCount
 
     /** The parameters whose instances are needed during the evaluation. */
     def parameters: immutable.Seq[ParameterType] = _parameters

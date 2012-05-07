@@ -1,4 +1,4 @@
-package cz.payola.domain.entities.analyses
+package cz.payola.domain.entities.analyses.evaluation
 
 import cz.payola.domain.Timer
 import actors.{TIMEOUT, Actor}
@@ -25,7 +25,7 @@ import cz.payola.domain.entities.analyses.messages._
   * @param dataSources The data sources used to provider the initial rdf data.
   * @param timeout Maximal time, the analysis evaluation may run.
   */
-class AnalysisEvaluation(
+/*class AnalysisEvaluation(
     private val analysis: Analysis,
     private val dataSources: Seq[DataSource],
     private val timeout: Option[Long])
@@ -186,3 +186,4 @@ class AnalysisEvaluation(
         }
     }
 }
+*/
