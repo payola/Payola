@@ -12,7 +12,7 @@ abstract class Plugin(protected var _name: String, protected val _inputCount: In
 
     type ParameterValueType = ParameterValue[_]
 
-    type ProgressReporter = Unit => Double
+    type ProgressReporter = Double => Unit
 
     protected var _isPublic = false
 

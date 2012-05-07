@@ -87,18 +87,6 @@ class PluginInstance(protected val _plugin: Plugin,
         }
     }
 
-    /**
-      * Starts evaluation of the plugin instance.
-      * @param invoker The invoker of the evaluation.
-      * @param inputGraph The input graph.
-      * @return An instance of the [[cz.payola.domain.entities.analyses.PluginEvaluation]].
-      */
-    /*private[entities] def evaluate(invoker: Actor, inputGraph: Graph): PluginEvaluation = {
-        val evaluation = new PluginEvaluation(invoker, this, inputGraph)
-        evaluation.start()
-        evaluation
-    }*/
-
     private def getParameterValue(parameter: Parameter[_]): Option[ParameterValue[_]] = {
         parameterValues.find(_.parameter == parameter)
     }
