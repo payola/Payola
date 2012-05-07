@@ -21,7 +21,7 @@ object TestObject
 
     def main(args: Array[String]) = {
         println("1")
-        PayolaDB.startDatabaseSession()
+        PayolaDB.connect()
 
         println("2")
         PayolaDB.createSchema()

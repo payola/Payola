@@ -62,7 +62,7 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
     val sParInst = new StringParameterInstance("si1", sPar, "string", plugInst)
 
     // Init
-    PayolaDB.startDatabaseSession()
+    assert (PayolaDB.connect())
 
     "Database" should "be created succesfuly" in {
         PayolaDB.createSchema()
@@ -311,8 +311,9 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
         assert(sParDao.getById(sPar.id) == None)
         assert(sParInstDao.getById(sParInst.id) == None)
 
-        /* TODO:
-        // Prepare for analysis removal
+        // Prepare for analysis removal test
+        plugDao.persist(plug)
+        sParDao.persist(sPar)
         plugInstDao.persist(plugInst)
         sParInstDao.persist(sParInst)
         assert (analysis.pluginInstances.size == 1)
@@ -321,7 +322,6 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
         // Remove analysis -> remove plugin instances
         analysisDao.removeById(analysis.id)
         assert (plugInstDao.getById(plugInst.id) == None)
-        */
     }
 
     "DAOs" should "paginate properly" in {

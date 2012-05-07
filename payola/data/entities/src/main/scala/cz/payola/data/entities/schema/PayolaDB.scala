@@ -112,13 +112,35 @@ object PayolaDB extends Schema
     override def applyDefaultForeignKeyPolicy(foreignKeyDeclaration: ForeignKeyDeclaration) =
         foreignKeyDeclaration.constrainReference
 
-    def startDatabaseSession(): Unit = {
+    def connect(): Boolean = {
+        // TODO: Read from config file
+        val databaseLocation: String = "jdbc:h2:tcp://localhost/~/h2/payola"
+        val userName: String = "sa"
+        val password: String = ""
+
+        try {
+            startDatabaseSession(databaseLocation, userName, password, "")
+
+            true
+        }
+        catch {
+            case e: Exception => println("Failed to connect. " + e)
+
+            false
+        }
+    }
+
+    private def startDatabaseSession(
+            database: String = "jdbc:h2:tcp://localhost/~/h2/payola",
+            userName: String = "sa",
+            password: String = "",
+            databaseType: String = "") {
+        // TODO: add database specific code
         java.lang.Class.forName("org.h2.Driver");
 
-        // TODO: Read values from some config file
         SessionFactory.concreteFactory = Some(() =>
             Session.create(
-                java.sql.DriverManager.getConnection(databaseConnection, databaseUsername, databasePassword),
+                java.sql.DriverManager.getConnection(database, userName, password),
                 new H2Adapter)
         )
     }

@@ -37,11 +37,16 @@ abstract class EntityDAO[A <: KeyedEntity[String]](protected val table: Table[A]
         try {
             // Insert or update entity
             transaction {
-                if (entity.isPersisted) {
-                    table.update(entity)
+                if (getById(entity.id) != None) {
+                //if (entity.isPersisted) {
+                    val result = table.update(entity)
+
+                    println("Update result: " + result)
                 }
                 else {
-                    table.insert(entity)
+                    val result = table.insert(entity)
+
+                    println("Insert result: " + result)
                 }
             }
         }
