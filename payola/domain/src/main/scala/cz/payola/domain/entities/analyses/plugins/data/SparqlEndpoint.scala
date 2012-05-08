@@ -9,7 +9,7 @@ import java.net.URL
 
 sealed class SparqlEndpoint extends DataFetcher("SPARQL Endpoint", List(new StringParameter("EndpointURL", "")))
 {
-    def evaluateWithQuery(instance: PluginInstance, query: String, progressReporter: ProgressReporter): Graph = {
+    def evaluateWithQuery(instance: PluginInstance, query: String, progressReporter: Double => Unit): Graph = {
         val endpointUrl = instance.getStringParameter("EndpointURL").get
         val queryUrl = endpointUrl + "?query=" + java.net.URLEncoder.encode(query, "UTF-8")
         val connection = new URL(queryUrl).openConnection()

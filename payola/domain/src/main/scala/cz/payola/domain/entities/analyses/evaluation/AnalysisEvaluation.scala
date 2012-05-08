@@ -6,6 +6,7 @@ import cz.payola.domain.rdf.Graph
 import cz.payola.domain.entities.Analysis
 import collection.mutable
 import cz.payola.domain.entities.analyses.{PluginInstance, AnalysisException}
+import cz.payola.domain.entities.analyses.optimization.AnalysisOptimizer
 
 class AnalysisEvaluation(private val analysis: Analysis, private val timeout: Option[Long]) extends Actor
 {
@@ -21,10 +22,9 @@ class AnalysisEvaluation(private val analysis: Analysis, private val timeout: Op
         try {
             timer.start()
             analysis.checkValidity()
+            val optimizedAnalysis = AnalysisOptimizer.process(analysis)
 
-            // TODO optimizations.
-
-            val instanceInputBindings = analysis.pluginInstanceBindings.groupBy(_.targetPluginInstance)
+            val instanceInputBindings = optimizedAnalysis.pluginInstanceInputBindings
             def startInstanceEvaluation(instance: PluginInstance, outputProcessor: Graph => Unit) {
                 val evaluation = new InstanceEvaluation(instance, this, outputProcessor)
                 instanceEvaluations += evaluation
@@ -37,7 +37,7 @@ class AnalysisEvaluation(private val analysis: Analysis, private val timeout: Op
                 }
             }
 
-            startInstanceEvaluation(analysis.outputInstance.get, analysisOutputProcessor)
+            startInstanceEvaluation(optimizedAnalysis.outputInstance.get, analysisOutputProcessor)
 
             loop {
                 react {

@@ -12,6 +12,8 @@ object Graph
     // Minimal length of the hash used for space-saving during serialization
     private val kRDFGraphMinimalNamespaceHashLength = 1
 
+    def empty: Graph = new Graph(Nil, Nil)
+
     def apply(model: Model): Graph = {
         // List the graph nodes and build the graph
         val identifiedNodes: HashMap[String, IdentifiedNode] = new HashMap[String, IdentifiedNode]()

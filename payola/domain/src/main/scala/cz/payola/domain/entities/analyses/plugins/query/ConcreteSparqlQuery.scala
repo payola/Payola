@@ -6,7 +6,7 @@ import cz.payola.domain.entities.analyses.PluginInstance
 
 sealed class ConcreteSparqlQuery extends SparqlQuery("SPARQL query", List(new StringParameter("Query", "")))
 {
-    def getQuery(instance: PluginInstance): String = {
-        instance.getStringParameter("Query").get
+    def getQuery(instance: PluginInstance): Option[String] = {
+        instance.getStringParameter("Query")
     }
 }

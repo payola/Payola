@@ -43,13 +43,21 @@ class Analysis(name: String, owner: Option[User])
         val index = _pluginInstances.indexOf(instance)
         if (index > 0) {
             _pluginInstances -= instance
-            _pluginInstanceBindings --= _pluginInstanceBindings.filter {binding: PluginInstanceBindingType =>
+            _pluginInstanceBindings --= _pluginInstanceBindings.filter {binding =>
                 binding.sourcePluginInstance == instance || binding.targetPluginInstance == instance
             }
             Some(instance)
         } else {
             None
         }
+    }
+
+    def pluginInstanceInputBindings: Map[PluginInstance, Seq[PluginInstanceBinding]] = {
+        pluginInstanceBindings.groupBy(_.targetPluginInstance)
+    }
+
+    def pluginInstanceOutputBindings: Map[PluginInstance, Seq[PluginInstanceBinding]] = {
+        pluginInstanceBindings.groupBy(_.sourcePluginInstance)
     }
 
     /**
@@ -64,6 +72,16 @@ class Analysis(name: String, owner: Option[User])
             "The target plugin instance has to be present in the analysis.")
 
         _pluginInstanceBindings += binding
+    }
+
+    /**
+      * Adds a new plugin instance binding to the analysis.
+      * @param sourcePluginInstance The source plugin instance.
+      * @param targetPluginInstance The target plugin instance.
+      * @param inputIndex Index of the target plugin instance input the binding is connected to.
+      */
+    def addBinding(sourcePluginInstance: PluginInstance, targetPluginInstance: PluginInstance, inputIndex: Int = 0) {
+        addBinding(new PluginInstanceBinding(sourcePluginInstance, targetPluginInstance, inputIndex))
     }
 
     /**
@@ -90,11 +108,8 @@ class Analysis(name: String, owner: Option[User])
             throw new AnalysisException("The analysis is empty.")
         }
 
-        val instanceInputBindings = pluginInstanceBindings.groupBy(_.targetPluginInstance)
-        val instanceOutputBindings = pluginInstanceBindings.groupBy(_.sourcePluginInstance)
-
         // Check input bindings.
-        val instancesWithInvalidInputBindings = instanceInputBindings.filter {b =>
+        val instancesWithInvalidInputBindings = pluginInstanceInputBindings.filter {b =>
             b._1.plugin.inputCount == b._2.length && b._2.length == b._2.map(_.targetInputIndex).distinct.length
         }
         if (instancesWithInvalidInputBindings.nonEmpty) {
@@ -102,12 +117,12 @@ class Analysis(name: String, owner: Option[User])
         }
 
         // Check output bindings.
-        if (instanceOutputBindings.exists(_._2.length > 1)) {
+        if (pluginInstanceOutputBindings.exists(_._2.length > 1)) {
             throw new AnalysisException("The analysis contains plugin instances with invalid output bindings.")
         }
 
         // Check analysis output.
-        val outputInstances = instanceOutputBindings.filter(_._2.isEmpty).map(_._1).toList
+        val outputInstances = pluginInstanceOutputBindings.filter(_._2.isEmpty).map(_._1).toList
         if (outputInstances.length != 1) {
             throw new AnalysisException("The analysis doesn't contain one output.")
         }
@@ -120,7 +135,7 @@ class Analysis(name: String, owner: Option[User])
                 throw new AnalysisException("The plugin instance bindings contain a cycle.")
             }
             visitedInstances += instance
-            instanceInputBindings(instance).foreach(binding => visitInstance(binding.sourcePluginInstance))
+            pluginInstanceInputBindings(instance).foreach(binding => visitInstance(binding.sourcePluginInstance))
         }
         visitInstance(outputInstance)
 
@@ -135,7 +150,7 @@ class Analysis(name: String, owner: Option[User])
       * [[scala.Some]] is returned.
       */
     def outputInstance: Option[PluginInstance] = {
-        pluginInstanceBindings.groupBy(_.sourcePluginInstance).find(_._2.isEmpty).map(_._1)
+        pluginInstanceInputBindings.find(_._2.isEmpty).map(_._1)
     }
 
     /**
