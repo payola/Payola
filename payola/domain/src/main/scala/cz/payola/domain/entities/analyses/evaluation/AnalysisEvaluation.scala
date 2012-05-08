@@ -14,15 +14,17 @@ class AnalysisEvaluation(private val analysis: Analysis, private val timeout: Op
 
     private val instanceEvaluations = new mutable.ArrayBuffer[InstanceEvaluation]
 
-    private var _progress = AnalysisEvaluationProgress(Nil, Map.empty, analysis.pluginInstances.toList)
+    private var _progress: AnalysisEvaluationProgress = null
 
     private var _result: Option[AnalysisResult] = None
 
     def act() {
         try {
             timer.start()
+
             analysis.checkValidity()
             val optimizedAnalysis = AnalysisOptimizer.process(analysis)
+            _progress = AnalysisEvaluationProgress(Nil, Map.empty, optimizedAnalysis.pluginInstances.toList)
 
             val instanceInputBindings = optimizedAnalysis.pluginInstanceInputBindings
             def startInstanceEvaluation(instance: PluginInstance, outputProcessor: Graph => Unit) {

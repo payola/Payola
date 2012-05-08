@@ -10,17 +10,22 @@ class InstanceEvaluation(private val instance: PluginInstance, private val analy
     extends Actor
 {
     def act() {
-        var inputs = new mutable.ArrayBuffer[InstanceEvaluationInput]()
-
-        loop {
-            react {
-                case input: InstanceEvaluationInput => {
-                    inputs += input
-                    if (inputs.length == instance.plugin.inputCount) {
-                        evaluateInstance(inputs.sortBy(_.index).map(_.value).toIndexedSeq)
+        if (instance.plugin.inputCount == 0) {
+            // If the instance has no inputs, then it may be evaluated right away.
+            evaluateInstance(Nil.toIndexedSeq)
+        } else {
+            // Wait for all the inputs, then evaluate the instance.
+            val inputs = new mutable.ArrayBuffer[InstanceEvaluationInput]()
+            loop {
+                react {
+                    case input: InstanceEvaluationInput => {
+                        inputs += input
+                        if (inputs.length == instance.plugin.inputCount) {
+                            evaluateInstance(inputs.sortBy(_.index).map(_.value).toIndexedSeq)
+                        }
                     }
+                    case _ => exit()
                 }
-                case _ => exit()
             }
         }
     }

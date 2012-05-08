@@ -12,7 +12,7 @@ object MergedQueryPartsPlugin extends SparqlQueryPart("Mltiple merged SPARQL que
     def getPattern(instance: PluginInstance, subject: String = defaultSubject): Option[String] = {
         instance match {
             case mergedInstance: MergedQueryPartsPluginInstance => {
-                val typedPattern = mergedInstance.typed.map(t => t.plugin.getPattern(t.instance, subject))
+                val typedPattern = mergedInstance.typed.flatMap(t => t.plugin.getPattern(t.instance, subject))
                 val propertyPatterns = mergedInstance.propertyURIs.map {uri =>
                     getTriplePattern(subject, uri, mergedInstance.propertyVariables(uri))
                 }

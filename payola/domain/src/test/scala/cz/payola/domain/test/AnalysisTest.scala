@@ -3,16 +3,16 @@ package cz.payola.domain.test
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.FlatSpec
 import cz.payola.domain._
-import entities.{Analysis, Plugin, PluginInstance, User}
 
+/*
 class AnalysisTest extends FlatSpec with ShouldMatchers {
-/*    "Analysis" should "not be initialized with null user or name" in {
+    "Analysis" should "not be initialized with null user or name" in {
         val u: User = new User(_name = "Franta")
         evaluating(new Analysis(_name = null, _owner = null)) should produce [IllegalArgumentException]
         evaluating(new Analysis(_name = "HelloWorld", _owner = null)) should produce [IllegalArgumentException]
         evaluating(new Analysis(_name = null, _owner = u)) should produce [IllegalArgumentException]
         evaluating(new Analysis(_name = "", _owner = u)) should produce [IllegalArgumentException]
-    }*/
+    }
 
     "Analysis" should "retain attributes passed in the constructor" in {
         val name: String = "HelloWorld"
@@ -45,6 +45,5 @@ class AnalysisTest extends FlatSpec with ShouldMatchers {
         a.setPluginInstances(Array[PluginInstance](instance1))
         a.pluginInstances.size should equal (1)
     }
-
-
 }
+*/

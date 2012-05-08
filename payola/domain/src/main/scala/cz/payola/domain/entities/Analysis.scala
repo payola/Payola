@@ -26,77 +26,15 @@ class Analysis(name: String, owner: Option[User])
     protected val _pluginInstanceBindings = mutable.ArrayBuffer[PluginInstanceBindingType]()
 
     /**
-      * Adds a new plugin instance to the analysis.
-      * @param instance The plugin instance to add.
+      * Starts evaluation of the analysis.
+      * @param timeout Maximal execution time.
+      * @return An instance of the [[cz.payola.domain.entities.analyses.evaluation.AnalysisEvaluation]] which can be
+      *         queried about analysis evaluation progress and result.
       */
-    def addPluginInstance(instance: PluginInstanceType) {
-        require(!_pluginInstances.contains(instance), "The instance is already present in the analysis.")
-        _pluginInstances += instance
-    }
-
-    /**
-      * Removes the specified plugin instance and all bindings connected to it from the analysis.
-      * @param instance The plugin instance to be removed.
-      * @return The removed plugin instance.
-      */
-    def removePluginInstance(instance: PluginInstanceType): Option[PluginInstanceType] = {
-        val index = _pluginInstances.indexOf(instance)
-        if (index > 0) {
-            _pluginInstances -= instance
-            _pluginInstanceBindings --= _pluginInstanceBindings.filter {binding =>
-                binding.sourcePluginInstance == instance || binding.targetPluginInstance == instance
-            }
-            Some(instance)
-        } else {
-            None
-        }
-    }
-
-    def pluginInstanceInputBindings: Map[PluginInstance, Seq[PluginInstanceBinding]] = {
-        pluginInstanceBindings.groupBy(_.targetPluginInstance)
-    }
-
-    def pluginInstanceOutputBindings: Map[PluginInstance, Seq[PluginInstanceBinding]] = {
-        pluginInstanceBindings.groupBy(_.sourcePluginInstance)
-    }
-
-    /**
-      * Adds a new plugin instance binding to the analysis.
-      * @param binding The plugin instance binding to add.
-      */
-    def addBinding(binding: PluginInstanceBindingType) {
-        require(!_pluginInstanceBindings.contains(binding), "The binding is already present in the analysis.")
-        require(_pluginInstances.contains(binding.sourcePluginInstance),
-            "The source plugin instance has to be present in the analysis.")
-        require(_pluginInstances.contains(binding.targetPluginInstance),
-            "The target plugin instance has to be present in the analysis.")
-
-        _pluginInstanceBindings += binding
-    }
-
-    /**
-      * Adds a new plugin instance binding to the analysis.
-      * @param sourcePluginInstance The source plugin instance.
-      * @param targetPluginInstance The target plugin instance.
-      * @param inputIndex Index of the target plugin instance input the binding is connected to.
-      */
-    def addBinding(sourcePluginInstance: PluginInstance, targetPluginInstance: PluginInstance, inputIndex: Int = 0) {
-        addBinding(new PluginInstanceBinding(sourcePluginInstance, targetPluginInstance, inputIndex))
-    }
-
-    /**
-      * Removes the specified plugin instance binding from the analysis.
-      * @param binding The plugin instance binding to be removed.
-      * @return The removed plugin instance binding.
-      */
-    def removeBinding(binding: PluginInstanceBindingType): Option[PluginInstanceBindingType] = {
-        val index = _pluginInstanceBindings.indexOf(binding)
-        if (index > 0) {
-            _pluginInstanceBindings -= binding
-            Some(binding)
-        } else {
-            None
-        }
+    def evaluate(timeout: Option[Long] = None): AnalysisEvaluation = {
+        val evaluation = new AnalysisEvaluation(this, timeout)
+        evaluation.start()
+        evaluation
     }
 
     /**
@@ -109,10 +47,14 @@ class Analysis(name: String, owner: Option[User])
         }
 
         // Check input bindings.
-        val instancesWithInvalidInputBindings = pluginInstanceInputBindings.filter {b =>
-            b._1.plugin.inputCount == b._2.length && b._2.length == b._2.map(_.targetInputIndex).distinct.length
+        val instanceInvalidBindings = pluginInstanceInputBindings.filter {instanceBindings =>
+            val instance = instanceBindings._1
+            val bindings = instanceBindings._2
+            val x = bindings.map(_.targetInputIndex).distinct
+            instance.plugin.inputCount != bindings.length || // Number of input bindings isn't input count.
+                bindings.length != x.length // Input has more than one binding.
         }
-        if (instancesWithInvalidInputBindings.nonEmpty) {
+        if (instanceInvalidBindings.nonEmpty) {
             throw new AnalysisException("The analysis contains plugin instances with invalid input bindings.")
         }
 
@@ -146,22 +88,100 @@ class Analysis(name: String, owner: Option[User])
     }
 
     /**
+      * Adds a new plugin instance to the analysis.
+      * @param instance The plugin instance to add.
+      */
+    def addPluginInstance(instance: PluginInstanceType) {
+        require(!_pluginInstances.contains(instance), "The instance is already present in the analysis.")
+        _pluginInstances += instance
+    }
+
+    /**
+      * Adds the specified plugin instances to the analysis.
+      * @param instances The plugin instance to add.
+      */
+    def addPluginInstances(instances: PluginInstanceType*) {
+        instances.foreach(i => addPluginInstance(i))
+    }
+
+    /**
+      * Removes the specified plugin instance and all bindings connected to it from the analysis.
+      * @param instance The plugin instance to be removed.
+      * @return The removed plugin instance.
+      */
+    def removePluginInstance(instance: PluginInstanceType): Option[PluginInstanceType] = {
+        val index = _pluginInstances.indexOf(instance)
+        if (index >= 0) {
+            _pluginInstances -= instance
+            _pluginInstanceBindings --= _pluginInstanceBindings.filter {binding =>
+                binding.sourcePluginInstance == instance || binding.targetPluginInstance == instance
+            }
+            Some(instance)
+        } else {
+            None
+        }
+    }
+
+    /**
+      * Returns the plugin instance bindings grouped by the target instances (the instances they go to).
+      */
+    def pluginInstanceInputBindings: Map[PluginInstance, Seq[PluginInstanceBinding]] = {
+        val instanceBindings = pluginInstanceBindings.groupBy(_.targetPluginInstance)
+        instanceBindings ++ pluginInstances.filter(i => !instanceBindings.contains(i)).map((_, Nil)).toMap
+    }
+
+    /**
+      * Returns the plugin instance bindings grouped by the source instances (the instances they come from).
+      */
+    def pluginInstanceOutputBindings: Map[PluginInstance, Seq[PluginInstanceBinding]] = {
+        val instanceBindings = pluginInstanceBindings.groupBy(_.sourcePluginInstance)
+        instanceBindings ++ pluginInstances.filter(i => !instanceBindings.contains(i)).map((_, Nil)).toMap
+    }
+
+    /**
+      * Adds a new plugin instance binding to the analysis.
+      * @param binding The plugin instance binding to add.
+      */
+    def addBinding(binding: PluginInstanceBindingType) {
+        require(!_pluginInstanceBindings.contains(binding), "The binding is already present in the analysis.")
+        require(_pluginInstances.contains(binding.sourcePluginInstance),
+            "The source plugin instance has to be present in the analysis.")
+        require(_pluginInstances.contains(binding.targetPluginInstance),
+            "The target plugin instance has to be present in the analysis.")
+
+        _pluginInstanceBindings += binding
+    }
+
+    /**
+      * Adds a new plugin instance binding to the analysis.
+      * @param sourcePluginInstance The source plugin instance.
+      * @param targetPluginInstance The target plugin instance.
+      * @param inputIndex Index of the target plugin instance input the binding is connected to.
+      */
+    def addBinding(sourcePluginInstance: PluginInstance, targetPluginInstance: PluginInstance, inputIndex: Int = 0) {
+        addBinding(new PluginInstanceBinding(sourcePluginInstance, targetPluginInstance, inputIndex))
+    }
+
+    /**
+      * Removes the specified plugin instance binding from the analysis.
+      * @param binding The plugin instance binding to be removed.
+      * @return The removed plugin instance binding.
+      */
+    def removeBinding(binding: PluginInstanceBindingType): Option[PluginInstanceBindingType] = {
+        val index = _pluginInstanceBindings.indexOf(binding)
+        if (index >= 0) {
+            _pluginInstanceBindings -= binding
+            Some(binding)
+        } else {
+            None
+        }
+    }
+
+    /**
       * Returns the plugin instance whose output is also output of the analysis. If the analysis is valid then
       * [[scala.Some]] is returned.
       */
     def outputInstance: Option[PluginInstance] = {
-        pluginInstanceInputBindings.find(_._2.isEmpty).map(_._1)
-    }
-
-    /**
-      * Starts evaluation of the analysis.
-      * @param timeout Maximal execution time.
-      * @return An instance of the [[cz.payola.domain.entities.analyses.evaluation.AnalysisEvaluation]] which can be
-      *         queried about analysis evaluation progress and result.
-      */
-    def evaluate(dataSources: Seq[DataSource], timeout: Option[Long] = None): AnalysisEvaluation = {
-        val evaluation = new AnalysisEvaluation(this, timeout)
-        evaluation.start()
-        evaluation
+        pluginInstanceOutputBindings.find(_._2.isEmpty).map(_._1)
     }
 }

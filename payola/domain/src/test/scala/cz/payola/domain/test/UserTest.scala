@@ -5,6 +5,7 @@ import entities.{Group, User}
 import org.scalatest.FlatSpec
 import org.scalatest.matchers._
 
+/*
 class UserTest extends FlatSpec with ShouldMatchers {
     "User" should "retain values passed in the constructor" in {
         new User(_name = "Franta").name == "Franta"
@@ -73,3 +74,4 @@ class UserTest extends FlatSpec with ShouldMatchers {
         evaluating(u.name_=("")) should produce [IllegalArgumentException]
     }
 }
+*/

@@ -1,12 +1,10 @@
 package cz.payola.domain.test
 
 import cz.payola.domain._
-import entities.parameters.{StringParameter, Parameter}
-import entities.{Plugin, PluginInstance}
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import collection.mutable.ArrayBuffer
-
+/*
 class PluginInstanceTest extends FlatSpec with ShouldMatchers {
 //    "PluginInstance" should "not get initialized with null plugin" in {
 //        evaluating(new PluginInstance(_plugin = null)) should produce [IllegalArgumentException]
@@ -35,8 +33,8 @@ class PluginInstanceTest extends FlatSpec with ShouldMatchers {
 //        pI.setValueForParameter(param, param.createInstance())
 //        pI.hasSetValueForParameter(param) should be (true)
 //        pI.valueForParameter(param).get.stringValue should be ("Jell-O")
-        
+
     }
 
-}
+}*/
 

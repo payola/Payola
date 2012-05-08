@@ -60,28 +60,31 @@ class PluginInstance(protected val _plugin: Plugin,  protected val _parameterVal
     /**
       * Sets value of a parameter with the specified name.
       */
-    def setParameter(parameterName: String, value: Any) {
+    def setParameter(parameterName: String, value: Any): PluginInstance = {
         getParameterValue(parameterName).foreach(i => setParameter(i, value))
+        this
     }
 
     /**
       * Sets value of the specified parameter.
       */
-    def setParameter(parameter: Parameter[_], value: Any) {
+    def setParameter(parameter: Parameter[_], value: Any): PluginInstance = {
         getParameterValue(parameter).foreach(i => setParameter(i, value))
+        this
     }
 
     /**
       * Updates the specified parameter value.
       */
-    def setParameter(parameterValue: ParameterValue[_], value: Any) {
+    def setParameter(parameterValue: ParameterValue[_], value: Any): PluginInstance = {
         parameterValue match {
             case instance: BooleanParameterValue => instance.value = value.asInstanceOf[Boolean]
             case instance: FloatParameterValue => instance.value = value.asInstanceOf[Float]
             case instance: IntParameterValue => instance.value = value.asInstanceOf[Int]
             case instance: StringParameterValue => instance.value = value.asInstanceOf[String]
-            case _ =>
+            case _ => throw new IllegalArgumentException("The value doesn't conform to type of the parameter.")
         }
+        this
     }
 
     private def getParameterValue(parameter: Parameter[_]): Option[ParameterValue[_]] = {

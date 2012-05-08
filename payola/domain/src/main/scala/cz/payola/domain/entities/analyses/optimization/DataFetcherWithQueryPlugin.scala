@@ -16,6 +16,7 @@ object DataFetcherWithQueryPlugin extends Plugin("Mltiple merged SPARQL query pa
             case dataFetcherWithQuery: DataFetcherWithQueryPluginInstance => {
                 val sparqlQuery = dataFetcherWithQuery.sparqlQuery
                 val query = sparqlQuery.plugin.getQuery(sparqlQuery.instance)
+                println(query)
                 val dataFetcher = dataFetcherWithQuery.dataFetcher
                 if (query.isDefined) {
                     dataFetcher.plugin.evaluateWithQuery(dataFetcher.instance, query.get, progressReporter)
