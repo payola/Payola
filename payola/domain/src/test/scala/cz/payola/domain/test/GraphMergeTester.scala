@@ -65,8 +65,8 @@ class GraphMergeTester extends FlatSpec with ShouldMatchers
         g.containsEdgeBetweenNodes(g.getVertexWithURI("URI1").get, g.getVertexWithURI("URI2").get, "Edge1") should be (true)
         g.containsEdgeBetweenNodes(g.getVertexWithURI("URI1").get, g.getVertexWithURI("URI3").get, "EdgeX") should be (true)
 
-        val serializer = new JSONSerializer()
-        println(serializer.serialize(g))
+        // val serializer = new JSONSerializer()
+        // println(serializer.serialize(g))
 
     }
 

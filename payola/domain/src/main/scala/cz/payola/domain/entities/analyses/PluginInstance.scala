@@ -77,6 +77,8 @@ class PluginInstance(protected val _plugin: Plugin,  protected val _parameterVal
       * Updates the specified parameter value.
       */
     def setParameter(parameterValue: ParameterValue[_], value: Any): PluginInstance = {
+        require(_parameterValues.contains(parameterValue))
+
         parameterValue match {
             case instance: BooleanParameterValue => instance.value = value.asInstanceOf[Boolean]
             case instance: FloatParameterValue => instance.value = value.asInstanceOf[Float]
