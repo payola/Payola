@@ -73,6 +73,10 @@ class User(protected var _name: String)
         }
     }
 
+    override def canEqual(other: Any): Boolean = {
+        other.isInstanceOf[User]
+    }
+
     def isMemberOfGroup(g: Group): Boolean = g.hasMember(this)
 
     /** Result is a new List consisting of only groups that

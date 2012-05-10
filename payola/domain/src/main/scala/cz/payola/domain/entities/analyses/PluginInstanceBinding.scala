@@ -12,4 +12,8 @@ class PluginInstanceBinding(protected val _sourcePluginInstance: PluginInstance,
         "The target input index is invalid.")
 
     type PluginInstanceType = PluginInstance
+
+    override def canEqual(other: Any): Boolean = {
+        other.isInstanceOf[PluginInstanceBinding]
+    }
 }

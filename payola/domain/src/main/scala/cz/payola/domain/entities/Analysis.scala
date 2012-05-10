@@ -48,6 +48,10 @@ class Analysis(name: String, owner: Option[User])
         evaluation
     }
 
+    override def canEqual(other: Any): Boolean = {
+        other.isInstanceOf[Analysis]
+    }
+
     /**
       * Checks whether the analysis is valid (i.e. it can be evaluated). If not, then
       * [[cz.payola.domain.entities.analyses.AnalysisException]] is thrown.

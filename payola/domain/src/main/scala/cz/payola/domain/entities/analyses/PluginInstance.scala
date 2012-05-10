@@ -14,6 +14,10 @@ class PluginInstance(protected val _plugin: Plugin,  protected val _parameterVal
 
     type PluginType = Plugin
 
+    override def canEqual(other: Any): Boolean = {
+        other.isInstanceOf[PluginInstance]
+    }
+
     /**
       * Returns value of a parameter with the specified name or [[scala.None.]] if such doesn't exist.
       */

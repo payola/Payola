@@ -14,6 +14,10 @@ abstract class Plugin(protected var _name: String, protected val _inputCount: In
 
     protected var _isPublic = false
 
+    override def canEqual(other: Any): Boolean = {
+        other.isInstanceOf[Plugin]
+    }
+
     /**
       * Returns a new instance of the plugin with all parameter instances set to default values.
       */
