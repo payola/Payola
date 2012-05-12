@@ -48,6 +48,10 @@ class Group(protected var _name: String, protected val _owner: User, validate: B
         }
     }
 
+    override def canEqual(other: Any): Boolean = {
+        other.isInstanceOf[Group]
+    }
+
     /** Results in true if the user is a member.
       *
       * @param u The user.

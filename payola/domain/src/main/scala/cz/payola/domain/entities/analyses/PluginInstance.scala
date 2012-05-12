@@ -14,6 +14,10 @@ class PluginInstance(protected val _plugin: Plugin,  protected val _parameterVal
 
     type PluginType = Plugin
 
+    override def canEqual(other: Any): Boolean = {
+        other.isInstanceOf[PluginInstance]
+    }
+
     /**
       * Returns value of a parameter with the specified name or [[scala.None.]] if such doesn't exist.
       */
@@ -77,6 +81,8 @@ class PluginInstance(protected val _plugin: Plugin,  protected val _parameterVal
       * Updates the specified parameter value.
       */
     def setParameter(parameterValue: ParameterValue[_], value: Any): PluginInstance = {
+        require(_parameterValues.contains(parameterValue))
+
         parameterValue match {
             case instance: BooleanParameterValue => instance.value = value.asInstanceOf[Boolean]
             case instance: FloatParameterValue => instance.value = value.asInstanceOf[Float]

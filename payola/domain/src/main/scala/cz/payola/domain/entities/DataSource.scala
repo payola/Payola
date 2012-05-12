@@ -5,4 +5,8 @@ class DataSource(protected var _name: String, protected val _owner: Option[User]
     with cz.payola.common.entities.DataSource
 {
     protected var _isPublic = false
+
+    override def canEqual(other: Any): Boolean = {
+        other.isInstanceOf[DataSource]
+    }
 }

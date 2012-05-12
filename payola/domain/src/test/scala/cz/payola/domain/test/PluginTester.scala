@@ -364,18 +364,19 @@ WHERE       { ?x foaf:name ?name }"""
 
     "SPARQL query plugin" should "return valid graph" in {
         // Create the analysis
-        val initialPlugin = new SparqlQuery()
+      //  val initialPlugin = new SparqlQuery()
         val graph: Graph = Graph(testRDF)
 
-        val param = initialPlugin.queryParameter.createValue(selectQuery)
-        val result = initialPlugin.evaluate(graph, List(param), { d: Double => })
+      //  val param = initialPlugin.queryParameter.createValue(selectQuery)
+      //  val result = initialPlugin.evaluate(graph, List(param), { d: Double => })
 
         val s: JSONSerializer = new JSONSerializer()
-        println(s.serialize(result))
+        println(s.serialize(graph))
 
     }
 
 
 
 }
+
 */

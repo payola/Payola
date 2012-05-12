@@ -25,6 +25,17 @@ class Analysis(name: String, owner: Option[User])
 
     protected val _pluginInstanceBindings = mutable.ArrayBuffer[PluginInstanceBindingType]()
 
+    // Sanity check. Allow both name and owner be null to enable DB initialization,
+    // however, don't allow mixed values. Note that we're testing the owner
+    // against null, not None.
+    if ((name == null || name == "") && owner != null){
+        // Name is empty, user not ->
+        require(false, "Owner of the analysis is defined, name not.")
+    }else if (owner == null && (name != null && name != "")){
+        // Other way around ->
+        require(false, "Name of the analysis is defined, owner not.")
+    }
+
     /**
       * Starts evaluation of the analysis.
       * @param timeout Maximal execution time.
@@ -35,6 +46,10 @@ class Analysis(name: String, owner: Option[User])
         val evaluation = new AnalysisEvaluation(this, timeout)
         evaluation.start()
         evaluation
+    }
+
+    override def canEqual(other: Any): Boolean = {
+        other.isInstanceOf[Analysis]
     }
 
     /**

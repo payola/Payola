@@ -5,7 +5,6 @@ import entities.{Group, User}
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 
-/*
 class GroupTest extends FlatSpec with ShouldMatchers {
     "Group" should "not be initialized with null or empty values" in {
 //        evaluating(new Group(_name = "", _owner = null)) should produce [IllegalArgumentException]
@@ -22,7 +21,7 @@ class GroupTest extends FlatSpec with ShouldMatchers {
     "Group" should "have its owner as a member" in {
         val u: User = new User(_name = "Franta")
         val g: Group = new Group(_name = "Grupa", _owner = u)
-        g.isOwnedByUser(u) && !g.hasMember(u)
+        g.owner == u && !g.hasMember(u)
     }
 
     "Group" should "not add nor remove a null user" in  {
@@ -57,4 +56,3 @@ class GroupTest extends FlatSpec with ShouldMatchers {
     }
 
 }
-*/
