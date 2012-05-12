@@ -4,16 +4,16 @@ import cz.payola.domain.rdf.Graph
 import cz.payola.domain.entities.analyses.{AnalysisException, PluginInstance}
 import cz.payola.domain.entities.analyses.Plugin
 
-object DataFetcherWithQueryPlugin extends Plugin("Mltiple merged SPARQL query parts", 0, Nil)
+object FetcherQueryPlugin extends Plugin("Mltiple merged SPARQL query parts", 0, Nil)
 {
     override def createInstance(): PluginInstance = {
         throw new UnsupportedOperationException(
-            "A new instance of the DataFetcherWithQueryPlugin cannot be created directly.")
+            "The FetchertQueryPluginto be instantiated directly using the constructor.")
     }
 
     def evaluate(instance: PluginInstance, inputs: IndexedSeq[Graph], progressReporter: Double => Unit): Graph = {
         instance match {
-            case dataFetcherWithQuery: DataFetcherWithQueryPluginInstance => {
+            case dataFetcherWithQuery: FetcherQueryPluginInstance => {
                 val sparqlQuery = dataFetcherWithQuery.sparqlQuery
                 val query = sparqlQuery.plugin.getQuery(sparqlQuery.instance)
                 println(query)

@@ -40,15 +40,4 @@ abstract class SparqlQuery(name: String, parameters: immutable.Seq[Parameter[_]]
       * @return The query.
       */
     def getQuery(instance: PluginInstance): Option[String]
-
-    /**
-      * Returns a triple pattern matching specified subject, property and object.
-      * @param subject The subject node.
-      * @param propertyURI Uri of the predicate.
-      * @param obj The object node.
-      * @return The triple pattern.
-      */
-    protected def getTriplePattern(subject: String, propertyURI: String, obj: String): String = {
-        "%s <%s> %s .".format(subject, propertyURI, obj)
-    }
 }

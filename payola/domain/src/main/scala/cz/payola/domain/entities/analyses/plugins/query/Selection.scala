@@ -2,8 +2,9 @@ package cz.payola.domain.entities.analyses.plugins.query
 
 import cz.payola.domain.entities.analyses.parameters.StringParameter
 import cz.payola.domain.entities.analyses.PluginInstance
+import cz.payola.domain.sparql._
 
-class Selection extends SparqlQueryPart("Selection", List(
+class Selection extends Construct("Selection", List(
     new StringParameter("PropertyURI", ""),
     new StringParameter("Operator", ""),
     new StringParameter("Value", "")))
@@ -20,11 +21,16 @@ class Selection extends SparqlQueryPart("Selection", List(
         instance.getStringParameter("Value")
     }
 
-    def getPattern(instance: PluginInstance, subject: String = defaultSubject): Option[String] = {
-        getPropertyURI(instance).map(uri => getTriplePattern(subject, uri, "?y"))
-    }
-
-    override def getFilter(instance: PluginInstance, obj: String = defaultObject): Option[String] = {
-        getOperator(instance).flatMap(operator => getValue(instance).map(value => obj + " " + operator + " " + value))
+    def getConstructQuery(instance: PluginInstance, subject: Subject, variableGetter: () => Variable) = {
+        getPropertyURI(instance).flatMap {uri =>
+            getOperator(instance).flatMap {operator =>
+                getValue(instance).map {value =>
+                    val objectVariable = variableGetter()
+                    val triples = List(TriplePattern(subject, Uri(uri), objectVariable))
+                    val filters = List(Filter(objectVariable + " " + operator + " " + value))
+                    ConstructQuery(triples, Some(GraphPattern(triples, filters = filters)))
+                }
+            }
+        }
     }
 }

@@ -123,6 +123,14 @@ class Analysis(name: String, owner: Option[User])
     }
 
     /**
+      * Removes the specified plugin instances from the analysis.
+      * @param instances The plugin instances to remove.
+      */
+    def removePluginInstances(instances: PluginInstanceType*) {
+        instances.foreach(i => removePluginInstance(i))
+    }
+
+    /**
       * Returns the plugin instance bindings grouped by the target instances (the instances they go to).
       */
     def pluginInstanceInputBindings: Map[PluginInstance, Seq[PluginInstanceBinding]] = {
@@ -150,6 +158,33 @@ class Analysis(name: String, owner: Option[User])
             "The target plugin instance has to be present in the analysis.")
 
         _pluginInstanceBindings += binding
+    }
+
+    /**
+      * Collapses the specified binding including the source and the target into one plugin instance. The binding
+      * target instance must have exactly one input in order to collapse the binding. The binding source instance must
+      * have exactly same number of inputs as the instance that replaces the binding.
+      * @param binding The binding to collapse.
+      * @param instance The instance that would replace the binding.
+      */
+    def collapseBinding(binding: PluginInstanceBindingType, instance: PluginInstance) {
+        require(_pluginInstanceBindings.contains(binding), "The binding isn't present in the analysis.")
+        require(!_pluginInstances.contains(instance), "The instance is already present in the analysis.")
+        require(binding.targetPluginInstance.plugin.inputCount == 1, "The binding target instance must have one imput.")
+        require(binding.sourcePluginInstance.plugin.inputCount == instance.plugin.inputCount,
+            "The binding source instance must have same number of inputs as the instance that replaces the binding.")
+
+        // Store the bindings for later use.
+        val sourceInstanceInputBindings = pluginInstanceInputBindings(binding.sourcePluginInstance)
+        val targetInstanceOutputBindings = pluginInstanceOutputBindings(binding.targetPluginInstance)
+
+        // Remove the old instances, including the bindings around them.
+        removePluginInstances(binding.sourcePluginInstance, binding.targetPluginInstance)
+
+        // Add the new instance and restore the bindings.
+        addPluginInstance(instance)
+        sourceInstanceInputBindings.foreach(b => addBinding(b.sourcePluginInstance, instance, b.targetInputIndex))
+        targetInstanceOutputBindings.foreach(b => addBinding(instance, b.targetPluginInstance, b.targetInputIndex))
     }
 
     /**
