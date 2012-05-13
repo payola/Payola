@@ -1,7 +1,6 @@
 package cz.payola.data.entities.dao
 
-import cz.payola.data.entities.schema.PayolaDB
-import cz.payola.data.entities.{User, Group}
+import cz.payola.data.entities.{Group, PayolaDB}
 
 class GroupDAO extends EntityDAO[Group](PayolaDB.groups)
 {

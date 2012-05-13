@@ -1,54 +1,44 @@
 package cz.payola.domain.entities
 
-import generic.{ConcreteEntity, SharedAnalysesOwner}
-import permissions.privilege.PublicPrivilege
-import scala.collection.mutable._
-import cz.payola.domain.entities.permissions.privilege.{GroupPrivilege, AnalysisPrivilege, Privilege}
+import permissions.privilege.{PublicPrivilege, GroupPrivilege, AnalysisPrivilege, Privilege}
+import scala.collection.mutable
 
 /** User entity at the domain level.
   *
   * Contains owned analyses and groups, member groups and privileges.
   *
-  * @param id ID of the user.
   * @param _name Name of the user.
   */
-class User(
-        id: String = java.util.UUID.randomUUID.toString,
-        protected var _name: String)
-    extends ConcreteEntity(id)
-    with cz.payola.common.entities.User
-    with SharedAnalysesOwner
+class User(protected var _name: String)
+    extends Entity with cz.payola.common.entities.User
 {
     type GroupType = Group
 
     type AnalysisType = Analysis
 
+    type DataSourceType = DataSource
+
     type PrivilegeType = Privilege[_]
 
     protected var _email: String = ""
+
     protected var _password: String = ""
 
-    protected val _ownedAnalyses: ArrayBuffer[AnalysisType] = new ArrayBuffer[AnalysisType]()
-    protected val _ownedGroups: ArrayBuffer[GroupType] = new ArrayBuffer[GroupType]()
-    protected val _memberGroups: ArrayBuffer[GroupType] = new ArrayBuffer[GroupType]()
-    protected val _privileges: ArrayBuffer[PrivilegeType] = new ArrayBuffer[PrivilegeType]()
+    protected val _ownedGroups = new mutable.ArrayBuffer[GroupType]()
+
+    protected val _ownedAnalyses = new mutable.ArrayBuffer[AnalysisType]()
+
+    protected val _ownedDataSources = new mutable.ArrayBuffer[DataSource]()
+
+    protected val _privileges = new mutable.ArrayBuffer[PrivilegeType]()
 
     /** Goes through privileges and returns a sequence of Analysis objects to which
       * the user has some kind of access.
       *
       * @return Analysis with access.
       */
-    def accessibleAnalyses: collection.Seq[AnalysisType] = {
-        val as: ArrayBuffer[AnalysisType] = new ArrayBuffer[AnalysisType]()
-        _privileges foreach { p: PrivilegeType =>
-            if (p.isInstanceOf[AnalysisPrivilege]){
-                val a: AnalysisType = p.asInstanceOf[AnalysisPrivilege].obj
-                if (!as.contains(a)){
-                    as += a
-                }
-            }
-        }
-        as
+    def accessibleAnalyses: Seq[AnalysisType] = {
+        privileges.collect { case p: AnalysisPrivilege => p.obj }.distinct
     }
 
     /** Adds the analysis to the analyses array. Does nothing if the analysis
@@ -60,31 +50,10 @@ class User(
       */
     def addAnalysis(a: AnalysisType) = {
         require(a != null, "Analysis mustn't be null")
-        require(isOwnerOfAnalysis(a), "User must be owner of the analysis")
+        require(a.owner.exists(_ == this), "User must be owner of the analysis")
 
         if (!_ownedAnalyses.contains(a)) {
             _ownedAnalyses += a
-        }
-    }
-
-    /** Adds the group to the member group array. Does nothing if the group has already been added.
-      *
-      * @note This method automatically adds the current user as a member
-      *       of the group if the user isn't.
-      *
-      * @param g Group to be added.
-      *
-      * @throws IllegalArgumentException if the group is null.
-      */
-    def addToGroup(g: Group): Unit = {
-        require(g != null, "Cannot add a user to a null group!")
-
-        // Avoid double membership
-        if (!_memberGroups.contains(g)) {
-            _memberGroups += g
-
-            // Automatically add self to the group as well
-            g.addMember(this)
         }
     }
 
@@ -96,7 +65,7 @@ class User(
       */
     def addOwnedGroup(g: Group) = {
         require(g != null, "Group is NULL!")
-        require(g.isOwnedByUser(this), "Group isn't owned by this user!")
+        require(g.owner == this, "Group isn't owned by this user!")
 
         // Avoid double membership
         if (!_ownedGroups.contains(g)) {
@@ -106,44 +75,13 @@ class User(
 
     def isMemberOfGroup(g: Group): Boolean = g.hasMember(this)
 
-    def isOwnerOfAnalysis(a: AnalysisType): Boolean = a.owner.id == this.id
-
-    def isOwnerOfGroup(g: Group): Boolean = g.owner.id == this.id
-
-    /** Returns a group at index. Will raise an exception if the index is out of bounds.
-      * The group will be loaded from DB if necessary.
-      *
-      * @param index Index of the group (according to the GroupIDs).
-      * @return The group.
-      */
-    def memberGroupAtIndex(index: Int): Group = {
-        require(index >= 0 && index < memberGroupCount, "Member group index out of bounds - " + index)
-
-        _memberGroups(index)
-    }
-
-    /** Number of member groups.
-      *
-      * @return Number of member groups
-      */
-    def memberGroupCount: Int = _memberGroups.size
-
     /** Result is a new List consisting of only groups that
-      *  the user is a member of.
+      * the user is a member of.
       *
       * @return New List with groups that the user is a member of.
       */
-    def memberGroups : collection.Seq[GroupType] = {
-        val gs: ArrayBuffer[GroupType] = new ArrayBuffer[GroupType]()
-        _privileges foreach { p: PrivilegeType =>
-            if (p.isInstanceOf[GroupPrivilege]){
-                val g: GroupType = p.asInstanceOf[GroupPrivilege].obj
-                if (!gs.contains(g)){
-                    gs += g
-                }
-            }
-        }
-        gs
+    def memberGroups: collection.Seq[GroupType] = {
+        privileges.collect { case p: GroupPrivilege => p.obj }.distinct
     }
 
     /** Returns an analysis at index. Will raise an exception if the index is out of bounds.
@@ -184,30 +122,8 @@ class User(
       *
       * @return Public privileges.
       */
-    def privileges: collection.Seq[PrivilegeType] = _privileges filter { p: Privilege[_] => p.isInstanceOf[PublicPrivilege] }
-
-
-    /** Removes the user from the group.
-      *
-      * '''Note:''' This also removes the user from the group's member array.
-      *
-      * @param g Group to be removed.
-      *
-      * @return Nothing, needs to have a declared return type because it calls
-      *          removeMember on the group which then may call back removeFromGroup
-      *          back on the user.
-      *
-      * @throws IllegalArgumentException if the group is null.
-      */
-    def removeFromGroup(g: Group): Unit = {
-        require(g != null, "Group is NULL!")
-
-        // Need to make this check, otherwise we'd
-        // get in to an infinite cycle
-        if (_memberGroups.contains(g)) {
-            _memberGroups -= g
-            g.removeMember(this)
-        }
+    def publicPrivileges: Seq[PrivilegeType] = {
+        _privileges.collect { case p: PublicPrivilege => p }
     }
 
     /** Removes the passed analysis from the analyses owned by the user.
@@ -231,7 +147,7 @@ class User(
       */
     def removeOwnedGroup(g: Group) = {
         require(g != null, "Group is NULL!")
-        require(!g.isOwnedByUser(this), "Group is still owned by this user!")
+        require(g.owner != this, "Group is still owned by this user!")
 
         _ownedGroups -= g
     }

@@ -1,14 +1,7 @@
 package cz.payola.data.entities
 
-import schema.PayolaDB
-
-class User(
-        id: String,
-        name: String,
-        pwd: String,
-        email: String)
-    extends cz.payola.domain.entities.User(id, name)
-    with PersistableEntity
+class User(name: String, pwd: String, email: String)
+    extends cz.payola.domain.entities.User(name) with PersistableEntity
 {
     password_=(pwd)
     email_=(email)
@@ -31,21 +24,22 @@ class User(
         evaluateCollection(_memberGroupsQuery)
     }
 
-    override def addToGroup(g: cz.payola.domain.entities.Group) {
-        super.addToGroup(g);
+    def addToGroup(g: GroupType) {
+        //TODO: super.addToGroup(g);
 
         if (g.isInstanceOf[Group]) {
             associate(g.asInstanceOf[Group], _memberGroupsQuery)
         }
     }
 
-    override def removeFromGroup(g: cz.payola.domain.entities.Group) {
-        super.removeFromGroup(g)
+    def removeFromGroup(g: GroupType) {
+        // TODO: super.removeFromGroup(g)
 
         if (g.isInstanceOf[Group]) {
             dissociate(g.asInstanceOf[Group], _memberGroupsQuery)
         }
     }
+
 
     /* TODO: how to handle managing owned entities (depends on field owner on entity)
     override def removeOwnedGroup(a: AnalysisType) = null

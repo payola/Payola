@@ -9,6 +9,3 @@ import cz.payola.domain.entities.Group
   * @param g A group which is the subject of this privilege.
   */
 class GroupModificationPrivilege(g: Group) extends GroupPrivilege(g)
-{
-
-}

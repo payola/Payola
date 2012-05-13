@@ -1,0 +1,13 @@
+package cz.payola.domain.entities.analyses.messages
+
+abstract class AnalysisEvaluationControl
+
+object StopEvaluation extends AnalysisEvaluationControl
+
+object TerminateEvaluation extends AnalysisEvaluationControl
+
+object GetQueryExecutionProgress extends AnalysisEvaluationControl
+
+object GetAnalysisEvaluationProgress extends AnalysisEvaluationControl
+
+object GetResult extends AnalysisEvaluationControl

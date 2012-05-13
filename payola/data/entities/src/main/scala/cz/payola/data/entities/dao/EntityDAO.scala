@@ -1,7 +1,6 @@
 package cz.payola.data.entities.dao
 
 import org.squeryl.PrimitiveTypeMode._
-import cz.payola.data.entities.schema.PayolaDB._
 import org.squeryl.{KeyedEntity, Table, Query}
 import collection.mutable.ArrayBuffer
 

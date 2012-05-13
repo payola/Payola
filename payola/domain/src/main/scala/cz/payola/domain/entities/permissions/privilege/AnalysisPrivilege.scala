@@ -7,5 +7,3 @@ import cz.payola.domain.entities.Analysis
   * @param a An analysis which is the subject of this privilege.
   */
 abstract class AnalysisPrivilege(a: Analysis) extends Privilege[Analysis](a)
-{
-}

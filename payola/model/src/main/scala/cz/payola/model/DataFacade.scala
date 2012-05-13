@@ -1,19 +1,16 @@
 package cz.payola.model
 
-import cz.payola.common.rdf.Graph
-import cz.payola.data.rdf.configurations.SparqlEndpointConfiguration
-import cz.payola.data.rdf.QueryExecutor
-import cz.payola.domain.rdf.RDFGraph
+import cz.payola.domain.rdf.Graph
+import cz.payola.domain.entities.sources.SparqlEndpointDataSource
 
 class DataFacade
 {
-    def getGraph(uri: String): Graph = {
-        val dbPediaEndpointUrl = "http://dbpedia.org/sparql" +
-            "?default-graph-uri=http%3A%2F%2Fdbpedia.org" +
-            "&format=application%2Frdf%2Bxml" +
-            "&save=display"
-        val configurations = List(new SparqlEndpointConfiguration(dbPediaEndpointUrl))
+    val defaultDataSources = List(
+        new SparqlEndpointDataSource("DBpedia", owner = None, endpointUrl = "http://dbpedia.org/sparql" +
+            "?default-graph-uri=http%3A%2F%2Fdbpedia.org&format=application%2Frdf%2Bxml&save=display")
+    )
 
+    def getGraph(uri: String): Graph = {
         val query = """
             CONSTRUCT {
                 <%s> ?p1 ?n1 .
@@ -26,6 +23,8 @@ class DataFacade
             LIMIT 40
         """.format(uri, uri)
 
-        QueryExecutor.executeQuery(configurations, query).data.headOption.map(rdf => RDFGraph(rdf)).get
+        // TODO: Where is DataProvider?
+        // DataProvider.executeQuery(defaultDataSources, query).data.headOption.map(rdf => Graph(rdf)).get
+        null
     }
 }

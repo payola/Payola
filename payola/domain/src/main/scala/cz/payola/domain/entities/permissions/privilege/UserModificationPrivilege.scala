@@ -9,5 +9,3 @@ import cz.payola.domain.entities.User
   * @param o A user which is the subject of this privilege.
   */
 class UserModificationPrivilege(o: User) extends UserPrivilege(o)
-{
-}
