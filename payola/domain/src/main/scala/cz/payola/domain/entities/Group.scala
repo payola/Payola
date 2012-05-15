@@ -22,12 +22,6 @@ class Group(protected var _name: String, protected val _owner: User, validate: B
     // We need to be able to create a new instance of Group with no parameters.
     // Hence if both _name and _owner are null, let it slip. If one of them is null
     // and the other isn't, something went wrong.
-    if (!(_name == null || _name == "") && _owner == null){
-        throw new IllegalArgumentException("Group needs and owner!")
-    }else if ((_name == null || _name == "") && _owner != null){
-        throw new IllegalArgumentException("Group needs a name!")
-    }
-
     if (_owner != null) {
         _owner.addOwnedGroup(this)
     }

@@ -5,6 +5,10 @@ package s2js.adapters.js.dom
   */
 abstract class Element extends Node
 {
+    var offsetTop: Double
+
+    var offsetLeft: Double
+
     val attributes: NamedNodeMap
 
     val tagName: String
@@ -40,4 +44,8 @@ abstract class Element extends Node
     def setAttribute(name: String, value: String)
 
     def setAttributeNS(ns: String, name: String, value: String)
+
+    val scrollLeft: Int
+
+    val scrollTop: Int
 }

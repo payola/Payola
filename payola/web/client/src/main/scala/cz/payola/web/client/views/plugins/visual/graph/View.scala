@@ -1,8 +1,8 @@
 package cz.payola.web.client.views.plugins.visual.graph
 
-import cz.payola.web.client.views.plugins.visual.{Layer, Color, Vector, Point}
-import s2js.adapters.js.browser.document
-import s2js.adapters.js.dom.{Element, Canvas, CanvasRenderingContext2D}
+import s2js.adapters.js.browser._
+import s2js.adapters.js.dom._
+import cz.payola.web.client.views.plugins.visual._
 
 trait View {
     /**
@@ -12,6 +12,14 @@ trait View {
       * @param position to which location to draw
       */
     def draw(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point])
+
+    /**
+     * Routine for fast drawing of the graphical representation of graphs objects. Should be used for animation
+     * @param context to which container to draw
+     * @param color which color to use
+     * @param position to which location to draw
+     */
+    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point])
 
     /**
       * Draws a rectangle with rounded corners, depending on the radius parameter to the input canvas context.
@@ -35,29 +43,20 @@ trait View {
 
         context.beginPath()
 
-        var aX = position.x + radius
-        var aY = position.y
-        context.moveTo(aX, aY)
+        val a = position
+        context.moveTo(a.x + radius, a.y)
 
-        aX = position.x
-        aY = position.y
-        context.quadraticCurveTo(aX, aY, aX, aY + radius) //upper left corner
+        context.quadraticCurveTo(a.x, a.y, a.x, a.y + radius) //upper left corner
 
-        aX = position.x
-        aY = position.y + size.y
-        context.lineTo(aX, aY - radius)
-        context.quadraticCurveTo(aX, aY, aX + radius, aY) //lower left corner
+        context.lineTo(a.x, a.y + size.y - radius)
+        context.quadraticCurveTo(a.x, a.y + size.y, a.x + radius, a.y + size.y) //lower left corner
 
 
-        aX = position.x + size.x
-        aY = position.y + size.y
-        context.lineTo(aX - radius, aY)
-        context.quadraticCurveTo(aX, aY, aX, aY - radius) //lower right corner
+        context.lineTo(a.x + size.x - radius, a.y + size.y)
+        context.quadraticCurveTo(a.x + size.x, a.y + size.y, a.x + size.x, a.y + size.y - radius) //lower right corner
 
-        aX = position.x + size.x
-        aY = position.y
-        context.lineTo(aX, aY + radius)
-        context.quadraticCurveTo(aX, aY, aX - radius, aY) //upper right corner
+        context.lineTo(a.x + size.x, a.y + radius)
+        context.quadraticCurveTo(a.x + size.x, a.y, a.x + size.x - radius, a.y) //upper right corner
 
         context.closePath()
     }
@@ -154,6 +153,50 @@ trait View {
     }
 
     /**
+      * Draws the image to the specified position and resizes it to the specified dimensions.
+      * @param context to where to draw
+      * @param image to draw
+      * @param location of drawing
+      * @param dimensions to stretch the image to
+      */
+    protected def drawImage(context: CanvasRenderingContext2D, image: Element, location: Point, dimensions: Vector) {
+
+        context.drawImage(image, location.x, location.y, dimensions.x, dimensions.y)
+    }
+
+    protected def prepareImage(colorToUse: Color, imagePath: String): Canvas = {
+
+        val imageSize = Vector(20, 20)
+        val canvas = document.createElement[Canvas]("canvas")
+        canvas.width = imageSize.x
+        canvas.height = imageSize.y
+        val context = canvas.getContext[CanvasRenderingContext2D]("2d")
+
+        //nakreslim do lokalniho canvasu
+
+        val imageElement = document.createElement[Image]("img")
+        imageElement.src = imagePath
+
+        drawImage(context, imageElement, Point(0, 0), imageSize)
+
+        //nakreslim do globalniho canvasu lokalni canvas
+        val imageData = context.getImageData(0, 0, imageSize.x, imageSize.y);
+        val canvasPixelArray = imageData.data;
+
+        var pixelPointer = 0
+        while(pixelPointer < canvasPixelArray.length) {
+
+            canvasPixelArray(pixelPointer) = colorToUse.red
+            canvasPixelArray(pixelPointer + 1) = colorToUse.green
+            canvasPixelArray(pixelPointer + 2) = colorToUse.blue
+            // alpha is unchanged to keep the shape of the image
+            pixelPointer += 4
+        }
+        context.putImageData(imageData, 0, 0);
+        canvas
+    }
+
+    /**
       * Clears the specified area from all drawn elements
       * @param context where in to clear
       * @param topLeft corner of the cleared rectangle
@@ -186,7 +229,7 @@ trait View {
         val layer = new Layer(canvas, context)
 
         container.appendChild(canvas)
-        layer.setSize(Vector(1500, 1500)) //TODO take it from the "created element"
+        layer.setSize(Vector(2000, 2000)) //TODO take it from the "created element"
         layer
     }
 }

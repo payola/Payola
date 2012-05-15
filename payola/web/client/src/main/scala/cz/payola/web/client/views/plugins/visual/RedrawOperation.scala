@@ -14,4 +14,9 @@ object RedrawOperation
       * Redraw operation called after vertices were moved.
       */
     val Movement = 1
+
+    /**
+      * Redraw operation called during technique processing,
+      */
+    val Animation = 2
 }

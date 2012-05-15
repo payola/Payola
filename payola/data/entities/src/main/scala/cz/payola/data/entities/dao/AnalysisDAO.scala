@@ -1,8 +1,7 @@
 package cz.payola.data.entities.dao
 
-import cz.payola.data.entities._
-import cz.payola.data.entities.PayolaDB
 import org.squeryl.PrimitiveTypeMode._
+import cz.payola.data.entities.{PayolaDB, Analysis, User}
 
 class AnalysisDAO extends EntityDAO[Analysis](PayolaDB.analyses)
 {
@@ -18,5 +17,13 @@ class AnalysisDAO extends EntityDAO[Analysis](PayolaDB.analyses)
         val query = table.where(a => userId === EVERY_USER or a.ownerId.getOrElse("").toString === userId)
 
         evaluateCollectionResultQuery(query, 0, count)
+    }
+
+    def getPublicAnalysesByOwner(o: User, page: Int = 1, pageLength: Int = 0) = {
+        val query = table.where(a => a.ownerId.getOrElse("") === o.id)
+
+        transaction {
+            query.page(page, pageLength).toSeq
+        }
     }
 }

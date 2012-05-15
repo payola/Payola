@@ -1,0 +1,8 @@
+@(str: String)
+@import java.security.MessageDigest
+
+@{
+    val md: MessageDigest = MessageDigest.getInstance("MD5")
+    val bytes = str.getBytes("CP1252")
+    BigInt(1,md.digest(bytes)).toString(16)
+}
