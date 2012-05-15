@@ -25,17 +25,6 @@ class Analysis(name: String, owner: Option[User])
 
     protected val _pluginInstanceBindings = mutable.ArrayBuffer[PluginInstanceBindingType]()
 
-    // Sanity check. Allow both name and owner be null to enable DB initialization,
-    // however, don't allow mixed values. Note that we're testing the owner
-    // against null, not None.
-    if ((name == null || name == "") && owner.isEmpty){
-        // Name is empty, user not ->
-        require(false, "Owner of the analysis is defined, name not.")
-    }else if (owner.isDefined && (name != null && name != "")){
-        // Other way around ->
-        require(false, "Name of the analysis is defined, owner not.")
-    }
-
     /**
       * Starts evaluation of the analysis.
       * @param timeout Maximal execution time.
