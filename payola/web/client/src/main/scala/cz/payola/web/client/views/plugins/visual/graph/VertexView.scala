@@ -1,46 +1,43 @@
 package cz.payola.web.client.views.plugins.visual.graph
 
-import s2js.adapters.js.dom.CanvasRenderingContext2D
 import collection.mutable.ListBuffer
 import cz.payola.common.rdf.{LiteralVertex, IdentifiedVertex, Vertex}
-import cz.payola.web.client.views.plugins.visual.{Vector, Color, Point}
+import s2js.adapters.js.dom.CanvasRenderingContext2D
+import cz.payola.web.client.views.plugins.visual._
 
 /**
-  * Graphical representation of Vertex object in the drawn graph.
-  * @param vertexModel the vertex object from the model, that is visualised
-  * @param position of this graphical representation in drawing space
-  */
-class VertexView(val vertexModel: Vertex, var position: Point) extends View {
-    /**
-      * Default radius of circles in corners.
-      * has to be 0 <= x <= Min(VERTEX_HEIGHT, VERTEX_WIDTH)/2 see Drawer.drawVertex(..)
-      */
-    private val defVertexCornerRadius: Double = 5
+ * Graphical representation of Vertex object in the drawn graph.
+ * @param vertexModel the vertex object from the model, that is visualised
+ * @param position of this graphical representation in drawing space
+ */
+class VertexView(val vertexModel: Vertex, var position: Point, var settings: VertexSettingsModel) extends View
+{
+
+    private var image = prepareImage(
+        vertexModel match {
+            case i: LiteralVertex => new Color(180, 50, 50, 1)
+            case i: IdentifiedVertex => new Color(50, 180, 50, 1)
+            case _ => new Color(0, 0, 0, 1)
+        }, vertexModel match {
+            case i: LiteralVertex => "/assets/images/book-icon.png"
+            case i: IdentifiedVertex => "/assets/images/view-eye-icon.png"
+            case _ => "/assets/images/question-mark-icon.png"
+        })
 
     /**
-      * Default dimensions of a vertex.
-      */
-    private val defVertexSize = Vector(30, 24)
-
-    /**
-      * Default color of a vertex.
-      */
-    private val defColor = new Color(0, 180, 0, 0.8)
-
-    /**
-      * Indicator of isSelected attribute. Does not effect inner mechanics.
-      */
+     * Indicator of isSelected attribute. Does not effect inner mechanics.
+     */
     var selected = false
 
     /**
-      * List of edges that this vertex representation has. Allows to Iterate throught the graphical representation
-      * of the graph.
-      */
+     * List of edges that this vertex representation has. Allows to Iterate through the graphical representation
+     * of the graph.
+     */
     var edges = ListBuffer[EdgeView]()
 
     /**
-      * Textual data that should be visualised with this vertex ("over this vertex").
-      */
+     * Textual data that should be visualised with this vertex ("over this vertex").
+     */
     val information: Option[InformationView] = vertexModel match {
         case i: LiteralVertex => Some(new InformationView(i))
         case i: IdentifiedVertex => Some(new InformationView(i))
@@ -48,17 +45,30 @@ class VertexView(val vertexModel: Vertex, var position: Point) extends View {
     }
 
     def isPointInside(point: Point): Boolean = {
-        isPointInRect(point, position + (defVertexSize / -2), position + (defVertexSize / 2))
+        isPointInRect(point, position + (settings.getSize / -2), position + (settings.getSize / 2))
     }
 
     def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
+        drawQuick(context, color, positionCorrection)
+        drawImage(context, image, position + Vector(-10, -10), Vector(20, 20))
+    }
 
-        val correction = positionCorrection.getOrElse(Point.Zero).toVector
+    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
+        val colorToUseOnBox = color.getOrElse(settings.colorMed)
+        val correctedPosition = this.position + (settings.getSize / -2) + positionCorrection.getOrElse(Point(0, 0)).toVector
 
-        drawRoundedRectangle(context, this.position + (defVertexSize / -2) + correction, defVertexSize, defVertexCornerRadius)
+        drawRoundedRectangle(context, correctedPosition, settings.getSize, settings.cornerRadius)
+        fillCurrentSpace(context, colorToUseOnBox)
+    }
 
-        val colorToUse = color.getOrElse(defColor)
-
-        fillCurrentSpace(context, colorToUse)
+    def drawInformation(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
+        if (information.isDefined) {
+            vertexModel match {
+                case i: IdentifiedVertex => information.get.draw(context, color, positionCorrection)
+                case _ => if (selected) {
+                    information.get.draw(context, color, positionCorrection)
+                }
+            }
+        }
     }
 }

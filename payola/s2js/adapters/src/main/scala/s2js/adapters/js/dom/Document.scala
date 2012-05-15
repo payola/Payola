@@ -10,4 +10,6 @@ abstract class Document
 
     // Definition of the function is there only for compilation purposes, bacause it can't be null.
     def createElement[A <: Element](name: String): A = body.asInstanceOf[A]
+
+    val documentElement: Element = null
 }

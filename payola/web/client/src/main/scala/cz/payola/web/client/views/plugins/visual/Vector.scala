@@ -60,4 +60,18 @@ case class Vector(x: Double, y: Double)
     def length: Double = {
         sqrt(pow(x, 2) + pow(y, 2))
     }
+
+    override def toString: String = {
+        "[" + x + ", " + y + "]"
+    }
+}
+
+/**
+  * Frequently used constant vectors
+  */
+object Vector
+{
+    val Zero = Vector(0, 0)
+    
+    val One = Vector(1, 1)
 }

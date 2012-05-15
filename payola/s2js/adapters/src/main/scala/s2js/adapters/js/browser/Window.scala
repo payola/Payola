@@ -16,7 +16,13 @@ class Window
 
     def alert(s: Any) {}
 
-    def setTimeout(fn: () => Unit, milliseconds: Int) {}
+    def setTimeout(fn: () => Unit, milliseconds: Int): Int = 0
+
+    def clearTimeout(timeoutId: Int): Int = 0
+
+    def setInterval(fn: () => Unit, milliseconds: Int): Int = 0
+    
+    def clearInterval(intervalId: Int): Int = 0
 
     object location
     {

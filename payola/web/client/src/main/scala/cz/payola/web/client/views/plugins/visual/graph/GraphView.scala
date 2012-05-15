@@ -3,22 +3,14 @@ package cz.payola.web.client.views.plugins.visual.graph
 import collection.mutable.ListBuffer
 import s2js.adapters.js.dom.{Element, CanvasRenderingContext2D}
 import cz.payola.common.rdf.{Vertex, Graph}
-import cz.payola.web.client.views.plugins.visual.{Vector, RedrawOperation, Color, Point}
+import cz.payola.web.client.views.plugins.visual._
+import components.visualsetup.VisualSetup
 
 /**
   * Graphical representation of Graph object.
-  * @param graphModel the graph object from the model
   * @param container the space where the graph should be visualised
   */
-class GraphView(val graphModel: Graph, container: Element) extends View
-{
-    private val ColorVertexHigh = new Color(200, 0, 0, 1)
-
-    private val ColorVertexMedium = new Color(0, 180, 0, 0.9)
-
-    private val ColorVertexLow = new Color(180, 180, 180, 0.3)
-
-    private val ColorTextHigh = new Color(50, 50, 50, 1)
+class GraphView(val container: Element, val settings: VisualSetup) extends View {
 
     /*The order in which are layers created determines their "z coordinate"
 (first created layer is on the bottom and last created one covers all the others).*/
@@ -51,14 +43,33 @@ class GraphView(val graphModel: Graph, container: Element) extends View
     /**
       * List of currently visualised vertices of the graph.
       */
-    val vertexViews = createVertexViews()
+    var vertexViews = ListBuffer[VertexView]()
 
     /**
       * List of currently visualised edges of the graph
       */
-    val edgeViews = createEdges(vertexViews)
+    var edgeViews = ListBuffer[EdgeView]()
 
     private var selectedCount = 0
+
+    /**
+      * Replaces the current graph with new one and marks all new vertices as selected.
+      * @param graph to replace the current graph representation with
+      */
+    def update(graph: Graph) {
+
+        val vertexViewsCache = vertexViews
+        vertexViews = createVertexViews(graph)
+        edgeViews = createEdgeViews(graph, vertexViews)
+
+        if(!vertexViewsCache.isEmpty) {
+            vertexViews.diff(vertexViewsCache).foreach{ vertexView =>
+                setVertexSelection(vertexView, true)
+            }
+        } else {
+            selectVertex(vertexViews.head)
+        }
+    }
 
     /**
       * Empty graph indication function.
@@ -69,34 +80,38 @@ class GraphView(val graphModel: Graph, container: Element) extends View
     }
 
     /**
-      * Constructs a list of vertexViews based on the graphModel variable.
+      * Constructs a list of vertexViews based on the _graphModel parameter.
+      * @param _graphModel to build from
       * @return container with packed Vertex objects in VertexView objects
       */
-    def createVertexViews(): ListBuffer[VertexView] = {
+    def createVertexViews(_graphModel: Graph): ListBuffer[VertexView] = {
         val buffer = ListBuffer[VertexView]()
         var counter = 0
 
-        graphModel.vertices.foreach {vertexModel =>
+        _graphModel.vertices.foreach {vertexModel =>
 
-            buffer += new VertexView(vertexModel, Point(0, 0))
+            buffer += new VertexView(vertexModel, Point(300, 300), settings.vertexModel) //TODO should be center of the canvas or something like that
             counter += 1
         }
+
         buffer
     }
 
     /**
-      * Constructs a list of edgeViews based on the graphModel and verticesView variables.
+      * Constructs a list of edgeViews based on the _graphModel and verticesView variables.
       * Also modifies the vertexViews and sets the constructed edges to their vertexView.edges
       * attributes.
+      * @param _graphModel to build from
       * @param _vertexViews list of vertexViews in which to search for vertexViews,
       * that are supposed to be connected by the created edgeViews
       * @return container with packed
       */
-    def createEdges(_vertexViews: ListBuffer[VertexView]): ListBuffer[EdgeView] = {
+    def createEdgeViews(_graphModel: Graph, _vertexViews: ListBuffer[VertexView]): ListBuffer[EdgeView] = {
         val buffer = ListBuffer[EdgeView]()
         if(_vertexViews.length != 0) {
-            graphModel.edges.foreach {edgeModel =>
-                buffer += new EdgeView(edgeModel, findVertexView(edgeModel.origin), findVertexView(edgeModel.destination))
+            _graphModel.edges.foreach {edgeModel =>
+                buffer += new EdgeView(edgeModel, findVertexView(edgeModel.origin),
+                    findVertexView(edgeModel.destination), settings.edgesModel)
             }
 
             _vertexViews.foreach {vertexView: VertexView =>
@@ -115,25 +130,18 @@ class GraphView(val graphModel: Graph, container: Element) extends View
       * @return container fith found edges
       */
     private def getEdgesOfVertex(vertexView: VertexView, _edgeViews: ListBuffer[EdgeView]): ListBuffer[EdgeView] = {
-        var edgeViewsBuffer = ListBuffer[EdgeView]()
-        var i = 0
-        //TODO may be used ...filter ?
-        _edgeViews.foreach {_edgeView: EdgeView =>
-            if ((_edgeView.originView.vertexModel eq vertexView.vertexModel) ||
-                (_edgeView.destinationView.vertexModel eq vertexView.vertexModel)) {
 
-                edgeViewsBuffer += _edgeView
-                i += 1
-            }
+        _edgeViews.filter { _edgeView: EdgeView =>
+            ((_edgeView.originView.vertexModel eq vertexView.vertexModel) ||
+                (_edgeView.destinationView.vertexModel eq vertexView.vertexModel))
         }
-        edgeViewsBuffer
     }
 
     /**
       * Adds the input vector to positions of all vertices in this graph visualisation.
       * @param difference to move the vertices
       */
-    def moveAllSelectedVetrtices(difference: Vector) {
+    def moveAllSelectedVertices(difference: Vector) {
         vertexViews.foreach { vertex =>
             if(vertex.selected) {
                 vertex.position += difference
@@ -143,17 +151,25 @@ class GraphView(val graphModel: Graph, container: Element) extends View
 
     /**
       * Marks all verices in this graph graphical representation as NOT selected.
-      * @return true if a change of the selection status was changed on some vertex
+      * @return list of deselected vertices if some were deselected, else None
       */
-    def deselectAll(): Boolean = {
-        var somethingChanged = false
+    def deselectAll(): Option[ListBuffer[VertexView]] = {
+
+        val deselected = ListBuffer[VertexView]()
         if (selectedCount > 0) {
             vertexViews.foreach {vertex =>
-                somethingChanged = deselectVertex(vertex) || somethingChanged
+                if(deselectVertex(vertex)) {
+                    deselected += vertex
+                }
             }
             selectedCount = 0
         }
-        somethingChanged
+
+        if(deselected.isEmpty) {
+            None
+        } else {
+            Some(deselected)
+        }
     }
 
     /**
@@ -221,46 +237,41 @@ class GraphView(val graphModel: Graph, container: Element) extends View
     def draw(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point]) {
         val positionCorrection = position.getOrElse(Point.Zero)
 
+        var colorVertex: Option[Color] = Some(Color.Black)
+        var colorText: Option[Color] = Some(Color.Black)
+
         vertexViews.foreach {vertexView =>
 
-            var colorToUseVertex: Option[Color] = Some(Color.Black)
-            var colorToUseText: Option[Color] = Some(Color.Black)
             if (color != None) {
-                colorToUseVertex = Some(color.get)
-                colorToUseText = Some(color.get)
+                colorVertex = Some(color.get)
+                colorText = Some(color.get)
             } else if (vertexView.selected) {
-                colorToUseVertex = Some(ColorVertexHigh)
-                colorToUseText = Some(ColorTextHigh)
+                colorVertex = Some(settings.vertexModel.colorHigh)
+                colorText = Some(settings.textModel.color)
             } else if (edgeViews.exists(edgeView =>
-                (edgeView.originView.eq(vertexView) && edgeView.destinationView.selected) ||
-                    (edgeView.destinationView.eq(vertexView) && edgeView.originView.selected))) {
-                colorToUseVertex = Some(ColorVertexMedium)
-                colorToUseText = Some(ColorTextHigh)
+                TODO_RenameThisMethod(edgeView, vertexView))) {
+                colorVertex = Some(settings.vertexModel.colorMed)
+                colorText = Some(settings.textModel.color)
             } else if (selectedCount == 0) {
-                colorToUseVertex = None
-                colorToUseText = Some(ColorTextHigh)
+                colorVertex = None
+                colorText = Some(settings.textModel.color)
             } else {
-                colorToUseVertex = Some(ColorVertexLow)
-                colorToUseText = Some(Color.Transparent)
+                colorVertex = Some(settings.vertexModel.colorLow)
+                colorText = Some(Color.Transparent)
             }
 
             if (vertexView.selected) {
                 if (verticesSelectedLayer.cleared) {
-                    vertexView.draw(verticesSelectedLayer.context, colorToUseVertex, Some(positionCorrection))
+                    vertexView.draw(verticesSelectedLayer.context, colorVertex, Some(positionCorrection))
                 }
-                if (verticesSelectedTextLayer.cleared && vertexView.information != None) {
-                    vertexView.information.get.draw(verticesSelectedTextLayer.context, colorToUseText,
+                if (verticesSelectedTextLayer.cleared) {
+                    vertexView.drawInformation(verticesSelectedTextLayer.context, colorText,
                         Some(LocationDescriptor.getVertexInformationPosition(vertexView.position) +
                             positionCorrection.toVector))
                 }
             } else {
                 if (verticesDeselectedLayer.cleared) {
-                    vertexView.draw(verticesDeselectedLayer.context, colorToUseVertex, Some(positionCorrection))
-                }
-                if (verticesDeselectedTextLayer.cleared && vertexView.information != None) {
-                    vertexView.information.get.draw(verticesDeselectedTextLayer.context, colorToUseText,
-                        Some(LocationDescriptor.getVertexInformationPosition(vertexView.position) +
-                            positionCorrection.toVector))
+                    vertexView.draw(verticesDeselectedLayer.context, colorVertex, Some(positionCorrection))
                 }
             }
         }
@@ -273,7 +284,7 @@ class GraphView(val graphModel: Graph, container: Element) extends View
             val colorToUseText = if (color != None) {
                 color
             } else if (edgeView.isSelected) {
-                Some(ColorTextHigh)
+                Some(settings.textModel.color)
             } else {
                 None
             }
@@ -303,6 +314,53 @@ class GraphView(val graphModel: Graph, container: Element) extends View
         layers.foreach(layer => layer.cleared = false)
     }
 
+    private def TODO_RenameThisMethod(edgeView: EdgeView, vertexView: VertexView): Boolean = {
+        (edgeView.originView.eq(vertexView) && edgeView.destinationView.selected) ||
+            (edgeView.destinationView.eq(vertexView) && edgeView.originView.selected)
+    }
+
+    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point]) {
+        val positionCorrection = position.getOrElse(Point.Zero)
+
+        vertexViews.foreach { vertexView =>
+
+            val colorToUseVertex = if (color != None) {
+                Some(color.get)
+            } else if (vertexView.selected) {
+                Some(settings.vertexModel.colorHigh)
+            } else {
+                Some(settings.vertexModel.colorMed)
+            }
+
+            if(vertexView.selected) {
+                if(verticesSelectedLayer.cleared) {
+                    vertexView.drawQuick(verticesSelectedLayer.context, colorToUseVertex, Some(positionCorrection))
+                }
+            } else {
+                if(verticesDeselectedLayer.cleared) {
+                    vertexView.drawQuick(verticesDeselectedLayer.context, colorToUseVertex, Some(positionCorrection))
+                }
+            }
+        }
+
+        edgeViews.foreach {edgeView =>
+
+            val colorToUseEdge = color
+
+            if (edgeView.isSelected) {
+                if (edgesSelectedLayer.cleared) {
+                    edgeView.draw(edgesSelectedLayer.context, colorToUseEdge, Some(positionCorrection))
+                }
+            } else {
+                if (edgesDeselectedLayer.cleared) {
+                    edgeView.draw(edgesDeselectedLayer.context, colorToUseEdge, Some(positionCorrection))
+                }
+            }
+        }
+
+        layers.foreach(layer => layer.cleared = false)
+    }
+
     /**
       * Prepares the layers for drawing and calls the draw routine of this graph based on the graphOperation parameter.
       * If the Movement operation is used only layers for selected objects are redrawn. If the selection operation
@@ -322,9 +380,19 @@ class GraphView(val graphModel: Graph, container: Element) extends View
                 verticesSelectedTextLayer.cleared = true
 
                 draw(null, None, None)
-            //^because elements are drawn into separate layers, redraw(..) does not know to which context to draw
+                //^because elements are drawn into separate layers, redraw(..) does not know to which context to draw
+
             case RedrawOperation.Selection =>
                 redrawAll()
+
+            case RedrawOperation.Animation =>
+                layers.foreach {layer =>
+                    clear(layer.context, Point.Zero, layer.getSize)
+                    layer.cleared = true
+                }
+
+                drawQuick(null, None, None)
+
             case _ =>
                 redrawAll()
         }
@@ -340,5 +408,11 @@ class GraphView(val graphModel: Graph, container: Element) extends View
         }
         draw(null, None, None)
         //^because elements are drawn into separate layers, redraw(..) does not know to which context to draw
+    }
+
+    def clean() {
+        while(container.childNodes.length > 0) {
+            container.removeChild(container.firstChild)
+        }
     }
 }
