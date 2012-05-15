@@ -6,6 +6,4 @@ import cz.payola.domain.entities.User
   *
   * @param o A user which is the subject of this privilege.
   */
-abstract class UserPrivilege(o: User) extends Privilege[User](o) {
-
-}
+abstract class UserPrivilege(o: User) extends Privilege[User](o)

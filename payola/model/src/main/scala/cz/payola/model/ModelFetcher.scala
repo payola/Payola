@@ -1,6 +1,7 @@
 package cz.payola.model
 
 import cz.payola.common.entities._
+import cz.payola.common.entities.analyses.{Parameter, PluginInstance, Plugin}
 
 abstract class ModelFetcher
 {

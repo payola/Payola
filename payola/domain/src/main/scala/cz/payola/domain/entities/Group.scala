@@ -1,32 +1,23 @@
 package cz.payola.domain.entities
 
-import collection.mutable._
-import cz.payola._
-import generic.{ConcreteEntity, SharedAnalysesOwner, ConcreteOwnedEntity, ConcreteNamedEntity}
+import scala.collection.mutable
 
 /** Group entity at the domain level.
   *
   * Contains a list of members, shared analyses.
   *
-  * @param id ID of the group.
   * @param _name Name of the group.
   * @param _owner Owner of the group.
   * @param validate ???
   */
-class Group(
-        id:String = java.util.UUID.randomUUID.toString,
-        protected var _name: String,
-        protected val _owner: User,
-        validate: Boolean = true)
-    extends ConcreteEntity(id)
-    with common.entities.Group
-    with ConcreteNamedEntity
-    with ConcreteOwnedEntity
-    with SharedAnalysesOwner
+class Group(protected var _name: String, protected val _owner: User, validate: Boolean = true)
+    extends Entity with NamedEntity with cz.payola.common.entities.Group
 {
-    def this() = this(null, null, null)
+    def this() = this(null, null, false)
 
-    protected val _members: ArrayBuffer[UserType] = new ArrayBuffer[UserType]()
+    type UserType = User
+
+    protected val _members = new mutable.ArrayBuffer[UserType]()
 
     // We need to be able to create a new instance of Group with no parameters.
     // Hence if both _name and _owner are null, let it slip. If one of them is null
@@ -37,7 +28,7 @@ class Group(
         throw new IllegalArgumentException("Group needs a name!")
     }
 
-    if (_owner != null){
+    if (_owner != null) {
         _owner.addOwnedGroup(this)
     }
 
@@ -54,9 +45,11 @@ class Group(
 
         if (!_members.contains(u)) {
             _members += u
-
-            u.addToGroup(this)
         }
+    }
+
+    override def canEqual(other: Any): Boolean = {
+        other.isInstanceOf[Group]
     }
 
     /** Results in true if the user is a member.
@@ -98,8 +91,6 @@ class Group(
         // Need to make this check, otherwise we'd
         // get in to an infinite cycle
         if (_members.contains(u)) {
-            u.removeFromGroup(this)
-
             _members -= u
         }
     }

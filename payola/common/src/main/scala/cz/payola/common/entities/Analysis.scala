@@ -1,14 +1,26 @@
 package cz.payola.common.entities
 
-import scala.collection
+import analyses.{PluginInstanceBinding, PluginInstance}
 import scala.collection.mutable
 
-trait Analysis extends NamedEntity with OwnedEntity
+/**
+  * A named sequence of analytical plugin instances.
+  */
+trait Analysis extends NamedEntity with OptionallyOwnedEntity with ShareableEntity
 {
-    /** Type of the plugin instances the analysis consists of. */
+    /** Type of the analytical plugin instances the analysis consists of. */
     type PluginInstanceType <: PluginInstance
+
+    /** Type of the bindings between analytical plugin instances. */
+    type PluginInstanceBindingType <: PluginInstanceBinding
 
     protected val _pluginInstances: mutable.Seq[PluginInstanceType]
 
-    def pluginInstances: collection.Seq[PluginInstanceType] = _pluginInstances
+    protected val _pluginInstanceBindings: mutable.Seq[PluginInstanceBindingType]
+
+    /* Analytical plugin instances the analysis consists of.*/
+    def pluginInstances: Seq[PluginInstanceType] = _pluginInstances
+
+    /* Bindings between the analytical plugin instances. */
+    def pluginInstanceBindings: Seq[PluginInstanceBindingType] = _pluginInstanceBindings
 }

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ScalaProjectSettings">
+    <option name="addFullQualifiedImports" value="true" />
+    <option name="classCountToUseImportOnDemand" value="3" />
+    <option name="searchAllSymbols" value="true" />
+    <option name="showArgumentsToByNameParams" value="true" />
+  </component>
+</project>
+

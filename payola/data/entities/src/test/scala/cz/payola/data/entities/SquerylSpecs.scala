@@ -3,7 +3,12 @@ package cz.payola.data.entities
 import dao._
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
-import schema.PayolaDB
+import cz.payola.data.entities.analyses._
+import cz.payola.data.entities.analyses.parameters._
+import scala.collection.immutable
+import cz.payola.domain.entities.analyses.plugins.data.SparqlEndpoint
+import cz.payola.domain.entities.analyses.plugins.query._
+import cz.payola.domain.entities.analyses.plugins.Union
 
 class SquerylSpecs extends FlatSpec with ShouldMatchers
 {
@@ -13,7 +18,7 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
 
     val analysisDao = new AnalysisDAO()
 
-    val plugDao = new PluginDAO
+    val plugDao = new PluginDAO()
 
     val plugInstDao = new PluginInstanceDAO()
 
@@ -33,33 +38,33 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
 
     val sParInstDao = new StringParameterInstanceDAO()
 
-    val user = new User("u1", "name", "pwd1", "email1")
+    val user = new User("name", "pwd1", "email1")
 
-    val group1 = new Group("g1", "group", user)
+    val group1 = new Group("group", user)
 
-    val group2 = new Group("g2", "group2", user)
+    val group2 = new Group("group2", user)
 
-    val analysis = new Analysis("a1", "an", user)
+    val analysis = new Analysis("an", Some(user))
 
-    val plug = new Plugin("p1", "plugin")
+    val bPar = new BooleanParameter("bPar", true)
 
-    val plugInst = new PluginInstance("pi1", plug, analysis)
+    val bParInst = new BooleanParameterValue(bPar, false)
 
-    val bPar = new BooleanParameter("b1", "bPar", true, plug)
+    val fPar = new FloatParameter("fPar", -1.0f)
 
-    val bParInst = new BooleanParameterInstance("bi1", bPar, false, plugInst)
+    val fParInst = new FloatParameterValue(fPar, 1.0f)
 
-    val fPar = new FloatParameter("f1", "fPar", -1.0f, plug)
+    val iPar = new IntParameter("iPar", -1)
 
-    val fParInst = new FloatParameterInstance("fi1", fPar, 1.0f, plugInst)
+    val iParInst = new IntParameterValue(iPar, 1)
 
-    val iPar = new IntParameter("i1", "iPar", -1, plug)
+    val sPar = new StringParameter("sPar", "empty")
 
-    val iParInst = new IntParameterInstance("ii1", iPar, 1, plugInst)
+    val sParInst = new StringParameterValue(sPar, "string")
 
-    val sPar = new StringParameter("s1", "sPar", "empty", plug)
+    val plug = new Plugin("plugin", 1, List(bPar, fPar, iPar, sPar))
 
-    val sParInst = new StringParameterInstance("si1", sPar, "string", plugInst)
+    val plugInst = new PluginInstance(plug, List(bParInst, fParInst, iParInst, sParInst))
 
     // Init
     assert (PayolaDB.connect())
@@ -104,7 +109,7 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
         assert(g != None)
         assert(g.get.id == group1.id)
         assert(g.get.name == group1.name)
-        assert(g.get.ownerId == user.id)
+        assert(g.get.ownerId.get == user.id)
     }
 
     "3) Members of groups" should "be persisted" in {
@@ -152,6 +157,7 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
     }
 
     "6) PluginInstances" should "be persited, loaded and managed by PluginInstancesDAO" in {
+        plugInst.analysisId = Some(analysis.id)
         plugInstDao.persist(plugInst)
 
         val p = plugInstDao.getById(plugInst.id)
@@ -163,10 +169,6 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
     }
 
     "7) BooleanParameters" should "be persited, loaded and managed by BooleanParameterDAO" in {
-        bParDao.persist(bPar)
-
-        // Update test
-        bPar.name += "1"
         bParDao.persist(bPar)
 
         val p = bParDao.getById(bPar.id)
@@ -193,10 +195,6 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
     "9) FloatParameters" should "be persited, loaded and managed by FloatParameterDAO" in {
         fParDao.persist(fPar)
 
-        // Update test
-        fPar.name += "1"
-        fParDao.persist(fPar)
-
         val p = fParDao.getById(fPar.id)
         assert(p != None)
         assert(p.get.id == fPar.id)
@@ -219,10 +217,6 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
     }
 
     "11) IntParameters" should "be persited, loaded and managed by IntParameterDAO" in {
-        iParDao.persist(iPar)
-
-        // Update test
-        iPar.name += "1"
         iParDao.persist(iPar)
 
         val p = iParDao.getById(iPar.id)
@@ -249,10 +243,6 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
     "13) StringParameters" should "be persited, loaded and managed by StringParameterDAO" in {
         sParDao.persist(sPar)
 
-        // Update test
-        sPar.name += "1"
-        sParDao.persist(sPar)
-
         val p = sParDao.getById(sPar.id)
         assert(p != None)
         assert(p.get.id == sPar.id)
@@ -276,17 +266,17 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
 
     "15) Plugins and Parameters" should "work with their instances" in {
         assert(plug.parameters.size == 4)
-        assert(plugInst.parameterInstances.size == 4)
+        assert(plugInst.parameterValues.size == 4)
 
         assert(plug.parameters.find(par => par.id == bPar.id) != None)
         assert(plug.parameters.find(par => par.id == fPar.id) != None)
         assert(plug.parameters.find(par => par.id == iPar.id) != None)
         assert(plug.parameters.find(par => par.id == sPar.id) != None)
 
-        assert(plugInst.parameterInstances.find(par => par.id == bParInst.id) != None)
-        assert(plugInst.parameterInstances.find(par => par.id == fParInst.id) != None)
-        assert(plugInst.parameterInstances.find(par => par.id == iParInst.id) != None)
-        assert(plugInst.parameterInstances.find(par => par.id == sParInst.id) != None)
+        assert(plugInst.parameterValues.find(par => par.id == bParInst.id) != None)
+        assert(plugInst.parameterValues.find(par => par.id == fParInst.id) != None)
+        assert(plugInst.parameterValues.find(par => par.id == iParInst.id) != None)
+        assert(plugInst.parameterValues.find(par => par.id == sParInst.id) != None)
     }
 
     "16) Cascade Deletes" should "be used when defined" in {
@@ -295,14 +285,14 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
         assert(bParDao.getById(bPar.id) == None)
         assert(bParInstDao.getById(bParInst.id) == None)
         assert(plug.parameters.size == 3)
-        assert(plugInst.parameterInstances.size == 3)
+        assert(plugInst.parameterValues.size == 3)
 
         // Parameter instance removing should not remove parameter 
         fParInstDao.removeById(fParInst.id)
         assert(fParDao.getById(fPar.id) != None)
         assert(fParInstDao.getById(fParInst.id) == None)
         assert(plug.parameters.size == 3)
-        assert(plugInst.parameterInstances.size == 2)
+        assert(plugInst.parameterValues.size == 2)
 
         // Remove plugin -> remove parameters, plugin instances, parameter instances
         plugDao.removeById(plug.id)
@@ -317,12 +307,45 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
         plugInstDao.persist(plugInst)
         sParInstDao.persist(sParInst)
         assert (analysis.pluginInstances.size == 1)
-        assert (plugInst.parameterInstances.find(par => par.id == sParInst.id) != None)
+        assert (plugInst.parameterValues.find(par => par.id == sParInst.id) != None)
 
         // Remove analysis -> remove plugin instances
         analysisDao.removeById(analysis.id)
         assert (plugInstDao.getById(plugInst.id) == None)
     }
+
+    /*
+    "Analysis" should "work" in {
+        val sparqlEndpointPlugin = new SparqlEndpoint
+        val concreteSparqlQueryPlugin = new ConcreteSparqlQuery
+        val projectionPlugin = new Projection
+        val selectionPlugin = new Selection
+        val typedPlugin = new Typed
+        //TODO: missing LeftJoin class in: val leftJoinPlugin = new LeftJoin
+        val unionPlugin = new Union
+
+        val plugins = List(
+            sparqlEndpointPlugin,
+            concreteSparqlQueryPlugin,
+            projectionPlugin,
+            selectionPlugin,
+            typedPlugin,
+            //leftJoinPlugin,
+            unionPlugin
+        )
+
+        for (p <- plugins) {
+            plugDao.persist(new Plugin(p.name, p.inputCount, p.parameters))
+            assert(plugDao.getByName(p.name) != None)
+        }
+        
+        val plugInst2 = plug.createInstance()
+        analysis.addPluginInstances(plugInst, plugInst2)
+        analysis.addBinding(new PluginInstanceBinding(plugInst, plugInst2))
+
+        assert(analysis.pluginInstanceBindings.size == 1)
+    }
+    */
 
     "DAOs" should "paginate properly" in {
         assert(userDao.getAll().size == 1)
