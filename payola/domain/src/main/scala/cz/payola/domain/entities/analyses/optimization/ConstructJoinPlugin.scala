@@ -4,7 +4,7 @@ import cz.payola.domain.entities.analyses.PluginInstance
 import cz.payola.domain.entities.analyses.plugins.query.Construct
 import cz.payola.domain.sparql._
 
-object ConstructJoinPlugin extends Construct("Joined SPARQL construct queries", Nil)
+object ConstructJoinPlugin extends Construct("Joined SPARQL construct queries")
 {
     override def createInstance(): PluginInstance = {
         throw new UnsupportedOperationException(

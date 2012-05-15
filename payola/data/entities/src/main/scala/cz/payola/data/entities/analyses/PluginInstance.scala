@@ -23,14 +23,12 @@ class PluginInstance(plugin: Plugin, paramValues: immutable.Seq[ParameterValue[_
 
     // Assosiate parameter values to plugin instance
     if (paramValues != null) {
-        paramValues.map(
-            _ match {
-                case paramValue: BooleanParameterValue => paramValue.pluginInstanceId = Some(id)
-                case paramValue: FloatParameterValue => paramValue.pluginInstanceId = Some(id)
-                case paramValue: IntParameterValue => paramValue.pluginInstanceId = Some(id)
-                case paramValue: StringParameterValue => paramValue.pluginInstanceId = Some(id)
-            }
-        )
+        paramValues.map {
+            case paramValue: BooleanParameterValue => paramValue.pluginInstanceId = Some(id)
+            case paramValue: FloatParameterValue => paramValue.pluginInstanceId = Some(id)
+            case paramValue: IntParameterValue => paramValue.pluginInstanceId = Some(id)
+            case paramValue: StringParameterValue => paramValue.pluginInstanceId = Some(id)
+        }
     }
 
     override def parameterValues: collection.immutable.Seq[PluginType#ParameterValueType] = {
