@@ -1,11 +1,11 @@
-package cz.payola.web.client.views.plugins.visual.components.visualsetup
+package cz.payola.web.client.views.plugins.visual.settings.components.visualsetup
 
 import cz.payola.web.client.mvvm_api.Component
 import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom.Element
 import cz.payola.web.client.mvvm_api.element.{Input, Div}
 import cz.payola.web.client.events.{EventArgs, ComponentEvent}
-import cz.payola.web.client.views.plugins.visual.VertexSettingsModel
+import cz.payola.web.client.views.plugins.visual.settings.VertexSettingsModel
 import s2js.adapters.js.browser.window
 
 class VertexModal(model: VertexSettingsModel) extends Component
@@ -83,15 +83,15 @@ class VertexModal(model: VertexSettingsModel) extends Component
         event => settingsChanged.trigger(new EventArgs[VertexModal](this))
     }
 
-    def render(parent: Element = document.body) = {
+    def render(parent: Element = document.body) {
         modal.render(parent)
     }
 
-    def show {
+    def show() {
         modal.show
     }
 
-    def hide {
+    def hide() {
         modal.hide
     }
 }

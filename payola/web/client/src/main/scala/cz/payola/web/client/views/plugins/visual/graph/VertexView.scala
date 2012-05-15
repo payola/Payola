@@ -4,6 +4,7 @@ import collection.mutable.ListBuffer
 import cz.payola.common.rdf.{LiteralVertex, IdentifiedVertex, Vertex}
 import s2js.adapters.js.dom.CanvasRenderingContext2D
 import cz.payola.web.client.views.plugins.visual._
+import settings.VertexSettingsModel
 
 /**
  * Graphical representation of Vertex object in the drawn graph.
@@ -13,7 +14,9 @@ import cz.payola.web.client.views.plugins.visual._
 class VertexView(val vertexModel: Vertex, var position: Point, var settings: VertexSettingsModel) extends View
 {
 
-    private var image = prepareImage(
+    private var age = 0
+
+    private val image = prepareImage(
         vertexModel match {
             case i: LiteralVertex => new Color(180, 50, 50, 1)
             case i: IdentifiedVertex => new Color(50, 180, 50, 1)
@@ -42,6 +45,18 @@ class VertexView(val vertexModel: Vertex, var position: Point, var settings: Ver
         case i: LiteralVertex => Some(new InformationView(i))
         case i: IdentifiedVertex => Some(new InformationView(i))
         case _ => None
+    }
+
+    def getCurrentAge: Int = {
+        age
+    }
+
+    def resetCurrentAge() {
+        age = 0
+    }
+
+    def increaseCurrentAge() {
+        age += 1
     }
 
     def isPointInside(point: Point): Boolean = {

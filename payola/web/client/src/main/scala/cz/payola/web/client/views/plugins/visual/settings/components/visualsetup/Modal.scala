@@ -1,8 +1,8 @@
-package cz.payola.web.client.views.plugins.visual.components.visualsetup
+package cz.payola.web.client.views.plugins.visual.settings.components.visualsetup
 
 import s2js.adapters.js.browser.document
 import cz.payola.web.client.mvvm_api.Component
-import s2js.adapters.js.dom.{Element}
+import s2js.adapters.js.dom.Element
 import cz.payola.web.client.events.{EventArgs, ComponentEvent}
 import cz.payola.web.client.mvvm_api.element.{Text, Anchor}
 import s2js.compiler.javascript
@@ -52,7 +52,7 @@ class Modal(title: String, body: Seq[Component]) extends Component
             }else false
     }
 
-    def render(parent: Element = document.body) = {
+    def render(parent: Element = document.body) {
         modalHeader.appendChild(btnClose)
         modalHeader.appendChild(heading)
         modalDiv.appendChild(modalHeader)

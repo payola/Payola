@@ -1,25 +1,29 @@
 package cz.payola.web.client.views.plugins.visual.techniques.minimalization
 
 import collection.mutable.ListBuffer
-import cz.payola.web.client.views.plugins.visual.graph.{EdgeView, VertexView}
 import cz.payola.web.client.views.plugins.visual.animation.Animation
 import cz.payola.web.client.views.plugins.visual.techniques.BaseTechnique
-import cz.payola.web.client.views.plugins.visual.components.visualsetup.VisualSetup
+import cz.payola.web.client.views.plugins.visual.settings.components.visualsetup.VisualSetup
+import cz.payola.web.client.views.plugins.visual.graph.{Component, EdgeView, VertexView}
+import cz.payola.web.client.views.plugins.visual.Point
 
 class MinimalizationTechnique(settings: VisualSetup) extends BaseTechnique(settings)
 {
     //TODO add some computation branch cutting...this algorithm is quite complex
-    def performTechnique() {
-        minimizeEdgeCrossing(graphView.get.vertexViews)
 
-        val moveToCorner2 = new Animation[VertexView](Animation.moveGraphToUpperLeftCorner, graphView.get.vertexViews,
-            None, redrawQuick, redraw, None)
-        val flip = new Animation[VertexView](Animation.flipGraph, graphView.get.vertexViews, Some(moveToCorner2),
-            redrawQuick, redraw, None)
-        val moveToCorner1 = new Animation[VertexView](Animation.moveGraphToUpperLeftCorner, graphView.get.vertexViews,
-            Some(flip), redrawQuick, redraw, None)
+    protected def getTechniquePerformer(component: Component, animate: Boolean): Animation[ListBuffer[(VertexView, Point)]] = {
 
-        basicTreeStructure(graphView.get.vertexViews, true, Some(moveToCorner1))
+        minimizeEdgeCrossing(component.vertexViews) //TODO this is impossible to combine with animation
+
+        if(animate) {
+            val flip = new Animation(
+                Animation.flipGraph, component.vertexViews, None, redrawQuick, redraw, None)
+            basicTreeStructure(component.vertexViews, Some(flip), redrawQuick, redraw, None)
+        } else {
+            val flip = new Animation(
+                Animation.flipGraph, component.vertexViews, None, redrawQuick, redraw, Some(0))
+            basicTreeStructure(component.vertexViews, Some(flip), redrawQuick, redraw, Some(0))
+        }
     }
 
     override def clean() {
@@ -184,17 +188,17 @@ class MinimalizationTechnique(settings: VisualSetup) extends BaseTechnique(setti
         // 1) vezmu parenta posledniho children listu a zarotuju
         // 2) pokud pri rotaci doslo k otoceni permutace dokola (jsem opet na prvni permutaci)
         //      musim udelat permutaci i na predchozim bratrovi (pokud takovy neni rotuju otce meho posledniho bratra)
-        var lastParent = root.getLastParent()
+        var lastParent = root.getLastParent
         if(lastParent.children.length < 2) {
-            lastParent = lastParent.getPreviousBrotherWithChildren()
+            lastParent = lastParent.getPreviousBrotherWithChildren
         }
 
         if (lastParent.rotateChildren()) {
-            var brother = lastParent.getPreviousBrotherWithChildren()
+            var brother = lastParent.getPreviousBrotherWithChildren
 
             while (brother.rotateChildren() && brother.parent != None) {
                 //if brother.parent == None pak jsem dosel do korene struktury a vsechny rotace byly vyzkouseny
-                brother = brother.getPreviousBrotherWithChildren()
+                brother = brother.getPreviousBrotherWithChildren
             }
         }
     }

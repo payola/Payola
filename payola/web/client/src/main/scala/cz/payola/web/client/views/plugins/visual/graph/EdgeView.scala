@@ -3,6 +3,7 @@ package cz.payola.web.client.views.plugins.visual.graph
 import cz.payola.common.rdf.Edge
 import s2js.adapters.js.dom.CanvasRenderingContext2D
 import cz.payola.web.client.views.plugins.visual._
+import settings.EdgeSettingsModel
 
 /**
   * Structure used during draw function of EdgeView. Helps to indicate position of vertices to each other.

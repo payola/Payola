@@ -1,7 +1,6 @@
 package cz.payola.web.client.views.plugins.visual
 
 import animation.Animation
-import components.visualsetup.VisualSetup
 import cz.payola.web.client.views.plugins.Plugin
 import graph.{InformationView, VertexView, GraphView}
 import s2js.adapters.js.dom.Element
@@ -10,6 +9,8 @@ import cz.payola.common.rdf.Graph
 import s2js.adapters.js.browser.document
 import s2js.adapters.goog._
 import collection.mutable.ListBuffer
+import settings.components.visualsetup.VisualSetup
+import s2js.adapters.js.browser.window
 
 /**
   * Representation of visual based output drawing plugin
@@ -78,7 +79,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
 
         val position = getPosition(event)
 
-        var resultedAnimation: Option[Animation[InformationView]] = None
+        var resultedAnimation: Option[Animation[ListBuffer[InformationView]]] = None
 
         val vertex = graphView.get.getTouchedVertex(position)
 
@@ -91,8 +92,8 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
                         toAnimate += vertex.get.information.get
                     }
                     toAnimate ++= getEdgesInformations(vertex.get)
-                    resultedAnimation = Some(new Animation(Animation.showText, toAnimate, None,
-                        redrawSelection, redrawSelection, None))
+                    resultedAnimation = Some(
+                        new Animation(Animation.showText, toAnimate, None, redrawSelection, redrawSelection, Some(0)))
                 } else {
                     redrawSelection()
                 }
@@ -102,13 +103,14 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
                 }
                 moveStart = Some(position)
                 if(graphView.get.selectVertex(vertex.get)) {
+
                     val toAnimate = ListBuffer[InformationView]()
                     if(vertex.get.information.isDefined) {
                         toAnimate += vertex.get.information.get
                     }
                     toAnimate ++= getEdgesInformations(vertex.get)
                     resultedAnimation = Some(new Animation(Animation.showText, toAnimate, None,
-                        redrawSelection, redrawSelection, None))
+                        redrawSelection, redrawSelection, Some(0)))
                 } else {
                     redrawSelection()
                 }
@@ -124,6 +126,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
         if(resultedAnimation.isDefined) {
             resultedAnimation.get.run()
         }
+
     }
 
     /**

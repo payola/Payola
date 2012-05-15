@@ -11,13 +11,11 @@ import cz.payola.web.client.views.plugins.visual.techniques.circle.CircleTechniq
 import cz.payola.web.client.views.plugins.visual.techniques.gravity.GravityTechnique
 import cz.payola.web.client.views.plugins.visual.techniques.minimalization.MinimalizationTechnique
 import cz.payola.web.client.views.plugins.textual.techniques.table.TableTechnique
-import s2js.adapters.goog
-import goog.events.BrowserEvent
 import cz.payola.web.client.views.plugins.textual.TextPlugin
-import cz.payola.web.client.views.plugins.visual.components.visualsetup.VisualSetup
+import cz.payola.web.client.views.plugins.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.views.plugins.visual._
-import cz.payola.web.client.events.ChangedEventArgs
 import cz.payola.web.client.mvvm_api.element.{Anchor, Li, Text}
+import settings.{VertexSettingsModel, TextSettingsModel, EdgeSettingsModel}
 
 // TODO remove after classloading is done
 @dependency("cz.payola.common.rdf.IdentifiedVertex")
@@ -51,10 +49,9 @@ class Index
 
         pluginBtn.clicked += {
             event =>
-                val pluginOp = plugins.find(_.getName == plugin.getName)
-                if(pluginOp.isDefined) {
-                    currentPlugin = pluginOp
-                    changePlugin(currentPlugin.get)
+                val newPlugin = plugins.find(_.getName == plugin.getName)
+                if(newPlugin.isDefined) {
+                    changePlugin(newPlugin.get)
                 }
                 false
         }
@@ -64,8 +61,10 @@ class Index
         try {
             visualSetup.render(document.getElementById("settings"))
             //TODO show "asking the server for the data"
+
             graph = Option(GraphFetcher.getInitialGraph)
             //TODO show "preparing visualisation"
+
             changePlugin(plugins.head)
             //TODO hide info
         } catch {
@@ -104,21 +103,16 @@ class Index
                 currentPlugin.get.redraw()
         }
     }
-    
-    def changePluginByNumber(number: Int) {
-        if(0 <= number && number < plugins.length) {
-            changePlugin(plugins(number))
-        }
-    }
 
     def changePlugin(plugin: Plugin) {
         currentPlugin.foreach(_.clean())
 
         // Switch to the new one.
         currentPlugin = Some(plugin)
-        plugin.init(document.getElementById("graph-plugin-draw-space"))
-        plugin.update(graph.get)
 
+        plugin.init(document.getElementById("graph-plugin-draw-space"))
+
+        plugin.update(graph.get)
 
         currentPlugin.get match {
             case i: TextPlugin =>

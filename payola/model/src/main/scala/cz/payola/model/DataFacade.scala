@@ -21,6 +21,20 @@ class DataFacade
             "&save=display"
         val configurations = List(new SparqlEndpointConfiguration(dbPediaEndpointUrl))
 
+        /*val query = """
+            CONSTRUCT {
+                ?x <http://dbpedia.org/ontology/populationDensity> ?p0 .
+                ?x <http://dbpedia.org/ontology/populationMetro> ?p1 .
+                ?x <http://dbpedia.org/ontology/populationTotal> ?p3 .
+                ?x <http://dbpedia.org/ontology/populationUrban> ?p4 . }
+            WHERE {
+                ?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/City> .
+                ?x <http://dbpedia.org/ontology/populationDensity> ?p0 .
+                ?x <http://dbpedia.org/ontology/populationMetro> ?p1 .
+                ?x <http://dbpedia.org/ontology/populationTotal> ?p3 .
+                ?x <http://dbpedia.org/ontology/populationUrban> ?p4 .
+                FILTER (?p4 > 2000000) .}""".format(uri,uri)*/
+
         val query = """
             CONSTRUCT {
                 <%s> ?p1 ?n1 .

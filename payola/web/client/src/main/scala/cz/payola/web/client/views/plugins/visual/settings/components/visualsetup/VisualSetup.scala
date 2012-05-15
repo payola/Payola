@@ -1,24 +1,16 @@
-package cz.payola.web.client.views.plugins.visual.components.visualsetup
+package cz.payola.web.client.views.plugins.visual.settings.components.visualsetup
 
 import cz.payola.web.client.mvvm_api.Component
 import s2js.adapters.js.browser.document
-import s2js.adapters.js.dom.{Element}
-import cz.payola.web.client.views.plugins.Plugin
-import cz.payola.web.client.events.{ChangedEventArgs, ChangedEvent}
-import cz.payola.web.client.views.plugins.visual.{EdgeSettingsModel, TextSettingsModel, VertexSettingsModel}
+import s2js.adapters.js.dom.Element
+import cz.payola.web.client.views.plugins.visual.settings.{VertexSettingsModel, TextSettingsModel, EdgeSettingsModel}
 import cz.payola.web.client.mvvm_api.element.{Anchor, Li, Text}
 
-/**
- *
- * @author jirihelmich
- * @created 5/4/12 7:16 PM
- * @package cz.payola.web.client.views.plugins.visual.components.visualsetup
- */
 
 class VisualSetup(var vertexModel: VertexSettingsModel, var edgesModel: EdgeSettingsModel, var textModel: TextSettingsModel) extends Component
 {
 
-    def render(parent: Element = document.body) = {
+    def render(parent: Element = document.body) {
 
         new Li(List(), "divider").render(parent)
 
@@ -42,19 +34,19 @@ class VisualSetup(var vertexModel: VertexSettingsModel, var edgesModel: EdgeSett
 
         vertex.clicked += {
             event =>
-                vertexSettings.show
+                vertexSettings.show()
                 false
         }
 
         edges.clicked += {
             event =>
-                edgesSettings.show
+                edgesSettings.show()
                 false
         }
 
         text.clicked += {
             event =>
-                textSettings.show
+                textSettings.show()
                 false
         }
     }
