@@ -6,6 +6,6 @@ import cz.payola.domain.rdf.Graph
 class Union extends Plugin("Union", 2, Nil)
 {
     def evaluate(instance: PluginInstance, inputs: IndexedSeq[Graph], progressReporter: Double => Unit): Graph = {
-        inputs(0) + inputs(1)
+        inputs.fold(Graph.empty)(_ + _)
     }
 }
