@@ -2,26 +2,77 @@ package cz.payola.domain.test
 
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
-import cz.payola.domain.entities.sources.SparqlEndpointDataSource
 import scala.actors.Actor
 import scala.collection.mutable.Queue
-import cz.payola.domain.entities.{Analysis, DataSource}
-import cz.payola.domain.entities.analyses.plugins.SparqlQuery
-import cz.payola.domain.entities.analyses.messages._
+import cz.payola.domain.entities.Analysis
 import cz.payola.domain.entities.analyses._
 import cz.payola.domain.rdf._
+import evaluation.Success
+import plugins.data.SparqlEndpoint
+import plugins.query._
+import plugins.{Join, Union}
 
 class AnalysisEvaluationSpecs extends FlatSpec with ShouldMatchers
 {
-    val dbPediaDataSource = new SparqlEndpointDataSource("DBPedia", None, "http://dbpedia.org/sparql")
+    "Analysis evaluation" should "work" in {
+        val sparqlEndpointPlugin = new SparqlEndpoint
+        val concreteSparqlQueryPlugin = new ConcreteSparqlQuery
+        val projectionPlugin = new Projection
+        val selectionPlugin = new Selection
+        val typedPlugin = new Typed
+        val join = new Join
+        val unionPlugin = new Union
 
-    val dataGovDataSource = new SparqlEndpointDataSource("Data.gov", None, "http://services.data.gov/sparql")
+        val analysis = new Analysis("Cities with more than 2 million habitants with countries", None)
 
-    val invalidDataSource = new SparqlEndpointDataSource("Invalid", None, "http://invalid/sparql")
+        val citiesFetcher = sparqlEndpointPlugin.createInstance().setParameter("EndpointURL", "http://dbpedia.org/sparql")
+        val citiesTyped = typedPlugin.createInstance().setParameter("TypeURI", "http://dbpedia.org/ontology/City")
+        val citiesProjection = projectionPlugin.createInstance().setParameter("PropertyURIs", List(
+            "http://dbpedia.org/ontology/populationDensity", "http://dbpedia.org/ontology/populationTotal"
+        ).mkString("\n"))
+        val citiesSelection = selectionPlugin.createInstance().setParameter(
+            "PropertyURI", "http://dbpedia.org/ontology/populationTotal"
+        ).setParameter(
+            "Operator", ">"
+        ).setParameter(
+            "Value", "2000000"
+        )
+        analysis.addPluginInstances(citiesFetcher, citiesTyped, citiesProjection, citiesSelection)
+        analysis.addBinding(citiesFetcher, citiesTyped)
+        analysis.addBinding(citiesTyped, citiesProjection)
+        analysis.addBinding(citiesProjection, citiesSelection)
+
+        val countriesFetcher = sparqlEndpointPlugin.createInstance().setParameter("EndpointURL", "http://dbpedia.org/sparql")
+        val countriesTyped = typedPlugin.createInstance().setParameter("TypeURI", "http://dbpedia.org/ontology/Country")
+        val countriesProjection = projectionPlugin.createInstance().setParameter("PropertyURIs", List(
+            "http://dbpedia.org/ontology/areaTotal"
+        ).mkString("\n"))
+        analysis.addPluginInstances(countriesFetcher, countriesTyped, countriesProjection)
+        analysis.addBinding(countriesFetcher, countriesTyped)
+        analysis.addBinding(countriesTyped, countriesProjection)
+
+        val citiesCountriesJoin = join.createInstance().setParameter(
+            "JoinPropertyURI", "http://dbpedia.org/ontology/country"
+        ).setParameter(
+            "IsInner", false
+        )
+        analysis.addPluginInstances(citiesCountriesJoin)
+        analysis.addBinding(citiesSelection, citiesCountriesJoin, 0)
+        analysis.addBinding(countriesProjection, citiesCountriesJoin, 1)
+
+        val evaluation = analysis.evaluate()
+        while (!evaluation.isFinished) {
+            println("Not finished, current progress: " + evaluation.progress.value)
+            Thread.sleep(1000)
+        }
+        val result = evaluation.result
+        println("Done with result: " + result.toString)
+        assert(result.map(_.isInstanceOf[Success]).getOrElse(false))
+    }
 
     val selectQuery = "select distinct ?Concept where {[] a ?Concept} LIMIT 100";
 
-    val constructQuery = """
+    /*val constructQuery = """
         CONSTRUCT {
             <http://dbpedia.org/resource/Prague> ?p1 ?n1 .
             ?n1 ?p2 ?n2 .
@@ -192,7 +243,7 @@ class AnalysisEvaluationSpecs extends FlatSpec with ShouldMatchers
         forwarder.start()
         queryExecution.start()
         forwarder
-    }
+    }*/
 }
 
 object GetNextMessage
@@ -223,21 +274,21 @@ class Forwarder extends Actor
     }
 }
 
-class NodeCounter extends Plugin("Node counter", Nil)
+class NodeCounter extends Plugin("Node counter", 1, Nil)
 {
-    def evaluate(inputGraph: Graph, parameterInstances: Seq[ParameterValue[_]], progressReporter: Double => Unit) = {
-        (1 to 10).foreach {i =>
+    def evaluate(instance: PluginInstance, inputs: IndexedSeq[Graph], progressReporter: Double => Unit): Graph = {
+        (1 to 10).foreach { i =>
             Thread.sleep(100)
             progressReporter(i / 10.0)
         }
-        new Graph(List(new LiteralNode(inputGraph.vertices.length)), Nil)
+        new Graph(List(new LiteralNode(inputs(0).vertices.length)), Nil)
     }
 }
 
-class IntDoubler extends Plugin("Int doubler", Nil)
+class IntDoubler extends Plugin("Int doubler", 1, Nil)
 {
-    def evaluate(inputGraph: Graph, parameterInstances: Seq[ParameterValue[_]], progressReporter: Double => Unit) = {
-        val doubled = inputGraph.vertices.headOption.flatMap {
+    def evaluate(instance: PluginInstance, inputs: IndexedSeq[Graph], progressReporter: Double => Unit): Graph = {
+        val doubled = inputs(0).vertices.headOption.flatMap {
             case l: LiteralNode => {
                 l.value match {
                     case i: Int => Some(i + i)

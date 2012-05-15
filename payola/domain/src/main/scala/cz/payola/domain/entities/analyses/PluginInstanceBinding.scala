@@ -15,4 +15,8 @@ class PluginInstanceBinding(protected val _sourcePluginInstance: PluginInstance,
     }
 
     type PluginInstanceType = PluginInstance
+
+    override def canEqual(other: Any): Boolean = {
+        other.isInstanceOf[PluginInstanceBinding]
+    }
 }

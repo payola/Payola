@@ -6,4 +6,8 @@ class ParameterValue[A](protected val _parameter: Parameter[A], protected var _v
     extends Entity with cz.payola.common.entities.analyses.ParameterValue[A]
 {
     type ParameterType = Parameter[A]
+
+    override def canEqual(other: Any): Boolean = {
+        other.isInstanceOf[ParameterValue[_]]
+    }
 }

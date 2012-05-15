@@ -1,21 +1,30 @@
 package cz.payola.domain.entities.analyses.plugins.query
 
-import cz.payola.domain.entities.analyses.parameters.StringParameter
-import cz.payola.domain.entities.analyses.{PluginInstance, Plugin}
+import cz.payola.domain.entities.analyses.{PluginInstance, Parameter}
+import collection.immutable
 import cz.payola.domain.entities.analyses.plugins.SparqlQuery
+import cz.payola.domain.sparql.{ConstructQuery, Subject, Variable}
 
-sealed class Construct extends SparqlQuery("Construct Query", List(
-    new StringParameter("URI", ""),
-    new StringParameter("Operator", ""),
-    new StringParameter("Value", "")))
+abstract class Construct(name: String, parameters: immutable.Seq[Parameter[_]])
+    extends SparqlQuery(name, parameters)
 {
-    def getQuery(instance: PluginInstance): String = {
-        val uri = instance.getStringParameter("URI").get
-        val operator = instance.getStringParameter("Operator").get
-        val value = instance.getStringParameter("Value").get
+    /**
+      * Returns the construct query representation.
+      * @param instance The instance whose query representation should be retrieved.
+      * @param subject The subject to use within the representation.
+      * @param variableGetter An unique variable provider, that must be used when the plugin needs a new variable.
+      * @return The construct query representation.
+      */
+    def getConstructQuery(instance: PluginInstance, subject: Subject, variableGetter: () => Variable):
+        Option[ConstructQuery]
 
-        // TODO Prefixes?
-        "PREFIX foaf:    <http://xmlns.com/foaf/0.1/>\n" +
-            "CONSTRUCT { " + uri + " " + operator + " " + value + " }"
+    def getQuery(instance: PluginInstance): Option[String] = {
+        var i = 0;
+        def variableGetter = () => {
+            i += 1
+            Variable("v" + i)
+        }
+
+        getConstructQuery(instance, Variable("s"), variableGetter).map(_.toString)
     }
 }

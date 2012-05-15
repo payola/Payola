@@ -10,4 +10,6 @@ import cz.payola.domain.entities.Entity
   * @param obj Object, over which is the user granted a privilege.
   * @tparam A A subclass of the ConcreteEntity trait.
   */
-abstract class Privilege[A <: Entity](val obj: A) extends common.entities.permissions.privilege.Privilege[A]
+abstract class Privilege[A <: Entity](val obj: A) extends common.entities.permissions.privilege.Privilege[A] {
+
+}

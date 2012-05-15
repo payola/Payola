@@ -1,34 +1,18 @@
 package cz.payola.domain.test
 
-import cz.payola.domain._
-import entities.parameters.{StringParameter, Parameter}
-import entities.Plugin
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
-import collection.mutable.ArrayBuffer
+import cz.payola.domain.entities.analyses.parameters.StringParameter
+import cz.payola.domain.entities.analyses.Plugin
 
 class PluginTest extends FlatSpec with ShouldMatchers {
-    "Plugin" should "not get initialized with null or an empty string or a null array" in {
-//        evaluating(new Plugin(_name = null)) should produce [IllegalArgumentException]
-//        evaluating(new Plugin(_name = "")) should produce [IllegalArgumentException]
-
-        // Shouldn't produce an exception
-        new Plugin(_name = "Something")
-    }
 
     "Plugin" should "have sane getters and setters" in {
-        val p: Plugin = new Plugin(_name = "MyPlugin")
-        val param: StringParameter = new StringParameter(n = "Hello", defaultValue = "")
+        val p: Plugin = new PseudoPlugin("MyPlugin")
+        val param: StringParameter = new StringParameter("Hello", "")
 
-        p.containsParameter(param) should be (false)
-
-        evaluating(p.addParameter(null)) should produce[IllegalArgumentException]
-        p.addParameter(param)
-        p.containsParameter(param) should be (true)
-
-        p.removeParameter(param)
-        // second removal should produce an exception
-        evaluating(p.removeParameter(param)) should produce[IllegalArgumentException]
+        p.getParameter("Helo").isDefined should be (false)
+        p.getParameter("Hello").isDefined should be (false)
 
         evaluating(p.name_=(null)) should produce[IllegalArgumentException]
         evaluating(p.name_=("")) should produce[IllegalArgumentException]

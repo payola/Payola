@@ -13,9 +13,11 @@ abstract class Plugin(protected var _name: String, protected val _inputCount: In
 
     type ParameterValueType = ParameterValue[_]
 
-    type ProgressReporter = Unit => Double
-
     protected var _isPublic = false
+
+    override def canEqual(other: Any): Boolean = {
+        other.isInstanceOf[Plugin]
+    }
 
     /**
       * Returns a new instance of the plugin with all parameter instances set to default values.
@@ -40,5 +42,5 @@ abstract class Plugin(protected var _name: String, protected val _inputCount: In
       *                         the [0.0, 1.0] interval).
       * @return The output graph.
       */
-    def evaluate(instance: PluginInstance, inputs: IndexedSeq[Graph], progressReporter: ProgressReporter): Graph
+    def evaluate(instance: PluginInstance, inputs: IndexedSeq[Graph], progressReporter: Double => Unit): Graph
 }

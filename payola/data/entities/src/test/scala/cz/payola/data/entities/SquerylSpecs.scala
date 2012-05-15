@@ -6,6 +6,9 @@ import org.scalatest.matchers.ShouldMatchers
 import cz.payola.data.entities.analyses._
 import cz.payola.data.entities.analyses.parameters._
 import scala.collection.immutable
+import cz.payola.domain.entities.analyses.plugins.data.SparqlEndpoint
+import cz.payola.domain.entities.analyses.plugins.query._
+import cz.payola.domain.entities.analyses.plugins.Union
 
 class SquerylSpecs extends FlatSpec with ShouldMatchers
 {
@@ -15,7 +18,7 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
 
     val analysisDao = new AnalysisDAO()
 
-    val plugDao = new PluginDAO
+    val plugDao = new PluginDAO()
 
     val plugInstDao = new PluginInstanceDAO()
 
@@ -313,10 +316,34 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
 
     /*
     "Analysis" should "work" in {
-        analysis.addPluginInstances(i1, i2, i3, i4)
-        analysis.addBinding(i1, i2)
-        analysis.addBinding(i2, i3)
-        analysis.addBinding(i3, i4)
+        val sparqlEndpointPlugin = new SparqlEndpoint
+        val concreteSparqlQueryPlugin = new ConcreteSparqlQuery
+        val projectionPlugin = new Projection
+        val selectionPlugin = new Selection
+        val typedPlugin = new Typed
+        //TODO: missing LeftJoin class in: val leftJoinPlugin = new LeftJoin
+        val unionPlugin = new Union
+
+        val plugins = List(
+            sparqlEndpointPlugin,
+            concreteSparqlQueryPlugin,
+            projectionPlugin,
+            selectionPlugin,
+            typedPlugin,
+            //leftJoinPlugin,
+            unionPlugin
+        )
+
+        for (p <- plugins) {
+            plugDao.persist(new Plugin(p.name, p.inputCount, p.parameters))
+            assert(plugDao.getByName(p.name) != None)
+        }
+        
+        val plugInst2 = plug.createInstance()
+        analysis.addPluginInstances(plugInst, plugInst2)
+        analysis.addBinding(new PluginInstanceBinding(plugInst, plugInst2))
+
+        assert(analysis.pluginInstanceBindings.size == 1)
     }
     */
 

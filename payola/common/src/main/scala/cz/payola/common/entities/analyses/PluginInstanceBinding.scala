@@ -22,6 +22,6 @@ trait PluginInstanceBinding extends Entity
     /** The plugin instance that acts as a target of the binding (the binding is connected to its input). */
     def targetPluginInstance = _targetPluginInstance
 
-    /** Index of a target plugin instance input the binding is connected to. */
+    /** Index of the target plugin instance input the binding is connected to. */
     def targetInputIndex = _targetInputIndex
 }

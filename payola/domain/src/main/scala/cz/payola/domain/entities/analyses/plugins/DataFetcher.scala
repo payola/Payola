@@ -16,7 +16,7 @@ abstract class DataFetcher(name: String, parameters: immutable.Seq[Parameter[_]]
         }
     """
 
-    def evaluate(instance: PluginInstance, inputs: IndexedSeq[Graph], progressReporter: ProgressReporter): Graph = {
+    def evaluate(instance: PluginInstance, inputs: IndexedSeq[Graph], progressReporter: Double => Unit): Graph = {
         evaluateWithQuery(instance, selectEverythingQuery, progressReporter)
     }
 
@@ -28,5 +28,5 @@ abstract class DataFetcher(name: String, parameters: immutable.Seq[Parameter[_]]
       *                         the [0.0, 1.0] interval).
       * @return The output graph.
       */
-    def evaluateWithQuery(instance: PluginInstance, query: String, progressReporter: ProgressReporter): Graph
+    def evaluateWithQuery(instance: PluginInstance, query: String, progressReporter: Double => Unit): Graph
 }

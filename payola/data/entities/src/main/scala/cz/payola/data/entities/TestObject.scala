@@ -3,6 +3,9 @@ package cz.payola.data.entities
 import cz.payola.data.entities.dao._
 import cz.payola.data.entities.analyses.parameters._
 import cz.payola.data.entities.analyses._
+import cz.payola.domain.entities.analyses.plugins.data.SparqlEndpoint
+import cz.payola.domain.entities.analyses.plugins.query._
+import cz.payola.domain.entities.analyses.plugins.Union
 
 object TestObject
 {
@@ -15,6 +18,8 @@ object TestObject
     val plugDao = new PluginDAO
 
     val plugInstDao = new PluginInstanceDAO()
+
+    val pibDao = new PluginInstanceBindingDAO()
 
     val bParDao = new BooleanParameterDAO()
 
@@ -67,7 +72,7 @@ object TestObject
         println("Creating schema ...")
         PayolaDB.createSchema();                                         
         
-        println("Persising user ...")
+        println("Persisting user ...")
         userDao.persist(user)
 
         // Update test
@@ -90,7 +95,7 @@ object TestObject
         assert(userDao.getUserByCredentials(user.name, user.password).get.id == user.id)
         assert(userDao.getUserByCredentials("invalid", "credientals") == None)                                         
                 
-        println("Persising group ...")
+        println("Persisting group ...")
         groupDao.persist(group1)
         groupDao.persist(group2)
 
@@ -113,7 +118,7 @@ object TestObject
         assert(group1.members(0).name == user.name, "Invalid group owner")
         assert(group2.members(0).name == user.name, "Invalid group2 owner")                                                                            
         
-        println("Persising analysis ...")
+        println("Persisting analysis ...")
         analysisDao.persist(analysis)
 
         // Update test
@@ -127,7 +132,7 @@ object TestObject
         assert(a.get.id == analysis.id)
         assert(analysisDao.getById("") == None)
 
-        println("Persising plugin ...")
+        println("Persisting plugin ...")
         plugDao.persist(plug)
 
         // Update test
@@ -140,7 +145,7 @@ object TestObject
         assert(pl.get.id == plug.id)
         assert(plugDao.getById("") == None)
 
-        println("Persising plugin instance ...")
+        println("Persisting plugin instance ...")
         plugInst.analysisId = Some(analysis.id)
         plugInstDao.persist(plugInst)
 
@@ -149,7 +154,7 @@ object TestObject
         assert(pi.get.id == plugInst.id)
         assert(plugInstDao.getById("") == None)
                 
-        println("Persising parameters and values ...")   
+        println("Persisting parameters and values ...")   
         println("   boolean:")
         bParDao.persist(bPar)
 
@@ -219,6 +224,7 @@ object TestObject
         assert(sPar.instances.size == 1)
         
         println("Analysis work ... ")
+        println("   Parameters check")
         assert(plug.parameters.size == 4)
         assert(plugInst.parameterValues.size == 4)
         assert (analysis.pluginInstances.size == 1)
@@ -232,7 +238,11 @@ object TestObject
         assert(plugInst.parameterValues.find(par => par.id == fParInst.id) != None)
         assert(plugInst.parameterValues.find(par => par.id == iParInst.id) != None)
         assert(plugInst.parameterValues.find(par => par.id == sParInst.id) != None)
-        
+                
+        println("   Derived plugins test")
+        testDerivedPlugins()
+
+        println("   Cascade removing")
         // With parameter its instance should be deleted        
         bParDao.removeById(bPar.id)
         assert(bParDao.getById(bPar.id) == None)
@@ -265,11 +275,45 @@ object TestObject
         // Remove analysis -> remove plugin instances
         analysisDao.removeById(analysis.id)
         assert (plugInstDao.getById(plugInst.id) == None)
-        
+
+        println("Pagination ...")
         assert(userDao.getAll().size == 1)
         assert(groupDao.getAll().size == 2)
         assert(groupDao.getAll(1, 2).size == 1)
         assert(groupDao.getAll(2, 5).size == 0)
         assert(groupDao.getAll(1, 0).size == 0)
+        
+        
+    }
+    
+    def testDerivedPlugins() {         
+        val sparqlEndpointPlugin = new SparqlEndpoint
+        val concreteSparqlQueryPlugin = new ConcreteSparqlQuery
+        val projectionPlugin = new Projection
+        val selectionPlugin = new Selection
+        val typedPlugin = new Typed
+        //TODO: missing LeftJoin class in: val leftJoinPlugin = new LeftJoin
+        val unionPlugin = new Union
+
+        val plugins = List(
+            sparqlEndpointPlugin,
+            concreteSparqlQueryPlugin,
+            projectionPlugin,
+            selectionPlugin,
+            typedPlugin,
+            //leftJoinPlugin,
+            unionPlugin
+        )
+
+        for (p <- plugins) {
+            plugDao.persist(new Plugin(p.name, p.inputCount, p.parameters))
+            assert(plugDao.getByName(p.name) != None)
+        }
+        
+        val plugInst2 = plug.createInstance().asInstanceOf[PluginInstance]
+        analysis.addPluginInstances(plugInst, plugInst2)
+        analysis.addBinding(new PluginInstanceBinding(plugInst, plugInst2))
+
+        assert(analysis.pluginInstanceBindings.size == 1)
     }
 }

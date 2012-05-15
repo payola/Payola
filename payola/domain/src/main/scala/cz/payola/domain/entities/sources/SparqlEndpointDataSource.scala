@@ -9,4 +9,8 @@ import cz.payola.domain.entities.{User, DataSource}
   * @param endpointUrl URL of the publicly accessible sparql endpoint.
   */
 class SparqlEndpointDataSource(name: String, owner: Option[User], val endpointUrl: String)
-    extends DataSource(name, owner)
+    extends DataSource(name, owner) {
+    override def canEqual(other: Any): Boolean = {
+        other.isInstanceOf[SparqlEndpointDataSource]
+    }
+}

@@ -7,8 +7,9 @@ import collection.immutable
 abstract class SparqlQuery(name: String, parameters: immutable.Seq[Parameter[_]])
     extends Plugin(name, 1, parameters)
 {
-    def evaluate(instance: PluginInstance, inputs: IndexedSeq[Graph], progressReporter: ProgressReporter): Graph = {
+    private var uniqueVariableId: Long = 0
 
+    def evaluate(instance: PluginInstance, inputs: IndexedSeq[Graph], progressReporter: Double => Unit): Graph = {
         val query = getQuery(instance)
 
         /** Unfortunately because of the the way Jena returns results,
@@ -19,14 +20,18 @@ abstract class SparqlQuery(name: String, parameters: immutable.Seq[Parameter[_]]
 
         // TODO wouldn't this fit better to the graph class? so code of this method would be just:
         // inputs(0).executeSPARQLQuery(getQuery(parameterValues))
-        if (query.contains("SELECT")) {
-            inputs(0).executeSelectSPARQLQuery(query)
-        } else if (query.contains("CONSTRUCT")) {
-            inputs(0).executeConstructSPARQLQuery(query)
-        } else {
-            // TODO ASK and possibly DESCRIBE?
-            throw new IllegalArgumentException("Unknown SPARQL query type (" + query + ")")
+        val graph = getQuery(instance).map {query =>
+            if (query.contains("SELECT")) {
+                inputs(0).executeSelectSPARQLQuery(query)
+            } else if (query.contains("CONSTRUCT")) {
+                inputs(0).executeConstructSPARQLQuery(query)
+            } else {
+                // TODO ASK and possibly DESCRIBE?
+                throw new IllegalArgumentException("Unknown SPARQL query type (" + query + ")")
+            }
         }
+
+        graph.getOrElse(Graph.empty)
     }
 
     /**
@@ -34,5 +39,5 @@ abstract class SparqlQuery(name: String, parameters: immutable.Seq[Parameter[_]]
       * @param instance The evaluated plugin instance.
       * @return The query.
       */
-    protected def getQuery(instance: PluginInstance): String
+    def getQuery(instance: PluginInstance): Option[String]
 }

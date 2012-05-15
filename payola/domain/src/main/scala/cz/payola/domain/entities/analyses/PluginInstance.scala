@@ -1,13 +1,10 @@
 package cz.payola.domain.entities.analyses
 
 import scala.collection.immutable
-import cz.payola.domain.rdf.Graph
 import cz.payola.domain.entities.Entity
 import cz.payola.domain.entities.analyses.parameters._
-import scala.actors.Actor
 
-class PluginInstance(protected val _plugin: Plugin,
-    protected val _parameterValues: immutable.Seq[ParameterValue[_]])
+class PluginInstance(protected val _plugin: Plugin,  protected val _parameterValues: immutable.Seq[ParameterValue[_]])
     extends Entity with cz.payola.common.entities.analyses.PluginInstance
 {
     // TODO cannot create DB Schema with this check
@@ -16,6 +13,10 @@ class PluginInstance(protected val _plugin: Plugin,
         "The instance doesn't contain parameter instances corresponding to the plugin.") */
 
     type PluginType = Plugin
+
+    override def canEqual(other: Any): Boolean = {
+        other.isInstanceOf[PluginInstance]
+    }
 
     /**
       * Returns value of a parameter with the specified name or [[scala.None.]] if such doesn't exist.
@@ -63,41 +64,34 @@ class PluginInstance(protected val _plugin: Plugin,
     /**
       * Sets value of a parameter with the specified name.
       */
-    def setParameter(parameterName: String, value: Any) {
+    def setParameter(parameterName: String, value: Any): PluginInstance = {
         getParameterValue(parameterName).foreach(i => setParameter(i, value))
+        this
     }
 
     /**
       * Sets value of the specified parameter.
       */
-    def setParameter(parameter: Parameter[_], value: Any) {
+    def setParameter(parameter: Parameter[_], value: Any): PluginInstance = {
         getParameterValue(parameter).foreach(i => setParameter(i, value))
+        this
     }
 
     /**
       * Updates the specified parameter value.
       */
-    def setParameter(parameterValue: ParameterValue[_], value: Any) {
+    def setParameter(parameterValue: ParameterValue[_], value: Any): PluginInstance = {
+        require(_parameterValues.contains(parameterValue))
+
         parameterValue match {
             case instance: BooleanParameterValue => instance.value = value.asInstanceOf[Boolean]
             case instance: FloatParameterValue => instance.value = value.asInstanceOf[Float]
             case instance: IntParameterValue => instance.value = value.asInstanceOf[Int]
             case instance: StringParameterValue => instance.value = value.asInstanceOf[String]
-            case _ =>
+            case _ => throw new IllegalArgumentException("The value doesn't conform to type of the parameter.")
         }
+        this
     }
-
-    /**
-      * Starts evaluation of the plugin instance.
-      * @param invoker The invoker of the evaluation.
-      * @param inputGraph The input graph.
-      * @return An instance of the [[cz.payola.domain.entities.analyses.PluginEvaluation]].
-      */
-    /*private[entities] def evaluate(invoker: Actor, inputGraph: Graph): PluginEvaluation = {
-        val evaluation = new PluginEvaluation(invoker, this, inputGraph)
-        evaluation.start()
-        evaluation
-    }*/
 
     private def getParameterValue(parameter: Parameter[_]): Option[ParameterValue[_]] = {
         parameterValues.find(_.parameter == parameter)

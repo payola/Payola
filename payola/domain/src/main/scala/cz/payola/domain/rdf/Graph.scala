@@ -9,77 +9,20 @@ import com.hp.hpl.jena.query._
 
 object Graph
 {
-    // Minimal length of the hash used for space-saving during serialization
-    private val kRDFGraphMinimalNamespaceHashLength = 1
+    /** Create a new empty graph.
+      *
+      * @return Empty graph instance.
+      */
+    def empty: Graph = new Graph(Nil, Nil)
 
+    /** Creates a new Graph instance from Jena's Model object.
+      *
+      * @param model Model.
+      * @return New graph instance.
+      */
     def apply(model: Model): Graph = {
-        // List the graph nodes and build the graph
-        val identifiedNodes: HashMap[String, IdentifiedNode] = new HashMap[String, IdentifiedNode]()
-        val allNodes: ListBuffer[Node] = new ListBuffer[Node]()
-        val edges: ListBuffer[Edge] = new ListBuffer[Edge]()
-        var objectIDCounter: Int = 0
-
-        val resIterator: ResIterator = model.listSubjects
-        while (resIterator.hasNext) {
-            val res: Resource = resIterator.nextResource
-
-            val URI = res.getURI
-            var node: IdentifiedNode = null
-            if (identifiedNodes.get(URI).isDefined) {
-                node = identifiedNodes.get(URI).get
-            } else {
-                node = new IdentifiedNode(URI)
-                node.objectID = objectIDCounter
-                objectIDCounter += 1
-                identifiedNodes.put(URI, node)
-                allNodes += node
-            }
-
-            // Look for edges and add them
-            val iterator: StmtIterator = res.listProperties
-            while (iterator.hasNext) {
-                val statement = iterator.nextStatement
-
-                val predicate: Property = statement.getPredicate
-                val rdfNode: com.hp.hpl.jena.rdf.model.RDFNode = statement.getObject
-
-                // We need to distinguish two cases - the node is a literal, or a reference
-                // to another node (resource)
-                var edge: Edge = null
-                if (rdfNode.isLiteral) {
-                    var language = statement.getLanguage
-                    if (language == "") {
-                        language = null
-                    }
-                    val literalNode = new LiteralNode(rdfNode.asLiteral.getValue, Option(language))
-                    literalNode.objectID = objectIDCounter
-                    objectIDCounter += 1
-                    allNodes += literalNode
-                    edge = new Edge(node, literalNode, predicate.getURI)
-                } else {
-                    val asResource = rdfNode.asResource
-                    val destinationURI = asResource.getURI
-                    var destination: IdentifiedNode = null
-                    if (identifiedNodes.get(destinationURI).isEmpty) {
-                        destination = new IdentifiedNode(destinationURI)
-                        destination.objectID = objectIDCounter
-                        objectIDCounter += 1
-                        identifiedNodes.put(destinationURI, destination)
-                        allNodes += destination
-                    } else {
-                        destination = identifiedNodes.get(destinationURI).get
-                    }
-                    edge = new Edge(node, destination, predicate.getURI)
-                }
-
-                edges += edge
-            }
-        }
-
-        val graph = new Graph(allNodes, edges)
-
-        // Returning the graph
-        graph
+        val factory = new GraphFactory(model)
+        factory.getGraph
     }
 
     /** Takes a XML or TTL string representing an RDF graph and returns an instance
@@ -279,9 +222,8 @@ object Graph
             case _ => throw new IllegalArgumentException("Unknown RDF graph node class - " + n)
         }
     }
-}
 
-import Graph._
+}
 
 class Graph(protected val _vertices: List[Node], protected val _edges: List[Edge])
     extends cz.payola.common.rdf.Graph
@@ -296,54 +238,6 @@ class Graph(protected val _vertices: List[Node], protected val _edges: List[Edge
 
     type EdgeType = Edge
 
-    //  Contains an array of Node objects representing nodes of the graph.
-    // private val nodes: ArrayBuffer[Node] = new ArrayBuffer[Node]()
-
-    /** _namespaces is a hash map that contains pairs [namespace, MD5-hash].
-      * This field is transient because we need inverted hash map. For the ease of adding
-      * namespaces, two hash maps are kept - _namespaces and _invertedNamespaces.
-      */
-    private val _namespaces: HashMap[String, String] = new HashMap[String, String]()
-
-    /** _invertedNamespaces is a hash map that contains pairs [MD5-hash, namespace].
-      * This field is serialized as 'namespaces'.
-      */
-    private val _invertedNamespaces: HashMap[String, String] = new HashMap[String, String]()
-
-    /** Computes a MD5 hash of a string.
-      *
-      * @param str The string to be hashed.
-      * @return The MD5 hash.
-      */
-    private def _md5String(str: String): String = {
-        val bytes = str.getBytes
-        val md5 = MessageDigest.getInstance("MD5")
-        md5.reset()
-        md5.update(bytes)
-        md5.digest().map(0xFF & _).map {
-            "%02x".format(_)
-        }.foldLeft("") {
-            _ + _
-        }
-    }
-
-    private def _populateNamespaces = {
-        _vertices.foreach {vertex: Node =>
-            if (vertex.isInstanceOf[IdentifiedNode]) {
-                val uri = vertex.asInstanceOf[IdentifiedNode].uri
-                if (uri != null) {
-                    shortenedNamespace(uri)
-                }
-            }
-        }
-
-        _edges.foreach {edge: Edge =>
-            if (edge.uri != null) {
-                shortenedNamespace(edge.uri)
-            }
-        }
-    }
-
     /** Creates a new graph with contents of this graph and otherGraph.
       *
       * @param otherGraph The graph to be merged.
@@ -352,6 +246,20 @@ class Graph(protected val _vertices: List[Node], protected val _edges: List[Edge
     def +(otherGraph: Graph): Graph = {
         // Create an empty graph and merge this and otherGraph into it
         Graph.merge(this, otherGraph)
+    }
+
+    /** Adds an equivalent of the Edge e to the model.
+      *
+      * @param e Edge.
+      * @param hashMap HashMap of the Resource objects.
+      * @param model Model to be added to.
+      */
+    private def addEdgeToModel(e: Edge, hashMap: HashMap[String, Resource], model: Model) {
+        val prop: Property = ResourceFactory.createProperty(e.uri)
+        val res: Resource = getResourceInModelForIdentifiedNode(e.origin, hashMap, model)
+
+        val statement: Statement = createStatementForEdge(res, prop, e.destination, hashMap, model)
+        model.add(statement)
     }
 
     /** Returns whether this graph contains an edge that goes between the two
@@ -364,6 +272,16 @@ class Graph(protected val _vertices: List[Node], protected val _edges: List[Edge
       */
     def containsEdgeBetweenNodes(origin: IdentifiedNode, destination: Node, edgeURI: String): Boolean = {
         Graph.collectionContainsEdgeBetweenNodes(_edges, origin, destination, edgeURI)
+    }
+
+    /** Returns whether this graph contains an edge whose destination is the literalNode.
+      *
+      * @param literalNode Literal node.
+      * @return True of false.
+      */
+    def containsEdgeWithLiteralNode(literalNode: LiteralNode): Boolean = {
+        // The literal node must always be destination of the edge
+        _edges.find({ e: Edge => e.destination == literalNode }).isDefined
     }
 
     /** Returns whether this graph contains a vertex with these properties.
@@ -383,6 +301,30 @@ class Graph(protected val _vertices: List[Node], protected val _edges: List[Edge
       */
     def containsVertexWithURI(vertexURI: String): Boolean = {
         getVertexWithURI(vertexURI).isDefined
+    }
+
+    /** Creates a statement - origin - property - destination. Origin and property
+      * are already the Jena objects, while destination is a Node.
+      *
+      * @param origin Origin.
+      * @param property Property.
+      * @param destination Destination.
+      * @param hashMap HashMap of Resource objects.
+      * @param model Model.
+      * @return Statement for this edge.
+      */
+    private def createStatementForEdge(origin: Resource, property: Property, destination: Node, hashMap: HashMap[String, Resource], model: Model): Statement = {
+        destination match {
+            case identifiedDestination: IdentifiedNode => {
+                val destinationResource: Resource = getResourceInModelForIdentifiedNode(identifiedDestination, hashMap, model)
+                origin.addProperty(property, destinationResource)
+                model.createStatement(origin, property, destinationResource)
+            }
+            case litDestination: LiteralNode => {
+                model.createStatement(origin, property, litDestination.value.toString, litDestination.language.getOrElse(""))
+            }
+            case _ => throw new IllegalArgumentException("Unknown node type " + destination.getClass)
+        }
     }
 
     /** Executes a construct SPARQL query on this graph and returns a new graph instance
@@ -445,35 +387,63 @@ class Graph(protected val _vertices: List[Node], protected val _edges: List[Edge
         // A hash map URI -> Resource
         val hashMap = new HashMap[String, Resource]()
 
-        // Go through all edges and add unknown vertices on the fly
-        _edges foreach {e: Edge =>
-            val prop = ResourceFactory.createProperty(e.uri)
-            val destination = e.destination
-            val res = hashMap.get(e.origin.uri).getOrElse({
-                val r = model.createResource(e.origin.uri)
-                hashMap.put(e.origin.uri, r)
-                r
-            })
-
-            val statement: Statement = if (destination.isInstanceOf[IdentifiedNode]) {
-                // Identified node
-                val identDest = destination.asInstanceOf[IdentifiedNode]
-                val destRes = hashMap.get(identDest.uri).getOrElse({
-                    val r = model.createResource(identDest.uri)
-                    hashMap.put(identDest.uri, r)
-                    r
-                })
-                res.addProperty(prop, destRes)
-                model.createStatement(res, prop, destRes)
-            } else {
-                // Literal node
-                val litDest = destination.asInstanceOf[LiteralNode]
-                model.createStatement(res, prop, litDest.value.toString, litDest.language.getOrElse(""))
+        // Add all identified vertices right now.
+        _vertices foreach { n: Node =>
+            if (n.isInstanceOf[IdentifiedNode]) {
+                getResourceInModelForIdentifiedNode(n.asInstanceOf[IdentifiedNode], hashMap, model)
             }
-            model.add(statement)
         }
 
+        // Now add all edges
+        _edges foreach { e: Edge => addEdgeToModel(e, hashMap, model) }
+
+        // TODO - this is an impossible case - investigate - Jena doesn't allow orphan literals.
+        /*
+        // Now handle orphans - we have handled identified nodes already, that's fine.
+        // However, if there's a literal-node orphan, it has been omitted for sure.
+        // Hence go through all the vertices and look for literal nodes that do not
+        // appear in any edge.
+        _vertices foreach { n: Node =>
+            if (n.isInstanceOf[LiteralNode]){
+                val literalNode: LiteralNode = n.asInstanceOf[LiteralNode]
+                if (!containsEdgeWithLiteralNode(literalNode)) {
+                    // No edge contains this poor thing. Add it
+                    val literal: Literal = model.createLiteral(literalNode.value.toString, literalNode.language.getOrElse(""))
+                    model.add(literal)
+                }
+            }
+        }
+        */
+
         model
+    }
+
+    /** Returns a Jena Resource object for the node. If there's no such object already saved
+      * in the hashMap, new Resource is created in the Model m.
+      *
+      * @param node Identified node.
+      * @param hashMap HashMap of created resources.
+      * @param m Model.
+      * @return Resource.
+      */
+    private def getResourceInModelForIdentifiedNode(node: IdentifiedNode, hashMap: HashMap[String, Resource], m: Model): Resource = {
+        getResourceInModelForURI(node.uri, hashMap, m)
+    }
+
+    /** Returns a Jena Resource object for uri. If there's no such object already saved
+      * in the hashMap, new Resource is created in the Model m.
+      *
+      * @param uri URI of the Resource.
+      * @param hashMap HashMap of created resources.
+      * @param model Model.
+      * @return Resource.
+      */
+    private def getResourceInModelForURI(uri: String, hashMap: HashMap[String, Resource], model: Model): Resource = {
+        hashMap.get(uri).getOrElse({
+            val r = model.createResource(uri)
+            hashMap.put(uri, r)
+            r
+        })
     }
 
     /** Returns a vertex with these properties or None if there is no such node.
@@ -485,39 +455,4 @@ class Graph(protected val _vertices: List[Node], protected val _edges: List[Edge
         Graph.getVertexWithURIFromCollection(_vertices, vertexURI)
     }
 
-    /** Returns the hashed namespace. This method is used in Edge classes
-      * during serialization.
-      *
-      * This method automatically registers the namespace if it wasn't encountered
-      * before. If the method processes a particular namespace for the first time,
-      * an MD5 hash is computed and the shortest unique prefix is used.
-      *
-      * @param ns The namespace.
-      * @return MD5-hash (or sub-hash) of the namespace.
-      */
-    def shortenedNamespace(ns: String) = {
-        if (ns == null) {
-            ""
-        } else {
-            val short: Option[String] = _namespaces.get(ns)
-            if (short.isEmpty) {
-                // Never seen this namespace before
-                // Compute MD5 and use the shortest unique prefix
-                val md5 = _md5String(ns)
-                var actualHash = md5.substring(0, kRDFGraphMinimalNamespaceHashLength)
-                var len = kRDFGraphMinimalNamespaceHashLength
-
-                while (_invertedNamespaces.contains(actualHash) && len < md5.length) {
-                    len += 1
-                    actualHash = md5.substring(0, len)
-                }
-
-                _namespaces.put(ns, actualHash)
-                _invertedNamespaces.put(actualHash, ns)
-                actualHash
-            } else {
-                short.get
-            }
-        }
-    }
 }

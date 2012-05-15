@@ -44,8 +44,27 @@ class Plugin(name: String, inputCount: Int, params: immutable.Seq[cz.payola.doma
         ).flatten.toSeq
     }
 
+    override def createInstance(): cz.payola.domain.entities.analyses.PluginInstance = {
+        // Create data.entities plugin instance with data.entities parameter values
+        new PluginInstance(
+            this,
+            parameters.map(
+                _ match {
+                    case p: cz.payola.data.entities.analyses.parameters.BooleanParameter => p.createValue(None).asInstanceOf[BooleanParameterValue]
+                    case p: cz.payola.data.entities.analyses.parameters.FloatParameter => p.createValue(None).asInstanceOf[FloatParameterValue]
+                    case p: cz.payola.data.entities.analyses.parameters.IntParameter => p.createValue(None).asInstanceOf[IntParameterValue]
+                    case p: cz.payola.data.entities.analyses.parameters.StringParameter => p.createValue(None).asInstanceOf[StringParameterValue]
+                    case p: cz.payola.domain.entities.analyses.parameters.BooleanParameter => new BooleanParameter(p.name, p.defaultValue).createValue(None).asInstanceOf[BooleanParameterValue]
+                    case p: cz.payola.domain.entities.analyses.parameters.FloatParameter => new FloatParameter(p.name, p.defaultValue).createValue(None).asInstanceOf[FloatParameterValue]
+                    case p: cz.payola.domain.entities.analyses.parameters.IntParameter => new IntParameter(p.name, p.defaultValue).createValue(None).asInstanceOf[IntParameterValue]
+                    case p: cz.payola.domain.entities.analyses.parameters.StringParameter => new StringParameter(p.name, p.defaultValue).createValue(None).asInstanceOf[StringParameterValue]
+                }
+            )
+        )
+    }
+
     def evaluate(
         instance: cz.payola.domain.entities.analyses.PluginInstance,
         inputs: IndexedSeq[Graph],
-        progressReporter: Plugin#ProgressReporter): Graph = { null }
+        progressReporter: Double => Unit): Graph = { null }
 }

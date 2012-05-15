@@ -20,7 +20,7 @@ trait Plugin extends NamedEntity with ShareableEntity
     protected val _parameters: immutable.Seq[ParameterType]
 
     /** Count of the plugin inputs. */
-    def inputCount: Int = inputCount
+    def inputCount: Int = _inputCount
 
     /** The parameters whose instances are needed during the evaluation. */
     def parameters: immutable.Seq[ParameterType] = _parameters
