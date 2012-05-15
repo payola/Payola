@@ -4,11 +4,9 @@ import cz.payola.domain.rdf.Graph
 import cz.payola.domain.entities.analyses.{PluginInstance, Plugin, Parameter}
 import collection.immutable
 
-abstract class SparqlQuery(name: String, parameters: immutable.Seq[Parameter[_]])
-    extends Plugin(name, 1, parameters)
+abstract class SparqlQuery(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
+    extends Plugin(name, inputCount, parameters, id)
 {
-    private var uniqueVariableId: Long = 0
-
     def evaluate(instance: PluginInstance, inputs: IndexedSeq[Graph], progressReporter: Double => Unit): Graph = {
         val query = getQuery(instance)
 
@@ -20,7 +18,7 @@ abstract class SparqlQuery(name: String, parameters: immutable.Seq[Parameter[_]]
 
         // TODO wouldn't this fit better to the graph class? so code of this method would be just:
         // inputs(0).executeSPARQLQuery(getQuery(parameterValues))
-        val graph = getQuery(instance).map {query =>
+        val graph = getQuery(instance).map { query =>
             if (query.contains("SELECT")) {
                 inputs(0).executeSelectSPARQLQuery(query)
             } else if (query.contains("CONSTRUCT")) {

@@ -50,7 +50,6 @@
     <orderEntry type="library" scope="TEST" name="org.scalatest_scalatest_2.9.1_1.6.1" level="project" />
     <orderEntry type="module" module-name="common" exported="" />
     <orderEntry type="module" module-name="domain" exported="" />
-    <orderEntry type="module" module-name="rdf" exported="" />
     <orderEntry type="module" module-name="entities" exported="" />
   </component>
 </module>

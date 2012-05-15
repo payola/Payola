@@ -1,14 +1,15 @@
 package cz.payola.web.client.views.plugins.visual.graph
 
-import s2js.adapters.js.dom.CanvasRenderingContext2D
-import cz.payola.web.client.views.plugins.visual.{Color, Point}
 import cz.payola.common.rdf.Edge
+import s2js.adapters.js.dom.CanvasRenderingContext2D
+import cz.payola.web.client.views.plugins.visual._
 
 /**
   * Structure used during draw function of EdgeView. Helps to indicate position of vertices to each other.
   */
 private object Quadrant
 {
+    //TODO correct to real enum
     val RightBottom = 1
 
     val LeftBottom = 2
@@ -24,28 +25,14 @@ private object Quadrant
   * @param originView the vertex object representing origin of this edge
   * @param destinationView of this graphical representation in drawing space
   */
-class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationView: VertexView) extends View
-{
-    /**
-      * Default color of an edge.
-      */
-    private val defColor = new Color(150, 150, 150, 0.5)
+class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationView: VertexView, var settings: EdgeSettingsModel)
+    extends View {
 
     /**
-      * Default color of a selected edge.
+      * If true, the drawn edge is straight, else is bezier curve
       */
-    private val defColorSelect = new Color(50, 50, 50, 1)
-
-    /**
-      * Default width of drawn line.
-      */
-    private val defLineWidth: Double = 1
-
-    /**
-      * The higher, the more are edges straight
-      */
-    private val straightenIndex = 2
-
+    private var drawStraight = true
+    
     /**
       * Textual data that should be visualised with this edge ("over this edge").
       */
@@ -67,7 +54,8 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
         originView.selected && destinationView.selected
     }
 
-    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
+    private def prepareBezierCurve(context: CanvasRenderingContext2D, color: Color, correction: Vector) {
+
         val A = originView.position
         val B = destinationView.position
 
@@ -99,15 +87,15 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
             quadrant match {
                 case Quadrant.RightBottom | Quadrant.RightTop =>
                     //we are in (0, pi/4] or in (pi7/4, 2pi]
-                    ctrl1.x = A.x + diff.x / straightenIndex
+                    ctrl1.x = A.x + diff.x / settings.straightenIndex
                     ctrl1.y = A.y
-                    ctrl2.x = B.x - diff.x / straightenIndex
+                    ctrl2.x = B.x - diff.x / settings.straightenIndex
                     ctrl2.y = B.y
                 case Quadrant.LeftBottom | Quadrant.LeftTop =>
                     //we are in (pi3/4, pi] or in (pi, pi5/4]
-                    ctrl1.x = A.x - diff.x / straightenIndex
+                    ctrl1.x = A.x - diff.x / settings.straightenIndex
                     ctrl1.y = A.y
-                    ctrl2.x = B.x + diff.x / straightenIndex
+                    ctrl2.x = B.x + diff.x / settings.straightenIndex
                     ctrl2.y = B.y
             }
         } else {
@@ -116,26 +104,46 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
                 case Quadrant.RightBottom | Quadrant.LeftBottom =>
                     //we are in (pi/4, pi/2] or in (pi/2, pi3/4]
                     ctrl1.x = A.x
-                    ctrl1.y = A.y + diff.y / straightenIndex
+                    ctrl1.y = A.y + diff.y / settings.straightenIndex
                     ctrl2.x = B.x
-                    ctrl2.y = B.y - diff.y / straightenIndex
+                    ctrl2.y = B.y - diff.y / settings.straightenIndex
                 case Quadrant.RightTop | Quadrant.LeftTop =>
                     //we are in (pi5/4, pi3/2] or in (pi3/2, pi7/4]
                     ctrl1.x = A.x
-                    ctrl1.y = A.y - diff.y / straightenIndex
+                    ctrl1.y = A.y - diff.y / settings.straightenIndex
                     ctrl2.x = B.x
-                    ctrl2.y = B.y + diff.y / straightenIndex
+                    ctrl2.y = B.y + diff.y / settings.straightenIndex
             }
         }
+        
+        drawBezierCurve(context, ctrl1 + correction, ctrl2 + correction, A + correction, B + correction,
+            settings.width, color)
+    }
+    
+    private def prepareStraight(context: CanvasRenderingContext2D, color: Color, correction: Vector) {
+        
+        drawStraightLine(context,
+            destinationView.position + correction, originView.position + correction,
+            settings.width, color)
+    }
+    
+    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
+
+        drawQuick(context, color, positionCorrection)
+    }
+
+    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
 
         val colorToUse = color.getOrElse(
-            if(isSelected) defColorSelect else  defColor
+            if(isSelected) settings.colorSelected else settings.color
         )
 
         val correction = positionCorrection.getOrElse(Point.Zero).toVector
 
-        drawStraightLine(context, A + correction, B + correction, defLineWidth, colorToUse)
-        /*drawBezierCurve(context, ctrl1 + correction, ctrl2 + correction, A + correction, B + correction,
-            defLineWidth, colorToUse)*/
+        if(drawStraight) {
+            prepareStraight(context, colorToUse, correction)
+        } else {
+            prepareBezierCurve(context, colorToUse, correction)
+        }
     }
 }

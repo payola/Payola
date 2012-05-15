@@ -2,15 +2,32 @@ package cz.payola.web.client.views.plugins.visual.techniques.minimalization
 
 import collection.mutable.ListBuffer
 import cz.payola.web.client.views.plugins.visual.graph.{EdgeView, VertexView}
+import cz.payola.web.client.views.plugins.visual.animation.Animation
 import cz.payola.web.client.views.plugins.visual.techniques.BaseTechnique
+import cz.payola.web.client.views.plugins.visual.components.visualsetup.VisualSetup
 
-class MinimalizationTechnique extends BaseTechnique
+class MinimalizationTechnique(settings: VisualSetup) extends BaseTechnique(settings)
 {
     //TODO add some computation branch cutting...this algorithm is quite complex
     def performTechnique() {
         minimizeEdgeCrossing(graphView.get.vertexViews)
-        basicTreeStructure(graphView.get.vertexViews)
-        moveGraphToUpperLeftCorner(graphView.get.vertexViews)
+
+        val moveToCorner2 = new Animation[VertexView](Animation.moveGraphToUpperLeftCorner, graphView.get.vertexViews,
+            None, redrawQuick, redraw, None)
+        val flip = new Animation[VertexView](Animation.flipGraph, graphView.get.vertexViews, Some(moveToCorner2),
+            redrawQuick, redraw, None)
+        val moveToCorner1 = new Animation[VertexView](Animation.moveGraphToUpperLeftCorner, graphView.get.vertexViews,
+            Some(flip), redrawQuick, redraw, None)
+
+        basicTreeStructure(graphView.get.vertexViews, true, Some(moveToCorner1))
+    }
+
+    override def clean() {
+        super.clean()
+    }
+
+    def getName:String = {
+        "tree ECM visualisation"
     }
 
     /**

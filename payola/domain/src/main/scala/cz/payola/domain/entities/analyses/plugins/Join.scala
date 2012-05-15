@@ -1,14 +1,20 @@
 package cz.payola.domain.entities.analyses.plugins
 
-import cz.payola.domain.entities.analyses.{PluginInstance, Plugin}
-import cz.payola.domain.entities.analyses.parameters.{BooleanParameter, StringParameter}
-import query.Construct
+import cz.payola.domain.entities.analyses.parameters._
+import scala.collection.immutable
+import cz.payola.domain.entities.analyses._
+import cz.payola.domain.IDGenerator
 import scala.collection.mutable.ListBuffer
 import cz.payola.domain.rdf._
 
-class Join extends Plugin("Join", 2, List(
-    new StringParameter("JoinPropertyURI", ""),
-    new BooleanParameter("IsInner", true)))
+class Join(
+    name: String = "Join",
+    inputCount: Int = 2,
+    parameters: immutable.Seq[Parameter[_]] = List(
+        new StringParameter("JoinPropertyURI", ""),
+        new BooleanParameter("IsInner", true)),
+    id: String = IDGenerator.newId)
+    extends Plugin(name, inputCount, parameters, id)
 {
     /** Gets "JoinPropertyURI" parameter.
       *

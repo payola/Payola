@@ -100,7 +100,7 @@ abstract class CanvasRenderingContext2D extends CanvasContext
 
     def moveTo(x: Double, y: Double)
 
-    def putImageData()
+    def putImageData(imageData: ImageData, dx: Double, dy: Double)
 
     def quadraticCurveTo(cpx: Double, cpy: Double, x: Double, y: Double)
 
@@ -125,4 +125,6 @@ abstract class CanvasRenderingContext2D extends CanvasContext
     def strokeText(text: String, x: Double, y: Double, maxWidth: Double)
 
     def translate(x: Double, y: Double)
+
+    def measureText(text: String): TextMetrics
 }

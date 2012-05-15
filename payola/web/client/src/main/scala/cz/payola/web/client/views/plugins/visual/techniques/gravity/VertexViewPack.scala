@@ -7,8 +7,8 @@ import cz.payola.web.client.views.plugins.visual.Vector
   * Representation of a VertexView object used in GravityTechnique perform routine.
   * @param value contained vertexView
   */
-class VertexViewPack(val value: VertexView)
-{
+class VertexViewPack(val value: VertexView) {
+
     /**
       * Force by which the vertex is being pushed in some direction.
       */
@@ -18,4 +18,9 @@ class VertexViewPack(val value: VertexView)
       * Velocity representing movement of the vertex in some direction.
       */
     var velocity = Vector(0, 0)
+
+    /**
+      *
+      */
+    var currentPosition = value.position
 }
