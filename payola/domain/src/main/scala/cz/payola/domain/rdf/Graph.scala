@@ -59,7 +59,9 @@ object Graph
         val model = ModelFactory.createDefaultModel
         model.read(reader, null, inputType)
 
-        apply(model)
+        val g = apply(model)
+        model.close()
+        g
     }
 
     /** Creates a new graph merged from graphs represented by RDF strings passed
@@ -208,7 +210,13 @@ class Graph(protected val _vertices: List[Node], protected val _edges: List[Edge
         val model: Model = this.getModel
 
         val execution: QueryExecution = QueryExecutionFactory.create(query, model)
-        Graph(execution.execConstruct)
+        val g = Graph(execution.execConstruct)
+
+        // Free up resources
+        execution.close()
+        model.close()
+
+        g
     }
 
     /** Executes a select SPARQL query on this graph and returns a new graph instance
@@ -229,9 +237,11 @@ class Graph(protected val _vertices: List[Node], protected val _edges: List[Edge
         val output: ByteArrayOutputStream = new ByteArrayOutputStream()
 
         ResultSetFormatter.outputAsRDF(output, "", results);
-        execution.close
-
         val resultingGraphXML: String = new String(output.toByteArray)
+
+        execution.close
+        model.close()
+
         Graph(resultingGraphXML)
     }
 
@@ -246,6 +256,9 @@ class Graph(protected val _vertices: List[Node], protected val _edges: List[Edge
     }
 
     /** Creates a Jena model out of itself.
+      *
+      * WARNING: You are responsible for calling close() on the model after you're
+      * done working with it.
       *
       * @return Model representing this graph.
       */
