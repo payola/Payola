@@ -199,13 +199,7 @@ object PayolaBuild extends Build
     lazy val dataProject = Project(
         "data", file("data"), settings = payolaSettings
     ).aggregate(
-        dataRdfProject, dataEntitiesProject
-    )
-
-    lazy val dataRdfProject = Project(
-        "rdf", file("data/rdf"), settings = payolaSettings
-    ).dependsOn(
-        commonProject, domainProject, scala2JsonProject
+        dataEntitiesProject
     )
 
     lazy val dataEntitiesProject = Project(
@@ -226,7 +220,7 @@ object PayolaBuild extends Build
     lazy val modelProject = Project(
         "model", file("model"), settings = payolaSettings
     ).dependsOn(
-        commonProject, domainProject, dataRdfProject, dataEntitiesProject
+        commonProject, domainProject, dataEntitiesProject
     )
 
     lazy val webProject = Project(

@@ -1,13 +1,19 @@
 package cz.payola.domain.entities.analyses.plugins.data
 
 import cz.payola.domain.entities.analyses.plugins.DataFetcher
-import cz.payola.domain.entities.analyses.PluginInstance
-import cz.payola.domain.entities.analyses.parameters.StringParameter
 import cz.payola.domain.rdf.Graph
-import io.Source
 import java.net.URL
+import scala.collection.immutable
+import cz.payola.domain.entities.analyses.parameters.StringParameter
+import cz.payola.domain.IDGenerator
+import cz.payola.domain.entities.analyses._
 
-sealed class SparqlEndpoint extends DataFetcher("SPARQL Endpoint", List(new StringParameter("EndpointURL", "")))
+sealed class SparqlEndpoint(
+    name: String = "SPARQL Endpoint",
+    inputCount: Int = 0,
+    parameters: immutable.Seq[Parameter[_]] = List(new StringParameter("EndpointURL", "")),
+    id: String = IDGenerator.newId)
+    extends DataFetcher(name, inputCount, parameters, id)
 {
     def evaluateWithQuery(instance: PluginInstance, query: String, progressReporter: Double => Unit): Graph = {
         val endpointUrl = instance.getStringParameter("EndpointURL").get
@@ -18,8 +24,6 @@ sealed class SparqlEndpoint extends DataFetcher("SPARQL Endpoint", List(new Stri
         )
 
         requestProperties.foreach(p => connection.setRequestProperty(p._1, p._2))
-        val rdfXml = Source.fromInputStream(connection.getInputStream, "UTF-8").mkString
-
-        Graph(rdfXml)
+        Graph(connection.getInputStream)
     }
 }

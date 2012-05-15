@@ -1,12 +1,17 @@
 package cz.payola.domain.entities.analyses.plugins.query
 
-import cz.payola.domain.entities.analyses.{PluginInstance, Parameter}
 import collection.immutable
 import cz.payola.domain.entities.analyses.plugins.SparqlQuery
 import cz.payola.domain.sparql.{ConstructQuery, Subject, Variable}
+import cz.payola.domain.entities.analyses.{Parameter, PluginInstance}
+import cz.payola.domain.IDGenerator
 
-abstract class Construct(name: String, parameters: immutable.Seq[Parameter[_]])
-    extends SparqlQuery(name, parameters)
+abstract class Construct(
+    name: String,
+    inputCount: Int = 1,
+    parameters: immutable.Seq[Parameter[_]] = Nil,
+    id: String = IDGenerator.newId)
+    extends SparqlQuery(name, inputCount, parameters, id)
 {
     /**
       * Returns the construct query representation.
@@ -16,7 +21,7 @@ abstract class Construct(name: String, parameters: immutable.Seq[Parameter[_]])
       * @return The construct query representation.
       */
     def getConstructQuery(instance: PluginInstance, subject: Subject, variableGetter: () => Variable):
-        Option[ConstructQuery]
+    Option[ConstructQuery]
 
     def getQuery(instance: PluginInstance): Option[String] = {
         var i = 0;

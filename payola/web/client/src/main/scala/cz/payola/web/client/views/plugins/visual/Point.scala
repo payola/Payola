@@ -50,6 +50,19 @@ case class Point(var x: Double, var y: Double)
     def toVector: Vector = {
         Vector(x, y)
     }
+
+    /**
+      * Creates vector between two points
+      * @param destination of the vector
+      * @return direction from this point to the destination
+      */
+    def createVector(destination: Point): Vector = {
+        Vector(destination.x - x, destination.y - y)
+    }
+
+    override def toString: String = {
+        "["+x+"; "+y+"]"
+    }
 }
 
 /**

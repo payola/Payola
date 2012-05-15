@@ -33,6 +33,10 @@ class BrowserEvent(e: s2js.adapters.js.browser.Event = null, currentTarget: Node
     val shiftKey: Boolean = false
 
     val target: Node = null
+
+    val pageX: Int = 0
+
+    val pageY: Int = 0
 }
 
 object BrowserEvent
