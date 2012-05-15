@@ -79,19 +79,4 @@ case class InformationView(data: Any) extends View {
 
         drawText(context, data.toString, position, color, "12px Sans", "center")
     }
-
-    private def updateTextColor(loader: SetupLoader) {
-        textColor = loader.createColor(loader.TextColorMedium).getOrElse(textColor)
-    }
-
-    private  def updateBackgroundColor(loader: SetupLoader) {
-        backgroundColor = loader.createColor(loader.TextColorBackground).getOrElse(backgroundColor)
-    }
-
-    def updateSettings(loader: SetupLoader) {
-
-        updateTextColor(loader)
-
-        updateBackgroundColor(loader)
-    }
 }

@@ -6,8 +6,9 @@ import cz.payola.web.client.views.plugins.visual.graph.{EdgeView, VertexView}
 import cz.payola.common.rdf.Graph
 import s2js.adapters.js.dom.Element
 import cz.payola.web.client.views.plugins.visual.animation.Animation
+import cz.payola.web.client.views.plugins.visual.components.visualsetup.VisualSetup
 
-abstract class BaseTechnique extends VisualPlugin
+abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(settings)
 {
     private val treeVerticesDistance = 100
 

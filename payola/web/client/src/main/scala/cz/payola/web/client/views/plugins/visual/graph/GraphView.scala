@@ -4,20 +4,13 @@ import collection.mutable.ListBuffer
 import s2js.adapters.js.dom.{Element, CanvasRenderingContext2D}
 import cz.payola.common.rdf.{Vertex, Graph}
 import cz.payola.web.client.views.plugins.visual._
-import s2js.adapters.js.browser._
+import components.visualsetup.VisualSetup
 
 /**
   * Graphical representation of Graph object.
   * @param container the space where the graph should be visualised
   */
-class GraphView(val container: Element) extends View {
-    private var colorVertexHigh = new Color(240, 240, 150, 1)
-
-    private var colorVertexMedium = new Color(200, 240, 200, 0.8)
-
-    private var colorVertexLow = new Color(180, 180, 180, 0.3)
-
-    private var colorTextDefault = new Color(50, 50, 50, 1)
+class GraphView(val container: Element, val settings: VisualSetup) extends View {
 
     /*The order in which are layers created determines their "z coordinate"
 (first created layer is on the bottom and last created one covers all the others).*/
@@ -97,7 +90,7 @@ class GraphView(val container: Element) extends View {
 
         _graphModel.vertices.foreach {vertexModel =>
 
-            buffer += new VertexView(vertexModel, Point(300, 300)) //TODO should be center of the canvas or something like that
+            buffer += new VertexView(vertexModel, Point(300, 300), settings.vertexModel) //TODO should be center of the canvas or something like that
             counter += 1
         }
 
@@ -118,7 +111,7 @@ class GraphView(val container: Element) extends View {
         if(_vertexViews.length != 0) {
             _graphModel.edges.foreach {edgeModel =>
                 buffer += new EdgeView(edgeModel, findVertexView(edgeModel.origin),
-                    findVertexView(edgeModel.destination))
+                    findVertexView(edgeModel.destination), settings.edgesModel)
             }
 
             _vertexViews.foreach {vertexView: VertexView =>
@@ -244,41 +237,41 @@ class GraphView(val container: Element) extends View {
     def draw(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point]) {
         val positionCorrection = position.getOrElse(Point.Zero)
 
+        var colorVertex: Option[Color] = Some(Color.Black)
+        var colorText: Option[Color] = Some(Color.Black)
+
         vertexViews.foreach {vertexView =>
 
-            var colorToUseVertex: Option[Color] = Some(Color.Black)
-            var colorToUseText: Option[Color] = Some(Color.Black)
             if (color != None) {
-                colorToUseVertex = Some(color.get)
-                colorToUseText = Some(color.get)
+                colorVertex = Some(color.get)
+                colorText = Some(color.get)
             } else if (vertexView.selected) {
-                colorToUseVertex = Some(colorVertexHigh)
-                colorToUseText = Some(colorTextDefault)
+                colorVertex = Some(settings.vertexModel.colorHigh)
+                colorText = Some(settings.textModel.color)
             } else if (edgeViews.exists(edgeView =>
-                (edgeView.originView.eq(vertexView) && edgeView.destinationView.selected) ||
-                    (edgeView.destinationView.eq(vertexView) && edgeView.originView.selected))) {
-                colorToUseVertex = Some(colorVertexMedium)
-                colorToUseText = Some(colorTextDefault)
+                TODO_RenameThisMethod(edgeView, vertexView))) {
+                colorVertex = Some(settings.vertexModel.colorMed)
+                colorText = Some(settings.textModel.color)
             } else if (selectedCount == 0) {
-                colorToUseVertex = None
-                colorToUseText = Some(colorTextDefault)
+                colorVertex = None
+                colorText = Some(settings.textModel.color)
             } else {
-                colorToUseVertex = Some(colorVertexLow)
-                colorToUseText = Some(Color.Transparent)
+                colorVertex = Some(settings.vertexModel.colorLow)
+                colorText = Some(Color.Transparent)
             }
 
             if (vertexView.selected) {
                 if (verticesSelectedLayer.cleared) {
-                    vertexView.draw(verticesSelectedLayer.context, colorToUseVertex, Some(positionCorrection))
+                    vertexView.draw(verticesSelectedLayer.context, colorVertex, Some(positionCorrection))
                 }
                 if (verticesSelectedTextLayer.cleared) {
-                    vertexView.drawInformation(verticesSelectedTextLayer.context, colorToUseText,
+                    vertexView.drawInformation(verticesSelectedTextLayer.context, colorText,
                         Some(LocationDescriptor.getVertexInformationPosition(vertexView.position) +
                             positionCorrection.toVector))
                 }
             } else {
                 if (verticesDeselectedLayer.cleared) {
-                    vertexView.draw(verticesDeselectedLayer.context, colorToUseVertex, Some(positionCorrection))
+                    vertexView.draw(verticesDeselectedLayer.context, colorVertex, Some(positionCorrection))
                 }
             }
         }
@@ -291,7 +284,7 @@ class GraphView(val container: Element) extends View {
             val colorToUseText = if (color != None) {
                 color
             } else if (edgeView.isSelected) {
-                Some(colorTextDefault)
+                Some(settings.textModel.color)
             } else {
                 None
             }
@@ -321,6 +314,11 @@ class GraphView(val container: Element) extends View {
         layers.foreach(layer => layer.cleared = false)
     }
 
+    private def TODO_RenameThisMethod(edgeView: EdgeView, vertexView: VertexView): Boolean = {
+        (edgeView.originView.eq(vertexView) && edgeView.destinationView.selected) ||
+            (edgeView.destinationView.eq(vertexView) && edgeView.originView.selected)
+    }
+
     def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point]) {
         val positionCorrection = position.getOrElse(Point.Zero)
 
@@ -329,9 +327,9 @@ class GraphView(val container: Element) extends View {
             val colorToUseVertex = if (color != None) {
                 Some(color.get)
             } else if (vertexView.selected) {
-                Some(colorVertexHigh)
+                Some(settings.vertexModel.colorHigh)
             } else {
-                Some(colorVertexMedium)
+                Some(settings.vertexModel.colorMed)
             }
 
             if(vertexView.selected) {
@@ -416,41 +414,5 @@ class GraphView(val container: Element) extends View {
         while(container.childNodes.length > 0) {
             container.removeChild(container.firstChild)
         }
-    }
-
-    private def updateMediumVertexColor(loader: SetupLoader) {
-        colorVertexMedium = loader.createColor(loader.VertexColorMedium).getOrElse(colorVertexMedium)
-    }
-
-    private def updateHighVertexColor(loader: SetupLoader) {
-        colorVertexHigh = loader.createColor(loader.VertexColorHigh).getOrElse(colorVertexHigh)
-    }
-
-    private def updateLowVertexColor(loader: SetupLoader) {
-        colorVertexLow = loader.createColor(loader.VertexColorLow).getOrElse(colorVertexLow)
-    }
-
-    private def updateTextDefault(loader: SetupLoader) {
-        colorTextDefault = loader.createColor(loader.TextColorMedium).getOrElse(colorTextDefault)
-    }
-
-    def updateSettings(loader: SetupLoader) {
-
-        updateLowVertexColor(loader)
-
-        updateMediumVertexColor(loader)
-
-        updateHighVertexColor(loader)
-
-        updateTextDefault(loader)
-        
-        vertexViews.foreach{ vertexView =>
-            vertexView.updateSettings(loader)
-        }
-
-        edgeViews.foreach{ edgeView =>
-            edgeView.updateSettings(loader)
-        }
-        
     }
 }

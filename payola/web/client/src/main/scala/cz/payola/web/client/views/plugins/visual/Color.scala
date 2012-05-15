@@ -3,6 +3,7 @@ package cz.payola.web.client.views.plugins.visual
 import math.Ordering.String
 import s2js.runtime.client.scala.collection.mutable.HashMap
 import scala.Int
+import java.lang.String
 
 /**
   * RGBA representation of colors used by visual plug-ins
@@ -31,48 +32,11 @@ case class Color(var red: Int, var green: Int, var blue: Int, var alpha: Double 
     }
 
     def toHexString: String = {
-        dec2hex(red)+dec2hex(green)+dec2hex(blue)+dec2hex((alpha*255).toInt)
-    }
-
-    def setByHexString(hexString: String)
-    {
-        red = hex2dec(hexString.substring(0,2))
-        green = hex2dec(hexString.substring(2,2))
-        blue = hex2dec(hexString.substring(4,2))
-        alpha = hex2dec(hexString.substring(6,2))/255.0
+        "#"+dec2hex(red)+dec2hex(green)+dec2hex(blue)+dec2hex((alpha*255).toInt)
     }
 
     private def dec2hex(n: Int) : String = {
-        "#"+convertDecToHex(n/16)+convertDecToHex(n%16)
-    }
-
-    private def hex2dec(hex: String) : Int = {
-        hex.size match {
-            case 1 => convertHexToDec(hex)
-            case 2 => convertHexToDec(hex.substring(0,1))*16+convertHexToDec(hex.substring(1,1))
-        }
-    }
-
-    private def convertHexToDec(c: String) : Int = {
-        c match {
-            case "0" => 0
-            case "1" => 1
-            case "2" => 2
-            case "3" => 3
-            case "4" => 4
-            case "5" => 5
-            case "6" => 6
-            case "7" => 7
-            case "8" => 8
-            case "9" => 9
-            case "a" => 10
-            case "b" => 11
-            case "c" => 12
-            case "d" => 13
-            case "e" => 14
-            case "f" => 15
-            case _ => 0
-        }
+        convertDecToHex(n/16)+convertDecToHex(n%16)
     }
 
     private def convertDecToHex(n: Int) : String = {
@@ -114,4 +78,46 @@ object Color
     val Blue = Color(0, 0, 255, 1)
 
     val Transparent = Color(0, 0, 0, 0)
+
+    def fromHex(hexString: String) : Color = {
+
+        val hexLower = hexString.toLowerCase
+
+        //leading #
+        val red = hex2dec(hexLower.substring(1,3))
+        val green = hex2dec(hexLower.substring(3,5))
+        val blue = hex2dec(hexLower.substring(5,7))
+        val alpha = hex2dec(hexLower.substring(7,9))/255.0
+
+        new Color(red, green, blue, alpha)
+    }
+
+    private def hex2dec(hex: String) : Int = {
+        hex.size match {
+            case 1 => convertHexToDec(hex)
+            case 2 => convertHexToDec(hex.substring(0,1))*16+convertHexToDec(hex.substring(1,2))
+        }
+    }
+
+    private def convertHexToDec(c: String) : Int = {
+        c match {
+            case "0" => 0
+            case "1" => 1
+            case "2" => 2
+            case "3" => 3
+            case "4" => 4
+            case "5" => 5
+            case "6" => 6
+            case "7" => 7
+            case "8" => 8
+            case "9" => 9
+            case "a" => 10
+            case "b" => 11
+            case "c" => 12
+            case "d" => 13
+            case "e" => 14
+            case "f" => 15
+            case _ => 0
+        }
+    }
 }

@@ -4,11 +4,12 @@ import cz.payola.web.client.views.plugins.visual.animation.Animation
 import cz.payola.web.client.views.plugins.visual.techniques.BaseTechnique
 import cz.payola.web.client.views.plugins.visual.graph.VertexView
 import collection.mutable.ListBuffer
+import cz.payola.web.client.views.plugins.visual.components.visualsetup.VisualSetup
 
 /**
   * Visual plug-in technique that places the vertices into a circled tree structure.
   */
-class CircleTechnique extends BaseTechnique
+class CircleTechnique(settings: VisualSetup) extends BaseTechnique(settings)
 {
     def performTechnique() {
 

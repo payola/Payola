@@ -3,11 +3,12 @@ package cz.payola.web.client.views.plugins.visual.techniques.tree
 import cz.payola.web.client.views.plugins.visual.animation.Animation
 import cz.payola.web.client.views.plugins.visual.techniques.BaseTechnique
 import cz.payola.web.client.views.plugins.visual.graph.VertexView
+import cz.payola.web.client.views.plugins.visual.components.visualsetup.VisualSetup
 
 /**
   * Visual plug-in technique that places the vertices into a tree structure.
   */
-class TreeTechnique extends BaseTechnique
+class TreeTechnique(settings: VisualSetup) extends BaseTechnique(settings)
 {
     def performTechnique() {
 

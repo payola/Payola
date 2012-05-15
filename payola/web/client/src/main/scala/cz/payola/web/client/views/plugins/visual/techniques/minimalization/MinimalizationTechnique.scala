@@ -4,8 +4,9 @@ import collection.mutable.ListBuffer
 import cz.payola.web.client.views.plugins.visual.graph.{EdgeView, VertexView}
 import cz.payola.web.client.views.plugins.visual.animation.Animation
 import cz.payola.web.client.views.plugins.visual.techniques.BaseTechnique
+import cz.payola.web.client.views.plugins.visual.components.visualsetup.VisualSetup
 
-class MinimalizationTechnique extends BaseTechnique
+class MinimalizationTechnique(settings: VisualSetup) extends BaseTechnique(settings)
 {
     //TODO add some computation branch cutting...this algorithm is quite complex
     def performTechnique() {
