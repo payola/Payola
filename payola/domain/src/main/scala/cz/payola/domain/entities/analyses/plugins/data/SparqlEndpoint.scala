@@ -18,8 +18,6 @@ sealed class SparqlEndpoint extends DataFetcher("SPARQL Endpoint", List(new Stri
         )
 
         requestProperties.foreach(p => connection.setRequestProperty(p._1, p._2))
-        val rdfXml = Source.fromInputStream(connection.getInputStream, "UTF-8").mkString
-
-        Graph(rdfXml)
+        Graph(connection.getInputStream)
     }
 }

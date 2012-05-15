@@ -4,8 +4,9 @@ import com.hp.hpl.jena.rdf.model._
 import java.security.MessageDigest
 import collection.mutable.{ArrayBuffer, HashMap, ListBuffer}
 import com.hp.hpl.jena.datatypes.RDFDatatype
-import java.io.{ByteArrayOutputStream, StringReader}
 import com.hp.hpl.jena.query._
+import java.io._
+import scala.io.Source
 
 object Graph
 {
@@ -14,6 +15,17 @@ object Graph
       * @return Empty graph instance.
       */
     def empty: Graph = new Graph(Nil, Nil)
+
+    /** Reads an RDF graph from input stream.
+      *
+      * @param is Input Stream.
+      * @param encoding Encoding of the input stream. UTF-8 by default.
+      * @return Instance of graph.
+      */
+    def apply(is: InputStream, encoding: String = "UTF-8"): Graph = {
+        val rdfXML: String = Source.fromInputStream(is, encoding).mkString
+        apply(rdfXML)
+    }
 
     /** Creates a new Graph instance from Jena's Model object.
       *
