@@ -47,18 +47,6 @@ class Analysis(name: String, owner: Option[User])
         }
     }
 
-    /**
-      * Adds a new plugin instance binding to the analysis.
-      * @param sourcePluginInstance The source plugin instance.
-      * @param targetPluginInstance The target plugin instance.
-      * @param inputIndex Index of the target plugin instance input the binding is connected to.
-      */
-    override def addBinding(sourcePluginInstance: PluginInstanceType, targetPluginInstance: PluginInstanceType, inputIndex: Int = 0) {
-        // TODO: can't call super.addBinding(..,..,..) becaure creater binding won't persist
-        // TODO: would have to create my own biding and assure that both parameters are from data.entities, not domain.entities -> overhead
-        require(false, "Method with created binding should be called instead of this")
-    }
-
     override def removeBinding(binding: PluginInstanceBindingType): Option[PluginInstanceBindingType] = {
         super.removeBinding(binding)
 

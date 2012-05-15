@@ -1,0 +1,13 @@
+@(user: Option[cz.payola.data.entities.User], analysis: cz.payola.data.entities.Analysis)
+
+@main(user, "Analysis "+analysis.name+" :: Payola!") {
+
+<div class="container-fluid">
+    <div class="row-fluid">
+          <h1>Detail of analysis: @analysis.name</h1>
+
+    </div><!--/row-->
+
+</div><!--/.fluid-container-->
+
+}
