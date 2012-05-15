@@ -1,22 +1,12 @@
 package cz.payola.data.entities
 
-import org.squeryl.KeyedEntity
-import schema.PayolaDB
-import org.squeryl.PrimitiveTypeMode._
-import collection.mutable.ArrayBuffer
-
 class Group(
         name: String,
         owner: User)
-<<<<<<< HEAD
     extends cz.payola.domain.entities.Group(name, owner)
-    with KeyedEntity[String]
-=======
-    extends cz.payola.domain.entities.Group(id, name, owner)
->>>>>>> develop
     with PersistableEntity
 {
-    val ownerId: String = if (owner == null) "" else owner.id
+    val ownerId: Option[String] = if (owner == null) None else Some(owner.id)
 
     private lazy val _groupMembersQuery = PayolaDB.groupMembership.right(this)
 
@@ -24,27 +14,19 @@ class Group(
         evaluateCollection(_groupMembersQuery)
     }
 
-    override def addMember(u: cz.payola.domain.entities.User) = {
+    override def addMember(u: UserType) = {
         super.addMember(u)
 
         if (u.isInstanceOf[User]) {
-            transaction {
-                if (_groupMembersQuery.find(user => u.id == user.id) == None) {
-                    _groupMembersQuery.associate(u.asInstanceOf[User])
-                }
-            }
+            associate(u.asInstanceOf[User], _groupMembersQuery)
         }
     }
 
-    override def removeMember(u: cz.payola.domain.entities.User) = {
+    override def removeMember(u: UserType) = {
         super.removeMember(u)
 
         if (u.isInstanceOf[User]) {
-            transaction {
-                if (_groupMembersQuery.find(user => u.id == user.id) != None) {
-                    _groupMembersQuery.dissociate(u.asInstanceOf[User])
-                }
-            }
+            dissociate(u.asInstanceOf[User], _groupMembersQuery)
         }
     }
 }

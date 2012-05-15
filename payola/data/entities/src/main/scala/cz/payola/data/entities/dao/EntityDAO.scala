@@ -1,7 +1,6 @@
 package cz.payola.data.entities.dao
 
 import org.squeryl.PrimitiveTypeMode._
-import cz.payola.data.entities.schema.PayolaDB._
 import org.squeryl.{KeyedEntity, Table, Query}
 import collection.mutable.ArrayBuffer
 
@@ -12,20 +11,41 @@ abstract class EntityDAO[A <: KeyedEntity[String]](protected val table: Table[A]
         evaluateSingleResultQuery(table.where(e => e.id === id))
     }
 
+    def removeById(id: String) {
+        try
+        {
+            transaction {
+                val result = table.deleteWhere(e => id === e.id)
+
+                // TODO:
+                println("delete result " + result)
+            }
+        }
+        catch {
+            //TODO: Handle exceptions
+            case e : Exception => println("Removing error: " + e)
+        }
+    }
+
     def getAll(offset: Int = 0, count: Int = 0): Seq[A] = {
         // Get all entities from table (paginated)
         evaluateCollectionResultQuery(table, offset, count)
     }
 
-    def persist(entity: A) =  {
+    def persist(entity: A) {
         try {
             // Insert or update entity
             transaction {
-                if (entity.isPersisted) {
-                    table.update(entity)
+                if (getById(entity.id) != None) {
+                //if (entity.isPersisted) {
+                    val result = table.update(entity)
+
+                    println("Update result: " + result)
                 }
                 else {
-                    table.insert(entity)
+                    val result = table.insert(entity)
+
+                    println("Insert result: " + result)
                 }
             }
         }
@@ -83,4 +103,6 @@ abstract class EntityDAO[A <: KeyedEntity[String]](protected val table: Table[A]
             Seq()
         }
     }
+
+
 }

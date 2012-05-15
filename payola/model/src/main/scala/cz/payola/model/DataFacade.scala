@@ -1,6 +1,5 @@
 package cz.payola.model
 
-import cz.payola.data.rdf.DataProvider
 import cz.payola.domain.rdf.Graph
 import cz.payola.domain.entities.sources.SparqlEndpointDataSource
 
@@ -24,6 +23,8 @@ class DataFacade
             LIMIT 40
         """.format(uri, uri)
 
-        DataProvider.executeQuery(defaultDataSources, query).data.headOption.map(rdf => Graph(rdf)).get
+        // TODO: Where is DataProvider?
+        // DataProvider.executeQuery(defaultDataSources, query).data.headOption.map(rdf => Graph(rdf)).get
+        null
     }
 }

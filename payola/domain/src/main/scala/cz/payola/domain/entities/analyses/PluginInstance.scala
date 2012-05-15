@@ -9,8 +9,8 @@ class PluginInstance(protected val _plugin: Plugin,  protected val _parameterVal
 {
     // TODO cannot create DB Schema with this check
     // require(plugin != null, "Cannot create a plugin instance of a null plugin!")
-    require(parameterValues.map(_.parameter).sortBy(_.name) == plugin.parameters.sortBy(_.name),
-        "The instance doesn't contain parameter instances corresponding to the plugin.")
+    /*require(parameterValues.map(_.parameter).sortBy(_.name) == plugin.parameters.sortBy(_.name),
+        "The instance doesn't contain parameter instances corresponding to the plugin.") */
 
     type PluginType = Plugin
 
