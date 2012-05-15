@@ -33,6 +33,11 @@ class Index
     val textSettings = new TextSettingsModel
 
     val visualSetup = new VisualSetup(vertexSettings, edgesSettings, textSettings)
+    visualSetup.settingsChanged += {
+        evt =>
+            currentPlugin.get.redraw()
+            false
+    }
 
     val plugins = List[Plugin](
         new CircleTechnique(visualSetup),

@@ -4,9 +4,9 @@ import cz.payola.web.client.mvvm_api.Component
 import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom.{Element}
 import cz.payola.web.client.views.plugins.Plugin
-import cz.payola.web.client.events.{ChangedEventArgs, ChangedEvent}
 import cz.payola.web.client.views.plugins.visual.{EdgeSettingsModel, TextSettingsModel, VertexSettingsModel}
 import cz.payola.web.client.mvvm_api.element.{Anchor, Li, Text}
+import cz.payola.web.client.events._
 
 /**
  *
@@ -17,46 +17,56 @@ import cz.payola.web.client.mvvm_api.element.{Anchor, Li, Text}
 
 class VisualSetup(var vertexModel: VertexSettingsModel, var edgesModel: EdgeSettingsModel, var textModel: TextSettingsModel) extends Component
 {
+    val settingsChanged = new ComponentEvent[VisualSetup, EventArgs[VisualSetup]]
+
+    val vertex = new Anchor(List(new Text("Vertices style")), "#")
+    val edges = new Anchor(List(new Text("Edges style")), "#")
+    val text = new Anchor(List(new Text("Text style")), "#")
+    val vertexSettings = new VertexModal(vertexModel)
+    val edgesSettings = new EdgeModal(edgesModel)
+    val textSettings = new TextModal(textModel)
 
     def render(parent: Element = document.body) = {
 
         new Li(List(), "divider").render(parent)
-
-        val vertex = new Anchor(List(new Text("Vertices style")), "#")
         new Li(List(vertex)).render(parent)
-
-        val edges = new Anchor(List(new Text("Edges style")), "#")
         new Li(List(edges)).render(parent)
-
-        val text = new Anchor(List(new Text("Text style")), "#")
         new Li(List(text)).render(parent)
 
-        val vertexSettings = new VertexModal(vertexModel)
         vertexSettings.render(document.body)
-
-        val edgesSettings = new EdgeModal(edgesModel)
         edgesSettings.render(document.body)
-
-        val textSettings = new TextModal(textModel)
         textSettings.render(document.body)
+    }
 
-        vertex.clicked += {
-            event =>
-                vertexSettings.show
-                false
-        }
+    vertexSettings.settingsChanged += {
+        evt => settingsChanged.trigger(new EventArgs[VisualSetup](this))
+        true
+    }
+    edgesSettings.settingsChanged += {
+        evt => settingsChanged.trigger(new EventArgs[VisualSetup](this))
+        true
+    }
+    textSettings.settingsChanged += {
+        evt => settingsChanged.trigger(new EventArgs[VisualSetup](this))
+        true
+    }
 
-        edges.clicked += {
-            event =>
-                edgesSettings.show
-                false
-        }
+    vertex.clicked += {
+        event =>
+            vertexSettings.show
+            false
+    }
 
-        text.clicked += {
-            event =>
-                textSettings.show
-                false
-        }
+    edges.clicked += {
+        event =>
+            edgesSettings.show
+            false
+    }
+
+    text.clicked += {
+        event =>
+            textSettings.show
+            false
     }
 
     private def constraintSize(size: Int, min: Int, max: Int, default: Int): Int = {

@@ -6,11 +6,12 @@ import s2js.adapters.js.dom.{Element}
 import cz.payola.web.client.events.{EventArgs, ComponentEvent}
 import cz.payola.web.client.mvvm_api.element.{Text, Anchor}
 import s2js.compiler.javascript
+import s2js.adapters.js.browser.window
 
 class Modal(title: String, body: Seq[Component]) extends Component
 {
-    def saved = new ComponentEvent[Modal, EventArgs[Modal]]
-    def closed = new ComponentEvent[Modal, EventArgs[Modal]]
+    val saved = new ComponentEvent[Modal, EventArgs[Modal]]
+    val closed = new ComponentEvent[Modal, EventArgs[Modal]]
 
     val modalDiv = document.createElement[Element]("div")
     modalDiv.setAttribute("class","modal")
