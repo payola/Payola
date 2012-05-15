@@ -2,6 +2,7 @@ package cz.payola.domain.entities.analyses
 
 import collection.immutable
 import cz.payola.domain.rdf.Graph
+import cz.payola.common.entities._
 import cz.payola.domain.entities.{ShareableEntity, NamedEntity, Entity}
 
 abstract class Plugin(protected var _name: String, protected val _inputCount: Int,

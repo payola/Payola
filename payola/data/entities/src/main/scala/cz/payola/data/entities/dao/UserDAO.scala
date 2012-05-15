@@ -1,9 +1,7 @@
 package cz.payola.data.entities.dao
 
-import cz.payola.data.entities.schema.PayolaDB
-import cz.payola.data.entities.User
+import cz.payola.data.entities.{User, PayolaDB}
 import org.squeryl.PrimitiveTypeMode._
-import collection.mutable.ArrayBuffer
 
 class UserDAO extends EntityDAO[User](PayolaDB.users)
 {
