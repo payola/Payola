@@ -4,7 +4,7 @@ import cz.payola.domain.entities.analyses.PluginInstance
 import cz.payola.domain.entities.analyses.plugins.query.Construct
 import cz.payola.domain.sparql.{Variable, Subject}
 
-object MultipleConstructsPlugin extends Construct("Merged SPARQL construct queries", Nil)
+object MultipleConstructsPlugin extends Construct("Merged SPARQL construct queries")
 {
     override def createInstance(): PluginInstance = {
         MultipleConstructsPluginInstance.empty

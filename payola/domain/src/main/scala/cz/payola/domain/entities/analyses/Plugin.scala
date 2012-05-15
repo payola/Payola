@@ -4,10 +4,14 @@ import collection.immutable
 import cz.payola.domain.rdf.Graph
 import cz.payola.common.entities._
 import cz.payola.domain.entities.{ShareableEntity, NamedEntity, Entity}
+import cz.payola.domain.IDGenerator
 
-abstract class Plugin(protected var _name: String, protected val _inputCount: Int,
-    protected val _parameters: immutable.Seq[Plugin#ParameterType])
-    extends Entity with NamedEntity with ShareableEntity with cz.payola.common.entities.analyses.Plugin
+abstract class Plugin(
+    protected var _name: String,
+    protected val _inputCount: Int,
+    protected val _parameters: immutable.Seq[Plugin#ParameterType],
+    protected var _id: String = IDGenerator.newId)
+    extends Entity(_id) with NamedEntity with ShareableEntity with cz.payola.common.entities.analyses.Plugin
 {
     type ParameterType = Parameter[_]
 

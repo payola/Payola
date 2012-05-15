@@ -4,8 +4,8 @@ import cz.payola.domain.entities.analyses.{PluginInstance, Plugin, Parameter}
 import cz.payola.domain.rdf.Graph
 import collection.immutable
 
-abstract class DataFetcher(name: String, parameters: immutable.Seq[Parameter[_]])
-    extends Plugin(name, 0, parameters)
+abstract class DataFetcher(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
+    extends Plugin(name, inputCount, parameters, id)
 {
     private val selectEverythingQuery = """
         CONSTRUCT {
@@ -14,7 +14,7 @@ abstract class DataFetcher(name: String, parameters: immutable.Seq[Parameter[_]]
         WHERE {
             ?n1 ?p1 ?n2 .
         }
-    """
+                                        """
 
     def evaluate(instance: PluginInstance, inputs: IndexedSeq[Graph], progressReporter: Double => Unit): Graph = {
         evaluateWithQuery(instance, selectEverythingQuery, progressReporter)

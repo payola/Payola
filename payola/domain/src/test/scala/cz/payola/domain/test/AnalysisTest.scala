@@ -7,12 +7,6 @@ import analyses.parameters.StringParameterValue
 import analyses.{Plugin, PluginInstance}
 
 class AnalysisTest extends FlatSpec with ShouldMatchers {
-    "Analysis" should "not be initialized with null user or name" in {
-        val u: User = new User("Franta")
-        evaluating(new Analysis("HelloWorld", null)) should produce [IllegalArgumentException]
-        evaluating(new Analysis(null, Some(u))) should produce [IllegalArgumentException]
-        evaluating(new Analysis("", Some(u))) should produce [IllegalArgumentException]
-    }
 
     "Analysis" should "retain attributes passed in the constructor" in {
         val name: String = "HelloWorld"
