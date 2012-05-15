@@ -45,23 +45,23 @@ object TestObject
 
     val analysis = new Analysis("an", Some(user))
 
-    val bPar = new BooleanParameter("bPar", true)
+    val bPar = new BooleanParameterDbRepresentation("bPar", true)
 
     val bParInst = new BooleanParameterValue(bPar, false)
 
-    val fPar = new FloatParameter("fPar", -1.0f)
+    val fPar = new FloatParameterDbRepresentation("fPar", -1.0f)
 
     val fParInst = new FloatParameterValue(fPar, 1.0f)
 
-    val iPar = new IntParameter("iPar", -1)
+    val iPar = new IntParameterDbRepresentation("iPar", -1)
 
     val iParInst = new IntParameterValue(iPar, 1)
 
-    val sPar = new StringParameter("sPar", "empty")
+    val sPar = new StringParameterDbRepresentation("sPar", "empty")
 
     val sParInst = new StringParameterValue(sPar, "string")
 
-    val plug = new Plugin("plugin", 1, List(bPar, fPar, iPar, sPar))
+    val plug = new PluginDbRepresentation("plugin", 1, List(bPar, fPar, iPar, sPar))
 
     val plugInst = new PluginInstance(plug, List(bParInst, fParInst, iParInst, sParInst))
 
@@ -250,7 +250,7 @@ object TestObject
         assert(plug.parameters.size == 3)
         assert(plugInst.parameterValues.size == 3)
 
-        // Parameter instance removing should not remove parameter 
+        // ParameterDbRepresentation instance removing should not remove parameter
         fParInstDao.removeById(fParInst.id)
         assert(fParDao.getById(fPar.id) != None)
         assert(fParInstDao.getById(fParInst.id) == None)
@@ -306,7 +306,7 @@ object TestObject
         )
 
         for (p <- plugins) {
-            plugDao.persist(new Plugin(p.name, p.inputCount, p.parameters))
+            plugDao.persist(new PluginDbRepresentation(p.name, p.inputCount, p.parameters))
             assert(plugDao.getByName(p.name) != None)
         }
         

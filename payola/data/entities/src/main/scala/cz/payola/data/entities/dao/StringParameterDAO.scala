@@ -1,8 +1,8 @@
 package cz.payola.data.entities.dao
 
 import cz.payola.data.entities.PayolaDB
-import cz.payola.data.entities.analyses.parameters.StringParameter
+import cz.payola.data.entities.analyses.parameters.StringParameterDbRepresentation
 
-class StringParameterDAO extends EntityDAO[StringParameter](PayolaDB.stringParameters)
+class StringParameterDAO extends EntityDAO[StringParameterDbRepresentation](PayolaDB.stringParameters)
 {
 }

@@ -5,7 +5,9 @@ import cz.payola.data.entities.analyses.parameters._
 import scala.collection.immutable
 import cz.payola.domain.rdf.Graph
 
-class PluginInstance(plugin: Plugin, paramValues: immutable.Seq[ParameterValue[_]])
+class PluginInstance(
+    plugin: cz.payola.domain.entities.analyses.Plugin,
+    paramValues: immutable.Seq[ParameterValue[_]])
     extends cz.payola.domain.entities.analyses.PluginInstance(plugin, paramValues)
     with PersistableEntity
 {
@@ -33,7 +35,7 @@ class PluginInstance(plugin: Plugin, paramValues: immutable.Seq[ParameterValue[_
         )
     }
 
-    override def parameterValues: collection.immutable.Seq[PluginType#ParameterValueType] = {
+    def parameterValues: collection.immutable.Seq[PluginType#ParameterValueType] = {
         List(
             evaluateCollection(_booleanParameterValues),
             evaluateCollection(_floatParameterValues),
