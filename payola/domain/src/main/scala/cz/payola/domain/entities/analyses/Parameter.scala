@@ -16,7 +16,7 @@ abstract class Parameter[A](protected val _name: String, protected val _defaultV
       * @return A new value of the parameter.
       */
     def createValue(value: Option[A] = None): ParameterValue[A] = {
-        createValue(value.getOrElse(_defaultValue))
+        createValue(value.getOrElse(defaultValue))
     }
 
     /**

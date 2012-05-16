@@ -18,9 +18,9 @@ trait Analysis extends NamedEntity with OptionallyOwnedEntity with ShareableEnti
 
     protected val _pluginInstanceBindings: mutable.Seq[PluginInstanceBindingType]
 
-    /* Analytical plugin instances the analysis consists of.*/
+    /** Analytical plugin instances the analysis consists of.*/
     def pluginInstances: Seq[PluginInstanceType] = _pluginInstances
 
-    /* Bindings between the analytical plugin instances. */
+    /** Bindings between the analytical plugin instances. */
     def pluginInstanceBindings: Seq[PluginInstanceBindingType] = _pluginInstanceBindings
 }

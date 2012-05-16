@@ -8,19 +8,11 @@ trait Parameter[A]
 {
     protected val _name: String
 
-    protected var _defaultValue: A
+    protected val _defaultValue: A
 
     /** Name of the parameter. */
-    def name  = _name
+    def name = _name
 
-    /** Default value for parameter **/
+    /** Default value of the parameter. */
     def defaultValue = _defaultValue
-
-    /**
-      * Sets default value of the parameter.
-      * @param value The new parameter default value.
-      */
-    protected def defaultValue_=(value: A) {
-        _defaultValue = value
-    }
 }
