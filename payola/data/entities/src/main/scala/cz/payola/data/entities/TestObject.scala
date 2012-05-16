@@ -5,10 +5,14 @@ import cz.payola.data.entities.analyses.parameters._
 import cz.payola.data.entities.analyses._
 import cz.payola.domain.entities.analyses.plugins.data.SparqlEndpoint
 import cz.payola.domain.entities.analyses.plugins.query._
-import cz.payola.domain.entities.analyses.plugins.Union
+import cz.payola.domain.entities.analyses.plugins._
+import cz.payola.domain.entities.analyses.evaluation.Success
 
 object TestObject
 {
+    println("Connecting ...")
+    assert (PayolaDB.connect())
+
     val userDao = new UserDAO()
 
     val groupDao = new GroupDAO()
@@ -45,29 +49,23 @@ object TestObject
 
     val analysis = new Analysis("an", Some(user))
 
-    val bPar = new BooleanParameterDbRepresentation("bPar", true)
+    val bPar = new BooleanParameter("bPar", "bPar", true)
 
-    val bParInst = new BooleanParameterValue(bPar, false)
+    val bParInst = new BooleanParameterValue("bParVal", bPar, false)
 
-    val fPar = new FloatParameterDbRepresentation("fPar", -1.0f)
+    val fPar = new FloatParameter("fPar", "fPar", -1.0f)
 
-    val fParInst = new FloatParameterValue(fPar, 1.0f)
+    val fParInst = new FloatParameterValue("fParVal", fPar, 1.0f)
 
-    val iPar = new IntParameterDbRepresentation("iPar", -1)
+    val iPar = new IntParameter("iParVal", "iPar", -1)
 
-    val iParInst = new IntParameterValue(iPar, 1)
+    val iParInst = new IntParameterValue("iParVal", iPar, 1)
 
-    val sPar = new StringParameterDbRepresentation("sPar", "empty")
+    val sPar = new StringParameter("sPar", "sPar", "empty")
 
-    val sParInst = new StringParameterValue(sPar, "string")
+    val sParInst = new StringParameterValue("sParVal", sPar, "string")
 
-    val plug = new PluginDbRepresentation("plugin", 1, List(bPar, fPar, iPar, sPar))
-
-    val plugInst = new PluginInstance(plug, List(bParInst, fParInst, iParInst, sParInst))
-
-    def main(args: Array[String]) {        
-        println("Connecting ...")
-        assert (PayolaDB.connect())
+    def main(args: Array[String]) {
         
         println("Creating schema ...")
         PayolaDB.createSchema();                                         
@@ -99,17 +97,13 @@ object TestObject
         groupDao.persist(group1)
         groupDao.persist(group2)
 
-        // Update test
-        group1.name += "1"
-        groupDao.persist(group1)
-
         val g = groupDao.getById(group1.id)
         assert(g != None)
         assert(g.get.id == group1.id)
         assert(g.get.name == group1.name)
         assert(g.get.ownerId.get == user.id)
         
-        user.addToGroup(group1)
+        group1.addMember(user)
         group2.addMember(user)
 
         assert(user.memberGroups.size == 2)
@@ -132,158 +126,15 @@ object TestObject
         assert(a.get.id == analysis.id)
         assert(analysisDao.getById("") == None)
 
-        println("Persisting plugin ...")
-        plugDao.persist(plug)
-
-        // Update test
-        plug.name += "1"
-        plugDao.persist(plug)
-
-        val pl = plugDao.getById(plug.id)
-        assert(pl != None)
-        assert(pl.get.name == plug.name)
-        assert(pl.get.id == plug.id)
-        assert(plugDao.getById("") == None)
-
-        println("Persisting plugin instance ...")
-        plugInst.analysisId = Some(analysis.id)
-        plugInstDao.persist(plugInst)
-
-        val pi = plugInstDao.getById(plugInst.id)
-        assert(pi != None)
-        assert(pi.get.id == plugInst.id)
-        assert(plugInstDao.getById("") == None)
-                
-        println("Persisting parameters and values ...")   
-        println("   boolean:")
-        bParDao.persist(bPar)
-
-        val pB = bParDao.getById(bPar.id)
-        assert(pB != None)
-        assert(pB.get.id == bPar.id)
-        assert(bParDao.getById("") == None)
-        
-        bParInstDao.persist(bParInst)
-
-        val pvB = bParInstDao.getById(bParInst.id)
-        assert(pvB != None)
-        assert(pvB.get.id == bParInst.id)
-        assert(bParInstDao.getById("") == None)
-
-        assert(bPar.instances.size == 1)
-
-        println("   float:")
-        fParDao.persist(fPar)
-
-        val pF = fParDao.getById(fPar.id)
-        assert(pF != None)
-        assert(pF.get.id == fPar.id)
-        assert(fParDao.getById("") == None)
-        
-        fParInstDao.persist(fParInst)
-
-        val pvF = fParInstDao.getById(fParInst.id)
-        assert(pvF != None)
-        assert(pvF.get.id == fParInst.id)
-        assert(fParInstDao.getById("") == None)
-
-        assert(fPar.instances.size == 1)
-
-        println("   int:")
-        iParDao.persist(iPar)
-
-        val pI = iParDao.getById(iPar.id)
-        assert(pI != None)
-        assert(pI.get.id == iPar.id)
-        assert(iParDao.getById("") == None)
-        
-        iParInstDao.persist(iParInst)
-
-        val pvI = iParInstDao.getById(iParInst.id)
-        assert(pvI != None)
-        assert(pvI.get.id == iParInst.id)
-        assert(iParInstDao.getById("") == None)
-
-        assert(iPar.instances.size == 1)
-
-        println("   string:")
-        sParDao.persist(sPar)
-
-        val pS = sParDao.getById(sPar.id)
-        assert(pS != None)
-        assert(pS.get.id == sPar.id)
-        assert(sParDao.getById("") == None)
-        
-        sParInstDao.persist(sParInst)
-
-        val pvS = sParInstDao.getById(sParInst.id)
-        assert(pvS != None)
-        assert(pvS.get.id == sParInst.id)
-        assert(sParInstDao.getById("") == None)
-
-        assert(sPar.instances.size == 1)
-        
-        println("Analysis work ... ")
-        println("   Parameters check")
-        assert(plug.parameters.size == 4)
-        assert(plugInst.parameterValues.size == 4)
-        assert (analysis.pluginInstances.size == 1)
-
-        assert(plug.parameters.find(par => par.id == bPar.id) != None)
-        assert(plug.parameters.find(par => par.id == fPar.id) != None)
-        assert(plug.parameters.find(par => par.id == iPar.id) != None)
-        assert(plug.parameters.find(par => par.id == sPar.id) != None)
-
-        assert(plugInst.parameterValues.find(par => par.id == bParInst.id) != None)
-        assert(plugInst.parameterValues.find(par => par.id == fParInst.id) != None)
-        assert(plugInst.parameterValues.find(par => par.id == iParInst.id) != None)
-        assert(plugInst.parameterValues.find(par => par.id == sParInst.id) != None)
-                
         println("   Derived plugins test")
         testDerivedPlugins()
-
-        println("   Cascade removing")
-        // With parameter its instance should be deleted        
-        bParDao.removeById(bPar.id)
-        assert(bParDao.getById(bPar.id) == None)
-        assert(bParInstDao.getById(bParInst.id) == None)
-        assert(plug.parameters.size == 3)
-        assert(plugInst.parameterValues.size == 3)
-
-        // ParameterDbRepresentation instance removing should not remove parameter
-        fParInstDao.removeById(fParInst.id)
-        assert(fParDao.getById(fPar.id) != None)
-        assert(fParInstDao.getById(fParInst.id) == None)
-        assert(plug.parameters.size == 3)
-        assert(plugInst.parameterValues.size == 2)
-
-        // Remove plugin -> remove parameters, plugin instances, parameter instances
-        plugDao.removeById(plug.id)
-        assert(analysis.pluginInstances.size == 0)
-        assert(plugInstDao.getById(plugInst.id) == None)
-        assert(sParDao.getById(sPar.id) == None)
-        assert(sParInstDao.getById(sParInst.id) == None)
-
-        // Prepare for analysis removal test
-        plugDao.persist(plug)
-        sParDao.persist(sPar)
-        plugInstDao.persist(plugInst)
-        sParInstDao.persist(sParInst)
-        assert (analysis.pluginInstances.size == 1)
-        assert (plugInst.parameterValues.find(par => par.id == sParInst.id) != None)
-
-        // Remove analysis -> remove plugin instances
-        analysisDao.removeById(analysis.id)
-        assert (plugInstDao.getById(plugInst.id) == None)
 
         println("Pagination ...")
         assert(userDao.getAll().size == 1)
         assert(groupDao.getAll().size == 2)
         assert(groupDao.getAll(1, 2).size == 1)
-        assert(groupDao.getAll(2, 5).size == 0)
+        assert(groupDao.getAll(2, 5).size == 0)                                 
         assert(groupDao.getAll(1, 0).size == 0)
-        
-        
     }
     
     def testDerivedPlugins() {         
@@ -292,8 +143,10 @@ object TestObject
         val projectionPlugin = new Projection
         val selectionPlugin = new Selection
         val typedPlugin = new Typed
-        //TODO: missing LeftJoin class in: val leftJoinPlugin = new LeftJoin
+        val join = new Join
         val unionPlugin = new Union
+
+        val analysisDao = new AnalysisDAO
 
         val plugins = List(
             sparqlEndpointPlugin,
@@ -301,19 +154,143 @@ object TestObject
             projectionPlugin,
             selectionPlugin,
             typedPlugin,
-            //leftJoinPlugin,
+            join,
             unionPlugin
         )
 
+        println("       persisting analysis")
+        // persist analysis
+        val analysis = new Analysis("Cities with more than 2 million habitants with countries", None)
+        analysisDao.persist(analysis)
+        assert(analysisDao.getById(analysis.id).isDefined)
+
+        println("       persisting plugins")
+        // Persist  plugins
         for (p <- plugins) {
-            plugDao.persist(new PluginDbRepresentation(p.name, p.inputCount, p.parameters))
-            assert(plugDao.getByName(p.name) != None)
+            plugDao.persist(p)
+
+            val p2 = plugDao.getByName(p.name)
+            assert(p2.isDefined)
+            assert(p2.get.id == p.id)
+            assert(p2.get.parameters.size == p.parameters.size)
+
+            // assert all parameters have proper IDs
+            for(param <- p2.get.parameters){
+                assert(p.parameters.find(_.id == param.id).get.name == param.name)
+                //assert(p.parameters.find(_.id == param.id).get.defaultValue == param.defaultValue)
+            }
+        }
+
+        println("       declaring analysis")
+        val citiesFetcher = sparqlEndpointPlugin.createInstance().setParameter("EndpointURL", "http://dbpedia.org/sparql")
+        val citiesTyped = typedPlugin.createInstance().setParameter("TypeURI", "http://dbpedia.org/ontology/City")
+        val citiesProjection = projectionPlugin.createInstance().setParameter("PropertyURIs", List(
+            "http://dbpedia.org/ontology/populationDensity", "http://dbpedia.org/ontology/populationTotal"
+        ).mkString("\n"))
+        val citiesSelection = selectionPlugin.createInstance().setParameter(
+            "PropertyURI", "http://dbpedia.org/ontology/populationTotal"
+        ).setParameter(
+            "Operator", ">"
+        ).setParameter(
+            "Value", "2000000"
+        )
+        analysis.addPluginInstances(citiesFetcher, citiesTyped, citiesProjection, citiesSelection)
+        analysis.addBinding(citiesFetcher, citiesTyped)
+        analysis.addBinding(citiesTyped, citiesProjection)
+        analysis.addBinding(citiesProjection, citiesSelection)
+
+        val countriesFetcher = sparqlEndpointPlugin.createInstance().setParameter("EndpointURL", "http://dbpedia.org/sparql")
+        val countriesTyped = typedPlugin.createInstance().setParameter("TypeURI", "http://dbpedia.org/ontology/Country")
+        val countriesProjection = projectionPlugin.createInstance().setParameter("PropertyURIs", List(
+            "http://dbpedia.org/ontology/areaTotal"
+        ).mkString("\n"))
+        analysis.addPluginInstances(countriesFetcher, countriesTyped, countriesProjection)
+        analysis.addBinding(countriesFetcher, countriesTyped)
+        analysis.addBinding(countriesTyped, countriesProjection)
+
+        val citiesCountriesJoin = join.createInstance().setParameter(
+            "JoinPropertyURI", "http://dbpedia.org/ontology/country"
+        ).setParameter(
+            "IsInner", false
+        )
+        analysis.addPluginInstances(citiesCountriesJoin)
+        analysis.addBinding(citiesSelection, citiesCountriesJoin, 0)
+        analysis.addBinding(countriesProjection, citiesCountriesJoin, 1)
+
+        /*
+        val evaluation = analysis.evaluate()
+        while (!evaluation.isFinished) {
+            println("Not finished, current progress: " + evaluation.progress.value)
+            Thread.sleep(1000)
+        }
+        val result = evaluation.result
+        */
+
+        println("       persisting analysis again")
+        analysisDao.persist(analysis)
+
+        println("       asserting persisted analysis")
+        // Get analysis from DB
+        val persistedAnalysis = analysisDao.getById(analysis.id)
+        assert(persistedAnalysis.isDefined)
+        assert(persistedAnalysis.get.pluginInstances.size > 0)
+        assert(persistedAnalysis.get.pluginInstanceBindings.size > 0)
+        assert(persistedAnalysis.get.pluginInstanceInputBindings.size > 0)
+        assert(persistedAnalysis.get.pluginInstanceOutputBindings.size > 0)
+                  
+        // Persist  plugins
+        for (p <- plugins) {
+            val p2 = plugDao.getByName(p.name)
+            assert(p2.isDefined)
+            assert(p2.get.id == p.id)
+            assert(p2.get.parameters.size == p.parameters.size)
+
+            // assert all parameters have proper IDs
+            for(param <- p2.get.parameters){
+                assert(p.parameters.find(_.id == param.id).get.name == param.name)
+                assert(p.parameters.find(_.id == param.id).get.defaultValue == param.defaultValue)
+                println("Parameter " + param.name + " of plugin " + p.name + " has " + param.asInstanceOf[Parameter[_]].parameterValues.size + " values")
+            }
         }
         
-        val plugInst2 = plug.createInstance().asInstanceOf[PluginInstance]
-        analysis.addPluginInstances(plugInst, plugInst2)
-        analysis.addBinding(new PluginInstanceBinding(plugInst, plugInst2))
+        val pluginInstances = List(
+            citiesFetcher,
+            citiesTyped,
+            citiesProjection,
+            citiesSelection,
+            countriesFetcher,
+            countriesTyped,
+            countriesProjection,
+            citiesCountriesJoin
+        )
+        
+        for(pi <- pluginInstances) {
+            val pi2 = plugInstDao.getById(pi.id)
+            assert(pi2.isDefined)
+            assert(pi2.get.id == pi.id)
+            assert(pi2.get.parameterValues.size == pi.parameterValues.size)
 
-        assert(analysis.pluginInstanceBindings.size == 1)
+            // assert all parameters have proper IDs
+            for(paramValue <- pi2.get.parameterValues){
+                assert(pi.parameterValues.find(_.id == paramValue.id).get.parameter.id == paramValue.parameter.id)
+                assert(pi.parameterValues.find(_.id == paramValue.id).get.value == paramValue.value)
+
+                println("ID: " + pi.parameterValues.find(_.id == paramValue.id).get.parameter.id + " vs " + paramValue.parameter.id)
+                println("Value: " + pi.parameterValues.find(_.id == paramValue.id).get.value + " vs " + paramValue.value)
+            }
+        }
+        /*
+        // .. and test it
+        println("       evaluating persisted analysis")
+        val eval = persistedAnalysis.get.evaluate()
+        while (!eval.isFinished) {
+            println("Not finished, current progress: " + eval.progress.value)
+            Thread.sleep(1000)
+        }
+        val res = eval.result
+
+        println("Done with result: " + res.toString)
+        assert(res.map(_.isInstanceOf[Success]).getOrElse(false))
+        */
     }
 }

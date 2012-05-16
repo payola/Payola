@@ -8,12 +8,11 @@ import scala.collection.mutable
   *
   * @param _name Name of the group.
   * @param _owner Owner of the group.
-  * @param validate ???
   */
-class Group(protected var _name: String, protected val _owner: User, validate: Boolean = true)
+class Group(protected var _name: String, protected val _owner: User)
     extends Entity with NamedEntity with cz.payola.common.entities.Group
 {
-    def this() = this(null, null, false)
+    //def this() = this(null, null, false)
 
     type UserType = User
 
@@ -23,7 +22,7 @@ class Group(protected var _name: String, protected val _owner: User, validate: B
     // Hence if both _name and _owner are null, let it slip. If one of them is null
     // and the other isn't, something went wrong.
     if (_owner != null) {
-        _owner.addOwnedGroup(this)
+        //TODO: _owner.addOwnedGroup(this)
     }
 
     /** Adds a member to the group. Does nothing if already a member.
@@ -34,7 +33,7 @@ class Group(protected var _name: String, protected val _owner: User, validate: B
       *
       * @throws IllegalArgumentException if the user is null.
       */
-    def addMember(u: User) = {
+    def addMember(u: User) {
         require(u != null, "User is NULL!")
 
         if (!_members.contains(u)) {
@@ -79,7 +78,7 @@ class Group(protected var _name: String, protected val _owner: User, validate: B
       *
       * @throws IllegalArgumentException if the user is null or owner.
       */
-    def removeMember(u: User) = {
+    def removeMember(u: User) {
         require(u != null, "User is NULL!")
 
         // Need to make this check, otherwise we'd

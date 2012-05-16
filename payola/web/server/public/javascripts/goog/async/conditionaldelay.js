@@ -187,7 +187,7 @@ goog.async.ConditionalDelay.prototype.isDone = function() {
  * Called when the listener has been successfully executed and returned
  * {@code true}. The {@see #isDone} method should return {@code true} by now.
  * Designed for inheritance, should be overridden by subclasses or on the
- * instances if they care.
+ * parameterValues if they care.
  */
 goog.async.ConditionalDelay.prototype.onSuccess = function() {
   // Do nothing by default.
@@ -198,7 +198,7 @@ goog.async.ConditionalDelay.prototype.onSuccess = function() {
  * Called when this delayed call is cancelled because the timeout has been
  * exceeded, and the listener has never returned {@code true}.
  * Designed for inheritance, should be overridden by subclasses or on the
- * instances if they care.
+ * parameterValues if they care.
  */
 goog.async.ConditionalDelay.prototype.onFailure = function() {
   // Do nothing by default.

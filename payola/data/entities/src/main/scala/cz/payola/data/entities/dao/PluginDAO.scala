@@ -13,13 +13,42 @@ class PluginDAO extends EntityDAO[PluginDbRepresentation](PayolaDB.plugins)
         val pluginDb: Option[PluginDbRepresentation] =
             evaluateSingleResultQuery(table.where(p => p.name === pluginName))
 
-        val parameters = pluginDb.parameters
-        val name = pluginDb.name
-        val inputCount = pluginDb.inputCount
-        val id = pluginDb.id
-        val pluginClass = pluginDb.pluginClass
+        if (pluginDb.isDefined) {
+            val parameters = pluginDb.get.parameters
+            val name = pluginDb.get.name
+            val inputCount = pluginDb.get.inputCount
+            val id = pluginDb.get.id
+            val className = pluginDb.get.pluginClass
 
-        // Return as domain.Plugin
-        new Plugin(name, inputCount, parameters);
+            // Return as domain.Plugin
+            instantiate(className, name, new java.lang.Integer(inputCount), parameters, id)
+        }
+        else {
+            // Not found
+            None
+        }
+    }
+
+    def persist(plugin: Plugin) {
+        val pluginClass = plugin.getClass.toString.replace("class ", "")
+        val pluginDb = new PluginDbRepresentation(
+            plugin.id,
+            plugin.name,
+            pluginClass,
+            plugin.inputCount
+        )
+
+        // First persist plugin ...
+        super.persist(pluginDb)
+
+        // ... then assign parameters to plugin
+        plugin.parameters.map(pluginDb.addParameter(_))
+    }
+
+    private def instantiate(className: String, args: AnyRef*): Option[Plugin] = {
+        val pluginClass = java.lang.Class.forName(className)
+        val constructor = pluginClass.getConstructors()(0)
+
+        Some(constructor.newInstance(args:_*).asInstanceOf[Plugin])
     }
 }

@@ -862,8 +862,8 @@ goog.array.removeDuplicates = function(arr, opt_rv) {
  * behavior for homogeneous arrays of String(s) and Number(s). The array
  * specified <b>must</b> be sorted in ascending order (as defined by the
  * comparison function).  If the array is not sorted, results are undefined.
- * If the array contains multiple instances of the specified target value, any
- * of these instances may be found.
+ * If the array contains multiple parameterValues of the specified target value, any
+ * of these parameterValues may be found.
  *
  * Runtime: O(log n)
  *

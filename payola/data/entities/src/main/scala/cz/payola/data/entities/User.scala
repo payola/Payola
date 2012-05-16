@@ -24,30 +24,45 @@ class User(name: String, pwd: String, email: String)
         evaluateCollection(_memberGroupsQuery)
     }
 
-    def addToGroup(g: GroupType) {
-        //TODO: super.addToGroup(g);
+    override def addAnalysis(a: AnalysisType) {
+        super.addAnalysis(
+            a match {
+                // Just associate Analysis with user and persist
+                case analysis: Analysis => {
+                    associate(analysis, _ownedAnalysesQuery);
 
-        if (g.isInstanceOf[Group]) {
-            associate(g.asInstanceOf[Group], _memberGroupsQuery)
-        }
+                    analysis
+                }
+                // "Convert" to data.Analysis, associate with user and persist
+                case analysis: cz.payola.domain.entities.Analysis => {
+                    // TODO: maybe also "converting" parameter values
+                    val an = new Analysis(analysis.name, None)
+                    associate(an, _ownedAnalysesQuery)
+
+                    an
+                }
+            }
+        )
     }
 
-    def removeFromGroup(g: GroupType) {
-        // TODO: super.removeFromGroup(g)
+    override def addOwnedGroup(g: GroupType) = {
+        super.addOwnedGroup(
+            g match {
+                // Just associate Group with user and persist
+                case group: Group => {
+                    associate(group, _ownedGroupsQuery);
 
-        if (g.isInstanceOf[Group]) {
-            dissociate(g.asInstanceOf[Group], _memberGroupsQuery)
-        }
+                    group
+                }
+                // "Convert" to data.Group, associate with user and persist
+                case group: cz.payola.domain.entities.Group => {
+                    // TODO: maybe also "converting" parameter values
+                    val gr = new Group(group.name, this)
+                    associate(gr, _ownedGroupsQuery)
+
+                    gr
+                }
+            }
+        )
     }
-
-
-    /* TODO: how to handle managing owned entities (depends on field owner on entity)
-    override def removeOwnedGroup(a: AnalysisType) = null
-
-    override def removeOwnedGroup(g: cz.payola.domain.entities.Group) {}
-
-    override def addAnalysis(a: cz.payola.domain.entities.AnalysisType) = null
-
-    override def addOwnedGroup(g: cz.payola.domain.entities.Group) = null
-    */
 }

@@ -4,15 +4,15 @@ import cz.payola.data.entities.analyses.parameters._
 import cz.payola.data.entities.{PersistableEntity, PayolaDB}
 import scala.collection.immutable
 import cz.payola.domain.rdf.Graph
+import cz.payola.domain.IDGenerator
 
 class PluginDbRepresentation(
+    val id: String,
     val name: String,
     val pluginClass: String,
-    val inputCount: Int,
-    val params: immutable.Seq[ParameterValue[_]])
+    val inputCount: Int)
     extends PersistableEntity
 {
-
     private lazy val _pluginInstancesQuery = PayolaDB.pluginsPluginInstances.left(this)
 
     private lazy val _booleanParameters = PayolaDB.booleanParametersOfPlugins.left(this)
@@ -23,30 +23,11 @@ class PluginDbRepresentation(
 
     private lazy val _stringParameters = PayolaDB.stringParametersOfPlugins.left(this)
 
-    private def mapParams(
-        params: immutable.Seq[cz.payola.domain.entities.analyses.Plugin#ParameterType],
-        pluginId: String): immutable.Seq[cz.payola.domain.entities.analyses.Plugin#ParameterType] = {
-        println("ParamID: " + pluginId)
-        Nil
-    }
-
-    // Assosiate parameters to plugin
-    if (params != null) {
-        params.map(
-            _ match {
-                case param: BooleanParameterDbRepresentation => param.pluginId = Some(id)
-                case param: FloatParameterDbRepresentation => param.pluginId = Some(id)
-                case param: IntParameterDbRepresentation => param.pluginId = Some(id)
-                case param: StringParameterDbRepresentation => param.pluginId = Some(id)
-            }
-        )
-    }
-
     def pluginInstances: collection.Seq[PluginInstance] = {
         evaluateCollection(_pluginInstancesQuery)
     }
 
-    override def parameters: collection.immutable.Seq[ParameterType] = {
+    def parameters: collection.immutable.Seq[Parameter[_]] = {
         List(
             evaluateCollection(_booleanParameters),
             evaluateCollection(_floatParameters),
@@ -55,27 +36,20 @@ class PluginDbRepresentation(
         ).flatten.toSeq
     }
 
-    override def createInstance(): cz.payola.domain.entities.analyses.PluginInstance = {
-        // Create data.entities plugin instance with data.entities parameter values
-        new PluginInstance(
-            this,
-            parameters.map(
-                _ match {
-                    case p: cz.payola.data.entities.analyses.parameters.BooleanParameterDbRepresentation => p.createValue(None).asInstanceOf[BooleanParameterValue]
-                    case p: cz.payola.data.entities.analyses.parameters.FloatParameterDbRepresentation => p.createValue(None).asInstanceOf[FloatParameterValue]
-                    case p: cz.payola.data.entities.analyses.parameters.IntParameterDbRepresentation => p.createValue(None).asInstanceOf[IntParameterValue]
-                    case p: cz.payola.data.entities.analyses.parameters.StringParameterDbRepresentation => p.createValue(None).asInstanceOf[StringParameterValue]
-                    case p: cz.payola.domain.entities.analyses.parameters.BooleanParameter => new BooleanParameterDbRepresentation(p.name, p.defaultValue).createValue(None).asInstanceOf[BooleanParameterValue]
-                    case p: cz.payola.domain.entities.analyses.parameters.FloatParameter => new FloatParameterDbRepresentation(p.name, p.defaultValue).createValue(None).asInstanceOf[FloatParameterValue]
-                    case p: cz.payola.domain.entities.analyses.parameters.IntParameter => new IntParameterDbRepresentation(p.name, p.defaultValue).createValue(None).asInstanceOf[IntParameterValue]
-                    case p: cz.payola.domain.entities.analyses.parameters.StringParameter => new StringParameterDbRepresentation(p.name, p.defaultValue).createValue(None).asInstanceOf[StringParameterValue]
-                }
-            )
-        )
+    def addParameter(parameter: cz.payola.domain.entities.analyses.Parameter[_]) {
+        parameter match {
+            case b: BooleanParameter => associate(b, _booleanParameters)
+            case f: FloatParameter => associate(f, _floatParameters)
+            case i: IntParameter => associate(i, _intParameters)
+            case s: StringParameter => associate(s, _stringParameters)
+            case b: cz.payola.domain.entities.analyses.parameters.BooleanParameter
+                    => associate(new BooleanParameter(b.id, b.name, b.defaultValue), _booleanParameters)
+            case f: cz.payola.domain.entities.analyses.parameters.FloatParameter
+                    => associate(new FloatParameter(f.id, f.name, f.defaultValue), _floatParameters)
+            case i: cz.payola.domain.entities.analyses.parameters.IntParameter
+                    => associate(new IntParameter(i.id, i.name, i.defaultValue), _intParameters)
+            case s: cz.payola.domain.entities.analyses.parameters.StringParameter
+                    => associate(new StringParameter(s.id, s.name, s.defaultValue), _stringParameters)
+        }
     }
-
-    def evaluate(
-        instance: cz.payola.domain.entities.analyses.PluginInstance,
-        inputs: IndexedSeq[Graph],
-        progressReporter: Double => Unit): Graph = { null }
 }

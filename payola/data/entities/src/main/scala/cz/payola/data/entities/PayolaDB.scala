@@ -22,19 +22,19 @@ object PayolaDB extends Schema
 
     val pluginInstances = table[PluginInstance]("pluginInstances")
 
-    val booleanParameters = table[BooleanParameterDbRepresentation]("booleanParameters")
+    val booleanParameters = table[BooleanParameter]("booleanParameters")
 
     val booleanParameterValues = table[BooleanParameterValue]("booleanParameterValues")
 
-    val floatParameters = table[FloatParameterDbRepresentation]("floatParameters")
+    val floatParameters = table[FloatParameter]("floatParameters")
 
     val floatParameterValues = table[FloatParameterValue]("floatParameterValues")
 
-    val intParameters = table[IntParameterDbRepresentation]("intParameters")
+    val intParameters = table[IntParameter]("intParameters")
 
     val intParameterValues = table[IntParameterValue]("intParameterValues")
 
-    val stringParameters = table[StringParameterDbRepresentation]("stringParameters")
+    val stringParameters = table[StringParameter]("stringParameters")
 
     val stringParameterValues = table[StringParameterValue]("stringParameterValues")
 
@@ -178,7 +178,8 @@ object PayolaDB extends Schema
 
         on(plugins)(plugin =>
             declare(
-                plugin.id is (primaryKey)
+                plugin.id is (primaryKey),
+                plugin.name is (unique)
             ))
 
         on(pluginInstances)(instance =>
@@ -236,14 +237,14 @@ object PayolaDB extends Schema
     }
 
     private def defineForeignKeyPolicy() {
-        // When a PluginDbRepresentation is deleted, all of the its instances will get deleted :
+        // When a PluginDbRepresentation is deleted, all of the its parameterValues will get deleted :
         pluginsPluginInstances.foreignKeyDeclaration.constrainReference(onDelete cascade)
 
-        // When an Analysis is deleted, all of the its plugin instances will get deleted :
+        // When an Analysis is deleted, all of the its plugin parameterValues will get deleted :
         analysesPluginInstances.foreignKeyDeclaration.constrainReference(onDelete cascade)
         analysesPluginInstancesBindings.foreignKeyDeclaration.constrainReference(onDelete cascade)
 
-        // When a ParameterDbRepresentation is deleted, all of the its instances will get deleted :
+        // When a Parameter is deleted, all of the its parameterValues will get deleted :
         valuesOfBooleanParameters.foreignKeyDeclaration.constrainReference(onDelete cascade)
         valuesOfFloatParameters.foreignKeyDeclaration.constrainReference(onDelete cascade)
         valuesOfIntParameters.foreignKeyDeclaration.constrainReference(onDelete cascade)

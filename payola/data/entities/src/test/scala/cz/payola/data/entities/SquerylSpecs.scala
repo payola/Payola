@@ -46,19 +46,19 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
 
     val analysis = new Analysis("an", Some(user))
 
-    val bPar = new BooleanParameterDbRepresentation("bPar", true)
+    val bPar = new BooleanParameter("bPar", true)
 
     val bParInst = new BooleanParameterValue(bPar, false)
 
-    val fPar = new FloatParameterDbRepresentation("fPar", -1.0f)
+    val fPar = new FloatParameter("fPar", -1.0f)
 
     val fParInst = new FloatParameterValue(fPar, 1.0f)
 
-    val iPar = new IntParameterDbRepresentation("iPar", -1)
+    val iPar = new IntParameter("iPar", -1)
 
     val iParInst = new IntParameterValue(iPar, 1)
 
-    val sPar = new StringParameterDbRepresentation("sPar", "empty")
+    val sPar = new StringParameter("sPar", "empty")
 
     val sParInst = new StringParameterValue(sPar, "string")
 
@@ -189,7 +189,7 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
         val x = bParInstDao.getById("")
         assert(x == None)
 
-        assert(bPar.instances.size == 1)
+        assert(bPar.parameterValues.size == 1)
     }
 
     "9) FloatParameters" should "be persited, loaded and managed by FloatParameterDAO" in {
@@ -213,7 +213,7 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
         val x = fParInstDao.getById("")
         assert(x == None)
 
-        assert(fPar.instances.size == 1)
+        assert(fPar.parameterValues.size == 1)
     }
 
     "11) IntParameters" should "be persited, loaded and managed by IntParameterDAO" in {
@@ -237,7 +237,7 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
         val x = iParInstDao.getById("")
         assert(x == None)
 
-        assert(iPar.instances.size == 1)
+        assert(iPar.parameterValues.size == 1)
     }
 
     "13) StringParameters" should "be persited, loaded and managed by StringParameterDAO" in {
@@ -261,10 +261,10 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
         val x = sParInstDao.getById("")
         assert(x == None)
 
-        assert(sPar.instances.size == 1)
+        assert(sPar.parameterValues.size == 1)
     }
 
-    "15) Plugins and Parameters" should "work with their instances" in {
+    "15) Plugins and Parameters" should "work with their parameterValues" in {
         assert(plug.parameters.size == 4)
         assert(plugInst.parameterValues.size == 4)
 
@@ -287,14 +287,14 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
         assert(plug.parameters.size == 3)
         assert(plugInst.parameterValues.size == 3)
 
-        // ParameterDbRepresentation instance removing should not remove parameter
+        // Parameter instance removing should not remove parameter
         fParInstDao.removeById(fParInst.id)
         assert(fParDao.getById(fPar.id) != None)
         assert(fParInstDao.getById(fParInst.id) == None)
         assert(plug.parameters.size == 3)
         assert(plugInst.parameterValues.size == 2)
 
-        // Remove plugin -> remove parameters, plugin instances, parameter instances
+        // Remove plugin -> remove parameters, plugin parameterValues, parameter parameterValues
         plugDao.removeById(plug.id)
         assert(analysis.pluginInstances.size == 0)
         assert(plugInstDao.getById(plugInst.id) == None)
@@ -309,7 +309,7 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
         assert (analysis.pluginInstances.size == 1)
         assert (plugInst.parameterValues.find(par => par.id == sParInst.id) != None)
 
-        // Remove analysis -> remove plugin instances
+        // Remove analysis -> remove plugin parameterValues
         analysisDao.removeById(analysis.id)
         assert (plugInstDao.getById(plugInst.id) == None)
     }
@@ -334,10 +334,7 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
             unionPlugin
         )
 
-        for (p <- plugins) {
-            plugDao.persist(new PluginDbRepresentation(p.name, p.inputCount, p.parameters))
-            assert(plugDao.getByName(p.name) != None)
-        }
+
         
         val plugInst2 = plug.createInstance()
         analysis.addPluginInstances(plugInst, plugInst2)

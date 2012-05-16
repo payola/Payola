@@ -4,7 +4,7 @@ import scala.collection.immutable
 import cz.payola.common.rdf.{Graph, Edge}
 import cz.payola.common.rdf.{LiteralVertex, IdentifiedVertex, Vertex}
 
-// TODO just temporary definition until the server side starts sending us instances of the Vertex, Edge and Graph
+// TODO just temporary definition until the server side starts sending us parameterValues of the Vertex, Edge and Graph
 // traits. Then there won't be any usage of these simple classes.
 
 class SimpleVertex extends Vertex
