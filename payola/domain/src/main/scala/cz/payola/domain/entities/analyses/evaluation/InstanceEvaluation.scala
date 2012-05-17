@@ -6,7 +6,7 @@ import cz.payola.domain.entities.analyses.PluginInstance
 import collection.mutable
 
 class InstanceEvaluation(private val instance: PluginInstance, private val analysisEvaluation: AnalysisEvaluation,
-    private val outputProcessor: Graph => Unit)
+    private val outputProcessor: Option[Graph] => Unit)
     extends Actor
 {
     def act() {
@@ -30,16 +30,20 @@ class InstanceEvaluation(private val instance: PluginInstance, private val analy
         }
     }
 
-    def evaluateInstance(inputs: IndexedSeq[Graph]) {
+    def evaluateInstance(inputs: IndexedSeq[Option[Graph]]) {
         reportProgress(0.0)
 
-        try {
-            val output = instance.plugin.evaluate(instance, inputs, reportCheckedProgress)
-            reportProgress(1.0)
-            outputProcessor(output)
+        val output: Option[Graph] = try {
+            Some(instance.plugin.evaluate(instance, inputs, reportCheckedProgress))
         } catch {
-            case throwable => analysisEvaluation ! InstanceEvaluationError(instance, throwable)
+            case throwable => {
+                analysisEvaluation ! InstanceEvaluationError(instance, throwable)
+                None
+            }
         }
+
+        reportProgress(1.0)
+        outputProcessor(output)
     }
 
     private def reportProgress(value: Double) {

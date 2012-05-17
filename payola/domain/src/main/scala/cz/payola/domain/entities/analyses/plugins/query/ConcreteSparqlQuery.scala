@@ -13,7 +13,7 @@ sealed class ConcreteSparqlQuery(
     id: String = IDGenerator.newId)
     extends SparqlQuery(name, inputCount, parameters, id)
 {
-    def getQuery(instance: PluginInstance): Option[String] = {
-        instance.getStringParameter("Query")
+    def getQuery(instance: PluginInstance): String = {
+        usingDefined(instance.getStringParameter("Query"))(query => query)
     }
 }

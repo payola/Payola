@@ -15,7 +15,7 @@ class Join(
     id: String = IDGenerator.newId)
     extends Plugin(name, inputCount, parameters, id)
 {
-    def getJoinPropertyUri(instance: PluginInstance): Option[String] = {
+    def getJoinPropertyURI(instance: PluginInstance): Option[String] = {
         instance.getStringParameter("JoinPropertyURI")
     }
 
@@ -23,7 +23,7 @@ class Join(
         instance.getBooleanParameter("IsInner")
     }
 
-    def evaluate(instance: PluginInstance, inputs: IndexedSeq[Graph], progressReporter: Double => Unit): Graph = {
+    def evaluate(instance: PluginInstance, inputs: IndexedSeq[Option[Graph]], progressReporter: Double => Unit) = {
         // TODO
         throw new Exception("Join.evaluate is not implemetned.")
     }

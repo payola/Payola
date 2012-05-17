@@ -11,10 +11,18 @@ object ConstructQuery
     def apply(triple: TriplePattern): ConstructQuery = {
         ConstructQuery(List(triple))
     }
+
+    def empty: ConstructQuery = {
+        ConstructQuery(Nil)
+    }
 }
 
 case class ConstructQuery(template: immutable.Seq[TriplePattern], pattern: Option[GraphPattern])
 {
+    def isEmpty: Boolean = {
+        template.isEmpty && pattern.isEmpty
+    }
+
     override def toString: String = {
         """
         CONSTRUCT {

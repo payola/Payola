@@ -20,7 +20,7 @@ class EntityEqualityTest extends FlatSpec with ShouldMatchers {
         (u == a) should equal (false)
     }
 
-    "Entities" should "be equal if both classes and IDs are the same, yet other content isn't" in {
+    it should "be equal if both classes and IDs are the same, yet other content isn't" in {
         val u: User = new UserWithTheSameID("Franta")
         val u2: User = new UserWithTheSameID("Ben")
         (u == u2) should equal (true)

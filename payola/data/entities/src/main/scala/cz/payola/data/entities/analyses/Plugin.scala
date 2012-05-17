@@ -65,6 +65,6 @@ class Plugin(name: String, inputCount: Int, params: immutable.Seq[cz.payola.doma
 
     def evaluate(
         instance: cz.payola.domain.entities.analyses.PluginInstance,
-        inputs: IndexedSeq[Graph],
+        inputs: IndexedSeq[Option[Graph]],
         progressReporter: Double => Unit): Graph = { null }
 }
