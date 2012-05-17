@@ -42,7 +42,7 @@ abstract class Plugin(
       * @param instance The corresponding instance.
       * @param inputs The input graphs.
       * @param progressReporter A method that can be used to report plugin evaluation progress (which has to be within
-      *                         the (0.0, 1.0) interval).
+      *                         the (0.0, 1.0] interval).
       * @return The output graph.
       */
     def evaluate(instance: PluginInstance, inputs: IndexedSeq[Option[Graph]], progressReporter: Double => Unit): Graph
