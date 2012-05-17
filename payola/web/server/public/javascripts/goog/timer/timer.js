@@ -47,7 +47,7 @@ goog.Timer = function(opt_interval, opt_timerObject) {
   /**
    * An object that implements setTimout, setInterval, clearTimeout and
    * clearInterval. We default to the window object. Changing this on
-   * goog.Timer.prototype changes the object for all timer parameterValues which can
+   * goog.Timer.prototype changes the object for all timer instances which can
    * be useful if your environment has some other implementation of timers than
    * the window object.
    * @type {Object}
@@ -100,7 +100,7 @@ goog.Timer.prototype.enabled = false;
 /**
  * An object that implements setTimout, setInterval, clearTimeout and
  * clearInterval. We default to the window object. Changing this on
- * goog.Timer.prototype changes the object for all timer parameterValues which can be
+ * goog.Timer.prototype changes the object for all timer instances which can be
  * useful if your environment has some other implementation of timers than the
  * window object.
  * @type {Object}

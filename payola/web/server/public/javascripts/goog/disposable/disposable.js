@@ -43,7 +43,7 @@ goog.Disposable = function() {
 
 /**
  * @define {boolean} Whether to enable the monitoring of the goog.Disposable
- *     parameterValues. Switching on the monitoring is only recommended for debugging
+ *     instances. Switching on the monitoring is only recommended for debugging
  *     because it has a significant impact on performance and memory usage.
  *     If switched off, the monitoring code compiles down to 0 bytes.
  *     The monitoring expects that all disposable objects call the

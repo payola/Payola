@@ -7,13 +7,16 @@ import cz.payola.domain.entities.analyses.ParameterValue
 class BooleanParameter(
     override val id: String,
     name: String,
-    override val defaultValue: Boolean)
-    extends cz.payola.domain.entities.analyses.parameters.BooleanParameter(name, defaultValue)
+    defaultVal: Boolean)
+    extends cz.payola.domain.entities.analyses.parameters.BooleanParameter(name, defaultVal)
     with Parameter[Boolean]
 {
     private lazy val _valuesQuery = PayolaDB.valuesOfBooleanParameters.left(this)
 
-    val _value: Boolean = defaultValue
+    // Get, store and set default value of parameter to Database
+    val _defaultValueDb = defaultVal
+
+    override def defaultValue = _defaultValueDb
 
     def parameterValues: Seq[BooleanParameterValue] = evaluateCollection(_valuesQuery)
 }
