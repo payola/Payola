@@ -20,6 +20,8 @@ class Typed(
     }
 
     def getConstructQuery(instance: PluginInstance, subject: Subject, variableGetter: () => Variable) = {
-        getTypeURI(instance).map(uri => ConstructQuery(TriplePattern(subject, typePropertyURI, Uri(uri))))
+        usingDefined(getTypeURI(instance)) { uri =>
+            ConstructQuery(TriplePattern(subject, typePropertyURI, Uri(uri)))
+        }
     }
 }

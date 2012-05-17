@@ -6,7 +6,7 @@ import cz.payola.domain.entities.analyses.PluginInstance
 import collection.mutable
 
 class InstanceEvaluation(private val instance: PluginInstance, private val analysisEvaluation: AnalysisEvaluation,
-    private val outputProcessor: Graph => Unit)
+    private val outputProcessor: Option[Graph] => Unit)
     extends Actor
 {
     def act() {
@@ -30,16 +30,20 @@ class InstanceEvaluation(private val instance: PluginInstance, private val analy
         }
     }
 
-    def evaluateInstance(inputs: IndexedSeq[Graph]) {
+    def evaluateInstance(inputs: IndexedSeq[Option[Graph]]) {
         reportProgress(0.0)
 
-        try {
-            val output = instance.plugin.evaluate(instance, inputs, reportCheckedProgress)
-            reportProgress(1.0)
-            outputProcessor(output)
+        val output: Option[Graph] = try {
+            Some(instance.plugin.evaluate(instance, inputs, reportCheckedProgress))
         } catch {
-            case throwable => analysisEvaluation ! InstanceEvaluationError(instance, throwable)
+            case throwable => {
+                analysisEvaluation ! InstanceEvaluationError(instance, throwable)
+                None
+            }
         }
+
+        reportProgress(1.0)
+        outputProcessor(output)
     }
 
     private def reportProgress(value: Double) {
@@ -47,7 +51,13 @@ class InstanceEvaluation(private val instance: PluginInstance, private val analy
     }
 
     private def reportCheckedProgress(value: Double) {
-        require(value > 0.0 && value < 1.0, "The progress value has to be within (0.0, 1.0) interval.")
-        reportProgress(value)
+        require(value > 0.0 && value <= 1.0, "The progress value has to be within (0.0, 1.0] interval.")
+
+        // The value 1.0 is reserved for the representation of a plugin instance evaluation end. Because there won't
+        // be no control over what a plugin reports, it might happen, that the plugin would report 1.0 but its
+        // evaluation  would actually continue (false report). However it's easier for the implementers of plugins to be
+        // able to report  even 1.0. So the 1.0 reported by a plugin is internally treated as 0.999 so we're sure, that
+        // the plugin instance evaluation is really done when 1.0 is reported to the analysis evaluation.
+        reportProgress(if (value == 1.0) 0.999 else value)
     }
 }
