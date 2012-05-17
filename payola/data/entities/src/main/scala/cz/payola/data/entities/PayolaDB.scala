@@ -40,6 +40,8 @@ object PayolaDB extends Schema
 
     val pluginInstanceBindings = table[PluginInstanceBinding]("pluginInstanceBindings")
 
+    //val groupMemberships = table[GroupMembership]("groupmembership")
+
     val groupMembership =
         manyToManyRelation(users, groups)
             .via[GroupMembership]((u, g, gm) => (gm.memberId === u.id, g.id === gm.groupId))

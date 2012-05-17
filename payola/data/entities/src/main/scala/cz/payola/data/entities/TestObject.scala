@@ -177,7 +177,7 @@ object TestObject
             // assert all parameters have proper IDs
             for(param <- p2.get.parameters){
                 assert(p.parameters.find(_.id == param.id).get.name == param.name)
-                //assert(p.parameters.find(_.id == param.id).get.defaultValue == param.defaultValue)
+                assert(p.parameters.find(_.id == param.id).get.defaultValue == param.defaultValue)
             }
         }
 
