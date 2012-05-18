@@ -24,7 +24,6 @@ class AnalysisEvaluationSpecs extends FlatSpec with ShouldMatchers
         val unionPlugin = new Union
 
         val analysis = new Analysis("Cities with more than 2 million habitants with countries", None)
-
         val citiesFetcher = sparqlEndpointPlugin.createInstance().setParameter("EndpointURL", "http://dbpedia.org/sparql")
         val citiesTyped = typedPlugin.createInstance().setParameter("TypeURI", "http://dbpedia.org/ontology/City")
         val citiesProjection = projectionPlugin.createInstance().setParameter("PropertyURIs", List(
