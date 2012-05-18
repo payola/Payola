@@ -223,4 +223,23 @@ class Analysis(name: String, owner: Option[User])
     def outputInstance: Option[PluginInstance] = {
         pluginInstanceOutputBindings.find(_._2.isEmpty).map(_._1)
     }
+
+    def getLeavesCount : Int = {
+        val output = outputInstance
+
+        def countLeaves(plugin: PluginInstance) : Int = {
+            val bindings = pluginInstanceBindings.find(_.targetPluginInstance == plugin)
+            bindings.size match {
+                case 0 => 1
+                case _ => bindings.map(binding => {
+                    countLeaves(binding.sourcePluginInstance)
+                }).sum
+            }
+        }
+
+        output match {
+            case None => 0
+            case _ => countLeaves(output.get)
+        }
+    }
 }
