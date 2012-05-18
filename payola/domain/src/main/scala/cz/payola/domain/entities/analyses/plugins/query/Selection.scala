@@ -29,15 +29,11 @@ class Selection(
     }
 
     def getConstructQuery(instance: PluginInstance, subject: Subject, variableGetter: () => Variable) = {
-        getPropertyURI(instance).flatMap { uri =>
-            getOperator(instance).flatMap { operator =>
-                getValue(instance).map { value =>
-                    val objectVariable = variableGetter()
-                    val triples = List(TriplePattern(subject, Uri(uri), objectVariable))
-                    val filters = List(Filter(objectVariable + " " + operator + " " + value))
-                    ConstructQuery(triples, Some(GraphPattern(triples, filters = filters)))
-                }
-            }
+        usingDefined(getPropertyURI(instance), getOperator(instance), getValue(instance)) { (u, o, v) =>
+            val objectVariable = variableGetter()
+            val triples = List(TriplePattern(subject, Uri(u), objectVariable))
+            val filters = List(Filter(objectVariable + " " + o + " " + v))
+            ConstructQuery(triples, Some(GraphPattern(triples, filters = filters)))
         }
     }
 }

@@ -24,7 +24,6 @@ class AnalysisEvaluationSpecs extends FlatSpec with ShouldMatchers
         val unionPlugin = new Union
 
         val analysis = new Analysis("Cities with more than 2 million habitants with countries", None)
-
         val citiesFetcher = sparqlEndpointPlugin.createInstance().setParameter("EndpointURL", "http://dbpedia.org/sparql")
         val citiesTyped = typedPlugin.createInstance().setParameter("TypeURI", "http://dbpedia.org/ontology/City")
         val citiesProjection = projectionPlugin.createInstance().setParameter("PropertyURIs", List(
@@ -62,10 +61,10 @@ class AnalysisEvaluationSpecs extends FlatSpec with ShouldMatchers
 
         val evaluation = analysis.evaluate()
         while (!evaluation.isFinished) {
-            println("Not finished, current progress: " + evaluation.progress.value)
+            println("Not finished, current progress: " + evaluation.getProgress.value)
             Thread.sleep(1000)
         }
-        val result = evaluation.result
+        val result = evaluation.getResult
         println("Done with result: " + result.toString)
         assert(result.map(_.isInstanceOf[Success]).getOrElse(false))
     }
@@ -246,6 +245,7 @@ class AnalysisEvaluationSpecs extends FlatSpec with ShouldMatchers
     }*/
 }
 
+/*
 object GetNextMessage
 
 object TerminateForwarder
@@ -299,4 +299,4 @@ class IntDoubler extends Plugin("Int doubler", 1, Nil)
         }
         new Graph(List(new LiteralNode(doubled.getOrElse(0))), Nil)
     }
-}
+}*/

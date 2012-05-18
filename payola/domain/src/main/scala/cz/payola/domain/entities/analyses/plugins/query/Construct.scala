@@ -1,10 +1,11 @@
 package cz.payola.domain.entities.analyses.plugins.query
 
 import collection.immutable
-import cz.payola.domain.entities.analyses.plugins.SparqlQuery
 import cz.payola.domain.sparql.{ConstructQuery, Subject, Variable}
-import cz.payola.domain.entities.analyses.{Parameter, PluginInstance}
 import cz.payola.domain.IDGenerator
+import cz.payola.domain.entities.analyses._
+import cz.payola.domain.entities.analyses.PluginException
+import cz.payola.domain.entities.analyses.plugins.SparqlQuery
 
 abstract class Construct(
     name: String,
@@ -20,16 +21,20 @@ abstract class Construct(
       * @param variableGetter An unique variable provider, that must be used when the plugin needs a new variable.
       * @return The construct query representation.
       */
-    def getConstructQuery(instance: PluginInstance, subject: Subject, variableGetter: () => Variable):
-    Option[ConstructQuery]
+    def getConstructQuery(instance: PluginInstance, subject: Subject, variableGetter: () => Variable): ConstructQuery
 
-    def getQuery(instance: PluginInstance): Option[String] = {
+    def getQuery(instance: PluginInstance): String = {
         var i = 0;
         def variableGetter = () => {
             i += 1
             Variable("v" + i)
         }
 
-        getConstructQuery(instance, Variable("s"), variableGetter).map(_.toString)
+        val query = getConstructQuery(instance, Variable("s"), variableGetter)
+        if (query.isEmpty) {
+            throw new PluginException("The construct query is empty.")
+        } else {
+            query.toString
+        }
     }
 }

@@ -1,9 +1,9 @@
 package cz.payola.domain.entities.analyses.optimization
 
-import cz.payola.domain.entities.analyses.{AnalysisException, PluginInstance}
+import cz.payola.domain.entities.AnalysisException
+import cz.payola.domain.entities.analyses.PluginInstance
 import collection.immutable
-import cz.payola.domain.entities.analyses.plugins.query.{Construct, Selection, Projection}
-import cz.payola.domain.sparql.ConstructQuery
+import cz.payola.domain.entities.analyses.plugins.query.Construct
 
 object MultipleConstructsPluginInstance
 {

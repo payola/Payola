@@ -7,8 +7,8 @@ import org.scalatest.matchers.ShouldMatchers
 import cz.payola.domain.rdf.Graph
 
 class PseudoPlugin(name: String) extends Plugin(name, 1, List(new StringParameter("Time", ""))) {
-    def evaluate(instance: PluginInstance, inputs: IndexedSeq[Graph], progressReporter: Double => Unit): Graph = {
-        new Graph(Nil, Nil)
+    def evaluate(instance: PluginInstance, inputs: IndexedSeq[Option[Graph]], progressReporter: Double => Unit) = {
+        Graph.empty
     }
 }
 
