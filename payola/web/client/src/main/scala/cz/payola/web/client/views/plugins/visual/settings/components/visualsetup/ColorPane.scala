@@ -20,7 +20,7 @@ class ColorPane(name: String, label: String, var color: Color) extends Component
 {
     val changed = new ChangedEvent[ColorPane]
 
-    val colorInput: Input = new Input(name, color.toString, "colorpicker")
+    val colorInput: Input = new Input(name, color.toString, None, "colorpicker")
     colorInput.field.setAttribute("readonly","true")
 
     val i = new I(List())

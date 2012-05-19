@@ -12,8 +12,16 @@ class TextModal(model: TextSettingsModel) extends Component
     val settingsChanged = new ComponentEvent[TextModal, EventArgs[TextModal]]
 
     val colorBackground = new ColorPane("text.color.background", "Text background", model.colorBackground)
+    colorBackground.changed += { event =>
+        model.colorBackground = colorBackground.getColor
+        false
+    }
 
     val color = new ColorPane("text.color.foreground", "Text foreground", model.color)
+    color.changed += { event =>
+        model.color = color.getColor
+        false
+    }
 
     val wrapper = new Div(List(color, colorBackground))
 

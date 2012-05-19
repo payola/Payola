@@ -4,19 +4,20 @@ import collection.mutable.ListBuffer
 import cz.payola.common.rdf.{LiteralVertex, IdentifiedVertex, Vertex}
 import s2js.adapters.js.dom.CanvasRenderingContext2D
 import cz.payola.web.client.views.plugins.visual._
-import settings.VertexSettingsModel
+import settings.{TextSettingsModel, VertexSettingsModel}
 
 /**
  * Graphical representation of Vertex object in the drawn graph.
  * @param vertexModel the vertex object from the model, that is visualised
  * @param position of this graphical representation in drawing space
  */
-class VertexView(val vertexModel: Vertex, var position: Point, var settings: VertexSettingsModel) extends View
+class VertexView(val vertexModel: Vertex, var position: Point, var settings: VertexSettingsModel,
+    settingsText: TextSettingsModel) extends View
 {
 
     private var age = 0
 
-    private val image = prepareImage(
+    private val image = prepareImage( //TODO This has to be called after color or path change event was fired
         vertexModel match {
             case i: LiteralVertex => new Color(180, 50, 50, 1)
             case i: IdentifiedVertex => new Color(50, 180, 50, 1)
@@ -42,8 +43,8 @@ class VertexView(val vertexModel: Vertex, var position: Point, var settings: Ver
      * Textual data that should be visualised with this vertex ("over this vertex").
      */
     val information: Option[InformationView] = vertexModel match {
-        case i: LiteralVertex => Some(new InformationView(i))
-        case i: IdentifiedVertex => Some(new InformationView(i))
+        case i: LiteralVertex => Some(new InformationView(i, settingsText))
+        case i: IdentifiedVertex => Some(new InformationView(i, settingsText))
         case _ => None
     }
 

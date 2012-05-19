@@ -3,7 +3,7 @@ package cz.payola.web.client.views.plugins.visual.graph
 import cz.payola.common.rdf.Edge
 import s2js.adapters.js.dom.CanvasRenderingContext2D
 import cz.payola.web.client.views.plugins.visual._
-import settings.EdgeSettingsModel
+import settings.{TextSettingsModel, EdgeSettingsModel}
 
 /**
   * Structure used during draw function of EdgeView. Helps to indicate position of vertices to each other.
@@ -26,18 +26,13 @@ private object Quadrant
   * @param originView the vertex object representing origin of this edge
   * @param destinationView of this graphical representation in drawing space
   */
-class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationView: VertexView, var settings: EdgeSettingsModel)
-    extends View {
-
-    /**
-      * If true, the drawn edge is straight, else is bezier curve
-      */
-    private var drawStraight = true
+class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationView: VertexView,
+    val settings: EdgeSettingsModel, settingsText: TextSettingsModel) extends View {
     
     /**
       * Textual data that should be visualised with this edge ("over this edge").
       */
-    val information: InformationView = InformationView(edgeModel)
+    val information: InformationView = new InformationView(edgeModel, settingsText)
 
     /**
       * Indicator of selection of this graphs element. Is used during color selection in draw function.
@@ -141,10 +136,10 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
 
         val correction = positionCorrection.getOrElse(Point.Zero).toVector
 
-        if(drawStraight) {
-            prepareStraight(context, colorToUse, correction)
-        } else {
+        if(1 <= settings.straightenIndex && settings.straightenIndex <= 6) {
             prepareBezierCurve(context, colorToUse, correction)
+        } else {
+            prepareStraight(context, colorToUse, correction)
         }
     }
 }

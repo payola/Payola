@@ -168,7 +168,8 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
 
         _graphModel.vertices.foreach { vertexModel =>
 
-            buffer += new VertexView(vertexModel, Point(300, 300), settings.vertexModel) //TODO should be center of the canvas or something like that
+            buffer += new VertexView(vertexModel, Point(300, 300), settings.vertexModel, settings.textModel)
+            //TODO should be center of the canvas or something like that
             counter += 1
         }
 
@@ -227,7 +228,8 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
             val origin = findVertexView(edgeModel.origin, vertexViews)
             val destination = findVertexView(edgeModel.destination, vertexViews)
             if(destination.isDefined && origin.isDefined) { //this should be successful always... hopefully :-)
-                newEdgeViews += new EdgeView(edgeModel, origin.get, destination.get, settings.edgesModel)
+                newEdgeViews += new EdgeView(edgeModel, origin.get, destination.get, settings.edgesModel,
+                    settings.textModel)
             }
         }
 
@@ -260,7 +262,8 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
                 val destination = findVertexView(oldEdgeView.edgeModel.destination, vertexViews)
                 if(destination.isDefined && origin.isDefined) { //this may not happen always
                     newOldEdgeViews +=
-                        new EdgeView(oldEdgeView.edgeModel, origin.get, destination.get, settings.edgesModel)
+                        new EdgeView(oldEdgeView.edgeModel, origin.get, destination.get, settings.edgesModel,
+                        settings.textModel)
                 }
             }
         }
