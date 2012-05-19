@@ -1,6 +1,7 @@
 package cz.payola.web.client.views.plugins.visual
 
 import scala.math._
+import s2js.adapters.js.browser.window
 
 /**
   * Representation of a vector in 2-dimensional space.

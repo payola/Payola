@@ -341,7 +341,7 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
         var selectionChanged = false
 
         while(!selectionChanged && componentPointer < components.length) {
-            selectionChanged = components(componentPointer).invertVertexSelection(vertexView)
+            selectionChanged = components(componentPointer).setVertexSelection(vertexView, true)
             componentPointer += 1
         }
 

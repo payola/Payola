@@ -6,7 +6,8 @@ import cz.payola.common.rdf.Graph
 import s2js.adapters.js.dom.Element
 import cz.payola.web.client.views.plugins.visual.animation.Animation
 import cz.payola.web.client.views.plugins.visual.settings.components.visualsetup.VisualSetup
-import cz.payola.web.client.views.plugins.visual.graph.{GraphView, Component, EdgeView, VertexView}
+import cz.payola.web.client.views.plugins.visual.graph._
+import s2js.adapters.js.browser.window
 
 abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(settings)
 {
@@ -32,29 +33,35 @@ abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(setting
     }
 
     private def performPositioning(graphView: GraphView) {
-        //TODO too simple, make it based on sizes of resulted sizes of the components, or use the gravity model, or...?
+        //TODO might be useful to somehow calculate the highest bottom (y-coordinate) of components in a row
 
         var firstAnimation: Animation[ListBuffer[(VertexView, Point)]] = null
         var isFirstAnimation = true
+        var componentNumber = 1
 
-        var previousAnimation: Animation[ListBuffer[(VertexView, Point)]] = null
+        var previousComponent: Option[Component] = None
 
         graphView.components.foreach{ component =>
 
-            val lastAnimation = getTechniquePerformer(component, true)
-
             if(isFirstAnimation) {
-                firstAnimation = lastAnimation
-                previousAnimation = lastAnimation
+                firstAnimation = getTechniquePerformer(component, true)
             } else {
-                //TODO add some moveToPosition Animation
-                previousAnimation.setFollowingAnimation(lastAnimation)
-                previousAnimation = lastAnimation
+                firstAnimation.addFollowingAnimation(getTechniquePerformer(component, true))
             }
 
-            isFirstAnimation = false
-        }
+            val componentPositionDesc =
+                new LocationDescriptor.ComponentPositionHelper(
+                    componentNumber, graphView.components.length, previousComponent)
 
+            val move = new Animation(
+                Animation.moveComponent, (componentPositionDesc, component.vertexViews), None, redrawQuick, redraw,
+                None)
+            firstAnimation.addFollowingAnimation(move)
+
+            isFirstAnimation = false
+            componentNumber += 1
+            previousComponent = Some(component)
+        }
         firstAnimation.run()
     }
 
@@ -62,8 +69,6 @@ abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(setting
       * Runs the vertex positioning algorithm and moves the vertices to "more suitable" positions.
       */
     protected def getTechniquePerformer(component: Component, animated: Boolean): Animation[ListBuffer[(VertexView, Point)]]
-
-
 
     /**
      * Moves the vertices to a tree like structure. The first element of input is placed in the root located

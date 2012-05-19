@@ -21,7 +21,7 @@ class DataFacade
             "&save=display"
         val configurations = List(new SparqlEndpointConfiguration(dbPediaEndpointUrl))
 
-        /*val query = """
+        /*val query = """ //multicomponent graph query
             CONSTRUCT {
                 ?x <http://dbpedia.org/ontology/populationDensity> ?p0 .
                 ?x <http://dbpedia.org/ontology/populationMetro> ?p1 .

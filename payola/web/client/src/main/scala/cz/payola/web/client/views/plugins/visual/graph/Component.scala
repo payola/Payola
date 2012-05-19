@@ -2,7 +2,6 @@ package cz.payola.web.client.views.plugins.visual.graph
 
 import collection.mutable.ListBuffer
 import cz.payola.web.client.views.plugins.visual.{Point, Vector}
-import s2js.adapters.js.browser.window
 
 class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuffer[EdgeView]) {
 
@@ -14,6 +13,120 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
 
     def isEmpty: Boolean = {
         vertexViews.isEmpty //TODO may be length == 0
+    }
+
+    def getLeftmostPosition(): Point = {
+        var result = vertexViews.head.position
+
+        vertexViews.foreach{ vertexView =>
+            if(result.x < vertexView.position.x) {
+                result = vertexView.position
+            }
+        }
+
+        result
+    }
+
+    def getBottomRight(): Point = {
+        var bottom = Double.MinValue
+        var right = Double.MinValue
+
+        var vals = ""
+        vertexViews.foreach{ vertexView =>
+            if(bottom < vertexView.position.y) {
+                bottom = vertexView.position.y
+            }
+            if(right < vertexView.position.x) {
+                right = vertexView.position.x
+            }
+            vals += vertexView.position.toString + " "
+        }
+
+        Point(right, bottom)
+    }
+
+    def getBottomLeft(): Point = {
+        var bottom = Double.MinValue
+        var left = Double.MaxValue
+
+        vertexViews.foreach{ vertexView =>
+            if(bottom < vertexView.position.y) {
+                bottom = vertexView.position.y
+            }
+            if(left > vertexView.position.x) {
+                left = vertexView.position.x
+            }
+        }
+
+        Point(left, bottom)
+    }
+
+    def getTopRight(): Point = {
+        var top = Double.MaxValue
+        var right = Double.MinValue
+
+        vertexViews.foreach{ vertexView =>
+            if(top > vertexView.position.y) {
+                top = vertexView.position.y
+            }
+            if(right < vertexView.position.x) {
+                right = vertexView.position.x
+            }
+        }
+
+        Point(right, top)
+    }
+
+    def getTopLeft(): Point = {
+        var top = Double.MaxValue
+        var left = Double.MaxValue
+
+        vertexViews.foreach{ vertexView =>
+            if(top > vertexView.position.y) {
+                top = vertexView.position.y
+            }
+            if(left > vertexView.position.x) {
+                left = vertexView.position.x
+            }
+        }
+
+        Point(left, top)
+    }
+
+    def getTopmostPosition(): Point = {
+        var result = vertexViews.head.position
+
+        vertexViews.foreach{ vertexView =>
+            if(result.y > vertexView.position.y) {
+                result = vertexView.position
+            }
+        }
+
+        result
+    }
+
+    def getRightmostPosition(): Point = {
+        var result = vertexViews.head.position
+
+        vertexViews.foreach{ vertexView =>
+            if(result.x > vertexView.position.x) {
+                result = vertexView.position
+            }
+        }
+
+        result
+    }
+
+    def getBottommostPosition(): Point = {
+        var result = vertexViews.head.position
+
+        vertexViews.foreach{ vertexView =>
+            if(result.y < vertexView.position.y) {
+                result = vertexView.position
+            }
+        }
+
+        result
     }
 
     def moveAllSelectedVertices(difference: Vector) {
@@ -95,7 +208,7 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
      * @param selected new value to be set to the vertex
      * @return true if the value of the vertex.selected attribute is changed
      */
-    private def setVertexSelection(vertex: VertexView, selected: Boolean): Boolean = {
+    def setVertexSelection(vertex: VertexView, selected: Boolean): Boolean = {
         if (vertex.selected != selected) {
             if(selected) {
                 selectedVertexViews += vertex

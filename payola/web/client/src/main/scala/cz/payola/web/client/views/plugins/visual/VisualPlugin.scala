@@ -92,8 +92,8 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
                         toAnimate += vertex.get.information.get
                     }
                     toAnimate ++= getEdgesInformations(vertex.get)
-                    resultedAnimation = Some(
-                        new Animation(Animation.showText, toAnimate, None, redrawSelection, redrawSelection, Some(0)))
+                    resultedAnimation = Some(new Animation(Animation.showText, toAnimate, None,
+                        redrawSelection, redrawSelection, None))
                 } else {
                     redrawSelection()
                 }
@@ -103,14 +103,13 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
                 }
                 moveStart = Some(position)
                 if(graphView.get.selectVertex(vertex.get)) {
-
                     val toAnimate = ListBuffer[InformationView]()
                     if(vertex.get.information.isDefined) {
                         toAnimate += vertex.get.information.get
                     }
                     toAnimate ++= getEdgesInformations(vertex.get)
                     resultedAnimation = Some(new Animation(Animation.showText, toAnimate, None,
-                        redrawSelection, redrawSelection, Some(0)))
+                        redrawSelection, redrawSelection, None))
                 } else {
                     redrawSelection()
                 }
@@ -127,6 +126,55 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
             resultedAnimation.get.run()
         }
 
+        /*val position = getPosition(event)
+
+        var resultedAnimation: Option[Animation[ListBuffer[InformationView]]] = None
+
+        val vertex = graphView.get.getTouchedVertex(position)
+
+        if (vertex.isDefined) { // Mouse down near a vertex.
+            if (event.shiftKey) { //change selection of the pressed one
+                graphView.get.invertVertexSelection(vertex.get)
+                if(vertex.get.selected) {
+                    val toAnimate = ListBuffer[InformationView]()
+                    if(vertex.get.information.isDefined) {
+                        toAnimate += vertex.get.information.get
+                    }
+                    toAnimate ++= getEdgesInformations(vertex.get)
+                    resultedAnimation = Some(
+                        new Animation(Animation.showText, toAnimate, None, redrawSelection, redrawSelection, None))
+                } else {
+                    redrawSelection()
+                }
+            } else { //deselect all and select the pressed one
+                if (!vertex.get.selected) {
+                    graphView.get.deselectAll()
+                }
+                moveStart = Some(position)
+                if(graphView.get.selectVertex(vertex.get)) {
+
+                    val toAnimate = ListBuffer[InformationView]()
+                    if(vertex.get.information.isDefined) {
+                        toAnimate += vertex.get.information.get
+                    }
+                    toAnimate ++= getEdgesInformations(vertex.get)
+                    resultedAnimation = Some(new Animation(Animation.showText, toAnimate, None,
+                        redrawSelection, redrawSelection, None))
+                } else {
+                    redrawSelection()
+                }
+            }
+
+        } else { // Mouse down somewhere between-vertex space.
+            if (!event.shiftKey) { //deselect all
+                graphView.get.deselectAll()
+                redrawSelection()
+            }
+        }
+
+        if(resultedAnimation.isDefined) {
+            resultedAnimation.get.run()
+        }*/
     }
 
     /**

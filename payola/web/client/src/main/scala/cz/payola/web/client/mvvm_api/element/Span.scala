@@ -6,14 +6,14 @@ import s2js.adapters.js.dom
 import cz.payola.web.client.events.{ClickedEvent, ClickedEventArgs}
 import dom.Element
 
-class Div(val innerElements: Seq[Component], val addClass: String = "") extends Component
+class Span(val innerElements: Seq[Component], val addClass: String = "") extends Component
 {
-    val div = document.createElement[dom.Element]("div")
-    div.setAttribute("class",addClass)
+    val span = document.createElement[dom.Element]("span")
+    span.setAttribute("class",addClass)
 
     def render(parent: Element = document.body) = {
-        parent.appendChild(div)
+        parent.appendChild(span)
 
-        innerElements.map(_.render(div))
+        innerElements.map(_.render(span))
     }
 }
