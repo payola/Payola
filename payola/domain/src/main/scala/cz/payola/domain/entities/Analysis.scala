@@ -9,6 +9,7 @@ class Analysis(protected var _name: String, protected val _owner: Option[User])
     with NamedEntity
     with OptionallyOwnedEntity
     with ShareableEntity
+    with DescribedEntity
     with cz.payola.common.entities.Analysis
 {
     checkConstructorPostConditions()
@@ -18,6 +19,8 @@ class Analysis(protected var _name: String, protected val _owner: Option[User])
     type PluginInstanceBindingType = PluginInstanceBinding
 
     protected var _isPublic = false
+
+    protected var _description = ""
 
     protected val _pluginInstances = mutable.ArrayBuffer[PluginInstanceType]()
 

@@ -1,15 +1,17 @@
 package cz.payola.domain.entities.analyses
 
 import scala.collection.immutable
-import cz.payola.domain.entities.Entity
 import cz.payola.domain.entities.analyses.parameters._
+import cz.payola.domain.entities._
 
 class PluginInstance(protected val _plugin: Plugin, protected val _parameterValues: immutable.Seq[ParameterValue[_]])
-    extends Entity with cz.payola.common.entities.analyses.PluginInstance
+    extends Entity with DescribedEntity with cz.payola.common.entities.analyses.PluginInstance
 {
     checkConstructorPostConditions()
 
     type PluginType = Plugin
+
+    protected var _description = ""
 
     /**
       * Returns value of a parameter with the specified name or [[scala.None.]] if such doesn't exist.
