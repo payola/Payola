@@ -37,7 +37,7 @@ class Analysis(name: String, owner: Option[User])
                     val inst = new PluginInstance(i.id, i.plugin, convertParamValues(i.parameterValues))
                     associate(inst, _pluginInstancesQuery)
 
-                    // Now assign paraneter values passed as parameter to PluginINstance
+                    // Now assign parameter values passed as parameter to PluginInstance
                     inst.associateParameterValues()
                     
                     inst

@@ -154,6 +154,15 @@ class Graph(protected val _vertices: List[Node], protected val _edges: List[Edge
         _edges.find({ e: Edge => e.destination == literalNode }).isDefined
     }
 
+    /** Returns whether this graph contains an edge with URI.
+      *
+      * @param edgeURI Edge URI.
+      * @return True of false.
+      */
+    def containsEdgeWithURI(edgeURI: String): Boolean = {
+        _edges.find(_.uri == edgeURI).isDefined
+    }
+
     /** Returns whether this graph contains a vertex with these properties.
       *
       * @param value Value of the literal vertex.
@@ -162,6 +171,14 @@ class Graph(protected val _vertices: List[Node], protected val _edges: List[Edge
       */
     def containsLiteralVertexWithValue(value: Any, language: Option[String] = None): Boolean = {
         getLiteralVertexWithValue(value, language).isDefined
+    }
+
+    def containsVertex(vertex: Node): Boolean = {
+        vertex match {
+            case iv: IdentifiedNode => containsVertexWithURI(iv.uri)
+            case lv: LiteralNode => containsLiteralVertexWithValue(lv.value, lv.language)
+            case _ => false
+        }
     }
 
     /** Returns whether this graph contains a vertex with these properties.
@@ -195,6 +212,15 @@ class Graph(protected val _vertices: List[Node], protected val _edges: List[Edge
             }
             case _ => throw new IllegalArgumentException("Unknown node type " + destination.getClass)
         }
+    }
+
+    /** Returns edges filtered by URI.
+      *
+      * @param edgeURI URI of the edge.
+      * @return A new sequence of edges with edgeURI.
+      */
+    def edgesWithURI(edgeURI: String): collection.Seq[Edge] = {
+        _edges.filter(_.uri == edgeURI)
     }
 
     /** Executes a construct SPARQL query on this graph and returns a new graph instance
@@ -239,7 +265,7 @@ class Graph(protected val _vertices: List[Node], protected val _edges: List[Edge
         ResultSetFormatter.outputAsRDF(output, "", results);
         val resultingGraphXML: String = new String(output.toByteArray)
 
-        execution.close
+        execution.close()
         model.close()
 
         Graph(resultingGraphXML)
