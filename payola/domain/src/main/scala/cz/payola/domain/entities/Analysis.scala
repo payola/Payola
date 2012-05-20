@@ -221,6 +221,25 @@ class Analysis(protected var _name: String, protected val _owner: Option[User])
         pluginInstanceOutputBindings.find(_._2.isEmpty).map(_._1)
     }
 
+    def getLeavesCount : Int = {
+        val output = outputInstance
+
+        def countLeaves(plugin: PluginInstance) : Int = {
+            val bindings = pluginInstanceBindings.find(_.targetPluginInstance == plugin)
+            bindings.size match {
+                case 0 => 1
+                case _ => bindings.map(binding => {
+                    countLeaves(binding.sourcePluginInstance)
+                }).sum
+            }
+        }
+
+        output match {
+            case None => 0
+            case _ => countLeaves(output.get)
+        }
+    }
+
     override def canEqual(other: Any): Boolean = {
         other.isInstanceOf[Analysis]
     }
