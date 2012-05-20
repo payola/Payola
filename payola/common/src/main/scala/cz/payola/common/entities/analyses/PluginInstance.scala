@@ -1,12 +1,12 @@
 package cz.payola.common.entities.analyses
 
 import scala.collection.immutable
-import cz.payola.common.entities.Entity
+import cz.payola.common.entities._
 
 /**
   * An instance of an analytical plugin with known parameter values.
   */
-trait PluginInstance extends Entity
+trait PluginInstance extends Entity with DescribedEntity
 {
     /** Type of the plugin the current object is instance of. */
     type PluginType <: Plugin

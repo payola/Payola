@@ -18,7 +18,7 @@ class Projection(
     }
 
     def getConstructQuery(instance: PluginInstance, subject: Subject, variableGetter: () => Variable) = {
-        getPropertyURIs(instance).map { uris =>
+        usingDefined(getPropertyURIs(instance)) { uris =>
             val triples = uris.map(uri => TriplePattern(subject, Uri(uri), variableGetter()))
             ConstructQuery(triples)
         }

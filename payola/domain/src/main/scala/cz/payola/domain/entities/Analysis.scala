@@ -4,22 +4,23 @@ import scala.collection.mutable
 import cz.payola.domain.entities.analyses._
 import evaluation.AnalysisEvaluation
 
-class Analysis(name: String, owner: Option[User])
+class Analysis(protected var _name: String, protected val _owner: Option[User])
     extends Entity
     with NamedEntity
     with OptionallyOwnedEntity
     with ShareableEntity
+    with DescribedEntity
     with cz.payola.common.entities.Analysis
 {
+    checkConstructorPostConditions()
+
     type PluginInstanceType = PluginInstance
 
     type PluginInstanceBindingType = PluginInstanceBinding
 
-    protected var _name = name
-
-    protected val _owner = owner
-
     protected var _isPublic = false
+
+    protected var _description = ""
 
     protected val _pluginInstances = mutable.ArrayBuffer[PluginInstanceType]()
 
@@ -35,10 +36,6 @@ class Analysis(name: String, owner: Option[User])
         val evaluation = new AnalysisEvaluation(this, timeout)
         evaluation.start()
         evaluation
-    }
-
-    override def canEqual(other: Any): Boolean = {
-        other.isInstanceOf[Analysis]
     }
 
     /**
@@ -222,5 +219,34 @@ class Analysis(name: String, owner: Option[User])
       */
     def outputInstance: Option[PluginInstance] = {
         pluginInstanceOutputBindings.find(_._2.isEmpty).map(_._1)
+    }
+
+    def getLeavesCount : Int = {
+        val output = outputInstance
+
+        def countLeaves(plugin: PluginInstance) : Int = {
+            val bindings = pluginInstanceBindings.find(_.targetPluginInstance == plugin)
+            bindings.size match {
+                case 0 => 1
+                case _ => bindings.map(binding => {
+                    countLeaves(binding.sourcePluginInstance)
+                }).sum
+            }
+        }
+
+        output match {
+            case None => 0
+            case _ => countLeaves(output.get)
+        }
+    }
+
+    override def canEqual(other: Any): Boolean = {
+        other.isInstanceOf[Analysis]
+    }
+
+    override protected def checkInvariants() {
+        super[Entity].checkInvariants()
+        super[NamedEntity].checkInvariants()
+        super[OptionallyOwnedEntity].checkInvariants()
     }
 }

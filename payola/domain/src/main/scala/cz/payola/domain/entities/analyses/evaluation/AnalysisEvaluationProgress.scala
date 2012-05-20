@@ -4,7 +4,8 @@ import cz.payola.domain.entities.analyses.PluginInstance
 import collection.immutable
 
 case class AnalysisEvaluationProgress(evaluatedInstances: immutable.Seq[PluginInstance],
-    runningInstances: Map[PluginInstance, Double], pendingInstances: immutable.Seq[PluginInstance])
+    runningInstances: Map[PluginInstance, Double], pendingInstances: immutable.Seq[PluginInstance],
+    errors: Map[PluginInstance, Throwable])
 {
     /**
       * Percentual representation of the analysis evaluation progress.
@@ -31,9 +32,14 @@ case class AnalysisEvaluationProgress(evaluatedInstances: immutable.Seq[PluginIn
                 running = running - instance
             }
 
-            AnalysisEvaluationProgress(evaluated, running, pending)
+            AnalysisEvaluationProgress(evaluated, running, pending, errors)
         } else {
             this
         }
+    }
+
+    private[entities] def withError(instance: PluginInstance, throwable: Throwable): AnalysisEvaluationProgress = {
+        AnalysisEvaluationProgress(evaluatedInstances, runningInstances, pendingInstances,
+            errors + (instance -> throwable))
     }
 }

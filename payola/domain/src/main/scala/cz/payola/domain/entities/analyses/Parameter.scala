@@ -1,14 +1,11 @@
 package cz.payola.domain.entities.analyses
 
-import cz.payola.domain.entities.Entity
+import cz.payola.domain.entities._
 
 abstract class Parameter[A](protected val _name: String, protected val _defaultValue: A)
     extends Entity with cz.payola.common.entities.analyses.Parameter[A]
 {
-
-    override def canEqual(other: Any): Boolean = {
-        other.isInstanceOf[Parameter[_]]
-    }
+    checkConstructorPostConditions()
 
     /**
       * Creates a new value of the parameter.
@@ -25,4 +22,13 @@ abstract class Parameter[A](protected val _name: String, protected val _defaultV
       * @return A new value of the parameter.
       */
     def createValue(value: A): ParameterValue[A]
+
+    override def canEqual(other: Any): Boolean = {
+        other.isInstanceOf[Parameter[_]]
+    }
+
+    override protected def checkInvariants() {
+        super[Entity].checkInvariants()
+        require(name != null, "The name mustn't be null.")
+    }
 }

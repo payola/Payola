@@ -2,6 +2,7 @@ package cz.payola.domain.entities
 
 import permissions.privilege.{PublicPrivilege, GroupPrivilege, AnalysisPrivilege, Privilege}
 import scala.collection.mutable
+import cz.payola.domain.entities.analyses.DataSource
 
 /** User entity at the domain level.
   *
@@ -10,8 +11,12 @@ import scala.collection.mutable
   * @param _name Name of the user.
   */
 class User(protected var _name: String)
-    extends Entity with cz.payola.common.entities.User
+    extends Entity
+    with NamedEntity
+    with cz.payola.common.entities.User
 {
+    checkConstructorPostConditions()
+
     type GroupType = Group
 
     type AnalysisType = Analysis
@@ -48,7 +53,7 @@ class User(protected var _name: String)
       *
       * @throws IllegalArgumentException if the analysis is null or the user isn't an owner of it.
       */
-    def addAnalysis(a: AnalysisType) {
+    def addAnalysis(a: AnalysisType) = {
         require(a != null, "Analysis mustn't be null")
         require(a.owner.exists(_ == this), "User must be owner of the analysis")
 
@@ -63,7 +68,7 @@ class User(protected var _name: String)
       *
       * @throws IllegalArgumentException if the group is null or the user isn't an owner of that group.
       */
-    def addOwnedGroup(g: GroupType) {
+    def addOwnedGroup(g: Group) = {
         require(g != null, "Group is NULL!")
         require(g.owner == this, "Group isn't owned by this user!")
 
@@ -73,11 +78,7 @@ class User(protected var _name: String)
         }
     }
 
-    override def canEqual(other: Any): Boolean = {
-        other.isInstanceOf[User]
-    }
-
-    def isMemberOfGroup(g: GroupType): Boolean = g.hasMember(this)
+    def isMemberOfGroup(g: Group): Boolean = g.hasMember(this)
 
     /** Result is a new List consisting of only groups that
       * the user is a member of.
@@ -111,7 +112,7 @@ class User(protected var _name: String)
       * @param index Index of the group (according to the GroupIDs).
       * @return The group.
       */
-    def ownedGroupAtIndex(index: Int): GroupType = {
+    def ownedGroupAtIndex(index: Int): Group = {
         require(index >= 0 && index < ownedGroupCount, "Owned group index out of bounds - " + index)
         _ownedGroups(index)
     }
@@ -136,7 +137,7 @@ class User(protected var _name: String)
       *
       * @throws IllegalArgumentException if the analysis is null.
       */
-    def removeOwnedAnalysis(a: AnalysisType) {
+    def removeOwnedAnalysis(a: AnalysisType) = {
         require(a != null, "Cannot remove null analysis!")
 
         _ownedAnalyses -= a
@@ -149,10 +150,19 @@ class User(protected var _name: String)
       *
       * @throws IllegalArgumentException if the group is null or the user is still owner of the group.
       */
-    def removeOwnedGroup(g: GroupType) {
+    def removeOwnedGroup(g: Group) = {
         require(g != null, "Group is NULL!")
         require(g.owner != this, "Group is still owned by this user!")
 
         _ownedGroups -= g
+    }
+
+    override def canEqual(other: Any): Boolean = {
+        other.isInstanceOf[User]
+    }
+
+    override protected def checkInvariants() {
+        super[Entity].checkInvariants()
+        super[NamedEntity].checkInvariants()
     }
 }
