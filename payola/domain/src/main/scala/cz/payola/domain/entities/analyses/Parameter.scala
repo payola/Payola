@@ -2,7 +2,7 @@ package cz.payola.domain.entities.analyses
 
 import cz.payola.domain.entities.Entity
 
-abstract class Parameter[A](val name: String, val defaultValue: A)
+abstract class Parameter[A](protected val _name: String, protected val _defaultValue: A)
     extends Entity with cz.payola.common.entities.analyses.Parameter[A]
 {
 

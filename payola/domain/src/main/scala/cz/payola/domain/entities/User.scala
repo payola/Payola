@@ -48,7 +48,7 @@ class User(protected var _name: String)
       *
       * @throws IllegalArgumentException if the analysis is null or the user isn't an owner of it.
       */
-    def addAnalysis(a: AnalysisType) = {
+    def addAnalysis(a: AnalysisType) {
         require(a != null, "Analysis mustn't be null")
         require(a.owner.exists(_ == this), "User must be owner of the analysis")
 
@@ -63,7 +63,7 @@ class User(protected var _name: String)
       *
       * @throws IllegalArgumentException if the group is null or the user isn't an owner of that group.
       */
-    def addOwnedGroup(g: Group) = {
+    def addOwnedGroup(g: GroupType) {
         require(g != null, "Group is NULL!")
         require(g.owner == this, "Group isn't owned by this user!")
 
@@ -77,7 +77,7 @@ class User(protected var _name: String)
         other.isInstanceOf[User]
     }
 
-    def isMemberOfGroup(g: Group): Boolean = g.hasMember(this)
+    def isMemberOfGroup(g: GroupType): Boolean = g.hasMember(this)
 
     /** Result is a new List consisting of only groups that
       * the user is a member of.
@@ -111,7 +111,7 @@ class User(protected var _name: String)
       * @param index Index of the group (according to the GroupIDs).
       * @return The group.
       */
-    def ownedGroupAtIndex(index: Int): Group = {
+    def ownedGroupAtIndex(index: Int): GroupType = {
         require(index >= 0 && index < ownedGroupCount, "Owned group index out of bounds - " + index)
         _ownedGroups(index)
     }
@@ -136,7 +136,7 @@ class User(protected var _name: String)
       *
       * @throws IllegalArgumentException if the analysis is null.
       */
-    def removeOwnedAnalysis(a: AnalysisType) = {
+    def removeOwnedAnalysis(a: AnalysisType) {
         require(a != null, "Cannot remove null analysis!")
 
         _ownedAnalyses -= a
@@ -149,7 +149,7 @@ class User(protected var _name: String)
       *
       * @throws IllegalArgumentException if the group is null or the user is still owner of the group.
       */
-    def removeOwnedGroup(g: Group) = {
+    def removeOwnedGroup(g: GroupType) {
         require(g != null, "Group is NULL!")
         require(g.owner != this, "Group is still owned by this user!")
 

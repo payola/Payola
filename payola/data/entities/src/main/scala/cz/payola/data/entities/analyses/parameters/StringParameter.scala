@@ -1,23 +1,24 @@
 package cz.payola.data.entities.analyses.parameters
 
-import cz.payola.data.entities.analyses.{Plugin, Parameter}
+import cz.payola.data.entities.analyses.{PluginDbRepresentation, Parameter}
 import cz.payola.data.entities.{PayolaDB, PersistableEntity}
 import cz.payola.domain.entities.analyses.ParameterValue
 
 class StringParameter(
+    override val id: String,
     name: String,
-    defaultValue: String)
-    extends cz.payola.domain.entities.analyses.parameters.StringParameter(name, defaultValue)
-    with PersistableEntity
+    defaultVal: String)
+    extends cz.payola.domain.entities.analyses.parameters.StringParameter(name, defaultVal)
     with Parameter[String]
 {
-    private lazy val _instances = PayolaDB.valuesOfStringParameters.left(this)
+    private lazy val _values = PayolaDB.valuesOfStringParameters.left(this)
 
-    def instances: Seq[StringParameterValue] = evaluateCollection(_instances)
+    // Get, store and set default value of parameter to Database
+    val _defaultValueDb = defaultVal
 
-    override def createValue(value: String) : ParameterValue[String] = {
-        new StringParameterValue(this, value)
-    }
+    override def defaultValue = _defaultValueDb
+
+    def parameterValues: Seq[StringParameterValue] = evaluateCollection(_values)
 }
 
 
