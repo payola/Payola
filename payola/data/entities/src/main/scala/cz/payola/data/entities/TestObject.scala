@@ -13,6 +13,9 @@ object TestObject
     println("Connecting ...")
     assert (PayolaDB.connect())
 
+    println("Creating schema ...")
+    PayolaDB.createSchema();
+
     val userDao = new UserDAO()
 
     val groupDao = new GroupDAO()
@@ -43,11 +46,12 @@ object TestObject
 
     val user = new User("name", "pwd1", "email1")
 
+    println("Persisting user ...")
+    userDao.persist(user)
+
     val group1 = new Group("group", user)
 
     val group2 = new Group("group2", user)
-
-    val analysis = new Analysis("an", Some(user))
 
     val bPar = new BooleanParameter("bPar", "bPar", true)
 
@@ -66,12 +70,6 @@ object TestObject
     val sParInst = new StringParameterValue("sParVal", sPar, "string")
 
     def main(args: Array[String]) {
-        
-        println("Creating schema ...")
-        PayolaDB.createSchema();                                         
-        
-        println("Persisting user ...")
-        userDao.persist(user)
 
         // Update test
         user.name += "1"
@@ -110,24 +108,9 @@ object TestObject
         assert(user.ownedGroups.size == 2)
 
         assert(group1.members(0).name == user.name, "Invalid group owner")
-        assert(group2.members(0).name == user.name, "Invalid group2 owner")                                                                            
-        
-        println("Persisting analysis ...")
-        analysisDao.persist(analysis)
 
-        // Update test
-        analysis.name += "1"
-        analysisDao.persist(analysis)
-
-        assert(user.ownedAnalyses.size == 1)
-
-        val a = analysisDao.getById(analysis.id)
-        assert(a != None)
-        assert(a.get.id == analysis.id)
-        assert(analysisDao.getById("") == None)
-
-        println("   Derived plugins test")
-        testDerivedPlugins()
+        println("   Analysis test")
+        testAnalysis()
 
         println("Pagination ...")
         assert(userDao.getAll().size == 1)
@@ -137,7 +120,7 @@ object TestObject
         assert(groupDao.getAll(1, 0).size == 0)
     }
     
-    def testDerivedPlugins() {         
+    def testAnalysis() {
         val sparqlEndpointPlugin = new SparqlEndpoint
         val concreteSparqlQueryPlugin = new ConcreteSparqlQuery
         val projectionPlugin = new Projection
@@ -160,9 +143,11 @@ object TestObject
 
         println("       persisting analysis")
         // persist analysis
-        val analysis = new Analysis("Cities with more than 2 million habitants with countries", None)
+        val analysis = new Analysis("Cities with more than 2 million habitants with countries", Some(user))
         analysisDao.persist(analysis)
         assert(analysisDao.getById(analysis.id).isDefined)
+        assert(user.ownedAnalyses.size > 0)
+
 
         println("       persisting plugins")
         // Persist  plugins

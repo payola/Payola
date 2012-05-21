@@ -7,7 +7,7 @@ import cz.payola.domain.rdf.Graph
 import cz.payola.domain.IDGenerator
 
 class PluginDbRepresentation(
-    val id: String,
+    override val id: String,
     val name: String,
     val pluginClass: String,
     val inputCount: Int)
