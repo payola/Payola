@@ -8,13 +8,20 @@ import cz.payola.domain.IDGenerator
 class PluginInstance(
     override val id: String,
     plugin: cz.payola.domain.entities.analyses.Plugin,
-    paramValues: immutable.Seq[ParameterValue[_]])
+    paramValues: immutable.Seq[ParameterValue[_]],
+    description : String)
     extends cz.payola.domain.entities.analyses.PluginInstance(plugin, paramValues)
     with PersistableEntity
 {
     val pluginId: Option[String] = if (plugin == null) None else Some(plugin.id)
 
     var analysisId: Option[String] = None
+
+    /*
+    private val _pluginDescription: String = pluginDescription
+
+    override def description = _pluginDescription
+    */
 
     private lazy val _booleanParameterValues = PayolaDB.booleanParameterValuesOfPluginInstances.left(this)
 

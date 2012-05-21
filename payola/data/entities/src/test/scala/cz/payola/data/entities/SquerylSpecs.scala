@@ -11,6 +11,11 @@ import cz.payola.domain.entities.analyses.plugins._
 
 class SquerylSpecs extends FlatSpec with ShouldMatchers
 {
+    // Init
+    assert (PayolaDB.connect())
+
+    PayolaDB.createSchema()
+
     val userDao = new UserDAO()
 
     val groupDao = new GroupDAO()
@@ -38,6 +43,7 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
     val sParInstDao = new StringParameterInstanceDAO()
 
     val user = new User("name", "pwd1", "email1")
+    userDao.persist(user)
 
     val group1 = new Group("group", user)
 
@@ -59,19 +65,7 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
 
     val sParInst = new StringParameterValue("sParVal", sPar, "string")
 
-    // Init
-    assert (PayolaDB.connect())
-
-    "Database" should "be created succesfuly" in {
-        PayolaDB.createSchema()
-    }
-
     "Users" should "be persited, loaded and managed by UserDAO" in {
-        userDao.persist(user)
-
-        // Update test
-        user.name += "1"
-        userDao.persist(user)
 
         val u = userDao.getById(user.id)
         assert(u != None)
@@ -83,7 +77,7 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
         // Test userDao
         assert(userDao.findByUsername("n", 0, 1)(0).id == user.id)
         assert(userDao.findByUsername("a", 0, 1)(0).id == user.id)
-        assert(userDao.findByUsername("1", 0, 1)(0).id == user.id)
+        assert(userDao.findByUsername("1", 0, 1).isEmpty)
         assert(userDao.findByUsername(user.name, 0, 1)(0).id == user.id)
         assert(userDao.findByUsername("invalid name").size == 0)
         assert(userDao.getUserByCredentials(user.name, user.password).get.id == user.id)
@@ -233,8 +227,6 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
             join,
             unionPlugin
         )
-
-        // TODO: this analysis is from data, not domain. OK?
 
         // persist analysis
         val analysis = new Analysis("Cities with more than 2 million habitants with countries", None)

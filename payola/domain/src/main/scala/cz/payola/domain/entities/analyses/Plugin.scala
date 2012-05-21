@@ -10,17 +10,18 @@ abstract class Plugin(
     protected val _inputCount: Int,
     protected val _parameters: immutable.Seq[Plugin#ParameterType],
     protected var _id: String = IDGenerator.newId)
-    extends Entity(_id) with NamedEntity with ShareableEntity with cz.payola.common.entities.analyses.Plugin
+    extends Entity(_id)
+    with NamedEntity
+    with ShareableEntity
+    with cz.payola.common.entities.analyses.Plugin
 {
+    checkConstructorPostConditions()
+
     type ParameterType = Parameter[_]
 
     type ParameterValueType = ParameterValue[_]
 
     protected var _isPublic = false
-
-    override def canEqual(other: Any): Boolean = {
-        other.isInstanceOf[Plugin]
-    }
 
     /**
       * Returns a new instance of the plugin with all parameter instances set to default values.
@@ -46,6 +47,10 @@ abstract class Plugin(
       * @return The output graph.
       */
     def evaluate(instance: PluginInstance, inputs: IndexedSeq[Option[Graph]], progressReporter: Double => Unit): Graph
+
+    override def canEqual(other: Any): Boolean = {
+        other.isInstanceOf[Plugin]
+    }
 
     /**
       * If there exists an empty input, the [[cz.payola.domain.entities.analyses.AnalysisException]] is thrown.
@@ -110,5 +115,12 @@ abstract class Plugin(
         p1.flatMap(value1 => p2.flatMap(value2 => p3.map(value3 => f(value1, value2, value3)))).getOrElse {
             throw new PluginException("One of the used values isn't defined.")
         }
+    }
+
+    override protected def checkInvariants() {
+        super[Entity].checkInvariants()
+        super[NamedEntity].checkInvariants()
+        require(inputCount >= 0, "The inputCount must be a non-negative number.")
+        require(parameters != null, "The parameters mustn't be null.")
     }
 }

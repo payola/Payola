@@ -6,7 +6,7 @@ import scala.collection.mutable
 /**
   * A named sequence of analytical plugin instances.
   */
-trait Analysis extends NamedEntity with OptionallyOwnedEntity with ShareableEntity
+trait Analysis extends NamedEntity with OptionallyOwnedEntity with ShareableEntity with DescribedEntity
 {
     /** Type of the analytical plugin instances the analysis consists of. */
     type PluginInstanceType <: PluginInstance

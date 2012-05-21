@@ -15,6 +15,8 @@ POST    /RPC                        controllers.RPC.index()
 GET     /test/RPC                   controllers.Application.rpcTest()
 POST    /RPC/async                  controllers.RPC.async()
 
+GET     /analysis/:id               controllers.Analysis.detail(id)
+
 GET     /dashboard                  controllers.Application.dashboard()
 GET     /profile/:username          controllers.Profile.index(username)
 GET     /profile/:username/edit     controllers.Profile.edit(username)

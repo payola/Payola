@@ -18,7 +18,6 @@ class PayolaController extends Controller
     PayolaDB.connect()
     PayolaDB.createSchema()
 
-
     def getUser(request: RequestHeader) : Option[User] = {
         val email = request.session.get("email")
         if (!email.isDefined)

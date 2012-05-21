@@ -23,6 +23,10 @@ class DataFacade
         userDAO.persist(u)
     }
 
+    def getAnalysisById(id: String) = {
+        analysisDAO.getById(id)
+    }
+
     def getPublicAnalysesByOwner(o: User) = {
         analysisDAO.getPublicAnalysesByOwner(o)
     }

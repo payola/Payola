@@ -34,7 +34,7 @@ class Analysis(name: String, owner: Option[User])
                 }
                 // "Convert" to data.Binding, associate with analysis and persist
                 case i: cz.payola.domain.entities.analyses.PluginInstance => {
-                    val inst = new PluginInstance(i.id, i.plugin, convertParamValues(i.parameterValues))
+                    val inst = new PluginInstance(i.id, i.plugin, convertParamValues(i.parameterValues), i.description)
                     associate(inst, _pluginInstancesQuery)
 
                     // Now assign parameter values passed as parameter to PluginInstance
@@ -108,12 +108,12 @@ class Analysis(name: String, owner: Option[User])
                     val source = b.sourcePluginInstance match {
                         case i: PluginInstance => i
                         case i: cz.payola.domain.entities.analyses.PluginInstance
-                            => new PluginInstance(i.id, i.plugin, convertParamValues(i.parameterValues))
+                            => new PluginInstance(i.id, i.plugin, convertParamValues(i.parameterValues), i.description)
                     }
                     val target = b.targetPluginInstance match {
                         case i: PluginInstance => i
                         case i: cz.payola.domain.entities.analyses.PluginInstance =>
-                            new PluginInstance(i.id, i.plugin, convertParamValues(i.parameterValues))
+                            new PluginInstance(i.id, i.plugin, convertParamValues(i.parameterValues), i.description)
                     }
 
                     // "Convert" binding, associate with analysis and persist
@@ -125,7 +125,6 @@ class Analysis(name: String, owner: Option[User])
             }
         )
     }
-
     override def removeBinding(binding: PluginInstanceBindingType): Option[PluginInstanceBindingType] = {
         super.removeBinding(binding)
 
