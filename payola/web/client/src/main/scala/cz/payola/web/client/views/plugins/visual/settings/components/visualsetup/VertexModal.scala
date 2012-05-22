@@ -53,6 +53,7 @@ class VertexModal(model: VertexSettingsModel) extends Component
 
     val colorLiteral = new ColorPane("vertex.color.literal","Vertex color (literal):",model.colorLiteral)
     colorLiteral.changed += { event =>
+
         model.colorLiteral = colorLiteral.getColor
         false
     }

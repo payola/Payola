@@ -123,23 +123,21 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
             settings.width, color)
     }
     
-    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
+    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
 
         drawQuick(context, color, positionCorrection)
     }
 
-    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
+    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
 
         val colorToUse = color.getOrElse(
             if(isSelected) settings.colorSelected else settings.color
         )
 
-        val correction = positionCorrection.getOrElse(Point.Zero).toVector
-
         if(1 <= settings.straightenIndex && settings.straightenIndex <= 6) {
-            prepareBezierCurve(context, colorToUse, correction)
+            prepareBezierCurve(context, colorToUse, Vector.Zero)
         } else {
-            prepareStraight(context, colorToUse, correction)
+            prepareStraight(context, colorToUse, Vector.Zero)
         }
     }
 }

@@ -48,6 +48,10 @@ class VertexView(val vertexModel: Vertex, var position: Point, var settings: Ver
         case _ => None
     }
 
+    def isSelected: Boolean = {
+        selected
+    }
+
     def getCurrentAge: Int = {
         age
     }
@@ -64,26 +68,24 @@ class VertexView(val vertexModel: Vertex, var position: Point, var settings: Ver
         isPointInRect(point, position + (settings.getSize / -2), position + (settings.getSize / 2))
     }
 
-    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
+    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
         drawQuick(context, color, positionCorrection)
         drawImage(context, image, position + Vector(-10, -10), Vector(20, 20))
     }
 
-    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
+    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
         val colorToUseOnBox = color.getOrElse(settings.colorMed)
-        val correctedPosition = this.position + (settings.getSize / -2) + positionCorrection.getOrElse(Point(0, 0)).toVector
+        val correctedPosition = this.position + (settings.getSize / -2) + positionCorrection
 
         drawRoundedRectangle(context, correctedPosition, settings.getSize, settings.cornerRadius)
         fillCurrentSpace(context, colorToUseOnBox)
     }
 
-    def drawInformation(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
+    def drawInformation(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
         if (information.isDefined) {
             vertexModel match {
                 case i: IdentifiedVertex => information.get.draw(context, color, positionCorrection)
-                case _ => if (selected) {
-                    information.get.draw(context, color, positionCorrection)
-                }
+                case _ => if (selected) { information.get.draw(context, color, positionCorrection) }
             }
         }
     }

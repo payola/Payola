@@ -33,6 +33,10 @@ class InformationView(data: Any, val settings: TextSettingsModel) extends View {
       */
     private var selected = false
 
+    def isSelected: Boolean = {
+        selected
+    }
+
     def setTextVisibility(newAlpha: Double) {
         textAlpha = newAlpha
     }
@@ -44,12 +48,12 @@ class InformationView(data: Any, val settings: TextSettingsModel) extends View {
         selected = true
     }
 
-    def draw(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point]) {
+    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
 
-        drawQuick(context, color, position)
+        drawQuick(context, color, positionCorrection)
     }
 
-    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point]) {
+    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
 
         val colorToUse = if(color.isDefined) {
             Color(color.get.red, color.get.green, color.get.blue, textAlpha)
@@ -57,9 +61,7 @@ class InformationView(data: Any, val settings: TextSettingsModel) extends View {
             Color(settings.color.red, settings.color.green, settings.color.blue, textAlpha)
         }
 
-        if(position != None) {
-            performDrawing(context, colorToUse, position.get)
-        }
+        performDrawing(context, colorToUse, Point(positionCorrection.x, positionCorrection.y))
 
         selected = false
     }

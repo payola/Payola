@@ -5,6 +5,7 @@ import s2js.adapters.js.dom
 import cz.payola.web.client.mvvm_api.Component
 import dom.Element
 import cz.payola.web.client.events._
+import s2js.adapters.js.browser.window
 
 /**
  *
@@ -32,8 +33,8 @@ class Input(val name: String, val value: String, val title: Option[String], val 
     }
     field.value = value
 
-    field.onkeyup = {
-        event => changed.trigger(new ChangedEventArgs(this))
+    field.onkeyup = { event =>
+        changed.trigger(new ChangedEventArgs(this))
     }
 
     field.onclick = {

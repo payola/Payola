@@ -6,6 +6,7 @@ import cz.payola.common.rdf.{Vertex, Graph}
 import cz.payola.web.client.views.plugins.visual._
 import settings.components.visualsetup.VisualSetup
 import s2js.adapters.js.browser.window
+import cz.payola.web.client.mvvm_api.element.CanvasPack
 
 /**
   * Graphical representation of Graph object.
@@ -18,36 +19,18 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
      */
     private val vertexHighestAge = 2
 
-    /*The order in which are layers created determines their "z coordinate"
-(first created layer is on the bottom and last created one covers all the others).*/
-    private val edgesDeselectedLayer = createLayer(container)
-
-    private val edgesDeselectedTextLayer = createLayer(container)
-
-    private val edgesSelectedLayer = createLayer(container)
-
-    private val edgesSelectedTextLayer = createLayer(container)
-
-    private val verticesDeselectedLayer = createLayer(container)
-
-    private val verticesDeselectedTextLayer = createLayer(container)
-
-    private val verticesSelectedLayer = createLayer(container)
-
-    private val verticesSelectedTextLayer = createLayer(container)
+    val canvasPack = createCanvasPack(container)
 
     /**
-      * Topmost layer to contain listeners, controls of the visualisation.
-      */
-    val controlsLayer = createLayer(container)
-
-    private val layers = List(
-        edgesDeselectedLayer, edgesDeselectedTextLayer, edgesSelectedLayer, edgesSelectedTextLayer,
-        verticesDeselectedLayer, verticesDeselectedTextLayer, verticesSelectedLayer, verticesSelectedTextLayer,
-        controlsLayer)
-
+     * Components containing vertices and their edges. A component is a part of graph, for which does not exist
+     * a path via edges and vertices, that would connect it to any other component. Graph may consist of only one
+     * component.
+     */
     val components = ListBuffer[Component]()
 
+    def isSelected: Boolean = {
+        false
+    }
 
     //###################################################################################################################
     //graph construction and update routines#############################################################################
@@ -385,11 +368,9 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
     //drawing############################################################################################################
     //###################################################################################################################
 
-    def draw(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point]) {
-        val positionCorrection = position.getOrElse(Point.Zero)
+    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
 
         var colorVertex: Option[Color] = Some(Color.Black)
-        var colorText: Option[Color] = Some(Color.Black)
 
         val vertexViews = getAllVertices
         val edgeViews = getAllEdges
@@ -398,74 +379,30 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
 
             if (color != None) {
                 colorVertex = Some(color.get)
-                colorText = Some(color.get)
-            } else if (vertexView.selected) {
+            } else if (vertexView.isSelected) {
                 colorVertex = Some(settings.vertexModel.colorHigh)
-                colorText = Some(settings.textModel.color)
             } else if (edgeViews.exists(edgeView =>
                 TODO_RenameThisMethod(edgeView, vertexView))) {
                 colorVertex = Some(settings.vertexModel.colorMed)
-                colorText = Some(settings.textModel.color)
             } else if (getAllSelectedVerticesCount == 0) {
                 colorVertex = None
-                colorText = Some(settings.textModel.color)
             } else {
                 colorVertex = Some(settings.vertexModel.colorLow)
-                colorText = Some(Color.Transparent)
             }
 
-            if (vertexView.selected) {
-                if (verticesSelectedLayer.cleared) {
-                    vertexView.draw(verticesSelectedLayer.context, colorVertex, Some(positionCorrection))
-                }
-                if (verticesSelectedTextLayer.cleared) {
-                    vertexView.drawInformation(verticesSelectedTextLayer.context, colorText,
-                        Some(LocationDescriptor.getVertexInformationPosition(vertexView.position) +
-                            positionCorrection.toVector))
-                }
-            } else {
-                if (verticesDeselectedLayer.cleared) {
-                    vertexView.draw(verticesDeselectedLayer.context, colorVertex, Some(positionCorrection))
-                }
-            }
+            canvasPack.draw(vertexView, colorVertex, positionCorrection)
         }
 
         edgeViews.foreach {edgeView =>
-
-            val positionToUse = LocationDescriptor.getEdgeInformationPosition(
-                edgeView.originView.position, edgeView.destinationView.position) + positionCorrection.toVector
-            val colorToUseEdge = color
-            val colorToUseText = if (color != None) {
-                color
-            } else if (edgeView.isSelected) {
-                Some(settings.textModel.color)
-            } else {
-                None
-            }
-
 
             if(edgeView.areBothVerticesSelected) {
                 edgeView.information.setSelectedForDrawing()
             }
 
-            if (edgeView.isSelected) {
-                if (edgesSelectedLayer.cleared) {
-                    edgeView.draw(edgesSelectedLayer.context, colorToUseEdge, Some(positionCorrection))
-                }
-                if (edgesSelectedTextLayer.cleared && edgeView.areBothVerticesSelected) {
-                    edgeView.information.draw(edgesSelectedTextLayer.context, colorToUseText, Some(positionToUse))
-                }
-            } else {
-                if (edgesDeselectedLayer.cleared) {
-                    edgeView.draw(edgesDeselectedLayer.context, colorToUseEdge, Some(positionCorrection))
-                }
-                if (edgesDeselectedTextLayer.cleared && edgeView.areBothVerticesSelected) {
-                    edgeView.information.draw(edgesDeselectedTextLayer.context, colorToUseText, Some(positionToUse))
-                }
-            }
+            canvasPack.draw(edgeView, color, positionCorrection)
         }
 
-        layers.foreach(layer => layer.cleared = false)
+        canvasPack.dirty()
     }
 
     private def TODO_RenameThisMethod(edgeView: EdgeView, vertexView: VertexView): Boolean = {
@@ -473,8 +410,7 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
             (edgeView.destinationView.eq(vertexView) && edgeView.originView.selected)
     }
 
-    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point]) {
-        val positionCorrection = position.getOrElse(Point.Zero)
+    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
 
         val vertexViews = getAllVertices
         val edgeViews = getAllEdges
@@ -489,33 +425,15 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
                 Some(settings.vertexModel.colorMed)
             }
 
-            if(vertexView.selected) {
-                if(verticesSelectedLayer.cleared) {
-                    vertexView.drawQuick(verticesSelectedLayer.context, colorToUseVertex, Some(positionCorrection))
-                }
-            } else {
-                if(verticesDeselectedLayer.cleared) {
-                    vertexView.drawQuick(verticesDeselectedLayer.context, colorToUseVertex, Some(positionCorrection))
-                }
-            }
+            canvasPack.drawQuick(vertexView, colorToUseVertex, positionCorrection)
         }
 
         edgeViews.foreach {edgeView =>
 
-            val colorToUseEdge = color
-
-            if (edgeView.isSelected) {
-                if (edgesSelectedLayer.cleared) {
-                    edgeView.draw(edgesSelectedLayer.context, colorToUseEdge, Some(positionCorrection))
-                }
-            } else {
-                if (edgesDeselectedLayer.cleared) {
-                    edgeView.draw(edgesDeselectedLayer.context, colorToUseEdge, Some(positionCorrection))
-                }
-            }
+            canvasPack.drawQuick(edgeView, color, positionCorrection)
         }
 
-        layers.foreach(layer => layer.cleared = false)
+        canvasPack.dirty()
     }
 
     /**
@@ -527,28 +445,16 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
     def redraw(graphOperation: Int) {
         graphOperation match {
             case RedrawOperation.Movement =>
-                clear(edgesSelectedLayer.context, Point.Zero, edgesSelectedLayer.getSize)
-                edgesSelectedLayer.cleared = true
-                clear(edgesSelectedTextLayer.context, Point.Zero, edgesSelectedTextLayer.getSize)
-                edgesSelectedTextLayer.cleared = true
-                clear(verticesSelectedLayer.context, Point.Zero, verticesSelectedLayer.getSize)
-                verticesSelectedLayer.cleared = true
-                clear(verticesSelectedTextLayer.context, Point.Zero, verticesSelectedTextLayer.getSize)
-                verticesSelectedTextLayer.cleared = true
-
-                draw(null, None, None)
+                canvasPack.clearForMovement()
+                draw(null, None, Vector.Zero)
                 //^because elements are drawn into separate layers, redraw(..) does not know to which context to draw
 
             case RedrawOperation.Selection =>
                 redrawAll()
 
             case RedrawOperation.Animation =>
-                layers.foreach {layer =>
-                    clear(layer.context, Point.Zero, layer.getSize)
-                    layer.cleared = true
-                }
-
-                drawQuick(null, None, None)
+                canvasPack.clear()
+                drawQuick(null, None, Vector.Zero)
 
             case _ =>
                 redrawAll()
@@ -559,11 +465,8 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
       * Redraws the whole graph from scratch. All layers are cleared and all elements of the graph are drawn again.
       */
     def redrawAll() {
-        layers.foreach {layer =>
-            clear(layer.context, Point.Zero, layer.getSize)
-            layer.cleared = true
-        }
-        draw(null, None, None)
+        canvasPack.clear()
+        draw(null, None, Vector.Zero)
         //^because elements are drawn into separate layers, redraw(..) does not know to which context to draw
     }
 
@@ -615,65 +518,4 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
 
         result
     }
-
-    /*private def diffVertex(from: ListBuffer[VertexView], of: ListBuffer[VertexView]): ListBuffer[VertexView] = {
-        var result = ListBuffer[VertexView]()
-
-        var pointerOuter = 0
-        var pointerInner = 0
-        var found = false
-
-        while(pointerOuter < from.length) {
-            pointerInner = 0
-            found = false
-
-            while(pointerInner < of.length && !found) {
-
-                if(from(pointerOuter).vertexModel eq of(pointerInner).vertexModel) {
-                    found = true
-                }
-                pointerInner += 1
-            }
-
-            if(!found) {
-                result += from(pointerInner)
-            }
-
-            pointerOuter += 1
-        }
-
-        result
-        TODO remove
-    }*/
-
-    /*private def diffEdge(from: ListBuffer[EdgeView], of: ListBuffer[EdgeView]): ListBuffer[EdgeView] = {
-        var result = ListBuffer[EdgeView]()
-
-        var pointerOuter = 0
-        var pointerInner = 0
-        var found = false
-
-        while(pointerOuter < from.length) {
-            pointerInner = 0
-            found = false
-
-            while(pointerInner < of.length && !found) {
-
-                if(from(pointerOuter).edgeModel eq of(pointerInner).edgeModel) {
-                    found = true
-                }
-                pointerInner += 1
-            }
-
-            if(!found) {
-                result += from(pointerInner)
-            }
-
-            pointerOuter += 1
-        }
-
-        result
-
-        TODO remove
-    }*/
 }
