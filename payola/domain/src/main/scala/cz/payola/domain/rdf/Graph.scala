@@ -229,7 +229,7 @@ class Graph(protected val _vertices: List[Node], protected val _edges: List[Edge
       * @param queryString SPARQL query string - mustn't be null.
       * @return New instance of graph with vertices that are in the query result.
       */
-    def executeConstructSPARQLQuery(queryString: String): Graph = {
+    private def executeConstructSPARQLQuery(queryString: String): Graph = {
         require(queryString != null && queryString != "", "Empty or NULL SPARQL query.")
 
         val query = QueryFactory.create(queryString)
@@ -251,7 +251,7 @@ class Graph(protected val _vertices: List[Node], protected val _edges: List[Edge
       * @param queryString SPARQL query string - mustn't be null.
       * @return New instance of graph with vertices that are in the query result.
       */
-    def executeSelectSPARQLQuery(queryString: String): Graph = {
+    private def executeSelectSPARQLQuery(queryString: String): Graph = {
         require(queryString != null && queryString != "", "Empty or NULL SPARQL query.")
 
         val query = QueryFactory.create(queryString)
@@ -269,6 +269,22 @@ class Graph(protected val _vertices: List[Node], protected val _edges: List[Edge
         model.close()
 
         Graph(resultingGraphXML)
+    }
+
+    /** Executes a given SPARQL query.
+      *
+      * @param queryString Query string.
+      * @return A graph that corresponds to the executed query result.
+      */
+    def executeSPARQLQuery(queryString: String): Graph = {
+        if (queryString.contains("SELECT")) {
+            executeSelectSPARQLQuery(queryString)
+        } else if (queryString.contains("CONSTRUCT")) {
+            executeConstructSPARQLQuery(queryString)
+        } else {
+            // TODO ASK and possibly DESCRIBE?
+            throw new IllegalArgumentException("Unknown SPARQL query type (" + queryString + ")")
+        }
     }
 
     /** Returns a vertex with these properties or None if there is no such node.
@@ -303,24 +319,6 @@ class Graph(protected val _vertices: List[Node], protected val _edges: List[Edge
 
         // Now add all edges
         _edges foreach { e: Edge => addEdgeToModel(e, hashMap, model) }
-
-        // TODO - this is an impossible case - investigate - Jena doesn't allow orphan literals.
-        /*
-        // Now handle orphans - we have handled identified nodes already, that's fine.
-        // However, if there's a literal-node orphan, it has been omitted for sure.
-        // Hence go through all the vertices and look for literal nodes that do not
-        // appear in any edge.
-        _vertices foreach { n: Node =>
-            if (n.isInstanceOf[LiteralNode]){
-                val literalNode: LiteralNode = n.asInstanceOf[LiteralNode]
-                if (!containsEdgeWithLiteralNode(literalNode)) {
-                    // No edge contains this poor thing. Add it
-                    val literal: Literal = model.createLiteral(literalNode.value.toString, literalNode.language.getOrElse(""))
-                    model.add(literal)
-                }
-            }
-        }
-        */
 
         model
     }
