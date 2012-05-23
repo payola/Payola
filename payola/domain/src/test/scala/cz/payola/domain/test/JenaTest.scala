@@ -12,6 +12,7 @@ import cz.payola.domain.entities.analyses.evaluation.Success
   * crash even though it does when testing via SBT for the second time.
   */
 
+/*
 class JenaTest extends FlatSpec with ShouldMatchers
 {
 
@@ -87,3 +88,4 @@ class JenaTest extends FlatSpec with ShouldMatchers
     }
 
 }
+*/

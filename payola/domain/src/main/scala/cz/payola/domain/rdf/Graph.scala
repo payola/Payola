@@ -1,15 +1,14 @@
 package cz.payola.domain.rdf
 
 import com.hp.hpl.jena.rdf.model._
-import java.security.MessageDigest
-import collection.mutable.{ArrayBuffer, HashMap, ListBuffer}
-import com.hp.hpl.jena.datatypes.RDFDatatype
+import collection.mutable.HashMap
 import com.hp.hpl.jena.query._
 import java.io._
 import scala.io.Source
 
 object Graph
 {
+
     /** Create a new empty graph.
       *
       * @return Empty graph instance.
