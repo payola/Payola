@@ -64,6 +64,10 @@ class VertexView(val vertexModel: Vertex, var position: Point, var settings: Ver
         age += 1
     }
 
+    def setCurrentAge(newAge: Int) {
+        age = newAge
+    }
+
     def isPointInside(point: Point): Boolean = {
         isPointInRect(point, position + (settings.getSize / -2), position + (settings.getSize / 2))
     }
@@ -88,5 +92,9 @@ class VertexView(val vertexModel: Vertex, var position: Point, var settings: Ver
                 case _ => if (selected) { information.get.draw(context, color, positionCorrection) }
             }
         }
+    }
+
+    override def toString: String = {
+        "["+vertexModel.toString+"]"
     }
 }

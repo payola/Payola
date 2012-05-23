@@ -4,12 +4,13 @@ import animation.Animation
 import cz.payola.web.client.views.plugins.Plugin
 import graph.{InformationView, VertexView, GraphView}
 import s2js.adapters.js.dom.Element
-import cz.payola.common.rdf.Graph
 import collection.mutable.ListBuffer
 import settings.components.visualsetup.VisualSetup
 import s2js.adapters.js.browser.document
 import cz.payola.web.client.mvvm_api.element.CanvasPack
-import cz.payola.web.client.events.{ClickedEventArgs, EventArgs, DraggedEventArgs, MouseDownEventArgs}
+import cz.payola.web.shared.GraphFetcher
+import cz.payola.web.client.events.{DoubleClickedEventArgs, EventArgs, DraggedEventArgs, MouseDownEventArgs}
+import cz.payola.common.rdf.{IdentifiedVertex, LiteralVertex, Graph}
 import s2js.adapters.js.browser.window
 
 /**
@@ -48,6 +49,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
         }
 
         graphView.get.canvasPack.mouseDblClicked += { event => //update graph
+            onMouseDoubleClick(event)
             false
         }
     }
@@ -92,10 +94,9 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
     private def onMouseDown(event: MouseDownEventArgs[CanvasPack]) {
 
         val position = getPosition(event)
-
         var resultedAnimation: Option[Animation[ListBuffer[InformationView]]] = None
-
         val vertex = graphView.get.getTouchedVertex(position)
+
 
         if (vertex.isDefined) { // Mouse down near a vertex.
             if (event.shiftKey) { //change selection of the pressed one
@@ -159,11 +160,11 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
 
     /**
       * Description of mouse-move event. Is called from the layer (canvas) binded to it in the initialization.
-      * @param event
+      * @param eventArgs
       */
-    private def onMouseDrag(event: DraggedEventArgs[CanvasPack]) {
+    private def onMouseDrag(eventArgs: DraggedEventArgs[CanvasPack]) {
         Animation.clearCurrentTimeout()
-        val end = getPosition(event)
+        val end = getPosition(eventArgs)
         val difference = end - moveStart
 
         graphView.get.moveAllSelectedVertices(difference)
@@ -172,7 +173,22 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
         graphView.get.redraw(RedrawOperation.Movement)
     }
 
-    private def getPosition(event: EventArgs[CanvasPack]): Point = {
+    private def onMouseDoubleClick(eventArgs: DoubleClickedEventArgs[CanvasPack]) {
+        val vertex = graphView.get.getTouchedVertex(getPosition(eventArgs))
+        if(vertex.isDefined) {
+            vertex.get.vertexModel match {
+                case i: IdentifiedVertex =>
+                    val neighborhood = GraphFetcher.getNeighborhoodOfVertex(i.uri)
+                    if(neighborhood == null) {
+                        window.alert("no vertices")
+                    }
+                    update(neighborhood)
+                case _ =>
+            }
+        }
+    }
+
+    private def getPosition(eventArgs: EventArgs[CanvasPack]): Point = {
 
         val positionCorrection = Vector(graphView.get.canvasPack.offsetLeft, graphView.get.canvasPack.offsetTop)
 
@@ -180,8 +196,8 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
             Point(event.clientX, event.clientX) + positionCorrection
         }
         else {*/
-            Point(event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft,
-                event.clientY + document.body.scrollTop + document.documentElement.scrollTop) +
+            Point(eventArgs.clientX + document.body.scrollLeft + document.documentElement.scrollLeft,
+                eventArgs.clientY + document.body.scrollTop + document.documentElement.scrollTop) +
             positionCorrection
         //}
     }

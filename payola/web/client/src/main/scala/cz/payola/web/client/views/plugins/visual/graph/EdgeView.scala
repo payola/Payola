@@ -140,4 +140,8 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
             prepareStraight(context, colorToUse, Vector.Zero)
         }
     }
+
+    override def toString: String = {
+        "["+originView.toString+"-"+edgeModel.toString+"-"+destinationView.toString+"]"
+    }
 }

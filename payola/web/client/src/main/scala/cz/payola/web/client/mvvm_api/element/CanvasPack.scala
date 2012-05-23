@@ -129,11 +129,11 @@ class CanvasPack(width: Int, height: Int) extends Canvas(width, height) {
                     }
                 }
             case i: EdgeView =>
-                if(view.isSelected) {
+                if(i.isSelected) {
                     if(edgesSelectedLayer.isCleared) {
                         i.draw(edgesSelectedLayer.context, color, positionCorrection)
                     }
-                    if(edgesSelectedTextLayer.isCleared) {
+                    if(i.areBothVerticesSelected && edgesSelectedTextLayer.isCleared) {
                         i.information.draw(edgesSelectedTextLayer.context, None,
                             (LocationDescriptor.getEdgeInformationPosition(i.originView.position,
                                 i.destinationView.position) + positionCorrection).toVector)
@@ -159,7 +159,7 @@ class CanvasPack(width: Int, height: Int) extends Canvas(width, height) {
                     }
                 }
             case i: EdgeView =>
-                if(view.isSelected) {
+                if(i.areBothVerticesSelected) {
                     if(edgesSelectedLayer.isCleared) {
                         i.drawQuick(edgesSelectedLayer.context, color, positionCorrection)
                     }

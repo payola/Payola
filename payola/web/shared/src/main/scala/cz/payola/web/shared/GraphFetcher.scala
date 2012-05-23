@@ -10,7 +10,7 @@ import cz.payola.model.DataFacade
     }
 
     def getNeighborhoodOfVertex(vertexUri: String): Graph = {
-        // TODO implement via calling model.
-        null
+        (new DataFacade).getGraph(vertexUri)
+        //^this is just a quick fix, dunno if it is correct, TODO implement it via calling model.
     }
 }

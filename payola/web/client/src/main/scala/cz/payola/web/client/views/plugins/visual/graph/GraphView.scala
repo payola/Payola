@@ -2,11 +2,11 @@ package cz.payola.web.client.views.plugins.visual.graph
 
 import collection.mutable.ListBuffer
 import s2js.adapters.js.dom.{Element, CanvasRenderingContext2D}
-import cz.payola.common.rdf.{Vertex, Graph}
 import cz.payola.web.client.views.plugins.visual._
 import settings.components.visualsetup.VisualSetup
 import s2js.adapters.js.browser.window
 import cz.payola.web.client.mvvm_api.element.CanvasPack
+import cz.payola.common.rdf.{IdentifiedVertex, Vertex, Graph}
 
 /**
   * Graphical representation of Graph object.
@@ -26,7 +26,7 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
      * a path via edges and vertices, that would connect it to any other component. Graph may consist of only one
      * component.
      */
-    val components = ListBuffer[Component]()
+    var components = ListBuffer[Component]()
 
     def isSelected: Boolean = {
         false
@@ -41,34 +41,88 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
       * @param graph to replace the current graph representation with
       */
     def update(graph: Graph) {
+        if (graph == null) {
+            return
+            window.alert("graph is null and I still continue in GraphView.update")
+        }
 
         //create vertexViews from the input
         val newVertexViews = createVertexViews(graph)
         //get vertexViews from the current (this) graphView
         val oldVertexViews = rebuildOldVertices(newVertexViews)
 
-        val vertexViews = newVertexViews ++ oldVertexViews
-
+        //window.alert("new vertices length: "+newVertexViews.length+"; old vertices length: "+oldVertexViews.length)
+        var vertexViews = newVertexViews ++ oldVertexViews
+        //window.alert("new vertices length: "+newVertexViews.length+"; rebuild vertices length: "+oldVertexViews.length+"; old vertices length: "+getAllVertices.length)
+        vertexViews = zkusNajitDuplicityV(vertexViews)
 
         //create edgeViews from the input
         val newEdgeViews = createEdgeViews(graph, vertexViews)
         //get edgeViews from the current (this) graphView
         val oldEdgeViews = rebuildOldEdges(newEdgeViews, vertexViews)
 
-        val edgeViews = newEdgeViews ++ oldEdgeViews
-
+        //window.alert("new edges length: "+newEdgeViews.length+"; rebuild edges length: "+oldEdgeViews.length+"; old edges length: "+getAllEdges.length)
+        var edgeViews = newEdgeViews ++ oldEdgeViews
+        edgeViews = zkusNajitDuplicityE(edgeViews)
 
         fillVertexViewsEdges(vertexViews, edgeViews)
+
 
         splitToComponents(vertexViews, edgeViews)
 
 
-        //if there were some vertices in the graph before the update
+        //if this is the first drawn graph, make some vertices selected from the start
         if(oldVertexViews.isEmpty) {
             components.foreach{ component =>
                 component.selectVertex(component.vertexViews.head)
             }
         }
+    }
+
+    private def zkusNajitDuplicityV(vertexViews: ListBuffer[VertexView]): ListBuffer[VertexView] = {
+        var ble = ListBuffer[VertexView]()
+        var p1 = 0
+        while(p1 < vertexViews.length) {
+            var p2 = p1 + 1
+            var duplicita = false
+            while(p2 < vertexViews.length) {
+                if(vertexViews(p1).vertexModel.toString eq vertexViews(p2).vertexModel.toString) {
+                    //window.alert("duplicita: "+vertexViews(p1).toString+" == "+vertexViews(p2).toString)
+                    duplicita = true
+                }
+                p2 += 1
+            }
+            if(!duplicita) {
+                ble += vertexViews(p1)
+            }
+            p1 += 1
+        }
+        ble
+    }
+
+    private def zkusNajitDuplicityE(edgeViews: ListBuffer[EdgeView]) : ListBuffer[EdgeView] = {
+        var ble = ListBuffer[EdgeView]()
+        var p1 = 0
+        while(p1 < edgeViews.length) {
+            var p2 = p1 + 1
+            var duplicita = false
+            while(p2 < edgeViews.length) {
+                if((edgeViews(p1).edgeModel.toString eq edgeViews(p2).edgeModel.toString)
+                    && (((edgeViews(p1).originView.vertexModel.toString eq edgeViews(p2).originView.vertexModel.toString)
+                        && (edgeViews(p1).destinationView.vertexModel.toString eq edgeViews(p2).destinationView.vertexModel.toString))
+                    ||((edgeViews(p1).originView.vertexModel.toString eq edgeViews(p2).destinationView.vertexModel.toString)
+                        && (edgeViews(p1).destinationView.vertexModel.toString eq edgeViews(p2).originView.vertexModel.toString)))) {
+
+                    duplicita = true
+                }
+                p2 += 1
+            }
+            if(!duplicita) {
+                ble += edgeViews(p1)
+            }
+            p1 += 1
+        }
+        ble
     }
 
     /**
@@ -79,6 +133,7 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
      */
     private def splitToComponents(vertexViews: ListBuffer[VertexView], edgeViews: ListBuffer[EdgeView]) {
 
+        components = ListBuffer[Component]()
 
         var remainingVertices = vertexViews
         while(!remainingVertices.isEmpty) {
@@ -172,18 +227,19 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
 
         getAllVertices.foreach{ oldVertexView =>
 
-            val vertexInNews = newVertexViews.find(_.vertexModel eq oldVertexView.vertexModel) //TODO may be dangerous
+            val vertexInNews = newVertexViews.find{ _.vertexModel.toString eq oldVertexView.vertexModel.toString } //TODO may be dangerous
 
-            if(vertexInNews.isDefined) {
-                vertexInNews.get.selected = oldVertexView.selected
-                vertexInNews.get.position = oldVertexView.position
+            /*if(vertexInNews.isDefined) {
+                //vertexInNews.get.selected = oldVertexView.selected
+                //vertexInNews.get.position = oldVertexView.position
+            } else */ if(vertexInNews.isEmpty && oldVertexView.getCurrentAge + 1 <= vertexHighestAge) { //filter out too old vertices
+                val plk = new VertexView(oldVertexView.vertexModel, Point(300, 300), settings.vertexModel, settings.textModel)
+                plk.setCurrentAge(oldVertexView.getCurrentAge + 1)
+                if(oldVertexView.selected) {
+                    plk.selected = true
+                }
 
-            } else if(oldVertexView.getCurrentAge + 1 <= vertexHighestAge) { //filter out too old vertices
-
-                oldVertexView.increaseCurrentAge()
-                oldVertexView.edges = ListBuffer[EdgeView]()
-
-                newOldVertexViews += oldVertexView
+                newOldVertexViews += plk
             }
         }
 
@@ -234,12 +290,11 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
         }
 
         val newOldEdgeViews = ListBuffer[EdgeView]()
-
         getAllEdges.foreach{ oldEdgeView =>
 
-            val edgeInNews = newEdgeViews.find(_.edgeModel eq oldEdgeView.edgeModel) //TODO may be dangerous
+            //val edgeInNews = newEdgeViews.find(_.edgeModel.toString eq oldEdgeView.edgeModel.toString) //TODO may be dangerous
 
-            if(edgeInNews.isEmpty) {
+            //if(edgeInNews.isEmpty) {
 
                 val origin = findVertexView(oldEdgeView.edgeModel.origin, vertexViews)
                 val destination = findVertexView(oldEdgeView.edgeModel.destination, vertexViews)
@@ -248,9 +303,8 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
                         new EdgeView(oldEdgeView.edgeModel, origin.get, destination.get, settings.edgesModel,
                         settings.textModel)
                 }
-            }
+            //}
         }
-
         newOldEdgeViews
     }
 
@@ -264,6 +318,10 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
 
         vertexViews.foreach { vertexView =>
             vertexView.edges = getEdgesOfVertex(vertexView, edgeViews)
+            if(vertexView.edges.length == 0) {
+                window.alert("vertex: "+vertexView.vertexModel.toString+" ; "+edgeViews.toString())
+            }
+            //window.alert(vertexView.toString+": "+vertexView.edges.length+" "+vertexView.edges.toString())
         }
     }
 
@@ -276,9 +334,9 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
      */
     private def getEdgesOfVertex(vertexView: VertexView, edgeViews: ListBuffer[EdgeView]): ListBuffer[EdgeView] = {
 
-        edgeViews.filter { edgeView: EdgeView =>
-            ((edgeView.originView.vertexModel eq vertexView.vertexModel) ||
-                (edgeView.destinationView.vertexModel eq vertexView.vertexModel))
+        edgeViews.filter { edgeView =>
+            ((edgeView.originView.vertexModel.toString eq vertexView.vertexModel.toString) ||
+                (edgeView.destinationView.vertexModel.toString eq vertexView.vertexModel.toString))
         }
     }
 
@@ -288,7 +346,7 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
      * @return found graphica; representation of the input vertex from the model
      */
     private def findVertexView(vertexModel: Vertex, vertexViews: ListBuffer[VertexView]): Option[VertexView] = {
-        vertexViews.find(_.vertexModel eq vertexModel)
+        vertexViews.find(_.vertexModel.toString eq vertexModel.toString)
     }
 
     //###################################################################################################################
