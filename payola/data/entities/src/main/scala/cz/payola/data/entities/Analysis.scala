@@ -40,6 +40,7 @@ class Analysis(name: String, owner: Option[User])
     }
 
     override def addBinding(binding: PluginInstanceBindingType) {
+
         super.addBinding(binding)
 
         if (binding.isInstanceOf[PluginInstanceBinding]){

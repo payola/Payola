@@ -23,8 +23,6 @@ class DataSource(protected var _name: String, protected val _owner: Option[User]
     with ShareableEntity
     with cz.payola.common.entities.analyses.DataSource
 {
-    protected var _isPublic = false
-
     /**
       * Executes the specified query.
       * @param query The query to execute.

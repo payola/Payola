@@ -15,9 +15,9 @@ trait NamedEntity extends Entity
       * @param value The value of new name.
       */
     def name_=(value: String) {
-        require(value != null, "Name mustn't be null!")
-        require(value != "", "Name mustn't be empty!")
-        require(value.trim != "", "Name mustn't be just whitespace!")
+        require(value != null, "Name mustn't be null.")
+        require(value != "", "Name mustn't be empty.")
+        require(value.trim != "", "Name mustn't be just whitespace.")
 
         _name = value
     }

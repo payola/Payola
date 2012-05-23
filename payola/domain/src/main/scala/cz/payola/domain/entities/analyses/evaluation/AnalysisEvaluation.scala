@@ -117,7 +117,7 @@ class AnalysisEvaluation(private val analysis: Analysis, private val timeout: Op
     }
 
     /**
-      * Result of the analysis evaluation. [[scala.None.]] in case the evaluation hasn't finished yet.
+      * Result of the analysis evaluation. [[scala.None]] in case the evaluation hasn't finished yet.
       */
     def getResult: Option[AnalysisResult] = {
         (this !? GetResult).asInstanceOf[Option[AnalysisResult]]

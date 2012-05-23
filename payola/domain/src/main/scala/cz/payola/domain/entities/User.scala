@@ -1,8 +1,8 @@
 package cz.payola.domain.entities
 
 import permissions.privilege.{PublicPrivilege, GroupPrivilege, AnalysisPrivilege, Privilege}
-import scala.collection.mutable
 import cz.payola.domain.entities.analyses.DataSource
+import scala.collection._
 
 /** User entity at the domain level.
   *
@@ -25,136 +25,81 @@ class User(protected var _name: String)
 
     type PrivilegeType = Privilege[_]
 
-    protected var _email: String = ""
-
-    protected var _password: String = ""
-
-    protected val _ownedGroups = new mutable.ArrayBuffer[GroupType]()
-
-    protected val _ownedAnalyses = new mutable.ArrayBuffer[AnalysisType]()
-
-    protected val _ownedDataSources = new mutable.ArrayBuffer[DataSource]()
-
-    protected val _privileges = new mutable.ArrayBuffer[PrivilegeType]()
-
-    /** Goes through privileges and returns a sequence of Analysis objects to which
-      * the user has some kind of access.
-      *
-      * @return Analysis with access.
+    /**
+      * Adds the analysis to the users owned analyses. The analysis has to be owned by the user.
+      * @param analysis Analysis to be added.
+      * @throws IllegalArgumentException if the analysis is null, the user already owns it or isn't an owner of it.
       */
-    def accessibleAnalyses: Seq[AnalysisType] = {
-        privileges.collect { case p: AnalysisPrivilege => p.obj }.distinct
+    def addOwnedAnalysis(analysis: AnalysisType) {
+        require(analysis != null, "Analysis mustn't be null.")
+        require(!ownedAnalyses.contains(analysis), "The analysis is already owned by the user.")
+        require(analysis.owner.exists(_ == this), "User must be owner of the analysis.")
+
+        storeOwnedAnalysis(analysis)
     }
 
-    /** Adds the analysis to the analyses array. Does nothing if the analysis
-      * has been already added. The Analysis has to be owned by the user.
-      *
-      * @param a Analysis to be added.
-      *
-      * @throws IllegalArgumentException if the analysis is null or the user isn't an owner of it.
+    /**
+      * Removes the specified analysis from the users owned analyses.
+      * @param analysis The analysis to be removed.
+      * @return The removed analysis.
       */
-    def addAnalysis(a: AnalysisType) = {
-        require(a != null, "Analysis mustn't be null")
-        require(a.owner.exists(_ == this), "User must be owner of the analysis")
-
-        if (!_ownedAnalyses.contains(a)) {
-            _ownedAnalyses += a
+    def removeOwnedAnalysis(analysis: AnalysisType): Option[Analysis] = {
+        require(analysis != null, "Analysis mustn't be null.")
+        ifContains(ownedAnalyses, analysis) {
+            discardOwnedAnalysis(analysis)
         }
     }
 
-    /** Adds the group to the owned groups. The user '''must''' already be set as the group's owner.
-      *
-      * @param g Group to be added.
-      *
-      * @throws IllegalArgumentException if the group is null or the user isn't an owner of that group.
+    /**
+      * Adds the group to the users owned groups. The group has to be owned by the user.
+      * @param group The group to be added.
+      * @throws IllegalArgumentException if the group is null, the user already owns it or isn't an owner of it.
       */
-    def addOwnedGroup(g: Group) = {
-        require(g != null, "Group is NULL!")
-        require(g.owner == this, "Group isn't owned by this user!")
+    def addOwnedGroup(group: GroupType) {
+        require(group != null, "Group mustn't be null.")
+        require(!ownedGroups.contains(group), "The group is already owned by the user.")
+        require(group.owner == this, "User must be owner of the group.")
 
-        // Avoid double membership
-        if (!_ownedGroups.contains(g)) {
-            _ownedGroups += g
+        storeOwnedGroup(group)
+    }
+
+    /**
+      * Removes the group from the users owned groups.
+      * @param group The group to be removed.
+      * @return The removed group.
+      */
+    def removeOwnedGroup(group: GroupType): Option[GroupType] = {
+        require(group != null, "Group mustn't be null.")
+        ifContains(ownedGroups, group) {
+            discardOwnedGroup(group)
         }
     }
 
-    def isMemberOfGroup(g: Group): Boolean = g.hasMember(this)
-
-    /** Result is a new List consisting of only groups that
-      * the user is a member of.
-      *
-      * @return New List with groups that the user is a member of.
-      */
-    def memberGroups: collection.Seq[GroupType] = {
-        privileges.collect { case p: GroupPrivilege => p.obj }.distinct
-    }
-
-    /** Returns an analysis at index. Will raise an exception if the index is out of bounds.
-      * The analysis will be loaded from DB if necessary.
-      *
-      * @param index Index of the analysis (according to the AnalysesIDs).
-      * @return The analysis.
-      */
-    def ownedAnalysisAtIndex(index: Int): AnalysisType = {
-        require(index >= 0 && index < ownedAnalysisCount, "Owned analysis index out of bounds - " + index)
-        _ownedAnalyses(index)
-    }
-
-    /** Number of owned analyses.
-      *
-      * @return Number of owned analyses.
-      */
-    def ownedAnalysisCount: Int = _ownedAnalyses.size
-
-    /** Returns a group at index. Will raise an exception if the index is out of bounds.
-      * The group will be loaded from DB if necessary.
-      *
-      * @param index Index of the group (according to the GroupIDs).
-      * @return The group.
-      */
-    def ownedGroupAtIndex(index: Int): Group = {
-        require(index >= 0 && index < ownedGroupCount, "Owned group index out of bounds - " + index)
-        _ownedGroups(index)
-    }
-
-    /** Number of owned groups.
-      *
-      * @return Number of owned groups
-      */
-    def ownedGroupCount: Int = _ownedGroups.size
-
-    /** Privileges. Only returns public ones.
-      *
-      * @return Public privileges.
+    /**
+      * Returns the public privileges.
       */
     def publicPrivileges: Seq[PrivilegeType] = {
-        _privileges.collect { case p: PublicPrivilege => p }
+        privileges.collect {
+            case p: PublicPrivilege => p
+        }
     }
 
-    /** Removes the passed analysis from the analyses owned by the user.
-      *
-      * @param a Analysis to be removed.
-      *
-      * @throws IllegalArgumentException if the analysis is null.
+    /**
+      * Returns the analyses that are accessible for the user.
       */
-    def removeOwnedAnalysis(a: AnalysisType) = {
-        require(a != null, "Cannot remove null analysis!")
-
-        _ownedAnalyses -= a
+    def accessibleAnalyses: Seq[AnalysisType] = {
+        privileges.collect {
+            case p: AnalysisPrivilege => p.obj
+        }.distinct
     }
 
-    /** Removes the group from the user's list of owned groups. The user '''mustn't''' be the
-      * group's owner anymore.
-      *
-      * @param g Group to be removed.
-      *
-      * @throws IllegalArgumentException if the group is null or the user is still owner of the group.
+    /**
+      * Returns the groups the user is member of.
       */
-    def removeOwnedGroup(g: Group) = {
-        require(g != null, "Group is NULL!")
-        require(g.owner != this, "Group is still owned by this user!")
-
-        _ownedGroups -= g
+    def memberGroups: Seq[GroupType] = {
+        privileges.collect {
+            case p: GroupPrivilege => p.obj
+        }.distinct
     }
 
     override def canEqual(other: Any): Boolean = {

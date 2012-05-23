@@ -1,18 +1,16 @@
 package cz.payola.domain.test
 
-import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
-import scala.actors.Actor
-import scala.collection.mutable.Queue
 import cz.payola.domain.entities.Analysis
 import cz.payola.domain.entities.analyses._
-import cz.payola.domain.rdf._
 import evaluation.Success
 import plugins.data.SparqlEndpoint
 import plugins.query._
 import plugins.{Join, Union}
+import org.scalatest.FlatSpec
 
-class AnalysisEvaluationSpecs extends FlatSpec with ShouldMatchers
+import org.scalatest.matchers.ShouldMatchers
+
+class AnalysisEvaluationSpec extends FlatSpec with ShouldMatchers
 {
     "Analysis evaluation" should "work" in {
         val sparqlEndpointPlugin = new SparqlEndpoint
@@ -24,7 +22,8 @@ class AnalysisEvaluationSpecs extends FlatSpec with ShouldMatchers
         val unionPlugin = new Union
 
         val analysis = new Analysis("Cities with more than 2 million habitants with countries", None)
-        val citiesFetcher = sparqlEndpointPlugin.createInstance().setParameter("EndpointURL", "http://dbpedia.org/sparql")
+        val citiesFetcher = sparqlEndpointPlugin.createInstance()
+            .setParameter("EndpointURL", "http://dbpedia.org/sparql")
         val citiesTyped = typedPlugin.createInstance().setParameter("TypeURI", "http://dbpedia.org/ontology/City")
         val citiesProjection = projectionPlugin.createInstance().setParameter("PropertyURIs", List(
             "http://dbpedia.org/ontology/populationDensity", "http://dbpedia.org/ontology/populationTotal"
@@ -41,7 +40,8 @@ class AnalysisEvaluationSpecs extends FlatSpec with ShouldMatchers
         analysis.addBinding(citiesTyped, citiesProjection)
         analysis.addBinding(citiesProjection, citiesSelection)
 
-        val countriesFetcher = sparqlEndpointPlugin.createInstance().setParameter("EndpointURL", "http://dbpedia.org/sparql")
+        val countriesFetcher = sparqlEndpointPlugin.createInstance()
+            .setParameter("EndpointURL", "http://dbpedia.org/sparql")
         val countriesTyped = typedPlugin.createInstance().setParameter("TypeURI", "http://dbpedia.org/ontology/Country")
         val countriesProjection = projectionPlugin.createInstance().setParameter("PropertyURIs", List(
             "http://dbpedia.org/ontology/areaTotal"

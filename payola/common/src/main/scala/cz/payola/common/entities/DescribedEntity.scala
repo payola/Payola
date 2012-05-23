@@ -5,7 +5,7 @@ package cz.payola.common.entities
   */
 trait DescribedEntity extends Entity
 {
-    protected var _description: String
+    protected var _description: String = ""
 
     /** Description of the entity */
     def description = _description
