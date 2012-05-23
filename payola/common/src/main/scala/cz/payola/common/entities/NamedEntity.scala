@@ -7,7 +7,7 @@ trait NamedEntity extends Entity
 {
     protected var _name: String
 
-    /** Name of the entity */
+    /** Name of the entity. */
     def name = _name
 
     /**

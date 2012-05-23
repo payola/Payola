@@ -3,15 +3,25 @@ package cz.payola.data.entities.analyses
 import cz.payola.data.entities.{PayolaDB, PersistableEntity, Analysis}
 import cz.payola.data.entities.analyses.parameters._
 import scala.collection.immutable
-import cz.payola.domain.rdf.Graph
+import cz.payola.domain.IDGenerator
 
-class PluginInstance(plugin: Plugin, paramValues: immutable.Seq[ParameterValue[_]])
+class PluginInstance(
+    override val id: String,
+    plugin: cz.payola.domain.entities.analyses.Plugin,
+    paramValues: immutable.Seq[ParameterValue[_]],
+    description : String)
     extends cz.payola.domain.entities.analyses.PluginInstance(plugin, paramValues)
     with PersistableEntity
 {
     val pluginId: Option[String] = if (plugin == null) None else Some(plugin.id)
 
     var analysisId: Option[String] = None
+
+    /*
+    private val _pluginDescription: String = pluginDescription
+
+    override def description = _pluginDescription
+    */
 
     private lazy val _booleanParameterValues = PayolaDB.booleanParameterValuesOfPluginInstances.left(this)
 
@@ -22,12 +32,12 @@ class PluginInstance(plugin: Plugin, paramValues: immutable.Seq[ParameterValue[_
     private lazy val _stringParameterValues = PayolaDB.stringParameterValuesOfPluginInstances.left(this)
 
     // Assosiate parameter values to plugin instance
-    if (paramValues != null) {
+    def associateParameterValues() {
         paramValues.map {
-            case paramValue: BooleanParameterValue => paramValue.pluginInstanceId = Some(id)
-            case paramValue: FloatParameterValue => paramValue.pluginInstanceId = Some(id)
-            case paramValue: IntParameterValue => paramValue.pluginInstanceId = Some(id)
-            case paramValue: StringParameterValue => paramValue.pluginInstanceId = Some(id)
+            case paramValue: BooleanParameterValue => associate(paramValue, _booleanParameterValues)
+            case paramValue: FloatParameterValue => associate(paramValue, _floatParameterValues)
+            case paramValue: IntParameterValue => associate(paramValue, _intParameterValues)
+            case paramValue: StringParameterValue => associate(paramValue, _stringParameterValues)
         }
     }
 
