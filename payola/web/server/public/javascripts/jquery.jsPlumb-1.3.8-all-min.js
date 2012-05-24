@@ -7030,19 +7030,6 @@
         },
         _atts = function(o, atts) {
             for (var i in atts) {
-                // IE8 fix: setattribute does not work after an element has been added to the dom!
-                // http://www.louisremi.com/2009/03/30/changes-in-vml-for-ie8-or-what-feature-can-the-ie-dev-team-break-for-you-today/
-                //o.setAttribute(i, atts[i]);
-
-                /*There is an additional problem when accessing VML elements by using get/setAttribute. The simple solution is following:
-
-                 if (document.documentMode==8) {
-                 ele.opacity=1;
-                 } else {
-                 ele.setAttribute(‘opacity’,1);
-                 }
-                 */
-
                 o[i] = atts[i];
             }
         },

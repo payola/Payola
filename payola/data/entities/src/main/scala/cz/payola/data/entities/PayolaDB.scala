@@ -7,6 +7,10 @@ import cz.payola.data.entities._
 import org.squeryl._
 import cz.payola.data.entities.analyses._
 import cz.payola.data.entities.analyses.parameters._
+import cz.payola.domain.entities.analyses.plugins.data.SparqlEndpoint
+import cz.payola.domain.entities.analyses.plugins.query._
+import cz.payola.domain.entities.analyses.plugins._
+import cz.payola.data.entities.dao._
 
 object PayolaDB extends Schema
 {
@@ -236,10 +240,6 @@ object PayolaDB extends Schema
             create
             //println(printDdl)
         }
-    }
-
-    def createInitialData() {
-        TestObject.testAnalysis()
     }
 
     private def defineForeignKeyPolicy() {

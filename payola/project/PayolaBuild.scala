@@ -241,6 +241,12 @@ object PayolaBuild extends Build
         commonProject, webSharedProject
     )
 
+    lazy val webDeployerProject = Project(
+        "deployer", file("web/deployer"), settings = payolaSettings
+    ).dependsOn(
+        domainProject,  dataEntitiesProject
+    )
+
     lazy val webServerProject = PlayProject(
         "server", PayolaSettings.version, Nil, path = file("web/server"), mainLang = SCALA
     ).settings(
