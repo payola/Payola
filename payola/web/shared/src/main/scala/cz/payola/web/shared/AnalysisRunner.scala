@@ -28,14 +28,19 @@ object AnalysisRunner
         val progress = evaluation.getProgress
 
         val evaluated = progress.evaluatedInstances.map(i => i.id)
-        val running = progress.runningInstances.map(m => m._1.id)
-        val errors = progress.errors.map(tuple => tuple._1.id)
+        val running = progress.runningInstances.map(m => m._1.id).toList
+        val errors = progress.errors.map(tuple => tuple._1.id).toList
 
         if (evaluation.isFinished)
         {
             runningEvaluations -= evaluationId
         }
 
-        new AnalysisProgress(evaluated, running, errors, progress.value, evaluation.isFinished)
+        val graph = evaluation.getResult.flatMap{
+            case r: Success => Some(r.outputGraph)
+            case _ => None
+        }
+
+        new AnalysisProgress(evaluated, running, errors, progress.value, evaluation.isFinished, graph)
     }
 }

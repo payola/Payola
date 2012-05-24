@@ -97,7 +97,7 @@ object RPC extends Controller
       * @return
       */
     def raiseError(e: Exception) = {
-        InternalServerError(exceptionSerializer.serialize(e))
+        InternalServerError(exceptionSerializer.serialize(e.getCause))
     }
 
     /**

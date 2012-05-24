@@ -7,11 +7,11 @@ import s2js.adapters.js.browser.document
 import cz.payola.web.client.events._
 import cz.payola.web.shared.AnalysisRunner
 import s2js.adapters.js.browser.window
-
+import cz.payola.common.rdf.Graph
 
 class AnalysisControls(analysisId: String) extends Component
 {
-    val analysisTriggered = new ComponentEvent[AnalysisControls, ClickedEventArgs[AnalysisControls]]
+    val analysisEvaluated = new ComponentEvent[AnalysisControls, EvaluationEventArgs]
 
     val icon = new I(List(), "icon-play icon-white")
     val caption = new Text("Run analysis")
@@ -39,32 +39,43 @@ class AnalysisControls(analysisId: String) extends Component
         window.setTimeout(pollingHandler, 500)
     }
 
+    def addClass(el: Element, addedClass: String) = {
+        val currentClass = el.getAttribute("class")
+        var newClass = currentClass.replaceAllLiterally("alert-warning","")
+        newClass = newClass.replaceAllLiterally("alert-error","")
+        newClass = newClass.replaceAllLiterally("alert-info","")
+        newClass = newClass+" "+addedClass
+        el.setAttribute("class",newClass)
+    }
+
     def pollingHandler() : Unit = {
         val progress = AnalysisRunner.getAnalysisProgress(evaluationId)
-        progressValueBar.setAttribute("style","width: "+progress.percent+"%")
+        progressValueBar.setAttribute("style","width: "+(progress.percent*100)+"%")
 
         progress.evaluated.map{
-            inst => document.getElementById("inst_"+inst).setAttribute("class","alert-success")
+            inst => addClass(document.getElementById("inst_"+inst), "alert-warning")
         }
 
         progress.errors.map{
-            inst => document.getElementById("inst_"+inst).setAttribute("class","alert-error")
+            inst => addClass(document.getElementById("inst_"+inst), "alert-error")
         }
 
         progress.evaluated.map{
-            inst => document.getElementById("inst_"+inst).setAttribute("class","alert-warning")
+            inst => addClass(document.getElementById("inst_"+inst), "alert-success")
         }
 
         if (!progress.isFinished)
         {
             schedulePolling
         }else{
-            markDone
+            markDone(progress.graph)
         }
     }
 
-    def markDone = {
+    def markDone(graph: Option[Graph]) = {
         runBtn.addClass("btn-success")
-        //TODO: progressbar should be deactivated
+        progressDiv.removeClass("active")
+
+        analysisEvaluated.trigger(new EvaluationEventArgs(this, graph))
     }
 }
