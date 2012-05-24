@@ -216,6 +216,14 @@ class Analysis(name: String, owner: Option[User])
         }
     }
 
+    def sources = {
+        pluginInstances.diff(pluginInstanceBindings.map(b => b.targetPluginInstance))
+    }
+
+    def outputs = {
+        pluginInstances.diff(pluginInstanceBindings.map(b => b.sourcePluginInstance))
+    }
+
     /**
       * Returns the plugin instance whose output is also output of the analysis. If the analysis is valid then
       * [[scala.Some]] is returned.
