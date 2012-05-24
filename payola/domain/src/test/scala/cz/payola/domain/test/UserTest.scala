@@ -24,7 +24,7 @@ class UserTest extends FlatSpec with ShouldMatchers {
     it should "not be a member and should be an owner of group when added" in  {
         val u: User = new User(_name = "Franta")
         val g: Group = new Group(_name = "Grupa", _owner = u);
-        !u.isMemberOfGroup(g) && g.owner == u
+        !g.hasMember(u) && g.owner == u
     }
 
     it should "be a member but not an owner of group when added" in  {
@@ -32,7 +32,7 @@ class UserTest extends FlatSpec with ShouldMatchers {
         val u2: User = new User(_name = "Pepa")
         val g: Group = new Group(_name = "Grupa", _owner = u1);
         g.addMember(u2)
-        u2.isMemberOfGroup(g) && u2 != g.owner
+        g.hasMember(u2) && u2 != g.owner
     }
 
     it should "update its group ownerships" in  {
@@ -52,14 +52,7 @@ class UserTest extends FlatSpec with ShouldMatchers {
         g.removeMember(u2)
         u2.memberGroups.size should be (0)
 
-        !u.isMemberOfGroup(g)
-    }
-
-    it should "not be removed from the group while still being an " +
-        "owner of the group" in  {
-        val u: User = new User(_name = "Franta")
-        val g: Group = new Group(_name = "Monoid", _owner = u)
-        evaluating(u.removeOwnedGroup(g)) should produce [IllegalArgumentException]
+        !g.hasMember(u)
     }
 
     it should "not be renamed to null or empty string" in  {

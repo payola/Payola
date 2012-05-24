@@ -14,19 +14,30 @@ class Group(
         evaluateCollection(_groupMembersQuery)
     }
 
-    override def addMember(u: UserType) = {
-        super.addMember(u)
+    override def addMember(u: UserType) {
+        super.addMember(
+            u match {
+                // Just associate User with group
+                case user: User => {
+                    associate(user, _groupMembersQuery);
 
-        if (u.isInstanceOf[User]) {
-            associate(u.asInstanceOf[User], _groupMembersQuery)
-        }
+                    user
+                }
+                // "Convert" to data.User, associate with group and persist
+                case user: cz.payola.domain.entities.User => {
+                    val usr = new User(user.name, user.password, user.email)
+                    associate(usr, _groupMembersQuery)
+
+                    usr
+                }
+            }
+        )
     }
 
-    override def removeMember(u: UserType) = {
-        super.removeMember(u)
-
-        if (u.isInstanceOf[User]) {
-            dissociate(u.asInstanceOf[User], _groupMembersQuery)
+    override protected def discardMember(user: UserType) {
+        user match {
+            case u: User => dissociate(u, _groupMembersQuery)
+            case _ =>
         }
     }
 }

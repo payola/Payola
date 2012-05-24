@@ -11,17 +11,15 @@ class PluginInstance(protected val _plugin: Plugin, protected val _parameterValu
 
     type PluginType = Plugin
 
-    protected var _description = ""
-
     /**
-      * Returns value of a parameter with the specified name or [[scala.None.]] if such doesn't exist.
+      * Returns value of a parameter with the specified name or [[scala.None]] if such doesn't exist.
       */
     def getParameter(parameterName: String): Option[Any] = {
         getParameterValue(parameterName).map(_.value)
     }
 
     /**
-      * Returns value of a boolean parameter with the specified name or [[scala.None.]] if such doesn't exist.
+      * Returns value of a boolean parameter with the specified name or [[scala.None]] if such doesn't exist.
       */
     def getBooleanParameter(parameterName: String): Option[Boolean] = {
         getParameter(parameterName).map {
@@ -30,7 +28,7 @@ class PluginInstance(protected val _plugin: Plugin, protected val _parameterValu
     }
 
     /**
-      * Returns value of a float parameter with the specified name or [[scala.None.]] if such doesn't exist.
+      * Returns value of a float parameter with the specified name or [[scala.None]] if such doesn't exist.
       */
     def getFloatParameter(parameterName: String): Option[Float] = {
         getParameter(parameterName).map {
@@ -39,7 +37,7 @@ class PluginInstance(protected val _plugin: Plugin, protected val _parameterValu
     }
 
     /**
-      * Returns value of an integer parameter with the specified name or [[scala.None.]] if such doesn't exist.
+      * Returns value of an integer parameter with the specified name or [[scala.None]] if such doesn't exist.
       */
     def getIntParameter(parameterName: String): Option[Int] = {
         getParameter(parameterName).map {
@@ -48,7 +46,7 @@ class PluginInstance(protected val _plugin: Plugin, protected val _parameterValu
     }
 
     /**
-      * Returns value of a string parameter with the specified name or [[scala.None.]] if such doesn't exist.
+      * Returns value of a string parameter with the specified name or [[scala.None]] if such doesn't exist.
       */
     def getStringParameter(parameterName: String): Option[String] = {
         getParameter(parameterName).map {

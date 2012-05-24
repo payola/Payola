@@ -6,6 +6,13 @@ package cz.payola.common.entities.analyses
   */
 trait Parameter[A]
 {
+    protected val _name: String
+
+    protected val _defaultValue: A
+
     /** Name of the parameter. */
-    val name: String
+    def name = _name
+
+    /** Default value of the parameter. */
+    def defaultValue = _defaultValue
 }

@@ -19,6 +19,11 @@ trait Graph
     def edges: collection.Seq[EdgeType] = _edges
 
     /**
+      * Returns whether the graph is empty (i.e. contains no vertices).
+      */
+    def isEmpty: Boolean = vertices.isEmpty
+
+    /**
       * Returns all edges that go from the specified vertex (i.e. the vertex is a subject in the relation).
       * @param vertexURI URI of the vertex whose edges to retrieve.
       * @return The edges.

@@ -4,19 +4,21 @@ import cz.payola.domain.IDGenerator
 
 abstract class Entity(val id: String = IDGenerator.newId) extends cz.payola.common.entities.Entity
 {
-    def canEqual(other: Any): Boolean = {
-        other.isInstanceOf[Entity]
-    }
-
-    override def equals(other: Any): Boolean = {
-        other match {
-            case that: Entity => that.canEqual(this) && this.id == that.id
-            case _ => false
+    /**
+      * Invokes the action if the specified sequence contains the item.
+      * @param seq The sequence to check.
+      * @param item The item to check.
+      * @param action The action to perform.
+      * @tparam A Type of the sequence item.
+      * @return The item or [[scala.None]] if the item isn't present in the sequence.
+      */
+    protected def ifContains[A](seq: Seq[A], item: A)(action: => Unit): Option[A] = {
+        if (seq.contains(item)) {
+            action
+            Some(item)
+        } else {
+            None
         }
-    }
-
-    override def hashCode: Int = {
-        id.hashCode
     }
 
     /**
@@ -33,5 +35,20 @@ abstract class Entity(val id: String = IDGenerator.newId) extends cz.payola.comm
       */
     protected def checkConstructorPostConditions() {
         checkInvariants()
+    }
+
+    def canEqual(other: Any): Boolean = {
+        other.isInstanceOf[Entity]
+    }
+
+    override def equals(other: Any): Boolean = {
+        other match {
+            case that: Entity => that.canEqual(this) && this.id == that.id
+            case _ => false
+        }
+    }
+
+    override def hashCode: Int = {
+        id.hashCode
     }
 }

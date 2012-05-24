@@ -18,14 +18,6 @@ class Analysis(protected var _name: String, protected val _owner: Option[User])
 
     type PluginInstanceBindingType = PluginInstanceBinding
 
-    protected var _isPublic = false
-
-    protected var _description = ""
-
-    protected val _pluginInstances = mutable.ArrayBuffer[PluginInstanceType]()
-
-    protected val _pluginInstanceBindings = mutable.ArrayBuffer[PluginInstanceBindingType]()
-
     /**
       * Starts evaluation of the analysis.
       * @param timeout Maximal execution time.
@@ -91,10 +83,11 @@ class Analysis(protected var _name: String, protected val _owner: Option[User])
     /**
       * Adds a new plugin instance to the analysis.
       * @param instance The plugin instance to add.
+      * @throws IllegalArgumentException if the instance can't be added to the analysis.
       */
     def addPluginInstance(instance: PluginInstanceType) {
-        require(!_pluginInstances.contains(instance), "The instance is already present in the analysis.")
-        _pluginInstances += instance
+        require(!pluginInstances.contains(instance), "The instance is already present in the analysis.")
+        storePluginInstance(instance)
     }
 
     /**
@@ -111,15 +104,12 @@ class Analysis(protected var _name: String, protected val _owner: Option[User])
       * @return The removed plugin instance.
       */
     def removePluginInstance(instance: PluginInstanceType): Option[PluginInstanceType] = {
-        val index = _pluginInstances.indexOf(instance)
-        if (index >= 0) {
-            _pluginInstances -= instance
-            _pluginInstanceBindings --= _pluginInstanceBindings.filter {binding =>
+        ifContains(pluginInstances, instance) {
+            discardPluginInstance(instance)
+            val bindingsToRemove = pluginInstanceBindings.filter { binding =>
                 binding.sourcePluginInstance == instance || binding.targetPluginInstance == instance
             }
-            Some(instance)
-        } else {
-            None
+            removeBindings(bindingsToRemove: _*)
         }
     }
 
@@ -152,13 +142,23 @@ class Analysis(protected var _name: String, protected val _owner: Option[User])
       * @param binding The plugin instance binding to add.
       */
     def addBinding(binding: PluginInstanceBindingType) {
-        require(!_pluginInstanceBindings.contains(binding), "The binding is already present in the analysis.")
-        require(_pluginInstances.contains(binding.sourcePluginInstance),
+        require(!pluginInstanceBindings.contains(binding), "The binding is already present in the analysis.")
+        require(pluginInstances.contains(binding.sourcePluginInstance),
             "The source plugin instance has to be present in the analysis.")
-        require(_pluginInstances.contains(binding.targetPluginInstance),
+        require(pluginInstances.contains(binding.targetPluginInstance),
             "The target plugin instance has to be present in the analysis.")
 
-        _pluginInstanceBindings += binding
+        storeBinding(binding)
+    }
+
+    /**
+      * Adds a new plugin instance binding to the analysis.
+      * @param sourcePluginInstance The source plugin instance.
+      * @param targetPluginInstance The target plugin instance.
+      * @param inputIndex Index of the target plugin instance input the binding is connected to.
+      */
+    def addBinding(sourcePluginInstance: PluginInstance, targetPluginInstance: PluginInstance, inputIndex: Int = 0) {
+        addBinding(new PluginInstanceBinding(sourcePluginInstance, targetPluginInstance, inputIndex))
     }
 
     /**
@@ -169,8 +169,8 @@ class Analysis(protected var _name: String, protected val _owner: Option[User])
       * @param instance The instance that would replace the binding.
       */
     def collapseBinding(binding: PluginInstanceBindingType, instance: PluginInstance) {
-        require(_pluginInstanceBindings.contains(binding), "The binding isn't present in the analysis.")
-        require(!_pluginInstances.contains(instance), "The instance is already present in the analysis.")
+        require(pluginInstanceBindings.contains(binding), "The binding isn't present in the analysis.")
+        require(!pluginInstances.contains(instance), "The instance is already present in the analysis.")
         require(binding.targetPluginInstance.plugin.inputCount == 1, "The binding target instance must have one imput.")
         require(binding.sourcePluginInstance.plugin.inputCount == instance.plugin.inputCount,
             "The binding source instance must have same number of inputs as the instance that replaces the binding.")
@@ -189,28 +189,22 @@ class Analysis(protected var _name: String, protected val _owner: Option[User])
     }
 
     /**
-      * Adds a new plugin instance binding to the analysis.
-      * @param sourcePluginInstance The source plugin instance.
-      * @param targetPluginInstance The target plugin instance.
-      * @param inputIndex Index of the target plugin instance input the binding is connected to.
-      */
-    def addBinding(sourcePluginInstance: PluginInstance, targetPluginInstance: PluginInstance, inputIndex: Int = 0) {
-        addBinding(new PluginInstanceBinding(sourcePluginInstance, targetPluginInstance, inputIndex))
-    }
-
-    /**
       * Removes the specified plugin instance binding from the analysis.
       * @param binding The plugin instance binding to be removed.
       * @return The removed plugin instance binding.
       */
     def removeBinding(binding: PluginInstanceBindingType): Option[PluginInstanceBindingType] = {
-        val index = _pluginInstanceBindings.indexOf(binding)
-        if (index >= 0) {
-            _pluginInstanceBindings -= binding
-            Some(binding)
-        } else {
-            None
+        ifContains(pluginInstanceBindings, binding) {
+            discardBinding(binding)
         }
+    }
+
+    /**
+      * Removes the specified plugin instance bindings from the analysis.
+      * @param bindings The plugin instance bindings to be removed.
+      */
+    def removeBindings(bindings: PluginInstanceBindingType*) {
+        bindings.foreach(removeBinding(_))
     }
 
     /**

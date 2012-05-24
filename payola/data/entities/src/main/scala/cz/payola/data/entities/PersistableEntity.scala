@@ -5,7 +5,7 @@ import org.squeryl.PrimitiveTypeMode._
 import collection.mutable.ArrayBuffer
 import org.squeryl.dsl.{ManyToOne, OneToMany, ManyToMany}
 
-trait PersistableEntity extends KeyedEntity[String]
+trait PersistableEntity extends cz.payola.domain.entities.Entity with KeyedEntity[String]
 {
     protected final def evaluateCollection[A](col: Query[A]): collection.Seq[A]  = {
         transaction {
@@ -50,6 +50,9 @@ trait PersistableEntity extends KeyedEntity[String]
             }
         }
     }
+
+
+    override protected def checkConstructorPostConditions() {}
 
     /*
     protected final def assign[A <: PersistableEntity](entity: A, relation: OneToMany[A]) {

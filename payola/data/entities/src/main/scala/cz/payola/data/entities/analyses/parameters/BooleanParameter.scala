@@ -1,23 +1,24 @@
 package cz.payola.data.entities.analyses.parameters
 
-import cz.payola.data.entities.analyses.{Plugin, Parameter}
+import cz.payola.data.entities.analyses.{PluginDbRepresentation, Parameter}
 import cz.payola.data.entities.{PayolaDB, PersistableEntity}
 import cz.payola.domain.entities.analyses.ParameterValue
 
 class BooleanParameter(
+    override val id: String,
     name: String,
-    defaultValue: Boolean)
-    extends cz.payola.domain.entities.analyses.parameters.BooleanParameter(name, defaultValue)
-    with PersistableEntity
+    defaultVal: Boolean)
+    extends cz.payola.domain.entities.analyses.parameters.BooleanParameter(name, defaultVal)
     with Parameter[Boolean]
 {
-    private lazy val _instances = PayolaDB.valuesOfBooleanParameters.left(this)
+    private lazy val _valuesQuery = PayolaDB.valuesOfBooleanParameters.left(this)
 
-    def instances: Seq[BooleanParameterValue] = evaluateCollection(_instances)
+    // Get, store and set default value of parameter to Database
+    val _defaultValueDb = defaultVal
 
-    override def createValue(value: Boolean): ParameterValue[Boolean] = {
-        new BooleanParameterValue(this, value)
-    }
+    override def defaultValue = _defaultValueDb
+
+    def parameterValues: Seq[BooleanParameterValue] = evaluateCollection(_valuesQuery)
 }
 
 
