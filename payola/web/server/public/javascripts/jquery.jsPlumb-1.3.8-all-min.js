@@ -7030,7 +7030,6 @@
         },
         _atts = function(o, atts) {
             for (var i in atts) {
-
                 o[i] = atts[i];
             }
         },

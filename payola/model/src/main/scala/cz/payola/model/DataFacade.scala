@@ -28,11 +28,11 @@ class DataFacade
     }
 
     def topAnalyses = {
-        List(FakeAnalysisDAO.analysis)
+        analysisDAO.getTopAnalyses()
     }
 
     def getPublicAnalysesByOwner(o: User) = {
-        List(FakeAnalysisDAO.analysis)
+        analysisDAO.getTopAnalysesByUser(o.id)
     }
 
     def getGraph(uri: String) : Graph = {
