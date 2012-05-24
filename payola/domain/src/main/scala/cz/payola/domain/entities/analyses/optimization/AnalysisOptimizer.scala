@@ -3,7 +3,6 @@ package cz.payola.domain.entities.analyses.optimization
 import cz.payola.domain.entities.Analysis
 import cz.payola.domain.entities.analyses.PluginInstance
 import cz.payola.domain.entities.analyses.plugins.query.Construct
-import collection.mutable
 import cz.payola.domain.entities.analyses.plugins.{Join, SparqlQuery, DataFetcher}
 
 object AnalysisOptimizer
@@ -19,14 +18,14 @@ object AnalysisOptimizer
       * @param analysis The analysis to optimize.
       * @return An evaluationally-equivalent optimized analysis.
       */
-    def process(analysis: Analysis): Analysis = {
-        phases.foldLeft[Analysis](cloneAnalysis(analysis))((a, phase) => phase(a))
+    def process(analysis: Analysis): OptimizedAnalysis = {
+        phases.foldLeft[OptimizedAnalysis](new OptimizedAnalysis(analysis))((a, phase) => phase(a))
     }
 
-    def mergeConstructs(analysis: Analysis): Analysis = {
+    def mergeConstructs(analysis: OptimizedAnalysis): OptimizedAnalysis = {
         def merge(instance: PluginInstance) {
             val inputBindings = analysis.pluginInstanceInputBindings(instance)
-            inputBindings.headOption.foreach {binding =>
+            inputBindings.headOption.foreach { binding =>
                 val source = binding.sourcePluginInstance
                 val target = binding.targetPluginInstance
                 if (source.plugin.isInstanceOf[Construct] && target.plugin.isInstanceOf[Construct]) {
@@ -46,7 +45,7 @@ object AnalysisOptimizer
         analysis
     }
 
-    def mergeSparqlQueryPartJoins(analysis: Analysis): Analysis = {
+    def mergeSparqlQueryPartJoins(analysis: OptimizedAnalysis): OptimizedAnalysis = {
         def merge(instance: PluginInstance) {
             analysis.pluginInstanceInputBindings(instance).foreach(b => merge(b.sourcePluginInstance))
             instance.plugin match {
@@ -55,7 +54,7 @@ object AnalysisOptimizer
                     val outputBindings = analysis.pluginInstanceOutputBindings(instance)
 
                     // Matches chains consisting af a DataFetcher and a Construct above the Join.
-                    val chains = instanceInputBindings(instance).sortBy(_.targetInputIndex).flatMap {binding =>
+                    val chains = instanceInputBindings(instance).sortBy(_.targetInputIndex).flatMap { binding =>
                         val source = binding.sourcePluginInstance
                         val sourceOfSource = instanceInputBindings(source).headOption.map(_.sourcePluginInstance)
                         sourceOfSource.map(_.plugin).flatMap {
@@ -71,22 +70,19 @@ object AnalysisOptimizer
 
                     chains.toList match {
                         case List((subjectConstruct, subjectFetcher), (objectConstruct, objectFetcher)) => {
-                            val dataFetcherParametersAreEqual = subjectFetcher.parameterValues.forall {value =>
+                            val dataFetcherParametersAreEqual = subjectFetcher.parameterValues.forall { value =>
                                 objectFetcher.getParameter(value.parameter.name).map(_ == value.value).getOrElse(false)
                             }
                             if (subjectFetcher.plugin == objectFetcher.plugin && dataFetcherParametersAreEqual) {
-                                analysis.removePluginInstances(objectFetcher)
-                                analysis.removePluginInstances(subjectConstruct.instance, objectConstruct.instance)
-                                analysis.removePluginInstances(instance)
+                                // Merge the instances.
+                                val joinInstance = new ConstructJoinPluginInstance(PluginWithInstance(join, instance),
+                                    subjectConstruct, objectConstruct)
+                                analysis.replaceInstances(joinInstance, objectFetcher, subjectConstruct.instance,
+                                    objectConstruct.instance, instance)
 
-                                val joinInstance = new ConstructJoinPluginInstance(
-                                    PluginWithInstance(join, instance),
-                                    subjectConstruct,
-                                    objectConstruct
-                                )
-                                analysis.addPluginInstance(joinInstance)
+                                // Restore the bindings.
                                 analysis.addBinding(subjectFetcher, joinInstance)
-                                outputBindings.foreach {b =>
+                                outputBindings.foreach { b =>
                                     analysis.addBinding(joinInstance, b.targetPluginInstance, b.targetInputIndex)
                                 }
                             }
@@ -102,8 +98,8 @@ object AnalysisOptimizer
         analysis
     }
 
-    def mergeDataFetchersWithQueries(analysis: Analysis): Analysis = {
-        analysis.pluginInstanceBindings.foreach{binding =>
+    def mergeDataFetchersWithQueries(analysis: OptimizedAnalysis): OptimizedAnalysis = {
+        analysis.pluginInstanceBindings.foreach { binding =>
             val source = binding.sourcePluginInstance
             val target = binding.targetPluginInstance
 
@@ -120,12 +116,5 @@ object AnalysisOptimizer
         }
 
         analysis
-    }
-
-    private def cloneAnalysis(analysis: Analysis): Analysis = {
-        val clone = new Analysis(analysis.name, analysis.owner)
-        analysis.pluginInstances.foreach(instance => clone.addPluginInstance(instance))
-        analysis.pluginInstanceBindings.foreach(binding => clone.addBinding(binding))
-        clone
     }
 }

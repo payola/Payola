@@ -22,33 +22,43 @@ class AnalysisEvaluation(private val analysis: Analysis, private val timeout: Op
     def act() {
         timer.start()
 
+        // Verify that the analysis may be evaluated.
         try {
             analysis.checkValidity()
-            val optimizedAnalysis = AnalysisOptimizer.process(analysis)
-            progress = AnalysisEvaluationProgress(Nil, Map.empty, optimizedAnalysis.pluginInstances.toList, Map.empty)
-
-            val instanceInputBindings = optimizedAnalysis.pluginInstanceInputBindings
-            def startInstanceEvaluation(instance: PluginInstance, outputProcessor: Option[Graph] => Unit) {
-                val evaluation = new InstanceEvaluation(instance, this, outputProcessor)
-                instanceEvaluations += evaluation
-                evaluation.start()
-
-                // Start the preceding plugin evaluations.
-                instanceInputBindings(instance).foreach { binding =>
-                    val instanceOutputProcessor = bindingOutputProcessor(evaluation, binding.targetInputIndex) _
-                    startInstanceEvaluation(binding.sourcePluginInstance, instanceOutputProcessor)
-                }
-            }
-
-            startInstanceEvaluation(optimizedAnalysis.outputInstance.get, analysisOutputProcessor)
         } catch {
             case throwable => finishEvaluation(Error(throwable, progress.errors))
         }
 
+        // Optimize the analysis
+        val optimizedAnalysis = AnalysisOptimizer.process(analysis)
+        val instanceInputBindings = optimizedAnalysis.pluginInstanceInputBindings
+
+        def startInstanceEvaluation(instance: PluginInstance, outputProcessor: Option[Graph] => Unit) {
+            val evaluation = new InstanceEvaluation(instance, this, outputProcessor)
+            instanceEvaluations += evaluation
+            evaluation.start()
+
+            // Start the preceding plugin evaluations.
+            instanceInputBindings(instance).foreach { binding =>
+                val instanceOutputProcessor = bindingOutputProcessor(evaluation, binding.targetInputIndex) _
+                startInstanceEvaluation(binding.sourcePluginInstance, instanceOutputProcessor)
+            }
+        }
+
+        // Start the evaluation of the analysis by starting the output plugin instance.
+        progress = AnalysisEvaluationProgress(Nil, Map.empty, optimizedAnalysis.allOriginalInstances, Map.empty)
+        startInstanceEvaluation(optimizedAnalysis.outputInstance.get, analysisOutputProcessor)
+
         loop {
             react {
-                case InstanceEvaluationProgress(i, v) => progress = progress.withChangedProgress(i, v)
-                case InstanceEvaluationError(i, t) => progress = progress.withError(i, t)
+                case InstanceEvaluationProgress(i, v) => {
+                    optimizedAnalysis.originalInstances(i).foreach { originalInstance =>
+                        progress = progress.withChangedProgress(originalInstance, v)
+                    }
+                }
+                case InstanceEvaluationError(i, t) => {
+                    progress = progress.withError(i, t)
+                }
                 case InstanceEvaluationInput(_, graph) => {
                     finishEvaluation(graph.map(g => Success(g, progress.errors)).getOrElse {
                         Error(new AnalysisException("The analysis ended with an empty result."), progress.errors)
@@ -66,14 +76,6 @@ class AnalysisEvaluation(private val analysis: Analysis, private val timeout: Op
 
     def analysisOutputProcessor(output: Option[Graph]) {
         this ! InstanceEvaluationInput(0, output)
-    }
-
-    /**
-      * Terminates all the dependent actors.
-      */
-    private def terminateDependentActors() {
-        timer ! None
-        instanceEvaluations.foreach(_ ! None)
     }
 
     /**
@@ -107,6 +109,14 @@ class AnalysisEvaluation(private val analysis: Analysis, private val timeout: Op
                 case _ =>
             }
         }
+    }
+
+    /**
+      * Terminates all the dependent actors.
+      */
+    private def terminateDependentActors() {
+        timer ! None
+        instanceEvaluations.foreach(_ ! None)
     }
 
     /**

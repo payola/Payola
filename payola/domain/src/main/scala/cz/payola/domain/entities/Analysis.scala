@@ -151,8 +151,6 @@ class Analysis(protected var _name: String, protected val _owner: Option[User])
         storeBinding(binding)
     }
 
-
-
     /**
       * Adds a new plugin instance binding to the analysis.
       * @param sourcePluginInstance The source plugin instance.
