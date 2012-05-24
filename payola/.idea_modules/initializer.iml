@@ -49,7 +49,7 @@
     <orderEntry type="library" name="org.apache.derby_derby_10.8.2.2" level="project" />
     <orderEntry type="library" scope="TEST" name="org.scalatest_scalatest_2.9.1_1.6.1" level="project" />
     <orderEntry type="module" module-name="domain" exported="" />
-    <orderEntry type="module" module-name="entities" exported="" />
+    <orderEntry type="module" module-name="data" exported="" />
   </component>
 </module>
 

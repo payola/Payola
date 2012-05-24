@@ -1,7 +1,7 @@
 package controllers
 
 import cz.payola.model.DataFacade
-import cz.payola.data.entities.PayolaDB
+import cz.payola.data.PayolaDB
 import cz.payola.data.entities.User
 import play.api.mvc.{Codec, RequestHeader}
 
