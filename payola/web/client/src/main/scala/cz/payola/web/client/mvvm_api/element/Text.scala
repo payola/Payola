@@ -14,6 +14,6 @@ import s2js.adapters.js.dom.{Element, Node}
 class Text(val value: String) extends Component
 {
     def render(parent: Element) = {
-        parent.innerHTML = value
+        parent.innerHTML = parent.innerHTML+value
     }
 }

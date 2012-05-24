@@ -199,6 +199,14 @@ class Analysis(protected var _name: String, protected val _owner: Option[User])
         }
     }
 
+    def sources = {
+        pluginInstances.diff(pluginInstanceBindings.map(b => b.targetPluginInstance))
+    }
+
+    def outputs = {
+        pluginInstances.diff(pluginInstanceBindings.map(b => b.sourcePluginInstance))
+    }
+
     /**
       * Removes the specified plugin instance bindings from the analysis.
       * @param bindings The plugin instance bindings to be removed.

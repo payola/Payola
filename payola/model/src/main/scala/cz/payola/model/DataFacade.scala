@@ -1,8 +1,8 @@
 package cz.payola.model
 
 import cz.payola.data.entities.User
-import cz.payola.data.entities.dao.{AnalysisDAO, UserDAO}
 import cz.payola.domain.rdf.Graph
+import cz.payola.data.entities.dao._
 
 class DataFacade
 {
@@ -27,8 +27,12 @@ class DataFacade
         analysisDAO.getById(id)
     }
 
+    def topAnalyses = {
+        List(FakeAnalysisDAO.analysis)
+    }
+
     def getPublicAnalysesByOwner(o: User) = {
-        analysisDAO.getPublicAnalysesByOwner(o)
+        List(FakeAnalysisDAO.analysis)
     }
 
     def getGraph(uri: String) : Graph = {
