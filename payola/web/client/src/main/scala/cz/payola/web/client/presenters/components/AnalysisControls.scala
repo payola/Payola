@@ -28,8 +28,8 @@ class AnalysisControls(analysisId: String) extends Component
         progressDiv.render(parent)
     }
 
-    a.clicked += { evt =>
-        a.addClass("disabled")
+    runBtn.clicked += { evt =>
+        runBtn.addClass("disabled")
         evaluationId = AnalysisRunner.runAnalysisById(analysisId) //TODO: prevent multiple evaluations
         schedulePolling
         false
@@ -39,20 +39,20 @@ class AnalysisControls(analysisId: String) extends Component
         window.setTimeout(pollingHandler, 500)
     }
 
-    def pollingHandler = {
+    def pollingHandler() : Unit = {
         val progress = AnalysisRunner.getAnalysisProgress(evaluationId)
         progressValueBar.setAttribute("style","width: "+progress.percent+"%")
 
         progress.evaluated.map{
-            inst => document.getElementById("inst_".inst).setAttribute("class","alert-success")
+            inst => document.getElementById("inst_"+inst).setAttribute("class","alert-success")
         }
 
-        progress.error.map{
-            inst => document.getElementById("inst_".inst).setAttribute("class","alert-error")
+        progress.errors.map{
+            inst => document.getElementById("inst_"+inst).setAttribute("class","alert-error")
         }
 
         progress.evaluated.map{
-            inst => document.getElementById("inst_".inst).setAttribute("class","alert-warning")
+            inst => document.getElementById("inst_"+inst).setAttribute("class","alert-warning")
         }
 
         if (!progress.isFinished)

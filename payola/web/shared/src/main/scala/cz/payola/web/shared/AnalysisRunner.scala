@@ -2,6 +2,7 @@ package cz.payola.web.shared
 
 import cz.payola.domain.entities.analyses.evaluation._
 import cz.payola.data.entities.dao.FakeAnalysisDAO
+import scala.collection.mutable.HashMap
 
 /**
   *
@@ -12,10 +13,10 @@ import cz.payola.data.entities.dao.FakeAnalysisDAO
 
 @remote object AnalysisRunner
 {
-    val runningEvaluations : Map[String, AnalysisEvaluation] = Map()
+    val runningEvaluations : HashMap[String, AnalysisEvaluation] = new HashMap[String, AnalysisEvaluation]
 
     def runAnalysisById(id: String) = {
-        val evaluation = new AnalysisEvaluation(FakeAnalysisDAO.analysis, 5000)
+        val evaluation = new AnalysisEvaluation(FakeAnalysisDAO.analysis, Some(5000L))
         evaluation.act()
 
         runningEvaluations += ("id", evaluation)
@@ -29,7 +30,7 @@ import cz.payola.data.entities.dao.FakeAnalysisDAO
         val progress = evaluation.getProgress
 
         val evaluated = progress.evaluatedInstances.map(i => i.id)
-        val running = progress.runningInstances.map(i => i.id)
+        val running = progress.runningInstances.map(m => m._1.id)
         val errors = progress.errors.map(tuple => tuple._1.id)
 
         if (evaluation.isFinished)
@@ -37,6 +38,6 @@ import cz.payola.data.entities.dao.FakeAnalysisDAO
             runningEvaluations -= "id"
         }
 
-        new AnalysisProgress(evaluated, running, errors, evaluation.isFinished)
+        new AnalysisProgress(evaluated, running, errors, progress.value, evaluation.isFinished)
     }
 }

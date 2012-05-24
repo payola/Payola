@@ -11,8 +11,8 @@ import s2js.adapters.js.browser.document
   * @package cz.payola.web.client.presenters
   */
 
-class Analysis(elementToDrawIn: String) extends Index(elementToDrawIn)
+class Analysis(elementToDrawIn: String, analysisId: String) extends Index(elementToDrawIn)
 {
-    val controls = new AnalysisControls
+    val controls = new AnalysisControls(analysisId)
     controls.render(document.getElementById("analysis-controls"))
 }
