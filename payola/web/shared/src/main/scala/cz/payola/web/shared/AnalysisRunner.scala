@@ -19,7 +19,7 @@ import scala.collection.mutable.HashMap
         val evaluation = new AnalysisEvaluation(FakeAnalysisDAO.analysis, Some(5000L))
         evaluation.act()
 
-        runningEvaluations += ("id", evaluation)
+        runningEvaluations.put("id",evaluation)
 
         "id"
     }
