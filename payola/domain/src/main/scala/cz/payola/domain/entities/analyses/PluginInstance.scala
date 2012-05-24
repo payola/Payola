@@ -1,32 +1,25 @@
 package cz.payola.domain.entities.analyses
 
 import scala.collection.immutable
-import cz.payola.domain.entities.Entity
 import cz.payola.domain.entities.analyses.parameters._
+import cz.payola.domain.entities._
 
-class PluginInstance(protected val _plugin: Plugin,  protected val _parameterValues: immutable.Seq[ParameterValue[_]])
-    extends Entity with cz.payola.common.entities.analyses.PluginInstance
+class PluginInstance(protected val _plugin: Plugin, protected val _parameterValues: immutable.Seq[ParameterValue[_]])
+    extends Entity with DescribedEntity with cz.payola.common.entities.analyses.PluginInstance
 {
-    // TODO cannot create DB Schema with this check
-    // require(plugin != null, "Cannot create a plugin instance of a null plugin!")
-    /*require(parameterValues.map(_.parameter).sortBy(_.name) == plugin.parameters.sortBy(_.name),
-        "The instance doesn't contain parameter instances corresponding to the plugin.") */
+    checkConstructorPostConditions()
 
     type PluginType = Plugin
 
-    override def canEqual(other: Any): Boolean = {
-        other.isInstanceOf[PluginInstance]
-    }
-
     /**
-      * Returns value of a parameter with the specified name or [[scala.None.]] if such doesn't exist.
+      * Returns value of a parameter with the specified name or [[scala.None]] if such doesn't exist.
       */
     def getParameter(parameterName: String): Option[Any] = {
         getParameterValue(parameterName).map(_.value)
     }
 
     /**
-      * Returns value of a boolean parameter with the specified name or [[scala.None.]] if such doesn't exist.
+      * Returns value of a boolean parameter with the specified name or [[scala.None]] if such doesn't exist.
       */
     def getBooleanParameter(parameterName: String): Option[Boolean] = {
         getParameter(parameterName).map {
@@ -35,7 +28,7 @@ class PluginInstance(protected val _plugin: Plugin,  protected val _parameterVal
     }
 
     /**
-      * Returns value of a float parameter with the specified name or [[scala.None.]] if such doesn't exist.
+      * Returns value of a float parameter with the specified name or [[scala.None]] if such doesn't exist.
       */
     def getFloatParameter(parameterName: String): Option[Float] = {
         getParameter(parameterName).map {
@@ -44,7 +37,7 @@ class PluginInstance(protected val _plugin: Plugin,  protected val _parameterVal
     }
 
     /**
-      * Returns value of an integer parameter with the specified name or [[scala.None.]] if such doesn't exist.
+      * Returns value of an integer parameter with the specified name or [[scala.None]] if such doesn't exist.
       */
     def getIntParameter(parameterName: String): Option[Int] = {
         getParameter(parameterName).map {
@@ -53,7 +46,7 @@ class PluginInstance(protected val _plugin: Plugin,  protected val _parameterVal
     }
 
     /**
-      * Returns value of a string parameter with the specified name or [[scala.None.]] if such doesn't exist.
+      * Returns value of a string parameter with the specified name or [[scala.None]] if such doesn't exist.
       */
     def getStringParameter(parameterName: String): Option[String] = {
         getParameter(parameterName).map {
@@ -91,6 +84,17 @@ class PluginInstance(protected val _plugin: Plugin,  protected val _parameterVal
             case _ => throw new IllegalArgumentException("The value doesn't conform to type of the parameter.")
         }
         this
+    }
+
+    override def canEqual(other: Any): Boolean = {
+        other.isInstanceOf[PluginInstance]
+    }
+
+    override protected def checkInvariants() {
+        super[Entity].checkInvariants()
+        require(plugin != null, "The plugin mustn't be null.")
+        require(parameterValues.map(_.parameter).sortBy(_.name) == plugin.parameters.sortBy(_.name),
+            "The parameter values must correspond to the plugin parameters.")
     }
 
     private def getParameterValue(parameter: Parameter[_]): Option[ParameterValue[_]] = {

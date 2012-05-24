@@ -15,8 +15,8 @@ object GraphPattern
 
 case class GraphPattern(triples: Seq[TriplePattern], optionals: Seq[GraphPattern] = Nil, filters: Seq[Filter] = Nil)
 {
-    override def toString: String = {
-        (triples.map(_.toString) ++ optionals.map("OPTIONAL { " + _ + " }") ++ filters.map(_.toString)).mkString("\n")
+    def isEmpty: Boolean = {
+        triples.isEmpty && optionals.forall(_.isEmpty) && filters.isEmpty
     }
 
     def +(pattern: GraphPattern): GraphPattern = {
@@ -28,5 +28,13 @@ case class GraphPattern(triples: Seq[TriplePattern], optionals: Seq[GraphPattern
             case Some(p) => this + p
             case None => this
         }
+    }
+
+    override def toString: String = {
+        (triples.map(_.toString) ++ optionals.map(optionalToString(_)) ++ filters.map(_.toString)).mkString("\n")
+    }
+
+    private def optionalToString(graphPattern: GraphPattern): String = {
+        if (!graphPattern.isEmpty) "OPTIONAL { " + graphPattern + " }" else ""
     }
 }

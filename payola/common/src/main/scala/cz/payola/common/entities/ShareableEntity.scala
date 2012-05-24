@@ -6,7 +6,7 @@ package cz.payola.common.entities
   */
 trait ShareableEntity extends Entity
 {
-    protected var _isPublic: Boolean
+    protected var _isPublic: Boolean = false
 
     /** Whether the entity is public. */
     def isPublic = _isPublic

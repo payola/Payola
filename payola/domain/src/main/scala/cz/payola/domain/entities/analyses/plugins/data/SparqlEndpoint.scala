@@ -32,12 +32,13 @@ sealed class SparqlEndpoint(
     def getNeighbourhood(instance: PluginInstance, nodeURI: String, distance: Int = 1): Graph = {
         require(distance > 0, "The distance has to be a positive number.")
 
-        val rootQuery = ConstructQuery(TriplePattern(Uri(nodeURI), Variable("p0"), Variable("n1")))
-        val optionalNeighboursQuery = (1 to (distance - 1)).foldRight(ConstructQuery.empty) {(i, query) =>
-            val triple = TriplePattern(Variable("n" + i), Variable("p" + i), Variable("n" + (i + 1)))
-            ConstructQuery(triple +: query.template, Some(GraphPattern(List(triple), query.pattern.toList, Nil)))
+        val rootTriplePattern = TriplePattern(Uri(nodeURI), Variable("p0"), Variable("n1"))
+        val neighbourTriplePatterns = (1 to (distance - 1)).map { i =>
+            TriplePattern(Variable("n" + i), Variable("p" + i), Variable("n" + (i + 1)))
         }
+        val triplePatterns = rootTriplePattern +: neighbourTriplePatterns
+        val graphPattern = triplePatterns.foldRight(GraphPattern.empty)((t, g) => GraphPattern(List(t), List(g)))
 
-        executeQuery(instance, (rootQuery + optionalNeighboursQuery).toString)
+        executeQuery(instance, ConstructQuery(triplePatterns, Some(graphPattern)).toString)
     }
 }
