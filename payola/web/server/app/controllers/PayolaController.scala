@@ -17,6 +17,7 @@ class PayolaController extends Controller
     val df = new DataFacade
     PayolaDB.connect()
     PayolaDB.createSchema()
+    //PayolaDB.createInitialData()
 
     def getUser(request: RequestHeader) : Option[User] = {
         val email = request.session.get("email")

@@ -5,6 +5,7 @@ import cz.payola.data.entities.{PayolaDB, Analysis, User}
 import cz.payola.domain.entities.analyses.plugins.data.SparqlEndpoint
 import cz.payola.domain.entities.analyses.plugins.query.{Selection, Projection, Typed}
 import cz.payola.domain.entities.analyses.plugins.Join
+import jena.query
 
 class AnalysisDAO extends EntityDAO[Analysis](PayolaDB.analyses)
 {
@@ -16,6 +17,7 @@ class AnalysisDAO extends EntityDAO[Analysis](PayolaDB.analyses)
 
     def getTopAnalysesByUser(userId: String, count: Int = 10): collection.Seq[Analysis] = {
         require(count >= 0, "Count must be >= 0")
+
         // Get by all users or just by specified one
         val query = table.where(a => userId === EVERY_USER or a.ownerId.getOrElse("").toString === userId)
 

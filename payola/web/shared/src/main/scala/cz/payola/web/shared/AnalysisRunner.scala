@@ -1,26 +1,25 @@
 package cz.payola.web.shared
 
 import cz.payola.domain.entities.analyses.evaluation._
-import cz.payola.data.entities.dao.FakeAnalysisDAO
+import cz.payola.data.entities.dao.AnalysisDAO
 import scala.collection.mutable.HashMap
 
-/**
-  *
-  * @author jirihelmich
-  * @created 5/24/12 1:44 AM
-  * @package cz.payola.web.shared
-  */
-
-@remote object AnalysisRunner
+@remote
+object AnalysisRunner
 {
     val runningEvaluations : HashMap[String, AnalysisEvaluation] = new HashMap[String, AnalysisEvaluation]
 
     def runAnalysisById(id: String) = {
+        //TODO: Get AnalysisDAO from datafacade! (JH)
+        val analysisOpt = new AnalysisDAO().getById(id)
 
-        val evaluation = FakeAnalysisDAO.analysis.evaluate()
-        runningEvaluations.put("id",evaluation)
+        if (analysisOpt.isEmpty) {
+            throw new EntityNotFoundException
+        }
 
-        "id"
+        runningEvaluations.put(id, analysisOpt.get.evaluate())
+
+        id
     }
 
     def getAnalysisProgress(evaluationId: String) : AnalysisProgress = {
@@ -34,7 +33,7 @@ import scala.collection.mutable.HashMap
 
         if (evaluation.isFinished)
         {
-            runningEvaluations -= "id"
+            runningEvaluations -= evaluationId
         }
 
         val graph = evaluation.getResult.flatMap{

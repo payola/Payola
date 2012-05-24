@@ -226,7 +226,7 @@ object PayolaBuild extends Build
     lazy val webProject = Project(
         "web", file("web"), settings = payolaSettings
     ).aggregate(
-        webSharedProject, webClientProject, webServerProject
+        webSharedProject, webClientProject, webInitializerProject, webServerProject
     )
 
     lazy val webSharedProject = ScalaToJsProject(
@@ -239,6 +239,12 @@ object PayolaBuild extends Build
         "client", file("web/client"), WebSettings.javaScriptsDir, payolaSettings
     ).dependsOn(
         commonProject, webSharedProject
+    )
+
+    lazy val webInitializerProject = Project(
+        "initializer", file("web/initializer"), settings = payolaSettings
+    ).dependsOn(
+        domainProject, dataEntitiesProject
     )
 
     lazy val webServerProject = PlayProject(

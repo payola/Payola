@@ -24,45 +24,35 @@ class User(name: String, pwd: String, email: String)
         evaluateCollection(_memberGroupsQuery)
     }
 
-    override def addOwnedAnalysis(a: AnalysisType) {
-        super.addOwnedAnalysis(
-            a match {
-                // Just associate Analysis with user and persist
-                case analysis: Analysis => {
-                    associate(analysis, _ownedAnalysesQuery);
+    override protected def storeOwnedAnalysis(analysis: User#AnalysisType) {
+        analysis match {
+            // Just associate Analysis with user and persist
+            case a: Analysis => associate(a, _ownedAnalysesQuery)
 
-                    analysis
-                }
-                // "Convert" to data.Analysis, associate with user and persist
-                case analysis: cz.payola.domain.entities.Analysis => {
-                    // TODO: maybe also "converting" parameter values
-                    val an = new Analysis(analysis.name, None)
-                    associate(an, _ownedAnalysesQuery)
-
-                    an
-                }
-            }
-        )
+            // "Convert" to data.Analysis, associate with user and persist
+            case a: cz.payola.domain.entities.Analysis => associate(new Analysis(a.name, None), _ownedAnalysesQuery)
+        }
     }
 
-    override def addOwnedGroup(g: GroupType) = {
-        super.addOwnedGroup(
-            g match {
-                // Just associate Group with user and persist
-                case group: Group => {
-                    associate(group, _ownedGroupsQuery);
+    //TODO: override protected def discardOwnedAnalysis(analysis: User#AnalysisType) {}
 
-                    group
-                }
-                // "Convert" to data.Group, associate with user and persist
-                case group: cz.payola.domain.entities.Group => {
-                    // TODO: maybe also "converting" parameter values
-                    val gr = new Group(group.name, this)
-                    associate(gr, _ownedGroupsQuery)
+    override protected def storeOwnedGroup(group: User#GroupType)  {
+        group match {
+            // Just associate Group with user and persist
+            case g: Group => associate(g, _ownedGroupsQuery);
 
-                    gr
-                }
-            }
-        )
+            // "Convert" to data.Group, associate with user and persist
+            case g: cz.payola.domain.entities.Group => associate(new Group(g.name, this), _ownedGroupsQuery)
+        }
     }
+
+    //TODO: override protected def discardOwnedGroup(group: User#GroupType)  {}
+
+    //TODO: override protected def storeOwnedDataSource(source: User#DataSourceType) = null
+
+    //TODO: override protected def discardOwnedDataSource(source: User#DataSourceType) = null
+
+    //TODO: override protected def storePrivilege(privilege: User#PrivilegeType) = null
+
+    //TODO: override protected def discardPrivilege(privilege: User#PrivilegeType) = null
 }

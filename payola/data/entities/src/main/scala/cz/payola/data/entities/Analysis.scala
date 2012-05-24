@@ -23,27 +23,58 @@ class Analysis(name: String, owner: Option[User])
         evaluateCollection(_pluginInstancesBindingsQuery)
     }
 
-    override def addPluginInstance(instance: PluginInstanceType) {
-        super.addPluginInstance(
-            instance match {
-                // Just associate binding with analysis and persist
-                case i: PluginInstance => {
-                    associate(i, _pluginInstancesQuery);
+    override protected def storePluginInstance(instance: Analysis#PluginInstanceType) {
+        instance match {
+            // Just associate binding with analysis and persist
+            case i: PluginInstance => associate(i, _pluginInstancesQuery)
 
-                    i
-                }
-                // "Convert" to data.Binding, associate with analysis and persist
-                case i: cz.payola.domain.entities.analyses.PluginInstance => {
-                    val inst = new PluginInstance(i.id, i.plugin, convertParamValues(i.parameterValues), i.description)
-                    associate(inst, _pluginInstancesQuery)
+            // "Convert" to data.PluginInstance, associate with analysis and persist
+            case i: cz.payola.domain.entities.analyses.PluginInstance => {
+                val inst = new PluginInstance(i.id, i.plugin, convertParamValues(i.parameterValues), i.description)
+                associate(inst, _pluginInstancesQuery)
 
-                    // Now assign parameter values passed as parameter to PluginInstance
-                    inst.associateParameterValues()
-                    
-                    inst
-                }
+                // Now assign parameter values passed as parameter to PluginInstance
+                inst.associateParameterValues()
             }
-        )
+        }
+    }
+
+    override protected def discardPluginInstance(instance: Analysis#PluginInstanceType) {
+        if (instance.isInstanceOf[PluginInstance]) {
+            instance.asInstanceOf[PluginInstance].analysisId = None
+        }
+    }
+
+    override protected def storeBinding(binding: Analysis#PluginInstanceBindingType) {
+        binding match {
+            // Just associate binding with analysis and persist
+            case b: PluginInstanceBinding => associate(b, _pluginInstancesBindingsQuery)
+
+            // "Convert" to data.Binding, associate with analysis and persist
+            case b: cz.payola.domain.entities.analyses.PluginInstanceBinding => {
+                // "Convert" source and target plugin parameterValues of binding in order to persist them
+                val source = b.sourcePluginInstance match {
+                    case i: PluginInstance => i
+                    case i: cz.payola.domain.entities.analyses.PluginInstance
+                        => new PluginInstance(i.id, i.plugin, convertParamValues(i.parameterValues), i.description)
+                }
+                val target = b.targetPluginInstance match {
+                    case i: PluginInstance => i
+                    case i: cz.payola.domain.entities.analyses.PluginInstance =>
+                        new PluginInstance(i.id, i.plugin, convertParamValues(i.parameterValues), i.description)
+                }
+
+                // "Convert" binding, associate with analysis and persist
+                val bin = new PluginInstanceBinding(source, target, b.targetInputIndex)
+                associate(bin, _pluginInstancesBindingsQuery)
+            }
+        }
+    }
+
+    override protected def discardBinding(binding: Analysis#PluginInstanceBindingType) {
+        if (binding.isInstanceOf[PluginInstanceBinding]) {
+                binding.asInstanceOf[PluginInstanceBinding].analysisId = None
+        }
     }
 
     private def convertParamValues(values: immutable.Seq[DomainParameterValueType]): immutable.Seq[ParameterValue[_]] = {
@@ -79,61 +110,5 @@ class Analysis(name: String, owner: Option[User])
                             s.value
                         )
         }
-    }
-
-    override def removePluginInstance(instance: PluginInstanceType): Option[PluginInstanceType] = {
-        super.removePluginInstance(instance)
-        
-        if (instance.isInstanceOf[PluginInstance]) {
-            instance.asInstanceOf[PluginInstance].analysisId = None
-            Some(instance)
-        }
-        else {
-            None
-        }
-    }
-
-    override def addBinding(binding: PluginInstanceBindingType) {
-        super.addBinding(
-            binding match {
-                // Just associate binding with analysis and persist
-                case b: PluginInstanceBinding => {
-                    associate(b, _pluginInstancesBindingsQuery)
-                    b
-                }
-                // "Convert" to data.Binding, associate with analysis and persist
-                case b: cz.payola.domain.entities.analyses.PluginInstanceBinding => {
-                    // "Convert" source and target plugin parameterValues of binding in order to persist them
-                    val source = b.sourcePluginInstance match {
-                        case i: PluginInstance => i
-                        case i: cz.payola.domain.entities.analyses.PluginInstance
-                            => new PluginInstance(i.id, i.plugin, convertParamValues(i.parameterValues), i.description)
-                    }
-                    val target = b.targetPluginInstance match {
-                        case i: PluginInstance => i
-                        case i: cz.payola.domain.entities.analyses.PluginInstance =>
-                            new PluginInstance(i.id, i.plugin, convertParamValues(i.parameterValues), i.description)
-                    }
-
-                    // "Convert" binding, associate with analysis and persist
-                    val bin = new PluginInstanceBinding(source, target, b.targetInputIndex)
-                    associate(bin, _pluginInstancesBindingsQuery)
-
-                    bin
-                }
-            }
-        )
-    }
-    override def removeBinding(binding: PluginInstanceBindingType): Option[PluginInstanceBindingType] = {
-        super.removeBinding(binding)
-
-        if (binding.isInstanceOf[PluginInstanceBinding]) {
-            binding.asInstanceOf[PluginInstanceBinding].analysisId = None
-            Some(binding)
-        }
-        else {
-            None
-        }
-
     }
 }
