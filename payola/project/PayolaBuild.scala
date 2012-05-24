@@ -197,13 +197,7 @@ object PayolaBuild extends Build
     )
 
     lazy val dataProject = Project(
-        "data", file("data"), settings = payolaSettings
-    ).aggregate(
-        dataEntitiesProject
-    )
-
-    lazy val dataEntitiesProject = Project(
-        "entities", file("data/entities"),
+        "data", file("data"),
         settings = payolaSettings ++ Seq(
             libraryDependencies ++= Seq(
                 "org.squeryl" % "squeryl_2.9.0-1" % "0.9.5",
@@ -220,7 +214,7 @@ object PayolaBuild extends Build
     lazy val modelProject = Project(
         "model", file("model"), settings = payolaSettings
     ).dependsOn(
-        commonProject, domainProject, dataEntitiesProject
+        commonProject, domainProject, dataProject
     )
 
     lazy val webProject = Project(
@@ -244,7 +238,7 @@ object PayolaBuild extends Build
     lazy val webInitializerProject = Project(
         "initializer", file("web/initializer"), settings = payolaSettings
     ).dependsOn(
-        domainProject, dataEntitiesProject
+        domainProject, dataProject
     )
 
     lazy val webServerProject = PlayProject(

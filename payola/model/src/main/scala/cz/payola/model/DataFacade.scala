@@ -2,7 +2,7 @@ package cz.payola.model
 
 import cz.payola.data.entities.User
 import cz.payola.domain.rdf.Graph
-import cz.payola.data.entities.dao._
+import cz.payola.data.dao._
 
 class DataFacade
 {
@@ -17,7 +17,7 @@ class DataFacade
         userDAO.getUserByUsername(username)
     }
 
-    def register(username: String, password: String): Unit = {
+    def register(username: String, password: String) {
         val u = new User(username, cryptPassword(password), username)
 
         userDAO.persist(u)

@@ -1,7 +1,7 @@
 package cz.payola.web.shared
 
 import cz.payola.domain.entities.analyses.evaluation._
-import cz.payola.data.entities.dao.AnalysisDAO
+import cz.payola.data.dao.AnalysisDAO
 import scala.collection.mutable.HashMap
 
 @remote
