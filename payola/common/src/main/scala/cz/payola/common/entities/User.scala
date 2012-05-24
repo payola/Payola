@@ -21,17 +21,17 @@ trait User extends NamedEntity
     /** Type of the privileges. */
     type PrivilegeType <: Privilege[_]
 
-    protected var _email: String
+    protected var _email: String = ""
 
-    protected var _password: String
+    protected var _password: String = ""
 
-    protected val _ownedGroups: mutable.Seq[GroupType]
+    protected val _ownedGroups = mutable.ArrayBuffer[GroupType]()
 
-    protected val _ownedAnalyses: mutable.Seq[AnalysisType]
+    protected val _ownedAnalyses = mutable.ArrayBuffer[AnalysisType]()
 
-    protected val _ownedDataSources: mutable.Seq[DataSourceType]
+    protected val _ownedDataSources = mutable.ArrayBuffer[DataSourceType]()
 
-    protected val _privileges: mutable.Seq[PrivilegeType]
+    protected val _privileges = mutable.ArrayBuffer[PrivilegeType]()
 
     /** Email of the user. */
     def email = _email
@@ -66,4 +66,68 @@ trait User extends NamedEntity
 
     /** Privileges of the user. */
     def privileges: Seq[PrivilegeType] = _privileges
+
+    /**
+      * Stores the specified analysis to the users owned analyses.
+      * @param analysis The analysis to store.
+      */
+    protected def storeOwnedAnalysis(analysis: AnalysisType) {
+        _ownedAnalyses += analysis
+    }
+
+    /**
+      * Discards the specified analysis from the users owned analyses. Complementary operation to store.
+      * @param analysis The analysis to discard.
+      */
+    protected def discardOwnedAnalysis(analysis: AnalysisType) {
+        _ownedAnalyses -= analysis
+    }
+
+    /**
+      * Stores the specified group to the users owned groups.
+      * @param group The group to store.
+      */
+    protected def storeOwnedGroup(group: GroupType) {
+        _ownedGroups += group
+    }
+
+    /**
+      * Discards the specified group from the users owned groups. Complementary operation to store.
+      * @param group The group to discard.
+      */
+    protected def discardOwnedGroup(group: GroupType) {
+        _ownedGroups -= group
+    }
+
+    /**
+      * Stores the specified data source to the users owned data sources.
+      * @param source The data source to store.
+      */
+    protected def storeOwnedDataSource(source: DataSourceType) {
+        _ownedDataSources += source
+    }
+
+    /**
+      * Discards the specified data source from the users owned data sources. Complementary operation to store.
+      * @param source The data source to discard.
+      */
+    protected def discardOwnedDataSource(source: DataSourceType) {
+        _ownedDataSources -= source
+    }
+
+    /**
+      * Stores the specified privileges to the users.
+      * @param privilege The privilege to store.
+      */
+    protected def storePrivilege(privilege: PrivilegeType) {
+        _privileges += privilege
+    }
+
+    /**
+      * Discards the privileges from the user. Complementary operation to store.
+      * @param privilege The privilege to discard.
+      */
+    protected def discardPrivilege(privilege: PrivilegeType) {
+        _privileges -= privilege
+    }
 }

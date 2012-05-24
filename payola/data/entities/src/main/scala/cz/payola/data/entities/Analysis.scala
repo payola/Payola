@@ -99,7 +99,6 @@ class Analysis(name: String, owner: Option[User])
                 // Just associate binding with analysis and persist
                 case b: PluginInstanceBinding => {
                     associate(b, _pluginInstancesBindingsQuery)
-
                     b
                 }
                 // "Convert" to data.Binding, associate with analysis and persist

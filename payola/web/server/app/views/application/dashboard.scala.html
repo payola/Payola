@@ -1,4 +1,4 @@
-@(user: Option[cz.payola.data.entities.User])
+@(user: Option[cz.payola.data.entities.User], topAnalyses: Seq[cz.payola.domain.entities.Analysis])
 
 @main(user, "Dashboard") {
     <div class="container-fluid">
@@ -15,7 +15,9 @@
                 <div class="span4">
                     <h2>Top analyses</h2>
                     <ul>
-                        <li><a href="@routes.Analysis.detail("a")">Fake analysis 1</a></li>
+                        @topAnalyses.map{a =>
+                            <li><a href="@routes.Analysis.detail(a.id)">@a.name</a></li>
+                        }
                     </ul>
                     <p><a class="btn" href="#">View all &raquo;</a></p>
                 </div><!--/span-->

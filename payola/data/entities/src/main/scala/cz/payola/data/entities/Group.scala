@@ -34,11 +34,10 @@ class Group(
         )
     }
 
-    override def removeMember(u: UserType) {
-        super.removeMember(u)
-
-        if (u.isInstanceOf[User]) {
-            dissociate(u.asInstanceOf[User], _groupMembersQuery)
+    override protected def discardMember(user: UserType) {
+        user match {
+            case u: User => dissociate(u, _groupMembersQuery)
+            case _ =>
         }
     }
 }

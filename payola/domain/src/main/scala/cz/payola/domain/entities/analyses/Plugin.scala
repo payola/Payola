@@ -21,8 +21,6 @@ abstract class Plugin(
 
     type ParameterValueType = ParameterValue[_]
 
-    protected var _isPublic = false
-
     /**
       * Returns a new instance of the plugin with all parameter instances set to default values.
       */

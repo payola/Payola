@@ -24,8 +24,8 @@ class User(name: String, pwd: String, email: String)
         evaluateCollection(_memberGroupsQuery)
     }
 
-    override def addAnalysis(a: AnalysisType) {
-        super.addAnalysis(
+    override def addOwnedAnalysis(a: AnalysisType) {
+        super.addOwnedAnalysis(
             a match {
                 // Just associate Analysis with user and persist
                 case analysis: Analysis => {

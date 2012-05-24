@@ -26,9 +26,9 @@ object Application extends PayolaController with Secured
     }
 
     def dashboard = IsAuthenticatedWithFallback ({ username => rh =>
-        Ok(views.html.application.dashboard(getUser(rh)))
+        Ok(views.html.application.dashboard(getUser(rh), topAnalyses = df.topAnalyses))
     }, {  _ =>
-        Ok(views.html.application.dashboard(None))
+        Ok(views.html.application.dashboard(None, topAnalyses = df.topAnalyses))
     })
 
     // -- Authentication
