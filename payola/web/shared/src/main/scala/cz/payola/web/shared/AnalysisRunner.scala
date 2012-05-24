@@ -16,9 +16,8 @@ import scala.collection.mutable.HashMap
     val runningEvaluations : HashMap[String, AnalysisEvaluation] = new HashMap[String, AnalysisEvaluation]
 
     def runAnalysisById(id: String) = {
-        val evaluation = new AnalysisEvaluation(FakeAnalysisDAO.analysis, Some(5000L))
-        evaluation.act()
 
+        val evaluation = FakeAnalysisDAO.analysis.evaluate()
         runningEvaluations.put("id",evaluation)
 
         "id"
@@ -30,14 +29,24 @@ import scala.collection.mutable.HashMap
         val progress = evaluation.getProgress
 
         val evaluated = progress.evaluatedInstances.map(i => i.id)
-        val running = progress.runningInstances.map(m => m._1.id)
-        val errors = progress.errors.map(tuple => tuple._1.id)
+        val running = progress.runningInstances.map(m => m._1.id).toList
+        val errors = progress.errors.map(tuple => tuple._1.id).toList
 
         if (evaluation.isFinished)
         {
             runningEvaluations -= "id"
         }
 
-        new AnalysisProgress(evaluated, running, errors, progress.value, evaluation.isFinished)
+        val graph = evaluation.getResult.isDefined match {
+            case true =>
+                val res = evaluation.getResult.get
+                res match {
+                    case r: Success => Some(r.outputGraph)
+                    case _ => None
+                }
+            case false => None
+        }
+
+        new AnalysisProgress(evaluated, running, errors, progress.value, evaluation.isFinished, graph)
     }
 }

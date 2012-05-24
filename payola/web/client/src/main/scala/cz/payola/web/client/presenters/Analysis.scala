@@ -15,4 +15,12 @@ class Analysis(elementToDrawIn: String, analysisId: String) extends Index(elemen
 {
     val controls = new AnalysisControls(analysisId)
     controls.render(document.getElementById("analysis-controls"))
+
+    controls.analysisEvaluated += {
+        evt =>
+            graph = evt.graph
+            changePluginByNumber(0)
+            //switchTabs
+            false
+    }
 }
