@@ -1,11 +1,13 @@
-package cz.payola.data.entities
+package cz.payola.web.initializer
 
 import cz.payola.domain.entities.analyses.plugins.data.SparqlEndpoint
 import cz.payola.domain.entities.analyses.plugins.query._
 import cz.payola.domain.entities.analyses.plugins._
 import cz.payola.data.entities.dao._
+import cz.payola.data.entities._
 
-object DatabaseInitializer extends App {
+object DatabaseInitializer extends App
+{
     // Connect to DB and (re)created DB schema
     PayolaDB.connect()
     PayolaDB.createSchema()
@@ -43,7 +45,8 @@ object DatabaseInitializer extends App {
             pluginDao.persist(p)
         }
 
-        val citiesFetcher = sparqlEndpointPlugin.createInstance().setParameter("EndpointURL", "http://dbpedia.org/sparql")
+        val citiesFetcher = sparqlEndpointPlugin.createInstance()
+            .setParameter("EndpointURL", "http://dbpedia.org/sparql")
         val citiesTyped = typedPlugin.createInstance().setParameter("TypeURI", "http://dbpedia.org/ontology/City")
         val citiesProjection = projectionPlugin.createInstance().setParameter("PropertyURIs", List(
             "http://dbpedia.org/ontology/populationDensity", "http://dbpedia.org/ontology/populationTotal"
@@ -60,7 +63,8 @@ object DatabaseInitializer extends App {
         analysis.addBinding(citiesTyped, citiesProjection)
         analysis.addBinding(citiesProjection, citiesSelection)
 
-        val countriesFetcher = sparqlEndpointPlugin.createInstance().setParameter("EndpointURL", "http://dbpedia.org/sparql")
+        val countriesFetcher = sparqlEndpointPlugin.createInstance()
+            .setParameter("EndpointURL", "http://dbpedia.org/sparql")
         val countriesTyped = typedPlugin.createInstance().setParameter("TypeURI", "http://dbpedia.org/ontology/Country")
         val countriesProjection = projectionPlugin.createInstance().setParameter("PropertyURIs", List(
             "http://dbpedia.org/ontology/areaTotal"
