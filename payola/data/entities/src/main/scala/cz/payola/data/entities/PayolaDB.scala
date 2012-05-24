@@ -238,6 +238,10 @@ object PayolaDB extends Schema
         }
     }
 
+    def createInitialData() {
+        TestObject.testAnalysis()
+    }
+
     private def defineForeignKeyPolicy() {
         // When a PluginDbRepresentation is deleted, all of the its instances will get deleted :
         pluginsPluginInstances.foreignKeyDeclaration.constrainReference(onDelete cascade)
