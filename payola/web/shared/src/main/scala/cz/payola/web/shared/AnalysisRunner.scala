@@ -37,14 +37,9 @@ import scala.collection.mutable.HashMap
             runningEvaluations -= "id"
         }
 
-        val graph = evaluation.getResult.isDefined match {
-            case true =>
-                val res = evaluation.getResult.get
-                res match {
-                    case r: Success => Some(r.outputGraph)
-                    case _ => None
-                }
-            case false => None
+        val graph = evaluation.getResult.flatMap{
+            case r: Success => Some(r.outputGraph)
+            case _ => None
         }
 
         new AnalysisProgress(evaluated, running, errors, progress.value, evaluation.isFinished, graph)
