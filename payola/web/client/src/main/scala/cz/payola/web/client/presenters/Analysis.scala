@@ -19,7 +19,7 @@ class Analysis(elementToDrawIn: String, analysisId: String) extends Index(elemen
     controls.analysisEvaluated += {
         evt =>
             graph = evt.graph
-            changePluginByNumber(0)
+            changePlugin(plugins.head)
             //switchTabs
             false
     }

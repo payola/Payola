@@ -1,28 +1,29 @@
 package cz.payola.web.client.views.plugins.visual.graph
 
 import s2js.adapters.js.dom.CanvasRenderingContext2D
-import cz.payola.web.client.views.plugins.visual.{SetupLoader, Vector, Color, Point}
-import s2js.adapters.js.browser.window;
+import cz.payola.web.client.views.plugins.visual.{Vector, Color, Point}
+import cz.payola.web.client.views.plugins.visual.settings.TextSettingsModel
+;
 
 /**
   * Graphical representation of textual data in the drawn graph.
   * @param data that are visualised (by toString function of this object)
   */
-case class InformationView(data: Any) extends View {
+class InformationView(data: Any, val settings: TextSettingsModel) extends View {
     /**
       * Default color of text.
       */
-    private var textColor = new Color(50, 50, 50, 1)
+    //private var textColor = new Color(50, 50, 50, 1)
 
     /**
       * Default color of background behind text.
       */
-    private var backgroundColor = new Color(255, 255, 255, 0.5)
+    //private var backgroundColor = new Color(255, 255, 255, 0.5)
 
     /**
       * Default width of line (used in background drawing).
       */
-    private val lineWidth: Double = 1
+    //private val lineWidth: Double = 1
 
     private var textAlpha: Double = 1
 
@@ -31,6 +32,10 @@ case class InformationView(data: Any) extends View {
       * see-through circle.
       */
     private var selected = false
+
+    def isSelected: Boolean = {
+        selected
+    }
 
     def setTextVisibility(newAlpha: Double) {
         textAlpha = newAlpha
@@ -43,22 +48,20 @@ case class InformationView(data: Any) extends View {
         selected = true
     }
 
-    def draw(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point]) {
+    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
 
-        drawQuick(context, color, position)
+        drawQuick(context, color, positionCorrection)
     }
 
-    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point]) {
+    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
 
         val colorToUse = if(color.isDefined) {
             Color(color.get.red, color.get.green, color.get.blue, textAlpha)
         } else {
-            Color(textColor.red, textColor.green, textColor.blue, textAlpha)
+            Color(settings.color.red, settings.color.green, settings.color.blue, textAlpha)
         }
 
-        if(position != None) {
-            performDrawing(context, colorToUse, position.get)
-        }
+        performDrawing(context, colorToUse, Point(positionCorrection.x, positionCorrection.y))
 
         selected = false
     }
@@ -73,10 +76,10 @@ case class InformationView(data: Any) extends View {
         if(selected) {
             val textWidth = context.measureText(data.toString).width
             drawRoundedRectangle(context, position + Vector(-textWidth/2, -15), Vector(textWidth, 20), 4)
-            fillCurrentSpace(context, backgroundColor)
+            fillCurrentSpace(context, settings.colorBackground)
             //todo how come, that the measureText returns different size on the first run??
         }
 
-        drawText(context, data.toString, position, color, "12px Sans", "center")
+        drawText(context, data.toString, position, settings.color, "12px Sans", "center")
     }
 }

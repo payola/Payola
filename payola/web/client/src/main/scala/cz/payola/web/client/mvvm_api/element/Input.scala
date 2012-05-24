@@ -3,10 +3,9 @@ package cz.payola.web.client.mvvm_api.element
 import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom
 import cz.payola.web.client.mvvm_api.Component
-import collection.mutable.ArrayBuffer
-import dom.{Element, Node}
-import s2js.adapters.js.browser.window
+import dom.Element
 import cz.payola.web.client.events._
+import s2js.adapters.js.browser.window
 
 /**
  *
@@ -15,8 +14,9 @@ import cz.payola.web.client.events._
  * @package cz.payola.web.client.mvvm_api.element
  */
 
-class Input(val name: String, val value: String, val addClass: String = "") extends Component
-{
+class Input(val name: String, val value: String, val title: Option[String], val addClass: String = "")
+    extends Component {
+
     //require(document.getElementById(name) == null)
 
     val changed = new ChangedEvent[Input]
@@ -28,10 +28,13 @@ class Input(val name: String, val value: String, val addClass: String = "") exte
     field.setAttribute("id",name)
     field.setAttribute("type","text")
     field.setAttribute("class", addClass)
+    if(title.isDefined) {
+        field.setAttribute("title", title.get)
+    }
     field.value = value
 
-    field.onkeyup = {
-        event => changed.trigger(new ChangedEventArgs(this))
+    field.onkeyup = { event =>
+        changed.trigger(new ChangedEventArgs(this))
     }
 
     field.onclick = {

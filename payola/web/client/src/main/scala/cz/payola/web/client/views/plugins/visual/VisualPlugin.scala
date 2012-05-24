@@ -1,15 +1,17 @@
 package cz.payola.web.client.views.plugins.visual
 
 import animation.Animation
-import components.visualsetup.VisualSetup
 import cz.payola.web.client.views.plugins.Plugin
 import graph.{InformationView, VertexView, GraphView}
 import s2js.adapters.js.dom.Element
-import s2js.adapters.goog.events._
-import cz.payola.common.rdf.Graph
-import s2js.adapters.js.browser.document
-import s2js.adapters.goog._
 import collection.mutable.ListBuffer
+import settings.components.visualsetup.VisualSetup
+import s2js.adapters.js.browser.document
+import cz.payola.web.client.mvvm_api.element.CanvasPack
+import cz.payola.web.shared.GraphFetcher
+import cz.payola.web.client.events.{DoubleClickedEventArgs, EventArgs, DraggedEventArgs, MouseDownEventArgs}
+import cz.payola.common.rdf.{IdentifiedVertex, LiteralVertex, Graph}
+import s2js.adapters.js.browser.window
 
 /**
   * Representation of visual based output drawing plugin
@@ -20,7 +22,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
     /**
       * Variable helping during movement of vertices. Contains position where the movement of a vertex tarted.
       */
-    private var moveStart: Option[Point] = None
+    private var moveStart: Point = Point(0, 0)
 
     /**
       * Contained graph in visualisation packing.
@@ -35,9 +37,21 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
 
         graphView = Some(new GraphView(container, settings))
 
-        listen[BrowserEvent](graphView.get.controlsLayer.canvas, EventType.MOUSEDOWN, onMouseDown _)
-        listen[BrowserEvent](graphView.get.controlsLayer.canvas, EventType.MOUSEMOVE, onMouseMove _)
-        listen[BrowserEvent](graphView.get.controlsLayer.canvas, EventType.MOUSEUP, onMouseUp _)
+        graphView.get.canvasPack.mouseDown += { event =>
+            moveStart = getPosition(event)
+            onMouseDown(event)
+            false
+        }
+
+        graphView.get.canvasPack.mouseDragged += { event => //vertices move
+            onMouseDrag(event)
+            false
+        }
+
+        graphView.get.canvasPack.mouseDblClicked += { event => //update graph
+            onMouseDoubleClick(event)
+            false
+        }
     }
     
     def update(graph: Graph) {
@@ -48,7 +62,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
         if(graphView.isDefined) {
             graphView.get.clean()
             graphView = None
-            moveStart = None
+            moveStart = Point(0, 0)
         }
     }
 
@@ -70,17 +84,19 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
         }
     }
 
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //mouse event handler routines///////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
       * Description of mouse-button-down event. Is called from the layer (canvas) binded to it in the initialization.
       * @param event
       */
-    private def onMouseDown(event: BrowserEvent) {
+    private def onMouseDown(event: MouseDownEventArgs[CanvasPack]) {
 
         val position = getPosition(event)
-
-        var resultedAnimation: Option[Animation[InformationView]] = None
-
+        var resultedAnimation: Option[Animation[ListBuffer[InformationView]]] = None
         val vertex = graphView.get.getTouchedVertex(position)
+
 
         if (vertex.isDefined) { // Mouse down near a vertex.
             if (event.shiftKey) { //change selection of the pressed one
@@ -100,7 +116,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
                 if (!vertex.get.selected) {
                     graphView.get.deselectAll()
                 }
-                moveStart = Some(position)
+                moveStart = position
                 if(graphView.get.selectVertex(vertex.get)) {
                     val toAnimate = ListBuffer[InformationView]()
                     if(vertex.get.information.isDefined) {
@@ -114,7 +130,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
                 }
             }
 
-        } else { // Mouse down somewhere between-vertex space.
+        } else { // Mouse down somewhere in between-vertex space.
             if (!event.shiftKey) { //deselect all
                 graphView.get.deselectAll()
                 redrawSelection()
@@ -144,41 +160,45 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
 
     /**
       * Description of mouse-move event. Is called from the layer (canvas) binded to it in the initialization.
-      * @param event
+      * @param eventArgs
       */
-    private def onMouseMove(event: BrowserEvent) {
-        if (moveStart.isDefined) { //mouse drag
-            Animation.clearCurrentTimeout()
-            val end = getPosition(event)
-            val difference = end - moveStart.get
+    private def onMouseDrag(eventArgs: DraggedEventArgs[CanvasPack]) {
+        Animation.clearCurrentTimeout()
+        val end = getPosition(eventArgs)
+        val difference = end - moveStart
 
-            graphView.get.moveAllSelectedVertices(difference)
+        graphView.get.moveAllSelectedVertices(difference)
 
-            moveStart = Some(end)
-            graphView.get.redraw(RedrawOperation.Movement)
+        moveStart = end
+        graphView.get.redraw(RedrawOperation.Movement)
+    }
+
+    private def onMouseDoubleClick(eventArgs: DoubleClickedEventArgs[CanvasPack]) {
+        val vertex = graphView.get.getTouchedVertex(getPosition(eventArgs))
+        if(vertex.isDefined) {
+            vertex.get.vertexModel match {
+                case i: IdentifiedVertex =>
+                    val neighborhood = GraphFetcher.getNeighborhoodOfVertex(i.uri)
+                    if(neighborhood == null) {
+                        window.alert("no vertices")
+                    }
+                    update(neighborhood)
+                case _ =>
+            }
         }
     }
 
-    /**
-      * Description of mouse-button-up event. Is called from the layer (canvas) binded to it in the initialization.
-      * @param event
-      */
-    private def onMouseUp(event: BrowserEvent) {
-        moveStart = None
-    }
+    private def getPosition(eventArgs: EventArgs[CanvasPack]): Point = {
 
-    private def getPosition(event: BrowserEvent): Point = {
+        val positionCorrection = Vector(graphView.get.canvasPack.offsetLeft, graphView.get.canvasPack.offsetTop)
 
-        val positionCorrection =
-            Vector(graphView.get.controlsLayer.canvas.offsetLeft, graphView.get.controlsLayer.canvas.offsetTop)
-
-        if (typeOf(event.pageX) != "undefined" && typeOf(event.pageY) != "undefined") {
-            Point(event.pageX, event.pageY) + positionCorrection
+        /*if (typeOf(event.clientX) != "undefined" && typeOf(event.clientY) != "undefined") { TODO this check was fine
+            Point(event.clientX, event.clientX) + positionCorrection
         }
-        else {
-            Point(event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft,
-                event.clientY + document.body.scrollTop + document.documentElement.scrollTop) +
+        else {*/
+            Point(eventArgs.clientX + document.body.scrollLeft + document.documentElement.scrollLeft,
+                eventArgs.clientY + document.body.scrollTop + document.documentElement.scrollTop) +
             positionCorrection
-        }
+        //}
     }
 }

@@ -2,24 +2,27 @@ package cz.payola.web.client.views.plugins.visual.techniques.tree
 
 import cz.payola.web.client.views.plugins.visual.animation.Animation
 import cz.payola.web.client.views.plugins.visual.techniques.BaseTechnique
-import cz.payola.web.client.views.plugins.visual.graph.VertexView
-import cz.payola.web.client.views.plugins.visual.components.visualsetup.VisualSetup
+import cz.payola.web.client.views.plugins.visual.settings.components.visualsetup.VisualSetup
+import cz.payola.web.client.views.plugins.visual.graph.{Component, VertexView}
+import collection.mutable.ListBuffer
+import cz.payola.web.client.views.plugins.visual.Point
 
 /**
   * Visual plug-in technique that places the vertices into a tree structure.
   */
 class TreeTechnique(settings: VisualSetup) extends BaseTechnique(settings)
 {
-    def performTechnique() {
+    protected def getTechniquePerformer(component: Component, animate: Boolean): Animation[ListBuffer[(VertexView, Point)]] = {
 
-        val moveToCorner2 = new Animation[VertexView](Animation.moveGraphToUpperLeftCorner, graphView.get.vertexViews,
-            None, redrawQuick, redraw, None)
-        val flip = new Animation[VertexView](Animation.flipGraph, graphView.get.vertexViews, Some(moveToCorner2),
-            redrawQuick, redraw, None)
-        val moveToCorner1 = new Animation[VertexView](Animation.moveGraphToUpperLeftCorner, graphView.get.vertexViews,
-            Some(flip), redrawQuick, redraw, None)
-
-        basicTreeStructure(graphView.get.vertexViews, true, Some(moveToCorner1))
+        if(animate) {
+            val flip = new Animation(
+                Animation.flipGraph, component.vertexViews, None, redrawQuick, redraw, None)
+            basicTreeStructure(component.vertexViews, Some(flip), redrawQuick, redraw, None)
+        } else {
+            val flip = new Animation(
+                Animation.flipGraph, component.vertexViews, None, redrawQuick, redraw, Some(0))
+            basicTreeStructure(component.vertexViews, Some(flip), redrawQuick, redraw, Some(0))
+        }
     }
 
     override def clean() {

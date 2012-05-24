@@ -1,7 +1,7 @@
 package cz.payola.web.client.views.plugins.textual.techniques
 
 import cz.payola.web.client.views.plugins.textual.TextPlugin
-import cz.payola.web.client.views.plugins.visual.components.visualsetup.VisualSetup
+import cz.payola.web.client.views.plugins.visual.settings.components.visualsetup.VisualSetup
 
 abstract class BaseTechnique(settings: VisualSetup) extends TextPlugin(settings)
 {

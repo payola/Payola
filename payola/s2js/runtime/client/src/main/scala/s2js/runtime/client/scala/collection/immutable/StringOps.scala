@@ -43,7 +43,7 @@ class StringOps(val x: java.lang.String) extends s2js.runtime.client.scala.colle
     @javascript("return parseFloat(self.x);")
     def toDouble: Double = 0.0
 
-    @javascript("return self.x.replace(/pattern/g,replacement);")
+    @javascript("return self.x.replace(pattern,replacement);")
     def replaceAllLiterally(pattern: String, replacement: String) = null
 
     override def toString = x

@@ -1,12 +1,12 @@
 package cz.payola.web.client.views.plugins.visual.techniques.gravity
 
 import collection.mutable.ListBuffer
-import cz.payola.web.client.views.plugins.visual.graph.{EdgeView, VertexView}
 import cz.payola.web.client.views.plugins.visual.techniques._
 import cz.payola.web.client.views.plugins.visual.{Point, Vector}
 import s2js.adapters.js.dom.Date
 import cz.payola.web.client.views.plugins.visual.animation.Animation
-import cz.payola.web.client.views.plugins.visual.components.visualsetup.VisualSetup
+import cz.payola.web.client.views.plugins.visual.settings.components.visualsetup.VisualSetup
+import cz.payola.web.client.views.plugins.visual.graph.{Component, EdgeView, VertexView}
 
 /**
   * Visual plug-in technique that places the vertices based on their edges.
@@ -43,27 +43,29 @@ class GravityTechnique(settings: VisualSetup) extends BaseTechnique(settings)
         "gravity visualisation"
     }
 
-    def performTechnique() {
+    protected def getTechniquePerformer(component: Component, animate: Boolean): Animation[ListBuffer[(VertexView, Point)]] = {
 
-        val moveToCorner = new Animation[VertexView](Animation.moveGraphToUpperLeftCorner, graphView.get.vertexViews,
-            None, redrawQuick, redraw, None)
-        val flip = new Animation[VertexView](Animation.flipGraph, graphView.get.vertexViews,
-            Some(moveToCorner), redrawQuick, redraw, None)
-
-
-
-        val animationOfThis = new Animation[VertexView](runningAnimation,
-            graphView.get.vertexViews, Some(flip), redrawQuick, redrawQuick, Some(70))
-
-        basicTreeStructure(graphView.get.vertexViews, true, Some(animationOfThis))
+        if(animate) {
+            val flip = new Animation[ListBuffer[VertexView]](
+                Animation.flipGraph, component.vertexViews, None, redrawQuick, redraw, None)
+            val animationOfThis = new Animation[Component](
+                runningAnimation, component, Some(flip), redrawQuick, redrawQuick, Some(70))
+            basicTreeStructure(component.vertexViews, Some(animationOfThis), redrawQuick, redraw, None)
+        } else {
+            val flip = new Animation[ListBuffer[VertexView]](
+                Animation.flipGraph, component.vertexViews, None, redrawQuick, redraw, Some(0))
+            val animationOfThis = new Animation[Component](
+                runningAnimation, component, Some(flip), redrawQuick, redrawQuick, Some(0))
+            basicTreeStructure(component.vertexViews, Some(animationOfThis), redrawQuick, redraw, Some(0))
+        }
     }
     
-    private def runningAnimation(vertexViewsToAnimate: ListBuffer[VertexView], followingAnimation: Option[Animation[_]],
-        redrawQuick: () => Unit, redrawFinal: () => Unit, runDuration: Option[Int]) {
+    private def runningAnimation(componentToAnimate: Component, followingAnimation: Option[Animation[_]],
+        redrawQuick: () => Unit, redrawFinal: () => Unit, animationStepLength: Option[Int]) {
 
 
-        val vertexViewPacks = buildVertexViewsWorkingStructure(graphView.get.vertexViews)
-        val edgeViewPacks = buildEdgeViewsWorkingStructure(vertexViewPacks, graphView.get.edgeViews)
+        val vertexViewPacks = buildVertexViewsWorkingStructure(componentToAnimate.vertexViews)
+        val edgeViewPacks = buildEdgeViewsWorkingStructure(vertexViewPacks, componentToAnimate.edgeViews)
 
         vertexViewPacks.foreach{ vPack =>
             vPack.currentPosition = vPack.value.position
@@ -74,11 +76,14 @@ class GravityTechnique(settings: VisualSetup) extends BaseTechnique(settings)
         val compStartTime = new Date()
         var currentTime = new Date()
 
-        //run the calculation for the specified time in miliseconds or just run it at once
-        while((runDuration.isDefined && needToContinue &&
-            compStartTime.getTime() + runDuration.get > currentTime.getTime())
+        //run the calculation for the specified time in miliseconds
+        // or just run it at once (if the animation step length is 0 or not defined)
+        while((animationStepLength.isDefined && needToContinue &&
+            compStartTime.getTime() + animationStepLength.get > currentTime.getTime())
             ||
-            (runDuration.isEmpty && needToContinue)) {
+            (animationStepLength.isDefined && animationStepLength.get == 0 && needToContinue)
+            ||
+            (animationStepLength.isEmpty && needToContinue)) {
 
             needToContinue = run(vertexViewPacks, edgeViewPacks)
             currentTime = new Date()
@@ -89,17 +94,18 @@ class GravityTechnique(settings: VisualSetup) extends BaseTechnique(settings)
             toMove += ((vVPack.value, vVPack.currentPosition))
         }
 
-        val a = new Animation(Animation.moveVertices, toMove, followingAnimation, redrawQuick, redrawQuick,
-            None)
+        val moveVerticesAnimation =
+            new Animation(Animation.moveVertices, toMove, followingAnimation, redrawQuick, redrawQuick,
+                animationStepLength)
         if(needToContinue) { //if the calculation is not finished yet
 
-            val nextRoundAnimation = new Animation(runningAnimation, graphView.get.vertexViews, followingAnimation,
-                redrawQuick, redrawQuick, runDuration)
-            a.setFollowingAnimation(nextRoundAnimation)
-            a.run()
+            val nextRoundAnimation = new Animation(runningAnimation, componentToAnimate, followingAnimation,
+                redrawQuick, redrawQuick, animationStepLength)
+            moveVerticesAnimation.setFollowingAnimation(nextRoundAnimation)
+            moveVerticesAnimation.run()
         } else {
 
-            a.run()
+            moveVerticesAnimation.run()
         }
     }
 

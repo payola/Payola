@@ -16,5 +16,4 @@ import s2js.adapters.js.dom.{Element, Node}
 trait Component
 {
     def render(parent: Element = document.body)
-
 }

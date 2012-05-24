@@ -11,4 +11,4 @@ import cz.payola.web.client.mvvm_api.Component
 
 class ClickedEvent[A] extends ComponentEvent[A, ClickedEventArgs[A]]
 {
- }
+}

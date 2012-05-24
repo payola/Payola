@@ -84,7 +84,7 @@ trait Seq extends Iterable
             self.getInternalJsArray().splice(index, 1);
         }
     """)
-    def -=(x: Double) {}
+    def -=(x: Any) {}
 
     // From SeqLike
     def indexWhere(p: Double => Boolean, from: Int = 0): Int = {

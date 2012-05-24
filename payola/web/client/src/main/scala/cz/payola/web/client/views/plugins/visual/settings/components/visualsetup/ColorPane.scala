@@ -1,4 +1,4 @@
-package cz.payola.web.client.views.plugins.visual.components.visualsetup
+package cz.payola.web.client.views.plugins.visual.settings.components.visualsetup
 
 import s2js.adapters.js.browser.document
 import collection.mutable.ArrayBuffer
@@ -20,7 +20,7 @@ class ColorPane(name: String, label: String, var color: Color) extends Component
 {
     val changed = new ChangedEvent[ColorPane]
 
-    val colorInput: Input = new Input(name, color.toString, "colorpicker")
+    val colorInput: Input = new Input(name, color.toString, None, "colorpicker")
     colorInput.field.setAttribute("readonly","true")
 
     val i = new I(List())

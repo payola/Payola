@@ -4,16 +4,20 @@ import collection.mutable.ListBuffer
 import cz.payola.common.rdf.{LiteralVertex, IdentifiedVertex, Vertex}
 import s2js.adapters.js.dom.CanvasRenderingContext2D
 import cz.payola.web.client.views.plugins.visual._
+import settings.{TextSettingsModel, VertexSettingsModel}
 
 /**
  * Graphical representation of Vertex object in the drawn graph.
  * @param vertexModel the vertex object from the model, that is visualised
  * @param position of this graphical representation in drawing space
  */
-class VertexView(val vertexModel: Vertex, var position: Point, var settings: VertexSettingsModel) extends View
+class VertexView(val vertexModel: Vertex, var position: Point, var settings: VertexSettingsModel,
+    settingsText: TextSettingsModel) extends View
 {
 
-    private var image = prepareImage(
+    private var age = 0
+
+    private val image = prepareImage( //TODO This has to be called after color or path change event was fired
         vertexModel match {
             case i: LiteralVertex => new Color(180, 50, 50, 1)
             case i: IdentifiedVertex => new Color(50, 180, 50, 1)
@@ -39,36 +43,58 @@ class VertexView(val vertexModel: Vertex, var position: Point, var settings: Ver
      * Textual data that should be visualised with this vertex ("over this vertex").
      */
     val information: Option[InformationView] = vertexModel match {
-        case i: LiteralVertex => Some(new InformationView(i))
-        case i: IdentifiedVertex => Some(new InformationView(i))
+        case i: LiteralVertex => Some(new InformationView(i, settingsText))
+        case i: IdentifiedVertex => Some(new InformationView(i, settingsText))
         case _ => None
+    }
+
+    def isSelected: Boolean = {
+        selected
+    }
+
+    def getCurrentAge: Int = {
+        age
+    }
+
+    def resetCurrentAge() {
+        age = 0
+    }
+
+    def increaseCurrentAge() {
+        age += 1
+    }
+
+    def setCurrentAge(newAge: Int) {
+        age = newAge
     }
 
     def isPointInside(point: Point): Boolean = {
         isPointInRect(point, position + (settings.getSize / -2), position + (settings.getSize / 2))
     }
 
-    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
+    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
         drawQuick(context, color, positionCorrection)
         drawImage(context, image, position + Vector(-10, -10), Vector(20, 20))
     }
 
-    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
+    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
         val colorToUseOnBox = color.getOrElse(settings.colorMed)
-        val correctedPosition = this.position + (settings.getSize / -2) + positionCorrection.getOrElse(Point(0, 0)).toVector
+        val correctedPosition = this.position + (settings.getSize / -2) + positionCorrection
 
         drawRoundedRectangle(context, correctedPosition, settings.getSize, settings.cornerRadius)
         fillCurrentSpace(context, colorToUseOnBox)
     }
 
-    def drawInformation(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
+    def drawInformation(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
         if (information.isDefined) {
             vertexModel match {
                 case i: IdentifiedVertex => information.get.draw(context, color, positionCorrection)
-                case _ => if (selected) {
-                    information.get.draw(context, color, positionCorrection)
-                }
+                case _ => if (selected) { information.get.draw(context, color, positionCorrection) }
             }
         }
+    }
+
+    override def toString: String = {
+        "["+vertexModel.toString+"]"
     }
 }
