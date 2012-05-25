@@ -405,6 +405,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
                 case select: Global#Select => compileSelect(select)
                 case apply: Global#Apply => compileApply(apply)
                 case typeApply: Global#TypeApply => compileTypeApply(typeApply)
+                case typed: Global#Typed => compileInstanceOf(typed.tpe.typeSymbol, true, typed.expr)
                 case assign: Global#Assign => compileAssign(assign)
                 case ifAst: Global#If => compileIf(ifAst)
                 case labelDef: Global#LabelDef => compileLabelDef(labelDef)
@@ -723,15 +724,25 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
             case Select(qualifier, name) if name.toString.matches("(is|as)InstanceOf") => {
                 typeApply.args.head.tpe match {
                     case uniqueTypeRef: Global#UniqueTypeRef => {
-                        compileInstanceOf(uniqueTypeRef.typeSymbol, name.toString.take(2) == "is") {
-                            compileAst(qualifier)
-                        }
+                        compileInstanceOf(uniqueTypeRef.typeSymbol, name.toString.take(2) == "is", qualifier)
                     }
                     case tpe => throw new ScalaToJsException("Unsupported type check/conversion: " + tpe.toString)
                 }
             }
             case select: Global#Select => compileSelect(select, isInsideApply = isInsideApply)
             case fun => compileAst(fun)
+        }
+    }
+
+    /**
+     * Compiles a type check or type conversion.
+     * @param typeSymbol Symbol of the type.
+     * @param isTypeCheck True in case of type check, false in case of type conversion.
+     * @param qualifier The qualifier that is compiled as a generic AST.
+   	 */
+    private def compileInstanceOf(typeSymbol: Global#Symbol, isTypeCheck: Boolean, qualifier: Global#Tree) {
+        compileInstanceOf(typeSymbol, isTypeCheck) {
+            compileAst(qualifier)
         }
     }
 

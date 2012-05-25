@@ -1,37 +1,33 @@
 package controllers.helpers
 
 import play.api.mvc._
-import controllers.routes
+import cz.payola.domain.entities.User
+import controllers._
+import play.api.libs.iteratee._
 
 /**
   * Provide security features
   */
-trait Secured {
+trait Secured
+{ self: PayolaController =>
 
-    /**
-      * Retrieve the connected user email.
-      */
-    private def username(request: RequestHeader) = request.session.get("email")
-
-    /**
-      * Redirect to login if the user in not authorized.
-      */
-    private def onUnauthorized(request: RequestHeader) = Results.Redirect(routes.Application.login)
-
-    // --
-
-    /**
-      * Action for authenticated users.
-      */
-    def IsAuthenticated(f: => String => Request[AnyContent] => Result) = Security.Authenticated(username, onUnauthorized) { user =>
-        Action(request => f(user)(request))
+    def authenticated(f: User => Result): Action[(Action[AnyContent], AnyContent)] = {
+        maybeAuthenticated { user: Option[User] =>
+            user.map(f(_)).getOrElse(Results.Redirect(routes.Application.login))
+        }
     }
 
-    /**
-    * Action for authenticated users.
-    */
-    def IsAuthenticatedWithFallback(f: => String => Request[AnyContent] => Result, unauthorized: RequestHeader => Result) = Security.Authenticated(username, unauthorized) { user =>
-        Action(request => f(user)(request))
-    }
+    def maybeAuthenticated(f: Option[User] => Result): Action[(Action[AnyContent], AnyContent)] = {
+        def username(requestHeader: RequestHeader): Option[String] = {
+            requestHeader.session.get("email")
+        }
+        def onUnauthorized(requestHandler: RequestHeader): Result = {
+            f(None)
+        }
+        def onAuthorized(userName: String): Action[AnyContent] = {
+            Action(request => f(getUser(userName)))
+        }
 
+        Security.Authenticated[AnyContent](username _, onUnauthorized _)(onAuthorized _)
+    }
 }

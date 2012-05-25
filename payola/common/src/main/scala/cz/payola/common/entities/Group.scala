@@ -1,11 +1,37 @@
 package cz.payola.common.entities
 
-import scala.collection
 import scala.collection.mutable
 
-trait Group extends NamedEntity with OwnedEntity
+/**
+  * A group of users.
+  */
+trait Group extends NamedEntity
 {
-    protected val _members: mutable.Seq[UserType]
+    type UserType <: User
 
-    def members: collection.Seq[UserType] = _members
+    protected val _owner: UserType
+
+    protected val _members = new mutable.ArrayBuffer[UserType]()
+
+    /** Owner of the group. */
+    def owner = _owner
+
+    /** Members of the group. */
+    def members: Seq[UserType] = _members
+
+    /**
+      * Stores the specified member to the group.
+      * @param user The member to store.
+      */
+    protected def storeMember(user: UserType) {
+        _members += user
+    }
+
+    /**
+      * Discards the specified member from the group. Complementary operation to store.
+      * @param user The member to discard.
+      */
+    protected def discardMember(user: UserType) {
+        _members -= user
+    }
 }

@@ -6,7 +6,7 @@ import s2js.adapters.js.dom
 import cz.payola.web.client.events.{ClickedEvent, ClickedEventArgs}
 import dom.Element
 
-class Div(val innerElements: Seq[Component], val addClass: String = "") extends Component
+class Div(val innerElements: Seq[Component] = List(), val addClass: String = "") extends Component
 {
     val div = document.createElement[dom.Element]("div")
     div.setAttribute("class",addClass)
@@ -15,5 +15,13 @@ class Div(val innerElements: Seq[Component], val addClass: String = "") extends 
         parent.appendChild(div)
 
         innerElements.map(_.render(div))
+    }
+
+    def setAttribute(attributeName: String, value: String) = {
+        div.setAttribute(attributeName, value)
+    }
+
+    def removeClass(remClass: String) = {
+        div.setAttribute("class",div.getAttribute("class").replaceAllLiterally(remClass, ""))
     }
 }

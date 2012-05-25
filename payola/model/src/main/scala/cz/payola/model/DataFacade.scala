@@ -1,54 +1,13 @@
 package cz.payola.model
 
-import cz.payola.common.rdf.Graph
-import cz.payola.data.rdf.configurations.SparqlEndpointConfiguration
-import cz.payola.data.rdf.QueryExecutor
-import cz.payola.domain.rdf.RDFGraph
 import cz.payola.data.entities.User
-import collection.mutable.Seq
-import collection.Seq
-import cz.payola.data.entities.dao.{AnalysisDAO, UserDAO}
+import cz.payola.domain.rdf.Graph
+import cz.payola.data.dao._
 
 class DataFacade
 {
     val userDAO = new UserDAO
     val analysisDAO = new AnalysisDAO
-
-    def getGraph(uri: String): Graph = {
-        val dbPediaEndpointUrl = "http://dbpedia.org/sparql" +
-            "?default-graph-uri=http%3A%2F%2Fdbpedia.org" +
-            "&format=application%2Frdf%2Bxml" +
-            "&save=display"
-        val configurations = List(new SparqlEndpointConfiguration(dbPediaEndpointUrl))
-
-        /*val query = """ //multicomponent graph query
-            CONSTRUCT {
-                ?x <http://dbpedia.org/ontology/populationDensity> ?p0 .
-                ?x <http://dbpedia.org/ontology/populationMetro> ?p1 .
-                ?x <http://dbpedia.org/ontology/populationTotal> ?p3 .
-                ?x <http://dbpedia.org/ontology/populationUrban> ?p4 . }
-            WHERE {
-                ?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/City> .
-                ?x <http://dbpedia.org/ontology/populationDensity> ?p0 .
-                ?x <http://dbpedia.org/ontology/populationMetro> ?p1 .
-                ?x <http://dbpedia.org/ontology/populationTotal> ?p3 .
-                ?x <http://dbpedia.org/ontology/populationUrban> ?p4 .
-                FILTER (?p4 > 2000000) .}""".format(uri,uri)*/
-
-        val query = """
-            CONSTRUCT {
-                <%s> ?p1 ?n1 .
-                ?n1 ?p2 ?n2 .
-            }
-            WHERE {
-                <%s> ?p1 ?n1 .
-                OPTIONAL { ?n1 ?p2 ?n2 }
-            }
-            LIMIT 40
-        """.format(uri, uri)
-
-        QueryExecutor.executeQuery(configurations, query).data.headOption.map(rdf => RDFGraph(rdf)).get
-    }
 
     def getUserByCredentials(username: String, password: String) : Option[User] = {
         userDAO.getUserByCredentials(username, cryptPassword(password))
@@ -58,17 +17,26 @@ class DataFacade
         userDAO.getUserByUsername(username)
     }
 
-    def register(username: String, password: String): Boolean = {
-        val u = new User(username, username, cryptPassword(password), username)
+    def register(username: String, password: String) {
+        val u = new User(username, cryptPassword(password), username)
 
-        userDAO.persist(u) match {
-            case user:User => true
-            case _ => false //TODO decide what to do here when the user is not inserted but updated (Unit returned)
-        }
+        userDAO.persist(u)
+    }
+
+    def getAnalysisById(id: String) = {
+        analysisDAO.getById(id)
+    }
+
+    def topAnalyses = {
+        analysisDAO.getTopAnalyses()
     }
 
     def getPublicAnalysesByOwner(o: User) = {
-        analysisDAO.getPublicAnalysesByOwner(o)
+        analysisDAO.getTopAnalysesByUser(o.id)
+    }
+
+    def getGraph(uri: String) : Graph = {
+        null
     }
 
     //TODO bcrypt

@@ -22,7 +22,7 @@ import settings.{VertexSettingsModel, TextSettingsModel, EdgeSettingsModel}
 @dependency("cz.payola.common.rdf.LiteralVertex")
 @dependency("cz.payola.common.rdf.Graph")
 @dependency("cz.payola.common.rdf.Edge")
-class Index
+class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
 {
     var graph: Option[Graph] = None
 
@@ -63,49 +63,28 @@ class Index
     }
 
     def init() {
-        try {
-            visualSetup.render(document.getElementById("settings"))
-            //TODO show "asking the server for the data"
+        visualSetup.render(document.getElementById("settings"))
 
-            graph = Option(GraphFetcher.getInitialGraph)
-            //TODO show "preparing visualisation"
-
-            changePlugin(plugins.head)
-            //TODO hide info
-        } catch {
-            case e: Exception => {
-                window.alert("Failed to call RPC. " + e.message)
-                graph = None
-            }
-            case e => {
-                window.alert("Graph fetch exception. " + e.toString)
-                graph = None
-            }
-
-            //TODO show error
-        }
-    }
-
-    def preloadImages() {
-/*        val imgLoaderElement = document.createElement[Image]("img")
-        imgLoaderElement.src = visualPluginSetup.getValue(visualPluginSetup.VertexIconIdentified).getOrElse("")
-        imgLoaderElement.src = visualPluginSetup.getValue(visualPluginSetup.VertexIconLiteral).getOrElse("")
-        imgLoaderElement.src = visualPluginSetup.getValue(visualPluginSetup.VertexIconUnknown).getOrElse("")*/
+        changePlugin(plugins.head)
     }
 
     def updateSettings() {
         currentPlugin.get match {
             case i: VisualPlugin =>
-//                i.updateSettings(visualSetup)
                 currentPlugin.get.redraw()
         }
     }
     
     def resetSettings() {
-        //visualPluginSetup.reset()
         currentPlugin.get match {
             case i: VisualPlugin =>
                 currentPlugin.get.redraw()
+        }
+    }
+    
+    def changePluginByNumber(number: Int) {
+        if(0 <= number && number < plugins.length) {
+            changePlugin(plugins(number))
         }
     }
 
@@ -114,10 +93,11 @@ class Index
 
         // Switch to the new one.
         currentPlugin = Some(plugin)
+        plugin.init(document.getElementById(elementToDrawIn))
+        if (graph.isDefined) {
+            plugin.update(graph.get)
+        }
 
-        plugin.init(document.getElementById("graph-plugin-draw-space"))
-
-        plugin.update(graph.get)
 
         currentPlugin.get match {
             case i: TextPlugin =>

@@ -10,11 +10,9 @@ import helpers.Secured
 object Application extends PayolaController with Secured
 {
 
-    def index = IsAuthenticatedWithFallback ({ username => rh =>
-        Ok(views.html.application.index(getUser(rh)))
-    }, {  _ =>
-        Ok(views.html.application.index(None))
-    })
+    def index = maybeAuthenticated { user =>
+        Ok(views.html.application.index(user))
+    }
 
     def rpcTest = Action {
         Ok(views.html.test())
@@ -25,13 +23,9 @@ object Application extends PayolaController with Secured
         Ok(javaScript).as("text/javascript")
     }
 
-    def dashboard = IsAuthenticatedWithFallback ({ username => rh =>
-        Ok(views.html.application.dashboard(getUser(rh)))
-    }, {  _ =>
-        Ok(views.html.application.dashboard(None))
-    })
-
-    // -- Authentication
+    def dashboard = maybeAuthenticated { user =>
+        Ok(views.html.application.dashboard(user, topAnalyses = df.topAnalyses))
+    }
 
     val loginForm = Form(
         tuple(

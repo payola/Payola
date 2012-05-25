@@ -188,7 +188,8 @@ object PayolaBuild extends Build
         "domain", file("domain"),
         settings = payolaSettings ++ Seq(
             libraryDependencies ++= Seq(
-                "org.apache.jena" % "jena-core" % "2.7.0-incubating"
+                "org.apache.jena" % "jena-core" % "2.7.0-incubating",
+                "com.hp.hpl.jena" % "arq" % "2.8.3"
             )
         )
     ).dependsOn(
@@ -196,19 +197,7 @@ object PayolaBuild extends Build
     )
 
     lazy val dataProject = Project(
-        "data", file("data"), settings = payolaSettings
-    ).aggregate(
-        dataRdfProject, dataEntitiesProject
-    )
-
-    lazy val dataRdfProject = Project(
-        "rdf", file("data/rdf"), settings = payolaSettings
-    ).dependsOn(
-        commonProject, domainProject, scala2JsonProject
-    )
-
-    lazy val dataEntitiesProject = Project(
-        "entities", file("data/entities"),
+        "data", file("data"),
         settings = payolaSettings ++ Seq(
             libraryDependencies ++= Seq(
                 "org.squeryl" % "squeryl_2.9.0-1" % "0.9.5",
@@ -225,13 +214,13 @@ object PayolaBuild extends Build
     lazy val modelProject = Project(
         "model", file("model"), settings = payolaSettings
     ).dependsOn(
-        commonProject, domainProject, dataRdfProject, dataEntitiesProject
+        commonProject, domainProject, dataProject
     )
 
     lazy val webProject = Project(
         "web", file("web"), settings = payolaSettings
     ).aggregate(
-        webSharedProject, webClientProject, webServerProject
+        webSharedProject, webClientProject, webInitializerProject, webServerProject
     )
 
     lazy val webSharedProject = ScalaToJsProject(
@@ -244,6 +233,12 @@ object PayolaBuild extends Build
         "client", file("web/client"), WebSettings.javaScriptsDir, payolaSettings
     ).dependsOn(
         commonProject, webSharedProject
+    )
+
+    lazy val webInitializerProject = Project(
+        "initializer", file("web/initializer"), settings = payolaSettings
+    ).dependsOn(
+        domainProject, dataProject
     )
 
     lazy val webServerProject = PlayProject(
