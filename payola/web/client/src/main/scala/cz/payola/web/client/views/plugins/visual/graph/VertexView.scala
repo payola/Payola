@@ -5,6 +5,7 @@ import cz.payola.common.rdf.{LiteralVertex, IdentifiedVertex, Vertex}
 import s2js.adapters.js.dom.CanvasRenderingContext2D
 import cz.payola.web.client.views.plugins.visual._
 import settings.{TextSettingsModel, VertexSettingsModel}
+import s2js.adapters.js.browser.window
 
 /**
  * Graphical representation of Vertex object in the drawn graph.
@@ -96,5 +97,21 @@ class VertexView(val vertexModel: Vertex, var position: Point, var settings: Ver
 
     override def toString: String = {
         "["+vertexModel.toString+"]"
+    }
+
+    /**
+     * Compares this to another vertexView. Returns true if vertexModels.toString are equal.
+     * @param vertexView
+     * @return
+     */
+    def isEqual(vertexView: Any): Boolean = {
+        if(vertexView == null) {
+            false
+        }
+        vertexView match {
+            case vv: VertexView =>
+                vv.vertexModel.toString eq vertexModel.toString
+            case _ => false
+        }
     }
 }

@@ -179,9 +179,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
             vertex.get.vertexModel match {
                 case i: IdentifiedVertex =>
                     val neighborhood = GraphFetcher.getNeighborhoodOfVertex(i.uri)
-                    if(neighborhood == null) {
-                        window.alert("no vertices")
-                    }
+                    graphView.get.selectVertex(vertex.get)
                     update(neighborhood)
                 case _ =>
             }
