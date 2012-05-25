@@ -10,17 +10,8 @@ import com.hp.hpl.jena.ontology._
 object Model {
 
     def apply(ontologyModel: OntModel): Model = {
-        val clIt = ontologyModel.listClasses()
-        while (clIt.hasNext) {
-            val cl: OntClass = clIt.next()
-            val clURI = cl.getURI
-
-            // TODO
-        }
-
-
-
-        null
+        val fact = new ModelFactory(ontologyModel)
+        fact.getModel
     }
 
     def apply(ontologyString: String): Model = {
@@ -30,7 +21,7 @@ object Model {
 
         // Create a model and read it from the input string
         val jenaModel: OntModel = com.hp.hpl.jena.rdf.model.ModelFactory.createOntologyModel()
-        jenaModel.read(reader, "OWL/XML")
+        jenaModel.read(reader, "RDF/XML")
 
         val m = apply(jenaModel)
         jenaModel.close()
@@ -42,5 +33,7 @@ object Model {
 
 class Model(val classes: collection.Seq[Class])
 {
-
+    override def toString: String = {
+        super.toString + " " + classes.toString
+    }
 }

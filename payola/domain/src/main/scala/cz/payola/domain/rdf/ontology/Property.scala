@@ -8,6 +8,7 @@ package cz.payola.domain.rdf.ontology
   * To change this template use File | Settings | File Templates.
   */
 
-class Property
+class Property(val URI: String)
 {
+    override def toString = super.toString + " => " + URI
 }
