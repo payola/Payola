@@ -9,19 +9,14 @@ import views._
 
 object Profile extends PayolaController with Secured
 {
-    def index(username: String) = IsAuthenticatedWithFallback ({ loggedUsername => rh =>
-        val u = df.getUserByUsername(username)
-        u.isDefined match {
-            case true => Ok(views.html.userProfile.index(getUser(rh), u.get, df.getPublicAnalysesByOwner(u.get)))
-            case false => NotFound(views.html.errors.err404("The user does not exist."))
+    def index(username: String) = maybeAuthenticated { user =>
+        df.getUserByUsername(username).map { profileUser =>
+            val profileUserAnalyses = df.getPublicAnalysesByOwner(profileUser)
+            Ok(views.html.userProfile.index(user, profileUser, profileUserAnalyses))
+        }.getOrElse {
+            NotFound(views.html.errors.err404("The user does not exist."))
         }
-    }, {  _ =>
-        val u = df.getUserByUsername(username)
-        u.isDefined match {
-            case true => Ok(views.html.userProfile.index(None, u.get, df.getPublicAnalysesByOwner(u.get)))
-            case false => NotFound(views.html.errors.err404("The user does not exist."))
-        }
-    })
+    }
 
     val profileForm = Form(
         tuple(
@@ -34,16 +29,13 @@ object Profile extends PayolaController with Secured
         )
     )
 
-    def edit(username: String) = IsAuthenticated { username => _ =>
-        df.getUserByUsername(username).map { user =>
-            Ok(
-                html.userProfile.edit(user, profileForm)
-            )
-        }.getOrElse(Forbidden)
+    // TODO is the username necessary here? A user may edit only his own profile...
+    def edit(username: String) = authenticated { user =>
+        Ok(html.userProfile.edit(user, profileForm))
     }
 
-
-    def save(username: String) = IsAuthenticated { username => _ =>
+    // TODO is the username necessary here? A user may edit only his own profile...
+    def save(username: String) =  authenticated { user =>
         Ok("TODO")
     }
 }

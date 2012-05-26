@@ -8,7 +8,6 @@
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/compiler.iml" filepath="$PROJECT_DIR$/.idea_modules/compiler.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/data.iml" filepath="$PROJECT_DIR$/.idea_modules/data.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/domain.iml" filepath="$PROJECT_DIR$/.idea_modules/domain.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea_modules/entities.iml" filepath="$PROJECT_DIR$/.idea_modules/entities.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/initializer.iml" filepath="$PROJECT_DIR$/.idea_modules/initializer.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/model.iml" filepath="$PROJECT_DIR$/.idea_modules/model.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea_modules/payola.iml" filepath="$PROJECT_DIR$/.idea_modules/payola.iml" />

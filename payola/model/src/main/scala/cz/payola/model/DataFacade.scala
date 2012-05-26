@@ -2,7 +2,7 @@ package cz.payola.model
 
 import cz.payola.data.entities.User
 import cz.payola.domain.rdf.Graph
-import cz.payola.data.entities.dao._
+import cz.payola.data.dao._
 
 class DataFacade
 {

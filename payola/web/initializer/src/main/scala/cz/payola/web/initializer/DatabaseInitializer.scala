@@ -3,8 +3,9 @@ package cz.payola.web.initializer
 import cz.payola.domain.entities.analyses.plugins.data.SparqlEndpoint
 import cz.payola.domain.entities.analyses.plugins.query._
 import cz.payola.domain.entities.analyses.plugins._
-import cz.payola.data.entities.dao._
+import cz.payola.data.dao._
 import cz.payola.data.entities._
+import cz.payola.data.PayolaDB
 
 object DatabaseInitializer extends App
 {
