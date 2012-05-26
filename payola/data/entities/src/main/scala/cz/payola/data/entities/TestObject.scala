@@ -44,14 +44,14 @@ object TestObject
 
     val sParInstDao = new StringParameterInstanceDAO()
 
-    val user = new User("name", "pwd1", "email1")
+    val user = new User("u", "name", "pwd1", "email1")
 
     println("Persisting user ...")
     userDao.persist(user)
 
-    val group1 = new Group("group", user)
+    val group1 = new Group("g1", "group", user)
 
-    val group2 = new Group("group2", user)
+    val group2 = new Group("g2", "group2", user)
 
     val bPar = new BooleanParameter("bPar", "bPar", true)
 
@@ -145,8 +145,8 @@ object TestObject
 
         println("       persisting analysis")
         // persist analysis
-        val analysis = new Analysis("Cities with more than 2 million habitants with countries", Some(user))
-        analysisDao.persist(analysis)
+        val analysis = new cz.payola.domain.entities.Analysis("Cities with more than 2 million habitants with countries", Some(user))
+        //TODO: analysisDao.persist(analysis)
         assert(analysisDao.getById(analysis.id).isDefined)
         assert(user.ownedAnalyses.size > 0)
 
@@ -212,9 +212,6 @@ object TestObject
         }
         val result = evaluation.result
         */
-
-        println("       persisting analysis again")
-        analysisDao.persist(analysis)
 
         println("       asserting persisted analysis")
         // Get analysis from DB

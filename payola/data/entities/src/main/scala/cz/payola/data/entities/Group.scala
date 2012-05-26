@@ -1,8 +1,16 @@
 package cz.payola.data.entities
 
+object Group {
+
+    def apply(g: cz.payola.common.entities.Group): Group = {
+        new Group(g.id, g.name, User(g.owner))
+    }
+}
+
 class Group(
-        name: String,
-        owner: User)
+    override val id: String,
+    name: String,
+    owner: User)
     extends cz.payola.domain.entities.Group(name, owner)
     with PersistableEntity
 {
@@ -25,7 +33,7 @@ class Group(
                 }
                 // "Convert" to data.User, associate with group and persist
                 case user: cz.payola.domain.entities.User => {
-                    val usr = new User(user.name, user.password, user.email)
+                    val usr = new User(user.id, user.name, user.password, user.email)
                     associate(usr, _groupMembersQuery)
 
                     usr

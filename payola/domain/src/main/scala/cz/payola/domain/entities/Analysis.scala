@@ -230,10 +230,6 @@ class Analysis(protected var _name: String, protected val _owner: Option[User])
         other.isInstanceOf[Analysis]
     }
 
-    def getSources : Seq[PluginInstanceType] = {
-        pluginInstances.diff(pluginInstanceBindings.map(b => b.targetPluginInstance))
-    }
-
     override protected def checkInvariants() {
         super[Entity].checkInvariants()
         super[NamedEntity].checkInvariants()

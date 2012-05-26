@@ -1,7 +1,15 @@
 package cz.payola.data.entities.analyses.parameters
 
-import cz.payola.data.entities.analyses._
-import cz.payola.data.entities._
+import cz.payola.data.entities.analyses.ParameterValue
+import cz.payola.data.entities.PayolaDB
+
+object IntParameterValue {
+
+    def apply(p: cz.payola.domain.entities.analyses.parameters.IntParameterValue): IntParameterValue = {
+        val parameter = IntParameter(p.parameter.asInstanceOf[cz.payola.domain.entities.analyses.parameters.IntParameter])
+        new IntParameterValue(p.id, parameter, p.value)
+    }
+}
 
 class IntParameterValue(
     override val id: String,

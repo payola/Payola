@@ -1,10 +1,12 @@
 package cz.payola.common.entities.analyses
 
+import cz.payola.common.entities.Entity
+
 /**
   * A parameter of an analytical plugin.
   * @tparam A Type of the parameter value.
   */
-trait Parameter[A]
+trait Parameter[A] extends Entity
 {
     protected val _name: String
 

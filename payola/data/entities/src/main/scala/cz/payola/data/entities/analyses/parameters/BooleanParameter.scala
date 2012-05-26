@@ -1,8 +1,14 @@
 package cz.payola.data.entities.analyses.parameters
 
-import cz.payola.data.entities.analyses.{PluginDbRepresentation, Parameter}
-import cz.payola.data.entities.{PayolaDB, PersistableEntity}
-import cz.payola.domain.entities.analyses.ParameterValue
+import cz.payola.data.entities.analyses.Parameter
+import cz.payola.data.entities.PayolaDB
+
+object BooleanParameter {
+
+    def apply(p: cz.payola.domain.entities.analyses.parameters.BooleanParameter): BooleanParameter = {
+        new BooleanParameter(p.id, p.name, p.defaultValue)
+    }
+}
 
 class BooleanParameter(
     override val id: String,

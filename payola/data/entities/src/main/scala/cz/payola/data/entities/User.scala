@@ -1,10 +1,21 @@
 package cz.payola.data.entities
 
-class User(name: String, pwd: String, email: String)
+object User {
+
+    def apply(u: cz.payola.common.entities.User): User = {
+        new User(u.id, u.name, u.password, u.email)
+    }
+}
+
+class User(
+    override val id: String,
+    name: String,
+    pwd: String,
+    mail: String)
     extends cz.payola.domain.entities.User(name) with PersistableEntity
 {
     password_=(pwd)
-    email_=(email)
+    email_=(mail)
 
     private lazy val _ownedGroupsQuery = PayolaDB.groupOwnership.left(this)
 
@@ -30,7 +41,7 @@ class User(name: String, pwd: String, email: String)
             case a: Analysis => associate(a, _ownedAnalysesQuery)
 
             // "Convert" to data.Analysis, associate with user and persist
-            case a: cz.payola.domain.entities.Analysis => associate(new Analysis(a.name, None), _ownedAnalysesQuery)
+            case a: cz.payola.domain.entities.Analysis => associate(new Analysis(a.id, a.name, Some(this)), _ownedAnalysesQuery)
         }
     }
 
@@ -42,7 +53,7 @@ class User(name: String, pwd: String, email: String)
             case g: Group => associate(g, _ownedGroupsQuery);
 
             // "Convert" to data.Group, associate with user and persist
-            case g: cz.payola.domain.entities.Group => associate(new Group(g.name, this), _ownedGroupsQuery)
+            case g: cz.payola.domain.entities.Group => associate(new Group(g.id, g.name, this), _ownedGroupsQuery)
         }
     }
 

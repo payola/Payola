@@ -37,7 +37,8 @@ object DatabaseInitializer extends App
             unionPlugin
         )
         // persist analysis
-        val analysis = new Analysis("DB: Cities with more than 2 million habitants with countries", None)
+        //TODO: SQUERYL and "xx" id
+        val analysis = new Analysis("xx", "DB: Cities with more than 2 million habitants with countries", None)
         analysisDao.persist(analysis)
 
         // Persist  plugins

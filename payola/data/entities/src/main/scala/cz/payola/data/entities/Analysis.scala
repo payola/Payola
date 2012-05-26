@@ -4,7 +4,18 @@ import cz.payola.data.entities.analyses._
 import cz.payola.data.entities.analyses.parameters._
 import scala.collection.immutable
 
-class Analysis(name: String, owner: Option[User])
+object Analysis {
+
+    def apply(a: cz.payola.common.entities.Analysis): Analysis = {
+        val owner = if (a.owner.isDefined) Some(User(a.owner.get)) else None
+        new Analysis(a.id, a.name, owner)
+    }
+}
+
+class Analysis(
+    override val id: String,
+    name: String,
+    owner: Option[User])
     extends cz.payola.domain.entities.Analysis(name, owner)
     with PersistableEntity
 {
@@ -15,12 +26,25 @@ class Analysis(name: String, owner: Option[User])
 
     val ownerId: Option[String] = owner.map(_.id)
 
-    override def pluginInstances : collection.Seq[PluginInstanceType] = {
-        evaluateCollection(_pluginInstancesQuery)
+    override def pluginInstances : collection.Seq[PluginInstanceType] = {        
+        println("Instances?")
+
+        val r = evaluateCollection(_pluginInstancesQuery)
+        
+        println("Instances " + r.size)
+        
+        r
+        
     }
 
     override def pluginInstanceBindings: Seq[PluginInstanceBindingType] = {
-        evaluateCollection(_pluginInstancesBindingsQuery)
+        println("Bindings?")
+        
+        val r = evaluateCollection(_pluginInstancesBindingsQuery)
+        
+        println("Bindings " + r.size)
+        
+        r
     }
 
     override protected def storePluginInstance(instance: Analysis#PluginInstanceType) {
@@ -32,9 +56,6 @@ class Analysis(name: String, owner: Option[User])
             case i: cz.payola.domain.entities.analyses.PluginInstance => {
                 val inst = new PluginInstance(i.id, i.plugin, convertParamValues(i.parameterValues), i.description)
                 associate(inst, _pluginInstancesQuery)
-
-                // Now assign parameter values passed as parameter to PluginInstance
-                inst.associateParameterValues()
             }
         }
     }
@@ -65,7 +86,7 @@ class Analysis(name: String, owner: Option[User])
                 }
 
                 // "Convert" binding, associate with analysis and persist
-                val bin = new PluginInstanceBinding(source, target, b.targetInputIndex)
+                val bin = new PluginInstanceBinding(b.id, source, target, b.targetInputIndex)
                 associate(bin, _pluginInstancesBindingsQuery)
             }
         }

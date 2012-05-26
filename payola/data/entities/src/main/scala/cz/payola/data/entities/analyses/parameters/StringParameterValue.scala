@@ -1,7 +1,15 @@
 package cz.payola.data.entities.analyses.parameters
 
-import cz.payola.data.entities.analyses.{PluginInstance, ParameterValue}
+import cz.payola.data.entities.analyses.ParameterValue
 import cz.payola.data.entities.PayolaDB
+
+object StringParameterValue {
+
+    def apply(p: cz.payola.domain.entities.analyses.parameters.StringParameterValue): StringParameterValue = {
+        val parameter = StringParameter(p.parameter.asInstanceOf[cz.payola.domain.entities.analyses.parameters.StringParameter])
+        new StringParameterValue(p.id, parameter, p.value)
+    }
+}
 
 class StringParameterValue(
     override val id: String,

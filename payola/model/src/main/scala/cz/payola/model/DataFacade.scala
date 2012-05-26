@@ -18,7 +18,8 @@ class DataFacade
     }
 
     def register(username: String, password: String): Unit = {
-        val u = new User(username, cryptPassword(password), username)
+        // TODO: SQUERYL and  "u" id
+        val u = new User("u", username, cryptPassword(password), username)
 
         userDAO.persist(u)
     }
