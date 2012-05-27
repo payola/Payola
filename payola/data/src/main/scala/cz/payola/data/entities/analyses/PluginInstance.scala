@@ -35,6 +35,7 @@ object PluginInstance {
 
         val instance = new PluginInstance(p.id, PluginDbRepresentation(p.plugin).createPlugin(), paramValues, p.description)
 
+        // TODO: might fail when Instance is not persisted yet
         instance.associateParameterValues
 
         instance
