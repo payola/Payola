@@ -2,17 +2,8 @@ package cz.payola.domain.test
 
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.FlatSpec
-import cz.payola.domain.rdf.Graph
-import cz.payola.domain.rdf.ontology.Model
 import cz.payola.scala2json._
-
-/**
-  * Created with IntelliJ IDEA.
-  * User: charliemonroe
-  * Date: 5/23/12
-  * Time: 2:00 PM
-  * To change this template use File | Settings | File Templates.
-  */
+import cz.payola.domain.rdf.ontology._
 
 class OntologyTest extends FlatSpec with ShouldMatchers {
 
@@ -120,24 +111,56 @@ class OntologyTest extends FlatSpec with ShouldMatchers {
                          |
                          |</rdf:RDF>""".stripMargin
 
-    "Ontology" should "be created from sample RDF" in {
+    val regularRDF = """<?xml version="1.0"?>
+                       |
+                       |<rdf:RDF
+                       |xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+                       |xmlns:cd="http://www.recshop.fake/cd#">
+                       |
+                       |<rdf:Description
+                       |rdf:about="http://www.recshop.fake/cd/Empire Burlesque">
+                       |  <cd:artist>Bob Dylan</cd:artist>
+                       |  <cd:country>USA</cd:country>
+                       |  <cd:company>Columbia</cd:company>
+                       |  <cd:price>10.90</cd:price>
+                       |  <cd:year>1985</cd:year>
+                       |</rdf:Description>
+                       |
+                       |<rdf:Description
+                       |rdf:about="http://www.recshop.fake/cd/Hide your heart">
+                       |  <cd:artist>Bonnie Tyler</cd:artist>
+                       |  <cd:country>UK</cd:country>
+                       |  <cd:company>CBS Records</cd:company>
+                       |  <cd:price>9.90</cd:price>
+                       |  <cd:year>1988</cd:year>
+                       |</rdf:Description>
+                       |</rdf:RDF>""".stripMargin
+
+
+    it should "be created from sample OWL" in {
         try {
-            val m: Model = Model(sampleOWL)
-            //val serializer = new JSONSerializer()
-            //serializer.outputFormat = OutputFormat.PrettyPrinted
-            //serializer.serializeInDepth = true
+            val o: Ontology = Ontology(sampleOWL)
+            val serializer = new JSONSerializer()
+            serializer.outputFormat = OutputFormat.PrettyPrinted
+            serializer.serializeInDepth = true
+            println(serializer.serialize(o))
+        }catch{
+            case e: Exception => e.printStackTrace()
+        }
+    }
+
+    it should "be created from second sample OWL" in {
+        try {
+            val m: Ontology = Ontology(secondSample)
             println(m)
         }catch{
             case e: Exception => e.printStackTrace()
         }
     }
 
-    "Ontology" should "be created from second sample RDF" in {
+    it should "be created from a sample RDF document" in {
         try {
-            val m: Model = Model(secondSample)
-            //val serializer = new JSONSerializer()
-            //serializer.outputFormat = OutputFormat.PrettyPrinted
-            //serializer.serializeInDepth = true
+            val m: Ontology = Ontology(regularRDF)
             println(m)
         }catch{
             case e: Exception => e.printStackTrace()

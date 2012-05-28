@@ -1,7 +1,7 @@
 package cz.payola.domain.rdf.ontology
 
 
-class Class(val URI: String, val label: String, val comment: String)
+class Class(val URI: String, val label: String, val comment: String) extends cz.payola.common.entities.ontology.Class
 {
     private var _properties: collection.Seq[Property] = Nil
     private var _superclasses: collection.Seq[Class] = Nil

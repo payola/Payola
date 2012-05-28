@@ -9,18 +9,18 @@ private[ontology] class OntologyFactory(val ontologyModel: OntModel) {
     // Need a hash map
     private val classes: HashMap[String, Class] = new HashMap[String, Class]()
     private val properties: HashMap[String, Property] = new HashMap[String, Property]()
-    private var model: Model = null
+    private var ontology: Ontology = null
 
     /** Actually creates a new Model instance from OntologyModel.
       */
-    private def createModel {
+    private def createOntology {
         val clIt = ontologyModel.listClasses()
         while (clIt.hasNext) {
             val cl: OntClass = clIt.next()
             processClass(cl)
         }
 
-        model = new Model(classes.values.toList)
+        ontology = new Ontology(classes.values.toList)
     }
 
 
@@ -33,17 +33,17 @@ private[ontology] class OntologyFactory(val ontologyModel: OntModel) {
     }
 
 
-    /** Returns an instance of Model. Can be called multiple times, however,
+    /** Returns an instance of Ontology. Can be called multiple times, however,
       * same instance will be returned each time.
       *
-      * @return Model instance generated from the OntologyModel.
+      * @return Ontology instance generated from the OntologyModel.
       */
-    def getModel: Model = {
-        if (model == null) {
-            createModel
+    def getOntology: Ontology = {
+        if (ontology == null) {
+            createOntology
         }
 
-        model
+        ontology
     }
 
 

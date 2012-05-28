@@ -7,31 +7,34 @@ import com.hp.hpl.jena.ontology._
   */
 
 
-object Model {
+object Ontology {
 
-    def apply(ontologyModel: OntModel): Model = {
-        val fact = new ModelFactory(ontologyModel)
-        fact.getModel
+    def apply(ontologyModel: OntModel): Ontology = {
+        val fact = new OntologyFactory(ontologyModel)
+        fact.getOntology
     }
 
-    def apply(ontologyString: String): Model = {
+    def apply(ontologyString: String): Ontology = {
         val reader = new StringReader(ontologyString)
 
+        // At this moment we don't allow any other format
+        // as both OWL and RDFS should theoretically come
+        // in XML format only
         val inputType = "RDF/XML"
 
         // Create a model and read it from the input string
         val jenaModel: OntModel = com.hp.hpl.jena.rdf.model.ModelFactory.createOntologyModel()
-        jenaModel.read(reader, "RDF/XML")
+        jenaModel.read(reader, inputType)
 
         val m = apply(jenaModel)
         jenaModel.close()
         m
     }
 
-    def empty: Model = new Model(Nil)
+    def empty: Ontology = new Ontology(Nil)
 }
 
-class Model(val classes: collection.Seq[Class])
+class Ontology(val classes: collection.Seq[Class]) extends cz.payola.common.entities.ontology.Ontology
 {
     override def toString: String = {
         super.toString + " " + classes.toString
