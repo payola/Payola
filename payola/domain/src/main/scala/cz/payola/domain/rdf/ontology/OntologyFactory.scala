@@ -4,7 +4,7 @@ import com.hp.hpl.jena.ontology._
 import scala.collection.mutable._
 import com.hp.hpl.jena.util.iterator.ExtendedIterator
 
-private[ontology] class ModelFactory(val ontologyModel: OntModel) {
+private[ontology] class OntologyFactory(val ontologyModel: OntModel) {
 
     // Need a hash map
     private val classes: HashMap[String, Class] = new HashMap[String, Class]()
