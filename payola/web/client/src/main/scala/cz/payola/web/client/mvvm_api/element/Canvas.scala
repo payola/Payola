@@ -9,7 +9,7 @@ import cz.payola.web.client.views.plugins.visual.{Point, Vector}
 /**
  * Representation of a space for drawing into a web page.
  */
-class Canvas(width: Int, height: Int) extends Component {
+class Canvas(width: Double, height: Double) extends Component {
 
     protected var mousePressed = false
 
@@ -38,8 +38,8 @@ class Canvas(width: Int, height: Int) extends Component {
      * @param size new dimensions.
      */
     def setSize(size: Vector) {
-        canvasElement.width = size.x;
-        canvasElement.height = size.y;
+        canvasElement.width = size.x
+        canvasElement.height = size.y
     }
 
     /**
@@ -67,13 +67,5 @@ class Canvas(width: Int, height: Int) extends Component {
      */
     def dirty() {
         cleared = false
-    }
-
-    def offsetLeft: Double = {
-        canvasElement.offsetLeft
-    }
-
-    def offsetTop: Double = {
-        canvasElement.offsetTop
     }
 }

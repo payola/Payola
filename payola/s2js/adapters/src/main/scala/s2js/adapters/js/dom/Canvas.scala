@@ -19,4 +19,5 @@ abstract class Canvas extends Element
     var onmousedown: (Event => Boolean)
     var onmouseup: (Event => Boolean)
     var onmousemove: (Event => Boolean)
+    var onmousewheel: (Event => Boolean)
 }

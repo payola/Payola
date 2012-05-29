@@ -6,6 +6,7 @@ import cz.payola.web.client.views.plugins.visual._
 import settings.components.visualsetup.VisualSetup
 import s2js.adapters.js.browser.window
 import cz.payola.common.rdf._
+import s2js.adapters.js.browser.document
 
 /**
   * Graphical representation of Graph object.
@@ -344,12 +345,22 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
     }
 
     /**
-      * Adds the input vector to positions of all vertices in this graph visualisation.
+      * Adds the input vector to positions of all selected vertices in this graph visualisation.
       * @param difference to move the vertices
       */
     def moveAllSelectedVertices(difference: Vector) {
         components.foreach{
             _.moveAllSelectedVertices(difference)
+        }
+    }
+
+    /**
+      * Adds the input vector to positions of all vertices in this graph visualisation.
+      * @param difference to move the vertices
+      */
+    def moveAllVertices(difference: Vector) {
+        components.foreach{
+            _.moveAllVertices(difference)
         }
     }
 
@@ -378,6 +389,8 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
     //###################################################################################################################
 
     def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
+
+        //fitCanvas()
 
         var colorVertex: Option[Color] = Some(Color.Black)
 
@@ -465,6 +478,10 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
                 canvasPack.clear()
                 drawQuick(null, None, Vector.Zero)
 
+            case RedrawOperation.All =>
+                canvasPack.clear()
+                redrawAll()
+
             case _ =>
                 redrawAll()
         }
@@ -489,7 +506,7 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
     //component together putters#########################################################################################
     //###################################################################################################################
 
-    private def getAllVertices: ListBuffer[VertexView] = {
+    def getAllVertices: ListBuffer[VertexView] = {
         var allVertices = ListBuffer[VertexView]()
         components.foreach{ component =>
             allVertices ++= component.vertexViews
@@ -498,7 +515,7 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
         allVertices
     }
 
-    private def getAllEdges: ListBuffer[EdgeView] = {
+    def getAllEdges: ListBuffer[EdgeView] = {
         var allEdges = ListBuffer[EdgeView]()
         components.foreach{ component =>
             allEdges ++= component.edgeViews
@@ -526,5 +543,23 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
         }
 
         result
+    }
+
+    def fitCanvas() {
+        //measure size of the graph and set dimensions of the canvasPack accordingly (max(sizeOfTheWindow, sizeOfTheGraph))
+        val maxBottomRight = Point(0, 0)
+        components.foreach{ component =>
+            val componentBR = component.getBottomRight()
+            if(maxBottomRight.x < componentBR.x) {
+                maxBottomRight.x = componentBR.x
+            }
+            if(maxBottomRight.y < componentBR.y) {
+                maxBottomRight.y = componentBR.y
+            }
+        }
+        val plk = Vector(
+            math.max(maxBottomRight.x - 50, window.innerWidth - canvasPack.offsetLeft),
+            math.max(maxBottomRight.y + 20, window.innerHeight - canvasPack.offsetTop))
+        canvasPack.setSize(plk)
     }
 }

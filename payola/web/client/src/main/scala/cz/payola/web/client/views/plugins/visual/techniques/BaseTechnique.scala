@@ -62,6 +62,9 @@ abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(setting
             componentNumber += 1
             previousComponent = Some(component)
         }
+        firstAnimation.addFollowingAnimation(
+            new Animation(Animation.emptyAnimation, false, None, graphView.fitCanvas, redraw, None))
+
         firstAnimation.run()
     }
 
@@ -85,7 +88,7 @@ abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(setting
      */
     def basicTreeStructure(vViews: ListBuffer[VertexView], nextAnimation: Option[Animation[_]], quickDraw: () => Unit,
         finalDraw: () => Unit, animationStepLength: Option[Int]): Animation[ListBuffer[(VertexView, Point)]] = {
-
+        //TODO je tu nejaka chyba...testovaci graf se kresli spatne
         var levels = ListBuffer[ListBuffer[VertexView]]()
         var level = ListBuffer[VertexView]()
         var levelNext = ListBuffer[VertexView]()
@@ -165,7 +168,7 @@ abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(setting
      */
     def basicTreeCircledStructure(vViews: ListBuffer[VertexView], nextAnimation: Option[Animation[_]], quickDraw: () => Unit,
         finalDraw: () => Unit, animationStepLength: Option[Int]): Animation[ListBuffer[(VertexView, Point)]] = {
-
+        //TODO je tu nejaka chyba...testovaci graf se kresli spatne
 
         var level1 = ListBuffer[(VertexView, Point)]()
         var level2 = ListBuffer[(VertexView, Point)]()

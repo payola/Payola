@@ -1,5 +1,7 @@
 package cz.payola.web.client.views.plugins.visual
 
+import s2js.adapters.js.browser.`package`.window
+
 /**
   * Representation of a position in 2-dimensional space.
   * @param x coordinate
@@ -58,6 +60,15 @@ case class Point(var x: Double, var y: Double)
       */
     def createVector(destination: Point): Vector = {
         Vector(destination.x - x, destination.y - y)
+    }
+
+    /**
+      * Computes distance of this and point p.
+      * @param p
+      * @return
+      */
+    def distance(p: Point): Double = {
+        math.sqrt(math.pow(x - p.x, 2) + math.pow(y - p.y, 2))
     }
 
     override def toString: String = {

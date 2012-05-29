@@ -137,6 +137,12 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
         }
     }
 
+    def moveAllVertices(difference: Vector) {
+        vertexViews.foreach { vertexView =>
+            vertexView.position += difference
+        }
+    }
+
     def deselectAll(): ListBuffer[VertexView] = {
 
         var deselected = ListBuffer[VertexView]()

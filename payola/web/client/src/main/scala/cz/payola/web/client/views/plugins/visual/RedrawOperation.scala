@@ -19,4 +19,9 @@ object RedrawOperation
       * Redraw operation called during technique processing,
       */
     val Animation = 2
+
+    /**
+      * Redraw operation called for whole graph moving.
+      */
+    val All = 3
 }
