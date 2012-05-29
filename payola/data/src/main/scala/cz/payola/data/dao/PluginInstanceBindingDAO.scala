@@ -5,4 +5,7 @@ import cz.payola.data.entities.analyses.PluginInstanceBinding
 
 class PluginInstanceBindingDAO extends EntityDAO[PluginInstanceBinding](PayolaDB.pluginInstanceBindings)
 {
+    def persist(b: cz.payola.common.entities.analyses.PluginInstanceBinding): Option[PluginInstanceBinding] = {
+        super.persist(PluginInstanceBinding(b))
+    }
 }

@@ -86,7 +86,7 @@ class Analysis(protected var _name: String, protected val _owner: Option[User])
       * @throws IllegalArgumentException if the instance can't be added to the analysis.
       */
     def addPluginInstance(instance: PluginInstanceType) {
-        //TODO: fails on type check - squeryl: require(!pluginInstances.contains(instance), "The instance is already present in the analysis.")
+        //TODO: SQUERYL - fails on type check: require(!pluginInstances.contains(instance), "The instance is already present in the analysis.")
         storePluginInstance(instance)
     }
 
@@ -228,10 +228,6 @@ class Analysis(protected var _name: String, protected val _owner: Option[User])
 
     override def canEqual(other: Any): Boolean = {
         other.isInstanceOf[Analysis]
-    }
-
-    def getSources : Seq[PluginInstanceType] = {
-        pluginInstances.diff(pluginInstanceBindings.map(b => b.targetPluginInstance))
     }
 
     override protected def checkInvariants() {

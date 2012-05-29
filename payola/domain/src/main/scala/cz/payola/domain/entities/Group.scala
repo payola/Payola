@@ -14,7 +14,9 @@ class Group(protected var _name: String, protected val _owner: User)
     with NamedEntity
     with cz.payola.common.entities.Group
 {
-    if (_owner != null) {
+    // When creating persistable Group based on non-persistable group
+    // via Group Companion object fails on "User already owns this group" (2x Constructor init)
+    if (_owner != null && !_owner.ownedGroups.contains(this)) {
         _owner.addOwnedGroup(this)
     }
     checkConstructorPostConditions()

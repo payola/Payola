@@ -6,5 +6,7 @@ trait Parameter[A] extends cz.payola.domain.entities.analyses.Parameter[A] with 
 {
     var pluginId: Option[String] = None
 
+    //def registerParameterValue(p: ParameterValue[A])
+
     def parameterValues: Seq[ParameterValue[A]]
 }
