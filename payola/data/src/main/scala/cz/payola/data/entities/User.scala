@@ -1,51 +1,74 @@
 package cz.payola.data.entities
 
 import cz.payola.data.PayolaDB
+import org.squeryl.annotations.Transient
 
-class User(name: String, pwd: String, email: String)
+object User {
+
+    def apply(u: cz.payola.common.entities.User): User = {
+        u match {
+            case user : User => user
+            case _ => new User(u.id, u.name, u.password, u.email)
+        }
+    }
+}
+
+class User(
+    override val id: String,
+    name: String,
+    pwd: String,
+    mail: String)
     extends cz.payola.domain.entities.User(name) with PersistableEntity
 {
     password_=(pwd)
-    email_=(email)
+    email_=(mail)
 
+    @Transient
+    private var _ownedGroupsLoaded = false
     private lazy val _ownedGroupsQuery = PayolaDB.groupOwnership.left(this)
 
+    @Transient
+    private var _ownedAnalysesLoaded = false
     private lazy val _ownedAnalysesQuery = PayolaDB.analysisOwnership.left(this)
 
+    @Transient
+    private var _memberGroupsLoaded = false
     private lazy val _memberGroupsQuery = PayolaDB.groupMembership.left(this)
 
     override def ownedGroups: collection.Seq[GroupType] = {
-        evaluateCollection(_ownedGroupsQuery)
+        if (!_ownedGroupsLoaded) {
+            evaluateCollection(_ownedGroupsQuery).map(g => 
+                if (!super.ownedGroups.contains(g))
+                    super.storeOwnedGroup(g)
+            )
+
+            _ownedGroupsLoaded = true
+        }
+
+        super.ownedGroups
     }
 
     override def ownedAnalyses: collection.Seq[AnalysisType] = {
-        evaluateCollection(_ownedAnalysesQuery)
-    }
+        if (!_ownedAnalysesLoaded) {
+            evaluateCollection(_ownedAnalysesQuery).map(a => 
+                if (!super.ownedAnalyses.contains(a))
+                    super.storeOwnedAnalysis(a)
+            )
 
-    override def memberGroups: collection.Seq[GroupType] = {
-        evaluateCollection(_memberGroupsQuery)
+            _ownedAnalysesLoaded = true
+        }
+
+        super.ownedAnalyses
     }
 
     override protected def storeOwnedAnalysis(analysis: User#AnalysisType) {
-        analysis match {
-            // Just associate Analysis with user and persist
-            case a: Analysis => associate(a, _ownedAnalysesQuery)
-
-            // "Convert" to data.Analysis, associate with user and persist
-            case a: cz.payola.domain.entities.Analysis => associate(new Analysis(a.name, None), _ownedAnalysesQuery)
-        }
+        super.storeOwnedAnalysis(associate(Analysis(analysis), _ownedAnalysesQuery).get)
     }
 
     //TODO: override protected def discardOwnedAnalysis(analysis: User#AnalysisType) {}
 
     override protected def storeOwnedGroup(group: User#GroupType) {
-        group match {
-            // Just associate Group with user and persist
-            case g: Group => associate(g, _ownedGroupsQuery);
-
-            // "Convert" to data.Group, associate with user and persist
-            case g: cz.payola.domain.entities.Group => associate(new Group(g.name, this), _ownedGroupsQuery)
-        }
+        super.storeOwnedGroup(associate(Group(group), _ownedGroupsQuery).get)
     }
 
     //TODO: override protected def discardOwnedGroup(group: User#GroupType)  {}

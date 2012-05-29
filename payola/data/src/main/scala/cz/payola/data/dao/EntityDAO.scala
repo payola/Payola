@@ -11,18 +11,19 @@ abstract class EntityDAO[A <: KeyedEntity[String]](protected val table: Table[A]
         evaluateSingleResultQuery(table.where(e => e.id === id))
     }
 
-    def removeById(id: String) {
+    def removeById(id: String): Boolean = {
         try {
             transaction {
                 val result = table.deleteWhere(e => id === e.id)
 
-                // TODO:
-                println("delete result " + result)
+                result == 1
             }
         }
         catch {
             //TODO: Handle exceptions
             case e: Exception => println("Removing error: " + e)
+
+            false
         }
     }
 
@@ -31,26 +32,27 @@ abstract class EntityDAO[A <: KeyedEntity[String]](protected val table: Table[A]
         evaluateCollectionResultQuery(table, offset, count)
     }
 
-    def persist(entity: A) {
+    protected def persist(entity: A): Option[A] = {
         try {
             // Insert or update entity {
             transaction {
                 if (getById(entity.id) != None) {
-                    //if (entity.isPersisted) {
-                    val result = table.update(entity)
+                    table.update(entity)
 
-                    println("Update result: " + result)
+                    Some(entity)
                 }
                 else {
-                    val result = table.insert(entity)
+                    table.insert(entity)
 
-                    println("Insert result: " + result)
+                    Some(entity)
                 }
             }
         }
         catch {
             //TODO: Handle exceptions
             case e: Exception => println("Persistance error: " + e)
+
+            None
         }
     }
 

@@ -42,12 +42,19 @@ private[rdf] class GraphFactory(val model: Model)
             language = null
         }
 
-        val literalNode = new LiteralNode(rdfNode.getValue, Option(language))
+        val literalNode = try {
+            new LiteralNode(rdfNode.getValue, Option(language))
+        }catch{
+            case _=> {
+                new LiteralNode(rdfNode.getString, Option(language))
+            }
+        }
         literalNode.objectID = objectIDCounter
         objectIDCounter += 1
         allNodes += literalNode
 
         literalNode
+
     }
 
     /** Returns an instance of Graph. Can be called multiple times, however,

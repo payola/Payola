@@ -1,10 +1,10 @@
-package cz.payola.data
+package cz.payola.web.initializer
 
 import cz.payola.domain.entities.analyses.plugins.data.SparqlEndpoint
 import cz.payola.domain.entities.analyses.plugins.query._
 import cz.payola.domain.entities.analyses.plugins._
 import cz.payola.data.dao._
-import cz.payola.data.entities.Analysis
+import cz.payola.data.PayolaDB
 
 object DatabaseInitializer extends App
 {
@@ -37,8 +37,8 @@ object DatabaseInitializer extends App
             unionPlugin
         )
         // persist analysis
-        val analysis = new Analysis("DB: Cities with more than 2 million habitants with countries", None)
-        analysisDao.persist(analysis)
+        val a = new cz.payola.domain.entities.Analysis("DB: Cities with more than 2 million habitants with countries", None)
+        val analysis = analysisDao.persist(a).get
 
         // Persist  plugins
         for (p <- plugins) {
