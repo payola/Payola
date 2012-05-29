@@ -5,12 +5,15 @@ import cz.payola.data.entities.PersistableEntity
 object PluginInstanceBinding {
 
     def apply(p: cz.payola.common.entities.analyses.PluginInstanceBinding): PluginInstanceBinding = {
-        new PluginInstanceBinding(
-            p.id,
-            PluginInstance(p.sourcePluginInstance),
-            PluginInstance(p.targetPluginInstance),
-            p.targetInputIndex
-        )
+        p match {
+            case b: PluginInstanceBinding => b
+            case _ => new PluginInstanceBinding(
+                            p.id,
+                            PluginInstance(p.sourcePluginInstance),
+                            PluginInstance(p.targetPluginInstance),
+                            p.targetInputIndex
+                        )
+        }
     }
 }
 

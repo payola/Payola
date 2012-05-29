@@ -18,8 +18,9 @@ class DataFacade
     }
 
     def register(username: String, password: String): Unit = {
-        // TODO: SQUERYL and  "u" id
-        val u = new User("u", username, cryptPassword(password), username)
+        val u = new cz.payola.domain.entities.User(username)
+        u.password = cryptPassword(password)
+        u.email = username
 
         userDAO.persist(u)
     }

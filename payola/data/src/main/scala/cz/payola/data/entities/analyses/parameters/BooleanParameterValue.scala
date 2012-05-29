@@ -6,8 +6,17 @@ import cz.payola.data.PayolaDB
 object BooleanParameterValue {
 
     def apply(p: cz.payola.domain.entities.analyses.parameters.BooleanParameterValue): BooleanParameterValue = {
-        val parameter = BooleanParameter(p.parameter.asInstanceOf[cz.payola.domain.entities.analyses.parameters.BooleanParameter])
-        new BooleanParameterValue(p.id, parameter, p.value)
+        p match {
+            case param: BooleanParameterValue => param
+            case _ => {
+                val parameter = BooleanParameter(p.parameter.asInstanceOf[cz.payola.domain.entities.analyses.parameters.BooleanParameter])
+                val parameterValue = new BooleanParameterValue(p.id, parameter, p.value)
+
+                parameter.registerParameterValue(parameterValue)
+
+                parameterValue
+            }
+        }
     }
 }
 

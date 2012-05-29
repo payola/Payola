@@ -6,8 +6,17 @@ import cz.payola.data.PayolaDB
 object StringParameterValue {
 
     def apply(p: cz.payola.domain.entities.analyses.parameters.StringParameterValue): StringParameterValue = {
-        val parameter = StringParameter(p.parameter.asInstanceOf[cz.payola.domain.entities.analyses.parameters.StringParameter])
-        new StringParameterValue(p.id, parameter, p.value)
+        p match {
+            case param: StringParameterValue => param
+            case _ => {
+                val parameter = StringParameter(p.parameter.asInstanceOf[cz.payola.domain.entities.analyses.parameters.StringParameter])
+                val parameterValue = new StringParameterValue(p.id, parameter, p.value)
+
+                parameter.registerParameterValue(parameterValue)
+
+                parameterValue
+            }
+        }
     }
 }
 

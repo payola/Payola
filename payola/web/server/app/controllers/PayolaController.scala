@@ -14,8 +14,8 @@ import play.api.mvc.{Codec, RequestHeader}
 
 class PayolaController extends Controller
 {
+    assert(PayolaDB.connect())
     val df = new DataFacade
-    PayolaDB.connect()
 
     def getUser(userName: String): Option[User] = {
         df.getUserByUsername(userName)

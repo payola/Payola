@@ -2,8 +2,10 @@ package cz.payola.data.entities
 
 import cz.payola.data.entities.analyses._
 import cz.payola.data.entities.analyses.parameters._
-import scala.collection.immutable
+import scala.collection.mutable
 import cz.payola.data.PayolaDB
+import cz.payola.data.dao.{PluginInstanceDAO, PluginInstanceBindingDAO}
+import org.squeryl.annotations.Transient
 
 object Analysis {
 
@@ -22,115 +24,76 @@ class Analysis(
 {
     type DomainParameterValueType = cz.payola.domain.entities.analyses.ParameterValue[_]
 
+    @Transient
+    private var _pluginInstancesLoaded = false;
     private lazy val _pluginInstancesQuery = PayolaDB.analysesPluginInstances.left(this)
 
+    @Transient
+    private var _pluginInstancesBindingsLoaded = false;
     private lazy val _pluginInstancesBindingsQuery = PayolaDB.analysesPluginInstancesBindings.left(this)
 
     val ownerId: Option[String] = owner.map(_.id)
 
-    override def pluginInstances : collection.Seq[PluginInstanceType] = {
-        println("Instances?")
+    override def pluginInstances : Seq[PluginInstanceType] = {
+        // Lazy-load related instances only for first time
+        if (!_pluginInstancesLoaded) {
+            evaluateCollection(_pluginInstancesQuery).map( i =>
+                if (!super.pluginInstances.contains(i)) {
+                    super.storePluginInstance(i)
+                }
+            )
 
-        val r = evaluateCollection(_pluginInstancesQuery)
-        
-        println("Instances " + r.size)
-        
-        r
+            _pluginInstancesLoaded = true
+        }
+
+        super.pluginInstances
     }
         
 
     override def pluginInstanceBindings: Seq[PluginInstanceBindingType] = {
-        println("Bindings?")
+        // Lazy-load related bindings only for first time
+        if (!_pluginInstancesBindingsLoaded) {
+            evaluateCollection(_pluginInstancesBindingsQuery).map(b =>
+                if (!super.pluginInstanceBindings.contains(b)) {
+                    super.storeBinding(b)
+                }
+            )
+
+            _pluginInstancesBindingsLoaded = true
+        }
         
-        val r = evaluateCollection(_pluginInstancesBindingsQuery)
-        
-        println("Bindings " + r.size)
-        
-        r
+        super.pluginInstanceBindings
     }
 
     override protected def storePluginInstance(instance: Analysis#PluginInstanceType) {
-        instance match {
-            // Just associate binding with analysis and persist
-            case i: PluginInstance => associate(i, _pluginInstancesQuery)
+        val i = PluginInstance(instance)
+        super.storePluginInstance(associate(i, _pluginInstancesQuery).get)
 
-            // "Convert" to data.PluginInstance, associate with analysis and persist
-            case i: cz.payola.domain.entities.analyses.PluginInstance => {
-                val inst = new PluginInstance(i.id, i.plugin, convertParamValues(i.parameterValues), i.description)
-                associate(inst, _pluginInstancesQuery)
-            }
-        }
+        // Needs to be done after pluin instance is persisted (SQUERYL)
+        i.associateParameterValues()
     }
 
     override protected def discardPluginInstance(instance: Analysis#PluginInstanceType) {
-        if (instance.isInstanceOf[PluginInstance]) {
-            instance.asInstanceOf[PluginInstance].analysisId = None
-        }
+        val i = PluginInstance(instance)
+        i.analysisId = None
+
+        // TODO: SQUERYL - ugly
+        new PluginInstanceDAO().persist(i)
+
+        super.discardPluginInstance(i)
     }
 
     override protected def storeBinding(binding: Analysis#PluginInstanceBindingType) {
-        binding match {
-            // Just associate binding with analysis and persist
-            case b: PluginInstanceBinding => associate(b, _pluginInstancesBindingsQuery)
-
-            // "Convert" to data.Binding, associate with analysis and persist
-            case b: cz.payola.domain.entities.analyses.PluginInstanceBinding => {
-                // "Convert" source and target plugin parameterValues of binding in order to persist them
-                val source = b.sourcePluginInstance match {
-                    case i: PluginInstance => i
-                    case i: cz.payola.domain.entities.analyses.PluginInstance
-                    => new PluginInstance(i.id, i.plugin, convertParamValues(i.parameterValues), i.description)
-                }
-                val target = b.targetPluginInstance match {
-                    case i: PluginInstance => i
-                    case i: cz.payola.domain.entities.analyses.PluginInstance =>
-                        new PluginInstance(i.id, i.plugin, convertParamValues(i.parameterValues), i.description)
-                }
-
-                // "Convert" binding, associate with analysis and persist
-                val bin = new PluginInstanceBinding(b.id, source, target, b.targetInputIndex)
-                associate(bin, _pluginInstancesBindingsQuery)
-            }
-        }
+        super.storeBinding(associate(PluginInstanceBinding(binding), _pluginInstancesBindingsQuery).get)
     }
 
     override protected def discardBinding(binding: Analysis#PluginInstanceBindingType) {
-        if (binding.isInstanceOf[PluginInstanceBinding]) {
-            binding.asInstanceOf[PluginInstanceBinding].analysisId = None
-        }
-    }
+        val b = PluginInstanceBinding(binding)
+        b.analysisId = None
 
-    private def convertParamValues(values: immutable.Seq[DomainParameterValueType]): immutable.Seq[ParameterValue[_]] = {
-        // Every parameter value needs to be data.ParameterValue
-        values.map {
-            case b: BooleanParameterValue => b
-            case f: FloatParameterValue => f
-            case i: IntParameterValue => i
-            case s: StringParameterValue => s
-            case b: cz.payola.domain.entities.analyses.parameters.BooleanParameterValue
-            => new BooleanParameterValue(
-                b.id,
-                new BooleanParameter(b.parameter.id, b.parameter.name, b.parameter.defaultValue),
-                b.value
-            )
-            case f: cz.payola.domain.entities.analyses.parameters.FloatParameterValue
-            => new FloatParameterValue(
-                f.id,
-                new FloatParameter(f.parameter.id, f.parameter.name, f.parameter.defaultValue),
-                f.value
-            )
-            case i: cz.payola.domain.entities.analyses.parameters.IntParameterValue
-            => new IntParameterValue(
-                i.id,
-                new IntParameter(i.parameter.id, i.parameter.name, i.parameter.defaultValue),
-                i.value
-            )
-            case s: cz.payola.domain.entities.analyses.parameters.StringParameterValue
-            => new StringParameterValue(
-                s.id,
-                new StringParameter(s.parameter.id, s.parameter.name, s.parameter.defaultValue),
-                s.value
-            )
-        }
+        // TODO: SQUERYL - ugly
+        new PluginInstanceBindingDAO().persist(b)
+
+        super.discardBinding(b)
     }
 }

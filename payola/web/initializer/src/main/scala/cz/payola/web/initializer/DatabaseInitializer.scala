@@ -4,7 +4,6 @@ import cz.payola.domain.entities.analyses.plugins.data.SparqlEndpoint
 import cz.payola.domain.entities.analyses.plugins.query._
 import cz.payola.domain.entities.analyses.plugins._
 import cz.payola.data.dao._
-import cz.payola.data.entities._
 import cz.payola.data.PayolaDB
 
 object DatabaseInitializer extends App
@@ -38,9 +37,8 @@ object DatabaseInitializer extends App
             unionPlugin
         )
         // persist analysis
-        //TODO: SQUERYL and "xx" id
-        val analysis = new Analysis("xx", "DB: Cities with more than 2 million habitants with countries", None)
-        analysisDao.persist(analysis)
+        val a = new cz.payola.domain.entities.Analysis("DB: Cities with more than 2 million habitants with countries", None)
+        val analysis = analysisDao.persist(a).get
 
         // Persist  plugins
         for (p <- plugins) {

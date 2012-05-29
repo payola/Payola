@@ -6,7 +6,10 @@ import cz.payola.data.PayolaDB
 object BooleanParameter {
 
     def apply(p: cz.payola.domain.entities.analyses.parameters.BooleanParameter): BooleanParameter = {
-        new BooleanParameter(p.id, p.name, p.defaultValue)
+        p match {
+            case p: BooleanParameter => p
+            case _ => new BooleanParameter(p.id, p.name, p.defaultValue)
+        }
     }
 }
 
@@ -25,6 +28,10 @@ class BooleanParameter(
     override def defaultValue = _defaultValueDb
 
     def parameterValues: Seq[BooleanParameterValue] = evaluateCollection(_valuesQuery)
+
+    def registerParameterValue(p: BooleanParameterValue) {
+        associate(p, _valuesQuery)
+    }
 }
 
 

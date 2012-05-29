@@ -6,7 +6,10 @@ import cz.payola.data.PayolaDB
 object FloatParameter {
 
     def apply(p: cz.payola.common.entities.analyses.parameters.FloatParameter): FloatParameter = {
-         new FloatParameter(p.id, p.name, p.defaultValue)
+        p match {
+            case p: FloatParameter => p
+            case _ => new FloatParameter(p.id, p.name, p.defaultValue)
+        }
     }
 }
 
@@ -17,14 +20,18 @@ class FloatParameter(
     extends cz.payola.domain.entities.analyses.parameters.FloatParameter(name, defaultVal)
     with Parameter[Float]
 {
-    private lazy val _instances = PayolaDB.valuesOfFloatParameters.left(this)
+    private lazy val _valuesQuery = PayolaDB.valuesOfFloatParameters.left(this)
 
     // Get, store and set default value of parameter to Database
     val _defaultValueDb = defaultVal
 
     override def defaultValue = _defaultValueDb
 
-    def parameterValues: Seq[FloatParameterValue] = evaluateCollection(_instances)
+    def parameterValues: Seq[FloatParameterValue] = evaluateCollection(_valuesQuery)
+
+    def registerParameterValue(p: FloatParameterValue) {
+        associate(p, _valuesQuery)
+    }
 }
 
 

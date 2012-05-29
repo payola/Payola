@@ -26,59 +26,75 @@ trait PersistableEntity extends cz.payola.domain.entities.Entity with KeyedEntit
         }
     }
 
-    protected final def associate[A <: PersistableEntity](entity: A, relation: ManyToMany[A,_]) {
+    protected final def associate[A <: PersistableEntity](entity: A, relation: ManyToMany[A,_]): Option[A] = {
         try
         {
             transaction {
                 if (relation.find(e => e.id == entity.id) == None) {
                     relation.associate(entity)
                 }
+
+                Some(entity)
             }
         }
         catch {
             case e: Exception => println("M:N association failed: " + e.toString)
+
+            None
         }
     }
 
-    protected final def assign[A <: PersistableEntity](entity: A, relation: ManyToMany[A,_]) {
+    protected final def assign[A <: PersistableEntity](entity: A, relation: ManyToMany[A,_]): Option[A] = {
         try
         {
             transaction {
                 if (relation.find(e => e.id == entity.id) == None) {
                     relation.assign(entity)
                 }
+
+                Some(entity)
             }
         }
         catch {
             case e: Exception => println("M:N assign failed: " + e.toString)
+
+            None
         }
     }
 
-    protected final def dissociate[A <: PersistableEntity](entity: A, relation: ManyToMany[A,_]) {
+    protected final def dissociate[A <: PersistableEntity](entity: A, relation: ManyToMany[A,_]): Option[A] = {
         try
         {
             transaction {
                 if (relation.find(e => e.id == entity.id) != None) {
                     relation.dissociate(entity)
                 }
+
+                Some(entity)
             }
         }
         catch {
             case e: Exception => println("M:N dissociation failed: " + e.toString)
+
+            None
         }
     }
 
-    protected final def associate[A <: PersistableEntity](entity: A, relation: OneToMany[A]) {
+    protected final def associate[A <: PersistableEntity](entity: A, relation: OneToMany[A]): Option[A] = {
         try
         {
             transaction {
                 if (relation.find(e => e.id == entity.id) == None) {
                     relation.associate(entity)
                 }
+
+                Some(entity)
             }
         }
         catch {
             case e: Exception => println("1:N association failed: " + e.toString)
+
+            None
         }
     }
 
