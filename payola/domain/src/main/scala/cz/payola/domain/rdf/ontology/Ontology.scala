@@ -1,7 +1,8 @@
 package cz.payola.domain.rdf.ontology
 
-import java.io.StringReader
 import com.hp.hpl.jena.ontology._
+import java.io._
+import scala.io.Source
 
 /** A class that represents an ontology model and its companion object
   * with several apply methods for ontology creation.
@@ -10,6 +11,17 @@ import com.hp.hpl.jena.ontology._
 
 
 object Ontology {
+
+    /** Reads an Ontology from input stream.
+      *
+      * @param is Input Stream.
+      * @param encoding Encoding of the input stream. UTF-8 by default.
+      * @return Instance of ontology.
+      */
+    def apply(is: InputStream, encoding: String = "UTF-8"): Ontology = {
+        val xml: String = Source.fromInputStream(is, encoding).mkString
+        apply(xml)
+    }
 
     /** Creates a new ontology from Jena's OntModel.
       *
@@ -54,6 +66,16 @@ object Ontology {
 
 class Ontology(val classes: collection.Seq[Class]) extends cz.payola.common.entities.ontology.Ontology
 {
+
+
+    def containsClassWithURI(uri: String): Boolean = {
+        getClassForURI(uri).isDefined
+    }
+
+    def getClassForURI(uri: String): Option[Class] = {
+        classes.find { p: Class => p.URI == uri }
+    }
+
     /** Overriding toString - printing the class list.
       *
       * @return Object description.

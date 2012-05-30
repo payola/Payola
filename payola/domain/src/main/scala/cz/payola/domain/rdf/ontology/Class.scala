@@ -23,6 +23,11 @@ class Class(val URI: String, val label: String, val comment: String) extends cz.
     // Superclasses
     private var _superclasses: collection.Seq[Class] = Nil
 
+    def containsPropertyWithURI(uri: String): Boolean = {
+        _properties find { p: Property => p.URI == uri } isDefined
+    }
+
+
     /** List of properties.
       *
       * @return List of properties.
