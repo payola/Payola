@@ -87,7 +87,12 @@ class CanvasPack(width: Double, height: Double) extends Canvas(width, height) {
     @javascript(
         """
            /* DOMMouseScroll is for mozilla. */
-           self.canvasElement.addEventListener('DOMMouseScroll', self.onMouseWheel, false);
+           self.canvasElement.addEventListener('DOMMouseScroll', function(event) {
+               var args = new cz.payola.web.client.events.MouseWheelEventArgs(self);
+               args.set(event);
+               self.mouseWheel.trigger(args);
+               return false;
+           });
         """)
     private def setMouseWheelListener() {}
     //^TODO this calls the onMouseWheel function in window context; that results in error, because window..mouseWheel does not exist

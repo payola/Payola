@@ -557,9 +557,7 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
                 maxBottomRight.y = componentBR.y
             }
         }
-        val plk = Vector(
-            math.max(maxBottomRight.x - 50, window.innerWidth - canvasPack.offsetLeft),
-            math.max(maxBottomRight.y + 20, window.innerHeight - canvasPack.offsetTop))
-        canvasPack.setSize(plk)
+        canvasPack.setSize(
+            Vector(window.innerWidth - canvasPack.offsetLeft, window.innerHeight - canvasPack.offsetTop))
     }
 }

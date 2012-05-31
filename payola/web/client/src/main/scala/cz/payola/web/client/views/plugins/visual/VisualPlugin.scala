@@ -98,7 +98,6 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
       * Description of mouse-button-down event. Is called from the layer (canvas) binded to it in the initialization.
-      * @param eventArgs
       */
     private def onMouseDown(eventArgs: MouseDownEventArgs[CanvasPack]) {
 
@@ -151,7 +150,6 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
     /**
      * goes through all edges of the vertex and returns informations of those,
      * which have selected both of their vertices
-     * @param vertexView
      * @return
      */
     private def getEdgesInformations(vertexView: VertexView): ListBuffer[InformationView] = {
@@ -173,7 +171,6 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
 
     /**
       * Description of mouse-move event. Is called from the layer (canvas) binded to it in the initialization.
-      * @param eventArgs
       */
     private def onMouseDrag(eventArgs: DraggedEventArgs[CanvasPack]) {
 
@@ -220,20 +217,14 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
             return
         }
 
-        val newBlek = ListBuffer[(VertexView, Point)]()
         var needToRedraw = false
 
         graphView.get.getAllVertices.foreach{ vv =>
             if(vv.position != position) {
 
-                val distance = vv.position.distance(position)
-                val d = if(zoomIn) {
-                    distance * 1.1
-                } else {
-                    distance * 0.1
-                }
-                var p1 = Point(0, 0)
-                var p2 = Point(0, 0)
+                val distance = vv.position.distance(position) * 0.09 /*zoom step*/
+                var p1 = vv.position
+                var p2 = vv.position
 
                 if(vv.position.y != position.y) {
                     val v = vv.position.x
@@ -245,7 +236,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
 
                     val a = 1 + (math.pow(m-v, 2)/math.pow(n-w, 2))
                     val b = 2*(((m-v)/(n-w))*((A/(n-w))-v)-w)
-                    val c = A/(n-w)*((A/(n-w))-2*v)+math.pow(v, 2)+math.pow(w, 2)-math.pow(d, 2)
+                    val c = A/(n-w)*((A/(n-w))-2*v)+math.pow(v, 2)+math.pow(w, 2)-math.pow(distance, 2)
 
                     val discrim = math.pow(b, 2) - 4*a*c
                     if(discrim > 1) {
@@ -259,15 +250,15 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
 
                         p1 = Point(x1, y1)
                         p2 = Point(x2, y2)
-                    } else {// something went wrong, it's impossible that there is only one or none intersections
-                        window.alert("PCHE!")
+                    } else {
+                        //window.alert("vertex is in the center of the zoom operation")
                     }
 
                 } else {
                     val y = vv.position.y
 
-                    val x1 = vv.position.x + d
-                    val x2 = vv.position.x - d
+                    val x1 = vv.position.x + distance
+                    val x2 = vv.position.x - distance
                     p1 = Point(x1, y)
                     p2 = Point(x2, y)
                 }
@@ -276,15 +267,15 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
 
                 if(zoomIn) {
                     if(p1Distance < p2Distance) {
-                        newBlek += ((vv, p2))
+                        vv.position = p2
                     } else {
-                        newBlek += ((vv, p1))
+                        vv.position = p1
                     }
                 } else {
                     if(p1Distance < p2Distance) {
-                        newBlek += ((vv, p1))
+                        vv.position = p1
                     } else {
-                        newBlek += ((vv, p2))
+                        vv.position = p2
                     }
                 }
 
@@ -294,9 +285,6 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
         }
 
         if(needToRedraw) {
-            newBlek.foreach{ plk =>
-                plk._1.position = plk._2
-            }
             redraw()
         }
     }
