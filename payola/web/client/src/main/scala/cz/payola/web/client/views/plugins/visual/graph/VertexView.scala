@@ -80,9 +80,11 @@ class VertexView(val vertexModel: Vertex, var position: Point, var settings: Ver
 
     def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
         val colorToUseOnBox = color.getOrElse(settings.colorMed)
-        val correctedPosition = this.position + (settings.getSize / -2) + positionCorrection
+        val correctedPosition = this.position + positionCorrection
 
-        drawRoundedRectangle(context, correctedPosition, settings.getSize, settings.cornerRadius)
+        drawCircle(context, correctedPosition, settings.getSize.x/2, 1, Color.Black)
+        //val correctedPosition = this.position + (settings.getSize / -2) + positionCorrection
+        //drawRoundedRectangle(context, correctedPosition, settings.getSize, settings.cornerRadius)
         fillCurrentSpace(context, colorToUseOnBox)
     }
 
