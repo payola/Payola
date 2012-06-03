@@ -1,4 +1,5 @@
-@(user: Option[cz.payola.data.entities.User], topAnalyses: Seq[cz.payola.domain.entities.Analysis])
+@(user: Option[cz.payola.data.entities.User], topAnalyses: Seq[cz.payola.domain.entities.Analysis],
+    topDataSources: Seq[cz.payola.domain.entities.analyses.PluginInstance])
 
 @main(user, "Dashboard") {
     <div class="container-fluid">
@@ -22,22 +23,19 @@
                     <p><a class="btn" href="#">View all &raquo;</a></p>
                 </div><!--/span-->
                 <div class="span4">
-                    <h2>Top data</h2>
-                    <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-                    <p><a class="btn" href="#">View details &raquo;</a></p>
+                    <h2>Top data sources</h2>
+                    <ul>
+                        @topDataSources.map{d =>
+                            <li><a href="@routes.DataSource.detail(d.id)">@d.getParameter("EndpointURL")</a></li>
+                        }
+                    </ul>
+                    <p><a class="btn" href="#">View all &raquo;</a></p>
                 </div><!--/span-->
                 <div class="span4">
                     <h2>New</h2>
                     <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
                     <p><a class="btn" href="#">View details &raquo;</a></p>
                 </div><!--/span-->
-            </div><!--/row-->
-            <div class="row-fluid">
-                <div class="well">
-                    <h2>Datastore browser</h2>
-                    <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-                    <p><a class="btn btn-primary" href="#">View more &raquo;</a></p>
-                </div>
             </div><!--/row-->
             @if(user.isDefined){
                 <div class="row-fluid">

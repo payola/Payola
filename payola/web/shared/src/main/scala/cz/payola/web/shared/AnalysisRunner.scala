@@ -4,13 +4,6 @@ import cz.payola.domain.entities.analyses.evaluation._
 import cz.payola.data.entities.dao.FakeAnalysisDAO
 import scala.collection.mutable.HashMap
 
-/**
-  *
-  * @author jirihelmich
-  * @created 5/24/12 1:44 AM
-  * @package cz.payola.web.shared
-  */
-
 @remote object AnalysisRunner
 {
     val runningEvaluations : HashMap[String, AnalysisEvaluation] = new HashMap[String, AnalysisEvaluation]
