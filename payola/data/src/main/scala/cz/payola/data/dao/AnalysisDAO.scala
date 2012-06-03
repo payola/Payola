@@ -3,6 +3,7 @@ package cz.payola.data.dao
 import org.squeryl.PrimitiveTypeMode._
 import cz.payola.data.PayolaDB
 import cz.payola.data.entities.{Analysis, User}
+import cz.payola.data.entities.analyses._
 
 class AnalysisDAO extends EntityDAO[Analysis](PayolaDB.analyses)
 {
@@ -27,5 +28,17 @@ class AnalysisDAO extends EntityDAO[Analysis](PayolaDB.analyses)
         transaction {
             query.page(page, pageLength).toSeq
         }
+    }
+
+    def persist(a: cz.payola.common.entities.Analysis): Option[Analysis] = {
+        val analysis = Analysis(a)
+        super.persist(analysis)
+
+        /*
+        //TODO: Need to store here?
+        a.pluginInstances.map(p => analysis.addPluginInstance(PluginInstance(p)))
+
+        a.pluginInstanceBindings.map(b => analysis.addBinding(PluginInstanceBinding(b)))
+        */
     }
 }

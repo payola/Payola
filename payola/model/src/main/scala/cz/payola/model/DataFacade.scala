@@ -17,8 +17,10 @@ class DataFacade
         userDAO.getUserByUsername(username)
     }
 
-    def register(username: String, password: String) {
-        val u = new User(username, cryptPassword(password), username)
+    def register(username: String, password: String): Unit = {
+        val u = new cz.payola.domain.entities.User(username)
+        u.password = cryptPassword(password)
+        u.email = username
 
         userDAO.persist(u)
     }
