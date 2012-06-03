@@ -1,13 +1,12 @@
 package cz.payola.web.client.views.plugins.visual.techniques
 
 import collection.mutable.ListBuffer
-import cz.payola.web.client.views.plugins.visual.{VisualPlugin, Point, Vector}
+import cz.payola.web.client.views.plugins.visual.{VisualPlugin, Point}
 import cz.payola.common.rdf.Graph
 import s2js.adapters.js.dom.Element
 import cz.payola.web.client.views.plugins.visual.animation.Animation
 import cz.payola.web.client.views.plugins.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.views.plugins.visual.graph._
-import s2js.adapters.js.browser.window
 
 abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(settings)
 {
@@ -88,7 +87,7 @@ abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(setting
      */
     def basicTreeStructure(vViews: ListBuffer[VertexView], nextAnimation: Option[Animation[_]], quickDraw: () => Unit,
         finalDraw: () => Unit, animationStepLength: Option[Int]): Animation[ListBuffer[(VertexView, Point)]] = {
-        //TODO je tu nejaka chyba...testovaci graf se kresli spatne
+
         var levels = ListBuffer[ListBuffer[VertexView]]()
         var level = ListBuffer[VertexView]()
         var levelNext = ListBuffer[VertexView]()
@@ -168,7 +167,6 @@ abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(setting
      */
     def basicTreeCircledStructure(vViews: ListBuffer[VertexView], nextAnimation: Option[Animation[_]], quickDraw: () => Unit,
         finalDraw: () => Unit, animationStepLength: Option[Int]): Animation[ListBuffer[(VertexView, Point)]] = {
-        //TODO je tu nejaka chyba...testovaci graf se kresli spatne
 
         var level1 = ListBuffer[(VertexView, Point)]()
         var level2 = ListBuffer[(VertexView, Point)]()
