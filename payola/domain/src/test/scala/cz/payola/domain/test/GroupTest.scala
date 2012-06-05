@@ -6,10 +6,6 @@ import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 
 class GroupTest extends FlatSpec with ShouldMatchers {
-    "Group" should "not be initialized with null or empty values" in {
-        evaluating(new Group(_name = "Monoid", _owner = null)) should produce [IllegalArgumentException]
-    }
-
     it should "retain values passed in the constructor" in {
         val u: User = new User(_name = "Franta")
         val g: Group = new Group(_name = "Grupa", _owner = u)
