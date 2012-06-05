@@ -49,16 +49,13 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
     }
 
     "Groups" should "be persisted, loaded and managed by GroupDAO" in {
-        println("a")
         val groupDao = new GroupDAO()
 
-        println("b")
         val user = new UserDAO().findByUsername("n", 0, 1)(0)
         val g1 = new cz.payola.domain.entities.Group("group1", user)
         val g2 = new cz.payola.domain.entities.Group("group2", user)
         val group1 = groupDao.persist(g1).get
         val group2 = groupDao.persist(g2).get
-        println("c")
 
         val g = groupDao.getById(group1.id)
         assert(g != None)
