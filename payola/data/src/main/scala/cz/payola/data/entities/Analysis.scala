@@ -53,7 +53,6 @@ class Analysis(
     override def pluginInstanceBindings: Seq[PluginInstanceBindingType] = {
         // Lazy-load related bindings only for first time
         if (!_pluginInstancesBindingsLoaded) {
-            println("lazy-loading bindings")
             evaluateCollection(_pluginInstancesBindingsQuery).map(b =>
                 if (!super.pluginInstanceBindings.contains(b)) {
                     super.storeBinding(b)
