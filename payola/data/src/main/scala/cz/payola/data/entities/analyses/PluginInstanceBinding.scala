@@ -2,6 +2,7 @@ package cz.payola.data.entities.analyses
 
 import cz.payola.data.entities.PersistableEntity
 import cz.payola.data.PayolaDB
+import org.squeryl.annotations.Transient
 
 object PluginInstanceBinding {
 
@@ -32,18 +33,25 @@ class PluginInstanceBinding(
 
     var analysisId: Option[String] = None
 
+    @Transient
+    private var _sourceLoaded = false
+    private var _source: cz.payola.domain.entities.analyses.PluginInstance = null
     private lazy val _sourcesQuery = PayolaDB.bindingsOfSourcePluginInstances.right(this)
 
+    @Transient
+    private var _targetLoaded = false
+    private var _target: cz.payola.domain.entities.analyses.PluginInstance = null
     private lazy val _targetsQuery = PayolaDB.bindingsOfTargetPluginInstances.right(this)
 
     override def sourcePluginInstance = {
         try{
-            if (sourcePluginInstanceId != null) {
-                evaluateCollection(_sourcesQuery)(0)
+            if (!_sourceLoaded) {
+                _source = evaluateCollection(_sourcesQuery)(0)
+
+                _sourceLoaded = true
             }
-            else {
-                null
-            }
+
+            _source
         }
         catch {
             case e: Exception => println("source error")
@@ -53,15 +61,16 @@ class PluginInstanceBinding(
 
     override def targetPluginInstance = {
         try {
-            if (targetPluginInstanceId != null) {
-                evaluateCollection(_targetsQuery)(0)
+            if (!_targetLoaded) {
+                _target = evaluateCollection(_targetsQuery)(0)
+
+                _targetLoaded = true
             }
-            else {
-                null
-            }
+
+            _target
         }
         catch {
-            case e: Exception => println("source error")
+            case e: Exception => println("target error")
             null
         }
     }
