@@ -20,6 +20,7 @@ class CanvasPack(width: Double, height: Double) extends Canvas(width, height) {
     val keyDown = new KeyDownEvent[CanvasPack]
     val mouseMove = new MouseMoveEvent[CanvasPack]
     val mouseWheel = new MouseWheelEvent[CanvasPack]
+    val windowResize = new WindowResizeEvent[CanvasPack]
 
     private val edgesDeselectedLayer = new Canvas(width, height)
     private val edgesDeselectedTextLayer = new Canvas(width, height)
@@ -67,6 +68,13 @@ class CanvasPack(width: Double, height: Double) extends Canvas(width, height) {
         } else {
             false
         }
+    }
+
+    window.onresize = { event =>
+        val args = new WindowResizeEventArgs(this)
+        args.set(event)
+        windowResize.trigger(args)
+        true
     }
 
     //on mouse wheel event work-around###################################################################################

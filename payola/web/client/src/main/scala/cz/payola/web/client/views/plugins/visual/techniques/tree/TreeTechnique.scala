@@ -15,13 +15,9 @@ class TreeTechnique(settings: VisualSetup) extends BaseTechnique(settings)
     protected def getTechniquePerformer(component: Component, animate: Boolean): Animation[ListBuffer[(VertexView, Point)]] = {
 
         if(animate) {
-            val flip = new Animation(
-                Animation.flipGraph, component.vertexViews, None, redrawQuick, redraw, None)
-            basicTreeStructure(component.vertexViews, Some(flip), redrawQuick, redraw, None)
+            basicTreeStructure(component.vertexViews, None, redrawQuick, redraw, None)
         } else {
-            val flip = new Animation(
-                Animation.flipGraph, component.vertexViews, None, redrawQuick, redraw, Some(0))
-            basicTreeStructure(component.vertexViews, Some(flip), redrawQuick, redraw, Some(0))
+            basicTreeStructure(component.vertexViews, None, redrawQuick, redraw, Some(0))
         }
     }
 

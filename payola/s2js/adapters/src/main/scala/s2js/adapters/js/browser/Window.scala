@@ -34,4 +34,8 @@ class Window
         // TODO
     }
 
+    /**
+      * window resizing event
+      */
+    var onresize: (Event => Boolean) = (event: Event) => false
 }

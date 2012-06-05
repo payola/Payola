@@ -46,16 +46,12 @@ class GravityTechnique(settings: VisualSetup) extends BaseTechnique(settings)
     protected def getTechniquePerformer(component: Component, animate: Boolean): Animation[ListBuffer[(VertexView, Point)]] = {
 
         if(animate) {
-            val flip = new Animation[ListBuffer[VertexView]](
-                Animation.flipGraph, component.vertexViews, None, redrawQuick, redraw, None)
-            val animationOfThis = new Animation[Component](
-                runningAnimation, component, Some(flip), redrawQuick, redrawQuick, Some(70))
+            val animationOfThis = new Animation(
+                runningAnimation, component, None, redrawQuick, redrawQuick, Some(70))
             basicTreeStructure(component.vertexViews, Some(animationOfThis), redrawQuick, redraw, None)
         } else {
-            val flip = new Animation[ListBuffer[VertexView]](
-                Animation.flipGraph, component.vertexViews, None, redrawQuick, redraw, Some(0))
-            val animationOfThis = new Animation[Component](
-                runningAnimation, component, Some(flip), redrawQuick, redrawQuick, Some(0))
+            val animationOfThis = new Animation(
+                runningAnimation, component, None, redrawQuick, redrawQuick, Some(0))
             basicTreeStructure(component.vertexViews, Some(animationOfThis), redrawQuick, redraw, Some(0))
         }
     }

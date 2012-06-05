@@ -52,10 +52,12 @@ abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(setting
                 new LocationDescriptor.ComponentPositionHelper(
                     componentNumber, graphView.components.length, previousComponent)
 
-            val move = new Animation(
+            firstAnimation.addFollowingAnimation(new Animation(
+                Animation.flipGraph, component.vertexViews, None, redrawQuick, redraw, None))
+
+            firstAnimation.addFollowingAnimation(new Animation(
                 Animation.moveComponent, (componentPositionDesc, component.vertexViews), None, redrawQuick, redraw,
-                None)
-            firstAnimation.addFollowingAnimation(move)
+                None))
 
             isFirstAnimation = false
             componentNumber += 1

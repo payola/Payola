@@ -8,10 +8,9 @@ import collection.mutable.ListBuffer
 import settings.components.visualsetup.VisualSetup
 import s2js.adapters.js.browser.document
 import cz.payola.web.client.mvvm_api.element.CanvasPack
-import cz.payola.web.shared.GraphFetcher
-import cz.payola.common.rdf.{IdentifiedVertex, LiteralVertex, Graph}
-import s2js.adapters.js.browser.window
 import cz.payola.web.client.events._
+import cz.payola.common.rdf._
+import s2js.adapters.js.browser.window
 
 /**
   * Representation of visual based output drawing plugin
@@ -22,6 +21,8 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
     private var mousePressedVertex = false
     private var mouseDragged = false
     private var mouseDownPosition = Point(0, 0)
+
+    val vertexUpdate = new VertexUpdateEvent
 
     /**
       * Contained graph in visualisation packing.
@@ -36,11 +37,13 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
             mouseDragged = false
             mouseDownPosition = getPosition(event)
             onMouseDown(event)
+
             false
         }
 
         graphView.get.canvasPack.mouseUp += {event => //deselect all
             onMouseUp(event)
+
             false
         }
 
@@ -51,12 +54,23 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
         }
 
         graphView.get.canvasPack.mouseDblClicked += { event => //update graph
-            onMouseDoubleClick(event)
+            val vertex = graphView.get.getTouchedVertex(getPosition(event))
+            if(vertex.isDefined) {
+                graphView.get.selectVertex(vertex.get)
+                val eventArgs = new VertexUpdateEventArgs(vertex.get.vertexModel)
+                vertexUpdate.trigger(eventArgs)
+            }
             false
         }
 
         graphView.get.canvasPack.mouseWheel += { event => //zoom
             onMouseWheel(event)
+            true
+        }
+
+        graphView.get.canvasPack.windowResize += { event => //fitting canvas on window resize
+            graphView.get.fitCanvas()
+            redraw()
             true
         }
     }
@@ -105,7 +119,6 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
         var resultedAnimation: Option[Animation[ListBuffer[InformationView]]] = None
         val vertex = graphView.get.getTouchedVertex(position)
 
-
         if (vertex.isDefined) { // Mouse down near a vertex.
             if (eventArgs.shiftKey) { //change selection of the pressed one
                 graphView.get.invertVertexSelection(vertex.get)
@@ -137,6 +150,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
                 }
             }
             mousePressedVertex = true
+
         } else {
             mousePressedVertex = false
         }
@@ -164,6 +178,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
 
     private def onMouseUp(eventArgs: MouseUpEventArgs[CanvasPack]) {
         if (!mouseDragged && !mousePressedVertex && !eventArgs.shiftKey) { //deselect all
+
             graphView.get.deselectAll()
             redrawSelection()
         }
@@ -191,19 +206,6 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
             graphView.get.redraw(RedrawOperation.All)
         }
         mouseDownPosition = end
-    }
-
-    private def onMouseDoubleClick(eventArgs: DoubleClickedEventArgs[CanvasPack]) {
-        val vertex = graphView.get.getTouchedVertex(getPosition(eventArgs))
-        if(vertex.isDefined) {
-            vertex.get.vertexModel match {
-                case i: IdentifiedVertex =>
-                    val neighborhood = GraphFetcher.getNeighborhoodOfVertex(i.uri)
-                    graphView.get.selectVertex(vertex.get)
-                    update(neighborhood)
-                case _ =>
-            }
-        }
     }
 
     private def onMouseWheel(eventArgs: MouseWheelEventArgs[CanvasPack]) {

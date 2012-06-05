@@ -15,6 +15,7 @@ import cz.payola.web.client.mvvm_api.element.{Anchor, Li, Text}
 import settings.{VertexSettingsModel, TextSettingsModel, EdgeSettingsModel}
 import  cz.payola.domain.rdf.{IdentifiedNode, LiteralNode, Edge, Graph}
 import cz.payola.web.shared.GraphFetcher
+import cz.payola.common.rdf.IdentifiedVertex
 
 // TODO remove after classloading is done
 @dependency("cz.payola.common.rdf.IdentifiedVertex")
@@ -101,6 +102,17 @@ class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
 
 
         currentPlugin.get match {
+            case i: VisualPlugin =>
+                i.vertexUpdate += { event =>
+                    event.target match {
+                        case ve: IdentifiedVertex =>
+                            val neighborhood = GraphFetcher.getNeighborhoodOfVertex(ve.uri)
+                            i.update(neighborhood)
+                        case _ =>
+                    }
+                    false
+                }
+
             case i: TextPlugin =>
                 i.redraw()
         }

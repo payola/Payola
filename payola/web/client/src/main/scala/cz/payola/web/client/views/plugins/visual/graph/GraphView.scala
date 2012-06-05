@@ -279,10 +279,9 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
 
         vertexViews.foreach { vertexView =>
             vertexView.edges = getEdgesOfVertex(vertexView, edgeViews)
-            if(vertexView.edges.length == 0) {
-                window.alert("vertex: "+vertexView.vertexModel.toString+" ; "+edgeViews.toString())
-            }
-            //window.alert(vertexView.toString+": "+vertexView.edges.length+" "+vertexView.edges.toString())
+            /*if(vertexView.edges.length == 0) {
+                window.alert("to vertex were set NO edges: "+vertexView.vertexModel.toString+" ; "+edgeViews.toString())
+            }*/
         }
     }
 
@@ -337,7 +336,7 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
         var selectionChanged = false
 
         while(!selectionChanged && componentPointer < components.length) {
-            selectionChanged = components(componentPointer).setVertexSelection(vertexView, true)
+            selectionChanged = components(componentPointer).selectVertex(vertexView)
             componentPointer += 1
         }
 
@@ -368,20 +367,20 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
       * Marks all verices in this graph graphical representation as NOT selected.
       * @return list of deselected vertices if some were deselected, else None
       */
-    def deselectAll(): Option[ListBuffer[VertexView]] = {
+    def deselectAll() {
 
-        var deselected = ListBuffer[VertexView]()
+        //var deselected = ListBuffer[VertexView]()
 
         components.foreach{ component =>
 
-            deselected ++= component.deselectAll()
+            component.deselectAll()
         }
 
-        if(deselected.isEmpty) {
+        /*if(deselected.isEmpty) {
             None
         } else {
             Some(deselected)
-        }
+        }*/
     }
 
     //###################################################################################################################
