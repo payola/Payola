@@ -11,14 +11,7 @@ abstract class SparqlQuery(name: String, inputCount: Int, parameters: immutable.
         val definedInputs = getDefinedInputs(inputs)
         val query = getQuery(instance)
 
-        if (query.contains("SELECT")) {
-            definedInputs(0).executeSelectSPARQLQuery(query)
-        } else if (query.contains("CONSTRUCT")) {
-            definedInputs(0).executeConstructSPARQLQuery(query)
-        } else {
-            // TODO ASK and possibly DESCRIBE?
-            throw new IllegalArgumentException("Unknown SPARQL query type (" + query + ")")
-        }
+        definedInputs(0).executeSPARQLQuery(query)
     }
 
     /**
