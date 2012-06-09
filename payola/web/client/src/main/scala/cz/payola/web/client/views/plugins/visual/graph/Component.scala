@@ -2,6 +2,7 @@ package cz.payola.web.client.views.plugins.visual.graph
 
 import collection.mutable.ListBuffer
 import cz.payola.web.client.views.plugins.visual.{Point, Vector}
+import s2js.adapters.js.browser.window
 
 class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuffer[EdgeView]) {
 
@@ -137,6 +138,12 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
         }
     }
 
+    def moveAllVertices(difference: Vector) {
+        vertexViews.foreach { vertexView =>
+            vertexView.position += difference
+        }
+    }
+
     def deselectAll(): ListBuffer[VertexView] = {
 
         var deselected = ListBuffer[VertexView]()
@@ -203,13 +210,16 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
     }
 
     /**
-     * Setter of the selected atribute for vertices.
+     * Setter of the selected attribute for vertices.
      * @param vertex to which is the selected value is set
      * @param selected new value to be set to the vertex
      * @return true if the value of the vertex.selected attribute is changed
      */
     def setVertexSelection(vertex: VertexView, selected: Boolean): Boolean = {
-        if (vertex.selected != selected) {
+
+        if (vertexViews.find(_.vertexModel eq vertex.vertexModel).isDefined && //check if the vertex is from this component
+            vertex.selected != selected) {
+
             if(selected) {
                 selectedVertexViews += vertex
             } else {

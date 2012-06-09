@@ -1,6 +1,7 @@
 package cz.payola.web.client.events
 
 import s2js.adapters.js.browser
+import s2js.adapters.js.browser.window
 
 /**
  *
@@ -11,6 +12,7 @@ import s2js.adapters.js.browser
 
 class EventArgs[A](val target: A)
 {
+    //TODO rozdel promenne do konkretnich eventArgs dedicich trid
     private var altKeyVal = false
 
     /**
@@ -110,6 +112,15 @@ class EventArgs[A](val target: A)
         shiftKeyVal
     }
 
+    private var wheelDeltaVal = 0
+
+    /**
+      * Returns scrolling force of the mouse wheel
+      */
+    def wheelDelta: Int = {
+        wheelDeltaVal
+    }
+
     def set(event: browser.Event) {
         altKeyVal = event.altKey
         buttonVal = event.button
@@ -122,5 +133,12 @@ class EventArgs[A](val target: A)
         screenXVal = event.screenX
         screenYVal = event.screenY
         shiftKeyVal = event.shiftKey
+
+        if(s2js.adapters.js.browser.isNaN(event.wheelDelta)) {
+            wheelDeltaVal = event.detail / 120
+        } else {
+            wheelDeltaVal = -event.wheelDelta / 3
+        }
+
     }
 }

@@ -1,10 +1,7 @@
 package cz.payola.web.client.mvvm_api
 
-import s2js.adapters.js.browser
 import s2js.adapters.js.browser.document
-import collection.mutable.ArrayBuffer
-import cz.payola.web.client.events.{ClickedEventArgs, EventArgs}
-import s2js.adapters.js.dom.{Element, Node}
+import s2js.adapters.js.dom.Element
 
 /**
  *

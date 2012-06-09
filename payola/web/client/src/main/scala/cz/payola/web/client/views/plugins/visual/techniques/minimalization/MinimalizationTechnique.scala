@@ -16,13 +16,9 @@ class MinimalizationTechnique(settings: VisualSetup) extends BaseTechnique(setti
         minimizeEdgeCrossing(component.vertexViews) //TODO this is impossible to combine with animation
 
         if(animate) {
-            val flip = new Animation(
-                Animation.flipGraph, component.vertexViews, None, redrawQuick, redraw, None)
-            basicTreeStructure(component.vertexViews, Some(flip), redrawQuick, redraw, None)
+            basicTreeStructure(component.vertexViews, None, redrawQuick, redraw, None)
         } else {
-            val flip = new Animation(
-                Animation.flipGraph, component.vertexViews, None, redrawQuick, redraw, Some(0))
-            basicTreeStructure(component.vertexViews, Some(flip), redrawQuick, redraw, Some(0))
+            basicTreeStructure(component.vertexViews, None, redrawQuick, redraw, Some(0))
         }
     }
 

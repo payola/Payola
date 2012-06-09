@@ -4,6 +4,7 @@ import cz.payola.common.rdf.Edge
 import s2js.adapters.js.dom.CanvasRenderingContext2D
 import cz.payola.web.client.views.plugins.visual._
 import settings.{TextSettingsModel, EdgeSettingsModel}
+import s2js.adapters.js.browser.window
 
 /**
   * Structure used during draw function of EdgeView. Helps to indicate position of vertices to each other.
@@ -143,5 +144,25 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
 
     override def toString: String = {
         "["+originView.toString+"-"+edgeModel.toString+"-"+destinationView.toString+"]"
+    }
+
+    /**
+     * Compares another edgeView to this one. Returns true if edgeModels.toString are equal and destination vertices
+     * and origin vertices are equal or flipped origin and destination and destination and origin are equal
+     * @param edgeView
+     * @return
+     */
+    def isEqual(edgeView: Any): Boolean = {
+        if(edgeView == null) {
+            false
+        }
+
+        edgeView match {
+            case ev: EdgeView =>
+                ((((originView isEqual ev.originView) && (destinationView isEqual ev.destinationView))
+                    || ((originView isEqual ev.destinationView) && (destinationView isEqual ev.originView)))
+                    && (edgeModel.toString eq ev.edgeModel.toString))
+            case _ => false
+        }
     }
 }

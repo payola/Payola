@@ -223,7 +223,8 @@ trait View {
       */
     protected def createCanvasPack(container: Element): CanvasPack = {
 
-        val canvasPack = new CanvasPack(2000, 2000) //TODO take it from the "created element"
+        val canvasPack = new CanvasPack(
+            window.innerWidth - container.offsetLeft, window.innerHeight - container.offsetTop)
         canvasPack.render(container)
 
         canvasPack

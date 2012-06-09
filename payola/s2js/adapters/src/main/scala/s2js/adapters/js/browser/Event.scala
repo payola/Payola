@@ -57,4 +57,14 @@ abstract class Event {
      * Returns whether or not the "SHIFT" key was pressed when an event was triggered
      */
     val shiftKey = false
+
+    /**
+      * Returns scrolling force of the mouse wheel
+      */
+    val wheelDelta = 0
+
+    /**
+      * Returns scrolling force of the mouse wheel in Mozilla Firefox browser
+      */
+    val detail = 0
 }

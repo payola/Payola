@@ -5,6 +5,7 @@ import cz.payola.common.rdf.{LiteralVertex, IdentifiedVertex, Vertex}
 import s2js.adapters.js.dom.CanvasRenderingContext2D
 import cz.payola.web.client.views.plugins.visual._
 import settings.{TextSettingsModel, VertexSettingsModel}
+import s2js.adapters.js.browser.window
 
 /**
  * Graphical representation of Vertex object in the drawn graph.
@@ -79,9 +80,11 @@ class VertexView(val vertexModel: Vertex, var position: Point, var settings: Ver
 
     def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
         val colorToUseOnBox = color.getOrElse(settings.colorMed)
-        val correctedPosition = this.position + (settings.getSize / -2) + positionCorrection
+        val correctedPosition = this.position + positionCorrection
 
-        drawRoundedRectangle(context, correctedPosition, settings.getSize, settings.cornerRadius)
+        drawCircle(context, correctedPosition, settings.getSize.x/2, 1, Color.Black)
+        //val correctedPosition = this.position + (settings.getSize / -2) + positionCorrection
+        //drawRoundedRectangle(context, correctedPosition, settings.getSize, settings.cornerRadius)
         fillCurrentSpace(context, colorToUseOnBox)
     }
 
@@ -96,5 +99,21 @@ class VertexView(val vertexModel: Vertex, var position: Point, var settings: Ver
 
     override def toString: String = {
         "["+vertexModel.toString+"]"
+    }
+
+    /**
+     * Compares this to another vertexView. Returns true if vertexModels.toString are equal.
+     * @param vertexView
+     * @return
+     */
+    def isEqual(vertexView: Any): Boolean = {
+        if(vertexView == null) {
+            false
+        }
+        vertexView match {
+            case vv: VertexView =>
+                vv.vertexModel.toString eq vertexModel.toString
+            case _ => false
+        }
     }
 }

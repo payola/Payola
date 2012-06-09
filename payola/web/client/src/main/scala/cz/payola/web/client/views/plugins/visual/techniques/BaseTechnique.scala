@@ -1,13 +1,12 @@
 package cz.payola.web.client.views.plugins.visual.techniques
 
 import collection.mutable.ListBuffer
-import cz.payola.web.client.views.plugins.visual.{VisualPlugin, Point, Vector}
+import cz.payola.web.client.views.plugins.visual.{VisualPlugin, Point}
 import cz.payola.common.rdf.Graph
 import s2js.adapters.js.dom.Element
 import cz.payola.web.client.views.plugins.visual.animation.Animation
 import cz.payola.web.client.views.plugins.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.views.plugins.visual.graph._
-import s2js.adapters.js.browser.window
 
 abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(settings)
 {
@@ -53,15 +52,20 @@ abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(setting
                 new LocationDescriptor.ComponentPositionHelper(
                     componentNumber, graphView.components.length, previousComponent)
 
-            val move = new Animation(
+            firstAnimation.addFollowingAnimation(new Animation(
+                Animation.flipGraph, component.vertexViews, None, redrawQuick, redraw, None))
+
+            firstAnimation.addFollowingAnimation(new Animation(
                 Animation.moveComponent, (componentPositionDesc, component.vertexViews), None, redrawQuick, redraw,
-                None)
-            firstAnimation.addFollowingAnimation(move)
+                None))
 
             isFirstAnimation = false
             componentNumber += 1
             previousComponent = Some(component)
         }
+        firstAnimation.addFollowingAnimation(
+            new Animation(Animation.emptyAnimation, false, None, graphView.fitCanvas, redraw, None))
+
         firstAnimation.run()
     }
 
@@ -165,7 +169,6 @@ abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(setting
      */
     def basicTreeCircledStructure(vViews: ListBuffer[VertexView], nextAnimation: Option[Animation[_]], quickDraw: () => Unit,
         finalDraw: () => Unit, animationStepLength: Option[Int]): Animation[ListBuffer[(VertexView, Point)]] = {
-
 
         var level1 = ListBuffer[(VertexView, Point)]()
         var level2 = ListBuffer[(VertexView, Point)]()

@@ -29,11 +29,23 @@ class Animation[T](
 
 object Animation
 {
+    private val currentAnimation: Option[Animation[_]] = None
+
     private val animationKillConst = 0
 
     private val animationPrepareConst = -1
 
     private var animationCurrentNumber = -1
+
+    def emptyAnimation(wontBeUsed1: Boolean, nextAnimation: Option[Animation[_]],
+        firstFuncToRun: () => Unit, secondFuncToRun: () => Unit, animationStepLength: Option[Int]) {
+
+        firstFuncToRun()
+        secondFuncToRun()
+        if(nextAnimation.isDefined) {
+            nextAnimation.get.run()
+        }
+    }
 
     def hideText(infosToAnimate: ListBuffer[InformationView], nextAnimation: Option[Animation[_]],
         quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
@@ -99,7 +111,7 @@ object Animation
     def moveGraphToUpperLeftCorner(vViews: ListBuffer[VertexView], nextAnimation: Option[Animation[_]],
         quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
 
-        moveGraphBy((Point(50, 50).toVector, vViews), nextAnimation, quickDraw, finalDraw, animationStepLength)
+        moveGraphBy((Point(50, 25).toVector, vViews), nextAnimation, quickDraw, finalDraw, animationStepLength)
     }
 
     def flipGraph(vViews: ListBuffer[VertexView], nextAnimation: Option[Animation[_]], quickDraw: () => Unit,

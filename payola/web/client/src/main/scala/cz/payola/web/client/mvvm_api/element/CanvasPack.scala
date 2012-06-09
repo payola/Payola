@@ -4,9 +4,11 @@ import cz.payola.web.client.events._
 import s2js.adapters.js.dom.Element
 import cz.payola.web.client.views.plugins.visual.{Color, Vector, Point}
 import cz.payola.web.client.views.plugins.visual.graph._
-import s2js.adapters.js.browser.window
+import s2js.adapters.js.dom
+import s2js.compiler.javascript
+import s2js.adapters.js.browser._
 
-class CanvasPack(width: Int, height: Int) extends Canvas(width, height) {
+class CanvasPack(width: Double, height: Double) extends Canvas(width, height) {
 
 
     val mouseClicked = new ClickedEvent[CanvasPack]
@@ -17,6 +19,8 @@ class CanvasPack(width: Int, height: Int) extends Canvas(width, height) {
     val keyUp = new KeyUpEvent[CanvasPack]
     val keyDown = new KeyDownEvent[CanvasPack]
     val mouseMove = new MouseMoveEvent[CanvasPack]
+    val mouseWheel = new MouseWheelEvent[CanvasPack]
+    val windowResize = new WindowResizeEvent[CanvasPack]
 
     private val edgesDeselectedLayer = new Canvas(width, height)
     private val edgesDeselectedTextLayer = new Canvas(width, height)
@@ -66,7 +70,67 @@ class CanvasPack(width: Int, height: Int) extends Canvas(width, height) {
         }
     }
 
+    window.onresize = { event =>
+        val args = new WindowResizeEventArgs(this)
+        args.set(event)
+        windowResize.trigger(args)
+        true
+    }
+
+    //on mouse wheel event work-around###################################################################################
+    /**
+      * definition of onMouseWheel trigger; required since Mozilla has different way of setting this up
+      * @param event
+      * @return
+      */
+    canvasElement.onmousewheel = onMouseWheel
+
+    private def onMouseWheel(event: s2js.adapters.js.browser.Event): Boolean = {
+        val args = new MouseWheelEventArgs(this)
+        args.set(event)
+        mouseWheel.trigger(args)
+        false
+    }
+
+    @javascript(
+        """
+           /* DOMMouseScroll is for mozilla. */
+           self.canvasElement.addEventListener('DOMMouseScroll', function(event) {
+               var args = new cz.payola.web.client.events.MouseWheelEventArgs(self);
+               args.set(event);
+               self.mouseWheel.trigger(args);
+               return false;
+           });
+        """)
+    private def setMouseWheelListener() {}
+    //^TODO this calls the onMouseWheel function in window context; that results in error, because window..mouseWheel does not exist
+
+    //###################################################################################################################
+
+
+    override def setSize(size: Vector) {
+        edgesDeselectedLayer.setSize(size)
+        edgesDeselectedTextLayer.setSize(size)
+        edgesSelectedLayer.setSize(size)
+        edgesSelectedTextLayer.setSize(size)
+        verticesDeselectedLayer.setSize(size)
+        verticesDeselectedTextLayer.setSize(size)
+        verticesSelectedLayer.setSize(size)
+        verticesSelectedTextLayer.setSize(size)
+        super.setSize(size)
+    }
+
+    def offsetLeft: Double = {
+        canvasElement.offsetLeft
+    }
+
+    def offsetTop: Double = {
+        canvasElement.offsetTop
+    }
+
     override def render(parent: Element) {
+
+        setMouseWheelListener()
 
         /*The order in which are layers created determines their "z coordinate"
         (first created layer is on the bottom and last created one covers all the others).*/
@@ -81,7 +145,6 @@ class CanvasPack(width: Int, height: Int) extends Canvas(width, height) {
         verticesSelectedTextLayer.render(parent)
         super.render(parent)
     }
-
 
     override def clear() {
         edgesDeselectedLayer.clear()
