@@ -4,16 +4,19 @@ import cz.payola.web.client.mvvm_api.Component
 import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom.{Element, Node}
 
-/**
- *
- * @author jirihelmich
- * @created 5/4/12 8:16 PM
- * @package cz.payola.web.client.mvvm_api.element
- */
-
-class Text(val value: String) extends Component
+class Text(var value: String) extends Component
 {
+    private var parentHtml = ""
+    private var parent: Element = null
+
+    def setText(text: String) = {
+        value = text
+        parent.innerHTML = parentHtml+text
+    }
+
     def render(parent: Element) = {
-        parent.innerHTML = parent.innerHTML+value
+        this.parent = parent
+        parentHtml = this.parent.innerHTML
+        this.parent.innerHTML = parentHtml+value
     }
 }
