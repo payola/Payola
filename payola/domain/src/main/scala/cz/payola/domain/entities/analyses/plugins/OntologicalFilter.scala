@@ -13,10 +13,10 @@ import cz.payola.domain.rdf._
   *
   */
 class OntologicalFilter(id: String)
-    extends Plugin("Ontological Filter", 1, List(new StringParameter("OntologyURL", "")), id)
+    extends Plugin("Ontological Filter", 1, List(new StringParameter("OntologyURLs", "")), id)
 {
     /** Creates a new instance of a graph that contains only vertices according to
-      * the ontology which is described at the OntologyURL URL.
+      * the ontology which is described at the OntologyURLs URL.
       *
       * @param instance The corresponding instance.
       * @param inputs The input graphs.
@@ -34,15 +34,7 @@ class OntologicalFilter(id: String)
         strippedGraphAccordingToOntology(definedInputs(0), ontology)
     }
 
-    /** Creates a new ontology sourced from the OntologyURL parameter.
-      *
-      * @param instance Plugin instance.
-      * @return Output graph.
-      */
-    private def getOntologyWithPluginInstance(instance: PluginInstance): Ontology = {
-        assert(instance.getStringParameter("OntologyURL").isDefined, "OntologyURL parameter must be defined")
-
-        val url = instance.getStringParameter("OntologyURL").get
+    private def getOntologyAtURL(url: String): Ontology = {
         val connection = new URL(url).openConnection()
         val requestProperties = Map(
             "Accept" -> "application/rdf+xml"
@@ -50,6 +42,29 @@ class OntologicalFilter(id: String)
         requestProperties.foreach(p => connection.setRequestProperty(p._1, p._2))
 
         Ontology(connection.getInputStream)
+    }
+
+    /** Creates a new ontology sourced from the OntologyURLs parameter.
+      *
+      * @param instance Plugin instance.
+      * @return Output graph.
+      */
+    private def getOntologyWithPluginInstance(instance: PluginInstance): Ontology = {
+        assert(instance.getStringParameter("OntologyURLs").isDefined, "OntologyURLs parameter must be defined")
+
+        // Assume that there can be more ontologies separated by a newline
+        val urlList = instance.getStringParameter("OntologyURLs").get
+        val URLs = urlList.split("\n").filter { p: String => !p.isEmpty }
+
+        assert(URLs.length != 0, "No URLs defined (empty string, or only whitespace!")
+
+        var resultingOntology = getOntologyAtURL(URLs(0))
+
+        for (i <- 1 until URLs.length) {
+            resultingOntology = resultingOntology + getOntologyAtURL(URLs(i))
+        }
+
+        resultingOntology
     }
 
     /** Takes the graph parameter and filters out all vertices and edges that are not
