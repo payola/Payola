@@ -24,9 +24,10 @@ object Application extends PayolaController with Secured
     }
 
     def dashboard = maybeAuthenticated { user =>
-        Ok(views.html.application.dashboard(user, topAnalyses = df.topAnalyses))
+        Ok(views.html.application.dashboard(user, topAnalyses = df.topAnalyses, df.getPublicDataSources(10)))
     }
 
+    // -- Authentication
     val loginForm = Form(
         tuple(
             "email" -> text,

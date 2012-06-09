@@ -3,6 +3,8 @@ package cz.payola.model
 import cz.payola.data.entities.User
 import cz.payola.domain.rdf.Graph
 import cz.payola.data.dao._
+import cz.payola.data.entities.dao._
+import cz.payola.domain.entities.analyses.PluginInstance
 
 class DataFacade
 {
@@ -39,6 +41,15 @@ class DataFacade
 
     def getGraph(uri: String) : Graph = {
         null
+    }
+
+    def getPublicDataSources(count: Int, skip: Int = 0) : Seq[PluginInstance] = {
+        //TODO this should return unique endpoints by EndpointURL
+        FakeAnalysisDAO.analysis.pluginInstances.filter(i => i.plugin.name == "SPARQL Endpoint")
+    }
+
+    def getDataSourceById(id: String) : Option[PluginInstance] = {
+        FakeAnalysisDAO.analysis.pluginInstances.filter(i => i.plugin.name == "SPARQL Endpoint").headOption
     }
 
     //TODO bcrypt
