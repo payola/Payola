@@ -3,6 +3,7 @@ package controllers
 import helpers.Secured
 import cz.payola.data.entities.dao.FakeAnalysisDAO
 import cz.payola.domain.entities.User
+import play.api.mvc.Request
 
 object DataSource extends PayolaController with Secured
 {

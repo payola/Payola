@@ -9,4 +9,9 @@ class GroupDAO extends EntityDAO[Group](PayolaDB.groups)
         val group = Group(g)
         super.persist(group)
     }
+
+    //TODO: OH - implement this
+    def getByOwnerId(id: String) : Seq[Group] = {
+        List()
+    }
 }

@@ -1,5 +1,7 @@
 @(user: Option[cz.payola.domain.entities.User], topAnalyses: Seq[cz.payola.domain.entities.Analysis],
-    topDataSources: Seq[cz.payola.domain.entities.analyses.PluginInstance])
+    topDataSources: Seq[cz.payola.domain.entities.analyses.PluginInstance],
+    groups: Seq[cz.payola.domain.entities.Group]
+)
 
 @main(user, "Dashboard") {
     <div class="container-fluid">
@@ -44,11 +46,13 @@
                         <ul>
 
                         </ul>
-                        <p><a class="btn" href="#">View all &raquo;</a><a class="btn btn-success" href="#">+&nbps;Create</a></p>
+                        <p><a class="btn" href="#">View all &raquo;</a><a class="btn btn-success" href="#">+&nbsp;Create</a></p>
                     </div><!--/span-->
                     <div class="span4">
                         <h2>My groups</h2>
-                        <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+                        @if(groups.size == 0){
+                            <p>No groups. <a href="@routes.Profile.createGroup()">Create one</a>.</p>
+                        }
                         <p><a class="btn" href="#">View details &raquo;</a></p>
                     </div><!--/span-->
                     <div class="span4">

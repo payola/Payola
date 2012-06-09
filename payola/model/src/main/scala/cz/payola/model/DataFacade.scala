@@ -1,6 +1,6 @@
 package cz.payola.model
 
-import cz.payola.data.entities.User
+import cz.payola.domain.entities.User
 import cz.payola.data.dao._
 import cz.payola.data.entities.dao._
 import cz.payola.domain.entities.analyses.PluginInstance
@@ -10,6 +10,7 @@ class DataFacade
 {
     val userDAO = new UserDAO
     val analysisDAO = new AnalysisDAO
+    val groupDAO = new GroupDAO
 
     def getUserByCredentials(username: String, password: String) : Option[User] = {
         userDAO.getUserByCredentials(username, cryptPassword(password))
@@ -50,6 +51,14 @@ class DataFacade
 
     def getDataSourceById(id: String) : Option[PluginInstance] = {
         FakeAnalysisDAO.analysis.pluginInstances.filter(i => i.plugin.name == "SPARQL Endpoint").headOption
+    }
+
+    def getGroupsByOwner(user: Option[User]) = {
+        if (!user.isDefined){
+            List()
+        }else{
+            groupDAO.getByOwnerId(user.get.id)
+        }
     }
 
     //TODO bcrypt

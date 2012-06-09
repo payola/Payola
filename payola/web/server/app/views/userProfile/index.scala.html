@@ -1,4 +1,6 @@
-@(user: Option[cz.payola.domain.entities.User], owner: cz.payola.data.entities.User, analyses: Seq[cz.payola.domain.entities.Analysis])
+@(user: Option[cz.payola.domain.entities.User], owner: cz.payola.domain.entities.User,
+    analyses: Seq[cz.payola.domain.entities.Analysis], groups: Seq[cz.payola.domain.entities.Group]
+)
 @import tags._
 
 @main(user, "User profile") {
@@ -37,6 +39,7 @@
                 }
                 </tbody>
             </table>
+            <a href="#" class="btn btn-success"><i class="icon-plus icon-white"></i>Create analysis</a>
         </div>
         <div class="span6">
             <h2>Groups owned by @if(user.isDefined && (user.get == owner)){ you }else{ the user }</h2>
@@ -67,6 +70,7 @@
                 }
                 </tbody>
             </table>
+            <a href="@routes.Profile.createGroup" class="btn btn-success"><i class="icon-plus icon-white"></i>Create group</a>
         </div>
     </div>
 </div>
