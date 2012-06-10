@@ -11,4 +11,11 @@ object Analysis extends PayolaController with Secured
             NotFound(views.html.errors.err404("The analysis does not exist."))
         }
     }
+
+    def create = authenticated { user =>
+
+        //val analysis = df.createEmptyAnalysis
+
+        Ok(views.html.analysis.create(user))
+    }
 }

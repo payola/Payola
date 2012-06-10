@@ -56,7 +56,7 @@
                         <td>@group.name</td>
                         <td>
                             @if(user.isDefined && (user.get == owner)){
-                                <a href="" class="btn btn-primary"><i class="icon-cog icon-white"></i> Administer</a>
+                                <a href="@routes.Profile.editGroup" class="btn btn-primary"><i class="icon-cog icon-white"></i> Administer</a>
                             }else{
                                 <a href="" class="btn btn-success"><i class="icon-plus icon-white"></i> Request membership</a>
                             }

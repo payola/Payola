@@ -4,8 +4,8 @@ import helpers.Secured
 import play.api.data._
 import play.api.data.Forms._
 import views._
-import play.api.mvc.Request
 import cz.payola.domain.entities._
+import play.api.mvc._
 
 object Profile extends PayolaController with Secured
 {
@@ -60,7 +60,15 @@ object Profile extends PayolaController with Secured
         Redirect(routes.Profile.index(user.email))
     }
 
-    def deleteGroup = authenticated { user =>
+    def editGroup = Action{ implicit request =>
         Ok("TODO")
     }
+    /*
+    def removeGroupMember = authenticated( user =>
+        //Ok()
+    )
+
+    def deleteGroup = authenticated { user =>
+        Ok("TODO")
+    }           */
 }
