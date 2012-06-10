@@ -2,12 +2,12 @@ package cz.payola.web.client.views.plugins.visual.settings.components.visualsetu
 
 import s2js.adapters.js.browser.document
 import collection.mutable.ArrayBuffer
-import cz.payola.web.client.mvvm_api.Component
+import cz.payola.web.client.mvvm.Component
 import cz.payola.web.client.views.plugins.visual.Color
 import s2js.adapters.js.dom.{Node, Element}
 import cz.payola.web.client.events.{ChangedEvent, ChangedEventArgs}
 import s2js.compiler.javascript
-import cz.payola.web.client.mvvm_api.element._
+import cz.payola.web.client.mvvm.element._
 
 /**
  *
@@ -23,7 +23,7 @@ class ColorPane(name: String, label: String, var color: Color) extends Component
     val colorInput: Input = new Input(name, color.toString, None, "colorpicker")
     colorInput.field.setAttribute("readonly","true")
 
-    val i = new I(List())
+    val i = new Italic(List())
     i.i.setAttribute("style","background-color: "+color.toString)
 
     val span = new Span(List(i),"add-on")

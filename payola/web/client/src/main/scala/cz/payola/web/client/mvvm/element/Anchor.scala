@@ -1,12 +1,12 @@
-package cz.payola.web.client.mvvm_api.element
+package cz.payola.web.client.mvvm.element
 
-import cz.payola.web.client.mvvm_api.Component
+import cz.payola.web.client.mvvm.Component
 import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom
 import dom.{Element, Node}
 import cz.payola.web.client.events._
 
-class Anchor(val innerElements: Seq[Component], val href: String, var additionalClass: String = "") extends Component
+class Anchor(val innerElements: Seq[Component], val href: String = "#", var additionalClass: String = "") extends Component
 {
     val a = document.createElement[dom.Anchor]("a")
     a.setAttribute("href",href)

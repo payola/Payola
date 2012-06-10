@@ -1,7 +1,7 @@
 package cz.payola.web.client.presenters.components
 
-import cz.payola.web.client.mvvm_api.Component
-import cz.payola.web.client.mvvm_api.element._
+import cz.payola.web.client.mvvm.Component
+import cz.payola.web.client.mvvm.element._
 import s2js.adapters.js.dom.Element
 import s2js.adapters.js.browser.document
 import cz.payola.web.client.events._
@@ -13,7 +13,7 @@ class AnalysisControls(analysisId: String) extends Component
 {
     val analysisEvaluated = new ComponentEvent[AnalysisControls, EvaluationEventArgs]
 
-    val icon = new I(List(), "icon-play icon-white")
+    val icon = new Italic(List(), "icon-play icon-white")
     val caption = new Text("Run analysis")
     val runBtn = new Anchor(List(icon, caption), "#", "btn btn-primary span2")
 

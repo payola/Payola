@@ -1,4 +1,4 @@
-package cz.payola.web.client.mvvm_api.element
+package cz.payola.web.client.mvvm.element
 
 import cz.payola.web.client.events._
 import s2js.adapters.js.dom.Element
@@ -96,7 +96,7 @@ class CanvasPack(width: Double, height: Double) extends Canvas(width, height) {
         """
            /* DOMMouseScroll is for mozilla. */
            self.canvasElement.addEventListener('DOMMouseScroll', function(event) {
-               var args = new cz.payola.web.client.events.MouseWheelEventArgs(self);
+               var args = new cz.payola.web.client.mvvm.events.MouseWheelEventArgs(self);
                args.set(event);
                self.mouseWheel.trigger(args);
                return false;

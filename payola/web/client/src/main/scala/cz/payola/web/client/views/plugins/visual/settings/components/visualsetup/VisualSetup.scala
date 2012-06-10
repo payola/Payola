@@ -1,9 +1,9 @@
 package cz.payola.web.client.views.plugins.visual.settings.components.visualsetup
 
-import cz.payola.web.client.mvvm_api.Component
+import cz.payola.web.client.mvvm.Component
 import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom.Element
-import cz.payola.web.client.mvvm_api.element.{Anchor, Li, Text}
+import cz.payola.web.client.mvvm.element.{Anchor, ListItem, Text}
 import cz.payola.web.client.events._
 import cz.payola.web.client.views.plugins.visual.settings.{TextSettingsModel, EdgeSettingsModel, VertexSettingsModel}
 
@@ -20,10 +20,10 @@ class VisualSetup(var vertexModel: VertexSettingsModel, var edgesModel: EdgeSett
 
     def render(parent: Element = document.body) {
 
-        new Li(List(), "divider").render(parent)
-        new Li(List(vertex)).render(parent)
-        new Li(List(edges)).render(parent)
-        new Li(List(text)).render(parent)
+        new ListItem(List(), "divider").render(parent)
+        new ListItem(List(vertex)).render(parent)
+        new ListItem(List(edges)).render(parent)
+        new ListItem(List(text)).render(parent)
 
         vertexSettings.render(document.body)
         edgesSettings.render(document.body)

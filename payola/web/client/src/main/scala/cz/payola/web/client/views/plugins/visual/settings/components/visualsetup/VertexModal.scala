@@ -1,11 +1,12 @@
 package cz.payola.web.client.views.plugins.visual.settings.components.visualsetup
 
-import cz.payola.web.client.mvvm_api.Component
+import cz.payola.web.client.mvvm.Component
 import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom.Element
 import cz.payola.web.client.events.{EventArgs, ComponentEvent}
 import cz.payola.web.client.views.plugins.visual.settings.VertexSettingsModel
-import cz.payola.web.client.mvvm_api.element.{Label, Input, Div}
+import cz.payola.web.client.mvvm.element.{Label, Input, Div}
+import cz.payola.web.client.mvvm.element.extensions.Bootstrap.Modal
 
 class VertexModal(model: VertexSettingsModel) extends Component
 {

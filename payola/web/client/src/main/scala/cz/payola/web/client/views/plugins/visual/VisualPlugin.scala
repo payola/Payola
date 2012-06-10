@@ -7,7 +7,7 @@ import s2js.adapters.js.dom.Element
 import collection.mutable.ListBuffer
 import settings.components.visualsetup.VisualSetup
 import s2js.adapters.js.browser.document
-import cz.payola.web.client.mvvm_api.element.CanvasPack
+import cz.payola.web.client.mvvm.element.CanvasPack
 import cz.payola.web.client.events._
 import cz.payola.common.rdf._
 import s2js.adapters.js.browser.window

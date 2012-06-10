@@ -1,9 +1,9 @@
 package cz.payola.web.client.presenters.components
 
-import cz.payola.web.client.mvvm_api.Component
+import cz.payola.web.client.mvvm.Component
 import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom.Element
-import cz.payola.web.client.mvvm_api.element._
+import cz.payola.web.client.mvvm.element._
 import cz.payola.web.client.events._
 
 class ZoomControls(var currentZoom: Int) extends Component

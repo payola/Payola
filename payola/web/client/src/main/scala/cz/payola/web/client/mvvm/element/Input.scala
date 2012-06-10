@@ -1,8 +1,8 @@
-package cz.payola.web.client.mvvm_api.element
+package cz.payola.web.client.mvvm.element
 
 import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom
-import cz.payola.web.client.mvvm_api.Component
+import cz.payola.web.client.mvvm.Component
 import dom.Element
 import cz.payola.web.client.events._
 import s2js.adapters.js.browser.window

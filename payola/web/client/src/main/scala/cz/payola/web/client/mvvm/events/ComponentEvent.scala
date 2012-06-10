@@ -1,6 +1,6 @@
 package cz.payola.web.client.events
 
-import cz.payola.web.client.mvvm_api.Component
+import cz.payola.web.client.mvvm.Component
 
 class ComponentEvent[A, B <: EventArgs[A]] extends Event[A,B,Boolean]
 {

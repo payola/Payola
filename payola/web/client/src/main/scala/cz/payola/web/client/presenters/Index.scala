@@ -11,7 +11,7 @@ import cz.payola.web.client.views.plugins.textual.techniques.table.TableTechniqu
 import cz.payola.web.client.views.plugins.textual.TextPlugin
 import cz.payola.web.client.views.plugins.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.views.plugins.visual._
-import cz.payola.web.client.mvvm_api.element.{Anchor, Li, Text}
+import cz.payola.web.client.mvvm.element.{Anchor, ListItem, Text}
 import settings.{VertexSettingsModel, TextSettingsModel, EdgeSettingsModel}
 import  cz.payola.domain.rdf.{IdentifiedNode, LiteralNode, Edge, Graph}
 import cz.payola.web.shared.GraphFetcher
@@ -50,7 +50,7 @@ class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
     plugins.foreach{ plugin =>
 
         val pluginBtn = new Anchor(List(new Text(plugin.getName)), "#")
-        new Li(List(pluginBtn)).render(document.getElementById("settings"))
+        new ListItem(List(pluginBtn)).render(document.getElementById("settings"))
 
         pluginBtn.clicked += {
             event =>
