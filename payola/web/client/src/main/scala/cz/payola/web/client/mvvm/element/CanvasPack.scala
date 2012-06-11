@@ -7,6 +7,7 @@ import cz.payola.web.client.views.plugins.visual.graph._
 import s2js.adapters.js.dom
 import s2js.compiler.javascript
 import s2js.adapters.js.browser._
+import cz.payola.web.client.presenters.components.ZoomControls
 
 class CanvasPack(width: Double, height: Double) extends Canvas(width, height) {
 
