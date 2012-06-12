@@ -77,7 +77,7 @@ class Analysis(
         val i = PluginInstance(instance)
         i.analysisId = None
 
-        // TODO: SQUERYL - ugly
+        // TODO: SQUERYL - ugly, but the change of analysisId is required
         new PluginInstanceDAO().persist(i)
 
         super.discardPluginInstance(i)
@@ -91,7 +91,7 @@ class Analysis(
         val b = PluginInstanceBinding(binding)
         b.analysisId = None
 
-        // TODO: SQUERYL - ugly
+        // TODO: SQUERYL - ugly, but the change of analysisId is required
         new PluginInstanceBindingDAO().persist(b)
 
         super.discardBinding(b)
