@@ -67,6 +67,22 @@ class DataFacade
         groupDAO.persist(g)
     }
 
+    def getGroupByOwnerAndId(shouldBeOwner: User, groupId: String) : Option[Group] = {
+        val group = groupDAO.getById(groupId)
+
+        if (group.isDefined)
+        {
+            if (group.get.owner.equals(shouldBeOwner))
+            {
+                group
+            }else{
+                None
+            }
+        }else{
+            None
+        }
+    }
+
     //TODO bcrypt
     private def cryptPassword(password: String, method: String = "SHA-1") : String = {
         val md = java.security.MessageDigest.getInstance(method)
