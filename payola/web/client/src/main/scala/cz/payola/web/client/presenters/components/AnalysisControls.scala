@@ -19,7 +19,7 @@ class AnalysisControls(analysisId: String) extends Component
 
     val progressValueBar = new Div(List(),"bar")
     progressValueBar.setAttribute("style", "width: 0%")
-    val progressDiv = new Div(List(progressValueBar),"progress progress-striped progress-success active span11")
+    val progressDiv = new Div(List(progressValueBar),"progress progress-striped progress-success active span10")
 
     var evaluationId = ""
 
@@ -28,10 +28,16 @@ class AnalysisControls(analysisId: String) extends Component
         progressDiv.render(parent)
     }
 
+    var analysisRunning = false
+
     runBtn.clicked += { evt =>
-        runBtn.addClass("disabled")
-        evaluationId = AnalysisRunner.runAnalysisById(analysisId) //TODO: prevent multiple evaluations
-        schedulePolling
+        if (!analysisRunning)
+        {
+            runBtn.addClass("disabled")
+            analysisRunning = true
+            evaluationId = AnalysisRunner.runAnalysisById(analysisId) //TODO: prevent multiple evaluations
+            schedulePolling
+        }
         false
     }
 
@@ -77,5 +83,6 @@ class AnalysisControls(analysisId: String) extends Component
         progressDiv.removeClass("active")
 
         analysisEvaluated.trigger(new EvaluationEventArgs(this, graph))
+        analysisRunning = false
     }
 }
