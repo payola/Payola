@@ -15,9 +15,15 @@ POST    /RPC                        controllers.RPC.index()
 GET     /test/RPC                   controllers.Application.rpcTest()
 POST    /RPC/async                  controllers.RPC.async()
 
+GET     /analysis/create            controllers.Analysis.create
 GET     /analysis/:id               controllers.Analysis.detail(id)
 
+GET     /datasource/:id             controllers.DataSource.detail(id)
+
 GET     /dashboard                  controllers.Application.dashboard()
+GET     /profile/create-group       controllers.Profile.createGroup()
+GET     /profile/edit-group       controllers.Profile.editGroup()
+POST     /profile/save-group         controllers.Profile.saveGroup()
 GET     /profile/:username          controllers.Profile.index(username)
 GET     /profile/:username/edit     controllers.Profile.edit(username)
 POST    /saveprofile/:username      controllers.Profile.save(username)

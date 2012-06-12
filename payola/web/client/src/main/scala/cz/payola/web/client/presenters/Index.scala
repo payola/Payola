@@ -1,23 +1,21 @@
 package cz.payola.web.client.presenters
 
 import s2js.adapters.js.browser._
-import cz.payola.common.rdf.Graph
 import cz.payola.web.client.views.plugins.Plugin
 import cz.payola.web.client.views.plugins.visual.techniques.tree.TreeTechnique
-import cz.payola.web.shared.GraphFetcher
 import s2js.compiler.dependency
-import s2js.runtime.shared.rpc.Exception
 import cz.payola.web.client.views.plugins.visual.techniques.circle.CircleTechnique
 import cz.payola.web.client.views.plugins.visual.techniques.gravity.GravityTechnique
 import cz.payola.web.client.views.plugins.visual.techniques.minimalization.MinimalizationTechnique
 import cz.payola.web.client.views.plugins.textual.techniques.table.TableTechnique
-import s2js.adapters.goog
-import goog.events.BrowserEvent
 import cz.payola.web.client.views.plugins.textual.TextPlugin
-import cz.payola.web.client.views.plugins.visual.components.visualsetup.VisualSetup
+import cz.payola.web.client.views.plugins.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.views.plugins.visual._
-import cz.payola.web.client.events.ChangedEventArgs
-import cz.payola.web.client.mvvm_api.element.{Anchor, Li, Text}
+import cz.payola.web.client.mvvm.element.{Anchor, ListItem, Text}
+import settings.{VertexSettingsModel, TextSettingsModel, EdgeSettingsModel}
+import  cz.payola.domain.rdf.{IdentifiedNode, LiteralNode, Edge, Graph}
+import cz.payola.web.shared.GraphFetcher
+import cz.payola.common.rdf.IdentifiedVertex
 
 // TODO remove after classloading is done
 @dependency("cz.payola.common.rdf.IdentifiedVertex")
@@ -26,7 +24,7 @@ import cz.payola.web.client.mvvm_api.element.{Anchor, Li, Text}
 @dependency("cz.payola.common.rdf.Edge")
 class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
 {
-    var graph: Option[Graph] = None
+    var graph: Option[cz.payola.common.rdf.Graph] = None
 
     val vertexSettings = new VertexSettingsModel
     val edgesSettings = new EdgeSettingsModel
@@ -52,14 +50,13 @@ class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
     plugins.foreach{ plugin =>
 
         val pluginBtn = new Anchor(List(new Text(plugin.getName)), "#")
-        new Li(List(pluginBtn)).render(document.getElementById("settings"))
+        new ListItem(List(pluginBtn)).render(document.getElementById("settings"))
 
         pluginBtn.clicked += {
             event =>
-                val pluginOp = plugins.find(_.getName == plugin.getName)
-                if(pluginOp.isDefined) {
-                    currentPlugin = pluginOp
-                    changePlugin(currentPlugin.get)
+                val newPlugin = plugins.find(_.getName == plugin.getName)
+                if(newPlugin.isDefined) {
+                    changePlugin(newPlugin.get)
                 }
                 false
         }
@@ -67,7 +64,7 @@ class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
 
     def init() {
         visualSetup.render(document.getElementById("settings"))
-
+        graph = Some(GraphFetcher.getInitialGraph)
         changePlugin(plugins.head)
     }
 
@@ -97,10 +94,23 @@ class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
         // Switch to the new one.
         currentPlugin = Some(plugin)
         plugin.init(document.getElementById(elementToDrawIn))
-        plugin.update(graph.get)
 
+        if (graph.isDefined) {
+            plugin.update(graph.get)
+        }
 
         currentPlugin.get match {
+            case i: VisualPlugin =>
+                i.vertexUpdate += { event =>
+                    event.target match {
+                        case ve: IdentifiedVertex =>
+                            val neighborhood = GraphFetcher.getNeighborhoodOfVertex(ve.uri)
+                            i.update(neighborhood)
+                        case _ =>
+                    }
+                    false
+                }
+
             case i: TextPlugin =>
                 i.redraw()
         }

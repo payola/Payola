@@ -28,7 +28,7 @@ trait Graph
       * @param vertexURI URI of the vertex whose edges to retrieve.
       * @return The edges.
       */
-    def getOutgoingEdges(vertexURI: String): Seq[Edge] = {
+    def getOutgoingEdges(vertexURI: String): Seq[EdgeType] = {
         edges.filter(_.origin.uri == vertexURI)
     }
 
@@ -37,7 +37,7 @@ trait Graph
       * @param vertexURI URI of the vertex whose edges to retrieve.
       * @return The edges.
       */
-    def getIncomingEdges(vertexURI: String): Seq[Edge] = {
+    def getIncomingEdges(vertexURI: String): Seq[EdgeType] = {
         edges.filter {e =>
             e.destination match {
                 case v: IdentifiedVertex => v.uri == vertexURI

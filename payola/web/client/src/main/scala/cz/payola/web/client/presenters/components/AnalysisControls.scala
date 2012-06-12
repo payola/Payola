@@ -1,7 +1,7 @@
 package cz.payola.web.client.presenters.components
 
-import cz.payola.web.client.mvvm_api.Component
-import cz.payola.web.client.mvvm_api.element._
+import cz.payola.web.client.mvvm.Component
+import cz.payola.web.client.mvvm.element._
 import s2js.adapters.js.dom.Element
 import s2js.adapters.js.browser.document
 import cz.payola.web.client.events._
@@ -13,13 +13,13 @@ class AnalysisControls(analysisId: String) extends Component
 {
     val analysisEvaluated = new ComponentEvent[AnalysisControls, EvaluationEventArgs]
 
-    val icon = new I(List(), "icon-play icon-white")
+    val icon = new Italic(List(), "icon-play icon-white")
     val caption = new Text("Run analysis")
     val runBtn = new Anchor(List(icon, caption), "#", "btn btn-primary span2")
 
     val progressValueBar = new Div(List(),"bar")
     progressValueBar.setAttribute("style", "width: 0%")
-    val progressDiv = new Div(List(progressValueBar),"progress progress-striped progress-success active span11")
+    val progressDiv = new Div(List(progressValueBar),"progress progress-striped progress-success active span10")
 
     var evaluationId = ""
 
@@ -28,10 +28,16 @@ class AnalysisControls(analysisId: String) extends Component
         progressDiv.render(parent)
     }
 
+    var analysisRunning = false
+
     runBtn.clicked += { evt =>
-        runBtn.addClass("disabled")
-        evaluationId = AnalysisRunner.runAnalysisById(analysisId) //TODO: prevent multiple evaluations
-        schedulePolling
+        if (!analysisRunning)
+        {
+            runBtn.addClass("disabled")
+            analysisRunning = true
+            evaluationId = AnalysisRunner.runAnalysisById(analysisId) //TODO: prevent multiple evaluations
+            schedulePolling
+        }
         false
     }
 
@@ -77,5 +83,6 @@ class AnalysisControls(analysisId: String) extends Component
         progressDiv.removeClass("active")
 
         analysisEvaluated.trigger(new EvaluationEventArgs(this, graph))
+        analysisRunning = false
     }
 }

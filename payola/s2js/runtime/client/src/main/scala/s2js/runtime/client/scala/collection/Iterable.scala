@@ -13,6 +13,8 @@ trait Iterable
 
     def +=(x: Any)
 
+    def -=(x: Any)
+
     def prepend(x: Any)
 
     // From TraversableLike
@@ -20,6 +22,10 @@ trait Iterable
 
     def ++=(coll: Iterable) {
         coll.foreach(this += _)
+    }
+
+    def --=(coll: Iterable) {
+        coll.foreach(this -= _)
     }
 
     // From TraversableOnce
@@ -203,6 +209,14 @@ trait Iterable
         val b = newInstance
         b ++= this
         b ++= that
+        b
+    }
+
+    // From TraversableLike
+    def --(that: Iterable): Iterable = {
+        val b = newInstance
+        b ++= this
+        b --= that
         b
     }
 

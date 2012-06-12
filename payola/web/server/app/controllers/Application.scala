@@ -6,6 +6,7 @@ import play.api.data._
 import play.api.data.Forms._
 import views._
 import helpers.Secured
+import cz.payola.domain.entities.User
 
 object Application extends PayolaController with Secured
 {
@@ -24,9 +25,10 @@ object Application extends PayolaController with Secured
     }
 
     def dashboard = maybeAuthenticated { user =>
-        Ok(views.html.application.dashboard(user, topAnalyses = df.topAnalyses))
+        Ok(views.html.application.dashboard(user, df.topAnalyses, df.getPublicDataSources(10), df.getGroupsByOwner(user)))
     }
 
+    // -- Authentication
     val loginForm = Form(
         tuple(
             "email" -> text,

@@ -78,3 +78,11 @@ label{
     float: left;
     width: 250px;
 }
+
+.instance h3 {
+    text-align: center;
+}
+
+.instance p {
+    max-width: 200px;
+}

@@ -4,8 +4,7 @@ import cz.payola.domain.entities.analyses.evaluation._
 import cz.payola.data.dao.AnalysisDAO
 import scala.collection.mutable.HashMap
 
-@remote
-object AnalysisRunner
+@remote object AnalysisRunner
 {
     val runningEvaluations : HashMap[String, AnalysisEvaluation] = new HashMap[String, AnalysisEvaluation]
 

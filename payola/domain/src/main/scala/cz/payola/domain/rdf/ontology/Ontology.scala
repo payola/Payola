@@ -62,11 +62,29 @@ object Ontology {
       * @return Empty ontology.
       */
     def empty: Ontology = new Ontology(Nil)
+
+    /** Merges two ontologies into a new one. Equivalent to o1 + o2.
+      *
+      * @param o1 First ontology.
+      * @param o2 Second ontology.
+      * @return New instance with merged classes and properties.
+      */
+    def merge(o1: Ontology, o2: Ontology): Ontology = {
+        OntologyMerger(o1, o2)
+    }
 }
 
-class Ontology(val classes: collection.Seq[Class]) extends cz.payola.common.entities.ontology.Ontology
+class Ontology(val classes: collection.Seq[Class]) extends cz.payola.common.rdf.ontology.Ontology
 {
 
+    /** Merges this onotlogy with the other one into a new one.
+      *
+      * @param otherOntology The other ontology.
+      * @return New instance with merged classes and properties.
+      */
+    def +(otherOntology: Ontology): Ontology = {
+        Ontology.merge(this, otherOntology)
+    }
 
     def containsClassWithURI(uri: String): Boolean = {
         getClassForURI(uri).isDefined

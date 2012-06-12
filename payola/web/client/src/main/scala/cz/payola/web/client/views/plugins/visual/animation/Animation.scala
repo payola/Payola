@@ -3,62 +3,91 @@ package cz.payola.web.client.views.plugins.visual.animation
 import collection.mutable.ListBuffer
 import cz.payola.web.client.views.plugins.visual.{Vector, Point}
 import s2js.adapters.js.browser.window
-import cz.payola.web.client.views.plugins.visual.graph.{InformationView, VertexView}
+import cz.payola.web.client.views.plugins.visual.graph._
 
 class Animation[T](
-    animationFunction: (ListBuffer[T], Option[Animation[_]], () => Unit, () => Unit, Option[Int]) => Unit,
-    verticesToAnimate: ListBuffer[T], var followingAnimation: Option[Animation[_]], quickDraw: () => Unit,
-    finalDraw: () => Unit, animationLength: Option[Int])
+    animationFunction: (T, Option[Animation[_]], () => Unit, () => Unit, Option[Int]) => Unit,
+    toAnimate: T, var followingAnimation: Option[Animation[_]], quickDraw: () => Unit,
+    finalDraw: () => Unit, animationStepLength: Option[Int])
 {
     def run() {
-        animationFunction(verticesToAnimate, followingAnimation, quickDraw, finalDraw, animationLength)
+        animationFunction(toAnimate, followingAnimation, quickDraw, finalDraw, animationStepLength)
     }
 
     def setFollowingAnimation(newFollowingAnimation: Animation[_]) {
         followingAnimation = Some(newFollowingAnimation)
     }
+
+    def addFollowingAnimation(nextFollowingAnimation: Animation[_]) {
+        if(followingAnimation.isEmpty) {
+            setFollowingAnimation(nextFollowingAnimation)
+        } else {
+            followingAnimation.get.addFollowingAnimation(nextFollowingAnimation)
+        }
+    }
 }
 
 object Animation
 {
+    private val currentAnimation: Option[Animation[_]] = None
+
     private val animationKillConst = 0
 
     private val animationPrepareConst = -1
 
     private var animationCurrentNumber = -1
 
-    def hideText(verticesToAnimate: ListBuffer[InformationView], nextAnimation: Option[Animation[_]],
-        quickDraw: () => Unit, finalDraw: () => Unit, animationLength: Option[Int]) {
+    def emptyAnimation(wontBeUsed1: Boolean, nextAnimation: Option[Animation[_]],
+        firstFuncToRun: () => Unit, secondFuncToRun: () => Unit, animationStepLength: Option[Int]) {
 
-        animationCurrentNumber = animationPrepareConst
-        animateTextVisibility(verticesToAnimate, 1 - 0.1, -0.1, nextAnimation, quickDraw, finalDraw, animationLength)
+        firstFuncToRun()
+        secondFuncToRun()
+        if(nextAnimation.isDefined) {
+            nextAnimation.get.run()
+        }
     }
 
-    def showText(verticesToAnimate: ListBuffer[InformationView], nextAnimation: Option[Animation[_]],
-        quickDraw: () => Unit, finalDraw: () => Unit, animationLength: Option[Int]) {
+    def hideText(infosToAnimate: ListBuffer[InformationView], nextAnimation: Option[Animation[_]],
+        quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
 
         animationCurrentNumber = animationPrepareConst
-        animateTextVisibility(verticesToAnimate, 0 + 0.1, 0.1, nextAnimation, quickDraw, finalDraw, animationLength)
+        animateTextVisibility(infosToAnimate, 1 - 0.1, -0.1, nextAnimation, quickDraw, finalDraw, animationStepLength)
+    }
+
+    def showText(infosToAnimate: ListBuffer[InformationView], nextAnimation: Option[Animation[_]],
+        quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
+
+        animationCurrentNumber = animationPrepareConst
+        animateTextVisibility(infosToAnimate, 0 + 0.1, 0.1, nextAnimation, quickDraw, finalDraw, animationStepLength)
     }
 
     def moveVertices(verticesToMove: ListBuffer[(VertexView, Point)], nextAnimation: Option[Animation[_]],
-        quickDraw: () => Unit, finalDraw: () => Unit, animationLength: Option[Int]) { //TODO chovej se k tehle funkci jako k ostatnim animacnim funkcim
+        quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
 
         val animationVViews = ListBuffer[AnimationVertexView]()
-        verticesToMove.foreach {
-            vToMove =>
-                val translation = vToMove._1.position.createVector(vToMove._2)
-                animationVViews += new AnimationVertexView(vToMove._1, translation, Vector.One)
+        verticesToMove.foreach { vToMove =>
+            val translation = vToMove._1.position.createVector(vToMove._2)
+            animationVViews += new AnimationVertexView(vToMove._1, translation, Vector.One)
         }
         animationCurrentNumber = animationPrepareConst
-        animateTranslation(animationVViews, nextAnimation, quickDraw, finalDraw, None)
+
+        animateTranslation(animationVViews, nextAnimation, quickDraw, finalDraw, animationStepLength)
     }
 
-    def moveGraphToUpperLeftCorner(vViews: ListBuffer[VertexView], nextAnimation: Option[Animation[_]],
-        quickDraw: () => Unit, finalDraw: () => Unit, animationLength: Option[Int]) {
+    def moveComponent(move: (LocationDescriptor.ComponentPositionHelper, ListBuffer[VertexView]),
+        nextAnimation: Option[Animation[_]], quickDraw: () => Unit, finalDraw: () => Unit,
+        animationStepLength: Option[Int]) {
+
+        moveGraphBy((move._1.getComponentPosition().toVector, move._2),
+            nextAnimation, quickDraw, finalDraw, animationStepLength)
+    }
+
+    def moveGraphBy(move: (Vector, ListBuffer[VertexView]), nextAnimation: Option[Animation[_]],
+        quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
+
         var vector = Vector(Double.MaxValue, Double.MaxValue)
         //search for the minimum
-        vViews.foreach {
+        move._2.foreach {
             v: VertexView =>
                 if (v.position.x < vector.x) {
                     vector = Vector(v.position.x, vector.y)
@@ -69,18 +98,24 @@ object Animation
         }
 
         //move the graph...actually to the [50,50] coordinate, that no vertices are cut off by the screen edge
-        vector = (vector) * (-1) + Vector(50, 50)
+        vector = (vector) * (-1) + move._1
         val animationVViews = ListBuffer[AnimationVertexView]()
-        vViews.foreach {
+        move._2.foreach {
             vView =>
                 animationVViews += new AnimationVertexView(vView, vector, Vector.One)
         }
         animationCurrentNumber = animationPrepareConst
-        animateTranslation(animationVViews, nextAnimation, quickDraw, finalDraw, None)
+        animateTranslation(animationVViews, nextAnimation, quickDraw, finalDraw, animationStepLength)
+    }
+
+    def moveGraphToUpperLeftCorner(vViews: ListBuffer[VertexView], nextAnimation: Option[Animation[_]],
+        quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
+
+        moveGraphBy((Point(50, 25).toVector, vViews), nextAnimation, quickDraw, finalDraw, animationStepLength)
     }
 
     def flipGraph(vViews: ListBuffer[VertexView], nextAnimation: Option[Animation[_]], quickDraw: () => Unit,
-        finalDraw: () => Unit, animationLength: Option[Int]) {
+        finalDraw: () => Unit, animationStepLength: Option[Int]) {
         var maxX: Double = Double.MinValue
         var minX: Double = Double.MaxValue
         var maxY: Double = Double.MinValue
@@ -113,7 +148,7 @@ object Animation
             }
 
             animationCurrentNumber = animationPrepareConst
-            animateTranslation(animationVViews, nextAnimation, quickDraw, finalDraw, None)
+            animateTranslation(animationVViews, nextAnimation, quickDraw, finalDraw, animationStepLength)
         } else {
             if (nextAnimation.isDefined) {
                 nextAnimation.get.run()
@@ -121,19 +156,12 @@ object Animation
         }
     }
 
-    /*def timeoutedAnimation(vViews: ListBuffer[VertexView], eViews: ListBuffer[EdgeView],
-        nextAnimation: Option[Animation], quickDraw: () => Unit, finalDraw: () => Unit) {
-
-        if(nextAnimation.isDefined) {
-            setTimeout(nextAnimation.get.run(), )
-        } //TODO remove
-    }*/
-
     private def animateTextVisibility(animVViews: ListBuffer[InformationView], visibilityCurrent: Double,
         visibilityStep: Double, nextAnimation: Option[Animation[_]], quickRedraw: () => Unit, finalRedraw: () => Unit,
-        animationLength: Option[Int]) {
+        animationStepLength: Option[Int]) {
 
-        if(animationCurrentNumber == animationKillConst) { //animation forcefully ended, set final visibility
+        if((animationStepLength.isDefined && animationStepLength.get == 0) //skip animation
+            || (animationCurrentNumber == animationKillConst)) { //animation forcefully ended, set final visibility
             val visibilityFinal = if(math.signum(visibilityStep) < 0) { 0.0 } else { 1.0 }
             animVViews.foreach { info =>
                 info.setTextVisibility(visibilityFinal)
@@ -144,9 +172,10 @@ object Animation
             }
         }
 
-        if((visibilityCurrent == 0 && visibilityCurrent + visibilityStep < 0) ||
-            (visibilityCurrent == 1 && 1 < visibilityCurrent + visibilityStep) || // animation is finished
-            animationCurrentNumber == animationKillConst) {
+        if((visibilityCurrent == 0 && visibilityCurrent + visibilityStep < 0)
+            || (visibilityCurrent == 1 && 1 < visibilityCurrent + visibilityStep) // animation is finished
+            || animationCurrentNumber == animationKillConst
+            || (animationStepLength.isDefined && animationStepLength.get == 0)) { //skip animation
 
 
             if(nextAnimation.isDefined) {
@@ -165,15 +194,17 @@ object Animation
                 }
             quickRedraw()
             setTimeout(() => animateTextVisibility(animVViews, visibilityNext, visibilityStep, nextAnimation,
-                quickRedraw, finalRedraw, animationLength), 1)
+                quickRedraw, finalRedraw, animationStepLength), 1)
         }
     }
 
     private def animateTranslation(animVViews: ListBuffer[AnimationVertexView], nextAnimation: Option[Animation[_]],
-        quickDraw: () => Unit, finalDraw: () => Unit, animationLength: Option[Int]) {
+        quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
         var translationFinished = true
 
-        if(animationCurrentNumber == animationKillConst) { //if animation forcefully ended set the final positions
+
+        if(animationCurrentNumber == animationKillConst //if animation forcefully ended set the final positions
+            || (animationStepLength.isDefined && animationStepLength.get == 0)) { //animation skipped
             animVViews.foreach{ vertex =>
                 vertex.value.position = vertex.value.position + vertex.translation
 
@@ -196,7 +227,9 @@ object Animation
             }
         }
 
-        if (translationFinished || animationCurrentNumber == animationKillConst) {
+        if (translationFinished
+            || animationCurrentNumber == animationKillConst //force end
+            || (animationStepLength.isDefined && animationStepLength.get == 0)) { //skip animation
 
             if (nextAnimation.isDefined) {
                 nextAnimation.get.run()

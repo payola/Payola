@@ -7,8 +7,9 @@ import s2js.adapters.js.dom.{CanvasRenderingContext2D, Canvas}
   * @param canvas object specifying sizes of the context
   * @param context object for drawing
   */
-class Layer(val canvas: Canvas, val context: CanvasRenderingContext2D)
+class Layer(val canvas: Canvas, val context: CanvasRenderingContext2D) //TODO delete
 {
+
     /**
       * Indicator whether is the layer ready for drawing into.
       */

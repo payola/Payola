@@ -28,8 +28,11 @@
         @renderInstance(inst = b.sourcePluginInstance, analysis)
     }
     <hr style="clear: both; height: 0px; visibility: hidden;" />
-    <div class="alert alert-info" style="text-align: center;" id="inst_@inst.id">
-        <h4>@inst.plugin.name</h4>
+    <div class="alert alert-info instance" id="inst_@inst.id">
+        <h3>@inst.plugin.name</h3>
+        @inst.plugin.parameters.map{param =>
+            <p><strong>@param.name</strong>: @inst.getParameter(param.name)</p>
+        }
     </div>
 
 </div>
@@ -43,7 +46,6 @@
         <div class="well" id="analysis-controls">
 
         </div>
-        <h1>Detail of analysis: @analysis.name</h1>
     </div><!--/row-->
 
     <div class="row-fluid">

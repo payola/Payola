@@ -70,7 +70,7 @@ class VertexViewPack(var value: VertexView, var children: ListBuffer[VertexViewP
       * right-most...child is on the right, if it is at the end of the children container
       * @return
       */
-    def getLastParent(): VertexViewPack = {
+    def getLastParent: VertexViewPack = {
 
         //find topmost parent
         var topmostParent = this
@@ -126,7 +126,7 @@ class VertexViewPack(var value: VertexView, var children: ListBuffer[VertexViewP
       * n-3 <= n-4 <= n-5 <= n-6
       * @return
       */
-    def getPreviousBrother(): VertexViewPack = {
+    def getPreviousBrother: VertexViewPack = {
 
         //find topmost parent
         var topmostParent = this
@@ -166,14 +166,14 @@ class VertexViewPack(var value: VertexView, var children: ListBuffer[VertexViewP
       * n-3 <= n-4 <= n-5 <= n-6
       * @return
       */
-    def getPreviousBrotherWithChildren(): VertexViewPack = {
+    def getPreviousBrotherWithChildren: VertexViewPack = {
         var lastElement = this //if the graph consists of only 2 vertices
-        var previousBrother = getPreviousBrother()
+        var previousBrother = getPreviousBrother
         while(previousBrother.children.length < 2 &&
             (lastElement.value.vertexModel ne previousBrother.value.vertexModel)) {
 
             lastElement = previousBrother
-            previousBrother = previousBrother.getPreviousBrother()
+            previousBrother = previousBrother.getPreviousBrother
         }
 
         previousBrother

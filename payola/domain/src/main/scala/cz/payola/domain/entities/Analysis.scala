@@ -169,11 +169,11 @@ class Analysis(protected var _name: String, protected val _owner: Option[User])
       * @param instance The instance that would replace the binding.
       */
     def collapseBinding(binding: PluginInstanceBindingType, instance: PluginInstance) {
-        require(pluginInstanceBindings.contains(binding), "The binding isn't present in the analysis.")
-        require(!pluginInstances.contains(instance), "The instance is already present in the analysis.")
-        require(binding.targetPluginInstance.plugin.inputCount == 1, "The binding target instance must have one imput.")
-        require(binding.sourcePluginInstance.plugin.inputCount == instance.plugin.inputCount,
-            "The binding source instance must have same number of inputs as the instance that replaces the binding.")
+//        require(pluginInstanceBindings.contains(binding), "The binding isn't present in the analysis.")
+//        require(!pluginInstances.contains(instance), "The instance is already present in the analysis.")
+//        require(binding.targetPluginInstance.plugin.inputCount == 1, "The binding target instance must have one imput.")
+//        require(binding.sourcePluginInstance.plugin.inputCount == instance.plugin.inputCount,
+//            "The binding source instance must have same number of inputs as the instance that replaces the binding.")
 
         // Store the bindings for later use.
         val sourceInstanceInputBindings = pluginInstanceInputBindings(binding.sourcePluginInstance)

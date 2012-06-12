@@ -3,6 +3,8 @@ package cz.payola.web.client.views.plugins.visual.graph
 import cz.payola.common.rdf.Edge
 import s2js.adapters.js.dom.CanvasRenderingContext2D
 import cz.payola.web.client.views.plugins.visual._
+import settings.{TextSettingsModel, EdgeSettingsModel}
+import s2js.adapters.js.browser.window
 
 /**
   * Structure used during draw function of EdgeView. Helps to indicate position of vertices to each other.
@@ -25,18 +27,13 @@ private object Quadrant
   * @param originView the vertex object representing origin of this edge
   * @param destinationView of this graphical representation in drawing space
   */
-class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationView: VertexView, var settings: EdgeSettingsModel)
-    extends View {
-
-    /**
-      * If true, the drawn edge is straight, else is bezier curve
-      */
-    private var drawStraight = true
+class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationView: VertexView,
+    val settings: EdgeSettingsModel, settingsText: TextSettingsModel) extends View {
     
     /**
       * Textual data that should be visualised with this edge ("over this edge").
       */
-    val information: InformationView = InformationView(edgeModel)
+    val information: InformationView = new InformationView(edgeModel, settingsText)
 
     /**
       * Indicator of selection of this graphs element. Is used during color selection in draw function.
@@ -127,23 +124,45 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
             settings.width, color)
     }
     
-    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
+    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
 
         drawQuick(context, color, positionCorrection)
     }
 
-    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Option[Point]) {
+    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
 
         val colorToUse = color.getOrElse(
             if(isSelected) settings.colorSelected else settings.color
         )
 
-        val correction = positionCorrection.getOrElse(Point.Zero).toVector
-
-        if(drawStraight) {
-            prepareStraight(context, colorToUse, correction)
+        if(1 <= settings.straightenIndex && settings.straightenIndex <= 6) {
+            prepareBezierCurve(context, colorToUse, Vector.Zero)
         } else {
-            prepareBezierCurve(context, colorToUse, correction)
+            prepareStraight(context, colorToUse, Vector.Zero)
+        }
+    }
+
+    override def toString: String = {
+        "["+originView.toString+"-"+edgeModel.toString+"-"+destinationView.toString+"]"
+    }
+
+    /**
+     * Compares another edgeView to this one. Returns true if edgeModels.toString are equal and destination vertices
+     * and origin vertices are equal or flipped origin and destination and destination and origin are equal
+     * @param edgeView
+     * @return
+     */
+    def isEqual(edgeView: Any): Boolean = {
+        if(edgeView == null) {
+            false
+        }
+
+        edgeView match {
+            case ev: EdgeView =>
+                ((((originView isEqual ev.originView) && (destinationView isEqual ev.destinationView))
+                    || ((originView isEqual ev.destinationView) && (destinationView isEqual ev.originView)))
+                    && (edgeModel.toString eq ev.edgeModel.toString))
+            case _ => false
         }
     }
 }

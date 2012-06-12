@@ -3,23 +3,30 @@ package cz.payola.web.client.views.plugins.visual.graph
 import s2js.adapters.js.browser._
 import s2js.adapters.js.dom._
 import cz.payola.web.client.views.plugins.visual._
+import cz.payola.web.client.mvvm.element.CanvasPack
 
 trait View {
+    /**
+     * Indicator of selection.
+     * @return true if marked as selected.
+     */
+    def isSelected: Boolean
+
     /**
       * Routine for drawing the graphical representation of graphs objects.
       * @param context to which container to draw
       * @param color which color to use
-      * @param position to which location to draw
+      * @param positionCorrection to modify the position of the drawn object
       */
-    def draw(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point])
+    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector)
 
     /**
      * Routine for fast drawing of the graphical representation of graphs objects. Should be used for animation
      * @param context to which container to draw
      * @param color which color to use
-     * @param position to which location to draw
+     * @param positionCorrection to modify the position of the drawn object
      */
-    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], position: Option[Point])
+    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector)
 
     /**
       * Draws a rectangle with rounded corners, depending on the radius parameter to the input canvas context.
@@ -196,16 +203,7 @@ trait View {
         canvas
     }
 
-    /**
-      * Clears the specified area from all drawn elements
-      * @param context where in to clear
-      * @param topLeft corner of the cleared rectangle
-      * @param size of the cleared rectangle
-      */
-    protected def clear(context: CanvasRenderingContext2D, topLeft: Point, size: Vector) {
-        val bottomRight = topLeft + size
-        context.clearRect(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
-    }
+
 
     /**
       * Indicator if the point is inside of the rectangle.
@@ -223,13 +221,12 @@ trait View {
       * @param container parent of the created canvas context
       * @return Layer object with a new canvas context
       */
-    protected def createLayer(container: Element): Layer = {
-        val canvas = document.createElement[Canvas]("canvas")
-        val context = canvas.getContext[CanvasRenderingContext2D]("2d")
-        val layer = new Layer(canvas, context)
+    protected def createCanvasPack(container: Element): CanvasPack = {
 
-        container.appendChild(canvas)
-        layer.setSize(Vector(2000, 2000)) //TODO take it from the "created element"
-        layer
+        val canvasPack = new CanvasPack(
+            window.innerWidth - container.offsetLeft, window.innerHeight - container.offsetTop)
+        canvasPack.render(container)
+
+        canvasPack
     }
 }
