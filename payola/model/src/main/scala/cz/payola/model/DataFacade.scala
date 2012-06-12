@@ -5,12 +5,13 @@ import cz.payola.data.dao._
 import cz.payola.data.entities.dao._
 import cz.payola.domain.entities.analyses.PluginInstance
 import cz.payola.common.rdf.Graph
+import cz.payola.domain.entities.Group
 
 class DataFacade
 {
-    val userDAO = new UserDAO
-    val analysisDAO = new AnalysisDAO
-    val groupDAO = new GroupDAO
+    private val userDAO = new UserDAO
+    private val analysisDAO = new AnalysisDAO
+    private val groupDAO = new GroupDAO
 
     def getUserByCredentials(username: String, password: String) : Option[User] = {
         userDAO.getUserByCredentials(username, cryptPassword(password))
@@ -59,6 +60,11 @@ class DataFacade
         }else{
             groupDAO.getByOwnerId(user.get.id)
         }
+    }
+
+    def createGroup(name: String, owner: User) = {
+        val g = new Group(name, owner)
+        groupDAO.persist(g)
     }
 
     //TODO bcrypt

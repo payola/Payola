@@ -49,11 +49,10 @@ object Profile extends PayolaController with Secured
     }
 
     def saveGroup = authenticatedWithRequest { (request: Request[_], user: User) =>
-        implicit val r = request
-        val name = groupForm.bindFromRequest.get
+        val name = groupForm.bindFromRequest()(request).get
+        df.createGroup(name, user)
 
-        val group = new Group(name, user)
-        df.groupDAO.persist(group)
+        //TODO flashMessage
 
         Redirect(routes.Profile.index(user.email))
     }
