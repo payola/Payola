@@ -74,7 +74,7 @@ object Ontology {
     }
 }
 
-class Ontology(val classes: collection.Seq[Class]) extends cz.payola.common.entities.ontology.Ontology
+class Ontology(val classes: collection.Seq[Class]) extends cz.payola.common.rdf.ontology.Ontology
 {
 
     /** Merges this onotlogy with the other one into a new one.

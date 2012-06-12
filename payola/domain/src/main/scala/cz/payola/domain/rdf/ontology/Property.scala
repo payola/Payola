@@ -4,7 +4,7 @@ package cz.payola.domain.rdf.ontology
   *
   * @param URI Property URI.
   */
-class Property(val URI: String, val typeURI: Option[String]) extends cz.payola.common.entities.ontology.Property
+class Property(val URI: String, val typeURI: Option[String]) extends cz.payola.common.rdf.ontology.Property
 {
     /** Overriding toString method to include URI in the description.
       *

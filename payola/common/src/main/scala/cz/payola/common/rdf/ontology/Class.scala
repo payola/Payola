@@ -1,4 +1,4 @@
-package cz.payola.common.entities.ontology
+package cz.payola.common.rdf.ontology
 
 
 trait Class

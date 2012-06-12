@@ -48,11 +48,9 @@ object Profile extends PayolaController with Secured
         Ok(html.userProfile.createGroup(user, groupForm))
     }
 
-    def saveGroup = authenticated { user: User =>
-
-        //val name = groupForm.bindFromRequest.get //TODO: get implicit request here. tried to do that, no effect
-
-        val name = "group xy"
+    def saveGroup = authenticatedWithRequest { (request: Request[_], user: User) =>
+        implicit val r = request
+        val name = groupForm.bindFromRequest.get
 
         val group = new Group(name, user)
         df.groupDAO.persist(group)
