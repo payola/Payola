@@ -86,7 +86,7 @@ class Analysis(protected var _name: String, protected val _owner: Option[User])
       * @throws IllegalArgumentException if the instance can't be added to the analysis.
       */
     def addPluginInstance(instance: PluginInstanceType) {
-        //TODO: SQUERYL - fails on type check: require(!pluginInstances.contains(instance), "The instance is already present in the analysis.")
+        require(!pluginInstances.contains(instance), "The instance is already present in the analysis.")
         storePluginInstance(instance)
     }
 
@@ -142,14 +142,11 @@ class Analysis(protected var _name: String, protected val _owner: Option[User])
       * @param binding The plugin instance binding to add.
       */
     def addBinding(binding: PluginInstanceBindingType) {
-        /*
-            TODO: fails on type check - Squery
-            require(!pluginInstanceBindings.contains(binding), "The binding is already present in the analysis.")
-            require(pluginInstances.contains(binding.sourcePluginInstance),
-                "The source plugin instance has to be present in the analysis.")
-            require(pluginInstances.contains(binding.targetPluginInstance),
-                "The target plugin instance has to be present in the analysis.")
-        */
+        require(!pluginInstanceBindings.contains(binding), "The binding is already present in the analysis.")
+        require(pluginInstances.contains(binding.sourcePluginInstance),
+            "The source plugin instance has to be present in the analysis.")
+        require(pluginInstances.contains(binding.targetPluginInstance),
+            "The target plugin instance has to be present in the analysis.")
 
         storeBinding(binding)
     }
