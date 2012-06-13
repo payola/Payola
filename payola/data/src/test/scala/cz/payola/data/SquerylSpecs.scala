@@ -8,6 +8,8 @@ import cz.payola.domain.entities.analyses.plugins.query._
 import cz.payola.domain.entities.analyses.plugins._
 import cz.payola.data.dao._
 import cz.payola.data.entities._
+import cz.payola.domain.entities.analyses.DataSource
+import scala.collection.immutable
 
 class SquerylSpecs extends FlatSpec with ShouldMatchers
 {
@@ -175,6 +177,25 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
                 assert(pi.parameterValues.find(_.id == paramValue.id).get.value == paramValue.value)
             }
         }
+
+        val ds1 = new DataSource("Cities", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.analyses.parameters.StringParameter].createValue("http://dbpedia.org/ontology/Country")))
+        val ds2 = new DataSource("Countries", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.analyses.parameters.StringParameter].createValue("http://dbpedia.org/ontology/City")))
+        val ds3 = new DataSource("Countries2", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.analyses.parameters.StringParameter].createValue("http://dbpedia.org/ontology/City")))
+
+        val dsDao = new DataSourceDAO()
+        val ds1_db = dsDao.persist(ds1).get
+        val ds2_db = dsDao.persist(ds2).get
+        val ds3_db = dsDao.persist(ds3).get
+
+        assert (ds1.id == ds1_db.id)
+        assert (ds2.id == ds2_db.id)
+        assert (ds3.id == ds3_db.id)
+
+        assert (ds1.parameterValues.size == ds1_db.parameterValues.size)
+        assert (ds2.parameterValues.size == ds2_db.parameterValues.size)
+        assert (ds3.parameterValues.size == ds3_db.parameterValues.size)
+
+        assert(dsDao.getPublicDataSources().size == 2)
 
         /*
         // TODO: Test : Remove plugin -> remove parameters, plugin parameterValues, parameter parameterValues

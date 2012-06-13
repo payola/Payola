@@ -1,7 +1,6 @@
 package cz.payola.web.shared
 
 import cz.payola.domain.entities.analyses.evaluation._
-import cz.payola.data.entities.dao.FakeAnalysisDAO
 import scala.collection.mutable.HashMap
 import cz.payola.common.rdf.Graph
 import cz.payola.model.DataFacade

@@ -8,5 +8,7 @@ trait ParameterValue[A] extends cz.payola.domain.entities.analyses.ParameterValu
 
     var pluginInstanceId: Option[String] = None
 
+    var dataSourceId: Option[String] = None
+
     override def parameter: ParameterType
 }
