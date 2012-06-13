@@ -8,7 +8,7 @@ trait OptionallyOwnedEntity extends Entity
     /** Type of the user who may own the entity. */
     type UserType <: User
 
-    protected val _owner: Option[UserType]
+    protected var _owner: Option[UserType]
 
     /** Owner of the entity. */
     def owner = _owner

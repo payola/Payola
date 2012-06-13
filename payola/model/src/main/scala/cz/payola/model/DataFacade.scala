@@ -2,16 +2,16 @@ package cz.payola.model
 
 import cz.payola.domain.entities.User
 import cz.payola.data.dao._
-import cz.payola.data.entities.dao._
-import cz.payola.domain.entities.analyses.PluginInstance
+import cz.payola.domain.entities.analyses.DataSource
 import cz.payola.common.rdf.Graph
 import cz.payola.domain.entities.Group
 
 class DataFacade
 {
-    private val userDAO = new UserDAO
-    private val analysisDAO = new AnalysisDAO
-    private val groupDAO = new GroupDAO
+    val userDAO = new UserDAO
+    val analysisDAO = new AnalysisDAO
+    val groupDAO = new GroupDAO
+    val dataSourceDAO = new DataSourceDAO
 
     def getUserByCredentials(username: String, password: String) : Option[User] = {
         userDAO.getUserByCredentials(username, cryptPassword(password))
@@ -45,13 +45,12 @@ class DataFacade
         null
     }
 
-    def getPublicDataSources(count: Int, skip: Int = 0) : Seq[PluginInstance] = {
-        //TODO this should return unique endpoints by EndpointURL
-        FakeAnalysisDAO.analysis.pluginInstances.filter(i => i.plugin.name == "SPARQL Endpoint")
+    def getPublicDataSources(count: Int, skip: Int = 0) : Seq[DataSource] = {
+        dataSourceDAO.getPublicDataSources(skip, count)
     }
 
-    def getDataSourceById(id: String) : Option[PluginInstance] = {
-        FakeAnalysisDAO.analysis.pluginInstances.filter(i => i.plugin.name == "SPARQL Endpoint").headOption
+    def getDataSourceById(id: String) : Option[DataSource] = {
+        dataSourceDAO.getById(id)
     }
 
     def getGroupsByOwner(user: Option[User]) = {
