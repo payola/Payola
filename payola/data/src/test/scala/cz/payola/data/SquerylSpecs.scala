@@ -59,13 +59,19 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
         val group1 = groupDao.persist(g1).get
         val group2 = groupDao.persist(g2).get
 
-        val g = groupDao.getById(group1.id)
+        var g = groupDao.getById(group1.id)
         assert(g != None)
         assert(g.get.id == group1.id)
         assert(g.get.name == group1.name)
-        assert(g.get.ownerId.get == user.id)
+        assert(g.get.owner.id == user.id)
 
-        //TODO: returns 4 not 2 - assert(user.ownedGroups.size == 2)
+        g = groupDao.getById(group2.id)
+        assert(g != None)
+        assert(g.get.id == group2.id)
+        assert(g.get.name == group2.name)
+        assert(g.get.owner.id == user.id)
+
+        //assert(user.ownedGroups.size == 2)
     }
 
     "Analysis persistance" should "work" in {
@@ -92,9 +98,13 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
         )
 
         // persist analysis
-        val a = new cz.payola.domain.entities.Analysis("Cities with more than 2 million habitants with countries", None)
+        val user = new UserDAO().findByUsername("n", 0, 1)(0)
+        val a = new cz.payola.domain.entities.Analysis("Cities with more than 2 million habitants with countries", Some(user))
         val analysis = analysisDao.persist(a).get
+
         assert(analysisDao.getById(analysis.id).isDefined)
+        assert(analysis.owner.get.id == user.id)
+        assert(user.ownedAnalyses.size == 1)
 
         // Persist  plugins
         for (p <- plugins) {
@@ -153,6 +163,7 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
         val persistedAnalysis = analysisDao.getById(analysis.id).get
         assert(persistedAnalysis.pluginInstances.size == analysis.pluginInstances.size)
         assert(persistedAnalysis.pluginInstanceBindings.size == analysis.pluginInstanceBindings.size)
+        assert(persistedAnalysis.owner.get.id == user.id)
 
         val pluginInstances = List(
             citiesFetcher,

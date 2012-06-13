@@ -15,7 +15,7 @@ object DataSource
     }
 }
 
-class DataSource(protected var _name: String, protected val _owner: Option[User], plugin: DataFetcher,
+class DataSource(protected var _name: String, protected var _owner: Option[User], plugin: DataFetcher,
     parameterValues: immutable.Seq[ParameterValue[_]])
     extends PluginInstance(plugin, parameterValues)
     with OptionallyOwnedEntity

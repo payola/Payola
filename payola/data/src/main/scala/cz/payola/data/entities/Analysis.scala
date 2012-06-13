@@ -24,8 +24,8 @@ object Analysis {
 class Analysis(
     override val id: String,
     name: String,
-    owner: Option[User])
-    extends cz.payola.domain.entities.Analysis(name, owner)
+    o: Option[User])
+    extends cz.payola.domain.entities.Analysis(name, o)
     with PersistableEntity
 {
     type DomainParameterValueType = cz.payola.domain.entities.analyses.ParameterValue[_]
@@ -38,7 +38,8 @@ class Analysis(
     private var _pluginInstancesBindingsLoaded = false;
     private lazy val _pluginInstancesBindingsQuery = PayolaDB.analysesPluginInstancesBindings.left(this)
 
-    var ownerId: Option[String] = owner.map(_.id)
+    var ownerId: Option[String] = o.map(_.id)
+    private lazy val _ownerQuery = PayolaDB.analysisOwnership.right(this)
 
     override def pluginInstances : Seq[PluginInstanceType] = {
         // Lazy-load related instances only for first time
@@ -54,7 +55,16 @@ class Analysis(
 
         super.pluginInstances
     }
-        
+
+    override def owner: Option[UserType] = {
+        if (_owner == None){
+            if (ownerId != null && ownerId.isDefined) {
+                _owner = evaluateCollection(_ownerQuery).headOption
+            }
+        }
+
+        _owner
+    }
 
     override def pluginInstanceBindings: Seq[PluginInstanceBindingType] = {
         // Lazy-load related bindings only for first time

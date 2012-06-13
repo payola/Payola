@@ -3,10 +3,6 @@ package cz.payola.data.entities.analyses
 import scala.collection.immutable
 import cz.payola.data.entities._
 import cz.payola.data.entities.analyses.parameters._
-import cz.payola.data.entities.analyses.parameters.BooleanParameterValue._
-import cz.payola.data.entities.analyses.parameters.FloatParameterValue._
-import cz.payola.data.entities.analyses.parameters.IntParameterValue._
-import cz.payola.data.entities.analyses.parameters.StringParameterValue._
 import cz.payola.data.PayolaDB
 import org.squeryl.annotations.Transient
 
@@ -54,7 +50,7 @@ class DataSource(
 {
     var pluginId: Option[String] = if (plugin == null) None else Some(plugin.id)
 
-    var ownerId: Option[String] = owner.map(_.id)
+    var ownerId: Option[String] = o.map(_.id)
 
     private lazy val _pluginQuery = PayolaDB.pluginsDataSources.right(this)
 
@@ -85,13 +81,14 @@ class DataSource(
         }
     }
 
-    override def owner = {
-        if (ownerId != null && ownerId.isDefined) {
-            Some(evaluateCollection(_ownerQuery)(0))
+    override def owner: Option[UserType] = {
+        if (_owner == None){
+            if (ownerId != null && ownerId.isDefined) {
+                _owner = evaluateCollection(_ownerQuery).headOption
+            }
         }
-        else {
-            None
-        }
+
+        _owner
     }
 
     override def parameterValues: collection.immutable.Seq[PluginType#ParameterValueType] = {

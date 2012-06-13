@@ -9,7 +9,7 @@ import scala.collection.mutable
   * @param _name Name of the group.
   * @param _owner Owner of the group.
   */
-class Group(protected var _name: String, protected val _owner: User)
+class Group(protected var _name: String, protected var _owner: User)
     extends Entity
     with NamedEntity
     with cz.payola.common.entities.Group

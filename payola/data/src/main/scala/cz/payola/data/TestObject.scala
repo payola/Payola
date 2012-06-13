@@ -57,11 +57,17 @@ object TestObject
         val group1 = groupDao.persist(g1).get
         val group2 = groupDao.persist(g2).get
 
-        val g = groupDao.getById(group1.id)
+        var g = groupDao.getById(group1.id)
         assert(g != None)
         assert(g.get.id == group1.id)
         assert(g.get.name == group1.name)
-        assert(g.get.ownerId.get == user.id)
+        assert(g.get.owner.id == user.id)
+
+        g = groupDao.getById(group2.id)
+        assert(g != None)
+        assert(g.get.id == group2.id)
+        assert(g.get.name == group2.name)
+        assert(g.get.owner.id == user.id)
 
         assert(user.ownedGroups.size == 2)
 
@@ -108,6 +114,7 @@ object TestObject
         val analysis = analysisDao.persist(a).get
 
         assert(analysisDao.getById(analysis.id).isDefined)
+        assert(analysis.owner.get.id == user.id)
         assert(user.ownedAnalyses.size == 1)
 
         println("       persisting plugins")
@@ -176,6 +183,7 @@ object TestObject
         println("bindings: DB (" + persistedAnalysis.pluginInstanceInputBindings.size + ") vs A (" + analysis.pluginInstanceInputBindings.size + ")")
         assert(persistedAnalysis.pluginInstances.size == analysis.pluginInstances.size)
         assert(persistedAnalysis.pluginInstanceBindings.size == analysis.pluginInstanceBindings.size)
+        assert(persistedAnalysis.owner.get.id == user.id)
         
         val pluginInstances = List(
             citiesFetcher,
@@ -222,6 +230,7 @@ object TestObject
         assert (ds2.parameterValues.size == ds2_db.parameterValues.size)
         assert (ds3.parameterValues.size == ds3_db.parameterValues.size)
 
+        //println("DSs: " + dsDao.getPublicDataSources().size)
         assert(dsDao.getPublicDataSources().size == 2)
     }
 }

@@ -31,8 +31,10 @@ class DataSourceDAO extends EntityDAO[DataSource](PayolaDB.dataSources)
 
         val map = new HashMap[String, DataSource]()
         for (ds <- evaluateCollectionResultQuery(query)){
-            if (!map.contains(ds.name)) {
-                map += (ds.name -> ds)
+            // TODO: it won't be the first parameter in every cases
+            val url = ds.parameterValues(0).value.toString
+            if (!map.contains(url)) {
+                map += (url -> ds)
             }
         }
 
