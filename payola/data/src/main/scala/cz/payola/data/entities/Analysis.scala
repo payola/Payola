@@ -10,16 +10,22 @@ import org.squeryl.annotations.Transient
 object Analysis {
 
     def apply(a: cz.payola.common.entities.Analysis): Analysis = {
-        val owner = if (a.owner.isDefined) Some(User(a.owner.get)) else None
-        new Analysis(a.id, a.name, owner)
+        a match {
+            case analysis : Analysis => analysis
+            case _ => {
+                val owner = if (a.owner.isDefined) Some(User(a.owner.get)) else None
+                new Analysis(a.id, a.name, owner)
+            }
+        }
+
     }
 }
 
 class Analysis(
     override val id: String,
     name: String,
-    owner: Option[User])
-    extends cz.payola.domain.entities.Analysis(name, owner)
+    o: Option[User])
+    extends cz.payola.domain.entities.Analysis(name, o)
     with PersistableEntity
 {
     type DomainParameterValueType = cz.payola.domain.entities.analyses.ParameterValue[_]
@@ -32,7 +38,8 @@ class Analysis(
     private var _pluginInstancesBindingsLoaded = false;
     private lazy val _pluginInstancesBindingsQuery = PayolaDB.analysesPluginInstancesBindings.left(this)
 
-    val ownerId: Option[String] = owner.map(_.id)
+    var ownerId: Option[String] = o.map(_.id)
+    private lazy val _ownerQuery = PayolaDB.analysisOwnership.right(this)
 
     override def pluginInstances : Seq[PluginInstanceType] = {
         // Lazy-load related instances only for first time
@@ -48,7 +55,16 @@ class Analysis(
 
         super.pluginInstances
     }
-        
+
+    override def owner: Option[UserType] = {
+        if (_owner == None){
+            if (ownerId != null && ownerId.isDefined) {
+                _owner = evaluateCollection(_ownerQuery).headOption
+            }
+        }
+
+        _owner
+    }
 
     override def pluginInstanceBindings: Seq[PluginInstanceBindingType] = {
         // Lazy-load related bindings only for first time

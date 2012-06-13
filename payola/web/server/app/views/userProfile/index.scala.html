@@ -5,6 +5,7 @@
 
 @main(user, "User profile") {
 <div class="container">
+
     <div class="hero-unit">
         <div class="row-fluid">
             <span class="span3">
@@ -42,35 +43,35 @@
             <a href="#" class="btn btn-success"><i class="icon-plus icon-white"></i>Create analysis</a>
         </div>
         <div class="span6">
-            <h2>Groups owned by @if(user.isDefined && (user.get == owner)){ you }else{ the user }</h2>
-            <table class="table table-striped">
-                <thead>
-                <tr>
-                    <th>Group name</th>
-                    <th></th>
-                </tr>
-                </thead>
-                <tbody>
-                @owner.ownedGroups.map{ group =>
+            @if(user.isDefined && (user.get == owner)){
+                <h2>Your groups</h2>
+                <table class="table table-striped">
+                    <thead>
                     <tr>
-                        <td>@group.name</td>
-                        <td>
-                            @if(user.isDefined && (user.get == owner)){
-                                <a href="@routes.Profile.editGroup" class="btn btn-primary"><i class="icon-cog icon-white"></i> Administer</a>
-                            }else{
-                                <a href="" class="btn btn-success"><i class="icon-plus icon-white"></i> Request membership</a>
-                            }
-                        </td>
+                        <th>Group name</th>
+                        <th></th>
                     </tr>
-                }
-                @if(owner.ownedGroups.isEmpty){
-                    <tr>
-                        <td colspan="2" class="alert alert-info">No groups.</td>
-                    </tr>
-                }
-                </tbody>
-            </table>
-            <a href="@routes.Profile.createGroup" class="btn btn-success"><i class="icon-plus icon-white"></i>Create group</a>
+                    </thead>
+                    <tbody>
+                    @owner.ownedGroups.map{ group =>
+                        <tr>
+                            <td>@group.name</td>
+                            <td>
+                                <a href="@routes.Profile.editGroup(group.id)" class="btn btn-primary"><i class="icon-cog icon-white"></i> Administer</a>
+                            </td>
+                        </tr>
+                    }
+                    @if(owner.ownedGroups.isEmpty){
+                        <tr>
+                            <td colspan="2" class="alert alert-info">No groups.</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+                <a href="@routes.Profile.createGroup" class="btn btn-success"><i class="icon-plus icon-white"></i>Create group</a>
+            }else{
+                <h2>The user has @owner.ownedGroups.size groups</h2>
+            }
         </div>
     </div>
 </div>

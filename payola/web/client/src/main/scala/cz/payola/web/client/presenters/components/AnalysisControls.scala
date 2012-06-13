@@ -18,7 +18,7 @@ class AnalysisControls(analysisId: String) extends Component
     val runBtn = new Anchor(List(icon, caption), "#", "btn btn-primary span2")
 
     val progressValueBar = new Div(List(),"bar")
-    progressValueBar.setAttribute("style", "width: 0%")
+    progressValueBar.setAttribute("style", "width: 0%; height: 40px")
     val progressDiv = new Div(List(progressValueBar),"progress progress-striped progress-success active span10")
 
     var evaluationId = ""
@@ -35,7 +35,8 @@ class AnalysisControls(analysisId: String) extends Component
         {
             runBtn.addClass("disabled")
             analysisRunning = true
-            evaluationId = AnalysisRunner.runAnalysisById(analysisId) //TODO: prevent multiple evaluations
+            evaluationId = AnalysisRunner.runAnalysisById(analysisId)
+            progressValueBar.setAttribute("style", "width: 2%; height: 40px")
             schedulePolling
         }
         false
@@ -56,7 +57,11 @@ class AnalysisControls(analysisId: String) extends Component
 
     def pollingHandler() : Unit = {
         val progress = AnalysisRunner.getAnalysisProgress(evaluationId)
-        progressValueBar.setAttribute("style","width: "+(progress.percent*100)+"%")
+        val percent = (progress.percent*100)
+
+        val display = if (percent > 2){ percent }else{ 2 }
+
+        progressValueBar.setAttribute("style","width: "+display+"%; height: 40px")
 
         progress.evaluated.map{
             inst => addClass(document.getElementById("inst_"+inst), "alert-warning")
