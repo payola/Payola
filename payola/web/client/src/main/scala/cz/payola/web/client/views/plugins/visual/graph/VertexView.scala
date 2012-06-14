@@ -98,7 +98,8 @@ class VertexView(val vertexModel: Vertex, var position: Point, var settings: Ver
     }
 
     override def toString: String = {
-        "["+vertexModel.toString+"]"
+        this.position.toString
+        //"["+vertexModel.toString+"]"
     }
 
     /**

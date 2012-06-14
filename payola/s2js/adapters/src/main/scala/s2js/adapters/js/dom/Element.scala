@@ -1,5 +1,7 @@
 package s2js.adapters.js.dom
 
+import s2js.adapters.js.browser.Event
+
 /**
   * A DOM element as it's described on http://www.w3schools.com/dom/dom_element.asp
   */
@@ -48,4 +50,13 @@ abstract class Element extends Node
     val scrollLeft: Int
 
     val scrollTop: Int
+
+    var onkeyup: (Event => Boolean)
+    var onkeydown: (Event => Boolean)
+    var onclick: (Event => Boolean)
+    var ondblclick: (Event => Boolean)
+    var onmousedown: (Event => Boolean)
+    var onmouseup: (Event => Boolean)
+    var onmousemove: (Event => Boolean)
+    var onmousewheel: (Event => Boolean)
 }

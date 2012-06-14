@@ -18,10 +18,6 @@ import cz.payola.web.client.presenters.components.ZoomControls
   */
 abstract class VisualPlugin(settings: VisualSetup) extends Plugin
 {
-    /**
-      * How much zoom (movement) causes one rotation of mouse wheel.
-      */
-    private val zoomStep = 0.09
 
     private var mousePressedVertex = false
     private var mouseDragged = false
@@ -40,7 +36,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
 
         graphView = Some(new GraphView(container, settings))
 
-        zoomTool.render(document.body)
+        zoomTool.render(document.getElementById("btn-stripe"))
 
         graphView.get.canvasPack.mouseDown += { event => //selection
             mouseDragged = false
@@ -72,23 +68,36 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
             false
         }
 
-        graphView.get.canvasPack.mouseWheel += { event => //zoom
-            onMouseWheel(event)
-            true
-        }
+        graphView.get.canvasPack.mouseWheel += { event => //zoom - invoked by mouse
+            val mousePosition = getPosition(event)
+            val scrolled = event.wheelDelta
 
-        zoomTool.zoomDecreased += { event =>
-            //window.alert("zoom out")
-            if(graphView.isDefined) {
-                zoomOut(graphView.get.getGraphCenter) //zooming from the center of the graph
+            if(scrolled < 0) {
+                if(zoomTool.canZoomIn) {
+                    zoomIn(mousePosition)
+                    zoomTool.increaseZoomInfo()
+                }
+            } else {
+                if(zoomTool.canZoomOut) {
+                    zoomOut(mousePosition)
+                    zoomTool.decreaseZoomInfo()
+                }
             }
             false
         }
 
-        zoomTool.zoomIncreased += { event =>
-            //window.alert("zoom In")
-            if(graphView.isDefined) {
+        zoomTool.zoomDecreased += { event => //zoom - invoked by zoom control button
+            if(graphView.isDefined && zoomTool.canZoomOut) {
+                zoomOut(graphView.get.getGraphCenter) //zooming from the center of the graph
+                zoomTool.decreaseZoomInfo()
+            }
+            false
+        }
+
+        zoomTool.zoomIncreased += { event => //zoom - invoked by zoom control button
+            if(graphView.isDefined && zoomTool.canZoomIn) {
                 zoomIn(graphView.get.getGraphCenter) //zooming to the center of the graph
+                zoomTool.increaseZoomInfo()
             }
             false
         }
@@ -233,35 +242,20 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
         mouseDownPosition = end
     }
 
-    private def onMouseWheel(eventArgs: MouseWheelEventArgs[CanvasPack]) {
-        val mousePosition = getPosition(eventArgs)
-        val scrolled = eventArgs.wheelDelta
-
-        if(scrolled < 0) {
-            zoomIn(mousePosition)
-        } else {
-            zoomOut(mousePosition)
-        }
-    }
-
 
     private def zoomIn(mousePosition: Point) {
-        if(graphView.isEmpty) {
-            return
-        }
 
         var needToRedraw = false
-
         graphView.get.getAllVertices.foreach{ vv =>
             if(vv.position != mousePosition) {
 
-                val (p1, p2) = getZoomPointCandidates(vv, mousePosition)
-                val p1Distance = p1.distance(mousePosition)
-                val p2Distance = p2.distance(mousePosition)
+                val points = getZoomPointCandidates(vv, mousePosition)
+                val p1Distance = points._1.distance(mousePosition)
+                val p2Distance = points._2.distance(mousePosition)
                 if(p1Distance < p2Distance) {
-                    vv.position = p2
+                    vv.position = points._2
                 } else {
-                    vv.position = p1
+                    vv.position = points._1
                 }
                 needToRedraw = true
             }
@@ -273,22 +267,18 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
     }
 
     private def zoomOut(mousePosition: Point) {
-        if(graphView.isEmpty) {
-            return
-        }
 
         var needToRedraw = false
-
         graphView.get.getAllVertices.foreach{ vv =>
             if(vv.position != mousePosition) {
 
-                val (p1, p2) = getZoomPointCandidates(vv, mousePosition)
-                val p1Distance = p1.distance(mousePosition)
-                val p2Distance = p2.distance(mousePosition)
+                val points = getZoomPointCandidates(vv, mousePosition)
+                val p1Distance = points._1.distance(mousePosition)
+                val p2Distance = points._2.distance(mousePosition)
                 if(p1Distance < p2Distance) {
-                    vv.position = p1
+                    vv.position = points._1
                 } else {
-                    vv.position = p2
+                    vv.position = points._2
                 }
                 needToRedraw = true
             }
@@ -301,11 +291,17 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
 
     private def getZoomPointCandidates(vv: VertexView, position: Point): (Point, Point) = {
 
-        val distance = vv.position.distance(position) * zoomStep
+        val distance = vv.position.distance(position) * zoomTool.zoomStep
+        if(distance == 0) {
+            //window.alert("distance == 0")
+        }
         var p1 = vv.position
         var p2 = vv.position
 
-        if(vv.position.y != position.y) {
+        if(math.round(vv.position.y) != math.round(position.y)) {
+            /*this comparison might look strange, the rounding is here, because JavaScript does not have that
+            precise double type*/
+
             val v = vv.position.x
             val w = vv.position.y
             val m = position.x
@@ -334,12 +330,20 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
             }
 
         } else {
+            //window.alert("vertex.position.y == mousePosition.y")
             val y = vv.position.y
 
-            val x1 = vv.position.x + distance
-            val x2 = vv.position.x - distance
-            p1 = Point(x1, y)
-            p2 = Point(x2, y)
+            val discrim = math.pow(distance, 2) - math.pow(y - vv.position.y, 2)
+            if(discrim > 1) {
+                val discrimSqrt = math.sqrt(discrim)
+
+                val x1 = vv.position.x + discrimSqrt
+                val x2 = vv.position.x - discrimSqrt
+                p1 = Point(x1, y)
+                p2 = Point(x2, y)
+            } else {
+                //window.alert("vertex.position.y == mousePosition.y && vertex is in the center of the zoom operation")
+            }
         }
 
         (p1, p2)
