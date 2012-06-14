@@ -6,7 +6,8 @@ import collection.mutable.ArrayBuffer
 import org.squeryl.dsl.{ManyToOne, OneToMany, ManyToMany}
 
 trait PersistableEntity extends cz.payola.domain.entities.Entity with KeyedEntity[String]
-{
+{ self: cz.payola.domain.entities.Entity =>
+
     protected final def evaluateCollection[A](col: Query[A]): collection.Seq[A]  = {
         try
         {
@@ -98,7 +99,20 @@ trait PersistableEntity extends cz.payola.domain.entities.Entity with KeyedEntit
         }
     }
 
+    /**
+      * Checks nothing, because SQUERYL fills constructors of Entities
+      * with null values during DB schema initialization,
+      * so all inner checks would fail.
+      */
     override protected def checkConstructorPostConditions() {}
+
+    //TODO: just UGLY copy of cz.payola.domain.entities.Entity.equals
+    override def equals(other: Any): Boolean = {
+        other match {
+            case that: cz.payola.domain.entities.Entity => that.canEqual(this) && this.id == that.id
+            case _ => false
+        }
+    }
 
     /*
     protected final def assign[A <: PersistableEntity](entity: A, relation: OneToMany[A]) {

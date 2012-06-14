@@ -6,6 +6,7 @@ import play.api.data._
 import play.api.data.Forms._
 import views._
 import helpers.Secured
+import cz.payola.domain.entities.User
 
 object Application extends PayolaController with Secured
 {

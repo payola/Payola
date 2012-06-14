@@ -27,7 +27,6 @@ object PluginInstance {
 
                 val pluginDb = PluginDbRepresentation(p.plugin)
 
-                //TODO: is it need to recreate plugin?
                 val instance = new PluginInstance(p.id, pluginDb.createPlugin(), paramValues, p.description)
 
                 // Create relation between plugin and this instance

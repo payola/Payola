@@ -2,6 +2,7 @@ package cz.payola.data.dao
 
 import cz.payola.data.PayolaDB
 import cz.payola.data.entities.Group
+import org.squeryl.PrimitiveTypeMode._
 
 class GroupDAO extends EntityDAO[Group](PayolaDB.groups)
 {
@@ -10,8 +11,16 @@ class GroupDAO extends EntityDAO[Group](PayolaDB.groups)
         super.persist(group)
     }
 
-    //TODO: OH - implement this
-    def getByOwnerId(id: String) : Seq[Group] = {
+    def getByOwnerId(id: String, offset: Int = 0, count: Int = 0) : Seq[Group] = {
+        /* TODO: fails on login
+        val query = from(table)(g =>
+            where (g.owner.id === id)
+            select (g)
+            orderBy (g.name)
+        )
+
+        evaluateCollectionResultQuery(query, offset, count)
+        */
         List()
     }
 }

@@ -9,10 +9,11 @@ import play.api.mvc._
 
 object Profile extends PayolaController with Secured
 {
-    def index(username: String) = maybeAuthenticated { user =>
+    def index(username: String) = maybeAuthenticated { user: Option[User] =>
         df.getUserByUsername(username).map { profileUser =>
             val profileUserAnalyses = df.getPublicAnalysesByOwner(profileUser)
             val profileUserGroups = df.getGroupsByOwner(Some(profileUser))
+
             Ok(views.html.userProfile.index(user, profileUser, profileUserAnalyses, profileUserGroups))
         }.getOrElse {
             NotFound(views.html.errors.err404("The user does not exist."))
@@ -48,20 +49,22 @@ object Profile extends PayolaController with Secured
         Ok(html.userProfile.createGroup(user, groupForm))
     }
 
-    def saveGroup = authenticated { user: User =>
+    def saveGroup = authenticatedWithRequest { (request: Request[_], user: User) =>
+        val name = groupForm.bindFromRequest()(request).get
+        df.createGroup(name, user)
 
-        //val name = groupForm.bindFromRequest.get //TODO: get implicit request here. tried to do that, no effect
-
-        val name = "group xy"
-
-        val group = new Group(name, user)
-        df.groupDAO.persist(group)
-
-        Redirect(routes.Profile.index(user.email))
+        Redirect(routes.Profile.index(user.email)).flashing("success" -> "The group has been sucessfully created.")
     }
 
-    def editGroup = Action{ implicit request =>
-        Ok("TODO")
+    def editGroup(id: String) = authenticatedWithRequest{ (request: Request[_], user: User) =>
+        val g = df.getGroupByOwnerAndId(user, id)
+
+        if (g.isDefined)
+        {
+            Ok(views.html.userProfile.editGroup(user, g.get))
+        }else{
+            NotFound("The group does not exist.")
+        }
     }
     /*
     def removeGroupMember = authenticated( user =>

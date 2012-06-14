@@ -6,7 +6,7 @@ package cz.payola.domain.rdf.ontology
   * @param label Label.
   * @param comment Comment.
   */
-class Class(val URI: String, val label: String, val comment: String) extends cz.payola.common.entities.ontology.Class
+class Class(val URI: String, val label: String, val comment: String) extends cz.payola.common.rdf.ontology.Class
 {
 
     /** Need to define these as private and create setters and getters.
