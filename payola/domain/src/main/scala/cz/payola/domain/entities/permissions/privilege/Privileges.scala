@@ -26,15 +26,14 @@ trait PublicPrivilege
   *
   * @param g A group which is the subject of this privilege.
   */
-class GroupPrivilege(g: Group) extends Privilege[Group](g) with cz.payola.common.entities.permissions.privilege.GroupPrivilege
+class GroupPrivilege(g: Group) extends Privilege[Group](g)
 
 
 /** This class narrows down the privilege subject to some analysis.
   *
   * @param a An analysis which is the subject of this privilege.
   */
-abstract class AnalysisPrivilege(a: Analysis) extends Privilege[Analysis](a)
-    with cz.payola.common.entities.permissions.privilege.AnalysisPrivilege with PublicPrivilege
+abstract class AnalysisPrivilege(a: Analysis) extends Privilege[Analysis](a) with PublicPrivilege
 
 
 /** Grants the right to access the data of analysis @a.
@@ -55,7 +54,6 @@ class AccessAnalysisResultOnlyPrivilege(a: Analysis) extends AnalysisPrivilege(a
   *
   * @param c An ontology customization which is the subject of this privilege.
   */
-class OntologyCustomizationPrivilege(c: Customization) extends Privilege[Customization](c)
-        with cz.payola.common.entities.permissions.privilege.OntologyCustomizationPrivilege with PublicPrivilege
+class OntologyCustomizationPrivilege(c: Customization) extends Privilege[Customization](c) with PublicPrivilege
 
 

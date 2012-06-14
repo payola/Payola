@@ -3,7 +3,7 @@ package cz.payola.domain.entities
 import permissions.privilege.{PublicPrivilege, GroupPrivilege, AnalysisPrivilege, Privilege}
 import cz.payola.domain.entities.analyses.DataSource
 import scala.collection._
-import cz.payola.common.entities.permissions.privilege.OntologyCustomizationPrivilege
+import cz.payola.domain.entities.permissions.privilege.OntologyCustomizationPrivilege
 
 /** User entity at the domain level.
   *
@@ -25,6 +25,8 @@ class User(protected var _name: String)
     type DataSourceType = DataSource
 
     type PrivilegeType = Privilege[_]
+
+    type OntologyCustomizationType = settings.ontology.Customization
 
     /**
       * Adds the analysis to the users owned analyses. The analysis has to be owned by the user.
