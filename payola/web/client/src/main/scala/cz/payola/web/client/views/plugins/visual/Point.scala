@@ -72,7 +72,7 @@ case class Point(var x: Double, var y: Double)
     }
 
     override def toString: String = {
-        "["+x+"; "+y+"]"
+        "["+math.round(x)+"; "+math.round(y)+"]"
     }
 }
 

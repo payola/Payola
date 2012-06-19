@@ -16,11 +16,13 @@ object Group {
 class Group(
     override val id: String,
     name: String,
-    owner: User)
-    extends cz.payola.domain.entities.Group(name, owner)
+    o: User)
+    extends cz.payola.domain.entities.Group(name, o)
     with PersistableEntity
 {
     val ownerId: Option[String] = if (owner == null) None else Some(owner.id)
+
+    private lazy val _ownerQuery = PayolaDB.groupOwnership.right(this)
 
     @Transient
     private var _groupMembersLoaded = false
@@ -39,11 +41,20 @@ class Group(
         super.members
     }
 
+    override def owner: UserType = {
+        if (_owner == null && ownerId != null){
+            _owner = evaluateCollection(_ownerQuery)(0)
+        }
+
+        _owner
+    }
+
     override def storeMember(u: UserType) {
         super.storeMember(associate(User(u), _groupMembersQuery).get)
     }
 
     override protected def discardMember(user: UserType) {
         dissociate(User(user), _groupMembersQuery)
+        super.discardMember(user)
     }
 }

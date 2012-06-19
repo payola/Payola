@@ -3,6 +3,7 @@ package cz.payola.domain.entities
 import permissions.privilege.{PublicPrivilege, GroupPrivilege, AnalysisPrivilege, Privilege}
 import cz.payola.domain.entities.analyses.DataSource
 import scala.collection._
+import cz.payola.domain.entities.permissions.privilege.OntologyCustomizationPrivilege
 
 /** User entity at the domain level.
   *
@@ -24,6 +25,8 @@ class User(protected var _name: String)
     type DataSourceType = DataSource
 
     type PrivilegeType = Privilege[_]
+
+    type OntologyCustomizationType = settings.ontology.Customization
 
     /**
       * Adds the analysis to the users owned analyses. The analysis has to be owned by the user.
@@ -90,6 +93,16 @@ class User(protected var _name: String)
     def accessibleAnalyses: Seq[AnalysisType] = {
         privileges.collect {
             case p: AnalysisPrivilege => p.obj
+        }.distinct
+    }
+
+    /** Returns accessible ontology customizations.
+      *
+      * @return Accessible ontology customizations.
+      */
+    def accessibleOntologyCustomizations: Seq[OntologyCustomizationType] = {
+        privileges.collect {
+            case c: OntologyCustomizationPrivilege => c.obj
         }.distinct
     }
 

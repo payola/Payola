@@ -21,6 +21,10 @@ class Div(val innerElements: Seq[Component] = List(), val addClass: String = "")
         div.setAttribute(attributeName, value)
     }
 
+    def addClass(addClass: String) = {
+        div.setAttribute("class",div.getAttribute("class")+" "+addClass)
+    }
+
     def removeClass(remClass: String) = {
         div.setAttribute("class",div.getAttribute("class").replaceAllLiterally(remClass, ""))
     }

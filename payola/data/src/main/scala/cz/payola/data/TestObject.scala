@@ -1,13 +1,13 @@
 package cz.payola.data.entities
 
 import cz.payola.data.dao._
-import cz.payola.data.entities.analyses.parameters._
-import cz.payola.data.entities.analyses._
 import cz.payola.data.PayolaDB
 import cz.payola.domain.entities.analyses.plugins.data.SparqlEndpoint
 import cz.payola.domain.entities.analyses.plugins.query._
 import cz.payola.domain.entities.analyses.plugins._
+import cz.payola.domain.entities.analyses._
 import cz.payola.domain.entities.analyses.evaluation.Success
+import scala.collection.immutable
 
 object TestObject
 {
@@ -21,7 +21,7 @@ object TestObject
     
         val userDao = new UserDAO()
     
-        val groupDao = new GroupDAO()  
+        val groupDao = new GroupDAO()
 
         val u1 = new cz.payola.domain.entities.User("name")
         
@@ -57,23 +57,30 @@ object TestObject
         val group1 = groupDao.persist(g1).get
         val group2 = groupDao.persist(g2).get
 
-        val g = groupDao.getById(group1.id)
+        var g = groupDao.getById(group1.id)
         assert(g != None)
         assert(g.get.id == group1.id)
         assert(g.get.name == group1.name)
-        assert(g.get.ownerId.get == user.id)
+        assert(g.get.owner.id == user.id)
+
+        g = groupDao.getById(group2.id)
+        assert(g != None)
+        assert(g.get.id == group2.id)
+        assert(g.get.name == group2.name)
+        assert(g.get.owner.id == user.id)
 
         assert(user.ownedGroups.size == 2)
 
         println("   Analysis test")
         testAnalysis()
 
-        println("Pagination ...")
+        print("Pagination ...")
         assert(userDao.getAll().size == 1)
         assert(groupDao.getAll().size == 2)
         assert(groupDao.getAll(1, 2).size == 1)
         assert(groupDao.getAll(2, 5).size == 0)                                 
         assert(groupDao.getAll(1, 0).size == 0)
+        println(" finished")
     }
     
     def testAnalysis() {
@@ -107,6 +114,7 @@ object TestObject
         val analysis = analysisDao.persist(a).get
 
         assert(analysisDao.getById(analysis.id).isDefined)
+        assert(analysis.owner.get.id == user.id)
         assert(user.ownedAnalyses.size == 1)
 
         println("       persisting plugins")
@@ -175,6 +183,7 @@ object TestObject
         println("bindings: DB (" + persistedAnalysis.pluginInstanceInputBindings.size + ") vs A (" + analysis.pluginInstanceInputBindings.size + ")")
         assert(persistedAnalysis.pluginInstances.size == analysis.pluginInstances.size)
         assert(persistedAnalysis.pluginInstanceBindings.size == analysis.pluginInstanceBindings.size)
+        assert(persistedAnalysis.owner.get.id == user.id)
         
         val pluginInstances = List(
             citiesFetcher,
@@ -203,18 +212,25 @@ object TestObject
                 println("Value: " + pi.parameterValues.find(_.id == paramValue.id).get.value + " vs " + paramValue.value)
             }
         }
-        /*
-        // .. and test it
-        println("       evaluating persisted analysis")
-        val eval = persistedAnalysis.get.evaluate()
-        while (!eval.isFinished) {
-            println("Not finished, current progress: " + eval.progress.value)
-            Thread.sleep(1000)
-        }
-        val res = eval.result
 
-        println("Done with result: " + res.toString)
-        assert(res.map(_.isInstanceOf[Success]).getOrElse(false))
-        */
+        val ds1 = new DataSource("Cities", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.analyses.parameters.StringParameter].createValue("http://dbpedia.org/ontology/Country")))
+        val ds2 = new DataSource("Countries", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.analyses.parameters.StringParameter].createValue("http://dbpedia.org/ontology/City")))
+        val ds3 = new DataSource("Countries2", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.analyses.parameters.StringParameter].createValue("http://dbpedia.org/ontology/City")))
+
+        val dsDao = new DataSourceDAO()
+        val ds1_db = dsDao.persist(ds1).get
+        val ds2_db = dsDao.persist(ds2).get
+        val ds3_db = dsDao.persist(ds3).get
+
+        assert (ds1.id == ds1_db.id)
+        assert (ds2.id == ds2_db.id)
+        assert (ds3.id == ds3_db.id)
+
+        assert (ds1.parameterValues.size == ds1_db.parameterValues.size)
+        assert (ds2.parameterValues.size == ds2_db.parameterValues.size)
+        assert (ds3.parameterValues.size == ds3_db.parameterValues.size)
+
+        //println("DSs: " + dsDao.getPublicDataSources().size)
+        assert(dsDao.getPublicDataSources().size == 2)
     }
 }

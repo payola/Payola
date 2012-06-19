@@ -31,6 +31,8 @@ class PluginDbRepresentation(
 
     private lazy val _pluginInstancesQuery = PayolaDB.pluginsPluginInstances.left(this)
 
+    private lazy val _dataSourcesQuery = PayolaDB.pluginsDataSources.left(this)
+
     private lazy val _booleanParameters = PayolaDB.booleanParametersOfPlugins.left(this)
 
     private lazy val _floatParameters = PayolaDB.floatParametersOfPlugins.left(this)
@@ -41,6 +43,10 @@ class PluginDbRepresentation(
 
     def pluginInstances: Seq[PluginInstance] = {
         evaluateCollection(_pluginInstancesQuery)
+    }
+
+    def dataSources: Seq[DataSource] = {
+        evaluateCollection(_dataSourcesQuery)
     }
 
     def parameters: Seq[Parameter[_]] = {
@@ -82,6 +88,10 @@ class PluginDbRepresentation(
 
     def registerPluginInstance(i: cz.payola.data.entities.analyses.PluginInstance) {
         associate(i, _pluginInstancesQuery)
+    }
+
+    def registerDataSource(ds: cz.payola.data.entities.analyses.DataSource) {
+        associate(ds, _dataSourcesQuery)
     }
 
     private def instantiate(className: String, args: AnyRef*): Plugin = {

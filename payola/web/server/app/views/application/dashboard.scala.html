@@ -1,72 +1,111 @@
 @(user: Option[cz.payola.domain.entities.User], topAnalyses: Seq[cz.payola.domain.entities.Analysis],
-    topDataSources: Seq[cz.payola.domain.entities.analyses.PluginInstance],
-    groups: Seq[cz.payola.domain.entities.Group]
+    topDataSources: Seq[cz.payola.domain.entities.analyses.PluginInstance]
 )
 
 @main(user, "Dashboard") {
     <div class="container-fluid">
-        <div class="row-fluid">
-            <div class="well">
-                <h1>Dashboard</h1>
-                <p>
-                    This is a Payola dashboard. In public mode, you can see the most current and the mosed used analyses here.
-                    When logged in, the page is customized to provide information relevant to your profile.
-                </p>
-                <p><a class="btn btn-primary btn-large">Learn more &raquo;</a></p>
-            </div>
+
+        <ul class="breadcrumb">
+            <li>
+                <a href="/">Home</a> <span class="divider">/</span>
+            </li>
+            <li class="active">Dashboard</li>
+        </ul>
+
+        <h1>Dashboard</h1>
+        <div class="well">
             <div class="row-fluid">
-                <div class="span4">
+                <div class="span6">
                     <h2>Top analyses</h2>
-                    <ul>
-                        @topAnalyses.map{a =>
-                            <li><a href="@routes.Analysis.detail(a.id)">@a.name</a></li>
-                        }
-                    </ul>
-                    <p><a class="btn" href="#">View all &raquo;</a></p>
+                    @if(topAnalyses.size == 0){
+                        <p class="alert alert-danger">No analyses.</p>
+                    }else{
+                        <ul>
+                            @topAnalyses.map{a =>
+                                <li><a href="@routes.Analysis.detail(a.id)">@a.name</a></li>
+                            }
+                        </ul>
+                    }
+                    <p><a class="btn" href="#"><i class="icon-list"></i> List all &raquo;</a></p>
                 </div><!--/span-->
-                <div class="span4">
+                <div class="span6">
                     <h2>Top data sources</h2>
+                    @if(topDataSources.size > 0){
+                        <ul>
+                            @topDataSources.map{d =>
+                                <li><a href="@routes.DataSource.detail(d.id)">@d.getParameter("EndpointURL")</a></li>
+                            }
+                        </ul>
+                    }else{
+                        <div class="alert alert-info">
+                            <h3 class="alert-heading">No datasources.</h3>
+                            <p class="alert-block">
+                                No data sources, no fun.
+                                But you may add a data source easily! Just press the green button below.
+                            </p>
+                        </div>
+                    }
+                    <p><a class="btn" href="#"><i class="icon-list"></i> List all &raquo;</a></p>
+                    </div>
+            </div><!--/span-->
+        </div>
+        @if(user.isDefined){
+            <div class="row-fluid">
+                <div class="span6">
+                    <h2>My analyses</h2>
+                    <div class="alert alert-info">
+                        <h3 class="alert-heading">No analyses.</h3>
+                        <p class="alert-block">But you may create one! Just press the green button below.</p>
+                    </div>
                     <ul>
-                        @topDataSources.map{d =>
-                            <li><a href="@routes.DataSource.detail(d.id)">@d.getParameter("EndpointURL")</a></li>
-                        }
+
                     </ul>
-                    <p><a class="btn" href="#">View all &raquo;</a></p>
+                    <p>
+                        <a class="btn" href="#"><i class="icon-list"></i> List all &raquo;</a>
+                        <a class="btn btn-success" href="@routes.Analysis.create"><i class="icon-plus icon-white"></i>Create &raquo;</a>
+                    </p>
                 </div><!--/span-->
-                <div class="span4">
-                    <h2>New</h2>
-                    <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-                    <p><a class="btn" href="#">View details &raquo;</a></p>
+                <div class="span6">
+                    <h2>My groups</h2>
+                    @if(user.get.ownedGroups.size == 0){
+                        <div class="alert alert-info">
+                            <h3 class="alert-heading">No groups.</h3>
+                            <p class="alert-block">
+                                You are not able to share analysis to more than one person at a time.
+                                But you may create a group easily! Just press the green button below.
+                            </p>
+                        </div>
+                    }else{
+                        <table class="table table-stripped">
+                            <thead>
+                                <tr>
+                                    <th>Group name</th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                        @user.get.ownedGroups.take(5).map{group =>
+                            <tr>
+                                <td>@group.name</td>
+                                <td>@group.members.size member(s)</td>
+                                <td><a href="@routes.Profile.editGroup(group.id)" class="btn btn-primary"><i class="icon-cog icon-white"></i> Administer</a></td>
+                            </tr>
+                        }
+                        </table>
+                    }
+                    <p>
+                        @if(user.get.ownedGroups.size > 5){
+                            <a class="btn" href="@routes.Profile.listGroups()"><i class="icon-list"></i> List all &raquo;</a>
+                        }
+                        <a class="btn btn-success" href="@routes.Profile.createGroup()"><i class="icon-plus icon-white"></i>Create &raquo;</a>
+                    </p>
                 </div><!--/span-->
             </div><!--/row-->
-            @if(user.isDefined){
-                <div class="row-fluid">
-                    <div class="span4">
-                        <h2>My analyses</h2>
-                        <ul>
-
-                        </ul>
-                        <p><a class="btn" href="#">View all &raquo;</a>&nbsp;<a class="btn btn-success" href="@routes.Analysis.create">+&nbsp;Create</a></p>
-                    </div><!--/span-->
-                    <div class="span4">
-                        <h2>My groups</h2>
-                        @if(groups.size == 0){
-                            <p>No groups. <a href="@routes.Profile.createGroup()">Create one</a>.</p>
-                        }
-                        <p><a class="btn" href="#">View details &raquo;</a></p>
-                    </div><!--/span-->
-                    <div class="span4">
-                        <h2>Recent actions</h2>
-                        <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-                        <p><a class="btn" href="#">View details &raquo;</a></p>
-                    </div><!--/span-->
-                </div><!--/row-->
-            }else{
-                <div class="well hero-unit">
-                    <h2>There's more!</h2>
-                    <p><a href="@routes.Application.login" class="btn btn-primary">Login</a> to see your top content here!</p>
-                </div>
-            }
-        </div><!--/row-->
+        }else{
+            <div class="well hero-unit">
+                <h2>There's more!</h2>
+                <p><a href="@routes.Application.login" class="btn btn-primary">Login</a> to see your top content here!</p>
+            </div>
+        }
     </div><!-- /.container-fluid -->
 }

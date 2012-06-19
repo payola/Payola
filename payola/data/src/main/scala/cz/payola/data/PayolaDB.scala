@@ -40,7 +40,7 @@ object PayolaDB extends Schema
 
     val pluginInstanceBindings = table[PluginInstanceBinding]("pluginInstanceBindings")
 
-    //val groupMemberships = table[GroupMembership]("groupmembership")
+    val dataSources = table[DataSource]("dataSources")
 
     val groupMembership =
         manyToManyRelation(users, groups)
@@ -54,6 +54,10 @@ object PayolaDB extends Schema
         oneToManyRelation(users, analyses)
             .via((u, a) => u.id === a.ownerId.getOrElse(EMPTY_ID).toString)
 
+    val dataSourcesOwnership =
+        oneToManyRelation(users, dataSources)
+            .via((u, ds) => u.id === ds.ownerId.getOrElse(EMPTY_ID).toString)
+
     val pluginsPluginInstances =
         oneToManyRelation(plugins, pluginInstances)
             .via((p, pi) => p.id === pi.pluginId.getOrElse(EMPTY_ID).toString)
@@ -61,6 +65,10 @@ object PayolaDB extends Schema
     val analysesPluginInstances =
         oneToManyRelation(analyses, pluginInstances)
             .via((a, pi) => (a.id === pi.analysisId.getOrElse(EMPTY_ID).toString))
+
+    val pluginsDataSources =
+        oneToManyRelation(plugins, dataSources)
+            .via((p, ds) => p.id === ds.pluginId.getOrElse(EMPTY_ID).toString)
 
     val analysesPluginInstancesBindings =
         oneToManyRelation(analyses, pluginInstanceBindings)
@@ -122,9 +130,26 @@ object PayolaDB extends Schema
         oneToManyRelation(pluginInstances, stringParameterValues)
             .via((pi, spv) => pi.id === spv.pluginInstanceId.getOrElse(EMPTY_ID).toString)
 
+    val booleanParameterValuesOfDataSources =
+        oneToManyRelation(dataSources, booleanParameterValues)
+            .via((ds, bpv) => ds.id === bpv.dataSourceId.getOrElse(EMPTY_ID).toString)
+
+    val floatParameterValuesOfDataSources =
+        oneToManyRelation(dataSources, floatParameterValues)
+            .via((ds, fpv) => ds.id === fpv.dataSourceId.getOrElse(EMPTY_ID).toString)
+
+    val intParameterValuesOfDataSources =
+        oneToManyRelation(dataSources, intParameterValues)
+            .via((ds, ipv) => ds.id === ipv.dataSourceId.getOrElse(EMPTY_ID).toString)
+
+    val stringParameterValuesOfDataSources =
+        oneToManyRelation(dataSources, stringParameterValues)
+            .via((ds, spv) => ds.id === spv.dataSourceId.getOrElse(EMPTY_ID).toString)
+
     // The default constraint for all foreign keys in this schema :
-    override def applyDefaultForeignKeyPolicy(foreignKeyDeclaration: ForeignKeyDeclaration) =
+    override def applyDefaultForeignKeyPolicy(foreignKeyDeclaration: ForeignKeyDeclaration) {
         foreignKeyDeclaration.constrainReference
+    }
 
     def connect(): Boolean = {
         // TODO: Read from config file
@@ -263,6 +288,9 @@ object PayolaDB extends Schema
         floatParameterValuesOfPluginInstances.foreignKeyDeclaration.constrainReference(onDelete cascade)
         intParameterValuesOfPluginInstances.foreignKeyDeclaration.constrainReference(onDelete cascade)
         stringParameterValuesOfPluginInstances.foreignKeyDeclaration.constrainReference(onDelete cascade)
+
+        groupMembership.leftForeignKeyDeclaration.constrainReference(onDelete cascade)
+        groupMembership.rightForeignKeyDeclaration.constrainReference(onDelete cascade)
     }
 
     class GroupMembership(val memberId: String, val groupId: String)

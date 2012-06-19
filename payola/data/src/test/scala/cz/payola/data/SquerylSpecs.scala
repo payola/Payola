@@ -8,6 +8,8 @@ import cz.payola.domain.entities.analyses.plugins.query._
 import cz.payola.domain.entities.analyses.plugins._
 import cz.payola.data.dao._
 import cz.payola.data.entities._
+import cz.payola.domain.entities.analyses.DataSource
+import scala.collection.immutable
 
 class SquerylSpecs extends FlatSpec with ShouldMatchers
 {
@@ -57,13 +59,19 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
         val group1 = groupDao.persist(g1).get
         val group2 = groupDao.persist(g2).get
 
-        val g = groupDao.getById(group1.id)
+        var g = groupDao.getById(group1.id)
         assert(g != None)
         assert(g.get.id == group1.id)
         assert(g.get.name == group1.name)
-        assert(g.get.ownerId.get == user.id)
+        assert(g.get.owner.id == user.id)
 
-        //TODO: returns 4 not 2 - assert(user.ownedGroups.size == 2)
+        g = groupDao.getById(group2.id)
+        assert(g != None)
+        assert(g.get.id == group2.id)
+        assert(g.get.name == group2.name)
+        assert(g.get.owner.id == user.id)
+
+        //assert(user.ownedGroups.size == 2)
     }
 
     "Analysis persistance" should "work" in {
@@ -90,9 +98,13 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
         )
 
         // persist analysis
-        val a = new cz.payola.domain.entities.Analysis("Cities with more than 2 million habitants with countries", None)
+        val user = new UserDAO().findByUsername("n", 0, 1)(0)
+        val a = new cz.payola.domain.entities.Analysis("Cities with more than 2 million habitants with countries", Some(user))
         val analysis = analysisDao.persist(a).get
+
         assert(analysisDao.getById(analysis.id).isDefined)
+        assert(analysis.owner.get.id == user.id)
+        assert(user.ownedAnalyses.size == 1)
 
         // Persist  plugins
         for (p <- plugins) {
@@ -151,6 +163,7 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
         val persistedAnalysis = analysisDao.getById(analysis.id).get
         assert(persistedAnalysis.pluginInstances.size == analysis.pluginInstances.size)
         assert(persistedAnalysis.pluginInstanceBindings.size == analysis.pluginInstanceBindings.size)
+        assert(persistedAnalysis.owner.get.id == user.id)
 
         val pluginInstances = List(
             citiesFetcher,
@@ -175,6 +188,25 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
                 assert(pi.parameterValues.find(_.id == paramValue.id).get.value == paramValue.value)
             }
         }
+
+        val ds1 = new DataSource("Cities", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.analyses.parameters.StringParameter].createValue("http://dbpedia.org/ontology/Country")))
+        val ds2 = new DataSource("Countries", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.analyses.parameters.StringParameter].createValue("http://dbpedia.org/ontology/City")))
+        val ds3 = new DataSource("Countries2", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.analyses.parameters.StringParameter].createValue("http://dbpedia.org/ontology/City")))
+
+        val dsDao = new DataSourceDAO()
+        val ds1_db = dsDao.persist(ds1).get
+        val ds2_db = dsDao.persist(ds2).get
+        val ds3_db = dsDao.persist(ds3).get
+
+        assert (ds1.id == ds1_db.id)
+        assert (ds2.id == ds2_db.id)
+        assert (ds3.id == ds3_db.id)
+
+        assert (ds1.parameterValues.size == ds1_db.parameterValues.size)
+        assert (ds2.parameterValues.size == ds2_db.parameterValues.size)
+        assert (ds3.parameterValues.size == ds3_db.parameterValues.size)
+
+        assert(dsDao.getPublicDataSources().size == 2)
 
         /*
         // TODO: Test : Remove plugin -> remove parameters, plugin parameterValues, parameter parameterValues

@@ -5,6 +5,8 @@ import cz.payola.domain.entities.analyses.plugins.query._
 import cz.payola.domain.entities.analyses.plugins._
 import cz.payola.data.dao._
 import cz.payola.data.PayolaDB
+import cz.payola.domain.entities.analyses.DataSource
+import scala.collection.immutable
 
 object DatabaseInitializer extends App
 {
@@ -81,6 +83,10 @@ object DatabaseInitializer extends App
         analysis.addPluginInstances(citiesCountriesJoin)
         analysis.addBinding(citiesSelection, citiesCountriesJoin, 0)
         analysis.addBinding(countriesProjection, citiesCountriesJoin, 1)
+
+        val ds1 = new DataSource("Cities", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.analyses.parameters.StringParameter].createValue("http://dbpedia.org/ontology/Country")))
+        val ds2 = new DataSource("Countries", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.analyses.parameters.StringParameter].createValue("http://dbpedia.org/ontology/City")))
+        val ds3 = new DataSource("Countries2", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.analyses.parameters.StringParameter].createValue("http://dbpedia.org/ontology/City")))
 
         println("Data initialized")
     }

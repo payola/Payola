@@ -1,8 +1,20 @@
 @(user: cz.payola.domain.entities.User, form: Form[(String)])
 
-@main(Some(user), "Payola login page") {
+@main(Some(user), "Create a new group - Payola!") {
+
 <div class="container">
-    @helper.form(routes.Profile.saveGroup()) {
+
+    <ul class="breadcrumb">
+        <li>
+            <a href="/">Home</a> <span class="divider">/</span>
+        </li>
+        <li>
+            <a href="@routes.Profile.index(user.name)">Your profile</a> <span class="divider">/</span>
+        </li>
+        <li class="active">Create group</li>
+    </ul>
+
+    @helper.form(routes.Profile.saveCreateGroup()) {
 
     <h1>Create a new group</h1>
 

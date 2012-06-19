@@ -4,6 +4,7 @@ import collection.mutable.ListBuffer
 import cz.payola.web.client.views.plugins.visual.{Vector, Point}
 import s2js.adapters.js.browser.window
 import cz.payola.web.client.views.plugins.visual.graph._
+import cz.payola.web.client.views.plugins.visual.graph.positioning._
 
 class Animation[T](
     animationFunction: (T, Option[Animation[_]], () => Unit, () => Unit, Option[Int]) => Unit,
@@ -74,35 +75,21 @@ object Animation
         animateTranslation(animationVViews, nextAnimation, quickDraw, finalDraw, animationStepLength)
     }
 
-    def moveComponent(move: (LocationDescriptor.ComponentPositionHelper, ListBuffer[VertexView]),
-        nextAnimation: Option[Animation[_]], quickDraw: () => Unit, finalDraw: () => Unit,
-        animationStepLength: Option[Int]) {
-
-        moveGraphBy((move._1.getComponentPosition().toVector, move._2),
-            nextAnimation, quickDraw, finalDraw, animationStepLength)
-    }
-
-    def moveGraphBy(move: (Vector, ListBuffer[VertexView]), nextAnimation: Option[Animation[_]],
+    def moveGraphByFunction(move: (PositionHelper, ListBuffer[VertexView]), nextAnimation: Option[Animation[_]],
         quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
 
-        var vector = Vector(Double.MaxValue, Double.MaxValue)
-        //search for the minimum
-        move._2.foreach {
-            v: VertexView =>
-                if (v.position.x < vector.x) {
-                    vector = Vector(v.position.x, vector.y)
-                }
-                if (v.position.y < vector.y) {
-                    vector = Vector(vector.x, v.position.y)
-                }
-        }
+        moveGraphByVector(((move._1.getPositionCorrection(), move._2)), nextAnimation, quickDraw, finalDraw,
+            animationStepLength)
+    }
 
-        //move the graph...actually to the [50,50] coordinate, that no vertices are cut off by the screen edge
-        vector = (vector) * (-1) + move._1
+    def moveGraphByVector(move: (Vector, ListBuffer[VertexView]), nextAnimation: Option[Animation[_]],
+        quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
+
+
         val animationVViews = ListBuffer[AnimationVertexView]()
         move._2.foreach {
             vView =>
-                animationVViews += new AnimationVertexView(vView, vector, Vector.One)
+                animationVViews += new AnimationVertexView(vView, move._1, Vector.One)
         }
         animationCurrentNumber = animationPrepareConst
         animateTranslation(animationVViews, nextAnimation, quickDraw, finalDraw, animationStepLength)
@@ -111,7 +98,7 @@ object Animation
     def moveGraphToUpperLeftCorner(vViews: ListBuffer[VertexView], nextAnimation: Option[Animation[_]],
         quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
 
-        moveGraphBy((Point(50, 25).toVector, vViews), nextAnimation, quickDraw, finalDraw, animationStepLength)
+        moveGraphByVector((Point(50, 25).toVector, vViews), nextAnimation, quickDraw, finalDraw, animationStepLength)
     }
 
     def flipGraph(vViews: ListBuffer[VertexView], nextAnimation: Option[Animation[_]], quickDraw: () => Unit,
@@ -162,7 +149,7 @@ object Animation
 
         if((animationStepLength.isDefined && animationStepLength.get == 0) //skip animation
             || (animationCurrentNumber == animationKillConst)) { //animation forcefully ended, set final visibility
-            val visibilityFinal = if(math.signum(visibilityStep) < 0) { 0.0 } else { 1.0 }
+        val visibilityFinal = if(math.signum(visibilityStep) < 0) { 0.0 } else { 1.0 }
             animVViews.foreach { info =>
                 info.setTextVisibility(visibilityFinal)
             }

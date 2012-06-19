@@ -25,7 +25,7 @@ object Application extends PayolaController with Secured
     }
 
     def dashboard = maybeAuthenticated { user =>
-        Ok(views.html.application.dashboard(user, df.topAnalyses, df.getPublicDataSources(10), df.getGroupsByOwner(user)))
+        Ok(views.html.application.dashboard(user, df.topAnalyses, df.getPublicDataSources(10)))
     }
 
     // -- Authentication

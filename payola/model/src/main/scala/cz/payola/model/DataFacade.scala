@@ -2,15 +2,18 @@ package cz.payola.model
 
 import cz.payola.domain.entities.User
 import cz.payola.data.dao._
-import cz.payola.data.entities.dao._
-import cz.payola.domain.entities.analyses.PluginInstance
+import cz.payola.domain.entities.analyses.DataSource
 import cz.payola.common.rdf.Graph
+import cz.payola.domain.entities.Group
 
 class DataFacade
 {
     val userDAO = new UserDAO
     val analysisDAO = new AnalysisDAO
     val groupDAO = new GroupDAO
+    val dataSourceDAO = new DataSourceDAO
+
+    private val GROUPS_COUNT_MAX_COUNT_DEFAULT = 10
 
     def getUserByCredentials(username: String, password: String) : Option[User] = {
         userDAO.getUserByCredentials(username, cryptPassword(password))
@@ -44,21 +47,45 @@ class DataFacade
         null
     }
 
-    def getPublicDataSources(count: Int, skip: Int = 0) : Seq[PluginInstance] = {
-        //TODO this should return unique endpoints by EndpointURL
-        FakeAnalysisDAO.analysis.pluginInstances.filter(i => i.plugin.name == "SPARQL Endpoint")
+    def getPublicDataSources(count: Int, skip: Int = 0) : Seq[DataSource] = {
+        dataSourceDAO.getPublicDataSources(skip, count)
     }
 
-    def getDataSourceById(id: String) : Option[PluginInstance] = {
-        FakeAnalysisDAO.analysis.pluginInstances.filter(i => i.plugin.name == "SPARQL Endpoint").headOption
+    def getDataSourceById(id: String) : Option[DataSource] = {
+        dataSourceDAO.getById(id)
     }
 
-    def getGroupsByOwner(user: Option[User]) = {
+    def getGroupsByOwner(user: Option[User], maxCount: Int = GROUPS_COUNT_MAX_COUNT_DEFAULT) = {
         if (!user.isDefined){
             List()
         }else{
-            groupDAO.getByOwnerId(user.get.id)
+            groupDAO.getByOwnerId(user.get.id, maxCount)
         }
+    }
+
+    def createGroup(name: String, owner: User) = {
+        val g = new Group(name, owner)
+        groupDAO.persist(g)
+    }
+
+    def getGroupByOwnerAndId(shouldBeOwner: User, groupId: String) : Option[Group] = {
+        val group = groupDAO.getById(groupId)
+
+        if (group.isDefined)
+        {
+            if (group.get.owner.equals(shouldBeOwner))
+            {
+                group
+            }else{
+                None
+            }
+        }else{
+            None
+        }
+    }
+
+    def getAllUsers() = {
+        userDAO.getAll()
     }
 
     //TODO bcrypt
