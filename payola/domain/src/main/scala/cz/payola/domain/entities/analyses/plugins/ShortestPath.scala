@@ -2,6 +2,8 @@ package cz.payola.domain.entities.analyses.plugins
 
 import cz.payola.domain.entities.analyses.parameters.StringParameter
 import cz.payola.domain.entities.analyses._
+import scala.collection.immutable
+import cz.payola.domain.IDGenerator
 import cz.payola.domain.rdf._
 import scala.collection.mutable._
 
@@ -10,10 +12,12 @@ import scala.collection.mutable._
   * graph is returned
   *
   */
-class ShortestPath(id: String)
-    extends Plugin("Shotest Path Plugin", 2, List(new StringParameter("OriginURI", ""),
-        new StringParameter("DestinationURI", "")), id)
+class ShortestPath(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
+    extends Plugin(name, inputCount, parameters, id)
 {
+    def this() = this("Shortest Path", 1, List(new StringParameter("OriginURI", ""),
+        new StringParameter("DestinationURI", "")), IDGenerator.newId)
+
     /** Creates and returns a new graph that only contains nodes and edges
       * on the shortest path from origin to destination.
       *

@@ -2,7 +2,9 @@ package s2js.compiler
 
 import tools.nsc.{Global, Settings}
 
-/** A Scala to JavaScript compiler. */
+/**
+  * A Scala to JavaScript compiler.
+  */
 class ScalaToJsCompiler(val classPath: String, val outputDirectory: String, val createPackageStructure: Boolean = true)
 {
     /**
@@ -19,7 +21,7 @@ class ScalaToJsCompiler(val classPath: String, val outputDirectory: String, val 
 
         val compiler = new InternalCompiler(settings, options)
         val run = new compiler.Run()
-        run.compile(sourceFiles);
+        run.compile(sourceFiles)
     }
 
     /** An internal compiler that adds the ScalaToJsPlugin phases to the set of phases. */

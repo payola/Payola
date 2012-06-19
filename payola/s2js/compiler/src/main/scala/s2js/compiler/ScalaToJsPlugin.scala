@@ -32,7 +32,7 @@ class ScalaToJsPlugin(val global: Global) extends Plugin
         val global = ScalaToJsPlugin.this.global
 
         /** List of phase names, this phase should run after.  */
-        val runsAfter = List[String]("refchecks");
+        val runsAfter = List[String]("refchecks")
 
         /** The name of the phase. */
         val phaseName = "s2js-phase"

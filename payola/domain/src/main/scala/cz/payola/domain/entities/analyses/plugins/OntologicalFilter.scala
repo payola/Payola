@@ -7,14 +7,17 @@ import cz.payola.domain.rdf.ontology.Ontology
 import java.net.URL
 import scala.collection.mutable.ListBuffer
 import cz.payola.domain.rdf._
+import cz.payola.domain.IDGenerator
 
 /** This plugin requires one parameter - an ontology URL. The ontology is then
   * loaded and a subgraph that corresponds to the ontology is returned.
   *
   */
-class OntologicalFilter(id: String)
-    extends Plugin("Ontological Filter", 1, List(new StringParameter("OntologyURLs", "")), id)
+class OntologicalFilter(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
+    extends Plugin(name, inputCount, parameters, id)
 {
+    def this() = this("Ontological Filter", 1, List(new StringParameter("OntologyURLs", "")), IDGenerator.newId)
+
     /** Creates a new instance of a graph that contains only vertices according to
       * the ontology which is described at the OntologyURLs URL.
       *

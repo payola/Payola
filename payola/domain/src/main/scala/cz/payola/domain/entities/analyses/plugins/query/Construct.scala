@@ -24,7 +24,7 @@ abstract class Construct(
     def getConstructQuery(instance: PluginInstance, subject: Subject, variableGetter: () => Variable): ConstructQuery
 
     def getQuery(instance: PluginInstance): String = {
-        var i = 0;
+        var i = 0
         def variableGetter = () => {
             i += 1
             Variable("v" + i)

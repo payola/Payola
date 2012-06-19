@@ -109,6 +109,6 @@ object RPC extends Controller
         request.body match {
             case AnyContentAsFormUrlEncoded(data) => data
             case _ => Map.empty[String, Seq[String]]
-        };
+        }
     }
 }

@@ -6,13 +6,11 @@ import cz.payola.domain.sparql._
 import cz.payola.domain.IDGenerator
 import cz.payola.domain.entities.analyses._
 
-class Projection(
-    name: String = "Projection",
-    inputCount: Int = 1,
-    parameters: immutable.Seq[Parameter[_]] = List(new StringParameter("PropertyURIs", "")),
-    id: String = IDGenerator.newId)
+class Projection(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
     extends Construct(name, inputCount, parameters, id)
 {
+    def this() = this("Projection", 1, List(new StringParameter("PropertyURIs", "")), IDGenerator.newId)
+
     def getPropertyURIs(instance: PluginInstance): Option[immutable.Seq[String]] = {
         instance.getStringParameter("PropertyURIs").map(_.split("\n").toList)
     }

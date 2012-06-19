@@ -7,15 +7,14 @@ import cz.payola.domain.IDGenerator
 import scala.collection.mutable.ListBuffer
 import cz.payola.domain.rdf._
 
-class Join(
-    name: String = "Join",
-    inputCount: Int = 2,
-    parameters: immutable.Seq[Parameter[_]] = List(
-        new StringParameter("JoinPropertyURI", ""),
-        new BooleanParameter("IsInner", true)),
-    id: String = IDGenerator.newId)
+class Join(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
     extends Plugin(name, inputCount, parameters, id)
 {
+    def this() = {
+        this("Join", 2, List(new StringParameter("JoinPropertyURI", ""), new BooleanParameter("IsInner", true)),
+            IDGenerator.newId)
+    }
+
     /**
       * Returns "JoinPropertyURI" parameter value.
       * @param instance Plugin Instance.

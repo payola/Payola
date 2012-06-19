@@ -6,13 +6,11 @@ import scala.collection.immutable
 import cz.payola.domain.IDGenerator
 import cz.payola.domain.entities.analyses._
 
-class Typed(
-    name: String = "Typed",
-    inputCount: Int = 1,
-    parameters: immutable.Seq[Parameter[_]] = List(new StringParameter("TypeURI", "")),
-    id: String = IDGenerator.newId)
+class Typed(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
     extends Construct(name, inputCount, parameters, id)
 {
+    def this() = this("Typed", 1, List(new StringParameter("TypeURI", "")), IDGenerator.newId)
+
     val typePropertyURI = Uri("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
 
     def getTypeURI(instance: PluginInstance): Option[String] = {

@@ -6,16 +6,12 @@ import scala.collection.immutable
 import cz.payola.domain.IDGenerator
 import cz.payola.domain.entities.analyses._
 
-class Selection(
-    name: String = "Selection",
-    inputCount: Int = 1,
-    parameters: immutable.Seq[Parameter[_]] = List(
-        new StringParameter("PropertyURI", ""),
-        new StringParameter("Operator", ""),
-        new StringParameter("Value", "")),
-    id: String = IDGenerator.newId)
+class Selection(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
     extends Construct(name, inputCount, parameters, id)
 {
+    def this() = this("Selection", 1, List(new StringParameter("PropertyURI", ""),
+        new StringParameter("Operator", ""), new StringParameter("Value", "")), IDGenerator.newId)
+
     def getPropertyURI(instance: PluginInstance): Option[String] = {
         instance.getStringParameter("PropertyURI")
     }

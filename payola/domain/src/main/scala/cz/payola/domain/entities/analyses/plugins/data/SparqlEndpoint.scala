@@ -9,15 +9,13 @@ import cz.payola.domain.IDGenerator
 import cz.payola.domain.entities.analyses._
 import cz.payola.domain.sparql._
 
-sealed class SparqlEndpoint(
-    name: String = "SPARQL Endpoint",
-    inputCount: Int = 0,
-    parameters: immutable.Seq[Parameter[_]] = List(new StringParameter("EndpointURL", "")),
-    id: String = IDGenerator.newId)
+sealed class SparqlEndpoint(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
     extends DataFetcher(name, inputCount, parameters, id)
 {
+    def this() = this("SPARQL Endpoint", 0, List(new StringParameter("EndpointURL", "")), IDGenerator.newId)
+
     def executeQuery(instance: PluginInstance, query: String): Graph = {
-        usingDefined(instance.getStringParameter("EndpointURL")) {endpointURL =>
+        usingDefined(instance.getStringParameter("EndpointURL")) { endpointURL =>
             val queryUrl = endpointURL + "?query=" + java.net.URLEncoder.encode(query, "UTF-8")
             val connection = new URL(queryUrl).openConnection()
             val requestProperties = Map(
