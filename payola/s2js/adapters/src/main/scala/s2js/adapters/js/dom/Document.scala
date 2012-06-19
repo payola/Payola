@@ -12,4 +12,6 @@ abstract class Document
     def createElement[A <: Element](name: String): A = body.asInstanceOf[A]
 
     val documentElement: Element = null
+
+    def createTextNode(s: String): Element = null
 }

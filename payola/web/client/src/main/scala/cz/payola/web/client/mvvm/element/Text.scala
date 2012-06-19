@@ -6,17 +6,21 @@ import s2js.adapters.js.dom.{Element, Node}
 
 class Text(var value: String) extends Component
 {
-    private var parentHtml = ""
+
     private var parent: Element = null
+    private var element: Element = null
 
     def setText(text: String) = {
-        value = text
-        parent.innerHTML = parentHtml+text
+        if(parent != null) {
+            parent.removeChild(element)
+            value = text
+            render(parent)
+        }
     }
 
-    def render(parent: Element) = {
+    def render(parent: Element = document.body) = {
         this.parent = parent
-        parentHtml = this.parent.innerHTML
-        this.parent.innerHTML = parentHtml+value
+        element = document.createTextNode(value)
+        parent.appendChild(element)
     }
 }

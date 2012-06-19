@@ -4,7 +4,7 @@ import cz.payola.web.client.mvvm.element.Italic
 import s2js.adapters.js.dom.Element
 import s2js.adapters.js.browser.document
 
-class Icon(iconName: String) extends Italic(List(), iconName)
+class Icon(iconName: String) extends Italic(List(), "icon-"+iconName)
 {
     override def render(parent: Element = document.body) = {
         super.render(parent)

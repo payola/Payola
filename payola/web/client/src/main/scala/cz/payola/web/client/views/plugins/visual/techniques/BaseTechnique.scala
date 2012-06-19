@@ -7,6 +7,7 @@ import s2js.adapters.js.dom.Element
 import cz.payola.web.client.views.plugins.visual.animation.Animation
 import cz.payola.web.client.views.plugins.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.views.plugins.visual.graph._
+import cz.payola.web.client.views.plugins.visual.graph.positioning._
 
 abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(settings)
 {
@@ -23,7 +24,7 @@ abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(setting
     override def init(container: Element) {
         super.init(container)
     }
-    
+
     override def update(graph: Graph) {
         super.update(graph)
         if(!graphView.get.isEmpty) { // graphView != None because this call is after update(..)
@@ -48,23 +49,31 @@ abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(setting
                 firstAnimation.addFollowingAnimation(getTechniquePerformer(component, true))
             }
 
-            val componentPositionDesc =
-                new LocationDescriptor.ComponentPositionHelper(
-                    componentNumber, graphView.components.length, previousComponent)
+            val componentPositionDesc = new ComponentPositionHelper(
+                componentNumber, graphView.components.length, previousComponent)
 
             firstAnimation.addFollowingAnimation(new Animation(
                 Animation.flipGraph, component.vertexViews, None, redrawQuick, redraw, None))
 
-            firstAnimation.addFollowingAnimation(new Animation(
-                Animation.moveComponent, (componentPositionDesc, component.vertexViews), None, redrawQuick, redraw,
-                None))
+            if(graphView.components.length != 1) {
+                firstAnimation.addFollowingAnimation(new Animation(
+                    Animation.moveGraphByFunction, (componentPositionDesc, component.vertexViews), None, redrawQuick, redraw,
+                    None))
+            }
 
             isFirstAnimation = false
             componentNumber += 1
             previousComponent = Some(component)
         }
+        //fit the drawing space to the window
         firstAnimation.addFollowingAnimation(
             new Animation(Animation.emptyAnimation, false, None, graphView.fitCanvas, redraw, None))
+
+        //finally move the whole graph to the center of the window
+        val graphCenterCorrector = new GraphPositionHelper(graphView.canvasPack.getSize, graphView.getGraphCenter)
+        firstAnimation.addFollowingAnimation(
+            new Animation(Animation.moveGraphByFunction,
+                (graphCenterCorrector, graphView.getAllVertices), None, redrawQuick, redraw, None))
 
         firstAnimation.run()
     }
@@ -75,18 +84,18 @@ abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(setting
     protected def getTechniquePerformer(component: Component, animated: Boolean): Animation[ListBuffer[(VertexView, Point)]]
 
     /**
-     * Moves the vertices to a tree like structure. The first element of input is placed in the root located
-     * in coordinates [0, 0]. All children of the root are vertices connected via an edge to the root. Every
-     * level of the "tree" are vertices connected by one edge to a vertex in the previous level. Vertices
-     * in next level have set higher number to the y-coordinate. Vertices in a level have set x-coordinate
-     * to appear in a line next to each other. Placed vertices are ignored for next levels construction.
-     * @param vViews vertices to place in the "tree" structure
-     * @param nextAnimation that will be launched after this operation is performed
-     * @param quickDraw method to redraw the vertices quickly
-     * @param finalDraw method to redraw the vertices after the last animation
-     * @param animationStepLength defining this parameter with 0 makes the animation to perform the operation instantly
-     *                            (skipping the animation)
-     */
+      * Moves the vertices to a tree like structure. The first element of input is placed in the root located
+      * in coordinates [0, 0]. All children of the root are vertices connected via an edge to the root. Every
+      * level of the "tree" are vertices connected by one edge to a vertex in the previous level. Vertices
+      * in next level have set higher number to the y-coordinate. Vertices in a level have set x-coordinate
+      * to appear in a line next to each other. Placed vertices are ignored for next levels construction.
+      * @param vViews vertices to place in the "tree" structure
+      * @param nextAnimation that will be launched after this operation is performed
+      * @param quickDraw method to redraw the vertices quickly
+      * @param finalDraw method to redraw the vertices after the last animation
+      * @param animationStepLength defining this parameter with 0 makes the animation to perform the operation instantly
+      *                            (skipping the animation)
+      */
     def basicTreeStructure(vViews: ListBuffer[VertexView], nextAnimation: Option[Animation[_]], quickDraw: () => Unit,
         finalDraw: () => Unit, animationStepLength: Option[Int]): Animation[ListBuffer[(VertexView, Point)]] = {
 
@@ -154,19 +163,19 @@ abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(setting
 
 
     /**
-     * Moves the vertices to a tree like structure. The first element of input is placed in the root located
-     * in coordinates [0, 0]. All children of the root are vertices connected via an edge to the root. Every
-     * level of the "tree" are vertices connected by one edge to a vertex in the previous level. Vertices
-     * in next level are placed to a circle with a bigger diameter than the vertices in the previous level.
-     * Vertices are placed in the circle regularly, that the vertices have the same distances between each other.
-     * Placed vertices are ignored for next levels construction.
-     * @param vViews vertices to place in the "tree" structure
-     * @param nextAnimation that will be launched after this operation is performed
-     * @param quickDraw method to redraw the vertices quickly
-     * @param finalDraw method to redraw the vertices after the last animation
-     * @param animationStepLength defining this parameter with 0 makes the animation to perform the operation instantly
-     *                            (skipping the animation)
-     */
+      * Moves the vertices to a tree like structure. The first element of input is placed in the root located
+      * in coordinates [0, 0]. All children of the root are vertices connected via an edge to the root. Every
+      * level of the "tree" are vertices connected by one edge to a vertex in the previous level. Vertices
+      * in next level are placed to a circle with a bigger diameter than the vertices in the previous level.
+      * Vertices are placed in the circle regularly, that the vertices have the same distances between each other.
+      * Placed vertices are ignored for next levels construction.
+      * @param vViews vertices to place in the "tree" structure
+      * @param nextAnimation that will be launched after this operation is performed
+      * @param quickDraw method to redraw the vertices quickly
+      * @param finalDraw method to redraw the vertices after the last animation
+      * @param animationStepLength defining this parameter with 0 makes the animation to perform the operation instantly
+      *                            (skipping the animation)
+      */
     def basicTreeCircledStructure(vViews: ListBuffer[VertexView], nextAnimation: Option[Animation[_]], quickDraw: () => Unit,
         finalDraw: () => Unit, animationStepLength: Option[Int]): Animation[ListBuffer[(VertexView, Point)]] = {
 
@@ -220,14 +229,14 @@ abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(setting
 
 
     /**
-     * Support method for basicTreeCircledStructure(..). This method takes all vertices in the vertexViews
-     * container and puts them into one circle.
-     * @param rotation modifies angle of the first placed vertex. This is an angle thats is between
-     * vertexViews.head.point, [0, 0] and [1, 0].
-     * @param radius distance of the vertices from center
-     * @param center of the circle
-     * @param vertexViews container of the vertices, that are placed to a circle
-     */
+      * Support method for basicTreeCircledStructure(..). This method takes all vertices in the vertexViews
+      * container and puts them into one circle.
+      * @param rotation modifies angle of the first placed vertex. This is an angle thats is between
+      * vertexViews.head.point, [0, 0] and [1, 0].
+      * @param radius distance of the vertices from center
+      * @param center of the circle
+      * @param vertexViews container of the vertices, that are placed to a circle
+      */
     private def placeVerticesOnCircle(rotation: Double, radius: Double, center: Point,
         vertexViews: ListBuffer[(VertexView, Point)]): ListBuffer[(VertexView, Point)] = {
 
@@ -271,21 +280,21 @@ abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(setting
     }
 
     /**
-     * Function for checking whether a vertex exists in a container
-     * @param whatToCheck vertex to search for
-     * @param whereToCheck container to search in
-     * @return true if the vertex is present in the container
-     */
+      * Function for checking whether a vertex exists in a container
+      * @param whatToCheck vertex to search for
+      * @param whereToCheck container to search in
+      * @return true if the vertex is present in the container
+      */
     private def existsVertex(whatToCheck: VertexView, whereToCheck: ListBuffer[VertexView]): Boolean = {
         whereToCheck.exists(element => element.vertexModel eq whatToCheck.vertexModel)
     }
 
     /**
-     * Function for checking whether a vertex exists in a container
-     * @param whatToCheck vertex to search for
-     * @param whereToCheck container to search in
-     * @return true if the vertex is present in the container
-     */
+      * Function for checking whether a vertex exists in a container
+      * @param whatToCheck vertex to search for
+      * @param whereToCheck container to search in
+      * @return true if the vertex is present in the container
+      */
     private def existsVertexStruct(whatToCheck: VertexView, whereToCheck: ListBuffer[(VertexView, Point)]): Boolean = {
         whereToCheck.exists(element => element._1.vertexModel eq whatToCheck.vertexModel)
     }
