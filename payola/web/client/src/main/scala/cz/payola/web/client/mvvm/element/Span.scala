@@ -8,7 +8,7 @@ import cz.payola.web.client.events._
 
 class Span(val innerElements: Seq[Component], val addClass: String = "") extends Component
 {
-    val clicked = new ClickedEvent[Span]
+    var clicked = new ClickedEvent[Span]
 
     val span = document.createElement[dom.Element]("span")
     span.setAttribute("class", addClass)

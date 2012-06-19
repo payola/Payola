@@ -494,6 +494,7 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
         //^because elements are drawn into separate layers, redraw(..) does not know to which context to draw
     }
 
+
     def clean() {
         while(container.childNodes.length > 0) {
             container.removeChild(container.firstChild)

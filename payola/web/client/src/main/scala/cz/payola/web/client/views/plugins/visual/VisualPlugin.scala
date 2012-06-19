@@ -23,7 +23,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
     private var mouseDragged = false
     private var mouseDownPosition = Point(0, 0)
 
-    val zoomTool = new ZoomControls(100)
+    var zoomTool: Option[ZoomControls] = None
 
     val vertexUpdate = new VertexUpdateEvent
 
@@ -35,8 +35,8 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
     def init(container: Element) {
 
         graphView = Some(new GraphView(container, settings))
-
-        zoomTool.render(document.getElementById("btn-stripe"))
+        zoomTool = Some(new ZoomControls(100))
+        zoomTool.get.render(document.getElementById("btn-stripe"))
 
         graphView.get.canvasPack.mouseDown += { event => //selection
             mouseDragged = false
@@ -73,31 +73,31 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
             val scrolled = event.wheelDelta
 
             if(scrolled < 0) {
-                if(zoomTool.canZoomIn) {
+                if(zoomTool.get.canZoomIn) {
                     zoomIn(mousePosition)
-                    zoomTool.increaseZoomInfo()
+                    zoomTool.get.increaseZoomInfo()
                 }
             } else {
-                if(zoomTool.canZoomOut) {
+                if(zoomTool.get.canZoomOut) {
                     zoomOut(mousePosition)
-                    zoomTool.decreaseZoomInfo()
+                    zoomTool.get.decreaseZoomInfo()
                 }
             }
             false
         }
 
-        zoomTool.zoomDecreased += { event => //zoom - invoked by zoom control button
-            if(graphView.isDefined && zoomTool.canZoomOut) {
+        zoomTool.get.zoomDecreased += { event => //zoom - invoked by zoom control button
+            if(graphView.isDefined && zoomTool.get.canZoomOut) {
                 zoomOut(graphView.get.getGraphCenter) //zooming from the center of the graph
-                zoomTool.decreaseZoomInfo()
+                zoomTool.get.decreaseZoomInfo()
             }
             false
         }
 
-        zoomTool.zoomIncreased += { event => //zoom - invoked by zoom control button
-            if(graphView.isDefined && zoomTool.canZoomIn) {
+        zoomTool.get.zoomIncreased += { event => //zoom - invoked by zoom control button
+            if(graphView.isDefined && zoomTool.get.canZoomIn) {
                 zoomIn(graphView.get.getGraphCenter) //zooming to the center of the graph
-                zoomTool.increaseZoomInfo()
+                zoomTool.get.increaseZoomInfo()
             }
             false
         }
@@ -121,6 +121,9 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
             mousePressedVertex = false
             mouseDownPosition = Point(0, 0)
         }
+
+        zoomTool.get.destroy()
+        zoomTool = None
     }
 
     protected def redrawQuick() { //TODO rename or move somewhere else
@@ -291,7 +294,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
 
     private def getZoomPointCandidates(vv: VertexView, position: Point): (Point, Point) = {
 
-        val distance = vv.position.distance(position) * zoomTool.zoomStep
+        val distance = vv.position.distance(position) * zoomTool.get.zoomStep
         if(distance == 0) {
             //window.alert("distance == 0")
         }

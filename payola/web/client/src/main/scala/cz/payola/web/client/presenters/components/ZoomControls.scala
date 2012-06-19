@@ -6,6 +6,7 @@ import s2js.adapters.js.dom.Element
 import cz.payola.web.client.mvvm.element._
 import cz.payola.web.client.events._
 import cz.payola.web.client.mvvm.element.extensions.Bootstrap.Icon
+import s2js.adapters.js.browser.window
 
 class ZoomControls(var currentZoom: Double) extends Component
 {
@@ -20,13 +21,15 @@ class ZoomControls(var currentZoom: Double) extends Component
     val zoomIncreased = new ZoomChangedEvent[ZoomControls]
     val zoomDecreased = new ZoomChangedEvent[ZoomControls]
 
-    private val spanCaption = new Text(getStatusCaption)
+    private val spanCaption = new Text("")
 
     val plus = new Span(List(new Icon(Icon.zoom_in)),"btn")
     val status = new Span(List(spanCaption))
     val minus = new Span(List(new Icon(Icon.zoom_out)),"btn")
 
     val wrapper = new Div(List(plus, status, minus), "zoom-controls")
+
+    var parentSpace: Option[Element] = None
 
     def canZoomIn: Boolean = {
         currentZoom < maximumZoomIn
@@ -59,17 +62,30 @@ class ZoomControls(var currentZoom: Double) extends Component
         setZoom(currentZoom - (zoomStep*50))
     }
 
+    def destroy() {
+        //spanCaption.setText("")
+
+        if(parentSpace.isDefined) {
+            wrapper.div.removeChild(minus.span)
+            wrapper.div.removeChild(status.span)
+            wrapper.div.removeChild(plus.span)
+            parentSpace.get.removeChild(wrapper.div)
+        }
+    }
+
     def render(parent: Element = document.body) {
         wrapper.render(parent)
-    }
+        spanCaption.setText(getStatusCaption)
+        parentSpace = Some(parent)
 
-    plus.clicked += { evt =>
-        zoomIncreased.trigger(new ZoomChangedEventArgs[ZoomControls](this))
-        false
-    }
+        plus.clicked += { evt =>
+            zoomIncreased.trigger(new ZoomChangedEventArgs[ZoomControls](this))
+            false
+        }
 
-    minus.clicked += { evt =>
-        zoomDecreased.trigger(new ZoomChangedEventArgs[ZoomControls](this))
-        false
+        minus.clicked += { evt =>
+            zoomDecreased.trigger(new ZoomChangedEventArgs[ZoomControls](this))
+            false
+        }
     }
 }
