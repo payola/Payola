@@ -4,7 +4,7 @@ import scala.collection.mutable
 import cz.payola.domain.entities.analyses._
 import evaluation.AnalysisEvaluation
 
-class Analysis(protected var _name: String, protected val _owner: Option[User])
+class Analysis(protected var _name: String, protected var _owner: Option[User])
     extends Entity
     with NamedEntity
     with OptionallyOwnedEntity

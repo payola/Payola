@@ -9,7 +9,7 @@ trait Group extends NamedEntity
 {
     type UserType <: User
 
-    protected val _owner: UserType
+    protected var _owner: UserType
 
     protected val _members = new mutable.ArrayBuffer[UserType]()
 
