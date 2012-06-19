@@ -1,10 +1,12 @@
 package cz.payola.common.entities.settings.ontology
 
+import cz.payola.common.entities.Entity
+
 /** This trait is a blue print for the domain class that wraps settings for custom
   * visualization of an ontology.
   *
   */
-trait Customization
+trait Customization extends Entity
 {
     /** Name of the customization. */
     var name: String

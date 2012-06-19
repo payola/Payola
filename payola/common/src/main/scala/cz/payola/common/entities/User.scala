@@ -68,11 +68,11 @@ trait User extends NamedEntity
     /** The data sources that are owned by the user. */
     def ownedDataSources: Seq[DataSource] = _ownedDataSources
 
+    /** Ontology customizations of the user. */
+    def ownedOntologyCustomizations: Seq[OntologyCustomizationType] = _ontologyCustomizations
+
     /** Privileges of the user. */
     def privileges: Seq[PrivilegeType] = _privileges
-
-    /** Ontology customizations of the user. */
-    def ontologyCustomizations: Seq[OntologyCustomizationType] = _ontologyCustomizations
 
     /**
       * Stores the specified analysis to the users owned analyses.
