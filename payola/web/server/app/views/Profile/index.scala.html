@@ -6,6 +6,13 @@
 @main(user, "User profile") {
 <div class="container">
 
+    <ul class="breadcrumb">
+        <li>
+            <a href="/">Home</a> <span class="divider">/</span>
+        </li>
+        <li class="active">Profile of: @owner.name</li>
+    </ul>
+
     <div class="hero-unit">
         <div class="row-fluid">
             <span class="span3">
@@ -50,12 +57,14 @@
                     <tr>
                         <th>Group name</th>
                         <th></th>
+                        <th></th>
                     </tr>
                     </thead>
                     <tbody>
-                    @owner.ownedGroups.take(10).map{ group =>
+                    @owner.ownedGroups.take(5).map{ group =>
                         <tr>
                             <td>@group.name</td>
+                            <td>@group.members.size member(s)</td>
                             <td>
                                 <a href="@routes.Profile.editGroup(group.id)" class="btn btn-primary"><i class="icon-cog icon-white"></i> Administer</a>
                             </td>
@@ -68,6 +77,9 @@
                     }
                     </tbody>
                 </table>
+                @if(user.get.ownedGroups.size > 5){
+                    <a class="btn" href="@routes.Profile.listGroups()">List all &raquo;</a>
+                }
                 <a href="@routes.Profile.createGroup" class="btn btn-success"><i class="icon-plus icon-white"></i>Create group</a>
             }else{
                 <h2>The user has @owner.ownedGroups.size groups</h2>

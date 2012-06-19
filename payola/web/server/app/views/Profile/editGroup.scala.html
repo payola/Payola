@@ -1,38 +1,50 @@
-@(user: cz.payola.domain.entities.User, group: cz.payola.domain.entities.Group)
+@(user: cz.payola.domain.entities.User, group: cz.payola.domain.entities.Group, users: Seq[cz.payola.domain.entities.User])
 
-@main(Some(user), "Edit group @group.name") {
-<div class="container-fluid">
+@main(Some(user), "Edit group "+ group.name) {
+<div class="container">
+
+    <ul class="breadcrumb">
+        <li>
+            <a href="/">Home</a> <span class="divider">/</span>
+        </li>
+        <li>
+            <a href="@routes.Profile.index(user.name)">Your profile</a> <span class="divider">/</span>
+        </li>
+        <li class="active">Edit group</li>
+    </ul>
 
     <div class="row-fluid">
-        <h1 class="span10">Edit group @group.name</h1><a class="btn btn-danger span2"><i class="icon-remove-circle">Delete the group</i></a>
+        <h1 class="span10">Edit group @group.name</h1><a href="@routes.Profile.deleteGroup(group.id)" onclick="return confirm('Are you sure?');" class="btn btn-danger span2"><i class="icon-remove-circle icon-white"></i>Delete the group</a>
     </div>
 
-    <div class="well">
-        <fieldset>
-            <legend>Change group properties</legend>
-            <div class="control-group">
-                <label class="control-label" for="name">Name</label>
-                <span class="controls">
-                    <input type="text" name="name" placeholder="Group name" id="name" value="@group.name" class="input span3">
-                </span>
-            </div>
-            <div class="control-group">
-                <label class="control-label" for="members">Members</label>
-                <span class="controls">
-                    <select name="members" id="members" class="chosen">
-                        @group.members.map{ m =>
-                         <li value="@m.id">@m.name</li>
-                        }
-                    </select>
-                </span>
-            </div>
-            <div class="control-group">
-                <span class="controls">
-                    <button type="submit" id="savebutton" class="btn btn-primary">Save group</button>
-                </span>
-            </div>
-        </fieldset>
-    </div>
+    <form action="@routes.Profile.saveGroup(group.id)" method="post">
+        <div class="well">
+            <fieldset>
+                <legend>Change group properties</legend>
+                <div class="control-group">
+                    <label class="control-label" for="name">Name</label>
+                    <span class="controls">
+                        <input type="text" name="name" placeholder="Group name" id="name" value="@group.name" class="input span3">
+                    </span>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="members">Members</label>
+                    <span class="controls">
+                        <select name="members" id="members" class="chosen" multiple="multiple">
+                            @users.map{ u =>
+                                <option@if(group.members.contains(u)){ selected="selected"} value="@u.id">@u.name</option>
+                            }
+                        </select>
+                    </span>
+                </div>
+                <div class="control-group">
+                    <span class="controls">
+                        <button type="submit" id="savebutton" class="btn btn-primary">Save group</button>
+                    </span>
+                </div>
+            </fieldset>
+        </div>
+    </form>
 
 </div>
 

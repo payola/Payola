@@ -84,6 +84,10 @@ class DataFacade
         }
     }
 
+    def getAllUsers() = {
+        userDAO.getAll()
+    }
+
     //TODO bcrypt
     private def cryptPassword(password: String, method: String = "SHA-1") : String = {
         val md = java.security.MessageDigest.getInstance(method)

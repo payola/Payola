@@ -41,6 +41,14 @@
 @main(user, "Analysis "+analysis.name+" :: Payola!") {
 
 <div class="container-fluid">
+
+    <ul class="breadcrumb">
+        <li>
+            <a href="/">Home</a> <span class="divider">/</span>
+        </li>
+        <li class="active">Analysis: @analysis.name</li>
+    </ul>
+
     <h1>Detail of analysis: @analysis.name</h1>
     <div class="row-fluid">
         <div class="well" id="analysis-controls">

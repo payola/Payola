@@ -2,6 +2,17 @@
 
 @main(Some(user), "Payola login page") {
 <div class="container">
+
+    <ul class="breadcrumb">
+        <li>
+            <a href="/">Home</a> <span class="divider">/</span>
+        </li>
+        <li>
+            <a href="@routes.Profile.index(user.name)">Your profile</a> <span class="divider">/</span>
+        </li>
+        <li class="active">Edit</li>
+    </ul>
+
     @helper.form(routes.Profile.save(user.email)) {
 
     <h1>Edit your profile</h1>

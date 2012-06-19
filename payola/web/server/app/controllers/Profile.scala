@@ -48,11 +48,47 @@ object Profile extends PayolaController with Secured
         Ok(html.Profile.createGroup(user, groupForm))
     }
 
-    def saveGroup = authenticatedWithRequest { (request: Request[_], user: User) =>
+    def saveCreateGroup = authenticatedWithRequest { (request: Request[_], user: User) =>
         val name = groupForm.bindFromRequest()(request).get
-        df.createGroup(name, user)
+        val groupOption = df.createGroup(name, user)
 
-        Redirect(routes.Profile.index(user.email)).flashing("success" -> "The group has been sucessfully created.")
+        if (groupOption.isDefined)
+        {
+            Redirect(routes.Profile.editGroup(groupOption.get.id)).flashing("success" -> "The group has been sucessfully created.")
+        }else
+        {
+            Ok("TODO")
+        }
+    }
+
+    def saveGroup(id: String) = authenticatedWithRequest{ (request: Request[_], user: User) =>
+
+        val data = request.body match {
+            case AnyContentAsFormUrlEncoded(data) => data
+            case _ => Map.empty[String, Seq[String]]
+        }
+
+        val group = df.groupDAO.getById(id)
+        if (group.isDefined)
+        {
+            group.get.name = data("name")(0)
+            group.get.members.toArray.map{m =>
+                group.get.removeMember(m)
+            }
+
+            if (data.contains("members"))
+            {
+                data("members").map{ u =>
+                    val m = df.userDAO.getById(u)
+                    if (m.isDefined){
+                        group.get.addMember(m.get)
+                    }
+                }
+            }
+
+            df.groupDAO.persist(group.get)
+        }
+        Redirect(routes.Profile.index(user.email)).flashing("success" -> "The group has been sucessfully saved.")
     }
 
     def editGroup(id: String) = authenticatedWithRequest{ (request: Request[_], user: User) =>
@@ -60,15 +96,24 @@ object Profile extends PayolaController with Secured
 
         if (g.isDefined)
         {
-            Ok(views.html.Profile.editGroup(user, g.get))
+            val allUsers = df.getAllUsers()
+
+            Ok(views.html.Profile.editGroup(user, g.get, allUsers))
         }else{
             NotFound("The group does not exist.")
         }
     }
-    /*
-    def removeGroupMember = authenticated( user =>
-        //Ok()
+
+    def listGroups = authenticatedWithRequest( (request: Request[_], user: User) =>
+        Ok(views.html.Profile.listGroups(user)(request.flash))
     )
-                */
-    def deleteGroup = TODO
+
+    def deleteGroup(id: String) = authenticated{ user =>
+        if (df.groupDAO.removeById(id))
+        {
+            Redirect(routes.Profile.listGroups()).flashing("success" -> "The group has been successfully deleted.")
+        }else{
+            Redirect(routes.Profile.listGroups()).flashing("error" -> "The group could not been deleted.")
+        }
+    }
 }
