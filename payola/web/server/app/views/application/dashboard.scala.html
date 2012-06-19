@@ -1,6 +1,5 @@
 @(user: Option[cz.payola.domain.entities.User], topAnalyses: Seq[cz.payola.domain.entities.Analysis],
-    topDataSources: Seq[cz.payola.domain.entities.analyses.PluginInstance],
-    groups: Seq[cz.payola.domain.entities.Group]
+    topDataSources: Seq[cz.payola.domain.entities.analyses.PluginInstance]
 )
 
 @main(user, "Dashboard") {
@@ -17,11 +16,15 @@
             <div class="row-fluid">
                 <div class="span4">
                     <h2>Top analyses</h2>
-                    <ul>
-                        @topAnalyses.map{a =>
-                            <li><a href="@routes.Analysis.detail(a.id)">@a.name</a></li>
-                        }
-                    </ul>
+                    @if(topAnalyses.size == 0){
+                        <p class="alert alert-danger">No analyses.</p>
+                    }else{
+                        <ul>
+                            @topAnalyses.map{a =>
+                                <li><a href="@routes.Analysis.detail(a.id)">@a.name</a></li>
+                            }
+                        </ul>
+                    }
                     <p><a class="btn" href="#">View all &raquo;</a></p>
                 </div><!--/span-->
                 <div class="span4">
@@ -43,17 +46,41 @@
                 <div class="row-fluid">
                     <div class="span4">
                         <h2>My analyses</h2>
+                        <div class="alert alert-info">
+                            <h3 class="alert-heading">No analyses.</h3>
+                            <p class="alert-block">But you may create one! Just press the green button below.</p>
+                        </div>
                         <ul>
 
                         </ul>
-                        <p><a class="btn" href="#">View all &raquo;</a>&nbsp;<a class="btn btn-success" href="@routes.Analysis.create">+&nbsp;Create</a></p>
+                        <p><a class="btn" href="#">View all &raquo;</a>&nbsp;<a class="btn btn-success" href="@routes.Analysis.create"><i class="icon-plus icon-white"></i>Create &raquo;</a></p>
                     </div><!--/span-->
                     <div class="span4">
                         <h2>My groups</h2>
-                        @if(groups.size == 0){
-                            <p>No groups. <a href="@routes.Profile.createGroup()">Create one</a>.</p>
+                        @if(user.get.ownedGroups.size == 0){
+                            <div class="alert alert-info">
+                                <h3 class="alert-heading">No groups.</h3>
+                                <p class="alert-block">
+                                    You are not able to share analysis to more than one person at a time.
+                                    But you may create a group easily! Just press the green button below.
+                                </p>
+                            </div>
+                        }else{
+                            <table class="table table-stripped">
+                            @user.get.ownedGroups.take(5).map{group =>
+                                <tr>
+                                    <td>@group.name</td>
+                                    <td><a href="@routes.Profile.editGroup(group.id)" class="btn btn-primary"><i class="icon-cog icon-white"></i> Administer</a></td>
+                                </tr>
+                            }
+                            </table>
                         }
-                        <p><a class="btn" href="#">View details &raquo;</a></p>
+                        <p>
+                            @if(user.get.ownedGroups.size > 5){
+                                <a class="btn" href="#">List all &raquo;</a>
+                            }
+                            <a class="btn btn-success" href="@routes.Profile.createGroup()"><i class="icon-plus icon-white"></i>Create &raquo;</a>
+                        </p>
                     </div><!--/span-->
                     <div class="span4">
                         <h2>Recent actions</h2>

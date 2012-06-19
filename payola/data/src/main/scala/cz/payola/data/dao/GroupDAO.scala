@@ -11,7 +11,7 @@ class GroupDAO extends EntityDAO[Group](PayolaDB.groups)
     }
 
     //TODO: OH - implement this
-    def getByOwnerId(id: String) : Seq[Group] = {
+    def getByOwnerId(id: String, maxCount: Int) : Seq[Group] = {
         List()
     }
 }

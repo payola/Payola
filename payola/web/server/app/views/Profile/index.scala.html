@@ -1,5 +1,5 @@
 @(user: Option[cz.payola.domain.entities.User], owner: cz.payola.domain.entities.User,
-    analyses: Seq[cz.payola.domain.entities.Analysis], groups: Seq[cz.payola.domain.entities.Group]
+    analyses: Seq[cz.payola.domain.entities.Analysis]
 )
 @import tags._
 
@@ -53,7 +53,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    @owner.ownedGroups.map{ group =>
+                    @owner.ownedGroups.take(10).map{ group =>
                         <tr>
                             <td>@group.name</td>
                             <td>

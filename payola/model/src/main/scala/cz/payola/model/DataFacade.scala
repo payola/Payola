@@ -13,6 +13,8 @@ class DataFacade
     private val analysisDAO = new AnalysisDAO
     private val groupDAO = new GroupDAO
 
+    private val GROUPS_COUNT_MAX_COUNT_DEFAULT = 10
+
     def getUserByCredentials(username: String, password: String) : Option[User] = {
         userDAO.getUserByCredentials(username, cryptPassword(password))
     }
@@ -54,11 +56,11 @@ class DataFacade
         FakeAnalysisDAO.analysis.pluginInstances.filter(i => i.plugin.name == "SPARQL Endpoint").headOption
     }
 
-    def getGroupsByOwner(user: Option[User]) = {
+    def getGroupsByOwner(user: Option[User], maxCount: Int = GROUPS_COUNT_MAX_COUNT_DEFAULT) = {
         if (!user.isDefined){
             List()
         }else{
-            groupDAO.getByOwnerId(user.get.id)
+            groupDAO.getByOwnerId(user.get.id, maxCount)
         }
     }
 

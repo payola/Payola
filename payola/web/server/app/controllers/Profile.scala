@@ -12,9 +12,8 @@ object Profile extends PayolaController with Secured
     def index(username: String) = maybeAuthenticated { user: Option[User] =>
         df.getUserByUsername(username).map { profileUser =>
             val profileUserAnalyses = df.getPublicAnalysesByOwner(profileUser)
-            val profileUserGroups = df.getGroupsByOwner(Some(profileUser))
 
-            Ok(views.html.userProfile.index(user, profileUser, profileUserAnalyses, profileUserGroups))
+            Ok(views.html.Profile.index(user, profileUser, profileUserAnalyses))
         }.getOrElse {
             NotFound(views.html.errors.err404("The user does not exist."))
         }
@@ -37,7 +36,7 @@ object Profile extends PayolaController with Secured
 
     // TODO is the username necessary here? A user may edit only his own profile...
     def edit(username: String) = authenticated { user =>
-        Ok(html.userProfile.edit(user, profileForm))
+        Ok(html.Profile.edit(user, profileForm))
     }
 
     // TODO is the username necessary here? A user may edit only his own profile...
@@ -46,7 +45,7 @@ object Profile extends PayolaController with Secured
     }
 
     def createGroup = authenticated { user =>
-        Ok(html.userProfile.createGroup(user, groupForm))
+        Ok(html.Profile.createGroup(user, groupForm))
     }
 
     def saveGroup = authenticatedWithRequest { (request: Request[_], user: User) =>
@@ -61,7 +60,7 @@ object Profile extends PayolaController with Secured
 
         if (g.isDefined)
         {
-            Ok(views.html.userProfile.editGroup(user, g.get))
+            Ok(views.html.Profile.editGroup(user, g.get))
         }else{
             NotFound("The group does not exist.")
         }
@@ -70,8 +69,6 @@ object Profile extends PayolaController with Secured
     def removeGroupMember = authenticated( user =>
         //Ok()
     )
-
-    def deleteGroup = authenticated { user =>
-        Ok("TODO")
-    }           */
+                */
+    def deleteGroup = TODO
 }
