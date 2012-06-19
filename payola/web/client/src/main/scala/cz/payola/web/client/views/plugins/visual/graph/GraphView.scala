@@ -560,7 +560,7 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
             Vector(window.innerWidth - canvasPack.offsetLeft, window.innerHeight - canvasPack.offsetTop))
     }
 
-    def getGraphCenter: Point = {
+    def getGraphCenter(): Point = { //() are intentional
         val top = getGraphTop.y
         val right = getGraphRight.x
         val bottom = getGraphBottom.y
