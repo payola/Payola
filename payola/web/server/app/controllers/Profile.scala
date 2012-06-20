@@ -57,7 +57,7 @@ object Profile extends PayolaController with Secured
             Redirect(routes.Profile.editGroup(groupOption.get.id)).flashing("success" -> "The group has been sucessfully created.")
         }else
         {
-            Ok("TODO")
+            Redirect(routes.Profile.listGroups()).flashing("error" -> "The group could not be created.")
         }
     }
 
@@ -68,27 +68,26 @@ object Profile extends PayolaController with Secured
             case _ => Map.empty[String, Seq[String]]
         }
 
-        val group = df.groupDAO.getById(id)
+        val membersNew = data.getOrElse("members",Nil).flatMap{ u => df.userDAO.getById(u) }
+        val group = df.getGroupByOwnerAndId(user, id)
+
         if (group.isDefined)
         {
-            group.get.name = data("name")(0)
-            group.get.members.toArray.map{m =>
-                group.get.removeMember(m)
+            val g = group.get
+            g.name = data.getOrElse("name", g.name).toString
+            g.members.diff(membersNew).map{m =>
+                g.removeMember(m)
             }
 
-            if (data.contains("members"))
-            {
-                data("members").map{ u =>
-                    val m = df.userDAO.getById(u)
-                    if (m.isDefined){
-                        group.get.addMember(m.get)
-                    }
-                }
+            membersNew.diff(g.members).map{ m =>
+                g.addMember(m)
             }
 
-            df.groupDAO.persist(group.get)
+            df.groupDAO.persist(g)
+            Redirect(routes.Profile.index(user.email)).flashing("success" -> "The group has been sucessfully saved.")
+        }else{
+            Forbidden
         }
-        Redirect(routes.Profile.index(user.email)).flashing("success" -> "The group has been sucessfully saved.")
     }
 
     def editGroup(id: String) = authenticatedWithRequest{ (request: Request[_], user: User) =>
@@ -109,7 +108,7 @@ object Profile extends PayolaController with Secured
     )
 
     def deleteGroup(id: String) = authenticated{ user =>
-        if (df.groupDAO.removeById(id))
+        if (df.getGroupByOwnerAndId(user, id).isDefined && df.groupDAO.removeById(id))
         {
             Redirect(routes.Profile.listGroups()).flashing("success" -> "The group has been successfully deleted.")
         }else{

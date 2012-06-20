@@ -90,4 +90,8 @@ class AnalysisControls(analysisId: String) extends Component
         analysisEvaluated.trigger(new EvaluationEventArgs(this, graph))
         analysisRunning = false
     }
+
+    def switchTab() = {
+
+    }
 }

@@ -4,13 +4,6 @@ import cz.payola.web.client.mvvm.element._
 import cz.payola.web.client.presenters.components.AnalysisControls
 import s2js.adapters.js.browser.document
 
-/**
-  *
-  * @author jirihelmich
-  * @created 5/23/12 11:20 PM
-  * @package cz.payola.web.client.presenters
-  */
-
 class Analysis(elementToDrawIn: String, analysisId: String) extends Index(elementToDrawIn)
 {
     val controls = new AnalysisControls(analysisId)
@@ -19,8 +12,9 @@ class Analysis(elementToDrawIn: String, analysisId: String) extends Index(elemen
     controls.analysisEvaluated += {
         evt =>
             graph = evt.graph
-            changePlugin(plugins.head)
-            //switchTabs
+            plugins.head.clean()
+            plugins.head.update(graph.get)
+            controls.switchTab
             false
     }
 }
