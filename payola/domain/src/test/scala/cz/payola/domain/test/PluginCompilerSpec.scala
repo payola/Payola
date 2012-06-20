@@ -15,7 +15,7 @@ class PluginCompilerSpec extends FlatSpec with ShouldMatchers
     val loader = new PluginClassLoader(pluginClassDirectory, getClass.getClassLoader)
 
     "Plugin compiler" should "compile simple plugins" in {
-        compiler.compile(
+        val pluginClassName = compiler.compile(
             """
                 package my.custom.plugin
 
@@ -39,7 +39,9 @@ class PluginCompilerSpec extends FlatSpec with ShouldMatchers
                 }
             """)
 
-        val plugin = loader.getPlugin("my.custom.plugin.MyPlugin")
+        assert(pluginClassName == "my.custom.plugin.MyPlugin", "Plugin class name doesn't match the one in the source.")
+
+        val plugin = loader.getPlugin(pluginClassName)
         assert(plugin.name == "Custom plugin", "The plugin name is invalid.")
         assert(plugin.inputCount == 123, "The plugin input count is invalid.")
         assert(plugin.parameters.length == 1, "The plugin parameter count is invalid.")
