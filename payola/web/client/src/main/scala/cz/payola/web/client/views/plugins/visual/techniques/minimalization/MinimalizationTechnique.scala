@@ -22,8 +22,8 @@ class MinimalizationTechnique(settings: VisualSetup) extends BaseTechnique(setti
         }
     }
 
-    override def clean() {
-        super.clean()
+    override def destroy() {
+        super.destroy()
     }
 
     def getName:String = {
