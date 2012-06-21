@@ -89,7 +89,7 @@ class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
     }
 
     def changePlugin(plugin: Plugin) {
-        currentPlugin.foreach(_.clean())
+        currentPlugin.foreach(_.destroy())
 
         // Switch to the new one.
         currentPlugin = Some(plugin)
@@ -110,9 +110,6 @@ class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
                     }
                     false
                 }
-
-            case i: TextPlugin =>
-                i.redraw()
         }
     }
 }

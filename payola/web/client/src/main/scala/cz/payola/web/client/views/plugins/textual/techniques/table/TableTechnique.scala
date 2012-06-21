@@ -145,11 +145,19 @@ class TableTechnique(settings: VisualSetup) extends BaseTechnique(settings)
         }
     }
 
-    override def clean() {
+    override def clear() {
+        destroy()
+    }
+
+    override def destroy() {
+        if(graphModel.isDefined) {
+            graphModel = None
+        }
+
         if(parentElement.isDefined) {
             val element = parentElement.get
             while(element.childNodes.length > 0) {
-                element.removeChild(element.firstChild)
+                element.removeChild(element.lastChild)
             }
         }
     }

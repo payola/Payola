@@ -15,10 +15,15 @@ trait Plugin
     def init(container: Element)
 
     /**
-      * Add a graph to the visualised structure.
-      * @param graph
+      * Updates the current graph of the plugin and re-runs the visualisation
+      * @param graph to be added to the current graph
       */
     def update(graph: Graph)
+
+    /**
+      * Removes the current graph from the plugins memory and resets the visualisation.
+      */
+    def clear()
 
     /**
       * Draws the contained graph.
@@ -26,9 +31,11 @@ trait Plugin
     def redraw()
 
     /**
-      * Purges the contained graph and contents of this plugin.
+      * Purges the contained graph, contents of this plugin and removes the created HTML elements form its parents.
+      * (Puts the plugin into initialization-required state, that calling init(..) would reset the plugin to its
+      * original state)
       */
-    def clean()
+    def destroy()
 
     /**
       * Short description name of this plugin
