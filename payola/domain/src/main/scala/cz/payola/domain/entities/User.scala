@@ -1,9 +1,9 @@
 package cz.payola.domain.entities
 
-import permissions.privilege.{PublicPrivilege, GroupPrivilege, AnalysisPrivilege, Privilege}
-import cz.payola.domain.entities.analyses.DataSource
 import scala.collection._
-import cz.payola.domain.entities.permissions.privilege.OntologyCustomizationPrivilege
+import cz.payola.domain.entities.permissions.privilege._
+import cz.payola.domain.entities.plugins.DataSource
+
 
 /** User entity at the domain level.
   *

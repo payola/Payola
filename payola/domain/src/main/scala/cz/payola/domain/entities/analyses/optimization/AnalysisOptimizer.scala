@@ -1,9 +1,9 @@
 package cz.payola.domain.entities.analyses.optimization
 
 import cz.payola.domain.entities.Analysis
-import cz.payola.domain.entities.analyses.PluginInstance
-import cz.payola.domain.entities.analyses.plugins.query.Construct
-import cz.payola.domain.entities.analyses.plugins.{Join, SparqlQuery, DataFetcher}
+import cz.payola.domain.entities.plugins.PluginInstance
+import cz.payola.domain.entities.plugins.concrete._
+import cz.payola.domain.entities.plugins.concrete.query.Construct
 
 object AnalysisOptimizer
 {

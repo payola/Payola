@@ -1,8 +1,7 @@
 package cz.payola.domain.entities.analyses.optimization
 
-import cz.payola.domain.entities.analyses.plugins.query.Construct
-import cz.payola.domain.entities.analyses._
-import cz.payola.domain.entities.analyses.PluginException
+import cz.payola.domain.entities.plugins._
+import cz.payola.domain.entities.plugins.concrete.query.Construct
 import cz.payola.domain.sparql._
 
 object MultipleConstructsPlugin extends Construct("Merged SPARQL construct queries")

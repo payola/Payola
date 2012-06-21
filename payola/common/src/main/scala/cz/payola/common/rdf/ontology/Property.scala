@@ -1,6 +1,5 @@
 package cz.payola.common.rdf.ontology
 
-
 trait Property
 {
     val URI: String

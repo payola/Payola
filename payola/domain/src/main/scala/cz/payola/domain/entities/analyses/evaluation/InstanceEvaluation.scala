@@ -1,9 +1,9 @@
 package cz.payola.domain.entities.analyses.evaluation
 
 import actors.Actor
-import cz.payola.domain.rdf.Graph
-import cz.payola.domain.entities.analyses.PluginInstance
 import collection.mutable
+import cz.payola.domain.rdf.Graph
+import cz.payola.domain.entities.plugins.PluginInstance
 
 class InstanceEvaluation(private val instance: PluginInstance, private val analysisEvaluation: AnalysisEvaluation,
     private val outputProcessor: Option[Graph] => Unit)

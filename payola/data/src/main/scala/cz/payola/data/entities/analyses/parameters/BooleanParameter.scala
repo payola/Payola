@@ -5,7 +5,7 @@ import cz.payola.data.PayolaDB
 
 object BooleanParameter {
 
-    def apply(p: cz.payola.domain.entities.analyses.parameters.BooleanParameter): BooleanParameter = {
+    def apply(p: cz.payola.domain.entities.plugins.parameters.BooleanParameter): BooleanParameter = {
         p match {
             case p: BooleanParameter => p
             case _ => new BooleanParameter(p.id, p.name, p.defaultValue)
@@ -17,7 +17,7 @@ class BooleanParameter(
     override val id: String,
     name: String,
     defaultVal: Boolean)
-    extends cz.payola.domain.entities.analyses.parameters.BooleanParameter(name, defaultVal)
+    extends cz.payola.domain.entities.plugins.parameters.BooleanParameter(name, defaultVal)
     with Parameter[Boolean]
 {
     private lazy val _valuesQuery = PayolaDB.valuesOfBooleanParameters.left(this)

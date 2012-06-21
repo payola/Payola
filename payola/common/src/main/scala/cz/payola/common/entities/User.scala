@@ -2,7 +2,7 @@ package cz.payola.common.entities
 
 import permissions.privilege.Privilege
 import scala.collection.mutable
-import cz.payola.common.entities.analyses.DataSource
+import cz.payola.common.entities.plugins.DataSource
 
 /**
   * A user of the application.

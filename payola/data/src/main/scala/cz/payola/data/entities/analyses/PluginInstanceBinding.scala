@@ -3,6 +3,7 @@ package cz.payola.data.entities.analyses
 import cz.payola.data.entities.PersistableEntity
 import cz.payola.data.PayolaDB
 import org.squeryl.annotations.Transient
+import cz.payola.domain.entities._
 
 object PluginInstanceBinding {
 
@@ -35,12 +36,12 @@ class PluginInstanceBinding(
 
     @Transient
     private var _sourceLoaded = false
-    private var _source: cz.payola.domain.entities.analyses.PluginInstance = null
+    private var _source: plugins.PluginInstance = null
     private lazy val _sourcesQuery = PayolaDB.bindingsOfSourcePluginInstances.right(this)
 
     @Transient
     private var _targetLoaded = false
-    private var _target: cz.payola.domain.entities.analyses.PluginInstance = null
+    private var _target: plugins.PluginInstance = null
     private lazy val _targetsQuery = PayolaDB.bindingsOfTargetPluginInstances.right(this)
 
     override def sourcePluginInstance = {

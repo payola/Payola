@@ -1,6 +1,6 @@
 package cz.payola.domain.entities.analyses.evaluation
 
-import cz.payola.domain.entities.analyses.PluginInstance
+import cz.payola.domain.entities.plugins.PluginInstance
 import collection.immutable
 
 case class AnalysisEvaluationProgress(evaluatedInstances: immutable.Seq[PluginInstance],

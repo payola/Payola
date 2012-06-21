@@ -1,8 +1,9 @@
 package cz.payola.domain.entities.analyses.optimization
 
+import collection.mutable
+import collection.immutable
 import cz.payola.domain.entities.Analysis
-import cz.payola.domain.entities.analyses.PluginInstance
-import scala.collection._
+import cz.payola.domain.entities.plugins.PluginInstance
 
 class OptimizedAnalysis(analysis: Analysis) extends Analysis(analysis.name, analysis.owner)
 {

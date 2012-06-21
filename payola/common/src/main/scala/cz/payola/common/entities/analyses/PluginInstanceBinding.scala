@@ -1,6 +1,7 @@
 package cz.payola.common.entities.analyses
 
 import cz.payola.common.entities.Entity
+import cz.payola.common.entities.plugins.PluginInstance
 
 /**
   * A binding between an output of one plugin instance and a particular input of another plugin instance.

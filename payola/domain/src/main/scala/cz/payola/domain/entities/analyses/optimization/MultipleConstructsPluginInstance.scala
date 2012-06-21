@@ -1,9 +1,9 @@
 package cz.payola.domain.entities.analyses.optimization
 
-import cz.payola.domain.entities.AnalysisException
-import cz.payola.domain.entities.analyses.PluginInstance
 import collection.immutable
-import cz.payola.domain.entities.analyses.plugins.query.Construct
+import cz.payola.domain.entities.analyses._
+import cz.payola.domain.entities.plugins.PluginInstance
+import cz.payola.domain.entities.plugins.concrete.query.Construct
 
 object MultipleConstructsPluginInstance
 {

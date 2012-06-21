@@ -2,13 +2,11 @@ package cz.payola.data
 
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
-import cz.payola.data.entities.analyses.parameters._
-import cz.payola.domain.entities.analyses.plugins.data.SparqlEndpoint
-import cz.payola.domain.entities.analyses.plugins.query._
-import cz.payola.domain.entities.analyses.plugins._
 import cz.payola.data.dao._
-import cz.payola.data.entities._
-import cz.payola.domain.entities.analyses.DataSource
+import cz.payola.domain.entities.plugins.concrete.data.SparqlEndpoint
+import cz.payola.domain.entities.plugins.concrete.query._
+import cz.payola.domain.entities.plugins.concrete._
+import cz.payola.domain.entities.plugins.DataSource
 import scala.collection.immutable
 
 class SquerylSpecs extends FlatSpec with ShouldMatchers
@@ -189,9 +187,9 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
             }
         }
 
-        val ds1 = new DataSource("Cities", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.analyses.parameters.StringParameter].createValue("http://dbpedia.org/ontology/Country")))
-        val ds2 = new DataSource("Countries", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.analyses.parameters.StringParameter].createValue("http://dbpedia.org/ontology/City")))
-        val ds3 = new DataSource("Countries2", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.analyses.parameters.StringParameter].createValue("http://dbpedia.org/ontology/City")))
+        val ds1 = new DataSource("Cities", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter].createValue("http://dbpedia.org/ontology/Country")))
+        val ds2 = new DataSource("Countries", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter].createValue("http://dbpedia.org/ontology/City")))
+        val ds3 = new DataSource("Countries2", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter].createValue("http://dbpedia.org/ontology/City")))
 
         val dsDao = new DataSourceDAO()
         val ds1_db = dsDao.persist(ds1).get

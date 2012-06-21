@@ -5,10 +5,11 @@ import cz.payola.data.entities.analyses._
 import org.squeryl.PrimitiveTypeMode._
 import jena.query
 import scala.collection.mutable.HashMap
+import cz.payola.common.entities.plugins
 
 class DataSourceDAO extends EntityDAO[DataSource](PayolaDB.dataSources)
 {
-    def persist(ds: cz.payola.common.entities.analyses.DataSource): Option[DataSource] = {
+    def persist(ds: plugins.DataSource): Option[DataSource] = {
         val dataSource = DataSource(ds)
 
         // First persist plugin instance ...

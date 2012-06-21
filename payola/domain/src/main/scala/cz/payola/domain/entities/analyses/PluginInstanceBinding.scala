@@ -1,6 +1,7 @@
 package cz.payola.domain.entities.analyses
 
 import cz.payola.domain.entities.Entity
+import cz.payola.domain.entities.plugins.PluginInstance
 
 class PluginInstanceBinding(
     protected val _sourcePluginInstance: PluginInstance,

@@ -3,6 +3,7 @@ package cz.payola.domain.entities
 import scala.collection.mutable
 import cz.payola.domain.entities.analyses._
 import evaluation.AnalysisEvaluation
+import cz.payola.domain.entities.plugins.PluginInstance
 
 class Analysis(protected var _name: String, protected var _owner: Option[User])
     extends Entity

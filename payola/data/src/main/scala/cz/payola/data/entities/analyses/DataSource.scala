@@ -5,9 +5,13 @@ import cz.payola.data.entities._
 import cz.payola.data.entities.analyses.parameters._
 import cz.payola.data.PayolaDB
 import org.squeryl.annotations.Transient
+import cz.payola.common.entities.plugins
+import cz.payola.domain.entities
+import cz.payola.domain.entities.plugins.concrete.DataFetcher
+import cz.payola.domain.entities.plugins.concrete
 
 object DataSource {
-    def apply(dataSource: cz.payola.common.entities.analyses.DataSource): DataSource =  {
+    def apply(dataSource: plugins.DataSource): DataSource =  {
         dataSource match {
             case ds: DataSource => ds
             case _ => {
@@ -18,15 +22,15 @@ object DataSource {
                         case f: FloatParameterValue => f
                         case i: IntParameterValue => i
                         case s: StringParameterValue => s
-                        case b: cz.payola.domain.entities.analyses.parameters.BooleanParameterValue => BooleanParameterValue(b)
-                        case f: cz.payola.domain.entities.analyses.parameters.FloatParameterValue => FloatParameterValue(f)
-                        case i: cz.payola.domain.entities.analyses.parameters.IntParameterValue => IntParameterValue(i)
-                        case s: cz.payola.domain.entities.analyses.parameters.StringParameterValue => StringParameterValue(s)
+                        case b: cz.payola.domain.entities.plugins.parameters.BooleanParameterValue => BooleanParameterValue(b)
+                        case f: cz.payola.domain.entities.plugins.parameters.FloatParameterValue => FloatParameterValue(f)
+                        case i: cz.payola.domain.entities.plugins.parameters.IntParameterValue => IntParameterValue(i)
+                        case s: cz.payola.domain.entities.plugins.parameters.StringParameterValue => StringParameterValue(s)
                     }
                 )
 
                 val pluginDb = PluginDbRepresentation(dataSource.plugin)
-                val dataFetcher = pluginDb.createPlugin().asInstanceOf[cz.payola.domain.entities.analyses.plugins.DataFetcher]
+                val dataFetcher = pluginDb.createPlugin().asInstanceOf[cz.payola.domain.entities.plugins.concrete.DataFetcher]
 
                 val source = new DataSource(dataSource.id, dataSource.name, owner, dataFetcher, paramValues)
 
@@ -43,9 +47,9 @@ class DataSource(
     override val id: String,
     n: String,
     o: Option[User],
-    p: cz.payola.domain.entities.analyses.plugins.DataFetcher,
+    p: concrete.DataFetcher,
     paramValues: immutable.Seq[ParameterValue[_]])
-    extends cz.payola.domain.entities.analyses.DataSource(n, o, p, paramValues)
+    extends cz.payola.domain.entities.plugins.DataSource(n, o, p, paramValues)
     with PersistableEntity
 {
     var pluginId: Option[String] = if (plugin == null) None else Some(plugin.id)

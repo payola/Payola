@@ -2,7 +2,7 @@ package cz.payola.domain.test
 
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
-import cz.payola.domain.entities.analyses.plugins.compiler._
+import cz.payola.domain.entities.plugins.compiler._
 
 class PluginCompilerSpec extends FlatSpec with ShouldMatchers
 {
@@ -19,17 +19,19 @@ class PluginCompilerSpec extends FlatSpec with ShouldMatchers
             """
                 package my.custom.plugin
 
-                import scala.collection.immutable
+                import collection.immutable
                 import cz.payola.domain._
-                import cz.payola.domain.entities.analyses._
-                import cz.payola.domain.entities.analyses.parameters._
+                import cz.payola.domain.entities._
+                import cz.payola.domain.entities.plugins._
+                import cz.payola.domain.entities.plugins.parameters._
                 import cz.payola.domain.rdf._
 
                 class MyPlugin(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
                     extends Plugin(name, inputCount, parameters, id)
                 {
                     def this() = {
-                        this("Custom plugin", 123, List(new StringParameter("Custom plugin param", "")), IDGenerator.newId)
+                        this("Custom plugin", 123, List(new StringParameter("Custom plugin param", "")),
+                        IDGenerator.newId)
                     }
 
                     def evaluate(instance: PluginInstance, inputs: collection.IndexedSeq[Option[Graph]],
@@ -39,8 +41,6 @@ class PluginCompilerSpec extends FlatSpec with ShouldMatchers
                 }
             """)
 
-        assert(pluginClassName == "my.custom.plugin.MyPlugin", "Plugin class name doesn't match the one in the source.")
-
         val plugin = loader.getPlugin(pluginClassName)
         assert(plugin.name == "Custom plugin", "The plugin name is invalid.")
         assert(plugin.inputCount == 123, "The plugin input count is invalid.")
@@ -49,7 +49,7 @@ class PluginCompilerSpec extends FlatSpec with ShouldMatchers
     }
 
     it should "throw exceptions when the compilation fails" in {
-        try {
+        try { {
             val plugin = compiler.compile(
                 """
                     package my.custom.plugin
@@ -57,6 +57,7 @@ class PluginCompilerSpec extends FlatSpec with ShouldMatchers
                     class MyPlugin(
                 """)
             fail("The PluginCompilationException wasn't thrown.")
+        }
         } catch {
             case _: PluginCompilationException => // NOOP
             case _ => fail("The PluginCompilationException wasn't thrown.")

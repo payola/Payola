@@ -1,10 +1,10 @@
 package cz.payola.domain.test
 
-import cz.payola.domain.entities.analyses._
-import plugins.data.SparqlEndpoint
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import cz.payola.common.rdf.IdentifiedVertex
+import cz.payola.domain.entities.plugins.DataSource
+import cz.payola.domain.entities.plugins.concrete.data.SparqlEndpoint
 
 class DataSourceSpec extends FlatSpec with ShouldMatchers
 {

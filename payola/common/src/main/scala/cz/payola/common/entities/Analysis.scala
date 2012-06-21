@@ -1,6 +1,7 @@
 package cz.payola.common.entities
 
-import analyses.{PluginInstanceBinding, PluginInstance}
+import cz.payola.common.entities.analyses.PluginInstanceBinding
+import cz.payola.common.entities.plugins.PluginInstance
 import scala.collection.mutable
 
 /**

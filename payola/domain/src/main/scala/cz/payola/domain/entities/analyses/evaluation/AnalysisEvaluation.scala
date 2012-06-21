@@ -1,13 +1,13 @@
 package cz.payola.domain.entities.analyses.evaluation
 
 import actors.{TIMEOUT, Actor}
-import cz.payola.domain.rdf.Graph
 import collection.mutable
-import cz.payola.domain.entities.{AnalysisException, Analysis}
-import cz.payola.domain.entities.analyses.PluginInstance
+import cz.payola.domain.entities.Analysis
+import cz.payola.domain.entities.analyses._
+import cz.payola.domain.entities.plugins.PluginInstance
 import cz.payola.domain.entities.analyses.optimization.AnalysisOptimizer
 import cz.payola.domain.Timer
-import scala.util.control.ControlThrowable
+import cz.payola.domain.rdf.Graph
 
 class AnalysisEvaluation(private val analysis: Analysis, private val timeout: Option[Long]) extends Actor
 {

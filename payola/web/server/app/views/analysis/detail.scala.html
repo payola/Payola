@@ -21,7 +21,7 @@
     }
 </style>
 
-@renderInstance(inst: cz.payola.domain.entities.analyses.PluginInstance, analysis: cz.payola.domain.entities.Analysis) = {
+@renderInstance(inst: cz.payola.domain.entities.plugins.PluginInstance, analysis: cz.payola.domain.entities.Analysis) = {
 
 <div style="float: left; min-width:300px;" class="successors">
     @analysis.pluginInstanceBindings.filter(p => p.targetPluginInstance == inst).map{ b =>

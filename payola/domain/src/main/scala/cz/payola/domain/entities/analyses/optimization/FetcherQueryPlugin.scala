@@ -1,8 +1,8 @@
 package cz.payola.domain.entities.analyses.optimization
 
+import cz.payola.domain.entities.Plugin
+import cz.payola.domain.entities.plugins._
 import cz.payola.domain.rdf.Graph
-import cz.payola.domain.entities.analyses._
-import cz.payola.domain.entities.analyses.PluginException
 
 object FetcherQueryPlugin extends Plugin("Mltiple merged SPARQL query parts", 0, Nil)
 {
