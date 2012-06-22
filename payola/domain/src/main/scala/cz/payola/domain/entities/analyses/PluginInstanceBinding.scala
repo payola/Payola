@@ -3,6 +3,11 @@ package cz.payola.domain.entities.analyses
 import cz.payola.domain.entities.Entity
 import cz.payola.domain.entities.plugins.PluginInstance
 
+/**
+  * @param _sourcePluginInstance The plugin instance that acts as a source of the binding.
+  * @param _targetPluginInstance The plugin instance that acts as a target of the binding.
+  * @param _targetInputIndex Index of the target plugin instance input the binding is connected to.
+  */
 class PluginInstanceBinding(
     protected val _sourcePluginInstance: PluginInstance,
     protected val _targetPluginInstance: PluginInstance,

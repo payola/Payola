@@ -5,8 +5,9 @@ import cz.payola.common.entities.analyses._
 import cz.payola.common.entities.plugins._
 
 /**
-  * An analytical plugin that takes a [[cz.payola.common.rdf.Graph]], performs particular operations or computations
-  * on the graph and returns modified or a completely new [[cz.payola.common.rdf.Graph]].
+  * An analytical plugin that, when evaluated, takes a non-negative number of input graphs, performs particular
+  * operations or computations on the input graphs (which may or may not be defined) and returns modified or a
+  * completely new [[cz.payola.common.rdf.Graph]].
   */
 trait Plugin extends NamedEntity with ShareableEntity
 {
@@ -23,6 +24,6 @@ trait Plugin extends NamedEntity with ShareableEntity
     /** Count of the plugin inputs. */
     def inputCount: Int = _inputCount
 
-    /** The parameters whose instances are needed during the evaluation. */
+    /** The plugin parameters. */
     def parameters: immutable.Seq[ParameterType] = _parameters
 }

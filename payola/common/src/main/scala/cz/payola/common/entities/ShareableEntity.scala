@@ -1,8 +1,8 @@
 package cz.payola.common.entities
 
 /**
-  * An entity that may be shared to single or groups of users. It may also be public which means that everyone may
-  * access the entity.
+  * An entity that may be shared to users or groups of users. It may also be public which means that everyone may
+  * access the entity. If the entity is not public, then it's visible only to those who have been shared the entity.
   */
 trait ShareableEntity extends Entity
 {

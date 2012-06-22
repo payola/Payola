@@ -1,9 +1,12 @@
-package cz.payola.domain.entities.analyses.optimization
+package cz.payola.domain.entities.analyses.optimization.plugins
 
 import cz.payola.domain.entities.plugins._
 import cz.payola.domain.entities.plugins.concrete.query.Construct
 import cz.payola.domain.sparql._
 
+/**
+  * A plugin that during optimization replaces a sequence of construct plugins.
+  */
 object MultipleConstructsPlugin extends Construct("Merged SPARQL construct queries")
 {
     override def createInstance(): PluginInstance = {

@@ -3,9 +3,14 @@ package cz.payola.domain.entities
 import collection.immutable
 import cz.payola.domain.rdf.Graph
 import cz.payola.domain.IDGenerator
-import cz.payola.domain.entities.analyses._
 import cz.payola.domain.entities.plugins._
 
+/**
+  * @param _name Name of the plugin.
+  * @param _inputCount Count of the plugin inputs.
+  * @param _parameters The plugin parameters.
+  * @param _id ID of the plugin.
+  */
 abstract class Plugin(
     protected var _name: String,
     protected val _inputCount: Int,
@@ -109,8 +114,7 @@ abstract class Plugin(
       * @tparam R Type of the function return value.
       * @return The result of application of the function.
       */
-    protected def usingDefined[A, B, C, R](p1: Option[A], p2: Option[B], p3: Option[C])
-        (f: (A, B, C) => R): R = {
+    protected def usingDefined[A, B, C, R](p1: Option[A], p2: Option[B], p3: Option[C])(f: (A, B, C) => R): R = {
         p1.flatMap(value1 => p2.flatMap(value2 => p3.map(value3 => f(value1, value2, value3)))).getOrElse {
             throw new PluginException("One of the used values isn't defined.")
         }
@@ -121,5 +125,6 @@ abstract class Plugin(
         super[NamedEntity].checkInvariants()
         require(inputCount >= 0, "The inputCount must be a non-negative number.")
         require(parameters != null, "The parameters mustn't be null.")
+        require(!parameters.contains(null), "The parameters mustn't contain null.")
     }
 }

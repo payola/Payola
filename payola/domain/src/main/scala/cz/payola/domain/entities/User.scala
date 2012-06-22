@@ -1,14 +1,10 @@
 package cz.payola.domain.entities
 
 import scala.collection._
-import cz.payola.domain.entities.permissions.privilege._
 import cz.payola.domain.entities.plugins.DataSource
+import cz.payola.domain.entities.privileges._
 
-
-/** User entity at the domain level.
-  *
-  * Contains owned analyses and groups, member groups and privileges.
-  *
+/**
   * @param _name Name of the user.
   */
 class User(protected var _name: String)
@@ -96,9 +92,8 @@ class User(protected var _name: String)
         }.distinct
     }
 
-    /** Returns accessible ontology customizations.
-      *
-      * @return Accessible ontology customizations.
+    /**
+      * Returns accessible ontology customizations.
       */
     def accessibleOntologyCustomizations: Seq[OntologyCustomizationType] = {
         privileges.collect {
@@ -110,6 +105,7 @@ class User(protected var _name: String)
       * Returns the groups the user is member of.
       */
     def memberGroups: Seq[GroupType] = {
+        // TODO privilege shouldn't be used as a group membership. Or should it be?
         privileges.collect {
             case p: GroupPrivilege => p.obj
         }.distinct

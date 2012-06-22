@@ -67,7 +67,7 @@
                 <div class="tab-pane active" id="tab1">
                     <div class="wrap-right">
                         <div class="wrap-left">
-                            @analysis.outputs.map{ o =>
+                            @analysis.outputInstances.map{ o =>
                                 @renderInstance(inst = o, analysis)
                             }
                         </div>

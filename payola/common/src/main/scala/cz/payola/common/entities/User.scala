@@ -1,11 +1,11 @@
 package cz.payola.common.entities
 
-import permissions.privilege.Privilege
 import scala.collection.mutable
 import cz.payola.common.entities.plugins.DataSource
+import cz.payola.common.entities.settings.ontology.Customization
 
 /**
-  * A user of the application.
+  * An user of the application.
   */
 trait User extends NamedEntity
 {
@@ -18,7 +18,8 @@ trait User extends NamedEntity
     /** Type of the data sources that the user can own. */
     type DataSourceType <: DataSource
 
-    type OntologyCustomizationType <: settings.ontology.Customization
+    /** Type of the ontology visual customizations that the user may own. */
+    type OntologyCustomizationType <: Customization
 
     /** Type of the privileges. */
     type PrivilegeType <: Privilege[_]
@@ -153,6 +154,4 @@ trait User extends NamedEntity
     protected def discardOntologyCustomization(customization:OntologyCustomizationType) {
         _ontologyCustomizations -= customization
     }
-
-
 }

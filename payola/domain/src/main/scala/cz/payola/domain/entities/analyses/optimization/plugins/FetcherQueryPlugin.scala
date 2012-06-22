@@ -1,9 +1,12 @@
-package cz.payola.domain.entities.analyses.optimization
+package cz.payola.domain.entities.analyses.optimization.plugins
 
 import cz.payola.domain.entities.Plugin
 import cz.payola.domain.entities.plugins._
 import cz.payola.domain.rdf.Graph
 
+/**
+  * A plugin that during optimization replaces a data fetcher followed by a SPARQL query.
+  */
 object FetcherQueryPlugin extends Plugin("Mltiple merged SPARQL query parts", 0, Nil)
 {
     override def createInstance(): PluginInstance = {
@@ -23,5 +26,3 @@ object FetcherQueryPlugin extends Plugin("Mltiple merged SPARQL query parts", 0,
         }
     }
 }
-
-

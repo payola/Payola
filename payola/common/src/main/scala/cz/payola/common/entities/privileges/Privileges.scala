@@ -1,16 +1,9 @@
-package cz.payola.common.entities.permissions.privilege
+package cz.payola.common.entities.privileges
 
 import cz.payola.common.entities._
 import cz.payola.common.entities.settings.ontology.Customization
 
-/** Privilege trait. Grants the user some rights around the object U.
-  *
-  * @tparam U Object of the privilege.
-  */
-trait Privilege[U <: Entity] extends Entity
-{
-    protected val obj: U
-}
+// TODO
 
 /** Group privilege. Denotes membership in the group. */
 trait GroupPrivilege extends Privilege[Group]

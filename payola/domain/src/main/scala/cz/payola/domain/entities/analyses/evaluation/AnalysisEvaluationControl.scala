@@ -1,11 +1,26 @@
 package cz.payola.domain.entities.analyses.evaluation
 
-abstract class AnalysisEvaluationControl
+/**
+  * A message used to control an analysis evaluation.
+  */
+private[evaluation] abstract class AnalysisEvaluationControl
 
-object Stop extends AnalysisEvaluationControl
+/**
+  * Signal to stop the analysis evaluation.
+  */
+private[evaluation] object Stop extends AnalysisEvaluationControl
 
-object Terminate extends AnalysisEvaluationControl
+/**
+  * Signal to terminate the analysis evaluation.
+  */
+private[evaluation] object Terminate extends AnalysisEvaluationControl
 
-object GetProgress extends AnalysisEvaluationControl
+/**
+  * Signal to respond with the analysis evaluation progress.
+  */
+private[evaluation] object GetProgress extends AnalysisEvaluationControl
 
-object GetResult extends AnalysisEvaluationControl
+/**
+  * Signal to respond with the analysis evaluation result.
+  */
+private[evaluation] object GetResult extends AnalysisEvaluationControl

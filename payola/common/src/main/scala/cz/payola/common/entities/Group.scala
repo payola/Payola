@@ -3,7 +3,8 @@ package cz.payola.common.entities
 import scala.collection.mutable
 
 /**
-  * A group of users.
+  * A user-defined group of users. The user may share shareable entities not only to other users, but also to groups
+  * of users.
   */
 trait Group extends NamedEntity
 {

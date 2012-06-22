@@ -4,7 +4,7 @@ import scala.collection.immutable
 import cz.payola.common.entities._
 
 /**
-  * An instance of an analytical plugin with known parameter values.
+  * An instance of an analytical plugin. That is an evaluation of the plugin parameter values.
   */
 trait PluginInstance extends Entity with DescribedEntity
 {
@@ -18,6 +18,6 @@ trait PluginInstance extends Entity with DescribedEntity
     /** The corresponding analytical plugin. */
     def plugin = _plugin
 
-    /** The parameter values. */
+    /** The plugin parameter values. */
     def parameterValues: immutable.Seq[PluginType#ParameterValueType] = _parameterValues
 }

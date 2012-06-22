@@ -5,12 +5,17 @@ import collection.immutable
 import cz.payola.domain.entities.Analysis
 import cz.payola.domain.entities.plugins.PluginInstance
 
+/**
+  * An analysis that is target of optimizations (i.e. collapsing multiple plugin instances into one, or replacing
+  * plugin instances with another). It tracks the current instances that replaced the original instances.
+  * @param analysis
+  */
 class OptimizedAnalysis(analysis: Analysis) extends Analysis(analysis.name, analysis.owner)
 {
     /**
-      * A map that for each plugin instance I contains a sequence of plugin instances that the instance I replaced
-      * during the analysis optimization. If the instance I didn't replace any plugin, then the sequence contains only
-      * the instance I.
+      * A map that for each plugin instance P contains a sequence of plugin instances that the instance P replaced
+      * during the analysis optimization. If the instance P didn't replace any plugin, then the sequence contains only
+      * the instance P.
       */
     val originalInstances: mutable.Map[PluginInstanceType, Seq[PluginInstanceType]] = analysis match {
         case optimizedAnalysis: OptimizedAnalysis => optimizedAnalysis.originalInstances.clone()
@@ -21,6 +26,9 @@ class OptimizedAnalysis(analysis: Analysis) extends Analysis(analysis.name, anal
     analysis.pluginInstances.foreach(instance => addPluginInstance(instance))
     analysis.pluginInstanceBindings.foreach(binding => addBinding(binding))
 
+    /**
+      * Returns all the original instances.
+      */
     def allOriginalInstances: immutable.Seq[PluginInstanceType] = {
         originalInstances.values.flatten.toList
     }
