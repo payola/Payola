@@ -88,6 +88,11 @@ object DatabaseInitializer extends App
         val ds2 = new DataSource("Countries", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter].createValue("http://dbpedia.org/ontology/City")))
         val ds3 = new DataSource("Countries2", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter].createValue("http://dbpedia.org/ontology/City")))
 
+        val dsDao = new DataSourceDAO()
+        dsDao.persist(ds1).get
+        dsDao.persist(ds2).get
+        dsDao.persist(ds3).get
+
         println("Data initialized")
     }
 }
