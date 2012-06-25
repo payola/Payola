@@ -1,11 +1,11 @@
 package cz.payola.common.entities
 
-import permissions.privilege.Privilege
 import scala.collection.mutable
-import cz.payola.common.entities.analyses.DataSource
+import cz.payola.common.entities.plugins.DataSource
+import cz.payola.common.entities.settings.ontology.Customization
 
 /**
-  * A user of the application.
+  * An user of the application.
   */
 trait User extends NamedEntity
 {
@@ -17,6 +17,9 @@ trait User extends NamedEntity
 
     /** Type of the data sources that the user can own. */
     type DataSourceType <: DataSource
+
+    /** Type of the ontology visual customizations that the user may own. */
+    type OntologyCustomizationType <: Customization
 
     /** Type of the privileges. */
     type PrivilegeType <: Privilege[_]
@@ -30,6 +33,8 @@ trait User extends NamedEntity
     protected val _ownedAnalyses = mutable.ArrayBuffer[AnalysisType]()
 
     protected val _ownedDataSources = mutable.ArrayBuffer[DataSourceType]()
+
+    protected val _ontologyCustomizations = mutable.ArrayBuffer[OntologyCustomizationType]()
 
     protected val _privileges = mutable.ArrayBuffer[PrivilegeType]()
 
@@ -63,6 +68,9 @@ trait User extends NamedEntity
 
     /** The data sources that are owned by the user. */
     def ownedDataSources: Seq[DataSource] = _ownedDataSources
+
+    /** Ontology customizations of the user. */
+    def ownedOntologyCustomizations: Seq[OntologyCustomizationType] = _ontologyCustomizations
 
     /** Privileges of the user. */
     def privileges: Seq[PrivilegeType] = _privileges
@@ -129,5 +137,21 @@ trait User extends NamedEntity
       */
     protected def discardPrivilege(privilege: PrivilegeType) {
         _privileges -= privilege
+    }
+
+    /**
+      * Stores the specified customization to the users.
+      * @param customization The customization to store.
+      */
+    protected def storeOntologyCustomization(customization: OntologyCustomizationType) {
+        _ontologyCustomizations += customization
+    }
+
+    /**
+      * Discards the customization from the user. Complementary operation to store.
+      * @param customization The customization to discard.
+      */
+    protected def discardOntologyCustomization(customization:OntologyCustomizationType) {
+        _ontologyCustomizations -= customization
     }
 }

@@ -21,7 +21,7 @@
     }
 </style>
 
-@renderInstance(inst: cz.payola.domain.entities.analyses.PluginInstance, analysis: cz.payola.domain.entities.Analysis) = {
+@renderInstance(inst: cz.payola.domain.entities.plugins.PluginInstance, analysis: cz.payola.domain.entities.Analysis) = {
 
 <div style="float: left; min-width:300px;" class="successors">
     @analysis.pluginInstanceBindings.filter(p => p.targetPluginInstance == inst).map{ b =>
@@ -41,6 +41,14 @@
 @main(user, "Analysis "+analysis.name+" :: Payola!") {
 
 <div class="container-fluid">
+
+    <ul class="breadcrumb">
+        <li>
+            <a href="/">Home</a> <span class="divider">/</span>
+        </li>
+        <li class="active">Analysis: @analysis.name</li>
+    </ul>
+
     <h1>Detail of analysis: @analysis.name</h1>
     <div class="row-fluid">
         <div class="well" id="analysis-controls">
@@ -59,7 +67,7 @@
                 <div class="tab-pane active" id="tab1">
                     <div class="wrap-right">
                         <div class="wrap-left">
-                            @analysis.outputs.map{ o =>
+                            @analysis.outputInstances.map{ o =>
                                 @renderInstance(inst = o, analysis)
                             }
                         </div>
@@ -67,15 +75,17 @@
                 </div>
                 <div class="tab-pane" id="tab2">
 
-                    <div class="btn-group">
-                        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                            <i class="icon-cog"></i>
-                            Settings
-                            <span class="caret"></span>
-                        </a>
-                        <ul class="dropdown-menu" id="settings">
-                            <!-- dropdown menu links -->
-                        </ul>
+                    <div id="btn-stripe">
+                        <div class="btn-group">
+                            <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                                <i class="icon-cog"></i>
+                                Settings
+                                <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu" id="settings">
+                                <!-- dropdown menu links -->
+                            </ul>
+                        </div>
                     </div>
 
                 </div>

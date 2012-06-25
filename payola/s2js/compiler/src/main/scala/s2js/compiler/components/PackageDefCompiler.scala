@@ -14,7 +14,7 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
     val dependencyManager = new DependencyManager(this)
 
     /** An unique id generator. */
-    private var uniqueId = 0;
+    private var uniqueId = 0
 
     /**
       * Compiles the PackageDef.

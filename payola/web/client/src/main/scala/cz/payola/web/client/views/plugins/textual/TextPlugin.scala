@@ -21,9 +21,12 @@ abstract class TextPlugin(settings: VisualSetup) extends Plugin
     def update(graph: Graph) {
 
         graphModel = Some(graph)
+        redraw()
     }
+
+    def clear()
 
     def redraw()
 
-    def clean()
+    def destroy()
 }

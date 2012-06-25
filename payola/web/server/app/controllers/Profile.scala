@@ -12,9 +12,8 @@ object Profile extends PayolaController with Secured
     def index(username: String) = maybeAuthenticated { user: Option[User] =>
         df.getUserByUsername(username).map { profileUser =>
             val profileUserAnalyses = df.getPublicAnalysesByOwner(profileUser)
-            val profileUserGroups = df.getGroupsByOwner(Some(profileUser))
 
-            Ok(views.html.userProfile.index(user, profileUser, profileUserAnalyses, profileUserGroups))
+            Ok(views.html.Profile.index(user, profileUser, profileUserAnalyses))
         }.getOrElse {
             NotFound(views.html.errors.err404("The user does not exist."))
         }
@@ -37,7 +36,7 @@ object Profile extends PayolaController with Secured
 
     // TODO is the username necessary here? A user may edit only his own profile...
     def edit(username: String) = authenticated { user =>
-        Ok(html.userProfile.edit(user, profileForm))
+        Ok(html.Profile.edit(user, profileForm))
     }
 
     // TODO is the username necessary here? A user may edit only his own profile...
@@ -46,14 +45,49 @@ object Profile extends PayolaController with Secured
     }
 
     def createGroup = authenticated { user =>
-        Ok(html.userProfile.createGroup(user, groupForm))
+        Ok(html.Profile.createGroup(user, groupForm))
     }
 
-    def saveGroup = authenticatedWithRequest { (request: Request[_], user: User) =>
+    def saveCreateGroup = authenticatedWithRequest { (request: Request[_], user: User) =>
         val name = groupForm.bindFromRequest()(request).get
-        df.createGroup(name, user)
+        val groupOption = df.createGroup(name, user)
 
-        Redirect(routes.Profile.index(user.email)).flashing("success" -> "The group has been sucessfully created.")
+        if (groupOption.isDefined)
+        {
+            Redirect(routes.Profile.editGroup(groupOption.get.id)).flashing("success" -> "The group has been sucessfully created.")
+        }else
+        {
+            Redirect(routes.Profile.listGroups()).flashing("error" -> "The group could not be created.")
+        }
+    }
+
+    def saveGroup(id: String) = authenticatedWithRequest{ (request: Request[_], user: User) =>
+
+        val data = request.body match {
+            case AnyContentAsFormUrlEncoded(data) => data
+            case _ => Map.empty[String, Seq[String]]
+        }
+
+        val membersNew = data.getOrElse("members",Nil).flatMap{ u => df.userDAO.getById(u) }
+        val group = df.getGroupByOwnerAndId(user, id)
+
+        if (group.isDefined)
+        {
+            val g = group.get
+            g.name = data.getOrElse("name", g.name).toString
+            g.members.diff(membersNew).map{m =>
+                g.removeMember(m)
+            }
+
+            membersNew.diff(g.members).map{ m =>
+                g.addMember(m)
+            }
+
+            df.groupDAO.persist(g)
+            Redirect(routes.Profile.index(user.email)).flashing("success" -> "The group has been sucessfully saved.")
+        }else{
+            Forbidden
+        }
     }
 
     def editGroup(id: String) = authenticatedWithRequest{ (request: Request[_], user: User) =>
@@ -61,17 +95,24 @@ object Profile extends PayolaController with Secured
 
         if (g.isDefined)
         {
-            Ok(views.html.userProfile.editGroup(user, g.get))
+            val allUsers = df.getAllUsers()
+
+            Ok(views.html.Profile.editGroup(user, g.get, allUsers))
         }else{
             NotFound("The group does not exist.")
         }
     }
-    /*
-    def removeGroupMember = authenticated( user =>
-        //Ok()
+
+    def listGroups = authenticatedWithRequest( (request: Request[_], user: User) =>
+        Ok(views.html.Profile.listGroups(user)(request.flash))
     )
 
-    def deleteGroup = authenticated { user =>
-        Ok("TODO")
-    }           */
+    def deleteGroup(id: String) = authenticated{ user =>
+        if (df.getGroupByOwnerAndId(user, id).isDefined && df.groupDAO.removeById(id))
+        {
+            Redirect(routes.Profile.listGroups()).flashing("success" -> "The group has been successfully deleted.")
+        }else{
+            Redirect(routes.Profile.listGroups()).flashing("error" -> "The group could not been deleted.")
+        }
+    }
 }

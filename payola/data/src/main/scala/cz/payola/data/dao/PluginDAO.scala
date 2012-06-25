@@ -3,7 +3,7 @@ package cz.payola.data.dao
 import org.squeryl.PrimitiveTypeMode._
 import cz.payola.data.PayolaDB
 import cz.payola.data.entities.analyses.PluginDbRepresentation
-import cz.payola.domain.entities.analyses.Plugin
+import cz.payola.domain.entities.Plugin
 
 class PluginDAO extends EntityDAO[PluginDbRepresentation](PayolaDB.plugins)
 {

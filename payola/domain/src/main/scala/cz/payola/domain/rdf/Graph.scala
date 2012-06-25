@@ -261,7 +261,7 @@ class Graph(protected val _vertices: List[Node], protected val _edges: List[Edge
 
         val output: ByteArrayOutputStream = new ByteArrayOutputStream()
 
-        ResultSetFormatter.outputAsRDF(output, "", results);
+        ResultSetFormatter.outputAsRDF(output, "", results)
         val resultingGraphXML: String = new String(output.toByteArray)
 
         execution.close()

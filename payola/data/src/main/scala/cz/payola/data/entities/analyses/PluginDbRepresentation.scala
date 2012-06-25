@@ -3,16 +3,17 @@ package cz.payola.data.entities.analyses
 import cz.payola.data.entities.analyses.parameters._
 import cz.payola.data.entities.PersistableEntity
 import cz.payola.data.PayolaDB
-import cz.payola.domain.entities.analyses.Plugin
+import cz.payola.domain.entities._
 import org.squeryl.annotations.Transient
+import cz.payola.common._
 
 object PluginDbRepresentation {
 
-    def apply(p: cz.payola.common.entities.analyses.Plugin): PluginDbRepresentation = {
+    def apply(p: entities.Plugin): PluginDbRepresentation = {
         new PluginDbRepresentation(p.id, p.name, pluginClass(p), p.inputCount)
     }
     
-    private def pluginClass(p: cz.payola.common.entities.analyses.Plugin): String = {
+    private def pluginClass(p: entities.Plugin): String = {
         p.getClass.toString.replace("class ", "")
     }
 }
@@ -64,19 +65,19 @@ class PluginDbRepresentation(
         params
     }
 
-    def addParameter(parameter: cz.payola.domain.entities.analyses.Parameter[_]) {
+    def addParameter(parameter: plugins.Parameter[_]) {
         parameter match {
             case b: BooleanParameter => associate(b, _booleanParameters)
             case f: FloatParameter => associate(f, _floatParameters)
             case i: IntParameter => associate(i, _intParameters)
             case s: StringParameter => associate(s, _stringParameters)
-            case b: cz.payola.domain.entities.analyses.parameters.BooleanParameter
+            case b: cz.payola.domain.entities.plugins.parameters.BooleanParameter
                     => associate(BooleanParameter(b), _booleanParameters)
-            case f: cz.payola.domain.entities.analyses.parameters.FloatParameter
+            case f: cz.payola.domain.entities.plugins.parameters.FloatParameter
                     => associate(FloatParameter(f), _floatParameters)
-            case i: cz.payola.domain.entities.analyses.parameters.IntParameter
+            case i: cz.payola.domain.entities.plugins.parameters.IntParameter
                     => associate(IntParameter(i), _intParameters)
-            case s: cz.payola.domain.entities.analyses.parameters.StringParameter
+            case s: cz.payola.domain.entities.plugins.parameters.StringParameter
                     => associate(StringParameter(s), _stringParameters)
         }
     }

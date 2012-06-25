@@ -2,9 +2,6 @@ package cz.payola.domain.test
 
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
-import cz.payola.domain.entities.analyses.plugins.data.SparqlEndpoint
-import cz.payola.domain.entities.analyses.plugins.query._
-import cz.payola.domain.entities.analyses.plugins._
 import cz.payola.domain.entities.Analysis
 import cz.payola.domain.entities.analyses.evaluation.Success
 

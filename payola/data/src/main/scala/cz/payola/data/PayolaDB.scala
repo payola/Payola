@@ -288,6 +288,9 @@ object PayolaDB extends Schema
         floatParameterValuesOfPluginInstances.foreignKeyDeclaration.constrainReference(onDelete cascade)
         intParameterValuesOfPluginInstances.foreignKeyDeclaration.constrainReference(onDelete cascade)
         stringParameterValuesOfPluginInstances.foreignKeyDeclaration.constrainReference(onDelete cascade)
+
+        groupMembership.leftForeignKeyDeclaration.constrainReference(onDelete cascade)
+        groupMembership.rightForeignKeyDeclaration.constrainReference(onDelete cascade)
     }
 
     class GroupMembership(val memberId: String, val groupId: String)

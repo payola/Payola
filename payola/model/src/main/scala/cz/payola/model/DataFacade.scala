@@ -2,7 +2,7 @@ package cz.payola.model
 
 import cz.payola.domain.entities.User
 import cz.payola.data.dao._
-import cz.payola.domain.entities.analyses.DataSource
+import cz.payola.domain.entities.plugins.DataSource
 import cz.payola.common.rdf.Graph
 import cz.payola.domain.entities.Group
 
@@ -12,6 +12,8 @@ class DataFacade
     val analysisDAO = new AnalysisDAO
     val groupDAO = new GroupDAO
     val dataSourceDAO = new DataSourceDAO
+
+    private val GROUPS_COUNT_MAX_COUNT_DEFAULT = 10
 
     def getUserByCredentials(username: String, password: String) : Option[User] = {
         userDAO.getUserByCredentials(username, cryptPassword(password))
@@ -53,11 +55,11 @@ class DataFacade
         dataSourceDAO.getById(id)
     }
 
-    def getGroupsByOwner(user: Option[User]) = {
+    def getGroupsByOwner(user: Option[User], maxCount: Int = GROUPS_COUNT_MAX_COUNT_DEFAULT) = {
         if (!user.isDefined){
             List()
         }else{
-            groupDAO.getByOwnerId(user.get.id)
+            groupDAO.getByOwnerId(user.get.id, maxCount)
         }
     }
 
@@ -80,6 +82,10 @@ class DataFacade
         }else{
             None
         }
+    }
+
+    def getAllUsers() = {
+        userDAO.getAll()
     }
 
     //TODO bcrypt

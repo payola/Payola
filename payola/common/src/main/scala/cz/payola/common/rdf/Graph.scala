@@ -10,13 +10,13 @@ trait Graph
     /** Type of the edges, that are between the vertices. */
     type EdgeType <: Edge
 
-    protected val _vertices: collection.Seq[EdgeType#VertexType]
+    protected val _vertices: immutable.Seq[EdgeType#VertexType]
 
-    protected val _edges: collection.Seq[EdgeType]
+    protected val _edges: immutable.Seq[EdgeType]
 
-    def vertices: collection.Seq[EdgeType#VertexType] = _vertices
+    def vertices: immutable.Seq[EdgeType#VertexType] = _vertices
 
-    def edges: collection.Seq[EdgeType] = _edges
+    def edges: immutable.Seq[EdgeType] = _edges
 
     /**
       * Returns whether the graph is empty (i.e. contains no vertices).
@@ -38,7 +38,7 @@ trait Graph
       * @return The edges.
       */
     def getIncomingEdges(vertexURI: String): Seq[EdgeType] = {
-        edges.filter {e =>
+        edges.filter { e =>
             e.destination match {
                 case v: IdentifiedVertex => v.uri == vertexURI
                 case _ => false

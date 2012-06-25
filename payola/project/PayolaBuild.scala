@@ -16,6 +16,10 @@ object PayolaBuild extends Build
     object Settings
     {
         val scalaVersion = "2.9.1"
+
+        val libDir = file("lib")
+
+        val targetDir = file("lib")
     }
 
     /** Common settings of the S2Js projects. */
@@ -23,11 +27,13 @@ object PayolaBuild extends Build
     {
         val version = "0.2"
 
-        val compilerJarName = "s2js-compiler_%s-%s.jar".format(Settings.scalaVersion, version)
-
-        val adaptersJarName = "s2js-adapters_%s-%s.jar".format(Settings.scalaVersion, version)
+        val compilerJarName = "compiler_%s-%s.jar".format(Settings.scalaVersion, version)
 
         val compilerTestsTarget = file("s2js/compiler/target/tests")
+
+        val compilerTestsClassPath = List(Settings.libDir, Settings.targetDir).flatMap { dir =>
+            new io.Directory(dir).files.map(_.path)
+        }.mkString(";")
     }
 
     /** Common settings of the Payola projects. */
@@ -36,8 +42,6 @@ object PayolaBuild extends Build
         val version = "0.1"
 
         val organization = "Payola"
-
-        val libDir = file("lib")
     }
 
     /** Settings of the web project. */
@@ -66,7 +70,10 @@ object PayolaBuild extends Build
         resolvers ++= Seq(
             DefaultMavenRepository
         ),
-        compileAndPackage <<= (packageBin in Compile),
+        compileAndPackage <<= (packageBin in Compile).map {jarFile: File =>
+            IO.copyFile(jarFile, Settings.targetDir / jarFile.name)
+            jarFile
+        },
         (test in Test) <<= (test in Test).dependsOn(compileAndPackage)
     )
 
@@ -87,7 +94,7 @@ object PayolaBuild extends Build
     lazy val payolaProject = Project(
         "payola", file("."), settings = payolaSettings
     ).aggregate(
-        s2JsProject, scala2JsonProject, commonProject, dataProject, modelProject, webProject
+        s2JsProject, scala2JsonProject, commonProject, domainProject, dataProject, modelProject, webProject
     )
 
     lazy val s2JsProject = Project(
@@ -97,13 +104,7 @@ object PayolaBuild extends Build
     )
 
     lazy val s2JsAdaptersProject = Project(
-        "adapters", file("s2js/adapters"),
-        settings = s2JsSettings ++ Seq(
-            compileAndPackage <<= compileAndPackage.map {jarFile: File =>
-                IO.copyFile(jarFile, PayolaSettings.libDir / S2JsSettings.adaptersJarName)
-                jarFile
-            }
-        )
+        "adapters", file("s2js/adapters"), settings = s2JsSettings
     )
 
     lazy val s2JsCompilerProject = Project(
@@ -114,14 +115,10 @@ object PayolaBuild extends Build
             ),
             testOptions ++= Seq(
                 Tests.Argument("-Dwd=" + S2JsSettings.compilerTestsTarget.absolutePath),
-                Tests.Argument("-Dcp=" + new io.Directory(PayolaSettings.libDir).files.map(_.path).mkString(";"))
+                Tests.Argument("-Dcp=" + S2JsSettings.compilerTestsClassPath)
             ),
             cleanBeforeTests := {
                 new io.Directory(S2JsSettings.compilerTestsTarget).deleteRecursively()
-            },
-            compileAndPackage <<= compileAndPackage.map {jarFile: File =>
-                IO.copyFile(jarFile, PayolaSettings.libDir / S2JsSettings.compilerJarName)
-                jarFile
             },
             (test in Test) <<= (test in Test).dependsOn(cleanBeforeTests)
         )
@@ -132,9 +129,7 @@ object PayolaBuild extends Build
     /** A project that is compiled to JavaScript using Scala to JavaScript compiler (beside standard compilation). */
     object ScalaToJsProject
     {
-        val compilerJar = file("lib/" + S2JsSettings.compilerJarName)
-
-        val adaptersJar = file("lib/" + S2JsSettings.adaptersJarName)
+        val compilerJar = Settings.targetDir / S2JsSettings.compilerJarName
 
         def apply(name: String, path: File, outputDir: File, projectSettings: Seq[Project.Setting[_]]) = {
             raw(name, path, outputDir, projectSettings).dependsOn(

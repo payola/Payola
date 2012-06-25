@@ -5,6 +5,8 @@
       <value>
         <option name="LINE_SEPARATOR" value="&#10;" />
         <option name="USE_FQ_CLASS_NAMES" value="true" />
+        <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="1" />
+        <option name="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="1" />
         <option name="RIGHT_MARGIN" value="121" />
         <option name="JD_ALIGN_PARAM_COMMENTS" value="false" />
         <option name="JD_ALIGN_EXCEPTION_COMMENTS" value="false" />
@@ -25,7 +27,6 @@
         <option name="IF_BRACE_FORCE" value="1" />
         <option name="WRAP_LONG_LINES" value="true" />
         <ScalaCodeStyleSettings>
-          <option name="ADD_UNAMBIGIOUS_IMPORTS_ON_THE_FLY" value="true" />
           <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="2" />
           <option name="ADD_FULL_QUALIFIED_IMPORTS" value="true" />
           <option name="SHOW_ARGUMENTS_TO_BY_NAME_PARAMETERS" value="true" />
@@ -97,6 +98,20 @@
           <option name="ALIGN_MULTILINE_PARAMETERS" value="false" />
           <option name="CALL_PARAMETERS_WRAP" value="1" />
           <option name="METHOD_PARAMETERS_WRAP" value="1" />
+          <option name="FOR_STATEMENT_WRAP" value="1" />
+          <option name="IF_BRACE_FORCE" value="1" />
+          <option name="PARENT_SETTINGS_INSTALLED" value="true" />
+        </codeStyleSettings>
+        <codeStyleSettings language="PHP">
+          <option name="KEEP_BLANK_LINES_IN_DECLARATIONS" value="0" />
+          <option name="KEEP_BLANK_LINES_IN_CODE" value="1" />
+          <option name="KEEP_BLANK_LINES_BEFORE_RBRACE" value="0" />
+          <option name="BLANK_LINES_AROUND_FIELD" value="1" />
+          <option name="ALIGN_MULTILINE_PARAMETERS" value="false" />
+          <option name="CALL_PARAMETERS_WRAP" value="1" />
+          <option name="METHOD_PARAMETERS_WRAP" value="1" />
+          <option name="EXTENDS_LIST_WRAP" value="1" />
+          <option name="METHOD_CALL_CHAIN_WRAP" value="1" />
           <option name="FOR_STATEMENT_WRAP" value="1" />
           <option name="IF_BRACE_FORCE" value="1" />
           <option name="PARENT_SETTINGS_INSTALLED" value="true" />

@@ -55,5 +55,6 @@ class Group(
 
     override protected def discardMember(user: UserType) {
         dissociate(User(user), _groupMembersQuery)
+        super.discardMember(user)
     }
 }

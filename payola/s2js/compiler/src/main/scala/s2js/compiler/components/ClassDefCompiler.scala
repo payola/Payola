@@ -653,6 +653,9 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     private def compileRpcCall(select: Global#Select, returnType: Global#Type, parameters: List[Global#Tree]) {
         val requiredTypes = ListBuffer[Global#Type](returnType)
         val isAsync = packageDefCompiler.symbolHasAnnotation(select.symbol, "s2js.compiler.async")
+        val isSecured = List(select.symbol, select.symbol.owner).exists { symbol =>
+            packageDefCompiler.symbolHasAnnotation(symbol, "s2js.compiler.secured")
+        }
 
         var realParameters = parameters
         var successCallback: Option[Global#Tree] = None
@@ -666,6 +669,12 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
             requiredTypes += successCallback.get.tpe.typeArgs.head
             realParameters = parameters.dropRight(2)
         }
+        if (isSecured) {
+            if (realParameters.isEmpty) {
+                throw new ScalaToJsException("A secured remote method must have a security context as a parameter.")
+            }
+            realParameters = realParameters.dropRight(1)
+        }
 
         // Add the required dependencies.
         requiredTypes.foreach {
@@ -677,10 +686,8 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         }
 
         // Compile the call itself.
-        buffer += "s2js.runtime.client.rpc.Wrapper.call%s('%s', ".format(
-            if (isAsync) "Async" else "Sync",
-            select.toString
-        )
+        buffer += "s2js.runtime.client.rpc.Wrapper.call%s('%s', ".format(if (isAsync) "Async" else "Sync",
+            select.toString)
         compileParameterValues(realParameters, asArray = true)
         buffer += ", ["
         compileParameterTypeNames(realParameters)

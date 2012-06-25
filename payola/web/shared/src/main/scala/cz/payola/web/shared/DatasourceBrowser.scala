@@ -1,10 +1,8 @@
 package cz.payola.web.shared
 
-import cz.payola.domain.entities.analyses.evaluation._
-import scala.collection.mutable.HashMap
 import cz.payola.common.rdf.Graph
 import cz.payola.model.DataFacade
-import cz.payola.domain.entities.analyses.plugins.data.SparqlEndpoint
+import cz.payola.domain.entities.plugins.concrete.data.SparqlEndpoint
 
 @remote object DatasourceBrowser
 {
@@ -14,6 +12,7 @@ import cz.payola.domain.entities.analyses.plugins.data.SparqlEndpoint
 
         if (instance.isDefined)
         {
+            // WTF? How do you know that the instance is an instance of a sparql endpoint?
             val se = new SparqlEndpoint()
             Some(se.getFirstTriple(instance.get))
         }else{

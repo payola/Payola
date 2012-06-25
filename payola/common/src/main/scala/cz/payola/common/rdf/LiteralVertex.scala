@@ -15,8 +15,5 @@ trait LiteralVertex extends Vertex
     /** Optional language of the literal. */
     def language = _language
 
-    /**
-      * @return value.toString
-      */
     override def toString = value.toString
 }

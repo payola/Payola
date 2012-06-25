@@ -7,6 +7,9 @@ trait IdentifiedObject
 {
     protected val _uri: String
 
+    /**
+      * Returns the identification URI of the object.
+      */
     def uri = _uri
 
     override def toString: String = uri

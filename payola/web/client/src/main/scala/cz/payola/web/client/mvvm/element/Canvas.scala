@@ -7,8 +7,8 @@ import s2js.adapters.js.browser.document
 import cz.payola.web.client.views.plugins.visual.{Point, Vector}
 
 /**
- * Representation of a space for drawing into a web page.
- */
+  * Representation of a space for drawing into a web page.
+  */
 class Canvas(width: Double, height: Double) extends Component {
 
     protected var mousePressed = false
@@ -20,13 +20,13 @@ class Canvas(width: Double, height: Double) extends Component {
     canvasElement.height = height
 
     /**
-     * Object for drawing
-     */
+      * Object for drawing
+      */
     val context = canvasElement.getContext[CanvasRenderingContext2D]("2d")
 
     /**
-     * Indicator whether is the layer ready for drawing into.
-     */
+      * Indicator whether is the layer ready for drawing into.
+      */
     protected var cleared = false
 
     def isCleared: Boolean = {
@@ -34,19 +34,19 @@ class Canvas(width: Double, height: Double) extends Component {
     }
 
     /**
-     * Setter of canvas dimensions.
-     * @param size new dimensions.
-     */
+      * Setter of canvas dimensions.
+      * @param size new dimensions.
+      */
     def setSize(size: Vector) {
         canvasElement.width = size.x
         canvasElement.height = size.y
     }
 
     /**
-     * Getter of canvas dimensions.
-     * @return dimensions
-     */
-    def getSize: Vector = {
+      * Getter of canvas dimensions.
+      * @return dimensions
+      */
+    def getSize(): Vector = { //() are intentional
         Vector(canvasElement.width, canvasElement.height)
     }
 
@@ -55,16 +55,16 @@ class Canvas(width: Double, height: Double) extends Component {
     }
 
     /**
-     * Clears the whole area from all drawn elements
-     */
+      * Clears the whole area from all drawn elements
+      */
     def clear() {
         context.clearRect(0, 0, canvasElement.width, canvasElement.height)
         cleared = true
     }
 
     /**
-     * Marks canvas as "clear required to allow drawing".
-     */
+      * Marks canvas as "clear required to allow drawing".
+      */
     def dirty() {
         cleared = false
     }

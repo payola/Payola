@@ -6,7 +6,6 @@ import cz.payola.web.client.views.plugins.visual._
 import settings.components.visualsetup.VisualSetup
 import s2js.adapters.js.browser.window
 import cz.payola.common.rdf._
-import s2js.adapters.js.browser.document
 
 /**
   * Graphical representation of Graph object.
@@ -495,7 +494,8 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
         //^because elements are drawn into separate layers, redraw(..) does not know to which context to draw
     }
 
-    def clean() {
+
+    def destroy() {
         while(container.childNodes.length > 0) {
             container.removeChild(container.firstChild)
         }
@@ -558,5 +558,54 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
         }
         canvasPack.setSize(
             Vector(window.innerWidth - canvasPack.offsetLeft, window.innerHeight - canvasPack.offsetTop))
+    }
+
+    def getGraphCenter(): Point = { //() are intentional
+        val top = getGraphTop.y
+        val right = getGraphRight.x
+        val bottom = getGraphBottom.y
+        val left = getGraphLeft.x
+
+        Point(left + (right - left)/2, top + (bottom - top)/2)
+    }
+
+    def getGraphTop: Point = {
+        var top = Point(0, Double.MaxValue)
+        getAllVertices.foreach{ vv =>
+            if(vv.position.y < top.y) {
+                top = vv.position
+            }
+        }
+        top
+    }
+
+    def getGraphLeft: Point = {
+        var left = Point(Double.MaxValue, 0)
+        getAllVertices.foreach{ vv =>
+            if(vv.position.x < left.x) {
+                left = vv.position
+            }
+        }
+        left
+    }
+
+    def getGraphBottom: Point = {
+        var bottom = Point(0, Double.MinValue)
+        getAllVertices.foreach{ vv =>
+            if(vv.position.y > bottom.y) {
+                bottom = vv.position
+            }
+        }
+        bottom
+    }
+
+    def getGraphRight: Point = {
+        var right = Point(Double.MinValue, 0)
+        getAllVertices.foreach{ vv =>
+            if(vv.position.x > right.x) {
+                right = vv.position
+            }
+        }
+        right
     }
 }

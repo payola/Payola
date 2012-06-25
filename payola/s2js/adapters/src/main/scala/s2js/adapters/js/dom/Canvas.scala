@@ -11,13 +11,4 @@ abstract class Canvas extends Element
     def getContext[A <: CanvasContext](contextId: String): A
 
     //def focus()
-
-    var onkeyup: (Event => Boolean)
-    var onkeydown: (Event => Boolean)
-    var onclick: (Event => Boolean)
-    var ondblclick: (Event => Boolean)
-    var onmousedown: (Event => Boolean)
-    var onmouseup: (Event => Boolean)
-    var onmousemove: (Event => Boolean)
-    var onmousewheel: (Event => Boolean)
 }

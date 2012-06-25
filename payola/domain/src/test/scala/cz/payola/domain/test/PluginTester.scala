@@ -2,8 +2,7 @@ package cz.payola.domain.test
 
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
-import cz.payola.domain.entities.analyses.plugins.SparqlQuery
-import cz.payola.domain.entities.sources.SparqlEndpointDataSource
+import cz.payola.domain.entities.plugins.concrete.SparqlQuery
 import cz.payola.domain.rdf.Graph
 import cz.payola.scala2json.JSONSerializer
 

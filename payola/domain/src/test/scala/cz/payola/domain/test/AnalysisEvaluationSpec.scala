@@ -1,14 +1,13 @@
 package cz.payola.domain.test
 
-import cz.payola.domain.entities.Analysis
-import cz.payola.domain.entities.analyses._
-import evaluation.Success
-import plugins.data.SparqlEndpoint
-import plugins.query._
-import plugins.{Join, Union}
 import org.scalatest.FlatSpec
 
 import org.scalatest.matchers.ShouldMatchers
+import cz.payola.domain.entities.plugins.concrete.data.SparqlEndpoint
+import cz.payola.domain.entities.plugins.concrete.query._
+import cz.payola.domain.entities.plugins.concrete._
+import cz.payola.domain.entities.analyses.evaluation.Success
+import cz.payola.domain.entities.Analysis
 
 class AnalysisEvaluationSpec extends FlatSpec with ShouldMatchers
 {

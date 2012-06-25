@@ -1,13 +1,10 @@
 package cz.payola.domain.entities
 
-import permissions.privilege.{PublicPrivilege, GroupPrivilege, AnalysisPrivilege, Privilege}
-import cz.payola.domain.entities.analyses.DataSource
 import scala.collection._
+import cz.payola.domain.entities.plugins.DataSource
+import cz.payola.domain.entities.privileges._
 
-/** User entity at the domain level.
-  *
-  * Contains owned analyses and groups, member groups and privileges.
-  *
+/**
   * @param _name Name of the user.
   */
 class User(protected var _name: String)
@@ -24,6 +21,8 @@ class User(protected var _name: String)
     type DataSourceType = DataSource
 
     type PrivilegeType = Privilege[_]
+
+    type OntologyCustomizationType = settings.ontology.Customization
 
     /**
       * Adds the analysis to the users owned analyses. The analysis has to be owned by the user.
@@ -94,9 +93,19 @@ class User(protected var _name: String)
     }
 
     /**
+      * Returns accessible ontology customizations.
+      */
+    def accessibleOntologyCustomizations: Seq[OntologyCustomizationType] = {
+        privileges.collect {
+            case c: OntologyCustomizationPrivilege => c.obj
+        }.distinct
+    }
+
+    /**
       * Returns the groups the user is member of.
       */
     def memberGroups: Seq[GroupType] = {
+        // TODO privilege shouldn't be used as a group membership. Or should it be?
         privileges.collect {
             case p: GroupPrivilege => p.obj
         }.distinct

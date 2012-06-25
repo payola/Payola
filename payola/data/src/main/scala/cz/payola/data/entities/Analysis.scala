@@ -6,6 +6,7 @@ import scala.collection.mutable
 import cz.payola.data.PayolaDB
 import cz.payola.data.dao.{PluginInstanceDAO, PluginInstanceBindingDAO}
 import org.squeryl.annotations.Transient
+import cz.payola.domain.entities.plugins
 
 object Analysis {
 
@@ -28,7 +29,7 @@ class Analysis(
     extends cz.payola.domain.entities.Analysis(name, o)
     with PersistableEntity
 {
-    type DomainParameterValueType = cz.payola.domain.entities.analyses.ParameterValue[_]
+    type DomainParameterValueType = plugins.ParameterValue[_]
 
     @Transient
     private var _pluginInstancesLoaded = false;

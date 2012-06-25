@@ -2,10 +2,11 @@ package cz.payola.data.dao
 
 import cz.payola.data.PayolaDB
 import cz.payola.data.entities.analyses.PluginInstance
+import cz.payola.common.entities.plugins
 
 class PluginInstanceDAO extends EntityDAO[PluginInstance](PayolaDB.pluginInstances)
 {
-    def persist(i: cz.payola.common.entities.analyses.PluginInstance): Option[PluginInstance] = {
+    def persist(i: plugins.PluginInstance): Option[PluginInstance] = {
         val instance = PluginInstance(i)
 
         // First persist plugin instance ...

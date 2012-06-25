@@ -3,12 +3,13 @@ package cz.payola.data.entities.analyses
 import cz.payola.data.PayolaDB
 import cz.payola.data.entities.PersistableEntity
 import cz.payola.data.entities.analyses.parameters._
-import scala.collection.{immutable, mutable}
+import scala.collection.immutable
 import org.squeryl.annotations.Transient
+import cz.payola.common.entities.plugins
 
 object PluginInstance {
 
-    def apply(p: cz.payola.common.entities.analyses.PluginInstance): PluginInstance = {
+    def apply(p: plugins.PluginInstance): PluginInstance = {
         p match {
             case instance: PluginInstance => instance
             case _ => {
@@ -18,10 +19,10 @@ object PluginInstance {
                         case f: FloatParameterValue => f
                         case i: IntParameterValue => i
                         case s: StringParameterValue => s
-                        case b: cz.payola.domain.entities.analyses.parameters.BooleanParameterValue => BooleanParameterValue(b)
-                        case f: cz.payola.domain.entities.analyses.parameters.FloatParameterValue => FloatParameterValue(f)
-                        case i: cz.payola.domain.entities.analyses.parameters.IntParameterValue => IntParameterValue(i)
-                        case s: cz.payola.domain.entities.analyses.parameters.StringParameterValue => StringParameterValue(s)
+                        case b: cz.payola.domain.entities.plugins.parameters.BooleanParameterValue => BooleanParameterValue(b)
+                        case f: cz.payola.domain.entities.plugins.parameters.FloatParameterValue => FloatParameterValue(f)
+                        case i: cz.payola.domain.entities.plugins.parameters.IntParameterValue => IntParameterValue(i)
+                        case s: cz.payola.domain.entities.plugins.parameters.StringParameterValue => StringParameterValue(s)
                     }
                 )
 
@@ -40,10 +41,10 @@ object PluginInstance {
 
 class PluginInstance(
     override val id: String,
-    p: cz.payola.domain.entities.analyses.Plugin,
+    p: cz.payola.domain.entities.Plugin,
     paramValues: immutable.Seq[ParameterValue[_]],
     description: String)
-    extends cz.payola.domain.entities.analyses.PluginInstance(p, paramValues)
+    extends cz.payola.domain.entities.plugins.PluginInstance(p, paramValues)
     with PersistableEntity
 {
     var pluginId: Option[String] = if (plugin == null) None else Some(plugin.id)

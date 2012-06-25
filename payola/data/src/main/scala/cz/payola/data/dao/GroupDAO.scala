@@ -11,8 +11,10 @@ class GroupDAO extends EntityDAO[Group](PayolaDB.groups)
         super.persist(group)
     }
 
-    def getByOwnerId(id: String, offset: Int = 0, count: Int = 0) : Seq[Group] = {
+    //TODO: OH - implement this
+    def getByOwnerId(id: String, maxCount: Int) : Seq[Group] = {
         /* TODO: fails on login
+        TODO: maxCount
         val query = from(table)(g =>
             where (g.owner.id === id)
             select (g)
@@ -21,6 +23,7 @@ class GroupDAO extends EntityDAO[Group](PayolaDB.groups)
 
         evaluateCollectionResultQuery(query, offset, count)
         */
+
         List()
     }
 }
