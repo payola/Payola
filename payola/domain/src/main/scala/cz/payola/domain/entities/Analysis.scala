@@ -127,15 +127,6 @@ class Analysis(protected var _name: String, protected var _owner: Option[User])
       */
     def outputInstance: Option[PluginInstance] = outputInstances.headOption
 
-    /* TODO
-    def sources = {
-        pluginInstances.diff(pluginInstanceBindings.map(b => b.targetPluginInstance))
-    }
-
-    def outputs = {
-        pluginInstances.diff(pluginInstanceBindings.map(b => b.sourcePluginInstance))
-    }*/
-
     /**
       * Adds a new plugin instance to the analysis.
       * @param instance The plugin instance to add.

@@ -88,7 +88,7 @@ class User(protected var _name: String)
       */
     def accessibleAnalyses: Seq[AnalysisType] = {
         privileges.collect {
-            case p: AnalysisPrivilege => p.obj
+            case p: AccessAnalysisPrivilege => p.obj
         }.distinct
     }
 
@@ -97,17 +97,7 @@ class User(protected var _name: String)
       */
     def accessibleOntologyCustomizations: Seq[OntologyCustomizationType] = {
         privileges.collect {
-            case c: OntologyCustomizationPrivilege => c.obj
-        }.distinct
-    }
-
-    /**
-      * Returns the groups the user is member of.
-      */
-    def memberGroups: Seq[GroupType] = {
-        // TODO privilege shouldn't be used as a group membership. Or should it be?
-        privileges.collect {
-            case p: GroupPrivilege => p.obj
+            case c: UseOntologyCustomizationPrivilege => c.obj
         }.distinct
     }
 

@@ -2,19 +2,25 @@ package cz.payola.common.entities.privileges
 
 import cz.payola.common.entities._
 import cz.payola.common.entities.settings.ontology.Customization
+import cz.payola.common.entities.plugins.DataSource
 
-// TODO
-
-/** Group privilege. Denotes membership in the group. */
-trait GroupPrivilege extends Privilege[Group]
-
-/** Analysis privilege. The ResultOnly privilege grants permission to view the only
-  *  the result of the analysis, whereas the Data privilege allows you view the whole
-  *  analysis including potentially private data.
+/**
+  * The user may access the specified analysis, so he can see the analysis structure and the plugin instances it
+  * consists of, run the analysis and browse the result.
   */
-trait AnalysisPrivilege extends Privilege[Analysis]
-trait AccessAnalysisResultOnlyPrivilege extends AnalysisPrivilege
-trait AccessAnalysisDataPrivilege extends AnalysisPrivilege
+trait AccessAnalysisPrivilege extends Privilege[Analysis]
 
-/** Grants access to other user's ontology customization. */
-trait OntologyCustomizationPrivilege extends Privilege[Customization]
+/**
+  * The user may browser the specified data source and use it in his analyses.
+  */
+trait AccessDataSourcePrivilege extends Privilege[DataSource]
+
+/**
+  * The user may use the specified plugin in his analyses.
+  */
+trait UsePluginPrivilege extends Privilege[Plugin]
+
+/**
+  * The user may apply the specified ontology customization to the results of analyses.
+  */
+trait UseOntologyCustomizationPrivilege extends Privilege[Customization]

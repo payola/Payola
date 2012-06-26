@@ -7,6 +7,13 @@ import cz.payola.domain.rdf.Graph
 
 object DataSource
 {
+    /**
+      * Creates a new data source based on the specified data fetcher plugin instance.
+      * @param name Name of the data source.
+      * @param owner Owner of the data source.
+      * @param instance The data fetcher plugin instance to base the data source on.
+      * @return The data source.
+      */
     def apply(name: String, owner: Option[User], instance: PluginInstance): DataSource = {
         instance.plugin match {
             case dataFetcher: DataFetcher => new DataSource(name, owner, dataFetcher, instance.parameterValues)
@@ -15,6 +22,12 @@ object DataSource
     }
 }
 
+/**
+  * @param _name Name of the data source.
+  * @param _owner Owner of the data source.
+  * @param plugin The data fetcher plugin corresponding to the data source.
+  * @param parameterValues The corresponding data fetcher plugin parameter values.
+  */
 class DataSource(protected var _name: String, protected var _owner: Option[User], plugin: DataFetcher,
     parameterValues: immutable.Seq[ParameterValue[_]])
     extends PluginInstance(plugin, parameterValues)
