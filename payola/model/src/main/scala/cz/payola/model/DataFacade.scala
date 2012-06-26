@@ -5,6 +5,8 @@ import cz.payola.data.dao._
 import cz.payola.domain.entities.analyses.DataSource
 import cz.payola.common.rdf.Graph
 import cz.payola.domain.entities.Group
+import cz.payola.domain.entities.analyses.plugins.data.SparqlEndpoint
+import cz.payola.common.entities.analyses.Plugin
 
 class DataFacade
 {
@@ -12,8 +14,13 @@ class DataFacade
     val analysisDAO = new AnalysisDAO
     val groupDAO = new GroupDAO
     val dataSourceDAO = new DataSourceDAO
+    val pluginDAO = new PluginDAO
 
     private val GROUPS_COUNT_MAX_COUNT_DEFAULT = 10
+
+    def getPlugins(search: String = "") = {
+        pluginDAO.getAll().map(_.createPlugin())
+    }
 
     def getUserByCredentials(username: String, password: String) : Option[User] = {
         userDAO.getUserByCredentials(username, cryptPassword(password))
@@ -44,7 +51,22 @@ class DataFacade
     }
 
     def getGraph(uri: String) : Graph = {
-        null
+
+        val instance = (new SparqlEndpoint).createInstance().setParameter("EndpointURL", "")
+
+        val dataSource = DataSource("DBPedia", None, instance)
+
+        val query = """
+        CONSTRUCT {
+            ?person rdf:type <http://xmlns.com/foaf/0.1/Person> .
+        } WHERE {
+            ?person rdf:type <http://xmlns.com/foaf/0.1/Person> .
+        }
+        LIMIT 50
+        """
+
+        dataSource.executeQuery(query)
+
     }
 
     def getPublicDataSources(count: Int, skip: Int = 0) : Seq[DataSource] = {

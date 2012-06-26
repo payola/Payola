@@ -115,4 +115,8 @@ object Profile extends PayolaController with Secured
             Redirect(routes.Profile.listGroups()).flashing("error" -> "The group could not been deleted.")
         }
     }
+
+    def createPlugin = authenticated{ user =>
+        Ok(views.html.Profile.createPlugin(user))
+    }
 }

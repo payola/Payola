@@ -2,17 +2,30 @@
 
 @main(Some(user), "Analysis analysis.name :: Payola!") {
 
+<style>
+    .successors {
+        float: left;
+        min-width:300px;
+        margin-right: 10px;
+    }
+
+    .clear {
+        clear: both; height: 0px; visibility: hidden; display: block;
+    }
+
+    .alert {
+        margin-bottom: 18px;
+    }
+</style>
+
 <div class="container-fluid">
     <h1>Edit analysis: <input type="text" value="analysis.name" /></h1>
 
     <div class="row-fluid">
         <div class="span3">
-            <div class="well" id="">
-                <ul class="nav nav-list">
-                    <li><a href="#" id="add-source-"><i class="icon-hdd"></i>Add public data source</a></li>
-                    <li><a href="#"><i class="icon-hdd"></i>Add private data source</a></li>
-                    <li><a href="#"><i class="icon-ok-sign"></i>Save analysis</a></li>
-                    <li><a href="#"><i class="icon-remove-sign"></i>Cancel editing</a></li>
+            <div class="well">
+                <ul id="menu">
+
                 </ul>
             </div>
         </div>
@@ -20,31 +33,17 @@
         <div class="span9">
             <div class="wrap-right">
                 <div class="wrap-left">
+                    <div id="plugin-space">
 
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div><!--/.fluid-container-->
-<!--
-<script>
-    var settings = {
-        PaintStyle:{ lineWidth:2, strokeStyle:"#BCE8F1", outlineColor:"#3A87AD", outlineWidth:1 },
-        Connector:[ "Flowchart", { stub: 1 } ],
-        Endpoint:[ "Dot", { radius:4 } ],
-        EndpointStyle : { fillStyle: "#3A87AD"  },
-        Anchor : [ "TopCenter", "BottomCenter" ]
-    };
-
-    analysis.pluginInstanceBindings.map{ b =>
-        var instance = jsPlumb.getInstance(settings);
-        instance.connect({ source:"inst_b.sourcePluginInstance.id", target:"inst_b.targetPluginInstance.id", scope:"someScope" });
-    }
-</script>
-<!--
-<script src="/javaScriptPackage/cz.payola.web.client.presenters.Analysis" type="text/javascript"></script>
+<script src="/javaScriptPackage/cz.payola.web.client.presenters.AnalysisBuilder" type="text/javascript"></script>
 <script type="text/javascript">
-    new cz.payola.web.client.presenters.Analysis("tab2", "analysis.id").init();
-</script>-->
+    new cz.payola.web.client.presenters.AnalysisBuilder("menu", "plugin-space");
+</script>
 
 }

@@ -13,4 +13,5 @@ import s2js.adapters.js.dom.Element
 trait Component
 {
     def render(parent: Element = document.body)
+    def destroy() = { }
 }

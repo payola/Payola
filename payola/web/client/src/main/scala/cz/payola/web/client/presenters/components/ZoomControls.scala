@@ -62,7 +62,7 @@ class ZoomControls(var currentZoom: Double) extends Component
         setZoom(currentZoom - (zoomStep*50))
     }
 
-    def destroy() {
+    override def destroy() {
         //spanCaption.setText("")
 
         if(parentSpace.isDefined) {

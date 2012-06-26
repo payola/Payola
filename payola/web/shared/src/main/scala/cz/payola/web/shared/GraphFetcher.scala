@@ -2,6 +2,7 @@ package cz.payola.web.shared
 
 import cz.payola.common.rdf.Graph
 import cz.payola.domain.rdf._
+import cz.payola.model.DataFacade
 
 @remote object GraphFetcher
 {
