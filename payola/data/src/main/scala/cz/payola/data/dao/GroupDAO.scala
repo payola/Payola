@@ -6,24 +6,31 @@ import org.squeryl.PrimitiveTypeMode._
 
 class GroupDAO extends EntityDAO[Group](PayolaDB.groups)
 {
-    def persist(g: cz.payola.common.entities.Group): Option[Group] = {
+    /**
+      * Inserts or updated [[cz.payola.common.entities.Group]].
+      *
+      * @param g - gourp to insert or update
+      * @return Returns persisted [[cz.payola.data.entities.Group]]
+      */
+    def persist(g: cz.payola.common.entities.Group): Group = {
         val group = Group(g)
         super.persist(group)
     }
 
-    //TODO: OH - implement this
-    def getByOwnerId(id: String, maxCount: Int) : Seq[Group] = {
-        /* TODO: fails on login
-        TODO: maxCount
+    /**
+      * Returns [[cz.payola.data.entities.Group]]s owned by specified owner. Result may be paginated
+      *
+      * @param ownerId - id of groups owner
+      * @param pagination - Optionally specified pagination
+      * @return Returns collecntion of [[cz.payola.data.entities.Group]]s
+      */
+    def getByOwnerId(ownerId: String, pagination: Option[PaginationInfo] = None) : Seq[Group] = {
         val query = from(table)(g =>
-            where (g.owner.id === id)
+            where (g.ownerId.getOrElse("") === ownerId)
             select (g)
             orderBy (g.name)
         )
 
-        evaluateCollectionResultQuery(query, offset, count)
-        */
-
-        List()
+        evaluateCollectionResultQuery(query, pagination)
     }
 }

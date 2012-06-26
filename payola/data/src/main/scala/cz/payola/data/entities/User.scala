@@ -2,6 +2,8 @@ package cz.payola.data.entities
 
 import cz.payola.data.PayolaDB
 import org.squeryl.annotations.Transient
+import cz.payola.data.dao._
+import cz.payola.data.entities.analyses.DataSource
 
 object User {
 
@@ -30,6 +32,10 @@ class User(
     @Transient
     private var _ownedAnalysesLoaded = false
     private lazy val _ownedAnalysesQuery = PayolaDB.analysisOwnership.left(this)
+
+    @Transient
+    private var _ownedDataSourcesLoaded = false
+    private lazy val _ownedDataSourcesQuery = PayolaDB.dataSourceOwnership.left(this)
 
     @Transient
     private var _memberGroupsLoaded = false
@@ -61,23 +67,55 @@ class User(
         super.ownedAnalyses
     }
 
+    override def ownedDataSources: collection.Seq[DataSourceType] = {
+        if (!_ownedDataSourcesLoaded) {
+            evaluateCollection(_ownedDataSourcesQuery).map(ds =>
+                if (!super.ownedDataSources.contains(ds))
+                    super.storeOwnedDataSource(ds)
+            )
+
+            _ownedDataSourcesLoaded = true
+        }
+
+        super.ownedDataSources
+    }
+
     override protected def storeOwnedAnalysis(analysis: User#AnalysisType) {
         super.storeOwnedAnalysis(associate(Analysis(analysis), _ownedAnalysesQuery).get)
     }
-
-    //TODO: override protected def discardOwnedAnalysis(analysis: User#AnalysisType) {}
 
     override protected def storeOwnedGroup(group: User#GroupType) {
         super.storeOwnedGroup(associate(Group(group), _ownedGroupsQuery).get)
     }
 
-    //TODO: override protected def discardOwnedGroup(group: User#GroupType)  {}
+    override protected def storeOwnedDataSource(source: User#DataSourceType) {
+        super.storeOwnedDataSource(associate(DataSource(source), _ownedDataSourcesQuery).get)
+    }
 
-    //TODO: override protected def storeOwnedDataSource(source: User#DataSourceType) = null
+    override protected def discardOwnedAnalysis(analysis: User#AnalysisType) {
+        // TODO: injection
+        new AnalysisDAO().removeById(analysis.id)
 
-    //TODO: override protected def discardOwnedDataSource(source: User#DataSourceType) = null
+        super.discardOwnedAnalysis(analysis)
+    }
 
-    //TODO: override protected def storePrivilege(privilege: User#PrivilegeType) = null
+    override protected def discardOwnedGroup(group: User#GroupType)  {
+        // TODO: injection
+        new GroupDAO().removeById(group.id)
+        
+        super.discardOwnedGroup(group)
+    }
 
-    //TODO: override protected def discardPrivilege(privilege: User#PrivilegeType) = null
+    override protected def discardOwnedDataSource(source: User#DataSourceType) {
+        // TODO: injection
+        new DataSourceDAO().removeById(source.id)
+
+        super.discardOwnedDataSource(source)
+    }
+
+    //TODO: Privileges...
+    // override protected def storePrivilege(privilege: User#PrivilegeType) = null
+
+    //TODO: Privileges...
+    // override protected def discardPrivilege(privilege: User#PrivilegeType) = null
 }

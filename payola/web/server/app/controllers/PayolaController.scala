@@ -6,7 +6,7 @@ import cz.payola.domain.entities.User
 
 class PayolaController extends Controller
 {
-    assert(PayolaDB.connect())
+    PayolaDB.connect()
     val df = new DataFacade
 
     def getUser(userName: String): Option[User] = {

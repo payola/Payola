@@ -8,11 +8,12 @@ import cz.payola.domain.entities.plugins.concrete.query._
 import cz.payola.domain.entities.plugins.concrete._
 import cz.payola.domain.entities.plugins.DataSource
 import scala.collection.immutable
+import cz.payola.data.PayolaDB
 
 class SquerylSpecs extends FlatSpec with ShouldMatchers
 {
     // Init
-    assert(PayolaDB.connect())
+    ssert(PayolaDB.connect(true)
 
     PayolaDB.createSchema()
 

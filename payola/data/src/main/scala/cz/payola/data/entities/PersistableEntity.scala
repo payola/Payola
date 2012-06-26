@@ -6,8 +6,7 @@ import collection.mutable.ArrayBuffer
 import org.squeryl.dsl.{ManyToOne, OneToMany, ManyToMany}
 
 trait PersistableEntity extends cz.payola.domain.entities.Entity with KeyedEntity[String]
-{ self: cz.payola.domain.entities.Entity =>
-
+{
     protected final def evaluateCollection[A](col: Query[A]): collection.Seq[A]  = {
         try
         {
@@ -40,24 +39,6 @@ trait PersistableEntity extends cz.payola.domain.entities.Entity with KeyedEntit
         }
         catch {
             case e: Exception => println("M:N association failed: " + e.toString)
-
-            None
-        }
-    }
-
-    protected final def assign[A <: PersistableEntity](entity: A, relation: ManyToMany[A,_]): Option[A] = {
-        try
-        {
-            transaction {
-                if (relation.find(e => e.id == entity.id) == None) {
-                    relation.assign(entity)
-                }
-
-                Some(entity)
-            }
-        }
-        catch {
-            case e: Exception => println("M:N assign failed: " + e.toString)
 
             None
         }
@@ -113,21 +94,4 @@ trait PersistableEntity extends cz.payola.domain.entities.Entity with KeyedEntit
             case _ => false
         }
     }
-
-    /*
-    protected final def assign[A <: PersistableEntity](entity: A, relation: OneToMany[A]) {
-        transaction {
-            if (relation.find(e => e.id == entity.id) == None) {
-                relation.assign(entity)
-            }
-        }
-    }
-    protected final def assign[A <: PersistableEntity](entity: A, relation: ManyToOne[A]) {
-        transaction {
-            if (relation.find(e => e.id == entity.id) == None) {
-                relation.assign(entity)
-            }
-        }
-    }
-    */
 }

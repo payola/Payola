@@ -5,26 +5,14 @@ import cz.payola.data.entities.PersistableEntity
 import cz.payola.data.entities.analyses.parameters._
 import scala.collection.immutable
 import org.squeryl.annotations.Transient
-import cz.payola.common.entities.plugins
 
 object PluginInstance {
 
-    def apply(p: plugins.PluginInstance): PluginInstance = {
+    def apply(p: cz.payola.common.entities.plugins.PluginInstance): PluginInstance = {
         p match {
             case instance: PluginInstance => instance
             case _ => {
-                val paramValues = p.parameterValues.map(
-                    _ match {
-                        case b: BooleanParameterValue => b
-                        case f: FloatParameterValue => f
-                        case i: IntParameterValue => i
-                        case s: StringParameterValue => s
-                        case b: cz.payola.domain.entities.plugins.parameters.BooleanParameterValue => BooleanParameterValue(b)
-                        case f: cz.payola.domain.entities.plugins.parameters.FloatParameterValue => FloatParameterValue(f)
-                        case i: cz.payola.domain.entities.plugins.parameters.IntParameterValue => IntParameterValue(i)
-                        case s: cz.payola.domain.entities.plugins.parameters.StringParameterValue => StringParameterValue(s)
-                    }
-                )
+                val paramValues = p.parameterValues.map(ParameterValue(_))
 
                 val pluginDb = PluginDbRepresentation(p.plugin)
 
@@ -33,6 +21,7 @@ object PluginInstance {
                 // Create relation between plugin and this instance
                 pluginDb.registerPluginInstance(instance)
 
+                // Return converted PluginInstance
                 instance
             }
         }

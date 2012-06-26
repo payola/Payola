@@ -11,7 +11,7 @@ import cz.payola.domain.entities.plugins.concrete.query._
 object TestObject
 {
     println("Connecting ...")
-    assert(PayolaDB.connect())
+    PayolaDB.connect(true)
 
     println("Creating schema ...")
     PayolaDB.createSchema();
@@ -24,12 +24,12 @@ object TestObject
         val u1 = new cz.payola.domain.entities.User("name")
 
         println("Persisting user ...")
-        val user = userDao.persist(u1).get
+        val user = userDao.persist(u1)
 
         // Update test
         user.email = "email"
         user.password = "password"
-        val x = userDao.persist(user).get
+        val x = userDao.persist(user)
         assert(x.email == "email")
         assert(x.password == "password")
 
@@ -41,9 +41,9 @@ object TestObject
         assert(u.get.email == user.email)
 
         // Test userDao
-        assert(userDao.findByUsername("n", 0, 1)(0).id == user.id)
-        assert(userDao.findByUsername("a", 0, 1)(0).id == user.id)
-        assert(userDao.findByUsername(user.name, 0, 1)(0).id == user.id)
+        assert(userDao.findByUsername("n", Some(new PaginationInfo(0, 1)))(0).id == user.id)
+        assert(userDao.findByUsername("a", Some(new PaginationInfo(0, 1)))(0).id == user.id)
+        assert(userDao.findByUsername(user.name, Some(new PaginationInfo(0, 1)))(0).id == user.id)
         assert(userDao.findByUsername("invalid name").size == 0)
         assert(userDao.getUserByCredentials(user.name, user.password).get.id == user.id)
         assert(userDao.getUserByCredentials("invalid", "credientals") == None)
@@ -52,8 +52,8 @@ object TestObject
 
         val g1 = new cz.payola.domain.entities.Group("group1", u1)
         val g2 = new cz.payola.domain.entities.Group("group2", user)
-        val group1 = groupDao.persist(g1).get
-        val group2 = groupDao.persist(g2).get
+        val group1 = groupDao.persist(g1)
+        val group2 = groupDao.persist(g2)
 
         var g = groupDao.getById(group1.id)
         assert(g != None)
@@ -75,9 +75,9 @@ object TestObject
         print("Pagination ...")
         assert(userDao.getAll().size == 1)
         assert(groupDao.getAll().size == 2)
-        assert(groupDao.getAll(1, 2).size == 1)
-        assert(groupDao.getAll(2, 5).size == 0)
-        assert(groupDao.getAll(1, 0).size == 0)
+        assert(groupDao.getAll(Some(new PaginationInfo(1, 2))).size == 1)
+        assert(groupDao.getAll(Some(new PaginationInfo(2, 5))).size == 0)
+        assert(groupDao.getAll(Some(new PaginationInfo(1, 0))).size == 0)
         println(" finished")
     }
 
@@ -107,10 +107,10 @@ object TestObject
 
         println("       persisting analysis")
         // persist analysis
-        val user = userDao.findByUsername("name", 0, 1)(0)
+        val user = userDao.findByUsername("name", Some(new PaginationInfo(0,1)))(0)
         val a = new cz.payola.domain.entities.Analysis("Cities with more than 2 million habitants with countries",
             Some(user))
-        val analysis = analysisDao.persist(a).get
+        val analysis = analysisDao.persist(a)
 
         assert(analysisDao.getById(analysis.id).isDefined)
         assert(analysis.owner.get.id == user.id)
@@ -119,7 +119,7 @@ object TestObject
         println("       persisting plugins")
         // Persist  plugins
         for (p <- plugins) {
-            val p1 = plugDao.persist(p).get
+            val p1 = plugDao.persist(p)
             assert(p1.id == p.id)
 
             val p2 = plugDao.getByName(p.name).get
@@ -227,9 +227,9 @@ object TestObject
                 .createValue("http://dbpedia.org/ontology/City")))
 
         val dsDao = new DataSourceDAO()
-        val ds1_db = dsDao.persist(ds1).get
-        val ds2_db = dsDao.persist(ds2).get
-        val ds3_db = dsDao.persist(ds3).get
+        val ds1_db = dsDao.persist(ds1)
+        val ds2_db = dsDao.persist(ds2)
+        val ds3_db = dsDao.persist(ds3)
 
         assert(ds1.id == ds1_db.id)
         assert(ds2.id == ds2_db.id)

@@ -66,19 +66,11 @@ class PluginDbRepresentation(
     }
 
     def addParameter(parameter: plugins.Parameter[_]) {
-        parameter match {
+        Parameter(parameter) match {
             case b: BooleanParameter => associate(b, _booleanParameters)
             case f: FloatParameter => associate(f, _floatParameters)
             case i: IntParameter => associate(i, _intParameters)
             case s: StringParameter => associate(s, _stringParameters)
-            case b: cz.payola.domain.entities.plugins.parameters.BooleanParameter
-                    => associate(BooleanParameter(b), _booleanParameters)
-            case f: cz.payola.domain.entities.plugins.parameters.FloatParameter
-                    => associate(FloatParameter(f), _floatParameters)
-            case i: cz.payola.domain.entities.plugins.parameters.IntParameter
-                    => associate(IntParameter(i), _intParameters)
-            case s: cz.payola.domain.entities.plugins.parameters.StringParameter
-                    => associate(StringParameter(s), _stringParameters)
         }
     }
 

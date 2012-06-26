@@ -48,7 +48,7 @@ class DataFacade
     }
 
     def getPublicDataSources(count: Int, skip: Int = 0) : Seq[DataSource] = {
-        dataSourceDAO.getPublicDataSources(skip, count)
+        dataSourceDAO.getPublicDataSources(Some(new PaginationInfo(skip, count)))
     }
 
     def getDataSourceById(id: String) : Option[DataSource] = {
@@ -59,7 +59,7 @@ class DataFacade
         if (!user.isDefined){
             List()
         }else{
-            groupDAO.getByOwnerId(user.get.id, maxCount)
+            groupDAO.getByOwnerId(user.get.id, Some(new PaginationInfo(0, maxCount)))
         }
     }
 
