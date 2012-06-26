@@ -7,7 +7,7 @@ import cz.payola.data.entities.analyses._
 
 class AnalysisDAO extends EntityDAO[Analysis](PayolaDB.analyses)
 {
-    private val EVERY_USER: String = "00000000-0000-0000-0000-000000000000";
+    private val EVERY_USER: String = "00000000-0000-0000-0000-000000000000"
 
     def getTopAnalyses(count: Int = 10): collection.Seq[Analysis] = {
         getTopAnalysesByUser(EVERY_USER)

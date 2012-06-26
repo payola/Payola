@@ -1,23 +1,34 @@
 package cz.payola.common.rdf.ontology
 
-trait Ontology
-{
-    val classes: collection.Seq[Class]
-}
-
-/* TODO
+import scala.collection._
 
 /**
   * A description of a set of object classes and relationships between them (http://www.w3.org/TR/owl-features/).
+  * @param classes The classes in the ontology indexed by their URIs.
+  * @param superClasses The super class relation between the classes in the ontology.
   */
-trait Ontology
+class Ontology(val classes: Map[String, Class], val superClasses: Map[String, Seq[String]])
 {
-    /** Type of the classes the ontology contains. */
-    type ClassType <: Class
+    /**
+      * Merges this ontology with the other one into a new one.
+      * @param otherOntology The other ontology.
+      * @return New instance with merged classes and properties.
+      */
+    def +(otherOntology: Ontology): Ontology = {
+        val mergedClasses = mutable.HashMap.empty[String, Class]
+        val mergedSuperClasses = mutable.HashMap.empty[String, Seq[String]]
 
-    /** The classes in the ontology indexed by their URIs. */
-    val classes: immutable.Map[String, ClassType]
+        List(this, otherOntology).foreach { ontology =>
+            ontology.classes.foreach { c =>
+                val merged = mergedClasses.remove(c._1).map(_ + c._2)
+                mergedClasses.put(c._1, merged.getOrElse(c._2))
+            }
+            ontology.superClasses.foreach { s =>
+                val merged = mergedSuperClasses.remove(s._1).map(_ ++ s._2)
+                mergedSuperClasses.put(s._1, merged.getOrElse(s._2))
+            }
+        }
+
+        new Ontology(mergedClasses.toMap, mergedSuperClasses.toMap)
+    }
 }
-
-
-*/

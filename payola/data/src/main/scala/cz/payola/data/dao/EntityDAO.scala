@@ -3,6 +3,7 @@ package cz.payola.data.dao
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.{KeyedEntity, Table, Query}
 import collection.mutable.ArrayBuffer
+import cz.payola.data.DataException
 
 abstract class EntityDAO[A <: KeyedEntity[String]](protected val table: Table[A])
 {
@@ -11,19 +12,9 @@ abstract class EntityDAO[A <: KeyedEntity[String]](protected val table: Table[A]
         evaluateSingleResultQuery(table.where(e => e.id === id))
     }
 
-    def removeById(id: String): Boolean = {
-        try {
-            transaction {
-                val result = table.deleteWhere(e => id === e.id)
-
-                result == 1
-            }
-        }
-        catch {
-            //TODO: Handle exceptions
-            case e: Exception => println("Removing error: " + e)
-
-            false
+    def removeById(id: String): Boolean = DataException.wrap {
+        transaction {
+            table.deleteWhere(e => id === e.id) == 1
         }
     }
 

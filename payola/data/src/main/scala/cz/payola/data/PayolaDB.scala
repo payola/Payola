@@ -184,7 +184,7 @@ object PayolaDB extends Schema
         )
     }
 
-    def createSchema() = {
+    def createSchema() {
         on(users)(user =>
             declare(
                 user.id is (primaryKey),

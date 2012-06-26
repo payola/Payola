@@ -1,14 +1,17 @@
 package cz.payola.domain.rdf.ontology
 
-/** A class that represents an ontology property.
-  *
-  * @param URI Property URI.
-  */
-class Property(val URI: String, val typeURI: Option[String]) extends cz.payola.common.rdf.ontology.Property
+import com.hp.hpl.jena.ontology.OntProperty
+
+object Property
 {
-    /** Overriding toString method to include URI in the description.
-      *
-      * @return Object description.
+    /**
+      * Creates a new property from the specified [[com.hp.hpl.jena.ontology.OntProperty]].
+      * @param ontologyProperty The Jena's property representation.
+      * @return A new instance of the property class.
       */
-    override def toString = super.toString + " => " + URI
+    def apply(ontologyProperty: OntProperty): cz.payola.common.rdf.ontology.Property = {
+        val propertyURI = ontologyProperty.getURI
+        val typeURI = Option(ontologyProperty.getRDFType).map(_.getURI)
+        new cz.payola.common.rdf.ontology.Property(propertyURI, typeURI)
+    }
 }

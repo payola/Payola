@@ -1,104 +1,76 @@
 package cz.payola.domain.rdf.ontology
 
-import com.hp.hpl.jena.ontology._
-import java.io._
+import scala.collection._
 import scala.io.Source
+import java.io._
+import cz.payola.common.rdf.ontology._
+import scala.Predef.Map
+import scala.Seq
 
-/** A class that represents an ontology model and its companion object
-  * with several apply methods for ontology creation.
-  *
+/**
+  * An ontology factory with several methods for ontology creation.
   */
-
-
-object Ontology {
-
-    /** Reads an Ontology from input stream.
-      *
-      * @param is Input Stream.
+object Ontology
+{
+    /**
+      * Reads a new ontology from an input stream.
+      * @param inputStream Input Stream.
       * @param encoding Encoding of the input stream. UTF-8 by default.
-      * @return Instance of ontology.
+      * @return A new instance of the ontology class.
       */
-    def apply(is: InputStream, encoding: String = "UTF-8"): Ontology = {
-        val xml: String = Source.fromInputStream(is, encoding).mkString
-        apply(xml)
+    def apply(inputStream: InputStream, encoding: String = "UTF-8"): Ontology = {
+        val xml: String = Source.fromInputStream(inputStream, encoding).mkString
+        Ontology(xml)
     }
 
-    /** Creates a new ontology from Jena's OntModel.
-      *
-      * @param ontologyModel Jena's ontology representation.
-      * @return New Ontology model.
-      */
-    def apply(ontologyModel: OntModel): Ontology = {
-        // Just pass it to the ontology factory
-        val fact = new OntologyFactory(ontologyModel)
-        fact.getOntology
-    }
-
-    /** Creates a new ontology from a string which contains a XML document
-      * with either RDFS or OWL ontology.
-      *
+    /**
+      * Creates a new ontology from a string which contains a XML document with either RDFS or OWL ontology.
       * @param ontologyString XML document.
-      * @return New Ontology model.
+      * @return A new instance of the ontology class.
       */
     def apply(ontologyString: String): Ontology = {
         val reader = new StringReader(ontologyString)
 
-        // At this moment we don't allow any other format
-        // as both OWL and RDFS should theoretically come
-        // in XML format only
+        // At this moment we don't allow any other format/ as both OWL and RDFS should theoretically come in XML
+        // format only.
         val inputType = "RDF/XML"
 
-        // Create a model and read it from the input string
-        val jenaModel: OntModel = com.hp.hpl.jena.rdf.model.ModelFactory.createOntologyModel()
+        // Create a model and read it from the input string.
+        val jenaModel = com.hp.hpl.jena.rdf.model.ModelFactory.createOntologyModel()
         jenaModel.read(reader, inputType)
 
-        val m = apply(jenaModel)
+        val ontology = Ontology(jenaModel)
         jenaModel.close()
-        m
+        ontology
     }
 
-    /** Returns an empty ontology.
-      *
-      * @return Empty ontology.
+    /**
+      * Creates a new ontology from the specified [[com.hp.hpl.jena.ontology.OntModel]].
+      * @param ontologyModel Jena's ontology representation.
+      * @return A new instance of the ontology class.
       */
-    def empty: Ontology = new Ontology(Nil)
+    def apply(ontologyModel: com.hp.hpl.jena.ontology.OntModel): Ontology = {
+        val classes = mutable.HashMap.empty[String, Class]
+        val superClasses = mutable.HashMap.empty[String, mutable.Buffer[String]]
 
-    /** Merges two ontologies into a new one. Equivalent to o1 + o2.
-      *
-      * @param o1 First ontology.
-      * @param o2 Second ontology.
-      * @return New instance with merged classes and properties.
+        val classIterator = ontologyModel.listClasses()
+        while (classIterator.hasNext) {
+            val ontologyClass = classIterator.next()
+            val c = Class(ontologyClass)
+            classes.put(c.URI, c)
+
+            val superClassIterator = ontologyClass.listSuperClasses()
+            val classSuperClasses = superClasses.getOrElseUpdate(c.URI, mutable.Buffer.empty[String])
+            while (superClassIterator.hasNext) {
+                classSuperClasses += superClassIterator.next().getURI
+            }
+        }
+
+        new Ontology(classes.toMap, superClasses.mapValues(_.toSeq).toMap)
+    }
+
+    /**
+      * Returns an empty ontology.
       */
-    def merge(o1: Ontology, o2: Ontology): Ontology = {
-        OntologyMerger(o1, o2)
-    }
-}
-
-class Ontology(val classes: collection.Seq[Class]) extends cz.payola.common.rdf.ontology.Ontology
-{
-
-    /** Merges this onotlogy with the other one into a new one.
-      *
-      * @param otherOntology The other ontology.
-      * @return New instance with merged classes and properties.
-      */
-    def +(otherOntology: Ontology): Ontology = {
-        Ontology.merge(this, otherOntology)
-    }
-
-    def containsClassWithURI(uri: String): Boolean = {
-        getClassForURI(uri).isDefined
-    }
-
-    def getClassForURI(uri: String): Option[Class] = {
-        classes.find { p: Class => p.URI == uri }
-    }
-
-    /** Overriding toString - printing the class list.
-      *
-      * @return Object description.
-      */
-    override def toString: String = {
-        super.toString + " " + classes.toString
-    }
+    def empty: Ontology = new Ontology(Map.empty[String, Class], Map.empty[String, Seq[String]])
 }
