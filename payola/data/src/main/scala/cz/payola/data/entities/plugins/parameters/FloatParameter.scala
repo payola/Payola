@@ -1,8 +1,12 @@
-package cz.payola.data.entities.analyses.parameters
+package cz.payola.data.entities.plugins.parameters
 
-import cz.payola.data.entities.analyses.Parameter
+import cz.payola.data.entities.plugins.Parameter
 import cz.payola.data.PayolaDB
 
+/**
+  * This objects converts [[cz.payola.common.entities.plugins.parameters.FloatParameter]]
+  * to [[cz.payola.data.entities.plugins.parameters.FloatParameter]]
+  */
 object FloatParameter
 {
     def apply(p: cz.payola.common.entities.plugins.parameters.FloatParameter): FloatParameter = {
@@ -29,7 +33,12 @@ class FloatParameter(
 
     def parameterValues: Seq[FloatParameterValue] = evaluateCollection(_valuesQuery)
 
-    def registerParameterValue(p: FloatParameterValue) {
+    /**
+      * Associates specified [[cz.payola.data.entities.plugins.parameters.FloatParameter]].
+      *
+      * @param p - [[cz.payola.data.entities.plugins.parameters.FloatParameter]] to associate
+      */
+    def associateParameterValue(p: FloatParameterValue) {
         associate(p, _valuesQuery)
     }
 }

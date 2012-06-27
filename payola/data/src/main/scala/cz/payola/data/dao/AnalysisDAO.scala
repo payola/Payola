@@ -7,30 +7,58 @@ import cz.payola.data.entities.analyses._
 
 class AnalysisDAO extends EntityDAO[Analysis](PayolaDB.analyses)
 {
-    private val EVERY_USER: String = "00000000-0000-0000-0000-000000000000"
-
-    def getTopAnalyses(count: Int = 10): collection.Seq[Analysis] = {
-        getTopAnalysesByUser(EVERY_USER)
+    /**
+      * Returns TOP analyses from all users.
+      *
+      * @param pagination - Optionally specified pagination of analyses
+      * @return Returns collection of TOP analyses
+      */
+    def getTopAnalyses(pagination: Option[PaginationInfo] = Some(new PaginationInfo(0, 10))): collection.Seq[Analysis] = {
+        getTopAnalyses(None, pagination)
     }
 
-    def getTopAnalysesByUser(userId: String, count: Int = 10): collection.Seq[Analysis] = {
-        require(count >= 0, "Count must be >= 0")
 
-        // Get by all users or just by specified one
-        val query = table.where(a => userId === EVERY_USER or a.ownerId.getOrElse("").toString === userId)
-
-        evaluateCollectionResultQuery(query, 0, count)
+    /**
+      * Returns TOP analyses from specified user.
+      *
+      * @param ownerId - id of analyses owner
+      * @param pagination - Optionally specified pagination of analyses
+      * @return Returns collection of TOP analyses
+      */
+    def getTopAnalysesByUser(ownerId: String, pagination: Option[PaginationInfo] = Some(new PaginationInfo(0, 10))): collection.Seq[Analysis] = {
+        getTopAnalyses(Some(ownerId), pagination)
     }
 
-    def getPublicAnalysesByOwner(o: User, page: Int = 1, pageLength: Int = 0) = {
-        val query = table.where(a => a.ownerId.getOrElse("") === o.id)
+    private def getTopAnalyses(ownerId: Option[String], pagination: Option[PaginationInfo]): collection.Seq[Analysis] = {
+        val query = from(table)(a =>
+                where (a.ownerId.getOrElse("-2").toString === ownerId.getOrElse("-1").toString)
+                select (a)
+                orderBy (a.name asc)
+            )
 
-        transaction {
-            query.page(page, pageLength).toSeq
-        }
+        evaluateCollectionResultQuery(query, pagination)
     }
 
-    def persist(a: cz.payola.common.entities.Analysis): Option[Analysis] = {
+    /**
+      * Returns public analyses of specified owner
+      *
+      * @param ownerId - id of analyses owner
+      * @param pagination - Optionally specified pagination
+      * @return Returns collection of analyses
+      */
+    def getPublicAnalysesByOwner(ownerId: String, pagination: Option[PaginationInfo] = None) = {
+        val query = table.where(a => a.ownerId.getOrElse("") === ownerId)
+
+        evaluateCollectionResultQuery(query, pagination)
+    }
+
+    /**
+      * Inserts or updates [[cz.payola.common.entities.Analysis]].
+      *
+      * @param a - analysis to insert or update
+      * @return Returns persisted [[cz.payola.data.entities.Analysis]]
+      */
+    def persist(a: cz.payola.common.entities.Analysis): Analysis = {
         val analysis = Analysis(a)
         super.persist(analysis)
 

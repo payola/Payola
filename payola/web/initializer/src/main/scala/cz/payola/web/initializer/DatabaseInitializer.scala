@@ -40,7 +40,7 @@ object DatabaseInitializer extends App
         )
         // persist analysis
         val a = new cz.payola.domain.entities.Analysis("DB: Cities with more than 2 million habitants with countries", None)
-        val analysis = analysisDao.persist(a).get
+        val analysis = analysisDao.persist(a)
 
         // Persist  plugins
         for (p <- plugins) {
@@ -87,6 +87,11 @@ object DatabaseInitializer extends App
         val ds1 = new DataSource("Cities", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter].createValue("http://dbpedia.org/ontology/Country")))
         val ds2 = new DataSource("Countries", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter].createValue("http://dbpedia.org/ontology/City")))
         val ds3 = new DataSource("Countries2", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter].createValue("http://dbpedia.org/ontology/City")))
+
+        val dsDao = new DataSourceDAO()
+        dsDao.persist(ds1)
+        dsDao.persist(ds2)
+        dsDao.persist(ds3)
 
         println("Data initialized")
     }

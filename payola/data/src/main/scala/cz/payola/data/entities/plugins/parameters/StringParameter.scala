@@ -1,8 +1,12 @@
-package cz.payola.data.entities.analyses.parameters
+package cz.payola.data.entities.plugins.parameters
 
-import cz.payola.data.entities.analyses.Parameter
+import cz.payola.data.entities.plugins.Parameter
 import cz.payola.data.PayolaDB
 
+/**
+  * This object converts [[cz.payola.common.entities.plugins.parameters.StringParameter]]
+  * to [[cz.payola.data.entities.plugins.parameters.StringParameter]]
+  */
 object StringParameter
 {
     def apply(p: cz.payola.common.entities.plugins.parameters.StringParameter): StringParameter = {
@@ -29,7 +33,12 @@ class StringParameter(
 
     def parameterValues: Seq[StringParameterValue] = evaluateCollection(_valuesQuery)
 
-    def registerParameterValue(p: StringParameterValue) {
+    /**
+      * Associates specified [[cz.payola.data.entities.plugins.parameters.StringParameter]].
+      *
+      * @param p - [[cz.payola.data.entities.plugins.parameters.StringParameter]] to associate
+      */
+    def associateParameterValue(p: StringParameterValue) {
         associate(p, _valuesQuery)
     }
 }
