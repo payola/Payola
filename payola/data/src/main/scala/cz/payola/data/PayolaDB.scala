@@ -1,12 +1,13 @@
 package cz.payola.data
 
-import org.squeryl.adapters.H2Adapter
+import org.squeryl.adapters._
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.dsl.CompositeKey2
-import cz.payola.data.entities._
 import org.squeryl._
-import cz.payola.data.entities.analyses._
-import cz.payola.data.entities.analyses.parameters._
+import cz.payola.data.entities.analyses.PluginInstanceBinding
+import cz.payola.data.entities.plugins.parameters._
+import cz.payola.data.entities._
+import cz.payola.data.entities.plugins._
 
 object PayolaDB extends Schema
 {

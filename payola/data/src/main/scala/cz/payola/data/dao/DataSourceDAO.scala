@@ -4,6 +4,7 @@ import cz.payola.data.PayolaDB
 import cz.payola.data.entities.analyses._
 import org.squeryl.PrimitiveTypeMode._
 import cz.payola.common.entities.plugins
+import cz.payola.data.entities.plugins.DataSource
 
 class DataSourceDAO extends EntityDAO[DataSource](PayolaDB.dataSources)
 {

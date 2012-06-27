@@ -1,6 +1,6 @@
-package cz.payola.data.entities.analyses.parameters
+package cz.payola.data.entities.plugins.parameters
 
-import cz.payola.data.entities.analyses.ParameterValue
+import cz.payola.data.entities.plugins.ParameterValue
 import cz.payola.data.PayolaDB
 
 object StringParameterValue {

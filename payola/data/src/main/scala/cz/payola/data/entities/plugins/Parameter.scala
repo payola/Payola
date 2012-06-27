@@ -1,9 +1,10 @@
-package cz.payola.data.entities.analyses
+package cz.payola.data.entities.plugins
 
 import cz.payola.data.entities._
-import cz.payola.data.entities.analyses.parameters._
+import cz.payola.data.entities.plugins.parameters._
 
-object Parameter {
+object Parameter
+{
     def apply(p: cz.payola.domain.entities.plugins.Parameter[_]) = {
         p match {
             case b: BooleanParameter => b

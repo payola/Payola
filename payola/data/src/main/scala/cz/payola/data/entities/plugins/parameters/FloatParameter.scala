@@ -1,6 +1,6 @@
-package cz.payola.data.entities.analyses.parameters
+package cz.payola.data.entities.plugins.parameters
 
-import cz.payola.data.entities.analyses.Parameter
+import cz.payola.data.entities.plugins.Parameter
 import cz.payola.data.PayolaDB
 
 object FloatParameter

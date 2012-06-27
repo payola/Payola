@@ -3,7 +3,7 @@ package cz.payola.data.entities
 import cz.payola.data.PayolaDB
 import org.squeryl.annotations.Transient
 import cz.payola.data.dao._
-import cz.payola.data.entities.analyses.DataSource
+import cz.payola.data.entities.plugins.DataSource
 
 object User {
 

@@ -2,8 +2,9 @@ package cz.payola.data.dao
 
 import org.squeryl.PrimitiveTypeMode._
 import cz.payola.data.PayolaDB
-import cz.payola.data.entities.analyses.PluginDbRepresentation
+import cz.payola.data.entities.PluginDbRepresentation
 import cz.payola.domain.entities.Plugin
+import cz.payola.data.entities.plugins.Parameter
 
 class PluginDAO extends EntityDAO[PluginDbRepresentation](PayolaDB.plugins)
 {
@@ -40,7 +41,7 @@ class PluginDAO extends EntityDAO[PluginDbRepresentation](PayolaDB.plugins)
         val result = super.persist(pluginDb)
 
         // ... then assign parameters
-        p.parameters.map(pluginDb.addParameter(_))
+        p.parameters.map(par => pluginDb.addParameter(Parameter(par)))
 
         result.createPlugin()
     }

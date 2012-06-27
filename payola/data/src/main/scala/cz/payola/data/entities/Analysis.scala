@@ -1,12 +1,10 @@
 package cz.payola.data.entities
 
 import cz.payola.data.entities.analyses._
-import cz.payola.data.entities.analyses.parameters._
-import scala.collection.mutable
 import cz.payola.data.PayolaDB
 import cz.payola.data.dao.{PluginInstanceDAO, PluginInstanceBindingDAO}
 import org.squeryl.annotations.Transient
-import cz.payola.domain.entities.plugins
+import cz.payola.data.entities.plugins.PluginInstance
 
 object Analysis {
 

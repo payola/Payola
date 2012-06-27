@@ -4,6 +4,7 @@ import cz.payola.data.entities.PersistableEntity
 import cz.payola.data.PayolaDB
 import org.squeryl.annotations.Transient
 import cz.payola.domain.entities._
+import cz.payola.data.entities.plugins.PluginInstance
 
 object PluginInstanceBinding {
 

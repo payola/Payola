@@ -1,21 +1,23 @@
-package cz.payola.data.entities.analyses
+package cz.payola.data.entities.plugins
 
 import scala.collection.immutable
 import cz.payola.data.entities._
-import cz.payola.data.entities.analyses.parameters._
+import cz.payola.data.entities.plugins.parameters._
 import cz.payola.data.PayolaDB
 import org.squeryl.annotations.Transient
 
-object DataSource {
-    def apply(dataSource: cz.payola.common.entities.plugins.DataSource): DataSource =  {
+object DataSource
+{
+    def apply(dataSource: cz.payola.common.entities.plugins.DataSource): DataSource = {
         dataSource match {
             case ds: DataSource => ds
             case _ => {
                 val owner = if (dataSource.owner.isDefined) Some(User(dataSource.owner.get)) else None
                 val paramValues = dataSource.parameterValues.map(ParameterValue(_))
 
-                val pluginDb = PluginDbRepresentation(dataSource.plugin)
-                val dataFetcher = pluginDb.createPlugin().asInstanceOf[cz.payola.domain.entities.plugins.concrete.DataFetcher]
+                val pluginDb = PluginDbRepresentation(dataSource.plugin.asInstanceOf[cz.payola.domain.entities.Plugin])
+                val dataFetcher = pluginDb.createPlugin()
+                    .asInstanceOf[cz.payola.domain.entities.plugins.concrete.DataFetcher]
 
                 val source = new DataSource(dataSource.id, dataSource.name, owner, dataFetcher, paramValues)
 
@@ -58,7 +60,8 @@ class DataSource(
     private var _parameterValuesLoaded = false
 
     @Transient
-    // This field represents val _parameterValues in common.PluginInstance - it cannot be overriden because it is immutable
+    // This field represents val _parameterValues in common.PluginInstance - it cannot be overriden because it is
+    // immutable
     // (can't be filled via lazy-loading)
     private var _paramValues: immutable.Seq[PluginType#ParameterValueType] = immutable.Seq()
 
@@ -72,7 +75,7 @@ class DataSource(
     }
 
     override def owner: Option[UserType] = {
-        if (_owner == None){
+        if (_owner == None) {
             if (ownerId != null && ownerId.isDefined) {
                 _owner = evaluateCollection(_ownerQuery).headOption
             }
@@ -82,7 +85,7 @@ class DataSource(
     }
 
     override def parameterValues: collection.immutable.Seq[PluginType#ParameterValueType] = {
-        if (!_parameterValuesLoaded ){
+        if (!_parameterValuesLoaded) {
             _paramValues = List(
                 evaluateCollection(_booleanParameterValuesQuery),
                 evaluateCollection(_floatParameterValuesQuery),

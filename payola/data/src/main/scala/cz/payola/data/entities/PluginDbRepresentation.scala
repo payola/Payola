@@ -1,19 +1,18 @@
-package cz.payola.data.entities.analyses
+package cz.payola.data.entities
 
-import cz.payola.data.entities.analyses.parameters._
-import cz.payola.data.entities.PersistableEntity
 import cz.payola.data.PayolaDB
-import cz.payola.domain.entities._
 import org.squeryl.annotations.Transient
-import cz.payola.common._
+import cz.payola.data.entities.plugins._
+import cz.payola.data.entities.plugins.parameters._
+import cz.payola.domain.entities.Plugin
 
-object PluginDbRepresentation {
-
-    def apply(p: entities.Plugin): PluginDbRepresentation = {
+object PluginDbRepresentation
+{
+    def apply(p: Plugin): PluginDbRepresentation = {
         new PluginDbRepresentation(p.id, p.name, pluginClass(p), p.inputCount)
     }
-    
-    private def pluginClass(p: entities.Plugin): String = {
+
+    private def pluginClass(p: Plugin): String = {
         p.getClass.toString.replace("class ", "")
     }
 }
@@ -65,8 +64,8 @@ class PluginDbRepresentation(
         params
     }
 
-    def addParameter(parameter: plugins.Parameter[_]) {
-        Parameter(parameter) match {
+    def addParameter(parameter: Parameter[_]) {
+        parameter match {
             case b: BooleanParameter => associate(b, _booleanParameters)
             case f: FloatParameter => associate(f, _floatParameters)
             case i: IntParameter => associate(i, _intParameters)
@@ -74,23 +73,23 @@ class PluginDbRepresentation(
         }
     }
 
-    def createPlugin(): Plugin  = {
+    def createPlugin(): Plugin = {
         // Return properly instantiated Plugin
         instantiate(pluginClass, name, new java.lang.Integer(inputCount), parameters, id)
     }
 
-    def registerPluginInstance(i: cz.payola.data.entities.analyses.PluginInstance) {
+    def registerPluginInstance(i: cz.payola.data.entities.plugins.PluginInstance) {
         associate(i, _pluginInstancesQuery)
     }
 
-    def registerDataSource(ds: cz.payola.data.entities.analyses.DataSource) {
+    def registerDataSource(ds: cz.payola.data.entities.plugins.DataSource) {
         associate(ds, _dataSourcesQuery)
     }
 
     private def instantiate(className: String, args: AnyRef*): Plugin = {
         val clazz = java.lang.Class.forName(className)
-        val constructor = clazz.getConstructors()(0)
+        val constructor = clazz.getConstructors().find(_.getParameterTypes().size == 4).get
 
-        constructor.newInstance(args:_*).asInstanceOf[Plugin]
+        constructor.newInstance(args: _*).asInstanceOf[Plugin]
     }
 }

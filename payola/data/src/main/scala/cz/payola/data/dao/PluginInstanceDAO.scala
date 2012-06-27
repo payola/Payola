@@ -1,7 +1,7 @@
 package cz.payola.data.dao
 
 import cz.payola.data.PayolaDB
-import cz.payola.data.entities.analyses.PluginInstance
+import cz.payola.data.entities.plugins.PluginInstance
 import cz.payola.common.entities.plugins
 
 class PluginInstanceDAO extends EntityDAO[PluginInstance](PayolaDB.pluginInstances)
