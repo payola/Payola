@@ -7,6 +7,7 @@ import cz.payola.domain.entities.Plugin
 import cz.payola.domain.entities.plugins._
 import cz.payola.domain.entities.plugins.parameters.StringParameter
 import cz.payola.domain.rdf._
+import cz.payola.common.rdf.ontology.Ontology
 import cz.payola.domain.rdf.ontology.Ontology
 
 /** This plugin requires one parameter - an ontology URL. The ontology is then
@@ -83,7 +84,7 @@ class OntologicalFilter(name: String, inputCount: Int, parameters: immutable.Seq
 
         graph.vertices foreach { n: Node =>
             if (n.isInstanceOf[IdentifiedNode]) {
-                if (ontology.containsClassWithURI(n.asInstanceOf[IdentifiedNode].uri)) {
+                if (ontology.classes.contains(n.asInstanceOf[IdentifiedNode].uri)) {
                     vertices += n
                 }
             }
@@ -92,8 +93,8 @@ class OntologicalFilter(name: String, inputCount: Int, parameters: immutable.Seq
         // Now go through edges
         graph.edges foreach { e: Edge =>
             if (vertices.contains(e.origin)) {
-                val cl = ontology.getClassForURI(e.origin.uri).get
-                if (cl.containsPropertyWithURI(e.uri)) {
+                val cl = ontology.classes.get(e.origin.uri).get
+                if (cl.properties.contains(e.uri)) {
                     if (e.destination.isInstanceOf[IdentifiedNode] && vertices.contains(e.destination)) {
                         edges += e
                     } else {

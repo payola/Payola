@@ -6,6 +6,10 @@ import org.squeryl.annotations.Transient
 import cz.payola.domain.entities._
 import cz.payola.data.entities.plugins.PluginInstance
 
+/**
+  * This objects convers [[cz.payola.common.entities.analyses.PluginInstanceBinding]]
+  * to [[cz.payola.data.entities.analyses.PluginInstanceBinding]]
+  */
 object PluginInstanceBinding {
 
     def apply(p: cz.payola.common.entities.analyses.PluginInstanceBinding): PluginInstanceBinding = {

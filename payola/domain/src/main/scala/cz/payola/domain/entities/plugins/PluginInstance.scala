@@ -4,6 +4,10 @@ import collection.immutable
 import cz.payola.domain.entities._
 import cz.payola.domain.entities.plugins.parameters._
 
+/**
+  * @param _plugin The corresponding plugin.
+  * @param _parameterValues The plugin parameter values.
+  */
 class PluginInstance(protected val _plugin: Plugin, protected val _parameterValues: immutable.Seq[ParameterValue[_]])
     extends Entity with DescribedEntity with cz.payola.common.entities.plugins.PluginInstance
 {
@@ -97,10 +101,16 @@ class PluginInstance(protected val _plugin: Plugin, protected val _parameterValu
             "The parameter values must correspond to the plugin parameters.")
     }
 
+    /**
+      * Returns parameter value of the specified parameter.
+      */
     private def getParameterValue(parameter: Parameter[_]): Option[ParameterValue[_]] = {
         parameterValues.find(_.parameter == parameter)
     }
 
+    /**
+      * Returns parameter value of the specified parameter.
+      */
     private def getParameterValue(parameterName: String): Option[ParameterValue[_]] = {
         plugin.getParameter(parameterName).flatMap(p => getParameterValue(p))
     }

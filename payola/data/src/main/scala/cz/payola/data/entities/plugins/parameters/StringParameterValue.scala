@@ -3,6 +3,10 @@ package cz.payola.data.entities.plugins.parameters
 import cz.payola.data.entities.plugins.ParameterValue
 import cz.payola.data.PayolaDB
 
+/**
+  * This obejct converts [[cz.payola.domain.entities.plugins.parameters.StringParameterValue]]
+  * to [[cz.payola.data.entities.plugins.parameters.StringParameterValue]]
+  */
 object StringParameterValue {
 
     def apply(p: cz.payola.domain.entities.plugins.parameters.StringParameterValue): StringParameterValue = {
@@ -12,7 +16,7 @@ object StringParameterValue {
                 val parameter = StringParameter(p.parameter.asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter])
                 val parameterValue = new StringParameterValue(p.id, parameter, p.value)
 
-                parameter.registerParameterValue(parameterValue)
+                parameter.associateParameterValue(parameterValue)
 
                 parameterValue
             }

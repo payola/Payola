@@ -2,6 +2,11 @@ package cz.payola.domain.entities.plugins
 
 import cz.payola.domain.entities._
 
+/**
+  * @param _name Name of the parameter.
+  * @param _defaultValue Default value of the parameter.
+  * @tparam A Type of the parameter value.
+  */
 abstract class Parameter[A](protected val _name: String, protected val _defaultValue: A)
     extends Entity with cz.payola.common.entities.plugins.Parameter[A]
 {

@@ -6,6 +6,9 @@ import cz.payola.data.dao.{PluginInstanceDAO, PluginInstanceBindingDAO}
 import org.squeryl.annotations.Transient
 import cz.payola.data.entities.plugins.PluginInstance
 
+/**
+  * This object converts [[cz.payola.common.entities.Analysis]] to [[cz.payola.data.entities.Analysis]]
+  */
 object Analysis {
 
     def apply(a: cz.payola.common.entities.Analysis): Analysis = {
@@ -81,7 +84,7 @@ class Analysis(
 
     override protected def storePluginInstance(instance: Analysis#PluginInstanceType) {
         val i = PluginInstance(instance)
-        super.storePluginInstance(associate(i, _pluginInstancesQuery).get)
+        super.storePluginInstance(associate(i, _pluginInstancesQuery))
 
         // SQUERYL: Paramters can be associated after the plugin instance is persisted
         i.associateParameterValues()
@@ -95,7 +98,7 @@ class Analysis(
     }
 
     override protected def storeBinding(binding: Analysis#PluginInstanceBindingType) {
-        super.storeBinding(associate(PluginInstanceBinding(binding), _pluginInstancesBindingsQuery).get)
+        super.storeBinding(associate(PluginInstanceBinding(binding), _pluginInstancesBindingsQuery))
     }
 
     override protected def discardBinding(binding: Analysis#PluginInstanceBindingType) {

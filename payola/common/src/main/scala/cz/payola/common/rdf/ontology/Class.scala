@@ -1,47 +1,30 @@
 package cz.payola.common.rdf.ontology
 
-trait Class
-{
-    val URI: String
-
-    val label: String
-
-    val comment: String
-
-    def properties: collection.Seq[Property]
-
-    def superclasses: collection.Seq[Class]
-}
-
-/* TODO
-
-package cz.payola.common.rdf.ontology
-
 import scala.collection.immutable
 
 /**
   * An ontology class of objects.
+  * @param URI URI of the class.
+  * @param label Label of the class.
+  * @param comment Comment of the class.
+  * @param properties Properties of the class indexed by their URIs.
   */
-trait Class
+class Class(val URI: String, val label: String, val comment: String, val properties: immutable.Map[String, Property])
 {
-    /** Type of the class property. */
-    type PropertyType <: Property
+    /**
+      * Merges this class with the other one.
+      * @param otherClass The class to merge with this class.
+      * @return A new merged class.
+      */
+    def +(otherClass: Class): Class = {
+        new Class(URI, label, comment, properties ++ otherClass.properties)
+    }
 
-    /** URI of the class. */
-    val URI: String
-
-    /** Label of the class. */
-    val label: String
-
-    /** Comment of the class. */
-    val comment: String
-
-    /** Properties of the class indexed by their URIs. */
-    val properties: immutable.Map[String, PropertyType]
-
-    /** Super classes of the class indexed by their URIs. */
-    val superClasses: immutable.Map[String, this.type]
+    override def toString: String = {
+        super.toString + " {\n\t" +
+            label + " (" + comment + ")\n\t"
+            "URI: " + URI + "\n\t" +
+            "Properties: " + properties.toString + "\n" +
+        "}"
+    }
 }
-
-
- */

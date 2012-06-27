@@ -1,25 +1,8 @@
 package cz.payola.common.rdf.ontology
 
-trait Property
-{
-    val URI: String
-
-    val typeURI: Option[String]
-}
-
-/* TODO
-
 /**
   * An ontology property of a class.
+  * @param URI URI of the property.
+  * @param typeURI URI of the property value type.
   */
-trait Property
-{
-    /** URI of the property. */
-    val URI: String
-
-    /** URI of the property value type. */
-    val typeURI: Option[String]
-}
-
-
-*/
+class Property(val URI: String, val typeURI: Option[String])

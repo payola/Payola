@@ -3,6 +3,11 @@ package cz.payola.data.entities.plugins
 import cz.payola.data.entities._
 import cz.payola.data.entities.plugins.parameters._
 
+/**
+  * This object converts [[cz.payola.common.entities.plugins.ParameterValue]] to proper parameter value
+  * in [[cz.payola.data.entities.plugins.parameters]] package.
+  *
+  */
 object ParameterValue
 {
     def apply(pv: cz.payola.common.entities.plugins.ParameterValue[_]): ParameterValue[_] = {
@@ -27,5 +32,8 @@ trait ParameterValue[A] extends cz.payola.domain.entities.plugins.ParameterValue
 
     var dataSourceId: Option[String] = None
 
+    /**
+      * @return Returns parameter this ParameterValue is associated to.
+      */
     override def parameter: ParameterType
 }

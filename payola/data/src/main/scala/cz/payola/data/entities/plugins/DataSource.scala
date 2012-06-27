@@ -6,6 +6,9 @@ import cz.payola.data.entities.plugins.parameters._
 import cz.payola.data.PayolaDB
 import org.squeryl.annotations.Transient
 
+/**
+  * This object converts [[cz.payola.common.entities.plugins.DataSource]] to [[cz.payola.data.entities.plugins.DataSource]]
+  */
 object DataSource
 {
     def apply(dataSource: cz.payola.common.entities.plugins.DataSource): DataSource = {

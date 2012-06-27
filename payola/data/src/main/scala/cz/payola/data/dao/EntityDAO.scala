@@ -3,6 +3,7 @@ package cz.payola.data.dao
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.{KeyedEntity, Table, Query}
 import collection.mutable.ArrayBuffer
+import cz.payola.data.DataException
 
 abstract class EntityDAO[A <: KeyedEntity[String]](protected val table: Table[A])
 {
@@ -24,18 +25,12 @@ abstract class EntityDAO[A <: KeyedEntity[String]](protected val table: Table[A]
       * @param id - id of an entity to remove
       * @return Returns true if entity is removed, false otherwise
       */
-    def removeById(id: String): Boolean = {
-        try {
+    def removeById(id: String): Boolean =
+        DataException.wrap {
             transaction {
-                val result = table.deleteWhere(e => id === e.id)
-
-                result == 1
+                table.deleteWhere(e => id === e.id) == 1
             }
         }
-        catch {
-            case e: Exception => {println("Removing error: " + e); throw e;}
-        }
-    }
 
     /**
       * Returns all entities from table. Result may be paginated.
@@ -54,8 +49,8 @@ abstract class EntityDAO[A <: KeyedEntity[String]](protected val table: Table[A]
       * @param entity - Entity to persist
       * @return Returns persisted entity
       */
-    protected def persist(entity: A): A = {
-        try {
+    protected def persist(entity: A): A =
+        DataException.wrap {
             // Insert or update entity {
             transaction {
                 if (getById(entity.id) != None) {
@@ -69,10 +64,6 @@ abstract class EntityDAO[A <: KeyedEntity[String]](protected val table: Table[A]
                 entity
             }
         }
-        catch {
-            case e: Exception => {println("Persistance error: " + e); throw e}
-        }
-    }
 
     /**
       * Evaluates specified query and returns only the first entity in the result.
@@ -80,9 +71,9 @@ abstract class EntityDAO[A <: KeyedEntity[String]](protected val table: Table[A]
       * @param query - query with 0 or 1 entitiy in result
       * @return Retuns Option of the first entity in result, None if result is empty
       */
-    protected final def evaluateSingleResultQuery(query: Query[A]): Option[A] = {
-        // Find single result an return its Option
-        try {
+    protected final def evaluateSingleResultQuery(query: Query[A]): Option[A] =
+        DataException.wrap {
+            // Find single result an return its Option
             transaction {
                 if (query.size == 0) {
                     None
@@ -92,10 +83,6 @@ abstract class EntityDAO[A <: KeyedEntity[String]](protected val table: Table[A]
                 }
             }
         }
-        catch {
-            case e: Exception => {println("Single-result query error: " + e); throw e;}
-        }
-    }
 
     /**
       * Evaluated specified query that returns collection of entities as a result.
@@ -105,12 +92,11 @@ abstract class EntityDAO[A <: KeyedEntity[String]](protected val table: Table[A]
       * @param pagination - Optionally specified pagination of the query
       * @return Returns collection of entities as a result of the query
       */
-    protected final def evaluateCollectionResultQuery(query: Query[A], pagination: Option[PaginationInfo]) = {
+    protected final def evaluateCollectionResultQuery(query: Query[A], pagination: Option[PaginationInfo]) =
+        DataException.wrap {
+            // Get all entities or paginate
+            val q = pagination.map(p => query.page(p.skip, p.limit)).getOrElse(query)
 
-        // Get all entities or paginate
-        val q = pagination.map(p => query.page(p.skip, p.limit)).getOrElse(query)
-
-        try {
             transaction {
                 val entities: ArrayBuffer[A] = new ArrayBuffer[A]()
 
@@ -121,8 +107,4 @@ abstract class EntityDAO[A <: KeyedEntity[String]](protected val table: Table[A]
                 entities.toSeq
             }
         }
-        catch {
-            case e: Exception => {println("Collection-result query error: " + e); throw e;}
-        }
-    }
 }

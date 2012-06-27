@@ -127,14 +127,6 @@ class Analysis(protected var _name: String, protected var _owner: Option[User])
       */
     def outputInstance: Option[PluginInstance] = outputInstances.headOption
 
-    /* TODO
-    def sources = {
-        pluginInstances.diff(pluginInstanceBindings.map(b => b.targetPluginInstance))
-    }
-
-    def outputs = {
-        pluginInstances.diff(pluginInstanceBindings.map(b => b.sourcePluginInstance))
-    }*/
 
     /**
       * Adds a new plugin instance to the analysis.
@@ -164,11 +156,11 @@ class Analysis(protected var _name: String, protected var _owner: Option[User])
     def removePluginInstance(instance: PluginInstanceType): Option[PluginInstanceType] = {
         ifContains(pluginInstances, instance) {
             invalidatePluginInstanceBindings()
-            discardPluginInstance(instance)
             val bindingsToRemove = pluginInstanceBindings.filter { binding =>
                 binding.sourcePluginInstance == instance || binding.targetPluginInstance == instance
             }
             removeBindings(bindingsToRemove: _*)
+            discardPluginInstance(instance)
         }
     }
 

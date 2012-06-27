@@ -5,6 +5,9 @@ import org.squeryl.annotations.Transient
 import cz.payola.data.dao._
 import cz.payola.data.entities.plugins.DataSource
 
+/**
+  * This object converts [[cz.payola.common.entities.User]] to [[cz.payola.common.entities.User]]
+  */
 object User {
 
     def apply(u: cz.payola.common.entities.User): User = {
@@ -44,8 +47,9 @@ class User(
     override def ownedGroups: collection.Seq[GroupType] = {
         if (!_ownedGroupsLoaded) {
             evaluateCollection(_ownedGroupsQuery).map(g => 
-                if (!super.ownedGroups.contains(g))
+                if (!super.ownedGroups.contains(g)) {
                     super.storeOwnedGroup(g)
+                }
             )
 
             _ownedGroupsLoaded = true
@@ -57,8 +61,9 @@ class User(
     override def ownedAnalyses: collection.Seq[AnalysisType] = {
         if (!_ownedAnalysesLoaded) {
             evaluateCollection(_ownedAnalysesQuery).map(a => 
-                if (!super.ownedAnalyses.contains(a))
+                if (!super.ownedAnalyses.contains(a)) {
                     super.storeOwnedAnalysis(a)
+                }
             )
 
             _ownedAnalysesLoaded = true
@@ -70,8 +75,9 @@ class User(
     override def ownedDataSources: collection.Seq[DataSourceType] = {
         if (!_ownedDataSourcesLoaded) {
             evaluateCollection(_ownedDataSourcesQuery).map(ds =>
-                if (!super.ownedDataSources.contains(ds))
+                if (!super.ownedDataSources.contains(ds)) {
                     super.storeOwnedDataSource(ds)
+                }
             )
 
             _ownedDataSourcesLoaded = true
@@ -81,15 +87,15 @@ class User(
     }
 
     override protected def storeOwnedAnalysis(analysis: User#AnalysisType) {
-        super.storeOwnedAnalysis(associate(Analysis(analysis), _ownedAnalysesQuery).get)
+        super.storeOwnedAnalysis(associate(Analysis(analysis), _ownedAnalysesQuery))
     }
 
     override protected def storeOwnedGroup(group: User#GroupType) {
-        super.storeOwnedGroup(associate(Group(group), _ownedGroupsQuery).get)
+        super.storeOwnedGroup(associate(Group(group), _ownedGroupsQuery))
     }
 
     override protected def storeOwnedDataSource(source: User#DataSourceType) {
-        super.storeOwnedDataSource(associate(DataSource(source), _ownedDataSourcesQuery).get)
+        super.storeOwnedDataSource(associate(DataSource(source), _ownedDataSourcesQuery))
     }
 
     override protected def discardOwnedAnalysis(analysis: User#AnalysisType) {

@@ -9,6 +9,10 @@ import cz.payola.data.entities.plugins.parameters._
 import cz.payola.data.entities._
 import cz.payola.data.entities.plugins._
 
+/**
+  * This is database definition that uses Squeryl.
+  * v http://www.squeryl.org).
+  */
 object PayolaDB extends Schema
 {
     /**
@@ -286,7 +290,7 @@ object PayolaDB extends Schema
       */
     def connect(test: Boolean = false) {
         // TODO: Read from config file, remove test variable
-        val databaseLocation: String = "jdbc:h2:tcp://localhost/~/h2/payola{0}".format(if(test) ".test" else "")
+        val databaseLocation: String = "jdbc:h2:tcp://localhost/~/h2/payola%s".format(if(test) ".test" else "")
         val userName: String = "sa"
         val password: String = ""
 
@@ -313,7 +317,7 @@ object PayolaDB extends Schema
       * Defines and creates all tables and foreign-key contstraints between tables.
       * Before schema is created, existing schema is dropped.
       */
-    def createSchema()  {
+    def createSchema() {
         on(users)(user =>
             declare(
                 user.id is (primaryKey),
@@ -452,5 +456,4 @@ object PayolaDB extends Schema
     {
         def id = compositeKey(memberId, groupId)
     }
-
 }

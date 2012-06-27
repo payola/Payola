@@ -5,6 +5,9 @@ import cz.payola.domain.entities.Plugin
 import cz.payola.domain.entities.plugins._
 import cz.payola.domain.rdf.Graph
 
+/**
+  * A plugin that is used to fetch RDF data using SPARQL queries, fetch neighbourhood of a particular node etc.
+  */
 abstract class DataFetcher(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
     extends Plugin(name, inputCount, parameters, id)
 {
@@ -17,10 +20,6 @@ abstract class DataFetcher(name: String, inputCount: Int, parameters: immutable.
         }"""
 
     private val selectFirstTripleQuery = selectEverythingQuery + " LIMIT 1"
-
-    def getFirstTriple(instance: PluginInstance): Graph = {
-        executeQuery(instance, selectFirstTripleQuery)
-    }
 
     def evaluate(instance: PluginInstance, inputs: IndexedSeq[Option[Graph]], progressReporter: Double => Unit) = {
         evaluateWithQuery(instance, selectEverythingQuery, progressReporter)
@@ -45,6 +44,15 @@ abstract class DataFetcher(name: String, inputCount: Int, parameters: immutable.
       * @return The result of the query.
       */
     def executeQuery(instance: PluginInstance, query: String): Graph
+
+    /**
+      * Returns the first available triple.
+      * @param instance The corresponding instance.
+      * @return The triple represented as a graph.
+      */
+    def getFirstTriple(instance: PluginInstance): Graph = {
+        executeQuery(instance, selectFirstTripleQuery)
+    }
 
     /**
       * Returns neighbourhood of the specified node.

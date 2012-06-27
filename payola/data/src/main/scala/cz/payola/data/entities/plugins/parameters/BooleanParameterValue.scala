@@ -3,6 +3,10 @@ package cz.payola.data.entities.plugins.parameters
 import cz.payola.data.entities.plugins._
 import cz.payola.data.PayolaDB
 
+/**
+  * This object converts [[cz.payola.domain.entities.plugins.parameters.BooleanParameterValue]]
+  * to [[cz.payola.data.entities.plugins.parameters.BooleanParameterValue]]
+  */
 object BooleanParameterValue {
 
     def apply(p: cz.payola.domain.entities.plugins.parameters.BooleanParameterValue): BooleanParameterValue = {
@@ -12,7 +16,7 @@ object BooleanParameterValue {
                 val parameter = BooleanParameter(p.parameter.asInstanceOf[cz.payola.domain.entities.plugins.parameters.BooleanParameter])
                 val parameterValue = new BooleanParameterValue(p.id, parameter, p.value)
 
-                parameter.registerParameterValue(parameterValue)
+                parameter.associateParameterValue(parameterValue)
 
                 parameterValue
             }

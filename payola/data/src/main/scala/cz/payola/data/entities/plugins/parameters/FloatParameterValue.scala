@@ -3,6 +3,10 @@ package cz.payola.data.entities.plugins.parameters
 import cz.payola.data.entities.plugins._
 import cz.payola.data.PayolaDB
 
+/**
+  * This object converts [[cz.payola.domain.entities.plugins.parameters.FloatParameterValue]]
+  * to [[cz.payola.data.entities.plugins.parameters.FloatParameterValue]]
+  */
 object FloatParameterValue {
 
     def apply(p: cz.payola.domain.entities.plugins.parameters.FloatParameterValue): FloatParameterValue = {
@@ -12,7 +16,7 @@ object FloatParameterValue {
                 val parameter = FloatParameter(p.parameter.asInstanceOf[cz.payola.domain.entities.plugins.parameters.FloatParameter])
                 val parameterValue = new FloatParameterValue(p.id, parameter, p.value)
 
-                parameter.registerParameterValue(parameterValue)
+                parameter.associateParameterValue(parameterValue)
 
                 parameterValue
             }

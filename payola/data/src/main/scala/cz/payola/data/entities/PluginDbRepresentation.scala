@@ -6,6 +6,9 @@ import cz.payola.data.entities.plugins._
 import cz.payola.data.entities.plugins.parameters._
 import cz.payola.domain.entities.Plugin
 
+/**
+  * This objects converts [[cz.payola.domain.entities.Plugin]] to [[cz.payola.data.entities.PluginDbRepresentation]]
+  */
 object PluginDbRepresentation
 {
     def apply(p: Plugin): PluginDbRepresentation = {
@@ -41,14 +44,24 @@ class PluginDbRepresentation(
 
     private lazy val _stringParameters = PayolaDB.stringParametersOfPlugins.left(this)
 
+    /**
+      * @return Returns all associated [[cz.payola.data.entities.plugins.PluginInstance]]s.
+      */
     def pluginInstances: Seq[PluginInstance] = {
         evaluateCollection(_pluginInstancesQuery)
     }
 
+    /**
+      * @return Returns all assicated [[cz.payola.data.entities.plugins.plugins.DataSource]]s.
+      */
     def dataSources: Seq[DataSource] = {
         evaluateCollection(_dataSourcesQuery)
     }
 
+    /**
+      *
+      * @return Rerurns list of assicated [[cz.payola.data.entities.plugins.Parameter]]s.
+      */
     def parameters: Seq[Parameter[_]] = {
         if (!_parametersLoaded) {
             params = List(
@@ -64,6 +77,11 @@ class PluginDbRepresentation(
         params
     }
 
+    /**
+      * Associates specified [[cz.payola.data.entities.plugins.Parameter]] to represented plugin.
+      *
+      * @param parameter - parameter to be associated to represented plugin
+      */
     def addParameter(parameter: Parameter[_]) {
         parameter match {
             case b: BooleanParameter => associate(b, _booleanParameters)
@@ -73,15 +91,32 @@ class PluginDbRepresentation(
         }
     }
 
+    /**
+      * Represented plugin is instantiated.
+      *
+      * @return Returns reperesented plugin.
+      */
     def createPlugin(): Plugin = {
         // Return properly instantiated Plugin
         instantiate(pluginClass, name, new java.lang.Integer(inputCount), parameters, id)
     }
 
+    /**
+      * If specifeid [[cz.payola.data.entities.plugins.PluginInstance]] is instance of represented plugin,
+      * relation between them is created by this method.
+      *
+      * @param i - plugin instance to associate to represented plugin
+      */
     def registerPluginInstance(i: cz.payola.data.entities.plugins.PluginInstance) {
         associate(i, _pluginInstancesQuery)
     }
 
+    /**
+      * If specifeid [[cz.payola.data.entities.plugins.plugins.DataSource]] should be related to represented plugin,
+      * relation between them is created by this method.
+      *
+      * @param ds - data source to associate to represented plugin
+      */
     def registerDataSource(ds: cz.payola.data.entities.plugins.DataSource) {
         associate(ds, _dataSourcesQuery)
     }

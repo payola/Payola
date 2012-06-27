@@ -6,6 +6,9 @@ import scala.collection.immutable
 import org.squeryl.annotations.Transient
 import cz.payola.data.entities._
 
+/**
+  * This object converts [[cz.payola.common.entities.plugins.PluginInstance]] to [[cz.payola.data.entities.plugins.PluginInstance]]
+  */
 object PluginInstance
 {
     def apply(p: cz.payola.common.entities.plugins.PluginInstance): PluginInstance = {
@@ -83,6 +86,9 @@ class PluginInstance(
         _paramValues
     }
 
+    /**
+      * This method associated all related [[cz.payola.data.entities.plugins.ParameterValue]]s.
+      */
     def associateParameterValues() {
         paramValues.map {
             case paramValue: BooleanParameterValue => associate(paramValue, _booleanParameterValues)
