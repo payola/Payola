@@ -21,6 +21,28 @@ abstract class Entity(val id: String = IDGenerator.newId) extends cz.payola.comm
         }
     }
 
+    protected def addOwnedEntity[A <: OptionallyOwnedEntity](entity: A, ownedEntities: Seq[A], storer: A => Unit) {
+        addOwnedEntity(entity, entity.owner, ownedEntities, storer)
+    }
+
+    protected def addOwnedEntity[A, B](entity: A, entityOwner: Option[B], ownedEntities: Seq[A], storer: A => Unit) {
+        require(entityOwner.exists(_ == this), "The entity owner doesn't correpond to the current entity.")
+        addRelatedEntity(entity, ownedEntities, storer)
+    }
+
+    protected def addRelatedEntity[A](entity: A, relatedEntities: Seq[A], storer: A => Unit) {
+        require(entity != null, "The entity mustn't be null.")
+        require(!relatedEntities.contains(entity), "The entity is already there.")
+        storer(entity)
+    }
+
+    protected def removeRelatedEntity[A](entity: A, relatedEntities: Seq[A], discarder: A => Unit): Option[A] = {
+        require(entity != null, "Entity mustn't be null.")
+        ifContains[A](relatedEntities, entity) {
+            discarder(entity)
+        }
+    }
+
     /**
       * Checks conditions that should always hold. If the entity is inconsistent (i.e. one of the invariants doesn't
       * hold), an exception is thrown.

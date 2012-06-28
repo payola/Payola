@@ -6,7 +6,7 @@ import scala.collection.mutable
   * A user-defined group of users. The user may share shareable entities not only to other users, but also to groups
   * of users.
   */
-trait Group extends NamedEntity
+trait Group extends NamedEntity with PrivilegableEntity
 {
     type UserType <: User
 

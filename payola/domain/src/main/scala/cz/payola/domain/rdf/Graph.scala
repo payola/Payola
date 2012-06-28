@@ -15,17 +15,6 @@ object Graph
       */
     def empty: Graph = new Graph(Nil, Nil)
 
-    /** Reads an RDF graph from input stream.
-      *
-      * @param is Input Stream.
-      * @param encoding Encoding of the input stream. UTF-8 by default.
-      * @return Instance of graph.
-      */
-    def apply(is: InputStream, encoding: String = "UTF-8"): Graph = {
-        val rdfXML: String = Source.fromInputStream(is, encoding).mkString
-        apply(rdfXML)
-    }
-
     /** Creates a new Graph instance from Jena's Model object.
       *
       * @param model Model.

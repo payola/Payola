@@ -9,6 +9,7 @@ import cz.payola.domain.entities.plugins.parameters.StringParameter
 import cz.payola.domain.rdf._
 import cz.payola.common.rdf.ontology.Ontology
 import cz.payola.domain.rdf.ontology.Ontology
+import cz.payola.domain.net.Downloader
 
 /** This plugin requires one parameter - an ontology URL. The ontology is then
   * loaded and a subgraph that corresponds to the ontology is returned.
@@ -38,37 +39,20 @@ class OntologicalFilter(name: String, inputCount: Int, parameters: immutable.Seq
         strippedGraphAccordingToOntology(definedInputs(0), ontology)
     }
 
-    private def getOntologyAtURL(url: String): Ontology = {
-        val connection = new java.net.URL(url).openConnection()
-        val requestProperties = Map(
-            "Accept" -> "application/rdf+xml"
-        )
-        requestProperties.foreach(p => connection.setRequestProperty(p._1, p._2))
-
-        Ontology(connection.getInputStream)
-    }
-
     /** Creates a new ontology sourced from the OntologyURLs parameter.
       *
       * @param instance Plugin instance.
       * @return Output graph.
       */
     private def getOntologyWithPluginInstance(instance: PluginInstance): Ontology = {
-        assert(instance.getStringParameter("OntologyURLs").isDefined, "OntologyURLs parameter must be defined")
+        usingDefined(instance.getStringParameter("OntologyURLs")) { (ontologyURLs: String) =>
+            // Assume that there can be more ontology urls separated by a newline.
+            val urls = ontologyURLs.split("\n").toList.filter(!_.isEmpty)
 
-        // Assume that there can be more ontologies separated by a newline
-        val urlList = instance.getStringParameter("OntologyURLs").get
-        val URLs = urlList.split("\n").filter { p: String => !p.isEmpty}
-
-        assert(URLs.length != 0, "No URLs defined (empty string, or only whitespace!")
-
-        var resultingOntology = getOntologyAtURL(URLs(0))
-
-        for (i <- 1 until URLs.length) {
-            resultingOntology = resultingOntology + getOntologyAtURL(URLs(i))
+            // Download and merge all ontologies in parallel.
+            val ontologies = urls.par.map(url => Ontology(new Downloader(url, accept = "application/rdf+xml").result))
+            ontologies.fold(Ontology.empty)(_ + _)
         }
-
-        resultingOntology
     }
 
     /** Takes the graph parameter and filters out all vertices and edges that are not
