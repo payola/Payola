@@ -67,7 +67,7 @@ class Analysis(
         _owner
     }
 
-    override def pluginInstanceBindings: Seq[PluginInstanceBindingType] = {
+    override def pluginInstanceBindings: immutable.Seq[PluginInstanceBindingType] = {
         // Lazy-load related bindings only for first time
         if (!_pluginInstancesBindingsLoaded) {
             evaluateCollection(_pluginInstancesBindingsQuery).map(b =>

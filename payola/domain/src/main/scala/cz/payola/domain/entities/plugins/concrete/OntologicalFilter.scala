@@ -6,10 +6,11 @@ import cz.payola.domain.IDGenerator
 import cz.payola.domain.entities.Plugin
 import cz.payola.domain.entities.plugins._
 import cz.payola.domain.entities.plugins.parameters.StringParameter
-import cz.payola.domain.rdf._
-import cz.payola.common.rdf.ontology.Ontology
+import cz.payola.domain.rdf.Graph
 import cz.payola.domain.rdf.ontology.Ontology
 import cz.payola.domain.net.Downloader
+import cz.payola.common.rdf._
+import cz.payola.common.rdf.ontology.Ontology
 
 /** This plugin requires one parameter - an ontology URL. The ontology is then
   * loaded and a subgraph that corresponds to the ontology is returned.
@@ -63,12 +64,12 @@ class OntologicalFilter(name: String, inputCount: Int, parameters: immutable.Seq
       * @return Output graph.
       */
     private def strippedGraphAccordingToOntology(graph: Graph, ontology: Ontology): Graph = {
-        val vertices = new mutable.ListBuffer[Node]()
+        val vertices = new mutable.ListBuffer[Vertex]()
         val edges = new mutable.ListBuffer[Edge]()
 
-        graph.vertices foreach { n: Node =>
-            if (n.isInstanceOf[IdentifiedNode]) {
-                if (ontology.classes.contains(n.asInstanceOf[IdentifiedNode].uri)) {
+        graph.vertices foreach { n: Vertex =>
+            if (n.isInstanceOf[IdentifiedVertex]) {
+                if (ontology.classes.contains(n.asInstanceOf[IdentifiedVertex].uri)) {
                     vertices += n
                 }
             }
@@ -79,7 +80,7 @@ class OntologicalFilter(name: String, inputCount: Int, parameters: immutable.Seq
             if (vertices.contains(e.origin)) {
                 val cl = ontology.classes.get(e.origin.uri).get
                 if (cl.properties.contains(e.uri)) {
-                    if (e.destination.isInstanceOf[IdentifiedNode] && vertices.contains(e.destination)) {
+                    if (e.destination.isInstanceOf[IdentifiedVertex] && vertices.contains(e.destination)) {
                         edges += e
                     } else {
                         // Literal -> add it to vertices and add the edge
@@ -90,6 +91,6 @@ class OntologicalFilter(name: String, inputCount: Int, parameters: immutable.Seq
             }
         }
 
-        new Graph(vertices, edges)
+        new Graph(vertices.toList, edges.toList)
     }
 }

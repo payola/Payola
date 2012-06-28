@@ -13,7 +13,7 @@ import cz.payola.web.client.views.plugins.visual.settings.components.visualsetup
 import cz.payola.web.client.views.plugins.visual._
 import cz.payola.web.client.mvvm.element.{Anchor, ListItem, Text}
 import settings.{VertexSettingsModel, TextSettingsModel, EdgeSettingsModel}
-import  cz.payola.domain.rdf.{IdentifiedNode, LiteralNode, Edge, Graph}
+import  cz.payola.domain.rdf.{IdentifiedVertex, LiteralVertex, Edge, Graph}
 import cz.payola.web.shared.GraphFetcher
 import cz.payola.common.rdf.IdentifiedVertex
 

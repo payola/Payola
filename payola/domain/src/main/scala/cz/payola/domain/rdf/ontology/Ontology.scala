@@ -12,15 +12,15 @@ object Ontology
     /**
       * Returns an empty ontology.
       */
-    def empty: Ontology = new Ontology(Map.empty[String, Class], Map.empty[String, Seq[String]])
+    def empty: Ontology = new Ontology(Map.empty[String, Class], Map.empty[String, List[String]])
 
     /**
       * Creates a new ontology from a string which contains a XML document with either RDFS or OWL ontology.
-      * @param ontologyString XML document.
+      * @param ontology XML document.
       * @return A new instance of the ontology class.
       */
-    def apply(ontologyString: String): Ontology = {
-        val reader = new java.io.StringReader(ontologyString)
+    def apply(ontology: String): Ontology = {
+        val reader = new java.io.StringReader(ontology)
 
         // At this moment we don't allow any other format/ as both OWL and RDFS should theoretically come in XML
         // format only.
@@ -30,9 +30,9 @@ object Ontology
         val jenaModel = jena.rdf.model.ModelFactory.createOntologyModel()
         jenaModel.read(reader, inputType)
 
-        val ontology = Ontology(jenaModel)
+        val result = Ontology(jenaModel)
         jenaModel.close()
-        ontology
+        result
     }
 
     /**
@@ -50,7 +50,7 @@ object Ontology
 
         val classIterator = ontologyModel.listClasses()
         while (classIterator.hasNext) {
-            val ontClass = classIterator.next()
+            val ontClass = classIterator.next
             val uri = ontClass.getURI
             if (uri != null) {
                 // Process the class.
@@ -61,12 +61,12 @@ object Ontology
                 val superClassIterator = ontClass.listSuperClasses()
                 val classSuperClasses = superClasses.getOrElseUpdate(uri, mutable.Buffer.empty[String])
                 while (superClassIterator.hasNext) {
-                    classSuperClasses += superClassIterator.next().getURI
+                    classSuperClasses += superClassIterator.next.getURI
                 }
             }
         }
 
-        new Ontology(classes.toMap, superClasses.mapValues(_.toSeq).toMap)
+        new Ontology(classes.toMap, superClasses.mapValues(_.toList).toMap)
     }
 
     /**
@@ -79,7 +79,7 @@ object Ontology
         val properties = mutable.HashMap.empty[String, mutable.HashMap[String, Property]]
         val propertyIterator = ontologyModel.listAllOntProperties()
         while (propertyIterator.hasNext) {
-            val property = propertyIterator.next()
+            val property = propertyIterator.next
             processProperty(property).foreach { p =>
                 val domainUri = property.getDomain.getURI
                 val classProperties = properties.getOrElseUpdate(domainUri, mutable.HashMap.empty[String, Property])

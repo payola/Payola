@@ -1,8 +1,9 @@
 package cz.payola.common.entities
 
-import scala.collection.mutable
+import scala.collection._
 import cz.payola.common.entities.plugins.DataSource
 import cz.payola.common.entities.settings.ontology.Customization
+import scala.Seq
 
 /**
   * An user of the application.
@@ -56,16 +57,16 @@ trait User extends NamedEntity with PrivilegableEntity
     }
 
     /** The groups that are owned by the user. */
-    def ownedGroups: Seq[GroupType] = _ownedGroups
+    def ownedGroups: immutable.Seq[GroupType] = _ownedGroups.toList
 
     /** The analyses that are owned by the user. */
-    def ownedAnalyses: Seq[AnalysisType] = _ownedAnalyses
+    def ownedAnalyses: immutable.Seq[AnalysisType] = _ownedAnalyses.toList
 
     /** The data sources that are owned by the user. */
-    def ownedDataSources: Seq[DataSourceType] = _ownedDataSources
+    def ownedDataSources: immutable.Seq[DataSourceType] = _ownedDataSources.toList
 
     /** Ontology customizations of the user. */
-    def ownedOntologyCustomizations: Seq[OntologyCustomizationType] = _ontologyCustomizations
+    def ownedOntologyCustomizations: immutable.Seq[OntologyCustomizationType] = _ontologyCustomizations.toList
 
     /**
       * Stores the specified analysis to the users owned analyses.

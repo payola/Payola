@@ -7,7 +7,8 @@ import scala.collection._
   * @param classes The classes in the ontology indexed by their URIs.
   * @param superClasses The super class relation between the classes in the ontology.
   */
-class Ontology(val classes: Map[String, Class], val superClasses: Map[String, Seq[String]])
+class Ontology(val classes: immutable.Map[String, Class],
+    val superClasses: immutable.Map[String, immutable.Seq[String]])
 {
     /**
       * Merges this ontology with the other one into a new one.
@@ -29,6 +30,6 @@ class Ontology(val classes: Map[String, Class], val superClasses: Map[String, Se
             }
         }
 
-        new Ontology(mergedClasses.toMap, mergedSuperClasses.toMap)
+        new Ontology(mergedClasses.toMap, mergedSuperClasses.mapValues(_.toList).toMap)
     }
 }

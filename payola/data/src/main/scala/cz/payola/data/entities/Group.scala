@@ -2,6 +2,7 @@ package cz.payola.data.entities
 
 import cz.payola.data.PayolaDB
 import org.squeryl.annotations.Transient
+import scala.collection.immutable
 
 /**
   * This object converts [[cz.payola.common.entities.Group]] to [[cz.payola.data.entities.Group]]
@@ -31,7 +32,7 @@ class Group(
     private var _groupMembersLoaded = false
     private lazy val _groupMembersQuery = PayolaDB.groupMembership.right(this)
 
-    override def members: collection.Seq[UserType] = {
+    override def members: immutable.Seq[UserType] = {
         if (!_groupMembersLoaded) {
             evaluateCollection(_groupMembersQuery).map(u =>
                 if (!super.members.contains(u)) {

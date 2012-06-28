@@ -1,351 +1,179 @@
 package cz.payola.domain.rdf
 
-import com.hp.hpl.jena.rdf.model._
-import collection.mutable.HashMap
+import scala.collection._
 import com.hp.hpl.jena.query._
-import java.io._
-import scala.io.Source
+import com.hp.hpl.jena.rdf.model._
+import cz.payola.common.rdf._
+import cz.payola.domain.DomainException
 
 object Graph
 {
-
-    /** Create a new empty graph.
-      *
-      * @return Empty graph instance.
+    /**
+      * Returns a new empty graph.
       */
     def empty: Graph = new Graph(Nil, Nil)
 
-    /** Creates a new Graph instance from Jena's Model object.
-      *
-      * @param model Model.
-      * @return New graph instance.
+    /**
+      * Takes a string representing a RDF data and returns an instance of Graph representing that particular graph.
+      * @param representation Type of the RDF data representation.
+      * @param data The RDF data of the graph.
+      * @return A new graph instance.
       */
-    def apply(model: Model): Graph = {
-        val factory = new GraphFactory(model)
-        factory.getGraph
+    def apply(representation: RdfRepresentation.Type, data: String): Graph = {
+        val model = ModelFactory.createDefaultModel
+        val language = representation match {
+            case RdfRepresentation.RdfXml => "RDF/XML"
+            case RdfRepresentation.Turtle => "TURTLE"
+        }
+        model.read(new java.io.StringReader(data), null, language)
+
+        val graph = Graph(model)
+        model.close()
+        graph
     }
 
-    /** Takes a XML or TTL string representing an RDF graph and returns an instance
-      * of Graph representing that particular graph.
-      *
-      * @param rdfString XML or TTL representation of the graph.
-      * @return The graph.
+    /**
+      * Creates a new Graph instance from an instance of [[com.hp.hpl.jena.rdf.model.Model]].
+      * @param model The model to create the graph from.
+      * @return A new graph instance.
       */
-    def apply(rdfString: String): Graph = {
-        val reader = new StringReader(rdfString)
+    private def apply(model: Model): Graph = {
+        val literalVertices = mutable.ListBuffer.empty[LiteralVertex]
+        val edges = mutable.HashSet.empty[Edge]
+        val identifiedVertices = mutable.HashMap.empty[String, IdentifiedVertex]
+        def getIdentifiedVertex(uri: String) = identifiedVertices.getOrElseUpdate(uri, new IdentifiedVertex(uri))
 
-        // Guess the input language. By default, Jena assumes it's
-        // RDF/XML - would fail if the input was Turtle. So, we use
-        // (at the moment) very primitive heuristic that XML files
-        // begin (or they should) with a '<' char.
-        var inputType = "RDF/XML"
-        if (!rdfString.startsWith("<")) {
-            inputType = "TURTLE"
+        // Process the vertices.
+        val subjectIterator = model.listSubjects
+        while (subjectIterator.hasNext) {
+            val subject = subjectIterator.nextResource
+            val origin = getIdentifiedVertex(subject.getURI)
+
+            // Process the edges that originate in the current vertex.
+            val propertyIterator = subject.listProperties
+            while (propertyIterator.hasNext) {
+                val statement = propertyIterator.nextStatement
+                val predicate = statement.getPredicate
+                val obj = statement.getObject
+                val destination = if (obj.isLiteral) {
+                    val lv = LiteralVertex(obj.asLiteral, statement)
+                    literalVertices += lv
+                    lv
+                } else {
+                    getIdentifiedVertex(obj.asResource.getURI)
+                }
+
+                edges += new Edge(origin, destination, predicate.getURI)
+            }
         }
 
-        // Create a model and read it from the input string
-        val model = ModelFactory.createDefaultModel
-        model.read(reader, null, inputType)
-
-        val g = apply(model)
-        model.close()
-        g
+        new Graph(literalVertices.toList ++ identifiedVertices.values, edges.toList)
     }
-
-    /** Creates a new graph merged from graphs represented by RDF strings passed
-      * as argument.
-      *
-      * @param rdfStrings XML or TTL representations of RDF graphs.
-      * @return New graph instance.
-      */
-    def apply(rdfStrings: String*): Graph = {
-        var g: Graph = null
-        rdfStrings.foreach({s: String =>
-            if (g == null) {
-                g = Graph(s)
-            } else {
-                g = g + Graph(s)
-            }
-        })
-
-        g
-    }
-
-    /** Merges two graphs into a new one. Equivalent to g1 + g2.
-      *
-      * @param g1 First graph.
-      * @param g2 Second graph.
-      * @return New instance with merged vertices and edges.
-      */
-    def merge(g1: Graph, g2: Graph): Graph = {
-        GraphMerger(g1, g2)
-    }
-
 }
 
-class Graph(protected val _vertices: List[Node], protected val _edges: List[Edge])
-    extends cz.payola.common.rdf.Graph
+class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge])
+    extends cz.payola.common.rdf.Graph(vertices, edges)
 {
-    /** A secondary constructor which converts any other collection to list.
-      *
-      * @param verts Vertices.
-      * @param es Edges.
-      * @return New graph instance.
-      */
-    def this(verts: Traversable[Node], es: Traversable[Edge]) = this(verts.toList, es.toList)
-
-    type EdgeType = Edge
-
-    /** Creates a new graph with contents of this graph and otherGraph.
-      *
+    /**
+      * Creates a new graph with contents of this graph and the specified other graph.
       * @param otherGraph The graph to be merged.
       * @return A new Graph instance.
       */
     def +(otherGraph: Graph): Graph = {
-        // Create an empty graph and merge this and otherGraph into it
-        Graph.merge(this, otherGraph)
-    }
-
-    /** Adds an equivalent of the Edge e to the model.
-      *
-      * @param e Edge.
-      * @param hashMap HashMap of the Resource objects.
-      * @param model Model to be added to.
-      */
-    private def addEdgeToModel(e: Edge, hashMap: HashMap[String, Resource], model: Model) {
-        val prop: Property = ResourceFactory.createProperty(e.uri)
-        val res: Resource = getResourceInModelForIdentifiedNode(e.origin, hashMap, model)
-
-        val statement: Statement = createStatementForEdge(res, prop, e.destination, hashMap, model)
-        model.add(statement)
-    }
-
-    /** Returns whether this graph contains an edge that goes between the two
-      * nodes.
-      *
-      * @param origin Origin of the edge.
-      * @param destination Destination of the edge.
-      * @param edgeURI URI of the edge.
-      * @return True if there is such an edge.
-      */
-    def containsEdgeBetweenNodes(origin: IdentifiedNode, destination: Node, edgeURI: String): Boolean = {
-        GraphHelper.collectionContainsEdgeBetweenNodes(_edges, origin, destination, edgeURI)
-    }
-
-    /** Returns whether this graph contains an edge whose destination is the literalNode.
-      *
-      * @param literalNode Literal node.
-      * @return True of false.
-      */
-    def containsEdgeWithLiteralNode(literalNode: LiteralNode): Boolean = {
-        // The literal node must always be destination of the edge
-        _edges.find({ e: Edge => e.destination == literalNode }).isDefined
-    }
-
-    /** Returns whether this graph contains an edge with URI.
-      *
-      * @param edgeURI Edge URI.
-      * @return True of false.
-      */
-    def containsEdgeWithURI(edgeURI: String): Boolean = {
-        _edges.find(_.uri == edgeURI).isDefined
-    }
-
-    /** Returns whether this graph contains a vertex with these properties.
-      *
-      * @param value Value of the literal vertex.
-      * @param language Language of the literal vertex.
-      * @return True if there is such a vertex.
-      */
-    def containsLiteralVertexWithValue(value: Any, language: Option[String] = None): Boolean = {
-        getLiteralVertexWithValue(value, language).isDefined
-    }
-
-    def containsVertex(vertex: Node): Boolean = {
-        vertex match {
-            case iv: IdentifiedNode => containsVertexWithURI(iv.uri)
-            case lv: LiteralNode => containsLiteralVertexWithValue(lv.value, lv.language)
-            case _ => false
+        val mergedVertices = (vertices.toSet ++ otherGraph.vertices).toList
+        val mergedEdges = (edges.toSet ++ otherGraph.edges).toList.map { e =>
+            // We have to make sure that all edges reference vertices from the mergedVertices collection. It's sure
+            // that vertices equal to origin and destination would be found in the mergedVertices, because edges in the
+            // original graphs surely had origin and destination present in the graph vertices.
+            val origin = mergedVertices.find(_ == e.origin).get.asInstanceOf[IdentifiedVertex]
+            val destination = mergedVertices.find(_ == e.destination).get
+            new Edge(origin, destination, e.uri)
         }
+        new Graph(mergedVertices, mergedEdges)
     }
 
-    /** Returns whether this graph contains a vertex with these properties.
-      *
-      * @param vertexURI URI of the vertex.
-      * @return True if there is such a vertex.
-      */
-    def containsVertexWithURI(vertexURI: String): Boolean = {
-        getVertexWithURI(vertexURI).isDefined
-    }
-
-    /** Creates a statement - origin - property - destination. Origin and property
-      * are already the Jena objects, while destination is a Node.
-      *
-      * @param origin Origin.
-      * @param property Property.
-      * @param destination Destination.
-      * @param hashMap HashMap of Resource objects.
-      * @param model Model.
-      * @return Statement for this edge.
-      */
-    private def createStatementForEdge(origin: Resource, property: Property, destination: Node, hashMap: HashMap[String, Resource], model: Model): Statement = {
-        destination match {
-            case identifiedDestination: IdentifiedNode => {
-                val destinationResource: Resource = getResourceInModelForIdentifiedNode(identifiedDestination, hashMap, model)
-                origin.addProperty(property, destinationResource)
-                model.createStatement(origin, property, destinationResource)
-            }
-            case litDestination: LiteralNode => {
-                model.createStatement(origin, property, litDestination.value.toString, litDestination.language.getOrElse(""))
-            }
-            case _ => throw new IllegalArgumentException("Unknown node type " + destination.getClass)
-        }
-    }
-
-    /** Returns edges filtered by URI.
-      *
-      * @param edgeURI URI of the edge.
-      * @return A new sequence of edges with edgeURI.
-      */
-    def edgesWithURI(edgeURI: String): collection.Seq[Edge] = {
-        _edges.filter(_.uri == edgeURI)
-    }
-
-    /** Executes a construct SPARQL query on this graph and returns a new graph instance
-      * that consists of only the nodes that are in the query result.
-      *
-      * @param queryString SPARQL query string - mustn't be null.
-      * @return New instance of graph with vertices that are in the query result.
-      */
-    private def executeConstructSPARQLQuery(queryString: String): Graph = {
-        require(queryString != null && queryString != "", "Empty or NULL SPARQL query.")
-
-        val query = QueryFactory.create(queryString)
-        val model: Model = this.getModel
-
-        val execution: QueryExecution = QueryExecutionFactory.create(query, model)
-        val g = Graph(execution.execConstruct)
-
-        // Free up resources
-        execution.close()
-        model.close()
-
-        g
-    }
-
-    /** Executes a select SPARQL query on this graph and returns a new graph instance
-      * that consists of only the nodes that are in the query result.
-      *
-      * @param queryString SPARQL query string - mustn't be null.
-      * @return New instance of graph with vertices that are in the query result.
-      */
-    private def executeSelectSPARQLQuery(queryString: String): Graph = {
-        require(queryString != null && queryString != "", "Empty or NULL SPARQL query.")
-
-        val query = QueryFactory.create(queryString)
-        val model: Model = this.getModel
-
-        val execution: QueryExecution = QueryExecutionFactory.create(query, model)
-        val results: ResultSet = execution.execSelect
-
-        val output: ByteArrayOutputStream = new ByteArrayOutputStream()
-
-        ResultSetFormatter.outputAsRDF(output, "", results)
-        val resultingGraphXML: String = new String(output.toByteArray)
-
-        execution.close()
-        model.close()
-
-        Graph(resultingGraphXML)
-    }
-
-    /** Executes a given SPARQL query.
-      *
-      * @param queryString Query string.
+    /**
+      * Executes the specified SPARQL query.
+      * @param query The query to execute.
       * @return A graph that corresponds to the executed query result.
       */
-    def executeSPARQLQuery(queryString: String): Graph = {
-        if (queryString.contains("SELECT")) {
-            executeSelectSPARQLQuery(queryString)
-        } else if (queryString.contains("CONSTRUCT")) {
-            executeConstructSPARQLQuery(queryString)
-        } else {
-            // TODO ASK and possibly DESCRIBE?
-            throw new IllegalArgumentException("Unknown SPARQL query type (" + queryString + ")")
+    def executeSPARQLQuery(query: String): Graph = {
+        val sparqlQuery = QueryFactory.create(query)
+        val model = getModel
+        try {
+            val execution = QueryExecutionFactory.create(sparqlQuery, model)
+            try {
+                sparqlQuery.getQueryType() match {
+                    case Query.QueryTypeSelect => processSelectQueryExecution(execution)
+                    case Query.QueryTypeConstruct => processConstructQueryExecution(execution)
+                    case Query.QueryTypeAsk => throw new DomainException("An ASK query isn't supported.")
+                    case Query.QueryTypeDescribe => throw new DomainException("A DESCRIBE query isn't supported.")
+                    case _ => throw new DomainException("Unknown type of the query.")
+                }
+            } finally {
+                execution.close()
+            }
+        } finally {
+            model.close()
         }
     }
 
-    /** Returns a vertex with these properties or None if there is no such node.
-      *
-      * @param value Value of the literal vertex.
-      * @param language Language of the literal vertex.
-      * @return Vertex or None if there isn't one with such properties.
+    /**
+      * Processes a query execution corresponding to a SPARQL select query.
+      * @param execution The query execution to process.
+      * @return A graph containing the result of the query.
       */
-    def getLiteralVertexWithValue(value: Any, language: Option[String] = None): Option[LiteralNode] = {
-        GraphHelper.getLiteralVertexWithValueFromCollection(_vertices, value, language)
+    private def processSelectQueryExecution(execution: QueryExecution): Graph = {
+        val results = execution.execSelect
+        val output = new java.io.ByteArrayOutputStream()
+        ResultSetFormatter.outputAsRDF(output, "", results)
+        Graph(RdfRepresentation.RdfXml, new String(output.toByteArray))
     }
 
-    /** Creates a Jena model out of itself.
-      *
-      * WARNING: You are responsible for calling close() on the model after you're
-      * done working with it.
-      *
+    /**
+      * Processes a query execution corresponding to a SPARQL construct query.
+      * @param execution The query execution to process.
+      * @return A graph containing the result of the query.
+      */
+    private def processConstructQueryExecution(execution: QueryExecution): Graph = {
+        Graph(execution.execConstruct)
+    }
+
+    /**
+      * Creates a Jena model out of the graph. The model has to be closed using the 'close' method, after working with
+      * it is done.
       * @return Model representing this graph.
       */
-    def getModel: Model = {
-        val model: Model = ModelFactory.createDefaultModel()
+    private def getModel: Model = {
+        val model = ModelFactory.createDefaultModel()
 
-        // A hash map URI -> Resource
-        val hashMap = new HashMap[String, Resource]()
+        // A map of resources identified by their URIs.
+        val resources = mutable.HashMap.empty[String, Resource]
+        def getResource(uri: String): Resource = resources.getOrElseUpdate(uri, model.createResource(uri))
 
-        // Add all identified vertices right now.
-        _vertices foreach { n: Node =>
-            if (n.isInstanceOf[IdentifiedNode]) {
-                getResourceInModelForIdentifiedNode(n.asInstanceOf[IdentifiedNode], hashMap, model)
-            }
+        // Add all identified vertices.
+        vertices.foreach {
+            case iv: IdentifiedVertex => getResource(iv.uri)
+            case _ => // NOOP
         }
 
-        // Now add all edges
-        _edges foreach { e: Edge => addEdgeToModel(e, hashMap, model) }
+        // Add all the edges
+        edges.foreach { e =>
+            val origin = getResource(e.origin.uri)
+            val property = ResourceFactory.createProperty(e.uri)
+            val statement = e.destination match {
+                case iv: IdentifiedVertex => {
+                    val destination = getResource(iv.uri)
+                    origin.addProperty(property, destination)
+                    model.createStatement(origin, property, destination)
+                }
+                case lv: LiteralVertex => {
+                    model.createStatement(origin, property, lv.value.toString, lv.language.getOrElse(""))
+                }
+            }
+            model.add(statement)
+        }
 
         model
     }
-
-    /** Returns a Jena Resource object for the node. If there's no such object already saved
-      * in the hashMap, new Resource is created in the Model m.
-      *
-      * @param node Identified node.
-      * @param hashMap HashMap of created resources.
-      * @param m Model.
-      * @return Resource.
-      */
-    private def getResourceInModelForIdentifiedNode(node: IdentifiedNode, hashMap: HashMap[String, Resource], m: Model): Resource = {
-        getResourceInModelForURI(node.uri, hashMap, m)
-    }
-
-    /** Returns a Jena Resource object for uri. If there's no such object already saved
-      * in the hashMap, new Resource is created in the Model m.
-      *
-      * @param uri URI of the Resource.
-      * @param hashMap HashMap of created resources.
-      * @param model Model.
-      * @return Resource.
-      */
-    private def getResourceInModelForURI(uri: String, hashMap: HashMap[String, Resource], model: Model): Resource = {
-        hashMap.get(uri).getOrElse({
-            val r = model.createResource(uri)
-            hashMap.put(uri, r)
-            r
-        })
-    }
-
-    /** Returns a vertex with these properties or None if there is no such node.
-      *
-      * @param vertexURI URI of the vertex.
-      * @return Vertex or None if there isn't one with such properties.
-      */
-    def getVertexWithURI(vertexURI: String): Option[IdentifiedNode] = {
-        GraphHelper.getVertexWithURIFromCollection(_vertices, vertexURI)
-    }
-
 }
