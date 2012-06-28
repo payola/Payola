@@ -77,7 +77,6 @@ class PluginVerifier(val global: Global) extends Plugin
                                 val parameterTypes = constructor.vparamss.flatten.map(_.tpt)
                                 val parameterTypesAreValid = parameterTypes.map(_.symbol.fullName) match {
                                     case List("java.lang.String", "scala.Int", _, "java.lang.String") => {
-                                        println(parameterTypes(2).toString)
                                         parameterTypes(2).toString == "scala.collection.immutable.Seq[" +
                                             "cz.payola.domain.entities.plugins.Parameter[_]]"
                                     }
