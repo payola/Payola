@@ -1,38 +1,30 @@
-package cz.payola.data.entities.analyses
+package cz.payola.data.entities.plugins
 
 import cz.payola.data.PayolaDB
-import cz.payola.data.entities.PersistableEntity
-import cz.payola.data.entities.analyses.parameters._
+import cz.payola.data.entities.plugins.parameters._
 import scala.collection.immutable
 import org.squeryl.annotations.Transient
-import cz.payola.common.entities.plugins
+import cz.payola.data.entities._
 
-object PluginInstance {
-
-    def apply(p: plugins.PluginInstance): PluginInstance = {
+/**
+  * This object converts [[cz.payola.common.entities.plugins.PluginInstance]] to [[cz.payola.data.entities.plugins.PluginInstance]]
+  */
+object PluginInstance
+{
+    def apply(p: cz.payola.common.entities.plugins.PluginInstance): PluginInstance = {
         p match {
             case instance: PluginInstance => instance
             case _ => {
-                val paramValues = p.parameterValues.map(
-                    _ match {
-                        case b: BooleanParameterValue => b
-                        case f: FloatParameterValue => f
-                        case i: IntParameterValue => i
-                        case s: StringParameterValue => s
-                        case b: cz.payola.domain.entities.plugins.parameters.BooleanParameterValue => BooleanParameterValue(b)
-                        case f: cz.payola.domain.entities.plugins.parameters.FloatParameterValue => FloatParameterValue(f)
-                        case i: cz.payola.domain.entities.plugins.parameters.IntParameterValue => IntParameterValue(i)
-                        case s: cz.payola.domain.entities.plugins.parameters.StringParameterValue => StringParameterValue(s)
-                    }
-                )
+                val paramValues = p.parameterValues.map(ParameterValue(_))
 
-                val pluginDb = PluginDbRepresentation(p.plugin)
+                val pluginDb = PluginDbRepresentation(p.plugin.asInstanceOf[cz.payola.domain.entities.Plugin])
 
                 val instance = new PluginInstance(p.id, pluginDb.createPlugin(), paramValues, p.description)
 
                 // Create relation between plugin and this instance
                 pluginDb.registerPluginInstance(instance)
 
+                // Return converted PluginInstance
                 instance
             }
         }
@@ -50,7 +42,7 @@ class PluginInstance(
     var pluginId: Option[String] = if (plugin == null) None else Some(plugin.id)
 
     var analysisId: Option[String] = None
-    
+
     private lazy val _pluginQuery = PayolaDB.pluginsPluginInstances.right(this)
 
     private lazy val _booleanParameterValues = PayolaDB.booleanParameterValuesOfPluginInstances.left(this)
@@ -65,7 +57,8 @@ class PluginInstance(
     private var _parameterValuesLoaded = false
 
     @Transient
-    // This field represents val _parameterValues in common.PluginInstance - it cannot be overriden because it is immutable
+    // This field represents val _parameterValues in common.PluginInstance - it cannot be overriden because it is
+    // immutable
     // (can't be filled via lazy-loading)
     private var _paramValues: immutable.Seq[PluginType#ParameterValueType] = immutable.Seq()
 
@@ -79,7 +72,7 @@ class PluginInstance(
     }
 
     override def parameterValues: collection.immutable.Seq[PluginType#ParameterValueType] = {
-        if (!_parameterValuesLoaded ){
+        if (!_parameterValuesLoaded) {
             _paramValues = List(
                 evaluateCollection(_booleanParameterValues),
                 evaluateCollection(_floatParameterValues),
@@ -93,6 +86,9 @@ class PluginInstance(
         _paramValues
     }
 
+    /**
+      * This method associated all related [[cz.payola.data.entities.plugins.ParameterValue]]s.
+      */
     def associateParameterValues() {
         paramValues.map {
             case paramValue: BooleanParameterValue => associate(paramValue, _booleanParameterValues)

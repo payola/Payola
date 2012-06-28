@@ -4,130 +4,112 @@ import org.squeryl.{Query, KeyedEntity}
 import org.squeryl.PrimitiveTypeMode._
 import collection.mutable.ArrayBuffer
 import org.squeryl.dsl.{ManyToOne, OneToMany, ManyToMany}
+import cz.payola.data.DataException
 
+/**
+  * This trait provided persistance to entities and allows them to create relations with entities
+  * (if relation is defined in [[cz.payola.data.PayolaDB]] schema)
+  *
+  */
 trait PersistableEntity extends cz.payola.domain.entities.Entity with KeyedEntity[String]
-{ self: cz.payola.domain.entities.Entity =>
-
-    protected final def evaluateCollection[A](col: Query[A]): collection.Seq[A]  = {
-        try
-        {
+{
+    /**
+      * Evaluates query that should return a collection of entities as a result.
+      *
+      * @param query - Query that returns collection
+      * @tparam A - type of entities in result
+      * @return Returns collection of entities of type A
+      */
+    protected final def evaluateCollection[A](query: Query[A]): collection.Seq[A] =
+        DataException.wrap {
             transaction {
                 val entities: ArrayBuffer[A] = new ArrayBuffer[A]()
 
-                for (e <- col) {
+                for (e <- query) {
                     entities += e
                 }
 
                 entities.toSeq
             }
         }
-        catch {
-            case e: Exception => println("Collection evaluating failed: " + e.toString)
-            Seq()
-        }
-    }
 
-    protected final def associate[A <: PersistableEntity](entity: A, relation: ManyToMany[A,_]): Option[A] = {
-        try
-        {
+    /**
+      * Creates M:N relation of this entity and specified entity.
+      * Specified entity will be persisted.
+      *
+      * @param entity - specified entity that will be related with this entity
+      * @param relation - definition of M:N relation
+      * @tparam A - type of specified entity
+      * @return Returns persisted specified entity
+      */
+    protected final def associate[A <: PersistableEntity](entity: A, relation: ManyToMany[A,_]): A =
+        DataException.wrap {
             transaction {
                 if (relation.find(e => e.id == entity.id) == None) {
                     relation.associate(entity)
                 }
 
-                Some(entity)
+                // Return entity
+                entity
             }
         }
-        catch {
-            case e: Exception => println("M:N association failed: " + e.toString)
 
-            None
-        }
-    }
-
-    protected final def assign[A <: PersistableEntity](entity: A, relation: ManyToMany[A,_]): Option[A] = {
-        try
-        {
-            transaction {
-                if (relation.find(e => e.id == entity.id) == None) {
-                    relation.assign(entity)
-                }
-
-                Some(entity)
-            }
-        }
-        catch {
-            case e: Exception => println("M:N assign failed: " + e.toString)
-
-            None
-        }
-    }
-
-    protected final def dissociate[A <: PersistableEntity](entity: A, relation: ManyToMany[A,_]): Option[A] = {
-        try
-        {
+    /**
+      * Removes M:N relation between this entity and specified entity.
+      * No entity will be removed.
+      *
+      * @param entity - specified entity whose relation with this item should be removed
+      * @param relation - definition on M:N relation
+      * @tparam A - type of specified entity
+      * @return Returns specified entity
+      */
+    protected final def dissociate[A <: PersistableEntity](entity: A, relation: ManyToMany[A,_]): A =
+        DataException.wrap {
             transaction {
                 if (relation.find(e => e.id == entity.id) != None) {
                     relation.dissociate(entity)
                 }
 
-                Some(entity)
+                // Return entity
+                entity
             }
         }
-        catch {
-            case e: Exception => println("M:N dissociation failed: " + e.toString)
 
-            None
-        }
-    }
-
-    protected final def associate[A <: PersistableEntity](entity: A, relation: OneToMany[A]): Option[A] = {
-        try
-        {
+    /**
+      * Creates 1:N relation between this entity (on '1' side of relation) and specified entity (on 'N' side of relation).
+      * Specified entity wil be persisted
+      *
+      * @param entity - specified entity to be ralted with this entity
+      * @param relation  - definition of 1:N relation between this and specified entity
+      * @tparam A - type of specified entity
+      * @return Returns pesisted specified entity
+      */
+    protected final def associate[A <: PersistableEntity](entity: A, relation: OneToMany[A]): A =
+        DataException.wrap {
             transaction {
                 if (relation.find(e => e.id == entity.id) == None) {
                     relation.associate(entity)
                 }
 
-                Some(entity)
+                // Return entity
+                entity
             }
         }
-        catch {
-            case e: Exception => println("1:N association failed: " + e.toString)
-
-            None
-        }
-    }
 
     /**
       * Checks nothing, because SQUERYL fills constructors of Entities
       * with null values during DB schema initialization,
-      * so all inner checks would fail.
+      * so all inner checks would fail during this initialization.
       */
     override protected def checkConstructorPostConditions() {}
 
-    //TODO: just UGLY copy of cz.payola.domain.entities.Entity.equals
+    /**
+      * This method is a copy of [[cz.payola.domain.entities.Entity.equals]] method.
+      */
     override def equals(other: Any): Boolean = {
         other match {
             case that: cz.payola.domain.entities.Entity => that.canEqual(this) && this.id == that.id
             case _ => false
         }
     }
-
-    /*
-    protected final def assign[A <: PersistableEntity](entity: A, relation: OneToMany[A]) {
-        transaction {
-            if (relation.find(e => e.id == entity.id) == None) {
-                relation.assign(entity)
-            }
-        }
-    }
-    protected final def assign[A <: PersistableEntity](entity: A, relation: ManyToOne[A]) {
-        transaction {
-            if (relation.find(e => e.id == entity.id) == None) {
-                relation.assign(entity)
-            }
-        }
-    }
-    */
 }

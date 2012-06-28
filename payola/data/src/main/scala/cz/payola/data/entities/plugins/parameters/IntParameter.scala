@@ -1,8 +1,12 @@
-package cz.payola.data.entities.analyses.parameters
+package cz.payola.data.entities.plugins.parameters
 
-import cz.payola.data.entities.analyses.Parameter
+import cz.payola.data.entities.plugins.Parameter
 import cz.payola.data.PayolaDB
 
+/**
+  * This object converts [[cz.payola.common.entities.plugins.parameters.IntParameter]]
+  * to [[cz.payola.data.entities.plugins.parameters.IntParameter]]
+  */
 object IntParameter
 {
     def apply(p: cz.payola.common.entities.plugins.parameters.IntParameter): IntParameter = {
@@ -29,7 +33,12 @@ class IntParameter(
 
     def parameterValues: Seq[IntParameterValue] = evaluateCollection(_valuesQuery)
 
-    def registerParameterValue(p: IntParameterValue) {
+    /**
+      * Associates specified [[cz.payola.data.entities.plugins.parameters.IntParameter]].
+      *
+      * @param p - [[cz.payola.data.entities.plugins.parameters.IntParameter]] to associate
+      */
+    def associateParameterValue(p: IntParameterValue) {
         associate(p, _valuesQuery)
     }
 }

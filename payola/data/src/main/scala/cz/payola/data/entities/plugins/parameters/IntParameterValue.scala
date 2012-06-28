@@ -1,8 +1,12 @@
-package cz.payola.data.entities.analyses.parameters
+package cz.payola.data.entities.plugins.parameters
 
-import cz.payola.data.entities.analyses.ParameterValue
+import cz.payola.data.entities.plugins._
 import cz.payola.data.PayolaDB
 
+/**
+  * This objects converts [[cz.payola.domain.entities.plugins.parameters.IntParameterValue]]
+  * to [[cz.payola.data.entities.plugins.parameters.IntParameterValue]]
+  */
 object IntParameterValue {
 
     def apply(p: cz.payola.domain.entities.plugins.parameters.IntParameterValue): IntParameterValue = {
@@ -12,7 +16,7 @@ object IntParameterValue {
                 val parameter = IntParameter(p.parameter.asInstanceOf[cz.payola.domain.entities.plugins.parameters.IntParameter])
                 val parameterValue = new IntParameterValue(p.id, parameter, p.value)
 
-                parameter.registerParameterValue(parameterValue)
+                parameter.associateParameterValue(parameterValue)
 
                 parameterValue
             }
