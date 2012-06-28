@@ -36,7 +36,7 @@ class VirtuosoStorage(val server: String, val port: Int, val useSSL: Boolean = f
       * @param groupURI Group URI.
       */
     def createGroup(groupURI: String) {
-        executeSQLQuery("DB.DBA.RDF_GRAPH_GROUP_CREATE('" + groupURI + "', 0)")
+        executeSQLQuery("DB.DBA.RDF_GRAPH_GROUP_CREATE('" + groupURI + "', 1)")
     }
 
     /** Deletes a graph from the Virtuoso instance.
@@ -94,7 +94,7 @@ class VirtuosoStorage(val server: String, val port: Int, val useSSL: Boolean = f
       * @return RDF XML string representing all the graphs within that group.
       */
     def selectAllInGroup(groupURI: String): String = {
-        executeSPARQLQuery("SELECT * FROM <" + groupURI + "> WHERE { ?s ?p ?o }")
+        executeSPARQLQuery("CONSTRUCT { ?s ?p ?o } FROM <" + groupURI + "> WHERE { ?s ?p ?o }")
     }
 
     /** Stores the graph in Virtuoso.
@@ -103,7 +103,7 @@ class VirtuosoStorage(val server: String, val port: Int, val useSSL: Boolean = f
       * @param graphURI URI of the graph.
       */
     def storeGraph(rdfXML: String, graphURI: String) {
-        executeSQLQuery("DB.DBA.RDF_LOAD_RDFXML('" + rdfXML.replaceAllLiterally("'", "\\'") + "', '', '" + graphURI + "'')")
+        executeSQLQuery("DB.DBA.RDF_LOAD_RDFXML('" + rdfXML.replaceAllLiterally("'", "\\'") + "', '', '" + graphURI + "')")
     }
 
 
