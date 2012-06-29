@@ -55,14 +55,14 @@ abstract class DataFetcher(name: String, inputCount: Int, parameters: immutable.
     }
 
     /**
-      * Returns neighbourhood of the specified node.
+      * Returns neighbourhood of the specified vertex.
       * @param instance The corresponding instance.
-      * @param nodeURI URI of the node whose neighbourhood should be returned.
-      * @param distance Maximal distance to travel from the node to its neighbours. To select only direct neighbours,
+      * @param vertexURI URI of the vertex whose neighbourhood should be returned.
+      * @param distance Maximal distance to travel from the vertex to its neighbours. To select only direct neighbours,
       *                 use 1, to select direct neighbours and their neighbours, use 2 etc. Note that particular data
       *                 fetchers may use some optimizations/heuristics so it's not guaranteed that this parameter will
       *                 be always taken into account.
       * @return The neighbourhood graph.
       */
-    def getNeighbourhood(instance: PluginInstance, nodeURI: String, distance: Int = 1): Graph
+    def getNeighbourhood(instance: PluginInstance, vertexURI: String, distance: Int = 1): Graph
 }

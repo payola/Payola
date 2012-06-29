@@ -52,10 +52,10 @@ class Join(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]
       * @param graph1 First graph.
       * @param graph2 Second graph.
       * @param propertyURI Property URI.
-      * @param isInner Whether the join is inner (a node S from the first graph is included in the result only if there
-      *                exists a node O in the second graph such that there exists an edge in the first graph with the
-      *                specified URI connecting S and O) or outer (all nodes from the first graph are included in the
-      *                result, but only those edges, that satisfy the condition of inner join mentioned above are
+      * @param isInner Whether the join is inner (a vertex S from the first graph is included in the result only if
+      *                there exists a vertex O in the second graph such that there exists an edge in the first graph
+      *                with the specified URI connecting S and O) or outer (all vertices from the first graph are
+      *                included in the result, but only those edges, that satisfy the condition of inner join mentioned above are
       *                included).
       * @return The joined graph.
       */

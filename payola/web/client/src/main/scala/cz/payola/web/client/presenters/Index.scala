@@ -8,12 +8,10 @@ import cz.payola.web.client.views.plugins.visual.techniques.circle.CircleTechniq
 import cz.payola.web.client.views.plugins.visual.techniques.gravity.GravityTechnique
 import cz.payola.web.client.views.plugins.visual.techniques.minimalization.MinimalizationTechnique
 import cz.payola.web.client.views.plugins.textual.techniques.table.TableTechnique
-import cz.payola.web.client.views.plugins.textual.TextPlugin
 import cz.payola.web.client.views.plugins.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.views.plugins.visual._
-import cz.payola.web.client.mvvm.element.{Anchor, ListItem, Text}
-import settings.{VertexSettingsModel, TextSettingsModel, EdgeSettingsModel}
-import  cz.payola.domain.rdf.{IdentifiedVertex, LiteralVertex, Edge, Graph}
+import cz.payola.web.client.mvvm.element._
+import settings._
 import cz.payola.web.shared.GraphFetcher
 import cz.payola.common.rdf.IdentifiedVertex
 
@@ -27,10 +25,13 @@ class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
     var graph: Option[cz.payola.common.rdf.Graph] = None
 
     val vertexSettings = new VertexSettingsModel
+
     val edgesSettings = new EdgeSettingsModel
+
     val textSettings = new TextSettingsModel
 
     val visualSetup = new VisualSetup(vertexSettings, edgesSettings, textSettings)
+
     visualSetup.settingsChanged += {
         evt =>
             currentPlugin.get.redraw()
@@ -47,7 +48,7 @@ class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
 
     var currentPlugin: Option[Plugin] = None
 
-    plugins.foreach{ plugin =>
+    plugins.foreach { plugin =>
 
         val pluginBtn = new Anchor(List(new Text(plugin.getName)), "#")
         new ListItem(List(pluginBtn)).render(document.getElementById("settings"))
@@ -55,7 +56,7 @@ class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
         pluginBtn.clicked += {
             event =>
                 val newPlugin = plugins.find(_.getName == plugin.getName)
-                if(newPlugin.isDefined) {
+                if (newPlugin.isDefined) {
                     changePlugin(newPlugin.get)
                 }
                 false
@@ -74,16 +75,16 @@ class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
                 currentPlugin.get.redraw()
         }
     }
-    
+
     def resetSettings() {
         currentPlugin.get match {
             case i: VisualPlugin =>
                 currentPlugin.get.redraw()
         }
     }
-    
+
     def changePluginByNumber(number: Int) {
-        if(0 <= number && number < plugins.length) {
+        if (0 <= number && number < plugins.length) {
             changePlugin(plugins(number))
         }
     }
