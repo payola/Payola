@@ -9,24 +9,29 @@ import cz.payola.domain.entities.plugins.concrete.query._
 
 object TestObject
 {
+    // Users
     val u1 = new cz.payola.domain.entities.User("HS")
     val u2 = new cz.payola.domain.entities.User("ChM")
     val u3 = new cz.payola.domain.entities.User("JH")
     val u4 = new cz.payola.domain.entities.User("OK")
     val u5 = new cz.payola.domain.entities.User("OH")
 
+    // Groups
     val g1 = new cz.payola.domain.entities.Group("group1", u1)
     val g2 = new cz.payola.domain.entities.Group("group2", u2)
     val g3 = new cz.payola.domain.entities.Group("group3", u3)
     val g4 = new cz.payola.domain.entities.Group("group4", u5)
     val g5 = new cz.payola.domain.entities.Group("group5", u5)
 
+    // DAOs
     val userDao = new UserDAO
     val groupDao = new GroupDAO
     val analysisDao = new AnalysisDAO
     val plugDao = new PluginDAO
     val plugInstDao = new PluginInstanceDAO
+    val dsDao = new DataSourceDAO()
 
+    // Plugins
     val sparqlEndpointPlugin = new SparqlEndpoint
     val concreteSparqlQueryPlugin = new ConcreteSparqlQuery
     val projectionPlugin = new Projection
@@ -34,6 +39,16 @@ object TestObject
     val typedPlugin = new Typed
     val join = new Join
     val unionPlugin = new Union
+
+    val plugins = List(
+        sparqlEndpointPlugin,
+        concreteSparqlQueryPlugin,
+        projectionPlugin,
+        selectionPlugin,
+        typedPlugin,
+        join,
+        unionPlugin
+    )
 
     def connect {
         println("Connecting ...")
@@ -131,24 +146,19 @@ object TestObject
     def persistAnalyses {
         println("Persisting analysis ...")
 
-        val plugins = List(
-            sparqlEndpointPlugin,
-            concreteSparqlQueryPlugin,
-            projectionPlugin,
-            selectionPlugin,
-            typedPlugin,
-            join,
-            unionPlugin
-        )
-
         // persist analysis
         val user = userDao.getById(u1.id).get
-        val a = new cz.payola.domain.entities.Analysis("Cities with more than 2M habitants with countries",   Some(user))
+        val count = analysisDao.getAll().size
+        val a = new cz.payola.domain.entities.Analysis(
+            "Cities with more than 2M habitants with countries " + count,
+            Some(user)
+        )
+        a.isPublic_=(true)
         val analysis = analysisDao.persist(a)
 
             assert(analysisDao.getById(analysis.id).isDefined)
             assert(analysis.owner.get.id == user.id)
-            assert(user.ownedAnalyses.size == 1)
+            assert(user.ownedAnalyses.size == count + 1)
 
         println("       persisting plugins")
         // Persist  plugins
@@ -261,7 +271,10 @@ object TestObject
             sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter]
                 .createValue("http://dbpedia.org/ontology/City")))
 
-        val dsDao = new DataSourceDAO()
+        ds1.isPublic_=(true)
+        ds2.isPublic_=(true)
+        ds3.isPublic_=(true)        
+        
         val ds1_db = dsDao.persist(ds1)
         val ds2_db = dsDao.persist(ds2)
         val ds3_db = dsDao.persist(ds3)
@@ -295,5 +308,44 @@ object TestObject
 
     def testCascadeDeletes {
 
+        var analysisCount = analysisDao.getAll().size
+        var pluginInstancesCount = plugInstDao.getAll().size
+        var pluginsCount = plugDao.getAll().size
+
+        // Create second analysis in DB
+        persistAnalyses
+
+        assert(analysisDao.getAll().size == analysisCount + 1)
+        assert(plugInstDao.getAll().size == pluginInstancesCount * 2)
+        assert(plugDao.getAll().size == pluginsCount)
+
+        // Remove one analysis
+        assert(analysisDao.removeById(analysisDao.getAll()(0).id) == true)
+
+        // One analysis and half of plugin instances are gone
+        assert(analysisDao.getAll().size == analysisCount)
+        assert(plugInstDao.getAll().size == pluginInstancesCount)
+        assert(plugDao.getAll().size == pluginsCount)
+
+        val analysis = analysisDao.getAll()(0)
+
+        /*
+            TODO: next line causes failure due to lazy-loading of instances
+                - they are lazy-loaded from db, then removed in DB, but not in entity
+         */
+        //assert(analysis.pluginInstances.size == pluginInstancesCount)
+
+        // Remove all plugins
+        for (p <- plugins) {
+            assert(plugDao.removeById(p.id) == true)
+        }
+
+        // Only (empty) analysis is left
+        assert(analysisDao.getAll().size == analysisCount)
+        assert(plugInstDao.getAll().size == 0)
+        assert(plugDao.getAll().size == 0)
+
+        assert(analysis.pluginInstances.size == 0)
+        assert(analysis.pluginInstanceBindings.size == 0)
     }
 }
