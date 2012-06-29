@@ -40,6 +40,7 @@ object DatabaseInitializer extends App
         )
         // persist analysis
         val a = new cz.payola.domain.entities.Analysis("DB: Cities with more than 2 million habitants with countries", None)
+        a.isPublic_=(true)        
         val analysis = analysisDao.persist(a)
 
         // Persist  plugins
@@ -89,6 +90,10 @@ object DatabaseInitializer extends App
         val ds3 = new DataSource("Countries2", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter].createValue("http://dbpedia.org/ontology/City")))
 
         val dsDao = new DataSourceDAO()
+        ds1.isPublic_=(true)
+        ds2.isPublic_=(true)
+        ds3.isPublic_=(true)
+
         dsDao.persist(ds1)
         dsDao.persist(ds2)
         dsDao.persist(ds3)
