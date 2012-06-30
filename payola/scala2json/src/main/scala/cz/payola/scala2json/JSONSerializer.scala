@@ -3,7 +3,11 @@ package cz.payola.scala2json
 import classes.SerializationClass
 import java.lang.reflect.{Field, Method}
 import rules.{CustomValueSerializationRule, CustomSerializationRule, BasicSerializationRule, SerializationRule}
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable._
+import cz.payola.scala2json.rules.BasicSerializationRule
+import scala.StringBuilder
+import cz.payola.scala2json.rules.CustomValueSerializationRule
+import cz.payola.scala2json.rules.CustomSerializationRule
 
 /** This enumeration defines output format for the serializer.
   *
@@ -89,11 +93,11 @@ class JSONSerializer
         if (cl.isInterface) {
             // I.e. a trait, treat it differently
             // Maybe, there is a field, so let's try finding it just to be sure
-            var found = cl.getDeclaredFields.exists {f: Field => f.getName == fName}
+            var found = getFieldsForClass(cl).exists {f: Field => f.getName == fName}
             if (!found) {
                 // Otherwise, we need a little magic - find a method whose name is the same
                 // and take one parameter of type cl
-                found = cl.getDeclaredMethods.exists {m: Method =>
+                found = cl.getMethods.exists {m: Method =>
                     val paramTypes: Array[Class[_]] = m.getParameterTypes
                     (m.getName == fName && (paramTypes.length == 0 || (paramTypes.length == 1 && paramTypes(0) == cl)))
                 }
@@ -105,9 +109,30 @@ class JSONSerializer
             }
             found
         } else {
-            // Acutal object class
-            cl.getDeclaredFields.exists {f: Field => f.getName == fName}
+            // Actual object class
+            getFieldsForClass(cl).exists {f: Field => f.getName == fName}
         }
+    }
+
+    /** Retrieves fields from all superclasses and interfaces.
+      *
+      * @param cl Class.
+      * @return All fields.
+      */
+    private def getFieldsForClass(cl: Class[_]): collection.Seq[Field] = {
+        val fields = new ListBuffer[Field]()
+
+        fields ++= cl.getDeclaredFields
+
+        if (cl.getSuperclass != null) {
+            fields ++= getFieldsForClass(cl.getSuperclass)
+        }
+
+        cl.getInterfaces foreach { interface: Class[_] =>
+            fields ++= getFieldsForClass(interface)
+        }
+
+        fields.distinct
     }
 
     /** Returns the object's class name.
@@ -291,7 +316,7 @@ class JSONSerializer
 
         // Get object's fields:
         val c: Class[_] = obj.getClass
-        val fields: Array[Field] = c.getDeclaredFields
+        val fields = getFieldsForClass(c)
 
         var haveProcessedField: Boolean = false
 
@@ -348,7 +373,7 @@ class JSONSerializer
 
         // Get object's fields:
         val originalClass: Class[_] = obj.getClass
-        val originalFields: Array[Field] = originalClass.getDeclaredFields
+        val originalFields = getFieldsForClass(originalClass)
 
         var haveProcessedField: Boolean = false
 
