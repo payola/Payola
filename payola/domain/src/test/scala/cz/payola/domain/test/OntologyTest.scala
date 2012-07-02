@@ -3,6 +3,7 @@ package cz.payola.domain.test
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.FlatSpec
 import cz.payola.domain.rdf.ontology.Ontology
+import cz.payola.domain.net.Downloader
 
 class OntologyTest extends FlatSpec with ShouldMatchers
 {
@@ -26,7 +27,7 @@ class OntologyTest extends FlatSpec with ShouldMatchers
           |        <rdfs:label>A transport classification system.</rdfs:label>
           |        <rdfs:comment>Cars and buses and some superclasses.</rdfs:comment>
           |    </owl:Ontology>
-          |        <owl:Class rdf:about="&ns_transport;Transport">
+          |    <owl:Class rdf:about="&ns_transport;Transport">
           |        <rdfs:label>Transport</rdfs:label>
           |        <rdfs:comment>Top-level root class for transport.</rdfs:comment>
           |    </owl:Class>
@@ -50,42 +51,20 @@ class OntologyTest extends FlatSpec with ShouldMatchers
           |        <rdfs:label>Car.</rdfs:label>
           |        <rdfs:comment>Bottom-level car class.</rdfs:comment>
           |    </owl:Class>
+          |    <rdf:Description rdf:about="http://purl.org/procurement/public-contracts#additionalObject">
+          |        <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+          |        <rdfs:subPropertyOf rdf:resource="http://purl.org/dc/terms/subject"/>
+          |        <rdfs:label xml:lang="en">
+          |            Additional object of contract
+          |        </rdfs:label>
+          |        <rdfs:comment xml:lang="en">
+          |            Property for additional object of public contract. Cardinality 0..*
+          |        </rdfs:comment>
+          |        <rdfs:domain rdf:resource="http://purl.org/procurement/public-contracts#Contract"/>
+          |        <rdfs:range rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+          |    </rdf:Description>
           |</rdf:RDF>
         """.stripMargin
-
-    val secondSampleOWL =
-        """<rdf:RDF
-          |    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-          |    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-          |    xmlns:owl="http://www.w3.org/2002/07/owl#"
-          |    xmlns:dc="http://purl.org/dc/elements/1.1/"
-          |    xmlns:plants="http://www.linkeddatatools.com/plants#">
-          |
-          |    <!-- OWL Class Definition - Plant Type -->
-          |    <owl:Class rdf:about="http://www.linkeddatatools.com/plants#planttype">
-          |        <rdfs:label>The plant type</rdfs:label>
-          |        <rdfs:comment>The class of all plant types.</rdfs:comment>
-          |    </owl:Class>
-          |
-          |    <!-- OWL Subclass Definition - Flower -->
-          |    <owl:Class rdf:about="http://www.linkeddatatools.com/plants#flowers">
-          |        <rdfs:subClassOf rdf:resource="http://www.linkeddatatools.com/plants#planttype"/>
-          |        <rdfs:label>Flowering plants</rdfs:label>
-          |        <rdfs:comment>Flowering plants, also known as angiosperms.</rdfs:comment>
-          |    </owl:Class>
-          |
-          |    <!-- OWL Subclass Definition - Shrub -->
-          |    <owl:Class rdf:about="http://www.linkeddatatools.com/plants#shrubs">
-          |        <rdfs:subClassOf rdf:resource="http://www.linkeddatatools.com/plants#planttype"/>
-          |        <rdfs:label>Shrubbery</rdfs:label>
-          |        <rdfs:comment>Shrubs, a type of plant which branches from the base.</rdfs:comment>
-          |    </owl:Class>
-          |
-          |    <!-- Individual (Instance) Example RDF Statement -->
-          |    <rdf:Description rdf:about="http://www.linkeddatatools.com/plants#magnolia">
-          |        <rdf:type rdf:resource="http://www.linkeddatatools.com/plants#flowers"/>
-          |    </rdf:Description>
-          |</rdf:RDF>""".stripMargin
 
     val regularRDF =
         """<?xml version="1.0"?>
@@ -110,28 +89,23 @@ class OntologyTest extends FlatSpec with ShouldMatchers
           |    </rdf:Description>
           |</rdf:RDF>""".stripMargin
 
-    it should "be created from sample OWL" in {
+    val publicDataOntologyUrl = "http://opendata.cz/pco/public-contracts.xml"
+
+    "Ontology" should "be created from a sample OWL document" in {
         val ontology = Ontology(sampleOWL)
-        assert(ontology.classes.count(_ => true) == 5, "All classes haven't been retrieved from the OWL.")
+        assert(ontology.classes.toList.length == 5, "All classes haven't been retrieved from the OWL.")
         assert(ontology.classes.contains("http://www.ibm.com/WSRR/Transport#Transport"),
             "The Transport class hasn't been retrieved.")
     }
 
-    /*it should "be created from second sample OWL" in {
-        try {
-            val ontology = Ontology(secondSampleOWL)
-            println(ontology)
-        }catch{
-            case e: Exception => e.printStackTrace()
-        }
+    it should "be created from a valid RDF document" in {
+        val ontology = Ontology(regularRDF)
+        assert(ontology.classes.isEmpty, "The ontology contains classes in case it shouldn't.")
     }
 
-    it should "be created from a sample RDF document" in {
-        try {
-            val ontology = Ontology(regularRDF)
-            println(ontology)
-        }catch{
-            case e: Exception => e.printStackTrace()
-        }
-    }*/
+    it should "be created from a downloaded document" in {
+        val ontology = Ontology(new Downloader(publicDataOntologyUrl, accept = "application/rdf+xml").result)
+        assert(!ontology.classes.isEmpty, "The downloaded ontology doesn't contain classes.")
+        assert(!ontology.classes.values.flatMap(_.properties.values).isEmpty, "The classes don't contain properties.")
+    }
 }

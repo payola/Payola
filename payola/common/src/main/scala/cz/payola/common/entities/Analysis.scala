@@ -2,7 +2,8 @@ package cz.payola.common.entities
 
 import cz.payola.common.entities.analyses.PluginInstanceBinding
 import cz.payola.common.entities.plugins.PluginInstance
-import scala.collection.mutable
+import scala.collection._
+import scala.Seq
 
 /**
   * A set of analytical plugin instances that are bound together (the output of one plugin instance is bound to the
@@ -23,10 +24,10 @@ trait Analysis extends NamedEntity with OptionallyOwnedEntity with ShareableEnti
     private val _pluginInstanceBindings = mutable.ArrayBuffer[PluginInstanceBindingType]()
 
     /** Analytical plugin instances the analysis consists of.*/
-    def pluginInstances: Seq[PluginInstanceType] = _pluginInstances
+    def pluginInstances: immutable.Seq[PluginInstanceType] = _pluginInstances.toList
 
     /** Bindings between the analytical plugin instances. */
-    def pluginInstanceBindings: Seq[PluginInstanceBindingType] = _pluginInstanceBindings
+    def pluginInstanceBindings: immutable.Seq[PluginInstanceBindingType] = _pluginInstanceBindings.toList
 
     /**
       * Stores the specified plugin instance to the analysis.

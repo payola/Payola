@@ -46,16 +46,16 @@ class DataSource(protected var _name: String, protected var _owner: Option[User]
     }
 
     /**
-      * Returns neighbourhood of the specified node.
-      * @param nodeURI URI of the node whose neighbourhood should be returned.
-      * @param distance Maximal distance to travel from the node to its neighbours. To select only direct neighbours,
+      * Returns neighbourhood of the specified vertex.
+      * @param vertexURI URI of the vertex whose neighbourhood should be returned.
+      * @param distance Maximal distance to travel from the vertex to its neighbours. To select only direct neighbours,
       *                 use 1, to select direct neighbours and their neighbours, use 2 etc. Note that particular data
       *                 fetchers may use some optimizations/heuristics so it's not guaranteed that this parameter will
       *                 be always taken into account.
       * @return The neighbourhood graph.
       */
-    def getNeighbourhood(nodeURI: String, distance: Int = 1): Graph = {
-        plugin.getNeighbourhood(this, nodeURI, distance)
+    def getNeighbourhood(vertexURI: String, distance: Int = 1): Graph = {
+        plugin.getNeighbourhood(this, vertexURI, distance)
     }
 
     override def canEqual(other: Any): Boolean = {

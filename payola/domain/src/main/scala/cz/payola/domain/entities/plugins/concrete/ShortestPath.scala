@@ -1,12 +1,12 @@
 package cz.payola.domain.entities.plugins.concrete
 
-import collection.immutable
-import collection.mutable
+import scala.collection._
+import cz.payola.common.rdf._
 import cz.payola.domain.IDGenerator
 import cz.payola.domain.entities.Plugin
 import cz.payola.domain.entities.plugins._
 import cz.payola.domain.entities.plugins.parameters.StringParameter
-import cz.payola.domain.rdf._
+import cz.payola.domain.rdf.Graph
 
 /** This filter returns a graph that consist of vertices that lie on the shortest
   * path between two vertices identified by URIs. If no such path exists, empty
@@ -31,25 +31,25 @@ class ShortestPath(name: String, inputCount: Int, parameters: immutable.Seq[Para
         // Using Dijkstra. Distances will be initialized at Int.MaxValue.
         // Only identified vertices are taken into account as we can't find shortest
         // path between literal vertices
-        val distances = new mutable.HashMap[IdentifiedNode, Int]()
-        val previous = new mutable.HashMap[IdentifiedNode, IdentifiedNode]()
+        val distances = new mutable.HashMap[IdentifiedVertex, Int]()
+        val previous = new mutable.HashMap[IdentifiedVertex, IdentifiedVertex]()
 
         // We assume that the origin and destination vertices are indeed in the graph
-        val origin: IdentifiedNode = inGraph.getVertexWithURI(fromOrigin).get
-        val destination: IdentifiedNode = inGraph.getVertexWithURI(toDestination).get
+        val origin: IdentifiedVertex = inGraph.getVertexWithURI(fromOrigin).get
+        val destination: IdentifiedVertex = inGraph.getVertexWithURI(toDestination).get
 
-        inGraph.vertices foreach { n: Node =>
-            if (n.isInstanceOf[IdentifiedNode]) {
-                distances.put(n.asInstanceOf[IdentifiedNode], Int.MaxValue)
+        inGraph.vertices foreach { n: Vertex =>
+            if (n.isInstanceOf[IdentifiedVertex]) {
+                distances.put(n.asInstanceOf[IdentifiedVertex], Int.MaxValue)
             }
         }
 
         distances.put(origin, 0)
 
-        val nodes = new mutable.ListBuffer[IdentifiedNode]()
-        inGraph.vertices.foreach { n: Node =>
-            if (n.isInstanceOf[IdentifiedNode]) {
-                nodes += n.asInstanceOf[IdentifiedNode]
+        val nodes = new mutable.ListBuffer[IdentifiedVertex]()
+        inGraph.vertices.foreach { n: Vertex =>
+            if (n.isInstanceOf[IdentifiedVertex]) {
+                nodes += n.asInstanceOf[IdentifiedVertex]
             }
         }
 
@@ -63,7 +63,7 @@ class ShortestPath(name: String, inputCount: Int, parameters: immutable.Seq[Para
                 nodes -= n
 
                 val neighbors = getVertexNeighbors(inGraph, n)
-                neighbors foreach { neighbor: IdentifiedNode =>
+                neighbors foreach { neighbor: IdentifiedVertex =>
                     val alt = distances(n) + 1
                     if (alt < distances(neighbor)) {
                         distances.put(neighbor, alt)
@@ -74,7 +74,7 @@ class ShortestPath(name: String, inputCount: Int, parameters: immutable.Seq[Para
         }
 
         // All done. Now to construct the graph
-        val vertices = mutable.ListBuffer[IdentifiedNode]()
+        val vertices = mutable.ListBuffer[IdentifiedVertex]()
         val edges = mutable.ListBuffer[Edge]()
         vertices += destination // Need to go backwards
 
@@ -85,8 +85,8 @@ class ShortestPath(name: String, inputCount: Int, parameters: immutable.Seq[Para
 
             // Find edge between these two
             val edge = inGraph.edges.find { e: Edge =>
-                e.origin.uri == prev.uri && e.destination.isInstanceOf[IdentifiedNode] && e.destination
-                    .asInstanceOf[IdentifiedNode].uri == current.uri
+                e.origin.uri == prev.uri && e.destination.isInstanceOf[IdentifiedVertex] && e.destination
+                    .asInstanceOf[IdentifiedVertex].uri == current.uri
             }
 
             assert(edge.isDefined, "Edge not defined between vertices!")
@@ -99,7 +99,7 @@ class ShortestPath(name: String, inputCount: Int, parameters: immutable.Seq[Para
         // Need to add origin
         vertices += origin
 
-        new Graph(vertices, edges)
+        new Graph(vertices.toList, edges.toList)
     }
 
     /** Creates a new instance of a graph that contains only vertices along the shortest path from
@@ -158,11 +158,11 @@ class ShortestPath(name: String, inputCount: Int, parameters: immutable.Seq[Para
       * @param vertex Vertex.
       * @return Neighbors.
       */
-    private def getVertexNeighbors(inGraph: Graph, vertex: IdentifiedNode): TraversableOnce[IdentifiedNode] = {
+    private def getVertexNeighbors(inGraph: Graph, vertex: IdentifiedVertex): TraversableOnce[IdentifiedVertex] = {
         // First get just the edges that go to identified vertices
         val edges: collection.Seq[Edge] = inGraph.getOutgoingEdges(vertex.uri)
-            .filter { e: Edge => e.destination.isInstanceOf[IdentifiedNode]}
-        edges.map { e: Edge => e.destination.asInstanceOf[IdentifiedNode]}
+            .filter { e: Edge => e.destination.isInstanceOf[IdentifiedVertex]}
+        edges.map { e: Edge => e.destination.asInstanceOf[IdentifiedVertex]}
     }
 
     /** Returns the vertex with smallest distance or null if the withinVertices is empty.
@@ -171,10 +171,10 @@ class ShortestPath(name: String, inputCount: Int, parameters: immutable.Seq[Para
       * @param withDistances Distances hash map.
       * @return Vertex with smallest distance.
       */
-    private def getVertexWithSmallestDistance(withinVertices: Iterable[IdentifiedNode],
-        withDistances: mutable.HashMap[IdentifiedNode, Int]): IdentifiedNode = {
-        var smallest: IdentifiedNode = null
-        withinVertices foreach { n: IdentifiedNode =>
+    private def getVertexWithSmallestDistance(withinVertices: Iterable[IdentifiedVertex],
+        withDistances: mutable.HashMap[IdentifiedVertex, Int]): IdentifiedVertex = {
+        var smallest: IdentifiedVertex = null
+        withinVertices foreach { n: IdentifiedVertex =>
             if (smallest == null) {
                 smallest = n
             } else if (withDistances(n) < withDistances(smallest)) {

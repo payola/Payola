@@ -21,22 +21,10 @@ class Group(protected var _name: String, protected var _owner: User)
     /**
       * Adds a member to the group.
       * @param user The user to be added.
-      * @throws IllegalArgumentException if the user is null, owner of the group or already member of the group.
       */
     def addMember(user: UserType) {
-        require(user != null, "The user mustn't be null.")
-        require(!members.contains(user), "The user is already member of the group.")
         require(user != owner, "The user mustn't be the group owner.")
-
-        storeMember(user)
-    }
-
-    /**
-      * Returns whether the specified user is a member of the group.
-      * @param user The user to check.
-      */
-    def hasMember(user: UserType): Boolean = {
-        members.contains(user)
+        addRelatedEntity(user, members, storeMember)
     }
 
     /**
@@ -45,10 +33,15 @@ class Group(protected var _name: String, protected var _owner: User)
       * @return The removed member.
       */
     def removeMember(user: UserType): Option[UserType] = {
-        require(user != null, "The user mustn't be null.")
-        ifContains(members, user) {
-            discardMember(user)
-        }
+        removeRelatedEntity(user, members, discardMember)
+    }
+
+    /**
+      * Returns whether the specified user is a member of the group.
+      * @param user The user to check.
+      */
+    def hasMember(user: UserType): Boolean = {
+        members.contains(user)
     }
 
     override def canEqual(other: Any): Boolean = {

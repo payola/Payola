@@ -4,6 +4,7 @@ import cz.payola.data.PayolaDB
 import org.squeryl.annotations.Transient
 import cz.payola.data.dao._
 import cz.payola.data.entities.plugins.DataSource
+import scala.collection.immutable
 
 /**
   * This object converts [[cz.payola.common.entities.User]] to [[cz.payola.common.entities.User]]
@@ -44,7 +45,7 @@ class User(
     private var _memberGroupsLoaded = false
     private lazy val _memberGroupsQuery = PayolaDB.groupMembership.left(this)
 
-    override def ownedGroups: collection.Seq[GroupType] = {
+    override def ownedGroups: immutable.Seq[GroupType] = {
         if (!_ownedGroupsLoaded) {
             evaluateCollection(_ownedGroupsQuery).map(g => 
                 if (!super.ownedGroups.contains(g)) {
@@ -58,7 +59,7 @@ class User(
         super.ownedGroups
     }
 
-    override def ownedAnalyses: collection.Seq[AnalysisType] = {
+    override def ownedAnalyses: immutable.Seq[AnalysisType] = {
         if (!_ownedAnalysesLoaded) {
             evaluateCollection(_ownedAnalysesQuery).map(a => 
                 if (!super.ownedAnalyses.contains(a)) {
@@ -72,7 +73,7 @@ class User(
         super.ownedAnalyses
     }
 
-    override def ownedDataSources: collection.Seq[DataSourceType] = {
+    override def ownedDataSources: immutable.Seq[DataSourceType] = {
         if (!_ownedDataSourcesLoaded) {
             evaluateCollection(_ownedDataSourcesQuery).map(ds =>
                 if (!super.ownedDataSources.contains(ds)) {

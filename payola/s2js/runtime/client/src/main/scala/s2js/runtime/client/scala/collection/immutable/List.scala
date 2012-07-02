@@ -10,7 +10,7 @@ object List extends s2js.runtime.client.scala.collection.SeqCompanion[List]
     def apply(xs: Any*): Any = null
 }
 
-class List extends s2js.runtime.client.scala.collection.Seq
+class List extends s2js.runtime.client.scala.collection.immutable.Seq
 {
     def newInstance = List.empty
 }

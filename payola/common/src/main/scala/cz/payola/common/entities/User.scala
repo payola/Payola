@@ -1,13 +1,14 @@
 package cz.payola.common.entities
 
-import scala.collection.mutable
+import scala.collection._
 import cz.payola.common.entities.plugins.DataSource
 import cz.payola.common.entities.settings.ontology.Customization
+import scala.Seq
 
 /**
   * An user of the application.
   */
-trait User extends NamedEntity
+trait User extends NamedEntity with PrivilegableEntity
 {
     /** Type of the groups that the user can own or be member of. */
     type GroupType <: Group
@@ -21,9 +22,6 @@ trait User extends NamedEntity
     /** Type of the ontology visual customizations that the user may own. */
     type OntologyCustomizationType <: Customization
 
-    /** Type of the privileges. */
-    type PrivilegeType <: Privilege[_]
-
     protected var _email: String = ""
 
     protected var _password: String = ""
@@ -35,8 +33,6 @@ trait User extends NamedEntity
     protected val _ownedDataSources = mutable.ArrayBuffer[DataSourceType]()
 
     protected val _ontologyCustomizations = mutable.ArrayBuffer[OntologyCustomizationType]()
-
-    protected val _privileges = mutable.ArrayBuffer[PrivilegeType]()
 
     /** Email of the user. */
     def email = _email
@@ -61,19 +57,16 @@ trait User extends NamedEntity
     }
 
     /** The groups that are owned by the user. */
-    def ownedGroups: Seq[GroupType] = _ownedGroups
+    def ownedGroups: immutable.Seq[GroupType] = _ownedGroups.toList
 
     /** The analyses that are owned by the user. */
-    def ownedAnalyses: Seq[AnalysisType] = _ownedAnalyses
+    def ownedAnalyses: immutable.Seq[AnalysisType] = _ownedAnalyses.toList
 
     /** The data sources that are owned by the user. */
-    def ownedDataSources: Seq[DataSourceType] = _ownedDataSources
+    def ownedDataSources: immutable.Seq[DataSourceType] = _ownedDataSources.toList
 
     /** Ontology customizations of the user. */
-    def ownedOntologyCustomizations: Seq[OntologyCustomizationType] = _ontologyCustomizations
-
-    /** Privileges of the user. */
-    def privileges: Seq[PrivilegeType] = _privileges
+    def ownedOntologyCustomizations: immutable.Seq[OntologyCustomizationType] = _ontologyCustomizations.toList
 
     /**
       * Stores the specified analysis to the users owned analyses.
@@ -121,22 +114,6 @@ trait User extends NamedEntity
       */
     protected def discardOwnedDataSource(source: DataSourceType) {
         _ownedDataSources -= source
-    }
-
-    /**
-      * Stores the specified privileges to the users.
-      * @param privilege The privilege to store.
-      */
-    protected def storePrivilege(privilege: PrivilegeType) {
-        _privileges += privilege
-    }
-
-    /**
-      * Discards the privileges from the user. Complementary operation to store.
-      * @param privilege The privilege to discard.
-      */
-    protected def discardPrivilege(privilege: PrivilegeType) {
-        _privileges -= privilege
     }
 
     /**

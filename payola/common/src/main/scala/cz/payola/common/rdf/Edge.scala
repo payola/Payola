@@ -1,21 +1,25 @@
 package cz.payola.common.rdf
 
 /**
-  * An edge between two vertices in a RDF graph.
+  * An edge between two vertices in a RDF graph. The origin must be an identified vertex.
+  * @param origin Origin of the edge.
+  * @param destination Destination of the edge.
+  * @param uri URI of the edge.
   */
-trait Edge extends IdentifiedObject
+class Edge(val origin: IdentifiedVertex, val destination: Vertex, val uri: String) extends IdentifiedObject
 {
-    /** Type of the vertices, the edge is between. */
-    type VertexType <: Vertex
+    override def equals(other: Any): Boolean = {
+        other match {
+            case e: Edge => uri == e.uri && origin == e.origin && destination == e.destination
+            case _ => false
+        }
+    }
 
-    /** Type of the vertices, the edge can originate in. */
-    type IdentifiedVertexType <: IdentifiedVertex
-
-    protected val _origin: IdentifiedVertexType
-
-    protected val _destination: VertexType
-
-    def origin = _origin
-
-    def destination = _destination
+    override def hashCode: Int = {
+        41 * (
+            41 * (
+                41 + uri.hashCode
+            ) + origin.hashCode
+        ) + destination.hashCode
+    }
 }
