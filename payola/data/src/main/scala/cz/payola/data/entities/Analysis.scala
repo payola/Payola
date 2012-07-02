@@ -5,6 +5,7 @@ import cz.payola.data.PayolaDB
 import cz.payola.data.dao.{PluginInstanceDAO, PluginInstanceBindingDAO}
 import org.squeryl.annotations.Transient
 import cz.payola.data.entities.plugins.PluginInstance
+import scala.collection.immutable
 
 /**
   * This object converts [[cz.payola.common.entities.Analysis]] to [[cz.payola.data.entities.Analysis]]
@@ -42,7 +43,7 @@ class Analysis(
     var ownerId: Option[String] = o.map(_.id)
     private lazy val _ownerQuery = PayolaDB.analysisOwnership.right(this)
 
-    override def pluginInstances : Seq[PluginInstanceType] = {
+    override def pluginInstances: immutable.Seq[PluginInstanceType] = {
         // Lazy-load related instances only for first time
         if (!_pluginInstancesLoaded) {
             evaluateCollection(_pluginInstancesQuery).map( i =>

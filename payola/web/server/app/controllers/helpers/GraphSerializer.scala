@@ -3,7 +3,7 @@ package controllers.helpers
 import cz.payola.scala2json.JSONSerializer
 import cz.payola.scala2json.rules.BasicSerializationRule
 import cz.payola.scala2json.classes.SimpleSerializationClass
-import cz.payola.common.rdf.{IdentifiedVertex, LiteralVertex, Edge, Graph}
+import cz.payola.common.rdf._
 
 class GraphSerializer extends JSONSerializer
 {

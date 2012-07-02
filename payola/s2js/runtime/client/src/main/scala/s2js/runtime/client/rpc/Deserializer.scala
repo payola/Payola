@@ -60,7 +60,7 @@ class Deserializer extends RpcResultTraverser[Any]
         instanceJsObject.set("internalJsArray", items.toBuffer)
 
         // Register the references.
-        var index = 0;
+        var index = 0
         items.foreach {item =>
             context.addReference(item, instanceJsObject, "internalJsArray[" + index + "]")
             index += 1

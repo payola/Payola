@@ -7,4 +7,10 @@ object Predef
     def augmentString(x: java.lang.String): StringOps = new StringOps(x)
 
     def unaugmentString(x: StringOps): java.lang.String = x.repr
+
+    final def require(requirement: Boolean, message: => Any) {
+        if (!requirement) {
+            throw new IllegalArgumentException("requirement failed: "+ message)
+        }
+    }
 }
