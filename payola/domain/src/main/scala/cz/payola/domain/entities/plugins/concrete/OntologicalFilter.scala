@@ -10,34 +10,67 @@ import cz.payola.domain.rdf.Graph
 import cz.payola.domain.rdf.ontology.Ontology
 import cz.payola.domain.net.Downloader
 import cz.payola.common.rdf._
-import cz.payola.common.rdf.ontology.Ontology
+import cz.payola.common.rdf.ontology._
+import cz.payola.domain.sparql._
+import scala.collection.mutable.ListBuffer
+import cz.payola.domain.sparql._
 
 /** This plugin requires one parameter - an ontology URL. The ontology is then
   * loaded and a subgraph that corresponds to the ontology is returned.
   *
   */
 class OntologicalFilter(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
-    extends Plugin(name, inputCount, parameters, id)
+    extends SparqlQuery(name, inputCount, parameters, id)
 {
     def this() = this("Ontological Filter", 1, List(new StringParameter("OntologyURLs", "")), IDGenerator.newId)
 
-    /** Creates a new instance of a graph that contains only vertices according to
-      * the ontology which is described at the OntologyURLs URL.
+    /** Creates a new SPARQL query that filters the graph according to the ontology.
       *
-      * @param instance The corresponding instance.
-      * @param inputs ThOntologicalFiltere input graphs.
-      * @param progressReporter A method that can be used to report plugin evaluation progress (which has to be within
-      *                         the (0.0, 1.0] interval).
-      * @return The output graph.
+      * @param ontology The ontology.
+      * @return SPARQL query.
       */
-    def evaluate(instance: PluginInstance, inputs: IndexedSeq[Option[Graph]], progressReporter: Double => Unit) = {
-        val definedInputs = getDefinedInputs(inputs)
+    private def getOntologyFilteringSPARQLQuery(ontology: Ontology): ConstructQuery = {
+        val template = new ListBuffer[TriplePattern]()
+        val classPatterns = new ListBuffer[TriplePattern]()
+        val variablePatterns = new ListBuffer[GraphPattern]()
+
+        var xCounter = 1
+        var vCounter = 1
+
+        ontology.classes foreach { case (_, cl) =>
+            val variable = new Variable("x" + xCounter)
+            xCounter = xCounter + 1
+
+            val classTP = new TriplePattern(variable, Uri.getTypePropertyURI, new Uri(cl.URI))
+            template += classTP
+            classPatterns += classTP
+
+            cl.properties foreach { case (_, prop) =>
+                val propVariable = new Variable("v" + vCounter)
+                vCounter = vCounter + 1
+
+                val variableTP = new TriplePattern(variable, new Uri(prop.URI), propVariable)
+                template += variableTP
+                variablePatterns += new GraphPattern(List(variableTP))
+            }
+        }
+
+        val patternGP = new GraphPattern(classPatterns, variablePatterns)
+        val query = new ConstructQuery(template, Some(patternGP))
+        query
+    }
+
+    /** See superclass.
+      *
+      * @param instance The evaluated plugin instance.
+      * @return The query.
+      */
+    override def getQuery(instance: PluginInstance): String = {
         val ontology = getOntologyWithPluginInstance(instance)
 
-        assert(definedInputs.size > 0, "This plugin requires some input!")
         assert(ontology != null, "Ontology couldn't be created")
 
-        strippedGraphAccordingToOntology(definedInputs(0), ontology)
+        getOntologyFilteringSPARQLQuery(ontology).toString
     }
 
     /** Creates a new ontology sourced from the OntologyURLs parameter.
@@ -56,41 +89,4 @@ class OntologicalFilter(name: String, inputCount: Int, parameters: immutable.Seq
         }
     }
 
-    /** Takes the graph parameter and filters out all vertices and edges that are not
-      * contained in the ontology parameter.
-      *
-      * @param graph Graph to be filtered.
-      * @param ontology Ontology.
-      * @return Output graph.
-      */
-    private def strippedGraphAccordingToOntology(graph: Graph, ontology: Ontology): Graph = {
-        val vertices = new mutable.ListBuffer[Vertex]()
-        val edges = new mutable.ListBuffer[Edge]()
-
-        graph.vertices foreach { n: Vertex =>
-            if (n.isInstanceOf[IdentifiedVertex]) {
-                if (ontology.classes.contains(n.asInstanceOf[IdentifiedVertex].uri)) {
-                    vertices += n
-                }
-            }
-        }
-
-        // Now go through edges
-        graph.edges foreach { e: Edge =>
-            if (vertices.contains(e.origin)) {
-                val cl = ontology.classes.get(e.origin.uri).get
-                if (cl.properties.contains(e.uri)) {
-                    if (e.destination.isInstanceOf[IdentifiedVertex] && vertices.contains(e.destination)) {
-                        edges += e
-                    } else {
-                        // Literal -> add it to vertices and add the edge
-                        vertices += e.destination
-                        edges += e
-                    }
-                }
-            }
-        }
-
-        new Graph(vertices.toList, edges.toList)
-    }
 }

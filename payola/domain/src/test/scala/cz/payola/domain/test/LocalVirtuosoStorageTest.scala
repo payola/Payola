@@ -1,8 +1,8 @@
 package cz.payola.domain.test
 
+import java.sql._
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
-import java.sql._
 import cz.payola.domain.virtuoso.PayolaVirtuosoStorage
 import cz.payola.domain.rdf._
 
