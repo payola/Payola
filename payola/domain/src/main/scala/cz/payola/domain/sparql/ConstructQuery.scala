@@ -1,10 +1,8 @@
 package cz.payola.domain.sparql
 
-import collection.immutable
-
 object ConstructQuery
 {
-    def apply(triples: immutable.Seq[TriplePattern]): ConstructQuery = {
+    def apply(triples: collection.Seq[TriplePattern]): ConstructQuery = {
         ConstructQuery(triples, Some(GraphPattern(triples)))
     }
 
@@ -17,7 +15,7 @@ object ConstructQuery
     }
 }
 
-case class ConstructQuery(template: immutable.Seq[TriplePattern], pattern: Option[GraphPattern])
+case class ConstructQuery(template: collection.Seq[TriplePattern], pattern: Option[GraphPattern])
 {
     def isEmpty: Boolean = {
         template.isEmpty && pattern.isEmpty

@@ -9,7 +9,7 @@ import scala.Seq
 /**
   * An entity that may be granted privileges.
   */
-trait PrivilegableEntity
+trait PrivilegableEntity extends Entity
 {
     /** Type of the privileges. */
     type PrivilegeType <: Privilege[_]
@@ -38,7 +38,7 @@ trait PrivilegableEntity
       * Stores the specified privileges to the users.
       * @param privilege The privilege to store.
       */
-    protected def storePrivilege(privilege: PrivilegeType) {
+    protected def storePrivilege(granter: User, privilege: PrivilegeType) {
         _privileges += privilege
     }
 

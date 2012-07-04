@@ -1,5 +1,5 @@
 package cz.payola.domain.virtuoso
 
-class VirtuosoException extends Exception
-{
-}
+import cz.payola.domain.DomainException
+
+class VirtuosoException(message: String) extends DomainException(message)
