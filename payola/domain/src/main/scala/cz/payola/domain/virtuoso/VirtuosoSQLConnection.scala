@@ -5,8 +5,6 @@ import java.sql._
 // i.e. jdbc:virtuoso://<server>:<port>
 class VirtuosoSQLConnection(val username: String = "dba", val password: String = "dba", val server: String = "localhost", val port: Int = 1111)
 {
-    // TODO - best way would be to create the connection at the beginning and
-    // then to destroy it on shut down -> would save us creating a new connection each time
 
     // Registers the driver in the drive manager
     Class.forName("virtuoso.jdbc3.Driver")

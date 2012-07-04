@@ -11,15 +11,13 @@ class Typed(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_
 {
     def this() = this("Typed", 1, List(new StringParameter("TypeURI", "")), IDGenerator.newId)
 
-    val typePropertyURI = Uri("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
-
     def getTypeURI(instance: PluginInstance): Option[String] = {
         instance.getStringParameter("TypeURI")
     }
 
     def getConstructQuery(instance: PluginInstance, subject: Subject, variableGetter: () => Variable) = {
         usingDefined(getTypeURI(instance)) { uri =>
-            ConstructQuery(TriplePattern(subject, typePropertyURI, Uri(uri)))
+            ConstructQuery(TriplePattern(subject, Uri.getTypePropertyURI, Uri(uri)))
         }
     }
 }
