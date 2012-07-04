@@ -1,9 +1,10 @@
 package cz.payola.domain.test
 
+import java.sql._
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
-import cz.payola.domain.virtuoso.LocalVirtuosoStorage
-import cz.payola.domain.rdf.Graph
+import cz.payola.domain.virtuoso.PayolaVirtuosoStorage
+import cz.payola.domain.rdf._
 
 class LocalVirtuosoStorageTest extends FlatSpec with ShouldMatchers
 {
@@ -18,14 +19,14 @@ class LocalVirtuosoStorageTest extends FlatSpec with ShouldMatchers
         val groupName = "my-weird-group"
         val graphName = "my-awesome-graph"
 
-        LocalVirtuosoStorage.createGroup(groupName)
-        LocalVirtuosoStorage.addGraphToGroup(testXML, graphName, groupName)
+        PayolaVirtuosoStorage.createGroup(groupName)
+        PayolaVirtuosoStorage.addGraphToGroup(testXML, graphName, groupName)
 
 
-        val response = LocalVirtuosoStorage.selectAllInGroup("mygroup-id")
+        val response = PayolaVirtuosoStorage.selectAllInGroup(groupName)
         println(response)
 
-        val g = Graph(response)
+        val g = Graph(RdfRepresentation.RdfXml, response)
 
         assume(g.containsVertexWithURI("http://www.recshop.fake/cd/Hide your heart"))
     }

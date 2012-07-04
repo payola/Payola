@@ -38,7 +38,7 @@ trait PrivilegableEntity extends Entity
       * Stores the specified privileges to the users.
       * @param privilege The privilege to store.
       */
-    protected def storePrivilege(privilege: PrivilegeType) {
+    protected def storePrivilege(granter: User, privilege: PrivilegeType) {
         _privileges += privilege
     }
 
