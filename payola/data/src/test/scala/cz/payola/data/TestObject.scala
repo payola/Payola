@@ -143,24 +143,9 @@ object TestObject
             assert(group5.members.size == 0)
     }
 
-    def persistAnalyses {
-        println("Persisting analysis ...")
+    def persistPlugins {
+        println("Persisting plugins ...")
 
-        // persist analysis
-        val user = userDao.getById(u1.id).get
-        val count = analysisDao.getAll().size
-        val a = new cz.payola.domain.entities.Analysis(
-            "Cities with more than 2M habitants with countries " + count,
-            Some(user)
-        )
-        a.isPublic_=(true)
-        val analysis = analysisDao.persist(a)
-
-            assert(analysisDao.getById(analysis.id).isDefined)
-            assert(analysis.owner.get.id == user.id)
-            assert(user.ownedAnalyses.size == count + 1)
-
-        println("       persisting plugins")
         // Persist  plugins
         for (p <- plugins) {
             val p1 = plugDao.persist(p)
@@ -183,8 +168,20 @@ object TestObject
                 assert(p.parameters.find(_.id == param.id).get.defaultValue == param.defaultValue)
             }
         }
+    }
 
-        println("       defining analysis")
+    def persistAnalyses {
+        println("Perisiting analyisis ...")
+        // Persist analysis
+        val user = userDao.getById(u1.id).get
+        val count = analysisDao.getAll().size
+        val a = new cz.payola.domain.entities.Analysis(
+            "Cities with more than 2M habitants with countries " + count,
+            Some(user)
+        )
+        a.isPublic_=(true)
+
+        println("      defining analysis")
         val citiesFetcher = sparqlEndpointPlugin.createInstance()
             .setParameter("EndpointURL", "http://dbpedia.org/sparql")
         val citiesTyped = typedPlugin.createInstance().setParameter("TypeURI", "http://dbpedia.org/ontology/City")
@@ -199,10 +196,25 @@ object TestObject
             "Value", "2000000"
         )
 
-            analysis.addPluginInstances(citiesFetcher, citiesTyped, citiesProjection, citiesSelection)
-            analysis.addBinding(citiesFetcher, citiesTyped)
-            analysis.addBinding(citiesTyped, citiesProjection)
-            analysis.addBinding(citiesProjection, citiesSelection)
+        // Try that defined analyiss can be persisted
+        a.addPluginInstances(citiesFetcher, citiesTyped, citiesProjection, citiesSelection)
+        a.addBinding(citiesFetcher, citiesTyped)
+        a.addBinding(citiesTyped, citiesProjection)
+        a.addBinding(citiesProjection, citiesSelection)
+
+        // Persist defined analysis
+        println("      persisting defined analysis")
+        val analysis = analysisDao.persist(a)
+
+            assert(analysisDao.getById(analysis.id).isDefined)
+            assert(analysis.owner.get.id == user.id)
+            assert(user.ownedAnalyses.size == count + 1)
+
+            // Asset all is persisted
+            assert(analysis.pluginInstances.size == a.pluginInstances.size)
+            assert(analysis.pluginInstances.size > 0)
+            assert(analysis.pluginInstanceBindings.size == a.pluginInstanceBindings.size)
+            assert(analysis.pluginInstanceBindings.size > 0)
 
         val countriesFetcher = sparqlEndpointPlugin.createInstance()
             .setParameter("EndpointURL", "http://dbpedia.org/sparql")
@@ -226,12 +238,17 @@ object TestObject
             analysis.addBinding(countriesProjection, citiesCountriesJoin, 1)
 
         println("       asserting persisted analysis")
+
+
         // Get analysis from DB
         val persistedAnalysis = analysisDao.getById(analysis.id).get
             assert(persistedAnalysis.pluginInstances.size == analysis.pluginInstances.size)
+            assert(persistedAnalysis.pluginInstances.size == 8)
             assert(persistedAnalysis.pluginInstanceBindings.size == analysis.pluginInstanceBindings.size)
+            assert(persistedAnalysis.pluginInstanceBindings.size == 7)
             assert(persistedAnalysis.owner.get.id == user.id)
 
+        // Assert persisted plugins instances
         val pluginInstances = List(
             citiesFetcher,
             citiesTyped,

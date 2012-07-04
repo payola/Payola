@@ -41,7 +41,7 @@ class PluginDAO extends EntityDAO[PluginDbRepresentation](PayolaDB.plugins)
         val result = super.persist(pluginDb)
 
         // ... then assign parameters
-        p.parameters.map(par => pluginDb.addParameter(Parameter(par)))
+        p.parameters.map(par => pluginDb.associateParameter(Parameter(par)))
 
         result.createPlugin()
     }
