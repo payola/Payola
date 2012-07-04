@@ -113,17 +113,33 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
         graphView.get.update(graph)
     }
 
-    def clean() {
+    def clear() {
         if(graphView.isDefined) {
-            graphView.get.clean()
+            graphView.get.canvasPack.clear()
             graphView = None
             mouseDragged = false
             mousePressedVertex = false
             mouseDownPosition = Point(0, 0)
         }
 
-        zoomTool.get.destroy()
-        zoomTool = None
+        if(zoomTool.isDefined) {
+            zoomTool.get.reset()
+        }
+    }
+
+    def destroy() {
+        if(graphView.isDefined) {
+            graphView.get.destroy()
+            graphView = None
+            mouseDragged = false
+            mousePressedVertex = false
+            mouseDownPosition = Point(0, 0)
+        }
+
+        if(zoomTool.isDefined) {
+            zoomTool.get.destroy()
+            zoomTool = None
+        }
     }
 
     protected def redrawQuick() { //TODO rename or move somewhere else

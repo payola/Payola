@@ -23,7 +23,7 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String)
 
         val dialog = new PluginDialog(AnalysisBuilderData.getPlugins)
         dialog.pluginNameClicked += { evt =>
-            val instance = new PluginInstance(evt.target.name, Some(inner))
+            val instance = new PluginInstance(evt.target.name, evt.target, Some(inner))
             instance.render(pluginsHolderElement)
 
             instance.connectButtonClicked += { evt =>
@@ -42,7 +42,9 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String)
 
     addDataSourceLink.clicked += {event =>
 
-        val instance = new PluginInstance("SPARQL Endpoint", None)
+        val plugin = AnalysisBuilderData.getSparqlEndpointPlugin
+
+        val instance = new PluginInstance("SPARQL Endpoint", plugin)
         instance.render(pluginsHolderElement)
 
         instance.connectButtonClicked += { evt =>

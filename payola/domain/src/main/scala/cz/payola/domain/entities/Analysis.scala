@@ -2,8 +2,13 @@ package cz.payola.domain.entities
 
 import scala.collection.mutable
 import cz.payola.domain.entities.analyses._
-import evaluation.AnalysisEvaluation
+import cz.payola.domain.entities.analyses.evaluation.AnalysisEvaluation
+import cz.payola.domain.entities.plugins.PluginInstance
 
+/**
+  * @param _name Name of the analysis.
+  * @param _owner Owner of the analysis.
+  */
 class Analysis(protected var _name: String, protected var _owner: Option[User])
     extends Entity
     with NamedEntity
@@ -18,11 +23,17 @@ class Analysis(protected var _name: String, protected var _owner: Option[User])
 
     type PluginInstanceBindingType = PluginInstanceBinding
 
+    type InstanceBindings = Map[PluginInstance, Seq[PluginInstanceBinding]]
+
+    protected var _pluginInstanceInputBindings: Option[InstanceBindings] = None
+
+    protected var _pluginInstanceOutputBindings: Option[InstanceBindings] = None
+
     /**
       * Starts evaluation of the analysis.
       * @param timeout Maximal execution time.
       * @return An instance of the [[cz.payola.domain.entities.analyses.evaluation.AnalysisEvaluation]] which can be
-      *         queried about analysis evaluation progress and result.
+      *         queried about the analysis evaluation progress and the result.
       */
     def evaluate(timeout: Option[Long] = None): AnalysisEvaluation = {
         val evaluation = new AnalysisEvaluation(this, timeout)
@@ -81,12 +92,51 @@ class Analysis(protected var _name: String, protected var _owner: Option[User])
     }
 
     /**
+      * Returns the plugin instance bindings grouped by the target instances (the instances they go to).
+      */
+    def pluginInstanceInputBindings: InstanceBindings = {
+        if (_pluginInstanceInputBindings.isEmpty) {
+            _pluginInstanceInputBindings = Some(groupBindingsByInstance(_.targetPluginInstance))
+        }
+        _pluginInstanceInputBindings.get
+    }
+
+    /**
+      * Returns the plugin instance bindings grouped by the source instances (the instances they come from).
+      */
+    def pluginInstanceOutputBindings: InstanceBindings = {
+        if (_pluginInstanceOutputBindings.isEmpty) {
+            _pluginInstanceOutputBindings = Some(groupBindingsByInstance(_.sourcePluginInstance))
+        }
+        _pluginInstanceOutputBindings.get
+    }
+
+    /**
+      * Returns the plugin instances that behave as sources of the analysis (they have no inputs).
+      */
+    def sourceInstances: Seq[PluginInstance] = getInstancesWithoutBindings(pluginInstanceInputBindings)
+
+    /**
+      * Returns the plugin instances that behave as outputs of the analysis (they don't have their outputs bound).
+      */
+    def outputInstances: Seq[PluginInstance] = getInstancesWithoutBindings(pluginInstanceOutputBindings)
+
+    /**
+      * Returns the plugin instance whose output is also output of the analysis. If the analysis is valid then
+      * [[scala.Some]] is returned.
+      */
+    def outputInstance: Option[PluginInstance] = outputInstances.headOption
+
+
+    /**
       * Adds a new plugin instance to the analysis.
       * @param instance The plugin instance to add.
       * @throws IllegalArgumentException if the instance can't be added to the analysis.
       */
     def addPluginInstance(instance: PluginInstanceType) {
         require(!pluginInstances.contains(instance), "The instance is already present in the analysis.")
+
+        invalidatePluginInstanceBindings()
         storePluginInstance(instance)
     }
 
@@ -105,11 +155,12 @@ class Analysis(protected var _name: String, protected var _owner: Option[User])
       */
     def removePluginInstance(instance: PluginInstanceType): Option[PluginInstanceType] = {
         ifContains(pluginInstances, instance) {
-            discardPluginInstance(instance)
+            invalidatePluginInstanceBindings()
             val bindingsToRemove = pluginInstanceBindings.filter { binding =>
                 binding.sourcePluginInstance == instance || binding.targetPluginInstance == instance
             }
             removeBindings(bindingsToRemove: _*)
+            discardPluginInstance(instance)
         }
     }
 
@@ -119,22 +170,6 @@ class Analysis(protected var _name: String, protected var _owner: Option[User])
       */
     def removePluginInstances(instances: PluginInstanceType*) {
         instances.foreach(i => removePluginInstance(i))
-    }
-
-    /**
-      * Returns the plugin instance bindings grouped by the target instances (the instances they go to).
-      */
-    def pluginInstanceInputBindings: Map[PluginInstance, Seq[PluginInstanceBinding]] = {
-        val instanceBindings = pluginInstanceBindings.groupBy(_.targetPluginInstance)
-        instanceBindings ++ pluginInstances.filter(i => !instanceBindings.contains(i)).map((_, Nil)).toMap
-    }
-
-    /**
-      * Returns the plugin instance bindings grouped by the source instances (the instances they come from).
-      */
-    def pluginInstanceOutputBindings: Map[PluginInstance, Seq[PluginInstanceBinding]] = {
-        val instanceBindings = pluginInstanceBindings.groupBy(_.sourcePluginInstance)
-        instanceBindings ++ pluginInstances.filter(i => !instanceBindings.contains(i)).map((_, Nil)).toMap
     }
 
     /**
@@ -148,6 +183,7 @@ class Analysis(protected var _name: String, protected var _owner: Option[User])
         require(pluginInstances.contains(binding.targetPluginInstance),
             "The target plugin instance has to be present in the analysis.")
 
+        invalidatePluginInstanceBindings()
         storeBinding(binding)
     }
 
@@ -169,11 +205,11 @@ class Analysis(protected var _name: String, protected var _owner: Option[User])
       * @param instance The instance that would replace the binding.
       */
     def collapseBinding(binding: PluginInstanceBindingType, instance: PluginInstance) {
-//        require(pluginInstanceBindings.contains(binding), "The binding isn't present in the analysis.")
-//        require(!pluginInstances.contains(instance), "The instance is already present in the analysis.")
-//        require(binding.targetPluginInstance.plugin.inputCount == 1, "The binding target instance must have one imput.")
-//        require(binding.sourcePluginInstance.plugin.inputCount == instance.plugin.inputCount,
-//            "The binding source instance must have same number of inputs as the instance that replaces the binding.")
+        require(pluginInstanceBindings.contains(binding), "The binding isn't present in the analysis.")
+        require(!pluginInstances.contains(instance), "The instance is already present in the analysis.")
+        require(binding.targetPluginInstance.plugin.inputCount == 1, "The binding target instance must have one imput.")
+        require(binding.sourcePluginInstance.plugin.inputCount == instance.plugin.inputCount,
+            "The binding source instance must have same number of inputs as the instance that replaces the binding.")
 
         // Store the bindings for later use.
         val sourceInstanceInputBindings = pluginInstanceInputBindings(binding.sourcePluginInstance)
@@ -195,16 +231,9 @@ class Analysis(protected var _name: String, protected var _owner: Option[User])
       */
     def removeBinding(binding: PluginInstanceBindingType): Option[PluginInstanceBindingType] = {
         ifContains(pluginInstanceBindings, binding) {
+            invalidatePluginInstanceBindings()
             discardBinding(binding)
         }
-    }
-
-    def sources = {
-        pluginInstances.diff(pluginInstanceBindings.map(b => b.targetPluginInstance))
-    }
-
-    def outputs = {
-        pluginInstances.diff(pluginInstanceBindings.map(b => b.sourcePluginInstance))
     }
 
     /**
@@ -215,14 +244,6 @@ class Analysis(protected var _name: String, protected var _owner: Option[User])
         bindings.foreach(removeBinding(_))
     }
 
-    /**
-      * Returns the plugin instance whose output is also output of the analysis. If the analysis is valid then
-      * [[scala.Some]] is returned.
-      */
-    def outputInstance: Option[PluginInstance] = {
-        pluginInstanceOutputBindings.find(_._2.isEmpty).map(_._1)
-    }
-
     override def canEqual(other: Any): Boolean = {
         other.isInstanceOf[Analysis]
     }
@@ -231,5 +252,34 @@ class Analysis(protected var _name: String, protected var _owner: Option[User])
         super[Entity].checkInvariants()
         super[NamedEntity].checkInvariants()
         super[OptionallyOwnedEntity].checkInvariants()
+    }
+
+    /**
+      * Groups the plugin instance bindings to groups indexed by plugin instances.
+      * @param f A function that selects the plugin instance, to whose group the plugin instance binding should belong.
+      * @return The plugin instance bindings.
+      */
+    private def groupBindingsByInstance(f: PluginInstanceBinding => PluginInstance): InstanceBindings = {
+        val instanceBindings = pluginInstanceBindings.groupBy(f)
+        val instancesWithoutBindings = pluginInstances.filter(i => !instanceBindings.contains(i))
+        instanceBindings ++ instancesWithoutBindings.map((_, Nil)).toMap
+    }
+
+    /**
+      * Returns plugin instances with no bindings in the specified map of instance bindings.
+      * @param instanceBindings The bindings indexed by the plugin instances.
+      * @return The plugin instances without bindings.
+      */
+    private def getInstancesWithoutBindings(instanceBindings: InstanceBindings): Seq[PluginInstance] = {
+        instanceBindings.filter(_._2.isEmpty).map(_._1).toList
+    }
+
+    /**
+      * Invalidates the plugin instance bindings. Should be called whenever the collection of plugins or plugin
+      * instances is altered.
+      */
+    private def invalidatePluginInstanceBindings() {
+        _pluginInstanceInputBindings = None
+        _pluginInstanceOutputBindings = None
     }
 }

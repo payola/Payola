@@ -125,4 +125,92 @@ class RpcSpecs extends CompilerFixtureSpec
                 """
             }
     }
+
+    it("synchronous and asynchronous remote methods are supported") {
+        configMap =>
+            scalaCode {
+                """
+                    import s2js.compiler._
+
+                    package server
+                    {
+                        @remote object o
+                        {
+                            @secured def foo(bar: Int, securityContext: AnyRef = null): Int = bar * 42
+
+                            @secured @async def bar(bar: String, securityContext: AnyRef = null)
+                                (successCallback: (Int => Unit))(errorCallback: (Throwable => Unit)) {
+                                successCallback(bar.length)
+                            }
+                        }
+                    }
+
+                    object client {
+                        def main() {
+                            server.o.foo(123)
+                            var x = 0
+                            server.o.bar("xyz") {i => x = i} {e => x = -1}
+                        }
+                    }
+                """
+            } shouldCompileTo {
+                """
+                    s2js.runtime.client.ClassLoader.provide('client');
+                    s2js.runtime.client.ClassLoader.provide('server.o');
+
+                    client.main = function() {
+                        var self = this;
+                        s2js.runtime.client.rpc.Wrapper.callSync('server.o.foo', [123], ['scala.Int']);
+                        var x = 0;
+                        s2js.runtime.client.rpc.Wrapper.callAsync('server.o.bar', ['xyz'], ['java.lang.String'],
+                            function(i) { x = i; }, function(e) { x = -1; });
+                    };
+                    client.__class__ = new s2js.runtime.client.Class('client', []);
+                """
+            }
+    }
+
+    it("secured remote objects are supported") {
+        configMap =>
+            scalaCode {
+                """
+                    import s2js.compiler._
+
+                    package server
+                    {
+                        @remote @secured object o
+                        {
+                            def foo(bar: Int, securityContext: AnyRef = null): Int = bar * 42
+
+                            @async def bar(bar: String, securityContext: AnyRef = null)
+                                (successCallback: (Int => Unit))(errorCallback: (Throwable => Unit)) {
+                                successCallback(bar.length)
+                            }
+                        }
+                    }
+
+                    object client {
+                        def main() {
+                            server.o.foo(123)
+                            var x = 0
+                            server.o.bar("xyz") {i => x = i} {e => x = -1}
+                        }
+                    }
+                """
+            } shouldCompileTo {
+                """
+                    s2js.runtime.client.ClassLoader.provide('client');
+                    s2js.runtime.client.ClassLoader.provide('server.o');
+
+                    client.main = function() {
+                        var self = this;
+                        s2js.runtime.client.rpc.Wrapper.callSync('server.o.foo', [123], ['scala.Int']);
+                        var x = 0;
+                        s2js.runtime.client.rpc.Wrapper.callAsync('server.o.bar', ['xyz'], ['java.lang.String'],
+                            function(i) { x = i; }, function(e) { x = -1; });
+                    };
+                    client.__class__ = new s2js.runtime.client.Class('client', []);
+                """
+            }
+    }
 }

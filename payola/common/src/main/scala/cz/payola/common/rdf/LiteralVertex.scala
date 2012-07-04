@@ -1,22 +1,24 @@
 package cz.payola.common.rdf
 
 /**
-  * A literal vertex in a RDF graph.
+  * A vertex in the RDF graph which only contains a literal value.
+  * @param value Value of the vertex.
+  * @param language Language of the vertex.
   */
-trait LiteralVertex extends Vertex
+class LiteralVertex(val value: Any, val language: Option[String] = None) extends Vertex
 {
-    protected val _value: Any
-
-    protected val _language: Option[String]
-
-    /** Value of the literal vertex. */
-    def value = _value
-
-    /** Optional language of the literal. */
-    def language = _language
-
-    /**
-      * @return value.toString
-      */
     override def toString = value.toString
+
+    override def equals(other: Any): Boolean = {
+        other match {
+            case lv: LiteralVertex => value == lv.value && language == lv.language
+            case _ => false
+        }
+    }
+
+    override def hashCode: Int = {
+        41 * (
+            41 + value.hashCode
+        ) + language.hashCode
+    }
 }

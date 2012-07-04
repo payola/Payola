@@ -1,11 +1,11 @@
 package cz.payola.web.initializer
 
-import cz.payola.domain.entities.analyses.plugins.data.SparqlEndpoint
-import cz.payola.domain.entities.analyses.plugins.query._
-import cz.payola.domain.entities.analyses.plugins._
-import cz.payola.data.dao._
 import cz.payola.data.PayolaDB
-import cz.payola.domain.entities.analyses.DataSource
+import cz.payola.domain.entities.plugins.concrete.data.SparqlEndpoint
+import cz.payola.domain.entities.plugins.concrete.query._
+import cz.payola.domain.entities.plugins.concrete._
+import cz.payola.data.dao._
+import cz.payola.domain.entities.plugins.DataSource
 import scala.collection.immutable
 
 object DatabaseInitializer extends App
@@ -40,7 +40,7 @@ object DatabaseInitializer extends App
         )
         // persist analysis
         val a = new cz.payola.domain.entities.Analysis("DB: Cities with more than 2 million habitants with countries", None)
-        val analysis = analysisDao.persist(a).get
+        val analysis = analysisDao.persist(a)
 
         // Persist  plugins
         for (p <- plugins) {
@@ -84,9 +84,14 @@ object DatabaseInitializer extends App
         analysis.addBinding(citiesSelection, citiesCountriesJoin, 0)
         analysis.addBinding(countriesProjection, citiesCountriesJoin, 1)
 
-        val ds1 = new DataSource("Cities", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.analyses.parameters.StringParameter].createValue("http://dbpedia.org/ontology/Country")))
-        val ds2 = new DataSource("Countries", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.analyses.parameters.StringParameter].createValue("http://dbpedia.org/ontology/City")))
-        val ds3 = new DataSource("Countries2", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.analyses.parameters.StringParameter].createValue("http://dbpedia.org/ontology/City")))
+        val ds1 = new DataSource("Cities", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter].createValue("http://dbpedia.org/ontology/Country")))
+        val ds2 = new DataSource("Countries", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter].createValue("http://dbpedia.org/ontology/City")))
+        val ds3 = new DataSource("Countries2", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter].createValue("http://dbpedia.org/ontology/City")))
+
+        val dsDao = new DataSourceDAO()
+        dsDao.persist(ds1)
+        dsDao.persist(ds2)
+        dsDao.persist(ds3)
 
         println("Data initialized")
     }

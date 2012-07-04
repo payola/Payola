@@ -1,10 +1,15 @@
 package cz.payola.common.entities
 
-import analyses.{PluginInstanceBinding, PluginInstance}
-import scala.collection.mutable
+import cz.payola.common.entities.analyses.PluginInstanceBinding
+import cz.payola.common.entities.plugins.PluginInstance
+import scala.collection._
+import scala.Seq
 
 /**
-  * A named sequence of analytical plugin instances.
+  * A set of analytical plugin instances that are bound together (the output of one plugin instance is bound to the
+  * input of another plugin instance). The analysis is in a valid state iff all plugin instances have all inputs and
+  * outputs bound, no input nor output is bound more than once and there is one plugin instance that doesn't have its
+  * output bound. That is the analysis output. If the analysis is in the valid state, it may be evaluated.
   */
 trait Analysis extends NamedEntity with OptionallyOwnedEntity with ShareableEntity with DescribedEntity
 {
@@ -19,10 +24,10 @@ trait Analysis extends NamedEntity with OptionallyOwnedEntity with ShareableEnti
     private val _pluginInstanceBindings = mutable.ArrayBuffer[PluginInstanceBindingType]()
 
     /** Analytical plugin instances the analysis consists of.*/
-    def pluginInstances: Seq[PluginInstanceType] = _pluginInstances
+    def pluginInstances: immutable.Seq[PluginInstanceType] = _pluginInstances.toList
 
     /** Bindings between the analytical plugin instances. */
-    def pluginInstanceBindings: Seq[PluginInstanceBindingType] = _pluginInstanceBindings
+    def pluginInstanceBindings: immutable.Seq[PluginInstanceBindingType] = _pluginInstanceBindings.toList
 
     /**
       * Stores the specified plugin instance to the analysis.

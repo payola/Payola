@@ -2,8 +2,8 @@ package cz.payola.domain.test
 
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
-import cz.payola.domain.entities.analyses.parameters.StringParameter
-import cz.payola.domain.entities.analyses.Plugin
+import cz.payola.domain.entities.Plugin
+import cz.payola.domain.entities.plugins.parameters.StringParameter
 
 class PluginTest extends FlatSpec with ShouldMatchers {
 

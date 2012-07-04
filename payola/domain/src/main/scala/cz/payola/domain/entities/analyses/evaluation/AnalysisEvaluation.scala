@@ -1,14 +1,22 @@
 package cz.payola.domain.entities.analyses.evaluation
 
 import actors.{TIMEOUT, Actor}
-import cz.payola.domain.rdf.Graph
 import collection.mutable
-import cz.payola.domain.entities.{AnalysisException, Analysis}
-import cz.payola.domain.entities.analyses.PluginInstance
-import cz.payola.domain.entities.analyses.optimization.AnalysisOptimizer
 import cz.payola.domain.Timer
-import scala.util.control.ControlThrowable
+import cz.payola.domain.entities.Analysis
+import cz.payola.domain.entities.analyses._
+import cz.payola.domain.entities.plugins.PluginInstance
+import cz.payola.domain.entities.analyses.optimization._
+import cz.payola.domain.rdf.Graph
+import cz.payola.domain.entities.analyses.optimization.phases._
 
+/**
+  * An actor that performs an analysis evaluation. It verifies and optimizes the analysis, starts all plugin instance
+  * evaluations, takes care of sending the plugin instance evaluation outputs to appropriate inputs, tracks the time
+  * spent evaluating, tracks the evaluation progress and responds to the control messages.
+  * @param analysis The analysis to evaluate.
+  * @param timeout The maximal time limit allowed for the evaluation to take.
+  */
 class AnalysisEvaluation(private val analysis: Analysis, private val timeout: Option[Long]) extends Actor
 {
     private val timer = new Timer(timeout, this)
@@ -20,18 +28,7 @@ class AnalysisEvaluation(private val analysis: Analysis, private val timeout: Op
     private var result: Option[AnalysisResult] = None
 
     def act() {
-        timer.start()
-
-        // Verify that the analysis may be evaluated.
-        try {
-            analysis.checkValidity()
-        } catch {
-            case throwable => finishEvaluation(Error(throwable, progress.errors))
-        }
-
-        // Optimize the analysis
-        val optimizedAnalysis = AnalysisOptimizer.process(analysis)
-        val instanceInputBindings = optimizedAnalysis.pluginInstanceInputBindings
+        val optimizedAnalysis = optimizeAnalysis()
 
         def startInstanceEvaluation(instance: PluginInstance, outputProcessor: Option[Graph] => Unit) {
             val evaluation = new InstanceEvaluation(instance, this, outputProcessor)
@@ -39,13 +36,14 @@ class AnalysisEvaluation(private val analysis: Analysis, private val timeout: Op
             evaluation.start()
 
             // Start the preceding plugin evaluations.
-            instanceInputBindings(instance).foreach { binding =>
+            optimizedAnalysis.pluginInstanceInputBindings(instance).foreach { binding =>
                 val instanceOutputProcessor = bindingOutputProcessor(evaluation, binding.targetInputIndex) _
                 startInstanceEvaluation(binding.sourcePluginInstance, instanceOutputProcessor)
             }
         }
 
         // Start the evaluation of the analysis by starting the output plugin instance.
+        timer.start()
         progress = AnalysisEvaluationProgress(Nil, Map.empty, optimizedAnalysis.allOriginalInstances, Map.empty)
         startInstanceEvaluation(optimizedAnalysis.outputInstance.get, analysisOutputProcessor)
 
@@ -70,11 +68,64 @@ class AnalysisEvaluation(private val analysis: Analysis, private val timeout: Op
         }
     }
 
-    def bindingOutputProcessor(targetEvaluation: InstanceEvaluation, targetInputIndex: Int)(output: Option[Graph]) {
+    /**
+      * Progress of the analysis evaluation.
+      */
+    def getProgress: AnalysisEvaluationProgress = {
+        (this !? GetProgress).asInstanceOf[AnalysisEvaluationProgress]
+    }
+
+    /**
+      * Result of the analysis evaluation. [[scala.None]] in case the evaluation hasn't finished yet.
+      */
+    def getResult: Option[AnalysisResult] = {
+        (this !? GetResult).asInstanceOf[Option[AnalysisResult]]
+    }
+
+    /**
+      * Whether the analysis evaluation has finished.
+      */
+    def isFinished: Boolean = {
+        getResult.isDefined
+    }
+
+    /**
+      * Prepares the analysis before the actual evaluation.
+      * @return The prepared optimized analysis.
+      */
+    private def optimizeAnalysis(): OptimizedAnalysis = {
+        try {
+            analysis.checkValidity()
+        } catch {
+            case throwable => finishEvaluation(Error(throwable, progress.errors))
+        }
+
+        val optimizer = new AnalysisOptimizer(List(
+            new MergeConstructs,
+            new MergeJoins,
+            new MergeFetchersWithQueries
+        ))
+        optimizer.optimize(analysis)
+    }
+
+    /**
+      * A function that takes a plugin instance evaluation output and sends it to the specified input.
+      * @param targetEvaluation The target plugin instance evaluation.
+      * @param targetInputIndex Index of the target plugin instance evaluation input.
+      * @param output The output graph to send.
+      */
+    private def bindingOutputProcessor(targetEvaluation: InstanceEvaluation, targetInputIndex: Int)
+        (output: Option[Graph]) {
+
         targetEvaluation ! InstanceEvaluationInput(targetInputIndex, output)
     }
 
-    def analysisOutputProcessor(output: Option[Graph]) {
+    /**
+      * A function that takes the output of the output plugin instance evaluation and sends it to the analysis
+      * evaluation.
+      * @param output The output graph to send.
+      */
+    private def analysisOutputProcessor(output: Option[Graph]) {
         this ! InstanceEvaluationInput(0, output)
     }
 
@@ -117,26 +168,5 @@ class AnalysisEvaluation(private val analysis: Analysis, private val timeout: Op
     private def terminateDependentActors() {
         timer ! None
         instanceEvaluations.foreach(_ ! None)
-    }
-
-    /**
-      * Progress of the analysis evaluation.
-      */
-    def getProgress: AnalysisEvaluationProgress = {
-        (this !? GetProgress).asInstanceOf[AnalysisEvaluationProgress]
-    }
-
-    /**
-      * Result of the analysis evaluation. [[scala.None]] in case the evaluation hasn't finished yet.
-      */
-    def getResult: Option[AnalysisResult] = {
-        (this !? GetResult).asInstanceOf[Option[AnalysisResult]]
-    }
-
-    /**
-      * Whether the analysis evaluation has finished.
-      */
-    def isFinished: Boolean = {
-        getResult.isDefined
     }
 }

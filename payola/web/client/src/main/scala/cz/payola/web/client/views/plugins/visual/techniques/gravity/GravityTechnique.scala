@@ -35,8 +35,8 @@ class GravityTechnique(settings: VisualSetup) extends BaseTechnique(settings)
       */
     private val velocitiesStabilization = 3
 
-    override def clean() {
-        super.clean()
+    override def destroy() {
+        super.destroy()
     }
 
     def getName:String = {

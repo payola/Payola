@@ -1,12 +1,15 @@
 package cz.payola.data.entities
 
 import cz.payola.data.entities.analyses._
-import cz.payola.data.entities.analyses.parameters._
-import scala.collection.mutable
 import cz.payola.data.PayolaDB
 import cz.payola.data.dao.{PluginInstanceDAO, PluginInstanceBindingDAO}
 import org.squeryl.annotations.Transient
+import cz.payola.data.entities.plugins.PluginInstance
+import scala.collection.immutable
 
+/**
+  * This object converts [[cz.payola.common.entities.Analysis]] to [[cz.payola.data.entities.Analysis]]
+  */
 object Analysis {
 
     def apply(a: cz.payola.common.entities.Analysis): Analysis = {
@@ -17,7 +20,6 @@ object Analysis {
                 new Analysis(a.id, a.name, owner)
             }
         }
-
     }
 }
 
@@ -28,7 +30,7 @@ class Analysis(
     extends cz.payola.domain.entities.Analysis(name, o)
     with PersistableEntity
 {
-    type DomainParameterValueType = cz.payola.domain.entities.analyses.ParameterValue[_]
+    type DomainParameterValueType = plugins.ParameterValue[_]
 
     @Transient
     private var _pluginInstancesLoaded = false;
@@ -41,7 +43,7 @@ class Analysis(
     var ownerId: Option[String] = o.map(_.id)
     private lazy val _ownerQuery = PayolaDB.analysisOwnership.right(this)
 
-    override def pluginInstances : Seq[PluginInstanceType] = {
+    override def pluginInstances: immutable.Seq[PluginInstanceType] = {
         // Lazy-load related instances only for first time
         if (!_pluginInstancesLoaded) {
             evaluateCollection(_pluginInstancesQuery).map( i =>
@@ -66,7 +68,7 @@ class Analysis(
         _owner
     }
 
-    override def pluginInstanceBindings: Seq[PluginInstanceBindingType] = {
+    override def pluginInstanceBindings: immutable.Seq[PluginInstanceBindingType] = {
         // Lazy-load related bindings only for first time
         if (!_pluginInstancesBindingsLoaded) {
             evaluateCollection(_pluginInstancesBindingsQuery).map(b =>
@@ -83,33 +85,27 @@ class Analysis(
 
     override protected def storePluginInstance(instance: Analysis#PluginInstanceType) {
         val i = PluginInstance(instance)
-        super.storePluginInstance(associate(i, _pluginInstancesQuery).get)
+        super.storePluginInstance(associate(i, _pluginInstancesQuery))
 
-        // Needs to be done after pluin instance is persisted (SQUERYL)
+        // SQUERYL: Paramters can be associated after the plugin instance is persisted
         i.associateParameterValues()
     }
 
     override protected def discardPluginInstance(instance: Analysis#PluginInstanceType) {
-        val i = PluginInstance(instance)
-        i.analysisId = None
+        // TODO: injection
+        new PluginInstanceDAO().removeById(instance.id)
 
-        // TODO: SQUERYL - ugly, but the change of analysisId is required
-        new PluginInstanceDAO().persist(i)
-
-        super.discardPluginInstance(i)
+        super.discardPluginInstance(instance)
     }
 
     override protected def storeBinding(binding: Analysis#PluginInstanceBindingType) {
-        super.storeBinding(associate(PluginInstanceBinding(binding), _pluginInstancesBindingsQuery).get)
+        super.storeBinding(associate(PluginInstanceBinding(binding), _pluginInstancesBindingsQuery))
     }
 
     override protected def discardBinding(binding: Analysis#PluginInstanceBindingType) {
-        val b = PluginInstanceBinding(binding)
-        b.analysisId = None
+        // TODO: injection
+        new PluginInstanceBindingDAO().removeById(binding.id)
 
-        // TODO: SQUERYL - ugly, but the change of analysisId is required
-        new PluginInstanceBindingDAO().persist(b)
-
-        super.discardBinding(b)
+        super.discardBinding(binding)
     }
 }

@@ -495,7 +495,7 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
     }
 
 
-    def clean() {
+    def destroy() {
         while(container.childNodes.length > 0) {
             container.removeChild(container.firstChild)
         }

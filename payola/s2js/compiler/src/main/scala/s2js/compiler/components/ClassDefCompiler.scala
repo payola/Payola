@@ -5,15 +5,15 @@ import scala.tools.nsc.Global
 import scala.collection.mutable
 import collection.mutable.{LinkedHashMap, ListBuffer}
 
-/**A factory for ClassDefCompiler objects. */
+/** A factory for ClassDefCompiler objects. */
 object ClassDefCompiler
 {
     /**
-     * Creates a ClassDefCompiler object corresponding to the specified ClassDef.
-     * @param packageDefCompiler The compiler of the package which contains the class.
-     * @param classDef The ClassDef of the class.
-     * @return The ClassDefCompiler object.
-     */
+      * Creates a ClassDefCompiler object corresponding to the specified ClassDef.
+      * @param packageDefCompiler The compiler of the package which contains the class.
+      * @param classDef The ClassDef of the class.
+      * @return The ClassDefCompiler object.
+      */
     def apply(packageDefCompiler: PackageDefCompiler, classDef: Global#ClassDef): ClassDefCompiler = {
         if (classDef.symbol.isPackageObjectClass) {
             new PackageObjectCompiler(packageDefCompiler, classDef)
@@ -25,53 +25,52 @@ object ClassDefCompiler
     }
 }
 
-/**A compiler of a ClassDef. */
+/** A compiler of a ClassDef. */
 abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val classDef: Global#ClassDef)
 {
-
     import packageDefCompiler.global._
 
-    /**Full name of the JavaScript object that corresponds to the ClassDef. */
+    /** Full name of the JavaScript object that corresponds to the ClassDef. */
     protected lazy val fullJsName = packageDefCompiler.getSymbolJsName(classDef.symbol)
 
-    /**Full name of the JavaScript object that should contains members (fields, methods) of the ClassDef. */
+    /** Full name of the JavaScript object that should contains members (fields, methods) of the ClassDef. */
     protected val memberContainerName = fullJsName
 
-    /**Parent class and inherited traits (doesn't contain internal classes). */
+    /** Parent class and inherited traits (doesn't contain internal classes). */
     protected val predecessors = classDef.impl.parents.filter(c => !packageDefCompiler.symbolIsInternal(c.symbol))
 
-    /**The parent class. */
+    /** The parent class. */
     protected val parentClass = predecessors.headOption
 
-    /**The inherited traits. */
+    /** The inherited traits. */
     protected val inheritedTraits = if (predecessors.nonEmpty) predecessors.tail else Nil
 
-    /**The ValDef or DefDef members. */
+    /** The ValDef or DefDef members. */
     protected val valOrDefDefs = classDef.impl.body.filter(_.isInstanceOf[Global#ValOrDefDef])
 
-    /**The ValDef members. */
+    /** The ValDef members. */
     protected val valDefs = valOrDefDefs.collect {
         case valDef: Global#ValDef => valDef
     }
 
-    /**The DefDef members. */
+    /** The DefDef members. */
     protected val defDefs = valOrDefDefs.collect {
         case defDef: Global#DefDef => defDef
     }
 
-    /**The constructor DefDef objects. */
+    /** The constructor DefDef objects. */
     protected val constructors = classDef.impl.body.filter(_.hasSymbolWhich(_.isPrimaryConstructor))
 
-    /**The first and currently the only used constructor. TODO support multiple constructors. */
+    /** The first and currently the only used constructor. TODO support multiple constructors. */
     protected val constructorDefDef: Option[Global#DefDef] = constructors.headOption.map(_.asInstanceOf[Global#DefDef])
 
-    /**Parameters of the constructor. */
+    /** Parameters of the constructor. */
     protected val constructorParameters: Option[List[Global#ValDef]] = constructorDefDef.map(_.vparamss.flatten)
 
-    /**Buffer containing the compiled JavaScript code. */
+    /** Buffer containing the compiled JavaScript code. */
     protected var buffer: mutable.ListBuffer[String] = null
 
-    /**Map of operators indexed by the corresponding method name. */
+    /** Map of operators indexed by the corresponding method name. */
     private val operatorTokenMap = Map[String, String](
         "eq" -> "===",
         "ne" -> "!==",
@@ -92,7 +91,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         "unary_$bang" -> "!"
     )
 
-    /**The special JavaScript characters and their escape sequences. */
+    /** The special JavaScript characters and their escape sequences. */
     private val stringEscapeMap = LinkedHashMap[String, String](
         "\\" -> """\\""",
         "\b" -> """\b""",
@@ -105,9 +104,9 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     )
 
     /**
-     * Compiles the ClassDef.
-     * @param buffer The buffer where the compiled JavaScript code is appended.
-     */
+      * Compiles the ClassDef.
+      * @param buffer The buffer where the compiled JavaScript code is appended.
+      */
     def compile(buffer: mutable.ListBuffer[String]) {
         this.buffer = buffer
 
@@ -117,8 +116,8 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles the ClassDef.
-     */
+      * Compiles the ClassDef.
+      */
     protected def internalCompile() {
         // Try to find the parent constructor call within the constructor.
         val parentConstructorCall: Option[Global#Apply] = constructorDefDef.flatMap {
@@ -135,14 +134,14 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles the constructor.
-     * @param parentConstructorCall Optional parent constructor call within the constructor.
-     */
+      * Compiles the constructor.
+      * @param parentConstructorCall Optional parent constructor call within the constructor.
+      */
     protected def compileConstructor(parentConstructorCall: Option[Global#Apply])
 
     /**
-     * Compiles inherited traits.
-     */
+      * Compiles inherited traits.
+      */
     protected def compileInheritedTraits() {
         // Traits should be compiled in reverse order as mentioned in the specification of stackable modifications.
         inheritedTraits.reverse.foreach {
@@ -155,16 +154,16 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles members of a ClassDef: ValDefs (field vals and vars) and DefDefs (methods).
-     */
+      * Compiles members of a ClassDef: ValDefs (field vals and vars) and DefDefs (methods).
+      */
     protected def compileMembers() {
         valDefs.foreach(compileMember(_))
         defDefs.foreach(compileMember(_))
     }
 
     /**
-     * Creates an instance of the Class corresponding to the ClassDef.
-     */
+      * Creates an instance of the Class corresponding to the ClassDef.
+      */
     private def instantiateClass() {
         buffer += "%s.__class__ = new s2js.runtime.client.Class('%s', [%s]);\n".format(
             memberContainerName,
@@ -174,10 +173,10 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles a member.
-     * @param memberAst The member AST.
-     * @param containerName Full name of the JavaScript object that should contain the member.
-     */
+      * Compiles a member.
+      * @param memberAst The member AST.
+      * @param containerName Full name of the JavaScript object that should contain the member.
+      */
     protected def compileMember(memberAst: Global#Tree, containerName: String = memberContainerName) {
         if (memberAst.hasSymbolWhich(!symbolIsIgnoredMember(_))) {
             memberAst match {
@@ -195,10 +194,10 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles a ValDef member.
-     * @param valDef The ValDef to compile.
-     * @param containerName Full name of the JavaScript object that should contain the member.
-     */
+      * Compiles a ValDef member.
+      * @param valDef The ValDef to compile.
+      * @param containerName Full name of the JavaScript object that should contain the member.
+      */
     protected def compileValDef(valDef: Global#ValDef, containerName: String = memberContainerName) {
         buffer += "%s.%s = ".format(containerName, packageDefCompiler.getSymbolLocalJsName(valDef.symbol))
         compileSymbol(valDef.symbol) {
@@ -208,12 +207,12 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles a function.
-     * @param parameters The list of parameters.
-     * @param declareSelf Whether the first statement of the function body should be declaration of the self
-     *                    variable (var self = this;).
-     * @param compileBody An action that compiles the function bodye.
-     */
+      * Compiles a function.
+      * @param parameters The list of parameters.
+      * @param declareSelf Whether the first statement of the function body should be declaration of the self
+      *                    variable (var self = this;).
+      * @param compileBody An action that compiles the function bodye.
+      */
     private def compileFunction(parameters: List[Global#ValDef], declareSelf: Boolean)(compileBody: => Unit) {
         // Function header.
         buffer += "function("
@@ -230,10 +229,10 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles a DefDef member.
-     * @param defDef The DefDef to compile.
-     * @param containerName Full name of the JavaScript object that should contain the member.
-     */
+      * Compiles a DefDef member.
+      * @param defDef The DefDef to compile.
+      * @param containerName Full name of the JavaScript object that should contain the member.
+      */
     protected def compileDefDef(defDef: Global#DefDef, containerName: String = memberContainerName) {
         buffer += "%s.%s = ".format(containerName, packageDefCompiler.getSymbolLocalJsName(defDef.symbol))
         compileFunction(defDef.vparamss.flatten, true) {
@@ -245,9 +244,9 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles an anonymous function.
-     * @param function The anonymous function to compile.
-     */
+      * Compiles an anonymous function.
+      * @param function The anonymous function to compile.
+      */
     private def compileAnonymousFunction(function: Global#Function) {
         compileFunction(function.vparams, false) {
             compileAstStatement(function.body, !packageDefCompiler.typeIsEmpty(function.body.tpe))
@@ -255,10 +254,10 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles call of a method that is declared in the parent class.
-     * @param parameters The parameter values.
-     * @param methodName Optional name of the method. If not specified, then parent constructor call is compiled.
-     */
+      * Compiles call of a method that is declared in the parent class.
+      * @param parameters The parameter values.
+      * @param methodName Optional name of the method. If not specified, then parent constructor call is compiled.
+      */
     protected def compileParentCall(parameters: List[Global#Tree], methodName: Option[Global#Name] = None) {
         buffer += "goog.base(self"
         if (methodName.isDefined) {
@@ -272,17 +271,17 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles declaration of method or function parameters.
-     * @param parameters The parameter list.
-     */
+      * Compiles declaration of method or function parameters.
+      * @param parameters The parameter list.
+      */
     protected def compileParameterDeclaration(parameters: List[Global#ValDef]) {
         compileParameterDeclaration(Option(parameters))
     }
 
     /**
-     * Compiles declaration of method or function parameters.
-     * @param parameters Optional parameter list.
-     */
+      * Compiles declaration of method or function parameters.
+      * @param parameters Optional parameter list.
+      */
     protected def compileParameterDeclaration(parameters: Option[List[Global#ValDef]]) {
         if (parameters.isDefined) {
             val nonvariadicParameters = parameters.get.filter(p => !typeIsVariadic(p.tpt))
@@ -291,17 +290,17 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles initialization of method or function parameters.
-     * @param parameters The parameter list.
-     */
+      * Compiles initialization of method or function parameters.
+      * @param parameters The parameter list.
+      */
     protected def compileParameterInitialization(parameters: List[Global#ValDef]) {
         compileParameterInitialization(Option(parameters))
     }
 
     /**
-     * Compiles initialization of method or function parameters.
-     * @param parameters Optional parameter list.
-     */
+      * Compiles initialization of method or function parameters.
+      * @param parameters Optional parameter list.
+      */
     protected def compileParameterInitialization(parameters: Option[List[Global#ValDef]]) {
         if (parameters.isDefined) {
             // Parameters with default values.
@@ -338,11 +337,11 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles parameter values passed to a method call or a function call.
-     * @param parameterValues List of parameter value ASTs.
-     * @param withParentheses Whether the compiled parameter values should be enclosed in parentheses.
-     * @param asArray Whether the parameters should be compiled as an array.
-     */
+      * Compiles parameter values passed to a method call or a function call.
+      * @param parameterValues List of parameter value ASTs.
+      * @param withParentheses Whether the compiled parameter values should be enclosed in parentheses.
+      * @param asArray Whether the parameters should be compiled as an array.
+      */
     protected def compileParameterValues(parameterValues: List[Global#Tree], withParentheses: Boolean = true,
         asArray: Boolean = false) {
         if (withParentheses || asArray) {
@@ -368,9 +367,9 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles parameter types as a comma separated sequence of their fully qualified names.
-     * @param parameterValues List of parameter value ASTs.
-     */
+      * Compiles parameter types as a comma separated sequence of their fully qualified names.
+      * @param parameterValues List of parameter value ASTs.
+      */
     protected def compileParameterTypeNames(parameterValues: List[Global#Tree]) {
         def typeToFullName(tpe: Global#Type): String = {
             val typeArguments = tpe.typeArgs.map(typeToFullName)
@@ -381,11 +380,11 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles an AST.
-     * @param ast The AST to compile.
-     * @param hasReturnValue Whether the last statement of the AST should be prepended with "return" keyword in the
-     *                       compiled JavaScript code.
-     */
+      * Compiles an AST.
+      * @param ast The AST to compile.
+      * @param hasReturnValue Whether the last statement of the AST should be prepended with "return" keyword in the
+      *                       compiled JavaScript code.
+      */
     protected def compileAst(ast: Global#Tree, hasReturnValue: Boolean = false) {
         // A Block handles the return value itself so it has to be compiled besides all other ast types.
         if (ast.isInstanceOf[Global#Block]) {
@@ -426,11 +425,11 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles an AST statement. The statement is terminated with the ";" in the compiled JavaScript code.
-     * @param ast The AST statement to compile.
-     * @param hasReturnValue Whether the last statement of the AST should be prepended with "return" keyword in the
-     *                       compiled JavaScript code.
-     */
+      * Compiles an AST statement. The statement is terminated with the ";" in the compiled JavaScript code.
+      * @param ast The AST statement to compile.
+      * @param hasReturnValue Whether the last statement of the AST should be prepended with "return" keyword in the
+      *                       compiled JavaScript code.
+      */
     protected def compileAstStatement(ast: Global#Tree, hasReturnValue: Boolean = false) {
         val previousBufferLength = buffer.length
         compileAst(ast, hasReturnValue)
@@ -447,21 +446,21 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles a Block of statements.
-     * @param block The Block to compile.
-     * @param hasReturnValue Whether the last statement of the Block should be prepended with "return" keyword in the
-     *                       compiled JavaScript code.
-     */
+      * Compiles a Block of statements.
+      * @param block The Block to compile.
+      * @param hasReturnValue Whether the last statement of the Block should be prepended with "return" keyword in the
+      *                       compiled JavaScript code.
+      */
     private def compileBlock(block: Global#Block, hasReturnValue: Boolean = false) {
         block.stats.foreach(compileAstStatement(_))
         compileAstStatement(block.expr, hasReturnValue)
     }
 
     /**
-     * Compiles a Literal value.
-     * @param literal The Literal to compile.
-     * @param isReturnValue Whether the literal is a return value of a function.
-     */
+      * Compiles a Literal value.
+      * @param literal The Literal to compile.
+      * @param isReturnValue Whether the literal is a return value of a function.
+      */
     private def compileLiteral(literal: Global#Literal, isReturnValue: Boolean = false) {
         literal match {
             case Literal(Constant(value)) => {
@@ -481,9 +480,9 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles a This reference.
-     * @param thisAst The This reference AST.
-     */
+      * Compiles a This reference.
+      * @param thisAst The This reference AST.
+      */
     private def compileThis(thisAst: Global#This) {
         if (thisAst.hasSymbolWhich(_.fullName.toString.startsWith("scala"))) {
             buffer += thisAst.symbol.fullName.toString
@@ -493,9 +492,9 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles an identifier.
-     * @param identifier The Ident to compile.
-     */
+      * Compiles an identifier.
+      * @param identifier The Ident to compile.
+      */
     private def compileIdentifier(identifier: Global#Ident) {
         if (identifier.symbol.isGetter) {
             buffer += "self.%s".format(packageDefCompiler.getSymbolLocalJsName(identifier.symbol))
@@ -505,31 +504,31 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles declaration of a local variable.
-     * @param localValDef The local variable declaration to compile.
-     */
+      * Compiles declaration of a local variable.
+      * @param localValDef The local variable declaration to compile.
+      */
     private def compileLocalValDef(localValDef: Global#ValDef) {
         buffer += "var %s = ".format(packageDefCompiler.getSymbolLocalJsName(localValDef.symbol))
         compileAst(localValDef.rhs)
     }
 
     /**
-     * Compiles instantiation of a class.
-     * @param instantiation The class instantiation to compile.
-     */
+      * Compiles instantiation of a class.
+      * @param instantiation The class instantiation to compile.
+      */
     private def compileNew(instantiation: Global#New) {
         buffer += "new %s".format(packageDefCompiler.getSymbolJsName(instantiation.tpe.typeSymbol))
         packageDefCompiler.dependencyManager.addRequiredSymbol(instantiation.tpe.typeSymbol)
     }
 
     /**
-     * Compiles a Select.
-     * @param select The Select to compile.
-     * @param isSubSelect Whether the select is within a chain of selections (another selection is applied on the
-     *                    result of the current Select).
-     * @param isInsideApply Whether the select is within an Apply (the result of the current Select is target of an
-     *                      Apply).
-     */
+      * Compiles a Select.
+      * @param select The Select to compile.
+      * @param isSubSelect Whether the select is within a chain of selections (another selection is applied on the
+      *                    result of the current Select).
+      * @param isInsideApply Whether the select is within an Apply (the result of the current Select is target of an
+      *                      Apply).
+      */
     private def compileSelect(select: Global#Select, isSubSelect: Boolean = false, isInsideApply: Boolean = false) {
         val subSelectToken = if (isSubSelect) "." else ""
         var name = packageDefCompiler.getSymbolLocalJsName(select.symbol)
@@ -586,9 +585,9 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles a value application (Apply).
-     * @param apply The Apply to compile.
-     */
+      * Compiles a value application (Apply).
+      * @param apply The Apply to compile.
+      */
     private def compileApply(apply: Global#Apply) {
         apply match {
             case Apply(s@Select(q, name), args) if symbolIsOperator(s.symbol) => {
@@ -645,14 +644,17 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles a synchronous RPC call (instead of a method call).
-     * @param select The method selection from the remote object.
-     * @param returnType Return type of the RPC call.
-     * @param parameters The parameters.
-     */
+      * Compiles a synchronous RPC call (instead of a method call).
+      * @param select The method selection from the remote object.
+      * @param returnType Return type of the RPC call.
+      * @param parameters The parameters.
+      */
     private def compileRpcCall(select: Global#Select, returnType: Global#Type, parameters: List[Global#Tree]) {
         val requiredTypes = ListBuffer[Global#Type](returnType)
         val isAsync = packageDefCompiler.symbolHasAnnotation(select.symbol, "s2js.compiler.async")
+        val isSecured = List(select.symbol, select.symbol.owner).exists { symbol =>
+            packageDefCompiler.symbolHasAnnotation(symbol, "s2js.compiler.secured")
+        }
 
         var realParameters = parameters
         var successCallback: Option[Global#Tree] = None
@@ -666,6 +668,12 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
             requiredTypes += successCallback.get.tpe.typeArgs.head
             realParameters = parameters.dropRight(2)
         }
+        if (isSecured) {
+            if (realParameters.isEmpty) {
+                throw new ScalaToJsException("A secured remote method must have a security context as a parameter.")
+            }
+            realParameters = realParameters.dropRight(1)
+        }
 
         // Add the required dependencies.
         requiredTypes.foreach {
@@ -677,10 +685,8 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         }
 
         // Compile the call itself.
-        buffer += "s2js.runtime.client.rpc.Wrapper.call%s('%s', ".format(
-            if (isAsync) "Async" else "Sync",
-            select.toString
-        )
+        buffer += "s2js.runtime.client.rpc.Wrapper.call%s('%s', ".format(if (isAsync) "Async" else "Sync",
+            select.toString)
         compileParameterValues(realParameters, asArray = true)
         buffer += ", ["
         compileParameterTypeNames(realParameters)
@@ -695,11 +701,11 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles an operator application.
-     * @param firstOperand The first operand.
-     * @param secondOperand The second operand.
-     * @param operatorToken The operator token ("+", "-" etc.).
-     */
+      * Compiles an operator application.
+      * @param firstOperand The first operand.
+      * @param secondOperand The second operand.
+      * @param operatorToken The operator token ("+", "-" etc.).
+      */
     private def compileOperator(firstOperand: Global#Tree, secondOperand: Option[Global#Tree], operatorToken: String) {
         buffer += "("
         if (operatorToken.startsWith("unary_")) {
@@ -714,11 +720,11 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles a type parameter application.
-     * @param typeApply The TypeApply to compile.
-     * @param isInsideApply Whether the type apply is within an Apply (the result of the current Type Apply is target
-     *                      of an Apply).
-     */
+      * Compiles a type parameter application.
+      * @param typeApply The TypeApply to compile.
+      * @param isInsideApply Whether the type apply is within an Apply (the result of the current Type Apply is target
+      *                      of an Apply).
+      */
     private def compileTypeApply(typeApply: Global#TypeApply, isInsideApply: Boolean = false) {
         typeApply.fun match {
             case Select(qualifier, name) if name.toString.matches("(is|as)InstanceOf") => {
@@ -735,11 +741,11 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles a type check or type conversion.
-     * @param typeSymbol Symbol of the type.
-     * @param isTypeCheck True in case of type check, false in case of type conversion.
-     * @param qualifier The qualifier that is compiled as a generic AST.
-   	 */
+      * Compiles a type check or type conversion.
+      * @param typeSymbol Symbol of the type.
+      * @param isTypeCheck True in case of type check, false in case of type conversion.
+      * @param qualifier The qualifier that is compiled as a generic AST.
+      */
     private def compileInstanceOf(typeSymbol: Global#Symbol, isTypeCheck: Boolean, qualifier: Global#Tree) {
         compileInstanceOf(typeSymbol, isTypeCheck) {
             compileAst(qualifier)
@@ -747,11 +753,11 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles a type check or type conversion.
-     * @param typeSymbol Symbol of the type.
-     * @param isTypeCheck True in case of type check, false in case of type conversion.
-     * @param compileQualifier An action that compiles the target object qualifier.
-     */
+      * Compiles a type check or type conversion.
+      * @param typeSymbol Symbol of the type.
+      * @param isTypeCheck True in case of type check, false in case of type conversion.
+      * @param compileQualifier An action that compiles the target object qualifier.
+      */
     private def compileInstanceOf(typeSymbol: Global#Symbol, isTypeCheck: Boolean)(compileQualifier: => Unit) {
         buffer += "s2js.runtime.client.%sInstanceOf(".format(if (isTypeCheck) "is" else "as")
         compileQualifier
@@ -759,18 +765,18 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles an assignment.
-     * @param assign The assignment to compile.
-     */
+      * Compiles an assignment.
+      * @param assign The assignment to compile.
+      */
     private def compileAssign(assign: Global#Assign) {
         compileAssign(assign.lhs, assign.rhs)
     }
 
     /**
-     * Compiles an assignment.
-     * @param assignee The target of the assignment.
-     * @param value The value to assign.
-     */
+      * Compiles an assignment.
+      * @param assignee The target of the assignment.
+      * @param value The value to assign.
+      */
     private def compileAssign(assignee: Global#Tree, value: Global#Tree) {
         assignee match {
             case select: Global#Select => compileSelect(select, isInsideApply = true)
@@ -781,9 +787,9 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles an if-then-else statement.
-     * @param condition The If statement to compile.
-     */
+      * Compiles an if-then-else statement.
+      * @param condition The If statement to compile.
+      */
     private def compileIf(condition: Global#If) {
         val hasReturn = !packageDefCompiler.typeIsEmpty(condition.tpe)
         if (hasReturn) {
@@ -812,9 +818,9 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles a label definition.
-     * @param labelDef The LabelDef to compile.
-     */
+      * Compiles a label definition.
+      * @param labelDef The LabelDef to compile.
+      */
     private def compileLabelDef(labelDef: Global#LabelDef) {
         labelDef.name match {
             case name if name.toString.startsWith("while$") => {
@@ -839,9 +845,9 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles a try-catch-finally statement.
-     * @param tryAst The Try to compile.
-     */
+      * Compiles a try-catch-finally statement.
+      * @param tryAst The Try to compile.
+      */
     private def compileTry(tryAst: Global#Try) {
         if (!tryAst.finalizer.isEmpty) {
             throw new ScalaToJsException("The finally statement in try-catch-finally isn't supported.")
@@ -864,9 +870,9 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles a throw statement.
-     * @param throwAst The Throw to compile.
-     */
+      * Compiles a throw statement.
+      * @param throwAst The Throw to compile.
+      */
     private def compileThrow(throwAst: Global#Throw) {
         // The throw statement has to be wrapped into an anonymous function to avoid "return throw ...".
         buffer += "(function() {\nthrow "
@@ -875,9 +881,9 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles a match statement.
-     * @param matchAst the Match to compile.
-     */
+      * Compiles a match statement.
+      * @param matchAst the Match to compile.
+      */
     private def compileMatch(matchAst: Global#Match) {
         val selectorName = packageDefCompiler.getUniqueLocalName("selector")
         val hasReturn = !packageDefCompiler.typeIsEmpty(matchAst.tpe)
@@ -889,9 +895,9 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles a case statement within a match statement.
-     * @param caseDef The CaseDef to compile.
-     */
+      * Compiles a case statement within a match statement.
+      * @param caseDef The CaseDef to compile.
+      */
     private def compileCase(caseDef: Global#CaseDef, selectorName: String, hasReturn: Boolean) {
         buffer += "if ("
         compilePattern(caseDef.pat, selectorName)
@@ -921,10 +927,10 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles a pattern in a case statement.
-     * @param patternAst The pattern AST to compile.
-     * @param selectorName Name of the selector variable.
-     */
+      * Compiles a pattern in a case statement.
+      * @param patternAst The pattern AST to compile.
+      * @param selectorName Name of the selector variable.
+      */
     private def compilePattern(patternAst: Global#Tree, selectorName: String) {
         patternAst match {
             case Ident(name) if name.toString == "_" => buffer += "true"
@@ -939,20 +945,20 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles a literal pattern in a case statement.
-     * @param literal The literal pattern value.
-     * @param selectorName Name of the selector variable.
-     */
+      * Compiles a literal pattern in a case statement.
+      * @param literal The literal pattern value.
+      * @param selectorName Name of the selector variable.
+      */
     private def compileLiteralPattern(literal: Global#Literal, selectorName: String) {
         buffer += "%s === ".format(selectorName)
         compileLiteral(literal)
     }
 
     /**
-     * Compiles a type check pattern in a case statement.
-     * @param typed The type check pattern value.
-     * @param selectorName Name of the selector variable.
-     */
+      * Compiles a type check pattern in a case statement.
+      * @param typed The type check pattern value.
+      * @param selectorName Name of the selector variable.
+      */
     private def compileTypedPattern(typed: Global#Typed, selectorName: String) {
         compileInstanceOf(typed.tpe.typeSymbol, true) {
             buffer += selectorName
@@ -960,20 +966,20 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles a selection pattern in a case statement.
-     * @param select The selection pattern value.
-     * @param selectorName Name of the selector variable.
-     */
+      * Compiles a selection pattern in a case statement.
+      * @param select The selection pattern value.
+      * @param selectorName Name of the selector variable.
+      */
     private def compileSelectPattern(select: Global#Select, selectorName: String) {
         buffer += "%s === ".format(selectorName)
         compileAst(select)
     }
 
     /**
-     * Compiles a value application pattern in a case statement.
-     * @param apply The value application pattern value.
-     * @param selectorName Name of the selector variable.
-     */
+      * Compiles a value application pattern in a case statement.
+      * @param apply The value application pattern value.
+      * @param selectorName Name of the selector variable.
+      */
     private def compileApplyPattern(apply: Global#Apply, selectorName: String) {
         compileInstanceOf(apply.tpe.typeSymbol, true) {
             buffer += selectorName
@@ -991,10 +997,10 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles a disjunction of two patterns in a case statement.
-     * @param alternative The disjunction of two patterns.
-     * @param selectorName Name of the selector variable.
-     */
+      * Compiles a disjunction of two patterns in a case statement.
+      * @param alternative The disjunction of two patterns.
+      * @param selectorName Name of the selector variable.
+      */
     private def compileAlternativePattern(alternative: Global#Alternative, selectorName: String) {
         alternative.trees.foreach {
             subPatternAst =>
@@ -1007,10 +1013,10 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Compiles variable bindings within a pattern.
-     * @param patternAst The pattern whose bindings to compile.
-     * @param selectorName Name of the selector variable.
-     */
+      * Compiles variable bindings within a pattern.
+      * @param patternAst The pattern whose bindings to compile.
+      * @param selectorName Name of the selector variable.
+      */
     private def compileBindings(patternAst: Global#Tree, selectorName: String) {
         patternAst match {
             case bind: Global#Bind => {
@@ -1030,10 +1036,10 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Returns whether the specified symbol corresponds to a JavaScript operator.
-     * @param symbol The symbol to check.
-     * @return True if the symbol corresponds to an operator, false otherwise.
-     */
+      * Returns whether the specified symbol corresponds to a JavaScript operator.
+      * @param symbol The symbol to check.
+      * @return True if the symbol corresponds to an operator, false otherwise.
+      */
     private def symbolIsOperator(symbol: Symbol): Boolean = {
         val anyRefOperators = Set("eq", "ne", "$eq$eq", "$bang$eq")
 
@@ -1043,12 +1049,12 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Returns whether the specified symbol is a method or an anonymous function.
-     * @param symbol The symbol to check.
-     * @return True if the symbol is a method or an anonymous function.
-     */
+      * Returns whether the specified symbol is a method or an anonymous function.
+      * @param symbol The symbol to check.
+      * @return True if the symbol is a method or an anonymous function.
+      */
     private def symbolIsCallable(symbol: Symbol): Boolean = {
-        val isScalaFunctionObject = symbol.fullName.matches("""scala\.Function[0-9]+""")
+        val isScalaFunctionObject = symbol.fullName.matches( """scala\.Function[0-9]+""")
 
         symbol.isMethod ||
             symbol.isAnonymousFunction ||
@@ -1057,19 +1063,19 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Returns whether the symbol is a member of an internal type.
-     * @param symbol The symbol to check.
-     * @return True if the symbol belongs to an internal type, false otherwise.
-     */
+      * Returns whether the symbol is a member of an internal type.
+      * @param symbol The symbol to check.
+      * @return True if the symbol belongs to an internal type, false otherwise.
+      */
     private def symbolIsInternalMember(symbol: Global#Symbol): Boolean = {
         packageDefCompiler.symbolIsInternal(symbol.enclClass)
     }
 
     /**
-     * Returns whether the specified symbol corresponding to a ClassDef member should be ignored during compilation.
-     * @param member The member t check.
-     * @return True if the member should be ignored during compilation, false otherwise.
-     */
+      * Returns whether the specified symbol corresponding to a ClassDef member should be ignored during compilation.
+      * @param member The member t check.
+      * @return True if the member should be ignored during compilation, false otherwise.
+      */
     protected def symbolIsIgnoredMember(member: Global#Symbol): Boolean = {
         val internalMemberNames = Set("hashCode", "equals", "canEqual", "readResolve")
 
@@ -1080,32 +1086,32 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
             member.isConstructor || // TODO support multiple constructors
             member.isParameter || // A parameter of a member method
             member.hasAccessorFlag || // A generated accesor method
-            member.nameString.matches("""^.*\$default\$[0-9]+$""") // A member generated for default parameter value
+            member.nameString.matches( """^.*\$default\$[0-9]+$""") // A member generated for default parameter value
     }
 
     /**
-     * Returns whether the type is a primitive type (either scala.AnyVal or java.lang.String).
-     * @param tpe the type to check.
-     * @return True if the type is primitive, false otherwise.
-     */
+      * Returns whether the type is a primitive type (either scala.AnyVal or java.lang.String).
+      * @param tpe the type to check.
+      * @return True if the type is primitive, false otherwise.
+      */
     private def typeIsPrimitive(tpe: Global#Type): Boolean = {
         tpe.typeSymbol.fullName == "java.lang.String" || tpe.baseClasses.exists(_.fullName.toString == "scala.AnyVal")
     }
 
     /**
-     * Returns whether the type is a variadic parameter type.
-     * @param typeAst The type AST.
-     * @return True if the type is variadic parameter type, false otherwise.
-     */
+      * Returns whether the type is a variadic parameter type.
+      * @param typeAst The type AST.
+      * @return True if the type is variadic parameter type, false otherwise.
+      */
     private def typeIsVariadic(typeAst: Global#Tree): Boolean = {
         typeAst.toString.endsWith("*")
     }
 
     /**
-     * Returns whether the select should be ignored during compilation.
-     * @param select The select to check.
-     * @return True if the select should be ignored, false otherwise.
-     */
+      * Returns whether the select should be ignored during compilation.
+      * @param select The select to check.
+      * @return True if the select should be ignored, false otherwise.
+      */
     private def selectIsIgnored(select: Global#Select): Boolean = {
         val ignoredNames = Set("<init>")
         val ignoredAnyValNames = Set("toLong", "toInt", "toShort", "toDouble", "toFloat")
@@ -1116,10 +1122,10 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Returns whether the select is a chain of package selections (for example "pkgA.pkgB.pkgC").
-     * @param select The select to check.
-     * @return True if the select is a chain of package selections, false otherwise.
-     */
+      * Returns whether the select is a chain of package selections (for example "pkgA.pkgB.pkgC").
+      * @param select The select to check.
+      * @return True if the select is a chain of package selections, false otherwise.
+      */
     private def selectIsPackageSelectChain(select: Global#Select): Boolean = {
         select.symbol.isPackage && (select.qualifier match {
             case subSelect: Global#Select => selectIsPackageSelectChain(subSelect)
@@ -1129,31 +1135,32 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Returns whether the select is invoked on a remote object.
-     * @param select The select to check.
-     * @return True if the select is invoked on a remote object.
-     */
+      * Returns whether the select is invoked on a remote object.
+      * @param select The select to check.
+      * @return True if the select is invoked on a remote object.
+      */
     private def selectIsOnRemote(select: Global#Select): Boolean = {
         select.qualifier.hasSymbolWhich(packageDefCompiler.symbolHasAnnotation(_, "remote"))
     }
 
     /**
-     * Converts the specified value to a quoted escaped JavaScript string.
-     * @param value The value to convert.
-     * @return The JavaScript string.
-     */
+      * Converts the specified value to a quoted escaped JavaScript string.
+      * @param value The value to convert.
+      * @return The JavaScript string.
+      */
     private def toJsString(value: String): String = {
         val r = "'" + stringEscapeMap.foldLeft(value)((z, escape) => z.replace(escape._1, escape._2)) + "'"
         r
     }
 
     /**
-     * Compiles the specified symbol. If the symbol has a s2js.compiler.javascript annotation, then the native JavaScript
-     * code from the annotation is used. Otherwise compiles the symbol using the specified action.
-     * @param symbol The symbol to compile.
-     * @param ifNotNativeAction The action that is invoked the symbol isn't annotated with the s2js.compiler.javascript
-     *                          annotation. Typically the action invokes direct compilation of the symbol.
-     */
+      * Compiles the specified symbol. If the symbol has a s2js.compiler.javascript annotation,
+      * then the native JavaScript
+      * code from the annotation is used. Otherwise compiles the symbol using the specified action.
+      * @param symbol The symbol to compile.
+      * @param ifNotNativeAction The action that is invoked the symbol isn't annotated with the s2js.compiler.javascript
+      *                          annotation. Typically the action invokes direct compilation of the symbol.
+      */
     private def compileSymbol(symbol: Global#Symbol)(ifNotNativeAction: => Unit) {
         val nativeAnnotations = packageDefCompiler.getSymbolAnnotations(symbol, "s2js.compiler.javascript")
         if (nativeAnnotations.nonEmpty) {

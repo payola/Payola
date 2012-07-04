@@ -1,6 +1,6 @@
 package s2js.runtime.client.js
 
-import collection.mutable.{ArrayBuffer, HashMap}
+import collection._
 
 /**
  * A base class for JSON object traversers.
@@ -17,7 +17,7 @@ abstract class JsonTraverser[A]
         if (isObject(value)) {
             // Traverse the properties and visit the object.
             val jsObject = new JsObject(value)
-            val traversedProperties = new HashMap[String, A]();
+            val traversedProperties = new mutable.HashMap[String, A]()
             if (objectIsTraversable(jsObject)) {
                 jsObject.foreach((name, value) => traversedProperties.put(name, traverse(value)))
             }
@@ -26,7 +26,7 @@ abstract class JsonTraverser[A]
         } else if (isArray(value)) {
             // Traverse the items and visit the array.
             val jsArray = new JsArray(value)
-            val traversedItems = new ArrayBuffer[A]()
+            val traversedItems = new mutable.ArrayBuffer[A]()
             jsArray.foreach((index, item) => traversedItems += traverse(item))
             arrayVisitor(jsArray, traversedItems)
 

@@ -21,8 +21,8 @@ class TreeTechnique(settings: VisualSetup) extends BaseTechnique(settings)
         }
     }
 
-    override def clean() {
-        super.clean()
+    override def destroy() {
+        super.destroy()
     }
 
     def getName:String = {

@@ -50,11 +50,11 @@ object Profile extends PayolaController with Secured
 
     def saveCreateGroup = authenticatedWithRequest { (request: Request[_], user: User) =>
         val name = groupForm.bindFromRequest()(request).get
-        val groupOption = df.createGroup(name, user)
+        val group = df.createGroup(name, user)
 
-        if (groupOption.isDefined)
+        if (group != null)
         {
-            Redirect(routes.Profile.editGroup(groupOption.get.id)).flashing("success" -> "The group has been sucessfully created.")
+            Redirect(routes.Profile.editGroup(group.id)).flashing("success" -> "The group has been sucessfully created.")
         }else
         {
             Redirect(routes.Profile.listGroups()).flashing("error" -> "The group could not be created.")

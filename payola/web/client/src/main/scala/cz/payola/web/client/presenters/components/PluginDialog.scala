@@ -6,7 +6,7 @@ import s2js.adapters.js.dom.Element
 import s2js.adapters.js.browser.document
 import cz.payola.web.client.mvvm.element._
 import cz.payola.web.client.events._
-import cz.payola.common.entities.analyses.Plugin
+import cz.payola.common.entities.Plugin
 
 class PluginDialog(plugins: Seq[Plugin]) extends Component
 {

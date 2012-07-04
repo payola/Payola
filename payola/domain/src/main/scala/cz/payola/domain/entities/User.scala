@@ -1,14 +1,10 @@
 package cz.payola.domain.entities
 
-import permissions.privilege.{PublicPrivilege, GroupPrivilege, AnalysisPrivilege, Privilege}
-import cz.payola.domain.entities.analyses.DataSource
 import scala.collection._
-import cz.payola.domain.entities.permissions.privilege.OntologyCustomizationPrivilege
+import cz.payola.domain.entities.plugins.DataSource
+import cz.payola.domain.entities.privileges._
 
-/** User entity at the domain level.
-  *
-  * Contains owned analyses and groups, member groups and privileges.
-  *
+/**
   * @param _name Name of the user.
   */
 class User(protected var _name: String)
@@ -24,21 +20,14 @@ class User(protected var _name: String)
 
     type DataSourceType = DataSource
 
-    type PrivilegeType = Privilege[_]
-
     type OntologyCustomizationType = settings.ontology.Customization
 
     /**
       * Adds the analysis to the users owned analyses. The analysis has to be owned by the user.
       * @param analysis Analysis to be added.
-      * @throws IllegalArgumentException if the analysis is null, the user already owns it or isn't an owner of it.
       */
     def addOwnedAnalysis(analysis: AnalysisType) {
-        require(analysis != null, "Analysis mustn't be null.")
-        require(!ownedAnalyses.contains(analysis), "The analysis is already owned by the user.")
-        require(analysis.owner.exists(_ == this), "User must be owner of the analysis.")
-
-        storeOwnedAnalysis(analysis)
+        addOwnedEntity(analysis, ownedAnalyses, storeOwnedAnalysis)
     }
 
     /**
@@ -46,24 +35,33 @@ class User(protected var _name: String)
       * @param analysis The analysis to be removed.
       * @return The removed analysis.
       */
-    def removeOwnedAnalysis(analysis: AnalysisType): Option[Analysis] = {
-        require(analysis != null, "Analysis mustn't be null.")
-        ifContains(ownedAnalyses, analysis) {
-            discardOwnedAnalysis(analysis)
-        }
+    def removeOwnedAnalysis(analysis: AnalysisType): Option[AnalysisType] = {
+        removeRelatedEntity(analysis, ownedAnalyses, discardOwnedAnalysis)
+    }
+
+    /**
+      * Adds the data source to the users owned data sources. The data source has to be owned by the user.
+      * @param dataSource The data source to be added.
+      */
+    def addOwnedDataSource(dataSource: DataSourceType) {
+        addOwnedEntity(dataSource, ownedDataSources, storeOwnedDataSource)
+    }
+
+    /**
+      * Removes the specified data source from the users owned data sources.
+      * @param dataSource The data source to be removed.
+      * @return The removed data source.
+      */
+    def removeOwnedDataSource(dataSource: DataSourceType): Option[DataSourceType] = {
+        removeRelatedEntity(dataSource, ownedDataSources, discardOwnedDataSource)
     }
 
     /**
       * Adds the group to the users owned groups. The group has to be owned by the user.
       * @param group The group to be added.
-      * @throws IllegalArgumentException if the group is null, the user already owns it or isn't an owner of it.
       */
     def addOwnedGroup(group: GroupType) {
-        require(group != null, "Group mustn't be null.")
-        require(!ownedGroups.contains(group), "The group is already owned by the user.")
-        require(group.owner == this, "User must be owner of the group.")
-
-        storeOwnedGroup(group)
+        addOwnedEntity(group, Option(group).flatMap(g => Option(g.owner)), ownedGroups, storeOwnedGroup)
     }
 
     /**
@@ -72,47 +70,7 @@ class User(protected var _name: String)
       * @return The removed group.
       */
     def removeOwnedGroup(group: GroupType): Option[GroupType] = {
-        require(group != null, "Group mustn't be null.")
-        ifContains(ownedGroups, group) {
-            discardOwnedGroup(group)
-        }
-    }
-
-    /**
-      * Returns the public privileges.
-      */
-    def publicPrivileges: Seq[PrivilegeType] = {
-        privileges.collect {
-            case p: PublicPrivilege => p
-        }
-    }
-
-    /**
-      * Returns the analyses that are accessible for the user.
-      */
-    def accessibleAnalyses: Seq[AnalysisType] = {
-        privileges.collect {
-            case p: AnalysisPrivilege => p.obj
-        }.distinct
-    }
-
-    /** Returns accessible ontology customizations.
-      *
-      * @return Accessible ontology customizations.
-      */
-    def accessibleOntologyCustomizations: Seq[OntologyCustomizationType] = {
-        privileges.collect {
-            case c: OntologyCustomizationPrivilege => c.obj
-        }.distinct
-    }
-
-    /**
-      * Returns the groups the user is member of.
-      */
-    def memberGroups: Seq[GroupType] = {
-        privileges.collect {
-            case p: GroupPrivilege => p.obj
-        }.distinct
+        removeRelatedEntity(group, ownedGroups, discardOwnedGroup)
     }
 
     override def canEqual(other: Any): Boolean = {

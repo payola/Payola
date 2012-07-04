@@ -3,8 +3,8 @@ package cz.payola.domain.test
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.FlatSpec
 import cz.payola.domain.entities._
-import analyses.parameters.StringParameterValue
-import analyses.{Plugin, PluginInstance}
+import cz.payola.domain.entities.plugins.PluginInstance
+import cz.payola.domain.entities.plugins.parameters.StringParameterValue
 
 class AnalysisTest extends FlatSpec with ShouldMatchers {
 

@@ -5,9 +5,7 @@ package cz.payola.common.rdf
   */
 trait IdentifiedObject
 {
-    protected val _uri: String
-
-    def uri = _uri
+    val uri: String
 
     override def toString: String = uri
 }

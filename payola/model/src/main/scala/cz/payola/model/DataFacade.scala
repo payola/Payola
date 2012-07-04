@@ -2,11 +2,10 @@ package cz.payola.model
 
 import cz.payola.domain.entities.User
 import cz.payola.data.dao._
-import cz.payola.domain.entities.analyses.DataSource
+import cz.payola.domain.entities.plugins.DataSource
 import cz.payola.common.rdf.Graph
 import cz.payola.domain.entities.Group
-import cz.payola.domain.entities.analyses.plugins.data.SparqlEndpoint
-import cz.payola.common.entities.analyses.Plugin
+import cz.payola.domain.entities.plugins.concrete.data.SparqlEndpoint
 
 class DataFacade
 {
@@ -70,7 +69,7 @@ class DataFacade
     }
 
     def getPublicDataSources(count: Int, skip: Int = 0) : Seq[DataSource] = {
-        dataSourceDAO.getPublicDataSources(skip, count)
+        dataSourceDAO.getPublicDataSources(Some(new PaginationInfo(skip, count)))
     }
 
     def getDataSourceById(id: String) : Option[DataSource] = {
@@ -81,7 +80,7 @@ class DataFacade
         if (!user.isDefined){
             List()
         }else{
-            groupDAO.getByOwnerId(user.get.id, maxCount)
+            groupDAO.getByOwnerId(user.get.id, Some(new PaginationInfo(0, maxCount)))
         }
     }
 

@@ -15,6 +15,8 @@ class ZoomControls(var currentZoom: Double) extends Component
       */
     val zoomStep = 0.09
 
+    private val zoomOrigin = currentZoom
+
     private val maximumZoomOut = 25
     private val maximumZoomIn = 200
 
@@ -30,6 +32,10 @@ class ZoomControls(var currentZoom: Double) extends Component
     val wrapper = new Div(List(plus, status, minus), "zoom-controls")
 
     var parentSpace: Option[Element] = None
+
+    def reset() {
+        setZoom(zoomOrigin)
+    }
 
     def canZoomIn: Boolean = {
         currentZoom < maximumZoomIn

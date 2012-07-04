@@ -1,29 +1,28 @@
 package cz.payola.web.client.mvvm.element.extensions.Payola
 
 import cz.payola.web.client.mvvm.element._
-import cz.payola.common.entities.analyses.Parameter
 import cz.payola.web.client.mvvm.Component
 import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom.Element
 import cz.payola.web.client.mvvm.element.extensions.Bootstrap.Button
 import cz.payola.web.client.events._
+import cz.payola.common.entities.Plugin
 
-class PluginInstance(pluginType: String, predecessors: Option[PluginInstance]) extends Component
+class PluginInstance(pluginType: String, plugin: Plugin, predecessors: Option[PluginInstance] = None) extends Component
 {
     val connectButtonClicked = new ClickedEvent[PluginInstance]
 
     val heading = new Heading3(List(new Text(pluginType)))
 
-    /*val list = parameters.keys.map{key =>
-        val strong = new Strong(List(new Text(key)))
+    val list = plugin.parameters.map{ param =>
+        val strong = new Strong(List(new Text(plugin.name)))
 
-        val parameter = parameters.get(key).get
-        val field = new Input(parameter.name,"", None)
+        val field = new Input(param.name,"", None)
 
         new Paragraph(List(strong, new Text(":"), field))
     }
 
-    val paramsDiv = new Div(list.toList)*/
+    val paramsDiv = new Div(list.toList)
     val connect = new Button("Add connection")
     val delete = new Button("Delete","btn-danger")
 

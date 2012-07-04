@@ -10,7 +10,7 @@ class ClassCompiler(packageDefCompiler: PackageDefCompiler, classDef: Global#Cla
     override val memberContainerName = fullJsName + ".prototype"
 
     protected def compileConstructor(parentConstructorCall: Option[Global#Apply]) {
-        buffer += fullJsName + " = function(";
+        buffer += fullJsName + " = function("
         compileParameterDeclaration(constructorParameters)
         buffer += ") {\n"
         buffer += "var self = this;\n"
@@ -31,8 +31,8 @@ class ClassCompiler(packageDefCompiler: PackageDefCompiler, classDef: Global#Cla
             compileMember(_, "self"))
 
         // Call the parent class constructor.
-        if (parentClass.isDefined && parentConstructorCall.isDefined) {
-            compileParentCall(parentConstructorCall.get.args)
+        if (parentClass.isDefined) {
+            compileParentCall(parentConstructorCall.map(_.args).getOrElse(Nil))
             buffer += ";\n"
         }
 
