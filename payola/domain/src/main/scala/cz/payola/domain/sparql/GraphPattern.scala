@@ -13,7 +13,7 @@ object GraphPattern
     }
 }
 
-case class GraphPattern(triples: Seq[TriplePattern], optionals: Seq[GraphPattern] = Nil, filters: Seq[Filter] = Nil)
+case class GraphPattern(triples: collection.Seq[TriplePattern], optionals: collection.Seq[GraphPattern] = Nil, filters: collection.Seq[Filter] = Nil)
 {
     def isEmpty: Boolean = {
         triples.isEmpty && optionals.forall(_.isEmpty) && filters.isEmpty

@@ -3,7 +3,7 @@ package cz.payola.domain.test
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import cz.payola.domain.virtuoso.LocalVirtuosoStorage
-import cz.payola.domain.rdf.Graph
+import cz.payola.domain.rdf._
 
 class LocalVirtuosoStorageTest extends FlatSpec with ShouldMatchers
 {
@@ -25,7 +25,7 @@ class LocalVirtuosoStorageTest extends FlatSpec with ShouldMatchers
         val response = LocalVirtuosoStorage.selectAllInGroup("mygroup-id")
         println(response)
 
-        val g = Graph(response)
+        val g = Graph(RdfRepresentation.RdfXml, response)
 
         assume(g.containsVertexWithURI("http://www.recshop.fake/cd/Hide your heart"))
     }
