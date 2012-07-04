@@ -9,7 +9,7 @@ import scala.Seq
 /**
   * An entity that may be granted privileges.
   */
-trait PrivilegableEntity
+trait PrivilegableEntity extends Entity
 {
     /** Type of the privileges. */
     type PrivilegeType <: Privilege[_]

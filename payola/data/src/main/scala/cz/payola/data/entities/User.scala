@@ -24,7 +24,7 @@ class User(
     name: String,
     pwd: String,
     mail: String)
-    extends cz.payola.domain.entities.User(name) with PersistableEntity
+    extends cz.payola.domain.entities.User(name) with PersistableEntity with PrivilegableEntity
 {
     password_=(pwd)
     email_=(mail)
@@ -119,10 +119,4 @@ class User(
 
         super.discardOwnedDataSource(source)
     }
-
-    //TODO: Privileges...
-    // override protected def storePrivilege(privilege: User#PrivilegeType) = null
-
-    //TODO: Privileges...
-    // override protected def discardPrivilege(privilege: User#PrivilegeType) = null
 }

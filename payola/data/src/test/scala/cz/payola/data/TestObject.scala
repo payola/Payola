@@ -237,8 +237,7 @@ object TestObject
             analysis.addBinding(citiesSelection, citiesCountriesJoin, 0)
             analysis.addBinding(countriesProjection, citiesCountriesJoin, 1)
 
-        println("       asserting persisted analysis")
-
+        println("      asserting persisted analysis")
 
         // Get analysis from DB
         val persistedAnalysis = analysisDao.getById(analysis.id).get
@@ -345,12 +344,6 @@ object TestObject
         assert(plugDao.getAll().size == pluginsCount)
 
         val analysis = analysisDao.getAll()(0)
-
-        /*
-            TODO: next line causes failure due to lazy-loading of instances
-                - they are lazy-loaded from db, then removed in DB, but not in entity
-         */
-        //assert(analysis.pluginInstances.size == pluginInstancesCount)
 
         // Remove all plugins
         for (p <- plugins) {

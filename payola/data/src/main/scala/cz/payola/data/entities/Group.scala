@@ -22,7 +22,7 @@ class Group(
     name: String,
     o: User)
     extends cz.payola.domain.entities.Group(name, o)
-    with PersistableEntity
+    with PersistableEntity with PrivilegableEntity
 {
     val ownerId: Option[String] = if (owner == null) None else Some(owner.id)
 
