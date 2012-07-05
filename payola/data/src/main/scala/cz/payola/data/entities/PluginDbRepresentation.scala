@@ -82,7 +82,7 @@ class PluginDbRepresentation(
       *
       * @param parameter - parameter to be associated to represented plugin
       */
-    def addParameter(parameter: Parameter[_]) {
+    def associateParameter(parameter: Parameter[_]) {
         parameter match {
             case b: BooleanParameter => associate(b, _booleanParameters)
             case f: FloatParameter => associate(f, _floatParameters)
@@ -102,7 +102,7 @@ class PluginDbRepresentation(
     }
 
     /**
-      * If specifeid [[cz.payola.data.entities.plugins.PluginInstance]] is instance of represented plugin,
+      * If specified [[cz.payola.data.entities.plugins.PluginInstance]] is instance of represented plugin,
       * relation between them is created by this method.
       *
       * @param i - plugin instance to associate to represented plugin
@@ -112,7 +112,7 @@ class PluginDbRepresentation(
     }
 
     /**
-      * If specifeid [[cz.payola.data.entities.plugins.plugins.DataSource]] should be related to represented plugin,
+      * If specified [[cz.payola.data.entities.plugins.plugins.DataSource]] should be related to represented plugin,
       * relation between them is created by this method.
       *
       * @param ds - data source to associate to represented plugin

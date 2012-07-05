@@ -25,8 +25,20 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
         TestObject.testGroupMembership
     }
 
+    "Plugins" should "be persisted with their parameters by PluginDAO" in {
+        TestObject.persistPlugins
+    }
+
     "Analysis" should "be stored/updated/loaded by AnalysisDAO" in {
         TestObject.persistAnalyses
+    }
+
+    "DataSources" should "be updated/stored by DataSourceDAO" in {
+        TestObject.persistDataSources
+    }
+
+    "Privileges" should "be granted and persisted properly" in {
+        TestObject.persistPrivileges
     }
 
     "Pagionation" should "work" in {

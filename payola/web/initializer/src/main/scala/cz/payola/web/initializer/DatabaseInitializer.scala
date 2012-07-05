@@ -44,9 +44,7 @@ object DatabaseInitializer extends App
         val analysis = analysisDao.persist(a)
 
         // Persist  plugins
-        for (p <- plugins) {
-            pluginDao.persist(p)
-        }
+        plugins.foreach(p => pluginDao.persist(p))
 
         val citiesFetcher = sparqlEndpointPlugin.createInstance()
             .setParameter("EndpointURL", "http://dbpedia.org/sparql")

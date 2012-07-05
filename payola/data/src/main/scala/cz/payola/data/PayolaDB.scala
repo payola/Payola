@@ -8,10 +8,12 @@ import cz.payola.data.entities.analyses.PluginInstanceBinding
 import cz.payola.data.entities.plugins.parameters._
 import cz.payola.data.entities._
 import cz.payola.data.entities.plugins._
+import cz.payola.data.entities.privileges.PrivilegeDbRepresentation
 
 /**
   * This is database definition that uses Squeryl.
-  * v http://www.squeryl.org).
+  *
+  * @see http://www.squeryl.org
   */
 object PayolaDB extends Schema
 {
@@ -95,6 +97,11 @@ object PayolaDB extends Schema
       * Table of [[cz.payola.data.entities.analyses.DataSource]]s
       */
     val dataSources = table[DataSource]("dataSources")
+
+    /**
+      * Table of [[cz.payola.data.entities.privileges.PrivilegeDbRepresentation]]s
+      */
+    val privileges = table[PrivilegeDbRepresentation]("privileges")
 
     /**
       * Relation that associates members to [[cz.payola.data.entities.Group]]s
@@ -294,11 +301,8 @@ object PayolaDB extends Schema
         val userName: String = "sa"
         val password: String = ""
 
-        try {
+        DataException.wrap{
             startDatabaseSession(databaseLocation, userName, password, "")
-        }
-        catch {
-            case e: Exception => {println("Failed to connect. " + e); throw e}
         }
     }
 
@@ -309,12 +313,13 @@ object PayolaDB extends Schema
         SessionFactory.concreteFactory = Some(() =>
             Session.create(
                 java.sql.DriverManager.getConnection(database, userName, password),
-                new H2Adapter)
+                new H2Adapter
+            )
         )
     }
 
     /**
-      * Defines and creates all tables and foreign-key contstraints between tables.
+      * Defines and creates all tables and foreign-key constrains between tables.
       * Before schema is created, existing schema is dropped.
       */
     def createSchema() {
@@ -392,6 +397,13 @@ object PayolaDB extends Schema
                 ds.id is (primaryKey)
             ))
 
+        on(privileges)(p =>
+            declare(
+                p.id is (primaryKey),
+                columns (p.granteeId, p.privilegeClass, p.objectId) are (unique)
+            )
+        )
+
         defineForeignKeyPolicy()
 
         transaction {
@@ -401,8 +413,9 @@ object PayolaDB extends Schema
     }
 
     private def defineForeignKeyPolicy() {
-        // When a PluginDbRepresentation is deleted, all of the its instances will get deleted :
+        // When a PluginDbRepresentation is deleted, all of the its instances and data sources will get deleted :
         pluginsPluginInstances.foreignKeyDeclaration.constrainReference(onDelete cascade)
+        pluginsDataSources.foreignKeyDeclaration.constrainReference(onDelete cascade)
 
         // When an Analysis is deleted, all of the its plugin instances will get deleted :
         analysesPluginInstances.foreignKeyDeclaration.constrainReference(onDelete cascade)

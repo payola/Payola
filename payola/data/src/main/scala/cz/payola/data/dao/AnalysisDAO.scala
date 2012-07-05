@@ -4,6 +4,7 @@ import org.squeryl.PrimitiveTypeMode._
 import cz.payola.data.PayolaDB
 import cz.payola.data.entities.{Analysis, User}
 import cz.payola.data.entities.analyses._
+import cz.payola.data.entities.plugins.PluginInstance
 
 class AnalysisDAO extends EntityDAO[Analysis](PayolaDB.analyses)
 {
@@ -30,8 +31,11 @@ class AnalysisDAO extends EntityDAO[Analysis](PayolaDB.analyses)
     }
 
     private def getTopAnalyses(ownerId: Option[String], pagination: Option[PaginationInfo]): collection.Seq[Analysis] = {
+        // OwnerId is not specified -> return all public unowned analyses
+        // OwnerId is specified -> return all analyses by user
         val query = from(table)(a =>
-                where (a.ownerId.getOrElse("-2").toString === ownerId.getOrElse("-1").toString)
+                where ((ownerId.isEmpty === true and a.isPublic === true and a.ownerId.isEmpty === true)
+                    or (a.ownerId.getOrElse("").toString === ownerId.getOrElse("").toString))
                 select (a)
                 orderBy (a.name asc)
             )
@@ -62,11 +66,35 @@ class AnalysisDAO extends EntityDAO[Analysis](PayolaDB.analyses)
         val analysis = Analysis(a)
         super.persist(analysis)
 
-        /*
-        //TODO: Need to store here?
-        a.pluginInstances.map(p => analysis.addPluginInstance(PluginInstance(p)))
+        // Associate plugin instances with their bindings
+        a.pluginInstances.map(pi => analysis.associatePluginInstance(PluginInstance(pi)))
+        a.pluginInstanceBindings.map(b => analysis.associatePluginInstanceBinding(PluginInstanceBinding(b)))
 
-        a.pluginInstanceBindings.map(b => analysis.addBinding(PluginInstanceBinding(b)))
-        */
+        // Return persisted analysis
+        analysis
     }
+
+    /*
+    def loadWholeAnalysis(analysisId: String): Option[Analysis] = {
+        val query =
+            from(PayolaDB.analyses, PayolaDB.pluginInstances, PayolaDB.pluginInstanceBindings, PayolaDB.booleanParameterValues,
+                PayolaDB.floatParameterValues, PayolaDB.intParameterValues, PayolaDB.stringParameterValues)
+                ((a, pi, bi, bpv, fpv, ipv, spv) =>
+                where (
+                    a.is === analysisId
+                    and a.pluginInstances.contains(pi)
+                    and a.pluginInstanceBindings.contains(bi)
+                    and (
+                        pi.parameterValues.contains(bpv)
+                        or pi.parameterValues.contains(fpv)
+                        or pi.parameterValues.contains(ipv)
+                        or pi.parameterValues.contains(spv)
+                    )
+                select(a)
+                )
+            )
+
+        super.evaluateSingleResultQuery(query)
+    }
+    */
 }

@@ -5,6 +5,7 @@ import org.squeryl.annotations.Transient
 import cz.payola.data.dao._
 import cz.payola.data.entities.plugins.DataSource
 import scala.collection.immutable
+import scala.collection.mutable
 
 /**
   * This object converts [[cz.payola.common.entities.User]] to [[cz.payola.common.entities.User]]
@@ -24,7 +25,7 @@ class User(
     name: String,
     pwd: String,
     mail: String)
-    extends cz.payola.domain.entities.User(name) with PersistableEntity
+    extends cz.payola.domain.entities.User(name) with PersistableEntity with PrivilegableEntity
 {
     password_=(pwd)
     email_=(mail)
@@ -42,8 +43,8 @@ class User(
     private lazy val _ownedDataSourcesQuery = PayolaDB.dataSourceOwnership.left(this)
 
     @Transient
-    private var _memberGroupsLoaded = false
-    private lazy val _memberGroupsQuery = PayolaDB.groupMembership.left(this)
+    private val _memberedGroups = new mutable.ArrayBuffer[Group]()
+    private lazy val _memberedGroupsQuery = PayolaDB.groupMembership.left(this)
 
     override def ownedGroups: immutable.Seq[GroupType] = {
         if (!_ownedGroupsLoaded) {
@@ -58,6 +59,20 @@ class User(
 
         super.ownedGroups
     }
+
+    /**
+      * @return Returns collection of [[cz.payola.data.entities.Group]]s that user is member of.
+      */
+    def memberedGroups: mutable.Seq[Group] = {
+            if (_memberedGroups.size == 0) {
+                // Lazy-load membered groups collection
+                evaluateCollection(_memberedGroupsQuery).map(g =>
+                    _memberedGroups += g
+                )
+            }
+
+            _memberedGroups
+        }
 
     override def ownedAnalyses: immutable.Seq[AnalysisType] = {
         if (!_ownedAnalysesLoaded) {
@@ -119,10 +134,4 @@ class User(
 
         super.discardOwnedDataSource(source)
     }
-
-    //TODO: Privileges...
-    // override protected def storePrivilege(privilege: User#PrivilegeType) = null
-
-    //TODO: Privileges...
-    // override protected def discardPrivilege(privilege: User#PrivilegeType) = null
 }

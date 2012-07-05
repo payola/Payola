@@ -81,11 +81,7 @@ class Analysis(
     }
 
     override protected def storePluginInstance(instance: Analysis#PluginInstanceType) {
-        val i = PluginInstance(instance)
-        super.storePluginInstance(associate(i, _pluginInstancesQuery))
-
-        // SQUERYL: Paramters can be associated after the plugin instance is persisted
-        i.associateParameterValues()
+        super.storePluginInstance(associatePluginInstance(PluginInstance(instance)))
     }
 
     override protected def discardPluginInstance(instance: Analysis#PluginInstanceType) {
@@ -96,7 +92,7 @@ class Analysis(
     }
 
     override protected def storeBinding(binding: Analysis#PluginInstanceBindingType) {
-        super.storeBinding(associate(PluginInstanceBinding(binding), _pluginInstancesBindingsQuery))
+        super.storeBinding(associatePluginInstanceBinding(PluginInstanceBinding(binding)))
     }
 
     override protected def discardBinding(binding: Analysis#PluginInstanceBindingType) {
@@ -104,5 +100,18 @@ class Analysis(
         new PluginInstanceBindingDAO().removeById(binding.id)
 
         super.discardBinding(binding)
+    }
+
+    def associatePluginInstance(instance: PluginInstance): PluginInstance = {
+        associate(instance, _pluginInstancesQuery)
+
+        // SQUERYL: Paramters can be associated after the plugin instance is persisted
+        instance.associateParameterValues()
+
+        instance
+    }
+
+    def associatePluginInstanceBinding(instance: PluginInstanceBinding): PluginInstanceBinding = {
+        associate(instance, _pluginInstancesBindingsQuery)
     }
 }

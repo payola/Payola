@@ -1,9 +1,14 @@
 package cz.payola.domain.entities
 
+import scala.collection._
+import cz.payola.common.entities.privileges._
+import cz.payola.common.entities.plugins.DataSource
+import cz.payola.domain.entities.privileges.PublicPrivilege
+
 trait PrivilegableEntity extends cz.payola.common.entities.PrivilegableEntity
 { self: Entity =>
 
-    type PrivilegeType = Privilege[_]
+    type PrivilegeType = Privilege[_  <: Entity]
 
     /**
       * Adds a new privilege to the entity.
@@ -11,7 +16,7 @@ trait PrivilegableEntity extends cz.payola.common.entities.PrivilegableEntity
       * @param granter The user who is granting the privilege.
       * @throws IllegalArgumentException if the privilege can't be added to the entity.
       */
-    def addPrivilege(privilege: PrivilegeType, granter: User) {
+    def grantPrivilege(privilege: PrivilegeType, granter: User) {
         addRelatedEntity(privilege, privileges, storePrivilege)
     }
 

@@ -6,6 +6,7 @@ import cz.payola.domain.entities.plugins.DataSource
 import cz.payola.domain.entities.plugins.concrete._
 import cz.payola.domain.entities.plugins.concrete.data.SparqlEndpoint
 import cz.payola.domain.entities.plugins.concrete.query._
+import cz.payola.domain.entities.privileges._
 
 object TestObject
 {
@@ -29,7 +30,8 @@ object TestObject
     val analysisDao = new AnalysisDAO
     val plugDao = new PluginDAO
     val plugInstDao = new PluginInstanceDAO
-    val dsDao = new DataSourceDAO()
+    val dsDao = new DataSourceDAO
+    val privDao = new PrivilegeDAO
 
     // Plugins
     val sparqlEndpointPlugin = new SparqlEndpoint
@@ -143,24 +145,9 @@ object TestObject
             assert(group5.members.size == 0)
     }
 
-    def persistAnalyses {
-        println("Persisting analysis ...")
+    def persistPlugins {
+        println("Persisting plugins ...")
 
-        // persist analysis
-        val user = userDao.getById(u1.id).get
-        val count = analysisDao.getAll().size
-        val a = new cz.payola.domain.entities.Analysis(
-            "Cities with more than 2M habitants with countries " + count,
-            Some(user)
-        )
-        a.isPublic_=(true)
-        val analysis = analysisDao.persist(a)
-
-            assert(analysisDao.getById(analysis.id).isDefined)
-            assert(analysis.owner.get.id == user.id)
-            assert(user.ownedAnalyses.size == count + 1)
-
-        println("       persisting plugins")
         // Persist  plugins
         for (p <- plugins) {
             val p1 = plugDao.persist(p)
@@ -183,8 +170,20 @@ object TestObject
                 assert(p.parameters.find(_.id == param.id).get.defaultValue == param.defaultValue)
             }
         }
+    }
 
-        println("       defining analysis")
+    def persistAnalyses {
+        println("Perisiting analyisis ...")
+        // Persist analysis
+        val user = userDao.getById(u1.id).get
+        val count = analysisDao.getAll().size
+        val a = new cz.payola.domain.entities.Analysis(
+            "Cities with more than 2M habitants with countries " + count,
+            Some(user)
+        )
+        a.isPublic_=(true)
+
+        println("      defining analysis")
         val citiesFetcher = sparqlEndpointPlugin.createInstance()
             .setParameter("EndpointURL", "http://dbpedia.org/sparql")
         val citiesTyped = typedPlugin.createInstance().setParameter("TypeURI", "http://dbpedia.org/ontology/City")
@@ -199,10 +198,25 @@ object TestObject
             "Value", "2000000"
         )
 
-            analysis.addPluginInstances(citiesFetcher, citiesTyped, citiesProjection, citiesSelection)
-            analysis.addBinding(citiesFetcher, citiesTyped)
-            analysis.addBinding(citiesTyped, citiesProjection)
-            analysis.addBinding(citiesProjection, citiesSelection)
+        // Try that defined analyiss can be persisted
+        a.addPluginInstances(citiesFetcher, citiesTyped, citiesProjection, citiesSelection)
+        a.addBinding(citiesFetcher, citiesTyped)
+        a.addBinding(citiesTyped, citiesProjection)
+        a.addBinding(citiesProjection, citiesSelection)
+
+        // Persist defined analysis
+        println("      persisting defined analysis")
+        val analysis = analysisDao.persist(a)
+
+            assert(analysisDao.getById(analysis.id).isDefined)
+            assert(analysis.owner.get.id == user.id)
+            assert(user.ownedAnalyses.size == count + 1)
+
+            // Asset all is persisted
+            assert(analysis.pluginInstances.size == a.pluginInstances.size)
+            assert(analysis.pluginInstances.size > 0)
+            assert(analysis.pluginInstanceBindings.size == a.pluginInstanceBindings.size)
+            assert(analysis.pluginInstanceBindings.size > 0)
 
         val countriesFetcher = sparqlEndpointPlugin.createInstance()
             .setParameter("EndpointURL", "http://dbpedia.org/sparql")
@@ -225,13 +239,17 @@ object TestObject
             analysis.addBinding(citiesSelection, citiesCountriesJoin, 0)
             analysis.addBinding(countriesProjection, citiesCountriesJoin, 1)
 
-        println("       asserting persisted analysis")
+        println("      asserting persisted analysis")
+
         // Get analysis from DB
         val persistedAnalysis = analysisDao.getById(analysis.id).get
             assert(persistedAnalysis.pluginInstances.size == analysis.pluginInstances.size)
+            assert(persistedAnalysis.pluginInstances.size == 8)
             assert(persistedAnalysis.pluginInstanceBindings.size == analysis.pluginInstanceBindings.size)
+            assert(persistedAnalysis.pluginInstanceBindings.size == 7)
             assert(persistedAnalysis.owner.get.id == user.id)
 
+        // Assert persisted plugins instances
         val pluginInstances = List(
             citiesFetcher,
             citiesTyped,
@@ -264,10 +282,10 @@ object TestObject
         val ds1 = new DataSource("Cities", None, sparqlEndpointPlugin, immutable.Seq(
             sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter]
                 .createValue("http://dbpedia.org/ontology/Country")))
-        val ds2 = new DataSource("Countries", None, sparqlEndpointPlugin, immutable.Seq(
+        val ds2 = new DataSource("Countries", Some(u2), sparqlEndpointPlugin, immutable.Seq(
             sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter]
                 .createValue("http://dbpedia.org/ontology/City")))
-        val ds3 = new DataSource("Countries2", None, sparqlEndpointPlugin, immutable.Seq(
+        val ds3 = new DataSource("Countries2", Some(u3), sparqlEndpointPlugin, immutable.Seq(
             sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter]
                 .createValue("http://dbpedia.org/ontology/City")))
 
@@ -286,11 +304,40 @@ object TestObject
             assert(ds1.parameterValues.size == ds1_db.parameterValues.size)
             assert(ds2.parameterValues.size == ds2_db.parameterValues.size)
             assert(ds3.parameterValues.size == ds3_db.parameterValues.size)
+        
+            assert(u2.id == ds2_db.owner.get.id)
+            assert(u3.id == ds3_db.owner.get.id)
 
         //println("DSs: " + dsDao.getPublicDataSources().size)
             assert(dsDao.getPublicDataSources().size == 0)
     }
 
+    def persistPrivileges {
+        println("Persisting privileges ...")
+
+        val a1 = analysisDao.getAll()(0)
+        val ds1 = dsDao.getAll()(0)
+        val ds2 = dsDao.getAll()(1)
+        val user1 = userDao.getById(u1.id).get
+        val user2 = userDao.getById(u2.id).get
+        val group1 = groupDao.getById(g1.id).get
+
+        val accessA1 = new AccessAnalysisPrivilege(a1)
+        val accessA2 = new AccessAnalysisPrivilege(a1)
+        val accessDS1 = new AccessDataSourcePrivilege(ds1)
+        val accessDS2 = new AccessDataSourcePrivilege(ds2)
+
+        user2.grantPrivilege(accessA1, user1)
+        user1.grantPrivilege(accessDS2, user2)
+        group1.grantPrivilege(accessDS1, user1)
+        group1.grantPrivilege(accessA2, user2)
+
+        assert(privDao.getAll().size == 4)
+        assert(user1.grantedDataSources.size == 1)
+        assert(user2.grantedAnalyses.size == 1)
+        assert(group1.grantedDataSources.size == 1)
+        assert(group1.grantedAnalyses.size == 1)
+    }
 
     def testPagination {
         println("Pagination ...")
@@ -328,12 +375,6 @@ object TestObject
         assert(plugDao.getAll().size == pluginsCount)
 
         val analysis = analysisDao.getAll()(0)
-
-        /*
-            TODO: next line causes failure due to lazy-loading of instances
-                - they are lazy-loaded from db, then removed in DB, but not in entity
-         */
-        //assert(analysis.pluginInstances.size == pluginInstancesCount)
 
         // Remove all plugins
         for (p <- plugins) {
