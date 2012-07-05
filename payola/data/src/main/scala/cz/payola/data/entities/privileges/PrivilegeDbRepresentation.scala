@@ -14,12 +14,26 @@ object PrivilegeDbRepresentation {
             privilege.id,
             granter.id,
             grantee.id,
-            grantee.getClass.toString,
-            privilege.getClass.toString,
+            stripClassName(grantee.getClass.toString),
+            stripClassName(privilege.getClass.toString),
             privilege.obj.asInstanceOf[entities.Entity].id,
-            privilege.obj.getClass.toString
+            stripClassName(privilege.obj.getClass.toString)
         )
    }
+
+    /**
+      * Modifies full-class name to format stored to database.
+      *
+      * @param className - full-class name of an object
+      * @return Returns properly-formatted class name
+      */
+    def stripClassName(className: String): String = {
+        var n = className.replace("class ", "")
+        val pos = n.lastIndexOf(".")
+
+        // Return class name - User, Group, ... (+1 means skip '.')
+        n.substring(pos + 1)
+    }
 }
 
 /**
@@ -28,10 +42,10 @@ object PrivilegeDbRepresentation {
   * @param id - id of a privilege
   * @param granterId - id of [[cz.payola.common.entities.User]] that granted the Privilege
   * @param granteeId - id of [[cz.payola.common.entities.PrivilegableEntity]] that is being granted the Privilege
-  * @param granteeClass - class of this PrivilegableEntity
-  * @param privilegeClass - class of the Privilege
+  * @param granteeClass - stripped class of this PrivilegableEntity
+  * @param privilegeClass - stripped class of the Privilege
   * @param objectId - id of [[cz.payola.common.entities.Entity]] that is object of the Privilede
-  * @param objectClass - class of this Object
+  * @param objectClass - stripped class of this Object
   */
 class PrivilegeDbRepresentation(
         override val id: String,

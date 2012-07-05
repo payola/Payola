@@ -18,19 +18,19 @@ class PrivilegeDAO extends EntityDAO[PrivilegeDbRepresentation](PayolaDB.privile
     }
 
     /**
-      * Loads IDs of objects that grantee has privilege to.
+      * Loads [[cz.payola.common.entities.Privilege]] by privileged object class and privileged greantee
       *
       * @param granteeId - id of [[cz.payola.common.entities.PrivilegableEntity]] that has privilege
-      * @param privilegeClass - class of [[cz.payola.common.entities.Privilege]] assigned to grantee Entity
-      * @param objectClass - class of objects that are subjects of the Privilege
+      * @param privilegeClass - stripped class of [[cz.payola.common.entities.Privilege]] assigned to grantee Entity
+      * @param objectClass - stripped class of objects that are subjects of the Privilege
       *
-      * @return Returns list of IDs
+      * @return Returns list of Privileges
       */
-    def loadObjectIds(granteeId: String, privilegeClass: String, objectClass: String): immutable.Seq[String] = {
+    def loadPrivileges(granteeId: String, privilegeClass: String, objectClass: String): Seq[PrivilegeDbRepresentation] = {
         val query = table.where(p => 
             p.granteeId === granteeId and p.privilegeClass === privilegeClass and p.objectClass === objectClass
         )
         
-        evaluateCollectionResultQuery(query).map(_.objectId).asInstanceOf[immutable.Seq[String]]
+        evaluateCollectionResultQuery(query)
     }
 }

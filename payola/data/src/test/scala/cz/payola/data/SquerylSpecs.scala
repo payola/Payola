@@ -33,8 +33,12 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
         TestObject.persistAnalyses
     }
 
+    "DataSources" should "be updated/stored by DataSourceDAO" in {
+        TestObject.persistDataSources
+    }
+
     "Privileges" should "be granted and persisted properly" in {
-        TestObject.testPrivileges
+        TestObject.persistPrivileges
     }
 
     "Pagionation" should "work" in {

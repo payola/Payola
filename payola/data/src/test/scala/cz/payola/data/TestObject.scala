@@ -30,7 +30,8 @@ object TestObject
     val analysisDao = new AnalysisDAO
     val plugDao = new PluginDAO
     val plugInstDao = new PluginInstanceDAO
-    val dsDao = new DataSourceDAO()
+    val dsDao = new DataSourceDAO
+    val privDao = new PrivilegeDAO
 
     // Plugins
     val sparqlEndpointPlugin = new SparqlEndpoint
@@ -308,9 +309,10 @@ object TestObject
             assert(dsDao.getPublicDataSources().size == 0)
     }
 
-    def testPrivileges {
+    def persistPrivileges {
+        println("Persisting privileges ...")
+
         val a1 = analysisDao.getAll()(0)
-        val a2 = analysisDao.getAll()(1)
         val ds1 = dsDao.getAll()(0)
         val ds2 = dsDao.getAll()(1)
         val user1 = userDao.getById(u1.id).get
@@ -318,14 +320,20 @@ object TestObject
         val group1 = groupDao.getById(g1.id).get
 
         val accessA1 = new AccessAnalysisPrivilege(a1)
-        val accessA2 = new AccessAnalysisPrivilege(a2)
+        val accessA2 = new AccessAnalysisPrivilege(a1)
         val accessDS1 = new AccessDataSourcePrivilege(ds1)
         val accessDS2 = new AccessDataSourcePrivilege(ds2)
 
-        user2.storePrivilege(user1, accessA1)
-        user2.storePrivilege(user1, accessDS2)
-        group1.storePrivilege(user1, accessDS1)
-        group1.storePrivilege(user1, accessA2)
+        user2.grantPrivilege(user1, accessA1)
+        user1.grantPrivilege(user2, accessDS2)
+        group1.grantPrivilege(user1, accessDS1)
+        group1.grantPrivilege(user2, accessA2)
+
+        assert(privDao.getAll().size == 4)
+        assert(user1.accessibleDataSources.size == 1)
+        assert(user2.accessibleAnalyses.size == 1)
+        assert(group1.accessibleDataSources.size == 1)
+        assert(group1.accessibleAnalyses.size == 1)
     }
 
     def testPagination {

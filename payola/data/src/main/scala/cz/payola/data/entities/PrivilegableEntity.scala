@@ -16,16 +16,18 @@ trait PrivilegableEntity extends cz.payola.common.entities.PrivilegableEntity {
         _loadObjectIds(
             classOf[AccessAnalysisPrivilege].toString,
             classOf[cz.payola.common.entities.Analysis].toString
-        ).flatMap(analysisDao.getById(_))
+        ).flatMap(analysisDao.getById(_)).toList
     }
 
     override def accessibleDataSources: immutable.Seq[cz.payola.common.entities.plugins.DataSource] = {
         val dataSourceDao = new DataSourceDAO
 
-        _loadObjectIds(
+        val r = _loadObjectIds(
             classOf[AccessDataSourcePrivilege].toString,
             classOf[cz.payola.common.entities.plugins.DataSource].toString
-        ).flatMap(dataSourceDao.getById(_))
+        ).flatMap(dataSourceDao.getById(_)).toList
+
+        r
     }
 
     /* TODO: customization will be implement later
@@ -37,9 +39,12 @@ trait PrivilegableEntity extends cz.payola.common.entities.PrivilegableEntity {
     }
     */
 
-
     private def _loadObjectIds(privilegeClass: String, objectClass: String) = {
-        new PrivilegeDAO().loadObjectIds(this.id, privilegeClass, objectClass)
+        new PrivilegeDAO().loadPrivileges(
+            this.id,
+            PrivilegeDbRepresentation.stripClassName(privilegeClass),
+            PrivilegeDbRepresentation.stripClassName(objectClass)
+        ).map(_.objectId)
     }
 
     protected override def storePrivilege(granter: cz.payola.common.entities.User,  privilege: PrivilegeType) {
