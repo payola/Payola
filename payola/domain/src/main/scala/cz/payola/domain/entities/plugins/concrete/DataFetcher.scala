@@ -4,6 +4,7 @@ import collection.immutable
 import cz.payola.domain.entities.Plugin
 import cz.payola.domain.entities.plugins._
 import cz.payola.domain.rdf.Graph
+import cz.payola.domain.sparql._
 
 /**
   * A plugin that is used to fetch RDF data using SPARQL queries, fetch neighbourhood of a particular node etc.
@@ -64,5 +65,16 @@ abstract class DataFetcher(name: String, inputCount: Int, parameters: immutable.
       *                 be always taken into account.
       * @return The neighbourhood graph.
       */
-    def getNeighbourhood(instance: PluginInstance, vertexURI: String, distance: Int = 1): Graph
+    def getNeighbourhood(instance: PluginInstance, vertexURI: String, distance: Int = 1): Graph = {
+        require(distance > 0, "The distance has to be a positive number.")
+
+        val rootTriplePattern = TriplePattern(Uri(vertexURI), Variable("p0"), Variable("n1"))
+        val neighbourTriplePatterns = (1 to (distance - 1)).map { i =>
+            TriplePattern(Variable("n" + i), Variable("p" + i), Variable("n" + (i + 1)))
+        }
+        val triplePatterns = rootTriplePattern +: neighbourTriplePatterns
+        val graphPattern = triplePatterns.foldRight(GraphPattern.empty)((t, g) => GraphPattern(List(t), List(g)))
+
+        executeQuery(instance, ConstructQuery(triplePatterns, Some(graphPattern)).toString)
+    }
 }

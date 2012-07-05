@@ -1,16 +1,16 @@
 package cz.payola.web.initializer
 
+import scala.collection.immutable
 import cz.payola.data.PayolaDB
-import cz.payola.domain.entities.plugins.concrete.data.SparqlEndpoint
+import cz.payola.domain.entities.plugins.concrete.data._
 import cz.payola.domain.entities.plugins.concrete.query._
 import cz.payola.domain.entities.plugins.concrete._
 import cz.payola.data.dao._
 import cz.payola.domain.entities.plugins.DataSource
-import scala.collection.immutable
 
 object DatabaseInitializer extends App
 {
-    // Connect to DB and (re)created DB schema
+    // Connect to the DB and (re)create the database schema.
     PayolaDB.connect()
     PayolaDB.createSchema()
 
