@@ -14,11 +14,8 @@ object Analysis {
 
     def apply(a: cz.payola.common.entities.Analysis): Analysis = {
         a match {
-            case analysis : Analysis => analysis
-            case _ => {
-                val owner = if (a.owner.isDefined) Some(User(a.owner.get)) else None
-                new Analysis(a.id, a.name, owner)
-            }
+            case analysis: Analysis => analysis
+            case _ => new Analysis(a.id, a.name, a.owner.map(User(_)))
         }
     }
 }
@@ -37,7 +34,7 @@ class Analysis(
     private lazy val _pluginInstancesQuery = PayolaDB.analysesPluginInstances.left(this)
 
     @Transient
-    private var _pluginInstancesBindingsLoaded = false;
+    private var _pluginInstancesBindingsLoaded = false
     private lazy val _pluginInstancesBindingsQuery = PayolaDB.analysesPluginInstancesBindings.left(this)
 
     var ownerId: Option[String] = o.map(_.id)

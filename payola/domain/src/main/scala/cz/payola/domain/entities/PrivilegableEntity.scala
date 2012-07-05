@@ -5,28 +5,28 @@ import cz.payola.common.entities.privileges._
 import cz.payola.common.entities.plugins.DataSource
 import cz.payola.domain.entities.privileges.PublicPrivilege
 
-/**
-  * An entity that may be granted privileges.
-  */
 trait PrivilegableEntity extends cz.payola.common.entities.PrivilegableEntity
-{
-    /** Type of the privileges. */
-    type PrivilegeType = Privilege[_]
+{ self: Entity =>
+
+    type PrivilegeType = Privilege[_  <: Entity]
 
     /**
-      * Grants given permission to this entity
-      * @param granter - User that grants privilege
-      * @param privilege - Privilege that is granted to this entity
+      * Adds a new privilege to the entity.
+      * @param privilege The privilege to add.
+      * @param granter The user who is granting the privilege.
+      * @throws IllegalArgumentException if the privilege can't be added to the entity.
       */
-    def grantPrivilege(granter: cz.payola.common.entities.User, privilege: PrivilegeType) {
-        storePrivilege(granter, privilege)
+    def grantPrivilege(privilege: PrivilegeType, granter: User) {
+        addRelatedEntity(privilege, privileges, storePrivilege)
     }
 
     /**
-      * Denies granted privilege to this entity
-      * @param privilege - granted privilege that will be denied
+      * Removes the specified privilege from the entity.
+      * @param privilege The privilege to be removed.
+      * @param granter The user who granted the privilege.
+      * @return The removed privilege.
       */
-    def denyPrivilege(privilege: PrivilegeType) {
-        discardPrivilege(privilege)
+    def removePrivilege(privilege: PrivilegeType, granter: User): Option[PrivilegeType] = {
+        removeRelatedEntity(privilege, privileges, discardPrivilege)
     }
 }

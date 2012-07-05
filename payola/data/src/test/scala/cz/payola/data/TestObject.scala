@@ -282,10 +282,10 @@ object TestObject
         val ds1 = new DataSource("Cities", None, sparqlEndpointPlugin, immutable.Seq(
             sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter]
                 .createValue("http://dbpedia.org/ontology/Country")))
-        val ds2 = new DataSource("Countries", None, sparqlEndpointPlugin, immutable.Seq(
+        val ds2 = new DataSource("Countries", Some(u2), sparqlEndpointPlugin, immutable.Seq(
             sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter]
                 .createValue("http://dbpedia.org/ontology/City")))
-        val ds3 = new DataSource("Countries2", None, sparqlEndpointPlugin, immutable.Seq(
+        val ds3 = new DataSource("Countries2", Some(u3), sparqlEndpointPlugin, immutable.Seq(
             sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter]
                 .createValue("http://dbpedia.org/ontology/City")))
 
@@ -304,6 +304,9 @@ object TestObject
             assert(ds1.parameterValues.size == ds1_db.parameterValues.size)
             assert(ds2.parameterValues.size == ds2_db.parameterValues.size)
             assert(ds3.parameterValues.size == ds3_db.parameterValues.size)
+        
+            assert(u2.id == ds2_db.owner.get.id)
+            assert(u3.id == ds3_db.owner.get.id)
 
         //println("DSs: " + dsDao.getPublicDataSources().size)
             assert(dsDao.getPublicDataSources().size == 0)
@@ -324,16 +327,16 @@ object TestObject
         val accessDS1 = new AccessDataSourcePrivilege(ds1)
         val accessDS2 = new AccessDataSourcePrivilege(ds2)
 
-        user2.grantPrivilege(user1, accessA1)
-        user1.grantPrivilege(user2, accessDS2)
-        group1.grantPrivilege(user1, accessDS1)
-        group1.grantPrivilege(user2, accessA2)
+        user2.grantPrivilege(accessA1, user1)
+        user1.grantPrivilege(accessDS2, user2)
+        group1.grantPrivilege(accessDS1, user1)
+        group1.grantPrivilege(accessA2, user2)
 
         assert(privDao.getAll().size == 4)
-        assert(user1.accessibleDataSources.size == 1)
-        assert(user2.accessibleAnalyses.size == 1)
-        assert(group1.accessibleDataSources.size == 1)
-        assert(group1.accessibleAnalyses.size == 1)
+        assert(user1.grantedDataSources.size == 1)
+        assert(user2.grantedAnalyses.size == 1)
+        assert(group1.grantedDataSources.size == 1)
+        assert(group1.grantedAnalyses.size == 1)
     }
 
     def testPagination {

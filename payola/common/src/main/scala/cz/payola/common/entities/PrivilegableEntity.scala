@@ -19,25 +19,25 @@ trait PrivilegableEntity extends Entity
     def privileges: immutable.Seq[PrivilegeType] = _privileges.toList
 
     /** Returns the analyses that are accessible for the entity directly via his privileges. */
-    def accessibleAnalyses: immutable.Seq[Analysis] = {
+    def grantedAnalyses: immutable.Seq[Analysis] = {
         privileges.toList.collect { case p: AccessAnalysisPrivilege => p.obj }
     }
 
     /** Returns the data sources that are accessible for the entity directly via his privileges. */
-    def accessibleDataSources: immutable.Seq[DataSource] = {
+    def grantedDataSources: immutable.Seq[DataSource] = {
         privileges.toList.collect { case p: AccessDataSourcePrivilege => p.obj }
     }
 
     /** Returns the ontology customizations that are accessible for the entity directly via his privileges. */
-    def accessibleOntologyCustomizations: immutable.Seq[settings.ontology.Customization] = {
-        privileges.toList.collect { case c: UseOntologyCustomizationPrivilege => c.obj }
+    def grantedOntologyCustomizations: immutable.Seq[settings.ontology.Customization] = {
+        privileges.toList.collect { case p: UseOntologyCustomizationPrivilege => p.obj }
     }
 
     /**
       * Stores the specified privileges to the entity.
       * @param privilege The privilege to store.
       */
-    protected def storePrivilege(granter: User, privilege: PrivilegeType) {
+    protected def storePrivilege(privilege: PrivilegeType) {
         _privileges += privilege
     }
 

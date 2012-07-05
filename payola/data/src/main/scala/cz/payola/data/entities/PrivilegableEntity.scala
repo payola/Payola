@@ -8,9 +8,10 @@ import cz.payola.domain.entities.privileges._
 /**
   * An entity that may be granted privileges.
   */
-trait PrivilegableEntity extends cz.payola.common.entities.PrivilegableEntity {
+trait PrivilegableEntity extends cz.payola.domain.entities.PrivilegableEntity
+{ self: cz.payola.domain.entities.Entity =>
 
-    override def accessibleAnalyses: immutable.Seq[cz.payola.common.entities.Analysis] = {
+    override def grantedAnalyses: immutable.Seq[cz.payola.common.entities.Analysis] = {
         val analysisDao = new AnalysisDAO
 
         _loadObjectIds(
@@ -19,7 +20,7 @@ trait PrivilegableEntity extends cz.payola.common.entities.PrivilegableEntity {
         ).flatMap(analysisDao.getById(_)).toList
     }
 
-    override def accessibleDataSources: immutable.Seq[cz.payola.common.entities.plugins.DataSource] = {
+    override def grantedDataSources: immutable.Seq[cz.payola.common.entities.plugins.DataSource] = {
         val dataSourceDao = new DataSourceDAO
 
         val r = _loadObjectIds(
@@ -31,7 +32,7 @@ trait PrivilegableEntity extends cz.payola.common.entities.PrivilegableEntity {
     }
 
     /* TODO: customization will be implement later
-    override def accessibleOntologyCustomizations: immutable.Seq[cz.payola.common.entities.settings.ontology.Customization] = {
+    override def grantedOntologyCustomizations: immutable.Seq[cz.payola.common.entities.settings.ontology.Customization] = {
         _loadObjectIds(
             UseOntologyCustomizationPrivilege.getClass.toString,
             cz.payola.common.entities.settings.ontology.Customization.getClass.toString
@@ -47,15 +48,26 @@ trait PrivilegableEntity extends cz.payola.common.entities.PrivilegableEntity {
         ).map(_.objectId)
     }
 
-    protected override def storePrivilege(granter: cz.payola.common.entities.User,  privilege: PrivilegeType) {
+    override def grantPrivilege(privilege: PrivilegeType, granter: cz.payola.domain.entities.User) {
+        // Call domain method to preserve functionality
+        storePrivilege(privilege)
+
         // TODO: injection
         new PrivilegeDAO().persist(PrivilegeDbRepresentation(privilege, granter, this))
-        super.storePrivilege(granter, privilege)
     }
 
-    protected override def discardPrivilege(privilege: PrivilegeType) {
+
+    override def removePrivilege(privilege: PrivilegeType, granter: cz.payola.domain.entities.User) = {
+        // Call domain method to preserve functionality
+        discardPrivilege(privilege)
+
         // TODO: injection
-        new PrivilegeDAO().removeById(privilege.id)
-        super.discardPrivilege(privilege)
+        if (new PrivilegeDAO().removeById(privilege.id) == true) {
+            Some(privilege)
+        }
+        else {
+            None
+        }
+
     }
 }
