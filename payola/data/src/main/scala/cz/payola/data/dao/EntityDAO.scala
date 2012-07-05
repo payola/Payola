@@ -92,7 +92,7 @@ abstract class EntityDAO[A <: KeyedEntity[String]](protected val table: Table[A]
       * @param pagination - Optionally specified pagination of the query
       * @return Returns collection of entities as a result of the query
       */
-    protected final def evaluateCollectionResultQuery(query: Query[A], pagination: Option[PaginationInfo]) =
+    protected final def evaluateCollectionResultQuery(query: Query[A], pagination: Option[PaginationInfo] = None) =
         DataException.wrap {
             // Get all entities or paginate
             val q = pagination.map(p => query.page(p.skip, p.limit)).getOrElse(query)

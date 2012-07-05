@@ -33,6 +33,10 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
         TestObject.persistAnalyses
     }
 
+    "Privileges" should "be granted and persisted properly" in {
+        TestObject.testPrivileges
+    }
+
     "Pagionation" should "work" in {
         TestObject.testPagination
     }

@@ -3,7 +3,6 @@ package cz.payola.common.entities
 import scala.collection._
 import cz.payola.common.entities.privileges._
 import cz.payola.common.entities.plugins.DataSource
-import cz.payola.common.entities.settings.ontology.Customization
 import scala.Seq
 
 /**

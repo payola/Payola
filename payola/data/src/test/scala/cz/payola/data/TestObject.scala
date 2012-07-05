@@ -6,6 +6,7 @@ import cz.payola.domain.entities.plugins.DataSource
 import cz.payola.domain.entities.plugins.concrete._
 import cz.payola.domain.entities.plugins.concrete.data.SparqlEndpoint
 import cz.payola.domain.entities.plugins.concrete.query._
+import cz.payola.domain.entities.privileges._
 
 object TestObject
 {
@@ -307,6 +308,25 @@ object TestObject
             assert(dsDao.getPublicDataSources().size == 0)
     }
 
+    def testPrivileges {
+        val a1 = analysisDao.getAll()(0)
+        val a2 = analysisDao.getAll()(1)
+        val ds1 = dsDao.getAll()(0)
+        val ds2 = dsDao.getAll()(1)
+        val user1 = userDao.getById(u1.id).get
+        val user2 = userDao.getById(u2.id).get
+        val group1 = groupDao.getById(g1.id).get
+
+        val accessA1 = new AccessAnalysisPrivilege(a1)
+        val accessA2 = new AccessAnalysisPrivilege(a2)
+        val accessDS1 = new AccessDataSourcePrivilege(ds1)
+        val accessDS2 = new AccessDataSourcePrivilege(ds2)
+
+        user2.storePrivilege(user1, accessA1)
+        user2.storePrivilege(user1, accessDS2)
+        group1.storePrivilege(user1, accessDS1)
+        group1.storePrivilege(user1, accessA2)
+    }
 
     def testPagination {
         println("Pagination ...")
