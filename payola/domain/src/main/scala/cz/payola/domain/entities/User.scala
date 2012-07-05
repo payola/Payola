@@ -10,6 +10,7 @@ import cz.payola.domain.entities.privileges._
 class User(protected var _name: String)
     extends Entity
     with NamedEntity
+    with PrivilegableEntity
     with cz.payola.common.entities.User
 {
     checkConstructorPostConditions()

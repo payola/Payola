@@ -7,6 +7,7 @@ package cz.payola.domain.entities
 class Group(protected var _name: String, protected var _owner: User)
     extends Entity
     with NamedEntity
+    with PrivilegableEntity
     with cz.payola.common.entities.Group
 {
     // If the group isn't in the owners owned groups yet, add it there (the group may already be there, because there

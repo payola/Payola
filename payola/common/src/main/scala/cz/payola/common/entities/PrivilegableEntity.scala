@@ -31,19 +31,19 @@ trait PrivilegableEntity extends Entity
 
     /** Returns the ontology customizations that are accessible for the user directly via his privileges. */
     def accessibleOntologyCustomizations: immutable.Seq[settings.ontology.Customization] = {
-        privileges.toList.collect { case c: UseOntologyCustomizationPrivilege => c.obj }
+        privileges.toList.collect { case p: UseOntologyCustomizationPrivilege => p.obj }
     }
 
     /**
-      * Stores the specified privileges to the users.
+      * Stores the specified privileges to the entity.
       * @param privilege The privilege to store.
       */
-    protected def storePrivilege(granter: User, privilege: PrivilegeType) {
+    protected def storePrivilege(privilege: PrivilegeType) {
         _privileges += privilege
     }
 
     /**
-      * Discards the privileges from the user. Complementary operation to store.
+      * Discards the privileges from the entity. Complementary operation to store.
       * @param privilege The privilege to discard.
       */
     protected def discardPrivilege(privilege: PrivilegeType) {

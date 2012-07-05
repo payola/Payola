@@ -127,7 +127,6 @@ class Analysis(protected var _name: String, protected var _owner: Option[User])
       */
     def outputInstance: Option[PluginInstance] = outputInstances.headOption
 
-
     /**
       * Adds a new plugin instance to the analysis.
       * @param instance The plugin instance to add.
