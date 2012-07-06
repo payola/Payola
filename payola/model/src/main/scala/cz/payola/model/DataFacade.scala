@@ -1,7 +1,7 @@
 package cz.payola.model
 
 import cz.payola.domain.entities.User
-import cz.payola.data.dao._
+import cz.payola.data.squeryl.repositories._
 import cz.payola.domain.entities.plugins.DataSource
 import cz.payola.common.rdf.Graph
 import cz.payola.domain.entities.Group

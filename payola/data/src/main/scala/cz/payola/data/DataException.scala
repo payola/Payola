@@ -8,7 +8,8 @@ object DataException
         } catch {
             case dataException: DataException => throw dataException
             case throwable: Throwable => {
-                throw new DataException("An unhandled exception was thrown in the data layer.", Some(throwable))
+                println("Error: " + throwable.toString)
+                throw new DataException("An exception was thrown in the data layer.", Some(throwable))
             }
         }
     }

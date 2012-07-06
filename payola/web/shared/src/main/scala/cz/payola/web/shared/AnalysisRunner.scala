@@ -1,7 +1,7 @@
 package cz.payola.web.shared
 
 import cz.payola.domain.entities.analyses.evaluation._
-import cz.payola.data.dao.AnalysisDAO
+import cz.payola.data.squeryl.repositories.AnalysisDAO
 import scala.collection.mutable.HashMap
 
 @remote object AnalysisRunner
@@ -9,7 +9,7 @@ import scala.collection.mutable.HashMap
     val runningEvaluations : HashMap[String, AnalysisEvaluation] = new HashMap[String, AnalysisEvaluation]
 
     def runAnalysisById(id: String) = {
-        //TODO: Get AnalysisDAO from datafacade! (JH)
+        //TODO: Get AnalysisRepository from datafacade! (JH)
         val analysisOpt = new AnalysisDAO().getById(id)
 
         if (analysisOpt.isEmpty) {
