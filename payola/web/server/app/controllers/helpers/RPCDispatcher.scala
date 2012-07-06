@@ -14,7 +14,7 @@ class RPCDispatcher(jsonSerializer: GraphSerializer)
       * a Scala Map[String, Seq[String] ] instance which is transformed to a typed parameters list. The list is used
       * to invoke a method named with the value of the POST field "method".
       *
-      * @param request HTTP request
+      * @param params request parameters
       * @param asynchronous Whether the call is ment to be synchronous (false) or asynchronous (true)
       * @return JSON-encoded response object
       */

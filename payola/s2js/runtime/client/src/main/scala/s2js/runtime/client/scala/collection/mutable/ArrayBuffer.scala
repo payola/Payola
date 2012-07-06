@@ -13,4 +13,12 @@ object ArrayBuffer extends s2js.runtime.client.scala.collection.SeqCompanion[Arr
 class ArrayBuffer extends s2js.runtime.client.scala.collection.Seq
 {
     def newInstance = ArrayBuffer.empty
+
+    def map(f: Any => Any): ArrayBuffer = {
+        val b = newInstance
+        for (x <- this) {
+            b += f(x)
+        }
+        b
+    }
 }

@@ -26,7 +26,7 @@ class PluginDialog(plugins: Seq[Plugin]) extends Component
         item.render(ul.ul)
     }
 
-    private val dialog = new Modal("Choose a type of plugin", List(ul))
+    private val dialog = new Modal("Choose a type of plugin", List(ul), false)
 
     def render(parent: Element = document.body) = {
         dialog.render(parent)
@@ -34,4 +34,8 @@ class PluginDialog(plugins: Seq[Plugin]) extends Component
 
     def show() = dialog.show
     def hide() = dialog.hide
+
+    def getDomElement : Element = {
+        dialog.getDomElement()
+    }
 }

@@ -15,4 +15,8 @@ class UnorderedList(val innerElements: Seq[Component], val addClass: String = ""
         parent.appendChild(ul)
         innerElements.map(_.render(ul))
     }
+
+    def getDomElement : Element = {
+        ul
+    }
 }

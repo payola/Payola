@@ -61,12 +61,5 @@ class VisualSetup(var vertexModel: VertexSettingsModel, var edgesModel: EdgeSett
             false
     }
 
-    /*private def constraintSize(size: Int, min: Int, max: Int, default: Int): Int = {
-        if (min <= size && size <= max) {
-            size
-        } else {
-            default
-        }
-        TODO remove?
-    }*/
+    def getDomElement : Element = vertexSettings.getDomElement
 }

@@ -14,4 +14,8 @@ class ListItem(val innerElements: Seq[Component], val addClass: String = "") ext
 
         innerElements.map(_.render(li))
     }
+
+    def getDomElement : Element = {
+        li
+    }
 }

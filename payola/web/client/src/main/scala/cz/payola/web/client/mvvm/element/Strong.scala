@@ -14,4 +14,8 @@ class Strong(val innerElements: Seq[Component] = List(), val addClass: String = 
         parent.appendChild(strong)
         innerElements.map(_.render(strong))
     }
+
+    def getDomElement : Element = {
+        strong
+    }
 }

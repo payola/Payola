@@ -64,4 +64,9 @@ class Input(val name: String, val value: String, val title: Option[String], val 
 
         changed.trigger(new ChangedEventArgs(this))
     }
+
+
+    def getDomElement : Element = {
+        field
+    }
 }

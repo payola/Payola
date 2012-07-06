@@ -17,7 +17,7 @@ class DataFacade
 
     private val GROUPS_COUNT_MAX_COUNT_DEFAULT = 10
 
-    def getPlugins(search: String = "") = {
+    def getPlugins() = {
         pluginDAO.getAll().map(_.createPlugin())
     }
 

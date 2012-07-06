@@ -15,4 +15,9 @@ class Heading3(val innerElements: Seq[Component], val addClass: String = "") ext
 
         innerElements.map(_.render(heading))
     }
+
+
+    def getDomElement : Element = {
+        heading
+    }
 }

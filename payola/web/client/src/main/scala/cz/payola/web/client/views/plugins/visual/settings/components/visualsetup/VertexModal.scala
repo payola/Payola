@@ -103,4 +103,6 @@ class VertexModal(model: VertexSettingsModel) extends Component
     def hide() {
         modal.hide
     }
+
+    def getDomElement : Element = modal.getDomElement
 }

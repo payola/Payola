@@ -28,4 +28,8 @@ class Anchor(val innerElements: Seq[Component], val href: String = "#", var addi
         additionalClass = additionalClass + " " + addedClass;
         a.setAttribute("class", additionalClass)
     }
+
+    def getDomElement : Element = {
+        a
+    }
 }

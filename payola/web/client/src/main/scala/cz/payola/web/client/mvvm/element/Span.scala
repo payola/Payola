@@ -24,4 +24,8 @@ class Span(val innerElements: Seq[Component], val addClass: String = "") extends
 
         innerElements.map(_.render(span))
     }
+
+    def getDomElement : Element = {
+        span
+    }
 }

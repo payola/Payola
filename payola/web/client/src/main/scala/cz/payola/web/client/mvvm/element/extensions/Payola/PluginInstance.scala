@@ -7,44 +7,92 @@ import s2js.adapters.js.dom.Element
 import cz.payola.web.client.mvvm.element.extensions.Bootstrap.Button
 import cz.payola.web.client.events._
 import cz.payola.common.entities.Plugin
+import s2js.compiler.javascript
 
-class PluginInstance(pluginType: String, plugin: Plugin, predecessors: Option[PluginInstance] = None) extends Component
+object PluginInstance
+{
+    var counter = 0
+    def getCounter() = {
+        counter += 1
+        counter
+    }
+}
+
+class PluginInstance(val plugin: Plugin, val predecessors: Seq[PluginInstance] = List()) extends Component
 {
     val connectButtonClicked = new ClickedEvent[PluginInstance]
 
-    val heading = new Heading3(List(new Text(pluginType)))
+    val deleteButtonClicked = new ClickedEvent[PluginInstance]
 
-    val list = plugin.parameters.map{ param =>
-        val strong = new Strong(List(new Text(plugin.name)))
+    private val heading = new Heading3(List(new Text(plugin.name)))
 
-        val field = new Input(param.name,"", None)
+    private val list = plugin.parameters.map { param =>
+        val strong = new Strong(List(new Text(param.name)))
+
+        val field = new Input(param.name, "", None)
 
         new Paragraph(List(strong, new Text(":"), field))
     }
 
-    val paramsDiv = new Div(list.toList)
-    val connect = new Button("Add connection")
-    val delete = new Button("Delete","btn-danger")
+    private val paramsDiv = new Div(list)
 
-    val alertDiv = new Div(List(heading,connect, delete),"alert alert-info instance")
-    val clearSpan = new Span(List(), "clear")
+    private val connect = new Button("Add connection")
 
-    val successors = new Div(List(clearSpan,alertDiv),"successors")
+    private val delete = new Button("Delete", "btn-danger")
+
+    private val alertDiv = new Div(List(heading, paramsDiv, connect, delete), "alert alert-info instance")
+
+    private val clearSpan = new Span(List(), "clear")
+
+    private val successors = new Div(List(clearSpan, alertDiv), "successors")
+
+    private var parent: Option[Element] = None
 
     def render(parent: Element = document.body) = {
+        this.parent = Some(parent)
+        alertDiv.setId(plugin.id+"_"+PluginInstance.getCounter())
         successors.render(parent)
-        if (predecessors.isDefined)
-        {
-            successors.div.insertBefore(predecessors.get.successors.div, clearSpan.span)
+
+        if (predecessors.size > 0) {
+            parent.insertBefore(successors.getDomElement, predecessors(0).getDomElement)
+        }
+
+        var i = 0
+        while (i < predecessors.size) {
+            successors.getDomElement.insertBefore(predecessors(i).getDomElement, clearSpan.getDomElement)
+            i += 1
         }
     }
 
     override def destroy() = {
-
+        if (parent.isDefined) {
+            unbindJsPlumb(getPluginElement)
+            var i = 0
+            while (i < predecessors.size) {
+                parent.get.insertBefore(predecessors(i).getDomElement, getDomElement)
+                i += 1
+            }
+            parent.get.removeChild(getDomElement)
+        }
     }
+
+    @javascript(""" var connections = jsPlumb.getConnections({target: element.getAttribute("id")}); for (var k in connections){ jsPlumb.detach(connections[k]); } """)
+    def unbindJsPlumb(element: Element) = {}
 
     connect.clicked += { evt =>
         connectButtonClicked.trigger(new ClickedEventArgs[PluginInstance](this))
         false
+    }
+    delete.clicked += { evt =>
+        deleteButtonClicked.trigger(new ClickedEventArgs[PluginInstance](this))
+        false
+    }
+
+    def getDomElement: Element = {
+        successors.getDomElement
+    }
+
+    def getPluginElement: Element = {
+        alertDiv.getDomElement
     }
 }

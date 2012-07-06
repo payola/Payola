@@ -23,9 +23,10 @@ class AnalysisControls(analysisId: String) extends Component
 
     var evaluationId = ""
 
+    val wrap = new Div(List(runBtn, progressDiv))
+
     def render(parent: Element = document.body) = {
-        runBtn.render(parent)
-        progressDiv.render(parent)
+        wrap.render(parent)
     }
 
     var analysisRunning = false
@@ -93,5 +94,9 @@ class AnalysisControls(analysisId: String) extends Component
 
     def switchTab() = {
 
+    }
+
+    def getDomElement : Element = {
+        wrap.getDomElement
     }
 }

@@ -94,4 +94,8 @@ class ZoomControls(var currentZoom: Double) extends Component
             false
         }
     }
+
+    def getDomElement : Element = {
+        wrapper.getDomElement
+    }
 }

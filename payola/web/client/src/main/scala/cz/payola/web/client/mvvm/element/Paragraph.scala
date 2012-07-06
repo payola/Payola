@@ -15,4 +15,8 @@ class Paragraph(val innerElements: Seq[Component], val addClass: String = "") ex
         parent.appendChild(p)
         innerElements.map(_.render(p))
     }
+
+    def getDomElement : Element = {
+        p
+    }
 }

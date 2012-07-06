@@ -7,11 +7,7 @@ import cz.payola.common.entities.Plugin
 {
     val df = new DataFacade
 
-    def getPlugins = {
+    def getPlugins() : Seq[Plugin] = {
         df.getPlugins()
-    }
-
-    def getSparqlEndpointPlugin : Plugin = {
-        df.getPlugins("Sparql Endpoint").head
     }
 }

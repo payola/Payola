@@ -13,4 +13,8 @@ class DataSourceDialog extends Component
         dialog.render()
     }
 
+    def getDomElement : Element = {
+        dialog.getDomElement()
+    }
+
 }
