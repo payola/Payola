@@ -6,10 +6,23 @@ import org.scalatest.matchers.ShouldMatchers
 class SquerylSpecs extends FlatSpec with ShouldMatchers
 {
     "Connection to DB" should "be initialized" in {
-        TestObject.connect
+        val dataContextComponent = new SquerylDataContextComponent
+        {
+            val schema = new SquerylSchema
+        }
+        println("Connecting")
+        dataContextComponent.schema.connect(true)
+        println("Creating")
+        dataContextComponent.schema.createSchema
+        println("Persisting user")
+        dataContextComponent.userDAO.persist(new cz.payola.domain.entities.User("HS"))
+        println("Retrieving users")
+        val users = dataContextComponent.userDAO.getAll()
+        println(users)
+        println(users.head.context)
     }
 
-    "Schema" should "be created" in {
+    /*"Schema" should "be created" in {
         TestObject.createSchema
     }
 
@@ -36,5 +49,5 @@ class SquerylSpecs extends FlatSpec with ShouldMatchers
     "Entities" should "be with removed their related entities" in {
         TestObject.testCascadeDeletes
 
-    }
+    }*/
 }

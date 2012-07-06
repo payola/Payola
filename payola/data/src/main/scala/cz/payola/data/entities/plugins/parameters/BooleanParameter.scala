@@ -1,7 +1,7 @@
 package cz.payola.data.entities.plugins.parameters
 
 import cz.payola.data.entities.plugins.Parameter
-import cz.payola.data.PayolaDB
+import cz.payola.data.SquerylDataContextComponent
 
 /**
   * This object converts [[cz.payola.common.entities.plugins.parameters.BooleanParameter]]
@@ -9,7 +9,8 @@ import cz.payola.data.PayolaDB
   */
 object BooleanParameter {
 
-    def apply(p: cz.payola.common.entities.plugins.parameters.BooleanParameter): BooleanParameter = {
+    def apply(p: cz.payola.common.entities.plugins.parameters.BooleanParameter)
+        (implicit context: SquerylDataContextComponent): BooleanParameter = {
         p match {
             case p: BooleanParameter => p
             case _ => new BooleanParameter(p.id, p.name, p.defaultValue)
@@ -20,11 +21,11 @@ object BooleanParameter {
 class BooleanParameter(
     override val id: String,
     name: String,
-    defaultVal: Boolean)
+    defaultVal: Boolean)(implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.plugins.parameters.BooleanParameter(name, defaultVal)
     with Parameter[Boolean]
 {
-    private lazy val _valuesQuery = PayolaDB.valuesOfBooleanParameters.left(this)
+    private lazy val _valuesQuery = context.schema.valuesOfBooleanParameters.left(this)
 
     // Get, store and set default value of parameter to Database
     val _defaultValueDb = defaultVal

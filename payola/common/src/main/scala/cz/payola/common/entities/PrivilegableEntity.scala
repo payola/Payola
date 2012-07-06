@@ -5,6 +5,7 @@ import cz.payola.common.entities.privileges._
 import cz.payola.common.entities.plugins.DataSource
 import cz.payola.common.entities.settings.ontology.Customization
 import scala.Seq
+import cz.payola.common.Entity
 
 /**
   * An entity that may be granted privileges.

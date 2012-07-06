@@ -1,8 +1,7 @@
 package cz.payola.data.entities
 
 import cz.payola.data.entities.analyses._
-import cz.payola.data.PayolaDB
-import cz.payola.data.dao.{PluginInstanceDAO, PluginInstanceBindingDAO}
+import cz.payola.data._
 import org.squeryl.annotations.Transient
 import cz.payola.data.entities.plugins.PluginInstance
 import scala.collection.immutable
@@ -12,7 +11,7 @@ import scala.collection.immutable
   */
 object Analysis {
 
-    def apply(a: cz.payola.common.entities.Analysis): Analysis = {
+    def apply(a: cz.payola.common.entities.Analysis)(implicit context: SquerylDataContextComponent): Analysis = {
         a match {
             case analysis: Analysis => analysis
             case _ => new Analysis(a.id, a.name, a.owner.map(User(_)))
@@ -20,10 +19,7 @@ object Analysis {
     }
 }
 
-class Analysis(
-    override val id: String,
-    name: String,
-    o: Option[User])
+class Analysis(override val id: String, name: String, o: Option[User])(implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.Analysis(name, o)
     with PersistableEntity
 {
@@ -31,14 +27,14 @@ class Analysis(
 
     @Transient
     private var _pluginInstancesLoaded = false;
-    private lazy val _pluginInstancesQuery = PayolaDB.analysesPluginInstances.left(this)
+    private lazy val _pluginInstancesQuery = context.schema.analysesPluginInstances.left(this)
 
     @Transient
     private var _pluginInstancesBindingsLoaded = false
-    private lazy val _pluginInstancesBindingsQuery = PayolaDB.analysesPluginInstancesBindings.left(this)
+    private lazy val _pluginInstancesBindingsQuery = context.schema.analysesPluginInstancesBindings.left(this)
 
     var ownerId: Option[String] = o.map(_.id)
-    private lazy val _ownerQuery = PayolaDB.analysisOwnership.right(this)
+    private lazy val _ownerQuery = context.schema.analysisOwnership.right(this)
 
     override def pluginInstances: immutable.Seq[PluginInstanceType] = {
         // Lazy-load related instances only for first time
@@ -89,8 +85,7 @@ class Analysis(
     }
 
     override protected def discardPluginInstance(instance: Analysis#PluginInstanceType) {
-        // TODO: injection
-        new PluginInstanceDAO().removeById(instance.id)
+        context.pluginInstanceDAO.removeById(instance.id)
 
         super.discardPluginInstance(instance)
     }
@@ -100,8 +95,7 @@ class Analysis(
     }
 
     override protected def discardBinding(binding: Analysis#PluginInstanceBindingType) {
-        // TODO: injection
-        new PluginInstanceBindingDAO().removeById(binding.id)
+        context.pluginInstanceBindingDAO.removeById(binding.id)
 
         super.discardBinding(binding)
     }

@@ -1,10 +1,16 @@
 package cz.payola.data.dao
 
-import cz.payola.data.PayolaDB
+import cz.payola.data._
 import cz.payola.data.entities.Group
 import org.squeryl.PrimitiveTypeMode._
 
-class GroupDAO extends EntityDAO[Group](PayolaDB.groups)
+trait GroupDAOComponent
+{
+    self: SquerylDataContextComponent =>
+
+    lazy val groupDAO = new GroupDAO
+
+    class GroupDAO extends EntityDAO[Group](schema.groups) with DAO[Group]
 {
     /**
       * Inserts or updated [[cz.payola.common.entities.Group]].
@@ -33,4 +39,5 @@ class GroupDAO extends EntityDAO[Group](PayolaDB.groups)
 
         evaluateCollectionResultQuery(query, pagination)
     }
+}
 }

@@ -3,15 +3,16 @@ package cz.payola.data.entities.plugins
 import scala.collection.immutable
 import cz.payola.data.entities._
 import cz.payola.data.entities.plugins.parameters._
-import cz.payola.data.PayolaDB
 import org.squeryl.annotations.Transient
+import cz.payola.data.SquerylDataContextComponent
 
 /**
   * This object converts [[cz.payola.common.entities.plugins.DataSource]] to [[cz.payola.data.entities.plugins.DataSource]]
   */
 object DataSource
 {
-    def apply(dataSource: cz.payola.common.entities.plugins.DataSource): DataSource = {
+    def apply(dataSource: cz.payola.common.entities.plugins.DataSource)
+        (implicit context: SquerylDataContextComponent): DataSource = {
         dataSource match {
             case ds: DataSource => ds
             case _ => {
@@ -39,7 +40,7 @@ class DataSource(
     n: String,
     o: Option[User],
     df: cz.payola.domain.entities.plugins.concrete.DataFetcher,
-    paramValues: immutable.Seq[ParameterValue[_]])
+    paramValues: immutable.Seq[ParameterValue[_]])(implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.plugins.DataSource(n, o, df, paramValues)
     with PersistableEntity
 {
@@ -47,17 +48,17 @@ class DataSource(
 
     var ownerId: Option[String] = o.map(_.id)
 
-    private lazy val _pluginQuery = PayolaDB.pluginsDataSources.right(this)
+    private lazy val _pluginQuery = context.schema.pluginsDataSources.right(this)
 
-    private lazy val _ownerQuery = PayolaDB.dataSourceOwnership.right(this)
+    private lazy val _ownerQuery = context.schema.dataSourceOwnership.right(this)
 
-    private lazy val _booleanParameterValuesQuery = PayolaDB.booleanParameterValuesOfDataSources.left(this)
+    private lazy val _booleanParameterValuesQuery = context.schema.booleanParameterValuesOfDataSources.left(this)
 
-    private lazy val _floatParameterValuesQuery = PayolaDB.floatParameterValuesOfDataSources.left(this)
+    private lazy val _floatParameterValuesQuery = context.schema.floatParameterValuesOfDataSources.left(this)
 
-    private lazy val _intParameterValuesQuery = PayolaDB.intParameterValuesOfDataSources.left(this)
+    private lazy val _intParameterValuesQuery = context.schema.intParameterValuesOfDataSources.left(this)
 
-    private lazy val _stringParameterValuesQuery = PayolaDB.stringParameterValuesOfDataSources.left(this)
+    private lazy val _stringParameterValuesQuery = context.schema.stringParameterValuesOfDataSources.left(this)
 
     @Transient
     private var _parameterValuesLoaded = false

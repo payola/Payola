@@ -3,6 +3,7 @@ package cz.payola.domain.entities.plugins
 import collection.immutable
 import cz.payola.domain.entities._
 import cz.payola.domain.entities.plugins.parameters._
+import cz.payola.domain.Entity
 
 /**
   * @param _plugin The corresponding plugin.

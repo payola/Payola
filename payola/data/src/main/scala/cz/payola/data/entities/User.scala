@@ -1,6 +1,6 @@
 package cz.payola.data.entities
 
-import cz.payola.data.PayolaDB
+import cz.payola.data._
 import org.squeryl.annotations.Transient
 import cz.payola.data.dao._
 import cz.payola.data.entities.plugins.DataSource
@@ -11,7 +11,7 @@ import scala.collection.immutable
   */
 object User {
 
-    def apply(u: cz.payola.common.entities.User): User = {
+    def apply(u: cz.payola.common.entities.User)(implicit context: SquerylDataContextComponent): User = {
         u match {
             case user : User => user
             case _ => new User(u.id, u.name, u.password, u.email)
@@ -19,31 +19,28 @@ object User {
     }
 }
 
-class User(
-    override val id: String,
-    name: String,
-    pwd: String,
-    mail: String)
+class User(override val id: String, name: String, pwd: String, mail: String)
+    (implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.User(name) with PersistableEntity
 {
-    password_=(pwd)
-    email_=(mail)
+    password = pwd
+    email = mail
 
     @Transient
     private var _ownedGroupsLoaded = false
-    private lazy val _ownedGroupsQuery = PayolaDB.groupOwnership.left(this)
+    private lazy val _ownedGroupsQuery = context.schema.groupOwnership.left(this)
 
     @Transient
     private var _ownedAnalysesLoaded = false
-    private lazy val _ownedAnalysesQuery = PayolaDB.analysisOwnership.left(this)
+    private lazy val _ownedAnalysesQuery = context.schema.analysisOwnership.left(this)
 
     @Transient
     private var _ownedDataSourcesLoaded = false
-    private lazy val _ownedDataSourcesQuery = PayolaDB.dataSourceOwnership.left(this)
+    private lazy val _ownedDataSourcesQuery = context.schema.dataSourceOwnership.left(this)
 
     @Transient
     private var _memberGroupsLoaded = false
-    private lazy val _memberGroupsQuery = PayolaDB.groupMembership.left(this)
+    private lazy val _memberGroupsQuery = context.schema.groupMembership.left(this)
 
     override def ownedGroups: immutable.Seq[GroupType] = {
         if (!_ownedGroupsLoaded) {
@@ -100,22 +97,19 @@ class User(
     }
 
     override protected def discardOwnedAnalysis(analysis: User#AnalysisType) {
-        // TODO: injection
-        new AnalysisDAO().removeById(analysis.id)
+        context.analysisDAO.removeById(analysis.id)
 
         super.discardOwnedAnalysis(analysis)
     }
 
     override protected def discardOwnedGroup(group: User#GroupType)  {
-        // TODO: injection
-        new GroupDAO().removeById(group.id)
+        context.groupDAO.removeById(group.id)
         
         super.discardOwnedGroup(group)
     }
 
     override protected def discardOwnedDataSource(source: User#DataSourceType) {
-        // TODO: injection
-        new DataSourceDAO().removeById(source.id)
+        context.dataSourceDAO.removeById(source.id)
 
         super.discardOwnedDataSource(source)
     }

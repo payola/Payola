@@ -1,8 +1,9 @@
-package cz.payola.domain.entities
+package cz.payola.domain
 
-import cz.payola.domain.IDGenerator
+import cz.payola.domain.entities.OptionallyOwnedEntity
+import cz.payola.common
 
-abstract class Entity(val id: String = IDGenerator.newId) extends cz.payola.common.entities.Entity
+abstract class Entity(val id: String = IDGenerator.newId) extends common.Entity
 {
     /**
       * Invokes the action if the specified sequence contains the item.

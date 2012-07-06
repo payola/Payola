@@ -1,10 +1,16 @@
 package cz.payola.data.dao
 
-import cz.payola.data.PayolaDB
+import cz.payola.data._
 import cz.payola.data.entities.User
 import org.squeryl.PrimitiveTypeMode._
 
-class UserDAO extends EntityDAO[User](PayolaDB.users)
+trait UserDAOComponent
+{
+    self: SquerylDataContextComponent =>
+
+    lazy val userDAO = new UserDAO
+
+    class UserDAO extends EntityDAO[User](schema.users) with DAO[User]
 {
     /**
       * Searches for all [[cz.payola.data.entities.User]]s, whose username CONTAINS specified name.
@@ -59,4 +65,5 @@ class UserDAO extends EntityDAO[User](PayolaDB.users)
     def persist(u: cz.payola.common.entities.User): User = {
         super.persist(User(u))
     }
+}
 }

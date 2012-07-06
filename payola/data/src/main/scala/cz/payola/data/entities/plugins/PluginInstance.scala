@@ -1,17 +1,18 @@
 package cz.payola.data.entities.plugins
 
-import cz.payola.data.PayolaDB
 import cz.payola.data.entities.plugins.parameters._
 import scala.collection.immutable
 import org.squeryl.annotations.Transient
 import cz.payola.data.entities._
+import cz.payola.data.SquerylDataContextComponent
 
 /**
   * This object converts [[cz.payola.common.entities.plugins.PluginInstance]] to [[cz.payola.data.entities.plugins.PluginInstance]]
   */
 object PluginInstance
 {
-    def apply(p: cz.payola.common.entities.plugins.PluginInstance): PluginInstance = {
+    def apply(p: cz.payola.common.entities.plugins.PluginInstance)
+        (implicit context: SquerylDataContextComponent): PluginInstance = {
         p match {
             case instance: PluginInstance => instance
             case _ => {
@@ -35,7 +36,7 @@ class PluginInstance(
     override val id: String,
     p: cz.payola.domain.entities.Plugin,
     paramValues: immutable.Seq[ParameterValue[_]],
-    description: String)
+    description: String)(implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.plugins.PluginInstance(p, paramValues)
     with PersistableEntity
 {
@@ -43,15 +44,15 @@ class PluginInstance(
 
     var analysisId: Option[String] = None
 
-    private lazy val _pluginQuery = PayolaDB.pluginsPluginInstances.right(this)
+    private lazy val _pluginQuery = context.schema.pluginsPluginInstances.right(this)
 
-    private lazy val _booleanParameterValues = PayolaDB.booleanParameterValuesOfPluginInstances.left(this)
+    private lazy val _booleanParameterValues = context.schema.booleanParameterValuesOfPluginInstances.left(this)
 
-    private lazy val _floatParameterValues = PayolaDB.floatParameterValuesOfPluginInstances.left(this)
+    private lazy val _floatParameterValues = context.schema.floatParameterValuesOfPluginInstances.left(this)
 
-    private lazy val _intParameterValues = PayolaDB.intParameterValuesOfPluginInstances.left(this)
+    private lazy val _intParameterValues = context.schema.intParameterValuesOfPluginInstances.left(this)
 
-    private lazy val _stringParameterValues = PayolaDB.stringParameterValuesOfPluginInstances.left(this)
+    private lazy val _stringParameterValues = context.schema.stringParameterValuesOfPluginInstances.left(this)
 
     @Transient
     private var _parameterValuesLoaded = false

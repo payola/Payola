@@ -3,6 +3,7 @@ package cz.payola.domain.entities
 import scala.collection._
 import cz.payola.domain.entities.plugins.DataSource
 import cz.payola.domain.entities.privileges._
+import cz.payola.domain.Entity
 
 /**
   * @param _name Name of the user.

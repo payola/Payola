@@ -1,12 +1,20 @@
 package cz.payola.data.dao
 
-import cz.payola.data.PayolaDB
+import cz.payola.data._
 import cz.payola.data.entities.analyses._
 import org.squeryl.PrimitiveTypeMode._
 import cz.payola.common.entities.plugins
 import cz.payola.data.entities.plugins.DataSource
+import org.squeryl.Table
+import cz.payola.data.entities.Analysis
 
-class DataSourceDAO extends EntityDAO[DataSource](PayolaDB.dataSources)
+trait DataSourceDAOComponent
+{
+    self: SquerylDataContextComponent =>
+
+    lazy val dataSourceDAO = new DataSourceDAO
+
+    class DataSourceDAO extends EntityDAO[DataSource](schema.dataSources) with DAO[DataSource]
 {
     /**
       * Inserts or updates [[cz.payola.common.entities.plugins.DataSource]].
@@ -43,4 +51,5 @@ class DataSourceDAO extends EntityDAO[DataSource](PayolaDB.dataSources)
 
         evaluateCollectionResultQuery(query, pagination)
     }
+}
 }

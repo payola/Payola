@@ -1,7 +1,7 @@
 package cz.payola.data.entities.plugins.parameters
 
 import cz.payola.data.entities.plugins._
-import cz.payola.data.PayolaDB
+import cz.payola.data.SquerylDataContextComponent
 
 /**
   * This object converts [[cz.payola.domain.entities.plugins.parameters.FloatParameterValue]]
@@ -9,7 +9,8 @@ import cz.payola.data.PayolaDB
   */
 object FloatParameterValue {
 
-    def apply(p: cz.payola.domain.entities.plugins.parameters.FloatParameterValue): FloatParameterValue = {
+    def apply(p: cz.payola.domain.entities.plugins.parameters.FloatParameterValue)
+        (implicit context: SquerylDataContextComponent): FloatParameterValue = {
         p match {
             case param: FloatParameterValue => param
             case _ => {
@@ -27,13 +28,13 @@ object FloatParameterValue {
 class FloatParameterValue(
     override val id: String,
     param: FloatParameter,
-    override var value: Float)
+    override var value: Float)(implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.plugins.parameters.FloatParameterValue(param, value)
     with ParameterValue[Float]
 {
     val parameterId: Option[String] = if (param == null) None else Some(param.id)
 
-    private lazy val _parameterQuery = PayolaDB.valuesOfFloatParameters.right(this)
+    private lazy val _parameterQuery = context.schema.valuesOfFloatParameters.right(this)
 
     override def parameter: ParameterType = evaluateCollection(_parameterQuery)(0)
 }

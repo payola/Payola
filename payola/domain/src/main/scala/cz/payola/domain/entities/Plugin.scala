@@ -2,7 +2,7 @@ package cz.payola.domain.entities
 
 import collection.immutable
 import cz.payola.domain.rdf.Graph
-import cz.payola.domain.IDGenerator
+import cz.payola.domain._
 import cz.payola.domain.entities.plugins._
 
 /**

@@ -1,7 +1,7 @@
 package cz.payola.data.entities.plugins.parameters
 
 import cz.payola.data.entities.plugins._
-import cz.payola.data.PayolaDB
+import cz.payola.data.SquerylDataContextComponent
 
 /**
   * This objects converts [[cz.payola.domain.entities.plugins.parameters.IntParameterValue]]
@@ -9,7 +9,8 @@ import cz.payola.data.PayolaDB
   */
 object IntParameterValue {
 
-    def apply(p: cz.payola.domain.entities.plugins.parameters.IntParameterValue): IntParameterValue = {
+    def apply(p: cz.payola.domain.entities.plugins.parameters.IntParameterValue)
+        (implicit context: SquerylDataContextComponent): IntParameterValue = {
         p match {
             case param: IntParameterValue => param
             case _ => {
@@ -27,13 +28,13 @@ object IntParameterValue {
 class IntParameterValue(
     override val id: String,
     param: IntParameter,
-    override var value: Int)
+    override var value: Int)(implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.plugins.parameters.IntParameterValue(param, value)
     with ParameterValue[Int]
 {
     val parameterId: Option[String] = if (param == null) None else Some(param.id)
 
-    private lazy val _parameterQuery = PayolaDB.valuesOfIntParameters.right(this)
+    private lazy val _parameterQuery = context.schema.valuesOfIntParameters.right(this)
 
     override def parameter: ParameterType = evaluateCollection(_parameterQuery)(0)
 }

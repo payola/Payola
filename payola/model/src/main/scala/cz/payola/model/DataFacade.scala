@@ -5,7 +5,8 @@ import cz.payola.data.dao._
 import cz.payola.domain.entities.plugins.DataSource
 import cz.payola.common.rdf.Graph
 import cz.payola.domain.entities.Group
-import cz.payola.data.PayolaDB
+import cz.payola.data._
+import scala.Some
 
 class DataFacade
 {

@@ -7,7 +7,7 @@ import cz.payola.domain.entities.plugins.concrete._
 import cz.payola.domain.entities.plugins.concrete.data.SparqlEndpoint
 import cz.payola.domain.entities.plugins.concrete.query._
 
-object TestObject
+/*object TestObject
 {
     val u1 = new cz.payola.domain.entities.User("HS")
     val u2 = new cz.payola.domain.entities.User("ChM")
@@ -296,4 +296,4 @@ object TestObject
     def testCascadeDeletes {
 
     }
-}
+}*/

@@ -1,7 +1,7 @@
 package cz.payola.data.entities.plugins.parameters
 
 import cz.payola.data.entities.plugins.Parameter
-import cz.payola.data.PayolaDB
+import cz.payola.data.SquerylDataContextComponent
 
 /**
   * This objects converts [[cz.payola.common.entities.plugins.parameters.FloatParameter]]
@@ -9,7 +9,8 @@ import cz.payola.data.PayolaDB
   */
 object FloatParameter
 {
-    def apply(p: cz.payola.common.entities.plugins.parameters.FloatParameter): FloatParameter = {
+    def apply(p: cz.payola.common.entities.plugins.parameters.FloatParameter)
+        (implicit context: SquerylDataContextComponent): FloatParameter = {
         p match {
             case p: FloatParameter => p
             case _ => new FloatParameter(p.id, p.name, p.defaultValue)
@@ -20,11 +21,11 @@ object FloatParameter
 class FloatParameter(
     override val id: String,
     name: String,
-    defaultVal: Float)
+    defaultVal: Float)(implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.plugins.parameters.FloatParameter(name, defaultVal)
     with Parameter[Float]
 {
-    private lazy val _valuesQuery = PayolaDB.valuesOfFloatParameters.left(this)
+    private lazy val _valuesQuery = context.schema.valuesOfFloatParameters.left(this)
 
     // Get, store and set default value of parameter to Database
     val _defaultValueDb = defaultVal

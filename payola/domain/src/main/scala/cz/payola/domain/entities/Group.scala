@@ -1,5 +1,7 @@
 package cz.payola.domain.entities
 
+import cz.payola.domain.Entity
+
 /**
   * @param _name Name of the group.
   * @param _owner Owner of the group.

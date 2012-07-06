@@ -1,4 +1,4 @@
-package cz.payola.common.entities
+package cz.payola.common
 
 /**
   * A generic entity.

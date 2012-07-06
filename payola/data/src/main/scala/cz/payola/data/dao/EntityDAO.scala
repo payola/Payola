@@ -3,7 +3,8 @@ package cz.payola.data.dao
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.{KeyedEntity, Table, Query}
 import collection.mutable.ArrayBuffer
-import cz.payola.data.DataException
+import cz.payola.data._
+import scala.Some
 
 abstract class EntityDAO[A <: KeyedEntity[String]](protected val table: Table[A])
 {

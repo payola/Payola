@@ -2,6 +2,7 @@ package cz.payola.data.entities.plugins
 
 import cz.payola.data.entities._
 import cz.payola.data.entities.plugins.parameters._
+import cz.payola.data.SquerylDataContextComponent
 
 /**
   * This object converts [[cz.payola.common.entities.plugins.ParameterValue]] to proper parameter value
@@ -10,7 +11,8 @@ import cz.payola.data.entities.plugins.parameters._
   */
 object ParameterValue
 {
-    def apply(pv: cz.payola.common.entities.plugins.ParameterValue[_]): ParameterValue[_] = {
+    def apply(pv: cz.payola.common.entities.plugins.ParameterValue[_])
+        (implicit context: SquerylDataContextComponent): ParameterValue[_] = {
         pv match {
             case b: BooleanParameterValue => b
             case f: FloatParameterValue => f

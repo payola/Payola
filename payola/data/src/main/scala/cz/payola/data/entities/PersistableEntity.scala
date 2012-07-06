@@ -5,13 +5,15 @@ import org.squeryl.PrimitiveTypeMode._
 import collection.mutable.ArrayBuffer
 import org.squeryl.dsl.{ManyToOne, OneToMany, ManyToMany}
 import cz.payola.data.DataException
+import cz.payola.domain._
+import cz.payola.domain
 
 /**
   * This trait provided persistance to entities and allows them to create relations with entities
   * (if relation is defined in [[cz.payola.data.PayolaDB]] schema)
   *
   */
-trait PersistableEntity extends cz.payola.domain.entities.Entity with KeyedEntity[String]
+trait PersistableEntity extends cz.payola.domain.Entity with KeyedEntity[String]
 {
     /**
       * Evaluates query that should return a collection of entities as a result.
@@ -108,7 +110,7 @@ trait PersistableEntity extends cz.payola.domain.entities.Entity with KeyedEntit
       */
     override def equals(other: Any): Boolean = {
         other match {
-            case that: cz.payola.domain.entities.Entity => that.canEqual(this) && this.id == that.id
+            case that: domain.Entity => that.canEqual(this) && this.id == that.id
             case _ => false
         }
     }

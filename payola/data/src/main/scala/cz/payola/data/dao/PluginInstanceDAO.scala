@@ -1,10 +1,16 @@
 package cz.payola.data.dao
 
-import cz.payola.data.PayolaDB
+import cz.payola.data._
 import cz.payola.data.entities.plugins.PluginInstance
 import cz.payola.common.entities.plugins
 
-class PluginInstanceDAO extends EntityDAO[PluginInstance](PayolaDB.pluginInstances)
+trait PluginInstanceDAOComponent
+{
+    self: SquerylDataContextComponent =>
+
+    lazy val pluginInstanceDAO = new PluginInstanceDAO
+
+    class PluginInstanceDAO extends EntityDAO[PluginInstance](schema.pluginInstances) with DAO[PluginInstance]
 {
     /**
       * Inserts or updates [[cz.payola.common.entities.analyses.PluginInstance]].
@@ -23,4 +29,5 @@ class PluginInstanceDAO extends EntityDAO[PluginInstance](PayolaDB.pluginInstanc
 
         result
     }
+}
 }

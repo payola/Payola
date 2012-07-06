@@ -1,10 +1,10 @@
 package cz.payola.data.entities.analyses
 
 import cz.payola.data.entities.PersistableEntity
-import cz.payola.data.PayolaDB
 import org.squeryl.annotations.Transient
 import cz.payola.domain.entities._
 import cz.payola.data.entities.plugins.PluginInstance
+import cz.payola.data.SquerylDataContextComponent
 
 /**
   * This objects convers [[cz.payola.common.entities.analyses.PluginInstanceBinding]]
@@ -12,7 +12,8 @@ import cz.payola.data.entities.plugins.PluginInstance
   */
 object PluginInstanceBinding {
 
-    def apply(p: cz.payola.common.entities.analyses.PluginInstanceBinding): PluginInstanceBinding = {
+    def apply(p: cz.payola.common.entities.analyses.PluginInstanceBinding)
+        (implicit context: SquerylDataContextComponent): PluginInstanceBinding = {
         p match {
             case b: PluginInstanceBinding => b
             case _ => new PluginInstanceBinding(
@@ -29,7 +30,7 @@ class PluginInstanceBinding(
     override val id: String,
     source: PluginInstance,
     target: PluginInstance,
-    private val _targetInputIdx: Int = 0)
+    private val _targetInputIdx: Int = 0)(implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.analyses.PluginInstanceBinding(source, target, _targetInputIdx)
     with PersistableEntity
 {
@@ -42,12 +43,12 @@ class PluginInstanceBinding(
     @Transient
     private var _sourceLoaded = false
     private var _source: plugins.PluginInstance = null
-    private lazy val _sourcesQuery = PayolaDB.bindingsOfSourcePluginInstances.right(this)
+    private lazy val _sourcesQuery = context.schema.bindingsOfSourcePluginInstances.right(this)
 
     @Transient
     private var _targetLoaded = false
     private var _target: plugins.PluginInstance = null
-    private lazy val _targetsQuery = PayolaDB.bindingsOfTargetPluginInstances.right(this)
+    private lazy val _targetsQuery = context.schema.bindingsOfTargetPluginInstances.right(this)
 
     override def sourcePluginInstance = {
         try{

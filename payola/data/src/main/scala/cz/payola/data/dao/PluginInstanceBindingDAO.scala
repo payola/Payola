@@ -1,9 +1,16 @@
 package cz.payola.data.dao
 
-import cz.payola.data.PayolaDB
+import cz.payola.data._
 import cz.payola.data.entities.analyses.PluginInstanceBinding
 
-class PluginInstanceBindingDAO extends EntityDAO[PluginInstanceBinding](PayolaDB.pluginInstanceBindings)
+trait PluginInstanceBindingDAOComponent
+{
+    self: SquerylDataContextComponent =>
+
+    lazy val pluginInstanceBindingDAO = new PluginInstanceBindingDAO
+
+    class PluginInstanceBindingDAO extends EntityDAO[PluginInstanceBinding](schema.pluginInstanceBindings)
+        with DAO[PluginInstanceBinding]
 {
     /**
       * Inserts or updates [[cz.payola.common.entities.analyses.PluginInstanceBinding]].
@@ -14,4 +21,5 @@ class PluginInstanceBindingDAO extends EntityDAO[PluginInstanceBinding](PayolaDB
     def persist(b: cz.payola.common.entities.analyses.PluginInstanceBinding): PluginInstanceBinding = {
         super.persist(PluginInstanceBinding(b))
     }
+}
 }

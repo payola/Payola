@@ -1,12 +1,19 @@
 package cz.payola.data.dao
 
 import org.squeryl.PrimitiveTypeMode._
-import cz.payola.data.PayolaDB
+import cz.payola.data._
 import cz.payola.data.entities.PluginDbRepresentation
 import cz.payola.domain.entities.Plugin
 import cz.payola.data.entities.plugins.Parameter
+import scala.Some
 
-class PluginDAO extends EntityDAO[PluginDbRepresentation](PayolaDB.plugins)
+trait PluginDAOComponent
+{
+    self: SquerylDataContextComponent =>
+
+    lazy val pluginDAO = new PluginDAO
+
+    class PluginDAO extends EntityDAO[PluginDbRepresentation](schema.plugins) with DAO[PluginDbRepresentation]
 {
     /**
       * Returns [[cz.payola.domain.entities.Plugin]] by its name.
@@ -45,4 +52,5 @@ class PluginDAO extends EntityDAO[PluginDbRepresentation](PayolaDB.plugins)
 
         result.createPlugin()
     }
+}
 }
