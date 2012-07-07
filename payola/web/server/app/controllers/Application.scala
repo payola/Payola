@@ -7,6 +7,7 @@ import play.api.data.Forms._
 import views._
 import helpers.Secured
 import cz.payola.domain.entities.User
+import cz.payola.web.shared.Payola
 
 object Application extends PayolaController with Secured
 {
@@ -25,7 +26,8 @@ object Application extends PayolaController with Secured
     }
 
     def dashboard = maybeAuthenticated { user =>
-        Ok(views.html.application.dashboard(user, df.topAnalyses, df.getPublicDataSources(10)))
+        Ok(views.html.application.dashboard(user, Payola.model.analysisModel.getTop,
+            Payola.model.dataSourceModel.getPublic(10)))
     }
 
     // -- Authentication
@@ -35,7 +37,7 @@ object Application extends PayolaController with Secured
             "password" -> text
         ) verifying("Invalid email or password", result =>
             result match {
-                case (email, password) => df.getUserByCredentials(email, password).isDefined
+                case (email, password) => Payola.model.userModel.getByCredentials(email, password).isDefined
             }
         )
     )
@@ -70,11 +72,9 @@ object Application extends PayolaController with Secured
         tuple(
             "email" -> text,
             "password" -> text
-        ) verifying("Username already taken.", result =>
-            result match {
-                case (email, password) => !df.getUserByUsername(email).isDefined
-            }
-        )
+        ) verifying("Username already taken.", _ match {
+            case (email, password) => Payola.model.userModel.getByName(email).isEmpty
+        })
     )
 
     def signup = Action {implicit request =>
@@ -88,7 +88,7 @@ object Application extends PayolaController with Secured
         signupForm.bindFromRequest.fold(
             formWithErrors => BadRequest(html.application.signup(formWithErrors)),
             user =>
-            {   df.register(user._1, user._2)
+            {   Payola.model.userModel.create(user._1, user._2)
                 Redirect(routes.Application.dashboard).withSession("email" -> user._1) }
         )
     }

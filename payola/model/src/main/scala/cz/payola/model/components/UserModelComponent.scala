@@ -23,7 +23,7 @@ trait UserModelComponent extends EntityModelComponent
             None
         }
 
-        def getByUsername(username: String): Option[User] = {
+        def getByName(name: String): Option[User] = {
             // TODO userDAO.getUserByUsername(username)
             None
         }

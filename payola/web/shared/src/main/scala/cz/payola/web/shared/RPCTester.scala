@@ -1,8 +1,7 @@
 package cz.payola.web.shared
 
-import cz.payola.common.rdf.Graph
-import cz.payola.model.DataFacade
 import s2js.compiler.async
+import cz.payola.domain.rdf.Graph
 
 @remote
 object RPCTester
@@ -60,16 +59,17 @@ object RPCTester
         param.mkString("")
     }
 
-    def throwException : Graph = {
+    def throwException: Graph = {
         throw new Exception("Was lazy to do this.")
     }
 
-    def throwCustomException : Graph = {
+    def throwCustomException: Graph = {
         throw new RPCTestException()
     }
 
-    def testGraph : Graph = {
-        (new DataFacade).getGraph("http://payola.cz")
+    def testGraph: Graph = {
+        // TODO (new DataFacade).getGraph("http://payola.cz")
+        Graph.empty
     }
     
     def testException : Int = {

@@ -233,7 +233,7 @@ object PayolaBuild extends Build
     lazy val webInitializerProject = Project(
         "initializer", file("web/initializer"), settings = payolaSettings
     ).dependsOn(
-        domainProject, dataProject
+        domainProject, dataProject, webSharedProject
     )
 
     lazy val webServerProject = PlayProject(

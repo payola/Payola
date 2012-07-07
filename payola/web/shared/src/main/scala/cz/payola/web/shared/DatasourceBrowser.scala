@@ -1,14 +1,12 @@
 package cz.payola.web.shared
 
 import cz.payola.common.rdf.Graph
-import cz.payola.model.DataFacade
 import cz.payola.domain.entities.plugins.concrete.data.SparqlEndpoint
 
 @remote object DatasourceBrowser
 {
     def getInitialGraph(id: String) : Option[Graph] = {
-        val df = new DataFacade
-        val instance = df.getDataSourceById(id)
+        val instance = Payola.model.dataSourceModel.getById(id)
 
         if (instance.isDefined)
         {

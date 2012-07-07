@@ -34,13 +34,10 @@
     <orderEntry type="library" name="org.slf4j_slf4j-api_1.6.4" level="project" />
     <orderEntry type="library" name="org.slf4j_slf4j-log4j12_1.6.4" level="project" />
     <orderEntry type="library" name="log4j_log4j_1.2.16" level="project" />
-    <orderEntry type="library" name="com.hp.hpl.jena_arq_2.8.3" level="project" />
-    <orderEntry type="library" name="com.hp.hpl.jena_jena_2.6.2" level="project" />
-    <orderEntry type="library" name="com.hp.hpl.jena_iri_0.8" level="project" />
-    <orderEntry type="library" name="org.codehaus.woodstox_wstx-asl_3.2.9" level="project" />
-    <orderEntry type="library" name="stax_stax-api_1.0.1" level="project" />
-    <orderEntry type="library" name="org.apache.lucene_lucene-core_2.3.1" level="project" />
-    <orderEntry type="library" name="junit_junit_4.5" level="project" />
+    <orderEntry type="library" name="org.apache.jena_jena-arq_2.9.0-incubating" level="project" />
+    <orderEntry type="library" name="commons-codec_commons-codec_1.5" level="project" />
+    <orderEntry type="library" name="org.apache.httpcomponents_httpclient_4.1.2" level="project" />
+    <orderEntry type="library" name="org.apache.httpcomponents_httpcore_4.1.3" level="project" />
     <orderEntry type="library" scope="TEST" name="org.scalatest_scalatest_2.9.1_1.6.1" level="project" />
     <orderEntry type="module" module-name="common" exported="" />
   </component>
