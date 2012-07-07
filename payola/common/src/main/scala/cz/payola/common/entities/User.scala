@@ -126,7 +126,7 @@ trait User extends NamedEntity with PrivilegableEntity
 
     /**
       * Stores the specified plugin to the users owned plugins.
-      * @param plugin The data source to store.
+      * @param plugin The plugin to store.
       */
     protected def storeOwnedPlugin(plugin: PluginType) {
         _ownedPlugins += plugin

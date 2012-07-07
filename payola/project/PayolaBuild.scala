@@ -131,8 +131,8 @@ object PayolaBuild extends Build
     {
         val compilerJar = Settings.targetDir / S2JsSettings.compilerJarName
 
-        def apply(name: String, path: File, outputDir: File, projectSettings: Seq[Project.Setting[_]]) = {
-            raw(name, path, outputDir, projectSettings).dependsOn(
+        def apply(name: String, path: File, outputDir: File, settings: Seq[Project.Setting[_]]) = {
+            raw(name, path, outputDir, settings).dependsOn(
                 s2JsRuntimeClientProject
             )
         }
@@ -219,7 +219,12 @@ object PayolaBuild extends Build
     )
 
     lazy val webSharedProject = ScalaToJsProject(
-        "shared", file("web/shared"), WebSettings.javaScriptsDir / "shared", payolaSettings
+        "shared", file("web/shared"), WebSettings.javaScriptsDir / "shared",
+        settings = payolaSettings ++ Seq(
+            libraryDependencies ++= Seq(
+                "com.typesafe" % "config" % "0.5.0"
+            )
+        )
     ).dependsOn(
         commonProject, modelProject
     )

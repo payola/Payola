@@ -4,27 +4,27 @@ import cz.payola.data.squeryl.SquerylDataContextComponent
 import cz.payola.domain.RdfStorageComponent
 import cz.payola.domain.virtuoso.VirtuosoStorage
 import cz.payola.model.ModelComponent
+import com.typesafe.config.ConfigFactory
 
 @remote object Payola
 {
-    // TODO use a Configuration based on some config. file
-    private[shared] lazy val configuration = new Configuration
+    private[shared] lazy val settings = new Settings(ConfigFactory.load("payola"))
 
     lazy val model: ModelComponent = new ModelComponent with SquerylDataContextComponent with RdfStorageComponent
     {
         lazy val schema = new Schema(
-            configuration.databaseLocation,
-            configuration.databaseUser,
-            configuration.databasePassword
+            settings.databaseLocation,
+            settings.databaseUser,
+            settings.databasePassword
         )
 
         lazy val rdfStorage = new VirtuosoStorage(
-            configuration.virtuosoServer,
-            configuration.virtuosoEndpointPort,
-            configuration.virtuosoEndpointSsl,
-            configuration.virtuosoSqlPort,
-            configuration.virtuosoSqlUser,
-            configuration.virtuosoSqlPassword
+            settings.virtuosoServer,
+            settings.virtuosoEndpointPort,
+            settings.virtuosoEndpointSsl,
+            settings.virtuosoSqlPort,
+            settings.virtuosoSqlUser,
+            settings.virtuosoSqlPassword
         )
     }
 }
