@@ -21,6 +21,7 @@ class VirtuosoStorage(
     val sqlPort: Int = 1111,
     val sqlUsername: String = "dba",
     val sqlPassword: String = "dba")
+    extends Storage
 {
     // Register the driver in the driver manager.
     Class.forName("virtuoso.jdbc3.Driver")
@@ -30,80 +31,31 @@ class VirtuosoStorage(
       */
     val endpointURL = "%s://%s:%s/sparql".format(if (endpointUsesSSL) "https" else "http", server, endpointPort)
 
-    /**
-      * Creates a new graph group.
-      * @param groupURI Group URI.
-      */
+
     def createGroup(groupURI: String) {
         executeSQL("DB.DBA.RDF_GRAPH_GROUP_CREATE('%s', 1)".format(escapeString(groupURI)))
     }
 
-    /**
-      * Deletes the specified graph group. Graphs within that group stay untouched.
-      * @param groupURI URI of the group to delete.
-      */
     def deleteGroup(groupURI: String) {
         executeSQL("DB.DBA.RDF_GRAPH_GROUP_DROP('%s', 1)".format(escapeString(groupURI)))
     }
 
-    /**
-      * Stores the graph in the Virtuoso triple store.
-      * @param graphURI URI of the graph.
-      * @param rdfXml XML representation of the graph.
-      */
     def storeGraph(graphURI: String, rdfXml: String) {
         executeSQL("DB.DBA.RDF_LOAD_RDFXML('%s', '', '%s')".format(escapeString(rdfXml), escapeString(graphURI)))
     }
 
-    /**
-      * Adds a graph with the specified URI to the specified group. A graph with must already exist on the server.
-      * @param graphURI URI of the graph.
-      * @param groupURI URI of the group.
-      */
     def addGraphToGroup(graphURI: String, groupURI: String) {
         executeSQL("DB.DBA.RDF_GRAPH_GROUP_INS('%s', '%s')".format(escapeString(groupURI), escapeString(graphURI)))
     }
 
-    /**
-      * Stores the specified graph to the database and adds it to the specified group.
-      * @param graphURI URI of the graph.
-      * @param rdfXml XML representation of the graph.
-      * @param groupURI URI of the group.
-      */
-    def addGraphToGroup(graphURI: String, rdfXml: String, groupURI: String) {
-        storeGraph(graphURI, rdfXml)
-        addGraphToGroup(graphURI, groupURI)
-    }
-
-    /**
-      * Deletes the specified graph from the database.
-      * @param graphURI URI of the graph to delete.
-      */
     def deleteGraph(graphURI: String) {
         executeSQLQuery("sparql CLEAR GRAPH <%s>".format(escapeString(graphURI)))
     }
 
-    /**
-      * Executes the specified SPARQL query.
-      * @param query The query to execute.
-      * @return The resulting graph.
-      */
     def executeSPARQLQuery(query: String): Graph = {
         val url = endpointURL + "?query=" + java.net.URLEncoder.encode(query, "UTF-8")
         val rdfXml = new Downloader(url, "application/rdf+xml").result
         Graph(RdfRepresentation.RdfXml, rdfXml)
-    }
-
-    /**
-      * Executes the specified SPARQL query over data in the specifed group.
-      * @param query The query to execute.
-      * @param groupURI URI of the group whose data should be queried.
-      * @return The resulting graph.
-      */
-    def executeSPARQLQuery(query: String, groupURI: String): Graph = {
-        val sparqlQuery = QueryFactory.create(query)
-        sparqlQuery.addGraphURI(groupURI)
-        executeSPARQLQuery(sparqlQuery.toString)
     }
 
     /**

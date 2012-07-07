@@ -2,7 +2,7 @@ package cz.payola.domain.entities.analyses.evaluation
 
 import actors.{TIMEOUT, Actor}
 import collection.mutable
-import cz.payola.domain.Timer
+import cz.payola.domain.actors.Timer
 import cz.payola.domain.entities.Analysis
 import cz.payola.domain.entities.analyses._
 import cz.payola.domain.entities.plugins.PluginInstance

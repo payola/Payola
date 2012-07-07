@@ -1,4 +1,4 @@
-package cz.payola.domain
+package cz.payola.domain.actors
 
 import actors.{TIMEOUT, Actor}
 

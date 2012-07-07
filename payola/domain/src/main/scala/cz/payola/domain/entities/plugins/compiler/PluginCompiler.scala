@@ -33,11 +33,10 @@ class PluginCompiler(val libDirectory: java.io.File, val pluginClassDirectory: j
         val pluginFile = new java.io.File(pluginFileName)
         new File(pluginFile).writeAll(pluginSourceCode)
 
-        try { {
+        try {
             val run = new compiler.Run()
             run.compile(List(pluginFileName))
             compiler.pluginVerifier.pluginClassName.get
-        }
         } finally {
             pluginFile.delete()
         }
@@ -53,5 +52,4 @@ class PluginCompiler(val libDirectory: java.io.File, val pluginClassDirectory: j
             pluginVerifier.components.foreach(phasesSet += _)
         }
     }
-
 }

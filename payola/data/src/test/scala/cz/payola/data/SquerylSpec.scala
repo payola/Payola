@@ -2,17 +2,11 @@ package cz.payola.data
 
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
-import cz.payola.data.squeryl.SquerylDataContextComponent
 import cz.payola.domain.entities.plugins.concrete.data.SparqlEndpoint
 import cz.payola.domain.entities.plugins.concrete.query._
 import cz.payola.domain.entities.plugins.concrete._
 
-trait TestDataContextComponent extends SquerylDataContextComponent
-{
-    lazy val schema = new Schema("jdbc:h2:tcp://localhost/~/h2/payola-test", "sa", "")
-}
-
-class SquerylSpecs extends FlatSpec with ShouldMatchers with TestDataContextComponent
+class SquerylSpec extends FlatSpec with ShouldMatchers with TestDataContextComponent
 {
     // Users
     val u1 = new cz.payola.domain.entities.User("HS")

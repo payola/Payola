@@ -12,6 +12,7 @@ trait PluginRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
 
+    // TODO take special care of the PayolaStorage plugin instantiation.
     lazy val pluginRepository = new Repository[Plugin]
     {
         def getById(id: String): Option[Plugin] = None // TODO

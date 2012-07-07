@@ -3,9 +3,12 @@ package cz.payola.data
 import cz.payola.domain.entities._
 import cz.payola.domain.entities.plugins._
 import cz.payola.domain.entities.analyses.PluginInstanceBinding
+import cz.payola.domain.RdfStorageComponent
 
 trait DataContextComponent
 {
+    self: RdfStorageComponent =>
+
     val userRepository: Repository[User]
 
     val groupRepository: Repository[Group]
