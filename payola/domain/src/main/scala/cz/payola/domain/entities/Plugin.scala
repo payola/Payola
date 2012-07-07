@@ -17,6 +17,7 @@ abstract class Plugin(
     protected val _parameters: immutable.Seq[Plugin#ParameterType],
     protected var _id: String = IDGenerator.newId)
     extends Entity(_id)
+    with OptionallyOwnedEntity
     with NamedEntity
     with ShareableEntity
     with cz.payola.common.entities.Plugin
@@ -26,6 +27,8 @@ abstract class Plugin(
     type ParameterType = Parameter[_]
 
     type ParameterValueType = ParameterValue[_]
+
+    var _owner: Option[UserType] = None
 
     /**
       * Returns a new instance of the plugin with all parameter instances set to default values.

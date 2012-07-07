@@ -19,6 +19,9 @@ trait User extends NamedEntity with PrivilegableEntity
     /** Type of the data sources that the user can own. */
     type DataSourceType <: DataSource
 
+    /** Type of the plugins that the user can own. */
+    type PluginType <: Plugin
+
     /** Type of the ontology visual customizations that the user may own. */
     type OntologyCustomizationType <: Customization
 
@@ -31,6 +34,8 @@ trait User extends NamedEntity with PrivilegableEntity
     protected val _ownedAnalyses = mutable.ArrayBuffer[AnalysisType]()
 
     protected val _ownedDataSources = mutable.ArrayBuffer[DataSourceType]()
+
+    protected val _ownedPlugins = mutable.ArrayBuffer[PluginType]()
 
     protected val _ontologyCustomizations = mutable.ArrayBuffer[OntologyCustomizationType]()
 
@@ -64,6 +69,9 @@ trait User extends NamedEntity with PrivilegableEntity
 
     /** The data sources that are owned by the user. */
     def ownedDataSources: immutable.Seq[DataSourceType] = _ownedDataSources.toList
+
+    /** The plugins that are owned by the user. */
+    def ownedPlugins: immutable.Seq[PluginType] = _ownedPlugins.toList
 
     /** Ontology customizations of the user. */
     def ownedOntologyCustomizations: immutable.Seq[OntologyCustomizationType] = _ontologyCustomizations.toList
@@ -114,6 +122,22 @@ trait User extends NamedEntity with PrivilegableEntity
       */
     protected def discardOwnedDataSource(source: DataSourceType) {
         _ownedDataSources -= source
+    }
+
+    /**
+      * Stores the specified plugin to the users owned plugins.
+      * @param plugin The data source to store.
+      */
+    protected def storeOwnedPlugin(plugin: PluginType) {
+        _ownedPlugins += plugin
+    }
+
+    /**
+      * Discards the specified plugin from the users owned plugins. Complementary operation to store.
+      * @param plugin The plugin to discard.
+      */
+    protected def discardOwnedPlugin(plugin: PluginType) {
+        _ownedPlugins -= plugin
     }
 
     /**
