@@ -17,11 +17,8 @@ object DataSource extends EntityConverter[DataSource]
             case e: DataSource => Some(e)
             case e: cz.payola.domain.entities.plugins.DataSource => {
                 val dataFetcher = e.plugin.asInstanceOf[DataFetcher]
-                val dataSource = new DataSource(e.id, e.name, e.owner.map(User(_)), dataFetcher,
-                    e.parameterValues.map(ParameterValue(_)))
-                // Create relation between plugin and this DataSource TODO why there? this should just convert it.
-                PluginDbRepresentation(dataFetcher).registerDataSource(dataSource)
-                Some(dataSource)
+                Some(new DataSource(e.id, e.name, e.owner.map(User(_)),
+                    dataFetcher,e.parameterValues.map(ParameterValue(_))))
             }
             case _ => None
         }

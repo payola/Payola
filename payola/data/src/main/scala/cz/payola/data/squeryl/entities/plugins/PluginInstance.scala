@@ -16,10 +16,7 @@ object PluginInstance extends EntityConverter[PluginInstance]
             case e: PluginInstance => Some(e)
             case e: cz.payola.common.entities.plugins.PluginInstance => {
                 val plugin = e.plugin.asInstanceOf[cz.payola.domain.entities.Plugin]
-                val i = new PluginInstance(e.id, plugin, e.parameterValues.map(ParameterValue(_)), e.description)
-                // Create relation between plugin and this instance // TODO why there? this should just convert it.
-                PluginDbRepresentation(plugin).registerPluginInstance(i)
-                Some(i)
+                Some(new PluginInstance(e.id, plugin, e.parameterValues.map(ParameterValue(_)), e.description))
             }
             case _ => None
         }
@@ -34,7 +31,7 @@ class PluginInstance(
     extends cz.payola.domain.entities.plugins.PluginInstance(p, paramValues)
     with PersistableEntity
 {
-    var pluginId: Option[String] = if (plugin == null) None else Some(plugin.id)
+    var pluginId: Option[String] = if (p == null) None else Some(p.id)
 
     var analysisId: Option[String] = None
 

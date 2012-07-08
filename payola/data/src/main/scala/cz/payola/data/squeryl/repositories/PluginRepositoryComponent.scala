@@ -12,53 +12,31 @@ trait PluginRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
 
-    // TODO take special care of the PayolaStorage plugin instantiation.
     lazy val pluginRepository = new Repository[Plugin]
     {
-        def getById(id: String): Option[Plugin] = None // TODO
+        private val _repository = new TableRepository[PluginDbRepresentation](schema.plugins, PluginDbRepresentation)
 
-        def removeById(id: String): Boolean = false // TODO
+        def getById(id: String): Option[Plugin] = _repository.getById(id).map(_.createPlugin())
 
-        def getAll(pagination: Option[PaginationInfo] = None): Seq[Plugin] = Nil // TODO
+        def removeById(id: String): Boolean = _repository.removeById(id)
 
-        /**
-          * Returns [[cz.payola.domain.entities.Plugin]] by its name.
-          *
-          * @param pluginName - name of a plugin to search
-          * @return Return Some([[cz.payola.domain.entities.Plugin]]) if found, None otherwise
-          */
-        def getByName(pluginName: String): Option[Plugin] = {
-            /*TODO// Get plugin representation from DB
-            val pluginDb: Option[PluginDbRepresentation] =
-                evaluateSingleResultQuery(table.where(p => p.name === pluginName))
-
-            if (pluginDb.isDefined) {
-                Some(pluginDb.get.createPlugin())
-            }
-            else {
-                // Not found
-                None
-            }*/
-            None
+        def getAll(pagination: Option[PaginationInfo] = None): Seq[Plugin] = {
+            _repository.getAll(pagination).map(_.createPlugin())
         }
 
-        /**
-          * Inserts or updates [[cz.payola.domain.entities.Plugin]].
-          *
-          * @param p - plugin to insert or update
-          * @return Returns persisted [[cz.payola.domain.entities.Plugin]]
-          */
         def persist(entity: AnyRef): Plugin = {
-            /*TODO val pluginDb = PluginDbRepresentation(p)
-
             // First persist plugin ...
-            val result = super.persist(pluginDb)
+            val pluginDb = _repository.persist(entity)
 
-            // ... then assign parameters
-            p.parameters.map(par => pluginDb.associateParameter(Parameter(par)))
+            // ... then assign parameters ...
+            entity.asInstanceOf[Plugin].parameters.map(par => pluginDb.associateParameter(Parameter(par)))
 
-            result.createPlugin()*/
-            null
+            // ... and return plugin
+            entity.asInstanceOf[Plugin]
+        }
+
+        def getByName(pluginName: String): Option[Plugin] = {
+            _repository.evaluateSingleResultQuery(_repository.table.where(p => p.name === pluginName)).map(_.createPlugin())
         }
     }
 }

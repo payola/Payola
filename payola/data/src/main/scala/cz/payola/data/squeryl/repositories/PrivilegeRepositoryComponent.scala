@@ -4,6 +4,8 @@ import org.squeryl.PrimitiveTypeMode._
 import cz.payola.data.squeryl._
 import cz.payola.domain.entities.Privilege
 import cz.payola.data.PaginationInfo
+import cz.payola.data.squeryl.entities.privileges.PrivilegeDbRepresentation
+import cz.payola.common.Entity
 
 trait PrivilegeRepositoryComponent extends TableRepositoryComponent
 {
@@ -11,30 +13,28 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
 
     lazy val privilegeRepository = new PrivilegeRepository[Privilege[_]]
     {
-        def getById(id: String): Option[Privilege[_]] = None // TODO
+        private val _repository = new TableRepository[PrivilegeDbRepresentation](schema.privileges, PrivilegeDbRepresentation)
 
-        def removeById(id: String): Boolean = false // TODO
+        def getById(id: String): Option[Privilege[_]] = None
 
-        def getAll(pagination: Option[PaginationInfo] = None): Seq[Privilege[_]] = Nil // TODO
+        def removeById(id: String): Boolean = _repository.removeById(id)
 
-        def persist(entity: AnyRef): Privilege[_] = null // TODO
+        def getAll(pagination: Option[PaginationInfo] = None): Seq[Privilege[_]] = Nil
 
-        /**
-          * Loads [[cz.payola.common.entities.Privilege]] by privileged object class and privileged greantee
-          *
-          * @param granteeId - id of [[cz.payola.common.entities.PrivilegableEntity]] that has privilege
-          * @param privilegeClass - stripped class of [[cz.payola.common.entities.Privilege]] assigned to grantee Entity
-          * @param objectClass - stripped class of objects that are subjects of the Privilege
-          *
-          * @return Returns list of Privileges
-          */
-        def getPrivilegeObjectIds(granteeId: String, privilegeClass: String, objectClass: String): Seq[String] = {
-            /*TODO val query = from(table)(p =>
+        def persist(entity: AnyRef): Privilege[_] =  {
+            _repository.persist(entity)
+
+            // TODO: no way to instantiate Privilege from its Db representation
+            null
+        }
+
+        def getPrivilegedObjectIds(granteeId: String, privilegeClass: String, objectClass: String): Seq[String] = {
+            val query = from(_repository.table)(p =>
                 where(p.granteeId === granteeId and p.privilegeClass === privilegeClass and p.objectClass === objectClass)
                 select(p.objectId)
             )
-            evaluateCollectionResultQuery(query)*/
-            Nil
+
+            _repository.evaluateCollectionResultQuery(query)
         }
     }
 }

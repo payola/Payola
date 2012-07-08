@@ -10,10 +10,15 @@ import cz.payola.data.squeryl.SquerylDataContextComponent
 /**
   * This objects converts [[cz.payola.domain.entities.Plugin]] to [[cz.payola.data.squeryl.entities.PluginDbRepresentation]]
   */
-object PluginDbRepresentation
+object PluginDbRepresentation extends EntityConverter[PluginDbRepresentation]
 {
-    def apply(p: Plugin)(implicit context: SquerylDataContextComponent): PluginDbRepresentation = {
-        new PluginDbRepresentation(p.id, p.name, pluginClass(p), p.inputCount)
+    def convert(entity: AnyRef)(implicit context: SquerylDataContextComponent): Option[PluginDbRepresentation] = {
+        entity match {
+            case p: PluginDbRepresentation => Some(p)
+            case p: cz.payola.domain.entities.Plugin 
+                    => Some(new PluginDbRepresentation(p.id, p.name, pluginClass(p), p.inputCount, p.owner.map(User(_))))
+            case _ => None
+        }
     }
 
     private def pluginClass(p: Plugin): String = {
@@ -21,10 +26,22 @@ object PluginDbRepresentation
     }
 }
 
-class PluginDbRepresentation(override val id: String, val name: String, val pluginClass: String, val inputCount: Int)
+class PluginDbRepresentation(
+    override val id: String,
+    val name: String,
+    val pluginClass: String,
+    val inputCount: Int,
+    o: Option[User])
     (implicit val context: SquerylDataContextComponent)
     extends PersistableEntity
 {
+
+    private var _owner: Option[User] = None
+
+    var ownerId: Option[String] = o.map(_.id)
+
+    private lazy val _ownerQuery = context.schema.pluginOwnership.right(this)
+
     @Transient
     private var _parametersLoaded = false
 
@@ -50,15 +67,25 @@ class PluginDbRepresentation(override val id: String, val name: String, val plug
     }
 
     /**
-      * @return Returns all assicated [[cz.payola.data.squeryl.entities.plugins.plugins.DataSource]]s.
+      * @return Returns all associated [[cz.payola.data.squeryl.entities.plugins.plugins.DataSource]]s.
       */
     def dataSources: Seq[DataSource] = {
         evaluateCollection(_dataSourcesQuery)
     }
 
+    def owner: Option[User] = {
+        if (_owner == None){
+            if (ownerId != null && ownerId.isDefined) {
+                _owner = evaluateCollection(_ownerQuery).headOption
+            }
+        }
+
+        _owner
+    }
+
     /**
       *
-      * @return Rerurns list of assicated [[cz.payola.data.squeryl.entities.plugins.Parameter]]s.
+      * @return Returns list of associated [[cz.payola.data.squeryl.entities.plugins.Parameter]]s.
       */
     def parameters: Seq[Parameter[_]] = {
         if (!_parametersLoaded) {
@@ -76,7 +103,7 @@ class PluginDbRepresentation(override val id: String, val name: String, val plug
     }
 
     /**
-      * Associates specified [[cz.payola.data.squeryl.entities.plugins.Parameter]] to represented plugin.
+      * Associates specified [[cz.payola.data.squeryl.entities.plugins.Parameter]] to plugin.
       *
       * @param parameter - parameter to be associated to represented plugin
       */
@@ -90,33 +117,31 @@ class PluginDbRepresentation(override val id: String, val name: String, val plug
     }
 
     /**
-      * Represented plugin is instantiated.
+      * Associates [[cz.payola.data.squeryl.entities.plugins.PluginInstance]] to plugin
       *
-      * @return Returns reperesented plugin.
+      * @param i - plugin instance to bo associated to represented plugin
       */
-    def createPlugin(): Plugin = {
-        // Return properly instantiated Plugin
-        instantiate(pluginClass, name, new java.lang.Integer(inputCount), parameters, id)
-    }
-
-    /**
-      * If specified [[cz.payola.data.squeryl.entities.plugins.PluginInstance]] is instance of represented plugin,
-      * relation between them is created by this method.
-      *
-      * @param i - plugin instance to associate to represented plugin
-      */
-    def registerPluginInstance(i: cz.payola.data.squeryl.entities.plugins.PluginInstance) {
+    def associatePluginInstance(i: cz.payola.data.squeryl.entities.plugins.PluginInstance) {
         associate(i, _pluginInstancesQuery)
     }
 
     /**
-      * If specified [[cz.payola.data.squeryl.entities.plugins.plugins.DataSource]] should be related to represented plugin,
-      * relation between them is created by this method.
+      * Associates [[cz.payola.data.squeryl.entities.plugins.plugins.DataSource]] to plugin
       *
-      * @param ds - data source to associate to represented plugin
+      * @param ds - data source to be associated to represented plugin
       */
-    def registerDataSource(ds: cz.payola.data.squeryl.entities.plugins.DataSource) {
+    def associateDataSource(ds: cz.payola.data.squeryl.entities.plugins.DataSource) {
         associate(ds, _dataSourcesQuery)
+    }
+
+    /**
+      * Represented plugin is instantiated.
+      *
+      * @return Returns represented plugin.
+      */
+    def createPlugin(): Plugin = {
+        // Return properly instantiated Plugin
+        instantiate(pluginClass, name, new java.lang.Integer(inputCount), parameters, id)
     }
 
     private def instantiate(className: String, args: AnyRef*): Plugin = {

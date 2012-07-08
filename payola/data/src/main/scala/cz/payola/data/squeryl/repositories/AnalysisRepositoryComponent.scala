@@ -13,23 +13,10 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
 
     lazy val analysisRepository = new TableRepository[Analysis](schema.analyses, Analysis)
     {
-        /**
-          * Returns TOP analyses from all users.
-          *
-          * @param pagination - Optionally specified pagination of analyses
-          * @return Returns collection of TOP analyses
-          */
         def getTopAnalyses(pagination: Option[PaginationInfo] = Some(new PaginationInfo(0, 10))): collection.Seq[Analysis] = {
             getTopAnalyses(None, pagination)
         }
 
-        /**
-          * Returns TOP analyses from specified user.
-          *
-          * @param ownerId - id of analyses owner
-          * @param pagination - Optionally specified pagination of analyses
-          * @return Returns collection of TOP analyses
-          */
         def getTopAnalysesByUser(ownerId: String, pagination: Option[PaginationInfo] = Some(new PaginationInfo(0, 10))): collection.Seq[Analysis] = {
             getTopAnalyses(Some(ownerId), pagination)
         }
@@ -39,7 +26,7 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
             // OwnerId is specified -> return all analyses by user
             val query = from(table)(a =>
                 where ((ownerId.isEmpty === true and a.isPublic === true and a.ownerId.isEmpty === true)
-                    or (a.ownerId.getOrElse("").toString === ownerId.getOrElse("").toString))
+                    or (ownerId.isEmpty === false and a.ownerId.getOrElse("").toString === ownerId.getOrElse("").toString))
                     select (a)
                     orderBy (a.name asc)
             )
@@ -47,25 +34,19 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
             evaluateCollectionResultQuery(query, pagination)
         }
 
-        /**
-          * Returns public analyses of specified owner
-          *
-          * @param ownerId - id of analyses owner
-          * @param pagination - Optionally specified pagination
-          * @return Returns collection of analyses
-          */
         def getPublicAnalysesByOwner(ownerId: String, pagination: Option[PaginationInfo] = None) = {
-            val query = table.where(a => a.ownerId.getOrElse("") === ownerId)
+            val query = table.where(a => a.ownerId.getOrElse("") === ownerId and a.isPublic === true)
 
             evaluateCollectionResultQuery(query, pagination)
         }
 
         override def persist(entity: AnyRef): Analysis = {
+            val e = entity.asInstanceOf[cz.payola.common.entities.Analysis]
             val analysis = super.persist(entity)
 
             // Associate plugin instances with their bindings
-            analysis.pluginInstances.map(pi => analysis.associatePluginInstance(PluginInstance(pi)))
-            analysis.pluginInstanceBindings.map(b => analysis.associatePluginInstanceBinding(PluginInstanceBinding(b)))
+            e.pluginInstances.map(pi => analysis.associatePluginInstance(PluginInstance(pi)))
+            e.pluginInstanceBindings.map(b => analysis.associatePluginInstanceBinding(PluginInstanceBinding(b)))
 
             // Return persisted analysis
             analysis

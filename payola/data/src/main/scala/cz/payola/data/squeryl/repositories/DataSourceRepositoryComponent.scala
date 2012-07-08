@@ -22,13 +22,6 @@ trait DataSourceRepositoryComponent extends TableRepositoryComponent
             dataSource
         }
 
-        /**
-          * Returns collection of public [[cz.payola.data.squeryl.entities.plugins.DataSource]].
-          * Result may be paginated.
-          *
-          * @param pagination - Optionally specified pagination
-          * @return Returns collection of public [[cz.payola.data.squeryl.entities.plugins.DataSource]]
-          */
         def getPublicDataSources(pagination: Option[PaginationInfo] = None): Seq[DataSource] = {
             val query =
                 from(table)(ds =>

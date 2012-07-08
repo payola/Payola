@@ -38,6 +38,10 @@ class User(override val id: String, name: String, pwd: String, mail: String)
     private lazy val _ownedAnalysesQuery = context.schema.analysisOwnership.left(this)
 
     @Transient
+    private var _ownedPluginsLoaded = false
+    private lazy val _ownedPluginsQuery = context.schema.pluginOwnership.left(this)
+
+    @Transient
     private var _ownedDataSourcesLoaded = false
     private lazy val _ownedDataSourcesQuery = context.schema.dataSourceOwnership.left(this)
 
@@ -63,15 +67,15 @@ class User(override val id: String, name: String, pwd: String, mail: String)
       * @return Returns collection of [[cz.payola.data.squeryl.entities.Group]]s that user is member of.
       */
     def memberedGroups: mutable.Seq[Group] = {
-            if (_memberedGroups.size == 0) {
-                // Lazy-load membered groups collection
-                evaluateCollection(_memberedGroupsQuery).map(g =>
-                    _memberedGroups += g
-                )
-            }
-
-            _memberedGroups
+        if (_memberedGroups.size == 0) {
+            // Lazy-load membered groups collection
+            evaluateCollection(_memberedGroupsQuery).map(g =>
+                _memberedGroups += g
+            )
         }
+
+        _memberedGroups
+    }
 
     override def ownedAnalyses: immutable.Seq[AnalysisType] = {
         if (!_ownedAnalysesLoaded) {
@@ -99,6 +103,20 @@ class User(override val id: String, name: String, pwd: String, mail: String)
         }
 
         super.ownedDataSources
+    }
+
+    override def ownedPlugins: immutable.Seq[PluginType] = {
+        if (!_ownedPluginsLoaded) {
+            evaluateCollection(_ownedPluginsQuery).map(p => p.createPlugin()).map(p =>
+                if (!super.ownedPlugins.contains(p)) {
+                    super.storeOwnedPlugin(p)
+                }
+            )
+
+            _ownedPluginsLoaded = true
+        }
+
+        super.ownedPlugins
     }
 
     override protected def storeOwnedAnalysis(analysis: User#AnalysisType) {

@@ -1,15 +1,17 @@
 package cz.payola.data.squeryl.entities.privileges
 
-import cz.payola.data.squeryl.entities.PersistableEntity
 import cz.payola.common._
+import cz.payola.data.squeryl.entities._
+import cz.payola.data.DataException
+import cz.payola.data.squeryl.SquerylDataContextComponent
 
 /**
   * This object converts [[cz.payola.common.entities.Privilege]] to [[cz.payola.data.squeryl.entities.PrivilegeDbRepresentation]]
   * in order to be persisted in database.
   */
-object PrivilegeDbRepresentation {
+object PrivilegeDbRepresentation extends EntityConverter[PrivilegeDbRepresentation] {
 
-   def apply(privilege: entities.Privilege[_ <: Entity], granter: entities.User, grantee: entities.PrivilegableEntity) = {
+    def apply(privilege: entities.Privilege[_ <: Entity], granter: entities.User, grantee: entities.PrivilegableEntity) = {
         new PrivilegeDbRepresentation(
             privilege.id,
             granter.id,
@@ -19,7 +21,14 @@ object PrivilegeDbRepresentation {
             privilege.obj.id,
             stripClassName(privilege.obj.getClass.toString)
         )
-   }
+    }
+
+    def convert(entity: AnyRef)(implicit context: SquerylDataContextComponent) = {
+        entity match {
+            case p: PrivilegeDbRepresentation => Some(p)
+            case _ => None
+        }
+    }
 
     /**
       * Modifies full-class name to format stored to database.

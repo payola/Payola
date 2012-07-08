@@ -29,6 +29,7 @@ class VirtuosoStorageSpec extends FlatSpec with ShouldMatchers with TestDataCont
 
     val graphName = "test-graph"
 
+    /*
     it should "create a group, add a graph to it, fetch the graph back and delete everything afterwards" in {
         rdfStorage.createGroup(groupName)
         rdfStorage.addGraphToGroup(graphName, testXML, groupName)
@@ -40,4 +41,5 @@ class VirtuosoStorageSpec extends FlatSpec with ShouldMatchers with TestDataCont
         rdfStorage.deleteGraph(graphName)
         rdfStorage.deleteGroup(groupName)
     }
+    */
 }

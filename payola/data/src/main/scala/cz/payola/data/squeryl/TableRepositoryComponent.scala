@@ -30,10 +30,11 @@ trait TableRepositoryComponent
 
         /**
           * Evaluates the specified query and returns only the first object in the result.
+          *
           * @param query The query to evaluate.
           * @return The first object in the result.
           */
-        protected final def evaluateSingleResultQuery[B](query: Query[B]): Option[B] = DataException.wrap {
+        final def evaluateSingleResultQuery[A](query: Query[A]): Option[A] = DataException.wrap {
             transaction {
                 if (query.size > 0) Some(query.single) else None
             }
@@ -45,7 +46,7 @@ trait TableRepositoryComponent
           * @param pagination Optionally specified pagination of the query.
           * @return Returns the result of the query.
           */
-        protected final def evaluateCollectionResultQuery[B](query: Query[B],
+        final def evaluateCollectionResultQuery[A](query: Query[A],
             pagination: Option[PaginationInfo] = None) = DataException.wrap {
 
             // Get all entities or paginate.

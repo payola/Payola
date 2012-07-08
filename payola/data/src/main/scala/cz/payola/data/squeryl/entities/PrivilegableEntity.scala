@@ -39,8 +39,11 @@ trait PrivilegableEntity extends cz.payola.domain.entities.PrivilegableEntity
     */
 
     private def _loadObjectIds(privilegeClass: String, objectClass: String) = {
-        context.privilegeRepository.getPrivilegeObjectIds(id, PrivilegeDbRepresentation.stripClassName(privilegeClass),
-            PrivilegeDbRepresentation.stripClassName(objectClass))
+        context.privilegeRepository.getPrivilegedObjectIds(
+            id,
+            PrivilegeDbRepresentation.stripClassName(privilegeClass),
+            PrivilegeDbRepresentation.stripClassName(objectClass)
+        )
     }
 
     override def grantPrivilege(privilege: PrivilegeType, granter: cz.payola.domain.entities.User) {
