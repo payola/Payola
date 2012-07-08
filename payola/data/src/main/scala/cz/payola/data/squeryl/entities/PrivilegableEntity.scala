@@ -43,7 +43,7 @@ trait PrivilegableEntity extends cz.payola.domain.entities.PrivilegableEntity
         // Call domain method to preserve functionality
         storePrivilege(privilege)
 
-        context.privilegeRepository.persist(PrivilegeDbRepresentation(privilege, granter, this))
+        context.privilegeRepository.persist(PrivilegeDbRepresentation(privilege, granter, this)(context))
     }
 
 

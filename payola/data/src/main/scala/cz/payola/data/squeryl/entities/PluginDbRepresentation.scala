@@ -22,7 +22,7 @@ object PluginDbRepresentation extends EntityConverter[PluginDbRepresentation]
     }
 }
 
-class PluginDbRepresentation(
+class   PluginDbRepresentation(
     override val id: String,
     val name: String,
     val className: String,

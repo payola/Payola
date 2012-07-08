@@ -88,7 +88,7 @@ trait DataContextComponent
         def getAllByOwnerId(ownerId: String, pagination: Option[PaginationInfo] = None) : Seq[A]
     }
 
-    trait PrivilegeRepository[+A]
+    trait PrivilegeRepository[+A] extends Repository[A]
     {
         /**
           * Returns count of privileges in the repository.
@@ -103,19 +103,6 @@ trait DataContextComponent
           * @param objectClass Class of the object.
           */
         def getPrivilegedObjectIds(granteeId: String, privilegeClass: Class[_], objectClass: Class[_]): Seq[String]
-
-        /**
-          * Persists the specified privilege into the repository.
-          * @param entity The entity to persist.
-          */
-        def persist(entity: AnyRef)
-
-        /**
-          * Removes a privilege with the specified ID from the repository.
-          * @param id Id of the privilege to remove.
-          * @return True if the privilege was removed, false otherwise.
-          */
-        def removeById(id: String): Boolean
     }
     
     trait AnalysisRepository[+A] extends Repository[A]

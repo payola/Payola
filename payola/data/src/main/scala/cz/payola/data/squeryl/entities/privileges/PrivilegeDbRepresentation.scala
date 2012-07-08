@@ -11,13 +11,14 @@ import cz.payola.data.squeryl.SquerylDataContextComponent
   */
 object PrivilegeDbRepresentation extends EntityConverter[PrivilegeDbRepresentation] {
 
-    def apply(privilege: entities.Privilege[_ <: Entity], granter: entities.User, grantee: entities.PrivilegableEntity) = {
+    def apply(privilege: entities.Privilege[_ <: Entity], granter: entities.User, grantee: entities.PrivilegableEntity)
+        (implicit context: SquerylDataContextComponent) = {
         new PrivilegeDbRepresentation(
             privilege.id,
             granter.id,
             grantee.id,
             stripClassName(grantee.getClass.toString),
-            stripClassName(privilege.getClass.toString),
+            privilege.getClass.getName,
             privilege.obj.id,
             stripClassName(privilege.obj.getClass.toString)
         )
@@ -37,7 +38,7 @@ object PrivilegeDbRepresentation extends EntityConverter[PrivilegeDbRepresentati
       * @return Returns properly-formatted class name
       */
     def stripClassName(className: String): String = {
-        var n = className.replace("class ", "")
+        val n = className.replace("class ", "")
         val pos = n.lastIndexOf(".")
 
         // Return class name - User, Group, ... (+1 means skip '.')
@@ -65,7 +66,14 @@ class PrivilegeDbRepresentation(
         val objectId: String,
         val objectClass: String
     )
-    extends PersistableEntity
-{
+    (implicit val context: SquerylDataContextComponent)
+    extends PersistableEntity {
 
+    /**
+      * Instantiates represented [[cz.payola.common.entities.Privilege]]
+      * @return Returns instantiated privilege
+      */
+    def toPrivilege: cz.payola.common.entities.Privilege[_] = {
+        context.privilegeRepository.getById(id).get
+    }
 }
