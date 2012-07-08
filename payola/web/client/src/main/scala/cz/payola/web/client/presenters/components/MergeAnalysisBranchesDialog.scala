@@ -5,13 +5,12 @@ import cz.payola.web.client.mvvm.Component
 import s2js.adapters.js.dom.Element
 import s2js.adapters.js.browser.document
 import cz.payola.web.client.mvvm.element._
-import cz.payola.web.client.events._
 import cz.payola.web.client.mvvm.element.extensions.Payola.PluginInstance
-import s2js.runtime.client.scala.collection.mutable._
 import s2js.compiler.javascript
-import s2js.runtime.client.scala.collection.Map
+import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.HashMap
 
-class MergeAnalysisBranchesDialog(instances: ArrayBuffer, inputsCount: Int) extends Component
+class MergeAnalysisBranchesDialog(instances: ArrayBuffer[PluginInstance], inputsCount: Int) extends Component
 {
     val mergeStrategyChosen = new MergeStrategyEvent()
     val outputToInstance = new HashMap[Int, PluginInstance]

@@ -87,7 +87,9 @@ object RPC extends Controller
             val response = dispatcher.dispatchRequest(params, async)
             Ok(response)
         } catch {
-            case e: Exception => raiseError(e)
+            case e: Exception =>
+                println(e)
+                raiseError(e)
         }
     }
 

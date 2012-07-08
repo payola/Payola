@@ -9,33 +9,73 @@ import cz.payola.web.shared.AnalysisBuilderData
 import s2js.compiler.javascript
 import cz.payola.common.entities.Plugin
 import s2js.adapters.js.browser.window
-import s2js.runtime.client.scala.collection.mutable.ArrayBuffer
+import cz.payola.web.client.events.ClickedEventArgs
+import scala.collection.mutable.ArrayBuffer
+import s2js.runtime.client.scala.collection.mutable.HashMap
 
-class AnalysisBuilder(menuHolder: String, pluginsHolder: String)
+class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: String, saveHolder: String)
 {
-    val allPlugins: Seq[Plugin] = AnalysisBuilderData.getPlugins()
+    private val allPlugins: Seq[Plugin] = AnalysisBuilderData.getPlugins()
+    private var lanes = new ArrayBuffer[PluginInstance]
+    private val htmlIdToinstanceId = new HashMap[String, String]
 
-    var lanes = new ArrayBuffer
+    private val menu = document.getElementById(menuHolder)
+    private val pluginsHolderElement = document.getElementById(pluginsHolder)
+    private val nameHolderElement = document.getElementById(nameHolder)
+    private val saveHolderElement = document.getElementById(saveHolder)
 
-    val menu = document.getElementById(menuHolder)
+    private val addPluginLink = new Anchor(List(new Icon(Icon.hdd), new Text(" Add plugin")))
+    private val addPluginLinkLi = new ListItem(List(addPluginLink))
 
-    val pluginsHolderElement = document.getElementById(pluginsHolder)
+    private val addDataSourceLink = new Anchor(List(new Icon(Icon.hdd), new Text(" Add datasource")))
+    private val addDataSourceLinkLi = new ListItem(List(addDataSourceLink))
 
-    val addPluginLink = new Anchor(List(new Icon(Icon.hdd), new Text(" Add plugin")))
+    private val mergeBranches = new Anchor(List(new Icon(Icon.glass), new Text(" Merge branches")))
+    private val mergeBranchesLi = new ListItem(List(mergeBranches))
 
-    val addPluginLinkLi = new ListItem(List(addPluginLink))
+    private val name = new Input("name","",Some("Analysis name"),"span3")
+    name.render(nameHolderElement)
 
-    val addDataSourceLink = new Anchor(List(new Icon(Icon.hdd), new Text(" Add datasource")))
-
-    val addDataSourceLinkLi = new ListItem(List(addDataSourceLink))
-
-    val mergeBranches = new Anchor(List(new Icon(Icon.glass), new Text(" Merge branches")))
-
-    val mergeBranchesLi = new ListItem(List(mergeBranches))
+    private val save = new Button("Save","btn-primary")
+    save.render(saveHolderElement)
 
     addPluginLinkLi.render(menu)
     addDataSourceLinkLi.render(menu)
     mergeBranchesLi.render(menu)
+
+    save.clicked += { eventArgs =>
+        savePluginInstances(lanes)
+        //saveBindings(getBindings())
+        false
+    }
+
+    def saveBindings(bindings: Seq[Tuple2[String, String]]) = {
+
+    }
+
+    def savePluginInstances(instances: Seq[PluginInstance]) : Unit = {
+        var i = 0
+        while (i < instances.size){
+            val instance = instances(i)
+            savePluginInstances(instance.predecessors)
+            val instanceId = AnalysisBuilderData.createInstance(instance.plugin.id, getParamsValues(instance))
+            htmlIdToinstanceId.put(instance.getPluginElement.getAttribute("id"),instanceId)
+
+            i += 1
+        }
+    }
+
+    def getParamsValues(instance: PluginInstance) = {
+        val buff = new ArrayBuffer[String]()
+
+        var i = 0
+        while (i < instance.plugin.parameters.size){
+            buff.append(instance.getParamValue(i))
+            i+=1
+        }
+
+        buff
+    }
 
     addPluginLink.clicked += { event =>
         val dialog = new PluginDialog(allPlugins.filter(_.inputCount == 0))
@@ -50,16 +90,7 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String)
                 false
             }
 
-            instance.deleteButtonClicked += { evt =>
-                lanes -= instance
-                var i = 0
-                while (i < instance.predecessors.size) {
-                    lanes += instance.predecessors(i)
-                    i += 1
-                }
-                instance.destroy()
-                false
-            }
+            instance.deleteButtonClicked += onDeleteClick
 
             dialog.hide
             false
@@ -86,11 +117,13 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String)
 
                 mergeDialog.mergeStrategyChosen += { event: MergeStrategyEventArgs =>
                     val instances = event.target
+
                     var i = 0
-                    val buffer = ArrayBuffer.empty
+                    val buffer = new ArrayBuffer[PluginInstance]()
 
                     while (i < instances.size) {
-                        buffer += instances(i)
+                        buffer.append(instances(i))
+                        instances(i).hideDeleteButton()
                         lanes -= instances(i)
                         i += 1
                     }
@@ -103,16 +136,7 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String)
                         false
                     }
 
-                    mergeInstance.deleteButtonClicked += { evt =>
-                        lanes -= mergeInstance
-                        var i = 0
-                        while (i < mergeInstance.predecessors.size) {
-                            lanes += mergeInstance.predecessors(i)
-                            i += 1
-                        }
-                        mergeInstance.destroy()
-                        false
-                    }
+                    mergeInstance.deleteButtonClicked += onDeleteClick
 
                     buffer.map { instance: Any =>
                         bind(instance.asInstanceOf[PluginInstance], mergeInstance)
@@ -141,6 +165,7 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String)
             val instance = new PluginInstance(evt.target, List(inner))
             lanes.append(instance)
             lanes -= inner
+            inner.hideDeleteButton()
 
             instance.render(pluginsHolderElement)
 
@@ -149,16 +174,7 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String)
                 false
             }
 
-            instance.deleteButtonClicked += { evt =>
-                lanes -= instance
-                var i = 0
-                while (i < instance.predecessors.size) {
-                    lanes += instance.predecessors(i)
-                    i += 1
-                }
-                instance.destroy()
-                false
-            }
+            instance.deleteButtonClicked += onDeleteClick
 
             bind(inner, instance)
 
@@ -167,6 +183,19 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String)
         }
         dialog.render(document.body)
         dialog.show
+    }
+
+    def onDeleteClick = { eventArgs: ClickedEventArgs[PluginInstance] =>
+        val instance = eventArgs.target
+        lanes -= instance
+        var i = 0
+        while (i < instance.predecessors.size) {
+            lanes += instance.predecessors(i)
+            instance.predecessors(i).showDeleteButton()
+            i += 1
+        }
+        instance.destroy()
+        false
     }
 
     @javascript(
@@ -182,4 +211,14 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String)
           jsPlumb.connect({ source:a.getPluginElement(), target:b.getPluginElement() },settings);
         """)
     def bind(a: PluginInstance, b: PluginInstance) = null
+
+    def saveBinding(source: String, target: String) = {
+        val sourceId = htmlIdToinstanceId(source)
+        val targetId = htmlIdToinstanceId(target)
+
+        AnalysisBuilderData.saveBinding(sourceId, targetId)
+    }
+
+    @javascript(""" var connections = jsPlumb.getAllConnections().jsPlumb_DefaultScope; for (var k in connections) { self.saveBinding(connections[k].sourceId,connections[k].targetId); }; """)
+    def saveBindings = {}
 }

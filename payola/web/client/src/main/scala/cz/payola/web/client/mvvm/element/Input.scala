@@ -29,6 +29,7 @@ class Input(val name: String, val value: String, val title: Option[String], val 
     field.setAttribute("type","text")
     field.setAttribute("class", addClass)
     if(title.isDefined) {
+        field.setAttribute("placeholder", title.get)
         field.setAttribute("title", title.get)
     }
     field.value = value

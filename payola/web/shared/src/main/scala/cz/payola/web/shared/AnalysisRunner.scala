@@ -3,12 +3,13 @@ package cz.payola.web.shared
 import cz.payola.domain.entities.analyses.evaluation._
 import cz.payola.data.dao.AnalysisDAO
 import scala.collection.mutable.HashMap
+import s2js.compiler.async
 
 @remote object AnalysisRunner
 {
     val runningEvaluations : HashMap[String, AnalysisEvaluation] = new HashMap[String, AnalysisEvaluation]
 
-    def runAnalysisById(id: String) = {
+    @async def runAnalysisById(id: String)(successCallback: (String => Unit))(failCallback: (Throwable => Unit)) = {
         //TODO: Get AnalysisDAO from datafacade! (JH)
         val analysisOpt = new AnalysisDAO().getById(id)
 
@@ -18,10 +19,10 @@ import scala.collection.mutable.HashMap
 
         runningEvaluations.put(id, analysisOpt.get.evaluate())
 
-        id
+        successCallback(id)
     }
 
-    def getAnalysisProgress(evaluationId: String) : AnalysisProgress = {
+    @async def getAnalysisProgress(evaluationId: String)(successCallback: (AnalysisProgress => Unit))(failCallback: (Throwable => Unit)) = {
 
         val evaluation = runningEvaluations.get(evaluationId).get
         val progress = evaluation.getProgress
@@ -40,6 +41,6 @@ import scala.collection.mutable.HashMap
             case _ => None
         }
 
-        new AnalysisProgress(evaluated, running, errors, progress.value, evaluation.isFinished, graph)
+        successCallback(new AnalysisProgress(evaluated, running, errors, progress.value, evaluation.isFinished, graph))
     }
 }
