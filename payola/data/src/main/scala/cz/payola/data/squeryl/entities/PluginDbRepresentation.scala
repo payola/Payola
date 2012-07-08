@@ -6,30 +6,26 @@ import cz.payola.data.squeryl.entities.plugins._
 import cz.payola.data.squeryl.entities.plugins.parameters._
 import cz.payola.domain.entities.Plugin
 import cz.payola.data.squeryl.SquerylDataContextComponent
+import cz.payola.domain.entities.plugins.concrete.data.PayolaStorage
 
-/**
-  * This objects converts [[cz.payola.domain.entities.Plugin]] to [[cz.payola.data.squeryl.entities.PluginDbRepresentation]]
-  */
 object PluginDbRepresentation extends EntityConverter[PluginDbRepresentation]
 {
     def convert(entity: AnyRef)(implicit context: SquerylDataContextComponent): Option[PluginDbRepresentation] = {
         entity match {
             case p: PluginDbRepresentation => Some(p)
-            case p: cz.payola.domain.entities.Plugin 
-                    => Some(new PluginDbRepresentation(p.id, p.name, pluginClass(p), p.inputCount, p.owner.map(User(_))))
+            case p: Plugin => {
+                val pluginClass = p.getClass.getName
+                Some(new PluginDbRepresentation(p.id, p.name, pluginClass, p.inputCount, p.owner.map(User(_))))
+            }
             case _ => None
         }
-    }
-
-    private def pluginClass(p: Plugin): String = {
-        p.getClass.toString.replace("class ", "")
     }
 }
 
 class PluginDbRepresentation(
     override val id: String,
     val name: String,
-    val pluginClass: String,
+    val className: String,
     val inputCount: Int,
     o: Option[User])
     (implicit val context: SquerylDataContextComponent)
@@ -139,15 +135,22 @@ class PluginDbRepresentation(
       *
       * @return Returns represented plugin.
       */
-    def createPlugin(): Plugin = {
-        // Return properly instantiated Plugin
-        instantiate(pluginClass, name, new java.lang.Integer(inputCount), parameters, id)
-    }
+    def toPlugin: Plugin = {
+        val pluginClass = Class.forName(className)
 
-    private def instantiate(className: String, args: AnyRef*): Plugin = {
-        val clazz = java.lang.Class.forName(className)
-        val constructor = clazz.getConstructors().find(_.getParameterTypes().size == 4).get
+        // Variables dependent on plugin type.
+        val pluginDependsOnContext = pluginClass == classOf[PayolaStorage]
+        val argumentCount = if (pluginDependsOnContext) 5 else 4
+        val additionalArguments = if (pluginDependsOnContext) List(context) else Nil
 
-        constructor.newInstance(args: _*).asInstanceOf[Plugin]
+        // Find the proper constructor.
+        val constructor = pluginClass.getConstructors.find(_.getParameterTypes().size == argumentCount).get
+        val constructorArguments = List(name, new java.lang.Integer(inputCount), parameters, id) ++ additionalArguments
+
+        // Instantiate the plugin.
+        val instance = constructor.newInstance(constructorArguments: _*)
+        val plugin = instance.asInstanceOf[Plugin]
+        plugin.owner = owner
+        plugin
     }
 }

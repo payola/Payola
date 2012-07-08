@@ -31,6 +31,15 @@ abstract class Plugin(
     var _owner: Option[UserType] = None
 
     /**
+      * Sets the owner of the plugin.
+      * @param value The new owner of the plugin.
+      */
+    def owner_=(value: Option[UserType]) {
+        _owner = value
+        super[OptionallyOwnedEntity].checkInvariants()
+    }
+
+    /**
       * Returns a new instance of the plugin with all parameter instances set to default values.
       */
     def createInstance(): PluginInstance = {

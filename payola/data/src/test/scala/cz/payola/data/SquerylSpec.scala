@@ -73,14 +73,14 @@ class SquerylSpec extends FlatSpec with ShouldMatchers with TestDataContextCompo
         assert(u.get.password == user.password)
         assert(u.get.email == user.email)
 
-        assert(userRepository.findByUsername("h")(0).id == u2.id)
-        assert(userRepository.findByUsername("J")(0).id == u3.id)
-        assert(userRepository.findByUsername("K")(0).id == u4.id)
-        assert(userRepository.findByUsername("H").size == 3)
-        assert(userRepository.findByUsername(user.name)(0).id == u1.id)
-        assert(userRepository.findByUsername("invalid name").size == 0)
-        assert(userRepository.getUserByCredentials(user.name, user.password).get.id == u1.id)
-        assert(userRepository.getUserByCredentials("invalid", "credientals") == None)
+        assert(userRepository.getAllWithNameLike("h")(0).id == u2.id)
+        assert(userRepository.getAllWithNameLike("J")(0).id == u3.id)
+        assert(userRepository.getAllWithNameLike("K")(0).id == u4.id)
+        assert(userRepository.getAllWithNameLike("H").size == 3)
+        assert(userRepository.getAllWithNameLike(user.name)(0).id == u1.id)
+        assert(userRepository.getAllWithNameLike("invalid name").size == 0)
+        assert(userRepository.getByCredentials(user.name, user.password).get.id == u1.id)
+        assert(userRepository.getByCredentials("invalid", "credientals") == None)
     }
 
     "Groups" should "be persisted, loaded and managed by GroupRepository" in {

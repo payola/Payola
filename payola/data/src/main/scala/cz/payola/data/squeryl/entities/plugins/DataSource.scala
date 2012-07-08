@@ -61,7 +61,7 @@ class DataSource(
 
     override def plugin = {
         if (pluginId != null) {
-            evaluateCollection(_pluginQuery)(0).createPlugin()
+            evaluateCollection(_pluginQuery)(0).toPlugin
         }
         else {
             null

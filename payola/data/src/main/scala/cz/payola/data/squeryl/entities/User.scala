@@ -107,7 +107,7 @@ class User(override val id: String, name: String, pwd: String, mail: String)
 
     override def ownedPlugins: immutable.Seq[PluginType] = {
         if (!_ownedPluginsLoaded) {
-            evaluateCollection(_ownedPluginsQuery).map(p => p.createPlugin()).map(p =>
+            evaluateCollection(_ownedPluginsQuery).map(p => p.toPlugin).map(p =>
                 if (!super.ownedPlugins.contains(p)) {
                     super.storeOwnedPlugin(p)
                 }

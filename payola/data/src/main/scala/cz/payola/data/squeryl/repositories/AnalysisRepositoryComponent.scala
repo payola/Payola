@@ -12,12 +12,13 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
     self: SquerylDataContextComponent =>
 
     lazy val analysisRepository = new TableRepository[Analysis](schema.analyses, Analysis)
+        with AnalysisRepository[Analysis]
     {
-        def getTopAnalyses(pagination: Option[PaginationInfo] = Some(new PaginationInfo(0, 10))): collection.Seq[Analysis] = {
+        def getTop(pagination: Option[PaginationInfo] = Some(new PaginationInfo(0, 10))): collection.Seq[Analysis] = {
             getTopAnalyses(None, pagination)
         }
 
-        def getTopAnalysesByUser(ownerId: String, pagination: Option[PaginationInfo] = Some(new PaginationInfo(0, 10))): collection.Seq[Analysis] = {
+        def getTopByOwner(ownerId: String, pagination: Option[PaginationInfo] = Some(new PaginationInfo(0, 10))): collection.Seq[Analysis] = {
             getTopAnalyses(Some(ownerId), pagination)
         }
 
@@ -34,7 +35,7 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
             evaluateCollectionResultQuery(query, pagination)
         }
 
-        def getPublicAnalysesByOwner(ownerId: String, pagination: Option[PaginationInfo] = None) = {
+        def getPublicByOwner(ownerId: String, pagination: Option[PaginationInfo] = None) = {
             val query = table.where(a => a.ownerId.getOrElse("") === ownerId and a.isPublic === true)
 
             evaluateCollectionResultQuery(query, pagination)

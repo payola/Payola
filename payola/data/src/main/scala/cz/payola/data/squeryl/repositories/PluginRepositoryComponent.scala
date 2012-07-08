@@ -12,31 +12,33 @@ trait PluginRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
 
-    lazy val pluginRepository = new Repository[Plugin]
+    lazy val pluginRepository = new PluginRepository[Plugin]
     {
-        private val _repository = new TableRepository[PluginDbRepresentation](schema.plugins, PluginDbRepresentation)
+        private val representationRepository = new TableRepository[PluginDbRepresentation](schema.plugins,
+            PluginDbRepresentation)
 
-        def getById(id: String): Option[Plugin] = _repository.getById(id).map(_.createPlugin())
+        def getById(id: String): Option[Plugin] = representationRepository.getById(id).map(_.toPlugin)
 
-        def removeById(id: String): Boolean = _repository.removeById(id)
+        def removeById(id: String): Boolean = representationRepository.removeById(id)
 
         def getAll(pagination: Option[PaginationInfo] = None): Seq[Plugin] = {
-            _repository.getAll(pagination).map(_.createPlugin())
+            representationRepository.getAll(pagination).map(_.toPlugin)
         }
 
         def persist(entity: AnyRef): Plugin = {
-            // First persist plugin ...
-            val pluginDb = _repository.persist(entity)
-
-            // ... then assign parameters ...
-            entity.asInstanceOf[Plugin].parameters.map(par => pluginDb.associateParameter(Parameter(par)))
-
-            // ... and return plugin
-            entity.asInstanceOf[Plugin]
+            entity match {
+                case plugin: Plugin => {
+                    // Persist the plugin and its parameters.
+                    val representation = representationRepository.persist(entity)
+                    plugin.parameters.map(parameter => representation.associateParameter(Parameter(parameter)))
+                    plugin
+                }
+                case _ => throw new DataException("Couldn't convert the entity to a plugin.")
+            }
         }
 
         def getByName(pluginName: String): Option[Plugin] = {
-            _repository.evaluateSingleResultQuery(_repository.table.where(p => p.name === pluginName)).map(_.createPlugin())
+            representationRepository.evaluateSingleResultQuery(representationRepository.table.where(p => p.name === pluginName)).map(_.toPlugin)
         }
     }
 }

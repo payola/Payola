@@ -9,15 +9,15 @@ trait DataContextComponent
 {
     self: RdfStorageComponent =>
 
-    val userRepository: Repository[User]
+    val userRepository: UserRepository[User]
 
-    val groupRepository: Repository[Group]
+    val groupRepository: GroupRepository[Group]
 
     val privilegeRepository: PrivilegeRepository[Privilege[_]]
 
-    val analysisRepository: Repository[Analysis]
+    val analysisRepository: AnalysisRepository[Analysis]
 
-    val pluginRepository: Repository[Plugin]
+    val pluginRepository: PluginRepository[Plugin]
 
     val pluginInstanceRepository: Repository[PluginInstance]
 
@@ -28,9 +28,8 @@ trait DataContextComponent
     trait Repository[+A]
     {
         /**
-          * Searches the repository for an entity with the specified ID.
+          * Returns an entity with the specified ID.
           * @param id Id of an entity to search for.
-          * @return The entity.
           */
         def getById(id: String): Option[A]
 
@@ -44,7 +43,6 @@ trait DataContextComponent
         /**
           * Returns all entities from the repository.
           * @param pagination Optionally specified pagination.
-          * @return Returns all specified entities.
           */
         def getAll(pagination: Option[PaginationInfo] = None): Seq[A]
 
@@ -57,127 +55,107 @@ trait DataContextComponent
         def persist(entity: AnyRef): A
     }
 
-    trait PrivilegeRepository[+A] extends Repository[A]
+    trait UserRepository[+A] extends Repository[A]
     {
         /**
-          * Loads [[cz.payola.common.entities.Privilege]] by privileged object class and privileged grantee
-          *
-          * @param granteeId - id of [[cz.payola.common.entities.PrivilegableEntity]] that has privilege
-          * @param privilegeClass - stripped class name of [[cz.payola.common.entities.Privilege]] assigned to grantee Entity
-          * @param objectClass - stripped class name of objects that are subjects of the Privilege
-          *
-          * @see [[cz.payola.data.squeryl.entities.privileges.PrivilegeDbRepresentation.stripClassName()]] method          *
-          *
-          * @return Returns list of Privileges
+          * Returns an user with the specified name.
+          * @param name Name of an user to search for.
           */
-        def getPrivilegedObjectIds(granteeId: String, privilegeClass: String, objectClass: String): Seq[String]
+        def getByName(name: String): Option[A]
 
         /**
-          *
-          * @return Returns number of privileges in database
+          * Returns an user with the specified name and password.
+          * @param name Name of the user to search for.
+          * @param password Password of the user to search for.
           */
-        def getPrivilegesCount(): Int
+        def getByCredentials(name: String, password: String): Option[A]
 
+        /**
+          * Returns all users whose names contain the specified name part as a substring.
+          * @param namePart Name part the users names must contain.
+          * @param pagination Optionally specified pagination of the result.
+          */
+        def getAllWithNameLike(namePart: String, pagination: Option[PaginationInfo] = None): Seq[A]
+    }
+
+    trait GroupRepository[+A] extends Repository[A]
+    {
+        /**
+          * Returns for all groups with the specified owner ID.
+          * @param ownerId ID of the group owner.
+          * @param pagination Optionally specified pagination of the result.
+          */
+        def getAllByOwnerId(ownerId: String, pagination: Option[PaginationInfo] = None) : Seq[A]
+    }
+
+    trait PrivilegeRepository[+A]
+    {
+        /**
+          * Returns count of privileges in the repository.
+          */
+        def getCount: Int
+
+        /**
+          * Returns IDs of privileged objects, that are granted to the specified grantee via privileges of the specified
+          * class.
+          * @param granteeId ID of the privilege grantee.
+          * @param privilegeClass Class of the privilege.
+          * @param objectClass Class of the object.
+          */
+        def getPrivilegedObjectIds(granteeId: String, privilegeClass: Class[_], objectClass: Class[_]): Seq[String]
+
+        /**
+          * Persists the specified privilege into the repository.
+          * @param entity The entity to persist.
+          */
+        def persist(entity: AnyRef)
+
+        /**
+          * Removes a privilege with the specified ID from the repository.
+          * @param id Id of the privilege to remove.
+          * @return True if the privilege was removed, false otherwise.
+          */
+        def removeById(id: String): Boolean
     }
     
-    trait AnalysisRepositoryComponent[+A] extends Repository[A]
+    trait AnalysisRepository[+A] extends Repository[A]
     {
         /**
-          * Returns TOP analyses from all users.
-          *
-          * @param pagination - Optionally specified pagination of analyses
-          * @return Returns collection of TOP analyses
+          * Returns top analyses in the repository.
+          * @param pagination Optionally specified pagination of the result.
           */
-        def getTopAnalyses(pagination: Option[PaginationInfo] = Some(new PaginationInfo(0, 10))): collection.Seq[A]
+        def getTop(pagination: Option[PaginationInfo] = Some(PaginationInfo(0, 10))): Seq[A]
 
         /**
-          * Returns TOP analyses from specified user.
-          *
-          * @param ownerId - id of analyses owner
-          * @param pagination - Optionally specified pagination of analyses
-          * @return Returns collection of TOP analyses
+          * Returns top analyses owned by the specified owner.
+          * @param ownerId ID of the analysis owner.
+          * @param pagination Optionally specified pagination of the result.
           */
-        def getTopAnalysesByUser(ownerId: String, pagination: Option[PaginationInfo] = Some(new PaginationInfo(0, 10))): collection.Seq[A]
+        def getTopByOwner(ownerId: String, pagination: Option[PaginationInfo] = Some(PaginationInfo(0, 10))): Seq[A]
 
         /**
-          * Returns public analyses of specified owner
-          *
-          * @param ownerId - id of analyses owner
-          * @param pagination - Optionally specified pagination
-          * @return Returns collection of analyses
+          * Returns public analyses owned by the specified owner.
+          * @param ownerId ID of the analysis owner.
+          * @param pagination Optionally specified pagination of the result.
           */
-        def getPublicAnalysesByOwner(ownerId: String, pagination: Option[PaginationInfo] = None)
+        def getPublicByOwner(ownerId: String, pagination: Option[PaginationInfo] = None): Seq[A]
     }
 
-    trait DataSourceRepositoryComponent[+A] extends Repository[A]
+    trait PluginRepository[+A] extends Repository[A]
     {
         /**
-          * Returns collection of public [[cz.payola.data.squeryl.entities.plugins.DataSource]].
-          * Result may be paginated.
-          *
-          * @param pagination - Optionally specified pagination
-          * @return Returns collection of public [[cz.payola.data.squeryl.entities.plugins.DataSource]]
+          * Returns a plugin with the specified name.
+          * @param name Name of the plugin to search for.
           */
-        def getPublicDataSources(pagination: Option[PaginationInfo] = None): Seq[A]
-
+        def getByName(name: String): Option[Plugin]
     }
 
-    trait GroupRepositoryComponent[+A] extends Repository[A]
+    trait DataSourceRepository[+A] extends Repository[A]
     {
         /**
-          * Returns [[cz.payola.data.squeryl.entities.Group]]s owned by specified owner. Result may be paginated
-          *
-          * @param ownerId - id of groups owner
-          * @param pagination - Optionally specified pagination
-          * @return Returns collection of [[cz.payola.data.squeryl.entities.Group]]s
+          * Returns all public data sources.
+          * @param pagination Optionally specified pagination of the result.
           */
-        def getByOwnerId(ownerId: String, pagination: Option[PaginationInfo] = None) : Seq[A]
+        def getPublic(pagination: Option[PaginationInfo] = None): Seq[A]
     }
-
-    trait UserRepositoryComponent[A] extends Repository[A]
-    {
-        /**
-          * Searches for all [[cz.payola.data.squeryl.entities.User]]s, whose username CONTAINS specified name.
-          * Result may be paginated.
-          *
-          * @param name - username (or just its part) that must appear in users username
-          * @param pagination - Optionally specified pagination of result
-          * @return Return collection of [[cz.payola.data.squeryl.entities.User]]s
-          */
-        def findByUsername(name: String, pagination: Option[PaginationInfo] = None): Seq[A]
-
-        /**
-          * Finds [[cz.payola.data.squeryl.entities.User]] with specified username.
-          *
-          * @param username - username of user to find
-          * @return Returns Option([[cz.payola.data.squeryl.entities.User]]) if found, None otherwise
-          */
-        def getUserByUsername(username: String): Option[A]
-
-        /**
-          * Finds [[cz.payola.data.squeryl.entities.User]] with specified username and password.
-          *
-          * @param username - username of user
-          * @param password - encrypted password of user
-          * @return Returns Option([[cz.payola.data.squeryl.entities.User]]) if found, None otherwise
-          */
-        def getUserByCredentials(username: String, password: String): Option[A]
-
-    }
-
-    trait PluginRepositoryComponent[A] extends Repository[A]
-    {
-        /**
-          * Returns [[cz.payola.domain.entities.Plugin]] by its name.
-          *
-          * @param pluginName - name of a plugin to search
-          * @return Return Some([[cz.payola.domain.entities.Plugin]]) if found, None otherwise
-          */
-        def getByName(pluginName: String): Option[A]
-    }
-    
-    trait PluginInstanceBindingRepositoryComponent[A] extends Repository[A] {}
-
-    trait PluginInstanceRepositoryComponent[A] extends Repository[A] {}
-
 }

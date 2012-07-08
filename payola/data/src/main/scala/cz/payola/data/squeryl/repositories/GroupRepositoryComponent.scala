@@ -10,9 +10,9 @@ trait GroupRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
 
-    lazy val groupRepository = new TableRepository[Group](schema.groups, Group)
+    lazy val groupRepository = new TableRepository[Group](schema.groups, Group) with GroupRepository[Group]
     {
-        def getByOwnerId(ownerId: String, pagination: Option[PaginationInfo] = None) : Seq[Group] = {
+        def getAllByOwnerId(ownerId: String, pagination: Option[PaginationInfo] = None) : Seq[Group] = {
             val query = from(table)(g =>
                 where (g.ownerId.getOrElse("") === ownerId)
                 select (g)

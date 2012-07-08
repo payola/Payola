@@ -5,6 +5,7 @@ import cz.payola.data.squeryl.entities.privileges.PrivilegeDbRepresentation
 import cz.payola.data.squeryl.repositories._
 import cz.payola.domain.entities.privileges._
 import cz.payola.data.squeryl.SquerylDataContextComponent
+import cz.payola.domain.entities.plugins.DataSource
 
 /**
   * An entity that may be granted privileges.
@@ -16,17 +17,13 @@ trait PrivilegableEntity extends cz.payola.domain.entities.PrivilegableEntity
     val context: SquerylDataContextComponent
 
     override def grantedAnalyses: immutable.Seq[cz.payola.common.entities.Analysis] = {
-        _loadObjectIds(
-            classOf[AccessAnalysisPrivilege].toString,
-            classOf[cz.payola.common.entities.Analysis].toString
-        ).flatMap(context.analysisRepository.getById(_)).toList
+        _loadObjectIds(classOf[AccessAnalysisPrivilege], classOf[Analysis]).flatMap(
+            context.analysisRepository.getById(_)).toList
     }
 
     override def grantedDataSources: immutable.Seq[cz.payola.common.entities.plugins.DataSource] = {
-        _loadObjectIds(
-            classOf[AccessDataSourcePrivilege].toString,
-            classOf[cz.payola.common.entities.plugins.DataSource].toString
-        ).flatMap(context.dataSourceRepository.getById(_)).toList
+        _loadObjectIds(classOf[AccessDataSourcePrivilege], classOf[DataSource]).flatMap(
+            context.dataSourceRepository.getById(_)).toList
     }
 
     /* TODO: customization will be implement later
@@ -38,12 +35,8 @@ trait PrivilegableEntity extends cz.payola.domain.entities.PrivilegableEntity
     }
     */
 
-    private def _loadObjectIds(privilegeClass: String, objectClass: String) = {
-        context.privilegeRepository.getPrivilegedObjectIds(
-            id,
-            PrivilegeDbRepresentation.stripClassName(privilegeClass),
-            PrivilegeDbRepresentation.stripClassName(objectClass)
-        )
+    private def _loadObjectIds(privilegeClass: Class[_], objectClass: Class[_]) = {
+        context.privilegeRepository.getPrivilegedObjectIds(id, privilegeClass, objectClass)
     }
 
     override def grantPrivilege(privilege: PrivilegeType, granter: cz.payola.domain.entities.User) {

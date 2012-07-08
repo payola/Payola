@@ -3,9 +3,7 @@ package cz.payola.data.squeryl.repositories
 import org.squeryl.PrimitiveTypeMode._
 import cz.payola.data.squeryl._
 import cz.payola.domain.entities.Privilege
-import cz.payola.data.PaginationInfo
 import cz.payola.data.squeryl.entities.privileges.PrivilegeDbRepresentation
-import cz.payola.common.Entity
 
 trait PrivilegeRepositoryComponent extends TableRepositoryComponent
 {
@@ -15,28 +13,24 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
     {
         private val _repository = new TableRepository[PrivilegeDbRepresentation](schema.privileges, PrivilegeDbRepresentation)
 
-        def getById(id: String): Option[Privilege[_]] = None
-
-        def removeById(id: String): Boolean = _repository.removeById(id)
-
-        def getAll(pagination: Option[PaginationInfo] = None): Seq[Privilege[_]] = Nil
-
-        def persist(entity: AnyRef): Privilege[_] =  {
+        def persist(entity: AnyRef) {
             _repository.persist(entity)
-
-            // TODO: no way to instantiate Privilege from its Db representation
-            null
         }
 
-        def getPrivilegedObjectIds(granteeId: String, privilegeClass: String, objectClass: String): Seq[String] = {
+        def removeById(id: String) = _repository.removeById(id)
+
+        def getPrivilegedObjectIds(granteeId: String, privilegeClass: Class[_], objectClass: Class[_]): Seq[String] = {
             val query = from(_repository.table)(p =>
-                where(p.granteeId === granteeId and p.privilegeClass === privilegeClass and p.objectClass === objectClass)
+                where(p.granteeId === granteeId and
+                    p.privilegeClass === PrivilegeDbRepresentation.stripClassName(privilegeClass.toString) and
+                    p.objectClass === PrivilegeDbRepresentation.stripClassName(objectClass.toString)
+                )
                 select(p.objectId)
             )
 
             _repository.evaluateCollectionResultQuery(query)
         }
 
-        def getPrivilegesCount(): Int = _repository.getAll().size
+        def getCount: Int = _repository.getAll().size
     }
 }
