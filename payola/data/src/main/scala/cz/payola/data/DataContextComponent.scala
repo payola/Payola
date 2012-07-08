@@ -72,6 +72,12 @@ trait DataContextComponent
           */
         def getPrivilegedObjectIds(granteeId: String, privilegeClass: String, objectClass: String): Seq[String]
 
+        /**
+          *
+          * @return Returns number of privileges in database
+          */
+        def getPrivilegesCount(): Int
+
     }
     
     trait AnalysisRepositoryComponent[+A] extends Repository[A]

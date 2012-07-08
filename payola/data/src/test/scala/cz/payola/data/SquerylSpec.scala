@@ -49,6 +49,10 @@ class SquerylSpec extends FlatSpec with ShouldMatchers with TestDataContextCompo
     }
 
     "Users" should "be persited, loaded and managed by UserRepository" in {
+        persistUsers
+    }
+
+    private def persistUsers {
         val user = userRepository.persist(u1)
         assert(userRepository.persist(u2) != null)
         assert(userRepository.persist(u3) != null)
@@ -80,6 +84,10 @@ class SquerylSpec extends FlatSpec with ShouldMatchers with TestDataContextCompo
     }
 
     "Groups" should "be persisted, loaded and managed by GroupRepository" in {
+        persistGroups
+    }
+
+    private def persistGroups {
         val group1 = groupRepository.persist(g1)
         val group2 = groupRepository.persist(g2)
         val group3 = groupRepository.persist(g3)
@@ -106,7 +114,11 @@ class SquerylSpec extends FlatSpec with ShouldMatchers with TestDataContextCompo
             assert(user.ownedGroups.size == 2)
     }
 
-    "Group" should "maintain members collection" in {
+    "Groups" should "maintain members collection" in {
+        persistGroupMemberships
+    }
+
+    private def persistGroupMemberships {
         val group1 = groupRepository.getById(g1.id).get
         val group2 = groupRepository.getById(g2.id).get
         val group3 = groupRepository.getById(g3.id).get
@@ -127,6 +139,10 @@ class SquerylSpec extends FlatSpec with ShouldMatchers with TestDataContextCompo
     }
 
     "Plugins" should "be persisted with their parameters by PluginRepository" in {
+        persistPlugins
+    }
+
+    private def persistPlugins {
         for (p <- plugins) {
             val p1 = pluginRepository.persist(p)
                 assert(p1.id == p.id)
@@ -148,120 +164,12 @@ class SquerylSpec extends FlatSpec with ShouldMatchers with TestDataContextCompo
                 assert(p.parameters.find(_.id == param.id).get.defaultValue == param.defaultValue)
             }
         }
+
+        assert(pluginRepository.getAll().size == plugins.size)
     }
 
     "Analysis" should "be stored/updated/loaded by AnalysisRepository" in {
         persistAnalyses
-    }
-
-    "DataSources" should "be updated/stored by DataSourceRepository" in {
-        println("Persisting datasources")
-
-        val ds1 = new DataSource("Cities", None, sparqlEndpointPlugin, immutable.Seq(
-            sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter]
-                .createValue("http://dbpedia.org/ontology/Country")))
-        val ds2 = new DataSource("Countries", Some(u2), sparqlEndpointPlugin, immutable.Seq(
-            sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter]
-                .createValue("http://dbpedia.org/ontology/City")))
-        val ds3 = new DataSource("Countries2", Some(u3), sparqlEndpointPlugin, immutable.Seq(
-            sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter]
-                .createValue("http://dbpedia.org/ontology/City")))
-
-        ds1.isPublic_=(true)
-        ds2.isPublic_=(true)
-        ds3.isPublic_=(true)
-
-        val ds1_db = dataSourceRepository.persist(ds1)
-        val ds2_db = dataSourceRepository.persist(ds2)
-        val ds3_db = dataSourceRepository.persist(ds3)
-
-            assert(ds1.id == ds1_db.id)
-            assert(ds2.id == ds2_db.id)
-            assert(ds3.id == ds3_db.id)
-
-            assert(ds1.parameterValues.size == ds1_db.parameterValues.size)
-            assert(ds2.parameterValues.size == ds2_db.parameterValues.size)
-            assert(ds3.parameterValues.size == ds3_db.parameterValues.size)
-
-            assert(u2.id == ds2_db.owner.get.id)
-            assert(u3.id == ds3_db.owner.get.id)
-
-        //println("DSs: " + dataSourceRepository.getPublicDataSources().size)
-            assert(dataSourceRepository.getPublicDataSources().size == 0)
-    }
-
-    "Privileges" should "be granted and persisted properly" in {
-        val a1 = analysisRepository.getAll()(0)
-        val ds1 = dataSourceRepository.getAll()(0)
-        val ds2 = dataSourceRepository.getAll()(1)
-        val user1 = userRepository.getById(u1.id).get
-        val user2 = userRepository.getById(u2.id).get
-        val group1 = groupRepository.getById(g1.id).get
-
-        val accessA1 = new AccessAnalysisPrivilege(a1)
-        val accessA2 = new AccessAnalysisPrivilege(a1)
-        val accessDS1 = new AccessDataSourcePrivilege(ds1)
-        val accessDS2 = new AccessDataSourcePrivilege(ds2)
-
-        user2.grantPrivilege(accessA1, user1)
-        user1.grantPrivilege(accessDS2, user2)
-        group1.grantPrivilege(accessDS1, user1)
-        group1.grantPrivilege(accessA2, user2)
-
-        //TODO: what will be returned? assert(privilegeRepository.getAll().size == 4)
-        assert(user1.grantedDataSources.size == 1)
-        assert(user2.grantedAnalyses.size == 1)
-        assert(group1.grantedDataSources.size == 1)
-        assert(group1.grantedAnalyses.size == 1)
-    }
-
-    "Pagionation" should "work" in {
-        assert(userRepository.getAll(Some(new PaginationInfo(2,1))).size == 1)
-        assert(userRepository.getAll(Some(new PaginationInfo(2,4))).size == 3)
-        assert(userRepository.getAll(Some(new PaginationInfo(5,1))).size == 0)
-        assert(userRepository.getAll(Some(new PaginationInfo(4,0))).size == 0)
-
-        assert(groupRepository.getAll().size == 5)
-        assert(groupRepository.getAll(Some(new PaginationInfo(1, 2))).size == 2)
-        assert(groupRepository.getAll(Some(new PaginationInfo(2, 5))).size == 3)
-        assert(groupRepository.getAll(Some(new PaginationInfo(5, 1))).size == 0)
-        assert(groupRepository.getAll(Some(new PaginationInfo(4, 0))).size == 0)
-    }
-
-    "Entities" should "be with removed their related entities" in {
-        var analysisCount = analysisRepository.getAll().size
-        var pluginInstancesCount = pluginInstanceRepository.getAll().size
-        var pluginsCount = pluginRepository.getAll().size
-
-        // Create another analysis in DB
-        persistAnalyses
-
-        assert(analysisRepository.getAll().size == analysisCount + 1)
-        assert(pluginInstanceRepository.getAll().size == pluginInstancesCount * 2)
-        assert(pluginRepository.getAll().size == pluginsCount)
-
-        // Remove one analysis
-        assert(analysisRepository.removeById(analysisRepository.getAll()(0).id) == true)
-
-        // One analysis and half of plugin instances are gone
-        assert(analysisRepository.getAll().size == analysisCount)
-        assert(pluginInstanceRepository.getAll().size == pluginInstancesCount)
-        assert(pluginRepository.getAll().size == pluginsCount)
-
-        val analysis = analysisRepository.getAll()(0)
-
-        // Remove all plugins
-        for (p <- plugins) {
-            assert(pluginRepository.removeById(p.id) == true)
-        }
-
-        // Only (empty) analysis is left
-        assert(analysisRepository.getAll().size == analysisCount)
-        assert(pluginInstanceRepository.getAll().size == 0)
-        assert(pluginRepository.getAll().size == 0)
-
-        assert(analysis.pluginInstances.size == 0)
-        assert(analysis.pluginInstanceBindings.size == 0)
     }
 
     private def persistAnalyses {
@@ -364,5 +272,132 @@ class SquerylSpec extends FlatSpec with ShouldMatchers with TestDataContextCompo
                 assert(pi.parameterValues.find(_.id == paramValue.id).get.value == paramValue.value)
             }
         }
+    }
+
+    "DataSources" should "be updated/stored by DataSourceRepository" in {
+        persistDataSources
+    }
+
+    private def persistDataSources {
+        println("Persisting datasources")
+
+        val ds1 = new DataSource("Cities", None, sparqlEndpointPlugin, immutable.Seq(
+            sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter]
+                .createValue("http://dbpedia.org/ontology/Country")))
+        val ds2 = new DataSource("Countries", Some(u2), sparqlEndpointPlugin, immutable.Seq(
+            sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter]
+                .createValue("http://dbpedia.org/ontology/City")))
+        val ds3 = new DataSource("Countries2", Some(u3), sparqlEndpointPlugin, immutable.Seq(
+            sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter]
+                .createValue("http://dbpedia.org/ontology/City")))
+
+        ds1.isPublic_=(true)
+        ds2.isPublic_=(true)
+        ds3.isPublic_=(true)
+
+        val ds1_db = dataSourceRepository.persist(ds1)
+        val ds2_db = dataSourceRepository.persist(ds2)
+        val ds3_db = dataSourceRepository.persist(ds3)
+
+            assert(ds1.id == ds1_db.id)
+            assert(ds2.id == ds2_db.id)
+            assert(ds3.id == ds3_db.id)
+
+            assert(ds1.parameterValues.size == ds1_db.parameterValues.size)
+            assert(ds2.parameterValues.size == ds2_db.parameterValues.size)
+            assert(ds3.parameterValues.size == ds3_db.parameterValues.size)
+
+            assert(u2.id == ds2_db.owner.get.id)
+            assert(u3.id == ds3_db.owner.get.id)
+
+        //println("DSs: " + dataSourceRepository.getPublicDataSources().size)
+            assert(dataSourceRepository.getPublicDataSources().size == 0)
+            assert(dataSourceRepository.getAll().size == 3)
+    }
+
+    "Privileges" should "be granted and persisted properly" in {
+        persistPrivileges
+    }
+
+    private def persistPrivileges {
+        val a1 = analysisRepository.getAll()(0)
+        val ds1 = dataSourceRepository.getAll()(0)
+        val ds2 = dataSourceRepository.getAll()(1)
+        val user1 = userRepository.getById(u1.id).get
+        val user2 = userRepository.getById(u2.id).get
+        val group1 = groupRepository.getById(g1.id).get
+
+        val accessA1 = new AccessAnalysisPrivilege(a1)
+        val accessA2 = new AccessAnalysisPrivilege(a1)
+        val accessDS1 = new AccessDataSourcePrivilege(ds1)
+        val accessDS2 = new AccessDataSourcePrivilege(ds2)
+
+        user2.grantPrivilege(accessA1, user1)
+        user1.grantPrivilege(accessDS2, user2)
+        group1.grantPrivilege(accessDS1, user1)
+        group1.grantPrivilege(accessA2, user2)
+
+        //TODO: assert(privilegeRepository.getPrivilegesCount() == 4)
+        assert(user1.grantedDataSources.size == 1)
+        assert(user2.grantedAnalyses.size == 1)
+        assert(group1.grantedDataSources.size == 1)
+        assert(group1.grantedAnalyses.size == 1)
+    }
+
+    "Pagionation" should "work" in {
+        testPagination
+    }
+
+    private def testPagination {
+        assert(userRepository.getAll(Some(new PaginationInfo(2,1))).size == 1)
+        assert(userRepository.getAll(Some(new PaginationInfo(2,4))).size == 3)
+        assert(userRepository.getAll(Some(new PaginationInfo(5,1))).size == 0)
+        assert(userRepository.getAll(Some(new PaginationInfo(4,0))).size == 0)
+
+        assert(groupRepository.getAll().size == 5)
+        assert(groupRepository.getAll(Some(new PaginationInfo(1, 2))).size == 2)
+        assert(groupRepository.getAll(Some(new PaginationInfo(2, 5))).size == 3)
+        assert(groupRepository.getAll(Some(new PaginationInfo(5, 1))).size == 0)
+        assert(groupRepository.getAll(Some(new PaginationInfo(4, 0))).size == 0)
+    }
+
+    "Entities" should "be with removed their related entities" in {
+        testCascadeDeletes
+    }
+
+    private def testCascadeDeletes {
+        val analysisCount = analysisRepository.getAll().size
+        val pluginInstancesCount = pluginInstanceRepository.getAll().size
+        val pluginsCount = pluginRepository.getAll().size
+
+        // Create another analysis in DB
+        persistAnalyses
+
+        assert(analysisRepository.getAll().size == analysisCount + 1)
+        assert(pluginInstanceRepository.getAll().size == pluginInstancesCount * 2)
+        assert(pluginRepository.getAll().size == pluginsCount)
+
+        // Remove one analysis
+        assert(analysisRepository.removeById(analysisRepository.getAll()(0).id) == true)
+
+        // One analysis and half of plugin instances are gone
+        assert(analysisRepository.getAll().size == analysisCount)
+        assert(pluginInstanceRepository.getAll().size == pluginInstancesCount)
+        assert(pluginRepository.getAll().size == pluginsCount)
+
+        val analysis = analysisRepository.getAll()(0)
+
+        // Remove all plugins
+        for (p <- plugins) {
+            assert(pluginRepository.removeById(p.id) == true)
+        }
+
+        // Only (empty) analysis is left
+        assert(analysisRepository.getAll().size == analysisCount)
+        assert(pluginInstanceRepository.getAll().size == 0)
+        assert(pluginRepository.getAll().size == 0)
+
+        assert(analysis.pluginInstances.size == 0)
+        assert(analysis.pluginInstanceBindings.size == 0)
     }
 }

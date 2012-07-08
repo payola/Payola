@@ -36,5 +36,7 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
 
             _repository.evaluateCollectionResultQuery(query)
         }
+
+        def getPrivilegesCount(): Int = _repository.getAll().size
     }
 }
