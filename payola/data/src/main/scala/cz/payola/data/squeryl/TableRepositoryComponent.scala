@@ -50,6 +50,11 @@ trait TableRepositoryComponent
             convertedEntity
         }
 
+        /**
+          * Executes the specified query and returns its results.
+          * @param query The query to execute.
+          * @return Results of the query.
+          */
         protected def select(query: Query[B]): Seq[A] = DataException.wrap {
             val results = transaction {
                 query.toList
@@ -57,21 +62,44 @@ trait TableRepositoryComponent
             processSelectResults(results)
         }
 
+        /**
+          * Executes the select query with possible id filter.
+          * @param id If defined, only entities with the specified id are selected. Otherwise all entities are selected.
+          * @return The selected entities.
+          */
         protected def select(id: Option[String]): Seq[A] = {
             select(getSelectQuery(id))
         }
 
+        /**
+          * Returns a query that should be used when selecting entities from the database.
+          * @param id If defined, only entities with the specified id are selected. Otherwise all entities are selected.
+          * @return The select query.
+          */
         protected def getSelectQuery(id: Option[String]): Query[B]
 
+        /**
+          * Processes results of the select query.
+          * @param results The results to process.
+          * @return Entities based on the selectcion results.
+          */
         protected def processSelectResults(results: Seq[B]): Seq[A]
 
-        protected def condition[C](option: Option[C], condition: C => LogicalBoolean): LogicalBoolean = {
-            option.map(condition).getOrElse(1 === 1)
+        /**
+          * Creates an expression that can be used within a query. If the option is empty, returns a Squeryl
+          * representation of true. If the option is defined, applies the expression on the option value and returns
+          * its result. The typical use case is specifying a filter that should be applied only when it's defined.
+          * @param option A value that determines whether to return true or the expression.
+          * @param expression An expression whose result is returned in case the option is defined.
+          * @tparam C Type of the option value.
+          * @return The expression.
+          */
+        protected def condition[C](option: Option[C], expression: C => LogicalBoolean): LogicalBoolean = {
+            option.map(expression).getOrElse(1 === 1)
         }
 
         /**
           * Evaluates the specified query and returns only the first object in the result.
-          *
           * @param query The query to evaluate.
           * @return The first object in the result.
           */
@@ -99,6 +127,10 @@ trait TableRepositoryComponent
         }
     }
 
+    /**
+      * A repository that doesn't use any special select query for entity selection. No related entities are selected,
+      * therefore it's called lazy.
+      */
     class LazyTableRepository[A <: PersistableEntity](table: Table[A], entityConverter: EntityConverter[A])
         extends TableRepository[A, A](table, entityConverter)
     {

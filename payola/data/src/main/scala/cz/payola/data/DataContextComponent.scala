@@ -5,6 +5,9 @@ import cz.payola.domain.entities.plugins._
 import cz.payola.domain.entities.analyses.PluginInstanceBinding
 import cz.payola.domain.RdfStorageComponent
 
+/**
+  * A component that provides access to a storage with persisted entities.
+  */
 trait DataContextComponent
 {
     self: RdfStorageComponent =>
