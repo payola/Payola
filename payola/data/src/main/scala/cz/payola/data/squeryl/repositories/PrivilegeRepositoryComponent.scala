@@ -14,7 +14,8 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
 
     lazy val privilegeRepository = new PrivilegeRepository[Privilege[_]]
     {
-        private val _repository = new TableRepository[PrivilegeDbRepresentation](schema.privileges, PrivilegeDbRepresentation)
+        private val _repository = new LazyTableRepository[PrivilegeDbRepresentation](schema.privileges,
+            PrivilegeDbRepresentation)
 
         def getAll(pagination: Option[PaginationInfo] = None): Seq[Privilege[_]] = Seq()
 

@@ -10,7 +10,7 @@ trait UserRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
 
-    lazy val userRepository = new TableRepository[User](schema.users, User) with UserRepository[User]
+    lazy val userRepository = new LazyTableRepository[User](schema.users, User) with UserRepository[User]
     {
         def getAllWithNameLike(name: String, pagination: Option[PaginationInfo] = None): Seq[User] = {
             val query =

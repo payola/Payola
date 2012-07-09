@@ -14,7 +14,7 @@ trait PluginRepositoryComponent extends TableRepositoryComponent
 
     lazy val pluginRepository = new PluginRepository[Plugin]
     {
-        private val representationRepository = new TableRepository[PluginDbRepresentation](schema.plugins,
+        private val representationRepository = new LazyTableRepository[PluginDbRepresentation](schema.plugins,
             PluginDbRepresentation)
 
         def getById(id: String): Option[Plugin] = representationRepository.getById(id).map(_.toPlugin)

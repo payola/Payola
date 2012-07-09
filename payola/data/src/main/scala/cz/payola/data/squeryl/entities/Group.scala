@@ -29,21 +29,24 @@ class Group(override val id: String, name: String, o: User)(implicit val context
     private lazy val _ownerQuery = context.schema.groupOwnership.right(this)
 
     @Transient
-    private var _groupMembersLoaded = false
+    var _groupMembersLoaded = false
     private lazy val _groupMembersQuery = context.schema.groupMembership.right(this)
 
     override def members: immutable.Seq[UserType] = {
         if (!_groupMembersLoaded) {
-            evaluateCollection(_groupMembersQuery).map(u =>
-                if (!super.members.contains(u)) {
-                    super.storeMember(u)
-                }
-            )
-
-            _groupMembersLoaded = true
+            members = evaluateCollection(_groupMembersQuery)
         }
 
         super.members
+    }
+
+    def members_=(members: Seq[User]) {
+        members.foreach { u =>
+            if (!super.members.contains(u)) {
+                super.storeMember(u)
+            }
+        }
+        _groupMembersLoaded = true
     }
 
     override def owner: UserType = {
@@ -52,6 +55,10 @@ class Group(override val id: String, name: String, o: User)(implicit val context
         }
 
         _owner
+    }
+
+    def owner_=(value: UserType) {
+        _owner = value
     }
 
     override def storeMember(u: UserType) {

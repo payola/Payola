@@ -12,11 +12,6 @@ class Group(protected var _name: String, protected var _owner: User)
     with PrivilegableEntity
     with cz.payola.common.entities.Group
 {
-    // If the group isn't in the owners owned groups yet, add it there (the group may already be there, because there
-    // may be another instance with the same ID which is therefore considered identical to this instance).
-    if (_owner != null && !_owner.ownedGroups.contains(this)) {
-        _owner.addOwnedGroup(this)
-    }
     checkConstructorPostConditions()
 
     type UserType = User

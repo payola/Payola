@@ -14,7 +14,7 @@ trait DataSourceRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
 
-    lazy val dataSourceRepository = new TableRepository[DataSource](schema.dataSources, DataSource)
+    lazy val dataSourceRepository = new LazyTableRepository[DataSource](schema.dataSources, DataSource)
     {
         override def persist(entity: AnyRef): DataSource = {
             val dataSource = super.persist(entity)
