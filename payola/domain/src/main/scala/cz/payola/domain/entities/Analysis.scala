@@ -4,6 +4,7 @@ import scala.collection.mutable
 import cz.payola.domain.entities.analyses._
 import cz.payola.domain.entities.analyses.evaluation.AnalysisEvaluation
 import cz.payola.domain.entities.plugins.PluginInstance
+import cz.payola.domain.Entity
 
 /**
   * @param _name Name of the analysis.

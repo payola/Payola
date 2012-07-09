@@ -1,5 +1,7 @@
 package cz.payola.common.entities
 
+import cz.payola.common.Entity
+
 /**
   * A described generic entity.
   */

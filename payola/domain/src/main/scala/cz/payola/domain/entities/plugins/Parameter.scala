@@ -1,6 +1,7 @@
 package cz.payola.domain.entities.plugins
 
 import cz.payola.domain.entities._
+import cz.payola.domain.Entity
 
 /**
   * @param _name Name of the parameter.

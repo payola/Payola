@@ -3,7 +3,6 @@ package cz.payola.domain.entities.plugins.compiler
 import tools.nsc.plugins.{PluginComponent, Plugin}
 import tools.nsc.{Phase, Global}
 import scala.tools.nsc.transform.Transform
-import cz.payola.domain.entities
 
 /** A plugin verifier compiler plugin. */
 class PluginVerifier(val global: Global) extends Plugin
@@ -34,7 +33,7 @@ class PluginVerifier(val global: Global) extends Plugin
         /** A plugin verifier phase. */
         private class PluginVerifierPhase(prev: Phase) extends StdPhase(prev)
         {
-            val pluginParentClassName = classOf[entities.Plugin].getName
+            val pluginParentClassName = classOf[cz.payola.domain.entities.Plugin].getName
 
             def apply(unit: CompilationUnit) {
                 // Verify that the unit contains one package definition.

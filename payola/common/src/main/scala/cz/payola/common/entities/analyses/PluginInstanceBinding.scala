@@ -1,6 +1,6 @@
 package cz.payola.common.entities.analyses
 
-import cz.payola.common.entities.Entity
+import cz.payola.common.Entity
 import cz.payola.common.entities.plugins.PluginInstance
 
 /**

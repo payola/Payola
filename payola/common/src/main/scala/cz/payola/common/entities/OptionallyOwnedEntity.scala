@@ -1,5 +1,7 @@
 package cz.payola.common.entities
 
+import cz.payola.common.Entity
+
 /**
   * An entity that may or may not be owned.
   */

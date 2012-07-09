@@ -6,13 +6,13 @@ import play.api.data.Forms._
 import views._
 import cz.payola.domain.entities._
 import play.api.mvc._
+import cz.payola.web.shared.Payola
 
 object Profile extends PayolaController with Secured
 {
     def index(username: String) = maybeAuthenticated { user: Option[User] =>
-        df.getUserByUsername(username).map { profileUser =>
-            val profileUserAnalyses = df.getPublicAnalysesByOwner(profileUser)
-
+        Payola.model.userModel.getByName(username).map { profileUser =>
+            val profileUserAnalyses = Payola.model.analysisModel.getPublicByOwner(profileUser)
             Ok(views.html.Profile.index(user, profileUser, profileUserAnalyses))
         }.getOrElse {
             NotFound(views.html.errors.err404("The user does not exist."))
@@ -23,11 +23,9 @@ object Profile extends PayolaController with Secured
         tuple(
             "email" -> text,
             "name" -> text
-        ) verifying("Invalid email or password", result =>
-            result match {
-                case (email, name) => !df.getUserByUsername(email).isDefined
-            }
-            )
+        ) verifying("Invalid email or password", _ match {
+                case (email, name) => Payola.model.userModel.getByName(email).isEmpty
+        })
     )
 
     val groupForm = Form(
@@ -50,7 +48,7 @@ object Profile extends PayolaController with Secured
 
     def saveCreateGroup = authenticatedWithRequest { (request: Request[_], user: User) =>
         val name = groupForm.bindFromRequest()(request).get
-        val group = df.createGroup(name, user)
+        val group = Payola.model.groupModel.create(name, user)
 
         if (group != null)
         {
@@ -68,8 +66,8 @@ object Profile extends PayolaController with Secured
             case _ => Map.empty[String, Seq[String]]
         }
 
-        val membersNew = data.getOrElse("members",Nil).flatMap{ u => df.userDAO.getById(u) }
-        val group = df.getGroupByOwnerAndId(user, id)
+        val membersNew = data.getOrElse("members",Nil).flatMap{ u => Payola.model.userModel.getById(u) }
+        val group = Payola.model.groupModel.getByOwnerAndId(user, id)
 
         if (group.isDefined)
         {
@@ -83,7 +81,7 @@ object Profile extends PayolaController with Secured
                 g.addMember(m)
             }
 
-            df.groupDAO.persist(g)
+            Payola.model.groupModel.persist(g)
             Redirect(routes.Profile.index(user.email)).flashing("success" -> "The group has been sucessfully saved.")
         }else{
             Forbidden
@@ -91,11 +89,11 @@ object Profile extends PayolaController with Secured
     }
 
     def editGroup(id: String) = authenticatedWithRequest{ (request: Request[_], user: User) =>
-        val g = df.getGroupByOwnerAndId(user, id)
+        val g = Payola.model.groupModel.getByOwnerAndId(user, id)
 
         if (g.isDefined)
         {
-            val allUsers = df.getAllUsers()
+            val allUsers = Payola.model.userModel.getAll
 
             Ok(views.html.Profile.editGroup(user, g.get, allUsers))
         }else{
@@ -108,11 +106,13 @@ object Profile extends PayolaController with Secured
     )
 
     def deleteGroup(id: String) = authenticated{ user =>
-        if (df.getGroupByOwnerAndId(user, id).isDefined && df.groupDAO.removeById(id))
-        {
-            Redirect(routes.Profile.listGroups()).flashing("success" -> "The group has been successfully deleted.")
-        }else{
-            Redirect(routes.Profile.listGroups()).flashing("error" -> "The group could not been deleted.")
-        }
+        val group = Payola.model.groupModel.getByOwnerAndId(user, id)
+        Redirect(routes.Profile.listGroups()).flashing(
+            if (group.map(g => Payola.model.groupModel.remove(g)).getOrElse(false)) {
+                "success" -> "The group has been successfully deleted."
+            } else {
+                "error" -> "The group could not been deleted."
+            }
+        )
     }
 }

@@ -1,6 +1,6 @@
 package cz.payola.common.entities.plugins
 
-import cz.payola.common.entities.Entity
+import cz.payola.common.Entity
 
 /**
   * A parameter of an analytical plugin.

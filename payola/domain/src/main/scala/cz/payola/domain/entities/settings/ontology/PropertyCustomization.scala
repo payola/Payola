@@ -1,6 +1,6 @@
 package cz.payola.domain.entities.settings.ontology
 
-import cz.payola.domain.entities.Entity
+import cz.payola.domain.Entity
 
 /** This class represents ontology property visual customization.
   */

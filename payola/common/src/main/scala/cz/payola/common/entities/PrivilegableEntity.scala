@@ -4,6 +4,7 @@ import scala.collection._
 import cz.payola.common.entities.privileges._
 import cz.payola.common.entities.plugins.DataSource
 import scala.Seq
+import cz.payola.common.Entity
 
 /**
   * An entity that may be granted privileges.

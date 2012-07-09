@@ -3,6 +3,7 @@ package cz.payola.domain.entities
 import scala.collection._
 import cz.payola.domain.entities.plugins.DataSource
 import cz.payola.domain.entities.privileges._
+import cz.payola.domain.Entity
 
 /**
   * @param _name Name of the user.
@@ -20,6 +21,8 @@ class User(protected var _name: String)
     type AnalysisType = Analysis
 
     type DataSourceType = DataSource
+
+    type PluginType = Plugin
 
     type OntologyCustomizationType = settings.ontology.Customization
 
@@ -55,6 +58,23 @@ class User(protected var _name: String)
       */
     def removeOwnedDataSource(dataSource: DataSourceType): Option[DataSourceType] = {
         removeRelatedEntity(dataSource, ownedDataSources, discardOwnedDataSource)
+    }
+
+    /**
+      * Adds the plugin to the users owned plugins. The plugin has to be owned by the user.
+      * @param plugin The plugin to be added.
+      */
+    def addOwnedPlugin(plugin: PluginType) {
+        addOwnedEntity(plugin, ownedPlugins, storeOwnedPlugin)
+    }
+
+    /**
+      * Removes the specified plugin from the users owned plugins.
+      * @param plugin The plugin to be removed.
+      * @return The removed plugin.
+      */
+    def removeOwnedPlugin(plugin: PluginType): Option[PluginType] = {
+        removeRelatedEntity(plugin, ownedPlugins, discardOwnedPlugin)
     }
 
     /**

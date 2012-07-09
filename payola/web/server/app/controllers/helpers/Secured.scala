@@ -8,7 +8,8 @@ import controllers._
   * Provide security features
   */
 trait Secured
-{ self: PayolaController =>
+{
+    self: PayolaController =>
 
     def authenticated(f: User => Result): Action[(Action[AnyContent], AnyContent)] = {
         authenticatedWithRequest((_, user) => f(user))

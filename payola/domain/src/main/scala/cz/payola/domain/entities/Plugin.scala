@@ -2,7 +2,7 @@ package cz.payola.domain.entities
 
 import collection.immutable
 import cz.payola.domain.rdf.Graph
-import cz.payola.domain.IDGenerator
+import cz.payola.domain._
 import cz.payola.domain.entities.plugins._
 
 /**
@@ -17,6 +17,7 @@ abstract class Plugin(
     protected val _parameters: immutable.Seq[Plugin#ParameterType],
     protected var _id: String = IDGenerator.newId)
     extends Entity(_id)
+    with OptionallyOwnedEntity
     with NamedEntity
     with ShareableEntity
     with cz.payola.common.entities.Plugin
@@ -26,6 +27,17 @@ abstract class Plugin(
     type ParameterType = Parameter[_]
 
     type ParameterValueType = ParameterValue[_]
+
+    var _owner: Option[UserType] = None
+
+    /**
+      * Sets the owner of the plugin.
+      * @param value The new owner of the plugin.
+      */
+    def owner_=(value: Option[UserType]) {
+        _owner = value
+        super[OptionallyOwnedEntity].checkInvariants()
+    }
 
     /**
       * Returns a new instance of the plugin with all parameter instances set to default values.
