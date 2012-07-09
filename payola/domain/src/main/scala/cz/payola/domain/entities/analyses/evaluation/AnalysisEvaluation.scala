@@ -15,7 +15,7 @@ import cz.payola.domain.entities.analyses.optimization.phases._
   * evaluations, takes care of sending the plugin instance evaluation outputs to appropriate inputs, tracks the time
   * spent evaluating, tracks the evaluation progress and responds to the control messages.
   * @param analysis The analysis to evaluate.
-  * @param timeout The maximal time limit allowed for the evaluation to take.
+  * @param timeout The maximal time limit allowed for the evaluation to take in milliseconds.
   */
 class AnalysisEvaluation(private val analysis: Analysis, private val timeout: Option[Long]) extends Actor
 {

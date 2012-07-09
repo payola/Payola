@@ -4,7 +4,10 @@ import tools.nsc.plugins.{PluginComponent, Plugin}
 import tools.nsc.{Phase, Global}
 import scala.tools.nsc.transform.Transform
 
-/** A plugin verifier compiler plugin. */
+/**
+  * A compiler plugin verifying that the compilation unit is actually a correctly defined analytical plugin. It also
+  * makes sure that the plugin class name is unique.
+  */
 class PluginVerifier(val global: Global) extends Plugin
 {
     val name = "plugin-verifier"
@@ -17,7 +20,9 @@ class PluginVerifier(val global: Global) extends Plugin
 
     var pluginClassName: Option[String] = None
 
-    /** A component that verifies the Plugin. */
+    /**
+      * A component that verifies correctness of the compilation unit.
+      */
     private object PluginVerifierComponent extends PluginComponent
     {
         val global = PluginVerifier.this.global
@@ -28,10 +33,7 @@ class PluginVerifier(val global: Global) extends Plugin
 
         val phaseName = "plugin-verifier"
 
-        def newPhase(prev: Phase): Phase = new PluginVerifierPhase(prev)
-
-        /** A plugin verifier phase. */
-        private class PluginVerifierPhase(prev: Phase) extends StdPhase(prev)
+        def newPhase(prev: Phase): Phase = new StdPhase(prev)
         {
             val pluginParentClassName = classOf[cz.payola.domain.entities.Plugin].getName
 
@@ -97,7 +99,9 @@ class PluginVerifier(val global: Global) extends Plugin
 
     }
 
-    /** A component that makes the plugin name unique. */
+    /**
+      * A component that makes the plugin name unique.
+      */
     private object PluginNameTransformerComponent extends PluginComponent with Transform
     {
         val global = PluginVerifier.this.global
@@ -108,11 +112,11 @@ class PluginVerifier(val global: Global) extends Plugin
 
         val phaseName = "plugin-name-transformer"
 
-        def newTransformer(unit: CompilationUnit) = new TemplateTransformer
-
-        class TemplateTransformer extends Transformer
+        def newTransformer(unit: CompilationUnit) = new Transformer
         {
             override def transform(tree: Tree): Tree = {
+                // If the tree matches the plugin class definition, replace the plugin class name with an unique
+                // name. Otherwise leave the tree as it is.
                 tree match {
                     case cd@ClassDef(mods, _, tparams, impl) if pluginClassName.exists(_ == cd.symbol.fullName) => {
                         val uniqueId = java.util.UUID.randomUUID.toString.replace("-", "_")

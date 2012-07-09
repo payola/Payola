@@ -32,7 +32,7 @@ class Analysis(protected var _name: String, protected var _owner: Option[User])
 
     /**
       * Starts evaluation of the analysis.
-      * @param timeout Maximal execution time.
+      * @param timeout Maximal execution time in milliseconds.
       * @return An instance of the [[cz.payola.domain.entities.analyses.evaluation.AnalysisEvaluation]] which can be
       *         queried about the analysis evaluation progress and the result.
       */
