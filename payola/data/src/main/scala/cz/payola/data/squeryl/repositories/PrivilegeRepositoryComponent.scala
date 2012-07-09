@@ -6,6 +6,7 @@ import cz.payola.domain.entities.{Privilege, User, Group, Analysis}
 import cz.payola.data.squeryl.entities.privileges.PrivilegeDbRepresentation
 import cz.payola.data.PaginationInfo
 import cz.payola.data.squeryl.entities.plugins.DataSource
+import cz.payola.domain.Entity
 
 trait PrivilegeRepositoryComponent extends TableRepositoryComponent
 {
@@ -13,16 +14,6 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
 
     lazy val privilegeRepository = new PrivilegeRepository[Privilege[_]]
     {
-        private val objectRepositories = Map(
-            PrivilegeDbRepresentation.stripClassName(classOf[Analysis].getName) -> analysisRepository,
-            PrivilegeDbRepresentation.stripClassName(classOf[DataSource].getName) -> dataSourceRepository
-        )
-
-        private val granteeRepositories = Map(
-            PrivilegeDbRepresentation.stripClassName(classOf[User].getName) -> userRepository,
-            PrivilegeDbRepresentation.stripClassName(classOf[Group].getName) -> groupRepository
-        )
-
         private val _repository = new TableRepository[PrivilegeDbRepresentation](schema.privileges, PrivilegeDbRepresentation)
 
         def getAll(pagination: Option[PaginationInfo] = None): Seq[Privilege[_]] = Seq()
@@ -38,7 +29,7 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
             }
             else {
                 // ... instantiate otherwise
-                val objectRepository: Repository[_] = objectRepositories.get(privilegeDb.get.objectClass).get
+                val objectRepository = repositoryRegistry(privilegeDb.get.objectClass)
 
                 val objectOption = objectRepository.getById(privilegeDb.get.objectId)
 
@@ -54,14 +45,17 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
                     val constructorArguments = List(objectOption.get, privilegeDb.get.id)
 
                     // Instantiate the privilege
-                    Some(constructor.newInstance(constructorArguments).asInstanceOf[Privilege[_]])
+                    Some(constructor.newInstance(constructorArguments).asInstanceOf[Privilege[_ <: Entity]])
                 }
 
             }
         }
 
-        def persist(entity: AnyRef) {
+        def persist(entity: AnyRef): Privilege[_] = {
             _repository.persist(entity)
+
+            // The entity was successfully persisted therefore it must be a privilege.
+            entity.asInstanceOf[Privilege[_]]
         }
 
         def removeById(id: String) = _repository.removeById(id)
@@ -69,8 +63,8 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
         def getPrivilegedObjectIds(granteeId: String, privilegeClass: Class[_], objectClass: Class[_]): Seq[String] = {
             val query = from(_repository.table)(p =>
                 where(p.granteeId === granteeId and
-                    p.privilegeClass === PrivilegeDbRepresentation.stripClassName(privilegeClass.toString) and
-                    p.objectClass === PrivilegeDbRepresentation.stripClassName(objectClass.toString)
+                    p.privilegeClass === privilegeClass.getName and
+                    p.objectClass === repositoryRegistry.getClassName(objectClass)
                 )
                 select(p.objectId)
             )

@@ -25,6 +25,17 @@ trait DataContextComponent
 
     val dataSourceRepository: Repository[DataSource]
 
+    lazy val repositoryRegistry = new RepositoryRegistry(Map(
+        classOf[User] -> userRepository,
+        classOf[Group] -> groupRepository,
+        classOf[Privilege[_]] -> privilegeRepository,
+        classOf[Analysis] -> analysisRepository,
+        classOf[Plugin] -> pluginRepository,
+        classOf[PluginInstance] -> pluginInstanceRepository,
+        classOf[PluginInstanceBinding] -> pluginInstanceBindingRepository,
+        classOf[DataSource] -> dataSourceRepository
+    ))
+
     trait Repository[+A]
     {
         /**
@@ -144,5 +155,41 @@ trait DataContextComponent
           * @param pagination Optionally specified pagination of the result.
           */
         def getPublic(pagination: Option[PaginationInfo] = None): Seq[A]
+    }
+
+    /**
+      * A registry providing repositories by entity classes or entity class names.
+      * @param repositoriesByClass The repositories to store in the registry indexed by classes whose instances the
+      *                            repositories contain.
+      */
+    class RepositoryRegistry(repositoriesByClass: Map[Class[_], Repository[_]])
+    {
+        private val repositoriesByClassName = repositoriesByClass.map(r => getClassName(r._1) -> r._2)
+
+        /**
+          * Returns a repository by an entity class.
+          * @param entityClass Class whose instances the repository contains.
+          */
+        def apply(entityClass: Class[_]): Repository[_] = {
+            apply(getClassName(entityClass))
+        }
+
+        /**
+          * Returns a repository by an entity class name.
+          * @param entityClassName Name of the class whose instances the repository contains.
+          */
+        def apply(entityClassName: String): Repository[_] = {
+            repositoriesByClassName.getOrElse(entityClassName, throw new DataException("A repository for class " +
+                entityClassName + " doesn't exist."))
+        }
+
+        /**
+          * Returns name of the class used for the purposes of the repository.
+          * @param entityClass The class whose name to return.
+          */
+        def getClassName(entityClass: Class[_]): String = {
+            val className = entityClass.getName
+            className.drop(className.lastIndexOf(".") + 1)
+        }
     }
 }

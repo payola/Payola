@@ -8,6 +8,7 @@ import scala.collection._
   */
 trait Group extends NamedEntity with PrivilegableEntity
 {
+    /** Type of the users that can be members of a group. */
     type UserType <: User
 
     protected var _owner: UserType

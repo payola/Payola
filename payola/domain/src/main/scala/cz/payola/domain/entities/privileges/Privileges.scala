@@ -5,18 +5,21 @@ import cz.payola.domain.entities.settings.ontology.Customization
 import cz.payola.domain.entities.plugins.DataSource
 import cz.payola.domain.IDGenerator
 
-class AccessAnalysisPrivilege(analysis: Analysis, id: String = IDGenerator.newId)
-    extends Privilege[Analysis](analysis, id)
+class AccessAnalysisPrivilege(granter: User, grantee: PrivilegableEntity, analysis: Analysis,
+    id: String = IDGenerator.newId)
+    extends Privilege[Analysis](granter, grantee, analysis, id)
     with cz.payola.common.entities.privileges.AccessAnalysisPrivilege
 
-class AccessDataSourcePrivilege(dataSource: DataSource, id: String = IDGenerator.newId)
-    extends Privilege[DataSource](dataSource, id)
+class AccessDataSourcePrivilege(granter: User, grantee: PrivilegableEntity, dataSource: DataSource,
+    id: String = IDGenerator.newId)
+    extends Privilege[DataSource](granter, grantee, dataSource, id)
     with cz.payola.common.entities.privileges.AccessDataSourcePrivilege
 
-class UsePluginPrivilege(plugin: Plugin, id: String = IDGenerator.newId)
-    extends Privilege[Plugin](plugin, id)
+class UsePluginPrivilege(granter: User, grantee: PrivilegableEntity, plugin: Plugin, id: String = IDGenerator.newId)
+    extends Privilege[Plugin](granter, grantee, plugin, id)
     with cz.payola.common.entities.privileges.UsePluginPrivilege
 
-class UseOntologyCustomizationPrivilege(customization: Customization, id: String = IDGenerator.newId)
-    extends Privilege[Customization](customization, id)
+class UseOntologyCustomizationPrivilege(granter: User, grantee: PrivilegableEntity, customization: Customization,
+    id: String = IDGenerator.newId)
+    extends Privilege[Customization](granter, grantee, customization, id)
     with cz.payola.common.entities.privileges.UseOntologyCustomizationPrivilege

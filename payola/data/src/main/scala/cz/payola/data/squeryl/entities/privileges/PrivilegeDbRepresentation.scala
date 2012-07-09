@@ -4,6 +4,7 @@ import cz.payola.common._
 import cz.payola.data.squeryl.entities._
 import cz.payola.data.DataException
 import cz.payola.data.squeryl.SquerylDataContextComponent
+import cz.payola.domain.entities.Privilege
 
 /**
   * This object converts [[cz.payola.common.entities.Privilege]] to [[cz.payola.data.squeryl.entities.PrivilegeDbRepresentation]]
@@ -11,38 +12,25 @@ import cz.payola.data.squeryl.SquerylDataContextComponent
   */
 object PrivilegeDbRepresentation extends EntityConverter[PrivilegeDbRepresentation] {
 
-    def apply(privilege: entities.Privilege[_ <: Entity], granter: entities.User, grantee: entities.PrivilegableEntity)
+    def apply(privilege: entities.Privilege[_ <: Entity])
         (implicit context: SquerylDataContextComponent) = {
         new PrivilegeDbRepresentation(
             privilege.id,
-            granter.id,
-            grantee.id,
-            stripClassName(grantee.getClass.toString),
+            privilege.granter.id,
+            privilege.grantee.id,
+            context.repositoryRegistry.getClassName(privilege.grantee.getClass),
             privilege.getClass.getName,
             privilege.obj.id,
-            stripClassName(privilege.obj.getClass.toString)
+            context.repositoryRegistry.getClassName(privilege.obj.getClass)
         )
     }
 
     def convert(entity: AnyRef)(implicit context: SquerylDataContextComponent) = {
         entity match {
             case p: PrivilegeDbRepresentation => Some(p)
+            case p: Privilege[_] => Some(PrivilegeDbRepresentation(p))
             case _ => None
         }
-    }
-
-    /**
-      * Modifies full-class name to format stored to database.
-      *
-      * @param className - full-class name of an object
-      * @return Returns properly-formatted class name
-      */
-    def stripClassName(className: String): String = {
-        val n = className.replace("class ", "")
-        val pos = n.lastIndexOf(".")
-
-        // Return class name - User, Group, ... (+1 means skip '.')
-        n.substring(pos + 1)
     }
 }
 
