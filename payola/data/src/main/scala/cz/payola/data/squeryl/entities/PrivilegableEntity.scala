@@ -14,7 +14,7 @@ trait PrivilegableEntity extends cz.payola.domain.entities.PrivilegableEntity
 {
     self: PersistableEntity =>
 
-    val context: SquerylDataContextComponent
+    implicit val context: SquerylDataContextComponent
 
     override def grantedAnalyses: immutable.Seq[cz.payola.common.entities.Analysis] = {
         _loadObjectIds(classOf[AccessAnalysisPrivilege], classOf[Analysis]).flatMap(
@@ -39,15 +39,15 @@ trait PrivilegableEntity extends cz.payola.domain.entities.PrivilegableEntity
         context.privilegeRepository.getPrivilegedObjectIds(id, privilegeClass, objectClass)
     }
 
-    override def grantPrivilege(privilege: PrivilegeType, granter: cz.payola.domain.entities.User) {
+    override def grantPrivilege(privilege: PrivilegeType) {
         // Call domain method to preserve functionality
         storePrivilege(privilege)
 
-        context.privilegeRepository.persist(PrivilegeDbRepresentation(privilege, granter, this)(context))
+        context.privilegeRepository.persist(privilege)
     }
 
 
-    override def removePrivilege(privilege: PrivilegeType, granter: cz.payola.domain.entities.User) = {
+    override def removePrivilege(privilege: PrivilegeType) = {
         // Call domain method to preserve functionality
         discardPrivilege(privilege)
 

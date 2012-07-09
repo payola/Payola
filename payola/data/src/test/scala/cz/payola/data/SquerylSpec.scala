@@ -327,15 +327,10 @@ class SquerylSpec extends FlatSpec with ShouldMatchers with TestDataContextCompo
         val user2 = userRepository.getById(u2.id).get
         val group1 = groupRepository.getById(g1.id).get
 
-        val accessA1 = new AccessAnalysisPrivilege(a1)
-        val accessA2 = new AccessAnalysisPrivilege(a1)
-        val accessDS1 = new AccessDataSourcePrivilege(ds1)
-        val accessDS2 = new AccessDataSourcePrivilege(ds2)
-
-        user2.grantPrivilege(accessA1, user1)
-        user1.grantPrivilege(accessDS2, user2)
-        group1.grantPrivilege(accessDS1, user1)
-        group1.grantPrivilege(accessA2, user2)
+        user2.grantPrivilege(new AccessAnalysisPrivilege(user1, user2, a1))
+        user1.grantPrivilege(new AccessDataSourcePrivilege(user2, user1, ds2))
+        group1.grantPrivilege(new AccessDataSourcePrivilege(user1, group1, ds1))
+        group1.grantPrivilege(new AccessAnalysisPrivilege(user2, group1, a1))
 
         //TODO: assert(privilegeRepository.getPrivilegesCount() == 4)
         assert(user1.grantedDataSources.size == 1)
