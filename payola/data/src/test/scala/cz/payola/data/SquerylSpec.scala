@@ -326,17 +326,25 @@ class SquerylSpec extends FlatSpec with ShouldMatchers with TestDataContextCompo
         val user1 = userRepository.getById(u1.id).get
         val user2 = userRepository.getById(u2.id).get
         val group1 = groupRepository.getById(g1.id).get
+        val p1 = pluginRepository.getById(sparqlEndpointPlugin.id).get
 
-        user2.grantPrivilege(new AccessAnalysisPrivilege(user1, user2, a1))
-        user1.grantPrivilege(new AccessDataSourcePrivilege(user2, user1, ds2))
+        // Privileges for groups
+        group1.grantPrivilege(new UsePluginPrivilege(user1, group1, p1))
         group1.grantPrivilege(new AccessDataSourcePrivilege(user1, group1, ds1))
         group1.grantPrivilege(new AccessAnalysisPrivilege(user2, group1, a1))
 
-        //TODO: assert(privilegeRepository.getPrivilegesCount() == 4)
+        // Privileges for users
+        user2.grantPrivilege(new AccessAnalysisPrivilege(user1, user2, a1))
+        user1.grantPrivilege(new AccessDataSourcePrivilege(user2, user1, ds2))
+        user2.grantPrivilege(new UsePluginPrivilege(user1, user2, p1))
+
+        assert(privilegeRepository.getCount == 6)
         assert(user1.grantedDataSources.size == 1)
         assert(user2.grantedAnalyses.size == 1)
+        assert(user2.grantedPlugins.size == 1)
         assert(group1.grantedDataSources.size == 1)
         assert(group1.grantedAnalyses.size == 1)
+        assert(group1.grantedPlugins.size == 1)
     }
 
     "Pagionation" should "work" in {

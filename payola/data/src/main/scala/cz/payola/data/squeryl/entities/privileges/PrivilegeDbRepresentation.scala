@@ -14,14 +14,23 @@ object PrivilegeDbRepresentation extends EntityConverter[PrivilegeDbRepresentati
 
     def apply(privilege: entities.Privilege[_ <: Entity])
         (implicit context: SquerylDataContextComponent) = {
+        // Plugins has to be handled slightly differently
+        val granteeClass = context.repositoryRegistry.getClassName(privilege.grantee.getClass)
+        val objectClass = context.repositoryRegistry.getClassName(
+            privilege.obj match {
+                case p: cz.payola.domain.entities.Plugin => classOf[cz.payola.domain.entities.Plugin]
+                case o => o.getClass
+            }
+        )
+        
         new PrivilegeDbRepresentation(
             privilege.id,
             privilege.granter.id,
             privilege.grantee.id,
-            context.repositoryRegistry.getClassName(privilege.grantee.getClass),
+            granteeClass,
             privilege.getClass.getName,
             privilege.obj.id,
-            context.repositoryRegistry.getClassName(privilege.obj.getClass)
+            objectClass
         )
     }
 

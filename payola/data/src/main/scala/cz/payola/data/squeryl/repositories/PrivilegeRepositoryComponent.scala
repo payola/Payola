@@ -30,11 +30,14 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
             else {
                 // ... instantiate otherwise
                 val objectRepository = repositoryRegistry(privilegeDb.get.objectClass)
+                val granteeRepository = repositoryRegistry(privilegeDb.get.granteeClass)
 
                 val objectOption = objectRepository.getById(privilegeDb.get.objectId)
+                val granteeOption = granteeRepository.getById(privilegeDb.get.granteeId)
+                val granterOption = userRepository.getById(privilegeDb.get.granterId)
 
-                // Object not found
-                if (objectOption.isEmpty) {
+                // If object or grantee or granter not found
+                if (objectOption.isEmpty || granteeOption.isEmpty || granterOption.isEmpty) {
                     None
                 }
                 else {
@@ -42,10 +45,10 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
                     val privilegeClass = java.lang.Class.forName(privilegeDb.get.privilegeClass)
 
                     val constructor = privilegeClass.getConstructors.find(_.getParameterTypes().size == 2).get
-                    val constructorArguments = List(objectOption.get, privilegeDb.get.id)
+                    val arguments = List(granterOption.get, granteeOption.get, objectOption.get, privilegeDb.get.id)
 
                     // Instantiate the privilege
-                    Some(constructor.newInstance(constructorArguments).asInstanceOf[Privilege[_ <: Entity]])
+                    Some(constructor.newInstance(arguments).asInstanceOf[Privilege[_ <: Entity]])
                 }
 
             }
