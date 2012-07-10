@@ -70,7 +70,7 @@ class VertexView(val vertexModel: Vertex, var position: Point, var settings: Ver
     }
 
     def isPointInside(point: Point): Boolean = {
-        isPointInRect(point, position + (settings.getSize / -2), position + (settings.getSize / 2))
+        isPointInRect(point, position + (new Vector(settings.radius, settings.radius) / -2), position + (new Vector(settings.radius, settings.radius) / 2))
     }
 
     def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
@@ -79,10 +79,10 @@ class VertexView(val vertexModel: Vertex, var position: Point, var settings: Ver
     }
 
     def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
-        val colorToUseOnBox = color.getOrElse(settings.colorMed)
+        val colorToUseOnBox = color.getOrElse(settings.color)
         val correctedPosition = this.position + positionCorrection
 
-        drawCircle(context, correctedPosition, settings.getSize.x/2, 1, Color.Black)
+        drawCircle(context, correctedPosition, settings.radius/2, 1, Color.Black)
         //val correctedPosition = this.position + (settings.getSize / -2) + positionCorrection
         //drawRoundedRectangle(context, correctedPosition, settings.getSize, settings.cornerRadius)
         fillCurrentSpace(context, colorToUseOnBox)

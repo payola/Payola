@@ -13,77 +13,26 @@ class VertexModal(model: VertexSettingsModel) extends Component
     val settingsChanged = new ComponentEvent[VertexModal, EventArgs[VertexModal]]
 
     //TODO add some bounds check for every input
-    val cornerRadius = new Input("vertex.corner.radius", model.cornerRadius.toString(), Some("0 ≤ x ≤ 15"))
-    val crLabel = new Label("Corner radius [px]:", cornerRadius.field)
-    cornerRadius.changed += { event =>
-        model.cornerRadius = cornerRadius.getText.toInt
+    val radius = new Input("vertex.radius", model.radius.toString(), Some("0 ≤ x ≤ 15"))
+    val rLabel = new Label("Corner radius [px]:", radius.getDomElement)
+    radius.changed += { event =>
+        model.radius = radius.getText.toInt
         false
     }
 
-    val width = new Input("vertex.width", model.width.toString(), Some("20 ≤ x ≤ 50"))
-    val wLabel = new Label("Width [px]:", width.field)
-    width.changed += { event =>
-        model.width = width.getText.toInt
+    val color = new ColorPane("vertex.color","Vertex color",model.color)
+    color.changed += { event =>
+        model.color = color.getColor
         false
     }
 
-    val height = new Input("vertex.height", model.height.toString(), Some("20 ≤ x ≤ 50"))
-    val hLabel = new Label("Height [px]:", height.field)
-    height.changed += { event =>
-        model.height = height.getText.toInt
+    val colorSelected = new ColorPane("vertex.color.selected","Vertex color (selected)",model.colorSelected)
+    colorSelected.changed += { event =>
+        model.colorSelected = colorSelected.getColor
         false
     }
 
-    val colorLow = new ColorPane("vertex.color.low","Vertex color (low)",model.colorLow)
-    colorLow.changed += { event =>
-        model.colorLow = colorLow.getColor
-        false
-    }
-
-    val colorMed = new ColorPane("vertex.color.medium","Vertex color (medium)",model.colorMed)
-    colorMed.changed += { event =>
-        model.colorMed = colorMed.getColor
-        false
-    }
-
-    val colorHigh = new ColorPane("vertex.color.high","Vertex color (selected):", model.colorHigh)
-    colorHigh.changed += { event =>
-        model.colorHigh = colorHigh.getColor
-        false
-    }
-
-    val colorLiteral = new ColorPane("vertex.color.literal","Vertex color (literal):",model.colorLiteral)
-    colorLiteral.changed += { event =>
-
-        model.colorLiteral = colorLiteral.getColor
-        false
-    }
-
-    val colorIdentifier = new ColorPane("vertex.color.identifier","Vertex color (ID):",model.colorIdentifier)
-    colorIdentifier.changed += { event =>
-        model.colorIdentifier = colorIdentifier.getColor
-        false
-    }
-
-    val colorUnknown = new ColorPane("vertex.color.unknown","Vertex color (unknown):",model.colorUnknown)
-    colorUnknown.changed += { event =>
-        model.colorUnknown = colorUnknown.getColor
-        false
-    }
-
-    val literalIcon = new Input("vertex.icon.literal", model.literalIcon, None)
-    val liLabel = new Label("Literal icon:", literalIcon.field)
-
-    val identifierIcon = new Input("vertex.icon.identifier", model.identifierIcon, None)
-    val idLabel = new Label("ID icon:", identifierIcon.field)
-
-    val unknownIcon = new Input("vertex.icon.unknow", model.unknownIcon, None)
-    val unknownLabel = new Label("Unknown icon:", unknownIcon.field)
-
-    val wrapper = new Div(
-        List(crLabel, cornerRadius, wLabel, width, hLabel, height,
-            colorLow, colorMed, colorHigh, colorLiteral, colorIdentifier, colorUnknown,
-            liLabel, literalIcon, idLabel, identifierIcon, unknownLabel, unknownIcon))
+    val wrapper = new Div(List(rLabel, radius, color, colorSelected))
 
     private val modal = new Modal("Vertex settings", List(wrapper))
 
