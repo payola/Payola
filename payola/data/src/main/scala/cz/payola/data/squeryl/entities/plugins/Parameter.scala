@@ -18,5 +18,5 @@ object Parameter
 
 trait Parameter[A] extends cz.payola.domain.entities.plugins.Parameter[A] with PersistableEntity
 {
-    var pluginId: Option[String] = None
+    var pluginId: String = null
 }

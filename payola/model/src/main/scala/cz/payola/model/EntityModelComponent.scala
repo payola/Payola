@@ -27,17 +27,13 @@ trait EntityModelComponent
     {
         def getAllAccessible(user: Option[User]): Seq[A] = {
             val accessible = user.map { u =>
-                val memberGroups = groupRepository.getAll.filter(_.hasMember(u))
+                val memberGroups = groupRepository.getAll().filter(_.hasMember(u))
                 val granteeIds = u.id +: memberGroups.map(_.id)
-                privilegeRepository.
+                // TODO privilegeRepository.
+                Nil
             }
             val public = repository.getAllPublic
+            public // ++ accessible
         }
-
-        def getAllPublic: Seq[A] = {
-            repository.get
-        }
-
-
     }
 }

@@ -67,7 +67,7 @@ object Profile extends PayolaController with Secured
         }
 
         val membersNew = data.getOrElse("members",Nil).flatMap{ u => Payola.model.userModel.getById(u) }
-        val group = Payola.model.groupModel.getByOwnerAndId(user, id)
+        val group = user.ownedGroups.find(_.id == id)
 
         if (group.isDefined)
         {
@@ -89,7 +89,7 @@ object Profile extends PayolaController with Secured
     }
 
     def editGroup(id: String) = authenticatedWithRequest{ (user, request) =>
-        val g = Payola.model.groupModel.getByOwnerAndId(user, id)
+        val g = user.ownedGroups.find(_.id == id)
 
         if (g.isDefined)
         {
@@ -106,7 +106,7 @@ object Profile extends PayolaController with Secured
     )
 
     def deleteGroup(id: String) = authenticated{ user =>
-        val group = Payola.model.groupModel.getByOwnerAndId(user, id)
+        val group = user.ownedGroups.find(_.id == id)
         Redirect(routes.Profile.listGroups()).flashing(
             if (group.map(g => Payola.model.groupModel.remove(g)).getOrElse(false)) {
                 "success" -> "The group has been successfully deleted."

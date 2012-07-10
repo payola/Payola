@@ -9,7 +9,7 @@ import scala.Some
 import cz.payola.domain.entities.Analysis
 
 /**
-  * This objects convers [[cz.payola.common.entities.analyses.PluginInstanceBinding]]
+  * This objects converts [[cz.payola.common.entities.analyses.PluginInstanceBinding]]
   * to [[cz.payola.data.squeryl.entities.analyses.PluginInstanceBinding]]
   */
 object PluginInstanceBinding extends EntityConverter[PluginInstanceBinding]
@@ -35,11 +35,11 @@ class PluginInstanceBinding(
     extends cz.payola.domain.entities.analyses.PluginInstanceBinding(source, target, _targetInputIdx)
     with PersistableEntity
 {
-    val sourcePluginInstanceId = if (source == null) None else Some(source.id)
+    val sourcePluginInstanceId: String = Option(source).map(_.id).getOrElse(null)
 
-    val targetPluginInstanceId = if (target == null) None else Some(target.id)
+    val targetPluginInstanceId: String = Option(target).map(_.id).getOrElse(null)
 
-    var analysisId: Option[String] = None
+    var analysisId: String = null
 
     @Transient
     private var _sourceLoaded = false

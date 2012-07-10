@@ -9,7 +9,7 @@ trait PluginInstanceRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
 
-    lazy val pluginInstanceRepository = new TableRepository[PluginInstance](schema.pluginInstances, PluginInstance)
+    lazy val pluginInstanceRepository = new LazyTableRepository[PluginInstance](schema.pluginInstances, PluginInstance)
     {
         override def persist(entity: AnyRef): PluginInstance = {
             // First persist ParameterInstance ...

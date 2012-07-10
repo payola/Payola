@@ -8,6 +8,6 @@ trait PluginInstanceBindingRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
 
-    lazy val pluginInstanceBindingRepository = new TableRepository[PluginInstanceBinding](schema.pluginInstanceBindings,
-        PluginInstanceBinding)
+    lazy val pluginInstanceBindingRepository = new LazyTableRepository[PluginInstanceBinding](
+        schema.pluginInstanceBindings, PluginInstanceBinding)
 }
