@@ -2,6 +2,7 @@ package cz.payola.common.entities.plugins
 
 import scala.collection.immutable
 import cz.payola.common.entities._
+import cz.payola.common.Entity
 
 /**
   * An instance of an analytical plugin. That is a valuation of the plugin parameters.

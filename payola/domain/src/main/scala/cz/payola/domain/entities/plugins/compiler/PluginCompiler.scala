@@ -33,16 +33,21 @@ class PluginCompiler(val libDirectory: java.io.File, val pluginClassDirectory: j
         val pluginFile = new java.io.File(pluginFileName)
         new File(pluginFile).writeAll(pluginSourceCode)
 
-        try { {
+        try {
             val run = new compiler.Run()
             run.compile(List(pluginFileName))
             compiler.pluginVerifier.pluginClassName.get
-        }
         } finally {
             pluginFile.delete()
         }
     }
 
+    /**
+      * A compiler that is actually used to compile the plugins. Adds all the phases of the plugin verifier to the
+      * standard set of the compiler phases.
+      * @param settings Settings of the compiler.
+      * @param reporter An error reporter.
+      */
     private class InternalCompiler(settings: Settings, reporter: Reporter) extends Global(settings, reporter)
     {
         val pluginVerifier = new PluginVerifier(this)
@@ -53,5 +58,4 @@ class PluginCompiler(val libDirectory: java.io.File, val pluginClassDirectory: j
             pluginVerifier.components.foreach(phasesSet += _)
         }
     }
-
 }

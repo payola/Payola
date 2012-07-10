@@ -4,6 +4,7 @@ import scala.collection.mutable
 import cz.payola.domain.entities.analyses._
 import cz.payola.domain.entities.analyses.evaluation.AnalysisEvaluation
 import cz.payola.domain.entities.plugins.PluginInstance
+import cz.payola.domain.Entity
 
 /**
   * @param _name Name of the analysis.
@@ -31,7 +32,7 @@ class Analysis(protected var _name: String, protected var _owner: Option[User])
 
     /**
       * Starts evaluation of the analysis.
-      * @param timeout Maximal execution time.
+      * @param timeout Maximal execution time in milliseconds.
       * @return An instance of the [[cz.payola.domain.entities.analyses.evaluation.AnalysisEvaluation]] which can be
       *         queried about the analysis evaluation progress and the result.
       */
@@ -126,7 +127,6 @@ class Analysis(protected var _name: String, protected var _owner: Option[User])
       * [[scala.Some]] is returned.
       */
     def outputInstance: Option[PluginInstance] = outputInstances.headOption
-
 
     /**
       * Adds a new plugin instance to the analysis.

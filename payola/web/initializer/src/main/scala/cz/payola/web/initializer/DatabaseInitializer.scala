@@ -1,51 +1,59 @@
 package cz.payola.web.initializer
 
-import cz.payola.data.PayolaDB
-import cz.payola.domain.entities.plugins.concrete.data.SparqlEndpoint
-import cz.payola.domain.entities.plugins.concrete.query._
 import cz.payola.domain.entities.plugins.concrete._
-import cz.payola.data.dao._
+import cz.payola.domain.entities.plugins.concrete.data._
+import cz.payola.domain.entities.plugins.concrete.query._
+import cz.payola.web.shared.Payola
+import cz.payola.data.squeryl.SquerylDataContextComponent
 import cz.payola.domain.entities.plugins.DataSource
 import scala.collection.immutable
 
 object DatabaseInitializer extends App
 {
-    // Connect to DB and (re)created DB schema
-    PayolaDB.connect()
-    PayolaDB.createSchema()
+    private val model = Payola.model.asInstanceOf[SquerylDataContextComponent]
 
-    // Create initial data
-    createInitialData()
+    print("Recreating the database schema ... ")
+    model.schema.recreate()
+    println("OK")
 
-    def createInitialData() {
+    print("Persisting the initial data ... ")
+    persistInitialData()
+    println("OK")
+
+    private def persistInitialData() {
         val sparqlEndpointPlugin = new SparqlEndpoint
+        val payolaStoragePlugin = new PayolaStorage
         val concreteSparqlQueryPlugin = new ConcreteSparqlQuery
         val projectionPlugin = new Projection
         val selectionPlugin = new Selection
         val typedPlugin = new Typed
         val join = new Join
         val unionPlugin = new Union
-
-        val analysisDao = new AnalysisDAO
-        val pluginDao = new PluginDAO
+        val ontologicalFilterPlugin = new OntologicalFilter
+        val shortestPathPlugin = new ShortestPath
 
         val plugins = List(
             sparqlEndpointPlugin,
+            payolaStoragePlugin,
             concreteSparqlQueryPlugin,
             projectionPlugin,
             selectionPlugin,
             typedPlugin,
             join,
-            unionPlugin
+            unionPlugin,
+            ontologicalFilterPlugin,
+            shortestPathPlugin
         )
+
+        // TODO persists the plugins and maybe some data sources like dbpedia, opendata.cz etc.
+
         // persist analysis
         val a = new cz.payola.domain.entities.Analysis("DB: Cities with more than 2 million habitants with countries", None)
-        val analysis = analysisDao.persist(a)
+        a.isPublic_=(true)
+        val analysis = model.analysisRepository.persist(a)
 
         // Persist  plugins
-        for (p <- plugins) {
-            pluginDao.persist(p)
-        }
+        plugins.foreach(p => model.pluginRepository.persist(p))
 
         val citiesFetcher = sparqlEndpointPlugin.createInstance()
             .setParameter("EndpointURL", "http://dbpedia.org/sparql")
@@ -88,11 +96,13 @@ object DatabaseInitializer extends App
         val ds2 = new DataSource("Countries", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter].createValue("http://dbpedia.org/ontology/City")))
         val ds3 = new DataSource("Countries2", None, sparqlEndpointPlugin, immutable.Seq(sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter].createValue("http://dbpedia.org/ontology/City")))
 
-        val dsDao = new DataSourceDAO()
-        dsDao.persist(ds1)
-        dsDao.persist(ds2)
-        dsDao.persist(ds3)
+        ds1.isPublic_=(true)
+        ds2.isPublic_=(true)
+        ds3.isPublic_=(true)
 
-        println("Data initialized")
+        model.dataSourceRepository.persist(ds1)
+        model.dataSourceRepository.persist(ds2)
+        model.dataSourceRepository.persist(ds3)
     }
 }
+

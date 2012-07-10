@@ -12,8 +12,9 @@ import cz.payola.web.client.views.plugins.visual.settings.components.visualsetup
 import cz.payola.web.client.views.plugins.visual._
 import cz.payola.web.client.mvvm.element._
 import settings._
-import cz.payola.web.shared.GraphFetcher
+import cz.payola.web.shared._
 import cz.payola.common.rdf.IdentifiedVertex
+import scala.Some
 
 // TODO remove after classloading is done
 @dependency("cz.payola.common.rdf.IdentifiedVertex")

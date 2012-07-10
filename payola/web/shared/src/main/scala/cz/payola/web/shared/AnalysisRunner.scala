@@ -1,17 +1,16 @@
 package cz.payola.web.shared
 
 import cz.payola.domain.entities.analyses.evaluation._
-import cz.payola.data.dao.AnalysisDAO
 import scala.collection.mutable.HashMap
 import s2js.compiler.async
 
+// TODO move the logic to the model.
 @remote object AnalysisRunner
 {
     val runningEvaluations : HashMap[String, AnalysisEvaluation] = new HashMap[String, AnalysisEvaluation]
 
     @async def runAnalysisById(id: String)(successCallback: (String => Unit))(failCallback: (Throwable => Unit)) = {
-        //TODO: Get AnalysisDAO from datafacade! (JH)
-        val analysisOpt = new AnalysisDAO().getById(id)
+        val analysisOpt = Payola.model.analysisModel.getById(id)
 
         if (analysisOpt.isEmpty) {
             throw new EntityNotFoundException

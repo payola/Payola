@@ -1,6 +1,6 @@
 package cz.payola.common.entities.settings.ontology
 
-import cz.payola.common.entities.Entity
+import cz.payola.common.Entity
 
 /** This trait is a blue print for the domain class that wraps settings for custom
   * visualization of an ontology.

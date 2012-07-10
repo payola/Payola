@@ -13,7 +13,7 @@ class AnalysisTest extends FlatSpec with ShouldMatchers {
         val u: User = new User("Franta")
         val a: Analysis = new Analysis(name, Some(u))
 
-        u == a.owner && u.accessibleAnalyses.contains(a) && a.name == name
+        u == a.owner && u.grantedAnalyses.contains(a) && a.name == name
     }
 
     it should "work correctly with appending and removing plugin instances" in {
