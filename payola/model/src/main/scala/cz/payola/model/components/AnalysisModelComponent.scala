@@ -6,7 +6,9 @@ import scala.Some
 import cz.payola.model.EntityModelComponent
 
 trait AnalysisModelComponent extends EntityModelComponent
-{self: DataContextComponent =>
+{
+    self: DataContextComponent =>
+
     lazy val analysisModel = new EntityModel(analysisRepository)
     {
         def getTop: Seq[Analysis] = {

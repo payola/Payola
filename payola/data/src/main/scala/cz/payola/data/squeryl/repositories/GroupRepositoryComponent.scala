@@ -6,6 +6,7 @@ import cz.payola.data.squeryl._
 import cz.payola.data._
 import org.squeryl.Query
 import cz.payola.data.PaginationInfo
+import org.squeryl.dsl.ast.LogicalBoolean
 
 trait GroupRepositoryComponent extends TableRepositoryComponent
 {
@@ -16,17 +17,14 @@ trait GroupRepositoryComponent extends TableRepositoryComponent
     {
         def getAllByOwnerId(ownerId: String, pagination: Option[PaginationInfo] = None): Seq[Group] = {
             // TODO pagination
-            select(getSelectQuery(id = None, ownerId = Some(ownerId)))
+            select(getSelectQuery(_.ownerId === Some(ownerId)))
         }
 
-        protected def getSelectQuery(id: Option[String]) = getSelectQuery(id = id, ownerId = None)
-
-        protected def getSelectQuery(id: Option[String], ownerId: Option[String]) = {
+        protected def getSelectQuery(entityFilter: Group => LogicalBoolean) = {
             join(schema.groups, schema.users, schema.groupMembership.leftOuter, schema.users.leftOuter)((g, o, a, u) =>
-                where(condition[String](id, _ === g.id) and condition[String](ownerId, Option(_) === g.ownerId))
+                where(entityFilter(g))
                 select(g, o, u)
-                on(g.ownerId === Option(o.id), Option(g.id) === a.map(_.groupId), a.map(_.memberId) === u.map(_.id)
-                )
+                on(g.ownerId === Option(o.id), Option(g.id) === a.map(_.groupId), a.map(_.memberId) === u.map(_.id))
             )
         }
 

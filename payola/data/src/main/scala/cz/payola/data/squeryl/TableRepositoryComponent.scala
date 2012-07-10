@@ -24,12 +24,12 @@ trait TableRepositoryComponent
         extends Repository[A]
     {
         def getById(id: String): Option[A] = {
-            select(id = Some(id)).headOption
+            select(getSelectQuery(_.id === id)).headOption
         }
 
         def getAll(pagination: Option[PaginationInfo] = None): Seq[A] = {
             // TODO pagination
-            select(id = None)
+            select(getSelectQuery(_ => 1 === 1))
         }
 
         def removeById(id: String): Boolean = DataException.wrap {
@@ -63,20 +63,11 @@ trait TableRepositoryComponent
         }
 
         /**
-          * Executes the select query with possible id filter.
-          * @param id If defined, only entities with the specified id are selected. Otherwise all entities are selected.
-          * @return The selected entities.
-          */
-        protected def select(id: Option[String]): Seq[A] = {
-            select(getSelectQuery(id))
-        }
-
-        /**
           * Returns a query that should be used when selecting entities from the database.
-          * @param id If defined, only entities with the specified id are selected. Otherwise all entities are selected.
+          * @param entityFilter Filters entities that should be selected.
           * @return The select query.
           */
-        protected def getSelectQuery(id: Option[String]): Query[B]
+        protected def getSelectQuery(entityFilter: A => LogicalBoolean): Query[B]
 
         /**
           * Processes results of the select query.
@@ -134,8 +125,8 @@ trait TableRepositoryComponent
     class LazyTableRepository[A <: PersistableEntity](table: Table[A], entityConverter: EntityConverter[A])
         extends TableRepository[A, A](table, entityConverter)
     {
-        protected def getSelectQuery(id: Option[String]): Query[A] = {
-            id.map(entityId => table.where(e => e.id === entityId)).getOrElse(table)
+        protected def getSelectQuery(entityFilter: A => LogicalBoolean): Query[A] = {
+            table.where(e => entityFilter(e))
         }
 
         protected def processSelectResults(results: Seq[A]): Seq[A] = {
