@@ -16,7 +16,7 @@ object User extends EntityConverter[User]
     def convert(entity: AnyRef)(implicit context: SquerylDataContextComponent): Option[User] = {
         entity match {
             case e: User => Some(e)
-            case e: cz.payola.common.entities.User => Some(new User(e.id, e.name, e.email, e.password))
+            case e: cz.payola.common.entities.User => Some(new User(e.id, e.name, e.password, e.email))
             case _ => None
         }
     }

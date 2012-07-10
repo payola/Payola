@@ -23,14 +23,14 @@ trait UserRepositoryComponent extends TableRepositoryComponent
             evaluateCollectionResultQuery(query, pagination)
         }
 
-        def getByName(username: String): Option[User] = {
-            val query = table.where(u => u.name === username)
+        def getByName(name: String): Option[User] = {
+            val query = table.where(u => u.name === name)
 
             evaluateSingleResultQuery(query)
         }
 
-        def getByCredentials(username: String, password: String): Option[User] = {
-            val query = table.where(u => u.name === username and u.password === password)
+        def getByCredentials(name: String, password: String): Option[User] = {
+            val query = table.where(u => u.name === name and u.password === password)
 
             evaluateSingleResultQuery(query)
         }
