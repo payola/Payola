@@ -34,7 +34,7 @@ class DataSource(
     extends cz.payola.domain.entities.plugins.DataSource(n, o, df, paramValues)
     with PersistableEntity
 {
-    var pluginId: Option[String] = if (df == null) None else Some(df.id)
+    var pluginId: String = Option(df).map(_.id).getOrElse(null)
 
     var ownerId: Option[String] = o.map(_.id)
 

@@ -4,7 +4,7 @@ import java.sql._
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 
-class VirtuosoStorageSpec extends FlatSpec with ShouldMatchers with TestDataContextComponent
+class VirtuosoStorageSpec extends TestDataContextComponent("virtuoso") with FlatSpec with ShouldMatchers
 {
     val testXML =
         """|<?xml version="1.0"?>

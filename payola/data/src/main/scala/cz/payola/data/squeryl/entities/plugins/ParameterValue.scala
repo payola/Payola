@@ -28,7 +28,7 @@ object ParameterValue
 
 trait ParameterValue[A] extends cz.payola.domain.entities.plugins.ParameterValue[A] with PersistableEntity
 {
-    val parameterId: Option[String]
+    val parameterId: String
 
     var pluginInstanceId: Option[String] = None
 

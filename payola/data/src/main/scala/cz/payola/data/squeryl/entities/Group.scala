@@ -24,7 +24,7 @@ class Group(override val id: String, name: String, o: User)(implicit val context
     extends cz.payola.domain.entities.Group(name, o)
     with PersistableEntity with PrivilegableEntity
 {
-    val ownerId: Option[String] = if (owner == null) None else Some(owner.id)
+    val ownerId: String = Option(o).map(_.id).getOrElse(null)
 
     private lazy val _ownerQuery = context.schema.groupOwnership.right(this)
 

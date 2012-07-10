@@ -62,6 +62,6 @@ class PrivilegeDbRepresentation(
       * @return Returns instantiated privilege
       */
     def toPrivilege: cz.payola.common.entities.Privilege[_] = {
-        context.privilegeRepository.getById(id).get
+        context.privilegeRepository.getById(id).getOrElse(null)
     }
 }

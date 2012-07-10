@@ -31,9 +31,9 @@ class PluginInstance(
     extends cz.payola.domain.entities.plugins.PluginInstance(p, paramValues)
     with PersistableEntity
 {
-    var pluginId: Option[String] = if (p == null) None else Some(p.id)
+    var pluginId: String = Option(p).map(_.id).getOrElse(null)
 
-    var analysisId: Option[String] = None
+    var analysisId: String = null
 
     private lazy val _pluginQuery = context.schema.pluginsPluginInstances.right(this)
 

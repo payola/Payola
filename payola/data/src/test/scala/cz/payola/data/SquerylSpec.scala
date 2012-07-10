@@ -9,7 +9,7 @@ import cz.payola.domain.entities.privileges._
 import cz.payola.domain.entities.plugins.DataSource
 import collection.immutable
 
-class SquerylSpec extends FlatSpec with ShouldMatchers with TestDataContextComponent
+class SquerylSpec extends TestDataContextComponent("") with FlatSpec with ShouldMatchers
 {
     // Users
     val u1 = new cz.payola.domain.entities.User("HS")
@@ -327,16 +327,25 @@ class SquerylSpec extends FlatSpec with ShouldMatchers with TestDataContextCompo
         val user2 = userRepository.getById(u2.id).get
         val group1 = groupRepository.getById(g1.id).get
 
-        user2.grantPrivilege(new AccessAnalysisPrivilege(user1, user2, a1))
-        user1.grantPrivilege(new AccessDataSourcePrivilege(user2, user1, ds2))
-        group1.grantPrivilege(new AccessDataSourcePrivilege(user1, group1, ds1))
-        group1.grantPrivilege(new AccessAnalysisPrivilege(user2, group1, a1))
+        val p1 = new AccessAnalysisPrivilege(user1, user2, a1)
+        val p2 = new AccessDataSourcePrivilege(user2, user1, ds2)
+        val p3 = new AccessDataSourcePrivilege(user1, group1, ds1)
+        val p4 = new AccessAnalysisPrivilege(user2, group1, a1)
 
-        //TODO: assert(privilegeRepository.getPrivilegesCount() == 4)
+        user2.grantPrivilege(p1)
+        user1.grantPrivilege(p2)
+        group1.grantPrivilege(p3)
+        group1.grantPrivilege(p4)
+
+        val p1_db = privilegeRepository.getById(p1.id)
+
+        assert(privilegeRepository.getCount == 4)
         assert(user1.grantedDataSources.size == 1)
         assert(user2.grantedAnalyses.size == 1)
         assert(group1.grantedDataSources.size == 1)
         assert(group1.grantedAnalyses.size == 1)
+
+
     }
 
     "Pagionation" should "work" in {

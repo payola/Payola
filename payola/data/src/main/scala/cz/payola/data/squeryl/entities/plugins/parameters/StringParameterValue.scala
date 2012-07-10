@@ -32,7 +32,7 @@ class StringParameterValue(
     extends cz.payola.domain.entities.plugins.parameters.StringParameterValue(param, value)
     with ParameterValue[String]
 {
-    val parameterId: Option[String] = if (param == null) None else Some(param.id)
+    val parameterId: String = Option(param).map(_.id).getOrElse(null)
 
     private lazy val _parameterQuery = context.schema.valuesOfStringParameters.right(this)
 

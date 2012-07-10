@@ -7,6 +7,8 @@ import cz.payola.data.squeryl.entities.privileges.PrivilegeDbRepresentation
 import cz.payola.data.PaginationInfo
 import cz.payola.data.squeryl.entities.plugins.DataSource
 import cz.payola.domain.Entity
+import scala.collection.mutable
+import cz.payola.data.squeryl.entities.PersistableEntity
 
 trait PrivilegeRepositoryComponent extends TableRepositoryComponent
 {
@@ -14,18 +16,37 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
 
     lazy val privilegeRepository = new PrivilegeRepository[Privilege[_]]
     {
-        private val _repository = new LazyTableRepository[PrivilegeDbRepresentation](schema.privileges,
+        private val representationRepository = new LazyTableRepository[PrivilegeDbRepresentation](schema.privileges,
             PrivilegeDbRepresentation)
 
         def getAll(pagination: Option[PaginationInfo] = None): Seq[Privilege[_]] = Seq()
 
-        def getById(id: String): Option[Privilege[_]] = {
-            val privilegeQuery = _repository.table.where(e => e.id === id)
+        def getByIds(ids: Seq[String]): Seq[Privilege[_]] = {
+            val privileges = representationRepository.getByIds(ids)
 
-            val privilegeDb = _repository.evaluateSingleResultQuery(privilegeQuery)
+            val repositories = mutable.Map[Repository[_], mutable.HashSet[String]]()
 
+            // Fill repositories map with values (Repository -> list of entity IDs to select)
+            privileges.foreach { p =>
+                // Add grantee
+                val granteeRepository = repositoryRegistry(p.granteeClass)
+                repositories.getOrElseUpdate(granteeRepository, mutable.HashSet.empty[String]) += p.granteeId
+
+                // Add object
+                val objectRepository = repositoryRegistry(p.granteeClass)
+                repositories.getOrElseUpdate(granteeRepository, mutable.HashSet.empty[String]) += p.granteeId
+
+                // Add owner
+                repositories.getOrElseUpdate(userRepository, mutable.HashSet.empty[String]) += p.granteeId
+            }
+
+            val entities = repositories.par.flatMap(r => r._1.getByIds(r._2.toSeq).map(e => (e.asInstanceOf[PersistableEntity].id, e)))
+
+            Seq()
+
+            /*
             // If not found ...
-            if (privilegeDb.isEmpty){
+            if (entities.isEmpty){
                 None
             }
             else {
@@ -50,19 +71,22 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
                 }
 
             }
+            */
         }
 
         def persist(entity: AnyRef): Privilege[_] = {
-            _repository.persist(entity)
+            representationRepository.persist(entity)
 
             // The entity was successfully persisted therefore it must be a privilege.
             entity.asInstanceOf[Privilege[_]]
         }
 
-        def removeById(id: String) = _repository.removeById(id)
+        def removeById(id: String) = representationRepository.removeById(id)
+
+        def getCount: Long = representationRepository.getCount
 
         def getPrivilegedObjectIds(granteeId: String, privilegeClass: Class[_], objectClass: Class[_]): Seq[String] = {
-            val query = from(_repository.table)(p =>
+            val query = from(representationRepository.table)(p =>
                 where(p.granteeId === granteeId and
                     p.privilegeClass === privilegeClass.getName and
                     p.objectClass === repositoryRegistry.getClassName(objectClass)
@@ -70,9 +94,7 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
                 select(p.objectId)
             )
 
-            _repository.evaluateCollectionResultQuery(query)
+            representationRepository.evaluateCollectionResultQuery(query)
         }
-
-        def getCount: Int = _repository.getAll().size
     }
 }

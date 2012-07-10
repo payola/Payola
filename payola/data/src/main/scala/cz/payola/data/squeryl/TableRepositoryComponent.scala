@@ -23,8 +23,8 @@ trait TableRepositoryComponent
         val entityConverter: EntityConverter[A])
         extends Repository[A]
     {
-        def getById(id: String): Option[A] = {
-            select(getSelectQuery(_.id === id)).headOption
+        def getByIds(ids: Seq[String]): Seq[A] = {
+            select(getSelectQuery(entity => entity.id in ids))
         }
 
         def getAll(pagination: Option[PaginationInfo] = None): Seq[A] = {
@@ -50,6 +50,13 @@ trait TableRepositoryComponent
             convertedEntity
         }
 
+        def getCount: Long = DataException.wrap {
+            transaction{
+                from(table)(e => compute(count))
+            }
+
+        }
+
         /**
           * Executes the specified query and returns its results.
           * @param query The query to execute.
@@ -72,7 +79,7 @@ trait TableRepositoryComponent
         /**
           * Processes results of the select query.
           * @param results The results to process.
-          * @return Entities based on the selectcion results.
+          * @return Entities based on the selection results.
           */
         protected def processSelectResults(results: Seq[B]): Seq[A]
 

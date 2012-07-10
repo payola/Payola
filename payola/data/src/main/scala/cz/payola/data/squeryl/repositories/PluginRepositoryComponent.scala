@@ -17,7 +17,7 @@ trait PluginRepositoryComponent extends TableRepositoryComponent
         private val representationRepository = new LazyTableRepository[PluginDbRepresentation](schema.plugins,
             PluginDbRepresentation)
 
-        def getById(id: String): Option[Plugin] = representationRepository.getById(id).map(_.toPlugin)
+        def getByIds(ids: Seq[String]): Seq[Plugin] = representationRepository.getByIds(ids).map(_.toPlugin)
 
         def removeById(id: String): Boolean = representationRepository.removeById(id)
 
@@ -37,8 +37,12 @@ trait PluginRepositoryComponent extends TableRepositoryComponent
             }
         }
 
+        def getCount: Long = representationRepository.getCount
+
         def getByName(pluginName: String): Option[Plugin] = {
-            representationRepository.evaluateSingleResultQuery(representationRepository.table.where(p => p.name === pluginName)).map(_.toPlugin)
+            representationRepository.evaluateSingleResultQuery(
+                representationRepository.table.where(p => p.name === pluginName)
+            ).map(_.toPlugin)
         }
     }
 }

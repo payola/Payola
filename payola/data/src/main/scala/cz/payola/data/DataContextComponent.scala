@@ -4,6 +4,7 @@ import cz.payola.domain.entities._
 import cz.payola.domain.entities.plugins._
 import cz.payola.domain.entities.analyses.PluginInstanceBinding
 import cz.payola.domain.RdfStorageComponent
+import cz.payola.data.squeryl.entities.PersistableEntity
 
 /**
   * A component that provides access to a storage with persisted entities.
@@ -45,7 +46,13 @@ trait DataContextComponent
           * Returns an entity with the specified ID.
           * @param id Id of an entity to search for.
           */
-        def getById(id: String): Option[A]
+        def getById(id: String): Option[A] = getByIds(Seq(id)).headOption
+        
+        /**
+          * Returns entities with the specified IDs.
+          * @param ids List of IDs of entities to search for.
+          */
+        def getByIds(ids: Seq[String]): Seq[A]
 
         /**
           * Removes an entity with the specified ID from the repository.
@@ -67,6 +74,11 @@ trait DataContextComponent
           * @return The persisted entity.
           */
         def persist(entity: AnyRef): A
+
+        /**
+          * @return Returns number of persisted entities
+          */
+        def getCount: Long
     }
 
     trait UserRepository[+A] extends Repository[A]
@@ -104,11 +116,6 @@ trait DataContextComponent
 
     trait PrivilegeRepository[+A] extends Repository[A]
     {
-        /**
-          * Returns count of privileges in the repository.
-          */
-        def getCount: Int
-
         /**
           * Returns IDs of privileged objects, that are granted to the specified grantee via privileges of the specified
           * class.

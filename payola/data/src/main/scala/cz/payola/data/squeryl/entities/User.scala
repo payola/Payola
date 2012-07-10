@@ -24,7 +24,7 @@ object User extends EntityConverter[User]
 
 class User(override val id: String, name: String, pwd: String, mail: String)
     (implicit val context: SquerylDataContextComponent)
-    extends cz.payola.domain.entities.User(name) with PersistableEntity
+    extends cz.payola.domain.entities.User(name) with PersistableEntity with PrivilegableEntity
 {
     password = pwd
     email = mail
