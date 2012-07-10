@@ -14,14 +14,23 @@ object PrivilegeDbRepresentation extends EntityConverter[PrivilegeDbRepresentati
 
     def apply(privilege: entities.Privilege[_ <: Entity])
         (implicit context: SquerylDataContextComponent) = {
+        // Plugins has to be handled slightly differently
+        val granteeClass = context.repositoryRegistry.getClassName(privilege.grantee.getClass)
+        val objectClass = context.repositoryRegistry.getClassName(
+            privilege.obj match {
+                case p: cz.payola.domain.entities.Plugin => classOf[cz.payola.domain.entities.Plugin]
+                case o => o.getClass
+            }
+        )
+        
         new PrivilegeDbRepresentation(
             privilege.id,
             privilege.granter.id,
             privilege.grantee.id,
-            context.repositoryRegistry.getClassName(privilege.grantee.getClass),
+            granteeClass,
             privilege.getClass.getName,
             privilege.obj.id,
-            context.repositoryRegistry.getClassName(privilege.obj.getClass)
+            objectClass
         )
     }
 
@@ -40,19 +49,19 @@ object PrivilegeDbRepresentation extends EntityConverter[PrivilegeDbRepresentati
   * @param id - id of a privilege
   * @param granterId - id of [[cz.payola.common.entities.User]] that granted the Privilege
   * @param granteeId - id of [[cz.payola.common.entities.PrivilegableEntity]] that is being granted the Privilege
-  * @param granteeClass - stripped class of this PrivilegableEntity
-  * @param privilegeClass - stripped class of the Privilege
+  * @param granteeClassName - stripped class name of this PrivilegableEntity
+  * @param privilegeClass - class of the Privilege
   * @param objectId - id of [[cz.payola.common.entities.Entity]] that is object of the Privilede
-  * @param objectClass - stripped class of this Object
+  * @param objectClassName - stripped class name of this Object
   */
 class PrivilegeDbRepresentation(
         override val id: String,
         val granterId: String,
         val granteeId: String,
-        val granteeClass: String,
+        val granteeClassName: String,
         val privilegeClass: String,
         val objectId: String,
-        val objectClass: String
+        val objectClassName: String
     )
     (implicit val context: SquerylDataContextComponent)
     extends PersistableEntity {

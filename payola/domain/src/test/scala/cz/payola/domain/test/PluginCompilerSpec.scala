@@ -3,6 +3,7 @@ package cz.payola.domain.test
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import cz.payola.domain.entities.plugins.compiler._
+import cz.payola.domain.entities.plugins.PluginClassLoader
 
 class PluginCompilerSpec extends FlatSpec with ShouldMatchers
 {

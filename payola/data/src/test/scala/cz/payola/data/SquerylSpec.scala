@@ -326,30 +326,45 @@ class SquerylSpec extends TestDataContextComponent("") with FlatSpec with Should
         val user1 = userRepository.getById(u1.id).get
         val user2 = userRepository.getById(u2.id).get
         val group1 = groupRepository.getById(g1.id).get
+        val p = pluginRepository.getById(sparqlEndpointPlugin.id).get
 
         val p1 = new AccessAnalysisPrivilege(user1, user2, a1)
         val p2 = new AccessDataSourcePrivilege(user2, user1, ds2)
         val p3 = new AccessDataSourcePrivilege(user1, group1, ds1)
         val p4 = new AccessAnalysisPrivilege(user2, group1, a1)
+        val p5 = new UsePluginPrivilege(user2, group1, p)
+        val p6 = new UsePluginPrivilege(user2, user1, p)
 
         user2.grantPrivilege(p1)
         user1.grantPrivilege(p2)
         group1.grantPrivilege(p3)
         group1.grantPrivilege(p4)
+        group1.grantPrivilege(p5)
+        user1.grantPrivilege(p6)
 
-        val p1_db = privilegeRepository.getById(p1.id)
+        val p1_db = privilegeRepository.getById(p1.id).get
 
-        assert(privilegeRepository.getCount == 4)
+        assert(p1_db.id == p1.id)
+        assert(p1_db.granter == p1.granter)
+        assert(p1_db.grantee == p1.grantee)
+        assert(p1_db.obj == p1.obj)
+        
+        assert(privilegeRepository.getById(p2.id).get.granter == p2.granter)
+        assert(privilegeRepository.getById(p3.id).get.grantee == p3.grantee)
+        assert(privilegeRepository.getById(p5.id).get.obj == p5.obj)
+        assert(privilegeRepository.getByIds(List(p4.id, p6.id)).size == 2)
+
+        assert(privilegeRepository.getCount == 6)
         assert(user1.grantedDataSources.size == 1)
         assert(user2.grantedAnalyses.size == 1)
+        assert(user1.grantedPlugins.size == 1)
         assert(group1.grantedDataSources.size == 1)
         assert(group1.grantedAnalyses.size == 1)
-
-
+        assert(group1.grantedPlugins.size == 1)
     }
 
     "Pagionation" should "work" in {
-        testPagination
+        //TODO: testPagination
     }
 
     private def testPagination {

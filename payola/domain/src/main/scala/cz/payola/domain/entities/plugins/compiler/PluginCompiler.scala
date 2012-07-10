@@ -42,6 +42,12 @@ class PluginCompiler(val libDirectory: java.io.File, val pluginClassDirectory: j
         }
     }
 
+    /**
+      * A compiler that is actually used to compile the plugins. Adds all the phases of the plugin verifier to the
+      * standard set of the compiler phases.
+      * @param settings Settings of the compiler.
+      * @param reporter An error reporter.
+      */
     private class InternalCompiler(settings: Settings, reporter: Reporter) extends Global(settings, reporter)
     {
         val pluginVerifier = new PluginVerifier(this)

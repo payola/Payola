@@ -1,4 +1,4 @@
-package cz.payola.domain.entities.plugins.compiler
+package cz.payola.domain.entities.plugins
 
 import cz.payola.domain.entities.Plugin
 
