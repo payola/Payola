@@ -7,7 +7,7 @@ trait EntityModelComponent
 {
     self: DataContextComponent =>
 
-    class EntityModel[+A <: Entity](val repository: Repository[A])
+    abstract class EntityModel[+A <: Entity](val repository: Repository[A])
     {
         def getById(id: String): Option[A] = repository.getById(id)
 

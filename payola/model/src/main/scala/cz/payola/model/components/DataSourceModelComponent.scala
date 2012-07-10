@@ -9,6 +9,11 @@ trait DataSourceModelComponent extends EntityModelComponent
 {self: DataContextComponent =>
     lazy val dataSourceModel = new EntityModel(dataSourceRepository)
     {
+        def create : DataSource = {
+            //TODO
+            getById("").get
+        }
+
         def getPublic(count: Int, skip: Int = 0): Seq[DataSource] = {
             // TODO repository.getPublicDataSources(Some(PaginationInfo(skip, count)))
             Nil

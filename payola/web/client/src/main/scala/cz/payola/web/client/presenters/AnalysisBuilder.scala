@@ -13,16 +13,23 @@ import cz.payola.web.client.events.ClickedEventArgs
 import scala.collection.mutable.ArrayBuffer
 import s2js.runtime.client.scala.collection.mutable.HashMap
 
-class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: String, saveHolder: String)
+class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: String)
 {
-    private val allPlugins: Seq[Plugin] = AnalysisBuilderData.getPlugins()
+    private var allPlugins : Seq[Plugin] = List()
+    private var analysisId = ""
+
+    AnalysisBuilderData.getPlugins(){ plugins => allPlugins = plugins}{ error => }
+    AnalysisBuilderData.createEmptyAnalysis(){
+        id =>
+            analysisId = id
+            AnalysisBuilderData.lockAnalysis(id)
+    }{ error => }
+
     private var lanes = new ArrayBuffer[PluginInstance]
-    private val htmlIdToinstanceId = new HashMap[String, String]
 
     private val menu = document.getElementById(menuHolder)
     private val pluginsHolderElement = document.getElementById(pluginsHolder)
     private val nameHolderElement = document.getElementById(nameHolder)
-    private val saveHolderElement = document.getElementById(saveHolder)
 
     private val addPluginLink = new Anchor(List(new Icon(Icon.hdd), new Text(" Add plugin")))
     private val addPluginLinkLi = new ListItem(List(addPluginLink))
@@ -36,62 +43,28 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
     private val name = new Input("name","",Some("Analysis name"),"span3")
     name.render(nameHolderElement)
 
-    private val save = new Button("Save","btn-primary")
-    save.render(saveHolderElement)
+    private var nameChangedTimeout : Option[Int] = None
+
+    name.changed += { eventArgs =>
+        if (nameChangedTimeout.isDefined){
+            window.clearTimeout(nameChangedTimeout.get)
+        }
+
+        nameChangedTimeout = Some(window.setTimeout({
+            AnalysisBuilderData.setAnalysisName(analysisId, eventArgs.target.value){ _ => () } { _ => () }
+        }, 300))
+
+        false
+    }
 
     addPluginLinkLi.render(menu)
     addDataSourceLinkLi.render(menu)
     mergeBranchesLi.render(menu)
 
-    save.clicked += { eventArgs =>
-        savePluginInstances(lanes)
-        //saveBindings(getBindings())
-        false
-    }
-
-    def saveBindings(bindings: Seq[Tuple2[String, String]]) = {
-
-    }
-
-    def savePluginInstances(instances: Seq[PluginInstance]) : Unit = {
-        var i = 0
-        while (i < instances.size){
-            val instance = instances(i)
-            savePluginInstances(instance.predecessors)
-            val instanceId = AnalysisBuilderData.createInstance(instance.plugin.id, getParamsValues(instance))
-            htmlIdToinstanceId.put(instance.getPluginElement.getAttribute("id"),instanceId)
-
-            i += 1
-        }
-    }
-
-    def getParamsValues(instance: PluginInstance) = {
-        val buff = new ArrayBuffer[String]()
-
-        var i = 0
-        while (i < instance.plugin.parameters.size){
-            buff.append(instance.getParamValue(i))
-            i+=1
-        }
-
-        buff
-    }
-
     addPluginLink.clicked += { event =>
         val dialog = new PluginDialog(allPlugins.filter(_.inputCount == 0))
-        dialog.pluginNameClicked += { evt =>
-            val instance = new PluginInstance(evt.target)
-            lanes.append(instance)
-
-            instance.render(pluginsHolderElement)
-
-            instance.connectButtonClicked += { evt =>
-                connectPlugin(evt.target)
-                false
-            }
-
-            instance.deleteButtonClicked += onDeleteClick
-
+        dialog.pluginNameClicked += { evtArgs =>
+            onPluginNameClicked(evtArgs.target, None)
             dialog.hide
             false
         }
@@ -157,27 +130,36 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
         false
     }
 
+    def onPluginNameClicked(plugin: Plugin, predecessor: Option[PluginInstance]) = {
+        val instance = if (predecessor.isDefined) {
+            new PluginInstance(plugin, List(predecessor.get))
+        }else{
+            new PluginInstance(plugin, List())
+        }
+
+        lanes.append(instance)
+
+        instance.render(pluginsHolderElement)
+        instance.connectButtonClicked += { evt =>
+            connectPlugin(evt.target)
+            false
+        }
+
+        instance.deleteButtonClicked += onDeleteClick
+
+        predecessor.map{ p =>
+            lanes -= p
+            p.hideDeleteButton()
+            bind(p, instance)
+        }
+    }
+
     def connectPlugin(pluginInstance: PluginInstance): Unit = {
         val inner = pluginInstance
 
         val dialog = new PluginDialog(allPlugins.filter(_.inputCount == 1))
-        dialog.pluginNameClicked += { evt =>
-            val instance = new PluginInstance(evt.target, List(inner))
-            lanes.append(instance)
-            lanes -= inner
-            inner.hideDeleteButton()
-
-            instance.render(pluginsHolderElement)
-
-            instance.connectButtonClicked += { evt =>
-                connectPlugin(evt.target)
-                false
-            }
-
-            instance.deleteButtonClicked += onDeleteClick
-
-            bind(inner, instance)
-
+        dialog.pluginNameClicked += { evtArgs =>
+            onPluginNameClicked(evtArgs.target, Some(inner))
             dialog.hide
             false
         }
@@ -211,14 +193,4 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
           jsPlumb.connect({ source:a.getPluginElement(), target:b.getPluginElement() },settings);
         """)
     def bind(a: PluginInstance, b: PluginInstance) = null
-
-    def saveBinding(source: String, target: String) = {
-        val sourceId = htmlIdToinstanceId(source)
-        val targetId = htmlIdToinstanceId(target)
-
-        AnalysisBuilderData.saveBinding(sourceId, targetId)
-    }
-
-    @javascript(""" var connections = jsPlumb.getAllConnections().jsPlumb_DefaultScope; for (var k in connections) { self.saveBinding(connections[k].sourceId,connections[k].targetId); }; """)
-    def saveBindings = {}
 }

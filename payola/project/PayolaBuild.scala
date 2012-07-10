@@ -245,7 +245,7 @@ object PayolaBuild extends Build
         "server", PayolaSettings.version, Nil, path = file("web/server"), mainLang = SCALA
     ).settings(
         compileAndPackage <<= (packageBin in Compile).dependsOn(clean).map {jarFile: File =>
-            // Retrieve the dependencies.
+        // Retrieve the dependencies.
             val dependencyExtensions = List("js", "css")
             val dependencyDirectory = new io.Directory(WebSettings.dependencyDir)
             val files = dependencyDirectory.deepFiles.filter(f => dependencyExtensions.contains(f.extension))
@@ -268,7 +268,7 @@ object PayolaBuild extends Build
                 }
                 requireRegex.findAllIn(fileContent).matchData.foreach(fileRequiredSymbols(path) += _.group(1))
             }
-            
+
             // Check whether all required symbols are provided.
             val errorFile = fileRequiredSymbols.find(_._2.exists(file => !symbolFiles.contains(file)))
             if (errorFile.isDefined) {
@@ -293,7 +293,7 @@ object PayolaBuild extends Build
             jarFile
         },
         clean <<= clean.map {_ =>
-            // Delete the dependency file.
+        // Delete the dependency file.
             new io.File(WebSettings.dependencyFile).delete()
         }
     ).dependsOn(

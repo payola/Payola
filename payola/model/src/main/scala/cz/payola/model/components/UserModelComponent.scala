@@ -1,7 +1,7 @@
 package cz.payola.model.components
 
 import cz.payola.data.DataContextComponent
-import cz.payola.domain.entities.User
+import cz.payola.domain.entities._
 import cz.payola.domain.RdfStorageComponent
 import cz.payola.model.EntityModelComponent
 
@@ -19,13 +19,11 @@ trait UserModelComponent extends EntityModelComponent
         }
 
         def getByCredentials(username: String, password: String): Option[User] = {
-            // TODO repository.getUserByCredentials(username, cryptPassword(password))
-            None
+            userRepository.getByCredentials(username, cryptPassword(password))
         }
 
         def getByName(name: String): Option[User] = {
-            // TODO userDAO.getUserByUsername(username)
-            None
+            userRepository.getByName(name)
         }
 
         // TODO bcrypt

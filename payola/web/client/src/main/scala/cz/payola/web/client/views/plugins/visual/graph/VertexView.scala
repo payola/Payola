@@ -82,7 +82,7 @@ class VertexView(val vertexModel: Vertex, var position: Point, var settings: Ver
         val colorToUseOnBox = color.getOrElse(settings.color)
         val correctedPosition = this.position + positionCorrection
 
-        drawCircle(context, correctedPosition, settings.radius/2, 1, Color.Black)
+        drawCircle(context, correctedPosition, settings.radius/2, 2, Color.Black)
         //val correctedPosition = this.position + (settings.getSize / -2) + positionCorrection
         //drawRoundedRectangle(context, correctedPosition, settings.getSize, settings.cornerRadius)
         fillCurrentSpace(context, colorToUseOnBox)

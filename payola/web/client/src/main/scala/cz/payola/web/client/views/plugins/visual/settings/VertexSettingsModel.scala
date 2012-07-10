@@ -4,9 +4,11 @@ import cz.payola.web.client.views.plugins.visual.{Vector, Color}
 
 class VertexSettingsModel
 {
-    var radius = 60
+    var radius = 50
 
-    var color = new Color(170, 240, 170, 0.8)
+    var color = new Color(51, 204, 255, 0.25)
 
-    var colorSelected = new Color(255, 0, 0, 0.8)
+    var colorSelected = new Color(51, 204, 255, 1.0)
+
+    var glyph = ""
 }

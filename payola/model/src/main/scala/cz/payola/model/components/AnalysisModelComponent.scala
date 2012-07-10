@@ -9,6 +9,11 @@ trait AnalysisModelComponent extends EntityModelComponent
 {self: DataContextComponent =>
     lazy val analysisModel = new EntityModel(analysisRepository)
     {
+        def create : Analysis = {
+            //TODO!
+            analysisRepository.getById("").get
+        }
+
         def getTop: Seq[Analysis] = {
             // TODO repository.getTopAnalyses()
             Nil

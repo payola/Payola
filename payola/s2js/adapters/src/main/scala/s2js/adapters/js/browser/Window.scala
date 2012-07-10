@@ -16,7 +16,7 @@ class Window
 
     def alert(s: Any) {}
 
-    def setTimeout(fn: () => Unit, milliseconds: Int): Int = 0
+    def setTimeout(fn: => Unit, milliseconds: Int): Int = 0
 
     def clearTimeout(timeoutId: Int): Int = 0
 

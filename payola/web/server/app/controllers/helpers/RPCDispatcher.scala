@@ -148,13 +148,28 @@ class RPCDispatcher(jsonSerializer: GraphSerializer)
             // "objectify" the desired mezhod to be able to invoke it later
             // this is a very ugly Java stuff, but Scala is not able to do this at the time
             val methodToRun: java.lang.reflect.Method = methodOption.getOrElse(null)
+            val methodAnnotations = methodToRun.getDeclaredAnnotations()
+            if (!methodAnnotations.find{a => a.annotationType().getName().equals("s2js.compiler.secured")}.isDefined)
+            {
+                checkAuthorization
+            }
+
             val runnableObj = clazz.getField("MODULE$").get(objectName)
+            val annotations = methodToRun.getAnnotations()
+            if (!annotations.find{a => a.annotationType().getName().equals("s2js.compiler.secured")}.isDefined)
+            {
+                checkAuthorization
+            }
 
             val dto = new InvocationInfo(methodToRun, clazz, runnableObj)
             dto
         }catch{
             case e: java.lang.ClassNotFoundException => throw new rpc.Exception("Invalid remote object name.")
         }
+    }
+
+    def checkAuthorization = {
+        //TODO
     }
 
     /**

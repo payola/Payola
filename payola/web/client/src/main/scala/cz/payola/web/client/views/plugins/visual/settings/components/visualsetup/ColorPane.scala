@@ -9,13 +9,6 @@ import cz.payola.web.client.events.{ChangedEvent, ChangedEventArgs}
 import s2js.compiler.javascript
 import cz.payola.web.client.mvvm.element._
 
-/**
- *
- * @author jirihelmich
- * @created 5/3/12 9:44 AM
- * @package cz.payola.web.client.views.plugins.visual.components.visualsetup
- */
-
 class ColorPane(name: String, label: String, var color: Color) extends Component
 {
     val changed = new ChangedEvent[ColorPane]
@@ -49,7 +42,7 @@ class ColorPane(name: String, label: String, var color: Color) extends Component
 
     def getDomElement : Element = div.getDomElement
 
-    @javascript("""jQuery(self.div.div).colorpicker({format: 'rgba'}).on('changeColor',function(evt){
+    @javascript("""jQuery(self.getDomElement).colorpicker({format: 'rgba'}).on('changeColor',function(evt){
         var rgba = evt.color.toRGB();
         self.color.red = rgba.r;
         self.color.green = rgba.g;
