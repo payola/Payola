@@ -7,7 +7,7 @@ import cz.payola.model.EntityModelComponent
 
 trait UserModelComponent extends EntityModelComponent
 {
-    self: DataContextComponent with RdfStorageComponent =>
+    self: DataContextComponent with PayolaStorageModelComponent =>
 
     lazy val userModel = new EntityModel(userRepository)
     {
@@ -17,7 +17,7 @@ trait UserModelComponent extends EntityModelComponent
             user.email = email
             repository.persist(user)
 
-            // TODO create his private data storage and data source.
+            payolaStorageModel.createUsersPrivateStorage(user)
         }
 
         def getByCredentials(name: String, password: String): Option[User] = {
@@ -28,8 +28,8 @@ trait UserModelComponent extends EntityModelComponent
             userRepository.getByName(name)
         }
 
-        // TODO bcrypt
         private def cryptPassword(password: String, method: String = "SHA-1"): String = {
+            // TODO bcrypt
             val md = java.security.MessageDigest.getInstance(method)
             val digest = md.digest(password.toCharArray.map(_.toByte))
             new String(digest.map(_.toChar))

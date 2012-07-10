@@ -6,6 +6,7 @@ import cz.payola.data._
 import cz.payola.data.squeryl.entities._
 import scala.Some
 import cz.payola.data.PaginationInfo
+import cz.payola.domain.entities.ShareableEntity
 
 trait TableRepositoryComponent
 {
@@ -67,6 +68,16 @@ trait TableRepositoryComponent
                 }
             }
             convertedEntity
+        }
+    }
+
+    trait ShareableEntityRepository[+A <: ShareableEntity]
+    {
+        self: TableRepository =>
+
+        def getAllPublic: Seq[A] = {
+            // TODO
+            Nil
         }
     }
 }

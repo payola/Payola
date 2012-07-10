@@ -9,10 +9,6 @@ import scala.collection.immutable
   */
 class Graph(val vertices: immutable.Seq[Vertex], val edges: immutable.Seq[Edge])
 {
-    // TODO
-    //require(edges.forall(e => vertices.contains(e.origin) && vertices.contains(e.destination)),
-     //   "All edge origins and destinations have to be present in the graph vertices.")
-
     /**
       * Returns whether the graph is empty (i.e. contains no vertices).
       */

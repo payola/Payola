@@ -4,6 +4,7 @@ import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.FlatSpec
 import cz.payola.domain.rdf.ontology.Ontology
 import cz.payola.domain.net.Downloader
+import cz.payola.domain.entities.settings.OntologyCustomization
 
 class OntologyTest extends FlatSpec with ShouldMatchers
 {

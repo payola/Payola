@@ -32,8 +32,7 @@ trait Secured
 
     def maybeAuthenticatedWithRequest(action: (Option[User], Request[AnyContent]) => Result): Action[AnyContent] = {
         Action { request =>
-            val email = request.session.get("email")
-            val user = email.flatMap(e => getUser(e))
+            val user = request.session.get("email").flatMap(e => getUser(e))
             action(user, request)
         }
     }

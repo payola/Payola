@@ -1,9 +1,10 @@
 package cz.payola.data
 
+import cz.payola.domain.RdfStorageComponent
 import cz.payola.domain.entities._
 import cz.payola.domain.entities.plugins._
 import cz.payola.domain.entities.analyses.PluginInstanceBinding
-import cz.payola.domain.RdfStorageComponent
+import cz.payola.domain.entities.settings.OntologyCustomization
 
 trait DataContextComponent
 {
@@ -25,6 +26,8 @@ trait DataContextComponent
 
     val dataSourceRepository: Repository[DataSource]
 
+    val ontologyCustomizationRepository: Repository[OntologyCustomizationRepository]
+
     lazy val repositoryRegistry = new RepositoryRegistry(Map(
         classOf[User] -> userRepository,
         classOf[Group] -> groupRepository,
@@ -33,7 +36,8 @@ trait DataContextComponent
         classOf[Plugin] -> pluginRepository,
         classOf[PluginInstance] -> pluginInstanceRepository,
         classOf[PluginInstanceBinding] -> pluginInstanceBindingRepository,
-        classOf[DataSource] -> dataSourceRepository
+        classOf[DataSource] -> dataSourceRepository,
+        classOf[OntologyCustomization] -> ontologyCustomizationRepository
     ))
 
     trait Repository[+A]
@@ -64,6 +68,17 @@ trait DataContextComponent
           * @return The persisted entity.
           */
         def persist(entity: AnyRef): A
+    }
+
+    trait ShareableEntityRepository[+A <: ShareableEntity]
+    {
+        self: Repository[A] =>
+
+        /**
+          * Returns all public entities.
+          * @return
+          */
+        def getAllPublic: Seq[A]
     }
 
     trait UserRepository[+A] extends Repository[A]
@@ -116,7 +131,7 @@ trait DataContextComponent
         def getPrivilegedObjectIds(granteeId: String, privilegeClass: Class[_], objectClass: Class[_]): Seq[String]
     }
     
-    trait AnalysisRepository[+A] extends Repository[A]
+    trait AnalysisRepository[+A] extends Repository[A] with ShareableEntityRepository[A]
     {
         /**
           * Returns top analyses in the repository.
@@ -139,7 +154,7 @@ trait DataContextComponent
         def getPublicByOwner(ownerId: String, pagination: Option[PaginationInfo] = None): Seq[A]
     }
 
-    trait PluginRepository[+A] extends Repository[A]
+    trait PluginRepository[+A] extends Repository[A] with ShareableEntityRepository[A]
     {
         /**
           * Returns a plugin with the specified name.
@@ -148,7 +163,7 @@ trait DataContextComponent
         def getByName(name: String): Option[Plugin]
     }
 
-    trait DataSourceRepository[+A] extends Repository[A]
+    trait DataSourceRepository[+A] extends Repository[A] with ShareableEntityRepository[A]
     {
         /**
           * Returns all public data sources.
@@ -156,6 +171,8 @@ trait DataContextComponent
           */
         def getPublic(pagination: Option[PaginationInfo] = None): Seq[A]
     }
+
+    trait OntologyCustomizationRepository[+A] extends Repository[A] with ShareableEntityRepository[A]
 
     /**
       * A registry providing repositories by entity classes or entity class names.
