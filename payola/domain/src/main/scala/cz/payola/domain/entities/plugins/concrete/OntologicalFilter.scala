@@ -41,7 +41,7 @@ class OntologicalFilter(name: String, inputCount: Int, parameters: immutable.Seq
             val variable = new Variable("x" + xCounter)
             xCounter = xCounter + 1
 
-            val classTP = new TriplePattern(variable, Uri.getTypePropertyURI, new Uri(cl.URI))
+            val classTP = new TriplePattern(variable, Uri.getTypePropertyURI, new Uri(cl.uri))
             template += classTP
             classPatterns += classTP
 
@@ -49,7 +49,7 @@ class OntologicalFilter(name: String, inputCount: Int, parameters: immutable.Seq
                 val propVariable = new Variable("v" + vCounter)
                 vCounter = vCounter + 1
 
-                val variableTP = new TriplePattern(variable, new Uri(prop.URI), propVariable)
+                val variableTP = new TriplePattern(variable, new Uri(prop.uri), propVariable)
                 template += variableTP
                 variablePatterns += new GraphPattern(List(variableTP))
             }

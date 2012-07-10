@@ -3,6 +3,10 @@ package controllers.helpers
 import play.api.mvc._
 import cz.payola.domain.entities.User
 import controllers._
+import scala.Left
+import play.api.libs.iteratee._
+import scala.Left
+import scala.Left
 
 /**
   * Provide security features
@@ -11,34 +15,25 @@ trait Secured
 {
     self: PayolaController =>
 
-    def authenticated(f: User => Result): Action[(Action[AnyContent], AnyContent)] = {
-        authenticatedWithRequest((_, user) => f(user))
+    def authenticated(action: User => Result) = {
+        authenticatedWithRequest((user, request) => action(user))
     }
 
-    def authenticatedWithRequest(f: (Request[_], User) => Result) = {
-        maybeAuthenticatedWithRequest { r: Option[(Request[AnyContent], User)] =>
-            val result = r.map { case (request: Request[_], user: User) => f(request, user) }
+    def authenticatedWithRequest(action: (User, Request[AnyContent]) => Result) = {
+        maybeAuthenticatedWithRequest { (user, request) =>
+            val result = user.map(u => action(u, request))
             result.getOrElse(Results.Redirect(routes.Application.login))
         }
     }
 
-    def maybeAuthenticated(f: Option[User] => Result): Action[(Action[AnyContent], AnyContent)] = {
-        maybeAuthenticatedWithRequest((r: Option[(Request[AnyContent], User)]) => f(r.map(_._2)))
+    def maybeAuthenticated(action: Option[User] => Result) = {
+        maybeAuthenticatedWithRequest((user, request) => action(user))
     }
 
-    def maybeAuthenticatedWithRequest(f: (Option[(Request[AnyContent], User)]) => Result):
-        Action[(Action[AnyContent], AnyContent)] = {
-
-        def username(requestHeader: RequestHeader): Option[String] = {
-            requestHeader.session.get("email")
+    def maybeAuthenticatedWithRequest(action: (Option[User], Request[AnyContent]) => Result): Action[AnyContent] = {
+        Action { request =>
+            val user = request.session.get("email").flatMap(e => getUser(e))
+            action(user, request)
         }
-        def onUnauthorized(requestHeader: RequestHeader): Result = {
-            f(None)
-        }
-        def onAuthorized(userName: String): Action[AnyContent] = {
-            Action(request => f(getUser(userName).map((request, _))))
-        }
-
-        Security.Authenticated[AnyContent](username _, onUnauthorized _)(onAuthorized _)
     }
 }

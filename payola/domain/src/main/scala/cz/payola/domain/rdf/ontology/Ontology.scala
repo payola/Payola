@@ -83,7 +83,7 @@ object Ontology
             processProperty(property).foreach { p =>
                 val domainUri = property.getDomain.getURI
                 val classProperties = properties.getOrElseUpdate(domainUri, mutable.HashMap.empty[String, Property])
-                classProperties.put(p.URI, p)
+                classProperties.put(p.uri, p)
             }
         }
         properties

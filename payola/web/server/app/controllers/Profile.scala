@@ -46,7 +46,7 @@ object Profile extends PayolaController with Secured
         Ok(html.Profile.createGroup(user, groupForm))
     }
 
-    def saveCreateGroup = authenticatedWithRequest { (request: Request[_], user: User) =>
+    def saveCreateGroup = authenticatedWithRequest { (user, request) =>
         val name = groupForm.bindFromRequest()(request).get
         val group = Payola.model.groupModel.create(name, user)
 
@@ -59,7 +59,7 @@ object Profile extends PayolaController with Secured
         }
     }
 
-    def saveGroup(id: String) = authenticatedWithRequest{ (request: Request[_], user: User) =>
+    def saveGroup(id: String) = authenticatedWithRequest{ (user, request) =>
 
         val data = request.body match {
             case AnyContentAsFormUrlEncoded(data) => data
@@ -88,7 +88,7 @@ object Profile extends PayolaController with Secured
         }
     }
 
-    def editGroup(id: String) = authenticatedWithRequest{ (request: Request[_], user: User) =>
+    def editGroup(id: String) = authenticatedWithRequest{ (user, request) =>
         val g = Payola.model.groupModel.getByOwnerAndId(user, id)
 
         if (g.isDefined)
@@ -101,7 +101,7 @@ object Profile extends PayolaController with Secured
         }
     }
 
-    def listGroups = authenticatedWithRequest( (request: Request[_], user: User) =>
+    def listGroups = authenticatedWithRequest( (user, request) =>
         Ok(views.html.Profile.listGroups(user)(request.flash))
     )
 

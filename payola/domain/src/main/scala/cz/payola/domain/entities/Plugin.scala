@@ -9,14 +9,14 @@ import cz.payola.domain.entities.plugins._
   * @param _name Name of the plugin.
   * @param _inputCount Count of the plugin inputs.
   * @param _parameters The plugin parameters.
-  * @param _id ID of the plugin.
+  * @param id ID of the plugin.
   */
 abstract class Plugin(
     protected var _name: String,
     protected val _inputCount: Int,
     protected val _parameters: immutable.Seq[Plugin#ParameterType],
-    protected var _id: String = IDGenerator.newId)
-    extends Entity(_id)
+    id: String = IDGenerator.newId)
+    extends Entity(id)
     with OptionallyOwnedEntity
     with NamedEntity
     with ShareableEntity
