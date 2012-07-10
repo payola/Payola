@@ -4,6 +4,7 @@ import scala.collection._
 import cz.payola.domain.entities.plugins.DataSource
 import cz.payola.domain.entities.privileges._
 import cz.payola.domain.Entity
+import cz.payola.domain.entities.settings.OntologyCustomization
 
 /**
   * @param _name Name of the user.
@@ -24,7 +25,7 @@ class User(protected var _name: String)
 
     type PluginType = Plugin
 
-    type OntologyCustomizationType = settings.ontology.Customization
+    type OntologyCustomizationType = OntologyCustomization
 
     /**
       * Adds the analysis to the users owned analyses. The analysis has to be owned by the user.

@@ -2,8 +2,7 @@ package cz.payola.common.entities
 
 import scala.collection._
 import cz.payola.common.entities.plugins.DataSource
-import cz.payola.common.entities.settings.ontology.Customization
-import scala.Seq
+import cz.payola.common.entities.settings.OntologyCustomization
 
 /**
   * An user of the application.
@@ -23,7 +22,7 @@ trait User extends NamedEntity with PrivilegableEntity
     type PluginType <: Plugin
 
     /** Type of the ontology visual customizations that the user may own. */
-    type OntologyCustomizationType <: Customization
+    type OntologyCustomizationType <: OntologyCustomization
 
     protected var _email: String = ""
 
@@ -109,22 +108,6 @@ trait User extends NamedEntity with PrivilegableEntity
     }
 
     /**
-      * Stores the specified data source to the users owned data sources.
-      * @param source The data source to store.
-      */
-    protected def storeOwnedDataSource(source: DataSourceType) {
-        _ownedDataSources += source
-    }
-
-    /**
-      * Discards the specified data source from the users owned data sources. Complementary operation to store.
-      * @param source The data source to discard.
-      */
-    protected def discardOwnedDataSource(source: DataSourceType) {
-        _ownedDataSources -= source
-    }
-
-    /**
       * Stores the specified plugin to the users owned plugins.
       * @param plugin The plugin to store.
       */
@@ -141,6 +124,22 @@ trait User extends NamedEntity with PrivilegableEntity
     }
 
     /**
+      * Stores the specified data source to the users owned data sources.
+      * @param source The data source to store.
+      */
+    protected def storeOwnedDataSource(source: DataSourceType) {
+        _ownedDataSources += source
+    }
+
+    /**
+      * Discards the specified data source from the users owned data sources. Complementary operation to store.
+      * @param source The data source to discard.
+      */
+    protected def discardOwnedDataSource(source: DataSourceType) {
+        _ownedDataSources -= source
+    }
+
+    /**
       * Stores the specified customization to the users.
       * @param customization The customization to store.
       */
@@ -152,7 +151,7 @@ trait User extends NamedEntity with PrivilegableEntity
       * Discards the customization from the user. Complementary operation to store.
       * @param customization The customization to discard.
       */
-    protected def discardOntologyCustomization(customization:OntologyCustomizationType) {
+    protected def discardOntologyCustomization(customization: OntologyCustomizationType) {
         _ontologyCustomizations -= customization
     }
 }

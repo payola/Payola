@@ -26,16 +26,16 @@ trait PrivilegableEntity extends cz.payola.domain.entities.PrivilegableEntity
             context.dataSourceRepository.getById(_)).toList
     }
 
-    def grantedPlugins: immutable.Seq[cz.payola.common.entities.Plugin] = {
+    override def grantedPlugins: immutable.Seq[cz.payola.common.entities.Plugin] = {
         _loadObjectIds(classOf[UsePluginPrivilege], classOf[cz.payola.common.entities.Plugin]).flatMap(
             context.pluginRepository.getById(_)).toList
     }
 
     /* TODO: customization will be implement later
-    override def grantedOntologyCustomizations: immutable.Seq[cz.payola.common.entities.settings.ontology.Customization] = {
+    override def grantedOntologyCustomizations: immutable.Seq[cz.payola.common.entities.settings.ontology.OntologyCustomization] = {
         _loadObjectIds(
             UseOntologyCustomizationPrivilege.getClass.toString,
-            cz.payola.common.entities.settings.ontology.Customization.getClass.toString
+            cz.payola.common.entities.settings.ontology.OntologyCustomization.getClass.toString
         )
     }
     */

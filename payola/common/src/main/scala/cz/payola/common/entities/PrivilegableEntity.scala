@@ -5,6 +5,7 @@ import cz.payola.common.entities.privileges._
 import cz.payola.common.entities.plugins.DataSource
 import scala.Seq
 import cz.payola.common.Entity
+import cz.payola.common.entities.settings.OntologyCustomization
 
 /**
   * An entity that may be granted privileges.
@@ -24,13 +25,18 @@ trait PrivilegableEntity extends Entity
         privileges.toList.collect { case p: AccessAnalysisPrivilege => p.obj }
     }
 
+    /** Returns the plugins that are accessible for the entity directly via his privileges. */
+    def grantedPlugins: immutable.Seq[Plugin] = {
+        privileges.toList.collect { case p: UsePluginPrivilege => p.obj }
+    }
+
     /** Returns the data sources that are accessible for the entity directly via his privileges. */
     def grantedDataSources: immutable.Seq[DataSource] = {
         privileges.toList.collect { case p: AccessDataSourcePrivilege => p.obj }
     }
 
     /** Returns the ontology customizations that are accessible for the entity directly via his privileges. */
-    def grantedOntologyCustomizations: immutable.Seq[settings.ontology.Customization] = {
+    def grantedOntologyCustomizations: immutable.Seq[settings.OntologyCustomization] = {
         privileges.toList.collect { case p: UseOntologyCustomizationPrivilege => p.obj }
     }
 
