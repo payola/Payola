@@ -22,7 +22,7 @@ trait EntityModelComponent
         def remove(entity: Entity): Boolean = repository.removeById(entity.id)
     }
 
-    class ShareableEntityModel[A <: ShareableEntity with OptionallyOwnedEntity, B <: Privilege[A]](
+    class ShareableEntityModel[A <: ShareableEntity with OptionallyOwnedEntity](
         override val repository: ShareableEntityRepository[A],
         accessPrivilegeClass: Class[_])
         extends EntityModel[A](repository)
@@ -38,8 +38,8 @@ trait EntityModelComponent
         private def getGrantedToUser(user: Option[User], groups: Seq[Group]): Seq[A] = {
             user.map { u =>
                 val granteeIds = u.id +: groups.filter(_.hasMember(u)).map(_.id)
-                val privileges = privilegeRepository.getAllGrantedTo[B](granteeIds, accessPrivilegeClass)
-                privileges.map(_.obj)
+                val privileges = privilegeRepository.getAllGrantedTo(granteeIds, accessPrivilegeClass)
+                privileges.map(_.obj.asInstanceOf[A])
             }.getOrElse(Nil)
         }
     }

@@ -10,8 +10,7 @@ trait DataSourceModelComponent extends EntityModelComponent
 {
     self: DataContextComponent with RdfStorageComponent =>
 
-    lazy val dataSourceModel = new ShareableEntityModel[DataSource, AccessDataSourcePrivilege](
-        dataSourceRepository, classOf[AccessDataSourcePrivilege])
+    lazy val dataSourceModel = new ShareableEntityModel[DataSource](dataSourceRepository, classOf[AccessDataSourcePrivilege])
     {
         def create : DataSource = {
             //TODO
