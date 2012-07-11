@@ -22,19 +22,17 @@ trait TableRepositoryComponent
         val entityConverter: EntityConverter[A])
         extends Repository[A]
     {
-        def getByIds(ids: Seq[String]): Seq[A] = wrapInTransaction {
+        def getByIds(ids: Seq[String]): Seq[A] = {
             selectWhere(entity => entity.id in ids)
         }
 
-        def getAll(pagination: Option[PaginationInfo] = None): Seq[A] = wrapInTransaction {
+        def getAll(pagination: Option[PaginationInfo] = None): Seq[A] = {
             // TODO pagination
             selectWhere(_ => 1 === 1)
         }
 
         def removeById(id: String): Boolean = wrapInTransaction {
-            transaction {
-                table.deleteWhere(e => id === e.id) == 1
-            }
+            table.deleteWhere(e => id === e.id) == 1
         }
 
         def persist(entity: AnyRef): A = wrapInTransaction {
@@ -65,7 +63,7 @@ trait TableRepositoryComponent
           * @param entityFilter A filter that excludes entites from the result.
           * @return The selected entities.
           */
-        private[squeryl] def selectWhere(entityFilter: A => LogicalBoolean): Seq[A] = {
+        private[squeryl] def selectWhere(entityFilter: A => LogicalBoolean): Seq[A] = wrapInTransaction {
             select(getSelectQuery(entityFilter))
         }
 
@@ -110,9 +108,7 @@ trait TableRepositoryComponent
     {
         self: TableRepository[A, _] =>
 
-        def getAllByOwnerId(ownerId: Option[String]): Seq[A] = {
-            selectWhere(_.owner.map(_.id) === ownerId)
-        }
+        def getAllByOwnerId(ownerId: Option[String]): Seq[A] = selectWhere(_.owner.map(_.id) === ownerId)
     }
 
     trait ShareableEntityTableRepository[A <: PersistableEntity with ShareableEntity with OptionallyOwnedEntity]

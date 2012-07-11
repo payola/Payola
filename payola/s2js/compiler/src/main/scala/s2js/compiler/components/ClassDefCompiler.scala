@@ -349,15 +349,16 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         }
         if (parameterValues.nonEmpty) {
             // Default parameter values are handled in the function body so they are ignored.
-            parameterValues.foreach {
-                parameterValue =>
-                    if (!parameterValue.hasSymbolWhich(_.name.toString.contains("$default$"))) {
-                        parameterValue match {
-                            case Block(_, expr) => compileAst(expr)
-                            case _ => compileAst(parameterValue)
-                        }
-                        buffer += ", "
+            parameterValues.foreach { parameterValue =>
+                if (!parameterValue.hasSymbolWhich(_.name.toString.contains("$default$"))) {
+                    parameterValue match {
+                        case Block(_, expr) => compileAst(expr)
+                        case _ => compileAst(parameterValue)
                     }
+                } else {
+                    buffer += "undefined"
+                }
+                buffer += ", "
             }
             buffer.remove(buffer.length - 1)
         }

@@ -181,28 +181,6 @@ trait DataContextComponent
         with NamedEntityRepository[Analysis]
         with OptionallyOwnedEntityRepository[Analysis]
         with ShareableEntityRepository[Analysis]
-    {
-        /**
-          * Returns top analyses in the repository.
-          * @param pagination Optionally specified pagination of the result.
-          */
-        def getTop(pagination: Option[PaginationInfo] = Some(PaginationInfo(0, 10))): Seq[Analysis]
-
-        /**
-          * Returns top analyses owned by the specified owner.
-          * @param ownerId ID of the analysis owner.
-          * @param pagination Optionally specified pagination of the result.
-          */
-        def getTopByOwner(ownerId: String, pagination: Option[PaginationInfo] = Some(PaginationInfo(0, 10))):
-            Seq[Analysis]
-
-        /**
-          * Returns public analyses owned by the specified owner.
-          * @param ownerId ID of the analysis owner.
-          * @param pagination Optionally specified pagination of the result.
-          */
-        def getPublicByOwner(ownerId: String, pagination: Option[PaginationInfo] = None): Seq[Analysis]
-    }
 
     trait OntologyCustomizationRepository[+A <: OntologyCustomization]
         extends Repository[A]

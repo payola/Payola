@@ -81,9 +81,9 @@ class MethodSpecs extends CompilerFixtureSpec
                         };
                         o1.m3 = function() {
                             var self = this;
-                            self.m1('foo');
+                            self.m1('foo', undefined);
                             self.m1('foo', 'bar');
-                            self.m2('foo');
+                            self.m2('foo', undefined);
                         };
                         o1.__class__ = new s2js.runtime.client.Class('o1', []);
                     """

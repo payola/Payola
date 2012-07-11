@@ -48,27 +48,27 @@ trait PluginRepositoryComponent extends TableRepositoryComponent
                 }
             }
 
-        def getByIds(ids: Seq[String]): Seq[Plugin] = schema.wrapInTransaction {
+        def getByIds(ids: Seq[String]): Seq[Plugin] = {
             representationRepository.getByIds(ids).map(_.toPlugin)
         }
 
-        def removeById(id: String): Boolean = schema.wrapInTransaction {
+        def removeById(id: String): Boolean = {
             representationRepository.removeById(id)
         }
 
-        def getAll(pagination: Option[PaginationInfo] = None): Seq[Plugin] = schema.wrapInTransaction {
+        def getAll(pagination: Option[PaginationInfo] = None): Seq[Plugin] = {
             representationRepository.getAll(pagination).map(_.toPlugin)
         }
 
-        def getAllPublic: Seq[Plugin] = schema.wrapInTransaction {
+        def getAllPublic: Seq[Plugin] = {
             representationRepository.selectWhere(_.isPublic === true).map(_.toPlugin)
         }
 
-        def getAllByOwnerId(ownerId: Option[String]): Seq[Plugin] = schema.wrapInTransaction {
+        def getAllByOwnerId(ownerId: Option[String]): Seq[Plugin] = {
             representationRepository.selectWhere(_.ownerId === ownerId).map(_.toPlugin)
         }
 
-        def getByName(name: String): Option[Plugin] = schema.wrapInTransaction {
+        def getByName(name: String): Option[Plugin] = {
             representationRepository.selectOneWhere(_.name === name).map(_.toPlugin)
         }
 
@@ -88,7 +88,7 @@ trait PluginRepositoryComponent extends TableRepositoryComponent
             }
         }
 
-        def getCount: Long = schema.wrapInTransaction {
+        def getCount: Long = {
             representationRepository.getCount
         }
     }
