@@ -3,5 +3,7 @@ import java.lang.annotation.*;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface secured {
+public @interface secured
+{
+
 }
