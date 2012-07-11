@@ -4,7 +4,8 @@ import cz.payola.common._
 import cz.payola.data.squeryl.entities._
 import cz.payola.data.DataException
 import cz.payola.data.squeryl.SquerylDataContextComponent
-import cz.payola.domain.entities.Privilege
+import cz.payola.domain.entities._
+import scala.Some
 
 /**
   * This object converts [[cz.payola.common.entities.Privilege]] to [[cz.payola.data.squeryl.entities.PrivilegeDbRepresentation]]
@@ -49,28 +50,30 @@ object PrivilegeDbRepresentation extends EntityConverter[PrivilegeDbRepresentati
   * @param id - id of a privilege
   * @param granterId - id of [[cz.payola.common.entities.User]] that granted the Privilege
   * @param granteeId - id of [[cz.payola.common.entities.PrivilegableEntity]] that is being granted the Privilege
-  * @param granteeClass - stripped class of this PrivilegableEntity
-  * @param privilegeClass - stripped class of the Privilege
+  * @param granteeClassName - stripped class name of this PrivilegableEntity
+  * @param privilegeClass - class of the Privilege
   * @param objectId - id of [[cz.payola.common.entities.Entity]] that is object of the Privilede
-  * @param objectClass - stripped class of this Object
+  * @param objectClassName - stripped class name of this Object
   */
 class PrivilegeDbRepresentation(
         override val id: String,
         val granterId: String,
         val granteeId: String,
-        val granteeClass: String,
+        val granteeClassName: String,
         val privilegeClass: String,
         val objectId: String,
-        val objectClass: String
+        val objectClassName: String
     )
     (implicit val context: SquerylDataContextComponent)
-    extends PersistableEntity {
+    extends PersistableEntity
+    with ShareableEntity
+{
 
     /**
       * Instantiates represented [[cz.payola.common.entities.Privilege]]
       * @return Returns instantiated privilege
       */
     def toPrivilege: cz.payola.common.entities.Privilege[_] = {
-        context.privilegeRepository.getById(id).get
+        context.privilegeRepository.getById(id).getOrElse(null)
     }
 }

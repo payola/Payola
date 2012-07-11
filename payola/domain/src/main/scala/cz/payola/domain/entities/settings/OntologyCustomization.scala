@@ -16,7 +16,7 @@ object OntologyCustomization
       * @return The customization.
       */
     def empty(ontologyURL: String, name: String, owner: Option[User]): OntologyCustomization = {
-        val ontology = Ontology(new Downloader(ontologyURL).result)
+        val ontology = Ontology(new Downloader(ontologyURL, accept = "application/rdf+xml").result)
         val classCustomizations = ontology.classes.values.map { c =>
             val propertyCustomizations = c.properties.values.map { p =>
                 new PropertyCustomization(p.uri, "", 0)

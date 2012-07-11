@@ -8,8 +8,10 @@ trait ModelComponent
     extends UserModelComponent
     with GroupModelComponent
     with AnalysisModelComponent
+    with PluginModelComponent
     with DataSourceModelComponent
     with PluginModelComponent
+    with PayolaStorageModelComponent
 {
     self: DataContextComponent with RdfStorageComponent =>
 }

@@ -3,8 +3,12 @@ package cz.payola.data
 import cz.payola.domain.entities._
 import cz.payola.domain.entities.plugins._
 import cz.payola.domain.entities.analyses.PluginInstanceBinding
+import cz.payola.domain.entities.settings.OntologyCustomization
 import cz.payola.domain.RdfStorageComponent
 
+/**
+  * A component that provides access to a storage with persisted entities.
+  */
 trait DataContextComponent
 {
     self: RdfStorageComponent =>
@@ -25,6 +29,8 @@ trait DataContextComponent
 
     val dataSourceRepository: Repository[DataSource]
 
+    // TODO val ontologyCustomizationRepository: OntologyCustomizationRepository[OntologyCustomization]
+
     lazy val repositoryRegistry = new RepositoryRegistry(Map(
         classOf[User] -> userRepository,
         classOf[Group] -> groupRepository,
@@ -34,6 +40,7 @@ trait DataContextComponent
         classOf[PluginInstance] -> pluginInstanceRepository,
         classOf[PluginInstanceBinding] -> pluginInstanceBindingRepository,
         classOf[DataSource] -> dataSourceRepository
+        // TODO classOf[OntologyCustomization] -> ontologyCustomizationRepository
     ))
 
     trait Repository[+A]
@@ -42,7 +49,13 @@ trait DataContextComponent
           * Returns an entity with the specified ID.
           * @param id Id of an entity to search for.
           */
-        def getById(id: String): Option[A]
+        def getById(id: String): Option[A] = getByIds(Seq(id)).headOption
+        
+        /**
+          * Returns entities with the specified IDs.
+          * @param ids List of IDs of entities to search for.
+          */
+        def getByIds(ids: Seq[String]): Seq[A]
 
         /**
           * Removes an entity with the specified ID from the repository.
@@ -64,6 +77,23 @@ trait DataContextComponent
           * @return The persisted entity.
           */
         def persist(entity: AnyRef): A
+
+        /**
+          * @return Returns number of persisted entities
+          */
+        def getCount: Long
+    }
+
+    /**
+      * A repository that contains shareable entities.
+      * @tparam A Type of the entities in the repository.
+      */
+    trait ShareableEntityRepository[+A <: ShareableEntity] extends Repository[A]
+    {
+        /**
+          * Returns all public entities.
+          */
+        def getAllPublic: Seq[A]
     }
 
     trait UserRepository[+A] extends Repository[A]
@@ -102,11 +132,6 @@ trait DataContextComponent
     trait PrivilegeRepository[+A] extends Repository[A]
     {
         /**
-          * Returns count of privileges in the repository.
-          */
-        def getCount: Int
-
-        /**
           * Returns IDs of privileged objects, that are granted to the specified grantee via privileges of the specified
           * class.
           * @param granteeId ID of the privilege grantee.
@@ -116,7 +141,7 @@ trait DataContextComponent
         def getPrivilegedObjectIds(granteeId: String, privilegeClass: Class[_], objectClass: Class[_]): Seq[String]
     }
     
-    trait AnalysisRepository[+A] extends Repository[A]
+    trait AnalysisRepository[+A <: Analysis] extends Repository[A] with ShareableEntityRepository[A]
     {
         /**
           * Returns top analyses in the repository.
@@ -139,7 +164,7 @@ trait DataContextComponent
         def getPublicByOwner(ownerId: String, pagination: Option[PaginationInfo] = None): Seq[A]
     }
 
-    trait PluginRepository[+A] extends Repository[A]
+    trait PluginRepository[+A <: Plugin] extends Repository[A] with ShareableEntityRepository[A]
     {
         /**
           * Returns a plugin with the specified name.
@@ -148,7 +173,7 @@ trait DataContextComponent
         def getByName(name: String): Option[Plugin]
     }
 
-    trait DataSourceRepository[+A] extends Repository[A]
+    trait DataSourceRepository[+A <: DataSource] extends Repository[A] with ShareableEntityRepository[A]
     {
         /**
           * Returns all public data sources.
@@ -156,6 +181,10 @@ trait DataContextComponent
           */
         def getPublic(pagination: Option[PaginationInfo] = None): Seq[A]
     }
+
+    trait OntologyCustomizationRepository[+A <: OntologyCustomization]
+        extends Repository[A]
+        with ShareableEntityRepository[A]
 
     /**
       * A registry providing repositories by entity classes or entity class names.

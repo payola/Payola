@@ -7,6 +7,8 @@ import cz.payola.data.squeryl.entities.privileges.PrivilegeDbRepresentation
 import cz.payola.data.PaginationInfo
 import cz.payola.data.squeryl.entities.plugins.DataSource
 import cz.payola.domain.Entity
+import scala.collection.mutable
+import cz.payola.data.squeryl.entities.PersistableEntity
 
 trait PrivilegeRepositoryComponent extends TableRepositoryComponent
 {
@@ -14,67 +16,72 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
 
     lazy val privilegeRepository = new PrivilegeRepository[Privilege[_]]
     {
-        private val _repository = new TableRepository[PrivilegeDbRepresentation](schema.privileges, PrivilegeDbRepresentation)
+        private val representationRepository = new LazyTableRepository[PrivilegeDbRepresentation](schema.privileges,
+            PrivilegeDbRepresentation)
 
         def getAll(pagination: Option[PaginationInfo] = None): Seq[Privilege[_]] = Seq()
 
-        def getById(id: String): Option[Privilege[_]] = {
-            val privilegeQuery = _repository.table.where(e => e.id === id)
+        def getByIds(ids: Seq[String]): Seq[Privilege[_]] = {
+            val privileges = representationRepository.getByIds(ids)
 
-            val privilegeDb = _repository.evaluateSingleResultQuery(privilegeQuery)
+            val repositories = mutable.Map[Repository[_], mutable.HashSet[String]]()
 
-            // If not found ...
-            if (privilegeDb.isEmpty){
-                None
+            // Fill repositories map with values (Repository -> list of entity IDs to select)
+            privileges.foreach { p =>
+                // Add grantee
+                val granteeRepository = repositoryRegistry(p.granteeClassName)
+                repositories.getOrElseUpdate(granteeRepository, mutable.HashSet.empty[String]) += p.granteeId
+
+                // Add object
+                val objectRepository = repositoryRegistry(p.objectClassName)
+                repositories.getOrElseUpdate(objectRepository, mutable.HashSet.empty[String]) += p.objectId
+
+                // Add owner (user)
+                repositories.getOrElseUpdate(userRepository, mutable.HashSet.empty[String]) += p.granterId
             }
-            else {
-                // ... instantiate otherwise
-                val objectRepository = repositoryRegistry(privilegeDb.get.objectClass)
-                val granteeRepository = repositoryRegistry(privilegeDb.get.granteeClass)
 
-                val objectOption = objectRepository.getById(privilegeDb.get.objectId)
-                val granteeOption = granteeRepository.getById(privilegeDb.get.granteeId)
-                val granterOption = userRepository.getById(privilegeDb.get.granterId)
+            // Create Map (EntityId -> Entity)
+            val entities = repositories.par.flatMap{r =>
+                r._1.getByIds(r._2.toSeq).map(e => (e.asInstanceOf[cz.payola.domain.Entity].id, e))
+            }
 
-                // If object or grantee or granter not found
-                if (objectOption.isEmpty || granteeOption.isEmpty || granterOption.isEmpty) {
-                    None
-                }
-                else {
-                    // Create instance
-                    val privilegeClass = java.lang.Class.forName(privilegeDb.get.privilegeClass)
+            privileges.map{ p =>
+                // Get granter, grantee, object from entities set
+                val granter = entities(p.granterId).asInstanceOf[java.lang.Object]
+                val grantee = entities(p.granteeId).asInstanceOf[java.lang.Object]
+                val obj = entities(p.objectId).asInstanceOf[java.lang.Object]
 
-                    val constructor = privilegeClass.getConstructors.find(_.getParameterTypes().size == 2).get
-                    val arguments = List(granterOption.get, granteeOption.get, objectOption.get, privilegeDb.get.id)
+                // Get and fill Privilege constructor (with 4 parameters)
+                val privilegeClass = java.lang.Class.forName(p.privilegeClass)
+                val constructor = privilegeClass.getConstructors.find(_.getParameterTypes().size == 4).get
+                val arguments = List(granter, grantee, obj, p.id).toArray
 
-                    // Instantiate the privilege
-                    Some(constructor.newInstance(arguments).asInstanceOf[Privilege[_ <: Entity]])
-                }
-
+                // Instantiate the privilege
+                constructor.newInstance(arguments: _*).asInstanceOf[Privilege[_]]
             }
         }
 
         def persist(entity: AnyRef): Privilege[_] = {
-            _repository.persist(entity)
+            representationRepository.persist(entity)
 
             // The entity was successfully persisted therefore it must be a privilege.
             entity.asInstanceOf[Privilege[_]]
         }
 
-        def removeById(id: String) = _repository.removeById(id)
+        def removeById(id: String) = representationRepository.removeById(id)
+
+        def getCount: Long = representationRepository.getCount
 
         def getPrivilegedObjectIds(granteeId: String, privilegeClass: Class[_], objectClass: Class[_]): Seq[String] = {
-            val query = from(_repository.table)(p =>
+            val query = from(representationRepository.table)(p =>
                 where(p.granteeId === granteeId and
                     p.privilegeClass === privilegeClass.getName and
-                    p.objectClass === repositoryRegistry.getClassName(objectClass)
+                    p.objectClassName === repositoryRegistry.getClassName(objectClass)
                 )
                 select(p.objectId)
             )
 
-            _repository.evaluateCollectionResultQuery(query)
+            representationRepository.evaluateCollectionResultQuery(query)
         }
-
-        def getCount: Int = _repository.getAll().size
     }
 }
