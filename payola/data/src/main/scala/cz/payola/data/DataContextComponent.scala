@@ -29,7 +29,7 @@ trait DataContextComponent
 
     val dataSourceRepository: Repository[DataSource]
 
-    // TODO val ontologyCustomizationRepository: OntologyCustomizationRepository[OntologyCustomization]
+    val ontologyCustomizationRepository: OntologyCustomizationRepository[OntologyCustomization]
 
     lazy val repositoryRegistry = new RepositoryRegistry(Map(
         classOf[User] -> userRepository,
@@ -39,8 +39,8 @@ trait DataContextComponent
         classOf[Plugin] -> pluginRepository,
         classOf[PluginInstance] -> pluginInstanceRepository,
         classOf[PluginInstanceBinding] -> pluginInstanceBindingRepository,
-        classOf[DataSource] -> dataSourceRepository
-        // TODO classOf[OntologyCustomization] -> ontologyCustomizationRepository
+        classOf[DataSource] -> dataSourceRepository,
+        classOf[OntologyCustomization] -> ontologyCustomizationRepository
     ))
 
     trait Repository[+A]
@@ -181,7 +181,8 @@ trait DataContextComponent
 
     trait OntologyCustomizationRepository[+A <: OntologyCustomization]
         extends Repository[A]
-        with ShareableEntityRepository[A]
+        with ShareableEntityRepository[A] {
+    }
 
     /**
       * A registry providing repositories by entity classes or entity class names.

@@ -9,6 +9,7 @@ import cz.payola.data.squeryl.entities.plugins._
 import cz.payola.data.squeryl.entities.plugins.parameters._
 import cz.payola.data.squeryl.entities.analyses.PluginInstanceBinding
 import cz.payola.data.squeryl.entities.privileges.PrivilegeDbRepresentation
+import cz.payola.data.squeryl.entities.settings._
 
 trait SchemaComponent
 {
@@ -81,6 +82,15 @@ trait SchemaComponent
         /** Table of [[cz.payola.data.squeryl.entities.privileges.PrivilegeDbRepresentation]]s */
         val privileges = table[PrivilegeDbRepresentation]("privileges")
 
+        /** Table of [[cz.payola.data.squeryl.entities.settings.OntologyCustomization]]s */
+        val ontologyCustomizations = table[OntologyCustomization]("ontologyCustomizations")
+
+        /** Table of [[cz.payola.data.squeryl.entities.settings.ClassCustomization]]s */
+        val classCustomizations = table[ClassCustomization]("classCustomizations")
+
+        /** Table of [[cz.payola.data.squeryl.entities.settings.PropertyCustomization]]s */
+        val propertyCustomizations = table[PropertyCustomization]("properyCustomizations")
+
         /**
           * Relation that associates members ([[cz.payola.data.squeryl.entities.User]]s)
           * to [[cz.payola.data.squeryl.entities.Group]]s
@@ -101,6 +111,13 @@ trait SchemaComponent
           */
         lazy val analysisOwnership = oneToManyRelation(users, analyses).via(
             (u, a) => u.id === a.ownerId.getOrElse(EMPTY_ID).toString)
+
+        /**
+          * Relation that associates [[cz.payola.data.squeryl.entities.settings.OntologyCustomization]] to its owner
+          * ([[cz.payola.data.squeryl.entities.User]]s)
+          */
+        lazy val customizationOwnership = oneToManyRelation(users, ontologyCustomizations).via(
+            (u, c) => u.id === c.ownerId.getOrElse(EMPTY_ID).toString)
 
         /**
           * Relation that associates [[cz.payola.data.squeryl.entities.PluginDbRepresentation]] to its owner
@@ -250,26 +267,39 @@ trait SchemaComponent
             (ds, bpv) => ds.id === bpv.dataSourceId.getOrElse(EMPTY_ID).toString)
 
         /**
-          * Relation that associates [[cz.payola.data.squeryl.entities.plugins.parameters.FloatParameter]]s values to
+          * Relation that associates [[cz.payola.data.squeryl.entities.plugins.parameters.FloatParameterValues]]s to
           * a [[cz.payola.data.squeryl.entities.analyses.DataSource]]
           */
         lazy val floatParameterValuesOfDataSources = oneToManyRelation(dataSources, floatParameterValues).via(
             (ds, fpv) => ds.id === fpv.dataSourceId.getOrElse(EMPTY_ID).toString)
 
         /**
-          * Relation that associates [[cz.payola.data.squeryl.entities.plugins.parameters.IntParameter]] to a [[cz
-          * .payola
-          * .data.squeryl.entities.analyses.DataSource]]
+          * Relation that associates [[cz.payola.data.squeryl.entities.plugins.parameters.IntParameterValues]] to
+          * a [[cz.payola.data.squeryl.entities.analyses.DataSource]]
           */
         lazy val intParameterValuesOfDataSources = oneToManyRelation(dataSources, intParameterValues).via(
             (ds, ipv) => ds.id === ipv.dataSourceId.getOrElse(EMPTY_ID).toString)
 
         /**
-          * Relation that associates [[cz.payola.data.squeryl.entities.plugins.parameters.StringParameter]]s values
+          * Relation that associates [[cz.payola.data.squeryl.entities.plugins.parameters.StringParameterValues]]s
           * to a [[cz.payola.data.squeryl.entities.analyses.DataSource]]
           */
         lazy val stringParameterValuesOfDataSources = oneToManyRelation(dataSources, stringParameterValues).via(
             (ds, spv) => ds.id === spv.dataSourceId.getOrElse(EMPTY_ID).toString)
+
+        /**
+          * Relation that associates [[cz.payola.data.squeryl.entities.settings.ClassCustomization]]s
+          * to a [[cz.payola.data.squeryl.entities.settings.OntologyCustomization]]
+          */
+        lazy val classCustomizationsOfOntologies = oneToManyRelation(ontologyCustomizations, classCustomizations).via(
+            (o, c) => o.id === c.ontologyCustomizationId)
+
+        /**
+          * Relation that associates [[cz.payola.data.squeryl.entities.settings.PropertyCustomization]]s
+          * to a [[cz.payola.data.squeryl.entities.settings.ClassCustomization]]
+          */
+        lazy val propertyCustomizationsOfClasses = oneToManyRelation(classCustomizations, propertyCustomizations).via(
+            (c, p) => c.id === p.classCustomizationId)
 
         /**
           * This value id used in 1:N relations when item on N side of this relation has not filled id of related
@@ -361,6 +391,13 @@ trait SchemaComponent
                     p.id is (primaryKey),
                     columns(p.granteeId, p.privilegeClass, p.objectId) are (unique)
                 ))
+            on(ontologyCustomizations)( c =>
+                declare(
+                    c.id is (primaryKey),
+                    columns(c.name, c.ownerId) are (unique)
+                ))
+            on(classCustomizations)(c => declare(c.id is (primaryKey)))
+            on(propertyCustomizations)(c => declare(c.id is (primaryKey)))
 
             // When a PluginDbRepresentation is deleted, all of the its instances and data sources will get deleted.
             pluginsPluginInstances.foreignKeyDeclaration.constrainReference(onDelete cascade)
@@ -407,6 +444,11 @@ trait SchemaComponent
             analysisOwnership.foreignKeyDeclaration.constrainReference(onDelete cascade)
             dataSourceOwnership.foreignKeyDeclaration.constrainReference(onDelete cascade)
             pluginOwnership.foreignKeyDeclaration.constrainReference(onDelete cascade)
+            customizationOwnership.foreignKeyDeclaration.constrainReference(onDelete cascade)
+
+            // When ontology customization is removed, remove all sub-customizations
+            classCustomizationsOfOntologies.foreignKeyDeclaration.constrainReference(onDelete cascade)
+            propertyCustomizationsOfClasses.foreignKeyDeclaration.constrainReference(onDelete cascade)
         }
     }
 }

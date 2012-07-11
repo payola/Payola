@@ -8,6 +8,7 @@ import cz.payola.domain.entities.plugins.concrete._
 import cz.payola.domain.entities.privileges._
 import cz.payola.domain.entities.plugins.DataSource
 import collection.immutable
+import cz.payola.domain.entities.settings.OntologyCustomization
 
 class SquerylSpec extends TestDataContextComponent("squeryl") with FlatSpec with ShouldMatchers
 {
@@ -392,6 +393,22 @@ class SquerylSpec extends TestDataContextComponent("squeryl") with FlatSpec with
         assert(groupRepository.getAll(Some(new PaginationInfo(4, 0))).size == 0)
     }
 
+    "Customizations" should "be persisted" in {
+        persistCustomizations
+    }
+
+    private def persistCustomizations {
+        val url = "http://opendata.cz/pco/public-contracts.xml"
+        val customization = OntologyCustomization.empty(url, "Name1", None)
+        val ownedCustomization = OntologyCustomization.empty(url, "Name2", Some(u1))
+
+        val c1 = ontologyCustomizationRepository.persist(customization)
+        val c2 = ontologyCustomizationRepository.persist(ownedCustomization)
+        
+        assert(c1.id == customization.id)
+        assert(c2.id == ownedCustomization.id)
+    }
+
     "Entities" should "be with removed their related entities" in {
         testCascadeDeletes
     }
@@ -430,5 +447,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl") with FlatSpec with
 
         assert(analysis.pluginInstances.size == 0)
         assert(analysis.pluginInstanceBindings.size == 0)
+
+        assert(userRepository.removeById(u1.id))
     }
 }
