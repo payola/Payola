@@ -9,21 +9,28 @@ import cz.payola.web.client.events.{ChangedEvent, ChangedEventArgs}
 import s2js.compiler.javascript
 import cz.payola.web.client.mvvm.element._
 
+/**
+ *
+ * @author jirihelmich
+ * @created 5/3/12 9:44 AM
+ * @package cz.payola.web.client.views.plugins.visual.components.visualsetup
+ */
+
 class ColorPane(name: String, label: String, var color: Color) extends Component
 {
     val changed = new ChangedEvent[ColorPane]
 
     val colorInput: Input = new Input(name, color.toString, None, "colorpicker")
-    colorInput.getDomElement.setAttribute("readonly","true")
+    colorInput.field.setAttribute("readonly","true")
 
     val i = new Italic(List())
     i.i.setAttribute("style","background-color: "+color.toString)
 
     val span = new Span(List(i),"add-on")
-    val labelElement = new Label(label, colorInput.getDomElement)
+    val labelElement = new Label(label, colorInput.field)
     val div = new Div(List(colorInput, span), "input-append color")
-    div.getDomElement.setAttribute("data-color", color.toString)
-    div.getDomElement.setAttribute("data-color-format", "rgba")
+    div.div.setAttribute("data-color", color.toString)
+    div.div.setAttribute("data-color-format", "rgba")
 
     def render(parent: Element) {
         labelElement.render(parent)
@@ -40,9 +47,9 @@ class ColorPane(name: String, label: String, var color: Color) extends Component
         colorInput.setText(value.toString)
     }
 
-    def getDomElement : Element = div.getDomElement
+    def getDomElement : Element = colorInput.getDomElement
 
-    @javascript("""jQuery(self.getDomElement).colorpicker({format: 'rgba'}).on('changeColor',function(evt){
+    @javascript("""jQuery(self.div.div).colorpicker({format: 'rgba'}).on('changeColor',function(evt){
         var rgba = evt.color.toRGB();
         self.color.red = rgba.r;
         self.color.green = rgba.g;

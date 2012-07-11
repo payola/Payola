@@ -9,9 +9,10 @@ trait AnalysisModelComponent extends EntityModelComponent
 {self: DataContextComponent =>
     lazy val analysisModel = new EntityModel(analysisRepository)
     {
-        def create : Analysis = {
-            //TODO!
-            analysisRepository.getById("").get
+        def create(owner: User) : Analysis = {
+            val instance = new Analysis("",Some(owner))
+            analysisRepository.persist(instance)
+            instance
         }
 
         def getTop: Seq[Analysis] = {

@@ -50,7 +50,7 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
             window.clearTimeout(nameChangedTimeout.get)
         }
 
-        nameChangedTimeout = Some(window.setTimeout({
+        nameChangedTimeout = Some(window.setTimeout({ () =>
             AnalysisBuilderData.setAnalysisName(analysisId, eventArgs.target.value){ _ => () } { _ => () }
         }, 300))
 

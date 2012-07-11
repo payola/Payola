@@ -37,7 +37,11 @@ object Application extends PayolaController with Secured
             "password" -> text
         ) verifying("Invalid email or password", result =>
             result match {
-                case (email, password) => Payola.model.userModel.getByCredentials(email, password).isDefined
+                case (email, password) => {
+                    val user = Payola.model.userModel.getByCredentials(email, password)
+                    user.isDefined
+
+                }
             }
         )
     )

@@ -1,16 +1,21 @@
 package cz.payola.web.shared
 
 import cz.payola.common.entities.Plugin
-import s2js.compiler.async
+import s2js.compiler._
+import cz.payola.domain.entities.User
 
 @remote object AnalysisBuilderData
 {
-    @async def createEmptyAnalysis()(successCallback: (String => Unit))(failCallback: (Throwable => Unit)) {
-        successCallback(Payola.model.analysisModel.create.id)
+    @async @secured def createEmptyAnalysis(user: User = null)(successCallback: (String => Unit))(failCallback: (Throwable => Unit)) {
+        successCallback(Payola.model.analysisModel.create(user).id)
     }
 
     @async def getPlugins()(successCallback: (Seq[Plugin] => Unit))(failCallback: (Throwable => Unit)) {
-        successCallback(Payola.model.pluginModel.getAll)
+        try{
+            successCallback(Payola.model.pluginModel.getAll)
+        }catch{
+            case e: Exception => failCallback(e)
+        }
     }
 
     def lockAnalysis(id: String) {
