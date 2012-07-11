@@ -4,7 +4,7 @@ import cz.payola.data._
 import org.squeryl.annotations.Transient
 import cz.payola.data.squeryl.entities.plugins._
 import cz.payola.data.squeryl.entities.plugins.parameters._
-import cz.payola.domain.entities._
+import cz.payola.domain.entities.Plugin
 import cz.payola.data.squeryl.SquerylDataContextComponent
 import cz.payola.domain.entities.plugins.concrete.data.PayolaStorage
 
@@ -15,33 +15,29 @@ object PluginDbRepresentation extends EntityConverter[PluginDbRepresentation]
             case p: PluginDbRepresentation => Some(p)
             case p: Plugin => {
                 val pluginClass = p.getClass.getName
-                Some(new PluginDbRepresentation(p.id, p.name, pluginClass, p.inputCount, p.owner.map(User(_))))
+                Some(new PluginDbRepresentation(p.id, p.name, pluginClass, p.inputCount, p.owner.map(User(_)),
+                    p.isPublic))
             }
             case _ => None
         }
     }
 }
 
-class   PluginDbRepresentation(
+class PluginDbRepresentation(
     override val id: String,
     val name: String,
     val className: String,
     val inputCount: Int,
-    o: Option[User])
+    o: Option[User],
+    var isPublic: Boolean)
     (implicit val context: SquerylDataContextComponent)
     extends PersistableEntity
-    with ShareableEntity
 {
-    private var _owner: Option[User] = o
+    val ownerId: Option[String] = o.map(_.id)
 
-    var ownerId: Option[String] = o.map(_.id)
-
-    private lazy val _ownerQuery = context.schema.pluginOwnership.right(this)
-
-    @Transient
-    private var _parametersLoaded = false
-
-    private var _params: Seq[Parameter[_]] = Seq()
+    var owner: Option[User] = None
+    
+    var parameters: Seq[Parameter[_]] = Seq()
 
     private lazy val _pluginInstancesQuery = context.schema.pluginsPluginInstances.left(this)
 
@@ -55,55 +51,6 @@ class   PluginDbRepresentation(
 
     private lazy val _stringParameters = context.schema.stringParametersOfPlugins.left(this)
 
-    /**
-      * @return Returns all associated [[cz.payola.data.squeryl.entities.plugins.PluginInstance]]s.
-      */
-    def pluginInstances: Seq[PluginInstance] = {
-        evaluateCollection(_pluginInstancesQuery)
-    }
-
-    /**
-      * @return Returns all associated [[cz.payola.data.squeryl.entities.plugins.plugins.DataSource]]s.
-      */
-    def dataSources: Seq[DataSource] = {
-        evaluateCollection(_dataSourcesQuery)
-    }
-
-    def owner: Option[User] = {
-        if (_owner == None){
-            if (ownerId != null && ownerId.isDefined) {
-                _owner = evaluateCollection(_ownerQuery).headOption
-            }
-        }
-
-        _owner
-    }
-
-    def owner_=(value: Option[User]) {_owner = value}
-
-    /**
-      *
-      * @return Returns list of associated [[cz.payola.data.squeryl.entities.plugins.Parameter]]s.
-      */
-    def parameters: Seq[Parameter[_]] = {
-        if (!_parametersLoaded) {
-            _params = List(
-                evaluateCollection(_booleanParameters),
-                evaluateCollection(_floatParameters),
-                evaluateCollection(_intParameters),
-                evaluateCollection(_stringParameters)
-            ).flatten.toSeq
-
-            _parametersLoaded = true
-        }
-
-        _params
-    }
-
-    def parameters_=(value: Seq[Parameter[_]]) {
-        _params = value
-        _parametersLoaded = true
-    }
 
     /**
       * Associates specified [[cz.payola.data.squeryl.entities.plugins.Parameter]] to plugin.

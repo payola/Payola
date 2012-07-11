@@ -31,7 +31,7 @@ class OntologyCustomization(
     val ontologyURL: String,
     protected var _name: String,
     protected var _owner: Option[User],
-    protected val _classCustomizations: immutable.Seq[ClassCustomization])
+    protected var _classCustomizations: immutable.Seq[ClassCustomization])
     extends Entity
     with NamedEntity
     with OptionallyOwnedEntity
@@ -50,5 +50,6 @@ class OntologyCustomization(
         super[Entity].checkInvariants()
         super[NamedEntity].checkInvariants()
         super[OptionallyOwnedEntity].checkInvariants()
+        super[ShareableEntity].checkInvariants()
     }
 }

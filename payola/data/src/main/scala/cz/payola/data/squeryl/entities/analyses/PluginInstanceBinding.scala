@@ -54,7 +54,9 @@ class PluginInstanceBinding(
     override def sourcePluginInstance = {
         try{
             if (!_sourceLoaded) {
-                _source = evaluateCollection(_sourcesQuery)(0)
+                wrapInTransaction {
+                    _source = _sourcesQuery.head
+                }
 
                 _sourceLoaded = true
             }
@@ -70,7 +72,9 @@ class PluginInstanceBinding(
     override def targetPluginInstance = {
         try {
             if (!_targetLoaded) {
-                _target = evaluateCollection(_targetsQuery)(0)
+                wrapInTransaction {
+                    _target = _targetsQuery.head
+                }
 
                 _targetLoaded = true
             }

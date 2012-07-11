@@ -12,7 +12,7 @@ trait Privilege[+A <: Entity] extends Entity
     type UserType <: User
 
     /** Type of the entities that may be grated the privilege. */
-    type PrivilegableEntityType <: PrivilegableEntity
+    type PrivilegableEntityType <: Entity with PrivilegableEntity
 
     /** The user who granted the privilege. */
     val granter: UserType

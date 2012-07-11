@@ -20,7 +20,7 @@ trait ClassCustomization extends Entity
 
     protected var _glyph: Option[Char]
 
-    protected val _propertyCustomizations: immutable.Seq[PropertyCustomizationType]
+    protected var _propertyCustomizations: immutable.Seq[PropertyCustomizationType]
 
     /** Fill color of the vertex. */
     def fillColor = _fillColor
@@ -51,8 +51,8 @@ trait ClassCustomization extends Entity
       * Sets the vertex glyph.
       * @param value New value of the vertex glyph.
       */
-    def glyph_=(value: String) {
-        _fillColor = value
+    def glyph_=(value: Option[Char]) {
+        _glyph = value
     }
 
     /** Customizations of properties of the class. */

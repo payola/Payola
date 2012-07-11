@@ -8,9 +8,9 @@ trait OntologyRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
     
-    type QueryType = (OntologyCustomization, Option[ClassCustomization], Option[PropertyCustomization])
+    private type QueryType = (OntologyCustomization, Option[ClassCustomization], Option[PropertyCustomization])
 
-    lazy val ontologyCustomizationRepository = new TableRepository[OntologyCustomization, QueryType](schema.ontologyCustomizations,
+    lazy val ontologyCustomizationRepository = new LazyTableRepository[OntologyCustomization](schema.ontologyCustomizations,
         OntologyCustomization)
         with OntologyCustomizationRepository[OntologyCustomization]
         with ShareableEntityTableRepository[OntologyCustomization]

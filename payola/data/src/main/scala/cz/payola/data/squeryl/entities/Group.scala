@@ -34,7 +34,9 @@ class Group(override val id: String, name: String, o: User)(implicit val context
 
     override def members: immutable.Seq[UserType] = {
         if (!_groupMembersLoaded) {
-            members = evaluateCollection(_groupMembersQuery)
+            wrapInTransaction {
+                members = _groupMembersQuery.toList
+            }
         }
 
         super.members
@@ -51,7 +53,9 @@ class Group(override val id: String, name: String, o: User)(implicit val context
 
     override def owner: UserType = {
         if (_owner == null && ownerId != null){
-            _owner = evaluateCollection(_ownerQuery)(0)
+            wrapInTransaction {
+                _owner = _ownerQuery.head
+            }
         }
 
         _owner

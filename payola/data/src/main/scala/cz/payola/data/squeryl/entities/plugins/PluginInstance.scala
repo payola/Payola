@@ -56,7 +56,9 @@ class PluginInstance(
 
     override def plugin = {
         if (pluginId != null) {
-            evaluateCollection(_pluginQuery)(0).toPlugin
+            wrapInTransaction {
+                _pluginQuery.head.toPlugin
+            }
         }
         else {
             null
@@ -65,12 +67,14 @@ class PluginInstance(
 
     override def parameterValues: collection.immutable.Seq[PluginType#ParameterValueType] = {
         if (!_parameterValuesLoaded) {
-            _paramValues = List(
-                evaluateCollection(_booleanParameterValues),
-                evaluateCollection(_floatParameterValues),
-                evaluateCollection(_intParameterValues),
-                evaluateCollection(_stringParameterValues)
-            ).flatten.toSeq
+            wrapInTransaction {
+                _paramValues = List(
+                    _booleanParameterValues.toList,
+                    _floatParameterValues.toList,
+                    _intParameterValues.toList,
+                    _stringParameterValues.toList
+                ).flatten
+            }
 
             _parameterValuesLoaded = true
         }

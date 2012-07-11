@@ -1,12 +1,13 @@
 package cz.payola.common.entities
 
 import scala.collection._
+import cz.payola.common.Entity
 
 /**
   * A user-defined group of users. The user may share shareable entities not only to other users, but also to groups
   * of users.
   */
-trait Group extends NamedEntity with PrivilegableEntity
+trait Group extends Entity with NamedEntity with PrivilegableEntity
 {
     /** Type of the users that can be members of a group. */
     type UserType <: User

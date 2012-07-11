@@ -14,14 +14,13 @@ trait PluginRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
 
-    lazy val pluginRepository = new PluginRepository[Plugin]
+    lazy val pluginRepository = new PluginRepository
     {
-        type QueryType = (PluginDbRepresentation, Option[User], Option[BooleanParameter], Option[FloatParameter],
+        private type QueryType = (PluginDbRepresentation, Option[User], Option[BooleanParameter], Option[FloatParameter],
                             Option[IntParameter], Option[StringParameter])
 
         private val representationRepository =
             new TableRepository[PluginDbRepresentation, QueryType](schema.plugins,PluginDbRepresentation)
-                with ShareableEntityTableRepository[PluginDbRepresentation]
             {
                 protected def getSelectQuery(entityFilter: (PluginDbRepresentation) => LogicalBoolean) = {
                     join(schema.plugins, schema.users.leftOuter, schema.booleanParameters.leftOuter,
@@ -49,19 +48,31 @@ trait PluginRepositoryComponent extends TableRepositoryComponent
                 }
             }
 
-        def getByIds(ids: Seq[String]): Seq[Plugin] = {
+        def getByIds(ids: Seq[String]): Seq[Plugin] = schema.wrapInTransaction {
             representationRepository.getByIds(ids).map(_.toPlugin)
         }
 
-        def removeById(id: String): Boolean = representationRepository.removeById(id)
+        def removeById(id: String): Boolean = schema.wrapInTransaction {
+            representationRepository.removeById(id)
+        }
 
-        def getAll(pagination: Option[PaginationInfo] = None): Seq[Plugin] = {
+        def getAll(pagination: Option[PaginationInfo] = None): Seq[Plugin] = schema.wrapInTransaction {
             representationRepository.getAll(pagination).map(_.toPlugin)
         }
 
-        def getAllPublic: Seq[Plugin] = representationRepository.getAllPublic.map(_.toPlugin)
+        def getAllPublic: Seq[Plugin] = schema.wrapInTransaction {
+            representationRepository.selectWhere(_.isPublic === true).map(_.toPlugin)
+        }
 
-        def persist(entity: AnyRef): Plugin = {
+        def getAllByOwnerId(ownerId: Option[String]): Seq[Plugin] = schema.wrapInTransaction {
+            representationRepository.selectWhere(_.ownerId === ownerId).map(_.toPlugin)
+        }
+
+        def getByName(name: String): Option[Plugin] = schema.wrapInTransaction {
+            representationRepository.selectOneWhere(_.name === name).map(_.toPlugin)
+        }
+
+        def persist(entity: AnyRef): Plugin = schema.wrapInTransaction {
             entity match {
                 case plugin: Plugin => {
                     // Persist the plugin ...
@@ -77,12 +88,8 @@ trait PluginRepositoryComponent extends TableRepositoryComponent
             }
         }
 
-        def getCount: Long = representationRepository.getCount
-
-        def getByName(pluginName: String): Option[Plugin] = {
-            representationRepository.evaluateSingleResultQuery(
-                representationRepository.table.where(p => p.name === pluginName)
-            ).map(_.toPlugin)
+        def getCount: Long = schema.wrapInTransaction {
+            representationRepository.getCount
         }
     }
 }

@@ -1,10 +1,10 @@
 package cz.payola.data
 
+import cz.payola.domain.RdfStorageComponent
 import cz.payola.domain.entities._
 import cz.payola.domain.entities.plugins._
 import cz.payola.domain.entities.analyses.PluginInstanceBinding
 import cz.payola.domain.entities.settings.OntologyCustomization
-import cz.payola.domain.RdfStorageComponent
 
 /**
   * A component that provides access to a storage with persisted entities.
@@ -13,21 +13,21 @@ trait DataContextComponent
 {
     self: RdfStorageComponent =>
 
-    val userRepository: UserRepository[User]
+    val userRepository: UserRepository
 
-    val groupRepository: GroupRepository[Group]
+    val groupRepository: GroupRepository
 
-    val privilegeRepository: PrivilegeRepository[Privilege[_]]
+    val privilegeRepository: PrivilegeRepository
 
-    val analysisRepository: AnalysisRepository[Analysis]
+    val analysisRepository: AnalysisRepository
 
-    val pluginRepository: PluginRepository[Plugin]
+    val pluginRepository: PluginRepository
 
     val pluginInstanceRepository: Repository[PluginInstance]
 
     val pluginInstanceBindingRepository: Repository[PluginInstanceBinding]
 
-    val dataSourceRepository: Repository[DataSource]
+    val dataSourceRepository: DataSourceRepository
 
     val ontologyCustomizationRepository: OntologyCustomizationRepository[OntologyCustomization]
 
@@ -85,104 +85,141 @@ trait DataContextComponent
     }
 
     /**
+      * A repository that contains named entities.
+      * @tparam A Type of the entities in the repository.
+      */
+    trait NamedEntityRepository[+A <: NamedEntity] extends Repository[A]
+    {
+        /**
+          * Returns an entity with the specified name.
+          * @param name Name of the entity to search for.
+          */
+        def getByName(name: String): Option[A]
+    }
+
+    /**
+      * A repository that contains optionally owned entities.
+      * @tparam A Type of the entities in the repository.
+      */
+    trait OptionallyOwnedEntityRepository[+A <: OptionallyOwnedEntity] extends Repository[A]
+    {
+        /**
+          * Returns all entities with the specified owner.
+          * @param ownerId Owner id of the entities to search for.
+          */
+        def getAllByOwnerId(ownerId: Option[String]): Seq[A]
+    }
+
+    /**
       * A repository that contains shareable entities.
       * @tparam A Type of the entities in the repository.
       */
-    trait ShareableEntityRepository[+A <: ShareableEntity] extends Repository[A]
+    trait ShareableEntityRepository[+A <: ShareableEntity with OptionallyOwnedEntity]
+        extends OptionallyOwnedEntityRepository[A]
     {
         /**
           * Returns all public entities.
           */
         def getAllPublic: Seq[A]
+
+        /**
+          * Returns all public entities with the specified owner.
+          * @param ownerId Owner id of the entities to search for.
+          */
+        def getAllPublicByOwnerId(ownerId: Option[String]): Seq[A] = getAllByOwnerId(ownerId).filter(_.isPublic)
     }
 
-    trait UserRepository[+A] extends Repository[A]
+    trait UserRepository
+        extends Repository[User]
+        with NamedEntityRepository[User]
     {
-        /**
-          * Returns an user with the specified name.
-          * @param name Name of an user to search for.
-          */
-        def getByName(name: String): Option[A]
-
         /**
           * Returns an user with the specified name and password.
           * @param name Name of the user to search for.
           * @param password Password of the user to search for.
           */
-        def getByCredentials(name: String, password: String): Option[A]
+        def getByCredentials(name: String, password: String): Option[User]
 
         /**
           * Returns all users whose names contain the specified name part as a substring.
           * @param namePart Name part the users names must contain.
           * @param pagination Optionally specified pagination of the result.
           */
-        def getAllWithNameLike(namePart: String, pagination: Option[PaginationInfo] = None): Seq[A]
+        def getAllWithNameLike(namePart: String, pagination: Option[PaginationInfo] = None): Seq[User]
     }
 
-    trait GroupRepository[+A] extends Repository[A]
+    trait GroupRepository extends Repository[Group]
     {
         /**
           * Returns for all groups with the specified owner ID.
           * @param ownerId ID of the group owner.
           * @param pagination Optionally specified pagination of the result.
           */
-        def getAllByOwnerId(ownerId: String, pagination: Option[PaginationInfo] = None) : Seq[A]
+        def getAllByOwnerId(ownerId: String, pagination: Option[PaginationInfo] = None) : Seq[Group]
     }
 
-    trait PrivilegeRepository[+A] extends Repository[A]
+    trait PrivilegeRepository extends Repository[Privilege[_ <: cz.payola.domain.Entity]]
     {
         /**
-          * Returns all privileges for grantee
+          * Returns all privileges of the specified type granted to the specified grantees.
+          * @param granteeIds The entities whose privileges should be returned.
+          * @param privilegeClass Type of the privilege.
+          * @tparam B Type of the privilege.
+          */
+        def getAllGrantedTo[B](granteeIds: Seq[String], privilegeClass: Class[_]): Seq[B]
+
+        /**
+          * Returns IDs of privileged objects, that are granted to the specified grantee via privileges of the specified
+          * class.
           * @param granteeId ID of the privilege grantee.
           */
-        def getByGrantee(granteeId: String): Seq[A]
+        def getByGrantee(granteeId: String): Seq[Privilege[_]]
     }
     
-    trait AnalysisRepository[+A <: Analysis] extends Repository[A] with ShareableEntityRepository[A]
+    trait AnalysisRepository
+        extends Repository[Analysis]
+        with NamedEntityRepository[Analysis]
+        with OptionallyOwnedEntityRepository[Analysis]
+        with ShareableEntityRepository[Analysis]
     {
         /**
           * Returns top analyses in the repository.
           * @param pagination Optionally specified pagination of the result.
           */
-        def getTop(pagination: Option[PaginationInfo] = Some(PaginationInfo(0, 10))): Seq[A]
+        def getTop(pagination: Option[PaginationInfo] = Some(PaginationInfo(0, 10))): Seq[Analysis]
 
         /**
           * Returns top analyses owned by the specified owner.
           * @param ownerId ID of the analysis owner.
           * @param pagination Optionally specified pagination of the result.
           */
-        def getTopByOwner(ownerId: String, pagination: Option[PaginationInfo] = Some(PaginationInfo(0, 10))): Seq[A]
+        def getTopByOwner(ownerId: String, pagination: Option[PaginationInfo] = Some(PaginationInfo(0, 10))):
+            Seq[Analysis]
 
         /**
           * Returns public analyses owned by the specified owner.
           * @param ownerId ID of the analysis owner.
           * @param pagination Optionally specified pagination of the result.
           */
-        def getPublicByOwner(ownerId: String, pagination: Option[PaginationInfo] = None): Seq[A]
-    }
-
-    trait PluginRepository[+A <: Plugin] extends Repository[A] with ShareableEntityRepository[A]
-    {
-        /**
-          * Returns a plugin with the specified name.
-          * @param name Name of the plugin to search for.
-          */
-        def getByName(name: String): Option[Plugin]
-    }
-
-    trait DataSourceRepository[+A <: DataSource] extends Repository[A] with ShareableEntityRepository[A]
-    {
-        /**
-          * Returns all public data sources.
-          * @param pagination Optionally specified pagination of the result.
-          */
-        def getPublic(pagination: Option[PaginationInfo] = None): Seq[A]
+        def getPublicByOwner(ownerId: String, pagination: Option[PaginationInfo] = None): Seq[Analysis]
     }
 
     trait OntologyCustomizationRepository[+A <: OntologyCustomization]
         extends Repository[A]
         with ShareableEntityRepository[A] {
     }
+
+    trait PluginRepository
+        extends Repository[Plugin]
+        with NamedEntityRepository[Plugin]
+        with OptionallyOwnedEntityRepository[Plugin]
+        with ShareableEntityRepository[Plugin]
+
+    trait DataSourceRepository
+        extends Repository[DataSource]
+        with NamedEntityRepository[DataSource]
+        with OptionallyOwnedEntityRepository[DataSource]
+        with ShareableEntityRepository[DataSource]
 
     /**
       * A registry providing repositories by entity classes or entity class names.

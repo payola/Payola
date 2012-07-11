@@ -2,53 +2,50 @@ package cz.payola.data.squeryl.repositories
 
 import org.squeryl.PrimitiveTypeMode._
 import cz.payola.data.squeryl._
-import cz.payola.domain.entities.{Privilege, User, Group, Analysis}
+import cz.payola.domain.entities.Privilege
 import cz.payola.data.squeryl.entities.privileges.PrivilegeDbRepresentation
 import cz.payola.data.PaginationInfo
-import cz.payola.data.squeryl.entities.plugins.DataSource
-import cz.payola.domain.Entity
 import scala.collection.mutable
-import cz.payola.data.squeryl.entities.PersistableEntity
-import org.squeryl.dsl.ast.LogicalBoolean
-import org.squeryl.Query
+import cz.payola.domain.Entity
 
 trait PrivilegeRepositoryComponent extends TableRepositoryComponent
 {                                      
     self: SquerylDataContextComponent =>
 
-    type PrivilegeType = Privilege[_ <: Entity]
-    
-    lazy val privilegeRepository = new PrivilegeRepository[PrivilegeType]
+    private type PrivilegeType = Privilege[_ <: Entity]
+
+    lazy val privilegeRepository = new PrivilegeRepository
     {
         private val representationRepository =
-            new TableRepository[PrivilegeDbRepresentation, PrivilegeDbRepresentation](schema.privileges,
-                PrivilegeDbRepresentation) {
+            new LazyTableRepository[PrivilegeDbRepresentation](schema.privileges, PrivilegeDbRepresentation)
 
-                protected def getSelectQuery(entityFilter: PrivilegeDbRepresentation => LogicalBoolean) = {
-                    table.where(e => entityFilter(e))
-                }
-
-                protected def processSelectResults(results: Seq[PrivilegeDbRepresentation]) = {
-                    results
-                }
-            }
-
-        def getAll(pagination: Option[PaginationInfo] = None): Seq[PrivilegeType] = Seq()
-
-        def getByIds(ids: Seq[String]): Seq[PrivilegeType] = {
+        def getByIds(ids: Seq[String]): Seq[PrivilegeType] = schema.wrapInTransaction {
             instantiate(representationRepository.getByIds(ids))
         }
 
-        def persist(entity: AnyRef): PrivilegeType = {
+        def getAll(pagination: Option[PaginationInfo] = None) = {
+            instantiate(representationRepository.getAll(pagination))
+        }
+
+        def persist(entity: AnyRef): PrivilegeType = schema.wrapInTransaction[PrivilegeType] {
             representationRepository.persist(entity)
 
             // The entity was successfully persisted therefore it must be a privilege.
             entity.asInstanceOf[PrivilegeType]
         }
 
-        def removeById(id: String) = representationRepository.removeById(id)
+        def removeById(id: String) = schema.wrapInTransaction{
+            representationRepository.removeById(id)
+        }
 
-        def getCount: Long = representationRepository.getCount
+        def getCount: Long = schema.wrapInTransaction {
+            representationRepository.getCount
+        }
+
+        def getAllGrantedTo[B](granteeIds: Seq[String], privilegeClass: Class[_]): Seq[B] = {
+            // TODO implement
+            Nil
+        }
 
         def getByGrantee(granteeId: String): Seq[PrivilegeType] = {
             // TODO: table where
@@ -57,7 +54,7 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
                 select(p)
             )
 
-            instantiate(representationRepository.evaluateCollectionResultQuery(query))
+            Nil
         }
 
         private def instantiate(privileges: Seq[PrivilegeDbRepresentation]): Seq[PrivilegeType] = {

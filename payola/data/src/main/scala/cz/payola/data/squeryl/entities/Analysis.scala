@@ -22,7 +22,7 @@ object Analysis extends EntityConverter[Analysis]
 
 class Analysis(override val id: String, name: String, o: Option[User])(implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.Analysis(name, o)
-    with PersistableEntity
+    with PersistableEntity with OptionallyOwnedEntity
 {
     type DomainParameterValueType = plugins.ParameterValue[_]
 
@@ -34,17 +34,16 @@ class Analysis(override val id: String, name: String, o: Option[User])(implicit 
     private var _pluginInstancesBindingsLoaded = false
     private lazy val _pluginInstancesBindingsQuery = context.schema.analysesPluginInstancesBindings.left(this)
 
-    var ownerId: Option[String] = o.map(_.id)
-    private lazy val _ownerQuery = context.schema.analysisOwnership.right(this)
-
     override def pluginInstances: immutable.Seq[PluginInstanceType] = {
         // Lazy-load related instances only for first time
         if (!_pluginInstancesLoaded) {
-            evaluateCollection(_pluginInstancesQuery).map( i =>
-                if (!super.pluginInstances.contains(i)) {
-                    super.storePluginInstance(i)
-                }
-            )
+            wrapInTransaction {
+                _pluginInstancesQuery.toList.foreach(i =>
+                    if (!super.pluginInstances.contains(i)) {
+                        super.storePluginInstance(i)
+                    }
+                )
+            }
 
             _pluginInstancesLoaded = true
         }
@@ -52,24 +51,16 @@ class Analysis(override val id: String, name: String, o: Option[User])(implicit 
         super.pluginInstances
     }
 
-    override def owner: Option[UserType] = {
-        if (_owner == None){
-            if (ownerId != null && ownerId.isDefined) {
-                _owner = evaluateCollection(_ownerQuery).headOption
-            }
-        }
-
-        _owner
-    }
-
     override def pluginInstanceBindings: immutable.Seq[PluginInstanceBindingType] = {
         // Lazy-load related bindings only for first time
         if (!_pluginInstancesBindingsLoaded) {
-            evaluateCollection(_pluginInstancesBindingsQuery).map(b =>
-                if (!super.pluginInstanceBindings.contains(b)) {
-                    super.storeBinding(b)
-                }
-            )
+            wrapInTransaction {
+                _pluginInstancesBindingsQuery.toList.foreach(b =>
+                    if (!super.pluginInstanceBindings.contains(b)) {
+                        super.storeBinding(b)
+                    }
+                )
+            }
 
             _pluginInstancesBindingsLoaded = true
         }

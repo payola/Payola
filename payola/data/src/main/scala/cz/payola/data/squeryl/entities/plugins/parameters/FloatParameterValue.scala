@@ -36,5 +36,5 @@ class FloatParameterValue(
 
     private lazy val _parameterQuery = context.schema.valuesOfFloatParameters.right(this)
 
-    override def parameter: ParameterType = evaluateCollection(_parameterQuery)(0)
+    override def parameter: ParameterType = wrapInTransaction { _parameterQuery.head }
 }

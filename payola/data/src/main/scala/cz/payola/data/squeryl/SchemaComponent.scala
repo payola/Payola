@@ -312,9 +312,17 @@ trait SchemaComponent
           */
         def recreate() {
             declareKeys()
-            transaction {
+            inTransaction {
                 drop
                 create
+            }
+        }
+
+        def wrapInTransaction[C](body: => C) = {
+            DataException.wrap {
+                inTransaction {
+                    body
+                }
             }
         }
 
@@ -326,7 +334,7 @@ trait SchemaComponent
             factoryFor(users) is { new User("", "", "", "") },
             factoryFor(groups) is { new Group("", "", null) },
             factoryFor(analyses) is { new Analysis("", "", None) },
-            factoryFor(plugins) is { new PluginDbRepresentation("", "", "", 0, None) },
+            factoryFor(plugins) is { new PluginDbRepresentation("", "", "", 0, None, false) },
             factoryFor(pluginInstances) is { new PluginInstance("", null, Nil, "") },
             factoryFor(booleanParameters) is { new BooleanParameter("", "", false) },
             factoryFor(booleanParameterValues) is { new BooleanParameterValue("", null, false)  },

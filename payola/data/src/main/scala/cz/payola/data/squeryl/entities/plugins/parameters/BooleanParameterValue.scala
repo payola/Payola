@@ -36,5 +36,5 @@ class BooleanParameterValue(
 
     private lazy val _parameterQuery = context.schema.valuesOfBooleanParameters.right(this)
 
-    override def parameter: ParameterType = evaluateCollection(_parameterQuery)(0)
+    override def parameter: ParameterType = wrapInTransaction { _parameterQuery.head }
 }

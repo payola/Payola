@@ -32,15 +32,11 @@ class DataSource(
     df: cz.payola.domain.entities.plugins.concrete.DataFetcher,
     paramValues: immutable.Seq[ParameterValue[_]])(implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.plugins.DataSource(n, o, df, paramValues)
-    with PersistableEntity
+    with PersistableEntity  with OptionallyOwnedEntity
 {
     var pluginId: String = Option(df).map(_.id).getOrElse(null)
 
-    var ownerId: Option[String] = o.map(_.id)
-
     private lazy val _pluginQuery = context.schema.pluginsDataSources.right(this)
-
-    private lazy val _ownerQuery = context.schema.dataSourceOwnership.right(this)
 
     private lazy val _booleanParameterValuesQuery = context.schema.booleanParameterValuesOfDataSources.left(this)
 
@@ -61,31 +57,25 @@ class DataSource(
 
     override def plugin = {
         if (pluginId != null) {
-            evaluateCollection(_pluginQuery)(0).toPlugin
+            wrapInTransaction {
+                _pluginQuery.head.toPlugin
+            }
         }
         else {
             null
         }
     }
 
-    override def owner: Option[UserType] = {
-        if (_owner == None) {
-            if (ownerId != null && ownerId.isDefined) {
-                _owner = evaluateCollection(_ownerQuery).headOption
-            }
-        }
-
-        _owner
-    }
-
     override def parameterValues: collection.immutable.Seq[PluginType#ParameterValueType] = {
         if (!_parameterValuesLoaded) {
-            _paramValues = List(
-                evaluateCollection(_booleanParameterValuesQuery),
-                evaluateCollection(_floatParameterValuesQuery),
-                evaluateCollection(_intParameterValuesQuery),
-                evaluateCollection(_stringParameterValuesQuery)
-            ).flatten.toSeq
+            wrapInTransaction {
+                _paramValues = List(
+                    _booleanParameterValuesQuery.toList,
+                    _floatParameterValuesQuery.toList,
+                    _intParameterValuesQuery.toList,
+                    _stringParameterValuesQuery.toList
+                ).flatten
+            }
 
             _parameterValuesLoaded = true
         }
