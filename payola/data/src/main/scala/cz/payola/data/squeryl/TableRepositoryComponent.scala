@@ -2,11 +2,11 @@ package cz.payola.data.squeryl
 
 import org.squeryl._
 import org.squeryl.PrimitiveTypeMode._
-import cz.payola.data._
-import cz.payola.data.squeryl.entities._
-import scala.Some
-import cz.payola.data.PaginationInfo
 import org.squeryl.dsl.ast.LogicalBoolean
+import cz.payola.data._
+import cz.payola.data.PaginationInfo
+import cz.payola.data.squeryl.entities._
+import cz.payola.domain.entities.ShareableEntity
 
 trait TableRepositoryComponent
 {
@@ -24,12 +24,12 @@ trait TableRepositoryComponent
         extends Repository[A]
     {
         def getByIds(ids: Seq[String]): Seq[A] = {
-            select(getSelectQuery(entity => entity.id in ids))
+            selectWhere(entity => entity.id in ids)
         }
 
         def getAll(pagination: Option[PaginationInfo] = None): Seq[A] = {
             // TODO pagination
-            select(getSelectQuery(_ => 1 === 1))
+            selectWhere(_ => 1 === 1)
         }
 
         def removeById(id: String): Boolean = DataException.wrap {
@@ -67,6 +67,15 @@ trait TableRepositoryComponent
                 query.toList
             }
             processSelectResults(results)
+        }
+
+        /**
+          * Selects all entities except the one filtered by the entity filter.
+          * @param entityFilter A filter that excludes enitites from the result.
+          * @return The selected entities.
+          */
+        protected def selectWhere(entityFilter: A => LogicalBoolean): Seq[A] = {
+            select(getSelectQuery(entityFilter))
         }
 
         /**
@@ -122,6 +131,16 @@ trait TableRepositoryComponent
             transaction {
                 paginatedQuery.toList
             }
+        }
+    }
+
+    trait ShareableEntityTableRepository[A <: PersistableEntity with ShareableEntity]
+        extends ShareableEntityRepository[A]
+    {
+        self: TableRepository[A, _] =>
+
+        def getAllPublic: Seq[A] = {
+            selectWhere(_.isPublic === true)
         }
     }
 

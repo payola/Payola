@@ -43,4 +43,6 @@ class TextModal(model: TextSettingsModel) extends Component
     def hide() {
         modal.hide
     }
+
+    def getDomElement : Element = modal.getDomElement
 }

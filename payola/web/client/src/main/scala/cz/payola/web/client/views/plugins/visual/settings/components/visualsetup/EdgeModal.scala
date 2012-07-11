@@ -58,4 +58,6 @@ class EdgeModal(model: EdgeSettingsModel) extends Component
     def hide() {
         modal.hide
     }
+
+    def getDomElement : Element = modal.getDomElement
 }

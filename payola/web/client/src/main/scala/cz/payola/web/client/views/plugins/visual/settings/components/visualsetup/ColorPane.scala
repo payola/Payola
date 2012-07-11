@@ -47,6 +47,8 @@ class ColorPane(name: String, label: String, var color: Color) extends Component
         colorInput.setText(value.toString)
     }
 
+    def getDomElement : Element = colorInput.getDomElement
+
     @javascript("""jQuery(self.div.div).colorpicker({format: 'rgba'}).on('changeColor',function(evt){
         var rgba = evt.color.toRGB();
         self.color.red = rgba.r;

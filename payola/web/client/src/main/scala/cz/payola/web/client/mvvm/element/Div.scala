@@ -28,4 +28,12 @@ class Div(val innerElements: Seq[Component] = List(), val addClass: String = "")
     def removeClass(remClass: String) = {
         div.setAttribute("class",div.getAttribute("class").replaceAllLiterally(remClass, ""))
     }
+
+    def getDomElement : Element = {
+        div
+    }
+
+    def setId(id: String) = {
+        div.setAttribute("id",id)
+    }
 }

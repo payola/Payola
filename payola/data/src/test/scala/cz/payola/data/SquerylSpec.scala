@@ -323,7 +323,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl") with FlatSpec with
             assert(u3.id == ds3_db.owner.get.id)
 
         //println("DSs: " + dataSourceRepository.getPublicDataSources().size)
-            assert(dataSourceRepository.getPublicDataSources().size == 0)
+            assert(dataSourceRepository.getAllPublic.size == 0)
             assert(dataSourceRepository.getAll().size == 3)
     }
 

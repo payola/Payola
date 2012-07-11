@@ -9,6 +9,8 @@ trait ModelComponent
     with GroupModelComponent
     with AnalysisModelComponent
     with DataSourceModelComponent
+    with PluginModelComponent
+    with PayolaStorageModelComponent
 {
     self: DataContextComponent with RdfStorageComponent =>
 }

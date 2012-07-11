@@ -2,6 +2,7 @@ package controllers.helpers
 
 import controllers.InvocationInfo
 import s2js.runtime.shared.rpc
+import cz.payola.domain.entities.User
 
 class RPCDispatcher(jsonSerializer: GraphSerializer)
 {
@@ -14,11 +15,11 @@ class RPCDispatcher(jsonSerializer: GraphSerializer)
       * a Scala Map[String, Seq[String] ] instance which is transformed to a typed parameters list. The list is used
       * to invoke a method named with the value of the POST field "method".
       *
-      * @param request HTTP request
+      * @param params request parameters
       * @param asynchronous Whether the call is ment to be synchronous (false) or asynchronous (true)
       * @return JSON-encoded response object
       */
-    def dispatchRequest(params: Map[String, Seq[String]], asynchronous: Boolean = false): String = {
+    def dispatchRequest(params: Map[String, Seq[String]], asynchronous: Boolean = false, user: Option[User]): String = {
 
         // get the name of the method
         // when empty, throw an exception
@@ -41,9 +42,9 @@ class RPCDispatcher(jsonSerializer: GraphSerializer)
         // call the remote method synchronously or asynchronously - depends on the asynchronous parameter
         val result = asynchronous match {
             case true => invokeAsync(fqdnParts._1, fqdnParts._2.stripPrefix("."), paramList,
-                paramTypes.get.asInstanceOf[Seq[String]])
+                paramTypes.get.asInstanceOf[Seq[String]], user)
             case false => invoke(fqdnParts._1, fqdnParts._2.stripPrefix("."), paramList,
-                paramTypes.get.asInstanceOf[Seq[String]])
+                paramTypes.get.asInstanceOf[Seq[String]], user)
         }
 
         // return remote method call result
@@ -68,13 +69,20 @@ class RPCDispatcher(jsonSerializer: GraphSerializer)
       * @return Response encoded into JSON string
       */
     private def invokeAsync(objectName: String, methodName: String, params: Iterable[Seq[String]],
-        paramTypes: Seq[String]): String = {
+        paramTypes: Seq[String], user: Option[User]): String = {
 
-        val dto = getReflectionObjects(objectName, methodName)
+        val dto = getReflectionObjects(objectName, methodName, user)
 
         val paramsSize = params.size
+
+        val extraSpace = if (dto.user.isDefined) { 3 } else { 2 }
+
         // allocate an array of objects for the parameters (adding 2 for callbacks)
-        val paramArray = constructParamArray(paramsSize, 2, params, dto.methodToRun, paramTypes)
+        val paramArray = constructParamArray(paramsSize, extraSpace, params, dto.methodToRun, paramTypes)
+
+        if (dto.user.isDefined){
+            paramArray.update(paramArray.size-3, user.get)
+        }
 
         val result = executeWithActors(paramArray, paramsSize, dto)
 
@@ -90,12 +98,18 @@ class RPCDispatcher(jsonSerializer: GraphSerializer)
       * @return Response encoded into JSON string
       */
     private def invoke(objectName: String, methodName: String, params: Iterable[Seq[String]],
-        paramTypes: Seq[String]): String = {
+        paramTypes: Seq[String], user: Option[User]): String = {
 
-        val dto = getReflectionObjects(objectName, methodName)
+        val dto = getReflectionObjects(objectName, methodName, user)
+
+        val extraSpace = if (dto.user.isDefined) { 1 } else { 0 }
 
         // update each parameter and replace it with its properly typed representation
-        val paramArray = constructParamArray(params.size, 0, params, dto.methodToRun, paramTypes)
+        val paramArray = constructParamArray(params.size, extraSpace, params, dto.methodToRun, paramTypes)
+
+        if (dto.user.isDefined){
+            paramArray.update(paramArray.size-1, user.get)
+        }
 
         // invoke the remote method (!? for synchronous behaviour)
         val result = dto.methodToRun.invoke(dto.runnableObj, paramArray: _*)
@@ -133,10 +147,10 @@ class RPCDispatcher(jsonSerializer: GraphSerializer)
       * @param methodName
       * @return
       */
-    private def getReflectionObjects(objectName: String, methodName: String) = {
+    private def getReflectionObjects(objectName: String, methodName: String, user: Option[User]) = {
         // while objects are not really a Java thing, they are compiled into static classes named with trailing $ sign
         try{
-            val clazz = Class.forName(objectName + "$"); // TODO: use Scala reflection when released
+            val clazz = Class.forName(objectName + "$");
 
             // get the desired method on the object
             val methodOption = clazz.getMethods.find(_.getName == methodName)
@@ -145,15 +159,37 @@ class RPCDispatcher(jsonSerializer: GraphSerializer)
                 throw new Exception
             }
 
+            var authorized: Option[User] = None
+
             // "objectify" the desired mezhod to be able to invoke it later
             // this is a very ugly Java stuff, but Scala is not able to do this at the time
             val methodToRun: java.lang.reflect.Method = methodOption.getOrElse(null)
-            val runnableObj = clazz.getField("MODULE$").get(objectName)
+            val methodAnnotations = methodToRun.getDeclaredAnnotations()
+            if (methodAnnotations.find{a => a.annotationType().getName().equals("s2js.compiler.secured")}.isDefined)
+            {
+                checkAuthorization(user)
+                authorized = user
+            }
 
-            val dto = new InvocationInfo(methodToRun, clazz, runnableObj)
+            val runnableObj = clazz.getField("MODULE$").get(objectName)
+            val annotations = methodToRun.getAnnotations()
+            if (annotations.find{a => a.annotationType().getName().equals("s2js.compiler.secured")}.isDefined)
+            {
+                checkAuthorization(user)
+                authorized = user
+            }
+
+            // authorized is None only if the authorization is not needed, otherwise Some/Exception thrown
+            val dto = new InvocationInfo(methodToRun, clazz, runnableObj, authorized)
             dto
         }catch{
             case e: java.lang.ClassNotFoundException => throw new rpc.Exception("Invalid remote object name.")
+        }
+    }
+
+    def checkAuthorization(user: Option[User]) = {
+        if (!user.isDefined){
+            throw new rpc.Exception("Not auhorized.")
         }
     }
 
@@ -169,14 +205,18 @@ class RPCDispatcher(jsonSerializer: GraphSerializer)
         val executor = new RPCActionExecutor()
         executor.start()
 
-        // add param - success callback
-        paramArray.update(paramsSize, {x: Any => executor ! new RPCReply(x)})
-        // add param - fail callback - takes only Throwable as a parameter
-        paramArray.update(paramsSize + 1, {x: Throwable => executor ! new RPCReply(x)})
-
         // invoke the remote method (!? for synchronous behaviour)
         val result = executor !? RPCActionMessage(dto.methodToRun, dto.runnableObj, paramArray)
-        result
+
+        result match {
+            case resultMessage: ActionExecutorSuccess => resultMessage.result
+            case errorMessage: ActionExecutorError =>
+                errorMessage.error match {
+                    case e: rpc.Exception => throw e
+                    case e: Exception => throw new rpc.Exception(e.getMessage)
+                    case _ => throw new rpc.Exception("Unspecified RPC error.")
+                }
+        }
     }
 
     /**

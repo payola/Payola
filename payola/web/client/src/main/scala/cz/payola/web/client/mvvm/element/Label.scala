@@ -15,4 +15,8 @@ class Label(val text: String, val forElement: Element, val addClass: String = ""
     def render(parent: Element = document.body) = {
         parent.appendChild(label)
     }
+
+    def getDomElement : Element = {
+        label
+    }
 }

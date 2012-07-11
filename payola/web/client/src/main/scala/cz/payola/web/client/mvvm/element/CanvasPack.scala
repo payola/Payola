@@ -235,4 +235,9 @@ class CanvasPack(width: Double, height: Double) extends Canvas(width, height) {
                 }
         }
     }
+
+    override def getDomElement : Element = {
+        //TODO
+        edgesDeselectedLayer.getDomElement()
+    }
 }

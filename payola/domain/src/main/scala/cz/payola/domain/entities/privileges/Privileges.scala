@@ -1,7 +1,7 @@
 package cz.payola.domain.entities.privileges
 
 import cz.payola.domain.entities._
-import cz.payola.domain.entities.settings.ontology.Customization
+import cz.payola.domain.entities.settings.OntologyCustomization
 import cz.payola.domain.entities.plugins.DataSource
 import cz.payola.domain.IDGenerator
 
@@ -19,7 +19,7 @@ class UsePluginPrivilege(granter: User, grantee: PrivilegableEntity, plugin: Plu
     extends Privilege[Plugin](granter, grantee, plugin, id)
     with cz.payola.common.entities.privileges.UsePluginPrivilege
 
-class UseOntologyCustomizationPrivilege(granter: User, grantee: PrivilegableEntity, customization: Customization,
+class UseOntologyCustomizationPrivilege(granter: User, grantee: PrivilegableEntity, customization: OntologyCustomization,
     id: String = IDGenerator.newId)
-    extends Privilege[Customization](granter, grantee, customization, id)
+    extends Privilege[OntologyCustomization](granter, grantee, customization, id)
     with cz.payola.common.entities.privileges.UseOntologyCustomizationPrivilege

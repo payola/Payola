@@ -46,7 +46,7 @@ object Profile extends PayolaController with Secured
         Ok(html.Profile.createGroup(user, groupForm))
     }
 
-    def saveCreateGroup = authenticatedWithRequest { (request: Request[_], user: User) =>
+    def saveCreateGroup = authenticatedWithRequest { (user, request) =>
         val name = groupForm.bindFromRequest()(request).get
         val group = Payola.model.groupModel.create(name, user)
 
@@ -59,7 +59,7 @@ object Profile extends PayolaController with Secured
         }
     }
 
-    def saveGroup(id: String) = authenticatedWithRequest{ (request: Request[_], user: User) =>
+    def saveGroup(id: String) = authenticatedWithRequest{ (user, request) =>
 
         val data = request.body match {
             case AnyContentAsFormUrlEncoded(data) => data
@@ -67,7 +67,7 @@ object Profile extends PayolaController with Secured
         }
 
         val membersNew = data.getOrElse("members",Nil).flatMap{ u => Payola.model.userModel.getById(u) }
-        val group = Payola.model.groupModel.getByOwnerAndId(user, id)
+        val group = user.ownedGroups.find(_.id == id)
 
         if (group.isDefined)
         {
@@ -88,8 +88,8 @@ object Profile extends PayolaController with Secured
         }
     }
 
-    def editGroup(id: String) = authenticatedWithRequest{ (request: Request[_], user: User) =>
-        val g = Payola.model.groupModel.getByOwnerAndId(user, id)
+    def editGroup(id: String) = authenticatedWithRequest{ (user, request) =>
+        val g = user.ownedGroups.find(_.id == id)
 
         if (g.isDefined)
         {
@@ -101,12 +101,12 @@ object Profile extends PayolaController with Secured
         }
     }
 
-    def listGroups = authenticatedWithRequest( (request: Request[_], user: User) =>
+    def listGroups = authenticatedWithRequest( (user, request) =>
         Ok(views.html.Profile.listGroups(user)(request.flash))
     )
 
     def deleteGroup(id: String) = authenticated{ user =>
-        val group = Payola.model.groupModel.getByOwnerAndId(user, id)
+        val group = user.ownedGroups.find(_.id == id)
         Redirect(routes.Profile.listGroups()).flashing(
             if (group.map(g => Payola.model.groupModel.remove(g)).getOrElse(false)) {
                 "success" -> "The group has been successfully deleted."
@@ -114,5 +114,9 @@ object Profile extends PayolaController with Secured
                 "error" -> "The group could not been deleted."
             }
         )
+    }
+
+    def createPlugin = authenticated{ user =>
+        Ok(views.html.Profile.createPlugin(user))
     }
 }

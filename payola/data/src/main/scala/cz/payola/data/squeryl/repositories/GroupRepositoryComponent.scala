@@ -17,7 +17,7 @@ trait GroupRepositoryComponent extends TableRepositoryComponent
     {
         def getAllByOwnerId(ownerId: String, pagination: Option[PaginationInfo] = None): Seq[Group] = {
             // TODO pagination
-            select(getSelectQuery(_.ownerId === ownerId))
+            selectWhere(_.ownerId === ownerId)
         }
 
         protected def getSelectQuery(entityFilter: Group => LogicalBoolean) = {

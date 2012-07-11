@@ -68,4 +68,8 @@ class Canvas(width: Double, height: Double) extends Component {
     def dirty() {
         cleared = false
     }
+
+    def getDomElement : Element = {
+        canvasElement
+    }
 }

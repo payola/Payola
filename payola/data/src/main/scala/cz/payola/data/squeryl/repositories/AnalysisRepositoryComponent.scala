@@ -13,6 +13,7 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
 
     lazy val analysisRepository = new LazyTableRepository[Analysis](schema.analyses, Analysis)
         with AnalysisRepository[Analysis]
+        with ShareableEntityTableRepository[Analysis]
     {
         def getTop(pagination: Option[PaginationInfo] = Some(new PaginationInfo(0, 10))): collection.Seq[Analysis] = {
             getTopAnalyses(None, pagination)

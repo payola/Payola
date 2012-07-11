@@ -8,6 +8,7 @@ import cz.payola.web.client.events._
 import cz.payola.web.shared.AnalysisRunner
 import s2js.adapters.js.browser.window
 import cz.payola.common.rdf.Graph
+import s2js.compiler.javascript
 
 class AnalysisControls(analysisId: String) extends Component
 {
@@ -23,9 +24,10 @@ class AnalysisControls(analysisId: String) extends Component
 
     var evaluationId = ""
 
+    val wrap = new Div(List(runBtn, progressDiv))
+
     def render(parent: Element = document.body) = {
-        runBtn.render(parent)
-        progressDiv.render(parent)
+        wrap.render(parent)
     }
 
     var analysisRunning = false
@@ -35,9 +37,13 @@ class AnalysisControls(analysisId: String) extends Component
         {
             runBtn.addClass("disabled")
             analysisRunning = true
-            evaluationId = AnalysisRunner.runAnalysisById(analysisId)
-            progressValueBar.setAttribute("style", "width: 2%; height: 40px")
-            schedulePolling
+            AnalysisRunner.runAnalysisById(analysisId){id =>
+                evaluationId = id
+                progressValueBar.setAttribute("style", "width: 2%; height: 40px")
+                schedulePolling
+            }{error =>
+                window.alert("Unable to run analysis.")
+            }
         }
         false
     }
@@ -56,30 +62,34 @@ class AnalysisControls(analysisId: String) extends Component
     }
 
     def pollingHandler() : Unit = {
-        val progress = AnalysisRunner.getAnalysisProgress(evaluationId)
-        val percent = (progress.percent*100)
 
-        val display = if (percent > 2){ percent }else{ 2 }
+        AnalysisRunner.getAnalysisProgress(evaluationId) {progress =>
+            val percent = (progress.percent*100)
 
-        progressValueBar.setAttribute("style","width: "+display+"%; height: 40px")
+            val display = if (percent > 2){ percent }else{ 2 }
 
-        progress.evaluated.map{
-            inst => addClass(document.getElementById("inst_"+inst), "alert-warning")
-        }
+            progressValueBar.setAttribute("style","width: "+display+"%; height: 40px")
 
-        progress.errors.map{
-            inst => addClass(document.getElementById("inst_"+inst), "alert-error")
-        }
+            progress.evaluated.map{
+                inst => addClass(document.getElementById("inst_"+inst), "alert-warning")
+            }
 
-        progress.evaluated.map{
-            inst => addClass(document.getElementById("inst_"+inst), "alert-success")
-        }
+            progress.errors.map{
+                inst => addClass(document.getElementById("inst_"+inst), "alert-error")
+            }
 
-        if (!progress.isFinished)
-        {
-            schedulePolling
-        }else{
-            markDone(progress.graph)
+            progress.evaluated.map{
+                inst => addClass(document.getElementById("inst_"+inst), "alert-success")
+            }
+
+            if (!progress.isFinished)
+            {
+                schedulePolling
+            }else{
+                markDone(progress.graph)
+            }
+        }{ error =>
+            window.alert("Unable to determine analysis progress.")
         }
     }
 
@@ -91,7 +101,10 @@ class AnalysisControls(analysisId: String) extends Component
         analysisRunning = false
     }
 
-    def switchTab() = {
+    @javascript("""jQuery("#results-tab-link").click();""")
+    def switchTab() = {}
 
+    def getDomElement : Element = {
+        wrap.getDomElement
     }
 }

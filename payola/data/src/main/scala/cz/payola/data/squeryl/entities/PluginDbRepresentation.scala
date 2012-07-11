@@ -4,7 +4,7 @@ import cz.payola.data._
 import org.squeryl.annotations.Transient
 import cz.payola.data.squeryl.entities.plugins._
 import cz.payola.data.squeryl.entities.plugins.parameters._
-import cz.payola.domain.entities.Plugin
+import cz.payola.domain.entities._
 import cz.payola.data.squeryl.SquerylDataContextComponent
 import cz.payola.domain.entities.plugins.concrete.data.PayolaStorage
 
@@ -30,6 +30,7 @@ class   PluginDbRepresentation(
     o: Option[User])
     (implicit val context: SquerylDataContextComponent)
     extends PersistableEntity
+    with ShareableEntity
 {
     private var _owner: Option[User] = o
 

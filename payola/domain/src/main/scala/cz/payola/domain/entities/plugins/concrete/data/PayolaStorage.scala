@@ -7,11 +7,19 @@ import cz.payola.domain.entities.plugins.concrete.DataFetcher
 import cz.payola.domain.entities.plugins.parameters.StringParameter
 import cz.payola.domain.rdf._
 
+object PayolaStorage
+{
+    val pluginName = "Payola Private Storage"
+
+    val groupURIParameterName = "GroupURI"
+}
+
 sealed class PayolaStorage(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
     (implicit val storageComponent: RdfStorageComponent)
     extends DataFetcher(name, inputCount, parameters, id)
 {
-    def this() = this("Payola Private Storage", 0, List(new StringParameter("GroupURI", "")), IDGenerator.newId)(null)
+    def this() = this(PayolaStorage.pluginName, 0, List(new StringParameter(PayolaStorage.groupURIParameterName, "")),
+        IDGenerator.newId)(null)
 
     def executeQuery(instance: PluginInstance, query: String): Graph = {
         usingDefined(instance.getStringParameter("GroupURI")) { groupURI =>

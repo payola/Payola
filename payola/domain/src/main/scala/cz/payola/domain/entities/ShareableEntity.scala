@@ -1,3 +1,5 @@
 package cz.payola.domain.entities
 
-trait ShareableEntity extends cz.payola.common.entities.ShareableEntity
+import cz.payola.domain.Entity
+
+trait ShareableEntity extends Entity with cz.payola.common.entities.ShareableEntity

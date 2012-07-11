@@ -2,14 +2,14 @@ package cz.payola.web.shared
 
 import cz.payola.domain.entities.analyses.evaluation._
 import scala.collection.mutable.HashMap
+import s2js.compiler.async
 
 // TODO move the logic to the model.
 @remote object AnalysisRunner
 {
     val runningEvaluations : HashMap[String, AnalysisEvaluation] = new HashMap[String, AnalysisEvaluation]
 
-    def runAnalysisById(id: String) = {
-        //TODO: Get AnalysisRepository from datafacade! (JH)
+    @async def runAnalysisById(id: String)(successCallback: (String => Unit))(failCallback: (Throwable => Unit)) = {
         val analysisOpt = Payola.model.analysisModel.getById(id)
 
         if (analysisOpt.isEmpty) {
@@ -18,10 +18,10 @@ import scala.collection.mutable.HashMap
 
         runningEvaluations.put(id, analysisOpt.get.evaluate())
 
-        id
+        successCallback(id)
     }
 
-    def getAnalysisProgress(evaluationId: String) : AnalysisProgress = {
+    @async def getAnalysisProgress(evaluationId: String)(successCallback: (AnalysisProgress => Unit))(failCallback: (Throwable => Unit)) = {
 
         val evaluation = runningEvaluations.get(evaluationId).get
         val progress = evaluation.getProgress
@@ -40,6 +40,6 @@ import scala.collection.mutable.HashMap
             case _ => None
         }
 
-        new AnalysisProgress(evaluated, running, errors, progress.value, evaluation.isFinished, graph)
+        successCallback(new AnalysisProgress(evaluated, running, errors, progress.value, evaluation.isFinished, graph))
     }
 }

@@ -21,6 +21,7 @@ trait PluginRepositoryComponent extends TableRepositoryComponent
 
         private val representationRepository =
             new TableRepository[PluginDbRepresentation, QueryType](schema.plugins,PluginDbRepresentation)
+                with ShareableEntityTableRepository[PluginDbRepresentation]
             {
                 protected def getSelectQuery(entityFilter: (PluginDbRepresentation) => LogicalBoolean) = {
                     join(schema.plugins, schema.users.leftOuter, schema.booleanParameters.leftOuter,
@@ -57,6 +58,8 @@ trait PluginRepositoryComponent extends TableRepositoryComponent
         def getAll(pagination: Option[PaginationInfo] = None): Seq[Plugin] = {
             representationRepository.getAll(pagination).map(_.toPlugin)
         }
+
+        def getAllPublic: Seq[Plugin] = representationRepository.getAllPublic.map(_.toPlugin)
 
         def persist(entity: AnyRef): Plugin = {
             entity match {
