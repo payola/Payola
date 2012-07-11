@@ -1,11 +1,12 @@
 package cz.payola.data.squeryl.entities
 
-import scala.collection.immutable
 import cz.payola.data.squeryl.entities.privileges.PrivilegeDbRepresentation
 import cz.payola.data.squeryl.repositories._
 import cz.payola.domain.entities.privileges._
 import cz.payola.data.squeryl.SquerylDataContextComponent
 import cz.payola.domain.entities.plugins.DataSource
+import scala.collection._
+import cz.payola.domain.entities.Privilege
 
 /**
   * An entity that may be granted privileges.
@@ -14,48 +15,28 @@ trait PrivilegableEntity extends cz.payola.domain.entities.PrivilegableEntity
 {
     self: PersistableEntity =>
 
+    _privileges = null
+
     implicit val context: SquerylDataContextComponent
 
-    override def grantedAnalyses: immutable.Seq[cz.payola.common.entities.Analysis] = {
-        _loadObjectIds(classOf[AccessAnalysisPrivilege], classOf[Analysis]).flatMap(
-            context.analysisRepository.getById(_)).toList
+    override def privileges = {
+        if (_privileges == null) {
+            _privileges = context.privilegeRepository.getByGrantee(id).toBuffer
+        }
+
+        _privileges.toList
     }
 
-    override def grantedDataSources: immutable.Seq[cz.payola.common.entities.plugins.DataSource] = {
-        _loadObjectIds(classOf[AccessDataSourcePrivilege], classOf[DataSource]).flatMap(
-            context.dataSourceRepository.getById(_)).toList
-    }
-
-    def grantedPlugins: immutable.Seq[cz.payola.common.entities.Plugin] = {
-        _loadObjectIds(classOf[UsePluginPrivilege], classOf[cz.payola.common.entities.Plugin]).flatMap(
-            context.pluginRepository.getById(_)).toList
-    }
-
-    /* TODO: customization will be implement later
-    override def grantedOntologyCustomizations: immutable.Seq[cz.payola.common.entities.settings.ontology.Customization] = {
-        _loadObjectIds(
-            UseOntologyCustomizationPrivilege.getClass.toString,
-            cz.payola.common.entities.settings.ontology.Customization.getClass.toString
-        )
-    }
-    */
-
-    private def _loadObjectIds(privilegeClass: Class[_], objectClass: Class[_]) = {
-        context.privilegeRepository.getPrivilegedObjectIds(id, privilegeClass, objectClass)
-    }
-
-    override def grantPrivilege(privilege: PrivilegeType) {
+    override def storePrivilege(privilege: PrivilegeType) {
         // Call domain method to preserve functionality
-        storePrivilege(privilege)
-
-        context.privilegeRepository.persist(privilege)
+        super.storePrivilege(context.privilegeRepository.persist(privilege))
     }
 
 
-    override def removePrivilege(privilege: PrivilegeType) = {
+    override def discardPrivilege(privilege: PrivilegeType) {
         // Call domain method to preserve functionality
-        discardPrivilege(privilege)
+        super.discardPrivilege(privilege)
 
-        if (context.privilegeRepository.removeById(privilege.id)) Some(privilege) else None
+        context.privilegeRepository.removeById(privilege.id)
     }
 }

@@ -9,7 +9,7 @@ import cz.payola.domain.entities.privileges._
 import cz.payola.domain.entities.plugins.DataSource
 import collection.immutable
 
-class SquerylSpec extends TestDataContextComponent("") with FlatSpec with ShouldMatchers
+class SquerylSpec extends TestDataContextComponent("squeryl") with FlatSpec with ShouldMatchers
 {
     // Users
     val u1 = new cz.payola.domain.entities.User("HS")
@@ -143,6 +143,8 @@ class SquerylSpec extends TestDataContextComponent("") with FlatSpec with Should
     }
 
     private def persistPlugins {
+        unionPlugin.owner = Some(u1)
+        
         for (p <- plugins) {
             val p1 = pluginRepository.persist(p)
                 assert(p1.id == p.id)
@@ -165,7 +167,17 @@ class SquerylSpec extends TestDataContextComponent("") with FlatSpec with Should
             }
         }
 
+        // Assert instantiation
+        val endPoint = pluginRepository.getById(sparqlEndpointPlugin.id).get
+        assert(endPoint.owner == None)
+        for( param <- endPoint.parameters) {
+            assert(sparqlEndpointPlugin.parameters.find(_.id == param.id).get.name == param.name)
+            assert(sparqlEndpointPlugin.parameters.find(_.id == param.id).get.defaultValue == param.defaultValue)
+        }
+
+        // getCount is not used on purpose to test instantiation:
         assert(pluginRepository.getAll().size == plugins.size)
+        assert(pluginRepository.getById(unionPlugin.id).get.owner == Some(u1))
     }
 
     "Analysis" should "be stored/updated/loaded by AnalysisRepository" in {
@@ -357,10 +369,10 @@ class SquerylSpec extends TestDataContextComponent("") with FlatSpec with Should
         assert(privilegeRepository.getCount == 6)
         assert(user1.grantedDataSources.size == 1)
         assert(user2.grantedAnalyses.size == 1)
-        assert(user1.grantedPlugins.size == 1)
+        //assert(user1.grantedPlugins.size == 1)
         assert(group1.grantedDataSources.size == 1)
         assert(group1.grantedAnalyses.size == 1)
-        assert(group1.grantedPlugins.size == 1)
+        //assert(group1.grantedPlugins.size == 1)
     }
 
     "Pagionation" should "work" in {

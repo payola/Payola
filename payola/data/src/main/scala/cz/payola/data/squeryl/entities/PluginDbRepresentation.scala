@@ -31,8 +31,7 @@ class   PluginDbRepresentation(
     (implicit val context: SquerylDataContextComponent)
     extends PersistableEntity
 {
-
-    private var _owner: Option[User] = None
+    private var _owner: Option[User] = o
 
     var ownerId: Option[String] = o.map(_.id)
 
@@ -41,7 +40,7 @@ class   PluginDbRepresentation(
     @Transient
     private var _parametersLoaded = false
 
-    private var params: Seq[Parameter[_]] = Seq()
+    private var _params: Seq[Parameter[_]] = Seq()
 
     private lazy val _pluginInstancesQuery = context.schema.pluginsPluginInstances.left(this)
 
@@ -79,13 +78,15 @@ class   PluginDbRepresentation(
         _owner
     }
 
+    def owner_=(value: Option[User]) {_owner = value}
+
     /**
       *
       * @return Returns list of associated [[cz.payola.data.squeryl.entities.plugins.Parameter]]s.
       */
     def parameters: Seq[Parameter[_]] = {
         if (!_parametersLoaded) {
-            params = List(
+            _params = List(
                 evaluateCollection(_booleanParameters),
                 evaluateCollection(_floatParameters),
                 evaluateCollection(_intParameters),
@@ -95,7 +96,12 @@ class   PluginDbRepresentation(
             _parametersLoaded = true
         }
 
-        params
+        _params
+    }
+
+    def parameters_=(value: Seq[Parameter[_]]) {
+        _params = value
+        _parametersLoaded = true
     }
 
     /**

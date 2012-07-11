@@ -117,13 +117,10 @@ trait DataContextComponent
     trait PrivilegeRepository[+A] extends Repository[A]
     {
         /**
-          * Returns IDs of privileged objects, that are granted to the specified grantee via privileges of the specified
-          * class.
+          * Returns all privileges for grantee
           * @param granteeId ID of the privilege grantee.
-          * @param privilegeClass Class of the privilege.
-          * @param objectClass Class of the object.
           */
-        def getPrivilegedObjectIds(granteeId: String, privilegeClass: Class[_], objectClass: Class[_]): Seq[String]
+        def getByGrantee(granteeId: String): Seq[A]
     }
     
     trait AnalysisRepository[+A] extends Repository[A]

@@ -6,7 +6,7 @@ trait PrivilegableEntity extends cz.payola.common.entities.PrivilegableEntity
 {
     self: Entity =>
 
-    type PrivilegeType = Privilege[_  <: Entity]
+    type PrivilegeType = Privilege[_ <: Entity]
 
     /**
       * Adds a new privilege to the entity.

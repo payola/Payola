@@ -14,7 +14,7 @@ trait PrivilegableEntity extends Entity
     /** Type of the privileges. */
     type PrivilegeType <: Privilege[_]
 
-    protected val _privileges = mutable.ArrayBuffer[PrivilegeType]()
+    protected var _privileges: mutable.Buffer[PrivilegeType] = mutable.ArrayBuffer[PrivilegeType]()
 
     /** Privileges of the entity. */
     def privileges: immutable.Seq[PrivilegeType] = _privileges.toList

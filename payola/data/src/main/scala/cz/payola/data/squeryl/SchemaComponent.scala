@@ -315,19 +315,47 @@ trait SchemaComponent
           */
         private def declareKeys() {
             on(users)(user => declare(user.id is (primaryKey), user.name is (unique)))
-            on(groups)(group => declare(group.id is (primaryKey), group.name is (unique)))
-            on(analyses)(analysis => declare(analysis.id is (primaryKey), analysis.name is (unique)))
             on(plugins)(plugin => declare(plugin.id is (primaryKey), plugin.name is (unique)))
             on(pluginInstances)(instance => declare(instance.id is (primaryKey)))
-            on(booleanParameters)(param => declare(param.id is (primaryKey)))
             on(booleanParameterValues)(param => declare(param.id is (primaryKey)))
-            on(floatParameters)(param => declare(param.id is (primaryKey)))
             on(floatParameterValues)(param => declare(param.id is (primaryKey)))
-            on(intParameters)(param => declare(param.id is (primaryKey)))
             on(intParameterValues)(param => declare(param.id is (primaryKey)))
-            on(stringParameters)(param => declare(param.id is (primaryKey)))
             on(stringParameterValues)(param => declare(param.id is (primaryKey)))
-            on(dataSources)(ds => declare(ds.id is (primaryKey)))
+            on(booleanParameters)(param =>
+                declare(
+                    param.id is (primaryKey),
+                    columns(param.pluginId, param.name) are (unique)
+                ))
+            on(floatParameters)(param =>
+                declare(
+                    param.id is (primaryKey),
+                    columns(param.pluginId, param.name) are (unique)
+                ))
+            on(intParameters)(param =>
+                declare(
+                    param.id is (primaryKey),
+                    columns(param.pluginId, param.name) are (unique)
+                ))
+            on(stringParameters)(param =>
+                declare(
+                    param.id is (primaryKey),
+                    columns(param.pluginId, param.name) are (unique)
+                ))
+            on(dataSources)(ds =>
+                declare(
+                    ds.id is (primaryKey),
+                    columns(ds.name, ds.ownerId) are (unique)
+                ))
+            on(groups)(group =>
+                declare(
+                    group.id is (primaryKey),
+                    columns(group.name, group.ownerId) are (unique)
+                ))
+            on(analyses)(analysis =>
+                declare(
+                    analysis.id is (primaryKey),
+                    columns(analysis.name, analysis.ownerId) are (unique)
+                ))
             on(privileges)(p =>
                 declare(
                     p.id is (primaryKey),
