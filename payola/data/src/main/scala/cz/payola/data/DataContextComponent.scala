@@ -85,18 +85,6 @@ trait DataContextComponent
     }
 
     /**
-      * A repository that contains shareable entities.
-      * @tparam A Type of the entities in the repository.
-      */
-    trait ShareableEntityRepository[+A <: ShareableEntity] extends Repository[A]
-    {
-        /**
-          * Returns all public entities.
-          */
-        def getAllPublic: Seq[A]
-    }
-
-    /**
       * A repository that contains named entities.
       * @tparam A Type of the entities in the repository.
       */
@@ -120,6 +108,25 @@ trait DataContextComponent
           * @param ownerId Owner id of the entities to search for.
           */
         def getAllByOwnerId(ownerId: Option[String]): Seq[A]
+    }
+
+    /**
+      * A repository that contains shareable entities.
+      * @tparam A Type of the entities in the repository.
+      */
+    trait ShareableEntityRepository[+A <: ShareableEntity with OptionallyOwnedEntity]
+        extends OptionallyOwnedEntityRepository[A]
+    {
+        /**
+          * Returns all public entities.
+          */
+        def getAllPublic: Seq[A]
+
+        /**
+          * Returns all public entities with the specified owner.
+          * @param ownerId Owner id of the entities to search for.
+          */
+        def getAllPublicByOwnerId(ownerId: Option[String]): Seq[A] = getAllByOwnerId(ownerId).filter(_.isPublic)
     }
 
     trait UserRepository

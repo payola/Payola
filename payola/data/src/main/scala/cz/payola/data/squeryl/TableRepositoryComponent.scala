@@ -116,8 +116,9 @@ trait TableRepositoryComponent
         }
     }
 
-    trait ShareableEntityTableRepository[A <: PersistableEntity with ShareableEntity]
-        extends ShareableEntityRepository[A]
+    trait ShareableEntityTableRepository[A <: PersistableEntity with ShareableEntity with OptionallyOwnedEntity]
+        extends OptionallyOwnedEntityTableRepository[A]
+        with ShareableEntityRepository[A]
     {
         self: TableRepository[A, _] =>
 

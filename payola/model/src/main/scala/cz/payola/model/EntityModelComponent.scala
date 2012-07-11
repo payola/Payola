@@ -22,30 +22,25 @@ trait EntityModelComponent
         def remove(entity: Entity): Boolean = repository.removeById(entity.id)
     }
 
-    class ShareableEntityModel[A <: ShareableEntity, B <: Privilege[A]](
+    class ShareableEntityModel[A <: ShareableEntity with OptionallyOwnedEntity, B <: Privilege[A]](
         override val repository: ShareableEntityRepository[A],
-        val accessPrivilegeClass: Class[_])
+        accessPrivilegeClass: Class[_])
         extends EntityModel[A](repository)
     {
         def getAccessibleToUser(user: Option[User]): Seq[A] = {
-            val granted = user.map { u =>
-                val memberGroups = groupRepository.getAll().filter(_.hasMember(u))
-                val granteeIds = u.id +: memberGroups.map(_.id)
-                val privileges = privilegeRepository.getAllGrantedTo[B](granteeIds, accessPrivilegeClass)
-                privileges.map(_.obj)
-            }
-            repository.getAllPublic +: granted.getOrElse(Nil)
+            repository.getAllPublic ++ getGrantedToUser(user, groupRepository.getAll())
         }
 
         def getAccessibleToUserByOwner(user: Option[User], owner: User): Seq[A] = {
-            // TODO
-            analysisRepository.getAllPublic
+            repository.getAllPublicByOwnerId(Some(owner.id)) ++ getGrantedToUser(user, owner.ownedGroups)
         }
 
-        def getAllAccessible(user: Option[User]): Seq[A] = {
-            val accessible =
-
-            public // ++ accessible
+        private def getGrantedToUser(user: Option[User], groups: Seq[Group]): Seq[A] = {
+            user.map { u =>
+                val granteeIds = u.id +: groups.filter(_.hasMember(u)).map(_.id)
+                val privileges = privilegeRepository.getAllGrantedTo[B](granteeIds, accessPrivilegeClass)
+                privileges.map(_.obj)
+            }.getOrElse(Nil)
         }
     }
 }
