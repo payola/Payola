@@ -10,6 +10,7 @@ trait ModelComponent
     with AnalysisModelComponent
     with DataSourceModelComponent
     with PluginModelComponent
+    with PluginInstanceModelComponent
     with PayolaStorageModelComponent
 {
     self: DataContextComponent with RdfStorageComponent =>

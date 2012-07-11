@@ -469,7 +469,7 @@ class JSONSerializer
             case _: Boolean => if (obj.asInstanceOf[Boolean]) "true" else "false"
             case _: Char => JSONUtilities.escapeChar(obj.asInstanceOf[Char])
             case _: Unit => throw new JSONSerializationException("Cannot serialize Unit.")
-            case _ => obj.toString
+            case _ => if (obj != null) {obj.toString}else{ "null" }
         }
     }
 

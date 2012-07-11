@@ -9,11 +9,6 @@ trait PluginModelComponent extends EntityModelComponent
     self: DataContextComponent =>
     lazy val pluginModel = new EntityModel(pluginRepository)
     {
-        def create: Plugin = {
-            //TODO
-            getById("").get
-        }
-
         def getByName(name: String): Option[Plugin] = pluginRepository.getByName(name)
     }
 }
