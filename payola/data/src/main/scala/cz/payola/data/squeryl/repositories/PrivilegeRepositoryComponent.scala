@@ -23,7 +23,7 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
             instantiate(representationRepository.getByIds(ids))
         }
 
-        def getAll(pagination: Option[PaginationInfo] = None) = {
+        def getAll(pagination: Option[PaginationInfo] = None) = schema.wrapInTransaction {
             instantiate(representationRepository.getAll(pagination))
         }
 
@@ -42,20 +42,21 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
             representationRepository.getCount
         }
 
-        def getAllGrantedTo[B](granteeIds: Seq[String], privilegeClass: Class[_]): Seq[B] = {
-            // TODO implement
-            Nil
+        def getAllGrantedTo(granteeIds: Seq[String], privilegeClass: Class[_]): Seq[PrivilegeType] = {
+            _getByGrantee(granteeIds, Some(privilegeClass))
         }
 
         def getByGrantee(granteeId: String): Seq[PrivilegeType] = {
-            // TODO: table where
-            val query = from(representationRepository.table)(p =>
-                where(p.granteeId === granteeId)
-                select(p)
-            )
-
-            Nil
+            _getByGrantee(List(granteeId), None)
         }
+
+        private def _getByGrantee(granteeIds: Seq[String], privilegeClass: Option[Class[_]]): Seq[PrivilegeType] =
+            schema.wrapInTransaction {
+                instantiate(
+                    representationRepository.selectWhere(p => p.granteeId in granteeIds
+                        and p.privilegeClass === privilegeClass.map(_.getName).getOrElse(p.privilegeClass).toString)
+                )
+            }
 
         private def instantiate(privileges: Seq[PrivilegeDbRepresentation]): Seq[PrivilegeType] = {
             // Repositories map with (Repository -> list of entity IDs to select)
@@ -75,7 +76,7 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
                 repositories.getOrElseUpdate(userRepository, mutable.HashSet.empty[String]) += p.granterId
             }
 
-            // Create Map (EntityId -> Entity) to simplify getting entites from Db
+            // Create Map (EntityId -> Entity) to simplify getting entities from Db
             val entities = repositories.par.flatMap{r =>
                 r._1.getByIds(r._2.toSeq).map(e => (e.asInstanceOf[cz.payola.domain.Entity].id, e))
             }
