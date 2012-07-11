@@ -143,7 +143,6 @@ var lookup = function(moduleName) {
 // -- kriskowal Kris Kowal Copyright (C) 2009-2010 MIT License
 // -- tlrobinson Tom Robinson Copyright (C) 2009-2010 MIT License (Narwhal Project)
 // -- dantman Daniel Friesen Copyright(C) 2010 XXX No License Specified
-// -- fschaefer Florian Schäfer Copyright (C) 2010 MIT License
 // -- Irakli Gozalishvili Copyright (C) 2010 MIT License
 
 /*!
@@ -2558,7 +2557,6 @@ var console = require('pilot/console');
 //                  Luke Smith http://lucassmith.name/ (2008)
 //                  Loic Dachary <loic@dachary.org> (2008)
 //                  Johan Euphrosine <proppy@aminche.com> (2008)
-//                  Øyvind Sean Kinsey http://kinsey.no/blog
 //
 // Information and discussions
 // http://jspoker.pokersource.info/skin/test-printstacktrace.html
