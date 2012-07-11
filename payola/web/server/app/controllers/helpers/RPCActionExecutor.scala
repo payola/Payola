@@ -2,13 +2,6 @@ package controllers.helpers
 
 import actors.Actor
 
-/**
-  *
-  * @author jirihelmich
-  * @created 3/13/12 2:08 PM
-  * @package controllers.helpers
-  */
-
 class RPCActionExecutor extends Actor
 {
     def act() {
@@ -17,20 +10,32 @@ class RPCActionExecutor extends Actor
                 // Store the sender of the query so the result can be sent to him later.
                 val querier = sender
 
-                methodToRun.invoke(runnableObj, paramArray:_*)
+                def successCallback(x: Any) {
+                    querier ! ActionExecutorSuccess(x)
+                    exit()
+                }
 
-                // Wait for the expectedResultCount number of data or error messages. TimeoutMessage is recevied in
-                // case the expectedResultCount messages haven't been received before the timeout.
-                react {
-                    case m: RPCReply => {
-                        querier ! m.response
-                        exit()
-                    }
+                def failCallback(e: Throwable) {
+                    querier ! ActionExecutorError(e)
+                    exit()
+                }
+
+                // add param - success callback
+                paramArray.update(paramArray.length-2, successCallback _)
+                // add param - fail callback - takes only Throwable as a parameter
+                paramArray.update(paramArray.length-1, failCallback _)
+
+                try{
+                    methodToRun.invoke(runnableObj, paramArray:_*)
+
+                    // This means that the exit() call in success or fail callback was not reached -> none of those methods
+                    // was invoked
+                    failCallback(new Exception("The remote method succeeded but did not invoke the success callback."))
+                }catch{
+                    case e: Throwable => failCallback(e)
                 }
             }
-            case _ => {
-                reply(None)
-            }
+            case _ =>
         }
     }
 }

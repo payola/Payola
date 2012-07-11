@@ -1,7 +1,7 @@
 package cz.payola.model.components
 
 import cz.payola.data.DataContextComponent
-import cz.payola.domain.entities.User
+import cz.payola.domain.entities._
 import cz.payola.domain.RdfStorageComponent
 import cz.payola.model.EntityModelComponent
 

@@ -7,6 +7,7 @@ import scala.Some
 import scala.Some
 import cz.payola.data.PaginationInfo
 import cz.payola.model.EntityModelComponent
+import cz.payola.domain.entities.plugins.DataSource
 
 trait GroupModelComponent extends EntityModelComponent
 {
@@ -14,6 +15,11 @@ trait GroupModelComponent extends EntityModelComponent
 
     lazy val groupModel = new EntityModel(groupRepository)
     {
+        def create : Group = {
+            //TODO
+            getById("").get
+        }
+
         def create(name: String, owner: User): Group = {
             repository.persist(new Group(name, owner))
         }

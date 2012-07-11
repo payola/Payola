@@ -1,8 +1,10 @@
 package controllers
 
-import helpers.{ExceptionSerializer, GraphSerializer, RPCDispatcher}
-import play.api.mvc._
+import controllers.helpers._
 import s2js.runtime.shared.rpc
+import play.api.mvc._
+import cz.payola.domain.entities.User
+import play.api.mvc.AnyContentAsFormUrlEncoded
 
 /**
   * The only controller which handles requests from the client side. It receives a POST request with the following
@@ -55,7 +57,7 @@ import s2js.runtime.shared.rpc
   * (the params are given as strings, so if the number of parameters matches, we are not able to decide which one is
   * the right one for the call. If you do, feel free to set up a pull request :).
   */
-object RPC extends Controller
+object RPC extends PayolaController with Secured
 {
     val exceptionSerializer = new ExceptionSerializer
 
@@ -67,13 +69,13 @@ object RPC extends Controller
       * Endpoint of the synchronous RPC call (mapped on /rpc)
       * @return
       */
-    def index() = Action {request => dispatchRequest(request, false)}
+    def index() = maybeAuthenticatedWithRequest { (user, request) => dispatchRequest(request, false, user)}
 
     /**
       * Endpoint of the asynchronous RPC call (maped on /rpc/async)
       * @return
       */
-    def async() = Action {request => dispatchRequest(request, true)}
+    def async() = maybeAuthenticatedWithRequest { (user, request) => dispatchRequest(request, true, user)}
 
     /**
       *
@@ -81,13 +83,15 @@ object RPC extends Controller
       * @param async
       * @return
       */
-    def dispatchRequest(request: Request[AnyContent], async: Boolean) = {
+    def dispatchRequest(request: Request[AnyContent], async: Boolean, user: Option[User]) = {
         try {
             val params = parseParams(request)
-            val response = dispatcher.dispatchRequest(params, async)
+            val response = dispatcher.dispatchRequest(params, async, user)
             Ok(response)
         } catch {
-            case e: Exception => raiseError(e)
+            case e: Exception =>
+                println(e)
+                raiseError(e)
         }
     }
 
@@ -97,7 +101,7 @@ object RPC extends Controller
       * @return
       */
     def raiseError(e: Exception) = {
-        InternalServerError(exceptionSerializer.serialize(e.getCause))
+        InternalServerError(exceptionSerializer.serialize(e))
     }
 
     /**

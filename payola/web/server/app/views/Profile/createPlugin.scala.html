@@ -1,0 +1,35 @@
+@(user: cz.payola.domain.entities.User)
+
+@main(Some(user), "Create a new plugin - Payola!") {
+
+    <pre id="editor">
+
+    </pre>
+
+    <script src="@routes.Assets.at("javascripts/ace/ace.js")" type="text/javascript" charset="utf-8"></script>
+    <script src="@routes.Assets.at("javascripts/ace/theme-clouds.js")" type="text/javascript" charset="utf-8"></script>
+    <script src="@routes.Assets.at("javascripts/ace/mode-scala.js")" type="text/javascript" charset="utf-8"></script>
+    <script>
+        window.onload = function() {
+            var editor = ace.edit("editor");
+            editor.setTheme("ace/theme/clouds");
+
+            var ScalaMode = require("ace/mode/scala").Mode;
+            editor.getSession().setMode(new ScalaMode());
+        };
+    </script>
+
+
+    <style type="text/css" media="screen">
+        #editor {
+            margin: auto;
+            width: 70%;
+            height: 600px;
+            margin: 0;
+        }
+        .ace-clouds .ace_gutter-layer .ace_gutter-cell{
+            padding-right: 14px;
+        }
+    </style>
+
+}

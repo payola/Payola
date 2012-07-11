@@ -23,4 +23,8 @@ class Text(var value: String) extends Component
         element = document.createTextNode(value)
         parent.appendChild(element)
     }
+
+    def getDomElement : Element = {
+        element
+    }
 }

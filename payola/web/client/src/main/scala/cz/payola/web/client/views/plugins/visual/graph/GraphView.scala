@@ -400,14 +400,14 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
             if (color != None) {
                 colorVertex = Some(color.get)
             } else if (vertexView.isSelected) {
-                colorVertex = Some(settings.vertexModel.colorHigh)
+                colorVertex = Some(settings.vertexModel.colorSelected)
             } else if (edgeViews.exists(edgeView =>
                 TODO_RenameThisMethod(edgeView, vertexView))) {
-                colorVertex = Some(settings.vertexModel.colorMed)
+//                colorVertex = Some(settings.vertexModel.colorMed)
             } else if (getAllSelectedVerticesCount == 0) {
                 colorVertex = None
             } else {
-                colorVertex = Some(settings.vertexModel.colorLow)
+                colorVertex = Some(settings.vertexModel.color)
             }
 
             canvasPack.draw(vertexView, colorVertex, positionCorrection)
@@ -440,9 +440,9 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
             val colorToUseVertex = if (color != None) {
                 Some(color.get)
             } else if (vertexView.selected) {
-                Some(settings.vertexModel.colorHigh)
+                Some(settings.vertexModel.colorSelected)
             } else {
-                Some(settings.vertexModel.colorMed)
+                Some(settings.vertexModel.color)
             }
 
             canvasPack.drawQuick(vertexView, colorToUseVertex, positionCorrection)

@@ -86,3 +86,6 @@ label{
 .instance p {
     max-width: 200px;
 }
+
+#plugin-space .alert {
+}
