@@ -9,8 +9,7 @@ trait PluginModelComponent extends EntityModelComponent
 {
     self: DataContextComponent =>
 
-    lazy val pluginModel = new ShareableEntityModel[Plugin, UsePluginPrivilege](pluginRepository,
-        classOf[UsePluginPrivilege])
+    lazy val pluginModel = new ShareableEntityModel[Plugin](pluginRepository, classOf[UsePluginPrivilege])
     {
         def create: Plugin = {
             //TODO

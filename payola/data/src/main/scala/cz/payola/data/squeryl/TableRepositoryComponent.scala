@@ -3,10 +3,9 @@ package cz.payola.data.squeryl
 import org.squeryl._
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.dsl.ast.LogicalBoolean
-import cz.payola.data._
-import cz.payola.data.squeryl.entities._
 import cz.payola.domain.entities._
 import cz.payola.data.PaginationInfo
+import cz.payola.data.squeryl.entities.{PersistableEntity, EntityConverter}
 
 trait TableRepositoryComponent
 {
@@ -61,7 +60,7 @@ trait TableRepositoryComponent
 
         /**
           * Selects all entities that pass the specified entity filter.
-          * @param entityFilter A filter that excludes enitites from the result.
+          * @param entityFilter A filter that excludes entites from the result.
           * @return The selected entities.
           */
         private[squeryl] def selectWhere(entityFilter: A => LogicalBoolean): Seq[A] = wrapInTransaction {
@@ -70,7 +69,7 @@ trait TableRepositoryComponent
 
         /**
           * Selects the first entity that passes the specified entity filter.
-          * @param entityFilter A filter that excludes enitites from the result.
+          * @param entityFilter A filter that excludes entites from the result.
           * @return The selected entity.
           */
         private[squeryl] def selectOneWhere(entityFilter: A => LogicalBoolean): Option[A] = {

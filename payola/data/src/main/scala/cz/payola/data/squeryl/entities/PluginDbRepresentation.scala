@@ -33,16 +33,11 @@ class PluginDbRepresentation(
     (implicit val context: SquerylDataContextComponent)
     extends PersistableEntity
 {
-    private var _owner: Option[User] = None
+    val ownerId: Option[String] = o.map(_.id)
 
-    var ownerId: Option[String] = o.map(_.id)
-
-    private lazy val _ownerQuery = context.schema.pluginOwnership.right(this)
-
-    @Transient
-    private var _parametersLoaded = false
-
-    private var params: Seq[Parameter[_]] = Seq()
+    var owner: Option[User] = None
+    
+    var parameters: Seq[Parameter[_]] = Seq()
 
     private lazy val _pluginInstancesQuery = context.schema.pluginsPluginInstances.left(this)
 
@@ -56,56 +51,6 @@ class PluginDbRepresentation(
 
     private lazy val _stringParameters = context.schema.stringParametersOfPlugins.left(this)
 
-    /**
-      * @return Returns all associated [[cz.payola.data.squeryl.entities.plugins.PluginInstance]]s.
-      */
-    def pluginInstances: Seq[PluginInstance] = {
-        wrapInTransaction {
-            _pluginInstancesQuery.toList
-        }
-    }
-
-    /**
-      * @return Returns all associated [[cz.payola.data.squeryl.entities.plugins.plugins.DataSource]]s.
-      */
-    def dataSources: Seq[DataSource] = {
-        wrapInTransaction {
-            _dataSourcesQuery.toList
-        }
-    }
-
-    def owner: Option[User] = {
-        if (_owner == None){
-            if (ownerId != null && ownerId.isDefined) {
-                wrapInTransaction {
-                    _owner = _ownerQuery.headOption
-                }
-            }
-        }
-
-        _owner
-    }
-
-    /**
-      *
-      * @return Returns list of associated [[cz.payola.data.squeryl.entities.plugins.Parameter]]s.
-      */
-    def parameters: Seq[Parameter[_]] = {
-        if (!_parametersLoaded) {
-            wrapInTransaction {
-                params = List(
-                    _booleanParameters.toList,
-                    _floatParameters.toList,
-                    _intParameters.toList,
-                    _stringParameters.toList
-                ).flatten
-            }
-
-            _parametersLoaded = true
-        }
-
-        params
-    }
 
     /**
       * Associates specified [[cz.payola.data.squeryl.entities.plugins.Parameter]] to plugin.

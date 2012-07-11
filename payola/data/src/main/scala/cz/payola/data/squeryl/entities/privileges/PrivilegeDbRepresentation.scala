@@ -1,11 +1,10 @@
 package cz.payola.data.squeryl.entities.privileges
 
 import cz.payola.common._
-import cz.payola.data.squeryl.entities._
-import cz.payola.data.DataException
 import cz.payola.data.squeryl.SquerylDataContextComponent
-import cz.payola.domain.entities._
 import scala.Some
+import cz.payola.domain.entities.Privilege
+import cz.payola.data.squeryl.entities._
 
 /**
   * This object converts [[cz.payola.common.entities.Privilege]] to [[cz.payola.data.squeryl.entities.PrivilegeDbRepresentation]]
@@ -65,8 +64,7 @@ class PrivilegeDbRepresentation(
         val objectClassName: String
     )
     (implicit val context: SquerylDataContextComponent)
-    extends PersistableEntity
-    with ShareableEntity
+    extends PersistableEntity with ShareableEntity
 {
 
     /**
