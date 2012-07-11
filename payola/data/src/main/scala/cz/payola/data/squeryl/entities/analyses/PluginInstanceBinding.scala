@@ -31,8 +31,8 @@ class PluginInstanceBinding(
     override val id: String,
     source: PluginInstance,
     target: PluginInstance,
-    private val _targetInputIdx: Int = 0)(implicit val context: SquerylDataContextComponent)
-    extends cz.payola.domain.entities.analyses.PluginInstanceBinding(source, target, _targetInputIdx)
+    val targetInputIdx: Int = 0)(implicit val context: SquerylDataContextComponent)
+    extends cz.payola.domain.entities.analyses.PluginInstanceBinding(source, target, targetInputIdx)
     with PersistableEntity
 {
     val sourcePluginInstanceId: String = Option(source).map(_.id).getOrElse(null)

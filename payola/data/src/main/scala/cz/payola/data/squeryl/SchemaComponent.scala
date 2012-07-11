@@ -336,6 +336,7 @@ trait SchemaComponent
             factoryFor(analyses) is { new Analysis("", "", None) },
             factoryFor(plugins) is { new PluginDbRepresentation("", "", "", 0, None, false) },
             factoryFor(pluginInstances) is { new PluginInstance("", null, Nil, "") },
+            factoryFor(pluginInstanceBindings) is { new PluginInstanceBinding("", null, null, 0) },
             factoryFor(booleanParameters) is { new BooleanParameter("", "", false) },
             factoryFor(booleanParameterValues) is { new BooleanParameterValue("", null, false)  },
             factoryFor(floatParameters) is { new FloatParameter("", "", 0) },
@@ -355,6 +356,12 @@ trait SchemaComponent
             on(users)(user => declare(user.id is (primaryKey), user.name is (unique)))
             on(plugins)(plugin => declare(plugin.id is (primaryKey), plugin.name is (unique)))
             on(pluginInstances)(instance => declare(instance.id is (primaryKey)))
+            on(pluginInstanceBindings)(binding =>
+                declare(
+                    binding.id is (primaryKey),
+                    columns(binding.sourcePluginInstanceId, binding.targetInputIdx) are (unique),
+                    columns(binding.targetPluginInstanceId, binding.analysisId) are (unique)
+                ))
             on(booleanParameterValues)(param => declare(param.id is (primaryKey)))
             on(floatParameterValues)(param => declare(param.id is (primaryKey)))
             on(intParameterValues)(param => declare(param.id is (primaryKey)))
