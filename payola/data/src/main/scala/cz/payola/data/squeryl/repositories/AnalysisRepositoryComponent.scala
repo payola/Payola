@@ -18,9 +18,7 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
         with ShareableEntityTableRepository[Analysis]
     {
         def getTop(pagination: Option[PaginationInfo] = Some(new PaginationInfo(0, 10))): collection.Seq[Analysis] = {
-            wrapInTransaction {
-                getTopAnalyses(None, pagination)
-            }
+            getTopAnalyses(None, pagination)
         }
 
         def getTopByOwner(ownerId: String, pagination: Option[PaginationInfo] = Some(new PaginationInfo(0, 10))): collection.Seq[Analysis] = {

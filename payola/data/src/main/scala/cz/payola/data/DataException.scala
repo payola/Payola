@@ -14,4 +14,4 @@ object DataException
     }
 }
 
-class DataException(val message: String, innerException: Option[Throwable] = None) extends Exception
+class DataException(val message: String, val innerException: Option[Throwable] = None) extends Exception
