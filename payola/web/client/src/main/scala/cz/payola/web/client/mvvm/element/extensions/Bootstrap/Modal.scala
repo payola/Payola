@@ -8,7 +8,7 @@ import cz.payola.web.client.mvvm.element.{Text, Anchor}
 import s2js.compiler.javascript
 import s2js.adapters.js.browser.window
 
-class Modal(title: String, body: Seq[Component], showSave: Boolean = true) extends Component
+class Modal(title: String, body: Seq[Component], showSave: Boolean = true, showCancel : Boolean = true) extends Component
 {
     val saved = new ComponentEvent[Modal, EventArgs[Modal]]
 
@@ -68,7 +68,10 @@ class Modal(title: String, body: Seq[Component], showSave: Boolean = true) exten
         modalDiv.appendChild(bodyWrap)
         body.map(_.render(bodyWrap))
         modalDiv.appendChild(footer)
-        closeA.render(footer)
+
+        if (showCancel){
+            closeA.render(footer)
+        }
 
         if (showSave){
             saveA.render(footer)
