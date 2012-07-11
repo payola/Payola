@@ -1,9 +1,9 @@
 package cz.payola.common.entities
 
-import cz.payola.common.entities.analyses.PluginInstanceBinding
-import cz.payola.common.entities.plugins.PluginInstance
 import scala.collection._
-import scala.Seq
+import cz.payola.common.Entity
+import cz.payola.common.entities.plugins.PluginInstance
+import cz.payola.common.entities.analyses.PluginInstanceBinding
 
 /**
   * A set of analytical plugin instances that are bound together (the output of one plugin instance is bound to the
@@ -11,7 +11,7 @@ import scala.Seq
   * outputs bound, no input nor output is bound more than once and there is one plugin instance that doesn't have its
   * output bound. That is the analysis output. If the analysis is in the valid state, it may be evaluated.
   */
-trait Analysis extends NamedEntity with OptionallyOwnedEntity with ShareableEntity with DescribedEntity
+trait Analysis extends Entity with NamedEntity with OptionallyOwnedEntity with ShareableEntity with DescribedEntity
 {
     /** Type of the analytical plugin instances the analysis consists of. */
     type PluginInstanceType <: PluginInstance

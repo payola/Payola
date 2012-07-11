@@ -61,7 +61,9 @@ class DataSource(
 
     override def plugin = {
         if (pluginId != null) {
-            evaluateCollection(_pluginQuery)(0).toPlugin
+            wrapInTransaction {
+                _pluginQuery.head.toPlugin
+            }
         }
         else {
             null
@@ -71,7 +73,9 @@ class DataSource(
     override def owner: Option[UserType] = {
         if (_owner == None) {
             if (ownerId != null && ownerId.isDefined) {
-                _owner = evaluateCollection(_ownerQuery).headOption
+                wrapInTransaction {
+                    _owner = _ownerQuery.headOption
+                }
             }
         }
 
@@ -80,12 +84,14 @@ class DataSource(
 
     override def parameterValues: collection.immutable.Seq[PluginType#ParameterValueType] = {
         if (!_parameterValuesLoaded) {
-            _paramValues = List(
-                evaluateCollection(_booleanParameterValuesQuery),
-                evaluateCollection(_floatParameterValuesQuery),
-                evaluateCollection(_intParameterValuesQuery),
-                evaluateCollection(_stringParameterValuesQuery)
-            ).flatten.toSeq
+            wrapInTransaction {
+                _paramValues = List(
+                    _booleanParameterValuesQuery.toList,
+                    _floatParameterValuesQuery.toList,
+                    _intParameterValuesQuery.toList,
+                    _stringParameterValuesQuery.toList
+                ).flatten
+            }
 
             _parameterValuesLoaded = true
         }

@@ -2,26 +2,23 @@ package cz.payola.data.squeryl.repositories
 
 import org.squeryl.PrimitiveTypeMode._
 import cz.payola.data.squeryl._
-import cz.payola.domain.entities.{Privilege, User, Group, Analysis}
+import cz.payola.domain.entities.Privilege
 import cz.payola.data.squeryl.entities.privileges.PrivilegeDbRepresentation
 import cz.payola.data.PaginationInfo
-import cz.payola.data.squeryl.entities.plugins.DataSource
-import cz.payola.domain.Entity
 import scala.collection.mutable
-import cz.payola.data.squeryl.entities.PersistableEntity
 
 trait PrivilegeRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
 
-    lazy val privilegeRepository = new PrivilegeRepository[Privilege[_]]
+    lazy val privilegeRepository = new PrivilegeRepository
     {
         private val representationRepository = new LazyTableRepository[PrivilegeDbRepresentation](schema.privileges,
             PrivilegeDbRepresentation)
 
         def getAll(pagination: Option[PaginationInfo] = None): Seq[Privilege[_]] = Seq()
 
-        def getByIds(ids: Seq[String]): Seq[Privilege[_]] = {
+        def getByIds(ids: Seq[String]): Seq[Privilege[_]] = schema.wrapInTransaction {
             val privileges = representationRepository.getByIds(ids)
 
             val repositories = mutable.Map[Repository[_], mutable.HashSet[String]]()
@@ -61,27 +58,31 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
             }
         }
 
-        def persist(entity: AnyRef): Privilege[_] = {
+        def persist(entity: AnyRef): Privilege[_] = schema.wrapInTransaction[Privilege[_]] {
             representationRepository.persist(entity)
 
             // The entity was successfully persisted therefore it must be a privilege.
             entity.asInstanceOf[Privilege[_]]
         }
 
-        def removeById(id: String) = representationRepository.removeById(id)
+        def removeById(id: String) = schema.wrapInTransaction{
+            representationRepository.removeById(id)
+        }
 
-        def getCount: Long = representationRepository.getCount
+        def getCount: Long = schema.wrapInTransaction {
+            representationRepository.getCount
+        }
 
         def getPrivilegedObjectIds(granteeId: String, privilegeClass: Class[_], objectClass: Class[_]): Seq[String] = {
-            val query = from(representationRepository.table)(p =>
-                where(p.granteeId === granteeId and
-                    p.privilegeClass === privilegeClass.getName and
-                    p.objectClassName === repositoryRegistry.getClassName(objectClass)
-                )
-                select(p.objectId)
-            )
-
-            representationRepository.evaluateCollectionResultQuery(query)
+            schema.wrapInTransaction {
+                from(representationRepository.table)(p =>
+                    where(p.granteeId === granteeId and
+                        p.privilegeClass === privilegeClass.getName and
+                        p.objectClassName === repositoryRegistry.getClassName(objectClass)
+                    )
+                    select(p.objectId)
+                ).toList
+            }
         }
     }
 }

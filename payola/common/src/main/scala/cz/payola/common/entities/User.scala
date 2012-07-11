@@ -3,11 +3,12 @@ package cz.payola.common.entities
 import scala.collection._
 import cz.payola.common.entities.plugins.DataSource
 import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.common.Entity
 
 /**
   * An user of the application.
   */
-trait User extends NamedEntity with PrivilegableEntity
+trait User extends Entity with NamedEntity with PrivilegableEntity
 {
     /** Type of the groups that the user can own or be member of. */
     type GroupType <: Group

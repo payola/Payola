@@ -32,7 +32,7 @@ class BooleanParameter(
 
     override def defaultValue = _defaultValueDb
 
-    def parameterValues: Seq[BooleanParameterValue] = evaluateCollection(_valuesQuery)
+    def parameterValues: Seq[BooleanParameterValue] = wrapInTransaction { _valuesQuery.toList }
 
     /**
       * Associates specified [[cz.payola.data.squeryl.entities.plugins.parameters.BooleanParameter]].

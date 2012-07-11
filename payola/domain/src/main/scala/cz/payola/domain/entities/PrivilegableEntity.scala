@@ -2,10 +2,8 @@ package cz.payola.domain.entities
 
 import cz.payola.domain.Entity
 
-trait PrivilegableEntity extends cz.payola.common.entities.PrivilegableEntity
+trait PrivilegableEntity extends Entity with cz.payola.common.entities.PrivilegableEntity
 {
-    self: Entity =>
-
     type PrivilegeType = Privilege[_  <: Entity]
 
     /**

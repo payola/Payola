@@ -32,7 +32,7 @@ class FloatParameter(
 
     override def defaultValue = _defaultValueDb
 
-    def parameterValues: Seq[FloatParameterValue] = evaluateCollection(_valuesQuery)
+    def parameterValues: Seq[FloatParameterValue] = wrapInTransaction { _valuesQuery.toList }
 
     /**
       * Associates specified [[cz.payola.data.squeryl.entities.plugins.parameters.FloatParameter]].

@@ -50,5 +50,6 @@ class OntologyCustomization(
         super[Entity].checkInvariants()
         super[NamedEntity].checkInvariants()
         super[OptionallyOwnedEntity].checkInvariants()
+        super[ShareableEntity].checkInvariants()
     }
 }

@@ -40,11 +40,13 @@ class Analysis(override val id: String, name: String, o: Option[User])(implicit 
     override def pluginInstances: immutable.Seq[PluginInstanceType] = {
         // Lazy-load related instances only for first time
         if (!_pluginInstancesLoaded) {
-            evaluateCollection(_pluginInstancesQuery).map( i =>
-                if (!super.pluginInstances.contains(i)) {
-                    super.storePluginInstance(i)
-                }
-            )
+            wrapInTransaction {
+                _pluginInstancesQuery.toList.foreach(i =>
+                    if (!super.pluginInstances.contains(i)) {
+                        super.storePluginInstance(i)
+                    }
+                )
+            }
 
             _pluginInstancesLoaded = true
         }
@@ -55,7 +57,9 @@ class Analysis(override val id: String, name: String, o: Option[User])(implicit 
     override def owner: Option[UserType] = {
         if (_owner == None){
             if (ownerId != null && ownerId.isDefined) {
-                _owner = evaluateCollection(_ownerQuery).headOption
+                wrapInTransaction {
+                    _owner = _ownerQuery.headOption
+                }
             }
         }
 
@@ -65,11 +69,13 @@ class Analysis(override val id: String, name: String, o: Option[User])(implicit 
     override def pluginInstanceBindings: immutable.Seq[PluginInstanceBindingType] = {
         // Lazy-load related bindings only for first time
         if (!_pluginInstancesBindingsLoaded) {
-            evaluateCollection(_pluginInstancesBindingsQuery).map(b =>
-                if (!super.pluginInstanceBindings.contains(b)) {
-                    super.storeBinding(b)
-                }
-            )
+            wrapInTransaction {
+                _pluginInstancesBindingsQuery.toList.foreach(b =>
+                    if (!super.pluginInstanceBindings.contains(b)) {
+                        super.storeBinding(b)
+                    }
+                )
+            }
 
             _pluginInstancesBindingsLoaded = true
         }

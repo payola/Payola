@@ -32,7 +32,7 @@ class IntParameter(
 
     override def defaultValue = _defaultValueDb
 
-    def parameterValues: Seq[IntParameterValue] = evaluateCollection(_valuesQuery)
+    def parameterValues: Seq[IntParameterValue] = wrapInTransaction { _valuesQuery.toList }
 
     /**
       * Associates specified [[cz.payola.data.squeryl.entities.plugins.parameters.IntParameter]].

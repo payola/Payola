@@ -63,8 +63,8 @@ class DataSource(protected var _name: String, protected var _owner: Option[User]
     }
 
     override protected def checkInvariants() {
-        super[PluginInstance].checkInvariants()
-        super[OptionallyOwnedEntity].checkInvariants()
         super[NamedEntity].checkInvariants()
+        super[OptionallyOwnedEntity].checkInvariants()
+        super[ShareableEntity].checkInvariants()
     }
 }

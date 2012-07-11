@@ -10,14 +10,14 @@ trait AnalysisModelComponent extends EntityModelComponent
 
     lazy val analysisModel = new EntityModel(analysisRepository)
     {
-        def getTop: Seq[Analysis] = {
-            // TODO repository.getTopAnalyses()
-            Nil
+        def getAccessibleToUser(user: Option[User]): Seq[Analysis] = {
+            // TODO
+            analysisRepository.getAllPublic
         }
 
-        def getPublicByOwner(owner: User) = {
-            // TODO repository.getTopAnalysesByUser(owner.id)
-            Nil
+        def getAccessibleToUserByOwner(user: Option[User], owner: User): Seq[Analysis] = {
+            // TODO
+            analysisRepository.getAllPublic
         }
     }
 }

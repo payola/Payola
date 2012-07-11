@@ -51,11 +51,13 @@ class User(override val id: String, name: String, pwd: String, mail: String)
 
     override def ownedGroups: immutable.Seq[GroupType] = {
         if (!_ownedGroupsLoaded) {
-            evaluateCollection(_ownedGroupsQuery).map(g => 
-                if (!super.ownedGroups.contains(g)) {
-                    super.storeOwnedGroup(g)
-                }
-            )
+            wrapInTransaction {
+                _ownedGroupsQuery.toList.foreach(g =>
+                    if (!super.ownedGroups.contains(g)) {
+                        super.storeOwnedGroup(g)
+                    }
+                )
+            }
 
             _ownedGroupsLoaded = true
         }
@@ -69,9 +71,11 @@ class User(override val id: String, name: String, pwd: String, mail: String)
     def memberedGroups: mutable.Seq[Group] = {
         if (_memberedGroups.size == 0) {
             // Lazy-load membered groups collection
-            evaluateCollection(_memberedGroupsQuery).map(g =>
-                _memberedGroups += g
-            )
+            wrapInTransaction {
+                _memberedGroupsQuery.toList.foreach(g =>
+                    _memberedGroups += g
+                )
+            }
         }
 
         _memberedGroups
@@ -79,11 +83,13 @@ class User(override val id: String, name: String, pwd: String, mail: String)
 
     override def ownedAnalyses: immutable.Seq[AnalysisType] = {
         if (!_ownedAnalysesLoaded) {
-            evaluateCollection(_ownedAnalysesQuery).map(a => 
-                if (!super.ownedAnalyses.contains(a)) {
-                    super.storeOwnedAnalysis(a)
-                }
-            )
+            wrapInTransaction {
+                _ownedAnalysesQuery.toList.foreach(a =>
+                    if (!super.ownedAnalyses.contains(a)) {
+                        super.storeOwnedAnalysis(a)
+                    }
+                )
+            }
 
             _ownedAnalysesLoaded = true
         }
@@ -93,11 +99,13 @@ class User(override val id: String, name: String, pwd: String, mail: String)
 
     override def ownedDataSources: immutable.Seq[DataSourceType] = {
         if (!_ownedDataSourcesLoaded) {
-            evaluateCollection(_ownedDataSourcesQuery).map(ds =>
-                if (!super.ownedDataSources.contains(ds)) {
-                    super.storeOwnedDataSource(ds)
-                }
-            )
+            wrapInTransaction {
+                _ownedDataSourcesQuery.toList.foreach(ds =>
+                    if (!super.ownedDataSources.contains(ds)) {
+                        super.storeOwnedDataSource(ds)
+                    }
+                )
+            }
 
             _ownedDataSourcesLoaded = true
         }
@@ -107,11 +115,13 @@ class User(override val id: String, name: String, pwd: String, mail: String)
 
     override def ownedPlugins: immutable.Seq[PluginType] = {
         if (!_ownedPluginsLoaded) {
-            evaluateCollection(_ownedPluginsQuery).map(p => p.toPlugin).map(p =>
-                if (!super.ownedPlugins.contains(p)) {
-                    super.storeOwnedPlugin(p)
-                }
-            )
+            wrapInTransaction {
+                _ownedPluginsQuery.toList.map(_.toPlugin).foreach(p =>
+                    if (!super.ownedPlugins.contains(p)) {
+                        super.storeOwnedPlugin(p)
+                    }
+                )
+            }
 
             _ownedPluginsLoaded = true
         }

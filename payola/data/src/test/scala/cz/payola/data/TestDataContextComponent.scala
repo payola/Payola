@@ -6,7 +6,7 @@ import cz.payola.domain.RdfStorageComponent
 
 abstract class TestDataContextComponent(name: String) extends SquerylDataContextComponent with RdfStorageComponent
 {
-    lazy val schema = new Schema("jdbc:h2:tcp://localhost/~/h2/payola-test-" + name, "sa", "")
+    lazy val schema = new Schema("jdbc:h2:tcp://localhost/~/h2/payola-test-" + name + ";TRACE_LEVEL_SYSTEM_OUT=3", "sa", "")
 
     lazy val rdfStorage = new VirtuosoStorage()
 }
