@@ -154,6 +154,14 @@ trait DataContextComponent
     trait PrivilegeRepository extends Repository[Privilege[_]]
     {
         /**
+          * Returns all privileges of the specified type granted to the specified grantees.
+          * @param granteeIds The entities whose privileges should be returned.
+          * @param privilegeClass Type of the privilege.
+          * @tparam B Type of the privilege.
+          */
+        def getAllGrantedTo[B](granteeIds: Seq[String], privilegeClass: Class[_]): Seq[B]
+
+        /**
           * Returns IDs of privileged objects, that are granted to the specified grantee via privileges of the specified
           * class.
           * @param granteeId ID of the privilege grantee.

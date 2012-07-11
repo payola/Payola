@@ -73,6 +73,12 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
             representationRepository.getCount
         }
 
+        def getAllGrantedTo[B](granteeIds: Seq[String], privilegeClass: Class[_]): Seq[B] = {
+            // TODO implement
+            Nil
+        }
+
+        // TODO remove
         def getPrivilegedObjectIds(granteeId: String, privilegeClass: Class[_], objectClass: Class[_]): Seq[String] = {
             schema.wrapInTransaction {
                 from(representationRepository.table)(p =>

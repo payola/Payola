@@ -22,17 +22,29 @@ trait EntityModelComponent
         def remove(entity: Entity): Boolean = repository.removeById(entity.id)
     }
 
-    class ShareableEntityModel[A <: ShareableEntity](override val repository: ShareableEntityRepository[A])
+    class ShareableEntityModel[A <: ShareableEntity, B <: Privilege[A]](
+        override val repository: ShareableEntityRepository[A],
+        val accessPrivilegeClass: Class[_])
         extends EntityModel[A](repository)
     {
-        def getAllAccessible(user: Option[User]): Seq[A] = {
-            val accessible = user.map { u =>
+        def getAccessibleToUser(user: Option[User]): Seq[A] = {
+            val granted = user.map { u =>
                 val memberGroups = groupRepository.getAll().filter(_.hasMember(u))
                 val granteeIds = u.id +: memberGroups.map(_.id)
-                // TODO privilegeRepository.
-                Nil
+                val privileges = privilegeRepository.getAllGrantedTo[B](granteeIds, accessPrivilegeClass)
+                privileges.map(_.obj)
             }
-            val public = repository.getAllPublic
+            repository.getAllPublic +: granted.getOrElse(Nil)
+        }
+
+        def getAccessibleToUserByOwner(user: Option[User], owner: User): Seq[A] = {
+            // TODO
+            analysisRepository.getAllPublic
+        }
+
+        def getAllAccessible(user: Option[User]): Seq[A] = {
+            val accessible =
+
             public // ++ accessible
         }
     }

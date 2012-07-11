@@ -58,10 +58,7 @@ trait TableRepositoryComponent
           * @return Results of the query.
           */
         protected def select(query: Query[B]): Seq[A] = {
-            val results = transaction {
-                query.toList
-            }
-            processSelectResults(results)
+            processSelectResults(query.toList)
         }
 
         /**
