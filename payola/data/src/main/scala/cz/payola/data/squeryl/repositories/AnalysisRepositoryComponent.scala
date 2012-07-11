@@ -1,22 +1,26 @@
 package cz.payola.data.squeryl.repositories
 
-import org.squeryl.PrimitiveTypeMode._
 import cz.payola.data.PaginationInfo
+import cz.payola.data.squeryl._
 import cz.payola.data.squeryl.entities.analyses._
 import cz.payola.data.squeryl.entities.Analysis
 import cz.payola.data.squeryl.entities.plugins.PluginInstance
-import cz.payola.data.squeryl._
+import org.squeryl.PrimitiveTypeMode._
 
 trait AnalysisRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
 
     lazy val analysisRepository = new LazyTableRepository[Analysis](schema.analyses, Analysis)
-        with AnalysisRepository[Analysis]
+        with AnalysisRepository
+        with NamedEntityTableRepository[Analysis]
+        with OptionallyOwnedEntityTableRepository[Analysis]
         with ShareableEntityTableRepository[Analysis]
     {
         def getTop(pagination: Option[PaginationInfo] = Some(new PaginationInfo(0, 10))): collection.Seq[Analysis] = {
-            getTopAnalyses(None, pagination)
+            wrapInTransaction {
+                getTopAnalyses(None, pagination)
+            }
         }
 
         def getTopByOwner(ownerId: String, pagination: Option[PaginationInfo] = Some(new PaginationInfo(0, 10))): collection.Seq[Analysis] = {
@@ -24,25 +28,17 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
         }
 
         private def getTopAnalyses(ownerId: Option[String], pagination: Option[PaginationInfo]): collection.Seq[Analysis] = {
-            // OwnerId is not specified -> return all public unowned analyses
-            // OwnerId is specified -> return all analyses by user
-            val query = from(table)(a =>
-                where ((ownerId.isEmpty === true and a.isPublic === true and a.ownerId.isEmpty === true)
-                    or (ownerId.isEmpty === false and a.ownerId.getOrElse("").toString === ownerId.getOrElse("").toString))
-                    select (a)
-                    orderBy (a.name asc)
-            )
-
-            evaluateCollectionResultQuery(query, pagination)
+            selectWhere { a =>
+                (ownerId.isEmpty === true and a.isPublic === true and a.ownerId.isEmpty === true) or
+                (ownerId.isEmpty === false and a.ownerId.getOrElse("").toString === ownerId.getOrElse("").toString)
+            }
         }
 
         def getPublicByOwner(ownerId: String, pagination: Option[PaginationInfo] = None) = {
-            val query = table.where(a => a.ownerId.getOrElse("") === ownerId and a.isPublic === true)
-
-            evaluateCollectionResultQuery(query, pagination)
+            selectWhere(a => a.ownerId.getOrElse("") === ownerId and a.isPublic === true)
         }
 
-        override def persist(entity: AnyRef): Analysis = {
+        override def persist(entity: AnyRef): Analysis = wrapInTransaction {
             val e = entity.asInstanceOf[cz.payola.common.entities.Analysis]
             val analysis = super.persist(entity)
 

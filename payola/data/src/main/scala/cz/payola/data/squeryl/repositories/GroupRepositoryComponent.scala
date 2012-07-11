@@ -13,9 +13,9 @@ trait GroupRepositoryComponent extends TableRepositoryComponent
     self: SquerylDataContextComponent =>
 
     lazy val groupRepository = new TableRepository[Group, (Group, User, Option[User])](schema.groups, Group)
-        with GroupRepository[Group]
+        with GroupRepository
     {
-        def getAllByOwnerId(ownerId: String, pagination: Option[PaginationInfo] = None): Seq[Group] = {
+        def getAllByOwnerId(ownerId: String, pagination: Option[PaginationInfo] = None) = wrapInTransaction {
             // TODO pagination
             selectWhere(_.ownerId === ownerId)
         }

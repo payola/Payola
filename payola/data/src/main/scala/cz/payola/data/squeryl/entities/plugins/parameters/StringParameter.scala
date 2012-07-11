@@ -32,7 +32,7 @@ class StringParameter(
 
     override def defaultValue = _defaultValueDb
 
-    def parameterValues: Seq[StringParameterValue] = evaluateCollection(_valuesQuery)
+    def parameterValues: Seq[StringParameterValue] = wrapInTransaction { _valuesQuery.toList }
 
     /**
       * Associates specified [[cz.payola.data.squeryl.entities.plugins.parameters.StringParameter]].

@@ -252,6 +252,7 @@ class Analysis(protected var _name: String, protected var _owner: Option[User])
         super[Entity].checkInvariants()
         super[NamedEntity].checkInvariants()
         super[OptionallyOwnedEntity].checkInvariants()
+        super[ShareableEntity].checkInvariants()
     }
 
     /**

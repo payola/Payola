@@ -7,6 +7,7 @@ import org.squeryl.dsl.{ManyToOne, OneToMany, ManyToMany}
 import cz.payola.data.DataException
 import cz.payola.domain._
 import cz.payola.domain
+import cz.payola.data.squeryl.SquerylDataContextComponent
 
 /**
   * This trait provided persistance to entities and allows them to create relations with entities
@@ -15,25 +16,11 @@ import cz.payola.domain
   */
 trait PersistableEntity extends cz.payola.domain.Entity with KeyedEntity[String]
 {
-    /**
-      * Evaluates query that should return a collection of entities as a result.
-      *
-      * @param query - Query that returns collection
-      * @tparam A - type of entities in result
-      * @return Returns collection of entities of type A
-      */
-    protected final def evaluateCollection[A](query: Query[A]): collection.Seq[A] =
-        DataException.wrap {
-            transaction {
-                val entities: ArrayBuffer[A] = new ArrayBuffer[A]()
+    val context: SquerylDataContextComponent
 
-                for (e <- query) {
-                    entities += e
-                }
-
-                entities.toSeq
-            }
-        }
+    protected def wrapInTransaction[C](body: => C) = {
+        context.schema.wrapInTransaction(body)
+    }
 
     /**
       * Creates M:N relation of this entity and specified entity.
@@ -44,17 +31,12 @@ trait PersistableEntity extends cz.payola.domain.Entity with KeyedEntity[String]
       * @tparam A - type of specified entity
       * @return Returns persisted specified entity
       */
-    protected final def associate[A <: PersistableEntity](entity: A, relation: ManyToMany[A,_]): A =
-        DataException.wrap {
-            transaction {
-                if (relation.find(e => e.id == entity.id) == None) {
-                    relation.associate(entity)
-                }
-
-                // Return entity
-                entity
-            }
+    protected final def associate[A <: PersistableEntity](entity: A, relation: ManyToMany[A,_]): A = wrapInTransaction {
+        if (relation.find(_.id == entity.id).isEmpty) {
+            relation.associate(entity)
         }
+        entity
+    }
 
     /**
       * Removes M:N relation between this entity and specified entity.
@@ -65,17 +47,12 @@ trait PersistableEntity extends cz.payola.domain.Entity with KeyedEntity[String]
       * @tparam A - type of specified entity
       * @return Returns specified entity
       */
-    protected final def dissociate[A <: PersistableEntity](entity: A, relation: ManyToMany[A,_]): A =
-        DataException.wrap {
-            transaction {
-                if (relation.find(e => e.id == entity.id) != None) {
-                    relation.dissociate(entity)
-                }
-
-                // Return entity
-                entity
-            }
+    protected final def dissociate[A <: PersistableEntity](entity: A, relation: ManyToMany[A,_]): A = wrapInTransaction {
+        if (relation.find(_.id == entity.id).isDefined) {
+            relation.dissociate(entity)
         }
+        entity
+    }
 
     /**
       * Creates 1:N relation between this entity (on '1' side of relation) and specified entity (on 'N' side of relation).
@@ -86,17 +63,12 @@ trait PersistableEntity extends cz.payola.domain.Entity with KeyedEntity[String]
       * @tparam A - type of specified entity
       * @return Returns pesisted specified entity
       */
-    protected final def associate[A <: PersistableEntity](entity: A, relation: OneToMany[A]): A =
-        DataException.wrap {
-            transaction {
-                if (relation.find(e => e.id == entity.id) == None) {
-                    relation.associate(entity)
-                }
-
-                // Return entity
-                entity
-            }
+    protected final def associate[A <: PersistableEntity](entity: A, relation: OneToMany[A]): A = wrapInTransaction {
+        if (relation.find(e => e.id == entity.id).isEmpty) {
+            relation.associate(entity)
         }
+        entity
+    }
 
     /**
       * Checks nothing, because SQUERYL fills constructors of Entities

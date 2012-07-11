@@ -12,7 +12,7 @@ object Profile extends PayolaController with Secured
 {
     def index(username: String) = maybeAuthenticated { user: Option[User] =>
         Payola.model.userModel.getByName(username).map { profileUser =>
-            val profileUserAnalyses = Payola.model.analysisModel.getPublicByOwner(profileUser)
+            val profileUserAnalyses = Payola.model.analysisModel.getAccessibleToUserByOwner(user, profileUser)
             Ok(views.html.Profile.index(user, profileUser, profileUserAnalyses))
         }.getOrElse {
             NotFound(views.html.errors.err404("The user does not exist."))

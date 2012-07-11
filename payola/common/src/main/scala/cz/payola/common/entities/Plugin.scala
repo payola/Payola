@@ -3,13 +3,14 @@ package cz.payola.common.entities
 import scala.collection.immutable
 import cz.payola.common.entities.analyses._
 import cz.payola.common.entities.plugins._
+import cz.payola.common.Entity
 
 /**
   * An analytical plugin that, when evaluated, takes a non-negative number of input graphs, performs particular
   * operations or computations on the input graphs (which may or may not be defined) and returns modified or a
   * completely new [[cz.payola.common.rdf.Graph]].
   */
-trait Plugin extends OptionallyOwnedEntity with NamedEntity with ShareableEntity
+trait Plugin extends Entity with OptionallyOwnedEntity with NamedEntity with ShareableEntity
 {
     /** Type of the parameters of the plugin */
     type ParameterType <: Parameter[_]

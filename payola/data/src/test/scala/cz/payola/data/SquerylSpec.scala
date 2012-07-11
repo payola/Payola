@@ -9,7 +9,7 @@ import cz.payola.domain.entities.privileges._
 import cz.payola.domain.entities.plugins.DataSource
 import collection.immutable
 
-class SquerylSpec extends TestDataContextComponent("") with FlatSpec with ShouldMatchers
+class SquerylSpec extends TestDataContextComponent("", false) with FlatSpec with ShouldMatchers
 {
     // Users
     val u1 = new cz.payola.domain.entities.User("HS")
@@ -49,7 +49,9 @@ class SquerylSpec extends TestDataContextComponent("") with FlatSpec with Should
     }
 
     "Users" should "be persited, loaded and managed by UserRepository" in {
-        persistUsers
+        schema.wrapInTransaction {
+            persistUsers
+        }
     }
 
     private def persistUsers {
@@ -84,7 +86,7 @@ class SquerylSpec extends TestDataContextComponent("") with FlatSpec with Should
     }
 
     "Groups" should "be persisted, loaded and managed by GroupRepository" in {
-        persistGroups
+        schema.wrapInTransaction { persistGroups }
     }
 
     private def persistGroups {
@@ -115,7 +117,7 @@ class SquerylSpec extends TestDataContextComponent("") with FlatSpec with Should
     }
 
     "Groups" should "maintain members collection" in {
-        persistGroupMemberships
+        schema.wrapInTransaction { persistGroupMemberships }
     }
 
     private def persistGroupMemberships {
@@ -139,7 +141,7 @@ class SquerylSpec extends TestDataContextComponent("") with FlatSpec with Should
     }
 
     "Plugins" should "be persisted with their parameters by PluginRepository" in {
-        persistPlugins
+        schema.wrapInTransaction { persistPlugins }
     }
 
     private def persistPlugins {
@@ -169,7 +171,7 @@ class SquerylSpec extends TestDataContextComponent("") with FlatSpec with Should
     }
 
     "Analysis" should "be stored/updated/loaded by AnalysisRepository" in {
-        persistAnalyses
+        schema.wrapInTransaction { persistAnalyses }
     }
 
     private def persistAnalyses {
@@ -275,7 +277,7 @@ class SquerylSpec extends TestDataContextComponent("") with FlatSpec with Should
     }
 
     "DataSources" should "be updated/stored by DataSourceRepository" in {
-        persistDataSources
+        schema.wrapInTransaction { persistDataSources }
     }
 
     private def persistDataSources {
@@ -316,7 +318,7 @@ class SquerylSpec extends TestDataContextComponent("") with FlatSpec with Should
     }
 
     "Privileges" should "be granted and persisted properly" in {
-        persistPrivileges
+        schema.wrapInTransaction { persistPrivileges }
     }
 
     private def persistPrivileges {
@@ -385,38 +387,50 @@ class SquerylSpec extends TestDataContextComponent("") with FlatSpec with Should
     }
 
     private def testCascadeDeletes {
-        val analysisCount = analysisRepository.getAll().size
-        val pluginInstancesCount = pluginInstanceRepository.getAll().size
-        val pluginsCount = pluginRepository.getAll().size
+        val (analysisCount, pluginInstancesCount, pluginsCount) = schema.wrapInTransaction {
+            val analysisCount = analysisRepository.getAll().size
+            val pluginInstancesCount = pluginInstanceRepository.getAll().size
+            val pluginsCount = pluginRepository.getAll().size
 
-        // Create another analysis in DB
-        persistAnalyses
+            // Create another analysis in DB
+            persistAnalyses
 
-        assert(analysisRepository.getAll().size == analysisCount + 1)
-        assert(pluginInstanceRepository.getAll().size == pluginInstancesCount * 2)
-        assert(pluginRepository.getAll().size == pluginsCount)
+            assert(analysisRepository.getAll().size == analysisCount + 1)
+            assert(pluginInstanceRepository.getAll().size == pluginInstancesCount * 2)
+            assert(pluginRepository.getAll().size == pluginsCount)
 
-        // Remove one analysis
-        assert(analysisRepository.removeById(analysisRepository.getAll()(0).id) == true)
+            (analysisCount, pluginInstancesCount, pluginsCount)
+        }
 
-        // One analysis and half of plugin instances are gone
-        assert(analysisRepository.getAll().size == analysisCount)
-        assert(pluginInstanceRepository.getAll().size == pluginInstancesCount)
-        assert(pluginRepository.getAll().size == pluginsCount)
+        schema.wrapInTransaction {
+            // Remove one analysis
+            assert(analysisRepository.removeById(analysisRepository.getAll()(0).id) == true)
+        }
 
-        val analysis = analysisRepository.getAll()(0)
+        val analysis = schema.wrapInTransaction {
+            // One analysis and half of plugin instances are gone
+            assert(analysisRepository.getAll().size == analysisCount)
+            assert(pluginInstanceRepository.getAll().size == pluginInstancesCount)
+            assert(pluginRepository.getAll().size == pluginsCount)
+
+            analysisRepository.getAll()(0)
+        }
 
         // Remove all plugins
-        for (p <- plugins) {
-            assert(pluginRepository.removeById(p.id) == true)
+        schema.wrapInTransaction {
+            for (p <- plugins) {
+                assert(pluginRepository.removeById(p.id) == true)
+            }
         }
 
         // Only (empty) analysis is left
-        assert(analysisRepository.getAll().size == analysisCount)
-        assert(pluginInstanceRepository.getAll().size == 0)
-        assert(pluginRepository.getAll().size == 0)
+        schema.wrapInTransaction {
+            assert(analysisRepository.getAll().size == analysisCount)
+            assert(pluginInstanceRepository.getAll().size == 0)
+            assert(pluginRepository.getAll().size == 0)
 
-        assert(analysis.pluginInstances.size == 0)
-        assert(analysis.pluginInstanceBindings.size == 0)
+            assert(analysis.pluginInstances.size == 0)
+            assert(analysis.pluginInstanceBindings.size == 0)
+        }
     }
 }

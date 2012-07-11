@@ -5,8 +5,10 @@ import cz.payola.common.Entity
 /**
   * An entity that may or may not be owned.
   */
-trait OptionallyOwnedEntity extends Entity
+trait OptionallyOwnedEntity
 {
+    self: Entity =>
+
     /** Type of the user who may own the entity. */
     type UserType <: User
 

@@ -10,8 +10,10 @@ import cz.payola.common.entities.settings.OntologyCustomization
 /**
   * An entity that may be granted privileges.
   */
-trait PrivilegableEntity extends Entity
+trait PrivilegableEntity
 {
+    self: Entity =>
+
     /** Type of the privileges. */
     type PrivilegeType <: Privilege[_]
 

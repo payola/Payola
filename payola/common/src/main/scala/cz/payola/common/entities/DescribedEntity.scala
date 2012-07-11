@@ -5,8 +5,10 @@ import cz.payola.common.Entity
 /**
   * A described generic entity.
   */
-trait DescribedEntity extends Entity
+trait DescribedEntity
 {
+    self: Entity =>
+
     protected var _description: String = ""
 
     /** Description of the entity */

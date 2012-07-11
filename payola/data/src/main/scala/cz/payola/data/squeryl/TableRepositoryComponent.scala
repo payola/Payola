@@ -4,9 +4,9 @@ import org.squeryl._
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.dsl.ast.LogicalBoolean
 import cz.payola.data._
-import cz.payola.data.PaginationInfo
 import cz.payola.data.squeryl.entities._
-import cz.payola.domain.entities.ShareableEntity
+import cz.payola.domain.entities._
+import cz.payola.data.PaginationInfo
 
 trait TableRepositoryComponent
 {
@@ -23,38 +23,33 @@ trait TableRepositoryComponent
         val entityConverter: EntityConverter[A])
         extends Repository[A]
     {
-        def getByIds(ids: Seq[String]): Seq[A] = {
+        def getByIds(ids: Seq[String]): Seq[A] = wrapInTransaction {
             selectWhere(entity => entity.id in ids)
         }
 
-        def getAll(pagination: Option[PaginationInfo] = None): Seq[A] = {
+        def getAll(pagination: Option[PaginationInfo] = None): Seq[A] = wrapInTransaction {
             // TODO pagination
             selectWhere(_ => 1 === 1)
         }
 
-        def removeById(id: String): Boolean = DataException.wrap {
+        def removeById(id: String): Boolean = wrapInTransaction {
             transaction {
                 table.deleteWhere(e => id === e.id) == 1
             }
         }
 
-        def persist(entity: AnyRef): A = DataException.wrap {
+        def persist(entity: AnyRef): A = wrapInTransaction {
             val convertedEntity = entityConverter(entity)
-            transaction {
-                if (getById(convertedEntity.id).isDefined) {
-                    table.update(convertedEntity)
-                } else {
-                    table.insert(convertedEntity)
-                }
+            if (getById(convertedEntity.id).isDefined) {
+                table.update(convertedEntity)
+            } else {
+                table.insert(convertedEntity)
             }
             convertedEntity
         }
 
-        def getCount: Long = DataException.wrap {
-            transaction{
-                from(table)(e => compute(count))
-            }
-
+        def getCount: Long = wrapInTransaction {
+            from(table)(e => compute(count))
         }
 
         /**
@@ -62,20 +57,26 @@ trait TableRepositoryComponent
           * @param query The query to execute.
           * @return Results of the query.
           */
-        protected def select(query: Query[B]): Seq[A] = DataException.wrap {
-            val results = transaction {
-                query.toList
-            }
-            processSelectResults(results)
+        protected def select(query: Query[B]): Seq[A] = {
+            processSelectResults(query.toList)
         }
 
         /**
-          * Selects all entities except the one filtered by the entity filter.
+          * Selects all entities that pass the specified entity filter.
           * @param entityFilter A filter that excludes enitites from the result.
           * @return The selected entities.
           */
-        protected def selectWhere(entityFilter: A => LogicalBoolean): Seq[A] = {
+        private[squeryl] def selectWhere(entityFilter: A => LogicalBoolean): Seq[A] = {
             select(getSelectQuery(entityFilter))
+        }
+
+        /**
+          * Selects the first entity that passes the specified entity filter.
+          * @param entityFilter A filter that excludes enitites from the result.
+          * @return The selected entity.
+          */
+        private[squeryl] def selectOneWhere(entityFilter: A => LogicalBoolean): Option[A] = {
+            selectWhere(entityFilter).headOption
         }
 
         /**
@@ -92,56 +93,36 @@ trait TableRepositoryComponent
           */
         protected def processSelectResults(results: Seq[B]): Seq[A]
 
-        /**
-          * Creates an expression that can be used within a query. If the option is empty, returns a Squeryl
-          * representation of true. If the option is defined, applies the expression on the option value and returns
-          * its result. The typical use case is specifying a filter that should be applied only when it's defined.
-          * @param option A value that determines whether to return true or the expression.
-          * @param expression An expression whose result is returned in case the option is defined.
-          * @tparam C Type of the option value.
-          * @return The expression.
-          */
-        protected def condition[C](option: Option[C], expression: C => LogicalBoolean): LogicalBoolean = {
-            option.map(expression).getOrElse(1 === 1)
-        }
-
-        /**
-          * Evaluates the specified query and returns only the first object in the result.
-          * @param query The query to evaluate.
-          * @return The first object in the result.
-          */
-        final def evaluateSingleResultQuery[C](query: Query[C]): Option[C] = DataException.wrap {
-            transaction {
-                if (query.size > 0) Some(query.single) else None
-            }
-        }
-
-        /**
-          * Evaluates the specified query that returns collection of objects as a result.
-          * @param query The query to evaluate.
-          * @param pagination Optionally specified pagination of the query.
-          * @return Returns the result of the query.
-          */
-        final def evaluateCollectionResultQuery[C](query: Query[C],
-            pagination: Option[PaginationInfo] = None) = DataException.wrap {
-
-            // Get all entities or paginate.
-            val paginatedQuery = pagination.map(p => query.page(p.skip, p.limit)).getOrElse(query)
-
-            transaction {
-                paginatedQuery.toList
-            }
+        protected def wrapInTransaction[C](body: => C) = {
+            schema.wrapInTransaction(body)
         }
     }
 
-    trait ShareableEntityTableRepository[A <: PersistableEntity with ShareableEntity]
-        extends ShareableEntityRepository[A]
+    trait NamedEntityTableRepository[A <: PersistableEntity with NamedEntity]
+        extends NamedEntityRepository[A]
     {
         self: TableRepository[A, _] =>
 
-        def getAllPublic: Seq[A] = {
-            selectWhere(_.isPublic === true)
+        def getByName(name: String): Option[A] = selectOneWhere(_.name === name)
+    }
+
+    trait OptionallyOwnedEntityTableRepository[A <: PersistableEntity with OptionallyOwnedEntity]
+        extends OptionallyOwnedEntityRepository[A]
+    {
+        self: TableRepository[A, _] =>
+
+        def getAllByOwnerId(ownerId: Option[String]): Seq[A] = {
+            selectWhere(_.owner.map(_.id) === ownerId)
         }
+    }
+
+    trait ShareableEntityTableRepository[A <: PersistableEntity with ShareableEntity with OptionallyOwnedEntity]
+        extends OptionallyOwnedEntityTableRepository[A]
+        with ShareableEntityRepository[A]
+    {
+        self: TableRepository[A, _] =>
+
+        def getAllPublic: Seq[A] = selectWhere(_.isPublic === true)
     }
 
     /**

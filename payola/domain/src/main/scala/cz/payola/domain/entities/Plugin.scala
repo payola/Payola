@@ -17,18 +17,18 @@ abstract class Plugin(
     protected val _parameters: immutable.Seq[Plugin#ParameterType],
     id: String = IDGenerator.newId)
     extends Entity(id)
-    with OptionallyOwnedEntity
     with NamedEntity
+    with OptionallyOwnedEntity
     with ShareableEntity
     with cz.payola.common.entities.Plugin
 {
+    var _owner: Option[UserType] = None
+
     checkConstructorPostConditions()
 
     type ParameterType = Parameter[_]
 
     type ParameterValueType = ParameterValue[_]
-
-    var _owner: Option[UserType] = None
 
     /**
       * Sets the owner of the plugin.
@@ -135,6 +135,8 @@ abstract class Plugin(
     override protected def checkInvariants() {
         super[Entity].checkInvariants()
         super[NamedEntity].checkInvariants()
+        super[OptionallyOwnedEntity].checkInvariants()
+        super[ShareableEntity].checkInvariants()
         require(inputCount >= 0, "The inputCount must be a non-negative number.")
         require(parameters != null, "The parameters mustn't be null.")
         require(!parameters.contains(null), "The parameters mustn't contain null.")
