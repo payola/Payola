@@ -27,7 +27,11 @@ import cz.payola.domain.entities.User
     }
 
     @async def setAnalysisName(id: String, name: String)(successCallback: (Boolean => Unit))(failCallback: (Throwable => Unit)) {
-        Payola.model.analysisModel.getById(id).map(_.name = name)
+        val analysis = Payola.model.analysisModel.getById(id)
+        analysis.map{a =>
+            a.name = name
+            Payola.model.analysisModel.persist(a)
+        }
         successCallback(true)
     }
 

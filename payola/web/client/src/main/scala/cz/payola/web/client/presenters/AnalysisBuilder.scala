@@ -9,21 +9,40 @@ import cz.payola.web.shared.AnalysisBuilderData
 import s2js.compiler.javascript
 import cz.payola.common.entities.Plugin
 import s2js.adapters.js.browser.window
-import cz.payola.web.client.events.ClickedEventArgs
+import cz.payola.web.client.events._
 import scala.collection.mutable.ArrayBuffer
 import s2js.runtime.client.scala.collection.mutable.HashMap
+import scala.Some
 
 class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: String)
 {
     private var allPlugins : Seq[Plugin] = List()
     private var analysisId = ""
 
+    private val nameComponent = new InputControl("Analysis name","init-name","","Enter analysis name")
+    private val nameDialog = new Modal("Please, enter the name of the new analysis",List(nameComponent))
+    nameDialog.render(document.body)
+
+    private val name = new Input("name","",Some("Analysis name"),"span3")
+    name.render(nameHolderElement)
+
     AnalysisBuilderData.getPlugins(){ plugins => allPlugins = plugins}{ error => }
     AnalysisBuilderData.createEmptyAnalysis(){
         id =>
             analysisId = id
             AnalysisBuilderData.lockAnalysis(id)
+            nameDialog.show
     }{ error => }
+
+    nameDialog.saved += { args =>
+        AnalysisBuilderData.setAnalysisName(analysisId, nameComponent.getValue()){success =>
+            name.setText(nameComponent.getValue())
+            nameDialog.hide
+        }{error =>
+            nameComponent.setError("Unable to use this name")
+        }
+        false
+    }
 
     private var lanes = new ArrayBuffer[PluginInstance]
 
@@ -39,9 +58,6 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
 
     private val mergeBranches = new Anchor(List(new Icon(Icon.glass), new Text(" Merge branches")))
     private val mergeBranchesLi = new ListItem(List(mergeBranches))
-
-    private val name = new Input("name","",Some("Analysis name"),"span3")
-    name.render(nameHolderElement)
 
     private var nameChangedTimeout : Option[Int] = None
 
