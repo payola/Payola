@@ -2,15 +2,15 @@ package cz.payola.data.squeryl.repositories
 
 import cz.payola.data.squeryl._
 import cz.payola.data.squeryl.entities.settings._
+import cz.payola.data.squeryl.entities.User
 
 trait OntologyRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
-    
-    private type QueryType = (OntologyCustomization, Option[ClassCustomization], Option[PropertyCustomization])
 
-    lazy val ontologyCustomizationRepository = new LazyTableRepository[OntologyCustomization](
-        schema.ontologyCustomizations, OntologyCustomization)
+    lazy val ontologyCustomizationRepository =
+        new TableRepository[OntologyCustomization, (OntologyCustomization, Option[User])](
+            schema.ontologyCustomizations,OntologyCustomization)
         with OntologyCustomizationRepository
         with NamedEntityTableRepository[OntologyCustomization]
         with OptionallyOwnedEntityTableRepository[OntologyCustomization]

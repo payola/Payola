@@ -473,7 +473,7 @@ trait SchemaComponent
           * @param entity - specified entity to be ralted with this entity
           * @param relation  - definition of 1:N relation between this and specified entity
           * @tparam A - type of specified entity
-          * @return Returns pesisted specified entity
+          * @return Returns persisted specified entity
           */
         def associate[A <: PersistableEntity](entity: A, relation: OneToMany[A]): A = {
             wrapInTransaction {

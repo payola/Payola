@@ -1,12 +1,10 @@
 package cz.payola.data.squeryl.entities
 
-import cz.payola.data._
-import org.squeryl.annotations.Transient
-import cz.payola.data.squeryl.repositories._
 import cz.payola.data.squeryl.entities.plugins.DataSource
 import scala.collection.immutable
 import scala.collection.mutable
 import cz.payola.data.squeryl.SquerylDataContextComponent
+import cz.payola.data.squeryl.entities.settings.OntologyCustomization
 
 /**
   * This object converts [[cz.payola.common.entities.User]] to [[cz.payola.common.entities.User]]
@@ -29,84 +27,80 @@ class User(override val id: String, name: String, pwd: String, mail: String)
     password = pwd
     email = mail
 
-    @Transient
-    private var _ownedGroupsLoaded = false
+    _ownedGroups = null
     private lazy val _ownedGroupsQuery = context.schema.groupOwnership.left(this)
 
-    @Transient
-    private var _ownedAnalysesLoaded = false
+    _ownedAnalyses = null
     private lazy val _ownedAnalysesQuery = context.schema.analysisOwnership.left(this)
 
-    @Transient
-    private var _ownedPluginsLoaded = false
+    _ownedPlugins = null
     private lazy val _ownedPluginsQuery = context.schema.pluginOwnership.left(this)
 
-    @Transient
-    private var _ownedDataSourcesLoaded = false
+    _ownedDataSources = null
     private lazy val _ownedDataSourcesQuery = context.schema.dataSourceOwnership.left(this)
 
+    _ontologyCustomizations = null
+    private lazy val _ownedCustomizationsQuery = context.schema.customizationOwnership.left(this)
+
     override def ownedGroups: immutable.Seq[GroupType] = {
-        if (!_ownedGroupsLoaded) {
+        if (_ownedGroups == null) {
             wrapInTransaction {
-                _ownedGroupsQuery.toList.foreach(g =>
-                    if (!super.ownedGroups.contains(g)) {
-                        super.storeOwnedGroup(g)
-                    }
+                _ownedGroups = mutable.ArrayBuffer(
+                    context.groupRepository.getAllByOwnerId(id): _*
                 )
             }
-
-            _ownedGroupsLoaded = true
         }
 
-        super.ownedGroups
+        _ownedGroups.toList
     }
 
     override def ownedAnalyses: immutable.Seq[AnalysisType] = {
-        if (!_ownedAnalysesLoaded) {
+        if (_ownedAnalyses == null) {
             wrapInTransaction {
-                _ownedAnalysesQuery.toList.foreach(a =>
-                    if (!super.ownedAnalyses.contains(a)) {
-                        super.storeOwnedAnalysis(a)
-                    }
+                _ownedAnalyses = mutable.ArrayBuffer(
+                    context.analysisRepository.getAllByOwnerId(Some(id)): _*
                 )
             }
-
-            _ownedAnalysesLoaded = true
         }
 
-        super.ownedAnalyses
+        _ownedAnalyses.toList
     }
 
+
     override def ownedDataSources: immutable.Seq[DataSourceType] = {
-        if (!_ownedDataSourcesLoaded) {
+        if (_ownedDataSources == null) {
             wrapInTransaction {
-                _ownedDataSourcesQuery.toList.foreach(ds =>
-                    if (!super.ownedDataSources.contains(ds)) {
-                        super.storeOwnedDataSource(ds)
-                    }
+                _ownedDataSources = mutable.ArrayBuffer(
+                    context.dataSourceRepository.getAllByOwnerId(Some(id)): _*
                 )
             }
-
-            _ownedDataSourcesLoaded = true
         }
 
-        super.ownedDataSources
+        _ownedDataSources.toList
     }
 
     override def ownedPlugins: immutable.Seq[PluginType] = {
-        if (!_ownedPluginsLoaded) {
+        if (_ownedPlugins == null) {
             wrapInTransaction {
-                _ownedPluginsQuery.toList.map(_.toPlugin).foreach(p =>
-                    if (!super.ownedPlugins.contains(p)) {
-                        super.storeOwnedPlugin(p)
-                    }
+                _ownedPlugins = mutable.ArrayBuffer(
+                    context.pluginRepository.getAllByOwnerId(Some(id)): _*
                 )
             }
-
-            _ownedPluginsLoaded = true
         }
 
-        super.ownedPlugins
+        _ownedPlugins.toList
+    }
+
+    override def ownedOntologyCustomizations: immutable.Seq[OntologyCustomizationType] = {
+        if (_ontologyCustomizations == null) {
+            wrapInTransaction {
+                _ontologyCustomizations = mutable.ArrayBuffer(
+                    context.ontologyCustomizationRepository.getAllByOwnerId(Some(id)): _*
+                )
+            }
+        }
+
+        _ontologyCustomizations.toList
     }
 
     override protected def storeOwnedAnalysis(analysis: User#AnalysisType) {
@@ -119,6 +113,18 @@ class User(override val id: String, name: String, pwd: String, mail: String)
 
     override protected def storeOwnedDataSource(source: User#DataSourceType) {
         super.storeOwnedDataSource(context.schema.associate(DataSource(source), _ownedDataSourcesQuery))
+    }
+
+    override protected def storeOwnedPlugin(plugin: User#PluginType) {
+        context.schema.associate(PluginDbRepresentation(plugin), _ownedPluginsQuery)
+
+        super.storeOwnedPlugin(plugin)
+    }
+    
+    override protected def storeOntologyCustomization(customization: User#OntologyCustomizationType) {
+        super.storeOntologyCustomization(
+            context.schema.associate(OntologyCustomization(customization), _ownedCustomizationsQuery)
+        )
     }
 
     override protected def discardOwnedAnalysis(analysis: User#AnalysisType) {
@@ -134,5 +140,17 @@ class User(override val id: String, name: String, pwd: String, mail: String)
     override protected def discardOwnedDataSource(source: User#DataSourceType) {
         context.dataSourceRepository.removeById(source.id)
         super.discardOwnedDataSource(source)
+    }
+    
+    override protected def discardOwnedPlugin(plugin: User#PluginType) {
+        context.pluginRepository.removeById(plugin.id)
+
+        super.discardOwnedPlugin(plugin)
+    }
+
+    override protected def discardOntologyCustomization(customization: User#OntologyCustomizationType) {
+        context.ontologyCustomizationRepository.removeById(customization.id)
+
+        super.discardOntologyCustomization(customization)
     }
 }

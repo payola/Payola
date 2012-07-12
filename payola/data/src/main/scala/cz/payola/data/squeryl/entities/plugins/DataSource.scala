@@ -32,7 +32,7 @@ class DataSource(
     df: cz.payola.domain.entities.plugins.concrete.DataFetcher,
     paramValues: immutable.Seq[ParameterValue[_]])(implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.plugins.DataSource(n, o, df, paramValues)
-    with PersistableEntity  with OptionallyOwnedEntity
+    with PersistableEntity  with OptionallyOwnedEntity with ShareableEntity
 {
     var pluginId: String = Option(df).map(_.id).getOrElse(null)
 
