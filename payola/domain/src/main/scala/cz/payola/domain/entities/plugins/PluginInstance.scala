@@ -91,6 +91,20 @@ class PluginInstance(protected val _plugin: Plugin, protected val _parameterValu
         this
     }
 
+    /**
+      * Returns parameter value of the specified parameter.
+      */
+    def getParameterValue(parameter: Parameter[_]): Option[ParameterValue[_]] = {
+        parameterValues.find(_.parameter == parameter)
+    }
+
+    /**
+      * Returns parameter value of the parameter specified by the given name.
+      */
+    def getParameterValue(parameterName: String): Option[ParameterValue[_]] = {
+        plugin.getParameter(parameterName).flatMap(getParameterValue(_))
+    }
+
     override def canEqual(other: Any): Boolean = {
         other.isInstanceOf[PluginInstance]
     }
@@ -100,19 +114,5 @@ class PluginInstance(protected val _plugin: Plugin, protected val _parameterValu
         require(plugin != null, "The plugin mustn't be null.")
         require(parameterValues.map(_.parameter).sortBy(_.name) == plugin.parameters.sortBy(_.name),
             "The parameter values must correspond to the plugin parameters.")
-    }
-
-    /**
-      * Returns parameter value of the specified parameter.
-      */
-    private def getParameterValue(parameter: Parameter[_]): Option[ParameterValue[_]] = {
-        parameterValues.find(_.parameter == parameter)
-    }
-
-    /**
-      * Returns parameter value of the specified parameter.
-      */
-    private def getParameterValue(parameterName: String): Option[ParameterValue[_]] = {
-        plugin.getParameter(parameterName).flatMap(p => getParameterValue(p))
     }
 }

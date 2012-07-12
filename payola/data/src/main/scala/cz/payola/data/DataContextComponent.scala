@@ -29,7 +29,7 @@ trait DataContextComponent
 
     val dataSourceRepository: DataSourceRepository
 
-    val ontologyCustomizationRepository: OntologyCustomizationRepository[OntologyCustomization]
+    val ontologyCustomizationRepository: OntologyCustomizationRepository
 
     lazy val repositoryRegistry = new RepositoryRegistry(Map(
         classOf[User] -> userRepository,
@@ -181,10 +181,11 @@ trait DataContextComponent
         with OptionallyOwnedEntityRepository[Analysis]
         with ShareableEntityRepository[Analysis]
 
-    trait OntologyCustomizationRepository[+A <: OntologyCustomization]
-        extends Repository[A]
-        with ShareableEntityRepository[A] {
-    }
+    trait OntologyCustomizationRepository
+        extends Repository[OntologyCustomization]
+        with NamedEntityRepository[OntologyCustomization]
+        with OptionallyOwnedEntityRepository[OntologyCustomization]
+        with ShareableEntityRepository[OntologyCustomization]
 
     trait PluginRepository
         extends Repository[Plugin]

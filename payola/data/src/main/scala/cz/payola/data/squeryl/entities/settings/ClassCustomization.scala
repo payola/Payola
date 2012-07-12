@@ -1,6 +1,5 @@
 package cz.payola.data.squeryl.entities.settings
 
-import cz.payola.domain.Entity
 import scala.collection.immutable
 import cz.payola.data.squeryl.entities._
 import cz.payola.data.squeryl.SquerylDataContextComponent
@@ -26,10 +25,4 @@ class ClassCustomization(
     with PersistableEntity
 {
     var ontologyCustomizationId: String = null
-
-    private lazy val _customizationsQuery = context.schema.propertyCustomizationsOfClasses.left(this)
-    
-    def associatePropertyCustomization(customization: PropertyCustomizationType) = {
-        context.schema.associate(PropertyCustomization(customization), _customizationsQuery)
-    }
 }

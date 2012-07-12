@@ -15,4 +15,8 @@ object Analysis extends PayolaController with Secured
     def create = authenticated { user =>
         Ok(views.html.analysis.create(user))
     }
+
+    def edit(id: String) = authenticated { user =>
+        Ok(views.html.analysis.edit(user, id))
+    }
 }

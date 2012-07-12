@@ -459,11 +459,11 @@ trait SchemaComponent
         }
 
         def wrapInTransaction[C](body: => C) = {
-            // TODO DataException.wrap {
-            inTransaction {
-                body
+            DataException.wrap {
+                inTransaction {
+                    body
+                }
             }
-            // }
         }
 
         /**

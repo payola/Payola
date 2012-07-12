@@ -88,7 +88,7 @@ trait TableRepositoryComponent
 
         /**
           * Persists the specified entity to the specified table.
-          * @param entity The entitty to persist.
+          * @param entity The entity to persist.
           * @param table Tha table to persist the entity int.
           * @tparam C Type of the entity.
           */

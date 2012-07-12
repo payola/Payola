@@ -24,12 +24,6 @@ class OntologyCustomization(
     extends cz.payola.domain.entities.settings.OntologyCustomization(u, n, o, c)
     with PersistableEntity with OptionallyOwnedEntity
 {
-    private lazy val _customizationsQuery = context.schema.classCustomizationsOfOntologies.left(this)
-
-    def associateClassCustomization(customization: ClassCustomizationType) = {
-        context.schema.associate(ClassCustomization(customization), _customizationsQuery)
-    }
-
     override def classCustomizations: immutable.Seq[ClassCustomizationType] = {
         if (_classCustomizations == null) {
             // TODO:
