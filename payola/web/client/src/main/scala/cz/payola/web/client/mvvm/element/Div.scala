@@ -6,10 +6,10 @@ import s2js.adapters.js.dom
 import cz.payola.web.client.events.{ClickedEvent, ClickedEventArgs}
 import dom.Element
 
-class Div(val innerElements: Seq[Component] = List(), addClass: String = "") extends Component
+class Div(val innerElements: Seq[Component] = List(), additionalClass: String = "") extends Component
 {
     val div = document.createElement[dom.Element]("div")
-    div.setAttribute("class",addClass)
+    div.setAttribute("class",additionalClass)
 
     def render(parent: Element = document.body) = {
         parent.appendChild(div)
@@ -22,7 +22,7 @@ class Div(val innerElements: Seq[Component] = List(), addClass: String = "") ext
     }
 
     def addClass(addClass: String) = {
-        div.setAttribute("class",div.getAttribute("class")+" "+addClass)
+        div.setAttribute("class",div.getAttribute("class").replaceAllLiterally(addClass, "")+" "+addClass)
     }
 
     def removeClass(remClass: String) = {

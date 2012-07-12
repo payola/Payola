@@ -13,61 +13,80 @@ import cz.payola.web.client.events._
 import scala.collection.mutable.ArrayBuffer
 import s2js.runtime.client.scala.collection.mutable.HashMap
 import scala.Some
+import cz.payola.web.client.presenters.models.ParameterValue
 
 class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: String)
 {
-    private var allPlugins : Seq[Plugin] = List()
-    private var analysisId = ""
+    protected var allPlugins: Seq[Plugin] = List()
 
-    private val nameComponent = new InputControl("Analysis name","init-name","","Enter analysis name")
-    private val nameDialog = new Modal("Please, enter the name of the new analysis",List(nameComponent))
-    nameDialog.render(document.body)
+    protected var analysisId = ""
 
-    private val name = new Input("name","",Some("Analysis name"),"span3")
+    protected val timeoutMap = new HashMap[String, Int]
+    protected val nameComponent = new InputControl("Analysis name", "init-name", "", "Enter analysis name")
+
+    protected val name = new InputControl("Analysis name:", "name", "", "Analysis name")
+
     name.render(nameHolderElement)
 
-    AnalysisBuilderData.getPlugins(){ plugins => allPlugins = plugins}{ error => }
-    AnalysisBuilderData.createEmptyAnalysis(){
-        id =>
-            analysisId = id
-            AnalysisBuilderData.lockAnalysis(id)
-            nameDialog.show
-    }{ error => }
+    protected var lanes = new ArrayBuffer[PluginInstance]
 
-    nameDialog.saved += { args =>
-        AnalysisBuilderData.setAnalysisName(analysisId, nameComponent.getValue()){success =>
-            name.setText(nameComponent.getValue())
-            nameDialog.hide
-        }{error =>
-            nameComponent.setError("Unable to use this name")
+    protected val menu = document.getElementById(menuHolder)
+
+    protected val pluginsHolderElement = document.getElementById(pluginsHolder)
+
+    protected val nameHolderElement = document.getElementById(nameHolder)
+
+    protected val addPluginLink = new Anchor(List(new Icon(Icon.hdd), new Text(" Add plugin")))
+
+    protected val addPluginLinkLi = new ListItem(List(addPluginLink))
+
+    protected val addDataSourceLink = new Anchor(List(new Icon(Icon.hdd), new Text(" Add datasource")))
+
+    protected val addDataSourceLinkLi = new ListItem(List(addDataSourceLink))
+
+    protected val mergeBranches = new Anchor(List(new Icon(Icon.glass), new Text(" Merge branches")))
+
+    protected val mergeBranchesLi = new ListItem(List(mergeBranches))
+
+    protected var nameChangedTimeout: Option[Int] = None
+
+    AnalysisBuilderData.getPlugins() { plugins => allPlugins = plugins} { error => window.alert("Unable to load plugins")}
+    init
+
+    def init {
+        val nameDialog = new Modal("Please, enter the name of the new analysis", List(nameComponent))
+
+        nameDialog.render(document.body)
+
+        AnalysisBuilderData.createEmptyAnalysis() {
+            id =>
+                analysisId = id
+                AnalysisBuilderData.lockAnalysis(id)
+                nameDialog.show
+        } { error => window.alert("Unable to create analysis")}
+
+        nameDialog.saved += { args =>
+            AnalysisBuilderData.setAnalysisName(analysisId, nameComponent.getValue()) { success =>
+                name.setValue(nameComponent.getValue())
+                nameDialog.hide
+            } { error =>
+                nameComponent.setError("Unable to use this name")
+            }
+            false
         }
-        false
     }
 
-    private var lanes = new ArrayBuffer[PluginInstance]
-
-    private val menu = document.getElementById(menuHolder)
-    private val pluginsHolderElement = document.getElementById(pluginsHolder)
-    private val nameHolderElement = document.getElementById(nameHolder)
-
-    private val addPluginLink = new Anchor(List(new Icon(Icon.hdd), new Text(" Add plugin")))
-    private val addPluginLinkLi = new ListItem(List(addPluginLink))
-
-    private val addDataSourceLink = new Anchor(List(new Icon(Icon.hdd), new Text(" Add datasource")))
-    private val addDataSourceLinkLi = new ListItem(List(addDataSourceLink))
-
-    private val mergeBranches = new Anchor(List(new Icon(Icon.glass), new Text(" Merge branches")))
-    private val mergeBranchesLi = new ListItem(List(mergeBranches))
-
-    private var nameChangedTimeout : Option[Int] = None
-
     name.changed += { eventArgs =>
-        if (nameChangedTimeout.isDefined){
+        if (nameChangedTimeout.isDefined) {
             window.clearTimeout(nameChangedTimeout.get)
         }
 
         nameChangedTimeout = Some(window.setTimeout({ () =>
-            AnalysisBuilderData.setAnalysisName(analysisId, eventArgs.target.value){ _ => () } { _ => () }
+            AnalysisBuilderData.setAnalysisName(analysisId, eventArgs.target.getValue) { _ =>
+                eventArgs.target.setOk()
+            } { _ =>
+                eventArgs.target.setError("Invalid name.")
+            }
         }, 300))
 
         false
@@ -117,23 +136,28 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
                         i += 1
                     }
 
-                    val mergeInstance = new PluginInstance(evt.target, buffer.asInstanceOf[Seq[PluginInstance]])
-                    mergeInstance.render(pluginsHolderElement)
+                    AnalysisBuilderData.createPluginInstance(evt.target.id, analysisId) { id =>
+                        val mergeInstance = new PluginInstance(id, evt.target, buffer.asInstanceOf[Seq[PluginInstance]])
+                        mergeInstance.render(pluginsHolderElement)
 
-                    mergeInstance.connectButtonClicked += { clickedEvent =>
-                        connectPlugin(mergeInstance)
-                        false
-                    }
+                        mergeInstance.connectButtonClicked += { clickedEvent =>
+                            connectPlugin(mergeInstance)
+                            false
+                        }
 
-                    mergeInstance.deleteButtonClicked += onDeleteClick
+                        mergeInstance.parameterValueChanged += onParameterValueChanged
+                        mergeInstance.deleteButtonClicked += onDeleteClick
 
-                    buffer.map { instance: Any =>
-                        bind(instance.asInstanceOf[PluginInstance], mergeInstance)
-                    }
+                        i = 0
+                        buffer.map { instance: Any =>
+                            bind(instance.asInstanceOf[PluginInstance], mergeInstance, i)
+                            i += 1
+                        }
 
-                    lanes += mergeInstance
+                        lanes += mergeInstance
 
-                    mergeDialog.hide()
+                        mergeDialog.hide()
+                    } { _ =>}
                 }
 
                 mergeDialog.show()
@@ -147,27 +171,53 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
     }
 
     def onPluginNameClicked(plugin: Plugin, predecessor: Option[PluginInstance]) = {
-        val instance = if (predecessor.isDefined) {
-            new PluginInstance(plugin, List(predecessor.get))
-        }else{
-            new PluginInstance(plugin, List())
+        AnalysisBuilderData.createPluginInstance(plugin.id, analysisId) { id =>
+            val instance = if (predecessor.isDefined) {
+                new PluginInstance(id, plugin, List(predecessor.get))
+            } else {
+                new PluginInstance(id, plugin, List())
+            }
+
+            lanes.append(instance)
+
+            instance.render(pluginsHolderElement)
+            instance.connectButtonClicked += { evt =>
+                connectPlugin(evt.target)
+                false
+            }
+
+            instance.parameterValueChanged += onParameterValueChanged
+            instance.deleteButtonClicked += onDeleteClick
+
+            predecessor.map { p =>
+                lanes -= p
+                p.hideDeleteButton()
+                bind(p, instance, 0)
+            }
+        } { _ =>
+        }
+    }
+
+    def onParameterValueChanged = { args: ChangedEventArgs[ParameterValue] =>
+
+        val parameterInfo = args.target
+        val parameterId = parameterInfo.parameterId
+
+        if (timeoutMap.contains(parameterId)) {
+            window.clearTimeout(timeoutMap(parameterId))
         }
 
-        lanes.append(instance)
+        val timeoutId = window.setTimeout(() => {
+            AnalysisBuilderData
+                .setParameterValue(parameterInfo.pluginInstanceId, parameterInfo.name, parameterInfo.value) { _ =>
+                parameterInfo.control.setOk()
+            } { _ =>
+                parameterInfo.control.setError("Wrong parameter value.")
+            }
+        }, 300)
 
-        instance.render(pluginsHolderElement)
-        instance.connectButtonClicked += { evt =>
-            connectPlugin(evt.target)
-            false
-        }
-
-        instance.deleteButtonClicked += onDeleteClick
-
-        predecessor.map{ p =>
-            lanes -= p
-            p.hideDeleteButton()
-            bind(p, instance)
-        }
+        timeoutMap.put(parameterId, timeoutId)
+        false
     }
 
     def connectPlugin(pluginInstance: PluginInstance): Unit = {
@@ -185,15 +235,26 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
 
     def onDeleteClick = { eventArgs: ClickedEventArgs[PluginInstance] =>
         val instance = eventArgs.target
-        lanes -= instance
-        var i = 0
-        while (i < instance.predecessors.size) {
-            lanes += instance.predecessors(i)
-            instance.predecessors(i).showDeleteButton()
-            i += 1
-        }
-        instance.destroy()
+
+        AnalysisBuilderData.deletePluginInstance(instance.id) { _ =>
+            lanes -= instance
+            var i = 0
+            while (i < instance.predecessors.size) {
+                lanes += instance.predecessors(i)
+                instance.predecessors(i).showDeleteButton()
+                i += 1
+            }
+            instance.destroy()
+        } { _ =>}
         false
+    }
+
+    def bind(a: PluginInstance, b: PluginInstance, inputIndex: Int) = {
+        AnalysisBuilderData.saveBinding(analysisId, a.id, b.id, inputIndex) { _ =>
+            renderBinding(a, b)
+        } { _ =>
+            window.alert("Unable to save the binding")
+        }
     }
 
     @javascript(
@@ -208,5 +269,5 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
                        };
           jsPlumb.connect({ source:a.getPluginElement(), target:b.getPluginElement() },settings);
         """)
-    def bind(a: PluginInstance, b: PluginInstance) = null
+    def renderBinding(a: PluginInstance, b: PluginInstance) = {}
 }
