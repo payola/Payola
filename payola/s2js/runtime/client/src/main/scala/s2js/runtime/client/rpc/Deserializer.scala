@@ -30,7 +30,7 @@ class Deserializer extends RpcResultTraverser[Any]
             new Reference(referencedObjectId.get)
         } else if (s2js.runtime.client.js.isArray(nonInstance)) {
             // If the non-instance is an array return traversed items instead of the array with non-traversed items.
-            items
+            items.map(traverse(_))
         } else {
             nonInstance
         }

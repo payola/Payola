@@ -257,9 +257,6 @@ class JSONSerializer
             builder.append('\n')
         }
 
-        // We know it is a Map[String, _]
-        //val mapIt: scala.collection.Iterable[(String, _)] = map.asInstanceOf[scala.collection.Iterable[(String, _)]]
-
         // Need to keep track of index so that
         // we don't add a comma after the first iteration
         var index: Int = 0
@@ -268,6 +265,7 @@ class JSONSerializer
                 jsonBuilder.appendKeyValue(key, value, index == 0, processedObjects)
                 index += 1
             }
+            case _ => throw new JSONSerializationException("Maps with other than String keys are not allowed.")
         }
 
         if (prettyPrint) {
