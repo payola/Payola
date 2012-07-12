@@ -3,9 +3,9 @@ package cz.payola.data.squeryl
 import org.squeryl._
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.dsl.ast.LogicalBoolean
-import cz.payola.domain.entities._
 import cz.payola.data.PaginationInfo
-import cz.payola.data.squeryl.entities.{PersistableEntity, EntityConverter}
+import cz.payola.domain.entities.NamedEntity
+import cz.payola.data.squeryl.entities._
 
 trait TableRepositoryComponent
 {
@@ -116,16 +116,32 @@ trait TableRepositoryComponent
     trait OptionallyOwnedEntityTableRepository[A <: PersistableEntity with OptionallyOwnedEntity]
         extends OptionallyOwnedEntityRepository[A]
     {
-        self: TableRepository[A, _] =>
+        self: TableRepository[A, (A, Option[User])] =>
 
-        def getAllByOwnerId(ownerId: Option[String]): Seq[A] = selectWhere(_.owner.map(_.id) === ownerId)
+        def getAllByOwnerId(ownerId: Option[String]): Seq[A] = selectWhere(_.ownerId === ownerId)
+
+        protected def getSelectQuery(entityFilter: A => LogicalBoolean): Query[(A, Option[User])] = {
+            join(table, schema.users.leftOuter)((e, o) =>
+                where(entityFilter(e))
+                select(e, o)
+                on(e.ownerId === o.map(_.id))
+            )
+        }
+
+        protected def processSelectResults(results: Seq[(A, Option[User])]): Seq[A] = {
+            results.groupBy(_._1).map { r =>
+                val entity = r._1
+                entity.owner = r._2.head._2
+                entity
+            }(collection.breakOut)
+        }
     }
 
     trait ShareableEntityTableRepository[A <: PersistableEntity with ShareableEntity with OptionallyOwnedEntity]
         extends OptionallyOwnedEntityTableRepository[A]
         with ShareableEntityRepository[A]
     {
-        self: TableRepository[A, _] =>
+        self: TableRepository[A, (A, Option[User])] =>
 
         def getAllPublic: Seq[A] = selectWhere(_.isPublic === true)
     }

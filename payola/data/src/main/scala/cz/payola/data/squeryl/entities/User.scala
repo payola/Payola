@@ -119,13 +119,15 @@ class User(override val id: String, name: String, pwd: String, mail: String)
     }
 
     override protected def storeOwnedPlugin(plugin: User#PluginType) {
-        associate(PluginDbRepresentation(plugin), _ownedPluginsQuery)
+        context.schema.associate(PluginDbRepresentation(plugin), _ownedPluginsQuery)
 
         super.storeOwnedPlugin(plugin)
     }
     
     override protected def storeOntologyCustomization(customization: User#OntologyCustomizationType) {
-        super.storeOntologyCustomization(associate(OntologyCustomization(customization), _ownedCustomizationsQuery))
+        super.storeOntologyCustomization(
+            context.schema.associate(OntologyCustomization(customization), _ownedCustomizationsQuery)
+        )
     }
 
     override protected def discardOwnedAnalysis(analysis: User#AnalysisType) {

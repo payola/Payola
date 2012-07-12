@@ -22,7 +22,7 @@ object Analysis extends EntityConverter[Analysis]
 
 class Analysis(override val id: String, name: String, o: Option[User])(implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.Analysis(name, o)
-    with PersistableEntity with OptionallyOwnedEntity
+    with PersistableEntity with OptionallyOwnedEntity with ShareableEntity
 {
     type DomainParameterValueType = plugins.ParameterValue[_]
 

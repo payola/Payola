@@ -3,15 +3,15 @@ package cz.payola.data.squeryl.repositories
 import cz.payola.data.PaginationInfo
 import cz.payola.data.squeryl._
 import cz.payola.data.squeryl.entities.analyses._
-import cz.payola.data.squeryl.entities.Analysis
 import cz.payola.data.squeryl.entities.plugins.PluginInstance
 import org.squeryl.PrimitiveTypeMode._
+import cz.payola.data.squeryl.entities._
 
 trait AnalysisRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
 
-    lazy val analysisRepository = new LazyTableRepository[Analysis](schema.analyses, Analysis)
+    lazy val analysisRepository = new TableRepository[Analysis, (Analysis, Option[User])](schema.analyses, Analysis)
         with AnalysisRepository
         with NamedEntityTableRepository[Analysis]
         with OptionallyOwnedEntityTableRepository[Analysis]
@@ -28,29 +28,5 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
             // Return persisted analysis
             analysis
         }
-
-        /*
-        def loadWholeAnalysis(analysisId: String): Option[Analysis] = {
-            val query =
-                from(PayolaDB.analyses, PayolaDB.pluginInstances, PayolaDB.pluginInstanceBindings, PayolaDB.booleanParameterValues,
-                    PayolaDB.floatParameterValues, PayolaDB.intParameterValues, PayolaDB.stringParameterValues)
-                    ((a, pi, bi, bpv, fpv, ipv, spv) =>
-                    where (
-                        a.is === analysisId
-                        and a.pluginInstances.contains(pi)
-                        and a.pluginInstanceBindings.contains(bi)
-                        and (
-                            pi.parameterValues.contains(bpv)
-                            or pi.parameterValues.contains(fpv)
-                            or pi.parameterValues.contains(ipv)
-                            or pi.parameterValues.contains(spv)
-                        )
-                    select(a)
-                    )
-                )
-
-            super.evaluateSingleResultQuery(query)
-        }
-        */
     }
 }
