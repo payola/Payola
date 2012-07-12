@@ -66,10 +66,10 @@ class Group(override val id: String, name: String, o: User)(implicit val context
     }
 
     override def storeMember(u: UserType) {
-        super.storeMember(associate(User(u), _groupMembersQuery))
+        super.storeMember(context.schema.associate(User(u), _groupMembersQuery))
     }
 
     override protected def discardMember(user: UserType) {
-        super.discardMember(dissociate(User(user), _groupMembersQuery))
+        super.discardMember(context.schema.dissociate(User(user), _groupMembersQuery))
     }
 }

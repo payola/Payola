@@ -59,10 +59,10 @@ class PluginDbRepresentation(
       */
     def associateParameter(parameter: Parameter[_]) {
         parameter match {
-            case b: BooleanParameter => associate(b, _booleanParameters)
-            case f: FloatParameter => associate(f, _floatParameters)
-            case i: IntParameter => associate(i, _intParameters)
-            case s: StringParameter => associate(s, _stringParameters)
+            case b: BooleanParameter => context.schema.associate(b, _booleanParameters)
+            case f: FloatParameter => context.schema.associate(f, _floatParameters)
+            case i: IntParameter => context.schema.associate(i, _intParameters)
+            case s: StringParameter => context.schema.associate(s, _stringParameters)
         }
     }
 
@@ -72,7 +72,7 @@ class PluginDbRepresentation(
       * @param i - plugin instance to bo associated to represented plugin
       */
     def associatePluginInstance(i: cz.payola.data.squeryl.entities.plugins.PluginInstance) {
-        associate(i, _pluginInstancesQuery)
+        context.schema.associate(i, _pluginInstancesQuery)
     }
 
     /**
@@ -81,7 +81,7 @@ class PluginDbRepresentation(
       * @param ds - data source to be associated to represented plugin
       */
     def associateDataSource(ds: cz.payola.data.squeryl.entities.plugins.DataSource) {
-        associate(ds, _dataSourcesQuery)
+        context.schema.associate(ds, _dataSourcesQuery)
     }
 
     /**

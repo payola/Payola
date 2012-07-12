@@ -81,4 +81,16 @@ class PluginInstance(
 
         _paramValues
     }
+
+    /**
+      * This method associated all related [[cz.payola.data.squeryl.entities.plugins.ParameterValue]]s.
+      */
+    def associateParameterValues() {
+        paramValues.map {
+            case paramValue: BooleanParameterValue => context.schema.associate(paramValue, _booleanParameterValues)
+            case paramValue: FloatParameterValue => context.schema.associate(paramValue, _floatParameterValues)
+            case paramValue: IntParameterValue => context.schema.associate(paramValue, _intParameterValues)
+            case paramValue: StringParameterValue => context.schema.associate(paramValue, _stringParameterValues)
+        }
+    }
 }

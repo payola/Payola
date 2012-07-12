@@ -10,6 +10,9 @@ import cz.payola.data.squeryl.entities.plugins._
 import cz.payola.data.squeryl.entities.plugins.parameters._
 import cz.payola.data.squeryl.entities.analyses.PluginInstanceBinding
 import cz.payola.data.squeryl.entities.privileges.PrivilegeDbRepresentation
+import org.squeryl.dsl._
+import scala.Some
+import cz.payola.data.squeryl.entities.Group
 
 trait SchemaComponent
 {
@@ -302,25 +305,6 @@ trait SchemaComponent
             (c, p) => c.id === p.classCustomizationId)
 
         /**
-          * Drops the current schema and recreates it.
-          */
-        def recreate() {
-            declareKeys()
-            inTransaction {
-                drop
-                create
-            }
-        }
-
-        def wrapInTransaction[C](body: => C) = {
-            DataException.wrap {
-                inTransaction {
-                    body
-                }
-            }
-        }
-
-        /**
           * All the entities have to be created using custom factories in order to inject their dependencies via the
           * implicit constructor parameter.
           */
@@ -461,6 +445,77 @@ trait SchemaComponent
             // When ontology customization is removed, remove all sub-customizations
             classCustomizationsOfOntologies.foreignKeyDeclaration.constrainReference(onDelete cascade)
             propertyCustomizationsOfClasses.foreignKeyDeclaration.constrainReference(onDelete cascade)
+        }
+
+        /**
+          * Drops the current schema and recreates it.
+          */
+        def recreate() {
+            declareKeys()
+            inTransaction {
+                drop
+                create
+            }
+        }
+
+        def wrapInTransaction[C](body: => C) = {
+            // TODO DataException.wrap {
+            inTransaction {
+                body
+            }
+            // }
+        }
+
+        /**
+          * Creates 1:N relation between this entity (on '1' side of relation) and specified entity (on 'N' side of relation).
+          * Specified entity wil be persisted
+          *
+          * @param entity - specified entity to be ralted with this entity
+          * @param relation  - definition of 1:N relation between this and specified entity
+          * @tparam A - type of specified entity
+          * @return Returns pesisted specified entity
+          */
+        def associate[A <: PersistableEntity](entity: A, relation: OneToMany[A]): A = {
+            wrapInTransaction {
+                if (relation.find(e => e.id == entity.id).isEmpty) {
+                    relation.associate(entity)
+                }
+                entity
+            }
+        }
+
+        /**
+          * Creates M:N relation of this entity and specified entity.
+          * @param entity - specified entity that will be related with this entity
+          * @param relation - definition of M:N relation
+          * @tparam A - type of specified entity
+          * @return Returns persisted specified entity
+          */
+        def associate[A <: PersistableEntity](entity: A, relation: ManyToMany[A,_]): A = {
+            wrapInTransaction {
+                if (relation.find(_.id == entity.id).isEmpty) {
+                    relation.associate(entity)
+                }
+                entity
+            }
+        }
+
+        /**
+          * Removes M:N relation between this entity and specified entity.
+          * No entity will be removed.
+          *
+          * @param entity - specified entity whose relation with this item should be removed
+          * @param relation - definition on M:N relation
+          * @tparam A - type of specified entity
+          * @return Returns specified entity
+          */
+        def dissociate[A <: PersistableEntity](entity: A, relation: ManyToMany[A,_]): A = {
+            wrapInTransaction {
+                if (relation.find(_.id == entity.id).isDefined) {
+                    relation.dissociate(entity)
+                }
+                entity
+            }
         }
     }
 }

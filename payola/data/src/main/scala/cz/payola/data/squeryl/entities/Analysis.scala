@@ -89,7 +89,7 @@ class Analysis(override val id: String, name: String, o: Option[User])(implicit 
     }
 
     def associatePluginInstance(instance: PluginInstance): PluginInstance = {
-        associate(instance, _pluginInstancesQuery)
+        context.schema.associate(instance, _pluginInstancesQuery)
 
         context.pluginInstanceRepository.persist(instance)
 
@@ -97,6 +97,6 @@ class Analysis(override val id: String, name: String, o: Option[User])(implicit 
     }
 
     def associatePluginInstanceBinding(instance: PluginInstanceBinding): PluginInstanceBinding = {
-        associate(instance, _pluginInstancesBindingsQuery)
+        context.schema.associate(instance, _pluginInstancesBindingsQuery)
     }
 }

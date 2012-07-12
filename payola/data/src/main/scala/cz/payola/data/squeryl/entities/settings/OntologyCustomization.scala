@@ -27,7 +27,7 @@ class OntologyCustomization(
     private lazy val _customizationsQuery = context.schema.classCustomizationsOfOntologies.left(this)
 
     def associateClassCustomization(customization: ClassCustomizationType) = {
-        associate(ClassCustomization(customization), _customizationsQuery)
+        context.schema.associate(ClassCustomization(customization), _customizationsQuery)
     }
 
     override def classCustomizations: immutable.Seq[ClassCustomizationType] = {

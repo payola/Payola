@@ -130,15 +130,15 @@ class User(override val id: String, name: String, pwd: String, mail: String)
     }
 
     override protected def storeOwnedAnalysis(analysis: User#AnalysisType) {
-        super.storeOwnedAnalysis(associate(Analysis(analysis), _ownedAnalysesQuery))
+        super.storeOwnedAnalysis(context.schema.associate(Analysis(analysis), _ownedAnalysesQuery))
     }
 
     override protected def storeOwnedGroup(group: User#GroupType) {
-        super.storeOwnedGroup(associate(Group(group), _ownedGroupsQuery))
+        super.storeOwnedGroup(context.schema.associate(Group(group), _ownedGroupsQuery))
     }
 
     override protected def storeOwnedDataSource(source: User#DataSourceType) {
-        super.storeOwnedDataSource(associate(DataSource(source), _ownedDataSourcesQuery))
+        super.storeOwnedDataSource(context.schema.associate(DataSource(source), _ownedDataSourcesQuery))
     }
 
     override protected def discardOwnedAnalysis(analysis: User#AnalysisType) {

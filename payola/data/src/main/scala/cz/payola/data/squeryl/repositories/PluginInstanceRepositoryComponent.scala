@@ -14,24 +14,7 @@ trait PluginInstanceRepositoryComponent extends TableRepositoryComponent
             // First persist ParameterInstance then associate all parameter values
             val persistedInstance = super.persist(entity)
 
-            persistedInstance.parameterValues.foreach {
-                case booleanValue: BooleanParameterValue => {
-                    //persist(booleanValue, schema.booleanParameterValues)
-                    schema.booleanParameterValuesOfPluginInstances.left(persistedInstance).associate(booleanValue)
-                }
-                case floatValue: FloatParameterValue => {
-                    //persist(floatValue, schema.floatParameterValues)
-                    schema.floatParameterValuesOfPluginInstances.left(persistedInstance).associate(floatValue)
-                }
-                case intValue: IntParameterValue => {
-                    //persist(intValue, schema.intParameterValues)
-                    schema.intParameterValuesOfPluginInstances.left(persistedInstance).associate(intValue)
-                }
-                case stringValue: StringParameterValue => {
-                    //persist(stringValue, schema.stringParameterValues)
-                    schema.stringParameterValuesOfPluginInstances.left(persistedInstance).associate(stringValue)
-                }
-            }
+            persistedInstance.associateParameterValues()
 
             persistedInstance
         }
