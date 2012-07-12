@@ -276,7 +276,6 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         assert(pluginInstanceRepository.getCount == pluginInstances.size)
 
         for (pi <- pluginInstances) {
-            println(pi.plugin.name)
             val pi2 = persistedAnalysis.pluginInstances.find(_.id == pi.id)
                 assert(pi2.isDefined)
                 assert(pi2.get.id == pi.id)
@@ -285,7 +284,6 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
 
             // assert all parameters have proper IDs
             for (paramValue <- pi2.get.parameterValues) {
-                println(paramValue.parameter.name)
                 assert(pi.parameterValues.find(_.id == paramValue.id).get.parameter.id == paramValue.parameter.id)
                 assert(pi.parameterValues.find(_.id == paramValue.id).get.value == paramValue.value)
             }
