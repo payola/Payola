@@ -106,8 +106,7 @@ class Analysis(override val id: String, name: String, o: Option[User])(implicit 
     def associatePluginInstance(instance: PluginInstance): PluginInstance = {
         associate(instance, _pluginInstancesQuery)
 
-        // SQUERYL: Paramters can be associated after the plugin instance is persisted
-        instance.associateParameterValues()
+        context.pluginInstanceRepository.persist(instance)
 
         instance
     }

@@ -100,21 +100,21 @@ trait SchemaComponent
           * ([[cz.payola.data.squeryl.entities.User]]s)
           */
         lazy val analysisOwnership = oneToManyRelation(users, analyses).via(
-            (u, a) => u.id === a.ownerId.getOrElse(EMPTY_ID).toString)
+            (u, a) => Option(u.id) === a.ownerId)
 
         /**
           * Relation that associates [[cz.payola.data.squeryl.entities.PluginDbRepresentation]] to its owner
           * ([[cz.payola.data.squeryl.entities.User]]s)
           */
         lazy val pluginOwnership = oneToManyRelation(users, plugins).via(
-            (u, p) => u.id === p.ownerId.getOrElse(EMPTY_ID).toString)
+            (u, p) => Option(u.id) === p.ownerId)
 
         /**
           * Relation that associates [[cz.payola.data.squeryl.entities.analyses.DataSource]] to its owner
           * ([[cz.payola.data.squeryl.entities.User]]s)
           */
         lazy val dataSourceOwnership = oneToManyRelation(users, dataSources).via(
-            (u, ds) => u.id === ds.ownerId.getOrElse(EMPTY_ID).toString)
+            (u, ds) => Option(u.id) === ds.ownerId)
 
         /**
           * Relation that associates [[cz.payola.data.squeryl.entities.analyses.PluginDbRepresentation]] to a
@@ -219,42 +219,42 @@ trait SchemaComponent
           * to a [[cz.payola.data.squeryl.entities.plugins.parameters.BooleanParameter]]
           */
         lazy val booleanParameterValuesOfPluginInstances = oneToManyRelation(pluginInstances, booleanParameterValues).via(
-            (pi, bpv) => pi.id === bpv.pluginInstanceId.getOrElse(EMPTY_ID).toString)
+            (pi, bpv) => Option(pi.id) === bpv.pluginInstanceId)
 
         /**
           * Relation that associates [[cz.payola.data.squeryl.entities.plugins.parameters.FloatParameterValue]]s to a
           * [[cz.payola.data.squeryl.entities.plugins.parameters.FloatParameter]]
           */
         lazy val floatParameterValuesOfPluginInstances = oneToManyRelation(pluginInstances, floatParameterValues).via(
-            (pi, fpv) => pi.id === fpv.pluginInstanceId.getOrElse(EMPTY_ID).toString)
+            (pi, fpv) => Option(pi.id) === fpv.pluginInstanceId)
 
         /**
           * Relation that associates [[cz.payola.data.squeryl.entities.plugins.parameters.IntParameterValue]]s to an
           * [[cz.payola.data.squeryl.entities.plugins.parameters.IntParameter]]
           */
         lazy val intParameterValuesOfPluginInstances = oneToManyRelation(pluginInstances, intParameterValues).via(
-            (pi, ipv) => pi.id === ipv.pluginInstanceId.getOrElse(EMPTY_ID).toString)
+            (pi, ipv) => Option(pi.id) === ipv.pluginInstanceId)
 
         /**
           * Relation that associates [[cz.payola.data.squeryl.entities.plugins.parameters.StringParameterValues]]s to
           * a [[cz.payola.data.squeryl.entities.plugins.parameters.StringParameter]]
           */
         lazy val stringParameterValuesOfPluginInstances = oneToManyRelation(pluginInstances, stringParameterValues).via(
-            (pi, spv) => pi.id === spv.pluginInstanceId.getOrElse(EMPTY_ID).toString)
+            (pi, spv) => Option(pi.id) === spv.pluginInstanceId)
 
         /**
           * Relation that associates [[cz.payola.data.squeryl.entities.plugins.parameters.BooleanParameterValues]]s
           * to a [[cz.payola.data.squeryl.entities.analyses.DataSource]]
           */
         lazy val booleanParameterValuesOfDataSources = oneToManyRelation(dataSources, booleanParameterValues).via(
-            (ds, bpv) => ds.id === bpv.dataSourceId.getOrElse(EMPTY_ID).toString)
+            (ds, bpv) => Option(ds.id) === bpv.dataSourceId)
 
         /**
           * Relation that associates [[cz.payola.data.squeryl.entities.plugins.parameters.FloatParameter]]s values to
           * a [[cz.payola.data.squeryl.entities.analyses.DataSource]]
           */
         lazy val floatParameterValuesOfDataSources = oneToManyRelation(dataSources, floatParameterValues).via(
-            (ds, fpv) => ds.id === fpv.dataSourceId.getOrElse(EMPTY_ID).toString)
+            (ds, fpv) => Option(ds.id) === fpv.dataSourceId)
 
         /**
           * Relation that associates [[cz.payola.data.squeryl.entities.plugins.parameters.IntParameter]] to a [[cz
@@ -262,20 +262,14 @@ trait SchemaComponent
           * .data.squeryl.entities.analyses.DataSource]]
           */
         lazy val intParameterValuesOfDataSources = oneToManyRelation(dataSources, intParameterValues).via(
-            (ds, ipv) => ds.id === ipv.dataSourceId.getOrElse(EMPTY_ID).toString)
+            (ds, ipv) => Option(ds.id) === ipv.dataSourceId)
 
         /**
           * Relation that associates [[cz.payola.data.squeryl.entities.plugins.parameters.StringParameter]]s values
           * to a [[cz.payola.data.squeryl.entities.analyses.DataSource]]
           */
         lazy val stringParameterValuesOfDataSources = oneToManyRelation(dataSources, stringParameterValues).via(
-            (ds, spv) => ds.id === spv.dataSourceId.getOrElse(EMPTY_ID).toString)
-
-        /**
-          * This value id used in 1:N relations when item on N side of this relation has not filled id of related
-          * item (it means the id is None)
-          */
-        private val EMPTY_ID: String = "00000000-0000-0000-0000-000000000000"
+            (ds, spv) => Option(ds.id) === spv.dataSourceId)
 
         /**
           * Drops the current schema and recreates it.

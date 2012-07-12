@@ -38,25 +38,12 @@ trait TableRepositoryComponent
 
         def persist(entity: AnyRef): A = wrapInTransaction {
             val convertedEntity = entityConverter(entity)
-            if (getById(convertedEntity.id).isDefined) {
-                table.update(convertedEntity)
-            } else {
-                table.insert(convertedEntity)
-            }
+            persist(convertedEntity, table)
             convertedEntity
         }
 
         def getCount: Long = wrapInTransaction {
             from(table)(e => compute(count))
-        }
-
-        /**
-          * Executes the specified query and returns its results.
-          * @param query The query to execute.
-          * @return Results of the query.
-          */
-        protected def select(query: Query[B]): Seq[A] = {
-            processSelectResults(query.toList)
         }
 
         /**
@@ -78,6 +65,15 @@ trait TableRepositoryComponent
         }
 
         /**
+          * Executes the specified query and returns its results.
+          * @param query The query to execute.
+          * @return Results of the query.
+          */
+        protected def select(query: Query[B]): Seq[A] = {
+            processSelectResults(query.toList)
+        }
+
+        /**
           * Returns a query that should be used when selecting entities from the database.
           * @param entityFilter Filters entities that should be selected.
           * @return The select query.
@@ -90,6 +86,20 @@ trait TableRepositoryComponent
           * @return Entities based on the selection results.
           */
         protected def processSelectResults(results: Seq[B]): Seq[A]
+
+        /**
+          * Persists the specified entity to the specified table.
+          * @param entity The entitty to persist.
+          * @param table Tha table to persist the entity int.
+          * @tparam C Type of the entity.
+          */
+        protected def persist[C <: PersistableEntity](entity: C, table: Table[C]) {
+            if (table.where(_.id === entity.id).isEmpty) {
+                table.insert(entity)
+            } else {
+                table.update(entity)
+            }
+        }
 
         protected def wrapInTransaction[C](body: => C) = {
             schema.wrapInTransaction(body)

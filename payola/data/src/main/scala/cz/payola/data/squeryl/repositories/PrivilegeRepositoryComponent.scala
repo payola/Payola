@@ -65,6 +65,10 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
             entity.asInstanceOf[Privilege[_]]
         }
 
+        private def _getByGrantee(granteeIds: Seq[String], privilegeClass: Option[Class[_]]) =
+                    representationRepository.selectWhere(p => p.granteeId in granteeIds and
+                        Option(p.privilegeClass) === privilegeClass.map(_.getName))
+
         def removeById(id: String) = schema.wrapInTransaction{
             representationRepository.removeById(id)
         }
