@@ -3,10 +3,9 @@ package cz.payola.data.squeryl
 import org.squeryl._
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.dsl.ast.LogicalBoolean
-import cz.payola.data._
-import cz.payola.data.squeryl.entities._
 import cz.payola.domain.entities._
 import cz.payola.data.PaginationInfo
+import cz.payola.data.squeryl.entities.{PersistableEntity, EntityConverter}
 
 trait TableRepositoryComponent
 {
@@ -38,16 +37,30 @@ trait TableRepositoryComponent
 
         def persist(entity: AnyRef): A = wrapInTransaction {
             val convertedEntity = entityConverter(entity)
-            if (getById(convertedEntity.id).isDefined) {
-                table.update(convertedEntity)
-            } else {
-                table.insert(convertedEntity)
-            }
+            persist(convertedEntity, table)
             convertedEntity
         }
 
         def getCount: Long = wrapInTransaction {
             from(table)(e => compute(count))
+        }
+
+        /**
+          * Selects all entities that pass the specified entity filter.
+          * @param entityFilter A filter that excludes entites from the result.
+          * @return The selected entities.
+          */
+        private[squeryl] def selectWhere(entityFilter: A => LogicalBoolean): Seq[A] = wrapInTransaction {
+            select(getSelectQuery(entityFilter))
+        }
+
+        /**
+          * Selects the first entity that passes the specified entity filter.
+          * @param entityFilter A filter that excludes entites from the result.
+          * @return The selected entity.
+          */
+        private[squeryl] def selectOneWhere(entityFilter: A => LogicalBoolean): Option[A] = {
+            selectWhere(entityFilter).headOption
         }
 
         /**
@@ -57,24 +70,6 @@ trait TableRepositoryComponent
           */
         protected def select(query: Query[B]): Seq[A] = {
             processSelectResults(query.toList)
-        }
-
-        /**
-          * Selects all entities that pass the specified entity filter.
-          * @param entityFilter A filter that excludes enitites from the result.
-          * @return The selected entities.
-          */
-        private[squeryl] def selectWhere(entityFilter: A => LogicalBoolean): Seq[A] = wrapInTransaction {
-            select(getSelectQuery(entityFilter))
-        }
-
-        /**
-          * Selects the first entity that passes the specified entity filter.
-          * @param entityFilter A filter that excludes enitites from the result.
-          * @return The selected entity.
-          */
-        private[squeryl] def selectOneWhere(entityFilter: A => LogicalBoolean): Option[A] = {
-            selectWhere(entityFilter).headOption
         }
 
         /**
@@ -90,6 +85,20 @@ trait TableRepositoryComponent
           * @return Entities based on the selection results.
           */
         protected def processSelectResults(results: Seq[B]): Seq[A]
+
+        /**
+          * Persists the specified entity to the specified table.
+          * @param entity The entitty to persist.
+          * @param table Tha table to persist the entity int.
+          * @tparam C Type of the entity.
+          */
+        protected def persist[C <: PersistableEntity](entity: C, table: Table[C]) {
+            if (table.where(_.id === entity.id).isEmpty) {
+                table.insert(entity)
+            } else {
+                table.update(entity)
+            }
+        }
 
         protected def wrapInTransaction[C](body: => C) = {
             schema.wrapInTransaction(body)

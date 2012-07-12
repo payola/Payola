@@ -17,25 +17,6 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
         with OptionallyOwnedEntityTableRepository[Analysis]
         with ShareableEntityTableRepository[Analysis]
     {
-        def getTop(pagination: Option[PaginationInfo] = Some(new PaginationInfo(0, 10))): collection.Seq[Analysis] = {
-            getTopAnalyses(None, pagination)
-        }
-
-        def getTopByOwner(ownerId: String, pagination: Option[PaginationInfo] = Some(new PaginationInfo(0, 10))): collection.Seq[Analysis] = {
-            getTopAnalyses(Some(ownerId), pagination)
-        }
-
-        private def getTopAnalyses(ownerId: Option[String], pagination: Option[PaginationInfo]): collection.Seq[Analysis] = {
-            selectWhere { a =>
-                (ownerId.isEmpty === true and a.isPublic === true and a.ownerId.isEmpty === true) or
-                (ownerId.isEmpty === false and a.ownerId.getOrElse("").toString === ownerId.getOrElse("").toString)
-            }
-        }
-
-        def getPublicByOwner(ownerId: String, pagination: Option[PaginationInfo] = None) = {
-            selectWhere(a => a.ownerId.getOrElse("") === ownerId and a.isPublic === true)
-        }
-
         override def persist(entity: AnyRef): Analysis = wrapInTransaction {
             val e = entity.asInstanceOf[cz.payola.common.entities.Analysis]
             val analysis = super.persist(entity)

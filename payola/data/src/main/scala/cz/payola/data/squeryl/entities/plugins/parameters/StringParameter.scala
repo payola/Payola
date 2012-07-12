@@ -40,7 +40,7 @@ class StringParameter(
       * @param p - [[cz.payola.data.squeryl.entities.plugins.parameters.StringParameter]] to associate
       */
     def associateParameterValue(p: StringParameterValue) {
-        associate(p, _valuesQuery)
+        context.schema.associate(p, _valuesQuery)
     }
 }
 

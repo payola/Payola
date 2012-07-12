@@ -8,6 +8,7 @@ import cz.payola.scala2json.rules.BasicSerializationRule
 import scala.StringBuilder
 import cz.payola.scala2json.rules.CustomValueSerializationRule
 import cz.payola.scala2json.rules.CustomSerializationRule
+import scala.collection.mutable
 
 /** This enumeration defines output format for the serializer.
   *
@@ -87,7 +88,28 @@ class JSONSerializer
 
     private val _rules = new ArrayBuffer[(SerializationClass, SerializationRule)]()
 
-    def addSerializationRule(forClass: SerializationClass, rule: SerializationRule) = _rules += ((forClass, rule))
+    /** Adds fields from @fieldToAdd to @fields in a name-distinct manner (i.e. if there
+      * already exists a field with the same name, it will not be added again).
+      *
+      * @param fieldsToAdd Fields to be added.
+      * @param fields Field list buffer where to add the fields.
+      */
+    private def addNameDistinctFieldsToListBuffer(fieldsToAdd: collection.Seq[Field], fields: ListBuffer[Field]) {
+        fieldsToAdd foreach { f: Field =>
+            if (!fields.exists(_.getName == f.getName)){
+                fields += f
+            }
+        }
+    }
+
+    /** Add a serialization rule.
+      *
+      * @param forClass For which class.
+      * @param rule Which rule.
+      */
+    def addSerializationRule(forClass: SerializationClass, rule: SerializationRule) {
+        _rules += ((forClass, rule))
+    }
 
     private def classHasField(cl: Class[_], fName: String): Boolean = {
         if (cl.isInterface) {
@@ -119,20 +141,29 @@ class JSONSerializer
       * @param cl Class.
       * @return All fields.
       */
-    private def getFieldsForClass(cl: Class[_]): collection.Seq[Field] = {
+    private def getFieldsForClass(cl: Class[_]): Seq[Field] = {
         val fields = new ListBuffer[Field]()
+        listFieldsForClass(cl, fields)
+        fields
+    }
 
-        fields ++= cl.getDeclaredFields
+    /** Retrieves fields from all superclasses and interfaces and stores them in the fields
+      * list buffer.
+      *
+      * @param cl Class.
+      * @param fields Fields list buffer.
+      * @return All fields.
+      */
+    private def listFieldsForClass(cl: Class[_], fields: ListBuffer[Field]) {
+        addNameDistinctFieldsToListBuffer(cl.getDeclaredFields, fields)
 
         if (cl.getSuperclass != null) {
-            fields ++= getFieldsForClass(cl.getSuperclass)
+            listFieldsForClass(cl.getSuperclass, fields)
         }
 
         cl.getInterfaces foreach { interface: Class[_] =>
-            fields ++= getFieldsForClass(interface)
+            listFieldsForClass(interface, fields)
         }
-
-        fields.distinct
     }
 
     /** Returns the object's class name.
@@ -184,9 +215,42 @@ class JSONSerializer
     /** Serializes an object that implements
       *  the Map trait, yet isn't a map.
       *
-      * @return JSON representation of obj.
+      *  @param map The map.
+      *  @param processedObjects Already processed objects.
+      *
+      *  @return JSON representation of obj.
       */
     private def serializeMap(map: scala.collection.Map[_, _], processedObjects: ArrayBuffer[Any]): String = {
+        val jsonBuilder: JSONStringBuilder = new JSONStringBuilder(this, prettyPrint, "{")
+        val builder = jsonBuilder.stringBuilder
+        if (prettyPrint) {
+            builder.append('\n')
+        }
+
+        jsonBuilder.appendKeySerializedValue("__class__", map.getClass.getName, true)
+
+        var serializedMapString = serializeMapAsPlainMap(map, processedObjects)
+        if (outputFormat == OutputFormat.PrettyPrinted) {
+            serializedMapString = JSONUtilities.padStringWithTab(serializedMapString)
+        }
+
+        jsonBuilder.appendKeySerializedValue("__value__", serializedMapString, false)
+
+        if (prettyPrint) {
+            builder.append('\n')
+        }
+
+        builder.append('}')
+        builder.toString
+    }
+
+    /** Serializes the map as a plain object, i.e. key-value pairs.
+      *
+      * @param map The map.
+      * @param processedObjects Already processed objects.
+      * @return JSON representation of the map.
+      */
+    private def serializeMapAsPlainMap(map: scala.collection.Map[_, _], processedObjects: ArrayBuffer[Any]): String = {
         val jsonBuilder: JSONStringBuilder = new JSONStringBuilder(this, prettyPrint, "{")
         val builder = jsonBuilder.stringBuilder
         if (prettyPrint) {
@@ -245,6 +309,8 @@ class JSONSerializer
             case (cl: SerializationClass, rule: SerializationRule) =>
                 cl.isClassOf(obj)
         }
+
+        println(obj + " --- " + serializationClass)
 
         var result = ""
         // Skip custom serialization if serializing as reference
@@ -351,6 +417,7 @@ class JSONSerializer
         }
         
         _rules foreach { item: (SerializationClass, SerializationRule) =>
+            println(item._1 + " vs. " + item._2)
             if (item._1.isClassOf(obj) && item._2.isInstanceOf[CustomValueSerializationRule[_]]){
                 val rule: CustomValueSerializationRule[AnyRef] = item._2.asInstanceOf[CustomValueSerializationRule[AnyRef]]
                 jsonBuilder.appendKeyValue(rule.fieldName, rule.definingFunction(this, obj), !haveProcessedField, processedObjects)
@@ -365,6 +432,7 @@ class JSONSerializer
         transientFields: Option[collection.Seq[String]],
         fieldAliases: Option[collection.Map[String, String]],
         processedObjects: ArrayBuffer[Any]): String = {
+
         val jsonBuilder: JSONStringBuilder = new JSONStringBuilder(this, prettyPrint, "")
         val builder = jsonBuilder.stringBuilder
 
@@ -488,7 +556,7 @@ class JSONSerializer
 
             var serializedValue = serializeTraversableValue(coll, processedObjects)
             if (prettyPrint) {
-                serializedValue = serializedValue.replaceAllLiterally("\n", "\n\t")
+                serializedValue = JSONUtilities.padStringWithTab(serializedValue)
             }
             jsonBuilder.appendKeySerializedValue("__value__", serializedValue, false)
 

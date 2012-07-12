@@ -22,7 +22,7 @@ object Analysis extends EntityConverter[Analysis]
 
 class Analysis(override val id: String, name: String, o: Option[User])(implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.Analysis(name, o)
-    with PersistableEntity
+    with PersistableEntity with OptionallyOwnedEntity
 {
     type DomainParameterValueType = plugins.ParameterValue[_]
 
@@ -33,9 +33,6 @@ class Analysis(override val id: String, name: String, o: Option[User])(implicit 
     @Transient
     private var _pluginInstancesBindingsLoaded = false
     private lazy val _pluginInstancesBindingsQuery = context.schema.analysesPluginInstancesBindings.left(this)
-
-    var ownerId: Option[String] = o.map(_.id)
-    private lazy val _ownerQuery = context.schema.analysisOwnership.right(this)
 
     override def pluginInstances: immutable.Seq[PluginInstanceType] = {
         // Lazy-load related instances only for first time
@@ -52,18 +49,6 @@ class Analysis(override val id: String, name: String, o: Option[User])(implicit 
         }
 
         super.pluginInstances
-    }
-
-    override def owner: Option[UserType] = {
-        if (_owner == None){
-            if (ownerId != null && ownerId.isDefined) {
-                wrapInTransaction {
-                    _owner = _ownerQuery.headOption
-                }
-            }
-        }
-
-        _owner
     }
 
     override def pluginInstanceBindings: immutable.Seq[PluginInstanceBindingType] = {
@@ -104,15 +89,14 @@ class Analysis(override val id: String, name: String, o: Option[User])(implicit 
     }
 
     def associatePluginInstance(instance: PluginInstance): PluginInstance = {
-        associate(instance, _pluginInstancesQuery)
+        context.schema.associate(instance, _pluginInstancesQuery)
 
-        // SQUERYL: Paramters can be associated after the plugin instance is persisted
-        instance.associateParameterValues()
+        context.pluginInstanceRepository.persist(instance)
 
         instance
     }
 
     def associatePluginInstanceBinding(instance: PluginInstanceBinding): PluginInstanceBinding = {
-        associate(instance, _pluginInstancesBindingsQuery)
+        context.schema.associate(instance, _pluginInstancesBindingsQuery)
     }
 }

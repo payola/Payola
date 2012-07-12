@@ -5,10 +5,14 @@ import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.adapters.H2Adapter
 import cz.payola.data._
 import cz.payola.data.squeryl.entities._
+import cz.payola.data.squeryl.entities.settings._
 import cz.payola.data.squeryl.entities.plugins._
 import cz.payola.data.squeryl.entities.plugins.parameters._
 import cz.payola.data.squeryl.entities.analyses.PluginInstanceBinding
 import cz.payola.data.squeryl.entities.privileges.PrivilegeDbRepresentation
+import org.squeryl.dsl._
+import scala.Some
+import cz.payola.data.squeryl.entities.Group
 
 trait SchemaComponent
 {
@@ -81,6 +85,15 @@ trait SchemaComponent
         /** Table of [[cz.payola.data.squeryl.entities.privileges.PrivilegeDbRepresentation]]s */
         val privileges = table[PrivilegeDbRepresentation]("privileges")
 
+        /** Table of [[cz.payola.data.squeryl.entities.settings.OntologyCustomization]]s */
+        val ontologyCustomizations = table[OntologyCustomization]("ontologyCustomizations")
+
+        /** Table of [[cz.payola.data.squeryl.entities.settings.ClassCustomization]]s */
+        val classCustomizations = table[ClassCustomization]("classCustomizations")
+
+        /** Table of [[cz.payola.data.squeryl.entities.settings.PropertyCustomization]]s */
+        val propertyCustomizations = table[PropertyCustomization]("properyCustomizations")
+
         /**
           * Relation that associates members ([[cz.payola.data.squeryl.entities.User]]s)
           * to [[cz.payola.data.squeryl.entities.Group]]s
@@ -100,21 +113,28 @@ trait SchemaComponent
           * ([[cz.payola.data.squeryl.entities.User]]s)
           */
         lazy val analysisOwnership = oneToManyRelation(users, analyses).via(
-            (u, a) => u.id === a.ownerId.getOrElse(EMPTY_ID).toString)
+            (u, a) => Option(u.id) === a.ownerId)
+
+        /**
+          * Relation that associates [[cz.payola.data.squeryl.entities.settings.OntologyCustomization]] to its owner
+          * ([[cz.payola.data.squeryl.entities.User]]s)
+          */
+        lazy val customizationOwnership = oneToManyRelation(users, ontologyCustomizations).via(
+            (u, c) => Option(u.id) === c.ownerId)
 
         /**
           * Relation that associates [[cz.payola.data.squeryl.entities.PluginDbRepresentation]] to its owner
           * ([[cz.payola.data.squeryl.entities.User]]s)
           */
         lazy val pluginOwnership = oneToManyRelation(users, plugins).via(
-            (u, p) => u.id === p.ownerId.getOrElse(EMPTY_ID).toString)
+            (u, p) => Option(u.id) === p.ownerId)
 
         /**
           * Relation that associates [[cz.payola.data.squeryl.entities.analyses.DataSource]] to its owner
           * ([[cz.payola.data.squeryl.entities.User]]s)
           */
         lazy val dataSourceOwnership = oneToManyRelation(users, dataSources).via(
-            (u, ds) => u.id === ds.ownerId.getOrElse(EMPTY_ID).toString)
+            (u, ds) => Option(u.id) === ds.ownerId)
 
         /**
           * Relation that associates [[cz.payola.data.squeryl.entities.analyses.PluginDbRepresentation]] to a
@@ -219,82 +239,70 @@ trait SchemaComponent
           * to a [[cz.payola.data.squeryl.entities.plugins.parameters.BooleanParameter]]
           */
         lazy val booleanParameterValuesOfPluginInstances = oneToManyRelation(pluginInstances, booleanParameterValues).via(
-            (pi, bpv) => pi.id === bpv.pluginInstanceId.getOrElse(EMPTY_ID).toString)
+            (pi, bpv) => Option(pi.id) === bpv.pluginInstanceId)
 
         /**
           * Relation that associates [[cz.payola.data.squeryl.entities.plugins.parameters.FloatParameterValue]]s to a
           * [[cz.payola.data.squeryl.entities.plugins.parameters.FloatParameter]]
           */
         lazy val floatParameterValuesOfPluginInstances = oneToManyRelation(pluginInstances, floatParameterValues).via(
-            (pi, fpv) => pi.id === fpv.pluginInstanceId.getOrElse(EMPTY_ID).toString)
+            (pi, fpv) => Option(pi.id) === fpv.pluginInstanceId)
 
         /**
           * Relation that associates [[cz.payola.data.squeryl.entities.plugins.parameters.IntParameterValue]]s to an
           * [[cz.payola.data.squeryl.entities.plugins.parameters.IntParameter]]
           */
         lazy val intParameterValuesOfPluginInstances = oneToManyRelation(pluginInstances, intParameterValues).via(
-            (pi, ipv) => pi.id === ipv.pluginInstanceId.getOrElse(EMPTY_ID).toString)
+            (pi, ipv) => Option(pi.id) === ipv.pluginInstanceId)
 
         /**
           * Relation that associates [[cz.payola.data.squeryl.entities.plugins.parameters.StringParameterValues]]s to
           * a [[cz.payola.data.squeryl.entities.plugins.parameters.StringParameter]]
           */
         lazy val stringParameterValuesOfPluginInstances = oneToManyRelation(pluginInstances, stringParameterValues).via(
-            (pi, spv) => pi.id === spv.pluginInstanceId.getOrElse(EMPTY_ID).toString)
+            (pi, spv) => Option(pi.id) === spv.pluginInstanceId)
 
         /**
           * Relation that associates [[cz.payola.data.squeryl.entities.plugins.parameters.BooleanParameterValues]]s
           * to a [[cz.payola.data.squeryl.entities.analyses.DataSource]]
           */
         lazy val booleanParameterValuesOfDataSources = oneToManyRelation(dataSources, booleanParameterValues).via(
-            (ds, bpv) => ds.id === bpv.dataSourceId.getOrElse(EMPTY_ID).toString)
+            (ds, bpv) => Option(ds.id) === bpv.dataSourceId)
 
         /**
-          * Relation that associates [[cz.payola.data.squeryl.entities.plugins.parameters.FloatParameter]]s values to
+          * Relation that associates [[cz.payola.data.squeryl.entities.plugins.parameters.FloatParameterValues]]s to
           * a [[cz.payola.data.squeryl.entities.analyses.DataSource]]
           */
         lazy val floatParameterValuesOfDataSources = oneToManyRelation(dataSources, floatParameterValues).via(
-            (ds, fpv) => ds.id === fpv.dataSourceId.getOrElse(EMPTY_ID).toString)
+            (ds, fpv) => Option(ds.id) === fpv.dataSourceId)
 
         /**
-          * Relation that associates [[cz.payola.data.squeryl.entities.plugins.parameters.IntParameter]] to a [[cz
-          * .payola
-          * .data.squeryl.entities.analyses.DataSource]]
+          * Relation that associates [[cz.payola.data.squeryl.entities.plugins.parameters.IntParameterValues]] to
+          * a [[cz.payola.data.squeryl.entities.analyses.DataSource]]
           */
         lazy val intParameterValuesOfDataSources = oneToManyRelation(dataSources, intParameterValues).via(
-            (ds, ipv) => ds.id === ipv.dataSourceId.getOrElse(EMPTY_ID).toString)
+            (ds, ipv) => Option(ds.id) === ipv.dataSourceId)
 
         /**
-          * Relation that associates [[cz.payola.data.squeryl.entities.plugins.parameters.StringParameter]]s values
+          * Relation that associates [[cz.payola.data.squeryl.entities.plugins.parameters.StringParameterValues]]s
           * to a [[cz.payola.data.squeryl.entities.analyses.DataSource]]
           */
         lazy val stringParameterValuesOfDataSources = oneToManyRelation(dataSources, stringParameterValues).via(
-            (ds, spv) => ds.id === spv.dataSourceId.getOrElse(EMPTY_ID).toString)
+            (ds, spv) => Option(ds.id) === spv.dataSourceId)
 
         /**
-          * This value id used in 1:N relations when item on N side of this relation has not filled id of related
-          * item (it means the id is None)
+          * Relation that associates [[cz.payola.data.squeryl.entities.settings.ClassCustomization]]s
+          * to a [[cz.payola.data.squeryl.entities.settings.OntologyCustomization]]
           */
-        private val EMPTY_ID: String = "00000000-0000-0000-0000-000000000000"
+        lazy val classCustomizationsOfOntologies = oneToManyRelation(ontologyCustomizations, classCustomizations).via(
+            (o, c) => o.id === c.ontologyCustomizationId)
 
         /**
-          * Drops the current schema and recreates it.
+          * Relation that associates [[cz.payola.data.squeryl.entities.settings.PropertyCustomization]]s
+          * to a [[cz.payola.data.squeryl.entities.settings.ClassCustomization]]
           */
-        def recreate() {
-            declareKeys()
-            inTransaction {
-                drop
-                create
-            }
-        }
-
-        def wrapInTransaction[C](body: => C) = {
-            DataException.wrap {
-                inTransaction {
-                    body
-                }
-            }
-        }
+        lazy val propertyCustomizationsOfClasses = oneToManyRelation(classCustomizations, propertyCustomizations).via(
+            (c, p) => c.id === p.classCustomizationId)
 
         /**
           * All the entities have to be created using custom factories in order to inject their dependencies via the
@@ -306,6 +314,7 @@ trait SchemaComponent
             factoryFor(analyses) is { new Analysis("", "", None) },
             factoryFor(plugins) is { new PluginDbRepresentation("", "", "", 0, None, false) },
             factoryFor(pluginInstances) is { new PluginInstance("", null, Nil, "") },
+            factoryFor(pluginInstanceBindings) is { new PluginInstanceBinding("", null, null, 0) },
             factoryFor(booleanParameters) is { new BooleanParameter("", "", false) },
             factoryFor(booleanParameterValues) is { new BooleanParameterValue("", null, false)  },
             factoryFor(floatParameters) is { new FloatParameter("", "", 0) },
@@ -315,7 +324,10 @@ trait SchemaComponent
             factoryFor(stringParameters) is { new StringParameter("", "", "") },
             factoryFor(stringParameterValues) is { new StringParameterValue("", null, "") },
             factoryFor(dataSources) is { new DataSource("", "", None, null, Nil) },
-            factoryFor(privileges) is { new PrivilegeDbRepresentation("", "", "", "", "", "", "") }
+            factoryFor(privileges) is { new PrivilegeDbRepresentation("", "", "", "", "", "", "") },
+            factoryFor(ontologyCustomizations) is { new OntologyCustomization("", "", "", None, Nil) },
+            factoryFor(classCustomizations) is { new ClassCustomization("", "", "", 0, Some('x'), Nil) },
+            factoryFor(propertyCustomizations) is { new PropertyCustomization("", "", "", 0) }
         )
 
         /**
@@ -323,24 +335,65 @@ trait SchemaComponent
           */
         private def declareKeys() {
             on(users)(user => declare(user.id is (primaryKey), user.name is (unique)))
-            on(groups)(group => declare(group.id is (primaryKey), group.name is (unique)))
-            on(analyses)(analysis => declare(analysis.id is (primaryKey), analysis.name is (unique)))
             on(plugins)(plugin => declare(plugin.id is (primaryKey), plugin.name is (unique)))
             on(pluginInstances)(instance => declare(instance.id is (primaryKey)))
-            on(booleanParameters)(param => declare(param.id is (primaryKey)))
+            on(pluginInstanceBindings)(binding =>
+                declare(
+                    binding.id is (primaryKey),
+                    columns(binding.targetPluginInstanceId, binding.inputIndex) are (unique),
+                    columns(binding.sourcePluginInstanceId, binding.analysisId) are (unique)
+                ))
             on(booleanParameterValues)(param => declare(param.id is (primaryKey)))
-            on(floatParameters)(param => declare(param.id is (primaryKey)))
             on(floatParameterValues)(param => declare(param.id is (primaryKey)))
-            on(intParameters)(param => declare(param.id is (primaryKey)))
             on(intParameterValues)(param => declare(param.id is (primaryKey)))
-            on(stringParameters)(param => declare(param.id is (primaryKey)))
             on(stringParameterValues)(param => declare(param.id is (primaryKey)))
-            on(dataSources)(ds => declare(ds.id is (primaryKey)))
+            on(booleanParameters)(param =>
+                declare(
+                    param.id is (primaryKey),
+                    columns(param.pluginId, param.name) are (unique)
+                ))
+            on(floatParameters)(param =>
+                declare(
+                    param.id is (primaryKey),
+                    columns(param.pluginId, param.name) are (unique)
+                ))
+            on(intParameters)(param =>
+                declare(
+                    param.id is (primaryKey),
+                    columns(param.pluginId, param.name) are (unique)
+                ))
+            on(stringParameters)(param =>
+                declare(
+                    param.id is (primaryKey),
+                    columns(param.pluginId, param.name) are (unique)
+                ))
+            on(dataSources)(ds =>
+                declare(
+                    ds.id is (primaryKey),
+                    columns(ds.name, ds.ownerId) are (unique)
+                ))
+            on(groups)(group =>
+                declare(
+                    group.id is (primaryKey),
+                    columns(group.name, group.ownerId) are (unique)
+                ))
+            on(analyses)(analysis =>
+                declare(
+                    analysis.id is (primaryKey),
+                    columns(analysis.name, analysis.ownerId) are (unique)
+                ))
             on(privileges)(p =>
                 declare(
                     p.id is (primaryKey),
                     columns(p.granteeId, p.privilegeClass, p.objectId) are (unique)
                 ))
+            on(ontologyCustomizations)( c =>
+                declare(
+                    c.id is (primaryKey),
+                    columns(c.name, c.ownerId) are (unique)
+                ))
+            on(classCustomizations)(c => declare(c.id is (primaryKey)))
+            on(propertyCustomizations)(c => declare(c.id is (primaryKey)))
 
             // When a PluginDbRepresentation is deleted, all of the its instances and data sources will get deleted.
             pluginsPluginInstances.foreignKeyDeclaration.constrainReference(onDelete cascade)
@@ -387,6 +440,82 @@ trait SchemaComponent
             analysisOwnership.foreignKeyDeclaration.constrainReference(onDelete cascade)
             dataSourceOwnership.foreignKeyDeclaration.constrainReference(onDelete cascade)
             pluginOwnership.foreignKeyDeclaration.constrainReference(onDelete cascade)
+            customizationOwnership.foreignKeyDeclaration.constrainReference(onDelete cascade)
+
+            // When ontology customization is removed, remove all sub-customizations
+            classCustomizationsOfOntologies.foreignKeyDeclaration.constrainReference(onDelete cascade)
+            propertyCustomizationsOfClasses.foreignKeyDeclaration.constrainReference(onDelete cascade)
+        }
+
+        /**
+          * Drops the current schema and recreates it.
+          */
+        def recreate() {
+            declareKeys()
+            inTransaction {
+                drop
+                create
+            }
+        }
+
+        def wrapInTransaction[C](body: => C) = {
+            // TODO DataException.wrap {
+            inTransaction {
+                body
+            }
+            // }
+        }
+
+        /**
+          * Creates 1:N relation between this entity (on '1' side of relation) and specified entity (on 'N' side of relation).
+          * Specified entity wil be persisted
+          *
+          * @param entity - specified entity to be ralted with this entity
+          * @param relation  - definition of 1:N relation between this and specified entity
+          * @tparam A - type of specified entity
+          * @return Returns pesisted specified entity
+          */
+        def associate[A <: PersistableEntity](entity: A, relation: OneToMany[A]): A = {
+            wrapInTransaction {
+                if (relation.find(e => e.id == entity.id).isEmpty) {
+                    relation.associate(entity)
+                }
+                entity
+            }
+        }
+
+        /**
+          * Creates M:N relation of this entity and specified entity.
+          * @param entity - specified entity that will be related with this entity
+          * @param relation - definition of M:N relation
+          * @tparam A - type of specified entity
+          * @return Returns persisted specified entity
+          */
+        def associate[A <: PersistableEntity](entity: A, relation: ManyToMany[A,_]): A = {
+            wrapInTransaction {
+                if (relation.find(_.id == entity.id).isEmpty) {
+                    relation.associate(entity)
+                }
+                entity
+            }
+        }
+
+        /**
+          * Removes M:N relation between this entity and specified entity.
+          * No entity will be removed.
+          *
+          * @param entity - specified entity whose relation with this item should be removed
+          * @param relation - definition on M:N relation
+          * @tparam A - type of specified entity
+          * @return Returns specified entity
+          */
+        def dissociate[A <: PersistableEntity](entity: A, relation: ManyToMany[A,_]): A = {
+            wrapInTransaction {
+                if (relation.find(_.id == entity.id).isDefined) {
+                    relation.dissociate(entity)
+                }
+                entity
+            }
         }
     }
 }

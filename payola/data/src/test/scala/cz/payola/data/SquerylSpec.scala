@@ -8,8 +8,9 @@ import cz.payola.domain.entities.plugins.concrete._
 import cz.payola.domain.entities.privileges._
 import cz.payola.domain.entities.plugins.DataSource
 import collection.immutable
+import cz.payola.domain.entities.settings.OntologyCustomization
 
-class SquerylSpec extends TestDataContextComponent("", false) with FlatSpec with ShouldMatchers
+class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSpec with ShouldMatchers
 {
     // Users
     val u1 = new cz.payola.domain.entities.User("HS")
@@ -49,9 +50,7 @@ class SquerylSpec extends TestDataContextComponent("", false) with FlatSpec with
     }
 
     "Users" should "be persited, loaded and managed by UserRepository" in {
-        schema.wrapInTransaction {
-            persistUsers
-        }
+        schema.wrapInTransaction { persistUsers }
     }
 
     private def persistUsers {
@@ -145,6 +144,8 @@ class SquerylSpec extends TestDataContextComponent("", false) with FlatSpec with
     }
 
     private def persistPlugins {
+        unionPlugin.owner = Some(u1)
+        
         for (p <- plugins) {
             val p1 = pluginRepository.persist(p)
                 assert(p1.id == p.id)
@@ -167,7 +168,17 @@ class SquerylSpec extends TestDataContextComponent("", false) with FlatSpec with
             }
         }
 
+        // Assert instantiation
+        val endPoint = pluginRepository.getById(sparqlEndpointPlugin.id).get
+        assert(endPoint.owner == None)
+        for( param <- endPoint.parameters) {
+            assert(sparqlEndpointPlugin.parameters.find(_.id == param.id).get.name == param.name)
+            assert(sparqlEndpointPlugin.parameters.find(_.id == param.id).get.defaultValue == param.defaultValue)
+        }
+
+        // getCount is not used on purpose to test instantiation:
         assert(pluginRepository.getAll().size == plugins.size)
+        assert(pluginRepository.getById(unionPlugin.id).get.owner == Some(u1))
     }
 
     "Analysis" should "be stored/updated/loaded by AnalysisRepository" in {
@@ -198,7 +209,7 @@ class SquerylSpec extends TestDataContextComponent("", false) with FlatSpec with
             "Value", "2000000"
         )
 
-        // Try that defined analyiss can be persisted
+        // Try that defined analysis can be persisted
         a.addPluginInstances(citiesFetcher, citiesTyped, citiesProjection, citiesSelection)
         a.addBinding(citiesFetcher, citiesTyped)
         a.addBinding(citiesTyped, citiesProjection)
@@ -247,7 +258,7 @@ class SquerylSpec extends TestDataContextComponent("", false) with FlatSpec with
             assert(persistedAnalysis.pluginInstances.size == 8)
             assert(persistedAnalysis.pluginInstanceBindings.size == analysis.pluginInstanceBindings.size)
             assert(persistedAnalysis.pluginInstanceBindings.size == 7)
-            assert(persistedAnalysis.owner.get.id == user.id)
+            //TODO: assert(persistedAnalysis.owner.get.id == user.id)
 
         // Assert persisted plugins instances
         val pluginInstances = List(
@@ -363,10 +374,13 @@ class SquerylSpec extends TestDataContextComponent("", false) with FlatSpec with
         assert(group1.grantedDataSources.size == 1)
         assert(group1.grantedAnalyses.size == 1)
         assert(group1.grantedPlugins.size == 1)
+
+        assert(privilegeRepository.getAllGrantedTo(List(group1.id), classOf[UsePluginPrivilege]).size == 1)
+        assert(privilegeRepository.getByGrantee(user1.id).size == 2)
     }
 
     "Pagionation" should "work" in {
-        //TODO: testPagination
+        //TODO:  schema.wrapInTransaction { testPagination }
     }
 
     private def testPagination {
@@ -382,55 +396,63 @@ class SquerylSpec extends TestDataContextComponent("", false) with FlatSpec with
         assert(groupRepository.getAll(Some(new PaginationInfo(4, 0))).size == 0)
     }
 
+    "Customizations" should "be persisted" in {
+        schema.wrapInTransaction { persistCustomizations }
+    }
+
+    private def persistCustomizations {
+        val url = "http://opendata.cz/pco/public-contracts.xml"
+        val customization = OntologyCustomization.empty(url, "Name1", None)
+        val ownedCustomization = OntologyCustomization.empty(url, "Name2", Some(u1))
+
+        val c1 = ontologyCustomizationRepository.persist(customization)
+        val c2 = ontologyCustomizationRepository.persist(ownedCustomization)
+        
+        assert(c1.id == customization.id)
+        assert(c2.id == ownedCustomization.id)
+    }
+
     "Entities" should "be with removed their related entities" in {
-        testCascadeDeletes
+        schema.wrapInTransaction { testCascadeDeletes }
     }
 
     private def testCascadeDeletes {
-        val (analysisCount, pluginInstancesCount, pluginsCount) = schema.wrapInTransaction {
-            val analysisCount = analysisRepository.getAll().size
-            val pluginInstancesCount = pluginInstanceRepository.getAll().size
-            val pluginsCount = pluginRepository.getAll().size
+        val analysisCount = analysisRepository.getAll().size
+        val pluginInstancesCount = pluginInstanceRepository.getAll().size
+        val pluginsCount = pluginRepository.getAll().size
 
-            // Create another analysis in DB
-            persistAnalyses
+        // Create another analysis in DB
+        persistAnalyses
 
-            assert(analysisRepository.getAll().size == analysisCount + 1)
-            assert(pluginInstanceRepository.getAll().size == pluginInstancesCount * 2)
-            assert(pluginRepository.getAll().size == pluginsCount)
+        assert(analysisRepository.getAll().size == analysisCount + 1)
+        assert(pluginInstanceRepository.getAll().size == pluginInstancesCount * 2)
+        assert(pluginRepository.getAll().size == pluginsCount)
 
-            (analysisCount, pluginInstancesCount, pluginsCount)
-        }
+        // Remove one analysis
+        assert(analysisRepository.removeById(analysisRepository.getAll()(0).id) == true)
 
-        schema.wrapInTransaction {
-            // Remove one analysis
-            assert(analysisRepository.removeById(analysisRepository.getAll()(0).id) == true)
-        }
+        // One analysis and half of plugin instances are gone
+        assert(analysisRepository.getAll().size == analysisCount)
+        assert(pluginInstanceRepository.getAll().size == pluginInstancesCount)
+        assert(pluginRepository.getAll().size == pluginsCount)
 
-        val analysis = schema.wrapInTransaction {
-            // One analysis and half of plugin instances are gone
-            assert(analysisRepository.getAll().size == analysisCount)
-            assert(pluginInstanceRepository.getAll().size == pluginInstancesCount)
-            assert(pluginRepository.getAll().size == pluginsCount)
-
-            analysisRepository.getAll()(0)
-        }
+        val analysis = analysisRepository.getAll()(0)
 
         // Remove all plugins
-        schema.wrapInTransaction {
-            for (p <- plugins) {
-                assert(pluginRepository.removeById(p.id) == true)
-            }
+        for (p <- plugins) {
+            assert(pluginRepository.removeById(p.id) == true)
         }
 
         // Only (empty) analysis is left
-        schema.wrapInTransaction {
-            assert(analysisRepository.getAll().size == analysisCount)
-            assert(pluginInstanceRepository.getAll().size == 0)
-            assert(pluginRepository.getAll().size == 0)
+        assert(analysisRepository.getAll().size == analysisCount)
+        assert(pluginInstanceRepository.getAll().size == 0)
+        assert(pluginRepository.getAll().size == 0)
 
-            assert(analysis.pluginInstances.size == 0)
-            assert(analysis.pluginInstanceBindings.size == 0)
-        }
+        // Assert nothing left for analysis
+        assert(analysis.pluginInstances.size == 0)
+        assert(analysis.pluginInstanceBindings.size == 0)
+
+        // Remove user and all his entities
+        assert(userRepository.removeById(u1.id))
     }
 }

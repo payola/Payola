@@ -15,11 +15,6 @@ trait GroupModelComponent extends EntityModelComponent
 
     lazy val groupModel = new EntityModel(groupRepository)
     {
-        def create : Group = {
-            //TODO
-            getById("").get
-        }
-
         def create(name: String, owner: User): Group = {
             repository.persist(new Group(name, owner))
         }

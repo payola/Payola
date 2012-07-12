@@ -8,6 +8,11 @@ object DataException
         } catch {
             case dataException: DataException => throw dataException
             case throwable: Throwable => {
+                throwable match {
+                    case e: Exception => {
+                        e.printStackTrace()
+                    }
+                }
                 throw new DataException("An exception was thrown in the data layer.", Some(throwable))
             }
         }

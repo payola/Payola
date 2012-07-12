@@ -15,6 +15,7 @@ trait SquerylDataContextComponent
     with PluginRepositoryComponent
     with PluginInstanceRepositoryComponent
     with PluginInstanceBindingRepositoryComponent
+    with OntologyRepositoryComponent
 {
     self: RdfStorageComponent =>
 

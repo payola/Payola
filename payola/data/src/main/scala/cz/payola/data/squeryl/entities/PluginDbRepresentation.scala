@@ -33,16 +33,11 @@ class PluginDbRepresentation(
     (implicit val context: SquerylDataContextComponent)
     extends PersistableEntity
 {
-    private var _owner: Option[User] = None
+    val ownerId: Option[String] = o.map(_.id)
 
-    var ownerId: Option[String] = o.map(_.id)
-
-    private lazy val _ownerQuery = context.schema.pluginOwnership.right(this)
-
-    @Transient
-    private var _parametersLoaded = false
-
-    private var params: Seq[Parameter[_]] = Seq()
+    var owner: Option[User] = None
+    
+    var parameters: Seq[Parameter[_]] = Seq()
 
     private lazy val _pluginInstancesQuery = context.schema.pluginsPluginInstances.left(this)
 
@@ -56,56 +51,6 @@ class PluginDbRepresentation(
 
     private lazy val _stringParameters = context.schema.stringParametersOfPlugins.left(this)
 
-    /**
-      * @return Returns all associated [[cz.payola.data.squeryl.entities.plugins.PluginInstance]]s.
-      */
-    def pluginInstances: Seq[PluginInstance] = {
-        wrapInTransaction {
-            _pluginInstancesQuery.toList
-        }
-    }
-
-    /**
-      * @return Returns all associated [[cz.payola.data.squeryl.entities.plugins.plugins.DataSource]]s.
-      */
-    def dataSources: Seq[DataSource] = {
-        wrapInTransaction {
-            _dataSourcesQuery.toList
-        }
-    }
-
-    def owner: Option[User] = {
-        if (_owner == None){
-            if (ownerId != null && ownerId.isDefined) {
-                wrapInTransaction {
-                    _owner = _ownerQuery.headOption
-                }
-            }
-        }
-
-        _owner
-    }
-
-    /**
-      *
-      * @return Returns list of associated [[cz.payola.data.squeryl.entities.plugins.Parameter]]s.
-      */
-    def parameters: Seq[Parameter[_]] = {
-        if (!_parametersLoaded) {
-            wrapInTransaction {
-                params = List(
-                    _booleanParameters.toList,
-                    _floatParameters.toList,
-                    _intParameters.toList,
-                    _stringParameters.toList
-                ).flatten
-            }
-
-            _parametersLoaded = true
-        }
-
-        params
-    }
 
     /**
       * Associates specified [[cz.payola.data.squeryl.entities.plugins.Parameter]] to plugin.
@@ -114,10 +59,10 @@ class PluginDbRepresentation(
       */
     def associateParameter(parameter: Parameter[_]) {
         parameter match {
-            case b: BooleanParameter => associate(b, _booleanParameters)
-            case f: FloatParameter => associate(f, _floatParameters)
-            case i: IntParameter => associate(i, _intParameters)
-            case s: StringParameter => associate(s, _stringParameters)
+            case b: BooleanParameter => context.schema.associate(b, _booleanParameters)
+            case f: FloatParameter => context.schema.associate(f, _floatParameters)
+            case i: IntParameter => context.schema.associate(i, _intParameters)
+            case s: StringParameter => context.schema.associate(s, _stringParameters)
         }
     }
 
@@ -127,7 +72,7 @@ class PluginDbRepresentation(
       * @param i - plugin instance to bo associated to represented plugin
       */
     def associatePluginInstance(i: cz.payola.data.squeryl.entities.plugins.PluginInstance) {
-        associate(i, _pluginInstancesQuery)
+        context.schema.associate(i, _pluginInstancesQuery)
     }
 
     /**
@@ -136,7 +81,7 @@ class PluginDbRepresentation(
       * @param ds - data source to be associated to represented plugin
       */
     def associateDataSource(ds: cz.payola.data.squeryl.entities.plugins.DataSource) {
-        associate(ds, _dataSourcesQuery)
+        context.schema.associate(ds, _dataSourcesQuery)
     }
 
     /**

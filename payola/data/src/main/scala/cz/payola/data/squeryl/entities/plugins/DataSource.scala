@@ -32,15 +32,11 @@ class DataSource(
     df: cz.payola.domain.entities.plugins.concrete.DataFetcher,
     paramValues: immutable.Seq[ParameterValue[_]])(implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.plugins.DataSource(n, o, df, paramValues)
-    with PersistableEntity
+    with PersistableEntity  with OptionallyOwnedEntity
 {
     var pluginId: String = Option(df).map(_.id).getOrElse(null)
 
-    var ownerId: Option[String] = o.map(_.id)
-
     private lazy val _pluginQuery = context.schema.pluginsDataSources.right(this)
-
-    private lazy val _ownerQuery = context.schema.dataSourceOwnership.right(this)
 
     private lazy val _booleanParameterValuesQuery = context.schema.booleanParameterValuesOfDataSources.left(this)
 
@@ -70,18 +66,6 @@ class DataSource(
         }
     }
 
-    override def owner: Option[UserType] = {
-        if (_owner == None) {
-            if (ownerId != null && ownerId.isDefined) {
-                wrapInTransaction {
-                    _owner = _ownerQuery.headOption
-                }
-            }
-        }
-
-        _owner
-    }
-
     override def parameterValues: collection.immutable.Seq[PluginType#ParameterValueType] = {
         if (!_parameterValuesLoaded) {
             wrapInTransaction {
@@ -101,10 +85,10 @@ class DataSource(
 
     def associateParameterValues() {
         paramValues.map {
-            case paramValue: BooleanParameterValue => associate(paramValue, _booleanParameterValuesQuery)
-            case paramValue: FloatParameterValue => associate(paramValue, _floatParameterValuesQuery)
-            case paramValue: IntParameterValue => associate(paramValue, _intParameterValuesQuery)
-            case paramValue: StringParameterValue => associate(paramValue, _stringParameterValuesQuery)
+            case paramValue: BooleanParameterValue => context.schema.associate(paramValue, _booleanParameterValuesQuery)
+            case paramValue: FloatParameterValue => context.schema.associate(paramValue, _floatParameterValuesQuery)
+            case paramValue: IntParameterValue => context.schema.associate(paramValue, _intParameterValuesQuery)
+            case paramValue: StringParameterValue => context.schema.associate(paramValue, _stringParameterValuesQuery)
         }
     }
 }
