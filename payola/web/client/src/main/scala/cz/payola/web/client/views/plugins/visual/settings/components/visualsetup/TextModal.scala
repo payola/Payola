@@ -1,12 +1,13 @@
 package cz.payola.web.client.views.plugins.visual.settings.components.visualsetup
 
-import cz.payola.web.client.mvvm.Component
+import cz.payola.web.client.views.Component
 import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom.Element
-import cz.payola.web.client.mvvm.element.Div
-import cz.payola.web.client.events.{EventArgs, ComponentEvent}
+import cz.payola.web.client.views.elements.Div
+import cz.payola.web.client.views.events._
 import cz.payola.web.client.views.plugins.visual.settings.TextSettingsModel
-import cz.payola.web.client.mvvm.element.extensions.Bootstrap.Modal
+import cz.payola.web.client.views.extensions.bootstrap.Modal
+import cz.payola.web.client.events.EventArgs
 
 class TextModal(model: TextSettingsModel) extends Component
 {

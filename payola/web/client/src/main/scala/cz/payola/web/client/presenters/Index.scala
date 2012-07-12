@@ -3,24 +3,17 @@ package cz.payola.web.client.presenters
 import s2js.adapters.js.browser._
 import cz.payola.web.client.views.plugins.Plugin
 import cz.payola.web.client.views.plugins.visual.techniques.tree.TreeTechnique
-import s2js.compiler.dependency
 import cz.payola.web.client.views.plugins.visual.techniques.circle.CircleTechnique
 import cz.payola.web.client.views.plugins.visual.techniques.gravity.GravityTechnique
 import cz.payola.web.client.views.plugins.visual.techniques.minimalization.MinimalizationTechnique
 import cz.payola.web.client.views.plugins.textual.techniques.table.TableTechnique
 import cz.payola.web.client.views.plugins.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.views.plugins.visual._
-import cz.payola.web.client.mvvm.element._
 import settings._
 import cz.payola.web.shared._
 import cz.payola.common.rdf.IdentifiedVertex
-import scala.Some
+import cz.payola.web.client.views.elements._
 
-// TODO remove after classloading is done
-@dependency("cz.payola.common.rdf.IdentifiedVertex")
-@dependency("cz.payola.common.rdf.LiteralVertex")
-@dependency("cz.payola.common.rdf.Graph")
-@dependency("cz.payola.common.rdf.Edge")
 class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
 {
     var graph: Option[cz.payola.common.rdf.Graph] = None

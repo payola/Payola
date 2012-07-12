@@ -1,12 +1,11 @@
 package cz.payola.web.client.presenters.components
 
-import cz.payola.web.client.mvvm.Component
+import cz.payola.web.client.views.Component
 import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom.Element
-import cz.payola.web.client.mvvm.element._
-import cz.payola.web.client.events._
-import cz.payola.web.client.mvvm.element.extensions.Bootstrap.Icon
-import s2js.adapters.js.browser.window
+import cz.payola.web.client.views.extensions.bootstrap.Icon
+import cz.payola.web.client.views.events._
+import cz.payola.web.client.views.elements._
 
 class ZoomControls(var currentZoom: Double) extends Component
 {

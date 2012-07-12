@@ -3,7 +3,8 @@ package cz.payola.web.client.views.plugins.visual.graph
 import s2js.adapters.js.browser._
 import s2js.adapters.js.dom._
 import cz.payola.web.client.views.plugins.visual._
-import cz.payola.web.client.mvvm.element.CanvasPack
+import cz.payola.web.client.views.elements.CanvasPack
+import cz.payola.web.client.views.elements.CanvasPack
 
 trait View {
     /**

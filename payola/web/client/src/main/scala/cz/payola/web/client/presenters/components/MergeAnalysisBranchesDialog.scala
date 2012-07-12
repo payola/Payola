@@ -1,14 +1,14 @@
 package cz.payola.web.client.presenters.components
 
-import cz.payola.web.client.mvvm.element.extensions.Bootstrap._
-import cz.payola.web.client.mvvm.Component
+import cz.payola.web.client.views._
+import cz.payola.web.client.views.Component
 import s2js.adapters.js.dom.Element
 import s2js.adapters.js.browser.document
-import cz.payola.web.client.mvvm.element._
-import cz.payola.web.client.mvvm.element.extensions.Payola.PluginInstance
 import s2js.compiler.javascript
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
+import cz.payola.web.client.views.elements._
+import cz.payola.web.client.views.extensions.bootstrap.Modal
 
 class MergeAnalysisBranchesDialog(instances: ArrayBuffer[PluginInstance], inputsCount: Int) extends Component
 {

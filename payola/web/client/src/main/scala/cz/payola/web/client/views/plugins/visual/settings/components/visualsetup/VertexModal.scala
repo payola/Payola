@@ -1,16 +1,17 @@
 package cz.payola.web.client.views.plugins.visual.settings.components.visualsetup
 
-import cz.payola.web.client.mvvm.Component
 import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom.Element
-import cz.payola.web.client.events.{EventArgs, ComponentEvent}
+import cz.payola.web.client.views.Component
+import cz.payola.web.client.views.events._
 import cz.payola.web.client.views.plugins.visual.settings.VertexSettingsModel
-import cz.payola.web.client.mvvm.element.{Label, Input, Div}
-import cz.payola.web.client.mvvm.element.extensions.Bootstrap.Modal
+import cz.payola.web.client.views.elements.{Label, Input, Div}
+import cz.payola.web.client.views.extensions.bootstrap.Modal
+import cz.payola.web.client.events.EventArgs
 
 class VertexModal(model: VertexSettingsModel) extends Component
 {
-    val settingsChanged = new ComponentEvent[VertexModal, EventArgs[VertexModal]]
+    val settingsChanged = new UnitEvent[VertexModal, EventArgs[VertexModal]]
 
     //TODO add some bounds check for every input
     val radius = new Input("vertex.radius", model.radius.toString(), Some("0 < x < 100"))

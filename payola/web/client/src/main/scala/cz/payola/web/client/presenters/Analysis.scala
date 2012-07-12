@@ -1,6 +1,5 @@
 package cz.payola.web.client.presenters
 
-import cz.payola.web.client.mvvm.element._
 import cz.payola.web.client.presenters.components.AnalysisControls
 import s2js.adapters.js.browser.document
 

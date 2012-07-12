@@ -1,14 +1,14 @@
 package cz.payola.web.client.presenters.components
 
-import cz.payola.web.client.mvvm.Component
-import cz.payola.web.client.mvvm.element._
+import cz.payola.web.client.views.Component
 import s2js.adapters.js.dom.Element
 import s2js.adapters.js.browser.document
-import cz.payola.web.client.events._
 import cz.payola.web.shared.AnalysisRunner
 import s2js.adapters.js.browser.window
 import cz.payola.common.rdf.Graph
 import s2js.compiler.javascript
+import cz.payola.web.client.views.events.ComponentEvent
+import cz.payola.web.client.views.elements._
 
 class AnalysisControls(analysisId: String) extends Component
 {

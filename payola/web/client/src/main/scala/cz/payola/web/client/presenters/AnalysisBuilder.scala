@@ -1,19 +1,18 @@
 package cz.payola.web.client.presenters
 
 import s2js.adapters.js.browser.document
-import cz.payola.web.client.mvvm.element.extensions.Bootstrap._
-import cz.payola.web.client.mvvm.element._
-import cz.payola.web.client.mvvm.element.extensions.Payola.PluginInstance
+import cz.payola.web.client.views.PluginInstance
 import cz.payola.web.client.presenters.components._
 import cz.payola.web.shared.AnalysisBuilderData
 import s2js.compiler.javascript
 import cz.payola.common.entities.Plugin
 import s2js.adapters.js.browser.window
-import cz.payola.web.client.events._
 import scala.collection.mutable.ArrayBuffer
 import s2js.runtime.client.scala.collection.mutable.HashMap
-import scala.Some
 import cz.payola.web.client.presenters.models.ParameterValue
+import cz.payola.web.client.views.events._
+import cz.payola.web.client.views.elements._
+import cz.payola.web.client.views.extensions.bootstrap._
 
 class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: String)
 {

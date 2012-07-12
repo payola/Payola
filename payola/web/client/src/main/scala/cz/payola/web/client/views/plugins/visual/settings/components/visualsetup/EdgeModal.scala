@@ -1,12 +1,13 @@
 package cz.payola.web.client.views.plugins.visual.settings.components.visualsetup
 
-import cz.payola.web.client.mvvm.Component
 import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom.Element
-import cz.payola.web.client.events.{EventArgs, ComponentEvent}
+import cz.payola.web.client.views.Component
+import cz.payola.web.client.views.events._
 import cz.payola.web.client.views.plugins.visual.settings.EdgeSettingsModel
-import cz.payola.web.client.mvvm.element.{Label, Input, Div}
-import cz.payola.web.client.mvvm.element.extensions.Bootstrap.Modal
+import cz.payola.web.client.views.elements._
+import cz.payola.web.client.views.extensions.bootstrap.Modal
+import cz.payola.web.client.events.EventArgs
 
 class EdgeModal(model: EdgeSettingsModel) extends Component
 {

@@ -1,11 +1,14 @@
 package cz.payola.web.client.views.plugins.visual.settings.components.visualsetup
 
-import cz.payola.web.client.mvvm.Component
+import cz.payola.web.client.views.Component
+import cz.payola.web.client.views.Component
 import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom.Element
-import cz.payola.web.client.mvvm.element.{Anchor, ListItem, Text}
+import cz.payola.web.client.views.elements._
+import cz.payola.web.client.views.elements.{Anchor, ListItem, Text}
 import cz.payola.web.client.events._
 import cz.payola.web.client.views.plugins.visual.settings.{TextSettingsModel, EdgeSettingsModel, VertexSettingsModel}
+import cz.payola.web.client.views.events._
 
 class VisualSetup(var vertexModel: VertexSettingsModel, var edgesModel: EdgeSettingsModel,
     var textModel: TextSettingsModel) extends Component

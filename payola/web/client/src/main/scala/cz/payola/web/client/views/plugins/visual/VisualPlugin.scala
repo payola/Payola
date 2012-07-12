@@ -7,11 +7,14 @@ import s2js.adapters.js.dom.Element
 import collection.mutable.ListBuffer
 import settings.components.visualsetup.VisualSetup
 import s2js.adapters.js.browser.document
-import cz.payola.web.client.mvvm.element.CanvasPack
+import cz.payola.web.client.views.elements.CanvasPack
+import cz.payola.web.client.views.elements.CanvasPack
 import cz.payola.web.client.events._
 import cz.payola.common.rdf._
 import s2js.adapters.js.browser.window
 import cz.payola.web.client.presenters.components.ZoomControls
+import cz.payola.web.client.views.events._
+import scala.Some
 
 /**
   * Representation of visual based output drawing plugin

@@ -1,20 +1,11 @@
 package cz.payola.web.client.views.plugins.visual.settings.components.visualsetup
 
-import s2js.adapters.js.browser.document
-import collection.mutable.ArrayBuffer
-import cz.payola.web.client.mvvm.Component
+import cz.payola.web.client.views.Component
 import cz.payola.web.client.views.plugins.visual.Color
-import s2js.adapters.js.dom.{Node, Element}
-import cz.payola.web.client.events.{ChangedEvent, ChangedEventArgs}
+import s2js.adapters.js.dom.Element
+import cz.payola.web.client.views.events._
 import s2js.compiler.javascript
-import cz.payola.web.client.mvvm.element._
-
-/**
- *
- * @author jirihelmich
- * @created 5/3/12 9:44 AM
- * @package cz.payola.web.client.views.plugins.visual.components.visualsetup
- */
+import cz.payola.web.client.views.elements._
 
 class ColorPane(name: String, label: String, var color: Color) extends Component
 {
