@@ -1,6 +1,6 @@
-@(user: cz.payola.domain.entities.User)
+@(user: cz.payola.domain.entities.User, id: String)
 
-@main(Some(user), "Create a new analysis :: Payola!") {
+@main(Some(user), "Edit analysis :: Payola!") {
 
 <style>
     .successors {
@@ -20,7 +20,7 @@
 
 <div class="container-fluid">
     <div class="row-fluid">
-        <h1 class="span2">Create analysis</h1>
+        <h1 class="span2">Edit analysis:</h1>
     </div>
 
     <div class="row-fluid">
@@ -44,9 +44,9 @@
         </div>
     </div>
 </div><!--/.fluid-container-->
-<script src="/javaScriptPackage/cz.payola.web.client.presenters.AnalysisBuilder" type="text/javascript"></script>
+<script src="/javaScriptPackage/cz.payola.web.client.presenters.AnalysisEditor" type="text/javascript"></script>
 <script type="text/javascript">
-    new cz.payola.web.client.presenters.AnalysisBuilder("menu", "plugin-space", "name-holder", "save-holder");
+    new cz.payola.web.client.presenters.AnalysisEditor("@id", "menu", "plugin-space", "name-holder", "save-holder");
 </script>
 
 }

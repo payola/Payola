@@ -11,11 +11,6 @@ trait PluginModelComponent extends EntityModelComponent
 
     lazy val pluginModel = new ShareableEntityModel[Plugin](pluginRepository, classOf[UsePluginPrivilege])
     {
-        def create: Plugin = {
-            //TODO
-            getById("").get
-        }
-
         def getByName(name: String): Option[Plugin] = pluginRepository.getByName(name)
     }
 }

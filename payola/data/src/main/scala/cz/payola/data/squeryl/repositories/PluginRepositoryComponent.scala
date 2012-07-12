@@ -75,13 +75,24 @@ trait PluginRepositoryComponent extends TableRepositoryComponent
         def persist(entity: AnyRef): Plugin = schema.wrapInTransaction {
             entity match {
                 case plugin: Plugin => {
-                    // Persist the plugin ...
                     val representation = representationRepository.persist(entity)
+                    plugin.parameters.foreach { parameter =>
+                        Parameter(parameter) match {
+                            case b: BooleanParameter => {
+                                schema.associate(b, schema.booleanParametersOfPlugins.left(representation))
+                            }
+                            case f: FloatParameter => {
+                                schema.associate(f, schema.floatParametersOfPlugins.left(representation))
+                            }
+                            case i: IntParameter => {
+                                schema.associate(i, schema.intParametersOfPlugins.left(representation))
+                            }
+                            case s: StringParameter => {
+                                schema.associate(s, schema.stringParametersOfPlugins.left(representation))
+                            }
+                        }
+                    }
 
-                    // ... then all its parameters
-                    plugin.parameters.map(parameter => representation.associateParameter(Parameter(parameter)))
-
-                    // Return persisted plugin
                     plugin
                 }
                 case _ => throw new DataException("Couldn't convert the entity to a plugin.")

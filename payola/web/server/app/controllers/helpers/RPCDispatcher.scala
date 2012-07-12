@@ -3,6 +3,7 @@ package controllers.helpers
 import controllers.InvocationInfo
 import s2js.runtime.shared.rpc
 import cz.payola.domain.entities.User
+import scala.collection.mutable
 
 class RPCDispatcher(jsonSerializer: GraphSerializer)
 {
@@ -33,7 +34,19 @@ class RPCDispatcher(jsonSerializer: GraphSerializer)
         val paramTypes = util.parsing.json.JSON.parseFull(paramTypesJson)
 
         // the map keys are now irellevant, continue with values only
-        val paramList = params.-("method").-("paramTypes").values
+        //val paramList = params.-("method").-("paramTypes").values
+
+        val paramBuffer = mutable.Buffer.empty[Seq[String]]
+
+        val limit = params.values.size-2
+        var i = 0
+        while (i < limit)
+        {
+            paramBuffer.append(params(i.toString()))
+            i += 1
+        }
+
+        val paramList = paramBuffer.toList
 
         // split the method names with "." to get package name and the name of the method without package
         // beware of the leading dot
@@ -213,7 +226,7 @@ class RPCDispatcher(jsonSerializer: GraphSerializer)
             case errorMessage: ActionExecutorError =>
                 errorMessage.error match {
                     case e: rpc.Exception => throw e
-                    case e: Exception => throw new rpc.Exception(e.getMessage)
+                    case e: Exception => throw new rpc.Exception(if (e.getMessage == null) "Unknown error." else e.getMessage )
                     case _ => throw new rpc.Exception("Unspecified RPC error.")
                 }
         }

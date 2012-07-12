@@ -54,7 +54,6 @@ class User(override val id: String, name: String, pwd: String, mail: String)
         _ownedGroups.toList
     }
 
-
     override def ownedAnalyses: immutable.Seq[AnalysisType] = {
         if (_ownedAnalyses == null) {
             wrapInTransaction {
@@ -80,7 +79,6 @@ class User(override val id: String, name: String, pwd: String, mail: String)
         _ownedDataSources.toList
     }
 
-
     override def ownedPlugins: immutable.Seq[PluginType] = {
         if (_ownedPlugins == null) {
             wrapInTransaction {
@@ -92,7 +90,6 @@ class User(override val id: String, name: String, pwd: String, mail: String)
 
         _ownedPlugins.toList
     }
-
 
     override def ownedOntologyCustomizations: immutable.Seq[OntologyCustomizationType] = {
         if (_ontologyCustomizations == null) {
@@ -132,19 +129,16 @@ class User(override val id: String, name: String, pwd: String, mail: String)
 
     override protected def discardOwnedAnalysis(analysis: User#AnalysisType) {
         context.analysisRepository.removeById(analysis.id)
-
         super.discardOwnedAnalysis(analysis)
     }
 
     override protected def discardOwnedGroup(group: User#GroupType)  {
         context.groupRepository.removeById(group.id)
-        
         super.discardOwnedGroup(group)
     }
 
     override protected def discardOwnedDataSource(source: User#DataSourceType) {
         context.dataSourceRepository.removeById(source.id)
-
         super.discardOwnedDataSource(source)
     }
     
@@ -153,12 +147,10 @@ class User(override val id: String, name: String, pwd: String, mail: String)
 
         super.discardOwnedPlugin(plugin)
     }
-    
 
     override protected def discardOntologyCustomization(customization: User#OntologyCustomizationType) {
         context.ontologyCustomizationRepository.removeById(customization.id)
 
         super.discardOntologyCustomization(customization)
     }
-    
 }

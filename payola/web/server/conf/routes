@@ -16,6 +16,7 @@ GET     /test/RPC                   controllers.Application.rpcTest()
 POST    /RPC/async                  controllers.RPC.async()
 
 GET     /analysis/create            controllers.Analysis.create
+GET     /analysis/edit/:id          controllers.Analysis.edit(id)
 GET     /analysis/:id               controllers.Analysis.detail(id)
 
 GET     /datasource/:id             controllers.DataSource.detail(id)

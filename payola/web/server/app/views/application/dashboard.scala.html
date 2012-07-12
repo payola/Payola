@@ -53,13 +53,21 @@
             <div class="row-fluid">
                 <div class="span6">
                     <h2>My analyses</h2>
+                    @if(user.get.ownedAnalyses.size == 0){
                     <div class="alert alert-info">
                         <h3 class="alert-heading">No analyses.</h3>
                         <p class="alert-block">But you may create one! Just press the green button below.</p>
                     </div>
-                    <ul>
-
-                    </ul>
+                    }else{
+                        <ul>
+                            @user.get.ownedAnalyses.map{a =>
+                            <li>
+                                <a href="@routes.Analysis.edit(a.id)">[<i class="icon icon-pencil"></i> Edit]</a>
+                                <a href="@routes.Analysis.detail(a.id)">@a.name</a>
+                            </li>
+                            }
+                        </ul>
+                    }
                     <p>
                         <a class="btn" href="#"><i class="icon-list"></i> List all &raquo;</a>
                         <a class="btn btn-success" href="@routes.Analysis.create"><i class="icon-plus icon-white"></i>Create &raquo;</a>
