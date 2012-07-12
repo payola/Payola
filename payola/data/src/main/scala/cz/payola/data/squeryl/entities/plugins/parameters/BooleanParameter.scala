@@ -40,7 +40,7 @@ class BooleanParameter(
       * @param p - [[cz.payola.data.squeryl.entities.plugins.parameters.BooleanParameter]] to associate
       */
     def associateParameterValue(p: BooleanParameterValue) {
-        associate(p, _valuesQuery)
+        context.schema.associate(p, _valuesQuery)
     }
 }
 

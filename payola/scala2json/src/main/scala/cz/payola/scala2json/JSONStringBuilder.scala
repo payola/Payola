@@ -19,10 +19,8 @@ class JSONStringBuilder(serializer: JSONSerializer, prettyPrint: Boolean, initia
       *
       * @param item The item.
       * @param isFirst Whether the field is first - if it is, the comma separator is left out.
-      *
-      * @return False if the field has been skipped.
       */
-    def appendStringArrayItem(item: String, isFirst: Boolean) = {
+    def appendStringArrayItem(item: String, isFirst: Boolean) {
         if (!isFirst) {
             stringBuilder.append(',')
             if (prettyPrint) {
@@ -37,7 +35,13 @@ class JSONStringBuilder(serializer: JSONSerializer, prettyPrint: Boolean, initia
         stringBuilder.append(item)
     }
 
-    def appendArrayItem(item: Any, isFirst: Boolean, processedObjects: ArrayBuffer[Any]) = {
+    /** Appends an array item to string builder.
+      *
+      * @param item The item.
+      * @param isFirst Whether the field is first - if it is, the comma separator is left out.
+      * @param processedObjects Already processed objects.
+      */
+    def appendArrayItem(item: Any, isFirst: Boolean, processedObjects: ArrayBuffer[Any]) {
         var serializedObj: String = serializer.serializeObject(item, processedObjects)
         if (prettyPrint) {
             serializedObj = serializedObj.replaceAllLiterally("\n", "\n\t")
@@ -50,7 +54,7 @@ class JSONStringBuilder(serializer: JSONSerializer, prettyPrint: Boolean, initia
       * @param key The key.
       * @param value The value.
       * @param isFirst If true, comma preceding the field is left out.
-      *
+      * @param processedObjects Already processed objects.
       */
     def appendKeyValue(key: String, value: Any, isFirst: Boolean, processedObjects: ArrayBuffer[Any]) = {
         var serializedObj: String = serializer.serializeObject(value, processedObjects)
@@ -60,10 +64,24 @@ class JSONStringBuilder(serializer: JSONSerializer, prettyPrint: Boolean, initia
         appendKeySerializedValue(key, serializedObj, isFirst)
     }
 
+    /** Appends "key: value" to @builder, preceded by comma, unless @isFirst is true.
+      *
+      * @param key The key.
+      * @param value The value.
+      * @param isFirst If true, comma preceding the field is left out.
+      */
     def appendKeySerializedValue(key: String, value: String, isFirst: Boolean) = {
         val separator: String = if (prettyPrint) ": " else ":"
         val field: String = "\"" + key + "\"" + separator + value
         appendStringArrayItem(field, isFirst)
+    }
+
+    /** The resulting string padded with tabs.
+      *
+      * @return Padded string.
+      */
+    def paddedToString(): String = {
+        JSONUtilities.padStringWithTab(this.toString)
     }
 
 }

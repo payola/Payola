@@ -87,10 +87,10 @@ class PluginInstance(
       */
     def associateParameterValues() {
         paramValues.map {
-            case paramValue: BooleanParameterValue => associate(paramValue, _booleanParameterValues)
-            case paramValue: FloatParameterValue => associate(paramValue, _floatParameterValues)
-            case paramValue: IntParameterValue => associate(paramValue, _intParameterValues)
-            case paramValue: StringParameterValue => associate(paramValue, _stringParameterValues)
+            case paramValue: BooleanParameterValue => context.schema.associate(paramValue, _booleanParameterValues)
+            case paramValue: FloatParameterValue => context.schema.associate(paramValue, _floatParameterValues)
+            case paramValue: IntParameterValue => context.schema.associate(paramValue, _intParameterValues)
+            case paramValue: StringParameterValue => context.schema.associate(paramValue, _stringParameterValues)
         }
     }
 }

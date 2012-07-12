@@ -46,4 +46,13 @@ object JSONUtilities
 
         builder.toString
     }
+
+    /** Pads every line with a tab.
+      *
+      * @param str String to be padded.
+      * @return Padded string
+      */
+    def padStringWithTab(str: String): String = {
+        str.replaceAllLiterally("\n", "\n\t")
+    }
 }

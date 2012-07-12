@@ -85,10 +85,10 @@ class DataSource(
 
     def associateParameterValues() {
         paramValues.map {
-            case paramValue: BooleanParameterValue => associate(paramValue, _booleanParameterValuesQuery)
-            case paramValue: FloatParameterValue => associate(paramValue, _floatParameterValuesQuery)
-            case paramValue: IntParameterValue => associate(paramValue, _intParameterValuesQuery)
-            case paramValue: StringParameterValue => associate(paramValue, _stringParameterValuesQuery)
+            case paramValue: BooleanParameterValue => context.schema.associate(paramValue, _booleanParameterValuesQuery)
+            case paramValue: FloatParameterValue => context.schema.associate(paramValue, _floatParameterValuesQuery)
+            case paramValue: IntParameterValue => context.schema.associate(paramValue, _intParameterValuesQuery)
+            case paramValue: StringParameterValue => context.schema.associate(paramValue, _stringParameterValuesQuery)
         }
     }
 }

@@ -209,7 +209,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
             "Value", "2000000"
         )
 
-        // Try that defined analyiss can be persisted
+        // Try that defined analysis can be persisted
         a.addPluginInstances(citiesFetcher, citiesTyped, citiesProjection, citiesSelection)
         a.addBinding(citiesFetcher, citiesTyped)
         a.addBinding(citiesTyped, citiesProjection)

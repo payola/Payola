@@ -40,7 +40,7 @@ class FloatParameter(
       * @param p - [[cz.payola.data.squeryl.entities.plugins.parameters.FloatParameter]] to associate
       */
     def associateParameterValue(p: FloatParameterValue) {
-        associate(p, _valuesQuery)
+        context.schema.associate(p, _valuesQuery)
     }
 }
 
