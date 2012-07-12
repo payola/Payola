@@ -9,8 +9,8 @@ import cz.payola.domain.entities.plugins.PluginInstance
   * @param _targetInputIndex Index of the target plugin instance input the binding is connected to.
   */
 class PluginInstanceBinding(
-    protected val _sourcePluginInstance: PluginInstance,
-    protected val _targetPluginInstance: PluginInstance,
+    protected var _sourcePluginInstance: PluginInstance,
+    protected var _targetPluginInstance: PluginInstance,
     protected val _targetInputIndex: Int = 0)
     extends Entity
     with cz.payola.common.entities.analyses.PluginInstanceBinding

@@ -1,9 +1,9 @@
 package cz.payola.data.squeryl.entities
 
 import cz.payola.data.squeryl.entities.analyses._
-import org.squeryl.annotations.Transient
 import cz.payola.data.squeryl.entities.plugins.PluginInstance
 import scala.collection.immutable
+import scala.collection.mutable
 import cz.payola.data.squeryl.SquerylDataContextComponent
 
 /**
@@ -26,46 +26,33 @@ class Analysis(override val id: String, name: String, o: Option[User])(implicit 
 {
     type DomainParameterValueType = plugins.ParameterValue[_]
 
-    @Transient
-    private var _pluginInstancesLoaded = false;
+    _pluginInstances = null;
     private lazy val _pluginInstancesQuery = context.schema.analysesPluginInstances.left(this)
 
-    @Transient
-    private var _pluginInstancesBindingsLoaded = false
+    _pluginInstanceBindings = null
     private lazy val _pluginInstancesBindingsQuery = context.schema.analysesPluginInstancesBindings.left(this)
 
     override def pluginInstances: immutable.Seq[PluginInstanceType] = {
-        // Lazy-load related instances only for first time
-        if (!_pluginInstancesLoaded) {
-            wrapInTransaction {
-                _pluginInstancesQuery.toList.foreach(i =>
-                    if (!super.pluginInstances.contains(i)) {
-                        super.storePluginInstance(i)
-                    }
-                )
-            }
+        if (_pluginInstances == null) {
+            context.analysisRepository.loadPluginInstances(this)}
 
-            _pluginInstancesLoaded = true
-        }
+        _pluginInstances.toList
+    }
 
-        super.pluginInstances
+    def pluginInstances_=(value: Seq[PluginInstanceType]) {
+        _pluginInstances =  mutable.ArrayBuffer(value: _*)
     }
 
     override def pluginInstanceBindings: immutable.Seq[PluginInstanceBindingType] = {
-        // Lazy-load related bindings only for first time
-        if (!_pluginInstancesBindingsLoaded) {
-            wrapInTransaction {
-                _pluginInstancesBindingsQuery.toList.foreach(b =>
-                    if (!super.pluginInstanceBindings.contains(b)) {
-                        super.storeBinding(b)
-                    }
-                )
-            }
-
-            _pluginInstancesBindingsLoaded = true
+        if (_pluginInstanceBindings == null) {
+            context.analysisRepository.loadPluginInstanceBindings(this)
         }
-        
-        super.pluginInstanceBindings
+
+        _pluginInstanceBindings.toList
+    }
+
+    def pluginInstanceBindings_=(value: Seq[PluginInstanceBindingType]){
+        _pluginInstanceBindings = mutable.ArrayBuffer(value: _*)
     }
 
     override protected def storePluginInstance(instance: Analysis#PluginInstanceType) {

@@ -33,8 +33,4 @@ class StringParameterValue(
     with ParameterValue[String]
 {
     val parameterId: String = Option(param).map(_.id).getOrElse(null)
-
-    private lazy val _parameterQuery = context.schema.valuesOfStringParameters.right(this)
-
-    override def parameter: ParameterType = wrapInTransaction { _parameterQuery.head }
 }

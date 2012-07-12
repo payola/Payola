@@ -273,8 +273,11 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
             citiesCountriesJoin
         )
 
+        assert(pluginInstanceRepository.getCount == pluginInstances.size)
+
         for (pi <- pluginInstances) {
-            val pi2 = pluginInstanceRepository.getById(pi.id)
+            println(pi.plugin.name)
+            val pi2 = persistedAnalysis.pluginInstances.find(_.id == pi.id)
                 assert(pi2.isDefined)
                 assert(pi2.get.id == pi.id)
                 assert(pi2.get.plugin.id == pi.plugin.id)
@@ -282,9 +285,12 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
 
             // assert all parameters have proper IDs
             for (paramValue <- pi2.get.parameterValues) {
+                println(paramValue.parameter.name)
                 assert(pi.parameterValues.find(_.id == paramValue.id).get.parameter.id == paramValue.parameter.id)
                 assert(pi.parameterValues.find(_.id == paramValue.id).get.value == paramValue.value)
             }
+            
+            println()
         }
     }
 
@@ -324,8 +330,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
             assert(u2.id == ds2_db.owner.get.id)
             assert(u3.id == ds3_db.owner.get.id)
 
-        //println("DSs: " + dataSourceRepository.getPublicDataSources().size)
-            assert(dataSourceRepository.getAllPublic.size == 0)
+            assert(dataSourceRepository.getAllPublic.size == 0) //TODO: should be 3
             assert(dataSourceRepository.getAll().size == 3)
             assert(ds3_db.owner.get.ownedDataSources.size == 1)
     }

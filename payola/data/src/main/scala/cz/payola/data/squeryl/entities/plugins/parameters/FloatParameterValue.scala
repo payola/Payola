@@ -33,8 +33,4 @@ class FloatParameterValue(
     with ParameterValue[Float]
 {
     val parameterId: String = Option(param).map(_.id).getOrElse(null)
-
-    private lazy val _parameterQuery = context.schema.valuesOfFloatParameters.right(this)
-
-    override def parameter: ParameterType = wrapInTransaction { _parameterQuery.head }
 }

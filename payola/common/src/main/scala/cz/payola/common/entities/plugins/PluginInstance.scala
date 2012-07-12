@@ -12,9 +12,9 @@ trait PluginInstance extends Entity with DescribedEntity
     /** Type of the plugin the current object is instance of. */
     type PluginType <: Plugin
 
-    protected val _plugin: PluginType
+    protected var _plugin: PluginType
 
-    protected val _parameterValues: immutable.Seq[PluginType#ParameterValueType]
+    protected var _parameterValues: immutable.Seq[PluginType#ParameterValueType]
 
     /** The corresponding analytical plugin. */
     def plugin = _plugin

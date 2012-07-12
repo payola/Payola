@@ -132,6 +132,7 @@ trait TableRepositoryComponent
             results.groupBy(_._1).map { r =>
                 val entity = r._1
                 entity.owner = r._2.head._2
+
                 entity
             }(collection.breakOut)
         }

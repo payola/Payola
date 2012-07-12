@@ -45,52 +45,11 @@ class PluginInstance(
 
     private lazy val _stringParameterValues = context.schema.stringParameterValuesOfPluginInstances.left(this)
 
-    @Transient
-    private var _parameterValuesLoaded = false
-
-    @Transient
-    // This field represents val _parameterValues in common.PluginInstance - it cannot be overriden because it is
-    // immutable
-    // (can't be filled via lazy-loading)
-    private var _paramValues: immutable.Seq[PluginType#ParameterValueType] = immutable.Seq()
-
-    override def plugin = {
-        if (pluginId != null) {
-            wrapInTransaction {
-                _pluginQuery.head.toPlugin
-            }
-        }
-        else {
-            null
-        }
+    def parameterValues_=(value: collection.immutable.Seq[PluginType#ParameterValueType]) {
+        _parameterValues = value
     }
 
-    override def parameterValues: collection.immutable.Seq[PluginType#ParameterValueType] = {
-        if (!_parameterValuesLoaded) {
-            wrapInTransaction {
-                _paramValues = List(
-                    _booleanParameterValues.toList,
-                    _floatParameterValues.toList,
-                    _intParameterValues.toList,
-                    _stringParameterValues.toList
-                ).flatten
-            }
-
-            _parameterValuesLoaded = true
-        }
-
-        _paramValues
-    }
-
-    /**
-      * This method associated all related [[cz.payola.data.squeryl.entities.plugins.ParameterValue]]s.
-      */
-    def associateParameterValues() {
-        paramValues.map {
-            case paramValue: BooleanParameterValue => context.schema.associate(paramValue, _booleanParameterValues)
-            case paramValue: FloatParameterValue => context.schema.associate(paramValue, _floatParameterValues)
-            case paramValue: IntParameterValue => context.schema.associate(paramValue, _intParameterValues)
-            case paramValue: StringParameterValue => context.schema.associate(paramValue, _stringParameterValues)
-        }
+    def plugin_=(value: PluginType) {
+        _plugin = value
     }
 }
