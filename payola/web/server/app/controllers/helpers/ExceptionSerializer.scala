@@ -7,6 +7,5 @@ import s2js.runtime.shared.rpc
 
 class ExceptionSerializer extends JSONSerializer
 {
-    val rule = new CustomValueSerializationRule[rpc.Exception]("message", { (_, exc) => exc.message })
-    this.addSerializationRule(new SimpleSerializationClass(classOf[rpc.Exception]), rule)
+
 }
