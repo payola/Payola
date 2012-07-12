@@ -117,7 +117,7 @@ trait SchemaComponent
           * ([[cz.payola.data.squeryl.entities.User]]s)
           */
         lazy val customizationOwnership = oneToManyRelation(users, ontologyCustomizations).via(
-            (u, c) => u.id === c.ownerId.getOrElse(EMPTY_ID).toString)
+            (u, c) => Option(u.id) === c.ownerId)
 
         /**
           * Relation that associates [[cz.payola.data.squeryl.entities.PluginDbRepresentation]] to its owner
@@ -341,7 +341,9 @@ trait SchemaComponent
             factoryFor(stringParameterValues) is { new StringParameterValue("", null, "") },
             factoryFor(dataSources) is { new DataSource("", "", None, null, Nil) },
             factoryFor(privileges) is { new PrivilegeDbRepresentation("", "", "", "", "", "", "") },
-            factoryFor(classCustomizations) is { new PrivilegeDbRepresentation("", "", "", "", "", "", "") }
+            factoryFor(ontologyCustomizations) is { new OntologyCustomization("", "", "", None, Nil) },
+            factoryFor(classCustomizations) is { new ClassCustomization("", "", "", 0, Some('x'), Nil) },
+            factoryFor(propertyCustomizations) is { new PropertyCustomization("", "", "", 0) }
         )
 
         /**
