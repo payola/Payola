@@ -1,9 +1,8 @@
 package cz.payola.web.shared
 
-import cz.payola.common.entities.Plugin
+import cz.payola.common.entities._
 import s2js.compiler._
 import cz.payola.domain.entities.User
-import cz.payola.domain.entities.plugins.parameters._
 
 @remote object AnalysisBuilderData
 {
@@ -14,12 +13,7 @@ import cz.payola.domain.entities.plugins.parameters._
     }
 
     @async def getPlugins()(successCallback: (Seq[Plugin] => Unit))(failCallback: (Throwable => Unit)) {
-        try { {
-            successCallback(Payola.model.pluginModel.getAll)
-        }
-        } catch {
-            case e: Exception => failCallback(e)
-        }
+        successCallback(Payola.model.pluginModel.getAll)
     }
 
     def lockAnalysis(id: String) {
@@ -49,6 +43,24 @@ import cz.payola.domain.entities.plugins.parameters._
         successCallback(true)
     }
 
-    def saveBinding(sourceId: String, targetId: String) {
+    @async def saveBinding(analysisId: String, sourceId: String, targetId: String, inputIndex: Int)
+        (successCallback: (Boolean => Unit))
+        (failCallback: (Throwable => Unit)) {
+        Payola.model.analysisModel.addBinding(analysisId, sourceId, targetId, inputIndex)
+        successCallback(true)
+    }
+
+    @async def deletePluginInstance(pluginInstanceId: String)(successCallback: (Boolean => Unit))
+        (failCallback: (Throwable => Unit)) {
+        Payola.model.pluginInstanceModel.getById(pluginInstanceId).map(Payola.model.pluginInstanceModel.remove(_)).getOrElse{
+            failCallback(new Exception("Unknown plugin instance."))
+        }
+        successCallback(true)
+    }
+
+    @async def getAnalysis(analysisId:String)(successCallback: (Analysis => Unit))
+        (failCallback: (Throwable => Unit)) {
+        val analysis = Payola.model.analysisModel.getById(analysisId)
+        successCallback(analysis.get)
     }
 }

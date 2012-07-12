@@ -154,11 +154,8 @@ class JSONSerializer
       */
     def serialize(obj: Any): String = {
         // If obj is null, return "null" - as defined at http://www.json.org/
-        if (obj == null) {
-            "null"
-        } else {
+
             serializeObject(obj, new ArrayBuffer[Any]())
-        }
     }
 
     /** Serializes an Array[_]
@@ -197,13 +194,13 @@ class JSONSerializer
         }
 
         // We know it is a Map[String, _]
-        val mapIt: scala.collection.Iterable[(String, _)] = map.asInstanceOf[scala.collection.Iterable[(String, _)]]
+        //val mapIt: scala.collection.Iterable[(String, _)] = map.asInstanceOf[scala.collection.Iterable[(String, _)]]
 
         // Need to keep track of index so that
         // we don't add a comma after the first iteration
         var index: Int = 0
-        mapIt foreach {
-            case (key, value) => {
+        map foreach {
+            case (key:String, value) => {
                 jsonBuilder.appendKeyValue(key, value, index == 0, processedObjects)
                 index += 1
             }

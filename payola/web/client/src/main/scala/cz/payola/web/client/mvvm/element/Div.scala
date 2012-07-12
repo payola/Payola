@@ -22,7 +22,7 @@ class Div(val innerElements: Seq[Component] = List(), additionalClass: String = 
     }
 
     def addClass(addClass: String) = {
-        div.setAttribute("class",div.getAttribute("class")+" "+addClass)
+        div.setAttribute("class",div.getAttribute("class").replaceAllLiterally(addClass, "")+" "+addClass)
     }
 
     def removeClass(remClass: String) = {

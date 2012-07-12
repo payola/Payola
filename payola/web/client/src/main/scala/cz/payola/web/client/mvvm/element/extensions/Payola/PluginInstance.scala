@@ -22,7 +22,7 @@ object PluginInstance
     }
 }
 
-class PluginInstance(val id: String, val plugin: Plugin, val predecessors: Seq[PluginInstance] = List())
+class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[PluginInstance] = List())
     extends Component
 {
     val connectButtonClicked = new ClickedEvent[PluginInstance]

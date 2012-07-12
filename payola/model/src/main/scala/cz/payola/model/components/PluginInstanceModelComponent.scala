@@ -24,11 +24,16 @@ trait PluginInstanceModelComponent extends EntityModelComponent
         }
 
         def setParameterValue(pluginInstanceId: String, parameterName: String, value: String) {
-            getById(pluginInstanceId).map { i =>
+            val instance = getById(pluginInstanceId)
+            instance.map { i =>
 
-                val parameterValue = i.getParameterValue(parameterName).orElse{
+                val option = i.getParameterValue(parameterName)
+
+                if (!option.isDefined){
                     throw new Exception("Unknown parameter name: "+parameterName+".")
                 }
+
+                val parameterValue = option.get
 
                 parameterValue match {
                     case v: BooleanParameterValue => v.value = value.toBoolean

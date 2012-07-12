@@ -226,7 +226,7 @@ class RPCDispatcher(jsonSerializer: GraphSerializer)
             case errorMessage: ActionExecutorError =>
                 errorMessage.error match {
                     case e: rpc.Exception => throw e
-                    case e: Exception => throw new rpc.Exception(e.getMessage)
+                    case e: Exception => throw new rpc.Exception(if (e.getMessage == null) "Unknown error." else e.getMessage )
                     case _ => throw new rpc.Exception("Unspecified RPC error.")
                 }
         }

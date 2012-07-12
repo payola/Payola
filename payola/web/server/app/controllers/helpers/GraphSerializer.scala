@@ -7,6 +7,7 @@ import cz.payola.common.entities.plugins.parameters._
 import cz.payola.scala2json.classes.SimpleSerializationClass
 import cz.payola.scala2json.rules.BasicSerializationRule
 import scala.Some
+import cz.payola.common.entities.Analysis
 
 class GraphSerializer extends JSONSerializer
 {
@@ -27,7 +28,9 @@ class GraphSerializer extends JSONSerializer
     val identifiedNodeRule = new BasicSerializationRule(Some(classOf[IdentifiedVertex]))
     this.addSerializationRule(identifiedNodeClass, identifiedNodeRule)
 
-
+    val analysisClass = new SimpleSerializationClass(classOf[Analysis])
+    val analysisRule = new BasicSerializationRule(Some(classOf[Analysis]))
+    this.addSerializationRule(analysisClass,analysisRule)
 
     val pluginClass = new SimpleSerializationClass(classOf[Plugin])
     val pluginRule = new BasicSerializationRule(Some(classOf[Plugin]))
