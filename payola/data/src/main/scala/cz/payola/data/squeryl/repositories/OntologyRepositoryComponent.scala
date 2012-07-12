@@ -9,9 +9,11 @@ trait OntologyRepositoryComponent extends TableRepositoryComponent
     
     private type QueryType = (OntologyCustomization, Option[ClassCustomization], Option[PropertyCustomization])
 
-    lazy val ontologyCustomizationRepository = new LazyTableRepository[OntologyCustomization](schema.ontologyCustomizations,
-        OntologyCustomization)
-        with OntologyCustomizationRepository[OntologyCustomization]
+    lazy val ontologyCustomizationRepository = new LazyTableRepository[OntologyCustomization](
+        schema.ontologyCustomizations, OntologyCustomization)
+        with OntologyCustomizationRepository
+        with NamedEntityTableRepository[OntologyCustomization]
+        with OptionallyOwnedEntityTableRepository[OntologyCustomization]
         with ShareableEntityTableRepository[OntologyCustomization]
     {
         override def persist(entity: AnyRef) = {
