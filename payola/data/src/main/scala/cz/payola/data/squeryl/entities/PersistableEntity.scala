@@ -64,10 +64,15 @@ trait PersistableEntity extends cz.payola.domain.Entity with KeyedEntity[String]
       * @return Returns pesisted specified entity
       */
     protected final def associate[A <: PersistableEntity](entity: A, relation: OneToMany[A]): A = wrapInTransaction {
+        try {
         if (relation.find(e => e.id == entity.id).isEmpty) {
             relation.associate(entity)
         }
         entity
+        }
+        catch {
+            case e: Throwable => println("ex: " + e); throw e;
+        }
     }
 
     /**
