@@ -359,8 +359,8 @@ trait SchemaComponent
             on(pluginInstanceBindings)(binding =>
                 declare(
                     binding.id is (primaryKey),
-                    columns(binding.sourcePluginInstanceId, binding.inputIndex) are (unique),
-                    columns(binding.targetPluginInstanceId, binding.analysisId) are (unique)
+                    columns(binding.targetPluginInstanceId, binding.inputIndex) are (unique),
+                    columns(binding.sourcePluginInstanceId, binding.analysisId) are (unique)
                 ))
             on(booleanParameterValues)(param => declare(param.id is (primaryKey)))
             on(floatParameterValues)(param => declare(param.id is (primaryKey)))
