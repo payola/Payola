@@ -152,6 +152,8 @@ trait Seq extends Iterable
 
     def toArray: ArrayBuffer = getInternalJsArray
 
+    def toList: ArrayBuffer = getInternalJsArray
+
     def toBuffer: ArrayBuffer = getInternalJsArray
 }
 

@@ -13,7 +13,7 @@ class VertexModal(model: VertexSettingsModel) extends Component
     val settingsChanged = new ComponentEvent[VertexModal, EventArgs[VertexModal]]
 
     //TODO add some bounds check for every input
-    val radius = new Input("vertex.radius", model.radius.toString(), Some("0 ≤ x ≤ 15"))
+    val radius = new Input("vertex.radius", model.radius.toString(), Some("0 < x < 100"))
     val rLabel = new Label("Corner radius [px]:", radius.getDomElement)
     radius.changed += { event =>
         model.radius = radius.getText.toInt
