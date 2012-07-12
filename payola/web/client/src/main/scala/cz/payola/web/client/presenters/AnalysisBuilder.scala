@@ -13,6 +13,7 @@ import cz.payola.web.client.presenters.models.ParameterValue
 import cz.payola.web.client.views.events._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.extensions.bootstrap._
+import cz.payola.web.client.events.EventArgs
 
 class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: String)
 {
@@ -197,7 +198,7 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
         }
     }
 
-    def onParameterValueChanged = { args: ChangedEventArgs[ParameterValue] =>
+    def onParameterValueChanged(args: EventArgs[ParameterValue]) {
 
         val parameterInfo = args.target
         val parameterId = parameterInfo.parameterId
@@ -216,7 +217,6 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
         }, 300)
 
         timeoutMap.put(parameterId, timeoutId)
-        false
     }
 
     def connectPlugin(pluginInstance: PluginInstance): Unit = {
@@ -232,7 +232,7 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
         dialog.show
     }
 
-    def onDeleteClick = { eventArgs: ClickedEventArgs[PluginInstance] =>
+    def onDeleteClick(eventArgs: EventArgs[PluginInstance]) {
         val instance = eventArgs.target
 
         AnalysisBuilderData.deletePluginInstance(instance.id) { _ =>
@@ -245,7 +245,6 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
             }
             instance.destroy()
         } { _ =>}
-        false
     }
 
     def bind(a: PluginInstance, b: PluginInstance, inputIndex: Int) = {

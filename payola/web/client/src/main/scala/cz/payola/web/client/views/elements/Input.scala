@@ -21,9 +21,9 @@ class Input(val name: String, val value: String, val title: Option[String], val 
 {
     //require(document.getElementById(name) == null)
 
-    val changed = new ChangedEvent[Input]
+    val changed = new SimpleEvent[Input]
 
-    val clicked = new ClickedEvent[Input]
+    val clicked = new SimpleEvent[Input]
 
     //val label = document.createElement[Label]()
     val field = document.createElement[dom.Input]("input")
@@ -38,12 +38,14 @@ class Input(val name: String, val value: String, val title: Option[String], val 
     }
     field.value = value
 
-    field.onkeyup = { event =>
-        changed.trigger(new ChangedEventArgs(this))
+    field.onkeyup = { e =>
+        changed.trigger(this)
+        false
     }
 
-    field.onclick = {
-        event => clicked.trigger(new ClickedEventArgs(this))
+    field.onclick = { e =>
+        clicked.trigger(this)
+        false
     }
 
     def setMaxLength(length: Int) {
@@ -67,7 +69,7 @@ class Input(val name: String, val value: String, val title: Option[String], val 
     def setText(value: String) {
         field.value = value
 
-        changed.trigger(new ChangedEventArgs(this))
+        changed.trigger(this)
     }
 
     def getDomElement: Element = {

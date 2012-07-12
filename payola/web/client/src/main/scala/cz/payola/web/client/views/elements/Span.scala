@@ -10,16 +10,15 @@ import cz.payola.web.client.views.events._
 
 class Span(val innerElements: Seq[Component], val addClass: String = "") extends Component
 {
-    var clicked = new ClickedEvent[Span]
+    var clicked = new SimpleEvent[Span]
 
     val span = document.createElement[dom.Element]("span")
 
     span.setAttribute("class", addClass)
 
     span.onclick = { event =>
-        val args = new ClickedEventArgs(this)
-        args.set(event)
-        clicked.trigger(args)
+        clicked.trigger(this)
+        false
     }
 
     def render(parent: Element = document.body) = {

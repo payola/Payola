@@ -7,12 +7,12 @@ import cz.payola.web.shared.AnalysisRunner
 import s2js.adapters.js.browser.window
 import cz.payola.common.rdf.Graph
 import s2js.compiler.javascript
-import cz.payola.web.client.views.events.ComponentEvent
 import cz.payola.web.client.views.elements._
+import cz.payola.web.client.events.UnitEvent
 
 class AnalysisControls(analysisId: String) extends Component
 {
-    val analysisEvaluated = new ComponentEvent[AnalysisControls, EvaluationEventArgs]
+    val analysisEvaluated = new UnitEvent[AnalysisControls, EvaluationEventArgs]
 
     val icon = new Italic(List(), "icon-play icon-white")
     val caption = new Text("Run analysis")

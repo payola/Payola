@@ -51,7 +51,7 @@ class MergeAnalysisBranchesDialog(instances: ArrayBuffer[PluginInstance], inputs
     def hide() = dialog.hide
 
     def getDomElement : Element = {
-        dialog.getDomElement()
+        dialog.getDomElement
     }
 
     dialog.saved += { event =>

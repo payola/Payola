@@ -7,22 +7,20 @@ import cz.payola.web.client.views.elements.Div
 import cz.payola.web.client.views.events._
 import cz.payola.web.client.views.plugins.visual.settings.TextSettingsModel
 import cz.payola.web.client.views.extensions.bootstrap.Modal
-import cz.payola.web.client.events.EventArgs
+import cz.payola.web.client.events._
 
 class TextModal(model: TextSettingsModel) extends Component
 {
-    val settingsChanged = new ComponentEvent[TextModal, EventArgs[TextModal]]
+    val settingsChanged = new SimpleEvent[TextModal]
 
     val colorBackground = new ColorPane("text.color.background", "Text background", model.colorBackground)
     colorBackground.changed += { event =>
         model.colorBackground = colorBackground.getColor
-        false
     }
 
     val color = new ColorPane("text.color.foreground", "Text foreground", model.color)
     color.changed += { event =>
         model.color = color.getColor
-        false
     }
 
     val wrapper = new Div(List(color, colorBackground))
@@ -30,7 +28,7 @@ class TextModal(model: TextSettingsModel) extends Component
     private val modal = new Modal("Text settings", List(wrapper))
 
     modal.saved += {
-        event => settingsChanged.trigger(new EventArgs[TextModal](this))
+        event => settingsChanged.trigger(this)
     }
 
     def render(parent: Element = document.body) {

@@ -6,6 +6,7 @@ import s2js.adapters.js.dom.Element
 import cz.payola.web.client.views.extensions.bootstrap.Icon
 import cz.payola.web.client.views.events._
 import cz.payola.web.client.views.elements._
+import cz.payola.web.client.events.SimpleEvent
 
 class ZoomControls(var currentZoom: Double) extends Component
 {
@@ -19,8 +20,8 @@ class ZoomControls(var currentZoom: Double) extends Component
     private val maximumZoomOut = 25
     private val maximumZoomIn = 200
 
-    val zoomIncreased = new ZoomChangedEvent[ZoomControls]
-    val zoomDecreased = new ZoomChangedEvent[ZoomControls]
+    val zoomIncreased = new SimpleEvent[ZoomControls]
+    val zoomDecreased = new SimpleEvent[ZoomControls]
 
     private val spanCaption = new Text("")
 
@@ -83,13 +84,13 @@ class ZoomControls(var currentZoom: Double) extends Component
         spanCaption.setText(getStatusCaption)
         parentSpace = Some(parent)
 
-        plus.clicked += { evt =>
-            zoomIncreased.trigger(new ZoomChangedEventArgs[ZoomControls](this))
+        plus.clicked += { e =>
+            zoomIncreased.trigger(this)
             false
         }
 
-        minus.clicked += { evt =>
-            zoomDecreased.trigger(new ZoomChangedEventArgs[ZoomControls](this))
+        minus.clicked += { e =>
+            zoomDecreased.trigger(this)
             false
         }
     }

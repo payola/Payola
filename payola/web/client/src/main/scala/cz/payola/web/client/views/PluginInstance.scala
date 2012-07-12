@@ -9,6 +9,8 @@ import cz.payola.web.client.presenters.models.ParameterValue
 import cz.payola.web.client.views.events._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.extensions.bootstrap._
+import cz.payola.web.client.events._
+import scala.Some
 
 object PluginInstance
 {
@@ -23,11 +25,11 @@ object PluginInstance
 class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[PluginInstance] = List())
     extends Component
 {
-    val connectButtonClicked = new ClickedEvent[PluginInstance]
+    val connectButtonClicked = new SimpleEvent[PluginInstance]
 
-    val deleteButtonClicked = new ClickedEvent[PluginInstance]
+    val deleteButtonClicked = new SimpleEvent[PluginInstance]
 
-    val parameterValueChanged = new ChangedEvent[ParameterValue]
+    val parameterValueChanged = new SimpleEvent[ParameterValue]
 
     private val heading = new Heading3(List(new Text(plugin.name)))
 
@@ -40,9 +42,7 @@ class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[P
         val field = new InputControl(param.name, param.id, "", "Enter parameter value")
 
         field.changed += { args =>
-            parameterValueChanged.trigger(new ChangedEventArgs[ParameterValue](
-                new ParameterValue(id, param.id, param.name, field.getValue(), field))
-            )
+            parameterValueChanged.trigger(new ParameterValue(id, param.id, param.name, field.getValue(), field))
         }
 
         params.put(paramIdx, field)
@@ -63,12 +63,12 @@ class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[P
 
     private val successors = new Div(List(clearSpan, alertDiv), "successors")
 
-    connect.clicked += { evt =>
-        connectButtonClicked.trigger(new ClickedEventArgs[PluginInstance](this))
+    connect.clicked += { e =>
+        connectButtonClicked.trigger(this)
         false
     }
-    delete.clicked += { evt =>
-        deleteButtonClicked.trigger(new ClickedEventArgs[PluginInstance](this))
+    delete.clicked += { e =>
+        deleteButtonClicked.trigger(this)
         false
     }
 

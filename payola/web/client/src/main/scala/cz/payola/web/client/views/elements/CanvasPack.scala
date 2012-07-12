@@ -13,25 +13,25 @@ import cz.payola.web.client.views.events._
 
 class CanvasPack(width: Double, height: Double) extends Canvas(width, height)
 {
-    val mouseClicked = new ClickedEvent[CanvasPack]
+    val mouseClicked = new BrowserEvent[CanvasPack]
 
-    val mouseDragged = new DraggedEvent[CanvasPack]
+    val mouseDragged = new BrowserEvent[CanvasPack]
 
-    val mouseDblClicked = new DoubleClickedEvent[CanvasPack]
+    val mouseDblClicked = new BrowserEvent[CanvasPack]
 
-    val mouseDown = new MouseDownEvent[CanvasPack]
+    val mouseDown = new BrowserEvent[CanvasPack]
 
-    val mouseUp = new MouseUpEvent[CanvasPack]
+    val mouseUp = new BrowserEvent[CanvasPack]
 
-    val keyUp = new KeyUpEvent[CanvasPack]
+    val keyUp = new BrowserEvent[CanvasPack]
 
-    val keyDown = new KeyDownEvent[CanvasPack]
+    val keyDown = new BrowserEvent[CanvasPack]
 
-    val mouseMove = new MouseMoveEvent[CanvasPack]
+    val mouseMove = new BrowserEvent[CanvasPack]
 
-    val mouseWheel = new MouseWheelEvent[CanvasPack]
+    val mouseWheel = new BrowserEvent[CanvasPack]
 
-    val windowResize = new WindowResizeEvent[CanvasPack]
+    val windowResize = new BrowserEvent[CanvasPack]
 
     private val edgesDeselectedLayer = new Canvas(width, height)
 
@@ -49,51 +49,30 @@ class CanvasPack(width: Double, height: Double) extends Canvas(width, height)
 
     private val verticesSelectedTextLayer = new Canvas(width, height)
 
-    canvasElement.onclick = { event =>
-        val args = new ClickedEventArgs(this)
-        args.set(event)
-        mouseClicked.trigger(args)
-    }
+    canvasElement.onclick = { e => mouseClicked.trigger(this, e) }
 
-    canvasElement.ondblclick = { event =>
-        val args = new DoubleClickedEventArgs(this)
-        args.set(event)
-        mouseDblClicked.trigger(args)
-    }
+    canvasElement.ondblclick = { e => mouseDblClicked.trigger(this, e) }
 
-    canvasElement.onmousedown = { event =>
+    canvasElement.onmousedown = { e =>
         mousePressed = true
-        val args = new MouseDownEventArgs(this)
-        args.set(event)
-        mouseDown.trigger(args)
+        mouseDown.trigger(this, e)
     }
 
-    canvasElement.onmouseup = { event =>
+    canvasElement.onmouseup = { e =>
         mousePressed = false
-        val args = new MouseUpEventArgs(this)
-        args.set(event)
-        mouseUp.trigger(args)
+        mouseUp.trigger(this, e)
     }
 
-    canvasElement.onmousemove = { event =>
-        val args = new MouseMoveEventArgs(this)
-        args.set(event)
-        mouseMove.trigger(args)
+    canvasElement.onmousemove = { e =>
+        val returnValue = mouseMove.trigger(this, e)
         if (mousePressed) {
-            val argsDrag = new DraggedEventArgs(this)
-            argsDrag.set(event)
-            mouseDragged.trigger(argsDrag)
+            mouseDragged.trigger(this, e)
         } else {
-            false
+            returnValue
         }
     }
 
-    window.onresize = { event =>
-        val args = new WindowResizeEventArgs(this)
-        args.set(event)
-        windowResize.trigger(args)
-        true
-    }
+    window.onresize = { e => windowResize.trigger(this, e) }
 
     //on mouse wheel event work-around###################################################################################
     /**
@@ -103,11 +82,8 @@ class CanvasPack(width: Double, height: Double) extends Canvas(width, height)
       */
     canvasElement.onmousewheel = onMouseWheel
 
-    private def onMouseWheel(event: s2js.adapters.js.browser.Event): Boolean = {
-        val args = new MouseWheelEventArgs(this)
-        args.set(event)
-        mouseWheel.trigger(args)
-        false
+    private def onMouseWheel(e: s2js.adapters.js.browser.Event): Boolean = {
+        mouseWheel.trigger(this, e)
     }
 
     @javascript(
@@ -254,6 +230,6 @@ class CanvasPack(width: Double, height: Double) extends Canvas(width, height)
 
     override def getDomElement: Element = {
         //TODO
-        edgesDeselectedLayer.getDomElement()
+        edgesDeselectedLayer.getDomElement
     }
 }

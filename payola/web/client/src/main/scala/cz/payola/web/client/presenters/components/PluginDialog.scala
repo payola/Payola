@@ -7,10 +7,11 @@ import cz.payola.common.entities.Plugin
 import cz.payola.web.client.views.events._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.extensions.bootstrap.Modal
+import cz.payola.web.client.events.SimpleEvent
 
 class PluginDialog(plugins: Seq[Plugin]) extends Component
 {
-    val pluginNameClicked = new ClickedEvent[Plugin]
+    val pluginNameClicked = new SimpleEvent[Plugin]
 
     private val ul = new UnorderedList(List())
 
@@ -18,8 +19,8 @@ class PluginDialog(plugins: Seq[Plugin]) extends Component
         val anchor = new Anchor(List(new Text(plugin.name)))
         val item = new ListItem(List(anchor))
 
-        anchor.clicked += { evt =>
-            pluginNameClicked.trigger(new ClickedEventArgs[Plugin](plugin))
+        anchor.clicked += { e =>
+            pluginNameClicked.trigger(plugin)
             false
         }
 
@@ -35,7 +36,7 @@ class PluginDialog(plugins: Seq[Plugin]) extends Component
     def show() = dialog.show
     def hide() = dialog.hide
 
-    def getDomElement : Element = {
-        dialog.getDomElement()
+    def getDomElement: Element = {
+        dialog.getDomElement
     }
 }

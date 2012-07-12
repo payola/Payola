@@ -7,11 +7,12 @@ import cz.payola.web.client.views.events._
 import cz.payola.web.client.views.plugins.visual.settings.VertexSettingsModel
 import cz.payola.web.client.views.elements.{Label, Input, Div}
 import cz.payola.web.client.views.extensions.bootstrap.Modal
-import cz.payola.web.client.events.EventArgs
+import cz.payola.web.client.events._
+import scala.Some
 
 class VertexModal(model: VertexSettingsModel) extends Component
 {
-    val settingsChanged = new UnitEvent[VertexModal, EventArgs[VertexModal]]
+    val settingsChanged = new SimpleEvent[VertexModal]
 
     //TODO add some bounds check for every input
     val radius = new Input("vertex.radius", model.radius.toString(), Some("0 < x < 100"))
@@ -24,13 +25,11 @@ class VertexModal(model: VertexSettingsModel) extends Component
     val color = new ColorPane("vertex.color","Vertex color",model.color)
     color.changed += { event =>
         model.color = color.getColor
-        false
     }
 
     val colorSelected = new ColorPane("vertex.color.selected","Vertex color (selected)",model.colorSelected)
     colorSelected.changed += { event =>
         model.colorSelected = colorSelected.getColor
-        false
     }
 
     val wrapper = new Div(List(rLabel, radius, color, colorSelected))
@@ -38,8 +37,7 @@ class VertexModal(model: VertexSettingsModel) extends Component
     private val modal = new Modal("Vertex settings", List(wrapper))
 
     modal.saved += {
-        event =>
-            settingsChanged.trigger(new EventArgs[VertexModal](this))
+        event => settingsChanged.trigger(this)
     }
 
     def render(parent: Element = document.body) {

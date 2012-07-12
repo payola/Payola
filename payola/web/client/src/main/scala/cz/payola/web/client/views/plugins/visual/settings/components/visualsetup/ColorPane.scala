@@ -6,10 +6,11 @@ import s2js.adapters.js.dom.Element
 import cz.payola.web.client.views.events._
 import s2js.compiler.javascript
 import cz.payola.web.client.views.elements._
+import cz.payola.web.client.events._
 
 class ColorPane(name: String, label: String, var color: Color) extends Component
 {
-    val changed = new ChangedEvent[ColorPane]
+    val changed = new SimpleEvent[ColorPane]
 
     val colorInput: Input = new Input(name, color.toString, None, "colorpicker")
     colorInput.field.setAttribute("readonly","true")

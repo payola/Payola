@@ -16,7 +16,7 @@ class Anchor(val innerElements: Seq[Component], val href: String = "#", var addi
     a.setAttribute("href", href)
     a.setAttribute("class", additionalClass)
 
-    val clicked = new ClickedEvent[Anchor]()
+    val clicked = new BrowserEvent[Anchor]()
 
     def render(parent: Element = document.body) = {
         parent.appendChild(a)
@@ -24,9 +24,7 @@ class Anchor(val innerElements: Seq[Component], val href: String = "#", var addi
         innerElements.map(_.render(a))
     }
 
-    a.onclick = {
-        event => clicked.trigger(new ClickedEventArgs(this))
-    }
+    a.onclick = { e => clicked.trigger(this, e) }
 
     def addClass(addedClass: String) {
         additionalClass = additionalClass + " " + addedClass;

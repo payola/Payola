@@ -6,13 +6,13 @@ import s2js.adapters.js.browser.document
 import cz.payola.web.client.views.Component
 import cz.payola.web.client.views.events._
 import cz.payola.web.client.views.elements.{Text, Anchor}
-import cz.payola.web.client.events.EventArgs
+import cz.payola.web.client.events._
 
 class Modal(title: String, body: Seq[Component], showSave: Boolean = true, showCancel: Boolean = true) extends Component
 {
-    val saved = new ComponentEvent[Modal, EventArgs[Modal]]
+    val saved = new SimpleEvent[Modal]
 
-    val closed = new ComponentEvent[Modal, EventArgs[Modal]]
+    val closed = new SimpleEvent[Modal]
 
     val modalDiv = document.createElement[Element]("div")
 
@@ -45,20 +45,14 @@ class Modal(title: String, body: Seq[Component], showSave: Boolean = true, showC
 
     val saveA = new Anchor(List(new Text("Save changes")), "#", "btn btn-primary")
 
-    saveA.clicked += {
-        event =>
-            if (saved.trigger(new EventArgs(this))) {
-                hide
-                true
-            } else false
+    saveA.clicked += { e =>
+        saved.trigger(this)
+        false
     }
 
-    closeA.clicked += {
-        event =>
-            if (closed.trigger(new EventArgs(this))) {
-                hide
-                true
-            } else false
+    closeA.clicked += { e =>
+        closed.trigger(this)
+        false
     }
 
     def render(parent: Element = document.body) {

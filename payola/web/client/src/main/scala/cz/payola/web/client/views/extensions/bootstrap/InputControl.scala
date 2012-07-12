@@ -5,10 +5,11 @@ import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom.Element
 import cz.payola.web.client.views.events._
 import cz.payola.web.client.views.elements._
+import cz.payola.web.client.events.SimpleEvent
 
 class InputControl(label: String, name: String, value: String, title: String) extends Component
 {
-    val changed = new ChangedEvent[InputControl]()
+    val changed = new SimpleEvent[InputControl]()
 
     private val input = new Input(name, value, Some(title))
 
@@ -47,7 +48,7 @@ class InputControl(label: String, name: String, value: String, title: String) ex
     }
 
     input.changed += { args =>
-        changed.trigger(new ChangedEventArgs[InputControl](this))
+        changed.trigger(this)
     }
 
     def getDomElement: Element = wrap.getDomElement

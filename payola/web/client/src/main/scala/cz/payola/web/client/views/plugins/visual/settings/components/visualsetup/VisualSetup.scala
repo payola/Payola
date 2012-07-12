@@ -13,7 +13,7 @@ import cz.payola.web.client.views.events._
 class VisualSetup(var vertexModel: VertexSettingsModel, var edgesModel: EdgeSettingsModel,
     var textModel: TextSettingsModel) extends Component
 {
-    val settingsChanged = new ComponentEvent[VisualSetup, EventArgs[VisualSetup]]
+    val settingsChanged = new SimpleEvent[VisualSetup]
 
     val vertex = new Anchor(List(new Text("Vertices default style")), "#")
     val vertexOwl = new Anchor(List(new Text("Vertices OWL style")), "#")

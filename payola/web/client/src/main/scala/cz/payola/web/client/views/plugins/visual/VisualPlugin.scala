@@ -28,7 +28,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
 
     var zoomTool: Option[ZoomControls] = None
 
-    val vertexUpdate = new VertexUpdateEvent
+    val vertexUpdate = new SimpleEvent[Vertex]
 
     /**
       * Contained graph in visualisation packing.
@@ -65,8 +65,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
             val vertex = graphView.get.getTouchedVertex(getPosition(event))
             if(vertex.isDefined) {
                 graphView.get.selectVertex(vertex.get)
-                val eventArgs = new VertexUpdateEventArgs(vertex.get.vertexModel)
-                vertexUpdate.trigger(eventArgs)
+                vertexUpdate.trigger(vertex.get.vertexModel)
             }
             false
         }
@@ -169,7 +168,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
     /**
       * Description of mouse-button-down event. Is called from the layer (canvas) binded to it in the initialization.
       */
-    private def onMouseDown(eventArgs: MouseDownEventArgs[CanvasPack]) {
+    private def onMouseDown(eventArgs: BrowserEventArgs[CanvasPack]) {
 
         val position = getPosition(eventArgs)
         var resultedAnimation: Option[Animation[ListBuffer[InformationView]]] = None
@@ -232,7 +231,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
         result
     }
 
-    private def onMouseUp(eventArgs: MouseUpEventArgs[CanvasPack]) {
+    private def onMouseUp(eventArgs: BrowserEventArgs[CanvasPack]) {
         if (!mouseDragged && !mousePressedVertex && !eventArgs.shiftKey) { //deselect all
 
             graphView.get.deselectAll()
@@ -243,7 +242,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
     /**
       * Description of mouse-move event. Is called from the layer (canvas) binded to it in the initialization.
       */
-    private def onMouseDrag(eventArgs: DraggedEventArgs[CanvasPack]) {
+    private def onMouseDrag(eventArgs: BrowserEventArgs[CanvasPack]) {
 
         val end = getPosition(eventArgs)
         if(mousePressedVertex) {
@@ -371,7 +370,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
         (p1, p2)
     }
 
-    private def getPosition(eventArgs: EventArgs[CanvasPack]): Point = {
+    private def getPosition(eventArgs: BrowserEventArgs[CanvasPack]): Point = {
 
         val positionCorrection = Vector(- graphView.get.canvasPack.offsetLeft, - graphView.get.canvasPack.offsetTop)
 
