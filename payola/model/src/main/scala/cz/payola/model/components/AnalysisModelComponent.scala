@@ -9,8 +9,7 @@ trait AnalysisModelComponent extends EntityModelComponent
 {
     self: DataContextComponent =>
 
-    lazy val analysisModel = new ShareableEntityModel[Analysis, AccessAnalysisPrivilege](analysisRepository,
-        classOf[AccessAnalysisPrivilege])
+    lazy val analysisModel = new ShareableEntityModel[Analysis](analysisRepository, classOf[AccessAnalysisPrivilege])
     {
         def create(owner: User): Analysis = {
             val instance = new Analysis("", Some(owner))

@@ -29,7 +29,7 @@ trait DataContextComponent
 
     val dataSourceRepository: DataSourceRepository
 
-    // TODO val ontologyCustomizationRepository: OntologyCustomizationRepository[OntologyCustomization]
+    val ontologyCustomizationRepository: OntologyCustomizationRepository[OntologyCustomization]
 
     lazy val repositoryRegistry = new RepositoryRegistry(Map(
         classOf[User] -> userRepository,
@@ -39,8 +39,8 @@ trait DataContextComponent
         classOf[Plugin] -> pluginRepository,
         classOf[PluginInstance] -> pluginInstanceRepository,
         classOf[PluginInstanceBinding] -> pluginInstanceBindingRepository,
-        classOf[DataSource] -> dataSourceRepository
-        // TODO classOf[OntologyCustomization] -> ontologyCustomizationRepository
+        classOf[DataSource] -> dataSourceRepository,
+        classOf[OntologyCustomization] -> ontologyCustomizationRepository
     ))
 
     trait Repository[+A]
@@ -158,24 +158,21 @@ trait DataContextComponent
         def getAllByOwnerId(ownerId: String, pagination: Option[PaginationInfo] = None) : Seq[Group]
     }
 
-    trait PrivilegeRepository extends Repository[Privilege[_]]
+    trait PrivilegeRepository extends Repository[Privilege[_ <: cz.payola.domain.Entity]]
     {
         /**
           * Returns all privileges of the specified type granted to the specified grantees.
           * @param granteeIds The entities whose privileges should be returned.
           * @param privilegeClass Type of the privilege.
-          * @tparam B Type of the privilege.
           */
-        def getAllGrantedTo[B](granteeIds: Seq[String], privilegeClass: Class[_]): Seq[B]
+        def getAllGrantedTo(granteeIds: Seq[String], privilegeClass: Class[_]): Seq[Privilege[_ <: cz.payola.domain.Entity]]
 
         /**
           * Returns IDs of privileged objects, that are granted to the specified grantee via privileges of the specified
           * class.
           * @param granteeId ID of the privilege grantee.
-          * @param privilegeClass Class of the privilege.
-          * @param objectClass Class of the object.
           */
-        def getPrivilegedObjectIds(granteeId: String, privilegeClass: Class[_], objectClass: Class[_]): Seq[String]
+        def getByGrantee(granteeId: String): Seq[Privilege[_ <: cz.payola.domain.Entity]]
     }
     
     trait AnalysisRepository
@@ -183,6 +180,11 @@ trait DataContextComponent
         with NamedEntityRepository[Analysis]
         with OptionallyOwnedEntityRepository[Analysis]
         with ShareableEntityRepository[Analysis]
+
+    trait OntologyCustomizationRepository[+A <: OntologyCustomization]
+        extends Repository[A]
+        with ShareableEntityRepository[A] {
+    }
 
     trait PluginRepository
         extends Repository[Plugin]
@@ -195,11 +197,6 @@ trait DataContextComponent
         with NamedEntityRepository[DataSource]
         with OptionallyOwnedEntityRepository[DataSource]
         with ShareableEntityRepository[DataSource]
-
-    /*trait OntologyCustomizationRepository[OntologyCustomization]
-        extends Repository[OntologyCustomization]
-        with NamedEntityRepository[OntologyCustomization]
-        with ShareableEntityRepository[OntologyCustomization]*/
 
     /**
       * A registry providing repositories by entity classes or entity class names.

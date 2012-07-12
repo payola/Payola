@@ -6,24 +6,63 @@ import cz.payola.domain.entities.Privilege
 import cz.payola.data.squeryl.entities.privileges.PrivilegeDbRepresentation
 import cz.payola.data.PaginationInfo
 import scala.collection.mutable
+import cz.payola.domain.Entity
 
 trait PrivilegeRepositoryComponent extends TableRepositoryComponent
-{
+{                                      
     self: SquerylDataContextComponent =>
+
+    private type PrivilegeType = Privilege[_ <: Entity]
 
     lazy val privilegeRepository = new PrivilegeRepository
     {
-        private val representationRepository = new LazyTableRepository[PrivilegeDbRepresentation](schema.privileges,
-            PrivilegeDbRepresentation)
+        private val representationRepository =
+            new LazyTableRepository[PrivilegeDbRepresentation](schema.privileges, PrivilegeDbRepresentation)
 
-        def getAll(pagination: Option[PaginationInfo] = None): Seq[Privilege[_]] = Seq()
+        def getByIds(ids: Seq[String]): Seq[PrivilegeType] = schema.wrapInTransaction {
+            instantiate(representationRepository.getByIds(ids))
+        }
 
-        def getByIds(ids: Seq[String]): Seq[Privilege[_]] = schema.wrapInTransaction {
-            val privileges = representationRepository.getByIds(ids)
+        def getAll(pagination: Option[PaginationInfo] = None) = schema.wrapInTransaction {
+            instantiate(representationRepository.getAll(pagination))
+        }
 
+        def persist(entity: AnyRef): PrivilegeType = schema.wrapInTransaction[PrivilegeType] {
+            representationRepository.persist(entity)
+
+            // The entity was successfully persisted therefore it must be a privilege.
+            entity.asInstanceOf[PrivilegeType]
+        }
+
+        def removeById(id: String) = schema.wrapInTransaction{
+            representationRepository.removeById(id)
+        }
+
+        def getCount: Long = schema.wrapInTransaction {
+            representationRepository.getCount
+        }
+
+        def getAllGrantedTo(granteeIds: Seq[String], privilegeClass: Class[_]): Seq[PrivilegeType] = {
+            _getByGrantee(granteeIds, Some(privilegeClass))
+        }
+
+        def getByGrantee(granteeId: String): Seq[PrivilegeType] = {
+            _getByGrantee(List(granteeId), None)
+        }
+
+        private def _getByGrantee(granteeIds: Seq[String], privilegeClass: Option[Class[_]]): Seq[PrivilegeType] =
+            schema.wrapInTransaction {
+                instantiate(
+                    representationRepository.selectWhere(p => p.granteeId in granteeIds
+                        and p.privilegeClass === privilegeClass.map(_.getName).getOrElse(p.privilegeClass).toString)
+                )
+            }
+
+        private def instantiate(privileges: Seq[PrivilegeDbRepresentation]): Seq[PrivilegeType] = {
+            // Repositories map with (Repository -> list of entity IDs to select)
             val repositories = mutable.Map[Repository[_], mutable.HashSet[String]]()
 
-            // Fill repositories map with values (Repository -> list of entity IDs to select)
+            // Fill the map
             privileges.foreach { p =>
                 // Add grantee
                 val granteeRepository = repositoryRegistry(p.granteeClassName)
@@ -37,7 +76,7 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
                 repositories.getOrElseUpdate(userRepository, mutable.HashSet.empty[String]) += p.granterId
             }
 
-            // Create Map (EntityId -> Entity)
+            // Create Map (EntityId -> Entity) to simplify getting entities from Db
             val entities = repositories.par.flatMap{r =>
                 r._1.getByIds(r._2.toSeq).map(e => (e.asInstanceOf[cz.payola.domain.Entity].id, e))
             }
@@ -54,44 +93,7 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
                 val arguments = List(granter, grantee, obj, p.id).toArray
 
                 // Instantiate the privilege
-                constructor.newInstance(arguments: _*).asInstanceOf[Privilege[_]]
-            }
-        }
-
-        def persist(entity: AnyRef): Privilege[_] = schema.wrapInTransaction[Privilege[_]] {
-            representationRepository.persist(entity)
-
-            // The entity was successfully persisted therefore it must be a privilege.
-            entity.asInstanceOf[Privilege[_]]
-        }
-
-        private def _getByGrantee(granteeIds: Seq[String], privilegeClass: Option[Class[_]]) =
-                    representationRepository.selectWhere(p => p.granteeId in granteeIds and
-                        Option(p.privilegeClass) === privilegeClass.map(_.getName))
-
-        def removeById(id: String) = schema.wrapInTransaction{
-            representationRepository.removeById(id)
-        }
-
-        def getCount: Long = schema.wrapInTransaction {
-            representationRepository.getCount
-        }
-
-        def getAllGrantedTo[B](granteeIds: Seq[String], privilegeClass: Class[_]): Seq[B] = {
-            // TODO implement
-            Nil
-        }
-
-        // TODO remove
-        def getPrivilegedObjectIds(granteeId: String, privilegeClass: Class[_], objectClass: Class[_]): Seq[String] = {
-            schema.wrapInTransaction {
-                from(representationRepository.table)(p =>
-                    where(p.granteeId === granteeId and
-                        p.privilegeClass === privilegeClass.getName and
-                        p.objectClassName === repositoryRegistry.getClassName(objectClass)
-                    )
-                    select(p.objectId)
-                ).toList
+                constructor.newInstance(arguments: _*).asInstanceOf[PrivilegeType]
             }
         }
     }

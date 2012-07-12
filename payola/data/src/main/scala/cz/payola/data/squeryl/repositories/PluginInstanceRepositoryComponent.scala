@@ -11,7 +11,7 @@ trait PluginInstanceRepositoryComponent extends TableRepositoryComponent
     lazy val pluginInstanceRepository = new LazyTableRepository[PluginInstance](schema.pluginInstances, PluginInstance)
     {
         override def persist(entity: AnyRef): PluginInstance = wrapInTransaction {
-            val persistedInstance = super.persist(entity)
+            /*val persistedInstance = super.persist(entity)
 
             // Persist and associate the parameter values.
             persistedInstance.parameterValues.foreach {
@@ -31,7 +31,11 @@ trait PluginInstanceRepositoryComponent extends TableRepositoryComponent
                     persist(stringValue, schema.stringParameterValues)
                     schema.stringParameterValuesOfPluginInstances.left(persistedInstance).associate(stringValue)
                 }
-            }
+            }*/
+            // First persist ParameterInstance then associate all parameter values
+            val persistedInstance = super.persist(entity)
+
+            persistedInstance.associateParameterValues()
 
             persistedInstance
         }
