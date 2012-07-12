@@ -3,9 +3,15 @@ package cz.payola.scala2json.test
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import cz.payola.scala2json._
-import classes._
-import rules._
+import cz.payola.scala2json.classes._
+import cz.payola.scala2json.rules._
 import collection.mutable.{HashMap, ArrayBuffer}
+import scala.collection.mutable
+import cz.payola.scala2json.rules.CustomValueSerializationRule
+import cz.payola.scala2json.rules.BasicSerializationRule
+import cz.payola.scala2json.rules.CustomSerializationRule
+import cz.payola.scala2json.classes.SimpleSerializationClass
+import scala.Some
 
 /**
   * This test shows some basic capabilities of the JSONSerializer
@@ -38,8 +44,18 @@ class Group(val name: String)
     val thisIsNotInTrait = null
 }
 
-class Exception1(val message: String = "", val cause: Exception = null) extends RuntimeException
+class Exception1(val message: String = "", val cause: Exception = null) extends RuntimeException with CommonException
 class Exception2(override val message: String = "", cause: Exception = null) extends Exception1(message, cause)
+
+trait CommonException {
+    val message: String
+}
+
+class ExceptionSerializer extends JSONSerializer
+{
+    val rule = new CustomValueSerializationRule[Exception1]("message", { (_, exc) => exc.message })
+    this.addSerializationRule(new SimpleSerializationClass(classOf[Exception1]), rule)
+}
 
 class Scala2JSONTest extends FlatSpec with ShouldMatchers {
     "JSONSerializer" should "handle cyclic dependencies and a BasicSerializationRule." in {
@@ -67,6 +83,11 @@ class Scala2JSONTest extends FlatSpec with ShouldMatchers {
 
         serializer.serialize(u) should equal ("""{"__class__":"cz.payola.scala2json.test.User","__objectID__":0,"name":"Franta","groups":{"__arrayClass__":"scala.collection.mutable.ArrayBuffer","__value__":[{"__class__":"cz.payola.scala2json.test.GroupTrait","__objectID__":2,"name":"My group","users":{"__arrayClass__":"scala.collection.mutable.ArrayBuffer","__value__":[{"__ref__":0}]}}]}}""")
         serializer.serialize(g) should equal ("""{"__class__":"cz.payola.scala2json.test.GroupTrait","__objectID__":0,"name":"My group","users":{"__arrayClass__":"scala.collection.mutable.ArrayBuffer","__value__":[{"__class__":"cz.payola.scala2json.test.User","__objectID__":2,"name":"Franta","groups":{"__arrayClass__":"scala.collection.mutable.ArrayBuffer","__value__":[{"__ref__":0}]}}]}}""")
+
+        val map = new mutable.HashMap[String, String]()
+        map.put("key", "value")
+        serializer.outputFormat = OutputFormat.PrettyPrinted
+        println(serializer.serialize(map))
     }
 
     "escapeString" should "escape string" in {
@@ -74,13 +95,18 @@ class Scala2JSONTest extends FlatSpec with ShouldMatchers {
     }
 
     "exception" should "have a message field serialized" in {
-        val serializer: JSONSerializer = new JSONSerializer()
-        val exc = new Exception2("Hello")
+        val serializer: ExceptionSerializer = new ExceptionSerializer()
+        val exc = new IllegalArgumentException("Hello")
 
-        val rule = new CustomValueSerializationRule[Exception2]("message", { (_, exc) => exc.message })
-        serializer.addSerializationRule(new SimpleSerializationClass(classOf[Exception2]), rule)
+        //val rule = new CustomValueSerializationRule[Exception2]("message", { (_, exc) => exc.message })
+        //serializer.addSerializationRule(new SimpleSerializationClass(classOf[Exception2]), rule)
 
-        assume(serializer.serialize(exc).contains("Hello"))
+       // val rule = new BasicSerializationRule(Some(classOf[CommonException]), Some(List("serialVersionUID")), None)
+       // serializer.addSerializationRule(new SimpleSerializationClass(classOf[CommonException]), rule)
+
+        println(serializer.serialize(exc))
+
+        //assume(serializer.serialize(exc).contains("Hello"))
     }
 
 }
