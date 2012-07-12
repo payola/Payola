@@ -8,6 +8,7 @@ import cz.payola.domain.entities.plugins.parameters._
 trait PluginInstanceModelComponent extends EntityModelComponent
 {
     self: DataContextComponent with PluginModelComponent =>
+
     lazy val pluginInstanceModel = new EntityModel(pluginInstanceRepository)
     {
         def create(pluginId: String, analysisId: String): PluginInstance = {

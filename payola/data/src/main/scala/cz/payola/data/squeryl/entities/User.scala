@@ -45,10 +45,6 @@ class User(override val id: String, name: String, pwd: String, mail: String)
     private var _ownedDataSourcesLoaded = false
     private lazy val _ownedDataSourcesQuery = context.schema.dataSourceOwnership.left(this)
 
-    @Transient
-    private val _memberedGroups = new mutable.ArrayBuffer[Group]()
-    private lazy val _memberedGroupsQuery = context.schema.groupMembership.left(this)
-
     override def ownedGroups: immutable.Seq[GroupType] = {
         if (!_ownedGroupsLoaded) {
             wrapInTransaction {
@@ -63,22 +59,6 @@ class User(override val id: String, name: String, pwd: String, mail: String)
         }
 
         super.ownedGroups
-    }
-
-    /**
-      * @return Returns collection of [[cz.payola.data.squeryl.entities.Group]]s that user is member of.
-      */
-    def memberedGroups: mutable.Seq[Group] = {
-        if (_memberedGroups.size == 0) {
-            // Lazy-load membered groups collection
-            wrapInTransaction {
-                _memberedGroupsQuery.toList.foreach(g =>
-                    _memberedGroups += g
-                )
-            }
-        }
-
-        _memberedGroups
     }
 
     override def ownedAnalyses: immutable.Seq[AnalysisType] = {
@@ -143,19 +123,16 @@ class User(override val id: String, name: String, pwd: String, mail: String)
 
     override protected def discardOwnedAnalysis(analysis: User#AnalysisType) {
         context.analysisRepository.removeById(analysis.id)
-
         super.discardOwnedAnalysis(analysis)
     }
 
     override protected def discardOwnedGroup(group: User#GroupType)  {
         context.groupRepository.removeById(group.id)
-        
         super.discardOwnedGroup(group)
     }
 
     override protected def discardOwnedDataSource(source: User#DataSourceType) {
         context.dataSourceRepository.removeById(source.id)
-
         super.discardOwnedDataSource(source)
     }
 }
