@@ -273,8 +273,6 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
             citiesCountriesJoin
         )
 
-        assert(pluginInstanceRepository.getCount == pluginInstances.size)
-
         for (pi <- pluginInstances) {
             val pi2 = persistedAnalysis.pluginInstances.find(_.id == pi.id)
                 assert(pi2.isDefined)
@@ -420,7 +418,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     }
 
     "Entities" should "be removed with their related entities" in {
-        //TODO: schema.wrapInTransaction { testCascadeDeletes }
+        schema.wrapInTransaction { testCascadeDeletes }
     }
 
     private def testCascadeDeletes {
