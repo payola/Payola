@@ -1,7 +1,6 @@
 package cz.payola.data.squeryl.repositories
 
 import cz.payola.data.squeryl._
-import cz.payola.domain.entities.settings
 import cz.payola.data.squeryl.entities.settings._
 
 trait OntologyRepositoryComponent extends TableRepositoryComponent
@@ -16,20 +15,33 @@ trait OntologyRepositoryComponent extends TableRepositoryComponent
         with ShareableEntityTableRepository[OntologyCustomization]
     {
         override def persist(entity: AnyRef) = {
-            // First persist ontology customization ...
-            val ontologyCustomization = super.persist(entity)
+            val persistedOntologyCustomization = super.persist(entity)
+            entity match {
+                case o: OntologyCustomization => // The entity is already in the database, so classes are already there.
+                case _ => {
+                    // Associate and persist the classes.
+                    persistedOntologyCustomization.classCustomizations.foreach { classCustomization =>
+                        val persistedClassCustomization = schema.associate(ClassCustomization(classCustomization),
+                            schema.classCustomizationsOfOntologies.left(persistedOntologyCustomization))
 
-            // ... then persist its class customizations
-            entity.asInstanceOf[settings.OntologyCustomization].classCustomizations.map{ cc =>
-                    val classCustomization = ontologyCustomization.associateClassCustomization(cc)
-
-                    // ... and its property customizations
-                    classCustomization.asInstanceOf[settings.ClassCustomization].propertyCustomizations.map{ pc =>
-                            classCustomization.associatePropertyCustomization(pc)
+                        // Associate and persist the properties
+                        persistedClassCustomization.propertyCustomizations.foreach { propertyCustomization =>
+                            schema.associate(PropertyCustomization(propertyCustomization),
+                                schema.propertyCustomizationsOfClasses.left(persistedClassCustomization))
+                        }
                     }
                 }
+            }
 
-            ontologyCustomization
+            persistedOntologyCustomization
+        }
+
+        def persistClassCustomization(classCustomization: AnyRef) {
+            persist(ClassCustomization(classCustomization), schema.classCustomizations)
+        }
+
+        def persistPropertyCustomization(propertyCustomization: AnyRef) {
+            persist(PropertyCustomization(propertyCustomization), schema.propertyCustomizations)
         }
     }
 }
