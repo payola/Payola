@@ -40,7 +40,7 @@ class IntParameter(
       * @param p - [[cz.payola.data.squeryl.entities.plugins.parameters.IntParameter]] to associate
       */
     def associateParameterValue(p: IntParameterValue) {
-        associate(p, _valuesQuery)
+        context.schema.associate(p, _valuesQuery)
     }
 }
 

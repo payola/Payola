@@ -30,6 +30,6 @@ class ClassCustomization(
     private lazy val _customizationsQuery = context.schema.propertyCustomizationsOfClasses.left(this)
     
     def associatePropertyCustomization(customization: PropertyCustomizationType) = {
-        associate(PropertyCustomization(customization), _customizationsQuery)
+        context.schema.associate(PropertyCustomization(customization), _customizationsQuery)
     }
 }
