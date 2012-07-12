@@ -310,8 +310,6 @@ class JSONSerializer
                 cl.isClassOf(obj)
         }
 
-        println(obj + " --- " + serializationClass)
-
         var result = ""
         // Skip custom serialization if serializing as reference
         if (serializeObjectAsReference
@@ -417,7 +415,6 @@ class JSONSerializer
         }
         
         _rules foreach { item: (SerializationClass, SerializationRule) =>
-            println(item._1 + " vs. " + item._2)
             if (item._1.isClassOf(obj) && item._2.isInstanceOf[CustomValueSerializationRule[_]]){
                 val rule: CustomValueSerializationRule[AnyRef] = item._2.asInstanceOf[CustomValueSerializationRule[AnyRef]]
                 jsonBuilder.appendKeyValue(rule.fieldName, rule.definingFunction(this, obj), !haveProcessedField, processedObjects)
