@@ -19,7 +19,7 @@ import cz.payola.domain.entities.plugins.PluginClassLoader
         try {
             val className = compiler.compile(pluginCode)
             val loader = new PluginClassLoader(pluginClassDirectory, getClass.getClassLoader)
-            val plugin = loader.getPlugin(className)
+            val plugin = loader.instantiatePlugin(className)
 
             if (Payola.model.pluginModel.getByName(plugin.name).isDefined) {
                 failCallback(new Exception("Plugin with this name already exists!"))

@@ -21,4 +21,8 @@ import com.typesafe.config._
     val databaseUser = config.getString("database.user")
 
     val databasePassword = config.getString("database.password")
+
+    val libDirectory = new java.io.File(config.getString("lib.directory"))
+
+    val pluginDirectory = new java.io.File(config.getString("plugin.directory"))
 }

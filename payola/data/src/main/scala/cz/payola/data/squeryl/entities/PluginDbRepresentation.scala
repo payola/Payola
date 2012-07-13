@@ -4,6 +4,7 @@ import cz.payola.data.squeryl.entities.plugins._
 import cz.payola.domain.entities.Plugin
 import cz.payola.data.squeryl.SquerylDataContextComponent
 import cz.payola.domain.entities.plugins.concrete.data.PayolaStorage
+import cz.payola.domain.PluginCompilerComponent
 
 object PluginDbRepresentation extends EntityConverter[PluginDbRepresentation]
 {
@@ -42,7 +43,7 @@ class PluginDbRepresentation(
       * @return Returns represented plugin.
       */
     def toPlugin: Plugin = {
-        val pluginClass = Class.forName(className)
+        val pluginClass = context.asInstanceOf[PluginCompilerComponent].pluginClassLoader.loadClass(className)
 
         // Variables dependent on plugin type.
         val pluginDependsOnContext = pluginClass == classOf[PayolaStorage]

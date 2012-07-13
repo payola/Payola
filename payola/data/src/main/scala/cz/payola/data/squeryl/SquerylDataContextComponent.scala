@@ -1,8 +1,8 @@
 package cz.payola.data.squeryl
 
-import cz.payola.domain.RdfStorageComponent
 import cz.payola.data.DataContextComponent
 import cz.payola.data.squeryl.repositories._
+import cz.payola.domain._
 
 trait SquerylDataContextComponent
     extends DataContextComponent
@@ -17,7 +17,7 @@ trait SquerylDataContextComponent
     with PluginInstanceBindingRepositoryComponent
     with OntologyRepositoryComponent
 {
-    self: RdfStorageComponent =>
+    self: RdfStorageComponent with PluginCompilerComponent =>
 
     implicit val context = this
 }
