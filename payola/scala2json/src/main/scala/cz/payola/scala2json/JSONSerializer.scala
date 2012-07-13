@@ -185,8 +185,7 @@ class JSONSerializer
       */
     def serialize(obj: Any): String = {
         // If obj is null, return "null" - as defined at http://www.json.org/
-
-            serializeObject(obj, new ArrayBuffer[Any]())
+        serializeObject(obj, new ArrayBuffer[Any]())
     }
 
     /** Serializes an Array[_]
