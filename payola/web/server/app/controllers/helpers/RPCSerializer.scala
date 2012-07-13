@@ -2,23 +2,20 @@ package controllers.helpers
 
 import cz.payola.scala2json._
 import cz.payola.common.rdf._
-import cz.payola.common.entities.Plugin
+import cz.payola.common.entities._
 import cz.payola.common.entities.plugins.parameters._
-import cz.payola.scala2json.classes.SimpleSerializationClass
-import cz.payola.scala2json.rules._
-import scala.Some
-import cz.payola.common.entities.Analysis
-import cz.payola.scala2json.rules.BasicSerializationRule
-import cz.payola.scala2json.classes.SimpleSerializationClass
-import scala.Some
 import cz.payola.scala2json.rules.CustomValueSerializationRule
 import cz.payola.scala2json.rules.BasicSerializationRule
 import cz.payola.scala2json.classes.SimpleSerializationClass
 import scala.Some
 import cz.payola.common.entities.plugins.PluginInstance
 import cz.payola.common.entities.analyses.PluginInstanceBinding
+import cz.payola.scala2json.rules.CustomValueSerializationRule
+import cz.payola.scala2json.rules.BasicSerializationRule
+import cz.payola.scala2json.classes.SimpleSerializationClass
+import scala.Some
 
-class GraphSerializer extends JSONSerializer
+class RPCSerializer extends JSONSerializer
 {
 
     val graphClass = new SimpleSerializationClass(classOf[Graph])
@@ -70,9 +67,6 @@ class GraphSerializer extends JSONSerializer
     val pluginRule = new BasicSerializationRule(Some(classOf[Plugin]))
     this.addSerializationRule(pluginClass, pluginRule)
 
-    val pluginParametersRule = new CustomValueSerializationRule[Plugin]("_parameters",(s,plugin) => plugin.parameters)
-    this.addSerializationRule(pluginClass, pluginParametersRule)
-
     val stringParamClass = new SimpleSerializationClass(classOf[StringParameter])
     val stringParamRule = new BasicSerializationRule(Some(classOf[StringParameter]))
     this.addSerializationRule(stringParamClass, stringParamRule)
@@ -88,5 +82,9 @@ class GraphSerializer extends JSONSerializer
     val intParamClass = new SimpleSerializationClass(classOf[IntParameter])
     val intParamRule = new BasicSerializationRule(Some(classOf[IntParameter]))
     this.addSerializationRule(intParamClass, intParamRule)
+
+    val userClass = new SimpleSerializationClass(classOf[User])
+    val userRule = new BasicSerializationRule(Some(classOf[User]))
+    this.addSerializationRule(userClass, userRule)
 
 }

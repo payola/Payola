@@ -5,7 +5,7 @@ import s2js.runtime.shared.rpc
 import cz.payola.domain.entities.User
 import scala.collection.mutable
 
-class RPCDispatcher(jsonSerializer: GraphSerializer)
+class RPCDispatcher(jsonSerializer: RPCSerializer)
 {
     /**
       * Processes the given HTTP request and returns a response. The expected result is a serialized JSON object. See
