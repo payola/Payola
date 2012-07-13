@@ -40,7 +40,7 @@ object BrowserEventArgs
   * @param wheelDelta Scrolling force of the mouse wheel.
   * @tparam A Type of the event target.
   */
-class BrowserEventArgs[A](
+class BrowserEventArgs[+A](
     target: A,
     val altKey: Boolean,
     val button: Int,

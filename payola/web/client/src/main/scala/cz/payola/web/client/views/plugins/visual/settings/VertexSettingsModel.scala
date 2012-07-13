@@ -1,6 +1,6 @@
 package cz.payola.web.client.views.plugins.visual.settings
 
-import cz.payola.web.client.views.plugins.visual.{Vector, Color}
+import cz.payola.web.client.views.plugins.visual.Color
 
 class VertexSettingsModel
 {

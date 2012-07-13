@@ -1,7 +1,7 @@
 package cz.payola.web.client.presenters.components
 
 import cz.payola.web.client.views.Component
-import s2js.adapters.js.dom.Element
+import s2js.adapters.js.dom._
 import s2js.adapters.js.browser.document
 import cz.payola.web.shared.AnalysisRunner
 import s2js.adapters.js.browser.window
@@ -9,6 +9,8 @@ import cz.payola.common.rdf.Graph
 import s2js.compiler.javascript
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events.UnitEvent
+import cz.payola.web.client.views.elements.Div
+import cz.payola.web.client.views.elements.Anchor
 
 class AnalysisControls(analysisId: String) extends Component
 {
@@ -26,16 +28,16 @@ class AnalysisControls(analysisId: String) extends Component
 
     val wrap = new Div(List(runBtn, progressDiv))
 
-    def render(parent: Element = document.body) = {
+    def render(parent: Node) = {
         wrap.render(parent)
     }
 
     var analysisRunning = false
 
-    runBtn.clicked += { evt =>
+    runBtn.mouseClicked += { evt =>
         if (!analysisRunning)
         {
-            runBtn.addClass("disabled")
+            runBtn.addCssClass("disabled")
             analysisRunning = true
             AnalysisRunner.runAnalysisById(analysisId){id =>
                 evaluationId = id
@@ -94,8 +96,8 @@ class AnalysisControls(analysisId: String) extends Component
     }
 
     def markDone(graph: Option[Graph]) = {
-        runBtn.addClass("btn-success")
-        progressDiv.removeClass("active")
+        runBtn.addCssClass("btn-success")
+        progressDiv.removeCssClass("active")
 
         analysisEvaluated.trigger(new EvaluationEventArgs(this, graph))
         analysisRunning = false
@@ -104,7 +106,7 @@ class AnalysisControls(analysisId: String) extends Component
     @javascript("""jQuery("#results-tab-link").click();""")
     def switchTab() = {}
 
-    def getDomElement : Element = {
-        wrap.getDomElement
+    def domElement : Element = {
+        wrap.domElement
     }
 }

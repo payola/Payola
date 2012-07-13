@@ -7,4 +7,6 @@ abstract class Input extends Element
     def focus()
 
     var value: String
+
+    var onchange: (Event => Boolean)
 }

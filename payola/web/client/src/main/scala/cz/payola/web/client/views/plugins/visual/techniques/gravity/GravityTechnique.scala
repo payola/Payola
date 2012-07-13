@@ -2,7 +2,7 @@ package cz.payola.web.client.views.plugins.visual.techniques.gravity
 
 import collection.mutable.ListBuffer
 import cz.payola.web.client.views.plugins.visual.techniques._
-import cz.payola.web.client.views.plugins.visual.{Point, Vector}
+import cz.payola.web.client.views._
 import s2js.adapters.js.dom.Date
 import cz.payola.web.client.views.plugins.visual.animation.Animation
 import cz.payola.web.client.views.plugins.visual.settings.components.visualsetup.VisualSetup
@@ -43,7 +43,7 @@ class GravityTechnique(settings: VisualSetup) extends BaseTechnique(settings)
         "gravity visualisation"
     }
 
-    protected def getTechniquePerformer(component: Component, animate: Boolean): Animation[ListBuffer[(VertexView, Point)]] = {
+    protected def getTechniquePerformer(component: Component, animate: Boolean): Animation[ListBuffer[(VertexView, Point2D)]] = {
 
         if(animate) {
             val animationOfThis = new Animation(
@@ -85,7 +85,7 @@ class GravityTechnique(settings: VisualSetup) extends BaseTechnique(settings)
             currentTime = new Date()
         }
 
-        val toMove = ListBuffer[(VertexView, Point)]()
+        val toMove = ListBuffer[(VertexView, Point2D)]()
         vertexViewPacks.foreach{ vVPack =>
             toMove += ((vVPack.value, vVPack.currentPosition))
         }
@@ -155,7 +155,7 @@ class GravityTechnique(settings: VisualSetup) extends BaseTechnique(settings)
     private def run(vertexViewPacks: ListBuffer[VertexViewPack], edgeViewPacks: ListBuffer[EdgeViewPack]): Boolean = {
 
         vertexViewPacks.foreach {pushed =>
-            pushed.force = Vector(0, 0)
+            pushed.force = Vector2D(0, 0)
 
             //set repulsion by all other vertices
             vertexViewPacks.foreach {pushing =>

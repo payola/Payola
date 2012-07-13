@@ -1,15 +1,16 @@
 package cz.payola.web.client.views
 
-import s2js.adapters.js.browser.document
-import s2js.adapters.js.dom.Element
+import s2js.adapters.js.dom
 
-trait Component
+abstract class Component
 {
-    def render(parent: Element)
+    val domElement: dom.Element
 
-    def destroy() {
-
+    def render(parent: dom.Node) {
+        parent.appendChild(domElement)
     }
 
-    def getDomElement: Element
+    def destroy() {
+        domElement.parentNode.removeChild(domElement)
+    }
 }

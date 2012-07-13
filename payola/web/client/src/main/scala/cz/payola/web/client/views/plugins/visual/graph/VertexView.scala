@@ -6,13 +6,25 @@ import s2js.adapters.js.dom.CanvasRenderingContext2D
 import cz.payola.web.client.views.plugins.visual._
 import settings.{TextSettingsModel, VertexSettingsModel}
 import s2js.adapters.js.browser.window
+import cz.payola.web._
+import scala.Some
+import scala.Some
+import scala.Some
+import scala.Some
+import cz.payola.web.client._
+import scala.Some
+import scala.Some
+import scala.Some
+import scala.Some
+import cz.payola.web.client.views._
+import scala.Some
 
 /**
  * Graphical representation of Vertex object in the drawn graph.
  * @param vertexModel the vertex object from the model, that is visualised
  * @param position of this graphical representation in drawing space
  */
-class VertexView(val vertexModel: Vertex, var position: Point, var settings: VertexSettingsModel,
+class VertexView(val vertexModel: Vertex, var position: Point2D, var settings: VertexSettingsModel,
     settingsText: TextSettingsModel) extends View
 {
 
@@ -69,16 +81,16 @@ class VertexView(val vertexModel: Vertex, var position: Point, var settings: Ver
         age = newAge
     }
 
-    def isPointInside(point: Point): Boolean = {
-        isPointInRect(point, position + (new Vector(settings.radius, settings.radius) / -2), position + (new Vector(settings.radius, settings.radius) / 2))
+    def isPointInside(point: Point2D): Boolean = {
+        isPointInRect(point, position + (new Vector2D(settings.radius, settings.radius) / -2), position + (new Vector2D(settings.radius, settings.radius) / 2))
     }
 
-    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
+    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D) {
         drawQuick(context, color, positionCorrection)
-        drawImage(context, image, position + Vector(-10, -10), Vector(20, 20))
+        drawImage(context, image, position + Vector2D(-10, -10), Vector2D(20, 20))
     }
 
-    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
+    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D) {
         val colorToUseOnBox = color.getOrElse(settings.color)
         val correctedPosition = this.position + positionCorrection
 
@@ -88,7 +100,7 @@ class VertexView(val vertexModel: Vertex, var position: Point, var settings: Ver
         fillCurrentSpace(context, colorToUseOnBox)
     }
 
-    def drawInformation(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
+    def drawInformation(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D) {
         if (information.isDefined) {
             vertexModel match {
                 case i: IdentifiedVertex => information.get.draw(context, color, positionCorrection)

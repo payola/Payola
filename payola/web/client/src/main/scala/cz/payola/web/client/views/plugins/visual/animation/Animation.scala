@@ -1,7 +1,7 @@
 package cz.payola.web.client.views.plugins.visual.animation
 
 import collection.mutable.ListBuffer
-import cz.payola.web.client.views.plugins.visual.{Vector, Point}
+import cz.payola.web.client.views._
 import s2js.adapters.js.browser.window
 import cz.payola.web.client.views.plugins.visual.graph._
 import cz.payola.web.client.views.plugins.visual.graph.positioning._
@@ -62,13 +62,13 @@ object Animation
         animateTextVisibility(infosToAnimate, 0 + 0.1, 0.1, nextAnimation, quickDraw, finalDraw, animationStepLength)
     }
 
-    def moveVertices(verticesToMove: ListBuffer[(VertexView, Point)], nextAnimation: Option[Animation[_]],
+    def moveVertices(verticesToMove: ListBuffer[(VertexView, Point2D)], nextAnimation: Option[Animation[_]],
         quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
 
         val animationVViews = ListBuffer[AnimationVertexView]()
         verticesToMove.foreach { vToMove =>
             val translation = vToMove._1.position.createVector(vToMove._2)
-            animationVViews += new AnimationVertexView(vToMove._1, translation, Vector.One)
+            animationVViews += new AnimationVertexView(vToMove._1, translation, Vector2D.One)
         }
         animationCurrentNumber = animationPrepareConst
 
@@ -82,14 +82,14 @@ object Animation
             animationStepLength)
     }
 
-    def moveGraphByVector(move: (Vector, ListBuffer[VertexView]), nextAnimation: Option[Animation[_]],
+    def moveGraphByVector(move: (Vector2D, ListBuffer[VertexView]), nextAnimation: Option[Animation[_]],
         quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
 
 
         val animationVViews = ListBuffer[AnimationVertexView]()
         move._2.foreach {
             vView =>
-                animationVViews += new AnimationVertexView(vView, move._1, Vector.One)
+                animationVViews += new AnimationVertexView(vView, move._1, Vector2D.One)
         }
         animationCurrentNumber = animationPrepareConst
         animateTranslation(animationVViews, nextAnimation, quickDraw, finalDraw, animationStepLength)
@@ -98,7 +98,7 @@ object Animation
     def moveGraphToUpperLeftCorner(vViews: ListBuffer[VertexView], nextAnimation: Option[Animation[_]],
         quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
 
-        moveGraphByVector((Point(50, 25).toVector, vViews), nextAnimation, quickDraw, finalDraw, animationStepLength)
+        moveGraphByVector((Point2D(50, 25).toVector, vViews), nextAnimation, quickDraw, finalDraw, animationStepLength)
     }
 
     def flipGraph(vViews: ListBuffer[VertexView], nextAnimation: Option[Animation[_]], quickDraw: () => Unit,
@@ -131,7 +131,7 @@ object Animation
             vViews.foreach {
                 vView =>
                     animationVViews += new AnimationVertexView(vView,
-                        vView.position.createVector(Point(vView.position.y, vView.position.x)), Vector.One)
+                        vView.position.createVector(Point2D(vView.position.y, vView.position.x)), Vector2D.One)
             }
 
             animationCurrentNumber = animationPrepareConst
@@ -198,15 +198,15 @@ object Animation
             }
         } else {
             animVViews.foreach { vertex =>
-                val loweredSpeed = Vector(getBiggestLowerSpeed(vertex.translation.x, vertex.speed.x),
+                val loweredSpeed = Vector2D(getBiggestLowerSpeed(vertex.translation.x, vertex.speed.x),
                     getBiggestLowerSpeed(vertex.translation.y, vertex.speed.y))
 
-                val tinyTrans = Vector(getNewTranslation(vertex.translation.x, loweredSpeed.x),
+                val tinyTrans = Vector2D(getNewTranslation(vertex.translation.x, loweredSpeed.x),
                     getNewTranslation(vertex.translation.y, loweredSpeed.y))
 
                 vertex.value.position = vertex.value.position + tinyTrans
                 vertex.translation = vertex.translation - tinyTrans
-                vertex.speed = loweredSpeed + Vector.One
+                vertex.speed = loweredSpeed + Vector2D.One
 
                 if (vertex.translation.x != 0 || vertex.translation.y != 0) {
                     translationFinished = false

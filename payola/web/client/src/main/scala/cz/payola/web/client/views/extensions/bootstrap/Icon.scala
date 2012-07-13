@@ -1,12 +1,12 @@
 package cz.payola.web.client.views.extensions.bootstrap
 
 import cz.payola.web.client.views.elements.Italic
-import s2js.adapters.js.dom.Element
+import s2js.adapters.js.dom._
 import s2js.adapters.js.browser.document
 
 class Icon(iconName: String) extends Italic(List(), "icon-" + iconName)
 {
-    override def render(parent: Element = document.body) = {
+    def render(parent: Node) = {
         super.render(parent)
     }
 }

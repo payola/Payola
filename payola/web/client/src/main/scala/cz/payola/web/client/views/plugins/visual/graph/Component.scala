@@ -1,8 +1,7 @@
 package cz.payola.web.client.views.plugins.visual.graph
 
 import collection.mutable.ListBuffer
-import cz.payola.web.client.views.plugins.visual.{Point, Vector}
-import s2js.adapters.js.browser.window
+import cz.payola.web.client.views._
 
 class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuffer[EdgeView]) {
 
@@ -16,7 +15,7 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
         vertexViews.isEmpty //TODO may be length == 0
     }
 
-    def getLeftmostPosition(): Point = {
+    def getLeftmostPosition(): Point2D = {
         var result = vertexViews.head.position
 
         vertexViews.foreach{ vertexView =>
@@ -28,7 +27,7 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
         result
     }
 
-    def getBottomRight(): Point = {
+    def getBottomRight(): Point2D = {
         var bottom = Double.MinValue
         var right = Double.MinValue
 
@@ -43,10 +42,10 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
             vals += vertexView.position.toString + " "
         }
 
-        Point(right, bottom)
+        Point2D(right, bottom)
     }
 
-    def getBottomLeft(): Point = {
+    def getBottomLeft(): Point2D = {
         var bottom = Double.MinValue
         var left = Double.MaxValue
 
@@ -59,10 +58,10 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
             }
         }
 
-        Point(left, bottom)
+        Point2D(left, bottom)
     }
 
-    def getTopRight(): Point = {
+    def getTopRight(): Point2D = {
         var top = Double.MaxValue
         var right = Double.MinValue
 
@@ -75,10 +74,10 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
             }
         }
 
-        Point(right, top)
+        Point2D(right, top)
     }
 
-    def getTopLeft(): Point = {
+    def getTopLeft(): Point2D = {
         var top = Double.MaxValue
         var left = Double.MaxValue
 
@@ -91,10 +90,10 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
             }
         }
 
-        Point(left, top)
+        Point2D(left, top)
     }
 
-    def getTopmostPosition(): Point = {
+    def getTopmostPosition(): Point2D = {
         var result = vertexViews.head.position
 
         vertexViews.foreach{ vertexView =>
@@ -106,7 +105,7 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
         result
     }
 
-    def getRightmostPosition(): Point = {
+    def getRightmostPosition(): Point2D = {
         var result = vertexViews.head.position
 
         vertexViews.foreach{ vertexView =>
@@ -118,7 +117,7 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
         result
     }
 
-    def getBottommostPosition(): Point = {
+    def getBottommostPosition(): Point2D = {
         var result = vertexViews.head.position
 
         vertexViews.foreach{ vertexView =>
@@ -130,7 +129,7 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
         result
     }
 
-    def moveAllSelectedVertices(difference: Vector) {
+    def moveAllSelectedVertices(difference: Vector2D) {
         selectedVertexViews.foreach { vertexView =>
             if(vertexView.selected) {
                 vertexView.position += difference
@@ -138,7 +137,7 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
         }
     }
 
-    def moveAllVertices(difference: Vector) {
+    def moveAllVertices(difference: Vector2D) {
         vertexViews.foreach { vertexView =>
             vertexView.position += difference
         }
@@ -169,7 +168,7 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
      * @param point to compare the locations of vertices with
      * @return vertexView, that has the input point "inside", if none is found None
      */
-    def getTouchedVertex(point: Point): Option[VertexView] = {
+    def getTouchedVertex(point: Point2D): Option[VertexView] = {
 
         vertexViews.find(v => v.isPointInside(point))
     }

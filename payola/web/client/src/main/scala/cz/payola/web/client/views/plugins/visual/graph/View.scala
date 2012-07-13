@@ -3,8 +3,10 @@ package cz.payola.web.client.views.plugins.visual.graph
 import s2js.adapters.js.browser._
 import s2js.adapters.js.dom._
 import cz.payola.web.client.views.plugins.visual._
-import cz.payola.web.client.views.elements.CanvasPack
-import cz.payola.web.client.views.elements.CanvasPack
+import cz.payola.web.client.views.todo._
+import cz.payola.web.client._
+import cz.payola.web.client.views._
+import s2js.adapters.js.dom.Element
 
 trait View {
     /**
@@ -19,7 +21,7 @@ trait View {
       * @param color which color to use
       * @param positionCorrection to modify the position of the drawn object
       */
-    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector)
+    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D)
 
     /**
      * Routine for fast drawing of the graphical representation of graphs objects. Should be used for animation
@@ -27,7 +29,7 @@ trait View {
      * @param color which color to use
      * @param positionCorrection to modify the position of the drawn object
      */
-    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector)
+    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D)
 
     /**
       * Draws a rectangle with rounded corners, depending on the radius parameter to the input canvas context.
@@ -36,7 +38,7 @@ trait View {
       * @param size of the drawn "rounded rectangle"
       * @param radius of the corners of the rectangle
       */
-    protected def drawRoundedRectangle(context: CanvasRenderingContext2D, position: Point, size: Vector, radius: Double) {
+    protected def drawRoundedRectangle(context: CanvasRenderingContext2D, position: Point2D, size: Vector2D, radius: Double) {
         //theory:
         //	context.quadraticCurveTo(
         //		bend X coord (control point), bend Y coord (control point),
@@ -79,8 +81,8 @@ trait View {
       * @param lineWidth width of the line
       * @param color of the line
       */
-    protected def drawBezierCurve(context: CanvasRenderingContext2D, control1: Point, control2: Point,
-        origin: Point, destination: Point, lineWidth: Double, color: Color) {
+    protected def drawBezierCurve(context: CanvasRenderingContext2D, control1: Point2D, control2: Point2D,
+        origin: Point2D, destination: Point2D, lineWidth: Double, color: Color) {
 
         context.lineWidth = lineWidth
         context.strokeStyle = color.toString
@@ -99,7 +101,7 @@ trait View {
       * @param lineWidth width of the line
       * @param color of the line
       */
-    protected def drawStraightLine(context: CanvasRenderingContext2D, origin: Point, destination: Point,
+    protected def drawStraightLine(context: CanvasRenderingContext2D, origin: Point2D, destination: Point2D,
         lineWidth: Double, color: Color) {
 
         context.lineWidth = lineWidth
@@ -119,7 +121,7 @@ trait View {
       * @param lineWidth width of the line of the circle
       * @param color of the line of the circle
       */
-    protected def drawCircle(context: CanvasRenderingContext2D, center: Point, radius: Double,
+    protected def drawCircle(context: CanvasRenderingContext2D, center: Point2D, radius: Double,
         lineWidth: Double, color: Color) {
 
         context.lineWidth = lineWidth
@@ -139,7 +141,7 @@ trait View {
       * @param font of the text
       * @param align of the text
       */
-    protected def drawText(context: CanvasRenderingContext2D, text: String,  origin: Point,
+    protected def drawText(context: CanvasRenderingContext2D, text: String,  origin: Point2D,
         color: Color, font: String, align: String) {
 
         context.fillStyle = color.toString
@@ -167,14 +169,14 @@ trait View {
       * @param location of drawing
       * @param dimensions to stretch the image to
       */
-    protected def drawImage(context: CanvasRenderingContext2D, image: Element, location: Point, dimensions: Vector) {
+    protected def drawImage(context: CanvasRenderingContext2D, image: Element, location: Point2D, dimensions: Vector2D) {
 
         context.drawImage(image, location.x, location.y, dimensions.x, dimensions.y)
     }
 
     protected def prepareImage(colorToUse: Color, imagePath: String): Canvas = {
 
-        val imageSize = Vector(20, 20)
+        val imageSize = Vector2D(20, 20)
         val canvas = document.createElement[Canvas]("canvas")
         canvas.width = imageSize.x
         canvas.height = imageSize.y
@@ -185,7 +187,7 @@ trait View {
         val imageElement = document.createElement[Image]("img")
         imageElement.src = imagePath
 
-        drawImage(context, imageElement, Point(0, 0), imageSize)
+        drawImage(context, imageElement, Point2D(0, 0), imageSize)
 
         //nakreslim do globalniho canvasu lokalni canvas
         val imageData = context.getImageData(0, 0, imageSize.x, imageSize.y);
@@ -213,7 +215,7 @@ trait View {
       * @param bottomRight point of the rectangle
       * @return true if the point is inside the rectangle
       */
-    protected def isPointInRect(point: Point, topLeft: Point, bottomRight: Point): Boolean = {
+    protected def isPointInRect(point: Point2D, topLeft: Point2D, bottomRight: Point2D): Boolean = {
         point >= topLeft && point <= bottomRight
     }
 
@@ -224,8 +226,8 @@ trait View {
       */
     protected def createCanvasPack(container: Element): CanvasPack = {
 
-        val canvasPack = new CanvasPack(
-            window.innerWidth - container.offsetLeft, window.innerHeight - container.offsetTop)
+        val canvasPack = new CanvasPack(Vector2D(window.innerWidth - container.offsetLeft,
+            window.innerHeight - container.offsetTop))
         canvasPack.render(container)
 
         canvasPack

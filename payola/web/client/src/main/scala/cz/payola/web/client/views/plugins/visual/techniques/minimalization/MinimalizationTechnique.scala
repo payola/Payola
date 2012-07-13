@@ -5,13 +5,13 @@ import cz.payola.web.client.views.plugins.visual.animation.Animation
 import cz.payola.web.client.views.plugins.visual.techniques.BaseTechnique
 import cz.payola.web.client.views.plugins.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.views.plugins.visual.graph.{Component, EdgeView, VertexView}
-import cz.payola.web.client.views.plugins.visual.Point
+import cz.payola.web.client.views.Point2D
 
 class MinimalizationTechnique(settings: VisualSetup) extends BaseTechnique(settings)
 {
     //TODO add some computation branch cutting...this algorithm is quite complex
 
-    protected def getTechniquePerformer(component: Component, animate: Boolean): Animation[ListBuffer[(VertexView, Point)]] = {
+    protected def getTechniquePerformer(component: Component, animate: Boolean): Animation[ListBuffer[(VertexView, Point2D)]] = {
 
         minimizeEdgeCrossing(component.vertexViews) //TODO this is impossible to combine with animation
 

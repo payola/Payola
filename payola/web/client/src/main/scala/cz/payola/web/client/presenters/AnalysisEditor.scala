@@ -1,6 +1,6 @@
 package cz.payola.web.client.presenters
 
-import cz.payola.web.client.views.PluginInstance
+import cz.payola.web.client.views.todo.PluginInstance
 import cz.payola.web.shared.AnalysisBuilderData
 import scala.collection.mutable.ArrayBuffer
 import s2js.runtime.client.scala.collection.mutable.HashMap

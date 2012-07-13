@@ -2,7 +2,7 @@ package cz.payola.web.client.views.plugins.visual.settings.components.visualsetu
 
 import cz.payola.web.client.views.Component
 import s2js.adapters.js.browser.document
-import s2js.adapters.js.dom.Element
+import s2js.adapters.js.dom._
 import cz.payola.web.client.views.elements.Div
 import cz.payola.web.client.views.events._
 import cz.payola.web.client.views.plugins.visual.settings.TextSettingsModel
@@ -28,10 +28,10 @@ class TextModal(model: TextSettingsModel) extends Component
     private val modal = new Modal("Text settings", List(wrapper))
 
     modal.saved += {
-        event => settingsChanged.trigger(this)
+        event => settingsChanged.triggerDirectly(this)
     }
 
-    def render(parent: Element = document.body) {
+    def render(parent: Node) {
         modal.render(parent)
     }
 
@@ -43,5 +43,5 @@ class TextModal(model: TextSettingsModel) extends Component
         modal.hide
     }
 
-    def getDomElement : Element = modal.getDomElement
+    def domElement : Element = modal.domElement
 }

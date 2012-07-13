@@ -1,4 +1,4 @@
-package cz.payola.web.client.views.plugins.visual
+package cz.payola.web.client.views
 
 import scala.math._
 import s2js.adapters.js.browser.window
@@ -8,15 +8,15 @@ import s2js.adapters.js.browser.window
   * @param x first value of the vector
   * @param y first value of the vector
   */
-case class Vector(x: Double, y: Double)
+case class Vector2D(x: Double, y: Double)
 {
     /**
       * Addition
       * @param vector to add
       * @return new vector with values of this vector plus the parameter vector
       */
-    def +(vector: Vector): Vector = {
-        Vector(x + vector.x, y + vector.y)
+    def +(vector: Vector2D): Vector2D = {
+        Vector2D(x + vector.x, y + vector.y)
     }
 
     /**
@@ -24,16 +24,16 @@ case class Vector(x: Double, y: Double)
       * @param vector to deduct
       * @return new vector with values of this vector minus the parameter vector
       */
-    def -(vector: Vector): Vector = {
-        Vector(x - vector.x, y - vector.y)
+    def -(vector: Vector2D): Vector2D = {
+        Vector2D(x - vector.x, y - vector.y)
     }
 
     /**
       * Times -1
       * @return new vector with values of this vector times -1
       */
-    def unary_-(): Vector = {
-        Vector(-x, -y)
+    def unary_-(): Vector2D = {
+        Vector2D(-x, -y)
     }
 
     /**
@@ -41,8 +41,8 @@ case class Vector(x: Double, y: Double)
       * @param value to multiply this vectors values with
       * @return new vector with values multiplied by the parameter value
       */
-    def *(value: Double): Vector = {
-        Vector(x * value, y * value)
+    def *(value: Double): Vector2D = {
+        Vector2D(x * value, y * value)
     }
 
     /**
@@ -50,8 +50,8 @@ case class Vector(x: Double, y: Double)
       * @param value to divide this vectors values with
       * @return new vector with values divided by the parameter value
       */
-    def /(value: Double): Vector = {
-        Vector(x / value, y / value)
+    def /(value: Double): Vector2D = {
+        Vector2D(x / value, y / value)
     }
 
     /**
@@ -70,9 +70,9 @@ case class Vector(x: Double, y: Double)
 /**
   * Frequently used constant vectors
   */
-object Vector
+object Vector2D
 {
-    val Zero = Vector(0, 0)
-    
-    val One = Vector(1, 1)
+    val Zero = Vector2D(0, 0)
+
+    val One = Vector2D(1, 1)
 }

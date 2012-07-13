@@ -1,21 +1,19 @@
-package cz.payola.web.client.views.plugins.visual
-
-import s2js.adapters.js.browser.`package`.window
+package cz.payola.web.client.views
 
 /**
   * Representation of a position in 2-dimensional space.
   * @param x coordinate
   * @param y coordinate
   */
-case class Point(var x: Double, var y: Double)
+case class Point2D(var x: Double, var y: Double)
 {
     /**
       * Move the position by a vector.
       * @param vector direction and distance of movement
       * @return new point with changed position
       */
-    def +(vector: Vector): Point = {
-        Point(x + vector.x, y + vector.y)
+    def +(vector: Vector2D): Point2D = {
+        Point2D(x + vector.x, y + vector.y)
     }
 
     /**
@@ -23,8 +21,8 @@ case class Point(var x: Double, var y: Double)
       * @param point to deduct
       * @return vector describing direction and distance to move this point to position of point parameter
       */
-    def -(point: Point): Vector = {
-        Vector(x - point.x, y - point.y)
+    def -(point: Point2D): Vector2D = {
+        Vector2D(x - point.x, y - point.y)
     }
 
     /**
@@ -32,7 +30,7 @@ case class Point(var x: Double, var y: Double)
       * @param point to compare with
       * @return true if both coordinates of this point are less than or equal to the parameter point
       */
-    def <=(point: Point): Boolean = {
+    def <=(point: Point2D): Boolean = {
         x <= point.x && y <= point.y
     }
 
@@ -41,16 +39,16 @@ case class Point(var x: Double, var y: Double)
       * @param point to compare with
       * @return true if both coordinates of this point are greater than or equal to the parameter point
       */
-    def >=(point: Point): Boolean = {
+    def >=(point: Point2D): Boolean = {
         x >= point.x && y >= point.y
     }
 
     /**
-      * Conversion to a Vector
-      * @return new Vector object values set to equal to this point
+      * Conversion to a Vector2D
+      * @return new Vector2D object values set to equal to this point
       */
-    def toVector: Vector = {
-        Vector(x, y)
+    def toVector: Vector2D = {
+        Vector2D(x, y)
     }
 
     /**
@@ -58,8 +56,8 @@ case class Point(var x: Double, var y: Double)
       * @param destination of the vector
       * @return direction from this point to the destination
       */
-    def createVector(destination: Point): Vector = {
-        Vector(destination.x - x, destination.y - y)
+    def createVector(destination: Point2D): Vector2D = {
+        Vector2D(destination.x - x, destination.y - y)
     }
 
     /**
@@ -67,19 +65,19 @@ case class Point(var x: Double, var y: Double)
       * @param p
       * @return
       */
-    def distance(p: Point): Double = {
+    def distance(p: Point2D): Double = {
         math.sqrt(math.pow(x - p.x, 2) + math.pow(y - p.y, 2))
     }
 
     override def toString: String = {
-        "["+math.round(x)+"; "+math.round(y)+"]"
+        "[" + math.round(x) + "; " + math.round(y) + "]"
     }
 }
 
 /**
   * Frequently used constant points
   */
-object Point
+object Point2D
 {
-    val Zero = Point(0, 0)
+    val Zero = Point2D(0, 0)
 }

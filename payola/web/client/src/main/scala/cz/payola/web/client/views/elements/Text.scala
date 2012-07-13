@@ -1,31 +1,29 @@
 package cz.payola.web.client.views.elements
 
-import cz.payola.web.client.views.Component
-import cz.payola.web.client.views.Component
 import s2js.adapters.js.browser.document
-import s2js.adapters.js.dom.{Element, Node}
+import s2js.adapters.js.dom
+import cz.payola.web.client.views.Component
 
-class Text(var value: String) extends Component
+class Text(initialValue: String) extends Component
 {
-    private var parent: Element = null
+    private var value = initialValue
 
-    private var element: Element = null
+    private var textNode: Option[dom.Node] = None
 
-    def setText(text: String) = {
-        if (parent != null) {
-            parent.removeChild(element)
-            value = text
-            render(parent)
-        }
+    def text: String = value
+
+    def text_=(text: String) {
+        value = text
+        destroy()
+        textNode.foreach(e => render(e.parentNode))
     }
 
-    def render(parent: Element = document.body) = {
-        this.parent = parent
-        element = document.createTextNode(value)
-        parent.appendChild(element)
+    def render(parent: dom.Node) {
+        textNode = Some(document.createTextNode(value))
+        parent.appendChild(textNode.get)
     }
 
-    def getDomElement: Element = {
-        element
+    def destroy() {
+        textNode.foreach(e => e.parentNode.removeChild(e))
     }
 }

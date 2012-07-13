@@ -1,7 +1,7 @@
 package cz.payola.web.client.views.extensions.bootstrap
 
 import s2js.compiler.javascript
-import s2js.adapters.js.dom.Element
+import s2js.adapters.js.dom._
 import s2js.adapters.js.browser.document
 import cz.payola.web.client.views.Component
 import cz.payola.web.client.views.events._
@@ -45,17 +45,17 @@ class Modal(title: String, body: Seq[Component], showSave: Boolean = true, showC
 
     val saveA = new Anchor(List(new Text("Save changes")), "#", "btn btn-primary")
 
-    saveA.clicked += { e =>
-        saved.trigger(this)
+    saveA.mouseClicked += { e =>
+        saved.triggerDirectly(this)
         false
     }
 
-    closeA.clicked += { e =>
-        closed.trigger(this)
+    closeA.mouseClicked += { e =>
+        closed.triggerDirectly(this)
         false
     }
 
-    def render(parent: Element = document.body) {
+    def render(parent: Node = document.body) {
         modalHeader.appendChild(btnClose)
         modalHeader.appendChild(heading)
         modalDiv.appendChild(modalHeader)
@@ -76,7 +76,7 @@ class Modal(title: String, body: Seq[Component], showSave: Boolean = true, showC
         init
     }
 
-    def getDomElement: Element = {
+    def domElement: Element = {
         modalDiv
     }
 

@@ -1,7 +1,7 @@
-package cz.payola.web.client.views
+package cz.payola.web.client.views.todo
 
 import s2js.adapters.js.browser.document
-import s2js.adapters.js.dom.Element
+import s2js.adapters.js.dom._
 import cz.payola.common.entities.Plugin
 import s2js.compiler.javascript
 import scala.collection.mutable
@@ -10,6 +10,10 @@ import cz.payola.web.client.views.events._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.extensions.bootstrap._
 import cz.payola.web.client.events._
+import scala.Some
+import cz.payola.web.client.views.Component
+import cz.payola.web.client.views.extensions.bootstrap.Button
+import cz.payola.web.client.views.elements.Div
 import scala.Some
 
 object PluginInstance
@@ -31,7 +35,7 @@ class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[P
 
     val parameterValueChanged = new SimpleEvent[ParameterValue]
 
-    private val heading = new Heading3(List(new Text(plugin.name)))
+    private val heading = new Heading(List(new Text(plugin.name)), 3)
 
     private val params = new mutable.HashMap[Int, InputControl]
 
@@ -42,7 +46,7 @@ class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[P
         val field = new InputControl(param.name, param.id, "", "Enter parameter value")
 
         field.changed += { args =>
-            parameterValueChanged.trigger(new ParameterValue(id, param.id, param.name, field.getValue(), field))
+            parameterValueChanged.triggerDirectly(new ParameterValue(id, param.id, param.name, field.getValue(), field))
         }
 
         params.put(paramIdx, field)
@@ -63,42 +67,42 @@ class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[P
 
     private val successors = new Div(List(clearSpan, alertDiv), "successors")
 
-    connect.clicked += { e =>
-        connectButtonClicked.trigger(this)
+    connect.mouseClicked += { e =>
+        connectButtonClicked.triggerDirectly(this)
         false
     }
-    delete.clicked += { e =>
-        deleteButtonClicked.trigger(this)
+    delete.mouseClicked += { e =>
+        deleteButtonClicked.triggerDirectly(this)
         false
     }
 
-    private var parent: Option[Element] = None
+    private var parentNode: Option[Node] = None
 
-    def render(parent: Element = document.body) = {
-        this.parent = Some(parent)
-        alertDiv.setId(plugin.id + "_" + PluginInstance.getCounter())
+    def render(parent: Node) = {
+        this.parentNode = Some(parent)
+        alertDiv.id = (plugin.id + "_" + PluginInstance.getCounter())
         successors.render(parent)
 
         if (predecessors.size > 0) {
-            parent.insertBefore(successors.getDomElement, predecessors(0).getDomElement)
+            parent.insertBefore(successors.domElement, predecessors(0).domElement)
         }
 
         var i = 0
         while (i < predecessors.size) {
-            successors.getDomElement.insertBefore(predecessors(i).getDomElement, clearSpan.getDomElement)
+            successors.domElement.insertBefore(predecessors(i).domElement, clearSpan.domElement)
             i += 1
         }
     }
 
     override def destroy() = {
-        if (parent.isDefined) {
+        if (parentNode.isDefined) {
             unbindJsPlumb(getPluginElement)
             var i = 0
             while (i < predecessors.size) {
-                parent.get.insertBefore(predecessors(i).getDomElement, getDomElement)
+                parentNode.get.insertBefore(predecessors(i).domElement, domElement)
                 i += 1
             }
-            parent.get.removeChild(getDomElement)
+            parentNode.get.removeChild(domElement)
         }
     }
 
@@ -108,20 +112,20 @@ class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[P
                  """)
     def unbindJsPlumb(element: Element) = {}
 
-    def getDomElement: Element = {
-        successors.getDomElement
+    def domElement: Element = {
+        successors.domElement
     }
 
     def getPluginElement: Element = {
-        alertDiv.getDomElement
+        alertDiv.domElement
     }
 
     def showDeleteButton() = {
-        delete.getDomElement.setAttribute("style", "display: inline-block;")
+        delete.domElement.setAttribute("style", "display: inline-block;")
     }
 
     def hideDeleteButton() = {
-        delete.getDomElement.setAttribute("style", "display: none;")
+        delete.domElement.setAttribute("style", "display: none;")
     }
 
     def getParamValue(index: Int) = {

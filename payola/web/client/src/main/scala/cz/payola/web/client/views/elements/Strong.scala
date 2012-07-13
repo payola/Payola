@@ -1,23 +1,7 @@
 package cz.payola.web.client.views.elements
 
-import cz.payola.web.client.views.Component
-import cz.payola.web.client.views.Component
-import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom
-import dom.Element
+import cz.payola.web.client.views._
 
-class Strong(val innerElements: Seq[Component] = List(), val addClass: String = "") extends Component
-{
-    val strong = document.createElement[dom.Element]("strong")
-
-    strong.setAttribute("class", addClass)
-
-    def render(parent: Element = document.body) = {
-        parent.appendChild(strong)
-        innerElements.map(_.render(strong))
-    }
-
-    def getDomElement: Element = {
-        strong
-    }
-}
+class Strong(innerComponents: Seq[Component] = Nil, cssClass: String = "")
+    extends Element[dom.Div]("strong", innerComponents, cssClass)

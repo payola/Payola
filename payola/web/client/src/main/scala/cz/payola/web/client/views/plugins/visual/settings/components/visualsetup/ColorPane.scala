@@ -13,16 +13,16 @@ class ColorPane(name: String, label: String, var color: Color) extends Component
     val changed = new SimpleEvent[ColorPane]
 
     val colorInput: Input = new Input(name, color.toString, None, "colorpicker")
-    colorInput.field.setAttribute("readonly","true")
+    colorInput.setAttribute("readonly","true")
 
     val i = new Italic(List())
-    i.i.setAttribute("style","background-color: "+color.toString)
+    i.setAttribute("style","background-color: "+color.toString)
 
     val span = new Span(List(i),"add-on")
-    val labelElement = new Label(label, colorInput.field)
+    val labelElement = new Label(label, colorInput)
     val div = new Div(List(colorInput, span), "input-append color")
-    div.div.setAttribute("data-color", color.toString)
-    div.div.setAttribute("data-color-format", "rgba")
+    div.setAttribute("data-color", color.toString)
+    div.setAttribute("data-color-format", "rgba")
 
     def render(parent: Element) {
         labelElement.render(parent)
@@ -36,10 +36,10 @@ class ColorPane(name: String, label: String, var color: Color) extends Component
 
     def setColor(value: Color) {
         color = value
-        colorInput.setText(value.toString)
+        colorInput.value = value.toString
     }
 
-    def getDomElement : Element = colorInput.getDomElement
+    def domElement : Element = colorInput.domElement
 
     @javascript("""jQuery(self.div.div).colorpicker({format: 'rgba'}).on('changeColor',function(evt){
         var rgba = evt.color.toRGB();

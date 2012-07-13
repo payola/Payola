@@ -1,7 +1,8 @@
 package cz.payola.web.client.views.plugins.visual.techniques
 
 import collection.mutable.ListBuffer
-import cz.payola.web.client.views.plugins.visual.{VisualPlugin, Point}
+import cz.payola.web.client.views.Point2D
+import cz.payola.web.client.views.plugins.visual.VisualPlugin
 import cz.payola.common.rdf.Graph
 import s2js.adapters.js.dom.Element
 import cz.payola.web.client.views.plugins.visual.animation.Animation
@@ -35,7 +36,7 @@ abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(setting
     private def performPositioning(graphView: GraphView) {
         //TODO might be useful to somehow calculate the highest bottom (y-coordinate) of components in a row
 
-        var firstAnimation: Animation[ListBuffer[(VertexView, Point)]] = null
+        var firstAnimation: Animation[ListBuffer[(VertexView, Point2D)]] = null
         var isFirstAnimation = true
         var componentNumber = 1
 
@@ -70,7 +71,7 @@ abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(setting
             new Animation(Animation.emptyAnimation, false, None, graphView.fitCanvas, redraw, None))
 
         //finally move the whole graph to the center of the window
-        val graphCenterCorrector = new GraphPositionHelper(graphView.canvasPack.getSize, graphView.getGraphCenter)
+        val graphCenterCorrector = new GraphPositionHelper(() => graphView.canvasPack.size, graphView.getGraphCenter)
         firstAnimation.addFollowingAnimation(
             new Animation(Animation.moveGraphByFunction,
                 (graphCenterCorrector, graphView.getAllVertices), None, redrawQuick, redraw, None))
@@ -81,7 +82,7 @@ abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(setting
     /**
       * Runs the vertex positioning algorithm and moves the vertices to "more suitable" positions.
       */
-    protected def getTechniquePerformer(component: Component, animated: Boolean): Animation[ListBuffer[(VertexView, Point)]]
+    protected def getTechniquePerformer(component: Component, animated: Boolean): Animation[ListBuffer[(VertexView, Point2D)]]
 
     /**
       * Moves the vertices to a tree like structure. The first element of input is placed in the root located
@@ -97,7 +98,7 @@ abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(setting
       *                            (skipping the animation)
       */
     def basicTreeStructure(vViews: ListBuffer[VertexView], nextAnimation: Option[Animation[_]], quickDraw: () => Unit,
-        finalDraw: () => Unit, animationStepLength: Option[Int]): Animation[ListBuffer[(VertexView, Point)]] = {
+        finalDraw: () => Unit, animationStepLength: Option[Int]): Animation[ListBuffer[(VertexView, Point2D)]] = {
 
         var levels = ListBuffer[ListBuffer[VertexView]]()
         var level = ListBuffer[VertexView]()
@@ -138,7 +139,7 @@ abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(setting
         var levelNum = 0
         var vertexNumInLevel = 0
         val lastLevelSize = levels.last.length
-        val toMove = ListBuffer[(VertexView, Point)]()
+        val toMove = ListBuffer[(VertexView, Point2D)]()
 
         //build structure of vertices and their destinations
         levels.foreach {elements =>
@@ -147,7 +148,7 @@ abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(setting
             val currentLevelSize = elements.length
             elements.foreach {element =>
 
-                val destination = Point(/*scala.math.random / 10 +*/ origin.x +
+                val destination = Point2D(/*scala.math.random / 10 +*/ origin.x +
                     (vertexNumInLevel * treeVerticesDistance) + treeVerticesDistance * (lastLevelSize - currentLevelSize) / 2,
                     /*scala.math.random / 10 +*/ origin.y + (levelNum * treeVerticesDistance))
 
@@ -177,14 +178,14 @@ abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(setting
       *                            (skipping the animation)
       */
     def basicTreeCircledStructure(vViews: ListBuffer[VertexView], nextAnimation: Option[Animation[_]], quickDraw: () => Unit,
-        finalDraw: () => Unit, animationStepLength: Option[Int]): Animation[ListBuffer[(VertexView, Point)]] = {
+        finalDraw: () => Unit, animationStepLength: Option[Int]): Animation[ListBuffer[(VertexView, Point2D)]] = {
 
-        var level1 = ListBuffer[(VertexView, Point)]()
-        var level2 = ListBuffer[(VertexView, Point)]()
+        var level1 = ListBuffer[(VertexView, Point2D)]()
+        var level2 = ListBuffer[(VertexView, Point2D)]()
         var alreadyOut = ListBuffer[VertexView]()
         var levelNum = 0
 
-        val toMove = ListBuffer[(VertexView, Point)]()
+        val toMove = ListBuffer[(VertexView, Point2D)]()
 
         level1 += ((vViews.head, vViews.head.position))
         //create level structure and for each of them calculate their destinations for moving
@@ -217,9 +218,9 @@ abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(setting
             }
 
             //switch levels
-            level1 = ListBuffer[(VertexView, Point)]()
+            level1 = ListBuffer[(VertexView, Point2D)]()
             level1 = level2
-            level2 = ListBuffer[(VertexView, Point)]()
+            level2 = ListBuffer[(VertexView, Point2D)]()
             levelNum += 1
         }
 
@@ -237,10 +238,10 @@ abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(setting
       * @param center of the circle
       * @param vertexViews container of the vertices, that are placed to a circle
       */
-    private def placeVerticesOnCircle(rotation: Double, radius: Double, center: Point,
-        vertexViews: ListBuffer[(VertexView, Point)]): ListBuffer[(VertexView, Point)] = {
+    private def placeVerticesOnCircle(rotation: Double, radius: Double, center: Point2D,
+        vertexViews: ListBuffer[(VertexView, Point2D)]): ListBuffer[(VertexView, Point2D)] = {
 
-        val resultPositions = ListBuffer[(VertexView, Point)]()
+        val resultPositions = ListBuffer[(VertexView, Point2D)]()
         val angle = 360 / vertexViews.length
 
         var counter = 0
@@ -262,13 +263,13 @@ abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(setting
             val newPosition = if (pom < 0) { //should never happen...but just to be safe
                 vView._1.position
             } else if (0 <= angleAct && angleAct < 90) {
-                Point(x, y1)
+                Point2D(x, y1)
             } else if (90 <= angleAct && angleAct < 180) {
-                Point(x, y1)
+                Point2D(x, y1)
             } else if (180 <= angleAct && angleAct < 270) {
-                Point(x, y2)
+                Point2D(x, y2)
             } else {//if (270 <= angleAct && angleAct < 360) {
-                Point(x, y2)
+                Point2D(x, y2)
             }
 
             resultPositions += ((vView._1, newPosition))
@@ -295,7 +296,7 @@ abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(setting
       * @param whereToCheck container to search in
       * @return true if the vertex is present in the container
       */
-    private def existsVertexStruct(whatToCheck: VertexView, whereToCheck: ListBuffer[(VertexView, Point)]): Boolean = {
+    private def existsVertexStruct(whatToCheck: VertexView, whereToCheck: ListBuffer[(VertexView, Point2D)]): Boolean = {
         whereToCheck.exists(element => element._1.vertexModel eq whatToCheck.vertexModel)
     }
 }

@@ -2,13 +2,16 @@ package cz.payola.web.client.presenters.components
 
 import cz.payola.web.client.views._
 import cz.payola.web.client.views.Component
-import s2js.adapters.js.dom.Element
+import s2js.adapters.js.dom._
 import s2js.adapters.js.browser.document
 import s2js.compiler.javascript
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.extensions.bootstrap.Modal
+import cz.payola.web.client.views.todo.PluginInstance
+import s2js.adapters.js.dom.Element
+import cz.payola.web.client.views.elements.Div
 
 class MergeAnalysisBranchesDialog(instances: ArrayBuffer[PluginInstance], inputsCount: Int) extends Component
 {
@@ -21,12 +24,12 @@ class MergeAnalysisBranchesDialog(instances: ArrayBuffer[PluginInstance], inputs
         val pluginInstance = instance.asInstanceOf[PluginInstance]
 
         val div = new Div(List(new Text(pluginInstance.plugin.name)), "alert alert-danger span2 draggable")
-        bindInstance(div.getDomElement, pluginInstance)
-        div.render(dragZone.getDomElement)
+        bindInstance(div.domElement, pluginInstance)
+        div.render(dragZone.domElement)
     }
 
     val clear = new Div(List(),"clear")
-    clear.render(dragZone.getDomElement)
+    clear.render(dragZone.domElement)
 
     val dropZoneWrapper = new Div(List())
 
@@ -34,14 +37,14 @@ class MergeAnalysisBranchesDialog(instances: ArrayBuffer[PluginInstance], inputs
     while (i < inputsCount)
     {
         val div = new Div(List(new Text("Input #"+i.toString())), "droppable well")
-        bindIndex(div.getDomElement, i)
-        div.render(dropZoneWrapper.getDomElement)
+        bindIndex(div.domElement, i)
+        div.render(dropZoneWrapper.domElement)
         i = i+1
     }
 
     private val dialog = new Modal("Choose how you want to merge the branches", List(dragZone, dropZoneWrapper))
 
-    def render(parent: Element = document.body) = {
+    def render(parent: Node) = {
         dialog.render(parent)
         bindDragAndDrop()
     }
@@ -50,8 +53,8 @@ class MergeAnalysisBranchesDialog(instances: ArrayBuffer[PluginInstance], inputs
 
     def hide() = dialog.hide
 
-    def getDomElement : Element = {
-        dialog.getDomElement
+    def domElement : Element = {
+        dialog.domElement
     }
 
     dialog.saved += { event =>

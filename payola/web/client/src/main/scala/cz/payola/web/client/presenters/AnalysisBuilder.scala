@@ -1,7 +1,7 @@
 package cz.payola.web.client.presenters
 
 import s2js.adapters.js.browser.document
-import cz.payola.web.client.views.PluginInstance
+import cz.payola.web.client.views.todo.PluginInstance
 import cz.payola.web.client.presenters.components._
 import cz.payola.web.shared.AnalysisBuilderData
 import s2js.compiler.javascript
@@ -10,7 +10,6 @@ import s2js.adapters.js.browser.window
 import scala.collection.mutable.ArrayBuffer
 import s2js.runtime.client.scala.collection.mutable.HashMap
 import cz.payola.web.client.presenters.models.ParameterValue
-import cz.payola.web.client.views.events._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.extensions.bootstrap._
 import cz.payola.web.client.events.EventArgs
@@ -96,7 +95,7 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
     addDataSourceLinkLi.render(menu)
     mergeBranchesLi.render(menu)
 
-    addPluginLink.clicked += { event =>
+    addPluginLink.mouseClicked += { event =>
         val dialog = new PluginDialog(allPlugins.filter(_.inputCount == 0))
         dialog.pluginNameClicked += { evtArgs =>
             onPluginNameClicked(evtArgs.target, None)
@@ -109,7 +108,7 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
         false
     }
 
-    mergeBranches.clicked += { event =>
+    mergeBranches.mouseClicked += { event =>
         val dialog = new PluginDialog(allPlugins.filter(_.inputCount > 1))
         dialog.pluginNameClicked += { evt =>
 

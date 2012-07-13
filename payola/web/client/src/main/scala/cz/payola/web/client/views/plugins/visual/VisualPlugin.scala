@@ -7,14 +7,13 @@ import s2js.adapters.js.dom.Element
 import collection.mutable.ListBuffer
 import settings.components.visualsetup.VisualSetup
 import s2js.adapters.js.browser.document
-import cz.payola.web.client.views.elements.CanvasPack
-import cz.payola.web.client.views.elements.CanvasPack
+import cz.payola.web.client.views.todo._
 import cz.payola.web.client.events._
 import cz.payola.common.rdf._
-import s2js.adapters.js.browser.window
 import cz.payola.web.client.presenters.components.ZoomControls
 import cz.payola.web.client.views.events._
-import scala.Some
+import cz.payola.web.client.views._
+import cz.payola.web.client.views.elements.Canvas
 
 /**
   * Representation of visual based output drawing plugin
@@ -24,7 +23,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
 
     private var mousePressedVertex = false
     private var mouseDragged = false
-    private var mouseDownPosition = Point(0, 0)
+    private var mouseDownPosition = Point2D(0, 0)
 
     var zoomTool: Option[ZoomControls] = None
 
@@ -41,7 +40,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
         zoomTool = Some(new ZoomControls(100))
         zoomTool.get.render(document.getElementById("btn-stripe"))
 
-        graphView.get.canvasPack.mouseDown += { event => //selection
+        graphView.get.canvasPack.mousePressed += { event => //selection
             mouseDragged = false
             mouseDownPosition = getPosition(event)
             onMouseDown(event)
@@ -49,7 +48,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
             false
         }
 
-        graphView.get.canvasPack.mouseUp += {event => //deselect all
+        graphView.get.canvasPack.mouseReleased += {event => //deselect all
             onMouseUp(event)
 
             false
@@ -61,16 +60,16 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
             false
         }
 
-        graphView.get.canvasPack.mouseDblClicked += { event => //update graph
+        graphView.get.canvasPack.mouseDoubleClicked += { event => //update graph
             val vertex = graphView.get.getTouchedVertex(getPosition(event))
             if(vertex.isDefined) {
                 graphView.get.selectVertex(vertex.get)
-                vertexUpdate.trigger(vertex.get.vertexModel)
+                vertexUpdate.triggerDirectly(vertex.get.vertexModel)
             }
             false
         }
 
-        graphView.get.canvasPack.mouseWheel += { event => //zoom - invoked by mouse
+        graphView.get.canvasPack.mouseWheelRotated += { event => //zoom - invoked by mouse
             val mousePosition = getPosition(event)
             val scrolled = event.wheelDelta
 
@@ -104,7 +103,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
             false
         }
 
-        graphView.get.canvasPack.windowResize += { event => //fitting canvas on window resize
+        graphView.get.canvasPack.windowResized += { event => //fitting canvas on window resize
             graphView.get.fitCanvas()
             redraw()
             true
@@ -121,7 +120,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
             graphView = None
             mouseDragged = false
             mousePressedVertex = false
-            mouseDownPosition = Point(0, 0)
+            mouseDownPosition = Point2D(0, 0)
         }
 
         if(zoomTool.isDefined) {
@@ -135,7 +134,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
             graphView = None
             mouseDragged = false
             mousePressedVertex = false
-            mouseDownPosition = Point(0, 0)
+            mouseDownPosition = Point2D(0, 0)
         }
 
         if(zoomTool.isDefined) {
@@ -231,7 +230,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
         result
     }
 
-    private def onMouseUp(eventArgs: BrowserEventArgs[CanvasPack]) {
+    private def onMouseUp(eventArgs: BrowserEventArgs[Canvas]) {
         if (!mouseDragged && !mousePressedVertex && !eventArgs.shiftKey) { //deselect all
 
             graphView.get.deselectAll()
@@ -264,7 +263,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
     }
 
 
-    private def zoomIn(mousePosition: Point) {
+    private def zoomIn(mousePosition: Point2D) {
 
         var needToRedraw = false
         graphView.get.getAllVertices.foreach{ vv =>
@@ -287,7 +286,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
         }
     }
 
-    private def zoomOut(mousePosition: Point) {
+    private def zoomOut(mousePosition: Point2D) {
 
         var needToRedraw = false
         graphView.get.getAllVertices.foreach{ vv =>
@@ -310,7 +309,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
         }
     }
 
-    private def getZoomPointCandidates(vv: VertexView, position: Point): (Point, Point) = {
+    private def getZoomPointCandidates(vv: VertexView, position: Point2D): (Point2D, Point2D) = {
 
         val distance = vv.position.distance(position) * zoomTool.get.zoomStep
         if(distance == 0) {
@@ -344,8 +343,8 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
                 val y2 = (-b - discrimSqrt)/(2*a)
                 val x2 = (A + (m-v)*y2)/(n-w)
 
-                p1 = Point(x1, y1)
-                p2 = Point(x2, y2)
+                p1 = Point2D(x1, y1)
+                p2 = Point2D(x2, y2)
             } else {
                 //window.alert("vertex is in the center of the zoom operation")
             }
@@ -360,8 +359,8 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
 
                 val x1 = vv.position.x + discrimSqrt
                 val x2 = vv.position.x - discrimSqrt
-                p1 = Point(x1, y)
-                p2 = Point(x2, y)
+                p1 = Point2D(x1, y)
+                p2 = Point2D(x2, y)
             } else {
                 //window.alert("vertex.position.y == mousePosition.y && vertex is in the center of the zoom operation")
             }
@@ -370,15 +369,15 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
         (p1, p2)
     }
 
-    private def getPosition(eventArgs: BrowserEventArgs[CanvasPack]): Point = {
+    private def getPosition(eventArgs: BrowserEventArgs[Canvas]): Point2D = {
 
-        val positionCorrection = Vector(- graphView.get.canvasPack.offsetLeft, - graphView.get.canvasPack.offsetTop)
+        val positionCorrection = Vector2D(- graphView.get.canvasPack.offsetLeft, - graphView.get.canvasPack.offsetTop)
 
         /*if (typeOf(event.clientX) != "undefined" && typeOf(event.clientY) != "undefined") { TODO this check was fine
-            Point(event.clientX, event.clientX) + positionCorrection
+            Point2D(event.clientX, event.clientX) + positionCorrection
         }
         else {*/
-            Point(eventArgs.clientX /*+ document.body.scrollLeft*/ + document.documentElement.scrollLeft,
+            Point2D(eventArgs.clientX /*+ document.body.scrollLeft*/ + document.documentElement.scrollLeft,
                 eventArgs.clientY /*+ document.body.scrollTop*/ + document.documentElement.scrollTop) + positionCorrection
         //}
     }

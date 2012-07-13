@@ -2,11 +2,13 @@ package cz.payola.web.client.presenters.components
 
 import cz.payola.web.client.views.Component
 import s2js.adapters.js.browser.document
-import s2js.adapters.js.dom.Element
+import s2js.adapters.js.dom._
 import cz.payola.web.client.views.extensions.bootstrap.Icon
 import cz.payola.web.client.views.events._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events.SimpleEvent
+import cz.payola.web.client.views.elements.Div
+import scala.Some
 
 class ZoomControls(var currentZoom: Double) extends Component
 {
@@ -31,7 +33,7 @@ class ZoomControls(var currentZoom: Double) extends Component
 
     val wrapper = new Div(List(plus, status, minus), "zoom-controls")
 
-    var parentSpace: Option[Element] = None
+    var parentNode: Option[Node] = None
 
     def reset() {
         setZoom(zoomOrigin)
@@ -57,7 +59,7 @@ class ZoomControls(var currentZoom: Double) extends Component
 
     def setZoom(zoom: Double) {
         currentZoom = zoom
-        spanCaption.setText(getStatusCaption)
+        spanCaption.text = (getStatusCaption)
     }
 
     def increaseZoomInfo() {
@@ -71,31 +73,31 @@ class ZoomControls(var currentZoom: Double) extends Component
     override def destroy() {
         //spanCaption.setText("")
 
-        if(parentSpace.isDefined) {
-            wrapper.div.removeChild(minus.span)
-            wrapper.div.removeChild(status.span)
-            wrapper.div.removeChild(plus.span)
-            parentSpace.get.removeChild(wrapper.div)
+        if(parentNode.isDefined) {
+            wrapper.domElement.removeChild(minus.domElement)
+            wrapper.domElement.removeChild(status.domElement)
+            wrapper.domElement.removeChild(plus.domElement)
+            parentNode.get.removeChild(wrapper.domElement)
         }
     }
 
-    def render(parent: Element = document.body) {
+    def render(parent: Node) {
         wrapper.render(parent)
-        spanCaption.setText(getStatusCaption)
-        parentSpace = Some(parent)
+        spanCaption.text = getStatusCaption
+        parentNode = Some(parent)
 
-        plus.clicked += { e =>
-            zoomIncreased.trigger(this)
+        plus.mouseClicked += { e =>
+            zoomIncreased.triggerDirectly(this)
             false
         }
 
-        minus.clicked += { e =>
-            zoomDecreased.trigger(this)
+        minus.mouseClicked += { e =>
+            zoomDecreased.triggerDirectly(this)
             false
         }
     }
 
-    def getDomElement : Element = {
-        wrapper.getDomElement
+    def domElement : Element = {
+        wrapper.domElement
     }
 }

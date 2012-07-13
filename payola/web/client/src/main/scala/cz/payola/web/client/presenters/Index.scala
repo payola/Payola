@@ -47,7 +47,7 @@ class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
         val pluginBtn = new Anchor(List(new Text(plugin.getName)), "#")
         new ListItem(List(pluginBtn)).render(document.getElementById("settings"))
 
-        pluginBtn.clicked += {
+        pluginBtn.mouseClicked += {
             event =>
                 val newPlugin = plugins.find(_.getName == plugin.getName)
                 if (newPlugin.isDefined) {

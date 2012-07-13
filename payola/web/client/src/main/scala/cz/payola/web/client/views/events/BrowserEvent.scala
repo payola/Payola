@@ -11,7 +11,7 @@ class BrowserEvent[A] extends Event[A, BrowserEventArgs[A], Boolean]
         stackTop && currentHandlerResult
     }
 
-    def trigger(target: A, event: browser.Event): Boolean = {
+    def triggerDirectly(target: A, event: browser.Event): Boolean = {
         trigger(BrowserEventArgs[A](target, event))
     }
 }

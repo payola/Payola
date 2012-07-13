@@ -1,6 +1,8 @@
 package cz.payola.web.client.views.plugins.visual
 
-import s2js.adapters.js.dom.{CanvasRenderingContext2D, Canvas}
+import s2js.adapters.js.dom._
+import cz.payola.web.client._
+import cz.payola.web.client.views.Vector2D
 
 /**
   * Representation of a space for drawing into a web page.
@@ -19,7 +21,7 @@ class Layer(val canvas: Canvas, val context: CanvasRenderingContext2D) //TODO de
       * Setter of canvas dimensions.
       * @param size new dimensions.
       */
-    def setSize(size: Vector) {
+    def setSize(size: Vector2D) {
         canvas.width = size.x;
         canvas.height = size.y;
     }
@@ -28,7 +30,7 @@ class Layer(val canvas: Canvas, val context: CanvasRenderingContext2D) //TODO de
       * Getter of canvas dimensions.
       * @return dimensions
       */
-    def getSize: Vector = {
-        Vector(canvas.width, canvas.height)
+    def getSize: Vector2D = {
+        Vector2D(canvas.width, canvas.height)
     }
 }

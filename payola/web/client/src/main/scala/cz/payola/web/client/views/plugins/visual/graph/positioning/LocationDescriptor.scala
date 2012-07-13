@@ -1,8 +1,6 @@
 package cz.payola.web.client.views.plugins.visual.graph.positioning
 
-import cz.payola.web.client.views.plugins.visual.{Point, Vector}
-import s2js.adapters.js.browser.window
-import scala.collection.mutable.ListBuffer
+import cz.payola.web.client.views._
 
 /**
   * Class for getting specified positions for InformationViews based on their parent View.
@@ -12,10 +10,10 @@ object LocationDescriptor
     /**
       * Correction for drawing of text.
       */
-    private val informationPositionCorrection = Vector(0, 4)
+    private val informationPositionCorrection = Vector2D(0, 4)
 
     /*using these variables kills the script, why the F*CK!? */
-    //private val componentPositionCorrection = Vector(50, 50)
+    //private val componentPositionCorrection = Vector2D(50, 50)
     //private val componentSpacing = 50
 
     /**
@@ -23,7 +21,7 @@ object LocationDescriptor
       * @param position of the owner VertexView object
       * @return corrected position for the owned InformationView object
       */
-    def getVertexInformationPosition(position: Point): Point = {
+    def getVertexInformationPosition(position: Point2D): Point2D = {
         position + informationPositionCorrection
     }
 
@@ -33,9 +31,9 @@ object LocationDescriptor
       * @param destinationPosition position of the owners destination VertexView position
       * @return corrected position for the owned InformationView object
       */
-    def getEdgeInformationPosition(originPosition: Point, destinationPosition: Point): Point = {
+    def getEdgeInformationPosition(originPosition: Point2D, destinationPosition: Point2D): Point2D = {
         val x = (originPosition.x + destinationPosition.x) / 2
         val y = (originPosition.y + destinationPosition.y) / 2
-        Point(x, y) + informationPositionCorrection
+        Point2D(x, y) + informationPositionCorrection
     }
 }

@@ -6,6 +6,8 @@ import cz.payola.web.client.views.plugins.visual._
 import settings.components.visualsetup.VisualSetup
 import s2js.adapters.js.browser.window
 import cz.payola.common.rdf._
+import cz.payola.web.client.views._
+import scala.Some
 
 /**
   * Graphical representation of Graph object.
@@ -147,7 +149,7 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
 
         graphModel.vertices.foreach { vertexModel =>
 
-            buffer += new VertexView(vertexModel, Point(300, 300), settings.vertexModel, settings.textModel)
+            buffer += new VertexView(vertexModel, Point2D(300, 300), settings.vertexModel, settings.textModel)
             //TODO should be center of the canvas or something like that
             counter += 1
         }
@@ -303,7 +305,7 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
     //selection and whatever routines####################################################################################
     //###################################################################################################################
 
-    def getTouchedVertex(position: Point): Option[VertexView] = {
+    def getTouchedVertex(position: Point2D): Option[VertexView] = {
 
         var result: Option[VertexView] = None
         var componentsPointer = 0
@@ -346,7 +348,7 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
       * Adds the input vector to positions of all selected vertices in this graph visualisation.
       * @param difference to move the vertices
       */
-    def moveAllSelectedVertices(difference: Vector) {
+    def moveAllSelectedVertices(difference: Vector2D) {
         components.foreach{
             _.moveAllSelectedVertices(difference)
         }
@@ -356,7 +358,7 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
       * Adds the input vector to positions of all vertices in this graph visualisation.
       * @param difference to move the vertices
       */
-    def moveAllVertices(difference: Vector) {
+    def moveAllVertices(difference: Vector2D) {
         components.foreach{
             _.moveAllVertices(difference)
         }
@@ -386,7 +388,7 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
     //drawing############################################################################################################
     //###################################################################################################################
 
-    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
+    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D) {
 
         //fitCanvas()
 
@@ -430,7 +432,7 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
             (edgeView.destinationView.eq(vertexView) && edgeView.originView.selected)
     }
 
-    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
+    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D) {
 
         val vertexViews = getAllVertices
         val edgeViews = getAllEdges
@@ -466,7 +468,7 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
         graphOperation match {
             case RedrawOperation.Movement =>
                 canvasPack.clearForMovement()
-                draw(null, None, Vector.Zero)
+                draw(null, None, Vector2D.Zero)
                 //^because elements are drawn into separate layers, redraw(..) does not know to which context to draw
 
             case RedrawOperation.Selection =>
@@ -474,7 +476,7 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
 
             case RedrawOperation.Animation =>
                 canvasPack.clear()
-                drawQuick(null, None, Vector.Zero)
+                drawQuick(null, None, Vector2D.Zero)
 
             case RedrawOperation.All =>
                 canvasPack.clear()
@@ -490,7 +492,7 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
       */
     def redrawAll() {
         canvasPack.clear()
-        draw(null, None, Vector.Zero)
+        draw(null, None, Vector2D.Zero)
         //^because elements are drawn into separate layers, redraw(..) does not know to which context to draw
     }
 
@@ -546,7 +548,7 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
 
     def fitCanvas() {
         //measure size of the graph and set dimensions of the canvasPack accordingly (max(sizeOfTheWindow, sizeOfTheGraph))
-        val maxBottomRight = Point(0, 0)
+        val maxBottomRight = Point2D(0, 0)
         components.foreach{ component =>
             val componentBR = component.getBottomRight()
             if(maxBottomRight.x < componentBR.x) {
@@ -557,20 +559,20 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
             }
         }
         canvasPack.setSize(
-            Vector(window.innerWidth - canvasPack.offsetLeft, window.innerHeight - canvasPack.offsetTop))
+            Vector2D(window.innerWidth - canvasPack.offsetLeft, window.innerHeight - canvasPack.offsetTop))
     }
 
-    def getGraphCenter(): Point = { //() are intentional
+    def getGraphCenter(): Point2D = { //() are intentional
         val top = getGraphTop.y
         val right = getGraphRight.x
         val bottom = getGraphBottom.y
         val left = getGraphLeft.x
 
-        Point(left + (right - left)/2, top + (bottom - top)/2)
+        Point2D(left + (right - left)/2, top + (bottom - top)/2)
     }
 
-    def getGraphTop: Point = {
-        var top = Point(0, Double.MaxValue)
+    def getGraphTop: Point2D = {
+        var top = Point2D(0, Double.MaxValue)
         getAllVertices.foreach{ vv =>
             if(vv.position.y < top.y) {
                 top = vv.position
@@ -579,8 +581,8 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
         top
     }
 
-    def getGraphLeft: Point = {
-        var left = Point(Double.MaxValue, 0)
+    def getGraphLeft: Point2D = {
+        var left = Point2D(Double.MaxValue, 0)
         getAllVertices.foreach{ vv =>
             if(vv.position.x < left.x) {
                 left = vv.position
@@ -589,8 +591,8 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
         left
     }
 
-    def getGraphBottom: Point = {
-        var bottom = Point(0, Double.MinValue)
+    def getGraphBottom: Point2D = {
+        var bottom = Point2D(0, Double.MinValue)
         getAllVertices.foreach{ vv =>
             if(vv.position.y > bottom.y) {
                 bottom = vv.position
@@ -599,8 +601,8 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
         bottom
     }
 
-    def getGraphRight: Point = {
-        var right = Point(Double.MinValue, 0)
+    def getGraphRight: Point2D = {
+        var right = Point2D(Double.MinValue, 0)
         getAllVertices.foreach{ vv =>
             if(vv.position.x > right.x) {
                 right = vv.position

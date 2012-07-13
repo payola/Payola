@@ -1,9 +1,9 @@
 package cz.payola.web.client.views.plugins.visual.graph
 
 import s2js.adapters.js.dom.CanvasRenderingContext2D
-import cz.payola.web.client.views.plugins.visual.{Vector, Color, Point}
+import cz.payola.web.client.views._
+import cz.payola.web.client.views.plugins.visual.Color
 import cz.payola.web.client.views.plugins.visual.settings.TextSettingsModel
-;
 
 /**
   * Graphical representation of textual data in the drawn graph.
@@ -48,12 +48,12 @@ class InformationView(data: Any, val settings: TextSettingsModel) extends View {
         selected = true
     }
 
-    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
+    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D) {
 
         drawQuick(context, color, positionCorrection)
     }
 
-    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
+    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D) {
 
         val colorToUse = if(color.isDefined) {
             Color(color.get.red, color.get.green, color.get.blue, textAlpha)
@@ -61,7 +61,7 @@ class InformationView(data: Any, val settings: TextSettingsModel) extends View {
             Color(settings.color.red, settings.color.green, settings.color.blue, textAlpha)
         }
 
-        performDrawing(context, colorToUse, Point(positionCorrection.x, positionCorrection.y))
+        performDrawing(context, colorToUse, Point2D(positionCorrection.x, positionCorrection.y))
 
         selected = false
     }
@@ -72,10 +72,10 @@ class InformationView(data: Any, val settings: TextSettingsModel) extends View {
       * @param color in which the text is draw
       * @param position where the text is drawn
       */
-    private def performDrawing(context: CanvasRenderingContext2D, color: Color, position: Point) {
+    private def performDrawing(context: CanvasRenderingContext2D, color: Color, position: Point2D) {
         if(selected) {
             val textWidth = context.measureText(data.toString).width
-            drawRoundedRectangle(context, position + Vector(-textWidth/2, -15), Vector(textWidth, 20), 4)
+            drawRoundedRectangle(context, position + Vector2D(-textWidth/2, -15), Vector2D(textWidth, 20), 4)
             fillCurrentSpace(context, settings.colorBackground)
             //todo how come, that the measureText returns different size on the first run??
         }

@@ -1,13 +1,13 @@
 package cz.payola.web.client.views.plugins.visual.settings.components.visualsetup
 
 import s2js.adapters.js.browser.document
-import s2js.adapters.js.dom.Element
+import s2js.adapters.js.dom._
 import cz.payola.web.client.views.Component
-import cz.payola.web.client.views.events._
 import cz.payola.web.client.views.plugins.visual.settings.VertexSettingsModel
 import cz.payola.web.client.views.elements.{Label, Input, Div}
 import cz.payola.web.client.views.extensions.bootstrap.Modal
 import cz.payola.web.client.events._
+import scala.Some
 import scala.Some
 
 class VertexModal(model: VertexSettingsModel) extends Component
@@ -16,9 +16,9 @@ class VertexModal(model: VertexSettingsModel) extends Component
 
     //TODO add some bounds check for every input
     val radius = new Input("vertex.radius", model.radius.toString(), Some("0 < x < 100"))
-    val rLabel = new Label("Corner radius [px]:", radius.getDomElement)
+    val rLabel = new Label("Corner radius [px]:", radius)
     radius.changed += { event =>
-        model.radius = radius.getText.toInt
+        model.radius = radius.value.toInt
         false
     }
 
@@ -37,10 +37,10 @@ class VertexModal(model: VertexSettingsModel) extends Component
     private val modal = new Modal("Vertex settings", List(wrapper))
 
     modal.saved += {
-        event => settingsChanged.trigger(this)
+        event => settingsChanged.triggerDirectly(this)
     }
 
-    def render(parent: Element = document.body) {
+    def render(parent: Node) {
         modal.render(parent)
     }
 
@@ -52,5 +52,5 @@ class VertexModal(model: VertexSettingsModel) extends Component
         modal.hide
     }
 
-    def getDomElement : Element = modal.getDomElement
+    def domElement : Element = modal.domElement
 }

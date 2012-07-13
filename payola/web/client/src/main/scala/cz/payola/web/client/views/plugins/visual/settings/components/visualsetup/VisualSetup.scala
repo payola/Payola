@@ -3,7 +3,7 @@ package cz.payola.web.client.views.plugins.visual.settings.components.visualsetu
 import cz.payola.web.client.views.Component
 import cz.payola.web.client.views.Component
 import s2js.adapters.js.browser.document
-import s2js.adapters.js.dom.Element
+import s2js.adapters.js.dom._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.elements.{Anchor, ListItem, Text}
 import cz.payola.web.client.events._
@@ -24,7 +24,7 @@ class VisualSetup(var vertexModel: VertexSettingsModel, var edgesModel: EdgeSett
     val edgesSettings = new EdgeModal(edgesModel)
     val textSettings = new TextModal(textModel)
 
-    def render(parent: Element = document.body) {
+    def render(parent: Node) {
         new ListItem(List(), "divider").render(parent)
         new ListItem(List(vertex)).render(parent)
         new ListItem(List(vertexOwl)).render(parent)
@@ -52,24 +52,24 @@ class VisualSetup(var vertexModel: VertexSettingsModel, var edgesModel: EdgeSett
             true
     }
 
-    vertex.clicked += { eventArgs =>
+    vertex.mouseClicked += { eventArgs =>
         vertexSettings.show()
         false
     }
 
-    edges.clicked += { eventArgs =>
+    edges.mouseClicked += { eventArgs =>
         edgesSettings.show()
         false
     }
 
-    text.clicked += { eventArgs =>
+    text.mouseClicked += { eventArgs =>
         textSettings.show()
         false
     }
 
-    vertexOwl.clicked += { eventArgs =>
+    vertexOwl.mouseClicked += { eventArgs =>
         false
     }
 
-    def getDomElement: Element = vertexSettings.getDomElement
+    def domElement: Element = vertexSettings.domElement
 }

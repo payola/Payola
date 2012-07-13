@@ -1,99 +1,70 @@
-package cz.payola.web.client.views.elements
+package cz.payola.web.client.views.todo
 
-import cz.payola.web.client.events._
 import s2js.adapters.js.dom.Element
-import cz.payola.web.client.views.plugins.visual.{Color, Vector, Point}
+import s2js.adapters.js.browser
+import cz.payola.web.client.views._
+import cz.payola.web.client.views.plugins.visual.Color
 import cz.payola.web.client.views.plugins.visual.graph._
-import s2js.adapters.js.dom
 import s2js.compiler.javascript
 import s2js.adapters.js.browser._
-import cz.payola.web.client.presenters.components.ZoomControls
 import cz.payola.web.client.views.plugins.visual.graph.positioning.LocationDescriptor
 import cz.payola.web.client.views.events._
+import cz.payola.web.client.views.elements.Canvas
 
-class CanvasPack(width: Double, height: Double) extends Canvas(width, height)
+class CanvasPack(size: Vector2D) extends Canvas(size)
 {
-    val mouseClicked = new BrowserEvent[CanvasPack]
-
     val mouseDragged = new BrowserEvent[CanvasPack]
 
-    val mouseDblClicked = new BrowserEvent[CanvasPack]
+    val windowResized = new BrowserEvent[CanvasPack]
 
-    val mouseDown = new BrowserEvent[CanvasPack]
+    protected var mouseIsPressed = false
 
-    val mouseUp = new BrowserEvent[CanvasPack]
+    private val edgesDeselectedLayer = new Canvas(size)
 
-    val keyUp = new BrowserEvent[CanvasPack]
+    private val edgesDeselectedTextLayer = new Canvas(size)
 
-    val keyDown = new BrowserEvent[CanvasPack]
+    private val edgesSelectedLayer = new Canvas(size)
 
-    val mouseMove = new BrowserEvent[CanvasPack]
+    private val edgesSelectedTextLayer = new Canvas(size)
 
-    val mouseWheel = new BrowserEvent[CanvasPack]
+    private val verticesDeselectedLayer = new Canvas(size)
 
-    val windowResize = new BrowserEvent[CanvasPack]
+    private val verticesDeselectedTextLayer = new Canvas(size)
 
-    private val edgesDeselectedLayer = new Canvas(width, height)
+    private val verticesSelectedLayer = new Canvas(size)
 
-    private val edgesDeselectedTextLayer = new Canvas(width, height)
+    private val verticesSelectedTextLayer = new Canvas(size)
 
-    private val edgesSelectedLayer = new Canvas(width, height)
-
-    private val edgesSelectedTextLayer = new Canvas(width, height)
-
-    private val verticesDeselectedLayer = new Canvas(width, height)
-
-    private val verticesDeselectedTextLayer = new Canvas(width, height)
-
-    private val verticesSelectedLayer = new Canvas(width, height)
-
-    private val verticesSelectedTextLayer = new Canvas(width, height)
-
-    canvasElement.onclick = { e => mouseClicked.trigger(this, e) }
-
-    canvasElement.ondblclick = { e => mouseDblClicked.trigger(this, e) }
-
-    canvasElement.onmousedown = { e =>
-        mousePressed = true
-        mouseDown.trigger(this, e)
+    mousePressed += { e =>
+        mouseIsPressed = true
+        false
     }
 
-    canvasElement.onmouseup = { e =>
-        mousePressed = false
-        mouseUp.trigger(this, e)
+    mouseReleased += { e =>
+        mouseIsPressed = false
+        false
     }
 
-    canvasElement.onmousemove = { e =>
-        val returnValue = mouseMove.trigger(this, e)
-        if (mousePressed) {
-            mouseDragged.trigger(this, e)
-        } else {
-            returnValue
+    mouseMoved += { e =>
+        if (mouseIsPressed) {
+            mouseDragged.trigger(e)
         }
+        false
     }
 
-    window.onresize = { e => windowResize.trigger(this, e) }
+    window.onresize = { e => windowResized.triggerDirectly(this, e)}
 
     //on mouse wheel event work-around###################################################################################
-    /**
-      * definition of onMouseWheel trigger; required since Mozilla has different way of setting this up
-      * @param event
-      * @return
-      */
-    canvasElement.onmousewheel = onMouseWheel
 
-    private def onMouseWheel(e: s2js.adapters.js.browser.Event): Boolean = {
-        mouseWheel.trigger(this, e)
+    private def onMouseWheel(e: browser.Event): Boolean = {
+        mouseWheelRotated.triggerDirectly(this, e)
     }
 
     @javascript(
         """
            /* DOMMouseScroll is for mozilla. */
            self.canvasElement.addEventListener('DOMMouseScroll', function(event) {
-               var args = new cz.payola.web.client.views.events.MouseWheelEventArgs(self);
-               args.set(event);
-               self.mouseWheel.trigger(args);
-               return false;
+               return self.mouseWheelRotated.triggerDirectly(self, event);
            });
         """)
     private def setMouseWheelListener() {}
@@ -103,27 +74,27 @@ class CanvasPack(width: Double, height: Double) extends Canvas(width, height)
 
     //###################################################################################################################
 
-    override def setSize(size: Vector) {
-        edgesDeselectedLayer.setSize(size)
-        edgesDeselectedTextLayer.setSize(size)
-        edgesSelectedLayer.setSize(size)
-        edgesSelectedTextLayer.setSize(size)
-        verticesDeselectedLayer.setSize(size)
-        verticesDeselectedTextLayer.setSize(size)
-        verticesSelectedLayer.setSize(size)
-        verticesSelectedTextLayer.setSize(size)
-        super.setSize(size)
+    override def setSize(size: Vector2D) {
+        edgesDeselectedLayer.size = size
+        edgesDeselectedTextLayer.size = size
+        edgesSelectedLayer.size = size
+        edgesSelectedTextLayer.size = size
+        verticesDeselectedLayer.size = size
+        verticesDeselectedTextLayer.size = size
+        verticesSelectedLayer.size = size
+        verticesSelectedTextLayer.size = size
+        super.size = size
     }
 
     def offsetLeft: Double = {
-        canvasElement.offsetLeft
+        domElement.offsetLeft
     }
 
     def offsetTop: Double = {
-        canvasElement.offsetTop
+        domElement.offsetTop
     }
 
-    override def render(parent: Element) {
+    def render(parent: Element) {
         setMouseWheelListener()
 
         /*The order in which are layers created determines their "z coordinate"
@@ -169,67 +140,62 @@ class CanvasPack(width: Double, height: Double) extends Canvas(width, height)
         verticesSelectedTextLayer.dirty()
     }
 
-    def draw(view: View, color: Option[Color], positionCorrection: Vector) {
+    def draw(view: View, color: Option[Color], positionCorrection: Vector2D) {
         view match {
             case i: VertexView =>
                 if (view.isSelected) {
-                    if (verticesSelectedLayer.isCleared) {
+                    if (verticesSelectedLayer.isClear) {
                         i.draw(verticesSelectedLayer.context, color, positionCorrection)
                     }
-                    if (verticesSelectedTextLayer.isCleared) {
+                    if (verticesSelectedTextLayer.isClear) {
                         i.drawInformation(verticesSelectedTextLayer.context, None,
                             (LocationDescriptor.getVertexInformationPosition(i.position) + positionCorrection).toVector)
                     }
                 } else {
-                    if (verticesDeselectedLayer.isCleared) {
+                    if (verticesDeselectedLayer.isClear) {
                         i.draw(verticesDeselectedLayer.context, color, positionCorrection)
                     }
                 }
             case i: EdgeView =>
                 if (i.isSelected) {
-                    if (edgesSelectedLayer.isCleared) {
+                    if (edgesSelectedLayer.isClear) {
                         i.draw(edgesSelectedLayer.context, color, positionCorrection)
                     }
-                    if (i.areBothVerticesSelected && edgesSelectedTextLayer.isCleared) {
+                    if (i.areBothVerticesSelected && edgesSelectedTextLayer.isClear) {
                         i.information.draw(edgesSelectedTextLayer.context, None,
                             (LocationDescriptor.getEdgeInformationPosition(i.originView.position,
                                 i.destinationView.position) + positionCorrection).toVector)
                     }
                 } else {
-                    if (edgesDeselectedLayer.isCleared) {
+                    if (edgesDeselectedLayer.isClear) {
                         i.draw(edgesDeselectedLayer.context, color, positionCorrection)
                     }
                 }
         }
     }
 
-    def drawQuick(view: View, color: Option[Color], positionCorrection: Vector) {
+    def drawQuick(view: View, color: Option[Color], positionCorrection: Vector2D) {
         view match {
             case i: VertexView =>
                 if (view.isSelected) {
-                    if (verticesSelectedLayer.isCleared) {
+                    if (verticesSelectedLayer.isClear) {
                         i.drawQuick(verticesSelectedLayer.context, color, positionCorrection)
                     }
                 } else {
-                    if (verticesDeselectedLayer.isCleared) {
+                    if (verticesDeselectedLayer.isClear) {
                         i.drawQuick(verticesDeselectedLayer.context, color, positionCorrection)
                     }
                 }
             case i: EdgeView =>
                 if (i.areBothVerticesSelected) {
-                    if (edgesSelectedLayer.isCleared) {
+                    if (edgesSelectedLayer.isClear) {
                         i.drawQuick(edgesSelectedLayer.context, color, positionCorrection)
                     }
                 } else {
-                    if (edgesDeselectedLayer.isCleared) {
+                    if (edgesDeselectedLayer.isClear) {
                         i.drawQuick(edgesDeselectedLayer.context, color, positionCorrection)
                     }
                 }
         }
-    }
-
-    override def getDomElement: Element = {
-        //TODO
-        edgesDeselectedLayer.getDomElement
     }
 }

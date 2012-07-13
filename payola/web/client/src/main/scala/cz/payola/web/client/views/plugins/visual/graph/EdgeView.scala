@@ -4,7 +4,7 @@ import cz.payola.common.rdf.Edge
 import s2js.adapters.js.dom.CanvasRenderingContext2D
 import cz.payola.web.client.views.plugins.visual._
 import settings.{TextSettingsModel, EdgeSettingsModel}
-import s2js.adapters.js.browser.window
+import cz.payola.web.client.views._
 
 /**
   * Structure used during draw function of EdgeView. Helps to indicate position of vertices to each other.
@@ -51,15 +51,15 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
         originView.selected && destinationView.selected
     }
 
-    private def prepareBezierCurve(context: CanvasRenderingContext2D, color: Color, correction: Vector) {
+    private def prepareBezierCurve(context: CanvasRenderingContext2D, color: Color, correction: Vector2D) {
 
         val A = originView.position
         val B = destinationView.position
 
-        val ctrl1 = Point(0, 0)
-        val ctrl2 = Point(0, 0)
+        val ctrl1 = Point2D(0, 0)
+        val ctrl2 = Point2D(0, 0)
 
-        val diff = Point(scala.math.abs(A.x - B.x), scala.math.abs(A.y - B.y))
+        val diff = Point2D(scala.math.abs(A.x - B.x), scala.math.abs(A.y - B.y))
 
         //quadrant of coordinate system
         val quadrant = {
@@ -117,28 +117,28 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
             settings.width, color)
     }
     
-    private def prepareStraight(context: CanvasRenderingContext2D, color: Color, correction: Vector) {
+    private def prepareStraight(context: CanvasRenderingContext2D, color: Color, correction: Vector2D) {
         
         drawStraightLine(context,
             destinationView.position + correction, originView.position + correction,
             settings.width, color)
     }
     
-    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
+    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D) {
 
         drawQuick(context, color, positionCorrection)
     }
 
-    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector) {
+    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D) {
 
         val colorToUse = color.getOrElse(
             if(isSelected) settings.colorSelected else settings.color
         )
 
         if(1 <= settings.straightenIndex && settings.straightenIndex <= 6) {
-            prepareBezierCurve(context, colorToUse, Vector.Zero)
+            prepareBezierCurve(context, colorToUse, Vector2D.Zero)
         } else {
-            prepareStraight(context, colorToUse, Vector.Zero)
+            prepareStraight(context, colorToUse, Vector2D.Zero)
         }
     }
 
