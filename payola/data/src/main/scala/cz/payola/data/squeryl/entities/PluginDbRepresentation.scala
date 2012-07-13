@@ -26,9 +26,9 @@ class PluginDbRepresentation(
     val className: String,
     val inputCount: Int,
     o: Option[User],
-    var isPublic: Boolean)
+    var _isPub: Boolean)
     (implicit val context: SquerylDataContextComponent)
-    extends PersistableEntity
+    extends PersistableEntity with ShareableEntity
 {
     val ownerId: Option[String] = o.map(_.id)
 
@@ -57,6 +57,7 @@ class PluginDbRepresentation(
         val instance = constructor.newInstance(constructorArguments: _*)
         val plugin = instance.asInstanceOf[Plugin]
         plugin.owner = owner
+        plugin.isPublic = isPublic
         plugin
     }
 }

@@ -4,7 +4,6 @@ import org.squeryl._
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.dsl.ast.LogicalBoolean
 import cz.payola.data.PaginationInfo
-import cz.payola.domain.entities.NamedEntity
 import cz.payola.data.squeryl.entities._
 
 trait TableRepositoryComponent
@@ -27,8 +26,7 @@ trait TableRepositoryComponent
         }
 
         def getAll(pagination: Option[PaginationInfo] = None): Seq[A] = {
-            // TODO pagination
-            selectWhere(_ => 1 === 1)
+            selectWhere(_ => 1 === 1, pagination)
         }
 
         def removeById(id: String): Boolean = wrapInTransaction {
@@ -50,8 +48,13 @@ trait TableRepositoryComponent
           * @param entityFilter A filter that excludes entites from the result.
           * @return The selected entities.
           */
-        private[squeryl] def selectWhere(entityFilter: A => LogicalBoolean): Seq[A] = wrapInTransaction {
-            select(getSelectQuery(entityFilter))
+        private[squeryl] def selectWhere(entityFilter: A => LogicalBoolean, pagination: Option[PaginationInfo] = None):
+            Seq[A] = wrapInTransaction {
+                // Define select query
+                val query = select(getSelectQuery(entityFilter))
+
+                // Simple pagination
+                pagination.map(p => query.drop(p.skip).take(p.limit)).getOrElse(query)
         }
 
         /**

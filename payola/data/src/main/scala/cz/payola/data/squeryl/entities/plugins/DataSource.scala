@@ -18,7 +18,7 @@ object DataSource extends EntityConverter[DataSource]
             case e: cz.payola.domain.entities.plugins.DataSource => {
                 val dataFetcher = e.plugin.asInstanceOf[DataFetcher]
                 Some(new DataSource(e.id, e.name, e.owner.map(User(_)),
-                    dataFetcher,e.parameterValues.map(ParameterValue(_))))
+                    dataFetcher, e.parameterValues.map(ParameterValue(_)), e.isPublic, e.description))
             }
             case _ => None
         }
@@ -30,9 +30,12 @@ class DataSource(
     n: String,
     o: Option[User],
     df: cz.payola.domain.entities.plugins.concrete.DataFetcher,
-    paramValues: immutable.Seq[ParameterValue[_]])(implicit val context: SquerylDataContextComponent)
+    paramValues: immutable.Seq[ParameterValue[_]],
+    var _isPub: Boolean,
+    var _desc: String)
+    (implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.plugins.DataSource(n, o, df, paramValues)
-    with PersistableEntity  with OptionallyOwnedEntity with ShareableEntity
+    with PersistableEntity with OptionallyOwnedEntity with ShareableEntity with NamedEntity with DescribedEntity
 {
     var pluginId: String = Option(df).map(_.id).getOrElse(null)
 

@@ -27,9 +27,9 @@ class PluginInstance(
     override val id: String,
     p: cz.payola.domain.entities.Plugin,
     paramValues: immutable.Seq[ParameterValue[_]],
-    description: String)(implicit val context: SquerylDataContextComponent)
+    var _desc: String)(implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.plugins.PluginInstance(p, paramValues)
-    with PersistableEntity
+    with PersistableEntity with DescribedEntity
 {
     var pluginId: String = Option(p).map(_.id).getOrElse(null)
 

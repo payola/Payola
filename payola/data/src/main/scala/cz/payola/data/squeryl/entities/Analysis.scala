@@ -14,15 +14,17 @@ object Analysis extends EntityConverter[Analysis]
     def convert(entity: AnyRef)(implicit context: SquerylDataContextComponent): Option[Analysis] = {
         entity match {
             case e: Analysis => Some(e)
-            case e: cz.payola.common.entities.Analysis => Some(new Analysis(e.id, e.name, e.owner.map(User(_))))
+            case e: cz.payola.common.entities.Analysis
+                    => Some(new Analysis(e.id, e.name, e.owner.map(User(_)), e.isPublic, e.description))
             case _ => None
         }
     }
 }
 
-class Analysis(override val id: String, name: String, o: Option[User])(implicit val context: SquerylDataContextComponent)
+class Analysis(override val id: String, name: String, o: Option[User], var _isPub: Boolean, var _desc: String)
+    (implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.Analysis(name, o)
-    with PersistableEntity with OptionallyOwnedEntity with ShareableEntity
+    with PersistableEntity with OptionallyOwnedEntity with ShareableEntity with NamedEntity with DescribedEntity
 {
     type DomainParameterValueType = plugins.ParameterValue[_]
 

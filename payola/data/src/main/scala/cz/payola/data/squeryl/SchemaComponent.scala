@@ -311,7 +311,7 @@ trait SchemaComponent
         override def callbacks = Seq(
             factoryFor(users) is { new User("", "", "", "") },
             factoryFor(groups) is { new Group("", "", null) },
-            factoryFor(analyses) is { new Analysis("", "", None) },
+            factoryFor(analyses) is { new Analysis("", "", None, false, "") },
             factoryFor(plugins) is { new PluginDbRepresentation("", "", "", 0, None, false) },
             factoryFor(pluginInstances) is { new PluginInstance("", null, Nil, "") },
             factoryFor(pluginInstanceBindings) is { new PluginInstanceBinding("", null, null, 0) },
@@ -323,9 +323,9 @@ trait SchemaComponent
             factoryFor(intParameterValues) is { new IntParameterValue("", null, 0) },
             factoryFor(stringParameters) is { new StringParameter("", "", "") },
             factoryFor(stringParameterValues) is { new StringParameterValue("", null, "") },
-            factoryFor(dataSources) is { new DataSource("", "", None, null, Nil) },
+            factoryFor(dataSources) is { new DataSource("", "", None, null, Nil, false, "") },
             factoryFor(privileges) is { new PrivilegeDbRepresentation("", "", "", "", "", "", "") },
-            factoryFor(ontologyCustomizations) is { new OntologyCustomization("", "", "", None, Nil) },
+            factoryFor(ontologyCustomizations) is { new OntologyCustomization("", "", "", None, Nil, false) },
             factoryFor(classCustomizations) is { new ClassCustomization("", "", "", 0, None, Nil) },
             factoryFor(propertyCustomizations) is { new PropertyCustomization("", "", "", 0) }
         )

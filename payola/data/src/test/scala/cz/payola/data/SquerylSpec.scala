@@ -145,6 +145,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
 
     private def persistPlugins {
         unionPlugin.owner = Some(u1)
+        unionPlugin.isPublic = true
         
         for (p <- plugins) {
             val p1 = pluginRepository.persist(p)
@@ -179,6 +180,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         // getCount is not used on purpose to test instantiation:
         assert(pluginRepository.getAll().size == plugins.size)
         assert(pluginRepository.getById(unionPlugin.id).get.owner == Some(u1))
+        assert(pluginRepository.getById(unionPlugin.id).get.isPublic == unionPlugin.isPublic)
         assert(pluginRepository.getById(unionPlugin.id).get.owner.get.ownedPlugins.size == 1)
     }
 
@@ -193,7 +195,9 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
             "Cities with more than 2M habitants with countries " + count,
             Some(user)
         )
-        a.isPublic_=(true)
+        
+        a.isPublic = true
+        a.description = "description"
 
         println("      defining analysis")
         val citiesFetcher = sparqlEndpointPlugin.createInstance()
@@ -210,6 +214,8 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
             "Value", "2000000"
         )
 
+        citiesFetcher.description = "fetch"
+
         // Try that defined analysis can be persisted
         a.addPluginInstances(citiesFetcher, citiesTyped, citiesProjection, citiesSelection)
         a.addBinding(citiesFetcher, citiesTyped)
@@ -223,6 +229,8 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
             assert(analysisRepository.getById(analysis.id).isDefined)
             assert(analysis.owner.get.id == user.id)
             assert(user.ownedAnalyses.size == count + 1)
+            assert(analysis.isPublic == a.isPublic)
+            assert(analysis.description == a.description)
 
             // Asset all is persisted
             assert(analysis.pluginInstances.size == a.pluginInstances.size)
@@ -287,6 +295,8 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
                 assert(pi.parameterValues.find(_.id == paramValue.id).get.value == paramValue.value)
             }
         }
+
+        assert(pluginInstanceRepository.getById(citiesFetcher.id).get.description == citiesFetcher.description)
     }
 
     "DataSources" should "be updated/stored by DataSourceRepository" in {
@@ -306,9 +316,10 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
             sparqlEndpointPlugin.parameters(0).asInstanceOf[cz.payola.domain.entities.plugins.parameters.StringParameter]
                 .createValue("http://dbpedia.org/ontology/City")))
 
-        ds1.isPublic_=(true)
-        ds2.isPublic_=(true)
-        ds3.isPublic_=(true)
+        ds1.isPublic = true
+        ds2.isPublic = true
+        ds3.isPublic = true
+        ds1.description = "desc"
 
         val ds1_db = dataSourceRepository.persist(ds1)
         val ds2_db = dataSourceRepository.persist(ds2)
@@ -322,10 +333,12 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
             assert(ds2.parameterValues.size == ds2_db.parameterValues.size)
             assert(ds3.parameterValues.size == ds3_db.parameterValues.size)
 
+            assert(ds1_db.isPublic == ds1.isPublic)
+            assert(ds1_db.description == ds1.description)
             assert(u2.id == ds2_db.owner.get.id)
             assert(u3.id == ds3_db.owner.get.id)
 
-            assert(dataSourceRepository.getAllPublic.size == 0) //TODO: should be 3
+            assert(dataSourceRepository.getAllPublic.size == 3)
             assert(dataSourceRepository.getCount == 3)
             assert(ds3_db.owner.get.ownedDataSources.size == 1)
     }
@@ -382,7 +395,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     }
 
     "Pagionation" should "work" in {
-        //TODO:  schema.wrapInTransaction { testPagination }
+        schema.wrapInTransaction { testPagination }
     }
 
     private def testPagination {
@@ -405,12 +418,23 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     private def persistCustomizations {
         val url = "http://opendata.cz/pco/public-contracts.xml"
         val customization = OntologyCustomization.empty(url, "Name1", None)
+        customization.isPublic = true
         val ownedCustomization = OntologyCustomization.empty(url, "Name2", Some(u1))
 
         val c1 = ontologyCustomizationRepository.persist(customization)
         val c2 = ontologyCustomizationRepository.persist(ownedCustomization)
         
+        val cc1 = ownedCustomization.classCustomizations(0)
+        cc1.radius = 1
+        cc1.fillColor = "grey"
+        cc1.glyph = Some('g')
+
+        val pp1 = cc1.propertyCustomizations(0)
+        pp1.strokeColor = "blue"
+        pp1.strokeWidth = "2"
+        
         assert(c1.id == customization.id)
+        assert(c1.isPublic == customization.isPublic)
         assert(c2.id == ownedCustomization.id)
         assert(c2.owner.get.id == u1.id)
         assert(c2.owner.get.ownedOntologyCustomizations.size == 1)

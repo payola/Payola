@@ -14,7 +14,7 @@ trait UserRepositoryComponent extends TableRepositoryComponent
         with NamedEntityTableRepository[User]
     {
         def getAllWithNameLike(name: String, pagination: Option[PaginationInfo] = None): Seq[User] = {
-            selectWhere(_.name like "%" + name + "%")
+            selectWhere(_.name like "%" + name + "%", pagination)
         }
 
         def getByCredentials(name: String, password: String): Option[User] = {
