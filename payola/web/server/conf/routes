@@ -23,7 +23,7 @@ GET     /datasource/:id             controllers.DataSource.detail(id)
 
 GET     /dashboard                          controllers.Application.dashboard()
 GET     /profile/create-group               controllers.Profile.createGroup()
-GET     /profile/create-plugin              controllers.Profile.createPlugin()
+GET     /plugin/create              controllers.Profile.createPlugin()
 GET     /profile/list-groups                controllers.Profile.listGroups()
 GET     /profile/delete-group               controllers.Profile.deleteGroup(id)
 GET     /profile/edit-group/:id             controllers.Profile.editGroup(id)

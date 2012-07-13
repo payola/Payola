@@ -1,13 +1,44 @@
 package cz.payola.web.shared
 
-/**
-  * Created with IntelliJ IDEA.
-  * User: charliemonroe
-  * Date: 7/13/12
-  * Time: 2:41 PM
-  * To change this template use File | Settings | File Templates.
-  */
+import s2js.compiler.async
+import cz.payola.domain.entities.plugins.compiler.PluginCompiler
+import cz.payola.domain.entities.plugins.PluginClassLoader
 
-object PluginManager
+@remote object PluginManager
 {
+    @async def uploadPlugin(pluginCode: String)(successCallback: (String => Unit))(failCallback: (Throwable => Unit)) {
+        // Try to compile code
+
+        val libDirectory = new java.io.File("lib")
+        val pluginClassDirectory = new java.io.File("plugins")
+        if (!pluginClassDirectory.exists()){
+            pluginClassDirectory.mkdir()
+        }
+
+        val compiler = new PluginCompiler(libDirectory, pluginClassDirectory)
+        try {
+            val className = compiler.compile(pluginCode)
+            val loader = new PluginClassLoader(pluginClassDirectory, getClass.getClassLoader)
+            val plugin = loader.getPlugin(className)
+
+            if (Payola.model.pluginModel.getByName(plugin.name).isDefined) {
+                failCallback(new Exception("Plugin with this name already exists!"))
+            }else{
+                Payola.model.pluginModel.persist(plugin)
+                successCallback("Plugin saved.")
+            }
+        }catch {
+            case e: Exception => {
+                println(e)
+                failCallback(new Exception("Code couldn't be compiled or loaded. \n\nDetails: " + e.getMessage))
+            }
+        }
+
+
+
+
+
+    }
+
+
 }
