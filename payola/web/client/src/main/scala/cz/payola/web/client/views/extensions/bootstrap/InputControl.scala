@@ -56,4 +56,8 @@ class InputControl(label: String, name: String, value: String, title: String) ex
     }
 
     def domElement: Element = wrap.domElement
+
+    def destroy() {
+        // TODO
+    }
 }

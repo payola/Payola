@@ -44,4 +44,8 @@ class TextModal(model: TextSettingsModel) extends Component
     }
 
     def domElement : Element = modal.domElement
+
+    def destroy() {
+        // TODO
+    }
 }

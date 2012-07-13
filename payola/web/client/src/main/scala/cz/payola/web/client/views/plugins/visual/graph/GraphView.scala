@@ -558,8 +558,7 @@ class GraphView(val container: Element, val settings: VisualSetup) extends View 
                 maxBottomRight.y = componentBR.y
             }
         }
-        canvasPack.setSize(
-            Vector2D(window.innerWidth - canvasPack.offsetLeft, window.innerHeight - canvasPack.offsetTop))
+        canvasPack.size = Vector2D(window.innerWidth - canvasPack.offsetLeft, window.innerHeight - canvasPack.offsetTop)
     }
 
     def getGraphCenter(): Point2D = { //() are intentional

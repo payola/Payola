@@ -14,8 +14,11 @@ class Text(initialValue: String) extends Component
 
     def text_=(text: String) {
         value = text
-        destroy()
-        textNode.foreach(e => render(e.parentNode))
+        textNode.foreach { e =>
+            val parentNode = e.parentNode
+            destroy()
+            render(parentNode)
+        }
     }
 
     def render(parent: dom.Node) {

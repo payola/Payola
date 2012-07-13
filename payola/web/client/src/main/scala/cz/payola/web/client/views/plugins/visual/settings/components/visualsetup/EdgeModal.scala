@@ -63,4 +63,8 @@ class EdgeModal(model: EdgeSettingsModel) extends Component
     }
 
     def domElement : Element = modal.domElement
+
+    def destroy() {
+        // TODO
+    }
 }

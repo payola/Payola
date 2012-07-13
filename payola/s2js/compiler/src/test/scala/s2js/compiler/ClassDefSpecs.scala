@@ -181,6 +181,9 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         package pkg
 
                         class A
+                        {
+                            val i: String = ""
+                        }
 
                         trait T1 {
                             val v1 = "test1"
@@ -195,6 +198,9 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         class B extends A with T1 with T2
 
                         class C(val v1: String, val v2: Int) extends A
+                        {
+                            val d = i + i
+                        }
                     """
                 } shouldCompileTo {
                     """

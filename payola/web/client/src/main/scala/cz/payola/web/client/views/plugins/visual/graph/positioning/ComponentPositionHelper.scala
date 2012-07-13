@@ -19,7 +19,6 @@ class ComponentPositionHelper(val componentNumber: Int, val componentsCount: Int
 
         if(componentNumber == 0 || componentsCount < 0) {
             window.alert("Error in component position helper")
-            Vector(0, 0)
         }
 
         val bottomRight = if(prevComp.isDefined) { prevComp.get.getBottomRight() } else { Point2D(0, 0) }

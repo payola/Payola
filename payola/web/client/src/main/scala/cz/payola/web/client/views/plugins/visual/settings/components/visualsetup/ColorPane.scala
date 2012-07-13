@@ -3,10 +3,10 @@ package cz.payola.web.client.views.plugins.visual.settings.components.visualsetu
 import cz.payola.web.client.views.Component
 import cz.payola.web.client.views.plugins.visual.Color
 import s2js.adapters.js.dom.Element
-import cz.payola.web.client.views.events._
 import s2js.compiler.javascript
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events._
+import s2js.adapters.js.dom
 
 class ColorPane(name: String, label: String, var color: Color) extends Component
 {
@@ -50,4 +50,11 @@ class ColorPane(name: String, label: String, var color: Color) extends Component
     })""")
     private def init = Nil
 
+    def render(parent: dom.Node) {
+
+    }
+
+    def destroy() {
+        // TODO
+    }
 }

@@ -9,12 +9,16 @@ class DataSourceDialog extends Component
 {
     private val dialog = new Modal("Find a datasource", List())
 
-    def render(parent: Node) = {
+    def render(parent: Node) {
         dialog.render()
     }
 
     def domElement : Element = {
         dialog.domElement
+    }
+
+    def destroy() {
+        // TODO
     }
 
 }

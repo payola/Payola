@@ -10,7 +10,7 @@ import cz.payola.web.client.views.extensions.bootstrap.Modal
 import cz.payola.web.client.events.SimpleEvent
 import cz.payola.web.client.views.elements.Anchor
 
-class PluginDialog(plugins: Seq[Plugin]) extends Component
+class PluginDialog(plugins: Seq[Plugin])
 {
     val pluginNameClicked = new SimpleEvent[Plugin]
 

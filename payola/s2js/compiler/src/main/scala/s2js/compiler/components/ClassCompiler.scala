@@ -26,15 +26,15 @@ class ClassCompiler(packageDefCompiler: PackageDefCompiler, classDef: Global#Cla
             }
         }
 
-        // Initialize fields that aren't implicit constructor parameters.
-        valDefs.filter(v => !initializedValDefs.contains(packageDefCompiler.getSymbolLocalJsName(v.symbol))).foreach(
-            compileMember(_, "self"))
-
         // Call the parent class constructor.
         if (parentClass.isDefined) {
             compileParentCall(parentConstructorCall.map(_.args).getOrElse(Nil))
             buffer += ";\n"
         }
+
+        // Initialize fields that aren't implicit constructor parameters.
+        valDefs.filter(v => !initializedValDefs.contains(packageDefCompiler.getSymbolLocalJsName(v.symbol))).foreach(
+            compileMember(_, "self"))
 
         // Compile the constructor body.
         classDef.impl.body.filter(!_.isInstanceOf[Global#ValOrDefDef]).foreach {ast =>

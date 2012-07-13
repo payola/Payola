@@ -89,4 +89,8 @@ class MergeAnalysisBranchesDialog(instances: ArrayBuffer[PluginInstance], inputs
     def setInstance(index: Int, instance: PluginInstance) = {
         outputToInstance.put(index, instance)
     }
+
+    def destroy() {
+        // TODO
+    }
 }

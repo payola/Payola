@@ -109,4 +109,8 @@ class AnalysisControls(analysisId: String) extends Component
     def domElement : Element = {
         wrap.domElement
     }
+
+    def destroy() {
+        // TODO
+    }
 }

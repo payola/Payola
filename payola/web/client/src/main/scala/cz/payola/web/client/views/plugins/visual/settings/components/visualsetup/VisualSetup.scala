@@ -72,4 +72,8 @@ class VisualSetup(var vertexModel: VertexSettingsModel, var edgesModel: EdgeSett
     }
 
     def domElement: Element = vertexSettings.domElement
+
+    def destroy() {
+        // TODO
+    }
 }

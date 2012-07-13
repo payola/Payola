@@ -5,11 +5,6 @@ import s2js.adapters.js.dom._
 import s2js.adapters.js.browser.document
 
 class Icon(iconName: String) extends Italic(List(), "icon-" + iconName)
-{
-    def render(parent: Node) = {
-        super.render(parent)
-    }
-}
 
 object Icon
 {

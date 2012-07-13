@@ -88,4 +88,8 @@ class Modal(title: String, body: Seq[Component], showSave: Boolean = true, showC
 
     @javascript("$(self.modalDiv).modal({show: false})")
     def init = Nil
+
+    def destroy() {
+        hide
+    }
 }

@@ -53,4 +53,8 @@ class VertexModal(model: VertexSettingsModel) extends Component
     }
 
     def domElement : Element = modal.domElement
+
+    def destroy() {
+        // TODO
+    }
 }

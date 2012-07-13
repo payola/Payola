@@ -167,7 +167,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
     /**
       * Description of mouse-button-down event. Is called from the layer (canvas) binded to it in the initialization.
       */
-    private def onMouseDown(eventArgs: BrowserEventArgs[CanvasPack]) {
+    private def onMouseDown(eventArgs: BrowserEventArgs[Canvas]) {
 
         val position = getPosition(eventArgs)
         var resultedAnimation: Option[Animation[ListBuffer[InformationView]]] = None
@@ -241,7 +241,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
     /**
       * Description of mouse-move event. Is called from the layer (canvas) binded to it in the initialization.
       */
-    private def onMouseDrag(eventArgs: BrowserEventArgs[CanvasPack]) {
+    private def onMouseDrag(eventArgs: BrowserEventArgs[Canvas]) {
 
         val end = getPosition(eventArgs)
         if(mousePressedVertex) {
