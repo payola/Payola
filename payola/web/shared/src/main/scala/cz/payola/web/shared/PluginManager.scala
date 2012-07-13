@@ -1,14 +1,17 @@
 package cz.payola.web.shared
 
-import s2js.compiler.async
+import s2js.compiler._
 import cz.payola.domain.entities.plugins.compiler.PluginCompiler
 import cz.payola.domain.entities.plugins.PluginClassLoader
+import cz.payola.domain.entities.User
 
 @remote object PluginManager
 {
-    @async def uploadPlugin(pluginCode: String)(successCallback: (String => Unit))(failCallback: (Throwable => Unit)) {
-        // Try to compile code
+    @async @secured def uploadPlugin(pluginCode: String, user: User = null)(successCallback: (String => Unit))(failCallback: (Throwable => Unit)) {
+        // Sanity check
+        assert(user != null, "Not logged in, or some other error")
 
+        // Try to compile code
         val libDirectory = new java.io.File("lib")
         val pluginClassDirectory = new java.io.File("plugins")
         if (!pluginClassDirectory.exists()){
@@ -24,12 +27,15 @@ import cz.payola.domain.entities.plugins.PluginClassLoader
             if (Payola.model.pluginModel.getByName(plugin.name).isDefined) {
                 failCallback(new Exception("Plugin with this name already exists!"))
             }else{
+                plugin.owner = Some(user)
+                user.addOwnedPlugin(plugin)
                 Payola.model.pluginModel.persist(plugin)
+
                 successCallback("Plugin saved.")
             }
         }catch {
             case e: Exception => {
-                println(e)
+                e.printStackTrace()
                 failCallback(new Exception("Code couldn't be compiled or loaded. \n\nDetails: " + e.getMessage))
             }
         }

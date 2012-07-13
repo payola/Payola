@@ -9,7 +9,7 @@ import cz.payola.web.shared.PluginManager
 
 // Can't pass the editor's pre ID as we're using it in the native JS, which needs to
 // be compile-time ready
-class PluginCreator(val buttonContainerID: String) extends Component
+class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) extends Component
 {
 
     createEditor()
@@ -45,12 +45,13 @@ class PluginCreator(val buttonContainerID: String) extends Component
     }
 
     private def postFailedCallback(t: Throwable){
-        // TODO: JS fails on t.getMessage -> fix
-        window.alert("Failed to upload plugin!")
+        val exceptionMessage = t.asInstanceOf[s2js.runtime.shared.Exception].message
+        window.alert("Failed to upload plugin!\n\n" + exceptionMessage)
     }
 
     private def postWasSuccessfulCallback(s: String) {
         window.alert("Plugin uploaded successfully!")
+        window.location.href = listPluginsURL
     }
 
     private def postCodeToServer(code: String) {
@@ -60,7 +61,6 @@ class PluginCreator(val buttonContainerID: String) extends Component
             t => postFailedCallback(t)
         }
     }
-
 
     def render(parent: Element) = {
         // TODO

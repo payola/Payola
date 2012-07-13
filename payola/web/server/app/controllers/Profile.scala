@@ -119,4 +119,8 @@ object Profile extends PayolaController with Secured
     def createPlugin = authenticated{ user =>
         Ok(views.html.plugin.create(user))
     }
+
+    def listPlugins = authenticated { user =>
+        Ok(views.html.plugin.list(user))
+    }
 }
