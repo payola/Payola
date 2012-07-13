@@ -25,4 +25,6 @@ class ClassCustomization(
     with PersistableEntity
 {
     var ontologyCustomizationId: String = null
+    
+    def propertyCustomizations_=(value: Seq[PropertyCustomizationType]) { _propertyCustomizations = value.toList}
 }

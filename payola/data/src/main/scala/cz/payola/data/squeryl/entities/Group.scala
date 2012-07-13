@@ -1,9 +1,6 @@
 package cz.payola.data.squeryl.entities
 
-import cz.payola.data._
-import org.squeryl.annotations.Transient
-import scala.collection.immutable
-import scala.Some
+import scala.collection._
 import cz.payola.data.squeryl.SquerylDataContextComponent
 
 /**
@@ -24,52 +21,23 @@ class Group(override val id: String, name: String, o: User)(implicit val context
     extends cz.payola.domain.entities.Group(name, o)
     with PersistableEntity with PrivilegableEntity
 {
-    val ownerId: String = Option(o).map(_.id).getOrElse(null)
-
-    private lazy val _ownerQuery = context.schema.groupOwnership.right(this)
-
-    @Transient
-    var _groupMembersLoaded = false
-    private lazy val _groupMembersQuery = context.schema.groupMembership.right(this)
-
-    override def members: immutable.Seq[UserType] = {
-        if (!_groupMembersLoaded) {
-            wrapInTransaction {
-                members = _groupMembersQuery.toList
-            }
-        }
-
-        super.members
-    }
+    var ownerId: String = Option(o).map(_.id).getOrElse(null)
 
     def members_=(members: Seq[User]) {
-        members.foreach { u =>
-            if (!super.members.contains(u)) {
-                super.storeMember(u)
-            }
-        }
-        _groupMembersLoaded = true
-    }
-
-    override def owner: UserType = {
-        if (_owner == null && ownerId != null){
-            wrapInTransaction {
-                _owner = _ownerQuery.head
-            }
-        }
-
-        _owner
+        _members = mutable.ArrayBuffer(members: _*)
     }
 
     def owner_=(value: UserType) {
         _owner = value
+
+        ownerId = value.id
     }
 
-    override def storeMember(u: UserType) {
-        super.storeMember(context.schema.associate(User(u), _groupMembersQuery))
+    override def storeMember(user: UserType) {
+        super.storeMember(context.schema.associate(User(user), context.schema.groupMembership.right(this)))
     }
 
     override protected def discardMember(user: UserType) {
-        super.discardMember(context.schema.dissociate(User(user), _groupMembersQuery))
+        super.discardMember(context.schema.dissociate(User(user), context.schema.groupMembership.right(this)))
     }
 }

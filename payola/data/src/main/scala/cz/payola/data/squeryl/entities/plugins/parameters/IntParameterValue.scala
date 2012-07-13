@@ -33,8 +33,4 @@ class IntParameterValue(
     with ParameterValue[Int]
 {
     val parameterId: String = Option(param).map(_.id).getOrElse(null)
-
-    private lazy val _parameterQuery = context.schema.valuesOfIntParameters.right(this)
-
-    override def parameter: ParameterType = wrapInTransaction { _parameterQuery.head }
 }

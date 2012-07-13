@@ -326,7 +326,7 @@ trait SchemaComponent
             factoryFor(dataSources) is { new DataSource("", "", None, null, Nil) },
             factoryFor(privileges) is { new PrivilegeDbRepresentation("", "", "", "", "", "", "") },
             factoryFor(ontologyCustomizations) is { new OntologyCustomization("", "", "", None, Nil) },
-            factoryFor(classCustomizations) is { new ClassCustomization("", "", "", 0, Some('x'), Nil) },
+            factoryFor(classCustomizations) is { new ClassCustomization("", "", "", 0, None, Nil) },
             factoryFor(propertyCustomizations) is { new PropertyCustomization("", "", "", 0) }
         )
 
@@ -459,11 +459,11 @@ trait SchemaComponent
         }
 
         def wrapInTransaction[C](body: => C) = {
-            // TODO DataException.wrap {
-            inTransaction {
-                body
+            DataException.wrap {
+                inTransaction {
+                    body
+                }
             }
-            // }
         }
 
         /**
@@ -473,7 +473,7 @@ trait SchemaComponent
           * @param entity - specified entity to be ralted with this entity
           * @param relation  - definition of 1:N relation between this and specified entity
           * @tparam A - type of specified entity
-          * @return Returns pesisted specified entity
+          * @return Returns persisted specified entity
           */
         def associate[A <: PersistableEntity](entity: A, relation: OneToMany[A]): A = {
             wrapInTransaction {

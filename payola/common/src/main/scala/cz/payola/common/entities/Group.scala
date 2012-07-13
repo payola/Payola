@@ -14,7 +14,7 @@ trait Group extends Entity with NamedEntity with PrivilegableEntity
 
     protected var _owner: UserType
 
-    protected val _members = new mutable.ArrayBuffer[UserType]()
+    protected var _members = new mutable.ArrayBuffer[UserType]()
 
     /** Owner of the group. */
     def owner = _owner

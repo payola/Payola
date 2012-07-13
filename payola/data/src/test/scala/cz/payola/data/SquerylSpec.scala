@@ -179,6 +179,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         // getCount is not used on purpose to test instantiation:
         assert(pluginRepository.getAll().size == plugins.size)
         assert(pluginRepository.getById(unionPlugin.id).get.owner == Some(u1))
+        assert(pluginRepository.getById(unionPlugin.id).get.owner.get.ownedPlugins.size == 1)
     }
 
     "Analysis" should "be stored/updated/loaded by AnalysisRepository" in {
@@ -187,7 +188,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
 
     private def persistAnalyses {
         val user = userRepository.getById(u1.id).get
-        val count = analysisRepository.getAll().size
+        val count = analysisRepository.getCount
         val a = new cz.payola.domain.entities.Analysis(
             "Cities with more than 2M habitants with countries " + count,
             Some(user)
@@ -258,7 +259,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
             assert(persistedAnalysis.pluginInstances.size == 8)
             assert(persistedAnalysis.pluginInstanceBindings.size == analysis.pluginInstanceBindings.size)
             assert(persistedAnalysis.pluginInstanceBindings.size == 7)
-            //TODO: assert(persistedAnalysis.owner.get.id == user.id)
+            assert(persistedAnalysis.owner.get.id == user.id)
 
         // Assert persisted plugins instances
         val pluginInstances = List(
@@ -272,8 +273,9 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
             citiesCountriesJoin
         )
 
+        // Assert eagerly-loaded relations to plugins and parameters
         for (pi <- pluginInstances) {
-            val pi2 = pluginInstanceRepository.getById(pi.id)
+            val pi2 = persistedAnalysis.pluginInstances.find(_.id == pi.id)
                 assert(pi2.isDefined)
                 assert(pi2.get.id == pi.id)
                 assert(pi2.get.plugin.id == pi.plugin.id)
@@ -323,9 +325,9 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
             assert(u2.id == ds2_db.owner.get.id)
             assert(u3.id == ds3_db.owner.get.id)
 
-        //println("DSs: " + dataSourceRepository.getPublicDataSources().size)
-            assert(dataSourceRepository.getAllPublic.size == 0)
-            assert(dataSourceRepository.getAll().size == 3)
+            assert(dataSourceRepository.getAllPublic.size == 0) //TODO: should be 3
+            assert(dataSourceRepository.getCount == 3)
+            assert(ds3_db.owner.get.ownedDataSources.size == 1)
     }
 
     "Privileges" should "be granted and persisted properly" in {
@@ -410,9 +412,34 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         
         assert(c1.id == customization.id)
         assert(c2.id == ownedCustomization.id)
+        assert(c2.owner.get.id == u1.id)
+        assert(c2.owner.get.ownedOntologyCustomizations.size == 1)
+
+        // Assert eager-loading
+        val c3 = ontologyCustomizationRepository.getById(ownedCustomization.id).get
+            assert(c3.owner == Some(u1))
+            assert(c3.name == ownedCustomization.name)
+            assert(c3.ontologyURL == ownedCustomization.ontologyURL)
+            assert(c3.classCustomizations.size == ownedCustomization.classCustomizations.size)
+        
+        for (cc <- ownedCustomization.classCustomizations){
+            val persistedCc = c3.classCustomizations.find(_.id == cc.id).get
+                assert(persistedCc.uri == cc.uri)
+                assert(persistedCc.fillColor == cc.fillColor)
+                assert(persistedCc.radius == cc.radius)
+                assert(persistedCc.glyph == cc.glyph)
+                assert(cc.propertyCustomizations.size == persistedCc.propertyCustomizations.size)
+
+            for (pc <- cc.propertyCustomizations){
+                val persistedPc = persistedCc.propertyCustomizations.find(_.id == pc.id).get
+                    assert(persistedPc.uri == pc.uri)
+                    assert(persistedPc.strokeWidth == pc.strokeWidth)
+                    assert(persistedPc.strokeColor == pc.strokeColor)
+            }
+        }
     }
 
-    "Entities" should "be with removed their related entities" in {
+    "Entities" should "be removed with their related entities" in {
         schema.wrapInTransaction { testCascadeDeletes }
     }
 
@@ -424,17 +451,17 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         // Create another analysis in DB
         persistAnalyses
 
-        assert(analysisRepository.getAll().size == analysisCount + 1)
-        assert(pluginInstanceRepository.getAll().size == pluginInstancesCount * 2)
-        assert(pluginRepository.getAll().size == pluginsCount)
+        assert(analysisRepository.getCount == analysisCount + 1)
+        assert(pluginInstanceRepository.getCount == pluginInstancesCount * 2)
+        assert(pluginRepository.getCount == pluginsCount)
 
         // Remove one analysis
         assert(analysisRepository.removeById(analysisRepository.getAll()(0).id) == true)
 
         // One analysis and half of plugin instances are gone
-        assert(analysisRepository.getAll().size == analysisCount)
-        assert(pluginInstanceRepository.getAll().size == pluginInstancesCount)
-        assert(pluginRepository.getAll().size == pluginsCount)
+        assert(analysisRepository.getCount == analysisCount)
+        assert(pluginInstanceRepository.getCount == pluginInstancesCount)
+        assert(pluginRepository.getCount == pluginsCount)
 
         val analysis = analysisRepository.getAll()(0)
 
@@ -444,9 +471,9 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         }
 
         // Only (empty) analysis is left
-        assert(analysisRepository.getAll().size == analysisCount)
-        assert(pluginInstanceRepository.getAll().size == 0)
-        assert(pluginRepository.getAll().size == 0)
+        assert(analysisRepository.getCount == analysisCount)
+        assert(pluginInstanceRepository.getCount == 0)
+        assert(pluginRepository.getCount == 0)
 
         // Assert nothing left for analysis
         assert(analysis.pluginInstances.size == 0)
@@ -454,5 +481,9 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
 
         // Remove user and all his entities
         assert(userRepository.removeById(u1.id))
+        assert(userRepository.removeById(u2.id))
+        assert(userRepository.removeById(u3.id))
+        assert(userRepository.removeById(u4.id))
+        assert(userRepository.removeById(u5.id))
     }
 }

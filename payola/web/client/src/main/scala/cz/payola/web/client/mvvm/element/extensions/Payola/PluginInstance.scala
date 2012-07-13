@@ -76,7 +76,7 @@ class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[P
 
     private var parent: Option[Element] = None
 
-    def render(parent: Element = document.body) = {
+    def render(parent: Element = document.body) {
         this.parent = Some(parent)
         alertDiv.setId(plugin.id + "_" + PluginInstance.getCounter())
         successors.render(parent)

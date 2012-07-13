@@ -66,13 +66,13 @@ object Profile extends PayolaController with Secured
             case _ => Map.empty[String, Seq[String]]
         }
 
-        val membersNew = data.getOrElse("members",Nil).flatMap{ u => Payola.model.userModel.getById(u) }
+        val membersNew = data.getOrElse("members",Nil).flatMap{ s => s.split(',') }.flatMap{ uId => Payola.model.userModel.getById(uId) }
         val group = user.ownedGroups.find(_.id == id)
 
         if (group.isDefined)
         {
             val g = group.get
-            g.name = data.getOrElse("name", g.name).toString
+            g.name = data.getOrElse("name", Nil).head
             g.members.diff(membersNew).map{m =>
                 g.removeMember(m)
             }

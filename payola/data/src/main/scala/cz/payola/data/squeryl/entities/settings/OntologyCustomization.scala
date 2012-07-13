@@ -22,13 +22,14 @@ class OntologyCustomization(
     override val id: String, u: String, n: String, o: Option[User], c: immutable.Seq[ClassCustomization])
     (implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.settings.OntologyCustomization(u, n, o, c)
-    with PersistableEntity with OptionallyOwnedEntity
+    with PersistableEntity with OptionallyOwnedEntity with ShareableEntity
 {
+    _classCustomizations = null
+
     override def classCustomizations: immutable.Seq[ClassCustomizationType] = {
         if (_classCustomizations == null) {
-            // TODO:
             _classCustomizations = wrapInTransaction {
-                Nil
+                context.ontologyCustomizationRepository.getClassCustomizations(id).toList
             }
         }
 
