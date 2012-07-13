@@ -326,7 +326,7 @@ trait SchemaComponent
             factoryFor(dataSources) is { new DataSource("", "", None, null, Nil) },
             factoryFor(privileges) is { new PrivilegeDbRepresentation("", "", "", "", "", "", "") },
             factoryFor(ontologyCustomizations) is { new OntologyCustomization("", "", "", None, Nil) },
-            factoryFor(classCustomizations) is { new ClassCustomization("", "", "", 0, Some('x'), Nil) },
+            factoryFor(classCustomizations) is { new ClassCustomization("", "", "", 0, None, Nil) },
             factoryFor(propertyCustomizations) is { new PropertyCustomization("", "", "", 0) }
         )
 
