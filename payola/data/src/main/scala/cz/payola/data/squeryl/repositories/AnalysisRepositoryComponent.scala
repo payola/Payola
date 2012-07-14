@@ -49,11 +49,7 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
                 pluginInstancesByIds.values.foreach{p =>
                     p.plugin = pluginsByIds(p.pluginId)
 
-                    // Set parameter to parameter value
-                    p.parameterValues.foreach{ v =>
-                        val value = v.asInstanceOf[ParameterValue[_]]
-                        value.parameter = p.plugin.parameters.find(_.id == value.parameterId).get
-                    }
+                    pluginInstanceRepository.mapParameterValuesToParameters(p)
                 }
 
                 // Set plugin instances to bindings

@@ -64,5 +64,22 @@ trait PluginInstanceRepositoryComponent extends TableRepositoryComponent
                 case s: StringParameterValue => persist(s, schema.stringParameterValues)
             }
         }
+
+        def mapParameterValuesToParameters(pluginInstance: PluginInstance) {
+            // Map parameter to parameter value
+            pluginInstance.parameterValues.foreach{ v =>
+                val value = v.asInstanceOf[ParameterValue[_]]
+                value.parameter = pluginInstance.plugin.parameters.find(_.id == value.parameterId).get
+            }
+        }
+
+        def loadPluginForPluginInstance(pluginInstance: PluginInstance) {
+            _loadPluginInstance(pluginInstance)
+        }
+
+        private def _loadPluginInstance(pluginInstance: PluginInstance) {
+            pluginInstance.plugin = pluginRepository.getById(pluginInstance.pluginId).get
+            mapParameterValuesToParameters(pluginInstance)
+        }
     }
 }

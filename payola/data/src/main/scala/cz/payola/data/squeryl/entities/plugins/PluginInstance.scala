@@ -35,15 +35,27 @@ class PluginInstance(
 
     var analysisId: String = null
 
-    private lazy val _pluginQuery = context.schema.pluginsPluginInstances.right(this)
+    override def plugin = {
+        if (_plugin == null) {
+            wrapInTransaction{
+                //context.pluginInstanceRepository.loadPluginForPluginInstance(this)
+            }
+        }
 
-    private lazy val _booleanParameterValues = context.schema.booleanParameterValuesOfPluginInstances.left(this)
+        _plugin
+    }
 
-    private lazy val _floatParameterValues = context.schema.floatParameterValuesOfPluginInstances.left(this)
+    override def parameterValues = {
+        // There is really need to check plugin -> loading plugins ensures mapping parameter values to parameters
+        // (otherwise NullPointerException is thrown when accessing paramterValues.parameter.something)
+        if (_plugin == null) {
+            wrapInTransaction{
+                //context.pluginInstanceRepository.loadPluginForPluginInstance(this)
+            }
+        }
 
-    private lazy val _intParameterValues = context.schema.intParameterValuesOfPluginInstances.left(this)
-
-    private lazy val _stringParameterValues = context.schema.stringParameterValuesOfPluginInstances.left(this)
+        super.parameterValues
+    }
 
     def parameterValues_=(value: collection.immutable.Seq[PluginType#ParameterValueType]) {
         _parameterValues = value
