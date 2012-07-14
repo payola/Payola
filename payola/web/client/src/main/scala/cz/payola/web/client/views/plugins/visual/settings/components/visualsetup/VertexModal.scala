@@ -1,19 +1,11 @@
 package cz.payola.web.client.views.plugins.visual.settings.components.visualsetup
 
-import s2js.adapters.js.browser.document
-import s2js.adapters.js.dom._
-import cz.payola.web.client.views.Component
 import cz.payola.web.client.views.plugins.visual.settings.VertexSettingsModel
 import cz.payola.web.client.views.elements.{Label, Input, Div}
-import cz.payola.web.client.views.extensions.bootstrap.Modal
-import cz.payola.web.client.events._
-import scala.Some
-import scala.Some
+import cz.payola.web.client.views.components.bootstrap.Modal
 
-class VertexModal(model: VertexSettingsModel) extends Component
+class VertexModal(model: VertexSettingsModel) extends Modal("Vertex settings")
 {
-    val settingsChanged = new SimpleEvent[VertexModal]
-
     //TODO add some bounds check for every input
     val radius = new Input("vertex.radius", model.radius.toString(), Some("0 < x < 100"))
     val rLabel = new Label("Corner radius [px]:", radius)
@@ -32,29 +24,5 @@ class VertexModal(model: VertexSettingsModel) extends Component
         model.colorSelected = colorSelected.getColor
     }
 
-    val wrapper = new Div(List(rLabel, radius, color, colorSelected))
-
-    private val modal = new Modal("Vertex settings", List(wrapper))
-
-    modal.saved += {
-        event => settingsChanged.triggerDirectly(this)
-    }
-
-    def render(parent: Node) {
-        modal.render(parent)
-    }
-
-    def show() {
-        modal.show
-    }
-
-    def hide() {
-        modal.hide
-    }
-
-    def domElement : Element = modal.domElement
-
-    def destroy() {
-        // TODO
-    }
+    override val body = List(new Div(List(rLabel, radius, color, colorSelected)))
 }

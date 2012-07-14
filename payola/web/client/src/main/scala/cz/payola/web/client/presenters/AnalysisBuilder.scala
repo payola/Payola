@@ -13,6 +13,8 @@ import cz.payola.web.client.presenters.models.ParameterValue
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.extensions.bootstrap._
 import cz.payola.web.client.events.EventArgs
+import cz.payola.web.client.views.components.bootstrap._
+import scala.Some
 
 class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: String)
 {
@@ -55,19 +57,17 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
     def init {
         val nameDialog = new Modal("Please, enter the name of the new analysis", List(nameComponent))
 
-        nameDialog.render(document.body)
-
         AnalysisBuilderData.createEmptyAnalysis() {
             id =>
                 analysisId = id
                 AnalysisBuilderData.lockAnalysis(id)
-                nameDialog.show
+                nameDialog.render()
         } { error => window.alert("Unable to create analysis")}
 
-        nameDialog.saved += { args =>
-            AnalysisBuilderData.setAnalysisName(analysisId, nameComponent.getValue()) { success =>
-                name.setValue(nameComponent.getValue())
-                nameDialog.hide
+        nameDialog.saving += { e =>
+            AnalysisBuilderData.setAnalysisName(analysisId, nameComponent.input.value) { success =>
+                name.input.value = nameComponent.input.value
+                nameDialog.destroy()
             } { error =>
                 nameComponent.setError("Unable to use this name")
             }
@@ -75,16 +75,16 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
         }
     }
 
-    name.changed += { eventArgs =>
+    name.input.changed += { eventArgs =>
         if (nameChangedTimeout.isDefined) {
             window.clearTimeout(nameChangedTimeout.get)
         }
 
         nameChangedTimeout = Some(window.setTimeout({ () =>
-            AnalysisBuilderData.setAnalysisName(analysisId, eventArgs.target.getValue) { _ =>
-                eventArgs.target.setOk()
+            AnalysisBuilderData.setAnalysisName(analysisId, name.input.value) { _ =>
+                name.setOk()
             } { _ =>
-                eventArgs.target.setError("Invalid name.")
+                name.setError("Invalid name.")
             }
         }, 300))
 
@@ -99,12 +99,10 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
         val dialog = new PluginDialog(allPlugins.filter(_.inputCount == 0))
         dialog.pluginNameClicked += { evtArgs =>
             onPluginNameClicked(evtArgs.target, None)
-            dialog.hide
+            dialog.destroy()
             false
         }
-        dialog.render(document.body)
-        dialog.show
-
+        dialog.render()
         false
     }
 
@@ -112,7 +110,7 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
         val dialog = new PluginDialog(allPlugins.filter(_.inputCount > 1))
         dialog.pluginNameClicked += { evt =>
 
-            dialog.hide()
+            dialog.destroy()
 
             val inputsCount = evt.target.inputCount
             if (inputsCount > lanes.size) {
@@ -120,10 +118,8 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
                     .size + " branches are available.")
             } else {
                 val mergeDialog = new MergeAnalysisBranchesDialog(lanes, inputsCount)
-                mergeDialog.render(document.body)
-
-                mergeDialog.mergeStrategyChosen += { event: MergeStrategyEventArgs =>
-                    val instances = event.target
+                mergeDialog.saving += { e =>
+                    val instances = mergeDialog.outputToInstance
 
                     var i = 0
                     val buffer = new ArrayBuffer[PluginInstance]()
@@ -155,17 +151,17 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
 
                         lanes += mergeInstance
 
-                        mergeDialog.hide()
+                        mergeDialog.destroy()
                     } { _ =>}
+                    false
                 }
 
-                mergeDialog.show()
+                mergeDialog.render()
             }
 
             false
         }
-        dialog.render(document.body)
-        dialog.show
+        dialog.render()
         false
     }
 
@@ -224,11 +220,10 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
         val dialog = new PluginDialog(allPlugins.filter(_.inputCount == 1))
         dialog.pluginNameClicked += { evtArgs =>
             onPluginNameClicked(evtArgs.target, Some(inner))
-            dialog.hide
+            dialog.destroy()
             false
         }
-        dialog.render(document.body)
-        dialog.show
+        dialog.render()
     }
 
     def onDeleteClick(eventArgs: EventArgs[PluginInstance]) {

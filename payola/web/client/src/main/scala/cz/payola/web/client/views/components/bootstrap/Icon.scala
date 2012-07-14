@@ -1,8 +1,6 @@
-package cz.payola.web.client.views.extensions.bootstrap
+package cz.payola.web.client.views.components.bootstrap
 
 import cz.payola.web.client.views.elements.Italic
-import s2js.adapters.js.dom._
-import s2js.adapters.js.browser.document
 
 class Icon(iconName: String) extends Italic(List(), "icon-" + iconName)
 

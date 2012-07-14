@@ -1,16 +1,10 @@
 package cz.payola.web.client.views.events
 
 import s2js.adapters.js.browser
-import cz.payola.web.client.events.Event
+import cz.payola.web.client.events._
 
-class BrowserEvent[A] extends Event[A, BrowserEventArgs[A], Boolean]
+class BrowserEvent[A] extends BooleanEvent[A, BrowserEventArgs[A]]
 {
-    protected def resultsFolderInitializer = true
-
-    protected def resultsFolderReducer(stackTop: Boolean, currentHandlerResult: Boolean) = {
-        stackTop && currentHandlerResult
-    }
-
     def triggerDirectly(target: A, event: browser.Event): Boolean = {
         trigger(BrowserEventArgs[A](target, event))
     }

@@ -1,21 +1,19 @@
 package cz.payola.web.client.presenters.components
 
-import cz.payola.web.client.views._
-import cz.payola.web.client.views.Component
 import s2js.adapters.js.dom._
 import s2js.adapters.js.browser.document
 import s2js.compiler.javascript
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 import cz.payola.web.client.views.elements._
-import cz.payola.web.client.views.extensions.bootstrap.Modal
+import cz.payola.web.client.views.components.bootstrap.Modal
 import cz.payola.web.client.views.todo.PluginInstance
 import s2js.adapters.js.dom.Element
 import cz.payola.web.client.views.elements.Div
 
-class MergeAnalysisBranchesDialog(instances: ArrayBuffer[PluginInstance], inputsCount: Int) extends Component
+class MergeAnalysisBranchesDialog(instances: ArrayBuffer[PluginInstance], inputsCount: Int)
+    extends Modal("Choose how you want to merge the branches")
 {
-    val mergeStrategyChosen = new MergeStrategyEvent()
     val outputToInstance = new HashMap[Int, PluginInstance]
 
     private val dragZone = new Div(List(),"droppable origin")
@@ -42,24 +40,11 @@ class MergeAnalysisBranchesDialog(instances: ArrayBuffer[PluginInstance], inputs
         i = i+1
     }
 
-    private val dialog = new Modal("Choose how you want to merge the branches", List(dragZone, dropZoneWrapper))
+    override val body = List(dragZone, dropZoneWrapper)
 
-    def render(parent: Node) = {
-        dialog.render(parent)
+    override def render(parent: Node = document.body) {
+        super.render(parent)
         bindDragAndDrop()
-    }
-
-    def show() = dialog.show
-
-    def hide() = dialog.hide
-
-    def domElement : Element = {
-        dialog.domElement
-    }
-
-    dialog.saved += { event =>
-        mergeStrategyChosen.trigger(new MergeStrategyEventArgs(outputToInstance))
-        false
     }
 
     @javascript(
@@ -78,19 +63,15 @@ class MergeAnalysisBranchesDialog(instances: ArrayBuffer[PluginInstance], inputs
                 }
            });
         """)
-    def bindDragAndDrop() = {}
+    def bindDragAndDrop() { }
 
     @javascript(""" jQuery(element).data("pluginInstance", instance); """)
-    def bindInstance(element: Element, instance: PluginInstance) = {}
+    def bindInstance(element: Element, instance: PluginInstance) {}
 
     @javascript(""" jQuery(element).data("inputIndex", index); """)
-    def bindIndex(element: Element, index: Int) = {}
+    def bindIndex(element: Element, index: Int) { }
 
     def setInstance(index: Int, instance: PluginInstance) = {
         outputToInstance.put(index, instance)
-    }
-
-    def destroy() {
-        // TODO
     }
 }

@@ -1,20 +1,16 @@
 package cz.payola.web.client.views.todo
 
-import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom._
 import cz.payola.common.entities.Plugin
 import s2js.compiler.javascript
 import scala.collection.mutable
 import cz.payola.web.client.presenters.models.ParameterValue
-import cz.payola.web.client.views.events._
 import cz.payola.web.client.views.elements._
-import cz.payola.web.client.views.extensions.bootstrap._
 import cz.payola.web.client.events._
-import scala.Some
 import cz.payola.web.client.views.Component
-import cz.payola.web.client.views.extensions.bootstrap.Button
+import cz.payola.web.client.views.components.bootstrap._
 import cz.payola.web.client.views.elements.Div
-import scala.Some
+import cz.payola.web.client.views.components.bootstrap.SpanButton
 
 object PluginInstance
 {
@@ -45,8 +41,9 @@ class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[P
 
         val field = new InputControl(param.name, param.id, "", "Enter parameter value")
 
-        field.changed += { args =>
-            parameterValueChanged.triggerDirectly(new ParameterValue(id, param.id, param.name, field.getValue(), field))
+        field.input.changed += { args =>
+            parameterValueChanged.triggerDirectly(new ParameterValue(id, param.id, param.name, field.input.value, field))
+            false
         }
 
         params.put(paramIdx, field)
@@ -57,9 +54,9 @@ class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[P
 
     private val paramsDiv = new Div(list)
 
-    private val connect = new Button("Add connection")
+    private val connect = new SpanButton("Add connection")
 
-    private val delete = new Button("Delete", "btn-danger")
+    private val delete = new SpanButton("Delete", "btn-danger")
 
     private val alertDiv = new Div(List(heading, paramsDiv, connect, delete), "alert alert-info instance")
 
@@ -129,6 +126,6 @@ class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[P
     }
 
     def getParamValue(index: Int) = {
-        params(index).getValue()
+        params(index).input.value
     }
 }

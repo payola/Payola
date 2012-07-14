@@ -1,10 +1,8 @@
 package cz.payola.web.client.presenters.components
 
 import cz.payola.web.client.views.Component
-import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom._
-import cz.payola.web.client.views.extensions.bootstrap.Icon
-import cz.payola.web.client.views.events._
+import cz.payola.web.client.views.components.bootstrap.Icon
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events.SimpleEvent
 import cz.payola.web.client.views.elements.Div

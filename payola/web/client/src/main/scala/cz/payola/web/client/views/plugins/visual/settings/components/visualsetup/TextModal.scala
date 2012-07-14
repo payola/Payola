@@ -1,18 +1,11 @@
 package cz.payola.web.client.views.plugins.visual.settings.components.visualsetup
 
-import cz.payola.web.client.views.Component
-import s2js.adapters.js.browser.document
-import s2js.adapters.js.dom._
 import cz.payola.web.client.views.elements.Div
-import cz.payola.web.client.views.events._
 import cz.payola.web.client.views.plugins.visual.settings.TextSettingsModel
-import cz.payola.web.client.views.extensions.bootstrap.Modal
-import cz.payola.web.client.events._
+import cz.payola.web.client.views.components.bootstrap.Modal
 
-class TextModal(model: TextSettingsModel) extends Component
+class TextModal(model: TextSettingsModel) extends Modal("Text settings")
 {
-    val settingsChanged = new SimpleEvent[TextModal]
-
     val colorBackground = new ColorPane("text.color.background", "Text background", model.colorBackground)
     colorBackground.changed += { event =>
         model.colorBackground = colorBackground.getColor
@@ -23,29 +16,5 @@ class TextModal(model: TextSettingsModel) extends Component
         model.color = color.getColor
     }
 
-    val wrapper = new Div(List(color, colorBackground))
-
-    private val modal = new Modal("Text settings", List(wrapper))
-
-    modal.saved += {
-        event => settingsChanged.triggerDirectly(this)
-    }
-
-    def render(parent: Node) {
-        modal.render(parent)
-    }
-
-    def show() {
-        modal.show
-    }
-
-    def hide() {
-        modal.hide
-    }
-
-    def domElement : Element = modal.domElement
-
-    def destroy() {
-        // TODO
-    }
+    override val body = List(new Div(List(color, colorBackground)))
 }

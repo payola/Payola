@@ -1,20 +1,14 @@
 package cz.payola.web.client.views.plugins.visual.settings.components.visualsetup
 
-import s2js.adapters.js.browser.document
-import s2js.adapters.js.dom._
-import cz.payola.web.client.views.Component
-import cz.payola.web.client.views.events._
 import cz.payola.web.client.views.plugins.visual.settings.EdgeSettingsModel
 import cz.payola.web.client.views.elements._
-import cz.payola.web.client.views.extensions.bootstrap.Modal
+import cz.payola.web.client.views.components.bootstrap.Modal
 import cz.payola.web.client.events._
 import cz.payola.web.client.views.elements.Input
 import cz.payola.web.client.views.elements.Div
 
-class EdgeModal(model: EdgeSettingsModel) extends Component
+class EdgeModal(model: EdgeSettingsModel) extends Modal("Edge settings")
 {
-    val settingsChanged = new SimpleEvent[EdgeModal]
-
     val width = new Input("edge.width", model.width.toString(), None)
     val wLabel = new Label("Width [px]:", width)
     width.changed += { event =>
@@ -41,30 +35,5 @@ class EdgeModal(model: EdgeSettingsModel) extends Component
         false
     }
 
-    val wrapper = new Div(
-        List(wLabel, width, sLabel, straightenIndex, colorSelect, color))
-
-    private val modal = new Modal("Edge settings", List(wrapper))
-
-    modal.saved += {
-        event => settingsChanged.triggerDirectly(this)
-    }
-
-    def render(parent: Node) {
-        modal.render(parent)
-    }
-
-    def show() {
-        modal.show
-    }
-
-    def hide() {
-        modal.hide
-    }
-
-    def domElement : Element = modal.domElement
-
-    def destroy() {
-        // TODO
-    }
+    override val body = List(new Div(List(wLabel, width, sLabel, straightenIndex, colorSelect, color)))
 }

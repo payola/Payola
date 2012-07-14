@@ -14,7 +14,7 @@ class AnalysisEditor(analysisIdP: String, menuHolder: String, pluginsHolder: Str
 
     override def init {
         AnalysisBuilderData.getAnalysis(analysisIdP){ analysis =>
-            name.setValue(analysis.name)
+            name.input.value = analysis.name
 
             analysis.pluginInstances.map{ instance =>
 

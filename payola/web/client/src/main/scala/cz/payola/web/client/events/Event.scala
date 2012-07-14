@@ -14,9 +14,9 @@ abstract class Event[A, B <: EventArgs[A], C]
 
     private val handlers = new ArrayBuffer[EventHandler]()
 
-    protected def resultsFolderReducer(stackTop: C, currentHandlerResult: C): C
-
     protected def resultsFolderInitializer: C
+
+    protected def resultsFolderReducer(stackTop: C, currentHandlerResult: C): C
 
     /**
       * Triggers all the event handlers and returns folded return values of the handlers.
