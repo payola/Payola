@@ -38,7 +38,7 @@ class PluginInstance(
     override def plugin = {
         if (_plugin == null) {
             wrapInTransaction{
-                //context.pluginInstanceRepository.loadPluginForPluginInstance(this)
+                //TODO: here - context.pluginInstanceRepository.loadPluginForPluginInstance(this)
             }
         }
 
@@ -50,7 +50,7 @@ class PluginInstance(
         // (otherwise NullPointerException is thrown when accessing paramterValues.parameter.something)
         if (_plugin == null) {
             wrapInTransaction{
-                //context.pluginInstanceRepository.loadPluginForPluginInstance(this)
+                //TODO: here - context.pluginInstanceRepository.loadPluginForPluginInstance(this)
             }
         }
 
