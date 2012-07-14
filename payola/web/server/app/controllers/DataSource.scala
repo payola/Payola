@@ -14,4 +14,8 @@ object DataSource extends PayolaController with Secured
             NotFound(views.html.errors.err404("The data source does not exist."))
         }
     }
+
+    def list() = authenticated { user: User =>
+        Ok(views.html.datasource.list(user))
+    }
 }

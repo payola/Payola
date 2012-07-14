@@ -1,0 +1,9 @@
+@(user: cz.payola.domain.entities.User)
+
+@import tags._
+
+@list_entities(user, "data source", "data sources", user.ownedDataSources, { Unit =>
+    new scala.xml.NodeBuffer() += <td>Name</td>
+}, { e: cz.payola.domain.Entity =>
+    new scala.xml.NodeBuffer() += <td>{e.asInstanceOf[cz.payola.domain.entities.plugins.DataSource].name}</td>
+})

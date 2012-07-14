@@ -1,0 +1,40 @@
+@(user: cz.payola.domain.entities.User, entityName: String, entityNamePlural: String, entities: Seq[cz.payola.domain.Entity], headerWriter: (Unit) => scala.xml.NodeBuffer, entityLister: (cz.payola.domain.Entity) => scala.xml.NodeBuffer)
+
+@main(Some(user), "List " + entityNamePlural + " - Payola!") {
+
+<div class="plugins_container">
+    <h1>List @entityNamePlural</h1>
+    @if(entities.size > 0){
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            @headerWriter()
+        </tr>
+        </thead>
+        @entities.map{ entity =>
+            <tr>
+                @entityLister(entity)
+            </tr>
+        }
+        <div style="text-align: center">
+            <div class="pagination">
+                <ul>
+                    <li><a href="#">Prev</a></li>
+                    <li class="active">
+                        <a href="#">1</a>
+                    </li>
+                    <li><a href="#">Next</a></li>
+                </ul>
+            </div>
+        </div>
+    </table>
+    }else{
+    <div class="alert alert-info">
+        <h3 class="alert-heading">No @entityNamePlural</h3>
+        <p class="alert-block">But you can create one!</p>
+    </div>
+    }
+    <a href="@routes.Profile.createPlugin()" class="btn btn-success"><i class="icon-plus icon-white"></i> Create @entityName &raquo;</a>
+</div>
+
+}

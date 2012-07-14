@@ -19,6 +19,7 @@ GET     /analysis/create            controllers.Analysis.create
 GET     /analysis/edit/:id          controllers.Analysis.edit(id)
 GET     /analysis/:id               controllers.Analysis.detail(id)
 
+GET     /datasource/list             controllers.DataSource.list()
 GET     /datasource/:id             controllers.DataSource.detail(id)
 
 GET     /dashboard                          controllers.Application.dashboard()

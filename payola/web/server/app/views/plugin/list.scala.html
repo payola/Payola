@@ -1,45 +1,9 @@
 @(user: cz.payola.domain.entities.User)
 
-@main(Some(user), "List plugins - Payola!") {
+@import tags._
 
-    <div class="plugins_container">
-        <h1>List plugins</h1>
-        @if(user.ownedPlugins.size > 0){
-        <table class="table table-striped">
-            <thead>
-            <tr>
-                <th>Name</th>
-            </tr>
-            </thead>
-            @user.ownedPlugins.map{ plugin =>
-            <tr>
-                <td>@plugin.name</td>
-            </tr>
-            }
-            <div style="text-align: center">
-                <div class="pagination">
-                    <ul>
-                        <li><a href="#">Prev</a></li>
-                        <li class="active">
-                            <a href="#">1</a>
-                        </li>
-                        <li><a href="#">Next</a></li>
-                    </ul>
-                </div>
-            </div>
-        </table>
-        }else{
-            <div class="alert alert-info">
-                <h3 class="alert-heading">No plugins</h3>
-                <p class="alert-block">But you can create one!</p>
-            </div>
-            }
-        <a href="@routes.Profile.createPlugin()" class="btn btn-success"><i class="icon-plus icon-white"></i> Create plugin &raquo;</a>
-    </div>
-
-<script src="@routes.Assets.at("javascripts/ace/ace.js")" type="text/javascript" charset="utf-8"></script>
-<script src="@routes.Assets.at("javascripts/ace/theme-clouds.js")" type="text/javascript" charset="utf-8"></script>
-<script src="@routes.Assets.at("javascripts/ace/mode-scala.js")" type="text/javascript" charset="utf-8"></script>
-
-
-}
+@list_entities(user, "plugin", "plugins", user.ownedPlugins, { Unit =>
+    new scala.xml.NodeBuffer() += <td>Name</td>
+}, { e: cz.payola.domain.Entity =>
+    new scala.xml.NodeBuffer() += <td>{e.asInstanceOf[cz.payola.domain.entities.Plugin].name}</td>
+})
