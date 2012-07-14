@@ -1,4 +1,4 @@
-@(user: cz.payola.domain.entities.User, entityName: String, entityNamePlural: String, entities: Seq[cz.payola.domain.Entity], headerWriter: (Unit) => scala.xml.NodeBuffer, entityLister: (cz.payola.domain.Entity) => scala.xml.NodeBuffer)
+@(user: cz.payola.domain.entities.User, entityName: String, entityNamePlural: String, entities: Seq[cz.payola.domain.Entity], headerWriter: (Unit) => scala.xml.NodeBuffer, entityLister: (cz.payola.domain.Entity) => scala.xml.NodeBuffer, newEntityCall: play.api.mvc.Call)
 
 @main(Some(user), "List " + entityNamePlural + " - Payola!") {
 
@@ -34,7 +34,7 @@
         <p class="alert-block">But you can create one!</p>
     </div>
     }
-    <a href="@routes.Profile.createPlugin()" class="btn btn-success"><i class="icon-plus icon-white"></i> Create @entityName &raquo;</a>
+    <a href="@newEntityCall" class="btn btn-success"><i class="icon-plus icon-white"></i> Create @entityName &raquo;</a>
 </div>
 
 }
