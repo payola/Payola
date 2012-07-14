@@ -464,7 +464,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     }
 
     "Entities" should "be removed with their related entities" in {
-        //TODO: schema.wrapInTransaction { testCascadeDeletes }
+        schema.wrapInTransaction { testCascadeDeletes }
     }
 
     private def testCascadeDeletes {

@@ -24,10 +24,7 @@ class Window
     
     def clearInterval(intervalId: Int): Int = 0
 
-    object location
-    {
-        var href = ""
-    }
+    val location = new Location
 
     object history
     {
@@ -39,3 +36,9 @@ class Window
       */
     var onresize: (Event => Boolean) = (event: Event) => false
 }
+
+class Location
+{
+    var href = ""
+}
+

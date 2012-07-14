@@ -43,9 +43,11 @@ class PluginInstanceBinding(
 
     var analysisId: String = null
 
-    // TODO: setter
-    def setSource(value: PluginInstanceType) {_sourcePluginInstance = value}
+    def sourcePluginInstance_=(value: PluginInstanceType) {
+        _sourcePluginInstance = value
+    }
 
-    // TODO: setter
-    def setTarget(value: PluginInstanceType) {_targetPluginInstance = value}
+    def targetPluginInstance_=(value: PluginInstanceType) {
+        _targetPluginInstance = value
+    }
 }

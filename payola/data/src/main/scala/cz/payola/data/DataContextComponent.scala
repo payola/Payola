@@ -1,6 +1,6 @@
 package cz.payola.data
 
-import cz.payola.domain.RdfStorageComponent
+import cz.payola.domain._
 import cz.payola.domain.entities._
 import cz.payola.domain.entities.plugins._
 import cz.payola.domain.entities.analyses.PluginInstanceBinding
@@ -11,8 +11,6 @@ import cz.payola.domain.entities.settings.OntologyCustomization
   */
 trait DataContextComponent
 {
-    self: RdfStorageComponent =>
-
     val userRepository: UserRepository
 
     val groupRepository: GroupRepository

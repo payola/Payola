@@ -42,7 +42,7 @@ class PluginCompilerSpec extends FlatSpec with ShouldMatchers
                 }
             """)
 
-        val plugin = loader.getPlugin(pluginClassName)
+        val plugin = loader.instantiatePlugin(pluginClassName)
         assert(plugin.name == "Custom plugin", "The plugin name is invalid.")
         assert(plugin.inputCount == 123, "The plugin input count is invalid.")
         assert(plugin.parameters.length == 1, "The plugin parameter count is invalid.")

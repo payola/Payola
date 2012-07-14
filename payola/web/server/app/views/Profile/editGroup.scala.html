@@ -30,11 +30,7 @@
                 <div class="control-group">
                     <label class="control-label" for="members">Members</label>
                     <span class="controls">
-                        <select name="members" id="members" class="chosen" multiple="multiple">
-                            @users.map{ u =>
-                                <option@if(group.members.contains(u)){ selected="selected"} value="@u.id">@u.name</option>
-                            }
-                        </select>
+                        <input name="members" id="members" value="@(group.members.map{ m => m.id+":"+m.name }.mkString(","))" class="chosen" />
                     </span>
                 </div>
                 <div class="control-group">
@@ -45,6 +41,10 @@
             </fieldset>
         </div>
     </form>
+    <script src="/javaScriptPackage/cz.payola.web.client.presenters.GroupEdit" type="text/javascript"></script>
+    <script type="text/javascript">
+        new cz.payola.web.client.presenters.GroupEdit("@group.id");
+    </script>
 
 </div>
 

@@ -61,7 +61,7 @@ object RPC extends PayolaController with Secured
 {
     val exceptionSerializer = new ExceptionSerializer
 
-    val jsonSerializer = new GraphSerializer
+    val jsonSerializer = new RPCSerializer
 
     val dispatcher = new RPCDispatcher(jsonSerializer)
 

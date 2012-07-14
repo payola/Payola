@@ -58,8 +58,8 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
 
                 // Set plugin instances to bindings
                 instanceBindings.foreach{ b =>
-                    b.setSource(pluginInstancesByIds(b.sourcePluginInstanceId))
-                    b.setTarget(pluginInstancesByIds(b.targetPluginInstanceId))
+                    b.sourcePluginInstance = pluginInstancesByIds(b.sourcePluginInstanceId)
+                    b.targetPluginInstance = pluginInstancesByIds(b.targetPluginInstanceId)
                 }
 
                 // Set loaded plugins, plugin instances and its bindings to analysis

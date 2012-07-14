@@ -1,7 +1,7 @@
 package cz.payola.model
 
 import cz.payola.data.DataContextComponent
-import cz.payola.domain.RdfStorageComponent
+import cz.payola.domain._
 import cz.payola.model.components._
 
 trait ModelComponent
@@ -14,5 +14,5 @@ trait ModelComponent
     with PluginInstanceModelComponent
     with PayolaStorageModelComponent
 {
-    self: DataContextComponent with RdfStorageComponent =>
+    self: DataContextComponent with RdfStorageComponent with PluginCompilerComponent =>
 }

@@ -1,0 +1,28 @@
+@(user: cz.payola.domain.entities.User)
+
+@import tags._
+
+@detailsLinkForID(id: String) = @{
+
+    <a href={routes.DataSource.detail(id).toString} class="btn btn-info"><i class="icon-info-sign icon-white"></i> Details</a>
+}
+
+@editLinkForID(id: String) = @{
+    <a href={routes.DataSource.edit(id).toString} class="btn btn-primary"><i class="icon-pencil icon-white"></i> Edit</a>
+}
+
+@list_entities(user, "data source", "data sources", user.ownedDataSources, { Unit =>
+    new scala.xml.NodeBuffer() += <td>Name</td>
+}, { e: cz.payola.domain.Entity =>
+    <td>{
+        e.asInstanceOf[cz.payola.domain.entities.plugins.DataSource].name
+    }</td>
+    <td>{
+        editLinkForID(e.id)
+    }</td>
+    <td>{
+        detailsLinkForID(e.id)
+    }</td>
+},
+routes.DataSource.create())
+
