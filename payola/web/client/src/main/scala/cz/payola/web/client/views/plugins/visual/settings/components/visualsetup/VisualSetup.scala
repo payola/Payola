@@ -16,7 +16,7 @@ class VisualSetup(
     var textModel: TextSettingsModel)
     extends ComposedComponent
 {
-    val settingsChanged = new SimpleEvent[VisualSetup]
+    val settingsChanged = new SimpleUnitEvent[VisualSetup]
 
     val vertex = new Anchor(List(new Text("Vertices default style")), "#")
 

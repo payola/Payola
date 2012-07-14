@@ -2,9 +2,9 @@ package cz.payola.web.client.views
 
 import s2js.adapters.js.dom
 
-abstract class Component
+trait Component
 {
-    def render(parent: dom.Node)
+    def render(parent: dom.Element)
 
     def destroy()
 }

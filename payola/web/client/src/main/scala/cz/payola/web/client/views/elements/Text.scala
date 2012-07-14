@@ -8,20 +8,22 @@ class Text(initialValue: String) extends Component
 {
     private var value = initialValue
 
-    private var textNode: Option[dom.Node] = None
+    private var textNode: Option[dom.Element] = None
+
+    private var parentElement: Option[dom.Element] = None
 
     def text: String = value
 
     def text_=(text: String) {
         value = text
         textNode.foreach { e =>
-            val parentNode = e.parentNode
             destroy()
-            render(parentNode)
+            parentElement.foreach(render(_))
         }
     }
 
-    def render(parent: dom.Node) {
+    def render(parent: dom.Element) {
+        parentElement = Some(parent)
         textNode = Some(document.createTextNode(value))
         parent.appendChild(textNode.get)
     }

@@ -10,7 +10,7 @@ import cz.payola.web.client.views.Point2D
 /**
   * Visual plug-in technique that places the vertices into a circled tree structure.
   */
-class CircleTechnique(settings: VisualSetup) extends BaseTechnique(settings)
+class CircleTechnique(settings: VisualSetup) extends BaseTechnique(settings, "Circle Visualisation")
 {
     protected def getTechniquePerformer(component: Component, animate: Boolean): Animation[ListBuffer[(VertexView, Point2D)]] = {
 
@@ -23,9 +23,5 @@ class CircleTechnique(settings: VisualSetup) extends BaseTechnique(settings)
 
     override def destroy() {
         super.destroy()
-    }
-
-    def getName:String = {
-        "circle visualisation"
     }
 }

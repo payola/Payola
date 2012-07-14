@@ -10,24 +10,15 @@ import cz.payola.web.client.views.plugins.visual.settings.components.visualsetup
 import cz.payola.web.client.views.plugins.visual.graph._
 import cz.payola.web.client.views.plugins.visual.graph.positioning._
 
-abstract class BaseTechnique(settings: VisualSetup) extends VisualPlugin(settings)
+abstract class BaseTechnique(settings: VisualSetup, name: String) extends VisualPlugin(settings, name)
 {
 
     private val treeVerticesDistance = 100
 
     private val circleLevelsDistance = 150
 
-    /**
-      * Calls initialization of the parent class and if the graph is not empty performs the
-      * vertex positioning technique.
-      * @param container where to visualise
-      */
-    override def init(container: Element) {
-        super.init(container)
-    }
-
-    override def update(graph: Graph) {
-        super.update(graph)
+    override def updateGraph(graph: Option[Graph]) {
+        super.updateGraph(graph)
         if(!graphView.get.isEmpty) { // graphView != None because this call is after update(..)
             performPositioning(graphView.get)
         }

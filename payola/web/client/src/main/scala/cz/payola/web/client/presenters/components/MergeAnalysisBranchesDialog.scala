@@ -1,6 +1,6 @@
 package cz.payola.web.client.presenters.components
 
-import s2js.adapters.js.dom._
+import s2js.adapters.js.dom
 import s2js.adapters.js.browser.document
 import s2js.compiler.javascript
 import scala.collection.mutable.ArrayBuffer
@@ -42,7 +42,7 @@ class MergeAnalysisBranchesDialog(instances: ArrayBuffer[PluginInstance], inputs
 
     override val body = List(dragZone, dropZoneWrapper)
 
-    override def render(parent: Node = document.body) {
+    override def render(parent: dom.Element = document.body) {
         super.render(parent)
         bindDragAndDrop()
     }

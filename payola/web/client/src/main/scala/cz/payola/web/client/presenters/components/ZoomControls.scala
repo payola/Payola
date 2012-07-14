@@ -1,12 +1,11 @@
 package cz.payola.web.client.presenters.components
 
 import cz.payola.web.client.views.Component
-import s2js.adapters.js.dom._
+import s2js.adapters.js.dom
 import cz.payola.web.client.views.components.bootstrap.Icon
 import cz.payola.web.client.views.elements._
-import cz.payola.web.client.events.SimpleEvent
+import cz.payola.web.client.events.SimpleUnitEvent
 import cz.payola.web.client.views.elements.Div
-import scala.Some
 
 class ZoomControls(var currentZoom: Double) extends Component
 {
@@ -20,8 +19,8 @@ class ZoomControls(var currentZoom: Double) extends Component
     private val maximumZoomOut = 25
     private val maximumZoomIn = 200
 
-    val zoomIncreased = new SimpleEvent[ZoomControls]
-    val zoomDecreased = new SimpleEvent[ZoomControls]
+    val zoomIncreased = new SimpleUnitEvent[ZoomControls]
+    val zoomDecreased = new SimpleUnitEvent[ZoomControls]
 
     private val spanCaption = new Text("")
 
@@ -31,7 +30,7 @@ class ZoomControls(var currentZoom: Double) extends Component
 
     val wrapper = new Div(List(plus, status, minus), "zoom-controls")
 
-    var parentNode: Option[Node] = None
+    var parentElement: Option[dom.Element] = None
 
     def reset() {
         setZoom(zoomOrigin)
@@ -71,18 +70,18 @@ class ZoomControls(var currentZoom: Double) extends Component
     override def destroy() {
         //spanCaption.setText("")
 
-        if(parentNode.isDefined) {
+        if(parentElement.isDefined) {
             wrapper.domElement.removeChild(minus.domElement)
             wrapper.domElement.removeChild(status.domElement)
             wrapper.domElement.removeChild(plus.domElement)
-            parentNode.get.removeChild(wrapper.domElement)
+            parentElement.get.removeChild(wrapper.domElement)
         }
     }
 
-    def render(parent: Node) {
+    def render(parent: dom.Element) {
         wrapper.render(parent)
         spanCaption.text = getStatusCaption
-        parentNode = Some(parent)
+        parentElement = Some(parent)
 
         plus.mouseClicked += { e =>
             zoomIncreased.triggerDirectly(this)
@@ -95,7 +94,7 @@ class ZoomControls(var currentZoom: Double) extends Component
         }
     }
 
-    def domElement : Element = {
+    def domElement : dom.Element = {
         wrapper.domElement
     }
 }

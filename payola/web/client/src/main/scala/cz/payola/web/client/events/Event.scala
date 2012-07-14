@@ -2,8 +2,11 @@ package cz.payola.web.client.events
 
 import collection.mutable.ArrayBuffer
 
+class EventArgs[+A](val target: A)
+
 /**
-  * Contains the event handlers and when triggered, all event handlers are invoked. Their return values are
+  * Contains the event handlers and when triggered, all event handlers are invoked. Their return values are folded
+  * together and the result is returned.
   * @tparam A Type of the event target (an object that triggers the event).
   * @tparam B Type of the event arguments.
   * @tparam C Type of the event handler return value.

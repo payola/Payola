@@ -119,7 +119,7 @@ class CanvasPack(initialSize: Vector2D) extends views.Component
         topLayer.domElement.offsetTop
     }
 
-    def render(parent: dom.Node) {
+    def render(parent: dom.Element) {
         setMouseWheelListener()
 
         /*The order in which are layers created determines their "z coordinate"

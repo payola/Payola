@@ -25,42 +25,6 @@ canvas
     color: rgb(255, 0, 0);
 }
 
-.tableTechnique
-{
-    text-align: left;
-    vertical-align: top;
-}
-.tableTechnique.table
-{
-    width: 75%;
-}
-
-.tableTechnique.header
-{
-    font-weight: bold;
-}
-
-.tableTechnique.line.odd
-{
-    background-color: rgb(240, 255, 240);
-}
-
-.tableTechnique.line.even
-{
-    background-color: rgb(255, 255, 255);
-}
-
-.tableTechnique.element
-{
-    padding: 2px 20px 2px 2px;
-}
-
-.tableTechnique.list.element
-{
-    list-style-type: square;
-}
-
-
 .visualPluginSettings.textField
 {
     width: 30px;

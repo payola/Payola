@@ -8,12 +8,13 @@ import s2js.adapters.js.browser.window
 import cz.payola.common.rdf._
 import cz.payola.web.client.views._
 import scala.Some
+import s2js.adapters.js.dom
 
 /**
   * Graphical representation of Graph object.
   * @param container the space where the graph should be visualised
   */
-class GraphView(val container: Element, val settings: VisualSetup) extends View {
+class GraphView(val container: dom.Element, val settings: VisualSetup) extends View {
 
     /**
      * During update vertices with higher age than this value are removed from this graph.

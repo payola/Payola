@@ -12,7 +12,7 @@ class Analysis(elementToDrawIn: String, analysisId: String) extends Index(elemen
         evt =>
             graph = evt.graph
             plugins.head.clear()
-            plugins.head.update(graph.get)
+            plugins.head.updateGraph(graph)
             controls.switchTab
             false
     }

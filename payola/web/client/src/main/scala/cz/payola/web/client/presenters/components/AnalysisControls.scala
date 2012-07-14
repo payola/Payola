@@ -1,7 +1,7 @@
 package cz.payola.web.client.presenters.components
 
 import cz.payola.web.client.views.Component
-import s2js.adapters.js.dom._
+import s2js.adapters.js.dom
 import s2js.adapters.js.browser.document
 import cz.payola.web.shared.AnalysisRunner
 import s2js.adapters.js.browser.window
@@ -28,7 +28,7 @@ class AnalysisControls(analysisId: String) extends Component
 
     val wrap = new Div(List(runBtn, progressDiv))
 
-    def render(parent: Node) = {
+    def render(parent: dom.Element) = {
         wrap.render(parent)
     }
 
@@ -54,7 +54,7 @@ class AnalysisControls(analysisId: String) extends Component
         window.setTimeout(pollingHandler, 500)
     }
 
-    def addClass(el: Element, addedClass: String) = {
+    def addClass(el: dom.Element, addedClass: String) = {
         val currentClass = el.getAttribute("class")
         var newClass = currentClass.replaceAllLiterally("alert-warning","")
         newClass = newClass.replaceAllLiterally("alert-error","")
@@ -106,7 +106,7 @@ class AnalysisControls(analysisId: String) extends Component
     @javascript("""jQuery("#results-tab-link").click();""")
     def switchTab() = {}
 
-    def domElement : Element = {
+    def domElement : dom.Element = {
         wrap.domElement
     }
 

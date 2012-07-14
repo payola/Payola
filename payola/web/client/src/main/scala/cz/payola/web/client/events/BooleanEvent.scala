@@ -10,3 +10,5 @@ class BooleanEvent[A, B <: EventArgs[A]] extends Event[A, B, Boolean]
         stackTop && currentHandlerResult
     }
 }
+
+class SimpleBooleanEvent[A] extends BooleanEvent[A, EventArgs[A]]

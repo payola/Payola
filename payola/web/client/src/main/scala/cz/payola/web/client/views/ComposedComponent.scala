@@ -2,7 +2,7 @@ package cz.payola.web.client.views
 
 import s2js.adapters.js.dom
 
-abstract class ComposedComponent extends Component
+trait ComposedComponent extends Component
 {
     private var _subComponents: Option[Seq[Component]] = None
 
@@ -15,7 +15,7 @@ abstract class ComposedComponent extends Component
         _subComponents.get
     }
 
-    def render(parent: dom.Node) {
+    def render(parent: dom.Element) {
         subComponents.foreach(_.render(parent))
     }
 

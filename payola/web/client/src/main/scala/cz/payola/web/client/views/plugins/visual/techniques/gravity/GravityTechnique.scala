@@ -16,7 +16,7 @@ import cz.payola.web.client.views.plugins.visual.graph.{Component, EdgeView, Ver
   * closer. The final positions of the vertices is reached when all vertices
   * have "small enough" velocity.
   */
-class GravityTechnique(settings: VisualSetup) extends BaseTechnique(settings)
+class GravityTechnique(settings: VisualSetup) extends BaseTechnique(settings, "Gravity Visualisation")
 {
     /**
       * How much vertices push away each other
@@ -37,10 +37,6 @@ class GravityTechnique(settings: VisualSetup) extends BaseTechnique(settings)
 
     override def destroy() {
         super.destroy()
-    }
-
-    def getName:String = {
-        "gravity visualisation"
     }
 
     protected def getTechniquePerformer(component: Component, animate: Boolean): Animation[ListBuffer[(VertexView, Point2D)]] = {

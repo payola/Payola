@@ -11,7 +11,6 @@ import scala.collection.mutable.ArrayBuffer
 import s2js.runtime.client.scala.collection.mutable.HashMap
 import cz.payola.web.client.presenters.models.ParameterValue
 import cz.payola.web.client.views.elements._
-import cz.payola.web.client.views.extensions.bootstrap._
 import cz.payola.web.client.events.EventArgs
 import cz.payola.web.client.views.components.bootstrap._
 import scala.Some

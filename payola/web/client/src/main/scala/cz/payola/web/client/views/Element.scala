@@ -26,7 +26,7 @@ abstract class Element[A <: dom.Element](domElementName: String, val innerCompon
 
     val mouseWheelRotated = new BrowserEvent[this.type]
 
-    protected var parentNode: Option[dom.Node] = None
+    protected var parentElement: Option[dom.Element] = None
 
     domElement.onkeyup = { e => keyPressed.triggerDirectly(this, e) }
     domElement.onkeydown = { e => keyReleased.triggerDirectly(this, e) }
@@ -38,14 +38,14 @@ abstract class Element[A <: dom.Element](domElementName: String, val innerCompon
     domElement.onmousewheel = { e => mouseWheelRotated.triggerDirectly(this, e) }
     addCssClass(cssClass)
 
-    def render(parent: dom.Node) {
-        parentNode = Some(parent)
+    def render(parent: dom.Element) {
+        parentElement = Some(parent)
         parent.appendChild(domElement)
         innerComponents.foreach(_.render(domElement))
     }
 
     def destroy() {
-        parentNode.foreach(_.removeChild(domElement))
+        parentElement.foreach(_.removeChild(domElement))
     }
 
     def getAttribute(name: String): String = {

@@ -14,11 +14,12 @@ import cz.payola.web.client.presenters.components.ZoomControls
 import cz.payola.web.client.views.events._
 import cz.payola.web.client.views._
 import cz.payola.web.client.views.elements.Canvas
+import s2js.adapters.js.dom
 
 /**
   * Representation of visual based output drawing plugin
   */
-abstract class VisualPlugin(settings: VisualSetup) extends Plugin
+abstract class VisualPlugin(settings: VisualSetup, name: String) extends Plugin(name)
 {
 
     private var mousePressedVertex = false
@@ -27,14 +28,17 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
 
     var zoomTool: Option[ZoomControls] = None
 
-    val vertexUpdate = new SimpleEvent[Vertex]
+    val vertexUpdate = new SimpleUnitEvent[Vertex]
 
     /**
       * Contained graph in visualisation packing.
       */
     var graphView: Option[GraphView] = None
 
-    def init(container: Element) {
+    // TODO
+    def createSubComponents = Nil
+
+    override def render(container: dom.Element) {
 
         graphView = Some(new GraphView(container, settings))
         zoomTool = Some(new ZoomControls(100))
@@ -110,11 +114,12 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
         }
     }
 
-    def update(graph: Graph) {
-        graphView.get.update(graph)
+    def updateGraph(graph: Option[Graph]) {
+        // TODO
+        graphView.get.update(graph.getOrElse(new Graph(Nil, Nil)))
     }
 
-    def clear() {
+    override def clear() {
         if(graphView.isDefined) {
             graphView.get.canvasPack.clear()
             graphView = None
@@ -128,7 +133,7 @@ abstract class VisualPlugin(settings: VisualSetup) extends Plugin
         }
     }
 
-    def destroy() {
+    override def destroy() {
         if(graphView.isDefined) {
             graphView.get.destroy()
             graphView = None

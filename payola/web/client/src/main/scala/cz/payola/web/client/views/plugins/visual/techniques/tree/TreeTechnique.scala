@@ -10,7 +10,7 @@ import cz.payola.web.client.views.Point2D
 /**
   * Visual plug-in technique that places the vertices into a tree structure.
   */
-class TreeTechnique(settings: VisualSetup) extends BaseTechnique(settings)
+class TreeTechnique(settings: VisualSetup) extends BaseTechnique(settings, "Tree Visualisation")
 {
     protected def getTechniquePerformer(component: Component, animate: Boolean): Animation[ListBuffer[(VertexView, Point2D)]] = {
 
@@ -23,9 +23,5 @@ class TreeTechnique(settings: VisualSetup) extends BaseTechnique(settings)
 
     override def destroy() {
         super.destroy()
-    }
-
-    def getName:String = {
-        "tree visualisation"
     }
 }

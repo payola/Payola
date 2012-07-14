@@ -1,44 +1,24 @@
 package cz.payola.web.client.views.plugins
 
+import cz.payola.web.client.views.ComposedComponent
 import cz.payola.common.rdf.Graph
-import s2js.adapters.js.dom.Element
 
 /**
-  * Representation of a visualisation plug-in
+  * A visualisation plug-in.
+  * @param name Name of the plugin.
   */
-trait Plugin
+abstract class Plugin(val name: String) extends ComposedComponent
 {
     /**
-      * Prepares the contents for proper drawing and data visualisation.
-      * @param container where to visualise
+      * Updates the current graph of the plugin and re-runs the visualisation.
+      * @param graph The graph to add to the current graph.
       */
-    def init(container: Element)
-
-    /**
-      * Updates the current graph of the plugin and re-runs the visualisation
-      * @param graph to be added to the current graph
-      */
-    def update(graph: Graph)
+    def updateGraph(graph: Option[Graph])
 
     /**
       * Removes the current graph from the plugins memory and resets the visualisation.
       */
-    def clear()
-
-    /**
-      * Draws the contained graph.
-      */
-    def redraw()
-
-    /**
-      * Purges the contained graph, contents of this plugin and removes the created HTML elements form its parents.
-      * (Puts the plugin into initialization-required state, that calling init(..) would reset the plugin to its
-      * original state)
-      */
-    def destroy()
-
-    /**
-      * Short description name of this plugin
-      */
-    def getName: String
+    def clear() {
+        updateGraph(None)
+    }
 }

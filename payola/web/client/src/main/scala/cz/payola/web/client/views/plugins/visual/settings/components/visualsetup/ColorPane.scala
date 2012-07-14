@@ -10,7 +10,7 @@ import s2js.adapters.js.dom
 
 class ColorPane(name: String, label: String, var color: Color) extends Component
 {
-    val changed = new SimpleEvent[ColorPane]
+    val changed = new SimpleUnitEvent[ColorPane]
 
     val colorInput: Input = new Input(name, color.toString, None, "colorpicker")
     colorInput.setAttribute("readonly","true")
@@ -49,10 +49,6 @@ class ColorPane(name: String, label: String, var color: Color) extends Component
         self.color.alpha = rgba.a;
     })""")
     private def init = Nil
-
-    def render(parent: dom.Node) {
-
-    }
 
     def destroy() {
         // TODO

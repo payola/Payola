@@ -1,6 +1,6 @@
 package cz.payola.web.client.views.todo
 
-import s2js.adapters.js.dom._
+import s2js.adapters.js.dom
 import cz.payola.common.entities.Plugin
 import s2js.compiler.javascript
 import scala.collection.mutable
@@ -25,11 +25,11 @@ object PluginInstance
 class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[PluginInstance] = List())
     extends Component
 {
-    val connectButtonClicked = new SimpleEvent[PluginInstance]
+    val connectButtonClicked = new SimpleUnitEvent[PluginInstance]
 
-    val deleteButtonClicked = new SimpleEvent[PluginInstance]
+    val deleteButtonClicked = new SimpleUnitEvent[PluginInstance]
 
-    val parameterValueChanged = new SimpleEvent[ParameterValue]
+    val parameterValueChanged = new SimpleUnitEvent[ParameterValue]
 
     private val heading = new Heading(List(new Text(plugin.name)), 3)
 
@@ -73,10 +73,10 @@ class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[P
         false
     }
 
-    private var parentNode: Option[Node] = None
+    private var parentElement: Option[dom.Element] = None
 
-    def render(parent: Node) = {
-        this.parentNode = Some(parent)
+    def render(parent: dom.Element) = {
+        this.parentElement = Some(parent)
         alertDiv.id = (plugin.id + "_" + PluginInstance.getCounter())
         successors.render(parent)
 
@@ -92,14 +92,14 @@ class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[P
     }
 
     override def destroy() = {
-        if (parentNode.isDefined) {
+        if (parentElement.isDefined) {
             unbindJsPlumb(getPluginElement)
             var i = 0
             while (i < predecessors.size) {
-                parentNode.get.insertBefore(predecessors(i).domElement, domElement)
+                parentElement.get.insertBefore(predecessors(i).domElement, domElement)
                 i += 1
             }
-            parentNode.get.removeChild(domElement)
+            parentElement.get.removeChild(domElement)
         }
     }
 
@@ -107,13 +107,13 @@ class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[P
                    var connections = jsPlumb.getConnections({target: element.getAttribute("id")});
                    for (var k in connections){ jsPlumb.detach(connections[k]); }
                  """)
-    def unbindJsPlumb(element: Element) = {}
+    def unbindJsPlumb(element: dom.Element) = {}
 
-    def domElement: Element = {
+    def domElement: dom.Element = {
         successors.domElement
     }
 
-    def getPluginElement: Element = {
+    def getPluginElement: dom.Element = {
         alertDiv.domElement
     }
 

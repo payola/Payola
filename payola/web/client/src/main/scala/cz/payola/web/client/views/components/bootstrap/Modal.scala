@@ -27,13 +27,13 @@ class Modal(
     /**
       * Triggered when the save button is clicked. The event handler should return whether the modal should be closed.
       */
-    val saving = new BooleanEvent[this.type, EventArgs[this.type]]
+    val saving = new SimpleBooleanEvent[this.type]
 
     /**
       * Triggered when the cancel or close button is clicked. The event handler should return whether the modal should
       * be closed.
       */
-    val closing = new BooleanEvent[this.type, EventArgs[this.type]]
+    val closing = new SimpleBooleanEvent[this.type]
 
     def createSubComponents = {
         val saveButton = new SpanButton(saveText.getOrElse(""), "btn-primary")
@@ -61,7 +61,7 @@ class Modal(
         ), "modal hide"))
     }
 
-    override def render(parent: dom.Node = document.body) {
+    override def render(parent: dom.Element = document.body) {
         super.render(parent)
         show()
     }
@@ -71,7 +71,7 @@ class Modal(
         super.destroy()
     }
 
-    private def buttonClickedHandler(eventToTrigger: BooleanEvent[this.type, EventArgs[this.type]]): Boolean = {
+    private def buttonClickedHandler(eventToTrigger: SimpleBooleanEvent[this.type]): Boolean = {
         if (eventToTrigger.trigger(new EventArgs[this.type](this))) {
             destroy()
         }

@@ -7,7 +7,7 @@ import cz.payola.web.client.views.plugins.visual.settings.components.visualsetup
 import cz.payola.web.client.views.plugins.visual.graph.{Component, EdgeView, VertexView}
 import cz.payola.web.client.views.Point2D
 
-class MinimalizationTechnique(settings: VisualSetup) extends BaseTechnique(settings)
+class MinimalizationTechnique(settings: VisualSetup) extends BaseTechnique(settings, "Tree ECM Visualisation")
 {
     //TODO add some computation branch cutting...this algorithm is quite complex
 
@@ -24,10 +24,6 @@ class MinimalizationTechnique(settings: VisualSetup) extends BaseTechnique(setti
 
     override def destroy() {
         super.destroy()
-    }
-
-    def getName:String = {
-        "tree ECM visualisation"
     }
 
     /**
