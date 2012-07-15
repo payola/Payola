@@ -53,3 +53,8 @@ label{
 
 #plugin-space .alert {
 }
+
+#plugin_create_button_container {
+    padding-left: 30px;
+    padding-bottom: 15px;
+}

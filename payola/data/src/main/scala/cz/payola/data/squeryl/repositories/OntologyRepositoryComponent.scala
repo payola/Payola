@@ -2,15 +2,16 @@ package cz.payola.data.squeryl.repositories
 
 import cz.payola.data.squeryl._
 import cz.payola.data.squeryl.entities.settings._
+import cz.payola.data.squeryl.entities.User
+import org.squeryl.PrimitiveTypeMode._
 
 trait OntologyRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
-    
-    private type QueryType = (OntologyCustomization, Option[ClassCustomization], Option[PropertyCustomization])
 
-    lazy val ontologyCustomizationRepository = new LazyTableRepository[OntologyCustomization](
-        schema.ontologyCustomizations, OntologyCustomization)
+    lazy val ontologyCustomizationRepository =
+        new TableRepository[OntologyCustomization, (OntologyCustomization, Option[User])](
+            schema.ontologyCustomizations,OntologyCustomization)
         with OntologyCustomizationRepository
         with NamedEntityTableRepository[OntologyCustomization]
         with OptionallyOwnedEntityTableRepository[OntologyCustomization]
@@ -20,9 +21,9 @@ trait OntologyRepositoryComponent extends TableRepositoryComponent
             val persistedOntologyCustomization = super.persist(entity)
             entity match {
                 case o: OntologyCustomization => // The entity is already in the database, so classes are already there.
-                case _ => {
+                case o: cz.payola.common.entities.settings.OntologyCustomization => {
                     // Associate and persist the classes.
-                    persistedOntologyCustomization.classCustomizations.foreach { classCustomization =>
+                    o.classCustomizations.foreach { classCustomization =>
                         val persistedClassCustomization = schema.associate(ClassCustomization(classCustomization),
                             schema.classCustomizationsOfOntologies.left(persistedOntologyCustomization))
 
@@ -44,6 +45,21 @@ trait OntologyRepositoryComponent extends TableRepositoryComponent
 
         def persistPropertyCustomization(propertyCustomization: AnyRef) {
             persist(PropertyCustomization(propertyCustomization), schema.propertyCustomizations)
+        }
+            
+        def getClassCustomizations(ontologyCustomizationId: String): Seq[ClassCustomization] = {
+            val result = join(schema.classCustomizations, schema.propertyCustomizations.leftOuter)((c, p) =>
+                where(c.ontologyCustomizationId === ontologyCustomizationId)
+                select(c, p)
+                on(p.map(_.classCustomizationId) === Some(c.id))
+            ).toList
+
+            result.groupBy(_._1).map { r =>
+                val classCustomization = r._1
+                classCustomization.propertyCustomizations = r._2.flatMap(_._2)
+
+                classCustomization
+            }(collection.breakOut)
         }
     }
 }

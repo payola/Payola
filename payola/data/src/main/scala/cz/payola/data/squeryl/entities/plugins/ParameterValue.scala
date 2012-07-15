@@ -9,19 +9,20 @@ import cz.payola.data.squeryl.SquerylDataContextComponent
   * in [[cz.payola.data.squeryl.entities.plugins.parameters]] package.
   *
   */
-object ParameterValue
+object ParameterValue extends EntityConverter[ParameterValue[_]]
 {
-    def apply(pv: cz.payola.common.entities.plugins.ParameterValue[_])
-        (implicit context: SquerylDataContextComponent): ParameterValue[_] = {
-        pv match {
-            case b: BooleanParameterValue => b
-            case f: FloatParameterValue => f
-            case i: IntParameterValue => i
-            case s: StringParameterValue => s
-            case b: cz.payola.domain.entities.plugins.parameters.BooleanParameterValue => BooleanParameterValue(b)
-            case f: cz.payola.domain.entities.plugins.parameters.FloatParameterValue => FloatParameterValue(f)
-            case i: cz.payola.domain.entities.plugins.parameters.IntParameterValue => IntParameterValue(i)
-            case s: cz.payola.domain.entities.plugins.parameters.StringParameterValue => StringParameterValue(s)
+    def convert(entity: AnyRef)
+        (implicit context: SquerylDataContextComponent): Option[ParameterValue[_]] = {
+        entity match {
+            case b: BooleanParameterValue => Some(b)
+            case f: FloatParameterValue => Some(f)
+            case i: IntParameterValue => Some(i)
+            case s: StringParameterValue => Some(s)
+            case b: cz.payola.domain.entities.plugins.parameters.BooleanParameterValue => Some(BooleanParameterValue(b))
+            case f: cz.payola.domain.entities.plugins.parameters.FloatParameterValue => Some(FloatParameterValue(f))
+            case i: cz.payola.domain.entities.plugins.parameters.IntParameterValue => Some(IntParameterValue(i))
+            case s: cz.payola.domain.entities.plugins.parameters.StringParameterValue => Some(StringParameterValue(s))
+            case _ => None
         }
     }
 }
@@ -34,8 +35,5 @@ trait ParameterValue[A] extends cz.payola.domain.entities.plugins.ParameterValue
 
     var dataSourceId: Option[String] = None
 
-    /**
-      * @return Returns parameter this ParameterValue is associated to.
-      */
-    override def parameter: ParameterType
+    def parameter_=(value: ParameterType) { _parameter = value }
 }

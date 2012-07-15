@@ -44,7 +44,6 @@ trait PluginRepositoryComponent extends TableRepositoryComponent
 
                         plugin
                     }(collection.breakOut)
-
                 }
             }
 

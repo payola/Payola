@@ -12,9 +12,22 @@ trait PluginInstance extends Entity with DescribedEntity
     /** Type of the plugin the current object is instance of. */
     type PluginType <: Plugin
 
-    protected val _plugin: PluginType
+    protected var _isEditable: Boolean = true
 
-    protected val _parameterValues: immutable.Seq[PluginType#ParameterValueType]
+    protected var _plugin: PluginType
+
+    protected var _parameterValues: immutable.Seq[PluginType#ParameterValueType]
+
+    /** Is the plugin instance editable? */
+    def isEditable = _isEditable
+
+    /** Set whether the plugin instance is editable.
+      *
+      * @param editable Editable?
+      */
+    def isEditable_=(editable: Boolean) {
+        _isEditable = editable
+    }
 
     /** The corresponding analytical plugin. */
     def plugin = _plugin

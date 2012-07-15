@@ -2,22 +2,13 @@
 
 @main(Some(user), "Create a new plugin - Payola!") {
 
-    <pre id="editor">
-
-    </pre>
+    <div style="padding-left: 30px; padding-bottom: 20px;"><a href="@routes.Profile.listPlugins()" class="btn btn-success">List plugins &raquo;</a></div>
+    <div id="plugin_create_button_container"></div>
+    <pre id="editor"></pre>
 
     <script src="@routes.Assets.at("javascripts/ace/ace.js")" type="text/javascript" charset="utf-8"></script>
     <script src="@routes.Assets.at("javascripts/ace/theme-clouds.js")" type="text/javascript" charset="utf-8"></script>
     <script src="@routes.Assets.at("javascripts/ace/mode-scala.js")" type="text/javascript" charset="utf-8"></script>
-    <script>
-        window.onload = function() {
-            var editor = ace.edit("editor");
-            editor.setTheme("ace/theme/clouds");
-
-            var ScalaMode = require("ace/mode/scala").Mode;
-            editor.getSession().setMode(new ScalaMode());
-        };
-    </script>
 
 
     <style type="text/css" media="screen">
@@ -31,5 +22,8 @@
             padding-right: 14px;
         }
     </style>
-
+    <script src="/javaScriptPackage/cz.payola.web.client.presenters.PluginCreator" type="text/javascript"></script>
+    <script type="text/javascript">
+        new cz.payola.web.client.presenters.PluginCreator("plugin_create_button_container", "@routes.Profile.listPlugins()");
+    </script>
 }

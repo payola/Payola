@@ -11,7 +11,7 @@ trait ParameterValue[A] extends Entity
     /** Type of the parameter the current object is value of. */
     type ParameterType <: Parameter[A]
 
-    protected val _parameter: ParameterType
+    protected var _parameter: ParameterType
 
     protected var _value: A
 

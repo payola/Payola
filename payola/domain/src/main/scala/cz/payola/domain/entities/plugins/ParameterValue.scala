@@ -7,7 +7,7 @@ import cz.payola.domain.Entity
   * @param _value Value of the parameter.
   * @tparam A Type of the parameter value.
   */
-abstract class ParameterValue[A](protected val _parameter: Parameter[A], protected var _value: A)
+abstract class ParameterValue[A](protected var _parameter: Parameter[A], protected var _value: A)
     extends Entity with cz.payola.common.entities.plugins.ParameterValue[A]
 {
     checkConstructorPostConditions()

@@ -29,15 +29,15 @@ trait User extends Entity with NamedEntity with PrivilegableEntity
 
     protected var _password: String = ""
 
-    protected val _ownedGroups = mutable.ArrayBuffer[GroupType]()
+    protected var _ownedGroups = mutable.ArrayBuffer[GroupType]()
 
-    protected val _ownedAnalyses = mutable.ArrayBuffer[AnalysisType]()
+    protected var _ownedAnalyses = mutable.ArrayBuffer[AnalysisType]()
 
-    protected val _ownedDataSources = mutable.ArrayBuffer[DataSourceType]()
+    protected var _ownedDataSources = mutable.ArrayBuffer[DataSourceType]()
 
-    protected val _ownedPlugins = mutable.ArrayBuffer[PluginType]()
+    protected var _ownedPlugins = mutable.ArrayBuffer[PluginType]()
 
-    protected val _ontologyCustomizations = mutable.ArrayBuffer[OntologyCustomizationType]()
+    protected var _ontologyCustomizations = mutable.ArrayBuffer[OntologyCustomizationType]()
 
     /** Email of the user. */
     def email = _email

@@ -5,7 +5,7 @@ import cz.payola.domain.entities.Plugin
 class PluginClassLoader(pluginClassDirectory: java.io.File, parentClassLoader: java.lang.ClassLoader)
     extends java.net.URLClassLoader(Array[java.net.URL](pluginClassDirectory.toURI.toURL), parentClassLoader)
 {
-    def getPlugin(pluginClassName: String): Plugin = {
+    def instantiatePlugin(pluginClassName: String): Plugin = {
         try {
             val pluginClass = loadClass(pluginClassName)
             pluginClass.newInstance match {

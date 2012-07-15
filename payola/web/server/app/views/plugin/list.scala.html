@@ -1,0 +1,10 @@
+@(user: cz.payola.domain.entities.User)
+
+@import tags._
+
+@list_entities(user, "plugin", "plugins", user.ownedPlugins, { Unit =>
+    new scala.xml.NodeBuffer() += <td>Name</td>
+}, { e: cz.payola.domain.Entity =>
+    new scala.xml.NodeBuffer() += <td>{e.asInstanceOf[cz.payola.domain.entities.Plugin].name}</td>
+},
+routes.Profile.createPlugin())
