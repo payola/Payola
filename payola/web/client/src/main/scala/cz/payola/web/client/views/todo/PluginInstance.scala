@@ -7,10 +7,10 @@ import scala.collection.mutable
 import cz.payola.web.client.presenters.models.ParameterValue
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events._
-import cz.payola.web.client.views.Component
-import cz.payola.web.client.views.components.bootstrap._
+import cz.payola.web.client.View
+import cz.payola.web.client.views.bootstrap._
 import cz.payola.web.client.views.elements.Div
-import cz.payola.web.client.views.components.bootstrap.SpanButton
+import cz.payola.web.client.views.bootstrap.SpanButton
 
 object PluginInstance
 {
@@ -23,7 +23,7 @@ object PluginInstance
 }
 
 class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[PluginInstance] = List())
-    extends Component
+    extends View
 {
     val connectButtonClicked = new SimpleUnitEvent[PluginInstance]
 

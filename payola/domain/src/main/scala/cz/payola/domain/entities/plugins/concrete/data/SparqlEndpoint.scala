@@ -11,7 +11,10 @@ import cz.payola.domain.net.Downloader
 sealed class SparqlEndpoint(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
     extends DataFetcher(name, inputCount, parameters, id)
 {
-    def this() = this("SPARQL Endpoint", 0, List(new StringParameter("EndpointURL", "")), IDGenerator.newId)
+    def this() = {
+        this("SPARQL Endpoint", 0, List(new StringParameter("EndpointURL", "")), IDGenerator.newId)
+        isPublic = true
+    }
 
     def executeQuery(instance: PluginInstance, query: String): Graph = {
         usingDefined(instance.getStringParameter("EndpointURL")) { endpointURL =>

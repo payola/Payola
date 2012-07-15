@@ -3,27 +3,12 @@
 @main(user, "Payola!") {
 
     <div class="container-fluid">
-        <div class="row-fluid">
+        <div class="row-fluid" id="graph-view">
+        </div>
+    </div>
 
-            <div id="graph-plugin-draw-space"></div>
-
-            <div id="btn-stripe" class="btn-group">
-                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                    <i class="icon-cog"></i>
-                    Settings
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu" id="settings">
-                    <!-- dropdown menu links -->
-                </ul>
-            </div>
-
-        </div><!--/row-->
-
-    </div><!--/.fluid-container-->
-
-    <script src="/javaScriptPackage/cz.payola.web.client.presenters.Index" type="text/javascript"></script>
+    <script src="/javaScriptPackage/cz.payola.web.client.presenters.GraphPresenter" type="text/javascript"></script>
     <script type="text/javascript">
-        new cz.payola.web.client.presenters.Index().init();
+        new cz.payola.web.client.presenters.GraphPresenter("graph-view").initialize();
     </script>
 }

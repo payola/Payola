@@ -2,7 +2,7 @@ package cz.payola.web.client.presenters.components
 
 import cz.payola.common.entities.Plugin
 import cz.payola.web.client.views.elements._
-import cz.payola.web.client.views.components.bootstrap.Modal
+import cz.payola.web.client.views.bootstrap.Modal
 import cz.payola.web.client.events.SimpleUnitEvent
 import cz.payola.web.client.views.elements.Anchor
 

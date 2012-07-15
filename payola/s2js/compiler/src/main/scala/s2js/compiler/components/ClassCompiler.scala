@@ -27,9 +27,10 @@ class ClassCompiler(packageDefCompiler: PackageDefCompiler, classDef: Global#Cla
         }
 
         // Call the parent class constructor.
-        if (parentClass.isDefined) {
-            compileParentCall(parentConstructorCall.map(_.args).getOrElse(Nil))
-            buffer += ";\n"
+        parentClass.foreach { c =>
+            buffer += packageDefCompiler.getSymbolFullJsName(c.symbol) + ".apply(self, "
+            compileParameterValues(parentConstructorCall.map(_.args).getOrElse(Nil), false, true)
+            buffer += ");\n"
         }
 
         // Initialize fields that aren't implicit constructor parameters.

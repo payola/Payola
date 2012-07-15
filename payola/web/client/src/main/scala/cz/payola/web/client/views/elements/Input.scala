@@ -2,10 +2,10 @@ package cz.payola.web.client.views.elements
 
 import cz.payola.web.client.views._
 import s2js.adapters.js.dom
-import cz.payola.web.client.views.events.BrowserEvent
+import cz.payola.web.client.events.BrowserEvent
 
 class Input(name: String, initialValue: String, title: Option[String], cssClass: String = "")
-    extends Element[dom.Input]("input", Nil, cssClass)
+    extends ElementView[dom.Input]("input", Nil, cssClass)
 {
     val changed = new BrowserEvent[Input]
 

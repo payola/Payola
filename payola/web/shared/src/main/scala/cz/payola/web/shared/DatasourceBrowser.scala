@@ -1,20 +1,20 @@
 package cz.payola.web.shared
 
+import s2js.compiler.secured
 import cz.payola.common.rdf.Graph
-import cz.payola.domain.entities.plugins.concrete.data.SparqlEndpoint
+import cz.payola.domain.entities.User
 
-@remote object DatasourceBrowser
+@remote object DataSourceBrowser
 {
-    def getInitialGraph(id: String) : Option[Graph] = {
-        val instance = Payola.model.dataSourceModel.getById(id)
+    // TODO change user type from User to Option[User].
+    @secured def getInitialGraph(dataSourceId: String, user: User = null): Option[Graph] = {
+        val dataSource = Payola.model.dataSourceModel.getAccessibleToUserById(Some(user), dataSourceId)
+        val result = dataSource.flatMap(d => d.getFirstTriple.map(e => d.getNeighbourhood(e.origin.uri)))
+        result
+    }
 
-        if (instance.isDefined)
-        {
-            // WTF? How do you know that the instance is an instance of a sparql endpoint?
-            val se = new SparqlEndpoint()
-            Some(se.getFirstTriple(instance.get))
-        }else{
-            None
-        }
+    @secured def getNeighbourhood(dataSourceId: String, vertexURI: String, user: User = null): Option[Graph] = {
+        None
+
     }
 }

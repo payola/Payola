@@ -1,13 +1,13 @@
 package cz.payola.web.client.presenters.components
 
-import cz.payola.web.client.views.Component
+import cz.payola.web.client.View
 import s2js.adapters.js.dom
-import cz.payola.web.client.views.components.bootstrap.Icon
+import cz.payola.web.client.views.bootstrap.Icon
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events.SimpleUnitEvent
 import cz.payola.web.client.views.elements.Div
 
-class ZoomControls(var currentZoom: Double) extends Component
+class ZoomControls(var currentZoom: Double) extends View
 {
     /**
       * How much zoom (movement) causes one rotation of mouse wheel.

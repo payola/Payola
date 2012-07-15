@@ -13,8 +13,11 @@ class Join(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]
     extends Plugin(name, inputCount, parameters, id)
 {
     def this() = {
-        this("Join", 2, List(new StringParameter("JoinPropertyURI", ""), new BooleanParameter("IsInner", true)),
+        this("Join", 2, List(
+            new StringParameter("JoinPropertyURI", ""),
+            new BooleanParameter("IsInner", true)),
             IDGenerator.newId)
+        isPublic = true
     }
 
     /**

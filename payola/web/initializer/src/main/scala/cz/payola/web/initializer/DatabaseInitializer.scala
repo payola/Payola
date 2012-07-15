@@ -32,7 +32,8 @@ object DatabaseInitializer extends App
         val ontologicalFilterPlugin = new OntologicalFilter
         val shortestPathPlugin = new ShortestPath
 
-        val plugins = List(
+        // Persist plugins.
+        List(
             sparqlEndpointPlugin,
             payolaStoragePlugin,
             concreteSparqlQueryPlugin,
@@ -43,10 +44,22 @@ object DatabaseInitializer extends App
             unionPlugin,
             ontologicalFilterPlugin,
             shortestPathPlugin
-        )
+        ).foreach { p =>
+            model.pluginRepository.persist(p)
+        }
 
-        // TODO persists the plugins and maybe some data sources like dbpedia, opendata.cz etc.
+        // Persist data sources.
+        List(
+            DataSource("DBpedia.org", None,
+                sparqlEndpointPlugin.createInstance().setParameter("EndpointURL", "http://dbpedia.org/sparql")),
+            DataSource("Opendata.cz", None,
+                sparqlEndpointPlugin.createInstance().setParameter("EndpointURL", "http://ld.opendata.cz/sparql"))
+        ).foreach { d =>
+            d.isPublic = true
+            model.dataSourceRepository.persist(d)
+        }
 
+        /*
         // persist analysis
         val a = new cz.payola.domain.entities.Analysis("DB: Cities with more than 2 million habitants with countries", None)
         a.isPublic_=(true)
@@ -102,7 +115,7 @@ object DatabaseInitializer extends App
 
         model.dataSourceRepository.persist(ds1)
         model.dataSourceRepository.persist(ds2)
-        model.dataSourceRepository.persist(ds3)
+        model.dataSourceRepository.persist(ds3)*/
     }
 }
 

@@ -3,9 +3,10 @@ package cz.payola.web.client.views.elements
 import s2js.adapters.js.dom
 import cz.payola.web.client.views._
 import s2js.adapters.js.dom.CanvasRenderingContext2D
+import cz.payola.web.client.views.algebra.Vector2D
 
 class Canvas(initialSize: Vector2D, cssClass: String = "")
-    extends Element[dom.Canvas]("canvas", Nil, cssClass)
+    extends ElementView[dom.Canvas]("canvas", Nil, cssClass)
 {
     val context = domElement.getContext[CanvasRenderingContext2D]("2d")
 

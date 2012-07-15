@@ -1,18 +1,18 @@
 package cz.payola.web.client.presenters
 
 import s2js.adapters.js.browser._
-import cz.payola.web.client.views.plugins.Plugin
-import cz.payola.web.client.views.plugins.visual.techniques.tree.TreeTechnique
-import cz.payola.web.client.views.plugins.visual.techniques.circle.CircleTechnique
-import cz.payola.web.client.views.plugins.visual.techniques.gravity.GravityTechnique
-import cz.payola.web.client.views.plugins.visual.techniques.minimalization.MinimalizationTechnique
-import cz.payola.web.client.views.plugins.visual.settings.components.visualsetup.VisualSetup
-import cz.payola.web.client.views.plugins.visual._
-import settings._
 import cz.payola.web.shared._
 import cz.payola.common.rdf.IdentifiedVertex
+import cz.payola.web.client.views.graph.PluginView
+import cz.payola.web.client.views.graph.visual.techniques.tree.TreeTechnique
+import cz.payola.web.client.views.graph.visual.techniques.circle.CircleTechnique
+import cz.payola.web.client.views.graph.visual.techniques.gravity.GravityTechnique
+import cz.payola.web.client.views.graph.visual.techniques.minimalization.MinimalizationTechnique
+import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.views.elements._
-import cz.payola.web.client.views.plugins.textual.TripleTablePlugin
+import cz.payola.web.client.views.graph.textual.TripleTablePluginView
+import cz.payola.web.client.views.graph.visual.settings._
+import cz.payola.web.client.views.graph.visual.VisualPluginView
 
 class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
 {
@@ -32,15 +32,15 @@ class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
             false
     }
 
-    val plugins = List[Plugin](
+    val plugins = List[PluginView](
         new CircleTechnique(visualSetup),
-        new TripleTablePlugin(visualSetup),
+        new TripleTablePluginView(visualSetup),
         new TreeTechnique(visualSetup),
         new MinimalizationTechnique(visualSetup),
         new GravityTechnique(visualSetup)
     )
 
-    var currentPlugin: Option[Plugin] = None
+    var currentPlugin: Option[PluginView] = None
 
     plugins.foreach { plugin =>
 
@@ -65,14 +65,14 @@ class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
 
     def updateSettings() {
         currentPlugin.get match {
-            case i: VisualPlugin =>
+            case i: VisualPluginView =>
                 // TODO currentPlugin.get.redraw()
         }
     }
 
     def resetSettings() {
         currentPlugin.get match {
-            case i: VisualPlugin =>
+            case i: VisualPluginView =>
                 // TODO currentPlugin.get.redraw()
         }
     }
@@ -83,7 +83,7 @@ class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
         }
     }
 
-    def changePlugin(plugin: Plugin) {
+    def changePlugin(plugin: PluginView) {
         currentPlugin.foreach(_.destroy())
 
         // Switch to the new one.
@@ -93,7 +93,7 @@ class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
         plugin.updateGraph(graph)
 
         currentPlugin.get match {
-            case i: VisualPlugin =>
+            case i: VisualPluginView =>
                 i.vertexUpdate += { event =>
                     event.target match {
                         case ve: IdentifiedVertex =>

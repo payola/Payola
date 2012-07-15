@@ -1,6 +1,6 @@
 package cz.payola.web.client.presenters.components
 
-import cz.payola.web.client.views.Component
+import cz.payola.web.client.View
 import s2js.adapters.js.dom
 import s2js.adapters.js.browser.document
 import cz.payola.web.shared.AnalysisRunner
@@ -12,7 +12,7 @@ import cz.payola.web.client.events.UnitEvent
 import cz.payola.web.client.views.elements.Div
 import cz.payola.web.client.views.elements.Anchor
 
-class AnalysisControls(analysisId: String) extends Component
+class AnalysisControls(analysisId: String) extends View
 {
     val analysisEvaluated = new UnitEvent[AnalysisControls, EvaluationEventArgs]
 

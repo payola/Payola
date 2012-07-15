@@ -4,6 +4,7 @@ import collection.immutable
 import cz.payola.domain.entities._
 import cz.payola.domain.entities.plugins.concrete.DataFetcher
 import cz.payola.domain.rdf.Graph
+import cz.payola.common.rdf.Edge
 
 object DataSource
 {
@@ -43,6 +44,13 @@ class DataSource(protected var _name: String, protected var _owner: Option[User]
       */
     def executeQuery(query: String): Graph = {
         plugin.executeQuery(this, query)
+    }
+
+    /**
+      * Returns the first available triple.
+      */
+    def getFirstTriple: Option[Edge] = {
+        plugin.getFirstTriple(this).edges.headOption
     }
 
     /**

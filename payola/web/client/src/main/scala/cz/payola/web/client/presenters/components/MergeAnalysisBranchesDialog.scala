@@ -6,7 +6,7 @@ import s2js.compiler.javascript
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 import cz.payola.web.client.views.elements._
-import cz.payola.web.client.views.components.bootstrap.Modal
+import cz.payola.web.client.views.bootstrap.Modal
 import cz.payola.web.client.views.todo.PluginInstance
 import s2js.adapters.js.dom.Element
 import cz.payola.web.client.views.elements.Div

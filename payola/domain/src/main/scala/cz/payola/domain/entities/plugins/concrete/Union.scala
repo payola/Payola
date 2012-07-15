@@ -9,7 +9,10 @@ import cz.payola.domain.entities.plugins._
 class Union(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
     extends Plugin(name, inputCount, parameters, id)
 {
-    def this() = this("Union", 2, Nil, IDGenerator.newId)
+    def this() = {
+        this("Union", 2, Nil, IDGenerator.newId)
+        isPublic = true
+    }
 
     def evaluate(instance: PluginInstance, inputs: IndexedSeq[Option[Graph]], progressReporter: Double => Unit) = {
         // Currently the Union behaves as a strict union which means that all inputs have to be defined.

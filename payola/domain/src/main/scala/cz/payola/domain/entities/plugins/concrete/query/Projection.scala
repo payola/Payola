@@ -9,7 +9,10 @@ import cz.payola.domain.sparql._
 class Projection(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
     extends Construct(name, inputCount, parameters, id)
 {
-    def this() = this("Projection", 1, List(new StringParameter("PropertyURIs", "")), IDGenerator.newId)
+    def this() = {
+        this("Projection", 1, List(new StringParameter("PropertyURIs", "")), IDGenerator.newId)
+        isPublic = true
+    }
 
     def getPropertyURIs(instance: PluginInstance): Option[immutable.Seq[String]] = {
         instance.getStringParameter("PropertyURIs").map(_.split("\n").toList)

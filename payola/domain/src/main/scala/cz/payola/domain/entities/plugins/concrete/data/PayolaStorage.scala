@@ -18,8 +18,11 @@ sealed class PayolaStorage(name: String, inputCount: Int, parameters: immutable.
     (implicit val storageComponent: RdfStorageComponent)
     extends DataFetcher(name, inputCount, parameters, id)
 {
-    def this() = this(PayolaStorage.pluginName, 0, List(new StringParameter(PayolaStorage.groupURIParameterName, "")),
-        IDGenerator.newId)(null)
+    def this() = {
+        this(PayolaStorage.pluginName, 0, List(new StringParameter(PayolaStorage.groupURIParameterName, "")),
+            IDGenerator.newId)(null)
+        isPublic = false
+    }
 
     def executeQuery(instance: PluginInstance, query: String): Graph = {
         usingDefined(instance.getStringParameter("GroupURI")) { groupURI =>

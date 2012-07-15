@@ -12,7 +12,7 @@ import s2js.runtime.client.scala.collection.mutable.HashMap
 import cz.payola.web.client.presenters.models.ParameterValue
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events.EventArgs
-import cz.payola.web.client.views.components.bootstrap._
+import cz.payola.web.client.views.bootstrap._
 import scala.Some
 
 class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: String)

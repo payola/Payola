@@ -31,6 +31,10 @@ trait EntityModelComponent
             repository.getAllPublic ++ getGrantedToUser(user, groupRepository.getAll())
         }
 
+        def getAccessibleToUserById(user: Option[User], id: String): Option[A] = {
+            getAccessibleToUser(user).find(_.id == id)
+        }
+
         def getAccessibleToUserByOwner(user: Option[User], owner: User): Seq[A] = {
             repository.getAllPublicByOwnerId(Some(owner.id)) ++ getGrantedToUser(user, owner.ownedGroups)
         }
