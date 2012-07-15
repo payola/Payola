@@ -215,6 +215,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         )
 
         citiesFetcher.description = "fetch"
+        citiesFetcher.isEditable = true
 
         // Try that defined analysis can be persisted
         a.addPluginInstances(citiesFetcher, citiesTyped, citiesProjection, citiesSelection)
@@ -309,6 +310,8 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
                 assert(pi.parameterValues.find(_.id == paramValue.id).get.value == paramValue.value)
             }
                 assert(pi2.get.plugin.id == pi.plugin.id)
+                assert(pi2.get.isEditable == pi.isEditable)
+                assert(pi2.get.description == pi.description)
         }
 
         assert(pluginInstanceRepository.getById(citiesFetcher.id).get.description == citiesFetcher.description)
@@ -335,6 +338,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         ds2.isPublic = true
         ds3.isPublic = true
         ds1.description = "desc"
+        ds1.isEditable = true
 
         val ds1_db = dataSourceRepository.persist(ds1)
         val ds2_db = dataSourceRepository.persist(ds2)
@@ -350,6 +354,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
 
             assert(ds1_db.isPublic == ds1.isPublic)
             assert(ds1_db.description == ds1.description)
+            assert(ds1_db.isEditable == ds1.isEditable)
             assert(u2.id == ds2_db.owner.get.id)
             assert(u3.id == ds3_db.owner.get.id)
 

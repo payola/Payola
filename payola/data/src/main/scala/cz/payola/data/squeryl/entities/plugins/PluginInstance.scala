@@ -16,7 +16,7 @@ object PluginInstance extends EntityConverter[PluginInstance]
             case e: PluginInstance => Some(e)
             case e: cz.payola.common.entities.plugins.PluginInstance => {
                 val plugin = e.plugin.asInstanceOf[cz.payola.domain.entities.Plugin]
-                Some(new PluginInstance(e.id, plugin, e.parameterValues.map(ParameterValue(_)), e.description))
+                Some(new PluginInstance(e.id, plugin, e.parameterValues.map(ParameterValue(_)), e.description, e.isEditable))
             }
             case _ => None
         }
@@ -27,7 +27,8 @@ class PluginInstance(
     override val id: String,
     p: cz.payola.domain.entities.Plugin,
     paramValues: immutable.Seq[ParameterValue[_]],
-    var _desc: String)(implicit val context: SquerylDataContextComponent)
+    var _desc: String,
+    var _isEdit: Boolean)(implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.plugins.PluginInstance(p, paramValues)
     with PersistableEntity with DescribedEntity
 {
@@ -35,10 +36,13 @@ class PluginInstance(
 
     var analysisId: String = null
 
+    // Load value from DB
+    isEditable = _isEdit
+
     override def plugin = {
         if (_plugin == null) {
             wrapInTransaction{
-                //TODO: here - context.pluginInstanceRepository.loadPluginForPluginInstance(this)
+                context.pluginInstanceRepository.loadPluginForPluginInstance(this)
             }
         }
 
@@ -47,10 +51,10 @@ class PluginInstance(
 
     override def parameterValues = {
         // There is really need to check plugin -> loading plugins ensures mapping parameter values to parameters
-        // (otherwise NullPointerException is thrown when accessing paramterValues.parameter.something)
+        // (otherwise NullPointerException is thrown when accessing parameterValues.parameter.something)
         if (_plugin == null) {
             wrapInTransaction{
-                //TODO: here - context.pluginInstanceRepository.loadPluginForPluginInstance(this)
+                context.pluginInstanceRepository.loadPluginForPluginInstance(this)
             }
         }
 

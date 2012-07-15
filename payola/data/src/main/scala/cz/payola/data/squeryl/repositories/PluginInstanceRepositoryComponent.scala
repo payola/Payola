@@ -13,8 +13,10 @@ trait PluginInstanceRepositoryComponent extends TableRepositoryComponent
     private type QueryType = (PluginInstance, Option[BooleanParameterValue], Option[FloatParameterValue],
                                 Option[IntParameterValue], Option[StringParameterValue])
 
-    lazy val pluginInstanceRepository = new TableRepository[PluginInstance, QueryType](
-        schema.pluginInstances, PluginInstance)
+    lazy val pluginInstanceRepository = new PluginInstanceTableRepository
+
+    class PluginInstanceTableRepository
+        extends TableRepository[PluginInstance, QueryType](schema.pluginInstances, PluginInstance)
     {
         override def persist(entity: AnyRef): PluginInstance = wrapInTransaction {
             // First persist ParameterInstance then associate all parameter values

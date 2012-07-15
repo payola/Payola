@@ -3,6 +3,7 @@
   <component name="ScalacSettings">
     <option name="COMPILER_LIBRARY_NAME" value="scala-2.9.1" />
     <option name="COMPILER_LIBRARY_LEVEL" value="Project" />
+    <option name="VM_PARAMETERS" value="-Xms1024m -Xss1m -server" />
   </component>
 </project>
 

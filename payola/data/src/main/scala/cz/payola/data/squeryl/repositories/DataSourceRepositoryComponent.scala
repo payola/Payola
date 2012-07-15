@@ -10,7 +10,10 @@ trait DataSourceRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
 
-    lazy val dataSourceRepository = new TableRepository[DataSource, (DataSource, Option[User])](schema.dataSources, DataSource)
+    lazy val dataSourceRepository = new DataSourceTableRepository
+
+    class DataSourceTableRepository
+        extends TableRepository[DataSource, (DataSource, Option[User])](schema.dataSources, DataSource)
         with DataSourceRepository
         with NamedEntityTableRepository[DataSource]
         with OptionallyOwnedEntityTableRepository[DataSource]
@@ -69,7 +72,10 @@ trait DataSourceRepositoryComponent extends TableRepositoryComponent
                 dataSource.plugin = pluginRepository.getById(dataSource.pluginId).get
             }
 
-            pluginInstanceRepository.mapParameterValuesToParameters(dataSource.asInstanceOf[PluginInstance])
+            dataSource.parameterValues.foreach{ v =>
+                val value = v.asInstanceOf[ParameterValue[_]]
+                value.parameter = dataSource.plugin.parameters.find(_.id == value.parameterId).get
+            }
         }
     }
 }
