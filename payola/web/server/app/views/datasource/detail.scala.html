@@ -1,23 +1,20 @@
-@(user: Option[cz.payola.domain.entities.User], dataSource: cz.payola.domain.entities.plugins.PluginInstance)
+@(user: Option[cz.payola.domain.entities.User], dataSource: cz.payola.domain.entities.plugins.DataSource, initialURI: Option[String])
 
-@main(user, "Data source :: Payola!") {
-
-<div class="container-fluid">
-    <h1>Browse data source: @dataSource.getParameter("EndpointURL")</h1>
-
-    <div class="row-fluid" id="placeholder" style="position: relative;">
-
-        <ul class="dropdown-menu" id="settings">
-            <!-- dropdown menu links -->
-        </ul>
-
+@main(user, "Data Source :: Payola!") {
+    <div class="container-fluid">
+        <h1>
+            Browser of Data Source: @dataSource.name
+        </h1>
+        <div class="row-fluid" id="graph-view">
+        </div>
     </div>
-</div><!--/.fluid-container-->
 
-
-<script src="/javaScriptPackage/cz.payola.web.client.presenters.Datasource" type="text/javascript"></script>
-<script type="text/javascript">
-    new cz.payola.web.client.presenters.Datasource("placeholder", "@dataSource.id").init();
-</script>
-
+    <script src="/javaScriptPackage/cz.payola.web.client.presenters.DataSourcePresenter" type="text/javascript"></script>
+    <script type="text/javascript">
+        new cz.payola.web.client.presenters.DataSourcePresenter(
+            'graph-view',
+            '@dataSource.id',
+            @initialURI.map("'" + _ + "'").getOrElse("undefined")
+        ).initialize();
+    </script>
 }

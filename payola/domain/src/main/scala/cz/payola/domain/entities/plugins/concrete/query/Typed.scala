@@ -9,7 +9,10 @@ import cz.payola.domain.entities.plugins.parameters.StringParameter
 class Typed(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
     extends Construct(name, inputCount, parameters, id)
 {
-    def this() = this("Typed", 1, List(new StringParameter("TypeURI", "")), IDGenerator.newId)
+    def this() = {
+        this("Typed", 1, List(new StringParameter("TypeURI", "")), IDGenerator.newId)
+        isPublic = true
+    }
 
     def getTypeURI(instance: PluginInstance): Option[String] = {
         instance.getStringParameter("TypeURI")

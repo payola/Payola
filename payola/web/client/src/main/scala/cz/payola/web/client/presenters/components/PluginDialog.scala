@@ -1,41 +1,23 @@
 package cz.payola.web.client.presenters.components
 
-import cz.payola.web.client.mvvm.element.extensions.Bootstrap._
-import cz.payola.web.client.mvvm.Component
-import s2js.adapters.js.dom.Element
-import s2js.adapters.js.browser.document
-import cz.payola.web.client.mvvm.element._
-import cz.payola.web.client.events._
 import cz.payola.common.entities.Plugin
+import cz.payola.web.client.views.elements._
+import cz.payola.web.client.views.bootstrap.Modal
+import cz.payola.web.client.events.SimpleUnitEvent
+import cz.payola.web.client.views.elements.Anchor
 
-class PluginDialog(plugins: Seq[Plugin]) extends Component
+class PluginDialog(plugins: Seq[Plugin]) extends Modal("Choose a type of plugin", Nil, None)
 {
-    val pluginNameClicked = new ClickedEvent[Plugin]
+    val pluginNameClicked = new SimpleUnitEvent[Plugin]
 
-    private val ul = new UnorderedList(List())
-
-    plugins.foreach{ plugin =>
+    private val pluginListItems = plugins.map { plugin =>
         val anchor = new Anchor(List(new Text(plugin.name)))
-        val item = new ListItem(List(anchor))
-
-        anchor.clicked += { evt =>
-            pluginNameClicked.trigger(new ClickedEventArgs[Plugin](plugin))
+        anchor.mouseClicked += { e =>
+            pluginNameClicked.triggerDirectly(plugin)
             false
         }
-
-        item.render(ul.ul)
+        new ListItem(List(anchor))
     }
 
-    private val dialog = new Modal("Choose a type of plugin", List(ul), false)
-
-    def render(parent: Element = document.body) = {
-        dialog.render(parent)
-    }
-
-    def show() = dialog.show
-    def hide() = dialog.hide
-
-    def getDomElement : Element = {
-        dialog.getDomElement()
-    }
+    override val body = List(new UnorderedList(pluginListItems))
 }

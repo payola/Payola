@@ -1,19 +1,9 @@
 package cz.payola.web.client.presenters
 
-import s2js.adapters.js.browser.document
-import cz.payola.web.client.mvvm.element.extensions.Bootstrap._
-import cz.payola.web.client.mvvm.element._
-import cz.payola.web.client.mvvm.element.extensions.Payola.PluginInstance
-import cz.payola.web.client.presenters.components._
+import cz.payola.web.client.views.todo.PluginInstance
 import cz.payola.web.shared.AnalysisBuilderData
-import s2js.compiler.javascript
-import cz.payola.common.entities.Plugin
-import s2js.adapters.js.browser.window
-import cz.payola.web.client.events._
 import scala.collection.mutable.ArrayBuffer
 import s2js.runtime.client.scala.collection.mutable.HashMap
-import scala.Some
-import cz.payola.web.client.presenters.models.ParameterValue
 
 class AnalysisEditor(analysisIdP: String, menuHolder: String, pluginsHolder: String, nameHolder: String)
     extends AnalysisBuilder(menuHolder,pluginsHolder,nameHolder)
@@ -24,7 +14,7 @@ class AnalysisEditor(analysisIdP: String, menuHolder: String, pluginsHolder: Str
 
     override def init {
         AnalysisBuilderData.getAnalysis(analysisIdP){ analysis =>
-            name.setValue(analysis.name)
+            name.input.value = analysis.name
 
             val sources = new ArrayBuffer[PluginInstance]
             val renderBuffer = new ArrayBuffer[PluginInstance]

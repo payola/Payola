@@ -25,7 +25,7 @@ object DataSource extends PayolaController with Secured
 
     def detail(id: String) = maybeAuthenticated { user: Option[User] =>
         Payola.model.dataSourceModel.getById(id).map { d =>
-            Ok(views.html.datasource.detail(user, d))
+            Ok(views.html.datasource.detail(user, d, None))
         }.getOrElse {
             NotFound(views.html.errors.err404("The data source does not exist."))
         }

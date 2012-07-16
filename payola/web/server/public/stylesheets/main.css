@@ -25,42 +25,6 @@ canvas
     color: rgb(255, 0, 0);
 }
 
-.tableTechnique
-{
-    text-align: left;
-    vertical-align: top;
-}
-.tableTechnique.table
-{
-    width: 75%;
-}
-
-.tableTechnique.header
-{
-    font-weight: bold;
-}
-
-.tableTechnique.line.odd
-{
-    background-color: rgb(240, 255, 240);
-}
-
-.tableTechnique.line.even
-{
-    background-color: rgb(255, 255, 255);
-}
-
-.tableTechnique.element
-{
-    padding: 2px 20px 2px 2px;
-}
-
-.tableTechnique.list.element
-{
-    list-style-type: square;
-}
-
-
 .visualPluginSettings.textField
 {
     width: 30px;
@@ -90,10 +54,18 @@ label{
 #plugin-space .alert {
 }
 
-
 #plugin_create_button_container {
     padding-left: 30px;
     padding-bottom: 15px;
 }
 
-
+input.active {
+    background: #fff url('spinner.gif') no-repeat 100%;
+    background: url('spinner.gif') no-repeat 100%, -webkit-gradient(linear, left bottom, left top, color-stop(0.85, white), color-stop(0.99, #eeeeee));
+    background: url('spinner.gif') no-repeat 100%, -webkit-linear-gradient(center bottom, white 85%, #eeeeee 99%);
+    background: url('spinner.gif') no-repeat 100%, -moz-linear-gradient(center bottom, white 85%, #eeeeee 99%);
+    background: url('spinner.gif') no-repeat 100%, -o-linear-gradient(bottom, white 85%, #eeeeee 99%);
+    background: url('spinner.gif') no-repeat 100%, -ms-linear-gradient(top, #ffffff 85%, #eeeeee 99%);
+    background: url('spinner.gif') no-repeat 100%, linear-gradient(top, #ffffff 85%, #eeeeee 99%);
+    background-position: 98%;
+}

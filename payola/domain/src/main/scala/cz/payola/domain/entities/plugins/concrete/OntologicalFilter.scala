@@ -22,7 +22,10 @@ import cz.payola.domain.sparql._
 class OntologicalFilter(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
     extends SparqlQuery(name, inputCount, parameters, id)
 {
-    def this() = this("Ontological Filter", 1, List(new StringParameter("OntologyURLs", "")), IDGenerator.newId)
+    def this() = {
+        this("Ontological Filter", 1, List(new StringParameter("OntologyURLs", "")), IDGenerator.newId)
+        isPublic = true
+    }
 
     /** Creates a new SPARQL query that filters the graph according to the ontology.
       *

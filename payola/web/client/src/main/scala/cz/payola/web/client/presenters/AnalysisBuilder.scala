@@ -1,27 +1,30 @@
 package cz.payola.web.client.presenters
 
 import s2js.adapters.js.browser.document
-import cz.payola.web.client.mvvm.element.extensions.Bootstrap._
-import cz.payola.web.client.mvvm.element._
-import cz.payola.web.client.mvvm.element.extensions.Payola.PluginInstance
+import cz.payola.web.client.views.todo.PluginInstance
 import cz.payola.web.client.presenters.components._
 import cz.payola.web.shared.AnalysisBuilderData
 import s2js.compiler.javascript
 import cz.payola.common.entities.Plugin
 import s2js.adapters.js.browser.window
-import cz.payola.web.client.events._
 import scala.collection.mutable.ArrayBuffer
 import s2js.runtime.client.scala.collection.mutable.HashMap
-import scala.Some
 import cz.payola.web.client.presenters.models.ParameterValue
+import cz.payola.web.client.views.elements._
+import cz.payola.web.client.events.EventArgs
+import cz.payola.web.client.views.bootstrap._
+import scala.Some
 
 class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: String)
 {
     protected var allPlugins: Seq[Plugin] = List()
 
+    val saveAsYouTypeTimeout = 1000
+
     protected var analysisId = ""
 
     protected val timeoutMap = new HashMap[String, Int]
+
     protected val nameComponent = new InputControl("Analysis name", "init-name", "", "Enter analysis name")
 
     protected val name = new InputControl("Analysis name:", "name", "", "Analysis name")
@@ -50,44 +53,52 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
 
     protected var nameChangedTimeout: Option[Int] = None
 
-    AnalysisBuilderData.getPlugins() { plugins => allPlugins = plugins} { error => window.alert("Unable to load plugins")}
     init
 
     def init {
         val nameDialog = new Modal("Please, enter the name of the new analysis", List(nameComponent))
+        nameDialog.render()
 
-        nameDialog.render(document.body)
+        nameDialog.saving += { e =>
+            AnalysisBuilderData.setAnalysisName(analysisId, nameComponent.input.value) { success =>
 
-        AnalysisBuilderData.createEmptyAnalysis() {
-            id =>
-                analysisId = id
-                AnalysisBuilderData.lockAnalysis(id)
-                nameDialog.show
-        } { error => window.alert("Unable to create analysis")}
+                AnalysisBuilderData.createEmptyAnalysis(nameComponent.input.value) {
+                    id =>
+                        analysisId = id
+                        AnalysisBuilderData.lockAnalysis(id)
+                        AnalysisBuilderData.getPlugins() { plugins => allPlugins = plugins}
+                        { error => window.alert("Unable to load plugins")}
+                } { error => window.alert("Unable to create analysis")}
 
-        nameDialog.saved += { args =>
-            AnalysisBuilderData.setAnalysisName(analysisId, nameComponent.getValue()) { success =>
-                name.setValue(nameComponent.getValue())
-                nameDialog.hide
+                name.input.value = nameComponent.input.value
+                nameDialog.destroy()
             } { error =>
                 nameComponent.setError("Unable to use this name")
             }
             false
         }
+
+        nameDialog.closing += { e =>
+            window.location.href = "/dashboard"
+            false
+        }
     }
 
-    name.changed += { eventArgs =>
+    name.input.changed += { eventArgs =>
         if (nameChangedTimeout.isDefined) {
             window.clearTimeout(nameChangedTimeout.get)
         }
 
+        name.setIsActive()
         nameChangedTimeout = Some(window.setTimeout({ () =>
-            AnalysisBuilderData.setAnalysisName(analysisId, eventArgs.target.getValue) { _ =>
-                eventArgs.target.setOk()
+            AnalysisBuilderData.setAnalysisName(analysisId, name.input.value) { _ =>
+                name.setIsActive(false)
+                name.setOk()
             } { _ =>
-                eventArgs.target.setError("Invalid name.")
+                name.setIsActive(false)
+                name.setError("Invalid name.")
             }
-        }, 300))
+        }, saveAsYouTypeTimeout))
 
         false
     }
@@ -96,24 +107,22 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
     addDataSourceLinkLi.render(menu)
     mergeBranchesLi.render(menu)
 
-    addPluginLink.clicked += { event =>
+    addPluginLink.mouseClicked += { event =>
         val dialog = new PluginDialog(allPlugins.filter(_.inputCount == 0))
         dialog.pluginNameClicked += { evtArgs =>
             onPluginNameClicked(evtArgs.target, None)
-            dialog.hide
+            dialog.destroy()
             false
         }
-        dialog.render(document.body)
-        dialog.show
-
+        dialog.render()
         false
     }
 
-    mergeBranches.clicked += { event =>
+    mergeBranches.mouseClicked += { event =>
         val dialog = new PluginDialog(allPlugins.filter(_.inputCount > 1))
         dialog.pluginNameClicked += { evt =>
 
-            dialog.hide()
+            dialog.destroy()
 
             val inputsCount = evt.target.inputCount
             if (inputsCount > lanes.size) {
@@ -121,10 +130,8 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
                     .size + " branches are available.")
             } else {
                 val mergeDialog = new MergeAnalysisBranchesDialog(lanes, inputsCount)
-                mergeDialog.render(document.body)
-
-                mergeDialog.mergeStrategyChosen += { event: MergeStrategyEventArgs =>
-                    val instances = event.target
+                mergeDialog.saving += { e =>
+                    val instances = mergeDialog.outputToInstance
 
                     var i = 0
                     val buffer = new ArrayBuffer[PluginInstance]()
@@ -156,17 +163,17 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
 
                         lanes += mergeInstance
 
-                        mergeDialog.hide()
+                        mergeDialog.destroy()
                     } { _ =>}
+                    false
                 }
 
-                mergeDialog.show()
+                mergeDialog.render()
             }
 
             false
         }
-        dialog.render(document.body)
-        dialog.show
+        dialog.render()
         false
     }
 
@@ -198,8 +205,7 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
         }
     }
 
-    def onParameterValueChanged = { args: ChangedEventArgs[ParameterValue] =>
-
+    def onParameterValueChanged(args: EventArgs[ParameterValue]) {
         val parameterInfo = args.target
         val parameterId = parameterInfo.parameterId
 
@@ -207,17 +213,21 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
             window.clearTimeout(timeoutMap(parameterId))
         }
 
+        parameterInfo.control.setIsActive()
+
         val timeoutId = window.setTimeout(() => {
             AnalysisBuilderData
-                .setParameterValue(parameterInfo.pluginInstanceId, parameterInfo.name, parameterInfo.value) { _ =>
+                .setParameterValue(analysisId, parameterInfo.pluginInstanceId, parameterInfo.name, parameterInfo.value)
+            { _ =>
                 parameterInfo.control.setOk()
+                parameterInfo.control.setIsActive(false)
             } { _ =>
                 parameterInfo.control.setError("Wrong parameter value.")
+                parameterInfo.control.setIsActive(false)
             }
-        }, 300)
+        }, saveAsYouTypeTimeout)
 
         timeoutMap.put(parameterId, timeoutId)
-        false
     }
 
     def connectPlugin(pluginInstance: PluginInstance): Unit = {
@@ -226,14 +236,13 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
         val dialog = new PluginDialog(allPlugins.filter(_.inputCount == 1))
         dialog.pluginNameClicked += { evtArgs =>
             onPluginNameClicked(evtArgs.target, Some(inner))
-            dialog.hide
+            dialog.destroy()
             false
         }
-        dialog.render(document.body)
-        dialog.show
+        dialog.render()
     }
 
-    def onDeleteClick = { eventArgs: ClickedEventArgs[PluginInstance] =>
+    def onDeleteClick(eventArgs: EventArgs[PluginInstance]) {
         val instance = eventArgs.target
 
         AnalysisBuilderData.deletePluginInstance(instance.id) { _ =>
@@ -246,7 +255,6 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
             }
             instance.destroy()
         } { _ =>}
-        false
     }
 
     def bind(a: PluginInstance, b: PluginInstance, inputIndex: Int) = {

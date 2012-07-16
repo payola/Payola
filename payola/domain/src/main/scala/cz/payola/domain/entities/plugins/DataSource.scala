@@ -4,6 +4,7 @@ import collection.immutable
 import cz.payola.domain.entities._
 import cz.payola.domain.entities.plugins.concrete.DataFetcher
 import cz.payola.domain.rdf.Graph
+import cz.payola.common.rdf.Edge
 
 object DataSource
 {
@@ -25,12 +26,12 @@ object DataSource
 /**
   * @param _name Name of the data source.
   * @param _owner Owner of the data source.
-  * @param plugin The data fetcher plugin corresponding to the data source.
+  * @param dataFetcher The data fetcher plugin corresponding to the data source.
   * @param parameterValues The corresponding data fetcher plugin parameter values.
   */
-class DataSource(protected var _name: String, protected var _owner: Option[User], plugin: DataFetcher,
+class DataSource(protected var _name: String, protected var _owner: Option[User], dataFetcher: DataFetcher,
     parameterValues: immutable.Seq[ParameterValue[_]])
-    extends PluginInstance(plugin, parameterValues)
+    extends PluginInstance(dataFetcher, parameterValues)
     with OptionallyOwnedEntity
     with NamedEntity
     with ShareableEntity
@@ -42,7 +43,14 @@ class DataSource(protected var _name: String, protected var _owner: Option[User]
       * @return The result of the query.
       */
     def executeQuery(query: String): Graph = {
-        plugin.executeQuery(this, query)
+        plugin.asInstanceOf[DataFetcher].executeQuery(this, query)
+    }
+
+    /**
+      * Returns the first available triple.
+      */
+    def getFirstTriple: Option[Edge] = {
+        plugin.asInstanceOf[DataFetcher].getFirstTriple(this).edges.headOption
     }
 
     /**
@@ -55,7 +63,7 @@ class DataSource(protected var _name: String, protected var _owner: Option[User]
       * @return The neighbourhood graph.
       */
     def getNeighbourhood(vertexURI: String, distance: Int = 1): Graph = {
-        plugin.getNeighbourhood(this, vertexURI, distance)
+        plugin.asInstanceOf[DataFetcher].getNeighbourhood(this, vertexURI, distance)
     }
 
     override def canEqual(other: Any): Boolean = {

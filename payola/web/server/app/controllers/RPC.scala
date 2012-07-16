@@ -89,9 +89,10 @@ object RPC extends PayolaController with Secured
             val response = dispatcher.dispatchRequest(params, async, user)
             Ok(response)
         } catch {
-            case e: Exception =>
-                println(e)
+            case e: Exception => {
+                Option(e.getCause).map(_.printStackTrace()).getOrElse(e.printStackTrace())
                 raiseError(e)
+            }
         }
     }
 

@@ -1,18 +1,19 @@
 package cz.payola.web.client.presenters.components
 
-import cz.payola.web.client.mvvm.element.extensions.Bootstrap._
-import cz.payola.web.client.mvvm.Component
-import s2js.adapters.js.dom.Element
+import s2js.adapters.js.dom
 import s2js.adapters.js.browser.document
-import cz.payola.web.client.mvvm.element._
-import cz.payola.web.client.mvvm.element.extensions.Payola.PluginInstance
 import s2js.compiler.javascript
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
+import cz.payola.web.client.views.elements._
+import cz.payola.web.client.views.bootstrap.Modal
+import cz.payola.web.client.views.todo.PluginInstance
+import s2js.adapters.js.dom.Element
+import cz.payola.web.client.views.elements.Div
 
-class MergeAnalysisBranchesDialog(instances: ArrayBuffer[PluginInstance], inputsCount: Int) extends Component
+class MergeAnalysisBranchesDialog(instances: ArrayBuffer[PluginInstance], inputsCount: Int)
+    extends Modal("Choose how you want to merge the branches")
 {
-    val mergeStrategyChosen = new MergeStrategyEvent()
     val outputToInstance = new HashMap[Int, PluginInstance]
 
     private val dragZone = new Div(List(),"droppable origin")
@@ -21,12 +22,12 @@ class MergeAnalysisBranchesDialog(instances: ArrayBuffer[PluginInstance], inputs
         val pluginInstance = instance.asInstanceOf[PluginInstance]
 
         val div = new Div(List(new Text(pluginInstance.plugin.name)), "alert alert-danger span2 draggable")
-        bindInstance(div.getDomElement, pluginInstance)
-        div.render(dragZone.getDomElement)
+        bindInstance(div.domElement, pluginInstance)
+        div.render(dragZone.domElement)
     }
 
     val clear = new Div(List(),"clear")
-    clear.render(dragZone.getDomElement)
+    clear.render(dragZone.domElement)
 
     val dropZoneWrapper = new Div(List())
 
@@ -34,29 +35,16 @@ class MergeAnalysisBranchesDialog(instances: ArrayBuffer[PluginInstance], inputs
     while (i < inputsCount)
     {
         val div = new Div(List(new Text("Input #"+i.toString())), "droppable well")
-        bindIndex(div.getDomElement, i)
-        div.render(dropZoneWrapper.getDomElement)
+        bindIndex(div.domElement, i)
+        div.render(dropZoneWrapper.domElement)
         i = i+1
     }
 
-    private val dialog = new Modal("Choose how you want to merge the branches", List(dragZone, dropZoneWrapper))
+    override val body = List(dragZone, dropZoneWrapper)
 
-    def render(parent: Element = document.body) = {
-        dialog.render(parent)
+    override def render(parent: dom.Element = document.body) {
+        super.render(parent)
         bindDragAndDrop()
-    }
-
-    def show() = dialog.show
-
-    def hide() = dialog.hide
-
-    def getDomElement : Element = {
-        dialog.getDomElement()
-    }
-
-    dialog.saved += { event =>
-        mergeStrategyChosen.trigger(new MergeStrategyEventArgs(outputToInstance))
-        false
     }
 
     @javascript(
@@ -75,13 +63,13 @@ class MergeAnalysisBranchesDialog(instances: ArrayBuffer[PluginInstance], inputs
                 }
            });
         """)
-    def bindDragAndDrop() = {}
+    def bindDragAndDrop() { }
 
     @javascript(""" jQuery(element).data("pluginInstance", instance); """)
-    def bindInstance(element: Element, instance: PluginInstance) = {}
+    def bindInstance(element: Element, instance: PluginInstance) {}
 
     @javascript(""" jQuery(element).data("inputIndex", index); """)
-    def bindIndex(element: Element, index: Int) = {}
+    def bindIndex(element: Element, index: Int) { }
 
     def setInstance(index: Int, instance: PluginInstance) = {
         outputToInstance.put(index, instance)

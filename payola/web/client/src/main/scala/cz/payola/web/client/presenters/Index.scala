@@ -1,26 +1,19 @@
 package cz.payola.web.client.presenters
 
 import s2js.adapters.js.browser._
-import cz.payola.web.client.views.plugins.Plugin
-import cz.payola.web.client.views.plugins.visual.techniques.tree.TreeTechnique
-import s2js.compiler.dependency
-import cz.payola.web.client.views.plugins.visual.techniques.circle.CircleTechnique
-import cz.payola.web.client.views.plugins.visual.techniques.gravity.GravityTechnique
-import cz.payola.web.client.views.plugins.visual.techniques.minimalization.MinimalizationTechnique
-import cz.payola.web.client.views.plugins.textual.techniques.table.TableTechnique
-import cz.payola.web.client.views.plugins.visual.settings.components.visualsetup.VisualSetup
-import cz.payola.web.client.views.plugins.visual._
-import cz.payola.web.client.mvvm.element._
-import settings._
 import cz.payola.web.shared._
 import cz.payola.common.rdf.IdentifiedVertex
-import scala.Some
+import cz.payola.web.client.views.graph.PluginView
+import cz.payola.web.client.views.graph.visual.techniques.tree.TreeTechnique
+import cz.payola.web.client.views.graph.visual.techniques.circle.CircleTechnique
+import cz.payola.web.client.views.graph.visual.techniques.gravity.GravityTechnique
+import cz.payola.web.client.views.graph.visual.techniques.minimalization.MinimalizationTechnique
+import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.VisualSetup
+import cz.payola.web.client.views.elements._
+import cz.payola.web.client.views.graph.textual.TripleTablePluginView
+import cz.payola.web.client.views.graph.visual.settings._
+import cz.payola.web.client.views.graph.visual.VisualPluginView
 
-// TODO remove after classloading is done
-@dependency("cz.payola.common.rdf.IdentifiedVertex")
-@dependency("cz.payola.common.rdf.LiteralVertex")
-@dependency("cz.payola.common.rdf.Graph")
-@dependency("cz.payola.common.rdf.Edge")
 class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
 {
     var graph: Option[cz.payola.common.rdf.Graph] = None
@@ -35,28 +28,28 @@ class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
 
     visualSetup.settingsChanged += {
         evt =>
-            currentPlugin.get.redraw()
+            // TODO currentPlugin.get.redraw()
             false
     }
 
-    val plugins = List[Plugin](
+    val plugins = List[PluginView](
         new CircleTechnique(visualSetup),
-        new TableTechnique(visualSetup),
+        new TripleTablePluginView(visualSetup),
         new TreeTechnique(visualSetup),
         new MinimalizationTechnique(visualSetup),
         new GravityTechnique(visualSetup)
     )
 
-    var currentPlugin: Option[Plugin] = None
+    var currentPlugin: Option[PluginView] = None
 
     plugins.foreach { plugin =>
 
-        val pluginBtn = new Anchor(List(new Text(plugin.getName)), "#")
+        val pluginBtn = new Anchor(List(new Text(plugin.name)), "#")
         new ListItem(List(pluginBtn)).render(document.getElementById("settings"))
 
-        pluginBtn.clicked += {
+        pluginBtn.mouseClicked += {
             event =>
-                val newPlugin = plugins.find(_.getName == plugin.getName)
+                val newPlugin = plugins.find(_.name == plugin.name)
                 if (newPlugin.isDefined) {
                     changePlugin(newPlugin.get)
                 }
@@ -72,15 +65,15 @@ class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
 
     def updateSettings() {
         currentPlugin.get match {
-            case i: VisualPlugin =>
-                currentPlugin.get.redraw()
+            case i: VisualPluginView =>
+                // TODO currentPlugin.get.redraw()
         }
     }
 
     def resetSettings() {
         currentPlugin.get match {
-            case i: VisualPlugin =>
-                currentPlugin.get.redraw()
+            case i: VisualPluginView =>
+                // TODO currentPlugin.get.redraw()
         }
     }
 
@@ -90,24 +83,22 @@ class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
         }
     }
 
-    def changePlugin(plugin: Plugin) {
+    def changePlugin(plugin: PluginView) {
         currentPlugin.foreach(_.destroy())
 
         // Switch to the new one.
         currentPlugin = Some(plugin)
-        plugin.init(document.getElementById(elementToDrawIn))
+        plugin.render(document.getElementById(elementToDrawIn))
 
-        if (graph.isDefined) {
-            plugin.update(graph.get)
-        }
+        plugin.updateGraph(graph)
 
         currentPlugin.get match {
-            case i: VisualPlugin =>
+            case i: VisualPluginView =>
                 i.vertexUpdate += { event =>
                     event.target match {
                         case ve: IdentifiedVertex =>
                             val neighborhood = GraphFetcher.getNeighborhoodOfVertex(ve.uri)
-                            i.update(neighborhood)
+                            i.updateGraph(Some(neighborhood))
                         case _ =>
                     }
                     false

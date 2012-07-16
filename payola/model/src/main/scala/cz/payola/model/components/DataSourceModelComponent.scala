@@ -5,12 +5,16 @@ import cz.payola.domain.entities.plugins.DataSource
 import cz.payola.model.EntityModelComponent
 import cz.payola.domain.RdfStorageComponent
 import cz.payola.domain.entities.privileges.AccessDataSourcePrivilege
+import cz.payola.domain.entities.User
 
 trait DataSourceModelComponent extends EntityModelComponent
 {
     self: DataContextComponent with RdfStorageComponent =>
 
-    lazy val dataSourceModel = new ShareableEntityModel[DataSource](dataSourceRepository, classOf[AccessDataSourcePrivilege])
+    lazy val dataSourceModel = new ShareableEntityModel[DataSource](
+        dataSourceRepository,
+        classOf[AccessDataSourcePrivilege],
+        (user: User) => user.ownedDataSources)
     {
         def create : DataSource = {
             //TODO

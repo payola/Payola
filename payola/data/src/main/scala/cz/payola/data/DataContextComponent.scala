@@ -180,7 +180,7 @@ trait DataContextComponent
         def persistPluginInstance(pluginInstance: PluginInstance)
 
         /**
-          * Persists ParameterValue of PluginInstance of Analysis
+          * Persists given ParameterValue
           * @param parameterValue ParameterValue to persist
           */
         def persistParameterValue(parameterValue: ParameterValue[_])

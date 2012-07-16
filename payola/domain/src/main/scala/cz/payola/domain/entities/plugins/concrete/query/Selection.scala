@@ -9,8 +9,14 @@ import cz.payola.domain.sparql._
 class Selection(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
     extends Construct(name, inputCount, parameters, id)
 {
-    def this() = this("Selection", 1, List(new StringParameter("PropertyURI", ""),
-        new StringParameter("Operator", ""), new StringParameter("Value", "")), IDGenerator.newId)
+    def this() = {
+        this("Selection", 1, List(
+            new StringParameter("PropertyURI", ""),
+            new StringParameter("Operator", ""),
+            new StringParameter("Value", "")),
+            IDGenerator.newId)
+        isPublic = true
+    }
 
     def getPropertyURI(instance: PluginInstance): Option[String] = {
         instance.getStringParameter("PropertyURI")

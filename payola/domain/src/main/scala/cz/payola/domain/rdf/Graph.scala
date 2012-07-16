@@ -4,7 +4,7 @@ import scala.collection._
 import com.hp.hpl.jena.query._
 import com.hp.hpl.jena.rdf.model._
 import cz.payola.common.rdf._
-import cz.payola.domain.DomainException
+import cz.payola.domain._
 
 object Graph
 {
@@ -41,13 +41,16 @@ object Graph
         val literalVertices = mutable.ListBuffer.empty[LiteralVertex]
         val edges = mutable.HashSet.empty[Edge]
         val identifiedVertices = mutable.HashMap.empty[String, IdentifiedVertex]
-        def getIdentifiedVertex(uri: String) = identifiedVertices.getOrElseUpdate(uri, new IdentifiedVertex(uri))
+        def getIdentifiedVertex(node: RDFNode) = {
+            val uri = Option(node.asResource.getURI).getOrElse(node.toString)
+            identifiedVertices.getOrElseUpdate(uri, new IdentifiedVertex(uri))
+        }
 
         // Process the vertices.
         val subjectIterator = model.listSubjects
         while (subjectIterator.hasNext) {
             val subject = subjectIterator.nextResource
-            val origin = getIdentifiedVertex(subject.getURI)
+            val origin = getIdentifiedVertex(subject)
 
             // Process the edges that originate in the current vertex.
             val propertyIterator = subject.listProperties
@@ -60,7 +63,7 @@ object Graph
                     literalVertices += lv
                     lv
                 } else {
-                    getIdentifiedVertex(obj.asResource.getURI)
+                    getIdentifiedVertex(obj)
                 }
 
                 edges += new Edge(origin, destination, predicate.getURI)

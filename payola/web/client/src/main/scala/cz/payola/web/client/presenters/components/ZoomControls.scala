@@ -1,14 +1,13 @@
 package cz.payola.web.client.presenters.components
 
-import cz.payola.web.client.mvvm.Component
-import s2js.adapters.js.browser.document
-import s2js.adapters.js.dom.Element
-import cz.payola.web.client.mvvm.element._
-import cz.payola.web.client.events._
-import cz.payola.web.client.mvvm.element.extensions.Bootstrap.Icon
-import s2js.adapters.js.browser.window
+import cz.payola.web.client.View
+import s2js.adapters.js.dom
+import cz.payola.web.client.views.bootstrap.Icon
+import cz.payola.web.client.views.elements._
+import cz.payola.web.client.events.SimpleUnitEvent
+import cz.payola.web.client.views.elements.Div
 
-class ZoomControls(var currentZoom: Double) extends Component
+class ZoomControls(var currentZoom: Double) extends View
 {
     /**
       * How much zoom (movement) causes one rotation of mouse wheel.
@@ -20,8 +19,8 @@ class ZoomControls(var currentZoom: Double) extends Component
     private val maximumZoomOut = 25
     private val maximumZoomIn = 200
 
-    val zoomIncreased = new ZoomChangedEvent[ZoomControls]
-    val zoomDecreased = new ZoomChangedEvent[ZoomControls]
+    val zoomIncreased = new SimpleUnitEvent[ZoomControls]
+    val zoomDecreased = new SimpleUnitEvent[ZoomControls]
 
     private val spanCaption = new Text("")
 
@@ -31,7 +30,7 @@ class ZoomControls(var currentZoom: Double) extends Component
 
     val wrapper = new Div(List(plus, status, minus), "zoom-controls")
 
-    var parentSpace: Option[Element] = None
+    var parentElement: Option[dom.Element] = None
 
     def reset() {
         setZoom(zoomOrigin)
@@ -57,7 +56,7 @@ class ZoomControls(var currentZoom: Double) extends Component
 
     def setZoom(zoom: Double) {
         currentZoom = zoom
-        spanCaption.setText(getStatusCaption)
+        spanCaption.text = (getStatusCaption)
     }
 
     def increaseZoomInfo() {
@@ -71,31 +70,31 @@ class ZoomControls(var currentZoom: Double) extends Component
     override def destroy() {
         //spanCaption.setText("")
 
-        if(parentSpace.isDefined) {
-            wrapper.div.removeChild(minus.span)
-            wrapper.div.removeChild(status.span)
-            wrapper.div.removeChild(plus.span)
-            parentSpace.get.removeChild(wrapper.div)
+        if(parentElement.isDefined) {
+            wrapper.domElement.removeChild(minus.domElement)
+            wrapper.domElement.removeChild(status.domElement)
+            wrapper.domElement.removeChild(plus.domElement)
+            parentElement.get.removeChild(wrapper.domElement)
         }
     }
 
-    def render(parent: Element = document.body) {
+    def render(parent: dom.Element) {
         wrapper.render(parent)
-        spanCaption.setText(getStatusCaption)
-        parentSpace = Some(parent)
+        spanCaption.text = getStatusCaption
+        parentElement = Some(parent)
 
-        plus.clicked += { evt =>
-            zoomIncreased.trigger(new ZoomChangedEventArgs[ZoomControls](this))
+        plus.mouseClicked += { e =>
+            zoomIncreased.triggerDirectly(this)
             false
         }
 
-        minus.clicked += { evt =>
-            zoomDecreased.trigger(new ZoomChangedEventArgs[ZoomControls](this))
+        minus.mouseClicked += { e =>
+            zoomDecreased.triggerDirectly(this)
             false
         }
     }
 
-    def getDomElement : Element = {
-        wrapper.getDomElement
+    def domElement : dom.Element = {
+        wrapper.domElement
     }
 }

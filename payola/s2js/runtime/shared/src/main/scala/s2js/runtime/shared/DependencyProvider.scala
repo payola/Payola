@@ -78,7 +78,7 @@ import tools.nsc.io
             symbols.flatMap(symbolFiles.get(_)).foreach(processFile(_))
             val javaScript = javaScriptBuffer.mkString("\n")
             val css = provideRegex.replaceAllIn(cssBuffer.mkString("\n"), "")
-            dependencyPackage = new DependencyPackage(javaScript, css, processedSymbols);
+            dependencyPackage = new DependencyPackage(javaScript, css, processedSymbols)
         }
 
         dependencyPackage
