@@ -13,7 +13,7 @@ import scala.collection.mutable.ListBuffer
     }
 
     @secured def dataSourceExistsWithName(name: String, user: User = null): Boolean = {
-        Payola.model.dataSourceModel.getByName(name).isDefined
+        Payola.model.dataSourceModel.getAll.exists(_.name == name)
     }
 
 }
