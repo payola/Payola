@@ -4,25 +4,25 @@ import cz.payola.common.entities._
 import s2js.compiler._
 import cz.payola.domain.entities.User
 
+@secured
 @remote object AnalysisBuilderData
 {
-    @async
-    @secured def createEmptyAnalysis(user: User = null)(successCallback: (String => Unit))
+    @async def createEmptyAnalysis(name: String, user: User = null)(successCallback: (String => Unit))
         (failCallback: (Throwable => Unit)) {
-        successCallback(Payola.model.analysisModel.create(user).id)
+        successCallback(Payola.model.analysisModel.create(user, name).id)
     }
 
-    @async def getPlugins()(successCallback: (Seq[Plugin] => Unit))(failCallback: (Throwable => Unit)) {
+    @async def getPlugins(user: User = null)(successCallback: (Seq[Plugin] => Unit))(failCallback: (Throwable => Unit)) {
         successCallback(Payola.model.pluginModel.getAll)
     }
 
-    def lockAnalysis(id: String) {
+    def lockAnalysis(id: String, user: User = null) {
     }
 
-    def unlockAnalysis(id: String) {
+    def unlockAnalysis(id: String, user: User = null) {
     }
 
-    @async def setAnalysisName(id: String, name: String)(successCallback: (Boolean => Unit))
+    @async def setAnalysisName(id: String, name: String, user: User = null)(successCallback: (Boolean => Unit))
         (failCallback: (Throwable => Unit)) {
         val analysis = Payola.model.analysisModel.getById(id)
         analysis.map { a =>
@@ -32,33 +32,36 @@ import cz.payola.domain.entities.User
         successCallback(true)
     }
 
-    @async def createPluginInstance(pluginId: String, analysisId: String)(successCallback: (String => Unit))
+    @async def createPluginInstance(pluginId: String, analysisId: String, user: User = null)(successCallback: (String => Unit))
         (failCallback: (Throwable => Unit)) {
         successCallback(Payola.model.pluginInstanceModel.create(pluginId, analysisId).id)
     }
 
-    @async def setParameterValue(pluginInstanceId: String, parameterName: String, value: String)
+    @async def setParameterValue(analysisId: String, pluginInstanceId: String, parameterName: String, value: String,
+        user: User = null)
         (successCallback: (Boolean => Unit))(failCallback: (Throwable => Unit)) {
-        Payola.model.pluginInstanceModel.setParameterValue(pluginInstanceId, parameterName, value)
+
+        Payola.model.analysisModel.setParameterValue(user, analysisId, pluginInstanceId, parameterName, value)
         successCallback(true)
     }
 
-    @async def saveBinding(analysisId: String, sourceId: String, targetId: String, inputIndex: Int)
+    @async def saveBinding(analysisId: String, sourceId: String, targetId: String, inputIndex: Int, user: User = null)
         (successCallback: (Boolean => Unit))
         (failCallback: (Throwable => Unit)) {
         Payola.model.analysisModel.addBinding(analysisId, sourceId, targetId, inputIndex)
         successCallback(true)
     }
 
-    @async def deletePluginInstance(pluginInstanceId: String)(successCallback: (Boolean => Unit))
+    @async def deletePluginInstance(pluginInstanceId: String, user: User = null)(successCallback: (Boolean => Unit))
         (failCallback: (Throwable => Unit)) {
-        Payola.model.pluginInstanceModel.getById(pluginInstanceId).map(Payola.model.pluginInstanceModel.remove(_)).getOrElse{
+        Payola.model.pluginInstanceModel.getById(pluginInstanceId).map(Payola.model.pluginInstanceModel.remove(_))
+            .getOrElse {
             failCallback(new Exception("Unknown plugin instance."))
         }
         successCallback(true)
     }
 
-    @async def getAnalysis(analysisId:String)(successCallback: (Analysis => Unit))
+    @async def getAnalysis(analysisId: String, user: User = null)(successCallback: (Analysis => Unit))
         (failCallback: (Throwable => Unit)) {
         val analysis = Payola.model.analysisModel.getById(analysisId)
         successCallback(analysis.get)

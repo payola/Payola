@@ -9,7 +9,7 @@ class Input(name: String, initialValue: String, title: Option[String], cssClass:
 {
     val changed = new BrowserEvent[Input]
 
-    domElement.onchange = { e => changed.triggerDirectly(this, e) }
+    domElement.onkeyup = { e => changed.triggerDirectly(this, e) }
 
     value = initialValue
     setAttribute("name", name)
@@ -34,5 +34,13 @@ class Input(name: String, initialValue: String, title: Option[String], cssClass:
 
     def value_=(value: String) {
         domElement.value = value
+    }
+
+    def setIsActive(isActive: Boolean = true){
+        if (isActive) {
+            addCssClass("active")
+        } else {
+            removeCssClass("active")
+        }
     }
 }

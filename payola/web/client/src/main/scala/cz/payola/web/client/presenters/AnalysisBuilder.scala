@@ -19,9 +19,12 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
 {
     protected var allPlugins: Seq[Plugin] = List()
 
+    val saveAsYouTypeTimeout = 1000
+
     protected var analysisId = ""
 
     protected val timeoutMap = new HashMap[String, Int]
+
     protected val nameComponent = new InputControl("Analysis name", "init-name", "", "Enter analysis name")
 
     protected val name = new InputControl("Analysis name:", "name", "", "Analysis name")
@@ -50,26 +53,33 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
 
     protected var nameChangedTimeout: Option[Int] = None
 
-    AnalysisBuilderData.getPlugins() { plugins => allPlugins = plugins} { error => window.alert("Unable to load plugins")}
     init
 
     def init {
         val nameDialog = new Modal("Please, enter the name of the new analysis", List(nameComponent))
-
-        AnalysisBuilderData.createEmptyAnalysis() {
-            id =>
-                analysisId = id
-                AnalysisBuilderData.lockAnalysis(id)
-                nameDialog.render()
-        } { error => window.alert("Unable to create analysis")}
+        nameDialog.render()
 
         nameDialog.saving += { e =>
             AnalysisBuilderData.setAnalysisName(analysisId, nameComponent.input.value) { success =>
+
+                AnalysisBuilderData.createEmptyAnalysis(nameComponent.input.value) {
+                    id =>
+                        analysisId = id
+                        AnalysisBuilderData.lockAnalysis(id)
+                        AnalysisBuilderData.getPlugins() { plugins => allPlugins = plugins}
+                        { error => window.alert("Unable to load plugins")}
+                } { error => window.alert("Unable to create analysis")}
+
                 name.input.value = nameComponent.input.value
                 nameDialog.destroy()
             } { error =>
                 nameComponent.setError("Unable to use this name")
             }
+            false
+        }
+
+        nameDialog.closing += { e =>
+            window.location.href = "/dashboard"
             false
         }
     }
@@ -79,13 +89,16 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
             window.clearTimeout(nameChangedTimeout.get)
         }
 
+        name.setIsActive()
         nameChangedTimeout = Some(window.setTimeout({ () =>
             AnalysisBuilderData.setAnalysisName(analysisId, name.input.value) { _ =>
+                name.setIsActive(false)
                 name.setOk()
             } { _ =>
+                name.setIsActive(false)
                 name.setError("Invalid name.")
             }
-        }, 300))
+        }, saveAsYouTypeTimeout))
 
         false
     }
@@ -193,7 +206,6 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
     }
 
     def onParameterValueChanged(args: EventArgs[ParameterValue]) {
-
         val parameterInfo = args.target
         val parameterId = parameterInfo.parameterId
 
@@ -201,14 +213,19 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
             window.clearTimeout(timeoutMap(parameterId))
         }
 
+        parameterInfo.control.setIsActive()
+
         val timeoutId = window.setTimeout(() => {
             AnalysisBuilderData
-                .setParameterValue(parameterInfo.pluginInstanceId, parameterInfo.name, parameterInfo.value) { _ =>
+                .setParameterValue(analysisId, parameterInfo.pluginInstanceId, parameterInfo.name, parameterInfo.value)
+            { _ =>
                 parameterInfo.control.setOk()
+                parameterInfo.control.setIsActive(false)
             } { _ =>
                 parameterInfo.control.setError("Wrong parameter value.")
+                parameterInfo.control.setIsActive(false)
             }
-        }, 300)
+        }, saveAsYouTypeTimeout)
 
         timeoutMap.put(parameterId, timeoutId)
     }

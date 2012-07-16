@@ -178,6 +178,13 @@ trait DataContextComponent
         with NamedEntityRepository[Analysis]
         with OptionallyOwnedEntityRepository[Analysis]
         with ShareableEntityRepository[Analysis]
+    {
+        /**
+          * Persists the given parameter value
+          * @param parameterValue
+          */
+        def persistParameterValue(parameterValue: ParameterValue[_])
+    }
 
     trait OntologyCustomizationRepository
         extends Repository[OntologyCustomization]

@@ -6,6 +6,7 @@ import cz.payola.data.squeryl.entities.analyses._
 import org.squeryl.PrimitiveTypeMode._
 import cz.payola.data.squeryl.entities._
 import cz.payola.data.squeryl.entities.plugins._
+import cz.payola.domain
 
 trait AnalysisRepositoryComponent extends TableRepositoryComponent
 {
@@ -27,6 +28,10 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
 
             // Return persisted analysis
             analysis
+        }
+
+        def persistParameterValue(parameterValue: domain.entities.plugins.ParameterValue[_]) {
+
         }
 
         def loadPluginInstances(analysis: Analysis) {
