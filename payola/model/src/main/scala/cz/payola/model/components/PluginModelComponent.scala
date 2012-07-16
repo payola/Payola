@@ -26,6 +26,7 @@ trait PluginModelComponent extends EntityModelComponent
             }else{
                 plugin.owner = Some(user)
                 user.addOwnedPlugin(plugin)
+
                 persist(plugin)
             }
 

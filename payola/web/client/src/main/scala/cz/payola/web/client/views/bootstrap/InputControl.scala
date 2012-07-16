@@ -3,7 +3,7 @@ package cz.payola.web.client.views.bootstrap
 import cz.payola.web.client.views._
 import cz.payola.web.client.views.elements._
 
-class InputControl(label: String, name: String, value: String, title: String) extends ComposedView
+class InputControl(val label: String, val name: String, value: String, title: String) extends ComposedView
 {
     val input = new Input(name, value, Some(title))
 

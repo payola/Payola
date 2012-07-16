@@ -13,11 +13,20 @@ object DataSource extends PayolaController with Secured
         Ok(views.html.datasource.create(user))
     }
 
+    def createNew() = authenticated { user: User =>
+
+
+
+        Redirect(routes.DataSource.list())
+    }
+
     def delete(id: String) = authenticated { user: User =>
         val ds: Option[cz.payola.domain.entities.plugins.DataSource] = Payola.model.dataSourceModel.getById(id)
         ds.map { d =>
             user.removeOwnedDataSource(d)
             Payola.model.dataSourceModel.remove(d)
+            Payola.model.userModel.persist(user)
+
             Redirect(routes.DataSource.list)
         }.getOrElse {
             NotFound(views.html.errors.err404("The data source does not exist."))
@@ -61,8 +70,25 @@ object DataSource extends PayolaController with Secured
     }
 
     def saveEditedDataSource(dataSource: plugins.DataSource, form: Map[String, Seq[String]]) = {
-        // The name
+        form foreach { case (key, values) =>
+            if (key == "__dataSourceName__") {
+                // The data source name itself
+                dataSource.name = values(0)
+            }else if (key == "__dataSourceDescription__") {
+                dataSource.description = values(0)
+            }else if (key != "__dataSourceIsPublic__") {
+                // A parameter value
+                println("Setting " + key + " to " + values(0))
 
+                val paramOption = dataSource.getParameterValue(key)
+                assert(paramOption.isDefined, key + " is not a defined parameter name")
+                dataSource.setParameter(paramOption.get, values(0))
+            }
+        }
+
+        dataSource.isPublic = form.get("__dataSourceIsPublic__").isDefined
+
+        Payola.model.dataSourceModel.persist(dataSource)
 
         Redirect(routes.DataSource.list())
     }
