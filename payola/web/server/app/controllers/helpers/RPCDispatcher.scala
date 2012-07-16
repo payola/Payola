@@ -4,6 +4,7 @@ import controllers.InvocationInfo
 import s2js.runtime.shared.rpc
 import cz.payola.domain.entities.User
 import scala.collection.mutable
+import cz.payola.domain.entities.User
 
 class RPCDispatcher(jsonSerializer: RPCSerializer)
 {
@@ -88,14 +89,12 @@ class RPCDispatcher(jsonSerializer: RPCSerializer)
 
         val paramsSize = params.size
 
-        val extraSpace = if (dto.user.isDefined) { 3 } else { 2 }
+        val extraSpace = if (dto.methodIsSecured) { 3 } else { 2 }
 
         // allocate an array of objects for the parameters (adding 2 for callbacks)
         val paramArray = constructParamArray(paramsSize, extraSpace, params, dto.methodToRun, paramTypes)
 
-        if (dto.user.isDefined){
-            paramArray.update(paramArray.size-3, user.get)
-        }
+        conditionallySetAuthorizationInfo(dto, paramArray, paramArray.size-extraSpace, user)
 
         val result = executeWithActors(paramArray, paramsSize, dto)
 
@@ -115,20 +114,28 @@ class RPCDispatcher(jsonSerializer: RPCSerializer)
 
         val dto = getReflectionObjects(objectName, methodName, user)
 
-        val extraSpace = if (dto.user.isDefined) { 1 } else { 0 }
+        val extraSpace = if (dto.methodIsSecured) { 1 } else { 0 }
 
         // update each parameter and replace it with its properly typed representation
         val paramArray = constructParamArray(params.size, extraSpace, params, dto.methodToRun, paramTypes)
 
-        if (dto.user.isDefined){
-            paramArray.update(paramArray.size-1, user.get)
-        }
+        conditionallySetAuthorizationInfo(dto, paramArray, paramArray.size-extraSpace, user)
 
         // invoke the remote method (!? for synchronous behaviour)
         val result = dto.methodToRun.invoke(dto.runnableObj, paramArray: _*)
 
         val serialized = jsonSerializer.serialize(result)
         serialized
+    }
+
+    private def conditionallySetAuthorizationInfo(dto: InvocationInfo, paramArray: Array[Object], paramIndex: Int, user: Option[User]) {
+        if (dto.methodIsSecured) {
+            if (dto.authorizationRequired) {
+                paramArray.update(paramIndex, user.get)
+            } else {
+                paramArray.update(paramIndex, user)
+            }
+        }
     }
 
     /**
@@ -172,32 +179,59 @@ class RPCDispatcher(jsonSerializer: RPCSerializer)
                 throw new Exception
             }
 
-            var authorized: Option[User] = None
-
             // "objectify" the desired mezhod to be able to invoke it later
             // this is a very ugly Java stuff, but Scala is not able to do this at the time
             val methodToRun: java.lang.reflect.Method = methodOption.getOrElse(null)
-            val methodAnnotations = methodToRun.getDeclaredAnnotations()
-            if (methodAnnotations.find{a => a.annotationType().getName().equals("s2js.compiler.secured")}.isDefined)
-            {
-                checkAuthorization(user)
-                authorized = user
-            }
-
             val runnableObj = clazz.getField("MODULE$").get(objectName)
-            val annotations = methodToRun.getAnnotations()
-            if (annotations.find{a => a.annotationType().getName().equals("s2js.compiler.secured")}.isDefined)
-            {
-                checkAuthorization(user)
-                authorized = user
+
+            var authorizedUser: Option[User] = None
+            val methodIsSecured = isSecuredMethod(clazz, methodToRun)
+            val authorizationRequired = isAuthorizationRequired(methodIsSecured, methodToRun)
+
+            if (methodIsSecured){
+                if (authorizationRequired)
+                {
+                    checkAuthorization(user)
+                }
+                authorizedUser = user
             }
 
-            // authorized is None only if the authorization is not needed, otherwise Some/Exception thrown
-            val dto = new InvocationInfo(methodToRun, clazz, runnableObj, authorized)
+            val dto = new InvocationInfo(methodToRun, clazz, runnableObj, methodIsSecured, authorizationRequired, authorizedUser)
             dto
         }catch{
             case e: java.lang.ClassNotFoundException => throw new rpc.Exception("Invalid remote object name.")
         }
+    }
+
+    def lastParameterIsOfTypeUser(methodToRun: java.lang.reflect.Method) : Boolean = {
+        methodToRun.getParameterTypes.find{_.getName.equals("cz.payola.domain.entities.User")}.isDefined
+    }
+
+    def isAuthorizationRequired(methodIsSecured: Boolean, methodToRun: java.lang.reflect.Method) : Boolean = {
+        if (!methodIsSecured){
+            false
+        } else {
+            lastParameterIsOfTypeUser(methodToRun)
+        }
+    }
+
+    def isAuthorizationAnnotationPresent(annotations: Array[java.lang.annotation.Annotation], authorizationClassName: String) : Boolean = {
+        return annotations.find{a => a.annotationType().getName().equals(authorizationClassName)}.isDefined
+    }
+
+    def isSecuredMethod(clazz: java.lang.Class[_], methodToRun: java.lang.reflect.Method) : Boolean = {
+        val classAnotations = clazz.getAnnotations
+
+        if (isAuthorizationAnnotationPresent(classAnotations, "s2js.compiler.secured")){
+            true
+        } else {
+            val methodAnnotations = methodToRun.getAnnotations()
+            if (isAuthorizationAnnotationPresent(methodAnnotations,"s2js.compiler.secured")){
+                true
+            }
+        }
+
+        false
     }
 
     def checkAuthorization(user: Option[User]) = {
