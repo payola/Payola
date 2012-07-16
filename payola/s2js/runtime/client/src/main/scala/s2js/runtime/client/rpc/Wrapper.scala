@@ -21,7 +21,7 @@ private object Wrapper
     def callAsync(procedureName: String, parameters: ArrayBuffer[Any], parameterTypes: ArrayBuffer[String],
         successCallback: (Any => Unit), exceptionCallback: (Throwable => Unit)) {
 
-        val request = createXmlHttpRequest("/RPC/async", isAsync = false)
+        val request = createXmlHttpRequest("/RPC/async", isAsync = true)
         request.onreadystatechange = () => {
             if (request.readyState == 4) {
                 processRequestResult(request, successCallback, exceptionCallback)

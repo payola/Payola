@@ -1,23 +1,34 @@
 package cz.payola.web.client.presenters
 
 import cz.payola.web.shared.DataSourceBrowser
+import s2js.adapters.js.browser.window
 
 class DataSourcePresenter(viewParentElementId: String, val dataSourceId: String, val initialVertexUri: String = "")
     extends GraphPresenter(viewParentElementId)
 {
-    view.vertexBrowsing += { e =>
-        val graph = DataSourceBrowser.getNeighbourhood(dataSourceId, e.vertex.uri)
-        view.updateGraph(graph)
-    }
+    view.vertexBrowsing += { e => fetchNeighbourhood(e.vertex.uri)}
 
     override def initialize() {
         super.initialize()
 
-        val initialGraph = if (initialVertexUri == "") {
-            DataSourceBrowser.getInitialGraph(dataSourceId)
+        if (initialVertexUri == "") {
+            DataSourceBrowser.getInitialGraph(dataSourceId)(view.updateGraph(_))(graphFetchErrorHandler)
         } else {
-            DataSourceBrowser.getNeighbourhood(dataSourceId, initialVertexUri)
+            fetchNeighbourhood(initialVertexUri)
         }
-        view.updateGraph(initialGraph)
+    }
+
+    private def fetchNeighbourhood(uri: String) {
+        view.block()
+        DataSourceBrowser.getNeighbourhood(dataSourceId, uri) { graph =>
+            view.updateGraph(graph)
+            view.unblock()
+        }(graphFetchErrorHandler)
+    }
+
+    private def graphFetchErrorHandler(t: Throwable) {
+        view.updateGraph(None)
+        view.unblock()
+        // TODO
     }
 }

@@ -5,6 +5,7 @@ import s2js.adapters.js.dom
 import s2js.adapters.js.browser.document
 import cz.payola.web.client.events.BrowserEvent
 import cz.payola.web.client.View
+import s2js.compiler.javascript
 
 abstract class ElementView[A <: dom.Element](domElementName: String, val innerViews: Seq[View], cssClass: String)
     extends View
@@ -73,4 +74,18 @@ abstract class ElementView[A <: dom.Element](domElementName: String, val innerVi
     def id_=(value: String) {
         setAttribute("id", value)
     }
+
+    @javascript("""
+        $(self.domElement).block({
+            message: null,
+            fadeIn: 100,
+            overlayCSS: {
+                backgroundColor: '#FFF',
+                opacity: 0.6
+            }
+        });""")
+    def block() { }
+
+    @javascript("$(self.domElement).unblock({ fadeOut: 0 });")
+    def unblock() { }
 }
