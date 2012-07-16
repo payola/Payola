@@ -45,7 +45,7 @@ trait TableRepositoryComponent
 
         /**
           * Selects all entities that pass the specified entity filter.
-          * @param entityFilter A filter that excludes entites from the result.
+          * @param entityFilter A filter that excludes entities from the result.
           * @return The selected entities.
           */
         private[squeryl] def selectWhere(entityFilter: A => LogicalBoolean, pagination: Option[PaginationInfo] = None):
@@ -96,11 +96,7 @@ trait TableRepositoryComponent
           * @tparam C Type of the entity.
           */
         protected def persist[C <: PersistableEntity](entity: C, table: Table[C]) {
-            if (table.where(_.id === entity.id).isEmpty) {
-                table.insert(entity)
-            } else {
-                table.update(entity)
-            }
+            schema.persist(entity, table)
         }
 
         protected def wrapInTransaction[C](body: => C) = {

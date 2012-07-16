@@ -30,42 +30,9 @@ class PluginInstance(
     var _desc: String,
     var _isEdit: Boolean)(implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.plugins.PluginInstance(p, paramValues)
-    with PersistableEntity with DescribedEntity
+    with PersistableEntity with DescribedEntity with PluginInstanceLike
 {
     var pluginId: String = Option(p).map(_.id).getOrElse(null)
 
     var analysisId: String = null
-
-    // Load value from DB
-    isEditable = _isEdit
-
-    override def plugin = {
-        if (_plugin == null) {
-            wrapInTransaction{
-                context.pluginInstanceRepository.loadPluginForPluginInstance(this)
-            }
-        }
-
-        _plugin
-    }
-
-    override def parameterValues = {
-        // There is really need to check plugin -> loading plugins ensures mapping parameter values to parameters
-        // (otherwise NullPointerException is thrown when accessing parameterValues.parameter.something)
-        if (_plugin == null) {
-            wrapInTransaction{
-                context.pluginInstanceRepository.loadPluginForPluginInstance(this)
-            }
-        }
-
-        super.parameterValues
-    }
-
-    def parameterValues_=(value: collection.immutable.Seq[PluginType#ParameterValueType]) {
-        _parameterValues = value
-    }
-
-    def plugin_=(value: PluginType) {
-        _plugin = value
-    }
 }

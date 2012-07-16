@@ -295,26 +295,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
                 assert(pi.parameterValues.find(_.id == paramValue.id).get.parameter.id == paramValue.parameter.id)
                 assert(pi.parameterValues.find(_.id == paramValue.id).get.value == paramValue.value)
             }
-        }    
-
-        // Assert eagerly-loaded relations (by repository) to plugins and parameters
-        for (pi <- pluginInstances) {
-            val pi2 = pluginInstanceRepository.getById(pi.id)
-                assert(pi2.isDefined)
-                assert(pi2.get.id == pi.id)
-                assert(pi2.get.parameterValues.size == pi.parameterValues.size)
-
-            // assert all parameters have proper IDs
-            for (paramValue <- pi2.get.parameterValues) {
-                assert(pi.parameterValues.find(_.id == paramValue.id).get.parameter.id == paramValue.parameter.id)
-                assert(pi.parameterValues.find(_.id == paramValue.id).get.value == paramValue.value)
-            }
-                assert(pi2.get.plugin.id == pi.plugin.id)
-                assert(pi2.get.isEditable == pi.isEditable)
-                assert(pi2.get.description == pi.description)
         }
-
-        assert(pluginInstanceRepository.getById(citiesFetcher.id).get.description == citiesFetcher.description)
     }
 
     "DataSources" should "be updated/stored by DataSourceRepository" in {
@@ -435,7 +416,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     }
 
     "Customizations" should "be persisted" in {
-        //TODO: schema.wrapInTransaction { persistCustomizations }
+        schema.wrapInTransaction { persistCustomizations }
     }
 
     private def persistCustomizations {
@@ -492,14 +473,12 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
 
     private def testCascadeDeletes {
         val analysisCount = analysisRepository.getAll().size
-        val pluginInstancesCount = pluginInstanceRepository.getAll().size
         val pluginsCount = pluginRepository.getAll().size
 
         // Create another analysis in DB
         persistAnalyses
 
         assert(analysisRepository.getCount == analysisCount + 1)
-        assert(pluginInstanceRepository.getCount == pluginInstancesCount * 2)
         assert(pluginRepository.getCount == pluginsCount)
 
         // Remove one analysis
@@ -507,7 +486,6 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
 
         // One analysis and half of plugin instances are gone
         assert(analysisRepository.getCount == analysisCount)
-        assert(pluginInstanceRepository.getCount == pluginInstancesCount)
         assert(pluginRepository.getCount == pluginsCount)
 
         val analysis = analysisRepository.getAll()(0)
@@ -519,7 +497,6 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
 
         // Only (empty) analysis is left
         assert(analysisRepository.getCount == analysisCount)
-        assert(pluginInstanceRepository.getCount == 0)
         assert(pluginRepository.getCount == 0)
 
         // Assert nothing left for analysis

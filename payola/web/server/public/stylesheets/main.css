@@ -58,3 +58,21 @@ label{
     padding-left: 30px;
     padding-bottom: 15px;
 }
+
+input.active {
+    background: #fff url('spinner.gif') no-repeat 100%;
+    background: url('spinner.gif') no-repeat 100%, -webkit-gradient(linear, left bottom, left top, color-stop(0.85, white), color-stop(0.99, #eeeeee));
+    background: url('spinner.gif') no-repeat 100%, -webkit-linear-gradient(center bottom, white 85%, #eeeeee 99%);
+    background: url('spinner.gif') no-repeat 100%, -moz-linear-gradient(center bottom, white 85%, #eeeeee 99%);
+    background: url('spinner.gif') no-repeat 100%, -o-linear-gradient(bottom, white 85%, #eeeeee 99%);
+    background: url('spinner.gif') no-repeat 100%, -ms-linear-gradient(top, #ffffff 85%, #eeeeee 99%);
+    background: url('spinner.gif') no-repeat 100%, linear-gradient(top, #ffffff 85%, #eeeeee 99%);
+    background-position: 98%;
+}
+
+.dashboard h2{color: black;}
+
+.icon-rdf{
+    background-image: url(rdf-white.png) !important;
+    background-position: 0px !important;
+}

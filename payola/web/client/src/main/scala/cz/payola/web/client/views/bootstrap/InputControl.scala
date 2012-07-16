@@ -30,4 +30,6 @@ class InputControl(val label: String, val name: String, value: String, title: St
         controlGroup.removeCssClass("error")
         controlGroup.addCssClass("success")
     }
+
+    def setIsActive(isActive: Boolean = true) = input.setIsActive(isActive)
 }

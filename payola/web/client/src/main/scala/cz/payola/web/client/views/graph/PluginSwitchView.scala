@@ -13,8 +13,6 @@ class PluginSwitchView(val plugins: Seq[PluginView]) extends GraphView with Comp
 
     private val pluginSpace = new Div()
 
-    private val pluginSpaceElement = pluginSpace.domElement
-
     // Re-trigger all events when the corresponding events are triggered in the plugins.
     plugins.foreach { plugin =>
         plugin.vertexSelected += { e => vertexSelected.trigger(new VertexEventArgs[this.type](this, e.vertex)) }
@@ -22,11 +20,19 @@ class PluginSwitchView(val plugins: Seq[PluginView]) extends GraphView with Comp
     }
 
     // Display the first plugin.
-    currentPlugin.render(pluginSpaceElement)
+    currentPlugin.render(pluginSpace.domElement)
 
     def updateGraph(graph: Option[Graph]) {
         currentGraph = graph
         currentPlugin.updateGraph(graph)
+    }
+
+    def block() {
+        pluginSpace.block()
+    }
+
+    def unblock() {
+        pluginSpace.unblock()
     }
 
     def createSubViews = {
@@ -57,7 +63,7 @@ class PluginSwitchView(val plugins: Seq[PluginView]) extends GraphView with Comp
 
             // Switch to the new plugin.
             currentPlugin = plugin
-            currentPlugin.render(pluginSpaceElement)
+            currentPlugin.render(pluginSpace.domElement)
             currentPlugin.updateGraph(currentGraph)
         }
     }

@@ -3,9 +3,8 @@
 @import cz.payola.web.shared._
 @import tags._
 
-@detailsLinkForID(id: String) = @{
-
-    <a href={routes.DataSource.detail(id).toString} class="btn btn-info"><i class="icon-info-sign icon-white"></i> Details</a>
+@detailsLinkForID(id: String, name: String) = @{
+    <a href={routes.DataSource.detail(id).toString}>{name}</a>
 }
 
 @editLinkForID(id: String) = @{
@@ -16,13 +15,14 @@
     new scala.xml.NodeBuffer() += <td>Name</td>
 }, { e: cz.payola.domain.Entity =>
     <td>{
-        e.asInstanceOf[cz.payola.domain.entities.plugins.DataSource].name
+        detailsLinkForID(e.id, e.asInstanceOf[cz.payola.domain.entities.plugins.DataSource].name)
     }</td>
     <td>{
-        if(e.asInstanceOf[cz.payola.domain.entities.plugins.DataSource].isEditable){ editLinkForID(e.id) }
-    }</td>
-    <td>{
-        detailsLinkForID(e.id)
+        if (e.asInstanceOf[cz.payola.domain.entities.plugins.DataSource].isEditable){
+            editLinkForID(e.id)
+        }else{
+            <span class="badge">Not editable</span>
+        }
     }</td>
 },
 routes.DataSource.create())
