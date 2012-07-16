@@ -9,7 +9,10 @@ trait AnalysisModelComponent extends EntityModelComponent
 {
     self: DataContextComponent =>
 
-    lazy val analysisModel = new ShareableEntityModel[Analysis](analysisRepository, classOf[AccessAnalysisPrivilege])
+    lazy val analysisModel = new ShareableEntityModel[Analysis](
+        analysisRepository,
+        classOf[AccessAnalysisPrivilege],
+        (user: User) => user.ownedAnalyses)
     {
         def addBinding(analysisId: String, sourceId: String, targetId: String, inputIndex: Int) = {
             val source = pluginInstanceRepository.getById(sourceId)

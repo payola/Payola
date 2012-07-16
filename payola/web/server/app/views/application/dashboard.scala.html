@@ -1,5 +1,5 @@
 @(user: Option[cz.payola.domain.entities.User], topAnalyses: Seq[cz.payola.domain.entities.Analysis],
-    topDataSources: Seq[cz.payola.domain.entities.plugins.PluginInstance]
+    topDataSources: Seq[cz.payola.domain.entities.plugins.DataSource]
 )
 
 @main(user, "Dashboard") {
@@ -16,7 +16,7 @@
         <div class="well">
             <div class="row-fluid">
                 <div class="span6">
-                    <h2>Top analyses</h2>
+                    <h2>Analyses</h2>
                     @if(topAnalyses.size == 0){
                         <p class="alert alert-danger">No analyses.</p>
                     }else{
@@ -29,11 +29,11 @@
                     <p><a class="btn" href="#"><i class="icon-list"></i> List all &raquo;</a></p>
                 </div><!--/span-->
                 <div class="span6">
-                    <h2>Top data sources</h2>
+                    <h2>Data sources</h2>
                     @if(topDataSources.size > 0){
                         <ul>
                             @topDataSources.map{d =>
-                                <li><a href="@routes.DataSource.detail(d.id)">@d.getParameter("EndpointURL")</a></li>
+                                <li><a href="@routes.DataSource.detail(d.id)">@d.name</a></li>
                             }
                         </ul>
                     }else{
