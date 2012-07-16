@@ -9,7 +9,7 @@ trait ComposedView extends View
 
     def createSubViews: Seq[View]
 
-    def subComponents: Seq[View] = {
+    def subViews: Seq[View] = {
         if (_subViews.isEmpty) {
             _subViews = Some(createSubViews)
         }
@@ -17,10 +17,10 @@ trait ComposedView extends View
     }
 
     def render(parent: dom.Element) {
-        subComponents.foreach(_.render(parent))
+        subViews.foreach(_.render(parent))
     }
 
     def destroy() {
-        subComponents.foreach(_.destroy())
+        subViews.foreach(_.destroy())
     }
 }
