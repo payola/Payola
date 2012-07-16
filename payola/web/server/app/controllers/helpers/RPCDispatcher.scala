@@ -228,10 +228,10 @@ class RPCDispatcher(jsonSerializer: RPCSerializer)
             val methodAnnotations = methodToRun.getAnnotations()
             if (isAuthorizationAnnotationPresent(methodAnnotations,"s2js.compiler.secured")){
                 true
+            }else{
+                false
             }
         }
-
-        false
     }
 
     def checkAuthorization(user: Option[User]) = {
