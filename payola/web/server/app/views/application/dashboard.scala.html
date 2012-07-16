@@ -33,7 +33,7 @@
                     @if(topDataSources.size > 0){
                         <ul>
                             @topDataSources.map{d =>
-                                <li><a href="@routes.DataSource.detail(d.id)">@d.name</a></li>
+                                <li><a href="@routes.DataSource.detail(d.id, None)">@d.name</a></li>
                             }
                         </ul>
                     }else{

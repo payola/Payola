@@ -7,6 +7,8 @@ trait ComposedView extends View
 {
     private var _subViews: Option[Seq[View]] = None
 
+    private var parentElement: Option[dom.Element] = None
+
     def createSubViews: Seq[View]
 
     def subViews: Seq[View] = {
@@ -17,10 +19,20 @@ trait ComposedView extends View
     }
 
     def render(parent: dom.Element) {
+        parentElement = Some(parent)
         subViews.foreach(_.render(parent))
     }
 
     def destroy() {
         subViews.foreach(_.destroy())
+        parentElement = None
+    }
+
+    def block() {
+        parentElement.foreach(blockElement(_))
+    }
+
+    def unblock() {
+        parentElement.foreach(unblockElement(_))
     }
 }

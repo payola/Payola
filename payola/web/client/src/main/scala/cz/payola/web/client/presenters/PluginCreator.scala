@@ -5,7 +5,7 @@ import s2js.compiler.javascript
 import s2js.adapters.js.browser._
 import cz.payola.web.shared.PluginManager
 import cz.payola.web.client.View
-import cz.payola.web.client.views.elements.Button
+import cz.payola.web.client.views.elements._
 
 // Can't pass the editor's pre ID as we're using it in the native JS, which needs to
 // be compile-time ready
@@ -15,7 +15,7 @@ class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) e
     createEditor()
 
     val buttonContainer = document.getElementById(buttonContainerID)
-    val submitButton = new Button("Create Plugin")
+    val submitButton = new Button(new Text("Create Plugin"))
     submitButton.mouseClicked += { event =>
         val code = getCode
         if (code == "") {
@@ -65,6 +65,14 @@ class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) e
     }
 
     def destroy() {
+        // TODO
+    }
+
+    def block() {
+        // TODO
+    }
+
+    def unblock() {
         // TODO
     }
 }
