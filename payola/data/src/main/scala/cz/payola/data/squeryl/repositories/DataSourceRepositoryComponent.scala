@@ -1,10 +1,10 @@
 package cz.payola.data.squeryl.repositories
 
 import cz.payola.data.squeryl._
-import cz.payola.data.squeryl.entities.User
 import cz.payola.data.squeryl.entities.plugins.parameters._
 import cz.payola.data.squeryl.entities.plugins._
 import org.squeryl.PrimitiveTypeMode._
+import cz.payola.data.squeryl.entities._
 
 trait DataSourceRepositoryComponent extends TableRepositoryComponent
 {
@@ -18,63 +18,41 @@ trait DataSourceRepositoryComponent extends TableRepositoryComponent
         with NamedEntityTableRepository[DataSource]
         with OptionallyOwnedEntityTableRepository[DataSource]
         with ShareableEntityTableRepository[DataSource]
+        with PluginInstanceTableRepository[DataSource]
     {
-        override def persist(entity: AnyRef): DataSource = wrapInTransaction {
-            // First persist data source then its parameter values
-            val dataSource = super.persist(entity)
+        protected val pluginInstanceLikeTable = schema.dataSources
+        protected val pluginInstanceLikeEntityConverter = DataSource
 
-            dataSource.parameterValues.foreach{
-                case paramValue: BooleanParameterValue => context.schema.associate(
-                    paramValue, schema.booleanParameterValuesOfDataSources.left(dataSource))
-                case paramValue: FloatParameterValue => context.schema.associate(
-                    paramValue, schema.floatParameterValuesOfDataSources.left(dataSource))
-                case paramValue: IntParameterValue => context.schema.associate(
-                    paramValue, schema.intParameterValuesOfDataSources.left(dataSource))
-                case paramValue: StringParameterValue => context.schema.associate(
-                    paramValue, schema.stringParameterValuesOfDataSources.left(dataSource))
-            }
+        val booleanParameterValuesRelation = schema.booleanParameterValuesOfDataSources
+        val floatParameterValuesRelation = schema.floatParameterValuesOfDataSources
+        val intParameterValuesRelation = schema.intParameterValuesOfDataSources
+        val stringParameterValuesRelation = schema.stringParameterValuesOfDataSources
 
-            dataSource
+        protected def getPluginInstanceLikeId(parameterValue: Option[ParameterValue[_]]) = {
+            parameterValue.flatMap(_.dataSourceId)
         }
 
-        def persistParameterValue(parameterValue: AnyRef){
-            ParameterValue(parameterValue) match{
-                case b: BooleanParameterValue => persist(b, schema.booleanParameterValues)
-                case f: FloatParameterValue => persist(f, schema.floatParameterValues)
-                case i: IntParameterValue => persist(i, schema.intParameterValues)
-                case s: StringParameterValue => persist(s, schema.stringParameterValues)
-            }
+        override def persist(entity: AnyRef) = {
+            val ds = DataSource(entity)
+
+            persistPluginInstance(ds)
+
+            ds
         }
 
-        def loadPluginForDataSource(dataSource: DataSource) {
+        def loadPlugin(dataSource: DataSource) {
             _loadDataSource(dataSource)
         }
 
-        def loadParameterValuesForDataSource(dataSource: DataSource) {
+        def loadParameterValues(dataSource: DataSource) {
             _loadDataSource(dataSource)
         }
 
         private def _loadDataSource(dataSource: DataSource) {
-            val query =
-                join(schema.dataSources, schema.booleanParameterValues.leftOuter,
-                    schema.floatParameterValues.leftOuter, schema.intParameterValues.leftOuter,
-                    schema.stringParameterValues.leftOuter)((ds, bPar, fPar, iPar, sPar) =>
-                        where(ds.id === dataSource.id)
-                        select(ds, bPar, fPar, iPar, sPar)
-                        on(bPar.flatMap(_.dataSourceId) === Some(ds.id),
-                            fPar.flatMap(_.dataSourceId) === Some(ds.id),
-                            iPar.flatMap(_.dataSourceId) === Some(ds.id),
-                            sPar.flatMap(_.dataSourceId) === Some(ds.id))
-                ).toList
-
-            query.groupBy(_._1).foreach { r =>
-                dataSource.parameterValues = r._2.flatMap(c => Seq(c._2, c._3, c._4, c._5).flatten).toList
-                dataSource.plugin = pluginRepository.getById(dataSource.pluginId).get
-            }
-
-            dataSource.parameterValues.foreach{ v =>
-                val value = v.asInstanceOf[ParameterValue[_]]
-                value.parameter = dataSource.plugin.parameters.find(_.id == value.parameterId).get
+            // Load DataSource with plugin and its plugin and parameter values (all mapped together)
+            loadPluginInstancesByFilter(ds => ds.id === dataSource.id).headOption.map{ ds =>
+                dataSource.plugin = ds.asInstanceOf[DataSource].plugin
+                dataSource.parameterValues = ds.asInstanceOf[DataSource].parameterValues
             }
         }
     }
