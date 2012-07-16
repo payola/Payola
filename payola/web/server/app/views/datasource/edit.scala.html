@@ -3,59 +3,40 @@
 @main(Some(user), "Data source :: Payola!") {
 
 <div class="container-fluid">
+
+    <!-- TODO - some validation before form posting? -->
+
     <h1>Edit data source: @dataSource.name</h1>
 
     <div class="row-fluid">
-        <a href="@routes.DataSource.delete(dataSource.id)" onclick="return confirm('Are you sure?');" class="btn btn-danger span2"><i class="icon-remove-circle icon-white"></i>Delete data source</a>
+        <a href="@routes.DataSource.list()" class="btn btn-primary span2"><i class="icon-list icon-white"></i> Back to listing</a>
+        <a href="@routes.DataSource.delete(dataSource.id)" onclick="return confirm('Are you sure?');" class="btn btn-danger span2"><i class="icon-remove-circle icon-white"></i> Delete data source</a>
     </div>
 
-    <form class="well">
+    <form class="well" action="@routes.DataSource.saveEdited(dataSource.id)" method="post">
         <div>Data source name:
-            <input type="text" class="span3" value="@dataSource.name">
+            <!-- setting the name to __dataSourceName__ so that it won't colide with any data source parameter values. -->
+            <input type="text" id="data_source_name_input" class="span3" name="__dataSourceName__" value="@dataSource.name">
         </div>
 
 
-        <div>Data fetcher:
-            <select class="span3" id="fetchers">
-                <option>@dataSource.plugin.name</option>
-                <option>----</option>
-                @availableDataFetchers.map{ fetcher =>
-                    <option>@fetcher.name</option>
-                }
-            </select>
+        <div style="padding-bottom: 20px;">Data fetcher: <span style="padding-left: 30px;">@dataSource.plugin.name</span>
         </div>
 
         <div>
             <table id="options">
                 @dataSource.parameterValues.map{ paramValue =>
                     <tr>
-                        <td>@{
-                            val paramName = paramValue.parameter.name
-                            if (paramName == null){
-                                "No name"
-                            }else{
-                                paramName
-                            }
-                        }</td>
-                        <td>@{paramValue.value}</td>
+                        <td>@paramValue.parameter.name</td>
+                        <td style="padding-left: 40px;"><input name={paramValue.parameter.name} type="text" value=@{paramValue.value.toString} /></td>
                     </tr>
                 }
             </table>
 
         </div>
 
+        <input type="submit" class="btn btn-primary span2" value="Save" onclick="return $('#data_source_name_input').textContent != '')"  />
     </form>
 
-    <div class="row-fluid" id="placeholder" style="position: relative;">
-
-
-    </div>
 </div><!--/.fluid-container-->
-
-
-<script src="/javaScriptPackage/cz.payola.web.client.presenters.DataSourceEditor" type="text/javascript"></script>
-<script type="text/javascript">
-    new cz.payola.web.client.presenters.DataSourceEditor("placeholder", "@dataSource.id");
-</script>
-
 }

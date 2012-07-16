@@ -1,10 +1,11 @@
 package controllers
 
 import helpers.Secured
-import cz.payola.domain.entities.User
-import play.api.mvc.Request
+import cz.payola.domain.entities._
+import play.api.mvc._
 import cz.payola.web.shared.Payola
 import cz.payola.domain.entities.plugins.concrete.DataFetcher
+import scala.Some
 
 object DataSource extends PayolaController with Secured
 {
@@ -42,6 +43,28 @@ object DataSource extends PayolaController with Secured
 
     def list() = authenticated { user: User =>
         Ok(views.html.datasource.list(user))
+    }
+
+    def saveEdited(id: String) = authenticatedWithRequest { (user, request) =>
+        // Before touching anything, get the data source
+        val dataSourceOption = Payola.model.dataSourceModel.getAccessibleToUserById(Some(user), id)
+        if (dataSourceOption.isEmpty){
+            NotFound(views.html.errors.err404("The data source does not exist."))
+        }else{
+            val dataSource = dataSourceOption.get
+
+            assert(request.body.asFormUrlEncoded.isDefined, "Wrong POST content. Content isn't a URL-encoded form.")
+            val form = request.body.asFormUrlEncoded.get
+
+            saveEditedDataSource(dataSource, form)
+        }
+    }
+
+    def saveEditedDataSource(dataSource: plugins.DataSource, form: Map[String, Seq[String]]) = {
+        // The name
+
+
+        Redirect(routes.DataSource.list())
     }
 
 
