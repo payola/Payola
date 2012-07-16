@@ -36,16 +36,14 @@ class DataSource(
     (implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.plugins.DataSource(n, o, df, paramValues)
     with PersistableEntity with OptionallyOwnedEntity with ShareableEntity with NamedEntity with DescribedEntity
+    with PluginInstanceLike
 {
     var pluginId: String = Option(df).map(_.id).getOrElse(null)
-
-    // Restore value from Db
-    isEditable = _isEdit
     
     override def plugin = {
         if (_plugin == null){
             wrapInTransaction {
-                context.dataSourceRepository.loadPluginForDataSource(this)
+                context.dataSourceRepository.loadPlugin(this)
             }
         }
 
@@ -55,18 +53,10 @@ class DataSource(
     override def parameterValues: collection.immutable.Seq[PluginType#ParameterValueType] = {
         if (_parameterValues == null) {
             wrapInTransaction {
-                context.dataSourceRepository.loadParameterValuesForDataSource(this)
+                context.dataSourceRepository.loadParameterValues(this)
             }
         }
 
         _parameterValues
-    }
-
-    def parameterValues_=(value: collection.immutable.Seq[PluginType#ParameterValueType]) {
-        _parameterValues = value
-    }
-
-    def plugin_=(value: PluginType) {
-        _plugin = value
     }
 }

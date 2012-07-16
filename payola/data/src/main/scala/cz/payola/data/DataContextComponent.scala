@@ -21,10 +21,6 @@ trait DataContextComponent
 
     val pluginRepository: PluginRepository
 
-    val pluginInstanceRepository: Repository[PluginInstance]
-
-    val pluginInstanceBindingRepository: Repository[PluginInstanceBinding]
-
     val dataSourceRepository: DataSourceRepository
 
     val ontologyCustomizationRepository: OntologyCustomizationRepository
@@ -35,8 +31,6 @@ trait DataContextComponent
         classOf[Privilege[_]] -> privilegeRepository,
         classOf[Analysis] -> analysisRepository,
         classOf[Plugin] -> pluginRepository,
-        classOf[PluginInstance] -> pluginInstanceRepository,
-        classOf[PluginInstanceBinding] -> pluginInstanceBindingRepository,
         classOf[DataSource] -> dataSourceRepository,
         classOf[OntologyCustomization] -> ontologyCustomizationRepository
     ))
@@ -178,6 +172,19 @@ trait DataContextComponent
         with NamedEntityRepository[Analysis]
         with OptionallyOwnedEntityRepository[Analysis]
         with ShareableEntityRepository[Analysis]
+    {
+        /**
+          * Persists specified PluginInstance of Analysis
+          * @param pluginInstance PluginInstance to persist
+          */
+        def persistPluginInstance(pluginInstance: PluginInstance)
+
+        /**
+          * Persists ParameterValue of PluginInstance of Analysis
+          * @param parameterValue ParameterValue to persist
+          */
+        def persistParameterValue(parameterValue: ParameterValue[_])
+    }
 
     trait OntologyCustomizationRepository
         extends Repository[OntologyCustomization]
@@ -196,6 +203,19 @@ trait DataContextComponent
         with NamedEntityRepository[DataSource]
         with OptionallyOwnedEntityRepository[DataSource]
         with ShareableEntityRepository[DataSource]
+    {
+        /**
+          * Persists specified PluginInstance of Analysis
+          * @param pluginInstance PluginInstance to persist
+          */
+        def persistPluginInstance(pluginInstance: PluginInstance)
+
+        /**
+          * Persists ParameterValue of PluginInstance of Analysis
+          * @param parameterValue ParameterValue to persist
+          */
+        def persistParameterValue(parameterValue: ParameterValue[_])
+    }
 
     /**
       * A registry providing repositories by entity classes or entity class names.

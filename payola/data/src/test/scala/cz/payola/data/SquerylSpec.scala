@@ -297,7 +297,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
             }
         }    
 
-        // Assert eagerly-loaded relations (by repository) to plugins and parameters
+        /* Assert eagerly-loaded relations (by repository) to plugins and parameters
         for (pi <- pluginInstances) {
             val pi2 = pluginInstanceRepository.getById(pi.id)
                 assert(pi2.isDefined)
@@ -315,6 +315,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         }
 
         assert(pluginInstanceRepository.getById(citiesFetcher.id).get.description == citiesFetcher.description)
+        */
     }
 
     "DataSources" should "be updated/stored by DataSourceRepository" in {
@@ -492,14 +493,12 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
 
     private def testCascadeDeletes {
         val analysisCount = analysisRepository.getAll().size
-        val pluginInstancesCount = pluginInstanceRepository.getAll().size
         val pluginsCount = pluginRepository.getAll().size
 
         // Create another analysis in DB
         persistAnalyses
 
         assert(analysisRepository.getCount == analysisCount + 1)
-        assert(pluginInstanceRepository.getCount == pluginInstancesCount * 2)
         assert(pluginRepository.getCount == pluginsCount)
 
         // Remove one analysis
@@ -507,7 +506,6 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
 
         // One analysis and half of plugin instances are gone
         assert(analysisRepository.getCount == analysisCount)
-        assert(pluginInstanceRepository.getCount == pluginInstancesCount)
         assert(pluginRepository.getCount == pluginsCount)
 
         val analysis = analysisRepository.getAll()(0)
@@ -519,7 +517,6 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
 
         // Only (empty) analysis is left
         assert(analysisRepository.getCount == analysisCount)
-        assert(pluginInstanceRepository.getCount == 0)
         assert(pluginRepository.getCount == 0)
 
         // Assert nothing left for analysis

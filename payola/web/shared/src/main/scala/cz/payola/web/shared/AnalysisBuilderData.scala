@@ -34,12 +34,12 @@ import cz.payola.domain.entities.User
 
     @async def createPluginInstance(pluginId: String, analysisId: String)(successCallback: (String => Unit))
         (failCallback: (Throwable => Unit)) {
-        successCallback(Payola.model.pluginInstanceModel.create(pluginId, analysisId).id)
+        successCallback(Payola.model.analysisModel.createPluginInstance(pluginId, analysisId).id)
     }
 
-    @async def setParameterValue(pluginInstanceId: String, parameterName: String, value: String)
+    @async def setParameterValue(analysisId: String, pluginInstanceId: String, parameterName: String, value: String)
         (successCallback: (Boolean => Unit))(failCallback: (Throwable => Unit)) {
-        Payola.model.pluginInstanceModel.setParameterValue(pluginInstanceId, parameterName, value)
+        Payola.model.analysisModel.setParameterValue(analysisId, pluginInstanceId, parameterName, value)
         successCallback(true)
     }
 
@@ -50,11 +50,9 @@ import cz.payola.domain.entities.User
         successCallback(true)
     }
 
-    @async def deletePluginInstance(pluginInstanceId: String)(successCallback: (Boolean => Unit))
+    @async def deletePluginInstance(analysisId: String, pluginInstanceId: String)(successCallback: (Boolean => Unit))
         (failCallback: (Throwable => Unit)) {
-        Payola.model.pluginInstanceModel.getById(pluginInstanceId).map(Payola.model.pluginInstanceModel.remove(_)).getOrElse{
-            failCallback(new Exception("Unknown plugin instance."))
-        }
+        Payola.model.analysisModel.removePluginInstanceById(analysisId, pluginInstanceId)
         successCallback(true)
     }
 

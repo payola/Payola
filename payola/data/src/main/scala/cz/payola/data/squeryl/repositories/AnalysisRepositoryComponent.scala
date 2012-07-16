@@ -11,12 +11,28 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
 
+    private lazy val pluginInstanceBindingRepository = new LazyTableRepository[PluginInstanceBinding](
+        schema.pluginInstanceBindings, PluginInstanceBinding)
+
     lazy val analysisRepository = new TableRepository[Analysis, (Analysis, Option[User])](schema.analyses, Analysis)
         with AnalysisRepository
         with NamedEntityTableRepository[Analysis]
         with OptionallyOwnedEntityTableRepository[Analysis]
         with ShareableEntityTableRepository[Analysis]
+        with PluginInstanceTableRepository[PluginInstance]
     {
+        protected val pluginInstanceLikeTable = schema.pluginInstances
+        protected val pluginInstanceLikeEntityConverter = PluginInstance
+
+        val booleanParameterValuesRelation = schema.booleanParameterValuesOfPluginInstances
+        val floatParameterValuesRelation = schema.floatParameterValuesOfPluginInstances
+        val intParameterValuesRelation = schema.intParameterValuesOfPluginInstances
+        val stringParameterValuesRelation = schema.stringParameterValuesOfPluginInstances
+
+        protected def getPluginInstanceLikeId(parameterValue: Option[ParameterValue[_]]) = {
+            parameterValue.flatMap(_.pluginInstanceId)
+        }
+
         override def persist(entity: AnyRef): Analysis = wrapInTransaction {
             val e = entity.asInstanceOf[cz.payola.common.entities.Analysis]
             val analysis = super.persist(entity)
@@ -29,6 +45,14 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
             analysis
         }
 
+        def removePluginInstanceById(pluginInstanceId: String): Boolean = wrapInTransaction {
+            schema.pluginInstances.deleteWhere(e => pluginInstanceId === e.id) == 1
+        }
+
+        def removePluginInstanceBindingById(pluginInstanceBindingId: String): Boolean = wrapInTransaction {
+            pluginInstanceBindingRepository.removeById(pluginInstanceBindingId)
+        }
+
         def loadPluginInstances(analysis: Analysis) {
             _loadAnalysis(analysis)
         }
@@ -39,18 +63,10 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
 
         private def _loadAnalysis(analysis: Analysis) {
             wrapInTransaction{
-                val pluginInstancesByIds = pluginInstanceRepository.selectWhere(pi => pi.analysisId === analysis.id)
-                    .map(p => (p.id, p)).toMap
+                val pluginInstancesByIds =
+                    loadPluginInstancesByFilter(pi => pi.asInstanceOf[PluginInstance].analysisId === analysis.id)
+                        .map(p => (p.id, p.asInstanceOf[PluginInstance])).toMap
                 val instanceBindings = pluginInstanceBindingRepository.selectWhere(b => b.analysisId === analysis.id)
-                val pluginIds = pluginInstancesByIds.values.map(_.pluginId).toSeq
-                val pluginsByIds = pluginRepository.getByIds(pluginIds).map(p => (p.id, p)).toMap
-
-                // Set plugins by id to parameter instances
-                pluginInstancesByIds.values.foreach{p =>
-                    p.plugin = pluginsByIds(p.pluginId)
-
-                    pluginInstanceRepository.mapParameterValuesToParameters(p)
-                }
 
                 // Set plugin instances to bindings
                 instanceBindings.foreach{ b =>

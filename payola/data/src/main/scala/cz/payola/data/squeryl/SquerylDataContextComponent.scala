@@ -10,11 +10,10 @@ trait SquerylDataContextComponent
     with UserRepositoryComponent
     with GroupRepositoryComponent
     with PrivilegeRepositoryComponent
+    with PluginInstanceRepositoryComponent
     with AnalysisRepositoryComponent
     with DataSourceRepositoryComponent
     with PluginRepositoryComponent
-    with PluginInstanceRepositoryComponent
-    with PluginInstanceBindingRepositoryComponent
     with OntologyRepositoryComponent
 {
     self: RdfStorageComponent with PluginCompilerComponent =>

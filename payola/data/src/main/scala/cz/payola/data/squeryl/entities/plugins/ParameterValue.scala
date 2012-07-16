@@ -35,5 +35,5 @@ trait ParameterValue[A] extends cz.payola.domain.entities.plugins.ParameterValue
 
     var dataSourceId: Option[String] = None
 
-    def parameter_=(value: ParameterType) { _parameter = value }
+    def parameter_=(value: Parameter[_]) { _parameter = value.asInstanceOf[ParameterType] }
 }
