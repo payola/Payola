@@ -69,3 +69,10 @@ input.active {
     background: url('spinner.gif') no-repeat 100%, linear-gradient(top, #ffffff 85%, #eeeeee 99%);
     background-position: 98%;
 }
+
+.dashboard h2{color: black;}
+
+.icon-rdf{
+    background-image: url(rdf-white.png) !important;
+    background-position: 0px !important;
+}
