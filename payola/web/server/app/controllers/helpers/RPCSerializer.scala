@@ -17,7 +17,6 @@ import scala.Some
 
 class RPCSerializer extends JSONSerializer
 {
-
     val graphClass = new SimpleSerializationClass(classOf[Graph])
     val graphRule = new BasicSerializationRule(Some(classOf[Graph]))
     this.addSerializationRule(graphClass, graphRule)
@@ -27,8 +26,12 @@ class RPCSerializer extends JSONSerializer
     this.addSerializationRule(edgeClass, edgeRule)
 
     val literalNodeClass = new SimpleSerializationClass(classOf[LiteralVertex])
-    val literalNodeRule = new BasicSerializationRule(Some(classOf[LiteralVertex]))
+    val literalNodeRule = new BasicSerializationRule(Some(classOf[LiteralVertex]), Some(List("value")))
     this.addSerializationRule(literalNodeClass, literalNodeRule)
+
+    // Always serialize the literal vertex value as a string because it may be almost anything.
+    this.addSerializationRule(literalNodeClass, new CustomValueSerializationRule[LiteralVertex](
+        "value", (serializer, literalVertex) => literalVertex.value.toString))
 
     val identifiedNodeClass = new SimpleSerializationClass(classOf[IdentifiedVertex])
     val identifiedNodeRule = new BasicSerializationRule(Some(classOf[IdentifiedVertex]))
