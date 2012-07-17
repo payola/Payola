@@ -3,6 +3,7 @@ package cz.payola.data.squeryl
 import org.squeryl._
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.adapters.H2Adapter
+import org.squeryl.dsl._
 import cz.payola.data._
 import cz.payola.data.squeryl.entities._
 import cz.payola.data.squeryl.entities.settings._
@@ -10,8 +11,6 @@ import cz.payola.data.squeryl.entities.plugins._
 import cz.payola.data.squeryl.entities.plugins.parameters._
 import cz.payola.data.squeryl.entities.analyses.PluginInstanceBinding
 import cz.payola.data.squeryl.entities.privileges.PrivilegeDbRepresentation
-import org.squeryl.dsl._
-import scala.Some
 import cz.payola.data.squeryl.entities.Group
 
 trait SchemaComponent
@@ -467,10 +466,26 @@ trait SchemaComponent
         }
 
         /**
+          * Persists the specified entity to the specified table.
+          * @param entity The entity to persist.
+          * @param table Tha table to persist the entity int.
+          * @tparam C Type of the entity.
+          */
+        def persist[C <: PersistableEntity](entity: C, table: Table[C]) {
+            wrapInTransaction{
+                if (table.where(_.id === entity.id).isEmpty) {
+                    table.insert(entity)
+                } else {
+                    table.update(entity)
+                }
+            }
+        }
+
+        /**
           * Creates 1:N relation between this entity (on '1' side of relation) and specified entity (on 'N' side of relation).
           * Specified entity wil be persisted
           *
-          * @param entity - specified entity to be ralted with this entity
+          * @param entity - specified entity to be related with this entity
           * @param relation  - definition of 1:N relation between this and specified entity
           * @tparam A - type of specified entity
           * @return Returns persisted specified entity

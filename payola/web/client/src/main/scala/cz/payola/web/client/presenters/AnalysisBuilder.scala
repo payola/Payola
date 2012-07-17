@@ -245,7 +245,7 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
     def onDeleteClick(eventArgs: EventArgs[PluginInstance]) {
         val instance = eventArgs.target
 
-        AnalysisBuilderData.deletePluginInstance(instance.id) { _ =>
+        AnalysisBuilderData.deletePluginInstance(analysisId, instance.id) { _ =>
             lanes -= instance
             var i = 0
             while (i < instance.predecessors.size) {
@@ -257,7 +257,7 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
         } { _ =>}
     }
 
-    def bind(a: PluginInstance, b: PluginInstance, inputIndex: Int) = {
+    def bind(a: PluginInstance, b: PluginInstance, inputIndex: Int) {
         AnalysisBuilderData.saveBinding(analysisId, a.id, b.id, inputIndex) { _ =>
             renderBinding(a, b)
         } { _ =>
@@ -277,5 +277,5 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
                        };
           jsPlumb.connect({ source:a.getPluginElement(), target:b.getPluginElement() },settings);
         """)
-    def renderBinding(a: PluginInstance, b: PluginInstance) = {}
+    def renderBinding(a: PluginInstance, b: PluginInstance) {}
 }

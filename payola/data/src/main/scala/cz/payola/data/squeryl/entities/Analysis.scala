@@ -62,7 +62,7 @@ class Analysis(override val id: String, name: String, o: Option[User], var _isPu
     }
 
     override protected def discardPluginInstance(instance: Analysis#PluginInstanceType) {
-        context.pluginInstanceRepository.removeById(instance.id)
+        context.analysisRepository.removePluginInstanceById(instance.id)
 
         super.discardPluginInstance(instance)
     }
@@ -72,7 +72,7 @@ class Analysis(override val id: String, name: String, o: Option[User], var _isPu
     }
 
     override protected def discardBinding(binding: Analysis#PluginInstanceBindingType) {
-        context.pluginInstanceBindingRepository.removeById(binding.id)
+        context.analysisRepository.removePluginInstanceBindingById(binding.id)
 
         super.discardBinding(binding)
     }
@@ -80,7 +80,7 @@ class Analysis(override val id: String, name: String, o: Option[User], var _isPu
     def associatePluginInstance(instance: PluginInstance): PluginInstance = {
         context.schema.associate(instance, _pluginInstancesQuery)
 
-        context.pluginInstanceRepository.persist(instance)
+        context.analysisRepository.persistPluginInstance(instance)
 
         instance
     }
