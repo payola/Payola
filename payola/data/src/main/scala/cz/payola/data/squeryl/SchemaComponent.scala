@@ -472,10 +472,12 @@ trait SchemaComponent
           * @tparam C Type of the entity.
           */
         def persist[C <: PersistableEntity](entity: C, table: Table[C]) {
-            if (table.where(_.id === entity.id).isEmpty) {
-                table.insert(entity)
-            } else {
-                table.update(entity)
+            wrapInTransaction{
+                if (table.where(_.id === entity.id).isEmpty) {
+                    table.insert(entity)
+                } else {
+                    table.update(entity)
+                }
             }
         }
 

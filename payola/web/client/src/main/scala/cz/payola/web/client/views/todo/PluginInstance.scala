@@ -3,14 +3,16 @@ package cz.payola.web.client.views.todo
 import s2js.adapters.js.dom
 import cz.payola.common.entities.Plugin
 import s2js.compiler.javascript
-import scala.collection.mutable
+import scala.collection._
 import cz.payola.web.client.presenters.models.ParameterValue
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events._
 import cz.payola.web.client.View
 import cz.payola.web.client.views.bootstrap._
 import cz.payola.web.client.views.elements.Div
-import cz.payola.web.client.views.bootstrap.SpanButton
+import scala.Seq
+import scala.Some
+import scala.collection.immutable.HashMap
 
 object PluginInstance
 {
@@ -22,24 +24,24 @@ object PluginInstance
     }
 }
 
-class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[PluginInstance] = List())
+class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[PluginInstance] = List(),
+    defaultValues: Map[String, String] = new HashMap[String, String]())
     extends View
 {
     val connectButtonClicked = new SimpleUnitEvent[PluginInstance]
-
     val deleteButtonClicked = new SimpleUnitEvent[PluginInstance]
-
     val parameterValueChanged = new SimpleUnitEvent[ParameterValue]
 
     private val heading = new Heading(List(new Text(plugin.name)), 3)
-
     private val params = new mutable.HashMap[Int, InputControl]
 
     var paramIdx = 0
 
     private val list = plugin.parameters.map { param =>
 
-        val field = new InputControl(param.name, param.id, "", "Enter parameter value")
+        val defaultVal = if (defaultValues.isDefinedAt(param.name)) defaultValues(param.name) else ""
+
+        val field = new InputControl(param.name, param.id, defaultVal, "Enter parameter value")
 
         field.input.changed += { args =>
             parameterValueChanged.triggerDirectly(new ParameterValue(id, param.id, param.name, field.input.value, field))
@@ -54,14 +56,12 @@ class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[P
 
     private val paramsDiv = new Div(list)
 
-    private val connect = new SpanButton("Add connection")
+    private val connect = new Button(new Text("Add connection"))
 
-    private val delete = new SpanButton("Delete", "btn-danger")
+    private val delete = new Button(new Text("Delete"), "btn-danger")
 
     private val alertDiv = new Div(List(heading, paramsDiv, connect, delete), "alert alert-info instance")
-
     private val clearSpan = new Span(List(), "clear")
-
     private val successors = new Div(List(clearSpan, alertDiv), "successors")
 
     connect.mouseClicked += { e =>
@@ -107,7 +107,7 @@ class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[P
                    var connections = jsPlumb.getConnections({target: element.getAttribute("id")});
                    for (var k in connections){ jsPlumb.detach(connections[k]); }
                  """)
-    def unbindJsPlumb(element: dom.Element) { }
+    def unbindJsPlumb(element: dom.Element) {}
 
     def domElement: dom.Element = {
         successors.domElement
@@ -127,5 +127,13 @@ class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[P
 
     def getParamValue(index: Int) = {
         params(index).input.value
+    }
+
+    def block() {
+        // TODO
+    }
+
+    def unblock() {
+        // TODO
     }
 }

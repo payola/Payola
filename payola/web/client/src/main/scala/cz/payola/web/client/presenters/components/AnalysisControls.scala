@@ -113,4 +113,12 @@ class AnalysisControls(analysisId: String) extends View
     def destroy() {
         // TODO
     }
+
+    def block() {
+        // TODO
+    }
+
+    def unblock() {
+        // TODO
+    }
 }

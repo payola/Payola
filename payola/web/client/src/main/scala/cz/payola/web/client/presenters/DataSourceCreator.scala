@@ -3,15 +3,13 @@ package cz.payola.web.client.presenters
 import cz.payola.web.client.View
 import s2js.adapters.js.browser._
 import cz.payola.web.shared.DataSourceManager
-import cz.payola.web.client.views.elements
 import cz.payola.web.client.views.elements._
 import s2js.adapters.js
-import s2js.adapters.js.dom._
 import cz.payola.domain.entities.Plugin
 import cz.payola.domain.entities.plugins.Parameter
 import cz.payola.web.client.views.bootstrap.InputControl
 import s2js.compiler.javascript
-import scala.collection.mutable.ListBuffer
+import s2js.adapters.js.dom.Element
 
 class DataSourceCreator(val dataFetcherDivID: String,
     val optionsDivID: String,
@@ -20,9 +18,6 @@ class DataSourceCreator(val dataFetcherDivID: String,
     val descriptionFieldDivID: String,
     val listingURL: String) extends View
 {
-
-    // An array of input controls
-    var optionInputControls = new ListBuffer[InputControl]()
 
     // Define internal <select> ID
     val dataFetcherListID = "data_fetcher_list"
@@ -58,6 +53,7 @@ class DataSourceCreator(val dataFetcherDivID: String,
         new SelectOption(List(new Text(dataFetcher.name))).render(dataFetcherList)
     }
 
+    // If there are no available data fetchers, go back to the listing
     if (availableDataFetchers.size == 0){
         // No available data fetchers
         window.alert("There are no data fetcher plugins available!")
@@ -68,7 +64,7 @@ class DataSourceCreator(val dataFetcherDivID: String,
     reloadOptions()
 
     // Create a submit button
-    val submitButton = new elements.Button("Create Data Source")
+    val submitButton = new Button(new Text("Create Data Source"))
     submitButton.mouseClicked += { event =>
         if (validateInputFields) {
             submitForm()
@@ -100,22 +96,28 @@ class DataSourceCreator(val dataFetcherDivID: String,
     private def reloadOptions() {
         // Remove all old options
         optionsDiv.innerHTML = ""
-        optionInputControls = new ListBuffer[InputControl]()
 
         val plugin: Plugin = getSelectedPlugin
         plugin.parameters foreach { param: Parameter[_] =>
             // TODO distinguish between string/bool/etc. parameters?
             val inputControl = new InputControl(param.name, param.name, param.defaultValue.toString, "")
-            optionInputControls += inputControl
             inputControl.render(optionsDiv)
         }
     }
 
+    /** Submit a form using JS.
+      *
+      */
     @javascript("document.forms['create_form'].submit();")
     private def submitForm(){
 
     }
 
+    /** Validates input fields. Goes through the name field, description,
+      * makes sure that a data source with this name doesn't exist yet.
+      *
+      * @return True when all fields are valid.
+      */
     private def validateInputFields: Boolean = {
         var result = false
         if (nameField.input.value == "") {
@@ -124,21 +126,8 @@ class DataSourceCreator(val dataFetcherDivID: String,
             window.alert("Data source with this name already exists!")
         }else if (descriptionField.input.value == ""){
             window.alert("Data source description musn't be empty!")
-        }else if (!validateOptionsInputFields){
-            // leave result false
         }else{
             result = true
-        }
-        result
-    }
-
-    private def validateOptionsInputFields: Boolean = {
-        var result = true
-        optionInputControls foreach { inputControl: InputControl =>
-            if (inputControl.input.value == ""){
-                window.alert("Parameter value cannot be empty for " + inputControl.label + ".")
-                result = false
-            }
         }
         result
     }
@@ -148,6 +137,14 @@ class DataSourceCreator(val dataFetcherDivID: String,
     }
 
     def destroy() {
+        // TODO
+    }
+
+    def block() {
+        // TODO
+    }
+
+    def unblock() {
         // TODO
     }
 

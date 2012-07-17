@@ -16,7 +16,9 @@
             <div class="row-fluid">
                 <div class="span6">
                     <div class="alert alert-info">
-                        <h2>Accessible analyses</h2>
+                        <h2 class="span10">Accessible analyses</h2>
+                        <a class="btn btn-primary span2" href="#"><i class="icon-list icon-white"></i> List all &raquo;</a>
+
                         @if(accessibleAnalysis.size == 0){
                             <p class="alert alert-danger">No analyses.</p>
                         }else{
@@ -37,18 +39,19 @@
                                 }
                             </table>
                         }
-                        <p><a class="btn" href="#"><i class="icon-list"></i> List all &raquo;</a></p>
                     </div>
                 </div><!--/span-->
                 <div class="span6">
                     <div class="alert alert-success">
-                        <h2>Accessible data sources</h2>
+                        <h2 class="span10">Accessible data sources</h2>
+                        <a class="btn btn-primary" href="#"><i class="icon-list icon-white"></i> List all &raquo;</a>
+
                         @if(accessibleDataSources.size > 0){
                             <table class="table table-striped">
                                 @accessibleDataSources.map{d =>
                                     <tr>
                                         <td>
-                                            <a href="@routes.DataSource.detail(d.id)">@d.name</a>
+                                            <a href="@routes.DataSource.detail(d.id, None)">@d.name</a>
                                         </td>
                                         <td>
                                             @if(d.owner.isDefined){
@@ -69,7 +72,6 @@
                                 </p>
                             </div>
                         }
-                        <p><a class="btn" href="#"><i class="icon-list"></i> List all &raquo;</a></p>
                         </div>
                     </div>
             </div><!--/span-->
@@ -77,7 +79,9 @@
         @if(user.isDefined){
             <div class="row-fluid">
                 <div class="span6">
-                    <h2>My analyses</h2>
+                    <h2 class="span8">My analyses</h2>
+                    <a class="btn btn-primary span2" href="#"><i class="icon-list icon-white"></i> List all &raquo;</a>
+                    <a class="btn btn-success span2" href="@routes.Analysis.create"><i class="icon-plus icon-white"></i>Create &raquo;</a>
                     @if(user.get.ownedAnalyses.size == 0){
                     <div class="alert alert-info">
                         <h3 class="alert-heading">No analyses.</h3>
@@ -93,13 +97,15 @@
                             }
                         </table>
                     }
-                    <p>
-                        <a class="btn" href="#"><i class="icon-list"></i> List all &raquo;</a>
-                        <a class="btn btn-success" href="@routes.Analysis.create"><i class="icon-plus icon-white"></i>Create &raquo;</a>
-                    </p>
                 </div><!--/span-->
                 <div class="span6">
-                    <h2>My datasources</h2>
+                    <h2 class="span8">My datasources</h2>
+                    @if(user.get.ownedDataSources.size > 5){
+                    <a class="btn btn-primary" href="@routes.DataSource.list()"><i class="icon-list"></i> List all &raquo;</a>
+                    }else{
+                    <span class="span2"></span>
+                    }
+                    <a class="btn btn-success span2" href="@routes.DataSource.create()"><i class="icon-plus icon-white"></i>Create &raquo;</a>
                     @if(user.get.ownedDataSources.size == 0){
                         <div class="alert alert-info">
                             <h3 class="alert-heading">No groups.</h3>
@@ -112,7 +118,7 @@
                         <table class="table table-stripped">
                         @user.get.ownedDataSources.take(5).map{ds =>
                             <tr>
-                                <td><a href="@routes.DataSource.detail(ds.id)">@ds.name</a></td>
+                                <td><a href="@routes.DataSource.detail(ds.id, None)">@ds.name</a></td>
                                 <td>
                                 @if(ds.isEditable){
                                     <a href="@routes.DataSource.edit(ds.id)" class="btn btn-primary"><i class="icon-pencil icon-white"></i> Edit</a>
@@ -124,12 +130,6 @@
                         }
                         </table>
                     }
-                    <p>
-                        @if(user.get.ownedDataSources.size > 5){
-                            <a class="btn" href="@routes.DataSource.list()"><i class="icon-list"></i> List all &raquo;</a>
-                        }
-                        <a class="btn btn-success" href="@routes.DataSource.create()"><i class="icon-plus icon-white"></i>Create &raquo;</a>
-                    </p>
                 </div><!--/span-->
             </div><!--/row-->
         }else{

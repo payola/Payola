@@ -8,6 +8,8 @@ import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.views.graph._
 import cz.payola.web.client.views.VertexEventArgs
+import cz.payola.web.client.views.bootstrap.Icon
+import cz.payola.web.client.View
 
 /**
   * A plugin that displays all edges in the graph as a table. The edges are firstly grouped by the edge origins,
@@ -56,7 +58,7 @@ class TripleTablePluginView(settings: VisualSetup) extends PluginView("Triple Ta
                 originRowCount += 1
                 if (originCell == null) {
                     originCell = addCell(row)
-                    createVertexAnchor(origin).render(originCell)
+                    createVertexView(origin).render(originCell)
                 }
 
                 // The edge cell.
@@ -67,13 +69,13 @@ class TripleTablePluginView(settings: VisualSetup) extends PluginView("Triple Ta
                 val destinationsCell = addCell(row)
                 val destinationListItems = edges.map { (edge: Edge) =>
                     val vertexElement = edge.destination match {
-                        case iv: IdentifiedVertex => createVertexAnchor(iv)
+                        case iv: IdentifiedVertex => createVertexView(iv)
                         case lv: LiteralVertex => new Text(lv.value.toString)
                         case v => new Text(v.toString)
                     }
                     new ListItem(List(vertexElement))
                 }
-                new UnorderedList(destinationListItems).render(destinationsCell)
+                new UnorderedList(destinationListItems, "unstyled").render(destinationsCell)
             }
             originCell.setAttribute("rowspan", originRowCount.toString)
         }
@@ -92,13 +94,19 @@ class TripleTablePluginView(settings: VisualSetup) extends PluginView("Triple Ta
         edgesByOrigin
     }
 
-    private def createVertexAnchor(vertex: IdentifiedVertex): Anchor = {
-        val anchor = new Anchor(List(new Text(vertex.uri)))
-        anchor.mouseClicked += { e =>
+    private def createVertexView(vertex: IdentifiedVertex): View = {
+        val dataSourceAnchor = new Anchor(List(new Icon(Icon.hdd)))
+        dataSourceAnchor.mouseClicked += { e =>
+            vertexBrowsingDataSource.trigger(new VertexEventArgs[this.type](this, vertex))
+            false
+        }
+        val browsingAnchor = new Anchor(List(new Text(vertex.uri)))
+        browsingAnchor.mouseClicked += { e =>
             vertexBrowsing.trigger(new VertexEventArgs[this.type](this, vertex))
             false
         }
-        anchor
+
+        new Span(List(dataSourceAnchor, new Span(List(new Text(" "))), browsingAnchor))
     }
 
     private def addRow(table: Element): Element = addElement(table, "tr")
