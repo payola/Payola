@@ -45,7 +45,7 @@ private object Wrapper
     private def processRequestResult(request: XMLHttpRequest, onSuccess: (Any => Unit),
         onException: (Throwable => Unit)): Any = {
 
-        try{
+        //try{
             val result = if (request.readyState == requestStatusDone && (request.status == 200 || request.status == 500)) {
                 deserializer.deserialize(eval("(" + request.responseText + ")"))
             } else if (request.readyState == requestStatusDone) {
@@ -62,9 +62,9 @@ private object Wrapper
                     value
                 }
             }
-        } catch {
+        /*} catch {
             case t => t
-        }
+        } */
     }
 
     private def createRequestBody(procedureName: String, parameters: ArrayBuffer[Any],
