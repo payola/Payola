@@ -52,7 +52,7 @@ import cz.payola.domain.entities.User
         successCallback(true)
     }
 
-    @async def deletePluginInstance(analysisId: String, pluginInstanceId: String)(successCallback: (Boolean => Unit))
+    @async def deletePluginInstance(analysisId: String, pluginInstanceId: String, user: User = null)(successCallback: (Boolean => Unit))
         (failCallback: (Throwable => Unit)) {
         Payola.model.analysisModel.removePluginInstanceById(analysisId, pluginInstanceId)
         successCallback(true)
