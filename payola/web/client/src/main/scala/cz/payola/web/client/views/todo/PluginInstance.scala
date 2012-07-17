@@ -10,7 +10,6 @@ import cz.payola.web.client.events._
 import cz.payola.web.client.View
 import cz.payola.web.client.views.bootstrap._
 import cz.payola.web.client.views.elements.Div
-import cz.payola.web.client.views.bootstrap.SpanButton
 import scala.Seq
 import scala.Some
 import scala.collection.immutable.HashMap
@@ -56,8 +55,11 @@ class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[P
     }
 
     private val paramsDiv = new Div(list)
-    private val connect = new SpanButton("Add connection")
-    private val delete = new SpanButton("Delete", "btn-danger")
+
+    private val connect = new Button(new Text("Add connection"))
+
+    private val delete = new Button(new Text("Delete"), "btn-danger")
+
     private val alertDiv = new Div(List(heading, paramsDiv, connect, delete), "alert alert-info instance")
     private val clearSpan = new Span(List(), "clear")
     private val successors = new Div(List(clearSpan, alertDiv), "successors")
@@ -125,5 +127,13 @@ class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[P
 
     def getParamValue(index: Int) = {
         params(index).input.value
+    }
+
+    def block() {
+        // TODO
+    }
+
+    def unblock() {
+        // TODO
     }
 }

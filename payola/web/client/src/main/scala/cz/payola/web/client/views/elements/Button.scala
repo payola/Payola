@@ -2,9 +2,10 @@ package cz.payola.web.client.views.elements
 
 import s2js.adapters.js.dom
 import cz.payola.web.client.views._
+import cz.payola.web.client.View
 
-class Button(text: String, cssClass: String = "")
-    extends ElementView[dom.Button]("button", List(new Text(text)), cssClass)
+class Button(subView: View, cssClass: String = "")
+    extends ElementView[dom.Button]("button", List(subView), cssClass + " btn")
 {
     setAttribute("type", "button")
 }

@@ -3,15 +3,13 @@ package cz.payola.web.client.presenters
 import cz.payola.web.client.View
 import s2js.adapters.js.browser._
 import cz.payola.web.shared.DataSourceManager
-import cz.payola.web.client.views.elements
 import cz.payola.web.client.views.elements._
 import s2js.adapters.js
-import s2js.adapters.js.dom._
 import cz.payola.domain.entities.Plugin
 import cz.payola.domain.entities.plugins.Parameter
 import cz.payola.web.client.views.bootstrap.InputControl
 import s2js.compiler.javascript
-import scala.collection.mutable.ListBuffer
+import s2js.adapters.js.dom.Element
 
 class DataSourceCreator(val dataFetcherDivID: String,
     val optionsDivID: String,
@@ -66,7 +64,7 @@ class DataSourceCreator(val dataFetcherDivID: String,
     reloadOptions()
 
     // Create a submit button
-    val submitButton = new elements.Button("Create Data Source")
+    val submitButton = new Button(new Text("Create Data Source"))
     submitButton.mouseClicked += { event =>
         if (validateInputFields) {
             submitForm()
@@ -139,6 +137,14 @@ class DataSourceCreator(val dataFetcherDivID: String,
     }
 
     def destroy() {
+        // TODO
+    }
+
+    def block() {
+        // TODO
+    }
+
+    def unblock() {
         // TODO
     }
 

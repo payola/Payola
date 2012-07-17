@@ -97,4 +97,12 @@ class ZoomControls(var currentZoom: Double) extends View
     def domElement : dom.Element = {
         wrapper.domElement
     }
+
+    def block() {
+        // TODO
+    }
+
+    def unblock() {
+        // TODO
+    }
 }

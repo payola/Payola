@@ -4,14 +4,28 @@ import cz.payola.common.rdf.Graph
 import cz.payola.web.client.views._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.Icon
+import cz.payola.web.client.views.graph.textual.TripleTablePluginView
+import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.VisualSetup
+import cz.payola.web.client.views.graph.visual.settings._
 
-class PluginSwitchView(val plugins: Seq[PluginView]) extends GraphView with ComposedView
+class PluginSwitchView extends GraphView with ComposedView
 {
+    // TODO
+    val visualSetup = new VisualSetup(new VertexSettingsModel, new EdgeSettingsModel, new TextSettingsModel)
+
+    private val plugins = List[PluginView](
+        new TripleTablePluginView(null)/*,
+            new CircleTechnique(visualSetup),
+            new TreeTechnique(visualSetup),
+            new MinimalizationTechnique(visualSetup),
+            new GravityTechnique(visualSetup)*/
+    )
+
     private var currentPlugin = plugins.head
 
     private var currentGraph: Option[Graph] = None
 
-    private val pluginSpace = new Div()
+    private val pluginSpace = new Div(Nil, "row-fluid")
 
     // Re-trigger all events when the corresponding events are triggered in the plugins.
     plugins.foreach { plugin =>
@@ -27,20 +41,12 @@ class PluginSwitchView(val plugins: Seq[PluginView]) extends GraphView with Comp
         currentPlugin.updateGraph(graph)
     }
 
-    def block() {
-        pluginSpace.block()
-    }
-
-    def unblock() {
-        pluginSpace.unblock()
-    }
-
     def createSubViews = {
-        val dropDownAnchor = new Anchor(
+        val pluginChangeAnchor = new Anchor(
             List(new Icon(Icon.cog), new Text("Change Visualisation Plugin"), new Span(Nil, "caret")),
             "#", "btn dropdown-toggle"
         )
-        dropDownAnchor.setAttribute("data-toggle", "dropdown")
+        pluginChangeAnchor.setAttribute("data-toggle", "dropdown")
 
         val pluginListItems = plugins.map { plugin =>
             val pluginAnchor = new Anchor(List(new Text(plugin.name)))
@@ -50,9 +56,11 @@ class PluginSwitchView(val plugins: Seq[PluginView]) extends GraphView with Comp
             }
             new ListItem(List(pluginAnchor))
         }
-
         val pluginList = new UnorderedList(pluginListItems, "dropdown-menu")
-        List(new Div(List(dropDownAnchor, pluginList), "btn-group"), pluginSpace)
+        val controls = new Div(List(pluginChangeAnchor, pluginList), "btn-group")
+        controls.setAttribute("style", "padding-bottom: 20px;")
+
+        List(controls, pluginSpace)
     }
 
     private def changePlugin(plugin: PluginView) {

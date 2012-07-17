@@ -57,4 +57,12 @@ class ColorPane(name: String, label: String, var color: Color) extends View
     def destroy() {
         // TODO
     }
+
+    def block() {
+        // TODO
+    }
+
+    def unblock() {
+        // TODO
+    }
 }

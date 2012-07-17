@@ -50,6 +50,14 @@ abstract class ElementView[A <: dom.Element](domElementName: String, val innerVi
         parentElement.foreach(_.removeChild(domElement))
     }
 
+    def block() {
+        blockElement(domElement)
+    }
+
+    def unblock() {
+        unblockElement(domElement)
+    }
+
     def getAttribute(name: String): String = {
         domElement.getAttribute(name)
     }
@@ -74,18 +82,4 @@ abstract class ElementView[A <: dom.Element](domElementName: String, val innerVi
     def id_=(value: String) {
         setAttribute("id", value)
     }
-
-    @javascript("""
-        $(self.domElement).block({
-            message: null,
-            fadeIn: 100,
-            overlayCSS: {
-                backgroundColor: '#FFF',
-                opacity: 0.6
-            }
-        });""")
-    def block() { }
-
-    @javascript("$(self.domElement).unblock({ fadeOut: 0 });")
-    def unblock() { }
 }

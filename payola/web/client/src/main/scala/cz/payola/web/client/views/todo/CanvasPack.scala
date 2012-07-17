@@ -227,4 +227,12 @@ class CanvasPack(initialSize: Vector2D) extends client.View
     def destroy() {
         // TODO
     }
+
+    def block() {
+        // TODO
+    }
+
+    def unblock() {
+        // TODO
+    }
 }
