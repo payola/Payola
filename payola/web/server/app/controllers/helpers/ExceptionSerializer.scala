@@ -26,6 +26,6 @@ class ExceptionSerializer extends JSONSerializer
         trace
     })
 
-    this.addSerializationRule(rpcExceptionClass, stackTraceRule)
     this.addSerializationRule(rpcExceptionClass, stackTraceDisable)
+    this.addSerializationRule(rpcExceptionClass, stackTraceRule)
 }
