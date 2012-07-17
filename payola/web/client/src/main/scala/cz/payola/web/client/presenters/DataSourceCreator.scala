@@ -21,9 +21,6 @@ class DataSourceCreator(val dataFetcherDivID: String,
     val listingURL: String) extends View
 {
 
-    // An array of input controls
-    var optionInputControls = new ListBuffer[InputControl]()
-
     // Define internal <select> ID
     val dataFetcherListID = "data_fetcher_list"
 
@@ -58,6 +55,7 @@ class DataSourceCreator(val dataFetcherDivID: String,
         new SelectOption(List(new Text(dataFetcher.name))).render(dataFetcherList)
     }
 
+    // If there are no available data fetchers, go back to the listing
     if (availableDataFetchers.size == 0){
         // No available data fetchers
         window.alert("There are no data fetcher plugins available!")
@@ -100,22 +98,28 @@ class DataSourceCreator(val dataFetcherDivID: String,
     private def reloadOptions() {
         // Remove all old options
         optionsDiv.innerHTML = ""
-        optionInputControls = new ListBuffer[InputControl]()
 
         val plugin: Plugin = getSelectedPlugin
         plugin.parameters foreach { param: Parameter[_] =>
             // TODO distinguish between string/bool/etc. parameters?
             val inputControl = new InputControl(param.name, param.name, param.defaultValue.toString, "")
-            optionInputControls += inputControl
             inputControl.render(optionsDiv)
         }
     }
 
+    /** Submit a form using JS.
+      *
+      */
     @javascript("document.forms['create_form'].submit();")
     private def submitForm(){
 
     }
 
+    /** Validates input fields. Goes through the name field, description,
+      * makes sure that a data source with this name doesn't exist yet.
+      *
+      * @return True when all fields are valid.
+      */
     private def validateInputFields: Boolean = {
         var result = false
         if (nameField.input.value == "") {
@@ -124,21 +128,8 @@ class DataSourceCreator(val dataFetcherDivID: String,
             window.alert("Data source with this name already exists!")
         }else if (descriptionField.input.value == ""){
             window.alert("Data source description musn't be empty!")
-        }else if (!validateOptionsInputFields){
-            // leave result false
         }else{
             result = true
-        }
-        result
-    }
-
-    private def validateOptionsInputFields: Boolean = {
-        var result = true
-        optionInputControls foreach { inputControl: InputControl =>
-            if (inputControl.input.value == ""){
-                window.alert("Parameter value cannot be empty for " + inputControl.label + ".")
-                result = false
-            }
         }
         result
     }
