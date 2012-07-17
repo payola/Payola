@@ -1,10 +1,14 @@
 package cz.payola.model.components
 
-import cz.payola.domain.RdfStorageComponent
+import cz.payola.domain._
 import cz.payola.domain.entities.User
 import cz.payola.domain.entities.plugins.concrete.data.PayolaStorage
 import cz.payola.domain.entities.plugins.DataSource
 import cz.payola.model.ModelException
+import java.io._
+import scala.Some
+import scala.Some
+import scala.io.Source
 
 trait PayolaStorageModelComponent
 {
@@ -32,6 +36,29 @@ trait PayolaStorageModelComponent
             dataSource.isEditable = false
             dataSourceModel.persist(dataSource)
             dataSource
+        }
+
+        /** Stores a graph that is stored at graphURL to the user's private data storage.
+          *
+          * @param graphURL Graph URL.
+          * @param user User.
+          */
+        def addGraphToUser(graphURL: String, user: User) {
+            val graphID = IDGenerator.newId
+            rdfStorage.storeGraphAtURL(graphID, graphURL)
+            rdfStorage.addGraphToGroup(graphID, user.id)
+        }
+
+        /** Stores a graph that is stored in the file to the user's private data storage.
+          *
+          * @param file File with graph.
+          * @param user User.
+          */
+        def addGraphToUser(file: File, user: User) {
+            val graphXML = Source.fromFile(file, "UTF-8").mkString
+            val graphID = IDGenerator.newId
+            rdfStorage.storeGraph(graphID, graphXML)
+            rdfStorage.addGraphToGroup(graphID, user.id)
         }
     }
 }

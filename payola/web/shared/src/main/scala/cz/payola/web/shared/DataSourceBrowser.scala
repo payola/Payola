@@ -7,6 +7,13 @@ import cz.payola.domain.entities.plugins.DataSource
 
 @remote object DataSourceBrowser
 {
+    @secured @async def getDataSources(user: Option[User] = null)
+        (successCallback: (Seq[DataSource] => Unit))
+        (failCallback: (Throwable => Unit)) {
+
+        successCallback(Payola.model.dataSourceModel.getAccessibleToUser(user))
+    }
+
     @secured @async def getInitialGraph(dataSourceId: String, user: Option[User] = null)
         (successCallback: (Option[Graph] => Unit))
         (failCallback: (Throwable => Unit)) {
