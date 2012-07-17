@@ -127,7 +127,6 @@ object DataSource extends PayolaController with Secured
     def list() = authenticatedWithRequest { (user, request) =>
         val pageStrings = request.queryString.get("page")
         val page = if (pageStrings.isDefined) pageStrings.get(0).toInt else 1
-        Payola.model.
         Ok(views.html.datasource.list(user, page))
     }
 

@@ -1,142 +1,84 @@
 @(user: Option[cz.payola.domain.entities.User], accessibleAnalysis: Seq[cz.payola.domain.entities.Analysis],
-    accessibleDataSources: Seq[cz.payola.domain.entities.plugins.DataSource]
+accessibleDataSources: Seq[cz.payola.domain.entities.plugins.DataSource]
 )
 
 @main(user, "Dashboard") {
-    <div class="container-fluid dashboard">
+<div class="container-fluid dashboard">
 
-        <ul class="breadcrumb">
-            <li>
-                <a href="/">Home</a> <span class="divider">/</span>
-            </li>
-            <li class="active">Dashboard</li>
-        </ul>
+    <ul class="breadcrumb">
+        <li>
+            <a href="/">Home</a> <span class="divider">/</span>
+        </li>
+        <li class="active">Dashboard</li>
+    </ul>
+
+    <div class="row-fluid">
+        @tags.dashboardList("Accessible analyses", "analyses", accessibleAnalysis,None,
+        { e: cz.payola.domain.Entity =>
+        val a = e.asInstanceOf[cz.payola.domain.entities.Analysis]
+        <td>
+            <a href={routes.Analysis.detail(a.id).toString}>{a.name}</a>
+        </td>
+        <td>
+            {if(a.owner.isDefined){
+            <a href={routes.Profile.index(a.owner.get.email).toString}><i class="icon-user"></i> {a.owner.get.name}</a>
+            }else{
+            <span class="badge badge-warning">Public</span>
+            }}
+        </td>
+        }, "alert alert-info", routes.Analysis.list)
 
 
-            <div class="row-fluid">
-                <div class="span6">
-                    <div class="alert alert-info">
-                        <h2 class="span10">Accessible analyses</h2>
-                        <a class="btn btn-primary span2" href="#"><i class="icon-list icon-white"></i> List all &raquo;</a>
+        @tags.dashboardList("Accessible data sources", "data sources", accessibleDataSources,None,
+        { e: cz.payola.domain.Entity =>
+        val d = e.asInstanceOf[cz.payola.domain.entities.plugins.DataSource]
+        <td>
+            <a href={routes.DataSource.detail(d.id, None).toString}>{d.name}</a>
+        </td>
+        <td>
+            {if(d.owner.isDefined){
+            <a href={routes.Profile.index(d.owner.get.email).toString}><i class="icon-user"></i> {d.owner.get.name}</a>
+            }else{
+            <span class="badge badge-warning">Public</span>
+            }}
+        </td>
+        }, "alert alert-success", routes.DataSource.list)
+    </div>
 
-                        @if(accessibleAnalysis.size == 0){
-                            <p class="alert alert-danger">No analyses.</p>
-                        }else{
-                            <table class="table table-striped">
-                                @accessibleAnalysis.map{a =>
-                                    <tr>
-                                        <td>
-                                            <a href="@routes.Analysis.detail(a.id)">@a.name</a>
-                                        </td>
-                                        <td>
-                                            @if(a.owner.isDefined){
-                                                <a href="@routes.Profile.index(a.owner.get.email)"><i class="icon-user"></i> @a.owner.get.name</a>
-                                            }else{
-                                                <span class="badge">Public</span>
-                                            }
-                                        </td>
-                                    </tr>
-                                }
-                            </table>
-                        }
-                    </div>
-                </div><!--/span-->
-                <div class="span6">
-                    <div class="alert alert-success">
-                        <h2 class="span10">Accessible data sources</h2>
-                        <a class="btn btn-primary" href="#"><i class="icon-list icon-white"></i> List all &raquo;</a>
+    @if(user.isDefined){
+    <div class="row-fluid">
+        @tags.dashboardList("My analyses", "analyses", user.get.ownedAnalyses,Some(routes.Analysis.create),
+        { e: cz.payola.domain.Entity =>
+        val a = e.asInstanceOf[cz.payola.domain.entities.Analysis]
+        <td>
+            <a href={routes.Analysis.detail(a.id).toString}>{a.name}</a>
+        </td>
+        <td><a href={routes.Analysis.edit(a.id).toString} class="btn"><i class="icon-pencil"></i> Edit</a></td>
+        }, "", routes.Analysis.list)
 
-                        @if(accessibleDataSources.size > 0){
-                            <table class="table table-striped">
-                                @accessibleDataSources.map{d =>
-                                    <tr>
-                                        <td>
-                                            <a href="@routes.DataSource.detail(d.id, None)">@d.name</a>
-                                        </td>
-                                        <td>
-                                            @if(d.owner.isDefined){
-                                            <a href="@routes.Profile.index(d.owner.get.email)"><i class="icon-user"></i> @d.owner.get.name</a>
-                                            }else{
-                                            <span class="badge">Public</span>
-                                            }
-                                        </td>
-                                    </tr>
-                                }
-                            </table>
-                        }else{
-                            <div class="alert alert-info">
-                                <h3 class="alert-heading">No datasources.</h3>
-                                <p class="alert-block">
-                                    No data sources, no fun.
-                                    But you may add a data source easily! Just press the green button below.
-                                </p>
-                            </div>
-                        }
-                        </div>
-                    </div>
-            </div><!--/span-->
+        @tags.dashboardList("My data sources", "data sources", user.get.ownedDataSources,Some(routes.DataSource.create),
+        { e: cz.payola.domain.Entity =>
+        val d = e.asInstanceOf[cz.payola.domain.entities.plugins.DataSource]
+        <td>
+            <a href={routes.DataSource.detail(d.id, None).toString}>{d.name}</a>
+        </td>
+        <td>
+            {if(d.isEditable){
+            <a href={routes.DataSource.edit(d.id).toString} class="btn"><i class="icon-pencil"></i> Edit</a>
+            }else{
+            <span class="badge">Not editable</span>
+            }}
+        </td>
+        }, "", routes.DataSource.list)
 
-        @if(user.isDefined){
-            <div class="row-fluid">
-                <div class="span6">
-                    <h2 class="span8">My analyses</h2>
-                    <a class="btn btn-primary span2" href="#"><i class="icon-list icon-white"></i> List all &raquo;</a>
-                    <a class="btn btn-success span2" href="@routes.Analysis.create"><i class="icon-plus icon-white"></i>Create &raquo;</a>
-                    @if(user.get.ownedAnalyses.size == 0){
-                    <div class="alert alert-info">
-                        <h3 class="alert-heading">No analyses.</h3>
-                        <p class="alert-block">But you may create one! Just press the green button below.</p>
-                    </div>
-                    }else{
-                        <table class="table table-striped">
-                            @user.get.ownedAnalyses.map{a =>
-                            <tr>
-                                <td><a href="@routes.Analysis.detail(a.id)">@a.name</a></td>
-                                <td><a href="@routes.Analysis.edit(a.id)" class="btn btn-primary"><i class="icon-white icon-pencil"></i> Edit</a></td>
-                            </tr>
-                            }
-                        </table>
-                    }
-                </div><!--/span-->
-                <div class="span6">
-                    <h2 class="span8">My datasources</h2>
-                    @if(user.get.ownedDataSources.size > 5){
-                    <a class="btn btn-primary" href="@routes.DataSource.list()"><i class="icon-list"></i> List all &raquo;</a>
-                    }else{
-                    <span class="span2"></span>
-                    }
-                    <a class="btn btn-success span2" href="@routes.DataSource.create()"><i class="icon-plus icon-white"></i>Create &raquo;</a>
-                    @if(user.get.ownedDataSources.size == 0){
-                        <div class="alert alert-info">
-                            <h3 class="alert-heading">No groups.</h3>
-                            <p class="alert-block">
-                                You are not able to share analysis to more than one person at a time.
-                                But you may create a group easily! Just press the green button below.
-                            </p>
-                        </div>
-                    }else{
-                        <table class="table table-stripped">
-                        @user.get.ownedDataSources.take(5).map{ds =>
-                            <tr>
-                                <td><a href="@routes.DataSource.detail(ds.id, None)">@ds.name</a></td>
-                                <td>
-                                @if(ds.isEditable){
-                                    <a href="@routes.DataSource.edit(ds.id)" class="btn btn-primary"><i class="icon-pencil icon-white"></i> Edit</a>
-                                }else{
-                                    <span class="badge">Not editable</span>
-                                }
-                                </td>
-                            </tr>
-                        }
-                        </table>
-                    }
-                </div><!--/span-->
-            </div><!--/row-->
-        }else{
-            <div class="well hero-unit">
-                <h2>There's more!</h2>
-                <p><a href="@routes.Application.login" class="btn btn-primary">Login</a> to see your top content here!</p>
-            </div>
-        }
-    </div><!-- /.container-fluid -->
+    </div>
+    <!--/row-->
+    }else{
+    <div class="well hero-unit">
+        <h2>There's more!</h2>
+
+        <p><a href="@routes.Application.login" class="btn btn-primary">Login</a> to see your top content here!</p>
+    </div>
+    }
+</div><!-- /.container-fluid -->
 }
