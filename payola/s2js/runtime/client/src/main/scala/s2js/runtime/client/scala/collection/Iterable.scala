@@ -510,8 +510,4 @@ trait Iterable
         }
         str
     }
-
-    def toMap[T, U](implicit ev: <:<[Double, (T, U)]): Map[T, U] = {
-        new HashMap[T,U]
-    }
 }
