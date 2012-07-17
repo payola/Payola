@@ -116,7 +116,7 @@ object Profile extends PayolaController with Secured
 
         if (g.isDefined)
         {
-            val allUsers = Payola.model.userModel.getAll
+            val allUsers = Payola.model.userModel.getAll()
 
             Ok(views.html.Profile.editGroup(user, g.get, allUsers))
         }else{
@@ -160,7 +160,7 @@ object Profile extends PayolaController with Secured
       *
       * @return Listing page for plugins.
       */
-    def listPlugins = authenticated { user =>
-        Ok(views.html.plugin.list(user))
+    def listPlugins(page: Int = 1) = authenticated { user =>
+        Ok(views.html.plugin.list(user, page))
     }
 }

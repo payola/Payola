@@ -34,7 +34,7 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
             entity.asInstanceOf[PrivilegeType]
         }
 
-        def removeById(id: String) = schema.wrapInTransaction{
+        def removeById(id: String) = schema.wrapInTransaction {
             representationRepository.removeById(id)
         }
 
@@ -58,43 +58,44 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
                 )
             }
 
-        private def instantiate(privileges: Seq[PrivilegeDbRepresentation]): Seq[PrivilegeType] = {
-            // Repositories map with (Repository -> list of entity IDs to select)
-            val repositories = mutable.Map[Repository[_], mutable.HashSet[String]]()
+        private def instantiate(privileges: Seq[PrivilegeDbRepresentation]): Seq[PrivilegeType] =
+            schema.wrapInTransaction {
+                // Repositories map with (Repository -> list of entity IDs to select)
+                val repositories = mutable.Map[Repository[_], mutable.HashSet[String]]()
 
-            // Fill the map
-            privileges.foreach { p =>
-                // Add grantee
-                val granteeRepository = repositoryRegistry(p.granteeClassName)
-                repositories.getOrElseUpdate(granteeRepository, mutable.HashSet.empty[String]) += p.granteeId
+                // Fill the map
+                privileges.foreach { p =>
+                    // Add grantee
+                    val granteeRepository = repositoryRegistry(p.granteeClassName)
+                    repositories.getOrElseUpdate(granteeRepository, mutable.HashSet.empty[String]) += p.granteeId
 
-                // Add object
-                val objectRepository = repositoryRegistry(p.objectClassName)
-                repositories.getOrElseUpdate(objectRepository, mutable.HashSet.empty[String]) += p.objectId
+                    // Add object
+                    val objectRepository = repositoryRegistry(p.objectClassName)
+                    repositories.getOrElseUpdate(objectRepository, mutable.HashSet.empty[String]) += p.objectId
 
-                // Add owner (user)
-                repositories.getOrElseUpdate(userRepository, mutable.HashSet.empty[String]) += p.granterId
+                    // Add owner (user)
+                    repositories.getOrElseUpdate(userRepository, mutable.HashSet.empty[String]) += p.granterId
+                }
+
+                // Create Map (EntityId -> Entity) to simplify getting entities from Db
+                val entities = repositories.par.flatMap{r =>
+                    r._1.getByIds(r._2.toSeq).map(e => (e.asInstanceOf[cz.payola.domain.Entity].id, e))
+                }
+
+                privileges.map{ p =>
+                    // Get granter, grantee, object from entities set
+                    val granter = entities(p.granterId).asInstanceOf[java.lang.Object]
+                    val grantee = entities(p.granteeId).asInstanceOf[java.lang.Object]
+                    val obj = entities(p.objectId).asInstanceOf[java.lang.Object]
+
+                    // Get and fill Privilege constructor (with 4 parameters)
+                    val privilegeClass = java.lang.Class.forName(p.privilegeClass)
+                    val constructor = privilegeClass.getConstructors.find(_.getParameterTypes().size == 4).get
+                    val arguments = List(granter, grantee, obj, p.id).toArray
+
+                    // Instantiate the privilege
+                    constructor.newInstance(arguments: _*).asInstanceOf[PrivilegeType]
+                }
             }
-
-            // Create Map (EntityId -> Entity) to simplify getting entities from Db
-            val entities = repositories.par.flatMap{r =>
-                r._1.getByIds(r._2.toSeq).map(e => (e.asInstanceOf[cz.payola.domain.Entity].id, e))
-            }
-
-            privileges.map{ p =>
-                // Get granter, grantee, object from entities set
-                val granter = entities(p.granterId).asInstanceOf[java.lang.Object]
-                val grantee = entities(p.granteeId).asInstanceOf[java.lang.Object]
-                val obj = entities(p.objectId).asInstanceOf[java.lang.Object]
-
-                // Get and fill Privilege constructor (with 4 parameters)
-                val privilegeClass = java.lang.Class.forName(p.privilegeClass)
-                val constructor = privilegeClass.getConstructors.find(_.getParameterTypes().size == 4).get
-                val arguments = List(granter, grantee, obj, p.id).toArray
-
-                // Instantiate the privilege
-                constructor.newInstance(arguments: _*).asInstanceOf[PrivilegeType]
-            }
-        }
     }
 }

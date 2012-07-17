@@ -1,41 +1,91 @@
-@(user: cz.payola.domain.entities.User, entityName: String, entityNamePlural: String, entities: Seq[cz.payola.domain.Entity], headerWriter: (Unit) => scala.xml.NodeBuffer, entityLister: (cz.payola.domain.Entity) => scala.xml.NodeBuffer, newEntityCall: play.api.mvc.Call)
+@(user: Option[cz.payola.domain.entities.User],
+    entityName: String,
+    entityNamePlural: String,
+    entityCount: Int,
+    entitiesFetcher: (Int, Int) => Seq[cz.payola.domain.Entity],
+    headerWriter: (Unit) => scala.xml.NodeBuffer,
+    entityLister: (cz.payola.domain.Entity) => scala.xml.NodeBuffer,
+    newEntityCall: play.api.mvc.Call,
+    page: Int = 1)
 
-@main(Some(user), "List " + entityNamePlural + " - Payola!") {
+@entitiesPerPage = @{
+        5
+}
+
+@lastPage = @{
+    (page * entitiesPerPage >= entityCount)
+}
+
+@numberOfPage = @{
+    if (entityCount % entitiesPerPage == 0) {
+        entityCount / entitiesPerPage
+    }else{
+        (entityCount / entitiesPerPage) + 1
+    }
+}
+
+@main(user, "List " + entityNamePlural + " - Payola!") {
+
 <div class="container-fluid">
-    <div class="plugins_container">
+    <div class="entity-container">
         <div class="row-fluid">
             <h1 class="span10">List @entityNamePlural</h1>
-            <a href="@newEntityCall" class="btn btn-success span2"><i class="icon-plus icon-white"></i> Create @entityName &raquo;</a>
+            <a href="@newEntityCall" class="btn btn-success span2"><i class="icon-plus icon-white"></i> Create
+                @entityName &raquo;</a>
         </div>
 
-        @if(entities.size > 0){
-        <table class="table table-striped">
-            <thead>
-            <tr>
-                @headerWriter()
-            </tr>
-            </thead>
-            @entities.map{ entity =>
+        @if(entityCount > 0){
+            <table class="table table-striped">
+                <thead>
                 <tr>
-                    @entityLister(entity)
+                    @headerWriter()
                 </tr>
-            }
-        </table>
+                </thead>
+                @entitiesFetcher(page, entitiesPerPage).map{ entity =>
+                    <tr>
+                        @entityLister(entity)
+                    </tr>
+                }
+            </table>
 
-        <div style="text-align: center">
-            <div class="pagination">
-                <ul>
-                    <li><a href="#">Prev</a></li>
-                    <li class="active">
-                        <a href="#">1</a>
-                    </li>
-                    <li><a href="#">Next</a></li>
-                </ul>
-            </div>
-        </div>
+            @if(entityCount > entitiesPerPage){
+                <div style="text-align: center">
+                    <div class="pagination">
+                        <ul>
+                            <li><a href=@{
+                                       if(page == 1){
+                                            "#"
+                                        }else{
+                                            "?page=" + (page - 1)
+                                        }
+                                    }>Prev</a></li>
+                            @for(i <- 0 until numberOfPage){
+                                <li@if((i + 1) == page){ class="active"}>
+                                        @if((i + 1) == page){
+                                            <a class="selected-page" href="#">@page</a>
+                                        }else{
+                                            <a href=@{ "?page=" + (i + 1)}>@{ i + 1 }</a>
+                                        }
+
+                                </li>
+                            }
+                            <li><a href=@{
+                                   if(lastPage){
+                                        "#"
+                                   }else{
+                                       "?page=" + (page + 1)
+                                   }
+                                }>Next</a></li>
+                        </ul>
+                    </div>
+                </div>
+            }else{
+                <p class="alert alert-info">The list contains all available @entityNamePlural.</p>
+            }
         }else{
         <div class="alert alert-info">
             <h3 class="alert-heading">No @entityNamePlural</h3>
+
             <p class="alert-block">But you can create one!</p>
         </div>
         }

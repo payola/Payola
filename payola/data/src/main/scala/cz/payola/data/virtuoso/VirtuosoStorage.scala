@@ -44,6 +44,10 @@ class VirtuosoStorage(
         executeSQL("DB.DBA.RDF_LOAD_RDFXML('%s', '', '%s')".format(escapeString(rdfXml), escapeString(graphURI)))
     }
 
+    def storeGraphAtURL(graphURI: String, graphURL: String) {
+        executeSQL("DB.DBA.RDF_LOAD_RDFXML(http_get('%s'), '', '%s')".format(graphURL, escapeString(graphURI)))
+    }
+
     def addGraphToGroup(graphURI: String, groupURI: String) {
         executeSQL("DB.DBA.RDF_GRAPH_GROUP_INS('%s', '%s')".format(escapeString(groupURI), escapeString(graphURI)))
     }

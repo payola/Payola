@@ -7,7 +7,7 @@ import cz.payola.web.client.views.elements._
 import s2js.adapters.js
 import cz.payola.domain.entities.Plugin
 import cz.payola.domain.entities.plugins.Parameter
-import cz.payola.web.client.views.bootstrap.InputControl
+import cz.payola.web.client.views.bootstrap.TextInputControl
 import s2js.compiler.javascript
 import s2js.adapters.js.dom.Element
 
@@ -30,9 +30,9 @@ class DataSourceCreator(val dataFetcherDivID: String,
     val descriptionFieldDiv = document.getElementById(descriptionFieldDivID)
 
     // Create name & description fields
-    val nameField = new InputControl("Data source name:", "__dataSourceName__", "My data source", "")
+    val nameField = new TextInputControl("Data source name:", "__dataSourceName__", "My data source", "")
     nameField.render(nameFieldDiv)
-    val descriptionField = new InputControl("Description:", "__dataSourceDescription__", "", "")
+    val descriptionField = new TextInputControl("Description:", "__dataSourceDescription__", "", "")
     descriptionField.render(descriptionFieldDiv)
 
     // Create a data fetcher list
@@ -100,7 +100,7 @@ class DataSourceCreator(val dataFetcherDivID: String,
         val plugin: Plugin = getSelectedPlugin
         plugin.parameters foreach { param: Parameter[_] =>
             // TODO distinguish between string/bool/etc. parameters?
-            val inputControl = new InputControl(param.name, param.name, param.defaultValue.toString, "")
+            val inputControl = new TextInputControl(param.name, param.name, param.defaultValue.toString, "")
             inputControl.render(optionsDiv)
         }
     }

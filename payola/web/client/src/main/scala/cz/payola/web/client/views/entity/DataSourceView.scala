@@ -6,13 +6,13 @@ import cz.payola.web.client.views.bootstrap._
 
 class DataSourceView(dataSourceName: String) extends ComposedView
 {
-    val heading = new Heading(List(new Text("Data source browser: " + dataSourceName)), 2)
+    val heading = new Heading(List(new Text("Data source: " + dataSourceName)), 2)
 
     val backButton = new Button(new Icon(Icon.arrow_left))
 
     val nextButton = new Button(new Icon(Icon.arrow_right))
 
-    val nodeUriInput = new Input("nodeUri", "", Some("Node URI"), "input-large")
+    val nodeUriInput = new Input("nodeUri", "", Some("Node URI"), "input-xxlarge")
 
     val goButton = new Button(new Text("Go!"))
 
@@ -23,8 +23,8 @@ class DataSourceView(dataSourceName: String) extends ComposedView
     def createSubViews = {
         List(
             new Div(List(
-                new Div(List(heading), "span8"),
-                new Div(List(navigation), "span4")),
+                new Div(List(heading), "span4"),
+                new Div(List(navigation), "span8")),
                 "row-fluid"
             ),
             graphViewSpace

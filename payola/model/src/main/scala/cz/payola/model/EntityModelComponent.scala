@@ -13,7 +13,7 @@ trait EntityModelComponent
     {
         def getById(id: String): Option[A] = repository.getById(id)
 
-        def getAll: Seq[A] = repository.getAll()
+        def getAll(pagination: Option[PaginationInfo] = None): Seq[A] = repository.getAll(pagination)
 
         def persist(entity: Entity) {
             repository.persist(entity)
@@ -22,7 +22,7 @@ trait EntityModelComponent
         def remove(entity: Entity): Boolean = repository.removeById(entity.id)
     }
 
-    class ShareableEntityModel[A <: ShareableEntity with OptionallyOwnedEntity](
+    class ShareableEntityModel[A <: ShareableEntity with OptionallyOwnedEntity with NamedEntity](
         override val repository: ShareableEntityRepository[A],
         accessPrivilegeClass: Class[_],
         val ownedEntitiesGetter: User => Seq[A])
@@ -32,7 +32,7 @@ trait EntityModelComponent
             val public = repository.getAllPublic
             val owned = getOwnedByUser(user)
             val granted = getGrantedToUser(user, groupRepository.getAll())
-            (public ++ owned ++ granted).distinct
+            (public ++ owned ++ granted).distinct.sortBy(_.name)
         }
 
         def getAccessibleToUserById(user: Option[User], id: String): Option[A] = {
@@ -46,7 +46,7 @@ trait EntityModelComponent
             } else {
                 getGrantedToUser(user, owner.ownedGroups)
             }
-            (publicEntities ++ entitiesOfOwner).distinct
+            (publicEntities ++ entitiesOfOwner).distinct.sortBy(_.name)
         }
 
         private def getGrantedToUser(user: Option[User], groups: Seq[Group]): Seq[A] = {

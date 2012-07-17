@@ -319,6 +319,57 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 }
         }
+
+        it("try/catch with return value is supported") {
+            configMap =>
+                scalaCode {
+                    """
+                        class A {
+                            def m() {
+                                val x = try {
+                                    "success"
+                                } catch {
+                                    case _: RuntimeException => "runtime exception"
+                                    case _: Exception => "exeption"
+                                    case _ => "unknown exception"
+                                }
+                            }
+                        }
+                    """
+                } shouldCompileTo {
+                    """
+                        s2js.runtime.client.ClassLoader.provide('A');
+
+                        A = function() { var self = this; };
+
+                        A.prototype.m = function() {
+                            var self = this;
+                            var x = (function() {
+                                var $tryReturnValue$1 = undefined;
+                                try {
+                                    $tryReturnValue$1 = (function() {
+                                        return 'success';
+                                    })();
+                                } catch ($ex$2) {
+                                    $tryReturnValue$1 = (function() {
+                                        if (s2js.runtime.client.isInstanceOf($ex$2, 'scala.RuntimeException')) {
+                                            return 'runtime exception';
+                                        }
+                                        if (s2js.runtime.client.isInstanceOf($ex$2, 'scala.Exception')) {
+                                            return 'exeption';
+                                        } if (true) {
+                                            return 'unknown exception';
+                                        }
+                                        throw $ex$2;
+                                    })();
+                                }
+                                return $tryReturnValue$1;
+                            })();
+                        };
+                        A.prototype.__class__ = new s2js.runtime.client.Class('A', []);
+                    """
+                }
+        }
     }
 
     describe("Match statements") {

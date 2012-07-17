@@ -13,7 +13,7 @@ import cz.payola.domain.entities.User
     }
 
     @async def getPlugins(user: User = null)(successCallback: (Seq[Plugin] => Unit))(failCallback: (Throwable => Unit)) {
-        successCallback(Payola.model.pluginModel.getAll)
+        successCallback(Payola.model.pluginModel.getAll())
     }
 
     def lockAnalysis(id: String, user: User = null) {
@@ -52,7 +52,7 @@ import cz.payola.domain.entities.User
         successCallback(true)
     }
 
-    @async def deletePluginInstance(analysisId: String, pluginInstanceId: String)(successCallback: (Boolean => Unit))
+    @async def deletePluginInstance(analysisId: String, pluginInstanceId: String, user: User = null)(successCallback: (Boolean => Unit))
         (failCallback: (Throwable => Unit)) {
         Payola.model.analysisModel.removePluginInstanceById(analysisId, pluginInstanceId)
         successCallback(true)

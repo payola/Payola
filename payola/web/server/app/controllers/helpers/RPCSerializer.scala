@@ -55,6 +55,10 @@ class RPCSerializer extends JSONSerializer
     val analysisPluginInstanceBindings = new CustomValueSerializationRule[Analysis]("_pluginInstanceBindings", (serializer, analysis) => analysis.pluginInstanceBindings)
     this.addSerializationRule(analysisClass,analysisPluginInstanceBindings)
 
+    val dataSourceClass = new SimpleSerializationClass(classOf[DataSource])
+    val dataSourceRule = new BasicSerializationRule(Some(classOf[DataSource]))
+    this.addSerializationRule(dataSourceClass, dataSourceRule)
+
     val pluginInstanceClass = new SimpleSerializationClass(classOf[PluginInstance])
     val pluginInstanceRule = new BasicSerializationRule(Some(classOf[PluginInstance]))
     this.addSerializationRule(pluginInstanceClass, pluginInstanceRule)
@@ -75,16 +79,18 @@ class RPCSerializer extends JSONSerializer
     val pluginRule = new BasicSerializationRule(Some(classOf[Plugin]))
     this.addSerializationRule(pluginClass, pluginRule)
 
+    val stringParamValueClass = new SimpleSerializationClass(classOf[ParameterValue[_]])
+    val stringParamValueRule = new BasicSerializationRule(Some(classOf[ParameterValue[_]]), Some(List("value")))
+    val paramValueAlias = new CustomValueSerializationRule[ParameterValue[_]]("_value", (serializer, v) => v.value)
+    this.addSerializationRule(stringParamValueClass, stringParamValueRule)
+    this.addSerializationRule(stringParamValueClass, paramValueAlias)
+
     val stringParamClass = new SimpleSerializationClass(classOf[StringParameter])
     val stringParamRule = new BasicSerializationRule(Some(classOf[StringParameter]))
     this.addSerializationRule(stringParamClass, stringParamRule)
 
-    val stringParamValueClass = new SimpleSerializationClass(classOf[ParameterValue[_]])
-    val stringParamValueRule = new BasicSerializationRule(Some(classOf[ParameterValue[_]]))
-    this.addSerializationRule(stringParamValueClass, stringParamValueRule)
-
     val boolParamClass = new SimpleSerializationClass(classOf[BooleanParameter])
-    val boolParamRule = new BasicSerializationRule(Some(classOf[StringParameter]))
+    val boolParamRule = new BasicSerializationRule(Some(classOf[BooleanParameter]))
     this.addSerializationRule(boolParamClass, boolParamRule)
 
     val floatParamClass = new SimpleSerializationClass(classOf[FloatParameter])

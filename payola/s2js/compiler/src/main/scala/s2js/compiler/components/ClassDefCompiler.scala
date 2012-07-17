@@ -854,20 +854,41 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
             throw new ScalaToJsException("The finally statement in try-catch-finally isn't supported.")
         }
 
+        val hasReturn = !packageDefCompiler.typeIsEmpty(tryAst.tpe)
+        val returnValueName = if (hasReturn) packageDefCompiler.getUniqueLocalName("tryReturnValue") else ""
+        if (hasReturn) {
+            buffer += "(function() {\n"
+            buffer += "var %s = undefined;\n".format(returnValueName)
+        }
+
         // Try.
         buffer += "try {\n"
-        compileAstStatement(tryAst.block)
+        if (hasReturn) {
+            buffer += "%s = (function() {\n".format(returnValueName)
+        }
+        compileAstStatement(tryAst.block, hasReturn)
+        if (hasReturn) {
+            buffer += "})();\n"
+        }
 
         // Catch.
         val exceptionName = packageDefCompiler.getUniqueLocalName("ex")
         buffer += "} catch (%s) {\n".format(exceptionName)
+        if (hasReturn) {
+            buffer += "%s = ".format(returnValueName)
+        }
         buffer += "(function() {\n"
-        tryAst.catches.foreach(c => compileCase(c, exceptionName, false))
+        tryAst.catches.foreach(c => compileCase(c, exceptionName, hasReturn))
 
         // If no one of the catch cases matched the exception, then the exception should be propagated further.
         buffer += "throw %s;\n".format(exceptionName)
         buffer += "})();\n"
         buffer += "}\n"
+
+        if (hasReturn) {
+            buffer += "return %s;\n".format(returnValueName)
+            buffer += "})()"
+        }
     }
 
     /**
