@@ -23,6 +23,7 @@ trait GroupRepositoryComponent extends TableRepositoryComponent
             join(schema.groups, schema.users, schema.groupMembership.leftOuter, schema.users.leftOuter)((g, o, a, u) =>
                 where(entityFilter(g))
                 select(g, o, u)
+                orderBy(g.name asc)
                 on(g.ownerId === o.id, Option(g.id) === a.map(_.groupId), a.map(_.memberId) === u.map(_.id))
             )
         }
