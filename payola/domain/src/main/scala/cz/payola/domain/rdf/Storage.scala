@@ -24,6 +24,13 @@ trait Storage
     def storeGraph(graphURI: String, rdfXml: String)
 
     /**
+      * Stores the graph in the storage.
+      * @param graphURI URI of the graph.
+      * @param graphURL URL at which to fetch the graph.
+      */
+    def storeGraphAtURL(graphURI: String, graphURL: String)
+
+    /**
       * Adds a graph with the specified URI to the specified group. A graph with must already exist on the server.
       * @param graphURI URI of the graph.
       * @param groupURI URI of the group.

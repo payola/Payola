@@ -65,9 +65,7 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
                 AnalysisBuilderData.createEmptyAnalysis(nameComponent.input.value) {
                     id =>
                         analysisId = id
-                        AnalysisBuilderData.lockAnalysis(id)
-                        AnalysisBuilderData.getPlugins() { plugins => allPlugins = plugins}
-                        { error => window.alert("Unable to load plugins")}
+                        lockAnalysisAndLoadPlugins()
                 } { error => window.alert("Unable to create analysis")}
 
                 name.input.value = nameComponent.input.value
@@ -82,6 +80,12 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
             window.location.href = "/dashboard"
             false
         }
+    }
+
+    protected def lockAnalysisAndLoadPlugins() = {
+        AnalysisBuilderData.lockAnalysis(analysisId)
+        AnalysisBuilderData.getPlugins() { plugins => allPlugins = plugins}
+        { error => window.alert("Unable to load plugins")}
     }
 
     name.input.changed += { eventArgs =>
@@ -205,7 +209,7 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
         }
     }
 
-    def onParameterValueChanged(args: EventArgs[ParameterValue]) {
+    protected def onParameterValueChanged(args: EventArgs[ParameterValue]) {
         val parameterInfo = args.target
         val parameterId = parameterInfo.parameterId
 

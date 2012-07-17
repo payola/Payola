@@ -4,7 +4,7 @@ import cz.payola.web.client.views._
 import s2js.adapters.js.dom
 import cz.payola.web.client.events.BrowserEvent
 
-class Input(name: String, initialValue: String, title: Option[String], cssClass: String = "")
+class Input(name: String, initialValue: String, title: Option[String], cssClass: String = "", inputType: String = "text")
     extends ElementView[dom.Input]("input", Nil, cssClass)
 {
     val changed = new BrowserEvent[Input]
@@ -14,7 +14,7 @@ class Input(name: String, initialValue: String, title: Option[String], cssClass:
     value = initialValue
     setAttribute("name", name)
     setAttribute("id", name)
-    setAttribute("type", "text")
+    setAttribute("type", inputType)
     title.map { t =>
         setAttribute("placeholder", t)
         setAttribute("title", t)

@@ -5,6 +5,8 @@ import cz.payola.web.shared.AnalysisBuilderData
 import scala.collection.mutable.ArrayBuffer
 import s2js.runtime.client.scala.collection.mutable.HashMap
 import cz.payola.common.entities
+import s2js.runtime.client.scala.collection.immutable
+import scala.collection.mutable
 
 class AnalysisEditor(analysisIdP: String, menuHolder: String, pluginsHolder: String, nameHolder: String)
     extends AnalysisBuilder(menuHolder, pluginsHolder, nameHolder)
@@ -15,6 +17,11 @@ class AnalysisEditor(analysisIdP: String, menuHolder: String, pluginsHolder: Str
 
     override def init {
         AnalysisBuilderData.getAnalysis(analysisIdP) { analysis =>
+
+            analysisId = analysis.id
+
+            lockAnalysisAndLoadPlugins
+
             setAnalysisNameToInputControl(analysis)
 
             val sources = new ArrayBuffer[PluginInstance]
@@ -91,6 +98,13 @@ class AnalysisEditor(analysisIdP: String, menuHolder: String, pluginsHolder: Str
             clientInstance.hideDeleteButton()
             creationMap.put(instance.id, clientInstance)
 
+            clientInstance.parameterValueChanged += onParameterValueChanged
+            clientInstance.deleteButtonClicked += onDeleteClick
+            clientInstance.connectButtonClicked += {e =>
+                connectPlugin(clientInstance)
+                false
+            }
+
             if (!analysis.pluginInstanceBindings.find(_.sourcePluginInstance == instance).isDefined) {
                 lanes += clientInstance
                 clientInstance.showDeleteButton()
@@ -104,7 +118,9 @@ class AnalysisEditor(analysisIdP: String, menuHolder: String, pluginsHolder: Str
         }
     }
 
-    private def getDefaultValues(instance: entities.plugins.PluginInstance): Map[String, String] = {
-        instance.parameterValues.map { v => (v.parameter.name, v.value.toString)}.toMap
+    private def getDefaultValues(instance: entities.plugins.PluginInstance): mutable.HashMap[String, String] = {
+        val map = new mutable.HashMap[String, String]
+        instance.parameterValues.map { v => map.put(v.parameter.name, v.value.toString)}
+        map
     }
 }
