@@ -212,6 +212,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
 
                         pkg.A = function() {
                             var self = this;
+                            self.i = '';
                         };
                         pkg.A.prototype.__class__ = new s2js.runtime.client.Class('pkg.A', []);
 
@@ -219,7 +220,8 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             var self = this;
                             self.v1 = v1;
                             self.v2 = v2;
-                            goog.base(self);
+                            pkg.A.apply(self, []);
+                            self.d = (self.i + self.i);
                         };
                         goog.inherits(pkg.C, pkg.A);
                         pkg.C.prototype.__class__ = new s2js.runtime.client.Class('pkg.C', [pkg.A]);
@@ -244,7 +246,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
 
                         pkg.B = function() {
                             var self = this;
-                            goog.base(self);
+                            pkg.A.apply(self, []);
                         };
                         goog.inherits(pkg.B, pkg.A);
                         goog.object.extend(pkg.B.prototype, new pkg.T2());
@@ -281,7 +283,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
 
                         pkg.B = function() {
                             var self = this;
-                            goog.base(self, 'test', 123);
+                            pkg.A.apply(self, ['test', 123]);
                         };
                         goog.inherits(pkg.B, pkg.A);
                         pkg.B.prototype.__class__ = new s2js.runtime.client.Class('pkg.B', [pkg.A]);
@@ -290,7 +292,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             var self = this;
                             self.v1 = v1;
                             self.v2 = v2;
-                            goog.base(self, v1, v2);
+                            pkg.A.apply(self, [v1, v2]);
                         };
                         goog.inherits(pkg.C, pkg.A);
                         pkg.C.prototype.__class__ = new s2js.runtime.client.Class('pkg.C', [pkg.A]);
@@ -319,7 +321,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                             self.x = x;
                             self.y = y;
                             self.z = z;
-                            goog.base(self);
+                            scala.Product.apply(self, []);
                         };
                         goog.inherits(A, scala.Product);
                         A.prototype.copy = function(x, y, z) {

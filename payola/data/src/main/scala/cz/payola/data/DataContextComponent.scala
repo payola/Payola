@@ -106,7 +106,7 @@ trait DataContextComponent
       * A repository that contains shareable entities.
       * @tparam A Type of the entities in the repository.
       */
-    trait ShareableEntityRepository[+A <: ShareableEntity with OptionallyOwnedEntity]
+    trait ShareableEntityRepository[+A <: ShareableEntity with OptionallyOwnedEntity with NamedEntity]
         extends OptionallyOwnedEntityRepository[A]
     {
         /**

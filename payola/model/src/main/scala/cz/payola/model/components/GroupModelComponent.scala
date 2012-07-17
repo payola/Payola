@@ -15,7 +15,7 @@ trait GroupModelComponent extends EntityModelComponent
         }
 
         def findAvailableMembers(group: Group, owner: User, term: String) : Seq[User] = {
-            userRepository.getAllWithNameLike(term).diff(owner +: group.members)
+            userRepository.getAllWithNameLike(term).diff(owner +: group.members).sortBy(_.name)
         }
     }
 }
