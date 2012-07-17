@@ -18,18 +18,16 @@ trait View[A]
     /**
       * Routine for drawing the graphical representation of graphs objects.
       * @param context to which container to draw
-      * @param color which color to use
       * @param positionCorrection to modify the position of the drawn object
       */
-    def draw(context: A, color: Option[Color], positionCorrection: Vector2D)
+    def draw(context: A, positionCorrection: Vector2D)
 
     /**
       * Routine for fast drawing of the graphical representation of graphs objects. Should be used for animation
       * @param context to which container to draw
-      * @param color which color to use
       * @param positionCorrection to modify the position of the drawn object
       */
-    def drawQuick(context: A, color: Option[Color], positionCorrection: Vector2D)
+    def drawQuick(context: A, positionCorrection: Vector2D)
 
     /**
       * Draws a rectangle with rounded corners, depending on the radius parameter to the input canvas context.
@@ -133,10 +131,21 @@ trait View[A]
     protected def drawArrow(context: CanvasRenderingContext2D, origin: Point2D, destination: Point2D,
         offset: Double, lineWidth: Double, color: Color) {
 
-        val arrowPointingTo = getArrowOriginPoint(destination - origin, destination, offset)
-        if(arrowPointingTo.isDefined) {
-            drawStraightLine(context, origin, arrowPointingTo.get, lineWidth, color)
-            drawArrowEnd(context, arrowPointingTo.get - origin, arrowPointingTo.get, lineWidth, color)
+        var arrowPointingFrom: Option[Point2D] = None
+        var arrowPointingTo: Option[Point2D] = None
+
+        if(origin.distance(destination) >= 2 * offset) {
+
+            arrowPointingFrom = getArrowOriginPoint(origin - destination, origin, offset)
+            arrowPointingTo = getArrowOriginPoint(destination - origin, destination, offset)
+        } else {
+            arrowPointingFrom = getArrowOriginPoint(destination - origin, destination, offset)
+            arrowPointingTo = getArrowOriginPoint(origin - destination, origin, offset)
+        }
+
+        if(arrowPointingTo.isDefined && arrowPointingFrom.isDefined) {
+            drawStraightLine(context, arrowPointingFrom.get, arrowPointingTo.get, lineWidth, color)
+            drawArrowEnd(context, arrowPointingTo.get - arrowPointingFrom.get, arrowPointingTo.get, lineWidth, color)
         } else {
             drawStraightLine(context, origin, destination, lineWidth, color)
         }

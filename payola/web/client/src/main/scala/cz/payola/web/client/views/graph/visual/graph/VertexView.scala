@@ -6,6 +6,7 @@ import s2js.adapters.js.dom.CanvasRenderingContext2D
 import cz.payola.web.client.views.graph.visual.settings._
 import cz.payola.web.client.views.graph.visual.Color
 import cz.payola.web.client.views.algebra._
+import cz.payola.web.client.views.graph.visual.graph.positioning.LocationDescriptor
 
 /**
   * Graphical representation of Vertex object in the drawn graph.
@@ -71,35 +72,29 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var s
     }
 
     def isPointInside(point: Point2D): Boolean = {
-        isPointInRect(point, position + (new Vector2D(settings.radius, settings.radius) / -2),
-            position + (new Vector2D(settings.radius, settings.radius) / 2))
+        isPointInRect(point, position + (new Vector2D(-settings.radius, -settings.radius)),
+            position + (new Vector2D(settings.radius, settings.radius)))
     }
 
-    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D) {
-        drawQuick(context, color, positionCorrection)
-        //drawImage(context, image, position + Vector2D(-10, -10), Vector2D(20, 20))
+    def draw(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
+
+        drawQuick(context, positionCorrection)
 
         if(information.isDefined) {
-            information.get.draw(context, Some(settingsText.color), positionCorrection)
+            information.get.draw(context,
+                (LocationDescriptor.getVertexInformationPosition(position) + positionCorrection).toVector)
         }
     }
 
-    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D) {
-        val colorToUseOnBox = color.getOrElse(settings.color)
+    def drawQuick(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
+
         val correctedPosition = this.position + positionCorrection
 
-        drawCircle(context, correctedPosition, settings.radius / 2, 2, Color.Black)
-        fillCurrentSpace(context, colorToUseOnBox)
-    }
-
-    def drawInformation(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D) {
-        if (information.isDefined) {
-            vertexModel match {
-                case i: IdentifiedVertex => information.get.draw(context, color, positionCorrection)
-                case _ => if (selected) {
-                    information.get.draw(context, color, positionCorrection)
-                }
-            }
+        drawCircle(context, correctedPosition, settings.radius, 2, Color.Black)
+        if(isSelected) {
+            fillCurrentSpace(context, settings.colorSelected)
+        } else {
+            fillCurrentSpace(context, settings.color)
         }
     }
 

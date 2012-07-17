@@ -5,6 +5,7 @@ import s2js.adapters.js.dom.CanvasRenderingContext2D
 import cz.payola.web.client.views.graph.visual.Color
 import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.VisualSetup
+import cz.payola.web.client.views.graph.visual.graph.positioning.LocationDescriptor
 
 /**
   * Structure used during draw function of EdgeView. Helps to indicate position of vertices to each other.
@@ -119,19 +120,20 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
     private def prepareStraight(context: CanvasRenderingContext2D, color: Color, correction: Vector2D) {
 
         drawArrow(context, originView.position, destinationView.position,
-            settings.vertexModel.radius, settings.edgesModel.width, color)
+            settings.vertexModel.radius + settings.vertexModel.radius / 2, settings.edgesModel.width, color)
     }
 
-    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D) {
+    def draw(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
 
-        drawQuick(context, color, positionCorrection)
-        information.draw(context, Some(settings.textModel.color), positionCorrection)
+        drawQuick(context, positionCorrection)
+        if (isSelected) {
+            information.draw(context, (LocationDescriptor.getEdgeInformationPosition(originView.position,
+                destinationView.position) + positionCorrection).toVector)
+        }
     }
 
-    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D) {
-        val colorToUse = color.getOrElse(
-            if(isSelected) settings.edgesModel.colorSelected else settings.edgesModel.color
-        )
+    def drawQuick(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
+        val colorToUse = if(isSelected) { settings.edgesModel.colorSelected } else { settings.edgesModel.color }
 
         if(1 <= settings.edgesModel.straightenIndex && settings.edgesModel.straightenIndex <= 6) {
             prepareBezierCurve(context, colorToUse, Vector2D.Zero)

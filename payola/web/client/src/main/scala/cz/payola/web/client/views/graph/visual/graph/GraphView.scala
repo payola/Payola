@@ -442,51 +442,56 @@ class GraphView(val container: dom.Element, val settings: VisualSetup) extends
     //drawing############################################################################################################
     //###################################################################################################################
 
-    def draw(canvasPack: CanvasPack, color: Option[Color], positionCorrection: Vector2D) {
-        //fitCanvas()
-
-        var colorVertex: Option[Color] = Some(Color.Black)
+    def draw(canvasPack: CanvasPack, positionCorrection: Vector2D) {
 
         val vertexViews = getAllVertices
         val edgeViews = getAllEdges
 
+        var selectedVerticesDrawn = false
+        var deselectedVerticesDrawn = false
         vertexViews.foreach { vertexView =>
 
-            if (color != None) {
-                colorVertex = Some(color.get)
-            } else if (vertexView.isSelected) {
-                colorVertex = Some(settings.vertexModel.colorSelected)
-            } else if (edgeViews.exists(edgeView =>
-                TODO_RenameThisMethod(edgeView, vertexView))) {
-                //                colorVertex = Some(settings.vertexModel.colorMed)
-            } else if (getAllSelectedVerticesCount == 0) {
-                colorVertex = None
-            } else {
-                colorVertex = Some(settings.vertexModel.color)
-            }
-
             if(vertexView.isSelected) {
-                vertexView.draw(canvasPack.verticesSelected.context, colorVertex, positionCorrection)
-                canvasPack.verticesSelected.dirty()
+                if(canvasPack.verticesSelected.isClear) {
+                    vertexView.draw(canvasPack.verticesSelected.context, positionCorrection)
+                    selectedVerticesDrawn = true
+                }
             } else {
-                vertexView.draw(canvasPack.verticesDeselected.context, colorVertex, positionCorrection)
-                canvasPack.verticesDeselected.dirty()
+                if(canvasPack.verticesDeselected.isClear) {
+                    vertexView.draw(canvasPack.verticesDeselected.context, positionCorrection)
+                    deselectedVerticesDrawn = true
+                }
             }
         }
+        if(selectedVerticesDrawn) {
+            canvasPack.verticesSelected.dirty()
+        }
+        if(deselectedVerticesDrawn) {
+            canvasPack.verticesDeselected.dirty()
+        }
 
+
+        var selectedEdgesDrawn = false
+        var deselectedEdgesDrawn = false
         edgeViews.foreach { edgeView =>
 
-            if (edgeView.areBothVerticesSelected) {
-                edgeView.information.setSelectedForDrawing()
-            }
-
             if(edgeView.isSelected) {
-                edgeView.draw(canvasPack.edgesSelected.context, color, positionCorrection)
-                canvasPack.edgesSelected.dirty()
+                if(canvasPack.edgesSelected.isClear) {
+                    edgeView.draw(canvasPack.edgesSelected.context, positionCorrection)
+                    selectedEdgesDrawn = true
+                }
             } else {
-                edgeView.draw(canvasPack.edgesDeselected.context, color, positionCorrection)
-                canvasPack.edgesDeselected.dirty()
+                if(canvasPack.edgesDeselected.isClear) {
+                    edgeView.draw(canvasPack.edgesDeselected.context, positionCorrection)
+                    deselectedEdgesDrawn = true
+                }
             }
+        }
+        if(selectedEdgesDrawn) {
+            canvasPack.edgesSelected.dirty()
+        }
+        if(deselectedEdgesDrawn) {
+            canvasPack.edgesDeselected.dirty()
         }
     }
 
@@ -495,38 +500,55 @@ class GraphView(val container: dom.Element, val settings: VisualSetup) extends
             (edgeView.destinationView.eq(vertexView) && edgeView.originView.selected)
     }
 
-    def drawQuick(canvasPack: CanvasPack, color: Option[Color], positionCorrection: Vector2D) {
+    def drawQuick(canvasPack: CanvasPack, positionCorrection: Vector2D) {
         val vertexViews = getAllVertices
         val edgeViews = getAllEdges
 
+        var selectedVerticesDrawn = false
+        var deselectedVerticesDrawn = false
         vertexViews.foreach { vertexView =>
 
-            val colorToUseVertex = if (color != None) {
-                Some(color.get)
-            } else if (vertexView.selected) {
-                Some(settings.vertexModel.colorSelected)
-            } else {
-                Some(settings.vertexModel.color)
-            }
-
             if(vertexView.isSelected) {
-                vertexView.drawQuick(canvasPack.verticesSelected.context, colorToUseVertex, positionCorrection)
-                canvasPack.verticesSelected.dirty()
+                if(canvasPack.verticesSelected.isClear) {
+                    vertexView.drawQuick(canvasPack.verticesSelected.context, positionCorrection)
+                    selectedVerticesDrawn = true
+                }
             } else {
-                vertexView.drawQuick(canvasPack.verticesDeselected.context, colorToUseVertex, positionCorrection)
-                canvasPack.verticesDeselected.dirty()
+                if(canvasPack.verticesDeselected.isClear) {
+                    vertexView.drawQuick(canvasPack.verticesDeselected.context, positionCorrection)
+                    deselectedVerticesDrawn = true
+                }
             }
         }
+        if(selectedVerticesDrawn) {
+            canvasPack.verticesSelected.dirty()
+        }
+        if(deselectedVerticesDrawn) {
+            canvasPack.verticesDeselected.dirty()
+        }
 
+
+        var selectedEdgesDrawn = false
+        var deselectedEdgesDrawn = false
         edgeViews.foreach { edgeView =>
 
             if(edgeView.isSelected) {
-                edgeView.drawQuick(canvasPack.edgesSelected.context, color, positionCorrection)
-                canvasPack.edgesSelected.dirty()
+                if(canvasPack.edgesSelected.isClear) {
+                    edgeView.drawQuick(canvasPack.edgesSelected.context, positionCorrection)
+                    selectedEdgesDrawn = true
+                }
             } else {
-                edgeView.drawQuick(canvasPack.edgesDeselected.context, color, positionCorrection)
-                canvasPack.edgesDeselected.dirty()
+                if(canvasPack.edgesDeselected.isClear) {
+                    edgeView.drawQuick(canvasPack.edgesDeselected.context, positionCorrection)
+                    deselectedEdgesDrawn = true
+                }
             }
+        }
+        if(selectedEdgesDrawn) {
+            canvasPack.edgesSelected.dirty()
+        }
+        if(deselectedEdgesDrawn) {
+            canvasPack.edgesDeselected.dirty()
         }
     }
 
@@ -540,7 +562,7 @@ class GraphView(val container: dom.Element, val settings: VisualSetup) extends
         graphOperation match {
             case RedrawOperation.Movement =>
                 canvasPack.clearForMovement()
-                draw(canvasPack, None, Vector2D.Zero)
+                draw(canvasPack, Vector2D.Zero)
             //^because elements are drawn into separate layers, redraw(..) does not know to which context to draw
 
             case RedrawOperation.Selection =>
@@ -548,10 +570,9 @@ class GraphView(val container: dom.Element, val settings: VisualSetup) extends
 
             case RedrawOperation.Animation =>
                 canvasPack.clear()
-                drawQuick(canvasPack, None, Vector2D.Zero)
+                drawQuick(canvasPack, Vector2D.Zero)
 
             case RedrawOperation.All =>
-                canvasPack.clear()
                 redrawAll(canvasPack)
 
             case _ =>
@@ -564,7 +585,7 @@ class GraphView(val container: dom.Element, val settings: VisualSetup) extends
       */
     def redrawAll(canvasPack: CanvasPack) {
         canvasPack.clear()
-        draw(canvasPack, None, Vector2D.Zero)
+        draw(canvasPack, Vector2D.Zero)
         //^because elements are drawn into separate layers, redraw(..) does not know to which context to draw
     }
 
