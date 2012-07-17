@@ -63,16 +63,16 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         // Update test
         user.email = "email"
         user.password = "password"
-        val x = userRepository.persist(user)
-        assert(x.email == "email")
-        assert(x.password == "password")
+        var u = userRepository.persist(user)
+        assert(u.email == user.email)
+        assert(u.password == user.password)
+        assert(u.name == u1.name)
 
-        val u = userRepository.getById(user.id)
-        assert(u != None)
-        assert(u.get.id == user.id)
-        assert(u.get.name == user.name)
-        assert(u.get.password == user.password)
-        assert(u.get.email == user.email)
+        u = userRepository.getById(user.id).get
+        assert(u.id == u1.id)
+        assert(u.name == u1.name)
+        assert(u.password == user.password)
+        assert(u.email == user.email)
 
         assert(userRepository.getAllWithNameLike("h")(0).id == u2.id)
         assert(userRepository.getAllWithNameLike("J")(0).id == u3.id)
@@ -89,22 +89,22 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     }
 
     private def persistGroups {
-        val group1 = groupRepository.persist(g1)
-        val group2 = groupRepository.persist(g2)
-        val group3 = groupRepository.persist(g3)
-        val group4 = groupRepository.persist(g4)
-        val group5 = groupRepository.persist(g5)
+        groupRepository.persist(g1)
+        groupRepository.persist(g2)
+        groupRepository.persist(g3)
+        groupRepository.persist(g4)
+        groupRepository.persist(g5)
 
-        var g = groupRepository.getById(group1.id)
+        var g = groupRepository.getById(g1.id)
             assert(g != None)
-            assert(g.get.id == group1.id)
-            assert(g.get.name == group1.name)
+            assert(g.get.id == g1.id)
+            assert(g.get.name == g1.name)
             assert(g.get.owner.id == u1.id)
 
-        g = groupRepository.getById(group2.id)
+        g = groupRepository.getById(g2.id)
             assert(g != None)
-            assert(g.get.id == group2.id)
-            assert(g.get.name == group2.name)
+            assert(g.get.id == g2.id)
+            assert(g.get.name == g2.name)
             assert(g.get.owner.id == u2.id)
 
         var user = userRepository.getById(u1.id).get
@@ -157,13 +157,13 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
                 assert(p1.parameters.size == p.parameters.size)
 
             // assert all parameters have proper IDs
-            for (param <- p2.parameters) {
+            for (param <- p1.parameters) {
                 assert(p.parameters.find(_.id == param.id).get.name == param.name)
                 assert(p.parameters.find(_.id == param.id).get.defaultValue == param.defaultValue)
             }
 
             // assert all parameters have proper IDs
-            for (param <- p1.parameters) {
+            for (param <- p2.parameters) {
                 assert(p.parameters.find(_.id == param.id).get.name == param.name)
                 assert(p.parameters.find(_.id == param.id).get.defaultValue == param.defaultValue)
             }
