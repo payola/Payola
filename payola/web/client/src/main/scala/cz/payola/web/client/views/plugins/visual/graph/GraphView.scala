@@ -242,7 +242,7 @@ class GraphView(val container: dom.Element, val settings: VisualSetup) extends V
         val destination = getVertexForEdgeConstruct(edgeModel.destination, vertexViews)
         if(destination.isDefined && origin.isDefined) {
             val createdEdgeView = new EdgeView(
-                edgeModel, origin.get, destination.get, settings.edgesModel, settings.textModel)
+                edgeModel, origin.get, destination.get, settings)
             destination.get.edges += createdEdgeView
             origin.get.edges += createdEdgeView
             Some(createdEdgeView)

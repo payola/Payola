@@ -5,6 +5,7 @@ import s2js.adapters.js.dom.CanvasRenderingContext2D
 import cz.payola.web.client.views.plugins.visual._
 import settings.{TextSettingsModel, EdgeSettingsModel}
 import cz.payola.web.client.views._
+import cz.payola.web.client.views.plugins.visual.settings.components.visualsetup.VisualSetup
 
 /**
   * Structure used during draw function of EdgeView. Helps to indicate position of vertices to each other.
@@ -28,12 +29,12 @@ private object Quadrant
   * @param destinationView of this graphical representation in drawing space
   */
 class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationView: VertexView,
-    val settings: EdgeSettingsModel, settingsText: TextSettingsModel) extends View {
-    
+    val settings: VisualSetup) extends View {
+
     /**
       * Textual data that should be visualised with this edge ("over this edge").
       */
-    val information: InformationView = new InformationView(edgeModel, settingsText)
+    val information: InformationView = new InformationView(edgeModel, settings.textModel)
 
     /**
       * Indicator of selection of this graphs element. Is used during color selection in draw function.
@@ -84,15 +85,15 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
             quadrant match {
                 case Quadrant.RightBottom | Quadrant.RightTop =>
                     //we are in (0, pi/4] or in (pi7/4, 2pi]
-                    ctrl1.x = A.x + diff.x / settings.straightenIndex
+                    ctrl1.x = A.x + diff.x / settings.edgesModel.straightenIndex
                     ctrl1.y = A.y
-                    ctrl2.x = B.x - diff.x / settings.straightenIndex
+                    ctrl2.x = B.x - diff.x / settings.edgesModel.straightenIndex
                     ctrl2.y = B.y
                 case Quadrant.LeftBottom | Quadrant.LeftTop =>
                     //we are in (pi3/4, pi] or in (pi, pi5/4]
-                    ctrl1.x = A.x - diff.x / settings.straightenIndex
+                    ctrl1.x = A.x - diff.x / settings.edgesModel.straightenIndex
                     ctrl1.y = A.y
-                    ctrl2.x = B.x + diff.x / settings.straightenIndex
+                    ctrl2.x = B.x + diff.x / settings.edgesModel.straightenIndex
                     ctrl2.y = B.y
             }
         } else {
@@ -101,29 +102,28 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
                 case Quadrant.RightBottom | Quadrant.LeftBottom =>
                     //we are in (pi/4, pi/2] or in (pi/2, pi3/4]
                     ctrl1.x = A.x
-                    ctrl1.y = A.y + diff.y / settings.straightenIndex
+                    ctrl1.y = A.y + diff.y / settings.edgesModel.straightenIndex
                     ctrl2.x = B.x
-                    ctrl2.y = B.y - diff.y / settings.straightenIndex
+                    ctrl2.y = B.y - diff.y / settings.edgesModel.straightenIndex
                 case Quadrant.RightTop | Quadrant.LeftTop =>
                     //we are in (pi5/4, pi3/2] or in (pi3/2, pi7/4]
                     ctrl1.x = A.x
-                    ctrl1.y = A.y - diff.y / settings.straightenIndex
+                    ctrl1.y = A.y - diff.y / settings.edgesModel.straightenIndex
                     ctrl2.x = B.x
-                    ctrl2.y = B.y + diff.y / settings.straightenIndex
+                    ctrl2.y = B.y + diff.y / settings.edgesModel.straightenIndex
             }
         }
-        
+
         drawBezierCurve(context, ctrl1 + correction, ctrl2 + correction, A + correction, B + correction,
-            settings.width, color)
+            settings.edgesModel.width, color)
     }
-    
+
     private def prepareStraight(context: CanvasRenderingContext2D, color: Color, correction: Vector2D) {
-        
-        drawStraightLine(context,
-            destinationView.position + correction, originView.position + correction,
-            settings.width, color)
+
+        drawArrow(context, originView.position, destinationView.position,
+            settings.vertexModel.radius, settings.edgesModel.width, color)
     }
-    
+
     def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D) {
 
         drawQuick(context, color, positionCorrection)
@@ -132,10 +132,10 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
     def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D) {
 
         val colorToUse = color.getOrElse(
-            if(isSelected) settings.colorSelected else settings.color
+            if(isSelected) settings.edgesModel.colorSelected else settings.edgesModel.color
         )
 
-        if(1 <= settings.straightenIndex && settings.straightenIndex <= 6) {
+        if(1 <= settings.edgesModel.straightenIndex && settings.edgesModel.straightenIndex <= 6) {
             prepareBezierCurve(context, colorToUse, Vector2D.Zero)
         } else {
             prepareStraight(context, colorToUse, Vector2D.Zero)
