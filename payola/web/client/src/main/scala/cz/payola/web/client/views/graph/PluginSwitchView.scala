@@ -1,6 +1,6 @@
 package cz.payola.web.client.views.graph
 
-import cz.payola.common.rdf.Graph
+import cz.payola.common.rdf._
 import cz.payola.web.client.views._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.Icon
@@ -29,8 +29,9 @@ class PluginSwitchView extends GraphView with ComposedView
 
     // Re-trigger all events when the corresponding events are triggered in the plugins.
     plugins.foreach { plugin =>
-        plugin.vertexSelected += { e => vertexSelected.trigger(new VertexEventArgs[this.type](this, e.vertex)) }
-        plugin.vertexBrowsing += { e => vertexBrowsing.trigger(new VertexEventArgs[this.type](this, e.vertex)) }
+        plugin.vertexSelected += { e => vertexSelected.trigger(createVertexEventArgs(e.vertex)) }
+        plugin.vertexBrowsing += { e => vertexBrowsing.trigger(createVertexEventArgs(e.vertex)) }
+        plugin.vertexBrowsingDataSource += { e => vertexBrowsingDataSource.trigger(createVertexEventArgs(e.vertex)) }
     }
 
     // Display the first plugin.
@@ -58,7 +59,7 @@ class PluginSwitchView extends GraphView with ComposedView
         }
         val pluginList = new UnorderedList(pluginListItems, "dropdown-menu")
         val controls = new Div(List(pluginChangeAnchor, pluginList), "btn-group")
-        controls.setAttribute("style", "padding-bottom: 20px;")
+        controls.setAttribute("style", "margin-bottom: 15px;")
 
         List(controls, pluginSpace)
     }
@@ -74,5 +75,9 @@ class PluginSwitchView extends GraphView with ComposedView
             currentPlugin.render(pluginSpace.domElement)
             currentPlugin.updateGraph(currentGraph)
         }
+    }
+
+    private def createVertexEventArgs(vertex: IdentifiedVertex): VertexEventArgs[this.type] = {
+        new VertexEventArgs[this.type](this, vertex)
     }
 }

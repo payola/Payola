@@ -1,4 +1,37 @@
-@(user: cz.payola.domain.entities.User)
+@(user: Option[cz.payola.domain.entities.User], analyses: Seq[cz.payola.domain.entities.Analysis], page: Int = 1,
+renderEditLink: Boolean = false)
 
 @import tags._
 
+@detailsLinkForID(id: String, name: String) = @{
+<a href={routes.DataSource.detail(id, None).toString}>{name}</a>
+}
+
+@editLinkForID(id: String) = @{
+<a href={routes.Analysis.edit(id).toString} class="btn btn-primary"><i class="icon-pencil icon-white"></i> Edit</a>
+}
+@deleteLinkForID(id: String) = @{
+<a href={routes.Analysis.delete(id).toString} class="btn btn-danger" onclick="return confirm('Are you sure?')"><i class="icon-remove-sign icon-white"></i> Delete</a>
+}
+
+@list_entities(user, "analysis", "analyses", analyses.size, {(page, countPerPage) =>
+    analyses.drop((page-1)*countPerPage).take(countPerPage)
+},{ Unit =>
+new scala.xml.NodeBuffer() +=
+<td>Name</td>
+}, { e: cz.payola.domain.Entity =>
+val analysis = e.asInstanceOf[cz.payola.domain.entities.Analysis]
+<td>{
+    detailsLinkForID(e.id, analysis.name)
+    }
+</td>
+<td>{
+        if (renderEditLink){
+            new scala.xml.NodeBuffer() += (editLinkForID(e.id),{<span> </span>},deleteLinkForID(e.id))
+        }else{
+            <span class="badge badge-inverse">Not editable</span>
+        }
+    }
+</td>
+},
+routes.Analysis.create(), page)

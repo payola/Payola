@@ -11,7 +11,7 @@
     <a href={routes.DataSource.edit(id).toString} class="btn btn-primary"><i class="icon-pencil icon-white"></i> Edit</a>
 }
 
-@list_entities(user,
+@list_entities(Some(user),
     "data source",
     "data sources",
     user.ownedDataSources.size,

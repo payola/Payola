@@ -51,7 +51,9 @@ class DataSource(
     }
 
     override def parameterValues: collection.immutable.Seq[PluginType#ParameterValueType] = {
-        if (_parameterValues == null) {
+        // Really check for plugin - when plugin is null
+        // parameterValues are definitely not loaded and mapped to parameters
+        if (_plugin == null) {
             wrapInTransaction {
                 context.dataSourceRepository.loadParameterValues(this)
             }

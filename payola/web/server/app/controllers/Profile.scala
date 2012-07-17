@@ -160,9 +160,7 @@ object Profile extends PayolaController with Secured
       *
       * @return Listing page for plugins.
       */
-    def listPlugins() = authenticatedWithRequest { (user, request) =>
-        val pageStrings = request.queryString.get("page")
-        val page = if (pageStrings.isDefined) pageStrings.get(0).toInt else 1
+    def listPlugins(page: Int = 1) = authenticated { user =>
         Ok(views.html.plugin.list(user, page))
     }
 }

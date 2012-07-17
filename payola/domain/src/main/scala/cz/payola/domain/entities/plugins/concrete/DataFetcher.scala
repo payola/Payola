@@ -67,12 +67,17 @@ abstract class DataFetcher(name: String, inputCount: Int, parameters: immutable.
       */
     def getNeighbourhood(instance: PluginInstance, vertexURI: String, distance: Int = 1): Graph = {
         require(distance > 0, "The distance has to be a positive number.")
+        val uri = vertexURI.trim
 
-        val rootTriplePatterns = List(
-            TriplePattern(Uri(vertexURI), Variable("op0"), Variable("o1")),
-            TriplePattern(Variable("s1"), Variable("sp0"), Uri(vertexURI))
-        )
-        executeQuery(instance, ConstructQuery(rootTriplePatterns).toString)
+        if (uri.nonEmpty) {
+            val rootTriplePatterns = List(
+                TriplePattern(Uri(vertexURI), Variable("op0"), Variable("o1")),
+                TriplePattern(Variable("s1"), Variable("sp0"), Uri(vertexURI))
+            )
+            executeQuery(instance, ConstructQuery(rootTriplePatterns).toString)
+        } else {
+            Graph.empty
+        }
 
         /* TODO take the distance into account
         val neighbourTriplePatterns = (1 to (distance - 1)).flatMap { i =>

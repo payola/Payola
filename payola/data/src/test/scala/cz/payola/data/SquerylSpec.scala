@@ -54,6 +54,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     }
 
     private def persistUsers {
+        println("Persisting users ...")
         val user = userRepository.persist(u1)
         assert(userRepository.persist(u2) != null)
         assert(userRepository.persist(u3) != null)
@@ -63,16 +64,16 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         // Update test
         user.email = "email"
         user.password = "password"
-        val x = userRepository.persist(user)
-        assert(x.email == "email")
-        assert(x.password == "password")
+        var u = userRepository.persist(user)
+        assert(u.email == user.email)
+        assert(u.password == user.password)
+        assert(u.name == u1.name)
 
-        val u = userRepository.getById(user.id)
-        assert(u != None)
-        assert(u.get.id == user.id)
-        assert(u.get.name == user.name)
-        assert(u.get.password == user.password)
-        assert(u.get.email == user.email)
+        u = userRepository.getById(user.id).get
+        assert(u.id == u1.id)
+        assert(u.name == u1.name)
+        assert(u.password == user.password)
+        assert(u.email == user.email)
 
         assert(userRepository.getAllWithNameLike("h")(0).id == u2.id)
         assert(userRepository.getAllWithNameLike("J")(0).id == u3.id)
@@ -89,22 +90,24 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     }
 
     private def persistGroups {
-        val group1 = groupRepository.persist(g1)
-        val group2 = groupRepository.persist(g2)
-        val group3 = groupRepository.persist(g3)
-        val group4 = groupRepository.persist(g4)
-        val group5 = groupRepository.persist(g5)
+        println("Persisting groups ...")
 
-        var g = groupRepository.getById(group1.id)
+        groupRepository.persist(g1)
+        groupRepository.persist(g2)
+        groupRepository.persist(g3)
+        groupRepository.persist(g4)
+        groupRepository.persist(g5)
+
+        var g = groupRepository.getById(g1.id)
             assert(g != None)
-            assert(g.get.id == group1.id)
-            assert(g.get.name == group1.name)
+            assert(g.get.id == g1.id)
+            assert(g.get.name == g1.name)
             assert(g.get.owner.id == u1.id)
 
-        g = groupRepository.getById(group2.id)
+        g = groupRepository.getById(g2.id)
             assert(g != None)
-            assert(g.get.id == group2.id)
-            assert(g.get.name == group2.name)
+            assert(g.get.id == g2.id)
+            assert(g.get.name == g2.name)
             assert(g.get.owner.id == u2.id)
 
         var user = userRepository.getById(u1.id).get
@@ -120,6 +123,8 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     }
 
     private def persistGroupMemberships {
+        println("Persisting members ...")
+
         val group1 = groupRepository.getById(g1.id).get
         val group2 = groupRepository.getById(g2.id).get
         val group3 = groupRepository.getById(g3.id).get
@@ -144,6 +149,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     }
 
     private def persistPlugins {
+        println("Persisting plugins ...")
         unionPlugin.owner = Some(u1)
         unionPlugin.isPublic = true
         
@@ -157,13 +163,13 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
                 assert(p1.parameters.size == p.parameters.size)
 
             // assert all parameters have proper IDs
-            for (param <- p2.parameters) {
+            for (param <- p1.parameters) {
                 assert(p.parameters.find(_.id == param.id).get.name == param.name)
                 assert(p.parameters.find(_.id == param.id).get.defaultValue == param.defaultValue)
             }
 
             // assert all parameters have proper IDs
-            for (param <- p1.parameters) {
+            for (param <- p2.parameters) {
                 assert(p.parameters.find(_.id == param.id).get.name == param.name)
                 assert(p.parameters.find(_.id == param.id).get.defaultValue == param.defaultValue)
             }
@@ -189,6 +195,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     }
 
     private def persistAnalyses {
+        println("Persisting analyses ...")
         val user = userRepository.getById(u1.id).get
         val count = analysisRepository.getCount
         val a = new cz.payola.domain.entities.Analysis(
@@ -270,6 +277,8 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
             assert(persistedAnalysis.pluginInstanceBindings.size == 7)
             assert(persistedAnalysis.owner.get.id == user.id)
 
+        println("      asserting persisted parameter values")
+
         // Assert persisted plugins instances
         val pluginInstances = List(
             citiesFetcher,
@@ -284,14 +293,13 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
 
         // Assert eagerly-loaded relations (by analysis) to plugins and parameters
         for (pi <- pluginInstances) {
-            val pi2 = persistedAnalysis.pluginInstances.find(_.id == pi.id)
-                assert(pi2.isDefined)
-                assert(pi2.get.id == pi.id)
-                assert(pi2.get.plugin.id == pi.plugin.id)
-                assert(pi2.get.parameterValues.size == pi.parameterValues.size)
+            val pi2 = persistedAnalysis.pluginInstances.find(_.id == pi.id).get
+                assert(pi2.id == pi.id)
+                assert(pi2.plugin.id == pi.plugin.id)
+                assert(pi2.parameterValues.size == pi.parameterValues.size)
 
             // assert all parameters have proper IDs
-            for (paramValue <- pi2.get.parameterValues) {
+            for (paramValue <- pi2.parameterValues) {
                 assert(pi.parameterValues.find(_.id == paramValue.id).get.parameter.id == paramValue.parameter.id)
                 assert(pi.parameterValues.find(_.id == paramValue.id).get.value == paramValue.value)
             }
@@ -321,9 +329,13 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         ds1.description = "desc"
         ds1.isEditable = true
 
-        val ds1_db = dataSourceRepository.persist(ds1)
-        val ds2_db = dataSourceRepository.persist(ds2)
-        val ds3_db = dataSourceRepository.persist(ds3)
+        dataSourceRepository.persist(ds1)
+        dataSourceRepository.persist(ds2)
+        dataSourceRepository.persist(ds3)
+
+        val ds1_db = dataSourceRepository.getById(ds1.id).get
+        val ds2_db = dataSourceRepository.getById(ds2.id).get
+        val ds3_db = dataSourceRepository.getById(ds3.id).get
 
             assert(ds1.id == ds1_db.id)
             assert(ds2.id == ds2_db.id)
@@ -345,6 +357,12 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         
             assert(ds3_db.plugin.id == sparqlEndpointPlugin.id)
             assert(ds3_db.parameterValues(0).parameter.id == sparqlEndpointPlugin.parameters(0).id)
+        
+        // assert all parameters have proper IDs
+        for (paramValue <- ds3_db.parameterValues) {
+            assert(ds3.parameterValues.find(_.id == paramValue.id).get.parameter.id == paramValue.parameter.id)
+            assert(ds3.parameterValues.find(_.id == paramValue.id).get.value == paramValue.value)
+        }
     }
 
     "Privileges" should "be granted and persisted properly" in {
@@ -352,6 +370,8 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     }
 
     private def persistPrivileges {
+        println("Persisting privileges ...")
+
         val a1 = analysisRepository.getAll()(0)
         val ds1 = dataSourceRepository.getAll()(0)
         val ds2 = dataSourceRepository.getAll()(1)
@@ -398,28 +418,13 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         assert(privilegeRepository.getByGrantee(user1.id).size == 2)
     }
 
-    "Pagionation" should "work" in {
-        schema.wrapInTransaction { testPagination }
-    }
-
-    private def testPagination {
-        assert(userRepository.getAll(Some(new PaginationInfo(2,1))).size == 1)
-        assert(userRepository.getAll(Some(new PaginationInfo(2,4))).size == 3)
-        assert(userRepository.getAll(Some(new PaginationInfo(5,1))).size == 0)
-        assert(userRepository.getAll(Some(new PaginationInfo(4,0))).size == 0)
-
-        assert(groupRepository.getAll().size == 5)
-        assert(groupRepository.getAll(Some(new PaginationInfo(1, 2))).size == 2)
-        assert(groupRepository.getAll(Some(new PaginationInfo(2, 5))).size == 3)
-        assert(groupRepository.getAll(Some(new PaginationInfo(5, 1))).size == 0)
-        assert(groupRepository.getAll(Some(new PaginationInfo(4, 0))).size == 0)
-    }
-
     "Customizations" should "be persisted" in {
-        schema.wrapInTransaction { persistCustomizations }
+        //TODO: schema.wrapInTransaction { persistCustomizations }
     }
 
     private def persistCustomizations {
+        println("Persisting customizations")
+        
         val url = "http://opendata.cz/pco/public-contracts.xml"
         val customization = OntologyCustomization.empty(url, "Name1", None)
         customization.isPublic = true
@@ -467,11 +472,31 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         }
     }
 
+    "Pagionation" should "work" in {
+        schema.wrapInTransaction { testPagination }
+    }
+
+    private def testPagination {
+        println("Paginating ...")
+
+        assert(userRepository.getAll(Some(new PaginationInfo(2,1))).size == 1)
+        assert(userRepository.getAll(Some(new PaginationInfo(2,4))).size == 3)
+        assert(userRepository.getAll(Some(new PaginationInfo(5,1))).size == 0)
+        assert(userRepository.getAll(Some(new PaginationInfo(4,0))).size == 0)
+
+        assert(groupRepository.getAll().size == 5)
+        assert(groupRepository.getAll(Some(new PaginationInfo(1, 2))).size == 2)
+        assert(groupRepository.getAll(Some(new PaginationInfo(2, 5))).size == 3)
+        assert(groupRepository.getAll(Some(new PaginationInfo(5, 1))).size == 0)
+        assert(groupRepository.getAll(Some(new PaginationInfo(4, 0))).size == 0)
+    }
+
     "Entities" should "be removed with their related entities" in {
         schema.wrapInTransaction { testCascadeDeletes }
     }
 
     private def testCascadeDeletes {
+        println("Removing ....")
         val analysisCount = analysisRepository.getAll().size
         val pluginsCount = pluginRepository.getAll().size
 

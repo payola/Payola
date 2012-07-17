@@ -1,4 +1,4 @@
-@(user: cz.payola.domain.entities.User,
+@(user: Option[cz.payola.domain.entities.User],
     entityName: String,
     entityNamePlural: String,
     entityCount: Int,
@@ -24,7 +24,7 @@
     }
 }
 
-@main(Some(user), "List " + entityNamePlural + " - Payola!") {
+@main(user, "List " + entityNamePlural + " - Payola!") {
 
 <div class="container-fluid">
     <div class="entity-container">
@@ -59,16 +59,16 @@
                                             "?page=" + (page - 1)
                                         }
                                     }>Prev</a></li>
-                            <li class="active">
-                                @for(i <- 0 until numberOfPage){
-                                    @if((i + 1) == page){
-                                        <a class="selected-page" href="#">@page</a>
-                                    }else{
-                                        <a href=@{ "?page=" + (i + 1)}>@{ i + 1 }</a>
-                                    }
-                                }
+                            @for(i <- 0 until numberOfPage){
+                                <li@if((i + 1) == page){ class="active"}>
+                                        @if((i + 1) == page){
+                                            <a class="selected-page" href="#">@page</a>
+                                        }else{
+                                            <a href=@{ "?page=" + (i + 1)}>@{ i + 1 }</a>
+                                        }
 
-                            </li>
+                                </li>
+                            }
                             <li><a href=@{
                                    if(lastPage){
                                         "#"
@@ -79,6 +79,8 @@
                         </ul>
                     </div>
                 </div>
+            }else{
+                <p class="alert alert-info">The list contains all available @entityNamePlural.</p>
             }
         }else{
         <div class="alert alert-info">
