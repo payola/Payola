@@ -29,7 +29,6 @@ trait PluginRepositoryComponent extends TableRepositoryComponent
                             schema.stringParameters.leftOuter)((p, o, bPar, fPar, iPar, sPar) =>
                                 where(entityFilter(p))
                                 select(p, o, bPar, fPar, iPar, sPar)
-                                orderBy(p.name asc)
                                 on(o.map(_.id) === p.ownerId,
                                     bPar.map(_.pluginId) === Some(p.id),
                                     fPar.map(_.pluginId) === Some(p.id),
@@ -58,15 +57,15 @@ trait PluginRepositoryComponent extends TableRepositoryComponent
         }
 
         def getAll(pagination: Option[PaginationInfo] = None): Seq[Plugin] = {
-            representationRepository.getAll(pagination).map(_.toPlugin)
+            representationRepository.getAll(pagination).map(_.toPlugin).sortBy(_.name)
         }
 
         def getAllPublic: Seq[Plugin] = {
-            representationRepository.selectWhere(_.isPublic === true).map(_.toPlugin)
+            representationRepository.selectWhere(_.isPublic === true).map(_.toPlugin).sortBy(_.name)
         }
 
         def getAllByOwnerId(ownerId: Option[String]): Seq[Plugin] = {
-            representationRepository.selectWhere(_.ownerId === ownerId).map(_.toPlugin)
+            representationRepository.selectWhere(_.ownerId === ownerId).map(_.toPlugin).sortBy(_.name)
         }
 
         def getByName(name: String): Option[Plugin] = {

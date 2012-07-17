@@ -117,13 +117,12 @@ trait TableRepositoryComponent
     {
         self: TableRepository[A, (A, Option[User])] =>
 
-        def getAllByOwnerId(ownerId: Option[String]): Seq[A] = selectWhere(_.ownerId === ownerId)
+        def getAllByOwnerId(ownerId: Option[String]): Seq[A] = selectWhere(_.ownerId === ownerId).sortBy(_.name)
 
         protected def getSelectQuery(entityFilter: A => LogicalBoolean): Query[(A, Option[User])] = {
             join(table, schema.users.leftOuter)((e, o) =>
                 where(entityFilter(e))
                 select(e, o)
-                orderBy(e.name asc)
                 on(e.ownerId === o.map(_.id))
             )
         }
