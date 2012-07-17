@@ -71,7 +71,7 @@ trait TableRepositoryComponent
           * @param query The query to execute.
           * @return Results of the query.
           */
-        protected def select(query: Query[B]): Seq[A] = {
+        protected def select(query: Query[B]): Seq[A] = schema.wrapInTransaction {
             processSelectResults(query.toList)
         }
 
@@ -112,7 +112,7 @@ trait TableRepositoryComponent
         def getByName(name: String): Option[A] = selectOneWhere(_.name === name)
     }
 
-    trait OptionallyOwnedEntityTableRepository[A <: PersistableEntity with OptionallyOwnedEntity]
+    trait OptionallyOwnedEntityTableRepository[A <: PersistableEntity with OptionallyOwnedEntity with NamedEntity]
         extends OptionallyOwnedEntityRepository[A]
     {
         self: TableRepository[A, (A, Option[User])] =>
@@ -123,6 +123,7 @@ trait TableRepositoryComponent
             join(table, schema.users.leftOuter)((e, o) =>
                 where(entityFilter(e))
                 select(e, o)
+                orderBy(e.name asc)
                 on(e.ownerId === o.map(_.id))
             )
         }
@@ -137,13 +138,14 @@ trait TableRepositoryComponent
         }
     }
 
-    trait ShareableEntityTableRepository[A <: PersistableEntity with ShareableEntity with OptionallyOwnedEntity]
+    trait ShareableEntityTableRepository[A <: PersistableEntity
+            with ShareableEntity with OptionallyOwnedEntity with NamedEntity]
         extends OptionallyOwnedEntityTableRepository[A]
         with ShareableEntityRepository[A]
     {
         self: TableRepository[A, (A, Option[User])] =>
 
-        def getAllPublic: Seq[A] = selectWhere(_.isPublic === true)
+        def getAllPublic: Seq[A] = selectWhere(_.isPublic === true).sortBy(_.name)
     }
 
     /**
