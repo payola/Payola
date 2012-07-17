@@ -1,11 +1,14 @@
-@(user: cz.payola.domain.entities.User, entityName: String, entityNamePlural: String, entities: Seq[cz.payola.domain.Entity], headerWriter: (Unit) => scala.xml.NodeBuffer, entityLister: (cz.payola.domain.Entity) => scala.xml.NodeBuffer, newEntityCall: play.api.mvc.Call)
+@(user: cz.payola.domain.entities.User, entityName: String, entityNamePlural: String,
+entities: Seq[cz.payola.domain.Entity], headerWriter: (Unit) => scala.xml.NodeBuffer,
+entityLister: (cz.payola.domain.Entity) => scala.xml.NodeBuffer, newEntityCall: play.api.mvc.Call)
 
 @main(Some(user), "List " + entityNamePlural + " - Payola!") {
 <div class="container-fluid">
     <div class="plugins_container">
         <div class="row-fluid">
             <h1 class="span10">List @entityNamePlural</h1>
-            <a href="@newEntityCall" class="btn btn-success span2"><i class="icon-plus icon-white"></i> Create @entityName &raquo;</a>
+            <a href="@newEntityCall" class="btn btn-success span2"><i class="icon-plus icon-white"></i> Create
+                @entityName &raquo;</a>
         </div>
 
         @if(entities.size > 0){
@@ -16,9 +19,9 @@
             </tr>
             </thead>
             @entities.map{ entity =>
-                <tr>
-                    @entityLister(entity)
-                </tr>
+            <tr>
+                @entityLister(entity)
+            </tr>
             }
         </table>
 
@@ -36,6 +39,7 @@
         }else{
         <div class="alert alert-info">
             <h3 class="alert-heading">No @entityNamePlural</h3>
+
             <p class="alert-block">But you can create one!</p>
         </div>
         }

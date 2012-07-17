@@ -27,6 +27,8 @@ GET     /datasource/edit/:id        controllers.DataSource.edit(id)
 GET     /datasource/delete/:id      controllers.DataSource.delete(id)
 POST    /datasource/save/:id        controllers.DataSource.saveEdited(id)
 
+GET     /analysis/list              controllers.Analysis.list()
+
 GET     /dashboard                  controllers.Application.dashboard()
 GET     /profile/create-group       controllers.Profile.createGroup()
 GET     /plugin/create              controllers.Profile.createPlugin()
