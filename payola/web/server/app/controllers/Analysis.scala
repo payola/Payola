@@ -20,7 +20,11 @@ object Analysis extends PayolaController with Secured
         Ok(views.html.analysis.edit(user, id))
     }
 
-    def list() = authenticated { user: User =>
-        Ok(views.html.analysis.list(user))
+    def listOwned() = authenticated { user: User =>
+        Ok(views.html.analysis.list(Some(user), user.ownedAnalyses, true))
+    }
+
+    def list() = maybeAuthenticated { user: Option[User] =>
+        Ok(views.html.analysis.list(user, Payola.model.analysisModel.getAccessibleToUser(user)))
     }
 }

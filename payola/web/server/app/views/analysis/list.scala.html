@@ -1,4 +1,28 @@
-@(user: cz.payola.domain.entities.User)
+@(user: Option[cz.payola.domain.entities.User], analyses: Seq[cz.payola.domain.entities.Analysis], renderEditLink: Boolean = false)
 
 @import tags._
 
+@detailsLinkForID(id: String, name: String) = @{
+<a href={routes.DataSource.detail(id, None).toString}>{name}</a>
+}
+
+@editLinkForID(id: String) = @{
+<a href={routes.DataSource.edit(id).toString} class="btn btn-primary"><i class="icon-pencil icon-white"></i> Edit</a>
+}
+
+@list_entities(user, "analysis", "analyses", analyses, { Unit =>
+new scala.xml.NodeBuffer() += <td>Name</td>
+}, { e: cz.payola.domain.Entity =>
+    val analysis = e.asInstanceOf[cz.payola.domain.entities.Analysis]
+<td>{
+    detailsLinkForID(e.id, analysis.name)
+    }</td>
+<td>{
+    if (renderEditLink){
+        editLinkForID(e.id)
+    }else{
+        <span class="badge badge-inverse">Not editable</span>
+    }
+    }</td>
+},
+routes.Analysis.create())

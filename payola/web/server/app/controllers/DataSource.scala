@@ -125,7 +125,7 @@ object DataSource extends PayolaController with Secured
       * @return Listing page.
       */
     def list() = authenticated { user: User =>
-        Ok(views.html.datasource.list(user))
+        Ok(views.html.datasource.list(Some(user)))
     }
 
     /** Saves the edited data source.

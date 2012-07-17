@@ -161,6 +161,6 @@ object Profile extends PayolaController with Secured
       * @return Listing page for plugins.
       */
     def listPlugins = authenticated { user =>
-        Ok(views.html.plugin.list(user))
+        Ok(views.html.plugin.list(Some(user)))
     }
 }

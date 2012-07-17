@@ -1,8 +1,8 @@
-@(user: cz.payola.domain.entities.User, entityName: String, entityNamePlural: String,
+@(user: Option[cz.payola.domain.entities.User], entityName: String, entityNamePlural: String,
 entities: Seq[cz.payola.domain.Entity], headerWriter: (Unit) => scala.xml.NodeBuffer,
 entityLister: (cz.payola.domain.Entity) => scala.xml.NodeBuffer, newEntityCall: play.api.mvc.Call)
 
-@main(Some(user), "List " + entityNamePlural + " - Payola!") {
+@main(user, "List " + entityNamePlural + " - Payola!") {
 <div class="container-fluid">
     <div class="plugins_container">
         <div class="row-fluid">
