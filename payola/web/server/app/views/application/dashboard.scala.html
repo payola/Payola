@@ -58,7 +58,7 @@
                                 @accessibleDataSources.take(5).map{d =>
                                     <tr>
                                         <td>
-                                            <a href="@routes.DataSource.detail(d.id)">@d.name</a>
+                                            <a href="@routes.DataSource.detail(d.id, None)">@d.name</a>
                                         </td>
                                         <td>
                                             @if(d.owner.isDefined){
@@ -129,7 +129,7 @@
                         <table class="table table-stripped">
                         @user.get.ownedDataSources.take(5).map{ds =>
                             <tr>
-                                <td><a href="@routes.DataSource.detail(ds.id)">@ds.name</a></td>
+                                <td><a href="@routes.DataSource.detail(ds.id, None)">@ds.name</a></td>
                                 <td>
                                 @if(ds.isEditable){
                                     <a href="@routes.DataSource.edit(ds.id)" class="btn"><i class="icon-pencil"></i> Edit</a>

@@ -4,7 +4,7 @@
 @import tags._
 
 @detailsLinkForID(id: String, name: String) = @{
-    <a href={routes.DataSource.detail(id).toString}>{name}</a>
+    <a href={routes.DataSource.detail(id, None).toString}>{name}</a>
 }
 
 @editLinkForID(id: String) = @{

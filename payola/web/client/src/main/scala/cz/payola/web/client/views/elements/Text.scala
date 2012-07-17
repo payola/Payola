@@ -31,4 +31,8 @@ class Text(initialValue: String) extends View
     def destroy() {
         textNode.foreach(e => e.parentNode.removeChild(e))
     }
+
+    def block() { }
+
+    def unblock() { }
 }

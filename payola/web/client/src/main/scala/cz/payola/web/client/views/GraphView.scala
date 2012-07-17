@@ -22,6 +22,11 @@ abstract class GraphView
     val vertexBrowsing = new UnitEvent[this.type, VertexEventArgs[this.type]]
 
     /**
+      * Triggered when the vertex is selected as a start of browsing in a particular data source.
+      */
+    val vertexBrowsingDataSource = new UnitEvent[this.type, VertexEventArgs[this.type]]
+
+    /**
       * Updates the current graph of the view and re-runs the visualisation.
       * @param graph The graph to add to the current graph.
       */

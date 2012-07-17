@@ -1,18 +1,32 @@
 package cz.payola.web.client.presenters
 
+import s2js.adapters.js.dom
 import cz.payola.web.shared.DataSourceBrowser
-import s2js.adapters.js.browser.window
+import cz.payola.web.client.views.entity.DataSourceView
+import cz.payola.web.client.views.graph.PluginSwitchView
 
-class DataSourcePresenter(viewParentElementId: String, val dataSourceId: String, val initialVertexUri: String = "")
-    extends GraphPresenter(viewParentElementId)
+class DataSourcePresenter(
+    viewElement: dom.Element,
+    val dataSourceId: String,
+    val dataSourceName: String,
+    val initialVertexUri: String = "")
 {
-    view.vertexBrowsing += { e => fetchNeighbourhood(e.vertex.uri)}
+    val view = new DataSourceView(dataSourceName)
 
-    override def initialize() {
-        super.initialize()
+    val graphView = new PluginSwitchView
+
+    graphView.vertexBrowsing += { e => fetchNeighbourhood(e.vertex.uri)}
+
+    def initialize() {
+        // Compose the views and render the main view.
+        graphView.render(view.graphViewSpace.domElement)
+        view.render(viewElement)
 
         if (initialVertexUri == "") {
-            DataSourceBrowser.getInitialGraph(dataSourceId)(view.updateGraph(_))(graphFetchErrorHandler)
+            DataSourceBrowser.getInitialGraph(dataSourceId)(graphView.updateGraph(_)) { error =>
+                graphView.updateGraph(None)
+                view.unblock()
+            }
         } else {
             fetchNeighbourhood(initialVertexUri)
         }
@@ -21,14 +35,11 @@ class DataSourcePresenter(viewParentElementId: String, val dataSourceId: String,
     private def fetchNeighbourhood(uri: String) {
         view.block()
         DataSourceBrowser.getNeighbourhood(dataSourceId, uri) { graph =>
-            view.updateGraph(graph)
+            graphView.updateGraph(graph)
             view.unblock()
-        }(graphFetchErrorHandler)
-    }
-
-    private def graphFetchErrorHandler(t: Throwable) {
-        view.updateGraph(None)
-        view.unblock()
-        // TODO
+        } { error =>
+            graphView.updateGraph(None)
+            view.unblock()
+        }
     }
 }

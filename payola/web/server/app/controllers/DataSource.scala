@@ -78,9 +78,9 @@ object DataSource extends PayolaController with Secured
         }
     }
 
-    def detail(id: String) = maybeAuthenticated { user: Option[User] =>
+    def detail(id: String, initialVertexUri: Option[String]) = maybeAuthenticated { user: Option[User] =>
         Payola.model.dataSourceModel.getById(id).map { d =>
-            Ok(views.html.datasource.detail(user, d, None))
+            Ok(views.html.datasource.detail(user, d, initialVertexUri))
         }.getOrElse {
             NotFound(views.html.errors.err404("The data source does not exist."))
         }
