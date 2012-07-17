@@ -8,12 +8,17 @@ import cz.payola.scala2json.rules.CustomValueSerializationRule
 import cz.payola.scala2json.rules.BasicSerializationRule
 import cz.payola.scala2json.classes.SimpleSerializationClass
 import scala.Some
-import cz.payola.common.entities.plugins.PluginInstance
+import cz.payola.common.entities.plugins._
 import cz.payola.common.entities.analyses.PluginInstanceBinding
 import cz.payola.scala2json.rules.CustomValueSerializationRule
 import cz.payola.scala2json.rules.BasicSerializationRule
 import cz.payola.scala2json.classes.SimpleSerializationClass
 import scala.Some
+import cz.payola.domain.entities.plugins.parameters.StringParameterValue
+import cz.payola.scala2json.rules.BasicSerializationRule
+import cz.payola.scala2json.classes.SimpleSerializationClass
+import scala.Some
+import cz.payola.scala2json.rules.CustomValueSerializationRule
 
 class RPCSerializer extends JSONSerializer
 {
@@ -73,6 +78,10 @@ class RPCSerializer extends JSONSerializer
     val stringParamClass = new SimpleSerializationClass(classOf[StringParameter])
     val stringParamRule = new BasicSerializationRule(Some(classOf[StringParameter]))
     this.addSerializationRule(stringParamClass, stringParamRule)
+
+    val stringParamValueClass = new SimpleSerializationClass(classOf[StringParameterValue])
+    val stringParamValueRule = new BasicSerializationRule(Some(classOf[ParameterValue[String]]))
+    this.addSerializationRule(stringParamValueClass, stringParamValueRule)
 
     val boolParamClass = new SimpleSerializationClass(classOf[BooleanParameter])
     val boolParamRule = new BasicSerializationRule(Some(classOf[StringParameter]))
