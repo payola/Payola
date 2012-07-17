@@ -1,8 +1,6 @@
 package cz.payola.web.shared
 
 import s2js.compiler._
-import cz.payola.domain.entities.plugins.compiler.PluginCompiler
-import cz.payola.domain.entities.plugins.PluginClassLoader
 import cz.payola.domain.entities.User
 
 @remote object PluginManager
@@ -15,6 +13,8 @@ import cz.payola.domain.entities.User
         try {
             val plugin = Payola.model.pluginModel.createPluginFromSource(pluginCode, user)
             if (plugin != null) {
+                user.addOwnedPlugin(plugin)
+                Payola.model.userModel.persist(user)
                 successCallback("Plugin saved.")
             }
         }catch{
