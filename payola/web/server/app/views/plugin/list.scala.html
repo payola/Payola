@@ -1,10 +1,23 @@
-@(user: Option[cz.payola.domain.entities.User])
+@(user: cz.payola.domain.entities.User, page: Int = 1)
 
 @import tags._
 
-@list_entities(user, "plugin", "plugins", user.get.ownedPlugins, { Unit =>
-    new scala.xml.NodeBuffer() += <td>Name</td>
-}, { e: cz.payola.domain.Entity =>
-    new scala.xml.NodeBuffer() += <td>{e.asInstanceOf[cz.payola.domain.entities.Plugin].name}</td>
-},
-routes.Profile.createPlugin())
+@list_entities(Some(user),
+    "plugin",
+    "plugins",
+    user.ownedPlugins.size,
+    { case (page, itemsPerPage) =>
+        val subseq = user.ownedPlugins.drop((page - 1) * itemsPerPage)
+        if (itemsPerPage > subseq.size){
+            subseq
+        }else{
+            subseq.take(itemsPerPage)
+        }
+    },
+    { Unit =>
+        new scala.xml.NodeBuffer() += <td>Name</td>
+    }, { e: cz.payola.domain.Entity =>
+        new scala.xml.NodeBuffer() += <td>{e.asInstanceOf[cz.payola.domain.entities.Plugin].name}</td>
+    },
+    routes.Profile.createPlugin(),
+    page)

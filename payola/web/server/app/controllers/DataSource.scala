@@ -71,7 +71,7 @@ object DataSource extends PayolaController with Secured
 
         Payola.model.dataSourceModel.persist(dataSource)
 
-        Redirect(routes.DataSource.list())
+        Redirect(routes.DataSource.list(1))
     }
 
     /** Deletes an owned data source.
@@ -86,7 +86,7 @@ object DataSource extends PayolaController with Secured
             Payola.model.dataSourceModel.remove(d)
             Payola.model.userModel.persist(user)
 
-            Redirect(routes.DataSource.list)
+            Redirect(routes.DataSource.list(1))
         }.getOrElse {
             NotFound(views.html.errors.err404("The data source does not exist."))
         }
@@ -124,8 +124,8 @@ object DataSource extends PayolaController with Secured
       *
       * @return Listing page.
       */
-    def list() = authenticated { user: User =>
-        Ok(views.html.datasource.list(Some(user)))
+    def list(page: Int = 1) = authenticated { user: User =>
+        Ok(views.html.datasource.list(user, page))
     }
 
     /** Saves the edited data source.
@@ -168,6 +168,8 @@ object DataSource extends PayolaController with Secured
                 val paramOption = dataSource.getParameterValue(key)
                 assert(paramOption.isDefined, key + " is not a defined parameter name")
                 dataSource.setParameter(paramOption.get, values(0))
+
+                Payola.model.pluginModel.getAll()
             }
         }
 

@@ -76,3 +76,7 @@ input.active {
     background-image: url(rdf-white.png) !important;
     background-position: 0px !important;
 }
+
+.selected-page{
+    background: #8891B7;
+}
