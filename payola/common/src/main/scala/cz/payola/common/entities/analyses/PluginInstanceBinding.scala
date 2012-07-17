@@ -11,9 +11,9 @@ trait PluginInstanceBinding extends Entity
     /** Type of the plugin instances the current binding is between. */
     type PluginInstanceType <: PluginInstance
 
-    protected val _sourcePluginInstance: PluginInstanceType
+    protected var _sourcePluginInstance: PluginInstanceType
 
-    protected val _targetPluginInstance: PluginInstanceType
+    protected var _targetPluginInstance: PluginInstanceType
 
     protected val _targetInputIndex: Int
 

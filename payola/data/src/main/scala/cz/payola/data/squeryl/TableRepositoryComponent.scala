@@ -3,9 +3,8 @@ package cz.payola.data.squeryl
 import org.squeryl._
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.dsl.ast.LogicalBoolean
-import cz.payola.domain.entities._
 import cz.payola.data.PaginationInfo
-import cz.payola.data.squeryl.entities.{PersistableEntity, EntityConverter}
+import cz.payola.data.squeryl.entities._
 
 trait TableRepositoryComponent
 {
@@ -27,8 +26,7 @@ trait TableRepositoryComponent
         }
 
         def getAll(pagination: Option[PaginationInfo] = None): Seq[A] = {
-            // TODO pagination
-            selectWhere(_ => 1 === 1)
+            selectWhere(_ => 1 === 1, pagination)
         }
 
         def removeById(id: String): Boolean = wrapInTransaction {
@@ -47,11 +45,16 @@ trait TableRepositoryComponent
 
         /**
           * Selects all entities that pass the specified entity filter.
-          * @param entityFilter A filter that excludes entites from the result.
+          * @param entityFilter A filter that excludes entities from the result.
           * @return The selected entities.
           */
-        private[squeryl] def selectWhere(entityFilter: A => LogicalBoolean): Seq[A] = wrapInTransaction {
-            select(getSelectQuery(entityFilter))
+        private[squeryl] def selectWhere(entityFilter: A => LogicalBoolean, pagination: Option[PaginationInfo] = None):
+            Seq[A] = wrapInTransaction {
+                // Define select query
+                val query = select(getSelectQuery(entityFilter))
+
+                // Simple pagination
+                pagination.map(p => query.drop(p.skip).take(p.limit)).getOrElse(query)
         }
 
         /**
@@ -93,11 +96,7 @@ trait TableRepositoryComponent
           * @tparam C Type of the entity.
           */
         protected def persist[C <: PersistableEntity](entity: C, table: Table[C]) {
-            if (table.where(_.id === entity.id).isEmpty) {
-                table.insert(entity)
-            } else {
-                table.update(entity)
-            }
+            schema.persist(entity, table)
         }
 
         protected def wrapInTransaction[C](body: => C) = {
@@ -116,16 +115,33 @@ trait TableRepositoryComponent
     trait OptionallyOwnedEntityTableRepository[A <: PersistableEntity with OptionallyOwnedEntity]
         extends OptionallyOwnedEntityRepository[A]
     {
-        self: TableRepository[A, _] =>
+        self: TableRepository[A, (A, Option[User])] =>
 
-        def getAllByOwnerId(ownerId: Option[String]): Seq[A] = selectWhere(_.owner.map(_.id) === ownerId)
+        def getAllByOwnerId(ownerId: Option[String]): Seq[A] = selectWhere(_.ownerId === ownerId)
+
+        protected def getSelectQuery(entityFilter: A => LogicalBoolean): Query[(A, Option[User])] = {
+            join(table, schema.users.leftOuter)((e, o) =>
+                where(entityFilter(e))
+                select(e, o)
+                on(e.ownerId === o.map(_.id))
+            )
+        }
+
+        protected def processSelectResults(results: Seq[(A, Option[User])]): Seq[A] = {
+            results.groupBy(_._1).map { r =>
+                val entity = r._1
+                entity.owner = r._2.head._2
+
+                entity
+            }(collection.breakOut)
+        }
     }
 
     trait ShareableEntityTableRepository[A <: PersistableEntity with ShareableEntity with OptionallyOwnedEntity]
         extends OptionallyOwnedEntityTableRepository[A]
         with ShareableEntityRepository[A]
     {
-        self: TableRepository[A, _] =>
+        self: TableRepository[A, (A, Option[User])] =>
 
         def getAllPublic: Seq[A] = selectWhere(_.isPublic === true)
     }

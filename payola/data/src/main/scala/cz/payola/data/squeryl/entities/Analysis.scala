@@ -1,9 +1,9 @@
 package cz.payola.data.squeryl.entities
 
 import cz.payola.data.squeryl.entities.analyses._
-import org.squeryl.annotations.Transient
 import cz.payola.data.squeryl.entities.plugins.PluginInstance
 import scala.collection.immutable
+import scala.collection.mutable
 import cz.payola.data.squeryl.SquerylDataContextComponent
 
 /**
@@ -14,58 +14,47 @@ object Analysis extends EntityConverter[Analysis]
     def convert(entity: AnyRef)(implicit context: SquerylDataContextComponent): Option[Analysis] = {
         entity match {
             case e: Analysis => Some(e)
-            case e: cz.payola.common.entities.Analysis => Some(new Analysis(e.id, e.name, e.owner.map(User(_))))
+            case e: cz.payola.common.entities.Analysis
+                    => Some(new Analysis(e.id, e.name, e.owner.map(User(_)), e.isPublic, e.description))
             case _ => None
         }
     }
 }
 
-class Analysis(override val id: String, name: String, o: Option[User])(implicit val context: SquerylDataContextComponent)
+class Analysis(override val id: String, name: String, o: Option[User], var _isPub: Boolean, var _desc: String)
+    (implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.Analysis(name, o)
-    with PersistableEntity with OptionallyOwnedEntity
+    with PersistableEntity with OptionallyOwnedEntity with ShareableEntity with NamedEntity with DescribedEntity
 {
     type DomainParameterValueType = plugins.ParameterValue[_]
 
-    @Transient
-    private var _pluginInstancesLoaded = false;
+    _pluginInstances = null;
     private lazy val _pluginInstancesQuery = context.schema.analysesPluginInstances.left(this)
 
-    @Transient
-    private var _pluginInstancesBindingsLoaded = false
+    _pluginInstanceBindings = null
     private lazy val _pluginInstancesBindingsQuery = context.schema.analysesPluginInstancesBindings.left(this)
 
     override def pluginInstances: immutable.Seq[PluginInstanceType] = {
-        // Lazy-load related instances only for first time
-        if (!_pluginInstancesLoaded) {
-            wrapInTransaction {
-                _pluginInstancesQuery.toList.foreach(i =>
-                    if (!super.pluginInstances.contains(i)) {
-                        super.storePluginInstance(i)
-                    }
-                )
-            }
+        if (_pluginInstances == null) {
+            context.analysisRepository.loadPluginInstances(this)}
 
-            _pluginInstancesLoaded = true
-        }
+        _pluginInstances.toList
+    }
 
-        super.pluginInstances
+    def pluginInstances_=(value: Seq[PluginInstanceType]) {
+        _pluginInstances =  mutable.ArrayBuffer(value: _*)
     }
 
     override def pluginInstanceBindings: immutable.Seq[PluginInstanceBindingType] = {
-        // Lazy-load related bindings only for first time
-        if (!_pluginInstancesBindingsLoaded) {
-            wrapInTransaction {
-                _pluginInstancesBindingsQuery.toList.foreach(b =>
-                    if (!super.pluginInstanceBindings.contains(b)) {
-                        super.storeBinding(b)
-                    }
-                )
-            }
-
-            _pluginInstancesBindingsLoaded = true
+        if (_pluginInstanceBindings == null) {
+            context.analysisRepository.loadPluginInstanceBindings(this)
         }
-        
-        super.pluginInstanceBindings
+
+        _pluginInstanceBindings.toList
+    }
+
+    def pluginInstanceBindings_=(value: Seq[PluginInstanceBindingType]){
+        _pluginInstanceBindings = mutable.ArrayBuffer(value: _*)
     }
 
     override protected def storePluginInstance(instance: Analysis#PluginInstanceType) {
@@ -73,7 +62,7 @@ class Analysis(override val id: String, name: String, o: Option[User])(implicit 
     }
 
     override protected def discardPluginInstance(instance: Analysis#PluginInstanceType) {
-        context.pluginInstanceRepository.removeById(instance.id)
+        context.analysisRepository.removePluginInstanceById(instance.id)
 
         super.discardPluginInstance(instance)
     }
@@ -83,7 +72,7 @@ class Analysis(override val id: String, name: String, o: Option[User])(implicit 
     }
 
     override protected def discardBinding(binding: Analysis#PluginInstanceBindingType) {
-        context.pluginInstanceBindingRepository.removeById(binding.id)
+        context.analysisRepository.removePluginInstanceBindingById(binding.id)
 
         super.discardBinding(binding)
     }
@@ -91,7 +80,7 @@ class Analysis(override val id: String, name: String, o: Option[User])(implicit 
     def associatePluginInstance(instance: PluginInstance): PluginInstance = {
         context.schema.associate(instance, _pluginInstancesQuery)
 
-        context.pluginInstanceRepository.persist(instance)
+        context.analysisRepository.persistPluginInstance(instance)
 
         instance
     }

@@ -64,7 +64,7 @@ class PrivilegeDbRepresentation(
         val objectClassName: String
     )
     (implicit val context: SquerylDataContextComponent)
-    extends PersistableEntity with ShareableEntity
+    extends PersistableEntity
 {
 
     /**

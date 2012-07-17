@@ -2,12 +2,7 @@ package cz.payola.model.components
 
 import cz.payola.data._
 import cz.payola.domain.entities._
-import cz.payola.domain.RdfStorageComponent
-import scala.Some
-import scala.Some
-import cz.payola.data.PaginationInfo
 import cz.payola.model.EntityModelComponent
-import cz.payola.domain.entities.plugins.DataSource
 
 trait GroupModelComponent extends EntityModelComponent
 {
@@ -17,6 +12,10 @@ trait GroupModelComponent extends EntityModelComponent
     {
         def create(name: String, owner: User): Group = {
             repository.persist(new Group(name, owner))
+        }
+
+        def findAvailableMembers(group: Group, owner: User, term: String) : Seq[User] = {
+            userRepository.getAllWithNameLike(term).diff(owner +: group.members)
         }
     }
 }

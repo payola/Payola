@@ -24,15 +24,29 @@ trait EntityModelComponent
 
     class ShareableEntityModel[A <: ShareableEntity with OptionallyOwnedEntity](
         override val repository: ShareableEntityRepository[A],
-        accessPrivilegeClass: Class[_])
+        accessPrivilegeClass: Class[_],
+        val ownedEntitiesGetter: User => Seq[A])
         extends EntityModel[A](repository)
     {
         def getAccessibleToUser(user: Option[User]): Seq[A] = {
-            repository.getAllPublic ++ getGrantedToUser(user, groupRepository.getAll())
+            val public = repository.getAllPublic
+            val owned = getOwnedByUser(user)
+            val granted = getGrantedToUser(user, groupRepository.getAll())
+            (public ++ owned ++ granted).distinct
+        }
+
+        def getAccessibleToUserById(user: Option[User], id: String): Option[A] = {
+            getAccessibleToUser(user).find(_.id == id)
         }
 
         def getAccessibleToUserByOwner(user: Option[User], owner: User): Seq[A] = {
-            repository.getAllPublicByOwnerId(Some(owner.id)) ++ getGrantedToUser(user, owner.ownedGroups)
+            val publicEntities = repository.getAllPublicByOwnerId(Some(owner.id))
+            val entitiesOfOwner = if (user == owner) {
+                getOwnedByUser(Some(owner))
+            } else {
+                getGrantedToUser(user, owner.ownedGroups)
+            }
+            (publicEntities ++ entitiesOfOwner).distinct
         }
 
         private def getGrantedToUser(user: Option[User], groups: Seq[Group]): Seq[A] = {
@@ -41,6 +55,10 @@ trait EntityModelComponent
                 val privileges = privilegeRepository.getAllGrantedTo(granteeIds, accessPrivilegeClass)
                 privileges.map(_.obj.asInstanceOf[A])
             }.getOrElse(Nil)
+        }
+
+        private def getOwnedByUser(user: Option[User]): Seq[A] = {
+            user.map(ownedEntitiesGetter(_)).getOrElse(Nil)
         }
     }
 }

@@ -3,6 +3,7 @@ package cz.payola.data.squeryl
 import org.squeryl._
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.adapters.H2Adapter
+import org.squeryl.dsl._
 import cz.payola.data._
 import cz.payola.data.squeryl.entities._
 import cz.payola.data.squeryl.entities.settings._
@@ -10,8 +11,6 @@ import cz.payola.data.squeryl.entities.plugins._
 import cz.payola.data.squeryl.entities.plugins.parameters._
 import cz.payola.data.squeryl.entities.analyses.PluginInstanceBinding
 import cz.payola.data.squeryl.entities.privileges.PrivilegeDbRepresentation
-import org.squeryl.dsl._
-import scala.Some
 import cz.payola.data.squeryl.entities.Group
 
 trait SchemaComponent
@@ -311,9 +310,9 @@ trait SchemaComponent
         override def callbacks = Seq(
             factoryFor(users) is { new User("", "", "", "") },
             factoryFor(groups) is { new Group("", "", null) },
-            factoryFor(analyses) is { new Analysis("", "", None) },
+            factoryFor(analyses) is { new Analysis("", "", None, false, "") },
             factoryFor(plugins) is { new PluginDbRepresentation("", "", "", 0, None, false) },
-            factoryFor(pluginInstances) is { new PluginInstance("", null, Nil, "") },
+            factoryFor(pluginInstances) is { new PluginInstance("", null, Nil, "", false) },
             factoryFor(pluginInstanceBindings) is { new PluginInstanceBinding("", null, null, 0) },
             factoryFor(booleanParameters) is { new BooleanParameter("", "", false) },
             factoryFor(booleanParameterValues) is { new BooleanParameterValue("", null, false)  },
@@ -323,10 +322,10 @@ trait SchemaComponent
             factoryFor(intParameterValues) is { new IntParameterValue("", null, 0) },
             factoryFor(stringParameters) is { new StringParameter("", "", "") },
             factoryFor(stringParameterValues) is { new StringParameterValue("", null, "") },
-            factoryFor(dataSources) is { new DataSource("", "", None, null, Nil) },
+            factoryFor(dataSources) is { new DataSource("", "", None, null, Nil, false, "", true) },
             factoryFor(privileges) is { new PrivilegeDbRepresentation("", "", "", "", "", "", "") },
-            factoryFor(ontologyCustomizations) is { new OntologyCustomization("", "", "", None, Nil) },
-            factoryFor(classCustomizations) is { new ClassCustomization("", "", "", 0, Some('x'), Nil) },
+            factoryFor(ontologyCustomizations) is { new OntologyCustomization("", "", "", None, Nil, false) },
+            factoryFor(classCustomizations) is { new ClassCustomization("", "", "", 0, None, Nil) },
             factoryFor(propertyCustomizations) is { new PropertyCustomization("", "", "", 0) }
         )
 
@@ -467,13 +466,27 @@ trait SchemaComponent
         }
 
         /**
+          * Persists the specified entity to the specified table.
+          * @param entity The entity to persist.
+          * @param table Tha table to persist the entity int.
+          * @tparam C Type of the entity.
+          */
+        def persist[C <: PersistableEntity](entity: C, table: Table[C]) {
+            if (table.where(_.id === entity.id).isEmpty) {
+                table.insert(entity)
+            } else {
+                table.update(entity)
+            }
+        }
+
+        /**
           * Creates 1:N relation between this entity (on '1' side of relation) and specified entity (on 'N' side of relation).
           * Specified entity wil be persisted
           *
-          * @param entity - specified entity to be ralted with this entity
+          * @param entity - specified entity to be related with this entity
           * @param relation  - definition of 1:N relation between this and specified entity
           * @tparam A - type of specified entity
-          * @return Returns pesisted specified entity
+          * @return Returns persisted specified entity
           */
         def associate[A <: PersistableEntity](entity: A, relation: OneToMany[A]): A = {
             wrapInTransaction {

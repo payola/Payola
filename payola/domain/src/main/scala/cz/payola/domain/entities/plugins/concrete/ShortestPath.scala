@@ -16,8 +16,13 @@ import cz.payola.domain.rdf.Graph
 class ShortestPath(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
     extends Plugin(name, inputCount, parameters, id)
 {
-    def this() = this("Shortest Path", 1, List(new StringParameter("OriginURI", ""),
-        new StringParameter("DestinationURI", "")), IDGenerator.newId)
+    def this() = {
+        this("Shortest Path", 1, List(
+            new StringParameter("OriginURI", ""),
+            new StringParameter("DestinationURI", "")),
+            IDGenerator.newId)
+        isPublic = true
+    }
 
     /** Creates and returns a new graph that only contains nodes and edges
       * on the shortest path from origin to destination.

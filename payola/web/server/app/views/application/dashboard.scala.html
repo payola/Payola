@@ -1,9 +1,9 @@
-@(user: Option[cz.payola.domain.entities.User], topAnalyses: Seq[cz.payola.domain.entities.Analysis],
-    topDataSources: Seq[cz.payola.domain.entities.plugins.PluginInstance]
+@(user: Option[cz.payola.domain.entities.User], accessibleAnalysis: Seq[cz.payola.domain.entities.Analysis],
+    accessibleDataSources: Seq[cz.payola.domain.entities.plugins.DataSource]
 )
 
 @main(user, "Dashboard") {
-    <div class="container-fluid">
+    <div class="container-fluid dashboard">
 
         <ul class="breadcrumb">
             <li>
@@ -12,43 +12,68 @@
             <li class="active">Dashboard</li>
         </ul>
 
-        <h1>Dashboard</h1>
-        <div class="well">
+
             <div class="row-fluid">
                 <div class="span6">
-                    <h2>Top analyses</h2>
-                    @if(topAnalyses.size == 0){
-                        <p class="alert alert-danger">No analyses.</p>
-                    }else{
-                        <ul>
-                            @topAnalyses.map{a =>
-                                <li><a href="@routes.Analysis.detail(a.id)">@a.name</a></li>
-                            }
-                        </ul>
-                    }
-                    <p><a class="btn" href="#"><i class="icon-list"></i> List all &raquo;</a></p>
+                    <div class="alert alert-info">
+                        <h2>Accessible analyses</h2>
+                        @if(accessibleAnalysis.size == 0){
+                            <p class="alert alert-danger">No analyses.</p>
+                        }else{
+                            <table class="table table-striped">
+                                @accessibleAnalysis.map{a =>
+                                    <tr>
+                                        <td>
+                                            <a href="@routes.Analysis.detail(a.id)">@a.name</a>
+                                        </td>
+                                        <td>
+                                            @if(a.owner.isDefined){
+                                                <a href="@routes.Profile.index(a.owner.get.email)"><i class="icon-user"></i> @a.owner.get.name</a>
+                                            }else{
+                                                <span class="badge">Public</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </table>
+                        }
+                        <p><a class="btn" href="#"><i class="icon-list"></i> List all &raquo;</a></p>
+                    </div>
                 </div><!--/span-->
                 <div class="span6">
-                    <h2>Top data sources</h2>
-                    @if(topDataSources.size > 0){
-                        <ul>
-                            @topDataSources.map{d =>
-                                <li><a href="@routes.DataSource.detail(d.id)">@d.getParameter("EndpointURL")</a></li>
-                            }
-                        </ul>
-                    }else{
-                        <div class="alert alert-info">
-                            <h3 class="alert-heading">No datasources.</h3>
-                            <p class="alert-block">
-                                No data sources, no fun.
-                                But you may add a data source easily! Just press the green button below.
-                            </p>
+                    <div class="alert alert-success">
+                        <h2>Accessible data sources</h2>
+                        @if(accessibleDataSources.size > 0){
+                            <table class="table table-striped">
+                                @accessibleDataSources.map{d =>
+                                    <tr>
+                                        <td>
+                                            <a href="@routes.DataSource.detail(d.id)">@d.name</a>
+                                        </td>
+                                        <td>
+                                            @if(d.owner.isDefined){
+                                            <a href="@routes.Profile.index(d.owner.get.email)"><i class="icon-user"></i> @d.owner.get.name</a>
+                                            }else{
+                                            <span class="badge">Public</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </table>
+                        }else{
+                            <div class="alert alert-info">
+                                <h3 class="alert-heading">No datasources.</h3>
+                                <p class="alert-block">
+                                    No data sources, no fun.
+                                    But you may add a data source easily! Just press the green button below.
+                                </p>
+                            </div>
+                        }
+                        <p><a class="btn" href="#"><i class="icon-list"></i> List all &raquo;</a></p>
                         </div>
-                    }
-                    <p><a class="btn" href="#"><i class="icon-list"></i> List all &raquo;</a></p>
                     </div>
             </div><!--/span-->
-        </div>
+
         @if(user.isDefined){
             <div class="row-fluid">
                 <div class="span6">
@@ -59,14 +84,14 @@
                         <p class="alert-block">But you may create one! Just press the green button below.</p>
                     </div>
                     }else{
-                        <ul>
+                        <table class="table table-striped">
                             @user.get.ownedAnalyses.map{a =>
-                            <li>
-                                <a href="@routes.Analysis.edit(a.id)">[<i class="icon icon-pencil"></i> Edit]</a>
-                                <a href="@routes.Analysis.detail(a.id)">@a.name</a>
-                            </li>
+                            <tr>
+                                <td><a href="@routes.Analysis.detail(a.id)">@a.name</a></td>
+                                <td><a href="@routes.Analysis.edit(a.id)" class="btn btn-primary"><i class="icon-white icon-pencil"></i> Edit</a></td>
+                            </tr>
                             }
-                        </ul>
+                        </table>
                     }
                     <p>
                         <a class="btn" href="#"><i class="icon-list"></i> List all &raquo;</a>
@@ -74,8 +99,8 @@
                     </p>
                 </div><!--/span-->
                 <div class="span6">
-                    <h2>My groups</h2>
-                    @if(user.get.ownedGroups.size == 0){
+                    <h2>My datasources</h2>
+                    @if(user.get.ownedDataSources.size == 0){
                         <div class="alert alert-info">
                             <h3 class="alert-heading">No groups.</h3>
                             <p class="alert-block">
@@ -85,27 +110,25 @@
                         </div>
                     }else{
                         <table class="table table-stripped">
-                            <thead>
-                                <tr>
-                                    <th>Group name</th>
-                                    <th></th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                        @user.get.ownedGroups.take(5).map{group =>
+                        @user.get.ownedDataSources.take(5).map{ds =>
                             <tr>
-                                <td>@group.name</td>
-                                <td>@group.members.size member(s)</td>
-                                <td><a href="@routes.Profile.editGroup(group.id)" class="btn btn-primary"><i class="icon-cog icon-white"></i> Administer</a></td>
+                                <td><a href="@routes.DataSource.detail(ds.id)">@ds.name</a></td>
+                                <td>
+                                @if(ds.isEditable){
+                                    <a href="@routes.DataSource.edit(ds.id)" class="btn btn-primary"><i class="icon-pencil icon-white"></i> Edit</a>
+                                }else{
+                                    <span class="badge">Not editable</span>
+                                }
+                                </td>
                             </tr>
                         }
                         </table>
                     }
                     <p>
-                        @if(user.get.ownedGroups.size > 5){
-                            <a class="btn" href="@routes.Profile.listGroups()"><i class="icon-list"></i> List all &raquo;</a>
+                        @if(user.get.ownedDataSources.size > 5){
+                            <a class="btn" href="@routes.DataSource.list()"><i class="icon-list"></i> List all &raquo;</a>
                         }
-                        <a class="btn btn-success" href="@routes.Profile.createGroup()"><i class="icon-plus icon-white"></i>Create &raquo;</a>
+                        <a class="btn btn-success" href="@routes.DataSource.create()"><i class="icon-plus icon-white"></i>Create &raquo;</a>
                     </p>
                 </div><!--/span-->
             </div><!--/row-->

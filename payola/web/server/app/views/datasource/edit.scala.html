@@ -1,0 +1,49 @@
+@(user: cz.payola.domain.entities.User, dataSource: cz.payola.domain.entities.plugins.DataSource, availableDataFetchers: Seq[cz.payola.domain.entities.plugins.concrete.DataFetcher])
+
+@main(Some(user), "Data source :: Payola!") {
+
+<div class="container-fluid">
+
+    <!-- TODO - some validation before form posting? -->
+
+    <h1>Edit data source: @dataSource.name</h1>
+
+    <div class="row-fluid">
+        <a href="@routes.DataSource.list()" class="btn btn-primary span2"><i class="icon-list icon-white"></i> Back to listing</a>
+        <a href="@routes.DataSource.delete(dataSource.id)" onclick="return confirm('Are you sure?');" class="btn btn-danger span2"><i class="icon-remove-circle icon-white"></i> Delete data source</a>
+    </div>
+
+    <form class="well" action="@routes.DataSource.saveEdited(dataSource.id)" method="post">
+        <div>Data source name:
+            <!-- setting the name to __dataSourceName__ (etc.) so that it won't colide with any data source parameter values. -->
+            <input type="text" id="data_source_name_input" class="span3" name="__dataSourceName__" value="@dataSource.name">
+        </div>
+
+        <div>Description:
+            <input type="text" id="data_source_description_input" class="span3" name="__dataSourceDescription__" value="@dataSource.description">
+        </div>
+
+        <div><input type="checkbox" name="__dataSourceIsPublic__" value="Public"  @if(dataSource.isPublic){ checked="checked" } /> Public
+        </div>
+
+
+        <div style="padding-bottom: 20px;">Data fetcher: <span style="padding-left: 30px;">@dataSource.plugin.name</span>
+        </div>
+
+        <div>
+            <table id="options">
+                @dataSource.parameterValues.map{ paramValue =>
+                    <tr>
+                        <td>@paramValue.parameter.name</td>
+                        <td style="padding-left: 40px;"><input name=@{paramValue.parameter.name} type="text" value=@{paramValue.value.toString} /></td>
+                    </tr>
+                }
+            </table>
+
+        </div>
+
+        <input type="submit" class="btn btn-primary span2" value="Save" onclick="return $('#data_source_name_input').textContent != '')"  />
+    </form>
+
+</div><!--/.fluid-container-->
+}

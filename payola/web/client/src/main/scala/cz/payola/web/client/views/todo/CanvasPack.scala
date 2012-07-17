@@ -2,17 +2,17 @@ package cz.payola.web.client.views.todo
 
 import s2js.adapters.js.dom
 import s2js.adapters.js.browser
-import cz.payola.web.client.views._
-import cz.payola.web.client.views.plugins.visual.Color
+import cz.payola.web.client.views.graph.visual.Color
 import s2js.compiler.javascript
 import s2js.adapters.js.browser._
-import cz.payola.web.client.views.plugins.visual.graph.positioning.LocationDescriptor
-import cz.payola.web.client.views.events._
+import cz.payola.web.client.views.graph.visual.graph.positioning.LocationDescriptor
 import cz.payola.web.client.views.elements.Canvas
-import cz.payola.web.client.views.plugins.visual.graph._
-import cz.payola.web.client.views
+import cz.payola.web._
+import cz.payola.web.client.views.graph.visual.graph._
+import cz.payola.web.client.views.algebra.Vector2D
+import cz.payola.web.client.events.BrowserEvent
 
-class CanvasPack(initialSize: Vector2D) extends views.Component
+class CanvasPack(initialSize: Vector2D) extends client.View
 {
     val mouseDoubleClicked = new BrowserEvent[Canvas]
 

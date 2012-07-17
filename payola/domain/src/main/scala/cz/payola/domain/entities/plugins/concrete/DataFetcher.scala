@@ -68,13 +68,23 @@ abstract class DataFetcher(name: String, inputCount: Int, parameters: immutable.
     def getNeighbourhood(instance: PluginInstance, vertexURI: String, distance: Int = 1): Graph = {
         require(distance > 0, "The distance has to be a positive number.")
 
-        val rootTriplePattern = TriplePattern(Uri(vertexURI), Variable("p0"), Variable("n1"))
-        val neighbourTriplePatterns = (1 to (distance - 1)).map { i =>
-            TriplePattern(Variable("n" + i), Variable("p" + i), Variable("n" + (i + 1)))
+        val rootTriplePatterns = List(
+            TriplePattern(Uri(vertexURI), Variable("op0"), Variable("o1")),
+            TriplePattern(Variable("s1"), Variable("sp0"), Uri(vertexURI))
+        )
+        executeQuery(instance, ConstructQuery(rootTriplePatterns).toString)
+
+        /* TODO take the distance into account
+        val neighbourTriplePatterns = (1 to (distance - 1)).flatMap { i =>
+            List(
+                TriplePattern(Variable("o" + i), Variable("op" + i), Variable("o" + (i + 1))),
+                TriplePattern(Variable("s" + i), Variable("sp" + i), Variable("s" + (i + 1)))
+            )
         }
-        val triplePatterns = rootTriplePattern +: neighbourTriplePatterns
+        val triplePatterns = rootTriplePatterns ++ neighbourTriplePatterns
         val graphPattern = triplePatterns.foldRight(GraphPattern.empty)((t, g) => GraphPattern(List(t), List(g)))
 
-        executeQuery(instance, ConstructQuery(triplePatterns, Some(graphPattern)).toString)
+        executeQuery(instance, ConstructQuery(triplePatterns, Some(graphPattern)).toString)*/
+
     }
 }

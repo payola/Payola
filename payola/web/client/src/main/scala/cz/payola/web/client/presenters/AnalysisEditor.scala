@@ -16,6 +16,9 @@ class AnalysisEditor(analysisIdP: String, menuHolder: String, pluginsHolder: Str
         AnalysisBuilderData.getAnalysis(analysisIdP){ analysis =>
             name.input.value = analysis.name
 
+            val sources = new ArrayBuffer[PluginInstance]
+            val renderBuffer = new ArrayBuffer[PluginInstance]
+
             analysis.pluginInstances.map{ instance =>
 
                 val clientInstance = new PluginInstance(instance.id,instance.plugin)
@@ -26,6 +29,12 @@ class AnalysisEditor(analysisIdP: String, menuHolder: String, pluginsHolder: Str
                     lanes += clientInstance
                     clientInstance.showDeleteButton()
                 }
+
+                if (!analysis.pluginInstanceBindings.find(_.targetPluginInstance == instance).isDefined){
+                    sources += clientInstance
+                }
+
+                renderBuffer += clientInstance
             }
 
             analysis.pluginInstanceBindings.map{b=>
@@ -36,7 +45,25 @@ class AnalysisEditor(analysisIdP: String, menuHolder: String, pluginsHolder: Str
                 creationMap(b.targetPluginInstance.id).predecessors = buff
             }
 
-            lanes.map(_.render(pluginsHolderElement))
+            sources.map{s =>
+                s.render(pluginsHolderElement)
+                renderBuffer -= s
+            }
+
+            while (!renderBuffer.isEmpty)
+            {
+                renderBuffer.map{s =>
+                    var canRender = true
+                    s.predecessors.map{predecessor =>
+                        canRender = (canRender && !renderBuffer.contains(predecessor))
+                    }
+
+                    if (canRender){
+                        s.render(pluginsHolderElement)
+                        renderBuffer -= s
+                    }
+                }
+            }
 
             analysis.pluginInstanceBindings.map{ b =>
                 renderBinding(creationMap(b.sourcePluginInstance.id), creationMap(b.targetPluginInstance.id))

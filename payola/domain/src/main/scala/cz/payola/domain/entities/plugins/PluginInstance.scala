@@ -9,7 +9,7 @@ import cz.payola.domain.Entity
   * @param _plugin The corresponding plugin.
   * @param _parameterValues The plugin parameter values.
   */
-class PluginInstance(protected val _plugin: Plugin, protected val _parameterValues: immutable.Seq[ParameterValue[_]])
+class PluginInstance(protected var _plugin: Plugin, protected var _parameterValues: immutable.Seq[ParameterValue[_]])
     extends Entity with DescribedEntity with cz.payola.common.entities.plugins.PluginInstance
 {
     checkConstructorPostConditions()

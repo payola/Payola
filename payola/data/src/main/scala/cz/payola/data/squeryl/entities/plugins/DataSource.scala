@@ -2,13 +2,12 @@ package cz.payola.data.squeryl.entities.plugins
 
 import scala.collection.immutable
 import cz.payola.data.squeryl.entities._
-import cz.payola.data.squeryl.entities.plugins.parameters._
-import org.squeryl.annotations.Transient
 import cz.payola.data.squeryl.SquerylDataContextComponent
 import cz.payola.domain.entities.plugins.concrete.DataFetcher
 
 /**
-  * This object converts [[cz.payola.common.entities.plugins.DataSource]] to [[cz.payola.data.squeryl.entities.plugins.DataSource]]
+  * This object converts [[cz.payola.common.entities.plugins.DataSource]]
+  * to [[cz.payola.data.squeryl.entities.plugins.DataSource]]
   */
 object DataSource extends EntityConverter[DataSource]
 {
@@ -18,7 +17,7 @@ object DataSource extends EntityConverter[DataSource]
             case e: cz.payola.domain.entities.plugins.DataSource => {
                 val dataFetcher = e.plugin.asInstanceOf[DataFetcher]
                 Some(new DataSource(e.id, e.name, e.owner.map(User(_)),
-                    dataFetcher,e.parameterValues.map(ParameterValue(_))))
+                    dataFetcher, e.parameterValues.map(ParameterValue(_)), e.isPublic, e.description, e.isEditable))
             }
             case _ => None
         }
@@ -30,65 +29,34 @@ class DataSource(
     n: String,
     o: Option[User],
     df: cz.payola.domain.entities.plugins.concrete.DataFetcher,
-    paramValues: immutable.Seq[ParameterValue[_]])(implicit val context: SquerylDataContextComponent)
+    paramValues: immutable.Seq[ParameterValue[_]],
+    var _isPub: Boolean,
+    var _desc: String,
+    var _isEdit: Boolean)
+    (implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.plugins.DataSource(n, o, df, paramValues)
-    with PersistableEntity  with OptionallyOwnedEntity
+    with PersistableEntity with OptionallyOwnedEntity with ShareableEntity with NamedEntity with DescribedEntity
+    with PluginInstanceLike
 {
     var pluginId: String = Option(df).map(_.id).getOrElse(null)
-
-    private lazy val _pluginQuery = context.schema.pluginsDataSources.right(this)
-
-    private lazy val _booleanParameterValuesQuery = context.schema.booleanParameterValuesOfDataSources.left(this)
-
-    private lazy val _floatParameterValuesQuery = context.schema.floatParameterValuesOfDataSources.left(this)
-
-    private lazy val _intParameterValuesQuery = context.schema.intParameterValuesOfDataSources.left(this)
-
-    private lazy val _stringParameterValuesQuery = context.schema.stringParameterValuesOfDataSources.left(this)
-
-    @Transient
-    private var _parameterValuesLoaded = false
-
-    @Transient
-    // This field represents val _parameterValues in common.PluginInstance - it cannot be overriden because it is
-    // immutable
-    // (can't be filled via lazy-loading)
-    private var _paramValues: immutable.Seq[PluginType#ParameterValueType] = immutable.Seq()
-
+    
     override def plugin = {
-        if (pluginId != null) {
+        if (_plugin == null){
             wrapInTransaction {
-                _pluginQuery.head.toPlugin
+                context.dataSourceRepository.loadPlugin(this)
             }
         }
-        else {
-            null
-        }
+
+        _plugin
     }
 
     override def parameterValues: collection.immutable.Seq[PluginType#ParameterValueType] = {
-        if (!_parameterValuesLoaded) {
+        if (_parameterValues == null) {
             wrapInTransaction {
-                _paramValues = List(
-                    _booleanParameterValuesQuery.toList,
-                    _floatParameterValuesQuery.toList,
-                    _intParameterValuesQuery.toList,
-                    _stringParameterValuesQuery.toList
-                ).flatten
+                context.dataSourceRepository.loadParameterValues(this)
             }
-
-            _parameterValuesLoaded = true
         }
 
-        _paramValues
-    }
-
-    def associateParameterValues() {
-        paramValues.map {
-            case paramValue: BooleanParameterValue => context.schema.associate(paramValue, _booleanParameterValuesQuery)
-            case paramValue: FloatParameterValue => context.schema.associate(paramValue, _floatParameterValuesQuery)
-            case paramValue: IntParameterValue => context.schema.associate(paramValue, _intParameterValuesQuery)
-            case paramValue: StringParameterValue => context.schema.associate(paramValue, _stringParameterValuesQuery)
-        }
+        _parameterValues
     }
 }

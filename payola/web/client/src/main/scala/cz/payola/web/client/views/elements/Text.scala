@@ -2,9 +2,9 @@ package cz.payola.web.client.views.elements
 
 import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom
-import cz.payola.web.client.views.Component
+import cz.payola.web.client.View
 
-class Text(initialValue: String) extends Component
+class Text(initialValue: String) extends View
 {
     private var value = initialValue
 

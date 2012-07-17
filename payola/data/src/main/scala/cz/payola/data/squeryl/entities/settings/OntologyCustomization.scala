@@ -11,7 +11,8 @@ object OntologyCustomization extends EntityConverter[OntologyCustomization]
             case o: OntologyCustomization => Some(o)
             case o: cz.payola.common.entities.settings.OntologyCustomization => {
                 val customizations = o.classCustomizations.map(ClassCustomization(_))
-                Some(new OntologyCustomization(o.id, o.ontologyURL, o.name, o.owner.map(User(_)), customizations))
+                Some(new OntologyCustomization(
+                    o.id, o.ontologyURL, o.name, o.owner.map(User(_)), customizations, o.isPublic))
             }
             case _ => None
         }
@@ -19,16 +20,18 @@ object OntologyCustomization extends EntityConverter[OntologyCustomization]
 }
 
 class OntologyCustomization(
-    override val id: String, u: String, n: String, o: Option[User], c: immutable.Seq[ClassCustomization])
+    override val id: String, u: String, n: String, o: Option[User],
+    c: immutable.Seq[ClassCustomization], var _isPub: Boolean)
     (implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.settings.OntologyCustomization(u, n, o, c)
-    with PersistableEntity with OptionallyOwnedEntity
+    with PersistableEntity with OptionallyOwnedEntity with ShareableEntity with NamedEntity
 {
+    _classCustomizations = null
+
     override def classCustomizations: immutable.Seq[ClassCustomizationType] = {
         if (_classCustomizations == null) {
-            // TODO:
             _classCustomizations = wrapInTransaction {
-                Nil
+                context.ontologyCustomizationRepository.getClassCustomizations(id).toList
             }
         }
 

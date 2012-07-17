@@ -61,7 +61,7 @@ object RPC extends PayolaController with Secured
 {
     val exceptionSerializer = new ExceptionSerializer
 
-    val jsonSerializer = new GraphSerializer
+    val jsonSerializer = new RPCSerializer
 
     val dispatcher = new RPCDispatcher(jsonSerializer)
 
@@ -89,9 +89,10 @@ object RPC extends PayolaController with Secured
             val response = dispatcher.dispatchRequest(params, async, user)
             Ok(response)
         } catch {
-            case e: Exception =>
-                println(e)
+            case e: Exception => {
+                Option(e.getCause).map(_.printStackTrace()).getOrElse(e.printStackTrace())
                 raiseError(e)
+            }
         }
     }
 

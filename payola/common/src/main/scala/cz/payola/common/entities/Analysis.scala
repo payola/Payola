@@ -19,9 +19,9 @@ trait Analysis extends Entity with NamedEntity with OptionallyOwnedEntity with S
     /** Type of the bindings between analytical plugin instances. */
     type PluginInstanceBindingType <: PluginInstanceBinding
 
-    private val _pluginInstances = mutable.ArrayBuffer[PluginInstanceType]()
+    protected var _pluginInstances = mutable.ArrayBuffer[PluginInstanceType]()
 
-    private val _pluginInstanceBindings = mutable.ArrayBuffer[PluginInstanceBindingType]()
+    protected var _pluginInstanceBindings = mutable.ArrayBuffer[PluginInstanceBindingType]()
 
     /** Analytical plugin instances the analysis consists of.*/
     def pluginInstances: immutable.Seq[PluginInstanceType] = _pluginInstances.toList

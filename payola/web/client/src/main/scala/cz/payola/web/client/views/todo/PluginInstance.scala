@@ -7,10 +7,10 @@ import scala.collection.mutable
 import cz.payola.web.client.presenters.models.ParameterValue
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events._
-import cz.payola.web.client.views.Component
-import cz.payola.web.client.views.components.bootstrap._
+import cz.payola.web.client.View
+import cz.payola.web.client.views.bootstrap._
 import cz.payola.web.client.views.elements.Div
-import cz.payola.web.client.views.components.bootstrap.SpanButton
+import cz.payola.web.client.views.bootstrap.SpanButton
 
 object PluginInstance
 {
@@ -23,7 +23,7 @@ object PluginInstance
 }
 
 class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[PluginInstance] = List())
-    extends Component
+    extends View
 {
     val connectButtonClicked = new SimpleUnitEvent[PluginInstance]
 
@@ -75,7 +75,7 @@ class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[P
 
     private var parentElement: Option[dom.Element] = None
 
-    def render(parent: dom.Element) = {
+    def render(parent: dom.Element) {
         this.parentElement = Some(parent)
         alertDiv.id = (plugin.id + "_" + PluginInstance.getCounter())
         successors.render(parent)
@@ -91,7 +91,7 @@ class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[P
         }
     }
 
-    override def destroy() = {
+    override def destroy() {
         if (parentElement.isDefined) {
             unbindJsPlumb(getPluginElement)
             var i = 0
@@ -107,7 +107,7 @@ class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[P
                    var connections = jsPlumb.getConnections({target: element.getAttribute("id")});
                    for (var k in connections){ jsPlumb.detach(connections[k]); }
                  """)
-    def unbindJsPlumb(element: dom.Element) = {}
+    def unbindJsPlumb(element: dom.Element) { }
 
     def domElement: dom.Element = {
         successors.domElement
@@ -117,11 +117,11 @@ class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[P
         alertDiv.domElement
     }
 
-    def showDeleteButton() = {
+    def showDeleteButton() {
         delete.domElement.setAttribute("style", "display: inline-block;")
     }
 
-    def hideDeleteButton() = {
+    def hideDeleteButton() {
         delete.domElement.setAttribute("style", "display: none;")
     }
 

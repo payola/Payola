@@ -29,63 +29,25 @@ object PluginInstanceBinding extends EntityConverter[PluginInstanceBinding]
 
 class PluginInstanceBinding(
     override val id: String,
-    source: PluginInstance,
-    target: PluginInstance,
-    _targetInputIdx: Int = 0)(implicit val context: SquerylDataContextComponent)
-    extends cz.payola.domain.entities.analyses.PluginInstanceBinding(source, target, _targetInputIdx)
+    s: PluginInstance,
+    t: PluginInstance,
+    idx: Int = 0)(implicit val context: SquerylDataContextComponent)
+    extends cz.payola.domain.entities.analyses.PluginInstanceBinding(s, t, idx)
     with PersistableEntity
 {
-    val sourcePluginInstanceId: String = Option(source).map(_.id).getOrElse(null)
+    val sourcePluginInstanceId: String = Option(s).map(_.id).getOrElse(null)
 
-    val targetPluginInstanceId: String = Option(target).map(_.id).getOrElse(null)
+    val targetPluginInstanceId: String = Option(t).map(_.id).getOrElse(null)
 
-    val inputIndex = _targetInputIndex
+    val inputIndex = idx
 
     var analysisId: String = null
 
-    @Transient
-    private var _sourceLoaded = false
-    private var _source: plugins.PluginInstance = null
-    private lazy val _sourcesQuery = context.schema.bindingsOfSourcePluginInstances.right(this)
-
-    @Transient
-    private var _targetLoaded = false
-    private var _target: plugins.PluginInstance = null
-    private lazy val _targetsQuery = context.schema.bindingsOfTargetPluginInstances.right(this)
-
-    override def sourcePluginInstance = {
-        try{
-            if (!_sourceLoaded) {
-                wrapInTransaction {
-                    _source = _sourcesQuery.head
-                }
-
-                _sourceLoaded = true
-            }
-
-            _source
-        }
-        catch {
-            case e: Exception => println("source error")
-            null
-        }
+    def sourcePluginInstance_=(value: PluginInstanceType) {
+        _sourcePluginInstance = value
     }
 
-    override def targetPluginInstance = {
-        try {
-            if (!_targetLoaded) {
-                wrapInTransaction {
-                    _target = _targetsQuery.head
-                }
-
-                _targetLoaded = true
-            }
-
-            _target
-        }
-        catch {
-            case e: Exception => println("target error")
-            null
-        }
+    def targetPluginInstance_=(value: PluginInstanceType) {
+        _targetPluginInstance = value
     }
 }

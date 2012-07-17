@@ -10,14 +10,20 @@ class RPCActionExecutor extends Actor
                 // Store the sender of the query so the result can be sent to him later.
                 val querier = sender
 
+                var callbackCalled = false
+
                 def successCallback(x: Any) {
-                    querier ! ActionExecutorSuccess(x)
-                    exit()
+                    if (!callbackCalled){
+                        querier ! ActionExecutorSuccess(x)
+                        callbackCalled = true
+                    }
                 }
 
                 def failCallback(e: Throwable) {
-                    querier ! ActionExecutorError(e)
-                    exit()
+                    if (!callbackCalled){
+                        querier ! ActionExecutorError(e)
+                        callbackCalled = true
+                    }
                 }
 
                 // add param - success callback
@@ -28,9 +34,9 @@ class RPCActionExecutor extends Actor
                 try{
                     methodToRun.invoke(runnableObj, paramArray:_*)
 
-                    // This means that the exit() call in success or fail callback was not reached -> none of those methods
-                    // was invoked
-                    failCallback(new Exception("The remote method succeeded but did not invoke the success callback."))
+                    if (!callbackCalled){
+                        failCallback(new Exception("The remote method succeeded but did not invoke the success callback."))
+                    }
                 }catch{
                     case e: Throwable => failCallback(e)
                 }
