@@ -92,7 +92,7 @@ class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
 
         plugin.updateGraph(graph)
 
-        currentPlugin.get match {
+        /*currentPlugin.get match {
             case i: VisualPluginView =>
                 i.vertexUpdate += { event =>
                     event.target match {
@@ -103,6 +103,6 @@ class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
                     }
                     false
                 }
-        }
+        }*/
     }
 }

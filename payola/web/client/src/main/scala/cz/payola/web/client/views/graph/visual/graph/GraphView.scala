@@ -1,26 +1,25 @@
 package cz.payola.web.client.views.graph.visual.graph
 
 import collection.mutable.ListBuffer
-import s2js.adapters.js.dom.CanvasRenderingContext2D
 import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.VisualSetup
 import s2js.adapters.js.browser.window
 import cz.payola.common.rdf._
 import s2js.adapters.js.dom
 import cz.payola.web.client.views.graph.visual._
 import cz.payola.web.client.views.algebra._
+import cz.payola.web.client.views.todo.CanvasPack
+import cz.payola.web.client.views.graph.visual.graph.positioning.LocationDescriptor
 
 /**
   * Graphical representation of Graph object.
   * @param container the space where the graph should be visualised
   */
-class GraphView(val container: dom.Element, val settings: VisualSetup) extends graph.View
-{
+class GraphView(val container: dom.Element, val settings: VisualSetup) extends
+    View[CanvasPack] {
     /**
       * During update vertices with higher age than this value are removed from this graph.
       */
     private val vertexHighestAge = 2
-
-    val canvasPack = createCanvasPack(container)
 
     /**
       * Components containing vertices and their edges. A component is a part of graph, for which does not exist
@@ -142,16 +141,76 @@ class GraphView(val container: dom.Element, val settings: VisualSetup) extends g
       */
     private def createVertexViews(graphModel: Graph): ListBuffer[VertexView] = {
         val buffer = ListBuffer[VertexView]()
-        var counter = 0
+        val literalVertices = ListBuffer[LiteralVertex]()
 
         graphModel.vertices.foreach { vertexModel =>
 
-            buffer += new VertexView(vertexModel, Point2D(300, 300), settings.vertexModel, settings.textModel)
-            //TODO should be center of the canvas or something like that
-            counter += 1
+            vertexModel match {
+                case i: IdentifiedVertex => {
+                    val newVertexView = new VertexView(i, Point2D(300, 300)/*TODO center of drawing space*/,
+                        settings.vertexModel, settings.textModel, None)
+                    //TODO this is the spot where ontology ID of a vertex is found and should be removed from the graph
+                    var rdfTypeEdge: Option[Edge]= None
+                    var rdfTypeEdgeNumber = -1
+                    graphModel.edges.foreach{ edge =>
+
+                        rdfTypeEdgeNumber += 1
+                        if((edge.origin == vertexModel || edge.destination == vertexModel)
+                            && edge.uri.indexOf("rdf:type") != -1) {// TODO RDF is a type extending Edge class
+
+                            window.alert("rdg:type found in edge uri while constructing vertex view: "+newVertexView.toString)//TODO remove
+                            rdfTypeEdge = Some(edge)
+                        }
+                    }
+
+                    newVertexView.rdfType = if(rdfTypeEdge.isDefined) {
+                        graphModel.edges.drop(rdfTypeEdgeNumber) //removing found rdf type
+                        Some(rdfTypeEdge.get.uri) //saving rdf type
+                    } else {
+                        None
+                    }
+                    buffer += newVertexView
+                }
+                case i: LiteralVertex => {
+                    literalVertices += i
+                }
+            }
         }
 
-        buffer
+        addLiteralVerticesToVertexViews(graphModel, buffer, literalVertices)
+    }
+
+    private def addLiteralVerticesToVertexViews(graphModel: Graph,
+        vertexViews: ListBuffer[VertexView], literalVertices: ListBuffer[LiteralVertex]): ListBuffer[VertexView] = {
+
+        literalVertices.foreach { literalVertex =>
+        // find edge by which the vertex is connected to the rest of the graph and add it to the identified vertex
+        // on the other side of the edge
+
+            val edgeToIdentVertex =
+                graphModel.edges.find{ edge => (edge.origin == literalVertex || edge.destination == literalVertex) }
+            if(edgeToIdentVertex.isDefined) {
+                //get identified vertex neighbour
+                val identNeighborVertex =
+                    edgeToIdentVertex.get.origin match {
+                        case i: LiteralVertex =>
+                            edgeToIdentVertex.get.destination.asInstanceOf[IdentifiedVertex]
+                        case i: IdentifiedVertex =>
+                            i
+                    }
+                //find the view vertex of the identified vertex neighbour
+                val identNeighbourVertexView =
+                    vertexViews.find{ vertexView => vertexView.vertexModel == identNeighborVertex }
+                if(identNeighbourVertexView.isDefined) {
+                    identNeighbourVertexView.get.literalVertices += literalVertex
+                } else {
+                    //this should never happen
+                }
+            } else {
+                //this should never happen
+            }
+        }
+        vertexViews
     }
 
     /**
@@ -383,7 +442,7 @@ class GraphView(val container: dom.Element, val settings: VisualSetup) extends g
     //drawing############################################################################################################
     //###################################################################################################################
 
-    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D) {
+    def draw(canvasPack: CanvasPack, color: Option[Color], positionCorrection: Vector2D) {
         //fitCanvas()
 
         var colorVertex: Option[Color] = Some(Color.Black)
@@ -406,7 +465,13 @@ class GraphView(val container: dom.Element, val settings: VisualSetup) extends g
                 colorVertex = Some(settings.vertexModel.color)
             }
 
-            canvasPack.draw(vertexView, colorVertex, positionCorrection)
+            if(vertexView.isSelected) {
+                vertexView.draw(canvasPack.verticesSelected.context, colorVertex, positionCorrection)
+                canvasPack.verticesSelected.dirty()
+            } else {
+                vertexView.draw(canvasPack.verticesDeselected.context, colorVertex, positionCorrection)
+                canvasPack.verticesDeselected.dirty()
+            }
         }
 
         edgeViews.foreach { edgeView =>
@@ -415,10 +480,14 @@ class GraphView(val container: dom.Element, val settings: VisualSetup) extends g
                 edgeView.information.setSelectedForDrawing()
             }
 
-            canvasPack.draw(edgeView, color, positionCorrection)
+            if(edgeView.isSelected) {
+                edgeView.draw(canvasPack.edgesSelected.context, color, positionCorrection)
+                canvasPack.edgesSelected.dirty()
+            } else {
+                edgeView.draw(canvasPack.edgesDeselected.context, color, positionCorrection)
+                canvasPack.edgesDeselected.dirty()
+            }
         }
-
-        canvasPack.dirty()
     }
 
     private def TODO_RenameThisMethod(edgeView: EdgeView, vertexView: VertexView): Boolean = {
@@ -426,7 +495,7 @@ class GraphView(val container: dom.Element, val settings: VisualSetup) extends g
             (edgeView.destinationView.eq(vertexView) && edgeView.originView.selected)
     }
 
-    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D) {
+    def drawQuick(canvasPack: CanvasPack, color: Option[Color], positionCorrection: Vector2D) {
         val vertexViews = getAllVertices
         val edgeViews = getAllEdges
 
@@ -440,15 +509,25 @@ class GraphView(val container: dom.Element, val settings: VisualSetup) extends g
                 Some(settings.vertexModel.color)
             }
 
-            canvasPack.drawQuick(vertexView, colorToUseVertex, positionCorrection)
+            if(vertexView.isSelected) {
+                vertexView.drawQuick(canvasPack.verticesSelected.context, colorToUseVertex, positionCorrection)
+                canvasPack.verticesSelected.dirty()
+            } else {
+                vertexView.drawQuick(canvasPack.verticesDeselected.context, colorToUseVertex, positionCorrection)
+                canvasPack.verticesDeselected.dirty()
+            }
         }
 
         edgeViews.foreach { edgeView =>
 
-            canvasPack.drawQuick(edgeView, color, positionCorrection)
+            if(edgeView.isSelected) {
+                edgeView.drawQuick(canvasPack.edgesSelected.context, color, positionCorrection)
+                canvasPack.edgesSelected.dirty()
+            } else {
+                edgeView.drawQuick(canvasPack.edgesDeselected.context, color, positionCorrection)
+                canvasPack.edgesDeselected.dirty()
+            }
         }
-
-        canvasPack.dirty()
     }
 
     /**
@@ -457,35 +536,35 @@ class GraphView(val container: dom.Element, val settings: VisualSetup) extends g
       * is used all layers are redrawn.
       * @param graphOperation specifying which layers should be redrawn
       */
-    def redraw(graphOperation: Int) {
+    def redraw(canvasPack: CanvasPack, graphOperation: Int) {
         graphOperation match {
             case RedrawOperation.Movement =>
                 canvasPack.clearForMovement()
-                draw(null, None, Vector2D.Zero)
+                draw(canvasPack, None, Vector2D.Zero)
             //^because elements are drawn into separate layers, redraw(..) does not know to which context to draw
 
             case RedrawOperation.Selection =>
-                redrawAll()
+                redrawAll(canvasPack)
 
             case RedrawOperation.Animation =>
                 canvasPack.clear()
-                drawQuick(null, None, Vector2D.Zero)
+                drawQuick(canvasPack, None, Vector2D.Zero)
 
             case RedrawOperation.All =>
                 canvasPack.clear()
-                redrawAll()
+                redrawAll(canvasPack)
 
             case _ =>
-                redrawAll()
+                redrawAll(canvasPack)
         }
     }
 
     /**
       * Redraws the whole graph from scratch. All layers are cleared and all elements of the graph are drawn again.
       */
-    def redrawAll() {
+    def redrawAll(canvasPack: CanvasPack) {
         canvasPack.clear()
-        draw(null, None, Vector2D.Zero)
+        draw(canvasPack, None, Vector2D.Zero)
         //^because elements are drawn into separate layers, redraw(..) does not know to which context to draw
     }
 
@@ -536,22 +615,6 @@ class GraphView(val container: dom.Element, val settings: VisualSetup) extends g
         }
 
         result
-    }
-
-    def fitCanvas() {
-        //measure size of the graph and set dimensions of the canvasPack accordingly (max(sizeOfTheWindow,
-        // sizeOfTheGraph))
-        val maxBottomRight = Point2D(0, 0)
-        components.foreach { component =>
-            val componentBR = component.getBottomRight()
-            if (maxBottomRight.x < componentBR.x) {
-                maxBottomRight.x = componentBR.x
-            }
-            if (maxBottomRight.y < componentBR.y) {
-                maxBottomRight.y = componentBR.y
-            }
-        }
-        canvasPack.size = Vector2D(window.innerWidth - canvasPack.offsetLeft, window.innerHeight - canvasPack.offsetTop)
     }
 
     def getGraphCenter(): Point2D = {

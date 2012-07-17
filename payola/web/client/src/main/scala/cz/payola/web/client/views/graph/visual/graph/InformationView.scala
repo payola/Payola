@@ -9,7 +9,7 @@ import cz.payola.web.client.views.algebra._
   * Graphical representation of textual data in the drawn graph.
   * @param data that are visualised (by toString function of this object)
   */
-class InformationView(data: Any, val settings: TextSettingsModel) extends View
+class InformationView(data: Any, val settings: TextSettingsModel) extends View[CanvasRenderingContext2D]
 {
     /**
       * Default color of text.

@@ -59,10 +59,10 @@ abstract class BaseTechnique(settings: VisualSetup, name: String) extends Visual
         }
         //fit the drawing space to the window
         firstAnimation.addFollowingAnimation(
-            new Animation(Animation.emptyAnimation, false, None, graphView.fitCanvas, redraw, None))
+            new Animation(Animation.emptyAnimation, false, None, fitCanvas, redraw, None))
 
         //finally move the whole graph to the center of the window
-        val graphCenterCorrector = new GraphPositionHelper(() => graphView.canvasPack.size, graphView.getGraphCenter)
+        val graphCenterCorrector = new GraphPositionHelper(() => topLayer.size, graphView.getGraphCenter)
         firstAnimation.addFollowingAnimation(
             new Animation(Animation.moveGraphByFunction,
                 (graphCenterCorrector, graphView.getAllVertices), None, redrawQuick, redraw, None))

@@ -6,6 +6,7 @@ import s2js.adapters.js.browser.document
 import cz.payola.web.client.events.BrowserEvent
 import cz.payola.web.client.View
 import s2js.compiler.javascript
+import s2js.adapters.js.browser.window
 
 abstract class ElementView[A <: dom.Element](domElementName: String, val innerViews: Seq[View], cssClass: String)
     extends View

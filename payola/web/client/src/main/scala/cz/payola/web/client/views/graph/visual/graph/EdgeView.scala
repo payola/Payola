@@ -28,7 +28,7 @@ private object Quadrant
   * @param destinationView of this graphical representation in drawing space
   */
 class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationView: VertexView,
-    val settings: VisualSetup) extends View {
+    val settings: VisualSetup) extends View[CanvasRenderingContext2D] {
 
     /**
       * Textual data that should be visualised with this edge ("over this edge").
@@ -125,6 +125,7 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
     def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D) {
 
         drawQuick(context, color, positionCorrection)
+        information.draw(context, Some(settings.textModel.color), positionCorrection)
     }
 
     def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D) {

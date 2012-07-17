@@ -7,7 +7,7 @@ import s2js.adapters.js.dom.Element
 import cz.payola.web.client.views.graph.visual.Color
 import cz.payola.web.client.views.algebra._
 
-trait View
+trait View[A]
 {
     /**
       * Indicator of selection.
@@ -21,7 +21,7 @@ trait View
       * @param color which color to use
       * @param positionCorrection to modify the position of the drawn object
       */
-    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D)
+    def draw(context: A, color: Option[Color], positionCorrection: Vector2D)
 
     /**
       * Routine for fast drawing of the graphical representation of graphs objects. Should be used for animation
@@ -29,7 +29,7 @@ trait View
       * @param color which color to use
       * @param positionCorrection to modify the position of the drawn object
       */
-    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D)
+    def drawQuick(context: A, color: Option[Color], positionCorrection: Vector2D)
 
     /**
       * Draws a rectangle with rounded corners, depending on the radius parameter to the input canvas context.
@@ -133,9 +133,9 @@ trait View
     protected def drawArrow(context: CanvasRenderingContext2D, origin: Point2D, destination: Point2D,
         offset: Double, lineWidth: Double, color: Color) {
 
-        drawStraightLine(context, origin, destination, lineWidth, color)
         val arrowPointingTo = getArrowOriginPoint(destination - origin, destination, offset)
         if(arrowPointingTo.isDefined) {
+            drawStraightLine(context, origin, arrowPointingTo.get, lineWidth, color)
             drawArrowEnd(context, arrowPointingTo.get - origin, arrowPointingTo.get, lineWidth, color)
         } else {
             drawStraightLine(context, origin, destination, lineWidth, color)
@@ -317,18 +317,5 @@ trait View
       */
     protected def isPointInRect(point: Point2D, topLeft: Point2D, bottomRight: Point2D): Boolean = {
         point >= topLeft && point <= bottomRight
-    }
-
-    /**
-      * Constructs a canvas context element as a child of the input container ElementView object.
-      * @param container parent of the created canvas context
-      * @return Layer object with a new canvas context
-      */
-    protected def createCanvasPack(container: Element): CanvasPack = {
-        val canvasPack = new CanvasPack(Vector2D(window.innerWidth - container.offsetLeft,
-            window.innerHeight - container.offsetTop))
-        canvasPack.render(container)
-
-        canvasPack
     }
 }
