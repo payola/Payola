@@ -25,9 +25,9 @@ class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: Str
 
     protected val timeoutMap = new HashMap[String, Int]
 
-    protected val nameComponent = new InputControl("Analysis name", "init-name", "", "Enter analysis name")
+    protected val nameComponent = new TextInputControl("Analysis name", "init-name", "", "Enter analysis name")
 
-    protected val name = new InputControl("Analysis name:", "name", "", "Analysis name")
+    protected val name = new TextInputControl("Analysis name:", "name", "", "Analysis name")
 
     name.render(nameHolderElement)
 

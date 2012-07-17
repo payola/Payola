@@ -26,7 +26,7 @@ class PrivateDataUploader(val uploaderFormID: String, val redirectURL: String) e
         true
     }
 
-    val urlField = new InputControl("Graph URL:", "graphURL", "", "")
+    val urlField = new TextInputControl("Graph URL:", "graphURL", "", "")
     val fileInput = new Input("graphFile", "", Some("RDF XML file"), "", "file")
     fileInput.setAttribute("accept", "application/rdf+xml, application/xml")
     val submitButtonText = new Text("")
