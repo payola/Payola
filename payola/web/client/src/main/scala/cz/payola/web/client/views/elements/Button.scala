@@ -8,4 +8,14 @@ class Button(subView: View, cssClass: String = "")
     extends ElementView[dom.Button]("button", List(subView), cssClass + " btn")
 {
     setAttribute("type", "button")
+
+    def setIsEnabled(isEnabled: Boolean) {
+        if (isEnabled) {
+            removeCssClass("disabled")
+            domElement.disabled = false
+        } else {
+            addCssClass("disabled")
+            domElement.disabled = true
+        }
+    }
 }

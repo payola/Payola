@@ -55,6 +55,10 @@ class RPCSerializer extends JSONSerializer
     val analysisPluginInstanceBindings = new CustomValueSerializationRule[Analysis]("_pluginInstanceBindings", (serializer, analysis) => analysis.pluginInstanceBindings)
     this.addSerializationRule(analysisClass,analysisPluginInstanceBindings)
 
+    val dataSourceClass = new SimpleSerializationClass(classOf[DataSource])
+    val dataSourceRule = new BasicSerializationRule(Some(classOf[DataSource]))
+    this.addSerializationRule(dataSourceClass, dataSourceRule)
+
     val pluginInstanceClass = new SimpleSerializationClass(classOf[PluginInstance])
     val pluginInstanceRule = new BasicSerializationRule(Some(classOf[PluginInstance]))
     this.addSerializationRule(pluginInstanceClass, pluginInstanceRule)

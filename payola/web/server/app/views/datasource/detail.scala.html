@@ -2,9 +2,10 @@
 
 @main(user, "Data Source :: Payola!") {
     <div class="container-fluid" id="view"></div>
-    <script src="/javaScriptPackage/cz.payola.web.client.presenters.DataSourcePresenter" type="text/javascript"></script>
+    <script src="/javaScriptPackage/cz.payola.web.client.presenters.entity.DataSourcePresenter" type="text/javascript">
+    </script>
     <script type="text/javascript">
-        new cz.payola.web.client.presenters.DataSourcePresenter(
+        new cz.payola.web.client.presenters.entity.DataSourcePresenter(
             document.getElementById('view'),
             '@dataSource.id',
             '@dataSource.name',
