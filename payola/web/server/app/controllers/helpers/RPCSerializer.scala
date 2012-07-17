@@ -79,8 +79,8 @@ class RPCSerializer extends JSONSerializer
     val stringParamRule = new BasicSerializationRule(Some(classOf[StringParameter]))
     this.addSerializationRule(stringParamClass, stringParamRule)
 
-    val stringParamValueClass = new SimpleSerializationClass(classOf[ParameterValue])
-    val stringParamValueRule = new BasicSerializationRule(Some(classOf[ParameterValue[String]]))
+    val stringParamValueClass = new SimpleSerializationClass(classOf[ParameterValue[_]])
+    val stringParamValueRule = new BasicSerializationRule(Some(classOf[ParameterValue[_]]))
     this.addSerializationRule(stringParamValueClass, stringParamValueRule)
 
     val boolParamClass = new SimpleSerializationClass(classOf[BooleanParameter])
