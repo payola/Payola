@@ -13,7 +13,7 @@ trait EntityModelComponent
     {
         def getById(id: String): Option[A] = repository.getById(id)
 
-        def getAll: Seq[A] = repository.getAll()
+        def getAll(pagination: Option[PaginationInfo] = None): Seq[A] = repository.getAll(pagination)
 
         def persist(entity: Entity) {
             repository.persist(entity)

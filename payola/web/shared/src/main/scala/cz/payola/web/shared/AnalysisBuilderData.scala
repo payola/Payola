@@ -13,7 +13,7 @@ import cz.payola.domain.entities.User
     }
 
     @async def getPlugins(user: User = null)(successCallback: (Seq[Plugin] => Unit))(failCallback: (Throwable => Unit)) {
-        successCallback(Payola.model.pluginModel.getAll)
+        successCallback(Payola.model.pluginModel.getAll())
     }
 
     def lockAnalysis(id: String, user: User = null) {

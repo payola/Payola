@@ -4,7 +4,6 @@ import s2js.compiler.secured
 import cz.payola.domain.entities._
 import cz.payola.domain.entities.plugins.concrete.DataFetcher
 import scala.Some
-import scala.collection.mutable.ListBuffer
 
 @remote object DataSourceManager
 {
@@ -24,7 +23,7 @@ import scala.collection.mutable.ListBuffer
       * @return True or false.
       */
     @secured def dataSourceExistsWithName(name: String, user: User = null): Boolean = {
-        Payola.model.dataSourceModel.getAll.exists(_.name == name)
+        Payola.model.dataSourceModel.getAll().exists(_.name == name)
     }
 
 }

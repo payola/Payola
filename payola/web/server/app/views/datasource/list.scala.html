@@ -1,4 +1,4 @@
-@(user: cz.payola.domain.entities.User)
+@(user: cz.payola.domain.entities.User, page: Int = 1)
 
 @import cz.payola.web.shared._
 @import tags._
@@ -11,19 +11,31 @@
     <a href={routes.DataSource.edit(id).toString} class="btn btn-primary"><i class="icon-pencil icon-white"></i> Edit</a>
 }
 
-@list_entities(user, "data source", "data sources", user.ownedDataSources, { Unit =>
-    new scala.xml.NodeBuffer() += <td>Name</td>
-}, { e: cz.payola.domain.Entity =>
-    <td>{
-        detailsLinkForID(e.id, e.asInstanceOf[cz.payola.domain.entities.plugins.DataSource].name)
-    }</td>
-    <td>{
-        if (e.asInstanceOf[cz.payola.domain.entities.plugins.DataSource].isEditable){
-            editLinkForID(e.id)
+@list_entities(user,
+    "data source",
+    "data sources",
+    user.ownedDataSources.size,
+    { case (page, itemsPerPage) =>
+        val subseq = user.ownedDataSources.drop((page - 1) * itemsPerPage)
+        if (itemsPerPage > subseq.size){
+            subseq
         }else{
-            <span class="badge">Not editable</span>
+            subseq.take(itemsPerPage)
         }
-    }</td>
-},
-routes.DataSource.create())
+    }, { Unit =>
+        new scala.xml.NodeBuffer() += <td>Name</td>
+    }, { e: cz.payola.domain.Entity =>
+        <td>{
+            detailsLinkForID(e.id, e.asInstanceOf[cz.payola.domain.entities.plugins.DataSource].name)
+        }</td>
+        <td>{
+            if (e.asInstanceOf[cz.payola.domain.entities.plugins.DataSource].isEditable){
+                editLinkForID(e.id)
+            }else{
+                <span class="badge">Not editable</span>
+            }
+        }</td>
+    },
+    routes.DataSource.create(),
+    page)
 

@@ -124,8 +124,11 @@ object DataSource extends PayolaController with Secured
       *
       * @return Listing page.
       */
-    def list() = authenticated { user: User =>
-        Ok(views.html.datasource.list(user))
+    def list() = authenticatedWithRequest { (user, request) =>
+        val pageStrings = request.queryString.get("page")
+        val page = if (pageStrings.isDefined) pageStrings.get(0).toInt else 1
+        Payola.model.
+        Ok(views.html.datasource.list(user, page))
     }
 
     /** Saves the edited data source.
@@ -168,6 +171,8 @@ object DataSource extends PayolaController with Secured
                 val paramOption = dataSource.getParameterValue(key)
                 assert(paramOption.isDefined, key + " is not a defined parameter name")
                 dataSource.setParameter(paramOption.get, values(0))
+
+                Payola.model.pluginModel.getAll()
             }
         }
 
