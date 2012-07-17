@@ -2,7 +2,8 @@
 
 @main(Some(user), "Create a new plugin - Payola!") {
 
-    <div style="padding-left: 30px; padding-bottom: 20px;"><a href="@routes.Profile.listPlugins()" class="btn btn-success">List plugins &raquo;</a></div>
+<div class="container-fluid">
+    <div><a href="@routes.Profile.listPlugins()" class="btn btn-success">List plugins &raquo;</a></div>
     <div id="plugin_create_button_container"></div>
     <pre id="editor"></pre>
 
@@ -26,4 +27,5 @@
     <script type="text/javascript">
         new cz.payola.web.client.presenters.PluginCreator("plugin_create_button_container", "@routes.Profile.listPlugins()");
     </script>
+</div>
 }

@@ -1,0 +1,41 @@
+@(
+    title: String,
+    entitiesNamePlural: String,
+    entities: Seq[cz.payola.domain.Entity],
+    createCall: Option[play.api.mvc.Call],
+    entityLister: (cz.payola.domain.Entity) => scala.xml.NodeBuffer,
+    boxClass: String,
+    listCall: play.api.mvc.Call,
+    entitiesToDisplay: Int = 5
+)
+
+<div class="span6">
+    <div class="@boxClass">
+        <h2 class="span@if(createCall.isDefined){6}else{9}">@title</h2>
+        @if(entities.size > 5){
+            <a class="btn btn-primary span3" href="@listCall"><i class="icon-list icon-white"></i> List all &raquo;</a>
+        }else{
+            @if(createCall.isDefined){
+                <span class="span3"></span>
+            }
+        }
+
+        @if(createCall.isDefined){
+            <a class="btn btn-success span3" href="@createCall">
+                <i class="icon-plus icon-white"></i> Create
+            </a>
+        }
+
+        @if(entities.isEmpty){
+        <p class="alert alert-danger">No @entitiesNamePlural.</p>
+        }else{
+        <table class="table table-striped">
+            @entities.take(5).map{e =>
+            <tr>
+                @entityLister(e)
+            </tr>
+            }
+        </table>
+        }
+    </div>
+</div><!--/span-->

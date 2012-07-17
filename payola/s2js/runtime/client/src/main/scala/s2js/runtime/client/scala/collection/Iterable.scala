@@ -2,6 +2,7 @@ package s2js.runtime.client.scala.collection
 
 import s2js.runtime.client.scala.util.control.Breaks._
 import s2js.runtime.client.scala.NotImplementedException
+import s2js.runtime.client.scala.collection.immutable.HashMap
 
 // Type of the item doesn't need to be specified as it's compiled to JavaScript and erased by the compiler. In order to
 // easily support min, max etc. functions, the type Double is used as an item type.
@@ -508,5 +509,9 @@ trait Iterable
             str = str.substring(0, idx2)
         }
         str
+    }
+
+    def toMap[T, U](implicit ev: <:<[Double, (T, U)]): Map[T, U] = {
+        new HashMap[T,U]
     }
 }
