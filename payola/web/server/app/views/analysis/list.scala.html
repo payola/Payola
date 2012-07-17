@@ -8,7 +8,10 @@ renderEditLink: Boolean = false)
 }
 
 @editLinkForID(id: String) = @{
-<a href={routes.DataSource.edit(id).toString} class="btn btn-primary"><i class="icon-pencil icon-white"></i> Edit</a>
+<a href={routes.Analysis.edit(id).toString} class="btn btn-primary"><i class="icon-pencil icon-white"></i> Edit</a>
+}
+@deleteLinkForID(id: String) = @{
+<a href={routes.Analysis.delete(id).toString} class="btn btn-danger" onclick="return confirm('Are you sure?')"><i class="icon-remove-sign icon-white"></i> Delete</a>
 }
 
 @list_entities(user, "analysis", "analyses", analyses.size, {(page, countPerPage) =>
@@ -23,11 +26,11 @@ val analysis = e.asInstanceOf[cz.payola.domain.entities.Analysis]
     }
 </td>
 <td>{
-    if (renderEditLink){
-    editLinkForID(e.id)
-    }else{
-    <span class="badge badge-inverse">Not editable</span>
-    }
+        if (renderEditLink){
+            new scala.xml.NodeBuffer() += (editLinkForID(e.id),{<span> </span>},deleteLinkForID(e.id))
+        }else{
+            <span class="badge badge-inverse">Not editable</span>
+        }
     }
 </td>
 },

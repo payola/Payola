@@ -20,6 +20,12 @@ object Analysis extends PayolaController with Secured
         Ok(views.html.analysis.edit(user, id))
     }
 
+    def delete(id: String) = authenticated { user =>
+        user.ownedAnalyses.find(_.id == id).map(Payola.model.analysisModel.remove(_))
+            .getOrElse(NotFound("Analysis not found."))
+        Redirect(routes.Application.dashboard())
+    }
+
     def listOwned(page: Int = 1) = authenticated { user: User =>
         Ok(views.html.analysis.list(Some(user), user.ownedAnalyses, page, true))
     }
