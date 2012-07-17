@@ -10,6 +10,11 @@ import cz.payola.web.shared.Payola
 
 object Profile extends PayolaController with Secured
 {
+    /** Index page for user.
+      *
+      * @param username User.
+      * @return The user's page.
+      */
     def index(username: String) = maybeAuthenticated { user: Option[User] =>
         Payola.model.userModel.getByName(username).map { profileUser =>
             val profileUserAnalyses = Payola.model.analysisModel.getAccessibleToUserByOwner(user, profileUser)
@@ -42,10 +47,18 @@ object Profile extends PayolaController with Secured
         Ok("TODO")
     }
 
+    /** Shows a group creation page.
+      *
+      * @return Page with group creation.
+      */
     def createGroup = authenticated { user =>
         Ok(html.Profile.createGroup(user, groupForm))
     }
 
+    /** Save a newly created group.
+      *
+      * @return Redirects to group listing.
+      */
     def saveCreateGroup = authenticatedWithRequest { (user, request) =>
         val name = groupForm.bindFromRequest()(request).get
         val group = Payola.model.groupModel.create(name, user)
@@ -59,6 +72,11 @@ object Profile extends PayolaController with Secured
         }
     }
 
+    /** Saves a group with id.
+      *
+      * @param id ID of group.
+      * @return Redirects to the user index page.
+      */
     def saveGroup(id: String) = authenticatedWithRequest{ (user, request) =>
 
         val data = request.body match {
@@ -88,6 +106,11 @@ object Profile extends PayolaController with Secured
         }
     }
 
+    /** Edit a group.
+      *
+      * @param id ID of a group to edit.
+      * @return Redirects to the group listing.
+      */
     def editGroup(id: String) = authenticatedWithRequest{ (user, request) =>
         val g = user.ownedGroups.find(_.id == id)
 
@@ -101,10 +124,19 @@ object Profile extends PayolaController with Secured
         }
     }
 
+    /** Shows the listing page for groups.
+      *
+      * @return Listing page for groups.
+      */
     def listGroups = authenticatedWithRequest( (user, request) =>
         Ok(views.html.Profile.listGroups(user)(request.flash))
     )
 
+    /** Deletes group with id.
+      *
+      * @param id ID of the group to delete.
+      * @return Redirects to the group listing.
+      */
     def deleteGroup(id: String) = authenticated{ user =>
         val group = user.ownedGroups.find(_.id == id)
         Redirect(routes.Profile.listGroups()).flashing(
@@ -116,10 +148,18 @@ object Profile extends PayolaController with Secured
         )
     }
 
+    /** Shows the create page for plugin.
+      *
+      * @return Create page for plugin.
+      */
     def createPlugin = authenticated{ user =>
         Ok(views.html.plugin.create(user))
     }
 
+    /** Shows the listing page for plugins.
+      *
+      * @return Listing page for plugins.
+      */
     def listPlugins = authenticated { user =>
         Ok(views.html.plugin.list(user))
     }
