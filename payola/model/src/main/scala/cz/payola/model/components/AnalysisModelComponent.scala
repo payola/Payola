@@ -54,7 +54,7 @@ trait AnalysisModelComponent extends EntityModelComponent
 
             val analysis = user.ownedAnalyses
                 .find(_.id == analysisId)
-                .getOrElse{throw new Exception("Analysis not found.")}
+                .get
 
             val pluginInstance = analysis.pluginInstances.find(_.id == pluginInstanceId)
 
