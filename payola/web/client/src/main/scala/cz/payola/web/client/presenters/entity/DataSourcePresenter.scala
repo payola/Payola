@@ -33,6 +33,7 @@ class DataSourcePresenter(
         view.nextButton.mouseClicked += onNextButtonClicked _
         graphView.vertexBrowsing += onVertexBrowsing _
         graphView.vertexBrowsingDataSource += onVertexBrowsingDataSource _
+        graphView.createOntologyCustomizationButton.mouseClicked += onCreateOntologyCustomizationButtonClicked _
 
         // Compose the views and render the main view.
         graphView.render(view.graphViewSpace.domElement)
@@ -64,6 +65,11 @@ class DataSourcePresenter(
             }
             selector.render()
         }
+    }
+
+    private def onCreateOntologyCustomizationButtonClicked(e: BrowserEventArgs[_]): Boolean = {
+
+        false
     }
 
     private def onBackButtonClicked(e: BrowserEventArgs[_]): Boolean = {
