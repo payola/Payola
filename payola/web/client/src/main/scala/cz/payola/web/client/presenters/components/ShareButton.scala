@@ -28,6 +28,14 @@ class ShareButton(isPublic: Boolean) extends ComposedView
 
     setIsPublic(isPublic)
 
+    def setActive(isActive: Boolean = true){
+        if (isActive){
+            dropDownButton.toggleAnchor.addCssClass("disabled")
+        }else{
+            dropDownButton.toggleAnchor.removeCssClass("disabled")
+        }
+    }
+
     def createSubViews = List(dropDownButton)
 
     def setIsPublic(isPublic: Boolean = true){

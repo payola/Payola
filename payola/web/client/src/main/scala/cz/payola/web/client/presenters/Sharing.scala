@@ -33,10 +33,12 @@ class Sharing(shareButtonPlaceholderClass: String, entityType: String)
     }
 
     def setIsPublicHandler(id: String, shareButton: ShareButton) {
-        val isPublic = !shareButton.getIsPublic
-        //SharingData.setIsPublic(entityType, id, isPublic){ ok =>
-            shareButton.setIsPublic(isPublic)
-        //}{ error => }
+        val isPublicToSet = !shareButton.getIsPublic
+        shareButton.setActive()
+        SharingData.setIsPublic(entityType, id, isPublicToSet){ ok =>
+            shareButton.setIsPublic(isPublicToSet)
+            shareButton.setActive(false)
+        }{ error => }
     }
 
     def shareToGroupHandler(id: String) {
