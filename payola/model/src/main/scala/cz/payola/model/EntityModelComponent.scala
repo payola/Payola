@@ -13,6 +13,8 @@ trait EntityModelComponent
     {
         def getById(id: String): Option[A] = repository.getById(id)
 
+        def getByIds(ids: Seq[String]): Seq[A] = repository.getByIds(ids)
+
         def getAll(pagination: Option[PaginationInfo] = None): Seq[A] = repository.getAll(pagination)
 
         def persist(entity: Entity) {

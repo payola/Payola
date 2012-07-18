@@ -17,8 +17,8 @@ renderEditLink: Boolean = false)
     <a href={routes.Analysis.delete(id).toString} class="btn btn-danger" onclick="return confirm('Are you sure?')"><i class="icon-remove-sign icon-white"></i> Delete</a>
 </div>
 }
-@shareLinkForID(id: String) = @{
-    <div class="btn-group share-button-placeholder" data-analysis-id="{id}"></div>
+@shareLinkForID(id: String, isPublic: Boolean) = @{
+    <div class="btn-group share-button-placeholder" data-shareable-entity-id={id} data-shareable-entity-public={isPublic.toString}></div>
 }
 
 @list_entities(user, "analysis", "analyses", analyses.size, {(page, countPerPage) =>
@@ -44,7 +44,7 @@ val analysis = e.asInstanceOf[cz.payola.domain.entities.Analysis]
         if (renderEditLink){
         <div class="btn-toolbar">
             {val buff = new scala.xml.NodeBuffer() += (editLinkForID(e.id),{<span> </span>})
-            buff ++= shareLinkForID(e.id)
+            buff ++= shareLinkForID(e.id, analysis.isPublic)
             buff += ({<span> </span>},deleteLinkForID(e.id))}
         </div>
         }else{
@@ -57,5 +57,5 @@ routes.Analysis.create(), page)
 
 <script language="javascript" type="text/javascript" src="/javaScriptPackage/cz.payola.web.client.presenters.Sharing"></script>
 <script type="text/javascript">
-    new cz.payola.web.client.presenters.Sharing("share-button-placeholder");
+    new cz.payola.web.client.presenters.Sharing("share-button-placeholder", "analysis");
 </script>
