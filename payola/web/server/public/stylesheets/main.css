@@ -107,7 +107,6 @@ input[type="checkbox"].active:after{
     background: #8891B7;
 }
 
-
 .successors {
     float: left;
     min-width:300px;
@@ -120,4 +119,8 @@ input[type="checkbox"].active:after{
 
 .alert {
     margin-bottom: 18px;
+}
+
+.position-relative {
+    position: relative;
 }

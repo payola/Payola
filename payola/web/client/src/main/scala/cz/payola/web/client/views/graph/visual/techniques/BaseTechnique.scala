@@ -17,10 +17,7 @@ abstract class BaseTechnique(settings: VisualSetup, name: String) extends Visual
 
     override def updateGraph(graph: Option[Graph]) {
         super.updateGraph(graph)
-        if (!graphView.get.isEmpty) {
-            // graphView != None because this call is after update(..)
-            performPositioning(graphView.get)
-        }
+        graphView.foreach(performPositioning(_))
     }
 
     private def performPositioning(graphView: GraphView) {
@@ -59,10 +56,10 @@ abstract class BaseTechnique(settings: VisualSetup, name: String) extends Visual
         }
         //fit the drawing space to the window
         firstAnimation.addFollowingAnimation(
-            new Animation(Animation.emptyAnimation, false, None, graphView.fitCanvas, redraw, None))
+            new Animation(Animation.emptyAnimation, false, None, fitCanvas, redraw, None))
 
         //finally move the whole graph to the center of the window
-        val graphCenterCorrector = new GraphPositionHelper(() => graphView.canvasPack.size, graphView.getGraphCenter)
+        val graphCenterCorrector = new GraphPositionHelper(() => topLayer.size, graphView.getGraphCenter)
         firstAnimation.addFollowingAnimation(
             new Animation(Animation.moveGraphByFunction,
                 (graphCenterCorrector, graphView.getAllVertices), None, redrawQuick, redraw, None))
