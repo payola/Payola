@@ -98,3 +98,7 @@ input[type="checkbox"].active:after{
 .selected-page{
     background: #8891B7;
 }
+
+.position-relative {
+    position: relative;
+}

@@ -29,7 +29,7 @@ class PluginSwitchView extends GraphView with ComposedView
 
     private var currentGraph: Option[Graph] = None
 
-    private val pluginSpace = new Div(Nil, "row-fluid")
+    private val pluginSpace = new Div(Nil, "row position-relative")
 
     // Re-trigger all events when the corresponding events are triggered in the plugins.
     plugins.foreach { plugin =>

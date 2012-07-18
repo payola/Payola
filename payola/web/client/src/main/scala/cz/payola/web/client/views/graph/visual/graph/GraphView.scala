@@ -14,7 +14,7 @@ import cz.payola.web.client.views.graph.visual.graph.positioning.LocationDescrip
   * Graphical representation of Graph object.
   * @param container the space where the graph should be visualised
   */
-class GraphView(val container: dom.Element, val settings: VisualSetup) extends
+class GraphView(val settings: VisualSetup) extends
     View[CanvasPack] {
     /**
       * During update vertices with higher age than this value are removed from this graph.
@@ -587,12 +587,6 @@ class GraphView(val container: dom.Element, val settings: VisualSetup) extends
         canvasPack.clear()
         draw(canvasPack, Vector2D.Zero)
         //^because elements are drawn into separate layers, redraw(..) does not know to which context to draw
-    }
-
-    def destroy() {
-        while (container.childNodes.length > 0) {
-            container.removeChild(container.firstChild)
-        }
     }
 
     //###################################################################################################################
