@@ -43,4 +43,14 @@ class Input(name: String, initialValue: String, title: Option[String], cssClass:
             removeCssClass("active")
         }
     }
+
+    def setIsEnabled(isEnabled: Boolean) {
+        if (isEnabled) {
+            removeCssClass("disabled")
+            domElement.disabled = false
+        } else {
+            addCssClass("disabled")
+            domElement.disabled = true
+        }
+    }
 }

@@ -290,6 +290,13 @@ trait SchemaComponent
             (ds, spv) => Option(ds.id) === spv.dataSourceId)
 
         /**
+          * Relation that associates [[cz.payola.data.squeryl.entities.settings.OntologyCustomization]]s
+          * to a [[cz.payola.data.squeryl.entities.Analysis]]
+          */
+        lazy val ontologyCustomizationsOfAnalyses = oneToManyRelation(analyses, ontologyCustomizations).via(
+            (a, o) => Option(a.id) === o.analysisId)
+
+        /**
           * Relation that associates [[cz.payola.data.squeryl.entities.settings.ClassCustomization]]s
           * to a [[cz.payola.data.squeryl.entities.settings.OntologyCustomization]]
           */
@@ -391,7 +398,10 @@ trait SchemaComponent
                     c.id is (primaryKey),
                     columns(c.name, c.ownerId) are (unique)
                 ))
-            on(classCustomizations)(c => declare(c.id is (primaryKey)))
+            on(classCustomizations)(c =>
+                declare(
+                    c.id is (primaryKey)
+                ))
             on(propertyCustomizations)(c => declare(c.id is (primaryKey)))
 
             // When a PluginDbRepresentation is deleted, all of the its instances and data sources will get deleted.
@@ -436,10 +446,10 @@ trait SchemaComponent
 
             // When user is deleted, delete all theirs owned items.
             groupOwnership.foreignKeyDeclaration.constrainReference(onDelete cascade)
+            customizationOwnership.foreignKeyDeclaration.constrainReference(onDelete cascade)
             analysisOwnership.foreignKeyDeclaration.constrainReference(onDelete cascade)
             dataSourceOwnership.foreignKeyDeclaration.constrainReference(onDelete cascade)
             pluginOwnership.foreignKeyDeclaration.constrainReference(onDelete cascade)
-            customizationOwnership.foreignKeyDeclaration.constrainReference(onDelete cascade)
 
             // When ontology customization is removed, remove all sub-customizations
             classCustomizationsOfOntologies.foreignKeyDeclaration.constrainReference(onDelete cascade)
@@ -457,6 +467,10 @@ trait SchemaComponent
             }
         }
 
+        /**
+          * Runs given command block via inTransaction statement (Squeryl)
+          * @param body
+          */
         def wrapInTransaction[C](body: => C) = {
             DataException.wrap {
                 inTransaction {

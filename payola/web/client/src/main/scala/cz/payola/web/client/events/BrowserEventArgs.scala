@@ -12,7 +12,7 @@ object BrowserEventArgs
             event.clientX,
             event.clientY,
             event.ctrlKey,
-            event.keyIdentifier,
+            event.keyCode,
             event.keyLocation,
             event.metaKey,
             event.screenX,
@@ -30,7 +30,7 @@ object BrowserEventArgs
   * @param clientX Horizontal coordinate of the mouse pointer, relative to the current window.
   * @param clientY Vertical coordinate of the mouse pointer, relative to the current window.
   * @param ctrlKey Whether the "CTRL" key is pressed.
-  * @param keyIdentifier Identifier of the key.
+  * @param keyCode Code of the key.
   * @param keyLocation Location of the key on the advice.
   * @param metaKey Whether the "meta" key is pressed.
   * @param screenX Horizontal coordinate of the mouse pointer, relative to the screen.
@@ -46,7 +46,7 @@ class BrowserEventArgs[+A](
     val clientX: Double,
     val clientY: Double,
     val ctrlKey: Boolean,
-    val keyIdentifier: Int,
+    val keyCode: Int,
     val keyLocation: Int,
     val metaKey: Boolean,
     val screenX: Double,

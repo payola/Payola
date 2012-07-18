@@ -19,6 +19,11 @@ import cz.payola.scala2json.rules.BasicSerializationRule
 import cz.payola.scala2json.classes.SimpleSerializationClass
 import scala.Some
 import cz.payola.scala2json.rules.CustomValueSerializationRule
+import cz.payola.common.entities.settings._
+import cz.payola.scala2json.rules.BasicSerializationRule
+import cz.payola.scala2json.classes.SimpleSerializationClass
+import scala.Some
+import cz.payola.scala2json.rules.CustomValueSerializationRule
 
 class RPCSerializer extends JSONSerializer
 {
@@ -104,5 +109,17 @@ class RPCSerializer extends JSONSerializer
     val userClass = new SimpleSerializationClass(classOf[User])
     val userRule = new BasicSerializationRule(Some(classOf[User]))
     this.addSerializationRule(userClass, userRule)
+
+    val ontologyCustomizationClass = new SimpleSerializationClass(classOf[OntologyCustomization])
+    val ontologyCustomizationRule = new BasicSerializationRule(Some(classOf[OntologyCustomization]))
+    this.addSerializationRule(ontologyCustomizationClass, ontologyCustomizationRule)
+
+    val classCustomizationClass = new SimpleSerializationClass(classOf[ClassCustomization])
+    val classCustomizationRule = new BasicSerializationRule(Some(classOf[ClassCustomization]))
+    this.addSerializationRule(classCustomizationClass, classCustomizationRule)
+
+    val propertyCustomizationClass = new SimpleSerializationClass(classOf[PropertyCustomization])
+    val propertyCustomizationRule = new BasicSerializationRule(Some(classOf[PropertyCustomization]))
+    this.addSerializationRule(propertyCustomizationClass, propertyCustomizationRule)
 
 }

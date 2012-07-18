@@ -29,10 +29,10 @@ trait ComposedView extends View
     }
 
     def block() {
-        parentElement.foreach(blockElement(_))
+        parentElement.foreach(View.block(_))
     }
 
     def unblock() {
-        parentElement.foreach(unblockElement(_))
+        parentElement.foreach(View.unblock(_))
     }
 }

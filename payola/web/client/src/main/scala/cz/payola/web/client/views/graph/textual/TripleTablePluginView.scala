@@ -21,6 +21,8 @@ class TripleTablePluginView(settings: VisualSetup) extends PluginView("Triple Ta
 
     private val tableWrapperElement = tableWrapper.domElement
 
+    tableWrapper.setAttribute("style", "padding: 0 0 0 30px;")
+
     def createSubViews = List(tableWrapper)
 
     def updateGraph(graph: Option[Graph]) {
@@ -32,6 +34,7 @@ class TripleTablePluginView(settings: VisualSetup) extends PluginView("Triple Ta
         // Insert the new table.
         val table = document.createElement[Element]("table")
         tableWrapperElement.appendChild(table)
+
         table.className = "table table-striped table-bordered table-condensed"
         val tableHead = addElement(table, "thead")
         val tableBody = addElement(table, "tbody")

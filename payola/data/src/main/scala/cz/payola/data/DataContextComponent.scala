@@ -184,6 +184,14 @@ trait DataContextComponent
           * @param parameterValue ParameterValue to persist
           */
         def persistParameterValue(parameterValue: ParameterValue[_])
+
+        /**
+          * Sets given OntologyCustomization as default OntologyCustomization for given Analysis
+          * @param analysisId ID of analysis with new default OntologyCustomization
+          * @param customization New default OntologyCustomization for Analysis
+          */
+        def setDefaultOntologyCustomization(analysisId: String, customization: Option[OntologyCustomization]):
+            Option[OntologyCustomization]
     }
 
     trait OntologyCustomizationRepository
@@ -191,6 +199,13 @@ trait DataContextComponent
         with NamedEntityRepository[OntologyCustomization]
         with OptionallyOwnedEntityRepository[OntologyCustomization]
         with ShareableEntityRepository[OntologyCustomization]
+    {
+        /**
+          * Gets default OntologyCustomization of analysis
+          * @param analysisId ID of analysis from which get default OntologyCustomization
+          */
+        def getDefaultOntologyCustomizationForAnalysis(analysisId: String): Option[OntologyCustomization]
+    }
 
     trait PluginRepository
         extends Repository[Plugin]
@@ -205,13 +220,7 @@ trait DataContextComponent
         with ShareableEntityRepository[DataSource]
     {
         /**
-          * Persists specified PluginInstance of Analysis
-          * @param pluginInstance PluginInstance to persist
-          */
-        def persistPluginInstance(pluginInstance: PluginInstance)
-
-        /**
-          * Persists ParameterValue of PluginInstance of Analysis
+          * Persists ParameterValue of DataSource
           * @param parameterValue ParameterValue to persist
           */
         def persistParameterValue(parameterValue: ParameterValue[_])

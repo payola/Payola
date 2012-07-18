@@ -61,5 +61,9 @@ trait OntologyRepositoryComponent extends TableRepositoryComponent
                 classCustomization
             }(collection.breakOut)
         }
+
+        def getDefaultOntologyCustomizationForAnalysis(analysisId: String): Option[OntologyCustomization] = {
+            selectOneWhere(o => o.analysisId === Some(analysisId))
+        }
     }
 }
