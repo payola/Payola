@@ -6,8 +6,11 @@ import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events._
 import scala.collection.mutable.ListBuffer
 import scala.Some
+import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
 
-class CustomizationModal(customization: OntologyCustomization) extends Modal("Customize ontology " + customization.name, Nil, Some("Done"), None, false, List("wide-customization-modal"))
+class CustomizationModal(customization: OntologyCustomization)
+    extends Modal("Customize ontology " + customization.name, Nil, Some("Done"), None, false,
+        "wide-customization-modal")
 {
     // Event handlers
     val classFillColorChanged = new BooleanEvent[this.type, ClassCustomizationModificationEventArgs[this.type, String]]

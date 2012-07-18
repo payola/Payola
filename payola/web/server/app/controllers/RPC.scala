@@ -89,20 +89,30 @@ object RPC extends PayolaController with Secured
             val response = dispatcher.dispatchRequest(params, async, user)
             Ok(response)
         } catch {
-            case e: Exception => {
-                Option(e.getCause).map(_.printStackTrace()).getOrElse(e.printStackTrace())
-                raiseError(e)
+            case t => {
+                Option(t.getCause).map(_.printStackTrace()).getOrElse(t.printStackTrace())
+                raiseError(t)
             }
         }
     }
 
     /**
       *
-      * @param e
+      * @param t
       * @return
       */
-    def raiseError(e: Exception) = {
-        InternalServerError(exceptionSerializer.serialize(e))
+    def raiseError(t: Throwable) = {
+        var deepStackTrace = ""
+        var throwable = t
+        while (throwable != null) {
+            deepStackTrace += Option(throwable.getMessage).map(_ + "\n\n" ).getOrElse("")
+            if (throwable.getStackTrace.nonEmpty) {
+                deepStackTrace += throwable.getStackTrace.toList.map(_.toString).mkString("\n") + "\n\n"
+            }
+            throwable = throwable.getCause
+        }
+        InternalServerError(exceptionSerializer.serialize(new rpc.Exception(
+            "Uncatched exception during a remote method call.", deepStackTrace)))
     }
 
     /**

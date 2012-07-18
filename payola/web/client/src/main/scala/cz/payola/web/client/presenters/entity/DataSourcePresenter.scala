@@ -13,6 +13,7 @@ import cz.payola.web.client.Presenter
 import cz.payola.web.client.views.bootstrap._
 import cz.payola.common.entities.settings.OntologyCustomization
 import cz.payola.web.client.presenters.OntologyCustomizationPresenter
+import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
 
 class DataSourcePresenter(
     viewElement: dom.Element,
@@ -51,9 +52,7 @@ class DataSourcePresenter(
                 graphView.updateGraph(graph)
                 updateNavigationView()
                 unblockPage()
-            } { error =>
-                // TODO
-            }
+            }(fatalErrorHandler(_))
         } else {
             addToHistoryAndGo(initialVertexUri)
         }

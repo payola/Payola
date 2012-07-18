@@ -7,7 +7,7 @@ import cz.payola.web.client.views.elements._
 import s2js.adapters.js
 import cz.payola.domain.entities.Plugin
 import cz.payola.domain.entities.plugins.Parameter
-import cz.payola.web.client.views.bootstrap.TextInputControl
+import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
 import s2js.compiler.javascript
 import s2js.adapters.js.dom.Element
 

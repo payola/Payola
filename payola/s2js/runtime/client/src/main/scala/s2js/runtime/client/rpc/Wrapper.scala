@@ -45,26 +45,33 @@ private object Wrapper
     private def processRequestResult(request: XMLHttpRequest, onSuccess: (Any => Unit),
         onException: (Throwable => Unit)): Any = {
 
-        //try{
-            val result = if (request.readyState == requestStatusDone && (request.status == 200 || request.status == 500)) {
+        val validStatuses = List(200, 500)
+        val result = if (request.readyState == requestStatusDone && (validStatuses.contains(request.status))) {
+            try {
                 deserializer.deserialize(eval("(" + request.responseText + ")"))
-            } else if (request.readyState == requestStatusDone) {
-                new Exception("RPC call exited with status code " + request.status + ".")
+            } catch {
+                case error => {
+                    val description = error match {
+                        case e: Exception => e.message
+                        case _ => error.toString
+                    }
+                    new Exception("Exception during deserialization of the remote method result.", description)
+                }
             }
+        } else if (request.readyState == requestStatusDone) {
+            new Exception("The RPC call exited with status code " + request.status + ".")
+        }
 
-            result match {
-                case throwable: Throwable => {
-                    onException(throwable)
-                    throwable
-                }
-                case value => {
-                    onSuccess(value)
-                    value
-                }
+        result match {
+            case throwable: Throwable => {
+                onException(throwable)
+                throwable
             }
-        /*} catch {
-            case t => t
-        } */
+            case value => {
+                onSuccess(value)
+                value
+            }
+        }
     }
 
     private def createRequestBody(procedureName: String, parameters: ArrayBuffer[Any],

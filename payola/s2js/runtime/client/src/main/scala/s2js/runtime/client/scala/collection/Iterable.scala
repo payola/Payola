@@ -498,7 +498,7 @@ trait Iterable
 
     // From TraversableLike
     def stringPrefix: String = {
-        var str = s2js.runtime.client.classOf(this).fullName
+        var str = s2js.runtime.client.classOf(this).get.fullName
         val idx1 = str.lastIndexOf(".")
         if (idx1 != -1) {
             str = str.substring(idx1 + 1)

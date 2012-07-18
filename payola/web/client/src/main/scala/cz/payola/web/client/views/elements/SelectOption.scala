@@ -6,5 +6,3 @@ import s2js.adapters.js.dom
 
 class SelectOption(innerViews: Seq[View] = Nil, cssClass: String = "")
     extends ElementView[dom.Element]("option", innerViews, cssClass)
-{
-}

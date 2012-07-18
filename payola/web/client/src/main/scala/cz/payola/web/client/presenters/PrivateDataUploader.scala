@@ -9,6 +9,7 @@ import scala.Some
 import cz.payola.web.client.views.elements._
 import scala.Some
 import s2js.compiler.javascript
+import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
 
 class PrivateDataUploader(val uploaderFormID: String, val redirectURL: String) extends View
 {
