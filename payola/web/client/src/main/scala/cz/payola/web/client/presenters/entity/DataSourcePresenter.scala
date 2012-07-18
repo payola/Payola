@@ -3,12 +3,15 @@ package cz.payola.web.client.presenters.entity
 import scala.collection.mutable
 import s2js.adapters.js.dom
 import s2js.adapters.js.browser._
-import cz.payola.web.shared.DataSourceBrowser
+import cz.payola.web.shared._
 import cz.payola.web.client.views.entity._
 import cz.payola.web.client.views.graph.PluginSwitchView
 import cz.payola.web.client.events.BrowserEventArgs
 import cz.payola.web.client.views.VertexEventArgs
 import cz.payola.common.entities.plugins.DataSource
+import cz.payola.web.client.views.bootstrap._
+import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.web.client.presenters.OntologyCustomizationPresenter
 
 class DataSourcePresenter(
     viewElement: dom.Element,
@@ -67,8 +70,36 @@ class DataSourcePresenter(
         }
     }
 
-    private def onCreateOntologyCustomizationButtonClicked(e: BrowserEventArgs[_]): Boolean = {
+    private def presentCustomizationEditorWithCustomization(customization: OntologyCustomization) {
+        val presenter = new OntologyCustomizationPresenter(customization)
+        presenter.initialize()
+    }
 
+    private def onCreateOntologyCustomizationButtonClicked(e: BrowserEventArgs[_]): Boolean = {
+        // First, show a modal asking for the Ontology URL
+        val nameInputField = new TextInputControl("Customization name", "ontologyCustomizationNameField", "", "")
+        val urlInputField = new TextInputControl("Ontology URL", "ontologyURLField", "", "")
+        val modal = new Modal("Create a new ontology customization.", List(nameInputField, urlInputField), Some("Create Customization"), Some("Cancel"), false)
+        modal.saving += { e =>
+            if (nameInputField.input.value == "") {
+                window.alert("Name input mustn't be empty!")
+            }else if (urlInputField.input.value == "") {
+                window.alert("Ontology URL field mustn't be empty!")
+            }else if (OntologyCustomizationManager.customizationExistsWithName(nameInputField.input.value)) {
+                window.alert("You have already created a customization with this name!")
+            }else{
+                OntologyCustomizationManager.createNewOntologyCustomizationForURL(urlInputField.input.value, nameInputField.input.value) { custom =>
+                    modal.destroy()
+                    presentCustomizationEditorWithCustomization(custom)
+                }
+                { t =>
+                    window.alert("Couldn't create an ontology customization with this URL.\n\n" + t.getMessage)
+                }
+            }
+            false
+        }
+
+        modal.render()
         false
     }
 
