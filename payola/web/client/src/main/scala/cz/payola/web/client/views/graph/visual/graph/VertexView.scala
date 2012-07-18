@@ -1,12 +1,12 @@
 package cz.payola.web.client.views.graph.visual.graph
 
 import collection.mutable.ListBuffer
-import cz.payola.common.rdf.{LiteralVertex, IdentifiedVertex, Vertex}
 import s2js.adapters.js.dom.CanvasRenderingContext2D
 import cz.payola.web.client.views.graph.visual.settings._
 import cz.payola.web.client.views.graph.visual.Color
 import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.graph.visual.graph.positioning.LocationDescriptor
+import cz.payola.common.rdf._
 
 /**
   * Graphical representation of Vertex object in the drawn graph.
@@ -16,7 +16,7 @@ import cz.payola.web.client.views.graph.visual.graph.positioning.LocationDescrip
 class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var settings: VertexSettingsModel,
     settingsText: TextSettingsModel, var rdfType: Option[String]) extends View[CanvasRenderingContext2D] {
 
-    var literalVertices = ListBuffer[LiteralVertex]()
+    var literalVertices = ListBuffer[(Edge, LiteralVertex)]()
 
     private var age = 0
 

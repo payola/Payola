@@ -4,5 +4,5 @@ object ShareableEntityType{
     val analysis = "analysis"
     val plugin = "plugin"
     val customization = "customization"
-    val data_source = "data_source"
+    val dataSource = "data_source"
 }
