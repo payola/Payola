@@ -55,7 +55,7 @@ trait PluginInstanceRepositoryComponent extends TableRepositoryComponent
             }
         }
 
-        private def getLoadQuery(entityFilter: (PluginInstanceLike) => LogicalBoolean) = {
+        private def _getLoadQuery(entityFilter: (PluginInstanceLike) => LogicalBoolean) = {
             join(pluginInstanceLikeTable, schema.booleanParameterValues.leftOuter,
                 schema.floatParameterValues.leftOuter, schema.intParameterValues.leftOuter,
                 schema.stringParameterValues.leftOuter)((instance, bPar, fPar, iPar, sPar) =>
@@ -71,7 +71,7 @@ trait PluginInstanceRepositoryComponent extends TableRepositoryComponent
         protected def loadPluginInstancesByFilter(entityFilter: (PluginInstanceLike) => LogicalBoolean):
             Seq[PluginInstanceLike] = schema.wrapInTransaction {
 
-            val pluginInstances = getLoadQuery(entityFilter).groupBy(_._1).map { r =>
+            val pluginInstances = _getLoadQuery(entityFilter).groupBy(_._1).map { r =>
                 val instance =  r._1
                 instance.parameterValues = r._2.flatMap(c => Seq(c._2, c._3, c._4, c._5).flatten).toList
 
@@ -85,13 +85,13 @@ trait PluginInstanceRepositoryComponent extends TableRepositoryComponent
             pluginInstances.foreach { p =>
                 p.plugin = pluginsByIds(p.pluginId)
 
-                mapParameterValuesToParameters(p)
+                _mapParameterValuesToParameters(p)
             }
 
             pluginInstances
         }
 
-        protected def mapParameterValuesToParameters(pluginInstanceLike: PluginInstanceLike) {
+        private def _mapParameterValuesToParameters(pluginInstanceLike: PluginInstanceLike) {
             // Map parameter to parameter value
             pluginInstanceLike.parameterValues.foreach { v =>
                 val value = v.asInstanceOf[ParameterValue[_]]

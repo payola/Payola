@@ -33,10 +33,27 @@ class Analysis(override val id: String, name: String, o: Option[User], var _isPu
 
     _pluginInstanceBindings = null
     private lazy val _pluginInstancesBindingsQuery = context.schema.analysesPluginInstancesBindings.left(this)
+    
+    _defaultCustomization = null
+    
+    override def defaultOntologyCustomization_=(value: Option[Analysis#OntologyCustomizationType]) {
+        wrapInTransaction{
+            _defaultCustomization = context.analysisRepository.setDefaultOntologyCustomization(id, value)
+        }
+    }
+
+    override def defaultOntologyCustomization = {
+        if (_defaultCustomization == null) {
+            context.analysisRepository.loadDefaultOntology(this)
+        }
+
+        _defaultCustomization
+    }
 
     override def pluginInstances: immutable.Seq[PluginInstanceType] = {
         if (_pluginInstances == null) {
-            context.analysisRepository.loadPluginInstances(this)}
+            context.analysisRepository.loadPluginInstances(this)
+        }
 
         _pluginInstances.toList
     }

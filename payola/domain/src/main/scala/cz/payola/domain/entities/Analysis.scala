@@ -5,6 +5,7 @@ import cz.payola.domain.entities.analyses._
 import cz.payola.domain.entities.analyses.evaluation.AnalysisEvaluation
 import cz.payola.domain.entities.plugins.PluginInstance
 import cz.payola.domain.Entity
+import cz.payola.domain.entities.settings.OntologyCustomization
 
 /**
   * @param _name Name of the analysis.
@@ -25,6 +26,8 @@ class Analysis(protected var _name: String, protected var _owner: Option[User])
     type PluginInstanceBindingType = PluginInstanceBinding
 
     type InstanceBindings = Map[PluginInstance, Seq[PluginInstanceBinding]]
+
+    type OntologyCustomizationType = OntologyCustomization
 
     protected var _pluginInstanceInputBindings: Option[InstanceBindings] = None
 

@@ -54,7 +54,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     }
 
     private def persistUsers {
-        println("Persisting users ...")
+        println("Persisting users")
         val user = userRepository.persist(u1)
         assert(userRepository.persist(u2) != null)
         assert(userRepository.persist(u3) != null)
@@ -90,7 +90,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     }
 
     private def persistGroups {
-        println("Persisting groups ...")
+        println("Persisting groups")
 
         groupRepository.persist(g1)
         groupRepository.persist(g2)
@@ -123,7 +123,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     }
 
     private def persistGroupMemberships {
-        println("Persisting members ...")
+        println("Persisting members")
 
         val group1 = groupRepository.getById(g1.id).get
         val group2 = groupRepository.getById(g2.id).get
@@ -149,7 +149,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     }
 
     private def persistPlugins {
-        println("Persisting plugins ...")
+        println("Persisting plugins")
         unionPlugin.owner = Some(u1)
         unionPlugin.isPublic = true
         
@@ -195,7 +195,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     }
 
     private def persistAnalyses {
-        println("Persisting analyses ...")
+        println("Persisting analyses")
         val user = userRepository.getById(u1.id).get
         val count = analysisRepository.getCount
         val a = new cz.payola.domain.entities.Analysis(
@@ -370,7 +370,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     }
 
     private def persistPrivileges {
-        println("Persisting privileges ...")
+        println("Persisting privileges")
 
         val a1 = analysisRepository.getAll()(0)
         val ds1 = dataSourceRepository.getAll()(0)
@@ -419,7 +419,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     }
 
     "Customizations" should "be persisted" in {
-        //TODO: schema.wrapInTransaction { persistCustomizations }
+        schema.wrapInTransaction { persistCustomizations }
     }
 
     private def persistCustomizations {
@@ -430,9 +430,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         customization.isPublic = true
         val ownedCustomization = OntologyCustomization.empty(url, "Name2", Some(u1))
 
-        val c1 = ontologyCustomizationRepository.persist(customization)
-        val c2 = ontologyCustomizationRepository.persist(ownedCustomization)
-        
+        /*
         val cc1 = ownedCustomization.classCustomizations(0)
         cc1.radius = 1
         cc1.fillColor = "grey"
@@ -441,7 +439,17 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         val pp1 = cc1.propertyCustomizations(0)
         pp1.strokeColor = "blue"
         pp1.strokeWidth = "2"
-        
+        */
+
+
+        // Assign customization
+        val a1 = analysisRepository.getAll()(0)
+        a1.defaultOntologyCustomization = Some(customization)
+        ontologyCustomizationRepository.persist(ownedCustomization)
+
+        val c1 = ontologyCustomizationRepository.getById(customization.id).get
+        val c2 = ontologyCustomizationRepository.getById(ownedCustomization.id).get
+
         assert(c1.id == customization.id)
         assert(c1.isPublic == customization.isPublic)
         assert(c2.id == ownedCustomization.id)
@@ -470,6 +478,14 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
                     assert(persistedPc.strokeColor == pc.strokeColor)
             }
         }
+
+        // Test assigned customization
+        assert(analysisRepository.getById(a1.id).get.defaultOntologyCustomization == Some(customization))
+        a1.defaultOntologyCustomization = None
+        assert(analysisRepository.getById(a1.id).get.defaultOntologyCustomization == None)
+        a1.defaultOntologyCustomization = Some(ownedCustomization)
+        assert(analysisRepository.getById(a1.id).get.defaultOntologyCustomization == Some(ownedCustomization))
+
     }
 
     "Pagionation" should "work" in {
@@ -477,7 +493,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     }
 
     private def testPagination {
-        println("Paginating ...")
+        println("Paginating")
 
         assert(userRepository.getAll(Some(new PaginationInfo(2,1))).size == 1)
         assert(userRepository.getAll(Some(new PaginationInfo(2,4))).size == 3)
@@ -496,7 +512,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     }
 
     private def testCascadeDeletes {
-        println("Removing ....")
+        println("Removing.")
         val analysisCount = analysisRepository.getAll().size
         val pluginsCount = pluginRepository.getAll().size
 

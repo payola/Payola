@@ -19,15 +19,29 @@ trait Analysis extends Entity with NamedEntity with OptionallyOwnedEntity with S
     /** Type of the bindings between analytical plugin instances. */
     type PluginInstanceBindingType <: PluginInstanceBinding
 
+    /** Type of the ontology customization for analysis */
+    type OntologyCustomizationType <: settings.OntologyCustomization
+
     protected var _pluginInstances = mutable.ArrayBuffer[PluginInstanceType]()
 
     protected var _pluginInstanceBindings = mutable.ArrayBuffer[PluginInstanceBindingType]()
+
+    protected var _defaultCustomization: Option[OntologyCustomizationType] = None
 
     /** Analytical plugin instances the analysis consists of.*/
     def pluginInstances: immutable.Seq[PluginInstanceType] = _pluginInstances.toList
 
     /** Bindings between the analytical plugin instances. */
     def pluginInstanceBindings: immutable.Seq[PluginInstanceBindingType] = _pluginInstanceBindings.toList
+
+    /** Default ontology customization for this analysis */
+    def defaultOntologyCustomization = _defaultCustomization
+
+    /**
+      * Sets new default ontology customization for this analysis
+      * @param value New default ontology customization for this analysis
+      */
+    def defaultOntologyCustomization_=(value: Option[OntologyCustomizationType]) { _defaultCustomization = value }
 
     /**
       * Stores the specified plugin instance to the analysis.

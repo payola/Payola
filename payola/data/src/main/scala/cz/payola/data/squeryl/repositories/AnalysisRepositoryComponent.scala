@@ -1,12 +1,11 @@
 package cz.payola.data.squeryl.repositories
 
-import cz.payola.data.PaginationInfo
 import cz.payola.data.squeryl._
 import cz.payola.data.squeryl.entities.analyses._
 import org.squeryl.PrimitiveTypeMode._
 import cz.payola.data.squeryl.entities._
 import cz.payola.data.squeryl.entities.plugins._
-import cz.payola.domain
+import cz.payola.domain.entities.settings.OntologyCustomization
 
 trait AnalysisRepositoryComponent extends TableRepositoryComponent
 {
@@ -15,7 +14,10 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
     private lazy val pluginInstanceBindingRepository = new LazyTableRepository[PluginInstanceBinding](
         schema.pluginInstanceBindings, PluginInstanceBinding)
 
-    lazy val analysisRepository = new TableRepository[Analysis, (Analysis, Option[User])](schema.analyses, Analysis)
+    lazy val analysisRepository = new AnalysisTableRepository
+
+    class AnalysisTableRepository
+        extends TableRepository[Analysis, (Analysis, Option[User])](schema.analyses, Analysis)
         with AnalysisRepository
         with NamedEntityTableRepository[Analysis]
         with OptionallyOwnedEntityTableRepository[Analysis]
@@ -32,6 +34,13 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
 
         protected def getPluginInstanceLikeId(parameterValue: Option[ParameterValue[_]]) = {
             parameterValue.flatMap(_.pluginInstanceId)
+        }
+
+        override def removeById(id: String) = {
+            // There is no cascade delete for OntologyCustomizations when Analysis is deleted
+            _removeCurrentDefaultOntologyCustomizationRelation(id)
+
+            super.removeById(id)
         }
 
         override def persist(entity: AnyRef): Analysis = wrapInTransaction {
@@ -54,11 +63,31 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
             pluginInstanceBindingRepository.removeById(pluginInstanceBindingId)
         }
 
+        def setDefaultOntologyCustomization(analysisId: String, customization: Option[OntologyCustomization]):
+            Option[OntologyCustomization] = wrapInTransaction {
+
+            _removeCurrentDefaultOntologyCustomizationRelation(analysisId)
+
+            if (customization.isDefined){
+                val c = cz.payola.data.squeryl.entities.settings.OntologyCustomization(customization.get)
+                c.analysisId = Some(analysisId)
+
+                Some(ontologyCustomizationRepository.persist(c))
+            }
+            else {
+                None
+            }
+        }
+
         def loadPluginInstances(analysis: Analysis) {
             _loadAnalysis(analysis)
         }
 
         def loadPluginInstanceBindings(analysis: Analysis) {
+            _loadAnalysis(analysis)
+        }
+
+        def loadDefaultOntology(analysis: Analysis) {
             _loadAnalysis(analysis)
         }
 
@@ -75,9 +104,20 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
                     b.targetPluginInstance = pluginInstancesByIds(b.targetPluginInstanceId)
                 }
 
-                // Set loaded plugins, plugin instances and its bindings to analysis
+                // Set loaded plugins, plugin instances and its bindings to analysis, load default cutomization
                 analysis.pluginInstances = pluginInstancesByIds.values.toSeq
                 analysis.pluginInstanceBindings = instanceBindings
+                analysis.defaultOntologyCustomization =
+                    ontologyCustomizationRepository.getDefaultOntologyCustomizationForAnalysis(analysis.id)
+            }
+        }
+
+        private def _removeCurrentDefaultOntologyCustomizationRelation(analysisId: String) {
+            // Discard previous default customization
+            val c = ontologyCustomizationRepository.getDefaultOntologyCustomizationForAnalysis(analysisId)
+            if (c.isDefined) {
+                c.get.analysisId = None
+                ontologyCustomizationRepository.persist(c.get)
             }
         }
     }
