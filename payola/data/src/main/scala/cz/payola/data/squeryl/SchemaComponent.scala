@@ -398,7 +398,10 @@ trait SchemaComponent
                     c.id is (primaryKey),
                     columns(c.name, c.ownerId) are (unique)
                 ))
-            on(classCustomizations)(c => declare(c.id is (primaryKey)))
+            on(classCustomizations)(c =>
+                declare(
+                    c.id is (primaryKey)
+                ))
             on(propertyCustomizations)(c => declare(c.id is (primaryKey)))
 
             // When a PluginDbRepresentation is deleted, all of the its instances and data sources will get deleted.

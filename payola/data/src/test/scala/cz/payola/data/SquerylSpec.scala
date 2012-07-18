@@ -429,8 +429,8 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         val customization = OntologyCustomization.empty(url, "Name1", None)
         customization.isPublic = true
         val ownedCustomization = OntologyCustomization.empty(url, "Name2", Some(u1))
+        val customizations = List(customization, ownedCustomization)
 
-        /*
         val cc1 = ownedCustomization.classCustomizations(0)
         cc1.radius = 1
         cc1.fillColor = "grey"
@@ -439,7 +439,6 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         val pp1 = cc1.propertyCustomizations(0)
         pp1.strokeColor = "blue"
         pp1.strokeWidth = "2"
-        */
 
 
         // Assign customization
@@ -457,25 +456,29 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         assert(c2.owner.get.ownedOntologyCustomizations.size == 1)
 
         // Assert eager-loading
-        val c3 = ontologyCustomizationRepository.getById(ownedCustomization.id).get
-            assert(c3.owner == Some(u1))
-            assert(c3.name == ownedCustomization.name)
-            assert(c3.ontologyURL == ownedCustomization.ontologyURL)
-            assert(c3.classCustomizations.size == ownedCustomization.classCustomizations.size)
-        
-        for (cc <- ownedCustomization.classCustomizations){
-            val persistedCc = c3.classCustomizations.find(_.id == cc.id).get
-                assert(persistedCc.uri == cc.uri)
-                assert(persistedCc.fillColor == cc.fillColor)
-                assert(persistedCc.radius == cc.radius)
-                assert(persistedCc.glyph == cc.glyph)
-                assert(cc.propertyCustomizations.size == persistedCc.propertyCustomizations.size)
 
-            for (pc <- cc.propertyCustomizations){
-                val persistedPc = persistedCc.propertyCustomizations.find(_.id == pc.id).get
-                    assert(persistedPc.uri == pc.uri)
-                    assert(persistedPc.strokeWidth == pc.strokeWidth)
-                    assert(persistedPc.strokeColor == pc.strokeColor)
+
+        for(ontologyCustomization <- customizations) {
+            val oc = ontologyCustomizationRepository.getById(ontologyCustomization.id).get
+                assert(oc.owner == ontologyCustomization.owner)
+                assert(oc.name == ontologyCustomization.name)
+                assert(oc.ontologyURL == ontologyCustomization.ontologyURL)
+                assert(oc.classCustomizations.size == ontologyCustomization.classCustomizations.size)
+
+            for (cc <- ontologyCustomization.classCustomizations){
+                val persistedCc = oc.classCustomizations.find(_.id == cc.id).get
+                    assert(persistedCc.uri == cc.uri)
+                    assert(persistedCc.fillColor == cc.fillColor)
+                    assert(persistedCc.radius == cc.radius)
+                    assert(persistedCc.glyph == cc.glyph)
+                    assert(cc.propertyCustomizations.size == persistedCc.propertyCustomizations.size)
+
+                for (pc <- cc.propertyCustomizations){
+                    val persistedPc = persistedCc.propertyCustomizations.find(_.id == pc.id).get
+                        assert(persistedPc.uri == pc.uri)
+                        assert(persistedPc.strokeWidth == pc.strokeWidth)
+                        assert(persistedPc.strokeColor == pc.strokeColor)
+                }
             }
         }
 
