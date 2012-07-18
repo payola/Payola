@@ -8,5 +8,7 @@ abstract class Input extends Element
 
     var value: String
 
+    var disabled: Boolean
+
     var onchange: (Event => Boolean)
 }

@@ -9,12 +9,14 @@ import cz.payola.web.client.views.graph.PluginSwitchView
 import cz.payola.web.client.events.BrowserEventArgs
 import cz.payola.web.client.views.VertexEventArgs
 import cz.payola.common.entities.plugins.DataSource
+import cz.payola.web.client.Presenter
 
 class DataSourcePresenter(
     viewElement: dom.Element,
     val dataSourceId: String,
     val dataSourceName: String,
     val initialVertexUri: String = "")
+    extends Presenter
 {
     private val view = new DataSourceView(dataSourceName)
 
@@ -31,6 +33,7 @@ class DataSourcePresenter(
         view.goButton.mouseClicked += onGoButtonClicked _
         view.backButton.mouseClicked += onBackButtonClicked _
         view.nextButton.mouseClicked += onNextButtonClicked _
+        view.nodeUriInput.keyPressed += onNodeUriInputKeyPressed _
         graphView.vertexBrowsing += onVertexBrowsing _
         graphView.vertexBrowsingDataSource += onVertexBrowsingDataSource _
         graphView.createOntologyCustomizationButton.mouseClicked += onCreateOntologyCustomizationButtonClicked _
@@ -40,11 +43,11 @@ class DataSourcePresenter(
         view.render(viewElement)
 
         if (initialVertexUri == "") {
-            view.block() // TODO loading.
+            blockPageLoading("Fetching the initial graph.")
             DataSourceBrowser.getInitialGraph(dataSourceId) { graph =>
                 graphView.updateGraph(graph)
                 updateNavigationView()
-                view.unblock()
+                unblockPage()
             } { error =>
                 // TODO
             }
@@ -88,6 +91,16 @@ class DataSourcePresenter(
         false
     }
 
+    private def onNodeUriInputKeyPressed(e: BrowserEventArgs[_]): Boolean = {
+        // If it's enter.
+        if (e.keyCode == 13) {
+            addToHistoryAndGo(view.nodeUriInput.value)
+            false
+        } else {
+            true
+        }
+    }
+
     private def onGoButtonClicked(e: BrowserEventArgs[_]): Boolean = {
         addToHistoryAndGo(view.nodeUriInput.value)
         false
@@ -109,12 +122,16 @@ class DataSourcePresenter(
     private def updateView() {
         val uri = history(historyPosition)
 
-        view.block()
+        blockPageLoading("Fetching the node neighbourhood.")
+        view.nodeUriInput.setIsEnabled(false)
+
         DataSourceBrowser.getNeighbourhood(dataSourceId, uri) { graph =>
             graphView.updateGraph(graph)
             updateNavigationView()
             view.nodeUriInput.value = uri
-            view.unblock()
+
+            view.nodeUriInput.setIsEnabled(true)
+            unblockPage()
         } { error =>
             // TODO
         }
@@ -129,10 +146,10 @@ class DataSourcePresenter(
         if (dataSources.isDefined) {
             callback(dataSources.get)
         } else {
-            view.block()
+            blockPageLoading("Fetching accessible data sources.")
             DataSourceBrowser.getDataSources() { ds =>
                 dataSources = Some(ds)
-                view.unblock()
+                unblockPage()
                 callback(ds)
             } { error =>
 

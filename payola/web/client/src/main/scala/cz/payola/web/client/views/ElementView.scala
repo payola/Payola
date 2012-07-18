@@ -31,8 +31,8 @@ abstract class ElementView[A <: dom.Element](domElementName: String, val innerVi
 
     protected var parentElement: Option[dom.Element] = None
 
-    domElement.onkeyup = { e => keyPressed.triggerDirectly(this, e) }
-    domElement.onkeydown = { e => keyReleased.triggerDirectly(this, e) }
+    domElement.onkeydown = { e => keyPressed.triggerDirectly(this, e) }
+    domElement.onkeyup = { e => keyReleased.triggerDirectly(this, e) }
     domElement.onclick = { e => mouseClicked.triggerDirectly(this, e) }
     domElement.ondblclick = { e => mouseDoubleClicked.triggerDirectly(this, e) }
     domElement.onmousedown = { e => mousePressed.triggerDirectly(this, e) }
@@ -52,11 +52,11 @@ abstract class ElementView[A <: dom.Element](domElementName: String, val innerVi
     }
 
     def block() {
-        blockElement(domElement)
+        View.block(domElement)
     }
 
     def unblock() {
-        unblockElement(domElement)
+        View.unblock(domElement)
     }
 
     def getAttribute(name: String): String = {
