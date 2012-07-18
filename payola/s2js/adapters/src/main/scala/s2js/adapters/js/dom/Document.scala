@@ -8,6 +8,8 @@ abstract class Document
 
     def getElementById(id: String): Element = null
 
+    def getElementsByClassName(cssClass: String): Seq[Element] = null
+
     // Definition of the function is there only for compilation purposes, bacause it can't be null.
     def createElement[A <: Element](name: String): A = body.asInstanceOf[A]
 

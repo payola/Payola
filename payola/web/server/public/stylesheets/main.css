@@ -94,7 +94,30 @@ input[type="checkbox"].active:after{
     background-image: url(rdf-white.png) !important;
     background-position: 0px !important;
 }
+.icon-group{
+    background-image: url(group.png) !important;
+    background-position: 0px !important;
+}
+.icon-group.icon-white{
+    background-image: url(group-white.png) !important;
+    background-position: 0px !important;
+}
 
 .selected-page{
     background: #8891B7;
+}
+
+
+.successors {
+    float: left;
+    min-width:300px;
+    margin-right: 10px;
+}
+
+.clear {
+    clear: both; height: 0px; visibility: hidden; display: block;
+}
+
+.alert {
+    margin-bottom: 18px;
 }

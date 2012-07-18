@@ -8,10 +8,17 @@ renderEditLink: Boolean = false)
 }
 
 @editLinkForID(id: String) = @{
-<a href={routes.Analysis.edit(id).toString} class="btn btn-primary"><i class="icon-pencil icon-white"></i> Edit</a>
+<div class="btn-group">
+    <a href={routes.Analysis.edit(id).toString} class="btn"><i class="icon-pencil"></i> Edit</a>
+</div>
 }
 @deleteLinkForID(id: String) = @{
-<a href={routes.Analysis.delete(id).toString} class="btn btn-danger" onclick="return confirm('Are you sure?')"><i class="icon-remove-sign icon-white"></i> Delete</a>
+<div class="btn-group">
+    <a href={routes.Analysis.delete(id).toString} class="btn btn-danger" onclick="return confirm('Are you sure?')"><i class="icon-remove-sign icon-white"></i> Delete</a>
+</div>
+}
+@shareLinkForID(id: String) = @{
+    <div class="btn-group share-button-placeholder" data-analysis-id="{id}"></div>
 }
 
 @list_entities(user, "analysis", "analyses", analyses.size, {(page, countPerPage) =>
@@ -27,7 +34,11 @@ val analysis = e.asInstanceOf[cz.payola.domain.entities.Analysis]
 </td>
 <td>{
         if (renderEditLink){
-            new scala.xml.NodeBuffer() += (editLinkForID(e.id),{<span> </span>},deleteLinkForID(e.id))
+            <div class="btn-toolbar">
+                {val buff = new scala.xml.NodeBuffer() += (editLinkForID(e.id),{<span> </span>})
+                buff ++= shareLinkForID(e.id)
+                buff += ({<span> </span>},deleteLinkForID(e.id))}
+            </div>
         }else{
             <span class="badge badge-inverse">Not editable</span>
         }
@@ -35,3 +46,8 @@ val analysis = e.asInstanceOf[cz.payola.domain.entities.Analysis]
 </td>
 },
 routes.Analysis.create(), page)
+
+<script language="javascript" type="text/javascript" src="/javaScriptPackage/cz.payola.web.client.presenters.Sharing"></script>
+<script type="text/javascript">
+    new cz.payola.web.client.presenters.Sharing("share-button-placeholder");
+</script>
