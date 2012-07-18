@@ -162,9 +162,7 @@ class DataSourcePresenter(
 
             view.nodeUriInput.setIsEnabled(true)
             unblockPage()
-        } { error =>
-            // TODO
-        }
+        }(fatalErrorHandler(_))
     }
 
     private def updateNavigationView() {
@@ -181,9 +179,7 @@ class DataSourcePresenter(
                 dataSources = Some(ds)
                 unblockPage()
                 callback(ds)
-            } { error =>
-
-            }
+            }(fatalErrorHandler(_))
         }
     }
 

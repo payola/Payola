@@ -16,10 +16,8 @@ class Text(initialValue: String) extends View
 
     def text_=(text: String) {
         value = text
-        textNode.foreach { e =>
-            destroy()
-            parentElement.foreach(render(_))
-        }
+        destroy()
+        textNode.foreach { e => parentElement.foreach(render(_)) }
     }
 
     def render(parent: dom.Element) {

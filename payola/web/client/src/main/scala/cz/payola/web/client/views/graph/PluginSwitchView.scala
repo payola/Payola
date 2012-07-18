@@ -20,9 +20,9 @@ class PluginSwitchView extends GraphView with ComposedView
     private val plugins = List[PluginView](
         new TripleTablePluginView(null),
         new CircleTechnique(visualSetup),
-        new TreeTechnique(visualSetup),
+        new TreeTechnique(visualSetup)/*,
         new MinimalizationTechnique(visualSetup),
-        new GravityTechnique(visualSetup)
+        new GravityTechnique(visualSetup)*/
     )
 
     private var currentPlugin = plugins.head
@@ -33,6 +33,27 @@ class PluginSwitchView extends GraphView with ComposedView
 
     val createOntologyCustomizationButton = new Anchor(List(new Icon(Icon.plus), new Text("Create new settings")))
 
+    val pluginListItems = plugins.map { plugin =>
+        val pluginAnchor = new Anchor(List(new Text(plugin.name)))
+        pluginAnchor.mouseClicked += { e =>
+            changePlugin(plugin)
+            false
+        }
+        new ListItem(List(pluginAnchor))
+    }
+
+    val ontologyCustomizationListItems = List(
+        new ListItem(List(createOntologyCustomizationButton))
+    )
+
+    val toolbar = new Div(List(
+        new DropDownButton(List(new Icon(Icon.cog), new Text("Change visualisation plugin")), pluginListItems),
+        new DropDownButton(List(new Text("Change appearance using ontologies")), ontologyCustomizationListItems)),
+        "btn-toolbar"
+    )
+
+    toolbar.setAttribute("style", "margin-bottom: 15px;")
+
     // Re-trigger all events when the corresponding events are triggered in the plugins.
     plugins.foreach { plugin =>
         plugin.vertexSelected += { e => vertexSelected.trigger(createVertexEventArgs(e.vertex)) }
@@ -42,45 +63,26 @@ class PluginSwitchView extends GraphView with ComposedView
 
     // Display the first plugin.
     currentPlugin.render(pluginSpace.domElement)
+    currentPlugin.renderControls(toolbar.domElement)
 
     def updateGraph(graph: Option[Graph]) {
         currentGraph = graph
         currentPlugin.updateGraph(graph)
     }
 
-    def createSubViews = {
-        val pluginListItems = plugins.map { plugin =>
-            val pluginAnchor = new Anchor(List(new Text(plugin.name)))
-            pluginAnchor.mouseClicked += { e =>
-                changePlugin(plugin)
-                false
-            }
-            new ListItem(List(pluginAnchor))
-        }
-
-        val ontologyCustomizationListItems = List(
-            new ListItem(List(createOntologyCustomizationButton))
-        )
-
-        val controls = new Div(List(
-            new DropDownButton(List(new Icon(Icon.cog), new Text("Change visualisation plugin")), pluginListItems),
-            new DropDownButton(List(new Text("Change appearance using ontologies")), ontologyCustomizationListItems)),
-            "btn-toolbar"
-        )
-        controls.setAttribute("style", "margin-bottom: 15px;")
-
-        List(controls, pluginSpace)
-    }
+    def createSubViews = List(toolbar, pluginSpace)
 
     private def changePlugin(plugin: PluginView) {
         if (currentPlugin != plugin) {
             // Destroy the current plugin.
-            currentPlugin.destroy()
             currentPlugin.updateGraph(None)
+            currentPlugin.destroyControls()
+            currentPlugin.destroy()
 
             // Switch to the new plugin.
             currentPlugin = plugin
             currentPlugin.render(pluginSpace.domElement)
+            currentPlugin.renderControls(toolbar.domElement)
             currentPlugin.updateGraph(currentGraph)
         }
     }
