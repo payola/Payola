@@ -57,11 +57,11 @@ class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
         }
     }
 
-    def init() {
+    /*def init() {
         visualSetup.render(document.getElementById("settings"))
         graph = Some(GraphFetcher.getInitialGraph)
         changePlugin(plugins.head)
-    }
+    }*/
 
     def updateSettings() {
         currentPlugin.get match {
@@ -92,7 +92,7 @@ class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
 
         plugin.updateGraph(graph)
 
-        currentPlugin.get match {
+        /*currentPlugin.get match {
             case i: VisualPluginView =>
                 i.vertexUpdate += { event =>
                     event.target match {
@@ -103,6 +103,6 @@ class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
                     }
                     false
                 }
-        }
+        }*/
     }
 }

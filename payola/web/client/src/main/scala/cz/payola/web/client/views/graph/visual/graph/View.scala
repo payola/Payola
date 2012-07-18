@@ -7,7 +7,7 @@ import s2js.adapters.js.dom.Element
 import cz.payola.web.client.views.graph.visual.Color
 import cz.payola.web.client.views.algebra._
 
-trait View
+trait View[A]
 {
     /**
       * Indicator of selection.
@@ -18,18 +18,16 @@ trait View
     /**
       * Routine for drawing the graphical representation of graphs objects.
       * @param context to which container to draw
-      * @param color which color to use
       * @param positionCorrection to modify the position of the drawn object
       */
-    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D)
+    def draw(context: A, positionCorrection: Vector2D)
 
     /**
       * Routine for fast drawing of the graphical representation of graphs objects. Should be used for animation
       * @param context to which container to draw
-      * @param color which color to use
       * @param positionCorrection to modify the position of the drawn object
       */
-    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D)
+    def drawQuick(context: A, positionCorrection: Vector2D)
 
     /**
       * Draws a rectangle with rounded corners, depending on the radius parameter to the input canvas context.
@@ -130,6 +128,125 @@ trait View
         context.stroke()
     }
 
+    protected def drawArrow(context: CanvasRenderingContext2D, origin: Point2D, destination: Point2D,
+        offset: Double, lineWidth: Double, color: Color) {
+
+        var arrowPointingFrom: Option[Point2D] = None
+        var arrowPointingTo: Option[Point2D] = None
+
+        if(origin.distance(destination) >= 2 * offset) {
+
+            arrowPointingFrom = getArrowOriginPoint(origin - destination, origin, offset)
+            arrowPointingTo = getArrowOriginPoint(destination - origin, destination, offset)
+        } else {
+            arrowPointingFrom = getArrowOriginPoint(destination - origin, destination, offset)
+            arrowPointingTo = getArrowOriginPoint(origin - destination, origin, offset)
+        }
+
+        if(arrowPointingTo.isDefined && arrowPointingFrom.isDefined) {
+            drawStraightLine(context, arrowPointingFrom.get, arrowPointingTo.get, lineWidth, color)
+            drawArrowEnd(context, arrowPointingTo.get - arrowPointingFrom.get, arrowPointingTo.get, lineWidth, color)
+        } else {
+            drawStraightLine(context, origin, destination, lineWidth, color)
+        }
+    }
+
+
+    protected def drawArrowEnd(context: CanvasRenderingContext2D, direction: Vector2D, destination: Point2D,
+        lineWidth: Double, color: Color) {
+
+        val arrowLength = 10.0
+        val arrowWidth = 8.0
+
+        val originPoint = getArrowOriginPoint(direction, destination, arrowLength)
+
+        if(originPoint.isDefined) {
+            var side1:Option[Point2D] = None
+            var side2: Option[Point2D] = None
+
+            val u = direction
+
+            if(u.x != 0) {
+                val a = math.pow(u.y, 2) + math.pow(u.x, 2)
+                val b = -2*math.pow(u.y, 2)*originPoint.get.y - 2*originPoint.get.y*math.pow(u.x, 2)
+                val c = math.pow(u.y*originPoint.get.y, 2) + math.pow(originPoint.get.y*u.x, 2)- math.pow(
+                    arrowWidth*u.x, 2)
+
+                val D = math.pow(b, 2) - 4*a*c
+                if(D >= 0) {
+                    val Dsqrt = math.sqrt(D)
+
+                    val y1 = (-b + Dsqrt) / (2*a)
+                    val y2 = (-b - Dsqrt) / (2*a)
+                    val x1 = (-u.y*y1 + u.x*originPoint.get.x + u.y*originPoint.get.y)/u.x
+                    val x2 = (-u.y*y2 + u.x*originPoint.get.x + u.y*originPoint.get.y)/u.x
+
+                    side1 = Some(Point2D(x1, y1))
+                    side2 = Some(Point2D(x2, y2))
+                } else {
+                    //something went somewhere terribly wrong
+                    //window.alert("D < 0 while getting sides of an arrow")
+                }
+            } else {
+                val y = destination.y
+                val x1 = arrowLength + originPoint.get.x
+                val x2 = -arrowLength + originPoint.get.x
+
+                side1 = Some(Point2D(x1, y))
+                side2 = Some(Point2D(x2, y))
+            }
+
+            if(side1.isDefined && side2.isDefined) {
+                drawStraightLine(context, side1.get, destination, lineWidth, color)
+                drawStraightLine(context, side2.get, destination, lineWidth, color)
+            }
+        }
+    }
+
+    private def getArrowOriginPoint(direction: Vector2D, destination: Point2D, arrowLength: Double): Option[Point2D] = {
+
+        var originPoint: Option[Point2D] = None
+        if(direction.y != 0) {
+            val a = math.pow(direction.x, 2) + math.pow(direction.y, 2)
+            val b = -2*math.pow(direction.x, 2)*destination.y - 2*destination.y*math.pow(direction.y, 2)
+            val c = math.pow(direction.x*destination.y, 2) + math.pow(destination.y*direction.y, 2)- math.pow(
+                arrowLength*direction.y, 2)
+
+            val D = math.pow(b, 2) - 4*a*c
+            if(D >= 0) {
+                val Dsqrt = math.sqrt(D)
+
+                val y1 = (-b + Dsqrt) / (2*a)
+                val y2 = (-b - Dsqrt) / (2*a)
+                val x1 = (direction.x*y1 + direction.y*destination.x - direction.x*destination.y)/direction.y
+                val x2 = (direction.x*y2 + direction.y*destination.x - direction.x*destination.y)/direction.y
+
+                val pointToCompare = destination + (-direction) //the result has to be closer to this point
+                if(pointToCompare.distance(Point2D(x1, y1)) <= pointToCompare.distance(Point2D(x2, y2))) {
+                    originPoint = Some(Point2D(x1, y1))
+                } else {
+                    originPoint = Some(Point2D(x2, y2))
+                }
+            } else {
+                //something went somewhere terribly wrong
+                //window.alert("D < 0 while getting second point of an arrow")
+            }
+        } else {
+            val y = destination.y
+            val x1 = arrowLength + destination.x
+            val x2 = -arrowLength + destination.x
+
+            val pointToCompare = destination + (-direction) //the result has to be closer to this point
+            if(pointToCompare.distance(Point2D(x1, y)) <= pointToCompare.distance(Point2D(x2, y))) {
+                originPoint = Some(Point2D(x1, y))
+            } else {
+                originPoint = Some(Point2D(x2, y))
+            }
+        }
+
+        originPoint
+    }
+
     /**
       * Draws text based on the parametes.
       * @param context to which to draw
@@ -209,18 +326,5 @@ trait View
       */
     protected def isPointInRect(point: Point2D, topLeft: Point2D, bottomRight: Point2D): Boolean = {
         point >= topLeft && point <= bottomRight
-    }
-
-    /**
-      * Constructs a canvas context element as a child of the input container ElementView object.
-      * @param container parent of the created canvas context
-      * @return Layer object with a new canvas context
-      */
-    protected def createCanvasPack(container: Element): CanvasPack = {
-        val canvasPack = new CanvasPack(Vector2D(window.innerWidth - container.offsetLeft,
-            window.innerHeight - container.offsetTop))
-        canvasPack.render(container)
-
-        canvasPack
     }
 }

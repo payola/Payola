@@ -7,6 +7,10 @@ import cz.payola.web.client.views.bootstrap.Icon
 import cz.payola.web.client.views.graph.textual.TripleTablePluginView
 import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.views.graph.visual.settings._
+import cz.payola.web.client.views.graph.visual.techniques.circle.CircleTechnique
+import cz.payola.web.client.views.graph.visual.techniques.tree.TreeTechnique
+import cz.payola.web.client.views.graph.visual.techniques.minimalization.MinimalizationTechnique
+import cz.payola.web.client.views.graph.visual.techniques.gravity.GravityTechnique
 
 class PluginSwitchView extends GraphView with ComposedView
 {
@@ -14,11 +18,11 @@ class PluginSwitchView extends GraphView with ComposedView
     val visualSetup = new VisualSetup(new VertexSettingsModel, new EdgeSettingsModel, new TextSettingsModel)
 
     private val plugins = List[PluginView](
-        new TripleTablePluginView(null)/*,
-            new CircleTechnique(visualSetup),
-            new TreeTechnique(visualSetup),
-            new MinimalizationTechnique(visualSetup),
-            new GravityTechnique(visualSetup)*/
+        new TripleTablePluginView(null),
+        new CircleTechnique(visualSetup),
+        new TreeTechnique(visualSetup),
+        new MinimalizationTechnique(visualSetup),
+        new GravityTechnique(visualSetup)
     )
 
     private var currentPlugin = plugins.head

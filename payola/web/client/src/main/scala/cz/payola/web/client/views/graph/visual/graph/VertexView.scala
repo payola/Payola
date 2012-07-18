@@ -4,21 +4,23 @@ import collection.mutable.ListBuffer
 import cz.payola.common.rdf.{LiteralVertex, IdentifiedVertex, Vertex}
 import s2js.adapters.js.dom.CanvasRenderingContext2D
 import cz.payola.web.client.views.graph.visual.settings._
-import cz.payola.web.client._
 import cz.payola.web.client.views.graph.visual.Color
 import cz.payola.web.client.views.algebra._
+import cz.payola.web.client.views.graph.visual.graph.positioning.LocationDescriptor
 
 /**
   * Graphical representation of Vertex object in the drawn graph.
   * @param vertexModel the vertex object from the model, that is visualised
   * @param position of this graphical representation in drawing space
   */
-class VertexView(val vertexModel: Vertex, var position: Point2D, var settings: VertexSettingsModel,
-    settingsText: TextSettingsModel) extends View
-{
+class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var settings: VertexSettingsModel,
+    settingsText: TextSettingsModel, var rdfType: Option[String]) extends View[CanvasRenderingContext2D] {
+
+    var literalVertices = ListBuffer[LiteralVertex]()
+
     private var age = 0
 
-    private val image = prepareImage(//TODO This has to be called after color or path change event was fired
+    /*private val image = prepareImage(//TODO This has to be called after color or path change event was fired
         vertexModel match {
             case i: LiteralVertex => new Color(180, 50, 50, 1)
             case i: IdentifiedVertex => new Color(50, 180, 50, 1)
@@ -27,7 +29,7 @@ class VertexView(val vertexModel: Vertex, var position: Point2D, var settings: V
             case i: LiteralVertex => "/assets/images/book-icon.png"
             case i: IdentifiedVertex => "/assets/images/view-eye-icon.png"
             case _ => "/assets/images/question-mark-icon.png"
-        })
+        })*/
 
     /**
       * Indicator of isSelected attribute. Does not effect inner mechanics.
@@ -70,33 +72,29 @@ class VertexView(val vertexModel: Vertex, var position: Point2D, var settings: V
     }
 
     def isPointInside(point: Point2D): Boolean = {
-        isPointInRect(point, position + (new Vector2D(settings.radius, settings.radius) / -2),
-            position + (new Vector2D(settings.radius, settings.radius) / 2))
+        isPointInRect(point, position + (new Vector2D(-settings.radius, -settings.radius)),
+            position + (new Vector2D(settings.radius, settings.radius)))
     }
 
-    def draw(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D) {
-        drawQuick(context, color, positionCorrection)
-        drawImage(context, image, position + Vector2D(-10, -10), Vector2D(20, 20))
+    def draw(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
+
+        drawQuick(context, positionCorrection)
+
+        if(information.isDefined) {
+            information.get.draw(context,
+                (LocationDescriptor.getVertexInformationPosition(position) + positionCorrection).toVector)
+        }
     }
 
-    def drawQuick(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D) {
-        val colorToUseOnBox = color.getOrElse(settings.color)
+    def drawQuick(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
+
         val correctedPosition = this.position + positionCorrection
 
-        drawCircle(context, correctedPosition, settings.radius / 2, 2, Color.Black)
-        //val correctedPosition = this.position + (settings.getSize / -2) + positionCorrection
-        //drawRoundedRectangle(context, correctedPosition, settings.getSize, settings.cornerRadius)
-        fillCurrentSpace(context, colorToUseOnBox)
-    }
-
-    def drawInformation(context: CanvasRenderingContext2D, color: Option[Color], positionCorrection: Vector2D) {
-        if (information.isDefined) {
-            vertexModel match {
-                case i: IdentifiedVertex => information.get.draw(context, color, positionCorrection)
-                case _ => if (selected) {
-                    information.get.draw(context, color, positionCorrection)
-                }
-            }
+        drawCircle(context, correctedPosition, settings.radius, 2, Color.Black)
+        if(isSelected) {
+            fillCurrentSpace(context, settings.colorSelected)
+        } else {
+            fillCurrentSpace(context, settings.color)
         }
     }
 

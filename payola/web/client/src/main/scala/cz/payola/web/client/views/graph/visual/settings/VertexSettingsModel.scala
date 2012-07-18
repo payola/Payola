@@ -4,7 +4,7 @@ import cz.payola.web.client.views.graph.visual.Color
 
 class VertexSettingsModel
 {
-    var radius = 50
+    var radius = 25
 
     var color = new Color(51, 204, 255, 0.25)
 

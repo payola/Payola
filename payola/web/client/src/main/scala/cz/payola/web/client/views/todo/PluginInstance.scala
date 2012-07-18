@@ -13,6 +13,8 @@ import cz.payola.web.client.views.elements.Div
 import scala.Seq
 import scala.Some
 import scala.collection.immutable.HashMap
+import cz.payola.common.entities.plugins.parameters._
+import scala.Some
 
 object PluginInstance
 {
@@ -39,9 +41,13 @@ class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[P
 
     private val list = plugin.parameters.map { param =>
 
-        val defaultVal = if (defaultValues.isDefinedAt(param.name)) defaultValues(param.name) else ""
-
-        val field = new InputControl(param.name, param.id, defaultVal, "Enter parameter value")
+        val defaultVal = if (defaultValues.isDefinedAt(param.name)) defaultValues(param.name) else param.defaultValue.toString
+        val field = param match {
+            case p: BooleanParameter => new CheckboxInputControl(param.name, param.id, defaultVal, "Enter parameter value")
+            case p: FloatParameter => new NumericInputControl(param.name, param.id, defaultVal, "Enter parameter value")
+            case p: IntParameter => new NumericInputControl(param.name, param.id, defaultVal, "Enter parameter value")
+            case _ => new TextInputControl(param.name, param.id, defaultVal, "Enter parameter value")
+        }
 
         field.input.changed += { args =>
             parameterValueChanged.triggerDirectly(new ParameterValue(id, param.id, param.name, field.input.value, field))

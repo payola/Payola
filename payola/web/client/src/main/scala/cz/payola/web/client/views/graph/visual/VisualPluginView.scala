@@ -9,19 +9,24 @@ import s2js.adapters.js.browser.document
 import cz.payola.web.client.events._
 import cz.payola.common.rdf._
 import cz.payola.web.client.presenters.components.ZoomControls
-import cz.payola.web.client.views._
 import cz.payola.web.client.views.elements._
-import s2js.adapters.js.dom
 import cz.payola.web.client._
 import cz.payola.web.client.views.algebra._
 import scala.Some
-import scala.Some
+import s2js.adapters.js.browser.window
+import s2js.adapters.js._
+import s2js.compiler.javascript
+import cz.payola.web.client.views.todo.CanvasPack
+import cz.payola.web.client.views.VertexEventArgs
 
 /**
   * Representation of visual based output drawing plugin
   */
 abstract class VisualPluginView(settings: VisualSetup, name: String) extends PluginView(name)
 {
+
+    protected var mouseIsPressed = false
+
     private var mousePressedVertex = false
 
     private var mouseDragged = false
@@ -30,22 +35,88 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
 
     var zoomTool: Option[ZoomControls] = None
 
-    val vertexUpdate = new SimpleUnitEvent[Vertex]
+    val mouseDraggedEvent = new BrowserEvent[Canvas]
+
+    val windowResizedEvent = new BrowserEvent[VisualPluginView]
 
     /**
       * Contained graph in visualisation packing.
       */
     var graphView: Option[views.graph.visual.graph.GraphView] = None
 
-    // TODO
-    def createSubViews = Nil
+    private var parent: dom.Element = null
+
+    protected val topLayer = new Canvas()
+
+    private val edgesDeselectedLayer = new Canvas()
+
+    private val edgesSelectedLayer = new Canvas()
+
+    private val verticesDeselectedLayer = new Canvas()
+
+    private val verticesSelectedLayer = new Canvas()
+
+    private val layersPack = new CanvasPack(edgesDeselectedLayer, edgesSelectedLayer,
+        verticesDeselectedLayer, verticesSelectedLayer)
+
+    def layers = List(edgesDeselectedLayer, edgesSelectedLayer, verticesDeselectedLayer, verticesSelectedLayer,
+        topLayer)
+
+    def createSubViews = layers
+
+    topLayer.mousePressed += { e =>
+        mouseIsPressed = true
+        true
+    }
+
+    topLayer.mouseReleased += { e =>
+        mouseIsPressed = false
+        true
+    }
+
+    topLayer.mouseMoved += { e =>
+        if (mouseIsPressed) {
+            mouseDraggedEvent.trigger(e)
+        }
+        true
+    }
+
+    window.onresize = { e => windowResizedEvent.triggerDirectly(this, e)}
+
+    //on mouse wheel event work-around###################################################################################
+
+    @javascript(
+        """
+           /* DOMMouseScroll is for mozilla. */
+           self.topLayer.domElement.addEventListener('DOMMouseScroll', function(event) {
+               return self.topLayer.mouseWheelRotated.triggerDirectly(self.topLayer, event);
+           });
+        """)
+    private def setMouseWheelListener() {}
+
+    //^TODO this calls the onMouseWheel function in window context; that results in error,
+    // because window..mouseWheel does not exist
+
+
+    private def offsetLeft: Double = {
+        topLayer.domElement.offsetLeft
+    }
+
+    private def offsetTop: Double = {
+        topLayer.domElement.offsetTop
+    }
 
     override def render(container: dom.Element) {
+        parent = container
+
+        setMouseWheelListener()
+        createSubViews.foreach(_.render(container))
+
         graphView = Some(new views.graph.visual.graph.GraphView(container, settings))
         zoomTool = Some(new ZoomControls(100))
         zoomTool.get.render(/* document.getElementById("btn-stripe")*/ new Div().domElement) // TODO
 
-        graphView.get.canvasPack.mousePressed += { event => //selection
+        topLayer.mousePressed += { event => //selection
             mouseDragged = false
             mouseDownPosition = getPosition(event)
             onMouseDown(event)
@@ -53,28 +124,30 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
             false
         }
 
-        graphView.get.canvasPack.mouseReleased += { event => //deselect all
+        topLayer.mouseReleased += { event => //deselect all
             onMouseUp(event)
 
             false
         }
 
-        graphView.get.canvasPack.mouseDragged += { event => //vertices move
+        mouseDraggedEvent += { event => //vertices move
             mouseDragged = true
             onMouseDrag(event)
             false
         }
 
-        graphView.get.canvasPack.mouseDoubleClicked += { event => //update graph
-            val vertex = graphView.get.getTouchedVertex(getPosition(event))
-            if (vertex.isDefined) {
-                graphView.get.selectVertex(vertex.get)
-                vertexUpdate.triggerDirectly(vertex.get.vertexModel)
+        topLayer.mouseDoubleClicked += { event => //update graph
+            if(graphView.isDefined) {
+                val vertex = graphView.get.getTouchedVertex(getPosition(event))
+                if (vertex.isDefined) {
+                    graphView.get.selectVertex(vertex.get)
+                    vertexBrowsing.trigger(new VertexEventArgs[this.type](this, vertex.get.vertexModel))
+                }
             }
             false
         }
 
-        graphView.get.canvasPack.mouseWheelRotated += { event => //zoom - invoked by mouse
+        topLayer.mouseWheelRotated += { event => //zoom - invoked by mouse
             val mousePosition = getPosition(event)
             val scrolled = event.wheelDelta
 
@@ -108,21 +181,28 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
             false
         }
 
-        graphView.get.canvasPack.windowResized += { event => //fitting canvas on window resize
-            graphView.get.fitCanvas()
+        windowResizedEvent += { event => //fitting canvas on window resize
+            fitCanvas()
             redraw()
             true
         }
     }
 
     def updateGraph(graph: Option[Graph]) {
-        // TODO
-        graphView.get.update(graph.getOrElse(new Graph(Nil, Nil)))
+        if(graph.isDefined) {
+            if(graphView.isDefined) {
+                graphView.get.update(graph.get)
+            } else {
+                graphView = Some(new views.graph.visual.graph.GraphView(parent, settings))
+            }
+        } else {
+            clear()
+        }
     }
 
     override def clear() {
         if (graphView.isDefined) {
-            graphView.get.canvasPack.clear()
+            createSubViews.foreach{_.clear()}
             graphView = None
             mouseDragged = false
             mousePressedVertex = false
@@ -133,6 +213,8 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
             zoomTool.get.reset()
         }
     }
+
+
 
     override def destroy() {
         if (graphView.isDefined) {
@@ -152,20 +234,27 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
     protected def redrawQuick() {
         //TODO rename or move somewhere else
         if (!graphView.isEmpty) {
-            graphView.get.redraw(RedrawOperation.Animation)
+            graphView.get.redraw(layersPack, RedrawOperation.Animation)
         }
     }
 
     def redraw() {
         if (!graphView.isEmpty) {
-            graphView.get.redrawAll()
+            graphView.get.redrawAll(layersPack)
         }
     }
 
     def redrawSelection() {
         if (graphView.isDefined) {
-            graphView.get.redraw(RedrawOperation.Selection)
+            graphView.get.redraw(layersPack, RedrawOperation.Selection)
         }
+    }
+
+    def size: Vector2D = topLayer.size
+
+    def size_=(size: Vector2D) {
+
+        layers.foreach(_.size = size)
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -213,6 +302,7 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
                 }
             }
             mousePressedVertex = true
+            vertexSelected.trigger(new VertexEventArgs[this.type](this, vertex.get.vertexModel))
         } else {
             mousePressedVertex = false
         }
@@ -258,14 +348,14 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
 
             graphView.get.moveAllSelectedVertices(difference)
 
-            graphView.get.redraw(RedrawOperation.Movement)
+            graphView.get.redraw(layersPack, RedrawOperation.Movement)
         } else {
             Animation.clearCurrentTimeout()
             val difference = end - mouseDownPosition
 
             graphView.get.moveAllVertices(difference)
 
-            graphView.get.redraw(RedrawOperation.All)
+            graphView.get.redraw(layersPack, RedrawOperation.All)
         }
         mouseDownPosition = end
     }
@@ -373,7 +463,7 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
     }
 
     private def getPosition(eventArgs: BrowserEventArgs[Canvas]): Point2D = {
-        val positionCorrection = Vector2D(-graphView.get.canvasPack.offsetLeft, -graphView.get.canvasPack.offsetTop)
+        val positionCorrection = Vector2D(offsetLeft, offsetTop)
 
         /*if (typeOf(event.clientX) != "undefined" && typeOf(event.clientY) != "undefined") { TODO this check was fine
             Point2D(event.clientX, event.clientX) + positionCorrection
@@ -382,5 +472,36 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
         Point2D(eventArgs.clientX /*+ document.body.scrollLeft*/ + document.documentElement.scrollLeft,
             eventArgs.clientY /*+ document.body.scrollTop*/ + document.documentElement.scrollTop) + positionCorrection
         //}
+    }
+
+    /**
+      * Constructs a canvas context element as a child of the input container ElementView object.
+      * @param container parent of the created canvas context
+      * @return Layer object with a new canvas context
+      */
+    /*protected def createCanvasPack(container: Element): CanvasPack = {
+        val canvasPack = new CanvasPack(Vector2D(window.innerWidth - container.offsetLeft,
+            window.innerHeight - container.offsetTop))
+        canvasPack.render(container)
+
+        canvasPack
+        TODO remove
+    }*/
+
+    def fitCanvas() {
+        //measure size of the graph and set dimensions of the canvasPack accordingly (max(sizeOfTheWindow,
+        // sizeOfTheGraph))
+        val maxBottomRight = Point2D(0, 0)
+        graphView.get.components.foreach { component =>
+            val componentBR = component.getBottomRight()
+            if (maxBottomRight.x < componentBR.x) {
+                maxBottomRight.x = componentBR.x
+            }
+            if (maxBottomRight.y < componentBR.y) {
+                maxBottomRight.y = componentBR.y
+            }
+        }
+        layers.foreach(_.size =
+            Vector2D(window.innerWidth - offsetLeft, window.innerHeight - offsetTop))
     }
 }

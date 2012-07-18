@@ -16,7 +16,7 @@ trait GroupRepositoryComponent extends TableRepositoryComponent
         with GroupRepository
     {
         def getAllByOwnerId(ownerId: String, pagination: Option[PaginationInfo] = None) = wrapInTransaction {
-            selectWhere(_.ownerId === ownerId, pagination)
+            selectWhere(_.ownerId === ownerId, pagination).sortBy(_.name)
         }
 
         protected def getSelectQuery(entityFilter: Group => LogicalBoolean) = {

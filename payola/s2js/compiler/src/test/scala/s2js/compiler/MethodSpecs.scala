@@ -395,7 +395,7 @@ class MethodSpecs extends CompilerFixtureSpec
 
                         $pkg.b = function() {
                             var self = this;
-                            goog.base(self);
+                            $pkg.a.apply(self, []);
                         };
                         goog.inherits($pkg.b, $pkg.a);
                         $pkg.b.prototype.m1 = function() {

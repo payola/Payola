@@ -22,21 +22,22 @@ trait PluginRepositoryComponent extends TableRepositoryComponent
         private val representationRepository =
             new TableRepository[PluginDbRepresentation, QueryType](schema.plugins,PluginDbRepresentation)
             {
-                protected def getSelectQuery(entityFilter: (PluginDbRepresentation) => LogicalBoolean) = {
-                    join(schema.plugins, schema.users.leftOuter, schema.booleanParameters.leftOuter,
-                        schema.floatParameters.leftOuter, schema.intParameters.leftOuter,
-                        schema.stringParameters.leftOuter)((p, o, bPar, fPar, iPar, sPar) =>
-                            where(entityFilter(p))
-                            select(p, o, bPar, fPar, iPar, sPar)
-                            on(o.map(_.id) === p.ownerId,
-                                bPar.map(_.pluginId) === Some(p.id),
-                                fPar.map(_.pluginId) === Some(p.id),
-                                iPar.map(_.pluginId) === Some(p.id),
-                                sPar.map(_.pluginId) === Some(p.id))
-                    )
-                }
+                protected def getSelectQuery(entityFilter: (PluginDbRepresentation) => LogicalBoolean) =
+                    schema.wrapInTransaction {
+                        join(schema.plugins, schema.users.leftOuter, schema.booleanParameters.leftOuter,
+                            schema.floatParameters.leftOuter, schema.intParameters.leftOuter,
+                            schema.stringParameters.leftOuter)((p, o, bPar, fPar, iPar, sPar) =>
+                                where(entityFilter(p))
+                                select(p, o, bPar, fPar, iPar, sPar)
+                                on(o.map(_.id) === p.ownerId,
+                                    bPar.map(_.pluginId) === Some(p.id),
+                                    fPar.map(_.pluginId) === Some(p.id),
+                                    iPar.map(_.pluginId) === Some(p.id),
+                                    sPar.map(_.pluginId) === Some(p.id))
+                        )
+                    }
 
-                protected def processSelectResults(results: Seq[QueryType]) = {
+                protected def processSelectResults(results: Seq[QueryType]) = schema.wrapInTransaction {
                     results.groupBy(_._1).map { r =>
                         val plugin =  r._1
                         plugin.owner = r._2.head._2
@@ -56,15 +57,15 @@ trait PluginRepositoryComponent extends TableRepositoryComponent
         }
 
         def getAll(pagination: Option[PaginationInfo] = None): Seq[Plugin] = {
-            representationRepository.getAll(pagination).map(_.toPlugin)
+            representationRepository.getAll(pagination).map(_.toPlugin).sortBy(_.name)
         }
 
         def getAllPublic: Seq[Plugin] = {
-            representationRepository.selectWhere(_.isPublic === true).map(_.toPlugin)
+            representationRepository.selectWhere(_.isPublic === true).map(_.toPlugin).sortBy(_.name)
         }
 
         def getAllByOwnerId(ownerId: Option[String]): Seq[Plugin] = {
-            representationRepository.selectWhere(_.ownerId === ownerId).map(_.toPlugin)
+            representationRepository.selectWhere(_.ownerId === ownerId).map(_.toPlugin).sortBy(_.name)
         }
 
         def getByName(name: String): Option[Plugin] = {
