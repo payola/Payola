@@ -6,7 +6,11 @@ object DataException
         try {
             body
         } catch {
-            case dataException: DataException => throw dataException
+            case dataException: DataException => {
+                println(dataException.message)
+
+                throw dataException
+            }
             case throwable: Throwable => {
                 throwable match {
                     case e: Exception => {

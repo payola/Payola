@@ -70,11 +70,14 @@ abstract class DataFetcher(name: String, inputCount: Int, parameters: immutable.
         val uri = vertexURI.trim
 
         if (uri.nonEmpty) {
-            val rootTriplePatterns = List(
-                TriplePattern(Uri(vertexURI), Variable("op0"), Variable("o1")),
-                TriplePattern(Variable("s1"), Variable("sp0"), Uri(vertexURI))
+            val subjectPattern = TriplePattern(Uri(vertexURI), Variable("op0"), Variable("o1"))
+            val objectPattern = TriplePattern(Variable("s1"), Variable("sp0"), Uri(vertexURI))
+            val queries = List(
+                ConstructQuery(List(subjectPattern)).toString,
+                ConstructQuery(List(objectPattern)).toString
             )
-            executeQuery(instance, ConstructQuery(rootTriplePatterns).toString)
+
+            queries.par.map(executeQuery(instance, _)).reduce(_ + _)
         } else {
             Graph.empty
         }

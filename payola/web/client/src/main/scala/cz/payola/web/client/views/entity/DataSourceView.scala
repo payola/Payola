@@ -16,7 +16,7 @@ class DataSourceView(dataSourceName: String) extends ComposedView
 
     val goButton = new Button(new Text("Go!"))
 
-    val navigation = new Form(List(backButton, nextButton, nodeUriInput, goButton), "form-inline pull-right")
+    val navigation = new Div(List(backButton, nextButton, nodeUriInput, goButton), "form-inline pull-right")
 
     val graphViewSpace = new Div(Nil, "row-fluid")
 

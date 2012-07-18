@@ -94,7 +94,70 @@ input[type="checkbox"].active:after{
     background-image: url(rdf-white.png) !important;
     background-position: 0px !important;
 }
+.icon-group{
+    background-image: url(group.png) !important;
+    background-position: 0px !important;
+}
+.icon-group.icon-white{
+    background-image: url(group-white.png) !important;
+    background-position: 0px !important;
+}
 
 .selected-page{
     background: #8891B7;
 }
+
+.successors {
+    float: left;
+    min-width:300px;
+    margin-right: 10px;
+}
+
+.clear {
+    clear: both; height: 0px; visibility: hidden; display: block;
+}
+
+.alert {
+    margin-bottom: 18px;
+}
+
+.position-relative {
+    position: relative;
+}
+
+.ontology-customization-class-div {
+    min-height: 30px;
+    horizontal-align: center;
+    padding: 5px;
+
+    background: #DDDBFE;
+    color: black;
+
+    border-width: 1px;
+    border: line;
+    border-color: #A6A4A9;
+}
+
+.selected-ontology-customization-class-div {
+    background: #9E9AD1;
+}
+
+.property-list-header {
+    background: #ABABAB;
+    margin-bottom: 10px;
+    padding-left: 5px;
+}
+
+.modal-inner-view {
+    height: 380px;
+    overflow: auto;
+}
+
+.property-list-div {
+    background: #FFFEE2;
+}
+
+.wide-customization-modal {
+    width: 800px;
+}
+

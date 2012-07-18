@@ -24,13 +24,14 @@ function extendJsArrayToArrayBuffer(jsArrayPrototype) {
 
     // The JavaScript Array itself should behave as the internal JavaScript Array of the scala ArrayBuffer.
     Object.defineProperty(jsArrayPrototype, 'getInternalJsArray', {
-        value: function() { return this; },
+        value: function() { return Array.prototype.slice.call(this); },
         writable: true,
         configurable: true
     });
 }
 
 extendJsArrayToArrayBuffer(Array.prototype);
+extendJsArrayToArrayBuffer(NodeList.prototype);
 
 // The CanvasPixelArray.prototype doesn't work in Chrome so the prototype has to be obtained from an instance.
 var pixelArrayPrototype = document.createElement('canvas').getContext('2d').getImageData(0, 0, 1, 1).data.__proto__;

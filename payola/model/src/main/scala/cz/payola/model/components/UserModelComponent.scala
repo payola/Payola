@@ -28,7 +28,7 @@ trait UserModelComponent extends EntityModelComponent
             userRepository.getByName(name)
         }
 
-        private def cryptPassword(password: String, method: String = "SHA-1"): String = {
+        def cryptPassword(password: String, method: String = "SHA-1"): String = {
             // TODO bcrypt
             val md = java.security.MessageDigest.getInstance(method)
             val digest = md.digest(password.toCharArray.map(_.toByte))

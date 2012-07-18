@@ -17,10 +17,7 @@ abstract class BaseTechnique(settings: VisualSetup, name: String) extends Visual
 
     override def updateGraph(graph: Option[Graph]) {
         super.updateGraph(graph)
-        if (!graphView.get.isEmpty) {
-            // graphView != None because this call is after update(..)
-            performPositioning(graphView.get)
-        }
+        graphView.foreach(performPositioning(_))
     }
 
     private def performPositioning(graphView: GraphView) {

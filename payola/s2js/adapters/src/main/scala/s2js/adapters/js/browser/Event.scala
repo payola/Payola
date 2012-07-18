@@ -29,9 +29,9 @@ abstract class Event {
     val ctrlKey = false
 
     /**
-     * Returns the identifier of a key
+     * Returns the code of a key
      */
-    val keyIdentifier = 0
+    val keyCode = 0
 
     /**
      * Returns the location of the key on the advice.
