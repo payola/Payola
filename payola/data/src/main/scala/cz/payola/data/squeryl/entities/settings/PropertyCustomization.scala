@@ -16,9 +16,9 @@ object PropertyCustomization extends EntityConverter[PropertyCustomization]
 }
 
 class PropertyCustomization(
-    override val id: String, u: String, c: String, w: Int)
+    override val id: String, uri: String, strokeColor: String, strokeWidth: Int)
     (implicit val context: SquerylDataContextComponent)
-    extends cz.payola.domain.entities.settings.PropertyCustomization(u, c, w)
+    extends cz.payola.domain.entities.settings.PropertyCustomization(uri, strokeColor, strokeWidth)
     with PersistableEntity
 {
     var classCustomizationId: String = null

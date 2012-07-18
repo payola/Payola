@@ -32,7 +32,7 @@ trait PropertyCustomization extends Entity
       * Sets stroke width of the edge.
       * @param value New value of the stroke width.
       */
-    def strokeWidth_=(value: String) {
-        _strokeColor = value
+    def strokeWidth_=(value: Int) {
+        _strokeWidth = value
     }
 }
