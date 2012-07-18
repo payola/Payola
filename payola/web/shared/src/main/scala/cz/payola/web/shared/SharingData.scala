@@ -86,6 +86,7 @@ import cz.payola.domain.Entity
     private def makeEntityPublic(ownedEntities: Seq[Entity with ShareableEntity], entityId: String, isPublic: Boolean = true) {
         ownedEntities.find(e => e.id == entityId).map { e =>
             e.isPublic_=(isPublic)
+            Payola.model.persistEntity(e)
         }
     }
 }
