@@ -24,6 +24,8 @@ import cz.payola.web.client.views.VertexEventArgs
   */
 abstract class VisualPluginView(settings: VisualSetup, name: String) extends PluginView(name)
 {
+    private var hoveringOverVertex: Option[VertexView] = None
+
     protected var mouseIsPressed = false
 
     private var mousePressedVertex = false
@@ -41,6 +43,8 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
     protected val topLayer = new Canvas()
 
     private val layerPack = new CanvasPack(new Canvas(), new Canvas(), new Canvas(), new Canvas())
+
+    def createSubViews = layers
 
     private var topLayerOffset = Vector2D(0, 0)
 
@@ -69,13 +73,15 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
     topLayer.mouseMoved += { e =>
         if (mouseIsPressed) {
             mouseDragged.trigger(e)
+        } else {
+            onMouseMove(e)
         }
         true
     }
 
-    mouseDragged += { event =>
+    mouseDragged += { e =>
         mouseIsDragging = true
-        onMouseDrag(event)
+        onMouseDrag(e)
         false
     }
 
@@ -125,7 +131,10 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
         """)
     private def setMouseWheelListener() {}
 
-    def createSubViews = layers
+
+    private var hoverEnter = new SimpleUnitEvent[Map[String, Seq[String]]]
+
+    private var hoverExit = new SimpleUnitEvent[Map[String, Seq[String]]]
 
     override def render(parent: dom.Element) {
         super.render(parent)
@@ -310,6 +319,30 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
             graphView.get.redraw(layerPack, RedrawOperation.All)
         }
         mouseDownPosition = end
+    }
+
+    /**
+      * Is supposed to be called only when mouse is not being dragged (no mouse button is pressed during mouse movement)
+      */
+    private def onMouseMove(eventArgs: BrowserEventArgs[Canvas]) {
+        val position = getPosition(eventArgs)
+        val vertex = graphView.get.getTouchedVertex(position)
+
+        if(vertex.isDefined) {
+            if(hoveringOverVertex.isEmpty || (!hoveringOverVertex.get.eq(vertex.get))) {
+                hoveringOverVertex = vertex
+                val infoTable = new VertexInfoTable(hoveringOverVertex.get.getLiteralVertices.toMap)
+                hoverEnter = new SimpleUnitEvent[Map[String, Seq[String]]]
+                hoverEnter += { event => infoTable.render() }
+                hoverExit = new SimpleUnitEvent[Map[String, Seq[String]]]
+                hoverExit += { event => infoTable.destroy() }
+                hoverEnter.triggerDirectly(hoveringOverVertex.get.getLiteralVertices.toMap)
+            }
+        } else if(hoveringOverVertex.isDefined) {
+            hoverExit.triggerDirectly(hoveringOverVertex.get.getLiteralVertices.toMap)
+            hoveringOverVertex = None
+        }
+
     }
 
     private def zoomIn(mousePosition: Point2D) {

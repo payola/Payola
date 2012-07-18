@@ -7,6 +7,7 @@ import cz.payola.web.client.views.graph.visual.Color
 import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.graph.visual.graph.positioning.LocationDescriptor
 import cz.payola.common.rdf._
+import cz.payola.web.client.events.SimpleUnitEvent
 
 /**
   * Graphical representation of Vertex object in the drawn graph.
@@ -16,7 +17,7 @@ import cz.payola.common.rdf._
 class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var settings: VertexSettingsModel,
     settingsText: TextSettingsModel, var rdfType: Option[String]) extends View[CanvasRenderingContext2D] {
 
-    var literalVertices = ListBuffer[(Edge, LiteralVertex)]()
+    private var literalVertices = ListBuffer[(String, Seq[String])]()
 
     private var age = 0
 
@@ -49,6 +50,16 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var s
         case i: LiteralVertex => Some(new InformationView(i, settingsText))
         case i: IdentifiedVertex => Some(new InformationView(i, settingsText))
         case _ => None
+    }
+
+    def getLiteralVertices: ListBuffer[(String, Seq[String])] = {
+        literalVertices
+    }
+
+    def addLiteralVertex(vertex: LiteralVertex, vertexEdges: Seq[Edge]) {
+
+        val vertexEdgesContents = vertexEdges.map(_.uri)
+        literalVertices += ((vertex.toString, vertexEdgesContents))
     }
 
     def isSelected: Boolean = {
