@@ -3,9 +3,10 @@ package cz.payola.web.client.views.elements
 import s2js.adapters.js.dom
 import cz.payola.web.client.views._
 import cz.payola.web.client.View
+import cz.payola.web.client.views.bootstrap.Icon
 
-class Button(subView: View, cssClass: String = "")
-    extends ElementView[dom.Button]("button", List(subView), cssClass + " btn")
+class Button(subView: View, cssClass: String = "", icon: Icon = null)
+    extends ElementView[dom.Button]("button", if (icon == null){List(subView)}else{List(icon,subView)}, cssClass + " btn")
 {
     setAttribute("type", "button")
 
