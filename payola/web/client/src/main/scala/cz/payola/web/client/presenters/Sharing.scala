@@ -2,13 +2,11 @@ package cz.payola.web.client.presenters
 
 import s2js.adapters.js.browser.document
 import cz.payola.web.client.presenters.components.ShareButton
-import s2js.adapters.js.dom.Element
 import s2js.compiler.javascript
 import cz.payola.web.shared._
-import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap._
 import scala.Some
-import scala.Some
+import s2js.adapters.js.browser.window
 
 class Sharing(shareButtonPlaceholderClass: String, entityType: String)
 {
@@ -25,7 +23,7 @@ class Sharing(shareButtonPlaceholderClass: String, entityType: String)
             false
         }
 
-        btn.clicked += { e =>
+        btn.dropDownButton.anchor.mouseClicked += { e =>
             setIsPublicHandler(id, btn)
             false
         }
@@ -50,36 +48,38 @@ class Sharing(shareButtonPlaceholderClass: String, entityType: String)
     }
 
     def shareToGroupHandler(id: String) {
-        val modal = createModal(entityType,"group")
-
-        modal.saving += {e =>
-            modal.destroy()
-            true
-        }
+        val modal = createModal(entityType,"group",{ value =>
+            SharingData.shareToGroup(entityType,id,value){ ok =>
+            }{ err => }
+        })
 
         modal.render()
         bindGroupSelect
     }
 
     def shareToUserHandler(id: String) {
-        val modal = createModal(entityType,"user")
-
-        modal.saving += {e =>
-            modal.destroy()
-            true
-        }
+        val modal = createModal(entityType,"user",{ value =>
+            SharingData.shareToUser(entityType,id,value){ ok =>
+            }{ err => }
+        })
 
         modal.render()
         bindUserSelect
     }
 
-    private def createModal(entityName: String, privilegedType: String) : Modal = {
+    private def createModal(entityName: String, privilegedType: String, callback: (String => Unit)) : Modal = {
 
         val privilegedSearchBox = new TextInputControl("Search "+privilegedType+":","privileged","","Enter name")
 
         val body = List(privilegedSearchBox)
         val modal = new Modal("Share "+entityName+" to a "+privilegedType+":", body, Some("Share"))
         modal.closing += {e =>
+            modal.destroy()
+            true
+        }
+
+        modal.saving += {e =>
+            callback(privilegedSearchBox.input.value)
             modal.destroy()
             true
         }

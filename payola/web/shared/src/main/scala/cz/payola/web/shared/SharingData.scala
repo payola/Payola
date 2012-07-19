@@ -22,21 +22,26 @@ import cz.payola.domain.Entity
     }
 
     @async
-    def shareToGroup(entityType: String, entityId: String, groupIds: List[String],
+    def shareToGroup(entityType: String, entityId: String, groupIds: String,
         user: User = null)
         (successCallback: Boolean => Unit)
         (failCallback: Throwable => Unit) {
-        val groups = user.ownedGroups.filter { g => !groupIds.contains(g.id)}
+        val groupIdsList = groupIds.split(',')
+        val groups = user.ownedGroups.filter { g => !groupIdsList.contains(g.id)}
         shareEntityToPrivilegableEntity(entityType, entityId, user, groups)
+        successCallback(true)
     }
 
     @async
-    def shareToUser(entityType: String, entityId: String, userIds: List[String],
+    def shareToUser(entityType: String, entityId: String, userIds: String,
         user: User = null)
         (successCallback: Boolean => Unit)
         (failCallback: Throwable => Unit) {
-        val shareTo = Payola.model.userModel.getByIds(userIds)
+
+        val userIdsList = userIds.split(',')
+        val shareTo = Payola.model.userModel.getByIds(userIdsList)
         shareEntityToPrivilegableEntity(entityType, entityId, user, shareTo)
+        successCallback(true)
     }
 
     private def shareEntityToPrivilegableEntity(entityType: String, entityId: String, granter: User,
