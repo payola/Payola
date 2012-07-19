@@ -22,9 +22,9 @@ class PluginSwitchView extends GraphView with ComposedView
     private val plugins = List[PluginView](
         new TripleTablePluginView(null),
         new CircleTechnique(visualSetup),
+        new GravityTechnique(visualSetup),
         new TreeTechnique(visualSetup)/*,
-        new MinimalizationTechnique(visualSetup),
-        new GravityTechnique(visualSetup)*/
+        new MinimalizationTechnique(visualSetup),*/
     )
 
     private var currentPlugin = plugins.head
