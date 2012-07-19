@@ -7,7 +7,7 @@ import org.scalatest.matchers.ShouldMatchers
 class VirtuosoStorageSpec extends TestDataContextComponent("virtuoso") with FlatSpec with ShouldMatchers
 {
     val testXML =
-        """|<?xml version="1.0"?>
+       """|<?xml version="1.0"?>
           |<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:cd="http://www.recshop.fake/cd#">
           |    <rdf:Description rdf:about="http://www.recshop.fake/cd/Empire Burlesque">
           |        <cd:artist>Bob Dylan</cd:artist>

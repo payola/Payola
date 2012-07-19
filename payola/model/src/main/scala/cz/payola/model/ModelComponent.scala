@@ -21,6 +21,10 @@ trait ModelComponent
     self: DataContextComponent with RdfStorageComponent with PluginCompilerComponent =>
 
     def persistEntity(e: Entity){
-        repositoryRegistry(e.getClass()).persist(e)
+        if (e.isInstanceOf[Plugin]){
+            pluginRepository.persist(e)
+        } else {
+            repositoryRegistry(e.getClass()).persist(e)
+        }
     }
 }
