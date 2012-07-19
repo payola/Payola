@@ -9,18 +9,17 @@ import cz.payola.web.client.views.graph.PluginSwitchView
 import cz.payola.web.client.events.BrowserEventArgs
 import cz.payola.web.client.views.VertexEventArgs
 import cz.payola.common.entities.plugins.DataSource
-import cz.payola.web.client.Presenter
 import cz.payola.web.client.views.bootstrap._
 import cz.payola.common.entities.settings.OntologyCustomization
 import cz.payola.web.client.presenters.OntologyCustomizationPresenter
 import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
+import cz.payola.web.client.views.elements.Span
 
 class DataSourcePresenter(
     viewElement: dom.Element,
     val dataSourceId: String,
     val dataSourceName: String,
     val initialVertexUri: String = "")
-    extends Presenter
 {
     private val view = new DataSourceView(dataSourceName)
 
@@ -37,22 +36,26 @@ class DataSourcePresenter(
         view.goButton.mouseClicked += onGoButtonClicked _
         view.backButton.mouseClicked += onBackButtonClicked _
         view.nextButton.mouseClicked += onNextButtonClicked _
-        view.nodeUriInput.keyPressed += onNodeUriInputKeyPressed _
         graphView.vertexBrowsing += onVertexBrowsing _
         graphView.vertexBrowsingDataSource += onVertexBrowsingDataSource _
         graphView.createOntologyCustomizationButton.mouseClicked += onCreateOntologyCustomizationButtonClicked _
+        graphView.ontologyCustomizationEditButtons foreach { button =>
+            button.mouseClicked += onEditOntologyCustomizationButtonClicked _
+        }
 
         // Compose the views and render the main view.
         graphView.render(view.graphViewSpace.domElement)
         view.render(viewElement)
 
         if (initialVertexUri == "") {
-            blockPageLoading("Fetching the initial graph.")
+            view.block() // TODO loading.
             DataSourceBrowser.getInitialGraph(dataSourceId) { graph =>
                 graphView.updateGraph(graph)
                 updateNavigationView()
-                unblockPage()
-            }(fatalErrorHandler(_))
+                view.unblock()
+            } { error =>
+                // TODO
+            }
         } else {
             addToHistoryAndGo(initialVertexUri)
         }
@@ -75,12 +78,15 @@ class DataSourcePresenter(
     private def presentCustomizationEditorWithCustomization(customization: OntologyCustomization) {
         val presenter = new OntologyCustomizationPresenter(customization)
         presenter.initialize()
+
+        // TODO save on the server
     }
 
     private def onCreateOntologyCustomizationButtonClicked(e: BrowserEventArgs[_]): Boolean = {
         // First, show a modal asking for the Ontology URL
-        val nameInputField = new TextInputControl("Customization name", "ontologyCustomizationNameField", "", "")
-        val urlInputField = new TextInputControl("Ontology URL", "ontologyURLField", "", "")
+        // TODO remove default values which are added for testing purposes
+        val nameInputField = new TextInputControl("Customization name", "ontologyCustomizationNameField", "My Ontology Customization", "")
+        val urlInputField = new TextInputControl("Ontology URL", "ontologyURLField", "http://opendata.cz/pco/public-contracts.xml", "")
         val modal = new Modal("Create a new ontology customization.", List(nameInputField, urlInputField), Some("Create Customization"), Some("Cancel"), false)
         modal.saving += { e =>
             if (nameInputField.input.value == "") {
@@ -105,6 +111,12 @@ class DataSourcePresenter(
         false
     }
 
+    private def onEditOntologyCustomizationButtonClicked(e: BrowserEventArgs[Span]): Boolean = {
+        val ontologyID = e.target.getAttribute("name")
+        presentCustomizationEditorWithCustomization(OntologyCustomizationManager.getCustomizationByID(ontologyID))
+        true
+    }
+
     private def onBackButtonClicked(e: BrowserEventArgs[_]): Boolean = {
         if (canGoBack) {
             historyPosition -= 1
@@ -119,16 +131,6 @@ class DataSourcePresenter(
             updateView()
         }
         false
-    }
-
-    private def onNodeUriInputKeyPressed(e: BrowserEventArgs[_]): Boolean = {
-        // If it's enter.
-        if (e.keyCode == 13) {
-            addToHistoryAndGo(view.nodeUriInput.value)
-            false
-        } else {
-            true
-        }
     }
 
     private def onGoButtonClicked(e: BrowserEventArgs[_]): Boolean = {
@@ -152,17 +154,15 @@ class DataSourcePresenter(
     private def updateView() {
         val uri = history(historyPosition)
 
-        blockPageLoading("Fetching the node neighbourhood.")
-        view.nodeUriInput.setIsEnabled(false)
-
+        view.block()
         DataSourceBrowser.getNeighbourhood(dataSourceId, uri) { graph =>
             graphView.updateGraph(graph)
             updateNavigationView()
             view.nodeUriInput.value = uri
-
-            view.nodeUriInput.setIsEnabled(true)
-            unblockPage()
-        }(fatalErrorHandler(_))
+            view.unblock()
+        } { error =>
+            // TODO
+        }
     }
 
     private def updateNavigationView() {
@@ -174,12 +174,14 @@ class DataSourcePresenter(
         if (dataSources.isDefined) {
             callback(dataSources.get)
         } else {
-            blockPageLoading("Fetching accessible data sources.")
+            view.block()
             DataSourceBrowser.getDataSources() { ds =>
                 dataSources = Some(ds)
-                unblockPage()
+                view.unblock()
                 callback(ds)
-            }(fatalErrorHandler(_))
+            } { error =>
+
+            }
         }
     }
 
