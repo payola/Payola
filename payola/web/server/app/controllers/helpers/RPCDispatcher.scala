@@ -257,12 +257,9 @@ class RPCDispatcher(jsonSerializer: RPCSerializer)
 
         result match {
             case resultMessage: ActionExecutorSuccess => resultMessage.result
-            case errorMessage: ActionExecutorError =>
-                errorMessage.error match {
-                    case e: rpc.Exception => throw e
-                    case e: Exception => throw new rpc.Exception(if (e.getMessage == null) "Unknown error." else e.getMessage )
-                    case _ => throw new rpc.Exception("Unspecified RPC error.")
-                }
+            case errorMessage: ActionExecutorError => {
+                throw new Exception("Exception during execution of the remote method.", errorMessage.error)
+            }
         }
     }
 

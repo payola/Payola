@@ -20,12 +20,8 @@ import cz.payola.domain.entities.User
 
         // Try to compile code
         try {
-            val plugin = Payola.model.pluginModel.createPluginFromSource(pluginCode, user)
-            if (plugin != null) {
-                user.addOwnedPlugin(plugin)
-                Payola.model.userModel.persist(user)
-                successCallback("Plugin saved.")
-            }
+            Payola.model.pluginModel.createPluginFromSource(pluginCode, user)
+            successCallback("Plugin saved.")
         }catch{
             case e: Exception => {
                 e.printStackTrace()

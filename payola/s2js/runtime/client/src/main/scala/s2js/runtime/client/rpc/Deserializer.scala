@@ -79,7 +79,7 @@ class Deserializer extends RpcResultTraverser[Any]
 
     private def createInstance(className: String): Any = {
         if (!ClassLoader.isLoaded(className)) {
-            throw new Exception("Can't deserialize an instance of class " + className + ". The class is not loaded.")
+            throw new Exception("Can't deserialize an instance of class " + className + ". The class isn't loaded.")
         }
 
         s2js.adapters.js.browser.eval("new " + className + "()")

@@ -2,9 +2,10 @@ package cz.payola.model.components
 
 import cz.payola.data._
 import cz.payola.domain.entities._
-import cz.payola.model.EntityModelComponent
+import cz.payola.model._
 import cz.payola.domain.entities.privileges.UsePluginPrivilege
 import cz.payola.domain.PluginCompilerComponent
+import scala.Some
 
 trait PluginModelComponent extends EntityModelComponent
 {
@@ -22,14 +23,11 @@ trait PluginModelComponent extends EntityModelComponent
             val plugin = loader.instantiatePlugin(className)
 
             if (getByName(plugin.name).isDefined) {
-                throw new Exception("Plugin with this name already exists!")
-            }else{
-                plugin.owner = Some(user)
-                user.addOwnedPlugin(plugin)
-
-                persist(plugin)
+                throw new ModelException("Plugin with this name already exists!")
             }
 
+            plugin.owner = Some(user)
+            user.addOwnedPlugin(plugin)
             plugin
         }
 

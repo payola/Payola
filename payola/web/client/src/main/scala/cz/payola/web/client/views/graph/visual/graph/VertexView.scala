@@ -7,7 +7,7 @@ import cz.payola.web.client.views.graph.visual.Color
 import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.graph.visual.graph.positioning.LocationDescriptor
 import cz.payola.common.rdf._
-import cz.payola.web.client.events.SimpleUnitEvent
+import scala.collection.mutable
 
 /**
   * Graphical representation of Vertex object in the drawn graph.
@@ -15,9 +15,9 @@ import cz.payola.web.client.events.SimpleUnitEvent
   * @param position of this graphical representation in drawing space
   */
 class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var settings: VertexSettingsModel,
-    settingsText: TextSettingsModel, var rdfType: Option[String]) extends View[CanvasRenderingContext2D] {
-
-    private var literalVertices = ListBuffer[(String, Seq[String])]()
+    settingsText: TextSettingsModel, var rdfType: Option[String]) extends View[CanvasRenderingContext2D]
+{
+    private var literalVertices = new mutable.HashMap[String, Seq[String]]()
 
     private var age = 0
 
@@ -52,14 +52,13 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var s
         case _ => None
     }
 
-    def getLiteralVertices: ListBuffer[(String, Seq[String])] = {
+    def getLiteralVertices: mutable.HashMap[String, Seq[String]] = {
         literalVertices
     }
 
     def addLiteralVertex(vertex: LiteralVertex, vertexEdges: Seq[Edge]) {
-
         val vertexEdgesContents = vertexEdges.map(_.uri)
-        literalVertices += ((vertex.toString, vertexEdgesContents))
+        literalVertices.put(vertex.toString, vertexEdgesContents)
     }
 
     def isSelected: Boolean = {
@@ -88,21 +87,19 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var s
     }
 
     def draw(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
-
         drawQuick(context, positionCorrection)
 
-        if(information.isDefined) {
+        if (information.isDefined) {
             information.get.draw(context,
                 (LocationDescriptor.getVertexInformationPosition(position) + positionCorrection).toVector)
         }
     }
 
     def drawQuick(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
-
         val correctedPosition = this.position + positionCorrection
 
         drawCircle(context, correctedPosition, settings.radius, 2, Color.Black)
-        if(isSelected) {
+        if (isSelected) {
             fillCurrentSpace(context, settings.colorSelected)
         } else {
             fillCurrentSpace(context, settings.color)

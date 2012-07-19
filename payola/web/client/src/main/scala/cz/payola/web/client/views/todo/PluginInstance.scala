@@ -15,6 +15,8 @@ import scala.Some
 import scala.collection.immutable.HashMap
 import cz.payola.common.entities.plugins.parameters._
 import scala.Some
+import cz.payola.web.client.views.bootstrap.inputs._
+import scala.Some
 
 object PluginInstance
 {

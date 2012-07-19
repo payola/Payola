@@ -4,6 +4,7 @@ import math.Ordering.String
 import s2js.runtime.client.scala.collection.mutable.HashMap
 import scala.Int
 import java.lang.String
+import s2js.compiler.javascript
 
 /**
   * RGBA representation of colors used by visual plug-ins
@@ -79,16 +80,20 @@ object Color
 
     val Transparent = Color(0, 0, 0, 0)
 
-    def fromHex(hexString: String): Color = {
-        val hexLower = hexString.toLowerCase
+    def fromHex(hexString: String): Option[Color] = {
+        if (hexString.matches("/^([0-9a-f]{1,2}){3}$/i")){
+            val hexLower = hexString.toLowerCase
 
-        //leading #
-        val red = hex2dec(hexLower.substring(1, 3))
-        val green = hex2dec(hexLower.substring(3, 5))
-        val blue = hex2dec(hexLower.substring(5, 7))
-        val alpha = hex2dec(hexLower.substring(7, 9)) / 255.0
+            //leading #
+            val red = hex2dec(hexLower.substring(1, 3))
+            val green = hex2dec(hexLower.substring(3, 5))
+            val blue = hex2dec(hexLower.substring(5, 7))
+            val alpha = hex2dec(hexLower.substring(7, 9)) / 255.0
 
-        new Color(red, green, blue, alpha)
+            Some(new Color(red, green, blue, alpha))
+        }else{
+            None
+        }
     }
 
     private def hex2dec(hex: String): Int = {

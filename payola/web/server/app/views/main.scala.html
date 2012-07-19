@@ -57,8 +57,8 @@
                                             <i class="icon-file icon-white"></i> My plugins<b class="caret"></b>
                                         </a>
                                         <ul class="dropdown-menu">
-                                            <li><a href="@routes.Profile.index(user.get.email)"><i class="icon-list"></i> View all</a></li>
-                                            <li><a href="@routes.Profile.edit(user.get.email)"><i class="icon-upload"></i> Upload new</a></li>
+                                            <li><a href="@routes.Profile.listPlugins(1)"><i class="icon-list"></i> View all</a></li>
+                                            <li><a href="@routes.Profile.createPlugin()"><i class="icon-upload"></i> Upload new</a></li>
                                         </ul>
                                     </li>
                                     <li class="dropdown">
@@ -66,7 +66,7 @@
                                             <i class="icon-rdf icon-white"></i> Private RDF storage<b class="caret"></b>
                                         </a>
                                         <ul class="dropdown-menu">
-                                            <li><a href="@routes.Profile.index(user.get.email)"><i class="icon-upload"></i> Upload data</a></li>
+                                            <li><a href="@routes.PrivateDataStorage.add()"><i class="icon-upload"></i> Upload data</a></li>
                                         </ul>
                                     </li>
                                     <li class="dropdown">

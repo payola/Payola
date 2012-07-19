@@ -7,12 +7,12 @@ object `package`
 {
     @javascript("""
         if (s2js.runtime.client.js.isDefined(anObject.__class__) && anObject.__class__ != null) {
-            return anObject.__class__;
+            return new scala.Some(anObject.__class__);
         } else {
-            throw new scala.RuntimeException('The object has no class specified.');
+            return scala.None;
         }
     """)
-    def classOf(anObject: Any): Class = null
+    def classOf(anObject: Any): Option[Class] = None
 
     def isClassDefined(className: String): Boolean = {
         s2js.runtime.client.js.isDefined(s2js.adapters.js.browser.eval(className))
@@ -41,7 +41,7 @@ object `package`
             }
             case "function" => throw new RuntimeException("Type check of a function isn't supported.")
             case "object" if classNameIsAnyOrAnyRef => true
-            case _ => classOf(anObject).isSubClassOrEqual(classFullName)
+            case _ => classOf(anObject).map(_.isSubClassOrEqual(classFullName)).getOrElse(false)
         }
     }
 

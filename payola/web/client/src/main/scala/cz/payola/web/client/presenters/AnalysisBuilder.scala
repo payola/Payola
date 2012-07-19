@@ -14,6 +14,7 @@ import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events.EventArgs
 import cz.payola.web.client.views.bootstrap._
 import scala.Some
+import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
 
 class AnalysisBuilder(menuHolder: String, pluginsHolder: String, nameHolder: String)
 {

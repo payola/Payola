@@ -17,12 +17,19 @@ case class Point2D(var x: Double, var y: Double)
     }
 
     /**
-      * Deduction of two points
+      * Subtraction of two points
       * @param point to deduct
       * @return vector describing direction and distance to move this point to position of point parameter
       */
     def -(point: Point2D): Vector2D = {
         Vector2D(x - point.x, y - point.y)
+    }
+
+    /**
+      * Returns the current point with coordinates multiplied by the specified value.
+      */
+    def *(value: Double): Point2D = {
+        Point2D(x * value, y * value)
     }
 
     /**

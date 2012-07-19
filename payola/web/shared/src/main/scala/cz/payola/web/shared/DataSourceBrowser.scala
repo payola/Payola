@@ -4,6 +4,7 @@ import s2js.compiler._
 import cz.payola.common.rdf.Graph
 import cz.payola.domain.entities.User
 import cz.payola.domain.entities.plugins.DataSource
+import cz.payola.model.ModelException
 
 @remote object DataSourceBrowser
 {

@@ -1,17 +1,17 @@
 package cz.payola.data.squeryl.repositories
 
-import org.squeryl.PrimitiveTypeMode._
 import cz.payola.data.squeryl._
-import cz.payola.domain.entities.Privilege
+import cz.payola.domain.entities._
 import cz.payola.data.squeryl.entities.privileges.PrivilegeDbRepresentation
-import cz.payola.data.PaginationInfo
 import scala.collection.mutable
 import cz.payola.domain.Entity
+import cz.payola.data.PaginationInfo
+import scala.Some
+import org.squeryl.PrimitiveTypeMode._
 
 trait PrivilegeRepositoryComponent extends TableRepositoryComponent
-{                                      
+{
     self: SquerylDataContextComponent =>
-
     private type PrivilegeType = Privilege[_ <: Entity]
 
     lazy val privilegeRepository = new PrivilegeRepository
@@ -50,11 +50,24 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
             _getByGrantee(List(granteeId), None)
         }
 
+        def getAllByObjectIdAndGranteeType(objId: String,
+            granteeType: Class[_ <: PrivilegableEntity]): Seq[Privilege[_ <: cz.payola.domain.Entity]] = {
+
+            schema.wrapInTransaction {
+                instantiate(
+                    representationRepository.selectWhere(p =>
+                        p.objectId === objId
+                        and p.granteeClassName === repositoryRegistry.getClassName(granteeType))
+                )
+            }
+        }
+
         private def _getByGrantee(granteeIds: Seq[String], privilegeClass: Option[Class[_]]): Seq[PrivilegeType] =
             schema.wrapInTransaction {
                 instantiate(
-                    representationRepository.selectWhere(p => p.granteeId in granteeIds
-                        and p.privilegeClass === privilegeClass.map(_.getName).getOrElse(p.privilegeClass).toString)
+                    representationRepository.selectWhere(p =>
+                        p.granteeId in granteeIds
+                            and p.privilegeClass === privilegeClass.map(_.getName).getOrElse(p.privilegeClass).toString)
                 )
             }
 
@@ -65,7 +78,7 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
 
                 // Fill the map
                 privileges.foreach { p =>
-                    // Add grantee
+                // Add grantee
                     val granteeRepository = repositoryRegistry(p.granteeClassName)
                     repositories.getOrElseUpdate(granteeRepository, mutable.HashSet.empty[String]) += p.granteeId
 
@@ -78,12 +91,12 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
                 }
 
                 // Create Map (EntityId -> Entity) to simplify getting entities from Db
-                val entities = repositories.par.flatMap{r =>
+                val entities = repositories.par.flatMap { r =>
                     r._1.getByIds(r._2.toSeq).map(e => (e.asInstanceOf[cz.payola.domain.Entity].id, e))
                 }
 
-                privileges.map{ p =>
-                    // Get granter, grantee, object from entities set
+                privileges.map { p =>
+                // Get granter, grantee, object from entities set
                     val granter = entities(p.granterId).asInstanceOf[java.lang.Object]
                     val grantee = entities(p.granteeId).asInstanceOf[java.lang.Object]
                     val obj = entities(p.objectId).asInstanceOf[java.lang.Object]
