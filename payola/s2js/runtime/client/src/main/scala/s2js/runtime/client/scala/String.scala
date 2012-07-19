@@ -20,4 +20,7 @@ class String
 
     @javascript("return new scala.collection.immutable.StringOps(self);")
     def asStringOps: StringOps = null
+
+    @javascript("var regexp = new RegExp(pattern); return regexp.test(self);")
+    def matches(pattern: String): Boolean = false
 }

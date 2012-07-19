@@ -16,16 +16,16 @@ class VertexModal(model: VertexSettingsModel) extends Modal("Vertex settings")
         false
     }
 
-    val color = new ColorPane("vertex.color", "Vertex color", model.color)
+    val color = new ColorPane("vertex.color", "Vertex color", Some(model.color))
 
     color.changed += { event =>
-        model.color = color.getColor
+        model.color = color.getColor.get
     }
 
-    val colorSelected = new ColorPane("vertex.color.selected", "Vertex color (selected)", model.colorSelected)
+    val colorSelected = new ColorPane("vertex.color.selected", "Vertex color (selected)", Some(model.colorSelected))
 
     colorSelected.changed += { event =>
-        model.colorSelected = colorSelected.getColor
+        model.colorSelected = colorSelected.getColor.get
     }
 
     override val body = List(new Div(List(rLabel, radius, color, colorSelected)))

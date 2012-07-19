@@ -26,17 +26,17 @@ class EdgeModal(model: EdgeSettingsModel) extends Modal("Edge settings")
         false
     }
 
-    val colorSelect = new ColorPane("edge.color.select", "Edge color (selected)", model.colorSelected)
+    val colorSelect = new ColorPane("edge.color.select", "Edge color (selected)", Some(model.colorSelected))
 
     colorSelect.changed += { event =>
-        model.colorSelected = colorSelect.getColor
+        model.colorSelected = colorSelect.getColor.get
         false
     }
 
-    val color = new ColorPane("edge.color.base", "Edge color", model.color)
+    val color = new ColorPane("edge.color.base", "Edge color", Some(model.color))
 
     color.changed += { event =>
-        model.color = color.getColor
+        model.color = color.getColor.get
         false
     }
 
