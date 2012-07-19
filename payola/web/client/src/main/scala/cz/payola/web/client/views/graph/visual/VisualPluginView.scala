@@ -2,7 +2,6 @@ package cz.payola.web.client.views.graph.visual
 
 import animation.Animation
 import cz.payola.web.client.views.graph.PluginView
-import graph.{InformationView, VertexView}
 import collection.mutable.ListBuffer
 import settings.components.visualsetup.VisualSetup
 import s2js.adapters.js.browser.document
@@ -17,13 +16,18 @@ import s2js.adapters.js.browser.window
 import s2js.adapters.js._
 import s2js.compiler.javascript
 import cz.payola.web.client.views.todo.CanvasPack
-import cz.payola.web.client.views.VertexEventArgs
+import cz.payola.web.client.views._
+import scala.Some
+import cz.payola.web.client.views.graph.visual.graph.VertexView
+import cz.payola.web.client.views.graph.visual.graph.InformationView
 
 /**
   * Representation of visual based output drawing plugin
   */
 abstract class VisualPluginView(settings: VisualSetup, name: String) extends PluginView(name)
 {
+    private var hoveringOverVertex: Option[VertexView] = None
+
     protected var mouseIsPressed = false
 
     private var mousePressedVertex = false
@@ -41,6 +45,8 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
     protected val topLayer = new Canvas()
 
     private val layerPack = new CanvasPack(new Canvas(), new Canvas(), new Canvas(), new Canvas())
+
+    def createSubViews = layers
 
     private var topLayerOffset = Vector2D(0, 0)
 
@@ -77,13 +83,15 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
     topLayer.mouseMoved += { e =>
         if (mouseIsPressed) {
             mouseDragged.trigger(e)
+        } else {
+            onMouseMove(e)
         }
         true
     }
 
-    mouseDragged += { event =>
+    mouseDragged += { e =>
         mouseIsDragging = true
-        onMouseDrag(event)
+        onMouseDrag(e)
         false
     }
 
@@ -143,6 +151,35 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
         """)
     private def setMouseWheelListener() {}
 
+    private var hoverExit = new SimpleUnitEvent[Boolean]
+
+    override def render(parent: dom.Element) {
+        super.render(parent)
+
+        setMouseWheelListener()
+        fitCanvas()
+
+        graphView = Some(new views.graph.visual.graph.GraphView(settings))
+        zoomTool = Some(new ZoomControls(100))
+        zoomTool.get.render(/* document.getElementById("btn-stripe")*/ new Div().domElement) // TODO
+
+        zoomTool.get.zoomDecreased += { event => //zoom - invoked by zoom control button
+            if (graphView.isDefined && zoomTool.get.canZoomOut) {
+                zoomOut(graphView.get.getGraphCenter) //zooming from the center of the graph
+                zoomTool.get.decreaseZoomInfo()
+            }
+            false
+        }
+
+        zoomTool.get.zoomIncreased += { event => //zoom - invoked by zoom control button
+            if (graphView.isDefined && zoomTool.get.canZoomIn) {
+                zoomIn(graphView.get.getGraphCenter) //zooming to the center of the graph
+                zoomTool.get.increaseZoomInfo()
+            }
+            false
+        }
+    }
+
     def updateGraph(graph: Option[Graph]) {
         if(graph.isDefined) {
             if(graphView.isDefined) {
@@ -159,17 +196,6 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
                 mouseDownPosition = Point2D(0, 0)
             }
         }
-    }
-
-    def createSubViews = layers
-
-    override def render(parent: dom.Element) {
-        super.render(parent)
-
-        setMouseWheelListener()
-        fitCanvas()
-
-        graphView = Some(new views.graph.visual.graph.GraphView(settings))
     }
 
     override def destroy() {
@@ -318,6 +344,28 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
             graphView.get.redraw(layerPack, RedrawOperation.All)
         }
         mouseDownPosition = end
+    }
+
+    /**
+      * Is supposed to be called only when mouse is not being dragged (no mouse button is pressed during mouse movement)
+      */
+    private def onMouseMove(eventArgs: BrowserEventArgs[Canvas]) {
+        val position = getPosition(eventArgs)
+        val vertex = graphView.get.getTouchedVertex(position)
+
+        if(vertex.isDefined) {
+            if(hoveringOverVertex.isEmpty || (!hoveringOverVertex.get.eq(vertex.get))) {
+                hoveringOverVertex = vertex
+                val infoTable = new VertexInfoTable(hoveringOverVertex.get.getLiteralVertices)
+                infoTable.render(document.body)
+                hoverExit = new SimpleUnitEvent[Boolean]
+                hoverExit += { event => infoTable.destroy() }
+            }
+        } else if(hoveringOverVertex.isDefined) {
+            hoverExit.triggerDirectly(true)
+            hoveringOverVertex = None
+        }
+
     }
 
     private def zoomIn(mousePosition: Point2D) {
