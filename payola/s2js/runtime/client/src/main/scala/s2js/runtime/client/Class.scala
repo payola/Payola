@@ -16,7 +16,7 @@ class Class(val fullName: String, val parentClassesJsArray: Any)
         }
         for (var i in self.parentClassesJsArray) {
             var parentClass = s2js.runtime.client.classOf(self.parentClassesJsArray[i].prototype)
-            if (parentClass.isSubClassOrEqual(classFullName)) {
+            if (parentClass.isDefined() && parentClass.get().isSubClassOrEqual(classFullName)) {
                 return true;
             }
         }

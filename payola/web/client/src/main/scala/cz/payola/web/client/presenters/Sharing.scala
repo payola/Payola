@@ -7,10 +7,20 @@ import cz.payola.web.shared._
 import cz.payola.web.client.views.bootstrap._
 import scala.Some
 import s2js.adapters.js.browser.window
+import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
+import cz.payola.web.client.Presenter
+import cz.payola.web.client.views.elements._
+import scala.Some
+import cz.payola.common.entities._
+import scala.Some
 
-class Sharing(shareButtonPlaceholderClass: String, entityType: String)
+class Sharing(shareButtonPlaceholderClass: String, entityType: String) extends Presenter
 {
     val placeholderList = document.getElementsByClassName(shareButtonPlaceholderClass)
+
+    def initialize() {
+
+    }
 
     placeholderList.foreach{ placeholder =>
         val btn = new ShareButton(placeholder.getAttribute("data-shareable-entity-public").toBoolean)
@@ -48,38 +58,70 @@ class Sharing(shareButtonPlaceholderClass: String, entityType: String)
     }
 
     def shareToGroupHandler(id: String) {
-        val modal = createModal(entityType,"group",{ value =>
+        val modal = createModal(entityType,"group",{ (callback,value) =>
             SharingData.shareToGroup(entityType,id,value){ ok =>
+                callback
+                showSuccessModal(entityType,"group")
             }{ err => }
         })
 
-        modal.render()
-        bindGroupSelect
+        blockPageLoading("Loading initial data.")
+        SharingData.getAlreadySharedTo(entityType, id, "group"){ groups =>
+            modal.render()
+            bindGroupSelect(groups)
+            unblockPage()
+        }{err => }
     }
 
     def shareToUserHandler(id: String) {
-        val modal = createModal(entityType,"user",{ value =>
+        val modal = createModal(entityType,"user",{ (callback,value) =>
             SharingData.shareToUser(entityType,id,value){ ok =>
+                callback
+                showSuccessModal(entityType,"user")
             }{ err => }
         })
 
-        modal.render()
-        bindUserSelect
+        blockPageLoading("Loading initial data.")
+        SharingData.getAlreadySharedTo(entityType, id, "user"){ users =>
+            modal.render()
+            bindUserSelect(users)
+            unblockPage()
+        }{err => }
     }
 
-    private def createModal(entityName: String, privilegedType: String, callback: (String => Unit)) : Modal = {
+    private def showSuccessModal(entityType:String, privilegedType: String){
 
-        val privilegedSearchBox = new TextInputControl("Search "+privilegedType+":","privileged","","Enter name")
+        val successText = new Heading(List(new Text("The "+entityType+" was successfully shared to the selected "+privilegedType+"!")),3,"alert-heading")
+        val body = List(new Div(List(successText),"alert alert-success"))
+
+        val modal = new Modal("Success", body, None)
+
+        modal.render()
+        val timeout = window.setTimeout(() => {
+            modal.destroy()
+        }, 2000)
+
+        modal.closing += {e =>
+            window.clearTimeout(timeout)
+            true
+        }
+    }
+
+    private def createModal(entityName: String, privilegedType: String, callback: ((Unit, String) => Unit)) : Modal = {
+
+        val privilegedSearchBox = new TextInputControl("Search "+privilegedType+":","privileged","init","Enter name")
 
         val body = List(privilegedSearchBox)
         val modal = new Modal("Share "+entityName+" to a "+privilegedType+":", body, Some("Share"))
+
         modal.closing += {e =>
             modal.destroy()
             true
         }
 
         modal.saving += {e =>
-            callback(privilegedSearchBox.input.value)
+            blockPageLoading("Sharing a "+entityName+" to a "+privilegedType+"...")
+            callback({ unblockPage() },privilegedSearchBox.input.value)
             modal.destroy()
             true
         }
@@ -99,17 +141,16 @@ class Sharing(shareButtonPlaceholderClass: String, entityType: String)
                     function(){ query.callback(data); }
                   );
               },
-              /*initSelection : function (element) {
-                  var data = [];
-                  $(element.val().split(",")).each(function () {
-                      var parts = this.split(":");
-                      data.push({id: parts[0], text: parts[1]});
-                  });
-                  return data;
-              }*/
+              initSelection : function (element) {
+                var data = [];
+                users.foreach(function(x){
+                    data.push({id: x.id, text: x.name()});
+                });
+                return data;
+              }
             });
         """)
-    def bindUserSelect = {}
+    def bindUserSelect(users: Seq[NamedEntity]) {}
 
     @javascript(
         """
@@ -124,17 +165,16 @@ class Sharing(shareButtonPlaceholderClass: String, entityType: String)
                     function(){ query.callback(data); }
                   );
               },
-              /*initSelection : function (element) {
+              initSelection: function (element) {
                   var data = [];
-                  $(element.val().split(",")).each(function () {
-                      var parts = this.split(":");
-                      data.push({id: parts[0], text: parts[1]});
+                  groups.foreach(function(x){
+                    data.push({id: x.id, text: x.name()});
                   });
                   return data;
-              }*/
+              }
             });
         """)
-    def bindGroupSelect = {}
+    def bindGroupSelect(groups: Seq[NamedEntity]) {}
 
     def fetchUsersByQuery(term: String, itemCallback: (String, String) => Unit, callback: () => Unit){
         DomainData.searchUsers(term){ users =>

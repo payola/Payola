@@ -52,6 +52,14 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
         topLayer
     )
 
+    private val zoomControls = new ZoomControls(100)
+
+    window.onresize = { e =>
+        fitCanvas()
+        redraw()
+        true
+    }
+
     topLayer.mousePressed += { e =>
         mouseIsPressed = true
         mouseIsDragging = false
@@ -95,23 +103,33 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
         val scrolled = event.wheelDelta
 
         if (scrolled < 0) {
-            if (zoomTool.get.canZoomIn) {
+            if (zoomControls.canZoomIn) {
                 zoomIn(mousePosition)
-                zoomTool.get.increaseZoomInfo()
+                zoomControls.increaseZoomInfo()
             }
         } else {
-            if (zoomTool.get.canZoomOut) {
+            if (zoomControls.canZoomOut) {
                 zoomOut(mousePosition)
-                zoomTool.get.decreaseZoomInfo()
+                zoomControls.decreaseZoomInfo()
             }
         }
         false
     }
 
-    window.onresize = { e =>
-        fitCanvas()
-        redraw()
-        true
+    zoomControls.zoomDecreased += { e =>
+        if (graphView.isDefined && zoomControls.canZoomOut) {
+            zoomOut(graphView.get.getGraphCenter) //zooming from the center of the graph
+            zoomControls.decreaseZoomInfo()
+        }
+        false
+    }
+
+    zoomControls.zoomIncreased += { event => //zoom - invoked by zoom control button
+        if (graphView.isDefined && zoomControls.canZoomIn) {
+            zoomIn(graphView.get.getGraphCenter) //zooming to the center of the graph
+            zoomControls.increaseZoomInfo()
+        }
+        false
     }
 
     //on mouse wheel event work-around###################################################################################
@@ -124,35 +142,6 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
            });
         """)
     private def setMouseWheelListener() {}
-
-    def createSubViews = layers
-
-    override def render(parent: dom.Element) {
-        super.render(parent)
-
-        setMouseWheelListener()
-        fitCanvas()
-
-        graphView = Some(new views.graph.visual.graph.GraphView(settings))
-        zoomTool = Some(new ZoomControls(100))
-        zoomTool.get.render(/* document.getElementById("btn-stripe")*/ new Div().domElement) // TODO
-
-        zoomTool.get.zoomDecreased += { event => //zoom - invoked by zoom control button
-            if (graphView.isDefined && zoomTool.get.canZoomOut) {
-                zoomOut(graphView.get.getGraphCenter) //zooming from the center of the graph
-                zoomTool.get.decreaseZoomInfo()
-            }
-            false
-        }
-
-        zoomTool.get.zoomIncreased += { event => //zoom - invoked by zoom control button
-            if (graphView.isDefined && zoomTool.get.canZoomIn) {
-                zoomIn(graphView.get.getGraphCenter) //zooming to the center of the graph
-                zoomTool.get.increaseZoomInfo()
-            }
-            false
-        }
-    }
 
     def updateGraph(graph: Option[Graph]) {
         if(graph.isDefined) {
@@ -172,6 +161,17 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
         }
     }
 
+    def createSubViews = layers
+
+    override def render(parent: dom.Element) {
+        super.render(parent)
+
+        setMouseWheelListener()
+        fitCanvas()
+
+        graphView = Some(new views.graph.visual.graph.GraphView(settings))
+    }
+
     override def destroy() {
         super.destroy()
 
@@ -181,6 +181,14 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
             mousePressedVertex = false
             mouseDownPosition = Point2D(0, 0)
         }
+    }
+
+    override def renderControls(toolbar: dom.Element) {
+        zoomControls.render(toolbar)
+    }
+
+    override def destroyControls() {
+        zoomControls.destroy()
     }
 
     protected def redrawQuick() {
@@ -313,105 +321,18 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
     }
 
     private def zoomIn(mousePosition: Point2D) {
-        var needToRedraw = false
-        graphView.get.getAllVertices.foreach { vv =>
-            if (vv.position != mousePosition) {
-
-                val points = getZoomPointCandidates(vv, mousePosition)
-                val p1Distance = points._1.distance(mousePosition)
-                val p2Distance = points._2.distance(mousePosition)
-                if (p1Distance < p2Distance) {
-                    vv.position = points._2
-                } else {
-                    vv.position = points._1
-                }
-                needToRedraw = true
-            }
-        }
-
-        if (needToRedraw) {
-            redraw()
-        }
+        alterVertexPositions(1 + zoomControls.zoomStep, (- mousePosition.toVector) * zoomControls.zoomStep)
     }
 
     private def zoomOut(mousePosition: Point2D) {
-        var needToRedraw = false
-        graphView.get.getAllVertices.foreach { vv =>
-            if (vv.position != mousePosition) {
-
-                val points = getZoomPointCandidates(vv, mousePosition)
-                val p1Distance = points._1.distance(mousePosition)
-                val p2Distance = points._2.distance(mousePosition)
-                if (p1Distance < p2Distance) {
-                    vv.position = points._1
-                } else {
-                    vv.position = points._2
-                }
-                needToRedraw = true
-            }
-        }
-
-        if (needToRedraw) {
-            redraw()
-        }
+        alterVertexPositions(1 - zoomControls.zoomStep, (mousePosition.toVector) * zoomControls.zoomStep)
     }
 
-    private def getZoomPointCandidates(vv: VertexView, position: Point2D): (Point2D, Point2D) = {
-        val distance = vv.position.distance(position) * zoomTool.get.zoomStep
-        if (distance == 0) {
-            //window.alert("distance == 0")
+    private def alterVertexPositions(positionMultiplier: Double, positionCorrection: Vector2D) {
+        graphView.get.getAllVertices.foreach { vv =>
+            vv.position = (vv.position * positionMultiplier) + positionCorrection
         }
-        var p1 = vv.position
-        var p2 = vv.position
-
-        if (scala.math.round(vv.position.y) != scala.math.round(position.y)) {
-            /*this comparison might look strange, the rounding is here, because JavaScript does not have that
-            precise double type*/
-
-            val v = vv.position.x
-            val w = vv.position.y
-            val m = position.x
-            val n = position.y
-
-            val A = (n - w) * v + (v - m) * w
-
-            val a = 1 + (math.pow(m - v, 2) / math.pow(n - w, 2))
-            val b = 2 * (((m - v) / (n - w)) * ((A / (n - w)) - v) - w)
-            val c = A / (n - w) * ((A / (n - w)) - 2 * v) + math.pow(v, 2) + math.pow(w, 2) - math.pow(distance, 2)
-
-            val discrim = math.pow(b, 2) - 4 * a * c
-            if (discrim > 1) {
-                val discrimSqrt = math.sqrt(discrim)
-
-                val y1 = (-b + discrimSqrt) / (2 * a)
-                val x1 = (A + (m - v) * y1) / (n - w)
-
-                val y2 = (-b - discrimSqrt) / (2 * a)
-                val x2 = (A + (m - v) * y2) / (n - w)
-
-                p1 = Point2D(x1, y1)
-                p2 = Point2D(x2, y2)
-            } else {
-                //window.alert("vertex is in the center of the zoom operation")
-            }
-        } else {
-            //window.alert("vertex.position.y == mousePosition.y")
-            val y = vv.position.y
-
-            val discrim = math.pow(distance, 2) - math.pow(y - vv.position.y, 2)
-            if (discrim > 1) {
-                val discrimSqrt = math.sqrt(discrim)
-
-                val x1 = vv.position.x + discrimSqrt
-                val x2 = vv.position.x - discrimSqrt
-                p1 = Point2D(x1, y)
-                p2 = Point2D(x2, y)
-            } else {
-                //window.alert("vertex.position.y == mousePosition.y && vertex is in the center of the zoom operation")
-            }
-        }
-
-        (p1, p2)
+        redraw()
     }
 
     private def getPosition(eventArgs: BrowserEventArgs[Canvas]): Point2D = {

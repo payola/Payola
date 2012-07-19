@@ -23,7 +23,7 @@ class Modal(
     val saveText: Option[String] = Some("Save changes"),
     val cancelText: Option[String] = Some("Cancel"),
     val hasCloseButton: Boolean = true,
-    val additionalCssClasses: Seq[String] = Nil)
+    val additionalCssClasses: String = "")
     extends ComposedView
 {
     /**
@@ -60,7 +60,7 @@ class Modal(
                     (if (saveText.isDefined) List(saveButton) else Nil),
                 "modal-footer"
             )
-        ), "modal hide " + additionalCssClasses.mkString(" ")))
+        ), "modal hide " + additionalCssClasses))
     }
 
     override def render(parent: dom.Element = document.body) {
@@ -81,8 +81,8 @@ class Modal(
     }
 
     @javascript("$(self.subViews().head().domElement).modal({ show: true, keyboard: false, backdrop: 'static' })")
-    private def show() {}
+    private def show() { }
 
     @javascript("jQuery(self.subViews().head().domElement).modal('hide')")
-    private def hide() {}
+    private def hide() { }
 }

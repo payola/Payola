@@ -9,23 +9,10 @@ import cz.payola.scala2json.rules.CustomValueSerializationRule
 
 class ExceptionSerializer extends JSONSerializer
 {
-    def getStackTrace(ex: java.lang.Throwable) : String = {
-        ex.getStackTrace.map(_.toString).mkString("\n")
-    }
-
     val rpcExceptionClass = new SimpleSerializationClass(classOf[rpc.Exception])
-    val stackTraceDisable = new BasicSerializationRule(Some(classOf[rpc.Exception]), Some(List("stackTrace")))
-    val stackTraceRule = new CustomValueSerializationRule[rpc.Exception]("stackTrace", {(ser, e) =>
-        var trace = ""
-        var ex: java.lang.Throwable = e
-        while (ex != null)
-        {
-            trace += getStackTrace(ex)
-            ex = ex.getCause
-        }
-        trace
-    })
-
+    val stackTraceDisable = new BasicSerializationRule(Some(classOf[rpc.Exception]), Some(List(
+        "stackTrace",
+        "cause"
+    )))
     this.addSerializationRule(rpcExceptionClass, stackTraceDisable)
-    this.addSerializationRule(rpcExceptionClass, stackTraceRule)
 }

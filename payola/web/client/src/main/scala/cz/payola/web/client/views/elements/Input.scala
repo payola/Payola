@@ -2,14 +2,17 @@ package cz.payola.web.client.views.elements
 
 import cz.payola.web.client.views._
 import s2js.adapters.js.dom
-import cz.payola.web.client.events.BrowserEvent
+import cz.payola.web.client.events._
 
 class Input(name: String, initialValue: String, title: Option[String], cssClass: String = "", inputType: String = "text")
     extends ElementView[dom.Input]("input", Nil, cssClass)
 {
-    val changed = new BrowserEvent[Input]
+    val changed = new SimpleUnitEvent[this.type]
 
-    domElement.onkeyup = { e => changed.triggerDirectly(this, e) }
+    keyPressed += { e =>
+        changed.triggerDirectly(this)
+        true
+    }
 
     value = initialValue
     setAttribute("name", name)

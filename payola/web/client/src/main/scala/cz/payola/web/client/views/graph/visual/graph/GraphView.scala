@@ -202,7 +202,7 @@ class GraphView(val settings: VisualSetup) extends
                 val identNeighbourVertexView =
                     vertexViews.find{ vertexView => vertexView.vertexModel == identNeighborVertex }
                 if(identNeighbourVertexView.isDefined) {
-                    identNeighbourVertexView.get.literalVertices += literalVertex
+                    identNeighbourVertexView.get.literalVertices += ((edgeToIdentVertex.get, literalVertex))
                 } else {
                     //this should never happen
                 }

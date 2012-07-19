@@ -16,6 +16,7 @@ trait ModelComponent
     with DataSourceModelComponent
     with OntologyCustomizationModelComponent
     with PayolaStorageModelComponent
+    with PrivilegeModelComponent
 {
     self: DataContextComponent with RdfStorageComponent with PluginCompilerComponent =>
 
