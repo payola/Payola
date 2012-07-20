@@ -157,7 +157,8 @@ trait DataContextComponent
           * @param granteeIds The entities whose privileges should be returned.
           * @param privilegeClass Type of the privilege.
           */
-        def getAllGrantedTo(granteeIds: Seq[String], privilegeClass: Class[_]): Seq[Privilege[_ <: cz.payola.domain.Entity]]
+        def getAllGrantedTo(granteeIds: Seq[String], privilegeClass: Class[_]):
+            Seq[Privilege[_ <: cz.payola.domain.Entity]]
 
         /**
           * Returns IDs of privileged objects, that are granted to the specified grantee via privileges of the specified
@@ -168,10 +169,11 @@ trait DataContextComponent
 
         /**
           * Gets a list of privileges to the object specified by the given object ID.
-          * @param objId
-          * @param granteeType
+          * @param objId ID of Privileged object
+          * @param granteeType Class of PrivilegableEntity Object is granted to
           */
-        def getAllByObjectIdAndGranteeType(objId: String, granteeType: Class[_ <: PrivilegableEntity]): Seq[Privilege[_ <: cz.payola.domain.Entity]]
+        def getAllByObjectIdAndGranteeType(objId: String, granteeType: Class[_ <: PrivilegableEntity]):
+            Seq[Privilege[_ <: cz.payola.domain.Entity]]
     }
     
     trait AnalysisRepository
@@ -191,14 +193,6 @@ trait DataContextComponent
           * @param parameterValue ParameterValue to persist
           */
         def persistParameterValue(parameterValue: ParameterValue[_])
-
-        /**
-          * Sets given OntologyCustomization as default OntologyCustomization for given Analysis
-          * @param analysisId ID of analysis with new default OntologyCustomization
-          * @param customization New default OntologyCustomization for Analysis
-          */
-        def setDefaultOntologyCustomization(analysisId: String, customization: Option[OntologyCustomization]):
-            Option[OntologyCustomization]
     }
 
     trait OntologyCustomizationRepository
@@ -208,13 +202,15 @@ trait DataContextComponent
         with ShareableEntityRepository[OntologyCustomization]
     {
         /**
-          * Gets default OntologyCustomization of analysis
-          * @param analysisId ID of analysis from which get default OntologyCustomization
+          * Persists given ClassCustomization
+          * @param classCustomization ClassCustomization to persist
           */
-        def getDefaultOntologyCustomizationForAnalysis(analysisId: String): Option[OntologyCustomization]
-
         def persistClassCustomization(classCustomization: AnyRef)
 
+        /**
+          * Persists given PropertyCustomization
+          * @param propertyCustomization PropertyCustomization to persist
+          */
         def persistPropertyCustomization(propertyCustomization: AnyRef)
     }
 

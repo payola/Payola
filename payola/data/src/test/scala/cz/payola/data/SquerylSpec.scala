@@ -45,6 +45,11 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         unionPlugin
     )
 
+    private val url = "http://opendata.cz/pco/public-contracts.xml"
+    val customization = OntologyCustomization.empty(url, "Name1", None)
+    val ownedCustomization = OntologyCustomization.empty(url, "Name2", Some(u1))
+    val customizations = List(customization, ownedCustomization)
+
     "Schema" should "be created" in {
         schema.recreate
     }
@@ -424,12 +429,6 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
 
     private def persistCustomizations {
         println("Persisting customizations")
-        
-        val url = "http://opendata.cz/pco/public-contracts.xml"
-        val customization = OntologyCustomization.empty(url, "Name1", None)
-        customization.isPublic = true
-        val ownedCustomization = OntologyCustomization.empty(url, "Name2", Some(u1))
-        val customizations = List(customization, ownedCustomization)
 
         val cc1 = ownedCustomization.classCustomizations(0)
         cc1.radius = 1
@@ -440,10 +439,9 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         pp1.strokeColor = "blue"
         pp1.strokeWidth = 2
 
+        customization.isPublic = true
 
-        // Assign customization
-        val a1 = analysisRepository.getAll()(0)
-        a1.defaultOntologyCustomization = Some(customization)
+        ontologyCustomizationRepository.persist(customization)
         ontologyCustomizationRepository.persist(ownedCustomization)
 
         val c1 = ontologyCustomizationRepository.getById(customization.id).get
@@ -483,12 +481,16 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         }
 
         // Test assigned customization
-        assert(analysisRepository.getById(a1.id).get.defaultOntologyCustomization == Some(customization))
-        a1.defaultOntologyCustomization = None
-        assert(analysisRepository.getById(a1.id).get.defaultOntologyCustomization == None)
+        val a1 = analysisRepository.getAll()(0)
+
         a1.defaultOntologyCustomization = Some(ownedCustomization)
         assert(analysisRepository.getById(a1.id).get.defaultOntologyCustomization == Some(ownedCustomization))
 
+        a1.defaultOntologyCustomization = None
+        assert(analysisRepository.getById(a1.id).get.defaultOntologyCustomization == None)
+
+        a1.defaultOntologyCustomization = Some(customization)
+        assert(analysisRepository.getById(a1.id).get.defaultOntologyCustomization == Some(customization))
     }
 
     "Pagionation" should "work" in {
@@ -515,7 +517,8 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     }
 
     private def testCascadeDeletes {
-        println("Removing.")
+        println("Removing")
+
         val analysisCount = analysisRepository.getAll().size
         val pluginsCount = pluginRepository.getAll().size
 
@@ -524,6 +527,9 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
 
         assert(analysisRepository.getCount == analysisCount + 1)
         assert(pluginRepository.getCount == pluginsCount)
+
+        // Test "undefault" customization from analysis
+        assert(ontologyCustomizationRepository.removeById(customization.id))
 
         // Remove one analysis
         assert(analysisRepository.removeById(analysisRepository.getAll()(0).id) == true)
@@ -535,9 +541,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         val analysis = analysisRepository.getAll()(0)
 
         // Remove all plugins
-        for (p <- plugins) {
-            assert(pluginRepository.removeById(p.id) == true)
-        }
+        plugins.foreach(p => assert(pluginRepository.removeById(p.id) == true))
 
         // Only (empty) analysis is left
         assert(analysisRepository.getCount == analysisCount)

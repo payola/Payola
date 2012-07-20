@@ -293,8 +293,8 @@ trait SchemaComponent
           * Relation that associates [[cz.payola.data.squeryl.entities.settings.OntologyCustomization]]s
           * to a [[cz.payola.data.squeryl.entities.Analysis]]
           */
-        lazy val ontologyCustomizationsOfAnalyses = oneToManyRelation(analyses, ontologyCustomizations).via(
-            (a, o) => Option(a.id) === o.analysisId)
+        lazy val ontologyCustomizationsOfAnalyses = oneToManyRelation(ontologyCustomizations, analyses).via(
+            (o, a) => a.defaultCustomizationId === Some(o.id))
 
         /**
           * Relation that associates [[cz.payola.data.squeryl.entities.settings.ClassCustomization]]s

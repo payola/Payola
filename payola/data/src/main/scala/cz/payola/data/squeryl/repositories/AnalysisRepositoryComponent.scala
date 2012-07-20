@@ -36,21 +36,29 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
             parameterValue.flatMap(_.pluginInstanceId)
         }
 
-        override def removeById(id: String) = {
-            // There is no cascade delete for OntologyCustomizations when Analysis is deleted
-            _removeCurrentDefaultOntologyCustomizationRelation(id)
-
-            super.removeById(id)
+        /**
+          * When an OntologyCustomization is removed, it should be removed as Default customization from analyses
+          * @param customizationId ID of removed OntologyCustomizations
+          */
+        def ontologyCustomizationIsRemoved(customizationId: String) {
+            selectWhere(_.defaultCustomizationId === Some(customizationId)).foreach{ a =>
+                a.defaultOntologyCustomization = None
+                persist(a)
+            }
         }
 
         override def persist(entity: AnyRef): Analysis = wrapInTransaction {
-            val e = entity.asInstanceOf[cz.payola.domain.entities.Analysis]
             val analysis = super.persist(entity)
 
             // Associate plugin instances with their bindings and default customization
-            e.pluginInstances.map(pi => analysis.associatePluginInstance(PluginInstance(pi)))
-            e.pluginInstanceBindings.map(b => analysis.associatePluginInstanceBinding(PluginInstanceBinding(b)))
-            analysis.defaultOntologyCustomization =  e.defaultOntologyCustomization
+            entity match {
+                case a: Analysis => // Everything allready persisted
+                case a: cz.payola.domain.entities.Analysis => {
+                    a.pluginInstances.map(pi => analysis.associatePluginInstance(PluginInstance(pi)))
+                    a.pluginInstanceBindings.map(b => analysis.associatePluginInstanceBinding(PluginInstanceBinding(b)))
+                    analysis.defaultOntologyCustomization =  a.defaultOntologyCustomization
+                }
+            }
 
             // Return persisted analysis
             analysis
@@ -62,24 +70,6 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
 
         def removePluginInstanceBindingById(pluginInstanceBindingId: String): Boolean = wrapInTransaction {
             pluginInstanceBindingRepository.removeById(pluginInstanceBindingId)
-        }
-
-        def setDefaultOntologyCustomization(analysisId: String, customization: Option[OntologyCustomization]):
-            Option[OntologyCustomization] = wrapInTransaction {
-
-            _removeCurrentDefaultOntologyCustomizationRelation(analysisId)
-
-            if (customization.isDefined){
-                // Persist with class customizations and property customizations if they are not persisted yet
-                val c = ontologyCustomizationRepository.persist(customization.get)
-                c.analysisId = Some(analysisId)
-
-                // This will persist only analysisId change
-                Some(ontologyCustomizationRepository.persist(c))
-            }
-            else {
-                None
-            }
         }
 
         def loadPluginInstances(analysis: Analysis) {
@@ -107,21 +97,15 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
                     b.targetPluginInstance = pluginInstancesByIds(b.targetPluginInstanceId)
                 }
 
-                // Set loaded plugins, plugin instances and its bindings to analysis, load default cutomization
+                // Set loaded plugins, plugin instances and its bindings to analysis, load default customization
                 analysis.pluginInstances = pluginInstancesByIds.values.toSeq
                 analysis.pluginInstanceBindings = instanceBindings
-                analysis.defaultOntologyCustomization =
-                    ontologyCustomizationRepository.getDefaultOntologyCustomizationForAnalysis(analysis.id)
+                analysis.defaultOntologyCustomization = _getDefaultOntologyCustomization(analysis.defaultCustomizationId)
             }
         }
 
-        private def _removeCurrentDefaultOntologyCustomizationRelation(analysisId: String) {
-            // Discard previous default customization
-            val c = ontologyCustomizationRepository.getDefaultOntologyCustomizationForAnalysis(analysisId)
-            if (c.isDefined) {
-                c.get.analysisId = None
-                ontologyCustomizationRepository.persist(c.get)
-            }
+        private def _getDefaultOntologyCustomization(id: Option[String]): Option[OntologyCustomization] = {
+            id.flatMap(ontologyCustomizationRepository.getById(_))
         }
     }
 }
