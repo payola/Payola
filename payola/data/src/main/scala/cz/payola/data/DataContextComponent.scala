@@ -212,6 +212,10 @@ trait DataContextComponent
           * @param analysisId ID of analysis from which get default OntologyCustomization
           */
         def getDefaultOntologyCustomizationForAnalysis(analysisId: String): Option[OntologyCustomization]
+
+        def persistClassCustomization(classCustomization: AnyRef)
+
+        def persistPropertyCustomization(propertyCustomization: AnyRef)
     }
 
     trait PluginRepository

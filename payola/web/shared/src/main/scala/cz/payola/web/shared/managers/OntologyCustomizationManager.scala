@@ -37,34 +37,47 @@ import cz.payola.common.ValidationException
         }
     }
 
-    private def getClassCustomizationFromCustomization(customization: OntologyCustomization, classURI: String, user: User, failCallback: Throwable => Unit): Option[ClassCustomization] = {
-        val classCustomizationOpt = customization.classCustomizations.find(_.uri == classURI)
-        if (classCustomizationOpt.isEmpty) {
-            failCallback(new RpcException("Class cannot be found in this ontology customization!"))
-            None
-        }else{
-            classCustomizationOpt
-        }
-    }
-
-    private def setClassAttribute(customizationID: String, classURI: String, setter: ClassCustomization => Unit, user: User, successCallback: String => Unit, failCallback: Throwable => Unit) {
+    private def getClassCustomizationFromCustomization(customizationID: String, classURI: String, user: User, failCallback: Throwable => Unit): Option[ClassCustomization] = {
         val optCustomization = Payola.model.ontologyCustomizationModel.getAccessibleToUserById(Some(user), customizationID)
         if (optCustomization.isEmpty){
             // No such customization
             failCallback(new RpcException("No such customization found!"))
             None
         }else{
-            val customization = optCustomization.get
-            val optClassCustomization = getClassCustomizationFromCustomization(customization, classURI, user, failCallback)
-            if (optClassCustomization.isDefined){
-                val classCustomization = optClassCustomization.get
-                setter(classCustomization)
-                Payola.model.ontologyCustomizationModel.persist(customization)
-                successCallback("")
+            val classCustomizationOpt = optCustomization.get.classCustomizations.find(_.uri == classURI)
+            if (classCustomizationOpt.isEmpty) {
+                failCallback(new RpcException("Class cannot be found in this ontology customization!"))
+                None
+            }else{
+                classCustomizationOpt
             }
         }
     }
 
+    private def setClassAttribute(customizationID: String, classURI: String, setter: ClassCustomization => Unit, user: User, successCallback: String => Unit, failCallback: Throwable => Unit) {
+        val optClassCustomization = getClassCustomizationFromCustomization(customizationID, classURI, user, failCallback)
+        if (optClassCustomization.isDefined){
+            val classCustomization = optClassCustomization.get
+            setter(classCustomization)
+            Payola.model.ontologyCustomizationModel.persistClassCustomization(classCustomization)
+            successCallback("")
+        }
+    }
+
+    private def getPropertyCustomizationFromCustomization(customizationID: String, classURI: String, propertyURI: String, user: User, failCallback: Throwable => Unit): Option[PropertyCustomization] = {
+        val classOpt = getClassCustomizationFromCustomization(customizationID, classURI, user, failCallback)
+        if (classOpt.isDefined) {
+            val propOpt = classOpt.get.propertyCustomizations.find(_.uri == propertyURI)
+            if (propOpt.isDefined) {
+                propOpt
+            }else{
+                failCallback(new RpcException("Couldn't find property."))
+                None
+            }
+        }else{
+            None
+        }
+    }
 
     @async @secured def setClassFillColor(customizationID: String, classURI: String, value: String, user: User = null)
         (successCallback: String => Unit)
@@ -81,31 +94,16 @@ import cz.payola.common.ValidationException
     @async @secured def setClassRadius(customizationID: String, classURI: String, value: Int, user: User = null)
         (successCallback: String => Unit)
         (failCallback: Throwable => Unit) {
-        setClassAttribute(customizationID, classURI, { _.radius = 66 }, user, successCallback, failCallback)
+        setClassAttribute(customizationID, classURI, { _.radius = value }, user, successCallback, failCallback)
     }
 
 
     private def setPropertyAttribute(customizationID: String, classURI: String, propertyURI: String, setter: PropertyCustomization => Unit, user: User, successCallback: String => Unit, failCallback: Throwable => Unit) {
-        val optCustomization = Payola.model.ontologyCustomizationModel.getAccessibleToUserById(Some(user), customizationID)
-        if (optCustomization.isEmpty){
-            // No such customization
-            failCallback(new RpcException("No such customization found!"))
-            None
-        }else{
-            val customization = optCustomization.get
-            val optClassCustomization = getClassCustomizationFromCustomization(customization, classURI, user, failCallback)
-            if (optClassCustomization.isDefined){
-                val classCustomization = optClassCustomization.get
-                val propertyOpt = classCustomization.propertyCustomizations.find(_.uri == propertyURI)
-                if (propertyOpt.isDefined) {
-                    setter(propertyOpt.get)
-                    Payola.model.ontologyCustomizationModel.persist(customization)
-                    successCallback("")
-                }else{
-                    failCallback(new RpcException("Couldn't find property!"))
-                    None
-                }
-            }
+        val propertyOpt = getPropertyCustomizationFromCustomization(customizationID, classURI, propertyURI, user, failCallback)
+        if (propertyOpt.isDefined) {
+            setter(propertyOpt.get)
+            Payola.model.ontologyCustomizationModel.persistPropertyCustomization(propertyOpt.get)
+            successCallback("")
         }
     }
 
