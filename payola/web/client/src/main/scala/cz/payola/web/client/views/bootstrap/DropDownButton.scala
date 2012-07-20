@@ -11,5 +11,7 @@ class DropDownButton(buttonViews: Seq[View], items: Seq[ListItem], buttonCssClas
 
     toggleAnchor.setAttribute("data-toggle", "dropdown")
 
-    override val subViews = List(toggleAnchor, new UnorderedList(items, "dropdown-menu"))
+    val menu = new UnorderedList(items, "dropdown-menu")
+
+    override val subViews = List(toggleAnchor, menu)
 }

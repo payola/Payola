@@ -3,12 +3,55 @@ package cz.payola.web.client.presenters
 import cz.payola.common.entities.settings._
 import cz.payola.web.client.views.graph.customization.CustomizationModal
 import cz.payola.web.client.events._
+import cz.payola.web.shared.managers.OntologyCustomizationManager
+import cz.payola.common.ValidationException
+import s2js.adapters.js.browser._
+import cz.payola.web.client.Presenter
 
-class OntologyCustomizationPresenter(ontologyCustomization: OntologyCustomization)
+class OntologyCustomizationPresenter(ontologyCustomization: OntologyCustomization) extends Presenter
 {
 
     // This will notify of any value being changed
     val customizationValueChanged: SimpleUnitEvent[this.type] = new SimpleUnitEvent[this.type]
+
+    val modal = new CustomizationModal(ontologyCustomization)
+
+
+    def classFillColorChangedHandler(args: ClassCustomizationModificationEventArgs[_, String]) {
+        OntologyCustomizationManager.setClassFillColor(ontologyCustomization.id, args.classURI, args.value) { Unit =>
+            // Success - update the client model
+            ontologyCustomization.classCustomizations.find(_.uri == args.classURI).get.fillColor = args.value
+        } { t: Throwable =>
+            t match {
+                case v: ValidationException => {
+                    modal.getFillColorInputForSelectedClass.setState(v ,"fillColor")
+                    // TODO reset the value
+                }
+                case _ => {
+                    modal.destroy()
+                    fatalErrorHandler(t)
+                }
+            }
+        }
+    }
+
+    def classRadiusChangedHandler(args: ClassCustomizationModificationEventArgs[_, Int]) {
+        OntologyCustomizationManager.setClassRadius(ontologyCustomization.id, args.classURI, args.value) { Unit =>
+        // Success - update the client model
+            ontologyCustomization.classCustomizations.find(_.uri == args.classURI).get.radius = args.value
+        } { t: Throwable =>
+            t match {
+                case v: ValidationException => {
+                    modal.getRadiusInputForSelectedClass.setState(v ,"radius")
+                    // TODO reset the value
+                }
+                case _ => {
+                    modal.destroy()
+                    fatalErrorHandler(t)
+                }
+            }
+        }
+    }
 
     /** Retrieves a class customization for a class URI from the ontology customization.
       *
@@ -33,17 +76,8 @@ class OntologyCustomizationPresenter(ontologyCustomization: OntologyCustomizatio
       *
       */
     def initialize() {
-        val modal = new CustomizationModal(ontologyCustomization)
-        modal.classFillColorChanged += { e =>
-            getClassWithURI(e.classURI).fillColor = e.value
-            postValueChangeNotification()
-            true
-        }
-        modal.classRadiusChanged += { e =>
-            getClassWithURI(e.classURI).radius = e.value
-            postValueChangeNotification()
-            true
-        }
+        modal.classFillColorChanged += classFillColorChangedHandler _
+        modal.classRadiusChanged += classRadiusChangedHandler _
         modal.classGlyphChanged += { e =>
             getClassWithURI(e.classURI).glyph = e.value
             postValueChangeNotification()

@@ -4,10 +4,10 @@ import cz.payola.common.entities.settings._
 import cz.payola.web.client.views.bootstrap._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events._
-import scala.Some
 import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
 import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.ColorPane
 import cz.payola.web.client.views.graph.visual.Color
+import s2js.adapters.js.browser._
 
 class CustomizationModal(customization: OntologyCustomization)
     extends Modal("Customize ontology " + customization.name, Nil, Some("Done"), None, false,
@@ -15,11 +15,11 @@ class CustomizationModal(customization: OntologyCustomization)
 {
 
     // Event handlers
-    val classFillColorChanged = new BooleanEvent[this.type, ClassCustomizationModificationEventArgs[this.type, String]]
-    var classRadiusChanged = new BooleanEvent[this.type, ClassCustomizationModificationEventArgs[this.type, Int]]
-    var classGlyphChanged = new BooleanEvent[this.type, ClassCustomizationModificationEventArgs[this.type, Option[Char]]]
-    var classPropertyStrokeColorChanged = new BooleanEvent[this.type, ClassPropertyCustomizationModificationEventArgs[this.type, String]]
-    var classPropertyStrokeWidthChanged = new BooleanEvent[this.type, ClassPropertyCustomizationModificationEventArgs[this.type, Int]]
+    val classFillColorChanged = new UnitEvent[this.type, ClassCustomizationModificationEventArgs[this.type, String]]
+    var classRadiusChanged = new UnitEvent[this.type, ClassCustomizationModificationEventArgs[this.type, Int]]
+    var classGlyphChanged = new UnitEvent[this.type, ClassCustomizationModificationEventArgs[this.type, Option[Char]]]
+    var classPropertyStrokeColorChanged = new UnitEvent[this.type, ClassPropertyCustomizationModificationEventArgs[this.type, String]]
+    var classPropertyStrokeWidthChanged = new UnitEvent[this.type, ClassPropertyCustomizationModificationEventArgs[this.type, Int]]
 
     // Create a completely enclosing div
     val enclosingDiv = new Div()
@@ -27,7 +27,6 @@ class CustomizationModal(customization: OntologyCustomization)
     enclosingDiv.addCssClass("container-fluid")
 
     val rowDiv = new Div()
-    rowDiv.addCssClass("row-fluid")
     rowDiv.render(enclosingDiv.domElement)
 
     // Override body to have just that div
@@ -36,25 +35,48 @@ class CustomizationModal(customization: OntologyCustomization)
     // Create a class div and values div
     val classListItems = createClassListItems
     val classUnorderedList = new UnorderedList(classListItems)
-    classUnorderedList.addCssClass("nav")
-    classUnorderedList.addCssClass("nav-list")
-
     val classListDiv = new Div(List(classUnorderedList))
-    classListDiv.setAttribute("style", "padding: 8px 0;")
-    classListDiv.addCssClass("span6")
-    classListDiv.addCssClass("modal-inner-view")
-    classListDiv.addCssClass("well")
-    classListDiv.addCssClass("no-padding")
-
     val propertiesDiv = new Div(Nil)
-    propertiesDiv.addCssClass("span6")
-    propertiesDiv.addCssClass("modal-inner-view")
+
+    setupDivAttributes()
 
     classListDiv.render(rowDiv.domElement)
     propertiesDiv.render(rowDiv.domElement)
 
     var selectedClassCustomization: ClassCustomization = null
     selectClassItem(classListItems(0))
+
+
+
+    private def getClassElementByName(name: String): InputControl = {
+        propertiesDiv.domElement.getElementsByTagName(name).item(0).asInstanceOf[InputControl]
+    }
+
+    def getFillColorInputForSelectedClass: InputControl = {
+        getClassElementByName("class-fill-color-input")
+    }
+
+    def getRadiusInputForSelectedClass: InputControl = {
+        getClassElementByName("class-radius")
+    }
+
+
+    private def setupDivAttributes() {
+        rowDiv.addCssClass("row-fluid")
+
+
+        classUnorderedList.addCssClass("nav")
+        classUnorderedList.addCssClass("nav-list")
+
+        classListDiv.setAttribute("style", "padding: 8px 0;")
+        classListDiv.addCssClass("span6")
+        classListDiv.addCssClass("modal-inner-view")
+        classListDiv.addCssClass("well")
+        classListDiv.addCssClass("no-padding")
+
+        propertiesDiv.addCssClass("span6")
+        propertiesDiv.addCssClass("modal-inner-view")
+    }
 
     /** Appends fields for the property customization to the propertiesDiv div.
       *
@@ -80,7 +102,7 @@ class CustomizationModal(customization: OntologyCustomization)
       *
       */
     private def appendCustomizablePropertiesForSelectedClass() {
-        val fillColorInput = new ColorPane("class-color-input", "Fill color:", Color.fromHex(selectedClassCustomization.fillColor))
+        val fillColorInput = new ColorPane("class-fill-color-input", "Fill color:", Color.fromHex(selectedClassCustomization.fillColor))
         val radiusInput = new TextInputControl("Radius:", "class-radius", selectedClassCustomization.radius.toString, "")
         val glyphInput = new TextInputControl("Glyph:", "class-glyph", selectedClassCustomization.glyph.getOrElse('\0').toString, "")
 

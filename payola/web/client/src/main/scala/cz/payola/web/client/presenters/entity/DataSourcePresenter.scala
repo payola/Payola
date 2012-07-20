@@ -39,8 +39,10 @@ class DataSourcePresenter(
         graphView.vertexBrowsing += onVertexBrowsing _
         graphView.vertexBrowsingDataSource += onVertexBrowsingDataSource _
         graphView.createOntologyCustomizationButton.mouseClicked += onCreateOntologyCustomizationButtonClicked _
-        graphView.ontologyCustomizationEditButtons foreach { button =>
-            button.mouseClicked += onEditOntologyCustomizationButtonClicked _
+        graphView.ontologiesGotLoaded += { Unit =>
+            graphView.ontologyCustomizationEditButtons foreach { button =>
+                button.mouseClicked += onEditOntologyCustomizationButtonClicked _
+            }
         }
 
         // Compose the views and render the main view.
@@ -105,8 +107,15 @@ class DataSourcePresenter(
     }
 
     private def onEditOntologyCustomizationButtonClicked(e: BrowserEventArgs[Span]): Boolean = {
-        val ontology = OntologyCustomizationManager.getCustomizationByID(e.target.getAttribute("name"))
-        new OntologyCustomizationPresenter(ontology).initialize()
+        graphView.block("Loading ontology...")
+        OntologyCustomizationManager.getCustomizationByID(e.target.getAttribute("name")) { customization =>
+            new OntologyCustomizationPresenter(customization).initialize()
+            graphView.unblock()
+        } { error =>
+            graphView.unblock()
+            fatalErrorHandler(error)
+        }
+
         true
     }
 
