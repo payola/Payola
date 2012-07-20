@@ -166,3 +166,19 @@ input[type="checkbox"].active:after{
     width: 800px;
 }
 
+.no-padding {
+    padding: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+.ontology-customization-menu-item {
+    padding-right: 70px;
+}
+
+.ontology-customization-edit-button {
+    right: 5px;
+    position: absolute;
+    padding-right: 5px;
+}
+

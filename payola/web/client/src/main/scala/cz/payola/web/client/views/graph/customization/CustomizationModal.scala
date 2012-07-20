@@ -4,24 +4,26 @@ import cz.payola.common.entities.settings._
 import cz.payola.web.client.views.bootstrap._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events._
-import scala.collection.mutable.ListBuffer
 import scala.Some
 import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
+import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.ColorPane
+import cz.payola.web.client.views.graph.visual.Color
 
 class CustomizationModal(customization: OntologyCustomization)
     extends Modal("Customize ontology " + customization.name, Nil, Some("Done"), None, false,
         "wide-customization-modal")
 {
+
     // Event handlers
     val classFillColorChanged = new BooleanEvent[this.type, ClassCustomizationModificationEventArgs[this.type, String]]
     var classRadiusChanged = new BooleanEvent[this.type, ClassCustomizationModificationEventArgs[this.type, Int]]
     var classGlyphChanged = new BooleanEvent[this.type, ClassCustomizationModificationEventArgs[this.type, Option[Char]]]
-
     var classPropertyStrokeColorChanged = new BooleanEvent[this.type, ClassPropertyCustomizationModificationEventArgs[this.type, String]]
     var classPropertyStrokeWidthChanged = new BooleanEvent[this.type, ClassPropertyCustomizationModificationEventArgs[this.type, Int]]
 
     // Create a completely enclosing div
     val enclosingDiv = new Div()
+    enclosingDiv.setAttribute("style", "padding: 0px 0;")
     enclosingDiv.addCssClass("container-fluid")
 
     val rowDiv = new Div()
@@ -32,19 +34,20 @@ class CustomizationModal(customization: OntologyCustomization)
     override val body = List(enclosingDiv)
 
     // Create a class div and values div
-    // TODO prettify
     val classListItems = createClassListItems
     val classUnorderedList = new UnorderedList(classListItems)
     classUnorderedList.addCssClass("nav")
     classUnorderedList.addCssClass("nav-list")
 
     val classListDiv = new Div(List(classUnorderedList))
-    classListDiv.addCssClass("span5")
+    classListDiv.setAttribute("style", "padding: 8px 0;")
+    classListDiv.addCssClass("span6")
     classListDiv.addCssClass("modal-inner-view")
     classListDiv.addCssClass("well")
+    classListDiv.addCssClass("no-padding")
 
     val propertiesDiv = new Div(Nil)
-    propertiesDiv.addCssClass("span7")
+    propertiesDiv.addCssClass("span6")
     propertiesDiv.addCssClass("modal-inner-view")
 
     classListDiv.render(rowDiv.domElement)
@@ -53,12 +56,16 @@ class CustomizationModal(customization: OntologyCustomization)
     var selectedClassCustomization: ClassCustomization = null
     selectClassItem(classListItems(0))
 
+    /** Appends fields for the property customization to the propertiesDiv div.
+      *
+      * @param propCustomization Property customization.
+      */
     private def appendCustomizablePropertiesForPropertyCustomization(propCustomization: PropertyCustomization) {
-        val strokeColorInput = new TextInputControl("Stroke color:", "property-stroke-color-" + propCustomization.uri, propCustomization.strokeColor, "")
+        val strokeColorInput = new ColorPane("property-stroke-color-" + propCustomization.uri, "Stroke color:", Color.fromHex(propCustomization.strokeColor))
         val widthInput = new TextInputControl("Stroke width:", "property-stroke-width-" + propCustomization.uri, propCustomization.strokeWidth.toString, "")
 
-        strokeColorInput.input.changed += { e =>
-            classPropertyStrokeColorChanged.trigger(new ClassPropertyCustomizationModificationEventArgs[this.type, String](selectedClassCustomization.uri, propCustomization.uri, strokeColorInput.input.value, this))
+        strokeColorInput.changed += { e =>
+            classPropertyStrokeColorChanged.trigger(new ClassPropertyCustomizationModificationEventArgs[this.type, String](selectedClassCustomization.uri, propCustomization.uri, strokeColorInput.getColorHexString, this))
         }
 
         widthInput.input.changed += { e =>
@@ -69,13 +76,16 @@ class CustomizationModal(customization: OntologyCustomization)
         widthInput.render(propertiesDiv.domElement)
     }
 
+    /** Appends fields for the selected class customization to the propertiesDiv div.
+      *
+      */
     private def appendCustomizablePropertiesForSelectedClass() {
-        val fillColorInput = new TextInputControl("Fill color:", "class-color-input", selectedClassCustomization.fillColor, "")
+        val fillColorInput = new ColorPane("class-color-input", "Fill color:", Color.fromHex(selectedClassCustomization.fillColor))
         val radiusInput = new TextInputControl("Radius:", "class-radius", selectedClassCustomization.radius.toString, "")
         val glyphInput = new TextInputControl("Glyph:", "class-glyph", selectedClassCustomization.glyph.getOrElse('\0').toString, "")
 
-        fillColorInput.input.changed += { e =>
-            classFillColorChanged.trigger(new ClassCustomizationModificationEventArgs[this.type, String](selectedClassCustomization.uri, fillColorInput.input.value, this))
+        fillColorInput.changed += { e =>
+            classFillColorChanged.trigger(new ClassCustomizationModificationEventArgs[this.type, String](selectedClassCustomization.uri, fillColorInput.getColorHexString, this))
         }
         radiusInput.input.changed += { e =>
             classRadiusChanged.trigger(new ClassCustomizationModificationEventArgs[this.type, Int](selectedClassCustomization.uri, radiusInput.input.value.toInt, this))
@@ -90,6 +100,10 @@ class CustomizationModal(customization: OntologyCustomization)
         glyphInput.render(propertiesDiv.domElement)
     }
 
+    /** Appends a header div - it contains the name. Is used for property titles.
+      *
+      * @param name Name to be used.
+      */
     private def appendHeaderDivForName(name: String) {
         val div = new Div(List(new Text(name)))
         div.addCssClass("label")
@@ -97,6 +111,11 @@ class CustomizationModal(customization: OntologyCustomization)
         div.render(propertiesDiv.domElement)
     }
 
+    /** Makes a list item representing the newly active class customization active
+      * and assigns the selectedClassCustomization variable.
+      *
+      * @param item The list item.
+      */
     private def selectClassItem(item: ListItem) {
         item.addCssClass("active")
 
@@ -105,31 +124,36 @@ class CustomizationModal(customization: OntologyCustomization)
         createPropertyDivsForSelectedClass()
     }
 
-
+    /** Handler for a class being selected.
+      *
+      * @param e Event arguments.
+      * @return Always true at this moment.
+      */
     private def classSelectionHandler(e: BrowserEventArgs[ListItem]) = {
         classListItems.foreach { listItem: ListItem =>
             listItem.removeCssClass("active")
         }
 
         selectClassItem(e.target)
-
         true
     }
 
+    /** Creates list items representing classes within the ontology customization.
+      *
+      * @return List items representing classes within the ontology customization.
+      */
     private def createClassListItems: Seq[ListItem] = {
-        val classItemsBuffer = new ListBuffer[ListItem]
-        customization.classCustomizations foreach { classCustomization: ClassCustomization =>
-            val classListItem = new ListItem(List(new Anchor(List(new Icon(Icon.tag), new Text(classCustomization.uri)))), "")
+        customization.classCustomizations.map { classCustomization: ClassCustomization =>
+            val classListItem = new ListItem(List(new Anchor(List(new Icon(Icon.tag), new Text(" " + classCustomization.uri.split("#")(1))))), "")
             classListItem.setAttribute("name", classCustomization.uri)
-
             classListItem.mouseClicked += classSelectionHandler
-
-            classItemsBuffer += classListItem
+            classListItem
         }
-
-        classItemsBuffer
     }
 
+    /** Creates the properties elements for selected class and fills the properties
+      * div with them.
+      */
     private def createPropertyDivsForSelectedClass() {
         // Clear properties
         propertiesDiv.domElement.innerHTML = ""
@@ -137,7 +161,7 @@ class CustomizationModal(customization: OntologyCustomization)
         appendCustomizablePropertiesForSelectedClass()
 
         selectedClassCustomization.propertyCustomizations.foreach { propCustomization: PropertyCustomization =>
-            appendHeaderDivForName(propCustomization.uri)
+            appendHeaderDivForName(propCustomization.uri.split("#")(1))
             appendCustomizablePropertiesForPropertyCustomization(propCustomization)
         }
 

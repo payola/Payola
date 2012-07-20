@@ -11,8 +11,7 @@ import cz.payola.web.client.views.algebra._
   * Graphical representation of Graph object.
   * @param container the space where the graph should be visualised
   */
-class GraphView(val settings: VisualSetup) extends
-    View[CanvasPack] {
+class GraphView(val settings: VisualSetup) extends View[CanvasPack] {
     /**
       * During update vertices with higher age than this value are removed from this graph.
       */
@@ -199,7 +198,9 @@ class GraphView(val settings: VisualSetup) extends
                 val identNeighbourVertexView =
                     vertexViews.find{ vertexView => vertexView.vertexModel == identNeighborVertex }
                 if(identNeighbourVertexView.isDefined) {
-                    identNeighbourVertexView.get.literalVertices += ((edgeToIdentVertex.get, literalVertex))
+                    identNeighbourVertexView.get.addLiteralVertex(literalVertex,
+                        graphModel.edges.filter{
+                            edge => (edge.origin == literalVertex || edge.destination == literalVertex) })
                 } else {
                     //this should never happen
                 }

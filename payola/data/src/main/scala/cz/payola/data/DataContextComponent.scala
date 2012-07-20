@@ -165,6 +165,13 @@ trait DataContextComponent
           * @param granteeId ID of the privilege grantee.
           */
         def getByGrantee(granteeId: String): Seq[Privilege[_ <: cz.payola.domain.Entity]]
+
+        /**
+          * Gets a list of privileges to the object specified by the given object ID.
+          * @param objId
+          * @param granteeType
+          */
+        def getAllByObjectIdAndGranteeType(objId: String, granteeType: Class[_ <: PrivilegableEntity]): Seq[Privilege[_ <: cz.payola.domain.Entity]]
     }
     
     trait AnalysisRepository

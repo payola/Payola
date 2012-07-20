@@ -115,8 +115,10 @@ class RPCSerializer extends JSONSerializer
     this.addSerializationRule(groupClass, groupRule)
 
     val ontologyCustomizationClass = new SimpleSerializationClass(classOf[OntologyCustomization])
-    val ontologyCustomizationRule = new BasicSerializationRule(Some(classOf[OntologyCustomization]))
+    val ontologyCustomizationRule = new BasicSerializationRule(Some(classOf[OntologyCustomization]), Some(List("_classCustomizations")))
+    val ontologyCustomizationAdditionalFieldRule = new CustomValueSerializationRule[OntologyCustomization]("_classCustomizations", { case (serializer, customization) => customization.classCustomizations })
     this.addSerializationRule(ontologyCustomizationClass, ontologyCustomizationRule)
+    this.addSerializationRule(ontologyCustomizationClass, ontologyCustomizationAdditionalFieldRule)
 
     val classCustomizationClass = new SimpleSerializationClass(classOf[ClassCustomization])
     val classCustomizationRule = new BasicSerializationRule(Some(classOf[ClassCustomization]))

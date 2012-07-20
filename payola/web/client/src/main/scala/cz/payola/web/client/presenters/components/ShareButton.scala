@@ -9,12 +9,6 @@ class ShareButton(isPublic: Boolean) extends ComposedView
 {
     private var isPublic_ : Boolean = false
 
-    val clicked = new SimpleUnitEvent[ShareButton]
-    dropDownButton.anchor.mouseClicked += {e =>
-        clicked.triggerDirectly(this)
-        false
-    }
-
     private val TEXT_IS_PUBLIC = "Make private"
     private val TEXT_IS_NOT_PUBLIC = "Make public"
 
@@ -31,7 +25,7 @@ class ShareButton(isPublic: Boolean) extends ComposedView
     private val publicItem = new ListItem(List(makePublicLink))
 
     private val textIsPublic = new Text(" ")
-    private val dropDownButton = new DropDownButtonWithCaret(List(textIsPublic),List(new Icon(Icon.share, true),new Text("Share")),
+    val dropDownButton = new DropDownButtonWithCaret(List(textIsPublic),List(new Icon(Icon.share, true),new Text("Share")),
         List(groupItem, userItem, divider, publicItem), "btn-warning")
 
     setIsPublic(isPublic)

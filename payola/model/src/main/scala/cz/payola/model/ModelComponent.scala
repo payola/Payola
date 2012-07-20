@@ -16,10 +16,15 @@ trait ModelComponent
     with DataSourceModelComponent
     with OntologyCustomizationModelComponent
     with PayolaStorageModelComponent
+    with PrivilegeModelComponent
 {
     self: DataContextComponent with RdfStorageComponent with PluginCompilerComponent =>
 
-    def persistEntity(e: Entity with ShareableEntity){
-        repositoryRegistry(e.getClass()).persist(e)
+    def persistEntity(e: Entity){
+        if (e.isInstanceOf[Plugin]){
+            pluginRepository.persist(e)
+        } else {
+            repositoryRegistry(e.getClass()).persist(e)
+        }
     }
 }

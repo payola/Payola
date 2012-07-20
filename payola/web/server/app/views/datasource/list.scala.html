@@ -11,6 +11,10 @@
     <a href={routes.DataSource.edit(id).toString} class="btn btn-primary"><i class="icon-pencil icon-white"></i> Edit</a>
 }
 
+@shareLinkForID(id: String, isPublic: Boolean) = @{
+<div class="btn-group share-button-placeholder" data-shareable-entity-id={id} data-shareable-entity-public={isPublic.toString}></div>
+}
+
 @list_entities(Some(user),
     "data source",
     "data sources",
@@ -29,13 +33,23 @@
             detailsLinkForID(e.id, e.asInstanceOf[cz.payola.domain.entities.plugins.DataSource].name)
         }</td>
         <td>{
-            if (e.asInstanceOf[cz.payola.domain.entities.plugins.DataSource].isEditable){
-                editLinkForID(e.id)
+            val dataSource = e.asInstanceOf[cz.payola.domain.entities.plugins.DataSource]
+            if (dataSource.isEditable){
+                val buff = new scala.xml.NodeBuffer() += editLinkForID(e.id)
+                buff += {shareLinkForID(e.id, dataSource.isPublic)}
+                buff
             }else{
-                <span class="badge">Not editable</span>
+                val buff = new scala.xml.NodeBuffer() += shareLinkForID(e.id, dataSource.isPublic)
+                buff += <span class="badge">Not editable</span>
+                buff
             }
         }</td>
     },
     routes.DataSource.create(),
     page)
+
+<script language="javascript" type="text/javascript" src="/javaScriptPackage/cz.payola.web.client.presenters.Sharing"></script>
+<script type="text/javascript">
+    new cz.payola.web.client.presenters.Sharing("share-button-placeholder", "data_source");
+</script>
 

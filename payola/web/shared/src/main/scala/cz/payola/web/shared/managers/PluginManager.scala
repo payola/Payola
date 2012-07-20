@@ -31,13 +31,9 @@ import cz.payola.domain.entities.plugins.concrete.DataFetcher
 
         // Try to compile code
         try {
-            val plugin = Payola.model.pluginModel.createPluginFromSource(pluginCode, user)
-            if (plugin != null) {
-                user.addOwnedPlugin(plugin)
-                Payola.model.userModel.persist(user)
-                successCallback("Plugin saved.")
-            }
-        } catch {
+            Payola.model.pluginModel.createPluginFromSource(pluginCode, user)
+            successCallback("Plugin saved.")
+        }catch{
             case e: Exception => {
                 e.printStackTrace()
                 failCallback(new Exception("Couldn't save plugin.\n\nDetails: " + e.getMessage))

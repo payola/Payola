@@ -9,8 +9,9 @@ import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.V
 import cz.payola.web.client.views.graph.visual.settings._
 import cz.payola.web.client.views.graph.visual.techniques.circle.CircleTechnique
 import cz.payola.web.client.views.graph.visual.techniques.tree.TreeTechnique
-import cz.payola.web.client.views.graph.visual.techniques.minimalization.MinimalizationTechnique
 import cz.payola.web.client.views.graph.visual.techniques.gravity.GravityTechnique
+import scala.collection.mutable.ListBuffer
+import cz.payola.web.shared.managers.OntologyCustomizationManager
 
 class PluginSwitchView extends GraphView with ComposedView
 {
@@ -20,9 +21,9 @@ class PluginSwitchView extends GraphView with ComposedView
     private val plugins = List[PluginView](
         new TripleTablePluginView(null),
         new CircleTechnique(visualSetup),
+        new GravityTechnique(visualSetup),
         new TreeTechnique(visualSetup)/*,
-        new MinimalizationTechnique(visualSetup),
-        new GravityTechnique(visualSetup)*/
+        new MinimalizationTechnique(visualSetup),*/
     )
 
     private var currentPlugin = plugins.head
@@ -42,9 +43,21 @@ class PluginSwitchView extends GraphView with ComposedView
         new ListItem(List(pluginAnchor))
     }
 
-    val ontologyCustomizationListItems = List(
-        new ListItem(List(createOntologyCustomizationButton))
-    )
+    val ontologyCustomizationEditButtons = new ListBuffer[Span]
+    val ontologyCustomizationListItems = createOntologyCustomizationItems
+
+    private def createOntologyCustomizationItems = {
+        val listItems = new ListBuffer[ListItem]()
+        listItems ++= OntologyCustomizationManager.getUsersCustomizations().map({ custom =>
+            val text = new Text(custom.name)
+            val editButton = new Span(List(new Icon(Icon.pencil), new Text(" Edit")), "btn btn-mini btn-info ontology-customization-edit-button")
+            editButton.setAttribute("name", custom.id)
+            ontologyCustomizationEditButtons += editButton
+            new ListItem(List(new Anchor(List(text, editButton))), "ontology-customization-menu-item")
+        })
+        listItems += new ListItem(List(createOntologyCustomizationButton))
+        listItems
+    }
 
     val toolbar = new Div(List(
         new DropDownButton(List(new Icon(Icon.cog), new Text("Change visualisation plugin")), pluginListItems),

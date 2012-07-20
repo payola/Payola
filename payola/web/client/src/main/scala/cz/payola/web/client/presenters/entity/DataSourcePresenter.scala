@@ -9,11 +9,12 @@ import cz.payola.web.client.events.BrowserEventArgs
 import cz.payola.web.client.models.Model
 import cz.payola.web.client.views.VertexEventArgs
 import cz.payola.web.client.views.entity.dataSource._
-import cz.payola.web.client.views.entity.customization.OntologyCustomizationCreateModal
 import cz.payola.web.client.views.graph.PluginSwitchView
-import cz.payola.web.client.Presenter
+import cz.payola.web.client.views.entity.customization.OntologyCustomizationCreateModal
 import cz.payola.web.client.presenters.OntologyCustomizationPresenter
 import cz.payola.common.ValidationException
+import cz.payola.web.client.views.elements.Span
+import cz.payola.web.client.Presenter
 
 class DataSourcePresenter(
     viewElement: dom.Element,
@@ -35,10 +36,12 @@ class DataSourcePresenter(
         view.goButton.mouseClicked += onGoButtonClicked _
         view.backButton.mouseClicked += onBackButtonClicked _
         view.nextButton.mouseClicked += onNextButtonClicked _
-        view.nodeUriInput.keyPressed += onNodeUriInputKeyPressed _
         graphView.vertexBrowsing += onVertexBrowsing _
         graphView.vertexBrowsingDataSource += onVertexBrowsingDataSource _
         graphView.createOntologyCustomizationButton.mouseClicked += onCreateOntologyCustomizationButtonClicked _
+        graphView.ontologyCustomizationEditButtons foreach { button =>
+            button.mouseClicked += onEditOntologyCustomizationButtonClicked _
+        }
 
         // Compose the views and render the main view.
         graphView.render(view.graphViewSpace.domElement)
@@ -52,8 +55,6 @@ class DataSourcePresenter(
                 updateNavigationView()
                 unblockPage()
             }(fatalErrorHandler(_))
-
-        // Otherwise display neighbourhood of the initial vertex.
         } else {
             addToHistoryAndGo(initialVertexUri)
         }
@@ -103,6 +104,12 @@ class DataSourcePresenter(
         false
     }
 
+    private def onEditOntologyCustomizationButtonClicked(e: BrowserEventArgs[Span]): Boolean = {
+        val ontology = OntologyCustomizationManager.getCustomizationByID(e.target.getAttribute("name"))
+        new OntologyCustomizationPresenter(ontology).initialize()
+        true
+    }
+
     private def onBackButtonClicked(e: BrowserEventArgs[_]): Boolean = {
         if (canGoBack) {
             historyPosition -= 1
@@ -117,16 +124,6 @@ class DataSourcePresenter(
             updateView()
         }
         false
-    }
-
-    private def onNodeUriInputKeyPressed(e: BrowserEventArgs[_]): Boolean = {
-        // If it's enter.
-        if (e.keyCode == 13) {
-            addToHistoryAndGo(view.nodeUriInput.value)
-            false
-        } else {
-            true
-        }
     }
 
     private def onGoButtonClicked(e: BrowserEventArgs[_]): Boolean = {
