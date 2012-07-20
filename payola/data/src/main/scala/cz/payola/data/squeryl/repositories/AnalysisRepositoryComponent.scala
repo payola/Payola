@@ -52,7 +52,7 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
 
             // Associate plugin instances with their bindings and default customization
             entity match {
-                case a: Analysis => // Everything allready persisted
+                case a: Analysis => // Everything already persisted
                 case a: cz.payola.domain.entities.Analysis => {
                     a.pluginInstances.map(pi => analysis.associatePluginInstance(PluginInstance(pi)))
                     a.pluginInstanceBindings.map(b => analysis.associatePluginInstanceBinding(PluginInstanceBinding(b)))
