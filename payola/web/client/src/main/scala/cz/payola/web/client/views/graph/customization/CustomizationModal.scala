@@ -148,6 +148,8 @@ class CustomizationModal(customization: OntologyCustomization)
         radiusInput.input.changed += { e =>
             if (radiusInput.input.value.toInt < 0) {
                 radiusInput.input.value = "0"
+            }else{
+                radiusInput.input.value = radiusInput.input.value.toInt.toString
             }
             classRadiusChanged.trigger(new ClassCustomizationModificationEventArgs[this.type, Int](selectedClassCustomization.uri, radiusInput.input.value.toInt, this))
         }

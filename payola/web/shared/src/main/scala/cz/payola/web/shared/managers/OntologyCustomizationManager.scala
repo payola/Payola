@@ -54,13 +54,14 @@ import cz.payola.common.ValidationException
         }
     }
 
-    private def setClassAttribute(customizationID: String, classURI: String, setter: ClassCustomization => Unit, user: User, successCallback: String => Unit, failCallback: Throwable => Unit) {
+    private def setClassAttribute(customizationID: String, classURI: String, setter: ClassCustomization => Unit, user: User, successCallback: () => Unit, failCallback: Throwable => Unit) {
         val optClassCustomization = getClassCustomizationFromCustomization(customizationID, classURI, user, failCallback)
         if (optClassCustomization.isDefined){
             val classCustomization = optClassCustomization.get
             setter(classCustomization)
             Payola.model.ontologyCustomizationModel.persistClassCustomization(classCustomization)
-            successCallback("")
+            println("Will be calling success callback " + successCallback)
+            successCallback()
         }
     }
 
@@ -80,41 +81,41 @@ import cz.payola.common.ValidationException
     }
 
     @async @secured def setClassFillColor(customizationID: String, classURI: String, value: String, user: User = null)
-        (successCallback: String => Unit)
+        (successCallback: () => Unit)
         (failCallback: Throwable => Unit) {
         setClassAttribute(customizationID, classURI, { _.fillColor = value }, user, successCallback, failCallback)
     }
 
     @async @secured def setClassGlyph(customizationID: String, classURI: String, value: Option[Char], user: User = null)
-        (successCallback: String => Unit)
+        (successCallback: () => Unit)
         (failCallback: Throwable => Unit) {
         setClassAttribute(customizationID, classURI, { _.glyph = value }, user, successCallback, failCallback)
     }
 
     @async @secured def setClassRadius(customizationID: String, classURI: String, value: Int, user: User = null)
-        (successCallback: String => Unit)
+        (successCallback: () => Unit)
         (failCallback: Throwable => Unit) {
         setClassAttribute(customizationID, classURI, { _.radius = value }, user, successCallback, failCallback)
     }
 
 
-    private def setPropertyAttribute(customizationID: String, classURI: String, propertyURI: String, setter: PropertyCustomization => Unit, user: User, successCallback: String => Unit, failCallback: Throwable => Unit) {
+    private def setPropertyAttribute(customizationID: String, classURI: String, propertyURI: String, setter: PropertyCustomization => Unit, user: User, successCallback: () => Unit, failCallback: Throwable => Unit) {
         val propertyOpt = getPropertyCustomizationFromCustomization(customizationID, classURI, propertyURI, user, failCallback)
         if (propertyOpt.isDefined) {
             setter(propertyOpt.get)
             Payola.model.ontologyCustomizationModel.persistPropertyCustomization(propertyOpt.get)
-            successCallback("")
+            successCallback()
         }
     }
 
     @async @secured def setPropertyStrokeColor(customizationID: String, classURI: String, propertyURI: String, value: String, user: User = null)
-        (successCallback: String => Unit)
+        (successCallback: () => Unit)
         (failCallback: Throwable => Unit) {
         setPropertyAttribute(customizationID, classURI, propertyURI, { _.strokeColor = value }, user, successCallback, failCallback)
     }
 
     @async @secured def setPropertyStrokeWidth(customizationID: String, classURI: String, propertyURI: String, value: Int, user: User = null)
-        (successCallback: String => Unit)
+        (successCallback: () => Unit)
         (failCallback: Throwable => Unit) {
         setPropertyAttribute(customizationID, classURI, propertyURI, { _.strokeWidth = value }, user, successCallback, failCallback)
     }

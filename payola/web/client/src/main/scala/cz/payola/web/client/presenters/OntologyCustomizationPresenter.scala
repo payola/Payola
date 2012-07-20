@@ -7,6 +7,7 @@ import cz.payola.web.shared.managers.OntologyCustomizationManager
 import cz.payola.common.ValidationException
 import cz.payola.web.client.Presenter
 import cz.payola.web.client.views.bootstrap.InputControl
+import s2js.adapters.js.browser._
 
 class OntologyCustomizationPresenter(ontologyCustomization: OntologyCustomization) extends Presenter
 {
@@ -40,7 +41,7 @@ class OntologyCustomizationPresenter(ontologyCustomization: OntologyCustomizatio
       * @param args Args of the event.
       */
     def classFillColorChangedHandler(args: ClassCustomizationModificationEventArgs[_, String]) {
-        OntologyCustomizationManager.setClassFillColor(ontologyCustomization.id, args.classURI, args.value) { Unit =>
+        OntologyCustomizationManager.setClassFillColor(ontologyCustomization.id, args.classURI, args.value) { () =>
             // Success - update the client model
             ontologyCustomization.classCustomizations.find(_.uri == args.classURI).get.fillColor = args.value
             postValueChangeNotification()
@@ -54,7 +55,7 @@ class OntologyCustomizationPresenter(ontologyCustomization: OntologyCustomizatio
       * @param args Args of the event.
       */
     def classGlyphChangedHandler(args: ClassCustomizationModificationEventArgs[_, Option[Char]]) {
-        OntologyCustomizationManager.setClassGlyph(ontologyCustomization.id, args.classURI, args.value) { Unit =>
+        OntologyCustomizationManager.setClassGlyph(ontologyCustomization.id, args.classURI, args.value) { () =>
         // Success - update the client model
             ontologyCustomization.classCustomizations.find(_.uri == args.classURI).get.glyph = args.value
             postValueChangeNotification()
@@ -68,7 +69,7 @@ class OntologyCustomizationPresenter(ontologyCustomization: OntologyCustomizatio
       * @param args Args of the event.
       */
     def classRadiusChangedHandler(args: ClassCustomizationModificationEventArgs[_, Int]) {
-        OntologyCustomizationManager.setClassRadius(ontologyCustomization.id, args.classURI, args.value) { Unit =>
+        OntologyCustomizationManager.setClassRadius(ontologyCustomization.id, args.classURI, args.value) { () =>
             // Success - update the client model
             ontologyCustomization.classCustomizations.find(_.uri == args.classURI).get.radius = args.value
             postValueChangeNotification()
@@ -82,7 +83,7 @@ class OntologyCustomizationPresenter(ontologyCustomization: OntologyCustomizatio
       * @param args Args of the event.
       */
     def propertyStrokeColorChangedHandler(args: ClassPropertyCustomizationModificationEventArgs[_, String]) {
-        OntologyCustomizationManager.setPropertyStrokeColor(ontologyCustomization.id, args.classURI, args.propertyURI, args.value) { Unit =>
+        OntologyCustomizationManager.setPropertyStrokeColor(ontologyCustomization.id, args.classURI, args.propertyURI, args.value) { () =>
         // Success - update the client model
             ontologyCustomization.classCustomizations.find(_.uri == args.classURI).get.propertyCustomizations.find(_.uri == args.propertyURI).get.strokeColor = args.value
             postValueChangeNotification()
@@ -96,7 +97,7 @@ class OntologyCustomizationPresenter(ontologyCustomization: OntologyCustomizatio
       * @param args Args of the event.
       */
     def propertyStrokeWidthChangedHandler(args: ClassPropertyCustomizationModificationEventArgs[_, Int]) {
-        OntologyCustomizationManager.setPropertyStrokeWidth(ontologyCustomization.id, args.classURI, args.propertyURI, args.value) { Unit =>
+        OntologyCustomizationManager.setPropertyStrokeWidth(ontologyCustomization.id, args.classURI, args.propertyURI, args.value) { () =>
         // Success - update the client model
             ontologyCustomization.classCustomizations.find(_.uri == args.classURI).get.propertyCustomizations.find(_.uri == args.propertyURI).get.strokeWidth = args.value
             postValueChangeNotification()
