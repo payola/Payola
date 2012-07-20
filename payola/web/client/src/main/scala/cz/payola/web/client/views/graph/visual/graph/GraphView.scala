@@ -4,11 +4,8 @@ import collection.mutable.ListBuffer
 import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.VisualSetup
 import s2js.adapters.js.browser.window
 import cz.payola.common.rdf._
-import s2js.adapters.js.dom
 import cz.payola.web.client.views.graph.visual._
 import cz.payola.web.client.views.algebra._
-import cz.payola.web.client.views.todo.CanvasPack
-import cz.payola.web.client.views.graph.visual.graph.positioning.LocationDescriptor
 
 /**
   * Graphical representation of Graph object.

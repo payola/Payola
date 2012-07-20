@@ -5,6 +5,9 @@ import cz.payola.common
 
 abstract class Entity(val id: String = IDGenerator.newId) extends common.Entity
 {
+    /** Name of the entity type that is presentable to the user of the application. */
+    def entityTypeName: String
+
     /**
       * Invokes the action if the specified sequence contains the item.
       * @param seq The sequence to check.
@@ -49,7 +52,7 @@ abstract class Entity(val id: String = IDGenerator.newId) extends common.Entity
       * hold), an exception is thrown.
       */
     protected def checkInvariants() {
-        require(id != null, "ID of the entity mustn't be null.")
+        require(id != null, "ID of the %s mustn't be null.".format(entityTypeName))
     }
 
     /**

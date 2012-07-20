@@ -3,6 +3,7 @@ package cz.payola.web.shared
 import cz.payola.domain.entities.analyses.evaluation._
 import scala.collection.mutable.HashMap
 import s2js.compiler.async
+import cz.payola.model.ModelException
 
 // TODO move the logic to the model.
 @remote object AnalysisRunner
@@ -13,7 +14,7 @@ import s2js.compiler.async
         val analysisOpt = Payola.model.analysisModel.getById(id)
 
         if (analysisOpt.isEmpty) {
-            throw new EntityNotFoundException
+            throw new ModelException("The analysis doesn't exist.") // TODO
         }
 
         runningEvaluations.put(id, analysisOpt.get.evaluate())

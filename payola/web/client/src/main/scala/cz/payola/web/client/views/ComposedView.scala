@@ -1,6 +1,7 @@
 package cz.payola.web.client.views
 
 import s2js.adapters.js.dom
+import s2js.adapters.js.browser.document
 import cz.payola.web.client.View
 
 trait ComposedView extends View
@@ -18,6 +19,8 @@ trait ComposedView extends View
         _subViews.get
     }
 
+    def blockDomElement = subViews.headOption.map(_.blockDomElement).getOrElse(document.createElement[dom.Div]("div"))
+
     def render(parent: dom.Element) {
         parentElement = Some(parent)
         subViews.foreach(_.render(parent))
@@ -26,13 +29,5 @@ trait ComposedView extends View
     def destroy() {
         subViews.foreach(_.destroy())
         parentElement = None
-    }
-
-    def block() {
-        parentElement.foreach(View.block(_))
-    }
-
-    def unblock() {
-        parentElement.foreach(View.unblock(_))
     }
 }

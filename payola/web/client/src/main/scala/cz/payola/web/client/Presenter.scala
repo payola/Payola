@@ -1,7 +1,7 @@
 package cz.payola.web.client
 
-import s2js.runtime.shared.rpc
-import cz.payola.web.client.views.bootstrap.LoadingMessage
+import s2js.runtime.shared.rpc.RpcException
+import cz.payola.common.PayolaException
 import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
 
 trait Presenter
@@ -13,19 +13,16 @@ trait Presenter
         unblockPage()
 
         val errorDescription = error match {
-            case e: rpc.Exception => e.message + (if (e.deepStackTrace.nonEmpty) "\n\n" + e.deepStackTrace else "")
+            case e: RpcException => e.message + (if (e.deepStackTrace.nonEmpty) "\n\n" + e.deepStackTrace else "")
+            case e: PayolaException => e.message
             case t => t.toString
         }
         val modal = new FatalErrorModal(errorDescription)
         modal.render()
     }
 
-    def blockPageLoading(message: String) {
-        blockPage(new LoadingMessage(message))
-    }
-
-    def blockPage(messageView: View) {
-        View.blockPage(Some(messageView))
+    def blockPage(message: String = "") {
+        View.blockPage(message)
     }
 
     def unblockPage() {

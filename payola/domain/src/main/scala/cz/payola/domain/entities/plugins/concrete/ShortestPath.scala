@@ -118,20 +118,17 @@ class ShortestPath(name: String, inputCount: Int, parameters: immutable.Seq[Para
       */
     def evaluate(instance: PluginInstance, inputs: collection.IndexedSeq[Option[Graph]],
         progressReporter: Double => Unit) = {
-        val definedInputs = getDefinedInputs(inputs)
 
-        assert(definedInputs.size > 0, "This plugin requires some input!")
+        usingDefined(inputs(0)) { g =>
+            val origin = getOriginURI(instance)
+            val destination = getDestinationURI(instance)
 
-        // Only the first graph is used
-        val g = definedInputs(0)
-        val origin = getOriginURI(instance)
-        val destination = getDestinationURI(instance)
-
-        if (g.containsVertexWithURI(origin) && g.containsVertexWithURI(destination)) {
-            createGraphWithShortestPath(g, origin, destination)
-        } else {
-            // Either origin or destination isn't present in the graph => return empty graph
-            Graph.empty
+            if (g.containsVertexWithURI(origin) && g.containsVertexWithURI(destination)) {
+                createGraphWithShortestPath(g, origin, destination)
+            } else {
+                // Either origin or destination isn't present in the graph => return empty graph
+                Graph.empty
+            }
         }
     }
 

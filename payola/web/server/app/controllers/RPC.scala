@@ -1,10 +1,12 @@
 package controllers
 
 import controllers.helpers._
-import s2js.runtime.shared.rpc
 import play.api.mvc._
 import cz.payola.domain.entities.User
 import play.api.mvc.AnyContentAsFormUrlEncoded
+import s2js.runtime.shared.rpc.RpcException
+import cz.payola.common.ValidationException
+import java.lang.reflect.InvocationTargetException
 
 /**
   * The only controller which handles requests from the client side. It receives a POST request with the following
@@ -97,22 +99,32 @@ object RPC extends PayolaController with Secured
     }
 
     /**
-      *
-      * @param t
+      * Only validation exceptions are allowed to pass to through the RPC to the client. All other exceptions are
+      * wrapped int o a RpcException.
+      * @param throwable
       * @return
       */
-    def raiseError(t: Throwable) = {
-        var deepStackTrace = ""
-        var throwable = t
-        while (throwable != null) {
-            deepStackTrace += Option(throwable.getMessage).map(_ + "\n\n" ).getOrElse("")
-            if (throwable.getStackTrace.nonEmpty) {
-                deepStackTrace += throwable.getStackTrace.toList.map(_.toString).mkString("\n") + "\n\n"
+    def raiseError(throwable: Throwable) = {
+        val exception = throwable match {
+            case i: InvocationTargetException if i.getTargetException.isInstanceOf[ValidationException] => {
+                i.getTargetException
             }
-            throwable = throwable.getCause
+            case _: RpcException => throwable
+            case _ => {
+                var deepStackTrace = ""
+                var cause = throwable
+                while (cause != null) {
+                    deepStackTrace += Option(cause.getMessage).map(_ + "\n\n" ).getOrElse("")
+                    if (cause.getStackTrace.nonEmpty) {
+                        deepStackTrace += cause.getStackTrace.toList.map(_.toString).mkString("\n") + "\n\n"
+                    }
+                    cause = cause.getCause
+                }
+                new RpcException("Uncatched exception during a remote method call.", deepStackTrace)
+            }
         }
-        InternalServerError(exceptionSerializer.serialize(new rpc.Exception(
-            "Uncatched exception during a remote method call.", deepStackTrace)))
+
+        InternalServerError(exceptionSerializer.serialize(exception))
     }
 
     /**

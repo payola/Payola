@@ -1,10 +1,15 @@
-
 canvas
 {
     border: 0px;
     position: absolute;
     top: 0;
     left: 0;
+}
+
+pre {
+  overflow: auto;
+  word-wrap: normal;
+  white-space: pre;
 }
 
 #canvas-holder{

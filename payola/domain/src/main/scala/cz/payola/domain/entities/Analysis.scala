@@ -33,6 +33,8 @@ class Analysis(protected var _name: String, protected var _owner: Option[User])
 
     protected var _pluginInstanceOutputBindings: Option[InstanceBindings] = None
 
+    def entityTypeName = "analysis"
+
     /**
       * Starts evaluation of the analysis.
       * @param timeout Maximal execution time in milliseconds.

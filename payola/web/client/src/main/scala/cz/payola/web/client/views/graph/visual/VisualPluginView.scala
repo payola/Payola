@@ -5,18 +5,15 @@ import cz.payola.web.client.views.graph.PluginView
 import graph.{InformationView, VertexView}
 import collection.mutable.ListBuffer
 import settings.components.visualsetup.VisualSetup
-import s2js.adapters.js.browser.document
 import cz.payola.web.client.events._
 import cz.payola.common.rdf._
 import cz.payola.web.client.presenters.components.ZoomControls
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client._
 import cz.payola.web.client.views.algebra._
-import scala.Some
 import s2js.adapters.js.browser.window
 import s2js.adapters.js._
 import s2js.compiler.javascript
-import cz.payola.web.client.views.todo.CanvasPack
 import cz.payola.web.client.views.VertexEventArgs
 
 /**

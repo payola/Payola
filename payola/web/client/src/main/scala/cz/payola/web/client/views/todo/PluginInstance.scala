@@ -17,6 +17,7 @@ import cz.payola.common.entities.plugins.parameters._
 import scala.Some
 import cz.payola.web.client.views.bootstrap.inputs._
 import scala.Some
+import s2js.adapters.js.dom.Element
 
 object PluginInstance
 {
@@ -137,11 +138,5 @@ class PluginInstance(val id: String, val plugin: Plugin, var predecessors: Seq[P
         params(index).input.value
     }
 
-    def block() {
-        // TODO
-    }
-
-    def unblock() {
-        // TODO
-    }
+    def blockDomElement: Element = null // TODO
 }

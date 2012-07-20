@@ -3,7 +3,7 @@ package s2js.runtime.client.rpc
 import collection.mutable.ArrayBuffer
 import s2js.compiler.javascript
 import s2js.adapters.js.browser._
-import s2js.runtime.shared.rpc.Exception
+import s2js.runtime.shared.rpc.RpcException
 
 private object Wrapper
 {
@@ -52,14 +52,14 @@ private object Wrapper
             } catch {
                 case error => {
                     val description = error match {
-                        case e: Exception => e.message
+                        case e: RpcException => e.message
                         case _ => error.toString
                     }
-                    new Exception("Exception during deserialization of the remote method result.", description)
+                    new RpcException("Exception during deserialization of the remote method result.", description)
                 }
             }
         } else if (request.readyState == requestStatusDone) {
-            new Exception("The RPC call exited with status code " + request.status + ".")
+            new RpcException("The RPC call exited with status code " + request.status + ".")
         }
 
         result match {

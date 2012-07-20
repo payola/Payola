@@ -74,11 +74,5 @@ class PrivateDataUploader(val uploaderFormID: String, val redirectURL: String) e
         // TODO
     }
 
-    def block() {
-        // TODO
-    }
-
-    def unblock() {
-        // TODO
-    }
+    def blockDomElement: Element = null // TODO
 }

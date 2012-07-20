@@ -10,11 +10,15 @@ import cz.payola.domain.Entity
   * @param _parameterValues The plugin parameter values.
   */
 class PluginInstance(protected var _plugin: Plugin, protected var _parameterValues: immutable.Seq[ParameterValue[_]])
-    extends Entity with DescribedEntity with cz.payola.common.entities.plugins.PluginInstance
+    extends Entity
+    with DescribedEntity
+    with cz.payola.common.entities.plugins.PluginInstance
 {
     checkConstructorPostConditions()
 
     type PluginType = Plugin
+
+    def entityTypeName = "plugin instance"
 
     /**
       * Returns value of a parameter with the specified name or [[scala.None]] if such doesn't exist.
@@ -79,7 +83,8 @@ class PluginInstance(protected var _plugin: Plugin, protected var _parameterValu
       * Updates the specified parameter value.
       */
     def setParameter(parameterValue: ParameterValue[_], value: Any): PluginInstance = {
-        require(_parameterValues.contains(parameterValue))
+        require(_parameterValues.contains(parameterValue),
+            "The parameter value to set doesn't correspond to the instance")
 
         parameterValue match {
             case instance: BooleanParameterValue => instance.value = value.asInstanceOf[Boolean]
@@ -111,8 +116,8 @@ class PluginInstance(protected var _plugin: Plugin, protected var _parameterValu
 
     override protected def checkInvariants() {
         super[Entity].checkInvariants()
-        require(plugin != null, "The plugin mustn't be null.")
-        require(parameterValues.map(_.parameter).sortBy(_.name) == plugin.parameters.sortBy(_.name),
-            "The parameter values must correspond to the plugin parameters.")
+        validate(plugin != null, "plugin", "The plugin mustn't be null.")
+        validate(parameterValues.map(_.parameter).sortBy(_.name) == plugin.parameters.sortBy(_.name),
+            "parameterValues", "The parameter values must correspond to the plugin parameters.")
     }
 }

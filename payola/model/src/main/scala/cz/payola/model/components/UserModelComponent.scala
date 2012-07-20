@@ -2,7 +2,7 @@ package cz.payola.model.components
 
 import cz.payola.data.DataContextComponent
 import cz.payola.domain.entities._
-import cz.payola.domain.RdfStorageComponent
+import cz.payola.domain._
 import cz.payola.model.EntityModelComponent
 
 trait UserModelComponent extends EntityModelComponent
@@ -11,11 +11,15 @@ trait UserModelComponent extends EntityModelComponent
 
     lazy val userModel = new EntityModel(userRepository)
     {
+        override def persist(entity: Entity) {
+            uniqueKeyCheckedPersist(entity, "name")
+        }
+
         def create(email: String, password: String) {
             val user = new User(email)
             user.password = cryptPassword(password)
             user.email = email
-            repository.persist(user)
+            persist(user)
 
             payolaStorageModel.createUsersPrivateStorage(user)
         }

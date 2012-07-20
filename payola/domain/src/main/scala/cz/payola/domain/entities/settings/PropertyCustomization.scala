@@ -7,4 +7,6 @@ class PropertyCustomization(val uri: String, protected var _strokeColor: String,
     with cz.payola.common.entities.settings.PropertyCustomization
 {
     checkConstructorPostConditions()
+
+    def entityTypeName = "ontology property customization"
 }

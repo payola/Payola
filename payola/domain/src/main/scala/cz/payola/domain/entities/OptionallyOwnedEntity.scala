@@ -9,6 +9,6 @@ trait OptionallyOwnedEntity extends cz.payola.common.entities.OptionallyOwnedEnt
     type UserType = User
 
     protected def checkInvariants() {
-        require(owner != null, "Owner of the entity mustn't be null.")
+        validate(owner != null, "owner", "Owner of the %s mustn't be null.".format(entityTypeName))
     }
 }

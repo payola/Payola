@@ -8,7 +8,7 @@ import cz.payola.web.client.View
 import s2js.compiler.javascript
 import s2js.adapters.js.browser.window
 
-abstract class ElementView[A <: dom.Element](domElementName: String, val innerViews: Seq[View], cssClass: String)
+abstract class ElementView[A <: dom.Element](domElementName: String, val subViews: Seq[View], cssClass: String)
     extends View
 {
     val domElement = document.createElement[A](domElementName)
@@ -41,22 +41,16 @@ abstract class ElementView[A <: dom.Element](domElementName: String, val innerVi
     domElement.onmousewheel = { e => mouseWheelRotated.triggerDirectly(this, e) }
     addCssClass(cssClass)
 
+    def blockDomElement = domElement
+
     def render(parent: dom.Element) {
         parentElement = Some(parent)
         parent.appendChild(domElement)
-        innerViews.foreach(_.render(domElement))
+        subViews.foreach(_.render(domElement))
     }
 
     def destroy() {
         parentElement.foreach(_.removeChild(domElement))
-    }
-
-    def block() {
-        View.block(domElement)
-    }
-
-    def unblock() {
-        View.unblock(domElement)
     }
 
     def getAttribute(name: String): String = {

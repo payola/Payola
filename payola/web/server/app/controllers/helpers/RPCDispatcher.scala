@@ -5,6 +5,7 @@ import s2js.runtime.shared.rpc
 import cz.payola.domain.entities.User
 import scala.collection.mutable
 import cz.payola.domain.entities.User
+import s2js.runtime.shared.rpc.RpcException
 
 class RPCDispatcher(jsonSerializer: RPCSerializer)
 {
@@ -25,7 +26,7 @@ class RPCDispatcher(jsonSerializer: RPCSerializer)
 
         // get the name of the method
         // when empty, throw an exception
-        val fqdn = params.get("method").flatMap(_.headOption).getOrElse(throw new Exception("TODO"))
+        val fqdn = params.get("method").flatMap(_.headOption).getOrElse(throw new RpcException("TODO"))
 
         // sort the params list with the parameter name (presumably a ordering-index - 1,2,3,...)
         params.toList.sortBy {
@@ -174,9 +175,9 @@ class RPCDispatcher(jsonSerializer: RPCSerializer)
 
             // get the desired method on the object
             val methodOption = clazz.getMethods.find(_.getName == methodName)
-            // if the method is not defined, throw an Exception
+            // if the method is not defined, throw an RpcException
             if (!methodOption.isDefined) {
-                throw new Exception
+                throw new RpcException
             }
 
             // "objectify" the desired mezhod to be able to invoke it later
@@ -199,7 +200,7 @@ class RPCDispatcher(jsonSerializer: RPCSerializer)
             val dto = new InvocationInfo(methodToRun, clazz, runnableObj, methodIsSecured, authorizationRequired, authorizedUser)
             dto
         }catch{
-            case e: java.lang.ClassNotFoundException => throw new rpc.Exception("Invalid remote object name.")
+            case e: java.lang.ClassNotFoundException => throw new RpcException("Invalid remote object name.")
         }
     }
 
@@ -236,7 +237,7 @@ class RPCDispatcher(jsonSerializer: RPCSerializer)
 
     def checkAuthorization(user: Option[User]) = {
         if (!user.isDefined){
-            throw new rpc.Exception("Not auhorized.")
+            throw new RpcException("Not authorized.")
         }
     }
 
@@ -257,9 +258,7 @@ class RPCDispatcher(jsonSerializer: RPCSerializer)
 
         result match {
             case resultMessage: ActionExecutorSuccess => resultMessage.result
-            case errorMessage: ActionExecutorError => {
-                throw new Exception("Exception during execution of the remote method.", errorMessage.error)
-            }
+            case errorMessage: ActionExecutorError => throw errorMessage.error
         }
     }
 

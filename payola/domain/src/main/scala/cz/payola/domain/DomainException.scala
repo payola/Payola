@@ -1,3 +1,5 @@
 package cz.payola.domain
 
-class DomainException(message: String) extends Exception(message)
+import cz.payola.common.PayolaException
+
+class DomainException(message: String = "", cause: Throwable = null) extends PayolaException(message, cause)

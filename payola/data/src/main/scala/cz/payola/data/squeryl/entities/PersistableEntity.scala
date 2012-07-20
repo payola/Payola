@@ -14,8 +14,10 @@ import cz.payola.data.squeryl.SquerylDataContextComponent
   * (if relation is defined in [[cz.payola.data.PayolaDB]] schema)
   *
   */
-trait PersistableEntity extends cz.payola.domain.Entity with KeyedEntity[String]
+trait PersistableEntity extends KeyedEntity[String]
 {
+    self: cz.payola.domain.Entity =>
+
     val context: SquerylDataContextComponent
 
     protected def wrapInTransaction[C](body: => C) = {

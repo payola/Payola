@@ -2,14 +2,15 @@ package cz.payola.web.client.presenters
 
 import cz.payola.web.client.View
 import s2js.adapters.js.browser._
-import cz.payola.web.shared.DataSourceManager
+import cz.payola.web.shared.managers.DataSourceManager
 import cz.payola.web.client.views.elements._
 import s2js.adapters.js
-import cz.payola.domain.entities.Plugin
-import cz.payola.domain.entities.plugins.Parameter
+import cz.payola.common.entities.Plugin
+import cz.payola.common.entities.plugins.Parameter
 import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
 import s2js.compiler.javascript
 import s2js.adapters.js.dom.Element
+import cz.payola.web.client.models.Model
 
 class DataSourceCreator(val dataFetcherDivID: String,
     val optionsDivID: String,
@@ -48,16 +49,15 @@ class DataSourceCreator(val dataFetcherDivID: String,
     }
 
     // Load data fetchers
-    val availableDataFetchers = DataSourceManager.getAvailableDataFetchers()
-    availableDataFetchers foreach { dataFetcher =>
-        new SelectOption(List(new Text(dataFetcher.name))).render(dataFetcherList)
-    }
-
-    // If there are no available data fetchers, go back to the listing
-    if (availableDataFetchers.size == 0){
-        // No available data fetchers
-        window.alert("There are no data fetcher plugins available!")
-        redirectToListing()
+    private var accessibleDataFetchers: Seq[Plugin] = null
+    Model.accessibleDataFetchers { dataFetchers =>
+        accessibleDataFetchers = dataFetchers
+        dataFetchers.foreach { d =>
+            val option = new SelectOption(List(new Text(d.name)))
+            option.render(dataFetcherList)
+        }
+    } { e =>
+        // TODO
     }
 
     // Reload plugin options
@@ -80,7 +80,7 @@ class DataSourceCreator(val dataFetcherDivID: String,
       * @return Selected plugin.
       */
     private def getSelectedPlugin: Plugin = {
-        availableDataFetchers.find(_.name == dataFetcherList.value).get
+        accessibleDataFetchers.find(_.name == dataFetcherList.value).get
     }
 
     /** Redirects to the data source listing page.
@@ -140,12 +140,6 @@ class DataSourceCreator(val dataFetcherDivID: String,
         // TODO
     }
 
-    def block() {
-        // TODO
-    }
-
-    def unblock() {
-        // TODO
-    }
+    def blockDomElement: Element = null // TODO
 
 }

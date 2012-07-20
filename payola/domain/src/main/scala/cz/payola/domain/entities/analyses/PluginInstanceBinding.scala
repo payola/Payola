@@ -19,17 +19,22 @@ class PluginInstanceBinding(
 
     type PluginInstanceType = PluginInstance
 
+    def entityTypeName = "plugin instance binding"
+
     override def canEqual(other: Any): Boolean = {
         other.isInstanceOf[PluginInstanceBinding]
     }
 
     override protected def checkInvariants() {
         super[Entity].checkInvariants()
-        require(sourcePluginInstance != null, "The source plugin instance mustn't be null.")
-        require(targetPluginInstance != null, "The target plugin instance mustn't be null.")
-        require(sourcePluginInstance != targetPluginInstance, "The source plugin instance cannot also be the target " +
-            "plugin instance (a cycle formed of one plugin instance).")
-        require(targetInputIndex >= 0 && targetInputIndex < targetPluginInstance.plugin.inputCount,
-            "The target input index is invalid.")
+        validate(sourcePluginInstance != null, "sourcePluginInstance",
+            "The source plugin instance of the binding mustn't be null.")
+        validate(targetPluginInstance != null, "targetPluginInstance",
+            "The target plugin instance of the binding mustn't be null.")
+        validate(sourcePluginInstance != targetPluginInstance, "sourcePluginInstance",
+            "The source plugin instance of the binding cannot also be the target plugin instance (a cycle formed of " +
+            "one plugin instance).")
+        validate(targetInputIndex >= 0 && targetInputIndex < targetPluginInstance.plugin.inputCount,
+            "targetInputIndex", "The target input index of the binding is invalid.")
     }
 }

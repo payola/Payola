@@ -6,6 +6,7 @@ import cz.payola.domain.entities.privileges._
 import cz.payola.domain.entities.settings.OntologyCustomization
 import cz.payola.model.EntityModelComponent
 import cz.payola.domain.entities.User
+import cz.payola.common.ValidationException
 
 trait OntologyCustomizationModelComponent extends EntityModelComponent
 {
@@ -16,6 +17,11 @@ trait OntologyCustomizationModelComponent extends EntityModelComponent
         classOf[UseOntologyCustomizationPrivilege],
         (user: User) => user.ownedOntologyCustomizations)
     {
+        def create(name: String, ontologyURL: String, owner: User): OntologyCustomization = {
+            val customization = OntologyCustomization.empty(ontologyURL, name, Some(owner))
+            persist(customization)
+            customization
+        }
 
     }
 }

@@ -4,5 +4,5 @@ import s2js.adapters.js.dom
 import cz.payola.web.client.views._
 import cz.payola.web.client.View
 
-class Italic(innerViews: Seq[View] = Nil, cssClass: String = "")
-    extends ElementView[dom.Element]("i", innerViews, cssClass)
+class Italic(subViews: Seq[View] = Nil, cssClass: String = "")
+    extends ElementView[dom.Element]("i", subViews, cssClass)

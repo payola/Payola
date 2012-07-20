@@ -4,6 +4,7 @@ import cz.payola.data._
 import cz.payola.domain.Entity
 import cz.payola.domain.entities._
 import cz.payola.model.components.GroupModelComponent
+import cz.payola.common.ValidationException
 
 trait EntityModelComponent
 {
@@ -18,10 +19,25 @@ trait EntityModelComponent
         def getAll(pagination: Option[PaginationInfo] = None): Seq[A] = repository.getAll(pagination)
 
         def persist(entity: Entity) {
-            repository.persist(entity)
+            simplePersist(entity)
         }
 
         def remove(entity: Entity): Boolean = repository.removeById(entity.id)
+
+        protected def simplePersist(entity: Entity) {
+            repository.persist(entity)
+        }
+
+        protected def uniqueKeyCheckedPersist(entity: Entity, uniqueFieldName: String) {
+            try {
+                simplePersist(entity)
+            } catch {
+                case d: DataException if d.isUniqueKeyViolation => {
+                    throw new ValidationException(uniqueFieldName,
+                        "There already exists a %s with this %s.".format(entity.entityTypeName, uniqueFieldName))
+                }
+            }
+        }
     }
 
     class ShareableEntityModel[A <: ShareableEntity with OptionallyOwnedEntity with NamedEntity](
@@ -30,6 +46,10 @@ trait EntityModelComponent
         val ownedEntitiesGetter: User => Seq[A])
         extends EntityModel[A](repository)
     {
+        override def persist(entity: Entity) {
+            uniqueKeyCheckedPersist(entity, "name")
+        }
+
         def getAccessibleToUser(user: Option[User]): Seq[A] = {
             val public = repository.getAllPublic
             val owned = getOwnedByUser(user)
