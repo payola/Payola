@@ -18,4 +18,6 @@ import cz.payola.domain.entities.User
     def dataSourceExistsWithName(name: String, user: User = null): Boolean = {
         model.getAll().exists(_.name == name)
     }
+
+
 }

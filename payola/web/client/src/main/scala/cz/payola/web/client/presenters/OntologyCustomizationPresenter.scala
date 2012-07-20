@@ -3,12 +3,107 @@ package cz.payola.web.client.presenters
 import cz.payola.common.entities.settings._
 import cz.payola.web.client.views.graph.customization.CustomizationModal
 import cz.payola.web.client.events._
+import cz.payola.web.shared.managers.OntologyCustomizationManager
+import cz.payola.common.ValidationException
+import cz.payola.web.client.Presenter
+import cz.payola.web.client.views.bootstrap.InputControl
 
-class OntologyCustomizationPresenter(ontologyCustomization: OntologyCustomization)
+class OntologyCustomizationPresenter(ontologyCustomization: OntologyCustomization) extends Presenter
 {
 
     // This will notify of any value being changed
     val customizationValueChanged: SimpleUnitEvent[this.type] = new SimpleUnitEvent[this.type]
+
+    val modal = new CustomizationModal(ontologyCustomization)
+
+    /** Failure handler for property saving.
+      *
+      * @param t The error.
+      * @param inputFetcher A function which fetches the input control from which the property has been edited.
+      * @param valueName Name of the value.
+      */
+    def classValueSetterFailHandler(t: Throwable, inputFetcher: => InputControl, valueName: String) {
+        t match {
+            case v: ValidationException => {
+                inputFetcher.setState(v ,valueName)
+                // TODO reset the value
+            }
+            case _ => {
+                modal.destroy()
+                fatalErrorHandler(t)
+            }
+        }
+    }
+
+    /** Handler for class fill color change.
+      *
+      * @param args Args of the event.
+      */
+    def classFillColorChangedHandler(args: ClassCustomizationModificationEventArgs[_, String]) {
+        OntologyCustomizationManager.setClassFillColor(ontologyCustomization.id, args.classURI, args.value) { Unit =>
+            // Success - update the client model
+            ontologyCustomization.classCustomizations.find(_.uri == args.classURI).get.fillColor = args.value
+            postValueChangeNotification()
+        } { t: Throwable =>
+            classValueSetterFailHandler(t, { modal.getFillColorInputForSelectedClass }, "fillColor")
+        }
+    }
+
+    /** Handler for class glyph change.
+      *
+      * @param args Args of the event.
+      */
+    def classGlyphChangedHandler(args: ClassCustomizationModificationEventArgs[_, Option[Char]]) {
+        OntologyCustomizationManager.setClassGlyph(ontologyCustomization.id, args.classURI, args.value) { Unit =>
+        // Success - update the client model
+            ontologyCustomization.classCustomizations.find(_.uri == args.classURI).get.glyph = args.value
+            postValueChangeNotification()
+        } { t: Throwable =>
+            classValueSetterFailHandler(t, { modal.getGlyphInputForSelectedClass }, "glyph")
+        }
+    }
+
+    /** Handler for class radius change.
+      *
+      * @param args Args of the event.
+      */
+    def classRadiusChangedHandler(args: ClassCustomizationModificationEventArgs[_, Int]) {
+        OntologyCustomizationManager.setClassRadius(ontologyCustomization.id, args.classURI, args.value) { Unit =>
+            // Success - update the client model
+            ontologyCustomization.classCustomizations.find(_.uri == args.classURI).get.radius = args.value
+            postValueChangeNotification()
+        } { t: Throwable =>
+            classValueSetterFailHandler(t, { modal.getRadiusInputForSelectedClass }, "radius")
+        }
+    }
+
+    /** Handler for property stroke color change.
+      *
+      * @param args Args of the event.
+      */
+    def propertyStrokeColorChangedHandler(args: ClassPropertyCustomizationModificationEventArgs[_, String]) {
+        OntologyCustomizationManager.setPropertyStrokeColor(ontologyCustomization.id, args.classURI, args.propertyURI, args.value) { Unit =>
+        // Success - update the client model
+            ontologyCustomization.classCustomizations.find(_.uri == args.classURI).get.propertyCustomizations.find(_.uri == args.propertyURI).get.strokeColor = args.value
+            postValueChangeNotification()
+        } { t: Throwable =>
+            classValueSetterFailHandler(t, { modal.getStrokeColorInputForPropertyOfSelectedClass(args.propertyURI) }, "strokeColor")
+        }
+    }
+
+    /** Handler for property stroke color change.
+      *
+      * @param args Args of the event.
+      */
+    def propertyStrokeWidthChangedHandler(args: ClassPropertyCustomizationModificationEventArgs[_, Int]) {
+        OntologyCustomizationManager.setPropertyStrokeWidth(ontologyCustomization.id, args.classURI, args.propertyURI, args.value) { Unit =>
+        // Success - update the client model
+            ontologyCustomization.classCustomizations.find(_.uri == args.classURI).get.propertyCustomizations.find(_.uri == args.propertyURI).get.strokeWidth = args.value
+            postValueChangeNotification()
+        } { t: Throwable =>
+            classValueSetterFailHandler(t, { modal.getStrokeWidthInputForPropertyOfSelectedClass(args.propertyURI) }, "strokeWidth")
+        }
+    }
 
     /** Retrieves a class customization for a class URI from the ontology customization.
       *
@@ -33,33 +128,12 @@ class OntologyCustomizationPresenter(ontologyCustomization: OntologyCustomizatio
       *
       */
     def initialize() {
-        val modal = new CustomizationModal(ontologyCustomization)
-        modal.classFillColorChanged += { e =>
-            getClassWithURI(e.classURI).fillColor = e.value
-            postValueChangeNotification()
-            true
-        }
-        modal.classRadiusChanged += { e =>
-            getClassWithURI(e.classURI).radius = e.value
-            postValueChangeNotification()
-            true
-        }
-        modal.classGlyphChanged += { e =>
-            getClassWithURI(e.classURI).glyph = e.value
-            postValueChangeNotification()
-            true
-        }
+        modal.classFillColorChanged += classFillColorChangedHandler _
+        modal.classRadiusChanged += classRadiusChangedHandler _
+        modal.classGlyphChanged += classGlyphChangedHandler _
 
-        modal.classPropertyStrokeColorChanged += { e =>
-            getPropertyOfClassWithURIs(e.classURI, e.propertyURI).strokeColor = e.value
-            postValueChangeNotification()
-            true
-        }
-        modal.classPropertyStrokeWidthChanged += { e =>
-            getPropertyOfClassWithURIs(e.classURI, e.propertyURI).strokeWidth = e.value
-            postValueChangeNotification()
-            true
-        }
+        modal.classPropertyStrokeColorChanged += propertyStrokeColorChangedHandler _
+        modal.classPropertyStrokeWidthChanged += propertyStrokeWidthChangedHandler _
 
         modal.render()
     }

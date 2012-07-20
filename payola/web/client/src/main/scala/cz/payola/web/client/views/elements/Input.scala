@@ -9,7 +9,9 @@ class Input(name: String, initialValue: String, title: Option[String], cssClass:
 {
     val changed = new SimpleUnitEvent[this.type]
 
-    keyPressed += { e =>
+    // Needs to be key released. On keyPressed, the event would precede the actual
+    // input value change - it would trigger something like willChange.
+    keyReleased += { e =>
         changed.triggerDirectly(this)
         true
     }
