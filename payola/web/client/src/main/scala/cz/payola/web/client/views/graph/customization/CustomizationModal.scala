@@ -7,7 +7,6 @@ import cz.payola.web.client.events._
 import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
 import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.ColorPane
 import cz.payola.web.client.views.graph.visual.Color
-import s2js.adapters.js.browser._
 
 class CustomizationModal(customization: OntologyCustomization)
     extends Modal("Customize ontology " + customization.name, Nil, Some("Done"), None, false,
@@ -46,21 +45,58 @@ class CustomizationModal(customization: OntologyCustomization)
     var selectedClassCustomization: ClassCustomization = null
     selectClassItem(classListItems(0))
 
-
-
-    private def getClassElementByName(name: String): InputControl = {
+    /** Retrieves a property element by name.
+      *
+      * @param name Name of the element.
+      * @return InputControl with the name.
+      */
+    private def getPropertyElementByName(name: String): InputControl = {
         propertiesDiv.domElement.getElementsByTagName(name).item(0).asInstanceOf[InputControl]
     }
 
+    /** Fill color input control;
+      *
+      * @return Fill color input control;
+      */
     def getFillColorInputForSelectedClass: InputControl = {
-        getClassElementByName("class-fill-color-input")
+        getPropertyElementByName("class-fill-color-input")
     }
 
+    /** Glyph input control;
+      *
+      * @return Glyph input control;
+      */
+    def getGlyphInputForSelectedClass: InputControl = {
+        getPropertyElementByName("class-glyph")
+    }
+
+    /** Radius input control;
+      *
+      * @return Radius input control;
+      */
     def getRadiusInputForSelectedClass: InputControl = {
-        getClassElementByName("class-radius")
+        getPropertyElementByName("class-radius")
     }
 
+    /** Stroke color input control;
+      *
+      * @return Stroke color input control;
+      */
+    def getStrokeColorInputForPropertyOfSelectedClass(propertyURI: String): InputControl = {
+        getPropertyElementByName("property-stroke-color-" + propertyURI)
+    }
 
+    /** Stroke width input control;
+      *
+      * @return Stroke width input control;
+      */
+    def getStrokeWidthInputForPropertyOfSelectedClass(propertyURI: String): InputControl = {
+        getPropertyElementByName("property-stroke-width-" + propertyURI)
+    }
+
+    /** Sets up div attributes (mostly adding CSS classes).
+      *
+      */
     private def setupDivAttributes() {
         rowDiv.addCssClass("row-fluid")
 
@@ -110,9 +146,15 @@ class CustomizationModal(customization: OntologyCustomization)
             classFillColorChanged.trigger(new ClassCustomizationModificationEventArgs[this.type, String](selectedClassCustomization.uri, fillColorInput.getColorHexString, this))
         }
         radiusInput.input.changed += { e =>
+            if (radiusInput.input.value.toInt < 0) {
+                radiusInput.input.value = "0"
+            }
             classRadiusChanged.trigger(new ClassCustomizationModificationEventArgs[this.type, Int](selectedClassCustomization.uri, radiusInput.input.value.toInt, this))
         }
         glyphInput.input.changed += { e =>
+            if (glyphInput.input.value.length > 1) {
+                glyphInput.input.value = glyphInput.input.value(0).toString
+            }
             val charOption = if (glyphInput.input.value == "") None else Some(glyphInput.input.value.charAt(0))
             classGlyphChanged.trigger(new ClassCustomizationModificationEventArgs[this.type, Option[Char]](selectedClassCustomization.uri, charOption, this))
         }
