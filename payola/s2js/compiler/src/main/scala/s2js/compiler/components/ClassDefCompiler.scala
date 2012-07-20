@@ -532,7 +532,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
       */
     private def compileSelect(select: Global#Select, isSubSelect: Boolean = false, isInsideApply: Boolean = false) {
         val subSelectToken = if (isSubSelect) "." else ""
-        var name = packageDefCompiler.getSymbolLocalJsName(select.symbol)
+        val name = packageDefCompiler.getSymbolLocalJsName(select.symbol)
 
         select match {
             case Select(qualifier, _) if selectIsIgnored(select) => {

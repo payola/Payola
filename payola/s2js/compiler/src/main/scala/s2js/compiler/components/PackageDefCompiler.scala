@@ -249,12 +249,13 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
     }
 
     /**
-      * Returns whether the type is a Function1 (a function with one parameter).
+      * Returns whether the type is a Function with the specified number of parameters.
       * @param tpe the type to check.
-      * @return True if the type is a function with one parameter, false otherwise.
+      * @param parameterCount Count of parameters, the function should have.
+      * @return True if the type is a function, false otherwise.
       */
-    def typeIsFunction1(tpe: Global#Type): Boolean = {
-        tpe.typeSymbol.fullName == "scala.Function1"
+    def typeIsFunction(tpe: Global#Type, parameterCount: Int): Boolean = {
+        tpe.typeSymbol.fullName == "scala.Function" + parameterCount
     }
 
     /**
@@ -275,7 +276,7 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
         val callbacks = parameters.takeRight(2)
         val successCallback = callbacks.head
         val errorCallback = callbacks.last
-        if (!typeIsFunction1(successCallback.tpe) || !typeIsFunction1(errorCallback.tpe)) {
+        if (!List(0, 1).exists(c => typeIsFunction(successCallback.tpe, c)) || !typeIsFunction(errorCallback.tpe, 1)) {
             throw new ScalaToJsException(errorPrefix +
                 " must have declared success callback function and error callback function parameters.")
         }

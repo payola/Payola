@@ -1,6 +1,5 @@
 package cz.payola.data
 
-import java.sql._
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 

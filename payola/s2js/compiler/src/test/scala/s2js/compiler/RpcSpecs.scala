@@ -89,7 +89,7 @@ class RpcSpecs extends CompilerFixtureSpec
             }
     }
 
-    it("asynchronous temote method call gets translated into an asynchronous rpc call") {
+    it("asynchronous remote method call gets translated into an asynchronous rpc call") {
         configMap =>
             scalaCode {
                 """
@@ -97,8 +97,12 @@ class RpcSpecs extends CompilerFixtureSpec
 
                     package server {
                         @remote object o {
-                            @async def foo(bar: String)(successCallback: (Int => Unit))(errorCallback: (Throwable => Unit)) {
+                            @async def foo(bar: String)(successCallback: Int => Unit)(errorCallback: Throwable => Unit) {
                                 successCallback(bar.length)
+                            }
+
+                            @async def bar()(successCallback: () => Unit)(errorCallback: Throwable => Unit) {
+                                successCallback()
                             }
                         }
                     }
@@ -107,6 +111,7 @@ class RpcSpecs extends CompilerFixtureSpec
                         def main() {
                             var x = 0
                             server.o.foo("xyz") {i => x = i} {e => x = -1}
+                            server.o.bar() { () => x = 1 } { e => x = 0 }
                         }
                     }
                 """
@@ -119,14 +124,18 @@ class RpcSpecs extends CompilerFixtureSpec
                         var self = this;
                         var x = 0;
                         s2js.runtime.client.rpc.Wrapper.callAsync('server.o.foo', ['xyz'], ['java.lang.String'],
-                            function(i) { x = i; }, function(e) { x = -1; });
+                            function(i) { x = i; },
+                            function(e) { x = -1; });
+                        s2js.runtime.client.rpc.Wrapper.callAsync('server.o.bar', [], [],
+                            function() { x = 1; },
+                            function(e) { x = 0; });
                     };
                     client.__class__ = new s2js.runtime.client.Class('client', []);
                 """
             }
     }
 
-    it("synchronous and asynchronous remote methods are supported") {
+    it("synchronous and asynchronous secured remote methods are supported") {
         configMap =>
             scalaCode {
                 """
