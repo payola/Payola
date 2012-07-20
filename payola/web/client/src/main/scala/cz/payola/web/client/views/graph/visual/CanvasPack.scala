@@ -1,4 +1,4 @@
-package cz.payola.web.client.views.todo
+package cz.payola.web.client.views.graph.visual
 
 import cz.payola.web.client.views.elements.Canvas
 

@@ -11,6 +11,7 @@ import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events.UnitEvent
 import cz.payola.web.client.views.elements.Div
 import cz.payola.web.client.views.elements.Anchor
+import s2js.adapters.js.dom.Element
 
 class AnalysisControls(analysisId: String) extends View
 {
@@ -114,11 +115,5 @@ class AnalysisControls(analysisId: String) extends View
         // TODO
     }
 
-    def block() {
-        // TODO
-    }
-
-    def unblock() {
-        // TODO
-    }
+    def blockDomElement: Element = null // TODO
 }

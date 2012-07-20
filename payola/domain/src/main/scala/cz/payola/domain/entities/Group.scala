@@ -16,6 +16,8 @@ class Group(protected var _name: String, protected var _owner: User)
 
     type UserType = User
 
+    def entityTypeName = "user group"
+
     /**
       * Adds a member to the group.
       * @param user The user to be added.
@@ -49,7 +51,7 @@ class Group(protected var _name: String, protected var _owner: User)
     override protected def checkInvariants() {
         super[Entity].checkInvariants()
         super[NamedEntity].checkInvariants()
-        require(owner != null, "Owner of the entity mustn't be null.")
+        validate(owner != null, "owner", "Owner of the group mustn't be null.")
     }
 }
 

@@ -4,5 +4,5 @@ import s2js.adapters.js.dom
 import cz.payola.web.client.views._
 import cz.payola.web.client.View
 
-class UnorderedList(innerViews: Seq[View] = Nil, cssClass: String = "")
-    extends ElementView[dom.Div]("ul", innerViews, cssClass)
+class UnorderedList(subViews: Seq[View] = Nil, cssClass: String = "")
+    extends ElementView[dom.Div]("ul", subViews, cssClass)

@@ -1,10 +1,20 @@
-package cz.payola.web.shared
+package cz.payola.web.shared.managers
 
 import s2js.compiler._
-import cz.payola.domain.entities.User
+import cz.payola.web.shared.Payola
+import cz.payola.domain.entities._
+import cz.payola.domain.entities.plugins.concrete.DataFetcher
 
-@remote object PluginManager
+@remote @secured object PluginManager
+    extends ShareableEntityManager[Plugin, cz.payola.common.entities.Plugin](Payola.model.pluginModel)
 {
+    @secured @async def getAccessibleDataFetchers(user: Option[User] = null)
+        (successCallback: Seq[cz.payola.common.entities.Plugin] => Unit)
+        (errorCallback: Throwable => Unit) {
+
+        successCallback(model.getAccessibleToUser(user).filter(_.isInstanceOf[DataFetcher]))
+    }
+
     /** Attempts to create a new plugin from pluginCode.
       *
       * @throws Exception when an error occurs (compilation, already-existing name, ...).
@@ -14,7 +24,8 @@ import cz.payola.domain.entities.User
       * @param successCallback Success callback.
       * @param failCallback Fail callback.
       */
-    @async @secured def uploadPlugin(pluginCode: String, user: User = null)(successCallback: (String => Unit))(failCallback: (Throwable => Unit)) {
+    @async def uploadPlugin(pluginCode: String, user: User = null)(successCallback: (String => Unit))
+        (failCallback: (Throwable => Unit)) {
         // Sanity check
         assert(user != null, "Not logged in, or some other error")
 
@@ -29,6 +40,4 @@ import cz.payola.domain.entities.User
             }
         }
     }
-
-
 }

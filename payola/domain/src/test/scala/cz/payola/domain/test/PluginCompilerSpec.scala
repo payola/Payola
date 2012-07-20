@@ -50,7 +50,7 @@ class PluginCompilerSpec extends FlatSpec with ShouldMatchers
     }
 
     it should "throw exceptions when the compilation fails" in {
-        try { {
+        try {
             val plugin = compiler.compile(
                 """
                     package my.custom.plugin
@@ -58,7 +58,6 @@ class PluginCompilerSpec extends FlatSpec with ShouldMatchers
                     class MyPlugin(
                 """)
             fail("The PluginCompilationException wasn't thrown.")
-        }
         } catch {
             case _: PluginCompilationException => // NOOP
             case _ => fail("The PluginCompilationException wasn't thrown.")

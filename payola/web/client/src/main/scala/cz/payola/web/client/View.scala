@@ -6,21 +6,21 @@ import s2js.compiler.javascript
 
 object View
 {
-    @javascript("$(target).block(self.getBlockParameters(messageView));")
-    def block(target: AnyRef, messageView: Option[View] = None) { }
-
-    @javascript("$.blockUI(self.getBlockParameters(messageView));")
-    def blockPage(messageView: Option[View] = None) { }
-
-    @javascript("$(target).unblock({ fadeOut: 0 });")
-    def unblock(target: AnyRef) { }
+    @javascript("$.blockUI(self.getBlockParameters(message));")
+    def blockPage(message: String = "") { }
 
     @javascript("$.unblockUI({ fadeOut: 0 });")
     def unblockPage() { }
 
+    @javascript("$(target).block(self.getBlockParameters(message));")
+    private def block(target: dom.Element, message: String) { }
+
+    @javascript("$(target).unblock({ fadeOut: 0 });")
+    private def unblock(target: dom.Element) { }
+
     @javascript("""
         return {
-            message: self.messageViewToHtml(messageView),
+            message: self.messageToHtml(message),
             fadeIn: 100,
             css: {
                 padding: 20,
@@ -31,14 +31,23 @@ object View
                 opacity: 0.6
             }
         };""")
-    private def getBlockParameters(messageView: Option[View]): String = ""
+    private def getBlockParameters(message: String): String = ""
 
-    private def messageViewToHtml(messageView: Option[View]): String = {
-        messageView.map { m =>
-            val wrapper = document.createElement[dom.Div]("div")
-            m.render(wrapper)
-            wrapper.innerHTML
-        }.getOrElse(null)
+    private def messageToHtml(message: String): String = {
+        if (message == null || message == "") {
+            null
+        } else {
+            """
+                <div class="row-fluid">
+                    <h3 style="padding: 20px;">""" + message + """</h3>
+                </div>
+                <div class="row-fluid">
+                    <div class="progress progress-striped active">
+                        <div class="bar" style="width: 100%"></div>
+                    </div>
+                </div>
+            """
+        }
     }
 }
 
@@ -48,7 +57,13 @@ trait View
 
     def destroy()
 
-    def block()
+    def blockDomElement: dom.Element
 
-    def unblock()
+    def block(message: String = "") {
+        View.block(blockDomElement, message)
+    }
+
+    def unblock() {
+        View.unblock(blockDomElement)
+    }
 }

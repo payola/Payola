@@ -37,6 +37,8 @@ class DataSource(protected var _name: String, protected var _owner: Option[User]
     with ShareableEntity
     with cz.payola.common.entities.plugins.DataSource
 {
+    override def entityTypeName = "data source"
+
     /**
       * Executes the specified query.
       * @param query The query to execute.

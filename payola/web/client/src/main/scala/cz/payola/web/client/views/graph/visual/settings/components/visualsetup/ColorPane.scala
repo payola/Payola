@@ -68,11 +68,5 @@ class ColorPane(name: String, label: String, var color: Option[Color]) extends V
         // TODO
     }
 
-    def block() {
-        // TODO
-    }
-
-    def unblock() {
-        // TODO
-    }
+    def blockDomElement: Element = null // TODO
 }

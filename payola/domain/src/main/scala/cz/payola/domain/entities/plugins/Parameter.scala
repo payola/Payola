@@ -9,9 +9,12 @@ import cz.payola.domain.Entity
   * @tparam A Type of the parameter value.
   */
 abstract class Parameter[A](protected val _name: String, protected val _defaultValue: A)
-    extends Entity with cz.payola.common.entities.plugins.Parameter[A]
+    extends Entity
+    with cz.payola.common.entities.plugins.Parameter[A]
 {
     checkConstructorPostConditions()
+
+    def entityTypeName = "parameter"
 
     /**
       * Creates a new value of the parameter.
@@ -35,6 +38,6 @@ abstract class Parameter[A](protected val _name: String, protected val _defaultV
 
     override protected def checkInvariants() {
         super[Entity].checkInvariants()
-        require(name != null, "The name mustn't be null.")
+        validate(name != null && name.trim != "", "name", "The name mustn't be empty.")
     }
 }

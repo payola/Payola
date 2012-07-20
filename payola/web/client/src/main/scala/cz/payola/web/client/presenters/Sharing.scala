@@ -65,7 +65,7 @@ class Sharing(shareButtonPlaceholderClass: String, entityType: String) extends P
             }{ err => }
         })
 
-        blockPageLoading("Loading initial data.")
+        blockPage("Loading initial data.")
         SharingData.getAlreadySharedTo(entityType, id, "group"){ groups =>
             modal.render()
             bindGroupSelect(groups)
@@ -81,7 +81,7 @@ class Sharing(shareButtonPlaceholderClass: String, entityType: String) extends P
             }{ err => }
         })
 
-        blockPageLoading("Loading initial data.")
+        blockPage("Loading initial data.")
         SharingData.getAlreadySharedTo(entityType, id, "user"){ users =>
             modal.render()
             bindUserSelect(users)
@@ -120,7 +120,7 @@ class Sharing(shareButtonPlaceholderClass: String, entityType: String) extends P
         }
 
         modal.saving += {e =>
-            blockPageLoading("Sharing a "+entityName+" to a "+privilegedType+"...")
+            blockPage("Sharing a "+entityName+" to a "+privilegedType+"...")
             callback({ unblockPage() },privilegedSearchBox.input.value)
             modal.destroy()
             true

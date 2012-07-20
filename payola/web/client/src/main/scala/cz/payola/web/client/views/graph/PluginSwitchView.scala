@@ -9,10 +9,10 @@ import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.V
 import cz.payola.web.client.views.graph.visual.settings._
 import cz.payola.web.client.views.graph.visual.techniques.circle.CircleTechnique
 import cz.payola.web.client.views.graph.visual.techniques.tree.TreeTechnique
-import cz.payola.web.client.views.graph.visual.techniques.minimalization.MinimalizationTechnique
 import cz.payola.web.client.views.graph.visual.techniques.gravity.GravityTechnique
-import cz.payola.web.shared.OntologyCustomizationManager
 import scala.collection.mutable.ListBuffer
+import cz.payola.web.shared.managers.OntologyCustomizationManager
+import cz.payola.web.client.events._
 
 class PluginSwitchView extends GraphView with ComposedView
 {
@@ -44,25 +44,33 @@ class PluginSwitchView extends GraphView with ComposedView
         new ListItem(List(pluginAnchor))
     }
 
+    val ontologiesGotLoaded = new SimpleUnitEvent[this.type]
     val ontologyCustomizationEditButtons = new ListBuffer[Span]
-    val ontologyCustomizationListItems = createOntologyCustomizationItems
+    val ontologyCustomizationListItems = new ListBuffer[ListItem]()
+    createOntologyCustomizationItems()
+    val ontologyCustomizationsButton = new DropDownButton(List(new Text("Change appearance using ontologies")), ontologyCustomizationListItems)
 
-    private def createOntologyCustomizationItems = {
-        val listItems = new ListBuffer[ListItem]()
-        listItems ++= OntologyCustomizationManager.getUsersCustomizations().map({ custom =>
-            val text = new Text(custom.name)
-            val editButton = new Span(List(new Icon(Icon.pencil), new Text(" Edit")), "btn btn-mini btn-info ontology-customization-edit-button")
-            editButton.setAttribute("name", custom.id)
-            ontologyCustomizationEditButtons += editButton
-            new ListItem(List(new Anchor(List(text, editButton))), "ontology-customization-menu-item")
-        })
-        listItems += new ListItem(List(createOntologyCustomizationButton))
-        listItems
+    private def createOntologyCustomizationItems() {
+        ontologyCustomizationListItems += new ListItem(List(createOntologyCustomizationButton))
+        OntologyCustomizationManager.getUsersCustomizations(){ customizations =>
+            customizations.foreach({ custom =>
+                val text = new Text(custom.name)
+                val editButton = new Span(List(new Icon(Icon.pencil), new Text(" Edit")), "btn btn-mini btn-info ontology-customization-edit-button")
+                editButton.setAttribute("name", custom.id)
+                ontologyCustomizationEditButtons += editButton
+                val listItem = new ListItem(List(new Anchor(List(text, editButton))), "ontology-customization-menu-item")
+                ontologyCustomizationListItems += listItem
+                listItem.render(ontologyCustomizationsButton.menu.domElement)
+            })
+            ontologiesGotLoaded.trigger(new EventArgs[PluginSwitchView.this.type](this))
+        }{ t: Throwable =>
+            // TODO - couldn't load ontology customizations
+        }
     }
 
     val toolbar = new Div(List(
         new DropDownButton(List(new Icon(Icon.cog), new Text("Change visualisation plugin")), pluginListItems),
-        new DropDownButton(List(new Text("Change appearance using ontologies")), ontologyCustomizationListItems)),
+        ontologyCustomizationsButton),
         "btn-toolbar"
     )
 

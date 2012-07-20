@@ -2,4 +2,4 @@ package cz.payola.domain.entities.plugins
 
 import cz.payola.domain.DomainException
 
-class PluginException(message: String) extends DomainException(message)
+class PluginException(message: String = "", cause: Throwable = null) extends DomainException(message, cause)

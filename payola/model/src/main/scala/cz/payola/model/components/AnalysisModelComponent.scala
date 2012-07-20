@@ -31,9 +31,9 @@ trait AnalysisModelComponent extends EntityModelComponent
         }
 
         def create(owner: User, name: String): Analysis = {
-            val instance = new Analysis(name, Some(owner))
-            analysisRepository.persist(instance)
-            instance
+            val analysis = new Analysis(name, Some(owner))
+            persist(analysis)
+            analysis
         }
 
         def createPluginInstance(pluginId: String, analysisId: String): PluginInstance = {

@@ -4,7 +4,8 @@ import cz.payola.data.squeryl.entities.plugins._
 import cz.payola.domain.entities.Plugin
 import cz.payola.data.squeryl.SquerylDataContextComponent
 import cz.payola.domain.entities.plugins.concrete.data.PayolaStorage
-import cz.payola.domain.PluginCompilerComponent
+import cz.payola.domain._
+import scala.Some
 
 object PluginDbRepresentation extends EntityConverter[PluginDbRepresentation]
 {
@@ -29,13 +30,15 @@ class PluginDbRepresentation(
     o: Option[User],
     var _isPub: Boolean)
     (implicit val context: SquerylDataContextComponent)
-    extends PersistableEntity with ShareableEntity
+    extends Entity(id) with PersistableEntity with ShareableEntity
 {
     val ownerId: Option[String] = o.map(_.id)
 
     var owner: Option[User] = None
     
     var parameters: Seq[Parameter[_]] = Seq()
+
+    def entityTypeName = "plugin database representation"
 
     /**
       * Represented plugin is instantiated.

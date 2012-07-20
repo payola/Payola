@@ -65,22 +65,22 @@ class Test
         try
         {
             RPCTester.throwException
-            window.alert("Exception was expected to be caught!")
+            window.alert("RpcException was expected to be caught!")
         }catch{
             case e: RPCException => {
                 window.alert("Yay!")
             }
         }*/
 
-        val test13Desc = "Testing a rpc.Exception throw on a bad RPC call."
+        val test13Desc = "Testing a rpc.RpcException throw on a bad RPC call."
 
         try
         {
             testException
-            failTest(13, test13Desc, "Exception was not thrown.")
+            failTest(13, test13Desc, "RpcException was not thrown.")
         } catch {
-            case e: rpc.Exception => window.alert("YES!")// NOOP, success
-            case _ => failTest(13, test13Desc, "Exception was thrown, but is not of type rpc.Exception")
+            case e: rpc.RpcException => window.alert("YES!")// NOOP, success
+            case _ => failTest(13, test13Desc, "RpcException was thrown, but is not of type rpc.RpcException")
         }
     }
 

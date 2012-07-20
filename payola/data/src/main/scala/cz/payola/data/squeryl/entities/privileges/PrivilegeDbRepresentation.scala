@@ -2,7 +2,6 @@ package cz.payola.data.squeryl.entities.privileges
 
 import cz.payola.common._
 import cz.payola.data.squeryl.SquerylDataContextComponent
-import scala.Some
 import cz.payola.domain.entities.Privilege
 import cz.payola.data.squeryl.entities._
 
@@ -64,8 +63,9 @@ class PrivilegeDbRepresentation(
         val objectClassName: String
     )
     (implicit val context: SquerylDataContextComponent)
-    extends PersistableEntity
+    extends cz.payola.domain.Entity(id) with PersistableEntity
 {
+    def entityTypeName = "privilege database representation"
 
     /**
       * Instantiates represented [[cz.payola.common.entities.Privilege]]

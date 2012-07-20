@@ -12,4 +12,6 @@ abstract class Privilege[A <: Entity](
     type UserType = User
 
     type PrivilegableEntityType = PrivilegableEntity
+
+    def entityTypeName = "privilege"
 }

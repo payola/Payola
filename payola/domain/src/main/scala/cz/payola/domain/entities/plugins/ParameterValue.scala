@@ -8,11 +8,14 @@ import cz.payola.domain.Entity
   * @tparam A Type of the parameter value.
   */
 abstract class ParameterValue[A](protected var _parameter: Parameter[A], protected var _value: A)
-    extends Entity with cz.payola.common.entities.plugins.ParameterValue[A]
+    extends Entity
+    with cz.payola.common.entities.plugins.ParameterValue[A]
 {
     checkConstructorPostConditions()
 
     type ParameterType = Parameter[A]
+
+    def entityTypeName = "parameter value"
 
     override def canEqual(other: Any): Boolean = {
         other.isInstanceOf[ParameterValue[_]]
@@ -20,6 +23,6 @@ abstract class ParameterValue[A](protected var _parameter: Parameter[A], protect
 
     override protected def checkInvariants() {
         super[Entity].checkInvariants()
-        require(parameter != null, "The parameter mustn't be null.")
+        validate(parameter != null, "parameter", "The parameter of the %s mustn't be null.".format(entityTypeName))
     }
 }

@@ -3,7 +3,7 @@ package cz.payola.web.client.presenters
 import s2js.adapters.js.dom.Element
 import s2js.compiler.javascript
 import s2js.adapters.js.browser._
-import cz.payola.web.shared.PluginManager
+import cz.payola.web.shared.managers.PluginManager
 import cz.payola.web.client.View
 import cz.payola.web.client.views.elements._
 
@@ -55,7 +55,7 @@ class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) e
       * @param t An instance of Throwable.
       */
     private def postFailedCallback(t: Throwable){
-        val exceptionMessage = t.asInstanceOf[s2js.runtime.shared.Exception].message
+        val exceptionMessage = t.asInstanceOf[s2js.runtime.shared.DependencyException].message
         window.alert("Failed to upload plugin!\n\n" + exceptionMessage)
     }
 
@@ -88,11 +88,5 @@ class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) e
         // TODO
     }
 
-    def block() {
-        // TODO
-    }
-
-    def unblock() {
-        // TODO
-    }
+    def blockDomElement: Element = null // TODO
 }

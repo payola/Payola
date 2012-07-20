@@ -54,7 +54,7 @@ import tools.nsc.io
             def processFile(path: String) {
                 if (!processedFiles.contains(path)) {
                     if (visitedFiles.contains(path)) {
-                        throw new Exception("A cycle in file dependencies detected. Check the file '%s'.".format(path))
+                        throw new DependencyException("A cycle in file dependencies detected. Check the file '%s'.".format(path))
                     }
                     visitedFiles += path
 

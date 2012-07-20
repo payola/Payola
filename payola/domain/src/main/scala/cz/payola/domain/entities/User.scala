@@ -27,6 +27,8 @@ class User(protected var _name: String)
 
     type OntologyCustomizationType = OntologyCustomization
 
+    def entityTypeName = "user"
+
     /**
       * Adds the analysis to the users owned analyses. The analysis has to be owned by the user.
       * @param analysis Analysis to be added.

@@ -2,7 +2,7 @@ package s2js.runtime.client.rpc
 
 import s2js.runtime.client.ClassLoader
 import s2js.runtime.client.js.JsObject
-import s2js.runtime.shared.rpc.Exception
+import s2js.runtime.shared.rpc.RpcException
 
 class Deserializer extends RpcResultTraverser[Any]
 {
@@ -79,7 +79,7 @@ class Deserializer extends RpcResultTraverser[Any]
 
     private def createInstance(className: String): Any = {
         if (!ClassLoader.isLoaded(className)) {
-            throw new Exception("Can't deserialize an instance of class " + className + ". The class isn't loaded.")
+            throw new RpcException("Can't deserialize an instance of class " + className + ". The class isn't loaded.")
         }
 
         s2js.adapters.js.browser.eval("new " + className + "()")

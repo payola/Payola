@@ -438,7 +438,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
 
         val pp1 = cc1.propertyCustomizations(0)
         pp1.strokeColor = "blue"
-        pp1.strokeWidth = "2"
+        pp1.strokeWidth = 2
 
 
         // Assign customization

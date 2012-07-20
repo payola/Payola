@@ -4,28 +4,28 @@ import scala.collection.mutable
 import s2js.adapters.js.dom
 import s2js.adapters.js.browser._
 import cz.payola.web.shared._
-import cz.payola.web.client.views.entity._
-import cz.payola.web.client.views.graph.PluginSwitchView
+import cz.payola.web.shared.managers.OntologyCustomizationManager
 import cz.payola.web.client.events.BrowserEventArgs
+import cz.payola.web.client.models.Model
 import cz.payola.web.client.views.VertexEventArgs
-import cz.payola.common.entities.plugins.DataSource
-import cz.payola.web.client.views.bootstrap._
-import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.web.client.views.entity.dataSource._
+import cz.payola.web.client.views.graph.PluginSwitchView
+import cz.payola.web.client.views.entity.customization.OntologyCustomizationCreateModal
 import cz.payola.web.client.presenters.OntologyCustomizationPresenter
-import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
+import cz.payola.common.ValidationException
 import cz.payola.web.client.views.elements.Span
+import cz.payola.web.client.Presenter
 
 class DataSourcePresenter(
     viewElement: dom.Element,
     val dataSourceId: String,
     val dataSourceName: String,
     val initialVertexUri: String = "")
+    extends Presenter
 {
     private val view = new DataSourceView(dataSourceName)
 
     private val graphView = new PluginSwitchView
-
-    private var dataSources: Option[Seq[DataSource]] = None
 
     private val history = mutable.ListBuffer.empty[String]
 
@@ -39,23 +39,24 @@ class DataSourcePresenter(
         graphView.vertexBrowsing += onVertexBrowsing _
         graphView.vertexBrowsingDataSource += onVertexBrowsingDataSource _
         graphView.createOntologyCustomizationButton.mouseClicked += onCreateOntologyCustomizationButtonClicked _
-        graphView.ontologyCustomizationEditButtons foreach { button =>
-            button.mouseClicked += onEditOntologyCustomizationButtonClicked _
+        graphView.ontologiesGotLoaded += { Unit =>
+            graphView.ontologyCustomizationEditButtons foreach { button =>
+                button.mouseClicked += onEditOntologyCustomizationButtonClicked _
+            }
         }
 
         // Compose the views and render the main view.
         graphView.render(view.graphViewSpace.domElement)
         view.render(viewElement)
 
+        // If the default URI isn't specified, display the initial graph.
         if (initialVertexUri == "") {
-            view.block() // TODO loading.
+            blockPage("Fetching the initial graph.")
             DataSourceBrowser.getInitialGraph(dataSourceId) { graph =>
                 graphView.updateGraph(graph)
                 updateNavigationView()
-                view.unblock()
-            } { error =>
-                // TODO
-            }
+                unblockPage()
+            }(fatalErrorHandler(_))
         } else {
             addToHistoryAndGo(initialVertexUri)
         }
@@ -66,54 +67,55 @@ class DataSourcePresenter(
     }
 
     private def onVertexBrowsingDataSource(e: VertexEventArgs[_]) {
-        fetchDataSources { ds =>
+        blockPage("Fetching accessible data sources.")
+        Model.accessibleDataSources { ds =>
+            unblockPage()
             val selector = new DataSourceSelector("Browse in different data source: " + e.vertex.uri, ds)
             selector.dataSourceSelected += { d =>
                 window.location.href = "/datasource/" + d.target.id + "?uri=" + encodeURI(e.vertex.uri)
             }
             selector.render()
-        }
-    }
-
-    private def presentCustomizationEditorWithCustomization(customization: OntologyCustomization) {
-        val presenter = new OntologyCustomizationPresenter(customization)
-        presenter.initialize()
-
-        // TODO save on the server
+        }(fatalErrorHandler(_))
     }
 
     private def onCreateOntologyCustomizationButtonClicked(e: BrowserEventArgs[_]): Boolean = {
-        // First, show a modal asking for the Ontology URL
-        // TODO remove default values which are added for testing purposes
-        val nameInputField = new TextInputControl("Customization name", "ontologyCustomizationNameField", "My Ontology Customization", "")
-        val urlInputField = new TextInputControl("Ontology URL", "ontologyURLField", "http://opendata.cz/pco/public-contracts.xml", "")
-        val modal = new Modal("Create a new ontology customization.", List(nameInputField, urlInputField), Some("Create Customization"), Some("Cancel"), false)
-        modal.saving += { e =>
-            if (nameInputField.input.value == "") {
-                window.alert("Name input mustn't be empty!")
-            }else if (urlInputField.input.value == "") {
-                window.alert("Ontology URL field mustn't be empty!")
-            }else if (OntologyCustomizationManager.customizationExistsWithName(nameInputField.input.value)) {
-                window.alert("You have already created a customization with this name!")
-            }else{
-                OntologyCustomizationManager.createNewOntologyCustomizationForURL(urlInputField.input.value, nameInputField.input.value) { custom =>
-                    modal.destroy()
-                    presentCustomizationEditorWithCustomization(custom)
-                }
-                { t =>
-                    window.alert("Couldn't create an ontology customization with this URL.\n\n" + t.getMessage)
+        val createView = new OntologyCustomizationCreateModal
+        createView.saving += { e =>
+            createView.block("Creating the ontology customization.")
+            OntologyCustomizationManager.create(createView.name.input.value, createView.url.input.value) { o =>
+                createView.unblock()
+                createView.destroy()
+                new OntologyCustomizationPresenter(o).initialize()
+            } { error =>
+                createView.unblock()
+                error match {
+                    case v: ValidationException => {
+                        createView.name.setState(v ,"name")
+                        createView.url.setState(v, "ontologyURL")
+                    }
+                    case _ => {
+                        createView.destroy()
+                        fatalErrorHandler(error)
+                    }
                 }
             }
             false
         }
 
-        modal.render()
+        createView.render()
         false
     }
 
     private def onEditOntologyCustomizationButtonClicked(e: BrowserEventArgs[Span]): Boolean = {
-        val ontologyID = e.target.getAttribute("name")
-        presentCustomizationEditorWithCustomization(OntologyCustomizationManager.getCustomizationByID(ontologyID))
+        graphView.block("Loading ontology...")
+        OntologyCustomizationManager.getCustomizationByID(e.target.getAttribute("name")) { customization =>
+            new OntologyCustomizationPresenter(customization).initialize()
+            graphView.unblock()
+        } { error =>
+            graphView.unblock()
+            fatalErrorHandler(error)
+        }
+
         true
     }
 
@@ -154,35 +156,22 @@ class DataSourcePresenter(
     private def updateView() {
         val uri = history(historyPosition)
 
-        view.block()
+        blockPage("Fetching the node neighbourhood.")
+        view.nodeUriInput.setIsEnabled(false)
+
         DataSourceBrowser.getNeighbourhood(dataSourceId, uri) { graph =>
             graphView.updateGraph(graph)
             updateNavigationView()
             view.nodeUriInput.value = uri
-            view.unblock()
-        } { error =>
-            // TODO
-        }
+
+            view.nodeUriInput.setIsEnabled(true)
+            unblockPage()
+        }(fatalErrorHandler(_))
     }
 
     private def updateNavigationView() {
         view.backButton.setIsEnabled(canGoBack)
         view.nextButton.setIsEnabled(canGoNext)
-    }
-
-    private def fetchDataSources(callback: Seq[DataSource] => Unit) {
-        if (dataSources.isDefined) {
-            callback(dataSources.get)
-        } else {
-            view.block()
-            DataSourceBrowser.getDataSources() { ds =>
-                dataSources = Some(ds)
-                view.unblock()
-                callback(ds)
-            } { error =>
-
-            }
-        }
     }
 
     private def canGoBack = history.nonEmpty && historyPosition > 0

@@ -1,6 +1,6 @@
 package s2js.runtime.client.rpc
 
-import s2js.runtime.shared.rpc.Exception
+import s2js.runtime.shared.rpc.RpcException
 
 class ReferenceToResolve(val reference: Reference, val sourceObject: Any, val propertyName: String)
 {
@@ -8,7 +8,7 @@ class ReferenceToResolve(val reference: Reference, val sourceObject: Any, val pr
         val targetObjectID = reference.targetObjectID
         val targetObject = context.objectRegistry.get(targetObjectID)
         if (targetObject.isEmpty) {
-            throw new Exception("The deserialized object graph contains an invalid reference '" + targetObjectID + "'.")
+            throw new RpcException("The deserialized object graph contains an invalid reference '" + targetObjectID + "'.")
         }
 
         // The reference has to be resolved using eval, because the property name can be nontrivial (array item access).

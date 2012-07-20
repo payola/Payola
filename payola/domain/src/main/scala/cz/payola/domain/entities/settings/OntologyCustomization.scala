@@ -1,10 +1,12 @@
 package cz.payola.domain.entities.settings
 
-import cz.payola.domain.Entity
+import cz.payola.domain._
 import cz.payola.domain.entities._
 import scala.collection.immutable
 import cz.payola.domain.rdf.ontology.Ontology
 import cz.payola.domain.net.Downloader
+import org.apache.xerces.impl.dv.DatatypeException
+import cz.payola.common.ValidationException
 
 object OntologyCustomization
 {
@@ -16,13 +18,19 @@ object OntologyCustomization
       * @return The customization.
       */
     def empty(ontologyURL: String, name: String, owner: Option[User]): OntologyCustomization = {
-        val ontology = Ontology(new Downloader(ontologyURL, accept = "application/rdf+xml").result)
-        val classCustomizations = ontology.classes.values.map { c =>
+        val ontology = try {
+             Ontology(new Downloader(ontologyURL, accept = "application/rdf+xml").result)
+        } catch {
+            case _ => throw new ValidationException("ontologyURL", "Couldn't fetch an ontology from the specified URL.")
+        }
+
+        val classCustomizations =ontology.classes.values.map { c =>
             val propertyCustomizations = c.properties.values.map { p =>
                 new PropertyCustomization(p.uri, "", 0)
             }
             new ClassCustomization(c.uri, "", 0, None, propertyCustomizations.toList)
         }
+
         new OntologyCustomization(ontologyURL, name, owner, classCustomizations.toList)
     }
 }
@@ -41,6 +49,8 @@ class OntologyCustomization(
     checkConstructorPostConditions()
 
     type ClassCustomizationType = ClassCustomization
+
+    def entityTypeName = "ontology customization"
 
     override def canEqual(other: Any): Boolean = {
         other.isInstanceOf[OntologyCustomization]

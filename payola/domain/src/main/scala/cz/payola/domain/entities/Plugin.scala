@@ -22,6 +22,7 @@ abstract class Plugin(
     with ShareableEntity
     with cz.payola.common.entities.Plugin
 {
+    // The owner has to be declared before the checkConstructorPostConditions invocation, which verifies it's not null.
     var _owner: Option[UserType] = None
 
     checkConstructorPostConditions()
@@ -29,6 +30,8 @@ abstract class Plugin(
     type ParameterType = Parameter[_]
 
     type ParameterValueType = ParameterValue[_]
+
+    def entityTypeName = "plugin"
 
     /**
       * Sets the owner of the plugin.
@@ -137,8 +140,8 @@ abstract class Plugin(
         super[NamedEntity].checkInvariants()
         super[OptionallyOwnedEntity].checkInvariants()
         super[ShareableEntity].checkInvariants()
-        require(inputCount >= 0, "The inputCount must be a non-negative number.")
-        require(parameters != null, "The parameters mustn't be null.")
-        require(!parameters.contains(null), "The parameters mustn't contain null.")
+        validate(inputCount >= 0, "inputCount", "The inputCount of the plugin must be a non-negative number.")
+        validate(parameters != null, "parameters", "The parameters of the plugin mustn't be null.")
+        validate(!parameters.contains(null), "parameters", "The parameters of the plugin mustn't contain null.")
     }
 }
