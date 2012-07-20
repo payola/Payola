@@ -1,4 +1,4 @@
-package cz.payola.web.client.views.entity.customization
+package cz.payola.web.client.views.entity.ontologyCustomization
 
 import cz.payola.web.client.views.bootstrap.Modal
 import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
