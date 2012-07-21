@@ -17,11 +17,11 @@ class Text(initialValue: String) extends View
 
     def text_=(text: String) {
         value = text
-        destroy()
         textNode.foreach { e => parentElement.foreach(render(_)) }
     }
 
     def render(parent: dom.Element) {
+        destroy()
         parentElement = Some(parent)
         textNode = Some(document.createTextNode(value))
         parent.appendChild(textNode.get)

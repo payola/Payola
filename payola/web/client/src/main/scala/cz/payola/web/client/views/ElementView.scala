@@ -77,4 +77,10 @@ abstract class ElementView[A <: dom.Element](domElementName: String, val subView
     def id_=(value: String) {
         setAttribute("id", value)
     }
+
+    def removeAllChildNodes() {
+        while (domElement.hasChildNodes) {
+            domElement.removeChild(domElement.firstChild)
+        }
+    }
 }

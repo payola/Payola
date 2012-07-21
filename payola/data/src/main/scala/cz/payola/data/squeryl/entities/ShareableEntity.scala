@@ -11,4 +11,10 @@ trait ShareableEntity extends Entity with cz.payola.domain.entities.ShareableEnt
 
     // Restore publicity value from DB
     isPublic = _isPub
+
+    override def isPublic_=(value: Boolean) {
+        _isPub = value
+
+        super.isPublic = value
+    }
 }

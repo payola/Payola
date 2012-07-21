@@ -8,11 +8,30 @@ import s2js.runtime.shared.rpc.RpcException
 import scala.Some
 import cz.payola.common.ValidationException
 
+/**
+  * A set of ontology customizations divided by their ownership.
+  * @param ownedCustomizations The customizations that are owned by the user. If [[scala.None]], the user can't even
+  *                            own or create a customization (that's the case of an anonymous user).
+  * @param othersCustomizations Customizations that aren't owned by the user, yet are accessible.
+  */
+class OntologyCustomizationsByOwnership(
+    val ownedCustomizations: Option[Seq[cz.payola.common.entities.settings.OntologyCustomization]],
+    val othersCustomizations: Seq[cz.payola.common.entities.settings.OntologyCustomization])
+
 @remote
 @secured object OntologyCustomizationManager
     extends ShareableEntityManager[OntologyCustomization, cz.payola.common.entities.settings.OntologyCustomization](
         Payola.model.ontologyCustomizationModel)
 {
+    @async def getByOwnership(user: Option[User] = null)
+        (successCallback: OntologyCustomizationsByOwnership => Unit)
+        (failCallback: Throwable => Unit) {
+
+        val accessible = Payola.model.ontologyCustomizationModel.getAccessibleToUser(user)
+        val (owned, others) = accessible.partition(user.isDefined && _.owner == user)
+        successCallback(new OntologyCustomizationsByOwnership(user.map(_ => owned), others))
+    }
+
     @async def create(name: String, ontologyURL: String, owner: User = null)
         (successCallback: cz.payola.common.entities.settings.OntologyCustomization => Unit)
         (failCallback: Throwable => Unit) {

@@ -10,4 +10,10 @@ trait DescribedEntity extends cz.payola.domain.entities.DescribedEntity
 
     // Restore description value from DB
     description = _desc
+
+    override def description_=(value: String) {
+        _desc = value
+
+        super.description = value
+    }
 }

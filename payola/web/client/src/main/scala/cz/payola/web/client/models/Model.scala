@@ -4,16 +4,24 @@ import cz.payola.common.entities._
 import cz.payola.common.entities.plugins.DataSource
 import cz.payola.web.shared.managers._
 import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.web.client.events.SimpleUnitEvent
+import scala.collection.mutable
 
 object Model
 {
+    val ontologyCustomizationsChanged = new SimpleUnitEvent[this.type]
+
     private var _accessibleDataSources: Option[Seq[DataSource]] = None
 
     private var _accessiblePlugins: Option[Seq[Plugin]] = None
 
     private var _accessibleDataFetchers: Option[Seq[Plugin]] = None
 
-    private var _accessibleOntologyCustomizations: Option[Seq[OntologyCustomization]] = None
+    private var _ownedOntologyCustomizations: Option[mutable.ListBuffer[OntologyCustomization]] = None
+
+    private var _othersOntologyCustomizations: Seq[OntologyCustomization] = Nil
+
+    private var _ontologyCustomizationsAreLoaded = false
 
     def accessibleDataSources(successCallback: Seq[DataSource] => Unit)(errorCallback: Throwable => Unit) {
         if (_accessibleDataSources.isEmpty) {
@@ -48,15 +56,46 @@ object Model
         }
     }
 
-    def accessibleOntologyCustomizations(successCallback: Seq[OntologyCustomization] => Unit)
+    def ontologyCustomizationsByOwnership(successCallback: OntologyCustomizationsByOwnership => Unit)
         (errorCallback: Throwable => Unit) {
-        if (_accessibleOntologyCustomizations.isEmpty) {
-            OntologyCustomizationManager.getAccessible() { o =>
-                _accessibleOntologyCustomizations = Some(o)
-                successCallback(o)
+
+        fetchOntologyCustomizations { () =>
+            successCallback(new OntologyCustomizationsByOwnership(
+                _ownedOntologyCustomizations,
+                _othersOntologyCustomizations
+            ))
+        }(errorCallback)
+    }
+
+    def createOntologyCustomization(name: String, ontologyURL: String)
+        (successCallback: OntologyCustomization => Unit)
+        (errorCallback: Throwable => Unit) {
+
+        fetchOntologyCustomizations { () =>
+            _ownedOntologyCustomizations.foreach { ownedCustomizations =>
+                OntologyCustomizationManager.create(name, ontologyURL) { newCustomization =>
+                    ownedCustomizations += newCustomization
+                    ontologyCustomizationsChanged.triggerDirectly(this)
+                    successCallback(newCustomization)
+                }(errorCallback)
+            }
+        }(errorCallback)
+    }
+
+    private def fetchOntologyCustomizations(successCallback: () => Unit)(errorCallback: Throwable => Unit) {
+        if (!_ontologyCustomizationsAreLoaded) {
+            OntologyCustomizationManager.getByOwnership() { customizationsByOwnership =>
+                customizationsByOwnership.ownedCustomizations.foreach { owned =>
+                    val c = mutable.ListBuffer.empty[OntologyCustomization]
+                    owned.foreach(c += _)
+                    _ownedOntologyCustomizations = Some(c)
+                }
+                _othersOntologyCustomizations = customizationsByOwnership.othersCustomizations
+                _ontologyCustomizationsAreLoaded = true
+                successCallback()
             }(errorCallback)
         } else {
-            successCallback(_accessibleOntologyCustomizations.get)
+            successCallback()
         }
     }
 }
