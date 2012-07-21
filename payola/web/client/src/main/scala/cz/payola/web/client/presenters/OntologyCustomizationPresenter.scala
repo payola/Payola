@@ -7,7 +7,6 @@ import cz.payola.web.shared.managers.OntologyCustomizationManager
 import cz.payola.common.ValidationException
 import cz.payola.web.client.Presenter
 import cz.payola.web.client.views.bootstrap.InputControl
-import s2js.adapters.js.browser._
 
 class OntologyCustomizationPresenter(ontologyCustomization: OntologyCustomization) extends Presenter
 {
