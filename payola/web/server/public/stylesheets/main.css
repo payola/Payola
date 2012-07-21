@@ -73,6 +73,7 @@ input.active {
     background: url('spinner.gif') no-repeat 100%, -ms-linear-gradient(top, #ffffff 85%, #eeeeee 99%);
     background: url('spinner.gif') no-repeat 100%, linear-gradient(top, #ffffff 85%, #eeeeee 99%);
     background-position: 98%;
+    padding-right: 25px !important;
 }
 
 input[type="checkbox"].active:after{
@@ -134,13 +135,9 @@ input[type="checkbox"].active:after{
     min-height: 30px;
     horizontal-align: center;
     padding: 5px;
-
     background: #DDDBFE;
     color: black;
-
-    border-width: 1px;
-    border: line;
-    border-color: #A6A4A9;
+    border: 1px solid #a6a4a9;
 }
 
 .selected-ontology-customization-class-div {
