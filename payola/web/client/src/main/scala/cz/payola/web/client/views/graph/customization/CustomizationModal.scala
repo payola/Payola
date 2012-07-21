@@ -7,6 +7,7 @@ import cz.payola.web.client.events._
 import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
 import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.ColorPane
 import cz.payola.web.client.views.graph.visual.Color
+import s2js.adapters.js.browser._
 
 class CustomizationModal(customization: OntologyCustomization)
     extends Modal("Customize ontology " + customization.name, Nil, Some("Done"), None, false,
@@ -122,9 +123,15 @@ class CustomizationModal(customization: OntologyCustomization)
         val strokeColorInput = new ColorPane("property-stroke-color-" + propCustomization.uri, "Stroke color:", Color.fromHex(propCustomization.strokeColor))
         val widthInput = new TextInputControl("Stroke width:", "property-stroke-width-" + propCustomization.uri, propCustomization.strokeWidth.toString, "")
 
-        strokeColorInput.changed += { e =>
+        // Place the event on closed. When not closed, the color is changing with
+        // every single change - we'd flood the server with dozens of requests
+        // instead of just one
+
+        val event = { e: EventArgs[ColorPane] =>
             classPropertyStrokeColorChanged.trigger(new ClassPropertyCustomizationModificationEventArgs[this.type, String](selectedClassCustomization.uri, propCustomization.uri, strokeColorInput.getColorHexString, this))
         }
+        strokeColorInput.closed += event
+        strokeColorInput.cleared += event
 
         widthInput.input.changed += { e =>
             classPropertyStrokeWidthChanged.trigger(new ClassPropertyCustomizationModificationEventArgs[this.type, Int](selectedClassCustomization.uri, propCustomization.uri, widthInput.input.value.toInt, this))
@@ -142,9 +149,15 @@ class CustomizationModal(customization: OntologyCustomization)
         val radiusInput = new TextInputControl("Radius:", "class-radius", selectedClassCustomization.radius.toString, "")
         val glyphInput = new TextInputControl("Glyph:", "class-glyph", selectedClassCustomization.glyph.getOrElse('\0').toString, "")
 
-        fillColorInput.changed += { e =>
+        // Place the event on closed. When not closed, the color is changing with
+        // every single change - we'd flood the server with dozens of requests
+        // instead of just one
+        val event = { e: EventArgs[ColorPane] =>
             classFillColorChanged.trigger(new ClassCustomizationModificationEventArgs[this.type, String](selectedClassCustomization.uri, fillColorInput.getColorHexString, this))
         }
+        fillColorInput.closed += event
+        fillColorInput.cleared += event
+
         radiusInput.input.changed += { e =>
             if (radiusInput.input.value.toInt < 0) {
                 radiusInput.input.value = "0"

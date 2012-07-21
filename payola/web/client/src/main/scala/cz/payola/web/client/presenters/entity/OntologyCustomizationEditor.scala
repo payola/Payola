@@ -7,6 +7,7 @@ import cz.payola.web.shared.managers.OntologyCustomizationManager
 import cz.payola.common.ValidationException
 import cz.payola.web.client.Presenter
 import cz.payola.web.client.views.bootstrap.InputControl
+import s2js.adapters.js.browser._
 
 class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) extends Presenter
 {
@@ -40,7 +41,7 @@ class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) 
       */
     def classFillColorChangedHandler(args: ClassCustomizationModificationEventArgs[_, String]) {
         OntologyCustomizationManager.setClassFillColor(ontologyCustomization.id, args.classURI, args.value) { () =>
-        // Success - update the client model
+            // Success - update the client model
             ontologyCustomization.classCustomizations.find(_.uri == args.classURI).get.fillColor = args.value
             postValueChangeNotification()
         } { t: Throwable =>
