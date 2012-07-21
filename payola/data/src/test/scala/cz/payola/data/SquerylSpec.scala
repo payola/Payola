@@ -56,7 +56,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     val customizations = List(customization, ownedCustomization)
 
     "Schema" should "be created" in {
-        schema.recreate
+        schema.wrapInTransaction { schema.recreate }
     }
 
     "Users" should "be persited, loaded and managed by UserRepository" in {

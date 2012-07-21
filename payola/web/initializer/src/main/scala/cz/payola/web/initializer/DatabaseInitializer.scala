@@ -12,12 +12,12 @@ object DatabaseInitializer extends App
 {
     private val model = Payola.model.asInstanceOf[SquerylDataContextComponent]
 
-    print("Recreating the database schema ... ")
-    model.schema.recreate()
-    println("OK")
-
-    print("Persisting the initial data ... ")
     model.schema.wrapInTransaction {
+        print("Recreating the database schema ... ")
+        model.schema.recreate()
+        println("OK")
+
+        print("Persisting the initial data ... ")
         persistInitialData()
         println("OK")
     }
