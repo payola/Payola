@@ -1,5 +1,8 @@
 $(document).ready(function(){
-    $('textarea').autosize();
+
+    $('textarea').livequery(function(){
+        $(this).autosize();
+    });
 
     $('input[type=text].autosize').live('focus',function(){
 

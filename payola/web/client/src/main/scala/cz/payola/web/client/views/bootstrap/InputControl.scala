@@ -3,6 +3,7 @@ package cz.payola.web.client.views.bootstrap
 import cz.payola.web.client.views._
 import cz.payola.web.client.views.elements._
 import cz.payola.common.ValidationException
+import s2js.adapters.js.dom
 
 abstract class InputControl(val label: String, val name: String, value: String, title: String) extends ComposedView
 {
@@ -15,7 +16,7 @@ abstract class InputControl(val label: String, val name: String, value: String, 
 
     def createSubViews = List(controlGroup)
 
-    def createInput : Input
+    def createInput : FormField[_ <: dom.Input]
 
     def setState(exception: ValidationException, fieldName: String) {
         if (fieldName == exception.fieldName) {

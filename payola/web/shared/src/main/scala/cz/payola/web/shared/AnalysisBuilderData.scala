@@ -32,6 +32,16 @@ import cz.payola.domain.entities.User
         successCallback(true)
     }
 
+    @async def setAnalysisDescription(id: String, description: String, user: User = null)(successCallback: (Boolean => Unit))
+        (failCallback: (Throwable => Unit)) {
+        val analysis = Payola.model.analysisModel.getById(id)
+        analysis.map { a =>
+            a.description = description
+            Payola.model.analysisModel.persist(a)
+        }
+        successCallback(true)
+    }
+
     @async def createPluginInstance(pluginId: String, analysisId: String, user: User = null)(successCallback: (String => Unit))
         (failCallback: (Throwable => Unit)) {
         successCallback(Payola.model.analysisModel.createPluginInstance(pluginId, analysisId).id)

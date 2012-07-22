@@ -8,21 +8,23 @@ import cz.payola.common.entities
 import s2js.runtime.client.scala.collection.immutable
 import scala.collection.mutable
 
-class AnalysisEditor(analysisIdP: String, menuHolder: String, pluginsHolder: String, nameHolder: String)
-    extends AnalysisBuilder(menuHolder, pluginsHolder, nameHolder)
+class AnalysisEditor(parentElementId: String, analysisIdP: String)
+    extends AnalysisBuilder(parentElementId)
 {
     private val creationMap = new HashMap[String, PluginInstance]
 
     analysisId = analysisIdP
 
-    override def init {
+    override def initialize() {
         AnalysisBuilderData.getAnalysis(analysisIdP) { analysis =>
 
             analysisId = analysis.id
+            lockAnalysisAndLoadPlugins()
 
-            lockAnalysisAndLoadPlugins
+            view.render(parentElement)
 
             setAnalysisNameToInputControl(analysis)
+            view.description.input.value_=(analysis.description)
 
             val sources = new ArrayBuffer[PluginInstance]
             val renderBuffer = new ArrayBuffer[PluginInstance]
@@ -53,7 +55,7 @@ class AnalysisEditor(analysisIdP: String, menuHolder: String, pluginsHolder: Str
             renderBuffer.map { s =>
                 val canRender: Boolean = checkInstanceCanRender(s, renderBuffer)
                 if (canRender) {
-                    s.render(pluginsHolderElement)
+                    view.renderInstance(s)
                     renderBuffer -= s
                 }
             }
@@ -70,7 +72,7 @@ class AnalysisEditor(analysisIdP: String, menuHolder: String, pluginsHolder: Str
 
     def renderSources(sources: ArrayBuffer[PluginInstance], renderBuffer: ArrayBuffer[PluginInstance]) {
         sources.map { s =>
-            s.render(pluginsHolderElement)
+            view.renderInstance(s)
             renderBuffer -= s
         }
     }
@@ -86,7 +88,7 @@ class AnalysisEditor(analysisIdP: String, menuHolder: String, pluginsHolder: Str
     }
 
     private def setAnalysisNameToInputControl(analysis: entities.Analysis) {
-        name.input.value = analysis.name
+        view.nameControl.input.value = analysis.name
     }
 
     protected def loadInstancesData(analysis: entities.Analysis, sources: ArrayBuffer[PluginInstance],

@@ -64,7 +64,7 @@ label{
     padding-bottom: 15px;
 }
 
-input.active {
+input.active, textarea.active {
     background: #fff url('spinner.gif') no-repeat 100%;
     background: url('spinner.gif') no-repeat 100%, -webkit-gradient(linear, left bottom, left top, color-stop(0.85, white), color-stop(0.99, #eeeeee));
     background: url('spinner.gif') no-repeat 100%, -webkit-linear-gradient(center bottom, white 85%, #eeeeee 99%);
