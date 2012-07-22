@@ -13,6 +13,7 @@ GET     /logout                     controllers.Application.logout()
 GET     /javaScriptPackage/:symbol  controllers.Application.javaScriptPackage(symbol: String)
 POST    /RPC                        controllers.RPC.index()
 GET     /test/RPC                   controllers.Application.rpcTest()
+GET     /test/downloadGraph          controllers.GraphDownloader.test()
 POST    /RPC/async                  controllers.RPC.async()
 
 GET     /analysis/list              controllers.Analysis.list(page: Int ?= 1)

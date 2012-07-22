@@ -9,15 +9,17 @@ abstract class FormField[A <: dom.Input](elementName: String, name: String, init
 {
     val changed = new SimpleUnitEvent[this.type]
 
-    keyPressed += {
-        e =>
-            changed.triggerDirectly(this)
-            true
+    // Needs to be key released. On keyPressed, the event would precede the actual
+    // input value change - it would trigger something like willChange.
+    keyReleased += { e =>
+        changed.triggerDirectly(this)
+        true
     }
 
     value = initialValue
     setAttribute("name", name)
     setAttribute("id", name)
+
     title.map {
         t =>
             setAttribute("placeholder", t)

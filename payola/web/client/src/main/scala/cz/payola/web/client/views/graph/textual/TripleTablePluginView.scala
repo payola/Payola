@@ -27,9 +27,7 @@ class TripleTablePluginView(settings: VisualSetup) extends PluginView("Triple Ta
 
     def updateGraph(graph: Option[Graph]) {
         // Remove the old table.
-        while (tableWrapperElement.hasChildNodes) {
-            tableWrapperElement.removeChild(tableWrapperElement.firstChild)
-        }
+        tableWrapper.removeAllChildNodes()
 
         // Insert the new table.
         val table = document.createElement[Element]("table")

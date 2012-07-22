@@ -1,3 +1,4 @@
+// WARNING: reference to this is directly in JS source - see ColorPane.init
 package cz.payola.web.client.views.graph.visual
 
 import math.Ordering.String
@@ -37,7 +38,15 @@ case class Color(var red: Int, var green: Int, var blue: Int, var alpha: Double 
     }
 
     private def dec2hex(n: Int): String = {
-        convertDecToHex(n / 16) + convertDecToHex(n % 16)
+        // JS will convert e.g. 48 / 16 to 1.5, which wouldn't be matched by any
+        // int in the convertDexToHex method
+        convertDecToHex(doubleToInt(n / 16)) + convertDecToHex(n % 16)
+    }
+
+    // Mustn't ceil or round as (255 / 16) == 15.9375, which would yield in 16
+    @javascript("return Math.floor(i);")
+    private def doubleToInt(i: Int): Int = {
+        0
     }
 
     private def convertDecToHex(n: Int): String = {
@@ -81,14 +90,24 @@ object Color
     val Transparent = Color(0, 0, 0, 0)
 
     def fromHex(hexString: String): Option[Color] = {
-        if (hexString.matches("/^([0-9a-f]{1,2}){3}$/i")){
-            val hexLower = hexString.toLowerCase
-
-            //leading #
+        val hexLower = hexString.toLowerCase
+        if (hexLower.matches("^#([0-9a-f]){6}")){
             val red = hex2dec(hexLower.substring(1, 3))
             val green = hex2dec(hexLower.substring(3, 5))
             val blue = hex2dec(hexLower.substring(5, 7))
-            val alpha = hex2dec(hexLower.substring(7, 9)) / 255.0
+
+            // alpha is optional
+            val alpha = if (hexLower.length < 8){ 1.0 } else { hex2dec(hexLower.substring(7, 9)) / 255.0 }
+
+            Some(new Color(red, green, blue, alpha))
+        }else if (hexLower.matches("^#([0-9a-f]){3}")){
+            //leading #
+            val red = hex2dec(hexLower.substring(1, 2)) * 16
+            val green = hex2dec(hexLower.substring(2, 3)) * 16
+            val blue = hex2dec(hexLower.substring(3, 4)) * 16
+
+            // alpha is optional
+            val alpha = if (hexLower.length < 5){ 1.0 } else { (hex2dec(hexLower.substring(4, 5)) * 16.0) / 255.0 }
 
             Some(new Color(red, green, blue, alpha))
         }else{

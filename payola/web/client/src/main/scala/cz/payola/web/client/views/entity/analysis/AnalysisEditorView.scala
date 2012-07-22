@@ -46,6 +46,8 @@ class AnalysisEditorView extends View
 
     def render(parent: Element = document.body) {
         container.render(parent)
+        nameControl.input.addCssClass("span12")
+        description.input.addCssClass("span12")
     }
 
 }
