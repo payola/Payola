@@ -122,7 +122,7 @@ class AnalysisEditor(parentElementId: String, analysisIdP: String)
 
     private def getDefaultValues(instance: entities.plugins.PluginInstance): mutable.HashMap[String, String] = {
         val map = new mutable.HashMap[String, String]
-        instance.parameterValues.map { v => map.put(v.parameter.name, v.value.toString)}
+        instance.parameterValues.foreach { v => map.put(v.parameter.name, v.value.toString)}
         map
     }
 }
