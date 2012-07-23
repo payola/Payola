@@ -16,6 +16,8 @@ import s2js.compiler.javascript
 import cz.payola.web.client.views.graph.visual.graph._
 import cz.payola.web.client.views._
 import s2js.adapters.js.browser.document
+import cz.payola.web.client.views.bootstrap.Icon
+import s2js.adapters.js.dom.CanvasContext
 
 /**
   * Representation of visual based output drawing plugin
@@ -55,6 +57,22 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
     )
 
     private val zoomControls = new ZoomControls(100)
+    private val png = new Button(new Text("Download as PNG"),"",new Icon(Icon.download))
+
+    png.mouseClicked += { e =>
+        val c = new Canvas()
+        c.domElement.width = topLayer.domElement.width
+        c.domElement.height = topLayer.domElement.height
+
+        c.domElement.getContext[CanvasContext]("2d").drawImage(layerPack.edgesDeselected.domElement,0,0)
+        c.domElement.getContext[CanvasContext]("2d").drawImage(layerPack.edgesSelected.domElement,0,0)
+        c.domElement.getContext[CanvasContext]("2d").drawImage(layerPack.verticesDeselected.domElement,0,0)
+        c.domElement.getContext[CanvasContext]("2d").drawImage(layerPack.verticesSelected.domElement,0,0)
+        c.domElement.getContext[CanvasContext]("2d").drawImage(topLayer.domElement,0,0)
+
+        window.open(c.domElement.toDataURL("image/png"))
+        false
+    }
 
     window.onresize = { e =>
         fitCanvas()
@@ -155,9 +173,11 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
         setMouseWheelListener()
         fitCanvas()
 
+        val zoomToolHolder = new Div().domElement
+
         graphView = Some(new views.graph.visual.graph.GraphView(settings))
         zoomTool = Some(new ZoomControls(100))
-        zoomTool.get.render(/* document.getElementById("btn-stripe")*/ new Div().domElement) // TODO
+        zoomTool.get.render(zoomToolHolder) // TODO
 
         zoomTool.get.zoomDecreased += { event => //zoom - invoked by zoom control button
             if (graphView.isDefined && zoomTool.get.canZoomOut) {
@@ -207,10 +227,12 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
 
     override def renderControls(toolbar: dom.Element) {
         zoomControls.render(toolbar)
+        png.render(toolbar)
     }
 
     override def destroyControls() {
         zoomControls.destroy()
+        png.destroy()
     }
 
     protected def redrawQuick() {
