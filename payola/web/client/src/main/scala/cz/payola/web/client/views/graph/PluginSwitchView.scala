@@ -37,8 +37,6 @@ class PluginSwitchView extends GraphView with ComposedView
 
     private var currentPlugin = plugins.head
 
-    private var currentGraph: Option[Graph] = None
-
     private val pluginSpace = new Div(Nil, "row position-relative")
 
     private val pluginListItems = plugins.map { plugin =>
@@ -75,9 +73,19 @@ class PluginSwitchView extends GraphView with ComposedView
 
     def createSubViews = List(toolbar, pluginSpace)
 
-    def updateGraph(graph: Option[Graph]) {
-        currentGraph = graph
+    override def update(graph: Option[Graph], customization: Option[OntologyCustomization]) {
+        super.update(graph, customization)
+        currentPlugin.update(graph, customization)
+    }
+
+    override def updateGraph(graph: Option[Graph]) {
+        super.updateGraph(graph)
         currentPlugin.updateGraph(graph)
+    }
+
+    override def updateOntologyCustomization(customization: Option[OntologyCustomization]) {
+        super.updateOntologyCustomization(customization)
+        currentPlugin.updateOntologyCustomization(customization)
     }
 
     def updateOntologyCustomizations(customizations: OntologyCustomizationsByOwnership) {
@@ -136,7 +144,7 @@ class PluginSwitchView extends GraphView with ComposedView
     private def changePlugin(plugin: PluginView) {
         if (currentPlugin != plugin) {
             // Destroy the current plugin.
-            currentPlugin.updateGraph(None)
+            currentPlugin.update(None, None)
             currentPlugin.destroyControls()
             currentPlugin.destroy()
 
@@ -144,7 +152,7 @@ class PluginSwitchView extends GraphView with ComposedView
             currentPlugin = plugin
             currentPlugin.render(pluginSpace.domElement)
             currentPlugin.renderControls(toolbar.domElement)
-            currentPlugin.updateGraph(currentGraph)
+            currentPlugin.update(currentGraph, currentCustomization)
         }
     }
 

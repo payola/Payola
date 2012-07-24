@@ -1,4 +1,4 @@
-package cz.payola.web.client.views.entity.dataSource
+package cz.payola.web.client.views.entity
 
 import cz.payola.web.client.views.ComposedView
 import cz.payola.web.client.views.elements._

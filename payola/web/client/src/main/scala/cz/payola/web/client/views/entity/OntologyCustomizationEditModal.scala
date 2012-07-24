@@ -1,4 +1,4 @@
-package cz.payola.web.client.views.graph.customization
+package cz.payola.web.client.views.entity
 
 import cz.payola.common.entities.settings._
 import cz.payola.web.client.views.bootstrap._
@@ -9,24 +9,31 @@ import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.C
 import cz.payola.web.client.views.graph.visual.Color
 import s2js.adapters.js.browser._
 
-class CustomizationModal(customization: OntologyCustomization)
+class OntologyCustomizationEditModal(customization: OntologyCustomization)
     extends Modal("Customize ontology " + customization.name, Nil, Some("Done"), None, false,
         "wide-customization-modal")
 {
-
     // Event handlers
     val classFillColorChanged = new UnitEvent[this.type, ClassCustomizationModificationEventArgs[this.type, String]]
+
     var classRadiusChanged = new UnitEvent[this.type, ClassCustomizationModificationEventArgs[this.type, Int]]
+
     var classGlyphChanged = new UnitEvent[this.type, ClassCustomizationModificationEventArgs[this.type, Option[Char]]]
-    var classPropertyStrokeColorChanged = new UnitEvent[this.type, ClassPropertyCustomizationModificationEventArgs[this.type, String]]
-    var classPropertyStrokeWidthChanged = new UnitEvent[this.type, ClassPropertyCustomizationModificationEventArgs[this.type, Int]]
+
+    var classPropertyStrokeColorChanged = new
+            UnitEvent[this.type, ClassPropertyCustomizationModificationEventArgs[this.type, String]]
+
+    var classPropertyStrokeWidthChanged = new
+            UnitEvent[this.type, ClassPropertyCustomizationModificationEventArgs[this.type, Int]]
 
     // Create a completely enclosing div
     val enclosingDiv = new Div()
+
     enclosingDiv.setAttribute("style", "padding: 0px 0;")
     enclosingDiv.addCssClass("container-fluid")
 
     val rowDiv = new Div()
+
     rowDiv.render(enclosingDiv.domElement)
 
     // Override body to have just that div
@@ -34,8 +41,11 @@ class CustomizationModal(customization: OntologyCustomization)
 
     // Create a class div and values div
     val classListItems = createClassListItems
+
     val classUnorderedList = new UnorderedList(classListItems)
+
     val classListDiv = new Div(List(classUnorderedList))
+
     val propertiesDiv = new Div(Nil)
 
     setupDivAttributes()
@@ -44,6 +54,7 @@ class CustomizationModal(customization: OntologyCustomization)
     propertiesDiv.render(rowDiv.domElement)
 
     var selectedClassCustomization: ClassCustomization = null
+
     selectClassItem(classListItems(0))
 
     /** Retrieves a property element by name.
@@ -120,8 +131,10 @@ class CustomizationModal(customization: OntologyCustomization)
       * @param propCustomization Property customization.
       */
     private def appendCustomizablePropertiesForPropertyCustomization(propCustomization: PropertyCustomization) {
-        val strokeColorInput = new ColorPane("property-stroke-color-" + propCustomization.uri, "Stroke color:", Color.fromHex(propCustomization.strokeColor))
-        val widthInput = new TextInputControl("Stroke width:", "property-stroke-width-" + propCustomization.uri, propCustomization.strokeWidth.toString, "")
+        val strokeColorInput = new ColorPane("property-stroke-color-" + propCustomization.uri, "Stroke color:",
+            Color.fromHex(propCustomization.strokeColor))
+        val widthInput = new TextInputControl("Stroke width:", "property-stroke-width-" + propCustomization.uri,
+            propCustomization.strokeWidth.toString, "")
 
         // Place the event on closed. When not closed, the color is changing with
         // every single change - we'd flood the server with dozens of requests
@@ -134,7 +147,9 @@ class CustomizationModal(customization: OntologyCustomization)
         strokeColorInput.cleared += event
 
         widthInput.input.changed += { e =>
-            classPropertyStrokeWidthChanged.trigger(new ClassPropertyCustomizationModificationEventArgs[this.type, Int](selectedClassCustomization.uri, propCustomization.uri, widthInput.input.value.toInt, this))
+            classPropertyStrokeWidthChanged.trigger(new
+                    ClassPropertyCustomizationModificationEventArgs[this.type, Int](selectedClassCustomization.uri,
+                        propCustomization.uri, widthInput.input.value.toInt, this))
         }
 
         strokeColorInput.render(propertiesDiv.domElement)
@@ -145,9 +160,11 @@ class CustomizationModal(customization: OntologyCustomization)
       *
       */
     private def appendCustomizablePropertiesForSelectedClass() {
-        val fillColorInput = new ColorPane("class-fill-color-input", "Fill color:", Color.fromHex(selectedClassCustomization.fillColor))
+        val fillColorInput = new
+                ColorPane("class-fill-color-input", "Fill color:", Color.fromHex(selectedClassCustomization.fillColor))
         val radiusInput = new TextInputControl("Radius:", "class-radius", selectedClassCustomization.radius.toString, "")
-        val glyphInput = new TextInputControl("Glyph:", "class-glyph", selectedClassCustomization.glyph.getOrElse('\0').toString, "")
+        val glyphInput = new
+                TextInputControl("Glyph:", "class-glyph", selectedClassCustomization.glyph.getOrElse('\0').toString, "")
 
         // Place the event on closed. When not closed, the color is changing with
         // every single change - we'd flood the server with dozens of requests
@@ -161,17 +178,21 @@ class CustomizationModal(customization: OntologyCustomization)
         radiusInput.input.changed += { e =>
             if (radiusInput.input.value.toInt < 0) {
                 radiusInput.input.value = "0"
-            }else{
+            } else {
                 radiusInput.input.value = radiusInput.input.value.toInt.toString
             }
-            classRadiusChanged.trigger(new ClassCustomizationModificationEventArgs[this.type, Int](selectedClassCustomization.uri, radiusInput.input.value.toInt, this))
+            classRadiusChanged.trigger(new
+                    ClassCustomizationModificationEventArgs[this.type, Int](selectedClassCustomization.uri,
+                        radiusInput.input.value.toInt, this))
         }
         glyphInput.input.changed += { e =>
             if (glyphInput.input.value.length > 1) {
                 glyphInput.input.value = glyphInput.input.value(0).toString
             }
             val charOption = if (glyphInput.input.value == "") None else Some(glyphInput.input.value.charAt(0))
-            classGlyphChanged.trigger(new ClassCustomizationModificationEventArgs[this.type, Option[Char]](selectedClassCustomization.uri, charOption, this))
+            classGlyphChanged.trigger(new
+                    ClassCustomizationModificationEventArgs[this.type, Option[Char]](selectedClassCustomization.uri,
+                        charOption, this))
         }
 
         fillColorInput.render(propertiesDiv.domElement)
@@ -223,7 +244,8 @@ class CustomizationModal(customization: OntologyCustomization)
       */
     private def createClassListItems: Seq[ListItem] = {
         customization.classCustomizations.map { classCustomization: ClassCustomization =>
-            val classListItem = new ListItem(List(new Anchor(List(new Icon(Icon.tag), new Text(" " + classCustomization.uri.split("#")(1))))), "")
+            val classListItem = new ListItem(
+                List(new Anchor(List(new Icon(Icon.tag), new Text(" " + classCustomization.uri.split("#")(1))))), "")
             classListItem.setAttribute("name", classCustomization.uri)
             classListItem.mouseClicked += classSelectionHandler
             classListItem
@@ -243,8 +265,5 @@ class CustomizationModal(customization: OntologyCustomization)
             appendHeaderDivForName(propCustomization.uri.split("#")(1))
             appendCustomizablePropertiesForPropertyCustomization(propCustomization)
         }
-
     }
-
-
 }
