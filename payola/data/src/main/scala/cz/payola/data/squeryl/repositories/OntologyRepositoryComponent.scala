@@ -39,6 +39,13 @@ trait OntologyRepositoryComponent extends TableRepositoryComponent
             persistedOntologyCustomization
         }
 
+        override def removeById(id: String) = {
+            // Unset from DefaultCustomizations of Analyses
+            analysisRepository.ontologyCustomizationIsRemoved(id)
+            
+            super.removeById(id)
+        }
+
         def persistClassCustomization(classCustomization: AnyRef) {
             persist(ClassCustomization(classCustomization), schema.classCustomizations)
         }
@@ -60,10 +67,6 @@ trait OntologyRepositoryComponent extends TableRepositoryComponent
 
                 classCustomization
             }(collection.breakOut)
-        }
-
-        def getDefaultOntologyCustomizationForAnalysis(analysisId: String): Option[OntologyCustomization] = {
-            selectOneWhere(o => o.analysisId === Some(analysisId))
         }
     }
 }

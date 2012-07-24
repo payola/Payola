@@ -5,6 +5,8 @@ import com.hp.hpl.jena.query._
 import com.hp.hpl.jena.rdf.model._
 import cz.payola.common.rdf._
 import cz.payola.domain._
+import java.io._
+import scala.io.Source
 
 object Graph
 {
@@ -178,5 +180,24 @@ class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge])
         }
 
         model
+    }
+
+    /** Returns a textual representation of the graph - either in RDF/XML or TTL.
+      *
+      * @param representationFormat Output format.
+      * @return String representation.
+      */
+    def textualRepresentation(representationFormat: RdfRepresentation.Type): String = {
+        val outputStream = new ByteArrayOutputStream()
+        representationFormat match {
+            case RdfRepresentation.RdfXml => {
+                this.getModel.write(outputStream)
+            }
+            case RdfRepresentation.Turtle => {
+                this.getModel.write(outputStream, "TURTLE")
+            }
+        }
+
+        Source.fromInputStream(new ByteArrayInputStream(outputStream.toByteArray), "UTF-8").mkString
     }
 }

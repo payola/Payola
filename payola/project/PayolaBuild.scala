@@ -95,17 +95,17 @@ object PayolaBuild extends Build
         "payola", file("."), settings = payolaSettings
     ).aggregate(
         s2JsProject, scala2JsonProject, commonProject, domainProject, dataProject, modelProject, webProject
-    )
+    ).settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
 
     lazy val s2JsProject = Project(
         "s2js", file("s2js"), settings = s2JsSettings
     ).aggregate(
         s2JsAdaptersProject, s2JsCompilerProject, s2JsRuntimeProject
-    )
+    ).settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
 
     lazy val s2JsAdaptersProject = Project(
         "adapters", file("s2js/adapters"), settings = s2JsSettings
-    )
+    ).settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
 
     lazy val s2JsCompilerProject = Project(
         "compiler", file("s2js/compiler"),
@@ -124,7 +124,7 @@ object PayolaBuild extends Build
         )
     ).dependsOn(
         s2JsAdaptersProject
-    )
+    ).settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
 
     /** A project that is compiled to JavaScript using Scala to JavaScript compiler (beside standard compilation). */
     object ScalaToJsProject
@@ -159,7 +159,7 @@ object PayolaBuild extends Build
         "runtime", file("s2js/runtime"), settings = s2JsSettings
     ).aggregate(
         s2JsRuntimeSharedProject, s2JsRuntimeClientProject
-    )
+    ).settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
 
     lazy val s2JsRuntimeSharedProject = ScalaToJsProject.raw(
         "runtime-shared", file("s2js/runtime/shared"), WebSettings.javaScriptsDir, s2JsSettings
@@ -173,7 +173,7 @@ object PayolaBuild extends Build
 
     lazy val scala2JsonProject = Project(
         "scala2json", file("scala2json"), settings = payolaSettings
-    )
+    ).settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
 
     lazy val commonProject = ScalaToJsProject(
         "common", file("common"), WebSettings.javaScriptsDir, payolaSettings
@@ -189,7 +189,7 @@ object PayolaBuild extends Build
         )
     ).dependsOn(
         commonProject
-    )
+    ).settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
 
     lazy val dataProject = Project(
         "data", file("data"),
@@ -204,19 +204,19 @@ object PayolaBuild extends Build
         )
     ).dependsOn(
         commonProject, domainProject
-    )
+    ).settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
 
     lazy val modelProject = Project(
         "model", file("model"), settings = payolaSettings
     ).dependsOn(
         commonProject, domainProject, dataProject
-    )
+    ).settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
 
     lazy val webProject = Project(
         "web", file("web"), settings = payolaSettings
     ).aggregate(
         webSharedProject, webClientProject, webInitializerProject, webServerProject
-    )
+    ).settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
 
     lazy val webSharedProject = ScalaToJsProject(
         "shared", file("web/shared"), WebSettings.javaScriptsDir / "shared",
@@ -239,7 +239,7 @@ object PayolaBuild extends Build
         "initializer", file("web/initializer"), settings = payolaSettings
     ).dependsOn(
         domainProject, dataProject, webSharedProject
-    )
+    ).settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
 
     lazy val webServerProject = PlayProject(
         "server", PayolaSettings.version, Nil, path = file("web/server"), mainLang = SCALA

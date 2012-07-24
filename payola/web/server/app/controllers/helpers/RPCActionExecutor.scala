@@ -41,7 +41,6 @@ class RPCActionExecutor extends Actor
                 paramArray.update(paramArray.length-1, failCallback _)
 
                 try{
-                    println("will be invoking method to be run")
                     methodToRun.invoke(runnableObj, paramArray:_*)
 
                     if (!callbackCalled){

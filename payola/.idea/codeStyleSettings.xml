@@ -26,17 +26,6 @@
         <option name="WRAP_COMMENTS" value="true" />
         <option name="IF_BRACE_FORCE" value="1" />
         <option name="WRAP_LONG_LINES" value="true" />
-        <ScalaCodeStyleSettings>
-          <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="2" />
-          <option name="ADD_FULL_QUALIFIED_IMPORTS" value="true" />
-          <option name="SHOW_ARGUMENTS_TO_BY_NAME_PARAMETERS" value="true" />
-          <option name="INCLUDE_BLOCK_EXPRESSIONS" value="true" />
-          <option name="INCLUDE_LITERALS" value="true" />
-          <option name="FINALLY_BRACE_FORCE" value="3" />
-          <option name="TRY_BRACE_FORCE" value="3" />
-          <option name="PLACE_CLOSURE_PARAMETERS_ON_NEW_LINE" value="false" />
-          <option name="USE_SCALADOC2_FORMATTING" value="true" />
-        </ScalaCodeStyleSettings>
         <XML>
           <option name="XML_LEGACY_SETTINGS_IMPORTED" value="true" />
         </XML>

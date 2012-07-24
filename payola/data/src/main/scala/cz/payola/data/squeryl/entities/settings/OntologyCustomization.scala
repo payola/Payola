@@ -28,8 +28,6 @@ class OntologyCustomization(
 {
     _classCustomizations = null
 
-    var analysisId: Option[String] = None
-
     override def classCustomizations: immutable.Seq[ClassCustomizationType] = {
         if (_classCustomizations == null) {
             _classCustomizations = wrapInTransaction {

@@ -293,8 +293,8 @@ trait SchemaComponent
           * Relation that associates [[cz.payola.data.squeryl.entities.settings.OntologyCustomization]]s
           * to a [[cz.payola.data.squeryl.entities.Analysis]]
           */
-        lazy val ontologyCustomizationsOfAnalyses = oneToManyRelation(analyses, ontologyCustomizations).via(
-            (a, o) => Option(a.id) === o.analysisId)
+        lazy val ontologyCustomizationsOfAnalyses = oneToManyRelation(ontologyCustomizations, analyses).via(
+            (o, a) => a.defaultCustomizationId === Some(o.id))
 
         /**
           * Relation that associates [[cz.payola.data.squeryl.entities.settings.ClassCustomization]]s
@@ -340,69 +340,189 @@ trait SchemaComponent
           * Declares primary, unique and foreign keys and constrains.
           */
         private def declareKeys() {
-            on(users)(user => declare(user.id is (primaryKey), user.name is (unique)))
-            on(plugins)(plugin => declare(plugin.id is (primaryKey), plugin.name is (unique)))
-            on(pluginInstances)(instance => declare(instance.id is (primaryKey)))
+            val COLUMN_TYPE_ID = "varchar(36)"
+            val COLUMN_TYPE_NAME = "varchar(128)"
+            val COLUMN_TYPE_DESCRIPTION = "text"
+            val COLUMN_TYPE_URI = "text"
+            val COLUMN_TYPE_VALUE = "text"
+            val COLUMN_TYPE_COLOR = "varchar(10)"
+            val COLUMN_TYPE_CLASSNAME = "varchar(64)"
+            val COLUMN_TYPE_FULL_CLASSNAME = "varchar(256)"
+
+            on(users)(user =>
+                declare(
+                    user.id is (primaryKey, dbType(COLUMN_TYPE_ID)),
+                    user.name is (unique, dbType(COLUMN_TYPE_ID)),
+                    user.password is (dbType("varchar(32)")),
+                    user.email is (dbType("varchar(128)"))
+                ))
+
+            on(plugins)(plugin =>
+                declare(
+                    plugin.id is (primaryKey, (dbType(COLUMN_TYPE_ID))),
+                    plugin.name is (unique, dbType(COLUMN_TYPE_NAME)),
+                    plugin.className is (dbType(COLUMN_TYPE_FULL_CLASSNAME)),
+                    plugin.ownerId is (dbType(COLUMN_TYPE_ID))
+                ))
+
+            on(pluginInstances)(instance =>
+                declare(
+                    instance.id is (primaryKey, (dbType(COLUMN_TYPE_ID))),
+                    instance._desc is (dbType(COLUMN_TYPE_DESCRIPTION)),
+                    instance.description is (dbType(COLUMN_TYPE_DESCRIPTION)),
+                    instance.analysisId is (dbType(COLUMN_TYPE_ID)),
+                    instance.pluginId is (dbType(COLUMN_TYPE_ID))
+                ))
+
             on(pluginInstanceBindings)(binding =>
                 declare(
-                    binding.id is (primaryKey),
+                    binding.id is (primaryKey, (dbType(COLUMN_TYPE_ID))),
+                    binding.targetPluginInstanceId is (dbType(COLUMN_TYPE_ID)),
+                    binding.sourcePluginInstanceId is (dbType(COLUMN_TYPE_ID)),
+                    binding.analysisId is (dbType(COLUMN_TYPE_ID)),
                     columns(binding.targetPluginInstanceId, binding.inputIndex) are (unique),
                     columns(binding.sourcePluginInstanceId, binding.analysisId) are (unique)
                 ))
-            on(booleanParameterValues)(param => declare(param.id is (primaryKey)))
-            on(floatParameterValues)(param => declare(param.id is (primaryKey)))
-            on(intParameterValues)(param => declare(param.id is (primaryKey)))
-            on(stringParameterValues)(param => declare(param.id is (primaryKey)))
+            on(booleanParameterValues)(param =>
+                declare(
+                    param.id is (primaryKey, (dbType(COLUMN_TYPE_ID))),
+                    param.pluginInstanceId is (dbType(COLUMN_TYPE_ID)),
+                    param.dataSourceId is (dbType(COLUMN_TYPE_ID)),
+                    param.parameterId is (dbType(COLUMN_TYPE_ID)),
+                    param.value is (dbType(COLUMN_TYPE_VALUE))
+                ))
+
+            on(floatParameterValues)(param =>
+                declare(
+                    param.id is (primaryKey, (dbType(COLUMN_TYPE_ID))),
+                    param.pluginInstanceId is (dbType(COLUMN_TYPE_ID)),
+                    param.dataSourceId is (dbType(COLUMN_TYPE_ID)),
+                    param.parameterId is (dbType(COLUMN_TYPE_ID)),
+                    param.value is (dbType(COLUMN_TYPE_VALUE))
+                ))
+
+            on(intParameterValues)(param =>
+                declare(
+                    param.id is (primaryKey, (dbType(COLUMN_TYPE_ID))),
+                    param.pluginInstanceId is (dbType(COLUMN_TYPE_ID)),
+                    param.dataSourceId is (dbType(COLUMN_TYPE_ID)),
+                    param.parameterId is (dbType(COLUMN_TYPE_ID)),
+                    param.value is (dbType(COLUMN_TYPE_VALUE))
+                ))
+
+            on(stringParameterValues)(param =>
+                declare(
+                    param.id is (primaryKey, (dbType(COLUMN_TYPE_ID))),
+                    param.pluginInstanceId is (dbType(COLUMN_TYPE_ID)),
+                    param.dataSourceId is (dbType(COLUMN_TYPE_ID)),
+                    param.parameterId is (dbType(COLUMN_TYPE_ID)),
+                    param.value is (dbType(COLUMN_TYPE_VALUE))
+                ))
+
             on(booleanParameters)(param =>
                 declare(
-                    param.id is (primaryKey),
+                    param.id is (primaryKey, (dbType(COLUMN_TYPE_ID))),
+                    param.pluginId is (dbType(COLUMN_TYPE_ID)),
+                    param._defaultValueDb is (dbType(COLUMN_TYPE_VALUE)),
+                    param.name is (dbType(COLUMN_TYPE_NAME)),
                     columns(param.pluginId, param.name) are (unique)
                 ))
+
             on(floatParameters)(param =>
                 declare(
-                    param.id is (primaryKey),
+                    param.id is (primaryKey, (dbType(COLUMN_TYPE_ID))),
+                    param.pluginId is (dbType(COLUMN_TYPE_ID)),
+                    param._defaultValueDb is (dbType(COLUMN_TYPE_VALUE)),
+                    param.name is (dbType(COLUMN_TYPE_NAME)),
                     columns(param.pluginId, param.name) are (unique)
                 ))
+
             on(intParameters)(param =>
                 declare(
-                    param.id is (primaryKey),
+                    param.id is (primaryKey, (dbType(COLUMN_TYPE_ID))),
+                    param.pluginId is (dbType(COLUMN_TYPE_ID)),
+                    param._defaultValueDb is (dbType(COLUMN_TYPE_VALUE)),
+                    param.name is (dbType(COLUMN_TYPE_NAME)),
                     columns(param.pluginId, param.name) are (unique)
                 ))
+
             on(stringParameters)(param =>
                 declare(
-                    param.id is (primaryKey),
+                    param.id is (primaryKey, (dbType(COLUMN_TYPE_ID))),
+                    param.pluginId is (dbType(COLUMN_TYPE_ID)),
+                    param._defaultValueDb is (dbType(COLUMN_TYPE_VALUE)),
+                    param.name is (dbType(COLUMN_TYPE_NAME)),
                     columns(param.pluginId, param.name) are (unique)
                 ))
+
             on(dataSources)(ds =>
                 declare(
-                    ds.id is (primaryKey),
+                    ds.id is (primaryKey, (dbType(COLUMN_TYPE_ID))),
+                    ds.name is (dbType(COLUMN_TYPE_NAME)),
+                    ds.pluginId is (dbType(COLUMN_TYPE_ID)),
+                    ds.ownerId is (dbType(COLUMN_TYPE_ID)),
+                    ds._desc is (dbType(COLUMN_TYPE_DESCRIPTION)),
+                    ds.description is (dbType(COLUMN_TYPE_DESCRIPTION)),
                     columns(ds.name, ds.ownerId) are (unique)
                 ))
+            
             on(groups)(group =>
                 declare(
-                    group.id is (primaryKey),
+                    group.id is (primaryKey, dbType(COLUMN_TYPE_ID)),
+                    group.name is (dbType(COLUMN_TYPE_NAME)),
+                    group.ownerId is (dbType(COLUMN_TYPE_ID)),
                     columns(group.name, group.ownerId) are (unique)
                 ))
+
             on(analyses)(analysis =>
                 declare(
-                    analysis.id is (primaryKey),
+                    analysis.id is (primaryKey, dbType(COLUMN_TYPE_ID)),
+                    analysis.name is (dbType(COLUMN_TYPE_NAME)),
+                    analysis.ownerId is (dbType(COLUMN_TYPE_ID)),
+                    analysis.defaultCustomizationId is (dbType(COLUMN_TYPE_ID)),
+                    analysis._desc is (dbType(COLUMN_TYPE_DESCRIPTION)),
+                    analysis.description is (dbType(COLUMN_TYPE_DESCRIPTION)),
                     columns(analysis.name, analysis.ownerId) are (unique)
                 ))
+
             on(privileges)(p =>
                 declare(
-                    p.id is (primaryKey),
+                    p.id is (primaryKey, (dbType(COLUMN_TYPE_ID))),
+                    p.granteeId is (dbType(COLUMN_TYPE_ID)),
+                    p.granterId is (dbType(COLUMN_TYPE_ID)),
+                    p.objectId is (dbType(COLUMN_TYPE_ID)),
+                    p.granteeClassName is (dbType(COLUMN_TYPE_CLASSNAME)),
+                    p.objectClassName is (dbType(COLUMN_TYPE_CLASSNAME)),
+                    p.privilegeClass is (dbType(COLUMN_TYPE_FULL_CLASSNAME)),
                     columns(p.granteeId, p.privilegeClass, p.objectId) are (unique)
                 ))
+
             on(ontologyCustomizations)( c =>
                 declare(
-                    c.id is (primaryKey),
+                    c.id is (primaryKey, (dbType(COLUMN_TYPE_ID))),
+                    c.name is (dbType(COLUMN_TYPE_NAME)),
+                    c.ownerId is (dbType(COLUMN_TYPE_ID)),
+                    c.ontologyURL is (dbType(COLUMN_TYPE_URI)),
+
                     columns(c.name, c.ownerId) are (unique)
                 ))
+
             on(classCustomizations)(c =>
                 declare(
-                    c.id is (primaryKey)
+                    c.id is (primaryKey, (dbType(COLUMN_TYPE_ID))),
+                    c.uri is (dbType(COLUMN_TYPE_URI)),
+                    c._g is (dbType("varchar(1)")),
+                    c.fillColor is (dbType(COLUMN_TYPE_COLOR)),
+                    c.ontologyCustomizationId is (dbType(COLUMN_TYPE_ID))
                 ))
-            on(propertyCustomizations)(c => declare(c.id is (primaryKey)))
+
+            on(propertyCustomizations)(c =>
+                declare(
+                    c.id is (primaryKey, (dbType(COLUMN_TYPE_ID))),
+                    c.strokeColor is (dbType(COLUMN_TYPE_COLOR)),
+                    c.classCustomizationId is (dbType(COLUMN_TYPE_ID)),
+                    c.uri is (dbType(COLUMN_TYPE_URI))
+                ))
 
             // When a PluginDbRepresentation is deleted, all of the its instances and data sources will get deleted.
             pluginsPluginInstances.foreignKeyDeclaration.constrainReference(onDelete cascade)

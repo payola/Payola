@@ -31,6 +31,8 @@ class Window
         // TODO
     }
 
+    def open(url: String) = {}
+
     /**
       * window resizing event
       */

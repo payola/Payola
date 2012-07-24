@@ -12,15 +12,17 @@ class VertexInfoTable(values: mutable.HashMap[String, Seq[String]]) extends Comp
 
         val buffer = new ArrayBuffer[ListItem]()
 
+        var even = true
         values.foreach{ x =>
             val innerList = x._2.map{ string =>
                 new ListItem(List(new Text(string)))
             }
 
-            buffer += new ListItem(List(new Text(x._1),new UnorderedList(innerList)))
+            buffer += new ListItem(List(new Text(x._1),new UnorderedList(innerList)),"badge "+(if(even){"badge-info"}))
+            even = !even
         }
 
-        List(new UnorderedList(buffer))
+        List(new UnorderedList(buffer,"span5 unstyled well"))
     }
 
 }

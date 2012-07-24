@@ -79,7 +79,6 @@ class OntologyCustomizationsByOwnership(
             val classCustomization = optClassCustomization.get
             setter(classCustomization)
             Payola.model.ontologyCustomizationModel.persistClassCustomization(classCustomization)
-            println("Will be calling success callback " + successCallback)
             successCallback()
         }
     }
