@@ -5,9 +5,9 @@ import s2js.adapters.js.dom
 import cz.payola.web.shared.managers._
 import cz.payola.web.client.events.BrowserEventArgs
 import cz.payola.web.client.views.VertexEventArgs
-import cz.payola.web.client.views.entity.dataSource._
 import cz.payola.web.client.Presenter
 import cz.payola.web.client.presenters.graph.GraphPresenter
+import cz.payola.web.client.views.entity.DataSourceView
 
 class DataSourceBrowser(
     val viewElement: dom.Element,

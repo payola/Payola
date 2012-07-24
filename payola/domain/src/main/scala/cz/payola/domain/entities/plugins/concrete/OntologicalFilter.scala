@@ -23,7 +23,7 @@ class OntologicalFilter(name: String, inputCount: Int, parameters: immutable.Seq
     extends SparqlQuery(name, inputCount, parameters, id)
 {
     def this() = {
-        this("Ontological Filter", 1, List(new StringParameter("OntologyURLs", "")), IDGenerator.newId)
+        this("Ontological Filter", 1, List(new StringParameter("OntologyURLs", "", false)), IDGenerator.newId)
         isPublic = true
     }
 

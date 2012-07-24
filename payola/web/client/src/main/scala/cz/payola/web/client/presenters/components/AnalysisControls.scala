@@ -12,6 +12,7 @@ import cz.payola.web.client.events.UnitEvent
 import cz.payola.web.client.views.elements.Div
 import cz.payola.web.client.views.elements.Anchor
 import s2js.adapters.js.dom.Element
+import cz.payola.web.client.presenters.notification.Notification
 
 class AnalysisControls(analysisId: String) extends View
 {
@@ -102,6 +103,8 @@ class AnalysisControls(analysisId: String) extends View
 
         analysisEvaluated.trigger(new EvaluationEventArgs(this, graph))
         analysisRunning = false
+
+        Notification.postNotification(window.location.href, "Analysis evalutation done.")
     }
 
     @javascript("""jQuery("#results-tab-link").click();""")

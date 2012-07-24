@@ -17,11 +17,15 @@ import scala.Some
 import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
 import cz.payola.web.client.Presenter
 import cz.payola.web.client.views.entity.analysis.AnalysisEditorView
+import cz.payola.common.entities.plugins.DataSource
+import scala.collection.mutable
+import cz.payola.web.client.views.entity.DataSourceSelector
 
 class AnalysisBuilder(parentElementId: String) extends Presenter
 {
     protected val parentElement = document.getElementById(parentElementId)
     protected var allPlugins: Seq[Plugin] = List()
+    protected var allSources: Seq[DataSource] = List()
     protected val saveAsYouTypeTimeout = 1000
     protected var analysisId = ""
     protected val timeoutMap = new HashMap[String, Int]
@@ -58,6 +62,8 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
     protected def lockAnalysisAndLoadPlugins() = {
         AnalysisBuilderData.lockAnalysis(analysisId)
         AnalysisBuilderData.getPlugins() { plugins => allPlugins = plugins}
+        { error => fatalErrorHandler(error) }
+        AnalysisBuilderData.getDataSources() { sources => allSources = sources}
         { error => fatalErrorHandler(error) }
     }
 
@@ -98,12 +104,47 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
     }
 
     view.addPluginLink.mouseClicked += { event =>
-        val dialog = new PluginDialog(allPlugins.filter(_.inputCount == 0))
+        val dialog = new PluginDialog(allPlugins.filter(_.inputCount == 0).filterNot(_.name == "Payola Private Storage"))
         dialog.pluginNameClicked += { evtArgs =>
             onPluginNameClicked(evtArgs.target, None)
             dialog.destroy()
             false
         }
+        dialog.render()
+        false
+    }
+
+    def onDataSourceSelected(dataSource: DataSource){
+        AnalysisBuilderData.cloneDataSource(dataSource.id, analysisId){ pi =>
+
+            val map = new mutable.HashMap[String, String]
+
+            pi.parameterValues.foreach{ paramValue =>
+                map.put(paramValue.parameter.name, paramValue.value.toString)
+            }
+
+            val instance = new PluginInstance(pi.id,pi.plugin, List(), map)
+
+            lanes.append(instance)
+            view.renderInstance(instance)
+
+            instance.connectButtonClicked += { evt =>
+                connectPlugin(evt.target)
+                false
+            }
+
+            instance.parameterValueChanged += onParameterValueChanged
+            instance.deleteButtonClicked += onDeleteClick
+        }{ err => fatalErrorHandler(err) }
+    }
+
+    view.addDataSourceLink.mouseClicked += { event =>
+        val dialog = new DataSourceSelector("Select one of available data sources:", allSources)
+        dialog.dataSourceSelected += { e =>
+            onDataSourceSelected(e.target)
+            dialog.destroy()
+        }
+
         dialog.render()
         false
     }

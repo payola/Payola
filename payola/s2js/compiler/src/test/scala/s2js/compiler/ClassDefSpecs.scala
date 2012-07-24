@@ -196,6 +196,13 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         }
 
                         class B extends A with T1 with T2
+                        {
+                            override def m1() {
+                                super.m1()
+                                super.m2()
+                                val x = "foo"
+                            }
+                        }
 
                         class C(val v1: String, val v2: Int) extends A
                         {
@@ -251,6 +258,12 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         goog.inherits(pkg.B, pkg.A);
                         goog.object.extend(pkg.B.prototype, new pkg.T2());
                         goog.object.extend(pkg.B.prototype, new pkg.T1());
+                        pkg.B.prototype.m1 = function() {
+                            var self = this;
+                            pkg.T1.prototype.m1.apply(self, []);
+                            pkg.T2.prototype.m2.apply(self, []);
+                            var x = 'foo';
+                        };
                         pkg.B.prototype.__class__ = new s2js.runtime.client.Class('pkg.B', [pkg.A, pkg.T1, pkg.T2]);
                     """
                 }

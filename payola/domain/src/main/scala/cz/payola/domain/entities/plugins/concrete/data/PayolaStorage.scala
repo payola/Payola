@@ -19,7 +19,7 @@ sealed class PayolaStorage(name: String, inputCount: Int, parameters: immutable.
     extends DataFetcher(name, inputCount, parameters, id)
 {
     def this() = {
-        this(PayolaStorage.pluginName, 0, List(new StringParameter(PayolaStorage.groupURIParameterName, "")),
+        this(PayolaStorage.pluginName, 0, List(new StringParameter(PayolaStorage.groupURIParameterName, "", false)),
             IDGenerator.newId)(null)
         isPublic = false
     }

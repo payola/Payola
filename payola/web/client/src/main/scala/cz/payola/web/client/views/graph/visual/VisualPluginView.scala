@@ -57,7 +57,8 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
     )
 
     private val zoomControls = new ZoomControls(100)
-    private val png = new Button(new Text("Download as PNG"),"",new Icon(Icon.download))
+
+    private val png = new Button(new Text("Download as PNG"), "pull-right", new Icon(Icon.download))
 
     png.mouseClicked += { e =>
         val c = new Canvas()
@@ -196,33 +197,36 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
         }
     }
 
-    def updateGraph(graph: Option[Graph]) {
-        if(graph.isDefined) {
-            if(graphView.isDefined) {
-                graphView.get.update(graph.get)
+    override def updateGraph(graph: Option[Graph]) {
+        // If the graph has changed, update the graph view.
+        if (graph != currentGraph) {
+            if(graph.isDefined) {
+                if (graphView.isDefined) {
+                    graphView.get.update(graph.get)
+                } else {
+                    graphView = Some(new views.graph.visual.graph.GraphView(settings))
+                }
             } else {
-                graphView = Some(new views.graph.visual.graph.GraphView(settings))
-            }
-        } else {
-            if (graphView.isDefined) {
-                layers.foreach(_.clear())
-                graphView = None
-                mouseIsDragging = false
-                mousePressedVertex = false
-                mouseDownPosition = Point2D(0, 0)
+                if (graphView.isDefined) {
+                    layers.foreach(_.clear())
+                    graphView = None
+                    mouseIsDragging = false
+                    mousePressedVertex = false
+                    mouseDownPosition = Point2D(0, 0)
+                }
             }
         }
+
+        super.updateGraph(graph)
     }
 
     override def destroy() {
         super.destroy()
 
-        graphView.foreach { g =>
-            graphView = None
-            mouseIsDragging = false
-            mousePressedVertex = false
-            mouseDownPosition = Point2D(0, 0)
-        }
+        graphView = None
+        mouseIsDragging = false
+        mousePressedVertex = false
+        mouseDownPosition = Point2D(0, 0)
     }
 
     override def renderControls(toolbar: dom.Element) {
