@@ -1,20 +1,19 @@
 package cz.payola.web.client.presenters.entity
 
 import cz.payola.common.entities.settings._
-import cz.payola.web.client.views.graph.customization.CustomizationModal
+import cz.payola.web.client.views.entity.OntologyCustomizationEditModal
 import cz.payola.web.client.events._
 import cz.payola.web.shared.managers.OntologyCustomizationManager
 import cz.payola.common.ValidationException
 import cz.payola.web.client.Presenter
 import cz.payola.web.client.views.bootstrap.InputControl
-import s2js.adapters.js.browser._
 
 class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) extends Presenter
 {
     // This will notify of any value being changed
     val customizationValueChanged: SimpleUnitEvent[this.type] = new SimpleUnitEvent[this.type]
 
-    val modal = new CustomizationModal(ontologyCustomization)
+    val modal = new OntologyCustomizationEditModal(ontologyCustomization)
 
     /** Failure handler for property saving.
       *
@@ -139,7 +138,7 @@ class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) 
             .find(_.uri == propertyURI).get
     }
 
-    /** Initialization. Creates a new CustomizationModal and renders it.
+    /** Initialization. Creates a new OntologyCustomizationEditModal and renders it.
       *
       */
     def initialize() {

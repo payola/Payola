@@ -1,7 +1,7 @@
 package cz.payola.web.client.presenters.entity
 
 import cz.payola.web.client.Presenter
-import cz.payola.web.client.views.entity.ontologyCustomization.OntologyCustomizationCreateModal
+import cz.payola.web.client.views.entity.OntologyCustomizationCreateModal
 import cz.payola.common.ValidationException
 import cz.payola.web.client.models.Model
 

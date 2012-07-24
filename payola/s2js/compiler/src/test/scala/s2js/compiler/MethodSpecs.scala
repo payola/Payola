@@ -400,11 +400,11 @@ class MethodSpecs extends CompilerFixtureSpec
                         goog.inherits($pkg.b, $pkg.a);
                         $pkg.b.prototype.m1 = function() {
                             var self = this;
-                            goog.base(self, 'm1');
+                            $pkg.a.prototype.m1.apply(self, []);
                         };
                         $pkg.b.prototype.m2 = function(x) {
                             var self = this;
-                            goog.base(self, 'm2', 'foo');
+                            $pkg.a.prototype.m2.apply(self, ['foo']);
                         };
                         $pkg.b.prototype.__class__ = new s2js.runtime.client.Class('$pkg.b', [$pkg.a]);
                     """

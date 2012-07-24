@@ -18,8 +18,8 @@ import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
 import cz.payola.web.client.Presenter
 import cz.payola.web.client.views.entity.analysis.AnalysisEditorView
 import cz.payola.common.entities.plugins.DataSource
-import cz.payola.web.client.views.entity.dataSource.DataSourceSelector
 import scala.collection.mutable
+import cz.payola.web.client.views.entity.DataSourceSelector
 
 class AnalysisBuilder(parentElementId: String) extends Presenter
 {

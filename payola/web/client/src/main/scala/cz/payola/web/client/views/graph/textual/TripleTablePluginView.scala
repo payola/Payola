@@ -10,6 +10,7 @@ import cz.payola.web.client.views.graph._
 import cz.payola.web.client.views.VertexEventArgs
 import cz.payola.web.client.views.bootstrap.Icon
 import cz.payola.web.client.View
+import cz.payola.common.entities.settings.OntologyCustomization
 
 /**
   * A plugin that displays all edges in the graph as a table. The edges are firstly grouped by the edge origins,
@@ -25,61 +26,65 @@ class TripleTablePluginView(settings: VisualSetup) extends PluginView("Triple Ta
 
     def createSubViews = List(tableWrapper)
 
-    def updateGraph(graph: Option[Graph]) {
-        // Remove the old table.
-        tableWrapper.removeAllChildNodes()
+    override def updateGraph(graph: Option[Graph]) {
+        if (graph != currentGraph) {
+            // Remove the old table.
+            tableWrapper.removeAllChildNodes()
 
-        // Insert the new table.
-        val table = document.createElement[Element]("table")
-        tableWrapperElement.appendChild(table)
+            // Insert the new table.
+            val table = document.createElement[Element]("table")
+            tableWrapperElement.appendChild(table)
 
-        table.className = "table table-striped table-bordered table-condensed"
-        val tableHead = addElement(table, "thead")
-        val tableBody = addElement(table, "tbody")
+            table.className = "table table-striped table-bordered table-condensed"
+            val tableHead = addElement(table, "thead")
+            val tableBody = addElement(table, "tbody")
 
-        // Create the headers.
-        val headerRow = addRow(tableHead)
-        List("Subject", "Property", "Value").foreach { title =>
-            val cell = addCell(headerRow, isHeader = true)
-            cell.innerHTML = title
-        }
-
-        // Fill the table with cells.
-        groupEdges(graph).foreach { edgesByOrigin =>
-            var originCell: Element = null
-            var originRowCount = 0
-
-            edgesByOrigin._2.foreach { edgesByEdgeType =>
-                val edgeUri = edgesByEdgeType._1
-                val edges = edgesByEdgeType._2
-                val origin = edges.head.origin
-                val row = addRow(tableBody)
-
-                // The origin vertex cell.
-                originRowCount += 1
-                if (originCell == null) {
-                    originCell = addCell(row)
-                    createVertexView(origin).render(originCell)
-                }
-
-                // The edge cell.
-                val edgeCell = addCell(row)
-                new Text(edgeUri).render(edgeCell)
-
-                // The destinations cell.
-                val destinationsCell = addCell(row)
-                val destinationListItems = edges.map { (edge: Edge) =>
-                    val vertexElement = edge.destination match {
-                        case iv: IdentifiedVertex => createVertexView(iv)
-                        case lv: LiteralVertex => new Text(lv.value.toString)
-                        case v => new Text(v.toString)
-                    }
-                    new ListItem(List(vertexElement))
-                }
-                new UnorderedList(destinationListItems, "unstyled").render(destinationsCell)
+            // Create the headers.
+            val headerRow = addRow(tableHead)
+            List("Subject", "Property", "Value").foreach { title =>
+                val cell = addCell(headerRow, isHeader = true)
+                cell.innerHTML = title
             }
-            originCell.setAttribute("rowspan", originRowCount.toString)
+
+            // Fill the table with cells.
+            groupEdges(graph).foreach { edgesByOrigin =>
+                var originCell: Element = null
+                var originRowCount = 0
+
+                edgesByOrigin._2.foreach { edgesByEdgeType =>
+                    val edgeUri = edgesByEdgeType._1
+                    val edges = edgesByEdgeType._2
+                    val origin = edges.head.origin
+                    val row = addRow(tableBody)
+
+                    // The origin vertex cell.
+                    originRowCount += 1
+                    if (originCell == null) {
+                        originCell = addCell(row)
+                        createVertexView(origin).render(originCell)
+                    }
+
+                    // The edge cell.
+                    val edgeCell = addCell(row)
+                    new Text(edgeUri).render(edgeCell)
+
+                    // The destinations cell.
+                    val destinationsCell = addCell(row)
+                    val destinationListItems = edges.map { (edge: Edge) =>
+                        val vertexElement = edge.destination match {
+                            case iv: IdentifiedVertex => createVertexView(iv)
+                            case lv: LiteralVertex => new Text(lv.value.toString)
+                            case v => new Text(v.toString)
+                        }
+                        new ListItem(List(vertexElement))
+                    }
+                    new UnorderedList(destinationListItems, "unstyled").render(destinationsCell)
+                }
+                originCell.setAttribute("rowspan", originRowCount.toString)
+            }
         }
+
+        super.updateGraph(graph)
     }
 
     private def groupEdges(graph: Option[Graph]): Map[String, Map[String, Seq[Edge]]] = {

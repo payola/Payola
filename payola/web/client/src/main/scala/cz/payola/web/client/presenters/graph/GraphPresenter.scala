@@ -6,7 +6,7 @@ import cz.payola.web.client.views.graph.PluginSwitchView
 import cz.payola.web.client.Presenter
 import cz.payola.web.client.views.VertexEventArgs
 import cz.payola.web.client.models.Model
-import cz.payola.web.client.views.entity.dataSource.DataSourceSelector
+import cz.payola.web.client.views.entity.DataSourceSelector
 import s2js.adapters.js.browser.window
 import cz.payola.web.client.events._
 import cz.payola.web.client.presenters.entity._
@@ -21,7 +21,7 @@ class GraphPresenter(val viewElement: dom.Element) extends Presenter
         Model.ontologyCustomizationsChanged += onOntologyCustomizationsChanged _
         view.vertexBrowsingDataSource += onVertexBrowsingDataSource _
         view.ontologyCustomizationsButton.mouseClicked += onOntologyCustomizationsButtonClicked _
-        // TODO view.ontologyCustomizationSelected +=
+        view.ontologyCustomizationSelected += onOntologyCustomizationSelected _
         view.ontologyCustomizationEditClicked += onOntologyCustomizationEditClicked _
         view.ontologyCustomizationCreateButton.mouseClicked += onOntologyCustomizationCreateButtonClicked _
 
@@ -47,11 +47,28 @@ class GraphPresenter(val viewElement: dom.Element) extends Presenter
     }
 
     private def onOntologyCustomizationEditClicked(e: EventArgs[OntologyCustomization]): Boolean = {
-        blockPage("Loading the ontology customization.")
-        OntologyCustomizationManager.getCustomizationByID(e.target.id) { customization =>
-            unblockPage()
-            new OntologyCustomizationEditor(customization).initialize()
-        }(fatalErrorHandler(_))
+        // The loading has to be delayed after the event is handled, because the page blocking interferes with the
+        // drop down menu.
+        delayed(0) { () =>
+            blockPage("Loading the ontology customization.")
+            OntologyCustomizationManager.getCustomizationByID(e.target.id) { customization =>
+                unblockPage()
+                new OntologyCustomizationEditor(customization).initialize()
+            }(fatalErrorHandler(_))
+        }
+        false
+    }
+
+    private def onOntologyCustomizationSelected(e: EventArgs[OntologyCustomization]): Boolean = {
+        // The loading has to be delayed after the event is handled, because the page blocking interferes with the
+        // drop down menu.
+        delayed(0) { () =>
+            blockPage("Loading the ontology customization.")
+            OntologyCustomizationManager.getCustomizationByID(e.target.id) { customization =>
+                unblockPage()
+                view.updateOntologyCustomization(Some(customization))
+            }(fatalErrorHandler(_))
+        }
         false
     }
 
