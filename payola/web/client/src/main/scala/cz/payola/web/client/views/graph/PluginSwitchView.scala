@@ -48,17 +48,22 @@ class PluginSwitchView extends GraphView with ComposedView
         new ListItem(List(pluginAnchor))
     }
 
-    val ontologyCustomizationsButton = new DropDownButton(List(new Text("Change appearance using ontologies")), Nil)
+    val pluginChangeButton = new DropDownButton(List(
+        new Icon(Icon.eye_open),
+        new Text("Change visualisation plugin")),
+        pluginListItems
+    )
+
+    val ontologyCustomizationsButton = new DropDownButton(List(
+        new Icon(Icon.wrench),
+        new Text("Change appearance using ontologies")),
+        Nil
+    )
 
     val ontologyCustomizationCreateButton = new Anchor(List(new Icon(Icon.plus), new Text("Create new settings")))
 
-    val toolbar = new Div(List(
-        new DropDownButton(List(new Icon(Icon.cog), new Text("Change visualisation plugin")), pluginListItems),
-        ontologyCustomizationsButton),
-        "btn-toolbar"
-    )
-
-    toolbar.setAttribute("style", "margin-bottom: 15px;")
+    val toolbar = new Div(List(pluginChangeButton, ontologyCustomizationsButton), "btn-toolbar").setAttribute(
+        "style", "margin-bottom: 15px;")
 
     // Re-trigger all events when the corresponding events are triggered in the plugins.
     plugins.foreach { plugin =>

@@ -21,6 +21,5 @@ class PluginTest extends FlatSpec with ShouldMatchers {
         p.name_=("NewName")
         p.name should be ("NewName")
     }
-
 }
 

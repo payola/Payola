@@ -23,9 +23,7 @@ object DatabaseInitializer extends App
     }
 
     private def persistInitialData() {
-        val admin = new User("admin@payola.cz")
-        admin.password = Payola.model.userModel.cryptPassword("payola!")
-
+        val admin = Payola.model.userModel.create("admin@payola.cz", "payola!")
         val owner = model.userRepository.persist(admin)
 
         val sparqlEndpointPlugin = new SparqlEndpoint

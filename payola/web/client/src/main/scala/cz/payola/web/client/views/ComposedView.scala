@@ -3,6 +3,7 @@ package cz.payola.web.client.views
 import s2js.adapters.js.dom
 import s2js.adapters.js.browser.document
 import cz.payola.web.client.View
+import cz.payola.web.client.views.elements.Text
 
 trait ComposedView extends View
 {
@@ -23,7 +24,10 @@ trait ComposedView extends View
 
     def render(parent: dom.Element) {
         parentElement = Some(parent)
-        subViews.foreach(_.render(parent))
+        subViews.foreach { v =>
+            new Text(" ").render(parent)
+            v.render(parent)
+        }
     }
 
     def destroy() {

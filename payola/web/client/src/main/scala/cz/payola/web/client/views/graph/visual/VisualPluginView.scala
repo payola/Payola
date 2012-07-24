@@ -34,8 +34,6 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
 
     private var mouseDownPosition = Point2D(0, 0)
 
-    var zoomTool: Option[ZoomControls] = None
-
     val mouseDragged = new BrowserEvent[Canvas]
 
     var graphView: Option[views.graph.visual.graph.GraphView] = None
@@ -43,8 +41,6 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
     protected val topLayer = new Canvas()
 
     private val layerPack = new CanvasPack(new Canvas(), new Canvas(), new Canvas(), new Canvas())
-
-    def createSubViews = layers
 
     private var topLayerOffset = Vector2D(0, 0)
 
@@ -58,22 +54,8 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
 
     private val zoomControls = new ZoomControls(100)
 
-    private val png = new Button(new Text("Download as PNG"), "pull-right", new Icon(Icon.download))
-
-    png.mouseClicked += { e =>
-        val c = new Canvas()
-        c.domElement.width = topLayer.domElement.width
-        c.domElement.height = topLayer.domElement.height
-
-        c.domElement.getContext[CanvasContext]("2d").drawImage(layerPack.edgesDeselected.domElement,0,0)
-        c.domElement.getContext[CanvasContext]("2d").drawImage(layerPack.edgesSelected.domElement,0,0)
-        c.domElement.getContext[CanvasContext]("2d").drawImage(layerPack.verticesDeselected.domElement,0,0)
-        c.domElement.getContext[CanvasContext]("2d").drawImage(layerPack.verticesSelected.domElement,0,0)
-        c.domElement.getContext[CanvasContext]("2d").drawImage(topLayer.domElement,0,0)
-
-        window.open(c.domElement.toDataURL("image/png"))
-        false
-    }
+    private val pngDownloadButton = new Button(new Text("Download as PNG"), "pull-right",
+        new Icon(Icon.download)).setAttribute("style", "margin: 0 5px;")
 
     window.onresize = { e =>
         fitCanvas()
@@ -155,6 +137,22 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
         false
     }
 
+    pngDownloadButton.mouseClicked += { e =>
+        val c = new Canvas()
+        c.domElement.width = topLayer.domElement.width
+        c.domElement.height = topLayer.domElement.height
+
+        c.domElement.getContext[CanvasContext]("2d").drawImage(layerPack.edgesDeselected.domElement,0,0)
+        c.domElement.getContext[CanvasContext]("2d").drawImage(layerPack.edgesSelected.domElement,0,0)
+        c.domElement.getContext[CanvasContext]("2d").drawImage(layerPack.verticesDeselected.domElement,0,0)
+        c.domElement.getContext[CanvasContext]("2d").drawImage(layerPack.verticesSelected.domElement,0,0)
+        c.domElement.getContext[CanvasContext]("2d").drawImage(topLayer.domElement,0,0)
+
+        window.open(c.domElement.toDataURL("image/png"))
+        false
+    }
+
+
     //on mouse wheel event work-around###################################################################################
 
     @javascript(
@@ -168,33 +166,13 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
 
     private var hoverExit = new SimpleUnitEvent[Boolean]
 
+    def createSubViews = layers
+
     override def render(parent: dom.Element) {
         super.render(parent)
 
         setMouseWheelListener()
         fitCanvas()
-
-        val zoomToolHolder = new Div().domElement
-
-        graphView = Some(new views.graph.visual.graph.GraphView(settings))
-        zoomTool = Some(new ZoomControls(100))
-        zoomTool.get.render(zoomToolHolder) // TODO
-
-        zoomTool.get.zoomDecreased += { event => //zoom - invoked by zoom control button
-            if (graphView.isDefined && zoomTool.get.canZoomOut) {
-                zoomOut(graphView.get.getGraphCenter) //zooming from the center of the graph
-                zoomTool.get.decreaseZoomInfo()
-            }
-            false
-        }
-
-        zoomTool.get.zoomIncreased += { event => //zoom - invoked by zoom control button
-            if (graphView.isDefined && zoomTool.get.canZoomIn) {
-                zoomIn(graphView.get.getGraphCenter) //zooming to the center of the graph
-                zoomTool.get.increaseZoomInfo()
-            }
-            false
-        }
     }
 
     override def updateGraph(graph: Option[Graph]) {
@@ -231,12 +209,12 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
 
     override def renderControls(toolbar: dom.Element) {
         zoomControls.render(toolbar)
-        png.render(toolbar)
+        pngDownloadButton.render(toolbar)
     }
 
     override def destroyControls() {
         zoomControls.destroy()
-        png.destroy()
+        pngDownloadButton.destroy()
     }
 
     protected def redrawQuick() {

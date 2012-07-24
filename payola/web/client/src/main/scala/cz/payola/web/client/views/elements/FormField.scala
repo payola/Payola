@@ -9,8 +9,6 @@ abstract class FormField[A <: dom.Input](elementName: String, name: String, init
 {
     val changed = new SimpleUnitEvent[this.type]
 
-    // Needs to be key released. On keyPressed, the event would precede the actual
-    // input value change - it would trigger something like willChange.
     keyReleased += { e =>
         changed.triggerDirectly(this)
         true
@@ -19,15 +17,13 @@ abstract class FormField[A <: dom.Input](elementName: String, name: String, init
     value = initialValue
     setAttribute("name", name)
     setAttribute("id", name)
-
-    title.map {
-        t =>
-            setAttribute("placeholder", t)
-            setAttribute("title", t)
+    title.foreach { t =>
+        setAttribute("placeholder", t)
+        setAttribute("title", t)
     }
 
     def maxLength_=(maxLength: Int) {
-        setAttribute("maxlength", maxLength.toString())
+        setAttribute("maxlength", maxLength.toString)
     }
 
     def maxLength: Int = {
