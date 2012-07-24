@@ -4,18 +4,20 @@ import cz.payola.data.squeryl._
 import cz.payola.data.squeryl.entities.settings._
 import cz.payola.data.squeryl.entities.User
 import org.squeryl.PrimitiveTypeMode._
+import org.squeryl.dsl.ast.LogicalBoolean
 
 trait OntologyRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
 
+    private type QueryType = (OntologyCustomization, Option[User], Option[ClassCustomization], Option[PropertyCustomization])
+
     lazy val ontologyCustomizationRepository =
-        new TableRepository[OntologyCustomization, (OntologyCustomization, Option[User])](
-            schema.ontologyCustomizations,OntologyCustomization)
+        new TableRepository[OntologyCustomization, QueryType](schema.ontologyCustomizations, OntologyCustomization)
         with OntologyCustomizationRepository
         with NamedEntityTableRepository[OntologyCustomization]
-        with OptionallyOwnedEntityTableRepository[OntologyCustomization]
-        with ShareableEntityTableRepository[OntologyCustomization]
+        with OptionallyOwnedEntityTableRepository[OntologyCustomization, QueryType]
+        with ShareableEntityTableRepository[OntologyCustomization, QueryType]
     {
         override def persist(entity: AnyRef) = {
             val persistedOntologyCustomization = super.persist(entity)
@@ -53,20 +55,34 @@ trait OntologyRepositoryComponent extends TableRepositoryComponent
         def persistPropertyCustomization(propertyCustomization: AnyRef) {
             persist(PropertyCustomization(propertyCustomization), schema.propertyCustomizations)
         }
-            
-        def getClassCustomizations(ontologyCustomizationId: String): Seq[ClassCustomization] = {
-            val result = join(schema.classCustomizations, schema.propertyCustomizations.leftOuter)((c, p) =>
-                where(c.ontologyCustomizationId === ontologyCustomizationId)
-                select(c, p)
-                on(p.map(_.classCustomizationId) === Some(c.id))
-            ).toList
 
-            result.groupBy(_._1).map { r =>
-                val classCustomization = r._1
-                classCustomization.propertyCustomizations = r._2.flatMap(_._2)
+        protected def getSelectQuery(entityFilter: (OntologyCustomization) => LogicalBoolean) =
+        {
+            join(table, schema.users.leftOuter, schema.classCustomizations.leftOuter,
+                schema.propertyCustomizations.leftOuter)((o, u, c, p) =>
+                    where(entityFilter(o))
+                    select(o, u, c, p)
+                    on(o.ownerId === u.map(_.id),
+                        c.map(_.ontologyCustomizationId) === Some(o.id),
+                        p.map(_.classCustomizationId) === c.map(_.id))
+            )
+        }
 
-                classCustomization
-            }(collection.breakOut)
+        protected def processSelectResults(results: Seq[QueryType]) = {
+            results.groupBy(_._1).map { r =>
+                 val ontologyCustomization = r._1
+                 ontologyCustomization.owner = r._2.head._2
+                 ontologyCustomization.classCustomizations = results.groupBy(_._3).flatMap { c =>
+                     val classCustomization = c._1
+                     if (classCustomization.isDefined) {
+                        classCustomization.get.propertyCustomizations = c._2.flatMap(_._4)
+                     }
+
+                     classCustomization
+                 } (collection.breakOut)
+
+                 ontologyCustomization
+             }(collection.breakOut)
         }
     }
 }

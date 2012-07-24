@@ -14,14 +14,13 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
     private lazy val pluginInstanceBindingRepository = new LazyTableRepository[PluginInstanceBinding](
         schema.pluginInstanceBindings, PluginInstanceBinding)
 
-    lazy val analysisRepository = new AnalysisTableRepository
+    lazy val analysisRepository = new AnalysisDefaultTableRepository
 
-    class AnalysisTableRepository
-        extends TableRepository[Analysis, (Analysis, Option[User])](schema.analyses, Analysis)
+    class AnalysisDefaultTableRepository
+        extends OptionallyOwnedEntityDefaultTableRepository[Analysis](schema.analyses, Analysis)
         with AnalysisRepository
         with NamedEntityTableRepository[Analysis]
-        with OptionallyOwnedEntityTableRepository[Analysis]
-        with ShareableEntityTableRepository[Analysis]
+        with ShareableEntityTableRepository[Analysis, (Analysis, Option[User])]
         with PluginInstanceTableRepository[PluginInstance]
     {
         protected val pluginInstanceLikeTable = schema.pluginInstances

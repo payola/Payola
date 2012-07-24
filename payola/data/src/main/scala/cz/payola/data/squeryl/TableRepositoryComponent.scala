@@ -112,37 +112,20 @@ trait TableRepositoryComponent
         def getByName(name: String): Option[A] = selectOneWhere(_.name === name)
     }
 
-    trait OptionallyOwnedEntityTableRepository[A <: PersistableEntity with OptionallyOwnedEntity with NamedEntity]
+    trait OptionallyOwnedEntityTableRepository[A <: PersistableEntity with OptionallyOwnedEntity with NamedEntity, B]
         extends OptionallyOwnedEntityRepository[A]
     {
-        self: TableRepository[A, (A, Option[User])] =>
+        self: TableRepository[A, B] =>
 
         def getAllByOwnerId(ownerId: Option[String]): Seq[A] = selectWhere(_.ownerId === ownerId).sortBy(_.name)
-
-        protected def getSelectQuery(entityFilter: A => LogicalBoolean): Query[(A, Option[User])] = {
-            join(table, schema.users.leftOuter)((e, o) =>
-                where(entityFilter(e))
-                select(e, o)
-                on(e.ownerId === o.map(_.id))
-            )
-        }
-
-        protected def processSelectResults(results: Seq[(A, Option[User])]): Seq[A] = {
-            results.groupBy(_._1).map { r =>
-                val entity = r._1
-                entity.owner = r._2.head._2
-
-                entity
-            }(collection.breakOut)
-        }
     }
 
     trait ShareableEntityTableRepository[A <: PersistableEntity
-            with ShareableEntity with OptionallyOwnedEntity with NamedEntity]
-        extends OptionallyOwnedEntityTableRepository[A]
+            with ShareableEntity with OptionallyOwnedEntity with NamedEntity, B]
+        extends OptionallyOwnedEntityTableRepository[A, B]
         with ShareableEntityRepository[A]
     {
-        self: TableRepository[A, (A, Option[User])] =>
+        self: TableRepository[A, B] =>
 
         def getAllPublic: Seq[A] = selectWhere(_.isPublic === true).sortBy(_.name)
     }
@@ -160,6 +143,35 @@ trait TableRepositoryComponent
 
         protected def processSelectResults(results: Seq[A]): Seq[A] = {
             results
+        }
+    }
+
+    /**
+     * A repository that loads entity with its owner
+     * @param table The corresponding table with the entities.
+     * @param entityConverter A converter that converts to instances that can be stored into the table.
+     * @tparam A Type of the entities in the repository.
+     */
+    class OptionallyOwnedEntityDefaultTableRepository[A <: PersistableEntity with OptionallyOwnedEntity with NamedEntity](
+        table: Table[A], entityConverter: EntityConverter[A])
+        extends TableRepository[A, (A, Option[User])](table, entityConverter)
+        with OptionallyOwnedEntityTableRepository[A, (A, Option[User])]
+    {
+        protected def getSelectQuery(entityFilter: A => LogicalBoolean): Query[(A, Option[User])] = {
+            join(table, schema.users.leftOuter)((e, o) =>
+                where(entityFilter(e))
+                select(e, o)
+                on(e.ownerId === o.map(_.id))
+            )
+        }
+
+        protected def processSelectResults(results: Seq[(A, Option[User])]): Seq[A] = {
+            results.groupBy(_._1).map { r =>
+                val entity = r._1
+                entity.owner = r._2.head._2
+
+                entity
+            }(collection.breakOut)
         }
     }
 }
