@@ -10,7 +10,7 @@ class Projection(name: String, inputCount: Int, parameters: immutable.Seq[Parame
     extends Construct(name, inputCount, parameters, id)
 {
     def this() = {
-        this("Projection", 1, List(new StringParameter("PropertyURIs", "")), IDGenerator.newId)
+        this("Projection", 1, List(new StringParameter("PropertyURIs", "", true)), IDGenerator.newId)
         isPublic = true
     }
 

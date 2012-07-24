@@ -10,7 +10,7 @@ class Typed(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_
     extends Construct(name, inputCount, parameters, id)
 {
     def this() = {
-        this("Typed", 1, List(new StringParameter("TypeURI", "")), IDGenerator.newId)
+        this("Typed", 1, List(new StringParameter("TypeURI", "", false)), IDGenerator.newId)
         isPublic = true
     }
 
