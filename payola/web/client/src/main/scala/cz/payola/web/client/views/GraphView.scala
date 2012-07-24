@@ -18,18 +18,13 @@ abstract class GraphView
     /** The ontology customization that is currently used during visualisation. */
     protected var currentCustomization: Option[OntologyCustomization] = None
 
-    /** Triggered when a vertex is selected.
-      */
+    /** Triggered when a vertex is selected. */
     val vertexSelected = new UnitEvent[this.type, VertexEventArgs[this.type]]
 
-    /**
-      * Triggered when the vertex is selected as a start of browsing.
-      */
+    /** Triggered when the vertex is selected as a start of browsing. */
     val vertexBrowsing = new UnitEvent[this.type, VertexEventArgs[this.type]]
 
-    /**
-      * Triggered when the vertex is selected as a start of browsing in a particular data source.
-      */
+    /** Triggered when the vertex is selected as a start of browsing in a particular data source. */
     val vertexBrowsingDataSource = new UnitEvent[this.type, VertexEventArgs[this.type]]
 
     /**

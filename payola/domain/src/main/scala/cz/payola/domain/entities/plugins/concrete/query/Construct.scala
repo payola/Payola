@@ -5,6 +5,16 @@ import cz.payola.domain.IDGenerator
 import cz.payola.domain.entities.plugins._
 import cz.payola.domain.entities.plugins.concrete.SparqlQuery
 import cz.payola.domain.sparql._
+import cz.payola.common.rdf.Edge
+
+object Construct
+{
+    def optionalProperties(subject: Subject, variableGetter: () => Variable): immutable.Seq[GraphPattern] = {
+        (Edge.rdfTypeEdge :: Edge.rdfLabelEdges).map { e =>
+            GraphPattern(TriplePattern(subject, Uri(e), variableGetter()))
+        }
+    }
+}
 
 abstract class Construct(
     name: String,
@@ -23,13 +33,7 @@ abstract class Construct(
     def getConstructQuery(instance: PluginInstance, subject: Subject, variableGetter: () => Variable): ConstructQuery
 
     def getQuery(instance: PluginInstance): String = {
-        var i = 0
-        def variableGetter = () => {
-            i += 1
-            Variable("v" + i)
-        }
-
-        val query = getConstructQuery(instance, Variable("s"), variableGetter)
+        val query = getConstructQuery(instance, Variable("s"), new VariableGenerator)
         if (query.isEmpty) {
             throw new PluginException("The construct query is empty.")
         } else {

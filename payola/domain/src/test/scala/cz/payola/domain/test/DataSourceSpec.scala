@@ -8,7 +8,7 @@ import cz.payola.domain.entities.plugins.concrete.data.SparqlEndpoint
 
 class DataSourceSpec extends FlatSpec with ShouldMatchers
 {
-    val instance = (new SparqlEndpoint).createInstance().setParameter("EndpointURL", "http://dbpedia.org/sparql")
+    val instance = (new SparqlEndpoint).createInstance().setParameter("EndpointURL", "http://ld.opendata.cz:8894/sparql")
 
     val dataSource = DataSource("DBPedia", None, instance)
 
@@ -29,16 +29,8 @@ class DataSourceSpec extends FlatSpec with ShouldMatchers
     }
 
     it should "retrieve neighbours" in {
-        val uri = "http://dbpedia.org/resource/Prague"
+        val uri = "http://ld.opendata.cz/resource/isvzus.cz/public-contract/9ef681a3-8932-4781-9ae2-1cb4edbdaa8b"
         val neighbourhood = dataSource.getNeighbourhood(uri)
         assert(!neighbourhood.isEmpty, "The neighbourhood is empty.")
-
-        val neighbour = neighbourhood.vertices.collect {
-            case i: IdentifiedVertex if i.uri != uri && i.uri.startsWith("http://dbpedia.org/resource/Czech") => i
-        }.headOption
-        assert(neighbour.nonEmpty, "The neighbourhood doesn't contain the expected vertex.")
-
-        val distantNeighbourhood = dataSource.getNeighbourhood(neighbour.get.uri)
-        assert(!distantNeighbourhood.isEmpty, "The neighbouhood of the first neighbour is empty.")
     }
 }
