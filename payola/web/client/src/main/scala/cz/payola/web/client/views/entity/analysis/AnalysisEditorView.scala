@@ -7,8 +7,9 @@ import cz.payola.web.client.views.todo.PluginInstance
 import cz.payola.web.client.View
 import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom.Element
+import cz.payola.web.client.views.ComposedView
 
-class AnalysisEditorView extends View
+class AnalysisEditorView extends ComposedView
 {
     val nameControl = new TextInputControl("Analysis name:", "name", "", "Analysis name")
     val description = new TextAreaInputControl("Description:", "description", "", "Anaylsis description")
@@ -29,8 +30,8 @@ class AnalysisEditorView extends View
     protected val rightCol = new Div(List(rightColContent),"span9")
 
     protected val container = new Div(List(leftCol, rightCol))
-
-    def blockDomElement = container.domElement
+    nameControl.input.addCssClass("span12")
+    description.input.addCssClass("span12")
 
     def setName(name: String){
         nameControl.input.value_=(name)
@@ -40,14 +41,5 @@ class AnalysisEditorView extends View
         instance.render(rightColContent.domElement)
     }
 
-    def destroy(){
-
-    }
-
-    def render(parent: Element = document.body) {
-        container.render(parent)
-        nameControl.input.addCssClass("span12")
-        description.input.addCssClass("span12")
-    }
-
+    def createSubViews = List(container)
 }

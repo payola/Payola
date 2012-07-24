@@ -34,7 +34,7 @@ import scala.Some
             throw new ModelException("The evaluation is not running.")
         }
 
-        if (!evaluationTuple._1.isDefined || evaluationTuple._1.get.equals(user)) {
+        if (!evaluationTuple._1.isDefined || evaluationTuple._1.get.id == user.get.id) {
 
             val evaluation = evaluationTuple._2
             val progress = evaluation.getProgress
