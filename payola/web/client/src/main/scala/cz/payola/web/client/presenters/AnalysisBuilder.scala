@@ -18,6 +18,7 @@ import cz.payola.web.client.views.entity.analysis.AnalysisEditorView
 import cz.payola.common.entities.plugins.DataSource
 import scala.collection.mutable
 import cz.payola.web.client.views.entity.DataSourceSelector
+import cz.payola.web.client.views.bootstrap.modals.AlertModal
 
 class AnalysisBuilder(parentElementId: String) extends Presenter
 {
@@ -155,7 +156,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
 
             val inputsCount = evt.target.inputCount
             if (inputsCount > lanes.size) {
-                window.alert("The merge plugin has " + inputsCount.toString() + " inputs, but only " + lanes
+                AlertModal.runModal("The merge plugin has " + inputsCount.toString() + " inputs, but only " + lanes
                     .size + " branches are available.")
             } else {
                 val mergeDialog = new MergeAnalysisBranchesDialog(lanes, inputsCount)
@@ -290,7 +291,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
         AnalysisBuilderData.saveBinding(analysisId, a.id, b.id, inputIndex) { _ =>
             renderBinding(a, b)
         } { _ =>
-            window.alert("Unable to save the binding")
+            AlertModal.runModal("Unable to save the binding")
         }
     }
 

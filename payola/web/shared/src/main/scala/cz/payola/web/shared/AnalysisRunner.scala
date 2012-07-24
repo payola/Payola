@@ -36,7 +36,7 @@ import cz.payola.domain.entities.analyses.evaluation.Success
 
     private def getEvaluationTupleForIDAndPerformSecurityChecks(id: String, user: Option[User]) = {
         val evaluationTuple = getEvaluationTupleForID(id)
-        if (!evaluationTuple._1.isDefined || evaluationTuple._1.get.equals(user)) {
+        if (!evaluationTuple._1.isDefined || evaluationTuple._1 == user) {
             evaluationTuple
         }else{
             throw new ModelException("Forbidden evaluation.")

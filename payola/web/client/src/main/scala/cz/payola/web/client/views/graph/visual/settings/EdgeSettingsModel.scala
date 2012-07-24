@@ -2,13 +2,28 @@ package cz.payola.web.client.views.graph.visual.settings
 
 import cz.payola.web.client.views.graph.visual.Color
 
-class EdgeSettingsModel
+class EdgeSettingsModel extends  SettingsModel
 {
-    var width = 1
+    var widthValue = 1
 
-    var straightenIndex = -1
+    var colorValue = new Color(150, 150, 150, 0.4)
 
-    var color = new Color(150, 150, 150, 0.5)
+    def width(typeName: String, typePropertyName: String): Int = {
+        val foundProperty = getProperty(typeName, typePropertyName)
+        if(foundProperty.isDefined && foundProperty.get.strokeWidth != 0) {
+            foundProperty.get.strokeWidth
+        } else {
+            widthValue
+        }
+    }
 
-    var colorSelected = new Color(50, 50, 50, 1)
+    def color(typeName: String, typePropertyName: String): Color = {
+        val foundProperty = getProperty(typeName, typePropertyName)
+        if(foundProperty.isDefined && foundProperty.get.strokeColor.length != 0) {
+            foundProperty.get.strokeColor
+        } else {
+            colorValue
+        }
+        colorValue
+    }
 }

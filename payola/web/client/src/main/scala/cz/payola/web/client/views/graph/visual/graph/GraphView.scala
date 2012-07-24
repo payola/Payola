@@ -6,12 +6,13 @@ import s2js.adapters.js.browser.window
 import cz.payola.common.rdf._
 import cz.payola.web.client.views.graph.visual._
 import cz.payola.web.client.views.algebra._
+import cz.payola.common.entities.settings.OntologyCustomization
 
 /**
   * Graphical representation of Graph object.
   * @param container the space where the graph should be visualised
   */
-class GraphView(val settings: VisualSetup) extends View[CanvasPack] {
+class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
     /**
       * During update vertices with higher age than this value are removed from this graph.
       */
@@ -23,6 +24,12 @@ class GraphView(val settings: VisualSetup) extends View[CanvasPack] {
       * component.
       */
     var components = ListBuffer[Component]()
+
+    def setVisualSetup(newCustomization: Option[OntologyCustomization]) {
+        settings.setOntologyCustomization(newCustomization)
+        getAllEdges.foreach(_.settings.setOntologyCustomization(newCustomization))
+        getAllVertices.foreach(_.settings.setOntologyCustomization(newCustomization))
+    }
 
     def isSelected: Boolean = {
         false
@@ -144,26 +151,19 @@ class GraphView(val settings: VisualSetup) extends View[CanvasPack] {
             vertexModel match {
                 case i: IdentifiedVertex => {
                     val newVertexView = new VertexView(i, Point2D(300, 300)/*TODO center of drawing space*/,
-                        settings.vertexModel, settings.textModel, None)
-                    //TODO this is the spot where ontology ID of a vertex is found and should be removed from the graph
+                        settings.vertexModel, settings.textModel, null)
                     var rdfTypeEdge: Option[Edge]= None
-                    var rdfTypeEdgeNumber = -1
                     graphModel.edges.foreach{ edge =>
 
-                        rdfTypeEdgeNumber += 1
-                        if((edge.origin == vertexModel || edge.destination == vertexModel)
-                            && edge.uri.indexOf("rdf:type") != -1) {// TODO RDF is a type extending Edge class
-
-                            window.alert("rdg:type found in edge uri while constructing vertex view: "+newVertexView.toString)//TODO remove
+                        if(edge.origin == vertexModel && edge.uri == Edge.rdfTypeEdge) {
                             rdfTypeEdge = Some(edge)
                         }
                     }
 
                     newVertexView.rdfType = if(rdfTypeEdge.isDefined) {
-                        graphModel.edges.drop(rdfTypeEdgeNumber) //removing found rdf type
-                        Some(rdfTypeEdge.get.uri) //saving rdf type
+                        rdfTypeEdge.get.destination.toString //saving rdf type
                     } else {
-                        None
+                        ""
                     }
                     buffer += newVertexView
                 }
