@@ -26,7 +26,7 @@ class IntParameter(name: String, defaultValue: Int)
     }
 }
 
-class StringParameter(name: String, defaultValue: String)
+class StringParameter(name: String, defaultValue: String, protected val _isMultiline: Boolean)
     extends Parameter[String](name, defaultValue) with cz.payola.common.entities.plugins.parameters.StringParameter
 {
     def createValue(value: String): ParameterValue[String] = {

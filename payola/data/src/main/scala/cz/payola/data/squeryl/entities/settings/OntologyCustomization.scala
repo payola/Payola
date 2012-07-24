@@ -26,15 +26,5 @@ class OntologyCustomization(
     extends cz.payola.domain.entities.settings.OntologyCustomization(u, n, o, c)
     with PersistableEntity with OptionallyOwnedEntity with ShareableEntity with NamedEntity
 {
-    _classCustomizations = null
-
-    override def classCustomizations: immutable.Seq[ClassCustomizationType] = {
-        if (_classCustomizations == null) {
-            _classCustomizations = wrapInTransaction {
-                context.ontologyCustomizationRepository.getClassCustomizations(id).toList
-            }
-        }
-
-        _classCustomizations.toList
-    }
+    def classCustomizations_=(value: immutable.Seq[ClassCustomizationType]) { _classCustomizations = value }
 }
