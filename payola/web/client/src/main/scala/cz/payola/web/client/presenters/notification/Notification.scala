@@ -23,7 +23,7 @@ object Notification
      * @param title Title of the notification.
      * @param subtitle Subtitle of the notification.
      */
-    @javascript("webkitNotifications.requestPermission(cz.payola.web.client.presenters.notification.Notification.reallyPostNotification(url, title, subtitle));")
+    @javascript("if (window.webkitNotifications != undefined) { \nwebkitNotifications.requestPermission(cz.payola.web.client.presenters.notification.Notification.reallyPostNotification(url, title, subtitle)); \n}")
     private def askForPermission(url: String, title: String, subtitle: String) {
 
     }
