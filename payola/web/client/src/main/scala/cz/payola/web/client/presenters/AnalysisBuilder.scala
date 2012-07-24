@@ -10,10 +10,8 @@ import s2js.adapters.js.browser.window
 import scala.collection.mutable.ArrayBuffer
 import s2js.runtime.client.scala.collection.mutable.HashMap
 import cz.payola.web.client.presenters.models.ParameterValue
-import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events.EventArgs
 import cz.payola.web.client.views.bootstrap._
-import scala.Some
 import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
 import cz.payola.web.client.Presenter
 import cz.payola.web.client.views.entity.analysis.AnalysisEditorView

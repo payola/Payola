@@ -5,6 +5,7 @@ import cz.payola.domain.IDGenerator
 import cz.payola.domain.entities.plugins._
 import cz.payola.domain.sparql._
 import cz.payola.domain.entities.plugins.parameters.StringParameter
+import cz.payola.common.rdf.Edge
 
 class Typed(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
     extends Construct(name, inputCount, parameters, id)
@@ -20,7 +21,8 @@ class Typed(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_
 
     def getConstructQuery(instance: PluginInstance, subject: Subject, variableGetter: () => Variable) = {
         usingDefined(getTypeURI(instance)) { uri =>
-            ConstructQuery(TriplePattern(subject, Uri.getTypePropertyURI, Uri(uri)))
+            val triples = List(TriplePattern(subject, Uri(Edge.rdfTypeEdge), Uri(uri)))
+            ConstructQuery(GraphPattern(triples, GraphPattern.optionalProperties(subject, variableGetter)))
         }
     }
 }

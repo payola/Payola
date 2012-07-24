@@ -20,7 +20,7 @@ class AnalysisEvaluationSpec extends FlatSpec with ShouldMatchers
         val join = new Join
         val unionPlugin = new Union
 
-        val analysis = new Analysis("Cities with more than 2 million habitants with countries", None)
+        val analysis = new Analysis("Cities with more than 2 million habitants", None)
         val citiesFetcher = sparqlEndpointPlugin.createInstance()
             .setParameter("EndpointURL", "http://dbpedia.org/sparql")
         val citiesTyped = typedPlugin.createInstance().setParameter("TypeURI", "http://dbpedia.org/ontology/City")
@@ -38,25 +38,6 @@ class AnalysisEvaluationSpec extends FlatSpec with ShouldMatchers
         analysis.addBinding(citiesFetcher, citiesTyped)
         analysis.addBinding(citiesTyped, citiesProjection)
         analysis.addBinding(citiesProjection, citiesSelection)
-
-        val countriesFetcher = sparqlEndpointPlugin.createInstance()
-            .setParameter("EndpointURL", "http://dbpedia.org/sparql")
-        val countriesTyped = typedPlugin.createInstance().setParameter("TypeURI", "http://dbpedia.org/ontology/Country")
-        val countriesProjection = projectionPlugin.createInstance().setParameter("PropertyURIs", List(
-            "http://dbpedia.org/ontology/areaTotal"
-        ).mkString("\n"))
-        analysis.addPluginInstances(countriesFetcher, countriesTyped, countriesProjection)
-        analysis.addBinding(countriesFetcher, countriesTyped)
-        analysis.addBinding(countriesTyped, countriesProjection)
-
-        val citiesCountriesJoin = join.createInstance().setParameter(
-            "JoinPropertyURI", "http://dbpedia.org/ontology/country"
-        ).setParameter(
-            "IsInner", false
-        )
-        analysis.addPluginInstances(citiesCountriesJoin)
-        analysis.addBinding(citiesSelection, citiesCountriesJoin, 0)
-        analysis.addBinding(countriesProjection, citiesCountriesJoin, 1)
 
         val evaluation = analysis.evaluate()
         while (!evaluation.isFinished) {

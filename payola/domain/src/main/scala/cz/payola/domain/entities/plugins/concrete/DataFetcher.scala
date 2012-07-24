@@ -5,6 +5,7 @@ import cz.payola.domain.entities.Plugin
 import cz.payola.domain.entities.plugins._
 import cz.payola.domain.rdf.Graph
 import cz.payola.domain.sparql._
+import cz.payola.domain.entities.plugins.concrete.query.Construct
 
 /**
   * A plugin that is used to fetch RDF data using SPARQL queries, fetch neighbourhood of a particular node etc.
@@ -70,14 +71,20 @@ abstract class DataFetcher(name: String, inputCount: Int, parameters: immutable.
         val uri = vertexURI.trim
 
         if (uri.nonEmpty) {
-            val subjectPattern = TriplePattern(Uri(vertexURI), Variable("op0"), Variable("o1"))
-            val objectPattern = TriplePattern(Variable("s1"), Variable("sp0"), Uri(vertexURI))
-            val queries = List(
-                ConstructQuery(List(subjectPattern)).toString,
-                ConstructQuery(List(objectPattern)).toString
+            val subjectVariable = Variable("s1")
+            val objectVariable = Variable("o1")
+            val patterns = List(
+                GraphPattern(
+                    List(TriplePattern(subjectVariable, Variable("sp0"), Uri(vertexURI))),
+                    GraphPattern.optionalProperties(subjectVariable)
+                ),
+                GraphPattern(
+                    List(TriplePattern(Uri(vertexURI), Variable("op0"), objectVariable)),
+                    GraphPattern.optionalProperties(objectVariable)
+                )
             )
 
-            queries.par.map(executeQuery(instance, _)).reduce(_ + _)
+            patterns.par.map(p => executeQuery(instance, ConstructQuery(p).toString)).reduce(_ + _)
         } else {
             Graph.empty
         }
