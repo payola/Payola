@@ -120,8 +120,9 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
     private def prepareStraight(context: CanvasRenderingContext2D, color: Color, correction: Vector2D) {
 
         drawArrow(context, originView.position, destinationView.position,
+            settings.vertexModel.radius(originView.rdfType) * 3 / 2,
             settings.vertexModel.radius(destinationView.rdfType) * 3 / 2,
-            settings.edgesModel.width(destinationView.rdfType, edgeModel.uri), color)
+            settings.edgesModel.width(originView.rdfType, edgeModel.uri), color)
     }
 
     def draw(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
@@ -135,16 +136,12 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
 
     def drawQuick(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
         val colorToUse = if(isSelected) {
-            settings.edgesModel.color(destinationView.rdfType, edgeModel.uri)
+            settings.edgesModel.color(originView.rdfType, edgeModel.uri)
         } else {
-            settings.edgesModel.color(destinationView.rdfType, edgeModel.uri)
+            settings.edgesModel.color(originView.rdfType, edgeModel.uri)
         } //TODO differ the color when selected
 
-        /*if(1 <= settings.edgesModel.straightenIndex && settings.edgesModel.straightenIndex <= 6) {
-            prepareBezierCurve(context, colorToUse, Vector2D.Zero)
-        } else {*/
-            prepareStraight(context, colorToUse, Vector2D.Zero)
-        //}
+        prepareStraight(context, colorToUse, Vector2D.Zero)
     }
 
     override def toString: String = {

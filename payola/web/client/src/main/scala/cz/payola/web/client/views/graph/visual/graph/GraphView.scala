@@ -152,23 +152,16 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
                 case i: IdentifiedVertex => {
                     val newVertexView = new VertexView(i, Point2D(300, 300)/*TODO center of drawing space*/,
                         settings.vertexModel, settings.textModel, null)
-                    //TODO this is the spot where ontology ID of a vertex is found and should be removed from the graph
                     var rdfTypeEdge: Option[Edge]= None
-                    var rdfTypeEdgeNumber = -1
                     graphModel.edges.foreach{ edge =>
 
-                        rdfTypeEdgeNumber += 1
-                        if((edge.origin == vertexModel || edge.destination == vertexModel)
-                            && edge.uri == Edge. .indexOf("rdf:type") != -1) {// TODO RDF is a type extending Edge class
-
-                            window.alert("rdf:type found in edge uri while constructing vertex view: "+newVertexView.toString)//TODO remove
+                        if(edge.origin == vertexModel && edge.uri == Edge.rdfTypeEdge) {
                             rdfTypeEdge = Some(edge)
                         }
                     }
 
                     newVertexView.rdfType = if(rdfTypeEdge.isDefined) {
-                        graphModel.edges.drop(rdfTypeEdgeNumber) //removing found rdf type
-                        rdfTypeEdge.get.uri //saving rdf type
+                        rdfTypeEdge.get.destination.toString //saving rdf type
                     } else {
                         ""
                     }

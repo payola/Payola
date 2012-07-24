@@ -1,6 +1,7 @@
 package cz.payola.web.client.views.graph.visual.settings
 
 import cz.payola.common.entities.settings._
+import s2js.adapters.js.browser.window
 
 abstract class SettingsModel {
 
@@ -22,7 +23,21 @@ abstract class SettingsModel {
         if(customization.isEmpty) {
             None
         } else {
-            customization.get.classCustomizations.find(_.uri == typeName)
+            var comparingTo = ""
+            val plk = customization.get.classCustomizations.find{custom =>
+                comparingTo += custom.uri +"; "
+                    custom.uri == typeName
+            }
+
+            /*window.alert("getting customization: "+typeName+" compared to "+
+                comparingTo)*/
+
+            /*if(plk.isDefined) {
+                window.alert("found")
+            } else {
+                window.alert("not found")
+            }*/
+            plk
         }
     }
 
