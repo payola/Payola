@@ -10,14 +10,13 @@ trait DataSourceRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
 
-    lazy val dataSourceRepository = new DataSourceTableRepository
+    lazy val dataSourceRepository = new DataSourceDefaultTableRepository
 
-    class DataSourceTableRepository
-        extends TableRepository[DataSource, (DataSource, Option[User])](schema.dataSources, DataSource)
+    class DataSourceDefaultTableRepository
+        extends OptionallyOwnedEntityDefaultTableRepository[DataSource](schema.dataSources, DataSource)
         with DataSourceRepository
         with NamedEntityTableRepository[DataSource]
-        with OptionallyOwnedEntityTableRepository[DataSource]
-        with ShareableEntityTableRepository[DataSource]
+        with ShareableEntityTableRepository[DataSource, (DataSource, Option[User])]
         with PluginInstanceTableRepository[DataSource]
     {
         protected val pluginInstanceLikeTable = schema.dataSources

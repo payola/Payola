@@ -4,6 +4,7 @@ import helpers.Secured
 import cz.payola.domain.entities.User
 import java.io.File
 import cz.payola.web.shared.Payola
+import play.api.mvc.Action
 
 object PrivateDataStorage extends PayolaController with Secured
 {
@@ -21,21 +22,25 @@ object PrivateDataStorage extends PayolaController with Secured
     /** Saves a graph to the user's private data storage.
       *
       */
-    def save() = authenticatedWithRequest { (user, request) =>
-        // First thing to do is to find out if it's a URL-encoded form (i.e. posting just a URL string)
-        // or multi-part and we're sending a whole file
+    def saveFromFile() = authenticatedWithRequest { (user, request) =>
+        if (request.body.asMultipartFormData.isDefined) {
+            val form = request.body.asMultipartFormData.get
+            val fileOption = form.file("graphFile")
+            assert(fileOption.isDefined, "No graph XML file!")
+
+            saveGraphFromFile(fileOption.get.ref.file, user)
+        }else{
+            Redirect(routes.PrivateDataStorage.error("Wrong form."))
+        }
+    }
+
+    def saveFromURL() = authenticatedWithRequest { (user, request) =>
         if (request.body.asFormUrlEncoded.isDefined) {
             val form = request.body.asFormUrlEncoded.get
             val urlOption = form.get("graphURL")
             assert(urlOption.isDefined, "No graph URL!")
 
             saveGraphAtURL(urlOption.get(0), user)
-        }else if (request.body.asMultipartFormData.isDefined) {
-            val form = request.body.asMultipartFormData.get
-            val fileOption = form.file("graphFile")
-            assert(fileOption.isDefined, "No graph XML file!")
-
-            saveGraphFromFile(fileOption.get.ref.file, user)
         }else{
             Redirect(routes.PrivateDataStorage.error("Wrong form."))
         }

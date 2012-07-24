@@ -4,12 +4,14 @@ import s2js.adapters.js.dom.Element
 import s2js.compiler.javascript
 import s2js.adapters.js.browser._
 import cz.payola.web.shared.managers.PluginManager
-import cz.payola.web.client.View
+import cz.payola.web.client._
 import cz.payola.web.client.views.elements._
+import cz.payola.web.client.views.bootstrap.modals.AlertModal
+import cz.payola.model.ModelException
 
 // Can't pass the editor's pre ID as we're using it in the native JS, which needs to
 // be compile-time ready
-class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) extends View
+class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) extends Presenter
 {
 
     // Create the ACE editor
@@ -21,7 +23,7 @@ class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) e
     submitButton.mouseClicked += { event =>
         val code = getCode
         if (code == "") {
-            window.alert("The code can't be empty!")
+            AlertModal.runModal("The code can't be empty!")
         }else{
             postCodeToServer(code)
         }
@@ -50,13 +52,19 @@ class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) e
         null
     }
 
+    def initialize() {
+
+    }
+
     /** A post fail callback. Shows an alert that the upload failed.
       *
       * @param t An instance of Throwable.
       */
     private def postFailedCallback(t: Throwable){
-        val exceptionMessage = t.asInstanceOf[s2js.runtime.shared.DependencyException].message
-        window.alert("Failed to upload plugin!\n\n" + exceptionMessage)
+        t match {
+            case exc: ModelException => AlertModal.runModal("Failed to upload plugin!\n\n" + exc.message)
+            case t: Throwable => fatalErrorHandler(t)
+        }
     }
 
     /** Post success callback. Shows a success alert and redirects back to listing.
@@ -64,8 +72,13 @@ class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) e
       * @param s Success string.
       */
     private def postWasSuccessfulCallback(s: String) {
-        window.alert("Plugin uploaded successfully!")
-        window.location.href = listPluginsURL
+        val alert = new AlertModal("Plugin uploaded successfully!", "alert-success")
+        alert.closing += { e =>
+            window.alert("Fuck off")
+            window.location.href = listPluginsURL
+            true
+        }
+        alert.render()
     }
 
     /** Posts code to the server to be compiled and a new plugin created.
@@ -79,14 +92,4 @@ class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) e
             t => postFailedCallback(t)
         }
     }
-
-    def render(parent: Element) = {
-        // TODO
-    }
-
-    def destroy() {
-        // TODO
-    }
-
-    def blockDomElement: Element = null // TODO
 }

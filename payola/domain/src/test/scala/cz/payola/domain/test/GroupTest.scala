@@ -4,6 +4,7 @@ import cz.payola.domain._
 import entities.{Group, User}
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
+import cz.payola.common.ValidationException
 
 class GroupTest extends FlatSpec with ShouldMatchers {
     it should "retain values passed in the constructor" in {
@@ -46,8 +47,8 @@ class GroupTest extends FlatSpec with ShouldMatchers {
     "User" should "not be renamed to null or empty string" in  {
         val u: User = new User(_name = "Franta")
         val g: Group = new Group(_name = "Pologrupa", _owner = u)
-        evaluating(g.name_=(null)) should produce [IllegalArgumentException]
-        evaluating(g.name_=("")) should produce [IllegalArgumentException]
+        evaluating(g.name_=(null)) should produce [ValidationException]
+        evaluating(g.name_=("")) should produce [ValidationException]
     }
 
 }

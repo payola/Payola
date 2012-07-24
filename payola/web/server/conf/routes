@@ -23,6 +23,9 @@ GET     /analysis/edit/:id          controllers.Analysis.edit(id)
 GET     /analysis/delete/:id        controllers.Analysis.delete(id)
 GET     /analysis/:id               controllers.Analysis.detail(id)
 
+GET     /analysis/:analysisID/evaluation/:evaluationID/download.xml   controllers.GraphDownloader.downloadAnalysisEvaluationResultAsXML(analysisID, evaluationID)
+GET     /analysis/:analysisID/evaluation/:evaluationID/download.ttl   controllers.GraphDownloader.downloadAnalysisEvaluationResultAsTTL(analysisID, evaluationID)
+
 GET     /datasource/create          controllers.DataSource.create()
 POST    /datasource/create          controllers.DataSource.createNew()
 GET     /datasource/list            controllers.DataSource.list(page: Int ?= 1)
@@ -32,7 +35,8 @@ GET     /datasource/delete/:id      controllers.DataSource.delete(id)
 POST    /datasource/save/:id        controllers.DataSource.saveEdited(id)
 
 GET     /virtuoso/add           controllers.PrivateDataStorage.add()
-POST     /virtuoso/save           controllers.PrivateDataStorage.save()
+POST     /virtuoso/upload/file           controllers.PrivateDataStorage.saveFromFile()
+POST     /virtuoso/upload/url           controllers.PrivateDataStorage.saveFromURL()
 GET     /virtuoso/error         controllers.PrivateDataStorage.error(error: String)
 
 GET     /dashboard                  controllers.Application.dashboard()

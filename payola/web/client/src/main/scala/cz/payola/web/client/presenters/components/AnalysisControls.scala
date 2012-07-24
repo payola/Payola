@@ -13,6 +13,7 @@ import cz.payola.web.client.views.elements.Div
 import cz.payola.web.client.views.elements.Anchor
 import s2js.adapters.js.dom.Element
 import cz.payola.web.client.presenters.notification.Notification
+import cz.payola.web.client.views.bootstrap.modals.AlertModal
 
 class AnalysisControls(analysisId: String) extends View
 {
@@ -46,7 +47,7 @@ class AnalysisControls(analysisId: String) extends View
                 progressValueBar.setAttribute("style", "width: 2%; height: 40px")
                 schedulePolling
             }{error =>
-                window.alert("Unable to run analysis.")
+                AlertModal.runModal("Unable to run analysis.")
             }
         }
         false
@@ -93,7 +94,7 @@ class AnalysisControls(analysisId: String) extends View
                 markDone(progress.graph)
             }
         }{ error =>
-            window.alert("Unable to determine analysis progress.")
+            AlertModal.runModal("Unable to determine analysis progress.")
         }
     }
 
