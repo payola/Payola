@@ -1,12 +1,12 @@
 package cz.payola.web.client.presenters
 
 import cz.payola.web.client.presenters.components.AnalysisControls
-import s2js.adapters.js.browser.document
 import cz.payola.web.client.views.graph.PluginSwitchView
 import cz.payola.web.client.Presenter
 import cz.payola.web.client.views.bootstrap._
 import cz.payola.web.client.views.elements._
 import s2js.adapters.js.browser._
+import cz.payola.web.client.views.bootstrap.modals.AlertModal
 
 class Analysis(elementToDrawIn: String, analysisId: String) extends Presenter
 {
@@ -17,7 +17,7 @@ class Analysis(elementToDrawIn: String, analysisId: String) extends Presenter
     private def getAnalysisEvaluationID: Option[String] = {
         val id = controls.evaluationId
         if (id == ""){
-            window.alert("Evaluation hasn't finished yet.")
+            AlertModal.runModal("Evaluation hasn't finished yet.")
             None
         }else{
             Some(id)

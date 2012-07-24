@@ -11,6 +11,7 @@ import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
 import s2js.compiler.javascript
 import s2js.adapters.js.dom.Element
 import cz.payola.web.client.models.Model
+import cz.payola.web.client.views.bootstrap.modals.AlertModal
 
 class DataSourceCreator(val dataFetcherDivID: String,
     val optionsDivID: String,
@@ -121,11 +122,11 @@ class DataSourceCreator(val dataFetcherDivID: String,
     private def validateInputFields: Boolean = {
         var result = false
         if (nameField.input.value == "") {
-            window.alert("Data source name may not be empty!")
+            AlertModal.runModal("Data source name may not be empty!")
         }else if (DataSourceManager.dataSourceExistsWithName(nameField.input.value)) {
-            window.alert("Data source with this name already exists!")
+            AlertModal.runModal("Data source with this name already exists!")
         }else if (descriptionField.input.value == ""){
-            window.alert("Data source description musn't be empty!")
+            AlertModal.runModal("Data source description musn't be empty!")
         }else{
             result = true
         }

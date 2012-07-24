@@ -3,13 +3,27 @@
 @main(Some(user), "Add private data - Payola!") {
 
 <div class="container-fluid">
-    <form id="data-uploader" name="create_form" method="post" action="@routes.PrivateDataStorage.save()">
 
-    </form>
+    <ul class="breadcrumb">
+        <li class="active">Upload File</li>
+    </ul>
+    <div class="well" id="file-uploader">
+        <form id="data-uploader" name="create_form" method="post" action="@routes.PrivateDataStorage.save()">
+
+        </form>
+    </div>
+
+    <ul class="breadcrumb">
+        <li class="active">Upload from URL</li>
+    </ul>
+    <div class="well" id="url-uploader">
+
+    </div>
+
 
     <script src="/javaScriptPackage/cz.payola.web.client.presenters.PrivateDataUploader" type="text/javascript"></script>
     <script type="text/javascript">
-        new cz.payola.web.client.presenters.PrivateDataUploader("data-uploader", "@routes.Profile.index(user.name)");
+        new cz.payola.web.client.presenters.PrivateDataUploader("file-uploader", "data-uploader", "url-uploader", "@routes.Profile.index(user.name)");
     </script>
 </div>
 }
