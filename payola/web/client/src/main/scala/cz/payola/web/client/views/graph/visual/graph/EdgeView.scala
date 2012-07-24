@@ -136,10 +136,11 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
 
     def drawQuick(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
         val colorToUse = if(isSelected) {
-            settings.edgesModel.color(originView.rdfType, edgeModel.uri)
+            val col = settings.edgesModel.color(originView.rdfType, edgeModel.uri)
+            Color(col.red, col.red, col.blue, 1.0)
         } else {
             settings.edgesModel.color(originView.rdfType, edgeModel.uri)
-        } //TODO differ the color when selected
+        }
 
         prepareStraight(context, colorToUse, Vector2D.Zero)
     }

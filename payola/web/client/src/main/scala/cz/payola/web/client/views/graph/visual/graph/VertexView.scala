@@ -101,7 +101,8 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var s
 
         drawCircle(context, correctedPosition, settings.radius(rdfType), 2, Color.Black)
         if (isSelected) {
-            fillCurrentSpace(context, settings.color(rdfType)) //TODO differ selected color
+            val col = settings.color(rdfType)
+            fillCurrentSpace(context, Color(col.red, col.green, col.blue, 1.0))
         } else {
             fillCurrentSpace(context, settings.color(rdfType))
         }

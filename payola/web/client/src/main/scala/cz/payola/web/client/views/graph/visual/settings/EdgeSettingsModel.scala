@@ -6,7 +6,7 @@ class EdgeSettingsModel extends  SettingsModel
 {
     var widthValue = 1
 
-    var colorValue = new Color(150, 150, 150, 0.5)
+    var colorValue = new Color(150, 150, 150, 0.4)
 
     def width(typeName: String, typePropertyName: String): Int = {
         val foundProperty = getProperty(typeName, typePropertyName)
