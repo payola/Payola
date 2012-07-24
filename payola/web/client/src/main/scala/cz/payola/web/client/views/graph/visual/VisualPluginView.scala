@@ -16,6 +16,7 @@ import s2js.compiler.javascript
 import cz.payola.web.client.views.graph.visual.graph._
 import cz.payola.web.client.views._
 import s2js.adapters.js.browser.document
+import cz.payola.common.entities.settings.OntologyCustomization
 
 /**
   * Representation of visual based output drawing plugin
@@ -176,33 +177,36 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
         }
     }
 
-    def updateGraph(graph: Option[Graph]) {
-        if(graph.isDefined) {
-            if(graphView.isDefined) {
-                graphView.get.update(graph.get)
+    override def updateGraph(graph: Option[Graph]) {
+        // If the graph has changed, update the graph view.
+        if (graph != currentGraph) {
+            if(graph.isDefined) {
+                if (graphView.isDefined) {
+                    graphView.get.update(graph.get)
+                } else {
+                    graphView = Some(new views.graph.visual.graph.GraphView(settings))
+                }
             } else {
-                graphView = Some(new views.graph.visual.graph.GraphView(settings))
-            }
-        } else {
-            if (graphView.isDefined) {
-                layers.foreach(_.clear())
-                graphView = None
-                mouseIsDragging = false
-                mousePressedVertex = false
-                mouseDownPosition = Point2D(0, 0)
+                if (graphView.isDefined) {
+                    layers.foreach(_.clear())
+                    graphView = None
+                    mouseIsDragging = false
+                    mousePressedVertex = false
+                    mouseDownPosition = Point2D(0, 0)
+                }
             }
         }
+
+        super.updateGraph(graph)
     }
 
     override def destroy() {
         super.destroy()
 
-        graphView.foreach { g =>
-            graphView = None
-            mouseIsDragging = false
-            mousePressedVertex = false
-            mouseDownPosition = Point2D(0, 0)
-        }
+        graphView = None
+        mouseIsDragging = false
+        mousePressedVertex = false
+        mouseDownPosition = Point2D(0, 0)
     }
 
     override def renderControls(toolbar: dom.Element) {

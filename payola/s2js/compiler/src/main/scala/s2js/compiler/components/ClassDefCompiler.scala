@@ -254,20 +254,22 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-      * Compiles call of a method that is declared in the parent class.
-      * @param parameters The parameter values.
-      * @param methodName Optional name of the method. If not specified, then parent constructor call is compiled.
+      * Compiles call of a method that is declared in a super class or trait.
+      * @param apply The method application AST.
+      * @param methodName Name of the method to call.
       */
-    protected def compileParentCall(parameters: List[Global#Tree], methodName: Option[Global#Name] = None) {
-        buffer += "goog.base(self"
-        if (methodName.isDefined) {
-            buffer += ", '" + packageDefCompiler.getLocalJsName(methodName.get.toString) + "'"
+    protected def compileSuperCall(apply: Global#Apply, methodName: String) {
+        apply.fun.symbol match {
+            case m: MethodSymbol => {
+                buffer += "%s.prototype.%s.apply(self, ".format(
+                    packageDefCompiler.getSymbolFullJsName(m.owner),
+                    packageDefCompiler.getLocalJsName(methodName)
+                )
+                compileParameterValues(apply.args, withParentheses = false, asArray = true)
+                buffer += ")"
+            }
+            case _ => throw new ScalaToJsException("Not implemented super call of type %s.".format(apply))
         }
-        if (parameters.nonEmpty) {
-            buffer += ", "
-            compileParameterValues(parameters, withParentheses = false)
-        }
-        buffer += ")"
     }
 
     /**
@@ -597,8 +599,8 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
             case Apply(select@Select(_, _), args) if select.symbol.isSetter => {
                 compileAssign(select, args.head)
             }
-            case Apply(Select(_: Super, name), _) => {
-                compileParentCall(apply.args, Some(name))
+            case Apply(Select(s: Super, name), _) => {
+                compileSuperCall(apply, name.toString)
             }
             case Apply(Select(qual, name), _)
                 if name.toString == "apply" && symbolIsCallable(qual.symbol.tpe.typeSymbol) => {
