@@ -1,6 +1,6 @@
 package cz.payola.web.client.presenters
 
-import cz.payola.web.client.View
+import cz.payola.web.client._
 import s2js.adapters.js.dom.Element
 import cz.payola.web.client.views.bootstrap._
 import cz.payola.web.shared.AnalysisBuilderData
@@ -11,46 +11,50 @@ import scala.Some
 import s2js.compiler.javascript
 import cz.payola.web.client.views.bootstrap.inputs._
 import scala.Some
+import cz.payola.web.client.views.bootstrap.modals.AlertModal
 
 class PrivateDataUploader(fileUploaderDivID: String,
-                                        fileUploaderFormID: String,
                                         urlUploaderDivID: String,
-                                        redirectURL: String) extends View
+                                        redirectURL: String) extends Presenter
 {
     val fileUploadDiv = document.getElementById(fileUploaderDivID)
-    val fileUploadForm = document.getElementById(fileUploaderFormID)
+    val fileInput = new FileInputControl("File: ", "graphFile", "", "span10")
+    val fileUploadButton = new Button(new Span(List(new Icon(Icon.upload, true), new Text(" Upload File"))), cssClass = "btn-primary span2")
 
-    val fileInput = new FileInputControl("File: ", "graphFile", "")
     fileInput.input.setAttribute("accept", "application/rdf+xml, application/xml,text/turtle")
-    fileInput.render(fileUploadForm)
-    val fileUploadButton = new Button(new Span(List(new Icon(Icon.upload, true), new Text(" Upload File"))), cssClass = "btn-primary")
+    fileInput.render(fileUploadDiv)
+
     fileUploadButton.mouseClicked += { event =>
-//        if (validateFields){
-//            submitForm()
-//        }
+        if (fileInput.input.value == ""){
+            AlertModal.runModal("You must choose a file first.")
+        }else{
+            submitForm("file-uploader-form")
+        }
         false
     }
-    fileUploadButton.render(fileUploadForm)
+    fileUploadButton.render(fileUploadDiv)
 
     val urlUploadDiv = document.getElementById(urlUploaderDivID)
-    val urlField = new TextInputControl("Graph URL:", "graphURL", "", "")
-    val urlUploadButton = new Button(new Span(List(new Icon(Icon.upload, true), new Text(" Upload from URL"))), cssClass = "btn-primary")
+    val urlField = new TextInputControl("Graph URL:", "graphURL", "", "", "span10")
+    val urlUploadButton = new Button(new Span(List(new Icon(Icon.upload, true), new Text(" Upload from URL"))), "btn-primary span2")
     urlField.render(urlUploadDiv)
+
+    urlUploadButton.mouseClicked += { event =>
+        if (urlField.input.value == ""){
+            AlertModal.runModal("URL field mustn't be empty.")
+        }else{
+            submitForm("url-uploader-form")
+        }
+        false
+    }
     urlUploadButton.render(urlUploadDiv)
 
-    @javascript("document.forms['create_form'].submit();")
-    private def submitForm(){
+    @javascript("document.forms[formName].submit();")
+    private def submitForm(formName: String){
 
     }
 
+    def initialize() {
 
-    def render(parent: Element) = {
-        // TODO
     }
-
-    def destroy() {
-        // TODO
-    }
-
-    def blockDomElement: Element = null // TODO
 }

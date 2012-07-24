@@ -4,26 +4,28 @@
 
 <div class="container-fluid">
 
-    <ul class="breadcrumb">
-        <li class="active">Upload File</li>
-    </ul>
-    <div class="well" id="file-uploader">
-        <form id="data-uploader" name="create_form" method="post" action="@routes.PrivateDataStorage.save()">
+        <ul class="breadcrumb">
+            <li class="active">Upload File</li>
+        </ul>
+        <form id="file-uploader-form" name="file_upload_form" method="post" action="@routes.PrivateDataStorage.saveFromFile()" enctype="multipart/form-data">
+            <div class="well" id="file-uploader">
 
+            </div>
         </form>
-    </div>
 
-    <ul class="breadcrumb">
-        <li class="active">Upload from URL</li>
-    </ul>
-    <div class="well" id="url-uploader">
+        <ul class="breadcrumb">
+            <li class="active">Upload from URL</li>
+        </ul>
+        <form id="url-uploader-form" name="url_upload_form" method="post" action="@routes.PrivateDataStorage.saveFromURL()">
+            <div class="well" id="url-uploader">
 
-    </div>
+            </div>
+        </form>
 
 
     <script src="/javaScriptPackage/cz.payola.web.client.presenters.PrivateDataUploader" type="text/javascript"></script>
     <script type="text/javascript">
-        new cz.payola.web.client.presenters.PrivateDataUploader("file-uploader", "data-uploader", "url-uploader", "@routes.Profile.index(user.name)");
+        new cz.payola.web.client.presenters.PrivateDataUploader("file-uploader", "url-uploader", "@routes.Profile.index(user.name)");
     </script>
 </div>
 }

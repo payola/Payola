@@ -1,6 +1,6 @@
 package cz.payola.web.client.presenters
 
-import cz.payola.web.client.View
+import cz.payola.web.client._
 import s2js.adapters.js.browser._
 import cz.payola.web.shared.managers.DataSourceManager
 import cz.payola.web.client.views.elements._
@@ -18,7 +18,7 @@ class DataSourceCreator(val dataFetcherDivID: String,
     val submitButtonDivID: String,
     val nameFieldDivID: String,
     val descriptionFieldDivID: String,
-    val listingURL: String) extends View
+    val listingURL: String) extends Presenter
 {
 
     // Define internal <select> ID
@@ -89,6 +89,10 @@ class DataSourceCreator(val dataFetcherDivID: String,
       */
     private def redirectToListing() {
         window.location.href = listingURL
+    }
+
+    def initialize() {
+
     }
 
     /** Lists all options for the selected plugin.
