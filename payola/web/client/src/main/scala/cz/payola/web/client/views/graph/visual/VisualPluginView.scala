@@ -18,6 +18,7 @@ import cz.payola.web.client.views._
 import s2js.adapters.js.browser.document
 import cz.payola.web.client.views.bootstrap.Icon
 import s2js.adapters.js.dom.CanvasContext
+import cz.payola.common.entities.settings.OntologyCustomization
 
 /**
   * Representation of visual based output drawing plugin
@@ -167,6 +168,18 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
     private def setMouseWheelListener() {}
 
     private var hoverExit = new SimpleUnitEvent[Boolean]
+
+    override def updateOntologyCustomization(newCustomization: Option[OntologyCustomization]) {
+        currentCustomization = newCustomization
+
+        if(graphView.isDefined) {
+            graphView.get.setVisualSetup(newCustomization)
+        }
+
+        settings.setOntologyCustomization(newCustomization)
+
+        redraw()
+    }
 
     override def render(parent: dom.Element) {
         super.render(parent)
@@ -377,6 +390,9 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
 
         if(vertex.isDefined) {
             if(hoveringOverVertex.isEmpty || (!hoveringOverVertex.get.eq(vertex.get))) {
+                if(hoveringOverVertex.isDefined && !hoveringOverVertex.get.eq(vertex.get)) {
+                    hoverExit.triggerDirectly(true)
+                }
                 hoveringOverVertex = vertex
                 val infoTable = new VertexInfoTable(hoveringOverVertex.get.getLiteralVertices)
                 infoTable.render(document.body)

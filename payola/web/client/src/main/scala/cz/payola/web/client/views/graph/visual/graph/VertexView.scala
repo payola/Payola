@@ -15,7 +15,7 @@ import scala.collection.mutable
   * @param position of this graphical representation in drawing space
   */
 class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var settings: VertexSettingsModel,
-    settingsText: TextSettingsModel, var rdfType: Option[String]) extends View[CanvasRenderingContext2D]
+    settingsText: TextSettingsModel, var rdfType: String) extends View[CanvasRenderingContext2D]
 {
     private var literalVertices = new mutable.HashMap[String, Seq[String]]()
 
@@ -82,8 +82,9 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var s
     }
 
     def isPointInside(point: Point2D): Boolean = {
-        isPointInRect(point, position + (new Vector2D(-settings.radius, -settings.radius)),
-            position + (new Vector2D(settings.radius, settings.radius)))
+        val radiusVector = Vector2D.One * settings.radius(rdfType)
+        isPointInRect(point, position + (-radiusVector),
+            position + radiusVector)
     }
 
     def draw(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
@@ -98,11 +99,11 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var s
     def drawQuick(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
         val correctedPosition = this.position + positionCorrection
 
-        drawCircle(context, correctedPosition, settings.radius, 2, Color.Black)
+        drawCircle(context, correctedPosition, settings.radius(rdfType), 2, Color.Black)
         if (isSelected) {
-            fillCurrentSpace(context, settings.colorSelected)
+            fillCurrentSpace(context, settings.color(rdfType)) //TODO differ selected color
         } else {
-            fillCurrentSpace(context, settings.color)
+            fillCurrentSpace(context, settings.color(rdfType))
         }
     }
 

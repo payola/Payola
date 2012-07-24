@@ -52,7 +52,7 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
         originView.selected && destinationView.selected
     }
 
-    private def prepareBezierCurve(context: CanvasRenderingContext2D, color: Color, correction: Vector2D) {
+    /*private def prepareBezierCurve(context: CanvasRenderingContext2D, color: Color, correction: Vector2D) {
         val A = originView.position
         val B = destinationView.position
 
@@ -115,12 +115,13 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
 
         drawBezierCurve(context, ctrl1 + correction, ctrl2 + correction, A + correction, B + correction,
             settings.edgesModel.width, color)
-    }
+    }*/
 
     private def prepareStraight(context: CanvasRenderingContext2D, color: Color, correction: Vector2D) {
 
         drawArrow(context, originView.position, destinationView.position,
-            settings.vertexModel.radius + settings.vertexModel.radius / 2, settings.edgesModel.width, color)
+            settings.vertexModel.radius(destinationView.rdfType) * 3 / 2,
+            settings.edgesModel.width(destinationView.rdfType, edgeModel.uri), color)
     }
 
     def draw(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
@@ -133,13 +134,17 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
     }
 
     def drawQuick(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
-        val colorToUse = if(isSelected) { settings.edgesModel.colorSelected } else { settings.edgesModel.color }
-
-        if(1 <= settings.edgesModel.straightenIndex && settings.edgesModel.straightenIndex <= 6) {
-            prepareBezierCurve(context, colorToUse, Vector2D.Zero)
+        val colorToUse = if(isSelected) {
+            settings.edgesModel.color(destinationView.rdfType, edgeModel.uri)
         } else {
+            settings.edgesModel.color(destinationView.rdfType, edgeModel.uri)
+        } //TODO differ the color when selected
+
+        /*if(1 <= settings.edgesModel.straightenIndex && settings.edgesModel.straightenIndex <= 6) {
+            prepareBezierCurve(context, colorToUse, Vector2D.Zero)
+        } else {*/
             prepareStraight(context, colorToUse, Vector2D.Zero)
-        }
+        //}
     }
 
     override def toString: String = {
