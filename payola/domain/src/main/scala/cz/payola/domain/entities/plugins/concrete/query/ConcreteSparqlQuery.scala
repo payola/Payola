@@ -10,7 +10,7 @@ sealed class ConcreteSparqlQuery(name: String, inputCount: Int, parameters: immu
     extends SparqlQuery(name, inputCount, parameters, id)
 {
     def this() = {
-        this("SPARQL Query", 1, List(new StringParameter("Query", "")), IDGenerator.newId)
+        this("SPARQL Query", 1, List(new StringParameter("Query", "", true)), IDGenerator.newId)
         isPublic = true
     }
 

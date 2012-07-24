@@ -14,7 +14,7 @@ class Join(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]
 {
     def this() = {
         this("Join", 2, List(
-            new StringParameter("JoinPropertyURI", ""),
+            new StringParameter("JoinPropertyURI", "", false),
             new BooleanParameter("IsInner", true)),
             IDGenerator.newId)
         isPublic = true

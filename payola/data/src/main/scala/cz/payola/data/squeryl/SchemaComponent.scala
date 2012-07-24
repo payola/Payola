@@ -327,7 +327,7 @@ trait SchemaComponent
             factoryFor(floatParameterValues) is { new FloatParameterValue("", null, 0) },
             factoryFor(intParameters) is { new IntParameter("", "", 0) },
             factoryFor(intParameterValues) is { new IntParameterValue("", null, 0) },
-            factoryFor(stringParameters) is { new StringParameter("", "", "") },
+            factoryFor(stringParameters) is { new StringParameter("", "", "", false) },
             factoryFor(stringParameterValues) is { new StringParameterValue("", null, "") },
             factoryFor(dataSources) is { new DataSource("", "", None, null, Nil, false, "", true) },
             factoryFor(privileges) is { new PrivilegeDbRepresentation("", "", "", "", "", "", "") },

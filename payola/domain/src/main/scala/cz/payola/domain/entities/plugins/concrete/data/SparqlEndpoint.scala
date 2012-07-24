@@ -12,7 +12,7 @@ sealed class SparqlEndpoint(name: String, inputCount: Int, parameters: immutable
     extends DataFetcher(name, inputCount, parameters, id)
 {
     def this() = {
-        this("SPARQL Endpoint", 0, List(new StringParameter("EndpointURL", "")), IDGenerator.newId)
+        this("SPARQL Endpoint", 0, List(new StringParameter("EndpointURL", "", false)), IDGenerator.newId)
         isPublic = true
     }
 
