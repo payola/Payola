@@ -37,11 +37,11 @@ class Modal(
       */
     val closing = new SimpleBooleanEvent[this.type]
 
-    def createSubViews = {
-        val saveButton = new Button(new Text(confirmText.getOrElse("")), "btn-primary")
-        val cancelButton = new Button(new Text(cancelText.getOrElse("")))
-        val closeButton = new Button(new Text("x"), "close")
+    protected val saveButton = new Button(new Text(confirmText.getOrElse("")), "btn-primary")
+    protected val cancelButton = new Button(new Text(cancelText.getOrElse("")))
+    protected val closeButton = new Button(new Text("x"), "close")
 
+    def createSubViews = {
         saveButton.mouseClicked += { e => buttonClickedHandler(confirming) }
         cancelButton.mouseClicked += { e => buttonClickedHandler(closing) }
         closeButton.mouseClicked += { e => buttonClickedHandler(closing) }

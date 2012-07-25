@@ -7,6 +7,9 @@ import cz.payola.web.shared.managers.OntologyCustomizationManager
 import cz.payola.common.ValidationException
 import cz.payola.web.client.Presenter
 import cz.payola.web.client.views.bootstrap.InputControl
+import cz.payola.web.client.views.bootstrap.modals._
+import cz.payola.web.client.models.Model
+import s2js.runtime.shared.rpc.RpcException
 
 class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) extends Presenter
 {
@@ -82,6 +85,27 @@ class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) 
         }
     }
 
+    private def deleteCustomizationHandler(e: EventArgs[_]) = {
+        val promptModal = new ConfirmModal("Do you really want to delete this customization?", "This action cannot be undone.", "Delete", "Cancel", true, "alert-error")
+        promptModal.confirming += { e =>
+            Model.deleteOntologyCustomization(ontologyCustomization) { () =>
+                modal.destroy()
+                AlertModal.runModal("Ontology customization successfully deleted.", "Success!", "alert-success")
+            }{ error =>
+                error match {
+                    case exc: RpcException => AlertModal.runModal(exc.message, "Error removing ontology customization.", "alert-error")
+                    case _ => {
+                        modal.destroy()
+                        fatalErrorHandler(error)
+                    }
+                }
+            }
+            true
+        }
+        promptModal.render()
+        true
+    }
+
     /** Handler for property stroke color change.
       *
       * @param args Args of the event.
@@ -148,6 +172,8 @@ class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) 
 
         modal.classPropertyStrokeColorChanged += propertyStrokeColorChangedHandler _
         modal.classPropertyStrokeWidthChanged += propertyStrokeWidthChangedHandler _
+
+        modal.deleteButton.mouseClicked += deleteCustomizationHandler _
 
         modal.render()
     }

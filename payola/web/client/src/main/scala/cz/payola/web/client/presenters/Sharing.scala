@@ -5,14 +5,11 @@ import cz.payola.web.client.presenters.components.ShareButton
 import s2js.compiler.javascript
 import cz.payola.web.shared._
 import cz.payola.web.client.views.bootstrap._
-import scala.Some
 import s2js.adapters.js.browser.window
 import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
 import cz.payola.web.client.Presenter
 import cz.payola.web.client.views.elements._
-import scala.Some
 import cz.payola.common.entities._
-import scala.Some
 
 class Sharing(shareButtonPlaceholderClass: String, entityType: String) extends Presenter
 {
