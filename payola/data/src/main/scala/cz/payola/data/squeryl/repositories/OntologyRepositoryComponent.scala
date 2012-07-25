@@ -19,7 +19,7 @@ trait OntologyRepositoryComponent extends TableRepositoryComponent
         with OptionallyOwnedEntityTableRepository[OntologyCustomization, QueryType]
         with ShareableEntityTableRepository[OntologyCustomization, QueryType]
     {
-        override def persist(entity: AnyRef) = {
+        override def persist(entity: AnyRef) = wrapInTransaction {
             val persistedOntologyCustomization = super.persist(entity)
             entity match {
                 case o: OntologyCustomization => // The entity is already in the database, so classes are already there.
@@ -68,11 +68,11 @@ trait OntologyRepositoryComponent extends TableRepositoryComponent
             )
         }
 
-        protected def processSelectResults(results: Seq[QueryType]) = {
+        protected def processSelectResults(results: Seq[QueryType]) = wrapInTransaction {
             results.groupBy(_._1).map { r =>
                  val ontologyCustomization = r._1
                  ontologyCustomization.owner = r._2.head._2
-                 ontologyCustomization.classCustomizations = results.groupBy(_._3).flatMap { c =>
+                 ontologyCustomization.classCustomizations = r._2.groupBy(_._3).flatMap { c =>
                      val classCustomization = c._1
                      if (classCustomization.isDefined) {
                         classCustomization.get.propertyCustomizations = c._2.flatMap(_._4)
@@ -82,7 +82,7 @@ trait OntologyRepositoryComponent extends TableRepositoryComponent
                  } (collection.breakOut)
 
                  ontologyCustomization
-             }(collection.breakOut)
+            }(collection.breakOut)
         }
     }
 }
