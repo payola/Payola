@@ -35,7 +35,7 @@ import cz.payola.common.rdf.Graph
         (successCallback: (Option[Graph] => Unit))
         (failCallback: (Throwable => Unit)) {
 
-        val graph = getDataSource(dataSourceId, user).map(_.getNeighbourhood(vertexURI, 1))
+        val graph = getDataSource(dataSourceId, user).map(_.getNeighbourhood(vertexURI))
         successCallback(graph)
     }
 
