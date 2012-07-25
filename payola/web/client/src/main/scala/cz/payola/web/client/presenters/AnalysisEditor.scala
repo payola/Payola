@@ -1,128 +1,75 @@
 package cz.payola.web.client.presenters
 
-import cz.payola.web.client.views.todo.PluginInstance
 import cz.payola.web.shared.AnalysisBuilderData
-import scala.collection.mutable.ArrayBuffer
-import s2js.runtime.client.scala.collection.mutable.HashMap
-import cz.payola.common.entities
-import s2js.runtime.client.scala.collection.immutable
-import scala.collection.mutable
+import cz.payola.web.client.views.entity.analysis._
+import cz.payola.web.client.presenters.models.ParameterValue
+import cz.payola.common.entities.Analysis
 
-class AnalysisEditor(parentElementId: String, analysisIdP: String)
+class AnalysisEditor(parentElementId: String, analysisIdParam: String)
     extends AnalysisBuilder(parentElementId)
 {
-    private val creationMap = new HashMap[String, PluginInstance]
-
-    analysisId = analysisIdP
+    analysisId = analysisIdParam
 
     override def initialize() {
-        AnalysisBuilderData.getAnalysis(analysisIdP) { analysis =>
+        AnalysisBuilderData.getAnalysis(analysisId) { analysis =>
 
-            analysisId = analysis.id
             lockAnalysisAndLoadPlugins()
-
+            val view = new AnalysisEditorView(analysis)
+            view.visualiser.pluginInstanceRendered += { e => instancesMap.put(e.target.id, e.target)}
             view.render(parentElement)
-
-            setAnalysisNameToInputControl(analysis)
-            view.description.input.value_=(analysis.description)
-
-            val sources = new ArrayBuffer[PluginInstance]
-            val renderBuffer = new ArrayBuffer[PluginInstance]
-
-            loadInstancesData(analysis, sources, renderBuffer)
-            processBindings(analysis)
-            initialRender(sources, renderBuffer, analysis)
+            view.nameControl.input.value = analysis.name
+            view.description.input.value = analysis.description
+            bindParameterChangedEvent(view.visualiser)
+            bindConnectButtonClickedEvent(view)
+            bindDeleteButtonClickedEvent(view.visualiser)
+            constructBranches(analysis)
+            bindMenuEvents(view)
 
             true
-        } { _ =>}
+        } { error => fatalErrorHandler(error) }
     }
 
-    private def initialRender(sources: ArrayBuffer[PluginInstance], renderBuffer: ArrayBuffer[PluginInstance],
-        analysis: entities.Analysis) {
-        renderSources(sources, renderBuffer)
-        renderBufferTopologically(renderBuffer)
-        renderBindings(analysis)
+    private def constructBranches(analysis: Analysis){
+        val targets = analysis.pluginInstances.filterNot{ pi =>
+            analysis.pluginInstanceBindings.find(_.sourcePluginInstance.id == pi.id).isDefined
+        }.map{ pi => instancesMap.get(pi.id).get }
+
+        targets.foreach(branches.append(_))
     }
 
-    private def renderBindings(analysis: entities.Analysis) {
-        analysis.pluginInstanceBindings.map { b =>
-            renderBinding(creationMap(b.sourcePluginInstance.id), creationMap(b.targetPluginInstance.id))
+    private def bindParameterChangedEvent(visualiser: EditableAnalysisVisualizer){
+        visualiser.parameterValueChanged += { e =>
+            val pv = e.target
+            pv.control.setIsActive()
+            storeParameterValueToServer(pv)
         }
     }
 
-    private def renderBufferTopologically(renderBuffer: ArrayBuffer[PluginInstance]) {
-        while (!renderBuffer.isEmpty) {
-            renderBuffer.map { s =>
-                val canRender: Boolean = checkInstanceCanRender(s, renderBuffer)
-                if (canRender) {
-                    view.renderInstance(s)
-                    renderBuffer -= s
-                }
-            }
+    private def bindConnectButtonClickedEvent(view: AnalysisEditorView){
+        view.visualiser.connectButtonClicked += onConnectClicked(view)
+    }
+
+    private def bindDeleteButtonClickedEvent(visualiser: EditableAnalysisVisualizer){
+        visualiser.deleteButtonClicked += onDeleteClick
+    }
+
+    private def storeParameterValueToServer(pv: ParameterValue) {
+        val key = getParameterValueId(pv)
+        clearTimeOutIfSet(key)
+        setTimeout(key, parameterChangedServerCall(pv))
+    }
+
+    private def getParameterValueId(pv: ParameterValue): String = {
+        pv.pluginInstanceId + "_" + pv.parameterId
+    }
+
+    private def parameterChangedServerCall(pv: ParameterValue) : (() => Unit) = {
+        () => AnalysisBuilderData.setParameterValue(analysisId,pv.pluginInstanceId,pv.name, pv.value){ success =>
+            pv.control.setIsActive(false)
+            pv.control.setOk()
+        }{ error =>
+            pv.control.setIsActive(false)
+            pv.control.setError("Invalid value")
         }
-    }
-
-    private def checkInstanceCanRender(s: PluginInstance, renderBuffer: ArrayBuffer[PluginInstance]): Boolean = {
-        var canRender = true
-        s.predecessors.map { predecessor =>
-            canRender = (canRender && !renderBuffer.contains(predecessor))
-        }
-        canRender
-    }
-
-    def renderSources(sources: ArrayBuffer[PluginInstance], renderBuffer: ArrayBuffer[PluginInstance]) {
-        sources.map { s =>
-            view.renderInstance(s)
-            renderBuffer -= s
-        }
-    }
-
-    private def processBindings(analysis: entities.Analysis) {
-        analysis.pluginInstanceBindings.map { b =>
-            val buff = new ArrayBuffer[PluginInstance]()
-            creationMap(b.targetPluginInstance.id).predecessors.map(buff.append(_))
-            buff.append(creationMap(b.sourcePluginInstance.id))
-
-            creationMap(b.targetPluginInstance.id).predecessors = buff
-        }
-    }
-
-    private def setAnalysisNameToInputControl(analysis: entities.Analysis) {
-        view.nameControl.input.value = analysis.name
-    }
-
-    protected def loadInstancesData(analysis: entities.Analysis, sources: ArrayBuffer[PluginInstance],
-        renderBuffer: ArrayBuffer[PluginInstance]) {
-        analysis.pluginInstances.map { instance =>
-
-            val defaultValues = getDefaultValues(instance)
-            val clientInstance = new PluginInstance(instance.id, instance.plugin, List(), defaultValues)
-            clientInstance.hideDeleteButton()
-            creationMap.put(instance.id, clientInstance)
-
-            clientInstance.parameterValueChanged += onParameterValueChanged
-            clientInstance.deleteButtonClicked += onDeleteClick
-            clientInstance.connectButtonClicked += {e =>
-                connectPlugin(clientInstance)
-                false
-            }
-
-            if (!analysis.pluginInstanceBindings.find(_.sourcePluginInstance == instance).isDefined) {
-                lanes += clientInstance
-                clientInstance.showDeleteButton()
-            }
-
-            if (!analysis.pluginInstanceBindings.find(_.targetPluginInstance == instance).isDefined) {
-                sources += clientInstance
-            }
-
-            renderBuffer += clientInstance
-        }
-    }
-
-    private def getDefaultValues(instance: entities.plugins.PluginInstance): mutable.HashMap[String, String] = {
-        val map = new mutable.HashMap[String, String]
-        instance.parameterValues.foreach { v => map.put(v.parameter.name, v.value.toString)}
-        map
     }
 }

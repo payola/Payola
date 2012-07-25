@@ -1,105 +1,21 @@
 @(user: Option[cz.payola.domain.entities.User], analysis: cz.payola.domain.entities.Analysis)
 
-@renderInstance(inst: cz.payola.domain.entities.plugins.PluginInstance, analysis: cz.payola.domain.entities.Analysis) = {
-
-    <div style="float: left; min-width:300px;" class="successors">
-        @analysis.pluginInstanceBindings.filter(p => p.targetPluginInstance == inst).map{ b =>
-            @renderInstance(inst = b.sourcePluginInstance, analysis)
+@main(user, "Analysis "+analysis.name+" :: Payola!") {
+<div class="container-fluid">
+    <h1>
+        Detail of analysis: @analysis.name @if(analysis.owner == user) {
+            <a href="@routes.Analysis.edit(analysis.id)" class="btn btn-small" style="margin-bottom: 5px; margin-left: 10px;"><i class="icon-pencil"></i> Edit</a>
         }
-        <hr style="clear: both; height: 0px; visibility: hidden;" />
-        <div class="alert alert-info instance" id="inst_@inst.id">
-            <h3>@inst.plugin.name</h3>
-            @inst.plugin.parameters.map{param =>
-                <p><strong>@param.name</strong>: @inst.getParameter(param.name)</p>
-            }
-        </div>
+    </h1>
+
+    <div class="row-fluid" id="client-canvas">
+
 
     </div>
-}
+</div><!--/.fluid-container-->
 
-@main(user, "Analysis "+analysis.name+" :: Payola!") {
-
-    <style type="text/css">
-        .successors > .successors{
-        margin-left: 10px;
-        }
-        .successors > .successors:first-child{
-        margin-left: 0px;
-        }
-
-        #progress{
-        top: 5px; position: relative;
-        }
-
-        .wrap-right{
-        float: left; position: relative; left: 50%;
-        }
-
-        .wrap-left{
-        float: left; position: relative; left: -50%;
-        }
-    </style>
-    <div class="container-fluid">
-
-        <ul class="breadcrumb">
-            <li>
-                <a href="/">Home</a> <span class="divider">/</span>
-            </li>
-            <li class="active">Analysis: @analysis.name</li>
-        </ul>
-
-        <h1>Detail of analysis: @analysis.name @if(analysis.owner == user) {
-                <a href="@routes.Analysis.edit(analysis.id)" class="btn btn-small" style="margin-bottom: 5px; margin-left: 10px;"><i class="icon-pencil"></i> Edit</a>
-            }
-        </h1>
-        <div class="row-fluid">
-            <div class="well" id="analysis-controls">
-
-            </div>
-        </div><!--/row-->
-
-        <div class="row-fluid">
-
-            <div class="tabbable">
-                <ul class="nav nav-tabs">
-                    <li class="active"><a href="#tab1" data-toggle="tab">Overview</a></li>
-                    <li><a href="#tab2" data-toggle="tab" id="results-tab-link">Results</a></li>
-                </ul>
-                <div class="tab-content" style="position: relative; overflow: visible;">
-                    <div class="tab-pane active" id="tab1">
-                        <div class="wrap-right">
-                            <div class="wrap-left">
-                                @analysis.outputInstances.map{ o =>
-                                    @renderInstance(inst = o, analysis)
-                                }
-                            </div>
-                        </div>
-                    </div>
-                    <div class="tab-pane" id="tab2">
-
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div><!--/.fluid-container-->
-
-    <script>
-        var settings = {
-            PaintStyle:{ lineWidth:2, strokeStyle:"#BCE8F1", outlineColor:"#3A87AD", outlineWidth:1 },
-            Connector:[ "Flowchart", { stub: 1 } ],
-            Endpoint:[ "Dot", { radius:4 } ],
-            EndpointStyle : { fillStyle: "#3A87AD"  },
-            Anchor : [ "TopCenter", "BottomCenter" ]
-        };
-
-        @analysis.pluginInstanceBindings.map{ b =>
-            var instance = jsPlumb.getInstance(settings);
-            instance.connect({ source:"inst_@b.sourcePluginInstance.id", target:"inst_@b.targetPluginInstance.id", scope:"someScope" });
-        }
-    </script>
-
-    <script src="/javaScriptPackage/cz.payola.web.client.presenters.Analysis" type="text/javascript"></script>
-    <script type="text/javascript">
-        new cz.payola.web.client.presenters.Analysis("tab2", "@analysis.id").initialize();
-    </script>
+<script src="/javaScriptPackage/cz.payola.web.client.presenters.AnalysisRunner" type="text/javascript"></script>
+<script type="text/javascript">
+    new cz.payola.web.client.presenters.AnalysisRunner("client-canvas", "@analysis.id").initialize();
+</script>
 }

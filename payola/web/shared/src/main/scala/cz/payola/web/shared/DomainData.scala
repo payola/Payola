@@ -2,11 +2,11 @@ package cz.payola.web.shared
 
 import cz.payola.domain.entities.User
 import s2js.compiler._
-import cz.payola.common.entities.Group
+import cz.payola.common.entities._
 
-@remote object DomainData
+@remote @secured object DomainData
 {
-    @async @secured def searchMembersAvailableForGroup(groupId: String, term: String, owner: User = null)(successCallback: (Seq[User] => Unit))
+    @async def searchMembersAvailableForGroup(groupId: String, term: String, owner: User = null)(successCallback: (Seq[User] => Unit))
         (failCallback: (Throwable => Unit)) {
         val group = Payola.model.groupModel.getById(groupId).getOrElse{
             throw new Exception("Group not found.")
@@ -16,13 +16,13 @@ import cz.payola.common.entities.Group
         successCallback(users)
     }
 
-    @async @secured def searchUsers(term: String, user: User = null)(successCallback: (Seq[User] => Unit))
+    @async def searchUsers(term: String, user: User = null)(successCallback: (Seq[User] => Unit))
         (failCallback: (Throwable => Unit)) {
         val users = Payola.model.userModel.getByNameLike(term)
         successCallback(users)
     }
 
-    @async @secured def searchGroups(term: String, user: User = null)(successCallback: (Seq[Group] => Unit))
+    @async def searchGroups(term: String, user: User = null)(successCallback: (Seq[Group] => Unit))
         (failCallback: (Throwable => Unit)) {
 
         val groups = user.ownedGroups.filter{ g =>
@@ -32,6 +32,13 @@ import cz.payola.common.entities.Group
         successCallback(groups)
     }
 
-    def searchDataSources(needle: String) = {
+    @async def getAnalysisById(analysisId: String, user: Option[User] = None)(successCallback: (Analysis => Unit))
+        (failCallback: (Throwable => Unit)) {
+
+        val analysis = Payola.model.analysisModel.getAccessibleToUserById(user,analysisId).getOrElse{
+            throw new Exception("Analysis not found.")
+        }
+
+        successCallback(analysis)
     }
 }

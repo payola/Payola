@@ -27,7 +27,6 @@ import cz.payola.domain.entities.analyses.evaluation.Success
         successCallback(evaluationId)
     }
 
-
     private def getEvaluationTupleForID(id: String) = {
         runningEvaluations.get(id).getOrElse {
             throw new ModelException("The evaluation is not running.")
@@ -38,7 +37,7 @@ import cz.payola.domain.entities.analyses.evaluation.Success
         val evaluationTuple = getEvaluationTupleForID(id)
         if (!evaluationTuple._1.isDefined || evaluationTuple._1 == user) {
             evaluationTuple
-        }else{
+        } else {
             throw new ModelException("Forbidden evaluation.")
         }
     }
@@ -50,11 +49,9 @@ import cz.payola.domain.entities.analyses.evaluation.Success
         val evaluation = evaluationTuple._2
         if (!evaluation.isFinished) {
             failCallback(new ModelException("Evaluation isn't finished yet."))
-        }else{
+        } else {
             successCallback()
         }
-
-
     }
 
     @async def getAnalysisProgress(evaluationId: String, user: Option[User] = None)
@@ -68,9 +65,7 @@ import cz.payola.domain.entities.analyses.evaluation.Success
         val running = progress.runningInstances.map(m => m._1.id).toList
         val errors = progress.errors.map(tuple => tuple._1.id).toList
 
-//        if (evaluation.isFinished) {
-//            runningEvaluations -= evaluationId
-//        }
+        //TODO timeout remove after some time
 
         val graph = evaluation.getResult.flatMap {
             case r: Success => Some(r.outputGraph)

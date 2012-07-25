@@ -3,12 +3,14 @@ package cz.payola.web.client.views.entity.analysis
 import cz.payola.web.client.views.bootstrap.inputs._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.Icon
-import cz.payola.web.client.views.todo.PluginInstance
+import cz.payola.web.client.views.todo.PluginInstanceView
 import cz.payola.web.client.View
 import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom.Element
+import cz.payola.web.client.views.ComposedView
+import cz.payola.common.entities.Analysis
 
-class AnalysisEditorView extends View
+class AnalysisEditorView(analysis: Analysis) extends ComposedView
 {
     val nameControl = new TextInputControl("Analysis name:", "name", "", "Analysis name")
     val description = new TextAreaInputControl("Description:", "description", "", "Anaylsis description")
@@ -22,32 +24,21 @@ class AnalysisEditorView extends View
     protected val mergeBranchesLi = new ListItem(List(mergeBranches))
     protected val menu = new UnorderedList(List(addPluginLinkLi, addDataSourceLinkLi, mergeBranchesLi))
 
+    val visualiser = new EditableAnalysisVisualizer(analysis)
+
     protected val leftColContent = new Div(List(menu,properties),"well")
-    protected val rightColContent = new Div(List(),"plugin-space")
+    val analysisCanvas = new Div(List(visualiser),"plugin-space")
 
     protected val leftCol = new Div(List(leftColContent),"span3")
-    protected val rightCol = new Div(List(rightColContent),"span9")
+    protected val rightCol = new Div(List(analysisCanvas),"span9")
 
     protected val container = new Div(List(leftCol, rightCol))
-
-    def blockDomElement = container.domElement
+    nameControl.input.addCssClass("span12")
+    description.input.addCssClass("span12")
 
     def setName(name: String){
         nameControl.input.value_=(name)
     }
 
-    def renderInstance(instance: PluginInstance){
-        instance.render(rightColContent.domElement)
-    }
-
-    def destroy(){
-
-    }
-
-    def render(parent: Element = document.body) {
-        container.render(parent)
-        nameControl.input.addCssClass("span12")
-        description.input.addCssClass("span12")
-    }
-
+    def createSubViews = List(container)
 }

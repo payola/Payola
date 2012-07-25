@@ -1,37 +1,38 @@
-canvas
-{
+canvas {
     border: 0px;
     position: absolute;
     top: 0;
     left: 0;
 }
 
-pre {
-  overflow: auto;
-  word-wrap: normal;
-  white-space: pre;
-}
-
-#canvas-holder{
+canvas:first-child {
     position: relative;
 }
 
-.clear{
+pre {
+    overflow: auto;
+    word-wrap: normal;
+    white-space: pre;
+}
+
+#canvas-holder {
+    position: relative;
+}
+
+.clear {
     clear: both;
 }
 
-.controls.plugin.switch.button
-{
+.controls.plugin.switch.button {
     color: rgb(0, 0, 255);
 }
-.controls.plugin.switch.button:hover
-{
+
+.controls.plugin.switch.button:hover {
     background-color: rgb(250, 250, 250);
     color: rgb(255, 0, 0);
 }
 
-.visualPluginSettings.textField
-{
+.visualPluginSettings.textField {
     width: 30px;
 }
 
@@ -39,11 +40,12 @@ body {
     padding-top: 60px;
     padding-bottom: 40px;
 }
+
 .sidebar-nav {
     padding: 9px 0;
 }
 
-label{
+label {
     float: left;
     width: 250px;
 }
@@ -76,51 +78,57 @@ input.active, textarea.active {
     padding-right: 25px !important;
 }
 
-input[type="checkbox"].active:after{
-     width: 20px;
-     height: 20px;
-     display: block;
-     background: #fff url('spinner.gif') no-repeat 100%;
-     background: url('spinner.gif') no-repeat 100%, -webkit-gradient(linear, left bottom, left top, color-stop(0.85, white), color-stop(0.99, #eeeeee));
-     background: url('spinner.gif') no-repeat 100%, -webkit-linear-gradient(center bottom, white 85%, #eeeeee 99%);
-     background: url('spinner.gif') no-repeat 100%, -moz-linear-gradient(center bottom, white 85%, #eeeeee 99%);
-     background: url('spinner.gif') no-repeat 100%, -o-linear-gradient(bottom, white 85%, #eeeeee 99%);
-     background: url('spinner.gif') no-repeat 100%, -ms-linear-gradient(top, #ffffff 85%, #eeeeee 99%);
-     background: url('spinner.gif') no-repeat 100%;
-     background-position: 98%;
-     content: "";
-     position: relative;
+input[type="checkbox"].active:after {
+    width: 20px;
+    height: 20px;
+    display: block;
+    background: #fff url('spinner.gif') no-repeat 100%;
+    background: url('spinner.gif') no-repeat 100%, -webkit-gradient(linear, left bottom, left top, color-stop(0.85, white), color-stop(0.99, #eeeeee));
+    background: url('spinner.gif') no-repeat 100%, -webkit-linear-gradient(center bottom, white 85%, #eeeeee 99%);
+    background: url('spinner.gif') no-repeat 100%, -moz-linear-gradient(center bottom, white 85%, #eeeeee 99%);
+    background: url('spinner.gif') no-repeat 100%, -o-linear-gradient(bottom, white 85%, #eeeeee 99%);
+    background: url('spinner.gif') no-repeat 100%, -ms-linear-gradient(top, #ffffff 85%, #eeeeee 99%);
+    background: url('spinner.gif') no-repeat 100%;
+    background-position: 98%;
+    content: "";
+    position: relative;
     left: 13px;
     top: -5px;
- }
+}
 
-.dashboard h2{color: black;}
+.dashboard h2 {
+    color: black;
+}
 
-.icon-rdf{
+.icon-rdf {
     background-image: url(rdf-white.png) !important;
     background-position: 0px !important;
 }
-.icon-group{
+
+.icon-group {
     background-image: url(group.png) !important;
     background-position: 0px !important;
 }
-.icon-group.icon-white{
+
+.icon-group.icon-white {
     background-image: url(group-white.png) !important;
     background-position: 0px !important;
 }
 
-.selected-page{
+.selected-page {
     background: #8891B7;
 }
 
 .successors {
     float: left;
-    min-width:300px;
-    margin-right: 10px;
+    min-width: 300px;
 }
 
 .clear {
-    clear: both; height: 0px; visibility: hidden; display: block;
+    clear: both;
+    height: 0px;
+    visibility: hidden;
+    display: block;
 }
 
 .alert {
@@ -178,3 +186,32 @@ input[type="checkbox"].active:after{
     padding-right: 0px;
 }
 
+.successors > .successors {
+    margin-left: 10px;
+}
+
+.successors > .successors:first-child {
+    margin-left: 0px;
+}
+
+#progress {
+    top: 5px;
+    position: relative;
+}
+
+.wrap-right {
+    float: left;
+    position: relative;
+    left: 50%;
+}
+
+.wrap-left {
+    float: left;
+    position: relative;
+    left: -50%;
+}
+
+.tab-content {
+    position: relative;
+    overflow: visible;
+}

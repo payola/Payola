@@ -29,9 +29,6 @@ payola/web/server/public/javascripts/shared/
 payola/web/server/public/javascripts/client/
 payola/web/server/public/dependencies
 
-# Tools. Maybe enable them in the future, so we all use the same.
-Tools/
-
 # IntelliJ Idea files.
 payola/.idea/uiDesigner.xml
 payola/.idea/workspace.xml
@@ -43,7 +40,7 @@ payola/.idea/dictionaries
 payola/.idea/libraries
 
 # Plugins folder
-plugins/
+/plugins/
 
 # OS X files
 .DS_Store

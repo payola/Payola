@@ -85,6 +85,14 @@ abstract class ElementView[A <: dom.Element](domElementName: String, val subView
         setAttribute("id", value)
     }
 
+    def hide(){
+        setAttribute("style","display: none")
+    }
+
+    def show(displayStyle: String = "block"){
+        setAttribute("style","display: "+displayStyle)
+    }
+
     def removeAllChildNodes() {
         while (domElement.hasChildNodes) {
             domElement.removeChild(domElement.firstChild)
