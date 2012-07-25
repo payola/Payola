@@ -17,12 +17,4 @@ class ExceptionSerializer extends JSONSerializer
     val exceptionClass = new SimpleSerializationClass(classOf[Exception])
     val disableStackTrace = new BasicSerializationRule(None, Some(List("stackTrace")))
     addSerializationRule(exceptionClass, disableStackTrace)
-
-    val rpcExceptionClass = new SimpleSerializationClass(classOf[RpcException])
-    val rpcExceptionSerializationRule = new BasicSerializationRule(Some(classOf[RpcExceptionTrait]))
-    addSerializationRule(rpcExceptionClass, rpcExceptionSerializationRule)
-
-    val validationExceptionClass = new SimpleSerializationClass(classOf[ValidationException])
-    val validationExceptionSerializationRule = new BasicSerializationRule(Some(classOf[ValidationExceptionTrait]))
-    addSerializationRule(validationExceptionClass, validationExceptionSerializationRule)
 }
