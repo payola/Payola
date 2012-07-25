@@ -14,17 +14,15 @@ class OntologyCustomizationEditModal(customization: OntologyCustomization)
         "wide-customization-modal")
 {
     // Event handlers
-    val classFillColorChanged = new UnitEvent[this.type, ClassCustomizationModificationEventArgs[this.type, String]]
+    val classFillColorChanged = new UnitEvent[this.type, ClassCustomizationModificationEventArgs[this.type]]
 
-    var classRadiusChanged = new UnitEvent[this.type, ClassCustomizationModificationEventArgs[this.type, Int]]
+    var classRadiusChanged = new UnitEvent[this.type, ClassCustomizationModificationEventArgs[this.type]]
 
-    var classGlyphChanged = new UnitEvent[this.type, ClassCustomizationModificationEventArgs[this.type, Option[Char]]]
+    var classGlyphChanged = new UnitEvent[this.type, ClassCustomizationModificationEventArgs[this.type]]
 
-    var classPropertyStrokeColorChanged = new
-            UnitEvent[this.type, ClassPropertyCustomizationModificationEventArgs[this.type, String]]
+    var propertyStrokeColorChanged = new UnitEvent[this.type, PropertyCustomizationModificationEventArgs[this.type]]
 
-    var classPropertyStrokeWidthChanged = new
-            UnitEvent[this.type, ClassPropertyCustomizationModificationEventArgs[this.type, Int]]
+    var propertyStrokeWidthChanged = new UnitEvent[this.type, PropertyCustomizationModificationEventArgs[this.type]]
 
     // Create a completely enclosing div
     val enclosingDiv = new Div()
@@ -94,7 +92,7 @@ class OntologyCustomizationEditModal(customization: OntologyCustomization)
       *
       * @return Stroke color input control;
       */
-    def getStrokeColorInputForPropertyOfSelectedClass(propertyURI: String): InputControl = {
+    def getStrokeColorForPropertyOfSelectedClass(propertyURI: String): InputControl = {
         getPropertyElementByName("property-stroke-color-" + propertyURI)
     }
 
@@ -102,7 +100,7 @@ class OntologyCustomizationEditModal(customization: OntologyCustomization)
       *
       * @return Stroke width input control;
       */
-    def getStrokeWidthInputForPropertyOfSelectedClass(propertyURI: String): InputControl = {
+    def getStrokeWidthForPropertyOfSelectedClass(propertyURI: String): InputControl = {
         getPropertyElementByName("property-stroke-width-" + propertyURI)
     }
 
@@ -139,17 +137,17 @@ class OntologyCustomizationEditModal(customization: OntologyCustomization)
         // Place the event on closed. When not closed, the color is changing with
         // every single change - we'd flood the server with dozens of requests
         // instead of just one
-
         val event = { e: EventArgs[ColorPane] =>
-            classPropertyStrokeColorChanged.trigger(new ClassPropertyCustomizationModificationEventArgs[this.type, String](selectedClassCustomization.uri, propCustomization.uri, strokeColorInput.getColorHexString, this))
+            val value = strokeColorInput.getColorHexString
+            propertyStrokeColorChanged.trigger(new PropertyCustomizationModificationEventArgs[this.type](
+                strokeColorInput.colorInput, selectedClassCustomization.uri, propCustomization.uri, value, this))
         }
         strokeColorInput.closed += event
         strokeColorInput.cleared += event
 
         widthInput.input.changed += { e =>
-            classPropertyStrokeWidthChanged.trigger(new
-                    ClassPropertyCustomizationModificationEventArgs[this.type, Int](selectedClassCustomization.uri,
-                        propCustomization.uri, widthInput.input.value.toInt, this))
+            propertyStrokeWidthChanged.trigger(new PropertyCustomizationModificationEventArgs[this.type](
+                widthInput, selectedClassCustomization.uri, propCustomization.uri, widthInput.input.value, this))
         }
 
         strokeColorInput.render(propertiesDiv.domElement)
@@ -170,29 +168,20 @@ class OntologyCustomizationEditModal(customization: OntologyCustomization)
         // every single change - we'd flood the server with dozens of requests
         // instead of just one
         val event = { e: EventArgs[ColorPane] =>
-            classFillColorChanged.trigger(new ClassCustomizationModificationEventArgs[this.type, String](selectedClassCustomization.uri, fillColorInput.getColorHexString, this))
+            classFillColorChanged.trigger(new ClassCustomizationModificationEventArgs[this.type](
+                fillColorInput.colorInput, selectedClassCustomization.uri, fillColorInput.getColorHexString, this))
         }
         fillColorInput.closed += event
         fillColorInput.cleared += event
 
         radiusInput.input.changed += { e =>
-            if (radiusInput.input.value.toInt < 0) {
-                radiusInput.input.value = "0"
-            } else {
-                radiusInput.input.value = radiusInput.input.value.toInt.toString
-            }
-            classRadiusChanged.trigger(new
-                    ClassCustomizationModificationEventArgs[this.type, Int](selectedClassCustomization.uri,
-                        radiusInput.input.value.toInt, this))
+            classRadiusChanged.trigger(new ClassCustomizationModificationEventArgs[this.type](
+                radiusInput, selectedClassCustomization.uri, radiusInput.input.value, this))
         }
+
         glyphInput.input.changed += { e =>
-            if (glyphInput.input.value.length > 1) {
-                glyphInput.input.value = glyphInput.input.value(0).toString
-            }
-            val charOption = if (glyphInput.input.value == "") None else Some(glyphInput.input.value.charAt(0))
-            classGlyphChanged.trigger(new
-                    ClassCustomizationModificationEventArgs[this.type, Option[Char]](selectedClassCustomization.uri,
-                        charOption, this))
+            classGlyphChanged.trigger(new ClassCustomizationModificationEventArgs[this.type](
+                glyphInput, selectedClassCustomization.uri, glyphInput.input.value, this))
         }
 
         fillColorInput.render(propertiesDiv.domElement)

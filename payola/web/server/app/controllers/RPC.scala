@@ -106,6 +106,7 @@ object RPC extends PayolaController with Secured
       */
     def raiseError(throwable: Throwable) = {
         val exception = throwable match {
+            case v: ValidationException => v
             case i: InvocationTargetException if i.getTargetException.isInstanceOf[ValidationException] => {
                 i.getTargetException
             }

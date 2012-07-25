@@ -1,5 +1,7 @@
 package cz.payola.web.client.events
 
-class ClassCustomizationModificationEventArgs[A, B](val classURI: String, val value: B, target: A) extends EventArgs[A](target)
+import cz.payola.web.client.views.bootstrap.InputControl
 
-class ClassPropertyCustomizationModificationEventArgs[A, B](val classURI: String, val propertyURI: String, val value: B, target: A) extends EventArgs[A](target)
+class ClassCustomizationModificationEventArgs[A](val input: InputControl, val classURI: String, val value: String, target: A) extends EventArgs[A](target)
+
+class PropertyCustomizationModificationEventArgs[A](val input: InputControl, val classURI: String, val propertyURI: String, val value: String, target: A) extends EventArgs[A](target)
