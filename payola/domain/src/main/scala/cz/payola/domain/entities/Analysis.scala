@@ -6,6 +6,8 @@ import cz.payola.domain.entities.analyses.evaluation.AnalysisEvaluation
 import cz.payola.domain.entities.plugins.PluginInstance
 import cz.payola.domain.Entity
 import cz.payola.domain.entities.settings.OntologyCustomization
+import cz.payola.domain.entities.plugins.concrete._
+import scala.Some
 
 /**
   * @param _name Name of the analysis.
@@ -93,7 +95,19 @@ class Analysis(protected var _name: String, protected var _owner: Option[User])
 
         // Check whether the instance graph is connected.
         if (visitedInstances.length != pluginInstances.length) {
-            throw new AnalysisException("The analysis contains more than one connected plugin intance component.")
+            throw new AnalysisException("The analysis contains more than one connected plugin instance component.")
+        }
+
+        // Check whether there is a DataFetcher connected to a non SPARQL query plugin.
+        val invalidBinding = pluginInstanceBindings.find { b =>
+            b.sourcePluginInstance.plugin.isInstanceOf[DataFetcher] &&
+            !b.targetPluginInstance.plugin.isInstanceOf[SparqlQuery]
+        }
+        invalidBinding.foreach { b =>
+            throw new AnalysisException(("The analysis contains a data fetcher plugin (%s) that is directly " +
+                "connected to a non SPARQL query plugin (%s). That kind of connection isn't currently supported, " +
+                "because it would cause a selection of everything from the storage corresponding to the data " +
+                "fatcher.").format(b.sourcePluginInstance.plugin.name, b.targetPluginInstance.plugin.name))
         }
     }
 

@@ -5,7 +5,6 @@ import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import cz.payola.domain.entities.plugins.concrete.data.SparqlEndpoint
 import cz.payola.domain.entities.plugins.concrete.query._
-import cz.payola.domain.entities.plugins.concrete._
 import cz.payola.domain.entities.analyses.evaluation.Success
 import cz.payola.domain.entities.Analysis
 
@@ -13,12 +12,9 @@ class AnalysisEvaluationSpec extends FlatSpec with ShouldMatchers
 {
     "Analysis evaluation" should "work" in {
         val sparqlEndpointPlugin = new SparqlEndpoint
-        val concreteSparqlQueryPlugin = new ConcreteSparqlQuery
         val projectionPlugin = new Projection
         val selectionPlugin = new Selection
         val typedPlugin = new Typed
-        val join = new Join
-        val unionPlugin = new Union
 
         val analysis = new Analysis("Cities with more than 2 million habitants", None)
         val citiesFetcher = sparqlEndpointPlugin.createInstance()
