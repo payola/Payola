@@ -131,7 +131,7 @@ class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) 
     def propertyStrokeWidthChangedHandler(args: ClassPropertyCustomizationModificationEventArgs[_, Int]) {
         OntologyCustomizationManager
             .setPropertyStrokeWidth(ontologyCustomization.id, args.classURI, args.propertyURI, args.value) { () =>
-        // Success - update the client model
+            // Success - update the client model
             ontologyCustomization.classCustomizations.find(_.uri == args.classURI).get.propertyCustomizations
                 .find(_.uri == args.propertyURI).get.strokeWidth = args.value
             postValueChangeNotification()

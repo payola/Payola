@@ -27,6 +27,7 @@ class ShareButton(isPublic: Boolean) extends ComposedView
     private val textIsPublic = new Text(" ")
     val dropDownButton = new DropDownButtonWithCaret(List(textIsPublic),List(new Icon(Icon.share, true),new Text("Share")),
         List(groupItem, userItem, divider, publicItem), "btn-warning")
+    dropDownButton.addCssClass(" share-button")
 
     setIsPublic(isPublic)
 
