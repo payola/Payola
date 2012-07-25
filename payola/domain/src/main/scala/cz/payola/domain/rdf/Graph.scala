@@ -1,12 +1,15 @@
 package cz.payola.domain.rdf
 
 import scala.collection._
+import scala.collection.JavaConverters._
 import com.hp.hpl.jena.query._
 import com.hp.hpl.jena.rdf.model._
 import cz.payola.common.rdf._
 import cz.payola.domain._
 import java.io._
 import scala.io.Source
+import org.openjena.riot._
+import org.openjena.riot.lang._
 
 object Graph
 {
@@ -22,16 +25,25 @@ object Graph
       * @return A new graph instance.
       */
     def apply(representation: RdfRepresentation.Type, data: String): Graph = {
-        val model = ModelFactory.createDefaultModel
-        val language = representation match {
-            case RdfRepresentation.RdfXml => "RDF/XML"
-            case RdfRepresentation.Turtle => "TURTLE"
+        val dataInputStream = new ByteArrayInputStream(data.getBytes("UTF-8"))
+        val jenaGraphs = representation match {
+            case RdfRepresentation.Trig => {
+                val dataSetGraph = DatasetFactory.createMem().asDatasetGraph()
+                RiotLoader.readQuads(dataInputStream, Lang.TRIG, "", new SinkQuadsToDataset(dataSetGraph))
+                dataSetGraph.listGraphNodes().asScala.toList.map(dataSetGraph.getGraph(_))
+            }
+            case _ => {
+                val language = representation match {
+                    case RdfRepresentation.RdfXml => Lang.RDFXML
+                    case RdfRepresentation.Turtle => Lang.TURTLE
+                }
+                val graph = com.hp.hpl.jena.graph.Factory.createDefaultGraph()
+                RiotLoader.readTriples(dataInputStream, language, "", new SinkTriplesToGraph(graph))
+                List(graph)
+            }
         }
-        model.read(new java.io.StringReader(data), null, language)
 
-        val graph = Graph(model)
-        model.close()
-        graph
+        jenaGraphs.map(g => Graph(ModelFactory.createModelForGraph(g))).fold(Graph.empty)(_ + _)
     }
 
     /**

@@ -11,9 +11,9 @@ class Selection(name: String, inputCount: Int, parameters: immutable.Seq[Paramet
 {
     def this() = {
         this("Selection", 1, List(
-            new StringParameter("PropertyURI", ""),
-            new StringParameter("Operator", ""),
-            new StringParameter("Value", "")),
+            new StringParameter("PropertyURI", "", false),
+            new StringParameter("Operator", "", false),
+            new StringParameter("Value", "", false)),
             IDGenerator.newId)
         isPublic = true
     }

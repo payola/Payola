@@ -31,7 +31,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     val groups = List(g1, g2, g3, g4, g5)
 
     // Plugins
-    private val params = List(new StringParameter("EndpointURL", "http://ld.opendata.cz:1111"))
+    private val params = List(new StringParameter("EndpointURL", "http://ld.opendata.cz:1111", true))
     val sparqlEndpointPlugin = new SparqlEndpoint("SPARQL Endpoint", 0, params, IDGenerator.newId)
     val concreteSparqlQueryPlugin = new ConcreteSparqlQuery
     val projectionPlugin = new Projection
@@ -165,7 +165,11 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         
         plugins.foreach { p =>
             
-            List(pluginRepository.persist(p), pluginRepository.getByName(p.name).get).foreach{ plugin =>
+            List(
+                pluginRepository.persist(p),
+                pluginRepository.getByName(p.name).get,
+                pluginRepository.getById(p.id).get
+            ).foreach{ plugin =>
                 assert(plugin.id == p.id)
                 assert(plugin.parameters.size == p.parameters.size)
                 assert(plugin.name == p.name)
@@ -173,8 +177,16 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
 
                 // assert all parameters have proper IDs
                 for (param <- p.parameters) {
-                    assert(plugin.parameters.find(_.id == param.id).get.name == param.name)
-                    assert(plugin.parameters.find(_.id == param.id).get.defaultValue == param.defaultValue)
+                    val persistedParam = plugin.parameters.find(_.id == param.id).get
+                    assert(persistedParam.name == param.name)
+                    assert(persistedParam.defaultValue == param.defaultValue)
+
+                    // Check StringParameter.isMultiline property
+                    type StringParam = cz.payola.common.entities.plugins.parameters.StringParameter
+                    persistedParam match {
+                        case s : StringParam => assert(s.isMultiline == param.asInstanceOf[StringParam].isMultiline)
+                        case _ => // There is no isMultiline property otherwise
+                    }
                 }
             }
         }
@@ -198,7 +210,8 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
             "Cities with more than " + count + "M habitants with countries",
             Some(user)
         )
-        
+
+        // Test storing properties
         a.isPublic = true
         a.description = "description"
 
@@ -300,6 +313,13 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
                 assert(parameter.name == loadedParameter.name)
                 assert(parameter.defaultValue == loadedParameter.defaultValue)
                 assert(pi2.parameterValues.find(_.id == paramValue.id).get.value == paramValue.value)
+
+                // Check StringParameter.isMultiline property
+                type StringParam = cz.payola.common.entities.plugins.parameters.StringParameter
+                loadedParameter match {
+                    case s : StringParam => assert(s.isMultiline == parameter.asInstanceOf[StringParam].isMultiline)
+                    case _ => // There is no isMultiline property otherwise
+                }
             }
         }
     }
@@ -327,17 +347,17 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
 
             val ds_db = dataSourceRepository.getById(ds.id).get
 
-            assert(ds.parameterValues.size == ds_db.parameterValues.size)
-            assert(ds_db.isPublic == ds.isPublic)
-            assert(ds_db.description == ds.description)
-            assert(ds_db.isEditable == ds.isEditable)
+                assert(ds.parameterValues.size == ds_db.parameterValues.size)
+                assert(ds_db.isPublic == ds.isPublic)
+                assert(ds_db.description == ds.description)
+                assert(ds_db.isEditable == ds.isEditable)
 
             val parameter = sparqlEndpointPlugin.parameters(0)
             val loadedParameter = ds_db.parameterValues(0).parameter
 
-            assert(parameter.id == loadedParameter.id)
-            assert(parameter.name == loadedParameter.name)
-            assert(parameter.defaultValue == loadedParameter.defaultValue)
+                assert(parameter.id == loadedParameter.id)
+                assert(parameter.name == loadedParameter.name)
+                assert(parameter.defaultValue == loadedParameter.defaultValue)
 
             // assert all parameters have proper IDs
             ds_db.parameterValues.foreach { paramValue =>
@@ -346,9 +366,9 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
             }
         }
 
-            assert(dataSourceRepository.getById(ds2.id).get.owner.get.ownedDataSources.size == 1)
-            assert(dataSourceRepository.getAllPublic.size == 2)
-            assert(dataSourceRepository.getCount == 2)
+        assert(dataSourceRepository.getById(ds2.id).get.owner.get.ownedDataSources.size == 1)
+        assert(dataSourceRepository.getAllPublic.size == 2)
+        assert(dataSourceRepository.getCount == 2)
     }
 
     "Privileges" should "be granted and persisted properly" in {
@@ -436,25 +456,25 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
 
         // Assert eager-loading
         for(ontologyCustomization <- customizations) {
-            val oc = ontologyCustomizationRepository.getById(ontologyCustomization.id).get
-                assert(oc.owner == ontologyCustomization.owner)
-                assert(oc.name == ontologyCustomization.name)
-                assert(oc.ontologyURL == ontologyCustomization.ontologyURL)
-                assert(oc.classCustomizations.size == ontologyCustomization.classCustomizations.size)
+            val persistedOc = ontologyCustomizationRepository.getById(ontologyCustomization.id).get
+                assert(persistedOc.owner == ontologyCustomization.owner)
+                assert(persistedOc.name == ontologyCustomization.name)
+                assert(persistedOc.ontologyURL == ontologyCustomization.ontologyURL)
+                assert(persistedOc.classCustomizations.size == ontologyCustomization.classCustomizations.size)
 
-            for (cc <- ontologyCustomization.classCustomizations){
-                val persistedCc = oc.classCustomizations.find(_.id == cc.id).get
-                    assert(persistedCc.uri == cc.uri)
-                    assert(persistedCc.fillColor == cc.fillColor)
-                    assert(persistedCc.radius == cc.radius)
-                    assert(persistedCc.glyph == cc.glyph)
-                    assert(cc.propertyCustomizations.size == persistedCc.propertyCustomizations.size)
+            for (classCustomization <- ontologyCustomization.classCustomizations){
+                val persistedCc = persistedOc.classCustomizations.find(_.id == classCustomization.id).get
+                    assert(persistedCc.uri == classCustomization.uri)
+                    assert(persistedCc.fillColor == classCustomization.fillColor)
+                    assert(persistedCc.radius == classCustomization.radius)
+                    assert(persistedCc.glyph == classCustomization.glyph)
+                    assert(persistedCc.propertyCustomizations.size == classCustomization.propertyCustomizations.size)
 
-                for (pc <- cc.propertyCustomizations){
-                    val persistedPc = persistedCc.propertyCustomizations.find(_.id == pc.id).get
-                        assert(persistedPc.uri == pc.uri)
-                        assert(persistedPc.strokeWidth == pc.strokeWidth)
-                        assert(persistedPc.strokeColor == pc.strokeColor)
+                for (propertyCustomization <- classCustomization.propertyCustomizations){
+                    val persistedPc = persistedCc.propertyCustomizations.find(_.id == propertyCustomization.id).get
+                        assert(persistedPc.uri == propertyCustomization.uri)
+                        assert(persistedPc.strokeWidth == propertyCustomization.strokeWidth)
+                        assert(persistedPc.strokeColor == propertyCustomization.strokeColor)
                 }
             }
         }

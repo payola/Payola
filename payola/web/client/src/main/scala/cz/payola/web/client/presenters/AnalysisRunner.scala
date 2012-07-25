@@ -11,6 +11,10 @@ import cz.payola.web.client.presenters.notification.Notification
 import cz.payola.web.client.events.UnitEvent
 import cz.payola.common.entities.Analysis
 import cz.payola.web.client.presenters.graph.GraphPresenter
+import cz.payola.web.client.views.elements._
+import cz.payola.web.client.views.bootstrap._
+import cz.payola.web.client.views.graph.DownloadButtonView
+import cz.payola.web.client.views.bootstrap.modals.AlertModal
 
 class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presenter
 {
@@ -32,6 +36,20 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
                     val graphPresenter = new GraphPresenter(view.resultsView.domElement)
                     graphPresenter.initialize()
                     graphPresenter.view.updateGraph(evt.graph)
+
+                    val downloadButtonView = new DownloadButtonView()
+                    downloadButtonView.render(graphPresenter.view.toolbar.domElement)
+
+                    downloadButtonView.rdfDownloadAnchor.mouseClicked += { e =>
+                        downloadResultAsRDF()
+                        true
+                    }
+
+                    downloadButtonView.ttlDownloadAnchor.mouseClicked += { e =>
+                        downloadResultAsTTL()
+                        true
+                    }
+
                     view.tabs.showTab(1)
                     view.tabs.switchTab(1)
                     false
@@ -56,6 +74,30 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
     def schedulePolling(view: AnalysisRunnerView, analysis: Analysis) = {
         window.setTimeout(() => { pollingHandler(view, analysis) }, 500)
+    }
+
+    private def getAnalysisEvaluationID: Option[String] = {
+        val id = evaluationId
+        if (id == ""){
+            AlertModal.runModal("Evaluation hasn't finished yet.")
+            None
+        }else{
+            Some(id)
+        }
+    }
+
+    private def downloadResultAs(extension: String){
+        if (getAnalysisEvaluationID.isDefined){
+            window.open("/analysis/" + analysisId + "/evaluation/" + getAnalysisEvaluationID.get + "/download." + extension)
+        }
+    }
+
+    private def downloadResultAsRDF(){
+        downloadResultAs("xml")
+    }
+
+    private def downloadResultAsTTL(){
+        downloadResultAs("ttl")
     }
                                                                       /*
     def addClass(el: dom.Element, addedClass: String) = {

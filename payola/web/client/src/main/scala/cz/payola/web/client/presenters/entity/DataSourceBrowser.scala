@@ -29,9 +29,10 @@ class DataSourceBrowser(
         graphPresenter.initialize()
 
         // Register the event handlers.
-        view.goButton.mouseClicked += onGoButtonClicked _
         view.backButton.mouseClicked += onBackButtonClicked _
         view.nextButton.mouseClicked += onNextButtonClicked _
+        view.goButton.mouseClicked += onGoButtonClicked _
+        view.nodeUriInput.keyPressed += onNodeUriKeyPressed _
         graphPresenter.view.vertexBrowsing += onVertexBrowsing _
 
         view.render(viewElement)
@@ -74,6 +75,15 @@ class DataSourceBrowser(
         false
     }
 
+    private def onNodeUriKeyPressed(e: BrowserEventArgs[_]): Boolean = {
+        if (e.keyCode == 13) {
+            addToHistoryAndGo(view.nodeUriInput.value)
+            false
+        } else {
+            true
+        }
+    }
+
     private def addToHistoryAndGo(uri: String) {
         // Remove all next items from the history.
         while (historyPosition < history.length - 1) {
@@ -89,14 +99,13 @@ class DataSourceBrowser(
 
     private def updateView() {
         val uri = history(historyPosition)
-
-        blockPage("Fetching the node neighbourhood.")
+        view.nodeUriInput.value = uri
         view.nodeUriInput.setIsEnabled(false)
 
+        blockPage("Fetching the node neighbourhood.")
         DataSourceManager.getNeighbourhood(dataSourceId, uri) { graph =>
             graphPresenter.view.updateGraph(graph)
             updateNavigationView()
-            view.nodeUriInput.value = uri
 
             view.nodeUriInput.setIsEnabled(true)
             unblockPage()

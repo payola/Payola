@@ -7,7 +7,6 @@ import cz.payola.model.ModelException
 import cz.payola.domain.IDGenerator
 import cz.payola.domain.entities.User
 import cz.payola.domain.entities.analyses.evaluation.Success
-import scala.Some
 
 // TODO move the logic to the model.
 @remote
@@ -28,34 +27,52 @@ import scala.Some
         successCallback(evaluationId)
     }
 
-    @async def getAnalysisProgress(evaluationId: String, user: Option[User] = None)
-        (successCallback: (AnalysisProgress => Unit))(failCallback: (Throwable => Unit)) = {
-        val evaluationTuple = runningEvaluations.get(evaluationId).getOrElse {
+    private def getEvaluationTupleForID(id: String) = {
+        runningEvaluations.get(id).getOrElse {
             throw new ModelException("The evaluation is not running.")
         }
+    }
 
-        if (!evaluationTuple._1.isDefined || evaluationTuple._1.get.id == user.get.id) {
-
-            val evaluation = evaluationTuple._2
-            val progress = evaluation.getProgress
-
-            val evaluated = progress.evaluatedInstances.map(i => i.id)
-            val running = progress.runningInstances.map(m => m._1.id).toList
-            val errors = progress.errors.map(tuple => tuple._1.id).toList
-
-            if (evaluation.isFinished) {
-                runningEvaluations -= evaluationId
-            }
-
-            val graph = evaluation.getResult.flatMap {
-                case r: Success => Some(r.outputGraph)
-                case _ => None
-            }
-
-            successCallback(
-                new AnalysisProgress(evaluated, running, errors, progress.value, evaluation.isFinished, graph))
+    private def getEvaluationTupleForIDAndPerformSecurityChecks(id: String, user: Option[User]) = {
+        val evaluationTuple = getEvaluationTupleForID(id)
+        if (!evaluationTuple._1.isDefined || evaluationTuple._1 == user) {
+            evaluationTuple
         } else {
-            throw new ModelException("Frobidden evaluation.")
+            throw new ModelException("Forbidden evaluation.")
         }
+    }
+
+    @async def downloadAnalysisResultAsXML(evaluationId: String, user: Option[User] = None)
+        (successCallback: (() => Unit))(failCallback: (Throwable => Unit)) = {
+        val evaluationTuple = getEvaluationTupleForIDAndPerformSecurityChecks(evaluationId, user)
+
+        val evaluation = evaluationTuple._2
+        if (!evaluation.isFinished) {
+            failCallback(new ModelException("Evaluation isn't finished yet."))
+        } else {
+            successCallback()
+        }
+    }
+
+    @async def getAnalysisProgress(evaluationId: String, user: Option[User] = None)
+        (successCallback: (AnalysisProgress => Unit))(failCallback: (Throwable => Unit)) = {
+        val evaluationTuple = getEvaluationTupleForIDAndPerformSecurityChecks(evaluationId, user)
+
+        val evaluation = evaluationTuple._2
+        val progress = evaluation.getProgress
+
+        val evaluated = progress.evaluatedInstances.map(i => i.id)
+        val running = progress.runningInstances.map(m => m._1.id).toList
+        val errors = progress.errors.map(tuple => tuple._1.id).toList
+
+        //TODO timeout remove after some time
+
+        val graph = evaluation.getResult.flatMap {
+            case r: Success => Some(r.outputGraph)
+            case _ => None
+        }
+
+        successCallback(
+            new AnalysisProgress(evaluated, running, errors, progress.value, evaluation.isFinished, graph))
     }
 }

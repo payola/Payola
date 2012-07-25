@@ -3,8 +3,9 @@ package cz.payola.model
 import cz.payola.data._
 import cz.payola.domain.Entity
 import cz.payola.domain.entities._
-import cz.payola.model.components.GroupModelComponent
-import cz.payola.common.ValidationException
+import cz.payola.data.PaginationInfo
+import scala.Some
+import cz.payola.common.exception.ValidationException
 
 trait EntityModelComponent
 {

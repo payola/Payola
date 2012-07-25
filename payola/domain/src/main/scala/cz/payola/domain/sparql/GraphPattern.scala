@@ -1,6 +1,7 @@
 package cz.payola.domain.sparql
 
-import collection.immutable.Seq
+import scala.collection.immutable
+import cz.payola.common.rdf.Edge
 
 object GraphPattern
 {
@@ -11,12 +12,29 @@ object GraphPattern
     def empty: GraphPattern = {
         GraphPattern(Nil)
     }
+
+    def optionalProperties(subject: Subject): immutable.Seq[GraphPattern] = {
+        optionalProperties(subject, new VariableGenerator)
+    }
+
+    def optionalProperties(subject: Subject, variableGetter: () => Variable): immutable.Seq[GraphPattern] = {
+        (Edge.rdfTypeEdge :: Edge.rdfLabelEdges).map { e =>
+            GraphPattern(TriplePattern(subject, Uri(e), variableGetter()))
+        }
+    }
 }
 
-case class GraphPattern(triples: collection.Seq[TriplePattern], optionals: collection.Seq[GraphPattern] = Nil, filters: collection.Seq[Filter] = Nil)
+case class GraphPattern(
+    triples: immutable.Seq[TriplePattern],
+    optionals: immutable.Seq[GraphPattern] = Nil,
+    filters: immutable.Seq[Filter] = Nil)
 {
     def isEmpty: Boolean = {
         triples.isEmpty && optionals.forall(_.isEmpty) && filters.isEmpty
+    }
+
+    def triplePatterns: immutable.Seq[TriplePattern] = {
+        triples ++ optionals.flatMap(_.triplePatterns)
     }
 
     def +(pattern: GraphPattern): GraphPattern = {

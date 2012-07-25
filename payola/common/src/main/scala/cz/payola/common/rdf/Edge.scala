@@ -1,5 +1,15 @@
 package cz.payola.common.rdf
 
+object Edge
+{
+    val rdfTypeEdge = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+
+    val rdfLabelEdges = List(
+        "http://www.w3.org/2000/01/rdf-schema#label",
+        "http://purl.org/dc/terms/title"
+    )
+}
+
 /**
   * An edge between two vertices in a RDF graph. The origin must be an identified vertex.
   * @param origin Origin of the edge.

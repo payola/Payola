@@ -5,6 +5,7 @@ import cz.payola.domain.entities.Plugin
 import cz.payola.domain.entities.plugins._
 import cz.payola.domain.rdf.Graph
 import cz.payola.domain.sparql._
+import cz.payola.domain.entities.plugins.concrete.query.Construct
 
 /**
   * A plugin that is used to fetch RDF data using SPARQL queries, fetch neighbourhood of a particular node etc.
@@ -59,40 +60,28 @@ abstract class DataFetcher(name: String, inputCount: Int, parameters: immutable.
       * Returns neighbourhood of the specified vertex.
       * @param instance The corresponding instance.
       * @param vertexURI URI of the vertex whose neighbourhood should be returned.
-      * @param distance Maximal distance to travel from the vertex to its neighbours. To select only direct neighbours,
-      *                 use 1, to select direct neighbours and their neighbours, use 2 etc. Note that particular data
-      *                 fetchers may use some optimizations/heuristics so it's not guaranteed that this parameter will
-      *                 be always taken into account.
       * @return The neighbourhood graph.
       */
-    def getNeighbourhood(instance: PluginInstance, vertexURI: String, distance: Int = 1): Graph = {
-        require(distance > 0, "The distance has to be a positive number.")
+    def getNeighbourhood(instance: PluginInstance, vertexURI: String): Graph = {
         val uri = vertexURI.trim
 
         if (uri.nonEmpty) {
-            val subjectPattern = TriplePattern(Uri(vertexURI), Variable("op0"), Variable("o1"))
-            val objectPattern = TriplePattern(Variable("s1"), Variable("sp0"), Uri(vertexURI))
-            val queries = List(
-                ConstructQuery(List(subjectPattern)).toString,
-                ConstructQuery(List(objectPattern)).toString
+            val subjectVariable = Variable("s1")
+            val objectVariable = Variable("o1")
+            val patterns = List(
+                GraphPattern(
+                    List(TriplePattern(subjectVariable, Variable("sp0"), Uri(vertexURI))),
+                    GraphPattern.optionalProperties(subjectVariable)
+                ),
+                GraphPattern(
+                    List(TriplePattern(Uri(vertexURI), Variable("op0"), objectVariable)),
+                    GraphPattern.optionalProperties(objectVariable)
+                )
             )
 
-            queries.par.map(executeQuery(instance, _)).reduce(_ + _)
+            patterns.par.map(p => executeQuery(instance, ConstructQuery(p).toString)).reduce(_ + _)
         } else {
             Graph.empty
         }
-
-        /* TODO take the distance into account
-        val neighbourTriplePatterns = (1 to (distance - 1)).flatMap { i =>
-            List(
-                TriplePattern(Variable("o" + i), Variable("op" + i), Variable("o" + (i + 1))),
-                TriplePattern(Variable("s" + i), Variable("sp" + i), Variable("s" + (i + 1)))
-            )
-        }
-        val triplePatterns = rootTriplePatterns ++ neighbourTriplePatterns
-        val graphPattern = triplePatterns.foldRight(GraphPattern.empty)((t, g) => GraphPattern(List(t), List(g)))
-
-        executeQuery(instance, ConstructQuery(triplePatterns, Some(graphPattern)).toString)*/
-
     }
 }

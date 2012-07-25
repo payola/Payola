@@ -159,7 +159,7 @@ input[type="checkbox"].active:after {
 }
 
 .modal-inner-view {
-    height: 380px;
+    height: 250px;
     overflow: auto;
 }
 
@@ -167,24 +167,23 @@ input[type="checkbox"].active:after {
     background: #FFFEE2;
 }
 
-.wide-customization-modal {
+.ontology-customization-modal {
     width: 800px;
+    max-width: 1024px;
+}
+
+.ontology-customization-modal .share-button {
+    display: inline;
+}
+
+.inline-display {
+    display: inline;
 }
 
 .no-padding {
     padding: 0px;
     padding-left: 0px;
     padding-right: 0px;
-}
-
-.ontology-customization-item {
-    padding-right: 70px;
-}
-
-.ontology-customization-button {
-    right: 5px;
-    position: absolute;
-    padding-right: 5px;
 }
 
 .successors > .successors {

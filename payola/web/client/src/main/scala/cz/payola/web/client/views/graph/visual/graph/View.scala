@@ -2,7 +2,6 @@ package cz.payola.web.client.views.graph.visual.graph
 
 import s2js.adapters.js.browser._
 import s2js.adapters.js.dom._
-import cz.payola.web.client.views.todo._
 import s2js.adapters.js.dom.Element
 import cz.payola.web.client.views.graph.visual.Color
 import cz.payola.web.client.views.algebra._
@@ -129,18 +128,18 @@ trait View[A]
     }
 
     protected def drawArrow(context: CanvasRenderingContext2D, origin: Point2D, destination: Point2D,
-        offset: Double, lineWidth: Double, color: Color) {
+        offsetOrigin: Double, offsetDestination: Double, lineWidth: Double, color: Color) {
 
         var arrowPointingFrom: Option[Point2D] = None
         var arrowPointingTo: Option[Point2D] = None
 
-        if(origin.distance(destination) >= 2 * offset) {
+        if(origin.distance(destination) >= offsetDestination + offsetOrigin) {
 
-            arrowPointingFrom = getArrowOriginPoint(origin - destination, origin, offset)
-            arrowPointingTo = getArrowOriginPoint(destination - origin, destination, offset)
+            arrowPointingFrom = getArrowOriginPoint(origin - destination, origin, offsetOrigin)
+            arrowPointingTo = getArrowOriginPoint(destination - origin, destination, offsetDestination)
         } else {
-            arrowPointingFrom = getArrowOriginPoint(destination - origin, destination, offset)
-            arrowPointingTo = getArrowOriginPoint(origin - destination, origin, offset)
+            arrowPointingFrom = getArrowOriginPoint(destination - origin, destination, offsetOrigin)
+            arrowPointingTo = getArrowOriginPoint(origin - destination, origin, offsetDestination)
         }
 
         if(arrowPointingTo.isDefined && arrowPointingFrom.isDefined) {
@@ -155,8 +154,8 @@ trait View[A]
     protected def drawArrowEnd(context: CanvasRenderingContext2D, direction: Vector2D, destination: Point2D,
         lineWidth: Double, color: Color) {
 
-        val arrowLength = 10.0
-        val arrowWidth = 8.0
+        val arrowLength = lineWidth*4
+        val arrowWidth = lineWidth*4
 
         val originPoint = getArrowOriginPoint(direction, destination, arrowLength)
 

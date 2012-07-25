@@ -29,9 +29,9 @@ abstract class Element extends Node
 
     def getAttributeNodeNS(ns: String, name: String): Attribute
 
-    def getElementsByTagName(name: String): NodeList
+    def getElementsByTagName(name: String): NodeList[Element]
 
-    def getElementsByTagNameNS(ns: String, name: String): NodeList
+    def getElementsByTagNameNS(ns: String, name: String): NodeList[Element]
 
     def hasAttribute(name: String): Boolean
 

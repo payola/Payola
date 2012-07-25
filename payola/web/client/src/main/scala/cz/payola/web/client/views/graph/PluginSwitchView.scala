@@ -22,8 +22,6 @@ class PluginSwitchView extends GraphView with ComposedView
 
     val ontologyCustomizationEditClicked = new SimpleUnitEvent[OntologyCustomization]
 
-    val ontologyCustomizationDeleteClicked = new SimpleUnitEvent[OntologyCustomization]
-
     // TODO
     private val visualSetup = new VisualSetup(new VertexSettingsModel, new EdgeSettingsModel, new TextSettingsModel)
 
@@ -48,17 +46,22 @@ class PluginSwitchView extends GraphView with ComposedView
         new ListItem(List(pluginAnchor))
     }
 
-    val ontologyCustomizationsButton = new DropDownButton(List(new Text("Change appearance using ontologies")), Nil)
-
-    val ontologyCustomizationCreateButton = new Anchor(List(new Icon(Icon.plus), new Text("Create new settings")))
-
-    val toolbar = new Div(List(
-        new DropDownButton(List(new Icon(Icon.cog), new Text("Change visualisation plugin")), pluginListItems),
-        ontologyCustomizationsButton),
-        "btn-toolbar"
+    val pluginChangeButton = new DropDownButton(List(
+        new Icon(Icon.eye_open),
+        new Text("Change visualisation plugin")),
+        pluginListItems
     )
 
-    toolbar.setAttribute("style", "margin-bottom: 15px;")
+    val ontologyCustomizationsButton = new DropDownButton(List(
+        new Icon(Icon.wrench),
+        new Text("Change appearance using ontologies")),
+        Nil
+    )
+
+    val ontologyCustomizationCreateButton = new Anchor(List(new Icon(Icon.plus), new Text("Create new customization")))
+
+    val toolbar = new Div(List(pluginChangeButton, ontologyCustomizationsButton), "btn-toolbar").setAttribute(
+        "style", "margin-bottom: 15px;")
 
     // Re-trigger all events when the corresponding events are triggered in the plugins.
     plugins.foreach { plugin =>
@@ -89,24 +92,11 @@ class PluginSwitchView extends GraphView with ComposedView
     }
 
     def updateOntologyCustomizations(customizations: OntologyCustomizationsByOwnership) {
-        // The owned customizations that are deletable and editable.
-        val owned = customizations.ownedCustomizations.getOrElse(Nil).map { c =>
-            val editButton = new Button(new Text(" Edit"), "btn-mini", new Icon(Icon.pencil))
-            val deleteButton = new Button(new Text(" Delete"), "btn-mini btn-danger",
-                new Icon(Icon.remove_sign))
-            editButton.mouseClicked += { e =>
-                ontologyCustomizationEditClicked.triggerDirectly(c)
-                false
-            }
-            deleteButton.mouseClicked += { e =>
-                ontologyCustomizationDeleteClicked.triggerDirectly(c)
-                false
-            }
-            createCustomizationListItem(c, List(editButton, deleteButton))
-        }
+        // The owned customizations that are editable.
+        val owned = customizations.ownedCustomizations.getOrElse(Nil).map(createCustomizationListItem(_, true))
 
         // The customizations of other users.
-        val others = customizations.othersCustomizations.map(createCustomizationListItem(_))
+        val others = customizations.othersCustomizations.map(createCustomizationListItem(_, false))
 
         // A separator between owned and others customizations.
         val separator1 = if (owned.nonEmpty && others.nonEmpty) List(new ListItem(Nil, "divider")) else Nil
@@ -130,15 +120,20 @@ class PluginSwitchView extends GraphView with ComposedView
         ontologyCustomizationsButton.setItems(items)
     }
 
-    private def createCustomizationListItem(customization: OntologyCustomization,
-        additionalSubViews: Seq[View] = Nil): ListItem = {
+    private def createCustomizationListItem(customization: OntologyCustomization, isEditable: Boolean): ListItem = {
+        val editButton = new Button(new Text("Edit"), "btn-mini", new Icon(Icon.pencil)).setAttribute(
+            "style", "position: absolute; right: 5px;")
+        editButton.mouseClicked += { e =>
+            ontologyCustomizationEditClicked.triggerDirectly(customization)
+            false
+        }
 
-        val anchor = new Anchor(List(new Text(customization.name)))
+        val anchor = new Anchor(List(new Text(customization.name)) ++ (if (isEditable) List(editButton) else Nil))
         anchor.mouseClicked += { e =>
             ontologyCustomizationSelected.triggerDirectly(customization)
             false
         }
-        new ListItem(List(anchor) ++ additionalSubViews)
+        new ListItem(List(anchor))
     }
 
     private def changePlugin(plugin: PluginView) {

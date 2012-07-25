@@ -18,14 +18,13 @@ import cz.payola.web.client.views._
 import s2js.adapters.js.browser.document
 import cz.payola.web.client.views.bootstrap.Icon
 import s2js.adapters.js.dom.CanvasContext
+import cz.payola.common.entities.settings.OntologyCustomization
 
 /**
   * Representation of visual based output drawing plugin
   */
 abstract class VisualPluginView(settings: VisualSetup, name: String) extends PluginView(name)
 {
-    private var hoveringOverVertex: Option[VertexView] = None
-
     protected var mouseIsPressed = false
 
     private var mousePressedVertex = false
@@ -34,8 +33,6 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
 
     private var mouseDownPosition = Point2D(0, 0)
 
-    var zoomTool: Option[ZoomControls] = None
-
     val mouseDragged = new BrowserEvent[Canvas]
 
     var graphView: Option[views.graph.visual.graph.GraphView] = None
@@ -43,8 +40,6 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
     protected val topLayer = new Canvas()
 
     private val layerPack = new CanvasPack(new Canvas(), new Canvas(), new Canvas(), new Canvas())
-
-    def createSubViews = layers
 
     private var topLayerOffset = Vector2D(0, 0)
 
@@ -58,22 +53,8 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
 
     private val zoomControls = new ZoomControls(100)
 
-    private val png = new Button(new Text("Download as PNG"), "pull-right", new Icon(Icon.download))
-
-    png.mouseClicked += { e =>
-        val c = new Canvas()
-        c.domElement.width = topLayer.domElement.width
-        c.domElement.height = topLayer.domElement.height
-
-        c.domElement.getContext[CanvasContext]("2d").drawImage(layerPack.edgesDeselected.domElement,0,0)
-        c.domElement.getContext[CanvasContext]("2d").drawImage(layerPack.edgesSelected.domElement,0,0)
-        c.domElement.getContext[CanvasContext]("2d").drawImage(layerPack.verticesDeselected.domElement,0,0)
-        c.domElement.getContext[CanvasContext]("2d").drawImage(layerPack.verticesSelected.domElement,0,0)
-        c.domElement.getContext[CanvasContext]("2d").drawImage(topLayer.domElement,0,0)
-
-        window.open(c.domElement.toDataURL("image/png"))
-        false
-    }
+    private val pngDownloadButton = new Button(new Text("Download as PNG"), "pull-right",
+        new Icon(Icon.download)).setAttribute("style", "margin: 0 5px;")
 
     window.onresize = { e =>
         fitCanvas()
@@ -98,8 +79,6 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
     topLayer.mouseMoved += { e =>
         if (mouseIsPressed) {
             mouseDragged.trigger(e)
-        } else {
-            onMouseMove(e)
         }
         true
     }
@@ -155,6 +134,22 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
         false
     }
 
+    pngDownloadButton.mouseClicked += { e =>
+        val c = new Canvas()
+        c.domElement.width = topLayer.domElement.width
+        c.domElement.height = topLayer.domElement.height
+
+        c.domElement.getContext[CanvasContext]("2d").drawImage(layerPack.edgesDeselected.domElement,0,0)
+        c.domElement.getContext[CanvasContext]("2d").drawImage(layerPack.edgesSelected.domElement,0,0)
+        c.domElement.getContext[CanvasContext]("2d").drawImage(layerPack.verticesDeselected.domElement,0,0)
+        c.domElement.getContext[CanvasContext]("2d").drawImage(layerPack.verticesSelected.domElement,0,0)
+        c.domElement.getContext[CanvasContext]("2d").drawImage(topLayer.domElement,0,0)
+
+        window.open(c.domElement.toDataURL("image/png"))
+        false
+    }
+
+
     //on mouse wheel event work-around###################################################################################
 
     @javascript(
@@ -166,35 +161,27 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
         """)
     private def setMouseWheelListener() {}
 
-    private var hoverExit = new SimpleUnitEvent[Boolean]
+    private var destroyVertexInfo: Option[SimpleUnitEvent[Boolean]] = None
+
+    override def updateOntologyCustomization(newCustomization: Option[OntologyCustomization]) {
+        currentCustomization = newCustomization
+
+        if(graphView.isDefined) {
+            graphView.get.setVisualSetup(newCustomization)
+        }
+
+        settings.setOntologyCustomization(newCustomization)
+
+        redraw()
+    }
+
+    def createSubViews = layers
 
     override def render(parent: dom.Element) {
         super.render(parent)
 
         setMouseWheelListener()
         fitCanvas()
-
-        val zoomToolHolder = new Div().domElement
-
-        graphView = Some(new views.graph.visual.graph.GraphView(settings))
-        zoomTool = Some(new ZoomControls(100))
-        zoomTool.get.render(zoomToolHolder) // TODO
-
-        zoomTool.get.zoomDecreased += { event => //zoom - invoked by zoom control button
-            if (graphView.isDefined && zoomTool.get.canZoomOut) {
-                zoomOut(graphView.get.getGraphCenter) //zooming from the center of the graph
-                zoomTool.get.decreaseZoomInfo()
-            }
-            false
-        }
-
-        zoomTool.get.zoomIncreased += { event => //zoom - invoked by zoom control button
-            if (graphView.isDefined && zoomTool.get.canZoomIn) {
-                zoomIn(graphView.get.getGraphCenter) //zooming to the center of the graph
-                zoomTool.get.increaseZoomInfo()
-            }
-            false
-        }
     }
 
     override def updateGraph(graph: Option[Graph]) {
@@ -231,12 +218,12 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
 
     override def renderControls(toolbar: dom.Element) {
         zoomControls.render(toolbar)
-        png.render(toolbar)
+        pngDownloadButton.render(toolbar)
     }
 
     override def destroyControls() {
         zoomControls.destroy()
-        png.destroy()
+        pngDownloadButton.destroy()
     }
 
     protected def redrawQuick() {
@@ -273,7 +260,6 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
       */
     private def onMouseDown(eventArgs: BrowserEventArgs[Canvas]) {
         val position = getPosition(eventArgs)
-        var resultedAnimation: Option[Animation[ListBuffer[InformationView]]] = None
         val vertex = graphView.get.getTouchedVertex(position)
 
         if (vertex.isDefined) {
@@ -281,43 +267,44 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
             if (eventArgs.shiftKey) {
                 //change selection of the pressed one
                 graphView.get.invertVertexSelection(vertex.get)
-                if (vertex.get.selected) {
-                    val toAnimate = ListBuffer[InformationView]()
-                    if (vertex.get.information.isDefined) {
-                        toAnimate += vertex.get.information.get
-                    }
-                    toAnimate ++= getEdgesInformations(vertex.get)
-                    resultedAnimation = Some(new Animation(Animation.showText, toAnimate, None,
-                        redrawSelection, redrawSelection, None))
-                } else {
-                    redrawSelection()
+
+                if(destroyVertexInfo.isDefined) {
+                    destroyVertexInfo.get.triggerDirectly(true)
+                    destroyVertexInfo = None
                 }
+
+                redrawSelection()
             } else {
+                if(destroyVertexInfo.isDefined) {
+                    destroyVertexInfo.get.triggerDirectly(true)
+                    destroyVertexInfo = None
+                }
+
                 //deselect all and select the pressed one
                 if (!vertex.get.selected) {
                     graphView.get.deselectAll()
                 }
-                if (graphView.get.selectVertex(vertex.get)) {
-                    val toAnimate = ListBuffer[InformationView]()
-                    if (vertex.get.information.isDefined) {
-                        toAnimate += vertex.get.information.get
-                    }
-                    toAnimate ++= getEdgesInformations(vertex.get)
-                    resultedAnimation = Some(new Animation(Animation.showText, toAnimate, None,
-                        redrawSelection, redrawSelection, None))
-                } else {
-                    redrawSelection()
+                graphView.get.invertVertexSelection(vertex.get)
+
+                if(vertex.get.selected) {
+                    val infoTable = new VertexInfoTable(vertex.get.getLiteralVertices)
+                    infoTable.render(document.body)
+                    destroyVertexInfo = Some(new SimpleUnitEvent[Boolean])
+                    destroyVertexInfo.get += { event => infoTable.destroy() }
+
+                    vertexSelected.trigger(new VertexEventArgs[this.type](this, vertex.get.vertexModel))
                 }
+
+
+                redrawSelection()
             }
             mousePressedVertex = true
-            vertexSelected.trigger(new VertexEventArgs[this.type](this, vertex.get.vertexModel))
         } else {
             mousePressedVertex = false
-        }
-
-
-        if (resultedAnimation.isDefined) {
-            resultedAnimation.get.run()
+            if(destroyVertexInfo.isDefined) {
+                destroyVertexInfo.get.triggerDirectly(true)
+                destroyVertexInfo = None
+            }
         }
     }
 
@@ -371,24 +358,27 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
     /**
       * Is supposed to be called only when mouse is not being dragged (no mouse button is pressed during mouse movement)
       */
-    private def onMouseMove(eventArgs: BrowserEventArgs[Canvas]) {
+    /*private def onMouseMove(eventArgs: BrowserEventArgs[Canvas]) {
         val position = getPosition(eventArgs)
         val vertex = graphView.get.getTouchedVertex(position)
 
         if(vertex.isDefined) {
             if(hoveringOverVertex.isEmpty || (!hoveringOverVertex.get.eq(vertex.get))) {
+                if(hoveringOverVertex.isDefined && !hoveringOverVertex.get.eq(vertex.get)) {
+                    destroyVertexInfo.triggerDirectly(true)
+                }
                 hoveringOverVertex = vertex
                 val infoTable = new VertexInfoTable(hoveringOverVertex.get.getLiteralVertices)
                 infoTable.render(document.body)
-                hoverExit = new SimpleUnitEvent[Boolean]
-                hoverExit += { event => infoTable.destroy() }
+                destroyVertexInfo = new SimpleUnitEvent[Boolean]
+                destroyVertexInfo += { event => infoTable.destroy() }
             }
         } else if(hoveringOverVertex.isDefined) {
-            hoverExit.triggerDirectly(true)
+            destroyVertexInfo.triggerDirectly(true)
             hoveringOverVertex = None
         }
 
-    }
+    }*/
 
     private def zoomIn(mousePosition: Point2D) {
         alterVertexPositions(1 + zoomControls.zoomStep, (- mousePosition.toVector) * zoomControls.zoomStep)
@@ -417,12 +407,14 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
 
     @javascript("""
         var offsetTop = 0;
+        var offsetLeft = 0;
         var element = self.topLayer.domElement;
         while (element != null) {
             offsetTop += element.offsetTop;
+            offsetLeft += element.offsetLeft;
             element = element.offsetParent;
         }
-        return new cz.payola.web.client.views.algebra.Vector2D(0, offsetTop);
-    """)
+        return new cz.payola.web.client.views.algebra.Vector2D(offsetLeft, offsetTop);
+                """)
     private def calculateTopLayerOffset: Vector2D = Vector2D(0, 0)
 }

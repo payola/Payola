@@ -4,6 +4,9 @@ import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import cz.payola.domain.entities.Plugin
 import cz.payola.domain.entities.plugins.parameters.StringParameter
+import cz.payola.common.exception._
+import cz.payola.common.ValidationException
+import cz.payola.common.exception.ValidationException
 
 class PluginTest extends FlatSpec with ShouldMatchers {
 
@@ -14,12 +17,11 @@ class PluginTest extends FlatSpec with ShouldMatchers {
         p.getParameter("Helo").isDefined should be (false)
         p.getParameter("Hello").isDefined should be (false)
 
-        evaluating(p.name_=(null)) should produce[IllegalArgumentException]
-        evaluating(p.name_=("")) should produce[IllegalArgumentException]
+        evaluating(p.name_=(null)) should produce[ValidationException]
+        evaluating(p.name_=("")) should produce[ValidationException]
 
         p.name_=("NewName")
         p.name should be ("NewName")
     }
-
 }
 

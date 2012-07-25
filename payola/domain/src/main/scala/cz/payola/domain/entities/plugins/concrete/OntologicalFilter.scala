@@ -23,7 +23,7 @@ class OntologicalFilter(name: String, inputCount: Int, parameters: immutable.Seq
     extends SparqlQuery(name, inputCount, parameters, id)
 {
     def this() = {
-        this("Ontological Filter", 1, List(new StringParameter("OntologyURLs", "")), IDGenerator.newId)
+        this("Ontological Filter", 1, List(new StringParameter("OntologyURLs", "", false)), IDGenerator.newId)
         isPublic = true
     }
 
@@ -44,7 +44,7 @@ class OntologicalFilter(name: String, inputCount: Int, parameters: immutable.Seq
             val variable = new Variable("x" + xCounter)
             xCounter = xCounter + 1
 
-            val classTP = new TriplePattern(variable, Uri.getTypePropertyURI, new Uri(cl.uri))
+            val classTP = new TriplePattern(variable, Uri(Edge.rdfTypeEdge), new Uri(cl.uri))
             template += classTP
             classPatterns += classTP
 
@@ -58,8 +58,8 @@ class OntologicalFilter(name: String, inputCount: Int, parameters: immutable.Seq
             }
         }
 
-        val patternGP = new GraphPattern(classPatterns, variablePatterns)
-        val query = new ConstructQuery(template, Some(patternGP))
+        val patternGP = new GraphPattern(classPatterns.toList, variablePatterns.toList)
+        val query = new ConstructQuery(template.toList, Some(patternGP))
         query
     }
 

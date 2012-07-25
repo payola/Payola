@@ -1,10 +1,11 @@
 package cz.payola.web.client.presenters.components
 
 import cz.payola.web.client.views.elements._
-import cz.payola.web.client.events.UnitEvent
 import cz.payola.web.client.views.elements.Div
 import cz.payola.web.client.views.elements.Anchor
 import cz.payola.web.client.views.ComposedView
+import cz.payola.web.client.presenters.notification.Notification
+import cz.payola.web.client.views.bootstrap.modals.AlertModal
 
 class AnalysisControls extends ComposedView
 {

@@ -67,6 +67,17 @@ object Model
         }(errorCallback)
     }
 
+    def changeOntologyCustomizationName(customization: OntologyCustomization, newName: String)
+        (successCallback: () => Unit)
+        (errorCallback: Throwable => Unit) {
+
+        OntologyCustomizationManager.rename(customization.id, newName) { () =>
+            customization.name = newName
+            ontologyCustomizationsChanged.triggerDirectly(this)
+            successCallback()
+        } (errorCallback)
+    }
+
     def createOntologyCustomization(name: String, ontologyURL: String)
         (successCallback: OntologyCustomization => Unit)
         (errorCallback: Throwable => Unit) {
@@ -80,6 +91,21 @@ object Model
                 }(errorCallback)
             }
         }(errorCallback)
+    }
+
+    def deleteOntologyCustomization(ontologyCustomization: OntologyCustomization)
+        (successCallback: () => Unit)
+        (errorCallback: Throwable => Unit) {
+
+        OntologyCustomizationManager.delete(ontologyCustomization.id) { () =>
+            _ownedOntologyCustomizations.foreach { ownedCustomizations =>
+                ownedCustomizations -= ontologyCustomization
+            }
+
+            ontologyCustomizationsChanged.triggerDirectly(this)
+            successCallback()
+        } (errorCallback)
+
     }
 
     private def fetchOntologyCustomizations(successCallback: () => Unit)(errorCallback: Throwable => Unit) {

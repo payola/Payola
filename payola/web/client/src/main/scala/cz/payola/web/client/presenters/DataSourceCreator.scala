@@ -1,6 +1,6 @@
 package cz.payola.web.client.presenters
 
-import cz.payola.web.client.View
+import cz.payola.web.client._
 import s2js.adapters.js.browser._
 import cz.payola.web.shared.managers.DataSourceManager
 import cz.payola.web.client.views.elements._
@@ -11,13 +11,14 @@ import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
 import s2js.compiler.javascript
 import s2js.adapters.js.dom.Element
 import cz.payola.web.client.models.Model
+import cz.payola.web.client.views.bootstrap.modals.AlertModal
 
 class DataSourceCreator(val dataFetcherDivID: String,
     val optionsDivID: String,
     val submitButtonDivID: String,
     val nameFieldDivID: String,
     val descriptionFieldDivID: String,
-    val listingURL: String) extends View
+    val listingURL: String) extends Presenter
 {
 
     // Define internal <select> ID
@@ -90,6 +91,10 @@ class DataSourceCreator(val dataFetcherDivID: String,
         window.location.href = listingURL
     }
 
+    def initialize() {
+
+    }
+
     /** Lists all options for the selected plugin.
       *
       */
@@ -121,11 +126,11 @@ class DataSourceCreator(val dataFetcherDivID: String,
     private def validateInputFields: Boolean = {
         var result = false
         if (nameField.input.value == "") {
-            window.alert("Data source name may not be empty!")
+            AlertModal.runModal("Data source name may not be empty!")
         }else if (DataSourceManager.dataSourceExistsWithName(nameField.input.value)) {
-            window.alert("Data source with this name already exists!")
+            AlertModal.runModal("Data source with this name already exists!")
         }else if (descriptionField.input.value == ""){
-            window.alert("Data source description musn't be empty!")
+            AlertModal.runModal("Data source description musn't be empty!")
         }else{
             result = true
         }
