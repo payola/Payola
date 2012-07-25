@@ -56,7 +56,7 @@ class OntologyCustomizationEditModal(customization: OntologyCustomization)
     val deleteButton = new Button(new Text(" Delete"), "btn-danger", new Icon(Icon.remove))
     deleteButton.setAttribute("style", "width: 82px;")
 
-    val buttonSpan = new Span(List(new Div(List(shareButton), "top-ontology-customization-editor-button"), shareButtonDiv, "span5")
+    val buttonSpan = new Span(List(shareButtonDiv, new Div(List(deleteButton))), "span5")
     buttonSpan.setAttribute("style", "text-align: right;")
     buttonSpan.render(customizationNameRowDiv.domElement)
 
