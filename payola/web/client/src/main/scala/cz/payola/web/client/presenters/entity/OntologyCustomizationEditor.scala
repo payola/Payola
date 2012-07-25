@@ -7,13 +7,18 @@ import cz.payola.web.shared.managers.OntologyCustomizationManager
 import cz.payola.common.ValidationException
 import cz.payola.web.client.Presenter
 import cz.payola.web.client.views.bootstrap.InputControl
+import cz.payola.web.client.views.bootstrap.modals._
+import cz.payola.web.client.models.Model
+import s2js.runtime.shared.rpc.RpcException
 
 class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) extends Presenter
 {
     // This will notify of any value being changed
     val customizationValueChanged: SimpleUnitEvent[this.type] = new SimpleUnitEvent[this.type]
 
-    val modal = new OntologyCustomizationEditModal(ontologyCustomization)
+    val view = new OntologyCustomizationEditModal(ontologyCustomization)
+
+    val shareButtonPresenter = new ShareButtonPresenter(view.shareButtonDiv, )
 
     /** Failure handler for property saving.
       *
@@ -28,7 +33,7 @@ class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) 
                 // TODO reset the value
             }
             case _ => {
-                modal.destroy()
+                view.destroy()
                 fatalErrorHandler(t)
             }
         }
@@ -45,7 +50,7 @@ class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) 
             postValueChangeNotification()
         } { t: Throwable =>
             classValueSetterFailHandler(t, {
-                modal.getFillColorInputForSelectedClass
+                view.getFillColorInputForSelectedClass
             }, "fillColor")
         }
     }
@@ -61,7 +66,7 @@ class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) 
             postValueChangeNotification()
         } { t: Throwable =>
             classValueSetterFailHandler(t, {
-                modal.getGlyphInputForSelectedClass
+                view.getGlyphInputForSelectedClass
             }, "glyph")
         }
     }
@@ -77,9 +82,30 @@ class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) 
             postValueChangeNotification()
         } { t: Throwable =>
             classValueSetterFailHandler(t, {
-                modal.getRadiusInputForSelectedClass
+                view.getRadiusInputForSelectedClass
             }, "radius")
         }
+    }
+
+    private def deleteCustomizationHandler(e: EventArgs[_]) = {
+        val promptModal = new ConfirmModal("Do you really want to delete this customization?", "This action cannot be undone.", "Delete", "Cancel", true, "alert-error")
+        promptModal.confirming += { e =>
+            Model.deleteOntologyCustomization(ontologyCustomization) { () =>
+                view.destroy()
+                AlertModal.runModal("Ontology customization successfully deleted.", "Success!", "alert-success")
+            }{ error =>
+                error match {
+                    case exc: RpcException => AlertModal.runModal(exc.message, "Error removing ontology customization.", "alert-error")
+                    case _ => {
+                        view.destroy()
+                        fatalErrorHandler(error)
+                    }
+                }
+            }
+            true
+        }
+        promptModal.render()
+        true
     }
 
     /** Handler for property stroke color change.
@@ -95,7 +121,7 @@ class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) 
             postValueChangeNotification()
         } { t: Throwable =>
             classValueSetterFailHandler(t, {
-                modal.getStrokeColorInputForPropertyOfSelectedClass(args.propertyURI)
+                view.getStrokeColorInputForPropertyOfSelectedClass(args.propertyURI)
             }, "strokeColor")
         }
     }
@@ -113,7 +139,7 @@ class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) 
             postValueChangeNotification()
         } { t: Throwable =>
             classValueSetterFailHandler(t, {
-                modal.getStrokeWidthInputForPropertyOfSelectedClass(args.propertyURI)
+                view.getStrokeWidthInputForPropertyOfSelectedClass(args.propertyURI)
             }, "strokeWidth")
         }
     }
@@ -142,14 +168,16 @@ class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) 
       *
       */
     def initialize() {
-        modal.classFillColorChanged += classFillColorChangedHandler _
-        modal.classRadiusChanged += classRadiusChangedHandler _
-        modal.classGlyphChanged += classGlyphChangedHandler _
+        view.classFillColorChanged += classFillColorChangedHandler _
+        view.classRadiusChanged += classRadiusChangedHandler _
+        view.classGlyphChanged += classGlyphChangedHandler _
 
-        modal.classPropertyStrokeColorChanged += propertyStrokeColorChangedHandler _
-        modal.classPropertyStrokeWidthChanged += propertyStrokeWidthChangedHandler _
+        view.classPropertyStrokeColorChanged += propertyStrokeColorChangedHandler _
+        view.classPropertyStrokeWidthChanged += propertyStrokeWidthChangedHandler _
 
-        modal.render()
+        view.deleteButton.mouseClicked += deleteCustomizationHandler _
+
+        view.render()
     }
 
     /** Triggers the customization value changed event.

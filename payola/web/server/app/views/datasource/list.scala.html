@@ -48,8 +48,10 @@
     routes.DataSource.create(),
     page)
 
-<script language="javascript" type="text/javascript" src="/javaScriptPackage/cz.payola.web.client.presenters.Sharing"></script>
+<script language="javascript" type="text/javascript" src="/javaScriptPackage/cz.payola.web.client.presenters.entity.SharingPresenter"></script>
 <script type="text/javascript">
-    new cz.payola.web.client.presenters.Sharing("share-button-placeholder", "data_source");
+    new cz.payola.web.client.presenters.entity.SharingPresenter(
+        document.getElementsByClassName("share-button-placeholder"),
+        "data_source"
+    ).initialize();
 </script>
-

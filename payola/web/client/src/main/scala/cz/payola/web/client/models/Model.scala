@@ -82,6 +82,21 @@ object Model
         }(errorCallback)
     }
 
+    def deleteOntologyCustomization(ontologyCustomization: OntologyCustomization)
+        (successCallback: () => Unit)
+        (errorCallback: Throwable => Unit) {
+
+        OntologyCustomizationManager.delete(ontologyCustomization.id) { () =>
+            _ownedOntologyCustomizations.foreach { ownedCustomizations =>
+                ownedCustomizations -= ontologyCustomization
+            }
+
+            ontologyCustomizationsChanged.triggerDirectly(this)
+            successCallback()
+        } (errorCallback)
+
+    }
+
     private def fetchOntologyCustomizations(successCallback: () => Unit)(errorCallback: Throwable => Unit) {
         if (!_ontologyCustomizationsAreLoaded) {
             OntologyCustomizationManager.getByOwnership() { customizationsByOwnership =>

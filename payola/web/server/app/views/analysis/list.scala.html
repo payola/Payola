@@ -47,7 +47,10 @@ val analysis = e.asInstanceOf[cz.payola.domain.entities.Analysis]
 },
 routes.Analysis.create(), page)
 
-<script language="javascript" type="text/javascript" src="/javaScriptPackage/cz.payola.web.client.presenters.Sharing"></script>
+<script language="javascript" type="text/javascript" src="/javaScriptPackage/cz.payola.web.client.presenters.entity.SharingPresenter"></script>
 <script type="text/javascript">
-    new cz.payola.web.client.presenters.Sharing("share-button-placeholder", "analysis");
+    new cz.payola.web.client.presenters.entity.SharingPresenter(
+        document.getElementsByClassName("share-button-placeholder"),
+        "analysis"
+    ).initialize();
 </script>

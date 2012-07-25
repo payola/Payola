@@ -4,7 +4,7 @@ import cz.payola.web.client.views.ComposedView
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap._
 
-class ShareButton(val entityId: String, private var _isPublic: Boolean) extends ComposedView
+class ShareButton(private var _isPublic: Boolean) extends ComposedView
 {
     val shareToGroupButton = new Anchor(List(new Icon(Icon.group), new Text(" To group")))
 
@@ -49,13 +49,13 @@ class ShareButton(val entityId: String, private var _isPublic: Boolean) extends 
         }
     }
 
-    def setActive(isActive: Boolean = true) {
-        if (isActive) {
-            dropDownButton.toggleAnchor.addCssClass("disabled")
-            dropDownButton.anchor.addCssClass("disabled")
-        } else {
+    def setIsEnabled(isEnabled: Boolean = true) {
+        if (isEnabled) {
             dropDownButton.toggleAnchor.removeCssClass("disabled")
             dropDownButton.anchor.removeCssClass("disabled")
+        } else {
+            dropDownButton.toggleAnchor.addCssClass("disabled")
+            dropDownButton.anchor.addCssClass("disabled")
         }
     }
 }

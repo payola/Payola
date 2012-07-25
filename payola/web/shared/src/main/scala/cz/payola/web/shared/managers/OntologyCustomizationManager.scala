@@ -7,6 +7,7 @@ import cz.payola.web.shared.Payola
 import s2js.runtime.shared.rpc.RpcException
 import scala.Some
 import cz.payola.common.ValidationException
+import cz.payola.model.ModelException
 
 /**
   * A set of ontology customizations divided by their ownership.
@@ -37,6 +38,24 @@ class OntologyCustomizationsByOwnership(
         (failCallback: Throwable => Unit) {
 
         successCallback(Payola.model.ontologyCustomizationModel.create(name, ontologyURL, owner))
+    }
+
+    @async def delete(customizationID: String, owner: User = null)
+        (successCallback: () => Unit)
+        (failCallback: Throwable => Unit)
+    {
+        val customOpt = Payola.model.ontologyCustomizationModel.getById(customizationID)
+        if (customOpt.isDefined) {
+            val customization = customOpt.get
+            if (customization.owner.isDefined && customization.owner.get == owner) {
+                Payola.model.ontologyCustomizationModel.remove(customization)
+                successCallback()
+            }else{
+                failCallback(new ModelException("Logged in user isn't owner of this customization."))
+            }
+        }else{
+            failCallback(new ModelException("The customization couldn't be found."))
+        }
     }
 
     private def getClassCustomizationFromCustomization(customizationID: String, classURI: String, user: User, failCallback: Throwable => Unit): Option[ClassCustomization] = {
