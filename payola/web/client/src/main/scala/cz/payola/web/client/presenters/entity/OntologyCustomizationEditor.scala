@@ -4,7 +4,7 @@ import cz.payola.common.entities.settings._
 import cz.payola.web.client.views.entity.OntologyCustomizationEditModal
 import cz.payola.web.client.events._
 import cz.payola.web.shared.managers.OntologyCustomizationManager
-import cz.payola.common.ValidationException
+import cz.payola.common.exception.ValidationException
 import cz.payola.web.client.Presenter
 import cz.payola.web.client.views.bootstrap.InputControl
 import cz.payola.web.client.views.bootstrap.modals._

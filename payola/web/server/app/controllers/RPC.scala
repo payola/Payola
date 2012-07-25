@@ -5,7 +5,7 @@ import play.api.mvc._
 import cz.payola.domain.entities.User
 import play.api.mvc.AnyContentAsFormUrlEncoded
 import s2js.runtime.shared.rpc.RpcException
-import cz.payola.common.ValidationException
+import cz.payola.common.exception.ValidationException
 import java.lang.reflect.InvocationTargetException
 
 /**

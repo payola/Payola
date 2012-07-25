@@ -2,8 +2,8 @@ package cz.payola.web.client
 
 import s2js.adapters.js.browser.window
 import s2js.runtime.shared.rpc.RpcException
-import cz.payola.common.PayolaException
 import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
+import cz.payola.common.exception.PayolaException
 
 trait Presenter
 {

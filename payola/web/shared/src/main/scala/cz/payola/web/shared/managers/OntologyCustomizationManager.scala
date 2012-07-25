@@ -6,7 +6,6 @@ import cz.payola.domain.entities.settings._
 import cz.payola.web.shared.Payola
 import s2js.runtime.shared.rpc.RpcException
 import scala.Some
-import cz.payola.common.ValidationException
 import cz.payola.model.ModelException
 
 /**

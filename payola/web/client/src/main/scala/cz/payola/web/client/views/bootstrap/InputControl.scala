@@ -2,8 +2,8 @@ package cz.payola.web.client.views.bootstrap
 
 import cz.payola.web.client.views._
 import cz.payola.web.client.views.elements._
-import cz.payola.common.ValidationException
 import s2js.adapters.js.dom
+import cz.payola.common.exception.ValidationException
 
 abstract class InputControl(val label: String, val name: String, value: String, title: String, cssClass: String = "") extends ComposedView
 {
