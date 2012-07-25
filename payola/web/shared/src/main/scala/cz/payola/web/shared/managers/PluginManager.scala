@@ -4,6 +4,7 @@ import s2js.compiler._
 import cz.payola.web.shared.Payola
 import cz.payola.domain.entities._
 import cz.payola.domain.entities.plugins.concrete.DataFetcher
+import s2js.runtime.shared.rpc.RpcException
 
 @remote @secured object PluginManager
     extends ShareableEntityManager[Plugin, cz.payola.common.entities.Plugin](Payola.model.pluginModel)
@@ -35,8 +36,7 @@ import cz.payola.domain.entities.plugins.concrete.DataFetcher
             successCallback("Plugin saved.")
         }catch{
             case e: Exception => {
-                e.printStackTrace()
-                failCallback(new Exception("Couldn't save plugin.\n\nDetails: " + e.getMessage))
+                failCallback(new RpcException("Couldn't save plugin.\n\nDetails: " + e.getMessage))
             }
         }
     }

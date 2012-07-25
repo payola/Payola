@@ -8,6 +8,7 @@ import cz.payola.web.client._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
 import cz.payola.model.ModelException
+import s2js.runtime.shared.rpc.RpcException
 
 // Can't pass the editor's pre ID as we're using it in the native JS, which needs to
 // be compile-time ready
@@ -48,10 +49,6 @@ class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) e
         ""
     }
 
-    def getDomElement : Element = {
-        null
-    }
-
     def initialize() {
 
     }
@@ -62,7 +59,7 @@ class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) e
       */
     private def postFailedCallback(t: Throwable){
         t match {
-            case exc: ModelException => AlertModal.runModal("Failed to upload plugin!\n\n" + exc.message)
+            case exc: RpcException => AlertModal.runModal(exc.message, title = "Failed to upload plugin!")
             case t: Throwable => fatalErrorHandler(t)
         }
     }
@@ -72,9 +69,8 @@ class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) e
       * @param s Success string.
       */
     private def postWasSuccessfulCallback(s: String) {
-        val alert = new AlertModal("Plugin uploaded successfully!", "alert-success")
-        alert.closing += { e =>
-            window.alert("Fuck off")
+        val alert = new AlertModal("Plugin uploaded successfully!", "Success!", "alert-success")
+        alert.confirming += { e =>
             window.location.href = listPluginsURL
             true
         }
@@ -86,10 +82,13 @@ class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) e
       * @param code Code of the plugin.
       */
     private def postCodeToServer(code: String) {
+        blockPage("Compiling plugin...")
        PluginManager.uploadPlugin(code) {
             s => postWasSuccessfulCallback(s)
+               unblockPage()
         } {
             t => postFailedCallback(t)
+               unblockPage()
         }
     }
 }
