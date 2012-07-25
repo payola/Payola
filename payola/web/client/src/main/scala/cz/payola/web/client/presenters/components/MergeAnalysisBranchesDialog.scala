@@ -7,19 +7,19 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.Modal
-import cz.payola.web.client.views.todo.PluginInstance
+import cz.payola.web.client.views.todo.PluginInstanceView
 import s2js.adapters.js.dom.Element
 import cz.payola.web.client.views.elements.Div
 
-class MergeAnalysisBranchesDialog(instances: ArrayBuffer[PluginInstance], inputsCount: Int)
+class MergeAnalysisBranchesDialog(instances: ArrayBuffer[PluginInstanceView], inputsCount: Int)
     extends Modal("Choose how you want to merge the branches")
 {
-    val outputToInstance = new HashMap[Int, PluginInstance]
+    val outputToInstance = new HashMap[Int, PluginInstanceView]
 
     private val dragZone = new Div(List(),"droppable origin")
 
     instances.map{instance:Any =>
-        val pluginInstance = instance.asInstanceOf[PluginInstance]
+        val pluginInstance = instance.asInstanceOf[PluginInstanceView]
 
         val div = new Div(List(new Text(pluginInstance.plugin.name)), "alert alert-danger span2 draggable")
         bindInstance(div.domElement, pluginInstance)
@@ -66,12 +66,12 @@ class MergeAnalysisBranchesDialog(instances: ArrayBuffer[PluginInstance], inputs
     def bindDragAndDrop() { }
 
     @javascript(""" jQuery(element).data("pluginInstance", instance); """)
-    def bindInstance(element: Element, instance: PluginInstance) {}
+    def bindInstance(element: Element, instance: PluginInstanceView) {}
 
     @javascript(""" jQuery(element).data("inputIndex", index); """)
     def bindIndex(element: Element, index: Int) { }
 
-    def setInstance(index: Int, instance: PluginInstance) = {
+    def setInstance(index: Int, instance: PluginInstanceView) = {
         outputToInstance.put(index, instance)
     }
 }

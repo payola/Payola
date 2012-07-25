@@ -2,8 +2,8 @@ package cz.payola.web.client.presenters.components
 
 import scala.collection.mutable
 import cz.payola.web.client.events.EventArgs
-import cz.payola.web.client.views.todo.PluginInstance
+import cz.payola.web.client.views.todo.PluginInstanceView
 
-class MergeStrategyEventArgs(target: mutable.HashMap[Int,PluginInstance]) extends EventArgs[mutable.HashMap[Int,PluginInstance]](target)
+class MergeStrategyEventArgs(target: mutable.HashMap[Int,PluginInstanceView]) extends EventArgs[mutable.HashMap[Int,PluginInstanceView]](target)
 {
 }

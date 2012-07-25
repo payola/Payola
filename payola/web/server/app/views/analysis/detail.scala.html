@@ -1,22 +1,5 @@
 @(user: Option[cz.payola.domain.entities.User], analysis: cz.payola.domain.entities.Analysis)
 
-@renderInstance(inst: cz.payola.domain.entities.plugins.PluginInstance, analysis: cz.payola.domain.entities.Analysis) = {
-
-<div style="float: left; min-width:300px;" class="successors">
-    @analysis.pluginInstanceBindings.filter(p => p.targetPluginInstance == inst).map{ b =>
-        @renderInstance(inst = b.sourcePluginInstance, analysis)
-    }
-    <hr style="clear: both; height: 0px; visibility: hidden;" />
-    <div class="alert alert-info instance" id="inst_@inst.id">
-        <h3>@inst.plugin.name</h3>
-        @inst.plugin.parameters.map{param =>
-            <p><strong>@param.name</strong>: @inst.getParameter(param.name)</p>
-        }
-    </div>
-
-</div>
-}
-
 @main(user, "Analysis "+analysis.name+" :: Payola!") {
 
 <div class="container-fluid">
@@ -36,21 +19,6 @@
 
     </div>
 </div><!--/.fluid-container-->
-
-<script>
-    var settings = {
-        PaintStyle:{ lineWidth:2, strokeStyle:"#BCE8F1", outlineColor:"#3A87AD", outlineWidth:1 },
-        Connector:[ "Flowchart", { stub: 1 } ],
-        Endpoint:[ "Dot", { radius:4 } ],
-        EndpointStyle : { fillStyle: "#3A87AD"  },
-        Anchor : [ "TopCenter", "BottomCenter" ]
-    };
-
-    @analysis.pluginInstanceBindings.map{ b =>
-        var instance = jsPlumb.getInstance(settings);
-        instance.connect({ source:"inst_@b.sourcePluginInstance.id", target:"inst_@b.targetPluginInstance.id", scope:"someScope" });
-    }
-</script>
 
 <script src="/javaScriptPackage/cz.payola.web.client.presenters.AnalysisRunner" type="text/javascript"></script>
 <script type="text/javascript">

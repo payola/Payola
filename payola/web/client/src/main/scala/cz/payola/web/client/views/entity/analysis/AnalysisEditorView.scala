@@ -3,7 +3,7 @@ package cz.payola.web.client.views.entity.analysis
 import cz.payola.web.client.views.bootstrap.inputs._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.Icon
-import cz.payola.web.client.views.todo.PluginInstance
+import cz.payola.web.client.views.todo.PluginInstanceView
 import cz.payola.web.client.View
 import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom.Element
@@ -24,10 +24,10 @@ class AnalysisEditorView extends ComposedView
     protected val menu = new UnorderedList(List(addPluginLinkLi, addDataSourceLinkLi, mergeBranchesLi))
 
     protected val leftColContent = new Div(List(menu,properties),"well")
-    protected val rightColContent = new Div(List(),"plugin-space")
+    val analysisCanvas = new Div(List(),"plugin-space")
 
     protected val leftCol = new Div(List(leftColContent),"span3")
-    protected val rightCol = new Div(List(rightColContent),"span9")
+    protected val rightCol = new Div(List(analysisCanvas),"span9")
 
     protected val container = new Div(List(leftCol, rightCol))
     nameControl.input.addCssClass("span12")
@@ -37,8 +37,8 @@ class AnalysisEditorView extends ComposedView
         nameControl.input.value_=(name)
     }
 
-    def renderInstance(instance: PluginInstance){
-        instance.render(rightColContent.domElement)
+    def renderInstance(instance: PluginInstanceView){
+        instance.render(analysisCanvas.domElement)
     }
 
     def createSubViews = List(container)

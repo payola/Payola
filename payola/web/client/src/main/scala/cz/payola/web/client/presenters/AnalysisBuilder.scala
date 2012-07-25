@@ -1,7 +1,8 @@
 package cz.payola.web.client.presenters
 
 import s2js.adapters.js.browser.document
-import cz.payola.web.client.views.todo.PluginInstance
+import cz.payola.web.client.views.todo.PluginInstanceView
+import cz.payola.web.client.views.todo.EditablePluginInstanceView
 import cz.payola.web.client.presenters.components._
 import cz.payola.web.shared.AnalysisBuilderData
 import s2js.compiler.javascript
@@ -10,7 +11,6 @@ import s2js.adapters.js.browser.window
 import scala.collection.mutable.ArrayBuffer
 import s2js.runtime.client.scala.collection.mutable.HashMap
 import cz.payola.web.client.presenters.models.ParameterValue
-import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events.EventArgs
 import cz.payola.web.client.views.bootstrap._
 import scala.Some
@@ -29,7 +29,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
     protected val saveAsYouTypeTimeout = 1000
     protected var analysisId = ""
     protected val timeoutMap = new HashMap[String, Int]
-    protected var lanes = new ArrayBuffer[PluginInstance]
+    protected var lanes = new ArrayBuffer[PluginInstanceView]
     protected var nameChangedTimeout: Option[Int] = None
     protected var descriptionChangedTimeout: Option[Int] = None
     protected val nameComponent = new TextInputControl("Analysis name", "init-name", "", "Enter analysis name")
@@ -123,7 +123,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                 map.put(paramValue.parameter.name, paramValue.value.toString)
             }
 
-            val instance = new PluginInstance(pi.id,pi.plugin, List(), map)
+            val instance = new EditablePluginInstanceView(pi.id,pi.plugin, List(), map)
 
             lanes.append(instance)
             view.renderInstance(instance)
@@ -165,17 +165,17 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                     val instances = mergeDialog.outputToInstance
 
                     var i = 0
-                    val buffer = new ArrayBuffer[PluginInstance]()
+                    val buffer = new ArrayBuffer[PluginInstanceView]()
 
                     while (i < instances.size) {
                         buffer.append(instances(i))
-                        instances(i).hideDeleteButton()
+                        instances(i).hideControls()
                         lanes -= instances(i)
                         i += 1
                     }
 
                     AnalysisBuilderData.createPluginInstance(evt.target.id, analysisId) { id =>
-                        val mergeInstance = new PluginInstance(id, evt.target, buffer.asInstanceOf[Seq[PluginInstance]])
+                        val mergeInstance = new EditablePluginInstanceView(id, evt.target, buffer.asInstanceOf[Seq[PluginInstanceView]])
                         view.renderInstance(mergeInstance)
 
                         mergeInstance.connectButtonClicked += { clickedEvent =>
@@ -188,7 +188,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
 
                         i = 0
                         buffer.map { instance: Any =>
-                            bind(instance.asInstanceOf[PluginInstance], mergeInstance, i)
+                            bind(instance.asInstanceOf[PluginInstanceView], mergeInstance, i)
                             i += 1
                         }
 
@@ -208,12 +208,12 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
         false
     }
 
-    def onPluginNameClicked(plugin: Plugin, predecessor: Option[PluginInstance]) = {
+    def onPluginNameClicked(plugin: Plugin, predecessor: Option[PluginInstanceView]) = {
         AnalysisBuilderData.createPluginInstance(plugin.id, analysisId) { id =>
             val instance = if (predecessor.isDefined) {
-                new PluginInstance(id, plugin, List(predecessor.get))
+                new EditablePluginInstanceView(id, plugin, List(predecessor.get))
             } else {
-                new PluginInstance(id, plugin, List())
+                new EditablePluginInstanceView(id, plugin, List())
             }
 
             lanes.append(instance)
@@ -229,7 +229,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
 
             predecessor.map { p =>
                 lanes -= p
-                p.hideDeleteButton()
+                p.hideControls()
                 bind(p, instance, 0)
             }
         } { _ =>
@@ -261,7 +261,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
         timeoutMap.put(parameterId, timeoutId)
     }
 
-    def connectPlugin(pluginInstance: PluginInstance): Unit = {
+    def connectPlugin(pluginInstance: PluginInstanceView): Unit = {
         val inner = pluginInstance
 
         val dialog = new PluginDialog(allPlugins.filter(_.inputCount == 1))
@@ -273,7 +273,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
         dialog.render()
     }
 
-    def onDeleteClick(eventArgs: EventArgs[PluginInstance]) {
+    def onDeleteClick(eventArgs: EventArgs[PluginInstanceView]) {
         val instance = eventArgs.target
 
         AnalysisBuilderData.deletePluginInstance(analysisId, instance.id) { _ =>
@@ -281,14 +281,14 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
             var i = 0
             while (i < instance.predecessors.size) {
                 lanes += instance.predecessors(i)
-                instance.predecessors(i).showDeleteButton()
+                instance.predecessors(i).showControls()
                 i += 1
             }
             instance.destroy()
         } { _ =>}
     }
 
-    def bind(a: PluginInstance, b: PluginInstance, inputIndex: Int) {
+    def bind(a: PluginInstanceView, b: PluginInstanceView, inputIndex: Int) {
         AnalysisBuilderData.saveBinding(analysisId, a.id, b.id, inputIndex) { _ =>
             renderBinding(a, b)
         } { _ =>
@@ -308,5 +308,5 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                        };
           jsPlumb.connect({ source:a.getPluginElement(), target:b.getPluginElement() },settings);
         """)
-    def renderBinding(a: PluginInstance, b: PluginInstance) {}
+    def renderBinding(a: PluginInstanceView, b: PluginInstanceView) {}
 }
