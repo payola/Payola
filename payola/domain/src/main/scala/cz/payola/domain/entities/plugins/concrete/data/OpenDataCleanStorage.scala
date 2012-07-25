@@ -1,6 +1,7 @@
 package cz.payola.domain.entities.plugins.concrete.data
 
 import scala.collection.immutable
+import java.net.URLEncoder
 import cz.payola.domain.IDGenerator
 import cz.payola.domain.entities.plugins._
 import cz.payola.domain.entities.plugins.concrete.DataFetcher
@@ -18,14 +19,14 @@ sealed class OpenDataCleanStorage(name: String, inputCount: Int, parameters: imm
 
     def executeQuery(instance: PluginInstance, query: String): Graph = {
         usingDefined(instance.getStringParameter("Server")) { server =>
-            val queryUrl = server + "/sparql?query=" + java.net.URLEncoder.encode(query, "UTF-8")
+            val queryUrl = server + "/sparql?query=" + URLEncoder.encode(query, "UTF-8")
             Graph(RdfRepresentation.RdfXml, new Downloader(queryUrl, accept = "application/rdf+xml").result)
         }
     }
 
     override def getNeighbourhood(instance: PluginInstance, vertexURI: String): Graph = {
         usingDefined(instance.getStringParameter("Server")) { server =>
-            val neighbourhoodUrl = server + "/uri?format=trig&uri=" + java.net.URLEncoder.encode(vertexURI, "UTF-8")
+            val neighbourhoodUrl = server + "/uri?format=trig&uri=" + URLEncoder.encode(vertexURI, "UTF-8")
             Graph(RdfRepresentation.Trig, new Downloader(neighbourhoodUrl).result)
         }
     }
