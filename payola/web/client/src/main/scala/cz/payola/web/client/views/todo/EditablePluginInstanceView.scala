@@ -13,9 +13,9 @@ import cz.payola.web.client.View
 class EditablePluginInstanceView(id: String, pluginI: Plugin, predecessors: Seq[PluginInstanceView] = List(),
     defaultValues: Map[String, String] = new HashMap[String, String]()) extends PluginInstanceView(id, pluginI, predecessors, defaultValues)
 {
-    val connectButtonClicked = new SimpleUnitEvent[PluginInstanceView]
+    val connectButtonClicked = new SimpleUnitEvent[EditablePluginInstanceView]
 
-    val deleteButtonClicked = new SimpleUnitEvent[PluginInstanceView]
+    val deleteButtonClicked = new SimpleUnitEvent[EditablePluginInstanceView]
 
     val parameterValueChanged = new SimpleUnitEvent[ParameterValue]
 

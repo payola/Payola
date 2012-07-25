@@ -9,9 +9,9 @@ import scala.Some
 @secured
 @remote object AnalysisBuilderData
 {
-    @async def createEmptyAnalysis(name: String, user: User = null)(successCallback: (String => Unit))
+    @async def createEmptyAnalysis(name: String, user: User = null)(successCallback: (Analysis => Unit))
         (failCallback: (Throwable => Unit)) {
-        successCallback(Payola.model.analysisModel.create(user, name).id)
+        successCallback(Payola.model.analysisModel.create(user, name))
     }
 
     @async def getPlugins(user: User = null)(successCallback: (Seq[Plugin] => Unit))(failCallback: (Throwable => Unit)) {

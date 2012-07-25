@@ -8,8 +8,9 @@ import cz.payola.web.client.View
 import s2js.adapters.js.browser.document
 import s2js.adapters.js.dom.Element
 import cz.payola.web.client.views.ComposedView
+import cz.payola.common.entities.Analysis
 
-class AnalysisEditorView extends ComposedView
+class AnalysisEditorView(analysis: Analysis) extends ComposedView
 {
     val nameControl = new TextInputControl("Analysis name:", "name", "", "Analysis name")
     val description = new TextAreaInputControl("Description:", "description", "", "Anaylsis description")
@@ -23,8 +24,10 @@ class AnalysisEditorView extends ComposedView
     protected val mergeBranchesLi = new ListItem(List(mergeBranches))
     protected val menu = new UnorderedList(List(addPluginLinkLi, addDataSourceLinkLi, mergeBranchesLi))
 
+    val visualiser = new EditableAnalysisVisualizer(analysis)
+
     protected val leftColContent = new Div(List(menu,properties),"well")
-    val analysisCanvas = new Div(List(),"plugin-space")
+    val analysisCanvas = new Div(List(visualiser),"plugin-space")
 
     protected val leftCol = new Div(List(leftColContent),"span3")
     protected val rightCol = new Div(List(analysisCanvas),"span9")
@@ -35,10 +38,6 @@ class AnalysisEditorView extends ComposedView
 
     def setName(name: String){
         nameControl.input.value_=(name)
-    }
-
-    def renderInstance(instance: PluginInstanceView){
-        instance.render(analysisCanvas.domElement)
     }
 
     def createSubViews = List(container)

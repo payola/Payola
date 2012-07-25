@@ -14,9 +14,9 @@ import cz.payola.web.client.events.SimpleUnitEvent
 import cz.payola.common.entities.plugins.PluginInstance
 import cz.payola.web.client.presenters.models.ParameterValue
 
-class AnalysisVisualizer(analysis: Analysis, editable: Boolean = false) extends View
+abstract class AnalysisVisualizer(analysis: Analysis) extends View
 {
-    val parameterValueChanged = new SimpleUnitEvent[ParameterValue]
+    val pluginInstanceRendered = new SimpleUnitEvent[PluginInstanceView]
 
     private val pluginCanvas = new Div(Nil, "plugin-canvas")
     private val instancesMap = new HashMap[String, PluginInstanceView]
@@ -55,7 +55,7 @@ class AnalysisVisualizer(analysis: Analysis, editable: Boolean = false) extends 
                 s =>
                     val canRender: Boolean = predecessorsRendered(s, renderBuffer)
                     if (canRender) {
-                        s.render(pluginCanvas.domElement)
+                        renderPluginInstanceView(s)
                         renderBuffer -= s
                     }
             }
@@ -73,7 +73,7 @@ class AnalysisVisualizer(analysis: Analysis, editable: Boolean = false) extends 
     def renderSources(sources: ArrayBuffer[PluginInstanceView], renderBuffer: ArrayBuffer[PluginInstanceView]) {
         sources.map {
             s =>
-                s.render(pluginCanvas.domElement)
+                renderPluginInstanceView(s)
                 renderBuffer -= s
         }
     }
@@ -93,11 +93,7 @@ class AnalysisVisualizer(analysis: Analysis, editable: Boolean = false) extends 
         analysis.pluginInstances.map {
             instance =>
 
-                val clientInstance = createClientInstance(instance)
-
-                if (clientInstance.isInstanceOf[EditablePluginInstanceView]) {
-                    initializeEditableInstance(clientInstance.asInstanceOf[EditablePluginInstanceView], instance, analysis)
-                }
+                val clientInstance = createPluginInstanceView(instance)
 
                 instancesMap.put(instance.id, clientInstance)
 
@@ -109,35 +105,13 @@ class AnalysisVisualizer(analysis: Analysis, editable: Boolean = false) extends 
         }
     }
 
+    def createPluginInstanceView(instance: PluginInstance) : PluginInstanceView
+
     private def isSource(instance: entities.plugins.PluginInstance, analysis: Analysis): Boolean = {
         !analysis.pluginInstanceBindings.find(_.targetPluginInstance == instance).isDefined
     }
 
-    private def initializeEditableInstance(clientInstance: EditablePluginInstanceView, instance: entities.plugins.PluginInstance,
-        analysis: Analysis) {
-        clientInstance.hideControls()
-
-        if (instanceHasNoFollowers(analysis, instance)) {
-            clientInstance.showControls()
-        }
-
-        clientInstance.parameterValueChanged += { e => parameterValueChanged.triggerDirectly(e.target) }
-    }
-
-    private def instanceHasNoFollowers(analysis: Analysis, instance: entities.plugins.PluginInstance): Boolean = {
-        !analysis.pluginInstanceBindings.find(_.sourcePluginInstance == instance).isDefined
-    }
-
-    private def createClientInstance(instance: entities.plugins.PluginInstance) : PluginInstanceView = {
-        val defaultValues = getDefaultValues(instance)
-        if (editable) {
-            new EditablePluginInstanceView(instance.id, instance.plugin, List(), defaultValues)
-        } else {
-            new ReadOnlyPluginInstanceView(instance.id, instance.plugin, List(), defaultValues)
-        }
-    }
-
-    private def getDefaultValues(instance: entities.plugins.PluginInstance): mutable.HashMap[String, String] = {
+    protected def getDefaultValues(instance: entities.plugins.PluginInstance): mutable.HashMap[String, String] = {
         val map = new mutable.HashMap[String, String]
         instance.parameterValues.foreach {
             v => map.put(v.parameter.name, v.value.toString)
@@ -158,4 +132,9 @@ class AnalysisVisualizer(analysis: Analysis, editable: Boolean = false) extends 
           jsPlumb.connect({ source:a.getPluginElement(), target:b.getPluginElement() },settings);
         """)
     def renderBinding(a: PluginInstanceView, b: PluginInstanceView) {}
+
+    def renderPluginInstanceView(v: PluginInstanceView){
+        v.render(pluginCanvas.domElement)
+        pluginInstanceRendered.triggerDirectly(v)
+    }
 }
