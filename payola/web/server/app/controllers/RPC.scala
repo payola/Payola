@@ -120,7 +120,7 @@ object RPC extends PayolaController with Secured
                     }
                     cause = cause.getCause
                 }
-                new RpcException("Uncatched exception during a remote method call.", deepStackTrace)
+                new RpcException("Uncaught exception during a remote method call.", deepStackTrace)
             }
         }
 

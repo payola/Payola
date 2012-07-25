@@ -39,7 +39,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
         val nameDialog = new Modal("Please, enter the name of the new analysis", List(nameComponent))
         nameDialog.render()
 
-        nameDialog.saving += { e =>
+        nameDialog.confirming += { e =>
             AnalysisBuilderData.setAnalysisName(analysisId, nameComponent.input.value) { success =>
 
                 AnalysisBuilderData.createEmptyAnalysis(nameComponent.input.value) { id =>
@@ -160,7 +160,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                     .size + " branches are available.")
             } else {
                 val mergeDialog = new MergeAnalysisBranchesDialog(lanes, inputsCount)
-                mergeDialog.saving += { e =>
+                mergeDialog.confirming += { e =>
                     val instances = mergeDialog.outputToInstance
 
                     var i = 0
