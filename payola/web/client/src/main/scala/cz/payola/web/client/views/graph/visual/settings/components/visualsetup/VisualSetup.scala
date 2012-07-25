@@ -24,21 +24,21 @@ class VisualSetup(
 
     vertex.mouseClicked += { eventArgs =>
         val modal = new VertexModal(vertexModel)
-        modal.saving += settingsChangedHandler _
+        modal.confirming += settingsChangedHandler _
         modal.render()
         false
     }
 
     edges.mouseClicked += { eventArgs =>
         val modal = new EdgeModal(edgesModel)
-        modal.saving += settingsChangedHandler _
+        modal.confirming += settingsChangedHandler _
         modal.render()
         false
     }
 
     text.mouseClicked += { eventArgs =>
         val modal = new TextModal(textModel)
-        modal.saving += settingsChangedHandler _
+        modal.confirming += settingsChangedHandler _
         modal.render()
         false
     }

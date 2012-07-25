@@ -13,23 +13,23 @@ import cz.payola.web.client.View
   * A modal popup window.
   * @param header Header of the modal.
   * @param body Components in the modal body.
-  * @param saveText Save button text. If empty, the save button isn't shown.
+  * @param confirmText Save button text. If empty, the save button isn't shown.
   * @param cancelText Cancel button text. If empty, the cancel button isn't shown.
   * @param hasCloseButton Whether the close button should be shown.
   */
 class Modal(
     val header: String,
     val body: Seq[View] = Nil,
-    val saveText: Option[String] = Some("Save changes"),
+    val confirmText: Option[String] = Some("OK"),
     val cancelText: Option[String] = Some("Cancel"),
     val hasCloseButton: Boolean = true,
     val additionalCssClasses: String = "")
     extends ComposedView
 {
     /**
-      * Triggered when the save button is clicked. The event handler should return whether the modal should be closed.
+      * Triggered when the OK button is clicked. The event handler should return whether the modal should be closed.
       */
-    val saving = new SimpleBooleanEvent[this.type]
+    val confirming = new SimpleBooleanEvent[this.type]
 
     /**
       * Triggered when the cancel or close button is clicked. The event handler should return whether the modal should
@@ -38,11 +38,11 @@ class Modal(
     val closing = new SimpleBooleanEvent[this.type]
 
     def createSubViews = {
-        val saveButton = new Button(new Text(saveText.getOrElse("")), "btn-primary")
+        val saveButton = new Button(new Text(confirmText.getOrElse("")), "btn-primary")
         val cancelButton = new Button(new Text(cancelText.getOrElse("")))
         val closeButton = new Button(new Text("x"), "close")
 
-        saveButton.mouseClicked += { e => buttonClickedHandler(saving) }
+        saveButton.mouseClicked += { e => buttonClickedHandler(confirming) }
         cancelButton.mouseClicked += { e => buttonClickedHandler(closing) }
         closeButton.mouseClicked += { e => buttonClickedHandler(closing) }
 
@@ -57,7 +57,7 @@ class Modal(
             ),
             new Div(
                 (if (cancelText.isDefined) List(cancelButton) else Nil) ++
-                    (if (saveText.isDefined) List(saveButton) else Nil),
+                    (if (confirmText.isDefined) List(saveButton) else Nil),
                 "modal-footer"
             )
         ), "modal hide " + additionalCssClasses))

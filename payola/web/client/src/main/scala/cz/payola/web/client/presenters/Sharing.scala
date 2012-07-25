@@ -123,7 +123,7 @@ class Sharing(shareButtonPlaceholderClass: String, entityType: String) extends P
             true
         }
 
-        modal.saving += {e =>
+        modal.confirming += {e =>
             blockPage("Sharing a "+entityName+" to a "+privilegedType+"...")
             callback({ unblockPage() },privilegedSearchBox.input.value)
             modal.destroy()
