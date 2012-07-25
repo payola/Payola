@@ -26,7 +26,7 @@ class ShareButton(private var _isPublic: Boolean) extends ComposedView
             new ListItem(List(makePublicButton))
         ),
         "btn-warning"
-    )
+    ).addCssClass("share-button")
 
     isPublic = _isPublic
 

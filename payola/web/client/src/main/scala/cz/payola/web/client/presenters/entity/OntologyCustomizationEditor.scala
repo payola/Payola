@@ -18,7 +18,8 @@ class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) 
 
     val view = new OntologyCustomizationEditModal(ontologyCustomization)
 
-    val shareButtonPresenter = new ShareButtonPresenter(view.shareButtonDiv, )
+    val shareButtonPresenter = new ShareButtonPresenter(view.shareButtonViewSpace.domElement, "customization",
+        ontologyCustomization.id, ontologyCustomization.isPublic, Some(view))
 
     /** Failure handler for property saving.
       *
@@ -133,7 +134,7 @@ class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) 
     def propertyStrokeWidthChangedHandler(args: ClassPropertyCustomizationModificationEventArgs[_, Int]) {
         OntologyCustomizationManager
             .setPropertyStrokeWidth(ontologyCustomization.id, args.classURI, args.propertyURI, args.value) { () =>
-        // Success - update the client model
+            // Success - update the client model
             ontologyCustomization.classCustomizations.find(_.uri == args.classURI).get.propertyCustomizations
                 .find(_.uri == args.propertyURI).get.strokeWidth = args.value
             postValueChangeNotification()
@@ -168,13 +169,13 @@ class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) 
       *
       */
     def initialize() {
+        shareButtonPresenter.initialize()
+
         view.classFillColorChanged += classFillColorChangedHandler _
         view.classRadiusChanged += classRadiusChangedHandler _
         view.classGlyphChanged += classGlyphChangedHandler _
-
         view.classPropertyStrokeColorChanged += propertyStrokeColorChangedHandler _
         view.classPropertyStrokeWidthChanged += propertyStrokeWidthChangedHandler _
-
         view.deleteButton.mouseClicked += deleteCustomizationHandler _
 
         view.render()

@@ -7,12 +7,10 @@ import cz.payola.web.client.events._
 import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
 import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.ColorPane
 import cz.payola.web.client.views.graph.visual.Color
-import s2js.adapters.js.browser._
-import cz.payola.web.client.models.Model
 
 class OntologyCustomizationEditModal(customization: OntologyCustomization)
     extends Modal("Edit ontology customization", Nil, Some("Done"), None, false,
-        "wide-customization-modal")
+        "ontology-customization-modal")
 {
     // Event handlers
     val ontologyNameHasChanged = new UnitEvent[this.type, EventArgs[this.type]]
@@ -35,7 +33,24 @@ class OntologyCustomizationEditModal(customization: OntologyCustomization)
     enclosingDiv.setAttribute("style", "padding: 0px 0;")
     enclosingDiv.addCssClass("container-fluid")
 
-    val customizationNameRowDiv = new Div()
+    // Add the input control and other buttons to the customizationNameRowDiv
+    val customizationNameFieldTitle = new Div(List(new Text("Name: ")), "span1")
+
+    val customizationNameField = new TextInputControl("", "custom-name", customization.name, "", "span6")
+    customizationNameField.input.keyReleased += { e =>
+        ontologyNameHasChanged.trigger(new EventArgs[OntologyCustomizationEditModal.this.type](this))
+        true
+    }
+    customizationNameField.render(customizationNameRowDiv.domElement)
+
+    val shareButtonViewSpace = new Span(Nil)
+
+    val deleteButton = new Anchor(List(new Icon(Icon.remove), new Text(" Delete")), "#", "btn btn-danger")
+    val deleteButtonSpan = new Span(List(deleteButton))
+
+    val buttonsDiv = new Div(List(shareButtonViewSpace, deleteButtonSpan), "btn-group span6")
+
+    val customizationNameRowDiv = new Div(List(customizationNameFieldTitle, customizationNameField, buttonsDiv))
     val rowDiv = new Div()
 
     customizationNameRowDiv.render(enclosingDiv.domElement)
@@ -43,22 +58,6 @@ class OntologyCustomizationEditModal(customization: OntologyCustomization)
 
     // Override body to have just that div
     override val body = List(enclosingDiv)
-
-    // Add the input control and other buttons to the customizationNameRowDiv
-    val customizationNameField = new TextInputControl("Customization name: ", "custom-name", customization.name, "", "span7")
-    customizationNameField.input.keyReleased += { e =>
-        ontologyNameHasChanged.trigger(new EventArgs[OntologyCustomizationEditModal.this.type](this))
-        true
-    }
-    customizationNameField.render(customizationNameRowDiv.domElement)
-
-    val shareButtonDiv = new Div(Nil, "ontology-customization-share-button")
-    val deleteButton = new Button(new Text(" Delete"), "btn-danger", new Icon(Icon.remove))
-    deleteButton.setAttribute("style", "width: 82px;")
-
-    val buttonSpan = new Span(List(shareButtonDiv, new Div(List(deleteButton))), "span5")
-    buttonSpan.setAttribute("style", "text-align: right;")
-    buttonSpan.render(customizationNameRowDiv.domElement)
 
     // Create a class div and values div
     val classListItems = createClassListItems
@@ -132,6 +131,7 @@ class OntologyCustomizationEditModal(customization: OntologyCustomization)
       */
     private def setupDivAttributes() {
         customizationNameRowDiv.addCssClass("row-fluid")
+        customizationNameRowDiv.addCssClass("well")
         rowDiv.addCssClass("row-fluid")
 
 
