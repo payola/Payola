@@ -6,8 +6,8 @@ import s2js.adapters.js.dom.Element
 import s2js.compiler.javascript
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events._
-import cz.payola.web.client.views.bootstrap.Icon
-
+import cz.payola.web.client.views.bootstrap.{InputControl, Icon}
+import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
 
 // Use the getter + setter for the color
 class ColorPane(name: String, label: String, private var colorOption: Option[Color]) extends View
@@ -16,8 +16,8 @@ class ColorPane(name: String, label: String, private var colorOption: Option[Col
     val closed = new SimpleUnitEvent[ColorPane]
     val cleared = new SimpleUnitEvent[ColorPane]
 
-    val colorInput: Input = new Input(name, if (colorOption.isDefined) colorOption.get.toString else "No color selected", None, "colorpicker")
-    colorInput.setAttribute("readonly", "true")
+    val colorInput: InputControl = new TextInputControl("", name, if (colorOption.isDefined) colorOption.get.toString else "No color selected", "colorpicker")
+    colorInput.input.setAttribute("readonly", "true")
 
     val colorWell = new Italic(List())
     colorWell.setAttribute("style", "background-color: " + (if (colorOption.isDefined) { colorOption.get.toString }else{ "rgba(0, 0, 0, 1)" }))
@@ -32,7 +32,7 @@ class ColorPane(name: String, label: String, private var colorOption: Option[Col
         true
     }
 
-    val labelElement = new Label(label, colorInput)
+    val labelElement = new Label(label, colorInput.input)
 
     val div = new Div(List(colorInput, colorWellSpan, clearColorSpan), "input-append color")
 
@@ -59,9 +59,9 @@ class ColorPane(name: String, label: String, private var colorOption: Option[Col
     def setColor(value: Option[Color]) {
         colorOption = value
         if (value.isDefined) {
-            colorInput.value = value.get.toString
+            colorInput.input.value = value.get.toString
         }else{
-            colorInput.value = "No color selected"
+            colorInput.input.value = "No color selected"
         }
         changed.trigger(new EventArgs[ColorPane](this))
     }
@@ -70,7 +70,7 @@ class ColorPane(name: String, label: String, private var colorOption: Option[Col
         closed.trigger(new EventArgs[ColorPane](this))
     }
 
-    def domElement: Element = colorInput.domElement
+    def domElement: Element = colorInput.input.domElement
 
     @javascript( """var cp = jQuery(self.div.domElement).colorpicker({format: 'rgba'})
                     cp.on('changeColor',function(evt){

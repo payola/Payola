@@ -1,5 +1,7 @@
 package cz.payola.common
 
+import cz.payola.common.exception._
+
 /**
   * A generic entity.
   */

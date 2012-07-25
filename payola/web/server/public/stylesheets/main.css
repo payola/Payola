@@ -161,9 +161,14 @@ input[type="checkbox"].active:after{
 
 .ontology-customization-modal {
     width: 800px;
+    max-width: 1024px;
 }
 
 .ontology-customization-modal .share-button {
+    display: inline;
+}
+
+.inline-display {
     display: inline;
 }
 

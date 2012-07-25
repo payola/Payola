@@ -6,7 +6,6 @@ import cz.payola.domain.entities.privileges._
 import cz.payola.domain.entities.settings.OntologyCustomization
 import cz.payola.model.EntityModelComponent
 import cz.payola.domain.entities.User
-import cz.payola.common.ValidationException
 import cz.payola.common.entities.settings._
 
 trait OntologyCustomizationModelComponent extends EntityModelComponent

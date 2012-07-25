@@ -5,7 +5,7 @@ import play.api.mvc._
 import cz.payola.domain.entities.User
 import play.api.mvc.AnyContentAsFormUrlEncoded
 import s2js.runtime.shared.rpc.RpcException
-import cz.payola.common.ValidationException
+import cz.payola.common.exception.ValidationException
 import java.lang.reflect.InvocationTargetException
 
 /**
@@ -106,6 +106,7 @@ object RPC extends PayolaController with Secured
       */
     def raiseError(throwable: Throwable) = {
         val exception = throwable match {
+            case v: ValidationException => v
             case i: InvocationTargetException if i.getTargetException.isInstanceOf[ValidationException] => {
                 i.getTargetException
             }

@@ -5,8 +5,7 @@ import cz.payola.domain.entities._
 import scala.collection.immutable
 import cz.payola.domain.rdf.ontology.Ontology
 import cz.payola.domain.net.Downloader
-import org.apache.xerces.impl.dv.DatatypeException
-import cz.payola.common.ValidationException
+import cz.payola.common.exception.ValidationException
 
 object OntologyCustomization
 {

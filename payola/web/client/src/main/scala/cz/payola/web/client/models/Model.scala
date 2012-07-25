@@ -67,6 +67,17 @@ object Model
         }(errorCallback)
     }
 
+    def changeOntologyCustomizationName(customization: OntologyCustomization, newName: String)
+        (successCallback: () => Unit)
+        (errorCallback: Throwable => Unit) {
+
+        OntologyCustomizationManager.rename(customization.id, newName) { () =>
+            customization.name = newName
+            ontologyCustomizationsChanged.triggerDirectly(this)
+            successCallback()
+        } (errorCallback)
+    }
+
     def createOntologyCustomization(name: String, ontologyURL: String)
         (successCallback: OntologyCustomization => Unit)
         (errorCallback: Throwable => Unit) {
