@@ -23,48 +23,48 @@ abstract class BaseTechnique(settings: VisualSetup, name: String) extends Visual
     private def performPositioning(graphView: GraphView) {
         //TODO might be useful to somehow calculate the highest bottom (y-coordinate) of components in a row
 
-        var firstAnimation: Animation[ListBuffer[(VertexView, Point2D)]] = null
-        var isFirstAnimation = true
+        var firstAnimation: Option[Animation[ListBuffer[(VertexView, Point2D)]]] = None
         var componentNumber = 1
 
         var previousComponent: Option[Component] = None
 
         graphView.components.foreach { component =>
 
-            if (isFirstAnimation) {
-                firstAnimation = getTechniquePerformer(component, true)
+            if (firstAnimation.isEmpty) {
+                firstAnimation = Some(getTechniquePerformer(component, true))
             } else {
-                firstAnimation.addFollowingAnimation(getTechniquePerformer(component, true))
+                firstAnimation.get.addFollowingAnimation(getTechniquePerformer(component, true))
             }
 
             val componentPositionDesc = new ComponentPositionHelper(
                 componentNumber, graphView.components.length, previousComponent)
 
-            firstAnimation.addFollowingAnimation(new Animation(
+            firstAnimation.get.addFollowingAnimation(new Animation(
                 Animation.flipGraph, component.vertexViews, None, redrawQuick, redraw, None))
 
             if (graphView.components.length != 1) {
-                firstAnimation.addFollowingAnimation(new Animation(
+                firstAnimation.get.addFollowingAnimation(new Animation(
                     Animation.moveGraphByFunction, (componentPositionDesc, component.vertexViews), None, redrawQuick,
                     redraw,
                     None))
             }
 
-            isFirstAnimation = false
             componentNumber += 1
             previousComponent = Some(component)
         }
-        //fit the drawing space to the window
-        firstAnimation.addFollowingAnimation(
-            new Animation(Animation.emptyAnimation, false, None, fitCanvas, redraw, None))
+        if(firstAnimation.isDefined) {
+            //fit the drawing space to the window
+            firstAnimation.get.addFollowingAnimation(
+                new Animation(Animation.emptyAnimation, false, None, fitCanvas, redraw, None))
 
-        //finally move the whole graph to the center of the window
-        val graphCenterCorrector = new GraphPositionHelper(() => topLayer.size, graphView.getGraphCenter)
-        firstAnimation.addFollowingAnimation(
-            new Animation(Animation.moveGraphByFunction,
-                (graphCenterCorrector, graphView.getAllVertices), None, redrawQuick, redraw, None))
+            //finally move the whole graph to the center of the window
+            val graphCenterCorrector = new GraphPositionHelper(() => topLayer.size, graphView.getGraphCenter)
+            firstAnimation.get.addFollowingAnimation(
+                new Animation(Animation.moveGraphByFunction,
+                    (graphCenterCorrector, graphView.getAllVertices), None, redrawQuick, redraw, None))
 
-        firstAnimation.run()
+            firstAnimation.get.run()
+        }
     }
 
     /**

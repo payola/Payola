@@ -2,11 +2,11 @@ package cz.payola.web.client.views.graph.visual.graph
 
 import collection.mutable.ListBuffer
 import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.VisualSetup
-import s2js.adapters.js.browser.window
 import cz.payola.common.rdf._
 import cz.payola.web.client.views.graph.visual._
 import cz.payola.web.client.views.algebra._
 import cz.payola.common.entities.settings.OntologyCustomization
+import s2js.adapters.js.browser.window
 
 /**
   * Graphical representation of Graph object.
@@ -152,19 +152,11 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
                 case i: IdentifiedVertex => {
                     val newVertexView = new VertexView(i, Point2D(300, 300)/*TODO center of drawing space*/,
                         settings.vertexModel, settings.textModel, null)
-                    var rdfTypeEdge: Option[Edge]= None
-                    graphModel.edges.foreach{ edge =>
 
-                        if(edge.origin == vertexModel && edge.uri == Edge.rdfTypeEdge) {
-                            rdfTypeEdge = Some(edge)
-                        }
-                    }
+                    newVertexView.rdfType = getRdfTypeForVertexView(graphModel.edges, i)
+                    newVertexView.setInformation(getInformationForVertexView(graphModel, i))
 
-                    newVertexView.rdfType = if(rdfTypeEdge.isDefined) {
-                        rdfTypeEdge.get.destination.toString //saving rdf type
-                    } else {
-                        ""
-                    }
+
                     buffer += newVertexView
                 }
                 case i: LiteralVertex => {
@@ -174,6 +166,34 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
         }
 
         addLiteralVerticesToVertexViews(graphModel, buffer, literalVertices)
+    }
+
+    private def getInformationForVertexView(graphModel: Graph, vertexModel: IdentifiedVertex): Option[Vertex] = {
+
+        val foundEdge = graphModel.edges.find{ edge =>
+            vertexModel.uri == edge.origin.uri && Edge.rdfLabelEdges.find( _ == edge.uri).isDefined
+        }
+        if(foundEdge.isDefined) {
+            Some(foundEdge.get.destination)
+        } else {
+            None
+        }
+    }
+
+    private def getRdfTypeForVertexView(edges: Seq[Edge], vertexModel: IdentifiedVertex): String = {
+        var rdfTypeEdge: Option[Edge]= None
+        edges.foreach{ edge =>
+
+            if(edge.origin == vertexModel && edge.uri == Edge.rdfTypeEdge) {
+                rdfTypeEdge = Some(edge)
+            }
+        }
+
+        if(rdfTypeEdge.isDefined) {
+            rdfTypeEdge.get.destination.toString //getting rdf type
+        } else {
+            ""
+        }
     }
 
     private def addLiteralVerticesToVertexViews(graphModel: Graph,
