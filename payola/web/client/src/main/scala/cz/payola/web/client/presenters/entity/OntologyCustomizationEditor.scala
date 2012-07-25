@@ -10,6 +10,7 @@ import cz.payola.web.client.views.bootstrap.InputControl
 import cz.payola.web.client.views.bootstrap.modals._
 import cz.payola.web.client.models.Model
 import s2js.runtime.shared.rpc.RpcException
+import s2js.adapters.js.browser._
 
 class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) extends Presenter
 {
@@ -165,6 +166,32 @@ class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) 
             .find(_.uri == propertyURI).get
     }
 
+    var ontologyNameChangeTimeout: Option[Int] = None
+
+    private def renameOntology(inputControl: InputControl){
+        Model.changeOntologyCustomizationName(ontologyCustomization, inputControl.input.value) { () =>
+            inputControl.setIsActive(false)
+            inputControl.setOk()
+        } { error: Throwable =>
+            inputControl.setIsActive(false)
+            error match {
+                case exc: ValidationException => inputControl.setState(exc, "name")
+                case exc: RpcException => AlertModal.runModal(exc.message)
+                case _ => fatalErrorHandler(error)
+            }
+        }
+    }
+
+    private def ontologyNameChangedHandler(evArgs: EventArgs[_]) {
+        val inputControl = view.customizationNameField
+        inputControl.setIsActive(true)
+
+        ontologyNameChangeTimeout.foreach(window.clearTimeout(_))
+        ontologyNameChangeTimeout = Some(delayed(1000) { () =>
+            renameOntology(inputControl)
+        })
+    }
+
     /** Initialization. Creates a new OntologyCustomizationEditModal and renders it.
       *
       */
@@ -177,6 +204,8 @@ class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) 
         view.classPropertyStrokeColorChanged += propertyStrokeColorChangedHandler _
         view.classPropertyStrokeWidthChanged += propertyStrokeWidthChangedHandler _
         view.deleteButton.mouseClicked += deleteCustomizationHandler _
+
+        view.ontologyNameChanged += ontologyNameChangedHandler _
 
         view.render()
     }

@@ -30,7 +30,7 @@ trait Presenter
         View.unblockPage()
     }
 
-    def delayed(delayInMilliseconds: Int)(f: () => Unit) {
+    def delayed(delayInMilliseconds: Int)(f: () => Unit): Int = {
         window.setTimeout(f, delayInMilliseconds)
     }
 }

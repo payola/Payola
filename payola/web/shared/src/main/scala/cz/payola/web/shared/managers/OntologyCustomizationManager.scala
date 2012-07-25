@@ -40,21 +40,42 @@ class OntologyCustomizationsByOwnership(
         successCallback(Payola.model.ontologyCustomizationModel.create(name, ontologyURL, owner))
     }
 
+    private def getOntologyCustomizationForIDWithSecurityChecks(id: String, owner: User, failCallback: Throwable => Unit): Option[OntologyCustomization] = {
+        val customOpt = Payola.model.ontologyCustomizationModel.getById(id)
+        if (customOpt.isDefined) {
+            val customization = customOpt.get
+            if (customization.owner.isDefined && customization.owner.get == owner) {
+                customOpt
+            }else{
+                failCallback(new ModelException("Logged in user isn't owner of this customization."))
+                None
+            }
+        }else{
+            failCallback(new ModelException("The customization couldn't be found."))
+            None
+        }
+    }
+
     @async def delete(customizationID: String, owner: User = null)
         (successCallback: () => Unit)
         (failCallback: Throwable => Unit)
     {
-        val customOpt = Payola.model.ontologyCustomizationModel.getById(customizationID)
-        if (customOpt.isDefined) {
-            val customization = customOpt.get
-            if (customization.owner.isDefined && customization.owner.get == owner) {
-                Payola.model.ontologyCustomizationModel.remove(customization)
-                successCallback()
-            }else{
-                failCallback(new ModelException("Logged in user isn't owner of this customization."))
-            }
-        }else{
-            failCallback(new ModelException("The customization couldn't be found."))
+        val customOpt = getOntologyCustomizationForIDWithSecurityChecks(customizationID, owner, failCallback)
+        customOpt.foreach { customization =>
+            Payola.model.ontologyCustomizationModel.remove(customization)
+            successCallback()
+        }
+    }
+
+    @async def rename(customizationID: String, newName: String, owner: User = null)
+        (successCallback: () => Unit)
+        (failCallback: Throwable => Unit)
+    {
+        val customOpt = getOntologyCustomizationForIDWithSecurityChecks(customizationID, owner, failCallback)
+        customOpt.foreach { customization =>
+            customization.name = newName
+            Payola.model.ontologyCustomizationModel.persist(customization)
+            successCallback()
         }
     }
 

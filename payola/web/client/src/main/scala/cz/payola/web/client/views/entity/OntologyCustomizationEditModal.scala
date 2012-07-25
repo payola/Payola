@@ -13,7 +13,7 @@ class OntologyCustomizationEditModal(customization: OntologyCustomization)
         "ontology-customization-modal")
 {
     // Event handlers
-    val ontologyNameHasChanged = new UnitEvent[this.type, EventArgs[this.type]]
+    val ontologyNameChanged = new UnitEvent[this.type, EventArgs[this.type]]
 
     val classFillColorChanged = new UnitEvent[this.type, ClassCustomizationModificationEventArgs[this.type, String]]
 
@@ -34,14 +34,13 @@ class OntologyCustomizationEditModal(customization: OntologyCustomization)
     enclosingDiv.addCssClass("container-fluid")
 
     // Add the input control and other buttons to the customizationNameRowDiv
-    val customizationNameFieldTitle = new Div(List(new Text("Name: ")), "span1")
+    val customizationNameFieldTitle = new Div(List(new Text("Name: ")), "span1 inline-display")
 
-    val customizationNameField = new TextInputControl("", "custom-name", customization.name, "", "span6")
+    val customizationNameField = new TextInputControl("", "custom-name", customization.name, "", "span5")
     customizationNameField.input.keyReleased += { e =>
-        ontologyNameHasChanged.trigger(new EventArgs[OntologyCustomizationEditModal.this.type](this))
+        ontologyNameChanged.trigger(new EventArgs[OntologyCustomizationEditModal.this.type](this))
         true
     }
-    customizationNameField.render(customizationNameRowDiv.domElement)
 
     val shareButtonViewSpace = new Span(Nil)
 
@@ -49,6 +48,7 @@ class OntologyCustomizationEditModal(customization: OntologyCustomization)
     val deleteButtonSpan = new Span(List(deleteButton))
 
     val buttonsDiv = new Div(List(shareButtonViewSpace, deleteButtonSpan), "btn-group span6")
+    buttonsDiv.setAttribute("style", "display: inline;")
 
     val customizationNameRowDiv = new Div(List(customizationNameFieldTitle, customizationNameField, buttonsDiv))
     val rowDiv = new Div()
@@ -131,9 +131,7 @@ class OntologyCustomizationEditModal(customization: OntologyCustomization)
       */
     private def setupDivAttributes() {
         customizationNameRowDiv.addCssClass("row-fluid")
-        customizationNameRowDiv.addCssClass("well")
         rowDiv.addCssClass("row-fluid")
-
 
         classUnorderedList.addCssClass("nav")
         classUnorderedList.addCssClass("nav-list")
