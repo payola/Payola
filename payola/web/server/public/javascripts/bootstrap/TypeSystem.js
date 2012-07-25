@@ -31,7 +31,6 @@ function extendJsArrayToArrayBuffer(jsArrayPrototype) {
 }
 
 extendJsArrayToArrayBuffer(Array.prototype);
-extendJsArrayToArrayBuffer(NodeList.prototype);
 
 // The CanvasPixelArray.prototype doesn't work in Chrome so the prototype has to be obtained from an instance.
 var pixelArrayPrototype = document.createElement('canvas').getContext('2d').getImageData(0, 0, 1, 1).data.__proto__;

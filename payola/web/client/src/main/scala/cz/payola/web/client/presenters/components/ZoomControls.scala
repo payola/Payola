@@ -40,7 +40,9 @@ class ZoomControls(var currentZoom: Double) extends ComposedView
         false
     }
 
-    def createSubViews = List(new Div(List(minus, currentZoomSpan, plus), "pull-right"))
+    def createSubViews = {
+        List(new Div(List(minus, currentZoomSpan, plus), "pull-right").setAttribute("style", "margin: 0 5px;"))
+    }
 
     def reset() {
         setZoom(zoomOrigin)

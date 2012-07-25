@@ -1,8 +1,8 @@
 package s2js.adapters.js.dom
 
-abstract class NodeList
+abstract class NodeList[A <: Node]
 {
     val length: Int
 
-    def item(index: Int): Node
+    def item(index: Int): A
 }

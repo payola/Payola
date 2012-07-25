@@ -7,7 +7,7 @@ abstract class Node
 {
     val baseURI: String
 
-    val childNodes: NodeList
+    val childNodes: NodeList[Node]
 
     val firstChild: Node
 

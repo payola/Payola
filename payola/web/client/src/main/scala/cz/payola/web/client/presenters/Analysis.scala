@@ -43,7 +43,7 @@ class Analysis(elementToDrawIn: String, analysisId: String) extends Presenter
         graphView.render(document.getElementById(elementToDrawIn))
 
         val graphToolbar = graphView.toolbar
-        val rdfDownloadAnchor = new Anchor(List(new Text(" Download As RDF")))
+        val rdfDownloadAnchor = new Anchor(List(new Text("Download As RDF")))
         rdfDownloadAnchor.mouseClicked += { e =>
             downloadResultAsRDF()
             true

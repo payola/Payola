@@ -15,13 +15,15 @@ trait UserModelComponent extends EntityModelComponent
             uniqueKeyCheckedPersist(entity, "name")
         }
 
-        def create(email: String, password: String) {
+        def create(email: String, password: String): User = {
             val user = new User(email)
             user.password = cryptPassword(password)
             user.email = email
             persist(user)
 
             payolaStorageModel.createUsersPrivateStorage(user)
+
+            user
         }
 
         def getByCredentials(name: String, password: String): Option[User] = {

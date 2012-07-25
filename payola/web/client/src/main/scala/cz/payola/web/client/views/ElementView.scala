@@ -7,6 +7,7 @@ import cz.payola.web.client.events.BrowserEvent
 import cz.payola.web.client.View
 import s2js.compiler.javascript
 import s2js.adapters.js.browser.window
+import cz.payola.web.client.views.elements.Text
 
 abstract class ElementView[A <: dom.Element](domElementName: String, val subViews: Seq[View], cssClass: String)
     extends View
@@ -46,7 +47,10 @@ abstract class ElementView[A <: dom.Element](domElementName: String, val subView
     def render(parent: dom.Element) {
         parentElement = Some(parent)
         parent.appendChild(domElement)
-        subViews.foreach(_.render(domElement))
+        subViews.foreach { v =>
+            new Text(" ").render(domElement)
+            v.render(domElement)
+        }
     }
 
     def destroy() {
@@ -57,17 +61,20 @@ abstract class ElementView[A <: dom.Element](domElementName: String, val subView
         domElement.getAttribute(name)
     }
 
-    def setAttribute(name: String, value: String) {
+    def setAttribute(name: String, value: String): this.type = {
         domElement.setAttribute(name, value)
+        this
     }
 
-    def addCssClass(cssClass: String) {
+    def addCssClass(cssClass: String): this.type =  {
         removeCssClass(cssClass)
         setAttribute("class", getAttribute("class") + " " + cssClass)
+        this
     }
 
-    def removeCssClass(cssClass: String) {
+    def removeCssClass(cssClass: String): this.type =  {
         setAttribute("class", getAttribute("class").replaceAllLiterally(cssClass, ""))
+        this
     }
 
     def id: String = {
