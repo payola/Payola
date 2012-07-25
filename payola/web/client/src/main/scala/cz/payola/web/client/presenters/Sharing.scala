@@ -22,7 +22,9 @@ class Sharing(shareButtonPlaceholderClass: String, entityType: String) extends P
 
     }
 
-    placeholderList.foreach{ placeholder =>
+    var i = 0
+    while (i < placeholderList.length) {
+        val placeholder = placeholderList.item(i)
         val btn = new ShareButton(placeholder.getAttribute("data-shareable-entity-public").toBoolean)
         btn.render(placeholder)
 
@@ -46,6 +48,8 @@ class Sharing(shareButtonPlaceholderClass: String, entityType: String) extends P
             shareToUserHandler(id)
             false
         }
+
+        i+= 1
     }
 
     def setIsPublicHandler(id: String, shareButton: ShareButton) {

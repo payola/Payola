@@ -47,28 +47,12 @@ class GraphPresenter(val viewElement: dom.Element) extends Presenter
     }
 
     private def onOntologyCustomizationEditClicked(e: EventArgs[OntologyCustomization]): Boolean = {
-        // The loading has to be delayed after the event is handled, because the page blocking interferes with the
-        // drop down menu.
-        delayed(0) { () =>
-            blockPage("Loading the ontology customization.")
-            OntologyCustomizationManager.getCustomizationByID(e.target.id) { customization =>
-                unblockPage()
-                new OntologyCustomizationEditor(customization).initialize()
-            }(fatalErrorHandler(_))
-        }
+        new OntologyCustomizationEditor(e.target).initialize()
         false
     }
 
     private def onOntologyCustomizationSelected(e: EventArgs[OntologyCustomization]): Boolean = {
-        // The loading has to be delayed after the event is handled, because the page blocking interferes with the
-        // drop down menu.
-        delayed(0) { () =>
-            blockPage("Loading the ontology customization.")
-            OntologyCustomizationManager.getCustomizationByID(e.target.id) { customization =>
-                unblockPage()
-                view.updateOntologyCustomization(Some(customization))
-            }(fatalErrorHandler(_))
-        }
+        view.updateOntologyCustomization(Some(e.target))
         false
     }
 

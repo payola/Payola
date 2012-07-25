@@ -39,23 +39,6 @@ class OntologyCustomizationsByOwnership(
         successCallback(Payola.model.ontologyCustomizationModel.create(name, ontologyURL, owner))
     }
 
-    @async @secured def getCustomizationByID(id: String, user: User = null)(successCallback: cz.payola.common.entities.settings.OntologyCustomization => Unit)(failCallback: Throwable => Unit) {
-        val opt = Payola.model.ontologyCustomizationModel.getAccessibleToUserById(Some(user), id)
-        if (opt.isDefined) {
-            successCallback(opt.get)
-        }else{
-            failCallback(new RpcException("Couldn't find customization."))
-        }
-    }
-
-    @async @secured def getUsersCustomizations(user: User = null)(successCallback: Seq[cz.payola.common.entities.settings.OntologyCustomization] => Unit)(failCallback: Throwable => Unit) = {
-        try {
-            successCallback(Payola.model.ontologyCustomizationModel.getAccessibleToUser(Some(user)))
-        }catch{
-            case t: Throwable => failCallback(t)
-        }
-    }
-
     private def getClassCustomizationFromCustomization(customizationID: String, classURI: String, user: User, failCallback: Throwable => Unit): Option[ClassCustomization] = {
         val optCustomization = Payola.model.ontologyCustomizationModel.getAccessibleToUserById(Some(user), customizationID)
         if (optCustomization.isEmpty){

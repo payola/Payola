@@ -23,9 +23,6 @@ object DatabaseInitializer extends App
     }
 
     private def persistInitialData() {
-        val admin = Payola.model.userModel.create("admin@payola.cz", "payola!")
-        val owner = model.userRepository.persist(admin)
-
         val sparqlEndpointPlugin = new SparqlEndpoint
         val payolaStoragePlugin = new PayolaStorage
         val concreteSparqlQueryPlugin = new ConcreteSparqlQuery
@@ -53,11 +50,14 @@ object DatabaseInitializer extends App
             model.pluginRepository.persist(p)
         }
 
+        // Create the admin.
+        val admin = Payola.model.userModel.create("admin@payola.cz", "payola!")
+
         // Persist data sources.
         List(
-            DataSource("DBpedia.org", Some(owner),
+            DataSource("DBpedia.org", Some(admin),
                 sparqlEndpointPlugin.createInstance().setParameter("EndpointURL", "http://dbpedia.org/sparql")),
-            DataSource("Opendata.cz", Some(owner),
+            DataSource("Opendata.cz", Some(admin),
                 sparqlEndpointPlugin.createInstance().setParameter("EndpointURL", "http://ld.opendata.cz:8894/sparql"))
         ).foreach { d =>
             d.isPublic = true
@@ -67,7 +67,7 @@ object DatabaseInitializer extends App
         // persist analysis
         val a = new cz.payola.domain.entities.Analysis(
             "DB: Cities with more than 2 million habitants with countries",
-            Some(owner))
+            Some(admin))
         a.isPublic = true
         val analysis = model.analysisRepository.persist(a)
 
