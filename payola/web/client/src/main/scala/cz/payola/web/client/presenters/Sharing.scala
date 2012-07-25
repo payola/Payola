@@ -1,18 +1,16 @@
 package cz.payola.web.client.presenters
 
 import s2js.adapters.js.browser.document
-import cz.payola.web.client.presenters.components.ShareButton
+import cz.payola.web.client.views.entity.ShareButton
 import s2js.compiler.javascript
 import cz.payola.web.shared._
 import cz.payola.web.client.views.bootstrap._
-import scala.Some
 import s2js.adapters.js.browser.window
 import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
 import cz.payola.web.client.Presenter
 import cz.payola.web.client.views.elements._
-import scala.Some
 import cz.payola.common.entities._
-import scala.Some
+import cz.payola.web.client.events.BrowserEventArgs
 
 class Sharing(shareButtonPlaceholderClass: String, entityType: String) extends Presenter
 {
@@ -25,68 +23,55 @@ class Sharing(shareButtonPlaceholderClass: String, entityType: String) extends P
     var i = 0
     while (i < placeholderList.length) {
         val placeholder = placeholderList.item(i)
-        val btn = new ShareButton(placeholder.getAttribute("data-shareable-entity-public").toBoolean)
-        btn.render(placeholder)
-
         val id = placeholder.getAttribute("data-shareable-entity-id")
+        val btn = new ShareButton(id, placeholder.getAttribute("data-shareable-entity-public").toBoolean)
 
-        btn.makePublicLink.mouseClicked += {e =>
-            setIsPublicHandler(id, btn)
-            false
-        }
+        btn.makePublicButton.mouseClicked += onMakePublicButtonClicked _
+        btn.dropDownButton.anchor.mouseClicked += onMakePublicButtonClicked _
+        btn.shareToGroupButton.mouseClicked += onShareToGroupButtonClicked _
+        btn.shareToUserButton.mouseClicked += onShareToUserButtonClicked _
 
-        btn.dropDownButton.anchor.mouseClicked += { e =>
-            setIsPublicHandler(id, btn)
-            false
-        }
-
-        btn.shareToGroupLink.mouseClicked += {e =>
-            shareToGroupHandler(id)
-            false
-        }
-        btn.shareToUserLink.mouseClicked += {e =>
-            shareToUserHandler(id)
-            false
-        }
-
+        btn.render(placeholder)
         i+= 1
     }
 
-    def setIsPublicHandler(id: String, shareButton: ShareButton) {
-        val isPublicToSet = !shareButton.getIsPublic
-        shareButton.setActive()
-        SharingData.setIsPublic(entityType, id, isPublicToSet){ ok =>
-            shareButton.setIsPublic(isPublicToSet)
-            shareButton.setActive(false)
+    def onMakePublicButtonClicked(e: BrowserEventArgs[ShareButton]): Boolean = {
+        val isPublicToSet = !e.target.isPublic
+        e.target.setActive()
+        SharingData.setIsPublic(entityType, e.target.entityId, isPublicToSet){ ok =>
+            e.target.isPublic = isPublicToSet
+            e.target.setActive(false)
         }{ error => }
+        false
     }
 
-    def shareToGroupHandler(id: String) {
+    def onShareToGroupButtonClicked(e: BrowserEventArgs[ShareButton]): Boolean = {
         val modal = createModal(entityType,"group",{ (callback,value) =>
-            SharingData.shareToGroup(entityType,id,value){ ok =>
+            SharingData.shareToGroup(entityType,e.target.entityId,value){ ok =>
                 callback
                 showSuccessModal(entityType,"group")
             }{ err => }
         })
 
         blockPage("Loading initial data.")
-        SharingData.getAlreadySharedTo(entityType, id, "group"){ groups =>
+        SharingData.getAlreadySharedTo(entityType, e.target.entityId, "group"){ groups =>
             modal.render()
             bindGroupSelect(groups)
             unblockPage()
         }{err => }
+        false
     }
 
-    def shareToUserHandler(id: String) {
+    def onShareToUserButtonClicked(e: BrowserEventArgs[ShareButton]): Boolean = {
         val modal = createModal(entityType,"user",{ (callback,value) =>
-            SharingData.shareToUser(entityType,id,value){ ok =>
+            SharingData.shareToUser(entityType,e.target.entityId,value){ ok =>
                 callback
                 showSuccessModal(entityType,"user")
             }{ err => }
         })
 
         blockPage("Loading initial data.")
-        SharingData.getAlreadySharedTo(entityType, id, "user"){ users =>
+        SharingData.getAlreadySharedTo(entityType, e.target.entityId, "user"){ users =>
             modal.render()
             bindUserSelect(users)
             unblockPage()
