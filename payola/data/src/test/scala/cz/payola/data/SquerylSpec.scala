@@ -456,25 +456,25 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
 
         // Assert eager-loading
         for(ontologyCustomization <- customizations) {
-            val oc = ontologyCustomizationRepository.getById(ontologyCustomization.id).get
-                assert(oc.owner == ontologyCustomization.owner)
-                assert(oc.name == ontologyCustomization.name)
-                assert(oc.ontologyURL == ontologyCustomization.ontologyURL)
-                assert(oc.classCustomizations.size == ontologyCustomization.classCustomizations.size)
+            val persistedOc = ontologyCustomizationRepository.getById(ontologyCustomization.id).get
+                assert(persistedOc.owner == ontologyCustomization.owner)
+                assert(persistedOc.name == ontologyCustomization.name)
+                assert(persistedOc.ontologyURL == ontologyCustomization.ontologyURL)
+                assert(persistedOc.classCustomizations.size == ontologyCustomization.classCustomizations.size)
 
-            for (cc <- ontologyCustomization.classCustomizations){
-                val persistedCc = oc.classCustomizations.find(_.id == cc.id).get
-                    assert(persistedCc.uri == cc.uri)
-                    assert(persistedCc.fillColor == cc.fillColor)
-                    assert(persistedCc.radius == cc.radius)
-                    assert(persistedCc.glyph == cc.glyph)
-                    assert(cc.propertyCustomizations.size == persistedCc.propertyCustomizations.size)
+            for (classCustomization <- ontologyCustomization.classCustomizations){
+                val persistedCc = persistedOc.classCustomizations.find(_.id == classCustomization.id).get
+                    assert(persistedCc.uri == classCustomization.uri)
+                    assert(persistedCc.fillColor == classCustomization.fillColor)
+                    assert(persistedCc.radius == classCustomization.radius)
+                    assert(persistedCc.glyph == classCustomization.glyph)
+                    assert(persistedCc.propertyCustomizations.size == classCustomization.propertyCustomizations.size)
 
-                for (pc <- cc.propertyCustomizations){
-                    val persistedPc = persistedCc.propertyCustomizations.find(_.id == pc.id).get
-                        assert(persistedPc.uri == pc.uri)
-                        assert(persistedPc.strokeWidth == pc.strokeWidth)
-                        assert(persistedPc.strokeColor == pc.strokeColor)
+                for (propertyCustomization <- classCustomization.propertyCustomizations){
+                    val persistedPc = persistedCc.propertyCustomizations.find(_.id == propertyCustomization.id).get
+                        assert(persistedPc.uri == propertyCustomization.uri)
+                        assert(persistedPc.strokeWidth == propertyCustomization.strokeWidth)
+                        assert(persistedPc.strokeColor == propertyCustomization.strokeColor)
                 }
             }
         }
