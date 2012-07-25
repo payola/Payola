@@ -14,9 +14,13 @@ import scala.Seq
 import scala.collection.immutable.HashMap
 import scala.Some
 import s2js.adapters.js.dom.Element
+import cz.payola.web.client.views.ComposedView
 
-abstract class PluginInstanceView(val id: String, val plugin: Plugin, var predecessors: Seq[PluginInstanceView] = List(),
-    defaultValues: Map[String, String] = new HashMap[String, String]())
+abstract class PluginInstanceView(
+    val id: String,
+    val plugin: Plugin,
+    var predecessors: Seq[PluginInstanceView] = Nil,
+    defaultValues: Map[String, String] = HashMap.empty[String, String])
     extends View
 {
     private val heading = new Heading(List(new Text(plugin.name)), 3)
@@ -41,7 +45,7 @@ abstract class PluginInstanceView(val id: String, val plugin: Plugin, var predec
         this.parentElement = Some(parent)
         successors.render(parent)
 
-        if (!predecessors.isEmpty) {
+        if (predecessors.nonEmpty) {
             parent.insertBefore(successors.domElement, predecessors(0).domElement)
         }
 
