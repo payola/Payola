@@ -42,6 +42,11 @@ class EditablePluginInstanceView(id: String, pluginI: Plugin, predecessors: Seq[
             case p: BooleanParameter => new CheckboxInputControl(param.name, param.id, defaultVal, "Enter parameter value")
             case p: FloatParameter => new NumericInputControl(param.name, param.id, defaultVal, "Enter parameter value")
             case p: IntParameter => new NumericInputControl(param.name, param.id, defaultVal, "Enter parameter value")
+            case p: StringParameter => if(p.isMultiline){
+                new TextAreaInputControl(param.name, param.id, defaultVal, "Enter parameter value")
+            }else{
+                new TextInputControl(param.name, param.id, defaultVal, "Enter parameter value")
+            }
             case _ => new TextInputControl(param.name, param.id, defaultVal, "Enter parameter value")
         }
 
