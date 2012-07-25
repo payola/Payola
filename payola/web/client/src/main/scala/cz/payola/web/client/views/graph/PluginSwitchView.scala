@@ -58,7 +58,7 @@ class PluginSwitchView extends GraphView with ComposedView
         Nil
     )
 
-    val ontologyCustomizationCreateButton = new Anchor(List(new Icon(Icon.plus), new Text("Create new settings")))
+    val ontologyCustomizationCreateButton = new Anchor(List(new Icon(Icon.plus), new Text("Create new customization")))
 
     val toolbar = new Div(List(pluginChangeButton, ontologyCustomizationsButton), "btn-toolbar").setAttribute(
         "style", "margin-bottom: 15px;")

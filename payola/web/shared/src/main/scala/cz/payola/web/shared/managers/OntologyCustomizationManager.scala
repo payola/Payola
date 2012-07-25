@@ -6,7 +6,8 @@ import cz.payola.domain.entities.settings._
 import cz.payola.web.shared.Payola
 import s2js.runtime.shared.rpc.RpcException
 import scala.Some
-import cz.payola.common.ValidationException
+import cz.payola.model.ModelException
+import cz.payola.common.exception.ValidationException
 
 /**
   * A set of ontology customizations divided by their ownership.
@@ -112,6 +113,29 @@ class OntologyCustomizationsByOwnership(
         }
     }
 
+    @async def delete(customizationID: String, owner: User = null)
+        (successCallback: () => Unit)
+        (failCallback: Throwable => Unit)
+    {
+        val customOpt = getOntologyCustomizationForIDWithSecurityChecks(customizationID, owner, failCallback)
+        customOpt.foreach { customization =>
+            Payola.model.ontologyCustomizationModel.remove(customization)
+            successCallback()
+        }
+    }
+
+    @async def rename(customizationID: String, newName: String, owner: User = null)
+        (successCallback: () => Unit)
+        (failCallback: Throwable => Unit)
+    {
+        val customOpt = getOntologyCustomizationForIDWithSecurityChecks(customizationID, owner, failCallback)
+        customOpt.foreach { customization =>
+            customization.name = newName
+            Payola.model.ontologyCustomizationModel.persist(customization)
+            successCallback()
+        }
+    }
+
     private def getClassCustomizationFromCustomization(customizationID: String, classURI: String, user: User, failCallback: Throwable => Unit): Option[ClassCustomization] = {
         val optCustomization = Payola.model.ontologyCustomizationModel.getAccessibleToUserById(Some(user), customizationID)
         if (optCustomization.isEmpty){
@@ -162,6 +186,23 @@ class OntologyCustomizationsByOwnership(
         }
     }
 
+    private def getOntologyCustomizationForIDWithSecurityChecks(id: String, owner: User, failCallback: Throwable => Unit): Option[OntologyCustomization] = {
+        val customOpt = Payola.model.ontologyCustomizationModel.getById(id)
+        if (customOpt.isDefined) {
+            val customization = customOpt.get
+            if (customization.owner.isDefined && customization.owner.get == owner) {
+                customOpt
+            }else{
+                failCallback(new ModelException("Logged in user isn't owner of this customization."))
+                None
+            }
+        }else{
+            failCallback(new ModelException("The customization couldn't be found."))
+            None
+        }
+    }
+
+
     private def validateChar(value: String, field: String): Option[Char] = {
         if (value.size > 1){
             throw new ValidationException(field, "Value is too long!")
@@ -177,7 +218,7 @@ class OntologyCustomizationsByOwnership(
         }
 
         val int = value.toInt
-        if (int.toString = "NaN"){
+        if (int.toString == "NaN"){
             throw new ValidationException(field, "Value is out of range")
         }
 

@@ -4,7 +4,9 @@ import cz.payola.domain._
 import entities.{Group, User}
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
+import cz.payola.common.exception._
 import cz.payola.common.ValidationException
+import cz.payola.common.exception.ValidationException
 
 class GroupTest extends FlatSpec with ShouldMatchers {
     it should "retain values passed in the constructor" in {
