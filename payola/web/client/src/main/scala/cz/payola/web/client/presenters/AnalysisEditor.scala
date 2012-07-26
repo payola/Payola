@@ -11,6 +11,7 @@ class AnalysisEditor(parentElementId: String, analysisIdParam: String)
     analysisId = analysisIdParam
 
     override def initialize() {
+        blockPage("Loading analysis data")
         AnalysisBuilderData.getAnalysis(analysisId) { analysis =>
 
             lockAnalysisAndLoadPlugins()
@@ -24,6 +25,7 @@ class AnalysisEditor(parentElementId: String, analysisIdParam: String)
             bindDeleteButtonClickedEvent(view.visualiser)
             constructBranches(analysis)
             bindMenuEvents(view)
+            unblockPage()
 
             true
         } { error => fatalErrorHandler(error) }

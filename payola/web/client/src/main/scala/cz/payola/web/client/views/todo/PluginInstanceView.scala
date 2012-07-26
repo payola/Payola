@@ -22,7 +22,7 @@ abstract class PluginInstanceView(
 {
     private val heading = new Heading(List(new Text(plugin.name)), 3)
 
-    private val paramsDiv = new Div(getParameterViews)
+    private val paramsDiv = new Div(getParameterViews, "parameters")
 
     private val controlViews = getAdditionalControlsViews
 
@@ -84,11 +84,11 @@ abstract class PluginInstanceView(
     }
 
     def showControls() {
-        additionalControls.show()
+        additionalControls.removeCssClass("hidden-element")
     }
 
     def hideControls() {
-        additionalControls.hide()
+        additionalControls.addCssClass("hidden-element")
     }
 
     def setRunning(){

@@ -27,9 +27,10 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
     var intervalHandler: Option[Int] = None
 
     def initialize() {
-        DomainData.getAnalysisById(analysisId) {
-            analysis =>
-                initUI(analysis)
+        blockPage("Loading analysis data")
+        DomainData.getAnalysisById(analysisId) { analysis =>
+            initUI(analysis)
+            unblockPage()
         } {
             err => fatalErrorHandler(err)
         }
@@ -157,6 +158,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
                     case s: EvaluationInProgress => renderEvaluationProgress(s, view)
                     case s: EvaluationError => evaluationErrorHandler(s, view)
                     case s: EvaluationSuccess => evaluationSuccessHandler(s, analysis, view)
+                    case s: EvaluationTimeout => evaluationTimeout(view)
                 }
 
                 if (state.isInstanceOf[EvaluationInProgress]) {
@@ -181,6 +183,17 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         }
     }
 
+    def evaluationTimeout(view: AnalysisRunnerView) {
+        view.overviewView.controls.progressDiv.addCssClass("progress-danger")
+        view.overviewView.controls.progressDiv.removeCssClass("progress-success")
+        view.overviewView.controls.progressDiv.removeCssClass("active")
+        analysisDone = true
+        view.overviewView.controls.stopButton.addCssClass("disabled")
+        intervalHandler.foreach(window.clearInterval(_))
+
+        AlertModal.display("The analysis has timed out.")
+    }
+
     def evaluationSuccessHandler(success: EvaluationSuccess, analysis: Analysis, view: AnalysisRunnerView) {
         view.overviewView.controls.progressValueBar.addCssClass("progress-danger")
         view.overviewView.controls.progressValueBar.removeCssClass("progress-success")
@@ -191,7 +204,6 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         success.instanceErrors.foreach{ err =>
             view.overviewView.analysisVisualizer.setInstanceError(err._1.id, err._2)
         }
-
 
         view.overviewView.controls.runBtn.addCssClass("btn-success")
         view.overviewView.controls.progressDiv.removeCssClass("active")
