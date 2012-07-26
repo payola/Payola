@@ -54,11 +54,12 @@ class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) 
             "This action cannot be undone.", "Delete", "Cancel", true, "alert-error")
         
         promptModal.confirming += { e =>
+            view.block("Deleting the ontology customization")
             Model.deleteOntologyCustomization(ontologyCustomization) { () =>
                 view.destroy()
                 AlertModal.display("Ontology customization successfully deleted.", "Success!", "alert-success")
             }(fatalErrorHandler(_))
-            false
+            true
         }
         
         promptModal.render()

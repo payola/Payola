@@ -47,7 +47,7 @@ body {
 
 label {
     float: left;
-    width: 250px;
+    padding: 5px 10px 5px 0;
 }
 
 .instance h3 {
@@ -75,7 +75,6 @@ input.active, textarea.active {
     background: url('spinner.gif') no-repeat 100%, -ms-linear-gradient(top, #ffffff 85%, #eeeeee 99%);
     background: url('spinner.gif') no-repeat 100%, linear-gradient(top, #ffffff 85%, #eeeeee 99%);
     background-position: 98%;
-    padding-right: 25px !important;
 }
 
 input[type="checkbox"].active:after {
@@ -139,25 +138,6 @@ input[type="checkbox"].active:after {
     position: relative;
 }
 
-.ontology-customization-class-div {
-    min-height: 30px;
-    horizontal-align: center;
-    padding: 5px;
-    background: #DDDBFE;
-    color: black;
-    border: 1px solid #a6a4a9;
-}
-
-.selected-ontology-customization-class-div {
-    background: #9E9AD1;
-}
-
-.property-list-header {
-    background: #ABABAB;
-    margin-bottom: 10px;
-    padding-left: 5px;
-}
-
 .modal-inner-view {
     height: 250px;
     overflow: auto;
@@ -167,13 +147,9 @@ input[type="checkbox"].active:after {
     background: #FFFEE2;
 }
 
-.ontology-customization-modal {
-    width: 800px;
-    max-width: 1024px;
-}
-
-.ontology-customization-modal .share-button {
-    display: inline;
+.large-modal {
+    width: 900px !important;
+    margin-left: -450px !important;
 }
 
 .inline-display {

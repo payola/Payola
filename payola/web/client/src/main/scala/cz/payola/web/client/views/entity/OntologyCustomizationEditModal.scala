@@ -11,7 +11,7 @@ import cz.payola.web.client.views.graph.visual.Color
 import cz.payola.web.client.presenters.entity.settings._
 
 class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomization)
-    extends Modal("Edit ontology customization", Nil, Some("Done"), None, false, "ontology-customization-modal")
+    extends Modal("Edit ontology customization", Nil, Some("Done"), None, false, "large-modal")
 {
     val classFillColorChanged = new UnitEvent[ColorPane, ClassCustomizationEventArgs[ColorPane]]
 
@@ -41,29 +41,26 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
         classListItem
     }
 
-    private val propertiesDiv = new Div(Nil, "span6 modal-inner-view")
+    private val propertiesDiv = new Div(Nil, "span8")
 
     override val body = List(
         new Div(List(
             new Div(List(
                 ontologyCustomizationName,
-                new Div(List(
-                    shareButtonViewSpace,
-                    new Span(List(deleteButton))),
-                    "btn-group span6"
-                ).setAttribute("style", "display: inline;")),
+                new Div(List(shareButtonViewSpace), "btn-group span3"),
+                new Div(List(deleteButton), "btn-group span3")),
                 "row-fluid"
             ),
             new Div(List(
                 new Div(
                     List(new UnorderedList(classCustomizationListItems, "nav nav-list")),
-                    "span6 modal-inner-view well no-padding"
+                    "span4 modal-inner-view well no-padding"
                 ).setAttribute("style", "padding: 8px 0;"),
                 propertiesDiv),
                 "row-fluid"
             )),
             "container-fluid"
-        ).setAttribute("style", "padding: 0px;")
+        ).setAttribute("style", "padding: 0;")
     )
 
     override def render(parent: dom.Element) {
@@ -110,7 +107,8 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
     private def renderPropertyCustomizationViews(classCustomization: ClassCustomization,
         propertyCustomization: PropertyCustomization) {
 
-        val headingDiv = new Div(List(new Text(uriToName(propertyCustomization.uri))), "label label-info")
+        val headingDiv = new Div(List(new Text("Property " + uriToName(propertyCustomization.uri))), "label label-info")
+        headingDiv.setAttribute("style", "padding: 5px; margin: 10px 0;")
         val strokeColor = new ColorPane("", "Stroke color:", Color.fromHex(propertyCustomization.strokeColor))
         val strokeWidth = new NumericInputControl("Stroke width:", "", propertyCustomization.strokeWidth.toString, "")
 
