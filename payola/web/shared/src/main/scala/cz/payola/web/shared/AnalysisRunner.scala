@@ -26,7 +26,7 @@ import cz.payola.common.exception.ValidationException
 
         val evaluationId = IDGenerator.newId
         val timeout = scala.math.min(1800, timeoutSeconds)
-        runningEvaluations.put(evaluationId, (user, analysis.evaluate(Some(timeout))))
+        runningEvaluations.put(evaluationId, (user, analysis.evaluate(Some(timeout*1000))))
 
         successCallback(evaluationId)
     }
