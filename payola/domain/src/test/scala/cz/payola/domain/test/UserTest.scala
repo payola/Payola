@@ -5,7 +5,6 @@ import entities.{Group, User}
 import org.scalatest.FlatSpec
 import org.scalatest.matchers._
 import cz.payola.common.exception._
-import cz.payola.common.ValidationException
 import cz.payola.common.exception.ValidationException
 
 class UserTest extends FlatSpec with ShouldMatchers {

@@ -332,7 +332,7 @@ trait SchemaComponent
             factoryFor(dataSources) is { new DataSource("", "", None, null, Nil, false, "", true) },
             factoryFor(privileges) is { new PrivilegeDbRepresentation("", "", "", "", "", "", "") },
             factoryFor(ontologyCustomizations) is { new OntologyCustomization("", "", "", None, Nil, false) },
-            factoryFor(classCustomizations) is { new ClassCustomization("", "", "", 0, None, Nil) },
+            factoryFor(classCustomizations) is { new ClassCustomization("", "", "", 0, "", Nil) },
             factoryFor(propertyCustomizations) is { new PropertyCustomization("", "", "", 0) }
         )
 
@@ -511,7 +511,7 @@ trait SchemaComponent
                 declare(
                     c.id is (primaryKey, (dbType(COLUMN_TYPE_ID))),
                     c.uri is (dbType(COLUMN_TYPE_URI)),
-                    c._g is (dbType("varchar(1)")),
+                    c.glyph is (dbType("varchar(1)")),
                     c.fillColor is (dbType(COLUMN_TYPE_COLOR)),
                     c.ontologyCustomizationId is (dbType(COLUMN_TYPE_ID))
                 ))

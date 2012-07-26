@@ -182,7 +182,7 @@ class OntologyCustomizationEditModal(customization: OntologyCustomization)
                 ColorPane("class-fill-color-input", "Fill color:", Color.fromHex(selectedClassCustomization.fillColor))
         val radiusInput = new TextInputControl("Radius:", "class-radius", selectedClassCustomization.radius.toString, "")
         val glyphInput = new
-                TextInputControl("Glyph:", "class-glyph", selectedClassCustomization.glyph.getOrElse('\0').toString, "")
+                TextInputControl("Glyph:", "class-glyph", selectedClassCustomization.glyph, "")
 
         // Place the event on closed. When not closed, the color is changing with
         // every single change - we'd flood the server with dozens of requests

@@ -75,8 +75,7 @@ class OntologyCustomizationsByOwnership(
         (failCallback: Throwable => Unit) {
 
         try {
-            val charOpt = validateChar(value, "glyph")
-            setClassAttribute(customizationID, classURI, { _.glyph = charOpt }, user, successCallback, failCallback)
+            setClassAttribute(customizationID, classURI, { _.glyph = value }, user, successCallback, failCallback)
         } catch {
             case t: Throwable => failCallback(t)
         }
@@ -202,27 +201,17 @@ class OntologyCustomizationsByOwnership(
         }
     }
 
-
-    private def validateChar(value: String, field: String): Option[Char] = {
-        if (value.size > 1){
-            throw new ValidationException(field, "Value is too long!")
-        }
-
-        // Return char option or None for empty string
-        if (value.size == 0) None else Some(value(0))
-    }
-
     private def validateInt(value: String, field: String): Int = {
         if (!value.matches("^[0-9]+$")){
             throw new ValidationException(field, "Value can contain only digits")
         }
 
-        val int = value.toInt
-        if (int.toString == "NaN"){
-            throw new ValidationException(field, "Value is out of range")
+        try
+        {
+            value.toInt
+        } catch {
+            case t: Throwable => throw new ValidationException(field, "Value is out of range")
         }
-
-        int
     }
 }
 

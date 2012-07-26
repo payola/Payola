@@ -85,8 +85,7 @@ class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) 
                 args.input.setIsActive(false)
                 args.input.setOk()
 
-                val glyph = if (args.value == "") None else Some(args.value(0))
-                getClassWithURI(args.classURI).glyph = glyph
+                getClassWithURI(args.classURI).glyph = args.value
                 postValueChangeNotification()
             } { t: Throwable => failHandler(t, args.input) }
         }, saveAsYouTypeTimeout))
