@@ -85,7 +85,7 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
     private def renderClassCustomizationViews(classCustomization: ClassCustomization) {
         val fillColor = new ColorPane("", "Fill color:", Color.fromHex(classCustomization.fillColor))
         val radius = new NumericInputControl("Radius:", "", classCustomization.radius.toString, "")
-        val glyph = new TextInputControl("Glyph:", "", classCustomization.glyph.getOrElse('\0').toString, "")
+        val glyph = new TextInputControl("Glyph:", "", classCustomization.glyph, "")
 
         val onFillColorChanged = { e: EventArgs[ColorPane] =>
             classFillColorChanged.trigger(new ClassCustomizationEventArgs(fillColor, classCustomization,

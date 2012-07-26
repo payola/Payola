@@ -8,7 +8,7 @@ class VertexSettingsModel extends SettingsModel
 
     var colorValue = new Color(51, 204, 255, 0.25)
 
-    var glyphValue: Option[Char] = None
+    var glyphValue: String = ""
 
     def radius(typeName: String): Int = {
         val foundCustomization = getCustomization(typeName)
@@ -29,7 +29,7 @@ class VertexSettingsModel extends SettingsModel
         }
     }
 
-    def glyph(typeName: String): Option[Char] = {
+    def glyph(typeName: String): String = {
         val foundCustomization = getCustomization(typeName)
         if(foundCustomization.isDefined && foundCustomization.get.glyph != 0) {
             foundCustomization.get.glyph

@@ -5,8 +5,8 @@ import cz.payola.domain.entities.plugins.concrete._
 import cz.payola.domain.entities.plugins.concrete.data._
 import cz.payola.domain.entities.plugins.concrete.query._
 import cz.payola.data.squeryl.SquerylDataContextComponent
-import cz.payola.domain.entities.User
 import cz.payola.web.shared.Payola
+import cz.payola.domain.entities.settings.OntologyCustomization
 
 object DatabaseInitializer extends App
 {
@@ -47,7 +47,8 @@ object DatabaseInitializer extends App
             join,
             unionPlugin,
             ontologicalFilterPlugin,
-            shortestPathPlugin
+            shortestPathPlugin,
+            openDataCleanStoragePlugin
         ).foreach { p =>
             model.pluginRepository.persist(p)
         }
@@ -109,6 +110,10 @@ object DatabaseInitializer extends App
         analysis.addPluginInstances(citiesCountriesJoin)
         analysis.addBinding(citiesSelection, citiesCountriesJoin, 0)
         analysis.addBinding(countriesProjection, citiesCountriesJoin, 1)
+
+        val url = "http://opendata.cz/pco/public-contracts.xml"
+        val customization = OntologyCustomization.empty(url, "Public contracts", Some(admin))
+        model.ontologyCustomizationRepository.persist(customization)
     }
 }
 

@@ -5,7 +5,6 @@ import org.scalatest.matchers.ShouldMatchers
 import cz.payola.domain.entities.Plugin
 import cz.payola.domain.entities.plugins.parameters.StringParameter
 import cz.payola.common.exception._
-import cz.payola.common.ValidationException
 import cz.payola.common.exception.ValidationException
 
 class PluginTest extends FlatSpec with ShouldMatchers {

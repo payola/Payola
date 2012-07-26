@@ -77,7 +77,7 @@ class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) 
     private def onClassGlyphChanged(e: ClassCustomizationEventArgs[InputControl]) {
         e.target.setIsActive(true)
         OntologyCustomizationManager.setClassGlyph(ontologyCustomization.id, e.classCustomization.uri, e.newValue){
-            () => successHandler(e, () => e.classCustomization.glyph = Some(e.newValue(0)))
+            () => successHandler(e, () => e.classCustomization.glyph = e.newValue)
         }(failHandler(_, e.target))
     }
 

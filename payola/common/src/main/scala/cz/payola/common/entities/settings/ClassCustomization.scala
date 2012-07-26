@@ -18,7 +18,7 @@ trait ClassCustomization extends Entity
 
     protected var _radius: Int
 
-    protected var _glyph: Option[Char]
+    protected var _glyph: String
 
     protected var _propertyCustomizations: immutable.Seq[PropertyCustomizationType]
 
@@ -51,7 +51,8 @@ trait ClassCustomization extends Entity
       * Sets the vertex glyph.
       * @param value New value of the vertex glyph.
       */
-    def glyph_=(value: Option[Char]) {
+    def glyph_=(value: String) {
+        validate(value.length <= 1, "glyph", "Glyph must be string with maximal lenght 1")
         _glyph = value
     }
 
