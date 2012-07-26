@@ -188,11 +188,10 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
         // If the graph has changed, update the graph view.
         if (graph != currentGraph) {
             if(graph.isDefined) {
-                if (graphView.isDefined) {
-                    graphView.get.update(graph.get)
-                } else {
+                if (graphView.isEmpty) {
                     graphView = Some(new views.graph.visual.graph.GraphView(settings))
                 }
+                graphView.get.update(graph.get)
             } else {
                 if (graphView.isDefined) {
                     layers.foreach(_.clear())
@@ -284,7 +283,7 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
                 if (!vertex.get.selected) {
                     graphView.get.deselectAll()
                 }
-                graphView.get.invertVertexSelection(vertex.get)
+                graphView.get.selectVertex(vertex.get)
 
                 if(vertex.get.selected) {
                     val infoTable = new VertexInfoTable(vertex.get.getLiteralVertices)

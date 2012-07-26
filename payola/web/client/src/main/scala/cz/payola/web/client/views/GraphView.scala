@@ -1,7 +1,6 @@
 package cz.payola.web.client.views
 
 import cz.payola.common.rdf._
-import cz.payola.web.client.View
 import cz.payola.web.client.events._
 import cz.payola.common.entities.settings.OntologyCustomization
 

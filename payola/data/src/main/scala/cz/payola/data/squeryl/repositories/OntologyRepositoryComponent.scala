@@ -75,11 +75,11 @@ trait OntologyRepositoryComponent extends TableRepositoryComponent
                  ontologyCustomization.classCustomizations = r._2.groupBy(_._3).flatMap { c =>
                      val classCustomization = c._1
                      if (classCustomization.isDefined) {
-                        classCustomization.get.propertyCustomizations = c._2.flatMap(_._4)
+                        classCustomization.get.propertyCustomizations = c._2.flatMap(_._4).sortBy(_.uri.split("#")(1))
                      }
 
                      classCustomization
-                 } (collection.breakOut)
+                 } (collection.breakOut).sortBy(_.uri.split("#")(1))
 
                  ontologyCustomization
             }(collection.breakOut)

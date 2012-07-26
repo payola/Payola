@@ -27,7 +27,7 @@ object OntologyCustomization
             val propertyCustomizations = c.properties.values.map { p =>
                 new PropertyCustomization(p.uri, "", 0)
             }
-            new ClassCustomization(c.uri, "", 0, None, propertyCustomizations.toList)
+            new ClassCustomization(c.uri, "", 0, "", propertyCustomizations.toList)
         }
 
         new OntologyCustomization(ontologyURL, name, owner, classCustomizations.toList)

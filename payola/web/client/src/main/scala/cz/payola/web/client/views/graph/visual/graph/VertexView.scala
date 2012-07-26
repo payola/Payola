@@ -8,6 +8,7 @@ import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.graph.visual.graph.positioning.LocationDescriptor
 import cz.payola.common.rdf._
 import scala.collection.mutable
+import s2js.adapters.js.browser.window
 
 /**
   * Graphical representation of Vertex object in the drawn graph.
@@ -17,7 +18,7 @@ import scala.collection.mutable
 class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var settings: VertexSettingsModel,
     settingsText: TextSettingsModel, var rdfType: String) extends View[CanvasRenderingContext2D]
 {
-    private var literalVertices = new mutable.HashMap[String, Seq[String]]()
+    private val literalVertices = new mutable.HashMap[String, Seq[String]]()
 
     private var age = 0
 
@@ -46,10 +47,15 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var s
     /**
       * Textual data that should be visualised with this vertex ("over this vertex").
       */
-    val information: Option[InformationView] = vertexModel match {
-        case i: LiteralVertex => Some(new InformationView(i, settingsText))
-        case i: IdentifiedVertex => Some(new InformationView(i, settingsText))
+    private var information: Option[InformationView] = vertexModel match {
+        case i: Vertex => Some(new InformationView(i, settingsText))
         case _ => None
+    }
+
+    def setInformation(data: Option[Vertex]) {
+        if(data.isDefined) {
+            information = Some(new InformationView(data.get, settingsText))
+        }
     }
 
     def getLiteralVertices: mutable.HashMap[String, Seq[String]] = {

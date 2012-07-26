@@ -12,6 +12,8 @@ import cz.payola.web.client.events._
 import cz.payola.web.client.presenters.entity._
 import cz.payola.web.shared.managers.OntologyCustomizationManager
 import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.web.client.presenters.entity.settings._
+import scala.Some
 
 class GraphPresenter(val viewElement: dom.Element) extends Presenter
 {

@@ -71,14 +71,14 @@ class DataSourceBrowser(
     }
 
     private def onGoButtonClicked(e: BrowserEventArgs[_]): Boolean = {
+        graphPresenter.view.updateGraph(None)
         addToHistoryAndGo(view.nodeUriInput.value)
         false
     }
 
     private def onNodeUriKeyPressed(e: BrowserEventArgs[_]): Boolean = {
         if (e.keyCode == 13) {
-            addToHistoryAndGo(view.nodeUriInput.value)
-            false
+            onGoButtonClicked(e)
         } else {
             true
         }
