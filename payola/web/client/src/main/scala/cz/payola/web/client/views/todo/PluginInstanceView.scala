@@ -108,8 +108,15 @@ abstract class PluginInstanceView(
             clearStyle()
             alertDiv.addCssClass("alert-danger")
             hasError = true
+            alertDiv.setAttribute("rel","popover")
+            alertDiv.setAttribute("data-content",message)
+            alertDiv.setAttribute("data-original-title","Error details")
+            activatePopover(alertDiv.domElement)
         }
     }
+
+    @javascript("""jQuery(e).popover()""")
+    def activatePopover(e: Element){}
 
     def clearStyle(){
         alertDiv.removeCssClass("alert-warning")

@@ -233,3 +233,7 @@ input[type="checkbox"].active:after {
 .analysis-controls {
     padding-bottom: 27px !important;
 }
+
+.popover-content p{
+    max-height: 200px;
+}
