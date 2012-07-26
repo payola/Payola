@@ -12,7 +12,7 @@ abstract class InputControl(val label: String, val name: String, value: String, 
     private val infoText = new Text("")
     private val infoSpan = new Span(List(infoText), "help-inline")
     private val controls = new Div(List(input, infoSpan), "controls")
-    private val controlGroup = new Div(List(inputLabel, controls), "control-group")
+    val controlGroup = new Div(List(inputLabel, controls), "control-group")
     controlGroup.addCssClass(cssClass)
 
     def createSubViews = List(controlGroup)

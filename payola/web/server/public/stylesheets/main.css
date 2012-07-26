@@ -45,11 +45,6 @@ body {
     padding: 9px 0;
 }
 
-label {
-    float: left;
-    width: 250px;
-}
-
 .instance h3 {
     text-align: center;
 }
@@ -214,4 +209,17 @@ input[type="checkbox"].active:after {
 .tab-content {
     position: relative;
     overflow: visible;
+}
+
+.timeout-control label {
+    width: 180px;
+    padding-top: 4px;
+}
+
+.none {
+    display: none !important;
+}
+
+.analysis-controls {
+    padding-bottom: 27px !important;
 }

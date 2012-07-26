@@ -44,4 +44,11 @@ abstract class Event[A, B <: EventArgs[A], C]
     def -=(handler: EventHandler) {
         handlers -= handler
     }
+
+    /**
+     * Removes all event handlers from the event.
+     */
+    def clear(){
+        handlers.clear()
+    }
 }

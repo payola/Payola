@@ -4,5 +4,5 @@ import cz.payola.web.client.events.EventArgs
 import cz.payola.common.rdf.Graph
 import cz.payola.common.entities.Analysis
 
-class EvaluationEventArgs(target: Analysis, val graph: Option[Graph])
+class EvaluationSuccessEventArgs(target: Analysis, val graph: Graph)
     extends EventArgs[Analysis](target)
