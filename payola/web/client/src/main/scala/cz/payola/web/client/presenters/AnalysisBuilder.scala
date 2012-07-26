@@ -164,7 +164,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
 
                         val inputsCount = evt.target.inputCount
                         if (inputsCount > branches.size) {
-                            AlertModal.runModal(
+                            AlertModal.display(
                                 "The merge plugin has " + inputsCount.toString() + " inputs, but only " + branches
                                     .size + " branches are available.")
                         } else {
@@ -363,7 +363,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                 renderBinding(a, b)
         } {
             _ =>
-                AlertModal.runModal("Unable to save the binding")
+                AlertModal.display("Unable to save the binding")
         }
     }
 

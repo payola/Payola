@@ -79,7 +79,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
     private def getAnalysisEvaluationID: Option[String] = {
         val id = evaluationId
         if (id == ""){
-            AlertModal.runModal("Evaluation hasn't finished yet.")
+            AlertModal.display("Evaluation hasn't finished yet.")
             None
         }else{
             Some(id)

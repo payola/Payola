@@ -24,7 +24,7 @@ class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) e
     submitButton.mouseClicked += { event =>
         val code = getCode
         if (code == "") {
-            AlertModal.runModal("The code can't be empty!")
+            AlertModal.display("The code can't be empty!")
         }else{
             postCodeToServer(code)
         }
@@ -59,7 +59,7 @@ class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) e
       */
     private def postFailedCallback(t: Throwable){
         t match {
-            case exc: RpcException => AlertModal.runModal(exc.message, title = "Failed to upload plugin!")
+            case exc: RpcException => AlertModal.display(exc.message, title = "Failed to upload plugin!")
             case t: Throwable => fatalErrorHandler(t)
         }
     }

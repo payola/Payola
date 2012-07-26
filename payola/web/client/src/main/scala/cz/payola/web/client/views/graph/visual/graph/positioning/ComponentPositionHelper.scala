@@ -16,7 +16,7 @@ class ComponentPositionHelper(val componentNumber: Int, val componentsCount: Int
         val componentSpacing = 50.0
 
         if (componentNumber == 0 || componentsCount < 0) {
-            AlertModal.runModal("Error in component position helper")
+            AlertModal.display("Error in component position helper")
         }
 
         val bottomRight = if (prevComp.isDefined) {
