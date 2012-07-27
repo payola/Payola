@@ -21,7 +21,22 @@ class BarChartPluginView(settings: VisualSetup) extends PluginView("Bar Chart")
      *
      * @param arr Bars to be displayed.
      */
-    @javascript("self.googleDataTable.addRows(arr);")
+    @javascript(
+        """
+          var array = [['Title','Value']];
+          arr.foreach(function(x){
+            array.push(x);
+          });
+          var data = google.visualization.arrayToDataTable(array);
+
+          var options = {
+            title: 'Company Performance',
+            vAxis: {title: 'Year',  titleTextStyle: {color: 'red'}}
+          };
+
+          var chart = new google.visualization.BarChart(self.chartWrapperElement);
+          chart.draw(data, options);
+        """)
     private def addRowsToGoogleDataTable(arr: List[List[Any]]){
 
     }
@@ -90,8 +105,6 @@ class BarChartPluginView(settings: VisualSetup) extends PluginView("Bar Chart")
         // Get those vertices representing bars in the chart
         val bars = g.getOutgoingEdges(v.uri).filter(_.uri == Edge.rdfTypeEdge).map(_.destination.asInstanceOf[IdentifiedVertex])
 
-        prepareGoogleDataTable()
-
         // Our assumption here is that the graph-as-chart has been validated
         // before being passed here, so no additional checks will be performed
         val values = bars.map { v =>
@@ -107,7 +120,7 @@ class BarChartPluginView(settings: VisualSetup) extends PluginView("Bar Chart")
         addRowsToGoogleDataTable(values)
 
         // Draw the chart
-        drawChart()
+        //drawChart()
     }
 
     private def setTextualContent(message: String, details: String) {
