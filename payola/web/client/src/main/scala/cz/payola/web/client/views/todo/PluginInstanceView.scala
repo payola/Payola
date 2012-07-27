@@ -12,6 +12,7 @@ import scala.collection.immutable.HashMap
 import scala.Some
 import s2js.adapters.js.dom.Element
 import cz.payola.web.client.views.ComposedView
+import s2js.runtime.client.scala.collection.mutable.ArrayBuffer
 
 abstract class PluginInstanceView(
     val id: String,
@@ -47,6 +48,24 @@ abstract class PluginInstanceView(
     def render(parent: dom.Element) {
         this.parentElement = Some(parent)
         successors.render(parent)
+
+        var i = 0
+        while (i < plugin.inputCount)
+        {
+            val conn = new Div(Nil,"connector connector-"+i.toString)
+            conn.setAttribute("style","left:"+(310*i+148)+"px")
+            conn.render(successors.domElement)
+            i += 1
+        }
+
+        var j = 0
+        while (j < plugin.inputCount)
+        {
+            val plumb = new Div(Nil,"plumb plumb-"+i.toString)
+            plumb.setAttribute("style","left:"+(310*j+145)+"px")
+            plumb.render(alertDiv.domElement)
+            j += 1
+        }
 
         if (predecessors.nonEmpty) {
             parent.insertBefore(successors.domElement, predecessors(0).domElement)

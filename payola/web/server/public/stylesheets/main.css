@@ -257,3 +257,19 @@ input[type="checkbox"].active:after {
 .popover-content p{
     max-height: 200px;
 }
+
+.connector{
+    border: 2px solid navy;
+    height: 90%;
+    position: absolute;
+    top: 0px;
+    z-index: -1;
+}
+
+.plumb{
+    position: absolute;
+    top: -4px;
+    border: 4px solid navy;
+}
+
+.successors, .successors .alert{ position: relative !important; }

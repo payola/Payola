@@ -121,15 +121,6 @@ abstract class AnalysisVisualizer(analysis: Analysis) extends View
 
     @javascript(
         """
-          jsPlumb.repaintEverything();
-          var settings = {
-                            paintStyle:{ lineWidth:2, strokeStyle:"#BCE8F1", outlineColor:"#3A87AD", outlineWidth:1 },
-                            connector:[ "Flowchart" ],
-                            endpoint:[ "Dot", { radius:4 } ],
-                            endpointStyle : { fillStyle: "#3A87AD"  },
-                            anchor : [ "BottomCenter", "TopCenter" ]
-                       };
-          jsPlumb.connect({ source:a.getPluginElement(), target:b.getPluginElement() },settings);
         """)
     def renderBinding(a: PluginInstanceView, b: PluginInstanceView) {}
 
