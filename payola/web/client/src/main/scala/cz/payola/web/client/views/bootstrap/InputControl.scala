@@ -4,7 +4,7 @@ import s2js.adapters.js.dom
 import s2js.adapters.js.browser.window
 import cz.payola.web.client.views._
 import cz.payola.web.client.views.elements._
-import cz.payola.common.exception.ValidationException
+import cz.payola.common.ValidationException
 import cz.payola.web.client.events.SimpleUnitEvent
 
 abstract class InputControl(
@@ -26,8 +26,7 @@ abstract class InputControl(
     private val infoSpan = new Span(List(infoText), "help-inline")
 
     private val controls = new Div(List(input, infoSpan), "controls")
-
-    private val controlGroup = new Div(List(inputLabel, controls), "control-group " + cssClass)
+    val controlGroup = new Div(List(inputLabel, controls), "control-group " + cssClass)
 
     private var delayedChangedTimeout: Option[Int] = None
 

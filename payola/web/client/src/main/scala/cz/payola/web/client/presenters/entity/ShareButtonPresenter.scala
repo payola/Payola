@@ -4,19 +4,20 @@ import s2js.adapters.js.dom
 import cz.payola.web.shared._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.Modal
-import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
 import s2js.compiler.javascript
 import cz.payola.common.entities._
 import cz.payola.web.client._
 import s2js.adapters.js.browser._
-import cz.payola.web.client.views.entity.ShareButton
+import cz.payola.web.client.views.entity._
 import cz.payola.web.client.events.EventArgs
-import scala.Some
+import cz.payola.common.Entity
+import cz.payola.web.client.views.bootstrap.modals.AlertModal
 
 class ShareButtonPresenter(
     val viewElement: dom.Element,
-    val entityType: String,
+    val entityClassName: String,
     val entityId: String,
+    val entityName: String,
     entityIsPublic: Boolean,
     val viewToBlock: Option[View] = None)
     extends Presenter
@@ -26,174 +27,55 @@ class ShareButtonPresenter(
     def initialize() {
         view.makePublicButton.mouseClicked += onMakePublicButtonClicked _
         view.dropDownButton.anchor.mouseClicked += onMakePublicButtonClicked _
-        view.shareToGroupButton.mouseClicked += onShareToGroupButtonClicked _
-        view.shareToUserButton.mouseClicked += onShareToUserButtonClicked _
+        view.shareToGroupsButton.mouseClicked += onShareToGroupsButtonClicked _
+        view.shareToUsersButton.mouseClicked += onShareToUsersButtonClicked _
 
         view.render(viewElement)
     }
 
-    def onMakePublicButtonClicked(e: EventArgs[_]): Boolean = {
+    private def onMakePublicButtonClicked(e: EventArgs[_]): Boolean = {
         view.setIsEnabled(false)
-        SharingData.setIsPublic(entityType, entityId, !view.isPublic) { _ =>
+        SharingData.setEntityPublicity(entityClassName, entityId, !view.isPublic) { () =>
             view.isPublic = !view.isPublic
             view.setIsEnabled(true)
         }(fatalErrorHandler(_))
         false
     }
 
-    def onShareToGroupButtonClicked(e: EventArgs[_]): Boolean = {
-        blockView("Fetching share data.")
-        SharingData.getAlreadySharedTo(entityType, entityId, "group") { groups =>
-            val modal = createModal(entityType, "group", { (callback, value) =>
-                blockView("Saving.")
-                SharingData.shareToGroup(entityType, entityId, value) { _ =>
-                    callback
-                    unblockView()
-                    showSuccessModal(entityType, "group")
-                }(fatalErrorHandler(_))
-            })
-            unblockView()
-            modal.render()
-            bindGroupSelect(groups)
-        }(fatalErrorHandler(_))
+    private def onShareToUsersButtonClicked(e: EventArgs[_]): Boolean = {
+        onShareButtonClicked(Entity.getClassName(classOf[User]), "user")
         false
     }
 
-    def onShareToUserButtonClicked(e: EventArgs[_]): Boolean = {
-        blockView("Fetching share data.")
-        SharingData.getAlreadySharedTo(entityType, entityId, "user") { users =>
-            val modal = createModal(entityType, "user", { (callback, value) =>
-                blockView("Saving.")
-                SharingData.shareToUser(entityType, entityId, value) { _ =>
-                    callback
-                    unblockView()
-                    showSuccessModal(entityType, "user")
-                }(fatalErrorHandler(_))
-            })
-            unblockView()
-            modal.render()
-            bindUserSelect(users)
-        }(fatalErrorHandler(_))
+    private def onShareToGroupsButtonClicked(e: EventArgs[_]): Boolean = {
+        onShareButtonClicked(Entity.getClassName(classOf[Group]), "user group")
         false
     }
 
-    private def showSuccessModal(entityType: String, privilegedType: String) {
-        val successText = new Heading(
-            List(new Text("The " + entityType + " was successfully shared to the selected " + privilegedType + "!")), 3,
-            "alert-heading")
-        val body = List(new Div(List(successText), "alert alert-success"))
+    private def onShareButtonClicked(granteeClassName: String, granteeClassNameText: String) {
+        blockView("Fetching share data.")
+        SharingData.getEntityGrantees(entityClassName, entityId, granteeClassName) { grantees =>
+            unblockView()
 
-        val modal = new Modal("Success", body, None)
-
-        modal.render()
-        val timeout = window.setTimeout(() => {
-            modal.destroy()
-        }, 2000)
-
-        modal.closing += {
-            e =>
-                window.clearTimeout(timeout)
+            val shareModal = new ShareModal(entityName, granteeClassNameText, grantees)
+            shareModal.granteeSearching += { e =>
+                SharingData.searchPotentialGrantees(granteeClassName, e.searchTerm) {
+                    e.successCallback(_)
+                }(fatalErrorHandler(_))
+            }
+            shareModal.confirming += { e =>
+                blockView("Sharing.")
+                val granteeIds = shareModal.granteeSelection.input.value
+                SharingData.shareEntity(entityClassName, entityId, granteeClassName, granteeIds) { () =>
+                    unblockView()
+                    AlertModal.display("Success", "The entity was successfully shared to selected " +
+                        granteeClassNameText + "s.", "alert-success", Some(4000))
+                }(fatalErrorHandler(_))
                 true
-        }
-    }
+            }
+            shareModal.render()
 
-    private def createModal(entityName: String, privilegedType: String, callback: ((Unit, String) => Unit)): Modal = {
-        val privilegedSearchBox = new
-                TextInputControl("Search " + privilegedType + ":", "privileged", "init", "Enter name")
-
-        val body = List(privilegedSearchBox)
-        val modal = new Modal("Share " + entityName + " to a " + privilegedType + ":", body, Some("Share"))
-
-        modal.closing += {
-            e =>
-                modal.destroy()
-                true
-        }
-
-        modal.confirming += {
-            e =>
-                blockPage("SharingPresenter a " + entityName + " to a " + privilegedType + "...")
-                callback({
-                    unblockPage()
-                }, privilegedSearchBox.input.value)
-                modal.destroy()
-                true
-        }
-        modal
-    }
-
-    @javascript(
-        """
-          jQuery("#privileged").select2({
-              minimumInputLength: 1,
-              multiple: true,
-              query: function (query) {
-                  var data = {results: []};
-                  self.fetchUsersByQuery(
-                    query.term,
-                    function(id, text){ data.results.push({id: id, text: text}); },
-                    function(){ query.callback(data); }
-                  );
-              },
-              initSelection : function (element) {
-                var data = [];
-                users.foreach(function(x){
-                    data.push({id: x.id, text: x.name()});
-                });
-                return data;
-              }
-            });
-        """)
-    def bindUserSelect(users: Seq[NamedEntity]) {}
-
-    @javascript(
-        """
-          jQuery("#privileged").select2({
-              minimumInputLength: 1,
-              multiple: true,
-              query: function (query) {
-                  var data = {results: []};
-                  self.fetchGroupsByQuery(
-                    query.term,
-                    function(id, text){ data.results.push({id: id, text: text}); },
-                    function(){ query.callback(data); }
-                  );
-              },
-              initSelection: function (element) {
-                  var data = [];
-                  groups.foreach(function(x){
-                    data.push({id: x.id, text: x.name()});
-                  });
-                  return data;
-              }
-            });
-        """)
-    def bindGroupSelect(groups: Seq[NamedEntity]) {}
-
-    def fetchUsersByQuery(term: String, itemCallback: (String, String) => Unit, callback: () => Unit) {
-        DomainData.searchUsers(term) {
-            users =>
-                users.map {
-                    u =>
-                        itemCallback(u.id, u.name)
-                }
-                callback()
-        } {
-            _ =>
-        }
-    }
-
-    def fetchGroupsByQuery(term: String, itemCallback: (String, String) => Unit, callback: () => Unit) {
-        DomainData.searchGroups(term) {
-            groups =>
-                groups.map {
-                    g =>
-                        itemCallback(g.id, g.name)
-                }
-                callback()
-        } {
-            _ =>
-        }
+        }(fatalErrorHandler(_))
     }
 
     private def blockView(message: String) {
@@ -210,5 +92,12 @@ class ShareButtonPresenter(
         } else {
             unblockPage()
         }
+    }
+}
+
+object ShareButtonPresenter
+{
+    def apply(viewElement: dom.Element, entity: ShareableEntity, viewToBlock: Option[View]): ShareButtonPresenter = {
+        new ShareButtonPresenter(viewElement, entity.className, entity.id, entity.name, entity.isPublic, viewToBlock)
     }
 }

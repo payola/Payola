@@ -16,22 +16,6 @@ import cz.payola.common.entities._
         successCallback(users)
     }
 
-    @async def searchUsers(term: String, user: User = null)(successCallback: (Seq[User] => Unit))
-        (failCallback: (Throwable => Unit)) {
-        val users = Payola.model.userModel.getByNameLike(term)
-        successCallback(users)
-    }
-
-    @async def searchGroups(term: String, user: User = null)(successCallback: (Seq[Group] => Unit))
-        (failCallback: (Throwable => Unit)) {
-
-        val groups = user.ownedGroups.filter{ g =>
-            g.name.contains(term)
-        }
-
-        successCallback(groups)
-    }
-
     @async def getAnalysisById(analysisId: String, user: Option[User] = None)(successCallback: (Analysis => Unit))
         (failCallback: (Throwable => Unit)) {
 

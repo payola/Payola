@@ -7,7 +7,7 @@ import cz.payola.domain.Entity
 
 trait GroupModelComponent extends EntityModelComponent
 {
-    self: DataContextComponent =>
+    self: DataContextComponent with PrivilegeModelComponent =>
 
     lazy val groupModel = new EntityModel(groupRepository)
     {

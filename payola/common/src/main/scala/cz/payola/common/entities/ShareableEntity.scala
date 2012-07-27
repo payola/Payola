@@ -6,10 +6,8 @@ import cz.payola.common.Entity
   * An entity that may be shared to users or groups of users. It may also be public which means that everyone may
   * access the entity. If the entity is not public, then it's visible only to those who have been shared the entity.
   */
-trait ShareableEntity
+trait ShareableEntity extends Entity with NamedEntity
 {
-    self: Entity =>
-
     protected var _isPublic: Boolean = false
 
     /** Whether the entity is public. */

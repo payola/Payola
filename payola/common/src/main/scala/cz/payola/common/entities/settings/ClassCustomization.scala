@@ -22,6 +22,8 @@ trait ClassCustomization extends Entity
 
     protected var _propertyCustomizations: immutable.Seq[PropertyCustomizationType]
 
+    override def classNameText = "ontology class customization"
+
     /** Fill color of the vertex. */
     def fillColor = _fillColor
 

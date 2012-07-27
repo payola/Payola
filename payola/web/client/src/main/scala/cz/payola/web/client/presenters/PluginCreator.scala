@@ -21,13 +21,8 @@ class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) e
     // Create submit button
     val buttonContainer = document.getElementById(buttonContainerID)
     val submitButton = new Button(new Text("Create Plugin"))
-    submitButton.mouseClicked += { event =>
-        val code = getCode
-        if (code == "") {
-            AlertModal.display("The code can't be empty!")
-        }else{
-            postCodeToServer(code)
-        }
+    submitButton.mouseClicked += { e =>
+        postCodeToServer(getCode)
         false
     }
     submitButton.render(buttonContainer)
@@ -59,7 +54,7 @@ class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) e
       */
     private def postFailedCallback(t: Throwable){
         t match {
-            case exc: RpcException => AlertModal.display(exc.message, title = "Failed to upload plugin!")
+            case exc: RpcException => AlertModal.display("Failed to upload plugin!", exc.message)
             case t: Throwable => fatalErrorHandler(t)
         }
     }
@@ -69,7 +64,7 @@ class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) e
       * @param s Success string.
       */
     private def postWasSuccessfulCallback(s: String) {
-        val alert = new AlertModal("Plugin uploaded successfully!", "Success!", "alert-success")
+        val alert = new AlertModal("Success!", "Plugin uploaded successfully!", "alert-success")
         alert.confirming += { e =>
             window.location.href = listPluginsURL
             true

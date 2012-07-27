@@ -10,12 +10,10 @@ import cz.payola.common.entities.settings._
 
 trait OntologyCustomizationModelComponent extends EntityModelComponent
 {
-    self: DataContextComponent with RdfStorageComponent =>
+    self: DataContextComponent with RdfStorageComponent with PrivilegeModelComponent =>
 
-    lazy val ontologyCustomizationModel = new ShareableEntityModel[OntologyCustomization](
-        ontologyCustomizationRepository,
-        classOf[UseOntologyCustomizationPrivilege],
-        (user: User) => user.ownedOntologyCustomizations)
+    lazy val ontologyCustomizationModel = new ShareableEntityModel(ontologyCustomizationRepository,
+        classOf[OntologyCustomization])
     {
         def create(name: String, ontologyURL: String, owner: User): OntologyCustomization = {
             val customization = OntologyCustomization.empty(ontologyURL, name, Some(owner))

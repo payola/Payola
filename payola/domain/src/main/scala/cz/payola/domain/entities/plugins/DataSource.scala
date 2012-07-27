@@ -34,11 +34,8 @@ class DataSource(protected var _name: String, protected var _owner: Option[User]
     extends PluginInstance(dataFetcher, parameterValues)
     with OptionallyOwnedEntity
     with NamedEntity
-    with ShareableEntity
     with cz.payola.common.entities.plugins.DataSource
 {
-    override def entityTypeName = "data source"
-
     /**
       * Executes the specified query.
       * @param query The query to execute.
@@ -71,6 +68,5 @@ class DataSource(protected var _name: String, protected var _owner: Option[User]
     override protected def checkInvariants() {
         super[NamedEntity].checkInvariants()
         super[OptionallyOwnedEntity].checkInvariants()
-        super[ShareableEntity].checkInvariants()
     }
 }

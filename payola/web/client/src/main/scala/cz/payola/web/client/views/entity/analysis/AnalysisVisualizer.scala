@@ -19,7 +19,7 @@ abstract class AnalysisVisualizer(analysis: Analysis) extends View
     val pluginInstanceRendered = new SimpleUnitEvent[PluginInstanceView]
 
     private val pluginCanvas = new Div(Nil, "plugin-canvas")
-    private val instancesMap = new HashMap[String, PluginInstanceView]
+    protected val instancesMap = new HashMap[String, PluginInstanceView]
 
     def render(parent: Element) {
         pluginCanvas.render(parent)

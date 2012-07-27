@@ -17,8 +17,6 @@ class Analysis(protected var _name: String, protected var _owner: Option[User])
     extends Entity
     with NamedEntity
     with OptionallyOwnedEntity
-    with ShareableEntity
-    with DescribedEntity
     with cz.payola.common.entities.Analysis
 {
     checkConstructorPostConditions()
@@ -34,8 +32,6 @@ class Analysis(protected var _name: String, protected var _owner: Option[User])
     protected var _pluginInstanceInputBindings: Option[InstanceBindings] = None
 
     protected var _pluginInstanceOutputBindings: Option[InstanceBindings] = None
-
-    def entityTypeName = "analysis"
 
     /**
       * Starts evaluation of the analysis.
@@ -271,7 +267,6 @@ class Analysis(protected var _name: String, protected var _owner: Option[User])
         super[Entity].checkInvariants()
         super[NamedEntity].checkInvariants()
         super[OptionallyOwnedEntity].checkInvariants()
-        super[ShareableEntity].checkInvariants()
     }
 
     /**

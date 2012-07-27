@@ -7,6 +7,8 @@ import cz.payola.model.ModelException
 import cz.payola.domain.IDGenerator
 import cz.payola.domain.entities.User
 import cz.payola.domain.entities.analyses.evaluation.Success
+import cz.payola.domain.entities.plugins.PluginInstance
+import cz.payola.common.ValidationException
 
 // TODO move the logic to the model.
 @remote
@@ -15,14 +17,16 @@ import cz.payola.domain.entities.analyses.evaluation.Success
     val runningEvaluations: HashMap[String, (Option[User], AnalysisEvaluation)] = new
             HashMap[String, (Option[User], AnalysisEvaluation)]
 
-    @async def runAnalysisById(id: String, user: Option[User] = None)(successCallback: (String => Unit))
+    @async def runAnalysisById(id: String, timeoutSeconds: Long, user: Option[User] = None)
+        (successCallback: (String => Unit))
         (failCallback: (Throwable => Unit)) {
         val analysis = Payola.model.analysisModel.getAccessibleToUserById(user, id).getOrElse {
             throw new ModelException("The analysis doesn't exist.") // TODO
         }
 
         val evaluationId = IDGenerator.newId
-        runningEvaluations.put(evaluationId, (user, analysis.evaluate()))
+        val timeout = scala.math.min(1800, timeoutSeconds)
+        runningEvaluations.put(evaluationId, (user, analysis.evaluate(Some(timeout * 1000))))
 
         successCallback(evaluationId)
     }
@@ -54,25 +58,30 @@ import cz.payola.domain.entities.analyses.evaluation.Success
         }
     }
 
-    @async def getAnalysisProgress(evaluationId: String, user: Option[User] = None)
-        (successCallback: (AnalysisProgress => Unit))(failCallback: (Throwable => Unit)) = {
+    @async def getEvaluationState(evaluationId: String, user: Option[User] = None)
+        (successCallback: (EvaluationState => Unit))(failCallback: (Throwable => Unit)) = {
         val evaluationTuple = getEvaluationTupleForIDAndPerformSecurityChecks(evaluationId, user)
 
         val evaluation = evaluationTuple._2
-        val progress = evaluation.getProgress
 
-        val evaluated = progress.evaluatedInstances.map(i => i.id)
-        val running = progress.runningInstances.map(m => m._1.id).toList
-        val errors = progress.errors.map(tuple => tuple._1.id).toList
-
-        //TODO timeout remove after some time
-
-        val graph = evaluation.getResult.flatMap {
-            case r: Success => Some(r.outputGraph)
-            case _ => None
+        val response = evaluation.getResult.map {
+            case r: Error => EvaluationError(transformException(r.error), r.instanceErrors.toList.map{e => (e._1,transformException(e._2))})
+            case r: Success => EvaluationSuccess(r.outputGraph, r.instanceErrors.toList.map{e => (e._1,transformException(e._2))})
+            case _ => throw new Exception("Unhandled evaluation state")
+            //TODO timeout remove after some time
+        }.getOrElse {
+            val progress = evaluation.getProgress
+            EvaluationInProgress(progress.value, progress.evaluatedInstances, progress.runningInstances.toList,
+                progress.errors.toList.map{e => (e._1,transformException(e._2))})
         }
 
-        successCallback(
-            new AnalysisProgress(evaluated, running, errors, progress.value, evaluation.isFinished, graph))
+        successCallback(response)
+    }
+
+    private def transformException(t: Throwable) : String = {
+        t match {
+            case e:Exception => e.getMessage
+            case _ => "Unknown error."
+        }
     }
 }

@@ -3,10 +3,9 @@ package cz.payola.domain
 import cz.payola.domain.entities.OptionallyOwnedEntity
 import cz.payola.common
 
-abstract class Entity(val id: String = IDGenerator.newId) extends common.Entity
+trait Entity extends common.Entity
 {
-    /** Name of the entity type that is presentable to the user of the application. */
-    def entityTypeName: String
+    val id: String = IDGenerator.newId
 
     /**
       * Invokes the action if the specified sequence contains the item.
@@ -52,7 +51,7 @@ abstract class Entity(val id: String = IDGenerator.newId) extends common.Entity
       * hold), an exception is thrown.
       */
     protected def checkInvariants() {
-        require(id != null, "ID of the %s mustn't be null.".format(entityTypeName))
+        require(id != null, "ID of the %s mustn't be null.".format(classNameText))
     }
 
     /**

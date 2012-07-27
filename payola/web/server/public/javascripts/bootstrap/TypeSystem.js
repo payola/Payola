@@ -4,6 +4,13 @@ s2js.runtime.client.ClassLoader.provide('bootstrap.TypeSystem');
 s2js.runtime.client.ClassLoader.require('scala.collection.mutable.ArrayBuffer');
 s2js.runtime.client.ClassLoader.require('scala.String');
 
+// Extend the JavaScript Object prototype with methods of a scala object.
+Object.defineProperty(Object.prototype, 'getClass', {
+    value: function() { return this.__class__; },
+    writable: true,
+    configurable: true
+});
+
 // Extend the JavaScript String prototype with methods of scala.String.
 goog.object.extend(String.prototype, scala.String.prototype);
 

@@ -1,11 +1,10 @@
 package cz.payola.data.squeryl.entities
 
-import cz.payola.data.squeryl.entities.plugins._
+import cz.payola.domain.PluginCompilerComponent
 import cz.payola.domain.entities.Plugin
-import cz.payola.data.squeryl.SquerylDataContextComponent
 import cz.payola.domain.entities.plugins.concrete.data.PayolaStorage
-import cz.payola.domain._
-import scala.Some
+import cz.payola.data.squeryl._
+import cz.payola.data.squeryl.entities.plugins._
 
 object PluginDbRepresentation extends EntityConverter[PluginDbRepresentation]
 {
@@ -13,9 +12,14 @@ object PluginDbRepresentation extends EntityConverter[PluginDbRepresentation]
         entity match {
             case p: PluginDbRepresentation => Some(p)
             case p: Plugin => {
-                val pluginClass = p.getClass.getName
-                Some(new PluginDbRepresentation(p.id, p.name, pluginClass, p.inputCount, p.owner.map(User(_)),
-                    p.isPublic))
+                Some(new PluginDbRepresentation(
+                    p.id,
+                    p.name,
+                    p.getClass.getName,
+                    p.inputCount,
+                    p.owner.map(User(_)),
+                    p.isPublic)
+                )
             }
             case _ => None
         }
@@ -24,13 +28,13 @@ object PluginDbRepresentation extends EntityConverter[PluginDbRepresentation]
 
 class PluginDbRepresentation(
     override val id: String,
-    val name: String,
-    val className: String,
+    protected var _name: String,
+    val pluginClassName: String,
     val inputCount: Int,
     o: Option[User],
     var _isPub: Boolean)
     (implicit val context: SquerylDataContextComponent)
-    extends Entity(id) with PersistableEntity with ShareableEntity
+    extends Entity with ShareableEntity
 {
     val ownerId: Option[String] = o.map(_.id)
 
@@ -38,7 +42,7 @@ class PluginDbRepresentation(
     
     var parameters: Seq[Parameter[_]] = Seq()
 
-    def entityTypeName = "plugin database representation"
+    override def classNameText = "plugin database representation"
 
     /**
       * Represented plugin is instantiated.
@@ -46,7 +50,7 @@ class PluginDbRepresentation(
       * @return Returns represented plugin.
       */
     def toPlugin: Plugin = {
-        val pluginClass = context.asInstanceOf[PluginCompilerComponent].pluginClassLoader.loadClass(className)
+        val pluginClass = context.asInstanceOf[PluginCompilerComponent].pluginClassLoader.loadClass(pluginClassName)
 
         // Variables dependent on plugin type.
         val pluginDependsOnContext = pluginClass == classOf[PayolaStorage]

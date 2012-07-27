@@ -24,5 +24,5 @@ abstract class TestDataContextComponent(name: String, trace: Boolean = false)
 
     lazy val pluginCompiler = new PluginCompiler(new java.io.File(""), new java.io.File(""))
 
-    lazy val pluginClassLoader = new PluginClassLoader(new java.io.File(""), this.getClass.getClassLoader)
+    lazy val pluginClassLoader = new PluginClassLoader(new java.io.File(""), getClass.getClassLoader)
 }

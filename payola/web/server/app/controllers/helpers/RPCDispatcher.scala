@@ -277,21 +277,18 @@ class RPCDispatcher(jsonSerializer: RPCSerializer)
         if (paramType.getName.startsWith("scala.collection")) {
             parseSequence(input, paramType, paramTypeClient)
         } else {
-            paramType.getName match {
-                case "Boolean" => java.lang.Boolean.parseBoolean(input.head): java.lang.Boolean
-                case "java.lang.Boolean" => java.lang.Boolean.parseBoolean(input.head): java.lang.Boolean
+            paramType.getName.toLowerCase match {
+                case "java.lang.boolean" => java.lang.Boolean.parseBoolean(input.head): java.lang.Boolean
                 case "boolean" => java.lang.Boolean.parseBoolean(input.head): java.lang.Boolean
-                case "Int" => java.lang.Integer.parseInt(input.head): java.lang.Integer
                 case "int" => java.lang.Integer.parseInt(input.head): java.lang.Integer
                 case "char" => input.head.charAt(0): java.lang.Character
-                case "Char" => input.head.charAt(0): java.lang.Character
-                case "java.lang.Character" => input.head.charAt(0): java.lang.Character
-                case "Double" => java.lang.Double.parseDouble(input.head): java.lang.Double
+                case "java.lang.character" => input.head.charAt(0): java.lang.Character
                 case "double" => java.lang.Double.parseDouble(input.head): java.lang.Double
-                case "java.lang.Double" => java.lang.Double.parseDouble(input.head): java.lang.Double
-                case "Float" => java.lang.Float.parseFloat(input.head): java.lang.Float
+                case "java.lang.double" => java.lang.Double.parseDouble(input.head): java.lang.Double
                 case "float" => java.lang.Float.parseFloat(input.head): java.lang.Float
-                case "java.lang.Float" => java.lang.Float.parseFloat(input.head): java.lang.Float
+                case "java.lang.float" => java.lang.Float.parseFloat(input.head): java.lang.Float
+                case "long" => java.lang.Long.parseLong(input.head): java.lang.Long
+                case "java.lang.long" => java.lang.Long.parseLong(input.head): java.lang.Long
                 case _ => input.head.toString: java.lang.String
             }
         }
@@ -315,6 +312,8 @@ class RPCDispatcher(jsonSerializer: RPCSerializer)
             util.parsing.json.JSON.perThreadNumberParser = {input: String => input.toShort}
         } else if (paramTypeClient.endsWith("[scala.Double]")) {
             util.parsing.json.JSON.perThreadNumberParser = {input: String => input.toDouble}
+        } else if (paramTypeClient.endsWith("[scala.Long]")) {
+            util.parsing.json.JSON.perThreadNumberParser = {input: String => input.toLong}
         }
 
         val collection = util.parsing.json.JSON.parseFull(seqString).get.asInstanceOf[Seq[AnyVal]]

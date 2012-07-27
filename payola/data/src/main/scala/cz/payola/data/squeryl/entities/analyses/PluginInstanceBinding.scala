@@ -3,10 +3,11 @@ package cz.payola.data.squeryl.entities.analyses
 import cz.payola.data.squeryl.entities._
 import org.squeryl.annotations.Transient
 import cz.payola.data.squeryl.entities.plugins.PluginInstance
-import cz.payola.data.squeryl.SquerylDataContextComponent
+import cz.payola.data.squeryl._
 import cz.payola.domain.entities.User
 import scala.Some
 import cz.payola.domain.entities.Analysis
+import scala.Some
 
 /**
   * This objects converts [[cz.payola.common.entities.analyses.PluginInstanceBinding]]
@@ -33,7 +34,7 @@ class PluginInstanceBinding(
     t: PluginInstance,
     idx: Int = 0)(implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.analyses.PluginInstanceBinding(s, t, idx)
-    with PersistableEntity
+    with Entity
 {
     val sourcePluginInstanceId: String = Option(s).map(_.id).getOrElse(null)
 

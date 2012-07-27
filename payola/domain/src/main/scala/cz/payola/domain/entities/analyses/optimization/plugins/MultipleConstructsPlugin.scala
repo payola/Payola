@@ -9,10 +9,6 @@ import cz.payola.domain.sparql._
   */
 object MultipleConstructsPlugin extends Construct("Merged SPARQL construct queries")
 {
-    override def createInstance(): PluginInstance = {
-        MultipleConstructsPluginInstance.empty
-    }
-
     def getConstructQuery(instance: PluginInstance, subject: Subject, variableGetter: () => Variable) = {
         instance match {
             case constructsInstance: MultipleConstructsPluginInstance => {

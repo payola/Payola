@@ -16,6 +16,4 @@ class ClassCustomization(
     checkConstructorPostConditions()
 
     type PropertyCustomizationType = PropertyCustomization
-
-    def entityTypeName = "ontology class customization"
 }

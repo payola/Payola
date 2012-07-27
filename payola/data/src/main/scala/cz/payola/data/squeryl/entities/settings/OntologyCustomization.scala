@@ -2,7 +2,8 @@ package cz.payola.data.squeryl.entities.settings
 
 import cz.payola.data.squeryl.entities._
 import scala.collection.immutable
-import cz.payola.data.squeryl.SquerylDataContextComponent
+import cz.payola.data.squeryl._
+import scala.Some
 
 object OntologyCustomization extends EntityConverter[OntologyCustomization]
 {    
@@ -24,7 +25,7 @@ class OntologyCustomization(
     c: immutable.Seq[ClassCustomization], var _isPub: Boolean)
     (implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.settings.OntologyCustomization(u, n, o, c)
-    with PersistableEntity with OptionallyOwnedEntity with ShareableEntity with NamedEntity
+    with Entity with OptionallyOwnedEntity with ShareableEntity
 {
     def classCustomizations_=(value: immutable.Seq[ClassCustomizationType]) { _classCustomizations = value }
 }

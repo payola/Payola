@@ -361,7 +361,7 @@ trait SchemaComponent
                 declare(
                     plugin.id is (primaryKey, (dbType(COLUMN_TYPE_ID))),
                     plugin.name is (unique, dbType(COLUMN_TYPE_NAME)),
-                    plugin.className is (dbType(COLUMN_TYPE_FULL_CLASSNAME)),
+                    plugin.pluginClassName is (dbType(COLUMN_TYPE_FULL_CLASSNAME)),
                     plugin.ownerId is (dbType(COLUMN_TYPE_ID))
                 ))
 
@@ -605,7 +605,7 @@ trait SchemaComponent
           * @param table Tha table to persist the entity int.
           * @tparam C Type of the entity.
           */
-        def persist[C <: PersistableEntity](entity: C, table: Table[C]) {
+        def persist[C <: Entity](entity: C, table: Table[C]) {
             wrapInTransaction{
                 if (table.where(_.id === entity.id).isEmpty) {
                     table.insert(entity)
@@ -624,7 +624,7 @@ trait SchemaComponent
           * @tparam A - type of specified entity
           * @return Returns persisted specified entity
           */
-        def associate[A <: PersistableEntity](entity: A, relation: OneToMany[A]): A = {
+        def associate[A <: Entity](entity: A, relation: OneToMany[A]): A = {
             wrapInTransaction {
                 if (relation.find(e => e.id == entity.id).isEmpty) {
                     relation.associate(entity)
@@ -640,7 +640,7 @@ trait SchemaComponent
           * @tparam A - type of specified entity
           * @return Returns persisted specified entity
           */
-        def associate[A <: PersistableEntity](entity: A, relation: ManyToMany[A,_]): A = {
+        def associate[A <: Entity](entity: A, relation: ManyToMany[A,_]): A = {
             wrapInTransaction {
                 if (relation.find(_.id == entity.id).isEmpty) {
                     relation.associate(entity)
@@ -658,7 +658,7 @@ trait SchemaComponent
           * @tparam A - type of specified entity
           * @return Returns specified entity
           */
-        def dissociate[A <: PersistableEntity](entity: A, relation: ManyToMany[A,_]): A = {
+        def dissociate[A <: Entity](entity: A, relation: ManyToMany[A,_]): A = {
             wrapInTransaction {
                 if (relation.find(_.id == entity.id).isDefined) {
                     relation.dissociate(entity)
