@@ -4,7 +4,7 @@ import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.Modal
 
 object AlertModal {
-    def runModal(alertDescription: String, title: String = "Alert", additionalCSSClass: String = "") {
+    def display(alertDescription: String, title: String = "Alert", additionalCSSClass: String = "") {
         val alert = new AlertModal(alertDescription, title, additionalCSSClass)
         alert.render()
     }

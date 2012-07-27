@@ -4,15 +4,11 @@ import s2js.adapters.js.browser.document
 import cz.payola.web.client._
 import cz.payola.web.client.views.entity.analysis.AnalysisRunnerView
 import cz.payola.web.shared._
-import s2js.adapters.js.dom
 import s2js.adapters.js.browser.window
-import cz.payola.web.client.presenters.components.EvaluationEventArgs
-import cz.payola.web.client.presenters.notification.Notification
+import cz.payola.web.client.presenters.components.EvaluationSuccessEventArgs
 import cz.payola.web.client.events.UnitEvent
 import cz.payola.common.entities.Analysis
 import cz.payola.web.client.presenters.graph.GraphPresenter
-import cz.payola.web.client.views.elements._
-import cz.payola.web.client.views.bootstrap._
 import cz.payola.web.client.views.graph.DownloadButtonView
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
 
@@ -20,122 +16,218 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 {
     val parentElement = document.getElementById(elementToDrawIn)
 
-    val analysisEvaluated = new UnitEvent[Analysis, EvaluationEventArgs]
+    val analysisEvaluationSuccess = new UnitEvent[Analysis, EvaluationSuccessEventArgs]
 
     var analysisRunning = false
+
+    var analysisDone = false
+
     var evaluationId = ""
 
+    var intervalHandler: Option[Int] = None
+
     def initialize() {
-        DomainData.getAnalysisById(analysisId){ analysis =>
-            val view = new AnalysisRunnerView(analysis)
-            view.render(parentElement)
-            view.tabs.hideTab(1)
+        blockPage("Loading analysis data")
+        DomainData.getAnalysisById(analysisId) { analysis =>
+            initUI(analysis)
+            unblockPage()
+        } {
+            err => fatalErrorHandler(err)
+        }
+    }
 
-            analysisEvaluated += {
-                evt =>
-                    val graphPresenter = new GraphPresenter(view.resultsView.domElement)
-                    graphPresenter.initialize()
-                    graphPresenter.view.updateGraph(evt.graph)
+    def initUI(analysis: Analysis) {
+        val view = new AnalysisRunnerView(analysis, 30)
+        view.render(parentElement)
+        view.tabs.hideTab(1)
 
-                    val downloadButtonView = new DownloadButtonView()
-                    downloadButtonView.render(graphPresenter.view.toolbar.domElement)
+        analysisEvaluationSuccess += {
+            evt =>
+                analysisDone = true
+                analysisRunning = false
+                intervalHandler.foreach(window.clearInterval(_))
+                view.overviewView.controls.stopButton.addCssClass("disabled")
 
-                    downloadButtonView.rdfDownloadAnchor.mouseClicked += { e =>
+                val graphPresenter = new GraphPresenter(view.resultsView.domElement)
+                graphPresenter.initialize()
+                graphPresenter.view.updateGraph(Some(evt.graph))
+
+                val downloadButtonView = new DownloadButtonView()
+                downloadButtonView.render(graphPresenter.view.toolbar.domElement)
+
+                downloadButtonView.rdfDownloadAnchor.mouseClicked += {
+                    e =>
                         downloadResultAsRDF()
                         true
-                    }
+                }
 
-                    downloadButtonView.ttlDownloadAnchor.mouseClicked += { e =>
+                downloadButtonView.ttlDownloadAnchor.mouseClicked += {
+                    e =>
                         downloadResultAsTTL()
                         true
-                    }
+                }
 
-                    view.tabs.showTab(1)
-                    view.tabs.switchTab(1)
-                    false
-            }
+                view.tabs.showTab(1)
+                view.tabs.switchTab(1)
+                false
+        }
 
-            view.overviewView.controls.runBtn.mouseClicked += { evt =>
-                if (!analysisRunning)
-                {
-                    view.overviewView.controls.runBtn.addCssClass("disabled")
+        view.overviewView.controls.runBtn.mouseClicked += {
+            evt =>
+                if (!analysisRunning) {
+                    uiAdaptAnalysisRunning(view, initUI _, analysis)
+                    var timeout = view.overviewView.controls.timeoutControl.input.value.toInt
+
                     analysisRunning = true
-                    AnalysisRunner.runAnalysisById(analysisId){id =>
-                        evaluationId = id
-                        view.overviewView.controls.progressValueBar.setAttribute("style", "width: 2%; height: 40px")
-                        schedulePolling(view, analysis)
-                    }{error => fatalErrorHandler(error) }
+                    AnalysisRunner.runAnalysisById(analysisId, timeout) {
+                        id =>
+
+                            intervalHandler = Some(window.setInterval(() => {
+                                view.overviewView.controls.timeoutInfo.text = timeout.toString
+                                timeout -= 1
+                            }, 1000))
+
+                            evaluationId = id
+                            view.overviewView.controls.progressValueBar.setAttribute("style", "width: 2%; height: 40px")
+                            schedulePolling(view, analysis)
+                    } {
+                        error => fatalErrorHandler(error)
+                    }
                 }
                 false
-            }
+        }
+    }
 
-        }{ err => fatalErrorHandler(err) }
+    private def uiAdaptAnalysisRunning(view: AnalysisRunnerView, initUI: (Analysis) => Unit, analysis: Analysis) {
+        view.overviewView.controls.runBtn.addCssClass("disabled")
+        view.overviewView.controls.stopButton.removeCssClass("disabled")
+        view.overviewView.controls.timeoutControl.controlGroup.addCssClass("none")
+        view.overviewView.controls.timeoutInfoBar.removeCssClass("none")
+        view.overviewView.controls.stopButton.mouseClicked += {
+            e =>
+                onStopClick(view, initUI, analysis)
+                false
+        }
+    }
+
+    private def onStopClick(view: AnalysisRunnerView, initUI: (Analysis) => Unit, analysis: Analysis) {
+        if (!analysisDone) {
+            analysisRunning = false
+            analysisDone = false
+            intervalHandler.foreach(window.clearInterval(_))
+            view.destroy()
+            initUI(analysis)
+        }
     }
 
     def schedulePolling(view: AnalysisRunnerView, analysis: Analysis) = {
-        window.setTimeout(() => { pollingHandler(view, analysis) }, 500)
+        window.setTimeout(() => {
+            pollingHandler(view, analysis)
+        }, 500)
     }
 
     private def getAnalysisEvaluationID: Option[String] = {
         val id = evaluationId
         if (id == ""){
-            AlertModal.runModal("Evaluation hasn't finished yet.")
+            AlertModal.display("Evaluation hasn't finished yet.")
             None
-        }else{
+        } else {
             Some(id)
         }
     }
 
-    private def downloadResultAs(extension: String){
-        if (getAnalysisEvaluationID.isDefined){
-            window.open("/analysis/" + analysisId + "/evaluation/" + getAnalysisEvaluationID.get + "/download." + extension)
+    private def downloadResultAs(extension: String) {
+        if (getAnalysisEvaluationID.isDefined) {
+            window.open(
+                "/analysis/" + analysisId + "/evaluation/" + getAnalysisEvaluationID.get + "/download." + extension)
         }
     }
 
-    private def downloadResultAsRDF(){
+    private def downloadResultAsRDF() {
         downloadResultAs("xml")
     }
 
-    private def downloadResultAsTTL(){
+    private def downloadResultAsTTL() {
         downloadResultAs("ttl")
     }
-                                                                      /*
-    def addClass(el: dom.Element, addedClass: String) = {
-        val currentClass = el.getAttribute("class")
-        var newClass = currentClass.replaceAllLiterally("alert-warning","")
-        newClass = newClass.replaceAllLiterally("alert-error","")
-        newClass = newClass.replaceAllLiterally("alert-info","")
-        newClass = newClass+" "+addedClass
-        el.setAttribute("class",newClass)
-    }                                                                   */
 
-    def pollingHandler(view: AnalysisRunnerView, analysis: Analysis) : Unit = {
+    def pollingHandler(view: AnalysisRunnerView, analysis: Analysis) {
+        AnalysisRunner.getEvaluationState(evaluationId) {
+            state =>
+                state match {
+                    case s: EvaluationInProgress => renderEvaluationProgress(s, view)
+                    case s: EvaluationError => evaluationErrorHandler(s, view)
+                    case s: EvaluationSuccess => evaluationSuccessHandler(s, analysis, view)
+                    case s: EvaluationTimeout => evaluationTimeout(view)
+                }
 
-        AnalysisRunner.getAnalysisProgress(evaluationId) {progress =>
-            val percent = (progress.percent*100)
+                if (state.isInstanceOf[EvaluationInProgress]) {
+                    schedulePolling(view, analysis)
+                }
+        } {
+            error => fatalErrorHandler(error)
+        }
+    }
 
-            val display = if (percent > 2){ percent }else{ 2 }
+    def evaluationErrorHandler(error: EvaluationError, view: AnalysisRunnerView) {
+        view.overviewView.controls.progressDiv.addCssClass("progress-danger")
+        view.overviewView.controls.progressDiv.removeCssClass("progress-success")
+        view.overviewView.controls.progressDiv.removeCssClass("active")
+        view.overviewView.controls.progressValueBar.setAttribute("style", "width:100%; height: 40px")
+        analysisDone = true
+        view.overviewView.controls.stopButton.addCssClass("disabled")
+        intervalHandler.foreach(window.clearInterval(_))
 
-            view.overviewView.controls.progressValueBar.setAttribute("style","width: "+display+"%; height: 40px")
-            /*progress.evaluated.map{
-                inst => addClass(document.getElementById("inst_"+inst), "alert-warning")
-            }
-            progress.errors.map{
-                inst => addClass(document.getElementById("inst_"+inst), "alert-error")
-            }
+        error.instanceErrors.foreach{ err =>
+            view.overviewView.analysisVisualizer.setInstanceError(err._1.id, err._2)
+        }
+    }
 
-            progress.evaluated.map{
-                inst => addClass(document.getElementById("inst_"+inst), "alert-success")
-            } */
+    def evaluationTimeout(view: AnalysisRunnerView) {
+        view.overviewView.controls.progressDiv.addCssClass("progress-danger")
+        view.overviewView.controls.progressDiv.removeCssClass("progress-success")
+        view.overviewView.controls.progressDiv.removeCssClass("active")
+        analysisDone = true
+        view.overviewView.controls.stopButton.addCssClass("disabled")
+        intervalHandler.foreach(window.clearInterval(_))
 
-            if (!progress.isFinished)
-            {
-                schedulePolling(view, analysis)
-            }else{
-                view.markDone(progress.graph)
-                analysisEvaluated.trigger(new EvaluationEventArgs(analysis, progress.graph))
-                //Notification.postNotification(window.location.href, "Evaluation of analysis "+analysis.name+" is done.")
-            }
-        }{ error => fatalErrorHandler(error) }
+        AlertModal.display("The analysis has timed out.")
+    }
+
+    def evaluationSuccessHandler(success: EvaluationSuccess, analysis: Analysis, view: AnalysisRunnerView) {
+        view.overviewView.controls.progressValueBar.addCssClass("progress-danger")
+        view.overviewView.controls.progressValueBar.removeCssClass("progress-success")
+        analysisDone = true
+        view.overviewView.controls.stopButton.addCssClass("disabled")
+        intervalHandler.foreach(window.clearInterval(_))
+
+        success.instanceErrors.foreach{ err =>
+            view.overviewView.analysisVisualizer.setInstanceError(err._1.id, err._2)
+        }
+
+        view.overviewView.controls.runBtn.addCssClass("btn-success")
+        view.overviewView.controls.progressDiv.removeCssClass("active")
+
+        analysisEvaluationSuccess.trigger(new EvaluationSuccessEventArgs(analysis, success.outputGraph))
+    }
+
+    def renderEvaluationProgress(progress: EvaluationInProgress, view: AnalysisRunnerView) {
+        val percent = (progress.value * 100)
+        val display = if (percent > 2) {
+            percent
+        } else {
+            2
+        }
+        view.overviewView.controls.progressValueBar.setAttribute("style", "width: " + display + "%; height: 40px")
+
+        progress.evaluatedInstances.map {
+            inst => view.overviewView.analysisVisualizer.setInstanceEvaluated(inst.id)
+        }
+        progress.errors.map {
+            tuple => view.overviewView.analysisVisualizer.setInstanceError(tuple._1.id, tuple._2)
+        }
+        progress.runningInstances.map {
+            inst => view.overviewView.analysisVisualizer.setInstanceRunning(inst._1.id)
+        }
     }
 }

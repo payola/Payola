@@ -66,4 +66,6 @@ abstract class Element extends Node
     var onmousemove: (Event => Boolean)
 
     var onmousewheel: (Event => Boolean)
+
+    var onmouseout: (Event => Boolean)
 }

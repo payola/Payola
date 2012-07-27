@@ -164,23 +164,21 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
 
                         val inputsCount = evt.target.inputCount
                         if (inputsCount > branches.size) {
-                            AlertModal.runModal(
+                            AlertModal.display(
                                 "The merge plugin has " + inputsCount.toString() + " inputs, but only " + branches
                                     .size + " branches are available.")
                         } else {
                             val mergeDialog = new MergeAnalysisBranchesDialog(branches, inputsCount)
-                            mergeDialog.confirming += {
-                                e =>
+                            mergeDialog.confirming += { e =>
                                     val instances = mergeDialog.outputToInstance
-
-                                    var i = 0
                                     val buffer = new ArrayBuffer[PluginInstanceView]()
 
-                                    while (i < instances.size) {
+                                    var i = 0
+                                    while(i < instances.size) {
                                         buffer.append(instances(i))
                                         instances(i).hideControls()
                                         branches -= instances(i)
-                                        i += 1
+                                        i = i+1
                                     }
 
                                     AnalysisBuilderData.createPluginInstance(evt.target.id, analysisId) {
@@ -363,7 +361,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                 renderBinding(a, b)
         } {
             _ =>
-                AlertModal.runModal("Unable to save the binding")
+                AlertModal.display("Unable to save the binding")
         }
     }
 

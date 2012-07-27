@@ -4,12 +4,25 @@ import cz.payola.web.client.View
 import cz.payola.web.client.views.elements._
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable
-import cz.payola.web.client.views.ComposedView
+import cz.payola.web.client.views.bootstrap.Icon
+import cz.payola.web.client.views._
+import cz.payola.common.rdf.IdentifiedVertex
+import cz.payola.web.client.events._
 
-class VertexInfoTable(values: mutable.HashMap[String, Seq[String]]) extends ComposedView
+class VertexInfoTable(vertex: IdentifiedVertex, values: mutable.HashMap[String, Seq[String]]) extends ComposedView
 {
+
+    var dataSourceButtonPressed = new SimpleUnitEvent[IdentifiedVertex]
+
     def createSubViews: Seq[View] = {
         val buffer = new ArrayBuffer[ListItem]()
+
+        val browsingButton = new Anchor(List(new Icon(Icon.hdd)))
+        browsingButton.mouseClicked += { e =>
+            dataSourceButtonPressed.triggerDirectly(vertex)
+            false
+        }
+        buffer += new ListItem(List(browsingButton))
 
         var even = true
         values.foreach {

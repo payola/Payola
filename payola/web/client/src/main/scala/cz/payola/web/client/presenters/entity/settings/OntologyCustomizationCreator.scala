@@ -1,4 +1,4 @@
-package cz.payola.web.client.presenters.entity
+package cz.payola.web.client.presenters.entity.settings
 
 import cz.payola.web.client.Presenter
 import cz.payola.web.client.views.entity.OntologyCustomizationCreateModal

@@ -7,7 +7,7 @@ import cz.payola.domain.rdf.Graph
 /**
   * A plugin that during optimization replaces a data fetcher followed by a SPARQL query.
   */
-object FetcherQueryPlugin extends Plugin("Mltiple merged SPARQL query parts", 0, Nil)
+object FetcherQueryPlugin extends Plugin("Multiple merged SPARQL query parts", 0, Nil)
 {
     override def createInstance(): PluginInstance = {
         throw new UnsupportedOperationException(

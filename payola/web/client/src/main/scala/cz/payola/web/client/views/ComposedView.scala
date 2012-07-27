@@ -4,6 +4,7 @@ import s2js.adapters.js.dom
 import s2js.adapters.js.browser.document
 import cz.payola.web.client.View
 import cz.payola.web.client.views.elements.Text
+import s2js.adapters.js.browser.window
 
 trait ComposedView extends View
 {

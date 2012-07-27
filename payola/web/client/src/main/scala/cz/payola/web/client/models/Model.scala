@@ -75,7 +75,7 @@ object Model
             customization.name = newName
             ontologyCustomizationsChanged.triggerDirectly(this)
             successCallback()
-        } (errorCallback)
+        }(errorCallback)
     }
 
     def createOntologyCustomization(name: String, ontologyURL: String)
@@ -98,14 +98,10 @@ object Model
         (errorCallback: Throwable => Unit) {
 
         OntologyCustomizationManager.delete(ontologyCustomization.id) { () =>
-            _ownedOntologyCustomizations.foreach { ownedCustomizations =>
-                ownedCustomizations -= ontologyCustomization
-            }
-
+            _ownedOntologyCustomizations.foreach(_ -= ontologyCustomization)
             ontologyCustomizationsChanged.triggerDirectly(this)
             successCallback()
-        } (errorCallback)
-
+        }(errorCallback)
     }
 
     private def fetchOntologyCustomizations(successCallback: () => Unit)(errorCallback: Throwable => Unit) {
