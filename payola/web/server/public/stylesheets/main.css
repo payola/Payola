@@ -215,3 +215,23 @@ input[type="checkbox"].active:after {
     position: relative;
     overflow: visible;
 }
+
+.bar-chart-textual-content {
+    font-weight: bolder;
+    color: #333;
+    text-shadow: 2px 2px #BCBCBC;
+    text-align: center;
+    vertical-align: center;
+}
+
+.bar-chart-textual-content-large {
+    padding-top: 150px;
+    font-size: 32pt;
+}
+
+.bar-chart-textual-content-small {
+    color: #666;
+    text-shadow: 1px 1px #DEDEDE;
+    padding-top: 30px;
+    font-size: 24px;
+}
