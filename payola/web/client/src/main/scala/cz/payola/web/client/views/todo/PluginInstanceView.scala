@@ -22,7 +22,7 @@ abstract class PluginInstanceView(
 {
     private val heading = new Heading(List(new Text(plugin.name)), 3)
 
-    private val paramsDiv = new Div(getParameterViews)
+    private val paramsDiv = new Div(getParameterViews, "parameters")
 
     private val controlViews = getAdditionalControlsViews
 
@@ -84,11 +84,11 @@ abstract class PluginInstanceView(
     }
 
     def showControls() {
-        additionalControls.show()
+        additionalControls.removeCssClass("hidden-element")
     }
 
     def hideControls() {
-        additionalControls.hide()
+        additionalControls.addCssClass("hidden-element")
     }
 
     def setRunning(){
@@ -108,8 +108,15 @@ abstract class PluginInstanceView(
             clearStyle()
             alertDiv.addCssClass("alert-danger")
             hasError = true
+            alertDiv.setAttribute("rel","popover")
+            alertDiv.setAttribute("data-content",message)
+            alertDiv.setAttribute("data-original-title","Error details")
+            activatePopover(alertDiv.domElement)
         }
     }
+
+    @javascript("""jQuery(e).popover()""")
+    def activatePopover(e: Element){}
 
     def clearStyle(){
         alertDiv.removeCssClass("alert-warning")

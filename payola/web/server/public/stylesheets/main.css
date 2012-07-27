@@ -45,6 +45,12 @@ body {
     padding: 9px 0;
 }
 
+label {
+    float: left;
+    margin-right: 10px;
+    padding-top: 4px;
+}
+
 .instance h3 {
     text-align: center;
 }
@@ -119,6 +125,15 @@ input[type="checkbox"].active:after {
     min-width: 300px;
 }
 
+.successors .parameters{
+    width: 250px;
+    overflow-x: scroll;
+}
+
+.successors+.successors {
+    margin-left: 10px;
+}
+
 .clear {
     clear: both;
     height: 0px;
@@ -127,7 +142,6 @@ input[type="checkbox"].active:after {
 }
 
 .alert {
-    margin-bottom: 18px;
 }
 
 .position-relative {
@@ -181,14 +195,6 @@ input[type="checkbox"].active:after {
     padding-right: 0px;
 }
 
-.successors > .successors {
-    margin-left: 10px;
-}
-
-.successors > .successors:first-child {
-    margin-left: 0px;
-}
-
 #progress {
     top: 5px;
     position: relative;
@@ -220,6 +226,14 @@ input[type="checkbox"].active:after {
     display: none !important;
 }
 
+.hidden-element{
+    visibility: hidden;
+}
+
 .analysis-controls {
     padding-bottom: 27px !important;
+}
+
+.popover-content p{
+    max-height: 200px;
 }

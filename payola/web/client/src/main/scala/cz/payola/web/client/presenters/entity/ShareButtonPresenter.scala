@@ -104,11 +104,7 @@ class ShareButtonPresenter(
         val body = List(privilegedSearchBox)
         val modal = new Modal("Share " + entityName + " to a " + privilegedType + ":", body, Some("Share"))
 
-        modal.closing += {
-            e =>
-                modal.destroy()
-                true
-        }
+        modal.closing += { e => true }
 
         modal.confirming += {
             e =>
@@ -116,7 +112,6 @@ class ShareButtonPresenter(
                 callback({
                     unblockPage()
                 }, privilegedSearchBox.input.value)
-                modal.destroy()
                 true
         }
         modal
