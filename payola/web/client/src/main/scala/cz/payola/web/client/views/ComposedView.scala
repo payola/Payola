@@ -24,6 +24,7 @@ trait ComposedView extends View
     def blockDomElement = subViews.headOption.map(_.blockDomElement).getOrElse(document.createElement[dom.Div]("div"))
 
     def render(parent: dom.Element) {
+
         parentElement = Some(parent)
         subViews.foreach { v =>
             new Text(" ").render(parent)

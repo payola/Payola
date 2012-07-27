@@ -21,7 +21,6 @@ abstract class BaseTechnique(settings: VisualSetup, name: String) extends Visual
     }
 
     private def performPositioning(graphView: GraphView) {
-        //TODO might be useful to somehow calculate the highest bottom (y-coordinate) of components in a row
 
         var firstAnimation: Option[Animation[ListBuffer[(VertexView, Point2D)]]] = None
         var componentNumber = 1
@@ -40,7 +39,8 @@ abstract class BaseTechnique(settings: VisualSetup, name: String) extends Visual
                 componentNumber, graphView.components.length, previousComponent)
 
             firstAnimation.get.addFollowingAnimation(new Animation(
-                Animation.flipGraph, component.vertexViews, None, redrawQuick, redraw, None))
+                Animation.flipGraph, ((new GraphCenterHelper(graphView.getGraphCenter), component.vertexViews)), None,
+                redrawQuick, redraw, None))
 
             if (graphView.components.length != 1) {
                 firstAnimation.get.addFollowingAnimation(new Animation(
