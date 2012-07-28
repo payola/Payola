@@ -9,9 +9,13 @@ class SharingPresenter(placeHolders: dom.NodeList[dom.Element], entityType: Stri
         var i = 0
         while (i < placeHolders.length) {
             val placeHolder = placeHolders.item(i)
-            val id = placeHolder.getAttribute("data-shareable-entity-id")
-            val isPublic = placeHolder.getAttribute("data-shareable-entity-public").toBoolean
-            new ShareButtonPresenter(placeHolder, entityType, id, isPublic).initialize()
+            new ShareButtonPresenter(
+                placeHolder,
+                entityType,
+                placeHolder.getAttribute("data-id"),
+                placeHolder.getAttribute("data-name"),
+                placeHolder.getAttribute("data-is-public").toBoolean
+            ).initialize()
             i += 1
         }
     }

@@ -128,8 +128,10 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
     private def getAnalysisEvaluationID: Option[String] = {
         val id = evaluationId
-        if (id == ""){
-            AlertModal.display("Evaluation hasn't finished yet.")
+        if (id == "") {
+            // TODO why is the Alert inside this method? Nobody would expect such side effects from method named
+            // TODO getAnalysisEvaluationID.
+            AlertModal.display("Evaluation hasn't finished yet.", "")
             None
         } else {
             Some(id)
@@ -191,7 +193,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         view.overviewView.controls.stopButton.addCssClass("disabled")
         intervalHandler.foreach(window.clearInterval(_))
 
-        AlertModal.display("The analysis has timed out.")
+        AlertModal.display("Time out", "The analysis evaluation has timed out.")
     }
 
     def evaluationSuccessHandler(success: EvaluationSuccess, analysis: Analysis, view: AnalysisRunnerView) {

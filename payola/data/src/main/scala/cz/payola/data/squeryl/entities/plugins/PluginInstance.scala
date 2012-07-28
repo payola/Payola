@@ -4,7 +4,8 @@ import cz.payola.data.squeryl.entities.plugins.parameters._
 import scala.collection.immutable
 import org.squeryl.annotations.Transient
 import cz.payola.data.squeryl.entities._
-import cz.payola.data.squeryl.SquerylDataContextComponent
+import cz.payola.data.squeryl._
+import scala.Some
 
 /**
   * This object converts [[cz.payola.common.entities.plugins.PluginInstance]] to [[cz.payola.data.squeryl.entities.plugins.PluginInstance]]
@@ -30,7 +31,7 @@ class PluginInstance(
     var _desc: String,
     var _isEdit: Boolean)(implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.plugins.PluginInstance(p, paramValues)
-    with PersistableEntity with DescribedEntity with PluginInstanceLike
+    with Entity with DescribedEntity with PluginInstanceLike
 {
     var pluginId: String = Option(p).map(_.id).getOrElse(null)
 

@@ -1,7 +1,7 @@
 package cz.payola.data
 
 import java.sql.SQLException
-import cz.payola.common.exception.PayolaException
+import cz.payola.common.PayolaException
 
 object DataException
 {

@@ -16,8 +16,6 @@ class Group(protected var _name: String, protected var _owner: User)
 
     type UserType = User
 
-    def entityTypeName = "user group"
-
     /**
       * Adds a member to the group.
       * @param user The user to be added.

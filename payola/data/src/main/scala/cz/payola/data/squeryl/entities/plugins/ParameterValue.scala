@@ -2,7 +2,8 @@ package cz.payola.data.squeryl.entities.plugins
 
 import cz.payola.data.squeryl.entities._
 import cz.payola.data.squeryl.entities.plugins.parameters._
-import cz.payola.data.squeryl.SquerylDataContextComponent
+import cz.payola.data.squeryl._
+import scala.Some
 
 /**
   * This object converts [[cz.payola.common.entities.plugins.ParameterValue]] to proper parameter value
@@ -27,7 +28,7 @@ object ParameterValue extends EntityConverter[ParameterValue[_]]
     }
 }
 
-trait ParameterValue[A] extends cz.payola.domain.entities.plugins.ParameterValue[A] with PersistableEntity
+trait ParameterValue[A] extends cz.payola.domain.entities.plugins.ParameterValue[A] with Entity
 {
     val parameterId: String
 

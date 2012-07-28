@@ -12,6 +12,8 @@ trait Parameter[A] extends Entity
 
     protected val _defaultValue: A
 
+    override def classNameText = "parameter"
+
     /** Name of the parameter. */
     def name = _name
 

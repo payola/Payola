@@ -3,8 +3,8 @@ package cz.payola.data.squeryl.entities.settings
 import scala.collection.immutable
 import scala.collection.mutable
 import cz.payola.data.squeryl.entities._
-import cz.payola.data.squeryl.SquerylDataContextComponent
-
+import cz.payola.data.squeryl._
+import scala.Some
 
 object ClassCustomization extends EntityConverter[ClassCustomization]
 {
@@ -26,7 +26,7 @@ class ClassCustomization(
     (implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.settings.ClassCustomization(
         uri, fillColor, radius, glyph, customizations)
-    with PersistableEntity
+    with Entity
 {
     var ontologyCustomizationId: String = null
 

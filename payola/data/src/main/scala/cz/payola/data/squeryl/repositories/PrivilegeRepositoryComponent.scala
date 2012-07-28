@@ -12,6 +12,7 @@ import org.squeryl.PrimitiveTypeMode._
 trait PrivilegeRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
+
     private type PrivilegeType = Privilege[_ <: Entity]
 
     lazy val privilegeRepository = new PrivilegeRepository
@@ -42,22 +43,21 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
             representationRepository.getCount
         }
 
-        def getAllGrantedTo(granteeIds: Seq[String], privilegeClass: Class[_]): Seq[PrivilegeType] = {
+        def getAllByGranteeIds(granteeIds: Seq[String], privilegeClass: Class[_]): Seq[PrivilegeType] = {
             _getByGrantee(granteeIds, Some(privilegeClass))
         }
 
-        def getByGrantee(granteeId: String): Seq[PrivilegeType] = {
+        def getAllByGranteeId(granteeId: String): Seq[PrivilegeType] = {
             _getByGrantee(List(granteeId), None)
         }
 
-        def getAllByObjectIdAndGranteeType(objId: String,
-            granteeType: Class[_ <: PrivilegableEntity]): Seq[Privilege[_ <: cz.payola.domain.Entity]] = {
+        def getAllByObjectIdAndPrivilegeClass(objId: String, privilegeClass: Class[_]): Seq[PrivilegeType] = {
 
             schema.wrapInTransaction {
                 instantiate(
                     representationRepository.selectWhere(p =>
                         p.objectId === objId
-                        and p.granteeClassName === repositoryRegistry.getClassName(granteeType))
+                        and p.privilegeClass === privilegeClass.getName)
                 )
             }
         }
@@ -103,7 +103,7 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
 
                     // Get and fill Privilege constructor (with 4 parameters)
                     val privilegeClass = java.lang.Class.forName(p.privilegeClass)
-                    val constructor = privilegeClass.getConstructors.find(_.getParameterTypes().size == 4).get
+                    val constructor = privilegeClass.getConstructors.find(_.getParameterTypes.size == 4).get
                     val arguments = List(granter, grantee, obj, p.id).toArray
 
                     // Instantiate the privilege

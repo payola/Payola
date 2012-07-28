@@ -1,7 +1,8 @@
 package cz.payola.data.squeryl.entities.settings
 
-import cz.payola.data.squeryl.SquerylDataContextComponent
+import cz.payola.data.squeryl._
 import cz.payola.data.squeryl.entities._
+import scala.Some
 
 object PropertyCustomization extends EntityConverter[PropertyCustomization]
 {
@@ -19,7 +20,7 @@ class PropertyCustomization(
     override val id: String, uri: String, strokeColor: String, strokeWidth: Int)
     (implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.settings.PropertyCustomization(uri, strokeColor, strokeWidth)
-    with PersistableEntity
+    with Entity
 {
     var classCustomizationId: String = null
 }

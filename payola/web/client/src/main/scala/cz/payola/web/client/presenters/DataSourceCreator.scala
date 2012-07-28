@@ -126,11 +126,11 @@ class DataSourceCreator(val dataFetcherDivID: String,
     private def validateInputFields: Boolean = {
         var result = false
         if (nameField.input.value == "") {
-            AlertModal.display("Data source name may not be empty!")
+            AlertModal.display("Data source name may not be empty!", "")
         }else if (DataSourceManager.dataSourceExistsWithName(nameField.input.value)) {
-            AlertModal.display("Data source with this name already exists!")
+            AlertModal.display("Data source with this name already exists!", "")
         }else if (descriptionField.input.value == ""){
-            AlertModal.display("Data source description musn't be empty!")
+            AlertModal.display("Data source description musn't be empty!", "")
         }else{
             result = true
         }

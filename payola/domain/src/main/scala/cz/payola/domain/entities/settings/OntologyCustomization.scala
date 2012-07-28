@@ -5,7 +5,7 @@ import cz.payola.domain.entities._
 import scala.collection.immutable
 import cz.payola.domain.rdf.ontology.Ontology
 import cz.payola.domain.net.Downloader
-import cz.payola.common.exception.ValidationException
+import cz.payola.common.ValidationException
 
 object OntologyCustomization
 {
@@ -42,14 +42,11 @@ class OntologyCustomization(
     extends Entity
     with NamedEntity
     with OptionallyOwnedEntity
-    with ShareableEntity
     with cz.payola.common.entities.settings.OntologyCustomization
 {
     checkConstructorPostConditions()
 
     type ClassCustomizationType = ClassCustomization
-
-    def entityTypeName = "ontology customization"
 
     override def canEqual(other: Any): Boolean = {
         other.isInstanceOf[OntologyCustomization]
@@ -59,6 +56,5 @@ class OntologyCustomization(
         super[Entity].checkInvariants()
         super[NamedEntity].checkInvariants()
         super[OptionallyOwnedEntity].checkInvariants()
-        super[ShareableEntity].checkInvariants()
     }
 }

@@ -4,7 +4,8 @@ import cz.payola.data.squeryl.entities.analyses._
 import cz.payola.data.squeryl.entities.plugins.PluginInstance
 import scala.collection.immutable
 import scala.collection.mutable
-import cz.payola.data.squeryl.SquerylDataContextComponent
+import cz.payola.data.squeryl._
+import scala.Some
 
 /**
   * This object converts [[cz.payola.common.entities.Analysis]] to [[cz.payola.data.squeryl.entities.Analysis]]
@@ -24,7 +25,7 @@ object Analysis extends EntityConverter[Analysis]
 class Analysis(override val id: String, name: String, o: Option[User], var _isPub: Boolean, var _desc: String)
     (implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.Analysis(name, o)
-    with PersistableEntity with OptionallyOwnedEntity with ShareableEntity with NamedEntity with DescribedEntity
+    with Entity with OptionallyOwnedEntity with ShareableEntity with DescribedEntity
 {
     type DomainParameterValueType = plugins.ParameterValue[_]
 

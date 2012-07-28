@@ -5,6 +5,7 @@ import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.dsl.ast.LogicalBoolean
 import cz.payola.data.PaginationInfo
 import cz.payola.data.squeryl.entities._
+import cz.payola.domain.entities.NamedEntity
 
 trait TableRepositoryComponent
 {
@@ -17,7 +18,7 @@ trait TableRepositoryComponent
       * @tparam A Type of the entities in the repository.
       * @tparam B Type of select query result.
       */
-    abstract class TableRepository[A <: PersistableEntity, B](val table: Table[A],
+    abstract class TableRepository[A <: Entity, B](val table: Table[A],
         val entityConverter: EntityConverter[A])
         extends Repository[A]
     {
@@ -95,7 +96,7 @@ trait TableRepositoryComponent
           * @param table Tha table to persist the entity int.
           * @tparam C Type of the entity.
           */
-        protected def persist[C <: PersistableEntity](entity: C, table: Table[C]) {
+        protected def persist[C <: Entity](entity: C, table: Table[C]) {
             schema.persist(entity, table)
         }
 
@@ -104,7 +105,7 @@ trait TableRepositoryComponent
         }
     }
 
-    trait NamedEntityTableRepository[A <: PersistableEntity with NamedEntity]
+    trait NamedEntityTableRepository[A <: Entity with NamedEntity]
         extends NamedEntityRepository[A]
     {
         self: TableRepository[A, _] =>
@@ -112,7 +113,7 @@ trait TableRepositoryComponent
         def getByName(name: String): Option[A] = selectOneWhere(_.name === name)
     }
 
-    trait OptionallyOwnedEntityTableRepository[A <: PersistableEntity with OptionallyOwnedEntity with NamedEntity, B]
+    trait OptionallyOwnedEntityTableRepository[A <: Entity with OptionallyOwnedEntity with NamedEntity, B]
         extends OptionallyOwnedEntityRepository[A]
     {
         self: TableRepository[A, B] =>
@@ -120,7 +121,7 @@ trait TableRepositoryComponent
         def getAllByOwnerId(ownerId: Option[String]): Seq[A] = selectWhere(_.ownerId === ownerId).sortBy(_.name)
     }
 
-    trait ShareableEntityTableRepository[A <: PersistableEntity
+    trait ShareableEntityTableRepository[A <: Entity
             with ShareableEntity with OptionallyOwnedEntity with NamedEntity, B]
         extends OptionallyOwnedEntityTableRepository[A, B]
         with ShareableEntityRepository[A]
@@ -134,7 +135,7 @@ trait TableRepositoryComponent
       * A repository that doesn't use any special select query for entity selection. No related entities are selected,
       * therefore it's called lazy.
       */
-    class LazyTableRepository[A <: PersistableEntity](table: Table[A], entityConverter: EntityConverter[A])
+    class LazyTableRepository[A <: Entity](table: Table[A], entityConverter: EntityConverter[A])
         extends TableRepository[A, A](table, entityConverter)
     {
         protected def getSelectQuery(entityFilter: A => LogicalBoolean): Query[A] = {
@@ -152,7 +153,7 @@ trait TableRepositoryComponent
      * @param entityConverter A converter that converts to instances that can be stored into the table.
      * @tparam A Type of the entities in the repository.
      */
-    class OptionallyOwnedEntityDefaultTableRepository[A <: PersistableEntity with OptionallyOwnedEntity with NamedEntity](
+    class OptionallyOwnedEntityDefaultTableRepository[A <: Entity with OptionallyOwnedEntity with NamedEntity](
         table: Table[A], entityConverter: EntityConverter[A])
         extends TableRepository[A, (A, Option[User])](table, entityConverter)
         with OptionallyOwnedEntityTableRepository[A, (A, Option[User])]

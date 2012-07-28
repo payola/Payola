@@ -7,3 +7,6 @@ import cz.payola.common.entities._
   * the vertex neighbourhood etc.).
   */
 trait DataSource extends PluginInstance with OptionallyOwnedEntity with NamedEntity with ShareableEntity
+{
+    override def classNameText = "data source"
+}

@@ -5,7 +5,7 @@ import cz.payola.common.Entity
 /**
   * A described generic entity.
   */
-trait DescribedEntity
+trait DescribedEntity extends Entity
 {
     self: Entity =>
 

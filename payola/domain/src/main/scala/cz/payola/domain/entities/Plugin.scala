@@ -15,15 +15,14 @@ abstract class Plugin(
     protected var _name: String,
     protected val _inputCount: Int,
     protected val _parameters: immutable.Seq[Plugin#ParameterType],
-    id: String = IDGenerator.newId)
-    extends Entity(id)
+    override val id: String = IDGenerator.newId)
+    extends Entity
     with NamedEntity
     with OptionallyOwnedEntity
-    with ShareableEntity
     with cz.payola.common.entities.Plugin
 {
     // The owner has to be declared before the checkConstructorPostConditions invocation, which verifies it's not null.
-    var _owner: Option[UserType] = None
+    final var _owner: Option[UserType] = None
 
     checkConstructorPostConditions()
 
@@ -31,13 +30,16 @@ abstract class Plugin(
 
     type ParameterValueType = ParameterValue[_]
 
-    def entityTypeName = "plugin"
+    /**
+     * All the plugins have to behave as if they were instances of the plugin class, not their concrete classes.
+     */
+    override final def className = "Plugin"
 
     /**
       * Sets the owner of the plugin.
       * @param value The new owner of the plugin.
       */
-    def owner_=(value: Option[UserType]) {
+    final def owner_=(value: Option[UserType]) {
         _owner = value
         super[OptionallyOwnedEntity].checkInvariants()
     }
@@ -45,7 +47,7 @@ abstract class Plugin(
     /**
       * Returns a new instance of the plugin with all parameter instances set to default values.
       */
-    def createInstance(): PluginInstance = {
+    final def createInstance(): PluginInstance = {
         new PluginInstance(this, parameters.map(_.createValue(None)))
     }
 
@@ -53,7 +55,7 @@ abstract class Plugin(
       * Returns a plugin parameter with the specified name.
       * @param parameterName Name of the parameter to return.
       */
-    def getParameter(parameterName: String): Option[Parameter[_]] = {
+    final def getParameter(parameterName: String): Option[Parameter[_]] = {
         parameters.find(_.name == parameterName)
     }
 
@@ -67,7 +69,7 @@ abstract class Plugin(
       */
     def evaluate(instance: PluginInstance, inputs: IndexedSeq[Option[Graph]], progressReporter: Double => Unit): Graph
 
-    override def canEqual(other: Any): Boolean = {
+    override final def canEqual(other: Any): Boolean = {
         other.isInstanceOf[Plugin]
     }
 
@@ -77,7 +79,7 @@ abstract class Plugin(
       * @param inputs The inputs.
       * @return The input graphs.
       */
-    protected def getDefinedInputs(inputs: IndexedSeq[Option[Graph]]): IndexedSeq[Graph] = {
+    protected final def getDefinedInputs(inputs: IndexedSeq[Option[Graph]]): IndexedSeq[Graph] = {
         if (inputs.exists(_.isEmpty)) {
             throw new PluginException("The plugin requires all inputs to be defined.")
         }
@@ -93,7 +95,7 @@ abstract class Plugin(
       * @tparam R Type of the function return value.
       * @return The result of application of the function.
       */
-    protected def usingDefined[A, R](p: Option[A])(f: (A) => R): R = {
+    protected final def usingDefined[A, R](p: Option[A])(f: (A) => R): R = {
         p.map(value => f(value)).getOrElse {
             throw new PluginException("The used value isn't defined.")
         }
@@ -110,7 +112,7 @@ abstract class Plugin(
       * @tparam R Type of the function return value.
       * @return The result of application of the function.
       */
-    protected def usingDefined[A, B, R](p1: Option[A], p2: Option[B])(f: (A, B) => R): R = {
+    protected final def usingDefined[A, B, R](p1: Option[A], p2: Option[B])(f: (A, B) => R): R = {
         p1.flatMap(value1 => p2.map(value2 => f(value1, value2))).getOrElse {
             throw new PluginException("One of the used values isn't defined.")
         }
@@ -129,17 +131,16 @@ abstract class Plugin(
       * @tparam R Type of the function return value.
       * @return The result of application of the function.
       */
-    protected def usingDefined[A, B, C, R](p1: Option[A], p2: Option[B], p3: Option[C])(f: (A, B, C) => R): R = {
+    protected final def usingDefined[A, B, C, R](p1: Option[A], p2: Option[B], p3: Option[C])(f: (A, B, C) => R): R = {
         p1.flatMap(value1 => p2.flatMap(value2 => p3.map(value3 => f(value1, value2, value3)))).getOrElse {
             throw new PluginException("One of the used values isn't defined.")
         }
     }
 
-    override protected def checkInvariants() {
+    override protected final def checkInvariants() {
         super[Entity].checkInvariants()
         super[NamedEntity].checkInvariants()
         super[OptionallyOwnedEntity].checkInvariants()
-        super[ShareableEntity].checkInvariants()
         validate(inputCount >= 0, "inputCount", "The inputCount of the plugin must be a non-negative number.")
         validate(parameters != null, "parameters", "The parameters of the plugin mustn't be null.")
         validate(!parameters.contains(null), "parameters", "The parameters of the plugin mustn't contain null.")

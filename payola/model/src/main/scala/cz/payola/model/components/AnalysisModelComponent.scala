@@ -11,11 +11,9 @@ import cz.payola.domain.entities.plugins.parameters.StringParameterValue
 
 trait AnalysisModelComponent extends EntityModelComponent
 {
-    self: DataContextComponent =>
-    lazy val analysisModel = new ShareableEntityModel[Analysis](
-        analysisRepository,
-        classOf[AccessAnalysisPrivilege],
-        (user: User) => user.ownedAnalyses)
+    self: DataContextComponent with PrivilegeModelComponent =>
+
+    lazy val analysisModel = new ShareableEntityModel(analysisRepository, classOf[Analysis])
     {
         def addBinding(analysisId: String, sourceId: String, targetId: String, inputIndex: Int) {
             getById(analysisId).map {
