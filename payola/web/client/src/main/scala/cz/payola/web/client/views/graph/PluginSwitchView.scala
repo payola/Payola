@@ -15,6 +15,7 @@ import cz.payola.web.shared.managers._
 import cz.payola.web.client.events._
 import cz.payola.common.entities.settings.OntologyCustomization
 import cz.payola.web.client.View
+import cz.payola.web.client.views.graph.visual.BarChartPluginView
 
 class PluginSwitchView extends GraphView with ComposedView
 {
@@ -29,7 +30,8 @@ class PluginSwitchView extends GraphView with ComposedView
         new TripleTablePluginView(null),
         new CircleTechnique(visualSetup),
         new GravityTechnique(visualSetup),
-        new TreeTechnique(visualSetup)/*,
+        new TreeTechnique(visualSetup),
+        new BarChartPluginView(visualSetup)/*,
         new MinimalizationTechnique(visualSetup),*/
     )
 

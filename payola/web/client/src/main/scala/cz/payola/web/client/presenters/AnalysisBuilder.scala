@@ -170,18 +170,16 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                             )
                         } else {
                             val mergeDialog = new MergeAnalysisBranchesDialog(branches, inputsCount)
-                            mergeDialog.confirming += {
-                                e =>
+                            mergeDialog.confirming += { e =>
                                     val instances = mergeDialog.outputToInstance
-
-                                    var i = 0
                                     val buffer = new ArrayBuffer[PluginInstanceView]()
 
-                                    while (i < instances.size) {
+                                    var i = 0
+                                    while(i < instances.size) {
                                         buffer.append(instances(i))
                                         instances(i).hideControls()
                                         branches -= instances(i)
-                                        i += 1
+                                        i = i+1
                                     }
 
                                     AnalysisBuilderData.createPluginInstance(evt.target.id, analysisId) {

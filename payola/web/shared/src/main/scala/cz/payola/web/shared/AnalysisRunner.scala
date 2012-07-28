@@ -26,7 +26,7 @@ import cz.payola.common.ValidationException
 
         val evaluationId = IDGenerator.newId
         val timeout = scala.math.min(1800, timeoutSeconds)
-        runningEvaluations.put(evaluationId, (user, analysis.evaluate(Some(timeout * 1000))))
+        runningEvaluations.put(evaluationId, (user, analysis.evaluate(Some(timeout*1000))))
 
         successCallback(evaluationId)
     }
@@ -67,6 +67,7 @@ import cz.payola.common.ValidationException
         val response = evaluation.getResult.map {
             case r: Error => EvaluationError(transformException(r.error), r.instanceErrors.toList.map{e => (e._1,transformException(e._2))})
             case r: Success => EvaluationSuccess(r.outputGraph, r.instanceErrors.toList.map{e => (e._1,transformException(e._2))})
+            case Timeout => new EvaluationTimeout
             case _ => throw new Exception("Unhandled evaluation state")
             //TODO timeout remove after some time
         }.getOrElse {

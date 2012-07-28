@@ -62,8 +62,12 @@ case class Vector2D(x: Double, y: Double)
         sqrt(pow(x, 2) + pow(y, 2))
     }
 
+    /**
+     * Creates String representation of this vector.
+     * @return "[" + x + "; " + y + "]"
+     */
     override def toString: String = {
-        "[" + x + ", " + y + "]"
+        "[" + x + "; " + y + "]"
     }
 }
 

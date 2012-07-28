@@ -9,16 +9,37 @@ import cz.payola.web.client.views.algebra._
 class Animation[T](
     animationFunction: (T, Option[Animation[_]], () => Unit, () => Unit, Option[Int]) => Unit,
     toAnimate: T, var followingAnimation: Option[Animation[_]], quickDraw: () => Unit,
-    finalDraw: () => Unit, animationStepLength: Option[Int])
+    finalDraw: () => Unit, var animationStepLength: Option[Int])
 {
+    /**
+     * Launches this animation and after its completion the row of followingAnimations is launched.
+     */
     def run() {
         animationFunction(toAnimate, followingAnimation, quickDraw, finalDraw, animationStepLength)
     }
 
+    /**
+     * Sets to this and all following animations animationStepLength to 0.
+     */
+    def finishAllAnimations() {
+        this.animationStepLength = Some(0)
+        if(followingAnimation.isDefined) {
+            followingAnimation.get.finishAllAnimations()
+        }
+    }
+
+    /**
+     * Sets the next animation of this animation. If any animation was already set, this will overwrite it.
+     * @param newFollowingAnimation aniamtion to set
+     */
     def setFollowingAnimation(newFollowingAnimation: Animation[_]) {
         followingAnimation = Some(newFollowingAnimation)
     }
 
+    /**
+     * Appends next animation to the last animation of this row of animations.
+     * @param nextFollowingAnimation animation to append
+     */
     def addFollowingAnimation(nextFollowingAnimation: Animation[_]) {
         if (followingAnimation.isEmpty) {
             setFollowingAnimation(nextFollowingAnimation)
@@ -30,15 +51,24 @@ class Animation[T](
 
 object Animation
 {
-    private val currentAnimation: Option[Animation[_]] = None
-
     private val animationKillConst = 0
 
     private val animationPrepareConst = -1
 
     private var animationCurrentNumber = -1
 
-    def emptyAnimation(wontBeUsed1: Boolean, nextAnimation: Option[Animation[_]],
+    /**
+     * Animation function for performing post animation functions. This animation does not animate anything, it just
+     * performs the first and second functions. This allows to perform a post animation functions
+     * @param wontBeUsed1
+     * @param nextAnimation following animation to perform
+     * @param firstFuncToRun function that will be performed first
+     * @param secondFuncToRun function that will be performed second
+     * @param animationStepLength parameter for controlling time consumption fo animation steps;
+     *                            if it is set to 0: animation is skipped
+     *                            otherwise the animation is performed normally
+     */
+    def emptyAnimation(wontBeUsed1: Any, nextAnimation: Option[Animation[_]],
         firstFuncToRun: () => Unit, secondFuncToRun: () => Unit, animationStepLength: Option[Int]) {
         firstFuncToRun()
         secondFuncToRun()
@@ -47,18 +77,16 @@ object Animation
         }
     }
 
-    def hideText(infosToAnimate: ListBuffer[InformationView], nextAnimation: Option[Animation[_]],
-        quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
-        animationCurrentNumber = animationPrepareConst
-        animateTextVisibility(infosToAnimate, 1 - 0.1, -0.1, nextAnimation, quickDraw, finalDraw, animationStepLength)
-    }
-
-    def showText(infosToAnimate: ListBuffer[InformationView], nextAnimation: Option[Animation[_]],
-        quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
-        animationCurrentNumber = animationPrepareConst
-        animateTextVisibility(infosToAnimate, 0 + 0.1, 0.1, nextAnimation, quickDraw, finalDraw, animationStepLength)
-    }
-
+    /**
+     * Animation function for moving every single vertex of a graph to a new specified position.
+     * @param verticesToMove list of vertices with their new positions
+     * @param nextAnimation following animation to perform
+     * @param quickDraw function for redrawing whole drawing space quickly, it is used after every iteration
+     * @param finalDraw function for redrawing whole drawing space after all animations have been finished
+     * @param animationStepLength parameter for controlling time consumption fo animation steps;
+     *                            if it is set to 0: animation is skipped
+     *                            otherwise the animation is performed normally
+     */
     def moveVertices(verticesToMove: ListBuffer[(VertexView, Point2D)], nextAnimation: Option[Animation[_]],
         quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
         val animationVViews = ListBuffer[AnimationVertexView]()
@@ -71,12 +99,32 @@ object Animation
         animateTranslation(animationVViews, nextAnimation, quickDraw, finalDraw, animationStepLength)
     }
 
+    /**
+     *Animation function for moving graph by provided function packed by PositionHelper
+     * @param move _1 packed function for getting a vector to move _2 vertices to move
+     * @param nextAnimation following animation to perform
+     * @param quickDraw function for redrawing whole drawing space quickly, it is used after every iteration
+     * @param finalDraw function for redrawing whole drawing space after all animations have been finished
+     * @param animationStepLength parameter for controlling time consumption fo animation steps;
+     *                            if it is set to 0: animation is skipped
+     *                            otherwise the animation is performed normally
+     */
     def moveGraphByFunction(move: (PositionHelper, ListBuffer[VertexView]), nextAnimation: Option[Animation[_]],
         quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
         moveGraphByVector(((move._1.getPositionCorrection(), move._2)), nextAnimation, quickDraw, finalDraw,
             animationStepLength)
     }
 
+    /**
+     * Animation function for moving graph by one vector.
+     * @param move _1 vector to move by, _2 vertices to move
+     * @param nextAnimation following animation to perform
+     * @param quickDraw function for redrawing whole drawing space quickly, it is used after every iteration
+     * @param finalDraw function for redrawing whole drawing space after all animations have been finished
+     * @param animationStepLength parameter for controlling time consumption fo animation steps;
+     *                            if it is set to 0: animation is skipped
+     *                            otherwise the animation is performed normally
+     */
     def moveGraphByVector(move: (Vector2D, ListBuffer[VertexView]), nextAnimation: Option[Animation[_]],
         quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
         val animationVViews = ListBuffer[AnimationVertexView]()
@@ -88,12 +136,33 @@ object Animation
         animateTranslation(animationVViews, nextAnimation, quickDraw, finalDraw, animationStepLength)
     }
 
+    /**
+     * Animation function for moving graph to upper left corner of the drawing space (actually to Point2D(50, 25)).
+     * @param vViews vertices to move
+     * @param nextAnimation following animation to perform
+     * @param quickDraw function for redrawing whole drawing space quickly, it is used after every iteration
+     * @param finalDraw function for redrawing whole drawing space after all animations have been finished
+     * @param animationStepLength parameter for controlling time consumption fo animation steps;
+     *                            if it is set to 0: animation is skipped
+     *                            otherwise the animation is performed normally
+     */
     def moveGraphToUpperLeftCorner(vViews: ListBuffer[VertexView], nextAnimation: Option[Animation[_]],
         quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
         moveGraphByVector((Point2D(50, 25).toVector, vViews), nextAnimation, quickDraw, finalDraw, animationStepLength)
     }
 
-    def flipGraph(vViews: ListBuffer[VertexView], nextAnimation: Option[Animation[_]], quickDraw: () => Unit,
+    /**
+     * Animation function for rotating vertices around line comming through the center of their group. The line is
+     * parallel with line x=y.
+     * @param move _1 position correction helper and _2 vertices to move
+     * @param nextAnimation animation to perform after this one
+     * @param quickDraw function for redrawing whole drawing space quickly, it is used after every iteration
+     * @param finalDraw function for redrawing whole drawing space after all animations have been finished
+     * @param animationStepLength parameter for controlling time consumption fo animation steps;
+     *                            if it is set to 0: animation is skipped
+     *                            otherwise the animation is performed normally
+     */
+    def flipGraph(move: (PositionHelper, ListBuffer[VertexView]), nextAnimation: Option[Animation[_]], quickDraw: () => Unit,
         finalDraw: () => Unit, animationStepLength: Option[Int]) {
         var maxX: Double = Double.MinValue
         var minX: Double = Double.MaxValue
@@ -101,7 +170,7 @@ object Animation
         var minY: Double = Double.MaxValue
 
         //find out if flipping the graph helps anything...
-        vViews.foreach {
+        move._2.foreach {
             v: VertexView =>
                 if (v.position.x > maxX) {
                     maxX = v.position.x
@@ -120,10 +189,13 @@ object Animation
             //flip it
 
             val animationVViews = ListBuffer[AnimationVertexView]()
-            vViews.foreach {
-                vView =>
-                    animationVViews += new AnimationVertexView(vView,
-                        vView.position.createVector(Point2D(vView.position.y, vView.position.x)), Vector2D.One)
+            val graphCenter = move._1.getPositionCorrection()
+            move._2.foreach { vView =>
+                val x = (vView.position.x + vView.position.y  + graphCenter.x - graphCenter.y) / 2
+                val y = vView.position.x + vView.position.y - x
+                val newPosition = vView.position + vView.position.createVector(Point2D(x, y)) * 2
+
+                animationVViews += new AnimationVertexView(vView, vView.position.createVector(newPosition), Vector2D.One)
             }
 
             animationCurrentNumber = animationPrepareConst
@@ -135,58 +207,24 @@ object Animation
         }
     }
 
-    private def animateTextVisibility(animVViews: ListBuffer[InformationView], visibilityCurrent: Double,
-        visibilityStep: Double, nextAnimation: Option[Animation[_]], quickRedraw: () => Unit, finalRedraw: () => Unit,
-        animationStepLength: Option[Int]) {
-        if ((animationStepLength.isDefined && animationStepLength.get == 0) //skip animation
-            || (animationCurrentNumber == animationKillConst)) {
-            //animation forcefully ended, set final visibility
-            val visibilityFinal = if (math.signum(visibilityStep) < 0) {
-                0.0
-            } else {
-                1.0
-            }
-            animVViews.foreach { info =>
-                info.setTextVisibility(visibilityFinal)
-            }
-        } else {
-            animVViews.foreach { info =>
-                info.setTextVisibility(visibilityCurrent)
-            }
-        }
-
-        if ((visibilityCurrent == 0 && visibilityCurrent + visibilityStep < 0)
-            || (visibilityCurrent == 1 && 1 < visibilityCurrent + visibilityStep) // animation is finished
-            || animationCurrentNumber == animationKillConst
-            || (animationStepLength.isDefined && animationStepLength.get == 0)) {
-            //skip animation
-
-
-            if (nextAnimation.isDefined) {
-                nextAnimation.get.run()
-            } else {
-                finalRedraw()
-            }
-        } else {
-            val visibilityNext =
-                if (visibilityCurrent + visibilityStep < 0) {
-                    0
-                } else if (1 < visibilityCurrent + visibilityStep) {
-                    1
-                } else {
-                    visibilityCurrent + visibilityStep
-                }
-            quickRedraw()
-            setTimeout(() =>
-                animateTextVisibility(animVViews, visibilityNext, visibilityStep, nextAnimation,
-                    quickRedraw, finalRedraw, animationStepLength), 1)
-        }
-    }
-
+    /**
+     * Function performing translation of vertexViews. Each iteration moves all vertices a bit and sets a timeout for
+     * next round. If the vertices are all at their new positions the nextAnimation is launched.
+     * @param animVViews vertices to move
+     * @param nextAnimation animation to run after this animation is completed
+     * @param quickDraw function for redrawing whole drawing space quickly, it is used after every iteration
+     * @param finalDraw function for redrawing whole drawing space after all animations have been finished
+     * @param animationStepLength parameter for controlling time consumption fo animation steps;
+     *                            if it is set to 0: animation is skipped
+     *                            otherwise the animation is performed normally
+     */
     private def animateTranslation(animVViews: ListBuffer[AnimationVertexView], nextAnimation: Option[Animation[_]],
         quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
         var translationFinished = true
 
+        if(animationCurrentNumber == animationKillConst && nextAnimation.isDefined) {
+            nextAnimation.get.finishAllAnimations()
+        }
 
         if (animationCurrentNumber == animationKillConst //if animation forcefully ended set the final positions
             || (animationStepLength.isDefined && animationStepLength.get == 0)) {
@@ -228,10 +266,17 @@ object Animation
         }
     }
 
-    private def getBiggestLowerSpeed(val1: Double, speed: Double): Double = {
-        if (val1 != 0) {
+    /**
+     * Calculates the biggest step by which the vertices can be moved in this iteration (of animateTranslation). The
+     * step has to be lower than the translation.
+     * @param translation how far is the final position of a vertex (whole translation of the animation)
+     * @param speed how fast the vertex has to be moved
+     * @return the highest speed that by which the vertex can be moved
+     */
+    private def getBiggestLowerSpeed(translation: Double, speed: Double): Double = {
+        if (translation != 0) {
             var _speed = speed
-            while (scala.math.abs(scala.math.signum(val1)) * _speed > scala.math.abs(val1)) {
+            while (/*math.abs(math.signum(translation)) * */_speed > math.abs(translation)) {
                 _speed -= 1
             }
 
@@ -241,19 +286,37 @@ object Animation
         }
     }
 
-    private def getNewTranslation(val1: Double, speed: Double): Double = {
+    /**
+     * Function for getting translation for vertices for every iteration of the animateTranslation function. Decides
+     * if the current iteration performs the final step of the whole animation (returns translationLength) or if
+     * the speed is not big enough (speed * signum(translationLength) is returned)
+     * @param translationLength how far the vertices have to be moved
+     * @param speed length of current iteration's step - how far the vertices can be moved
+     * @return
+     */
+    private def getNewTranslation(translationLength: Double, speed: Double): Double = {
         if (speed < 1) {
-            val1
+            translationLength
         } else {
-            scala.math.signum(val1) * speed
+            math.signum(translationLength) * speed
         }
     }
 
+    /**
+     * Method to forcefully end running animations. The current animation and those waiting in stack to be performed
+     * will not be skipped, but launched with animationStepLength set to 0. This causes all animations to jump to
+     * their final position and run their following animation.
+     */
     def clearCurrentTimeout() {
         animationCurrentNumber = animationKillConst
     }
 
-    def setTimeout(function: () => Unit, timeout: Int) {
+    /**
+     * Setter of a next function iteration. The function will be launched after the timeout countdown is completed.
+     * @param function what to run after the countdown
+     * @param timeout how long to wait before the function will be launched
+     */
+    private def setTimeout(function: () => Unit, timeout: Int) {
         animationCurrentNumber = window.setTimeout(function, timeout)
     }
 }

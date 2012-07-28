@@ -8,7 +8,6 @@ import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.graph.visual.graph.positioning.LocationDescriptor
 import cz.payola.common.rdf._
 import scala.collection.mutable
-import s2js.adapters.js.browser.window
 
 /**
   * Graphical representation of Vertex object in the drawn graph.
@@ -21,17 +20,6 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var s
     private val literalVertices = new mutable.HashMap[String, Seq[String]]()
 
     private var age = 0
-
-    /*private val image = prepareImage(//TODO This has to be called after color or path change event was fired
-        vertexModel match {
-            case i: LiteralVertex => new Color(180, 50, 50, 1)
-            case i: IdentifiedVertex => new Color(50, 180, 50, 1)
-            case _ => new Color(0, 0, 0, 1)
-        }, vertexModel match {
-            case i: LiteralVertex => "/assets/images/book-icon.png"
-            case i: IdentifiedVertex => "/assets/images/view-eye-icon.png"
-            case _ => "/assets/images/question-mark-icon.png"
-        })*/
 
     /**
       * Indicator of isSelected attribute. Does not effect inner mechanics.

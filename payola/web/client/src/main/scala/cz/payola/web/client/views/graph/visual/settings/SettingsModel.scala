@@ -24,20 +24,10 @@ abstract class SettingsModel {
             None
         } else {
             var comparingTo = ""
-            val plk = customization.get.classCustomizations.find{custom =>
+            customization.get.classCustomizations.find{custom =>
                 comparingTo += custom.uri +"; "
                     custom.uri == typeName
             }
-
-            /*window.alert("getting customization: "+typeName+" compared to "+
-                comparingTo)*/
-
-            /*if(plk.isDefined) {
-                window.alert("found")
-            } else {
-                window.alert("not found")
-            }*/
-            plk
         }
     }
 

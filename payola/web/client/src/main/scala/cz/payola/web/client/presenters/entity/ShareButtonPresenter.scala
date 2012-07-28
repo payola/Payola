@@ -2,12 +2,8 @@ package cz.payola.web.client.presenters.entity
 
 import s2js.adapters.js.dom
 import cz.payola.web.shared._
-import cz.payola.web.client.views.elements._
-import cz.payola.web.client.views.bootstrap.Modal
-import s2js.compiler.javascript
 import cz.payola.common.entities._
 import cz.payola.web.client._
-import s2js.adapters.js.browser._
 import cz.payola.web.client.views.entity._
 import cz.payola.web.client.events.EventArgs
 import cz.payola.common.Entity

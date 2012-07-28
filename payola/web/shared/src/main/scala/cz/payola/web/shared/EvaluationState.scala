@@ -31,9 +31,9 @@ case class EvaluationSuccess(outputGraph: Graph, instanceErrors: Seq[(PluginInst
 /**
  * A result meaning that the analysis evaluation hasn't finished in the specified time limit.
  */
-object EvaluationTimeout extends EvaluationState
+class EvaluationTimeout extends EvaluationState
 
 /**
  * A result meaning that the analysis evaluation has been stopped.
  */
-object EvaluationStopped extends EvaluationState
+class EvaluationStopped extends EvaluationState

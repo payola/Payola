@@ -18,12 +18,24 @@ class MergeAnalysisBranchesDialog(instances: ArrayBuffer[PluginInstanceView], in
 
     private val dragZone = new Div(List(),"droppable origin")
 
-    instances.map{instance:Any =>
-        val pluginInstance = instance.asInstanceOf[PluginInstanceView]
 
-        val div = new Div(List(new Text(pluginInstance.plugin.name)), "alert alert-danger span2 draggable")
-        bindInstance(div.domElement, pluginInstance)
+    var id = 1
+    instances.map{instance =>
+        val div = new Div(List(new Text(instance.plugin.name)), "alert alert-danger span2 draggable")
+
+        div.mouseMoved += { e =>
+            instance.domElement.setAttribute("style","border: 3px solid black")
+            false
+        }
+
+        div.mouseOut += { e =>
+            instance.domElement.setAttribute("style","border: none")
+            false
+        }
+
+        bindInstance(div.domElement, instance)
         div.render(dragZone.domElement)
+        id += 1
     }
 
     val clear = new Div(List(),"clear")

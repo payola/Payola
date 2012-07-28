@@ -14,7 +14,6 @@ class Canvas(cssClass: String = "") extends ElementView[dom.Canvas]("canvas", Ni
 
 
     size = Vector2D(window.innerWidth /2, window.innerHeight /2)
-    //size = Vector2D(window.innerWidth - container.offsetLeft, window.innerHeight - container.offsetTop)
 
     def size: Vector2D = {
         Vector2D(domElement.width, domElement.height)
