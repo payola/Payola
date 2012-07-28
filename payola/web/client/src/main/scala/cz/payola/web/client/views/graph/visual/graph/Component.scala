@@ -4,30 +4,37 @@ import collection.mutable.ListBuffer
 import cz.payola.web.client.views._
 import cz.payola.web.client.views.algebra._
 
+/**
+ * Representation of a graph component (part of all vertices and edges from which does not exist a path to another
+ * component of the graph)
+ * @param vertexViews contained in this component
+ * @param edgeViews contained in this component
+ */
 class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuffer[EdgeView])
 {
+    /**
+     * vertexViews marked as selected
+     */
     private var selectedVertexViews = vertexViews.filter(_.selected)
 
+    /**
+     * Getter of count of selected vertexViews in this component
+     * @return selected vertexViews count
+     */
     def getSelectedCount: Int = {
         selectedVertexViews.length
     }
 
+    /**
+     * @return true if the component contains any vertexViews
+     */
     def isEmpty: Boolean = {
-        vertexViews.isEmpty //TODO may be length == 0
+        vertexViews.isEmpty
     }
 
-    def getLeftmostPosition(): Point2D = {
-        var result = vertexViews.head.position
-
-        vertexViews.foreach { vertexView =>
-            if (result.x < vertexView.position.x) {
-                result = vertexView.position
-            }
-        }
-
-        result
-    }
-
+    /**
+     * @return position of the bottom right corner of the rectangle that contains all vertexViews in this component
+     */
     def getBottomRight(): Point2D = {
         var bottom = Double.MinValue
         var right = Double.MinValue
@@ -46,6 +53,9 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
         Point2D(right, bottom)
     }
 
+    /**
+     * @return position of the bottom left corner of the rectangle that contains all vertexViews in this component
+     */
     def getBottomLeft(): Point2D = {
         var bottom = Double.MinValue
         var left = Double.MaxValue
@@ -62,6 +72,9 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
         Point2D(left, bottom)
     }
 
+    /**
+     * @return position of the top right corner of the rectangle that contains all vertexViews in this component
+     */
     def getTopRight(): Point2D = {
         var top = Double.MaxValue
         var right = Double.MinValue
@@ -78,6 +91,9 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
         Point2D(right, top)
     }
 
+    /**
+     * @return position of the top left corner of the rectangle that contains all vertexViews in this component
+     */
     def getTopLeft(): Point2D = {
         var top = Double.MaxValue
         var left = Double.MaxValue
@@ -94,6 +110,24 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
         Point2D(left, top)
     }
 
+    /**
+     * @return vertexView's position with the lowest x-coordinate position
+     */
+    def getLeftmostPosition(): Point2D = {
+        var result = vertexViews.head.position
+
+        vertexViews.foreach { vertexView =>
+            if (result.x > vertexView.position.x) {
+                result = vertexView.position
+            }
+        }
+
+        result
+    }
+
+    /**
+     * @return vertexView's position with the lowest y-coordinate position
+     */
     def getTopmostPosition(): Point2D = {
         var result = vertexViews.head.position
 
@@ -106,11 +140,14 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
         result
     }
 
+    /**
+     * @return vertexView's position with the highest x-coordinate position
+     */
     def getRightmostPosition(): Point2D = {
         var result = vertexViews.head.position
 
         vertexViews.foreach { vertexView =>
-            if (result.x > vertexView.position.x) {
+            if (result.x < vertexView.position.x) {
                 result = vertexView.position
             }
         }
@@ -118,6 +155,9 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
         result
     }
 
+    /**
+     * @return vertexView's position with the highest y-coordinate position
+     */
     def getBottommostPosition(): Point2D = {
         var result = vertexViews.head.position
 
@@ -130,6 +170,10 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
         result
     }
 
+    /**
+     * Moves all selected vertexViews in this component by the difference vector2D
+     * @param difference to move vertexViews by
+     */
     def moveAllSelectedVertices(difference: Vector2D) {
         selectedVertexViews.foreach { vertexView =>
             if (vertexView.selected) {
@@ -138,23 +182,14 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
         }
     }
 
+    /**
+     * Moves all vertexViews in this component by the difference vector2D
+     * @param difference to move vertexViews by
+     */
     def moveAllVertices(difference: Vector2D) {
         vertexViews.foreach { vertexView =>
             vertexView.position += difference
         }
-    }
-
-    def deselectAll(): ListBuffer[VertexView] = {
-        var deselected = ListBuffer[VertexView]()
-        selectedVertexViews.foreach { vertex =>
-            deselected += vertex
-        }
-
-        while (!selectedVertexViews.isEmpty) {
-            deselectVertex(selectedVertexViews.head)
-        }
-
-        deselected
     }
 
     //###################################################################################################################
@@ -185,12 +220,36 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
     }
 
     /**
+     * Sets all vertexViews attribute selected to false
+     * @return vertexViews that were deselected by this
+     */
+    def deselectAll(): ListBuffer[VertexView] = {
+        var deselected = ListBuffer[VertexView]()
+        selectedVertexViews.foreach { vertex =>
+            deselected += vertex
+        }
+
+        while (!selectedVertexViews.isEmpty) {
+            deselectVertex(selectedVertexViews.head)
+        }
+
+        deselected
+    }
+
+    /**
       * Marks the input vertex as selected by calling setVertexSelection(vertex, true)
       * @param vertex to change its selected attribute
       * @return true if the vertex is in this component and the selected attribute of the vertex has changed
       */
     def selectVertex(vertex: VertexView): Boolean = {
         setVertexSelection(vertex, true)
+    }
+
+    /**
+     * @return true is all vertices are selected
+     */
+    def isSelected: Boolean = {
+        vertexViews.find{vertexView => !vertexView.isSelected}.isEmpty
     }
 
     /**

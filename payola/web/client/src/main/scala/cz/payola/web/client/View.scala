@@ -53,8 +53,15 @@ object View
 
 trait View
 {
+    /**
+     * Constructs this View's HTML representation and appends it to the parent HTML element.
+     * @param parent element to which this View will be appended
+     */
     def render(parent: dom.Element)
 
+    /**
+     * Destroys inner variables and removes this View's HTML representation from its parent element.
+     */
     def destroy()
 
     def blockDomElement: dom.Element

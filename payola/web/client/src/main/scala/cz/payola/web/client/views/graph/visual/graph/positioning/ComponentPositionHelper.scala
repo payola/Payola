@@ -1,6 +1,5 @@
 package cz.payola.web.client.views.graph.visual.graph.positioning
 
-import s2js.adapters.js.browser.window
 import cz.payola.web.client.views.graph.visual.graph.Component
 import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.bootstrap.modals.AlertModal

@@ -1,6 +1,5 @@
 package cz.payola.web.client.views.graph.visual.graph.positioning
 
-import cz.payola.web.client.views._
 import cz.payola.web.client.views.algebra._
 
 /**
@@ -12,10 +11,6 @@ object LocationDescriptor
       * Correction for drawing of text.
       */
     private val informationPositionCorrection = Vector2D(0, 4)
-
-    /*using these variables kills the script, why the F*CK!? */
-    //private val componentPositionCorrection = Vector2D(50, 50)
-    //private val componentSpacing = 50
 
     /**
       * Position getter for InformationViews owned by VertexViews.
