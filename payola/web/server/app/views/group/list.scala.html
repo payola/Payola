@@ -1,7 +1,7 @@
 @(user: cz.payola.domain.entities.User)(flash: Flash)
 
 @main(Some(user), "List groups") {
-
+ <div class="container-fluid">
     <ul class="breadcrumb">
         <li>
             <a href="/">Home</a> <span class="divider">/</span>
@@ -63,4 +63,5 @@
         <a href="@routes.Group.create()" class="btn btn-success"><i class="icon-plus icon-white"></i> Create group &raquo;</a>
 
     </div>
+ </div>
 }
