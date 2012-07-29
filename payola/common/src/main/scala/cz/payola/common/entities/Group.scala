@@ -16,6 +16,8 @@ trait Group extends Entity with NamedEntity with PrivilegableEntity
 
     protected var _members = new mutable.ArrayBuffer[UserType]()
 
+    override def classNameText = "user group"
+
     /** Owner of the group. */
     def owner = _owner
 

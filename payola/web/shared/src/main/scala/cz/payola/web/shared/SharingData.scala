@@ -1,126 +1,63 @@
 package cz.payola.web.shared
 
-import cz.payola.domain.entities._
 import s2js.compiler._
-import cz.payola.common.entities.privileges.ShareableEntityType
+import cz.payola.common._
+import cz.payola.domain.entities._
 import cz.payola.common.entities.ShareableEntity
-import cz.payola.domain.entities.privileges._
-import cz.payola.domain.entities.plugins.DataSource
-import cz.payola.domain.entities.settings.OntologyCustomization
-import cz.payola.domain.Entity
 
-@secured
-@remote object SharingData
+@remote @secured object SharingData
 {
-    @async
-    def setIsPublic(entityType: String, entityId: String, isPublic: Boolean = true, user: User = null)
-        (successCallback: Boolean => Unit)
+    private type GranteeType = cz.payola.common.Entity with cz.payola.common.entities.PrivilegableEntity
+
+    @async def getEntityGrantees(entityClassName: String, entityId: String, granteeClassName: String, user: User = null)
+        (successCallback: Seq[GranteeType] => Unit)
         (failCallback: Throwable => Unit) {
-        val sharedEntities = getOwnedEntitiesByType(entityType, user)
-        makeEntityPublic(sharedEntities, entityId, isPublic)
-        successCallback(true)
+
+        val entity = getShareableEntity(user, entityClassName, entityId)
+        val privilegeClass = Payola.model.privilegeModel.getSharingPrivilegeClass(entity)
+        val privileges = Payola.model.privilegeModel.getAllByObjectIdAndPrivilegeClass(entity.id, privilegeClass)
+        successCallback(privileges.map(_.grantee))
     }
 
-    @async
-    def shareToGroup(entityType: String, entityId: String, groupIds: String,
+    @async def getPotentialGrantees(granteeClassName: String, user: User = null)
+        (successCallback: Seq[GranteeType] => Unit)
+        (failCallback: Throwable => Unit) {
+
+        successCallback(Payola.model.privilegeModel.getPotentialGrantees(granteeClassName, user))
+    }
+
+    @async def searchPotentialGrantees(granteeClassName: String, searchTerm: String, user: User = null)
+        (successCallback: Seq[GranteeType] => Unit)
+        (failCallback: Throwable => Unit) {
+
+        getPotentialGrantees(granteeClassName, user) { grantees =>
+            successCallback(grantees.filter(_.name.toLowerCase.contains(searchTerm.toLowerCase.trim)))
+        }(failCallback(_))
+    }
+
+    @async def setEntityPublicity(entityClassName: String, entityId: String, isPublic: Boolean, user: User = null)
+        (successCallback: () => Unit)
+        (failCallback: Throwable => Unit) {
+
+        val entity = getShareableEntity(user, entityClassName, entityId)
+        entity.isPublic = isPublic
+        Payola.model.persistEntity(entity)
+        successCallback()
+    }
+
+    @async def shareEntity(entityClassName: String, entityId: String, granteeClassName: String, granteeIds: String,
         user: User = null)
-        (successCallback: Boolean => Unit)
+        (successCallback: () => Unit)
         (failCallback: Throwable => Unit) {
-        val groupIdsList = groupIds.split(',')
-        val groups = user.ownedGroups.filter { g => groupIdsList.contains(g.id)}
-        shareEntityToPrivilegableEntity(entityType, entityId, user, groups, "group")
-        successCallback(true)
+
+        val sharedEntity = getShareableEntity(user, entityClassName, entityId)
+        Payola.model.privilegeModel.shareEntity(sharedEntity, granteeClassName, granteeIds.split(","), user)
+        successCallback()
     }
 
-    @async
-    def shareToUser(entityType: String, entityId: String, userIds: String,
-        user: User = null)
-        (successCallback: Boolean => Unit)
-        (failCallback: Throwable => Unit) {
-        val userIdsList = userIds.split(',')
-        val shareTo = Payola.model.userModel.getByIds(userIdsList)
-        shareEntityToPrivilegableEntity(entityType, entityId, user, shareTo, "user")
-        successCallback(true)
-    }
-
-    @async
-    def getAlreadySharedTo(entityType: String, entityId: String, privilegableType: String, user: User = null)
-        (successCallback: (Seq[NamedEntity] => Unit))(failCallback: (Throwable => Unit)) = {
-        val collection = getOwnedEntitiesByType(entityType, user)
-        val sharedEntity = collection.find(_.id == entityId).getOrElse {
-            throw new Exception("Unknown shareable entity.")
-        }
-
-        val privilegedTypeClass = getClassForPrivilegedTypeName(privilegableType)
-
-        successCallback(Payola.model.privilegeModel.getAllByObjectIdAndGranteeType(entityId, privilegedTypeClass)
-            .map(_.grantee.asInstanceOf[NamedEntity]))
-
-    }
-
-    private def shareEntityToPrivilegableEntity(entityType: String, entityId: String, granter: User,
-        shareTo: Seq[Entity with PrivilegableEntity], privilegableType: String) {
-
-        val ownedEntities = getOwnedEntitiesByType(entityType, granter)
-        val sharedEntity = ownedEntities.find(_.id == entityId).getOrElse {
-            throw new Exception("Shared entity not found.")
-        }
-
-        val privilegedTypeClass = getClassForPrivilegedTypeName(privilegableType)
-
-        val currentPrivileges = Payola.model.privilegeModel.getAllByObjectIdAndGranteeType(entityId, privilegedTypeClass)
-        val isSharedTo = currentPrivileges.map(_.grantee)
-        val willDelete = isSharedTo.diff(shareTo)
-        willDelete.foreach(destroyPrivilege(sharedEntity, granter, _))
-
-        val willCreate = shareTo.diff(isSharedTo)
-        willCreate.foreach { grantee =>
-            val privilege = createPrivilegeByType(sharedEntity, granter, grantee)
-            grantee.grantPrivilege(privilege)
-        }
-    }
-
-    private def getClassForPrivilegedTypeName(privilegableType: String): Class[_ <: PrivilegableEntity] = {
-        privilegableType match {
-            case "user" => classOf[User]
-            case "group" => classOf[Group]
-            case _ => throw new Exception("Unknown privilegable entity type.")
-        }
-    }
-
-    private def createPrivilegeByType(sharedEntity: ShareableEntity, granter: User,
-        grantee: Entity with PrivilegableEntity): Privilege[_ <: Entity] = {
-        sharedEntity match {
-            case e: Analysis => new AccessAnalysisPrivilege(granter, grantee, e)
-            case e: Plugin => new UsePluginPrivilege(granter, grantee, e)
-            case e: DataSource => new AccessDataSourcePrivilege(granter, grantee, e)
-            case e: OntologyCustomization => new UseOntologyCustomizationPrivilege(granter, grantee, e)
-            case _ => throw new Exception("Unknown entity type.")
-        }
-    }
-
-    private def destroyPrivilege(sharedEntity: Entity with ShareableEntity, granter: User, grantee: PrivilegableEntity) {
-        grantee.privileges.find(p => (p.granter == granter) && (p.obj == sharedEntity)).map { p =>
-            grantee.removePrivilege(p)
-        }
-    }
-
-    private def getOwnedEntitiesByType(entityType: String,
-        user: User): Seq[Entity with ShareableEntity with NamedEntity] = {
-        entityType match {
-            case ShareableEntityType.analysis => user.ownedAnalyses
-            case ShareableEntityType.plugin => user.ownedPlugins
-            case ShareableEntityType.dataSource => user.ownedDataSources
-            case ShareableEntityType.customization => user.ownedOntologyCustomizations
-            case _ => throw new Exception("Unknown entity type.")
-        }
-    }
-
-    private def makeEntityPublic(ownedEntities: Seq[Entity with ShareableEntity], entityId: String,
-        isPublic: Boolean = true) {
-        ownedEntities.find(e => e.id == entityId).map { e =>
-            e.isPublic_=(isPublic)
-            Payola.model.persistEntity(e)
+    private def getShareableEntity(owner: User, entityClassName: String, entityId: String): ShareableEntity = {
+        owner.getOwnedShareableEntity(entityClassName, entityId).getOrElse {
+            throw new PayolaException("The user doesn't own the specified entity.")
         }
     }
 }

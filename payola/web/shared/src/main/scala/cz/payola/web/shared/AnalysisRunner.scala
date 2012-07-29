@@ -8,7 +8,7 @@ import cz.payola.domain.IDGenerator
 import cz.payola.domain.entities.User
 import cz.payola.domain.entities.analyses.evaluation.Success
 import cz.payola.domain.entities.plugins.PluginInstance
-import cz.payola.common.exception.ValidationException
+import cz.payola.common.ValidationException
 
 // TODO move the logic to the model.
 @remote

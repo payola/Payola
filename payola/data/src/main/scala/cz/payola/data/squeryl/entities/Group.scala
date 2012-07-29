@@ -1,7 +1,8 @@
 package cz.payola.data.squeryl.entities
 
 import scala.collection._
-import cz.payola.data.squeryl.SquerylDataContextComponent
+import cz.payola.data.squeryl._
+import scala.Some
 
 /**
   * This object converts [[cz.payola.common.entities.Group]] to [[cz.payola.data.squeryl.entities.Group]]
@@ -19,7 +20,7 @@ object Group extends EntityConverter[Group]
 
 class Group(override val id: String, name: String, o: User)(implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.Group(name, o)
-    with PersistableEntity with PrivilegableEntity with NamedEntity
+    with Entity with PrivilegableEntity
 {
     var ownerId: String = Option(o).map(_.id).getOrElse(null)
 

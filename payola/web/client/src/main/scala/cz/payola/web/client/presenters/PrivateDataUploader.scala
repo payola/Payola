@@ -26,7 +26,7 @@ class PrivateDataUploader(fileUploaderDivID: String,
 
     fileUploadButton.mouseClicked += { event =>
         if (fileInput.input.value == ""){
-            AlertModal.display("You must choose a file first.")
+            AlertModal.display("You must choose a file first.", "")
         }else{
             submitForm("file-uploader-form")
         }
@@ -41,7 +41,7 @@ class PrivateDataUploader(fileUploaderDivID: String,
 
     urlUploadButton.mouseClicked += { event =>
         if (urlField.input.value == ""){
-            AlertModal.display("URL field mustn't be empty.")
+            AlertModal.display("URL field mustn't be empty.", "")
         }else{
             submitForm("url-uploader-form")
         }

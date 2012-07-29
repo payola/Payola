@@ -9,12 +9,9 @@ import scala.Some
 
 trait PluginModelComponent extends EntityModelComponent
 {
-    self: DataContextComponent with PluginCompilerComponent =>
+    self: DataContextComponent with PluginCompilerComponent with PrivilegeModelComponent =>
 
-    lazy val pluginModel = new ShareableEntityModel[Plugin](
-        pluginRepository,
-        classOf[UsePluginPrivilege],
-        (user: User) => user.ownedPlugins)
+    lazy val pluginModel = new ShareableEntityModel(pluginRepository, classOf[Plugin])
     {
         def createPluginFromSource(source: String, user: User): Plugin = {
             val compiler = self.pluginCompiler

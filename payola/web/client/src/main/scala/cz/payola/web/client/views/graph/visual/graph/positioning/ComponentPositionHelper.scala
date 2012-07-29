@@ -1,11 +1,11 @@
 package cz.payola.web.client.views.graph.visual.graph.positioning
 
-import s2js.adapters.js.browser.window
 import cz.payola.web.client.views.graph.visual.graph.Component
 import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
 
 /**
+  * // TODO why from 1?
   * IMPORTANT, the first component must have number 1 (not 0)!!!!!
   * @param componentNumber COUNT FROM 1!!!!! not form 0
   */
@@ -16,7 +16,8 @@ class ComponentPositionHelper(val componentNumber: Int, val componentsCount: Int
         val componentSpacing = 50.0
 
         if (componentNumber == 0 || componentsCount < 0) {
-            AlertModal.display("Error in component position helper")
+            // TODO get rid of this. Write it in a way, that this can't happen.
+            AlertModal.display("Error in component position helper", "")
         }
 
         val bottomRight = if (prevComp.isDefined) {

@@ -1,10 +1,10 @@
 package cz.payola.web.client.presenters.entity.settings
 
 import cz.payola.common.entities.settings._
-import cz.payola.web.client.views.entity.OntologyCustomizationEditModal
+import cz.payola.web.client.views.entity.settings.OntologyCustomizationEditModal
 import cz.payola.web.client.events._
 import cz.payola.web.shared.managers.OntologyCustomizationManager
-import cz.payola.common.exception.ValidationException
+import cz.payola.common.ValidationException
 import cz.payola.web.client.Presenter
 import cz.payola.web.client.views.bootstrap.InputControl
 import cz.payola.web.client.views.bootstrap.modals._
@@ -18,8 +18,11 @@ class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) 
 
     private val view = new OntologyCustomizationEditModal(ontologyCustomization)
 
-    private val shareButtonPresenter = new ShareButtonPresenter(view.shareButtonViewSpace.domElement, 
-        "customization", ontologyCustomization.id, ontologyCustomization.isPublic, Some(view))
+    private val shareButtonPresenter = ShareButtonPresenter(
+        view.shareButtonViewSpace.domElement,
+        ontologyCustomization,
+        Some(view)
+    )
 
     def initialize() {
         shareButtonPresenter.initialize()
@@ -54,11 +57,13 @@ class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) 
             "This action cannot be undone.", "Delete", "Cancel", true, "alert-error")
         
         promptModal.confirming += { e =>
+            view.block("Deleting the ontology customization")
             Model.deleteOntologyCustomization(ontologyCustomization) { () =>
                 view.destroy()
-                AlertModal.display("Ontology customization successfully deleted.", "Success!", "alert-success")
+                AlertModal.display("Success", "The ontology customization was successfully deleted.", "alert-success",
+                    Some(4000))
             }(fatalErrorHandler(_))
-            false
+            true
         }
         
         promptModal.render()

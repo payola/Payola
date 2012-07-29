@@ -13,7 +13,7 @@ trait PluginInstanceRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
     
-    trait PluginInstanceTableRepository[A <: PersistableEntity with PluginInstanceLike]
+    trait PluginInstanceTableRepository[A <: Entity with PluginInstanceLike]
     {
         protected val pluginInstanceLikeTable: Table[A]
         protected val pluginInstanceLikeEntityConverter: EntityConverter[A]

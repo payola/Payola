@@ -3,8 +3,12 @@
 @import tags._
 
 
-@shareLinkForID(id: String, isPublic: Boolean) = @{
-<div class="btn-group share-button-placeholder" data-shareable-entity-id={id} data-shareable-entity-public={isPublic.toString}></div>
+@shareLinkForID(id: String, name: String, isPublic: Boolean) = @{
+    <div class="btn-group share-button-placeholder"
+         data-id={id}
+         data-name={name}
+         data-is-public={isPublic.toString}>
+    </div>
 }
 
 @list_entities(Some(user),
@@ -24,7 +28,7 @@
     }, { e: cz.payola.domain.Entity =>
         val plugin = e.asInstanceOf[cz.payola.domain.entities.Plugin]
         val buff = new scala.xml.NodeBuffer() += <td>{plugin.name}</td>
-        buff += <td>{shareLinkForID(e.id, plugin.isPublic)}</td>
+        buff += <td>{shareLinkForID(e.id, plugin.name, plugin.isPublic)}</td>
         buff
     },
     routes.Profile.createPlugin(),
@@ -32,5 +36,8 @@
 
 <script language="javascript" type="text/javascript" src="/javaScriptPackage/cz.payola.web.client.presenters.Sharing"></script>
 <script type="text/javascript">
-    new cz.payola.web.client.presenters.Sharing("share-button-placeholder", "plugin");
+    new cz.payola.web.client.presenters.Sharing(
+        "share-button-placeholder",
+        "@cz.payola.common.Entity.getClassName(classOf[cz.payola.common.entities.Plugin])"
+    ).initialize();
 </script>

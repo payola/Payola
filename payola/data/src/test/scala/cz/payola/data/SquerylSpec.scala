@@ -420,8 +420,8 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         assert(group1.grantedAnalyses.size == 1)
         assert(group1.grantedPlugins.size == 1)
 
-        assert(privilegeRepository.getAllGrantedTo(List(group1.id), classOf[UsePluginPrivilege]).size == 1)
-        assert(privilegeRepository.getByGrantee(user1.id).size == 2)
+        assert(privilegeRepository.getAllByGranteeIds(List(group1.id), classOf[UsePluginPrivilege]).size == 1)
+        assert(privilegeRepository.getAllByGranteeId(user1.id).size == 2)
     }
 
     "Customizations" should "be persisted" in {

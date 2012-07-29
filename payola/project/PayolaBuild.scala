@@ -293,7 +293,7 @@ object PayolaBuild extends Build
             jarFile
         },
         clean <<= clean.map {_ =>
-        // Delete the dependency file.
+            // Delete the dependency file.
             new io.File(WebSettings.dependencyFile).delete()
         }
     ).dependsOn(

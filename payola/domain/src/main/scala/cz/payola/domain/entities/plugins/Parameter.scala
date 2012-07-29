@@ -14,8 +14,6 @@ abstract class Parameter[A](protected val _name: String, protected val _defaultV
 {
     checkConstructorPostConditions()
 
-    def entityTypeName = "parameter"
-
     /**
       * Creates a new value of the parameter.
       * @param value Value of the parameter. If it's [[scala.None]] then default value is used.

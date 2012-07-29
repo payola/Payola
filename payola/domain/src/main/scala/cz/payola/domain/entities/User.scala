@@ -1,16 +1,17 @@
 package cz.payola.domain.entities
 
 import scala.collection._
+import cz.payola.common.Entity
+import cz.payola.common.entities.ShareableEntity
 import cz.payola.domain.entities.plugins.DataSource
-import cz.payola.domain.entities.privileges._
-import cz.payola.domain.Entity
 import cz.payola.domain.entities.settings.OntologyCustomization
+import cz.payola.domain.DomainException
 
 /**
   * @param _name Name of the user.
   */
 class User(protected var _name: String)
-    extends Entity
+    extends cz.payola.domain.Entity
     with NamedEntity
     with PrivilegableEntity
     with cz.payola.common.entities.User
@@ -26,8 +27,6 @@ class User(protected var _name: String)
     type PluginType = Plugin
 
     type OntologyCustomizationType = OntologyCustomization
-
-    def entityTypeName = "user"
 
     /**
       * Adds the analysis to the users owned analyses. The analysis has to be owned by the user.
@@ -95,6 +94,51 @@ class User(protected var _name: String)
       */
     def removeOwnedGroup(group: GroupType): Option[GroupType] = {
         removeRelatedEntity(group, ownedGroups, discardOwnedGroup)
+    }
+
+    /**
+     * Returns the users owned entities of the specified class.
+     */
+    def getOwnedEntities(entityClassName: String): Seq[Entity with NamedEntity] = {
+        Map(
+            Entity.getClassName(classOf[Analysis]) -> ownedAnalyses,
+            Entity.getClassName(classOf[DataSource]) -> ownedDataSources,
+            Entity.getClassName(classOf[Plugin]) -> ownedPlugins,
+            Entity.getClassName(classOf[OntologyCustomization]) -> ownedOntologyCustomizations,
+            Entity.getClassName(classOf[Group]) -> ownedGroups
+        ).getOrElse(entityClassName, throw new DomainException("The user doesn't own entities of class " +
+            entityClassName + "."))
+    }
+
+    /**
+     * Returns the users owned entities of the specified class.
+     */
+    def getOwnedEntities(entityClass: Class[_]): Seq[Entity with NamedEntity] = {
+        getOwnedEntities(Entity.getClassName(entityClass))
+    }
+
+    /**
+     * Returns the users owned entity with the specified class and id.
+     */
+    def getOwnedEntity(entityClassName: String, entityId: String): Option[Entity with NamedEntity] = {
+        getOwnedEntities(entityClassName).find(_.id == entityId)
+    }
+
+    /**
+     * Returns the users owned entity with the specified class and id.
+     */
+    def getOwnedEntity(entityClass: Class[_], entityId: String): Option[Entity with NamedEntity] = {
+        getOwnedEntity(entityClass.getName, entityId)
+    }
+
+    /**
+     * Returns the users owned shareable entity with the specified class and id.
+     */
+    def getOwnedShareableEntity(entityClassName: String, entityId: String): Option[ShareableEntity] = {
+        getOwnedEntity(entityClassName, entityId).flatMap {
+            case p: ShareableEntity => Some(p)
+            case _ => None
+        }
     }
 
     override def canEqual(other: Any): Boolean = {

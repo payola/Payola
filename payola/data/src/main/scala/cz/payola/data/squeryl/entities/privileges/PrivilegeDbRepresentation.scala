@@ -1,42 +1,29 @@
 package cz.payola.data.squeryl.entities.privileges
 
-import cz.payola.common._
-import cz.payola.data.squeryl.SquerylDataContextComponent
 import cz.payola.domain.entities.Privilege
+import cz.payola.data.squeryl._
 import cz.payola.data.squeryl.entities._
 
 /**
   * This object converts [[cz.payola.common.entities.Privilege]] to [[cz.payola.data.squeryl.entities.PrivilegeDbRepresentation]]
   * in order to be persisted in database.
   */
-object PrivilegeDbRepresentation extends EntityConverter[PrivilegeDbRepresentation] {
-
-    def apply(privilege: entities.Privilege[_ <: Entity])
-        (implicit context: SquerylDataContextComponent) = {
-        // Plugins has to be handled slightly differently
-        val granteeClass = context.repositoryRegistry.getClassName(privilege.grantee.getClass)
-        val objectClass = context.repositoryRegistry.getClassName(
-            privilege.obj match {
-                case p: cz.payola.domain.entities.Plugin => classOf[cz.payola.domain.entities.Plugin]
-                case o => o.getClass
-            }
-        )
-        
-        new PrivilegeDbRepresentation(
-            privilege.id,
-            privilege.granter.id,
-            privilege.grantee.id,
-            granteeClass,
-            privilege.getClass.getName,
-            privilege.obj.id,
-            objectClass
-        )
-    }
-
+object PrivilegeDbRepresentation extends EntityConverter[PrivilegeDbRepresentation]
+{
     def convert(entity: AnyRef)(implicit context: SquerylDataContextComponent) = {
         entity match {
             case p: PrivilegeDbRepresentation => Some(p)
-            case p: Privilege[_] => Some(PrivilegeDbRepresentation(p))
+            case privilege: Privilege[_] => {
+                Some(new PrivilegeDbRepresentation(
+                    privilege.id,
+                    privilege.granter.id,
+                    privilege.grantee.id,
+                    privilege.grantee.className,
+                    privilege.getClass.getName,
+                    privilege.obj.id,
+                    privilege.obj.className
+                ))
+            }
             case _ => None
         }
     }
@@ -54,18 +41,16 @@ object PrivilegeDbRepresentation extends EntityConverter[PrivilegeDbRepresentati
   * @param objectClassName - stripped class name of this Object
   */
 class PrivilegeDbRepresentation(
-        override val id: String,
-        val granterId: String,
-        val granteeId: String,
-        val granteeClassName: String,
-        val privilegeClass: String,
-        val objectId: String,
-        val objectClassName: String
-    )
-    (implicit val context: SquerylDataContextComponent)
-    extends cz.payola.domain.Entity(id) with PersistableEntity
+    override val id: String,
+    val granterId: String,
+    val granteeId: String,
+    val granteeClassName: String,
+    val privilegeClass: String,
+    val objectId: String,
+    val objectClassName: String)(implicit val context: SquerylDataContextComponent)
+    extends Entity
 {
-    def entityTypeName = "privilege database representation"
+    override def classNameText = "privilege database representation"
 
     /**
       * Instantiates represented [[cz.payola.common.entities.Privilege]]

@@ -186,6 +186,7 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
 
     override def updateGraph(graph: Option[Graph]) {
         // If the graph has changed, update the graph view.
+        zoomControls.reset()
         if (graph != currentGraph) {
             if(graph.isDefined) {
                 if (graphView.isEmpty) {
@@ -226,7 +227,6 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
     }
 
     protected def redrawQuick() {
-        //TODO rename or move somewhere else
         if (!graphView.isEmpty) {
             graphView.get.redraw(layerPack, RedrawOperation.Animation)
         }
@@ -293,7 +293,7 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
 
                     infoTable.render(document.body)
                     destroyVertexInfo = Some(new SimpleUnitEvent[Boolean])
-                    destroyVertexInfo.get += { event => infoTable.destroy() }
+                    destroyVertexInfo.get += { event => /*window.alert("destroy infotable");*/ infoTable.destroy() }
 
                     vertexSelected.trigger(new VertexEventArgs[this.type](this, vertex.get.vertexModel))
                 }

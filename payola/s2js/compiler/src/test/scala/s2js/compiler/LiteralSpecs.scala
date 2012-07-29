@@ -158,5 +158,30 @@ class LiteralSpecs extends CompilerFixtureSpec
                     """"""
                 }
         }
+
+        it("classOf is supported") {
+            configMap =>
+                scalaCode {
+                    """
+                        package p
+
+                        class A
+
+                        object a {
+                            val a = classOf[A]
+                        }
+                    """
+                } shouldCompileTo  {
+                    """
+                        s2js.runtime.client.ClassLoader.provide('p.A');
+                        s2js.runtime.client.ClassLoader.provide('p.a');
+
+                        p.A = function() { var self = this; };
+                        p.A.prototype.__class__ = new s2js.runtime.client.Class('p.A', []);
+                        p.a.a = p.A.prototype.__class__;
+                        p.a.__class__ = new s2js.runtime.client.Class('p.a', []);
+                    """
+                }
+        }
     }
 }

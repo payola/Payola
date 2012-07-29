@@ -33,6 +33,13 @@ case class Point2D(var x: Double, var y: Double)
     }
 
     /**
+     * Returns the current point with coordinates divided by the specified value.
+     */
+    def /(value: Double): Point2D = {
+        Point2D(x / value, y / value)
+    }
+
+    /**
       * Comparison of two points.
       * @param point to compare with
       * @return true if both coordinates of this point are less than or equal to the parameter point
@@ -76,6 +83,10 @@ case class Point2D(var x: Double, var y: Double)
         math.sqrt(math.pow(x - p.x, 2) + math.pow(y - p.y, 2))
     }
 
+    /**
+     * Creates String representation of this point.
+     * @return "[" + math.round(x) + "; " + math.round(y) + "]"
+     */
     override def toString: String = {
         "[" + math.round(x) + "; " + math.round(y) + "]"
     }

@@ -1,11 +1,9 @@
 package cz.payola.data.squeryl.entities
 
-import cz.payola.domain.Entity
+import cz.payola.data.squeryl.Entity
 
-trait OptionallyOwnedEntity extends cz.payola.domain.entities.OptionallyOwnedEntity
+trait OptionallyOwnedEntity extends Entity with cz.payola.domain.entities.OptionallyOwnedEntity
 {
-    self: Entity =>
-    
     var ownerId = owner.map(_.id)
 
     /**
@@ -13,7 +11,6 @@ trait OptionallyOwnedEntity extends cz.payola.domain.entities.OptionallyOwnedEnt
       */
     def owner_=(value: Option[User]) {
         ownerId = value.map(_.id)
-
         _owner = value
     }
 }

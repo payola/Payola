@@ -4,6 +4,7 @@ import collection.mutable.ArrayBuffer
 import s2js.compiler.javascript
 import s2js.adapters.js.browser._
 import s2js.runtime.shared.rpc.RpcException
+import s2js.runtime.client.scala.collection.immutable.StringOps
 
 private object Wrapper
 {
@@ -87,7 +88,7 @@ private object Wrapper
 
         // Append the parameters to the request body.
         var index = -1
-        parameters.foreach {parameterValue =>
+        parameters.foreach { parameterValue =>
             index += 1
             requestBody += parameterSeparator + index + "="
             requestBody += encodeURIComponent(processParameter(parameterTypeNames(index), parameterValue))
@@ -99,6 +100,7 @@ private object Wrapper
     private def processParameter(typeName: String, value: Any): String = {
         value match {
             case s: String => s
+            case s: StringOps => s.toString
             case items: Seq[_] => {
                 val escapedItems: Seq[String] =
                     if (typeName.endsWith("[scala.String]") || typeName.endsWith("[java.lang.String]")) {
