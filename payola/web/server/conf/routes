@@ -41,8 +41,8 @@ GET     /virtuoso/error         controllers.PrivateDataStorage.error(error: Stri
 
 GET     /dashboard                  controllers.Application.dashboard()
 GET     /group/create               controllers.Group.create()
-GET     /plugin/create              controllers.Profile.createPlugin()
-GET     /plugin/list                controllers.Profile.listPlugins(page: Int ?= 1)
+GET     /plugin/create              controllers.Plugin.createPlugin()
+GET     /plugin/list                controllers.Plugin.listPlugins(page: Int ?= 1)
 GET     /group/list                 controllers.Group.list()
 GET     /group/delete/:id           controllers.Group.delete(id)
 GET     /group/edit/:id             controllers.Group.edit(id)
