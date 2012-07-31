@@ -235,7 +235,7 @@ input[type="checkbox"].active:after {
 }
 
 .connector{
-    border: 2px solid navy;
+    border: 2px solid #3A87AD;
     height: 90%;
     position: absolute;
     top: 0px;
@@ -245,7 +245,7 @@ input[type="checkbox"].active:after {
 .plumb{
     position: absolute;
     top: -4px;
-    border: 4px solid navy;
+    border: 4px solid #3A87AD;
 }
 
 .successors, .successors .alert{ position: relative !important; }

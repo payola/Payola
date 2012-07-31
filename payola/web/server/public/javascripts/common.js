@@ -1,6 +1,6 @@
 $(document).ready(function(){
 
-    $('textarea').livequery(function(){
+    $('textarea:not(.textarea-fixed)').livequery(function(){
         $(this).autosize();
     });
 
