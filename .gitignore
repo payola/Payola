@@ -40,7 +40,7 @@ payola/.idea/dictionaries
 payola/.idea/libraries
 
 # Plugins folder
-/plugins/
+/payola/plugins/
 
 # OS X files
 .DS_Store
