@@ -22,7 +22,7 @@ class ColorInput(name: String, label: String, private var colorOption: Option[Co
 
     colorWell.setAttribute("style", "background-color: " + getColorString("rgba(0, 0, 0, 1)") )
 
-    val colorWellSpan = new Span(List(colorWell), "add-on")
+    val colorWellSpan = new Span(List(colorWell), "btn")
 
     val clearIcon = new Icon(Icon.remove)
 
@@ -39,8 +39,8 @@ class ColorInput(name: String, label: String, private var colorOption: Option[Co
 
     val div = new Div(List(colorInput, colorWellSpan, clearColorSpan), "input-append")
 
-    div.setAttribute("data-color",  getColorString("rgba(0, 0, 0, 1)"))
-    div.setAttribute("data-color-format", "rgba")
+    colorInput.setAttribute("data-color",  getColorString("rgba(0, 0, 0, 1)"))
+    colorInput.setAttribute("data-color-format", "rgba")
 
     override def render(parent: dom.Element) {
         labelElement.render(parent)
@@ -57,17 +57,15 @@ class ColorInput(name: String, label: String, private var colorOption: Option[Co
         colorOption.map(_.toHexString).getOrElse("")
     }
 
-    def getColorString(defaultValue: String) = {
+    private def getColorString(defaultValue: String) = {
         colorOption.map(_.toString).getOrElse(defaultValue).toString
     }
 
     def setColor(value: Option[Color]) {
         colorOption = value
-        if (value.isDefined) {
-            colorInput.value = value.get.toString
-        } else {
-            colorInput.value = "No color selected"
-        }
+
+        colorInput.value = getColorString("No color selected")
+
         changed.trigger(new EventArgs[ColorInput.this.type](this))
     }
 
@@ -80,7 +78,10 @@ class ColorInput(name: String, label: String, private var colorOption: Option[Co
     }
 
     override def value_=(value: String) {
-        setColor(Color.fromHex(value))
+        // During initialization is value set (.ctor), but field doesn't exists yet
+        if (colorInput != null){
+            setColor(Color.fromHex(value))
+        }
     }
 
     override def setIsActive(isActive: Boolean) {
