@@ -193,7 +193,7 @@ input[type="checkbox"].active:after {
     overflow: visible;
 }
 
-.bar-chart-textual-content {
+.column-chart-textual-content {
     font-weight: bolder;
     color: #333;
     text-shadow: 2px 2px #BCBCBC;
@@ -201,12 +201,12 @@ input[type="checkbox"].active:after {
     vertical-align: center;
 }
 
-.bar-chart-textual-content-large {
+.column-chart-textual-content-large {
     padding-top: 150px;
     font-size: 32pt;
 }
 
-.bar-chart-textual-content-small {
+.column-chart-textual-content-small {
     color: #666;
     text-shadow: 1px 1px #DEDEDE;
     padding-top: 30px;
@@ -229,8 +229,6 @@ input[type="checkbox"].active:after {
 .analysis-controls {
     padding-bottom: 27px !important;
 }
-<<<<<<< HEAD
-=======
 
 .popover-content p{
     max-height: 200px;
@@ -251,4 +249,10 @@ input[type="checkbox"].active:after {
 }
 
 .successors, .successors .alert{ position: relative !important; }
->>>>>>> ec0fe378d3a0a24d3e166db0b9ba320fb03a6a0c
+
+.column-chart-wrapper {
+    overflow: auto;
+    padding-left: 40px;
+    padding-right: 40px;
+    min-height: 250px;
+}

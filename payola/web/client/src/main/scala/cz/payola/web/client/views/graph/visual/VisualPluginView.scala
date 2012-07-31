@@ -408,16 +408,6 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
         layers.foreach(_.size = layerSize)
     }
 
-    @javascript("""
-        var offsetTop = 0;
-        var offsetLeft = 0;
-        var element = self.topLayer.domElement;
-        while (element != null) {
-            offsetTop += element.offsetTop;
-            offsetLeft += element.offsetLeft;
-            element = element.offsetParent;
-        }
-        return new cz.payola.web.client.views.algebra.Vector2D(offsetLeft, offsetTop);
-                """)
-    private def calculateTopLayerOffset: Vector2D = Vector2D(0, 0)
+
+    private def calculateTopLayerOffset: Vector2D = topLayer.topLeftCorner
 }
