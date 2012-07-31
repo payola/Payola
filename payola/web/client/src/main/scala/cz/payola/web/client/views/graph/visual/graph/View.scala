@@ -242,29 +242,32 @@ trait View[A]
         }
 
         if(arrowPointingTo.isDefined && arrowPointingFrom.isDefined) {
-            drawStraightLine(context, arrowPointingFrom.get, arrowPointingTo.get, lineWidth, color)
-            drawArrowEnd(context, arrowPointingTo.get - arrowPointingFrom.get, arrowPointingTo.get, lineWidth, color)
+            val correctedArrowPointingTo = arrowPointingTo.get + (
+                -arrowPointingFrom.get.createVector(arrowPointingTo.get).createVectorOfSize(lineWidth))
+
+
+            drawStraightLine(context, arrowPointingFrom.get, correctedArrowPointingTo, lineWidth, color)
+            drawArrowCap(context, arrowPointingTo.get - arrowPointingFrom.get, correctedArrowPointingTo, lineWidth, color)
         } else {
             drawStraightLine(context, origin, destination, lineWidth, color)
         }
     }
 
     /**
-     * Draws an arrow without the center line (not ->, but only >).
+     * Draws an arrow cap (arrow without the center line - not ->, but only >).
      * @param context to which to draw
-     * @param direction in which the arrow shold be pointing
+     * @param direction in which the arrow should be pointing
      * @param destination which should be the top point of the arrow
      * @param lineWidth width of the lines; also determines size of the arrow; the length is lineWidth * 4
      *                  and the distance between the two distant ends is lineWidth * 4
      * @param color of the drawn lines
      */
-    private  def drawArrowEnd(context: CanvasRenderingContext2D, direction: Vector2D, destination: Point2D,
+    private  def drawArrowCap(context: CanvasRenderingContext2D, direction: Vector2D, destination: Point2D,
         lineWidth: Double, color: Color) {
 
-        val arrowLength = lineWidth*4
-        val arrowWidth = lineWidth*4
+        val arrowSize = Vector2D(lineWidth, lineWidth)*4
 
-        val originPoint = getOffsetPoint(direction, destination, arrowLength)
+        val originPoint = getOffsetPoint(direction, destination, arrowSize.y)
 
         if(originPoint.isDefined) {
             var side1:Option[Point2D] = None
@@ -276,7 +279,7 @@ trait View[A]
                 val a = math.pow(u.y, 2) + math.pow(u.x, 2)
                 val b = -2*math.pow(u.y, 2)*originPoint.get.y - 2*originPoint.get.y*math.pow(u.x, 2)
                 val c = math.pow(u.y*originPoint.get.y, 2) + math.pow(originPoint.get.y*u.x, 2)- math.pow(
-                    arrowWidth*u.x, 2)
+                    arrowSize.x*u.x, 2)
 
                 val D = math.pow(b, 2) - 4*a*c
                 if(D >= 0) {
@@ -295,16 +298,20 @@ trait View[A]
                 }
             } else {
                 val y = destination.y
-                val x1 = arrowLength + originPoint.get.x
-                val x2 = -arrowLength + originPoint.get.x
+                val x1 = arrowSize.y + originPoint.get.x
+                val x2 = -arrowSize.x + originPoint.get.x
 
                 side1 = Some(Point2D(x1, y))
                 side2 = Some(Point2D(x2, y))
             }
 
             if(side1.isDefined && side2.isDefined) {
-                drawStraightLine(context, side1.get, destination, lineWidth, color)
-                drawStraightLine(context, side2.get, destination, lineWidth, color)
+                val destinationCorrection1 = -destination.createVector(side1.get).createVectorOfSize(lineWidth / 2)
+
+                val destinationCorrection2 = -destination.createVector(side2.get).createVectorOfSize(lineWidth / 2)
+
+                drawStraightLine(context, side1.get, destination + destinationCorrection1, lineWidth, color)
+                drawStraightLine(context, side2.get, destination + destinationCorrection2, lineWidth, color)
             }
         }
     }

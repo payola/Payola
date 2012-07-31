@@ -29,6 +29,15 @@ case class Vector2D(x: Double, y: Double)
     }
 
     /**
+     * Constructs a new vector with the same direction as this and converts its size to the specified value size
+     * @param size of the created vector
+     * @return new resized vector based on this vector
+     */
+    def createVectorOfSize(size: Double): Vector2D = {
+        this / this.length * size
+    }
+
+    /**
       * Times -1
       * @return new vector with values of this vector times -1
       */
