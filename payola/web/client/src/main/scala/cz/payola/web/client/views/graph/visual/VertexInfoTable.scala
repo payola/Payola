@@ -41,17 +41,14 @@ class VertexInfoTable(vertex: IdentifiedVertex, values: mutable.HashMap[String, 
                 even = !even
         }
 
-        val div = new Div(List(new UnorderedList(buffer, "span5 unstyled well")))
-        div.setAttribute("rel","popover")
-        div.setAttribute("style","position: absolute; top: "+position.y.toString()+"px; left: "+position.x.toString()+"px;")
+        val popoverTitle = new Heading(List(new Text("Vertex info")),3,"popover-title")
+        val popoverContent = new Div(List(new UnorderedList(buffer, "unstyled well")),"popover-content")
+        val popoverInner = new Div(List(popoverTitle, popoverContent), "popover-inner")
+        val popoverArrow = new Div(Nil,"arrow")
+        popoverArrow.setAttribute("style","top: 15px;")
+        val div = new Div(List(popoverArrow, popoverInner))
+        div.setAttribute("class","popover fade right in")
+        div.setAttribute("style","display: block; max-height: 300px; position: absolute; top: "+(position.y-10).toString()+"px; left: "+position.x.toString()+"px;")
         List(div)
-    }
-
-    @javascript("""jQuery(e).popover("show")""")
-    def activatePopover(e: Element){}
-
-    override def render(parent: Element){
-        super.render(parent)
-        activatePopover(subViews.head.blockDomElement)
     }
 }
