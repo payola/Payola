@@ -1,15 +1,16 @@
 package cz.payola.model
 
-import cz.payola.data._
+import cz.payola.common.ValidationException
+import cz.payola.common.entities.ShareableEntity
 import cz.payola.domain.Entity
 import cz.payola.domain.entities._
+import cz.payola.data._
 import cz.payola.data.PaginationInfo
-import scala.Some
-import cz.payola.common.exception.ValidationException
+import cz.payola.model.components.PrivilegeModelComponent
 
 trait EntityModelComponent
 {
-    self: DataContextComponent  =>
+    self: DataContextComponent with PrivilegeModelComponent =>
 
     abstract class EntityModel[+A <: Entity](val repository: Repository[A])
     {
@@ -35,7 +36,7 @@ trait EntityModelComponent
             } catch {
                 case d: DataException if d.isUniqueKeyViolation => {
                     throw new ValidationException(uniqueFieldName,
-                        "There already exists a %s with this %s.".format(entity.entityTypeName, uniqueFieldName))
+                        "There already exists a %s with this %s.".format(entity.classNameText, uniqueFieldName))
                 }
             }
         }
@@ -43,8 +44,7 @@ trait EntityModelComponent
 
     class ShareableEntityModel[A <: ShareableEntity with OptionallyOwnedEntity with NamedEntity](
         override val repository: ShareableEntityRepository[A],
-        accessPrivilegeClass: Class[_],
-        val ownedEntitiesGetter: User => Seq[A])
+        val entityClass: Class[_])
         extends EntityModel[A](repository)
     {
         override def persist(entity: Entity) {
@@ -75,13 +75,14 @@ trait EntityModelComponent
         private def getGrantedToUser(user: Option[User], groups: Seq[Group]): Seq[A] = {
             user.map { u =>
                 val granteeIds = u.id +: groups.filter(_.hasMember(u)).map(_.id)
-                val privileges = privilegeRepository.getAllGrantedTo(granteeIds, accessPrivilegeClass)
+                val privilegeClass = privilegeModel.getSharingPrivilegeClass(entityClass)
+                val privileges = privilegeRepository.getAllByGranteeIds(granteeIds, privilegeClass)
                 privileges.map(_.obj.asInstanceOf[A])
             }.getOrElse(Nil)
         }
 
         private def getOwnedByUser(user: Option[User]): Seq[A] = {
-            user.map(ownedEntitiesGetter(_)).getOrElse(Nil)
+            user.map(_.getOwnedEntities(entityClass).map(_.asInstanceOf[A])).getOrElse(Nil)
         }
     }
 }

@@ -2,8 +2,9 @@ package cz.payola.data.squeryl.entities.plugins
 
 import scala.collection.immutable
 import cz.payola.data.squeryl.entities._
-import cz.payola.data.squeryl.SquerylDataContextComponent
+import cz.payola.data.squeryl._
 import cz.payola.domain.entities.plugins.concrete.DataFetcher
+import scala.Some
 
 /**
   * This object converts [[cz.payola.common.entities.plugins.DataSource]]
@@ -35,7 +36,7 @@ class DataSource(
     var _isEdit: Boolean)
     (implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.plugins.DataSource(n, o, df, paramValues)
-    with PersistableEntity with OptionallyOwnedEntity with ShareableEntity with NamedEntity with DescribedEntity
+    with Entity with OptionallyOwnedEntity with ShareableEntity with DescribedEntity
     with PluginInstanceLike
 {
     var pluginId: String = Option(df).map(_.id).getOrElse(null)

@@ -17,6 +17,8 @@ trait PluginInstanceBinding extends Entity
 
     protected val _targetInputIndex: Int
 
+    override def classNameText = "plugin instance binding"
+
     /** The plugin instance that acts as a source of the binding (the binding is connected to its output). */
     def sourcePluginInstance = _sourcePluginInstance
 

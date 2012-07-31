@@ -471,8 +471,16 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
                     case _: Unit => if (isReturnValue) {
                         buffer += "undefined"
                     }
-                    case null => buffer += "null"
-                    case _: String | _: Char => buffer += toJsString(value.toString)
+                    case null => {
+                        buffer += "null"
+                    }
+                    case _: String | _: Char => {
+                        buffer += toJsString(value.toString)
+                    }
+                    case r: Global#UniqueTypeRef => {
+                        packageDefCompiler.dependencyManager.addRequiredSymbol(r.typeSymbol)
+                        buffer += packageDefCompiler.getSymbolFullJsName(r.typeSymbol) + ".prototype.__class__"
+                    }
                     case _ => buffer += value.toString
                 }
             }

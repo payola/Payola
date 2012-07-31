@@ -5,9 +5,8 @@ import cz.payola.domain.entities.User
 import cz.payola.domain.entities.settings._
 import cz.payola.web.shared.Payola
 import s2js.runtime.shared.rpc.RpcException
-import scala.Some
 import cz.payola.model.ModelException
-import cz.payola.common.exception.ValidationException
+import cz.payola.common.ValidationException
 
 /**
   * A set of ontology customizations divided by their ownership.

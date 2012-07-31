@@ -4,6 +4,7 @@ import s2js.adapters.js.dom
 import s2js.adapters.js.browser.document
 import cz.payola.web.client.View
 import cz.payola.web.client.views.elements.Text
+import s2js.adapters.js.browser.window
 
 trait ComposedView extends View
 {
@@ -23,6 +24,7 @@ trait ComposedView extends View
     def blockDomElement = subViews.headOption.map(_.blockDomElement).getOrElse(document.createElement[dom.Div]("div"))
 
     def render(parent: dom.Element) {
+
         parentElement = Some(parent)
         subViews.foreach { v =>
             new Text(" ").render(parent)

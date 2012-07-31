@@ -14,10 +14,10 @@
     </ul>
 
     <div class="row-fluid">
-        <h1 class="span10">Edit group @group.name</h1><a href="@routes.Profile.deleteGroup(group.id)" onclick="return confirm('Are you sure?');" class="btn btn-danger span2"><i class="icon-remove-circle icon-white"></i>Delete the group</a>
+        <h1 class="span10">Edit group @group.name</h1><a href="@routes.Group.delete(group.id)" onclick="return confirm('Are you sure?');" class="btn btn-danger span2"><i class="icon-remove-circle icon-white"></i>Delete the group</a>
     </div>
 
-    <form action="@routes.Profile.saveGroup(group.id)" method="post">
+    <form action="@routes.Group.save(group.id)" method="post">
         <div class="well">
             <fieldset>
                 <legend>Change group properties</legend>

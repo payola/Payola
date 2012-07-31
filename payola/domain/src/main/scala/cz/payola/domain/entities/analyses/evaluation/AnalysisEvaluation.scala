@@ -55,7 +55,9 @@ class AnalysisEvaluation(private val analysis: Analysis, private val timeout: Op
                     }
                 }
                 case InstanceEvaluationError(i, t) => {
-                    progress = progress.withError(i, t)
+                    optimizedAnalysis.originalInstances(i).foreach { originalInstance =>
+                        progress = progress.withError(originalInstance, t)
+                    }
                 }
                 case InstanceEvaluationInput(_, graph) => {
                     finishEvaluation(graph.map(g => Success(g, progress.errors)).getOrElse {

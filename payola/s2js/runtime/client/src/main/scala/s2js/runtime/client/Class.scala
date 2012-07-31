@@ -23,4 +23,6 @@ class Class(val fullName: String, val parentClassesJsArray: Any)
         return false;
     """)
     def isSubClassOrEqual(classFullName: String): Boolean = false
+
+    def getName: String = fullName
 }

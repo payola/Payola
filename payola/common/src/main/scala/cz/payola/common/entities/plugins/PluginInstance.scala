@@ -18,6 +18,8 @@ trait PluginInstance extends Entity with DescribedEntity
 
     protected var _parameterValues: immutable.Seq[PluginType#ParameterValueType]
 
+    override def classNameText = "plugin instance"
+
     /** Is the plugin instance editable? */
     def isEditable = _isEditable
 

@@ -7,7 +7,7 @@ import cz.payola.model.EntityModelComponent
 
 trait UserModelComponent extends EntityModelComponent
 {
-    self: DataContextComponent with PayolaStorageModelComponent =>
+    self: DataContextComponent with PayolaStorageModelComponent with PrivilegeModelComponent =>
 
     lazy val userModel = new EntityModel(userRepository)
     {

@@ -9,16 +9,7 @@ import cz.payola.domain.entities.User
 
 trait DataSourceModelComponent extends EntityModelComponent
 {
-    self: DataContextComponent with RdfStorageComponent =>
+    self: DataContextComponent with RdfStorageComponent with PrivilegeModelComponent =>
 
-    lazy val dataSourceModel = new ShareableEntityModel[DataSource](
-        dataSourceRepository,
-        classOf[AccessDataSourcePrivilege],
-        (user: User) => user.ownedDataSources)
-    {
-        def create : DataSource = {
-            //TODO
-            getById("").get
-        }
-    }
+    lazy val dataSourceModel = new ShareableEntityModel(dataSourceRepository, classOf[DataSource])
 }

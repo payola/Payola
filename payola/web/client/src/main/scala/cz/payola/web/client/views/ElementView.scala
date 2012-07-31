@@ -28,6 +28,8 @@ abstract class ElementView[A <: dom.Element](domElementName: String, val subView
 
     val mouseMoved = new BrowserEvent[this.type]
 
+    val mouseOut = new BrowserEvent[this.type]
+
     val mouseWheelRotated = new BrowserEvent[this.type]
 
     protected var parentElement: Option[dom.Element] = None
@@ -40,6 +42,7 @@ abstract class ElementView[A <: dom.Element](domElementName: String, val subView
     domElement.onmouseup = { e => mouseReleased.triggerDirectly(this, e) }
     domElement.onmousemove = { e => mouseMoved.triggerDirectly(this, e) }
     domElement.onmousewheel = { e => mouseWheelRotated.triggerDirectly(this, e) }
+    domElement.onmouseout = { e => mouseOut.triggerDirectly(this, e) }
     addCssClass(cssClass)
 
     def blockDomElement = domElement

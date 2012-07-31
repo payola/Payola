@@ -80,7 +80,7 @@ object DataSource extends PayolaController with Secured
       * @return Redirects back to the data source listing, or throws 404 if the resource doesn't exist.
       */
     def delete(id: String) = authenticated { user: User =>
-        val ds: Option[cz.payola.domain.entities.plugins.DataSource] = Payola.model.dataSourceModel.getById(id)
+        val ds: Option[cz.payola.domain.entities.plugins.DataSource] = Payola.model.dataSourceModel.getAccessibleToUserById(Some(user), id)
         ds.map { d =>
             user.removeOwnedDataSource(d)
             Payola.model.dataSourceModel.remove(d)
@@ -99,7 +99,7 @@ object DataSource extends PayolaController with Secured
       * @return Detail of the data source or 404 if the resource doesn't exist.
       */
     def detail(id: String, initialVertexUri: Option[String]) = maybeAuthenticated { user: Option[User] =>
-        Payola.model.dataSourceModel.getById(id).map { d =>
+        Payola.model.dataSourceModel.getAccessibleToUserById(user, id).map { d =>
             Ok(views.html.datasource.detail(user, d, initialVertexUri))
         }.getOrElse {
             NotFound(views.html.errors.err404("The data source does not exist."))
@@ -112,7 +112,7 @@ object DataSource extends PayolaController with Secured
       * @return Edit page of the data source or 404 if the resource doesn't exist.
       */
     def edit(id: String) = authenticated { user: User =>
-        Payola.model.dataSourceModel.getById(id).map { d =>
+        Payola.model.dataSourceModel.getAccessibleToUserById(Some(user), id).map { d =>
             val availableDataFetchers = Payola.model.pluginModel.getAccessibleToUser(Some(user)).filter(p => p.isInstanceOf[DataFetcher]).asInstanceOf[Seq[DataFetcher]]
             Ok(views.html.datasource.edit(user, d, availableDataFetchers))
         }.getOrElse {
@@ -154,7 +154,7 @@ object DataSource extends PayolaController with Secured
       * @param form Form with values.
       * @return Redirects back to the data source listing.
       */
-    def saveEditedDataSource(dataSource: plugins.DataSource, form: Map[String, Seq[String]]) = {
+    private def saveEditedDataSource(dataSource: plugins.DataSource, form: Map[String, Seq[String]]) = {
         form foreach { case (key, values) =>
             if (key == "__dataSourceName__") {
                 // The data source name itself

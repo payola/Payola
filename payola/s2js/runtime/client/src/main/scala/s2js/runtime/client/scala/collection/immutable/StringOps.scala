@@ -21,7 +21,7 @@ class StringOps(val str: java.lang.String) extends s2js.runtime.client.scala.col
     @javascript("""self.setInternalJsArray(value.split(''))""")
     def initializeInternalJsArray(value: String) {}
 
-    @javascript("return self.getInternalJsArray().join();")
+    @javascript("return self.getInternalJsArray().join('');")
     def repr: String = ""
 
     @javascript("return self.x == 'true';")
@@ -48,5 +48,5 @@ class StringOps(val str: java.lang.String) extends s2js.runtime.client.scala.col
     @javascript("return self.x.replace(pattern, replacement);")
     def replaceAllLiterally(pattern: String, replacement: String) = null
 
-    override def toString = x
+    override def toString = repr
 }

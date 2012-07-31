@@ -15,14 +15,12 @@ abstract class ParameterValue[A](protected var _parameter: Parameter[A], protect
 
     type ParameterType = Parameter[A]
 
-    def entityTypeName = "parameter value"
-
     override def canEqual(other: Any): Boolean = {
         other.isInstanceOf[ParameterValue[_]]
     }
 
     override protected def checkInvariants() {
         super[Entity].checkInvariants()
-        validate(parameter != null, "parameter", "The parameter of the %s mustn't be null.".format(entityTypeName))
+        validate(parameter != null, "parameter", "The parameter of the %s mustn't be null.".format(classNameText))
     }
 }

@@ -4,7 +4,12 @@ import cz.payola.web.client.views._
 import s2js.adapters.js.dom
 import cz.payola.web.client.events._
 
-abstract class FormField[A <: dom.Input](elementName: String, name: String, initialValue: String, title: Option[String], cssClass: String = "")
+abstract class FormField[A <: dom.Input](
+    elementName: String,
+    name: String,
+    initialValue: String,
+    title: Option[String],
+    cssClass: String = "")
     extends ElementView[A](elementName, Nil, cssClass)
 {
     val changed = new SimpleUnitEvent[this.type]

@@ -17,6 +17,8 @@ trait OntologyCustomization extends Entity with NamedEntity with OptionallyOwned
 
     protected var _classCustomizations: immutable.Seq[ClassCustomizationType]
 
+    override def classNameText = "ontology customization"
+
     /** Customizations of classes in the ontology. */
     def classCustomizations = _classCustomizations
 }

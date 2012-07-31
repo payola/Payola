@@ -1,11 +1,9 @@
 package cz.payola.data.squeryl.entities
 
-import cz.payola.domain.Entity
+import cz.payola.data.squeryl.Entity
 
-trait DescribedEntity extends cz.payola.domain.entities.DescribedEntity
+trait DescribedEntity extends Entity with cz.payola.common.entities.DescribedEntity
 {
-    self: Entity =>
-
     var _desc: String
 
     // Restore description value from DB
@@ -13,7 +11,6 @@ trait DescribedEntity extends cz.payola.domain.entities.DescribedEntity
 
     override def description_=(value: String) {
         _desc = value
-
         super.description = value
     }
 }

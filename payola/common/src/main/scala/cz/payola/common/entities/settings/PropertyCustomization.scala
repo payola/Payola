@@ -14,6 +14,8 @@ trait PropertyCustomization extends Entity
 
     protected var _strokeWidth: Int
 
+    override def classNameText = "ontology property customization"
+
     /** Stroke color of the edge. */
     def strokeColor = _strokeColor
 

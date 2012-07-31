@@ -11,14 +11,11 @@ import cz.payola.domain.Entity
   */
 class PluginInstance(protected var _plugin: Plugin, protected var _parameterValues: immutable.Seq[ParameterValue[_]])
     extends Entity
-    with DescribedEntity
     with cz.payola.common.entities.plugins.PluginInstance
 {
     checkConstructorPostConditions()
 
     type PluginType = Plugin
-
-    def entityTypeName = "plugin instance"
 
     /**
       * Returns value of a parameter with the specified name or [[scala.None]] if such doesn't exist.

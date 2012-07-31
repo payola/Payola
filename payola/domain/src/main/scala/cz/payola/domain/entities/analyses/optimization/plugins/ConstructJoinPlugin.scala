@@ -9,11 +9,6 @@ import cz.payola.domain.sparql._
   */
 object ConstructJoinPlugin extends Construct("Joined SPARQL construct queries")
 {
-    override def createInstance(): PluginInstance = {
-        throw new UnsupportedOperationException(
-            "The ConstructJoinPlugin class has to be instantiated directly using the constructor.")
-    }
-
     def getConstructQuery(instance: PluginInstance, subject: Subject, variableGetter: () => Variable) = {
         instance match {
             case constructJoinInstance: ConstructJoinPluginInstance => {

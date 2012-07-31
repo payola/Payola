@@ -89,7 +89,7 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
         false
     }
 
-    topLayer.mouseDoubleClicked += { event =>
+    /*topLayer.mouseDoubleClicked += { event =>
         graphView.foreach { g =>
             val vertex = g.getTouchedVertex(getPosition(event))
             vertex.foreach { v =>
@@ -98,7 +98,7 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
             }
         }
         false
-    }
+    }*/
 
     topLayer.mouseWheelRotated += { event => //zoom - invoked by mouse
         val mousePosition = getPosition(event)
@@ -186,6 +186,7 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
 
     override def updateGraph(graph: Option[Graph]) {
         // If the graph has changed, update the graph view.
+        zoomControls.reset()
         if (graph != currentGraph) {
             if(graph.isDefined) {
                 if (graphView.isEmpty) {
@@ -226,7 +227,6 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
     }
 
     protected def redrawQuick() {
-        //TODO rename or move somewhere else
         if (!graphView.isEmpty) {
             graphView.get.redraw(layerPack, RedrawOperation.Animation)
         }
@@ -286,10 +286,14 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
                 graphView.get.selectVertex(vertex.get)
 
                 if(vertex.get.selected) {
-                    val infoTable = new VertexInfoTable(vertex.get.getLiteralVertices)
+                    val infoTable = new VertexInfoTable(vertex.get.vertexModel, vertex.get.getLiteralVertices)
+                    infoTable.dataSourceButtonPressed += { a =>
+                        vertexBrowsing.trigger(new VertexEventArgs[this.type](this, vertex.get.vertexModel))
+                    }
+
                     infoTable.render(document.body)
                     destroyVertexInfo = Some(new SimpleUnitEvent[Boolean])
-                    destroyVertexInfo.get += { event => infoTable.destroy() }
+                    destroyVertexInfo.get += { event => /*window.alert("destroy infotable");*/ infoTable.destroy() }
 
                     vertexSelected.trigger(new VertexEventArgs[this.type](this, vertex.get.vertexModel))
                 }

@@ -23,7 +23,7 @@ class Modal(
     val confirmText: Option[String] = Some("OK"),
     val cancelText: Option[String] = Some("Cancel"),
     val hasCloseButton: Boolean = true,
-    val additionalCssClasses: String = "")
+    val cssClass: String = "")
     extends ComposedView
 {
     /**
@@ -60,7 +60,7 @@ class Modal(
                     (if (confirmText.isDefined) List(saveButton) else Nil),
                 "modal-footer"
             )
-        ), "modal hide " + additionalCssClasses))
+        ), "modal hide " + cssClass))
     }
 
     override def render(parent: dom.Element = document.body) {

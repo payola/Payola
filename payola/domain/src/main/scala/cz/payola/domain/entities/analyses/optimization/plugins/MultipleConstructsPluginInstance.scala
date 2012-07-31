@@ -43,7 +43,7 @@ class MultipleConstructsPluginInstance(val constructs: immutable.Seq[PluginWithI
                 new MultipleConstructsPluginInstance(PluginWithInstance(construct, instance) +: constructs)
             }
             case plugin => {
-                throw new AnalysisException("Cannot add an instance of plugin %s.".format(plugin.getClass))
+                throw new AnalysisException("Cannot add an instance of plugin %s.".format(plugin.getClass.getName))
             }
         }
     }

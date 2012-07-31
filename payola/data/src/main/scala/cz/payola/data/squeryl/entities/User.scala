@@ -3,8 +3,9 @@ package cz.payola.data.squeryl.entities
 import cz.payola.data.squeryl.entities.plugins.DataSource
 import scala.collection.immutable
 import scala.collection.mutable
-import cz.payola.data.squeryl.SquerylDataContextComponent
+import cz.payola.data.squeryl._
 import cz.payola.data.squeryl.entities.settings.OntologyCustomization
+import scala.Some
 
 /**
   * This object converts [[cz.payola.common.entities.User]] to [[cz.payola.common.entities.User]]
@@ -23,7 +24,7 @@ object User extends EntityConverter[User]
 class User(override val id: String, name: String, pwd: String, mail: String)
     (implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.User(name)
-    with PersistableEntity with PrivilegableEntity with NamedEntity
+    with Entity with PrivilegableEntity
 {
     password = pwd
     email = mail

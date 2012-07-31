@@ -3,23 +3,32 @@ package s2js.runtime.client
 import collection.mutable.ArrayBuffer
 import s2js.compiler.javascript
 import s2js.runtime.shared.DependencyProvider
+import s2js.adapters.js.browser.console
+import s2js.runtime.shared.rpc.RpcException
 
 object ClassLoader
 {
     val loadedClasses = new ArrayBuffer[String]()
 
     def load(classNames: Seq[String]) {
-        val classesToLoad = classNames.filter(!loadedClasses.contains(_))
-        if (classesToLoad.nonEmpty) {
-            val dependencyPackage = DependencyProvider.get(classesToLoad, loadedClasses)
+        try {
+            val classesToLoad = classNames.filter(!loadedClasses.contains(_))
+            if (classesToLoad.nonEmpty) {
+                val dependencyPackage = DependencyProvider.get(classesToLoad, loadedClasses)
 
-            // Process the dependency package.
-            dependencyPackage.providedSymbols.foreach(provide(_))
-            if (dependencyPackage.javaScript != "") {
-                s2js.adapters.js.browser.eval(dependencyPackage.javaScript)
+                // Process the dependency package.
+                dependencyPackage.providedSymbols.foreach(provide(_))
+                if (dependencyPackage.javaScript != "") {
+                    s2js.adapters.js.browser.eval(dependencyPackage.javaScript)
+                }
+                if (dependencyPackage.css != "") {
+                    evaluateCss(dependencyPackage.css)
+                }
             }
-            if (dependencyPackage.css != "") {
-                evaluateCss(dependencyPackage.css)
+        } catch {
+            case e: RpcException => {
+                console.log(e.deepStackTrace)
+                throw e
             }
         }
     }

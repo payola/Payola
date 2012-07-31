@@ -1,7 +1,7 @@
 @(user: cz.payola.domain.entities.User)(flash: Flash)
 
 @main(Some(user), "List groups") {
-
+ <div class="container-fluid">
     <ul class="breadcrumb">
         <li>
             <a href="/">Home</a> <span class="divider">/</span>
@@ -38,7 +38,7 @@
                 <tr>
                     <td>@group.name</td>
                     <td>@group.members.size member(s)</td>
-                    <td><a href="@routes.Profile.editGroup(group.id)" class="btn btn-primary"><i class="icon-cog icon-white"></i> Administer</a></td>
+                    <td><a href="@routes.Group.edit(group.id)" class="btn btn-primary"><i class="icon-cog icon-white"></i> Administer</a></td>
                 </tr>
             }
             <div style="text-align: center">
@@ -60,7 +60,8 @@
                 <p class="alert-block">But you can create one!</p>
             </div>
         }
-        <a href="@routes.Profile.createGroup()" class="btn btn-success"><i class="icon-plus icon-white"></i> Create group &raquo;</a>
+        <a href="@routes.Group.create()" class="btn btn-success"><i class="icon-plus icon-white"></i> Create group &raquo;</a>
 
     </div>
+ </div>
 }

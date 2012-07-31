@@ -19,8 +19,6 @@ class PluginInstanceBinding(
 
     type PluginInstanceType = PluginInstance
 
-    def entityTypeName = "plugin instance binding"
-
     override def canEqual(other: Any): Boolean = {
         other.isInstanceOf[PluginInstanceBinding]
     }

@@ -9,8 +9,8 @@ import cz.payola.common.entities.settings.OntologyCustomization
 import s2js.adapters.js.browser.window
 
 /**
-  * Graphical representation of Graph object.
-  * @param container the space where the graph should be visualised
+  * Graphical representation of a Graph object.
+  * @param settings to get drawing attributes from
   */
 class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
     /**
@@ -25,6 +25,10 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
       */
     var components = ListBuffer[Component]()
 
+    /**
+     * Setter of the ontology visual configuration.
+     * @param newCustomization new configuration for drawing
+     */
     def setVisualSetup(newCustomization: Option[OntologyCustomization]) {
         settings.setOntologyCustomization(newCustomization)
         getAllEdges.foreach(_.settings.setOntologyCustomization(newCustomization))
@@ -32,7 +36,7 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
     }
 
     def isSelected: Boolean = {
-        false
+        components.find{component => !component.isSelected}.isEmpty
     }
 
     //###################################################################################################################
@@ -40,8 +44,10 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
     //###################################################################################################################
 
     /**
-      * Replaces the current graph with new one and marks all new vertices as selected.
-      * @param graph to replace the current graph representation with
+      * Updates the represented graph. VertexViews with age value higher than vertexHighestAge are destryed, other
+      * vertexViews have their age increased and vertices in the graph parameter are added to the graphView
+      * representation. VertexViews that are already in the graphView are refreshed (their age is set to 0).
+      * @param graph to update the current representation
       */
     def update(graph: Graph) {
         if (graph == null) {
@@ -75,9 +81,12 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
     }
 
     /**
-      * splits vertices to components according to accessibility between vertices (two vertices are in the same component
-      * only if a series of edges and vertices connecting them exists)
-      */
+     * Splits vertices to components according to accessibility between vertices (two vertices are in the same component
+     * only if a series of edges and vertices connecting them exists). Sets the created components to the this.components
+     * variable.
+     * @param vertexViews to split
+     * @param edgeViews to split
+     */
     private def splitToComponents(vertexViews: ListBuffer[VertexView], edgeViews: ListBuffer[EdgeView]) {
         components = ListBuffer[Component]()
 
@@ -120,8 +129,10 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
     }
 
     /**
-      * returns list of vertices, that are neighbours to the ofVertex
-      */
+     * Searches for neighbouring vertexViews of the ofVertex
+     * @param ofVertex to search neighbours of
+     * @return list of vertices, that are neighbours to the ofVertex
+     */
     private def getNeighbours(ofVertex: VertexView): ListBuffer[VertexView] = {
         var neighbours = ListBuffer[VertexView]()
 
@@ -138,7 +149,7 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
     }
 
     /**
-      * Constructs a list of vertexViews based on the _graphModel parameter.
+      * Constructs a list of vertexViews based on the graphModel parameter.
       * @param graphModel to build from
       * @return container with packed Vertex objects in VertexView objects
       */
@@ -168,6 +179,13 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
         addLiteralVerticesToVertexViews(graphModel, buffer, literalVertices)
     }
 
+    /**
+     * Looks in the graphModel for neighbour literalVertices of vertexModel with edge with uri from Edge.rdfLabelEdges
+     * and if a literalVertex is found it is returned
+     * @param graphModel where to look
+     * @param vertexModel for which the information is being searched
+     * @return
+     */
     private def getInformationForVertexView(graphModel: Graph, vertexModel: IdentifiedVertex): Option[Vertex] = {
 
         val foundEdge = graphModel.edges.find{ edge =>
@@ -180,6 +198,12 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
         }
     }
 
+    /**
+     * Gets rdf type to specify the type required for drawing and getting drawing configuration based on an ontology.
+     * @param edges to search for an edge with Edge.rdfTypeEdge uri
+     * @param vertexModel for which the type is being searched
+     * @return the found type or an empty string
+     */
     private def getRdfTypeForVertexView(edges: Seq[Edge], vertexModel: IdentifiedVertex): String = {
         var rdfTypeEdge: Option[Edge]= None
         edges.foreach{ edge =>
@@ -196,6 +220,13 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
         }
     }
 
+    /**
+     * Adds literalVertices to their neighbouring identifiedVertices (vertexViews)
+     * @param graphModel to get edges from
+     * @param vertexViews to set the literalVertices to
+     * @param literalVertices available for setting to identifiedVertices
+     * @return vertexViews (identifiedVertices) with configured literalVertices neighbours
+     */
     private def addLiteralVerticesToVertexViews(graphModel: Graph,
         vertexViews: ListBuffer[VertexView], literalVertices: ListBuffer[LiteralVertex]): ListBuffer[VertexView] = {
 
@@ -232,11 +263,13 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
     }
 
     /**
-      * Removes edges of the old vertices that are not too old (and are not in the newVertexViews container), that the
-      * graph can be rebuild.
-      * Vertices in the newVertexViews container are updated if they are found in the old edges (old edges found this way
-      * are removed to be replaced by the ne vertices)
-      */
+     * Removes edges of the old vertices that are not too old (and are not in the newVertexViews container), that the
+     * graph can be rebuild.
+     * Vertices in the newVertexViews container are updated if they are found in the old edges (old edges found this way
+     * are removed to be replaced by the new vertices)
+     * @param newVertexViews to refresh the already present vertices
+     * @return rebuilt vertexViews
+     */
     private def rebuildOldVertices(newVertexViews: ListBuffer[VertexView]): ListBuffer[VertexView] = {
         var newOldVertexViews = ListBuffer[VertexView]()
         var allVertices = newVertexViews ++ newOldVertexViews
@@ -286,10 +319,12 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
     }
 
     /**
-      * For every edge of this graph a new edge is created if its origin and destination exist in the vertexViews
-      * parameter. Container of these renewed "valid" edges is returned.
-      * @return
-      */
+     * For every edge of this graph a new edge is created if its origin and destination exist in the vertexViews
+     * parameter. Container of these renewed "valid" edges is returned.
+     * @param newEdgeViews edges to be added to the graph
+     * @param vertexViews to search for origins and destinations of vertices
+     * @return renewed edges
+     */
     private def rebuildOldEdges(newEdgeViews: ListBuffer[EdgeView], vertexViews: ListBuffer[VertexView]):
     ListBuffer[EdgeView] = {
         if (vertexViews.isEmpty) {
@@ -311,6 +346,12 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
         newOldEdgeViews
     }
 
+    /**
+     * Searches for origin and destination of an edgeModel and if they exist an edgeView is created.
+     * @param edgeModel to create an edgeView for
+     * @param vertexViews to search for origin and destination of the edge
+     * @return EdgeView if origin and destination vertexViews are found
+     */
     private def createEdgeView(edgeModel: Edge, vertexViews: ListBuffer[VertexView]): Option[EdgeView] = {
         val origin = getVertexForEdgeConstruct(edgeModel.origin, vertexViews)
         val destination = getVertexForEdgeConstruct(edgeModel.destination, vertexViews)
@@ -325,6 +366,12 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
         }
     }
 
+    /**
+     * Search routine for getting vertexViews based on vertex from model.
+     * @param vertex to search for
+     * @param vertexViews to seach in
+     * @return found VertexView or None
+     */
     private def getVertexForEdgeConstruct(vertex: Vertex, vertexViews: ListBuffer[VertexView]): Option[VertexView] = {
         val foundVertices = vertexViews.filter {
             _.vertexModel.toString eq vertex.toString
@@ -351,24 +398,23 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
     }
 
     /**
-      * finds all edges of every vertex, that have this vertex as origin or destination and set its vertex.edges
-      * attribute
-      */
+     * Finds all edges of every vertex, that have this vertex as origin or destination and set its vertex.edges
+     * attribute.
+     * @param vertexViews to set edgeViews to
+     * @param edgeViews awailable for setting
+     */
     private def fillVertexViewsEdges(vertexViews: ListBuffer[VertexView], edgeViews: ListBuffer[EdgeView]) {
         vertexViews.foreach { vertexView =>
             vertexView.edges = getEdgesOfVertex(vertexView, edgeViews)
-            /*if(vertexView.edges.length == 0) {
-                window.alert("to vertex were set NO edges: "+vertexView.vertexModel.toString+" ; "+edgeViews.toString())
-            }*/
         }
     }
 
     /**
       * Searches for all edges in the _edgeViews parameter, that have the vertexView parameter as its origin or
       * destination and returns all these edges in a container.
-      * @param vertexView to searche the edges container for
+      * @param vertexView to search the edges container for
       * @param edgeViews container of edges to search in
-      * @return container fith found edges
+      * @return container with found edges
       */
     private def getEdgesOfVertex(vertexView: VertexView, edgeViews: ListBuffer[EdgeView]): ListBuffer[EdgeView] = {
         edgeViews.filter { edgeView =>
@@ -381,6 +427,11 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
     //selection and whatever routines####################################################################################
     //###################################################################################################################
 
+    /**
+     * Searches the graphView for an vertexView which has the position inside of its graphical representation.
+     * @param position to compare vertexViews' positions with
+     * @return found vertexView or None
+     */
     def getTouchedVertex(position: Point2D): Option[VertexView] = {
         var result: Option[VertexView] = None
         var componentsPointer = 0
@@ -393,6 +444,11 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
         result
     }
 
+    /**
+     * Inverts selected attribute of the vertexView.
+     * @param vertexView to invert the selection attribute
+     * @return if the selection was inverted
+     */
     def invertVertexSelection(vertexView: VertexView): Boolean = {
         var componentPointer = 0
         var selectionInverted = false
@@ -405,6 +461,11 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
         selectionInverted
     }
 
+    /**
+     * Marks the vertexView as selected.
+     * @param vertexView to mark
+     * @return true if the selection status of the vertex has changed
+     */
     def selectVertex(vertexView: VertexView): Boolean = {
         var componentPointer = 0
         var selectionChanged = false
@@ -438,22 +499,14 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
     }
 
     /**
-      * Marks all verices in this graph graphical representation as NOT selected.
-      * @return list of deselected vertices if some were deselected, else None
+      * Marks all the vertexViews in this graphView as NOT selected.
       */
     def deselectAll() {
-        //var deselected = ListBuffer[VertexView]()
 
         components.foreach { component =>
 
             component.deselectAll()
         }
-
-        /*if(deselected.isEmpty) {
-            None
-        } else {
-            Some(deselected)
-        }*/
     }
 
     //###################################################################################################################
@@ -513,11 +566,6 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
         }
     }
 
-    private def TODO_RenameThisMethod(edgeView: EdgeView, vertexView: VertexView): Boolean = {
-        (edgeView.originView.eq(vertexView) && edgeView.destinationView.selected) ||
-            (edgeView.destinationView.eq(vertexView) && edgeView.originView.selected)
-    }
-
     def drawQuick(canvasPack: CanvasPack, positionCorrection: Vector2D) {
         val vertexViews = getAllVertices
         val edgeViews = getAllEdges
@@ -571,11 +619,12 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
     }
 
     /**
-      * Prepares the layers for drawing and calls the draw routine of this graph based on the graphOperation parameter.
-      * If the Movement operation is used only layers for selected objects are redrawn. If the selection operation
-      * is used all layers are redrawn.
-      * @param graphOperation specifying which layers should be redrawn
-      */
+     * Prepares the layers for drawing and calls the draw routine of this graph based on the graphOperation parameter.
+     * If the Movement operation is used only layers for selected objects are redrawn. If the selection operation
+     * is used all layers are redrawn.
+     * @param canvasPack canvases to draw on
+     * @param graphOperation specified draw operation
+     */
     def redraw(canvasPack: CanvasPack, graphOperation: Int) {
         graphOperation match {
             case RedrawOperation.Movement =>
@@ -599,8 +648,9 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
     }
 
     /**
-      * Redraws the whole graph from scratch. All layers are cleared and all elements of the graph are drawn again.
-      */
+     * Redraws the whole graph from scratch. All layers are cleared and all elements of the graph are drawn again.
+     * @param canvasPack canvases to draw on
+     */
     def redrawAll(canvasPack: CanvasPack) {
         canvasPack.clear()
         draw(canvasPack, Vector2D.Zero)
@@ -611,6 +661,9 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
     //component together putters#########################################################################################
     //###################################################################################################################
 
+    /**
+     * @return all vetexViews in this graphView
+     */
     def getAllVertices: ListBuffer[VertexView] = {
         var allVertices = ListBuffer[VertexView]()
         components.foreach { component =>
@@ -620,6 +673,9 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
         allVertices
     }
 
+    /**
+     * @return all edgeViews in this graphView
+     */
     def getAllEdges: ListBuffer[EdgeView] = {
         var allEdges = ListBuffer[EdgeView]()
         components.foreach { component =>
@@ -629,6 +685,9 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
         allEdges
     }
 
+    /**
+     * @return count of selected vertexViews in this graphView
+     */
     private def getAllSelectedVerticesCount: Int = {
         var allSelectedCount = 0
         components.foreach { component =>
@@ -638,8 +697,8 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
     }
 
     /**
-      * Empty graph indication function.
-      * @return true if no vertices are present in this.vertexViews variable
+      * Empty graph indication.
+      * @return true if no vertexViews are present in this graphView
       */
     def isEmpty: Boolean = {
         var result = true
@@ -650,6 +709,9 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
         result
     }
 
+    /**
+     * @return geometrical center of this graphView
+     */
     def getGraphCenter(): Point2D = {
         //() are intentional
         val top = getGraphTop.y
@@ -660,6 +722,9 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
         Point2D(left + (right - left) / 2, top + (bottom - top) / 2)
     }
 
+    /**
+     * @return geometrical top of this graphView
+     */
     def getGraphTop: Point2D = {
         var top = Point2D(0, Double.MaxValue)
         getAllVertices.foreach { vv =>
@@ -670,6 +735,9 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
         top
     }
 
+    /**
+     * @return geometrical leftmost position of this graphView
+     */
     def getGraphLeft: Point2D = {
         var left = Point2D(Double.MaxValue, 0)
         getAllVertices.foreach { vv =>
@@ -680,6 +748,9 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
         left
     }
 
+    /**
+     * @return geometrical bottom of this graphView
+     */
     def getGraphBottom: Point2D = {
         var bottom = Point2D(0, Double.MinValue)
         getAllVertices.foreach { vv =>
@@ -690,6 +761,9 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
         bottom
     }
 
+    /**
+     * @return geometrical rightmost position of this graphView
+     */
     def getGraphRight: Point2D = {
         var right = Point2D(Double.MinValue, 0)
         getAllVertices.foreach { vv =>

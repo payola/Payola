@@ -15,6 +15,8 @@ trait ParameterValue[A] extends Entity
 
     protected var _value: A
 
+    override def classNameText = "parameter value"
+
     /** The parameter corresponding to this parameter value. */
     def parameter = _parameter
 

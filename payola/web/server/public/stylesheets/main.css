@@ -47,7 +47,8 @@ body {
 
 label {
     float: left;
-    width: 250px;
+    margin-right: 10px;
+    padding-top: 4px;
 }
 
 .instance h3 {
@@ -75,7 +76,6 @@ input.active, textarea.active {
     background: url('spinner.gif') no-repeat 100%, -ms-linear-gradient(top, #ffffff 85%, #eeeeee 99%);
     background: url('spinner.gif') no-repeat 100%, linear-gradient(top, #ffffff 85%, #eeeeee 99%);
     background-position: 98%;
-    padding-right: 25px !important;
 }
 
 input[type="checkbox"].active:after {
@@ -124,6 +124,15 @@ input[type="checkbox"].active:after {
     min-width: 300px;
 }
 
+.successors .parameters{
+    width: 250px;
+    overflow-x: scroll;
+}
+
+.successors+.successors {
+    margin-left: 10px;
+}
+
 .clear {
     clear: both;
     height: 0px;
@@ -132,30 +141,10 @@ input[type="checkbox"].active:after {
 }
 
 .alert {
-    margin-bottom: 18px;
 }
 
 .position-relative {
     position: relative;
-}
-
-.ontology-customization-class-div {
-    min-height: 30px;
-    horizontal-align: center;
-    padding: 5px;
-    background: #DDDBFE;
-    color: black;
-    border: 1px solid #a6a4a9;
-}
-
-.selected-ontology-customization-class-div {
-    background: #9E9AD1;
-}
-
-.property-list-header {
-    background: #ABABAB;
-    margin-bottom: 10px;
-    padding-left: 5px;
 }
 
 .modal-inner-view {
@@ -167,13 +156,9 @@ input[type="checkbox"].active:after {
     background: #FFFEE2;
 }
 
-.ontology-customization-modal {
-    width: 800px;
-    max-width: 1024px;
-}
-
-.ontology-customization-modal .share-button {
-    display: inline;
+.large-modal {
+    width: 900px !important;
+    margin-left: -450px !important;
 }
 
 .inline-display {
@@ -184,14 +169,6 @@ input[type="checkbox"].active:after {
     padding: 0px;
     padding-left: 0px;
     padding-right: 0px;
-}
-
-.successors > .successors {
-    margin-left: 10px;
-}
-
-.successors > .successors:first-child {
-    margin-left: 0px;
 }
 
 #progress {
@@ -215,3 +192,63 @@ input[type="checkbox"].active:after {
     position: relative;
     overflow: visible;
 }
+
+.bar-chart-textual-content {
+    font-weight: bolder;
+    color: #333;
+    text-shadow: 2px 2px #BCBCBC;
+    text-align: center;
+    vertical-align: center;
+}
+
+.bar-chart-textual-content-large {
+    padding-top: 150px;
+    font-size: 32pt;
+}
+
+.bar-chart-textual-content-small {
+    color: #666;
+    text-shadow: 1px 1px #DEDEDE;
+    padding-top: 30px;
+    font-size: 24px;
+}
+
+.timeout-control label {
+    width: 180px;
+    padding-top: 4px;
+}
+
+.none {
+    display: none !important;
+}
+
+.hidden-element{
+    visibility: hidden;
+}
+
+.analysis-controls {
+    padding-bottom: 27px !important;
+}
+<<<<<<< HEAD
+=======
+
+.popover-content p{
+    max-height: 200px;
+}
+
+.connector{
+    border: 2px solid navy;
+    height: 90%;
+    position: absolute;
+    top: 0px;
+    z-index: -1;
+}
+
+.plumb{
+    position: absolute;
+    top: -4px;
+    border: 4px solid navy;
+}
+
+.successors, .successors .alert{ position: relative !important; }
+>>>>>>> ec0fe378d3a0a24d3e166db0b9ba320fb03a6a0c

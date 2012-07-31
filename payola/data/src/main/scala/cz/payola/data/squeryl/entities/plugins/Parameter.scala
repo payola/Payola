@@ -2,7 +2,7 @@ package cz.payola.data.squeryl.entities.plugins
 
 import cz.payola.data.squeryl.entities._
 import cz.payola.data.squeryl.entities.plugins.parameters._
-import cz.payola.data.squeryl.SquerylDataContextComponent
+import cz.payola.data.squeryl._
 
 object Parameter
 {
@@ -16,7 +16,7 @@ object Parameter
     }
 }
 
-trait Parameter[A] extends cz.payola.domain.entities.plugins.Parameter[A] with PersistableEntity
+trait Parameter[A] extends cz.payola.domain.entities.plugins.Parameter[A] with Entity
 {
     var pluginId: String = null
 }

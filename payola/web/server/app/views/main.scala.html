@@ -20,6 +20,11 @@
         <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/jquery-plugins/jquery.autosize-min.js")"></script>
         <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/jquery-plugins/jquery.livequery.min.js")"></script>
         <script type="text/javascript" src="@routes.Assets.at("javascripts/common.js")"></script>
+        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+        <script type="text/javascript">
+            // Load the Visualization API and the piechart package.
+            google.load("visualization", "1", {packages: ["barchart"]});
+        </script>
     </head>
         <body>
             <div class="navbar navbar-fixed-top">
@@ -60,8 +65,8 @@
                                             <i class="icon-file icon-white"></i> My plugins<b class="caret"></b>
                                         </a>
                                         <ul class="dropdown-menu">
-                                            <li><a href="@routes.Profile.listPlugins(1)"><i class="icon-list"></i> View all</a></li>
-                                            <li><a href="@routes.Profile.createPlugin()"><i class="icon-upload"></i> Upload new</a></li>
+                                            <li><a href="@routes.Plugin.listPlugins(1)"><i class="icon-list"></i> View all</a></li>
+                                            <li><a href="@routes.Plugin.createPlugin()"><i class="icon-upload"></i> Upload new</a></li>
                                         </ul>
                                     </li>
                                     <li class="dropdown">
@@ -78,8 +83,8 @@
                                             User groups<b class="caret"></b>
                                         </a>
                                         <ul class="dropdown-menu">
-                                            <li><a href="@routes.Profile.listGroups()"><i class="icon-list"></i> View all</a></li>
-                                            <li><a href="@routes.Profile.createGroup()"><i class="icon-plus"></i> Create new</a></li>
+                                            <li><a href="@routes.Group.list()"><i class="icon-list"></i> View all</a></li>
+                                            <li><a href="@routes.Group.create()"><i class="icon-plus"></i> Create new</a></li>
                                         </ul>
                                     </li>
                                 }
