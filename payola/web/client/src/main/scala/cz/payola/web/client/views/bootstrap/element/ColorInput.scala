@@ -16,7 +16,7 @@ class ColorInput(name: String, label: String, private var colorOption: Option[Co
 
     val cleared = new SimpleUnitEvent[ColorInput]
 
-    val colorInput = new Input(name, colorOption.map(_.toString).getOrElse("").toString, Some("No color selected"), "color")
+    val colorInput = new Input(name, colorOption.map(_.toString).getOrElse("").toString, Some("No color selected"))
 
     val colorWell = new Italic(List())
 
