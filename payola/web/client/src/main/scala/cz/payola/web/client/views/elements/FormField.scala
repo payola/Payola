@@ -1,6 +1,7 @@
 package cz.payola.web.client.views.elements
 
 import cz.payola.web.client.views._
+import bootstrap.EditableInput
 import s2js.adapters.js.dom
 import cz.payola.web.client.events._
 
@@ -10,10 +11,8 @@ abstract class FormField[A <: dom.Input](
     initialValue: String,
     title: Option[String],
     cssClass: String = "")
-    extends ElementView[A](elementName, Nil, cssClass)
+    extends ElementView[A](elementName, Nil, cssClass) with EditableInput
 {
-    val changed = new SimpleUnitEvent[this.type]
-
     keyReleased += { e =>
         changed.triggerDirectly(this)
         true

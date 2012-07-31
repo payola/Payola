@@ -5,23 +5,23 @@ import cz.payola.common.entities.settings._
 import cz.payola.web.client.views.bootstrap._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events._
-import cz.payola.web.client.views.bootstrap.inputs._
-import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.ColorPane
-import cz.payola.web.client.views.graph.visual.Color
+import element.ColorInput
+import inputs._
 import cz.payola.web.client.presenters.entity.settings._
 
 class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomization)
     extends Modal("Edit ontology customization", Nil, Some("Done"), None, false, "large-modal")
 {
-    val classFillColorChanged = new UnitEvent[ColorPane, ClassCustomizationEventArgs[ColorPane]]
+    val classFillColorChanged = new UnitEvent[InputControl[_], ClassCustomizationEventArgs[InputControl[_]]]
 
-    val classRadiusDelayedChanged = new UnitEvent[InputControl, ClassCustomizationEventArgs[InputControl]]
+    val classRadiusDelayedChanged = new UnitEvent[InputControl[_], ClassCustomizationEventArgs[InputControl[_]]]
 
-    val classGlyphDelayedChanged = new UnitEvent[InputControl, ClassCustomizationEventArgs[InputControl]]
+    val classGlyphDelayedChanged = new UnitEvent[InputControl[_], ClassCustomizationEventArgs[InputControl[_]]]
 
-    val propertyStrokeColorChanged = new UnitEvent[ColorPane, PropertyCustomizationEventArgs[ColorPane]]
+    val propertyStrokeColorChanged = new UnitEvent[InputControl[_], PropertyCustomizationEventArgs[InputControl[_]]]
 
-    val propertyStrokeWidthDelayedChanged = new UnitEvent[InputControl, PropertyCustomizationEventArgs[InputControl]]
+    val propertyStrokeWidthDelayedChanged =
+        new UnitEvent[InputControl[_], PropertyCustomizationEventArgs[InputControl[_]]]
 
     val ontologyCustomizationName = new TextInputControl("Name:", "name", ontologyCustomization.name, "", "span6")
 
@@ -82,17 +82,17 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
     }
 
     private def renderClassCustomizationViews(classCustomization: ClassCustomization) {
-        val fillColor = new ColorPane("", "Fill color:", Color.fromHex(classCustomization.fillColor))
+        val fillColor = new ColorInputControl("Fill color:", "", classCustomization.fillColor, "")
         val radius = new NumericInputControl("Radius:", "", classCustomization.radius.toString, "")
         val glyph = new TextInputControl("Glyph:", "", classCustomization.glyph, "")
 
         val onFillColorChanged = {
-            e: EventArgs[ColorPane] =>
+            e: EventArgs[ColorInput] =>
                 classFillColorChanged.trigger(new ClassCustomizationEventArgs(fillColor, classCustomization,
-                    fillColor.getColorHexString))
+                    fillColor.input.getColorHexString))
         }
-        fillColor.closed += onFillColorChanged
-        fillColor.cleared += onFillColorChanged
+        fillColor.input.closed += onFillColorChanged
+        fillColor.input.cleared += onFillColorChanged
         radius.delayedChanged += {
             e =>
                 classRadiusDelayedChanged.trigger(new ClassCustomizationEventArgs(radius, classCustomization,
@@ -113,16 +113,16 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
         propertyCustomization: PropertyCustomization) {
         val headingDiv = new Div(List(new Text("Property " + uriToName(propertyCustomization.uri))), "label label-info")
         headingDiv.setAttribute("style", "padding: 5px; margin: 10px 0;")
-        val strokeColor = new ColorPane("", "Stroke color:", Color.fromHex(propertyCustomization.strokeColor))
+        val strokeColor = new ColorInputControl("Stroke color:", "", propertyCustomization.strokeColor, "")
         val strokeWidth = new NumericInputControl("Stroke width:", "", propertyCustomization.strokeWidth.toString, "")
 
         val onStrokeColorChanged = {
-            e: EventArgs[ColorPane] =>
+            e: EventArgs[ColorInput] =>
                 propertyStrokeColorChanged.trigger(new PropertyCustomizationEventArgs(strokeColor, classCustomization,
-                    propertyCustomization, strokeColor.getColorHexString))
+                    propertyCustomization, strokeColor.input.getColorHexString))
         }
-        strokeColor.closed += onStrokeColorChanged
-        strokeColor.cleared += onStrokeColorChanged
+        strokeColor.input.closed += onStrokeColorChanged
+        strokeColor.input.cleared += onStrokeColorChanged
         strokeWidth.delayedChanged += {
             e =>
                 propertyStrokeWidthDelayedChanged.trigger(new PropertyCustomizationEventArgs(strokeWidth,

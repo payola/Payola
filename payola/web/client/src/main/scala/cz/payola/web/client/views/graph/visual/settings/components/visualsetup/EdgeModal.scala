@@ -5,6 +5,7 @@ import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.Modal
 import cz.payola.web.client.views.elements.Input
 import cz.payola.web.client.views.elements.Div
+import cz.payola.web.client.views.bootstrap.element.ColorInput
 
 class EdgeModal(model: EdgeSettingsModel) extends Modal("Edge settings")
 {
@@ -17,7 +18,7 @@ class EdgeModal(model: EdgeSettingsModel) extends Modal("Edge settings")
         false
     }
 
-    val color = new ColorPane("edge.color.base", "Edge color", Some(model.colorValue))
+    val color = new ColorInput("edge.color.base", "Edge color", Some(model.colorValue))
 
     color.changed += { event =>
         model.colorValue = color.getColor.get

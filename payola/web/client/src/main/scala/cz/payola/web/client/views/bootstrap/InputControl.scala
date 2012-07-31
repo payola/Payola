@@ -7,7 +7,7 @@ import cz.payola.web.client.views.elements._
 import cz.payola.common.ValidationException
 import cz.payola.web.client.events.SimpleUnitEvent
 
-abstract class InputControl(
+abstract class InputControl[A <: ElementView[_] with EditableInput](
     val label: String,
     val name: String,
     value: String,
@@ -40,7 +40,7 @@ abstract class InputControl(
 
     def createSubViews = List(controlGroup)
 
-    def createInput: FormField[_ <: dom.Input]
+    def createInput: A
 
     def setState(exception: ValidationException, fieldName: String) {
         if (fieldName == exception.fieldName) {
