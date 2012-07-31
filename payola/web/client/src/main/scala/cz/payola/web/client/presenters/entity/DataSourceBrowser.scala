@@ -7,7 +7,9 @@ import cz.payola.web.client.events.BrowserEventArgs
 import cz.payola.web.client.views.VertexEventArgs
 import cz.payola.web.client.Presenter
 import cz.payola.web.client.presenters.graph.GraphPresenter
-import cz.payola.web.client.views.entity.DataSourceView
+import cz.payola.web.client.views.entity.plugins._
+import cz.payola.common.ValidationException
+import cz.payola.web.client.views.bootstrap.modals.AlertModal
 
 class DataSourceBrowser(
     val viewElement: dom.Element,
@@ -32,6 +34,7 @@ class DataSourceBrowser(
         view.backButton.mouseClicked += onBackButtonClicked _
         view.nextButton.mouseClicked += onNextButtonClicked _
         view.goButton.mouseClicked += onGoButtonClicked _
+        view.sparqlQueryButton.mouseClicked += onSparqlQueryButtonClicked _
         view.nodeUriInput.keyPressed += onNodeUriKeyPressed _
         graphPresenter.view.vertexBrowsing += onVertexBrowsing _
 
@@ -73,6 +76,27 @@ class DataSourceBrowser(
     private def onGoButtonClicked(e: BrowserEventArgs[_]): Boolean = {
         graphPresenter.view.updateGraph(None)
         addToHistoryAndGo(view.nodeUriInput.value)
+        false
+    }
+
+    private def onSparqlQueryButtonClicked(e: BrowserEventArgs[_]): Boolean = {
+        val modal = new SparqlQueryModal
+        modal.confirming += { e =>
+            modal.block("Executing the SPARQL query.")
+            DataSourceManager.executeSparqlQuery(dataSourceId, modal.sparqlQueryInput.value) { g =>
+                modal.unblock()
+                modal.destroy()
+                graphPresenter.view.updateGraph(g)
+            } { e =>
+                modal.unblock()
+                e match {
+                    case v: ValidationException => AlertModal.display("Error", v.message)
+                    case t => fatalErrorHandler(t)
+                }
+            }
+            false
+        }
+        modal.render()
         false
     }
 

@@ -85,12 +85,4 @@ object GraphDownloader extends PayolaController with Secured
     def downloadGraphAsRepresentation(graph: Graph, representation: RdfRepresentation.Type, mimeType: String, fileName: String, fileExtension: String) = Action {
         downloadGraphAsRepresentationResult(graph, representation, mimeType, fileName, fileExtension)
     }
-
-    def test() = Action {
-        val downloader = new Downloader("http://tmp.charliemonroe.net/sample.rdf")
-        val rdfString = downloader.result
-        val g = Graph(RdfRepresentation.RdfXml, rdfString)
-        downloadGraphAsRDF(g)
-    }
-
 }

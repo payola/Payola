@@ -2,14 +2,14 @@ package cz.payola.domain.rdf
 
 import scala.collection._
 import scala.collection.JavaConverters._
+import scala.io.Source
+import java.io._
 import com.hp.hpl.jena.query._
 import com.hp.hpl.jena.rdf.model._
-import cz.payola.common.rdf._
-import cz.payola.domain._
-import java.io._
-import scala.io.Source
 import org.openjena.riot._
 import org.openjena.riot.lang._
+import cz.payola.domain._
+import cz.payola.common.rdf._
 
 object Graph
 {
@@ -26,23 +26,23 @@ object Graph
       */
     def apply(representation: RdfRepresentation.Type, data: String): Graph = {
         val dataInputStream = new ByteArrayInputStream(data.getBytes("UTF-8"))
+        val jenaLanguage = representation match {
+            case RdfRepresentation.RdfXml => Lang.RDFXML
+            case RdfRepresentation.Turtle => Lang.TURTLE
+        }
+
         val jenaGraphs = representation match {
             case RdfRepresentation.Trig => {
                 val dataSetGraph = DatasetFactory.createMem().asDatasetGraph()
-                RiotLoader.readQuads(dataInputStream, Lang.TRIG, "", new SinkQuadsToDataset(dataSetGraph))
+                RiotLoader.readQuads(dataInputStream, jenaLanguage, "", new SinkQuadsToDataset(dataSetGraph))
                 dataSetGraph.listGraphNodes().asScala.toList.map(dataSetGraph.getGraph(_))
             }
             case _ => {
-                val language = representation match {
-                    case RdfRepresentation.RdfXml => Lang.RDFXML
-                    case RdfRepresentation.Turtle => Lang.TURTLE
-                }
                 val graph = com.hp.hpl.jena.graph.Factory.createDefaultGraph()
-                RiotLoader.readTriples(dataInputStream, language, "", new SinkTriplesToGraph(graph))
+                RiotLoader.readTriples(dataInputStream, jenaLanguage, "", new SinkTriplesToGraph(graph))
                 List(graph)
             }
         }
-
         jenaGraphs.map(g => Graph(ModelFactory.createModelForGraph(g))).fold(Graph.empty)(_ + _)
     }
 
@@ -92,16 +92,16 @@ class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge])
     extends cz.payola.common.rdf.Graph(vertices, edges)
 {
     /**
-      * Creates a new graph with contents of this graph and the specified other graph.
-      * @param otherGraph The graph to be merged.
-      * @return A new Graph instance.
-      */
+     * Creates a new graph with contents of this graph and the specified other graph.
+     * @param otherGraph The graph to be merged.
+     * @return A new Graph instance.
+     */
     def +(otherGraph: Graph): Graph = {
         val mergedVertices = (vertices.toSet ++ otherGraph.vertices).toList
         val mergedEdges = (edges.toSet ++ otherGraph.edges).toList.map { e =>
-            // We have to make sure that all edges reference vertices from the mergedVertices collection. It's sure
-            // that vertices equal to origin and destination would be found in the mergedVertices, because edges in the
-            // original graphs surely had origin and destination present in the graph vertices.
+        // We have to make sure that all edges reference vertices from the mergedVertices collection. It's sure
+        // that vertices equal to origin and destination would be found in the mergedVertices, because edges in the
+        // original graphs surely had origin and destination present in the graph vertices.
             val origin = mergedVertices.find(_ == e.origin).get.asInstanceOf[IdentifiedVertex]
             val destination = mergedVertices.find(_ == e.destination).get
             new Edge(origin, destination, e.uri)
@@ -120,12 +120,10 @@ class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge])
         try {
             val execution = QueryExecutionFactory.create(sparqlQuery, model)
             try {
-                sparqlQuery.getQueryType() match {
+                sparqlQuery.getQueryType match {
                     case Query.QueryTypeSelect => processSelectQueryExecution(execution)
                     case Query.QueryTypeConstruct => processConstructQueryExecution(execution)
-                    case Query.QueryTypeAsk => throw new DomainException("An ASK query isn't supported.")
-                    case Query.QueryTypeDescribe => throw new DomainException("A DESCRIBE query isn't supported.")
-                    case _ => throw new DomainException("Unknown type of the query.")
+                    case _ => throw new DomainException("Unsupported query type.")
                 }
             } finally {
                 execution.close()

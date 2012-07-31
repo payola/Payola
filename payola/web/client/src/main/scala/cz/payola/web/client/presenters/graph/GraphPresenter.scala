@@ -6,14 +6,11 @@ import cz.payola.web.client.views.graph.PluginSwitchView
 import cz.payola.web.client.Presenter
 import cz.payola.web.client.views.VertexEventArgs
 import cz.payola.web.client.models.Model
-import cz.payola.web.client.views.entity.DataSourceSelector
+import cz.payola.web.client.views.entity.plugins.DataSourceSelector
 import s2js.adapters.js.browser.window
 import cz.payola.web.client.events._
-import cz.payola.web.client.presenters.entity._
-import cz.payola.web.shared.managers.OntologyCustomizationManager
 import cz.payola.common.entities.settings.OntologyCustomization
 import cz.payola.web.client.presenters.entity.settings._
-import scala.Some
 
 class GraphPresenter(val viewElement: dom.Element) extends Presenter
 {

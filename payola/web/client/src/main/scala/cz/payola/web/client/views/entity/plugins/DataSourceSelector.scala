@@ -1,4 +1,4 @@
-package cz.payola.web.client.views.entity
+package cz.payola.web.client.views.entity.plugins
 
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap._
@@ -9,13 +9,15 @@ class DataSourceSelector(title: String, dataSources: Seq[DataSource]) extends Mo
 {
     val dataSourceSelected = new SimpleUnitEvent[DataSource]
 
-    val dataSourceListItems = dataSources.map { d =>
-        val anchor = new Anchor(List(new Text(d.name)))
-        anchor.mouseClicked += { e =>
-            dataSourceSelected.triggerDirectly(d)
-            false
-        }
-        new ListItem(List(anchor))
+    val dataSourceListItems = dataSources.map {
+        d =>
+            val anchor = new Anchor(List(new Text(d.name)))
+            anchor.mouseClicked += {
+                e =>
+                    dataSourceSelected.triggerDirectly(d)
+                    false
+            }
+            new ListItem(List(anchor))
     }
 
     override val body = List(new UnorderedList(dataSourceListItems))

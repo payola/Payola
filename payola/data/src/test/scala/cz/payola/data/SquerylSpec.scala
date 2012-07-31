@@ -2,7 +2,7 @@ package cz.payola.data
 
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
-import cz.payola.domain.entities.plugins.concrete.data.SparqlEndpoint
+import cz.payola.domain.entities.plugins.concrete.data.SparqlEndpointFetcher
 import cz.payola.domain.entities.plugins.concrete.query._
 import cz.payola.domain.entities.plugins.concrete._
 import cz.payola.domain.entities.privileges._
@@ -32,7 +32,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
 
     // Plugins
     private val params = List(new StringParameter("EndpointURL", "http://ld.opendata.cz:1111", true))
-    val sparqlEndpointPlugin = new SparqlEndpoint("SPARQL Endpoint", 0, params, IDGenerator.newId)
+    val sparqlEndpointPlugin = new SparqlEndpointFetcher("SPARQL Endpoint", 0, params, IDGenerator.newId)
     val concreteSparqlQueryPlugin = new ConcreteSparqlQuery
     val projectionPlugin = new Projection
     val selectionPlugin = new Selection
