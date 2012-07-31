@@ -177,11 +177,14 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
 
     def createSubViews = layers
 
+    private var parent : Option[dom.Element] = None
+
     override def render(parent: dom.Element) {
         super.render(parent)
 
         setMouseWheelListener()
         fitCanvas()
+        this.parent = Some(parent)
     }
 
     override def updateGraph(graph: Option[Graph]) {
@@ -285,17 +288,21 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
                 }
                 graphView.get.selectVertex(vertex.get)
 
-                if(vertex.get.selected) {
-                    val infoTable = new VertexInfoTable(vertex.get.vertexModel, vertex.get.getLiteralVertices)
-                    infoTable.dataSourceButtonPressed += { a =>
-                        vertexBrowsing.trigger(new VertexEventArgs[this.type](this, vertex.get.vertexModel))
+                vertex.foreach{ v =>
+                    if(v.selected) {
+                        val infoTable = new VertexInfoTable(v.vertexModel, v.getLiteralVertices, v.position+Vector2D(v.settings.radius(v.rdfType),0))
+                        infoTable.dataSourceButtonPressed += { a =>
+                            vertexBrowsing.trigger(new VertexEventArgs[this.type](this, v.vertexModel))
+                        }
+
+
+                        infoTable.render(parent.getOrElse(document.body))
+
+                        destroyVertexInfo = Some(new SimpleUnitEvent[Boolean])
+                        destroyVertexInfo.get += { event => /*window.alert("destroy infotable");*/ infoTable.destroy() }
+
+                        vertexSelected.trigger(new VertexEventArgs[this.type](this, v.vertexModel))
                     }
-
-                    infoTable.render(document.body)
-                    destroyVertexInfo = Some(new SimpleUnitEvent[Boolean])
-                    destroyVertexInfo.get += { event => /*window.alert("destroy infotable");*/ infoTable.destroy() }
-
-                    vertexSelected.trigger(new VertexEventArgs[this.type](this, vertex.get.vertexModel))
                 }
 
 
@@ -357,31 +364,6 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
         }
         mouseDownPosition = end
     }
-
-    /**
-      * Is supposed to be called only when mouse is not being dragged (no mouse button is pressed during mouse movement)
-      */
-    /*private def onMouseMove(eventArgs: BrowserEventArgs[Canvas]) {
-        val position = getPosition(eventArgs)
-        val vertex = graphView.get.getTouchedVertex(position)
-
-        if(vertex.isDefined) {
-            if(hoveringOverVertex.isEmpty || (!hoveringOverVertex.get.eq(vertex.get))) {
-                if(hoveringOverVertex.isDefined && !hoveringOverVertex.get.eq(vertex.get)) {
-                    destroyVertexInfo.triggerDirectly(true)
-                }
-                hoveringOverVertex = vertex
-                val infoTable = new VertexInfoTable(hoveringOverVertex.get.getLiteralVertices)
-                infoTable.render(document.body)
-                destroyVertexInfo = new SimpleUnitEvent[Boolean]
-                destroyVertexInfo += { event => infoTable.destroy() }
-            }
-        } else if(hoveringOverVertex.isDefined) {
-            destroyVertexInfo.triggerDirectly(true)
-            hoveringOverVertex = None
-        }
-
-    }*/
 
     private def zoomIn(mousePosition: Point2D) {
         alterVertexPositions(1 + zoomControls.zoomStep, (- mousePosition.toVector) * zoomControls.zoomStep)

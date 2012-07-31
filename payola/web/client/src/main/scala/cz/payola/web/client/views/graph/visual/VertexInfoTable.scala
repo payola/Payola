@@ -8,8 +8,11 @@ import cz.payola.web.client.views.bootstrap.Icon
 import cz.payola.web.client.views._
 import cz.payola.common.rdf.IdentifiedVertex
 import cz.payola.web.client.events._
+import s2js.compiler.javascript
+import s2js.adapters.js.dom.Element
+import cz.payola.web.client.views.algebra.Point2D
 
-class VertexInfoTable(vertex: IdentifiedVertex, values: mutable.HashMap[String, Seq[String]]) extends ComposedView
+class VertexInfoTable(vertex: IdentifiedVertex, values: mutable.HashMap[String, Seq[String]], position: Point2D) extends ComposedView
 {
 
     var dataSourceButtonPressed = new SimpleUnitEvent[IdentifiedVertex]
@@ -37,6 +40,18 @@ class VertexInfoTable(vertex: IdentifiedVertex, values: mutable.HashMap[String, 
                 }))
                 even = !even
         }
-        List(new UnorderedList(buffer, "span5 unstyled well vitable"))
+
+        val div = new Div(List(new UnorderedList(buffer, "span5 unstyled well")))
+        div.setAttribute("rel","popover")
+        div.setAttribute("style","position: absolute; top: "+position.y.toString()+"px; left: "+position.x.toString()+"px;")
+        List(div)
+    }
+
+    @javascript("""jQuery(e).popover("show")""")
+    def activatePopover(e: Element){}
+
+    override def render(parent: Element){
+        super.render(parent)
+        activatePopover(subViews.head.blockDomElement)
     }
 }
