@@ -66,10 +66,47 @@ A logged-in user can create new data sources, analyses, plugins (you can actuall
 
 > TODO: the following chapters are in the order they should be written: the data sources are the easiest to create, groups need to be explained for sharing, private data storage is closely connected to data sources, then analyses and the most advanced topic (plugins) last 
 
+---
+
 ### Data Sources
+
+A data source is - as its name hints - a source of data. Payola needs to know where to get its data for evaluating analyses, etc. - data sources.
+
+##### Creating
+
+When creating a data source, you need to enter a data source name and description, decide whether it's public (then it's visible even to logged out users) and which data fetcher to use.
+
+A data fetcher is a plugin which can communicate with a data source of a specific type. A good example is a SPARQL Endpoint data fetcher. SPARQL is a query language for fetching data and such a data fetcher can work with any SPARQL endpoint.
+
+Select a data fetcher of your choice, fill in the data fetcher's parameters (for example, in SPARQL Endpoint data fetcher's case an `EndpointURL` parameter) and hit the `Create Data Source` button. You have just created your first data source.
+
+##### Editing
+
+Just like with the other entities (analyses, plugins, etc.) use the toolbar at the top of the page to list available data sources (click on the `My Datasources` button and select `View All`).
+
+You can view all available data sources. If you wish to edit it (e.g. change name or description), click on the Edit button next to its name. You'll be redirected to an edit page which contains a delete button as well. The sharing functionality will be described in the [Sharing section](#sharing).
+
+##### Viewing
+
+When on the Dashboard or listing all available data sources, click on a data source's name to view the data source.
+
+You'll be presented with a neighborhood of an initial vertex.
+
+Such a subgraph can be viewed in many ways. The default one, presented to you, is a simple table. You can change the visualization plugin using the `Change visualization plugin` button. `Circle`, `Gravity` and `Tree` visualizations will display a regular graph using vertices and edges. 
+
+###### TODO - describe what can be done with a graph
+
+The `Column Chart` visualization will display a column bar graph, but works only with graphs with a specific structure. The graph must have one identified vertex, whose edges are of a `rdf:type` URI with identified vertex destinations - this destination then must have exactly two edges, both directed to a literal vertex, one with a string value (name of the column), the second one with a numeric value.
+
+##### Ontology Customization
+---
 ### Groups
-### Sharing
+---
+### <a name="sharing"></a>Sharing
+---
 ### Private Data Storage
+---
 ### Analyses
+---
 ### Plugins
 
