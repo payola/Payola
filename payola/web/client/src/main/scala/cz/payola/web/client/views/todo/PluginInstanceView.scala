@@ -79,7 +79,6 @@ abstract class PluginInstanceView(
 
     override def destroy() {
         if (parentElement.isDefined) {
-            unbindJsPlumb(getPluginElement)
             predecessors.map {
                 p =>
                     parentElement.get.insertBefore(p.domElement, domElement)
@@ -87,12 +86,6 @@ abstract class PluginInstanceView(
             parentElement.get.removeChild(domElement)
         }
     }
-
-    @javascript( """
-                   var connections = jsPlumb.getConnections({target: element.getAttribute("id")});
-                   for (var k in connections){ jsPlumb.detach(connections[k]); }
-                 """)
-    def unbindJsPlumb(element: dom.Element) {}
 
     def domElement: dom.Element = {
         successors.domElement

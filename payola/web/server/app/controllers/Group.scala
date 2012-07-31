@@ -71,7 +71,7 @@ object Group extends PayolaController with Secured
                 Payola.model.groupModel.persist(g)
                 Redirect(routes.Profile.index(user.email)).flashing("success" -> "The group has been sucessfully saved.")
             } else {
-                Forbidden
+                NotFound("The group does not exist.")
             }
     }
 
