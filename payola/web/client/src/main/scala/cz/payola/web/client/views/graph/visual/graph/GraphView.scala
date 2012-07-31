@@ -6,7 +6,7 @@ import cz.payola.common.rdf._
 import cz.payola.web.client.views.graph.visual._
 import cz.payola.web.client.views.algebra._
 import cz.payola.common.entities.settings.OntologyCustomization
-import s2js.adapters.js.browser.window
+import cz.payola.common.entities.settings.OntologyCustomization
 
 /**
   * Graphical representation of a Graph object.
@@ -100,15 +100,17 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
             var currentComponentsVertices = ListBuffer[VertexView]()
             var currentComponentsEdges = ListBuffer[EdgeView]()
 
-            var plk = true
-            while (plk) {
+            var componentNumber = 0
+
+            var run = true
+            while (run) {
 
                 val neighbours = getNeighbours(currentVertex)
 
                 currentNeighbours ++= neighbours
 
                 currentNeighbours --= currentNeighbours -- remainingVertices
-                //^remove vertices from currNeighb that are not present in remVerts
+                //^remove vertices from currentNeighbours that are not present in remainingVertices
 
                 remainingVertices -= currentVertex
 
@@ -117,14 +119,15 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
                 currentComponentsEdges ++= currentVertex.edges -- currentComponentsEdges
 
                 if (currentNeighbours.isEmpty) {
-                    plk = false
+                    run = false
                 } else {
                     currentVertex = currentNeighbours.head
                     currentNeighbours -= currentVertex
                 }
             }
 
-            components += new Component(currentComponentsVertices, currentComponentsEdges)
+            components += new Component(currentComponentsVertices, currentComponentsEdges, componentNumber)
+            componentNumber += 1
         }
     }
 

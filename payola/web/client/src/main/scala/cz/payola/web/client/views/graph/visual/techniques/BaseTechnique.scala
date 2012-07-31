@@ -23,7 +23,6 @@ abstract class BaseTechnique(settings: VisualSetup, name: String) extends Visual
     private def performPositioning(graphView: GraphView) {
 
         var firstAnimation: Option[Animation[ListBuffer[(VertexView, Point2D)]]] = None
-        var componentNumber = 1
 
         var previousComponent: Option[Component] = None
 
@@ -35,8 +34,7 @@ abstract class BaseTechnique(settings: VisualSetup, name: String) extends Visual
                 firstAnimation.get.addFollowingAnimation(getTechniquePerformer(component, true))
             }
 
-            val componentPositionDesc = new ComponentPositionHelper(
-                componentNumber, graphView.components.length, previousComponent)
+            val componentPositionDesc = new ComponentPositionHelper(graphView.components.length, previousComponent)
 
             firstAnimation.get.addFollowingAnimation(new Animation(
                 Animation.flipGraph, ((new GraphCenterHelper(graphView.getGraphCenter), component.vertexViews)), None,
@@ -49,7 +47,6 @@ abstract class BaseTechnique(settings: VisualSetup, name: String) extends Visual
                     None))
             }
 
-            componentNumber += 1
             previousComponent = Some(component)
         }
         if(firstAnimation.isDefined) {

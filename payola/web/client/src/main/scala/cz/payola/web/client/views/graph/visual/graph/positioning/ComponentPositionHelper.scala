@@ -2,31 +2,34 @@ package cz.payola.web.client.views.graph.visual.graph.positioning
 
 import cz.payola.web.client.views.graph.visual.graph.Component
 import cz.payola.web.client.views.algebra._
-import cz.payola.web.client.views.bootstrap.modals.AlertModal
 
 /**
-  * // TODO why from 1?
-  * IMPORTANT, the first component must have number 1 (not 0)!!!!!
-  * @param componentNumber COUNT FROM 1!!!!! not form 0
-  */
-class ComponentPositionHelper(val componentNumber: Int, val componentsCount: Int, val prevComp: Option[Component])
+ * Helper for getting vector correcting the position of a component in the context of other components in a whole graph.
+ * Is used during components placement of the graph by move graph by function animation function.
+ * @param componentsCount count of components of the whole graph
+ * @param previousComponent component that was drawn previously
+ */
+class ComponentPositionHelper(val componentsCount: Int, val previousComponent: Option[Component])
     extends PositionHelper
 {
     def getPositionCorrection(): Vector2D = {
         val componentSpacing = 50.0
-
-        if (componentNumber == 0 || componentsCount < 0) {
-            // TODO get rid of this. Write it in a way, that this can't happen.
-            AlertModal.display("Error in component position helper", "")
+        val componentNumber = if(previousComponent.get.componentNumber >= 0) {
+            previousComponent.get.componentNumber + 1
+            //^it is expected, that components are numbered from 0
+        } else {
+            1
+            //in case the component number is wrong, this wont cause the calculation to crash
         }
 
-        val bottomRight = if (prevComp.isDefined) {
-            prevComp.get.getBottomRight()
+
+        val bottomRight = if (previousComponent.isDefined) {
+            previousComponent.get.getBottomRight()
         } else {
             Point2D(0, 0)
         }
-        val topRight = if (prevComp.isDefined) {
-            prevComp.get.getTopRight()
+        val topRight = if (previousComponent.isDefined) {
+            previousComponent.get.getTopRight()
         } else {
             Point2D(0, 0)
         }
@@ -41,8 +44,8 @@ class ComponentPositionHelper(val componentNumber: Int, val componentsCount: Int
             }
 
         //lets enjoy some little math :-)
-        val numberOfCurrentLine = math.ceil(componentNumber / componentsInRowCount)
-        val positionInRow = componentNumber - ((numberOfCurrentLine - 1) * componentsInRowCount)
+        val numberOfCurrentLine = math.ceil((componentNumber)/ componentsInRowCount)
+        val positionInRow = (componentNumber) - ((numberOfCurrentLine - 1) * componentsInRowCount)
 
         if (positionInRow == 1) {
             //next row

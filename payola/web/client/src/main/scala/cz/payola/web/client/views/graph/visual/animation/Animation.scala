@@ -60,7 +60,7 @@ object Animation
     /**
      * Animation function for performing post animation functions. This animation does not animate anything, it just
      * performs the first and second functions. This allows to perform a post animation functions
-     * @param wontBeUsed1
+     * @param param1: this parameter will not be used
      * @param nextAnimation following animation to perform
      * @param firstFuncToRun function that will be performed first
      * @param secondFuncToRun function that will be performed second
@@ -68,7 +68,7 @@ object Animation
      *                            if it is set to 0: animation is skipped
      *                            otherwise the animation is performed normally
      */
-    def emptyAnimation(wontBeUsed1: Any, nextAnimation: Option[Animation[_]],
+    def emptyAnimation(param1: Any, nextAnimation: Option[Animation[_]],
         firstFuncToRun: () => Unit, secondFuncToRun: () => Unit, animationStepLength: Option[Int]) {
         firstFuncToRun()
         secondFuncToRun()
