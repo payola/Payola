@@ -37,6 +37,6 @@ class VertexInfoTable(vertex: IdentifiedVertex, values: mutable.HashMap[String, 
                 }))
                 even = !even
         }
-        List(new UnorderedList(buffer, "span5 unstyled well"))
+        List(new UnorderedList(buffer, "span5 unstyled well vitable"))
     }
 }
