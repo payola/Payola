@@ -84,12 +84,14 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
     }
 
     mouseDragged += { e =>
+        triggerDestroyVertexInfo()
         mouseIsDragging = true
         onMouseDrag(e)
         false
     }
 
-    /*topLayer.mouseDoubleClicked += { event =>
+    topLayer.mouseDoubleClicked += { event =>
+        triggerDestroyVertexInfo()
         graphView.foreach { g =>
             val vertex = g.getTouchedVertex(getPosition(event))
             vertex.foreach { v =>
@@ -98,9 +100,10 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
             }
         }
         false
-    }*/
+    }
 
     topLayer.mouseWheelRotated += { event => //zoom - invoked by mouse
+        triggerDestroyVertexInfo()
         val mousePosition = getPosition(event)
         val scrolled = event.wheelDelta
 
@@ -120,6 +123,7 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
 
     zoomControls.zoomDecreased += { e =>
         if (graphView.isDefined && zoomControls.canZoomOut) {
+            triggerDestroyVertexInfo()
             zoomOut(graphView.get.getGraphCenter) //zooming from the center of the graph
             zoomControls.decreaseZoomInfo()
         }
@@ -128,6 +132,7 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
 
     zoomControls.zoomIncreased += { event => //zoom - invoked by zoom control button
         if (graphView.isDefined && zoomControls.canZoomIn) {
+            triggerDestroyVertexInfo()
             zoomIn(graphView.get.getGraphCenter) //zooming to the center of the graph
             zoomControls.increaseZoomInfo()
         }
@@ -162,6 +167,13 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
     private def setMouseWheelListener() {}
 
     private var destroyVertexInfo: Option[SimpleUnitEvent[Boolean]] = None
+
+    private def triggerDestroyVertexInfo() {
+        if(destroyVertexInfo.isDefined) {
+            destroyVertexInfo.get.triggerDirectly(true)
+            destroyVertexInfo = None
+        }
+    }
 
     override def updateOntologyCustomization(newCustomization: Option[OntologyCustomization]) {
         currentCustomization = newCustomization
@@ -270,17 +282,11 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
                 //change selection of the pressed one
                 graphView.get.invertVertexSelection(vertex.get)
 
-                if(destroyVertexInfo.isDefined) {
-                    destroyVertexInfo.get.triggerDirectly(true)
-                    destroyVertexInfo = None
-                }
+                triggerDestroyVertexInfo()
 
                 redrawSelection()
             } else {
-                if(destroyVertexInfo.isDefined) {
-                    destroyVertexInfo.get.triggerDirectly(true)
-                    destroyVertexInfo = None
-                }
+                triggerDestroyVertexInfo()
 
                 //deselect all and select the pressed one
                 if (!vertex.get.selected) {
@@ -291,15 +297,20 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
                 vertex.foreach{ v =>
                     if(v.selected) {
                         val infoTable = new VertexInfoTable(v.vertexModel, v.getLiteralVertices, v.position+Vector2D(v.settings.radius(v.rdfType),0))
-                        infoTable.dataSourceButtonPressed += { a =>
-                            vertexBrowsing.trigger(new VertexEventArgs[this.type](this, v.vertexModel))
+                        infoTable.vertexBrowsing += { a =>
+                            triggerDestroyVertexInfo()
+                            vertexBrowsing.trigger(new VertexEventArgs[this.type](this, vertex.get.vertexModel))
+                        }
+                        infoTable.vertexBrowsingDataSource += { a =>
+                            triggerDestroyVertexInfo()
+                            vertexBrowsingDataSource.trigger(new VertexEventArgs[this.type](this, vertex.get.vertexModel))
                         }
 
 
                         infoTable.render(parent.getOrElse(document.body))
 
                         destroyVertexInfo = Some(new SimpleUnitEvent[Boolean])
-                        destroyVertexInfo.get += { event => /*window.alert("destroy infotable");*/ infoTable.destroy() }
+                        destroyVertexInfo.get += { event => infoTable.destroy() }
 
                         vertexSelected.trigger(new VertexEventArgs[this.type](this, v.vertexModel))
                     }
@@ -311,10 +322,7 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
             mousePressedVertex = true
         } else {
             mousePressedVertex = false
-            if(destroyVertexInfo.isDefined) {
-                destroyVertexInfo.get.triggerDirectly(true)
-                destroyVertexInfo = None
-            }
+            triggerDestroyVertexInfo()
         }
     }
 
