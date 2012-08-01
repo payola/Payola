@@ -3,7 +3,7 @@ package cz.payola.domain.test
 import org.scalatest.FlatSpec
 
 import org.scalatest.matchers.ShouldMatchers
-import cz.payola.domain.entities.plugins.concrete.data.SparqlEndpoint
+import cz.payola.domain.entities.plugins.concrete.data.SparqlEndpointFetcher
 import cz.payola.domain.entities.plugins.concrete.query._
 import cz.payola.domain.entities.analyses.evaluation.Success
 import cz.payola.domain.entities.Analysis
@@ -11,7 +11,7 @@ import cz.payola.domain.entities.Analysis
 class AnalysisEvaluationSpec extends FlatSpec with ShouldMatchers
 {
     "Analysis evaluation" should "work" in {
-        val sparqlEndpointPlugin = new SparqlEndpoint
+        val sparqlEndpointPlugin = new SparqlEndpointFetcher
         val projectionPlugin = new Projection
         val selectionPlugin = new Selection
         val typedPlugin = new Typed

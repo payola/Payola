@@ -26,11 +26,12 @@ class VirtuosoStorage(
     // Register the driver in the driver manager.
     Class.forName("virtuoso.jdbc3.Driver")
 
-    /**
-      * URL of the Virtuoso SPARQL endpoint.
-      */
-    val endpointURL = "%s://%s:%s/sparql".format(if (endpointUsesSSL) "https" else "http", server, endpointPort)
-
+    /** The private storage SPARQL endpoint. */
+    val sparqlEndpoint = new SparqlEndpoint("%s://%s:%s/sparql".format(
+        if (endpointUsesSSL) "https" else "http",
+        server,
+        endpointPort
+    ))
 
     def createGroup(groupURI: String) {
         executeSQL("DB.DBA.RDF_GRAPH_GROUP_CREATE('%s', 1)".format(escapeString(groupURI)))
@@ -57,9 +58,7 @@ class VirtuosoStorage(
     }
 
     def executeSPARQLQuery(query: String): Graph = {
-        val url = endpointURL + "?query=" + java.net.URLEncoder.encode(query, "UTF-8")
-        val rdfXml = new Downloader(url, "application/rdf+xml").result
-        Graph(RdfRepresentation.RdfXml, rdfXml)
+        sparqlEndpoint.executeQuery(query)
     }
 
     /**

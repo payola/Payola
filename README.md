@@ -7,6 +7,8 @@ Payola requires a [Scala](http://www.scala-lang.org) environment, which is suppo
 
 Aside from the actual Payola server, you need to be capable of running any [Squeryl-compatible](http://squeryl.org) relational database for storing user data and a [Virtuoso](http://virtuoso.openlinksw.com) server for storing personal RDF data. Neither of those need to necessarily be running on the same system as Payola itself (this is configurable in the `payola.conf` file as described later on).
 
+To work with Payola, you'll need a web browser which is capable of displaying HTML5 web pages. Payola quite heavily uses HTML5 features - keep your web browser up-to-date all the time. Recommended are the latest versions of WebKit-based browsers (e.g. Chrome, Safari), Firefox, Opera, or IE.
+
 ## Installation Guide
 
 You need to have a working Scala environment to install Payola with [SBT (Scala Build Tool)](https://github.com/harrah/xsbt/wiki/) installed. Clone Payola git repository: `git://github.com/siroky/Payola.git` to a local folder.
@@ -82,7 +84,7 @@ Select a data fetcher of your choice, fill in the data fetcher's parameters (for
 
 ##### Editing
 
-Just like with the other entities (analyses, plugins, etc.) use the toolbar at the top of the page to list available data sources (click on the `My Datasources` button and select `View All`).
+Just like with the other entities (analyses, plugins, etc.) use the toolbar at the top of the page to list available data sources (click on the `My Data Sources` button and select `View All`).
 
 You can view all available data sources. If you wish to edit it (e.g. change name or description), click on the Edit button next to its name. You'll be redirected to an edit page which contains a delete button as well. The sharing functionality will be described in the [Sharing section](#sharing).
 
@@ -101,10 +103,38 @@ The `Column Chart` visualization will display a column bar graph, but works only
 ##### Ontology Customization
 ---
 ### Groups
+
+You can create user groups to make sharing easier (as described in the next chapter). Imagine you want to share a resource (e.g. an analysis) with a group of co-workers. One approach would be to share it with each one of them, but this can be tedious considering you might want to share something with them every week or every day. Hence there's a possibility to create user groups - in the top toolbar, click on the `User Groups` button and select `Create New`.
+
+Enter the group name (e.g. 'My co-workers') and hit the `Create Group` button. After the group has been created, you can start adding members to the group. To do so, make the `Members` field active and start typing - the suggestion box will offer you users with a matching name. Click on the user to add him or her. If you decide to remove a user, click on the `x` button in front of his or her name. Remember to use the `Save Group` button before leaving the edit page, or all changes made will be lost.
+
+To delete a group, use the `Delete` button at the top-right corner of the page.
+
+
+` TODO - enable ![Editing a Group](https://github.com/siroky/Payola/raw/develop/docs/img/group_edit.png)`
+
 ---
 ### <a name="sharing"></a>Sharing
+
+Now that you know how to create a group, let's share a data source. In the toolbar, click on the `My Data Sources` button and select `View All`. This lists all your data sources. You can use the `Edit` button to edit the data source, the `Public` button to toggle whether the data source is private (then only you and people you share it to can use it), or public - anyone can use it, even people who are not logged in.
+
+Then there's the `Share` button. When you click on it, a menu pops up, allowing you to share the data source either to users or groups. When you select the `To Users` menu item, a new modal shows with a text field which will suggest users as you type just like when you were adding members to a group. 
+
+The other option is to share the data source to groups - again a modal will appear, letting you select multiple groups using the suggestion box. Add groups you want and hit the `Share` button. All users within the selected groups will be now able to use this data source.
+
+If you no longer want to share a resource with a group or a user, follow the same steps as if you wanted to share it with someone - the modal which appears will contain the users or groups whom you've shared the resource to previously. Press the `Share` button. The list of users and groups allowed to access the resource will be updated accordingly.
+
 ---
 ### Private Data Storage
+
+While listing data sources, you might have noticed a data source called `Private Storage of ...` - when you sign up, a new private data storage is created in your Virtuoso instance. You can add your own data to this storage. Of course, you can share this data storage as well.
+
+##### Adding data to data storage
+
+To add data to your private data storage, use toolabar's `Private RDF Storage` button and select `Upload Data`.
+
+Here you are presented with two options: to upload a RDF/XML or TTL file, or load the RDF/XML from a URL. Retrieving a TTL file from a URL isn't currently supported.
+
 ---
 ### Analyses
 ---

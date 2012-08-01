@@ -15,17 +15,25 @@ import cz.payola.web.client.views.algebra.Point2D
 class VertexInfoTable(vertex: IdentifiedVertex, values: mutable.HashMap[String, Seq[String]], position: Point2D) extends ComposedView
 {
 
-    var dataSourceButtonPressed = new SimpleUnitEvent[IdentifiedVertex]
+
+    var vertexBrowsingDataSource = new SimpleUnitEvent[IdentifiedVertex]
+    var vertexBrowsing = new SimpleUnitEvent[IdentifiedVertex]
 
     def createSubViews: Seq[View] = {
         val buffer = new ArrayBuffer[ListItem]()
 
-        val browsingButton = new Anchor(List(new Icon(Icon.hdd)))
-        browsingButton.mouseClicked += { e =>
-            dataSourceButtonPressed.triggerDirectly(vertex)
+        val dataSourceAnchor = new Anchor(List(new Icon(Icon.hdd)))
+        dataSourceAnchor.mouseClicked += { e =>
+            vertexBrowsingDataSource.triggerDirectly(vertex)
             false
         }
-        buffer += new ListItem(List(browsingButton))
+        val browsingAnchor = new Anchor(List(new Text(vertex.uri)))
+        browsingAnchor.mouseClicked += { e =>
+            vertexBrowsing.triggerDirectly(vertex)
+            false
+        }
+
+        buffer += new ListItem(List(dataSourceAnchor, new Span(List(new Text(" "))), browsingAnchor))
 
         var even = true
         values.foreach {

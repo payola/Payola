@@ -19,8 +19,7 @@ sealed class OpenDataCleanStorage(name: String, inputCount: Int, parameters: imm
 
     def executeQuery(instance: PluginInstance, query: String): Graph = {
         usingDefined(instance.getStringParameter("Server")) { server =>
-            val queryUrl = server + "/sparql?query=" + URLEncoder.encode(query, "UTF-8")
-            Graph(RdfRepresentation.RdfXml, new Downloader(queryUrl, accept = "application/rdf+xml").result)
+            new SparqlEndpoint(server + "/sparql").executeQuery(query)
         }
     }
 
