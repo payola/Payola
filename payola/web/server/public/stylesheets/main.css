@@ -124,9 +124,9 @@ input[type="checkbox"].active:after {
     min-width: 300px;
 }
 
-.successors .parameters{
+.successors .parameters {
     width: 250px;
-    overflow-x: scroll;
+    overflow-x: auto;
 }
 
 .successors+.successors {
@@ -222,7 +222,7 @@ input[type="checkbox"].active:after {
     display: none !important;
 }
 
-.hidden-element{
+.hidden-element {
     visibility: hidden;
 }
 
@@ -230,11 +230,11 @@ input[type="checkbox"].active:after {
     padding-bottom: 27px !important;
 }
 
-.popover-content p{
+.popover-content p {
     max-height: 200px;
 }
 
-.connector{
+.connector {
     border: 2px solid #3A87AD;
     height: 90%;
     position: absolute;
@@ -242,13 +242,15 @@ input[type="checkbox"].active:after {
     z-index: -1;
 }
 
-.plumb{
+.plumb {
     position: absolute;
     top: -4px;
     border: 4px solid #3A87AD;
 }
 
-.successors, .successors .alert{ position: relative !important; }
+.successors, .successors .alert {
+    position: relative !important;
+}
 
 .column-chart-wrapper {
     overflow: auto;
@@ -257,8 +259,9 @@ input[type="checkbox"].active:after {
     min-height: 250px;
 }
 
-.vitable{
+.vitable {
+    display: block !important;
+    max-height: 300px;
     position: absolute;
-    left: 0px;
-    top: 80px;
+    width: 400px;
 }
