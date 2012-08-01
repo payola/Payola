@@ -43,8 +43,8 @@
                 buff += {shareLinkForID(e.id, dataSource.name, dataSource.isPublic)}
                 buff
             }else{
-                val buff = new scala.xml.NodeBuffer() += shareLinkForID(e.id, dataSource.name, dataSource.isPublic)
-                buff += <span class="badge">Not editable</span>
+                val buff = new scala.xml.NodeBuffer() += <span class="badge">Not editable</span>
+                buff += shareLinkForID(e.id, dataSource.name, dataSource.isPublic)
                 buff
             }
         }</td>
