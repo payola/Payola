@@ -108,7 +108,7 @@ Enter the group name (e.g. 'My co-workers') and hit the `Create Group` button. A
 
 To delete a group, use the `Delete` button at the top-right corner of the page.
 
-![Editing a Group](https://github.com/siroky/Payola/raw/develop/docs/img/group_edit.png)
+>![Editing a Group](https://github.com/siroky/Payola/raw/develop/docs/img/group_edit.png)
 
 ---
 ### <a name="sharing"></a>Sharing
