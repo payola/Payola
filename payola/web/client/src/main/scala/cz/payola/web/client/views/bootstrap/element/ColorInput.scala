@@ -9,38 +9,36 @@ import cz.payola.web.client.views.bootstrap.{EditableInput, Icon}
 
 // Use the getter + setter for the color
 class ColorInput(name: String, label: String, private var colorOption: Option[Color], cssClass: String = "")
-    extends Input(name, colorOption.map(_.toString).getOrElse("").toString, Some("No color selected"), "color")
+    extends Input(name, colorOption.map(_.toString).getOrElse("").toString, Some("No color selected"), cssClass)
     with EditableInput
 {
-    val closed = new SimpleUnitEvent[ColorInput]
+    val colorInput = new Input(name, colorOption.map(_.toString).getOrElse("").toString, Some(NO_COLOR_TEXT))
 
-    val cleared = new SimpleUnitEvent[ColorInput]
+    private val colorWell = new Italic(List())
 
-    val colorInput = new Input(name, colorOption.map(_.toString).getOrElse("").toString, Some("No color selected"))
+    //colorWell.setAttribute("style", "background-color: " + getColorRgbaString("rgba(0, 0, 0, 1)") )
 
-    val colorWell = new Italic(List())
+    private val colorWellSpan = new Span(List(colorWell), "add-on")
 
-    colorWell.setAttribute("style", "background-color: " + getColorString("rgba(0, 0, 0, 1)") )
+    private val clearIcon = new Icon(Icon.remove)
 
-    val colorWellSpan = new Span(List(colorWell), "btn")
+    private val clearColorSpan = new Span(List(clearIcon), "btn")
 
-    val clearIcon = new Icon(Icon.remove)
+    private val labelElement = new Label(label, colorInput)
 
-    val clearColorSpan = new Span(List(clearIcon), "btn")
+    private val div = new Div(List(colorInput, colorWellSpan, clearColorSpan), "input-append color")
 
-    clearColorSpan.mouseClicked += {
-        e =>
-            setColor(None)
-            cleared.trigger(new EventArgs[ColorInput](this))
-            true
-    }
+    private val NO_COLOR_TEXT = "No color selected"
+    private val NO_COLOR_RGBA_VALUE = "rgba(0, 0, 0, 1)"
 
-    val labelElement = new Label(label, colorInput)
-
-    val div = new Div(List(colorInput, colorWellSpan, clearColorSpan), "input-append")
-
-    colorInput.setAttribute("data-color",  getColorString("rgba(0, 0, 0, 1)"))
+    colorInput.setAttribute("data-color",  getColorRgbaString(NO_COLOR_RGBA_VALUE))
     colorInput.setAttribute("data-color-format", "rgba")
+
+    clearColorSpan.mouseClicked += { e =>
+        setColor(None)
+        //cleared.trigger(new EventArgs[ColorInput](this))
+        true
+    }
 
     override def render(parent: dom.Element) {
         labelElement.render(parent)
@@ -51,26 +49,6 @@ class ColorInput(name: String, label: String, private var colorOption: Option[Co
 
     def getColor: Option[Color] = {
         colorOption
-    }
-
-    def getColorHexString = {
-        colorOption.map(_.toHexString).getOrElse("")
-    }
-
-    private def getColorString(defaultValue: String) = {
-        colorOption.map(_.toString).getOrElse(defaultValue).toString
-    }
-
-    def setColor(value: Option[Color]) {
-        colorOption = value
-
-        colorInput.value = getColorString("No color selected")
-
-        changed.trigger(new EventArgs[ColorInput.this.type](this))
-    }
-
-    def triggerHideEvent() {
-        closed.trigger(new EventArgs[ColorInput.this.type](this))
     }
 
     override def value = {
@@ -94,7 +72,23 @@ class ColorInput(name: String, label: String, private var colorOption: Option[Co
         var color = new cz.payola.web.client.views.graph.visual.Color(rgba.r, rgba.g, rgba.b, rgba.a);
         self.setColor(new scala.Some(color));
     });
-        cp.on('hide', function(evt) { self.triggerHideEvent(); });
                  """)
     private def init = Nil
+
+    private def getColorHexString = {
+        colorOption.map(_.toHexString).getOrElse("")
+    }
+
+    private def getColorRgbaString(defaultValue: String) = {
+        colorOption.map(_.toString).getOrElse(defaultValue).toString
+    }
+
+    private def setColor(color: Option[Color]) {
+        colorOption = color
+
+        colorInput.value = getColorRgbaString(NO_COLOR_TEXT)
+        colorWell.setAttribute("style", "background-color: " + getColorRgbaString(NO_COLOR_RGBA_VALUE))
+
+        changed.triggerDirectly(this)
+    }
 }

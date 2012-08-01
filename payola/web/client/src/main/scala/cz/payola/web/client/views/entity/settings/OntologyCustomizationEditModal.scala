@@ -89,10 +89,9 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
         val onFillColorChanged = {
             e: EventArgs[ColorInput] =>
                 classFillColorChanged.trigger(new ClassCustomizationEventArgs(fillColor, classCustomization,
-                    fillColor.input.getColorHexString))
+                    fillColor.input.value))
         }
-        fillColor.input.closed += onFillColorChanged
-        fillColor.input.cleared += onFillColorChanged
+        fillColor.input.changed += onFillColorChanged
         radius.delayedChanged += {
             e =>
                 classRadiusDelayedChanged.trigger(new ClassCustomizationEventArgs(radius, classCustomization,
@@ -119,10 +118,9 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
         val onStrokeColorChanged = {
             e: EventArgs[ColorInput] =>
                 propertyStrokeColorChanged.trigger(new PropertyCustomizationEventArgs(strokeColor, classCustomization,
-                    propertyCustomization, strokeColor.input.getColorHexString))
+                    propertyCustomization, strokeColor.input.value))
         }
-        strokeColor.input.closed += onStrokeColorChanged
-        strokeColor.input.cleared += onStrokeColorChanged
+        strokeColor.input.changed += onStrokeColorChanged
         strokeWidth.delayedChanged += {
             e =>
                 propertyStrokeWidthDelayedChanged.trigger(new PropertyCustomizationEventArgs(strokeWidth,
