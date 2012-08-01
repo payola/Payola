@@ -5,9 +5,10 @@ import cz.payola.web.shared._
 import cz.payola.common.entities._
 import cz.payola.web.client._
 import cz.payola.web.client.views.entity._
-import cz.payola.web.client.events.EventArgs
+import cz.payola.web.client.events._
 import cz.payola.common.Entity
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
+import scala.Some
 
 class ShareButtonPresenter(
     val viewElement: dom.Element,
@@ -18,6 +19,8 @@ class ShareButtonPresenter(
     val viewToBlock: Option[View] = None)
     extends Presenter
 {
+    val publicityChanged = new SimpleUnitEvent[Boolean]
+
     private val view = new ShareButton(entityIsPublic)
 
     def initialize() {
@@ -31,9 +34,11 @@ class ShareButtonPresenter(
 
     private def onMakePublicButtonClicked(e: EventArgs[_]): Boolean = {
         view.setIsEnabled(false)
-        SharingData.setEntityPublicity(entityClassName, entityId, !view.isPublic) { () =>
-            view.isPublic = !view.isPublic
+        val newPublicity = !view.isPublic
+        SharingData.setEntityPublicity(entityClassName, entityId, newPublicity) { () =>
+            view.isPublic = newPublicity
             view.setIsEnabled(true)
+            publicityChanged.triggerDirectly(newPublicity)
         }(fatalErrorHandler(_))
         false
     }
