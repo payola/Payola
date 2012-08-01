@@ -22,7 +22,7 @@ class DataSourceBrowser(
 
     private val graphPresenter = new GraphPresenter(view.graphViewSpace.domElement)
 
-    private val history = mutable.ListBuffer.empty[String]
+    private var history = mutable.ListBuffer.empty[String]
 
     private var historyPosition = -1
 
@@ -86,6 +86,11 @@ class DataSourceBrowser(
             DataSourceManager.executeSparqlQuery(dataSourceId, modal.sparqlQueryInput.value) { g =>
                 modal.unblock()
                 modal.destroy()
+
+                history = mutable.ListBuffer.empty[String]
+                historyPosition = -1
+                updateNavigationView()
+
                 graphPresenter.view.updateGraph(g)
             } { e =>
                 modal.unblock()
@@ -139,6 +144,9 @@ class DataSourceBrowser(
     private def updateNavigationView() {
         view.backButton.setIsEnabled(canGoBack)
         view.nextButton.setIsEnabled(canGoNext)
+        if (historyPosition < 0) {
+            view.nodeUriInput.value = ""
+        }
     }
 
     private def canGoBack = history.nonEmpty && historyPosition > 0

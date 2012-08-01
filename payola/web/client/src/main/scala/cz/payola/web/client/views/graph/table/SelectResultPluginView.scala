@@ -3,15 +3,46 @@ package cz.payola.web.client.views.graph.table
 import scala.collection._
 import s2js.adapters.js.dom.Element
 import cz.payola.common.rdf._
-import cz.payola.web.client.views.elements.Text
+import cz.payola.web.client.views.elements._
+import s2js.adapters.js.dom
+import cz.payola.web.client.views.bootstrap.Icon
 
 class SelectResultPluginView extends TablePluginView("Select Result Table")
 {
+    private var variables = mutable.ListBuffer.empty[String]
+
+    private var solutions = mutable.HashMap.empty[String, mutable.ListBuffer[Binding]]
+
+    private var bindings = mutable.HashMap.empty[String, Binding]
+
+    private val csvDownloadButton = new Button(new Text("Export to CSV"), "pull-right", new Icon(Icon.list_alt))
+
+    csvDownloadButton.mouseClicked += { e =>
+        var csv = ""
+
+        if (variables.nonEmpty) {
+            variables.foreach(csv += _ + ",")
+            csv = csv.substring(0, csv.length - 1) + "\n"
+
+            solutions.foreach { s =>
+                variables.foreach { variable =>
+                    csv += s._2.find(_.variable == variable).map(_.value.toString).getOrElse("") + ","
+                }
+                csv = csv.substring(0, csv.length - 1) + "\n"
+            }
+        }
+
+
+        val modal = new CsvExportModal(csv)
+        modal.render()
+        false
+    }
+
     def fillTable(graph: Option[Graph], tableHead: Element, tableBody: Element) {
         graph.foreach { g =>
-            val variables = mutable.ListBuffer.empty[String]
-            val solutions = mutable.HashMap.empty[String, mutable.ListBuffer[Binding]]
-            val bindings = mutable.HashMap.empty[String, Binding]
+            variables = mutable.ListBuffer.empty[String]
+            solutions = mutable.HashMap.empty[String, mutable.ListBuffer[Binding]]
+            bindings = mutable.HashMap.empty[String, Binding]
 
             // Retrieve the bindings.
             g.edges.foreach { e =>
@@ -59,6 +90,14 @@ class SelectResultPluginView extends TablePluginView("Select Result Table")
                 }
             }
         }
+    }
+
+    override def renderControls(toolbar: dom.Element) {
+        csvDownloadButton.render(toolbar)
+    }
+
+    override def destroyControls() {
+        csvDownloadButton.destroy()
     }
 }
 
