@@ -14,8 +14,8 @@ import cz.payola.common.ValidationException
 @remote
 @secured object AnalysisRunner
 {
-    val runningEvaluations: HashMap[String, (Option[User], AnalysisEvaluation)] = new
-            HashMap[String, (Option[User], AnalysisEvaluation)]
+    val runningEvaluations: HashMap[String, (Option[User], AnalysisEvaluation, Long)] = new
+            HashMap[String, (Option[User], AnalysisEvaluation, Long)]
 
     @async def runAnalysisById(id: String, timeoutSeconds: Long, user: Option[User] = None)
         (successCallback: (String => Unit))
@@ -26,12 +26,20 @@ import cz.payola.common.ValidationException
 
         val evaluationId = IDGenerator.newId
         val timeout = scala.math.min(1800, timeoutSeconds)
-        runningEvaluations.put(evaluationId, (user, analysis.evaluate(Some(timeout*1000))))
+        runningEvaluations.put(evaluationId, (user, analysis.evaluate(Some(timeout*1000)), (new java.util.Date).getTime))
 
         successCallback(evaluationId)
     }
 
     private def getEvaluationTupleForID(id: String) = {
+
+        val date = new java.util.Date
+        runningEvaluations.foreach{ tuple =>
+            if (tuple._2._3+(20*60*1000) < date.getTime){
+                runningEvaluations.remove(tuple._1)
+            }
+        }
+
         runningEvaluations.get(id).getOrElse {
             throw new ModelException("The evaluation is not running.")
         }
@@ -47,7 +55,7 @@ import cz.payola.common.ValidationException
     }
 
     @async def downloadAnalysisResultAsXML(evaluationId: String, user: Option[User] = None)
-        (successCallback: (() => Unit))(failCallback: (Throwable => Unit)) = {
+        (successCallback: (() => Unit))(failCallback: (Throwable => Unit)) {
         val evaluationTuple = getEvaluationTupleForIDAndPerformSecurityChecks(evaluationId, user)
 
         val evaluation = evaluationTuple._2
@@ -59,8 +67,10 @@ import cz.payola.common.ValidationException
     }
 
     @async def getEvaluationState(evaluationId: String, user: Option[User] = None)
-        (successCallback: (EvaluationState => Unit))(failCallback: (Throwable => Unit)) = {
+        (successCallback: (EvaluationState => Unit))(failCallback: (Throwable => Unit)) {
         val evaluationTuple = getEvaluationTupleForIDAndPerformSecurityChecks(evaluationId, user)
+
+        runningEvaluations.put(evaluationId, (evaluationTuple._1, evaluationTuple._2, (new java.util.Date).getTime))
 
         val evaluation = evaluationTuple._2
 
@@ -69,7 +79,6 @@ import cz.payola.common.ValidationException
             case r: Success => EvaluationSuccess(r.outputGraph, r.instanceErrors.toList.map{e => (e._1,transformException(e._2))})
             case Timeout => new EvaluationTimeout
             case _ => throw new Exception("Unhandled evaluation state")
-            //TODO timeout remove after some time
         }.getOrElse {
             val progress = evaluation.getProgress
             EvaluationInProgress(progress.value, progress.evaluatedInstances, progress.runningInstances.toList,
