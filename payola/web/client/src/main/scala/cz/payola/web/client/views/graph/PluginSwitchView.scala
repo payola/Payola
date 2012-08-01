@@ -4,18 +4,16 @@ import cz.payola.common.rdf._
 import cz.payola.web.client.views._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap._
-import cz.payola.web.client.views.graph.textual.TripleTablePluginView
+import cz.payola.web.client.views.graph.table._
 import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.views.graph.visual.settings._
+import cz.payola.web.client.views.graph.visual.ColumnChartPluginView
 import cz.payola.web.client.views.graph.visual.techniques.circle.CircleTechnique
 import cz.payola.web.client.views.graph.visual.techniques.tree.TreeTechnique
 import cz.payola.web.client.views.graph.visual.techniques.gravity.GravityTechnique
-import scala.collection.mutable.ListBuffer
 import cz.payola.web.shared.managers._
 import cz.payola.web.client.events._
 import cz.payola.common.entities.settings.OntologyCustomization
-import cz.payola.web.client.View
-import cz.payola.web.client.views.graph.visual.ColumnChartPluginView
 
 class PluginSwitchView extends GraphView with ComposedView
 {
@@ -27,12 +25,12 @@ class PluginSwitchView extends GraphView with ComposedView
     private val visualSetup = new VisualSetup(new VertexSettingsModel, new EdgeSettingsModel, new TextSettingsModel)
 
     private val plugins = List[PluginView](
-        new TripleTablePluginView(null),
+        new TripleTablePluginView,
+        new SelectResultPluginView,
         new CircleTechnique(visualSetup),
-        new GravityTechnique(visualSetup),
         new TreeTechnique(visualSetup),
-        new ColumnChartPluginView(visualSetup)/*,
-        new MinimalizationTechnique(visualSetup),*/
+        new GravityTechnique(visualSetup),
+        new ColumnChartPluginView(visualSetup)
     )
 
     private var currentPlugin = plugins.head

@@ -8,8 +8,6 @@ class FatalErrorModal(errorDescription: String)
 {
     val description = new PreFormatted(errorDescription, "pre-scrollable")
 
-    description.setAttribute("style", "height: 300px;")
-
     override val body = List(
         new Div(List(
             new Text(

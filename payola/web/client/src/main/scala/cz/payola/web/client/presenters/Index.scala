@@ -10,7 +10,7 @@ import cz.payola.web.client.views.graph.visual.techniques.gravity.GravityTechniq
 import cz.payola.web.client.views.graph.visual.techniques.minimalization.MinimalizationTechnique
 import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.views.elements._
-import cz.payola.web.client.views.graph.textual.TripleTablePluginView
+import cz.payola.web.client.views.graph.table.TripleTablePluginView
 import cz.payola.web.client.views.graph.visual.settings._
 import cz.payola.web.client.views.graph.visual.VisualPluginView
 
@@ -34,7 +34,7 @@ class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
 
     val plugins = List[PluginView](
         new CircleTechnique(visualSetup),
-        new TripleTablePluginView(visualSetup),
+        new TripleTablePluginView,
         new TreeTechnique(visualSetup),
         new MinimalizationTechnique(visualSetup),
         new GravityTechnique(visualSetup)

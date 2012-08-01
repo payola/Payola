@@ -18,7 +18,7 @@ import cz.payola.web.client.Presenter
 import cz.payola.web.client.views.entity.analysis.AnalysisEditorView
 import cz.payola.common.entities.plugins.DataSource
 import scala.collection.mutable
-import cz.payola.web.client.views.entity.DataSourceSelector
+import cz.payola.web.client.views.entity.plugins.DataSourceSelector
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
 
 class AnalysisBuilder(parentElementId: String) extends Presenter

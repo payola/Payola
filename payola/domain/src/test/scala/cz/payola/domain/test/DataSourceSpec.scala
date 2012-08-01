@@ -4,11 +4,11 @@ import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import cz.payola.common.rdf.IdentifiedVertex
 import cz.payola.domain.entities.plugins.DataSource
-import cz.payola.domain.entities.plugins.concrete.data.SparqlEndpoint
+import cz.payola.domain.entities.plugins.concrete.data.SparqlEndpointFetcher
 
 class DataSourceSpec extends FlatSpec with ShouldMatchers
 {
-    val instance = (new SparqlEndpoint).createInstance().setParameter("EndpointURL", "http://ld.opendata.cz:8894/sparql")
+    val instance = (new SparqlEndpointFetcher).createInstance().setParameter("EndpointURL", "http://ld.opendata.cz:8894/sparql")
 
     val dataSource = DataSource("DBPedia", None, instance)
 
