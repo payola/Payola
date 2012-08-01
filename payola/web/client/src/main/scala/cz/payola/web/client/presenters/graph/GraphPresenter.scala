@@ -22,7 +22,7 @@ class GraphPresenter(val viewElement: dom.Element) extends Presenter
         view.ontologyCustomizationsButton.mouseClicked += onOntologyCustomizationsButtonClicked _
         view.ontologyCustomizationSelected += onOntologyCustomizationSelected _
         view.ontologyCustomizationEditClicked += onOntologyCustomizationEditClicked _
-        view.ontologyCustomizationCreateButton.mouseClicked += onOntologyCustomizationCreateButtonClicked _
+        view.ontologyCustomizationCreateClicked += onOntologyCustomizationCreateClicked _
 
         view.render(viewElement)
     }
@@ -40,9 +40,12 @@ class GraphPresenter(val viewElement: dom.Element) extends Presenter
         true
     }
 
-    private def onOntologyCustomizationCreateButtonClicked(e: BrowserEventArgs[_]): Boolean = {
-        new OntologyCustomizationCreator().initialize()
-        false
+    private def onOntologyCustomizationCreateClicked(e: EventArgs[_]) = {
+        val creator = new OntologyCustomizationCreator()
+        creator.ontologyCustomizationCreated += { e =>
+            view.updateOntologyCustomization(Some(e.target))
+        }
+        creator.initialize()
     }
 
     private def onOntologyCustomizationEditClicked(e: EventArgs[OntologyCustomization]): Boolean = {
