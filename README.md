@@ -111,7 +111,7 @@ Enter the group name (e.g. 'My co-workers') and hit the `Create Group` button. A
 To delete a group, use the `Delete` button at the top-right corner of the page.
 
 
-` TODO - enable ![Editing a Group](https://github.com/siroky/Payola/raw/develop/docs/img/group_edit.png)`
+[Editing a Group](https://github.com/siroky/Payola/raw/develop/docs/img/group_edit.png)
 
 ---
 ### <a name="sharing"></a>Sharing
@@ -175,7 +175,7 @@ You can add multiple data sources, creating multiple branches that need to be me
 
 Merging branches can be done using the `Merge branches` button. You will be given a choice to use either Join or Union. After selecting one (each is described below), you need to specify which branches you want to merge - at the bottom of the dialog, there are wells for each input. At the top of the dialog, you have each branch represented by the name of the last plugin in each branch. If you hover your mouse over the box representing a branch, that particular branch gets highlighted in the background (it gets a thick black frame). You need to drag the branch boxes to the input boxes (see picture attached).
 
-` TODO - enable ![Branches on Input Boxes](https://github.com/siroky/Payola/raw/develop/docs/img/analysis_branches.png)`
+![Branches on Input Boxes](https://github.com/siroky/Payola/raw/develop/docs/img/analysis_branches.png)
 
 ##### Union
 
@@ -185,8 +185,24 @@ Union simply merges two graphs together as one would expect. Vertices with the s
 
 Join can be either inner or outer (default).
 
-Outer join keeps vertices from the first graph, but only those edges, that satisfy the condition of inner join mentioned above are
-      *                included
+*Inner join:* Only edges from the first graph with URI defined in the `PropertyURI` parameter are included. Also, the origin of the edge must be present in the second graph. Otherwise, the edge is omitted.
+
+> *Example:* You have two graphs:
+>> ###### Graph A
+>> `payola.cz/dog` - `payola.cz/barks-at` - `payola.cz/tree`<br/>
+>>
+>> ###### Graph B
+>> `payola.cz/wolf` - `payola.cz/evolved-to` - `payola.cz/dog` 
+>>
+>
+> If graph A is joined with graph B using the `payola.cz/barks-at` property, the `dog - barks-at - tree` triple is included in the result (`payola.cz/dog` is a vertex in graph B).
+><br/><br/>
+> When tried the other way around - joining graph B with graph A using the `payola.cz/evolved-to` property, an empty graph is returned because `payola.cz/wolf` isn't a vertex in graph A.
+
+
+*Outer join:* All vertices that are origins of edges with URI defined in the `PropertyURI` parameter are included. Moreover, if origin of the edge is included in the second graph, destination of the edge and the edge itself are both included as well.
+
+> *Example:* Using the same graphs as before, merging graph A with graph B will yield in the same result. Merging B with A, however, will include a single vertex `payola.cz/wolf` and no edges.
 
 ---
 ### <a name="plugins"></a>Plugins
