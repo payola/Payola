@@ -1,6 +1,7 @@
 package cz.payola.web.client.views.graph.visual.settings
 
 import cz.payola.web.client.views.graph.visual.Color
+import s2js.adapters.js.browser.window
 
 class EdgeSettingsModel extends  SettingsModel
 {
@@ -19,11 +20,11 @@ class EdgeSettingsModel extends  SettingsModel
 
     def color(typeName: String, typePropertyName: String): Color = {
         val foundProperty = getProperty(typeName, typePropertyName)
+
         if(foundProperty.isDefined && foundProperty.get.strokeColor.length != 0) {
-            foundProperty.get.strokeColor
+            Color.fromHex(foundProperty.get.strokeColor).getOrElse(colorValue)
         } else {
             colorValue
         }
-        colorValue
     }
 }

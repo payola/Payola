@@ -359,23 +359,8 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
     def bind(a: PluginInstanceView, b: PluginInstanceView, inputIndex: Int) {
         AnalysisBuilderData.saveBinding(analysisId, a.id, b.id, inputIndex) {
             _ =>
-                renderBinding(a, b)
         }(fatalErrorHandler(_))
     }
-
-    @javascript(
-        """
-          jsPlumb.repaintEverything();
-          var settings = {
-                            paintStyle:{ lineWidth:2, strokeStyle:"#BCE8F1", outlineColor:"#3A87AD", outlineWidth:1 },
-                            connector:[ "Flowchart" ],
-                            endpoint:[ "Dot", { radius:4 } ],
-                            endpointStyle : { fillStyle: "#3A87AD"  },
-                            anchor : [ "BottomCenter", "TopCenter" ]
-                       };
-          jsPlumb.connect({ source:a.getPluginElement(), target:b.getPluginElement() },settings);
-        """)
-    def renderBinding(a: PluginInstanceView, b: PluginInstanceView) {}
 
     protected def setTimeout(key: String, callback: () => Unit) {
         timeoutMap.put(key, window.setTimeout(callback, saveAsYouTypeTimeout))

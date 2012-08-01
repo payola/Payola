@@ -6,6 +6,7 @@ import play.api.mvc.AnyContentAsFormUrlEncoded
 import play.api.data.Form
 import play.api.data.Forms._
 import controllers.helpers.Secured
+import cz.payola.common.ValidationException
 
 object Group extends PayolaController with Secured
 {
@@ -13,9 +14,9 @@ object Group extends PayolaController with Secured
      *
      * @return Page with group creation.
      */
-    def create = authenticated {
-        user =>
-            Ok(html.group.create(user, groupForm))
+    def create = authenticatedWithRequest {
+        (user, request) =>
+            Ok(html.group.create(user, groupForm)(request.flash))
     }
 
     /**Save a newly created group.
@@ -25,13 +26,18 @@ object Group extends PayolaController with Secured
     def saveCreate = authenticatedWithRequest {
         (user, request) =>
             val name = groupForm.bindFromRequest()(request).get
-            val group = Payola.model.groupModel.create(name, user)
+            try {
+                val group = Payola.model.groupModel.create(name, user)
 
-            if (group != null) {
-                Redirect(routes.Group.edit(group.id))
-                    .flashing("success" -> "The group has been sucessfully created.")
-            } else {
-                Redirect(routes.Group.list()).flashing("error" -> "The group could not be created.")
+                if (group != null) {
+                    Redirect(routes.Group.edit(group.id))
+                        .flashing("success" -> "The group has been sucessfully created.")
+                } else {
+                    Redirect(routes.Group.list()).flashing("error" -> "The group could not be created.")
+                }
+            }catch {
+                case validationExc: ValidationException => Redirect(routes.Group.create()).flashing("error" -> validationExc.message)
+                // Otherwise, let the exception bubble up
             }
     }
 
@@ -71,7 +77,7 @@ object Group extends PayolaController with Secured
                 Payola.model.groupModel.persist(g)
                 Redirect(routes.Profile.index(user.email)).flashing("success" -> "The group has been sucessfully saved.")
             } else {
-                Forbidden
+                NotFound("The group does not exist.")
             }
     }
 

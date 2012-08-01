@@ -1,7 +1,6 @@
 package cz.payola.web.client.views.graph.visual.graph
 
 import collection.mutable.ListBuffer
-import cz.payola.web.client.views._
 import cz.payola.web.client.views.algebra._
 
 /**
@@ -9,8 +8,9 @@ import cz.payola.web.client.views.algebra._
  * component of the graph)
  * @param vertexViews contained in this component
  * @param edgeViews contained in this component
+ * @param componentNumber determines position of this component in whole graph (can be
  */
-class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuffer[EdgeView])
+class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuffer[EdgeView], val componentNumber: Int)
 {
     /**
      * vertexViews marked as selected

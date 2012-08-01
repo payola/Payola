@@ -12,6 +12,7 @@ import s2js.compiler.javascript
 import s2js.adapters.js.dom.Element
 import cz.payola.web.client.models.Model
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
+import s2js.runtime.shared.rpc.RpcException
 
 class DataSourceCreator(val dataFetcherDivID: String,
     val optionsDivID: String,
@@ -50,6 +51,7 @@ class DataSourceCreator(val dataFetcherDivID: String,
     }
 
     // Load data fetchers
+    blockPage("Loading accessible data fetchers...")
     private var accessibleDataFetchers: Seq[Plugin] = null
     Model.accessibleDataFetchers { dataFetchers =>
         accessibleDataFetchers = dataFetchers
@@ -57,15 +59,26 @@ class DataSourceCreator(val dataFetcherDivID: String,
             val option = new SelectOption(List(new Text(d.name)))
             option.render(dataFetcherList)
         }
+        // Reload plugin options
+        reloadOptions()
+        unblockPage()
     } { e =>
-        // TODO
+        unblockPage()
+        e match {
+            case exc: RpcException => {
+                val alert = new AlertModal("Error loading accessible data fetchers", exc.message)
+                alert.confirming += { args =>
+                    window.location.href = listingURL
+                    true
+                }
+                alert.render()
+            }
+            case _ => fatalErrorHandler(e)
+        }
     }
 
-    // Reload plugin options
-    reloadOptions()
-
     // Create a submit button
-    val submitButton = new Button(new Text("Create Data Source"))
+    val submitButton = new Button(new Text("Create Data Source"), "btn-primary")
     submitButton.mouseClicked += { event =>
         if (validateInputFields) {
             submitForm()
@@ -76,12 +89,17 @@ class DataSourceCreator(val dataFetcherDivID: String,
     }
     submitButton.render(submitButtonDiv)
 
+
     /** Returns selected plugin according to selected name.
       *
       * @return Selected plugin.
       */
     private def getSelectedPlugin: Plugin = {
-        accessibleDataFetchers.find(_.name == dataFetcherList.value).get
+        if (accessibleDataFetchers == null){
+            null
+        }else{
+            accessibleDataFetchers.find(_.name == dataFetcherList.value).get
+        }
     }
 
     /** Redirects to the data source listing page.
@@ -104,7 +122,6 @@ class DataSourceCreator(val dataFetcherDivID: String,
 
         val plugin: Plugin = getSelectedPlugin
         plugin.parameters foreach { param: Parameter[_] =>
-            // TODO distinguish between string/bool/etc. parameters?
             val inputControl = new TextInputControl(param.name, param.name, param.defaultValue.toString, "")
             inputControl.render(optionsDiv)
         }
@@ -126,11 +143,11 @@ class DataSourceCreator(val dataFetcherDivID: String,
     private def validateInputFields: Boolean = {
         var result = false
         if (nameField.input.value == "") {
-            AlertModal.display("Data source name may not be empty!", "")
+            AlertModal.display("Validation failed", "Data source name may not be empty!")
         }else if (DataSourceManager.dataSourceExistsWithName(nameField.input.value)) {
-            AlertModal.display("Data source with this name already exists!", "")
+            AlertModal.display("Validation failed", "Data source with this name already exists!")
         }else if (descriptionField.input.value == ""){
-            AlertModal.display("Data source description musn't be empty!", "")
+            AlertModal.display("Validation failed", "Data source description musn't be empty!")
         }else{
             result = true
         }

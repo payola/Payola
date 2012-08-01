@@ -6,10 +6,10 @@ import cz.payola.web.client.views.elements._
 import cz.payola.common.rdf._
 import s2js.compiler.javascript
 
-class BarChartPluginView(settings: VisualSetup) extends PluginView("Bar Chart")
+class ColumnChartPluginView(settings: VisualSetup) extends PluginView("Column Chart")
 {
 
-    private val chartWrapper = new Div()
+    private val chartWrapper = new Div(Nil, "column-chart-wrapper")
 
     // Used in drawChart()'s @javascript annotation. Beware before renaming
     private val chartWrapperElement = chartWrapper.domElement
@@ -23,21 +23,31 @@ class BarChartPluginView(settings: VisualSetup) extends PluginView("Bar Chart")
      */
     @javascript(
         """
-          var array = [['Title','Value']];
+          var array = [['Title', legendTitle]];
           arr.foreach(function(x){
             array.push(x);
           });
           var data = google.visualization.arrayToDataTable(array);
 
+          var tlc = self.chartWrapper.topLeftCorner();
+          var multiplicator = 80;
+          if (array.length < 16){
+              multiplicator = 160;
+          }
+          var w = array.length * multiplicator + 40;
+
           var options = {
-            title: 'Company Performance',
-            vAxis: {title: 'Year',  titleTextStyle: {color: 'red'}}
+            left: 50,
+            height: window.innerHeight - tlc.y - 25,
+            width: w,
+            fontSize: 110,
+            legend: {position: 'top', textStyle: {color: 'blue', fontSize: 16}}
           };
 
-          var chart = new google.visualization.BarChart(self.chartWrapperElement);
+          var chart = new google.visualization.ColumnChart(self.chartWrapperElement);
           chart.draw(data, options);
         """)
-    private def addRowsToGoogleDataTable(arr: List[List[Any]]){
+    private def createDataTable(arr: List[List[Any]], legendTitle: String){
 
     }
 
@@ -77,12 +87,7 @@ class BarChartPluginView(settings: VisualSetup) extends PluginView("Bar Chart")
 
     def createSubViews = List(chartWrapper)
 
-    @javascript("var chart = new google.visualization.BarChart(self.chartWrapperElement); chart.draw(self.googleDataTable, {});")
-    private def drawChart(){
-
-    }
-
-    def findInitialVertexForBarChart(g: Graph): Option[IdentifiedVertex] = {
+    def findInitialVertexForColumnChart(g: Graph): Option[IdentifiedVertex] = {
         val identifiedVertices = g.vertices.filter(_.isInstanceOf[IdentifiedVertex]).asInstanceOf[Seq[IdentifiedVertex]]
         identifiedVertices.find { v =>
             val typeEdges = g.getOutgoingEdges(v.uri).filter(_.uri == Edge.rdfTypeEdge)
@@ -95,15 +100,10 @@ class BarChartPluginView(settings: VisualSetup) extends PluginView("Bar Chart")
         }
     }
 
-
-    @javascript("self.googleDataTable = new google.visualization.DataTable(); self.googleDataTable.addColumn('string', 'Titles'); self.googleDataTable.addColumn('number', 'Value');")
-    private def prepareGoogleDataTable(){
-
-    }
-
     private def setGraphContentWithInitialVertex(g: Graph, v: IdentifiedVertex) {
         // Get those vertices representing bars in the chart
         val bars = g.getOutgoingEdges(v.uri).filter(_.uri == Edge.rdfTypeEdge).map(_.destination.asInstanceOf[IdentifiedVertex])
+        var legendTitle = ""
 
         // Our assumption here is that the graph-as-chart has been validated
         // before being passed here, so no additional checks will be performed
@@ -111,27 +111,27 @@ class BarChartPluginView(settings: VisualSetup) extends PluginView("Bar Chart")
             // Each vertex should have exactly two edges, one with the title and one
             // with the value
             // Both edges point to literal vertices (due to prior assumed validations)
-            val literals = g.getOutgoingEdges(v.uri).map(_.destination.asInstanceOf[LiteralVertex])
+            val outgoingEdges = g.getOutgoingEdges(v.uri)
+            val literals = outgoingEdges.map(_.destination.asInstanceOf[LiteralVertex])
 
             val title = literals.find(litVertex => variableIsString(litVertex.value)).get.value
-            val value = literals.find(litVertex => variableIsNumber(litVertex.value)).get.value
+            val valueVertex = literals.find(litVertex => variableIsNumber(litVertex.value)).get
+            val value = valueVertex.value
+            legendTitle = outgoingEdges.find(_.destination == valueVertex).get.uri
             List(title, value).toList
         }.toList
-        addRowsToGoogleDataTable(values)
 
-        // Draw the chart
-        //drawChart()
+        createDataTable(values, legendTitle)
     }
 
     private def setTextualContent(message: String, details: String) {
-        val messageDiv = new Div(List(new Text(message)), "bar-chart-textual-content bar-chart-textual-content-large")
-        val descriptionDiv = new Div(List(new Text(details)), "bar-chart-textual-content bar-chart-textual-content-small")
+        val messageDiv = new Div(List(new Text(message)), "column-chart-textual-content column-chart-textual-content-large")
+        val descriptionDiv = new Div(List(new Text(details)), "column-chart-textual-content column-chart-textual-content-small")
         messageDiv.render(chartWrapperElement)
         descriptionDiv.render(chartWrapperElement)
     }
 
-    override def updateGraph(g: Option[Graph]) {
-        val graph = Some(createPhonyGraph)
+    override def updateGraph(graph: Option[Graph]) {
         if (graph != currentGraph) {
             // Clear the wrapper
             chartWrapper.removeAllChildNodes()
@@ -140,11 +140,11 @@ class BarChartPluginView(settings: VisualSetup) extends PluginView("Bar Chart")
                 // Add a 'No graph' title
                 setTextualContent("No graph available...", "Load a graph to begin.")
             }else{
-                val initialVertex = findInitialVertexForBarChart(graph.get)
+                val initialVertex = findInitialVertexForColumnChart(graph.get)
                 if (initialVertex.isDefined){
                     setGraphContentWithInitialVertex(graph.get, initialVertex.get)
                 }else{
-                    setTextualContent("This graph can't be displayed as a bar chart...", "Choose a different visualisation plugin.")
+                    setTextualContent("This graph can't be displayed as a column chart...", "Choose a different visualisation plugin.")
                 }
             }
 

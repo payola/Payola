@@ -7,6 +7,10 @@ import s2js.adapters.js.browser.Event
   */
 abstract class Element extends Node
 {
+    var clientWidth: Double
+
+    var clientHeight: Double
+
     var offsetTop: Double
 
     var offsetLeft: Double
