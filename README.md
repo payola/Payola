@@ -82,7 +82,7 @@ Select a data fetcher of your choice, fill in the data fetcher's parameters (for
 
 ##### Editing
 
-Just like with the other entities (analyses, plugins, etc.) use the toolbar at the top of the page to list available data sources (click on the `My Datasources` button and select `View All`).
+Just like with the other entities (analyses, plugins, etc.) use the toolbar at the top of the page to list available data sources (click on the `My Data Sources` button and select `View All`).
 
 You can view all available data sources. If you wish to edit it (e.g. change name or description), click on the Edit button next to its name. You'll be redirected to an edit page which contains a delete button as well. The sharing functionality will be described in the [Sharing section](#sharing).
 
@@ -101,6 +101,9 @@ The `Column Chart` visualization will display a column bar graph, but works only
 ##### Ontology Customization
 ---
 ### Groups
+
+You can create user groups to make sharing easier (as described in the next chapter). Imagine you want to share a resource (e.g. an analysis) with a group of co-workers. One approach would be to share it with each one of them, but this can be tedious considering you might want to share something with them every week or every day. Hence there's a possibility to create user groups - in the top toolbar, click on the `User Groups` button and select `Create New`.
+
 ---
 ### <a name="sharing"></a>Sharing
 ---
