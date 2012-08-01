@@ -104,6 +104,12 @@ The `Column Chart` visualization will display a column bar graph, but works only
 
 You can create user groups to make sharing easier (as described in the next chapter). Imagine you want to share a resource (e.g. an analysis) with a group of co-workers. One approach would be to share it with each one of them, but this can be tedious considering you might want to share something with them every week or every day. Hence there's a possibility to create user groups - in the top toolbar, click on the `User Groups` button and select `Create New`.
 
+Enter the group name (e.g. 'My co-workers') and hit the `Create Group` button. After the group has been created, you can start adding members to the group. To do so, make the `Members` field active and start typing - the suggestion box will offer you users with a matching name. Click on the user to add him or her. If you decide to remove a user, click on the `x` button in front of his or her name. Remember to use the `Save Group` button before leaving the edit page, or all changes made will be lost.
+
+To delete a group, use the `Delete` button at the top-right corner of the page.
+
+![Editing a Group](docs/img/group_edit.png)
+
 ---
 ### <a name="sharing"></a>Sharing
 ---
