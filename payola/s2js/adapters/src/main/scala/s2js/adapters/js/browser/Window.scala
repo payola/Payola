@@ -37,6 +37,8 @@ class Window
       * window resizing event
       */
     var onresize: (Event => Boolean) = (event: Event) => false
+
+    var onunload : Unit = {}
 }
 
 class Location

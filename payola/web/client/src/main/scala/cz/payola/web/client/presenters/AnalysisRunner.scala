@@ -100,6 +100,8 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
             } {
                 error => fatalErrorHandler(error)
             }
+
+            window.onunload = { onStopClick(view, initUI, analysis) }
         }
         false
     }
@@ -109,10 +111,9 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         view.overviewView.controls.stopButton.removeCssClass("disabled")
         view.overviewView.controls.timeoutControl.controlGroup.addCssClass("none")
         view.overviewView.controls.timeoutInfoBar.removeCssClass("none")
-        view.overviewView.controls.stopButton.mouseClicked += {
-            e =>
-                onStopClick(view, initUI, analysis)
-                false
+        view.overviewView.controls.stopButton.mouseClicked += { e =>
+            onStopClick(view, initUI, analysis)
+            false
         }
     }
 
@@ -123,6 +124,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
             intervalHandler.foreach(window.clearInterval(_))
             view.destroy()
             initUI(analysis)
+            window.onunload = {}
         }
     }
 
@@ -185,9 +187,8 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         view.overviewView.controls.stopButton.addCssClass("disabled")
         intervalHandler.foreach(window.clearInterval(_))
 
-        error.instanceErrors.foreach {
-            err =>
-                view.overviewView.analysisVisualizer.setInstanceError(err._1.id, err._2)
+        error.instanceErrors.foreach { err =>
+            view.overviewView.analysisVisualizer.setInstanceError(err._1.id, err._2)
         }
 
         initReRun(view, analysis)
@@ -209,7 +210,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
     def initReRun(view: AnalysisRunnerView, analysis: Analysis) {
         view.overviewView.controls.runBtn.removeCssClass("disabled")
         view.overviewView.controls.runBtnCaption.text = "Run again"
-
+        window.onunload = {}
         view.overviewView.controls.runBtn.mouseClicked += { e =>
             view.destroy()
 
@@ -227,6 +228,8 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         analysisDone = true
         view.overviewView.controls.stopButton.addCssClass("disabled")
         intervalHandler.foreach(window.clearInterval(_))
+
+        window.onunload = {}
 
         success.instanceErrors.foreach {
             err =>
