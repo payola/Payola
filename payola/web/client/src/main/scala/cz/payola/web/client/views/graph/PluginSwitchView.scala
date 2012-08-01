@@ -1,6 +1,7 @@
 package cz.payola.web.client.views.graph
 
 import cz.payola.common.rdf._
+import cz.payola.common.entities.settings.OntologyCustomization
 import cz.payola.web.client.views._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap._
@@ -13,10 +14,11 @@ import cz.payola.web.client.views.graph.visual.techniques.tree.TreeTechnique
 import cz.payola.web.client.views.graph.visual.techniques.gravity.GravityTechnique
 import cz.payola.web.shared.managers._
 import cz.payola.web.client.events._
-import cz.payola.common.entities.settings.OntologyCustomization
 
 class PluginSwitchView extends GraphView with ComposedView
 {
+    val ontologyCustomizationCreateClicked = new SimpleUnitEvent[this.type]
+
     val ontologyCustomizationSelected = new SimpleUnitEvent[OntologyCustomization]
 
     val ontologyCustomizationEditClicked = new SimpleUnitEvent[OntologyCustomization]
@@ -37,19 +39,19 @@ class PluginSwitchView extends GraphView with ComposedView
 
     private val pluginSpace = new Div(Nil, "row position-relative")
 
-    private val pluginListItems = plugins.map { plugin =>
-        val pluginAnchor = new Anchor(List(new Text(plugin.name)))
-        pluginAnchor.mouseClicked += { e =>
-            changePlugin(plugin)
-            false
-        }
-        new ListItem(List(pluginAnchor))
-    }
-
-    val pluginChangeButton = new DropDownButton(List(
+    val pluginChangeButton: DropDownButton = new DropDownButton(List(
         new Icon(Icon.eye_open),
         new Text("Change visualisation plugin")),
-        pluginListItems
+        plugins.map { plugin =>
+            val pluginAnchor = new Anchor(List(new Text(plugin.name)))
+            val listItem = new ListItem(List(pluginAnchor))
+            pluginAnchor.mouseClicked += { e =>
+                pluginChangeButton.setActiveItem(listItem)
+                changePlugin(plugin)
+                false
+            }
+            listItem
+        }
     )
 
     val ontologyCustomizationsButton = new DropDownButton(List(
@@ -57,8 +59,6 @@ class PluginSwitchView extends GraphView with ComposedView
         new Text("Change appearance using ontologies")),
         Nil
     )
-
-    val ontologyCustomizationCreateButton = new Anchor(List(new Icon(Icon.plus), new Text("Create new customization")))
 
     val toolbar = new Div(List(pluginChangeButton, ontologyCustomizationsButton), "btn-toolbar").setAttribute(
         "style", "margin-bottom: 15px;")
@@ -71,6 +71,7 @@ class PluginSwitchView extends GraphView with ComposedView
     }
 
     // Display the first plugin.
+    pluginChangeButton.setActiveItem(pluginChangeButton.items.head)
     currentPlugin.render(pluginSpace.domElement)
     currentPlugin.renderControls(toolbar.domElement)
 
@@ -102,9 +103,14 @@ class PluginSwitchView extends GraphView with ComposedView
         val separator1 = if (owned.nonEmpty && others.nonEmpty) List(new ListItem(Nil, "divider")) else Nil
 
         // The create new button.
+        val createButton = new Anchor(List(new Icon(Icon.plus), new Text("Create new customization")))
+        createButton.mouseClicked += { e =>
+            ontologyCustomizationCreateClicked.triggerDirectly(this)
+            false
+        }
         val createNew = customizations.ownedCustomizations.map { _ =>
             val separator2 = if (owned.nonEmpty || others.nonEmpty) List(new ListItem(Nil, "divider")) else Nil
-            separator2 ++ List(new ListItem(List(ontologyCustomizationCreateButton)))
+            separator2 ++ List(new ListItem(List(createButton)))
         }.getOrElse(Nil)
 
         // All the items merged together.
@@ -117,7 +123,7 @@ class PluginSwitchView extends GraphView with ComposedView
             List(listItem)
         }
 
-        ontologyCustomizationsButton.setItems(items)
+        ontologyCustomizationsButton.items = items
     }
 
     private def createCustomizationListItem(customization: OntologyCustomization, isEditable: Boolean): ListItem = {
@@ -133,7 +139,12 @@ class PluginSwitchView extends GraphView with ComposedView
             ontologyCustomizationSelected.triggerDirectly(customization)
             false
         }
-        new ListItem(List(anchor))
+
+        val listItem = new ListItem(List(anchor))
+        if (currentCustomization.exists(_ == customization)) {
+            listItem.addCssClass("active")
+        }
+        listItem
     }
 
     private def changePlugin(plugin: PluginView) {

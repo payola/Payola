@@ -6,9 +6,9 @@ import cz.payola.web.client.views.elements._
 class DropDownButtonWithCaret(
     anchorViews: Seq[View],
     toggleAnchorViews: Seq[View],
-    items: Seq[ListItem],
+    _items: Seq[ListItem],
     buttonCssClass: String = "")
-    extends DropDownButton(toggleAnchorViews, items, buttonCssClass)
+    extends DropDownButton(toggleAnchorViews, _items, buttonCssClass)
 {
     val anchor = new Anchor(anchorViews, "#", "btn dropdown-toggle " + buttonCssClass)
 

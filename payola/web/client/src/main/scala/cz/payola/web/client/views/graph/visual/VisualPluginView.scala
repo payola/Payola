@@ -43,6 +43,8 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
 
     private var topLayerOffset = Vector2D(0, 0)
 
+    private var currentInfoTable : Option[VertexInfoTable] = None
+
     private val layers = List(
         layerPack.edgesDeselected,
         layerPack.edgesSelected,
@@ -229,6 +231,8 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
         mouseIsDragging = false
         mousePressedVertex = false
         mouseDownPosition = Point2D(0, 0)
+
+        currentInfoTable.foreach(_.destroy())
     }
 
     override def renderControls(toolbar: dom.Element) {
@@ -306,6 +310,7 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
                             vertexBrowsingDataSource.trigger(new VertexEventArgs[this.type](this, vertex.get.vertexModel))
                         }
 
+                        currentInfoTable = Some(infoTable)
 
                         infoTable.render(parent.getOrElse(document.body))
 

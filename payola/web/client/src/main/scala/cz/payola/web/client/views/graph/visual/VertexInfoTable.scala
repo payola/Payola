@@ -55,8 +55,8 @@ class VertexInfoTable(vertex: IdentifiedVertex, values: mutable.HashMap[String, 
         val popoverArrow = new Div(Nil,"arrow")
         popoverArrow.setAttribute("style","top: 15px;")
         val div = new Div(List(popoverArrow, popoverInner))
-        div.setAttribute("class","popover fade right in")
-        div.setAttribute("style","display: block; max-height: 300px; position: absolute; top: "+(position.y-10).toString()+"px; left: "+position.x.toString()+"px;")
+        div.setAttribute("class","popover fade right in vitable")
+        div.setAttribute("style","top: "+(position.y-10).toString()+"px; left: "+position.x.toString()+"px;")
         List(div)
     }
 }
