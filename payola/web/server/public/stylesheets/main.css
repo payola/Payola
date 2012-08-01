@@ -260,7 +260,21 @@ input[type="checkbox"].active:after {
 
 .vitable {
     display: block !important;
-    max-height: 300px;
     position: absolute;
-    width: 400px;
+    max-height: 330px;
+}
+
+.vitable .popover-content{
+    width: 472px;
+    height: 300px;
+    overflow: auto;
+}
+
+.vitable .popover-inner{
+    width: 500px;
+    max-height: 375px;
+}
+
+.vitable .popover-title a{
+    font-size: 11px;
 }
