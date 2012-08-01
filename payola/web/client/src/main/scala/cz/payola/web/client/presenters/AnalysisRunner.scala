@@ -124,7 +124,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
             intervalHandler.foreach(window.clearInterval(_))
             view.destroy()
             initUI(analysis)
-            window.onunload = {}
+            window.onunload = null
         }
     }
 
@@ -210,7 +210,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
     def initReRun(view: AnalysisRunnerView, analysis: Analysis) {
         view.overviewView.controls.runBtn.removeCssClass("disabled")
         view.overviewView.controls.runBtnCaption.text = "Run again"
-        window.onunload = {}
+        window.onunload = null
         view.overviewView.controls.runBtn.mouseClicked += { e =>
             view.destroy()
 
@@ -229,7 +229,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         view.overviewView.controls.stopButton.addCssClass("disabled")
         intervalHandler.foreach(window.clearInterval(_))
 
-        window.onunload = {}
+        window.onunload = null
 
         success.instanceErrors.foreach {
             err =>
