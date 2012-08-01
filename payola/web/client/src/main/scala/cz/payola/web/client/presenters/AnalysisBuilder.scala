@@ -20,6 +20,8 @@ import cz.payola.common.entities.plugins.DataSource
 import scala.collection.mutable
 import cz.payola.web.client.views.entity.plugins.DataSourceSelector
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
+import s2js.runtime.shared.rpc.RpcException
+import cz.payola.common.ValidationException
 
 class AnalysisBuilder(parentElementId: String) extends Presenter
 {
@@ -66,13 +68,22 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                                 view.setName(nameComponent.input.value)
 
                                 bindMenuEvents(view)
+
+                                nameDialog.destroy()
                         } {
-                            error => fatalErrorHandler(error)
+                            error =>
+                                error match {
+                                    case rpc: ValidationException => {
+                                        AlertModal.display("Validation failed", rpc.message)
+                                        false
+                                    }
+                                    case _ => fatalErrorHandler(error)
+                                }
                         }
                 } {
                     error => fatalErrorHandler(error)
                 }
-                true
+                false
         }
 
         nameDialog.closing += {

@@ -111,7 +111,7 @@ Enter the group name (e.g. 'My co-workers') and hit the `Create Group` button. A
 To delete a group, use the `Delete` button at the top-right corner of the page.
 
 
-` TODO - enable ![Editing a Group](https://github.com/siroky/Payola/raw/develop/docs/img/group_edit.png)`
+[Editing a Group](https://github.com/siroky/Payola/raw/develop/docs/img/group_edit.png)
 
 ---
 ### <a name="sharing"></a>Sharing
@@ -131,12 +131,79 @@ While listing data sources, you might have noticed a data source called `Private
 
 ##### Adding data to data storage
 
-To add data to your private data storage, use toolabar's `Private RDF Storage` button and select `Upload Data`.
+To add data to your private data storage, use toolbar's `Private RDF Storage` button and select `Upload Data`.
 
-Here you are presented with two options: to upload a RDF/XML or TTL file, or load the RDF/XML from a URL. Retrieving a TTL file from a URL isn't currently supported.
+Here you are presented with two options: to upload a RDF/XML or TTL file, or load the RDF/XML from a URL. Retrieving a graph in a TTL format from a URL isn't currently supported.
 
 ---
 ### Analyses
+
+Creating a new analysis is similar to creating any other resource - in the toolbar, select `Create New` from `My Analyses` button's menu. You will be prompted to enter a name - enter the analysis name - you can change it later on.
+
+You will be presented with a blank page with a control box in the top-left corner. Start by filling in the analysis description.
+
+First, you'll need a data source to start with. You can do so either using the `Add data source` button which will offer you available data sources, or `Add plugin` which will let you add a data fetcher - generally an anonymous data source. This can be useful if you decide to use a data source that you don't want to save right ahead (e.g. you know you'll use it just once).
+
+Now that you've added a data source, you need to do something with the data. Click on the `Add Connection` button on your data source box. Payola comes with 6 installed plugins, which will be described one by one below. Of course, you can add your own plugin (see [section Plugins](#plugins)). Plugins are ordered in a row (though more branches can be created, see below) - a plugin will always get the result of its previous one and work with it.
+
+##### Typed
+
+This plugin selects vertices of a type that's filled in as a parameter `TypeURI` from its input graph.
+
+##### Projection
+
+Projection plugin takes property URIs separated by a newline as a single parameter. It will select vertices that are connected to other vertices using one of the listed URIs. 
+> *Note:* Payola performs some optimizations, potentially merging several consecutive plugins together. For example, two consecutive projection plugins are merged - hence their result isn't an empty graph as one could expect (the first plugin would create a graph containing vertices connected to each other using URIs declared in the first plugin, which is then filtered using the second plugin), but a graph that contains both projections.
+
+##### Selection
+
+Selection plugin lets you select vertices with a particular attribute - for example select cities with more than 2 million inhabitants.
+
+> *Example:* Let's create an analysis which selects all cities with more than 2 million inhabitants. First, add a `DBpedia.org` data source, then connect a new Typed plugin with TypeURI `http://dbpedia.org/ontology/City`. Continue with a Projection plugin with PropertyURIs `http://dbpedia.org/ontology/populationTotal`, then a Selection plugin with PropertyURI `http://dbpedia.org/ontology/populationTotal`, Operator `>` and Value `2000000`. And that's it. Your first analysis that actually does something useful.
+
+##### Ontological Filter
+
+Ontological Filter plugin filters a graph according to ontologies stored at URLs listed in the OntologyURLs parameter.
+
+##### SPARQL Query
+
+This is a more advanced plugin letting you to perform your own custom SPARQL Query on the output of the previous plugin.
+
+#### Branches
+
+You can add multiple data sources, creating multiple branches that need to be merged before the analysis can be run (trying to run such an analysis will yield in an error). Of course, you can have such an incomplete analysis saved and work on it later.
+
+Merging branches can be done using the `Merge branches` button. You will be given a choice to use either Join or Union. After selecting one (each is described below), you need to specify which branches you want to merge - at the bottom of the dialog, there are wells for each input. At the top of the dialog, you have each branch represented by the name of the last plugin in each branch. If you hover your mouse over the box representing a branch, that particular branch gets highlighted in the background (it gets a thick black frame). You need to drag the branch boxes to the input boxes (see picture attached).
+
+![Branches on Input Boxes](https://github.com/siroky/Payola/raw/develop/docs/img/analysis_branches.png)
+
+##### Union
+
+Union simply merges two graphs together as one would expect. Vertices with the same URI will be unified, their properties merged.
+
+##### Join
+
+Join can be either inner or outer (default).
+
+*Inner join:* Only edges from the first graph with URI defined in the `PropertyURI` parameter are included. Also, the origin of the edge must be present in the second graph. Otherwise, the edge is omitted.
+
+> *Example:* You have two graphs:
+>> ###### Graph A
+>> `payola.cz/dog` - `payola.cz/barks-at` - `payola.cz/tree`<br/>
+>>
+>> ###### Graph B
+>> `payola.cz/wolf` - `payola.cz/evolved-to` - `payola.cz/dog` 
+>>
+>
+> If graph A is joined with graph B using the `payola.cz/barks-at` property, the `dog - barks-at - tree` triple is included in the result (`payola.cz/dog` is a vertex in graph B).
+><br/><br/>
+> When tried the other way around - joining graph B with graph A using the `payola.cz/evolved-to` property, an empty graph is returned because `payola.cz/wolf` isn't a vertex in graph A.
+
+
+*Outer join:* All vertices that are origins of edges with URI defined in the `PropertyURI` parameter are included. Moreover, if origin of the edge is included in the second graph, destination of the edge and the edge itself are both included as well.
+
+> *Example:* Using the same graphs as before, merging graph A with graph B will yield in the same result. Merging B with A, however, will include a single vertex `payola.cz/wolf` and no edges.
+
 ---
-### Plugins
+### <a name="plugins"></a>Plugins
 
