@@ -138,7 +138,7 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
       * @return The replacement Some(oldPackage, newPackage) if such was found, None oterwise.
       */
     def symbolPackageReplacement(symbol: Global#Symbol): Option[(String, String)] = {
-        // Ordered by transformation priority (if A is a prefix of B, then the A should be first).
+        // Ordered by transformation priority (if A is a prefix of B, then the B should be first).
         val packageReplacementMap = mutable.LinkedHashMap(
             "java.lang" -> "scala",
             "scala.this" -> "scala",
@@ -146,6 +146,7 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
             "s2js.adapters.js.dom" -> "",
             "s2js.adapters.js.html.elements" -> "",
             "s2js.adapters.js.html" -> "",
+            "s2js.adapters.js" -> "",
             "s2js.adapters" -> "",
             "s2js.runtime.client.scala" -> "scala"
         )

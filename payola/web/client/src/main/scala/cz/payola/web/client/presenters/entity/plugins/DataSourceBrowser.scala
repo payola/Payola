@@ -43,11 +43,10 @@ class DataSourceBrowser(
         // If the default URI isn't specified, display the initial graph.
         if (initialVertexUri == "") {
             blockPage("Fetching the initial graph.")
-            DataSourceManager.getInitialGraph(dataSourceId) {
-                graph =>
-                    graphPresenter.view.updateGraph(graph)
-                    updateNavigationView()
-                    unblockPage()
+            DataSourceManager.getInitialGraph(dataSourceId) { graph =>
+                graphPresenter.view.updateGraph(graph)
+                updateNavigationView()
+                unblockPage()
             }(fatalErrorHandler(_))
         } else {
             addToHistoryAndGo(initialVertexUri)
@@ -82,28 +81,25 @@ class DataSourceBrowser(
 
     private def onSparqlQueryButtonClicked(e: BrowserEventArgs[_]): Boolean = {
         val modal = new SparqlQueryModal
-        modal.confirming += {
-            e =>
-                modal.block("Executing the SPARQL query.")
-                DataSourceManager.executeSparqlQuery(dataSourceId, modal.sparqlQueryInput.value) {
-                    g =>
-                        modal.unblock()
-                        modal.destroy()
+        modal.confirming += { e =>
+            modal.block("Executing the SPARQL query.")
+            DataSourceManager.executeSparqlQuery(dataSourceId, modal.sparqlQueryInput.value) { g =>
+                modal.unblock()
+                modal.destroy()
 
-                        history = mutable.ListBuffer.empty[String]
-                        historyPosition = -1
-                        updateNavigationView()
+                history = mutable.ListBuffer.empty[String]
+                historyPosition = -1
+                updateNavigationView()
 
-                        graphPresenter.view.updateGraph(g)
-                } {
-                    e =>
-                        modal.unblock()
-                        e match {
-                            case v: ValidationException => AlertModal.display("Error", v.message)
-                            case t => fatalErrorHandler(t)
-                        }
+                graphPresenter.view.updateGraph(g)
+            } { e =>
+                modal.unblock()
+                e match {
+                    case v: ValidationException => AlertModal.display("Error", v.message)
+                    case t => fatalErrorHandler(t)
                 }
-                false
+            }
+            false
         }
         modal.render()
         false
