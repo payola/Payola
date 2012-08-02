@@ -1,6 +1,6 @@
 package cz.payola.web.client.views.entity.settings
 
-import s2js.adapters.js.dom
+import s2js.adapters.js.html
 import cz.payola.common.entities.settings._
 import cz.payola.web.client.views.bootstrap._
 import cz.payola.web.client.views.elements._
@@ -65,7 +65,7 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
         ).setAttribute("style", "padding: 0;")
     )
 
-    override def render(parent: dom.Element) {
+    override def render(parent: html.Element) {
         super.render(parent)
         ontologyCustomization.classCustomizations.headOption.foreach {
             onClassCustomizationSelected(_, classCustomizationListItems.head)
@@ -104,9 +104,9 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
                     glyph.input.value))
         }
 
-        fillColor.render(propertiesDiv.domElement)
-        radius.render(propertiesDiv.domElement)
-        glyph.render(propertiesDiv.domElement)
+        fillColor.render(propertiesDiv.htmlElement)
+        radius.render(propertiesDiv.htmlElement)
+        glyph.render(propertiesDiv.htmlElement)
     }
 
     private def renderPropertyCustomizationViews(classCustomization: ClassCustomization,
@@ -129,9 +129,9 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
                     classCustomization, propertyCustomization, strokeWidth.input.value))
         }
 
-        headingDiv.render(propertiesDiv.domElement)
-        strokeColor.render(propertiesDiv.domElement)
-        strokeWidth.render(propertiesDiv.domElement)
+        headingDiv.render(propertiesDiv.htmlElement)
+        strokeColor.render(propertiesDiv.htmlElement)
+        strokeWidth.render(propertiesDiv.htmlElement)
     }
 
     private def uriToName(uri: String): String = {

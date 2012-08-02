@@ -1,6 +1,6 @@
 package s2js.adapters.js.browser
 
-class Console
+abstract class Console
 {
-    def log(value: Any) {}
+    def log(value: Any)
 }

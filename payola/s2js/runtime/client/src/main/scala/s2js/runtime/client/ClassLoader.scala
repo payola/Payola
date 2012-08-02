@@ -19,7 +19,7 @@ object ClassLoader
                 // Process the dependency package.
                 dependencyPackage.providedSymbols.foreach(provide(_))
                 if (dependencyPackage.javaScript != "") {
-                    s2js.adapters.js.browser.eval(dependencyPackage.javaScript)
+                    s2js.adapters.js.eval(dependencyPackage.javaScript)
                 }
                 if (dependencyPackage.css != "") {
                     evaluateCss(dependencyPackage.css)

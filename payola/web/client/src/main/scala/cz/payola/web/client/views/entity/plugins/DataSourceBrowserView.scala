@@ -4,7 +4,7 @@ import cz.payola.web.client.views.ComposedView
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap._
 
-class DataSourceView(dataSourceName: String) extends ComposedView
+class DataSourceBrowserView(dataSourceName: String) extends ComposedView
 {
     val heading = new Heading(List(new Text("Data source: " + dataSourceName)), 2)
 

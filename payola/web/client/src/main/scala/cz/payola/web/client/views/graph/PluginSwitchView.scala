@@ -72,8 +72,8 @@ class PluginSwitchView extends GraphView with ComposedView
 
     // Display the first plugin.
     pluginChangeButton.setActiveItem(pluginChangeButton.items.head)
-    currentPlugin.render(pluginSpace.domElement)
-    currentPlugin.renderControls(toolbar.domElement)
+    currentPlugin.render(pluginSpace.htmlElement)
+    currentPlugin.renderControls(toolbar.htmlElement)
 
     def createSubViews = List(toolbar, pluginSpace)
 
@@ -156,8 +156,8 @@ class PluginSwitchView extends GraphView with ComposedView
 
             // Switch to the new plugin.
             currentPlugin = plugin
-            currentPlugin.render(pluginSpace.domElement)
-            currentPlugin.renderControls(toolbar.domElement)
+            currentPlugin.render(pluginSpace.htmlElement)
+            currentPlugin.renderControls(toolbar.htmlElement)
             currentPlugin.update(currentGraph, currentCustomization)
         }
     }

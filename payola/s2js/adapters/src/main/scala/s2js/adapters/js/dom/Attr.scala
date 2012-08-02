@@ -1,6 +1,6 @@
 package s2js.adapters.js.dom
 
-abstract class Attribute extends Node
+abstract class Attr extends Node
 {
     val isId: Boolean
 
@@ -9,4 +9,6 @@ abstract class Attribute extends Node
     val ownerElement: Element
 
     val specified: Boolean
+
+    var value: Any
 }

@@ -1,8 +1,9 @@
 package s2js.adapters.goog.events
 
 import s2js.adapters.js.dom.Node
+import s2js.adapters.js.html
 
-class BrowserEvent(e: s2js.adapters.js.browser.Event = null, currentTarget: Node = null) extends Event("")
+class BrowserEvent(e: html.MouseKeyboardEvent = null, currentTarget: Node = null) extends Event("")
 {
     def isMouseActionButton: Boolean = false
 

@@ -1,7 +1,7 @@
 package cz.payola.web.client.views.graph.visual.graph
 
 import cz.payola.common.rdf.Edge
-import s2js.adapters.js.dom.CanvasRenderingContext2D
+import s2js.adapters.js.html
 import cz.payola.web.client.views.graph.visual.Color
 import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.VisualSetup
@@ -15,7 +15,7 @@ import cz.payola.web.client.views.graph.visual.graph.positioning.LocationDescrip
   * @param settings draw settings used in draw and quickDraw routines
   */
 class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationView: VertexView,
-    val settings: VisualSetup) extends View[CanvasRenderingContext2D] {
+    val settings: VisualSetup) extends View[html.elements.CanvasRenderingContext2D] {
 
     /**
       * Textual data that should be visualised with this edge ("over this edge").
@@ -38,7 +38,7 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
         originView.selected && destinationView.selected
     }
 
-    def draw(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
+    def draw(context: html.elements.CanvasRenderingContext2D, positionCorrection: Vector2D) {
 
         drawQuick(context, positionCorrection)
         if (isSelected) {
@@ -47,7 +47,7 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
         }
     }
 
-    def drawQuick(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
+    def drawQuick(context: html.elements.CanvasRenderingContext2D, positionCorrection: Vector2D) {
         val colorToUse = if(isSelected) {
             val col = settings.edgesModel.color(originView.rdfType, edgeModel.uri)
 

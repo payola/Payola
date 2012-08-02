@@ -1,16 +1,15 @@
 package cz.payola.web.client.views
 
-import s2js.adapters.js.dom
+import s2js.adapters.js.html
 import s2js.adapters.js.browser.document
 import cz.payola.web.client.View
 import cz.payola.web.client.views.elements.Text
-import s2js.adapters.js.browser.window
 
 trait ComposedView extends View
 {
     private var _subViews: Option[Seq[View]] = None
 
-    private var parentElement: Option[dom.Element] = None
+    private var parentElement: Option[html.Element] = None
 
     def createSubViews: Seq[View]
 
@@ -21,10 +20,11 @@ trait ComposedView extends View
         _subViews.get
     }
 
-    def blockDomElement = subViews.headOption.map(_.blockDomElement).getOrElse(document.createElement[dom.Div]("div"))
+    def blockHtmlElement = {
+        subViews.headOption.map(_.blockHtmlElement).getOrElse(document.createElement[html.Element]("div"))
+    }
 
-    def render(parent: dom.Element) {
-
+    def render(parent: html.Element) {
         parentElement = Some(parent)
         subViews.foreach { v =>
             new Text(" ").render(parent)

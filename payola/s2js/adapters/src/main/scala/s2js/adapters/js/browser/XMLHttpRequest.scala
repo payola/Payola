@@ -20,8 +20,7 @@ class XMLHttpRequest
 
     def getResponseHeader(header: String): String = ""
 
-    def open(method: String, url: String, async: Boolean = true, username: String = "",
-        password: String = "") {}
+    def open(method: String, url: String, async: Boolean = true, username: String = "", password: String = "") {}
 
     def send(data: String = "") {}
 

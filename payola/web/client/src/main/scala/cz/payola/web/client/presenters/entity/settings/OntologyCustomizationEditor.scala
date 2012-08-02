@@ -19,7 +19,7 @@ class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) 
     private val view = new OntologyCustomizationEditModal(ontologyCustomization)
 
     private val shareButtonPresenter = ShareButtonPresenter(
-        view.shareButtonViewSpace.domElement,
+        view.shareButtonViewSpace.htmlElement,
         ontologyCustomization,
         Some(view)
     )

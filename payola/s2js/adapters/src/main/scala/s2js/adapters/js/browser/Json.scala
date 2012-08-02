@@ -1,8 +1,8 @@
 package s2js.adapters.js.browser
 
-class Json
+abstract class Json
 {
-    def stringify(x: Any): String = ""
+    def stringify(x: Any): String
 
-    def parse(x: String): Any = null
+    def parse(x: String): Any
 }

@@ -1,6 +1,6 @@
 package cz.payola.web.client.views.graph.visual.graph
 
-import s2js.adapters.js.dom.CanvasRenderingContext2D
+import s2js.adapters.js.html
 import cz.payola.web.client.views.graph.visual.Color
 import cz.payola.web.client.views.graph.visual.settings.TextSettingsModel
 import cz.payola.web.client.views.algebra._
@@ -10,18 +10,18 @@ import cz.payola.web.client.views.algebra._
   * @param data that are visualised (by toString function of this object)
   * @param settings how to draw this informationView
   */
-class InformationView(data: Any, val settings: TextSettingsModel) extends View[CanvasRenderingContext2D]
+class InformationView(data: Any, val settings: TextSettingsModel) extends View[html.elements.CanvasRenderingContext2D]
 {
 
     def isSelected: Boolean = {
         false
     }
 
-    def draw(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
+    def draw(context: html.elements.CanvasRenderingContext2D, positionCorrection: Vector2D) {
         drawQuick(context, positionCorrection)
     }
 
-    def drawQuick(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
+    def drawQuick(context: html.elements.CanvasRenderingContext2D, positionCorrection: Vector2D) {
 
         performDrawing(context, settings.color, Point2D(positionCorrection.x, positionCorrection.y))
     }
@@ -32,7 +32,7 @@ class InformationView(data: Any, val settings: TextSettingsModel) extends View[C
       * @param color in which the text is draw
       * @param position where the text is drawn
       */
-    private def performDrawing(context: CanvasRenderingContext2D, color: Color, position: Point2D) {
+    private def performDrawing(context: html.elements.CanvasRenderingContext2D, color: Color, position: Point2D) {
 
         val textWidth = context.measureText(data.toString).width
         drawRoundedRectangle(context, position + Vector2D(-textWidth / 2, -15), Vector2D(textWidth, 20), 4)

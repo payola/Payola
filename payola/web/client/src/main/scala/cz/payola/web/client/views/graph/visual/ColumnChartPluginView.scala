@@ -12,7 +12,7 @@ class ColumnChartPluginView(settings: VisualSetup) extends PluginView("Column Ch
     private val chartWrapper = new Div(Nil, "column-chart-wrapper")
 
     // Used in drawChart()'s @javascript annotation. Beware before renaming
-    private val chartWrapperElement = chartWrapper.domElement
+    private val chartWrapperElement = chartWrapper.htmlElement
 
     // Used from @javascript annotations. Do *NOT* remove.
     private var googleDataTable = null

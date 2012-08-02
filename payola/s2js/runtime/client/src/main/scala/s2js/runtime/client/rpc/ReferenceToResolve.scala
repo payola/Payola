@@ -12,6 +12,6 @@ class ReferenceToResolve(val reference: Reference, val sourceObject: Any, val pr
         }
 
         // The reference has to be resolved using eval, because the property name can be nontrivial (array item access).
-        s2js.adapters.js.browser.eval("self.sourceObject." + propertyName + " = targetObject.get()")
+        s2js.adapters.js.eval("self.sourceObject." + propertyName + " = targetObject.get()")
     }
 }

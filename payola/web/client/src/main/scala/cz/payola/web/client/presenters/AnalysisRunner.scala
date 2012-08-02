@@ -49,12 +49,12 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
                 intervalHandler.foreach(window.clearInterval(_))
                 view.overviewView.controls.stopButton.addCssClass("disabled")
 
-                val graphPresenter = new GraphPresenter(view.resultsView.domElement)
+                val graphPresenter = new GraphPresenter(view.resultsView.htmlElement)
                 graphPresenter.initialize()
                 graphPresenter.view.updateGraph(Some(evt.graph))
 
                 val downloadButtonView = new DownloadButtonView()
-                downloadButtonView.render(graphPresenter.view.toolbar.domElement)
+                downloadButtonView.render(graphPresenter.view.toolbar.htmlElement)
 
                 downloadButtonView.rdfDownloadAnchor.mouseClicked += {
                     e =>

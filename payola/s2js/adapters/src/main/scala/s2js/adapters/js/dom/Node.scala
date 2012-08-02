@@ -1,10 +1,9 @@
 package s2js.adapters.js.dom
 
-/**
-  * A DOM node as it's described on http://www.w3schools.com/dom/dom_node.asp
-  */
 abstract class Node
 {
+    val attributes: NamedNodeMap[Attr]
+
     val baseURI: String
 
     val childNodes: NodeList[Node]
@@ -34,10 +33,6 @@ abstract class Node
     val previousSibling: Node
 
     var textContent: String
-
-    var text: String
-
-    var xml: String
 
     def appendChild(newChild: Node)
 

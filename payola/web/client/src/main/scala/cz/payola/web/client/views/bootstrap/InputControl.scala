@@ -1,11 +1,14 @@
 package cz.payola.web.client.views.bootstrap
 
-import s2js.adapters.js.dom
+import s2js.adapters.js._
 import s2js.adapters.js.browser.window
 import cz.payola.web.client.views._
 import cz.payola.web.client.views.elements._
 import cz.payola.common.ValidationException
 import cz.payola.web.client.events.SimpleUnitEvent
+import scala.Some
+import scala.Some
+import scala.Some
 
 abstract class InputControl(
     val label: String,
@@ -40,7 +43,7 @@ abstract class InputControl(
 
     def createSubViews = List(controlGroup)
 
-    def createInput: FormField[_ <: dom.Input]
+    def createInput: FormField[_ <: html.elements.Input]
 
     def setState(exception: ValidationException, fieldName: String) {
         if (fieldName == exception.fieldName) {

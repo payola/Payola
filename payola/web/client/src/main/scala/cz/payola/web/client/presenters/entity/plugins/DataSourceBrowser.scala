@@ -1,7 +1,7 @@
-package cz.payola.web.client.presenters.entity
+package cz.payola.web.client.presenters.entity.plugins
 
 import scala.collection.mutable
-import s2js.adapters.js.dom
+import s2js.adapters.js.html
 import cz.payola.web.shared.managers._
 import cz.payola.web.client.events.BrowserEventArgs
 import cz.payola.web.client.views.VertexEventArgs
@@ -12,15 +12,15 @@ import cz.payola.common.ValidationException
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
 
 class DataSourceBrowser(
-    val viewElement: dom.Element,
+    val viewElement: html.Element,
     val dataSourceId: String,
     val dataSourceName: String,
     val initialVertexUri: String = "")
     extends Presenter
 {
-    private val view = new DataSourceView(dataSourceName)
+    private val view = new DataSourceBrowserView(dataSourceName)
 
-    private val graphPresenter = new GraphPresenter(view.graphViewSpace.domElement)
+    private val graphPresenter = new GraphPresenter(view.graphViewSpace.htmlElement)
 
     private var history = mutable.ListBuffer.empty[String]
 
@@ -43,10 +43,11 @@ class DataSourceBrowser(
         // If the default URI isn't specified, display the initial graph.
         if (initialVertexUri == "") {
             blockPage("Fetching the initial graph.")
-            DataSourceManager.getInitialGraph(dataSourceId) { graph =>
-                graphPresenter.view.updateGraph(graph)
-                updateNavigationView()
-                unblockPage()
+            DataSourceManager.getInitialGraph(dataSourceId) {
+                graph =>
+                    graphPresenter.view.updateGraph(graph)
+                    updateNavigationView()
+                    unblockPage()
             }(fatalErrorHandler(_))
         } else {
             addToHistoryAndGo(initialVertexUri)
@@ -81,25 +82,28 @@ class DataSourceBrowser(
 
     private def onSparqlQueryButtonClicked(e: BrowserEventArgs[_]): Boolean = {
         val modal = new SparqlQueryModal
-        modal.confirming += { e =>
-            modal.block("Executing the SPARQL query.")
-            DataSourceManager.executeSparqlQuery(dataSourceId, modal.sparqlQueryInput.value) { g =>
-                modal.unblock()
-                modal.destroy()
+        modal.confirming += {
+            e =>
+                modal.block("Executing the SPARQL query.")
+                DataSourceManager.executeSparqlQuery(dataSourceId, modal.sparqlQueryInput.value) {
+                    g =>
+                        modal.unblock()
+                        modal.destroy()
 
-                history = mutable.ListBuffer.empty[String]
-                historyPosition = -1
-                updateNavigationView()
+                        history = mutable.ListBuffer.empty[String]
+                        historyPosition = -1
+                        updateNavigationView()
 
-                graphPresenter.view.updateGraph(g)
-            } { e =>
-                modal.unblock()
-                e match {
-                    case v: ValidationException => AlertModal.display("Error", v.message)
-                    case t => fatalErrorHandler(t)
+                        graphPresenter.view.updateGraph(g)
+                } {
+                    e =>
+                        modal.unblock()
+                        e match {
+                            case v: ValidationException => AlertModal.display("Error", v.message)
+                            case t => fatalErrorHandler(t)
+                        }
                 }
-            }
-            false
+                false
         }
         modal.render()
         false
@@ -132,12 +136,13 @@ class DataSourceBrowser(
         view.nodeUriInput.setIsEnabled(false)
 
         blockPage("Fetching the node neighbourhood.")
-        DataSourceManager.getNeighbourhood(dataSourceId, uri) { graph =>
-            graphPresenter.view.updateGraph(graph)
-            updateNavigationView()
+        DataSourceManager.getNeighbourhood(dataSourceId, uri) {
+            graph =>
+                graphPresenter.view.updateGraph(graph)
+                updateNavigationView()
 
-            view.nodeUriInput.setIsEnabled(true)
-            unblockPage()
+                view.nodeUriInput.setIsEnabled(true)
+                unblockPage()
         }(fatalErrorHandler(_))
     }
 

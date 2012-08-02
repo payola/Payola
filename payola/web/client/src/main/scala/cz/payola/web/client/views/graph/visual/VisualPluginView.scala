@@ -1,8 +1,8 @@
 package cz.payola.web.client.views.graph.visual
 
+import scala.collection._
 import animation.Animation
 import cz.payola.web.client.views.graph.PluginView
-import collection.mutable.ListBuffer
 import settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.events._
 import cz.payola.common.rdf._
@@ -10,14 +10,12 @@ import cz.payola.web.client.presenters.components.ZoomControls
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client._
 import cz.payola.web.client.views.algebra._
-import s2js.adapters.js.browser.window
-import s2js.adapters.js._
+import s2js.adapters.js.browser._
+import s2js.adapters.js.html
 import s2js.compiler.javascript
 import cz.payola.web.client.views.graph.visual.graph._
 import cz.payola.web.client.views._
-import s2js.adapters.js.browser.document
 import cz.payola.web.client.views.bootstrap.Icon
-import s2js.adapters.js.dom.CanvasContext
 import cz.payola.common.entities.settings.OntologyCustomization
 
 /**
@@ -143,16 +141,16 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
 
     pngDownloadButton.mouseClicked += { e =>
         val c = new Canvas()
-        c.domElement.width = topLayer.domElement.width
-        c.domElement.height = topLayer.domElement.height
+        c.htmlElement.width = topLayer.htmlElement.width
+        c.htmlElement.height = topLayer.htmlElement.height
 
-        c.domElement.getContext[CanvasContext]("2d").drawImage(layerPack.edgesDeselected.domElement,0,0)
-        c.domElement.getContext[CanvasContext]("2d").drawImage(layerPack.edgesSelected.domElement,0,0)
-        c.domElement.getContext[CanvasContext]("2d").drawImage(layerPack.verticesDeselected.domElement,0,0)
-        c.domElement.getContext[CanvasContext]("2d").drawImage(layerPack.verticesSelected.domElement,0,0)
-        c.domElement.getContext[CanvasContext]("2d").drawImage(topLayer.domElement,0,0)
+        c.htmlElement.getContext[html.elements.CanvasContext]("2d").drawImage(layerPack.edgesDeselected.htmlElement,0,0)
+        c.htmlElement.getContext[html.elements.CanvasContext]("2d").drawImage(layerPack.edgesSelected.htmlElement,0,0)
+        c.htmlElement.getContext[html.elements.CanvasContext]("2d").drawImage(layerPack.verticesDeselected.htmlElement,0,0)
+        c.htmlElement.getContext[html.elements.CanvasContext]("2d").drawImage(layerPack.verticesSelected.htmlElement,0,0)
+        c.htmlElement.getContext[html.elements.CanvasContext]("2d").drawImage(topLayer.htmlElement,0,0)
 
-        window.open(c.domElement.toDataURL("image/png"))
+        window.open(c.htmlElement.toDataURL("image/png"))
         false
     }
 
@@ -162,7 +160,7 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
     @javascript(
         """
            /* DOMMouseScroll is for mozilla. */
-           self.topLayer.domElement.addEventListener('DOMMouseScroll', function(event) {
+           self.topLayer.htmlElement.addEventListener('DOMMouseScroll', function(event) {
                return self.topLayer.mouseWheelRotated.triggerDirectly(self.topLayer, event);
            });
         """)
@@ -191,9 +189,9 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
 
     def createSubViews = layers
 
-    private var parent : Option[dom.Element] = None
+    private var parent : Option[html.Element] = None
 
-    override def render(parent: dom.Element) {
+    override def render(parent: html.Element) {
         super.render(parent)
 
         setMouseWheelListener()
@@ -235,7 +233,7 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
         currentInfoTable.foreach(_.destroy())
     }
 
-    override def renderControls(toolbar: dom.Element) {
+    override def renderControls(toolbar: html.Element) {
         zoomControls.render(toolbar)
         pngDownloadButton.render(toolbar)
     }
@@ -336,8 +334,8 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
       * which have selected both of their vertices
       * @return
       */
-    private def getEdgesInformations(vertexView: VertexView): ListBuffer[InformationView] = {
-        val result = ListBuffer[InformationView]()
+    private def getEdgesInformations(vertexView: VertexView): mutable.ListBuffer[InformationView] = {
+        val result = mutable.ListBuffer[InformationView]()
         vertexView.edges.foreach { edgeView =>
             if (edgeView.originView.selected && edgeView.destinationView.selected) {
                 result += edgeView.information

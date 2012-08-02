@@ -1,6 +1,6 @@
 package cz.payola.web.client.views.graph.visual
 
-import s2js.adapters.js.dom._
+import s2js.adapters.js.html
 import cz.payola.web.client.views.algebra.Vector2D
 
 /**
@@ -8,7 +8,7 @@ import cz.payola.web.client.views.algebra.Vector2D
   * @param canvas object specifying sizes of the context
   * @param context object for drawing
   */
-class Layer(val canvas: Canvas, val context: CanvasRenderingContext2D) //TODO delete
+class Layer(val canvas: html.elements.Canvas, val context: html.elements.CanvasRenderingContext2D) //TODO delete
 {
     /**
       * Indicator whether is the layer ready for drawing into.

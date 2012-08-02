@@ -1,10 +1,11 @@
 package cz.payola.web.client.events
 
 import s2js.adapters.js.browser
+import s2js.adapters.js.html.MouseKeyboardEvent
 
 object BrowserEventArgs
 {
-    def apply[A](target: A, event: browser.Event): BrowserEventArgs[A] = {
+    def apply[A](target: A, event: MouseKeyboardEvent): BrowserEventArgs[A] = {
         new BrowserEventArgs[A](
             target,
             event.altKey,
@@ -18,13 +19,13 @@ object BrowserEventArgs
             event.screenX,
             event.screenY,
             event.shiftKey,
-            if (browser.isNaN(event.wheelDelta)) event.detail / 120 else (-event.wheelDelta / 3)
+            if (s2js.adapters.js.isNaN(event.wheelDelta)) event.detail / 120 else (- event.wheelDelta / 3)
         )
     }
 }
 
 /**
-  * Event arguments of a browser event.
+  * MouseKeyboardEvent arguments of a browser event.
   * @param altKey Whether the "ALT" key is pressed.
   * @param button Mouse button that is pressed.
   * @param clientX Horizontal coordinate of the mouse pointer, relative to the current window.

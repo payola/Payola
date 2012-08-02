@@ -1,10 +1,10 @@
 package cz.payola.web.client.views.elements
 
 import cz.payola.web.client.views._
-import s2js.adapters.js.dom
+import s2js.adapters.js.html
 import cz.payola.web.client.events._
 
-abstract class FormField[A <: dom.Input](
+abstract class FormField[A <: html.elements.Input](
     elementName: String,
     name: String,
     initialValue: String,
@@ -14,17 +14,19 @@ abstract class FormField[A <: dom.Input](
 {
     val changed = new SimpleUnitEvent[this.type]
 
-    keyReleased += { e =>
-        changed.triggerDirectly(this)
-        true
+    keyReleased += {
+        e =>
+            changed.triggerDirectly(this)
+            true
     }
 
     value = initialValue
     setAttribute("name", name)
     setAttribute("id", name)
-    title.foreach { t =>
-        setAttribute("placeholder", t)
-        setAttribute("title", t)
+    title.foreach {
+        t =>
+            setAttribute("placeholder", t)
+            setAttribute("title", t)
     }
 
     def maxLength_=(maxLength: Int) {
@@ -36,11 +38,11 @@ abstract class FormField[A <: dom.Input](
     }
 
     def value: String = {
-        domElement.value
+        htmlElement.value
     }
 
     def value_=(value: String) {
-        domElement.value = value
+        htmlElement.value = value
     }
 
     def setIsActive(isActive: Boolean = true) {
@@ -54,10 +56,10 @@ abstract class FormField[A <: dom.Input](
     def setIsEnabled(isEnabled: Boolean) {
         if (isEnabled) {
             removeCssClass("disabled")
-            domElement.disabled = false
+            htmlElement.disabled = false
         } else {
             addCssClass("disabled")
-            domElement.disabled = true
+            htmlElement.disabled = true
         }
     }
 }

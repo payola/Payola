@@ -1,7 +1,6 @@
 package cz.payola.web.client.presenters.graph
 
-import s2js.adapters.js.dom
-import s2js.adapters.js.browser._
+import s2js.adapters.js.html
 import s2js.adapters.js.browser.window
 import cz.payola.web.client.events._
 import cz.payola.web.client.views.graph.PluginSwitchView
@@ -12,9 +11,11 @@ import cz.payola.web.client.views.entity.plugins.DataSourceSelector
 import cz.payola.common.entities.settings.OntologyCustomization
 import cz.payola.web.client.presenters.entity.settings._
 
-class GraphPresenter(val viewElement: dom.Element) extends Presenter
+class GraphPresenter(val viewElement: html.Element) extends Presenter
 {
     val view = new PluginSwitchView
+
+    private var currentOntologyCustomization: Option[OntologyCustomization] = None
 
     def initialize() {
         Model.ontologyCustomizationsChanged += onOntologyCustomizationsChanged _
@@ -40,22 +41,22 @@ class GraphPresenter(val viewElement: dom.Element) extends Presenter
         true
     }
 
-    private def onOntologyCustomizationCreateClicked(e: EventArgs[_]) = {
+    private def onOntologyCustomizationCreateClicked(e: EventArgs[_]) {
         val creator = new OntologyCustomizationCreator()
         creator.ontologyCustomizationCreated += { e =>
-            view.updateOntologyCustomization(Some(e.target))
+            onOntologyCustomizationSelected(e)
+            editOntologyCustomization(e.target)
         }
         creator.initialize()
     }
 
-    private def onOntologyCustomizationEditClicked(e: EventArgs[OntologyCustomization]): Boolean = {
-        new OntologyCustomizationEditor(e.target).initialize()
-        false
+    private def onOntologyCustomizationEditClicked(e: EventArgs[OntologyCustomization]) {
+        editOntologyCustomization(e.target)
     }
 
-    private def onOntologyCustomizationSelected(e: EventArgs[OntologyCustomization]): Boolean = {
+    private def onOntologyCustomizationSelected(e: EventArgs[OntologyCustomization]) {
+        currentOntologyCustomization = Some(e.target)
         view.updateOntologyCustomization(Some(e.target))
-        false
     }
 
     private def onVertexBrowsingDataSource(e: VertexEventArgs[_]) {
@@ -64,9 +65,17 @@ class GraphPresenter(val viewElement: dom.Element) extends Presenter
             unblockPage()
             val selector = new DataSourceSelector("Browse in different data source: " + e.vertex.uri, ds)
             selector.dataSourceSelected += { d =>
-                window.location.href = "/datasource/" + d.target.id + "?uri=" + encodeURI(e.vertex.uri)
+                window.location.href = "/datasource/" + d.target.id + "?uri=" + s2js.adapters.js.encodeURI(e.vertex.uri)
             }
             selector.render()
         }(fatalErrorHandler(_))
+    }
+
+    private def editOntologyCustomization(customization: OntologyCustomization) {
+        val editor = new OntologyCustomizationEditor(customization)
+        if (currentOntologyCustomization.exists(_ == customization)) {
+            editor.customizationValueChanged += { e => view.updateOntologyCustomization(Some(customization)) }
+        }
+        editor.initialize()
     }
 }

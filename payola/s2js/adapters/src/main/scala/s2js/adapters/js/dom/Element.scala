@@ -1,33 +1,16 @@
 package s2js.adapters.js.dom
 
-import s2js.adapters.js.browser.Event
-
-/**
-  * A DOM element as it's described on http://www.w3schools.com/dom/dom_element.asp
-  */
 abstract class Element extends Node
 {
-    var offsetTop: Double
-
-    var offsetLeft: Double
-
-    val attributes: NamedNodeMap
-
     val tagName: String
-
-    val id: String
-
-    var innerHTML: String
-
-    var className: String
 
     def getAttribute(name: String): String
 
     def getAttributeNS(ns: String, name: String): String
 
-    def getAttributeNode(name: String): Attribute
+    def getAttributeNode(name: String): Attr
 
-    def getAttributeNodeNS(ns: String, name: String): Attribute
+    def getAttributeNodeNS(ns: String, name: String): Attr
 
     def getElementsByTagName(name: String): NodeList[Element]
 
@@ -41,31 +24,9 @@ abstract class Element extends Node
 
     def removeAttributeNS(ns: String, name: String)
 
-    def removeAttributeNode(attribute: Attribute)
+    def removeAttributeNode(attribute: Attr)
 
     def setAttribute(name: String, value: String)
 
     def setAttributeNS(ns: String, name: String, value: String)
-
-    val scrollLeft: Int
-
-    val scrollTop: Int
-
-    var onkeyup: (Event => Boolean)
-
-    var onkeydown: (Event => Boolean)
-
-    var onclick: (Event => Boolean)
-
-    var ondblclick: (Event => Boolean)
-
-    var onmousedown: (Event => Boolean)
-
-    var onmouseup: (Event => Boolean)
-
-    var onmousemove: (Event => Boolean)
-
-    var onmousewheel: (Event => Boolean)
-
-    var onmouseout: (Event => Boolean)
 }

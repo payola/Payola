@@ -2,7 +2,7 @@ package cz.payola.web.client.views.graph.visual.settings.components.visualsetup
 
 import cz.payola.web.client.View
 import cz.payola.web.client.views.graph.visual.Color
-import s2js.adapters.js.dom.Element
+import s2js.adapters.js.html.Element
 import s2js.compiler.javascript
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events._
@@ -70,7 +70,7 @@ class ColorPane(name: String, label: String, private var colorOption: Option[Col
         closed.trigger(new EventArgs[ColorPane](this))
     }
 
-    def domElement: Element = colorInput.input.domElement
+    def domElement: Element = colorInput.input.htmlElement
 
     @javascript( """var cp = jQuery(self.div.domElement).colorpicker({format: 'rgba'})
                     cp.on('changeColor',function(evt){
@@ -86,5 +86,5 @@ class ColorPane(name: String, label: String, private var colorOption: Option[Col
         // TODO
     }
 
-    def blockDomElement: Element = null // TODO
+    def blockHtmlElement: Element = null // TODO
 }

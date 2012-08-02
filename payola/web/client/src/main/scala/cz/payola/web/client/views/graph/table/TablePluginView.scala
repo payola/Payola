@@ -1,19 +1,19 @@
 package cz.payola.web.client.views.graph.table
 
-import cz.payola.web.client.views.graph.PluginView
-import s2js.adapters.js.dom.Element
+import s2js.adapters.js.html
+import s2js.adapters.js.browser.document
 import cz.payola.common.rdf._
 import cz.payola.web.client.View
 import cz.payola.web.client.views.VertexEventArgs
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.Icon
-import s2js.adapters.js.browser.document
+import cz.payola.web.client.views.graph.PluginView
 
 abstract class TablePluginView(name: String) extends PluginView(name)
 {
     private val tableWrapper = new Div()
 
-    private val tableWrapperElement = tableWrapper.domElement
+    private val tableWrapperElement = tableWrapper.htmlElement
 
     tableWrapper.setAttribute("style", "padding: 0 0 0 30px;")
 
@@ -25,7 +25,7 @@ abstract class TablePluginView(name: String) extends PluginView(name)
             tableWrapper.removeAllChildNodes()
 
             // Insert the new table.
-            val table = document.createElement[Element]("table")
+            val table = document.createElement[html.Element]("table")
             tableWrapperElement.appendChild(table)
 
             table.className = "table table-striped table-bordered table-condensed"
@@ -36,7 +36,7 @@ abstract class TablePluginView(name: String) extends PluginView(name)
         super.updateGraph(graph)
     }
 
-    def fillTable(graph: Option[Graph], tableHead: Element, tableBody: Element)
+    def fillTable(graph: Option[Graph], tableHead: html.Element, tableBody: html.Element)
 
     protected def createVertexView(vertex: IdentifiedVertex): View = {
         val dataSourceAnchor = new Anchor(List(new Icon(Icon.hdd)))
@@ -53,12 +53,12 @@ abstract class TablePluginView(name: String) extends PluginView(name)
         new Span(List(dataSourceAnchor, new Span(List(new Text(" "))), browsingAnchor))
     }
 
-    protected def addRow(table: Element): Element = addElement(table, "tr")
+    protected def addRow(table: html.Element): html.Element = addElement(table, "tr")
 
-    protected def addCell(row: Element, isHeader: Boolean = false) = addElement(row, if (isHeader) "th" else "td")
+    protected def addCell(row: html.Element, isHeader: Boolean = false) = addElement(row, if (isHeader) "th" else "td")
 
-    protected def addElement(parent: Element, name: String): Element = {
-        val element = document.createElement[Element](name)
+    protected def addElement(parent: html.Element, name: String): html.Element = {
+        val element = document.createElement[html.Element](name)
         parent.appendChild(element)
         element
     }

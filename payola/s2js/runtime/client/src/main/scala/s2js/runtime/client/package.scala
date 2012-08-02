@@ -15,7 +15,7 @@ object `package`
     def classOf(anObject: Any): Option[Class] = None
 
     def isClassDefined(className: String): Boolean = {
-        s2js.runtime.client.js.isDefined(s2js.adapters.js.browser.eval(className))
+        s2js.runtime.client.js.isDefined(s2js.adapters.js.eval(className))
     }
 
     private def isInstanceOf(anObject: Any, classFullName: String): Boolean = {

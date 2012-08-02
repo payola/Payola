@@ -18,7 +18,7 @@ class DropDownButton(buttonViews: Seq[View], private var _items: Seq[ListItem], 
     def items_=(items: Seq[ListItem]) {
         _items.foreach(_.destroy())
         _items = items
-        _items.foreach(_.render(menu.domElement))
+        _items.foreach(_.render(menu.htmlElement))
     }
 
     def setActiveItem(item: ListItem) {

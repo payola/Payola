@@ -1,12 +1,11 @@
 package cz.payola.web.client.views.bootstrap
 
 import s2js.compiler.javascript
-import s2js.adapters.js.dom
+import s2js.adapters.js.html
 import s2js.adapters.js.browser.document
 import cz.payola.web.client.views._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events._
-import scala.Some
 import cz.payola.web.client.View
 
 /**
@@ -63,7 +62,7 @@ class Modal(
         ), "modal hide " + cssClass))
     }
 
-    override def render(parent: dom.Element = document.body) {
+    override def render(parent: html.Element = document.body) {
         super.render(parent)
         show()
     }
@@ -80,9 +79,9 @@ class Modal(
         false
     }
 
-    @javascript("$(self.subViews().head().domElement).modal({ show: true, keyboard: false, backdrop: 'static' })")
+    @javascript("$(self.subViews().head().htmlElement).modal({ show: true, keyboard: false, backdrop: 'static' })")
     private def show() { }
 
-    @javascript("jQuery(self.subViews().head().domElement).modal('hide')")
+    @javascript("jQuery(self.subViews().head().htmlElement).modal('hide')")
     private def hide() { }
 }

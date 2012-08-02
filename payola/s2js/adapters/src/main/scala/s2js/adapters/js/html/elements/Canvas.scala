@@ -1,6 +1,32 @@
-package s2js.adapters.js.dom
+package s2js.adapters.js.html.elements
 
-import s2js.adapters.js.browser.Window
+import s2js.adapters.js.html.Element
+import scala.collection.mutable.ArrayBuffer
+
+abstract class Canvas extends Element
+{
+    var height: Double = 0
+
+    var width: Double = 0
+
+    def getContext[A <: CanvasContext](contextId: String): A
+
+    def toDataURL(mimeType: String): String
+}
+
+abstract class CanvasContext
+{
+    def drawImage(canvas: Canvas, offsetX: Int, offsetY: Int)
+}
+
+abstract class CanvasGradient
+{
+    def addColorStop(offset: Double, color: String)
+}
+
+abstract class CanvasPattern
+
+abstract class CanvasPixelArray extends ArrayBuffer[Long]
 
 abstract class CanvasRenderingContext2D extends CanvasContext
 {
@@ -8,21 +34,21 @@ abstract class CanvasRenderingContext2D extends CanvasContext
 
     var fillStyle: Any
 
-    var font: String = "10px sans-serif"
+    var font: String
 
     var textAlign: String
 
-    var globalAlpha: Double = 1f
+    var globalAlpha: Double
 
-    var globalCOmpositeOperation: String = "over"
+    var globalCOmpositeOperation: String
 
-    var lineCap: String = "square"
+    var lineCap: String
 
-    var lineJoin: String = "miter"
+    var lineJoin: String
 
-    var lineWidth: Double = 1f
+    var lineWidth: Double
 
-    var miterLimit: Double = 1f
+    var miterLimit: Double
 
     var shadowBlur: Double
 
@@ -34,15 +60,15 @@ abstract class CanvasRenderingContext2D extends CanvasContext
 
     var strokeStyle: Any
 
-    val DRAWWINDOW_DRAW_CARET: Long = 0x01
+    val DRAWWINDOW_DRAW_CARET: Int
 
-    val DRAWWINDOW_DO_NOT_FLUSH: Long = 0x02
+    val DRAWWINDOW_DO_NOT_FLUSH: Int
 
-    val DRAWWINDOW_DRAW_VIEW: Long = 0x04
+    val DRAWWINDOW_DRAW_VIEW: Int
 
-    val DRAWWINDOW_USE_WIDGET_LAYERS = 0x08
+    val DRAWWINDOW_USE_WIDGET_LAYERS: Int
 
-    val DRAWWINDOW_ASYNC_DECODE_IMAGE = 0x10
+    val DRAWWINDOW_ASYNC_DECODE_IMAGE: Int
 
     def arc(x: Double, y: Double, r: Double, startAngle: Double, endAngle: Double)
 
@@ -79,10 +105,6 @@ abstract class CanvasRenderingContext2D extends CanvasContext
 
     def drawImage(image: Element, a1: Double, a2: Double, a3: Double, a4: Double, a5: Double, a6: Double, a7: Double,
         a8: Double)
-
-    def drawWindow(window: Window, x: Double, y: Double, w: Double, h: Double, bgColor: String)
-
-    def drawWindow(window: Window, x: Double, y: Double, w: Double, h: Double, bgColor: String, flags: Long)
 
     def fill()
 
@@ -127,4 +149,19 @@ abstract class CanvasRenderingContext2D extends CanvasContext
     def translate(x: Double, y: Double)
 
     def measureText(text: String): TextMetrics
+}
+
+abstract class ImageData
+{
+    val width: Long
+
+    val height: Long
+
+    val data: CanvasPixelArray
+}
+
+
+abstract class TextMetrics
+{
+    val width: Double
 }

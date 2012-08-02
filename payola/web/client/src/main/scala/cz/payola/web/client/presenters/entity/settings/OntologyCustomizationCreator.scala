@@ -19,7 +19,6 @@ class OntologyCustomizationCreator extends Presenter
                 modal.unblock()
                 modal.destroy()
                 ontologyCustomizationCreated.triggerDirectly(o)
-                new OntologyCustomizationEditor(o).initialize()
             } { error =>
                 modal.unblock()
                 error match {

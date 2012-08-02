@@ -1,46 +1,77 @@
 package s2js.adapters.js.browser
 
-class Window
+import s2js.adapters.js.html._
+
+abstract class Window
 {
+    val closed: Boolean
+
+    var defaultStatus: String
+
+    val document: Document
+
+    val history: History
+
+    var innerHeight: Double
+
+    var innerWidth: Double
+
+    val location: Location
+
+    var name: String
+
+    val navigator: Navigator
+
+    val opener: Window
+
+    var outerHeight: Double
+
+    var outerWidth: Double
+
+    val pageXOffset: Double
+
+    val pageYOffset: Double
+
+    val parent: Window
+
+    val screen: Screen
+
+    val screenLeft: Double
+
+    var screenTop: Double
+
+    val screenX: Double
+
+    val screenY: Double
+
+    val self: Window
+
+    var status: String
+
+    val top: Window
+
     val sessionStorage: Storage = null
 
     val localStorage: Storage = null
 
-    val innerWidth: Double = 0
+    var onresize: Event => Boolean
 
-    val innerHeight: Double = 0
-
-    def get(key: String) = ""
+    def get(key: String)
 
     def focus() {}
 
     def alert(s: Any) {}
 
-    def setTimeout(fn: () => Unit, milliseconds: Int): Int = 0
+    def setTimeout(fn: () => Unit, milliseconds: Int): Int
 
-    def clearTimeout(timeoutId: Int): Int = 0
+    def clearTimeout(timeoutId: Int)
 
-    def setInterval(fn: () => Unit, milliseconds: Int): Int = 0
+    def setInterval(fn: () => Unit, milliseconds: Int): Int
     
-    def clearInterval(intervalId: Int): Int = 0
+    def clearInterval(intervalId: Int)
 
-    val location = new Location
-
-    object history
-    {
-        // TODO
-    }
-
-    def open(url: String) = {}
-
-    /**
-      * window resizing event
-      */
-    var onresize: (Event => Boolean) = (event: Event) => false
+    def open(url: String)
 }
 
-class Location
-{
-    var href = ""
-}
+
 

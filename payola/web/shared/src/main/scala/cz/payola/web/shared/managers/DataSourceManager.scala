@@ -12,16 +12,6 @@ import cz.payola.common.ValidationException
     extends ShareableEntityManager[DataSource, cz.payola.common.entities.plugins.DataSource](
         Payola.model.dataSourceModel)
 {
-    /** Returns true if a data source with this name already exists.
-      *
-      * @param name Name of the potential data source.
-      * @param user User.
-      * @return True or false.
-      */
-    def dataSourceExistsWithName(name: String, user: User = null): Boolean = {
-        model.getAll().exists(_.name == name)
-    }
-
     @async def getInitialGraph(dataSourceId: String, user: Option[User] = null)
         (successCallback: (Option[Graph] => Unit))
         (failCallback: (Throwable => Unit)) {

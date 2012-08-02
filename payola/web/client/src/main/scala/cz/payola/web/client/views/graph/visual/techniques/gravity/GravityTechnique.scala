@@ -1,13 +1,12 @@
 package cz.payola.web.client.views.graph.visual.techniques.gravity
 
 import collection.mutable.ListBuffer
-import s2js.adapters.js.dom.Date
+import s2js.adapters.js.Date
 import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.views.graph.visual.graph._
 import cz.payola.web.client.views.graph.visual.animation.Animation
 import cz.payola.web.client.views.graph.visual.techniques.BaseTechnique
 import cz.payola.web.client.views.algebra._
-import scala.Some
 
 /**
   * Visual plug-in technique that places the vertices based on their edges.
@@ -70,7 +69,7 @@ class GravityTechnique(settings: VisualSetup) extends BaseTechnique(settings, "G
         //run the calculation for the specified time in miliseconds
         // or just run it at once (if the animation step length is 0 or not defined)
         while ((animationStepLength.isDefined && needToContinue &&
-            compStartTime.getTime() + animationStepLength.get > currentTime.getTime())
+            compStartTime.getTime + animationStepLength.get > currentTime.getTime)
             ||
             (animationStepLength.isDefined && animationStepLength.get == 0 && needToContinue)
             ||
