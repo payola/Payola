@@ -1,6 +1,6 @@
 package s2js.adapters.js.html.elements
 
-import s2js.adapters.js.dom.Element
+import s2js.adapters.js.html.Element
 
 abstract class Select extends Element with InputLike
 {

@@ -62,12 +62,12 @@ abstract class PluginInstanceView(
         }
 
         if (predecessors.nonEmpty) {
-            parent.insertBefore(successors.htmlElement, predecessors(0).domElement)
+            parent.insertBefore(successors.htmlElement, predecessors(0).htmlElement)
         }
 
         predecessors.foreach {
             p =>
-                successors.htmlElement.insertBefore(p.domElement, clearSpan.htmlElement)
+                successors.htmlElement.insertBefore(p.htmlElement, clearSpan.htmlElement)
         }
     }
 
@@ -75,13 +75,13 @@ abstract class PluginInstanceView(
         if (parentElement.isDefined) {
             predecessors.map {
                 p =>
-                    parentElement.get.insertBefore(p.domElement, domElement)
+                    parentElement.get.insertBefore(p.htmlElement, htmlElement)
             }
-            parentElement.get.removeChild(domElement)
+            parentElement.get.removeChild(htmlElement)
         }
     }
 
-    def domElement: html.Element = {
+    def htmlElement: html.Element = {
         successors.htmlElement
     }
 

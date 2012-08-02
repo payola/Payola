@@ -1,13 +1,11 @@
 package cz.payola.web.client.views.entity
 
 import s2js.compiler.javascript
-import s2js.adapters.js.dom
+import s2js.adapters.js.html
 import cz.payola.web.client.views.bootstrap.Modal
 import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
 import cz.payola.common.entities._
 import cz.payola.web.client.events._
-import s2js.runtime.client.js.JsObject
-import scala.Some
 
 class ShareModal(
     val entityName: String,
@@ -21,7 +19,7 @@ class ShareModal(
 
     override val body = List(granteeSelection)
 
-    override def render(parent: dom.Element) {
+    override def render(parent: html.Element) {
         super.render()
         initializeGranteeSelection()
     }
@@ -31,7 +29,7 @@ class ShareModal(
     }
 
     @javascript("""
-        jQuery(self.granteeSelection.input.domElement).select2({
+        jQuery(self.granteeSelection.input.htmlElement).select2({
             minimumInputLength: 1,
             multiple: true,
             initSelection: function(element) {

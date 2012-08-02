@@ -19,14 +19,14 @@ class DataSourceCreatorView(plugins: Seq[Plugin]) extends ComposedView
 
     val createButton = new Button(new Text("Create"))
 
-    pluginInput.input
+    pluginInput.input*/
 
     def createSubViews = List(
-        nameInput,
+        /*nameInput,
         descriptionInput,
         publicityInput,
         pluginInput,
         parameterInputsSpace,
-        createButton
-    )*/
+        createButton*/
+    )
 }

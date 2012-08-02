@@ -3,6 +3,7 @@ package cz.payola.web.client.views.graph.visual.settings.components.visualsetup
 import cz.payola.web.client.views.elements.{Label, Input, Div}
 import cz.payola.web.client.views.bootstrap.Modal
 import cz.payola.web.client.views.graph.visual.settings.VertexSettingsModel
+import cz.payola.web.client.views.bootstrap.element.ColorInput
 
 class VertexModal(model: VertexSettingsModel) extends Modal("Vertex settings")
 {
@@ -16,7 +17,7 @@ class VertexModal(model: VertexSettingsModel) extends Modal("Vertex settings")
         false
     }
 
-    val color = new ColorPane("vertex.color", "Vertex color", Some(model.colorValue))
+    val color = new ColorInput("vertex.color", "Vertex color", Some(model.colorValue))
 
     color.changed += { event =>
         model.colorValue = color.getColor.get

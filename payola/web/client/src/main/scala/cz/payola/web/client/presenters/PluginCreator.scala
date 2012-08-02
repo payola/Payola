@@ -1,13 +1,11 @@
 package cz.payola.web.client.presenters
 
-import s2js.adapters.js.dom.Element
 import s2js.compiler.javascript
 import s2js.adapters.js.browser._
 import cz.payola.web.shared.managers.PluginManager
 import cz.payola.web.client._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
-import cz.payola.model.ModelException
 import s2js.runtime.shared.rpc.RpcException
 
 // Can't pass the editor's pre ID as we're using it in the native JS, which needs to

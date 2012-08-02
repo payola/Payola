@@ -8,8 +8,6 @@ import cz.payola.web.client.views.bootstrap.Icon
 import cz.payola.web.client.views._
 import cz.payola.common.rdf.IdentifiedVertex
 import cz.payola.web.client.events._
-import s2js.compiler.javascript
-import s2js.adapters.js.dom.Element
 import cz.payola.web.client.views.algebra.Point2D
 
 class VertexInfoTable(vertex: IdentifiedVertex, values: mutable.HashMap[String, Seq[String]], position: Point2D) extends ComposedView

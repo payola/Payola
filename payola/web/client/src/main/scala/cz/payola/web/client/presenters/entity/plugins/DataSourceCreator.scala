@@ -24,6 +24,10 @@ class DataSourceCreator(val dataFetcherDivID: String,
     val descriptionFieldDivID: String,
     val listingURL: String) extends Presenter
 {
+    def initialize() {
+        // TODO
+    }
+
     // Define internal <select> ID
     /*val dataFetcherListID = "data_fetcher_list"
 

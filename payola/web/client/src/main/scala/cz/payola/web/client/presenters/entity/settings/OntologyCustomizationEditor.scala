@@ -6,11 +6,12 @@ import cz.payola.web.client.events._
 import cz.payola.web.shared.managers.OntologyCustomizationManager
 import cz.payola.common.ValidationException
 import cz.payola.web.client.Presenter
-import cz.payola.web.client.views.bootstrap.InputControl
 import cz.payola.web.client.views.bootstrap.modals._
 import cz.payola.web.client.models.Model
 import cz.payola.web.client.presenters.entity.ShareButtonPresenter
-import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.ColorPane
+import cz.payola.web.client.views.bootstrap.element.ColorInput
+import cz.payola.web.client.views.bootstrap.inputs.ColorInputControl
+import cz.payola.web.client.views.bootstrap.{EditableInput, InputControl}
 
 class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) extends Presenter
 {
@@ -39,7 +40,7 @@ class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) 
         view.render()
     }
 
-    private def onOntologyCustomizationNameChanged(e: EventArgs[InputControl]) {
+    private def onOntologyCustomizationNameChanged(e: EventArgs[InputControl[_ <: EditableInput]]) {
         e.target.setIsActive(true)
         Model.changeOntologyCustomizationName(ontologyCustomization, e.target.input.value) { () =>
             e.target.setIsActive(false)
@@ -71,50 +72,44 @@ class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) 
         false
     }
 
-    private def onClassFillColorChanged(e: ClassCustomizationEventArgs[ColorPane]) {
-        // TODO e.target.setIsActive(true)
+    private def onClassFillColorChanged(e: ClassCustomizationEventArgs[InputControl[_]]) {
+        e.target.setIsActive(true)
         OntologyCustomizationManager.setClassFillColor(ontologyCustomization.id, e.classCustomization.uri, e.newValue) {
-            () => // TODO successHandler(e, () => e.classCustomization.fillColor = e.newValue)
-                e.classCustomization.fillColor = e.newValue
-                customizationValueChanged.triggerDirectly(this)
-        }(/* TODO failHandler(_, e.target)*/ fatalErrorHandler(_))
+            () => successHandler(e, () => e.classCustomization.fillColor = e.newValue)
+        }(failHandler(_, e.target))
     }
 
-    private def onClassGlyphChanged(e: ClassCustomizationEventArgs[InputControl]) {
+    private def onClassGlyphChanged(e: ClassCustomizationEventArgs[InputControl[_]]) {
         e.target.setIsActive(true)
         OntologyCustomizationManager.setClassGlyph(ontologyCustomization.id, e.classCustomization.uri, e.newValue){
             () => successHandler(e, () => e.classCustomization.glyph = e.newValue)
         }(failHandler(_, e.target))
     }
 
-    private def onClassRadiusChanged(e: ClassCustomizationEventArgs[InputControl]) {
+    private def onClassRadiusChanged(e: ClassCustomizationEventArgs[InputControl[_]]) {
         e.target.setIsActive(true)
         OntologyCustomizationManager.setClassRadius(ontologyCustomization.id, e.classCustomization.uri, e.newValue){
             () => successHandler(e, () => e.classCustomization.radius = e.newValue.toInt)
         }(failHandler(_, e.target))
     }
 
-    private def onPropertyStrokeColorChanged(e: PropertyCustomizationEventArgs[ColorPane]) {
-        // TODO e.target.setIsActive(true)
+    private def onPropertyStrokeColorChanged(e: PropertyCustomizationEventArgs[InputControl[_]]) {
+        e.target.setIsActive(true)
         OntologyCustomizationManager.setPropertyStrokeColor(ontologyCustomization.id, e.classCustomization.uri, 
             e.propertyCustomization.uri, e.newValue) { () =>
-
-            // TODO successHandler(e, () => e.propertyCustomization.strokeColor = e.newValue)
-            e.propertyCustomization.strokeColor = e.newValue
-            customizationValueChanged.triggerDirectly(this)
-        }(/* TODO failHandler(_, e.target)*/ fatalErrorHandler(_))
-    }
-
-    private def onPropertyStrokeWidthChanged(e: PropertyCustomizationEventArgs[InputControl]) {
-        e.target.setIsActive(true)
-        OntologyCustomizationManager.setPropertyStrokeWidth(ontologyCustomization.id, e.classCustomization.uri,
-            e.propertyCustomization.uri, e.newValue) { () =>
-
-            successHandler(e, () => e.propertyCustomization.strokeWidth = e.newValue.toInt)
+                successHandler(e, () => e.propertyCustomization.strokeColor = e.newValue)
         }(failHandler(_, e.target))
     }
 
-    private def successHandler(e: EventArgs[InputControl], valueSetter: () => Unit) {
+    private def onPropertyStrokeWidthChanged(e: PropertyCustomizationEventArgs[InputControl[_]]) {
+        e.target.setIsActive(true)
+        OntologyCustomizationManager.setPropertyStrokeWidth(ontologyCustomization.id, e.classCustomization.uri,
+            e.propertyCustomization.uri, e.newValue) { () =>
+                successHandler(e, () => e.propertyCustomization.strokeWidth = e.newValue.toInt)
+        }(failHandler(_, e.target))
+    }
+
+    private def successHandler(e: EventArgs[InputControl[_]], valueSetter: () => Unit) {
         e.target.setIsActive(false)
         e.target.setOk()
         valueSetter()
@@ -126,7 +121,7 @@ class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) 
      * @param t The error.
      * @param input The corresponding input control
      */
-    private def failHandler(t: Throwable, input: InputControl) {
+    private def failHandler(t: Throwable, input: InputControl[_]) {
         t match {
             case v: ValidationException => {
                 input.setIsActive(false)

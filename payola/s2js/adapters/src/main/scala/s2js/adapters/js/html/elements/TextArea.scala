@@ -1,6 +1,8 @@
 package s2js.adapters.js.html.elements
 
-abstract class TextArea extends TextInputLike
+import s2js.adapters.js.html.Element
+
+abstract class TextArea extends Element with TextInputLike
 {
     var rows: Int
 

@@ -3,10 +3,6 @@ package cz.payola.web.client.views.entity.analysis
 import cz.payola.web.client.views.bootstrap.inputs._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.Icon
-import cz.payola.web.client.views.todo.PluginInstanceView
-import cz.payola.web.client.View
-import s2js.adapters.js.browser.document
-import s2js.adapters.js.dom.Element
 import cz.payola.web.client.views.ComposedView
 import cz.payola.common.entities.Analysis
 
