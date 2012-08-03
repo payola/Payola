@@ -9,7 +9,7 @@ class SelectInputControl(
     nameString: String,
     value: String,
     title: String)
-    extends InputControl[Select](labelString, nameString, value, title)
+    extends InputControl[Select](labelString, nameString, value, title, "")
 {
     def createInput = new Select(options)
 }

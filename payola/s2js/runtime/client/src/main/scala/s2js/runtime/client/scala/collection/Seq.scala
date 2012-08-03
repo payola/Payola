@@ -102,6 +102,10 @@ trait Seq extends Iterable
         i
     }
 
+    def indexOf(item: Double): Int = {
+        indexWhere(_ == item)
+    }
+
     // From SeqLike
     def contains(x: Double): Boolean = {
         exists(_ == x)
