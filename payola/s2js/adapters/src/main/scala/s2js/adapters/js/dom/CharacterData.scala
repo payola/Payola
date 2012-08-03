@@ -1,18 +1,18 @@
 package s2js.adapters.js.dom
 
-abstract class CharacterData extends Node
+trait CharacterData extends Node
 {
     var data: String
 
-    def appendData(data: String)
+    val length: Int
 
-    def deleteData(offset: Int, count: Int)
+    def substringData(offset: Int, count: Int)
+
+    def appendData(data: String)
 
     def insertData(offset: Int, data: String)
 
-    def length: Int
+    def deleteData(offset: Int, count: Int)
 
     def replaceData(offset: Int, count: Int, data: String)
-
-    def substringData(offset: Int, count: Int)
 }
