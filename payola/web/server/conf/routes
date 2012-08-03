@@ -15,8 +15,8 @@ POST    /RPC                        controllers.RPC.index()
 GET     /test/RPC                   controllers.Application.rpcTest()
 POST    /RPC/async                  controllers.RPC.async()
 
+GET     /analysis/accessible        controllers.Analysis.listAccessible(page: Int ?= 1)
 GET     /analysis/list              controllers.Analysis.list(page: Int ?= 1)
-GET     /analysis/listOwned         controllers.Analysis.listOwned(page: Int ?= 1)
 GET     /analysis/create            controllers.Analysis.create
 GET     /analysis/edit/:id          controllers.Analysis.edit(id)
 GET     /analysis/delete/:id        controllers.Analysis.delete(id)
