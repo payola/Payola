@@ -28,6 +28,7 @@ GET     /analysis/:analysisID/evaluation/:evaluationID/download.ttl   controller
 GET     /datasource/create          controllers.DataSource.create()
 POST    /datasource/create          controllers.DataSource.createNew()
 GET     /datasource/list            controllers.DataSource.list(page: Int ?= 1)
+GET     /datasource/accessible        controllers.DataSource.listAccessible(page: Int ?= 1)
 GET     /datasource/:id             controllers.DataSource.detail(id, uri: Option[String])
 GET     /datasource/edit/:id        controllers.DataSource.edit(id)
 GET     /datasource/delete/:id      controllers.DataSource.delete(id)
