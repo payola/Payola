@@ -4,6 +4,25 @@ import s2js.adapters.js.browser._
 import s2js.adapters.js.html
 import cz.payola.web.client.views.graph.visual.Color
 import cz.payola.web.client.views.algebra._
+import s2js.adapters.html.elements._
+import scala.Some
+import scala.Option
+import s2js.adapters.html._
+import scala.Some
+import scala.Some
+import scala.Some
+import scala.Some
+import scala.Some
+import scala.Some
+import scala.Some
+import scala.Some
+import scala.Some
+import scala.Some
+import scala.Some
+import scala.Some
+import scala.Some
+import scala.Some
+import s2js.adapters
 
 /**
  * Structure used during draw function of EdgeView. Helps to indicate position of vertices to each other.
@@ -48,7 +67,7 @@ trait View[A]
       * @param size of the drawn "rounded rectangle"
       * @param radius of the corners of the rectangle
       */
-    protected def drawRoundedRectangle(context: html.elements.CanvasRenderingContext2D, position: Point2D,
+    protected def drawRoundedRectangle(context: elements.CanvasRenderingContext2D, position: Point2D,
         size: Vector2D, radius: Double) {
         //theory:
         //	context.quadraticCurveTo(
@@ -91,7 +110,7 @@ trait View[A]
      * @param lineWidth width of the drawn curve
      * @param straightenIndex the higher the straighter the line is, number from interval (0, 6) is expected
      */
-    protected def drawBezierCurve(context: html.elements.CanvasRenderingContext2D, origin: Point2D,
+    protected def drawBezierCurve(context: elements.CanvasRenderingContext2D, origin: Point2D,
         destination: Point2D, color: Color, lineWidth: Double, straightenIndex: Double) {
 
         val A = origin
@@ -167,7 +186,7 @@ trait View[A]
       * @param lineWidth width of the line
       * @param color of the line
       */
-    private def performBezierCurveDrawing(context: html.elements.CanvasRenderingContext2D, control1: Point2D,
+    private def performBezierCurveDrawing(context: elements.CanvasRenderingContext2D, control1: Point2D,
         control2: Point2D, origin: Point2D, destination: Point2D, lineWidth: Double, color: Color) {
         context.lineWidth = lineWidth
         context.strokeStyle = color.toString
@@ -186,7 +205,7 @@ trait View[A]
       * @param lineWidth width of the line
       * @param color of the line
       */
-    protected def drawStraightLine(context: html.elements.CanvasRenderingContext2D, origin: Point2D,
+    protected def drawStraightLine(context: elements.CanvasRenderingContext2D, origin: Point2D,
         destination: Point2D, lineWidth: Double, color: Color) {
         context.lineWidth = lineWidth
         context.strokeStyle = color.toString
@@ -205,7 +224,7 @@ trait View[A]
       * @param lineWidth width of the line of the circle
       * @param color of the line of the circle
       */
-    protected def drawCircle(context: html.elements.CanvasRenderingContext2D, center: Point2D, radius: Double,
+    protected def drawCircle(context: elements.CanvasRenderingContext2D, center: Point2D, radius: Double,
         lineWidth: Double, color: Color) {
         context.lineWidth = lineWidth
         context.strokeStyle = color.toString
@@ -225,7 +244,7 @@ trait View[A]
      * @param lineWidth width of the line
      * @param color of the line and the arrow
      */
-    protected def drawArrow(context: html.elements.CanvasRenderingContext2D, origin: Point2D, destination: Point2D,
+    protected def drawArrow(context: elements.CanvasRenderingContext2D, origin: Point2D, destination: Point2D,
         offsetOrigin: Double, offsetDestination: Double, lineWidth: Double, color: Color) {
 
         var arrowPointingFrom: Option[Point2D] = None
@@ -261,7 +280,7 @@ trait View[A]
      *                  and the distance between the two distant ends is lineWidth * 4
      * @param color of the drawn lines
      */
-    private  def drawArrowCap(context: html.elements.CanvasRenderingContext2D, direction: Vector2D,
+    private  def drawArrowCap(context: elements.CanvasRenderingContext2D, direction: Vector2D,
         destination: Point2D, lineWidth: Double, color: Color) {
 
         val arrowSize = Vector2D(lineWidth, lineWidth)*4
@@ -376,7 +395,7 @@ trait View[A]
       * @param font of the text
       * @param align of the text
       */
-    protected def drawText(context: html.elements.CanvasRenderingContext2D, text: String, origin: Point2D,
+    protected def drawText(context: elements.CanvasRenderingContext2D, text: String, origin: Point2D,
         color: Color, font: String, align: String) {
         context.fillStyle = color.toString
         context.font = font
@@ -390,7 +409,7 @@ trait View[A]
       * @param context where in to fill a space
       * @param color of the filling
       */
-    protected def fillCurrentSpace(context: html.elements.CanvasRenderingContext2D, color: Color) {
+    protected def fillCurrentSpace(context: elements.CanvasRenderingContext2D, color: Color) {
         context.fillStyle = color.toString
         context.fill()
     }
@@ -402,7 +421,7 @@ trait View[A]
       * @param location of drawing
       * @param dimensions to stretch the image to
       */
-    protected def drawImage(context: html.elements.CanvasRenderingContext2D, image: html.Element, location: Point2D,
+    protected def drawImage(context: elements.CanvasRenderingContext2D, image: adapters.html.Element, location: Point2D,
         dimensions: Vector2D) {
         context.drawImage(image, location.x, location.y, dimensions.x, dimensions.y)
     }
@@ -414,10 +433,10 @@ trait View[A]
      */
     protected def prepareImage(imagePath: String): html.elements.Canvas = {
         val imageSize = Vector2D(20, 20)
-        val canvas = document.createElement[html.elements.Canvas]("canvas")
+        val canvas = document.createElement[elements.Canvas]("canvas")
         canvas.width = imageSize.x
         canvas.height = imageSize.y
-        val context = canvas.getContext[html.elements.CanvasRenderingContext2D]("2d")
+        val context = canvas.getContext[elements.CanvasRenderingContext2D]("2d")
 
         //nakreslim do lokalniho canvasu
 
@@ -436,9 +455,9 @@ trait View[A]
      * @param color that should be set to all pixels in the rectangle; the alpha value stays unchanged
      * @return canvas with set color
      */
-    protected def setColorOfDrawnElements(canvas: html.elements.Canvas, startPoint: Point2D, endPoint: Point2D,
-        color: Color): html.elements.Canvas = {
-        val context = canvas.getContext[html.elements.CanvasRenderingContext2D]("2d")
+    protected def setColorOfDrawnElements(canvas: elements.Canvas, startPoint: Point2D, endPoint: Point2D,
+        color: Color): elements.Canvas = {
+        val context = canvas.getContext[elements.CanvasRenderingContext2D]("2d")
         //nakreslim do globalniho canvasu lokalni canvas
         val imageData = context.getImageData(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
         val canvasPixelArray = imageData.data;

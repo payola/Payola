@@ -7,6 +7,7 @@ import cz.payola.web.client.views._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events._
 import cz.payola.web.client.View
+import s2js.adapters.html.Element
 
 /**
   * A modal popup window.

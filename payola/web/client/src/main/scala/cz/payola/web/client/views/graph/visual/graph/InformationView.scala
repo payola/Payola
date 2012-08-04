@@ -4,6 +4,8 @@ import s2js.adapters.js.html
 import cz.payola.web.client.views.graph.visual.Color
 import cz.payola.web.client.views.graph.visual.settings.TextSettingsModel
 import cz.payola.web.client.views.algebra._
+import s2js.adapters.html.elements.CanvasRenderingContext2D
+import s2js.adapters.html._
 
 /**
   * Graphical representation of textual data in the drawn graph.
@@ -17,11 +19,11 @@ class InformationView(data: Any, val settings: TextSettingsModel) extends View[h
         false
     }
 
-    def draw(context: html.elements.CanvasRenderingContext2D, positionCorrection: Vector2D) {
+    def draw(context: elements.CanvasRenderingContext2D, positionCorrection: Vector2D) {
         drawQuick(context, positionCorrection)
     }
 
-    def drawQuick(context: html.elements.CanvasRenderingContext2D, positionCorrection: Vector2D) {
+    def drawQuick(context: elements.CanvasRenderingContext2D, positionCorrection: Vector2D) {
 
         performDrawing(context, settings.color, Point2D(positionCorrection.x, positionCorrection.y))
     }
@@ -32,7 +34,7 @@ class InformationView(data: Any, val settings: TextSettingsModel) extends View[h
       * @param color in which the text is draw
       * @param position where the text is drawn
       */
-    private def performDrawing(context: html.elements.CanvasRenderingContext2D, color: Color, position: Point2D) {
+    private def performDrawing(context: elements.CanvasRenderingContext2D, color: Color, position: Point2D) {
 
         val textWidth = context.measureText(data.toString).width
         drawRoundedRectangle(context, position + Vector2D(-textWidth / 2, -15), Vector2D(textWidth, 20), 4)

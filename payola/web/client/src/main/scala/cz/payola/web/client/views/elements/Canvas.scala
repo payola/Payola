@@ -4,6 +4,7 @@ import s2js.adapters.js.html
 import s2js.adapters.js.browser.window
 import cz.payola.web.client.views._
 import cz.payola.web.client.views.algebra.Vector2D
+import s2js.adapters.html.elements._
 
 class Canvas(cssClass: String = "") extends ElementView[html.elements.Canvas]("canvas", Nil, cssClass)
 {

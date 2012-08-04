@@ -5,6 +5,7 @@ import s2js.adapters.js.html
 import s2js.compiler.javascript
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.{EditableInput, Icon}
+import s2js.adapters.html.Element
 
 // Use the getter + setter for the color
 class ColorInput(name: String, label: String, private var colorOption: Option[Color], cssClass: String = "")

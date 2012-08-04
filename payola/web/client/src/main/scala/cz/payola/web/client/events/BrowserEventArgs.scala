@@ -1,6 +1,8 @@
 package cz.payola.web.client.events
 
 import s2js.adapters.js.browser
+import s2js.adapters.events.MouseKeyboardEvent
+import s2js.adapters.html.MouseKeyboardEvent
 import s2js.adapters.js.html.MouseKeyboardEvent
 
 object BrowserEventArgs

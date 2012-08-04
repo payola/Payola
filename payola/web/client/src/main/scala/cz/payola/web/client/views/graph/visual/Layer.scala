@@ -2,6 +2,7 @@ package cz.payola.web.client.views.graph.visual
 
 import s2js.adapters.js.html
 import cz.payola.web.client.views.algebra.Vector2D
+import s2js.adapters.html.elements._
 
 /**
   * Representation of a space for drawing into a web page.

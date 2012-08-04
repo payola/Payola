@@ -6,6 +6,8 @@ import cz.payola.web.client.views.graph.visual.Color
 import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.views.graph.visual.graph.positioning.LocationDescriptor
+import s2js.adapters.html.elements.CanvasRenderingContext2D
+import s2js.adapters.html._
 
 /**
   * Graphical representation of Edge object in the drawn graph.
@@ -38,7 +40,7 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
         originView.selected && destinationView.selected
     }
 
-    def draw(context: html.elements.CanvasRenderingContext2D, positionCorrection: Vector2D) {
+    def draw(context: elements.CanvasRenderingContext2D, positionCorrection: Vector2D) {
 
         drawQuick(context, positionCorrection)
         if (isSelected) {
@@ -47,7 +49,7 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
         }
     }
 
-    def drawQuick(context: html.elements.CanvasRenderingContext2D, positionCorrection: Vector2D) {
+    def drawQuick(context: elements.CanvasRenderingContext2D, positionCorrection: Vector2D) {
         val colorToUse = if(isSelected) {
             val col = settings.edgesModel.color(originView.rdfType, edgeModel.uri)
 

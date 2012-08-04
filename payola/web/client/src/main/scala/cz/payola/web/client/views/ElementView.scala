@@ -7,6 +7,10 @@ import cz.payola.web.client.events.BrowserEvent
 import cz.payola.web.client.View
 import cz.payola.web.client.views.elements.Text
 import cz.payola.web.client.views.algebra.Vector2D
+import s2js.adapters.html.Element
+import s2js._
+import scala.Some
+import scala.Some
 
 abstract class ElementView[A <: html.Element](htmlElementName: String, val subViews: Seq[View], cssClass: String)
     extends View
@@ -31,7 +35,7 @@ abstract class ElementView[A <: html.Element](htmlElementName: String, val subVi
 
     val mouseWheelRotated = new BrowserEvent[this.type]
 
-    protected var parentElement: Option[html.Element] = None
+    protected var parentElement: Option[adapters.html.Element] = None
 
     htmlElement.onkeydown = { e => keyPressed.triggerDirectly(this, e) }
     htmlElement.onkeyup = { e => keyReleased.triggerDirectly(this, e) }
@@ -46,7 +50,7 @@ abstract class ElementView[A <: html.Element](htmlElementName: String, val subVi
 
     def blockHtmlElement = htmlElement
 
-    def render(parent: html.Element) {
+    def render(parent: adapters.html.Element) {
         parentElement = Some(parent)
         parent.appendChild(htmlElement)
         subViews.foreach { v =>
@@ -102,7 +106,7 @@ abstract class ElementView[A <: html.Element](htmlElementName: String, val subVi
     def topLeftCorner: Vector2D = {
         var offsetTop = 0.0
         var offsetLeft = 0.0
-        var element: html.Element = htmlElement
+        var element: adapters.html.Element = htmlElement
         while (element != null) {
             offsetTop += element.offsetTop
             offsetLeft += element.offsetLeft

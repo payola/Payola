@@ -1,6 +1,7 @@
 package cz.payola.web.client.views.graph.visual.graph
 
 import collection.mutable.ListBuffer
+import s2js.adapters.html.elements.CanvasRenderingContext2D
 import s2js.adapters.js.html.elements.CanvasRenderingContext2D
 import cz.payola.web.client.views.graph.visual.settings._
 import cz.payola.web.client.views.graph.visual.Color

@@ -12,6 +12,7 @@ import scala.collection.mutable
 import s2js.compiler.javascript
 import cz.payola.web.client.events.SimpleUnitEvent
 import cz.payola.common.entities.plugins.PluginInstance
+import s2js.adapters.html.Element
 
 abstract class AnalysisVisualizer(analysis: Analysis) extends View
 {

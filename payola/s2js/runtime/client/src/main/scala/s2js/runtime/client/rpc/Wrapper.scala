@@ -6,6 +6,7 @@ import s2js.adapters.js._
 import s2js.adapters.js.browser._
 import s2js.runtime.shared.rpc.RpcException
 import s2js.runtime.client.scala.collection.immutable.StringOps
+import s2js.adapters.browser._
 
 private object Wrapper
 {

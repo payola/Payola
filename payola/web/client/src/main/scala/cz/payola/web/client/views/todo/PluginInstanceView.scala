@@ -7,6 +7,12 @@ import cz.payola.common.entities.Plugin
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.View
 import cz.payola.web.client.views.elements.Div
+import s2js.adapters.html.Element
+import s2js._
+import scala.Some
+import scala.Some
+import scala.Some
+import scala.Some
 
 abstract class PluginInstanceView(
     val id: String,
@@ -39,7 +45,7 @@ abstract class PluginInstanceView(
 
     private var parentElement: Option[html.Element] = None
 
-    def render(parent: html.Element) {
+    def render(parent: adapters.html.Element) {
         this.parentElement = Some(parent)
         successors.render(parent)
 
@@ -81,11 +87,11 @@ abstract class PluginInstanceView(
         }
     }
 
-    def htmlElement: html.Element = {
+    def htmlElement: adapters.html.Element = {
         successors.htmlElement
     }
 
-    def getPluginElement: html.Element = {
+    def getPluginElement: adapters.html.Element = {
         alertDiv.htmlElement
     }
 
@@ -122,7 +128,7 @@ abstract class PluginInstanceView(
     }
 
     @javascript("""jQuery(e).popover()""")
-    def activatePopover(e: html.Element){}
+    def activatePopover(e: adapters.html.Element){}
 
     def clearStyle(){
         alertDiv.removeCssClass("alert-warning")
@@ -131,5 +137,5 @@ abstract class PluginInstanceView(
         alertDiv.removeCssClass("alert-danger")
     }
 
-    def blockHtmlElement: html.Element = successors.htmlElement
+    def blockHtmlElement: adapters.html.Element = successors.htmlElement
 }

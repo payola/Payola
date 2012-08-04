@@ -7,6 +7,7 @@ import cz.payola.web.client._
 import cz.payola.web.client.models.Model
 import cz.payola.web.client.views.entity.plugins.DataSourceCreatorView
 import cz.payola.web.shared.managers.DataSourceManager
+import s2js.adapters.html.Element
 
 class DataSourceCreator(val viewElement: html.Element) extends Presenter
 {

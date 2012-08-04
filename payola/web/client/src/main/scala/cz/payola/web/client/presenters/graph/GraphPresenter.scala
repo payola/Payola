@@ -10,6 +10,7 @@ import cz.payola.web.client.models.Model
 import cz.payola.web.client.views.entity.plugins.DataSourceSelector
 import cz.payola.common.entities.settings.OntologyCustomization
 import cz.payola.web.client.presenters.entity.settings._
+import s2js.adapters.html.Element
 
 class GraphPresenter(val viewElement: html.Element) extends Presenter
 {

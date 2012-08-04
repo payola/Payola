@@ -17,6 +17,14 @@ import cz.payola.web.client.views.graph.visual.graph._
 import cz.payola.web.client.views._
 import cz.payola.web.client.views.bootstrap.Icon
 import cz.payola.common.entities.settings.OntologyCustomization
+import s2js.adapters.html.elements.CanvasContext
+import s2js._
+import scala.Some
+import scala.Some
+import scala.Some
+import s2js.adapters.html.Element
+import scala.Some
+import scala.Some
 
 /**
   * Representation of visual based output drawing plugin
@@ -145,10 +153,10 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
         c.htmlElement.height = topLayer.htmlElement.height
 
         c.htmlElement.getContext[html.elements.CanvasContext]("2d").drawImage(layerPack.edgesDeselected.htmlElement,0,0)
-        c.htmlElement.getContext[html.elements.CanvasContext]("2d").drawImage(layerPack.edgesSelected.htmlElement,0,0)
-        c.htmlElement.getContext[html.elements.CanvasContext]("2d").drawImage(layerPack.verticesDeselected.htmlElement,0,0)
-        c.htmlElement.getContext[html.elements.CanvasContext]("2d").drawImage(layerPack.verticesSelected.htmlElement,0,0)
-        c.htmlElement.getContext[html.elements.CanvasContext]("2d").drawImage(topLayer.htmlElement,0,0)
+        c.htmlElement.getContext[adapters.html.elements.CanvasContext]("2d").drawImage(layerPack.edgesSelected.htmlElement,0,0)
+        c.htmlElement.getContext[adapters.html.elements.CanvasContext]("2d").drawImage(layerPack.verticesDeselected.htmlElement,0,0)
+        c.htmlElement.getContext[adapters.html.elements.CanvasContext]("2d").drawImage(layerPack.verticesSelected.htmlElement,0,0)
+        c.htmlElement.getContext[adapters.html.elements.CanvasContext]("2d").drawImage(topLayer.htmlElement,0,0)
 
         window.open(c.htmlElement.toDataURL("image/png"))
         false
@@ -191,7 +199,7 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
 
     private var parent : Option[html.Element] = None
 
-    override def render(parent: html.Element) {
+    override def render(parent: adapters.html.Element) {
         super.render(parent)
 
         setMouseWheelListener()
@@ -233,7 +241,7 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
         currentInfoTable.foreach(_.destroy())
     }
 
-    override def renderControls(toolbar: html.Element) {
+    override def renderControls(toolbar: adapters.html.Element) {
         zoomControls.render(toolbar)
         pngDownloadButton.render(toolbar)
     }

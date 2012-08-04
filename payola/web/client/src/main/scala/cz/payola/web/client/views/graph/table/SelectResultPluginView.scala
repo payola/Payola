@@ -5,6 +5,8 @@ import s2js.adapters.js.html
 import cz.payola.common.rdf._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.Icon
+import s2js.adapters.html.Element
+import s2js._
 
 class SelectResultPluginView extends TablePluginView("Select Result Table")
 {
@@ -37,7 +39,7 @@ class SelectResultPluginView extends TablePluginView("Select Result Table")
         false
     }
 
-    def fillTable(graph: Option[Graph], tableHead: html.Element, tableBody: html.Element) {
+    def fillTable(graph: Option[Graph], tableHead: html.Element, tableBody: adapters.html.Element) {
         graph.foreach { g =>
             variables = mutable.ListBuffer.empty[String]
             solutions = mutable.HashMap.empty[String, mutable.ListBuffer[Binding]]
@@ -91,7 +93,7 @@ class SelectResultPluginView extends TablePluginView("Select Result Table")
         }
     }
 
-    override def renderControls(toolbar: html.Element) {
+    override def renderControls(toolbar: adapters.html.Element) {
         csvDownloadButton.render(toolbar)
     }
 

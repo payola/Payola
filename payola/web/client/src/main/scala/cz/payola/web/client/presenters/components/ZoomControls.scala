@@ -6,6 +6,7 @@ import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events.SimpleUnitEvent
 import cz.payola.web.client.views.elements.Div
 import cz.payola.web.client.views.ComposedView
+import s2js.adapters.html.Element
 
 class ZoomControls(var currentZoom: Double) extends ComposedView
 {

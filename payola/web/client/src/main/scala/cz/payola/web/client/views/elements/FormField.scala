@@ -3,6 +3,8 @@ package cz.payola.web.client.views.elements
 import cz.payola.web.client.views._
 import s2js.adapters.js.html
 import bootstrap.EditableInput
+import s2js.adapters.html.elements.InputLike
+import s2js.adapters.html.Element
 
 abstract class FormField[A <: html.Element with html.elements.InputLike](
     elementName: String,

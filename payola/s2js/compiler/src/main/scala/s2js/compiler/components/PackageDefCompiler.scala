@@ -142,10 +142,11 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
         val packageReplacementMap = mutable.LinkedHashMap(
             "java.lang" -> "scala",
             "scala.this" -> "scala",
-            "s2js.adapters.js.browser" -> "",
-            "s2js.adapters.js.dom" -> "",
-            "s2js.adapters.js.html.elements" -> "",
-            "s2js.adapters.js.html" -> "",
+            "s2js.adapters.browser" -> "",
+            "s2js.adapters.dom" -> "",
+            "s2js.adapters.events" -> "",
+            "s2js.adapters.html.elements" -> "",
+            "s2js.adapters.html" -> "",
             "s2js.adapters.js" -> "",
             "s2js.adapters" -> "",
             "s2js.runtime.client.scala" -> "scala"

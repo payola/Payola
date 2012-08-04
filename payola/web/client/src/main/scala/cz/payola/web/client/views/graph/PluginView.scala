@@ -2,6 +2,7 @@ package cz.payola.web.client.views.graph
 
 import s2js.adapters.js.html
 import cz.payola.web.client.views._
+import s2js.adapters.html.Element
 
 /**
   * A graph visualisation plugin view.

@@ -2,6 +2,7 @@ package cz.payola.web.client.views.elements
 
 import s2js.adapters.js.html
 import cz.payola.web.client.views._
+import s2js.adapters.html.Element
 
 class Label(text: String, forElement: ElementView[_], cssClass: String = "")
     extends ElementView[html.Element]("label", Nil, cssClass)

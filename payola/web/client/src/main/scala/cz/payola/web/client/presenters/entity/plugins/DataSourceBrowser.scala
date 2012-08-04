@@ -10,6 +10,7 @@ import cz.payola.web.client.presenters.graph.GraphPresenter
 import cz.payola.web.client.views.entity.plugins._
 import cz.payola.common.ValidationException
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
+import s2js.adapters.html.Element
 
 class DataSourceBrowser(
     val viewElement: html.Element,
