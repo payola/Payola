@@ -1,6 +1,6 @@
 package cz.payola.web.client.views.entity.settings
 
-import s2js.adapters.js.html
+import s2js.adapters.html
 import cz.payola.common.entities.settings._
 import cz.payola.web.client.views.bootstrap._
 import cz.payola.web.client.views.elements._
@@ -8,7 +8,6 @@ import cz.payola.web.client.events._
 import element.ColorInput
 import inputs._
 import cz.payola.web.client.presenters.entity.settings._
-import s2js.adapters.html.Element
 
 class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomization)
     extends Modal("Edit ontology customization", Nil, Some("Done"), None, false, "large-modal")

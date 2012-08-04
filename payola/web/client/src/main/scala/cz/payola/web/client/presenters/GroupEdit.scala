@@ -30,7 +30,7 @@ class GroupEdit(groupId: String)
               }
             });
         """)
-    def bindSelect = {}
+    def bindSelect {}
 
     def fetchUsersByQuery(term: String, itemCallback: (String, String) => Unit, callback: () => Unit){
         DomainData.searchMembersAvailableForGroup(groupId, term){ users =>

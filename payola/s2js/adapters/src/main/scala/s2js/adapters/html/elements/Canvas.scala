@@ -3,7 +3,7 @@ package s2js.adapters.html.elements
 import scala.collection.mutable.ArrayBuffer
 import s2js.adapters.html.Element
 
-abstract class Canvas extends Element
+trait Canvas extends Element
 {
     var height: Double = 0
 
@@ -14,21 +14,21 @@ abstract class Canvas extends Element
     def toDataURL(mimeType: String): String
 }
 
-abstract class CanvasContext
+trait CanvasContext
 {
     def drawImage(canvas: Canvas, offsetX: Int, offsetY: Int)
 }
 
-abstract class CanvasGradient
+trait CanvasGradient
 {
     def addColorStop(offset: Double, color: String)
 }
 
-abstract class CanvasPattern
+trait CanvasPattern
 
-abstract class CanvasPixelArray extends ArrayBuffer[Long]
+trait CanvasPixelArray extends ArrayBuffer[Long]
 
-abstract class CanvasRenderingContext2D extends CanvasContext
+trait CanvasRenderingContext2D extends CanvasContext
 {
     val canvas: Canvas
 
@@ -151,7 +151,7 @@ abstract class CanvasRenderingContext2D extends CanvasContext
     def measureText(text: String): TextMetrics
 }
 
-abstract class ImageData
+trait ImageData
 {
     val width: Long
 
@@ -160,7 +160,7 @@ abstract class ImageData
     val data: CanvasPixelArray
 }
 
-abstract class TextMetrics
+trait TextMetrics
 {
     val width: Double
 }

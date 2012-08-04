@@ -3,15 +3,16 @@ package s2js.adapters.html
 import s2js.adapters.js.Date
 import s2js.adapters.dom._
 import s2js.adapters.events._
-import s2js.adapters.html.elements.Body
 
-abstract class Document extends s2js.adapters.dom.Document with DocumentEvent with EventTarget
+trait Document extends s2js.adapters.dom.Document with DocumentEvent with EventTarget
 {
     type ElementType = Element
 
-    val body: Body
+    val body: Element
 
     val cookie: String
+
+    val documentMode: String
 
     val domain: String
 
@@ -41,10 +42,9 @@ abstract class Document extends s2js.adapters.dom.Document with DocumentEvent wi
 
     var onunload: Event[this.type] => Unit
 
-    var onwheel: WheelEvent[this.type] => Boolean
-
+    var onmousewheel: WheelEvent[this.type] => Boolean
 
     def getElementsByClassName(cssClass: String): NodeList[ElementType]
 
-    def execCommand(command: String, showDefaultUI: Boolean, value: String) {}
+    def createRange(): Range
 }

@@ -1,6 +1,6 @@
 package cz.payola.web.client.presenters.entity
 
-import s2js.adapters.js.html
+import s2js.adapters.html
 import cz.payola.web.shared._
 import cz.payola.common.entities._
 import cz.payola.web.client._
@@ -99,7 +99,7 @@ class ShareButtonPresenter(
 
 object ShareButtonPresenter
 {
-    def apply(viewElement: adapters.html.Element, entity: ShareableEntity, viewToBlock: Option[View]): ShareButtonPresenter = {
+    def apply(viewElement: html.Element, entity: ShareableEntity, viewToBlock: Option[View]): ShareButtonPresenter = {
         new ShareButtonPresenter(viewElement, entity.className, entity.id, entity.name, entity.isPublic, viewToBlock)
     }
 }

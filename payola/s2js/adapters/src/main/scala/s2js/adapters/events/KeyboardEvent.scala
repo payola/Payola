@@ -6,6 +6,8 @@ trait KeyboardEvent[+A <: EventTarget] extends UIEvent[A]
 
     val key: String
 
+    val keyCode: Int
+
     val location: Int
 
     val ctrlKey: Boolean

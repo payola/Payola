@@ -82,6 +82,7 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
     def symbolIsInternal(symbol: Global#Symbol): Boolean = {
         val internalPackageNames = Set(
             "s2js.adapters.js",
+            "s2js.adapters.browser",
             "scala.reflect"
         )
         val internalTypeNames = Set(

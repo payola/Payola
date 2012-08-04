@@ -1,6 +1,6 @@
 package cz.payola.web.client.views.bootstrap
 
-import s2js.adapters.js.browser.window
+import s2js.adapters.browser._
 import cz.payola.web.client.views._
 import cz.payola.web.client.views.elements._
 import cz.payola.common.ValidationException
@@ -25,6 +25,7 @@ abstract class InputControl[A <: ElementView[_] with EditableInput](
     private val infoSpan = new Span(List(infoText), "help-inline")
 
     private val controls = new Div(List(input, infoSpan), "controls")
+
     val controlGroup = new Div(List(inputLabel, controls), "control-group " + cssClass)
 
     private var delayedChangedTimeout: Option[Int] = None

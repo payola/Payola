@@ -1,16 +1,15 @@
 package cz.payola.web.client.presenters.entity.plugins
 
 import scala.collection.mutable
-import s2js.adapters.js.html
+import s2js.adapters.html
 import cz.payola.web.shared.managers._
-import cz.payola.web.client.events.BrowserEventArgs
 import cz.payola.web.client.views.VertexEventArgs
 import cz.payola.web.client.Presenter
 import cz.payola.web.client.presenters.graph.GraphPresenter
 import cz.payola.web.client.views.entity.plugins._
 import cz.payola.common.ValidationException
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
-import s2js.adapters.html.Element
+import cz.payola.web.client.events._
 
 class DataSourceBrowser(
     val viewElement: html.Element,
@@ -58,7 +57,7 @@ class DataSourceBrowser(
         addToHistoryAndGo(e.vertex.uri)
     }
 
-    private def onBackButtonClicked(e: BrowserEventArgs[_]): Boolean = {
+    private def onBackButtonClicked(e: EventArgs[_]): Boolean = {
         if (canGoBack) {
             historyPosition -= 1
             updateView()
@@ -66,7 +65,7 @@ class DataSourceBrowser(
         false
     }
 
-    private def onNextButtonClicked(e: BrowserEventArgs[_]): Boolean = {
+    private def onNextButtonClicked(e: EventArgs[_]): Boolean = {
         if (canGoNext) {
             historyPosition += 1
             updateView()
@@ -74,15 +73,15 @@ class DataSourceBrowser(
         false
     }
 
-    private def onGoButtonClicked(e: BrowserEventArgs[_]): Boolean = {
+    private def onGoButtonClicked(e: EventArgs[_]): Boolean = {
         graphPresenter.view.updateGraph(None)
         addToHistoryAndGo(view.nodeUriInput.value)
         false
     }
 
-    private def onSparqlQueryButtonClicked(e: BrowserEventArgs[_]): Boolean = {
+    private def onSparqlQueryButtonClicked(e: EventArgs[_]): Boolean = {
         val modal = new SparqlQueryModal
-        modal.confirming += { e =>
+        modal.confirming += { _ =>
             modal.block("Executing the SPARQL query.")
             DataSourceManager.executeSparqlQuery(dataSourceId, modal.sparqlQueryInput.value) { g =>
                 modal.unblock()
@@ -93,9 +92,9 @@ class DataSourceBrowser(
                 updateNavigationView()
 
                 graphPresenter.view.updateGraph(g)
-            } { e =>
+            } { error =>
                 modal.unblock()
-                e match {
+                error match {
                     case v: ValidationException => AlertModal.display("Error", v.message)
                     case t => fatalErrorHandler(t)
                 }
@@ -106,7 +105,7 @@ class DataSourceBrowser(
         false
     }
 
-    private def onNodeUriKeyPressed(e: BrowserEventArgs[_]): Boolean = {
+    private def onNodeUriKeyPressed(e: KeyboardEventArgs[_]): Boolean = {
         if (e.keyCode == 13) {
             onGoButtonClicked(e)
         } else {

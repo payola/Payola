@@ -12,7 +12,7 @@ class VertexSettingsModel extends SettingsModel
 
     def radius(typeName: String): Int = {
         val foundCustomization = getCustomization(typeName)
-        if(foundCustomization.isDefined && foundCustomization.get.radius != 0) {
+        if (foundCustomization.isDefined && foundCustomization.get.radius != 0) {
             foundCustomization.get.radius
         } else {
             radiusValue
@@ -21,7 +21,7 @@ class VertexSettingsModel extends SettingsModel
 
     def color(typeName: String): Color = {
         val foundCustomization = getCustomization(typeName)
-        if(foundCustomization.isDefined && foundCustomization.get.fillColor.length != 0) {
+        if (foundCustomization.isDefined && foundCustomization.get.fillColor.length != 0) {
             val color = Color.fromHex(foundCustomization.get.fillColor)
             color.getOrElse(colorValue)
         } else {
@@ -31,7 +31,7 @@ class VertexSettingsModel extends SettingsModel
 
     def glyph(typeName: String): String = {
         val foundCustomization = getCustomization(typeName)
-        if(foundCustomization.isDefined && foundCustomization.get.glyph != 0) {
+        if (foundCustomization.isDefined && foundCustomization.get.glyph != 0) {
             foundCustomization.get.glyph
         } else {
             glyphValue

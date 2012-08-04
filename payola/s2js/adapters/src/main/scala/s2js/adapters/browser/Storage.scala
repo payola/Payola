@@ -1,6 +1,6 @@
 package s2js.adapters.browser
 
-abstract class Storage
+trait Storage
 {
     val length: Long
 

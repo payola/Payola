@@ -1,11 +1,9 @@
 package cz.payola.web.client.views.graph.table
 
 import scala.collection._
-import s2js.adapters.js.html
+import s2js.adapters.html
 import cz.payola.common.rdf._
 import cz.payola.web.client.views.elements._
-import s2js.adapters.html.Element
-import s2js._
 
 /**
  * A plugin that displays all edges in the graph as a table. The edges are firstly grouped by the edge origins,
@@ -13,7 +11,7 @@ import s2js._
  */
 class TripleTablePluginView extends TablePluginView("Triple Table")
 {
-    def fillTable(graph: Option[Graph], tableHead: html.Element, tableBody: adapters.html.Element) {
+    def fillTable(graph: Option[Graph], tableHead: html.Element, tableBody: html.Element) {
         // Create the headers.
         val headerRow = addRow(tableHead)
         List("Subject", "Property", "Value").foreach { title =>
@@ -23,7 +21,7 @@ class TripleTablePluginView extends TablePluginView("Triple Table")
 
         // Fill the table with cells.
         groupEdges(graph).foreach { edgesByOrigin =>
-            var originCell: adapters.html.Element = null
+            var originCell: html.Element = null
             var originRowCount = 0
 
             edgesByOrigin._2.foreach { edgesByEdgeType =>

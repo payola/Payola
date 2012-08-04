@@ -1,6 +1,6 @@
 package s2js.adapters.browser
 
-abstract class Console
+trait Console
 {
     def log(value: Any)
 }

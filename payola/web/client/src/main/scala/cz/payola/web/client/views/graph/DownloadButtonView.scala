@@ -7,7 +7,9 @@ import cz.payola.web.client.views.bootstrap._
 class DownloadButtonView extends ComposedView
 {
     val rdfDownloadAnchor = new Anchor(List(new Text("Download As RDF")))
+
     val ttlDownloadAnchor = new Anchor(List(new Text(" Download As TTL")))
+
     val downloadButton = new DropDownButton(List(
         new Icon(Icon.download),
         new Text(" Download  ")

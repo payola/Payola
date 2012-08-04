@@ -1,3 +1,3 @@
 package s2js.adapters.browser
 
-abstract class History
+trait History

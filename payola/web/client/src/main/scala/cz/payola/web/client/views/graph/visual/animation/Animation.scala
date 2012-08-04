@@ -1,7 +1,7 @@
 package cz.payola.web.client.views.graph.visual.animation
 
 import collection.mutable.ListBuffer
-import s2js.adapters.js.browser.window
+import s2js.adapters.browser._
 import cz.payola.web.client.views.graph.visual.graph._
 import cz.payola.web.client.views.graph.visual.graph.positioning.PositionHelper
 import cz.payola.web.client.views.algebra._
@@ -23,7 +23,7 @@ class Animation[T](
      */
     def finishAllAnimations() {
         this.animationStepLength = Some(0)
-        if(followingAnimation.isDefined) {
+        if (followingAnimation.isDefined) {
             followingAnimation.get.finishAllAnimations()
         }
     }
@@ -100,7 +100,7 @@ object Animation
     }
 
     /**
-     *Animation function for moving graph by provided function packed by PositionHelper
+     * Animation function for moving graph by provided function packed by PositionHelper
      * @param move _1 packed function for getting a vector to move _2 vertices to move
      * @param nextAnimation following animation to perform
      * @param quickDraw function for redrawing whole drawing space quickly, it is used after every iteration
@@ -162,7 +162,8 @@ object Animation
      *                            if it is set to 0: animation is skipped
      *                            otherwise the animation is performed normally
      */
-    def flipGraph(move: (PositionHelper, ListBuffer[VertexView]), nextAnimation: Option[Animation[_]], quickDraw: () => Unit,
+    def flipGraph(move: (PositionHelper, ListBuffer[VertexView]), nextAnimation: Option[Animation[_]],
+        quickDraw: () => Unit,
         finalDraw: () => Unit, animationStepLength: Option[Int]) {
         var maxX: Double = Double.MinValue
         var minX: Double = Double.MaxValue
@@ -191,7 +192,7 @@ object Animation
             val animationVViews = ListBuffer[AnimationVertexView]()
             val graphCenter = move._1.getPositionCorrection()
             move._2.foreach { vView =>
-                val x = (vView.position.x + vView.position.y  + graphCenter.x - graphCenter.y) / 2
+                val x = (vView.position.x + vView.position.y + graphCenter.x - graphCenter.y) / 2
                 val y = vView.position.x + vView.position.y - x
                 val newPosition = vView.position + vView.position.createVector(Point2D(x, y)) * 2
 
@@ -222,7 +223,7 @@ object Animation
         quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
         var translationFinished = true
 
-        if(animationCurrentNumber == animationKillConst && nextAnimation.isDefined) {
+        if (animationCurrentNumber == animationKillConst && nextAnimation.isDefined) {
             nextAnimation.get.finishAllAnimations()
         }
 
@@ -276,7 +277,7 @@ object Animation
     private def getBiggestLowerSpeed(translation: Double, speed: Double): Double = {
         if (translation != 0) {
             var _speed = speed
-            while (/*math.abs(math.signum(translation)) * */_speed > math.abs(translation)) {
+            while ( /*math.abs(math.signum(translation)) * */ _speed > math.abs(translation)) {
                 _speed -= 1
             }
 

@@ -2,7 +2,7 @@ package s2js.adapters.html.elements
 
 import s2js.adapters.html.Element
 
-abstract class Anchor extends Element
+trait Anchor extends Element
 {
     var charset: String
 

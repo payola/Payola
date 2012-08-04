@@ -3,7 +3,7 @@ package s2js.adapters.html
 import s2js.adapters.dom
 import s2js.adapters.events._
 
-abstract class Element extends dom.Element with EventTarget
+trait Element extends dom.Element with EventTarget
 {
     var accessKey: String
 

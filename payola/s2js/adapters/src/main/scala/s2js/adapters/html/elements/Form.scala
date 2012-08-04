@@ -3,7 +3,7 @@ package s2js.adapters.html.elements
 import s2js.adapters.html._
 import s2js.adapters.events.Event
 
-abstract class Form extends Element
+trait Form extends Element
 {
     var acceptCharset: String
 
@@ -19,7 +19,7 @@ abstract class Form extends Element
 
     var onreset: Event[this.type] => Boolean
 
-    var onsubmit: Event[this.type] => Unit
+    var onsubmit: Event[this.type] => Boolean
 
     def reset()
 

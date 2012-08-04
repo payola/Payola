@@ -1,6 +1,6 @@
 package s2js.adapters.browser
 
-abstract class Location
+trait Location
 {
     var href: String
 }

@@ -1,42 +1,41 @@
 package s2js.adapters.html.elements
 
-import s2js.adapters.js.html._
 import s2js.adapters.html.Element
 
-abstract class Input extends Element with InputLike
+trait Input extends Element with InputLike
 {
     var `type`: String
 }
 
-abstract class TextInput extends Input with TextInputLike
+trait TextInput extends Input with TextInputLike
 {
     var maxLength: Int
 }
 
-abstract class CheckInput extends Input
+trait CheckInput extends Input
 {
     var checked: Boolean
 
     val defaultChecked: Boolean
 }
 
-abstract class InputButton extends Input
+trait InputButton extends Input
 
-abstract class InputCheckbox extends CheckInput
+trait InputCheckbox extends CheckInput
 
-abstract class InputFile extends Input
+trait InputFile extends Input
 {
     var accept: String
 }
 
-abstract class InputHidden extends Input
+trait InputHidden extends Input
 
-abstract class InputPassword extends TextInput
+trait InputPassword extends TextInput
 
-abstract class InputRadio extends CheckInput
+trait InputRadio extends CheckInput
 
-abstract class InputReset extends Input
+trait InputReset extends Input
 
-abstract class InputSubmit extends Input
+trait InputSubmit extends Input
 
-abstract class InputText extends TextInput
+trait InputText extends TextInput

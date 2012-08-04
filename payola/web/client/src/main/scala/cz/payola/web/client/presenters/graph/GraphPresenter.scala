@@ -1,7 +1,7 @@
 package cz.payola.web.client.presenters.graph
 
-import s2js.adapters.js.html
-import s2js.adapters.js.browser.window
+import s2js.adapters.browser._
+import s2js.adapters.html
 import cz.payola.web.client.events._
 import cz.payola.web.client.views.graph.PluginSwitchView
 import cz.payola.web.client.Presenter
@@ -33,7 +33,7 @@ class GraphPresenter(val viewElement: html.Element) extends Presenter
         Model.ontologyCustomizationsByOwnership(view.updateOntologyCustomizations(_))(fatalErrorHandler(_))
     }
 
-    private def onOntologyCustomizationsButtonClicked(e: BrowserEventArgs[_]): Boolean = {
+    private def onOntologyCustomizationsButtonClicked(e: EventArgs[_]): Boolean = {
         blockPage("Fetching accessible ontology customizations.")
         Model.ontologyCustomizationsByOwnership { o =>
             view.updateOntologyCustomizations(o)

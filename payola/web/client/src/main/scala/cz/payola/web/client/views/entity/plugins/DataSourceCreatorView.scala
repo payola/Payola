@@ -1,11 +1,10 @@
 package cz.payola.web.client.views.entity.plugins
 
-import s2js.adapters.js.html
+import s2js.adapters.html
 import cz.payola.web.client.views.ComposedView
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.inputs._
 import cz.payola.common.entities.Plugin
-import s2js.adapters.html.Element
 
 class DataSourceCreatorView(plugins: Seq[Plugin]) extends ComposedView
 {

@@ -2,6 +2,8 @@ package s2js.adapters.events
 
 trait WheelEvent[+A <: EventTarget] extends MouseEvent[A]
 {
+    val wheelDelta: Double
+
     val deltaX: Double
 
     val deltaY: Double

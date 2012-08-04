@@ -2,7 +2,7 @@ package s2js.adapters.html.elements
 
 import s2js.adapters.html.Element
 
-abstract class Option extends Element with InputLike
+trait Option extends Element with InputLike
 {
     val defaultSelected: Boolean
 

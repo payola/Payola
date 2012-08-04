@@ -1,15 +1,12 @@
 package cz.payola.web.client.views
 
 import scala.collection._
-import s2js.adapters.js.html
-import s2js.adapters.js.browser.document
-import cz.payola.web.client.events.BrowserEvent
+import s2js.adapters.browser._
+import s2js.adapters.html
 import cz.payola.web.client.View
 import cz.payola.web.client.views.elements.Text
 import cz.payola.web.client.views.algebra.Vector2D
-import s2js.adapters.html.Element
-import s2js._
-import scala.Some
+import cz.payola.web.client.events._
 import scala.Some
 
 abstract class ElementView[A <: html.Element](htmlElementName: String, val subViews: Seq[View], cssClass: String)
@@ -17,40 +14,40 @@ abstract class ElementView[A <: html.Element](htmlElementName: String, val subVi
 {
     val htmlElement = document.createElement[A](htmlElementName)
 
-    val keyPressed = new BrowserEvent[this.type]
+    val keyPressed = new BooleanEvent[this.type, KeyboardEventArgs[this.type]]
 
-    val keyReleased = new BrowserEvent[this.type]
+    val keyReleased = new BooleanEvent[this.type, KeyboardEventArgs[this.type]]
 
-    val mouseClicked = new BrowserEvent[this.type]
+    val mouseClicked = new BooleanEvent[this.type, MouseEventArgs[this.type]]
 
-    val mouseDoubleClicked = new BrowserEvent[this.type]
+    val mouseDoubleClicked = new BooleanEvent[this.type, MouseEventArgs[this.type]]
 
-    val mousePressed = new BrowserEvent[this.type]
+    val mousePressed = new BooleanEvent[this.type, MouseEventArgs[this.type]]
 
-    val mouseReleased = new BrowserEvent[this.type]
+    val mouseReleased = new BooleanEvent[this.type, MouseEventArgs[this.type]]
 
-    val mouseMoved = new BrowserEvent[this.type]
+    val mouseMoved = new BooleanEvent[this.type, MouseEventArgs[this.type]]
 
-    val mouseOut = new BrowserEvent[this.type]
+    val mouseOut = new BooleanEvent[this.type, MouseEventArgs[this.type]]
 
-    val mouseWheelRotated = new BrowserEvent[this.type]
+    val mouseWheelRotated = new BooleanEvent[this.type, MouseWheelEventArgs[this.type]]
 
-    protected var parentElement: Option[adapters.html.Element] = None
+    protected var parentElement: Option[html.Element] = None
 
-    htmlElement.onkeydown = { e => keyPressed.triggerDirectly(this, e) }
-    htmlElement.onkeyup = { e => keyReleased.triggerDirectly(this, e) }
-    htmlElement.onclick = { e => mouseClicked.triggerDirectly(this, e) }
-    htmlElement.ondblclick = { e => mouseDoubleClicked.triggerDirectly(this, e) }
-    htmlElement.onmousedown = { e => mousePressed.triggerDirectly(this, e) }
-    htmlElement.onmouseup = { e => mouseReleased.triggerDirectly(this, e) }
-    htmlElement.onmousemove = { e => mouseMoved.triggerDirectly(this, e) }
-    htmlElement.onmousewheel = { e => mouseWheelRotated.triggerDirectly(this, e) }
-    htmlElement.onmouseout = { e => mouseOut.triggerDirectly(this, e) }
+    htmlElement.onkeydown = { e => keyPressed.trigger(KeyboardEventArgs[this.type](this, e))}
+    htmlElement.onkeyup = { e => keyReleased.trigger(KeyboardEventArgs[this.type](this, e))}
+    htmlElement.onclick = { e => mouseClicked.trigger(MouseEventArgs[this.type](this, e))}
+    htmlElement.ondblclick = { e => mouseDoubleClicked.trigger(MouseEventArgs[this.type](this, e))}
+    htmlElement.onmousedown = { e => mousePressed.trigger(MouseEventArgs[this.type](this, e))}
+    htmlElement.onmouseup = { e => mouseReleased.trigger(MouseEventArgs[this.type](this, e))}
+    htmlElement.onmousemove = { e => mouseMoved.trigger(MouseEventArgs[this.type](this, e))}
+    htmlElement.onmouseout = { e => mouseOut.trigger(MouseEventArgs[this.type](this, e))}
+    htmlElement.onmousewheel = { e => mouseWheelRotated.trigger(MouseWheelEventArgs[this.type](this, e))}
     addCssClass(cssClass)
 
     def blockHtmlElement = htmlElement
 
-    def render(parent: adapters.html.Element) {
+    def render(parent: html.Element) {
         parentElement = Some(parent)
         parent.appendChild(htmlElement)
         subViews.foreach { v =>
@@ -72,19 +69,19 @@ abstract class ElementView[A <: html.Element](htmlElementName: String, val subVi
         this
     }
 
-    def addCssClass(cssClass: String): this.type =  {
+    def addCssClass(cssClass: String): this.type = {
         removeCssClass(cssClass)
         setAttribute("class", getAttribute("class") + " " + cssClass)
         this
     }
 
-    def removeCssClass(cssClass: String): this.type =  {
+    def removeCssClass(cssClass: String): this.type = {
         setAttribute("class", getAttribute("class").replaceAllLiterally(cssClass, ""))
         this
     }
 
     def hide() {
-        setAttribute("style","display: none")
+        setAttribute("style", "display: none")
     }
 
     def show(displayStyle: String = "block") {
@@ -106,7 +103,7 @@ abstract class ElementView[A <: html.Element](htmlElementName: String, val subVi
     def topLeftCorner: Vector2D = {
         var offsetTop = 0.0
         var offsetLeft = 0.0
-        var element: adapters.html.Element = htmlElement
+        var element: html.Element = htmlElement
         while (element != null) {
             offsetTop += element.offsetTop
             offsetLeft += element.offsetLeft

@@ -1,15 +1,13 @@
 package cz.payola.web.client.views.graph.table
 
-import s2js.adapters.js.html
-import s2js.adapters.js.browser.document
+import s2js.adapters.browser._
+import s2js.adapters.html
 import cz.payola.common.rdf._
 import cz.payola.web.client.View
 import cz.payola.web.client.views.VertexEventArgs
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.Icon
 import cz.payola.web.client.views.graph.PluginView
-import s2js.adapters.html.Element
-import s2js._
 
 abstract class TablePluginView(name: String) extends PluginView(name)
 {
@@ -38,7 +36,7 @@ abstract class TablePluginView(name: String) extends PluginView(name)
         super.updateGraph(graph)
     }
 
-    def fillTable(graph: Option[Graph], tableHead: adapters.html.Element, tableBody: adapters.html.Element)
+    def fillTable(graph: Option[Graph], tableHead: html.Element, tableBody: html.Element)
 
     protected def createVertexView(vertex: IdentifiedVertex): View = {
         val dataSourceAnchor = new Anchor(List(new Icon(Icon.hdd)))
@@ -55,12 +53,12 @@ abstract class TablePluginView(name: String) extends PluginView(name)
         new Span(List(dataSourceAnchor, new Span(List(new Text(" "))), browsingAnchor))
     }
 
-    protected def addRow(table: adapters.html.Element): adapters.html.Element = addElement(table, "tr")
+    protected def addRow(table: html.Element): html.Element = addElement(table, "tr")
 
-    protected def addCell(row: adapters.html.Element, isHeader: Boolean = false) = addElement(row, if (isHeader) "th" else "td")
+    protected def addCell(row: html.Element, isHeader: Boolean = false) = addElement(row, if (isHeader) "th" else "td")
 
-    protected def addElement(parent: adapters.html.Element, name: String): adapters.html.Element = {
-        val element = document.createElement[adapters.html.Element](name)
+    protected def addElement(parent: html.Element, name: String): html.Element = {
+        val element = document.createElement[html.Element](name)
         parent.appendChild(element)
         element
     }

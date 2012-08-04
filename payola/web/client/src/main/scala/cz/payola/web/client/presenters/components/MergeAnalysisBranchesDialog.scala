@@ -1,7 +1,7 @@
 package cz.payola.web.client.presenters.components
 
-import s2js.adapters.js.html
-import s2js.adapters.js.browser.document
+import s2js.adapters.browser._
+import s2js.adapters.html
 import s2js.compiler.javascript
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
@@ -9,8 +9,6 @@ import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.Modal
 import cz.payola.web.client.views.todo.PluginInstanceView
 import cz.payola.web.client.views.elements.Div
-import s2js.adapters.html.Element
-import s2js._
 
 class MergeAnalysisBranchesDialog(instances: ArrayBuffer[PluginInstanceView], inputsCount: Int)
     extends Modal("Choose how you want to merge the branches")
@@ -79,10 +77,10 @@ class MergeAnalysisBranchesDialog(instances: ArrayBuffer[PluginInstanceView], in
     def bindDragAndDrop() { }
 
     @javascript(""" jQuery(element).data("pluginInstance", instance); """)
-    def bindInstance(element: adapters.html.Element, instance: PluginInstanceView) {}
+    def bindInstance(element: html.Element, instance: PluginInstanceView) {}
 
     @javascript(""" jQuery(element).data("inputIndex", index); """)
-    def bindIndex(element: adapters.html.Element, index: Int) { }
+    def bindIndex(element: html.Element, index: Int) { }
 
     def setInstance(index: Int, instance: PluginInstanceView) = {
         outputToInstance.put(index, instance)

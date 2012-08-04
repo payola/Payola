@@ -1,47 +1,45 @@
 package cz.payola.web.client.views.graph.visual.graph
 
 import cz.payola.common.rdf.Edge
-import s2js.adapters.js.html
+import s2js.adapters.html
 import cz.payola.web.client.views.graph.visual.Color
 import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.views.graph.visual.graph.positioning.LocationDescriptor
-import s2js.adapters.html.elements.CanvasRenderingContext2D
 import s2js.adapters.html._
 
 /**
-  * Graphical representation of Edge object in the drawn graph.
-  * @param edgeModel the object graphically represented by this class
-  * @param originView the vertex object representing origin of this edge
-  * @param destinationView of this graphical representation in drawing space
-  * @param settings draw settings used in draw and quickDraw routines
-  */
+ * Graphical representation of Edge object in the drawn graph.
+ * @param edgeModel the object graphically represented by this class
+ * @param originView the vertex object representing origin of this edge
+ * @param destinationView of this graphical representation in drawing space
+ * @param settings draw settings used in draw and quickDraw routines
+ */
 class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationView: VertexView,
-    val settings: VisualSetup) extends View[html.elements.CanvasRenderingContext2D] {
-
+    val settings: VisualSetup) extends View[html.elements.CanvasRenderingContext2D]
+{
     /**
-      * Textual data that should be visualised with this edge ("over this edge").
-      */
+     * Textual data that should be visualised with this edge ("over this edge").
+     */
     val information: InformationView = new InformationView(edgeModel, settings.textModel)
 
     /**
-      * Indicator of selection of this graphs element. Is used during color selection in draw function.
-      * @return true if one of the edges vertices is selected.
-      */
+     * Indicator of selection of this graphs element. Is used during color selection in draw function.
+     * @return true if one of the edges vertices is selected.
+     */
     def isSelected: Boolean = {
         originView.selected || destinationView.selected
     }
 
     /**
-      * Indicator of selection of this graphs element. Is not used by inner mechanics.
-      * @return true if both edges vertices are selected.
-      */
+     * Indicator of selection of this graphs element. Is not used by inner mechanics.
+     * @return true if both edges vertices are selected.
+     */
     def areBothVerticesSelected: Boolean = {
         originView.selected && destinationView.selected
     }
 
     def draw(context: elements.CanvasRenderingContext2D, positionCorrection: Vector2D) {
-
         drawQuick(context, positionCorrection)
         if (isSelected) {
             information.draw(context, (LocationDescriptor.getEdgeInformationPosition(originView.position,
@@ -50,7 +48,7 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
     }
 
     def drawQuick(context: elements.CanvasRenderingContext2D, positionCorrection: Vector2D) {
-        val colorToUse = if(isSelected) {
+        val colorToUse = if (isSelected) {
             val col = settings.edgesModel.color(originView.rdfType, edgeModel.uri)
 
             Color(col.red, col.green, col.blue, 1.0)
@@ -69,13 +67,13 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
     }
 
     /**
-      * Compares another edgeView to this one.
-      * @param edgeView to compare this with
-      * @return true if edgeModels.toString are equal and destination vertices
-      *         and origin vertices are equal
-      */
+     * Compares another edgeView to this one.
+     * @param edgeView to compare this with
+     * @return true if edgeModels.toString are equal and destination vertices
+     *         and origin vertices are equal
+     */
     def isEqual(edgeView: Any): Boolean = {
-        if(edgeView == null) {
+        if (edgeView == null) {
             false
         }
 

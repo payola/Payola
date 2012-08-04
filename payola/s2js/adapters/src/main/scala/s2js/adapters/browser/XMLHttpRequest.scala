@@ -1,28 +1,45 @@
 package s2js.adapters.browser
 
-class XMLHttpRequest
+import s2js.adapters.events._
+import s2js.adapters.dom.Document
+
+class XMLHttpRequest extends EventTarget
 {
-    var readyState: Int = 0
+    val readyState: Int = 0
 
-    var responseText: String = ""
+    val status: Int = 0
 
-    var responseXML: String = ""
+    val statusText: String = ""
 
-    var status: Int = 0
+    val response: Any = ""
 
-    var statusText: String = ""
+    val responseText: String = ""
 
-    var onreadystatechange: () => Unit = null
+    val responseXML: Document = null
 
-    var onerror: () => Unit = null
+    var onloadstart: Event[this.type] => Unit = null
+
+    var onprogress: Event[this.type] => Unit = null
+
+    var onabort: Event[this.type] => Unit = null
+
+    var onerror: Event[this.type] => Unit = null
+
+    var onload: Event[this.type] => Unit = null
+
+    var ontimeout: Event[this.type] => Unit = null
+
+    var onloadend: Event[this.type] => Unit = null
+
+    var onreadystatechange: Event[this.type] => Unit = null
+
+    def open(method: String, url: String, async: Boolean = true, username: String = "", password: String = "") {}
+
+    def setRequestHeader(header: String, value: String) {}
+
+    def send(data: String = "") {}
 
     def abort() {}
 
     def getResponseHeader(header: String): String = ""
-
-    def open(method: String, url: String, async: Boolean = true, username: String = "", password: String = "") {}
-
-    def send(data: String = "") {}
-
-    def setRequestHeader(header: String, value: String) {}
 }

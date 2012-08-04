@@ -7,6 +7,7 @@ import cz.payola.common.entities.Analysis
 class AnalysisOverviewView(analysis: Analysis, timeoutSeconds: Long) extends ComposedView
 {
     val controls = new AnalysisControls(timeoutSeconds)
+
     val analysisVisualizer = new ReadOnlyAnalysisVisualizer(analysis)
 
     def createSubViews = List(controls, analysisVisualizer)

@@ -197,20 +197,20 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
     //###################################################################################################################
 
     /**
-      * Finds a vertex in this graphs vertexViews container, that has the input point inside its graphical
-      * (rectangular) representation.
-      * @param point to compare the locations of vertices with
-      * @return vertexView, that has the input point "inside", if none is found None
-      */
+     * Finds a vertex in this graphs vertexViews container, that has the input point inside its graphical
+     * (rectangular) representation.
+     * @param point to compare the locations of vertices with
+     * @return vertexView, that has the input point "inside", if none is found None
+     */
     def getTouchedVertex(point: Point2D): Option[VertexView] = {
         vertexViews.find(v => v.isPointInside(point))
     }
 
     /**
-      * Marks the input vertex as NOT selected by calling setVertexSelection(vertex, false)
-      * @param vertex to change its selected attribute
-      * @return true if the vertex is in this component and the selected attribute of the vertex has changed
-      */
+     * Marks the input vertex as NOT selected by calling setVertexSelection(vertex, false)
+     * @param vertex to change its selected attribute
+     * @return true if the vertex is in this component and the selected attribute of the vertex has changed
+     */
     def deselectVertex(vertex: VertexView): Boolean = {
         if (vertexViews.find(_.vertexModel eq vertex.vertexModel).isDefined) {
             setVertexSelection(vertex, false)
@@ -237,10 +237,10 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
     }
 
     /**
-      * Marks the input vertex as selected by calling setVertexSelection(vertex, true)
-      * @param vertex to change its selected attribute
-      * @return true if the vertex is in this component and the selected attribute of the vertex has changed
-      */
+     * Marks the input vertex as selected by calling setVertexSelection(vertex, true)
+     * @param vertex to change its selected attribute
+     * @return true if the vertex is in this component and the selected attribute of the vertex has changed
+     */
     def selectVertex(vertex: VertexView): Boolean = {
         setVertexSelection(vertex, true)
     }
@@ -249,14 +249,14 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
      * @return true is all vertices are selected
      */
     def isSelected: Boolean = {
-        vertexViews.find{vertexView => !vertexView.isSelected}.isEmpty
+        vertexViews.find { vertexView => !vertexView.isSelected}.isEmpty
     }
 
     /**
-      * Switches the selected attribute of the input vertex to the opposite value.
-      * @param vertex to switch its selected attribute
-      * @return true if the vertex is in this component and the selected attribute has changed
-      */
+     * Switches the selected attribute of the input vertex to the opposite value.
+     * @param vertex to switch its selected attribute
+     * @return true if the vertex is in this component and the selected attribute has changed
+     */
     def invertVertexSelection(vertex: VertexView): Boolean = {
         if (!vertex.selected || vertexViews.find(_.vertexModel eq vertex.vertexModel).isDefined) {
             setVertexSelection(vertex, !vertex.selected)
@@ -266,11 +266,11 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
     }
 
     /**
-      * Setter of the selected attribute for vertices.
-      * @param vertex to which is the selected value is set
-      * @param selected new value to be set to the vertex
-      * @return true if the value of the vertex.selected attribute is changed
-      */
+     * Setter of the selected attribute for vertices.
+     * @param vertex to which is the selected value is set
+     * @param selected new value to be set to the vertex
+     * @return true if the value of the vertex.selected attribute is changed
+     */
     def setVertexSelection(vertex: VertexView, selected: Boolean): Boolean = {
         if (vertexViews.find(_.vertexModel eq vertex.vertexModel)
             .isDefined && //check if the vertex is from this component

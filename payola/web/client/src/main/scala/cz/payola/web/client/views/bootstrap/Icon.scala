@@ -2,7 +2,11 @@ package cz.payola.web.client.views.bootstrap
 
 import cz.payola.web.client.views.elements.Italic
 
-class Icon(iconName: String, isWhite: Boolean = false) extends Italic(List(), (if (isWhite){"icon-white "}else{""})+"icon-" + iconName)
+class Icon(iconName: String, isWhite: Boolean = false) extends Italic(List(), (if (isWhite) {
+    "icon-white "
+} else {
+    ""
+}) + "icon-" + iconName)
 
 object Icon
 {

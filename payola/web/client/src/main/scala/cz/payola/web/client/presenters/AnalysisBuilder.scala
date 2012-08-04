@@ -1,13 +1,11 @@
 package cz.payola.web.client.presenters
 
-import s2js.adapters.js.browser.document
+import s2js.adapters.browser._
 import cz.payola.web.client.views.todo.PluginInstanceView
 import cz.payola.web.client.views.todo.EditablePluginInstanceView
 import cz.payola.web.client.presenters.components._
 import cz.payola.web.shared.AnalysisBuilderData
-import s2js.compiler.javascript
 import cz.payola.common.entities.Plugin
-import s2js.adapters.js.browser.window
 import scala.collection.mutable.ArrayBuffer
 import s2js.runtime.client.scala.collection.mutable.HashMap
 import cz.payola.web.client.presenters.models.ParameterValue
@@ -20,7 +18,6 @@ import cz.payola.common.entities.plugins.DataSource
 import scala.collection.mutable
 import cz.payola.web.client.views.entity.plugins.DataSourceSelector
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
-import s2js.runtime.shared.rpc.RpcException
 import cz.payola.common.ValidationException
 
 class AnalysisBuilder(parentElementId: String) extends Presenter

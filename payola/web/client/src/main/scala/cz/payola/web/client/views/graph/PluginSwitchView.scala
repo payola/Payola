@@ -65,9 +65,9 @@ class PluginSwitchView extends GraphView with ComposedView
 
     // Re-trigger all events when the corresponding events are triggered in the plugins.
     plugins.foreach { plugin =>
-        plugin.vertexSelected += { e => vertexSelected.trigger(createVertexEventArgs(e.vertex)) }
-        plugin.vertexBrowsing += { e => vertexBrowsing.trigger(createVertexEventArgs(e.vertex)) }
-        plugin.vertexBrowsingDataSource += { e => vertexBrowsingDataSource.trigger(createVertexEventArgs(e.vertex)) }
+        plugin.vertexSelected += { e => vertexSelected.trigger(createVertexEventArgs(e.vertex))}
+        plugin.vertexBrowsing += { e => vertexBrowsing.trigger(createVertexEventArgs(e.vertex))}
+        plugin.vertexBrowsingDataSource += { e => vertexBrowsingDataSource.trigger(createVertexEventArgs(e.vertex))}
     }
 
     // Display the first plugin.

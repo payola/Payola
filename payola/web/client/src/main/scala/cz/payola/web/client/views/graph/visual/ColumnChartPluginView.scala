@@ -8,7 +8,6 @@ import s2js.compiler.javascript
 
 class ColumnChartPluginView(settings: VisualSetup) extends PluginView("Column Chart")
 {
-
     private val chartWrapper = new Div(Nil, "column-chart-wrapper")
 
     // Used in drawChart()'s @javascript annotation. Beware before renaming
@@ -17,7 +16,7 @@ class ColumnChartPluginView(settings: VisualSetup) extends PluginView("Column Ch
     // Used from @javascript annotations. Do *NOT* remove.
     private var googleDataTable = null
 
-    /** Adds a bars to the chart. Is a list of list with two values - title and value.
+    /**Adds a bars to the chart. Is a list of list with two values - title and value.
      *
      * @param arr Bars to be displayed.
      */
@@ -47,8 +46,7 @@ class ColumnChartPluginView(settings: VisualSetup) extends PluginView("Column Ch
           var chart = new google.visualization.ColumnChart(self.chartWrapperElement);
           chart.draw(data, options);
         """)
-    private def createDataTable(arr: List[List[Any]], legendTitle: String){
-
+    private def createDataTable(arr: List[List[Any]], legendTitle: String) {
     }
 
     def createPhonyGraph: Graph = {
@@ -93,7 +91,8 @@ class ColumnChartPluginView(settings: VisualSetup) extends PluginView("Column Ch
             val typeEdges = g.getOutgoingEdges(v.uri).filter(_.uri == Edge.rdfTypeEdge)
             typeEdges.size > 0 && typeEdges.forall { e =>
                 e.destination match {
-                    case identified: IdentifiedVertex => validateLiteralVerticesOnEdges(g.getOutgoingEdges(identified.uri))
+                    case identified: IdentifiedVertex => validateLiteralVerticesOnEdges(
+                        g.getOutgoingEdges(identified.uri))
                     case _ => false
                 }
             }
@@ -102,15 +101,16 @@ class ColumnChartPluginView(settings: VisualSetup) extends PluginView("Column Ch
 
     private def setGraphContentWithInitialVertex(g: Graph, v: IdentifiedVertex) {
         // Get those vertices representing bars in the chart
-        val bars = g.getOutgoingEdges(v.uri).filter(_.uri == Edge.rdfTypeEdge).map(_.destination.asInstanceOf[IdentifiedVertex])
+        val bars = g.getOutgoingEdges(v.uri).filter(_.uri == Edge.rdfTypeEdge)
+            .map(_.destination.asInstanceOf[IdentifiedVertex])
         var legendTitle = ""
 
         // Our assumption here is that the graph-as-chart has been validated
         // before being passed here, so no additional checks will be performed
         val values = bars.map { v =>
-            // Each vertex should have exactly two edges, one with the title and one
-            // with the value
-            // Both edges point to literal vertices (due to prior assumed validations)
+        // Each vertex should have exactly two edges, one with the title and one
+        // with the value
+        // Both edges point to literal vertices (due to prior assumed validations)
             val outgoingEdges = g.getOutgoingEdges(v.uri)
             val literals = outgoingEdges.map(_.destination.asInstanceOf[LiteralVertex])
 
@@ -125,8 +125,10 @@ class ColumnChartPluginView(settings: VisualSetup) extends PluginView("Column Ch
     }
 
     private def setTextualContent(message: String, details: String) {
-        val messageDiv = new Div(List(new Text(message)), "column-chart-textual-content column-chart-textual-content-large")
-        val descriptionDiv = new Div(List(new Text(details)), "column-chart-textual-content column-chart-textual-content-small")
+        val messageDiv = new
+                Div(List(new Text(message)), "column-chart-textual-content column-chart-textual-content-large")
+        val descriptionDiv = new
+                Div(List(new Text(details)), "column-chart-textual-content column-chart-textual-content-small")
         messageDiv.render(chartWrapperElement)
         descriptionDiv.render(chartWrapperElement)
     }
@@ -139,15 +141,15 @@ class ColumnChartPluginView(settings: VisualSetup) extends PluginView("Column Ch
             if (graph.isEmpty) {
                 // Add a 'No graph' title
                 setTextualContent("No graph available...", "Load a graph to begin.")
-            }else{
+            } else {
                 val initialVertex = findInitialVertexForColumnChart(graph.get)
-                if (initialVertex.isDefined){
+                if (initialVertex.isDefined) {
                     setGraphContentWithInitialVertex(graph.get, initialVertex.get)
-                }else{
-                    setTextualContent("This graph can't be displayed as a column chart...", "Choose a different visualisation plugin.")
+                } else {
+                    setTextualContent("This graph can't be displayed as a column chart...",
+                        "Choose a different visualisation plugin.")
                 }
             }
-
         }
         super.updateGraph(graph)
     }
@@ -157,11 +159,10 @@ class ColumnChartPluginView(settings: VisualSetup) extends PluginView("Column Ch
             // We need exactly two vertices, one with the bar title, one with the bar height (value)
             edges.find(e => variableIsString(e.destination.asInstanceOf[LiteralVertex].value)).isDefined &&
                 edges.find(e => variableIsNumber(e.destination.asInstanceOf[LiteralVertex].value)).isDefined
-        }else{
+        } else {
             false
         }
     }
-
 
     @javascript("return (typeof num == 'number');")
     private def variableIsNumber(num: Any): Boolean = {

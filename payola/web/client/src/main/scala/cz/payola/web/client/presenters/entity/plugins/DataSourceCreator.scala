@@ -1,13 +1,12 @@
 package cz.payola.web.client.presenters.entity.plugins
 
-import s2js.adapters.js.html
-import s2js.adapters.js.browser._
+import s2js.adapters.browser._
+import s2js.adapters.html
 import cz.payola.common.ValidationException
 import cz.payola.web.client._
 import cz.payola.web.client.models.Model
 import cz.payola.web.client.views.entity.plugins.DataSourceCreatorView
 import cz.payola.web.shared.managers.DataSourceManager
-import s2js.adapters.html.Element
 
 class DataSourceCreator(val viewElement: html.Element) extends Presenter
 {

@@ -1,28 +1,10 @@
 package cz.payola.web.client.views.graph.visual.graph
 
-import s2js.adapters.js.browser._
-import s2js.adapters.js.html
+import s2js.adapters.browser._
+import s2js.adapters.html
+import s2js.adapters.html.elements
 import cz.payola.web.client.views.graph.visual.Color
 import cz.payola.web.client.views.algebra._
-import s2js.adapters.html.elements._
-import scala.Some
-import scala.Option
-import s2js.adapters.html._
-import scala.Some
-import scala.Some
-import scala.Some
-import scala.Some
-import scala.Some
-import scala.Some
-import scala.Some
-import scala.Some
-import scala.Some
-import scala.Some
-import scala.Some
-import scala.Some
-import scala.Some
-import scala.Some
-import s2js.adapters
 
 /**
  * Structure used during draw function of EdgeView. Helps to indicate position of vertices to each other.
@@ -41,32 +23,32 @@ private object Quadrant
 trait View[A]
 {
     /**
-      * Indicator of selection.
-      * @return true if marked as selected.
-      */
+     * Indicator of selection.
+     * @return true if marked as selected.
+     */
     def isSelected: Boolean
 
     /**
-      * Routine for drawing the graphical representation of graphs objects.
-      * @param context to which container to draw
-      * @param positionCorrection to modify the position of the drawn object
-      */
+     * Routine for drawing the graphical representation of graphs objects.
+     * @param context to which container to draw
+     * @param positionCorrection to modify the position of the drawn object
+     */
     def draw(context: A, positionCorrection: Vector2D)
 
     /**
-      * Routine for fast drawing of the graphical representation of graphs objects. Should be used for animation
-      * @param context to which container to draw
-      * @param positionCorrection to modify the position of the drawn object
-      */
+     * Routine for fast drawing of the graphical representation of graphs objects. Should be used for animation
+     * @param context to which container to draw
+     * @param positionCorrection to modify the position of the drawn object
+     */
     def drawQuick(context: A, positionCorrection: Vector2D)
 
     /**
-      * Draws a rectangle with rounded corners, depending on the radius parameter to the input canvas context.
-      * @param context to which to draw
-      * @param position to which location to draw
-      * @param size of the drawn "rounded rectangle"
-      * @param radius of the corners of the rectangle
-      */
+     * Draws a rectangle with rounded corners, depending on the radius parameter to the input canvas context.
+     * @param context to which to draw
+     * @param position to which location to draw
+     * @param size of the drawn "rounded rectangle"
+     * @param radius of the corners of the rectangle
+     */
     protected def drawRoundedRectangle(context: elements.CanvasRenderingContext2D, position: Point2D,
         size: Vector2D, radius: Double) {
         //theory:
@@ -112,7 +94,6 @@ trait View[A]
      */
     protected def drawBezierCurve(context: elements.CanvasRenderingContext2D, origin: Point2D,
         destination: Point2D, color: Color, lineWidth: Double, straightenIndex: Double) {
-
         val A = origin
         val B = destination
 
@@ -177,15 +158,15 @@ trait View[A]
     }
 
     /**
-      * Draws a bezier curve based on the parameters.
-      * @param context to which to draw
-      * @param control1 first point of bending the line
-      * @param control2 second point of bending the line
-      * @param origin where to start the line
-      * @param destination where to end the line
-      * @param lineWidth width of the line
-      * @param color of the line
-      */
+     * Draws a bezier curve based on the parameters.
+     * @param context to which to draw
+     * @param control1 first point of bending the line
+     * @param control2 second point of bending the line
+     * @param origin where to start the line
+     * @param destination where to end the line
+     * @param lineWidth width of the line
+     * @param color of the line
+     */
     private def performBezierCurveDrawing(context: elements.CanvasRenderingContext2D, control1: Point2D,
         control2: Point2D, origin: Point2D, destination: Point2D, lineWidth: Double, color: Color) {
         context.lineWidth = lineWidth
@@ -198,13 +179,13 @@ trait View[A]
     }
 
     /**
-      * Draws a straight line based on the parameters.
-      * @param context to which to draw
-      * @param origin where to start the line
-      * @param destination where to end the line
-      * @param lineWidth width of the line
-      * @param color of the line
-      */
+     * Draws a straight line based on the parameters.
+     * @param context to which to draw
+     * @param origin where to start the line
+     * @param destination where to end the line
+     * @param lineWidth width of the line
+     * @param color of the line
+     */
     protected def drawStraightLine(context: elements.CanvasRenderingContext2D, origin: Point2D,
         destination: Point2D, lineWidth: Double, color: Color) {
         context.lineWidth = lineWidth
@@ -217,13 +198,13 @@ trait View[A]
     }
 
     /**
-      * Draws a circle based on the parameters.
-      * @param context to which to draw
-      * @param center of the drawn circle
-      * @param radius of the drawn circle
-      * @param lineWidth width of the line of the circle
-      * @param color of the line of the circle
-      */
+     * Draws a circle based on the parameters.
+     * @param context to which to draw
+     * @param center of the drawn circle
+     * @param radius of the drawn circle
+     * @param lineWidth width of the line of the circle
+     * @param color of the line of the circle
+     */
     protected def drawCircle(context: elements.CanvasRenderingContext2D, center: Point2D, radius: Double,
         lineWidth: Double, color: Color) {
         context.lineWidth = lineWidth
@@ -246,11 +227,10 @@ trait View[A]
      */
     protected def drawArrow(context: elements.CanvasRenderingContext2D, origin: Point2D, destination: Point2D,
         offsetOrigin: Double, offsetDestination: Double, lineWidth: Double, color: Color) {
-
         var arrowPointingFrom: Option[Point2D] = None
         var arrowPointingTo: Option[Point2D] = None
 
-        if(origin.distance(destination) >= offsetDestination + offsetOrigin) {
+        if (origin.distance(destination) >= offsetDestination + offsetOrigin) {
 
             arrowPointingFrom = getOffsetPoint(origin - destination, origin, offsetOrigin)
             arrowPointingTo = getOffsetPoint(destination - origin, destination, offsetDestination)
@@ -259,13 +239,14 @@ trait View[A]
             arrowPointingTo = getOffsetPoint(origin - destination, origin, offsetDestination)
         }
 
-        if(arrowPointingTo.isDefined && arrowPointingFrom.isDefined) {
+        if (arrowPointingTo.isDefined && arrowPointingFrom.isDefined) {
             val correctedArrowPointingTo = arrowPointingTo.get + (
                 -arrowPointingFrom.get.createVector(arrowPointingTo.get).createVectorOfSize(lineWidth))
 
 
             drawStraightLine(context, arrowPointingFrom.get, correctedArrowPointingTo, lineWidth, color)
-            drawArrowCap(context, arrowPointingTo.get - arrowPointingFrom.get, correctedArrowPointingTo, lineWidth, color)
+            drawArrowCap(context, arrowPointingTo.get - arrowPointingFrom.get, correctedArrowPointingTo, lineWidth,
+                color)
         } else {
             drawStraightLine(context, origin, destination, lineWidth, color)
         }
@@ -280,33 +261,32 @@ trait View[A]
      *                  and the distance between the two distant ends is lineWidth * 4
      * @param color of the drawn lines
      */
-    private  def drawArrowCap(context: elements.CanvasRenderingContext2D, direction: Vector2D,
+    private def drawArrowCap(context: elements.CanvasRenderingContext2D, direction: Vector2D,
         destination: Point2D, lineWidth: Double, color: Color) {
-
-        val arrowSize = Vector2D(lineWidth, lineWidth)*4
+        val arrowSize = Vector2D(lineWidth, lineWidth) * 4
 
         val originPoint = getOffsetPoint(direction, destination, arrowSize.y)
 
-        if(originPoint.isDefined) {
-            var side1:Option[Point2D] = None
+        if (originPoint.isDefined) {
+            var side1: Option[Point2D] = None
             var side2: Option[Point2D] = None
 
             val u = direction
 
-            if(u.x != 0) {
+            if (u.x != 0) {
                 val a = math.pow(u.y, 2) + math.pow(u.x, 2)
-                val b = -2*math.pow(u.y, 2)*originPoint.get.y - 2*originPoint.get.y*math.pow(u.x, 2)
-                val c = math.pow(u.y*originPoint.get.y, 2) + math.pow(originPoint.get.y*u.x, 2)- math.pow(
-                    arrowSize.x*u.x, 2)
+                val b = -2 * math.pow(u.y, 2) * originPoint.get.y - 2 * originPoint.get.y * math.pow(u.x, 2)
+                val c = math.pow(u.y * originPoint.get.y, 2) + math.pow(originPoint.get.y * u.x, 2) - math.pow(
+                    arrowSize.x * u.x, 2)
 
-                val D = math.pow(b, 2) - 4*a*c
-                if(D >= 0) {
+                val D = math.pow(b, 2) - 4 * a * c
+                if (D >= 0) {
                     val Dsqrt = math.sqrt(D)
 
-                    val y1 = (-b + Dsqrt) / (2*a)
-                    val y2 = (-b - Dsqrt) / (2*a)
-                    val x1 = (-u.y*y1 + u.x*originPoint.get.x + u.y*originPoint.get.y)/u.x
-                    val x2 = (-u.y*y2 + u.x*originPoint.get.x + u.y*originPoint.get.y)/u.x
+                    val y1 = (-b + Dsqrt) / (2 * a)
+                    val y2 = (-b - Dsqrt) / (2 * a)
+                    val x1 = (-u.y * y1 + u.x * originPoint.get.x + u.y * originPoint.get.y) / u.x
+                    val x2 = (-u.y * y2 + u.x * originPoint.get.x + u.y * originPoint.get.y) / u.x
 
                     side1 = Some(Point2D(x1, y1))
                     side2 = Some(Point2D(x2, y2))
@@ -323,7 +303,7 @@ trait View[A]
                 side2 = Some(Point2D(x2, y))
             }
 
-            if(side1.isDefined && side2.isDefined) {
+            if (side1.isDefined && side2.isDefined) {
                 val destinationCorrection1 = -destination.createVector(side1.get).createVectorOfSize(lineWidth / 2)
 
                 val destinationCorrection2 = -destination.createVector(side2.get).createVectorOfSize(lineWidth / 2)
@@ -343,25 +323,24 @@ trait View[A]
      * @return the new point distant by offset from the destination lying on the line determined by opposite to direction
      */
     private def getOffsetPoint(direction: Vector2D, destination: Point2D, offset: Double): Option[Point2D] = {
-
         var originPoint: Option[Point2D] = None
-        if(direction.y != 0) {
+        if (direction.y != 0) {
             val a = math.pow(direction.x, 2) + math.pow(direction.y, 2)
-            val b = -2*math.pow(direction.x, 2)*destination.y - 2*destination.y*math.pow(direction.y, 2)
-            val c = math.pow(direction.x*destination.y, 2) + math.pow(destination.y*direction.y, 2)- math.pow(
-                offset*direction.y, 2)
+            val b = -2 * math.pow(direction.x, 2) * destination.y - 2 * destination.y * math.pow(direction.y, 2)
+            val c = math.pow(direction.x * destination.y, 2) + math.pow(destination.y * direction.y, 2) - math.pow(
+                offset * direction.y, 2)
 
-            val D = math.pow(b, 2) - 4*a*c
-            if(D >= 0) {
+            val D = math.pow(b, 2) - 4 * a * c
+            if (D >= 0) {
                 val Dsqrt = math.sqrt(D)
 
-                val y1 = (-b + Dsqrt) / (2*a)
-                val y2 = (-b - Dsqrt) / (2*a)
-                val x1 = (direction.x*y1 + direction.y*destination.x - direction.x*destination.y)/direction.y
-                val x2 = (direction.x*y2 + direction.y*destination.x - direction.x*destination.y)/direction.y
+                val y1 = (-b + Dsqrt) / (2 * a)
+                val y2 = (-b - Dsqrt) / (2 * a)
+                val x1 = (direction.x * y1 + direction.y * destination.x - direction.x * destination.y) / direction.y
+                val x2 = (direction.x * y2 + direction.y * destination.x - direction.x * destination.y) / direction.y
 
                 val pointToCompare = destination + (-direction) //the result has to be closer to this point
-                if(pointToCompare.distance(Point2D(x1, y1)) <= pointToCompare.distance(Point2D(x2, y2))) {
+                if (pointToCompare.distance(Point2D(x1, y1)) <= pointToCompare.distance(Point2D(x2, y2))) {
                     originPoint = Some(Point2D(x1, y1))
                 } else {
                     originPoint = Some(Point2D(x2, y2))
@@ -376,7 +355,7 @@ trait View[A]
             val x2 = -offset + destination.x
 
             val pointToCompare = destination + (-direction) //the result has to be closer to this point
-            if(pointToCompare.distance(Point2D(x1, y)) <= pointToCompare.distance(Point2D(x2, y))) {
+            if (pointToCompare.distance(Point2D(x1, y)) <= pointToCompare.distance(Point2D(x2, y))) {
                 originPoint = Some(Point2D(x1, y))
             } else {
                 originPoint = Some(Point2D(x2, y))
@@ -387,14 +366,14 @@ trait View[A]
     }
 
     /**
-      * Draws text.
-      * @param context to which to draw
-      * @param text which to draw
-      * @param origin where to start drawing
-      * @param color of the text
-      * @param font of the text
-      * @param align of the text
-      */
+     * Draws text.
+     * @param context to which to draw
+     * @param text which to draw
+     * @param origin where to start drawing
+     * @param color of the text
+     * @param font of the text
+     * @param align of the text
+     */
     protected def drawText(context: elements.CanvasRenderingContext2D, text: String, origin: Point2D,
         color: Color, font: String, align: String) {
         context.fillStyle = color.toString
@@ -405,23 +384,23 @@ trait View[A]
     }
 
     /**
-      * Fills the last drawn object with color.
-      * @param context where in to fill a space
-      * @param color of the filling
-      */
+     * Fills the last drawn object with color.
+     * @param context where in to fill a space
+     * @param color of the filling
+     */
     protected def fillCurrentSpace(context: elements.CanvasRenderingContext2D, color: Color) {
         context.fillStyle = color.toString
         context.fill()
     }
 
     /**
-      * Draws the image to the specified position and resizes it to the specified dimensions.
-      * @param context to where to draw
-      * @param image to draw
-      * @param location of drawing
-      * @param dimensions to stretch the image to
-      */
-    protected def drawImage(context: elements.CanvasRenderingContext2D, image: adapters.html.Element, location: Point2D,
+     * Draws the image to the specified position and resizes it to the specified dimensions.
+     * @param context to where to draw
+     * @param image to draw
+     * @param location of drawing
+     * @param dimensions to stretch the image to
+     */
+    protected def drawImage(context: elements.CanvasRenderingContext2D, image: html.Element, location: Point2D,
         dimensions: Vector2D) {
         context.drawImage(image, location.x, location.y, dimensions.x, dimensions.y)
     }
@@ -476,12 +455,12 @@ trait View[A]
     }
 
     /**
-      * Indicator if the point is inside of the rectangle.
-      * @param point to ask for location
-      * @param topLeft point of the rectangle
-      * @param bottomRight point of the rectangle
-      * @return true if the point is inside the rectangle
-      */
+     * Indicator if the point is inside of the rectangle.
+     * @param point to ask for location
+     * @param topLeft point of the rectangle
+     * @param bottomRight point of the rectangle
+     * @return true if the point is inside the rectangle
+     */
     protected def isPointInRect(point: Point2D, topLeft: Point2D, bottomRight: Point2D): Boolean = {
         point >= topLeft && point <= bottomRight
     }

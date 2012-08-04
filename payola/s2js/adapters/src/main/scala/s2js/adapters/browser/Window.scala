@@ -3,7 +3,7 @@ package s2js.adapters.browser
 import s2js.adapters.html._
 import s2js.adapters.events._
 
-abstract class Window extends EventTarget
+trait Window extends EventTarget
 {
     val closed: Boolean
 
@@ -51,9 +51,9 @@ abstract class Window extends EventTarget
 
     val top: Window
 
-    val sessionStorage: Storage = null
+    val sessionStorage: Storage
 
-    val localStorage: Storage = null
+    val localStorage: Storage
 
     var onresize: Event[this.type] => Unit
 

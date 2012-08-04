@@ -12,7 +12,7 @@ class FatalErrorModal(errorDescription: String)
         new Div(List(
             new Text(
                 "The application encountered a fatal error. If the problem doesn't go away after the page refresh, " +
-                "please send us the following error description."
+                    "please send us the following error description."
             )),
             "alert alert-error"
         ),

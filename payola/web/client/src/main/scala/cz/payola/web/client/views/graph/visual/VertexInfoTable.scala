@@ -10,11 +10,11 @@ import cz.payola.common.rdf.IdentifiedVertex
 import cz.payola.web.client.events._
 import cz.payola.web.client.views.algebra.Point2D
 
-class VertexInfoTable(vertex: IdentifiedVertex, values: mutable.HashMap[String, Seq[String]], position: Point2D) extends ComposedView
+class VertexInfoTable(vertex: IdentifiedVertex, values: mutable.HashMap[String, Seq[String]], position: Point2D)
+    extends ComposedView
 {
-
-
     var vertexBrowsingDataSource = new SimpleUnitEvent[IdentifiedVertex]
+
     var vertexBrowsing = new SimpleUnitEvent[IdentifiedVertex]
 
     def createSubViews: Seq[View] = {
@@ -47,14 +47,14 @@ class VertexInfoTable(vertex: IdentifiedVertex, values: mutable.HashMap[String, 
                 even = !even
         }
 
-        val popoverTitle = new Heading(List(new Text("Vertex info")),3,"popover-title")
-        val popoverContent = new Div(List(new UnorderedList(buffer, "unstyled well")),"popover-content")
+        val popoverTitle = new Heading(List(new Text("Vertex info")), 3, "popover-title")
+        val popoverContent = new Div(List(new UnorderedList(buffer, "unstyled well")), "popover-content")
         val popoverInner = new Div(List(popoverTitle, popoverContent), "popover-inner")
-        val popoverArrow = new Div(Nil,"arrow")
-        popoverArrow.setAttribute("style","top: 15px;")
+        val popoverArrow = new Div(Nil, "arrow")
+        popoverArrow.setAttribute("style", "top: 15px;")
         val div = new Div(List(popoverArrow, popoverInner))
-        div.setAttribute("class","popover fade right in vitable")
-        div.setAttribute("style","top: "+(position.y-10).toString()+"px; left: "+position.x.toString()+"px;")
+        div.setAttribute("class", "popover fade right in vitable")
+        div.setAttribute("style", "top: " + (position.y - 10).toString() + "px; left: " + position.x.toString() + "px;")
         List(div)
     }
 }

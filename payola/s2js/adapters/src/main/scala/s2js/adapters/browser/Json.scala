@@ -1,6 +1,6 @@
 package s2js.adapters.browser
 
-abstract class Json
+trait Json
 {
     def stringify(x: Any): String
 

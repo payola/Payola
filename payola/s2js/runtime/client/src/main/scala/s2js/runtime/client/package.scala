@@ -1,7 +1,6 @@
 package s2js.runtime.client
 
 import s2js.compiler.javascript
-import s2js.adapters.goog
 
 object `package`
 {
@@ -22,7 +21,7 @@ object `package`
         val classNameIsAny = classFullName == "scala.Any"
         val classNameIsAnyOrAnyVal = classNameIsAny || classFullName == "scala.AnyVal"
         val classNameIsAnyOrAnyRef = classNameIsAny || classFullName == "scala.AnyRef"
-        goog.typeOf(anObject) match {
+        googTypeOf(anObject) match {
             case "undefined" | "null" => false
             case "number" => {
                 classFullName match {
@@ -53,4 +52,6 @@ object `package`
         anObject
     }
 
+    @javascript("return goog.typeOf(anObject);")
+    private def googTypeOf(anObject: Any): String = ""
 }

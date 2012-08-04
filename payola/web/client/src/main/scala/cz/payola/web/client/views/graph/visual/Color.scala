@@ -1,33 +1,31 @@
 // WARNING: reference to this is directly in JS source - see ColorPane.init
 package cz.payola.web.client.views.graph.visual
 
-import math.Ordering.String
-import s2js.runtime.client.scala.collection.mutable.HashMap
 import scala.Int
 import java.lang.String
 import s2js.compiler.javascript
 
 /**
-  * RGBA representation of colors used by visual plug-ins
-  * @param red component of the color
-  * @param green component of the color
-  * @param blue component of the color
-  * @param alpha component of the color ("see through attribute")
-  */
+ * RGBA representation of colors used by visual plug-ins
+ * @param red component of the color
+ * @param green component of the color
+ * @param blue component of the color
+ * @param alpha component of the color ("see through attribute")
+ */
 case class Color(var red: Int, var green: Int, var blue: Int, var alpha: Double = 1)
 {
     /**
-      * Creates new color inverted to this color.
-      * @return inverted color
-      */
+     * Creates new color inverted to this color.
+     * @return inverted color
+     */
     def inverse(): Color = {
         Color(255 - red, 255 - green, 255 - blue, alpha)
     }
 
     /**
-      * Converts this color to textual representation used by canvas context drawing techniques.
-      * @return rgba("red", "green", "blue", "alpha")
-      */
+     * Converts this color to textual representation used by canvas context drawing techniques.
+     * @return rgba("red", "green", "blue", "alpha")
+     */
     override def toString: String = {
         // TODO use String.format when it's supported by the js runtime.
         "rgba(" + red + ", " + green + ", " + blue + ", " + alpha + ")"
@@ -73,8 +71,8 @@ case class Color(var red: Int, var green: Int, var blue: Int, var alpha: Double 
 }
 
 /**
-  * Few useful basic colors.
-  */
+ * Few useful basic colors.
+ */
 object Color
 {
     val Black = Color(0, 0, 0, 1)
@@ -91,26 +89,34 @@ object Color
 
     def fromHex(hexString: String): Option[Color] = {
         val hexLower = hexString.toLowerCase
-        if (hexLower.matches("^#([0-9a-f]){6}")){
+        if (hexLower.matches("^#([0-9a-f]){6}")) {
             val red = hex2dec(hexLower.substring(1, 3))
             val green = hex2dec(hexLower.substring(3, 5))
             val blue = hex2dec(hexLower.substring(5, 7))
 
             // alpha is optional
-            val alpha = if (hexLower.length < 8){ 1.0 } else { hex2dec(hexLower.substring(7, 9)) / 255.0 }
+            val alpha = if (hexLower.length < 8) {
+                1.0
+            } else {
+                hex2dec(hexLower.substring(7, 9)) / 255.0
+            }
 
             Some(new Color(red, green, blue, alpha))
-        }else if (hexLower.matches("^#([0-9a-f]){3}")){
+        } else if (hexLower.matches("^#([0-9a-f]){3}")) {
             //leading #
             val red = hex2dec(hexLower.substring(1, 2)) * 16
             val green = hex2dec(hexLower.substring(2, 3)) * 16
             val blue = hex2dec(hexLower.substring(3, 4)) * 16
 
             // alpha is optional
-            val alpha = if (hexLower.length < 5){ 1.0 } else { (hex2dec(hexLower.substring(4, 5)) * 16.0) / 255.0 }
+            val alpha = if (hexLower.length < 5) {
+                1.0
+            } else {
+                (hex2dec(hexLower.substring(4, 5)) * 16.0) / 255.0
+            }
 
             Some(new Color(red, green, blue, alpha))
-        }else{
+        } else {
             None
         }
     }

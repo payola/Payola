@@ -8,8 +8,8 @@ import collection.mutable.ListBuffer
 import cz.payola.web.client.views.algebra.Point2D
 
 /**
-  * Visual plug-in technique that places the vertices into a circled tree structure.
-  */
+ * Visual plug-in technique that places the vertices into a circled tree structure.
+ */
 class CircleTechnique(settings: VisualSetup) extends BaseTechnique(settings, "Circle Visualisation")
 {
     protected def getTechniquePerformer(component: Component,

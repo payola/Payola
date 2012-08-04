@@ -3,7 +3,7 @@ package cz.payola.web.client.views.entity.analysis
 import cz.payola.web.client.views.elements._
 import cz.payola.common.entities.Analysis
 import cz.payola.web.client.View
-import s2js.adapters.js.html
+import s2js.adapters.html
 import scala.collection.mutable.ArrayBuffer
 import cz.payola.web.client.views.todo._
 import cz.payola.common.entities
@@ -12,13 +12,13 @@ import scala.collection.mutable
 import s2js.compiler.javascript
 import cz.payola.web.client.events.SimpleUnitEvent
 import cz.payola.common.entities.plugins.PluginInstance
-import s2js.adapters.html.Element
 
 abstract class AnalysisVisualizer(analysis: Analysis) extends View
 {
     val pluginInstanceRendered = new SimpleUnitEvent[PluginInstanceView]
 
     private val pluginCanvas = new Div(Nil, "plugin-canvas")
+
     protected val instancesMap = new HashMap[String, PluginInstanceView]
 
     def render(parent: html.Element) {
@@ -105,7 +105,7 @@ abstract class AnalysisVisualizer(analysis: Analysis) extends View
         }
     }
 
-    def createPluginInstanceView(instance: PluginInstance) : PluginInstanceView
+    def createPluginInstanceView(instance: PluginInstance): PluginInstanceView
 
     private def isSource(instance: entities.plugins.PluginInstance, analysis: Analysis): Boolean = {
         !analysis.pluginInstanceBindings.find(_.targetPluginInstance == instance).isDefined
@@ -124,7 +124,7 @@ abstract class AnalysisVisualizer(analysis: Analysis) extends View
         """)
     def renderBinding(a: PluginInstanceView, b: PluginInstanceView) {}
 
-    def renderPluginInstanceView(v: PluginInstanceView){
+    def renderPluginInstanceView(v: PluginInstanceView) {
         v.render(pluginCanvas.htmlElement)
         pluginInstanceRendered.triggerDirectly(v)
     }

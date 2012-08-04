@@ -1,17 +1,12 @@
 package cz.payola.web.client.views.todo
 
 import scala.collection._
-import s2js.adapters.js.html
+import s2js.adapters.html
 import s2js.compiler.javascript
 import cz.payola.common.entities.Plugin
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.View
 import cz.payola.web.client.views.elements.Div
-import s2js.adapters.html.Element
-import s2js._
-import scala.Some
-import scala.Some
-import scala.Some
 import scala.Some
 
 abstract class PluginInstanceView(
@@ -45,24 +40,22 @@ abstract class PluginInstanceView(
 
     private var parentElement: Option[html.Element] = None
 
-    def render(parent: adapters.html.Element) {
+    def render(parent: html.Element) {
         this.parentElement = Some(parent)
         successors.render(parent)
 
         var i = 0
-        while (i < plugin.inputCount)
-        {
-            val conn = new Div(Nil,"connector connector-"+i.toString)
-            conn.setAttribute("style","left:"+(310*i+148)+"px")
+        while (i < plugin.inputCount) {
+            val conn = new Div(Nil, "connector connector-" + i.toString)
+            conn.setAttribute("style", "left:" + (310 * i + 148) + "px")
             conn.render(successors.htmlElement)
             i += 1
         }
 
         var j = 0
-        while (j < plugin.inputCount)
-        {
-            val plumb = new Div(Nil,"plumb plumb-"+i.toString)
-            plumb.setAttribute("style","left:"+(310*j+145)+"px")
+        while (j < plugin.inputCount) {
+            val plumb = new Div(Nil, "plumb plumb-" + i.toString)
+            plumb.setAttribute("style", "left:" + (310 * j + 145) + "px")
             plumb.render(alertDiv.htmlElement)
             j += 1
         }
@@ -87,11 +80,11 @@ abstract class PluginInstanceView(
         }
     }
 
-    def htmlElement: adapters.html.Element = {
+    def htmlElement: html.Element = {
         successors.htmlElement
     }
 
-    def getPluginElement: adapters.html.Element = {
+    def getPluginElement: html.Element = {
         alertDiv.htmlElement
     }
 
@@ -103,39 +96,39 @@ abstract class PluginInstanceView(
         additionalControls.addCssClass("hidden-element")
     }
 
-    def setRunning(){
+    def setRunning() {
         clearStyle()
         alertDiv.addCssClass("alert-warning")
     }
 
-    def setEvaluated(){
+    def setEvaluated() {
         clearStyle()
         alertDiv.addCssClass("alert-success")
     }
 
     var hasError = false
 
-    def setError(message: String){
-        if (!hasError){
+    def setError(message: String) {
+        if (!hasError) {
             clearStyle()
             alertDiv.addCssClass("alert-danger")
             hasError = true
-            alertDiv.setAttribute("rel","popover")
-            alertDiv.setAttribute("data-content",message)
-            alertDiv.setAttribute("data-original-title","Error details")
+            alertDiv.setAttribute("rel", "popover")
+            alertDiv.setAttribute("data-content", message)
+            alertDiv.setAttribute("data-original-title", "Error details")
             activatePopover(alertDiv.htmlElement)
         }
     }
 
-    @javascript("""jQuery(e).popover()""")
-    def activatePopover(e: adapters.html.Element){}
+    @javascript( """jQuery(e).popover()""")
+    def activatePopover(e: html.Element) {}
 
-    def clearStyle(){
+    def clearStyle() {
         alertDiv.removeCssClass("alert-warning")
         alertDiv.removeCssClass("alert-success")
         alertDiv.removeCssClass("alert-info")
         alertDiv.removeCssClass("alert-danger")
     }
 
-    def blockHtmlElement: adapters.html.Element = successors.htmlElement
+    def blockHtmlElement: html.Element = successors.htmlElement
 }

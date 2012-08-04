@@ -1,10 +1,9 @@
 package cz.payola.web.client.views
 
-import s2js.adapters.js.html
-import s2js.adapters.js.browser.document
+import s2js.adapters.browser._
+import s2js.adapters.html
 import cz.payola.web.client.View
 import cz.payola.web.client.views.elements.Text
-import s2js.adapters.html.Element
 import s2js._
 import scala.Some
 
@@ -27,7 +26,7 @@ trait ComposedView extends View
         subViews.headOption.map(_.blockHtmlElement).getOrElse(document.createElement[adapters.html.Element]("div"))
     }
 
-    def render(parent: adapters.html.Element) {
+    def render(parent: html.Element) {
         parentElement = Some(parent)
         subViews.foreach { v =>
             new Text(" ").render(parent)

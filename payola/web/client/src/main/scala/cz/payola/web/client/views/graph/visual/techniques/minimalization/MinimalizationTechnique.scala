@@ -28,10 +28,10 @@ class MinimalizationTechnique(settings: VisualSetup) extends BaseTechnique(setti
     }
 
     /**
-      * Builds structure for easier vertexViews handling
-      * @param rootVertexView
-      * @return
-      */
+     * Builds structure for easier vertexViews handling
+     * @param rootVertexView
+     * @return
+     */
     private def buildUtilityStructure(rootVertexView: VertexView): VertexViewPack = {
         val structureRoot = new VertexViewPack(rootVertexView, ListBuffer[VertexViewPack](), None)
         var level = ListBuffer[ListBuffer[VertexViewPack]](
@@ -84,13 +84,13 @@ class MinimalizationTechnique(settings: VisualSetup) extends BaseTechnique(setti
     }
 
     /**
-      * Sorts lists of edges of every vertexView in the structure, that it is in the same order as in the
-      * vertexViewPack.children container.
-      * (example: VertexViewPack A has children B, C, D. The vertexView that A contains has edges to vertexViews
-      * B, C, D, but the A.value.edges container is sorted like this: A-D, A-C, A-B. The sorted list of edges of
-      * the A vertexView will be A-B, A-C, A-D.)
-      * @param rootVertexViewPack
-      */
+     * Sorts lists of edges of every vertexView in the structure, that it is in the same order as in the
+     * vertexViewPack.children container.
+     * (example: VertexViewPack A has children B, C, D. The vertexView that A contains has edges to vertexViews
+     * B, C, D, but the A.value.edges container is sorted like this: A-D, A-C, A-B. The sorted list of edges of
+     * the A vertexView will be A-B, A-C, A-D.)
+     * @param rootVertexViewPack
+     */
     private def sortEdgeViewLists(rootVertexViewPack: VertexViewPack) {
         var level = ListBuffer[VertexViewPack](rootVertexViewPack)
         var levelNext = ListBuffer[VertexViewPack]()
@@ -132,13 +132,13 @@ class MinimalizationTechnique(settings: VisualSetup) extends BaseTechnique(setti
     }
 
     /**
-      * Level is list of vertexViews that are connected by one edge to a vertex in a previus level. The first level
-      * contains one "special" (e.g. user-selected) edge.
-      * The algorithm finds drawing of the graph that has the lowest count of edge crossings of edges between levels.
-      * In every iteration the crossings are counted and chilren of the last ratate-able parent are rotated
-      * (see rotate(..)). The found drawing is then set by the sorthEdgeViewList method.
-      * @param vertexViews
-      */
+     * Level is list of vertexViews that are connected by one edge to a vertex in a previus level. The first level
+     * contains one "special" (e.g. user-selected) edge.
+     * The algorithm finds drawing of the graph that has the lowest count of edge crossings of edges between levels.
+     * In every iteration the crossings are counted and chilren of the last ratate-able parent are rotated
+     * (see rotate(..)). The found drawing is then set by the sorthEdgeViewList method.
+     * @param vertexViews
+     */
     private def minimizeEdgeCrossing(vertexViews: ListBuffer[VertexView]) {
         val originalStructure = buildUtilityStructure(vertexViews.head)
         var minCrossings = Double.MaxValue
@@ -170,12 +170,12 @@ class MinimalizationTechnique(settings: VisualSetup) extends BaseTechnique(setti
     }
 
     /**
-      * Finds parent of children, that do not have any further children (by vertexViewPack.getLastParent)
-      * and rotates the children list (by vertexViewPack.rotateChildren). If the returned value is true
-      * it takes previous brother of the (current) parent and rotates its children, etc.
-      * (see vertexViewPack.getPreviousBrother)
-      * @param root
-      */
+     * Finds parent of children, that do not have any further children (by vertexViewPack.getLastParent)
+     * and rotates the children list (by vertexViewPack.rotateChildren). If the returned value is true
+     * it takes previous brother of the (current) parent and rotates its children, etc.
+     * (see vertexViewPack.getPreviousBrother)
+     * @param root
+     */
     private def rotate(root: VertexViewPack) {
         // 1) vezmu parenta posledniho children listu a zarotuju
         // 2) pokud pri rotaci doslo k otoceni permutace dokola (jsem opet na prvni permutaci)
@@ -196,10 +196,10 @@ class MinimalizationTechnique(settings: VisualSetup) extends BaseTechnique(setti
     }
 
     /**
-      * Counts crossings in the input level, nothing more, nothing less
-      * @param levelOfElements
-      * @return
-      */
+     * Counts crossings in the input level, nothing more, nothing less
+     * @param levelOfElements
+     * @return
+     */
     private def countCrossings(levelOfElements: ListBuffer[ListBuffer[VertexViewPack]]): Double = {
         var processedVertexGroups = ListBuffer[VertexViewPack]() //vertices that were present in already processed groups
 
@@ -223,14 +223,14 @@ class MinimalizationTechnique(settings: VisualSetup) extends BaseTechnique(setti
     }
 
     /**
-      * Support function for countCrossings.
-      * Finds first appearance of addedElement in processedVertexGroups and counts elements, that did not appear
-      * before addedElement (addedElement included), from this position to the end of the container.
-      * Returns -1 if addedElement is not found or number of crossings
-      * @param processedVertexGroups
-      * @param addedElement
-      * @return
-      */
+     * Support function for countCrossings.
+     * Finds first appearance of addedElement in processedVertexGroups and counts elements, that did not appear
+     * before addedElement (addedElement included), from this position to the end of the container.
+     * Returns -1 if addedElement is not found or number of crossings
+     * @param processedVertexGroups
+     * @param addedElement
+     * @return
+     */
     private def countCrossingsIn(processedVertexGroups: ListBuffer[VertexViewPack],
         addedElement: VertexViewPack): Int = {
         var ignoreList = ListBuffer[VertexViewPack]()

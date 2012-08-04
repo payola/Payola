@@ -1,10 +1,9 @@
 package cz.payola.web.client.presenters
 
-import s2js.adapters.js.browser.document
+import s2js.adapters.browser._
 import cz.payola.web.client._
 import cz.payola.web.client.views.entity.analysis.AnalysisRunnerView
 import cz.payola.web.shared._
-import s2js.adapters.js.browser.window
 import cz.payola.web.client.presenters.components.EvaluationSuccessEventArgs
 import cz.payola.web.client.events.UnitEvent
 import cz.payola.common.entities.Analysis

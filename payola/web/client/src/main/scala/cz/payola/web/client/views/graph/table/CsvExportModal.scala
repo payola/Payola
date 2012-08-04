@@ -18,7 +18,7 @@ class CsvExportModal(val csv: String) extends Modal("CSV Export", Nil, Some("OK"
         false
     }
 
-    @javascript("""
+    @javascript( """
         if (document.selection) {
             var range = document.body.createTextRange();
             range.moveToElementText(self.csvPreFormatted.htmlElement);
@@ -28,6 +28,6 @@ class CsvExportModal(val csv: String) extends Modal("CSV Export", Nil, Some("OK"
             range.selectNode(self.csvPreFormatted.htmlElement);
             window.getSelection().addRange(range);
         }
-    """)
-    private def selectAll() { }
+                 """)
+    private def selectAll() {}
 }

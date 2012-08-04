@@ -1,10 +1,9 @@
 package cz.payola.web.client.views.elements
 
-import s2js.adapters.js.html
+import s2js.adapters.html
 import cz.payola.web.client.views._
 import cz.payola.web.client.View
 import cz.payola.web.client.views.bootstrap.Icon
-import s2js.adapters.html.elements.Button
 
 class Button(subView: View, cssClass: String = "", icon: Icon = null)
     extends ElementView[html.elements.Button]("button", if (icon == null) {

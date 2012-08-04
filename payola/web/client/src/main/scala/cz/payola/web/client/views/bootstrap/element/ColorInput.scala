@@ -1,11 +1,10 @@
 package cz.payola.web.client.views.bootstrap.element
 
 import cz.payola.web.client.views.graph.visual.Color
-import s2js.adapters.js.html
+import s2js.adapters.html
 import s2js.compiler.javascript
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.{EditableInput, Icon}
-import s2js.adapters.html.Element
 
 // Use the getter + setter for the color
 class ColorInput(name: String, label: String, private var colorOption: Option[Color], cssClass: String = "")
@@ -29,9 +28,10 @@ class ColorInput(name: String, label: String, private var colorOption: Option[Co
     private val div = new Div(List(colorInput, colorWellSpan, clearColorSpan), "input-append color")
 
     private val NO_COLOR_TEXT = "No color selected"
+
     private val NO_COLOR_RGBA_VALUE = "rgba(0, 0, 0, 1)"
 
-    colorInput.setAttribute("data-color",  getColorRgbaString(NO_COLOR_RGBA_VALUE))
+    colorInput.setAttribute("data-color", getColorRgbaString(NO_COLOR_RGBA_VALUE))
     colorInput.setAttribute("data-color-format", "rgba")
 
     clearColorSpan.mouseClicked += { e =>
@@ -57,7 +57,7 @@ class ColorInput(name: String, label: String, private var colorOption: Option[Co
 
     override def value_=(value: String) {
         // During initialization is value set (.ctor), but field doesn't exists yet
-        if (colorInput != null){
+        if (colorInput != null) {
             setColor(Color.fromHex(value))
         }
     }
@@ -66,7 +66,7 @@ class ColorInput(name: String, label: String, private var colorOption: Option[Co
         colorInput.setIsActive(isActive)
     }
 
-    @javascript("""var cp = jQuery(self.colorInput.htmlElement).colorpicker({format: 'rgba'})
+    @javascript( """var cp = jQuery(self.colorInput.htmlElement).colorpicker({format: 'rgba'})
                     cp.on('changeColor',function(evt){
         var rgba = evt.color.toRGB();
         var color = new cz.payola.web.client.views.graph.visual.Color(rgba.r, rgba.g, rgba.b, rgba.a);

@@ -1,9 +1,9 @@
 package cz.payola.web.client.presenters
 
-import s2js.adapters.js.browser._
-import cz.payola.web.shared.RPCTester
+import s2js.adapters.browser._
 import s2js.compiler.javascript
 import s2js.runtime.shared.rpc
+import cz.payola.web.shared.RPCTester
 
 class Test
 {

@@ -2,7 +2,7 @@ package s2js.adapters.html.elements
 
 import s2js.adapters.html._
 
-abstract class Image extends Element
+trait Image extends Element
 {
     var alt: String
 

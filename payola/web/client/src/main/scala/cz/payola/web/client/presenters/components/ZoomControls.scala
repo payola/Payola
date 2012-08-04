@@ -1,6 +1,6 @@
 package cz.payola.web.client.presenters.components
 
-import s2js.adapters.js.html
+import s2js.adapters.html
 import cz.payola.web.client.views.bootstrap.Icon
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events.SimpleUnitEvent

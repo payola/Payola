@@ -1,6 +1,6 @@
 package cz.payola.web.client.views.graph.visual.settings
 
-import s2js.adapters.js.browser._
+import s2js.adapters.browser._
 
 class SetupLoader
 {
