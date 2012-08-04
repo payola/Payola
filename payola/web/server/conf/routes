@@ -37,7 +37,6 @@ POST    /datasource/save/:id        controllers.DataSource.saveEdited(id)
 GET     /virtuoso/add           controllers.PrivateDataStorage.add()
 POST     /virtuoso/upload/file           controllers.PrivateDataStorage.saveFromFile()
 POST     /virtuoso/upload/url           controllers.PrivateDataStorage.saveFromURL()
-GET     /virtuoso/error         controllers.PrivateDataStorage.error(error: String)
 
 GET     /dashboard                  controllers.Application.dashboard()
 GET     /group/create               controllers.Group.create()

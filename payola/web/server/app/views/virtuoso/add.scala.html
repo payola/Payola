@@ -1,8 +1,12 @@
-@(user: cz.payola.domain.entities.User)
+@(user: cz.payola.domain.entities.User)(flash: Flash)
+
+@import tags._
 
 @main(Some(user), "Add private data - Payola!") {
 
 <div class="container-fluid">
+
+        @render_flash(flash)
 
         <ul class="breadcrumb">
             <li class="active">Upload File</li>

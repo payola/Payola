@@ -1,5 +1,7 @@
 @(user: cz.payola.domain.entities.User)(flash: Flash)
 
+@import tags._
+
 @main(Some(user), "List groups") {
  <div class="container-fluid">
     <ul class="breadcrumb">
@@ -12,17 +14,7 @@
         <li class="active">Groups</li>
     </ul>
 
-    @flash.get("success").map { message =>
-    <p class="alert alert-success">
-        @message
-    </p>
-    }
-
-    @flash.get("error").map { message =>
-    <p class="alert alert-error">
-        @message
-    </p>
-    }
+    @render_flash(flash)
 
     <div class="container">
         <h1>List groups</h1>

@@ -1,5 +1,7 @@
 @(user: cz.payola.domain.entities.User, form: Form[(String)])(flash: Flash)
 
+@import tags._
+
 @main(Some(user), "Create a new group - Payola!") {
 
 <div class="container">
@@ -18,11 +20,7 @@
 
     <h1>Create a new group</h1>
 
-    @flash.get("error").map { message =>
-    <p class="alert alert-error">
-        @message
-    </p>
-    }
+    @render_flash(flash)
 
     <div class="well">
         <fieldset>

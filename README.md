@@ -101,6 +101,9 @@ Such a subgraph can be viewed in many ways. The default one, presented to you, i
 The `Column Chart` visualization will display a column bar graph, but works only with graphs with a specific structure. The graph must have one identified vertex, whose edges are of a `rdf:type` URI with identified vertex destinations - this destination then must have exactly two edges, both directed to a literal vertex, one with a string value (name of the column), the second one with a numeric value.
 
 ##### Ontology Customization
+
+###### TODO - describe what can be done with a graph
+
 ---
 ### Groups
 
@@ -203,6 +206,8 @@ Join can be either inner or outer (default).
 *Outer join:* All vertices that are origins of edges with URI defined in the `PropertyURI` parameter are included. Moreover, if origin of the edge is included in the second graph, destination of the edge and the edge itself are both included as well.
 
 > *Example:* Using the same graphs as before, merging graph A with graph B will yield in the same result. Merging B with A, however, will include a single vertex `payola.cz/wolf` and no edges.
+
+#### Running Analyses
 
 ---
 ### <a name="plugins"></a>Plugins
