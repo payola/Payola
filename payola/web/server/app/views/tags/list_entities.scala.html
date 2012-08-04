@@ -52,13 +52,10 @@
                 <div style="text-align: center">
                     <div class="pagination">
                         <ul>
-                            <li><a href=@{
-                                       if(page == 1){
-                                            "#"
-                                        }else{
-                                            "?page=" + (page - 1)
-                                        }
-                                    }>Prev</a></li>
+
+                            @if(page != 1){
+                                <li><a href=@{ "?page=" + (page - 1) }>Prev</a></li>
+                            }
                             @for(i <- 0 until numberOfPage){
                                 <li@if((i + 1) == page){ class="active"}>
                                         @if((i + 1) == page){
@@ -69,13 +66,10 @@
 
                                 </li>
                             }
-                            <li><a href=@{
-                                   if(lastPage){
-                                        "#"
-                                   }else{
-                                       "?page=" + (page + 1)
-                                   }
-                                }>Next</a></li>
+
+                            @if(!lastPage){
+                                <li><a href=@{ "?page=" + (page + 1) }>Next</a></li>
+                            }
                         </ul>
                     </div>
                 </div>
