@@ -1,21 +1,19 @@
 @(user: cz.payola.domain.entities.User, form: Form[(String,String)])
 
-@main(Some(user), "Payola login page") {
+@breadcrumbContent = {
+    <li>
+        <a href="/">Home</a> <span class="divider">/</span>
+    </li>
+    <li>
+        <a href="@routes.Profile.index(user.name)">Your profile</a> <span class="divider">/</span>
+    </li>
+    <li class="active">Edit</li>
+}
+
+@main(Some(user), "Payola login page", Some("Edit your profile"), Some(breadcrumbContent)) {
 <div class="container">
 
-    <ul class="breadcrumb">
-        <li>
-            <a href="/">Home</a> <span class="divider">/</span>
-        </li>
-        <li>
-            <a href="@routes.Profile.index(user.name)">Your profile</a> <span class="divider">/</span>
-        </li>
-        <li class="active">Edit</li>
-    </ul>
-
     @helper.form(routes.Profile.save(user.email)) {
-
-    <h1>Edit your profile</h1>
 
     <div class="well">
         <fieldset>

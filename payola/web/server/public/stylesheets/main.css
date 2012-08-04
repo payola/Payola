@@ -35,6 +35,15 @@ pre {
     width: 30px;
 }
 
+.main-header {
+    padding-left: 40px;
+    padding-bottom: 20px;
+}
+
+.main-breadcrumb {
+    padding-left: 40px;
+}
+
 body {
     padding-top: 60px;
     padding-bottom: 40px;

@@ -2,15 +2,12 @@
 
 @import tags._
 
-@main(Some(user), "Add private data - Payola!") {
+@main(Some(user), "Add private data - Payola!", Some("Upload Data to Private RDF Storage")) {
 
 <div class="container-fluid">
 
         @render_flash(flash)
 
-        <ul class="breadcrumb">
-            <li class="active">Upload File</li>
-        </ul>
         <form id="file-uploader-form" name="file_upload_form" method="post" action="@routes.PrivateDataStorage.saveFromFile()" enctype="multipart/form-data">
             <div class="well" id="file-uploader">
 

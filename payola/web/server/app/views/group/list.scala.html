@@ -2,22 +2,21 @@
 
 @import tags._
 
-@main(Some(user), "List groups") {
- <div class="container-fluid">
-    <ul class="breadcrumb">
-        <li>
-            <a href="/">Home</a> <span class="divider">/</span>
-        </li>
-        <li>
-            <a href="@routes.Profile.index(user.id)">Your profile</a> <span class="divider">/</span>
-        </li>
-        <li class="active">Groups</li>
-    </ul>
+@breadcrumbContent = {
+    <li>
+        <a href="/">Home</a> <span class="divider">/</span>
+    </li>
+    <li>
+        <a href="@routes.Profile.index(user.id)">Your profile</a> <span class="divider">/</span>
+    </li>
+    <li class="active">Groups</li>
+}
 
+@main(Some(user), "List groups", Some("List groups"), Some(breadcrumbContent)) {
+ <div class="container-fluid">
     @render_flash(flash)
 
     <div class="container">
-        <h1>List groups</h1>
         @if(user.ownedGroups.size > 0){
         <table class="table table-striped">
             <thead>

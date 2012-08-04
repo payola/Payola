@@ -1,9 +1,8 @@
 @(user: cz.payola.domain.entities.User)
 
-@main(Some(user), "Create a new plugin - Payola!") {
+@main(Some(user), "Create a new plugin - Payola!", Some("Create a new plugin from source code")) {
 
 <div class="container-fluid">
-    <h1>Create a new plugin from source code</h1>
     <div id="plugin_create_button_container"></div>
     <pre id="editor"></pre>
 

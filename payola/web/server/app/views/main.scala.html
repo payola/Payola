@@ -1,4 +1,4 @@
-@(user: Option[cz.payola.common.entities.User], title: String)(content: Html)
+@(user: Option[cz.payola.common.entities.User], title: String, heading: Option[String] = None, breadcrumbContent: Option[Html] = None)(content: Html)
 
 <!DOCTYPE html>
 <html>
@@ -101,6 +101,18 @@
                     </div>
                 </div>
             </div>
+
+
+            @breadcrumbContent.map { content =>
+                <div class="main-breadcrumb"><ul class="breadcrumb">
+                    @content
+                </ul></div>
+            }
+
+            @heading.map { str =>
+                <div class="main-header"><h1>@str</h1></div>
+            }
+
 
             @content
 
