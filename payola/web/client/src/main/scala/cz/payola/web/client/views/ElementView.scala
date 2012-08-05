@@ -115,5 +115,4 @@ abstract class ElementView[A <: dom.Element](domElementName: String, val subView
         return new cz.payola.web.client.views.algebra.Vector2D(offsetLeft, offsetTop);
                 """)
     def topLeftCorner: Vector2D = Vector2D(0, 0)
-
 }
