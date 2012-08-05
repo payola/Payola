@@ -8,12 +8,43 @@ import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.V
 import cz.payola.web.client.views.graph.visual.graph._
 import cz.payola.web.client.views.graph.visual.animation.Animation
 import cz.payola.web.client.views.graph.visual.graph.positioning._
+import s2js.adapters.js.dom
+import cz.payola.web.client.views.elements._
+import cz.payola.web.client.views.bootstrap.Icon
 
 abstract class BaseTechnique(settings: VisualSetup, name: String) extends VisualPluginView(settings, name)
 {
     private val treeVerticesDistance = 100
 
     private val circleLevelsDistance = 150
+
+    /**
+     * This is set to true if the animationStopButton is pressed.
+     */
+    protected var animationStopForced = false
+
+    /**
+     * A way to end the main animation. Has to be set show(..) in the visual technique.
+     */
+    protected val animationStopButton = new Button(new Text("Stop animation"), "pull-right",
+        new Icon(Icon.stop)).setAttribute("style", "margin: 0 5px;")
+
+    animationStopButton.mouseClicked += { e =>
+        animationStopForced = true
+        Animation.clearCurrentTimeout()
+        animationStopButton.hide()
+        false
+    }
+    override def renderControls(toolbar: dom.Element) {
+        super.renderControls(toolbar)
+        animationStopButton.render(toolbar)
+        animationStopButton.hide()
+    }
+
+    override def destroyControls() {
+        animationStopButton.destroy()
+        super.destroyControls()
+    }
 
     override def updateGraph(graph: Option[Graph]) {
         super.updateGraph(graph)
@@ -59,6 +90,10 @@ abstract class BaseTechnique(settings: VisualSetup, name: String) extends Visual
             firstAnimation.get.addFollowingAnimation(
                 new Animation(Animation.moveGraphByFunction,
                     (graphCenterCorrector, graphView.getAllVertices), None, redrawQuick, redraw, None))
+
+            //disable animationStop button
+            firstAnimation.get.addFollowingAnimation(
+                new Animation(Animation.emptyAnimation, false, None, animationStopButton.hide, redraw, None))
 
             firstAnimation.get.run()
         }

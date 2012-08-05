@@ -43,6 +43,7 @@ class GravityTechnique(settings: VisualSetup) extends BaseTechnique(settings, "G
     protected def getTechniquePerformer(component: Component,
         animate: Boolean): Animation[ListBuffer[(VertexView, Point2D)]] = {
         if (animate) {
+            animationStopButton.show()
             val animationOfThis = new Animation(
                 runningAnimation, component, None, redrawQuick, redrawQuick, Some(70))
             basicTreeStructure(component.vertexViews, Some(animationOfThis), redrawQuick, redraw, None)
@@ -69,12 +70,12 @@ class GravityTechnique(settings: VisualSetup) extends BaseTechnique(settings, "G
 
         //run the calculation for the specified time in miliseconds
         // or just run it at once (if the animation step length is 0 or not defined)
-        while ((animationStepLength.isDefined && needToContinue &&
+        while (((animationStepLength.isDefined && needToContinue &&
             compStartTime.getTime() + animationStepLength.get > currentTime.getTime())
             ||
             (animationStepLength.isDefined && animationStepLength.get == 0 && needToContinue)
             ||
-            (animationStepLength.isEmpty && needToContinue)) {
+            (animationStepLength.isEmpty && needToContinue)) && !animationStopForced) {
 
             needToContinue = run(vertexViewPacks, edgeViewPacks)
             currentTime = new Date()
@@ -88,7 +89,7 @@ class GravityTechnique(settings: VisualSetup) extends BaseTechnique(settings, "G
         val moveVerticesAnimation =
             new Animation(Animation.moveVertices, toMove, followingAnimation, redrawQuick, redrawQuick,
                 animationStepLength)
-        if (needToContinue) {
+        if (needToContinue && !animationStopForced) {
             //if the calculation is not finished yet
 
             val nextRoundAnimation = new Animation(runningAnimation, componentToAnimate, followingAnimation,
