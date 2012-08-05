@@ -131,16 +131,26 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var s
     def draw(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
         drawQuick(context, positionCorrection)
 
-        if (information.isDefined) {
-            information.get.draw(context,
-                (LocationDescriptor.getVertexInformationPosition(position) + positionCorrection).toVector)
-        }
+        val glyph = settings.glyph(rdfType)
+
+        drawText(context, glyph, this.position + positionCorrection + Vector2D(0, settings.glyphSize / 4),
+            Color.Black, settings.glyphWholeFont, settings.glyphAlign)
+
+        val halfRadius = settings.radius(rdfType) / 2
+
+        val informationPositionCorrection =
+            if(glyph != "") { Vector2D(0, halfRadius + (settings.glyphSize / 4)) } else { Vector2D.Zero }
+        val informationPosition =
+            (LocationDescriptor.getVertexInformationPosition(position) + positionCorrection).toVector +
+                informationPositionCorrection
+
+        information.get.draw(context, informationPosition)
     }
 
     def drawQuick(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
         val correctedPosition = this.position + positionCorrection
 
-        drawCircle(context, correctedPosition, settings.radius(rdfType), 2, Color.Black)
+        drawCircle(context, correctedPosition, settings.radius(rdfType), settings.borderSize, settings.borderColor)
         if (isSelected) {
             val col = settings.color(rdfType)
             fillCurrentSpace(context, Color(col.red, col.green, col.blue, 1.0))
