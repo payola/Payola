@@ -11,6 +11,10 @@ abstract class Element extends Node
 
     var offsetLeft: Double
 
+    var offsetWidth: Double
+
+    var offsetHeight: Double
+
     val attributes: NamedNodeMap
 
     val tagName: String
