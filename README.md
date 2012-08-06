@@ -109,20 +109,20 @@ The `Column Chart` visualization will display a column bar graph, but works only
 
 ##### Ontology Customization
 
-By default, each vertex and edge is of the same color and has the same size (or width). To emphasize or diminish some parts of the graph, you can customize the visual appearance using an ontology customization.
+By default, each vertex and edge is of the same color and has the same size (width). To emphasize or diminish some parts of the graph, you can customize the visual appearance using an ontology customization.
 
-While viewing a graph, press the `Change appearance using ontologies` button. If you have already saved some customizations, they'll be listed there - if not, select the `Create New` menu item. Enter name of the customization, ontology URL and press `Create`.
+While viewing a graph, press the `Change appearance using ontologies` button. If you have already saved some customizations, they'll be listed there - if you haven't created any yet, select the `Create New` menu item. Enter name of the customization, ontology URL and press `Create`.
 
-You will be presented with a customization dialog. On the left, ontology classes are listed - select one. On the right, properties of that class are listed. At the very top of the right column, you can customize the appearance of vertices of that class, below, you can modify appearance of edges of that property.
+You will be presented with a customization dialog. On the left, ontology classes are listed - select one. On the right, properties of that class are listed. At the very top of the right column, you can customize the appearance of that class itself (in the graph displayed as vertices), below, you can modify appearance of that property (in the graph displayed as edges).
 
 When done, simply press the `Done` button. If you want to further modify the customization, you can click on the `Edit` button in the `Change appearance using ontologies` button's menu.
 
 ---
 ### Groups
 
-You can create user groups to make sharing easier (as described in the next chapter). Imagine you want to share a resource (e.g. an analysis) with a group of co-workers. One approach would be to share it with each one of them, but this can be tedious considering you might want to share something with them every week or every day. Hence there's a possibility to create user groups - in the top toolbar, click on the `User Groups` button and select `Create New`.
+You can create user groups to make sharing easier (as described in the next chapter). Imagine you want to share a resource (e.g. an analysis) to a group of co-workers. One approach would be to share it to each one of them, but this can be tedious considering you might want to share something to them every week or every day. Hence there's a possibility to create user groups - in the top toolbar, click on the `User Groups` button and select `Create New`.
 
-Enter the group name (e.g. 'My co-workers') and hit the `Create Group` button. After the group has been created, you can start adding members to the group. To do so, make the `Members` field active and start typing - the suggestion box will offer you users with a matching name. Click on the user to add him or her. If you decide to remove a user, click on the `x` button in front of his or her name. Remember to use the `Save Group` button before leaving the edit page, or all changes made will be lost.
+Enter the group name (e.g. 'My co-workers') and hit the `Create Group` button. After the group has been created, you can start adding members to the group. To do so, make the `Members` field active and start typing - the suggestion box will offer users with a matching name. Click on the user to add him or her. If you decide to remove a user, click on the `x` button in front of his or her name. Remember to use the `Save Group` button before leaving the edit page, or all changes made will be lost.
 
 To delete a group, use the `Delete` button at the top-right corner of the page.
 
@@ -132,35 +132,35 @@ To delete a group, use the `Delete` button at the top-right corner of the page.
 ---
 ### <a name="sharing"></a>Sharing
 
-Now that you know how to create a group, let's share a data source. In the toolbar, click on the `My Data Sources` button and select `View All`. This lists all your data sources. You can use the `Edit` button to edit the data source, the `Public` button to toggle whether the data source is private (then only you and people you share it to can use it), or public - anyone can use it, even people who are not logged in.
+Now that you know how to create a group, let's share a data source. In the toolbar, click on the `My Data Sources` button and select `View All`. This lists all your data sources. You can use the `Edit` button to edit the data source, the `Private`/`Public` button to toggle whether the data source is private (only you and people you share it to can use it), or public - anyone can use it, even people who are not logged in.
 
-Then there's the `Share` button. When you click on it, a menu pops up, allowing you to share the data source either to users or groups. When you select the `To Users` menu item, a new modal shows with a text field which will suggest users as you type just like when you were adding members to a group. 
+Then there's the `Share` button. When you click on it, a menu pops up, allowing you to share the data source either to users or groups. When you select the `To Users` menu item, a dialog is shown with a text field which will suggest users as you type just like when you were adding members to a group. 
 
-The other option is to share the data source to groups - again a modal will appear, letting you select multiple groups using the suggestion box. Add groups you want and hit the `Share` button. All users within the selected groups will be now able to use this data source.
+The other option is to share the data source to groups - again a dialog will appear, letting you select multiple groups using the suggestion box. Add groups you want and hit the `Share` button. All users within the selected groups will be now able to use this data source.
 
-If you no longer want to share a resource with a group or a user, follow the same steps as if you wanted to share it with someone - the modal which appears will contain the users or groups whom you've shared the resource to previously. Press the `Share` button. The list of users and groups allowed to access the resource will be updated accordingly.
+If you no longer want to share a resource with a group or a user, follow the same steps as if you wanted to share it with someone - the dialog which appears will contain the users or groups whom you've shared the resource to previously. Press the `Share` button. The list of users and groups allowed to access the resource will be updated accordingly.
 
 ---
 ### Private Data Storage
 
-While listing data sources, you might have noticed a data source called `Private Storage of ...` - when you sign up, a new private data storage is created in your Virtuoso instance. You can add your own data to this storage. Of course, you can share this data storage as well.
+While listing data sources, you might have noticed a data source called `Private Storage of ...` - when you sign up, a new private data storage is created in your Virtuoso instance. You can add your own data to this storage. Of course, you can share this data source as well.
 
 ##### Adding data to data storage
 
 To add data to your private data storage, use toolbar's `Private RDF Storage` button and select `Upload Data`.
 
-Here you are presented with two options: to upload a RDF/XML or TTL file, or load the RDF/XML from a URL. Retrieving a graph in a TTL format from a URL isn't currently supported.
+Here you are presented with two options: to upload an RDF/XML or TTL file, or load the RDF/XML from a URL. Retrieving a graph in a TTL format from a URL isn't currently supported.
 
 ---
 ### Analyses
 
-Creating a new analysis is similar to creating any other resource - in the toolbar, select `Create New` from `My Analyses` button's menu. You will be prompted to enter a name - enter the analysis name - you can change it later on.
+Creating a new analysis is similar to creating any other resource - in the toolbar, select `Create New` from `My Analyses` button's menu. You will be prompted to enter a name - enter the analysis' name - you can change it later on.
 
 You will be presented with a blank page with a control box in the top-left corner. Start by filling in the analysis description.
 
-First, you'll need a data source to start with. You can do so either using the `Add data source` button which will offer you available data sources, or `Add plugin` which will let you add a data fetcher - generally an anonymous data source. This can be useful if you decide to use a data source that you don't want to save right ahead (e.g. you know you'll use it just once).
+First, you'll need a data source to start with. You can do so either using the `Add data source` button which will offer you available data sources, or `Add plugin` which will let you add a data fetcher - an anonymous data source. This can be useful if you decide to use a data source that you don't want to save right away (e.g. you know you'll use it just once).
 
-Now that you've added a data source, you need to do something with the data. Click on the `Add Connection` button on your data source box. Payola comes with 6 installed plugins, which will be described one by one below. Of course, you can add your own plugin (see [section Plugins](#plugins)). Plugins are ordered in a row (though more branches can be created, see below) - a plugin will always get the result of its previous one and work with it.
+Now that you've added a data source, you need to do something with the data. Click on the `Add Connection` button on your data source box. Payola comes with 6 pre-installed plugins, which will be described one by one below. Of course, you can add your own plugin (see [section Plugins](#plugins)). Plugins are ordered in a row (though more branches can be created, see below) - a plugin  always gets the result of the previous one as its input.
 
 ##### Typed
 
@@ -169,27 +169,27 @@ This plugin selects vertices of a type that's filled in as a parameter `TypeURI`
 ##### Projection
 
 Projection plugin takes property URIs separated by a newline as a single parameter. It will select vertices that are connected to other vertices using one of the listed URIs. 
-> *Note:* Payola performs some optimizations, potentially merging several consecutive plugins together. For example, two consecutive projection plugins are merged - hence their result isn't an empty graph as one could expect (the first plugin would create a graph containing vertices connected to each other using URIs declared in the first plugin, which is then filtered using the second plugin), but a graph that contains both projections.
+> **Note:** Payola performs some optimizations, potentially merging several consecutive plugins together. For example, two consecutive projection plugins are merged - hence their result isn't an empty graph as one could expect even if each of them lists completely different set of URIs, but a graph that contains both projections (if this optimization didn't take place, the first plugin would create a graph containing vertices connected to each other using URIs declared in the first plugin, which is then filtered using the second plugin).
 
 ##### Selection
 
 Selection plugin lets you select vertices with a particular attribute - for example select cities with more than 2 million inhabitants.
 
-> *Example:* Let's create an analysis which selects all cities with more than 2 million inhabitants. First, add a `DBpedia.org` data source, then connect a new Typed plugin with TypeURI `http://dbpedia.org/ontology/City`. Continue with a Projection plugin with PropertyURIs `http://dbpedia.org/ontology/populationTotal`, then a Selection plugin with PropertyURI `http://dbpedia.org/ontology/populationTotal`, Operator `>` and Value `2000000`. And that's it. Your first analysis that actually does something useful.
+> *Example:* Let's create an analysis which selects all cities with more than 2 million inhabitants. First, add a `DBpedia.org` data source, then connect a new Typed plugin with TypeURI `http://dbpedia.org/ontology/City`. Continue with a Projection plugin with PropertyURIs `http://dbpedia.org/ontology/populationTotal`, then a Selection plugin with PropertyURI `http://dbpedia.org/ontology/populationTotal`, Operator `>` and Value `2000000`. And that's it: your first analysis.
 
 ##### Ontological Filter
 
-Ontological Filter plugin filters a graph according to ontologies stored at URLs listed in the OntologyURLs parameter.
+Ontological Filter plugin filters a graph according to ontologies located at URLs listed in the OntologyURLs parameter.
 
 ##### SPARQL Query
 
-This is a more advanced plugin letting you to perform your own custom SPARQL Query on the output of the previous plugin.
+This is a more advanced plugin letting you perform your own custom SPARQL query on the output of the previous plugin.
 
 #### Branches
 
-You can add multiple data sources, creating multiple branches that need to be merged before the analysis can be run (trying to run such an analysis will yield in an error). Of course, you can have such an incomplete analysis saved and work on it later.
+You can add multiple data sources, creating multiple branches that need to be merged before the analysis can be run (trying to run an analysis with branches that aren't merged will yield in an error). Of course, you can have such an incomplete analysis saved and work on it later.
 
-Merging branches can be done using the `Merge branches` button. You will be given a choice to use either Join or Union. After selecting one (each is described below), you need to specify which branches you want to merge - at the bottom of the dialog, there are wells for each input. At the top of the dialog, you have each branch represented by the name of the last plugin in each branch. If you hover your mouse over the box representing a branch, that particular branch gets highlighted in the background (it gets a thick black frame). You need to drag the branch boxes to the input boxes (see picture attached).
+Merging branches can be done using the `Merge branches` button. You will be given a choice to use either Join or Union. After selecting one (each is described below), you need to specify which branches you want to merge - at the bottom of the dialog, there are wells for each input of the merge plugin. At the top of the dialog, you have each branch represented by the name of the last plugin in each branch. If you hover your mouse over the box representing a branch, that particular branch gets highlighted in the background (it gets a thick black frame). You need to drag the branch boxes to the input boxes (see picture attached).
 
 ![Branches on Input Boxes](https://github.com/siroky/Payola/raw/develop/docs/img/analysis_branches.png)
 
@@ -216,7 +216,7 @@ Join can be either inner or outer (default).
 > When tried the other way around - joining graph B with graph A using the `payola.cz/evolved-to` property, an empty graph is returned because `payola.cz/wolf` isn't a vertex in graph A.
 
 
-*Outer join:* All vertices that are origins of edges with URI defined in the `PropertyURI` parameter are included. Moreover, if origin of the edge is included in the second graph, destination of the edge and the edge itself are both included as well.
+*Outer join:* All vertices from the first graph that are origins of edges with URI defined in the `PropertyURI` parameter are included. Moreover, if origin of the edge is included in the second graph, destination of the edge and the edge itself are both included as well.
 
 > *Example:* Using the same graphs as before, merging graph A with graph B will yield in the same result. Merging B with A, however, will include a single vertex `payola.cz/wolf` and no edges.
 
