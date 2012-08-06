@@ -1,12 +1,12 @@
 package cz.payola.web.client.views.graph.visual.settings
 
-import cz.payola.web.client.views.graph.visual.Color
+import cz.payola.common.visual.Color
 
 class TextSettingsModel extends SettingsModel
 {
-    var colorBackgroundValue = new Color(255, 255, 255, 0.5)
+    private val colorBackgroundValue = new Color(255, 255, 255)
 
-    var colorValue = new Color(50, 50, 50, 1)
+    private val colorValue = new Color(50, 50, 50)
 
     def colorBackground: Color = colorBackgroundValue
 

@@ -82,25 +82,21 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
     }
 
     private def renderClassCustomizationViews(classCustomization: ClassCustomization) {
-        val fillColor = new ColorInputControl("Fill color:", "", classCustomization.fillColor, "")
-        val radius = new NumericInputControl("Radius:", "", classCustomization.radius.toString, "")
-        val glyph = new TextInputControl("Glyph:", "", classCustomization.glyph, "")
+        val fillColor = new ColorInputControl("Fill color:", "fillColor", classCustomization.fillColor, "")
+        val radius = new NumericInputControl("Radius:", "radius", classCustomization.radius.toString, "")
+        val glyph = new TextInputControl("Glyph:", "glyph", classCustomization.glyph, "")
 
-        val onFillColorChanged = {
-            e: EventArgs[ColorInput] =>
-                classFillColorChanged.trigger(new ClassCustomizationEventArgs(fillColor, classCustomization,
-                    fillColor.input.value))
+        fillColor.delayedChanged += { e =>
+            classFillColorChanged.trigger(new ClassCustomizationEventArgs(fillColor, classCustomization,
+                fillColor.input.value))
         }
-        fillColor.input.changed += onFillColorChanged
-        radius.delayedChanged += {
-            e =>
-                classRadiusDelayedChanged.trigger(new ClassCustomizationEventArgs(radius, classCustomization,
-                    radius.input.value))
+        radius.delayedChanged += { e =>
+            classRadiusDelayedChanged.trigger(new ClassCustomizationEventArgs(radius, classCustomization,
+                                radius.input.value))
         }
-        glyph.delayedChanged += {
-            e =>
-                classGlyphDelayedChanged.trigger(new ClassCustomizationEventArgs(glyph, classCustomization,
-                    glyph.input.value))
+        glyph.delayedChanged += { e =>
+            classGlyphDelayedChanged.trigger(new ClassCustomizationEventArgs(glyph, classCustomization,
+                glyph.input.value))
         }
 
         fillColor.render(propertiesDiv.domElement)
@@ -112,19 +108,16 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
         propertyCustomization: PropertyCustomization) {
         val headingDiv = new Div(List(new Text("Property " + uriToName(propertyCustomization.uri))), "label label-info")
         headingDiv.setAttribute("style", "padding: 5px; margin: 10px 0;")
-        val strokeColor = new ColorInputControl("Stroke color:", "", propertyCustomization.strokeColor, "")
-        val strokeWidth = new NumericInputControl("Stroke width:", "", propertyCustomization.strokeWidth.toString, "")
+        val strokeColor = new ColorInputControl("Stroke color:", "strokeColor", propertyCustomization.strokeColor, "")
+        val strokeWidth = new NumericInputControl("Stroke width:", "strokeWidth", propertyCustomization.strokeWidth.toString, "")
 
-        val onStrokeColorChanged = {
-            e: EventArgs[ColorInput] =>
-                propertyStrokeColorChanged.trigger(new PropertyCustomizationEventArgs(strokeColor, classCustomization,
-                    propertyCustomization, strokeColor.input.value))
+        strokeColor.delayedChanged += { e =>
+            propertyStrokeColorChanged.trigger(new PropertyCustomizationEventArgs(strokeColor, classCustomization,
+                propertyCustomization, strokeColor.input.value))
         }
-        strokeColor.input.changed += onStrokeColorChanged
-        strokeWidth.delayedChanged += {
-            e =>
-                propertyStrokeWidthDelayedChanged.trigger(new PropertyCustomizationEventArgs(strokeWidth,
-                    classCustomization, propertyCustomization, strokeWidth.input.value))
+        strokeWidth.delayedChanged += { e =>
+            propertyStrokeWidthDelayedChanged.trigger(new PropertyCustomizationEventArgs(strokeWidth,
+                classCustomization, propertyCustomization, strokeWidth.input.value))
         }
 
         headingDiv.render(propertiesDiv.domElement)

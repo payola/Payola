@@ -1,8 +1,9 @@
 package cz.payola.domain.entities.settings
 
 import cz.payola.domain.Entity
-import scala.collection.mutable.ListBuffer
 import scala.collection.immutable
+import cz.payola.common.visual.Color
+import cz.payola.common.ValidationException
 
 class ClassCustomization(
     val uri: String,
@@ -13,7 +14,16 @@ class ClassCustomization(
     extends Entity
     with cz.payola.common.entities.settings.ClassCustomization
 {
+    type PropertyCustomizationType = PropertyCustomization
+
     checkConstructorPostConditions()
 
-    type PropertyCustomizationType = PropertyCustomization
+    /**
+     * Validates that stored value represents a color. Value is stored without spaces.
+     * @param value New value of the fill color.
+     */
+    override def fillColor_=(value: String) {
+        validate(value.length == 0 || Color(value).isDefined, "fillColor", "Value doesn't represent any color")
+        super.fillColor = value.replace(" ", "")
+    }
 }

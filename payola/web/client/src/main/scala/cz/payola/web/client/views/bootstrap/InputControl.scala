@@ -20,6 +20,7 @@ abstract class InputControl[A <: ElementView[_] with EditableInput](
     val input = createInput
 
     private val inputLabel = new Label(label, input)
+    inputLabel.addCssClass("span2")
 
     private val infoText = new Text("")
 

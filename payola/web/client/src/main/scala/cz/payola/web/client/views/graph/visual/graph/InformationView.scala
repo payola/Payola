@@ -1,7 +1,7 @@
 package cz.payola.web.client.views.graph.visual.graph
 
 import s2js.adapters.js.dom.CanvasRenderingContext2D
-import cz.payola.web.client.views.graph.visual.Color
+import cz.payola.common.visual.Color
 import cz.payola.web.client.views.graph.visual.settings.TextSettingsModel
 import cz.payola.web.client.views.algebra._
 
