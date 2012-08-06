@@ -209,7 +209,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
     def initReRun(view: AnalysisRunnerView, analysis: Analysis) {
         view.overviewView.controls.runBtn.removeCssClass("disabled")
-        view.overviewView.controls.runBtnCaption.text = "Run again"
+        view.overviewView.controls.runBtnCaption.text = "Run Again"
         window.onunload = null
         view.overviewView.controls.runBtn.mouseClicked += { e =>
             view.destroy()

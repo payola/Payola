@@ -7,7 +7,7 @@ Payola requires a [Scala](http://www.scala-lang.org) environment, which is suppo
 
 Aside from the actual Payola server, you need to be capable of running any [Squeryl-compatible](http://squeryl.org) relational database for storing user data and a [Virtuoso](http://virtuoso.openlinksw.com) server for storing personal RDF data. Neither of those need to be necessarily running on the same system as Payola itself (this is configurable in the `payola.conf` file as described later on).
 
-To work with Payola, you'll need a web browser capable of displaying HTML5 web pages. Payola takes advantage of many HTML5 features - keep your web browser up-to-date all the time. Recommended are the *latest versions* of WebKit-based browsers (e.g. Chrome, Safari), Firefox, Opera, or IE.
+To work with Payola, you'll need a web browser capable of displaying HTML5 web pages. Payola takes advantage of many HTML5 features - keep your web browser up-to-date all the time. Recommended are the *latest versions* of WebKit-based browsers (e.g. Chrome, Safari), Firefox, Opera, or IE. A 1440x900 or larger display is highly recommended.
 
 ## Installation Guide
 
@@ -221,6 +221,14 @@ Join can be either inner or outer (default).
 > *Example:* Using the same graphs as before, merging graph A with graph B will yield in the same result. Merging B with A, however, will include a single vertex `payola.cz/wolf` and no edges.
 
 #### Running Analyses
+
+Either on your dashboard, or on analyses listing, click on an analysis to display details of it. You are presented with an overview of the analysis (which plugins with which parameters and connections are going to be used).
+
+As some analyses can take a really long time to finish (some may be theoretically infinite), there's a timeout field in the top-right corner. By default, an analyses times out in 30 seconds. If you find it's too short time to evaluate the analysis, change it to a higher value.
+
+Now press the `Run Analysis` button. If the analysis succeeds, you will be switched to a result tab - you can now browse the resulting graph just as when browsing a data source.
+
+If the evaluation fails, the plugin boxes turn red and an error description is shown when you hover mouse cursor over them. You can then either try to run it again, or to Edit it using the `Edit` button next to the analysis' title.
 
 ---
 ### <a name="plugins"></a>Plugins

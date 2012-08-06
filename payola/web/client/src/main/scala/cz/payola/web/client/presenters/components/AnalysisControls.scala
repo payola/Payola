@@ -11,7 +11,7 @@ class AnalysisControls(timeoutSeconds: Long) extends ComposedView
 {
     private val icon = new Italic(List(), "icon-play icon-white")
 
-    val runBtnCaption = new Text("Run analysis")
+    val runBtnCaption = new Text("Run Analysis")
 
     val runBtn = new Anchor(List(icon, runBtnCaption), "#", "btn btn-success span2")
 
