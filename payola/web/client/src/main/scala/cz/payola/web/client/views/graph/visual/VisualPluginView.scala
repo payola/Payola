@@ -43,6 +43,25 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
 
     private val layerPack = new CanvasPack(new Canvas(), new Canvas(), new Canvas(), new Canvas())
 
+    /**
+     * A way to end the main animation. Has to be set show(..) in the visual technique.
+     */
+    protected val animationStopButton = new Button(new Text("Stop animation"), "pull-right",
+        new Icon(Icon.stop)).setAttribute("style", "margin: 0 5px;")
+
+    /**
+     * This is set to true if the animationStopButton is pressed.
+     */
+    protected var animationStopForced = false
+
+
+    animationStopButton.mouseClicked += { e =>
+        animationStopForced = true
+        Animation.clearCurrentTimeout()
+        animationStopButton.setIsEnabled(false)
+        false
+    }
+
     private val layers = List(
         layerPack.edgesDeselected,
         layerPack.edgesSelected,
@@ -237,11 +256,14 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
 
     override def renderControls(toolbar: dom.Element) {
         zoomControls.render(toolbar)
+        animationStopButton.render(toolbar)
+        animationStopButton.setIsEnabled(false)
         pngDownloadButton.render(toolbar)
     }
 
     override def destroyControls() {
         zoomControls.destroy()
+        animationStopButton.destroy()
         pngDownloadButton.destroy()
     }
 

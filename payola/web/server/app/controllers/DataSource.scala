@@ -188,5 +188,13 @@ object DataSource extends PayolaController with Secured
         Redirect(routes.DataSource.list())
     }
 
-
+    def listAccessibleByOwner(ownerId: String, page: Int = 1) = maybeAuthenticated { user: Option[User] =>
+        val owner = Payola.model.userModel.getById(ownerId)
+        val analyses = if (owner.isDefined) {
+            Payola.model.dataSourceModel.getAccessibleToUserByOwner(user, owner.get)
+        }else{
+            List()
+        }
+        Ok(views.html.datasource.list(user, analyses, page))
+    }
 }
