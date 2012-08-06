@@ -1,5 +1,5 @@
 @(user: Option[cz.payola.domain.entities.User], owner: cz.payola.domain.entities.User,
-    analyses: Seq[cz.payola.domain.entities.Analysis]
+analyses: Seq[cz.payola.domain.entities.Analysis], dataSources: Seq[cz.payola.domain.entities.plugins.DataSource]
 )
 @import tags._
 
@@ -24,67 +24,29 @@
     </div>
 
     <div class="row-fluid">
-        <div class="span6">
-            <h2>Analysis shared by @if(user.isDefined && (user.get == owner)){ you }else{ the user }</h2>
-            <table class="table table-striped">
-                <thead>
-                <tr>
-                    <th>Analysis name</th>
-                    <th></th>
-                </tr>
-                </thead>
-                <tbody>
-                @analyses.map{analysis =>
-                    <tr>
-                        <td>@analysis.name</td>
-                        <td><a href="" class="btn btn-primary"><i class="icon-zoom-in icon-white"></i> View</a></td>
-                    </tr>
-                }
-                @if(analyses.isEmpty){
-                    <tr>
-                        <td class="alert alert-info" colspan="2">No analyses.</td>
-                    </tr>
-                }
-                </tbody>
-            </table>
-            <a href="#" class="btn btn-success"><i class="icon-plus icon-white"></i>Create analysis</a>
-        </div>
-        <div class="span6">
-            @if(user.isDefined && (user.get == owner)){
-                <h2>Your groups</h2>
-                <table class="table table-striped">
-                    <thead>
-                    <tr>
-                        <th>Group name</th>
-                        <th></th>
-                        <th></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @owner.ownedGroups.take(5).map{ group =>
-                        <tr>
-                            <td>@group.name</td>
-                            <td>@group.members.size member(s)</td>
-                            <td>
-                                <a href="@routes.Group.edit(group.id)" class="btn"><i class="icon-pencil"></i> Edit</a>
-                            </td>
-                        </tr>
-                    }
-                    @if(owner.ownedGroups.isEmpty){
-                        <tr>
-                            <td colspan="2" class="alert alert-info">No groups.</td>
-                        </tr>
-                    }
-                    </tbody>
-                </table>
-                @if(user.get.ownedGroups.size > 5){
-                    <a class="btn" href="@routes.Group.list()">View all &raquo;</a>
-                }
-                <a href="@routes.Group.create" class="btn btn-success"><i class="icon-plus icon-white"></i>Create Group</a>
-            }else{
-                <h2>The user has @owner.ownedGroups.size groups</h2>
-            }
-        </div>
+
+        @if(!user.isDefined || (user.isDefined && (user.get.id != owner.id))){
+
+            @tags.dashboardList("Analyses shared to you by the user", "analyses", analyses, None,
+            { e: cz.payola.domain.Entity =>
+            val a = e.asInstanceOf[cz.payola.domain.entities.Analysis]
+            <td>
+                <a href={routes.Analysis.detail(a.id).toString}>{a.name}</a>
+            </td>
+            <td></td>
+            }, "alert alert-info", routes.Analysis.listAccessibleByOwner(owner.id, 1))
+
+
+            @tags.dashboardList("Data sources shared to you by the user", "data sources", dataSources, None,
+            { e: cz.payola.domain.Entity =>
+            val d = e.asInstanceOf[cz.payola.domain.entities.plugins.DataSource]
+            <td>
+                <a href={routes.DataSource.detail(d.id, None).toString}>{d.name}</a>
+            </td>
+            <td></td>
+            }, "alert alert-info", routes.DataSource.listAccessibleByOwner(owner.id,1))
+
+        }
     </div>
 </div>
 }
