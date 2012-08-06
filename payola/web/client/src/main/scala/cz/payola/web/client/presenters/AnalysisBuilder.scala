@@ -183,42 +183,14 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                                     val instances = mergeDialog.outputToInstance
                                     val buffer = new ArrayBuffer[PluginInstanceView]()
 
-                                    var i = 0
-                                    while(i < instances.size) {
-                                        buffer.append(instances(i))
-                                        instances(i).hideControls()
-                                        branches -= instances(i)
-                                        i = i+1
+                                    if(mergeDialog.outputToInstance.size < inputsCount){
+                                        mergeDialog.destroy()
+                                        AlertModal.display("Not enough inputs bound","You need to bind all the inputs provided.")
+                                    } else {
+                                        mergeBranches(instances, buffer, evt, view, mergeDialog)
                                     }
 
-                                    AnalysisBuilderData.createPluginInstance(evt.target.id, analysisId) {
-                                        id =>
-                                            val mergeInstance = new EditablePluginInstanceView(id, evt.target,
-                                                buffer.asInstanceOf[Seq[PluginInstanceView]])
-                                            view.visualiser.renderPluginInstanceView(mergeInstance)
-
-                                            mergeInstance.connectButtonClicked += {
-                                                clickedEvent =>
-                                                    connectPlugin(mergeInstance, view)
-                                                    false
-                                            }
-
-                                            mergeInstance.parameterValueChanged += onParameterValueChanged
-                                            mergeInstance.deleteButtonClicked += onDeleteClick
-
-                                            i = 0
-                                            buffer.map {
-                                                instance: Any =>
-                                                    bind(instance.asInstanceOf[PluginInstanceView], mergeInstance, i)
-                                                    i += 1
-                                            }
-
-                                            branches += mergeInstance
-                                            mergeDialog.destroy()
-                                    } {
-                                        _ =>
-                                    }
-                                    false
+                                false
                             }
 
                             mergeDialog.render()
@@ -228,6 +200,45 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                 }
                 dialog.render()
                 false
+        }
+    }
+
+    def mergeBranches(instances: mutable.HashMap[Int, PluginInstanceView], buffer: ArrayBuffer[PluginInstanceView],
+        evt: EventArgs[Plugin], view: AnalysisEditorView, mergeDialog: MergeAnalysisBranchesDialog) {
+        var i = 0
+        while (i < instances.size) {
+            buffer.append(instances(i))
+            instances(i).hideControls()
+            branches -= instances(i)
+            i = i + 1
+        }
+
+        AnalysisBuilderData.createPluginInstance(evt.target.id, analysisId) {
+            id =>
+                val mergeInstance = new EditablePluginInstanceView(id, evt.target,
+                    buffer.asInstanceOf[Seq[PluginInstanceView]])
+                view.visualiser.renderPluginInstanceView(mergeInstance)
+
+                mergeInstance.connectButtonClicked += {
+                    clickedEvent =>
+                        connectPlugin(mergeInstance, view)
+                        false
+                }
+
+                mergeInstance.parameterValueChanged += onParameterValueChanged
+                mergeInstance.deleteButtonClicked += onDeleteClick
+
+                i = 0
+                buffer.map {
+                    instance: Any =>
+                        bind(instance.asInstanceOf[PluginInstanceView], mergeInstance, i)
+                        i += 1
+                }
+
+                branches += mergeInstance
+                mergeDialog.destroy()
+        } {
+            _ =>
         }
     }
 
