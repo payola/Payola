@@ -43,7 +43,6 @@ class GravityTechnique(settings: VisualSetup) extends BaseTechnique(settings, "G
     protected def getTechniquePerformer(component: Component,
         animate: Boolean): Animation[ListBuffer[(VertexView, Point2D)]] = {
         if (animate) {
-            animationStopButton.show()
             val animationOfThis = new Animation(
                 runningAnimation, component, None, redrawQuick, redrawQuick, Some(70))
             basicTreeStructure(component.vertexViews, Some(animationOfThis), redrawQuick, redraw, None)
