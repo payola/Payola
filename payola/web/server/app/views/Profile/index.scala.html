@@ -13,6 +13,12 @@ analyses: Seq[cz.payola.domain.entities.Analysis], dataSources: Seq[cz.payola.do
         <li class="active">Profile of: @owner.name</li>
     </ul>
 
+    @if(user.isDefined && (user.get.id == owner.id)){
+    <div class="row-fluid well">
+        <a href="@routes.Profile.edit()" class="btn btn-primary span3"><i class="icon-white icon-pencil"></i> Edit profile</a>
+    </div>
+    }
+
     <div class="hero-unit">
         <div class="row-fluid">
             <span class="span3">
@@ -23,9 +29,9 @@ analyses: Seq[cz.payola.domain.entities.Analysis], dataSources: Seq[cz.payola.do
         </div>
     </div>
 
-    <div class="row-fluid">
+    @if(!user.isDefined || (user.isDefined && (user.get.id != owner.id))){
 
-        @if(!user.isDefined || (user.isDefined && (user.get.id != owner.id))){
+        <div class="row-fluid">
 
             @tags.dashboardList("Analyses shared to you by the user", "analyses", analyses, None,
             { e: cz.payola.domain.Entity =>
@@ -46,7 +52,7 @@ analyses: Seq[cz.payola.domain.entities.Analysis], dataSources: Seq[cz.payola.do
             <td></td>
             }, "alert alert-info", routes.DataSource.listAccessibleByOwner(owner.id,1))
 
-        }
-    </div>
+        </div>
+    }
 </div>
 }
