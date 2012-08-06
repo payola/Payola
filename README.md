@@ -225,3 +225,132 @@ Join can be either inner or outer (default).
 ---
 ### <a name="plugins"></a>Plugins
 
+---
+
+# Programmer documentation
+
+The Payola application consists of several layers and libraries that are all enclosed within a solution project ```payola```. The following sections will describe structure of the solution, the functionality hidden within the layers and libraries and their relations.
+
+## Solution structure
+
+The solution is defined using the [SBT](https://github.com/harrah/xsbt/wiki/ "SBT") which isn't tightly coupled to any particuale IDE, so you may generate corresponding project files for the most commonly used IDEs (e.g. IntelliJ IDEA, Eclipse). The SBT doesn't introduce any concept that can be directly used as a solution, but it can be emulated using projects and subprojects. In our case, the ```payola``` solution is just a project with no source files. The solution structure is:
+
+- ```payola```
+	- [```common```](#common)
+	- [```data```](#data)
+	- [```domain```](#domain)
+	- [```model```](#model)
+	- [```project```](#project)
+	- [```s2js```](#s2js)
+		- [```adapters```](#adapters)
+		- [```compiler```](#compiler)
+		- [```runtime```](#runtime)
+			- [```client```](#runtime-client)
+			- [```shared```](#runtime-shared)
+	- [```scala2json```](#scala2json)
+	- [```web```](#web)
+		- [```client```](#client)
+		- [```initializer```](#initializer)
+		- [```shared```](#shared)
+		- [```server```](#server)
+
+Briefly, the project [```payola/project```](#project) defines that structure, dependencies among the projects, external dependencies and the build process, so it can be understood as a Makefile. Somehow standalone libraries are the [```payola/scala2json```](#scala2json) which provides means of scala object serialization into the JSON format and [```payola/s2js```](#s2js) which with all its subprojects enables us to write web applications in Scala (compile Scala code to equivalent JavaScript code).
+
+The Payola application itself is spread within the rest of the projects, namely [```payola/common```](#common) that defines classes that are used throughout all layers and even on the client side. The [```payola/domain```](#domain) mostly extends classes from the [```payola/common```](#common) with backend logic. The [```payola/data```](#data) is a persistance, data access layer. The [```payola\model``` wraps up the previous three modules with an uniform interface. It's ment as a standard programmatical access point to the Payola. Finally, the web application consists of the [```payola\web\initializer```](#initializer) which is a console application initializing the databases (i.e an installer), [```payola\web\server```](#server) that is a [Play](http://www.playframework.org/) web application and the [```payola\web\client```](#client) which contains a browser MVP application (compiled to JavaScript). Last but not least is the [```payola/web/shared```](#shared) with objects that are called from the client, but executed on the server.
+
+This structure also determines package names, which follow the pattern ```cz.payola.[project path where '/' is replaced with '.']```. So for example a class declared in the ```payola/s2js/compiler``` project can be found in the ```cz.payola.s2js.compiler``` package or one of its subpackages.
+
+<a name="project"></a>
+## Project payola/project
+
+<a name="scala2json"></a>
+## Package cz.payola.scala2json
+
+<a name="s2js"></a>
+## Project payola/s2js
+
+<a name="compiler"></a>
+### Package cz.payola.s2js.compiler
+
+<a name="adapters"></a>
+### Package cz.payola.s2js.adapters
+
+#### Package cz.payola.s2js.adapters.browser
+
+#### Package cz.payola.s2js.adapters.dom
+
+#### Package cz.payola.s2js.adapters.events
+
+#### Package cz.payola.s2js.adapters.html
+
+#### Package cz.payola.s2js.adapters.js
+
+<a name="runtime"></a>
+### Project payola/s2js/runtime
+
+<a name="runtime-client"></a>
+#### Package cz.payola.s2js.runtime.client
+
+##### Package cz.payola.s2js.runtime.client.js
+
+##### Package cz.payola.s2js.runtime.client.rpc
+
+##### Package cz.payola.s2js.runtime.client.scala
+
+<a name="runtime-shared"></a>
+#### Package cz.payola.s2js.runtime.shared
+
+<a name="common"></a>
+## Package cz.payola.common
+
+### Package cz.payola.common.entities
+
+#### Package cz.payola.common.entities.analyses
+
+#### Package cz.payola.common.entities.plugins
+
+#### Package cz.payola.common.entities.privileges
+
+#### Package cz.payola.common.entities.settings
+
+### Package cz.payola.common.rdf
+
+<a name="domain"></a>
+## Package cz.payola.domain
+
+<a name="data"></a>
+## Package cz.payola.data
+
+### Package cz.payola.squeryl
+
+#### Package cz.payola.squeryl.entities
+
+#### Package cz.payola.squeryl.repositories
+
+### Package cz.payola.virtuoso
+
+<a name="model"></a>
+## Package cz.payola.model
+
+<a name="web"></a>
+## Package cz.payola.web
+
+<a name="initializer"></a>
+### Package cz.payola.web.initializer
+
+<a name="shared"></a>
+### Package cz.payola.web.shared
+
+<a name="server"></a>
+### Package cz.payola.web.server
+
+<a name="client"></a>
+### Package cz.payola.web.client
+
+#### Package cz.payola.web.client.events
+
+#### Package cz.payola.web.client.models
+
+#### Package cz.payola.web.client.views
+
+#### Package cz.payola.web.client.presenters
