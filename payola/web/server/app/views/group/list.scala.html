@@ -1,58 +1,40 @@
-@(user: cz.payola.domain.entities.User)(flash: Flash)
+@(user: Option[cz.payola.domain.entities.User], page: Int = 1)(flash: Flash)
 
 @import tags._
 
-@breadcrumbContent = {
-    <li>
-        <a href="/">Home</a> <span class="divider">/</span>
-    </li>
-    <li>
-        <a href="@routes.Profile.index(user.id)">Your profile</a> <span class="divider">/</span>
-    </li>
-    <li class="active">Groups</li>
+@detailsLinkForID(id: String, name: String) = @{
+{name}
 }
 
-@main(Some(user), "List groups", Some("List groups"), Some(breadcrumbContent)) {
- <div class="container-fluid">
-    @render_flash(flash)
-
-    <div class="container">
-        @if(user.ownedGroups.size > 0){
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th># of members</th>
-                </tr>
-            </thead>
-            @user.ownedGroups.map{ group =>
-                <tr>
-                    <td>@group.name</td>
-                    <td>@group.members.size member(s)</td>
-                    <td><a href="@routes.Group.edit(group.id)" class="btn btn-primary"><i class="icon-cog icon-white"></i> Administer</a></td>
-                </tr>
-            }
-            <div style="text-align: center">
-                <div class="pagination">
-                    <ul>
-                        <li><a href="#">Prev</a></li>
-                        <li class="active">
-                            <a href="#">1</a>
-                        </li>
-                        <li><a href="#">Next</a></li>
-                    </ul>
-                </div>
-            </div>
-
-        </table>
-        }else{
-            <div class="alert alert-info">
-                <h3 class="alert-heading">No groups</h3>
-                <p class="alert-block">But you can create one!</p>
-            </div>
-        }
-        <a href="@routes.Group.create()" class="btn btn-success"><i class="icon-plus icon-white"></i> Create Group &raquo;</a>
-
-    </div>
- </div>
+@editLinkForID(id: String) = @{
+<a href={routes.Group.edit(id).toString} class="btn btn-primary"><i class="icon-pencil icon-white"></i> Edit</a>
 }
+
+@render_flash(flash)
+
+@list_entities(user,
+"group",
+"groups",
+user.get.ownedGroups.size,
+{ case (page, itemsPerPage) =>
+val subseq = user.get.ownedGroups.drop((page - 1) * itemsPerPage)
+if (itemsPerPage > subseq.size){
+subseq
+}else{
+subseq.take(itemsPerPage)
+}
+}, { Unit =>
+new scala.xml.NodeBuffer() += <td>Name</td>
+}, { e: cz.payola.domain.Entity =>
+<td>{
+    detailsLinkForID(e.id, e.asInstanceOf[cz.payola.domain.entities.Group].name)
+    }</td>
+<td>{
+    editLinkForID(e.id)
+    }</td>
+<td>{
+    <span class="badge badge-info">{e.asInstanceOf[cz.payola.domain.entities.Group].members.size} members</span>
+    }</td>
+},
+routes.Group.create(),
+page)
