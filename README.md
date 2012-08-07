@@ -235,6 +235,43 @@ If the evaluation fails, the plugin boxes turn red and an error description is s
 ---
 ### <a name="plugins"></a>Plugins
 
+Creating a new plugin requires programming skills in Scala. A detailed reference of the Plugin classes is described in the Developer Guide. Here is a sample code of a plugin:
+
+```
+package my.custom.plugin
+
+import collection.immutable
+import cz.payola.domain._
+import cz.payola.domain.entities._
+import cz.payola.domain.entities.plugins._
+import cz.payola.domain.entities.plugins.parameters._
+import cz.payola.domain.rdf._
+
+class ValuesInbetween(name: String, inputCount: Int, parameters:
+				immutable.Seq[Parameter[_]], id: String)
+	extends Plugin(name, inputCount, parameters, id)
+{
+	def this() = {
+		this("Filter Values in Between", 1, 
+			List(new IntParameter("MinValue", 0), 
+				new IntParameter("MaxValue", 0)), 
+			IDGenerator.newId)
+	}
+
+	def evaluate(instance: PluginInstance, 
+			inputs: collection.IndexedSeq[Option[Graph]],
+			progressReporter: Double => Unit) = {
+		...
+	}
+}
+```
+
+In this example, a new plugin is created with name `Filter Values in Between`. The parameterless constructor `this()` is called to fill in values to the default constructor. Here you set up the parameters as well.
+
+The `evaluate` method is the one doing all the work. Here would be your code filtering the input graph. The `instance` variable contains all parameter values, `inputs` is a sequence of `Option[Graph]`'s - in our case just one as defined in `this()`. You can optionally report progress using the `progressReporter` function passed, which reports the progress to the user (values between 0.0 and 1.0).
+
+Entire plugin documentation can be found in the Developer Guide. If you intend to write your own plugin, please, refer there.
+
 ---
 
 # Developer Guide
