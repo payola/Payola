@@ -1,22 +1,24 @@
-@(user: cz.payola.domain.entities.User, form: Form[(String)])
+@(user: cz.payola.domain.entities.User, form: Form[(String)])(flash: Flash)
 
-@main(Some(user), "Create a new group - Payola!") {
+@import tags._
+
+@breadcrumbContent = {
+    <li>
+        <a href="/">Home</a> <span class="divider">/</span>
+    </li>
+    <li>
+        <a href="@routes.Profile.index(user.name)">Your profile</a> <span class="divider">/</span>
+    </li>
+    <li class="active">Create Group</li>
+}
+
+@main(Some(user), "Create a new group - Payola!", Some("Create a new group"), Some(breadcrumbContent)) {
 
 <div class="container">
 
-    <ul class="breadcrumb">
-        <li>
-            <a href="/">Home</a> <span class="divider">/</span>
-        </li>
-        <li>
-            <a href="@routes.Profile.index(user.name)">Your profile</a> <span class="divider">/</span>
-        </li>
-        <li class="active">Create group</li>
-    </ul>
-
     @helper.form(routes.Group.saveCreate()) {
 
-    <h1>Create a new group</h1>
+    @render_flash(flash)
 
     <div class="well">
         <fieldset>
@@ -29,7 +31,7 @@
             </div>
             <div class="control-group">
                 <span class="controls">
-                    <button type="submit" id="savebutton" class="btn btn-primary">Create group</button>
+                    <button type="submit" id="savebutton" class="btn btn-primary">Create Group</button>
                 </span>
             </div>
         </fieldset>

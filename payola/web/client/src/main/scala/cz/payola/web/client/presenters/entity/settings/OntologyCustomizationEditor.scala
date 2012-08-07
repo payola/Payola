@@ -26,6 +26,7 @@ class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) 
     )
 
     def initialize() {
+        shareButtonPresenter.publicityChanged += { e => ontologyCustomization.isPublic = e.target }
         shareButtonPresenter.initialize()
 
         view.ontologyCustomizationName.delayedChanged += onOntologyCustomizationNameChanged _

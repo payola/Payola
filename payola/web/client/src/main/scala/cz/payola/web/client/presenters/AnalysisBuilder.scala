@@ -18,8 +18,10 @@ import cz.payola.web.client.Presenter
 import cz.payola.web.client.views.entity.analysis.AnalysisEditorView
 import cz.payola.common.entities.plugins.DataSource
 import scala.collection.mutable
-import cz.payola.web.client.views.entity.DataSourceSelector
+import cz.payola.web.client.views.entity.plugins.DataSourceSelector
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
+import s2js.runtime.shared.rpc.RpcException
+import cz.payola.common.ValidationException
 
 class AnalysisBuilder(parentElementId: String) extends Presenter
 {
@@ -66,13 +68,22 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                                 view.setName(nameComponent.input.value)
 
                                 bindMenuEvents(view)
+
+                                nameDialog.destroy()
                         } {
-                            error => fatalErrorHandler(error)
+                            error =>
+                                error match {
+                                    case rpc: ValidationException => {
+                                        AlertModal.display("Validation failed", rpc.message)
+                                        false
+                                    }
+                                    case _ => fatalErrorHandler(error)
+                                }
                         }
                 } {
                     error => fatalErrorHandler(error)
                 }
-                true
+                false
         }
 
         nameDialog.closing += {
@@ -129,13 +140,11 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
 
         view.addPluginLink.mouseClicked += {
             event =>
-                val dialog = new
-                        PluginDialog(allPlugins.filter(_.inputCount == 0).filterNot(_.name == "Payola Private Storage"))
-                dialog.pluginNameClicked += {
-                    evtArgs =>
-                        onPluginNameClicked(evtArgs.target, None, view)
-                        dialog.destroy()
-                        false
+                val dialog = new PluginDialog(allPlugins.filter(_.inputCount == 0).filterNot(_.name == "Payola Private Storage"))
+                dialog.pluginNameClicked += { evtArgs =>
+                    onPluginNameClicked(evtArgs.target, None, view)
+                    dialog.destroy()
+                    false
                 }
                 dialog.render()
                 false
@@ -174,42 +183,14 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                                     val instances = mergeDialog.outputToInstance
                                     val buffer = new ArrayBuffer[PluginInstanceView]()
 
-                                    var i = 0
-                                    while(i < instances.size) {
-                                        buffer.append(instances(i))
-                                        instances(i).hideControls()
-                                        branches -= instances(i)
-                                        i = i+1
+                                    if(mergeDialog.outputToInstance.size < inputsCount){
+                                        mergeDialog.destroy()
+                                        AlertModal.display("Not enough inputs bound","You need to bind all the inputs provided.")
+                                    } else {
+                                        mergeBranches(instances, buffer, evt, view, mergeDialog)
                                     }
 
-                                    AnalysisBuilderData.createPluginInstance(evt.target.id, analysisId) {
-                                        id =>
-                                            val mergeInstance = new EditablePluginInstanceView(id, evt.target,
-                                                buffer.asInstanceOf[Seq[PluginInstanceView]])
-                                            view.visualiser.renderPluginInstanceView(mergeInstance)
-
-                                            mergeInstance.connectButtonClicked += {
-                                                clickedEvent =>
-                                                    connectPlugin(mergeInstance, view)
-                                                    false
-                                            }
-
-                                            mergeInstance.parameterValueChanged += onParameterValueChanged
-                                            mergeInstance.deleteButtonClicked += onDeleteClick
-
-                                            i = 0
-                                            buffer.map {
-                                                instance: Any =>
-                                                    bind(instance.asInstanceOf[PluginInstanceView], mergeInstance, i)
-                                                    i += 1
-                                            }
-
-                                            branches += mergeInstance
-                                            mergeDialog.destroy()
-                                    } {
-                                        _ =>
-                                    }
-                                    false
+                                false
                             }
 
                             mergeDialog.render()
@@ -219,6 +200,45 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                 }
                 dialog.render()
                 false
+        }
+    }
+
+    def mergeBranches(instances: mutable.HashMap[Int, PluginInstanceView], buffer: ArrayBuffer[PluginInstanceView],
+        evt: EventArgs[Plugin], view: AnalysisEditorView, mergeDialog: MergeAnalysisBranchesDialog) {
+        var i = 0
+        while (i < instances.size) {
+            buffer.append(instances(i))
+            instances(i).hideControls()
+            branches -= instances(i)
+            i = i + 1
+        }
+
+        AnalysisBuilderData.createPluginInstance(evt.target.id, analysisId) {
+            id =>
+                val mergeInstance = new EditablePluginInstanceView(id, evt.target,
+                    buffer.asInstanceOf[Seq[PluginInstanceView]])
+                view.visualiser.renderPluginInstanceView(mergeInstance)
+
+                mergeInstance.connectButtonClicked += {
+                    clickedEvent =>
+                        connectPlugin(mergeInstance, view)
+                        false
+                }
+
+                mergeInstance.parameterValueChanged += onParameterValueChanged
+                mergeInstance.deleteButtonClicked += onDeleteClick
+
+                i = 0
+                buffer.map {
+                    instance: Any =>
+                        bind(instance.asInstanceOf[PluginInstanceView], mergeInstance, i)
+                        i += 1
+                }
+
+                branches += mergeInstance
+                mergeDialog.destroy()
+        } {
+            _ =>
         }
     }
 
@@ -237,65 +257,68 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
     }
 
     def onDataSourceSelected(dataSource: DataSource, view: AnalysisEditorView) {
-        AnalysisBuilderData.cloneDataSource(dataSource.id, analysisId) {
-            pi =>
+        blockPage("Making the data source available...")
+        AnalysisBuilderData.cloneDataSource(dataSource.id, analysisId) { pi =>
+            val map = new mutable.HashMap[String, String]
 
-                val map = new mutable.HashMap[String, String]
+            pi.parameterValues.foreach {
+                paramValue =>
+                    map.put(paramValue.parameter.name, paramValue.value.toString)
+            }
 
-                pi.parameterValues.foreach {
-                    paramValue =>
-                        map.put(paramValue.parameter.name, paramValue.value.toString)
-                }
+            val instance = new EditablePluginInstanceView(pi.id, pi.plugin, List(), map)
 
-                val instance = new EditablePluginInstanceView(pi.id, pi.plugin, List(), map)
+            branches.append(instance)
+            view.visualiser.renderPluginInstanceView(instance)
 
-                branches.append(instance)
-                view.visualiser.renderPluginInstanceView(instance)
+            instance.connectButtonClicked += onConnectClicked(view)
 
-                instance.connectButtonClicked += onConnectClicked(view)
+            instance.parameterValueChanged += onParameterValueChanged
+            instance.deleteButtonClicked += onDeleteClick
 
-                instance.parameterValueChanged += onParameterValueChanged
-                instance.deleteButtonClicked += onDeleteClick
+            unblockPage()
         } {
             err => fatalErrorHandler(err)
+                unblockPage()
         }
     }
 
-    protected def onConnectClicked(view: AnalysisEditorView): (EventArgs[PluginInstanceView]) => Unit = {
-        evt =>
-            connectPlugin(evt.target, view)
-            false
+    protected def onConnectClicked(view: AnalysisEditorView): (EventArgs[PluginInstanceView]) => Unit = { evt =>
+        connectPlugin(evt.target, view)
+        false
     }
 
     def onPluginNameClicked(plugin: Plugin, predecessor: Option[PluginInstanceView], view: AnalysisEditorView) = {
-        AnalysisBuilderData.createPluginInstance(plugin.id, analysisId) {
-            id =>
-                val instance = if (predecessor.isDefined) {
-                    new EditablePluginInstanceView(id, plugin, List(predecessor.get))
-                } else {
-                    new EditablePluginInstanceView(id, plugin, List())
-                }
+        blockPage("Creating an instance of the plugin...")
 
-                branches.append(instance)
-                view.visualiser.renderPluginInstanceView(instance)
+        AnalysisBuilderData.createPluginInstance(plugin.id, analysisId) { id =>
+            val instance = if (predecessor.isDefined) {
+                new EditablePluginInstanceView(id, plugin, List(predecessor.get))
+            } else {
+                new EditablePluginInstanceView(id, plugin, List())
+            }
 
-                instance.connectButtonClicked += {
-                    evt =>
-                        connectPlugin(evt.target, view)
-                        false
-                }
+            branches.append(instance)
+            view.visualiser.renderPluginInstanceView(instance)
 
-                instance.parameterValueChanged += onParameterValueChanged
-                instance.deleteButtonClicked += onDeleteClick
+            instance.connectButtonClicked += { evt =>
+                connectPlugin(evt.target, view)
+                false
+            }
 
-                predecessor.map {
-                    p =>
-                        branches -= p
-                        p.hideControls()
-                        bind(p, instance, 0)
-                }
+            instance.parameterValueChanged += onParameterValueChanged
+            instance.deleteButtonClicked += onDeleteClick
+
+            predecessor.map {
+                p =>
+                    branches -= p
+                    p.hideControls()
+                    bind(p, instance, 0)
+            }
+
+            unblockPage()
         } {
-            _ =>
+            _ => unblockPage()
         }
     }
 
@@ -340,7 +363,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
 
     def onDeleteClick(eventArgs: EventArgs[PluginInstanceView]) {
         val instance = eventArgs.target
-
+        blockPage("Deleting...")
         AnalysisBuilderData.deletePluginInstance(analysisId, instance.id) {
             _ =>
                 branches -= instance
@@ -351,31 +374,18 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                     i += 1
                 }
                 instance.destroy()
+                unblockPage()
         } {
-            _ =>
+            _ => unblockPage()
+                AlertModal.display("Error when deleting","The plugin could not be deleted.")
         }
     }
 
     def bind(a: PluginInstanceView, b: PluginInstanceView, inputIndex: Int) {
         AnalysisBuilderData.saveBinding(analysisId, a.id, b.id, inputIndex) {
             _ =>
-                renderBinding(a, b)
         }(fatalErrorHandler(_))
     }
-
-    @javascript(
-        """
-          jsPlumb.repaintEverything();
-          var settings = {
-                            paintStyle:{ lineWidth:2, strokeStyle:"#BCE8F1", outlineColor:"#3A87AD", outlineWidth:1 },
-                            connector:[ "Flowchart" ],
-                            endpoint:[ "Dot", { radius:4 } ],
-                            endpointStyle : { fillStyle: "#3A87AD"  },
-                            anchor : [ "BottomCenter", "TopCenter" ]
-                       };
-          jsPlumb.connect({ source:a.getPluginElement(), target:b.getPluginElement() },settings);
-        """)
-    def renderBinding(a: PluginInstanceView, b: PluginInstanceView) {}
 
     protected def setTimeout(key: String, callback: () => Unit) {
         timeoutMap.put(key, window.setTimeout(callback, saveAsYouTypeTimeout))

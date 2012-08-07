@@ -1,12 +1,13 @@
-@(user: cz.payola.domain.entities.User)
+@(user: cz.payola.domain.entities.User)(flash: Flash)
 
-@main(Some(user), "Add private data - Payola!") {
+@import tags._
+
+@main(Some(user), "Add private data - Payola!", Some("Upload Data to Private RDF Storage")) {
 
 <div class="container-fluid">
 
-        <ul class="breadcrumb">
-            <li class="active">Upload File</li>
-        </ul>
+        @render_flash(flash)
+
         <form id="file-uploader-form" name="file_upload_form" method="post" action="@routes.PrivateDataStorage.saveFromFile()" enctype="multipart/form-data">
             <div class="well" id="file-uploader">
 

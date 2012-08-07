@@ -20,7 +20,7 @@ class EditablePluginInstanceView(id: String, pluginI: Plugin, predecessors: Seq[
     val parameterValueChanged = new SimpleUnitEvent[ParameterValue]
 
     def getAdditionalControlsViews : Seq[View] = {
-        val connect = new Button(new Text("Add connection"))
+        val connect = new Button(new Text("Add Connection"))
         connect.mouseClicked += { e =>
             connectButtonClicked.triggerDirectly(this)
             false

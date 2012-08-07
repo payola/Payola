@@ -6,8 +6,11 @@ import cz.payola.web.client.views.graph.visual.VisualPluginView
 import cz.payola.common.rdf.Graph
 import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.views.graph.visual.graph._
-import cz.payola.web.client.views.graph.visual.animation.Animation
 import cz.payola.web.client.views.graph.visual.graph.positioning._
+import s2js.adapters.js.dom
+import cz.payola.web.client.views.elements._
+import cz.payola.web.client.views.bootstrap.Icon
+import cz.payola.web.client.views.graph.visual.animation._
 
 abstract class BaseTechnique(settings: VisualSetup, name: String) extends VisualPluginView(settings, name)
 {
@@ -23,7 +26,6 @@ abstract class BaseTechnique(settings: VisualSetup, name: String) extends Visual
     private def performPositioning(graphView: GraphView) {
 
         var firstAnimation: Option[Animation[ListBuffer[(VertexView, Point2D)]]] = None
-        var componentNumber = 1
 
         var previousComponent: Option[Component] = None
 
@@ -35,8 +37,7 @@ abstract class BaseTechnique(settings: VisualSetup, name: String) extends Visual
                 firstAnimation.get.addFollowingAnimation(getTechniquePerformer(component, true))
             }
 
-            val componentPositionDesc = new ComponentPositionHelper(
-                componentNumber, graphView.components.length, previousComponent)
+            val componentPositionDesc = new ComponentPositionHelper(graphView.components.length, previousComponent)
 
             firstAnimation.get.addFollowingAnimation(new Animation(
                 Animation.flipGraph, ((new GraphCenterHelper(graphView.getGraphCenter), component.vertexViews)), None,
@@ -49,13 +50,12 @@ abstract class BaseTechnique(settings: VisualSetup, name: String) extends Visual
                     None))
             }
 
-            componentNumber += 1
             previousComponent = Some(component)
         }
         if(firstAnimation.isDefined) {
             //fit the drawing space to the window
             firstAnimation.get.addFollowingAnimation(
-                new Animation(Animation.emptyAnimation, false, None, fitCanvas, redraw, None))
+                new Animation(Animation.emptyAnimation, new AfterAnimationParamLess(fitCanvas), None, redrawQuick, redraw, None))
 
             //finally move the whole graph to the center of the window
             val graphCenterCorrector = new GraphPositionHelper(() => topLayer.size, graphView.getGraphCenter)
@@ -63,6 +63,12 @@ abstract class BaseTechnique(settings: VisualSetup, name: String) extends Visual
                 new Animation(Animation.moveGraphByFunction,
                     (graphCenterCorrector, graphView.getAllVertices), None, redrawQuick, redraw, None))
 
+            //disable animationStop button
+            firstAnimation.get.addFollowingAnimation(new Animation(
+                Animation.emptyAnimation, new AfterAnimationWithParams(animationStopButton.setIsEnabled, false), None,
+                redrawQuick, redraw, None))
+
+            animationStopButton.setIsEnabled(true)
             firstAnimation.get.run()
         }
     }

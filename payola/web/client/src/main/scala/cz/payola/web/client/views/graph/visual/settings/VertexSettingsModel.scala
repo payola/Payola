@@ -6,9 +6,20 @@ class VertexSettingsModel extends SettingsModel
 {
     var radiusValue = 25
 
+    var borderSizeValue = 2.0
+
+    var borderColorValue = Color.Black
+
     var colorValue = new Color(51, 204, 255, 0.25)
 
     var glyphValue: String = ""
+
+    var glyphFontValue: String = "EntypoRegular"
+
+    var glyphFontSizeValue: Int = 40
+
+    var glyphAlignValue: String = "center"
+
 
     def radius(typeName: String): Int = {
         val foundCustomization = getCustomization(typeName)
@@ -37,4 +48,14 @@ class VertexSettingsModel extends SettingsModel
             glyphValue
         }
     }
+
+    def glyphAlign: String = glyphAlignValue
+
+    def glyphWholeFont: String = glyphFontSizeValue.toString() + "px " + glyphFontValue
+
+    def glyphSize: Int = glyphFontSizeValue
+
+    def borderSize: Double = borderSizeValue
+
+    def borderColor: Color = borderColorValue
 }

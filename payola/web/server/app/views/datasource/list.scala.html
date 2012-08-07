@@ -1,4 +1,4 @@
-@(user: cz.payola.domain.entities.User, page: Int = 1)
+@(user: Option[cz.payola.domain.entities.User], dataSources: Seq[cz.payola.domain.entities.plugins.DataSource], page: Int = 1)
 
 @import cz.payola.web.shared._
 @import tags._
@@ -19,12 +19,12 @@
     </div>
 }
 
-@list_entities(Some(user),
+@list_entities(user,
     "data source",
     "data sources",
-    user.ownedDataSources.size,
+    dataSources.size,
     { case (page, itemsPerPage) =>
-        val subseq = user.ownedDataSources.drop((page - 1) * itemsPerPage)
+        val subseq = dataSources.drop((page - 1) * itemsPerPage)
         if (itemsPerPage > subseq.size){
             subseq
         }else{
@@ -43,8 +43,8 @@
                 buff += {shareLinkForID(e.id, dataSource.name, dataSource.isPublic)}
                 buff
             }else{
-                val buff = new scala.xml.NodeBuffer() += shareLinkForID(e.id, dataSource.name, dataSource.isPublic)
-                buff += <span class="badge">Not editable</span>
+                val buff = new scala.xml.NodeBuffer() += <span class="badge">Not editable</span>
+                buff += shareLinkForID(e.id, dataSource.name, dataSource.isPublic)
                 buff
             }
         }</td>

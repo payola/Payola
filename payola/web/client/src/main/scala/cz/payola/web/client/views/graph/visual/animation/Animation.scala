@@ -58,24 +58,29 @@ object Animation
     private var animationCurrentNumber = -1
 
     /**
-     * Animation function for performing post animation functions. This animation does not animate anything, it just
-     * performs the first and second functions. This allows to perform a post animation functions
-     * @param wontBeUsed1
+     * Animation function for performing function after (or during) animation. This animation does not animate anything,
+     * it just performs the afterAnimationTool.
+     * @param afterAnimationTool this represents the function with its parameters
      * @param nextAnimation following animation to perform
-     * @param firstFuncToRun function that will be performed first
-     * @param secondFuncToRun function that will be performed second
+     * @param quickDraw function for redrawing whole drawing space quickly, it is used after every iteration
+     * @param finalDraw function for redrawing whole drawing space after all animations have been finished
      * @param animationStepLength parameter for controlling time consumption fo animation steps;
      *                            if it is set to 0: animation is skipped
      *                            otherwise the animation is performed normally
      */
-    def emptyAnimation(wontBeUsed1: Any, nextAnimation: Option[Animation[_]],
-        firstFuncToRun: () => Unit, secondFuncToRun: () => Unit, animationStepLength: Option[Int]) {
-        firstFuncToRun()
-        secondFuncToRun()
+    def emptyAnimation(afterAnimationTool: AfterAnimation, nextAnimation: Option[Animation[_]],
+        quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
+
+        afterAnimationTool.perform()
+
         if (nextAnimation.isDefined) {
             nextAnimation.get.run()
+        } else {
+            finalDraw()
         }
     }
+
+
 
     /**
      * Animation function for moving every single vertex of a graph to a new specified position.

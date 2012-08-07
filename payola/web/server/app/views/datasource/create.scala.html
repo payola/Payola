@@ -3,18 +3,17 @@
 @main(Some(user), "Create a new data source - Payola!") {
 
 <div class="container-fluid">
-    <div class="row-fluid">
-        <h1 class="span9">Create a new data source</h1>
-        <a href="@routes.DataSource.list()" class="btn btn-success span3">List data sources &raquo;</a>
-    </div>
+    <ul class="breadcrumb">
+        <li class="active">Create a new data source</li>
+    </ul>
 
     <div class="row-fluid">
         <form class="well" id="create_form"  action="@routes.DataSource.createNew()" method="post">
             <div id="data_source_name_input_wrapper"></div>
             <div id ="data_source_description_input_wrapper"></div>
-            <div><input type="checkbox" name="__dataSourceIsPublic__" value="Public"/> Public</div>
+            <div><input type="checkbox" name="__dataSourceIsPublic__" value="Public"/> Public</div><br/>
             <div style="padding-bottom: 20px;" id="data_fetcher_select_wrapper"></div>
-            <div id="options_div"></div>
+            <div id="options_div" class="well"></div>
             <div id="submit_button_div"></div>
         </form>
     </div>

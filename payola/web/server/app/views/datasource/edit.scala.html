@@ -1,12 +1,10 @@
 @(user: cz.payola.domain.entities.User, dataSource: cz.payola.domain.entities.plugins.DataSource, availableDataFetchers: Seq[cz.payola.domain.entities.plugins.concrete.DataFetcher])
 
-@main(Some(user), "Data source :: Payola!") {
+@main(Some(user), "Data source :: Payola!", Some("Edit data source: " + dataSource.name)) {
 
 <div class="container-fluid">
 
     <!-- TODO - some validation before form posting? -->
-
-    <h1>Edit data source: @dataSource.name</h1>
 
     <div class="row-fluid">
         <a href="@routes.DataSource.list()" class="btn btn-primary span2"><i class="icon-list icon-white"></i> Back to listing</a>

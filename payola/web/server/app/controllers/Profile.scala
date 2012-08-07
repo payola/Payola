@@ -6,6 +6,7 @@ import play.api.data.Forms._
 import views._
 import cz.payola.domain.entities._
 import cz.payola.web.shared.Payola
+import play.api.mvc.Request
 
 object Profile extends PayolaController with Secured
 {
@@ -17,29 +18,44 @@ object Profile extends PayolaController with Secured
     def index(username: String) = maybeAuthenticated { user: Option[User] =>
         Payola.model.userModel.getByName(username).map { profileUser =>
             val profileUserAnalyses = Payola.model.analysisModel.getAccessibleToUserByOwner(user, profileUser)
-            Ok(views.html.Profile.index(user, profileUser, profileUserAnalyses))
+            val profileUserDataSources = Payola.model.dataSourceModel.getAccessibleToUserByOwner(user, profileUser)
+            Ok(views.html.Profile.index(user, profileUser, profileUserAnalyses, profileUserDataSources))
         }.getOrElse {
             NotFound(views.html.errors.err404("The user does not exist."))
         }
     }
 
-    val profileForm = Form(
-        tuple(
-            "email" -> text,
-            "name" -> text
-        ) verifying("Invalid email or password", _ match {
-                case (email, name) => Payola.model.userModel.getByName(email).isEmpty
-        })
-    )
-
-    // TODO is the username necessary here? A user may edit only his own profile...
-    def edit(username: String) = authenticated { user =>
-        Ok(html.Profile.edit(user, profileForm))
+    def getForm(user: User) : play.api.data.Form[(String, String, String)] = {
+        Form(
+            tuple(
+                "email" -> text,
+                "oldpassword" -> text,
+                "password" -> text
+            ) verifying("Invalid email or password", _ match {
+                    case (email, oldpassword, password) =>
+                        (Payola.model.userModel.getByCredentials(user.name, Payola.model.userModel.cryptPassword(oldpassword)).isEmpty
+                        || (email == user.name || Payola.model.userModel.getByName(email).isEmpty))
+            })
+        )
     }
 
-    // TODO is the username necessary here? A user may edit only his own profile...
-    def save(username: String) = authenticated { user =>
-        Ok("TODO")
+    def edit() = authenticated { user =>
+        Ok(html.Profile.edit(user, getForm(user)))
+    }
+
+    def save() = authenticatedWithRequest { (user: User, request: Request[_]) =>
+        getForm(user).bindFromRequest()(request).fold(
+            formWithErrors => BadRequest(html.Profile.edit(user, formWithErrors)),
+            triple =>
+            {
+                user.password = Payola.model.userModel.cryptPassword(triple._3)
+                user.name = triple._1
+
+                Payola.model.userModel.persist(user)
+
+                Redirect(routes.Application.dashboard).withSession("email" -> triple._1)
+            }
+        )
     }
 
 }

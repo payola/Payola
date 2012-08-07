@@ -6,7 +6,7 @@ import cz.payola.common.rdf._
 import cz.payola.web.client.views.graph.visual._
 import cz.payola.web.client.views.algebra._
 import cz.payola.common.entities.settings.OntologyCustomization
-import s2js.adapters.js.browser.window
+import cz.payola.common.entities.settings.OntologyCustomization
 
 /**
   * Graphical representation of a Graph object.
@@ -49,13 +49,13 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
       * representation. VertexViews that are already in the graphView are refreshed (their age is set to 0).
       * @param graph to update the current representation
       */
-    def update(graph: Graph) {
+    def update(graph: Graph, vertexInitPosition: Point2D) {
         if (graph == null) {
             return
         }
 
         //create vertexViews from the input
-        val newVertexViews = createVertexViews(graph)
+        val newVertexViews = createVertexViews(graph, vertexInitPosition)
         //get vertexViews from the current (this) graphView
         val oldVertexViews = rebuildOldVertices(newVertexViews)
         val vertexViews = newVertexViews ++ oldVertexViews
@@ -100,15 +100,17 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
             var currentComponentsVertices = ListBuffer[VertexView]()
             var currentComponentsEdges = ListBuffer[EdgeView]()
 
-            var plk = true
-            while (plk) {
+            var componentNumber = 0
+
+            var run = true
+            while (run) {
 
                 val neighbours = getNeighbours(currentVertex)
 
                 currentNeighbours ++= neighbours
 
                 currentNeighbours --= currentNeighbours -- remainingVertices
-                //^remove vertices from currNeighb that are not present in remVerts
+                //^remove vertices from currentNeighbours that are not present in remainingVertices
 
                 remainingVertices -= currentVertex
 
@@ -117,14 +119,15 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
                 currentComponentsEdges ++= currentVertex.edges -- currentComponentsEdges
 
                 if (currentNeighbours.isEmpty) {
-                    plk = false
+                    run = false
                 } else {
                     currentVertex = currentNeighbours.head
                     currentNeighbours -= currentVertex
                 }
             }
 
-            components += new Component(currentComponentsVertices, currentComponentsEdges)
+            components += new Component(currentComponentsVertices, currentComponentsEdges, componentNumber)
+            componentNumber += 1
         }
     }
 
@@ -151,9 +154,10 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
     /**
       * Constructs a list of vertexViews based on the graphModel parameter.
       * @param graphModel to build from
+      * @param vertexInitPosition where created vertices are positioned
       * @return container with packed Vertex objects in VertexView objects
       */
-    private def createVertexViews(graphModel: Graph): ListBuffer[VertexView] = {
+    private def createVertexViews(graphModel: Graph, vertexInitPosition: Point2D): ListBuffer[VertexView] = {
         val buffer = ListBuffer[VertexView]()
         val literalVertices = ListBuffer[LiteralVertex]()
 
@@ -161,7 +165,7 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack] {
 
             vertexModel match {
                 case i: IdentifiedVertex => {
-                    val newVertexView = new VertexView(i, Point2D(300, 300)/*TODO center of drawing space*/,
+                    val newVertexView = new VertexView(i, vertexInitPosition,
                         settings.vertexModel, settings.textModel, null)
 
                     newVertexView.rdfType = getRdfTypeForVertexView(graphModel.edges, i)

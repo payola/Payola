@@ -3,8 +3,8 @@ package cz.payola.web.client.views.elements
 import s2js.adapters.js.dom
 import cz.payola.web.client.views._
 import s2js.adapters.js.dom.CanvasRenderingContext2D
-import cz.payola.web.client.views.algebra.Vector2D
 import s2js.adapters.js.browser.window
+import cz.payola.web.client.views.algebra._
 
 class Canvas(cssClass: String = "") extends ElementView[dom.Canvas]("canvas", Nil, cssClass) {
 
@@ -24,7 +24,7 @@ class Canvas(cssClass: String = "") extends ElementView[dom.Canvas]("canvas", Ni
         domElement.height = value.y
     }
 
-    def sizeGet(): Vector2D = {
+    def getSize(): Vector2D = {
         Vector2D(domElement.width, domElement.height)
     }
 
@@ -46,5 +46,9 @@ class Canvas(cssClass: String = "") extends ElementView[dom.Canvas]("canvas", Ni
       */
     def dirty() {
         cleared = false
+    }
+
+    def getCenter: Point2D = {
+        Point2D(size.x / 2, size.y / 2)
     }
 }

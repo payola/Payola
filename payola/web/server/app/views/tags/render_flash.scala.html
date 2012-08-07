@@ -1,0 +1,13 @@
+@(flash: Flash)
+
+@flash.get("success").map { message =>
+    <p class="alert alert-success">
+        @message
+    </p>
+}
+
+@flash.get("error").map { message =>
+    <p class="alert alert-error">
+        @message
+    </p>
+}

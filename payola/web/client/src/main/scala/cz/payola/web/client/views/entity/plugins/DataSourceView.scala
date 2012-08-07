@@ -1,4 +1,4 @@
-package cz.payola.web.client.views.entity
+package cz.payola.web.client.views.entity.plugins
 
 import cz.payola.web.client.views.ComposedView
 import cz.payola.web.client.views.elements._
@@ -12,11 +12,20 @@ class DataSourceView(dataSourceName: String) extends ComposedView
 
     val nextButton = new Button(new Icon(Icon.arrow_right))
 
-    val nodeUriInput = new Input("nodeUri", "", Some("Node URI"), "input-xxlarge")
+    val nodeUriInput = new Input("nodeUri", "", Some("Node URI"), "input-xlarge")
 
     val goButton = new Button(new Text("Go!"))
 
-    val navigation = new Div(List(backButton, nextButton, nodeUriInput, goButton), "form-inline pull-right")
+    val sparqlQueryButton = new Button(new Text("SPARQL"), "", new Icon(Icon.asterisk))
+
+    val navigation = new Div(List(
+        backButton,
+        nextButton,
+        nodeUriInput,
+        goButton,
+        sparqlQueryButton),
+        "form-inline pull-right"
+    )
 
     val graphViewSpace = new Div(Nil, "row-fluid")
 

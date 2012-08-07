@@ -39,6 +39,6 @@ class InformationView(data: Any, val settings: TextSettingsModel) extends View[C
         fillCurrentSpace(context, settings.colorBackground)
         //TODO how come, that the measureText returns different size on the first run??
 
-        drawText(context, data.toString, position, color, "12px Sans", "center")
+        drawText(context, data.toString, position, color, settings.font, settings.align)
     }
 }

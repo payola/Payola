@@ -1,10 +1,8 @@
 @(form: Form[(String,String)])
 
-@main(None, "Payola login page") {
+@main(None, "Payola login page", Some("Sign in")) {
     <div class="container">
         @helper.form(routes.Application.authenticate) {
-
-            <h1>Sign in</h1>
 
             @form.globalError.map { error =>
             <p class="alert alert-error">

@@ -6,9 +6,9 @@ import cz.payola.web.client.views.bootstrap._
 
 class ShareButton(private var _isPublic: Boolean) extends ComposedView
 {
-    val shareToGroupsButton = new Anchor(List(new Icon(Icon.group), new Text(" To groups")))
+    val shareToGroupsButton = new Anchor(List(new Icon(Icon.group), new Text(" To Groups")))
 
-    val shareToUsersButton = new Anchor(List(new Icon(Icon.user), new Text(" To users")))
+    val shareToUsersButton = new Anchor(List(new Icon(Icon.user), new Text(" To Users")))
 
     private val makePublicButtonText = new Text("")
 
@@ -37,12 +37,12 @@ class ShareButton(private var _isPublic: Boolean) extends ComposedView
     def isPublic_=(value: Boolean) {
         _isPublic = value
         if (_isPublic) {
-            makePublicButtonText.text_=("Make private")
+            makePublicButtonText.text_=("Make Private")
             isPublicText.text_=(" Public")
             dropDownButton.anchor.removeCssClass("btn-warning")
             dropDownButton.anchor.addCssClass("btn-success")
         } else {
-            makePublicButtonText.text_=("Make public")
+            makePublicButtonText.text_=("Make Public")
             isPublicText.text_=(" Private")
             dropDownButton.anchor.addCssClass("btn-warning")
             dropDownButton.anchor.removeCssClass("btn-success")

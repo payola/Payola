@@ -8,6 +8,7 @@ import cz.payola.web.client.View
 import s2js.compiler.javascript
 import s2js.adapters.js.browser.window
 import cz.payola.web.client.views.elements.Text
+import cz.payola.web.client.views.algebra.Vector2D
 
 abstract class ElementView[A <: dom.Element](domElementName: String, val subViews: Seq[View], cssClass: String)
     extends View
@@ -101,4 +102,17 @@ abstract class ElementView[A <: dom.Element](domElementName: String, val subView
             domElement.removeChild(domElement.firstChild)
         }
     }
+
+    @javascript("""
+        var offsetTop = 0;
+        var offsetLeft = 0;
+        var element = self.domElement;
+        while (element != null) {
+            offsetTop += element.offsetTop;
+            offsetLeft += element.offsetLeft;
+            element = element.offsetParent;
+        }
+        return new cz.payola.web.client.views.algebra.Vector2D(offsetLeft, offsetTop);
+                """)
+    def topLeftCorner: Vector2D = Vector2D(0, 0)
 }

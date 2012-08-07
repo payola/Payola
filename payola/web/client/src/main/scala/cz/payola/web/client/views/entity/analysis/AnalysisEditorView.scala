@@ -18,7 +18,7 @@ class AnalysisEditorView(analysis: Analysis) extends ComposedView
 
     val addPluginLink = new Anchor(List(new Icon(Icon.hdd), new Text(" Add plugin")))
     protected val addPluginLinkLi = new ListItem(List(addPluginLink))
-    val addDataSourceLink = new Anchor(List(new Icon(Icon.hdd), new Text(" Add datasource")))
+    val addDataSourceLink = new Anchor(List(new Icon(Icon.hdd), new Text(" Add data source")))
     protected val addDataSourceLinkLi = new ListItem(List(addDataSourceLink))
     val mergeBranches = new Anchor(List(new Icon(Icon.glass), new Text(" Merge branches")))
     protected val mergeBranchesLi = new ListItem(List(mergeBranches))
