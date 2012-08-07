@@ -1,30 +1,18 @@
 package cz.payola.web.client.views.graph.visual.settings
 
-import cz.payola.web.client.views.graph.visual.Color
-import s2js.adapters.js.browser.window
+import cz.payola.common.visual.Color
 
-class EdgeSettingsModel extends  SettingsModel
+class EdgeSettingsModel extends SettingsModel
 {
-    var widthValue = 1
+    private val widthValue = 1
 
-    var colorValue = new Color(150, 150, 150, 0.4)
+    private val colorValue = new Color(150, 150, 150)
 
     def width(typeName: String, typePropertyName: String): Int = {
-        val foundProperty = getProperty(typeName, typePropertyName)
-        if(foundProperty.isDefined && foundProperty.get.strokeWidth != 0) {
-            foundProperty.get.strokeWidth
-        } else {
-            widthValue
-        }
+        getProperty(typeName, typePropertyName).map(_.strokeWidth).filter(_ > 0).getOrElse(widthValue)
     }
 
     def color(typeName: String, typePropertyName: String): Color = {
-        val foundProperty = getProperty(typeName, typePropertyName)
-
-        if(foundProperty.isDefined && foundProperty.get.strokeColor.length != 0) {
-            Color.fromHex(foundProperty.get.strokeColor).getOrElse(colorValue)
-        } else {
-            colorValue
-        }
+        getProperty(typeName, typePropertyName).flatMap(c => Color(c.strokeColor)).getOrElse(colorValue)
     }
 }

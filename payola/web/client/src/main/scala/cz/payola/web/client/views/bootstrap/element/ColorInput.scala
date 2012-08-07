@@ -1,64 +1,65 @@
 package cz.payola.web.client.views.bootstrap.element
 
-import cz.payola.web.client.views.graph.visual.Color
+import cz.payola.common.visual.Color
 import s2js.adapters.js.dom
 import s2js.compiler.javascript
 import cz.payola.web.client.views.elements._
-import cz.payola.web.client.events._
 import cz.payola.web.client.views.bootstrap.{EditableInput, Icon}
 
-// Use the getter + setter for the color
-class ColorInput(name: String, label: String, private var colorOption: Option[Color], cssClass: String = "")
-    extends Input(name, colorOption.map(_.toString).getOrElse("").toString, Some("No color selected"), cssClass)
-    with EditableInput
+class ColorInput(name: String, label: String, initialValue: String, cssClass: String = "")
+    extends Input(name, "", Some("Select color"), cssClass) with EditableInput
 {
-    val colorInput = new Input(name, colorOption.map(_.toString).getOrElse("").toString, Some(NO_COLOR_TEXT))
+    private val NO_COLOR_TEXT = "No color selected"
+
+    private val NO_COLOR_RGB_VALUE = "rgb(0, 0, 0)"
+
+    private val colorInput = new Input(name, initialValue, Some("Select color"))
+    colorInput.value = getColorRgbString(Color(initialValue), NO_COLOR_TEXT)
+    colorInput.setAttribute("data-color",  getColorRgbString(Color(initialValue), NO_COLOR_RGB_VALUE))
+    colorInput.setAttribute("data-color-format", "rgb")
+    colorInput.keyReleased += { e =>
+        setColorWellBackgroundColor(getColorRgbString(Color(colorInput.value), NO_COLOR_RGB_VALUE))
+        changed.triggerDirectly(this)
+
+        true
+    }
 
     private val colorWell = new Italic(List())
-
-    //colorWell.setAttribute("style", "background-color: " + getColorRgbaString("rgba(0, 0, 0, 1)") )
 
     private val colorWellSpan = new Span(List(colorWell), "add-on")
 
     private val clearIcon = new Icon(Icon.remove)
 
     private val clearColorSpan = new Span(List(clearIcon), "btn")
+    clearColorSpan.mouseClicked += { e =>
+        setColor(None)
+        true
+    }
 
     private val labelElement = new Label(label, colorInput)
 
     private val div = new Div(List(colorInput, colorWellSpan, clearColorSpan), "input-append color")
 
-    private val NO_COLOR_TEXT = "No color selected"
-    private val NO_COLOR_RGBA_VALUE = "rgba(0, 0, 0, 1)"
-
-    colorInput.setAttribute("data-color",  getColorRgbaString(NO_COLOR_RGBA_VALUE))
-    colorInput.setAttribute("data-color-format", "rgba")
-
-    clearColorSpan.mouseClicked += { e =>
-        setColor(None)
-        //cleared.trigger(new EventArgs[ColorInput](this))
-        true
-    }
-
     override def render(parent: dom.Element) {
         labelElement.render(parent)
         div.render(parent)
         init
-        setColor(colorOption)
-    }
-
-    def getColor: Option[Color] = {
-        colorOption
     }
 
     override def value = {
-        getColorHexString
+        val v = colorInput.value
+        if (v == NO_COLOR_TEXT){
+            ""
+        }
+        else {
+            v
+        }
     }
 
     override def value_=(value: String) {
         // During initialization is value set (.ctor), but field doesn't exists yet
         if (colorInput != null){
-            setColor(Color.fromHex(value))
+            setColor(Color(value))
         }
     }
 
@@ -66,29 +67,26 @@ class ColorInput(name: String, label: String, private var colorOption: Option[Co
         colorInput.setIsActive(isActive)
     }
 
-    @javascript("""var cp = jQuery(self.colorInput.domElement).colorpicker({format: 'rgba'})
+    @javascript("""var cp = jQuery(self.colorInput.domElement).colorpicker({format: 'rgb'})
                     cp.on('changeColor',function(evt){
-        var rgba = evt.color.toRGB();
-        var color = new cz.payola.web.client.views.graph.visual.Color(rgba.r, rgba.g, rgba.b, rgba.a);
-        self.setColor(new scala.Some(color));
+        var rgb = evt.color.toRGB();
+        self.setColor(new scala.Some(new cz.payola.common.visual.Color(rgb.r, rgb.g, rgb.b)));
     });
                  """)
     private def init = Nil
 
-    private def getColorHexString = {
-        colorOption.map(_.toHexString).getOrElse("")
-    }
-
-    private def getColorRgbaString(defaultValue: String) = {
-        colorOption.map(_.toString).getOrElse(defaultValue).toString
-    }
-
     private def setColor(color: Option[Color]) {
-        colorOption = color
-
-        colorInput.value = getColorRgbaString(NO_COLOR_TEXT)
-        colorWell.setAttribute("style", "background-color: " + getColorRgbaString(NO_COLOR_RGBA_VALUE))
+        colorInput.value = getColorRgbString(color, NO_COLOR_TEXT)
+        setColorWellBackgroundColor(getColorRgbString(color, NO_COLOR_RGB_VALUE))
 
         changed.triggerDirectly(this)
+    }
+
+    private def setColorWellBackgroundColor(rgbColor: String){
+        colorWell.setAttribute("style", "background-color: " + rgbColor)
+    }
+
+    private def getColorRgbString(color: Option[Color], defaultValue: String): String = {
+        color.map(_.toString).getOrElse(defaultValue).toString
     }
 }

@@ -3,7 +3,7 @@ package cz.payola.web.client.views.graph.visual.graph
 import collection.mutable.ListBuffer
 import s2js.adapters.js.dom.CanvasRenderingContext2D
 import cz.payola.web.client.views.graph.visual.settings._
-import cz.payola.web.client.views.graph.visual.Color
+import cz.payola.common.visual.Color
 import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.graph.visual.graph.positioning.LocationDescriptor
 import cz.payola.common.rdf._
@@ -153,7 +153,7 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var s
         drawCircle(context, correctedPosition, settings.radius(rdfType), settings.borderSize, settings.borderColor)
         if (isSelected) {
             val col = settings.color(rdfType)
-            fillCurrentSpace(context, Color(col.red, col.green, col.blue, 1.0))
+            fillCurrentSpace(context, new Color(col.red, col.green, col.blue))
         } else {
             fillCurrentSpace(context, settings.color(rdfType))
         }

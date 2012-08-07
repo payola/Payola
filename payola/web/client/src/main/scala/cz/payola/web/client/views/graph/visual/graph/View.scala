@@ -3,7 +3,7 @@ package cz.payola.web.client.views.graph.visual.graph
 import s2js.adapters.js.browser._
 import s2js.adapters.js.dom._
 import s2js.adapters.js.dom.Element
-import cz.payola.web.client.views.graph.visual.Color
+import cz.payola.common.visual.Color
 import cz.payola.web.client.views.algebra._
 
 /**

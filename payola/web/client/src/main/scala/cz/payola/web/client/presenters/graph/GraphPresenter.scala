@@ -40,7 +40,7 @@ class GraphPresenter(val viewElement: dom.Element) extends Presenter
         true
     }
 
-    private def onOntologyCustomizationCreateClicked(e: EventArgs[_]) = {
+    private def onOntologyCustomizationCreateClicked(e: EventArgs[_]) {
         val creator = new OntologyCustomizationCreator()
         creator.ontologyCustomizationCreated += { e =>
             view.updateOntologyCustomization(Some(e.target))

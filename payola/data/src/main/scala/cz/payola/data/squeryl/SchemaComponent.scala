@@ -345,7 +345,7 @@ trait SchemaComponent
             val COLUMN_TYPE_DESCRIPTION = "text"
             val COLUMN_TYPE_URI = "text"
             val COLUMN_TYPE_VALUE = "text"
-            val COLUMN_TYPE_COLOR = "varchar(10)"
+            val COLUMN_TYPE_COLOR = "varchar(20)"
             val COLUMN_TYPE_CLASSNAME = "varchar(64)"
             val COLUMN_TYPE_FULL_CLASSNAME = "varchar(256)"
 
@@ -383,6 +383,7 @@ trait SchemaComponent
                     columns(binding.targetPluginInstanceId, binding.inputIndex) are (unique),
                     columns(binding.sourcePluginInstanceId, binding.analysisId) are (unique)
                 ))
+
             on(booleanParameterValues)(param =>
                 declare(
                     param.id is (primaryKey, (dbType(COLUMN_TYPE_ID))),
