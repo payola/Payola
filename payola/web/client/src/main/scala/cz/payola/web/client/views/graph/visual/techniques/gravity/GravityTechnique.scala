@@ -7,7 +7,6 @@ import cz.payola.web.client.views.graph.visual.graph._
 import cz.payola.web.client.views.graph.visual.animation.Animation
 import cz.payola.web.client.views.graph.visual.techniques.BaseTechnique
 import cz.payola.web.client.views.algebra._
-import scala.Some
 
 /**
   * Visual plug-in technique that places the vertices based on their edges.

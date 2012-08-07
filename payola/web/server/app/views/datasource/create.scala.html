@@ -1,12 +1,8 @@
 @(user: cz.payola.domain.entities.User)
 
-@main(Some(user), "Create a new data source - Payola!") {
+@main(Some(user), "Create a new data source - Payola!", Some("Create a new data source")) {
 
 <div class="container-fluid">
-    <ul class="breadcrumb">
-        <li class="active">Create a new data source</li>
-    </ul>
-
     <div class="row-fluid">
         <form class="well" id="create_form"  action="@routes.DataSource.createNew()" method="post">
             <div id="data_source_name_input_wrapper"></div>

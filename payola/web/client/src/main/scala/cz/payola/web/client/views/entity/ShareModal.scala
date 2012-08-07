@@ -7,7 +7,6 @@ import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
 import cz.payola.common.entities._
 import cz.payola.web.client.events._
 import s2js.runtime.client.js.JsObject
-import scala.Some
 
 class ShareModal(
     val entityName: String,

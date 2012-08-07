@@ -4,7 +4,6 @@ import scala.collection.immutable
 import cz.payola.data.squeryl.entities._
 import cz.payola.data.squeryl._
 import cz.payola.domain.entities.plugins.concrete.DataFetcher
-import scala.Some
 
 /**
   * This object converts [[cz.payola.common.entities.plugins.DataSource]]

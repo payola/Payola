@@ -5,12 +5,9 @@ import s2js.adapters.js.dom.Element
 import cz.payola.web.client.views.bootstrap._
 import cz.payola.web.shared.AnalysisBuilderData
 import s2js.adapters.js.browser._
-import scala.Some
 import cz.payola.web.client.views.elements._
-import scala.Some
 import s2js.compiler.javascript
 import cz.payola.web.client.views.bootstrap.inputs._
-import scala.Some
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
 
 class PrivateDataUploader(fileUploaderDivID: String,

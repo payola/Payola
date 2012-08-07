@@ -8,7 +8,6 @@ import cz.payola.web.client.views.entity._
 import cz.payola.web.client.events._
 import cz.payola.common.Entity
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
-import scala.Some
 
 class ShareButtonPresenter(
     val viewElement: dom.Element,
