@@ -4,7 +4,6 @@ import cz.payola.common.entities._
 import s2js.compiler._
 import cz.payola.domain.entities.User
 import cz.payola.common.entities.plugins._
-import scala.Some
 
 @secured
 @remote object AnalysisBuilderData

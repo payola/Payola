@@ -1,10 +1,8 @@
 package cz.payola.data.squeryl.entities.settings
 
 import scala.collection.immutable
-import scala.collection.mutable
 import cz.payola.data.squeryl.entities._
 import cz.payola.data.squeryl._
-import scala.Some
 
 object ClassCustomization extends EntityConverter[ClassCustomization]
 {

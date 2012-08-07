@@ -1,13 +1,8 @@
 package cz.payola.data.squeryl.entities.analyses
 
 import cz.payola.data.squeryl.entities._
-import org.squeryl.annotations.Transient
 import cz.payola.data.squeryl.entities.plugins.PluginInstance
 import cz.payola.data.squeryl._
-import cz.payola.domain.entities.User
-import scala.Some
-import cz.payola.domain.entities.Analysis
-import scala.Some
 
 /**
   * This objects converts [[cz.payola.common.entities.analyses.PluginInstanceBinding]]

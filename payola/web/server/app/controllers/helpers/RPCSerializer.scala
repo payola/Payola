@@ -4,25 +4,11 @@ import cz.payola.scala2json._
 import cz.payola.common.rdf._
 import cz.payola.common.entities._
 import cz.payola.common.entities.plugins.parameters._
-import cz.payola.scala2json.rules.CustomValueSerializationRule
-import cz.payola.scala2json.rules.BasicSerializationRule
-import cz.payola.scala2json.classes.SimpleSerializationClass
-import scala.Some
 import cz.payola.common.entities.plugins._
 import cz.payola.common.entities.analyses.PluginInstanceBinding
-import cz.payola.scala2json.rules.CustomValueSerializationRule
-import cz.payola.scala2json.rules.BasicSerializationRule
-import cz.payola.scala2json.classes.SimpleSerializationClass
-import scala.Some
-import cz.payola.domain.entities.plugins.parameters.StringParameterValue
-import cz.payola.scala2json.rules.BasicSerializationRule
-import cz.payola.scala2json.classes.SimpleSerializationClass
-import scala.Some
-import cz.payola.scala2json.rules.CustomValueSerializationRule
 import cz.payola.common.entities.settings._
 import cz.payola.scala2json.rules.BasicSerializationRule
 import cz.payola.scala2json.classes.SimpleSerializationClass
-import scala.Some
 import cz.payola.scala2json.rules.CustomValueSerializationRule
 
 class RPCSerializer extends JSONSerializer

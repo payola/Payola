@@ -329,7 +329,15 @@ The ```clean``` SBT task is overriden so all generated files are deleted in addi
 <a name="scala2json"></a>
 ## Package cz.payola.scala2json
 
-> TODO: CH.M.
+To transfer data from the server side to the client side, one needs to serialize the data transferred. To save bandwidth, we've decided to go with [JSON](http://www.json.org). It is a lightweight format that's easy to decode in JavaScript, which is used on the client side.
+
+While other solutions for serializing Scala objects to JSON do exist (for example [scala-json](https://github.com/stevej/scala-json)), they mostly work only on collections, maps and numeric types. Other objects need to implement their own `toJSON()` method.
+
+This seemed to us as too much unnecessary code, so we've decided to write out own serializer. This serializer is capable of serializing any object using reflection - the serializer goes through the object's fields.
+
+For some purposes, we needed to customize the serialization process - skip some fields, add some fields, etc. - this lead to serialization rules. For example, you have a class with private fields that are prefixed with an underscore (`_`) - you might want to hide this implementation detail - just add a new `BasicSerializationRule`, where you can define a class (or trait) whose fields should be serialized (e.g. you want to serialize only fields of a superclass), list of fields that should be omitted (transient fields) and list of field name aliases (a map of string &rarr; string).
+
+You can explore additional serialization rules in our generated [docset](TODO Link).
 
 <a name="s2js"></a>
 ## Project payola/s2js
@@ -412,11 +420,7 @@ Adapters of web browser related objects (```Window```, ```History``` etc.), base
 
 ### Package cz.payola.common.entities
 
-> TODO: CH.M.
-
-#### Package cz.payola.common.entities.analyses
-
-> TODO: H.S.
+The package includes classes representing the basic entities (e.g. user, analysis, plugin) that ensure the core functionality of Payola. Each entity has its own ID (string-based, 128-bit UUID) and can be stored in the relational database (see [data package](#data) for more information).
 
 #### Package cz.payola.common.entities.plugins
 
@@ -424,15 +428,15 @@ Adapters of web browser related objects (```Window```, ```History``` etc.), base
 
 #### Package cz.payola.common.entities.privileges
 
-> TODO: CH.M.
+To share entities between users, privileges are used. This makes it easy to extend the model in the future, or to change the privilege granularity. Currently, there are privileges to access a resource - analysis, data source, ontology customization and plugin; however, easily can be added a privilege type that grants a user the right to edit some entity, etc.
 
 #### Package cz.payola.common.entities.settings
 
-> TODO: CH.M.
+The settings package encapsulates ontology customizations. 
 
 ### Package cz.payola.common.rdf
 
-> TODO: CH.M.
+This package contains classes representing RDF graphs and ontologies. Only core functionality is included in this package - class declarations, some basic methods that are used on the client, as well. More functionality, such as converting a RDF/XML file to a `Graph` object is added in the [`domain`](#domain) project.
 
 <a name="domain"></a>
 ## Package cz.payola.domain
@@ -446,21 +450,21 @@ Adapters of web browser related objects (```Window```, ```History``` etc.), base
 
 > TODO: O.H.
 
-### Package cz.payola.squeryl
+### Package cz.payola.data.squeryl
 
 > TODO: O.H.
 
-#### Package cz.payola.squeryl.entities
+#### Package cz.payola.data.squeryl.entities
 
 > TODO: O.H.
 
-#### Package cz.payola.squeryl.repositories
+#### Package cz.payola.data.squeryl.repositories
 
 > TODO: O.H.
 
-### Package cz.payola.virtuoso
+### Package cz.payola.data.virtuoso
 
-> TODO: CH.M.
+Virtuoso is used for storing private RDF data - classes in this package let you communicate with a Virtuoso instance - create a graph group, upload a graph to the graph group, and then retrieve all graphs within a graph group.
 
 <a name="model"></a>
 ## Package cz.payola.model

@@ -6,7 +6,6 @@ import s2js.adapters.js.browser.document
 import cz.payola.web.client.views._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events._
-import scala.Some
 import cz.payola.web.client.View
 
 /**

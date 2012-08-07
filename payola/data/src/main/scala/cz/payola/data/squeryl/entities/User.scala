@@ -5,7 +5,6 @@ import scala.collection.immutable
 import scala.collection.mutable
 import cz.payola.data.squeryl._
 import cz.payola.data.squeryl.entities.settings.OntologyCustomization
-import scala.Some
 
 /**
   * This object converts [[cz.payola.common.entities.User]] to [[cz.payola.common.entities.User]]

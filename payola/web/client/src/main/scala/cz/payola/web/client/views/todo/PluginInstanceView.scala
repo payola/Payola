@@ -9,7 +9,6 @@ import cz.payola.web.client.View
 import cz.payola.web.client.views.elements.Div
 import scala.Seq
 import scala.collection.immutable.HashMap
-import scala.Some
 import s2js.adapters.js.dom.Element
 import cz.payola.web.client.views.ComposedView
 import s2js.runtime.client.scala.collection.mutable.ArrayBuffer
