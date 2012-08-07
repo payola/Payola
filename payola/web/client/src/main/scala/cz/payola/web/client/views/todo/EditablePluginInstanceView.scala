@@ -1,19 +1,17 @@
 package cz.payola.web.client.views.todo
 
-import cz.payola.common.entities.Plugin
 import cz.payola.common.entities.plugins.parameters._
 import cz.payola.web.client.presenters.models.ParameterValue
-import scala.collection.immutable.HashMap
 import scala.collection._
 import cz.payola.web.client.events.SimpleUnitEvent
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.View
+import cz.payola.common.entities.plugins._
 import cz.payola.web.client.views.elements.form.fields._
 import cz.payola.web.client.views.bootstrap.InputControl
 
-class EditablePluginInstanceView(id: String, pluginI: Plugin, predecessors: Seq[PluginInstanceView] = List(),
-    defaultValues: Map[String, String] = new HashMap[String, String]())
-    extends PluginInstanceView(id, pluginI, predecessors, defaultValues)
+class EditablePluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[PluginInstanceView] = List())
+    extends PluginInstanceView(pluginInst, predecessors)
 {
     val connectButtonClicked = new SimpleUnitEvent[EditablePluginInstanceView]
 
@@ -37,34 +35,22 @@ class EditablePluginInstanceView(id: String, pluginI: Plugin, predecessors: Seq[
         List(connect, delete)
     }
 
-    def getParameterViews = getPlugin.parameters.map { param =>
-
-        val defaultVal = if (defaultValues.isDefinedAt(param.name)) {
-            defaultValues(param.name)
-        }
-        else {
-            param.defaultValue.toString
-        }
-
-        val field = param match {
-            case p: BooleanParameter => new CheckBox(param.id, defaultVal.toBoolean, "Enter parameter value")
-            case p: IntParameter => new NumericInput(param.id, defaultVal.toInt, "Enter parameter value")
-            case p: StringParameter => {
-                if (p.isMultiline) {
-                    new TextArea(param.id, defaultVal, "Enter parameter value")
-                } else {
-                    new TextInput(param.id, defaultVal, "Enter parameter value")
-                }
+    def getParameterViews = getPlugin.parameters.flatMap { param =>
+        pluginInstance.getParameter(param.name).map { v =>
+            val field = param match {
+                case p: BooleanParameter => new CheckBox(param.id, v.asInstanceOf[Boolean], "Enter parameter value")
+                case p: IntParameter => new NumericInput(param.id, v.asInstanceOf[Int], "Enter parameter value")
+                case p: StringParameter if p.isMultiline => new TextArea(param.id, v.toString, "Enter parameter value")
+                case _ => new TextInput(param.id, v.toString, "Enter parameter value")
             }
-            case _ => new TextInput(param.id, defaultVal, "Enter parameter value")
-        }
 
-        val inputControl = new InputControl(param.name, field)
-        inputControl.delayedChanged += { _ =>
-            parameterValueChanged.triggerDirectly(new ParameterValue(getId, param.id, param.name, field.value.toString,
-                inputControl))
-        }
+            val inputControl = new InputControl(param.name, field)
+            inputControl.delayedChanged += { _ =>
+                parameterValueChanged.triggerDirectly(new ParameterValue(getId, param.id, param.name,
+                    field.value.toString, inputControl))
+            }
 
-        inputControl
+            inputControl
+        }
     }
 }

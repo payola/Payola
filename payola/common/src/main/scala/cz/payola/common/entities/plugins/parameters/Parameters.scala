@@ -20,7 +20,8 @@ trait IntParameter extends Parameter[Int]
 /**
   * A parameter with [[scala.String]] value.
   */
-trait StringParameter extends Parameter[String] {
+trait StringParameter extends Parameter[String]
+{
     protected val _isMultiline: Boolean
     
     def isMultiline: Boolean = _isMultiline

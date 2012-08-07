@@ -3,9 +3,7 @@ package cz.payola.model.components
 import cz.payola.data._
 import cz.payola.domain.entities._
 import cz.payola.model._
-import cz.payola.domain.entities.privileges.UsePluginPrivilege
 import cz.payola.domain.PluginCompilerComponent
-import scala.Some
 
 trait PluginModelComponent extends EntityModelComponent
 {

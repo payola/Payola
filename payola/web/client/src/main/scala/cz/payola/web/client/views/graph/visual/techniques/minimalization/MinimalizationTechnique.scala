@@ -6,7 +6,6 @@ import cz.payola.web.client.views.graph.visual.graph._
 import cz.payola.web.client.views.algebra.Point2D
 import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.views.graph.visual.animation.Animation
-import scala.Some
 
 class MinimalizationTechnique(settings: VisualSetup) extends BaseTechnique(settings, "Tree ECM Visualisation")
 {

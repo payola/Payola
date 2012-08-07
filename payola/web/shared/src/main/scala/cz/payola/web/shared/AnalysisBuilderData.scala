@@ -4,7 +4,6 @@ import cz.payola.common.entities._
 import s2js.compiler._
 import cz.payola.domain.entities.User
 import cz.payola.common.entities.plugins._
-import scala.Some
 
 @secured
 @remote object AnalysisBuilderData
@@ -56,9 +55,9 @@ import scala.Some
     }
 
     @async def createPluginInstance(pluginId: String, analysisId: String, user: User = null)
-        (successCallback: (String => Unit))
+        (successCallback: (PluginInstance => Unit))
         (failCallback: (Throwable => Unit)) {
-        successCallback(Payola.model.analysisModel.createPluginInstance(pluginId, analysisId).id)
+        successCallback(Payola.model.analysisModel.createPluginInstance(pluginId, analysisId))
     }
 
     @async def setParameterValue(analysisId: String, pluginInstanceId: String, parameterName: String, value: String,

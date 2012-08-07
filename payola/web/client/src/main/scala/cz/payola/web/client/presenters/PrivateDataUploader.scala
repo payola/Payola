@@ -1,10 +1,10 @@
 package cz.payola.web.client.presenters
 
 import s2js.adapters.browser._
-import s2js.compiler.javascript
 import cz.payola.web.client._
 import cz.payola.web.client.views.bootstrap._
 import cz.payola.web.client.views.elements._
+import s2js.compiler.javascript
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
 import cz.payola.web.client.views.elements.form.fields._
 

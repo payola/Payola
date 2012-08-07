@@ -6,13 +6,6 @@ analyses: Seq[cz.payola.domain.entities.Analysis], dataSources: Seq[cz.payola.do
 @main(user, "User profile") {
 <div class="container">
 
-    <ul class="breadcrumb">
-        <li>
-            <a href="/">Home</a> <span class="divider">/</span>
-        </li>
-        <li class="active">Profile of: @owner.name</li>
-    </ul>
-
     @if(user.isDefined && (user.get.id == owner.id)){
     <div class="row-fluid well">
         <a href="@routes.Profile.edit()" class="btn btn-primary span3"><i class="icon-white icon-pencil"></i> Edit profile</a>

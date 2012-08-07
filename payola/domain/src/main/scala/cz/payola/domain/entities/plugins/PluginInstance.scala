@@ -17,14 +17,6 @@ class PluginInstance(protected var _plugin: Plugin, protected var _parameterValu
     checkConstructorPostConditions()
 
     type PluginType = Plugin
-
-    /**
-      * Returns value of a parameter with the specified name or [[scala.None]] if such doesn't exist.
-      */
-    def getParameter(parameterName: String): Option[Any] = {
-        getParameterValue(parameterName).map(_.value)
-    }
-
     /**
       * Returns value of a boolean parameter with the specified name or [[scala.None]] if such doesn't exist.
       */
@@ -73,7 +65,7 @@ class PluginInstance(protected var _plugin: Plugin, protected var _parameterValu
       * Sets value of the specified parameter.
       */
     def setParameter(parameter: Parameter[_], value: Any): PluginInstance = {
-        getParameterValue(parameter).foreach(i => setParameter(i, value))
+        getParameterValue(parameter.name).foreach(i => setParameter(i, value))
         this
     }
 
@@ -113,20 +105,6 @@ class PluginInstance(protected var _plugin: Plugin, protected var _parameterValu
         }
 
         this
-    }
-
-    /**
-      * Returns parameter value of the specified parameter.
-      */
-    def getParameterValue(parameter: Parameter[_]): Option[ParameterValue[_]] = {
-        parameterValues.find(_.parameter == parameter)
-    }
-
-    /**
-      * Returns parameter value of the parameter specified by the given name.
-      */
-    def getParameterValue(parameterName: String): Option[ParameterValue[_]] = {
-        plugin.getParameter(parameterName).flatMap(getParameterValue(_))
     }
 
     override def canEqual(other: Any): Boolean = {

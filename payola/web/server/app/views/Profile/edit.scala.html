@@ -1,16 +1,6 @@
 @(user: cz.payola.domain.entities.User, form: Form[(String,String, String)])
 
-@breadcrumbContent = {
-    <li>
-        <a href="/">Home</a> <span class="divider">/</span>
-    </li>
-    <li>
-        <a href="@routes.Profile.index(user.name)">Your profile</a> <span class="divider">/</span>
-    </li>
-    <li class="active">Edit</li>
-}
-
-@main(Some(user), "Payola login page", Some("Edit your profile"), Some(breadcrumbContent)) {
+@main(Some(user), "Payola login page", Some("Edit your profile")) {
 <div class="container">
 
     @helper.form(routes.Profile.save()) {

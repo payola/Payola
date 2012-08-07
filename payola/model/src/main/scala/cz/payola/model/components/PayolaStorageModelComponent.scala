@@ -6,8 +6,6 @@ import cz.payola.domain.entities.plugins.concrete.data.PayolaStorage
 import cz.payola.domain.entities.plugins.DataSource
 import cz.payola.model.ModelException
 import java.io._
-import scala.Some
-import scala.Some
 import scala.io.Source
 
 trait PayolaStorageModelComponent

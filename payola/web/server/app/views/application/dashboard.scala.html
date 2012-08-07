@@ -5,13 +5,6 @@ accessibleDataSources: Seq[cz.payola.domain.entities.plugins.DataSource]
 @main(user, "Dashboard") {
 <div class="container-fluid dashboard">
 
-    <ul class="breadcrumb">
-        <li>
-            <a href="/">Home</a> <span class="divider">/</span>
-        </li>
-        <li class="active">Dashboard</li>
-    </ul>
-
     <div class="row-fluid">
         @tags.dashboardList("Accessible analyses", "analyses", accessibleAnalysis,None,
         { e: cz.payola.domain.Entity =>

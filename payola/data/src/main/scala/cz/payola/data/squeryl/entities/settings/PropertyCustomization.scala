@@ -2,7 +2,6 @@ package cz.payola.data.squeryl.entities.settings
 
 import cz.payola.data.squeryl._
 import cz.payola.data.squeryl.entities._
-import scala.Some
 
 object PropertyCustomization extends EntityConverter[PropertyCustomization]
 {

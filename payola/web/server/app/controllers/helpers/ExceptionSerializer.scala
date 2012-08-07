@@ -2,7 +2,6 @@ package controllers.helpers
 
 import cz.payola.scala2json.JSONSerializer
 import cz.payola.scala2json.classes.SimpleSerializationClass
-import scala.Some
 import cz.payola.scala2json.rules.BasicSerializationRule
 
 class ExceptionSerializer extends JSONSerializer

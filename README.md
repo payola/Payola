@@ -1,5 +1,9 @@
-# We &hearts; Payola!
+# Payola!
 ---
+Payola is a HTML5 web application which enables you to work with graph data in a completely new way. You can visualise Linked Data via several plugins (which produces table, graph, etc.). That also means, that you no longer needs Pubby to browse through a Linked Data storage (via its SPARQL endpoint). Moreover, you can create an analysis and run it against a set of SPARQL endpoints. It represents a way of assembling a SPARQL query which is executed against a set of endpoints without further knowledge of SPARQL. Analysis results are processed and visualised using the embedded visualisation plugin.
+
+Since Payola is rather a platform, you can fork the project and write your own plugins, extensions and more.
+
 # Setting up Payola
 ## System Requirements
 
@@ -235,6 +239,43 @@ If the evaluation fails, the plugin boxes turn red and an error description is s
 ---
 ### <a name="plugins"></a>Plugins
 
+Creating a new plugin requires programming skills in Scala. A detailed reference of the Plugin classes is described in the Developer Guide. Here is a sample code of a plugin:
+
+```
+package my.custom.plugin
+
+import collection.immutable
+import cz.payola.domain._
+import cz.payola.domain.entities._
+import cz.payola.domain.entities.plugins._
+import cz.payola.domain.entities.plugins.parameters._
+import cz.payola.domain.rdf._
+
+class ValuesInbetween(name: String, inputCount: Int, parameters:
+				immutable.Seq[Parameter[_]], id: String)
+	extends Plugin(name, inputCount, parameters, id)
+{
+	def this() = {
+		this("Filter Values in Between", 1, 
+			List(new IntParameter("MinValue", 0), 
+				new IntParameter("MaxValue", 0)), 
+			IDGenerator.newId)
+	}
+
+	def evaluate(instance: PluginInstance, 
+			inputs: collection.IndexedSeq[Option[Graph]],
+			progressReporter: Double => Unit) = {
+		...
+	}
+}
+```
+
+In this example, a new plugin is created with name `Filter Values in Between`. The parameterless constructor `this()` is called to fill in values to the default constructor. Here you set up the parameters as well.
+
+The `evaluate` method is the one doing all the work. Here would be your code filtering the input graph. The `instance` variable contains all parameter values, `inputs` is a sequence of `Option[Graph]`'s - in our case just one as defined in `this()`. You can optionally report progress using the `progressReporter` function passed, which reports the progress to the user (values between 0.0 and 1.0).
+
+Entire plugin documentation can be found in the Developer Guide. If you intend to write your own plugin, please, refer there.
+
 ---
 
 # Developer Guide
@@ -292,7 +333,15 @@ The ```clean``` SBT task is overriden so all generated files are deleted in addi
 <a name="scala2json"></a>
 ## Package cz.payola.scala2json
 
-> TODO: CH.M.
+To transfer data from the server side to the client side, one needs to serialize the data transferred. To save bandwidth, we've decided to go with [JSON](http://www.json.org). It is a lightweight format that's easy to decode in JavaScript, which is used on the client side.
+
+While other solutions for serializing Scala objects to JSON do exist (for example [scala-json](https://github.com/stevej/scala-json)), they mostly work only on collections, maps and numeric types. Other objects need to implement their own `toJSON()` method.
+
+This seemed to us as too much unnecessary code, so we've decided to write out own serializer. This serializer is capable of serializing any object using reflection - the serializer goes through the object's fields.
+
+For some purposes, we needed to customize the serialization process - skip some fields, add some fields, etc. - this lead to serialization rules. For example, you have a class with private fields that are prefixed with an underscore (`_`) - you might want to hide this implementation detail - just add a new `BasicSerializationRule`, where you can define a class (or trait) whose fields should be serialized (e.g. you want to serialize only fields of a superclass), list of fields that should be omitted (transient fields) and list of field name aliases (a map of string &rarr; string).
+
+You can explore additional serialization rules in our generated [docset](TODO Link).
 
 <a name="s2js"></a>
 ## Project payola/s2js
@@ -375,11 +424,7 @@ Adapters of web browser related objects (```Window```, ```History``` etc.), base
 
 ### Package cz.payola.common.entities
 
-> TODO: CH.M.
-
-#### Package cz.payola.common.entities.analyses
-
-> TODO: H.S.
+The package includes classes representing the basic entities (e.g. user, analysis, plugin) that ensure the core functionality of Payola. Each entity has its own ID (string-based, 128-bit UUID) and can be stored in the relational database (see [data package](#data) for more information).
 
 #### Package cz.payola.common.entities.plugins
 
@@ -387,15 +432,15 @@ Adapters of web browser related objects (```Window```, ```History``` etc.), base
 
 #### Package cz.payola.common.entities.privileges
 
-> TODO: CH.M.
+To share entities between users, privileges are used. This makes it easy to extend the model in the future, or to change the privilege granularity. Currently, there are privileges to access a resource - analysis, data source, ontology customization and plugin; however, easily can be added a privilege type that grants a user the right to edit some entity, etc.
 
 #### Package cz.payola.common.entities.settings
 
-> TODO: CH.M.
+The settings package encapsulates ontology customizations. 
 
 ### Package cz.payola.common.rdf
 
-> TODO: CH.M.
+This package contains classes representing RDF graphs and ontologies. Only core functionality is included in this package - class declarations, some basic methods that are used on the client, as well. More functionality, such as converting a RDF/XML file to a `Graph` object is added in the [`domain`](#domain) project.
 
 <a name="domain"></a>
 ## Package cz.payola.domain
@@ -409,26 +454,32 @@ Adapters of web browser related objects (```Window```, ```History``` etc.), base
 
 > TODO: O.H.
 
-### Package cz.payola.squeryl
+### Package cz.payola.data.squeryl
 
 > TODO: O.H.
 
-#### Package cz.payola.squeryl.entities
+#### Package cz.payola.data.squeryl.entities
 
 > TODO: O.H.
 
-#### Package cz.payola.squeryl.repositories
+#### Package cz.payola.data.squeryl.repositories
 
 > TODO: O.H.
 
-### Package cz.payola.virtuoso
+### Package cz.payola.data.virtuoso
 
-> TODO: CH.M.
+Virtuoso is used for storing private RDF data - classes in this package let you communicate with a Virtuoso instance - create a graph group, upload a graph to the graph group, and then retrieve all graphs within a graph group.
 
 <a name="model"></a>
 ## Package cz.payola.model
 
-> TODO: J.H.
+The classes in this package builds up a wrapper which encapsulates all the business logic and data access. The goal of the code in this package is to decouple any presentation layer from the application logic and data access. In fact, all the existing presentation layers (web application controllers and RPC remote objects) are built on top of this package.
+
+It is crucial to mention, that the model package does not make up the whole model. The model is spread into more packages, e.g. the domain, data, and common. All of those packages provides standalone model capabilities and the model package uses them all to get specific tasks done.
+
+If you want to understand the following text (and the code) better, please, get familiar with the [Scala Cake pattern for DI](http://jonasboner.com/2008/10/06/real-world-scala-dependency-injection-di/).
+
+
 
 <a name="web"></a>
 ## Package cz.payola.web
