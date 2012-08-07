@@ -67,6 +67,10 @@ label {
     max-width: 200px;
 }
 
+.listing-name{
+    width: 600px;
+}
+
 #plugin-space .alert {
 }
 

@@ -115,6 +115,8 @@ While viewing a graph, press the `Change appearance using ontologies` button. If
 
 You will be presented with a customization dialog. On the left, ontology classes are listed - select one. On the right, properties of that class are listed. At the very top of the right column, you can customize the appearance of that class itself (in the graph displayed as vertices), below, you can modify appearance of that property (in the graph displayed as edges).
 
+####### TODO glyphs
+
 When done, simply press the `Done` button. If you want to further modify the customization, you can click on the `Edit` button in the `Change appearance using ontologies` button's menu.
 
 ---

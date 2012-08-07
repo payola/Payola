@@ -3,12 +3,16 @@
 @import cz.payola.web.shared._
 @import tags._
 
+@deleteLinkForID(id: String) = @{
+<div class="btn-group"><a href={routes.DataSource.delete(id).toString} class="btn btn-danger" onclick="return confirm('Are you sure?')"><i class="icon-remove-sign icon-white"></i> Delete</a></div><span> </span>
+}
+
 @detailsLinkForID(id: String, name: String) = @{
     <a href={routes.DataSource.detail(id, None).toString}>{name}</a>
 }
 
 @editLinkForID(id: String) = @{
-    <a href={routes.DataSource.edit(id).toString} class="btn btn-primary"><i class="icon-pencil icon-white"></i> Edit</a>
+    <div class="btn-group"><a href={routes.DataSource.edit(id).toString} class="btn"><i class="icon-pencil"></i> Edit</a></div><span> </span>
 }
 
 @shareLinkForID(id: String, name: String, isPublic: Boolean) = @{
@@ -33,21 +37,22 @@
     }, { Unit =>
         new scala.xml.NodeBuffer() += <td>Name</td>
     }, { e: cz.payola.domain.Entity =>
-        <td>{
+        <td class="listing-name">{
             detailsLinkForID(e.id, e.asInstanceOf[cz.payola.domain.entities.plugins.DataSource].name)
         }</td>
-        <td>{
+        <td><div class="btn-toolbar">{
             val dataSource = e.asInstanceOf[cz.payola.domain.entities.plugins.DataSource]
             if (dataSource.isEditable){
-                val buff = new scala.xml.NodeBuffer() += editLinkForID(e.id)
+                val buff = editLinkForID(e.id)
                 buff += {shareLinkForID(e.id, dataSource.name, dataSource.isPublic)}
+                buff ++= deleteLinkForID(e.id)
                 buff
             }else{
                 val buff = new scala.xml.NodeBuffer() += <span class="badge">Not editable</span>
                 buff += shareLinkForID(e.id, dataSource.name, dataSource.isPublic)
                 buff
             }
-        }</td>
+        }</div></td>
     },
     routes.DataSource.create(),
     page)
