@@ -2,12 +2,16 @@
 
 @import tags._
 
+@deleteLinkForID(id: String) = @{
+    <div class="btn-group"><a href={routes.Group.delete(id).toString} class="btn btn-danger" onclick="return confirm('Are you sure?')"><i class="icon-remove-sign icon-white"></i> Delete</a></div>
+}
+
 @detailsLinkForID(id: String, name: String) = @{
 {name}
 }
 
 @editLinkForID(id: String) = @{
-<a href={routes.Group.edit(id).toString} class="btn btn-primary"><i class="icon-pencil icon-white"></i> Edit</a>
+    <div class="btn-group"><a href={routes.Group.edit(id).toString} class="btn"><i class="icon-pencil"></i> Edit</a></div><span> </span>
 }
 
 @render_flash(flash)
@@ -26,12 +30,12 @@ subseq.take(itemsPerPage)
 }, { Unit =>
 new scala.xml.NodeBuffer() += <td>Name</td>
 }, { e: cz.payola.domain.Entity =>
-<td>{
+<td class="listing-name">{
     detailsLinkForID(e.id, e.asInstanceOf[cz.payola.domain.entities.Group].name)
     }</td>
-<td>{
-    editLinkForID(e.id)
-    }</td>
+<td><div class="btn-toolbar">{
+    editLinkForID(e.id) ++ deleteLinkForID(e.id)
+    }</div></td>
 <td>{
     <span class="badge badge-info">{e.asInstanceOf[cz.payola.domain.entities.Group].members.size} members</span>
     }</td>
