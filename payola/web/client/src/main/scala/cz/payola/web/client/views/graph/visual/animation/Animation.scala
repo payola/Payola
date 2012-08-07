@@ -75,6 +75,8 @@ object Animation
 
         if (nextAnimation.isDefined) {
             nextAnimation.get.run()
+        } else {
+            finalDraw()
         }
     }
 
