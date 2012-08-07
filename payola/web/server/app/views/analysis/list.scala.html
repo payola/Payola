@@ -1,5 +1,4 @@
-@(user: Option[cz.payola.domain.entities.User], analyses: Seq[cz.payola.domain.entities.Analysis], page: Int = 1,
-renderEditLink: Boolean = false)
+@(user: Option[cz.payola.domain.entities.User], analyses: Seq[cz.payola.domain.entities.Analysis], page: Int = 1)
 
 @import tags._
 
@@ -37,7 +36,7 @@ val analysis = e.asInstanceOf[cz.payola.domain.entities.Analysis]
     }
 </td>
 <td>{
-        if (renderEditLink){
+        if (user.isDefined && analysis.owner.isDefined && user.get.id ==  analysis.owner.get.id){
         <div class="btn-toolbar">
             {val buff = new scala.xml.NodeBuffer() += (editLinkForID(e.id),{<span> </span>})
             buff ++= shareLinkForID(e.id, analysis.name, analysis.isPublic)

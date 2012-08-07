@@ -1,7 +1,7 @@
 package cz.payola.web.client.views.graph.visual.graph
 
 import s2js.adapters.html
-import cz.payola.web.client.views.graph.visual.Color
+import cz.payola.common.visual.Color
 import cz.payola.web.client.views.graph.visual.settings.TextSettingsModel
 import cz.payola.web.client.views.algebra._
 import s2js.adapters.html._
@@ -37,6 +37,6 @@ class InformationView(data: Any, val settings: TextSettingsModel) extends View[h
         fillCurrentSpace(context, settings.colorBackground)
         //TODO how come, that the measureText returns different size on the first run??
 
-        drawText(context, data.toString, position, color, "12px Sans", "center")
+        drawText(context, data.toString, position, color, settings.font, settings.align)
     }
 }

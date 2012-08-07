@@ -11,13 +11,10 @@ object PrivateDataStorage extends PayolaController with Secured
     /** Show the add graph page.
       *
       */
-    def add() = authenticated{ user: User =>
-        Ok(views.html.virtuoso.add(user))
+    def add() = authenticatedWithRequest { (user, request) =>
+        Ok(views.html.virtuoso.add(user)(request.flash))
     }
 
-    def error(error: String) = authenticated { user: User =>
-        Ok(views.html.virtuoso.error(user, error))
-    }
 
     /** Saves a graph to the user's private data storage.
       *
@@ -30,7 +27,7 @@ object PrivateDataStorage extends PayolaController with Secured
 
             saveGraphFromFile(fileOption.get.ref.file, user)
         }else{
-            Redirect(routes.PrivateDataStorage.error("Wrong form."))
+            Redirect(routes.PrivateDataStorage.add()).flashing("error" -> "Wrong form.")
         }
     }
 
@@ -42,7 +39,7 @@ object PrivateDataStorage extends PayolaController with Secured
 
             saveGraphAtURL(urlOption.get(0), user)
         }else{
-            Redirect(routes.PrivateDataStorage.error("Wrong form."))
+            Redirect(routes.PrivateDataStorage.add()).flashing("error" -> "Wrong form.")
         }
     }
 
@@ -54,9 +51,9 @@ object PrivateDataStorage extends PayolaController with Secured
     private def saveGraphAtURL(graphURL: String, user: User) = {
         try {
             Payola.model.payolaStorageModel.addGraphToUser(graphURL, user)
-            Redirect(routes.Profile.index(user.name))
+            Redirect(routes.PrivateDataStorage.add()).flashing("success" -> "Successfully saved graph.")
         }catch{
-            case t: Throwable => Redirect(routes.PrivateDataStorage.error(t.getMessage))
+            case t: Throwable => Redirect(routes.PrivateDataStorage.add()).flashing("error" -> t.getMessage)
         }
     }
 
@@ -68,9 +65,9 @@ object PrivateDataStorage extends PayolaController with Secured
     private def saveGraphFromFile(file: File, user: User) = {
         try {
             Payola.model.payolaStorageModel.addGraphToUser(file, user)
-            Redirect(routes.Profile.index(user.name))
+            Redirect(routes.PrivateDataStorage.add()).flashing("success" -> "Successfully saved graph.")
         }catch{
-            case t: Throwable => Redirect(routes.PrivateDataStorage.error(t.getMessage))
+            case t: Throwable => Redirect(routes.PrivateDataStorage.add()).flashing("error" -> t.getMessage)
         }
     }
 

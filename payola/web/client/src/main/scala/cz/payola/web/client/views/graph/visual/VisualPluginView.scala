@@ -37,11 +37,28 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
 
     protected val topLayer = new Canvas()
 
-    private val layerPack = new CanvasPack(new Canvas(), new Canvas(), new Canvas(), new Canvas())
-
     private var topLayerOffset = Vector2D(0, 0)
 
-    private var currentInfoTable: Option[VertexInfoTable] = None
+    private val layerPack = new CanvasPack(new Canvas(), new Canvas(), new Canvas(), new Canvas())
+
+    /**
+     * A way to end the main animation. Has to be set show(..) in the visual technique.
+     */
+    protected val animationStopButton = new Button(new Text("Stop animation"), "pull-right",
+        new Icon(Icon.stop)).setAttribute("style", "margin: 0 5px;")
+
+    /**
+     * This is set to true if the animationStopButton is pressed.
+     */
+    protected var animationStopForced = false
+
+
+    animationStopButton.mouseClicked += { e =>
+        animationStopForced = true
+        Animation.clearCurrentTimeout()
+        animationStopButton.setIsEnabled(false)
+        false
+    }
 
     private val layers = List(
         layerPack.edgesDeselected,
@@ -50,6 +67,8 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
         layerPack.verticesSelected,
         topLayer
     )
+
+    private var currentInfoTable : Option[VertexInfoTable] = None
 
     private val zoomControls = new ZoomControls(100)
 
@@ -198,8 +217,8 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
         super.render(parent)
 
         setMouseWheelListener()
-        fitCanvas()
         this.parent = Some(parent)
+        fitCanvas()
     }
 
     override def updateGraph(graph: Option[Graph]) {
@@ -210,7 +229,7 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
                 if (graphView.isEmpty) {
                     graphView = Some(new views.graph.visual.graph.GraphView(settings))
                 }
-                graphView.get.update(graph.get)
+                graphView.get.update(graph.get, topLayer.getCenter)
             } else {
                 if (graphView.isDefined) {
                     layers.foreach(_.clear())
@@ -238,11 +257,14 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
 
     override def renderControls(toolbar: html.Element) {
         zoomControls.render(toolbar)
+        animationStopButton.render(toolbar)
+        animationStopButton.setIsEnabled(false)
         pngDownloadButton.render(toolbar)
     }
 
     override def destroyControls() {
         zoomControls.destroy()
+        animationStopButton.destroy()
         pngDownloadButton.destroy()
     }
 
@@ -400,9 +422,12 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
     }
 
     def fitCanvas() {
-        topLayerOffset = calculateTopLayerOffset
-        val layerSize = Vector2D(window.innerWidth, window.innerHeight) - topLayerOffset
-        layers.foreach(_.size = layerSize)
+        if(parent.isDefined) {
+            topLayerOffset = calculateTopLayerOffset
+
+            val layerSize = Vector2D(window.innerWidth, window.innerHeight) - topLayerOffset
+            layers.foreach(_.size = layerSize)
+        }
     }
 
     private def calculateTopLayerOffset: Vector2D = topLayer.topLeftCorner

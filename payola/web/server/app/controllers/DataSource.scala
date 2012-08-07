@@ -125,7 +125,15 @@ object DataSource extends PayolaController with Secured
       * @return Listing page.
       */
     def list(page: Int = 1) = authenticated { user: User =>
-        Ok(views.html.datasource.list(user, page))
+        Ok(views.html.datasource.list(Some(user), user.ownedDataSources, page))
+    }
+
+    /** Lists data sources accessible by the user.
+     *
+     * @return Listing page.
+     */
+    def listAccessible(page: Int = 1) = maybeAuthenticated { user: Option[User] =>
+        Ok(views.html.datasource.list(user, Payola.model.dataSourceModel.getAccessibleToUser(user), page))
     }
 
     /** Saves the edited data source.
@@ -180,5 +188,13 @@ object DataSource extends PayolaController with Secured
         Redirect(routes.DataSource.list())
     }
 
-
+    def listAccessibleByOwner(ownerId: String, page: Int = 1) = maybeAuthenticated { user: Option[User] =>
+        val owner = Payola.model.userModel.getById(ownerId)
+        val analyses = if (owner.isDefined) {
+            Payola.model.dataSourceModel.getAccessibleToUserByOwner(user, owner.get)
+        }else{
+            List()
+        }
+        Ok(views.html.datasource.list(user, analyses, page))
+    }
 }

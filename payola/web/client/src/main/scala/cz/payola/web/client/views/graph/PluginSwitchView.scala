@@ -103,7 +103,7 @@ class PluginSwitchView extends GraphView with ComposedView
         val separator1 = if (owned.nonEmpty && others.nonEmpty) List(new ListItem(Nil, "divider")) else Nil
 
         // The create new button.
-        val createButton = new Anchor(List(new Icon(Icon.plus), new Text("Create new customization")))
+        val createButton = new Anchor(List(new Icon(Icon.plus), new Text("Create New Customization")))
         createButton.mouseClicked += { e =>
             ontologyCustomizationCreateClicked.triggerDirectly(this)
             false

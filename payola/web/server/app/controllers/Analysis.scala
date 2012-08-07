@@ -27,11 +27,21 @@ object Analysis extends PayolaController with Secured
         Redirect(routes.Analysis.list())
     }
 
-    def listOwned(page: Int = 1) = authenticated { user: User =>
-        Ok(views.html.analysis.list(Some(user), user.ownedAnalyses, page, true))
+    def list(page: Int = 1) = authenticated { user: User =>
+        Ok(views.html.analysis.list(Some(user), user.ownedAnalyses, page))
     }
 
-    def list(page: Int = 1) = maybeAuthenticated { user: Option[User] =>
+    def listAccessible(page: Int = 1) = maybeAuthenticated { user: Option[User] =>
         Ok(views.html.analysis.list(user, Payola.model.analysisModel.getAccessibleToUser(user), page))
+    }
+
+    def listAccessibleByOwner(ownerId: String, page: Int = 1) = maybeAuthenticated { user: Option[User] =>
+        val owner = Payola.model.userModel.getById(ownerId)
+        val analyses = if (owner.isDefined) {
+            Payola.model.analysisModel.getAccessibleToUserByOwner(user, owner.get)
+        }else{
+            List()
+        }
+        Ok(views.html.analysis.list(user, analyses, page))
     }
 }

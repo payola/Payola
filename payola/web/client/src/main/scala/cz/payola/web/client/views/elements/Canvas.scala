@@ -3,7 +3,7 @@ package cz.payola.web.client.views.elements
 import s2js.adapters.browser._
 import s2js.adapters.html
 import cz.payola.web.client.views._
-import cz.payola.web.client.views.algebra.Vector2D
+import cz.payola.web.client.views.algebra._
 
 class Canvas(cssClass: String = "") extends ElementView[html.elements.Canvas]("canvas", Nil, cssClass)
 {
@@ -20,10 +20,6 @@ class Canvas(cssClass: String = "") extends ElementView[html.elements.Canvas]("c
     def size_=(value: Vector2D) {
         htmlElement.width = value.x
         htmlElement.height = value.y
-    }
-
-    def sizeGet(): Vector2D = {
-        Vector2D(htmlElement.width, htmlElement.height)
     }
 
     /**
@@ -44,5 +40,9 @@ class Canvas(cssClass: String = "") extends ElementView[html.elements.Canvas]("c
      */
     def dirty() {
         cleared = false
+    }
+
+    def getCenter: Point2D = {
+        Point2D(size.x / 2, size.y / 2)
     }
 }

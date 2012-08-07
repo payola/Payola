@@ -1,40 +1,45 @@
 package cz.payola.web.client.views.graph.visual.settings
 
-import cz.payola.web.client.views.graph.visual.Color
+import cz.payola.common.visual.Color
 
 class VertexSettingsModel extends SettingsModel
 {
-    var radiusValue = 25
+    private val radiusValue = 25
 
-    var colorValue = new Color(51, 204, 255, 0.25)
+    var borderSizeValue = 2.0
 
-    var glyphValue: String = ""
+    var borderColorValue = Color.Black
+
+    private val colorValue = new Color(51, 204, 255)
+
+    private val glyphValue: String = ""
+
+    var glyphFontValue: String = "EntypoRegular"
+
+    var glyphFontSizeValue: Int = 40
+
+    var glyphAlignValue: String = "center"
+
 
     def radius(typeName: String): Int = {
-        val foundCustomization = getCustomization(typeName)
-        if (foundCustomization.isDefined && foundCustomization.get.radius != 0) {
-            foundCustomization.get.radius
-        } else {
-            radiusValue
-        }
+        getCustomization(typeName).map(_.radius).filter(_ > 0).getOrElse(radiusValue)
     }
 
     def color(typeName: String): Color = {
-        val foundCustomization = getCustomization(typeName)
-        if (foundCustomization.isDefined && foundCustomization.get.fillColor.length != 0) {
-            val color = Color.fromHex(foundCustomization.get.fillColor)
-            color.getOrElse(colorValue)
-        } else {
-            colorValue
-        }
+        getCustomization(typeName).flatMap(c => Color(c.fillColor)).getOrElse(colorValue)
     }
 
     def glyph(typeName: String): String = {
-        val foundCustomization = getCustomization(typeName)
-        if (foundCustomization.isDefined && foundCustomization.get.glyph != 0) {
-            foundCustomization.get.glyph
-        } else {
-            glyphValue
-        }
+        getCustomization(typeName).map(_.glyph).filter(_.length > 0).getOrElse(glyphValue)
     }
+
+    def glyphAlign: String = glyphAlignValue
+
+    def glyphWholeFont: String = glyphFontSizeValue.toString() + "px " + glyphFontValue
+
+    def glyphSize: Int = glyphFontSizeValue
+
+    def borderSize: Double = borderSizeValue
+
+    def borderColor: Color = borderColorValue
 }

@@ -35,6 +35,15 @@ pre {
     width: 30px;
 }
 
+.main-header {
+    padding-left: 40px;
+    padding-bottom: 20px;
+}
+
+.main-breadcrumb {
+    padding-left: 40px;
+}
+
 body {
     padding-top: 60px;
     padding-bottom: 40px;
@@ -238,7 +247,7 @@ input[type="checkbox"].active:after {
     height: 90%;
     position: absolute;
     top: 0px;
-    z-index: -1;
+    z-index: 0;
 }
 
 .plumb {
@@ -247,8 +256,19 @@ input[type="checkbox"].active:after {
     border: 4px solid #3A87AD;
 }
 
+.successors{
+    background-color: white;
+    margin-bottom: 18px;
+    z-index: 1;
+}
+
 .successors, .successors .alert {
     position: relative !important;
+}
+
+.successors .alert {
+    z-index: 1;
+    margin-bottom: 0px;
 }
 
 .column-chart-wrapper {
@@ -260,7 +280,25 @@ input[type="checkbox"].active:after {
 
 .vitable {
     display: block !important;
-    max-height: 300px;
     position: absolute;
-    width: 400px;
+    max-height: 330px;
+}
+
+.vitable .popover-content{
+    width: 472px;
+    height: 300px;
+    overflow: auto;
+}
+
+.vitable .popover-inner{
+    width: 500px;
+    max-height: 375px;
+}
+
+.vitable .popover-title a{
+    font-size: 11px;
+}
+
+.highlight .alert{
+    background-color: navy;
 }

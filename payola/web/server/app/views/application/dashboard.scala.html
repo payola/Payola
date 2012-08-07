@@ -54,7 +54,7 @@ accessibleDataSources: Seq[cz.payola.domain.entities.plugins.DataSource]
             <a href={routes.Analysis.detail(a.id).toString}>{a.name}</a>
         </td>
         <td><a href={routes.Analysis.edit(a.id).toString} class="btn"><i class="icon-pencil"></i> Edit</a></td>
-        }, "", routes.Analysis.listOwned(1))
+        }, "", routes.Analysis.listAccessible(1))
 
         @tags.dashboardList("My data sources", "data sources", user.get.ownedDataSources,Some(routes.DataSource.create),
         { e: cz.payola.domain.Entity =>
@@ -69,7 +69,7 @@ accessibleDataSources: Seq[cz.payola.domain.entities.plugins.DataSource]
             <span class="badge badge-inverse">Not editable</span>
             }}
         </td>
-        }, "", routes.DataSource.list(1))
+        }, "", routes.DataSource.listAccessible(1))
 
     </div>
     <!--/row-->

@@ -66,7 +66,11 @@ class OntologyCustomizationsByOwnership(
         (successCallback: () => Unit)
         (failCallback: Throwable => Unit) {
 
-        setClassAttribute(customizationID, classURI, { _.fillColor = value }, user, successCallback, failCallback)
+        try {
+            setClassAttribute(customizationID, classURI, { _.fillColor = value }, user, successCallback, failCallback)
+        }catch{
+            case t: Throwable => failCallback(t)
+        }
     }
 
     @async @secured def setClassGlyph(customizationID: String, classURI: String, value: String, user: User = null)
@@ -96,7 +100,11 @@ class OntologyCustomizationsByOwnership(
         (successCallback: () => Unit)
         (failCallback: Throwable => Unit) {
 
-        setPropertyAttribute(customizationID, classURI, propertyURI, { _.strokeColor = value }, user, successCallback, failCallback)
+        try {
+            setPropertyAttribute(customizationID, classURI, propertyURI, { _.strokeColor = value }, user, successCallback, failCallback)
+        }catch{
+            case t: Throwable => failCallback(t)
+        }
     }
 
     @async @secured def setPropertyStrokeWidth(customizationID: String, classURI: String, propertyURI: String, value: String, user: User = null)

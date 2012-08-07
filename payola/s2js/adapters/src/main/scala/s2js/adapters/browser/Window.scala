@@ -57,6 +57,8 @@ trait Window extends EventTarget
 
     var onresize: Event[this.type] => Unit
 
+    var onunload: Event[this.type] => Unit
+
     def get(key: String)
 
     def focus() {}

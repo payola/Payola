@@ -75,7 +75,7 @@ object Group extends PayolaController with Secured
                 }
 
                 Payola.model.groupModel.persist(g)
-                Redirect(routes.Profile.index(user.email)).flashing("success" -> "The group has been sucessfully saved.")
+                Redirect(routes.Group.list()).flashing("success" -> "The group has been sucessfully saved.")
             } else {
                 NotFound("The group does not exist.")
             }
@@ -103,8 +103,8 @@ object Group extends PayolaController with Secured
      *
      * @return Listing page for groups.
      */
-    def list = authenticatedWithRequest((user, request) =>
-        Ok(views.html.group.list(user)(request.flash))
+    def list(page: Int = 1) = authenticatedWithRequest((user, request) =>
+        Ok(views.html.group.list(Some(user),page)(request.flash))
     )
 
     /**Deletes group with id.

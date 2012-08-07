@@ -23,12 +23,12 @@ class MergeAnalysisBranchesDialog(instances: ArrayBuffer[PluginInstanceView], in
         val div = new Div(List(new Text(instance.plugin.name)), "alert alert-danger span2 draggable")
 
         div.mouseMoved += { e =>
-            instance.htmlElement.setAttribute("style","border: 3px solid black")
+            instance.addCssClass("highlight")
             false
         }
 
         div.mouseOut += { e =>
-            instance.htmlElement.setAttribute("style","border: none")
+            instance.removeCssClass("highlight")
             false
         }
 

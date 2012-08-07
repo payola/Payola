@@ -1,8 +1,8 @@
 package cz.payola.web.client.views.graph.visual.graph
 
-import cz.payola.common.rdf.Edge
 import s2js.adapters.html
-import cz.payola.web.client.views.graph.visual.Color
+import cz.payola.common.rdf.Edge
+import cz.payola.common.visual.Color
 import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.views.graph.visual.graph.positioning.LocationDescriptor
@@ -50,8 +50,7 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
     def drawQuick(context: elements.CanvasRenderingContext2D, positionCorrection: Vector2D) {
         val colorToUse = if (isSelected) {
             val col = settings.edgesModel.color(originView.rdfType, edgeModel.uri)
-
-            Color(col.red, col.green, col.blue, 1.0)
+            new Color(col.red, col.red, col.blue)
         } else {
             settings.edgesModel.color(originView.rdfType, edgeModel.uri)
         }

@@ -7,7 +7,6 @@ import cz.payola.common.entities.Plugin
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.View
 import cz.payola.web.client.views.elements.Div
-import scala.Some
 
 abstract class PluginInstanceView(
     val id: String,
@@ -44,29 +43,27 @@ abstract class PluginInstanceView(
         this.parentElement = Some(parent)
         successors.render(parent)
 
-        var i = 0
-        while (i < plugin.inputCount) {
-            val conn = new Div(Nil, "connector connector-" + i.toString)
-            conn.setAttribute("style", "left:" + (310 * i + 148) + "px")
-            conn.render(successors.htmlElement)
-            i += 1
-        }
-
-        var j = 0
-        while (j < plugin.inputCount) {
-            val plumb = new Div(Nil, "plumb plumb-" + i.toString)
-            plumb.setAttribute("style", "left:" + (310 * j + 145) + "px")
-            plumb.render(alertDiv.htmlElement)
-            j += 1
-        }
-
         if (predecessors.nonEmpty) {
             parent.insertBefore(successors.htmlElement, predecessors(0).htmlElement)
         }
 
-        predecessors.foreach {
-            p =>
-                successors.htmlElement.insertBefore(p.htmlElement, clearSpan.htmlElement)
+        var w = 0.0
+        predecessors.foreach { p =>
+            successors.htmlElement.insertBefore(p.htmlElement, clearSpan.htmlElement)
+
+            if (w > 0){
+                w += 10
+            }
+            w += p.htmlElement.offsetWidth
+            val pos = w-(p.htmlElement.offsetWidth/2)-4
+
+            val conn = new Div(Nil,"connector")
+            conn.setAttribute("style","left:"+(pos)+"px")
+            conn.render(successors.htmlElement)
+
+            val plumb = new Div(Nil,"plumb")
+            plumb.setAttribute("style","left:"+(pos-3)+"px")
+            plumb.render(alertDiv.htmlElement)
         }
     }
 
@@ -131,4 +128,12 @@ abstract class PluginInstanceView(
     }
 
     def blockHtmlElement: html.Element = successors.htmlElement
+
+    def addCssClass(cssClass: String){
+        successors.addCssClass(cssClass)
+    }
+
+    def removeCssClass(cssClass: String){
+        successors.removeCssClass(cssClass)
+    }
 }
