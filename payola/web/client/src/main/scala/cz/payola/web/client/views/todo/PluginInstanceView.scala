@@ -3,25 +3,20 @@ package cz.payola.web.client.views.todo
 import s2js.adapters.js.dom
 import cz.payola.common.entities.Plugin
 import s2js.compiler.javascript
-import scala.collection._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.View
 import cz.payola.web.client.views.elements.Div
 import scala.Seq
-import scala.collection.immutable.HashMap
-import scala.Some
 import s2js.adapters.js.dom.Element
-import cz.payola.web.client.views.ComposedView
-import s2js.runtime.client.scala.collection.mutable.ArrayBuffer
+import cz.payola.common.entities.plugins._
+import scala.Some
 
 abstract class PluginInstanceView(
-    val id: String,
-    val plugin: Plugin,
-    var predecessors: Seq[PluginInstanceView] = Nil,
-    defaultValues: Map[String, String] = HashMap.empty[String, String])
+    val pluginInstance: PluginInstance,
+    var predecessors: Seq[PluginInstanceView] = Nil)
     extends View
 {
-    private val heading = new Heading(List(new Text(plugin.name)), 3)
+    private val heading = new Heading(List(new Text(pluginInstance.plugin.name)), 3)
 
     private val paramsDiv = new Div(getParameterViews, "parameters")
 
@@ -39,9 +34,9 @@ abstract class PluginInstanceView(
 
     def getAdditionalControlsViews: Seq[View]
 
-    def getPlugin: Plugin = plugin
+    def getPlugin: Plugin = pluginInstance.plugin
 
-    def getId: String = id
+    def getId: String = pluginInstance.id
 
     private var parentElement: Option[dom.Element] = None
 
@@ -142,4 +137,5 @@ abstract class PluginInstanceView(
     def removeCssClass(cssClass: String){
         successors.removeCssClass(cssClass)
     }
+
 }

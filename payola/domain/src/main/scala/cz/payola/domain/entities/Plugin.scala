@@ -52,14 +52,6 @@ abstract class Plugin(
     }
 
     /**
-      * Returns a plugin parameter with the specified name.
-      * @param parameterName Name of the parameter to return.
-      */
-    final def getParameter(parameterName: String): Option[Parameter[_]] = {
-        parameters.find(_.name == parameterName)
-    }
-
-    /**
       * Evaluates the plugin.
       * @param instance The corresponding instance.
       * @param inputs The input graphs.

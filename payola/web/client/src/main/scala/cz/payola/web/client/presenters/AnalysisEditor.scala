@@ -16,7 +16,7 @@ class AnalysisEditor(parentElementId: String, analysisIdParam: String)
 
             lockAnalysisAndLoadPlugins()
             val view = new AnalysisEditorView(analysis)
-            view.visualiser.pluginInstanceRendered += { e => instancesMap.put(e.target.id, e.target)}
+            view.visualiser.pluginInstanceRendered += { e => instancesMap.put(e.target.pluginInstance.id, e.target)}
             view.render(parentElement)
             view.nameControl.input.value = analysis.name
             view.description.input.value = analysis.description

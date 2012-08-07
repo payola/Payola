@@ -1,5 +1,9 @@
-# We &hearts; Payola!
+# Payola!
 ---
+Payola is a HTML5 web application which enables you to work with graph data in a completely new way. You can visualise Linked Data via several plugins (which produces table, graph, etc.). That also means, that you no longer needs Pubby to browse through a Linked Data storage (via its SPARQL endpoint). Moreover, you can create an analysis and run it against a set of SPARQL endpoints. It represents a way of assembling a SPARQL query which is executed against a set of endpoints without further knowledge of SPARQL. Analysis results are processed and visualised using the embedded visualisation plugin.
+
+Since Payola is rather a platform, you can fork the project and write your own plugins, extensions and more.
+
 # Setting up Payola
 ## System Requirements
 
@@ -426,7 +430,13 @@ Adapters of web browser related objects (```Window```, ```History``` etc.), base
 <a name="model"></a>
 ## Package cz.payola.model
 
-> TODO: J.H.
+The classes in this package builds up a wrapper which encapsulates all the business logic and data access. The goal of the code in this package is to decouple any presentation layer from the application logic and data access. In fact, all the existing presentation layers (web application controllers and RPC remote objects) are built on top of this package.
+
+It is crucial to mention, that the model package does not make up the whole model. The model is spread into more packages, e.g. the domain, data, and common. All of those packages provides standalone model capabilities and the model package uses them all to get specific tasks done.
+
+If you want to understand the following text (and the code) better, please, get familiar with the [Scala Cake pattern for DI](http://jonasboner.com/2008/10/06/real-world-scala-dependency-injection-di/).
+
+
 
 <a name="web"></a>
 ## Package cz.payola.web

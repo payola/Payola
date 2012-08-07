@@ -56,9 +56,9 @@ import scala.Some
     }
 
     @async def createPluginInstance(pluginId: String, analysisId: String, user: User = null)
-        (successCallback: (String => Unit))
+        (successCallback: (PluginInstance => Unit))
         (failCallback: (Throwable => Unit)) {
-        successCallback(Payola.model.analysisModel.createPluginInstance(pluginId, analysisId).id)
+        successCallback(Payola.model.analysisModel.createPluginInstance(pluginId, analysisId))
     }
 
     @async def setParameterValue(analysisId: String, pluginInstanceId: String, parameterName: String, value: String,

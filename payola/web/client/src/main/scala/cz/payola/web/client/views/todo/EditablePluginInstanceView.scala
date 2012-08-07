@@ -1,17 +1,16 @@
 package cz.payola.web.client.views.todo
 
-import cz.payola.common.entities.Plugin
 import cz.payola.common.entities.plugins.parameters._
 import cz.payola.web.client.views.bootstrap.inputs._
 import cz.payola.web.client.presenters.models.ParameterValue
-import scala.collection.immutable.HashMap
 import scala.collection._
 import cz.payola.web.client.events.SimpleUnitEvent
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.View
+import cz.payola.common.entities.plugins._
 
-class EditablePluginInstanceView(id: String, pluginI: Plugin, predecessors: Seq[PluginInstanceView] = List(),
-    defaultValues: Map[String, String] = new HashMap[String, String]()) extends PluginInstanceView(id, pluginI, predecessors, defaultValues)
+class EditablePluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[PluginInstanceView] = List())
+    extends PluginInstanceView(pluginInst, predecessors)
 {
     val connectButtonClicked = new SimpleUnitEvent[EditablePluginInstanceView]
 
@@ -37,7 +36,10 @@ class EditablePluginInstanceView(id: String, pluginI: Plugin, predecessors: Seq[
 
     def getParameterViews = getPlugin.parameters.map { param =>
 
-        val defaultVal = if (defaultValues.isDefinedAt(param.name)) defaultValues(param.name) else param.defaultValue.toString
+        val instanceValue = pluginInstance.getParameter(param.name)
+
+        // TODO INPUT
+        val defaultVal = instanceValue.getOrElse("").toString
         val field = param match {
             case p: BooleanParameter => new CheckboxInputControl(param.name, param.id, defaultVal, "Enter parameter value")
             case p: FloatParameter => new NumericInputControl(param.name, param.id, defaultVal, "Enter parameter value")

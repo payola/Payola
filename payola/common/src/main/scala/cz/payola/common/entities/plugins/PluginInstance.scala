@@ -36,4 +36,18 @@ trait PluginInstance extends Entity with DescribedEntity
 
     /** The plugin parameter values. */
     def parameterValues: immutable.Seq[PluginType#ParameterValueType] = _parameterValues
+
+    /**
+     * Returns value of a parameter with the specified name or [[scala.None]] if such doesn't exist.
+     */
+    def getParameter(parameterName: String): Option[Any] = {
+        getParameterValue(parameterName).map(_.value)
+    }
+
+    /**
+     * Returns parameter value of the parameter specified by the given name.
+     */
+    def getParameterValue(parameterName: String): Option[PluginType#ParameterValueType] = {
+        plugin.getParameter(parameterName).flatMap(p => parameterValues.find(_.parameter == p))
+    }
 }

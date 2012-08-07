@@ -14,8 +14,7 @@ class EditableAnalysisVisualizer(analysis: Analysis) extends AnalysisVisualizer(
     val deleteButtonClicked = new SimpleUnitEvent[EditablePluginInstanceView]
 
     def createPluginInstanceView(instance: PluginInstance) : PluginInstanceView = {
-        val defaultValues = getDefaultValues(instance)
-        val view = new EditablePluginInstanceView(instance.id, instance.plugin, List(), defaultValues)
+        val view = new EditablePluginInstanceView(instance, List())
         initializeEditableInstance(view, instance, analysis)
         view
     }

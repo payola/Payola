@@ -62,7 +62,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                                 lockAnalysisAndLoadPlugins()
                                 val view = new AnalysisEditorView(analysis)
                                 view.visualiser.pluginInstanceRendered += {
-                                    e => instancesMap.put(e.target.id, e.target)
+                                    e => instancesMap.put(e.target.pluginInstance.id, e.target)
                                 }
                                 view.render(parentElement)
                                 view.setName(nameComponent.input.value)
@@ -213,10 +213,8 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
             i = i + 1
         }
 
-        AnalysisBuilderData.createPluginInstance(evt.target.id, analysisId) {
-            id =>
-                val mergeInstance = new EditablePluginInstanceView(id, evt.target,
-                    buffer.asInstanceOf[Seq[PluginInstanceView]])
+        AnalysisBuilderData.createPluginInstance(evt.target.id, analysisId) { createdInstance =>
+                val mergeInstance = new EditablePluginInstanceView(createdInstance, buffer.asInstanceOf[Seq[PluginInstanceView]])
                 view.visualiser.renderPluginInstanceView(mergeInstance)
 
                 mergeInstance.connectButtonClicked += {
@@ -266,7 +264,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                     map.put(paramValue.parameter.name, paramValue.value.toString)
             }
 
-            val instance = new EditablePluginInstanceView(pi.id, pi.plugin, List(), map)
+            val instance = new EditablePluginInstanceView(pi, List())
 
             branches.append(instance)
             view.visualiser.renderPluginInstanceView(instance)
@@ -291,11 +289,11 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
     def onPluginNameClicked(plugin: Plugin, predecessor: Option[PluginInstanceView], view: AnalysisEditorView) = {
         blockPage("Creating an instance of the plugin...")
 
-        AnalysisBuilderData.createPluginInstance(plugin.id, analysisId) { id =>
+        AnalysisBuilderData.createPluginInstance(plugin.id, analysisId) { createdInstance =>
             val instance = if (predecessor.isDefined) {
-                new EditablePluginInstanceView(id, plugin, List(predecessor.get))
+                new EditablePluginInstanceView(createdInstance, List(predecessor.get))
             } else {
-                new EditablePluginInstanceView(id, plugin, List())
+                new EditablePluginInstanceView(createdInstance, List())
             }
 
             branches.append(instance)
@@ -364,7 +362,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
     def onDeleteClick(eventArgs: EventArgs[PluginInstanceView]) {
         val instance = eventArgs.target
         blockPage("Deleting...")
-        AnalysisBuilderData.deletePluginInstance(analysisId, instance.id) {
+        AnalysisBuilderData.deletePluginInstance(analysisId, instance.pluginInstance.id) {
             _ =>
                 branches -= instance
                 var i = 0
@@ -382,7 +380,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
     }
 
     def bind(a: PluginInstanceView, b: PluginInstanceView, inputIndex: Int) {
-        AnalysisBuilderData.saveBinding(analysisId, a.id, b.id, inputIndex) {
+        AnalysisBuilderData.saveBinding(analysisId, a.pluginInstance.id, b.pluginInstance.id, inputIndex) {
             _ =>
         }(fatalErrorHandler(_))
     }

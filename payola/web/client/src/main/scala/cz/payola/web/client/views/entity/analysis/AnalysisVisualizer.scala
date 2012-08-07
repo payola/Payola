@@ -111,14 +111,6 @@ abstract class AnalysisVisualizer(analysis: Analysis) extends View
         !analysis.pluginInstanceBindings.find(_.targetPluginInstance == instance).isDefined
     }
 
-    protected def getDefaultValues(instance: entities.plugins.PluginInstance): mutable.HashMap[String, String] = {
-        val map = new mutable.HashMap[String, String]
-        instance.parameterValues.foreach {
-            v => map.put(v.parameter.name, v.value.toString)
-        }
-        map
-    }
-
     @javascript(
         """
         """)
