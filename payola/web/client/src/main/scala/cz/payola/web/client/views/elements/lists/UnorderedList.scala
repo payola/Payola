@@ -1,4 +1,4 @@
-package cz.payola.web.client.views.elements
+package cz.payola.web.client.views.elements.lists
 
 import s2js.adapters.html
 import cz.payola.web.client.views._

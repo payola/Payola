@@ -5,6 +5,7 @@ import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.Modal
 import cz.payola.web.client.events.SimpleUnitEvent
 import cz.payola.web.client.views.elements.Anchor
+import cz.payola.web.client.views.elements.lists._
 
 class PluginDialog(plugins: Seq[Plugin]) extends Modal("Choose a type of plugin", Nil, None)
 {

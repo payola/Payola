@@ -11,6 +11,7 @@ import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.graph.table.TripleTablePluginView
 import cz.payola.web.client.views.graph.visual.settings._
 import cz.payola.web.client.views.graph.visual.VisualPluginView
+import cz.payola.web.client.views.elements.lists.ListItem
 
 class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
 {

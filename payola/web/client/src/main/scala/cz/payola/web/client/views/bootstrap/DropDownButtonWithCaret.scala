@@ -2,6 +2,7 @@ package cz.payola.web.client.views.bootstrap
 
 import cz.payola.web.client.View
 import cz.payola.web.client.views.elements._
+import cz.payola.web.client.views.elements.lists._
 
 class DropDownButtonWithCaret(
     anchorViews: Seq[View],

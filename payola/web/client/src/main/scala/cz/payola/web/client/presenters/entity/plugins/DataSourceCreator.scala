@@ -17,10 +17,10 @@ class DataSourceCreator(val viewElement: html.Element) extends Presenter
 
             view.createButton.mouseClicked += { _ =>
                 blockPage("Creating.")
-                val name = view.name.input.value
-                val description = view.description.input.value
-                val plugin = view.plugin.input.value
-                val parameterValues = view.parameters.map(_.input.value)
+                val name = view.name.field.value
+                val description = view.description.field.value
+                val plugin = view.plugin.field.value
+                val parameterValues = view.parameters.map(_.field.value)
                 DataSourceManager.create(name, description, plugin, parameterValues) { () =>
                     window.location.href = "/datasource/list"
                 } { e =>
@@ -29,7 +29,7 @@ class DataSourceCreator(val viewElement: html.Element) extends Presenter
                         case v: ValidationException => {
                             view.name.setState(v, "name")
                             view.description.setState(v, "description")
-                            view.parameters.foreach(i => i.setState(v, i.name))
+                            view.parameters.foreach(i => i.setState(v, i.field.htmlElement.name))
                         }
                         case t => fatalErrorHandler(t)
                     }

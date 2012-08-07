@@ -4,6 +4,7 @@ import scala.collection._
 import s2js.adapters.html
 import cz.payola.common.rdf._
 import cz.payola.web.client.views.elements._
+import cz.payola.web.client.views.elements.lists._
 
 /**
  * A plugin that displays all edges in the graph as a table. The edges are firstly grouped by the edge origins,

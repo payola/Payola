@@ -4,10 +4,10 @@ import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.elements.Div
 import cz.payola.web.client.views.elements.Anchor
 import cz.payola.web.client.views.ComposedView
-import cz.payola.web.client.views.bootstrap.Icon
-import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
+import cz.payola.web.client.views.bootstrap._
+import cz.payola.web.client.views.elements.form.fields.NumericInput
 
-class AnalysisControls(timeoutSeconds: Long) extends ComposedView
+class AnalysisControls(timeoutSeconds: Int) extends ComposedView
 {
     private val icon = new Italic(List(), "icon-play icon-white")
 
@@ -23,10 +23,12 @@ class AnalysisControls(timeoutSeconds: Long) extends ComposedView
 
     val stopButton = new Button(new Text("Stop"), "btn-danger disabled span2", new Icon(Icon.stop, true))
 
-    val timeoutControl = new TextInputControl("Set evaluation timeout [sec.]:", "timeout", timeoutSeconds.toString(),
-        "Set timeout", "span3 timeout-control")
+    val timeoutControl = new InputControl(
+        "Set evaluation timeout [sec.]:",
+        new NumericInput("timeout", timeoutSeconds, "Set timeout", "span3 timeout-control")
+    )
 
-    timeoutControl.input.addCssClass("span2")
+    timeoutControl.field.addCssClass("span2")
 
     private val timeoutInfoCaptionPre = new Text("The evaluation will timeout in [sec.]: ")
     val timeoutInfo = new Text(timeoutSeconds.toString)

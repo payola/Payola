@@ -1,18 +1,19 @@
 package cz.payola.web.client.views.entity.analysis
 
-import cz.payola.web.client.views.bootstrap.inputs._
 import cz.payola.web.client.views.elements._
-import cz.payola.web.client.views.bootstrap.Icon
+import cz.payola.web.client.views.bootstrap._
 import cz.payola.web.client.views.ComposedView
 import cz.payola.common.entities.Analysis
+import cz.payola.web.client.views.elements.lists._
+import cz.payola.web.client.views.elements.form.fields._
 
 class AnalysisEditorView(analysis: Analysis) extends ComposedView
 {
-    val nameControl = new TextInputControl("Analysis name:", "name", "", "Analysis name")
+    val name = new InputControl("Analysis name:", new TextInput("name", "", "Analysis name"))
 
-    val description = new TextAreaInputControl("Description:", "description", "", "Anaylsis description")
+    val description = new InputControl("Description:", new TextArea("description", "", "Anaylsis description"))
 
-    protected val properties = new Div(List(nameControl, description))
+    protected val properties = new Div(List(name, description))
 
     val addPluginLink = new Anchor(List(new Icon(Icon.hdd), new Text(" Add plugin")))
 
@@ -40,11 +41,11 @@ class AnalysisEditorView(analysis: Analysis) extends ComposedView
 
     protected val container = new Div(List(leftCol, rightCol))
 
-    nameControl.input.addCssClass("span12")
-    description.input.addCssClass("span12")
+    name.field.addCssClass("span12")
+    description.field.addCssClass("span12")
 
-    def setName(name: String) {
-        nameControl.input.value_=(name)
+    def setName(newValue: String) {
+        name.field.value = newValue
     }
 
     def createSubViews = List(container)

@@ -3,6 +3,8 @@ package cz.payola.web.client.views.entity.plugins
 import cz.payola.web.client.views.ComposedView
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap._
+import cz.payola.web.client.views.elements.form.fields._
+import scala.Some
 
 class DataSourceBrowserView(dataSourceName: String) extends ComposedView
 {
@@ -12,7 +14,7 @@ class DataSourceBrowserView(dataSourceName: String) extends ComposedView
 
     val nextButton = new Button(new Icon(Icon.arrow_right))
 
-    val nodeUriInput = new Input("nodeUri", "", Some("Node URI"), "input-xlarge")
+    val nodeUriInput = new TextInput("nodeUri", "", "Node URI", "input-xlarge")
 
     val goButton = new Button(new Text("Go!"))
 

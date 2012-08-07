@@ -9,6 +9,7 @@ import cz.payola.web.client.views._
 import cz.payola.common.rdf.IdentifiedVertex
 import cz.payola.web.client.events._
 import cz.payola.web.client.views.algebra.Point2D
+import cz.payola.web.client.views.elements.lists._
 
 class VertexInfoTable(vertex: IdentifiedVertex, values: mutable.HashMap[String, Seq[String]], position: Point2D)
     extends ComposedView

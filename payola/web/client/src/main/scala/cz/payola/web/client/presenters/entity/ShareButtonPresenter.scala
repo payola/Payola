@@ -67,7 +67,7 @@ class ShareButtonPresenter(
             }
             shareModal.confirming += { e =>
                 blockView("Sharing.")
-                val granteeIds = shareModal.granteeSelection.input.value
+                val granteeIds = shareModal.granteeSelection.field.value
                 SharingData.shareEntity(entityClassName, entityId, granteeClassName, granteeIds) { () =>
                     unblockView()
                     AlertModal.display("Success", "The entity was successfully shared to selected " +

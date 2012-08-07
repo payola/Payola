@@ -18,8 +18,8 @@ class AnalysisEditor(parentElementId: String, analysisIdParam: String)
             val view = new AnalysisEditorView(analysis)
             view.visualiser.pluginInstanceRendered += { e => instancesMap.put(e.target.id, e.target)}
             view.render(parentElement)
-            view.nameControl.input.value = analysis.name
-            view.description.input.value = analysis.description
+            view.name.field.value = analysis.name
+            view.description.field.value = analysis.description
             bindParameterChangedEvent(view.visualiser)
             bindConnectButtonClickedEvent(view)
             bindDeleteButtonClickedEvent(view.visualiser)
@@ -42,7 +42,7 @@ class AnalysisEditor(parentElementId: String, analysisIdParam: String)
     private def bindParameterChangedEvent(visualiser: EditableAnalysisVisualizer){
         visualiser.parameterValueChanged += { e =>
             val pv = e.target
-            pv.control.setIsActive()
+            pv.control.isActive = true
             storeParameterValueToServer(pv)
         }
     }
@@ -56,9 +56,7 @@ class AnalysisEditor(parentElementId: String, analysisIdParam: String)
     }
 
     private def storeParameterValueToServer(pv: ParameterValue) {
-        val key = getParameterValueId(pv)
-        clearTimeOutIfSet(key)
-        setTimeout(key, parameterChangedServerCall(pv))
+        parameterChangedServerCall(pv)
     }
 
     private def getParameterValueId(pv: ParameterValue): String = {
@@ -67,10 +65,10 @@ class AnalysisEditor(parentElementId: String, analysisIdParam: String)
 
     private def parameterChangedServerCall(pv: ParameterValue) : (() => Unit) = {
         () => AnalysisBuilderData.setParameterValue(analysisId,pv.pluginInstanceId,pv.name, pv.value){ success =>
-            pv.control.setIsActive(false)
+            pv.control.isActive = false
             pv.control.setOk()
         }{ error =>
-            pv.control.setIsActive(false)
+            pv.control.isActive = false
             pv.control.setError("Invalid value")
         }
     }

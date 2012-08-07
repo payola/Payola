@@ -3,6 +3,7 @@ package cz.payola.web.client.views.bootstrap
 import cz.payola.web.client.views.ComposedView
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.View
+import cz.payola.web.client.views.elements.lists._
 
 class Tabs(tabs: Seq[(String, View)], tabsId: String) extends ComposedView
 {

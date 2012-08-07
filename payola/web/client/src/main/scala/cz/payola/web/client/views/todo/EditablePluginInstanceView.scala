@@ -2,13 +2,14 @@ package cz.payola.web.client.views.todo
 
 import cz.payola.common.entities.Plugin
 import cz.payola.common.entities.plugins.parameters._
-import cz.payola.web.client.views.bootstrap.inputs._
 import cz.payola.web.client.presenters.models.ParameterValue
 import scala.collection.immutable.HashMap
 import scala.collection._
 import cz.payola.web.client.events.SimpleUnitEvent
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.View
+import cz.payola.web.client.views.elements.form.fields._
+import cz.payola.web.client.views.bootstrap.InputControl
 
 class EditablePluginInstanceView(id: String, pluginI: Plugin, predecessors: Seq[PluginInstanceView] = List(),
     defaultValues: Map[String, String] = new HashMap[String, String]())
@@ -44,25 +45,26 @@ class EditablePluginInstanceView(id: String, pluginI: Plugin, predecessors: Seq[
         else {
             param.defaultValue.toString
         }
+
         val field = param match {
-            case p: BooleanParameter => new
-                    CheckboxInputControl(param.name, param.id, defaultVal, "Enter parameter value")
-            case p: FloatParameter => new NumericInputControl(param.name, param.id, defaultVal, "Enter parameter value")
-            case p: IntParameter => new NumericInputControl(param.name, param.id, defaultVal, "Enter parameter value")
-            case p: StringParameter => if (p.isMultiline) {
-                new TextAreaInputControl(param.name, param.id, defaultVal, "Enter parameter value")
-            } else {
-                new TextInputControl(param.name, param.id, defaultVal, "Enter parameter value")
+            case p: BooleanParameter => new CheckBox(param.id, defaultVal.toBoolean, "Enter parameter value")
+            case p: IntParameter => new NumericInput(param.id, defaultVal.toInt, "Enter parameter value")
+            case p: StringParameter => {
+                if (p.isMultiline) {
+                    new TextArea(param.id, defaultVal, "Enter parameter value")
+                } else {
+                    new TextInput(param.id, defaultVal, "Enter parameter value")
+                }
             }
-            case _ => new TextInputControl(param.name, param.id, defaultVal, "Enter parameter value")
+            case _ => new TextInput(param.id, defaultVal, "Enter parameter value")
         }
 
-        field.input.changed += { args =>
-            parameterValueChanged
-                .triggerDirectly(new ParameterValue(getId, param.id, param.name, field.input.value, field))
-            false
+        val inputControl = new InputControl(param.name, field)
+        inputControl.delayedChanged += { _ =>
+            parameterValueChanged.triggerDirectly(new ParameterValue(getId, param.id, param.name, field.value.toString,
+                inputControl))
         }
 
-        field
+        inputControl
     }
 }

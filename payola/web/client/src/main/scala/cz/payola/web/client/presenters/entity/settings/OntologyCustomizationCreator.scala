@@ -15,7 +15,7 @@ class OntologyCustomizationCreator extends Presenter
         val modal = new OntologyCustomizationCreateModal
         modal.confirming += { e =>
             modal.block("Creating the ontology customization.")
-            Model.createOntologyCustomization(modal.name.input.value, modal.url.input.value) { o =>
+            Model.createOntologyCustomization(modal.name.field.value, modal.url.field.value) { o =>
                 modal.unblock()
                 modal.destroy()
                 ontologyCustomizationCreated.triggerDirectly(o)

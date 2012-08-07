@@ -82,7 +82,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
     def runButtonClickHandler(view: AnalysisRunnerView, analysis: Analysis) = {
         if (!analysisRunning) {
             uiAdaptAnalysisRunning(view, initUI _, analysis)
-            var timeout = view.overviewView.controls.timeoutControl.input.value.toInt
+            var timeout = view.overviewView.controls.timeoutControl.field.value
 
             analysisRunning = true
             AnalysisRunner.runAnalysisById(analysisId, timeout) {

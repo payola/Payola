@@ -6,8 +6,11 @@ import cz.payola.web.client.views.bootstrap._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events._
 import element.ColorInput
-import inputs._
 import cz.payola.web.client.presenters.entity.settings._
+import cz.payola.web.client.views.elements.lists._
+import cz.payola.web.client.views.elements.form.fields._
+import scala.Some
+import cz.payola.common.visual.Color
 
 class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomization)
     extends Modal("Edit ontology customization", Nil, Some("Done"), None, false, "large-modal")
@@ -23,7 +26,10 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
     val propertyStrokeWidthDelayedChanged =
         new UnitEvent[InputControl[_], PropertyCustomizationEventArgs[InputControl[_]]]
 
-    val ontologyCustomizationName = new TextInputControl("Name:", "name", ontologyCustomization.name, "", "span6")
+    val ontologyCustomizationName = new InputControl(
+        "Name:",
+        new TextInput("name", ontologyCustomization.name, "", "span6")
+    )
 
     val shareButtonViewSpace = new Span(Nil)
 
@@ -82,21 +88,30 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
     }
 
     private def renderClassCustomizationViews(classCustomization: ClassCustomization) {
-        val fillColor = new ColorInputControl("Fill color:", "fillColor", classCustomization.fillColor, "")
-        val radius = new NumericInputControl("Radius:", "radius", classCustomization.radius.toString, "")
-        val glyph = new TextInputControl("Glyph:", "glyph", classCustomization.glyph, "")
+        val fillColor = new InputControl(
+            "Fill color:",
+            new ColorInput("fillColor", Color(classCustomization.fillColor), "")
+        )
+        val radius = new InputControl(
+            "Radius:",
+            new NumericInput("radius", classCustomization.radius, "")
+        )
+        val glyph = new InputControl(
+            "Glyph:",
+            new TextInput("glyph", classCustomization.glyph, "")
+        )
 
-        fillColor.delayedChanged += { e =>
+        fillColor.delayedChanged += { _ =>
             classFillColorChanged.trigger(new ClassCustomizationEventArgs(fillColor, classCustomization,
-                fillColor.input.value))
+                fillColor.field.value.map(_.toString).getOrElse("")))
         }
-        radius.delayedChanged += { e =>
+        radius.delayedChanged += { _ =>
             classRadiusDelayedChanged.trigger(new ClassCustomizationEventArgs(radius, classCustomization,
-                                radius.input.value))
+                radius.field.value.toString))
         }
-        glyph.delayedChanged += { e =>
+        glyph.delayedChanged += { _ =>
             classGlyphDelayedChanged.trigger(new ClassCustomizationEventArgs(glyph, classCustomization,
-                glyph.input.value))
+                glyph.field.value))
         }
 
         fillColor.render(propertiesDiv.htmlElement)
@@ -108,16 +123,23 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
         propertyCustomization: PropertyCustomization) {
         val headingDiv = new Div(List(new Text("Property " + uriToName(propertyCustomization.uri))), "label label-info")
         headingDiv.setAttribute("style", "padding: 5px; margin: 10px 0;")
-        val strokeColor = new ColorInputControl("Stroke color:", "strokeColor", propertyCustomization.strokeColor, "")
-        val strokeWidth = new NumericInputControl("Stroke width:", "strokeWidth", propertyCustomization.strokeWidth.toString, "")
 
-        strokeColor.delayedChanged += { e =>
+        val strokeColor = new InputControl(
+            "Stroke color:",
+            new ColorInput("strokeColor", Color(propertyCustomization.strokeColor), "")
+        )
+        val strokeWidth = new InputControl(
+            "Stroke width:",
+            new NumericInput("strokeWidth", propertyCustomization.strokeWidth, "")
+        )
+
+        strokeColor.delayedChanged += { _ =>
             propertyStrokeColorChanged.trigger(new PropertyCustomizationEventArgs(strokeColor, classCustomization,
-                propertyCustomization, strokeColor.input.value))
+                propertyCustomization, strokeColor.field.value.map(_.toString).getOrElse("")))
         }
-        strokeWidth.delayedChanged += { e =>
+        strokeWidth.delayedChanged += { _ =>
             propertyStrokeWidthDelayedChanged.trigger(new PropertyCustomizationEventArgs(strokeWidth,
-                classCustomization, propertyCustomization, strokeWidth.input.value))
+                classCustomization, propertyCustomization, strokeWidth.field.value.toString))
         }
 
         headingDiv.render(propertiesDiv.htmlElement)

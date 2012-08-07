@@ -1,7 +1,6 @@
 package cz.payola.web.client.views.graph.visual.settings.components.visualsetup
 
 import cz.payola.web.client.views._
-import cz.payola.web.client.views.elements.{Anchor, ListItem, Text}
 import cz.payola.web.client.events._
 import cz.payola.web.client.views.graph.visual.settings._
 import cz.payola.common.entities.settings.OntologyCustomization

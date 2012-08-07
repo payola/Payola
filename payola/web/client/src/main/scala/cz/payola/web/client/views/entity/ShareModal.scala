@@ -2,10 +2,10 @@ package cz.payola.web.client.views.entity
 
 import s2js.compiler.javascript
 import s2js.adapters.html
-import cz.payola.web.client.views.bootstrap.Modal
-import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
+import cz.payola.web.client.views.bootstrap._
 import cz.payola.common.entities._
 import cz.payola.web.client.events._
+import cz.payola.web.client.views.elements.form.fields.TextInput
 
 class ShareModal(
     val entityName: String,
@@ -15,7 +15,10 @@ class ShareModal(
 {
     val granteeSearching = new UnitEvent[ShareModal, GranteeSearchEventArgs]
 
-    val granteeSelection = new TextInputControl("Share to " + granteeClassNameText + "s", "", "init", "Enter name")
+    val granteeSelection = new InputControl(
+        "Share to " + granteeClassNameText + "s",
+        new TextInput("", "init", "Enter name")
+    )
 
     override val body = List(granteeSelection)
 

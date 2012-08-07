@@ -4,6 +4,7 @@ import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap._
 import cz.payola.common.entities.plugins.DataSource
 import cz.payola.web.client.events.SimpleUnitEvent
+import cz.payola.web.client.views.elements.lists._
 
 class DataSourceSelector(title: String, dataSources: Seq[DataSource]) extends Modal(title, Nil, None)
 {

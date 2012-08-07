@@ -1,8 +1,9 @@
 package s2js.adapters.html.elements
 
 import s2js.adapters.events._
+import s2js.adapters.html.Element
 
-trait InputLike extends EventTarget
+trait InputLike extends EventTarget with Element
 {
     var disabled: Boolean
 

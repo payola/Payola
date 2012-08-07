@@ -5,6 +5,7 @@ import cz.payola.web.client.views.elements._
 import cz.payola.web.client.View
 import scala.collection.immutable.HashMap
 import scala.collection._
+import cz.payola.web.client.views.elements.lists._
 
 class ReadOnlyPluginInstanceView(id: String, plugin: Plugin, predecessors: Seq[PluginInstanceView] = List(),
     defaultValues: Map[String, String] = new HashMap[String, String]())

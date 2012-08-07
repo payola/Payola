@@ -14,6 +14,7 @@ import cz.payola.web.client.views.graph.visual.techniques.tree.TreeTechnique
 import cz.payola.web.client.views.graph.visual.techniques.gravity.GravityTechnique
 import cz.payola.web.shared.managers._
 import cz.payola.web.client.events._
+import cz.payola.web.client.views.elements.lists.ListItem
 
 class PluginSwitchView extends GraphView with ComposedView
 {

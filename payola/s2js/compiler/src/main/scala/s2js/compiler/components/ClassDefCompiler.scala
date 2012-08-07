@@ -144,12 +144,11 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
       */
     protected def compileInheritedTraits() {
         // Traits should be compiled in reverse order as mentioned in the specification of stackable modifications.
-        inheritedTraits.reverse.foreach {
-            traitAst =>
-                buffer += "goog.object.extend(%s, new %s());\n".format(
-                    memberContainerName,
-                    packageDefCompiler.getSymbolJsName(traitAst.symbol)
-                )
+        inheritedTraits.reverse.foreach { traitAst =>
+            buffer += "goog.object.extend(%s, new %s());\n".format(
+                memberContainerName,
+                packageDefCompiler.getSymbolJsName(traitAst.symbol)
+            )
         }
     }
 

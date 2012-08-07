@@ -3,6 +3,7 @@ package cz.payola.web.client.views.graph
 import cz.payola.web.client.views.ComposedView
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap._
+import cz.payola.web.client.views.elements.lists.ListItem
 
 class DownloadButtonView extends ComposedView
 {
