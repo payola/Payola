@@ -235,7 +235,7 @@ If the evaluation fails, the plugin boxes turn red and an error description is s
 
 ---
 
-# Programmer documentation
+# Developer Guide
 
 The Payola application consists of several layers and libraries that are all enclosed within a solution project ```payola```. The following sections will describe structure of the solution, the functionality hidden within the layers and libraries and their relations.
 
@@ -271,94 +271,200 @@ This structure also determines package names, which follow the pattern ```cz.pay
 <a name="project"></a>
 ## Project payola/project
 
+This project contains only two files: ```plugins.sbt``` and ```PayolaBuild.scala```. Tho former one is just a configuration of the SBT, i.e. SBT plugins that should be used on the top of standard SBT and additional Maven repositories to download dependencies from.
+
+The ```PayolaBuild.scala``` is a [build definition file](https://github.com/harrah/xsbt/wiki/Getting-Started-Full-Def) of the whole solution. The solution structure, projects, dependencies, compilation and test settings and other concepts used there are deeply described in the [SBT Wiki](https://github.com/harrah/xsbt/wiki). Moreover there is a template for all projects that should be compiled to JavaScript, that adds the [s2js](#s2js) compiler plugin to the standard scala compiler. To create a project that should be compiled to JavaScript, use the ```ScalaToJsProject(...)``` instead of standard ```Project(...)```.
+
+### The cp task
+
+The build file defines a custom SBT Task called ```cp``` which is an abbreviation for 'compile and package'. In order to support compilation of the payola solution in one step, we had to introduce this non-standard task. Because the solution contains both the [s2js](#s2js) compiler plugin project and also projects that use that compiler plugin, it's not sufficient to mark the compiler plugin project as a dependency of projects that should be compiled to Javascript. The scala compiler is pluginable only via ```.jar``` files so the compiler plugin project has to be not only compiled, but also packed into a ```.jar``` package, so it can be later used.
+
+### Compilation of payola/web/server using cp
+
+Another compilation customization required by the [s2js](#s2js) is added to  compilation of the [server project](#server). During compilation of a ```ScalaToJsProject```, the generated ```.js``` files are stored into the ```payola/web/server/public/javascripts``` directory. Each file provides some symbols (classes and objects declared in the file) and requires some (classes and objects used in the file). All files in the previously mentioned directory are traversed, while extracting the dependency declarations (provides and requires) to the ```payola/web/server/public/dependencies``` file, which is used later.
+
+### The clean task
+
+The ```clean``` SBT task is overriden so all generated files are deleted in addition to the standard behavior of ```clean```.
+
 <a name="scala2json"></a>
 ## Package cz.payola.scala2json
+
+> TODO: CH.M.
 
 <a name="s2js"></a>
 ## Project payola/s2js
 
+In order to implement whole application in one language and to get around code duplication that arises during development of rich internet applications (duplication of domain class declarations), we decided to use a tool that compiles Scala code to JavaScript. First of all, we investigated the tools that are already there:
+
+- [https://github.com/alvaroc1/s2js](https://github.com/alvaroc1/s2js)
+- [http://scalagwt.github.com/](http://scalagwt.github.com/)
+- [https://github.com/efleming969/scalosure](https://github.com/efleming969/scalosure)
+
+The first two unfortunately didn't suite our needs, mostly because they're still in a development phase and could be marked experimental. The build process of Scala+GWT seemed to be difficultly integratable into our build system. And complexity of the tool (e.g. the compilation process) discouraged us from potential modifications of our own. The third one, Scalosure, successor of the s2js, appealed to us the most thanks to its integration of [Google Closure Library](http://closure-library.googlecode.com/svn/docs/index.html) and relative lightweightness. Stopped development of the Scalosure was definitely disadvantage number one.
+
+So we commenced with the Scalosure, but rather sooner than later, we got to a point where we had to modify and extend the tool itself. As we dug deeper and deeper into the Scalosure, we started to dislike its implementation. Having in mind that core of the Scalosure was just about 1000 LOC (including many duplicities), we decided to start on a green field and implement our own, yet heavily inspired by the Scalosure.
+
+To make everything work, not only the [Scala to JavaScript compiler](#compiler) is necessary. One often needs to use already existing JavaScript libraries without a necessity to rewrite them into Scala. That's what the [adapters project](#adapters) is for. The somehow opposite direction is usage of classes from the [Scala Library](http://www.scala-lang.org/api/current/index.html#package) which can't be currently compiled using any compiler, nor ours. So the [runtime project](#runtime) contains simplified mirrors of the Scala Library classes compilable to JavaScript. There are also our own classes that are needed during s2js runtime both in the browser and on the server.
+
+Note that the tool was created just to match the requirements of Payola, so there are many gaps in implementation and ad-hoc solutions. Supported adapters and Scala Library classes are only those, we needed.
+
 <a name="compiler"></a>
 ### Package cz.payola.s2js.compiler
+
+> TODO H.S.
 
 <a name="adapters"></a>
 ### Package cz.payola.s2js.adapters
 
-#### Package cz.payola.s2js.adapters.browser
+As mentioned before, the adapters are defined to allow a programmer to access core JavaScript functionality or use already existing JavaScript libraries. Without them, it would be impossible to use for example ```document.getElementById``` method in the Scala code that will be compiled into JavaScript, because there is no such object ```document``` in the Scala standard library. The adapter classes don't have to contain any implementation, therefore they're mostly abstract classes or traits. They're not compiled to JavaScript, nor are they used anywhere during Scala application runtime. The class and method names have to be exactly the same as it is in the adapted libraries.
+
+#### Package cz.payola.s2js.adapters.js
+
+Adapters of some of the JavaScript core classes and the global functions, objects and constants. The adapters are based on the 'JavaScript Objects' section of the [JavaSript and HTML DOM Reference](http://www.w3schools.com/jsref/default.asp).
 
 #### Package cz.payola.s2js.adapters.dom
 
+Adapters of all interfaces and objects (```Node```, ```Element``` etc.) defined in the [DOM Level 3 Core Specification](http://www.w3.org/TR/DOM-Level-3-Core/).
+
 #### Package cz.payola.s2js.adapters.events
+
+Adapters of all interfaces and objects (```Event```, ```MouseEvent``` etc.) defined in the [DOM Level 3 Events Specification](http://www.w3.org/TR/DOM-Level-3-Events/) including some of the the [DOM Level 4 Events](http://www.w3.org/TR/dom/#events) extensions.
 
 #### Package cz.payola.s2js.adapters.html
 
-#### Package cz.payola.s2js.adapters.js
+Selected HTML related interfaces and elements (```Document```, ```Anchor```, ```Canvas``` etc.), based both on the [HTML Standard](http://www.whatwg.org/html) and on the 'HTML DOM Objects' section of the [JavaSript and HTML DOM Reference](http://www.w3schools.com/jsref/default.asp)
+
+#### Package cz.payola.s2js.adapters.browser
+
+Adapters of web browser related objects (```Window```, ```History``` etc.), based on the 'Browser Objects' section of the [JavaSript and HTML DOM Reference](http://www.w3schools.com/jsref/default.asp) and also on the same resources as the ```cz.payola.s2js.adapters.html``` package.
 
 <a name="runtime"></a>
 ### Project payola/s2js/runtime
 
+> TODO: H.S.
+
 <a name="runtime-client"></a>
 #### Package cz.payola.s2js.runtime.client
 
+> TODO: H.S.
+
 ##### Package cz.payola.s2js.runtime.client.js
+
+> TODO: H.S.
 
 ##### Package cz.payola.s2js.runtime.client.rpc
 
+> TODO: H.S.
+
 ##### Package cz.payola.s2js.runtime.client.scala
+
+> TODO: H.S.
 
 <a name="runtime-shared"></a>
 #### Package cz.payola.s2js.runtime.shared
 
+> TODO: H.S.
+
 <a name="common"></a>
 ## Package cz.payola.common
 
+> TODO: H.S.
+
 ### Package cz.payola.common.entities
+
+> TODO: CH.M.
 
 #### Package cz.payola.common.entities.analyses
 
+> TODO: H.S.
+
 #### Package cz.payola.common.entities.plugins
+
+> TODO: H.S.
 
 #### Package cz.payola.common.entities.privileges
 
+> TODO: CH.M.
+
 #### Package cz.payola.common.entities.settings
 
+> TODO: CH.M.
+
 ### Package cz.payola.common.rdf
+
+> TODO: CH.M.
 
 <a name="domain"></a>
 ## Package cz.payola.domain
 
+> TODO: package structure
+
+> TODO: CH.M. & H.S
+
 <a name="data"></a>
 ## Package cz.payola.data
 
+> TODO: O.H.
+
 ### Package cz.payola.squeryl
+
+> TODO: O.H.
 
 #### Package cz.payola.squeryl.entities
 
+> TODO: O.H.
+
 #### Package cz.payola.squeryl.repositories
 
+> TODO: O.H.
+
 ### Package cz.payola.virtuoso
+
+> TODO: CH.M.
 
 <a name="model"></a>
 ## Package cz.payola.model
 
+> TODO: J.H.
+
 <a name="web"></a>
 ## Package cz.payola.web
+
+> TODO: J.H.
 
 <a name="initializer"></a>
 ### Package cz.payola.web.initializer
 
+> TODO: O.H.
+
 <a name="shared"></a>
 ### Package cz.payola.web.shared
+
+> TODO: J.H.
 
 <a name="server"></a>
 ### Package cz.payola.web.server
 
+> TODO: J.H.
+
 <a name="client"></a>
 ### Package cz.payola.web.client
 
+> TODO: O.K.
+
 #### Package cz.payola.web.client.events
+
+> TODO: O.K.
 
 #### Package cz.payola.web.client.models
 
+> TODO: O.K.
+
 #### Package cz.payola.web.client.views
 
+> TODO: O.K.
+
 #### Package cz.payola.web.client.presenters
+
+> TODO: O.K.
