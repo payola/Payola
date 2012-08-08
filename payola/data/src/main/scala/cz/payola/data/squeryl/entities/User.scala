@@ -7,7 +7,7 @@ import cz.payola.data.squeryl._
 import cz.payola.data.squeryl.entities.settings.OntologyCustomization
 
 /**
-  * This object converts [[cz.payola.common.entities.User]] to [[cz.payola.common.entities.User]]
+  * This object converts [[cz.payola.common.entities.User]] to [[cz.payola.common.entities.User]].
   */
 object User extends EntityConverter[User]
 {
@@ -20,6 +20,14 @@ object User extends EntityConverter[User]
     }
 }
 
+/**
+ * Provides database persistence to [[cz.payola.domain.entities.User]] entity.
+ * @param id ID of the user
+ * @param name Name of the user
+ * @param pwd Password of the user
+ * @param mail Email of the user
+ * @param context Implicit context
+ */
 class User(override val id: String, name: String, pwd: String, mail: String)
     (implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.User(name)

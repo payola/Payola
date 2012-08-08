@@ -27,13 +27,30 @@ object ParameterValue extends EntityConverter[ParameterValue[_]]
     }
 }
 
+/**
+ * General parameter value for plugin instances
+ * @tparam A Type of the parameter value.
+ */
 trait ParameterValue[A] extends cz.payola.domain.entities.plugins.ParameterValue[A] with Entity
 {
+    /**
+     * ID of parent parameter
+     */
     val parameterId: String
 
+    /**
+     * ID of plugin instances this parameter value is assigned to
+     */
     var pluginInstanceId: Option[String] = None
 
+    /**
+     * ID of data source this parameter value is assigned to
+     */
     var dataSourceId: Option[String] = None
 
+    /**
+     * Sets the parameter from which this parameter value is derived. Called when parameter value is fetched from DB.
+     * @param value Parameter from which this parameter value is derived
+     */
     def parameter_=(value: Parameter[_]) { _parameter = value.asInstanceOf[ParameterType] }
 }

@@ -3,7 +3,7 @@ package cz.payola.data.squeryl.entities
 import cz.payola.data.squeryl._
 
 /**
-  * An entity that may be granted privileges.
+  * Provides persistence to [[cz.payola.domain.entities.PrivilegableEntity]] entities.
   */
 trait PrivilegableEntity extends Entity with cz.payola.domain.entities.PrivilegableEntity
 {

@@ -23,6 +23,14 @@ object PluginInstanceBinding extends EntityConverter[PluginInstanceBinding]
     }
 }
 
+/**
+ * Provides database persistence to [[cz.payola.domain.entities.analyses.PluginInstanceBinding]] entities.
+ * @param id ID of this binding
+ * @param s Source plugin instance of this binding
+ * @param t Target plugin instance of this binding
+ * @param idx Input index of this binding
+ * @param context Implicit context
+ */
 class PluginInstanceBinding(
     override val id: String,
     s: PluginInstance,

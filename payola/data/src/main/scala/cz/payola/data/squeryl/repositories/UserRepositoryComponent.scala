@@ -5,8 +5,14 @@ import org.squeryl.PrimitiveTypeMode._
 import cz.payola.data.squeryl._
 import cz.payola.data.PaginationInfo
 
+/**
+ * Provides repository to access persisted users
+ */
 trait UserRepositoryComponent extends TableRepositoryComponent
 {
+    /**
+     * A repository to access persisted users
+     */
     self: SquerylDataContextComponent =>
 
     lazy val userRepository = new LazyTableRepository[User](schema.users, User)

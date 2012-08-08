@@ -8,10 +8,16 @@ import org.squeryl.Query
 import cz.payola.data.PaginationInfo
 import org.squeryl.dsl.ast.LogicalBoolean
 
+/**
+ * Provides repository to access persisted groups
+ */
 trait GroupRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
 
+    /**
+     * A repository to access persisted groups
+     */
     lazy val groupRepository = new TableRepository[Group, (Group, User, Option[User])](schema.groups, Group)
         with GroupRepository
     {
