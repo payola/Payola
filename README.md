@@ -278,6 +278,8 @@ Entire plugin documentation can be found in the Developer Guide. If you intend t
 
 ---
 
+##### TODO - information about which libraries are used (where, why)
+
 # Developer Guide
 
 The Payola application consists of several layers and libraries that are all enclosed within a solution project ```payola```. The following sections will describe structure of the solution, the functionality hidden within the layers and libraries and their relations.
@@ -333,13 +335,13 @@ The ```clean``` SBT task is overriden so all generated files are deleted in addi
 <a name="scala2json"></a>
 ## Package cz.payola.scala2json
 
-To transfer data from the server side to the client side, one needs to serialize the data transferred. To save bandwidth, we've decided to go with [JSON](http://www.json.org). It is a lightweight format that's easy to decode in JavaScript, which is used on the client side.
+To transfer data from the server side to the client side, one needs to serialize the data. To save bandwidth, we've chosen [JSON](http://www.json.org) as the data format. It is a lightweight format that's also easy to decode in JavaScript, which is used on the client side.
 
 While other solutions for serializing Scala objects to JSON do exist (for example [scala-json](https://github.com/stevej/scala-json)), they mostly work only on collections, maps and numeric types. Other objects need to implement their own `toJSON()` method.
 
-This seemed to us as too much unnecessary code, so we've decided to write out own serializer. This serializer is capable of serializing any object using reflection - the serializer goes through the object's fields.
+This seemed to us as too much unnecessary code, so we've decided to write our own serializer. This serializer is capable of serializing any Scala or Java object using Java language reflection.
 
-For some purposes, we needed to customize the serialization process - skip some fields, add some fields, etc. - this lead to serialization rules. For example, you have a class with private fields that are prefixed with an underscore (`_`) - you might want to hide this implementation detail - just add a new `BasicSerializationRule`, where you can define a class (or trait) whose fields should be serialized (e.g. you want to serialize only fields of a superclass), list of fields that should be omitted (transient fields) and list of field name aliases (a map of string &rarr; string).
+For some purposes, customizing the serialization process is necessary - it has proven useful to skip or add some fields of the object, etc. - this lead to serialization rules. For example, you might want to hide an implementation detail that a class' private fields are prefixed with an underscore (`_`) - it is possible to do so simply by adding a new `BasicSerializationRule`, where you can define a class (or trait) whose fields should be serialized (e.g. you want to serialize only fields of a superclass), a list of fields that should be omitted (transient fields) and a list of field name aliases (a map of string &rarr; string translations).
 
 You can explore additional serialization rules in our generated [docset](TODO Link).
 
@@ -424,7 +426,7 @@ Adapters of web browser related objects (```Window```, ```History``` etc.), base
 
 ### Package cz.payola.common.entities
 
-The package includes classes representing the basic entities (e.g. user, analysis, plugin) that ensure the core functionality of Payola. Each entity has its own ID (string-based, 128-bit UUID) and can be stored in the relational database (see [data package](#data) for more information).
+The package includes classes representing the basic entities (user, analysis, plugin, etc.) that ensure the core functionality of Payola. Each entity has its own ID (string-based, 128-bit UUID) and can be stored in a relational database (see the [data package](#data) for more information).
 
 #### Package cz.payola.common.entities.plugins
 
@@ -432,22 +434,45 @@ The package includes classes representing the basic entities (e.g. user, analysi
 
 #### Package cz.payola.common.entities.privileges
 
-To share entities between users, privileges are used. This makes it easy to extend the model in the future, or to change the privilege granularity. Currently, there are privileges to access a resource - analysis, data source, ontology customization and plugin; however, easily can be added a privilege type that grants a user the right to edit some entity, etc.
+To share entities between users, privileges are used. This makes it easy to extend the model in the future, or to change the granularity of privilege granting. Currently, there are privileges to access a resource - analysis, data source, ontology customization and plugin; however, a privilege type that grants a user the right to edit some entity, for example, can be easily added.
 
 #### Package cz.payola.common.entities.settings
 
-The settings package encapsulates ontology customizations. 
+The settings package encapsulates ontology customizations (used on the client side to change display settings of a graph using ontologies).
 
+<a name="rdf-common"></a>
 ### Package cz.payola.common.rdf
 
-This package contains classes representing RDF graphs and ontologies. Only core functionality is included in this package - class declarations, some basic methods that are used on the client, as well. More functionality, such as converting a RDF/XML file to a `Graph` object is added in the [`domain`](#domain) project.
+This package contains classes representing RDF graphs and ontologies. Only core functionality is included in this package - class declarations to represent the data, some basic methods that are used on the client. More functionality, such as converting a RDF/XML file to a `Graph` object is added in the [`domain`](#domain) project.
 
 <a name="domain"></a>
 ## Package cz.payola.domain
 
-> TODO: package structure
+The `domain` project builds on the [`common`](#common) project, inheriting from classes and traits in the `common` project. Additional functionality and logic is hence added as well as dependencies on other libraries, such as [Jena](http://jena.apache.org) for parsing RDF/XML files into Graph objects.
 
-> TODO: CH.M. & H.S
+### Package cz.payola.domain.entities
+
+> TODO: C.M.
+
+### Package cz.payola.domain.entities.analyses
+
+> TODO: H.S.
+
+### Package cz.payola.domain.entities.plugins
+
+> TODO: H.S.
+
+### Package cz.payola.domain.rdf
+
+> TODO: C.M.
+
+### Package cz.payola.domain.rdf.ontology
+
+> TODO: C.M.
+
+### Package cz.payola.domain.sparql
+
+> TODO: H.S.
 
 <a name="data"></a>
 ## Package cz.payola.data
@@ -468,7 +493,7 @@ This package contains classes representing RDF graphs and ontologies. Only core 
 
 ### Package cz.payola.data.virtuoso
 
-Virtuoso is used for storing private RDF data - classes in this package let you communicate with a Virtuoso instance - create a graph group, upload a graph to the graph group, and then retrieve all graphs within a graph group.
+Virtuoso is used for storing private RDF data of a user - classes in this package let you communicate with a Virtuoso instance and perform some tasks - create a graph group, upload a graph to the graph group, and then retrieve all graphs within a graph group.
 
 <a name="model"></a>
 ## Package cz.payola.model
