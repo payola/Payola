@@ -347,6 +347,50 @@ For some purposes, customizing the serialization process is necessary - it has p
 
 You can explore additional serialization rules in our generated [docset](TODO Link).
 
+The serialization process has to deal with a few obstacles, such as a cyclic object dependencies (i.e. one object's variable is pointing to a second object which has a variable pointing back to the first one).
+
+- **Cyclic dependencies**: The serializer has an option to either serialize the object in depth (this means that a cyclic dependency will cause an exception), or to handle cycles. The first option has an advantage that no references need to be created, hence the resulting JSON is exactly the object's representation, with no additional fields. A cyclic dependency graph, however, is fairly common, hence it had to be solved. The serializer needs to keep a list of objects it has encountered - each object is assigned an `__objectID__` field which is simply an index of the object. Once the object is encountered the second time, instead of repeating the object, such a construct is entered: `"object_second_time": { "__ref__": 4 }` - i.e. a reference to an object with `__objectID__` 4.
+- **Classes**: when deserializing the object on the server, a class of the object is required:
+	- *Regular objects*: For regular objects, `__class__` field is added, including the class name: `"some_obj": { "__class__": "cz.payola.some.class", ... }`
+	- *Maps*: Even for maps and other collection, a class name is needed. Maps are translated to an object with two field: `__class__` and `__value__`: ```{ "map": { "__class__": "scala.collection.Map", "__value__": { "key": "value", ... } } }```
+	- *Collections*: Other collections get translated to an object with two fields as well: ```{ "collection": { "__arrayClass__": "scala.collection.mutable.ArrayBuffer", "__value__": [ "obj1", ... ] } }```
+	- *Arrays*: Regular arrays (i.e. `scala.Array`) are translated directly to a JSON array without any wrappers.
+- **Fields**: As Scala language doesn't have its own reflection API yet, Java reflection API had to be used. This presents several problems regarding getting fields: some fields are translated into methods - a getter with no parameters and a setter with one parameter, in case it's a `var` field. The serializer must therefore look for fields even within methods when looking for a field of a particular name. Also, when requesting fields on an object, an empty array is returned - only declared fields get listed, so the serializer must go through the whole class hierarchy itself, listing fields of all interface and superclasses.
+
+> Example: Assume this code:
+>```
+class Class1 {
+    val map = Map("my key" -> "my value", "key2" -> "value")
+    val list = List("Hello")
+    var obj: Any = null
+}
+val o = new Class1
+o.obj = o
+```
+>It will be translated to:
+>```
+{
+	"__class__": "cz.payola.scala2json.test.Class1",
+	"__objectID__": 0,
+	"map": {
+		"__class__": scala.collection.immutable.Map$Map2,
+		"__value__": {
+			"my key": "my value",
+			"key2": "value"
+		}
+	},
+	"list": {
+		"__arrayClass__": "scala.collection.immutable.List",
+		"__value__": [
+			"Hello"
+		]
+	},
+	"obj": {
+		"__ref__": 0
+	}
+}
+```
+
 <a name="s2js"></a>
 ## Project payola/s2js
 
