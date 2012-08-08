@@ -475,9 +475,11 @@ Virtuoso is used for storing private RDF data - classes in this package let you 
 
 The classes in this package builds up a wrapper which encapsulates all the business logic and data access. The goal of the code in this package is to decouple any presentation layer from the application logic and data access. In fact, all the existing presentation layers (web application controllers and RPC remote objects) are built on top of this package.
 
-It is crucial to mention, that the model package does not make up the whole model. The model is spread into more packages, e.g. the domain, data, and common. All of those packages provides standalone model capabilities and the model package uses them all to get specific tasks done.
+It is crucial to mention, that the model package does not make up the whole model. The model is spread into more packages, the domain, data, and common. All of those packages provides model capabilities and the model package uses them all to get specific tasks done.
 
 If you want to understand the following text (and the code) better, please, get familiar with the [Scala Cake pattern for DI](http://jonasboner.com/2008/10/06/real-world-scala-dependency-injection-di/).
+
+There is an object which logically belongs to this package, but you can find it elsewhere. It is the cz.payola.web.shared.Payola object. It stands for an entrypoint to the model, in the classic DI architecture, you would probably call it a container. It is a place, where all configuration is done and an instance of ModelComponent is created. Since objects behaves in certain situations like Singletons, 
 
 
 

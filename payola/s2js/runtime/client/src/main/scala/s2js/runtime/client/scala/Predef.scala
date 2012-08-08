@@ -13,4 +13,6 @@ object Predef
             throw new IllegalArgumentException("requirement failed: "+ message)
         }
     }
+
+    def fallbackStringCanBuildFrom = true
 }
