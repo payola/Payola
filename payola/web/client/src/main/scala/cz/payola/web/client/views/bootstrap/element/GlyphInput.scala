@@ -73,7 +73,7 @@ class GlyphInput(name: String, initialValue: Option[String], cssClass: String = 
         }
     }
 
-    def value_=(newValue: Option[String]) {
+    protected def updateValue(newValue: Option[String]) {
         glyphInput.value = newValue.map(_.toString).getOrElse(nothingSelectedText)
     }
 
@@ -82,5 +82,4 @@ class GlyphInput(name: String, initialValue: Option[String], cssClass: String = 
     def isActive_=(newValue: Boolean) {
         glyphInput.isActive = newValue
     }
-
 }
