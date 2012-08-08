@@ -22,6 +22,15 @@ object Analysis extends EntityConverter[Analysis]
     }
 }
 
+/**
+ * Provides database persistence to [[cz.payola.domain.entities.Analysis]] entities.
+ * @param id ID of the analysis
+ * @param name Name of the analysis
+ * @param o Owner of the analysis
+ * @param _isPub Whether the analysis is public or not
+ * @param _desc Description of the analysis
+ * @param context Implicit context
+ */
 class Analysis(override val id: String, name: String, o: Option[User], var _isPub: Boolean, var _desc: String)
     (implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.Analysis(name, o)

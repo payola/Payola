@@ -26,6 +26,16 @@ object PluginDbRepresentation extends EntityConverter[PluginDbRepresentation]
     }
 }
 
+/**
+ * Provides persistence to [[cz.payola.domain.entities.Plugin]] entities
+ * @param id ID of the plugins
+ * @param _name Name of the plugin
+ * @param pluginClassName Class name of the plugin
+ * @param inputCount Input count of the plugin
+ * @param o Owner of the plugin
+ * @param _isPub Whether plugin is public or not
+ * @param context Implicit context
+ */
 class PluginDbRepresentation(
     override val id: String,
     protected var _name: String,
@@ -64,8 +74,10 @@ class PluginDbRepresentation(
         // Instantiate the plugin.
         val instance = constructor.newInstance(constructorArguments: _*)
         val plugin = instance.asInstanceOf[Plugin]
+
         plugin.owner = owner
         plugin.isPublic = isPublic
+
         plugin
     }
 }

@@ -16,7 +16,14 @@ object Parameter
     }
 }
 
+/**
+ * General parameter pro plugins
+ * @tparam A Type of the parameter.
+ */
 trait Parameter[A] extends cz.payola.domain.entities.plugins.Parameter[A] with Entity
 {
+    /**
+     * ID of plugin this parameter is assigned to
+     */
     var pluginId: String = null
 }

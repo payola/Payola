@@ -1,12 +1,8 @@
 package cz.payola.data.squeryl.entities.analyses
 
 import cz.payola.data.squeryl.entities._
-import org.squeryl.annotations.Transient
 import cz.payola.data.squeryl.entities.plugins.PluginInstance
 import cz.payola.data.squeryl._
-import cz.payola.domain.entities.User
-import scala.Some
-import cz.payola.domain.entities.Analysis
 import scala.Some
 
 /**
@@ -28,6 +24,14 @@ object PluginInstanceBinding extends EntityConverter[PluginInstanceBinding]
     }
 }
 
+/**
+ * Provides database persistence to [[cz.payola.domain.entities.analyses.PluginInstanceBinding]] entities.
+ * @param id ID of this binding
+ * @param s Source plugin instance of this binding
+ * @param t Target plugin instance of this binding
+ * @param idx Input index of this binding
+ * @param context Implicit context
+ */
 class PluginInstanceBinding(
     override val id: String,
     s: PluginInstance,

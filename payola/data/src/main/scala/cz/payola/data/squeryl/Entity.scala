@@ -3,8 +3,8 @@ package cz.payola.data.squeryl
 import org.squeryl.KeyedEntity
 
 /**
- * This trait provided persistance to entities and allows them to create relations with entities
- * (if relation is defined in [[cz.payola.data.PayolaDB]] schema)
+ * This trait provided persistence to entities from domain layer, allows them to create relations with other entities.
+ * This relation must be defined in [[cz.payola.data.squeryl.SchemaComponent]] schema.
  *
  */
 trait Entity extends KeyedEntity[String] with cz.payola.domain.Entity

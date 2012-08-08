@@ -23,8 +23,9 @@ Payola comes pre-configured to work with default settings of a Virtuoso server a
 
 As you clone just source codes from the git repository, it is necessary to compile Payola. To do so, you need to have SBT installed as noted above. Open command line (console, terminal) and make `payola` subdirectory current working subdirectory. Launch SBT (most likely using the `sbt` command) and enter the following commands:
 
+<a name="run-initializer"></a>
 ```
-> cp
+>cp
 ...
 > project initializer
 > run
@@ -50,12 +51,13 @@ While a simple guess of another user's group identifier is unlikely (and a brute
 
 To launch Payola, open SBT just like when you were compiling it and enter these two commands (you do not need to run the `cp` command if you haven't modified any source code since the last compilation):
 
-```
-> cp
+
+> ```cp```
 ...
-> project server
-> run
-```
+> ```project server```
+...
+> ```run```
+
 
 >*Warning:* Do **not** run the `initializer` project. All users, analyses, data sources, etc. would be lost. (See [this note](#drop-create-warning))
 
@@ -254,7 +256,7 @@ class ValuesInbetween(name: String, inputCount: Int, parameters:
 	def this() = {
 		this("Filter Values in Between", 1, 
 			List(new IntParameter("MinValue", 0), 
-				new IntParameter("MaxValue", 0)), 
+				new IntParameter("MaxValue", 10)), 
 			IDGenerator.newId)
 	}
 
@@ -268,7 +270,7 @@ class ValuesInbetween(name: String, inputCount: Int, parameters:
 
 In this example, a new plugin is created with name `Filter Values in Between`. The parameterless constructor `this()` is called to fill in values to the default constructor. Here you set up the parameters as well.
 
-The `evaluate` method is the one doing all the work. Here would be your code filtering the input graph. The `instance` variable contains all parameter values, `inputs` is a sequence of `Option[Graph]`'s - in our case just one as defined in `this()`. You can optionally report progress using the `progressReporter` function passed, which reports the progress to the user (values between 0.0 and 1.0).
+The `evaluate` method is the one doing all the work. Here would be your code filtering the input graph. The `instance` variable contains all parameter values, `inputs` is a sequence of `Option[Graph]`'s - in our case just one as defined in `this()`. You can optionally report progress using the `progressReporter` function passed, which reports the progress to the user (values between 0 and 10).
 
 Entire plugin documentation can be found in the Developer Guide. If you intend to write your own plugin, please, refer there.
 
@@ -285,6 +287,10 @@ The solution is defined using the [SBT](https://github.com/harrah/xsbt/wiki/ "SB
 - ```payola```
 	- [```common```](#common)
 	- [```data```](#data)
+		- [```squeryl```](#squeryl)
+			- [```entities```](#squeryl-entities)
+			- [```repositories```](#squeryl-repositories)
+		- [```virtuoso```](#virtuoso)
 	- [```domain```](#domain)
 	- [```model```](#model)
 	- [```project```](#project)
@@ -444,20 +450,48 @@ Adapters of web browser related objects (```Window```, ```History``` etc.), base
 <a name="data"></a>
 ## Package cz.payola.data
 
-> TODO: O.H.
+This whole package represents data layer. Trait `DataContextComponent` defines API for cominucation between data layer and other Payola components. The two vital task of data layer are:
 
+- store and fetch entities from [domain layer](#domain) from and into database
+- use [Virtuoso](http://virtuoso.openlinksw.com/) to as private RDF data store
+
+Aritecture of Payola implies that domain layer is independent from data layer and since Payola is an open-source, data layer can be implemented specificaly to fit different platform-specific needs. 
+
+<a name="squeryl"></a>
 ### Package cz.payola.squeryl
 
-> TODO: O.H.
+In this version Payola uses [Squeryl](http://squeryl.org) (an ORM for Scala) for persisting entities into H2 database. Squeryl generates database schema from structure of stored objects. Every persisted entity is persisted in its own table, definition of this table is derived from entity structure. In order to have domain layer independent from data layer, there were implemented [entities](#squeryl-entities) that:
 
+- represent entities from domain layer and 
+- can be stored and loaded via Squeryl ORM into and from database
+
+#####Why Squeryl?
+
+Squeryl is existing, tested, functional and simple ORM for scala applications that had met the requirements of Payola during the process of making decision whether use existing ORM or implement own ORM tool.
+
+<a name="about-squeryl"></a>
+#####About Squeryl
+
+
+<a name="squeryl-entities"></a>
 #### Package cz.payola.squeryl.entities
 
-> TODO: O.H.
+For every entity in [domain layer](#domain) that issupposed to be persisted, exists a class in [data layer](#data) that provides database persistence to the corresponding domain layer entity.
 
+Every data layer entity has a corresponding companion object (extending `EntityConverter`) that provides conversion from domain layer entity. When conversion fails, a `DataException` is thrown.
+
+Every data layer entity extends the represented domain layer entity (with two exceptions that will be explained later), which allows treat data layer entities like domain layer entities. There is no added bussines logic in data layer entities, their only purpose is to be stored and loaded into and from database.
+
+The two mentioned enxeptions are `PluginDbRepresentation` and  `PrivilegeDbRepresentation`. Those data layer entities do not extend `Plugin` and `Privelege` from domain layer, because real plugins and privileges could be added in runtime (even by a user). Those domain layer entities are just abstract parents of real plugins and privileges, so they are simply wrapped into data layer entities. Data layer entities are persisted and domain layer entities are reconstructed from them using reflection.
+
+Domain layer entities allows adding another entities into their internal collections (i.e. an plugin instance can be added to an anylyses via `analysis.addPluginInstance(pluginInstance)` statement). Data layer entities overrides this behavior by adding a code to persist this new relation into database and leaving domain layer behavior unchanged. 
+
+<a name="squeryl-repositories"></a>
 #### Package cz.payola.squeryl.repositories
 
 > TODO: O.H.
 
+<a name="virtuoso"></a>
 ### Package cz.payola.virtuoso
 
 > TODO: CH.M.
@@ -475,7 +509,15 @@ Adapters of web browser related objects (```Window```, ```History``` etc.), base
 <a name="initializer"></a>
 ### Package cz.payola.web.initializer
 
-> TODO: O.H.
+This project should be run during installation as described [here](#run-initializer). 
+
+Created database contains:
+
+- an user with login name "admin@payola.cz" and password "payola!"
+- a public analysis owned by this user
+- two public data sources owned by this user
+- a public ontology customization for [Public contracts](http://opendata.cz/pco/public-contracts.xml) ontology
+- a set of pre-implemented plugins
 
 <a name="shared"></a>
 ### Package cz.payola.web.shared

@@ -9,10 +9,17 @@ import org.squeryl._
 import org.squeryl.dsl._
 import cz.payola.data.squeryl.entities._
 
+/**
+ * Defines operation of repositories to access persisted
+ * [[cz.payola.data.squeryl.entities.plugins.PluginInstanceLike]] entities
+ */
 trait PluginInstanceRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
-    
+
+    /**
+     * A repository to access persisted [[cz.payola.data.squeryl.entities.plugins.PluginInstanceLike]] entities
+     */
     trait PluginInstanceTableRepository[A <: Entity with PluginInstanceLike]
     {
         protected val pluginInstanceLikeTable: Table[A]

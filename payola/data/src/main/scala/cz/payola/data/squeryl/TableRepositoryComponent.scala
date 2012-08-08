@@ -100,11 +100,23 @@ trait TableRepositoryComponent
             schema.persist(entity, table)
         }
 
+        /**
+         * Wraps code block into inTransaction block.
+         * All commands that acces data vis Squeryl needs to be wrapped in inTransaction block.
+         *
+         * @param body Code block to be wrapped
+         * @tparam C Return type of the code block
+         * @return Returns result of the code block
+         */
         protected def wrapInTransaction[C](body: => C) = {
             schema.wrapInTransaction(body)
         }
     }
 
+    /**
+     * Repository that fetches entites with name
+     * @tparam A Type of the named entities in the repository.
+     */
     trait NamedEntityTableRepository[A <: Entity with NamedEntity]
         extends NamedEntityRepository[A]
     {
@@ -113,6 +125,11 @@ trait TableRepositoryComponent
         def getByName(name: String): Option[A] = selectOneWhere(_.name === name)
     }
 
+    /**
+     * Repository, that fetches entities with their optional owner
+     * @tparam A Type of the optionally owned entities in the repository.
+     * @tparam B Result type of database query, when entity is load, in most cases it is type [(A, Option[User])]
+     */
     trait OptionallyOwnedEntityTableRepository[A <: Entity with OptionallyOwnedEntity with NamedEntity, B]
         extends OptionallyOwnedEntityRepository[A]
     {
@@ -121,6 +138,11 @@ trait TableRepositoryComponent
         def getAllByOwnerId(ownerId: Option[String]): Seq[A] = selectWhere(_.ownerId === ownerId).sortBy(_.name)
     }
 
+    /**
+     * Repository that fetches shareable entities
+     * @tparam A Type of the shareable entities in the repository.
+     * @tparam B Result type of database query, when entity is load, in most cases it is type [(A, Option[User])]
+     */
     trait ShareableEntityTableRepository[A <: Entity
             with ShareableEntity with OptionallyOwnedEntity with NamedEntity, B]
         extends OptionallyOwnedEntityTableRepository[A, B]

@@ -11,20 +11,44 @@ import cz.payola.domain.entities.settings.OntologyCustomization
   */
 trait DataContextComponent
 {
+    /**
+     * A repository to access persisted users
+     */
     val userRepository: UserRepository
 
+    /**
+     * A repository to access persisted groups
+     */
     val groupRepository: GroupRepository
 
+    /**
+     * A repository to access persisted privileges
+     */
     val privilegeRepository: PrivilegeRepository
 
+    /**
+     * A repository to access persisted analyses
+     */
     val analysisRepository: AnalysisRepository
 
+    /**
+     * A repository to access persisted plugins
+     */
     val pluginRepository: PluginRepository
 
+    /**
+     * A repository to access persisted data sources
+     */
     val dataSourceRepository: DataSourceRepository
 
+    /**
+     * A repository to access persisted ontology customizations
+     */
     val ontologyCustomizationRepository: OntologyCustomizationRepository
 
+    /**
+     * A registry that provides repositories by class name of persisted entity
+     */
     lazy val repositoryRegistry = new RepositoryRegistry(Map(
         classOf[User] -> userRepository,
         classOf[Group] -> groupRepository,
@@ -35,6 +59,10 @@ trait DataContextComponent
         classOf[OntologyCustomization] -> ontologyCustomizationRepository
     ))
 
+    /**
+     * Defines all operations common to all entity repositories
+     * @tparam A Type of entities in the repository
+     */
     trait Repository[+A]
     {
         /**
@@ -77,7 +105,8 @@ trait DataContextComponent
     }
 
     /**
-      * A repository that contains named entities.
+      * Defines operations common to all repositories accessing entities that extend
+      * [[cz.payola.domain.entities.NamedEntity]].
       * @tparam A Type of the entities in the repository.
       */
     trait NamedEntityRepository[+A <: NamedEntity] extends Repository[A]
@@ -90,7 +119,8 @@ trait DataContextComponent
     }
 
     /**
-      * A repository that contains optionally owned entities.
+      * Defines operations common to all repositories accessing entities that extend
+      * [[cz.payola.domain.entities.OptionallyOwnedEntity]].
       * @tparam A Type of the entities in the repository.
       */
     trait OptionallyOwnedEntityRepository[+A <: OptionallyOwnedEntity] extends Repository[A]
@@ -103,7 +133,8 @@ trait DataContextComponent
     }
 
     /**
-      * A repository that contains shareable entities.
+      * Defines operations common to all repositories accessing entities that extend
+      * [[cz.payola.common.entities.ShareableEntity]].
       * @tparam A Type of the entities in the repository.
       */
     trait ShareableEntityRepository[+A <: ShareableEntity with OptionallyOwnedEntity with NamedEntity]
@@ -121,6 +152,9 @@ trait DataContextComponent
         def getAllPublicByOwnerId(ownerId: Option[String]): Seq[A] = getAllByOwnerId(ownerId).filter(_.isPublic)
     }
 
+    /**
+     * Defines operations of repository accessing users
+     */
     trait UserRepository
         extends Repository[User]
         with NamedEntityRepository[User]
@@ -140,6 +174,9 @@ trait DataContextComponent
         def getAllWithNameLike(namePart: String, pagination: Option[PaginationInfo] = None): Seq[User]
     }
 
+    /**
+     * Defines operations of repository accessing groups
+     */
     trait GroupRepository extends Repository[Group]
     {
         /**
@@ -150,6 +187,9 @@ trait DataContextComponent
         def getAllByOwnerId(ownerId: String, pagination: Option[PaginationInfo] = None) : Seq[Group]
     }
 
+    /**
+     * Defines operations of repository accessing privileges
+     */
     trait PrivilegeRepository extends Repository[Privilege[_ <: Entity]]
     {
         /**
@@ -172,7 +212,10 @@ trait DataContextComponent
           */
         def getAllByObjectIdAndPrivilegeClass(objId: String, privilegeClass: Class[_]): Seq[Privilege[_ <: Entity]]
     }
-    
+
+    /**
+     * Defines operations of repository accessing analyses
+     */
     trait AnalysisRepository
         extends Repository[Analysis]
         with NamedEntityRepository[Analysis]
@@ -192,6 +235,9 @@ trait DataContextComponent
         def persistParameterValue(parameterValue: ParameterValue[_])
     }
 
+    /**
+     * Defines operations of repository accessing ontology customizations
+     */
     trait OntologyCustomizationRepository
         extends Repository[OntologyCustomization]
         with NamedEntityRepository[OntologyCustomization]
@@ -211,6 +257,9 @@ trait DataContextComponent
         def persistPropertyCustomization(propertyCustomization: AnyRef)
     }
 
+    /**
+     * Defines operations of repository accessing plugins
+     */
     trait PluginRepository
         extends Repository[Plugin]
         with NamedEntityRepository[Plugin]

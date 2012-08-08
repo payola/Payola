@@ -25,6 +25,18 @@ object DataSource extends EntityConverter[DataSource]
     }
 }
 
+/**
+ * Provides database persistence to [[cz.payola.domain.entities.plugins.DataSource]] entities.
+ * @param id ID of the data source
+ * @param n Name of the data source
+ * @param o Owner of the data source
+ * @param df [[cz.payola.domain.entities.plugins.concrete.DataFetcher]]
+ * @param paramValues List of parameters assigned to this data source
+ * @param _isPub Whether this data source is public or not
+ * @param _desc Description of the data source
+ * @param _isEdit Whether this data source is editable or not
+ * @param context Implicit context
+ */
 class DataSource(
     override val id: String,
     n: String,

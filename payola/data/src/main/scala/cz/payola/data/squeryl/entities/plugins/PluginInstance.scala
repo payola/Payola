@@ -24,6 +24,15 @@ object PluginInstance extends EntityConverter[PluginInstance]
     }
 }
 
+/**
+ * Provides database persistence to [[cz.payola.domain.entities.plugins.PluginInstance]] entities.
+ * @param id ID of the plugin instance
+ * @param p Plugin the instance is derived from
+ * @param paramValues List of parameter values for the plugin instance
+ * @param _desc Description
+ * @param _isEdit Whether the plugin instance is editable or not
+ * @param context Implicit context
+ */
 class PluginInstance(
     override val id: String,
     p: cz.payola.domain.entities.Plugin,
