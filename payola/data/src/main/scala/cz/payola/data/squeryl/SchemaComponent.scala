@@ -351,7 +351,7 @@ trait SchemaComponent
             val COLUMN_TYPE_DESCRIPTION = "text"
             val COLUMN_TYPE_URI = "text"
             val COLUMN_TYPE_VALUE = "text"
-            val COLUMN_TYPE_COLOR = "varchar(20)"
+            val COLUMN_TYPE_COLOR = "varchar(128)"
             val COLUMN_TYPE_CLASSNAME = "varchar(64)"
             val COLUMN_TYPE_FULL_CLASSNAME = "varchar(256)"
 
