@@ -28,10 +28,6 @@ abstract class InputLikeView[A <: html.Element with html.elements.InputLike, B](
 
     def formHtmlElement = htmlElement
 
-    def value: B
-
-    def value_=(newValue: B)
-
     def enable() {
         htmlElement.disabled = false
         removeCssClass("disabled")
@@ -58,6 +54,15 @@ abstract class InputLikeView[A <: html.Element with html.elements.InputLike, B](
             addCssClass("active")
         } else {
             removeCssClass("active")
+        }
+    }
+
+    def triggerChangedOnKeyReleased() {
+        keyReleased += { e =>
+            if (e.keyCode > 45) {
+                changed.triggerDirectly(this)
+            }
+            true
         }
     }
 }

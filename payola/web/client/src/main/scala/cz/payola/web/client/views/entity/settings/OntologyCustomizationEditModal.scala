@@ -5,11 +5,9 @@ import cz.payola.common.entities.settings._
 import cz.payola.web.client.views.bootstrap._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events._
-import element.ColorInput
 import cz.payola.web.client.presenters.entity.settings._
 import cz.payola.web.client.views.elements.lists._
 import cz.payola.web.client.views.elements.form.fields._
-import scala.Some
 import cz.payola.common.visual.Color
 
 class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomization)

@@ -16,9 +16,11 @@ abstract class Input[A <: html.Element with html.elements.Input, B](
 class TextInput(name: String, initialValue: String, title: String = "", cssClass: String = "")
     extends Input[html.elements.TextInput, String]("text", name, initialValue, title, cssClass)
 {
+    triggerChangedOnKeyReleased()
+
     def value = htmlElement.value
 
-    def value_=(newValue: String) {
+    def updateValue(newValue: String) {
         htmlElement.value = newValue
     }
 
@@ -36,7 +38,7 @@ class FileInput(name: String, title: String = "", cssClass: String = "")
 {
     def value = htmlElement.value
 
-    def value_=(newValue: String) {
+    def updateValue(newValue: String) {
         htmlElement.value = newValue
     }
 }
@@ -44,9 +46,11 @@ class FileInput(name: String, title: String = "", cssClass: String = "")
 class NumericInput(name: String, initialValue: Int, title: String = "", cssClass: String = "")
     extends Input[html.elements.Input, Int]("number", name, initialValue, title, cssClass)
 {
+    triggerChangedOnKeyReleased()
+
     def value = htmlElement.value.toInt
 
-    def value_=(newValue: Int) {
+    def updateValue(newValue: Int) {
         htmlElement.value = newValue.toString
     }
 }
@@ -61,7 +65,7 @@ abstract class CheckInput(
 {
     def value = htmlElement.checked
 
-    def value_=(newValue: Boolean) {
+    def updateValue(newValue: Boolean) {
         htmlElement.checked = newValue
     }
 }

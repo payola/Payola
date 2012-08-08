@@ -12,9 +12,16 @@ trait Field[A] extends View
 
     def value: A
 
-    def value_=(value: A)
+    def value_=(newValue: A) {
+        if (newValue != value) {
+            updateValue(newValue)
+            changed.triggerDirectly(this)
+        }
+    }
 
     def isActive: Boolean
 
     def isActive_=(value: Boolean)
+
+    protected def updateValue(newValue: A)
 }
