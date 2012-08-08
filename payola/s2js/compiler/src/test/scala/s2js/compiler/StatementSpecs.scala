@@ -7,7 +7,7 @@ class StatementSpecs extends CompilerFixtureSpec
             configMap =>
                 scalaCode {
                     """
-                        import s2js.adapters.js.browser._
+                        import s2js.adapters.browser._
 
                         object a {
                             def m1() = {

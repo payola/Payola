@@ -3,11 +3,11 @@ package s2js.compiler
 class FunctionSpecs extends CompilerFixtureSpec
 {
     describe("Functions") {
-        it("can be higher-orderd") {
+        it("can be higher-ordered") {
             configMap =>
                 scalaCode {
                     """
-                        import s2js.adapters.js.browser._
+                        import s2js.adapters.browser._
 
                         class F {
                             val v1 = "v1"
@@ -68,7 +68,7 @@ class FunctionSpecs extends CompilerFixtureSpec
             configMap =>
                 scalaCode {
                     """
-                        import s2js.adapters.js.browser._
+                        import s2js.adapters.browser._
 
                         object a {
                             val x = (y: String) => { window.alert(y) }

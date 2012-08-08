@@ -4,13 +4,14 @@ import s2js.compiler.javascript
 
 object `package`
 {
-    @javascript("""
-        if (s2js.runtime.client.js.isDefined(anObject.__class__) && anObject.__class__ != null) {
-            return new scala.Some(anObject.__class__);
-        } else {
-            return scala.None;
-        }
-    """)
+    @javascript(
+        """
+            if (s2js.runtime.client.js.isDefined(anObject.__class__) && anObject.__class__ != null) {
+                return new scala.Some(anObject.__class__);
+            } else {
+                return scala.None;
+            }
+        """)
     def classOf(anObject: Any): Option[Class] = None
 
     def isClassDefined(className: String): Boolean = {
@@ -51,6 +52,16 @@ object `package`
         }
         anObject
     }
+
+    @javascript(
+        """
+            for (var i in mixedObject) {
+                if (i != '__class__') {
+                    targetObject[i] = mixedObject[i];
+                }
+            }
+        """)
+    private def mixIn(targetObject: Any, mixedObject: Any) {}
 
     @javascript("return goog.typeOf(anObject);")
     private def googTypeOf(anObject: Any): String = ""

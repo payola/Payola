@@ -154,7 +154,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                     """
                         package pkg
 
-                        import s2js.adapters.js.browser._
+                        import s2js.adapters.browser._
 
                         class A(val v1: Int) {
                             window.alert(v1.toString)
@@ -254,10 +254,11 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         pkg.B = function() {
                             var self = this;
                             pkg.A.apply(self, []);
+                            s2js.runtime.client.mixIn(self, new pkg.T2());
+                            s2js.runtime.client.mixIn(self, new pkg.T1());
                         };
                         goog.inherits(pkg.B, pkg.A);
-                        goog.object.extend(pkg.B.prototype, new pkg.T2());
-                        goog.object.extend(pkg.B.prototype, new pkg.T1());
+
                         pkg.B.prototype.m1 = function() {
                             var self = this;
                             pkg.T1.prototype.m1.apply(self, []);
@@ -487,9 +488,9 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         };
                         pkg.T2.prototype.__class__ = new s2js.runtime.client.Class('pkg.T2', []);
 
-                        goog.object.extend(pkg.o, new pkg.A());
-                        goog.object.extend(pkg.o, new pkg.T2());
-                        goog.object.extend(pkg.o, new pkg.T1());
+                        s2js.runtime.client.mixIn(pkg.o, new pkg.A());
+                        s2js.runtime.client.mixIn(pkg.o, new pkg.T2());
+                        s2js.runtime.client.mixIn(pkg.o, new pkg.T1());
                         pkg.o.__class__ = new s2js.runtime.client.Class('pkg.o', [pkg.A, pkg.T1, pkg.T2]);
                     """
                 }
@@ -604,7 +605,7 @@ class ClassDefSpecs extends CompilerFixtureSpec
                         };
                         pkg.B.prototype.__class__ = new s2js.runtime.client.Class('pkg.B', []);
 
-                        goog.object.extend(pkg, new pkg.A());
+                        s2js.runtime.client.mixIn(pkg, new pkg.A());
                         pkg.__class__ = new s2js.runtime.client.Class('pkg', [pkg.A]);
                     """
                 }
