@@ -63,7 +63,7 @@ To launch Payola, open SBT just like when you were compiling it and enter these 
 > ```run```
 
 
->*Warning:* Do **not** run the `initializer` project. All users, analyses, data sources, etc. would be lost. (See [this note](#drop-create-warning))
+> *Warning:* Do **not** run the `initializer` project. All users, analyses, data sources, etc. would be lost. (See [this note](#drop-create-warning))
 
 Once the server is running, enter the following address in your web browser:
 
@@ -293,10 +293,6 @@ The solution is defined using the [SBT](https://github.com/harrah/xsbt/wiki/ "SB
 - ```payola```
 	- [```common```](#common)
 	- [```data```](#data)
-		- [```squeryl```](#squeryl)
-			- [```entities```](#squeryl-entities)
-			- [```repositories```](#squeryl-repositories)
-		- [```virtuoso```](#virtuoso)
 	- [```domain```](#domain)
 	- [```model```](#model)
 	- [```project```](#project)
