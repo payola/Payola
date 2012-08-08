@@ -26,7 +26,7 @@ object DatabaseInitializer extends App
     }
 
     private def persistInitialData() {
-        val sparqlEndpointPlugin = new SparqlEndpoint
+        val sparqlEndpointPlugin = new SparqlEndpointFetcher
         val payolaStoragePlugin = new PayolaStorage
         val openDataCleanStoragePlugin = new OpenDataCleanStorage
         val concreteSparqlQueryPlugin = new ConcreteSparqlQuery

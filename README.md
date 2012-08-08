@@ -1,6 +1,6 @@
 # Payola!
 ---
-Payola is a HTML5 web application which enables you to work with graph data in a completely new way. You can visualise Linked Data via several plugins (which produces table, graph, etc.). That also means, that you no longer needs Pubby to browse through a Linked Data storage (via its SPARQL endpoint). Moreover, you can create an analysis and run it against a set of SPARQL endpoints. It represents a way of assembling a SPARQL query which is executed against a set of endpoints without further knowledge of SPARQL. Analysis results are processed and visualised using the embedded visualisation plugin.
+Payola is a HTML5 web application which lets you work with graph data in a completely new way. You can visualize Linked Data using several plugins (which produce a table, graph, etc.). That also means, that you no longer needs Pubby to browse through a Linked Data storage (via its SPARQL endpoint). Moreover, you can create an analysis and run it against a set of SPARQL endpoints without any knowledge of SPARQL language itself. Analysis results are processed and visualized using the embedded visualization plugin.
 
 Since Payola is rather a platform, you can fork the project and write your own plugins, extensions and more.
 
@@ -63,7 +63,7 @@ To launch Payola, open SBT just like when you were compiling it and enter these 
 > ```run```
 
 
->*Warning:* Do **not** run the `initializer` project. All users, analyses, data sources, etc. would be lost. (See [this note](#drop-create-warning))
+> *Warning:* Do **not** run the `initializer` project. All users, analyses, data sources, etc. would be lost. (See [this note](#drop-create-warning))
 
 Once the server is running, enter the following address in your web browser:
 
@@ -293,10 +293,6 @@ The solution is defined using the [SBT](https://github.com/harrah/xsbt/wiki/ "SB
 - ```payola```
 	- [```common```](#common)
 	- [```data```](#data)
-		- [```squeryl```](#squeryl)
-			- [```entities```](#squeryl-entities)
-			- [```repositories```](#squeryl-repositories)
-		- [```virtuoso```](#virtuoso)
 	- [```domain```](#domain)
 	- [```model```](#model)
 	- [```project```](#project)
