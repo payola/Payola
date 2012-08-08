@@ -1,11 +1,8 @@
 package cz.payola.data.squeryl.entities.plugins
 
-import cz.payola.data.squeryl.entities.plugins.parameters._
 import scala.collection.immutable
-import org.squeryl.annotations.Transient
 import cz.payola.data.squeryl.entities._
 import cz.payola.data.squeryl._
-import scala.Some
 
 /**
   * This object converts [[cz.payola.common.entities.plugins.PluginInstance]] to [[cz.payola.data.squeryl.entities.plugins.PluginInstance]]

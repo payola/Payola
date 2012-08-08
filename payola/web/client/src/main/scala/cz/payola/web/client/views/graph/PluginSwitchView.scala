@@ -14,6 +14,7 @@ import cz.payola.web.client.views.graph.visual.techniques.tree.TreeTechnique
 import cz.payola.web.client.views.graph.visual.techniques.gravity.GravityTechnique
 import cz.payola.web.shared.managers._
 import cz.payola.web.client.events._
+import cz.payola.web.client.views.elements.lists.ListItem
 
 class PluginSwitchView extends GraphView with ComposedView
 {
@@ -65,15 +66,15 @@ class PluginSwitchView extends GraphView with ComposedView
 
     // Re-trigger all events when the corresponding events are triggered in the plugins.
     plugins.foreach { plugin =>
-        plugin.vertexSelected += { e => vertexSelected.trigger(createVertexEventArgs(e.vertex)) }
-        plugin.vertexBrowsing += { e => vertexBrowsing.trigger(createVertexEventArgs(e.vertex)) }
-        plugin.vertexBrowsingDataSource += { e => vertexBrowsingDataSource.trigger(createVertexEventArgs(e.vertex)) }
+        plugin.vertexSelected += { e => vertexSelected.trigger(createVertexEventArgs(e.vertex))}
+        plugin.vertexBrowsing += { e => vertexBrowsing.trigger(createVertexEventArgs(e.vertex))}
+        plugin.vertexBrowsingDataSource += { e => vertexBrowsingDataSource.trigger(createVertexEventArgs(e.vertex))}
     }
 
     // Display the first plugin.
     pluginChangeButton.setActiveItem(pluginChangeButton.items.head)
-    currentPlugin.render(pluginSpace.domElement)
-    currentPlugin.renderControls(toolbar.domElement)
+    currentPlugin.render(pluginSpace.htmlElement)
+    currentPlugin.renderControls(toolbar.htmlElement)
 
     def createSubViews = List(toolbar, pluginSpace)
 
@@ -156,8 +157,8 @@ class PluginSwitchView extends GraphView with ComposedView
 
             // Switch to the new plugin.
             currentPlugin = plugin
-            currentPlugin.render(pluginSpace.domElement)
-            currentPlugin.renderControls(toolbar.domElement)
+            currentPlugin.render(pluginSpace.htmlElement)
+            currentPlugin.renderControls(toolbar.htmlElement)
             currentPlugin.update(currentGraph, currentCustomization)
         }
     }

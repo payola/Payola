@@ -4,15 +4,10 @@ import cz.payola.domain.rdf._
 import play.api.mvc._
 import scala.io.Source
 import cz.payola.domain.rdf.Graph
-import cz.payola.domain.entities.analyses.evaluation.Success
-import cz.payola.domain.net.Downloader
 import cz.payola.web.shared._
 import cz.payola.domain.entities.User
 import controllers.helpers.Secured
 import cz.payola.domain.entities.analyses.evaluation.Success
-import scala.Some
-import cz.payola.domain.entities.analyses.evaluation.Success
-import scala.Some
 
 object GraphDownloader extends PayolaController with Secured
 {

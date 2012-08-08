@@ -3,16 +3,6 @@
 @main(Some(user), "Edit group "+ group.name) {
 <div class="container">
 
-    <ul class="breadcrumb">
-        <li>
-            <a href="/">Home</a> <span class="divider">/</span>
-        </li>
-        <li>
-            <a href="@routes.Profile.index(user.name)">Your profile</a> <span class="divider">/</span>
-        </li>
-        <li class="active">Edit group</li>
-    </ul>
-
     <div class="row-fluid">
         <h1 class="span7">Edit group @group.name</h1><span class="span5" style="text-align: right;"><a href="@routes.Group.delete(group.id)" onclick="return confirm('Are you sure?');" class="btn btn-danger"><i class="icon-remove-circle icon-white"></i> Delete '@group.name'</a></span>
     </div>

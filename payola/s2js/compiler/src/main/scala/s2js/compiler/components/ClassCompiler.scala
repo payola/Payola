@@ -33,6 +33,9 @@ class ClassCompiler(packageDefCompiler: PackageDefCompiler, classDef: Global#Cla
             buffer += ");\n"
         }
 
+        // Mix in the inherited traits.
+        mixInInheritedTraits("self")
+
         // Initialize fields that aren't implicit constructor parameters.
         valDefs.filter(v => !initializedValDefs.contains(packageDefCompiler.getSymbolLocalJsName(v.symbol))).foreach(
             compileMember(_, "self"))

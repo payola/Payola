@@ -1,9 +1,10 @@
 package cz.payola.web.client.presenters.entity
 
 import cz.payola.web.client.Presenter
-import s2js.adapters.js.dom
+import s2js.adapters.dom
+import s2js.adapters.html
 
-class SharingPresenter(placeHolders: dom.NodeList[dom.Element], entityType: String) extends Presenter
+class SharingPresenter(placeHolders: dom.NodeList[html.Element], entityType: String) extends Presenter
 {
     def initialize() {
         var i = 0

@@ -3,7 +3,7 @@ package cz.payola.web.client.views.entity.analysis
 import cz.payola.web.client.views.elements._
 import cz.payola.common.entities.Analysis
 import cz.payola.web.client.View
-import s2js.adapters.js.dom.Element
+import s2js.adapters.html
 import scala.collection.mutable.ArrayBuffer
 import cz.payola.web.client.views.todo._
 import cz.payola.common.entities
@@ -12,16 +12,16 @@ import scala.collection.mutable
 import s2js.compiler.javascript
 import cz.payola.web.client.events.SimpleUnitEvent
 import cz.payola.common.entities.plugins.PluginInstance
-import cz.payola.web.client.presenters.models.ParameterValue
 
 abstract class AnalysisVisualizer(analysis: Analysis) extends View
 {
     val pluginInstanceRendered = new SimpleUnitEvent[PluginInstanceView]
 
     private val pluginCanvas = new Div(Nil, "plugin-canvas")
+
     protected val instancesMap = new HashMap[String, PluginInstanceView]
 
-    def render(parent: Element) {
+    def render(parent: html.Element) {
         pluginCanvas.render(parent)
         renderAnalysis()
     }
@@ -30,7 +30,7 @@ abstract class AnalysisVisualizer(analysis: Analysis) extends View
         pluginCanvas.destroy()
     }
 
-    def blockDomElement = pluginCanvas.domElement
+    def blockHtmlElement = pluginCanvas.htmlElement
 
     private def renderAnalysis() {
         val sources = new ArrayBuffer[PluginInstanceView]
@@ -105,18 +105,10 @@ abstract class AnalysisVisualizer(analysis: Analysis) extends View
         }
     }
 
-    def createPluginInstanceView(instance: PluginInstance) : PluginInstanceView
+    def createPluginInstanceView(instance: PluginInstance): PluginInstanceView
 
     private def isSource(instance: entities.plugins.PluginInstance, analysis: Analysis): Boolean = {
         !analysis.pluginInstanceBindings.find(_.targetPluginInstance == instance).isDefined
-    }
-
-    protected def getDefaultValues(instance: entities.plugins.PluginInstance): mutable.HashMap[String, String] = {
-        val map = new mutable.HashMap[String, String]
-        instance.parameterValues.foreach {
-            v => map.put(v.parameter.name, v.value.toString)
-        }
-        map
     }
 
     @javascript(
@@ -124,8 +116,8 @@ abstract class AnalysisVisualizer(analysis: Analysis) extends View
         """)
     def renderBinding(a: PluginInstanceView, b: PluginInstanceView) {}
 
-    def renderPluginInstanceView(v: PluginInstanceView){
-        v.render(pluginCanvas.domElement)
+    def renderPluginInstanceView(v: PluginInstanceView) {
+        v.render(pluginCanvas.htmlElement)
         pluginInstanceRendered.triggerDirectly(v)
     }
 }

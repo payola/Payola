@@ -1,39 +1,38 @@
 package cz.payola.web.client.views.graph.visual.techniques.gravity
 
 import collection.mutable.ListBuffer
-import s2js.adapters.js.dom.Date
+import s2js.adapters.js.Date
 import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.views.graph.visual.graph._
 import cz.payola.web.client.views.graph.visual.animation.Animation
 import cz.payola.web.client.views.graph.visual.techniques.BaseTechnique
 import cz.payola.web.client.views.algebra._
-import scala.Some
 
 /**
-  * Visual plug-in technique that places the vertices based on their edges.
-  * Every vertex causes a negative force on every other vertex, that makes
-  * vertices push each other away. Every edge causes a positive force on
-  * both vertices, that share the edge, that makes vertices push each other
-  * closer. The final positions of the vertices is reached when all vertices
-  * have "small enough" velocity.
-  */
+ * Visual plug-in technique that places the vertices based on their edges.
+ * Every vertex causes a negative force on every other vertex, that makes
+ * vertices push each other away. Every edge causes a positive force on
+ * both vertices, that share the edge, that makes vertices push each other
+ * closer. The final positions of the vertices is reached when all vertices
+ * have "small enough" velocity.
+ */
 class GravityTechnique(settings: VisualSetup) extends BaseTechnique(settings, "Gravity Visualisation")
 {
     /**
-      * How much vertices push away each other
-      */
+     * How much vertices push away each other
+     */
     private val repulsion: Double = 300
 
     /**
-      * How much edges make vertices attracted to each other
-      */
+     * How much edges make vertices attracted to each other
+     */
     private val attraction: Double = 0.05
 
     /**
-      * The "small enough" constant. The computation ends when
-      * Sum(vertexViewPacks.velocities) is less than this number.
-      * 0.5 is well tested, change it carefully.
-      */
+     * The "small enough" constant. The computation ends when
+     * Sum(vertexViewPacks.velocities) is less than this number.
+     * 0.5 is well tested, change it carefully.
+     */
     private val velocitiesStabilization = 3
 
     override def destroy() {
@@ -70,7 +69,7 @@ class GravityTechnique(settings: VisualSetup) extends BaseTechnique(settings, "G
         //run the calculation for the specified time in miliseconds
         // or just run it at once (if the animation step length is 0 or not defined)
         while (((animationStepLength.isDefined && needToContinue &&
-            compStartTime.getTime() + animationStepLength.get > currentTime.getTime())
+            compStartTime.getTime + animationStepLength.get > currentTime.getTime)
             ||
             (animationStepLength.isDefined && animationStepLength.get == 0 && needToContinue)
             ||
@@ -102,10 +101,10 @@ class GravityTechnique(settings: VisualSetup) extends BaseTechnique(settings, "G
     }
 
     /**
-      * Constructus a structure of vertexViewPacks, that the gravity algorithm works with.
-      * @param vertexViews to create vertexViewPacks from
-      * @return created vertexViewPacks
-      */
+     * Constructus a structure of vertexViewPacks, that the gravity algorithm works with.
+     * @param vertexViews to create vertexViewPacks from
+     * @return created vertexViewPacks
+     */
     private def buildVertexViewsWorkingStructure(vertexViews: ListBuffer[VertexView]): ListBuffer[VertexViewPack] = {
         var workingStructure = ListBuffer[VertexViewPack]()
 
@@ -117,11 +116,11 @@ class GravityTechnique(settings: VisualSetup) extends BaseTechnique(settings, "G
     }
 
     /**
-      * Constructs a structure of edgeViewPacks, that the gravity algorithm works with.
-      * @param vertexViewPacks to search for connected vertices
-      * @param edgeViews to create edgeViewPacks from
-      * @return created edgeViewPacks
-      */
+     * Constructs a structure of edgeViewPacks, that the gravity algorithm works with.
+     * @param vertexViewPacks to search for connected vertices
+     * @param edgeViews to create edgeViewPacks from
+     * @return created edgeViewPacks
+     */
     private def buildEdgeViewsWorkingStructure(vertexViewPacks: ListBuffer[VertexViewPack],
         edgeViews: ListBuffer[EdgeView]): ListBuffer[EdgeViewPack] = {
         var workingStructure = ListBuffer[EdgeViewPack]()
@@ -139,15 +138,15 @@ class GravityTechnique(settings: VisualSetup) extends BaseTechnique(settings, "G
     }
 
     /**
-      * Gravity model algorithm. Use it carefully, the computation complexity is quite high
-      * (vertices^2 + edges + vertices) * "something strange".
-      * The main loop ends if sum of velocities of vertices is less than 0.5. The inner loops compute forces effecting
-      * vertices. Vertices push away
-      * each other and their edges push them together. In the first loop are computed repulsions. In the
-      * second are computed attractions. And in the last loop are the forces applied.
-      * @param vertexViewPacks
-      * @param edgeViewPacks
-      */
+     * Gravity model algorithm. Use it carefully, the computation complexity is quite high
+     * (vertices^2 + edges + vertices) * "something strange".
+     * The main loop ends if sum of velocities of vertices is less than 0.5. The inner loops compute forces effecting
+     * vertices. Vertices push away
+     * each other and their edges push them together. In the first loop are computed repulsions. In the
+     * second are computed attractions. And in the last loop are the forces applied.
+     * @param vertexViewPacks
+     * @param edgeViewPacks
+     */
     private def run(vertexViewPacks: ListBuffer[VertexViewPack], edgeViewPacks: ListBuffer[EdgeViewPack]): Boolean = {
         vertexViewPacks.foreach { pushed =>
             pushed.force = Vector2D(0, 0)

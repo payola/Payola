@@ -6,7 +6,6 @@ import cz.payola.data.squeryl.entities.privileges.PrivilegeDbRepresentation
 import scala.collection.mutable
 import cz.payola.domain.Entity
 import cz.payola.data.PaginationInfo
-import scala.Some
 import org.squeryl.PrimitiveTypeMode._
 
 /**

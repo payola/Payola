@@ -27,4 +27,12 @@ trait Plugin extends Entity with OptionallyOwnedEntity with NamedEntity with Sha
 
     /** The plugin parameters. */
     def parameters: immutable.Seq[ParameterType] = _parameters
+
+    /**
+     * Returns a plugin parameter with the specified name.
+     * @param parameterName Name of the parameter to return.
+     */
+    final def getParameter(parameterName: String): Option[Parameter[_]] = {
+        parameters.find(_.name == parameterName)
+    }
 }

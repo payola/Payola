@@ -10,17 +10,19 @@ import cz.payola.common.entities.plugins.PluginInstance
 class EditableAnalysisVisualizer(analysis: Analysis) extends AnalysisVisualizer(analysis)
 {
     val parameterValueChanged = new SimpleUnitEvent[ParameterValue]
+
     val connectButtonClicked = new SimpleUnitEvent[EditablePluginInstanceView]
+
     val deleteButtonClicked = new SimpleUnitEvent[EditablePluginInstanceView]
 
     def createPluginInstanceView(instance: PluginInstance) : PluginInstanceView = {
-        val defaultValues = getDefaultValues(instance)
-        val view = new EditablePluginInstanceView(instance.id, instance.plugin, List(), defaultValues)
+        val view = new EditablePluginInstanceView(instance, List())
         initializeEditableInstance(view, instance, analysis)
         view
     }
 
-    private def initializeEditableInstance(instanceView: EditablePluginInstanceView, instance: entities.plugins.PluginInstance,
+    private def initializeEditableInstance(instanceView: EditablePluginInstanceView,
+        instance: entities.plugins.PluginInstance,
         analysis: Analysis) {
         instanceView.hideControls()
 
@@ -28,9 +30,9 @@ class EditableAnalysisVisualizer(analysis: Analysis) extends AnalysisVisualizer(
             instanceView.showControls()
         }
 
-        instanceView.parameterValueChanged += { e => parameterValueChanged.triggerDirectly(e.target) }
-        instanceView.connectButtonClicked += { e => connectButtonClicked.triggerDirectly(e.target) }
-        instanceView.deleteButtonClicked += { e => deleteButtonClicked.triggerDirectly(e.target) }
+        instanceView.parameterValueChanged += { e => parameterValueChanged.triggerDirectly(e.target)}
+        instanceView.connectButtonClicked += { e => connectButtonClicked.triggerDirectly(e.target)}
+        instanceView.deleteButtonClicked += { e => deleteButtonClicked.triggerDirectly(e.target)}
     }
 
     private def instanceHasNoFollowers(analysis: Analysis, instance: entities.plugins.PluginInstance): Boolean = {

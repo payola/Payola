@@ -1,22 +1,22 @@
 package cz.payola.web.client.views.graph.visual.graph
 
 import collection.mutable.ListBuffer
-import s2js.adapters.js.dom.CanvasRenderingContext2D
+import s2js.adapters.html.elements.CanvasRenderingContext2D
 import cz.payola.web.client.views.graph.visual.settings._
-import cz.payola.web.client.views.graph.visual.Color
+import cz.payola.common.visual.Color
 import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.graph.visual.graph.positioning.LocationDescriptor
 import cz.payola.common.rdf._
 import scala.collection.mutable
 
 /**
-  * Graphical representation of IdentifiedVertex object in the drawn graph.
-  * @param vertexModel the vertex object from the model, that is visualised
-  * @param position of this graphical representation in drawing space
-  * @param settings draw settings used in draw and quickDraw routines
-  * @param settingsText draw settings used by the contained informationView
-  * @param rdfType type of the vertex used to identify drawing settings in an ontology
-  */
+ * Graphical representation of IdentifiedVertex object in the drawn graph.
+ * @param vertexModel the vertex object from the model, that is visualised
+ * @param position of this graphical representation in drawing space
+ * @param settings draw settings used in draw and quickDraw routines
+ * @param settingsText draw settings used by the contained informationView
+ * @param rdfType type of the vertex used to identify drawing settings in an ontology
+ */
 class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var settings: VertexSettingsModel,
     settingsText: TextSettingsModel, var rdfType: String) extends View[CanvasRenderingContext2D]
 {
@@ -31,19 +31,19 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var s
     private var age = 0
 
     /**
-      * Indicator of isSelected attribute.
-      */
+     * Indicator of isSelected attribute.
+     */
     var selected = false
 
     /**
-      * List of edges that this vertex representation has. Allows to Iterate through the graphical representation
-      * of the graph.
-      */
+     * List of edges that this vertex representation has. Allows to Iterate through the graphical representation
+     * of the graph.
+     */
     var edges = ListBuffer[EdgeView]()
 
     /**
-      * Textual data that should be visualised with this vertex ("over this vertex").
-      */
+     * Textual data that should be visualised with this vertex ("over this vertex").
+     */
     private var information: Option[InformationView] = vertexModel match {
         case i: Vertex => Some(new InformationView(i, settingsText))
         case _ => None
@@ -54,7 +54,7 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var s
      * @param data what should the informationView of this vertex display
      */
     def setInformation(data: Option[Vertex]) {
-        if(data.isDefined) {
+        if (data.isDefined) {
             information = Some(new InformationView(data.get, settingsText))
         }
     }
@@ -153,7 +153,7 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var s
         drawCircle(context, correctedPosition, settings.radius(rdfType), settings.borderSize, settings.borderColor)
         if (isSelected) {
             val col = settings.color(rdfType)
-            fillCurrentSpace(context, Color(col.red, col.green, col.blue, 1.0))
+            fillCurrentSpace(context, new Color(col.red, col.green, col.blue))
         } else {
             fillCurrentSpace(context, settings.color(rdfType))
         }
@@ -165,10 +165,10 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var s
     }
 
     /**
-      * Compares this to another vertexView. Returns true if vertexModels.toString are equal.
-      * @param vertexView
-      * @return
-      */
+     * Compares this to another vertexView. Returns true if vertexModels.toString are equal.
+     * @param vertexView
+     * @return
+     */
     def isEqual(vertexView: Any): Boolean = {
         if (vertexView == null) {
             false

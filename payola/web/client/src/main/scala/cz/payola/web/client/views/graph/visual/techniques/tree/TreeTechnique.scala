@@ -8,8 +8,8 @@ import collection.mutable.ListBuffer
 import cz.payola.web.client.views.algebra.Point2D
 
 /**
-  * Visual plug-in technique that places the vertices into a tree structure.
-  */
+ * Visual plug-in technique that places the vertices into a tree structure.
+ */
 class TreeTechnique(settings: VisualSetup) extends BaseTechnique(settings, "Tree Visualisation")
 {
     protected def getTechniquePerformer(component: Component,

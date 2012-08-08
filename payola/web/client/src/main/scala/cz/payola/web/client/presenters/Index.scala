@@ -1,8 +1,6 @@
 package cz.payola.web.client.presenters
 
-import s2js.adapters.js.browser._
-import cz.payola.web.shared._
-import cz.payola.common.rdf.IdentifiedVertex
+import s2js.adapters.browser._
 import cz.payola.web.client.views.graph.PluginView
 import cz.payola.web.client.views.graph.visual.techniques.tree.TreeTechnique
 import cz.payola.web.client.views.graph.visual.techniques.circle.CircleTechnique
@@ -13,6 +11,7 @@ import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.graph.table.TripleTablePluginView
 import cz.payola.web.client.views.graph.visual.settings._
 import cz.payola.web.client.views.graph.visual.VisualPluginView
+import cz.payola.web.client.views.elements.lists.ListItem
 
 class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
 {

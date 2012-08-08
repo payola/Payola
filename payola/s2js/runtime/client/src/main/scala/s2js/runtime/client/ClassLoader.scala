@@ -1,14 +1,13 @@
 package s2js.runtime.client
 
-import collection.mutable.ArrayBuffer
+import _root_.scala.collection._
 import s2js.compiler.javascript
 import s2js.runtime.shared.DependencyProvider
-import s2js.adapters.js.browser.console
 import s2js.runtime.shared.rpc.RpcException
 
 object ClassLoader
 {
-    val loadedClasses = new ArrayBuffer[String]()
+    val loadedClasses = mutable.ArrayBuffer.empty[String]
 
     def load(classNames: Seq[String]) {
         try {
@@ -19,7 +18,7 @@ object ClassLoader
                 // Process the dependency package.
                 dependencyPackage.providedSymbols.foreach(provide(_))
                 if (dependencyPackage.javaScript != "") {
-                    s2js.adapters.js.browser.eval(dependencyPackage.javaScript)
+                    s2js.adapters.js.eval(dependencyPackage.javaScript)
                 }
                 if (dependencyPackage.css != "") {
                     evaluateCss(dependencyPackage.css)
@@ -27,7 +26,7 @@ object ClassLoader
             }
         } catch {
             case e: RpcException => {
-                console.log(e.deepStackTrace)
+                s2js.adapters.browser.console.log(e.deepStackTrace)
                 throw e
             }
         }

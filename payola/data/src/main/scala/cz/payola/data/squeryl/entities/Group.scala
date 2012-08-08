@@ -2,7 +2,6 @@ package cz.payola.data.squeryl.entities
 
 import scala.collection._
 import cz.payola.data.squeryl._
-import scala.Some
 
 /**
   * This object converts [[cz.payola.common.entities.Group]] to [[cz.payola.data.squeryl.entities.Group]]

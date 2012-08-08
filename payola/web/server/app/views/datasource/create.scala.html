@@ -1,27 +1,17 @@
 @(user: cz.payola.domain.entities.User)
 
-@main(Some(user), "Create a new data source - Payola!") {
+@main(Some(user), "Create a new data source - Payola!", Some("Create a new data source")) {
 
-<div class="container-fluid">
-    <ul class="breadcrumb">
-        <li class="active">Create a new data source</li>
-    </ul>
-
-    <div class="row-fluid">
-        <form class="well" id="create_form"  action="@routes.DataSource.createNew()" method="post">
-            <div id="data_source_name_input_wrapper"></div>
-            <div id ="data_source_description_input_wrapper"></div>
-            <div><input type="checkbox" name="__dataSourceIsPublic__" value="Public"/> Public</div><br/>
-            <div style="padding-bottom: 20px;" id="data_fetcher_select_wrapper"></div>
-            <div id="options_div" class="well"></div>
-            <div id="submit_button_div"></div>
-        </form>
+<<<<<<< HEAD
+    <div class="container-fluid">
+        <h1>Create a new data source</h1>
+        <div id="data-source-properties" class="row-fluid">
+        </div>
     </div>
-</div>
-
-<script src="/javaScriptPackage/cz.payola.web.client.presenters.DataSourceCreator" type="text/javascript"></script>
-<script type="text/javascript">
-    new cz.payola.web.client.presenters.DataSourceCreator("data_fetcher_select_wrapper", "options_div", "submit_button_div", "data_source_name_input_wrapper", "data_source_description_input_wrapper", "@routes.DataSource.list()");
-</script>
-
+    <script src="/javaScriptPackage/cz.payola.web.client.presenters.entity.plugins.DataSourceCreator" type="text/javascript"></script>
+    <script type="text/javascript">
+        new cz.payola.web.client.presenters.entity.plugins.DataSourceCreator(
+            document.getElementById('data-source-properties')
+        ).initialize();
+    </script>
 }

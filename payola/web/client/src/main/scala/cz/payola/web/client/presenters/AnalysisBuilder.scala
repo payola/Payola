@@ -1,27 +1,24 @@
 package cz.payola.web.client.presenters
 
-import s2js.adapters.js.browser.document
+import s2js.adapters.browser._
 import cz.payola.web.client.views.todo.PluginInstanceView
 import cz.payola.web.client.views.todo.EditablePluginInstanceView
 import cz.payola.web.client.presenters.components._
 import cz.payola.web.shared.AnalysisBuilderData
-import s2js.compiler.javascript
 import cz.payola.common.entities.Plugin
-import s2js.adapters.js.browser.window
 import scala.collection.mutable.ArrayBuffer
 import s2js.runtime.client.scala.collection.mutable.HashMap
 import cz.payola.web.client.presenters.models.ParameterValue
 import cz.payola.web.client.events.EventArgs
 import cz.payola.web.client.views.bootstrap._
-import cz.payola.web.client.views.bootstrap.inputs.TextInputControl
 import cz.payola.web.client.Presenter
 import cz.payola.web.client.views.entity.analysis.AnalysisEditorView
 import cz.payola.common.entities.plugins.DataSource
 import scala.collection.mutable
 import cz.payola.web.client.views.entity.plugins.DataSourceSelector
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
-import s2js.runtime.shared.rpc.RpcException
 import cz.payola.common.ValidationException
+import cz.payola.web.client.views.elements.form.fields.TextInput
 
 class AnalysisBuilder(parentElementId: String) extends Presenter
 {
@@ -31,19 +28,14 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
 
     protected var allSources: Seq[DataSource] = List()
 
-    protected val saveAsYouTypeTimeout = 1000
-
     protected var analysisId = ""
-
-    protected val timeoutMap = new HashMap[String, Int]
 
     protected var branches = new ArrayBuffer[PluginInstanceView]
 
-    protected var nameChangedTimeout: Option[Int] = None
-
-    protected var descriptionChangedTimeout: Option[Int] = None
-
-    protected val nameComponent = new TextInputControl("Analysis name", "init-name", "", "Enter analysis name")
+    protected val nameComponent = new InputControl(
+        "Analysis name",
+        new TextInput("init-name", "", "Enter analysis name")
+    )
 
     protected val instancesMap = new mutable.HashMap[String, PluginInstanceView]
 
@@ -53,19 +45,19 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
 
         nameDialog.confirming += {
             e =>
-                AnalysisBuilderData.setAnalysisName(analysisId, nameComponent.input.value) {
+                AnalysisBuilderData.setAnalysisName(analysisId, nameComponent.field.value) {
                     success =>
 
-                        AnalysisBuilderData.createEmptyAnalysis(nameComponent.input.value) {
+                        AnalysisBuilderData.createEmptyAnalysis(nameComponent.field.value) {
                             analysis =>
                                 analysisId = analysis.id
                                 lockAnalysisAndLoadPlugins()
                                 val view = new AnalysisEditorView(analysis)
                                 view.visualiser.pluginInstanceRendered += {
-                                    e => instancesMap.put(e.target.id, e.target)
+                                    e => instancesMap.put(e.target.pluginInstance.id, e.target)
                                 }
                                 view.render(parentElement)
-                                view.setName(nameComponent.input.value)
+                                view.setName(nameComponent.field.value)
 
                                 bindMenuEvents(view)
 
@@ -94,60 +86,37 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
     }
 
     protected def bindMenuEvents(view: AnalysisEditorView) {
-        view.description.input.changed += {
-            eventArgs =>
-                if (descriptionChangedTimeout.isDefined) {
-                    window.clearTimeout(descriptionChangedTimeout.get)
-                }
-
-                view.description.setIsActive()
-                descriptionChangedTimeout = Some(window.setTimeout({
-                    () =>
-                        AnalysisBuilderData.setAnalysisDescription(analysisId, view.description.input.value) {
-                            _ =>
-                                view.description.setIsActive(false)
-                                view.description.setOk()
-                        } {
-                            _ =>
-                                view.description.setIsActive(false)
-                                view.description.setError("Invalid description.")
-                        }
-                }, saveAsYouTypeTimeout))
+        view.description.delayedChanged += { _ =>
+            view.description.isActive = true
+            AnalysisBuilderData.setAnalysisDescription(analysisId, view.description.field.value) { _ =>
+                view.description.isActive = false
+                view.description.setOk()
+            } { _ =>
+                view.description.isActive = false
+                view.description.setError("Invalid description.")
+            }
         }
 
-        view.nameControl.input.changed += {
-            eventArgs =>
-                if (nameChangedTimeout.isDefined) {
-                    window.clearTimeout(nameChangedTimeout.get)
-                }
-
-                view.nameControl.setIsActive()
-                nameChangedTimeout = Some(window.setTimeout({
-                    () =>
-                        AnalysisBuilderData.setAnalysisName(analysisId, view.nameControl.input.value) {
-                            _ =>
-                                view.nameControl.setIsActive(false)
-                                view.nameControl.setOk()
-                        } {
-                            _ =>
-                                view.nameControl.setIsActive(false)
-                                view.nameControl.setError("Invalid name.")
-                        }
-                }, saveAsYouTypeTimeout))
-
-                false
+        view.name.delayedChanged += { _ =>
+            view.name.isActive = true
+            AnalysisBuilderData.setAnalysisName(analysisId, view.name.field.value) { _ =>
+                view.name.isActive = false
+                view.name.setOk()
+            } { _ =>
+                view.name.isActive = false
+                view.name.setError("Invalid name.")
+            }
         }
 
-        view.addPluginLink.mouseClicked += {
-            event =>
-                val dialog = new PluginDialog(allPlugins.filter(_.inputCount == 0).filterNot(_.name == "Payola Private Storage"))
-                dialog.pluginNameClicked += { evtArgs =>
-                    onPluginNameClicked(evtArgs.target, None, view)
-                    dialog.destroy()
-                    false
-                }
-                dialog.render()
+        view.addPluginLink.mouseClicked += { _ =>
+            val dialog = new PluginDialog(allPlugins.filter(_.inputCount == 0).filterNot(_.name == "Payola Private Storage"))
+            dialog.pluginNameClicked += { evtArgs =>
+                onPluginNameClicked(evtArgs.target, None, view)
+                dialog.destroy()
                 false
+            }
+            dialog.render()
+            false
         }
 
         view.addDataSourceLink.mouseClicked += {
@@ -213,10 +182,8 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
             i = i + 1
         }
 
-        AnalysisBuilderData.createPluginInstance(evt.target.id, analysisId) {
-            id =>
-                val mergeInstance = new EditablePluginInstanceView(id, evt.target,
-                    buffer.asInstanceOf[Seq[PluginInstanceView]])
+        AnalysisBuilderData.createPluginInstance(evt.target.id, analysisId) { createdInstance =>
+                val mergeInstance = new EditablePluginInstanceView(createdInstance, buffer.asInstanceOf[Seq[PluginInstanceView]])
                 view.visualiser.renderPluginInstanceView(mergeInstance)
 
                 mergeInstance.connectButtonClicked += {
@@ -266,7 +233,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                     map.put(paramValue.parameter.name, paramValue.value.toString)
             }
 
-            val instance = new EditablePluginInstanceView(pi.id, pi.plugin, List(), map)
+            val instance = new EditablePluginInstanceView(pi, List())
 
             branches.append(instance)
             view.visualiser.renderPluginInstanceView(instance)
@@ -291,11 +258,11 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
     def onPluginNameClicked(plugin: Plugin, predecessor: Option[PluginInstanceView], view: AnalysisEditorView) = {
         blockPage("Creating an instance of the plugin...")
 
-        AnalysisBuilderData.createPluginInstance(plugin.id, analysisId) { id =>
+        AnalysisBuilderData.createPluginInstance(plugin.id, analysisId) { createdInstance =>
             val instance = if (predecessor.isDefined) {
-                new EditablePluginInstanceView(id, plugin, List(predecessor.get))
+                new EditablePluginInstanceView(createdInstance, List(predecessor.get))
             } else {
-                new EditablePluginInstanceView(id, plugin, List())
+                new EditablePluginInstanceView(createdInstance, List())
             }
 
             branches.append(instance)
@@ -324,28 +291,14 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
 
     protected def onParameterValueChanged(args: EventArgs[ParameterValue]) {
         val parameterInfo = args.target
-        val parameterId = parameterInfo.parameterId
-
-        if (timeoutMap.contains(parameterId)) {
-            window.clearTimeout(timeoutMap(parameterId))
+        parameterInfo.control.isActive = true
+        AnalysisBuilderData.setParameterValue(analysisId, parameterInfo.pluginInstanceId, parameterInfo.name, parameterInfo.value) { _ =>
+            parameterInfo.control.setOk()
+            parameterInfo.control.isActive = false
+        } { _ =>
+            parameterInfo.control.setError("Wrong parameter value.")
+            parameterInfo.control.isActive = false
         }
-
-        parameterInfo.control.setIsActive()
-
-        val timeoutId = window.setTimeout(() => {
-            AnalysisBuilderData
-                .setParameterValue(analysisId, parameterInfo.pluginInstanceId, parameterInfo.name, parameterInfo.value) {
-                _ =>
-                    parameterInfo.control.setOk()
-                    parameterInfo.control.setIsActive(false)
-            } {
-                _ =>
-                    parameterInfo.control.setError("Wrong parameter value.")
-                    parameterInfo.control.setIsActive(false)
-            }
-        }, saveAsYouTypeTimeout)
-
-        timeoutMap.put(parameterId, timeoutId)
     }
 
     def connectPlugin(pluginInstance: PluginInstanceView, view: AnalysisEditorView): Unit = {
@@ -364,7 +317,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
     def onDeleteClick(eventArgs: EventArgs[PluginInstanceView]) {
         val instance = eventArgs.target
         blockPage("Deleting...")
-        AnalysisBuilderData.deletePluginInstance(analysisId, instance.id) {
+        AnalysisBuilderData.deletePluginInstance(analysisId, instance.pluginInstance.id) {
             _ =>
                 branches -= instance
                 var i = 0
@@ -382,18 +335,8 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
     }
 
     def bind(a: PluginInstanceView, b: PluginInstanceView, inputIndex: Int) {
-        AnalysisBuilderData.saveBinding(analysisId, a.id, b.id, inputIndex) {
+        AnalysisBuilderData.saveBinding(analysisId, a.pluginInstance.id, b.pluginInstance.id, inputIndex) {
             _ =>
         }(fatalErrorHandler(_))
-    }
-
-    protected def setTimeout(key: String, callback: () => Unit) {
-        timeoutMap.put(key, window.setTimeout(callback, saveAsYouTypeTimeout))
-    }
-
-    protected def clearTimeOutIfSet(key: String) {
-        if (timeoutMap.get(key).isDefined) {
-            window.clearTimeout(timeoutMap.get(key).get)
-        }
     }
 }

@@ -6,9 +6,7 @@ import cz.payola.web.shared.Payola
 import cz.payola.domain.entities.plugins.concrete.DataFetcher
 import cz.payola.domain.entities.plugins._
 import scala.collection.mutable.ListBuffer
-import scala.Some
 import cz.payola.domain.entities.plugins.parameters._
-import scala.Some
 
 object DataSource extends PayolaController with Secured
 {

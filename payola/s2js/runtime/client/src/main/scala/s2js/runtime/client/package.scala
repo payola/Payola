@@ -1,28 +1,28 @@
 package s2js.runtime.client
 
 import s2js.compiler.javascript
-import s2js.adapters.goog
 
 object `package`
 {
-    @javascript("""
-        if (s2js.runtime.client.js.isDefined(anObject.__class__) && anObject.__class__ != null) {
-            return new scala.Some(anObject.__class__);
-        } else {
-            return scala.None;
-        }
-    """)
+    @javascript(
+        """
+            if (s2js.runtime.client.js.isDefined(anObject.__class__) && anObject.__class__ != null) {
+                return new scala.Some(anObject.__class__);
+            } else {
+                return scala.None;
+            }
+        """)
     def classOf(anObject: Any): Option[Class] = None
 
     def isClassDefined(className: String): Boolean = {
-        s2js.runtime.client.js.isDefined(s2js.adapters.js.browser.eval(className))
+        s2js.runtime.client.js.isDefined(s2js.adapters.js.eval(className))
     }
 
     private def isInstanceOf(anObject: Any, classFullName: String): Boolean = {
         val classNameIsAny = classFullName == "scala.Any"
         val classNameIsAnyOrAnyVal = classNameIsAny || classFullName == "scala.AnyVal"
         val classNameIsAnyOrAnyRef = classNameIsAny || classFullName == "scala.AnyRef"
-        goog.typeOf(anObject) match {
+        googTypeOf(anObject) match {
             case "undefined" | "null" => false
             case "number" => {
                 classFullName match {
@@ -53,4 +53,16 @@ object `package`
         anObject
     }
 
+    @javascript(
+        """
+            for (var i in mixedObject) {
+                if (i != '__class__') {
+                    targetObject[i] = mixedObject[i];
+                }
+            }
+        """)
+    private def mixIn(targetObject: Any, mixedObject: Any) {}
+
+    @javascript("return goog.typeOf(anObject);")
+    private def googTypeOf(anObject: Any): String = ""
 }

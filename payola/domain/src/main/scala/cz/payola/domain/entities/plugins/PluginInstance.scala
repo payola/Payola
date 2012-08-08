@@ -4,6 +4,7 @@ import collection.immutable
 import cz.payola.domain.entities._
 import cz.payola.domain.entities.plugins.parameters._
 import cz.payola.domain.Entity
+import cz.payola.common.ValidationException
 
 /**
   * @param _plugin The corresponding plugin.
@@ -16,14 +17,6 @@ class PluginInstance(protected var _plugin: Plugin, protected var _parameterValu
     checkConstructorPostConditions()
 
     type PluginType = Plugin
-
-    /**
-      * Returns value of a parameter with the specified name or [[scala.None]] if such doesn't exist.
-      */
-    def getParameter(parameterName: String): Option[Any] = {
-        getParameterValue(parameterName).map(_.value)
-    }
-
     /**
       * Returns value of a boolean parameter with the specified name or [[scala.None]] if such doesn't exist.
       */
@@ -72,39 +65,46 @@ class PluginInstance(protected var _plugin: Plugin, protected var _parameterValu
       * Sets value of the specified parameter.
       */
     def setParameter(parameter: Parameter[_], value: Any): PluginInstance = {
-        getParameterValue(parameter).foreach(i => setParameter(i, value))
+        getParameterValue(parameter.name).foreach(i => setParameter(i, value))
         this
     }
 
     /**
       * Updates the specified parameter value.
       */
-    def setParameter(parameterValue: ParameterValue[_], value: Any): PluginInstance = {
+    def setParameter(parameterValue: ParameterValue[_], newValue: Any): PluginInstance = {
         require(_parameterValues.contains(parameterValue),
             "The parameter value to set doesn't correspond to the instance")
 
-        parameterValue match {
-            case instance: BooleanParameterValue => instance.value = value.asInstanceOf[Boolean]
-            case instance: FloatParameterValue => instance.value = value.asInstanceOf[Float]
-            case instance: IntParameterValue => instance.value = value.asInstanceOf[Int]
-            case instance: StringParameterValue => instance.value = value.asInstanceOf[String]
-            case _ => throw new IllegalArgumentException("The value doesn't conform to type of the parameter.")
+        try {
+            parameterValue match {
+                case booleanParameterValue: BooleanParameterValue => {
+                    booleanParameterValue.value = newValue match {
+                        case b: Boolean => b
+                        case v => v.toString.toBoolean
+                    }
+                }
+                case floatParameterValue: FloatParameterValue => {
+                    floatParameterValue.value = newValue match {
+                        case f: Float => f
+                        case v => v.toString.toFloat
+                    }
+                }
+                case intParameterValue: IntParameterValue => {
+                    intParameterValue.value = newValue match {
+                        case i: Int => i
+                        case v => v.toString.toInt
+                    }
+                }
+                case stringParameterValue: StringParameterValue => {
+                    stringParameterValue.value = newValue.toString
+                }
+            }
+        } catch {
+            case _ => throw new ValidationException(parameterValue.parameter.id, "The parameter value is invalid.")
         }
+
         this
-    }
-
-    /**
-      * Returns parameter value of the specified parameter.
-      */
-    def getParameterValue(parameter: Parameter[_]): Option[ParameterValue[_]] = {
-        parameterValues.find(_.parameter == parameter)
-    }
-
-    /**
-      * Returns parameter value of the parameter specified by the given name.
-      */
-    def getParameterValue(parameterName: String): Option[ParameterValue[_]] = {
-        plugin.getParameter(parameterName).flatMap(getParameterValue(_))
     }
 
     override def canEqual(other: Any): Boolean = {

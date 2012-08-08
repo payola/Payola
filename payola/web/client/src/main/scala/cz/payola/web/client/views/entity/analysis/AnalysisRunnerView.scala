@@ -5,7 +5,7 @@ import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.Tabs
 import cz.payola.common.entities.Analysis
 
-class AnalysisRunnerView(analysis: Analysis, timeoutSeconds: Long) extends ComposedView
+class AnalysisRunnerView(analysis: Analysis, timeoutSeconds: Int) extends ComposedView
 {
     val overviewView = new AnalysisOverviewView(analysis, timeoutSeconds)
 

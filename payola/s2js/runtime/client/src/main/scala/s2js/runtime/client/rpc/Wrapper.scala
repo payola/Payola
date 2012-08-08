@@ -2,7 +2,8 @@ package s2js.runtime.client.rpc
 
 import collection.mutable.ArrayBuffer
 import s2js.compiler.javascript
-import s2js.adapters.js.browser._
+import s2js.adapters.js._
+import s2js.adapters.browser._
 import s2js.runtime.shared.rpc.RpcException
 import s2js.runtime.client.scala.collection.immutable.StringOps
 
@@ -11,6 +12,7 @@ private object Wrapper
     val deserializer = new Deserializer()
 
     val parameterSeparator = "&"
+
     val requestStatusDone = 4
 
     def callSync(procedureName: String, parameters: ArrayBuffer[Any], parameterTypes: ArrayBuffer[String]): Any = {
@@ -23,7 +25,7 @@ private object Wrapper
         successCallback: (Any => Unit), exceptionCallback: (Throwable => Unit)) {
 
         val request = createXmlHttpRequest("/RPC/async", isAsync = true)
-        request.onreadystatechange = () => {
+        request.onreadystatechange = { _ =>
             if (request.readyState == 4) {
                 processRequestResult(request, successCallback, exceptionCallback)
             }

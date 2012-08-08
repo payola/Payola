@@ -1,22 +1,21 @@
 package cz.payola.web.client.views.bootstrap
 
 import s2js.compiler.javascript
-import s2js.adapters.js.dom
-import s2js.adapters.js.browser.document
+import s2js.adapters.browser._
+import s2js.adapters.html
 import cz.payola.web.client.views._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events._
-import scala.Some
 import cz.payola.web.client.View
 
 /**
-  * A modal popup window.
-  * @param header Header of the modal.
-  * @param body Components in the modal body.
-  * @param confirmText Save button text. If empty, the save button isn't shown.
-  * @param cancelText Cancel button text. If empty, the cancel button isn't shown.
-  * @param hasCloseButton Whether the close button should be shown.
-  */
+ * A modal popup window.
+ * @param header Header of the modal.
+ * @param body Components in the modal body.
+ * @param confirmText Save button text. If empty, the save button isn't shown.
+ * @param cancelText Cancel button text. If empty, the cancel button isn't shown.
+ * @param hasCloseButton Whether the close button should be shown.
+ */
 class Modal(
     val header: String,
     val body: Seq[View] = Nil,
@@ -27,24 +26,26 @@ class Modal(
     extends ComposedView
 {
     /**
-      * Triggered when the OK button is clicked. The event handler should return whether the modal should be closed.
-      */
+     * Triggered when the OK button is clicked. The event handler should return whether the modal should be closed.
+     */
     val confirming = new SimpleBooleanEvent[this.type]
 
     /**
-      * Triggered when the cancel or close button is clicked. The event handler should return whether the modal should
-      * be closed.
-      */
+     * Triggered when the cancel or close button is clicked. The event handler should return whether the modal should
+     * be closed.
+     */
     val closing = new SimpleBooleanEvent[this.type]
 
     protected val saveButton = new Button(new Text(confirmText.getOrElse("")), "btn-primary")
+
     protected val cancelButton = new Button(new Text(cancelText.getOrElse("")))
+
     protected val closeButton = new Button(new Text("x"), "close")
 
     def createSubViews = {
-        saveButton.mouseClicked += { e => buttonClickedHandler(confirming) }
-        cancelButton.mouseClicked += { e => buttonClickedHandler(closing) }
-        closeButton.mouseClicked += { e => buttonClickedHandler(closing) }
+        saveButton.mouseClicked += { e => buttonClickedHandler(confirming)}
+        cancelButton.mouseClicked += { e => buttonClickedHandler(closing)}
+        closeButton.mouseClicked += { e => buttonClickedHandler(closing)}
 
         List(new Div(List(
             new Div(
@@ -63,7 +64,7 @@ class Modal(
         ), "modal hide " + cssClass))
     }
 
-    override def render(parent: dom.Element = document.body) {
+    override def render(parent: html.Element = document.body) {
         super.render(parent)
         show()
     }
@@ -80,9 +81,9 @@ class Modal(
         false
     }
 
-    @javascript("$(self.subViews().head().domElement).modal({ show: true, keyboard: false, backdrop: 'static' })")
-    private def show() { }
+    @javascript("$(self.subViews().head().htmlElement).modal({ show: true, keyboard: false, backdrop: 'static' })")
+    private def show() {}
 
-    @javascript("jQuery(self.subViews().head().domElement).modal('hide')")
-    private def hide() { }
+    @javascript("jQuery(self.subViews().head().htmlElement).modal('hide')")
+    private def hide() {}
 }

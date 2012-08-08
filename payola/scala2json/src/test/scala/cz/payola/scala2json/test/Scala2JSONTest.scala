@@ -11,7 +11,6 @@ import cz.payola.scala2json.rules.CustomValueSerializationRule
 import cz.payola.scala2json.rules.BasicSerializationRule
 import cz.payola.scala2json.rules.CustomSerializationRule
 import cz.payola.scala2json.classes.SimpleSerializationClass
-import scala.Some
 
 /**
   * This test shows some basic capabilities of the JSONSerializer

@@ -7,7 +7,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
             configMap =>
                 scalaCode {
                     """
-                        import s2js.adapters.js.browser._
+                        import s2js.adapters.browser._
 
                         object a {
                             def m1() {
@@ -40,7 +40,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
             configMap =>
                 scalaCode {
                     """
-                        import s2js.adapters.js.browser._
+                        import s2js.adapters.browser._
 
                         object a {
                             def m1() = {
@@ -110,7 +110,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
             configMap =>
                 scalaCode {
                     """
-                        import s2js.adapters.js.browser._
+                        import s2js.adapters.browser._
 
                         object o1 {
                             def m1(): String = "fooy"

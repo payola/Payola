@@ -3,7 +3,6 @@ package cz.payola.data.squeryl.entities.analyses
 import cz.payola.data.squeryl.entities._
 import cz.payola.data.squeryl.entities.plugins.PluginInstance
 import cz.payola.data.squeryl._
-import scala.Some
 
 /**
   * This objects converts [[cz.payola.common.entities.analyses.PluginInstanceBinding]]

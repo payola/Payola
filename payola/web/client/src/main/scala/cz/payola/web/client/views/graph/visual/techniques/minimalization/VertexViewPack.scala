@@ -4,24 +4,24 @@ import collection.mutable.ListBuffer
 import cz.payola.web.client.views.graph.visual.graph.VertexView
 
 /**
-  * Representation of a VertexView object used in MinimalizationTechnique perform routine.
-  * @param value contained vertexView
-  * @param children vertices, that have an edge with this contained vertexView without parent
-  * @param parent vertexView higher in the vertices tree structure
-  */
+ * Representation of a VertexView object used in MinimalizationTechnique perform routine.
+ * @param value contained vertexView
+ * @param children vertices, that have an edge with this contained vertexView without parent
+ * @param parent vertexView higher in the vertices tree structure
+ */
 class VertexViewPack(var value: VertexView, var children: ListBuffer[VertexViewPack],
     var parent: Option[VertexViewPack])
 {
     /**
-      * Permutations of the children list, generated for the rotateChildren routine
-      */
+     * Permutations of the children list, generated for the rotateChildren routine
+     */
     private var permutations: Option[ListBuffer[ListBuffer[VertexViewPack]]] = None
 
     /**
-      * Generator of permutations of the children list.
-      * @param toPermute container of elements to generate permutations for
-      * @return container with all possible permutations of the input parameter
-      */
+     * Generator of permutations of the children list.
+     * @param toPermute container of elements to generate permutations for
+     * @return container with all possible permutations of the input parameter
+     */
     private def generatePermutations(toPermute: ListBuffer[VertexViewPack]): ListBuffer[ListBuffer[VertexViewPack]] = {
         //does not depend on the type of elements in the input container
 
@@ -45,10 +45,10 @@ class VertexViewPack(var value: VertexView, var children: ListBuffer[VertexViewP
     }
 
     /**
-      * Permutes the children list. If the children list has already contained its all possible permutations true
-      * is returned
-      * @return true if all possible permutations have been tryed
-      */
+     * Permutes the children list. If the children list has already contained its all possible permutations true
+     * is returned
+     * @return true if all possible permutations have been tryed
+     */
     def rotateChildren(): Boolean = {
         if (permutations == None) {
             //permutations not initialized yet
@@ -67,10 +67,10 @@ class VertexViewPack(var value: VertexView, var children: ListBuffer[VertexViewP
     }
 
     /**
-      * returns the right-most parent with children, that do not have any further children
-      * right-most...child is on the right, if it is at the end of the children container
-      * @return
-      */
+     * returns the right-most parent with children, that do not have any further children
+     * right-most...child is on the right, if it is at the end of the children container
+     * @return
+     */
     def getLastParent: VertexViewPack = {
         //find topmost parent
         var topmostParent = this
@@ -102,10 +102,10 @@ class VertexViewPack(var value: VertexView, var children: ListBuffer[VertexViewP
     }
 
     /**
-      * Counts elements in list of lists. Helper function for Equals routine.
-      * @param container to count elements of
-      * @return count of elements inside two dimensional container
-      */
+     * Counts elements in list of lists. Helper function for Equals routine.
+     * @param container to count elements of
+     * @return count of elements inside two dimensional container
+     */
     private def countElements(container: ListBuffer[ListBuffer[VertexViewPack]]): Int = {
         var counter = 0
         container.foreach { subContainer =>
@@ -118,14 +118,14 @@ class VertexViewPack(var value: VertexView, var children: ListBuffer[VertexViewP
     }
 
     /**
-      * Routine for getting this structure in linearized style...
-      * (e.g. tree A-B, A-C, B-D, B-E, C-F, C-G is linearized like this: [A, B, C, D, E, F, G].
-      * The previous brother of F is than E.)
-      * n
-      * n-1 <= n-2
-      * n-3 <= n-4 <= n-5 <= n-6
-      * @return
-      */
+     * Routine for getting this structure in linearized style...
+     * (e.g. tree A-B, A-C, B-D, B-E, C-F, C-G is linearized like this: [A, B, C, D, E, F, G].
+     * The previous brother of F is than E.)
+     * n
+     * n-1 <= n-2
+     * n-3 <= n-4 <= n-5 <= n-6
+     * @return
+     */
     def getPreviousBrother: VertexViewPack = {
         //find topmost parent
         var topmostParent = this
@@ -157,14 +157,14 @@ class VertexViewPack(var value: VertexView, var children: ListBuffer[VertexViewP
     }
 
     /**
-      * Routine for getting this structure in linearized style...
-      * (e.g. tree A-B, A-C, B-D, B-E, C-F, C-G is linearized like this: [A, B, C, D, E, F, G].
-      * The previous brother of F is than E.)
-      * n
-      * n-1 <= n-2
-      * n-3 <= n-4 <= n-5 <= n-6
-      * @return
-      */
+     * Routine for getting this structure in linearized style...
+     * (e.g. tree A-B, A-C, B-D, B-E, C-F, C-G is linearized like this: [A, B, C, D, E, F, G].
+     * The previous brother of F is than E.)
+     * n
+     * n-1 <= n-2
+     * n-3 <= n-4 <= n-5 <= n-6
+     * @return
+     */
     def getPreviousBrotherWithChildren: VertexViewPack = {
         var lastElement = this //if the graph consists of only 2 vertices
         var previousBrother = getPreviousBrother
@@ -179,9 +179,9 @@ class VertexViewPack(var value: VertexView, var children: ListBuffer[VertexViewP
     }
 
     /**
-      * creates a copy of this structure, but without copying its content of values
-      * @return
-      */
+     * creates a copy of this structure, but without copying its content of values
+     * @return
+     */
     override def clone(): VertexViewPack = {
         val root = new VertexViewPack(value, ListBuffer[VertexViewPack](), None)
         var level1New = ListBuffer[VertexViewPack](root)
@@ -218,11 +218,11 @@ class VertexViewPack(var value: VertexView, var children: ListBuffer[VertexViewP
     }
 
     /**
-      * Comparison of the structure of this object without recursion.
-      * (with too deep recursion it might crash in JS (DAMN YOU JS!!!!))
-      * @param pack to compare this object with
-      * @return true if the structure is of both objects is the same
-      */
+     * Comparison of the structure of this object without recursion.
+     * (with too deep recursion it might crash in JS (DAMN YOU JS!!!!))
+     * @param pack to compare this object with
+     * @return true if the structure is of both objects is the same
+     */
     def isEqual(pack: VertexViewPack): Boolean = {
         var equal = true
         if (this.value.vertexModel ne pack.value.vertexModel) {
@@ -273,10 +273,10 @@ class VertexViewPack(var value: VertexView, var children: ListBuffer[VertexViewP
     }
 
     /**
-      * returns just a list of vertices in the specified level (no vertex repeates)
-      * @param levelNum
-      * @return
-      */
+     * returns just a list of vertices in the specified level (no vertex repeates)
+     * @param levelNum
+     * @return
+     */
     private def getLevelSimple(levelNum: Int): ListBuffer[VertexViewPack] = {
         var level = this.children
         var levelNext = ListBuffer[VertexViewPack]()
@@ -306,13 +306,13 @@ class VertexViewPack(var value: VertexView, var children: ListBuffer[VertexViewP
     }
 
     /**
-      * Builds container with elements with the same distance from this object.
-      * The distance is measured by count of edges that create the shortest
-      * path between vertices.
-      * @param levelNum specifies number of edges, that create the shortest path
-      * @return list of lists of vertices that are reachable by the minimum count
-      *         of edges; every list describes children of a vertex in a previous level (levelNum -1)
-      */
+     * Builds container with elements with the same distance from this object.
+     * The distance is measured by count of edges that create the shortest
+     * path between vertices.
+     * @param levelNum specifies number of edges, that create the shortest path
+     * @return list of lists of vertices that are reachable by the minimum count
+     *         of edges; every list describes children of a vertex in a previous level (levelNum -1)
+     */
     def getLevel(levelNum: Int): ListBuffer[ListBuffer[VertexViewPack]] = {
         var result = ListBuffer[ListBuffer[VertexViewPack]](children)
         var level = ListBuffer[ListBuffer[VertexViewPack]](children)

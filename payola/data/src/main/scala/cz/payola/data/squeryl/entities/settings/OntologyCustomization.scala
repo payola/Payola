@@ -3,7 +3,6 @@ package cz.payola.data.squeryl.entities.settings
 import cz.payola.data.squeryl.entities._
 import scala.collection.immutable
 import cz.payola.data.squeryl._
-import scala.Some
 
 /**
  * This object converts [[cz.payola.domain.entities.settings.PropertyCustomization]] to

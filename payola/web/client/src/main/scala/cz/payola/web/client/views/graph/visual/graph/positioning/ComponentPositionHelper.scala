@@ -14,7 +14,7 @@ class ComponentPositionHelper(val componentsCount: Int, val previousComponent: O
 {
     def getPositionCorrection(): Vector2D = {
         val componentSpacing = 50.0
-        val componentNumber = if(previousComponent.get.componentNumber >= 0) {
+        val componentNumber = if (previousComponent.get.componentNumber >= 0) {
             previousComponent.get.componentNumber + 1
             //^it is expected, that components are numbered from 0
         } else {
@@ -44,7 +44,7 @@ class ComponentPositionHelper(val componentsCount: Int, val previousComponent: O
             }
 
         //lets enjoy some little math :-)
-        val numberOfCurrentLine = math.ceil((componentNumber)/ componentsInRowCount)
+        val numberOfCurrentLine = math.ceil((componentNumber) / componentsInRowCount)
         val positionInRow = (componentNumber) - ((numberOfCurrentLine - 1) * componentsInRowCount)
 
         if (positionInRow == 1) {

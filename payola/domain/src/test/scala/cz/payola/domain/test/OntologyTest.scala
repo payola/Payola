@@ -109,4 +109,22 @@ class OntologyTest extends FlatSpec with ShouldMatchers
         assert(!ontology.classes.isEmpty, "The downloaded ontology doesn't contain classes.")
         assert(!ontology.classes.values.flatMap(_.properties.values).isEmpty, "The classes don't contain properties.")
     }
+
+    /*
+    "Colors" should "be stored only if are valid" in {
+        val emptyColor = ""
+        val properColor = "rgb(0,       200,   155)"
+        val invalidColor1 = "rgb(256, 0, 0)";
+        val invalidColor2 = "rgba(200, 200, 200)"
+        val invalidColor3 = "rgb(200, 200, 200, 1)"
+        val invalidColor4 = "some string"
+
+        val ontology = Ontology(new Downloader(publicDataOntologyUrl, accept = "application/rdf+xml").result)
+        val clas = ontology
+        val property = clas.propertyCustomizations(0)
+
+        clas.fillColor = emptyColor
+        property.strokeColor = emptyColor
+    }
+    */
 }

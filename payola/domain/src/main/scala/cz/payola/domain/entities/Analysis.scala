@@ -7,7 +7,6 @@ import cz.payola.domain.entities.plugins.PluginInstance
 import cz.payola.domain.Entity
 import cz.payola.domain.entities.settings.OntologyCustomization
 import cz.payola.domain.entities.plugins.concrete._
-import scala.Some
 
 /**
   * @param _name Name of the analysis.

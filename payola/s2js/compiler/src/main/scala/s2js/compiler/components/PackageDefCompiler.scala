@@ -1,11 +1,10 @@
 package s2js.compiler.components
 
-import s2js.compiler.ScalaToJsException
 import scala.tools.nsc.Global
-import scala.collection.mutable
-import scala.collection.mutable.LinkedHashMap
+import scala.collection._
 import scala.tools.nsc.io.AbstractFile
 import reflect.NoType
+import s2js.compiler.ScalaToJsException
 
 /** A compiler of PackageDef objects */
 class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFile, val packageDef: Global#PackageDef)
@@ -83,6 +82,7 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
     def symbolIsInternal(symbol: Global#Symbol): Boolean = {
         val internalPackageNames = Set(
             "s2js.adapters.js",
+            "s2js.adapters.browser",
             "scala.reflect"
         )
         val internalTypeNames = Set(
@@ -139,12 +139,16 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
       * @return The replacement Some(oldPackage, newPackage) if such was found, None oterwise.
       */
     def symbolPackageReplacement(symbol: Global#Symbol): Option[(String, String)] = {
-        // Ordered by transformation priority (if A is a prefix of B, then the A should be first).
-        val packageReplacementMap = LinkedHashMap(
+        // Ordered by transformation priority (if A is a prefix of B, then the B should be first).
+        val packageReplacementMap = mutable.LinkedHashMap(
             "java.lang" -> "scala",
             "scala.this" -> "scala",
-            "s2js.adapters.js.browser" -> "",
-            "s2js.adapters.js.dom" -> "",
+            "s2js.adapters.browser" -> "",
+            "s2js.adapters.dom" -> "",
+            "s2js.adapters.events" -> "",
+            "s2js.adapters.html.elements" -> "",
+            "s2js.adapters.html" -> "",
+            "s2js.adapters.js" -> "",
             "s2js.adapters" -> "",
             "s2js.runtime.client.scala" -> "scala"
         )

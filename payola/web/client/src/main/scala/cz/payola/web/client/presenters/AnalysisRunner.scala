@@ -1,10 +1,9 @@
 package cz.payola.web.client.presenters
 
-import s2js.adapters.js.browser.document
+import s2js.adapters.browser._
 import cz.payola.web.client._
 import cz.payola.web.client.views.entity.analysis.AnalysisRunnerView
 import cz.payola.web.shared._
-import s2js.adapters.js.browser.window
 import cz.payola.web.client.presenters.components.EvaluationSuccessEventArgs
 import cz.payola.web.client.events.UnitEvent
 import cz.payola.common.entities.Analysis
@@ -49,12 +48,12 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
                 intervalHandler.foreach(window.clearInterval(_))
                 view.overviewView.controls.stopButton.addCssClass("disabled")
 
-                val graphPresenter = new GraphPresenter(view.resultsView.domElement)
+                val graphPresenter = new GraphPresenter(view.resultsView.htmlElement)
                 graphPresenter.initialize()
                 graphPresenter.view.updateGraph(Some(evt.graph))
 
                 val downloadButtonView = new DownloadButtonView()
-                downloadButtonView.render(graphPresenter.view.toolbar.domElement)
+                downloadButtonView.render(graphPresenter.view.toolbar.htmlElement)
 
                 downloadButtonView.rdfDownloadAnchor.mouseClicked += {
                     e =>
@@ -83,7 +82,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
     def runButtonClickHandler(view: AnalysisRunnerView, analysis: Analysis) = {
         if (!analysisRunning) {
             uiAdaptAnalysisRunning(view, initUI _, analysis)
-            var timeout = view.overviewView.controls.timeoutControl.input.value.toInt
+            var timeout = view.overviewView.controls.timeoutControl.field.value
 
             analysisRunning = true
             AnalysisRunner.runAnalysisById(analysisId, timeout) {
@@ -101,7 +100,9 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
                 error => fatalErrorHandler(error)
             }
 
-            window.onunload = { onStopClick(view, initUI, analysis) }
+            window.onunload = { _ =>
+                onStopClick(view, initUI, analysis)
+            }
         }
         false
     }

@@ -1,11 +1,12 @@
 package cz.payola.web.client.presenters.components
 
-import s2js.adapters.js.dom
+import s2js.adapters.html
 import cz.payola.web.client.views.bootstrap.Icon
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events.SimpleUnitEvent
 import cz.payola.web.client.views.elements.Div
 import cz.payola.web.client.views.ComposedView
+import s2js.adapters.html.Element
 
 class ZoomControls(var currentZoom: Double) extends ComposedView
 {
@@ -79,7 +80,7 @@ class ZoomControls(var currentZoom: Double) extends ComposedView
         setZoom(currentZoom - (zoomStep*50))
     }
 
-    override def render(parent: dom.Element) {
+    override def render(parent: html.Element) {
         super.render(parent)
         currentZoomText.text = getStatusCaption
     }

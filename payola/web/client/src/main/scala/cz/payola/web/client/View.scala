@@ -1,8 +1,8 @@
 package cz.payola.web.client
 
-import s2js.adapters.js.dom
-import s2js.adapters.js.browser.document
 import s2js.compiler.javascript
+import s2js.adapters.html
+import s2js._
 
 object View
 {
@@ -13,10 +13,10 @@ object View
     def unblockPage() { }
 
     @javascript("$(target).block(self.getBlockParameters(message));")
-    private def block(target: dom.Element, message: String) { }
+    private def block(target: html.Element, message: String) { }
 
     @javascript("$(target).unblock({ fadeOut: 0 });")
-    private def unblock(target: dom.Element) { }
+    private def unblock(target: html.Element) { }
 
     @javascript("""
         return {
@@ -57,20 +57,20 @@ trait View
      * Constructs this View's HTML representation and appends it to the parent HTML element.
      * @param parent element to which this View will be appended
      */
-    def render(parent: dom.Element)
+    def render(parent: html.Element)
 
     /**
      * Destroys inner variables and removes this View's HTML representation from its parent element.
      */
     def destroy()
 
-    def blockDomElement: dom.Element
+    def blockHtmlElement: html.Element
 
     def block(message: String = "") {
-        View.block(blockDomElement, message)
+        View.block(blockHtmlElement, message)
     }
 
     def unblock() {
-        View.unblock(blockDomElement)
+        View.unblock(blockHtmlElement)
     }
 }

@@ -82,6 +82,6 @@ class Deserializer extends RpcResultTraverser[Any]
             throw new RpcException("Can't deserialize an instance of class " + className + ". The class isn't loaded.")
         }
 
-        s2js.adapters.js.browser.eval("new " + className + "()")
+        s2js.adapters.js.eval("new " + className + "()")
     }
 }

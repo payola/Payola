@@ -34,10 +34,10 @@
     routes.Plugin.createPlugin(),
     page)
 
-<script language="javascript" type="text/javascript" src="/javaScriptPackage/cz.payola.web.client.presenters.Sharing"></script>
+<script language="javascript" type="text/javascript" src="/javaScriptPackage/cz.payola.web.client.presenters.entity.SharingPresenter"></script>
 <script type="text/javascript">
-    new cz.payola.web.client.presenters.Sharing(
-        "share-button-placeholder",
+    new cz.payola.web.client.presenters.entity.SharingPresenter(
+        document.getElementsByClassName("share-button-placeholder"),
         "@cz.payola.common.Entity.getClassName(classOf[cz.payola.common.entities.Plugin])"
     ).initialize();
 </script>

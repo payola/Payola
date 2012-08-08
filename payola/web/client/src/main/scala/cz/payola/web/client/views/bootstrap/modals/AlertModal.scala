@@ -1,10 +1,11 @@
 package cz.payola.web.client.views.bootstrap.modals
 
-import s2js.adapters.js.browser.window
+import s2js.adapters.browser._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.Modal
 
-object AlertModal {
+object AlertModal
+{
     def display(title: String, description: String, cssClass: String = "", autoCloseDelay: Option[Int] = None) {
         val modal = new AlertModal(title, description, cssClass)
 

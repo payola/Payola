@@ -66,7 +66,7 @@ class DependencySpecs extends CompilerFixtureSpec
             configMap =>
                 scalaCode {
                     """
-                        import s2js.adapters.js.browser._
+                        import s2js.adapters.browser._
 
                         object o1 {
                             val f1 = "aaaa"
@@ -93,7 +93,7 @@ class DependencySpecs extends CompilerFixtureSpec
             configMap =>
                 scalaCode {
                     """
-                        import s2js.adapters.js.browser._
+                        import s2js.adapters.browser._
 
                         object o1 {
                             val f1 = window.location
@@ -105,29 +105,6 @@ class DependencySpecs extends CompilerFixtureSpec
 
                         o1.f1 = window.location;
                         o1.__class__ = new s2js.runtime.client.Class('o1', []);
-                    """
-                }
-        }
-
-        it("add require for used object members") {
-            configMap =>
-                scalaCode {
-                    """
-                        import s2js.adapters.goog.events.EventType._
-
-                        object a {
-                            val x = CLICK
-                        }
-
-                    """
-                } shouldCompileTo {
-                    """
-                        s2js.runtime.client.ClassLoader.provide('a');
-
-                        s2js.runtime.client.ClassLoader.require('goog.events.EventType');
-
-                        a.x = goog.events.EventType.CLICK;
-                        a.__class__ = new s2js.runtime.client.Class('a', []);
                     """
                 }
         }

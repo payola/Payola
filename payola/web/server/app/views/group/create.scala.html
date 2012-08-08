@@ -2,17 +2,7 @@
 
 @import tags._
 
-@breadcrumbContent = {
-    <li>
-        <a href="/">Home</a> <span class="divider">/</span>
-    </li>
-    <li>
-        <a href="@routes.Profile.index(user.name)">Your profile</a> <span class="divider">/</span>
-    </li>
-    <li class="active">Create Group</li>
-}
-
-@main(Some(user), "Create a new group - Payola!", Some("Create a new group"), Some(breadcrumbContent)) {
+@main(Some(user), "Create a new group - Payola!", Some("Create a new group")) {
 
 <div class="container">
 

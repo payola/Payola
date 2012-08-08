@@ -1,27 +1,19 @@
 package cz.payola.web.client.views.todo
 
-import s2js.adapters.js.dom
-import cz.payola.common.entities.Plugin
+import s2js.adapters.html
 import s2js.compiler.javascript
-import scala.collection._
+import cz.payola.common.entities.Plugin
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.View
 import cz.payola.web.client.views.elements.Div
-import scala.Seq
-import scala.collection.immutable.HashMap
-import scala.Some
-import s2js.adapters.js.dom.Element
-import cz.payola.web.client.views.ComposedView
-import s2js.runtime.client.scala.collection.mutable.ArrayBuffer
+import cz.payola.common.entities.plugins._
 
 abstract class PluginInstanceView(
-    val id: String,
-    val plugin: Plugin,
-    var predecessors: Seq[PluginInstanceView] = Nil,
-    defaultValues: Map[String, String] = HashMap.empty[String, String])
+    val pluginInstance: PluginInstance,
+    var predecessors: Seq[PluginInstanceView] = Nil)
     extends View
 {
-    private val heading = new Heading(List(new Text(plugin.name)), 3)
+    private val heading = new Heading(List(new Text(pluginInstance.plugin.name)), 3)
 
     private val paramsDiv = new Div(getParameterViews, "parameters")
 
@@ -39,37 +31,37 @@ abstract class PluginInstanceView(
 
     def getAdditionalControlsViews: Seq[View]
 
-    def getPlugin: Plugin = plugin
+    def getPlugin: Plugin = pluginInstance.plugin
 
-    def getId: String = id
+    def getId: String = pluginInstance.id
 
-    private var parentElement: Option[dom.Element] = None
+    private var parentElement: Option[html.Element] = None
 
-    def render(parent: dom.Element) {
+    def render(parent: html.Element) {
         this.parentElement = Some(parent)
         successors.render(parent)
 
         if (predecessors.nonEmpty) {
-            parent.insertBefore(successors.domElement, predecessors(0).domElement)
+            parent.insertBefore(successors.htmlElement, predecessors(0).htmlElement)
         }
 
         var w = 0.0
         predecessors.foreach { p =>
-            successors.domElement.insertBefore(p.domElement, clearSpan.domElement)
+            successors.htmlElement.insertBefore(p.htmlElement, clearSpan.htmlElement)
 
             if (w > 0){
                 w += 10
             }
-            w += p.domElement.offsetWidth
-            val pos = w-(p.domElement.offsetWidth/2)-4
+            w += p.htmlElement.offsetWidth
+            val pos = w-(p.htmlElement.offsetWidth/2)-4
 
             val conn = new Div(Nil,"connector")
             conn.setAttribute("style","left:"+(pos)+"px")
-            conn.render(successors.domElement)
+            conn.render(successors.htmlElement)
 
             val plumb = new Div(Nil,"plumb")
             plumb.setAttribute("style","left:"+(pos-3)+"px")
-            plumb.render(alertDiv.domElement)
+            plumb.render(alertDiv.htmlElement)
         }
     }
 
@@ -77,18 +69,18 @@ abstract class PluginInstanceView(
         if (parentElement.isDefined) {
             predecessors.map {
                 p =>
-                    parentElement.get.insertBefore(p.domElement, domElement)
+                    parentElement.get.insertBefore(p.htmlElement, htmlElement)
             }
-            parentElement.get.removeChild(domElement)
+            parentElement.get.removeChild(htmlElement)
         }
     }
 
-    def domElement: dom.Element = {
-        successors.domElement
+    def htmlElement: html.Element = {
+        successors.htmlElement
     }
 
-    def getPluginElement: dom.Element = {
-        alertDiv.domElement
+    def getPluginElement: html.Element = {
+        alertDiv.htmlElement
     }
 
     def showControls() {
@@ -99,41 +91,41 @@ abstract class PluginInstanceView(
         additionalControls.addCssClass("hidden-element")
     }
 
-    def setRunning(){
+    def setRunning() {
         clearStyle()
         alertDiv.addCssClass("alert-warning")
     }
 
-    def setEvaluated(){
+    def setEvaluated() {
         clearStyle()
         alertDiv.addCssClass("alert-success")
     }
 
     var hasError = false
 
-    def setError(message: String){
-        if (!hasError){
+    def setError(message: String) {
+        if (!hasError) {
             clearStyle()
             alertDiv.addCssClass("alert-danger")
             hasError = true
-            alertDiv.setAttribute("rel","popover")
-            alertDiv.setAttribute("data-content",message)
-            alertDiv.setAttribute("data-original-title","Error details")
-            activatePopover(alertDiv.domElement)
+            alertDiv.setAttribute("rel", "popover")
+            alertDiv.setAttribute("data-content", message)
+            alertDiv.setAttribute("data-original-title", "Error details")
+            activatePopover(alertDiv.htmlElement)
         }
     }
 
-    @javascript("""jQuery(e).popover()""")
-    def activatePopover(e: Element){}
+    @javascript( """jQuery(e).popover()""")
+    def activatePopover(e: html.Element) {}
 
-    def clearStyle(){
+    def clearStyle() {
         alertDiv.removeCssClass("alert-warning")
         alertDiv.removeCssClass("alert-success")
         alertDiv.removeCssClass("alert-info")
         alertDiv.removeCssClass("alert-danger")
     }
 
-    def blockDomElement: Element = successors.domElement
+    def blockHtmlElement: html.Element = successors.htmlElement
 
     def addCssClass(cssClass: String){
         successors.addCssClass(cssClass)
@@ -142,4 +134,5 @@ abstract class PluginInstanceView(
     def removeCssClass(cssClass: String){
         successors.removeCssClass(cssClass)
     }
+
 }

@@ -7,8 +7,7 @@ import cz.payola.common.entities.plugins.PluginInstance
 class ReadOnlyAnalysisVisualizer(analysis: Analysis) extends AnalysisVisualizer(analysis)
 {
     def createPluginInstanceView(instance: PluginInstance): PluginInstanceView = {
-        val defaultValues = getDefaultValues(instance)
-        val result = new ReadOnlyPluginInstanceView(instance.id, instance.plugin, List(), defaultValues)
+        val result = new ReadOnlyPluginInstanceView(instance, List())
         instancesMap.put(instance.id, result)
         result
     }
