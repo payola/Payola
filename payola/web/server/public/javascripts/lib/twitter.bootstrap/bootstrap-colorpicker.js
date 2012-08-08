@@ -215,7 +215,8 @@
 				}
 				this.element.data('color', this.format.call(this));
 			} else {
-				this.element.prop('value', this.format.call(this));
+			    // Setting of the element value should be done within the hide event handler.
+				// this.element.prop('value', this.format.call(this));
 			}
 			this.element.trigger({
 				type: 'hide',

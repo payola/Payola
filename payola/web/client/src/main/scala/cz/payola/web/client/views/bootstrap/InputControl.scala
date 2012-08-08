@@ -31,7 +31,7 @@ class InputControl[A <: Field[_]](val label: String, val field: A)
         delayedChangedTimeout.foreach(window.clearTimeout(_))
         delayedChangedTimeout = Some(window.setTimeout({ () =>
             delayedChanged.triggerDirectly(this)
-        }, 1000))
+        }, 500))
         true
     }
 

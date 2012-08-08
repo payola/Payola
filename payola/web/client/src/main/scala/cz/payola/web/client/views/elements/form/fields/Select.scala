@@ -12,7 +12,7 @@ class Select(
 {
     def value: String = options(htmlElement.selectedIndex).htmlElement.value
 
-    def value_=(newValue: String) {
+    def updateValue(newValue: String) {
         options.find(_.htmlElement.value == newValue).foreach(o => htmlElement.selectedIndex = options.indexOf(o))
     }
 }

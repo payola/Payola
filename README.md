@@ -1,6 +1,6 @@
 # Payola!
 ---
-Payola is a HTML5 web application which enables you to work with graph data in a completely new way. You can visualise Linked Data via several plugins (which produces table, graph, etc.). That also means, that you no longer needs Pubby to browse through a Linked Data storage (via its SPARQL endpoint). Moreover, you can create an analysis and run it against a set of SPARQL endpoints. It represents a way of assembling a SPARQL query which is executed against a set of endpoints without further knowledge of SPARQL. Analysis results are processed and visualised using the embedded visualisation plugin.
+Payola is a HTML5 web application which lets you work with graph data in a completely new way. You can visualize Linked Data using several plugins (which produce a table, graph, etc.). That also means, that you no longer needs Pubby to browse through a Linked Data storage (via its SPARQL endpoint). Moreover, you can create an analysis and run it against a set of SPARQL endpoints without any knowledge of SPARQL language itself. Analysis results are processed and visualized using the embedded visualization plugin.
 
 Since Payola is rather a platform, you can fork the project and write your own plugins, extensions and more.
 
@@ -27,8 +27,9 @@ Payola comes pre-configured to work with default settings of a Virtuoso server a
 
 As you clone just source codes from the git repository, it is necessary to compile Payola. To do so, you need to have SBT installed as noted above. Open command line (console, terminal) and make `payola` subdirectory current working subdirectory. Launch SBT (most likely using the `sbt` command) and enter the following commands:
 
+<a name="run-initializer"></a>
 ```
-> cp
+>cp
 ...
 > project initializer
 > run
@@ -54,14 +55,15 @@ While a simple guess of another user's group identifier is unlikely (and a brute
 
 To launch Payola, open SBT just like when you were compiling it and enter these two commands (you do not need to run the `cp` command if you haven't modified any source code since the last compilation):
 
-```
-> cp
-...
-> project server
-> run
-```
 
->*Warning:* Do **not** run the `initializer` project. All users, analyses, data sources, etc. would be lost. (See [this note](#drop-create-warning))
+> ```cp```
+...
+> ```project server```
+...
+> ```run```
+
+
+> *Warning:* Do **not** run the `initializer` project. All users, analyses, data sources, etc. would be lost. (See [this note](#drop-create-warning))
 
 Once the server is running, enter the following address in your web browser:
 
@@ -258,7 +260,7 @@ class ValuesInbetween(name: String, inputCount: Int, parameters:
 	def this() = {
 		this("Filter Values in Between", 1, 
 			List(new IntParameter("MinValue", 0), 
-				new IntParameter("MaxValue", 0)), 
+				new IntParameter("MaxValue", 10)), 
 			IDGenerator.newId)
 	}
 
@@ -272,11 +274,13 @@ class ValuesInbetween(name: String, inputCount: Int, parameters:
 
 In this example, a new plugin is created with name `Filter Values in Between`. The parameterless constructor `this()` is called to fill in values to the default constructor. Here you set up the parameters as well.
 
-The `evaluate` method is the one doing all the work. Here would be your code filtering the input graph. The `instance` variable contains all parameter values, `inputs` is a sequence of `Option[Graph]`'s - in our case just one as defined in `this()`. You can optionally report progress using the `progressReporter` function passed, which reports the progress to the user (values between 0.0 and 1.0).
+The `evaluate` method is the one doing all the work. Here would be your code filtering the input graph. The `instance` variable contains all parameter values, `inputs` is a sequence of `Option[Graph]`'s - in our case just one as defined in `this()`. You can optionally report progress using the `progressReporter` function passed, which reports the progress to the user (values between 0 and 10).
 
 Entire plugin documentation can be found in the Developer Guide. If you intend to write your own plugin, please, refer there.
 
 ---
+
+##### TODO - information about which libraries are used (where, why)
 
 # Developer Guide
 
@@ -333,13 +337,13 @@ The ```clean``` SBT task is overriden so all generated files are deleted in addi
 <a name="scala2json"></a>
 ## Package cz.payola.scala2json
 
-To transfer data from the server side to the client side, one needs to serialize the data transferred. To save bandwidth, we've decided to go with [JSON](http://www.json.org). It is a lightweight format that's easy to decode in JavaScript, which is used on the client side.
+To transfer data from the server side to the client side, one needs to serialize the data. To save bandwidth, we've chosen [JSON](http://www.json.org) as the data format. It is a lightweight format that's also easy to decode in JavaScript, which is used on the client side.
 
 While other solutions for serializing Scala objects to JSON do exist (for example [scala-json](https://github.com/stevej/scala-json)), they mostly work only on collections, maps and numeric types. Other objects need to implement their own `toJSON()` method.
 
-This seemed to us as too much unnecessary code, so we've decided to write out own serializer. This serializer is capable of serializing any object using reflection - the serializer goes through the object's fields.
+This seemed to us as too much unnecessary code, so we've decided to write our own serializer. This serializer is capable of serializing any Scala or Java object using Java language reflection.
 
-For some purposes, we needed to customize the serialization process - skip some fields, add some fields, etc. - this lead to serialization rules. For example, you have a class with private fields that are prefixed with an underscore (`_`) - you might want to hide this implementation detail - just add a new `BasicSerializationRule`, where you can define a class (or trait) whose fields should be serialized (e.g. you want to serialize only fields of a superclass), list of fields that should be omitted (transient fields) and list of field name aliases (a map of string &rarr; string).
+For some purposes, customizing the serialization process is necessary - it has proven useful to skip or add some fields of the object, etc. - this lead to serialization rules. For example, you might want to hide an implementation detail that a class' private fields are prefixed with an underscore (`_`) - it is possible to do so simply by adding a new `BasicSerializationRule`, where you can define a class (or trait) whose fields should be serialized (e.g. you want to serialize only fields of a superclass), a list of fields that should be omitted (transient fields) and a list of field name aliases (a map of string &rarr; string translations).
 
 You can explore additional serialization rules in our generated [docset](TODO Link).
 
@@ -424,7 +428,7 @@ Adapters of web browser related objects (```Window```, ```History``` etc.), base
 
 ### Package cz.payola.common.entities
 
-The package includes classes representing the basic entities (e.g. user, analysis, plugin) that ensure the core functionality of Payola. Each entity has its own ID (string-based, 128-bit UUID) and can be stored in the relational database (see [data package](#data) for more information).
+The package includes classes representing the basic entities (user, analysis, plugin, etc.) that ensure the core functionality of Payola. Each entity has its own ID (string-based, 128-bit UUID) and can be stored in a relational database (see the [data package](#data) for more information).
 
 #### Package cz.payola.common.entities.plugins
 
@@ -432,43 +436,92 @@ The package includes classes representing the basic entities (e.g. user, analysi
 
 #### Package cz.payola.common.entities.privileges
 
-To share entities between users, privileges are used. This makes it easy to extend the model in the future, or to change the privilege granularity. Currently, there are privileges to access a resource - analysis, data source, ontology customization and plugin; however, easily can be added a privilege type that grants a user the right to edit some entity, etc.
+To share entities between users, privileges are used. This makes it easy to extend the model in the future, or to change the granularity of privilege granting. Currently, there are privileges to access a resource - analysis, data source, ontology customization and plugin; however, a privilege type that grants a user the right to edit some entity, for example, can be easily added.
 
 #### Package cz.payola.common.entities.settings
 
-The settings package encapsulates ontology customizations. 
+The settings package encapsulates ontology customizations (used on the client side to change display settings of a graph using ontologies).
 
+<a name="rdf-common"></a>
 ### Package cz.payola.common.rdf
 
-This package contains classes representing RDF graphs and ontologies. Only core functionality is included in this package - class declarations, some basic methods that are used on the client, as well. More functionality, such as converting a RDF/XML file to a `Graph` object is added in the [`domain`](#domain) project.
+This package contains classes representing RDF graphs and ontologies. Only core functionality is included in this package - class declarations to represent the data, some basic methods that are used on the client. More functionality, such as converting a RDF/XML file to a `Graph` object is added in the [`domain`](#domain) project.
 
 <a name="domain"></a>
 ## Package cz.payola.domain
 
-> TODO: package structure
+The `domain` project builds on the [`common`](#common) project, inheriting from classes and traits in the `common` project. Additional functionality and logic is hence added as well as dependencies on other libraries, such as [Jena](http://jena.apache.org) for parsing RDF/XML files into Graph objects.
 
-> TODO: CH.M. & H.S
+### Package cz.payola.domain.entities
+
+> TODO: C.M.
+
+### Package cz.payola.domain.entities.analyses
+
+> TODO: H.S.
+
+### Package cz.payola.domain.entities.plugins
+
+> TODO: H.S.
+
+### Package cz.payola.domain.rdf
+
+> TODO: C.M.
+
+### Package cz.payola.domain.rdf.ontology
+
+> TODO: C.M.
+
+### Package cz.payola.domain.sparql
+
+> TODO: H.S.
 
 <a name="data"></a>
 ## Package cz.payola.data
 
-> TODO: O.H.
+This whole package represents data layer. Trait `DataContextComponent` defines API for cominucation between data layer and other Payola components. The two vital task of data layer are:
+
+- store and fetch entities from [domain layer](#domain) from and into database
+- use [Virtuoso](http://virtuoso.openlinksw.com/) to as private RDF data store
+
+Aritecture of Payola implies that domain layer is independent from data layer and since Payola is an open-source, data layer can be implemented specificaly to fit different platform-specific needs. 
 
 ### Package cz.payola.data.squeryl
 
-> TODO: O.H.
+In this version Payola uses [Squeryl](http://squeryl.org) (an ORM for Scala) for persisting entities into H2 database. Squeryl generates database schema from structure of stored objects. Every persisted entity is persisted in its own table, definition of this table is derived from entity structure. In order to have domain layer independent from data layer, there were implemented [entities](#squeryl-entities) that:
 
+- represent entities from domain layer and 
+- can be stored and loaded via Squeryl ORM into and from database
+
+#####Why Squeryl?
+
+Squeryl is existing, tested, functional and simple ORM for scala applications that had met the requirements of Payola during the process of making decision whether use existing ORM or implement own ORM tool.
+
+<a name="about-squeryl"></a>
+#####About Squeryl
+
+<a name="squeryl-entities"></a>
 #### Package cz.payola.data.squeryl.entities
 
-> TODO: O.H.
+For every entity in [domain layer](#domain) that issupposed to be persisted, exists a class in [data layer](#data) that provides database persistence to the corresponding domain layer entity.
 
+Every data layer entity has a corresponding companion object (extending `EntityConverter`) that provides conversion from domain layer entity. When conversion fails, a `DataException` is thrown.
+
+Every data layer entity extends the represented domain layer entity (with two exceptions that will be explained later), which allows treat data layer entities like domain layer entities. There is no added bussines logic in data layer entities, their only purpose is to be stored and loaded into and from database.
+
+The two mentioned enxeptions are `PluginDbRepresentation` and  `PrivilegeDbRepresentation`. Those data layer entities do not extend `Plugin` and `Privelege` from domain layer, because real plugins and privileges could be added in runtime (even by a user). Those domain layer entities are just abstract parents of real plugins and privileges, so they are simply wrapped into data layer entities. Data layer entities are persisted and domain layer entities are reconstructed from them using reflection.
+
+Domain layer entities allows adding another entities into their internal collections (i.e. an plugin instance can be added to an anylyses via `analysis.addPluginInstance(pluginInstance)` statement). Data layer entities overrides this behavior by adding a code to persist this new relation into database and leaving domain layer behavior unchanged. 
+
+<a name="squeryl-repositories"></a>
 #### Package cz.payola.data.squeryl.repositories
 
 > TODO: O.H.
 
+<a name="virtuoso"></a>
 ### Package cz.payola.data.virtuoso
 
-Virtuoso is used for storing private RDF data - classes in this package let you communicate with a Virtuoso instance - create a graph group, upload a graph to the graph group, and then retrieve all graphs within a graph group.
+Virtuoso is used for storing private RDF data of a user - classes in this package let you communicate with a Virtuoso instance and perform some tasks - create a graph group, upload a graph to the graph group, and then retrieve all graphs within a graph group.
 
 <a name="model"></a>
 ## Package cz.payola.model
@@ -491,7 +544,15 @@ There is an object which logically belongs to this package, but you can find it 
 <a name="initializer"></a>
 ### Package cz.payola.web.initializer
 
-> TODO: O.H.
+This project should be run during installation as described [here](#run-initializer). 
+
+Created database contains:
+
+- an user with login name "admin@payola.cz" and password "payola!"
+- a public analysis owned by this user
+- two public data sources owned by this user
+- a public ontology customization for [Public contracts](http://opendata.cz/pco/public-contracts.xml) ontology
+- a set of pre-implemented plugins
 
 <a name="shared"></a>
 ### Package cz.payola.web.shared

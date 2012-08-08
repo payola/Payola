@@ -8,6 +8,9 @@ import cz.payola.data.squeryl.SquerylDataContextComponent
 import cz.payola.web.shared.Payola
 import cz.payola.domain.entities.settings.OntologyCustomization
 
+/**
+ * Runing this object will drop existing database, create new database and fill it with initial data.
+ */
 object DatabaseInitializer extends App
 {
     private val model = Payola.model.asInstanceOf[SquerylDataContextComponent]

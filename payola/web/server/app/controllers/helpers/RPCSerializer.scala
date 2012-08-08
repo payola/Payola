@@ -36,26 +36,32 @@ class RPCSerializer extends JSONSerializer
     val analysisClass = new SimpleSerializationClass(classOf[Analysis])
     val analysisRule = new BasicSerializationRule(
         Some(classOf[Analysis]),
-        Some(List("cz$payola$common$entities$Analysis$$_pluginInstances","cz$payola$common$entities$Analysis$$_pluginInstanceBindings"))
+        Some(List(
+            "_pluginInstances",
+            "_pluginInstanceBindings")
+        )
     )
     this.addSerializationRule(analysisClass,analysisRule)
 
     val analysisPluginInstances = new CustomValueSerializationRule[Analysis]("_pluginInstances", (serializer, analysis) => analysis.pluginInstances)
-    this.addSerializationRule(analysisClass,analysisPluginInstances)
+    this.addSerializationRule(analysisClass, analysisPluginInstances)
 
     val analysisPluginInstanceBindings = new CustomValueSerializationRule[Analysis]("_pluginInstanceBindings", (serializer, analysis) => analysis.pluginInstanceBindings)
-    this.addSerializationRule(analysisClass,analysisPluginInstanceBindings)
+    this.addSerializationRule(analysisClass, analysisPluginInstanceBindings)
 
     val dataSourceClass = new SimpleSerializationClass(classOf[DataSource])
     val dataSourceRule = new BasicSerializationRule(Some(classOf[DataSource]))
     this.addSerializationRule(dataSourceClass, dataSourceRule)
 
     val pluginInstanceClass = new SimpleSerializationClass(classOf[PluginInstance])
-    val pluginInstanceRule = new BasicSerializationRule(Some(classOf[PluginInstance]))
+    val pluginInstanceRule = new BasicSerializationRule(
+        Some(classOf[PluginInstance]),
+        Some(List("_plugin"))
+    )
     this.addSerializationRule(pluginInstanceClass, pluginInstanceRule)
 
     val pluginInstancePlugin = new CustomValueSerializationRule[PluginInstance]("_plugin", (serializer, instance) => instance.plugin)
-    this.addSerializationRule(pluginInstanceClass,pluginInstancePlugin)
+    this.addSerializationRule(pluginInstanceClass, pluginInstancePlugin)
 
     val pluginInstanceBindingClass = new SimpleSerializationClass(classOf[PluginInstanceBinding])
     val pluginInstanceBindingRule = new BasicSerializationRule(Some(classOf[PluginInstanceBinding]))
@@ -93,7 +99,10 @@ class RPCSerializer extends JSONSerializer
     this.addSerializationRule(intParamClass, intParamRule)
 
     val userClass = new SimpleSerializationClass(classOf[User])
-    val userRule = new BasicSerializationRule(Some(classOf[User]))
+    val userRule = new BasicSerializationRule(
+        Some(classOf[User]),
+        Some(List("_password"))
+    )
     this.addSerializationRule(userClass, userRule)
 
     val groupClass = new SimpleSerializationClass(classOf[Group])

@@ -7,6 +7,9 @@ import cz.payola.data.squeryl.entities._
 import cz.payola.data.squeryl.entities.plugins._
 import cz.payola.domain.entities.settings.OntologyCustomization
 
+/**
+ * Provides repository to access persisted analyses
+ */
 trait AnalysisRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
@@ -14,6 +17,9 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
     private lazy val pluginInstanceBindingRepository = new LazyTableRepository[PluginInstanceBinding](
         schema.pluginInstanceBindings, PluginInstanceBinding)
 
+    /**
+     * A repository to access persisted analyses
+     */
     lazy val analysisRepository = new AnalysisDefaultTableRepository
 
     class AnalysisDefaultTableRepository

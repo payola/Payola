@@ -4,6 +4,10 @@ import cz.payola.data.squeryl.entities._
 import scala.collection.immutable
 import cz.payola.data.squeryl._
 
+/**
+ * This object converts [[cz.payola.domain.entities.settings.PropertyCustomization]] to
+ * [[cz.payola.data.squeryl.entities.settings.PropertyCustomization]]
+ */
 object OntologyCustomization extends EntityConverter[OntologyCustomization]
 {    
     def convert(entity: AnyRef)(implicit context: SquerylDataContextComponent): Option[OntologyCustomization] = {
@@ -19,6 +23,16 @@ object OntologyCustomization extends EntityConverter[OntologyCustomization]
     }
 }
 
+/**
+ * Provides database persistence to [[cz.payola.domain.entities.settings.OntologyCustomization]] entities.
+ * @param id ID of the ontology customization
+ * @param u URI of the ontology customization
+ * @param n Name of the ontology customization
+ * @param o Owner of the ontology customization
+ * @param c List of child class customizations
+ * @param _isPub Whether the ontology customization is public or not
+ * @param context Implicit context
+ */
 class OntologyCustomization(
     override val id: String, u: String, n: String, o: Option[User],
     c: immutable.Seq[ClassCustomization], var _isPub: Boolean)

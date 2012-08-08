@@ -6,12 +6,18 @@ import cz.payola.data.squeryl.entities.User
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.dsl.ast.LogicalBoolean
 
+/**
+ * Provides repository to access persisted ontology customizations
+ */
 trait OntologyRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
 
     private type QueryType = (OntologyCustomization, Option[User], Option[ClassCustomization], Option[PropertyCustomization])
 
+    /**
+     * A repository to access persisted ontology customizations
+     */
     lazy val ontologyCustomizationRepository =
         new TableRepository[OntologyCustomization, QueryType](schema.ontologyCustomizations, OntologyCustomization)
         with OntologyCustomizationRepository
@@ -75,11 +81,11 @@ trait OntologyRepositoryComponent extends TableRepositoryComponent
                  ontologyCustomization.classCustomizations = r._2.groupBy(_._3).flatMap { c =>
                      val classCustomization = c._1
                      if (classCustomization.isDefined) {
-                        classCustomization.get.propertyCustomizations = c._2.flatMap(_._4).sortBy(_.uri)
+                        classCustomization.get.propertyCustomizations = c._2.flatMap(_._4).sortBy(_.uri.split("#")(1))
                      }
 
                      classCustomization
-                 } (collection.breakOut).sortBy(_.uri)
+                 } (collection.breakOut).sortBy(_.uri.split("#")(1))
 
                  ontologyCustomization
             }(collection.breakOut)

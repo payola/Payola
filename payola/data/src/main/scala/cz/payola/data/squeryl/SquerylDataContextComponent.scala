@@ -4,6 +4,11 @@ import cz.payola.data.DataContextComponent
 import cz.payola.data.squeryl.repositories._
 import cz.payola.domain._
 
+/**
+ * Contains context that is passed as an implicit parameters to entities providing them access to repositories.
+ *
+ * @see Dependency Injection pattern, Cake pattern
+ */
 trait SquerylDataContextComponent
     extends DataContextComponent
     with SchemaComponent
@@ -18,5 +23,8 @@ trait SquerylDataContextComponent
 {
     self: RdfStorageComponent with PluginCompilerComponent =>
 
+    /**
+     * Implicit context
+     */
     implicit val context = this
 }

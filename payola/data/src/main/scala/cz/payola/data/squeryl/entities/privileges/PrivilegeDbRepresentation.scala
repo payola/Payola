@@ -5,8 +5,8 @@ import cz.payola.data.squeryl._
 import cz.payola.data.squeryl.entities._
 
 /**
-  * This object converts [[cz.payola.common.entities.Privilege]] to [[cz.payola.data.squeryl.entities.PrivilegeDbRepresentation]]
-  * in order to be persisted in database.
+  * This object converts [[cz.payola.common.entities.Privilege]] to
+ * [[cz.payola.data.squeryl.entities.PrivilegeDbRepresentation]] in order to be persisted in database.
   */
 object PrivilegeDbRepresentation extends EntityConverter[PrivilegeDbRepresentation]
 {
@@ -32,13 +32,13 @@ object PrivilegeDbRepresentation extends EntityConverter[PrivilegeDbRepresentati
 /**
   * Represents [[cz.payola.common.entities.Privilege]] in order to be persisted in database.
   *
-  * @param id - id of a privilege
-  * @param granterId - id of [[cz.payola.common.entities.User]] that granted the Privilege
-  * @param granteeId - id of [[cz.payola.common.entities.PrivilegableEntity]] that is being granted the Privilege
-  * @param granteeClassName - stripped class name of this PrivilegableEntity
-  * @param privilegeClass - class of the Privilege
-  * @param objectId - id of [[cz.payola.common.entities.Entity]] that is object of the Privilede
-  * @param objectClassName - stripped class name of this Object
+  * @param id -ID of the privilege
+  * @param granterId ID of [[cz.payola.common.entities.User]] that granted the Privilege
+  * @param granteeId ID of [[cz.payola.common.entities.PrivilegableEntity]] that is being granted the Privilege
+  * @param granteeClassName Stripped class name of this PrivilegableEntity
+  * @param privilegeClass Class of the Privilege
+  * @param objectId ID of [[cz.payola.common.entities.Entity]] that is object of the Privilede
+  * @param objectClassName Stripped class name of this Object
   */
 class PrivilegeDbRepresentation(
     override val id: String,

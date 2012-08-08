@@ -197,27 +197,6 @@ class MethodSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("methods from same package should be fully qualified") {
-            configMap =>
-                scalaCode {
-                    """
-                        package s2js.adapters.goog.events
-
-                        object a {
-                            val x = Event.preventDefault(null)
-                        }
-                    """
-                } shouldCompileTo {
-                    """
-                        s2js.runtime.client.ClassLoader.provide('goog.events.a');
-                        s2js.runtime.client.ClassLoader.require('goog.events.Event');
-
-                        goog.events.a.x = goog.events.Event.preventDefault(null);
-                        goog.events.a.__class__ = new s2js.runtime.client.Class('goog.events.a', []);
-                    """
-                }
-        }
-
         it("can call a method of returned object") {
             configMap =>
                 scalaCode {
@@ -264,7 +243,7 @@ class MethodSpecs extends CompilerFixtureSpec
             configMap =>
                 scalaCode {
                     """
-                        import s2js.adapters.js.browser._
+                        import s2js.adapters.browser._
 
                         object o1 {
                             def m1(name: String)(fn: (String) => Unit) {
@@ -299,7 +278,7 @@ class MethodSpecs extends CompilerFixtureSpec
             configMap =>
                 scalaCode {
                     """
-                        import s2js.adapters.js.browser._
+                        import s2js.adapters.browser._
 
                         class C1 {
                             val f1 = "c1"
@@ -415,7 +394,7 @@ class MethodSpecs extends CompilerFixtureSpec
             configMap =>
                 scalaCode {
                     """
-                        import s2js.adapters.js.browser._
+                        import s2js.adapters.browser._
 
                         object o {
                             def m1(x: Int*) {

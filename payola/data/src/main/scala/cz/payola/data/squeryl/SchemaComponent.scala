@@ -13,18 +13,24 @@ import cz.payola.data.squeryl.entities.analyses.PluginInstanceBinding
 import cz.payola.data.squeryl.entities.privileges.PrivilegeDbRepresentation
 import cz.payola.data.squeryl.entities.Group
 
+/**
+ * Component that provides DB schema
+ */
 trait SchemaComponent
 {
     self: SquerylDataContextComponent =>
 
+    /**
+     * Database schema
+     */
     val schema: Schema
 
     /**
       * Definition of the Payola schema in Squeryl.
       * @see http://www.squeryl.org
-      * @param databaseURL A database url of the form 'jdbc:subprotocol:subname'.
+      * @param databaseURL A database url of the 'jdbc:subprotocol:subname' format.
       * @param userName The database user on whose behalf the connection is being made.
-      * @param password The user's password.
+      * @param password The users password.
       */
     class Schema(val databaseURL: String, val userName: String, val password: String) extends org.squeryl.Schema
     {
@@ -345,7 +351,7 @@ trait SchemaComponent
             val COLUMN_TYPE_DESCRIPTION = "text"
             val COLUMN_TYPE_URI = "text"
             val COLUMN_TYPE_VALUE = "text"
-            val COLUMN_TYPE_COLOR = "varchar(20)"
+            val COLUMN_TYPE_COLOR = "varchar(128)"
             val COLUMN_TYPE_CLASSNAME = "varchar(64)"
             val COLUMN_TYPE_FULL_CLASSNAME = "varchar(256)"
 
@@ -589,7 +595,7 @@ trait SchemaComponent
         }
 
         /**
-          * Runs given command block via inTransaction statement (Squeryl)
+          * Runs given code block wrapped in inTransaction statement (Squeryl)
           * @param body
           */
         def wrapInTransaction[C](body: => C) = {

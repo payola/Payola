@@ -104,11 +104,12 @@ class MiscellaneousSpecs extends CompilerFixtureSpec
         configMap =>
             scalaCode {
                 """
-                    import s2js.adapters.js
+                    import s2js.adapters.browser
+                    import s2js.adapters.html
 
                     object o {
                         def foo() {
-                            val e = js.browser.document.createElement[js.dom.Element]("div")
+                            val e = browser.document.createElement[html.Element]("div")
                             val l = e.childNodes.length
                         }
                     }

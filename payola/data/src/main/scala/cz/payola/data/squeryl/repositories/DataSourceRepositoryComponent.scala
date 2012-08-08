@@ -6,10 +6,16 @@ import cz.payola.data.squeryl.entities.plugins._
 import org.squeryl.PrimitiveTypeMode._
 import cz.payola.data.squeryl.entities._
 
+/**
+ * Provides repository to access persisted data sources
+ */
 trait DataSourceRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
 
+    /**
+     * A repository to access persisted data sources
+     */
     lazy val dataSourceRepository = new DataSourceDefaultTableRepository
 
     class DataSourceDefaultTableRepository

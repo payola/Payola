@@ -22,11 +22,11 @@ class Color(val red: Int, val green: Int, val blue: Int)
 
     /**
      * Converts this color to textual representation used by canvas context drawing techniques.
-     * @return rgb("red", "green", "blue")
+     * @return rgb("red","green","blue")
      */
     override def toString: String = {
         // TODO use String.format when it's supported by the js runtime.
-        "rgb(" + red + ", " + green + ", " + blue + ")"
+        "rgb(" + red + "," + green + "," + blue + ")"
     }
 }
 
@@ -67,12 +67,10 @@ object Color
             // Validate
             if (r < 256 && g < 256 && b < 256) {
                 Some(new Color(r, g, b))
-            }
-            else {
+            } else {
                 None
             }
-        }
-        else {
+        } else {
             None
         }
     }

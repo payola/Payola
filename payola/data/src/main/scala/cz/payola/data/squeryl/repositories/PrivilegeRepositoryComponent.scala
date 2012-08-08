@@ -8,12 +8,18 @@ import cz.payola.domain.Entity
 import cz.payola.data.PaginationInfo
 import org.squeryl.PrimitiveTypeMode._
 
+/**
+ * Provides repository to access persisted privileges
+ */
 trait PrivilegeRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
 
     private type PrivilegeType = Privilege[_ <: Entity]
 
+    /**
+     * A repository to access persisted privileges
+     */
     lazy val privilegeRepository = new PrivilegeRepository
     {
         private val representationRepository =

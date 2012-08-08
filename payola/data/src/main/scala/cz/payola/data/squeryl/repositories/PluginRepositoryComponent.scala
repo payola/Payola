@@ -10,10 +10,16 @@ import org.squeryl.dsl.ast.LogicalBoolean
 import cz.payola.data.squeryl.entities.plugins.parameters._
 import cz.payola.data.{PaginationInfo, DataException}
 
+/**
+ * Provides repository to access persisted plugins
+ */
 trait PluginRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
 
+    /**
+     * A repository to access persisted plugins
+     */
     lazy val pluginRepository = new PluginRepository
     {
         private type QueryType = (PluginDbRepresentation, Option[User], Option[BooleanParameter], Option[FloatParameter],
