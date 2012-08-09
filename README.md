@@ -1,3 +1,5 @@
+<a name="top"></a>
+<a name="user"></a>
 # Payola!
 ---
 Payola is a HTML5 web application which lets you work with graph data in a completely new way. You can visualize Linked Data using several plugins (which produce a table, graph, etc.). That also means, that you no longer needs Pubby to browse through a Linked Data storage (via its SPARQL endpoint). Moreover, you can create an analysis and run it against a set of SPARQL endpoints without any knowledge of SPARQL language itself. Analysis results are processed and visualized using the embedded visualization plugin.
@@ -165,16 +167,16 @@ You will be presented with a customization dialog. On the left, ontology classes
 
 ####### TODO glyphs
 
-When done, simply press the `Done` button. If you want to further modify the customization, you can click on the `Edit` button in the `Change appearance using ontologies` button's menu.
+When done, simply press the `Done` button. If you want to further modify the customization, click on the `Edit` button in the `Change appearance using ontologies` button's menu.
 
 ---
 ### Groups
 
 You can create user groups to make sharing easier (as described in the next chapter). Imagine you want to share a resource (e.g. an analysis) to a group of co-workers. One approach would be to share it to each one of them, but this can be tedious considering you might want to share something to them every week or every day. Hence there's a possibility to create user groups - in the top toolbar, click on the `User Groups` button and select `Create New`.
 
-Enter the group name (e.g. 'My co-workers') and hit the `Create Group` button. After the group has been created, you can start adding members to the group. To do so, make the `Members` field active and start typing - the suggestion box will offer users with a matching name. Click on the user to add him or her. If you decide to remove a user, click on the `x` button in front of his or her name. Remember to use the `Save Group` button before leaving the edit page, or all changes made will be lost.
+Enter the group name (e.g. 'My co-workers') and press the `Create Group` button. After the group has been created, you can start adding members to the group. To do so, make the `Members` field active and start typing - the suggestion box will offer users with a matching name. Click on the user to add him or her. If you decide to remove a user, click on the `x` button in front of his or her name. Remember to use the `Save Group` button before leaving the edit page, otherwise all changes made will be lost.
 
-To delete a group, use the `Delete` button at the top-right corner of the page.
+To delete a group, use the `Delete` button at the top-right corner of the edit page, or on the groups listing.
 
 
 [Editing a Group](https://github.com/siroky/Payola/raw/develop/docs/img/group_edit.png)
@@ -182,13 +184,13 @@ To delete a group, use the `Delete` button at the top-right corner of the page.
 ---
 ### <a name="sharing"></a>Sharing
 
-Now that you know how to create a group, let's share a data source. In the toolbar, click on the `My Data Sources` button and select `View All`. This lists all your data sources. You can use the `Edit` button to edit the data source, the `Private`/`Public` button to toggle whether the data source is private (only you and people you share it to can use it), or public - anyone can use it, even people who are not logged in.
+Now that you know how to create a group, let's share a data source. In the toolbar, click on the `My Data Sources` button and select `View All`. This lists all your data sources. You can use the `Edit` button to edit the data source, the `Private`/`Public` button to toggle whether the data source is private (only you and people you share it to can use it), or public - anyone can use it, even people who are not logged in; or use the delete button to remove the data source.
 
 Then there's the `Share` button. When you click on it, a menu pops up, allowing you to share the data source either to users or groups. When you select the `To Users` menu item, a dialog is shown with a text field which will suggest users as you type just like when you were adding members to a group. 
 
-The other option is to share the data source to groups - again a dialog will appear, letting you select multiple groups using the suggestion box. Add groups you want and hit the `Share` button. All users within the selected groups will be now able to use this data source.
+The other option is to share the data source to groups - again a dialog will appear, letting you select multiple groups using the suggestion box. Add groups you want and confirm the dialog. All users within the selected groups will be now able to use this data source.
 
-If you no longer want to share a resource with a group or a user, follow the same steps as if you wanted to share it with someone - the dialog which appears will contain the users or groups whom you've shared the resource to previously. Press the `Share` button. The list of users and groups allowed to access the resource will be updated accordingly.
+If you no longer want to share a resource with a group or a user, follow the same steps as if you wanted to share it with someone - the dialog which appears will contain the users or groups whom you've shared the resource to previously. Press the `Share` button to confirm the dialog. The list of users and groups allowed to access the resource will be updated accordingly.
 
 ---
 ### Private Data Storage
@@ -208,9 +210,9 @@ Creating a new analysis is similar to creating any other resource - in the toolb
 
 You will be presented with a blank page with a control box in the top-left corner. Start by filling in the analysis description.
 
-First, you'll need a data source to start with. You can do so either using the `Add data source` button which will offer you available data sources, or `Add plugin` which will let you add a data fetcher - an anonymous data source. This can be useful if you decide to use a data source that you don't want to save right away (e.g. you know you'll use it just once).
+First, you'll need a data source to start with. You can do so either using the `Add data source` button which will offer you available data sources, or `Add plugin` which lets you add a data fetcher - an anonymous data source. This can be useful if you decide to use a data source that you don't want to save right away (e.g. you know you'll use it just once).
 
-Now that you've added a data source, you need to do something with the data. Click on the `Add Connection` button on your data source box. Payola comes with 6 pre-installed plugins, which will be described one by one below. Of course, you can add your own plugin (see [section Plugins](#plugins)). Plugins are ordered in a row (though more branches can be created, see below) - a plugin  always gets the result of the previous one as its input.
+Now that you've added a data source, you need to do something with the data. Click on the `Add Connection` button on your data source box. Payola comes with pre-installed plugins, which are described one by one below. Of course, you can add your own plugin (see [section Plugins](#plugins)). Plugins are ordered in a sequence (though more branches can be created, see below) - a plugin always gets the result of the previous one as its input.
 
 ##### Typed
 
@@ -219,17 +221,17 @@ This plugin selects vertices of a type that's filled in as a parameter `TypeURI`
 ##### Projection
 
 Projection plugin takes property URIs separated by a newline as a single parameter. It will select vertices that are connected to other vertices using one of the listed URIs. 
-> **Note:** Payola performs some optimizations, potentially merging several consecutive plugins together. For example, two consecutive projection plugins are merged - hence their result isn't an empty graph as one could expect even if each of them lists completely different set of URIs, but a graph that contains both projections (if this optimization didn't take place, the first plugin would create a graph containing vertices connected to each other using URIs declared in the first plugin, which is then filtered using the second plugin).
+> **Note:** Payola performs some optimizations, potentially merging several consecutive plugins together. For example, two consecutive projection plugins are always merged - hence their result isn't an empty graph as one could expect even if each of them lists completely different set of URIs, but a graph that contains both projections (if this optimization hadn't taken place, the first plugin would create a graph containing vertices connected to each other using URIs declared in the first plugin, which would then be filtered using the second plugin, resulting in an empty intersection).
 
 ##### Selection
 
 Selection plugin lets you select vertices with a particular attribute - for example select cities with more than 2 million inhabitants.
 
-> *Example:* Let's create an analysis which selects all cities with more than 2 million inhabitants. First, add a `DBpedia.org` data source, then connect a new Typed plugin with TypeURI `http://dbpedia.org/ontology/City`. Continue with a Projection plugin with PropertyURIs `http://dbpedia.org/ontology/populationTotal`, then a Selection plugin with PropertyURI `http://dbpedia.org/ontology/populationTotal`, Operator `>` and Value `2000000`. And that's it: your first analysis.
+> *Example:* Let's create an analysis which selects all cities with more than 2 million inhabitants. First, add a `DBpedia.org` data source, then connect a new `Typed` plugin with `TypeURI` `http://dbpedia.org/ontology/City`. Continue with a `Projection` plugin with `PropertyURIs` `http://dbpedia.org/ontology/populationTotal`, then a `Selection` plugin with `PropertyURI` `http://dbpedia.org/ontology/populationTotal`, `Operator` `>` and `Value` `2000000`. And that's it: your first analysis.
 
 ##### Ontological Filter
 
-Ontological Filter plugin filters a graph according to ontologies located at URLs listed in the OntologyURLs parameter.
+Ontological Filter plugin filters a graph using ontologies located at URLs listed in the OntologyURLs parameter.
 
 ##### SPARQL Query
 
@@ -237,9 +239,9 @@ This is a more advanced plugin letting you perform your own custom SPARQL query 
 
 #### Branches
 
-You can add multiple data sources, creating multiple branches that need to be merged before the analysis can be run (trying to run an analysis with branches that aren't merged will yield in an error). Of course, you can have such an incomplete analysis saved and work on it later.
+You can add multiple data sources, creating numerous branches that need to be merged before the analysis can be run (trying to run an analysis with branches that aren't merged will yield in an error). Of course, you can have such an incomplete analysis saved to work on it later.
 
-Merging branches can be done using the `Merge branches` button. You will be given a choice to use either Join or Union. After selecting one (each is described below), you need to specify which branches you want to merge - at the bottom of the dialog, there are wells for each input of the merge plugin. At the top of the dialog, you have each branch represented by the name of the last plugin in each branch. If you hover your mouse over the box representing a branch, that particular branch gets highlighted in the background (it gets a thick black frame). You need to drag the branch boxes to the input boxes (see picture attached).
+Merging branches can be done using the `Merge branches` button. You will be given a choice to use either Join or Union. After selecting one (each is described below), you need to specify which branches to be merged - at the bottom of the dialog, there are wells for each input of the merge plugin. At the top of the dialog, you have each branch represented by the name of the last plugin in each branch. If you hover your mouse over the box representing a branch, that particular branch gets highlighted in the background. You need to drag the branch boxes to the input boxes (see picture attached).
 
 ![Branches on Input Boxes](https://github.com/siroky/Payola/raw/develop/docs/img/analysis_branches.png)
 
@@ -266,7 +268,7 @@ Join can be either inner or outer (default).
 > When tried the other way around - joining graph B with graph A using the `payola.cz/evolved-to` property, an empty graph is returned because `payola.cz/wolf` isn't a vertex in graph A.
 
 
-*Outer join:* All vertices from the first graph that are origins of edges with URI defined in the `PropertyURI` parameter are included. Moreover, if origin of the edge is included in the second graph, destination of the edge and the edge itself are both included as well.
+*Outer join:* All vertices from the first graph that are origins of edges with URI defined in the `PropertyURI` parameter are included. Moreover, if origin of the edge is included in the second graph, destination of the edge and the edge itself are both included in the result as well.
 
 > *Example:* Using the same graphs as before, merging graph A with graph B will yield in the same result. Merging B with A, however, will include a single vertex `payola.cz/wolf` and no edges.
 
@@ -274,16 +276,17 @@ Join can be either inner or outer (default).
 
 Either on your dashboard, or on analyses listing, click on an analysis to display details of it. You are presented with an overview of the analysis (which plugins with which parameters and connections are going to be used).
 
-As some analyses can take a really long time to finish (some may be theoretically infinite), there's a timeout field in the top-right corner. By default, an analyses times out in 30 seconds. If you find it's too short time to evaluate the analysis, change it to a higher value.
+As some analyses can take a really long time to finish (some may be theoretically infinite), there's a timeout field in the top-right corner as well as a `Stop` button. By default, an analyses times out in 30 seconds. If you find it's too short time to evaluate the analysis, change it to a higher value.
 
 Now press the `Run Analysis` button. If the analysis succeeds, you will be switched to a result tab - you can now browse the resulting graph just as when browsing a data source.
 
 If the evaluation fails, the plugin boxes turn red and an error description is shown when you hover mouse cursor over them. You can then either try to run it again, or to Edit it using the `Edit` button next to the analysis' title.
 
 ---
-### <a name="plugins"></a>Plugins
+<a name="plugins"></a>
+### Plugins
 
-Creating a new plugin requires programming skills in Scala. A detailed reference of the Plugin classes is described in the Developer Guide. Here is a sample code of a plugin:
+Creating a new plugin requires at least basic programming skills in Scala. A detailed reference of the Plugin class is described in the [Developer Guide](#developer) and in the [generated docs](#gen-docs). Here is a code of a sample plugin:
 
 ```
 package my.custom.plugin
@@ -314,23 +317,23 @@ class ValuesInbetween(name: String, inputCount: Int, parameters:
 }
 ```
 
-In this example, a new plugin is created with name `Filter Values in Between`. The parameterless constructor `this()` is called to fill in values to the default constructor. Here you set up the parameters as well.
+In this example, a new plugin named `Filter Values in Between` is created`. The parameterless constructor `this()` is called to fill in values to the default constructor. Here you set up required parameters as well.
 
-The `evaluate` method is the one doing all the work. Here would be your code filtering the input graph. The `instance` variable contains all parameter values, `inputs` is a sequence of `Option[Graph]`'s - in our case just one as defined in `this()`. You can optionally report progress using the `progressReporter` function passed, which reports the progress to the user (values between 0 and 10).
+The `evaluate` method is the one doing all the work. Here would be your code filtering the input graph. The `instance` variable contains all parameter values, `inputs` is a sequence of `Option[Graph]`'s - in our case just one as defined in `this()`. You can optionally report progress using the `progressReporter` function passed, which reports the progress to the user (values between 0.0 and 1.0).
 
-Entire plugin documentation can be found in the Developer Guide. If you intend to write your own plugin, please, refer there.
+More information about plugin architecture can be found in the [Developer Guide](#developer). If you intend to write your own plugin, please, refer there.
 
 ---
-
+<a name="developer"></a>
 ##### TODO - information about which libraries are used (where, why)
 
 # Developer Guide
 
-The Payola application consists of several layers and libraries that are all enclosed within a solution project ```payola```. The following sections will describe structure of the solution, the functionality hidden within the layers and libraries and their relations.
+The Payola application consists of several layers and libraries that are all enclosed within a solution project ```payola```. The following sections describe structure of the solution, the functionality hidden within the layers and libraries and their relations.
 
 ## Solution structure
 
-The solution is defined using the [SBT](https://github.com/harrah/xsbt/wiki/ "SBT") which isn't tightly coupled to any particuale IDE, so you may generate corresponding project files for the most commonly used IDEs (e.g. IntelliJ IDEA, Eclipse). The SBT doesn't introduce any concept that can be directly used as a solution, but it can be emulated using projects and subprojects. In our case, the ```payola``` solution is just a project with no source files. The solution structure is:
+The solution is defined using the [SBT](https://github.com/harrah/xsbt/wiki/ "SBT") which isn't tightly coupled to any particular IDE, so you may generate corresponding project files for the most commonly used IDEs (e.g. [IntelliJ IDEA](http://www.jetbrains.com/idea/), [Eclipse](http://www.eclipse.org)). SBT doesn't support any concept that can be directly used as a solution, but it can be emulated using projects and subprojects. In our case, the ```payola``` solution is just a project with no source files. The solution structure is:
 
 - ```payola```
 	- [```common```](#common)
@@ -351,53 +354,49 @@ The solution is defined using the [SBT](https://github.com/harrah/xsbt/wiki/ "SB
 		- [```shared```](#shared)
 		- [```server```](#server)
 
-Briefly, the project [```payola/project```](#project) defines that structure, dependencies among the projects, external dependencies and the build process, so it can be understood as a Makefile. Somehow standalone libraries are the [```payola/scala2json```](#scala2json) which provides means of scala object serialization into the JSON format and [```payola/s2js```](#s2js) which with all its subprojects enables us to write web applications in Scala (compile Scala code to equivalent JavaScript code).
+Briefly, the project [```payola/project```](#project) defines this structure, dependencies among the projects, external dependencies and the build process, so it can be understood as a Makefile equivalent. Somewhat standalone libraries are the [```payola/scala2json```](#scala2json) project which provides means of Scala object serialization into the JSON format and [```payola/s2js```](#s2js) project which with all its subprojects enables us to write web applications in Scala (compile Scala code to equivalent JavaScript code).
 
-The Payola application itself is spread within the rest of the projects, namely [```payola/common```](#common) that defines classes that are used throughout all layers and even on the client side. The [```payola/domain```](#domain) mostly extends classes from the [```payola/common```](#common) with backend logic. The [```payola/data```](#data) is a persistance, data access layer. The [```payola\model``` wraps up the previous three modules with an uniform interface. It's ment as a standard programmatical access point to the Payola. Finally, the web application consists of the [```payola\web\initializer```](#initializer) which is a console application initializing the databases (i.e an installer), [```payola\web\server```](#server) that is a [Play](http://www.playframework.org/) web application and the [```payola\web\client```](#client) which contains a browser MVP application (compiled to JavaScript). Last but not least is the [```payola/web/shared```](#shared) with objects that are called from the client, but executed on the server.
+The Payola application itself is spread within the rest of the projects, namely [```payola/common```](#common) that defines classes that are used throughout all layers and even on the client side. The [```payola/domain```](#domain) mostly extends classes from the [```payola/common```](#common) with backend logic. The [```payola/data```](#data) is a persistence, data access layer. The [```payola\model```](#model) wraps up the previous three modules with an uniform interface. It's meant as a standard programmatic access point to Payola. Finally, the web application consists of the [```payola\web\initializer```](#initializer) which is a console application initializing the database (i.e an installer), [```payola\web\server```](#server) that is a [Play](http://www.playframework.org/) web application and the [```payola\web\client```](#client) which contains a browser MVP application (compiled to JavaScript). Last but not least the [```payola/web/shared```](#shared) consists of objects that are called from the client, but executed on the server.
 
-This structure also determines package names, which follow the pattern ```cz.payola.[project path where '/' is replaced with '.']```. So for example a class declared in the ```payola/s2js/compiler``` project can be found in the ```cz.payola.s2js.compiler``` package or one of its subpackages.
+This structure also determines package names, which follow the pattern ```cz.payola.[project path where '/' is replaced with '.']```. So, for example, a class declared in the ```payola/s2js/compiler``` project can be found in the ```cz.payola.s2js.compiler``` package or one of its subpackages.
 
 <a name="project"></a>
 ## Project payola/project
 
-This project contains only two files: ```plugins.sbt``` and ```PayolaBuild.scala```. Tho former one is just a configuration of the SBT, i.e. SBT plugins that should be used on the top of standard SBT and additional Maven repositories to download dependencies from.
+This project contains only two files: ```plugins.sbt``` and ```PayolaBuild.scala```. The former one is just a configuration SBT file, i.e. SBT plugins that should be used on top of standard SBT and additional Maven repository declarations to download dependencies from.
 
-The ```PayolaBuild.scala``` is a [build definition file](https://github.com/harrah/xsbt/wiki/Getting-Started-Full-Def) of the whole solution. The solution structure, projects, dependencies, compilation and test settings and other concepts used there are deeply described in the [SBT Wiki](https://github.com/harrah/xsbt/wiki). Moreover there is a template for all projects that should be compiled to JavaScript, that adds the [s2js](#s2js) compiler plugin to the standard scala compiler. To create a project that should be compiled to JavaScript, use the ```ScalaToJsProject(...)``` instead of standard ```Project(...)```.
+The ```PayolaBuild.scala``` is a [build definition file](https://github.com/harrah/xsbt/wiki/Getting-Started-Full-Def) of the whole solution. The solution structure, projects, dependencies, compilation, test settings and other concepts used there are described in depth in the [SBT Wiki](https://github.com/harrah/xsbt/wiki). Moreover, there is a template for all projects that should be compiled to JavaScript, that adds the [s2js](#s2js) compiler plugin to the standard Scala compiler. To create a project that should be compiled to JavaScript, use ```ScalaToJsProject(...)``` instead of the standard ```Project(...)```.
 
 ### The cp task
 
-The build file defines a custom SBT Task called ```cp``` which is an abbreviation for 'compile and package'. In order to support compilation of the payola solution in one step, we had to introduce this non-standard task. Because the solution contains both the [s2js](#s2js) compiler plugin project and also projects that use that compiler plugin, it's not sufficient to mark the compiler plugin project as a dependency of projects that should be compiled to Javascript. The scala compiler is pluginable only via ```.jar``` files so the compiler plugin project has to be not only compiled, but also packed into a ```.jar``` package, so it can be later used.
+The build file defines a custom SBT Task called ```cp``` which is an abbreviation for 'compile and package'. In order to support compilation of the payola solution in one step, we had to introduce this non-standard task. Because the solution contains both the [s2js](#s2js) compiler plugin project and also projects that use that compiler plugin, it's not sufficient to mark the compiler plugin project as a dependency of projects that should be compiled to Javascript. The Scala compiler accepts only ```.jar``` plugin files so the compiler plugin project has to be not only compiled, but also packed into a ```.jar``` package, for it to be used.
 
 ### Compilation of payola/web/server using cp
 
-Another compilation customization required by the [s2js](#s2js) is added to  compilation of the [server project](#server). During compilation of a ```ScalaToJsProject```, the generated ```.js``` files are stored into the ```payola/web/server/public/javascripts``` directory. Each file provides some symbols (classes and objects declared in the file) and requires some (classes and objects used in the file). All files in the previously mentioned directory are traversed, while extracting the dependency declarations (provides and requires) to the ```payola/web/server/public/dependencies``` file, which is used later.
+Another compilation customization required by [s2js](#s2js) is added to the compilation process of the [server project](#server). During compilation of a ```ScalaToJsProject```, the generated ```.js``` files are stored into the ```payola/web/server/public/javascripts``` directory. Each file provides some symbols (classes and objects declared in the file) and requires some (classes and objects used in the file). All files in the previously mentioned directory are traversed, while extracting the dependency declarations (provides and requires /terminus technicus or provisions and requirements?/) to the ```payola/web/server/public/dependencies``` file, which is used later.
 
 ### The clean task
 
-The ```clean``` SBT task is overriden so all generated files are deleted in addition to the standard behavior of ```clean```.
+The ```clean``` SBT task is overridden to ensure all generated files are deleted in addition to the standard behavior of ```clean```.
 
 <a name="scala2json"></a>
 ## Package cz.payola.scala2json
 
-To transfer data from the server side to the client side, one needs to serialize the data. To save bandwidth, we've chosen [JSON](http://www.json.org) as the data format. It is a lightweight format that's also easy to decode in JavaScript, which is used on the client side.
+To transfer data from the server side to the client side, one needs to serialize the data. Not only to save bandwidth, we've chosen [JSON](http://www.json.org) as the data format. It is a lightweight format that's also easy to decode in JavaScript, which is used on the client side.
 
 While other solutions for serializing Scala objects to JSON do exist (for example [scala-json](https://github.com/stevej/scala-json)), they mostly work only on collections, maps and numeric types. Other objects need to implement their own `toJSON()` method.
 
 This seemed to us as too much unnecessary code, so we've decided to write our own serializer. This serializer is capable of serializing any Scala or Java object using Java language reflection.
 
-For some purposes, customizing the serialization process is necessary - it has proven useful to skip or add some fields of the object, etc. - this lead to serialization rules. For example, you might want to hide an implementation detail that a class' private fields are prefixed with an underscore (`_`) - it is possible to do so simply by adding a new `BasicSerializationRule`, where you can define a class (or trait) whose fields should be serialized (e.g. you want to serialize only fields of a superclass), a list of fields that should be omitted (transient fields) and a list of field name aliases (a map of string &rarr; string translations).
+The serialization process has to deal with a few obstacles, such as cyclic object dependencies (i.e. one object's variable is pointing to a second object which has a variable pointing back to the first one).
 
-You can explore additional serialization rules in our generated [docset](TODO Link).
-
-The serialization process has to deal with a few obstacles, such as a cyclic object dependencies (i.e. one object's variable is pointing to a second object which has a variable pointing back to the first one).
-
-- **Cyclic dependencies**: The serializer has an option to either serialize the object in depth (this means that a cyclic dependency will cause an exception), or to handle cycles. The first option has an advantage that no references need to be created, hence the resulting JSON is exactly the object's representation, with no additional fields. A cyclic dependency graph, however, is fairly common, hence it had to be solved. The serializer needs to keep a list of objects it has encountered - each object is assigned an `__objectID__` field which is simply an index of the object. Once the object is encountered the second time, instead of repeating the object, such a construct is entered: `"object_second_time": { "__ref__": 4 }` - i.e. a reference to an object with `__objectID__` 4.
-- **Classes**: when deserializing the object on the server, a class of the object is required:
+- **Cyclic dependencies**: The serializer has an option to either serialize the object in depth (this means that a cyclic dependency will cause an exception), or to handle cycles using object references. The first option has an advantage that no references need to be created, hence the resulting JSON is exactly the object's representation, with no additional fields and is very easy to deserialize into the resulting object.<br/><br/>A cyclic dependency graph, however, is fairly common, hence it had to be dealt with. The serializer keeps a list of objects it has encountered - each object is assigned an object ID which is simply an index of the object in the encountered-objects list. The object ID is then appended to the serialized object as an `__objectID__` field . Once the object is encountered for the second time, instead of serializing the object again, such a construct is entered: `"object_for_the_second_time": { "__ref__": 4 }` - i.e. a reference to an object with an object ID `4`.
+- **Classes**: when deserializing the object on the client, a class of the object is required, so it needs to be included in the serialized object:
 	- *Regular objects*: For regular objects, `__class__` field is added, including the class name: `"some_obj": { "__class__": "cz.payola.some.class", ... }`
-	- *Maps*: Even for maps and other collection, a class name is needed. Maps are translated to an object with two field: `__class__` and `__value__`: ```{ "map": { "__class__": "scala.collection.Map", "__value__": { "key": "value", ... } } }```
-	- *Collections*: Other collections get translated to an object with two fields as well: ```{ "collection": { "__arrayClass__": "scala.collection.mutable.ArrayBuffer", "__value__": [ "obj1", ... ] } }```
-	- *Arrays*: Regular arrays (i.e. `scala.Array`) are translated directly to a JSON array without any wrappers.
-- **Fields**: As Scala language doesn't have its own reflection API yet, Java reflection API had to be used. This presents several problems regarding getting fields: some fields are translated into methods - a getter with no parameters and a setter with one parameter, in case it's a `var` field. The serializer must therefore look for fields even within methods when looking for a field of a particular name. Also, when requesting fields on an object, an empty array is returned - only declared fields get listed, so the serializer must go through the whole class hierarchy itself, listing fields of all interface and superclasses.
+	- *Maps*: Even for maps and other collection, a class name is needed. Maps are translated to a JSON object with two field: `__class__` and `__value__`: ```{ "map": { "__class__": "scala.collection.Map", "__value__": { "key": "value", ... } } }```
+	- *Collections*: Other collections get translated to a JSON object with two fields as well: ```{ "collection": { "__arrayClass__": "scala.collection.mutable.ArrayBuffer", "__value__": [ "obj1", ... ] } }```
+	- *Arrays*: Regular array (i.e. `scala.Array`) is translated directly to a JSON array without any wrapper.
+- **Fields**: As the Scala language doesn't have its own reflection API yet, [Java reflection API](http://docs.oracle.com/javase/tutorial/reflect/index.html) had to be used. This presents several problems regarding getting fields: some fields in Scala are translated into methods - a getter with no parameters and a setter with one parameter, in case it's a `var` field. The serializer must therefore look for fields even within methods when looking for a field of a particular name. Also, when requesting fields on an object, an empty array is returned - only declared fields get listed, so the serializer must go through the whole class hierarchy itself, listing fields of all interface and superclasses.
 
 > Example: Assume this code:
 >```
@@ -433,20 +432,24 @@ o.obj = o
 }
 ```
 
+For some purposes, customizing the serialization process is necessary - it has proven useful to skip or add some fields of the object, etc. - this lead to serialization rules. For example, you might want to hide an implementation detail that a class' private fields are prefixed with an underscore (`_`) - it is possible to do so simply by adding a new `BasicSerializationRule`, where you can define a class (or trait) whose fields should be serialized (e.g. you want to serialize only fields of a common superclass, ignoring fields of subclasses), a list of fields that should be omitted (transient fields) and a list of field name aliases (a map of string &rarr; string translations).
+
+The rules are applied in the same order as they are added to the serializer. You can explore additional serialization rules in our generated [docset](#gen-doc).
+
 <a name="s2js"></a>
 ## Project payola/s2js
 
-In order to implement whole application in one language and to get around code duplication that arises during development of rich internet applications (duplication of domain class declarations), we decided to use a tool that compiles Scala code to JavaScript. First of all, we investigated the tools that are already there:
+In order to implement the whole application in one language and to get around code duplication that arises during development of rich internet applications (duplication of domain class declarations), we decided to use a tool that compiles Scala code to JavaScript. First of all, we have investigated tools that already exist:
 
 - [https://github.com/alvaroc1/s2js](https://github.com/alvaroc1/s2js)
 - [http://scalagwt.github.com/](http://scalagwt.github.com/)
 - [https://github.com/efleming969/scalosure](https://github.com/efleming969/scalosure)
 
-The first two unfortunately didn't suite our needs, mostly because they're still in a development phase and could be marked experimental. The build process of Scala+GWT seemed to be difficultly integratable into our build system. And complexity of the tool (e.g. the compilation process) discouraged us from potential modifications of our own. The third one, Scalosure, successor of the s2js, appealed to us the most thanks to its integration of [Google Closure Library](http://closure-library.googlecode.com/svn/docs/index.html) and relative lightweightness. Stopped development of the Scalosure was definitely disadvantage number one.
+The first two unfortunately didn't match our needs, mostly because they're still in a development phase and could be marked experimental. The build process of Scala+GWT seemed to be integrable into our build system only with huge difficulties and complexity of the tool (e.g. the compilation process) discouraged us from potential modifications of our own. The third one, Scalosure, successor of the s2js, appealed to us the most thanks to its integration of [Google Closure Library](http://closure-library.googlecode.com/svn/docs/index.html) and relative lightweightness. Abandoned development of the Scalosure, however, was definitely disadvantage number one.
 
-So we commenced with the Scalosure, but rather sooner than later, we got to a point where we had to modify and extend the tool itself. As we dug deeper and deeper into the Scalosure, we started to dislike its implementation. Having in mind that core of the Scalosure was just about 1000 LOC (including many duplicities), we decided to start on a green field and implement our own, yet heavily inspired by the Scalosure.
+We have commenced with Scalosure, but rather sooner than later, we got to a point where we had to modify and extend the tool itself. As we dug deeper and deeper into the Scalosure, we started to dislike its implementation. Having in mind that the core of Scalosure was just about 1000 LOC (including many duplicities), we have decided to start fresh and implement our own tool, heavily inspired by Scalosure.
 
-To make everything work, not only the [Scala to JavaScript compiler](#compiler) is necessary. One often needs to use already existing JavaScript libraries without a necessity to rewrite them into Scala. That's what the [adapters project](#adapters) is for. The somehow opposite direction is usage of classes from the [Scala Library](http://www.scala-lang.org/api/current/index.html#package) which can't be currently compiled using any compiler, nor ours. So the [runtime project](#runtime) contains simplified mirrors of the Scala Library classes compilable to JavaScript. There are also our own classes that are needed during s2js runtime both in the browser and on the server.
+To make everything work, not only the [Scala to JavaScript compiler](#compiler) is necessary. One often needs to use already existing JavaScript libraries without the necessity to rewrite them to Scala. That's what the [adapters project](#adapters) is for. The somehow opposite direction is usage of classes from the [Scala Library](http://www.scala-lang.org/api/current/index.html#package) which can't be currently compiled using any compiler, not even ours. So the [runtime project](#runtime) contains simplified mirrors of the Scala Library classes compilable to JavaScript. There are also our own classes that are needed for the s2js runtime both in the browser and on the server.
 
 Note that the tool was created just to match the requirements of Payola, so there are many gaps in implementation and ad-hoc solutions. Supported adapters and Scala Library classes are only those, we needed.
 
@@ -514,7 +517,7 @@ Adapters of web browser related objects (```Window```, ```History``` etc.), base
 
 ### Package cz.payola.common.entities
 
-The package includes classes representing the basic entities (user, analysis, plugin, etc.) that ensure the core functionality of Payola. Each entity has its own ID (string-based, 128-bit UUID) and can be stored in a relational database (see the [data package](#data) for more information).
+This package includes classes representing the basic entities (user, analysis, plugin, etc.) that ensure the core functionality of Payola. Each entity has its own ID (string-based, 128-bit UUID) and can be stored in a relational database (see the [data package](#data) for more information).
 
 #### Package cz.payola.common.entities.plugins
 
@@ -522,7 +525,7 @@ The package includes classes representing the basic entities (user, analysis, pl
 
 #### Package cz.payola.common.entities.privileges
 
-To share entities between users, privileges are used. This makes it easy to extend the model in the future, or to change the granularity of privilege granting. Currently, there are privileges to access a resource - analysis, data source, ontology customization and plugin; however, a privilege type that grants a user the right to edit some entity, for example, can be easily added.
+To share entities between users, privileges are used. This makes it easy to extend the model in the future, or to change the granularity of privilege granting. Currently, there are only privileges granting access to a resource - analysis, data source, ontology customization and plugin; however, a privilege type that grants a user the right to edit some entity, for instance, can be easily added.
 
 #### Package cz.payola.common.entities.settings
 
@@ -565,23 +568,23 @@ The `domain` project builds on the [`common`](#common) project, inheriting from 
 <a name="data"></a>
 ## Package cz.payola.data
 
-This whole package represents data layer. Trait `DataContextComponent` defines API for cominucation between data layer and other Payola components. The two vital task of data layer are:
+This whole package represents the data layer. Trait `DataContextComponent` defines API for communication between data layer and other Payola components. The two vital tasks of the data layer are:
 
-- store and fetch entities from [domain layer](#domain) from and into database
-- use [Virtuoso](http://virtuoso.openlinksw.com/) to as private RDF data store
+- store and fetch entities from the [domain layer](#domain) in and out of the database
+- usage of [Virtuoso](http://virtuoso.openlinksw.com/) server as a private RDF data storage
 
-Aritecture of Payola implies that domain layer is independent from data layer and since Payola is an open-source, data layer can be implemented specificaly to fit different platform-specific needs. 
+Architecture of Payola implies that the domain layer is independent from the data layer and since Payola is an open-source project, the data layer can be implemented specifically to fit different platform-specific needs. 
 
 ### Package cz.payola.data.squeryl
 
-In this version Payola uses [Squeryl](http://squeryl.org) (an ORM for Scala) for persisting entities into H2 database. Squeryl generates database schema from structure of stored objects. Every persisted entity is persisted in its own table, definition of this table is derived from entity structure. In order to have domain layer independent from data layer, there were implemented [entities](#squeryl-entities) that:
+In this version Payola uses [Squeryl](http://squeryl.org) (an ORM for Scala) for persisting entities into H2 database. Squeryl generates a database schema from the structure of objects to be stored. Every persisted entity is persisted in its own table, definition of this table is derived from entity object structure. In order to have the domain layer independent from the data layer, [entities](#squeryl-entities) were implemented that:
 
-- represent entities from domain layer and 
-- can be stored and loaded via Squeryl ORM into and from database
+- represent entities from the domain layer and 
+- can be stored and loaded via Squeryl ORM into and from the database
 
 #####Why Squeryl?
 
-Squeryl is existing, tested, functional and simple ORM for scala applications that had met the requirements of Payola during the process of making decision whether use existing ORM or implement own ORM tool.
+Squeryl is an existing, tested, functional and simple ORM for Scala applications that had met the needs of Payola during the process of making a decision whether to use an existing ORM or implement our own ORM tool.
 
 <a name="about-squeryl"></a>
 #####About Squeryl
@@ -589,15 +592,15 @@ Squeryl is existing, tested, functional and simple ORM for scala applications th
 <a name="squeryl-entities"></a>
 #### Package cz.payola.data.squeryl.entities
 
-For every entity in [domain layer](#domain) that issupposed to be persisted, exists a class in [data layer](#data) that provides database persistence to the corresponding domain layer entity.
+For every entity in the [domain layer](#domain) that needs to be persisted, a class exists in the [data layer](#data) that provides database persistence to the corresponding domain layer entity.
 
-Every data layer entity has a corresponding companion object (extending `EntityConverter`) that provides conversion from domain layer entity. When conversion fails, a `DataException` is thrown.
+Every data layer entity has a corresponding companion object (extending `EntityConverter`) that provides conversion from the domain layer entity. When the conversion fails, a `DataException` is thrown.
 
-Every data layer entity extends the represented domain layer entity (with two exceptions that will be explained later), which allows treat data layer entities like domain layer entities. There is no added bussines logic in data layer entities, their only purpose is to be stored and loaded into and from database.
+Every data layer entity extends the represented domain layer entity (with two exceptions that will be explained later), which allows to treat data layer entities like domain layer entities. There is no added business logic in data layer entities - their only purpose is to be stored and loaded into and from the database.
 
-The two mentioned enxeptions are `PluginDbRepresentation` and  `PrivilegeDbRepresentation`. Those data layer entities do not extend `Plugin` and `Privelege` from domain layer, because real plugins and privileges could be added in runtime (even by a user). Those domain layer entities are just abstract parents of real plugins and privileges, so they are simply wrapped into data layer entities. Data layer entities are persisted and domain layer entities are reconstructed from them using reflection.
+The two mentioned exceptions are `PluginDbRepresentation` and `PrivilegeDbRepresentation`. These data layer entities do not extend `Plugin` and `Privilege` from the domain layer, because the real plugins and privileges may be added at the runtime (even by a user). Instead, these domain layer entities are just abstract parents of the real plugins and privileges, so that they are simply wrapped into data layer entities. The data layer entities are persisted and the domain layer entities are reconstructed from them using reflection.
 
-Domain layer entities allows adding another entities into their internal collections (i.e. an plugin instance can be added to an anylyses via `analysis.addPluginInstance(pluginInstance)` statement). Data layer entities overrides this behavior by adding a code to persist this new relation into database and leaving domain layer behavior unchanged. 
+Domain layer entities allow adding another entities into their internal collections (e.g. an plugin instance can be added to an analysis via `analysis.addPluginInstance(pluginInstance)` statement). The data layer entities override this behavior by adding a code to persist this new relation into the database and leaving the domain layer behavior unchanged. 
 
 <a name="squeryl-repositories"></a>
 #### Package cz.payola.data.squeryl.repositories
@@ -609,16 +612,18 @@ Domain layer entities allows adding another entities into their internal collect
 
 Virtuoso is used for storing private RDF data of a user - classes in this package let you communicate with a Virtuoso instance and perform some tasks - create a graph group, upload a graph to the graph group, and then retrieve all graphs within a graph group.
 
+Some of these tasks are performed at Virtuoso's SPARQL endpoint which is as simple as posting a regular HTTP request, but some require a connection to its SQL database, for which a `virtuoso.jdbc3.Driver` driver is required. This driver is included in the `lib` directory of Payola project.
+
 <a name="model"></a>
 ## Package cz.payola.model
 
-The classes in this package builds up a wrapper which encapsulates all the business logic and data access. The goal of the code in this package is to decouple any presentation layer from the application logic and data access. In fact, all the existing presentation layers (web application controllers and RPC remote objects) are built on top of this package.
+The classes in this package build up a wrapper which encapsulates all the business logic and data access. The goal of the code in this package is to decouple any presentation layer from the application logic and data access. In fact, all the existing presentation layers (web application controllers and RPC remote objects) are built on top of this package.
 
-It is crucial to mention, that the model package does not make up the whole model. The model is spread into more packages, the domain, data, and common. All of those packages provides model capabilities and the model package uses them all to get specific tasks done.
+It is crucial to mention, that the model package does not make up the whole model. The model is spread into more packages, the domain, data, and common. All of those packages provide model capabilities and the model package itself uses them all to get specific tasks done.
 
 If you want to understand the following text (and the code) better, please, get familiar with the [Scala Cake pattern for DI](http://jonasboner.com/2008/10/06/real-world-scala-dependency-injection-di/).
 
-There is an object which logically belongs to this package, but you can find it elsewhere. It is the cz.payola.web.shared.Payola object. It stands for an entrypoint to the model, in the classic DI architecture, you would probably call it a container. It is a place, where all configuration is done and an instance of ModelComponent is created. Since objects behaves in certain situations like Singletons, 
+There exists an object, however, which should belong to this package, but is to be found elsewhere - the `cz.payola.web.shared.Payola` object. It represents an entry point to the model, in the classic DI architecture, you would probably call it a container. It is a place, where all the configuration is done and an instance of ModelComponent is created. Since objects behave in certain situations like Singletons, XXXXXXXXX
 
 
 
@@ -634,7 +639,7 @@ This project should be run during installation as described [here](#run-initiali
 
 Created database contains:
 
-- an user with login name "admin@payola.cz" and password "payola!"
+- a user with login name "admin@payola.cz" and password "payola!"
 - a public analysis owned by this user
 - two public data sources owned by this user
 - a public ontology customization for [Public contracts](http://opendata.cz/pco/public-contracts.xml) ontology
@@ -670,3 +675,10 @@ Created database contains:
 #### Package cz.payola.web.client.presenters
 
 > TODO: O.K.
+
+
+<a name="gen-docs"></a>
+# Generated documentation
+
+
+
