@@ -3,7 +3,7 @@ package s2js.compiler
 class LiteralSpecs extends CompilerFixtureSpec
 {
     describe("Literals") {
-        it("null is supported") {
+        ignore("null is supported") {
             configMap =>
                 scalaCode {
                     """
@@ -27,7 +27,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("booleans are supported") {
+        ignore("booleans are supported") {
             configMap =>
                 scalaCode {
                     """
@@ -53,7 +53,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("numbers are supported") {
+        ignore("numbers are supported") {
             configMap =>
                 scalaCode {
                     """
@@ -85,7 +85,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("chars are supported") {
+        ignore("chars are supported") {
             configMap =>
                 scalaCode {
                     """
@@ -119,7 +119,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("strings are supported") {
+        ignore("strings are supported") {
             configMap =>
                 scalaCode {
                     """
@@ -159,7 +159,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("classOf is supported") {
+        ignore("classOf is supported") {
             configMap =>
                 scalaCode {
                     """

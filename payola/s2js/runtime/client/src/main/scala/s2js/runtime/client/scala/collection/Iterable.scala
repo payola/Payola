@@ -1,5 +1,6 @@
 package s2js.runtime.client.scala.collection
 
+import s2js.runtime.client.core._
 import s2js.runtime.client.scala.util.control.Breaks._
 import s2js.runtime.client.scala.NotImplementedException
 
@@ -166,14 +167,14 @@ trait Iterable
         var result = ""
         var separator = ""
         var suffix = ""
-        if (s2js.runtime.client.js.isDefined(end)) {
+        if (isDefined(end)) {
             result = start
             separator = sep
             suffix = end
-        } else if (s2js.runtime.client.js.isDefined(sep)) {
+        } else if (isDefined(sep)) {
             result = start
             separator = start
-        } else if (s2js.runtime.client.js.isDefined(start)) {
+        } else if (isDefined(start)) {
             separator = start
         }
 
@@ -498,9 +499,9 @@ trait Iterable
 
     // From TraversableLike
     def stringPrefix: String = {
-        val clazz = s2js.runtime.client.classOf(this)
-        if (clazz.isDefined){
-            var str = clazz.get.fullName
+        val clazz = classOf(this)
+        if (clazz != null){
+            var str = clazz.fullName
             val idx1 = str.lastIndexOf(".")
             if (idx1 != -1) {
                 str = str.substring(idx1 + 1)
@@ -510,7 +511,7 @@ trait Iterable
                 str = str.substring(0, idx2)
             }
             str
-        }else{
+        } else {
             "anonymous"
         }
     }

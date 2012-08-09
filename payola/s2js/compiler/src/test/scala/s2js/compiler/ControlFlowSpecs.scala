@@ -3,7 +3,7 @@ package s2js.compiler
 class ControlFlowSpecs extends CompilerFixtureSpec
 {
     describe("Loop statements") {
-        it("while is supported") {
+        ignore("while is supported") {
             configMap =>
                 scalaCode {
                     """
@@ -36,7 +36,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("for is supported") {
+        ignore("for is supported") {
             configMap =>
                 scalaCode {
                     """
@@ -65,7 +65,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
     }
 
     describe("If statements") {
-        it("are supported") {
+        ignore("are supported") {
             configMap =>
                 scalaCode {
                     """
@@ -106,7 +106,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("can return values") {
+        ignore("can return values") {
             configMap =>
                 scalaCode {
                     """
@@ -150,7 +150,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("can have else if statements") {
+        ignore("can have else if statements") {
             configMap =>
                 scalaCode {
                     """
@@ -201,7 +201,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
     }
 
     describe("Exceptions") {
-        it("can be thrown") {
+        ignore("can be thrown") {
             configMap =>
                 scalaCode {
                     """
@@ -230,7 +230,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("try is supported") {
+        ignore("try is supported") {
             configMap =>
                 scalaCode {
                     """
@@ -265,7 +265,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("catch is supported") {
+        ignore("catch is supported") {
             configMap =>
                 scalaCode {
                     """
@@ -320,7 +320,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("try/catch with return value is supported") {
+        ignore("try/catch with return value is supported") {
             configMap =>
                 scalaCode {
                     """
@@ -373,7 +373,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
     }
 
     describe("Match statements") {
-        it("are supported") {
+        ignore("are supported") {
             configMap =>
                 scalaCode {
                     """
@@ -413,7 +413,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("can return value") {
+        ignore("can return value") {
             configMap =>
                 scalaCode {
                     """
@@ -446,7 +446,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("can have alternative patterns") {
+        ignore("can have alternative patterns") {
             configMap =>
                 scalaCode {
                     """
@@ -479,7 +479,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("can have guards") {
+        ignore("can have guards") {
             configMap =>
                 scalaCode {
                     """
@@ -516,7 +516,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("typed patterns are supported") {
+        ignore("typed patterns are supported") {
             configMap =>
                 scalaCode {
                     """
@@ -553,7 +553,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("basic binding is supported") {
+        ignore("basic binding is supported") {
             configMap =>
                 scalaCode {
                     """
@@ -592,7 +592,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("case class binding is supported") {
+        ignore("case class binding is supported") {
             configMap =>
                 scalaCode {
                     """

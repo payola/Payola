@@ -5,6 +5,7 @@ import scala.tools.nsc.io
 import sbt._
 import Keys._
 import PlayProject._
+import scala.util.matching.Regex
 
 object PayolaBuild extends Build
 {
@@ -131,22 +132,22 @@ object PayolaBuild extends Build
     {
         val compilerJar = Settings.targetDir / S2JsSettings.compilerJarName
 
-        def apply(name: String, path: File, outputDir: File, settings: Seq[Project.Setting[_]]) = {
+        def apply(name: String, path: String, outputDir: File, settings: Seq[Project.Setting[_]]) = {
             raw(name, path, outputDir, settings).dependsOn(
                 s2JsRuntimeClientProject
             )
         }
 
-        def raw(name: String, path: File, outputDir: File, projectSettings: Seq[Project.Setting[_]]) = {
+        def raw(name: String, path: String, outputDir: File, projectSettings: Seq[Project.Setting[_]]) = {
             Project(
-                name, path,
+                name, file(path),
                 settings = projectSettings ++ Seq(
                     scalacOptions ++= Seq(
                         "-Xplugin:" + compilerJar.absolutePath,
-                        "-P:s2js:outputDirectory:" + (outputDir / name).absolutePath
+                        "-P:s2js:outputDirectory:" + (outputDir / path).absolutePath
                     ),
                     clean <<= clean.map {_ =>
-                        new io.Directory(outputDir / name).deleteRecursively()
+                        new io.Directory(outputDir / path).deleteRecursively()
                     }
                 )
             ).dependsOn(
@@ -162,11 +163,11 @@ object PayolaBuild extends Build
     ).settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
 
     lazy val s2JsRuntimeSharedProject = ScalaToJsProject.raw(
-        "runtime-shared", file("s2js/runtime/shared"), WebSettings.javaScriptsDir, s2JsSettings
+        "runtime-shared", "s2js/runtime/shared", WebSettings.javaScriptsDir, s2JsSettings
     )
 
     lazy val s2JsRuntimeClientProject = ScalaToJsProject.raw(
-        "runtime-client", file("s2js/runtime/client"), WebSettings.javaScriptsDir, s2JsSettings
+        "runtime-client", "s2js/runtime/client", WebSettings.javaScriptsDir, s2JsSettings
     ).dependsOn(
         s2JsRuntimeSharedProject
     )
@@ -176,7 +177,7 @@ object PayolaBuild extends Build
     ).settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
 
     lazy val commonProject = ScalaToJsProject(
-        "common", file("common"), WebSettings.javaScriptsDir, payolaSettings
+        "common", "common", WebSettings.javaScriptsDir, payolaSettings
     ).dependsOn(scala2JsonProject)
 
     lazy val domainProject = Project(
@@ -219,7 +220,7 @@ object PayolaBuild extends Build
     ).settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
 
     lazy val webSharedProject = ScalaToJsProject(
-        "shared", file("web/shared"), WebSettings.javaScriptsDir / "shared",
+        "shared", "web/shared", WebSettings.javaScriptsDir / "shared",
         settings = payolaSettings ++ Seq(
             libraryDependencies ++= Seq(
                 "com.typesafe" % "config" % "0.5.0"
@@ -230,7 +231,7 @@ object PayolaBuild extends Build
     )
 
     lazy val webClientProject = ScalaToJsProject(
-        "client", file("web/client"), WebSettings.javaScriptsDir, payolaSettings
+        "client", "web/client", WebSettings.javaScriptsDir, payolaSettings
     ).dependsOn(
         commonProject, webSharedProject
     )
@@ -244,48 +245,59 @@ object PayolaBuild extends Build
     lazy val webServerProject = PlayProject(
         "server", PayolaSettings.version, Nil, path = file("web/server"), mainLang = SCALA
     ).settings(
-        compileAndPackage <<= (packageBin in Compile).dependsOn(clean).map {jarFile: File =>
-        // Retrieve the dependencies.
+        compileAndPackage <<= (packageBin in Compile).dependsOn(clean).map { jarFile: File =>
+            // Retrieve the dependencies.
             val dependencyExtensions = List("js", "css")
             val dependencyDirectory = new io.Directory(WebSettings.dependencyDir)
             val files = dependencyDirectory.deepFiles.filter(f => dependencyExtensions.contains(f.extension))
 
             val symbolFiles = new mutable.HashMap[String, String]
-            val fileProvidedSymbols = new mutable.HashMap[String, mutable.ArrayBuffer[String]]
-            val fileRequiredSymbols = new mutable.HashMap[String, mutable.ArrayBuffer[String]]
-            val provideRegex = """s2js\.runtime\.client\.ClassLoader\.provide\(\s*['\"]([^'\"]+)['\"]\s*\);""".r
-            val requireRegex = """s2js\.runtime\.client\.ClassLoader\.require\(\s*['\"]([^'\"]+)['\"]\s*\);""".r
+            val fileProvides = new mutable.HashMap[String, mutable.ArrayBuffer[String]]
+            val fileDeclarationRequires = new mutable.HashMap[String, mutable.ArrayBuffer[String]]
+            val fileRuntimeRequires = new mutable.HashMap[String, mutable.ArrayBuffer[String]]
 
-            files.foreach {file =>
+            def classLoaderCallRegex(methodName: String): Regex = {
+                """s2js\.runtime\.client\.core\.classLoader\.%s\(\s*['\"]([^'\"]+)['\"]\s*\);""".format(methodName).r
+            }
+            val provideRegex = classLoaderCallRegex("provide")
+            val declarationRequireRegex = classLoaderCallRegex("declarationRequire")
+            val runtimeRequireRegex = classLoaderCallRegex("require")
+
+            files.foreach { file =>
                 val path = file.toAbsolute.path.toString.replace("\\", "/")
-                fileProvidedSymbols += path -> new mutable.ArrayBuffer[String]
-                fileRequiredSymbols += path -> new mutable.ArrayBuffer[String]
-
                 val fileContent = Source.fromFile(path).getLines.mkString
+
                 provideRegex.findAllIn(fileContent).matchData.foreach {m =>
-                    fileProvidedSymbols(path) += m.group(1)
+                    fileProvides.getOrElseUpdate(path, mutable.ArrayBuffer.empty[String]) += m.group(1)
                     symbolFiles += m.group(1) -> path
                 }
-                requireRegex.findAllIn(fileContent).matchData.foreach(fileRequiredSymbols(path) += _.group(1))
+                declarationRequireRegex.findAllIn(fileContent).matchData.foreach {
+                    fileDeclarationRequires.getOrElseUpdate(path, mutable.ArrayBuffer.empty[String]) += _.group(1)
+                }
+                runtimeRequireRegex.findAllIn(fileContent).matchData.foreach {
+                    fileRuntimeRequires.getOrElseUpdate(path, mutable.ArrayBuffer.empty[String]) += _.group(1)
+                }
             }
 
             // Check whether all required symbols are provided.
-            val errorFile = fileRequiredSymbols.find(_._2.exists(file => !symbolFiles.contains(file)))
-            if (errorFile.isDefined) {
+            val errorFile = (fileDeclarationRequires ++ fileRuntimeRequires).find(_._2.exists(!symbolFiles.contains(_)))
+            errorFile.foreach { f =>
                 throw new Exception("Dependency '%s' declared in the file '%s' wasn't found.".format(
-                    errorFile.get._2.find(file => !symbolFiles.contains(file)).get.toString,
-                    errorFile.get._1.toString
+                    f._2.find(file => !symbolFiles.contains(file)).get.toString,
+                    f._1.toString
                 ))
             }
 
             // Create the dependency file.
             val dependencyFile = WebSettings.dependencyFile
             val dependencyBuffer = ListBuffer.empty[String]
-            fileProvidedSymbols.keys.foreach{file =>
+            fileProvides.keys.foreach{file =>
                 dependencyBuffer += "'%s': [".format(file)
-                dependencyBuffer += fileProvidedSymbols(file).mkString(",")
+                dependencyBuffer += fileProvides.get(file).flatten.mkString(",")
                 dependencyBuffer += "] ["
-                dependencyBuffer += fileRequiredSymbols(file).mkString(",")
+                dependencyBuffer += fileDeclarationRequires.get(file).flatten.mkString(",")
+                dependencyBuffer += "] ["
+                dependencyBuffer += fileRuntimeRequires.get(file).flatten.mkString(",")
                 dependencyBuffer += "]\n"
             }
             new io.File(dependencyFile).writeAll(dependencyBuffer.mkString)

@@ -3,7 +3,7 @@ package s2js.compiler
 class StatementSpecs extends CompilerFixtureSpec
 {
     describe("Statements") {
-        it("are terminated by semicolons") {
+        ignore("are terminated by semicolons") {
             configMap =>
                 scalaCode {
                     """
@@ -32,7 +32,7 @@ class StatementSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("assignments are supported") {
+        ignore("assignments are supported") {
             configMap =>
                 scalaCode {
                     """
@@ -129,7 +129,7 @@ class StatementSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("not operator is supported") {
+        ignore("not operator is supported") {
             configMap =>
                 scalaCode {
                     """

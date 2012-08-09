@@ -1,18 +1,26 @@
 package s2js.runtime.client.rpc
 
-import s2js.runtime.client.ClassLoader
-import s2js.runtime.client.js.JsObject
+import scala.collection._
+import s2js.adapters.js
+import s2js.runtime.client.core._
+import s2js.runtime.client.js._
 import s2js.runtime.shared.rpc.RpcException
+import s2js.runtime.shared.DependencyProvider
 
 class Deserializer extends RpcResultTraverser[Any]
 {
     private val classNameRetriever = new ClassNameRetriever()
 
-    private var context = new DeserializationContext();
+    private var context = new DeserializationContext()
 
     def deserialize(value: Any): Any = {
         // Retrieve the class names of the classes that has to be loaded while deserializing the object and load them.
-        ClassLoader.load(classNameRetriever.traverse(value))
+        val classesToLoad = classNameRetriever.traverse(value).filter(!classLoader.isLoaded(_))
+        if (classesToLoad.nonEmpty) {
+            val loadedClasses = mutable.ListBuffer.empty[String]
+            new JsArray(classLoader.loadedClasses).foreach((i, c) => loadedClasses += c.toString)
+            js.eval(DependencyProvider.get(classesToLoad, loadedClasses).javaScript)
+        }
 
         // Deserialize the object. As a side-effect, the deserialization context is filled.
         context = new DeserializationContext()
@@ -28,7 +36,7 @@ class Deserializer extends RpcResultTraverser[Any]
         val referencedObjectId = JsObject.fromAny(nonInstance).flatMap(_.getInt("__ref__"))
         if (referencedObjectId.isDefined) {
             new Reference(referencedObjectId.get)
-        } else if (s2js.runtime.client.js.isArray(nonInstance)) {
+        } else if (isArray(nonInstance)) {
             // If the non-instance is an array return traversed items instead of the array with non-traversed items.
             items
         } else {
@@ -78,10 +86,9 @@ class Deserializer extends RpcResultTraverser[Any]
     }
 
     private def createInstance(className: String): Any = {
-        if (!ClassLoader.isLoaded(className)) {
+        if (!classLoader.isLoaded(className)) {
             throw new RpcException("Can't deserialize an instance of class " + className + ". The class isn't loaded.")
         }
-
-        s2js.adapters.js.eval("new " + className + "()")
+        js.eval("new " + className + "()")
     }
 }

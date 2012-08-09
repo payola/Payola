@@ -20,13 +20,9 @@ payola/lib/s2js_2.9.1-0.2.jar
 payola/lib/scala2json_2.9.1-0.1.jar
 payola/lib/shared_2.9.1-0.1.jar
 payola/lib/web_2.9.1-0.1.jar
-payola/web/server/public/javascripts/compiled/
-payola/web/server/public/javascripts/runtime/
-payola/web/server/public/javascripts/runtime-shared/
-payola/web/server/public/javascripts/runtime-client/
+payola/web/server/public/javascripts/s2js/runtime/
 payola/web/server/public/javascripts/common/
-payola/web/server/public/javascripts/shared/
-payola/web/server/public/javascripts/client/
+payola/web/server/public/javascripts/web/
 payola/web/server/public/dependencies
 
 # IntelliJ Idea files.

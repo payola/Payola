@@ -1,6 +1,7 @@
 package s2js.runtime.client.js
 
 import s2js.compiler.javascript
+import s2js.runtime.client.core._
 
 object JsArray
 {

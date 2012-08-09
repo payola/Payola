@@ -3,7 +3,7 @@ package s2js.compiler
 class AnnotationSpecs extends CompilerFixtureSpec
 {
     describe("Annotations") {
-        it("native class implementation is supported") {
+        ignore("native class implementation is supported") {
             configMap =>
                 scalaCode {
                     """
@@ -27,7 +27,7 @@ class AnnotationSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("native method implementation is supported") {
+        ignore("native method implementation is supported") {
             configMap =>
                 scalaCode {
                     """
@@ -59,7 +59,7 @@ class AnnotationSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("native val value is supported") {
+        ignore("native val value is supported") {
             configMap =>
                 scalaCode {
                     """

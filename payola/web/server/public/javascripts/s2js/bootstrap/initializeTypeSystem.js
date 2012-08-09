@@ -1,8 +1,8 @@
-s2js.runtime.client.ClassLoader.provide('bootstrap.TypeSystem');
+s2js.runtime.client.ClassLoader.provide('s2js.bootstrap.initializeTypeSystem');
 
 // Classes used to extend the prototypes of primitive JavaScript types and Arrays.
-s2js.runtime.client.ClassLoader.require('scala.collection.mutable.ArrayBuffer');
-s2js.runtime.client.ClassLoader.require('scala.String');
+s2js.runtime.client.ClassLoader.declarationRequire('scala.collection.mutable.ArrayBuffer');
+s2js.runtime.client.ClassLoader.declarationRequire('scala.String');
 
 // Extend the JavaScript Object prototype with methods of a scala object.
 Object.defineProperty(Object.prototype, 'getClass', {

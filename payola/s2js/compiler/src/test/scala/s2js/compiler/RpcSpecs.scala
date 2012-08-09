@@ -2,7 +2,7 @@ package s2js.compiler
 
 class RpcSpecs extends CompilerFixtureSpec
 {
-    it("remote objects aren't compiled") {
+    ignore("remote objects aren't compiled") {
         configMap =>
             scalaCode {
                 """
@@ -19,7 +19,7 @@ class RpcSpecs extends CompilerFixtureSpec
             }
     }
 
-    it("synchronous remote method call gets translated into a synchronous rpc call") {
+    ignore("synchronous remote method call gets translated into a synchronous rpc call") {
         configMap =>
             scalaCode {
                 """
@@ -50,7 +50,7 @@ class RpcSpecs extends CompilerFixtureSpec
             }
     }
 
-    it("parameters of collection types are supported") {
+    ignore("parameters of collection types are supported") {
         configMap =>
             scalaCode {
                 """
@@ -89,7 +89,7 @@ class RpcSpecs extends CompilerFixtureSpec
             }
     }
 
-    it("asynchronous remote method call gets translated into an asynchronous rpc call") {
+    ignore("asynchronous remote method call gets translated into an asynchronous rpc call") {
         configMap =>
             scalaCode {
                 """
@@ -135,7 +135,7 @@ class RpcSpecs extends CompilerFixtureSpec
             }
     }
 
-    it("synchronous and asynchronous secured remote methods are supported") {
+    ignore("synchronous and asynchronous secured remote methods are supported") {
         configMap =>
             scalaCode {
                 """
@@ -179,7 +179,7 @@ class RpcSpecs extends CompilerFixtureSpec
             }
     }
 
-    it("secured remote objects are supported") {
+    ignore("secured remote objects are supported") {
         configMap =>
             scalaCode {
                 """

@@ -18,7 +18,7 @@ class ObjectCompiler(packageDefCompiler: PackageDefCompiler, classDef: Global#Cl
         if (parentClass.isDefined && parentConstructorCall.isDefined) {
             // Because the object may be a package object or a companion object, the members that already exist
             // there need to be preserved.
-            buffer += "s2js.runtime.client.mixIn(%s, new %s".format(
+            buffer += "s2js.runtime.client.core.mixIn(%s, new %s".format(
                 fullJsName,
                 packageDefCompiler.getSymbolJsName(parentClass.get.symbol)
             )

@@ -2,8 +2,9 @@ package s2js.runtime.client.rpc
 
 import collection.mutable.ArrayBuffer
 import s2js.compiler.javascript
-import s2js.adapters.js._
+import s2js.adapters.js
 import s2js.adapters.browser._
+import s2js.runtime.client.core._
 import s2js.runtime.shared.rpc.RpcException
 import s2js.runtime.client.scala.collection.immutable.StringOps
 
@@ -34,7 +35,7 @@ private object Wrapper
     }
 
     private def createXmlHttpRequest(controllerUrl: String, isAsync: Boolean): XMLHttpRequest = {
-        val request = if (s2js.runtime.client.isClassDefined("XMLHttpRequest")) {
+        val request = if (isObjectDefined("XMLHttpRequest")) {
             new XMLHttpRequest()
         } else {
             new ActiveXObject("Msxml2.XMLHTTP")
@@ -51,7 +52,7 @@ private object Wrapper
         val validStatuses = List(200, 500)
         val result = if (request.readyState == requestStatusDone && (validStatuses.contains(request.status))) {
             try {
-                deserializer.deserialize(eval("(" + request.responseText + ")"))
+                deserializer.deserialize(js.eval("(" + request.responseText + ")"))
             } catch {
                 case error => {
                     val description = error match {
@@ -86,14 +87,14 @@ private object Wrapper
 
         // Append the parameter types to the request body.
         requestBody += parameterSeparator + "paramTypes="
-        requestBody += encodeURIComponent(parameterTypeNames.map(jsonEscapeAndQuote).mkString("[", ",", "]"))
+        requestBody += js.encodeURIComponent(parameterTypeNames.map(jsonEscapeAndQuote).mkString("[", ",", "]"))
 
         // Append the parameters to the request body.
         var index = -1
         parameters.foreach { parameterValue =>
             index += 1
             requestBody += parameterSeparator + index + "="
-            requestBody += encodeURIComponent(processParameter(parameterTypeNames(index), parameterValue))
+            requestBody += js.encodeURIComponent(processParameter(parameterTypeNames(index), parameterValue))
         }
 
         requestBody.mkString

@@ -1,6 +1,7 @@
 package s2js.runtime.client.js
 
 import collection._
+import s2js.runtime.client.core._
 
 /**
  * A base class for JSON object traversers.
