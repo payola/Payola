@@ -11,21 +11,65 @@ Payola requires a [Scala](http://www.scala-lang.org) environment, which is suppo
 
 Aside from the actual Payola server, you need to be capable of running any [Squeryl-compatible](http://squeryl.org) relational database for storing user data and a [Virtuoso](http://virtuoso.openlinksw.com) server for storing personal RDF data. Neither of those need to be necessarily running on the same system as Payola itself (this is configurable in the `payola.conf` file as described later on).
 
-To work with Payola, you'll need a web browser capable of displaying HTML5 web pages. Payola takes advantage of many HTML5 features - keep your web browser up-to-date all the time. Recommended are the *latest versions* of WebKit-based browsers (e.g. Chrome, Safari), Firefox, Opera, or IE. A 1440x900 or larger display is highly recommended.
+To work with Payola, a web browser capable of displaying HTML5 web pages is required. Payola takes advantage of many HTML5 features - keep your web browser up-to-date all the time. Recommended are the *latest versions* of WebKit-based browsers (e.g. Chrome, Safari), Firefox, Opera, or IE. A 1440x900 or larger display is highly recommended.
 
 ## Installation Guide
 
-You need to have a working Scala environment to install Payola with [SBT (Scala Build Tool)](https://github.com/harrah/xsbt/wiki/) installed. Clone Payola git repository: `git://github.com/siroky/Payola.git` to a local folder.
+You need to have a working Scala environment with [SBT (Scala Build Tool)](https://github.com/harrah/xsbt/wiki/) to install Payola. Clone Payola git repository: `git://github.com/siroky/Payola.git` to a local folder.
 
-### <a name="configuring"></a>Configuring 
+### <a name="configuration"></a>Configuration 
 
-Payola comes pre-configured to work with default settings of a Virtuoso server and an H2 database installed on the same server as Payola is running (i.e. localhost). To change this configuration, edit `payola/web/shared/src/main/resources/payola.conf` - it’s a regular text file with various options on each line. Comment lines start with a hash symbol (`#`).
+Payola comes pre-configured to work with default settings of a Virtuoso server and an H2 database installed on the same server as Payola is running (i.e. localhost). To change this configuration, edit `payola/web/shared/src/main/resources/payola.conf` - it’s a regular text file with various key-value options separated by an equal sign (`=`) on each line. Comment lines start with a hash symbol (`#`).
 
-###### TODO: Describe each option in the conf
+> **Virtuoso Settings**
 
+> ** **
+
+> *virtuoso.server* - address of the Virtuoso server
+
+> *virtuoso.endpoint.port* - port of the Virtuoso server's SPARQL endpoint
+
+> *virtuoso.endpoint.ssl* - enter true if the connection to the Virtuoso SPARQL endpoint should use SSL
+
+> *virtuoso.sql.port* - port of the Virtuoso server's SQL database
+
+> *virtuoso.sql.user* - SQL database login name
+
+> *virtuoso.sql.password* - SQL database login password
+
+> ** **
+
+> **Relational Database Settings**
+
+> ** **
+
+> *database.location* - JDBC URL of the database
+
+> *database.user* - login name to the database
+
+> *database.password* - password for the login name
+
+> ** **
+
+> **Libraries**
+
+> ** **
+
+> *lib.directory* - storage for 3rd party libraries
+
+> ** **
+
+> **Plugins Directory**
+
+> ** **
+
+> *plugin.directory* - where to store plugins uploaded by users
+
+
+<a name="compiling"></a>
 ### Compiling and Running Payola
 
-As you clone just source codes from the git repository, it is necessary to compile Payola. To do so, you need to have SBT installed as noted above. Open command line (console, terminal) and make `payola` subdirectory current working subdirectory. Launch SBT (most likely using the `sbt` command) and enter the following commands:
+As the cloned repository contains just source codes, it is necessary to compile Payola. To do so, you need to have SBT installed as noted above. Open command line (console, terminal) and make `payola` subdirectory the current working subdirectory (`cd payola`). Launch SBT (most likely using the `sbt` command) and enter the following commands:
 
 <a name="run-initializer"></a>
 ```
@@ -40,20 +84,20 @@ As you clone just source codes from the git repository, it is necessary to compi
 
 Voilà! Your Payola server is running. The `initializer` project sets up your database to include an admin user (login `admin@payola.cz`, password `payola!`), a sample analysis and some data sources. You can, of course, remove those and create your own.
 
-> <a name="drop-create-warning"></a> **WARNING:** The `initializer` project drop-creates necessary tables - hence all previous data will be lost. Run this project only when installing Payola.
+> <a name="drop-create-warning"></a> **WARNING:** The `initializer` project drop-creates all required tables - hence all previous data will be lost. Run this project only when installing Payola or if you want to reset Payola to factory settings.
 
 ### Security
 
-Both the Virtuoso server and H2 database allow by default incoming connections from outside of your network, or localhost - Payola allows users to store their own private RDF data using Virtuoso groups that are identified using a generated 128-bit UUID (and the H2 database is secured by a username-password combination).
+Payola allows users to store their own private RDF data using Virtuoso graph groups that are identified using a generated 128-bit UUID (and the H2 database is secured by a username-password combination). Both the Virtuoso server and H2 database allow incoming connections from outside of your network, or localhost, by default.
 
-While a simple guess of another user's group identifier is unlikely (and a brute-force attack on the username-password combination is highly noticeable), it is advisable to secure your local Virtuoso storage and your relational database by denying all incoming and outgoing connections outside of localhost, or if on a secure company network, outside of that particular network. This is up to each admin to correctly set up the server's firewall.
+While a simple guess of another user's group identifier is unlikely (and a brute-force attack on the username-password combination for the relational database is highly noticeable), it is advisable to secure your local Virtuoso storage and your relational database by denying all incoming and outgoing connections outside of localhost, or if on a secure company network, outside of that particular network. This is up to each administrator to correctly set up the server's firewall.
 
 ---
 # Using Payola
 
 ## Launching
 
-To launch Payola, open SBT just like when you were compiling it and enter these two commands (you do not need to run the `cp` command if you haven't modified any source code since the last compilation):
+To launch Payola, open SBT just like when you were [compiling](#compiling) it and enter these two commands (you do not need to run the `cp` command unless you have modified the source code since the last compilation):
 
 
 > ```cp```
@@ -63,17 +107,17 @@ To launch Payola, open SBT just like when you were compiling it and enter these 
 > ```run```
 
 
-> *Warning:* Do **not** run the `initializer` project. All users, analyses, data sources, etc. would be lost. (See [this note](#drop-create-warning))
+> *Warning:* Do **not** run the `initializer` project. All users, analyses, data sources, etc. would be lost. (See [this note](#drop-create-warning) for details.)
 
 Once the server is running, enter the following address in your web browser:
 
 ><http://localhost:9000/>
 
-Of course, the port will be different depending on your configuration file (see section [Configuring](#configuring) for details).
+Of course, the port will be different depending on your configuration file (see section [Configuration](#configuration) for details).
 
 ## Basic usage
 
-You can use Payola both as a logged in user, or a guest. A guest is limited to analyses and data sources marked as public by other users and only in a read-only mode (i.e. can't edit them).
+You can use Payola both as a logged-in user, or a guest. A guest is limited to analyses and data sources marked as public by other users and only in a read-only mode (i.e. can't edit them).
 
 A logged-in user can create new data sources, analyses, plugins (you can actually write your own plugin, more about that later), edit them and share them; and upload your own private RDF data.
 
@@ -85,9 +129,9 @@ A data source is - as its name hints - a source of data. Payola needs to know wh
 
 ##### Creating
 
-When creating a data source, you need to enter a data source name and description, decide whether it's public (then it's visible even to logged out users) and which data fetcher to use.
+Let's start by creating a new data source. In the toolbar, click on the `My Data Sources` button and select `Create New`. You will need to enter a data source name and description, decide whether it's public (then it's visible even to guest users) and which data fetcher to use.
 
-A data fetcher is a plugin which can communicate with a data source of a specific type. A good example is a `SPARQL Endpoint` data fetcher. SPARQL is a query language for fetching data and such a data fetcher can work with any SPARQL endpoint.
+A data fetcher is a plugin which can communicate with a data source of a specific type. For example, `SPARQL Endpoint` is a data fetcher. SPARQL is a query language for fetching data and such a data fetcher can work with any SPARQL endpoint.
 
 Select a data fetcher of your choice, fill in the data fetcher's parameters (for example, in `SPARQL Endpoint` data fetcher's case an `EndpointURL` parameter) and hit the `Create Data Source` button. You have just created your first data source.
 
@@ -97,7 +141,7 @@ Use the toolbar at the top of the page to list available data sources (click on 
 
 You can view all data sources available to you. If you wish to edit one (e.g. change its name or description), click on the Edit button on the same row. You'll be redirected to an edit page which contains a delete button as well for removing the data source. The sharing functionality will be described in the [Sharing section](#sharing).
 
-Follow the same steps to list and edit any other entity in the system (analyses, plugins, etc.).
+The same steps to list and edit apply to any other entity in the system (analyses, plugins, etc.).
 
 ##### Viewing
 
@@ -107,17 +151,15 @@ You'll be presented with a neighborhood of an initial vertex.
 
 Such a subgraph can be viewed in many ways. The default one, presented to you, is a simple table. You can change the visualization plugin using the `Change visualization plugin` button. `Circle`, `Gravity` and `Tree` visualizations will display a regular graph using vertices and edges. 
 
-###### TODO - describe what can be done with a graph
+###### TODO - OK describe what can be done with a graph
 
-The `Column Chart` visualization will display a column bar graph, but works only with graphs of a specific structure. The graph must have one identified vertex, whose edges are of a `rdf:type` URI, with identified vertex destinations - this destination then must have exactly two edges, both directed to a literal vertex, one with a string value (name of the column), the second one with a numeric value.
-
-###### TODO - a picture of such a graph
+The `Column Chart` visualization will display a column bar graph, but works only with graphs of a specific structure. The graph must have one identified vertex, whose edges are of a `rdf:type` URI, with identified vertex destinations - this destination must then have exactly two edges, both directed to a literal vertex, one with a string value (name of the column), the second one with a numeric value.
 
 ##### Ontology Customization
 
 By default, each vertex and edge is of the same color and has the same size (width). To emphasize or diminish some parts of the graph, you can customize the visual appearance using an ontology customization.
 
-While viewing a graph, press the `Change appearance using ontologies` button. If you have already saved some customizations, they'll be listed there - if you haven't created any yet, select the `Create New` menu item. Enter name of the customization, ontology URL and press `Create`.
+While viewing a graph, press the `Change appearance using ontologies` button. If you have already saved some customizations, they will be listed here - if you haven't created any yet, select the `Create New` menu item. Enter name of the customization, ontology URL and press `Create`.
 
 You will be presented with a customization dialog. On the left, ontology classes are listed - select one. On the right, properties of that class are listed. At the very top of the right column, you can customize the appearance of that class itself (in the graph displayed as vertices), below, you can modify appearance of that property (in the graph displayed as edges).
 

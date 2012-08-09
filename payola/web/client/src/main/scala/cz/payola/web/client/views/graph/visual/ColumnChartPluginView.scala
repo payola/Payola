@@ -147,7 +147,7 @@ class ColumnChartPluginView(settings: VisualSetup) extends PluginView("Column Ch
                     setGraphContentWithInitialVertex(graph.get, initialVertex.get)
                 } else {
                     setTextualContent("This graph can't be displayed as a column chart...",
-                        "Choose a different visualisation plugin.")
+                        "Choose a different visualization plugin.")
                 }
             }
         }

@@ -11,7 +11,7 @@ import scala.collection.mutable
 
 /**
  * Graphical representation of IdentifiedVertex object in the drawn graph.
- * @param vertexModel the vertex object from the model, that is visualised
+ * @param vertexModel the vertex object from the model, that is visualized
  * @param position of this graphical representation in drawing space
  * @param settings draw settings used in draw and quickDraw routines
  * @param settingsText draw settings used by the contained informationView
@@ -42,7 +42,7 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var s
     var edges = ListBuffer[EdgeView]()
 
     /**
-     * Textual data that should be visualised with this vertex ("over this vertex").
+     * Textual data that should be visualized with this vertex ("over this vertex").
      */
     private var information: Option[InformationView] = vertexModel match {
         case i: Vertex => Some(new InformationView(i, settingsText))

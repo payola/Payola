@@ -42,7 +42,7 @@ class PluginSwitchView extends GraphView with ComposedView
 
     val pluginChangeButton: DropDownButton = new DropDownButton(List(
         new Icon(Icon.eye_open),
-        new Text("Change visualisation plugin")),
+        new Text("Change visualization plugin")),
         plugins.map { plugin =>
             val pluginAnchor = new Anchor(List(new Text(plugin.name)))
             val listItem = new ListItem(List(pluginAnchor))

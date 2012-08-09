@@ -482,7 +482,7 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack]
     }
 
     /**
-     * Adds the input vector to positions of all selected vertices in this graph visualisation.
+     * Adds the input vector to positions of all selected vertices in this graph visualization.
      * @param difference to move the vertices
      */
     def moveAllSelectedVertices(difference: Vector2D) {
@@ -492,7 +492,7 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack]
     }
 
     /**
-     * Adds the input vector to positions of all vertices in this graph visualisation.
+     * Adds the input vector to positions of all vertices in this graph visualization.
      * @param difference to move the vertices
      */
     def moveAllVertices(difference: Vector2D) {
