@@ -12,7 +12,7 @@ object Option
 {
     /** An implicit conversion that converts an option to an iterable value
       */
-    implicit def option2Iterable[A](xo: Option[A]): Iterable[A] = xo.toList
+    implicit def option2Iterable[A](xo: Option[A]): Iterable[A] = if (xo.isEmpty) List() else List(xo.get)
 
     /** An Option factory which creates Some(x) if the argument is not null,
       *  and None if it is null.

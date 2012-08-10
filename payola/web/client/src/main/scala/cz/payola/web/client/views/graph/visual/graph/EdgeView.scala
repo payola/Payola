@@ -19,7 +19,7 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
     val settings: VisualSetup) extends View[html.elements.CanvasRenderingContext2D]
 {
     /**
-     * Textual data that should be visualised with this edge ("over this edge").
+     * Textual data that should be visualized with this edge ("over this edge").
      */
     val information: InformationView = new InformationView(edgeModel, settings.textModel)
 

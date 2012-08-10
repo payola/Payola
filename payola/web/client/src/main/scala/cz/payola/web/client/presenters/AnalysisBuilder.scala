@@ -53,7 +53,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                                 analysisId = analysis.id
                                 lockAnalysisAndLoadPlugins()
                                 val view = new AnalysisEditorView(analysis)
-                                view.visualiser.pluginInstanceRendered += {
+                                view.visualizer.pluginInstanceRendered += {
                                     e => instancesMap.put(e.target.pluginInstance.id, e.target)
                                 }
                                 view.render(parentElement)
@@ -184,7 +184,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
 
         AnalysisBuilderData.createPluginInstance(evt.target.id, analysisId) { createdInstance =>
                 val mergeInstance = new EditablePluginInstanceView(createdInstance, buffer.asInstanceOf[Seq[PluginInstanceView]])
-                view.visualiser.renderPluginInstanceView(mergeInstance)
+                view.visualizer.renderPluginInstanceView(mergeInstance)
 
                 mergeInstance.connectButtonClicked += {
                     clickedEvent =>
@@ -236,7 +236,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
             val instance = new EditablePluginInstanceView(pi, List())
 
             branches.append(instance)
-            view.visualiser.renderPluginInstanceView(instance)
+            view.visualizer.renderPluginInstanceView(instance)
 
             instance.connectButtonClicked += onConnectClicked(view)
 
@@ -266,7 +266,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
             }
 
             branches.append(instance)
-            view.visualiser.renderPluginInstanceView(instance)
+            view.visualizer.renderPluginInstanceView(instance)
 
             instance.connectButtonClicked += { evt =>
                 connectPlugin(evt.target, view)

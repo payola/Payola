@@ -5,10 +5,12 @@ import cz.payola.common.entities.settings._
 import cz.payola.web.client.views.bootstrap._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.events._
+import cz.payola.web.client.views.bootstrap.element._
 import cz.payola.web.client.presenters.entity.settings._
 import cz.payola.web.client.views.elements.lists._
 import cz.payola.web.client.views.elements.form.fields._
 import cz.payola.common.visual.Color
+import scala.Some
 
 class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomization)
     extends Modal("Edit ontology customization", Nil, Some("Done"), None, false, "large-modal")
@@ -23,6 +25,8 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
 
     val propertyStrokeWidthDelayedChanged =
         new UnitEvent[InputControl[_], PropertyCustomizationEventArgs[InputControl[_]]]
+
+
 
     val ontologyCustomizationName = new InputControl(
         "Name:",
@@ -96,7 +100,7 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
         )
         val glyph = new InputControl(
             "Glyph:",
-            new TextInput("glyph", classCustomization.glyph, "")
+            new GlyphInput("glyph", Some(classCustomization.glyph), "")
         )
 
         fillColor.delayedChanged += { _ =>
@@ -109,7 +113,7 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
         }
         glyph.delayedChanged += { _ =>
             classGlyphDelayedChanged.trigger(new ClassCustomizationEventArgs(glyph, classCustomization,
-                glyph.field.value))
+                glyph.field.value.getOrElse("")))
         }
 
         fillColor.render(propertiesDiv.htmlElement)

@@ -63,7 +63,7 @@ label {
     max-width: 200px;
 }
 
-.listing-name{
+.listing-name {
     width: 600px;
 }
 
@@ -256,7 +256,7 @@ input[type="checkbox"].active:after {
     border: 4px solid #3A87AD;
 }
 
-.successors{
+.successors {
     background-color: white;
     margin-bottom: 18px;
     z-index: 1;
@@ -284,21 +284,62 @@ input[type="checkbox"].active:after {
     max-height: 330px;
 }
 
-.vitable .popover-content{
+.vitable .popover-content {
     width: 472px;
     height: 300px;
     overflow: auto;
 }
 
-.vitable .popover-inner{
+.vitable .popover-inner {
     width: 500px;
     max-height: 375px;
 }
 
-.vitable .popover-title a{
+.vitable .popover-title a {
     font-size: 11px;
 }
 
-.highlight .alert{
+.highlight .alert {
     background-color: navy;
+}
+
+.glyph-wrapper {
+    position: relative;
+}
+
+.glyph {
+    font-family: "EntypoRegular";
+    font-size: 57px;
+}
+
+input.glyph {
+    font-size: 31px !important;
+    text-align: center;
+}
+
+.glyph-popup .glyph {
+    width: 43px;
+    display: inline-block;
+    height: 40px;
+    padding-top: 6px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.glyph-popup .glyph:hover {
+    background: rgba(0, 51, 153, 0.6);
+}
+
+.glyph-popup {
+    padding: 10px !important;
+    top: -180px !important;
+    left: -298px !important;
+}
+
+.glyph-wrapper .add-on {
+    cursor: pointer;
+}
+
+.glyph-wrapper input, .glyph-wrapper .add-on {
+    padding: 10px !important;
 }

@@ -16,7 +16,7 @@ import cz.payola.web.client.views.algebra._
  * closer. The final positions of the vertices is reached when all vertices
  * have "small enough" velocity.
  */
-class GravityTechnique(settings: VisualSetup) extends BaseTechnique(settings, "Gravity Visualisation")
+class GravityTechnique(settings: VisualSetup) extends BaseTechnique(settings, "Gravity Visualization")
 {
     /**
      * How much vertices push away each other

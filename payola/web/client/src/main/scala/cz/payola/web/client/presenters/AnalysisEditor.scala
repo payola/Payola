@@ -16,13 +16,13 @@ class AnalysisEditor(parentElementId: String, analysisIdParam: String)
 
             lockAnalysisAndLoadPlugins()
             val view = new AnalysisEditorView(analysis)
-            view.visualiser.pluginInstanceRendered += { e => instancesMap.put(e.target.pluginInstance.id, e.target)}
+            view.visualizer.pluginInstanceRendered += { e => instancesMap.put(e.target.pluginInstance.id, e.target)}
             view.render(parentElement)
             view.name.field.value = analysis.name
             view.description.field.value = analysis.description
-            bindParameterChangedEvent(view.visualiser)
+            bindParameterChangedEvent(view.visualizer)
             bindConnectButtonClickedEvent(view)
-            bindDeleteButtonClickedEvent(view.visualiser)
+            bindDeleteButtonClickedEvent(view.visualizer)
             constructBranches(analysis)
             bindMenuEvents(view)
             unblockPage()
@@ -39,8 +39,8 @@ class AnalysisEditor(parentElementId: String, analysisIdParam: String)
         targets.foreach(branches.append(_))
     }
 
-    private def bindParameterChangedEvent(visualiser: EditableAnalysisVisualizer){
-        visualiser.parameterValueChanged += { e =>
+    private def bindParameterChangedEvent(visualizer: EditableAnalysisVisualizer){
+        visualizer.parameterValueChanged += { e =>
             val pv = e.target
             pv.control.isActive = true
             storeParameterValueToServer(pv)
@@ -48,11 +48,11 @@ class AnalysisEditor(parentElementId: String, analysisIdParam: String)
     }
 
     private def bindConnectButtonClickedEvent(view: AnalysisEditorView){
-        view.visualiser.connectButtonClicked += onConnectClicked(view)
+        view.visualizer.connectButtonClicked += onConnectClicked(view)
     }
 
-    private def bindDeleteButtonClickedEvent(visualiser: EditableAnalysisVisualizer){
-        visualiser.deleteButtonClicked += onDeleteClick
+    private def bindDeleteButtonClickedEvent(visualizer: EditableAnalysisVisualizer){
+        visualizer.deleteButtonClicked += onDeleteClick
     }
 
     private def storeParameterValueToServer(pv: ParameterValue) {

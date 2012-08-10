@@ -43,7 +43,7 @@ import java.lang.reflect.InvocationTargetException
   * continue. When the call is done (response loaded), one of the callbacks is triggered. Keep this in mind while
   * using the mechanism. The typical use case would be loading a large graph structure from the server. One would
   * show a "loading" animation to the user to keep him noticed that something is happening on the background. After
-  * the graph arrives to the client side of the application, the graph could be rendered using one of the visualisation
+  * the graph arrives to the client side of the application, the graph could be rendered using one of the visualization
   * plugins.
   *
   * The asynchronous version of the RPC call uses the Actors framework on the server side to guarantee the synchronous

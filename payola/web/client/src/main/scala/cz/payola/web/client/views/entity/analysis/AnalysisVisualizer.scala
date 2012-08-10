@@ -8,12 +8,11 @@ import scala.collection.mutable.ArrayBuffer
 import cz.payola.web.client.views.todo._
 import cz.payola.common.entities
 import s2js.runtime.client.scala.collection.mutable.HashMap
-import scala.collection.mutable
-import s2js.compiler.javascript
 import cz.payola.web.client.events.SimpleUnitEvent
 import cz.payola.common.entities.plugins.PluginInstance
+import cz.payola.web.client.views.ComposedView
 
-abstract class AnalysisVisualizer(analysis: Analysis) extends View
+abstract class AnalysisVisualizer(analysis: Analysis) extends ComposedView
 {
     val pluginInstanceRendered = new SimpleUnitEvent[PluginInstanceView]
 
@@ -21,16 +20,14 @@ abstract class AnalysisVisualizer(analysis: Analysis) extends View
 
     protected val instancesMap = new HashMap[String, PluginInstanceView]
 
-    def render(parent: html.Element) {
-        pluginCanvas.render(parent)
+    def createSubViews: Seq[View] = {
+        List(pluginCanvas)
+    }
+
+    override def render(parent: html.Element) {
+        super.render(parent)
         renderAnalysis()
     }
-
-    def destroy() {
-        pluginCanvas.destroy()
-    }
-
-    def blockHtmlElement = pluginCanvas.htmlElement
 
     private def renderAnalysis() {
         val sources = new ArrayBuffer[PluginInstanceView]
@@ -40,13 +37,6 @@ abstract class AnalysisVisualizer(analysis: Analysis) extends View
         setPredecessorsFromBindings(analysis)
         renderSources(sources, renderBuffer)
         renderBufferTopologically(renderBuffer)
-        renderBindings(analysis)
-    }
-
-    private def renderBindings(analysis: entities.Analysis) {
-        analysis.pluginInstanceBindings.map {
-            b => renderBinding(instancesMap(b.sourcePluginInstance.id), instancesMap(b.targetPluginInstance.id))
-        }
     }
 
     private def renderBufferTopologically(renderBuffer: ArrayBuffer[PluginInstanceView]) {
@@ -110,11 +100,6 @@ abstract class AnalysisVisualizer(analysis: Analysis) extends View
     private def isSource(instance: entities.plugins.PluginInstance, analysis: Analysis): Boolean = {
         !analysis.pluginInstanceBindings.find(_.targetPluginInstance == instance).isDefined
     }
-
-    @javascript(
-        """
-        """)
-    def renderBinding(a: PluginInstanceView, b: PluginInstanceView) {}
 
     def renderPluginInstanceView(v: PluginInstanceView) {
         v.render(pluginCanvas.htmlElement)

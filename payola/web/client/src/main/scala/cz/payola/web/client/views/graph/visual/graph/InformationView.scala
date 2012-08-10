@@ -8,7 +8,7 @@ import s2js.adapters.html._
 
 /**
  * Graphical representation of textual data in the drawn graph.
- * @param data that are visualised (by toString function of this object)
+ * @param data that are visualized (by toString function of this object)
  * @param settings how to draw this informationView
  */
 class InformationView(data: Any, val settings: TextSettingsModel) extends View[html.elements.CanvasRenderingContext2D]
