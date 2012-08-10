@@ -220,7 +220,7 @@ object PayolaBuild extends Build
     ).settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
 
     lazy val webSharedProject = ScalaToJsProject(
-        "shared", "web/shared", WebSettings.javaScriptsDir / "shared",
+        "shared", "web/shared", WebSettings.javaScriptsDir,
         settings = payolaSettings ++ Seq(
             libraryDependencies ++= Seq(
                 "com.typesafe" % "config" % "0.5.0"
@@ -257,7 +257,9 @@ object PayolaBuild extends Build
             val fileRuntimeRequires = new mutable.HashMap[String, mutable.ArrayBuffer[String]]
 
             def classLoaderCallRegex(methodName: String): Regex = {
-                """s2js\.runtime\.client\.core\.classLoader\.%s\(\s*['\"]([^'\"]+)['\"]\s*\);""".format(methodName).r
+                """s2js\.runtime\.client\.core\.get\(\)\.classLoader\.%s\(\s*['\"]([^'\"]+)['\"]\s*\);""".format(
+                    methodName
+                ).r
             }
             val provideRegex = classLoaderCallRegex("provide")
             val declarationRequireRegex = classLoaderCallRegex("declarationRequire")

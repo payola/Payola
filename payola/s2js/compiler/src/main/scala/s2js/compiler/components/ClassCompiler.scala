@@ -48,7 +48,7 @@ class ClassCompiler(packageDefCompiler: PackageDefCompiler, classDef: Global#Cla
         buffer += "};\n"
 
         if (parentClass.isDefined) {
-            buffer += "goog.inherits(%s, %s);\n".format(
+            buffer += "s2js.runtime.client.core.get().inherit(%s, %s);\n".format(
                 fullJsName,
                 packageDefCompiler.getSymbolJsName(parentClass.get.symbol)
             )

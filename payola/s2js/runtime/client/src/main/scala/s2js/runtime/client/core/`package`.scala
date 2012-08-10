@@ -53,7 +53,7 @@ object `package`
     /**
      * Returns whether the specified object can be perceived as an integer.
      */
-    @javascript("return self.isNumber(obj) && (obj % 1 === 1);")
+    @javascript("return self.isNumber(obj) && (obj % 1 === 0);")
     def isInteger(obj: Any): Boolean = false
 
     /**
@@ -85,7 +85,7 @@ object `package`
     @javascript(
         """
             for (var i in sourceObject) {
-                if (i != '__class__' || includeClass) {
+                if (self.isUndefined(targetObject[i]) && (i != '__class__' || includeClass)) {
                     targetObject[i] = sourceObject[i];
                 }
             }
@@ -174,7 +174,7 @@ object `package`
             }
             for (var i in c.parentClasses) {
                 var parentClass = self.classOf(c.parentClasses[i].prototype)
-                if (parentClass !== null && classIsSubClassOrEqual(parentClass, classFullName)) {
+                if (parentClass !== null && self.classIsSubClassOrEqual(parentClass, classFullName)) {
                     return true;
                 }
             }

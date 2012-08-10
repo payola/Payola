@@ -1,8 +1,8 @@
-s2js.runtime.client.ClassLoader.provide('s2js.bootstrap.initializeTypeSystem');
+s2js.runtime.client.core.get().classLoader.provide('s2js.bootstrap.initializeTypeSystem');
 
 // Classes used to extend the prototypes of primitive JavaScript types and Arrays.
-s2js.runtime.client.ClassLoader.declarationRequire('scala.collection.mutable.ArrayBuffer');
-s2js.runtime.client.ClassLoader.declarationRequire('scala.String');
+s2js.runtime.client.core.get().classLoader.declarationRequire('scala.collection.mutable.ArrayBuffer');
+s2js.runtime.client.core.get().classLoader.declarationRequire('scala.String');
 
 // Extend the JavaScript Object prototype with methods of a scala object.
 Object.defineProperty(Object.prototype, 'getClass', {
@@ -12,7 +12,7 @@ Object.defineProperty(Object.prototype, 'getClass', {
 });
 
 // Extend the JavaScript String prototype with methods of scala.String.
-goog.object.extend(String.prototype, scala.String.prototype);
+s2js.runtime.client.core.get().mixIn(String.prototype, scala.String.prototype, true);
 
 // Extend the JavaScript Arrays with the methods of scala.collection.mutable.ArrayBuffer.
 function extendJsArrayToArrayBuffer(jsArrayPrototype) {

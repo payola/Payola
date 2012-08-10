@@ -140,12 +140,21 @@ class PackageSpecs extends CompilerFixtureSpec
                         package a.b.c
 
                         object `package` {
-                            def foo() {}
+                            def foo() {
+                                val a = List("X")
+                                val b = List.empty[String]
+                            }
+
+                            def empty[A]: Option[A] = None
                         }
 
                         object bar {
                             def bar() {
                                 foo()
+                            }
+
+                            def baz() {
+                                bar()
                             }
                         }
                     """

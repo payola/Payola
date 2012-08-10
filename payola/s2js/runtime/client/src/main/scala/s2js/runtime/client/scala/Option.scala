@@ -12,7 +12,7 @@ object Option
 {
     /** An implicit conversion that converts an option to an iterable value
       */
-    // TODO implicit def option2Iterable[A](xo: Option[A]): Iterable[A] = xo.toList
+    implicit def option2Iterable[A](xo: Option[A]): Iterable[A] = xo.toList
 
     /** An Option factory which creates Some(x) if the argument is not null,
       *  and None if it is null.
@@ -211,8 +211,7 @@ sealed abstract class Option[+A] extends Product with Serializable
     /** Returns a singleton list containing the $option's value
       * if it is nonempty, or the empty list if the $option is empty.
       */
-    // TODO def toList: List[A] =
-    // TODO     if (isEmpty) List() else List(this.get)
+    def toList: List[A] = if (isEmpty) List() else List(this.get)
 }
 
 /** Class `Some[A]` represents existing values of type

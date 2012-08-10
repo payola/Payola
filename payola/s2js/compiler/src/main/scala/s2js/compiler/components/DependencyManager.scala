@@ -25,7 +25,7 @@ class DependencyManager(private val packageDefCompiler: PackageDefCompiler)
     def compileDependencies(buffer: mutable.ListBuffer[String]) {
         def symbolsToClassLoaderCalls(symbols: mutable.HashSet[String], methodName: String) = {
             symbols.toSeq.sortBy(s => s).map { s =>
-                "s2js.runtime.client.core.classLoader.%s('%s');\n".format(methodName, s)
+                "s2js.runtime.client.core.get().classLoader.%s('%s');\n".format(methodName, s)
             }.mkString
         }
 

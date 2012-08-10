@@ -14,14 +14,8 @@ class ComponentPositionHelper(val componentsCount: Int, val previousComponent: O
 {
     def getPositionCorrection(): Vector2D = {
         val componentSpacing = 50.0
-        val componentNumber = if (previousComponent.get.componentNumber >= 0) {
-            previousComponent.get.componentNumber + 1
-            //^it is expected, that components are numbered from 0
-        } else {
-            1
-            //in case the component number is wrong, this wont cause the calculation to crash
-        }
 
+        val componentNumber = previousComponent.map(_.componentNumber).filter(_ >= 0).getOrElse(0) + 1
 
         val bottomRight = if (previousComponent.isDefined) {
             previousComponent.get.getBottomRight()

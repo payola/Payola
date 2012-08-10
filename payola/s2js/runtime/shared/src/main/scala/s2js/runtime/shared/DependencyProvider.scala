@@ -2,6 +2,7 @@ package s2js.runtime.shared
 
 import collection.mutable
 import io.Source
+import scala.util.matching.Regex
 
 @remote object DependencyProvider
 {
@@ -9,7 +10,8 @@ import io.Source
 
     private val fileDependenciesRegex = """'(.+)': \[(.*)\] \[(.*)\] \[(.*)\]""".r
 
-    private val provideRegex = """s2js\.runtime\.client\.core\.classLoader\.provide\(\s*['\"]([^'\"]+)['\"]\s*\);""".r
+    private val provideRegex =
+        """s2js\.runtime\.client\.core\.get\(\)\.classLoader\.provide\(\s*['\"]([^'\"]+)['\"]\s*\);""".r
 
     def get(symbols: Seq[String], symbolsToIgnore: Seq[String]): DependencyPackage = {
         var dependencyPackage = new DependencyPackage("", "", Nil)

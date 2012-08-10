@@ -79,9 +79,7 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
         // Check whether the async methods on remote objects are declared properly.
         structure.remoteObjects.foreach {classDef =>
             val methods = classDef.impl.body.collect { case defDef: Global#DefDef => defDef }
-            methods.filter(v => symbolHasAnnotation(v.symbol, "s2js.compiler.async")).foreach {defDef =>
-                checkAsyncMethod(defDef)
-            }
+            methods.filter(v => symbolHasAnnotation(v.symbol, "s2js.compiler.async")).foreach(checkAsyncMethod(_))
         }
     }
 
@@ -171,13 +169,11 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
       * @return The name.
       */
     def getSymbolFullJsName(symbol: Global#Symbol): String = {
-        var name = symbol.fullName
+        var name = symbol.fullName.replace(".this", "").replace(".package", "")
 
         // Perform the namespace transformation (use the longest matching namespace).
-        val replacement = symbolPackageReplacement(symbol)
-        if (replacement.isDefined) {
-            val (oldPackage, newPackage) = replacement.get
-
+        symbolPackageReplacement(symbol).foreach { r =>
+            val (oldPackage, newPackage) = r
             name = name.stripPrefix(oldPackage)
             if (newPackage.isEmpty && name.startsWith(".")) {
                 name = name.drop(1)
@@ -185,8 +181,7 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
             name = newPackage + name
         }
 
-        // Drop the "package" package that isn't used in the JavaScript.
-        name.replace(".package", "")
+        name
     }
 
     /**

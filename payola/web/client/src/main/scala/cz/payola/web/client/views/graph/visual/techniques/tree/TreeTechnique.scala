@@ -20,8 +20,4 @@ class TreeTechnique(settings: VisualSetup) extends BaseTechnique(settings, "Tree
             basicTreeStructure(component.vertexViews, None, redrawQuick, redraw, Some(0))
         }
     }
-
-    override def destroy() {
-        super.destroy()
-    }
 }
