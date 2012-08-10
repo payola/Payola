@@ -138,20 +138,6 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     protected def compileConstructor(parentConstructorCall: Option[Global#Apply])
 
     /**
-     * Mixes the inherited traits into the specified target object.
-     * @param targetObject The object to mix the inherited traits into.
-     */
-    protected def mixInInheritedTraits(targetObject: String) {
-        // Traits should be mixed-in in reverse order as mentioned in the specification of stackable modifications.
-        inheritedTraits.reverse.foreach { traitAst =>
-            buffer += "s2js.runtime.client.core.get().mixIn(%s, new %s());\n".format(
-                targetObject,
-                packageDefCompiler.getSymbolJsName(traitAst.symbol)
-            )
-        }
-    }
-
-    /**
      * Compiles members of a ClassDef: ValDefs (field vals and vars) and DefDefs (methods).
      */
     protected def compileMembers() {

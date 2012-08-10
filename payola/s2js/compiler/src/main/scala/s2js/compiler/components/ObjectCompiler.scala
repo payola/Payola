@@ -38,6 +38,11 @@ class ObjectCompiler(packageDefCompiler: PackageDefCompiler, classDef: Global#Cl
         }
 
         // Mix in the inherited traits.
-        mixInInheritedTraits(memberContainerName)
+        inheritedTraits.reverse.foreach { traitAst =>
+            buffer += "s2js.runtime.client.core.get().mixIn(%s, new %s());\n".format(
+                memberContainerName,
+                packageDefCompiler.getSymbolJsName(traitAst.symbol)
+            )
+        }
     }
 }

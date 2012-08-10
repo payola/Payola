@@ -33,8 +33,12 @@ class ClassCompiler(packageDefCompiler: PackageDefCompiler, classDef: Global#Cla
             buffer += ");\n"
         }
 
-        // Mix in the inherited traits.
-        mixInInheritedTraits("self")
+        // Mix in the fields of the inherited traits.
+        inheritedTraits.reverse.foreach { traitAst =>
+            buffer += "s2js.runtime.client.core.get().mixInFields(self, new %s());\n".format(
+                packageDefCompiler.getSymbolJsName(traitAst.symbol)
+            )
+        }
 
         // Initialize fields that aren't implicit constructor parameters.
         valDefs.filter(v => !initializedValDefs.contains(packageDefCompiler.getSymbolLocalJsName(v.symbol))).foreach(
@@ -51,6 +55,14 @@ class ClassCompiler(packageDefCompiler: PackageDefCompiler, classDef: Global#Cla
             buffer += "s2js.runtime.client.core.get().inherit(%s, %s);\n".format(
                 fullJsName,
                 packageDefCompiler.getSymbolJsName(parentClass.get.symbol)
+            )
+        }
+
+        // Copy all the functions of the inherited trait prototypes to the current class prototype.
+        inheritedTraits.reverse.foreach { traitAst =>
+            buffer += "s2js.runtime.client.core.get().mixInFunctions(%s, %s.prototype);\n".format(
+                memberContainerName,
+                packageDefCompiler.getSymbolJsName(traitAst.symbol)
             )
         }
     }

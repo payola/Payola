@@ -12,7 +12,7 @@ Object.defineProperty(Object.prototype, 'getClass', {
 });
 
 // Extend the JavaScript String prototype with methods of scala.String.
-s2js.runtime.client.core.get().mixIn(String.prototype, scala.String.prototype, true);
+s2js.runtime.client.core.get().mixIn(String.prototype, scala.String.prototype);
 
 // Extend the JavaScript Arrays with the methods of scala.collection.mutable.ArrayBuffer.
 function extendJsArrayToArrayBuffer(jsArrayPrototype) {

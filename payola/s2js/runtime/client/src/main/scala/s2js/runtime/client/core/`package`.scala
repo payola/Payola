@@ -77,20 +77,49 @@ object `package`
     def inherit(subClass: Any, superClass: Any) {}
 
     /**
-     * Copies all the values (fields and functions) from the source object to the target object.
+     * Copies all the fields from the source object to the target object. Copies only those fields that aren't directly
+     * defined in the target object.
      * @param targetObject An object where the values are copied to.
      * @param sourceObject An object whose values are copied to the target object.
-     * @param includeClass Whether the reference to the object class should be copied.
      */
     @javascript(
         """
             for (var i in sourceObject) {
-                if (self.isUndefined(targetObject[i]) && (i != '__class__' || includeClass)) {
+                if (!self.isFunction(sourceObject[i]) &&
+                    !Object.prototype.hasOwnProperty.call(targetObject, i) &&
+                    !Object.prototype.hasOwnProperty.call(targetObject.constructor.prototype, i)) {
                     targetObject[i] = sourceObject[i];
                 }
             }
         """)
-    def mixIn(targetObject: Any, sourceObject: Any, includeClass: Boolean = false) {}
+    def mixInFields(targetObject: Any, sourceObject: Any) {}
+
+    /**
+     * Copies all the functions from the source object to the target object. Copies only those functions that aren't
+     * directly defined in the target object prototype.
+     * @param targetObject An object where the values are copied to.
+     * @param sourceObject An object whose values are copied to the target object.
+     */
+    @javascript(
+        """
+            for (var i in sourceObject) {
+                if (self.isFunction(sourceObject[i]) &&
+                    !Object.prototype.hasOwnProperty.call(targetObject.constructor.prototype, i)) {
+                    targetObject[i] = sourceObject[i];
+                }
+            }
+        """)
+    def mixInFunctions(targetObject: Any, sourceObject: Any) {}
+
+    /**
+     * Copies all the values (fields and functions) from the source object to the target object.
+     * @param targetObject An object where the values are copied to.
+     * @param sourceObject An object whose values are copied to the target object.
+     */
+    def mixIn(targetObject: Any, sourceObject: Any) {
+        mixInFields(targetObject, sourceObject)
+        mixInFunctions(targetObject, sourceObject)
+    }
 
     /**
      * Returns whether the specified path correspond to an existing object (i.e. whether the 'evaled' path is defined).
