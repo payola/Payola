@@ -5,6 +5,10 @@ import s2js.adapters.html.Element
 
 trait Canvas extends Element
 {
+    var top: Double = 0
+
+    var left: Double = 0
+
     var height: Double = 0
 
     var width: Double = 0

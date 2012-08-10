@@ -2,7 +2,6 @@ package cz.payola.web.client.views.graph.visual.techniques.gravity
 
 import collection.mutable.ListBuffer
 import s2js.adapters.js.Date
-import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.views.graph.visual.graph._
 import cz.payola.web.client.views.graph.visual.animation.Animation
 import cz.payola.web.client.views.graph.visual.techniques.BaseTechnique
@@ -16,7 +15,7 @@ import cz.payola.web.client.views.algebra._
  * closer. The final positions of the vertices is reached when all vertices
  * have "small enough" velocity.
  */
-class GravityTechnique(settings: VisualSetup) extends BaseTechnique(settings, "Gravity Visualization")
+class GravityTechnique extends BaseTechnique("Gravity Visualization")
 {
     /**
      * How much vertices push away each other
@@ -34,10 +33,6 @@ class GravityTechnique(settings: VisualSetup) extends BaseTechnique(settings, "G
      * 0.5 is well tested, change it carefully.
      */
     private val velocitiesStabilization = 3
-
-    override def destroy() {
-        super.destroy()
-    }
 
     protected def getTechniquePerformer(component: Component,
         animate: Boolean): Animation[ListBuffer[(VertexView, Point2D)]] = {

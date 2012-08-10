@@ -1,23 +1,19 @@
 package cz.payola.common.visual
 
-import scala.Int
-import java.lang.String
-import s2js.compiler.javascript
-
 /**
  * RGB representation of colors used by visual plug-ins
  * @param red component of the color
  * @param green component of the color
  * @param blue component of the color
  */
-class Color(val red: Int, val green: Int, val blue: Int)
+class Color(val red: Int, val green: Int, val blue: Int, val alpha: Double = 1.0)
 {
     /**
      * Creates new color inverted to this color.
      * @return inverted color
      */
     def inverse(): Color = {
-        new Color(255 - red, 255 - green, 255 - blue)
+        new Color(255 - red, 255 - green, 255 - blue, alpha)
     }
 
     /**
@@ -26,7 +22,7 @@ class Color(val red: Int, val green: Int, val blue: Int)
      */
     override def toString: String = {
         // TODO use String.format when it's supported by the js runtime.
-        "rgb(" + red + "," + green + "," + blue + ")"
+        "rgba(" + red + "," + green + "," + blue + "," + alpha + ")"
     }
 }
 
@@ -45,7 +41,7 @@ object Color
 
     val Blue = new Color(0, 0, 255)
 
-    val Transparent = new Color(0, 0, 0)
+    val Transparent = new Color(0, 0, 0, 0)
 
     /**
      * Converts color from rgb string

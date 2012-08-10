@@ -6,7 +6,6 @@ import s2js.adapters.html
 import s2js.compiler.javascript
 import animation.Animation
 import cz.payola.web.client.views.graph.PluginView
-import settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.events._
 import cz.payola.common.rdf._
 import cz.payola.web.client.presenters.components.ZoomControls
@@ -21,7 +20,7 @@ import cz.payola.common.entities.settings.OntologyCustomization
 /**
  * Representation of visual based output drawing plugin
  */
-abstract class VisualPluginView(settings: VisualSetup, name: String) extends PluginView(name)
+abstract class VisualPluginView(name: String) extends PluginView(name)
 {
     protected var mouseIsPressed = false
 
@@ -37,9 +36,7 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
 
     protected val topLayer = new Canvas()
 
-    private var topLayerOffset = Vector2D(0, 0)
-
-    private val layerPack = new CanvasPack(new Canvas(), new Canvas(), new Canvas(), new Canvas())
+    private val layerPack = new CanvasPack(topLayer, new Canvas(), new Canvas(), new Canvas(), new Canvas())
 
     /**
      * A way to end the main animation. Has to be set show(..) in the visual technique.
@@ -188,12 +185,10 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
         """)
     private def setMouseWheelListener() {}
 
-    private var destroyVertexInfo: Option[SimpleUnitEvent[Boolean]] = None
-
     private def triggerDestroyVertexInfo() {
-        if (destroyVertexInfo.isDefined) {
-            destroyVertexInfo.get.triggerDirectly(true)
-            destroyVertexInfo = None
+        if(currentInfoTable.isDefined) {
+            currentInfoTable.get.destroy()
+            currentInfoTable = None
         }
     }
 
@@ -201,23 +196,23 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
         currentCustomization = newCustomization
 
         if (graphView.isDefined) {
-            graphView.get.setVisualSetup(newCustomization)
+            graphView.get.setConfiguration(newCustomization)
         }
-
-        settings.setOntologyCustomization(newCustomization)
 
         redraw()
     }
 
-    def createSubViews = layers
+    def createSubViews = layerPack.getLayers
 
-    private var parent: Option[html.Element] = None
+    private var _parentHtmlElement: Option[html.Element] = None
+    protected def parentHtmlElement_=(value: Option[html.Element]) {_parentHtmlElement = value}
+    protected def parentHtmlElement: Option[html.Element] = _parentHtmlElement
 
     override def render(parent: html.Element) {
         super.render(parent)
 
         setMouseWheelListener()
-        this.parent = Some(parent)
+        parentHtmlElement = Some(parent)
         fitCanvas()
     }
 
@@ -227,7 +222,7 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
         if (graph != currentGraph) {
             if (graph.isDefined) {
                 if (graphView.isEmpty) {
-                    graphView = Some(new views.graph.visual.graph.GraphView(settings))
+                    graphView = Some(new views.graph.visual.graph.GraphView)
                 }
                 graphView.get.update(graph.get, topLayer.getCenter)
             } else {
@@ -301,6 +296,7 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
     private def onMouseDown(eventArgs: MouseEventArgs[Canvas]) {
         val position = getPosition(eventArgs)
         val vertex = graphView.get.getTouchedVertex(position)
+        triggerDestroyVertexInfo()
 
         if (vertex.isDefined) {
             // Mouse down near a vertex.
@@ -308,11 +304,8 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
                 //change selection of the pressed one
                 graphView.get.invertVertexSelection(vertex.get)
 
-                triggerDestroyVertexInfo()
-
                 redrawSelection()
             } else {
-                triggerDestroyVertexInfo()
 
                 //deselect all and select the pressed one
                 if (!vertex.get.selected) {
@@ -323,7 +316,7 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
                 vertex.foreach { v =>
                     if (v.selected) {
                         val infoTable = new VertexInfoTable(v.vertexModel, v.getLiteralVertices,
-                            v.position + Vector2D(v.settings.radius(v.rdfType), 0))
+                            v.position + Vector2D(v.radius, 0))
                         infoTable.vertexBrowsing += { a =>
                             triggerDestroyVertexInfo()
                             vertexBrowsing.trigger(new VertexEventArgs[this.type](this, vertex.get.vertexModel))
@@ -336,10 +329,7 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
 
                         currentInfoTable = Some(infoTable)
 
-                        infoTable.render(parent.getOrElse(document.body))
-
-                        destroyVertexInfo = Some(new SimpleUnitEvent[Boolean])
-                        destroyVertexInfo.get += { event => infoTable.destroy()}
+                        infoTable.render(parentHtmlElement.getOrElse(document.body))
 
                         vertexSelected.trigger(new VertexEventArgs[this.type](this, v.vertexModel))
                     }
@@ -351,7 +341,6 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
             mousePressedVertex = true
         } else {
             mousePressedVertex = false
-            triggerDestroyVertexInfo()
         }
     }
 
@@ -418,14 +407,14 @@ abstract class VisualPluginView(settings: VisualSetup, name: String) extends Plu
     }
 
     private def getPosition(eventArgs: MouseEventArgs[Canvas]): Point2D = {
-        Point2D(eventArgs.clientX - topLayerOffset.x, eventArgs.clientY - topLayerOffset.y)
+        Point2D(eventArgs.clientX - layerPack.offset.x, eventArgs.clientY - layerPack.offset.y)
     }
 
     def fitCanvas() {
-        if(parent.isDefined) {
-            topLayerOffset = calculateTopLayerOffset
+        if(parentHtmlElement.isDefined) {
+            layerPack.offset = calculateTopLayerOffset
 
-            val layerSize = Vector2D(window.innerWidth, window.innerHeight) - topLayerOffset
+            val layerSize = Vector2D(window.innerWidth, window.innerHeight) - layerPack.offset
             layers.foreach(_.size = layerSize)
         }
     }
