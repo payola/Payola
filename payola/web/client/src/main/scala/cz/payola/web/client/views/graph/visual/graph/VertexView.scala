@@ -2,24 +2,36 @@ package cz.payola.web.client.views.graph.visual.graph
 
 import collection.mutable.ListBuffer
 import s2js.adapters.html.elements.CanvasRenderingContext2D
-import cz.payola.web.client.views.graph.visual.settings._
 import cz.payola.common.visual.Color
 import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.graph.visual.graph.positioning.LocationDescriptor
 import cz.payola.common.rdf._
 import scala.collection.mutable
+import cz.payola.web.client.views.elements._
+import cz.payola.common.entities.settings.OntologyCustomization
+import s2js.adapters.browser.document
 
 /**
  * Graphical representation of IdentifiedVertex object in the drawn graph.
  * @param vertexModel the vertex object from the model, that is visualized
  * @param position of this graphical representation in drawing space
- * @param settings draw settings used in draw and quickDraw routines
- * @param settingsText draw settings used by the contained informationView
  * @param rdfType type of the vertex used to identify drawing settings in an ontology
  */
-class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var settings: VertexSettingsModel,
-    settingsText: TextSettingsModel, var rdfType: String) extends View[CanvasRenderingContext2D]
-{
+class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var rdfType: String)
+    extends View[CanvasRenderingContext2D] {
+
+    var radius = 25
+
+    var borderSize = 2
+
+    var borderColor = Color.Black
+
+    var color = new Color(51, 204, 255, 0.25)
+
+    var glyph: String = "a"
+
+    private var glyphSpan: Option[Span] = None
+
     /**
      * Neighbouring literal vertices of this vertex describing attributes of this vertex.
      */
@@ -45,7 +57,7 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var s
      * Textual data that should be visualized with this vertex ("over this vertex").
      */
     private var information: Option[InformationView] = vertexModel match {
-        case i: Vertex => Some(new InformationView(i, settingsText))
+        case i: Vertex => Some(new InformationView(i))
         case _ => None
     }
 
@@ -55,7 +67,7 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var s
      */
     def setInformation(data: Option[Vertex]) {
         if (data.isDefined) {
-            information = Some(new InformationView(data.get, settingsText))
+            information = Some(new InformationView(data.get))
         }
     }
 
@@ -120,26 +132,109 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var s
      * Determines if the point is (geometrically) inside of this vertexView (rectangle represented byt this vertexView).
      * Should be used in vertexView selection process.
      * @param point to be decided if is inside or not
-     * @return true if this.position - this.settings.size <= point <= this.position + this.settings.size
+     * @return true if this.position - radius <= point <= this.position + radius
      */
     def isPointInside(point: Point2D): Boolean = {
-        val radiusVector = Vector2D.One * settings.radius(rdfType)
+        val radiusVector = Vector2D.One * radius
         isPointInRect(point, position + (-radiusVector),
             position + radiusVector)
+    }
+
+    def setRadius(newRadius: Option[Int]) {
+        radius = newRadius.getOrElse(25)
+    }
+
+    def setBorderSize(newBorderSize: Option[Int]) {
+        borderSize = newBorderSize.getOrElse(2)
+    }
+
+    def setBorderColor(newColor: Option[Color]) {
+        borderColor = newColor.getOrElse(Color.Black)
+    }
+
+    def setColor(newColor: Option[Color]) {
+        color = newColor.getOrElse(new Color(51, 204, 255, 0.25))
+    }
+
+    def setGlyph(newGlyph: Option[String]) {
+
+        glyph = newGlyph.getOrElse("")
+
+        if(glyph == "" && glyphSpan.isDefined) {
+            glyphSpan.get.destroy()
+            glyphSpan = None
+        } else if(glyph != "") {
+            if(glyphSpan.isDefined) {
+                glyphSpan.get.destroy()
+                glyphSpan = None
+            }
+
+            val newSpan = new ListBuffer[cz.payola.web.client.View]()
+            newSpan += (new Text(glyph))
+            glyphSpan = Some(new Span(newSpan, "glyph"))
+            glyphSpan.get.render(document.body)
+        }
+    }
+
+    def resetConfiguration() {
+        setRadius(None)
+        setBorderSize(None)
+        setBorderColor(None)
+        setColor(None)
+        setGlyph(None)
+    }
+
+    def setConfiguration(newCustomization: Option[OntologyCustomization]) {
+        if(newCustomization.isEmpty) {
+            resetConfiguration()
+        } else {
+            val foundCustomization = newCustomization.get.classCustomizations.find{_.uri == rdfType}
+
+            if(foundCustomization.isEmpty) {
+                resetConfiguration()
+            } else {
+                //radius
+                if(foundCustomization.get.radius != 0) {
+                    setRadius(Some(foundCustomization.get.radius))
+                } else {
+                    setRadius(None)
+                }
+
+                //color
+                if(foundCustomization.get.fillColor.length != 0) {
+                    setColor(Color(foundCustomization.get.fillColor))
+                } else {
+                    setColor(None)
+                }
+
+                //glyph
+                if(foundCustomization.get.glyph.length != 0) {
+                    setGlyph(Some(foundCustomization.get.glyph))
+                } else {
+                    setGlyph(None)
+                }
+            }
+        }
+
+        if(information.isDefined) {
+            information.get.setConfiguration(newCustomization)
+        }
     }
 
     def draw(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
         drawQuick(context, positionCorrection)
 
-        val glyph = settings.glyph(rdfType)
+        val halfRadius = radius / 2
 
-        drawText(context, glyph, this.position + positionCorrection + Vector2D(0, settings.glyphSize / 4),
-            Color.Black, settings.glyphWholeFont, settings.glyphAlign)
-
-        val halfRadius = settings.radius(rdfType) / 2
+        /*if(glyphSpan.isDefined) {
+            glyphSpan.get.setAttribute("width", radius.toString)
+            glyphSpan.get.setAttribute("height", radius.toString)
+            glyphSpan.get.setAttribute("left", (position.x - halfRadius + context.canvas.left).toString)
+            glyphSpan.get.setAttribute("top", (position.y - halfRadius + context.canvas.top).toString)
+        }*/
 
         val informationPositionCorrection =
-            if(glyph != "") { Vector2D(0, halfRadius + (settings.glyphSize / 4)) } else { Vector2D.Zero }
+            if(glyphSpan.isDefined) { Vector2D(0, halfRadius) } else { Vector2D.Zero }
         val informationPosition =
             (LocationDescriptor.getVertexInformationPosition(position) + positionCorrection).toVector +
                 informationPositionCorrection
@@ -150,12 +245,11 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var s
     def drawQuick(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
         val correctedPosition = this.position + positionCorrection
 
-        drawCircle(context, correctedPosition, settings.radius(rdfType), settings.borderSize, settings.borderColor)
+        drawCircle(context, correctedPosition, radius, borderSize, borderColor)
         if (isSelected) {
-            val col = settings.color(rdfType)
-            fillCurrentSpace(context, new Color(col.red, col.green, col.blue))
+            fillCurrentSpace(context, new Color(color.red, color.green, color.blue))
         } else {
-            fillCurrentSpace(context, settings.color(rdfType))
+            fillCurrentSpace(context, color)
         }
     }
 

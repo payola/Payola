@@ -1,12 +1,11 @@
 package cz.payola.web.client.views.graph.visual
 
-import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.views.graph.PluginView
 import cz.payola.web.client.views.elements._
 import cz.payola.common.rdf._
 import s2js.compiler.javascript
 
-class ColumnChartPluginView(settings: VisualSetup) extends PluginView("Column Chart")
+class ColumnChartPluginView extends PluginView("Column Chart")
 {
     private val chartWrapper = new Div(Nil, "column-chart-wrapper")
 

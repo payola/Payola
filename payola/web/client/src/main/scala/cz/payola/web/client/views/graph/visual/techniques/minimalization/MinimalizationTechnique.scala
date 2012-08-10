@@ -4,10 +4,9 @@ import collection.mutable.ListBuffer
 import cz.payola.web.client.views.graph.visual.techniques.BaseTechnique
 import cz.payola.web.client.views.graph.visual.graph._
 import cz.payola.web.client.views.algebra.Point2D
-import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.views.graph.visual.animation.Animation
 
-class MinimalizationTechnique(settings: VisualSetup) extends BaseTechnique(settings, "Tree ECM Visualization")
+class MinimalizationTechnique extends BaseTechnique("Tree ECM Visualization")
 {
     //TODO add some computation branch cutting...this algorithm is quite complex
 

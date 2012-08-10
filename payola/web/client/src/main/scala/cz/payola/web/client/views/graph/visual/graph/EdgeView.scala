@@ -4,24 +4,27 @@ import s2js.adapters.html
 import cz.payola.common.rdf.Edge
 import cz.payola.common.visual.Color
 import cz.payola.web.client.views.algebra._
-import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.views.graph.visual.graph.positioning.LocationDescriptor
 import s2js.adapters.html._
+import cz.payola.common.entities.settings.OntologyCustomization
 
 /**
  * Graphical representation of Edge object in the drawn graph.
  * @param edgeModel the object graphically represented by this class
  * @param originView the vertex object representing origin of this edge
  * @param destinationView of this graphical representation in drawing space
- * @param settings draw settings used in draw and quickDraw routines
  */
-class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationView: VertexView,
-    val settings: VisualSetup) extends View[html.elements.CanvasRenderingContext2D]
+class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationView: VertexView)
+    extends View[html.elements.CanvasRenderingContext2D]
 {
+    var width = 1
+
+    var color = new Color(150, 150, 150, 0.4)
+
     /**
      * Textual data that should be visualized with this edge ("over this edge").
      */
-    val information: InformationView = new InformationView(edgeModel, settings.textModel)
+    val information: InformationView = new InformationView(edgeModel)
 
     /**
      * Indicator of selection of this graphs element. Is used during color selection in draw function.
@@ -39,6 +42,54 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
         originView.selected && destinationView.selected
     }
 
+    def setWidth(newWidth: Option[Int]) {
+        width = newWidth.getOrElse(1)
+    }
+
+    def setColor(newColor: Option[Color]) {
+        color = newColor.getOrElse(new Color(150, 150, 150, 0.4))
+    }
+
+    def resetConfiguration() {
+        setWidth(None)
+        setColor(None)
+    }
+
+    def setConfiguration(newCustomization: Option[OntologyCustomization]) {
+        if(newCustomization.isEmpty) {
+            resetConfiguration()
+        } else {
+            val foundCustomizationType = newCustomization.get.classCustomizations.find{_.uri == originView.rdfType}
+
+            if(foundCustomizationType.isEmpty) {
+                resetConfiguration()
+            } else {
+                val foundCustomizationProperty = foundCustomizationType.get.propertyCustomizations.find{
+                    _.uri == edgeModel.uri
+                }
+                if(foundCustomizationProperty.isEmpty) {
+                    resetConfiguration()
+                } else {
+                    //width
+                    if(foundCustomizationProperty.get.strokeWidth != 0) {
+                        setWidth(Some(foundCustomizationProperty.get.strokeWidth))
+                    } else {
+                        setWidth(None)
+                    }
+
+                    //color
+                    if(foundCustomizationProperty.get.strokeColor.length != 0) {
+                        setColor(Color(foundCustomizationProperty.get.strokeColor))
+                    } else {
+                        setColor(None)
+                    }
+                }
+            }
+        }
+
+        information.setConfiguration(newCustomization)
+    }
+
     def draw(context: elements.CanvasRenderingContext2D, positionCorrection: Vector2D) {
         drawQuick(context, positionCorrection)
         if (isSelected) {
@@ -48,17 +99,14 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
     }
 
     def drawQuick(context: elements.CanvasRenderingContext2D, positionCorrection: Vector2D) {
-        val colorToUse = if (isSelected) {
-            val col = settings.edgesModel.color(originView.rdfType, edgeModel.uri)
-            new Color(col.red, col.red, col.blue)
+        val colorToUse = if(isSelected) {
+            new Color(color.red, color.green, color.blue)
         } else {
-            settings.edgesModel.color(originView.rdfType, edgeModel.uri)
+            color
         }
 
         drawArrow(context, originView.position, destinationView.position,
-            settings.vertexModel.radius(originView.rdfType) * 3 / 2,
-            settings.vertexModel.radius(destinationView.rdfType) * 3 / 2,
-            settings.edgesModel.width(originView.rdfType, edgeModel.uri), colorToUse)
+            originView.radius, destinationView.radius, width, colorToUse)
     }
 
     override def toString: String = {

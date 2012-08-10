@@ -5,6 +5,7 @@ import s2js.adapters.html
 import s2js.adapters.html.elements
 import cz.payola.common.visual.Color
 import cz.payola.web.client.views.algebra._
+import cz.payola.common.entities.settings.OntologyCustomization
 
 /**
  * Structure used during draw function of EdgeView. Helps to indicate position of vertices to each other.
@@ -41,6 +42,17 @@ trait View[A]
      * @param positionCorrection to modify the position of the drawn object
      */
     def drawQuick(context: A, positionCorrection: Vector2D)
+
+    /**
+     * Setter of the ontology visual configuration to default.
+     */
+    def resetConfiguration()
+
+    /**
+     * Setter of the ontology visual configuration.
+     * @param newCustomization new configuration for drawing
+     */
+    def setConfiguration(newCustomization: Option[OntologyCustomization])
 
     /**
      * Draws a rectangle with rounded corners, depending on the radius parameter to the input canvas context.
@@ -438,8 +450,8 @@ trait View[A]
         color: Color): elements.Canvas = {
         val context = canvas.getContext[elements.CanvasRenderingContext2D]("2d")
         //nakreslim do globalniho canvasu lokalni canvas
-        val imageData = context.getImageData(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
-        val canvasPixelArray = imageData.data;
+        val imageData = context.getImageData(startPoint.x, startPoint.y, endPoint.x, endPoint.y)
+        val canvasPixelArray = imageData.data
 
         var pixelPointer = 0
         while (pixelPointer < canvasPixelArray.length) {
@@ -450,7 +462,7 @@ trait View[A]
             // alpha is unchanged to keep the shape of the image
             pixelPointer += 4
         }
-        context.putImageData(imageData, 0, 0);
+        context.putImageData(imageData, 0, 0)
         canvas
     }
 
