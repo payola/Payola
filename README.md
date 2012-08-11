@@ -358,7 +358,7 @@ Briefly, the project [```payola/project```](#project) defines this structure, de
 
 The Payola application itself is spread within the rest of the projects, namely [```payola/common```](#common) that defines classes that are used throughout all layers and even on the client side. The [```payola/domain```](#domain) mostly extends classes from the [```payola/common```](#common) with backend logic. The [```payola/data```](#data) is a persistence, data access layer. The [```payola\model```](#model) wraps up the previous three modules with an uniform interface. It's meant as a standard programmatic access point to Payola. Finally, the web application consists of the [```payola\web\initializer```](#initializer) which is a console application initializing the database (i.e an installer), [```payola\web\server```](#server) that is a [Play](http://www.playframework.org/) web application and the [```payola\web\client```](#client) which contains a browser MVP application (compiled to JavaScript). Last but not least the [```payola/web/shared```](#shared) consists of objects that are called from the client, but executed on the server.
 
-This structure also determines package names, which follow the pattern ```cz.payola.[project path where '/' is replaced with '.']```. So, for example, a class declared in the ```payola/s2js/compiler``` project can be found in the ```cz.payola.s2js.compiler``` package or one of its subpackages.
+This structure also determines package names, which follow the pattern ```cz.payola.[project path where '/' is replaced with '.']```. So, for example, a class declared in the ```payola/web/client``` project can be found in the ```cz.payola.web.client``` package or one of its subpackages. The [```payola/s2js```](#s2js) project uses different package naming conventions, all packages and subpackages have the ```cz.payola``` prefix left out, so they start with ```s2js```.
 
 <a name="project"></a>
 ## Project payola/project
@@ -454,34 +454,82 @@ To make everything work, not only the [Scala to JavaScript compiler](#compiler) 
 Note that the tool was created just to match the requirements of Payola, so there are many gaps in implementation and ad-hoc solutions. Supported adapters and Scala Library classes are only those, we needed.
 
 <a name="compiler"></a>
-### Package cz.payola.s2js.compiler
+### Package s2js.compiler
+
+The heart of the Scala to JavaScript process is surely the compiler. In fact, it's not a standalone compiler, it's a [Scala Compiler Plugin](http://www.scala-lang.org/node/140). So it takes advantage of the standard scala compiler, which does the 'dirty' work of lexical analysis, syntax analysis and construction of the [abstract syntax trees](http://en.wikipedia.org/wiki/Abstract_syntax_tree) (ASTs) corresponding to the code that is being compiled. The scala compiler consists of a sequence of phases, that can be percieved as functions taking an AST and producing an AST. There are some [standard phases](https://wiki.scala-lang.org/display/SIW/Overview+of+Compiler+Phases) that continually alter the AST, so Java bytecode can be finally generated. A scala compiler plugin is just another sequence of phase that is mixed into the sequence of standard phases on the specified places.
+
+#### Class s2js.compiler.ScalaToJsPlugin
+
+This is the definition of the scala compier plugin, its only phase ```ScalaToJsPhase``` and its components as it's descried it the official [Scala Compiler Plugin tutorial](http://www.scala-lang.org/node/140). The plugin doesn't change the input AST at all, it behaves like an identity function. But as a side-effect, it generates JavaScript code that should be equivalent to the input AST. The following custom plugin options are defined here:
+
+- ```outputDirectory```: The directory where the generated JavaScript files are placed. Default value is the current directory.
+- ```createPackageStructure```: If set to ```true``` a directory structure mirroring the packages in compiled files is created in the output directory. If set to ```false```, all generated files are created right in the output directory, which is taken advantage of during the compiler plugin tests.
+
+Usage of the options can be found in the ```PayolaBuild.scala``` within the 
+[```project```](#project) project.
+
+#### Class s2js.compiler.ScalaToJsCompiler
+
+An extension of the scala compiler, that has the ```ScalaToJsPlugin``` plugged in, so the compilation of Scala files into JavaScript can be invoked programatically.
+
+#### Package s2js.compiler.components
+
+The previous two classes are just utility classes, that don't participate in the compilation. They just invoke it. On the other hand, classes from the ```s2js.compiler.components``` directly take part in the compilation. 
+
+##### Class s2js.compiler.components.PackageDefCompiler
+
+Purpose of this class is to compile the ```PackageDef``` AST nodes (representation of a package and all its content within a file) into JavaScript. Because the plugin compiler input AST is always a ```PackageDef``` node, the class is used as an entry point to the compilation process. 
+
+> *Note*: The ```ClassDef``` is a type an AST node, the defines a class, a trait, an object or a package object.
+
+The compilation algorithm works basically in the following way:
+
+1. Retrieve the structure of the package using the [```s2js.compiler.components.DependencyManager```](#DependencyManager). It traverses the AST, finds all ```ClassDef```s and initializes the dependency graph of them (```ClassDef``` ```A``` depends on ```ClassDef``` ```B``` iff ```A``` extends or mixins ```B```). 
+2. Compile the ```ClassDef```s using the [```s2js.compiler.components.ClassDefCompiler```](#ClassDefCompiler) in the topological ordering determined by the ```ClassDef``` dependency graph. If there is a cycle in the dependency graph, an exception is thrown. During the compilation of ```ClassDef```s, the ```DependencyManager``` is informed about the inter-file dependencies (e.g. when a compiled class extends a class that is not part of the current compilation unit ~ file).
+3. Add the inter-file dependency declarations to the beginning of the compiled JavaScript file.
+
+Moreover, the ```PackageDefCompiler``` defines additional public service methods (e.g. ```symbolHasAnnotation```, ```typeIsFunction``` etc.) that can be used by other components with a reference to the ```PackageDefCompiler```.
+
+<a name="DependencyManager"></a>
+##### Class s2js.compiler.components.DependencyManager
+
+Tracks all kinds of so-called dependencies among symbols that are declared inside a ```PackageDef``` node:
+
+- **```ClassDef``` dependency graph**: Dependencies among ```ClassDef```s among the current compilation unit. The graph is used to determine an order of the class compilation. 
+- **Inter-file dependencies**
+	- *Provided symbols*: The ```ClassDef```s that the current compilation unit provides (i.e. the API). Some other compilation units may require them.
+	- *Declaration-required symbols*: The ```ClassDef```s that have to be declared in the generated JavaScript before the ```ClassDef```s from the current compilation unit are declared.
+	- *Runtime-required symbols*: The ```ClassDef```s that have to be declared in the generated JavaScript so that the current compilation unit can run (they're not needed when declaring the current compilation unit in generated JavaScript).
+
+<a name="ClassDefCompiler"></a>
+##### Class s2js.compiler.components.ClassDefCompiler
 
 > TODO H.S.
 
 <a name="adapters"></a>
-### Package cz.payola.s2js.adapters
+### Package s2js.adapters
 
 As mentioned before, the adapters are defined to allow a programmer to access core JavaScript functionality or use already existing JavaScript libraries. Without them, it would be impossible to use for example ```document.getElementById``` method in the Scala code that will be compiled into JavaScript, because there is no such object ```document``` in the Scala standard library. The adapter classes don't have to contain any implementation, therefore they're mostly abstract classes or traits. They're not compiled to JavaScript, nor are they used anywhere during Scala application runtime. The class and method names have to be exactly the same as it is in the adapted libraries.
 
-#### Package cz.payola.s2js.adapters.js
+#### Package s2js.adapters.js
 
 Adapters of some of the JavaScript core classes and the global functions, objects and constants. The adapters are based on the 'JavaScript Objects' section of the [JavaSript and HTML DOM Reference](http://www.w3schools.com/jsref/default.asp).
 
-#### Package cz.payola.s2js.adapters.dom
+#### Package s2js.adapters.dom
 
 Adapters of all interfaces and objects (```Node```, ```Element``` etc.) defined in the [DOM Level 3 Core Specification](http://www.w3.org/TR/DOM-Level-3-Core/).
 
-#### Package cz.payola.s2js.adapters.events
+#### Package s2js.adapters.events
 
 Adapters of all interfaces and objects (```Event```, ```MouseEvent``` etc.) defined in the [DOM Level 3 Events Specification](http://www.w3.org/TR/DOM-Level-3-Events/) including some of the the [DOM Level 4 Events](http://www.w3.org/TR/dom/#events) extensions.
 
-#### Package cz.payola.s2js.adapters.html
+#### Package s2js.adapters.html
 
 Selected HTML related interfaces and elements (```Document```, ```Anchor```, ```Canvas``` etc.), based both on the [HTML Standard](http://www.whatwg.org/html) and on the 'HTML DOM Objects' section of the [JavaSript and HTML DOM Reference](http://www.w3schools.com/jsref/default.asp)
 
-#### Package cz.payola.s2js.adapters.browser
+#### Package s2js.adapters.browser
 
-Adapters of web browser related objects (```Window```, ```History``` etc.), based on the 'Browser Objects' section of the [JavaSript and HTML DOM Reference](http://www.w3schools.com/jsref/default.asp) and also on the same resources as the ```cz.payola.s2js.adapters.html``` package.
+Adapters of web browser related objects (```Window```, ```History``` etc.), based on the 'Browser Objects' section of the [JavaSript and HTML DOM Reference](http://www.w3schools.com/jsref/default.asp) and also on the same resources as the ```s2js.adapters.html``` package.
 
 <a name="runtime"></a>
 ### Project payola/s2js/runtime
@@ -489,24 +537,24 @@ Adapters of web browser related objects (```Window```, ```History``` etc.), base
 > TODO: H.S.
 
 <a name="runtime-client"></a>
-#### Package cz.payola.s2js.runtime.client
+#### Package s2js.runtime.client
 
 > TODO: H.S.
 
-##### Package cz.payola.s2js.runtime.client.js
+##### Package s2js.runtime.client.js
 
 > TODO: H.S.
 
-##### Package cz.payola.s2js.runtime.client.rpc
+##### Package s2js.runtime.client.rpc
 
 > TODO: H.S.
 
-##### Package cz.payola.s2js.runtime.client.scala
+##### Package s2js.runtime.client.scala
 
 > TODO: H.S.
 
 <a name="runtime-shared"></a>
-#### Package cz.payola.s2js.runtime.shared
+#### Package s2js.runtime.shared
 
 > TODO: H.S.
 
