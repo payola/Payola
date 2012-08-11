@@ -1,9 +1,8 @@
 package cz.payola.web.client.views.graph.visual
 
 import scala.collection._
-import s2js.adapters.browser._
 import s2js.adapters.html
-import s2js.compiler.javascript
+import s2js.adapters.browser._
 import animation.Animation
 import cz.payola.web.client.views.graph.PluginView
 import cz.payola.web.client.events._
@@ -71,12 +70,6 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
 
     private val pngDownloadButton = new Button(new Text("Download as PNG"), "pull-right",
         new Icon(Icon.download)).setAttribute("style", "margin: 0 5px;")
-
-    window.onresize = { e =>
-        fitCanvas()
-        redraw()
-        true
-    }
 
     topLayer.mousePressed += { e =>
         mouseIsPressed = true
@@ -194,14 +187,28 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
     def createSubViews = layerPack.getLayers
 
     private var _parentHtmlElement: Option[html.Element] = None
-    protected def parentHtmlElement_=(value: Option[html.Element]) {_parentHtmlElement = value}
-    protected def parentHtmlElement: Option[html.Element] = _parentHtmlElement
 
     override def render(parent: html.Element) {
         super.render(parent)
+        window.onresize = { _ =>
+            updateCanvasSize()
+            redraw()
+        }
 
-        parentHtmlElement = Some(parent)
-        fitCanvas()
+        _parentHtmlElement = Some(parent)
+        updateCanvasSize()
+    }
+
+    override def destroy() {
+        super.destroy()
+        window.onresize = { _ => }
+
+        graphView = None
+        mouseIsDragging = false
+        mousePressedVertex = false
+        mouseDownPosition = Point2D(0, 0)
+
+        currentInfoTable.foreach(_.destroy())
     }
 
     override def updateGraph(graph: Option[Graph]) {
@@ -225,17 +232,6 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
         }
 
         super.updateGraph(graph)
-    }
-
-    override def destroy() {
-        super.destroy()
-
-        graphView = None
-        mouseIsDragging = false
-        mousePressedVertex = false
-        mouseDownPosition = Point2D(0, 0)
-
-        currentInfoTable.foreach(_.destroy())
     }
 
     override def renderControls(toolbar: html.Element) {
@@ -317,7 +313,7 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
 
                         currentInfoTable = Some(infoTable)
 
-                        infoTable.render(parentHtmlElement.getOrElse(document.body))
+                        infoTable.render(_parentHtmlElement.getOrElse(document.body))
 
                         vertexSelected.trigger(new VertexEventArgs[this.type](this, v.vertexModel))
                     }
@@ -398,9 +394,7 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
         Point2D(eventArgs.clientX - layerPack.offset.x, eventArgs.clientY - layerPack.offset.y)
     }
 
-    def fitCanvas() {
-        parentHtmlElement.foreach { e =>
-            layerPack.size = Vector2D(window.innerWidth, window.innerHeight) - topLayer.offset
-        }
+    private def updateCanvasSize() {
+        layerPack.size = Vector2D(window.innerWidth, window.innerHeight) - topLayer.offset
     }
 }

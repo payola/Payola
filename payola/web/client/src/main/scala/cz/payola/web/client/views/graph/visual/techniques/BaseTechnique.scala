@@ -49,10 +49,6 @@ abstract class BaseTechnique(name: String) extends VisualPluginView(name)
             previousComponent = Some(component)
         }
         if (firstAnimation.isDefined) {
-            //fit the drawing space to the window
-            firstAnimation.get.addFollowingAnimation(
-                new Animation(Animation.emptyAnimation, new AfterAnimationParamLess(fitCanvas), None, redrawQuick, redraw, None))
-
             //finally move the whole graph to the center of the window
             val graphCenterCorrector = new GraphPositionHelper(() => topLayer.size, graphView.getGraphCenter)
             firstAnimation.get.addFollowingAnimation(
