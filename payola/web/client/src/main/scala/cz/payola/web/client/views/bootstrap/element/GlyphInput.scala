@@ -10,7 +10,7 @@ class GlyphInput(name: String, initialValue: Option[String], cssClass: String = 
 {
     private val nothingSelectedText = ""
 
-    private val glyphInput = new TextInput(name, "", "", "disabled input-mini glyph")
+    private val glyphInput = new TextInput(name, if(initialValue.isDefined){initialValue.get}else{""}, "", "disabled input-mini glyph")
     glyphInput.setAttribute("disabled","disabled")
 
     private val addOn = new Span(List(new Text("Choose glyph")),"add-on")
@@ -44,7 +44,8 @@ class GlyphInput(name: String, initialValue: Option[String], cssClass: String = 
     val spans = charSeq.map{ num =>
         val span = new Span(List(new Text(num)), "glyph")
         span.mouseClicked += { e =>
-            glyphInput.value = num
+            glyphInput.updateValue(num)
+            changed.triggerDirectly(this)
             closePopup()
             false
         }
@@ -74,7 +75,7 @@ class GlyphInput(name: String, initialValue: Option[String], cssClass: String = 
     }
 
     protected def updateValue(newValue: Option[String]) {
-        glyphInput.value = newValue.map(_.toString).getOrElse(nothingSelectedText)
+        glyphInput.updateValue(newValue.map(_.toString).getOrElse(nothingSelectedText))
     }
 
     def isActive = glyphInput.isActive

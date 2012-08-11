@@ -19,7 +19,7 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
 
     val classRadiusDelayedChanged = new UnitEvent[InputControl[_], ClassCustomizationEventArgs[InputControl[_]]]
 
-    val classGlyphDelayedChanged = new UnitEvent[InputControl[_], ClassCustomizationEventArgs[InputControl[_]]]
+    val classGlyphChanged = new UnitEvent[InputControl[_], ClassCustomizationEventArgs[InputControl[_]]]
 
     val propertyStrokeColorChanged = new UnitEvent[InputControl[_], PropertyCustomizationEventArgs[InputControl[_]]]
 
@@ -111,8 +111,8 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
             classRadiusDelayedChanged.trigger(new ClassCustomizationEventArgs(radius, classCustomization,
                 radius.field.value.toString))
         }
-        glyph.delayedChanged += { _ =>
-            classGlyphDelayedChanged.trigger(new ClassCustomizationEventArgs(glyph, classCustomization,
+        glyph.field.changed += { _ =>
+            classGlyphChanged.trigger(new ClassCustomizationEventArgs(glyph, classCustomization,
                 glyph.field.value.getOrElse("")))
         }
 
