@@ -32,7 +32,7 @@ class OntologyCustomizationEditor(ontologyCustomization: OntologyCustomization) 
         view.deleteButton.mouseClicked += onDeleteButtonClicked _
         view.classFillColorChanged += onClassFillColorChanged _
         view.classRadiusDelayedChanged += onClassRadiusChanged _
-        view.classGlyphDelayedChanged += onClassGlyphChanged _
+        view.classGlyphChanged += onClassGlyphChanged _
         view.propertyStrokeColorChanged += onPropertyStrokeColorChanged _
         view.propertyStrokeWidthDelayedChanged += onPropertyStrokeWidthChanged _
 
