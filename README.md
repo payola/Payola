@@ -356,7 +356,7 @@ The solution is defined using the [SBT](https://github.com/harrah/xsbt/wiki/ "SB
 
 Briefly, the project [```payola/project```](#project) defines this structure, dependencies among the projects, external dependencies and the build process, so it can be understood as a Makefile equivalent. Somewhat standalone libraries are the [```payola/scala2json```](#scala2json) project which provides means of Scala object serialization into the JSON format and [```payola/s2js```](#s2js) project which with all its subprojects enables us to write web applications in Scala (compile Scala code to equivalent JavaScript code).
 
-The Payola application itself is spread within the rest of the projects, namely [```payola/common```](#common) that defines classes that are used throughout all layers and even on the client side. The [```payola/domain```](#domain) mostly extends classes from the [```payola/common```](#common) with backend logic. The [```payola/data```](#data) is a persistence, data access layer. The [```payola\model```](#model) wraps up the previous three modules with an uniform interface. It's meant as a standard programmatic access point to Payola. Finally, the web application consists of the [```payola\web\initializer```](#initializer) which is a console application initializing the database (i.e an installer), [```payola\web\server```](#server) that is a [Play](http://www.playframework.org/) web application and the [```payola\web\client```](#client) which contains a browser MVP application (compiled to JavaScript). Last but not least the [```payola/web/shared```](#shared) consists of objects that are called from the client, but executed on the server.
+The Payola application itself is spread within the rest of the projects, namely [```payola/common```](#common) that defines classes that are used throughout all layers and even on the client side. The [```payola/domain```](#domain) mostly extends classes from the [```payola/common```](#common) with backend logic. The [```payola/data```](#data) is a persistence, data access layer. The [```payola/model```](#model) wraps up the previous three modules with an uniform interface. It's meant as a standard programmatic access point to Payola. Finally, the web application consists of the [```payola/web/initializer```](#initializer) which is a console application initializing the database (i.e an installer), [```payola/web/server```](#server) that is a [Play](http://www.playframework.org/) web application and the [```payola/web/client```](#client) which contains a browser MVP application (compiled to JavaScript). Last but not least the [```payola/web/shared```](#shared) consists of objects that are called from the client, but executed on the server.
 
 This structure also determines package names, which follow the pattern ```cz.payola.[project path where '/' is replaced with '.']```. So, for example, a class declared in the ```payola/web/client``` project can be found in the ```cz.payola.web.client``` package or one of its subpackages. The [```payola/s2js```](#s2js) project uses different package naming conventions, all packages and subpackages have the ```cz.payola``` prefix left out, so they start with ```s2js```.
 
@@ -456,7 +456,7 @@ Note that the tool was created just to match the requirements of Payola, so ther
 <a name="compiler"></a>
 ### Package s2js.compiler
 
-The heart of the Scala to JavaScript process is surely the compiler. In fact, it's not a standalone compiler, it's a [Scala Compiler Plugin](http://www.scala-lang.org/node/140). So it takes advantage of the standard scala compiler, which does the 'dirty' work of lexical analysis, syntax analysis and construction of the [abstract syntax trees](http://en.wikipedia.org/wiki/Abstract_syntax_tree) (ASTs) corresponding to the code that is being compiled. The scala compiler consists of a sequence of phases, that can be percieved as functions taking an AST and producing an AST. There are some [standard phases](https://wiki.scala-lang.org/display/SIW/Overview+of+Compiler+Phases) that continually alter the AST, so Java bytecode can be finally generated. A scala compiler plugin is just another sequence of phase that is mixed into the sequence of standard phases on the specified places.
+The heart of the Scala to JavaScript process is surely the compiler. In fact, it's not a standalone compiler, it's a [Scala Compiler Plugin](http://www.scala-lang.org/node/140). So it takes advantage of the standard scala compiler, which does the 'dirty' work of lexical analysis, syntax analysis and construction of the [abstract syntax trees](http://en.wikipedia.org/wiki/Abstract_syntax_tree) (ASTs) corresponding to the code that is being compiled. The scala compiler consists of a sequence of phases, that can be percieved as functions taking an AST and producing an AST. There are some [standard phases](https://wiki.scala-lang.org/display/SIW/Overview+of+Compiler+Phases) that continually alter the AST, so Java bytecode can be finally generated. A scala compiler plugin is just another sequence of phases that is mixed into the sequence of standard phases on the specified places.
 
 #### Class s2js.compiler.ScalaToJsPlugin
 
@@ -474,7 +474,7 @@ An extension of the scala compiler, that has the ```ScalaToJsPlugin``` plugged i
 
 #### Package s2js.compiler.components
 
-The previous two classes are just utility classes, that don't participate in the compilation. They just invoke it. On the other hand, classes from the ```s2js.compiler.components``` directly take part in the compilation. 
+The previous two classes are utility classes, that don't participate in the compilation. They just invoke it. On the other hand, classes from the ```s2js.compiler.components``` directly take part in the compilation. 
 
 ##### Class s2js.compiler.components.PackageDefCompiler
 
@@ -484,7 +484,7 @@ Purpose of this class is to compile the ```PackageDef``` AST nodes (representati
 
 The compilation algorithm works basically in the following way:
 
-1. Retrieve the structure of the package using the [```s2js.compiler.components.DependencyManager```](#DependencyManager). It traverses the AST, finds all ```ClassDef```s and initializes the dependency graph of them (```ClassDef``` ```A``` depends on ```ClassDef``` ```B``` iff ```A``` extends or mixins ```B```). 
+1. Retrieve the structure of the package using the [```s2js.compiler.components.DependencyManager```](#DependencyManager). It traverses the AST, finds all ```ClassDef```s and initializes the dependency graph of them. 
 2. Compile the ```ClassDef```s using the [```s2js.compiler.components.ClassDefCompiler```](#ClassDefCompiler) in the topological ordering determined by the ```ClassDef``` dependency graph. If there is a cycle in the dependency graph, an exception is thrown. During the compilation of ```ClassDef```s, the ```DependencyManager``` is informed about the inter-file dependencies (e.g. when a compiled class extends a class that is not part of the current compilation unit ~ file).
 3. Add the inter-file dependency declarations to the beginning of the compiled JavaScript file.
 
@@ -495,7 +495,7 @@ Moreover, the ```PackageDefCompiler``` defines additional public service methods
 
 Tracks all kinds of so-called dependencies among symbols that are declared inside a ```PackageDef``` node:
 
-- **```ClassDef``` dependency graph**: Dependencies among ```ClassDef```s among the current compilation unit. The graph is used to determine an order of the class compilation. 
+- **ClassDef dependency graph**: Dependencies among ```ClassDef```s among the current compilation unit (```ClassDef``` ```A``` depends on ```ClassDef``` ```B``` iff ```A``` extends or mixins ```B```). The graph is used to determine an order of the class compilation. 
 - **Inter-file dependencies**
 	- *Provided symbols*: The ```ClassDef```s that the current compilation unit provides (i.e. the API). Some other compilation units may require them.
 	- *Declaration-required symbols*: The ```ClassDef```s that have to be declared in the generated JavaScript before the ```ClassDef```s from the current compilation unit are declared.
