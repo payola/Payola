@@ -174,17 +174,6 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
         false
     }
 
-    //on mouse wheel event work-around###################################################################################
-
-    @javascript(
-        """
-           /* DOMMouseScroll is for mozilla. */
-           self.topLayer.htmlElement.addEventListener('DOMMouseScroll', function(event) {
-               return self.topLayer.mouseWheelRotated.triggerDirectly(self.topLayer, event);
-           });
-        """)
-    private def setMouseWheelListener() {}
-
     private def triggerDestroyVertexInfo() {
         if(currentInfoTable.isDefined) {
             currentInfoTable.get.destroy()
@@ -211,7 +200,6 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
     override def render(parent: html.Element) {
         super.render(parent)
 
-        setMouseWheelListener()
         parentHtmlElement = Some(parent)
         fitCanvas()
     }
@@ -411,13 +399,8 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
     }
 
     def fitCanvas() {
-        if(parentHtmlElement.isDefined) {
-            layerPack.offset = calculateTopLayerOffset
-
-            val layerSize = Vector2D(window.innerWidth, window.innerHeight) - layerPack.offset
-            layers.foreach(_.size = layerSize)
+        parentHtmlElement.foreach { e =>
+            layerPack.size = Vector2D(window.innerWidth, window.innerHeight) - topLayer.offset
         }
     }
-
-    private def calculateTopLayerOffset: Vector2D = topLayer.topLeftCorner
 }

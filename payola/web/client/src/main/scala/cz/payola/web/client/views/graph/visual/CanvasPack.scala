@@ -14,10 +14,6 @@ class CanvasPack(val controls: Canvas, val edgesDeselected: Canvas, val edgesSel
         controls.offset
     }
 
-    def offset_=(value: Vector2D) {
-        controls.offset = value
-    }
-
     def clear() {
         getLayers.foreach(_.clear())
     }

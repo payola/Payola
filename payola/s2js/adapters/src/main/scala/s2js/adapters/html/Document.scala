@@ -1,7 +1,7 @@
 package s2js.adapters.html
 
 import s2js.adapters.js.Date
-import s2js.adapters.dom._
+import s2js.adapters.dom
 import s2js.adapters.events._
 
 trait Document extends s2js.adapters.dom.Document with DocumentEvent with EventTarget
@@ -44,7 +44,7 @@ trait Document extends s2js.adapters.dom.Document with DocumentEvent with EventT
 
     var onmousewheel: WheelEvent[this.type] => Boolean
 
-    def getElementsByClassName(cssClass: String): NodeList[ElementType]
+    def getElementsByClassName(cssClass: String): dom.NodeList[ElementType]
 
     def createRange(): Range
 }

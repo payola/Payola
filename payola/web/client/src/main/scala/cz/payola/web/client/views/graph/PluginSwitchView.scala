@@ -22,7 +22,6 @@ class PluginSwitchView extends GraphView with ComposedView
 
     val ontologyCustomizationEditClicked = new SimpleUnitEvent[OntologyCustomization]
 
-
     private val plugins = List[PluginView](
         new TripleTablePluginView,
         new SelectResultPluginView,
@@ -34,7 +33,7 @@ class PluginSwitchView extends GraphView with ComposedView
 
     private var currentPlugin = plugins.head
 
-    private val pluginSpace = new Div(Nil, "row position-relative")
+    private val pluginSpace = new Div(Nil, "plugin-space")
 
     val pluginChangeButton: DropDownButton = new DropDownButton(List(
         new Icon(Icon.eye_open),

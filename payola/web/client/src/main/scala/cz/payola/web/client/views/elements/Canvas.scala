@@ -11,8 +11,6 @@ class Canvas(cssClass: String = "") extends ElementView[html.elements.Canvas]("c
 
     protected var cleared = false
 
-    var offset = Vector2D(0, 0)
-
     size = Vector2D(window.innerWidth / 2, window.innerHeight / 2)
 
     def size: Vector2D = {

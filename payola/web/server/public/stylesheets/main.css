@@ -1,21 +1,6 @@
-canvas {
-    border: 0px;
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-
-canvas:first-child {
-    position: relative;
-}
-
 pre {
     white-space: pre !important;
     word-wrap: normal !important;
-}
-
-#canvas-holder {
-    position: relative;
 }
 
 .clear {
@@ -67,7 +52,20 @@ label {
     width: 600px;
 }
 
-#plugin-space .alert {
+.plugin-space {
+    position: absolute;
+    left: 0;
+}
+
+.plugin-space > div {
+    margin: 0 20px;
+}
+
+.plugin-space canvas {
+    border: 0px;
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 
 #plugin_create_button_container {
@@ -149,10 +147,6 @@ input[type="checkbox"].active:after {
 }
 
 .alert {
-}
-
-.position-relative {
-    position: relative;
 }
 
 .modal-inner-view {

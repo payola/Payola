@@ -7,7 +7,8 @@ import cz.payola.web.client.View
 import cz.payola.web.client.views.elements.Text
 import cz.payola.web.client.views.algebra.Vector2D
 import cz.payola.web.client.events._
-import scala.Some
+import s2js.compiler.javascript
+import s2js.adapters.events
 
 abstract class ElementView[A <: html.Element](htmlElementName: String, val subViews: Seq[View], cssClass: String)
     extends View
@@ -42,7 +43,8 @@ abstract class ElementView[A <: html.Element](htmlElementName: String, val subVi
     htmlElement.onmouseup = { e => mouseReleased.trigger(MouseEventArgs[this.type](this, e))}
     htmlElement.onmousemove = { e => mouseMoved.trigger(MouseEventArgs[this.type](this, e))}
     htmlElement.onmouseout = { e => mouseOut.trigger(MouseEventArgs[this.type](this, e))}
-    htmlElement.onmousewheel = { e => mouseWheelRotated.trigger(MouseWheelEventArgs[this.type](this, e))}
+    htmlElement.onmousewheel = triggerMouseWheelRotated _
+    bindDOMMouseWheel()
     addCssClass(cssClass)
 
     def blockHtmlElement = htmlElement
@@ -100,15 +102,20 @@ abstract class ElementView[A <: html.Element](htmlElementName: String, val subVi
         }
     }
 
-    def topLeftCorner: Vector2D = {
-        var offsetTop = 0.0
-        var offsetLeft = 0.0
-        var element: html.Element = htmlElement
-        while (element != null) {
-            offsetTop += element.offsetTop
-            offsetLeft += element.offsetLeft
-            element = element.offsetParent
-        }
-        Vector2D(offsetLeft, offsetTop)
+    def offset: Vector2D = {
+        val rectangle = htmlElement.getBoundingClientRect
+        Vector2D(rectangle.left + document.body.scrollLeft, rectangle.top + document.body.scrollTop)
     }
+
+    private def triggerMouseWheelRotated(e: events.WheelEvent[html.Element]): Boolean = {
+        mouseWheelRotated.trigger(MouseWheelEventArgs[this.type](this, e))
+    }
+
+    @javascript(
+        """
+            self.htmlElement.addEventListener('DOMMouseScroll', function(e) {
+                self.triggerMouseWheelRotated(e);
+            });
+        """)
+    private def bindDOMMouseWheel() {}
 }
