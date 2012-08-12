@@ -10,6 +10,7 @@ import scala.collection.mutable
 import cz.payola.web.client.views.elements._
 import cz.payola.common.entities.settings.OntologyCustomization
 import s2js.adapters.browser.document
+import s2js.adapters.browser.window
 
 /**
  * Graphical representation of IdentifiedVertex object in the drawn graph.
@@ -28,7 +29,11 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var r
 
     var color = new Color(51, 204, 255, 0.25)
 
-    var glyph: String = "a"
+    var glyph: String = ""
+
+    private var glyphHeight = 0.0
+    private var glyphWidth = 0.0
+
 
     private var glyphSpan: Option[Span] = None
 
@@ -173,6 +178,23 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var r
             newSpan += (new Text(glyph))
             glyphSpan = Some(new Span(newSpan, "glyph"))
             glyphSpan.get.render(document.body)
+
+
+
+
+            //following section measures size of the glyph2
+            //creates a new hidden div element
+            val measuredText = new Text(glyph)
+            val measuredSpan = new Span(List(measuredText), "glyph")
+
+            val measuredDiv = new Div(List(measuredSpan))
+            measuredDiv.setAttribute("style", "visibility: hidden; position: absolute; height: auto; width: auto;")
+            measuredDiv.render(document.body)
+            //measures the size
+            glyphWidth = (measuredDiv.htmlElement.clientWidth + 1)
+            glyphHeight = (measuredDiv.htmlElement.clientHeight + 1)
+            //removes the element
+            measuredDiv.destroy()
         }
     }
 
@@ -224,17 +246,24 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var r
     def draw(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
         drawQuick(context, positionCorrection)
 
-        val halfRadius = radius / 2
+        if(glyphSpan.isDefined) {
+            if(0 < position.y - glyphWidth/2 && position.y + glyphWidth/2 < context.canvas.clientHeight &&
+                0 < position.x - glyphHeight/2 && position.x + glyphHeight/2 < context.canvas.clientWidth) {
 
-        /*if(glyphSpan.isDefined) {
-            glyphSpan.get.setAttribute("width", radius.toString)
-            glyphSpan.get.setAttribute("height", radius.toString)
-            glyphSpan.get.setAttribute("left", (position.x - halfRadius + context.canvas.left).toString)
-            glyphSpan.get.setAttribute("top", (position.y - halfRadius + context.canvas.top).toString)
-        }*/
+                glyphSpan.get.show("block")
+                glyphSpan.get.setAttribute("style",
+                    "left: "+
+                        (position.x + context.canvas.offsetLeft + positionCorrection.x - glyphWidth/2 + 1).toString+
+                    "px; top: "+
+                        (position.y + context.canvas.offsetTop + positionCorrection.y - glyphHeight/2 + 1).toString+
+                    "px;")
+            } else {
+                glyphSpan.get.hide()
+            }
+        }
 
         val informationPositionCorrection =
-            if(glyphSpan.isDefined) { Vector2D(0, halfRadius) } else { Vector2D.Zero }
+            if(glyphSpan.isDefined) { Vector2D(0, glyphHeight/2) } else { Vector2D.Zero }
         val informationPosition =
             (LocationDescriptor.getVertexInformationPosition(position) + positionCorrection).toVector +
                 informationPositionCorrection
