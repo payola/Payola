@@ -37,24 +37,22 @@ class OntologicalFilter(name: String, inputCount: Int, parameters: immutable.Seq
         val classPatterns = new ListBuffer[TriplePattern]()
         val variablePatterns = new ListBuffer[GraphPattern]()
 
-        var xCounter = 1
-        var vCounter = 1
+        val xGenerator = new VariableGenerator
+        val vGenerator = new VariableGenerator
 
         ontology.classes foreach { case (_, cl) =>
-            val variable = new Variable("x" + xCounter)
-            xCounter = xCounter + 1
+            val variable = xGenerator()
 
             val classTP = new TriplePattern(variable, Uri(Edge.rdfTypeEdge), new Uri(cl.uri))
             template += classTP
             classPatterns += classTP
 
             cl.properties foreach { case (_, prop) =>
-                val propVariable = new Variable("v" + vCounter)
-                vCounter = vCounter + 1
+                val propVariable = vGenerator()
 
                 val variableTP = new TriplePattern(variable, new Uri(prop.uri), propVariable)
                 template += variableTP
-                variablePatterns += new GraphPattern(List(variableTP))
+                variablePatterns += GraphPattern(List(variableTP), GraphPattern.optionalProperties(variable, vGenerator))
             }
         }
 

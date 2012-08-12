@@ -21,14 +21,6 @@ class RPCSerializer extends JSONSerializer
     val edgeRule = new BasicSerializationRule(Some(classOf[Edge]))
     this.addSerializationRule(edgeClass, edgeRule)
 
-    val literalNodeClass = new SimpleSerializationClass(classOf[LiteralVertex])
-    val literalNodeRule = new BasicSerializationRule(Some(classOf[LiteralVertex]), Some(List("value")))
-    this.addSerializationRule(literalNodeClass, literalNodeRule)
-
-    // Always serialize the literal vertex value as a string because it may be almost anything.
-    this.addSerializationRule(literalNodeClass, new CustomValueSerializationRule[LiteralVertex](
-        "value", (serializer, literalVertex) => literalVertex.value.toString))
-
     val identifiedNodeClass = new SimpleSerializationClass(classOf[IdentifiedVertex])
     val identifiedNodeRule = new BasicSerializationRule(Some(classOf[IdentifiedVertex]))
     this.addSerializationRule(identifiedNodeClass, identifiedNodeRule)

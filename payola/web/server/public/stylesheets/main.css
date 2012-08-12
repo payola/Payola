@@ -270,6 +270,10 @@ input[type="checkbox"].active:after {
     padding-left: 40px;
     padding-right: 40px;
     min-height: 250px;
+    min-width: 500px;
+
+    height: 100%;
+    width: 100%;
 }
 
 .vitable {
