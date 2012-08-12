@@ -18,6 +18,7 @@ class GlyphInput(name: String, initialValue: Option[String], cssClass: String = 
 
     clearBtn.mouseClicked += { e =>
         glyphInput.value = nothingSelectedText
+        changed.triggerDirectly(this)
         false
     }
 
