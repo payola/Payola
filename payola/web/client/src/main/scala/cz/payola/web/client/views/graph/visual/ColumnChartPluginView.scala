@@ -4,16 +4,17 @@ import cz.payola.web.client.views.graph.PluginView
 import cz.payola.web.client.views.elements._
 import cz.payola.common.rdf._
 import s2js.compiler.javascript
+import s2js.adapters.browser._
 
 class ColumnChartPluginView extends PluginView("Column Chart")
 {
-    private val chartWrapper = new Div(Nil, "column-chart-wrapper")
+    private val chartWrapper = new Div(Nil)
+    chartWrapper.setAttribute("id", "chart-wrapper")
+
+    private val pluginWrapper = new Div(List(chartWrapper), "column-chart-wrapper")
 
     // Used in drawChart()'s @javascript annotation. Beware before renaming
     private val chartWrapperElement = chartWrapper.htmlElement
-
-    // Used from @javascript annotations. Do *NOT* remove.
-    private var googleDataTable = null
 
     /**Adds a bars to the chart. Is a list of list with two values - title and value.
      *
@@ -21,29 +22,28 @@ class ColumnChartPluginView extends PluginView("Column Chart")
      */
     @javascript(
         """
-          var array = [['Title', legendTitle]];
-          arr.foreach(function(x){
-            array.push(x);
-          });
-          var data = google.visualization.arrayToDataTable(array);
+           var rawData = [];
+           var titles = [];
 
-          var tlc = self.chartWrapper.offset();
-          var multiplicator = 80;
-          if (array.length < 8){
-              multiplicator = 160;
-          }
-          var w = array.length * multiplicator + 70;
+           var counter = 0;
+           arr.foreach(function(x){
+                var title = x[0];
+                var value = x[1];
+                rawData.push([ counter, value ]);
+                titles.push([ counter, title ]);
+                ++counter;
+           });
 
-          var options = {
-            left: 50,
-            height: window.innerHeight - tlc.y - 25,
-            width: w,
-            fontSize: 110,
-            legend: {position: 'top', textStyle: {color: 'blue', fontSize: 16}}
-          };
-
-          var chart = new google.visualization.ColumnChart(self.chartWrapperElement);
-          chart.draw(data, options);
+           var data = [{
+                label: legendTitle,
+                data: rawData,
+                bars: {
+                    show: true,
+                    barWidth: 0.5,
+                    align: "center"
+                }
+           }];
+          $.plot($("#chart-wrapper"), data, { label: legendTitle, xaxis: { ticks: titles }, hoverable: true });
         """)
     private def createDataTable(arr: List[List[Any]], legendTitle: String) {
     }
@@ -82,7 +82,13 @@ class ColumnChartPluginView extends PluginView("Column Chart")
         )
     }
 
-    def createSubViews = List(chartWrapper)
+    def createSubViews = {
+        // Update width and height of the pluginWrapper
+        val width = window.innerWidth - 220
+        val styleString = "width: " + width + "px;"
+        pluginWrapper.setAttribute("style", styleString)
+        List(pluginWrapper)
+    }
 
     def findInitialVertexForColumnChart(g: Graph): Option[IdentifiedVertex] = {
         val identifiedVertices = g.vertices.filter(_.isInstanceOf[IdentifiedVertex]).asInstanceOf[Seq[IdentifiedVertex]]
@@ -120,6 +126,7 @@ class ColumnChartPluginView extends PluginView("Column Chart")
             List(title, value).toList
         }.toList
 
+        setupDivSizeForColumns(values)
         createDataTable(values, legendTitle)
     }
 
@@ -130,6 +137,15 @@ class ColumnChartPluginView extends PluginView("Column Chart")
                 Div(List(new Text(details)), "column-chart-textual-content column-chart-textual-content-small")
         messageDiv.render(chartWrapperElement)
         descriptionDiv.render(chartWrapperElement)
+    }
+
+    private def setupDivSizeForColumns(values: List[_]){
+        val multiplier = 80
+        val width = values.length * multiplier
+        val height = 400
+
+        val styleString = "width: " + width + "px; height: " + height + "px;"
+        chartWrapper.setAttribute("style", styleString)
     }
 
     override def updateGraph(graph: Option[Graph]) {

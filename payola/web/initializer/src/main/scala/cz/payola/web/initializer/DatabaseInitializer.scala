@@ -157,7 +157,7 @@ object DatabaseInitializer extends App
             "PropertyURI", "http://purl.org/procurement/public-contracts#numberOfTenders"
         ).setParameter(
             "Operator", ">"
-        ).setParameter("Value", "100")
+        ).setParameter("Value", "120")
 
         columnChartAnalysis2.addPluginInstances(columnFetcher2, contractTyped, contractSelection)
         columnChartAnalysis2.addBinding(columnFetcher2, contractTyped)
