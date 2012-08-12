@@ -495,8 +495,8 @@ Moreover, the ```PackageDefCompiler``` defines additional public service methods
 
 Tracks all kinds of so-called dependencies among symbols that are declared inside a ```PackageDef``` node:
 
-- **ClassDef dependency graph**: Dependencies among ```ClassDef```s among the current compilation unit (```ClassDef``` ```A``` depends on ```ClassDef``` ```B``` iff ```A``` extends or mixins ```B```). The graph is used to determine an order of the class compilation. 
-- **Inter-file dependencies**
+- *ClassDef dependency graph*: Dependencies among ```ClassDef```s among the current compilation unit (```ClassDef``` ```A``` depends on ```ClassDef``` ```B``` iff ```A``` extends or mixins ```B```). The graph is used to determine an order of the class compilation. 
+- *Inter-file dependencies*
 	- *Provided symbols*: The ```ClassDef```s that the current compilation unit provides (i.e. the API). Some other compilation units may require them.
 	- *Declaration-required symbols*: The ```ClassDef```s that have to be declared in the generated JavaScript before the ```ClassDef```s from the current compilation unit are declared.
 	- *Runtime-required symbols*: The ```ClassDef```s that have to be declared in the generated JavaScript so that the current compilation unit can run (they're not needed when declaring the current compilation unit in generated JavaScript).
@@ -504,7 +504,60 @@ Tracks all kinds of so-called dependencies among symbols that are declared insid
 <a name="ClassDefCompiler"></a>
 ##### Class s2js.compiler.components.ClassDefCompiler
 
-> TODO H.S.
+In terms of code lines, the ```ClassDefCompiler``` is the largest class of the project, with objective to compile ```ClassDef``` AST nodes with everything they contain. The ```ClassDefCompiler``` has subclasses for some types of ```ClassDef```s that slightly alter behavior of the compiler to fit the particular ```ClassDef``` needs:
+
+- ```ClassCompiler``` for classes and traits.
+- ```ObjectCompiler``` for objects.
+- ```PackageObjectCompiler``` for package objects.
+
+Compilation of a ```ClassDef``` is composed of the three following steps:
+
+1. Compile the ```ClassDef``` constructor.
+2. Compile the members (fields, methods) of the ```ClassDef```. Inner classes or objects are currently supported.
+3. Bind the ```ClassDef``` JavaScript prototype with an instance of the  [```s2js.runtime.core.Class```](#Class) class, so all instances of the ```ClassDef``` have a refence it.
+
+Most of the Scala language constructs are compiled into JavaScript pretty naturally, majority of them have direct equivalents in the target language, so these naturally translated constructs won't be described here, as it would be a waste of space. We'll concentrate on how the differences between the languages are solved and on some other interesting details or extensions.
+
+###### Expressions
+
+In Scala, everything is an expression with return value, even if the return value is the ```Unit``` (void). As a consequence, return values of statements can be directly assigned to a variable. For example the ```if-then-else``` statement has a return value in Scala, yet in JavaScript, it doesn't. This is solved by wrapping the statement in an anonymous function, which is immediately invoked.
+
+> *Scala code*:
+
+> ```val x = if (a) { b } else { c }```
+
+> compiles into:
+
+> ```var x = (function() { if (a) { return b; } else { return c; } })();```
+
+###### Operators
+
+There are no operators in Scala, only methods with names like ```+``` or ```<=``` that the scala compiler transforms into ```$plus``` or ```$less$eq```. On primitive types that are compiled into JavaScript primitive types (```Number```, ```String``` and ```Boolean```), those methods are compiled as the JavaScript operators. On other types, the methods are left untouched.
+
+###### Match statement
+
+JavaScript has no usable equivalent of the Scala match expression, so a sequence of ```if-then``` statements, that corrspond to the match cases, is used instead. A lot of technical details has to be taken into account as there are a few pattern types, variable bindings, guards etc.
+
+###### Classes and inheritance
+
+JavaScript is a prototype-based language, so it has no notion of classes at all. But it can be emulated using object constructor functions and prototypes. The constructor function defines and initializes fields of the object (```val```s and ```var```s) and executes the class constructor body. Methods of the class are set to the object constructor prototype. When the JavaScript runtime resolves object properties (fields, methods), it first looks directly into the object and then it traverses the object prototype chain so all class methods are found there. 
+
+Ineritance is implemented by setting the prototype of the sub-class prototype to the super-class prototype (i.e. linking the prototypes to a chain). Trait inheritance is divided into two steps. First of all, references to all methods of the trait prototype are copied into the class prototype. Secondly, within the class constructor, the trait is instantiated and all fields of the trait instance are copied to the class instance that is being constructed.
+
+A little problem arises with the objects and package objects whose declaration is also their initialization (correspondence to a static constructor). The problem is, that the objects may access other objects during their initialization. What's even worse is, that this access may be indirect by for example instantiation a class that accesses other object in its constructor. So it's almost impossible to determine the object initialization order. We solved it by introducing the [lazy pattern](http://en.wikipedia.org/wiki/Lazy_initialization); the object initialization is delayed to the moment when it's actually accessed for the first time. This ensures, that the objects are initialized in proper order.
+
+###### Annotation ```@javascript```
+
+This annotation can be used on a method or a field, enabling the programmer to implement the method body or the field value directly in JavaScript. The method body or field value can be anything in Scala, because it gets replaced with the value provided to the annotation.
+
+
+###### Annotation ```@remote```
+
+An object or class marked with this annotation isn't compiled to JavaScript. From the first point of view, it may look useless, but combined with the RPC that is described in the following section, it really simplifies client-server communication.
+
+###### RPC
+
+> TODO
 
 <a name="adapters"></a>
 ### Package s2js.adapters

@@ -1129,19 +1129,6 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Returns whether the select is a chain of package selections (for example "pkgA.pkgB.pkgC").
-     * @param select The select to check.
-     * @return True if the select is a chain of package selections, false otherwise.
-     */
-    private def selectIsPackageSelectChain(select: Global#Select): Boolean = {
-        select.symbol.isPackage && (select.qualifier match {
-            case subSelect: Global#Select => selectIsPackageSelectChain(subSelect)
-            case identifier: Global#Ident => identifier.symbol.isPackage
-            case _ => false
-        })
-    }
-
-    /**
      * Returns whether the select is invoked on a remote object.
      * @param select The select to check.
      * @return True if the select is invoked on a remote object.
