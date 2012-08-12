@@ -27,12 +27,12 @@ class ColumnChartPluginView extends PluginView("Column Chart")
           });
           var data = google.visualization.arrayToDataTable(array);
 
-          var tlc = self.chartWrapper.topLeftCorner();
+          var tlc = self.chartWrapper.offset();
           var multiplicator = 80;
-          if (array.length < 16){
+          if (array.length < 8){
               multiplicator = 160;
           }
-          var w = array.length * multiplicator + 40;
+          var w = array.length * multiplicator + 70;
 
           var options = {
             left: 50,
@@ -63,9 +63,9 @@ class ColumnChartPluginView extends PluginView("Column Chart")
         val value2 = new LiteralVertex(666)
         val value3 = new LiteralVertex(999)
 
-        val e1 = new Edge(initialVertex, bar1, Edge.rdfTypeEdge)
-        val e2 = new Edge(initialVertex, bar2, Edge.rdfTypeEdge)
-        val e3 = new Edge(initialVertex, bar3, Edge.rdfTypeEdge)
+        val e1 = new Edge(bar1, initialVertex, Edge.rdfTypeEdge)
+        val e2 = new Edge(bar2, initialVertex, Edge.rdfTypeEdge)
+        val e3 = new Edge(bar3, initialVertex, Edge.rdfTypeEdge)
 
         val e4 = new Edge(bar1, name1, "name")
         val e5 = new Edge(bar1, value1, "value")
@@ -87,9 +87,9 @@ class ColumnChartPluginView extends PluginView("Column Chart")
     def findInitialVertexForColumnChart(g: Graph): Option[IdentifiedVertex] = {
         val identifiedVertices = g.vertices.filter(_.isInstanceOf[IdentifiedVertex]).asInstanceOf[Seq[IdentifiedVertex]]
         identifiedVertices.find { v =>
-            val typeEdges = g.getOutgoingEdges(v.uri).filter(_.uri == Edge.rdfTypeEdge)
+            val typeEdges = g.getIncomingEdges(v.uri).filter(_.uri == Edge.rdfTypeEdge)
             typeEdges.size > 0 && typeEdges.forall { e =>
-                e.destination match {
+                e.origin match {
                     case identified: IdentifiedVertex => validateLiteralVerticesOnEdges(
                         g.getOutgoingEdges(identified.uri))
                     case _ => false
@@ -98,20 +98,20 @@ class ColumnChartPluginView extends PluginView("Column Chart")
         }
     }
 
-    private def setGraphContentWithInitialVertex(g: Graph, v: IdentifiedVertex) {
+    private def setGraphContentWithInitialVertex(g: Graph, initialVertex: IdentifiedVertex) {
         // Get those vertices representing bars in the chart
-        val bars = g.getOutgoingEdges(v.uri).filter(_.uri == Edge.rdfTypeEdge)
-            .map(_.destination.asInstanceOf[IdentifiedVertex])
+        val bars = g.getIncomingEdges(initialVertex.uri).filter(_.uri == Edge.rdfTypeEdge)
+            .map(_.origin)
         var legendTitle = ""
 
         // Our assumption here is that the graph-as-chart has been validated
         // before being passed here, so no additional checks will be performed
         val values = bars.map { v =>
-        // Each vertex should have exactly two edges, one with the title and one
-        // with the value
-        // Both edges point to literal vertices (due to prior assumed validations)
+           // Each vertex should have exactly two edges, one with the title and one
+           // with the value
+           // Both edges point to literal vertices (due to prior assumed validations)
             val outgoingEdges = g.getOutgoingEdges(v.uri)
-            val literals = outgoingEdges.map(_.destination.asInstanceOf[LiteralVertex])
+            val literals = outgoingEdges.filter(_.destination.isInstanceOf[LiteralVertex]).map(_.destination.asInstanceOf[LiteralVertex])
 
             val title = literals.find(litVertex => variableIsString(litVertex.value)).get.value
             val valueVertex = literals.find(litVertex => variableIsNumber(litVertex.value)).get
@@ -154,10 +154,10 @@ class ColumnChartPluginView extends PluginView("Column Chart")
     }
 
     private def validateLiteralVerticesOnEdges(edges: Seq[Edge]): Boolean = {
-        if (edges.size == 2 && edges.forall(_.destination.isInstanceOf[LiteralVertex])) {
+        if (edges.size == 3 && edges.forall(e => e.destination.isInstanceOf[LiteralVertex] || e.uri == Edge.rdfTypeEdge)) {
             // We need exactly two vertices, one with the bar title, one with the bar height (value)
-            edges.find(e => variableIsString(e.destination.asInstanceOf[LiteralVertex].value)).isDefined &&
-                edges.find(e => variableIsNumber(e.destination.asInstanceOf[LiteralVertex].value)).isDefined
+            edges.find(e => e.destination.isInstanceOf[LiteralVertex] && variableIsString(e.destination.asInstanceOf[LiteralVertex].value)).isDefined &&
+                edges.find(e => e.destination.isInstanceOf[LiteralVertex] && variableIsNumber(e.destination.asInstanceOf[LiteralVertex].value)).isDefined
         } else {
             false
         }

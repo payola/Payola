@@ -17,6 +17,16 @@ private[rdf] object LiteralVertex
         } catch {
             case _ => literal.getString
         }
-        new cz.payola.common.rdf.LiteralVertex(value, language)
+
+        // Making sure value is of primitive types, otherwise, convert to string
+        val primitiveValue = value match {
+            case b: java.lang.Boolean => if (b) "true" else "false"
+            case i: java.lang.Integer => i
+            case d: java.lang.Double => d
+            case s: String => s
+            case otherObj => otherObj.toString()
+        }
+
+        new cz.payola.common.rdf.LiteralVertex(primitiveValue, language)
     }
 }
