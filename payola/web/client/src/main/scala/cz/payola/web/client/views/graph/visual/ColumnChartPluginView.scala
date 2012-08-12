@@ -43,7 +43,7 @@ class ColumnChartPluginView extends PluginView("Column Chart")
                     align: "center"
                 }
            }];
-          $.plot($("#chart-wrapper"), data, { label: legendTitle, xaxis: { ticks: titles }, hoverable: true });
+          $.plot($("#chart-wrapper"), data, { label: legendTitle, xaxis: { ticks: titles }, grid: { hoverable: true, clickable: true } });
         """)
     private def createDataTable(arr: List[List[Any]], legendTitle: String) {
     }
@@ -127,6 +127,7 @@ class ColumnChartPluginView extends PluginView("Column Chart")
         }.toList
 
         setupDivSizeForColumns(values)
+        setupTooltip()
         createDataTable(values, legendTitle)
     }
 
@@ -139,9 +140,47 @@ class ColumnChartPluginView extends PluginView("Column Chart")
         descriptionDiv.render(chartWrapperElement)
     }
 
+    @javascript(
+        """
+          var previousPoint = null;
+              $("#chart-wrapper").bind("plothover", function (event, pos, item) {
+                  if (item) {
+                      if (previousPoint != item.dataIndex) {
+                          previousPoint = item.dataIndex;
+
+                          $("#tooltip").remove();
+                          var x = item.pageX,
+                              y = item.pageY;
+                          $('<div id="tooltip">' + "Value: " + item.datapoint[1] + '</div>').css( {
+                                      position: 'absolute',
+                                      display: 'none',
+                                      top: y + 5,
+                                      left: x + 5,
+                                      border: '1px solid #fdd',
+                                      padding: '2px',
+                                      'padding-left': '5px',
+                                      'padding-right': '5px',
+                                      'background-color': '#fee',
+                                      opacity: 0.80
+                                  }).appendTo("body").fadeIn(200);
+                      }
+                  }
+                  else {
+                      $("#tooltip").remove();
+                      previousPoint = null;
+                  }
+              });
+        """)
+    private def setupTooltip(){
+
+    }
+
     private def setupDivSizeForColumns(values: List[_]){
         val multiplier = 80
-        val width = values.length * multiplier
+        var width = values.length * multiplier
+        if (width < 500) {
+            width = 500
+        }
         val height = 400
 
         val styleString = "width: " + width + "px; height: " + height + "px;"
