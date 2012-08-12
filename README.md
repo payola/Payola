@@ -513,7 +513,7 @@ In terms of code lines, the ```ClassDefCompiler``` is the largest class of the p
 Compilation of a ```ClassDef``` is composed of the three following steps:
 
 1. Compile the ```ClassDef``` constructor.
-2. Compile the members (fields, methods) of the ```ClassDef```. Inner classes or objects are currently supported.
+2. Compile the members (fields, methods) of the ```ClassDef```. Inner classes or objects aren't currently supported.
 3. Bind the ```ClassDef``` JavaScript prototype with an instance of the  [```s2js.runtime.core.Class```](#Class) class, so all instances of the ```ClassDef``` have a refence it.
 
 Most of the Scala language constructs are compiled into JavaScript pretty naturally, majority of them have direct equivalents in the target language, so these naturally translated constructs won't be described here, as it would be a waste of space. We'll concentrate on how the differences between the languages are solved and on some other interesting details or extensions.
@@ -522,7 +522,7 @@ Most of the Scala language constructs are compiled into JavaScript pretty natura
 
 In Scala, everything is an expression with return value, even if the return value is the ```Unit``` (void). As a consequence, return values of statements can be directly assigned to a variable. For example the ```if-then-else``` statement has a return value in Scala, yet in JavaScript, it doesn't. This is solved by wrapping the statement in an anonymous function, which is immediately invoked.
 
-> *Scala code*:
+> Scala code:
 
 > ```val x = if (a) { b } else { c }```
 
