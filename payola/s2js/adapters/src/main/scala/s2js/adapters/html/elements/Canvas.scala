@@ -167,4 +167,6 @@ trait ImageData
 trait TextMetrics
 {
     val width: Double
+
+    val height: Double
 }
