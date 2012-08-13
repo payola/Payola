@@ -7,7 +7,6 @@ import cz.payola.web.client.presenters.components._
 import cz.payola.web.shared.AnalysisBuilderData
 import cz.payola.common.entities.Plugin
 import scala.collection.mutable.ArrayBuffer
-import s2js.runtime.client.scala.collection.mutable.HashMap
 import cz.payola.web.client.presenters.models.ParameterValue
 import cz.payola.web.client.events.EventArgs
 import cz.payola.web.client.views.bootstrap._
@@ -32,7 +31,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
 
     protected var branches = new ArrayBuffer[PluginInstanceView]
 
-    protected val nameComponent = new InputControl(
+    protected var nameComponent = new InputControl(
         "Analysis name",
         new TextInput("init-name", "", "Enter analysis name")
     )
@@ -52,7 +51,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                             analysis =>
                                 analysisId = analysis.id
                                 lockAnalysisAndLoadPlugins()
-                                val view = new AnalysisEditorView(analysis)
+                                val view = new AnalysisEditorView(analysis, Some(nameComponent.field.value), None)
                                 view.visualizer.pluginInstanceRendered += {
                                     e => instancesMap.put(e.target.pluginInstance.id, e.target)
                                 }
@@ -210,14 +209,17 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
     }
 
     protected def lockAnalysisAndLoadPlugins() = {
-        AnalysisBuilderData.lockAnalysis(analysisId)
-        AnalysisBuilderData.getPlugins() {
-            plugins => allPlugins = plugins
-        } {
-            error => fatalErrorHandler(error)
-        }
-        AnalysisBuilderData.getDataSources() {
-            sources => allSources = sources
+        AnalysisBuilderData.lockAnalysis(analysisId) { () =>
+            AnalysisBuilderData.getPlugins() {
+                plugins => allPlugins = plugins
+            } {
+                error => fatalErrorHandler(error)
+            }
+            AnalysisBuilderData.getDataSources() {
+                sources => allSources = sources
+            } {
+                error => fatalErrorHandler(error)
+            }
         } {
             error => fatalErrorHandler(error)
         }
@@ -292,7 +294,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
     protected def onParameterValueChanged(args: EventArgs[ParameterValue]) {
         val parameterInfo = args.target
         parameterInfo.control.isActive = true
-        AnalysisBuilderData.setParameterValue(analysisId, parameterInfo.pluginInstanceId, parameterInfo.name, parameterInfo.value) { _ =>
+        AnalysisBuilderData.setParameterValue(analysisId, parameterInfo.pluginInstanceId, parameterInfo.name, parameterInfo.value) { () =>
             parameterInfo.control.setOk()
             parameterInfo.control.isActive = false
         } { _ =>

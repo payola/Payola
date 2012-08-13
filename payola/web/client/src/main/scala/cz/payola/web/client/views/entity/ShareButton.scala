@@ -18,7 +18,7 @@ class ShareButton(private var _isPublic: Boolean) extends ComposedView
     private val isPublicText = new Text("")
 
     val dropDownButton = new DropDownButtonWithCaret(
-        List(isPublicText),
+        isPublicText,
         List(new Icon(Icon.share, true), new Text("Share")),
         List(
             new ListItem(List(shareToGroupsButton)),
@@ -51,12 +51,7 @@ class ShareButton(private var _isPublic: Boolean) extends ComposedView
     }
 
     def setIsEnabled(isEnabled: Boolean = true) {
-        if (isEnabled) {
-            dropDownButton.toggleAnchor.removeCssClass("disabled")
-            dropDownButton.anchor.removeCssClass("disabled")
-        } else {
-            dropDownButton.toggleAnchor.addCssClass("disabled")
-            dropDownButton.anchor.addCssClass("disabled")
-        }
+        dropDownButton.toggleAnchor.setIsEnabled(isEnabled)
+        dropDownButton.anchor.setIsEnabled(isEnabled)
     }
 }

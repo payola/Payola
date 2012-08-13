@@ -10,7 +10,6 @@ import scala.collection.mutable
 import cz.payola.web.client.views.elements._
 import cz.payola.common.entities.settings.OntologyCustomization
 import s2js.adapters.browser.document
-import s2js.adapters.browser.window
 
 /**
  * Graphical representation of IdentifiedVertex object in the drawn graph.

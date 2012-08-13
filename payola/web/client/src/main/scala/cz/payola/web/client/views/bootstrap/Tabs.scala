@@ -29,7 +29,7 @@ class Tabs(tabs: Seq[(String, View)], tabsId: String) extends ComposedView
 
     private val tabContent = new Div(tabViews, "tab-content")
     // TODO - Quick-fix
-    tabContent.setAttribute("style", "height: 500px;")
+    //tabContent.setAttribute("style", "height: 500px;")
 
     private val list = new UnorderedList(tabItems, "nav nav-tabs")
 

@@ -11,13 +11,14 @@ class GlyphInput(name: String, initialValue: Option[String], cssClass: String = 
     private val nothingSelectedText = ""
 
     private val glyphInput = new TextInput(name, if(initialValue.isDefined){initialValue.get}else{""}, "", "disabled input-mini glyph")
-    glyphInput.setAttribute("disabled","disabled")
+    glyphInput.setIsEnabled(false)
 
     private val addOn = new Span(List(new Text("Choose glyph")),"add-on")
     private val clearBtn = new Button(new Text("Clear"))
 
     clearBtn.mouseClicked += { e =>
         glyphInput.value = nothingSelectedText
+        changed.triggerDirectly(this)
         false
     }
 

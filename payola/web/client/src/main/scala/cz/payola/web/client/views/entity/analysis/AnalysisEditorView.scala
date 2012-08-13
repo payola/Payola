@@ -7,11 +7,11 @@ import cz.payola.common.entities.Analysis
 import cz.payola.web.client.views.elements.lists._
 import cz.payola.web.client.views.elements.form.fields._
 
-class AnalysisEditorView(analysis: Analysis) extends ComposedView
+class AnalysisEditorView(analysis: Analysis, newName: Option[String], newDesc: Option[String]) extends ComposedView
 {
-    val name = new InputControl("Analysis name:", new TextInput("name", "", "Analysis name"))
+    val name = new InputControl("Analysis name:", new TextInput("name", if(newName.isDefined){newName.get}else{analysis.name}, "Analysis name"))
 
-    val description = new InputControl("Description:", new TextArea("description", "", "Anaylsis description"))
+    val description = new InputControl("Description:", new TextArea("description",  if(newDesc.isDefined){newDesc.get}else{analysis.description}, "Anaylsis description"))
 
     protected val properties = new Div(List(name, description))
 
@@ -37,7 +37,7 @@ class AnalysisEditorView(analysis: Analysis) extends ComposedView
 
     protected val leftCol = new Div(List(leftColContent), "span3")
 
-    protected val rightCol = new Div(List(analysisCanvas), "span9")
+    protected val rightCol = new Div(List(analysisCanvas), "span9 relative")
 
     protected val container = new Div(List(leftCol, rightCol))
 
