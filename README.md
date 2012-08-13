@@ -29,7 +29,7 @@ As you clone just source codes from the git repository, it is necessary to compi
 
 <a name="run-initializer"></a>
 ```
->cp
+> cp
 ...
 > project initializer
 > run
@@ -55,13 +55,13 @@ While a simple guess of another user's group identifier is unlikely (and a brute
 
 To launch Payola, open SBT just like when you were compiling it and enter these two commands (you do not need to run the `cp` command if you haven't modified any source code since the last compilation):
 
-
-> ```cp```
+```
+> cp
 ...
-> ```project server```
+> project server
 ...
-> ```run```
-
+> run
+```
 
 > *Warning:* Do **not** run the `initializer` project. All users, analyses, data sources, etc. would be lost. (See [this note](#drop-create-warning))
 
@@ -488,22 +488,50 @@ Aritecture of Payola implies that domain layer is independent from data layer an
 
 ### Package cz.payola.data.squeryl
 
-In this version Payola uses [Squeryl](http://squeryl.org) (an ORM for Scala) for persisting entities into H2 database. Squeryl generates database schema from structure of stored objects. Every persisted entity is persisted in its own table, definition of this table is derived from entity structure. In order to have domain layer independent from data layer, there were implemented [entities](#squeryl-entities) that:
+In this version Payola uses [Squeryl](http://squeryl.org) (an ORM tool for Scala) for persisting entities into H2 database. Every type of entity is persisted in its own table, definition of this table is derived from entity structure ([described later](#about-squeryl). In order to have domain layer independent from data layer (i.e. to avoid placing a squeryl-specific code to domain layer, where it logically doesn't belong), there were implemented [entities](#squeryl-entities) that:
 
 - represent entities from domain layer and 
 - can be stored and loaded via Squeryl ORM into and from database
 
-#####Why Squeryl?
+##### Why Squeryl?
 
 Squeryl is existing, tested, functional and simple ORM for scala applications that had met the requirements of Payola during the process of making decision whether use existing ORM or implement own ORM tool.
 
 <a name="about-squeryl"></a>
-#####About Squeryl
+##### Briefly about Squeryl
+
+[Squeryl](http://squeryl.org) is a free ORM tool for Scala projects, it can be connected to any relational database supported by JDBC drivers.
+
+A database structure needs to be defined in an object extending `org.squeryl.Schema`  object. This object contains definition of tables - definition that says what entity is persisted in what table. Squeryl enables to redefine column types of tables, to declare 1:N and M:N relations between entities, to define foreign key constraints for those relations.
+
+Squeryl provides lazy fetching of entities from "N" side of 1:N or M:N relations, which is a desirable feature of ORM tool. The query that fetches the entities of a relation is defined in a lazy field of related entity, on the first request for data is the query evaluated. There is a method `associate` in Squeryl for creating a relation between entities. The code could look like this:
+
+```
+	// Definition of lazy field with query fetching groups owned by user
+	// The relation between groups and user is defined in schema.groupOwnership
+	private lazy val _ownedGroupsQuery = schema.groupOwnership.left(this)
+
+    // Returns owned groups of user
+    def ownedGroups = {
+        inTransaction {
+            _ownedGroupsQuery.toList
+        }
+    }
+
+	// Creates relation between user and group
+	def addOwnedGroup(group: Group) {
+		inTransaction {
+			_ownedGroupsQuery.associate(group)
+		}	
+	}	
+```
+
+Every query that fetches any data from database needs to be wrapped inside some transaction block (as could be seen in previous sample code). Squeryl provide `transaction { ... }` and `inTransaction { ... }` blocks. Every `transaction` block creates a new transaction, what includes to establish a new database connection, whereas `inTransaction` block nests transactions together.
 
 <a name="squeryl-entities"></a>
 #### Package cz.payola.data.squeryl.entities
 
-For every entity in [domain layer](#domain) that issupposed to be persisted, exists a class in [data layer](#data) that provides database persistence to the corresponding domain layer entity.
+For every entity in [domain layer](#domain) that is supposed to be persisted, exists a class in [data layer](#data) that provides database persistence to the corresponding domain layer entity.
 
 Every data layer entity has a corresponding companion object (extending `EntityConverter`) that provides conversion from domain layer entity. When conversion fails, a `DataException` is thrown.
 
