@@ -4,7 +4,7 @@ import s2js.adapters.html
 import cz.payola.web.client.views._
 
 /**
- * A graph visualisation plugin view.
+ * A graph visualization plugin view.
  * @param name Name of the plugin.
  */
 abstract class PluginView(val name: String) extends GraphView with ComposedView

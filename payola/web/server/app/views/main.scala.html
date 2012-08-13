@@ -3,6 +3,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("fonts/font-face/stylesheet.css")"/>
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")"/>
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/bootstrap.css")"/>
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/select2.css")"/>
@@ -18,14 +19,10 @@
         <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/select2/select2.min.js")"></script>
         <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/jquery-plugins/jquery.autosize-min.js")"></script>
         <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/jquery-plugins/jquery.livequery.min.js")"></script>
+        <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/flot/jquery.flot.min.js")"></script>
         <script type="text/javascript" src="@routes.Assets.at("javascripts/common.js")"></script>
-        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-        <script type="text/javascript">
-            // Load the Visualization API and the chart package.
-            google.load("visualization", "1", {packages: ["columnchart"]});
-        </script>
     </head>
-        <body>
+    <body>
             <div class="navbar navbar-fixed-top">
                 <div class="navbar-inner">
                     <div class="container-fluid">

@@ -10,7 +10,18 @@ import s2js.compiler.ScalaToJsException
 class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFile, val packageDef: Global#PackageDef)
 {
     /** The dependency manager. */
-    val dependencyManager = new DependencyManager(this)
+    val dependencies = new DependencyManager(this)
+
+    /** Packages of the adapter classes. */
+    val adapterPackagesNames = List(
+        "s2js.adapters.browser",
+        "s2js.adapters.dom",
+        "s2js.adapters.events",
+        "s2js.adapters.html.elements",
+        "s2js.adapters.html",
+        "s2js.adapters.js",
+        "s2js.adapters"
+    )
 
     /** An unique id generator. */
     private var uniqueId = 0
@@ -23,7 +34,7 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
         val buffer = new mutable.ListBuffer[String]
 
         // Retrieve the PackageDef structure.
-        val structure = dependencyManager.getPackageDefStructure
+        val structure = dependencies.getPackageDefStructure
 
         // Check the structure.
         checkPackageDefStructure(structure)
@@ -55,7 +66,7 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
         }
 
         // Compile the dependencies
-        dependencyManager.compileDependencies(buffer)
+        dependencies.compileDependencies(buffer)
 
         buffer.mkString
     }
@@ -68,9 +79,7 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
         // Check whether the async methods on remote objects are declared properly.
         structure.remoteObjects.foreach {classDef =>
             val methods = classDef.impl.body.collect { case defDef: Global#DefDef => defDef }
-            methods.filter(v => symbolHasAnnotation(v.symbol, "s2js.compiler.async")).foreach {defDef =>
-                checkAsyncMethod(defDef)
-            }
+            methods.filter(v => symbolHasAnnotation(v.symbol, "s2js.compiler.async")).foreach(checkAsyncMethod(_))
         }
     }
 
@@ -80,11 +89,7 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
       * @return True if the symbol is internal, false otherwise.
       */
     def symbolIsInternal(symbol: Global#Symbol): Boolean = {
-        val internalPackageNames = Set(
-            "s2js.adapters.js",
-            "s2js.adapters.browser",
-            "scala.reflect"
-        )
+        val internalPackageNames = List("scala.reflect") ++ adapterPackagesNames
         val internalTypeNames = Set(
             "java.lang.Object",
             "scala.Any",
@@ -142,16 +147,8 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
         // Ordered by transformation priority (if A is a prefix of B, then the B should be first).
         val packageReplacementMap = mutable.LinkedHashMap(
             "java.lang" -> "scala",
-            "scala.this" -> "scala",
-            "s2js.adapters.browser" -> "",
-            "s2js.adapters.dom" -> "",
-            "s2js.adapters.events" -> "",
-            "s2js.adapters.html.elements" -> "",
-            "s2js.adapters.html" -> "",
-            "s2js.adapters.js" -> "",
-            "s2js.adapters" -> "",
             "s2js.runtime.client.scala" -> "scala"
-        )
+        ) ++ adapterPackagesNames.map(_ -> "")
 
         packageReplacementMap.find(r => symbol.fullName.startsWith(r._1))
     }
@@ -172,13 +169,11 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
       * @return The name.
       */
     def getSymbolFullJsName(symbol: Global#Symbol): String = {
-        var name = symbol.fullName;
+        var name = symbol.fullName.replace(".this", "").replace(".package", "")
 
         // Perform the namespace transformation (use the longest matching namespace).
-        val replacement = symbolPackageReplacement(symbol)
-        if (replacement.isDefined) {
-            val (oldPackage, newPackage) = replacement.get
-
+        symbolPackageReplacement(symbol).foreach { r =>
+            val (oldPackage, newPackage) = r
             name = name.stripPrefix(oldPackage)
             if (newPackage.isEmpty && name.startsWith(".")) {
                 name = name.drop(1)
@@ -186,8 +181,7 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
             name = newPackage + name
         }
 
-        // Drop the "package" package that isn't used in the JavaScript.
-        name.replace(".package", "")
+        name
     }
 
     /**

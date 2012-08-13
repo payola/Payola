@@ -6,10 +6,8 @@ import cz.payola.web.client.views.graph.visual.techniques.tree.TreeTechnique
 import cz.payola.web.client.views.graph.visual.techniques.circle.CircleTechnique
 import cz.payola.web.client.views.graph.visual.techniques.gravity.GravityTechnique
 import cz.payola.web.client.views.graph.visual.techniques.minimalization.MinimalizationTechnique
-import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.graph.table.TripleTablePluginView
-import cz.payola.web.client.views.graph.visual.settings._
 import cz.payola.web.client.views.graph.visual.VisualPluginView
 import cz.payola.web.client.views.elements.lists.ListItem
 
@@ -17,26 +15,12 @@ class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
 {
     var graph: Option[cz.payola.common.rdf.Graph] = None
 
-    val vertexSettings = new VertexSettingsModel
-
-    val edgesSettings = new EdgeSettingsModel
-
-    val textSettings = new TextSettingsModel
-
-    val visualSetup = new VisualSetup(vertexSettings, edgesSettings, textSettings)
-
-    visualSetup.settingsChanged += {
-        evt =>
-            // TODO currentPlugin.get.redraw()
-            false
-    }
-
     val plugins = List[PluginView](
-        new CircleTechnique(visualSetup),
+        new CircleTechnique,
         new TripleTablePluginView,
-        new TreeTechnique(visualSetup),
-        new MinimalizationTechnique(visualSetup),
-        new GravityTechnique(visualSetup)
+        new TreeTechnique,
+        new MinimalizationTechnique,
+        new GravityTechnique
     )
 
     var currentPlugin: Option[PluginView] = None
@@ -55,12 +39,6 @@ class Index(val elementToDrawIn: String = "graph-plugin-draw-space")
                 false
         }
     }
-
-    /*def init() {
-        visualSetup.render(document.getElementById("settings"))
-        graph = Some(GraphFetcher.getInitialGraph)
-        changePlugin(plugins.head)
-    }*/
 
     def updateSettings() {
         currentPlugin.get match {

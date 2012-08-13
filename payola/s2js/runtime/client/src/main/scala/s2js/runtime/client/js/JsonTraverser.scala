@@ -1,6 +1,7 @@
 package s2js.runtime.client.js
 
 import collection._
+import s2js.runtime.client.core._
 
 /**
  * A base class for JSON object traversers.
@@ -14,7 +15,14 @@ abstract class JsonTraverser[A]
      * @return The result of the traversal.
      */
     def traverse(value: Any): A = {
-        if (isObject(value)) {
+        if (isArray(value)) {
+            // Traverse the items and visit the array.
+            val jsArray = new JsArray(value)
+            val traversedItems = new mutable.ArrayBuffer[A]()
+            jsArray.foreach((index, item) => traversedItems += traverse(item))
+            arrayVisitor(jsArray, traversedItems)
+
+        } else if (isObject(value)) {
             // Traverse the properties and visit the object.
             val jsObject = new JsObject(value)
             val traversedProperties = new mutable.HashMap[String, A]()
@@ -22,14 +30,6 @@ abstract class JsonTraverser[A]
                 jsObject.foreach((name, value) => traversedProperties.put(name, traverse(value)))
             }
             objectVisitor(jsObject, traversedProperties)
-
-        } else if (isArray(value)) {
-            // Traverse the items and visit the array.
-            val jsArray = new JsArray(value)
-            val traversedItems = new mutable.ArrayBuffer[A]()
-            jsArray.foreach((index, item) => traversedItems += traverse(item))
-            arrayVisitor(jsArray, traversedItems)
-
         } else {
             // Just visit the value.
             valueVisitor(value)

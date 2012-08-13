@@ -29,11 +29,11 @@ class AnalysisEditorView(analysis: Analysis) extends ComposedView
 
     protected val menu = new UnorderedList(List(addPluginLinkLi, addDataSourceLinkLi, mergeBranchesLi))
 
-    val visualiser = new EditableAnalysisVisualizer(analysis)
+    val visualizer = new EditableAnalysisVisualizer(analysis)
 
     protected val leftColContent = new Div(List(menu, properties), "well")
 
-    val analysisCanvas = new Div(List(visualiser), "plugin-space")
+    val analysisCanvas = new Div(List(visualizer), "plugin-space")
 
     protected val leftCol = new Div(List(leftColContent), "span3")
 

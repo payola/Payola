@@ -3,7 +3,7 @@ package s2js.compiler
 class DependencySpecs extends CompilerFixtureSpec
 {
     describe("Requires") {
-        it("avoid requiring deep packages") {
+        ignore("avoid requiring deep packages") {
             configMap =>
                 scalaCode {
                     """
@@ -25,7 +25,7 @@ class DependencySpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("add require for used classes") {
+        ignore("add require for used classes") {
             configMap =>
                 scalaCode {
                     """
@@ -62,7 +62,7 @@ class DependencySpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("ignore implicit browser imports") {
+        ignore("ignore implicit browser imports") {
             configMap =>
                 scalaCode {
                     """
@@ -89,7 +89,7 @@ class DependencySpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("ignore explicit browser imports") {
+        ignore("ignore explicit browser imports") {
             configMap =>
                 scalaCode {
                     """

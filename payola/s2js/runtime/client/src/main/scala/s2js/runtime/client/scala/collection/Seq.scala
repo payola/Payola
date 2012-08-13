@@ -6,7 +6,7 @@ import s2js.compiler.javascript
 
 object Seq
 {
-    // TODO just a hack to make the map function work.
+    // Just a hack to make the map function work.
     def canBuildFrom: Boolean = true
 }
 
@@ -48,7 +48,7 @@ trait Seq extends Iterable
     override def size: Int = 0
 
     @javascript("""
-        if (s2js.runtime.client.js.isUndefined(self.getInternalJsArray()[n])) {
+        if (s2js.runtime.client.core.get().isUndefined(self.getInternalJsArray()[n])) {
             throw new scala.NoSuchElementException('An item with index ' + n + ' is not present.');
         }
         return self.getInternalJsArray()[n];

@@ -4,14 +4,11 @@ import collection.mutable.ListBuffer
 import cz.payola.web.client.views.algebra.Point2D
 import cz.payola.web.client.views.graph.visual.VisualPluginView
 import cz.payola.common.rdf.Graph
-import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.views.graph.visual.graph._
 import cz.payola.web.client.views.graph.visual.graph.positioning._
-import cz.payola.web.client.views.elements._
-import cz.payola.web.client.views.bootstrap.Icon
 import cz.payola.web.client.views.graph.visual.animation._
 
-abstract class BaseTechnique(settings: VisualSetup, name: String) extends VisualPluginView(settings, name)
+abstract class BaseTechnique(name: String) extends VisualPluginView(name)
 {
     private val treeVerticesDistance = 100
 
@@ -23,6 +20,7 @@ abstract class BaseTechnique(settings: VisualSetup, name: String) extends Visual
     }
 
     private def performPositioning(graphView: GraphView) {
+
         var firstAnimation: Option[Animation[ListBuffer[(VertexView, Point2D)]]] = None
 
         var previousComponent: Option[Component] = None
@@ -51,10 +49,6 @@ abstract class BaseTechnique(settings: VisualSetup, name: String) extends Visual
             previousComponent = Some(component)
         }
         if (firstAnimation.isDefined) {
-            //fit the drawing space to the window
-            firstAnimation.get.addFollowingAnimation(
-                new Animation(Animation.emptyAnimation, new AfterAnimationParamLess(fitCanvas), None, redrawQuick, redraw, None))
-
             //finally move the whole graph to the center of the window
             val graphCenterCorrector = new GraphPositionHelper(() => topLayer.size, graphView.getGraphCenter)
             firstAnimation.get.addFollowingAnimation(

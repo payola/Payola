@@ -31,14 +31,6 @@ class ScalaToJsCompiler(val classPath: String, val outputDirectory: String, val 
         override protected def computeInternalPhases() {
             val scalaToJsPlugin = new ScalaToJsPlugin(this)
             scalaToJsPlugin.processOptions(options, s => ())
-
-            phasesSet += syntaxAnalyzer
-            phasesSet += analyzer.namerFactory
-            phasesSet += analyzer.packageObjects
-            phasesSet += analyzer.typerFactory
-            phasesSet += superAccessors
-            phasesSet += pickler
-            phasesSet += refchecks
             scalaToJsPlugin.components.foreach(phasesSet += _)
         }
     }

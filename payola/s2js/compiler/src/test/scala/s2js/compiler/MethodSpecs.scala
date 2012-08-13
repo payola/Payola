@@ -3,7 +3,7 @@ package s2js.compiler
 class MethodSpecs extends CompilerFixtureSpec
 {
     describe("Method calls") {
-        it("parentheses can be omitted") {
+        ignore("parentheses can be omitted") {
             configMap =>
                 scalaCode {
                     """
@@ -53,7 +53,7 @@ class MethodSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("default parameters are supported") {
+        ignore("default parameters are supported") {
             configMap =>
                 scalaCode {
                     """
@@ -90,7 +90,7 @@ class MethodSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("default parameters can reference fields") {
+        ignore("default parameters can reference fields") {
             configMap =>
                 scalaCode {
                     """
@@ -124,7 +124,7 @@ class MethodSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("can have a return value") {
+        ignore("can have a return value") {
             configMap =>
                 scalaCode {
                     """
@@ -170,7 +170,7 @@ class MethodSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("generic methods can be called") {
+        ignore("generic methods can be called") {
             configMap =>
                 scalaCode {
                     """
@@ -197,7 +197,7 @@ class MethodSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("can call a method of returned object") {
+        ignore("can call a method of returned object") {
             configMap =>
                 scalaCode {
                     """
@@ -239,7 +239,7 @@ class MethodSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("can have multiple parameter lists") {
+        ignore("can have multiple parameter lists") {
             configMap =>
                 scalaCode {
                     """
@@ -274,7 +274,7 @@ class MethodSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("methods can have other methods as parameters") {
+        ignore("methods can have other methods as parameters") {
             configMap =>
                 scalaCode {
                     """
@@ -341,7 +341,7 @@ class MethodSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("can override base class methods") {
+        ignore("can override base class methods") {
             configMap =>
                 scalaCode {
                     """
@@ -390,7 +390,7 @@ class MethodSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("variadic methods are supported") {
+        ignore("variadic methods are supported") {
             configMap =>
                 scalaCode {
                     """

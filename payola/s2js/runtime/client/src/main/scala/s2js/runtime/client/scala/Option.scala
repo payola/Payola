@@ -12,7 +12,7 @@ object Option
 {
     /** An implicit conversion that converts an option to an iterable value
       */
-    implicit def option2Iterable[A](xo: Option[A]): Iterable[A] = xo.toList
+    implicit def option2Iterable[A](xo: Option[A]): Iterable[A] = if (xo.isEmpty) List() else List(xo.get)
 
     /** An Option factory which creates Some(x) if the argument is not null,
       *  and None if it is null.
@@ -168,22 +168,6 @@ sealed abstract class Option[+A] extends Product with Serializable
       */
     final def nonEmpty = isDefined
 
-    /** Necessary to keep $option from being implicitly converted to
-      * [[scala.collection.Iterable]] in `for` comprehensions.
-      */
-    // TODO def withFilter(p: A => Boolean): WithFilter = new WithFilter(p)
-
-    /** We need a whole WithFilter class to honor the "doesn't create a new
-      *  collection" contract even though it seems unlikely to matter much in a
-      *  collection with max size 1.
-      */
-    /* TODO class WithFilter(p: A => Boolean) {
-      def map[B](f: A => B): Option[B] = self filter p map f
-      def flatMap[B](f: A => Option[B]): Option[B] = self filter p flatMap f
-      def foreach[U](f: A => U): Unit = self filter p foreach f
-      def withFilter(q: A => Boolean): WithFilter = new WithFilter(x => p(x) && q(x))
-    }*/
-
     /** Returns true if this option is nonempty '''and''' the predicate
       * $p returns true when applied to this $option's value.
       * Otherwise, returns false.
@@ -224,39 +208,10 @@ sealed abstract class Option[+A] extends Product with Serializable
     @inline final def orElse[B >: A](alternative: => Option[B]): Option[B] =
         if (isEmpty) alternative else this
 
-    /** Returns a singleton iterator returning the $option's value
-      * if it is nonempty, or an empty iterator if the option is empty.
-      */
-    /* TODO def iterator: Iterator[A] =
-if (isEmpty) collection.Iterator.empty else collection.Iterator.single(this.get)*/
-
     /** Returns a singleton list containing the $option's value
       * if it is nonempty, or the empty list if the $option is empty.
       */
-    /* TODO def toList: List[A] =
-if (isEmpty) List() else List(this.get)*/
-
-    /** Returns a [[scala.Left]] containing the given
-      * argument `left` if this $option is empty, or
-      * a [[scala.Right]] containing this $option's value if
-      * this is nonempty.
-      *
-      * @param left the expression to evaluate and return if this is empty
-      * @see toLeft
-      */
-    /* TODO @inline final def toRight[X](left: => X) =
-if (isEmpty) Left(left) else Right(this.get)*/
-
-    /** Returns a [[scala.Right]] containing the given
-      * argument `right` if this is empty, or
-      * a [[scala.Left]] containing this $option's value
-      * if this $option is nonempty.
-      *
-      * @param right the expression to evaluate and return if this is empty
-      * @see toRight
-      */
-    /* TODO @inline final def toLeft[X](right: => X) =
-if (isEmpty) Right(right) else Left(this.get)*/
+    def toList: List[A] = if (isEmpty) List() else List(this.get)
 }
 
 /** Class `Some[A]` represents existing values of type

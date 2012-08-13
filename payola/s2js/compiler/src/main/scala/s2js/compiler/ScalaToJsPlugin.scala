@@ -100,11 +100,11 @@ class ScalaToJsPlugin(val global: Global) extends Plugin
             }
         }
 
-        if (optionsMap.contains("outputDirectory")) {
-            outputDirectory = new File(optionsMap.getOrElse("outputDirectory", ""))
+        optionsMap.get("outputDirectory").foreach { o =>
+            outputDirectory = new File(o)
         }
-        if (optionsMap.contains("createPackageStructure")) {
-            createPackageStructure = optionsMap.getOrElse("createPackageStructure", "true") == "true"
+        optionsMap.get("createPackageStructure").foreach { c =>
+            createPackageStructure = c == "true"
         }
     }
 }

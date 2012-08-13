@@ -21,7 +21,14 @@ object Application extends PayolaController with Secured
     }
 
     def javaScriptPackage(symbol: String) = Action {
-        val javaScript = DependencyProvider.get(List("bootstrap", symbol), Nil).javaScript
+        val javaScript = try {
+            DependencyProvider.get(List("s2js.bootstrap", symbol), Nil).javaScript
+        } catch {
+            case e => {
+                e.printStackTrace()
+                ""
+            }
+        }
         Ok(javaScript).as("text/javascript")
     }
 

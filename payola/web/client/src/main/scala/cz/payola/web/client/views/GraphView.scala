@@ -11,10 +11,10 @@ class VertexEventArgs[+A](target: A, val vertex: IdentifiedVertex) extends Event
  */
 abstract class GraphView
 {
-    /**The graph that is currently being visualised. */
+    /**The graph that is currently being visualized. */
     protected var currentGraph: Option[Graph] = None
 
-    /**The ontology customization that is currently used during visualisation. */
+    /**The ontology customization that is currently used during visualization. */
     protected var currentCustomization: Option[OntologyCustomization] = None
 
     /**Triggered when a vertex is selected. */
@@ -37,7 +37,7 @@ abstract class GraphView
     }
 
     /**
-     * Updates the current graph of the view and re-runs the visualisation.
+     * Updates the current graph of the view and re-runs the visualization.
      * @param graph The graph to add to the current graph.
      */
     def updateGraph(graph: Option[Graph]) {
@@ -45,7 +45,7 @@ abstract class GraphView
     }
 
     /**
-     * Updates the ontology customization that should be used during graph visualisation and re-runs the visualisation.
+     * Updates the ontology customization that should be used during graph visualization and re-runs the visualization.
      * @param customization The ontology customization that should be used.
      */
     def updateOntologyCustomization(customization: Option[OntologyCustomization]) {
@@ -53,7 +53,7 @@ abstract class GraphView
     }
 
     /**
-     * Removes the current graph from the view memory and resets the visualisation.
+     * Removes the current graph from the view memory and resets the visualization.
      */
     def clear() {
         updateGraph(None)

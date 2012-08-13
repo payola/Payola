@@ -1,20 +1,20 @@
 package cz.payola.web.client.views.graph.visual
 
-import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.web.client.views.graph.PluginView
 import cz.payola.web.client.views.elements._
 import cz.payola.common.rdf._
 import s2js.compiler.javascript
+import s2js.adapters.browser._
 
-class ColumnChartPluginView(settings: VisualSetup) extends PluginView("Column Chart")
+class ColumnChartPluginView extends PluginView("Column Chart")
 {
-    private val chartWrapper = new Div(Nil, "column-chart-wrapper")
+    private val chartWrapper = new Div(Nil)
+    chartWrapper.setAttribute("id", "chart-wrapper")
+
+    private val pluginWrapper = new Div(List(chartWrapper), "column-chart-wrapper")
 
     // Used in drawChart()'s @javascript annotation. Beware before renaming
     private val chartWrapperElement = chartWrapper.htmlElement
-
-    // Used from @javascript annotations. Do *NOT* remove.
-    private var googleDataTable = null
 
     /**Adds a bars to the chart. Is a list of list with two values - title and value.
      *
@@ -22,29 +22,28 @@ class ColumnChartPluginView(settings: VisualSetup) extends PluginView("Column Ch
      */
     @javascript(
         """
-          var array = [['Title', legendTitle]];
-          arr.foreach(function(x){
-            array.push(x);
-          });
-          var data = google.visualization.arrayToDataTable(array);
+           var rawData = [];
+           var titles = [];
 
-          var tlc = self.chartWrapper.topLeftCorner();
-          var multiplicator = 80;
-          if (array.length < 16){
-              multiplicator = 160;
-          }
-          var w = array.length * multiplicator + 40;
+           var counter = 0;
+           arr.foreach(function(x){
+                var title = x[0];
+                var value = x[1];
+                rawData.push([ counter, value ]);
+                titles.push([ counter, title ]);
+                ++counter;
+           });
 
-          var options = {
-            left: 50,
-            height: window.innerHeight - tlc.y - 25,
-            width: w,
-            fontSize: 110,
-            legend: {position: 'top', textStyle: {color: 'blue', fontSize: 16}}
-          };
-
-          var chart = new google.visualization.ColumnChart(self.chartWrapperElement);
-          chart.draw(data, options);
+           var data = [{
+                label: legendTitle,
+                data: rawData,
+                bars: {
+                    show: true,
+                    barWidth: 0.5,
+                    align: "center"
+                }
+           }];
+          $.plot($("#chart-wrapper"), data, { label: legendTitle, xaxis: { ticks: titles }, grid: { hoverable: true, clickable: true } });
         """)
     private def createDataTable(arr: List[List[Any]], legendTitle: String) {
     }
@@ -64,9 +63,9 @@ class ColumnChartPluginView(settings: VisualSetup) extends PluginView("Column Ch
         val value2 = new LiteralVertex(666)
         val value3 = new LiteralVertex(999)
 
-        val e1 = new Edge(initialVertex, bar1, Edge.rdfTypeEdge)
-        val e2 = new Edge(initialVertex, bar2, Edge.rdfTypeEdge)
-        val e3 = new Edge(initialVertex, bar3, Edge.rdfTypeEdge)
+        val e1 = new Edge(bar1, initialVertex, Edge.rdfTypeEdge)
+        val e2 = new Edge(bar2, initialVertex, Edge.rdfTypeEdge)
+        val e3 = new Edge(bar3, initialVertex, Edge.rdfTypeEdge)
 
         val e4 = new Edge(bar1, name1, "name")
         val e5 = new Edge(bar1, value1, "value")
@@ -83,14 +82,20 @@ class ColumnChartPluginView(settings: VisualSetup) extends PluginView("Column Ch
         )
     }
 
-    def createSubViews = List(chartWrapper)
+    def createSubViews = {
+        // Update width and height of the pluginWrapper
+        val width = window.innerWidth - 220
+        val styleString = "width: " + width + "px;"
+        pluginWrapper.setAttribute("style", styleString)
+        List(pluginWrapper)
+    }
 
     def findInitialVertexForColumnChart(g: Graph): Option[IdentifiedVertex] = {
         val identifiedVertices = g.vertices.filter(_.isInstanceOf[IdentifiedVertex]).asInstanceOf[Seq[IdentifiedVertex]]
         identifiedVertices.find { v =>
-            val typeEdges = g.getOutgoingEdges(v.uri).filter(_.uri == Edge.rdfTypeEdge)
+            val typeEdges = g.getIncomingEdges(v.uri).filter(_.uri == Edge.rdfTypeEdge)
             typeEdges.size > 0 && typeEdges.forall { e =>
-                e.destination match {
+                e.origin match {
                     case identified: IdentifiedVertex => validateLiteralVerticesOnEdges(
                         g.getOutgoingEdges(identified.uri))
                     case _ => false
@@ -99,20 +104,20 @@ class ColumnChartPluginView(settings: VisualSetup) extends PluginView("Column Ch
         }
     }
 
-    private def setGraphContentWithInitialVertex(g: Graph, v: IdentifiedVertex) {
+    private def setGraphContentWithInitialVertex(g: Graph, initialVertex: IdentifiedVertex) {
         // Get those vertices representing bars in the chart
-        val bars = g.getOutgoingEdges(v.uri).filter(_.uri == Edge.rdfTypeEdge)
-            .map(_.destination.asInstanceOf[IdentifiedVertex])
+        val bars = g.getIncomingEdges(initialVertex.uri).filter(_.uri == Edge.rdfTypeEdge)
+            .map(_.origin)
         var legendTitle = ""
 
         // Our assumption here is that the graph-as-chart has been validated
         // before being passed here, so no additional checks will be performed
         val values = bars.map { v =>
-        // Each vertex should have exactly two edges, one with the title and one
-        // with the value
-        // Both edges point to literal vertices (due to prior assumed validations)
+           // Each vertex should have exactly two edges, one with the title and one
+           // with the value
+           // Both edges point to literal vertices (due to prior assumed validations)
             val outgoingEdges = g.getOutgoingEdges(v.uri)
-            val literals = outgoingEdges.map(_.destination.asInstanceOf[LiteralVertex])
+            val literals = outgoingEdges.filter(_.destination.isInstanceOf[LiteralVertex]).map(_.destination.asInstanceOf[LiteralVertex])
 
             val title = literals.find(litVertex => variableIsString(litVertex.value)).get.value
             val valueVertex = literals.find(litVertex => variableIsNumber(litVertex.value)).get
@@ -121,6 +126,8 @@ class ColumnChartPluginView(settings: VisualSetup) extends PluginView("Column Ch
             List(title, value).toList
         }.toList
 
+        setupDivSizeForColumns(values)
+        setupTooltip()
         createDataTable(values, legendTitle)
     }
 
@@ -131,6 +138,53 @@ class ColumnChartPluginView(settings: VisualSetup) extends PluginView("Column Ch
                 Div(List(new Text(details)), "column-chart-textual-content column-chart-textual-content-small")
         messageDiv.render(chartWrapperElement)
         descriptionDiv.render(chartWrapperElement)
+    }
+
+    @javascript(
+        """
+          var previousPoint = null;
+              $("#chart-wrapper").bind("plothover", function (event, pos, item) {
+                  if (item) {
+                      if (previousPoint != item.dataIndex) {
+                          previousPoint = item.dataIndex;
+
+                          $("#tooltip").remove();
+                          var x = item.pageX,
+                              y = item.pageY;
+                          $('<div id="tooltip">' + "Value: " + item.datapoint[1] + '</div>').css( {
+                                      position: 'absolute',
+                                      display: 'none',
+                                      top: y + 5,
+                                      left: x + 5,
+                                      border: '1px solid #fdd',
+                                      padding: '2px',
+                                      'padding-left': '5px',
+                                      'padding-right': '5px',
+                                      'background-color': '#fee',
+                                      opacity: 0.80
+                                  }).appendTo("body").fadeIn(200);
+                      }
+                  }
+                  else {
+                      $("#tooltip").remove();
+                      previousPoint = null;
+                  }
+              });
+        """)
+    private def setupTooltip(){
+
+    }
+
+    private def setupDivSizeForColumns(values: List[_]){
+        val multiplier = 80
+        var width = values.length * multiplier
+        if (width < 500) {
+            width = 500
+        }
+        val height = 400
+
+        val styleString = "width: " + width + "px; height: " + height + "px;"
+        chartWrapper.setAttribute("style", styleString)
     }
 
     override def updateGraph(graph: Option[Graph]) {
@@ -147,7 +201,7 @@ class ColumnChartPluginView(settings: VisualSetup) extends PluginView("Column Ch
                     setGraphContentWithInitialVertex(graph.get, initialVertex.get)
                 } else {
                     setTextualContent("This graph can't be displayed as a column chart...",
-                        "Choose a different visualisation plugin.")
+                        "Choose a different visualization plugin.")
                 }
             }
         }
@@ -155,10 +209,10 @@ class ColumnChartPluginView(settings: VisualSetup) extends PluginView("Column Ch
     }
 
     private def validateLiteralVerticesOnEdges(edges: Seq[Edge]): Boolean = {
-        if (edges.size == 2 && edges.forall(_.destination.isInstanceOf[LiteralVertex])) {
+        if (edges.size == 3 && edges.forall(e => e.destination.isInstanceOf[LiteralVertex] || e.uri == Edge.rdfTypeEdge)) {
             // We need exactly two vertices, one with the bar title, one with the bar height (value)
-            edges.find(e => variableIsString(e.destination.asInstanceOf[LiteralVertex].value)).isDefined &&
-                edges.find(e => variableIsNumber(e.destination.asInstanceOf[LiteralVertex].value)).isDefined
+            edges.find(e => e.destination.isInstanceOf[LiteralVertex] && variableIsString(e.destination.asInstanceOf[LiteralVertex].value)).isDefined &&
+                edges.find(e => e.destination.isInstanceOf[LiteralVertex] && variableIsNumber(e.destination.asInstanceOf[LiteralVertex].value)).isDefined
         } else {
             false
         }

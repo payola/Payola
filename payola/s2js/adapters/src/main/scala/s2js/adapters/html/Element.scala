@@ -96,4 +96,6 @@ trait Element extends dom.Element with EventTarget
     var onunload: Event[this.type] => Unit
 
     var onmousewheel: WheelEvent[this.type] => Boolean
+
+    def getBoundingClientRect: TextRectangle
 }

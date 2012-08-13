@@ -13,6 +13,6 @@ trait SeqCompanion[A >: Null <: Seq]
     """)
     def fromJsArray(jsArray: Any): A = null
 
-    // TODO just a hack to make the map function work.
+    // Just a hack to make the map function work.
     def canBuildFrom: Boolean = true
 }

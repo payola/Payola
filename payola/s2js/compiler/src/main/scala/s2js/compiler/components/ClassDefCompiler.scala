@@ -28,7 +28,6 @@ object ClassDefCompiler
 /**A compiler of a ClassDef. */
 abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val classDef: Global#ClassDef)
 {
-
     import packageDefCompiler.global._
 
     /**Full name of the JavaScript object that corresponds to the ClassDef. */
@@ -139,20 +138,6 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     protected def compileConstructor(parentConstructorCall: Option[Global#Apply])
 
     /**
-     * Mixes the inherited traits into the specified target object.
-     * @param targetObject The object to mix the inherited traits into.
-     */
-    protected def mixInInheritedTraits(targetObject: String) {
-        // Traits should be mixed-in in reverse order as mentioned in the specification of stackable modifications.
-        inheritedTraits.reverse.foreach { traitAst =>
-            buffer += "s2js.runtime.client.mixIn(%s, new %s());\n".format(
-                targetObject,
-                packageDefCompiler.getSymbolJsName(traitAst.symbol)
-            )
-        }
-    }
-
-    /**
      * Compiles members of a ClassDef: ValDefs (field vals and vars) and DefDefs (methods).
      */
     protected def compileMembers() {
@@ -164,7 +149,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
      * Creates an instance of the Class corresponding to the ClassDef.
      */
     private def instantiateClass() {
-        buffer += "%s.__class__ = new s2js.runtime.client.Class('%s', [%s]);\n".format(
+        buffer += "%s.__class__ = new s2js.runtime.client.core.Class('%s', [%s]);\n".format(
             memberContainerName,
             fullJsName,
             predecessors.map(c => packageDefCompiler.getSymbolJsName(c.symbol)).mkString(", ")
@@ -285,8 +270,8 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
      */
     protected def compileParameterDeclaration(parameters: Option[List[Global#ValDef]]) {
         if (parameters.isDefined) {
-            val nonvariadicParameters = parameters.get.filter(p => !typeIsVariadic(p.tpt))
-            buffer += nonvariadicParameters.map(p => packageDefCompiler.getSymbolLocalJsName(p.symbol)).mkString(", ")
+            val nonVariadicParameters = parameters.get.filter(p => !typeIsVariadic(p.tpt))
+            buffer += nonVariadicParameters.map(p => packageDefCompiler.getSymbolLocalJsName(p.symbol)).mkString(", ")
         }
     }
 
@@ -303,9 +288,9 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
      * @param parameters Optional parameter list.
      */
     protected def compileParameterInitialization(parameters: Option[List[Global#ValDef]]) {
-        if (parameters.isDefined) {
+        parameters.foreach { p =>
             // Parameters with default values.
-            parameters.get.filter(_.symbol.hasDefault).foreach { parameter =>
+            p.filter(_.symbol.hasDefault).foreach { parameter =>
                 buffer += "if (typeof(%1$s) === 'undefined') { %1$s = ".format(
                     packageDefCompiler.getSymbolLocalJsName(parameter.symbol)
                 )
@@ -319,17 +304,19 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
             }
 
             // Variadic parameter.
-            parameters.get.filter(p => typeIsVariadic(p.tpt)).foreach { parameter =>
-                packageDefCompiler.dependencyManager.addRequiredSymbol("scala.collection.immutable.List")
-                buffer += "var %s = scala.collection.immutable.List.fromJsArray(".format(
+            p.filter(t => typeIsVariadic(t.tpt)).foreach { parameter =>
+                packageDefCompiler.dependencies.addRequiredSymbolName(
+                    "scala.collection.immutable.List",
+                    declarationRequired = false
+                )
+                buffer += "var %s = scala.collection.immutable.List.get().fromJsArray(".format(
                     packageDefCompiler.getSymbolLocalJsName(parameter.symbol)
                 )
 
                 // In fact, the "arguments" JS variable only behaves like an array, but isn't an array. The
                 // following trick described on http://www.mennovanslooten.nl/blog/post/59 is used to turn it
                 // into an array that doesn't contain the normal named parameters.
-                buffer += "[].splice.call(arguments, %1$s, arguments.length - %1$s)"
-                    .format(parameters.get.length - 1)
+                buffer += "[].splice.call(arguments, %1$s, arguments.length - %1$s)".format(p.length - 1)
                 buffer += ");\n"
             }
         }
@@ -475,8 +462,9 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
                         buffer += toJsString(value.toString)
                     }
                     case r: Global#UniqueTypeRef => {
-                        packageDefCompiler.dependencyManager.addRequiredSymbol(r.typeSymbol)
-                        buffer += packageDefCompiler.getSymbolFullJsName(r.typeSymbol) + ".prototype.__class__"
+                        // The result of classOf[X].
+                        packageDefCompiler.dependencies.addRequiredSymbol(r.typeSymbol)
+                        buffer += "%s.prototype.__class__".format(packageDefCompiler.getSymbolFullJsName(r.typeSymbol))
                     }
                     case _ => buffer += value.toString
                 }
@@ -492,8 +480,9 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
      * @param thisAst The This reference AST.
      */
     private def compileThis(thisAst: Global#This) {
-        if (thisAst.hasSymbolWhich(_.fullName.toString.startsWith("scala"))) {
-            buffer += thisAst.symbol.fullName.toString
+        if (thisAst.hasSymbolWhich(_.isModule)) {
+            buffer += packageDefCompiler.getSymbolFullJsName(thisAst.symbol)
+            buffer += ".get()"
         } else {
             buffer += "self"
         }
@@ -504,7 +493,10 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
      * @param identifier The Ident to compile.
      */
     private def compileIdentifier(identifier: Global#Ident) {
-        if (identifier.symbol.isGetter) {
+        if (identifier.hasSymbolWhich(_.isModule)) {
+            buffer += packageDefCompiler.getSymbolFullJsName(identifier.symbol)
+            buffer += ".get()"
+        } else if (identifier.symbol.isGetter) {
             buffer += "self.%s".format(packageDefCompiler.getSymbolLocalJsName(identifier.symbol))
         } else {
             buffer += packageDefCompiler.getSymbolJsName(identifier.symbol)
@@ -526,7 +518,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
      */
     private def compileNew(instantiation: Global#New) {
         buffer += "new %s".format(packageDefCompiler.getSymbolJsName(instantiation.tpe.typeSymbol))
-        packageDefCompiler.dependencyManager.addRequiredSymbol(instantiation.tpe.typeSymbol)
+        packageDefCompiler.dependencies.addRequiredSymbol(instantiation.tpe.typeSymbol)
     }
 
     /**
@@ -542,53 +534,42 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         val name = packageDefCompiler.getSymbolLocalJsName(select.symbol)
 
         select match {
+            case _ if selectIsOnRemote(select) && select.hasSymbolWhich(s => s.isMethod) => {
+                compileRpcCall(select, select.tpe, Nil)
+            }
             case Select(qualifier, _) if selectIsIgnored(select) => {
                 compileAst(qualifier)
-            }
-            case select@Select(subSelect@Select(_, _), _) if select.name.toString == "package" => {
-                // Delegate the compilation to the subSelect and don't do anything with the subSelectToken.
-                compileSelect(subSelect, isSubSelect)
-            }
-            case select@Select(qualifier, _) if select.name.toString == "package" => {
-                buffer += packageDefCompiler.getSymbolFullJsName(select.tpe.typeSymbol)
                 buffer += subSelectToken
             }
             case select@Select(qualifier, _) if symbolIsOperator(select.symbol) => {
                 compileOperator(qualifier, None, name)
             }
-            case _ if selectIsPackageSelectChain(select) &&
-                packageDefCompiler.symbolPackageReplacement(select.symbol).isDefined => {
-                val name = packageDefCompiler.getSymbolJsName(select.symbol)
-                buffer += name + (if (name.isEmpty) "" else subSelectToken)
-            }
-            case _ if selectIsOnRemote(select) && select.hasSymbolWhich(s => s.isMethod) => {
-                compileRpcCall(select, select.tpe, Nil)
+            case _ if select.hasSymbolWhich(_.isModule) => {
+                val jsName = packageDefCompiler.getSymbolFullJsName(select.symbol)
+                if (jsName != "") {
+                    buffer += jsName
+                    if (!packageDefCompiler.adapterPackagesNames.exists(select.symbol.fullName.startsWith(_))) {
+                        buffer += ".get()"
+                    }
+                    buffer += subSelectToken
+                }
+                packageDefCompiler.dependencies.addRequiredSymbol(select.symbol)
             }
             case Select(qualifier, _) => {
-                qualifier match {
-                    case subSelect@Select(_, _) => compileSelect(subSelect, true)
-                    case _ => {
-                        compileAst(qualifier)
-                        buffer += "."
-                    }
+                val bufferLength = buffer.length
+                compileAst(qualifier)
+                if (buffer.takeRight(buffer.length - bufferLength).mkString != "") {
+                    buffer += "."
                 }
-                buffer += (if (select.hasSymbolWhich(s => s.isSetter)) name.stripSuffix("_$eq") else name)
 
-                // If the select is actually a method call, parentheses has to be added after the name.
+                buffer += (if (select.hasSymbolWhich(s => s.isSetter)) name.stripSuffix("_$eq") else name)
                 if (!isInsideApply && select.hasSymbolWhich(s => s.isMethod && !s.isGetter)) {
+                    // If the select is actually a method call, parentheses has to be added after the name.
                     buffer += "()"
                 }
 
                 buffer += subSelectToken
             }
-        }
-
-        // TODO find better way how to determine whether the qualifier is an object
-        List(select, select.qualifier).foreach {
-            ast =>
-                if (ast.hasSymbolWhich(_.toString.startsWith("object "))) {
-                    packageDefCompiler.dependencyManager.addRequiredSymbol(ast.symbol)
-                }
         }
     }
 
@@ -686,13 +667,12 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         // Add the required dependencies.
         requiredTypes.foreach { tpe =>
             if (!typeIsPrimitive(tpe)) {
-                packageDefCompiler.dependencyManager.addRequiredSymbol(packageDefCompiler.getSymbolFullJsName(
-                    tpe.typeSymbol))
+                packageDefCompiler.dependencies.addRequiredSymbol(tpe.typeSymbol)
             }
         }
 
         // Compile the call itself.
-        buffer += "s2js.runtime.client.rpc.Wrapper.call%s('%s', ".format(
+        buffer += "s2js.runtime.client.rpc.Wrapper.get().call%s('%s', ".format(
             if (isAsync) "Async" else "Sync",
             select.toString
         )
@@ -768,7 +748,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
      * @param compileQualifier An action that compiles the target object qualifier.
      */
     private def compileInstanceOf(typeSymbol: Global#Symbol, isTypeCheck: Boolean)(compileQualifier: => Unit) {
-        buffer += "s2js.runtime.client.%sInstanceOf(".format(if (isTypeCheck) "is" else "as")
+        buffer += "s2js.runtime.client.core.get().%sInstanceOf(".format(if (isTypeCheck) "is" else "as")
         compileQualifier
         buffer += ", '%s')".format(packageDefCompiler.getSymbolJsName(typeSymbol))
     }
@@ -1016,12 +996,11 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         }
         buffer += " && "
 
-        apply.args.zipWithIndex.foreach {
-            arg => // _1 is the argument, _2 is the index
-                buffer += "("
-                compilePattern(arg._1, "%s.productElement(%s)".format(selectorName, arg._2))
-                buffer += ")"
-                buffer += " && "
+        apply.args.zipWithIndex.foreach { arg => // _1 is the argument, _2 is the index
+            buffer += "("
+            compilePattern(arg._1, "%s.productElement(%s)".format(selectorName, arg._2))
+            buffer += ")"
+            buffer += " && "
         }
         buffer.remove(buffer.length - 1)
     }
@@ -1032,12 +1011,11 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
      * @param selectorName Name of the selector variable.
      */
     private def compileAlternativePattern(alternative: Global#Alternative, selectorName: String) {
-        alternative.trees.foreach {
-            subPatternAst =>
-                buffer += "("
-                compilePattern(subPatternAst, selectorName)
-                buffer += ")"
-                buffer += " || "
+        alternative.trees.foreach { subPatternAst =>
+            buffer += "("
+            compilePattern(subPatternAst, selectorName)
+            buffer += ")"
+            buffer += " || "
         }
         buffer.remove(buffer.length - 1)
     }
@@ -1056,9 +1034,8 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
                 )
             }
             case apply: Global#Apply => {
-                apply.args.zipWithIndex.foreach {
-                    arg => // _1 is the argument, _2 is the index
-                        compileBindings(arg._1, "%s.productElement(%s)".format(selectorName, arg._2))
+                apply.args.zipWithIndex.foreach { arg => // _1 is the argument, _2 is the index
+                    compileBindings(arg._1, "%s.productElement(%s)".format(selectorName, arg._2))
                 }
             }
             case _ =>
@@ -1152,19 +1129,6 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     }
 
     /**
-     * Returns whether the select is a chain of package selections (for example "pkgA.pkgB.pkgC").
-     * @param select The select to check.
-     * @return True if the select is a chain of package selections, false otherwise.
-     */
-    private def selectIsPackageSelectChain(select: Global#Select): Boolean = {
-        select.symbol.isPackage && (select.qualifier match {
-            case subSelect: Global#Select => selectIsPackageSelectChain(subSelect)
-            case identifier: Global#Ident => identifier.symbol.isPackage
-            case _ => false
-        })
-    }
-
-    /**
      * Returns whether the select is invoked on a remote object.
      * @param select The select to check.
      * @return True if the select is invoked on a remote object.
@@ -1179,8 +1143,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
      * @return The JavaScript string.
      */
     private def toJsString(value: String): String = {
-        val r = "'" + stringEscapeMap.foldLeft(value)((z, escape) => z.replace(escape._1, escape._2)) + "'"
-        r
+        "'" + stringEscapeMap.foldLeft(value)((z, escape) => z.replace(escape._1, escape._2)) + "'"
     }
 
     /**
@@ -1203,11 +1166,12 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
 
         // Check for the dependency annotation.
         val dependencyAnnotations = packageDefCompiler.getSymbolAnnotations(symbol, "s2js.compiler.dependency")
-        dependencyAnnotations.foreach {
-            annotationInfo =>
-                annotationInfo.args.foreach {
-                    case Literal(Constant(d: String)) => packageDefCompiler.dependencyManager.addRequiredSymbol(d)
+        dependencyAnnotations.foreach { annotationInfo =>
+            annotationInfo.args.foreach {
+                case Literal(Constant(d: String)) => {
+                    packageDefCompiler.dependencies.addRequiredSymbolName(d)
                 }
+            }
         }
     }
 }

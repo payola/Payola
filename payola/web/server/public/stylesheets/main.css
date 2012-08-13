@@ -1,21 +1,6 @@
-canvas {
-    border: 0px;
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-
-canvas:first-child {
-    position: relative;
-}
-
 pre {
     white-space: pre !important;
     word-wrap: normal !important;
-}
-
-#canvas-holder {
-    position: relative;
 }
 
 .clear {
@@ -63,11 +48,24 @@ label {
     max-width: 200px;
 }
 
-.listing-name{
+.listing-name {
     width: 600px;
 }
 
-#plugin-space .alert {
+.plugin-space {
+    position: absolute;
+    left: 0;
+}
+
+.plugin-space > div {
+    margin: 0 20px;
+}
+
+.plugin-space canvas {
+    border: 0px;
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 
 #plugin_create_button_container {
@@ -149,10 +147,6 @@ input[type="checkbox"].active:after {
 }
 
 .alert {
-}
-
-.position-relative {
-    position: relative;
 }
 
 .modal-inner-view {
@@ -256,7 +250,7 @@ input[type="checkbox"].active:after {
     border: 4px solid #3A87AD;
 }
 
-.successors{
+.successors {
     background-color: white;
     margin-bottom: 18px;
     z-index: 1;
@@ -276,6 +270,10 @@ input[type="checkbox"].active:after {
     padding-left: 40px;
     padding-right: 40px;
     min-height: 250px;
+    min-width: 500px;
+
+    height: 100%;
+    width: 100%;
 }
 
 .vitable {
@@ -284,21 +282,66 @@ input[type="checkbox"].active:after {
     max-height: 330px;
 }
 
-.vitable .popover-content{
+.vitable .popover-content {
     width: 472px;
     height: 300px;
     overflow: auto;
 }
 
-.vitable .popover-inner{
+.vitable .popover-inner {
     width: 500px;
     max-height: 375px;
 }
 
-.vitable .popover-title a{
+.vitable .popover-title a {
     font-size: 11px;
 }
 
-.highlight .alert{
+.highlight .alert {
     background-color: navy;
+}
+
+.glyph-wrapper {
+    position: relative;
+}
+
+.glyph {
+    position: relative;
+    font-family: "EntypoRegular";
+    font-size: 57px;
+    width: auto;
+    height: auto;
+    z-index: -1;
+}
+
+input.glyph {
+    font-size: 31px !important;
+    text-align: center;
+}
+
+.glyph-popup .glyph {
+    width: 43px;
+    display: inline-block;
+    height: 40px;
+    padding-top: 6px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.glyph-popup .glyph:hover {
+    background: rgba(0, 51, 153, 0.6);
+}
+
+.glyph-popup {
+    padding: 10px !important;
+    top: -180px !important;
+    left: -298px !important;
+}
+
+.glyph-wrapper .add-on {
+    cursor: pointer;
+}
+
+.glyph-wrapper input, .glyph-wrapper .add-on {
+    padding: 10px !important;
 }

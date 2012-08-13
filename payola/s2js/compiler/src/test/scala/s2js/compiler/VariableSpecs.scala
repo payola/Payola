@@ -3,7 +3,7 @@ package s2js.compiler
 class VariableSpecs extends CompilerFixtureSpec
 {
     describe("Variables") {
-        it("can have literal values") {
+        ignore("can have literal values") {
             configMap =>
                 scalaCode {
                     """
@@ -38,7 +38,7 @@ class VariableSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("can have instance values") {
+        ignore("can have instance values") {
             configMap =>
                 scalaCode {
                     """
@@ -74,7 +74,7 @@ class VariableSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("can have parameter values") {
+        ignore("can have parameter values") {
             configMap =>
                 scalaCode {
                     """
@@ -102,7 +102,7 @@ class VariableSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("can have function return values") {
+        ignore("can have function return values") {
             configMap =>
                 scalaCode {
                     """
@@ -135,7 +135,7 @@ class VariableSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("can have expression values") {
+        ignore("can have expression values") {
             configMap =>
                 scalaCode {
                     """
@@ -167,7 +167,7 @@ class VariableSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("can have function values") {
+        ignore("can have function values") {
             configMap =>
                 scalaCode {
                     """

@@ -6,8 +6,6 @@ import cz.payola.web.client.views._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap._
 import cz.payola.web.client.views.graph.table._
-import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.VisualSetup
-import cz.payola.web.client.views.graph.visual.settings._
 import cz.payola.web.client.views.graph.visual.ColumnChartPluginView
 import cz.payola.web.client.views.graph.visual.techniques.circle.CircleTechnique
 import cz.payola.web.client.views.graph.visual.techniques.tree.TreeTechnique
@@ -24,25 +22,22 @@ class PluginSwitchView extends GraphView with ComposedView
 
     val ontologyCustomizationEditClicked = new SimpleUnitEvent[OntologyCustomization]
 
-    // TODO
-    private val visualSetup = new VisualSetup(new VertexSettingsModel, new EdgeSettingsModel, new TextSettingsModel)
-
     private val plugins = List[PluginView](
         new TripleTablePluginView,
         new SelectResultPluginView,
-        new CircleTechnique(visualSetup),
-        new TreeTechnique(visualSetup),
-        new GravityTechnique(visualSetup),
-        new ColumnChartPluginView(visualSetup)
+        new CircleTechnique,
+        new TreeTechnique,
+        new GravityTechnique,
+        new ColumnChartPluginView
     )
 
     private var currentPlugin = plugins.head
 
-    private val pluginSpace = new Div(Nil, "row position-relative")
+    private val pluginSpace = new Div(Nil, "plugin-space")
 
     val pluginChangeButton: DropDownButton = new DropDownButton(List(
         new Icon(Icon.eye_open),
-        new Text("Change visualisation plugin")),
+        new Text("Change visualization plugin")),
         plugins.map { plugin =>
             val pluginAnchor = new Anchor(List(new Text(plugin.name)))
             val listItem = new ListItem(List(pluginAnchor))

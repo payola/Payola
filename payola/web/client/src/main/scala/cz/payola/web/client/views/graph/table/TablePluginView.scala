@@ -13,10 +13,6 @@ abstract class TablePluginView(name: String) extends PluginView(name)
 {
     private val tableWrapper = new Div()
 
-    private val tableWrapperElement = tableWrapper.htmlElement
-
-    tableWrapper.setAttribute("style", "padding: 0 0 0 30px;")
-
     def createSubViews = List(tableWrapper)
 
     override def updateGraph(graph: Option[Graph]) {
@@ -26,7 +22,7 @@ abstract class TablePluginView(name: String) extends PluginView(name)
 
             // Insert the new table.
             val table = document.createElement[html.Element]("table")
-            tableWrapperElement.appendChild(table)
+            tableWrapper.htmlElement.appendChild(table)
 
             table.className = "table table-striped table-bordered table-condensed"
 

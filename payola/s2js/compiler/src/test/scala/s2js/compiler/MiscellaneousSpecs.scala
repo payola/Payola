@@ -2,7 +2,7 @@ package s2js.compiler
 
 class MiscellaneousSpecs extends CompilerFixtureSpec
 {
-    it("conversion methods between numeric types are ignored") {
+    ignore("conversion methods between numeric types are ignored") {
         configMap =>
             scalaCode {
                 """
@@ -38,7 +38,7 @@ class MiscellaneousSpecs extends CompilerFixtureSpec
             }
     }
 
-    it("Custom operators are supported and default operators are not overriden.") {
+    ignore("Custom operators are supported and default operators are not overriden.") {
         configMap =>
             scalaCode {
                 """
@@ -100,7 +100,7 @@ class MiscellaneousSpecs extends CompilerFixtureSpec
             }
     }
 
-    it("field and method names of adapter objects are preserved") {
+    ignore("field and method names of adapter objects are preserved") {
         configMap =>
             scalaCode {
                 """

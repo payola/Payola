@@ -3,7 +3,7 @@ package s2js.compiler
 class FunctionSpecs extends CompilerFixtureSpec
 {
     describe("Functions") {
-        it("can be higher-ordered") {
+        ignore("can be higher-ordered") {
             configMap =>
                 scalaCode {
                     """
@@ -64,7 +64,7 @@ class FunctionSpecs extends CompilerFixtureSpec
                 }
         }
 
-        it("anonymous functions can be assigned to variables") {
+        ignore("anonymous functions can be assigned to variables") {
             configMap =>
                 scalaCode {
                     """

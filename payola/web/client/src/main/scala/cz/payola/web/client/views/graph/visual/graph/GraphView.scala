@@ -1,18 +1,16 @@
 package cz.payola.web.client.views.graph.visual.graph
 
 import collection.mutable.ListBuffer
-import cz.payola.web.client.views.graph.visual.settings.components.visualsetup.VisualSetup
 import cz.payola.common.rdf._
 import cz.payola.web.client.views.graph.visual._
 import cz.payola.web.client.views.algebra._
 import cz.payola.common.entities.settings.OntologyCustomization
+import s2js.adapters.browser.window
 
 /**
  * Graphical representation of a Graph object.
- * @param settings to get drawing attributes from
  */
-class GraphView(var settings: VisualSetup) extends View[CanvasPack]
-{
+class GraphView extends View[CanvasPack] {
     /**
      * During update vertices with higher age than this value are removed from this graph.
      */
@@ -25,14 +23,14 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack]
      */
     var components = ListBuffer[Component]()
 
-    /**
-     * Setter of the ontology visual configuration.
-     * @param newCustomization new configuration for drawing
-     */
-    def setVisualSetup(newCustomization: Option[OntologyCustomization]) {
-        settings.setOntologyCustomization(newCustomization)
-        getAllEdges.foreach(_.settings.setOntologyCustomization(newCustomization))
-        getAllVertices.foreach(_.settings.setOntologyCustomization(newCustomization))
+    def resetConfiguration() {
+        getAllEdges.foreach(_.resetConfiguration())
+        getAllVertices.foreach(_.resetConfiguration())
+    }
+
+    def setConfiguration(newCustomization: Option[OntologyCustomization]) {
+        getAllEdges.foreach(_.setConfiguration(newCustomization))
+        getAllVertices.foreach(_.setConfiguration(newCustomization))
     }
 
     def isSelected: Boolean = {
@@ -60,13 +58,11 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack]
         val oldVertexViews = rebuildOldVertices(newVertexViews)
         val vertexViews = newVertexViews ++ oldVertexViews
 
-
         //create edgeViews from the input
         val newEdgeViews = createEdgeViews(graph, vertexViews)
         //get edgeViews from the current (this) graphView
         val oldEdgeViews = rebuildOldEdges(newEdgeViews, vertexViews)
         val edgeViews = newEdgeViews ++ oldEdgeViews
-
 
         fillVertexViewsEdges(vertexViews, edgeViews)
 
@@ -165,8 +161,7 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack]
 
             vertexModel match {
                 case i: IdentifiedVertex => {
-                    val newVertexView = new VertexView(i, vertexInitPosition,
-                        settings.vertexModel, settings.textModel, null)
+                    val newVertexView = new VertexView(i, vertexInitPosition, null)
 
                     newVertexView.rdfType = getRdfTypeForVertexView(graphModel.edges, i)
                     newVertexView.setInformation(getInformationForVertexView(graphModel, i))
@@ -359,8 +354,7 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack]
         val origin = getVertexForEdgeConstruct(edgeModel.origin, vertexViews)
         val destination = getVertexForEdgeConstruct(edgeModel.destination, vertexViews)
         if (destination.isDefined && origin.isDefined) {
-            val createdEdgeView = new EdgeView(
-                edgeModel, origin.get, destination.get, settings)
+            val createdEdgeView = new EdgeView(edgeModel, origin.get, destination.get)
             destination.get.edges += createdEdgeView
             origin.get.edges += createdEdgeView
             Some(createdEdgeView)
@@ -377,8 +371,9 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack]
      */
     private def getVertexForEdgeConstruct(vertex: Vertex, vertexViews: ListBuffer[VertexView]): Option[VertexView] = {
         val foundVertices = vertexViews.filter {
-            _.vertexModel.toString eq vertex.toString
+            _.vertexModel eq vertex
         }
+
         foundVertices.length match {
             case 0 =>
                 None
@@ -482,7 +477,7 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack]
     }
 
     /**
-     * Adds the input vector to positions of all selected vertices in this graph visualisation.
+     * Adds the input vector to positions of all selected vertices in this graph visualization.
      * @param difference to move the vertices
      */
     def moveAllSelectedVertices(difference: Vector2D) {
@@ -492,7 +487,7 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack]
     }
 
     /**
-     * Adds the input vector to positions of all vertices in this graph visualisation.
+     * Adds the input vector to positions of all vertices in this graph visualization.
      * @param difference to move the vertices
      */
     def moveAllVertices(difference: Vector2D) {
@@ -516,6 +511,7 @@ class GraphView(var settings: VisualSetup) extends View[CanvasPack]
     //###################################################################################################################
 
     def draw(canvasPack: CanvasPack, positionCorrection: Vector2D) {
+
         val vertexViews = getAllVertices
         val edgeViews = getAllEdges
 

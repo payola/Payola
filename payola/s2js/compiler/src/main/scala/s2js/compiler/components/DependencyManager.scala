@@ -3,72 +3,79 @@ package s2js.compiler.components
 import collection.mutable
 import tools.nsc.Global
 
-/** A manager of dependencies in a PackageDef object. */
+/**A manager of dependencies in a PackageDef object. */
 class DependencyManager(private val packageDefCompiler: PackageDefCompiler)
 {
-    /** Set of fully qualified names of required classes/objects. */
-    private val requireHashSet = new mutable.HashSet[String]
+    /**Set of fully qualified names of symbols that have to be declared before the declaration. */
+    private val declarationRequiredSymbols = new mutable.HashSet[String]
 
-    /** Set of fully qualified names of provided classes/objects. */
-    private val provideHashSet = new mutable.HashSet[String]
+    /**Set of fully qualified names of symbols that are required during runtime. */
+    private val runtimeRequiredSymbols = new mutable.HashSet[String]
 
-    /** Structure of the PackageDef object. */
+    /**Set of fully qualified names of provided symbols. */
+    private val providedSymbols = new mutable.HashSet[String]
+
+    /**Structure of the PackageDef object. */
     private var packageDefStructure: PackageDefStructure = null
 
     /**
-      * Compiles the dependencies into a sequence of s2js.ClassLoader.provide and s2js.ClassLoader.require statements.
-      * @param buffer Buffer where the sequence is inserted.
-      */
+     * Compiles the dependencies into a sequence of require, declarationRequire and provide symbols.
+     * @param buffer Buffer where the sequence is inserted.
+     */
     def compileDependencies(buffer: mutable.ListBuffer[String]) {
-        val nonLocalRequires = requireHashSet.toArray.filter(!provideHashSet.contains(_))
-        val provided = provideHashSet.toArray.sortBy(x => x).map(
-            "s2js.runtime.client.ClassLoader.provide('%s');\n".format(_))
-        val required = nonLocalRequires.sortBy(x => x).map(
-            "s2js.runtime.client.ClassLoader.require('%s');\n".format(_))
-        buffer.insert(0, provided.mkString)
-        buffer.insert(1, required.mkString)
+        def symbolsToClassLoaderCalls(symbols: mutable.HashSet[String], methodName: String) = {
+            symbols.toSeq.sortBy(s => s).map { s =>
+                "s2js.runtime.client.core.get().classLoader.%s('%s');\n".format(methodName, s)
+            }.mkString
+        }
+
+        buffer.insert(0, symbolsToClassLoaderCalls(providedSymbols, "provide"))
+        buffer.insert(1, symbolsToClassLoaderCalls(declarationRequiredSymbols -- providedSymbols, "declarationRequire"))
+        buffer.insert(2, symbolsToClassLoaderCalls(runtimeRequiredSymbols -- providedSymbols, "require"))
     }
 
     /**
-      * Adds the specified symbol to the provided set.
-      * @param symbol The symbol to add.
-      */
+     * Adds the specified symbol to the provided set.
+     * @param symbol The symbol to add.
+     */
     def addProvidedSymbol(symbol: Global#Symbol) {
-        provideHashSet += packageDefCompiler.getSymbolFullJsName(symbol)
+        providedSymbols += packageDefCompiler.getSymbolFullJsName(symbol)
     }
 
     /**
-      * Adds the specified symbol to the required set.
-      * @param symbol The symbol to add.
-      */
-    def addRequiredSymbol(symbol: Global#Symbol) {
+     * Adds the specified symbol to the required set.
+     * @param symbol The symbol to add.
+     * @param declarationRequired Whether the symbol should be added to the declaration required set.
+     */
+    def addRequiredSymbol(symbol: Global#Symbol, declarationRequired: Boolean = false) {
         if (!packageDefCompiler.symbolIsInternal(symbol)) {
-            addRequiredSymbol(packageDefCompiler.getSymbolFullJsName(symbol))
+            addRequiredSymbolName(packageDefCompiler.getSymbolFullJsName(symbol), declarationRequired)
         }
     }
 
     /**
-      * Adds the specified fully qualified class/object name to the required set.
-      * @param symbolFullName Fully qualified name of the symbol to add.
-      */
-    def addRequiredSymbol(symbolFullName: String) {
-        requireHashSet += symbolFullName
+     * Adds the specified fully qualified class/object name to the required set.
+     * @param symbolFullName Fully qualified name of the symbol to add.
+     * @param declarationRequired Whether the symbol should be added to the declaration required set.
+     */
+    def addRequiredSymbolName(symbolFullName: String, declarationRequired: Boolean = false) {
+        (if (declarationRequired) declarationRequiredSymbols else runtimeRequiredSymbols) += symbolFullName
     }
 
     /**
-      * Returns structure of the PackageDef object.
-      * @return Structure of the PackageDef object.
-      */
+     * Returns structure of the PackageDef object.
+     * @return Structure of the PackageDef object.
+     */
     def getPackageDefStructure: PackageDefStructure = {
-        packageDefStructure = new PackageDefStructure();
+        packageDefStructure = new PackageDefStructure()
         retrieveStructure(packageDefCompiler.packageDef)
         packageDefStructure
     }
 
     /**
-      * Retrieves structure of the specified AST.
-      * @param ast The AST whose structure should be retrieved.
-      */
+     * Retrieves structure of the specified AST.
+     * @param ast The AST whose structure should be retrieved.
+     */
     private def retrieveStructure(ast: Global#Tree) {
         ast match {
             case packageDef: Global#PackageDef => packageDef.children.foreach(retrieveStructure)
@@ -78,18 +85,17 @@ class DependencyManager(private val packageDefCompiler: PackageDefCompiler)
     }
 
     /**
-      * Retrieves structure of the specified ClassDef.
-      * @param classDef The ClassDef whose structure should be retrieved.
-      */
+     * Retrieves structure of the specified ClassDef.
+     * @param classDef The ClassDef whose structure should be retrieved.
+     */
     private def retrieveClassDefStructure(classDef: Global#ClassDef) {
         addProvidedSymbol(classDef.symbol)
 
         // Remote objects aren't compiled.
         if (packageDefCompiler.getSymbolAnnotations(classDef.symbol, "remote").nonEmpty) {
             packageDefStructure.remoteObjects += classDef
-
-            // Non-remote object should be added into the dependency graph.
         } else {
+            // Non-remote object should be added into the dependency graph.
             val name = getStructureKey(classDef.symbol)
             val dependencies = new mutable.HashSet[String]
 
@@ -103,12 +109,12 @@ class DependencyManager(private val packageDefCompiler: PackageDefCompiler)
 
             // Resolve the dependencies. The class depends on parent classes that are currently compiled and requires
             // the other parent classes.
-            classDef.impl.parents.foreach {parentClass =>
+            classDef.impl.parents.foreach { parentClass =>
                 if (!packageDefCompiler.symbolIsInternal(parentClass.symbol)) {
                     if (packageDefCompiler.symbolIsCompiled(parentClass.symbol)) {
                         dependencies += getStructureKey(parentClass.symbol)
                     } else {
-                        addRequiredSymbol(parentClass.symbol)
+                        addRequiredSymbol(parentClass.symbol, declarationRequired = true)
                     }
                 }
             }
@@ -119,10 +125,10 @@ class DependencyManager(private val packageDefCompiler: PackageDefCompiler)
     }
 
     /**
-      * Returns key to be used in the PackageDefStructure map and graph as an unique ClassDef identifier.
-      * @param classDefSymbol Symbol whose key should be retrieved.
-      * @return The key.
-      */
+     * Returns key to be used in the PackageDefStructure map and graph as an unique ClassDef identifier.
+     * @param classDefSymbol Symbol whose key should be retrieved.
+     * @return The key.
+     */
     private def getStructureKey(classDefSymbol: Global#Symbol): String = {
         (if (classDefSymbol.isModuleClass) "object" else "class") + " " + classDefSymbol.fullName
     }
