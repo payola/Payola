@@ -9,11 +9,11 @@ import cz.payola.web.client.views.elements.form.fields.NumericInput
 
 class AnalysisControls(timeoutSeconds: Int) extends ComposedView
 {
-    private val icon = new Italic(List(), "icon-play icon-white")
+    private val runBtnIcon = new Icon(Icon.play, true)
 
     val runBtnCaption = new Text("Run Analysis")
 
-    val runBtn = new Anchor(List(icon, runBtnCaption), "#", "btn btn-success span2")
+    val runBtn = new Button(runBtnCaption, "btn btn-success span2", runBtnIcon)
 
     val progressValueBar = new Div(List(), "bar")
 
@@ -22,6 +22,7 @@ class AnalysisControls(timeoutSeconds: Int) extends ComposedView
     val progressDiv = new Div(List(progressValueBar), "progress progress-striped progress-success active span5")
 
     val stopButton = new Button(new Text("Stop"), "btn-danger disabled span2", new Icon(Icon.stop, true))
+    stopButton.setIsEnabled(false)
 
     val timeoutControl = new InputControl(
         "Set evaluation timeout [sec.]:",

@@ -7,7 +7,7 @@ import cz.payola.web.client.views.elements.lists._
 class DropDownButton(buttonViews: Seq[View], private var _items: Seq[ListItem], buttonCssClass: String = "")
     extends Div(Nil, "btn-group")
 {
-    val toggleAnchor = new Anchor(buttonViews ++ List(new Span(Nil, "caret")), "#",
+    val toggleAnchor = new Button(new Span(buttonViews ++ List(new Span(Nil, "caret"))),
         "btn dropdown-toggle " + buttonCssClass).setAttribute("data-toggle", "dropdown")
 
     val menu = new UnorderedList(items, "dropdown-menu")

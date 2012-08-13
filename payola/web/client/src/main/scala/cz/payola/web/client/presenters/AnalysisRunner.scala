@@ -46,7 +46,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
                 analysisDone = true
                 analysisRunning = false
                 intervalHandler.foreach(window.clearInterval(_))
-                view.overviewView.controls.stopButton.addCssClass("disabled")
+                view.overviewView.controls.stopButton.setIsEnabled(false)
 
                 val graphPresenter = new GraphPresenter(view.resultsView.htmlElement)
                 graphPresenter.initialize()
@@ -108,8 +108,8 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
     }
 
     private def uiAdaptAnalysisRunning(view: AnalysisRunnerView, initUI: (Analysis) => Unit, analysis: Analysis) {
-        view.overviewView.controls.runBtn.addCssClass("disabled")
-        view.overviewView.controls.stopButton.removeCssClass("disabled")
+        view.overviewView.controls.runBtn.setIsEnabled(false)
+        view.overviewView.controls.stopButton.setIsEnabled(true)
         view.overviewView.controls.timeoutControl.controlGroup.addCssClass("none")
         view.overviewView.controls.timeoutInfoBar.removeCssClass("none")
         view.overviewView.controls.stopButton.mouseClicked += { e =>
@@ -185,7 +185,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         view.overviewView.controls.progressDiv.removeCssClass("active")
         view.overviewView.controls.progressValueBar.setAttribute("style", "width:100%; height: 40px")
         analysisDone = true
-        view.overviewView.controls.stopButton.addCssClass("disabled")
+        view.overviewView.controls.stopButton.setIsEnabled(false)
         intervalHandler.foreach(window.clearInterval(_))
 
         error.instanceErrors.foreach { err =>
@@ -200,7 +200,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         view.overviewView.controls.progressDiv.removeCssClass("progress-success")
         view.overviewView.controls.progressDiv.removeCssClass("active")
         analysisDone = true
-        view.overviewView.controls.stopButton.addCssClass("disabled")
+        view.overviewView.controls.stopButton.setIsEnabled(false)
         intervalHandler.foreach(window.clearInterval(_))
 
         AlertModal.display("Time out", "The analysis evaluation has timed out.")
@@ -209,7 +209,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
     }
 
     def initReRun(view: AnalysisRunnerView, analysis: Analysis) {
-        view.overviewView.controls.runBtn.removeCssClass("disabled")
+        view.overviewView.controls.runBtn.setIsEnabled(true)
         view.overviewView.controls.runBtnCaption.text = "Run Again"
         window.onunload = null
         view.overviewView.controls.runBtn.mouseClicked += { e =>
@@ -227,7 +227,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         view.overviewView.controls.progressValueBar.addCssClass("progress-danger")
         view.overviewView.controls.progressValueBar.removeCssClass("progress-success")
         analysisDone = true
-        view.overviewView.controls.stopButton.addCssClass("disabled")
+        view.overviewView.controls.stopButton.setIsEnabled(false)
         intervalHandler.foreach(window.clearInterval(_))
 
         window.onunload = null
