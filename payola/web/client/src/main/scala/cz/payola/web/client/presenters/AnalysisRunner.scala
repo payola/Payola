@@ -52,6 +52,8 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
         successEventHandler = {
             evt: EvaluationSuccessEventArgs =>
+                blockPage("Loading result...")
+
                 analysisDone = true
                 analysisRunning = false
                 intervalHandler.foreach(window.clearInterval(_))
@@ -82,6 +84,8 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
                 view.tabs.switchTab(1)
 
                 analysisEvaluationSuccess -= successEventHandler
+
+                unblockPage()
         }
         analysisEvaluationSuccess += successEventHandler
 
@@ -94,12 +98,15 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
     def runButtonClickHandler(view: AnalysisRunnerView, analysis: Analysis) = {
         if (!analysisRunning) {
+            blockPage("Starting analysis...")
+
             uiAdaptAnalysisRunning(view, initUI _, analysis)
             var timeout = view.overviewView.controls.timeoutControl.field.value
 
             analysisRunning = true
             AnalysisRunner.runAnalysisById(analysisId, timeout) {
                 id =>
+                    unblockPage()
 
                     intervalHandler = Some(window.setInterval(() => {
                         view.overviewView.controls.timeoutInfo.text = timeout.toString
