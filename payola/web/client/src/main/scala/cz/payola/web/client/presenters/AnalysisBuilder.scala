@@ -7,7 +7,6 @@ import cz.payola.web.client.presenters.components._
 import cz.payola.web.shared.AnalysisBuilderData
 import cz.payola.common.entities.Plugin
 import scala.collection.mutable.ArrayBuffer
-import s2js.runtime.client.scala.collection.mutable.HashMap
 import cz.payola.web.client.presenters.models.ParameterValue
 import cz.payola.web.client.events.EventArgs
 import cz.payola.web.client.views.bootstrap._
@@ -210,14 +209,17 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
     }
 
     protected def lockAnalysisAndLoadPlugins() = {
-        AnalysisBuilderData.lockAnalysis(analysisId)
-        AnalysisBuilderData.getPlugins() {
-            plugins => allPlugins = plugins
-        } {
-            error => fatalErrorHandler(error)
-        }
-        AnalysisBuilderData.getDataSources() {
-            sources => allSources = sources
+        AnalysisBuilderData.lockAnalysis(analysisId) { () =>
+            AnalysisBuilderData.getPlugins() {
+                plugins => allPlugins = plugins
+            } {
+                error => fatalErrorHandler(error)
+            }
+            AnalysisBuilderData.getDataSources() {
+                sources => allSources = sources
+            } {
+                error => fatalErrorHandler(error)
+            }
         } {
             error => fatalErrorHandler(error)
         }

@@ -25,10 +25,12 @@ import cz.payola.common.entities.plugins._
         successCallback(Payola.model.analysisModel.cloneDataSource(dataSource, analysisId))
     }
 
-    def lockAnalysis(id: String, user: User = null) {
+    @async def lockAnalysis(id: String, user: User = null)(successCallback: (() => Unit))(failCallback: (Throwable => Unit)) {
+        successCallback()
     }
 
-    def unlockAnalysis(id: String, user: User = null) {
+    @async def unlockAnalysis(id: String, user: User = null)(successCallback: (() => Unit))(failCallback: (Throwable => Unit)) {
+        successCallback()
     }
 
     @async def setAnalysisName(id: String, name: String, user: User = null)(successCallback: (Boolean => Unit))
@@ -63,6 +65,7 @@ import cz.payola.common.entities.plugins._
     @async def setParameterValue(analysisId: String, pluginInstanceId: String, parameterName: String, value: String,
         user: User = null)
         (successCallback: (Boolean => Unit))(failCallback: (Throwable => Unit)) {
+        println("Setting value to analysis " + analysisId + " instance " + pluginInstanceId + " parameter name: " + parameterName + " and value " + value)
         Payola.model.analysisModel.setParameterValue(user, analysisId, pluginInstanceId, parameterName, value)
         successCallback(true)
     }
