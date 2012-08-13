@@ -31,7 +31,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
 
     protected var branches = new ArrayBuffer[PluginInstanceView]
 
-    protected val nameComponent = new InputControl(
+    protected var nameComponent = new InputControl(
         "Analysis name",
         new TextInput("init-name", "", "Enter analysis name")
     )
@@ -51,7 +51,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                             analysis =>
                                 analysisId = analysis.id
                                 lockAnalysisAndLoadPlugins()
-                                val view = new AnalysisEditorView(analysis)
+                                val view = new AnalysisEditorView(analysis, Some(nameComponent.field.value), None)
                                 view.visualizer.pluginInstanceRendered += {
                                     e => instancesMap.put(e.target.pluginInstance.id, e.target)
                                 }

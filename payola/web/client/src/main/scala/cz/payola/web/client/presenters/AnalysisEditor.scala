@@ -15,11 +15,9 @@ class AnalysisEditor(parentElementId: String, analysisIdParam: String)
         AnalysisBuilderData.getAnalysis(analysisId) { analysis =>
 
             lockAnalysisAndLoadPlugins()
-            val view = new AnalysisEditorView(analysis)
+            val view = new AnalysisEditorView(analysis, None, None)
             view.visualizer.pluginInstanceRendered += { e => instancesMap.put(e.target.pluginInstance.id, e.target)}
             view.render(parentElement)
-            view.name.field.value = analysis.name
-            view.description.field.value = analysis.description
             bindParameterChangedEvent(view.visualizer)
             bindConnectButtonClickedEvent(view)
             bindDeleteButtonClickedEvent(view.visualizer)
