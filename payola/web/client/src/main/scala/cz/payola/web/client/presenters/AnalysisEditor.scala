@@ -63,8 +63,8 @@ class AnalysisEditor(parentElementId: String, analysisIdParam: String)
         pv.pluginInstanceId + "_" + pv.parameterId
     }
 
-    private def parameterChangedServerCall(pv: ParameterValue) : (() => Unit) = {
-        () => AnalysisBuilderData.setParameterValue(analysisId,pv.pluginInstanceId,pv.name, pv.value){ success =>
+    private def parameterChangedServerCall(pv: ParameterValue) {
+        AnalysisBuilderData.setParameterValue(analysisId,pv.pluginInstanceId,pv.name, pv.value){ () =>
             pv.control.isActive = false
             pv.control.setOk()
         }{ error =>

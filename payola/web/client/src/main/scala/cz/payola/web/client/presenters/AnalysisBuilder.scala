@@ -294,7 +294,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
     protected def onParameterValueChanged(args: EventArgs[ParameterValue]) {
         val parameterInfo = args.target
         parameterInfo.control.isActive = true
-        AnalysisBuilderData.setParameterValue(analysisId, parameterInfo.pluginInstanceId, parameterInfo.name, parameterInfo.value) { _ =>
+        AnalysisBuilderData.setParameterValue(analysisId, parameterInfo.pluginInstanceId, parameterInfo.name, parameterInfo.value) { () =>
             parameterInfo.control.setOk()
             parameterInfo.control.isActive = false
         } { _ =>

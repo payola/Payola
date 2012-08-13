@@ -64,10 +64,9 @@ import cz.payola.common.entities.plugins._
 
     @async def setParameterValue(analysisId: String, pluginInstanceId: String, parameterName: String, value: String,
         user: User = null)
-        (successCallback: (Boolean => Unit))(failCallback: (Throwable => Unit)) {
-        println("Setting value to analysis " + analysisId + " instance " + pluginInstanceId + " parameter name: " + parameterName + " and value " + value)
+        (successCallback: (() => Unit))(failCallback: (Throwable => Unit)) {
         Payola.model.analysisModel.setParameterValue(user, analysisId, pluginInstanceId, parameterName, value)
-        successCallback(true)
+        successCallback()
     }
 
     @async def saveBinding(analysisId: String, sourceId: String, targetId: String, inputIndex: Int, user: User = null)
