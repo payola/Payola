@@ -345,3 +345,7 @@ input.glyph {
 .glyph-wrapper input, .glyph-wrapper .add-on {
     padding: 10px !important;
 }
+
+.relative {
+    position: relative;
+}

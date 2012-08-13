@@ -37,7 +37,7 @@ class AnalysisEditorView(analysis: Analysis) extends ComposedView
 
     protected val leftCol = new Div(List(leftColContent), "span3")
 
-    protected val rightCol = new Div(List(analysisCanvas), "span9")
+    protected val rightCol = new Div(List(analysisCanvas), "span9 relative")
 
     protected val container = new Div(List(leftCol, rightCol))
 
