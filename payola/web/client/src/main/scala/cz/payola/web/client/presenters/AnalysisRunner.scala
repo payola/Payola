@@ -5,11 +5,15 @@ import cz.payola.web.client._
 import cz.payola.web.client.views.entity.analysis.AnalysisRunnerView
 import cz.payola.web.shared._
 import cz.payola.web.client.presenters.components.EvaluationSuccessEventArgs
-import cz.payola.web.client.events.UnitEvent
+import cz.payola.web.client.events._
 import cz.payola.common.entities.Analysis
 import cz.payola.web.client.presenters.graph.GraphPresenter
 import cz.payola.web.client.views.graph.DownloadButtonView
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
+import scala.Some
+import cz.payola.web.shared.EvaluationInProgress
+import cz.payola.web.shared.EvaluationError
+import cz.payola.web.shared.EvaluationSuccess
 
 class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presenter
 {
@@ -21,9 +25,14 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
     var analysisDone = false
 
+    var graphPresenter: GraphPresenter = null
+
+    var successEventHandler: (EvaluationSuccessEventArgs => Unit) = null
+
     var evaluationId = ""
 
     var intervalHandler: Option[Int] = None
+
 
     def initialize() {
         blockPage("Loading analysis data")
@@ -41,16 +50,16 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         view.render(parentElement)
         view.tabs.hideTab(1)
 
-        analysisEvaluationSuccess += {
-            evt =>
+        successEventHandler = {
+            evt: EvaluationSuccessEventArgs =>
                 analysisDone = true
                 analysisRunning = false
                 intervalHandler.foreach(window.clearInterval(_))
                 view.overviewView.controls.stopButton.setIsEnabled(false)
 
-                val graphPresenter = new GraphPresenter(view.resultsView.htmlElement)
+                // First initialization
+                graphPresenter = new GraphPresenter(view.resultsView.htmlElement)
                 graphPresenter.initialize()
-                graphPresenter.view.updateGraph(Some(evt.graph))
 
                 val downloadButtonView = new DownloadButtonView()
                 downloadButtonView.render(graphPresenter.view.toolbar.htmlElement)
@@ -67,10 +76,14 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
                         true
                 }
 
+                graphPresenter.view.updateGraph(Some(evt.graph))
+
                 view.tabs.showTab(1)
                 view.tabs.switchTab(1)
-                false
+
+                analysisEvaluationSuccess -= successEventHandler
         }
+        analysisEvaluationSuccess += successEventHandler
 
         view.overviewView.controls.runBtn.mouseClicked += {
             evt => runButtonClickHandler(view, analysis)
@@ -229,6 +242,8 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         analysisDone = true
         view.overviewView.controls.stopButton.setIsEnabled(false)
         intervalHandler.foreach(window.clearInterval(_))
+
+        initReRun(view, analysis)
 
         window.onunload = null
 
