@@ -57,6 +57,14 @@ label {
     left: 0;
 }
 
+.tabbable .plugin-space {
+    position: relative;
+}
+
+.tabbable canvas:first-of-type {
+    position: relative;
+}
+
 .plugin-space > div {
     margin: 0 20px;
 }
