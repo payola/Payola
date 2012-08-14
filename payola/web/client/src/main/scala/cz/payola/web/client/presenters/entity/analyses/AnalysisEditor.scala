@@ -1,4 +1,4 @@
-package cz.payola.web.client.presenters
+package cz.payola.web.client.presenters.entity.analyses
 
 import cz.payola.web.shared.AnalysisBuilderData
 import cz.payola.web.client.views.entity.analysis._
@@ -26,18 +26,18 @@ class AnalysisEditor(parentElementId: String, analysisIdParam: String)
             unblockPage()
 
             true
-        } { error => fatalErrorHandler(error) }
+        } { error => fatalErrorHandler(error)}
     }
 
-    private def constructBranches(analysis: Analysis){
-        val targets = analysis.pluginInstances.filterNot{ pi =>
+    private def constructBranches(analysis: Analysis) {
+        val targets = analysis.pluginInstances.filterNot { pi =>
             analysis.pluginInstanceBindings.find(_.sourcePluginInstance.id == pi.id).isDefined
-        }.map{ pi => instancesMap.get(pi.id).get }
+        }.map { pi => instancesMap.get(pi.id).get}
 
         targets.foreach(branches.append(_))
     }
 
-    private def bindParameterChangedEvent(visualizer: EditableAnalysisVisualizer){
+    private def bindParameterChangedEvent(visualizer: EditableAnalysisVisualizer) {
         visualizer.parameterValueChanged += { e =>
             val pv = e.target
             pv.control.isActive = true
@@ -45,11 +45,11 @@ class AnalysisEditor(parentElementId: String, analysisIdParam: String)
         }
     }
 
-    private def bindConnectButtonClickedEvent(view: AnalysisEditorView){
+    private def bindConnectButtonClickedEvent(view: AnalysisEditorView) {
         view.visualizer.connectButtonClicked += onConnectClicked(view)
     }
 
-    private def bindDeleteButtonClickedEvent(visualizer: EditableAnalysisVisualizer){
+    private def bindDeleteButtonClickedEvent(visualizer: EditableAnalysisVisualizer) {
         visualizer.deleteButtonClicked += onDeleteClick
     }
 
@@ -62,10 +62,10 @@ class AnalysisEditor(parentElementId: String, analysisIdParam: String)
     }
 
     private def parameterChangedServerCall(pv: ParameterValue) {
-        AnalysisBuilderData.setParameterValue(analysisId,pv.pluginInstanceId,pv.name, pv.value){ () =>
+        AnalysisBuilderData.setParameterValue(analysisId, pv.pluginInstanceId, pv.name, pv.value) { () =>
             pv.control.isActive = false
             pv.control.setOk()
-        }{ error =>
+        } { error =>
             pv.control.isActive = false
             pv.control.setError("Invalid value")
         }

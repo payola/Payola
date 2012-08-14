@@ -1,4 +1,4 @@
-package cz.payola.web.client.presenters
+package cz.payola.web.client.presenters.entity.analyses
 
 import s2js.adapters.browser._
 import cz.payola.web.client._
@@ -33,7 +33,6 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
     var intervalHandler: Option[Int] = None
 
-
     def initialize() {
         blockPage("Loading analysis data")
         DomainData.getAnalysisById(analysisId) {
@@ -45,7 +44,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         }
     }
 
-    def initUI(analysis: Analysis) : AnalysisRunnerView = {
+    def initUI(analysis: Analysis): AnalysisRunnerView = {
         val view = new AnalysisRunnerView(analysis, 30)
         view.render(parentElement)
         view.tabs.hideTab(1)
