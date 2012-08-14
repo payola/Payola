@@ -824,8 +824,11 @@ Squeryl privides only lazy fetchig data from database. The lazy fetching is used
 - plugin instance bindings are loaded only with IDs of target and source plugin instances, those plugin insances are loaded on the first access to then
 - users are loaded with no data, all their groups, privileges, analyses, plugins, datasourced are loaded only when needed
 
+The rest of entities is loaded eagerly (i.e. entity is loaded with some of its relations evaluated). Eager-loading is provided by `TableRepository` abstract class. Every repository component that extends `TableRepository` must implement `getSelectQuery` and `processSelectResults` methods. `getSelectQuery` method defines query to load entity (and all related entities) from database, `processSelectResults` method evaluates the defined query result and returns loaded entity. Entities are loaded by its repositories in following way:
 
-The rest of entities is loaded eagerly
+- **analyses** are loaded with their *owner*
+- **data sources** are loaded with *parameter values*, those *parameter values* are loaded with *parameters* (from which they are derived)
+
 
 <a name="virtuoso"></a>
 ### Package cz.payola.data.virtuoso
