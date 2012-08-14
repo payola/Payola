@@ -245,6 +245,10 @@ object PayolaBuild extends Build
     lazy val webServerProject = PlayProject(
         "server", PayolaSettings.version, Nil, path = file("web/server"), mainLang = SCALA
     ).settings(
+        libraryDependencies ++= Seq(
+            "org.apache.jena" % "jena-core" % "2.7.0-incubating",
+            "org.apache.jena" % "jena-arq" % "2.9.0-incubating"
+        ),
         compileAndPackage <<= (packageBin in Compile).dependsOn(clean).map { jarFile: File =>
             // Retrieve the dependencies.
             val dependencyExtensions = List("js", "css")

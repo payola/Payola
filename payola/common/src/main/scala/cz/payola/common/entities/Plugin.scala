@@ -32,7 +32,7 @@ trait Plugin extends Entity with OptionallyOwnedEntity with NamedEntity with Sha
      * Returns a plugin parameter with the specified name.
      * @param parameterName Name of the parameter to return.
      */
-    final def getParameter(parameterName: String): Option[Parameter[_]] = {
+    final def getParameter(parameterName: String): Option[ParameterType] = {
         parameters.find(_.name == parameterName)
     }
 }
