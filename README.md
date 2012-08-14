@@ -513,7 +513,7 @@ In terms of code lines, the ```ClassDefCompiler``` is the largest class of the p
 Compilation of a ```ClassDef``` is composed of the three following steps:
 
 1. Compile the ```ClassDef``` constructor.
-2. Compile the members (fields, methods) of the ```ClassDef```. Inner classes or objects are currently supported.
+2. Compile the members (fields, methods) of the ```ClassDef```. Inner classes or objects aren't currently supported.
 3. Bind the ```ClassDef``` JavaScript prototype with an instance of the  [```s2js.runtime.core.Class```](#Class) class, so all instances of the ```ClassDef``` have a refence it.
 
 Most of the Scala language constructs are compiled into JavaScript pretty naturally, majority of them have direct equivalents in the target language, so these naturally translated constructs won't be described here, as it would be a waste of space. We'll concentrate on how the differences between the languages are solved and on some other interesting details or extensions.
@@ -522,7 +522,7 @@ Most of the Scala language constructs are compiled into JavaScript pretty natura
 
 In Scala, everything is an expression with return value, even if the return value is the ```Unit``` (void). As a consequence, return values of statements can be directly assigned to a variable. For example the ```if-then-else``` statement has a return value in Scala, yet in JavaScript, it doesn't. This is solved by wrapping the statement in an anonymous function, which is immediately invoked.
 
-> *Scala code*:
+> Scala code:
 
 > ```val x = if (a) { b } else { c }```
 
@@ -642,9 +642,11 @@ This package contains classes representing RDF graphs and ontologies. Only core 
 
 The `domain` project builds on the [`common`](#common) project, inheriting from classes and traits in the `common` project. Additional functionality and logic is hence added as well as dependencies on other libraries, such as [Jena](http://jena.apache.org) for parsing RDF/XML files into Graph objects.
 
+The idea behind the `domain` project is to be fully independent on other projects within Payola (other than `common`) - you can take the domain project and use it in a different project without any modification.
+
 ### Package cz.payola.domain.entities
 
-> TODO: C.M.
+Domain entities extend the `common` entities that are mostly traits and fully functional classes are formed - as with the whole package, you can take the `domain.entities` package and use it completely elsewhere - outside of Payola without any modification.
 
 ### Package cz.payola.domain.entities.analyses
 
@@ -656,11 +658,11 @@ The `domain` project builds on the [`common`](#common) project, inheriting from 
 
 ### Package cz.payola.domain.rdf
 
-> TODO: C.M.
+The `common` Graph class is enriched by the ability to execute SPARQL queries on the graph as well as to convert the Graph object to a RDF/XML or TTL textual representation. A companion object is present as well for creating Graph objects from RDF/XML or TTL representation. To perform these tasks, [Jena](http://jena.apache.org) library is used.
 
 ### Package cz.payola.domain.rdf.ontology
 
-> TODO: C.M.
+Just like with the `cz.payola.domain.rdf` package, the ontology package adds the ability to create Ontology objects from OWL or RDFS formats. No reverse conversion from Ontology object to textual representation is supported in this case currently, however.
 
 ### Package cz.payola.domain.sparql
 

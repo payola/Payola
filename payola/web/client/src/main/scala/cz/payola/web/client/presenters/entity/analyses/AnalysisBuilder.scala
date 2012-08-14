@@ -1,4 +1,4 @@
-package cz.payola.web.client.presenters
+package cz.payola.web.client.presenters.entity.analyses
 
 import s2js.adapters.browser._
 import cz.payola.web.client.views.todo.PluginInstanceView
@@ -108,7 +108,8 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
         }
 
         view.addPluginLink.mouseClicked += { _ =>
-            val dialog = new PluginDialog(allPlugins.filter(_.inputCount == 0).filterNot(_.name == "Payola Private Storage"))
+            val dialog = new
+                    PluginDialog(allPlugins.filter(_.inputCount == 0).filterNot(_.name == "Payola Private Storage"))
             dialog.pluginNameClicked += { evtArgs =>
                 onPluginNameClicked(evtArgs.target, None, view)
                 dialog.destroy()
@@ -143,20 +144,21 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                         if (inputsCount > branches.size) {
                             AlertModal.display(
                                 "The plugin can't be used", "The merge plugin has " + inputsCount.toString +
-                                " inputs, but only " + branches.size + " branches are available."
+                                    " inputs, but only " + branches.size + " branches are available."
                             )
                         } else {
                             val mergeDialog = new MergeAnalysisBranchesDialog(branches, inputsCount)
                             mergeDialog.confirming += { e =>
-                                    val instances = mergeDialog.outputToInstance
-                                    val buffer = new ArrayBuffer[PluginInstanceView]()
+                                val instances = mergeDialog.outputToInstance
+                                val buffer = new ArrayBuffer[PluginInstanceView]()
 
-                                    if(mergeDialog.outputToInstance.size < inputsCount){
-                                        mergeDialog.destroy()
-                                        AlertModal.display("Not enough inputs bound","You need to bind all the inputs provided.")
-                                    } else {
-                                        mergeBranches(instances, buffer, evt, view, mergeDialog)
-                                    }
+                                if (mergeDialog.outputToInstance.size < inputsCount) {
+                                    mergeDialog.destroy()
+                                    AlertModal
+                                        .display("Not enough inputs bound", "You need to bind all the inputs provided.")
+                                } else {
+                                    mergeBranches(instances, buffer, evt, view, mergeDialog)
+                                }
 
                                 false
                             }
@@ -182,27 +184,28 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
         }
 
         AnalysisBuilderData.createPluginInstance(evt.target.id, analysisId) { createdInstance =>
-                val mergeInstance = new EditablePluginInstanceView(createdInstance, buffer.asInstanceOf[Seq[PluginInstanceView]])
-                view.visualizer.renderPluginInstanceView(mergeInstance)
+            val mergeInstance = new
+                    EditablePluginInstanceView(createdInstance, buffer.asInstanceOf[Seq[PluginInstanceView]])
+            view.visualizer.renderPluginInstanceView(mergeInstance)
 
-                mergeInstance.connectButtonClicked += {
-                    clickedEvent =>
-                        connectPlugin(mergeInstance, view)
-                        false
-                }
+            mergeInstance.connectButtonClicked += {
+                clickedEvent =>
+                    connectPlugin(mergeInstance, view)
+                    false
+            }
 
-                mergeInstance.parameterValueChanged += onParameterValueChanged
-                mergeInstance.deleteButtonClicked += onDeleteClick
+            mergeInstance.parameterValueChanged += onParameterValueChanged
+            mergeInstance.deleteButtonClicked += onDeleteClick
 
-                i = 0
-                buffer.map {
-                    instance: Any =>
-                        bind(instance.asInstanceOf[PluginInstanceView], mergeInstance, i)
-                        i += 1
-                }
+            i = 0
+            buffer.map {
+                instance: Any =>
+                    bind(instance.asInstanceOf[PluginInstanceView], mergeInstance, i)
+                    i += 1
+            }
 
-                branches += mergeInstance
-                mergeDialog.destroy()
+            branches += mergeInstance
+            mergeDialog.destroy()
         } {
             _ =>
         }
@@ -247,7 +250,8 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
 
             unblockPage()
         } {
-            err => fatalErrorHandler(err)
+            err =>
+                fatalErrorHandler(err)
                 unblockPage()
         }
     }
@@ -294,7 +298,9 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
     protected def onParameterValueChanged(args: EventArgs[ParameterValue]) {
         val parameterInfo = args.target
         parameterInfo.control.isActive = true
-        AnalysisBuilderData.setParameterValue(analysisId, parameterInfo.pluginInstanceId, parameterInfo.name, parameterInfo.value) { () =>
+        AnalysisBuilderData
+            .setParameterValue(analysisId, parameterInfo.pluginInstanceId, parameterInfo.name, parameterInfo.value)
+        { () =>
             parameterInfo.control.setOk()
             parameterInfo.control.isActive = false
         } { _ =>
@@ -331,8 +337,9 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                 instance.destroy()
                 unblockPage()
         } {
-            _ => unblockPage()
-                AlertModal.display("Error when deleting","The plugin could not be deleted.")
+            _ =>
+                unblockPage()
+                AlertModal.display("Error when deleting", "The plugin could not be deleted.")
         }
     }
 

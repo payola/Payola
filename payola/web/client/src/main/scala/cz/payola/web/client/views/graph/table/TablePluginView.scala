@@ -11,7 +11,7 @@ import cz.payola.web.client.views.graph.PluginView
 
 abstract class TablePluginView(name: String) extends PluginView(name)
 {
-    private val tableWrapper = new Div()
+    protected val tableWrapper = new Div().setAttribute("style", "padding: 0 20px;")
 
     def createSubViews = List(tableWrapper)
 
@@ -20,13 +20,14 @@ abstract class TablePluginView(name: String) extends PluginView(name)
             // Remove the old table.
             tableWrapper.removeAllChildNodes()
 
-            // Insert the new table.
-            val table = document.createElement[html.Element]("table")
-            tableWrapper.htmlElement.appendChild(table)
-
-            table.className = "table table-striped table-bordered table-condensed"
-
-            fillTable(graph, addElement(table, "thead"), addElement(table, "tbody"))
+            if (graph.isEmpty) {
+                renderMessage(tableWrapper.htmlElement, "The graph is empty...")
+            } else {
+                val table = document.createElement[html.Element]("table")
+                table.className = "table table-striped table-bordered table-condensed"
+                tableWrapper.htmlElement.appendChild(table)
+                fillTable(graph, addElement(table, "thead"), addElement(table, "tbody"))
+            }
         }
 
         super.updateGraph(graph)

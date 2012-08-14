@@ -99,9 +99,9 @@ class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge])
     def +(otherGraph: Graph): Graph = {
         val mergedVertices = (vertices.toSet ++ otherGraph.vertices).toList
         val mergedEdges = (edges.toSet ++ otherGraph.edges).toList.map { e =>
-        // We have to make sure that all edges reference vertices from the mergedVertices collection. It's sure
-        // that vertices equal to origin and destination would be found in the mergedVertices, because edges in the
-        // original graphs surely had origin and destination present in the graph vertices.
+            // We have to make sure that all edges reference vertices from the mergedVertices collection. It's sure
+            // that vertices equal to origin and destination would be found in the mergedVertices, because edges in the
+            // original graphs surely had origin and destination present in the graph vertices.
             val origin = mergedVertices.find(_ == e.origin).get.asInstanceOf[IdentifiedVertex]
             val destination = mergedVertices.find(_ == e.destination).get
             new Edge(origin, destination, e.uri)
