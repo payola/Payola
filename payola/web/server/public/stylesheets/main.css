@@ -58,6 +58,32 @@ label {
     width: 100%;
 }
 
+.tabbable {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.tabbable .btn-toolbar {
+    padding: 0 15px;
+}
+
+.tabbable .tab-pane:first-child {
+    padding: 15px;
+}
+
+.tabbable .nav-tabs li {
+    position: relative;
+    left: 21px;
+}
+
+.tabbable .control-group {
+    display: inline-block;
+    width: 280px;
+    float: left;
+}
+
 .tabbable .plugin-space {
     position: relative;
 }
@@ -299,13 +325,21 @@ input[type="checkbox"].active:after {
     position: relative;
 }
 
+.glyphed-element {
+    position: absolute;
+    font-family: "EntypoRegular";
+    font-size: 57px;
+    width: auto;
+    height: auto;
+    align: center;
+}
+
 .glyph {
     position: relative;
     font-family: "EntypoRegular";
     font-size: 57px;
     width: auto;
     height: auto;
-    z-index: -1;
 }
 
 input.glyph {

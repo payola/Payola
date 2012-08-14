@@ -797,7 +797,9 @@ Every query that fetches any data from database needs to be wrapped inside some 
 <a name="squeryl-entities"></a>
 #### Package cz.payola.data.squeryl.entities
 
-For every entity in the [domain layer](#domain) that needs to be persisted, a class exists in the [data layer](#data) that provides database persistence to the corresponding domain layer entity.
+For every entity in the [domain layer](#domain) that needs to be persisted, a class exists in the [data layer](#data) that provides database persistence to the corresponding domain layer entity, as is shown on the following picture:
+
+![Data layer entities](https://raw.github.com/siroky/Payola/develop/docs/img/data_entities.png) 
 
 Every data layer entity has a corresponding companion object (extending `EntityConverter`) that provides conversion from the domain layer entity. When the conversion fails, a `DataException` is thrown.
 
@@ -810,7 +812,20 @@ Domain layer entities allow adding another entities into some collections (e.g. 
 <a name="squeryl-repositories"></a>
 #### Package cz.payola.data.squeryl.repositories
 
-Repositories provides persistence and fetching of entities (entities must extend `Entity` trait in [squeryl](#squeryl) package. API for repositories is defined in trait `DataContextComponent` in [data](#data) package. Methods are implmented in trait `TableRepositoryComponent`. Every repository provides methods to persist entity, to fetch entities by IDs and to remove entity by ID; those methods are implemted in `TableRepository` abstract class. More concrete repositories extend this class and add some specialized functionality.
+Repositories provides persistence and fetching of entities (entities must extend `Entity` trait in [squeryl](#squeryl) package. The API for repositories is defined in trait `DataContextComponent` in [data](#data) package. The API is a set of traits, their structure is shown in the nex picture:
+
+![Data layer repositories](https://raw.github.com/siroky/Payola/develop/docs/img/data_repositories.png)
+
+For every repository defined in API there exists a repository component, that implements the repository. Traits `Repository`, `NamedEntityRepository`, `OptionallyOwnedEntityRepository`, `ShareableEntityRepository` are implemented within `TableRepositoryComponent` trait. The rest of API repositories is implmented by corresponding repository components (e.g. `UserRepository` is implemented by `UserRepositorComponent`).
+
+##### Eager vs Lazy loading
+Squeryl privides only lazy fetchig data from database. The lazy fetching is used when loading users, privileges and plugin instance bindings from database. Those entities are loaded in the most simplified form: 
+
+- plugin instance bindings are loaded only with IDs of target and source plugin instances, those plugin insances are loaded on the first access to then
+- users are loaded with no data, all their groups, privileges, analyses, plugins, datasourced are loaded only when needed
+
+
+The rest of entities is loaded eagerly
 
 <a name="virtuoso"></a>
 ### Package cz.payola.data.virtuoso

@@ -7,7 +7,7 @@ import s2js.adapters.html
 import scala.collection.mutable.ArrayBuffer
 import cz.payola.web.client.views.todo._
 import cz.payola.common.entities
-import s2js.runtime.client.scala.collection.mutable.HashMap
+import scala.collection.mutable.HashMap
 import cz.payola.web.client.events.SimpleUnitEvent
 import cz.payola.common.entities.plugins.PluginInstance
 import cz.payola.web.client.views.ComposedView
@@ -18,7 +18,7 @@ abstract class AnalysisVisualizer(analysis: Analysis) extends ComposedView
 
     private val pluginCanvas = new Div(Nil, "plugin-canvas")
 
-    protected val instancesMap = new HashMap[String, PluginInstanceView]
+    protected val instancesMap: HashMap[String, PluginInstanceView] = new HashMap[String, PluginInstanceView]
 
     def createSubViews: Seq[View] = {
         List(pluginCanvas)

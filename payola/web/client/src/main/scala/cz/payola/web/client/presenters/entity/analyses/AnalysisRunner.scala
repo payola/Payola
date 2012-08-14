@@ -61,6 +61,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
                 view.overviewView.controls.timeoutInfoBar.addCssClass("none")
                 view.overviewView.controls.progressBar.setStyleToSuccess()
                 view.overviewView.controls.progressBar.setProgress(0.0)
+                view.overviewView.analysisVisualizer.clearAllAttributes()
 
                 graphPresenter = new GraphPresenter(view.resultsView.htmlElement)
                 graphPresenter.initialize()

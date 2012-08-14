@@ -23,6 +23,10 @@ class GraphView extends View[CanvasPack] {
      */
     var components = ListBuffer[Component]()
 
+    def destroy() {
+        getAllVertices.foreach{ _.destroy() }
+    }
+
     def resetConfiguration() {
         getAllEdges.foreach(_.resetConfiguration())
         getAllVertices.foreach(_.resetConfiguration())

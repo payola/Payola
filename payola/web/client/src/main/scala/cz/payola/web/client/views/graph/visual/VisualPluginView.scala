@@ -34,6 +34,8 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
     var graphView: Option[views.graph.visual.graph.GraphView] = None
 
     protected val topLayer = new Canvas()
+    topLayer.setAttribute("style", "z-index: 500;")
+    //^THANKS to this glyphs of VertexViews are visible but are hidden under the topLayer
 
     private val layerPack = new CanvasPack(topLayer, new Canvas(), new Canvas(), new Canvas(), new Canvas())
 
@@ -203,6 +205,9 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
         super.destroy()
         window.onresize = { _ => }
 
+        if(graphView.isDefined) {
+            graphView.get.destroy()
+        }
         graphView = None
         mouseIsDragging = false
         mousePressedVertex = false
@@ -223,6 +228,7 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
             } else {
                 if (graphView.isDefined) {
                     layers.foreach(_.clear())
+                    graphView.get.destroy()
                     graphView = None
                     mouseIsDragging = false
                     mousePressedVertex = false
