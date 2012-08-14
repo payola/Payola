@@ -20,33 +20,37 @@ class PluginCompilerSpec extends FlatSpec with ShouldMatchers
             """
                 package my.custom.plugin
 
-                import collection.immutable
+                import scala.collection._
                 import cz.payola.domain._
                 import cz.payola.domain.entities._
                 import cz.payola.domain.entities.plugins._
                 import cz.payola.domain.entities.plugins.parameters._
                 import cz.payola.domain.rdf._
 
-                class MyPlugin(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
+                class DelayInSeconds(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
                     extends Plugin(name, inputCount, parameters, id)
                 {
                     def this() = {
-                        this("Custom plugin", 123, List(new StringParameter("Custom plugin param", "")),
-                        IDGenerator.newId)
+                        this("Delay in seconds", 1, List(new IntParameter("Delay", 1)), IDGenerator.newId)
                     }
 
-                    def evaluate(instance: PluginInstance, inputs: collection.IndexedSeq[Option[Graph]],
-                        progressReporter: Double => Unit) = {
-                        Graph.empty
+                    def evaluate(instance: PluginInstance, inputs: IndexedSeq[Option[Graph]], progressReporter: Double => Unit) = {
+                        usingDefined(instance.getIntParameter("Delay")) { d =>
+                            (1 to d).foreach { i =>
+                                Thread.sleep(1000)
+                                progressReporter(i.toDouble / d)
+                            }
+                            inputs(0).getOrElse(Graph.empty)
+                        }
                     }
                 }
             """)
 
         val plugin = loader.instantiatePlugin(pluginClassName)
-        assert(plugin.name == "Custom plugin", "The plugin name is invalid.")
-        assert(plugin.inputCount == 123, "The plugin input count is invalid.")
+        assert(plugin.name == "Delay in seconds", "The plugin name is invalid.")
+        assert(plugin.inputCount == 1, "The plugin input count is invalid.")
         assert(plugin.parameters.length == 1, "The plugin parameter count is invalid.")
-        assert(plugin.parameters.head.name == "Custom plugin param", "The plugin parameter is invalid.")
+        assert(plugin.parameters.head.name == "Delay", "The plugin parameter is invalid.")
     }
 
     it should "throw exceptions when the compilation fails" in {

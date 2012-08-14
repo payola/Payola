@@ -45,6 +45,8 @@ case class AnalysisEvaluationProgress(evaluatedInstances: immutable.Seq[PluginIn
             if (value == 1.0) {
                 evaluated = instance +: evaluated
                 running = running - instance
+            } else {
+                running = running.updated(instance, value)
             }
 
             AnalysisEvaluationProgress(evaluated, running, pending, errors)
