@@ -524,11 +524,11 @@ In Scala, everything is an expression with return value, even if the return valu
 
 > Scala code:
 
-> ```val x = if (a) { b } else { c }```
+```val x = if (a) { b } else { c }```
 
 > compiles into:
 
-> ```var x = (function() { if (a) { return b; } else { return c; } })();```
+```var x = (function() { if (a) { return b; } else { return c; } })();```
 
 ###### Operators
 
@@ -553,11 +553,80 @@ This annotation can be used on a method or a field, enabling the programmer to i
 
 ###### Annotation ```@remote```
 
-An object or class marked with this annotation isn't compiled to JavaScript. From the first point of view, it may look useless, but combined with the RPC that is described in the following section, it really simplifies client-server communication.
+An object or class marked with this annotation isn't compiled to JavaScript.  
 
-###### RPC
+###### RPC (Remote Procedure Call)
 
-> TODO
+In order to simplify the client-server communication and to hide the low-level JavaScript constructs necessary for it (```XmlHttpRequest``` or ```ActiveXObject```) from the programmer, a [RPC mechanism](http://en.wikipedia.org/wiki/Remote_procedure_call) is used. The compiler takes a small but irreplacable part in the whole process, the rest is done in the [server-side runtime](#runtime-server) and [client-side runtime](#runtime-client). 
+
+All methods that are marked with the ```@remote``` annotation or defined on an object with the ```@remote``` annotation are considered RPC methods (remote methods), so their invocations are compiled to JavaScript in a different way. Remote methods may also be marked with the ```@async``` annotation, which makes them behave asynchronously, but introduces additional constraints on them (i.e. they must have the success callback function and fail callback function parameters and Unit return type). The compilation of a remote method invocation can be seen in the following example:
+
+> Scala code: 
+
+```
+@remote object remote {
+    def foo(bar: Int, baz: String): Int = bar * baz.length
+
+	@async def asyncFoo(bar: Int, baz: String)
+		(successCallback: Int => Unit)
+		(errorCallback: Throwable => Unit) {
+                                
+		successCallback(bar * baz.length)
+	}
+}
+
+.
+.
+.
+
+// Somewhere in an object or class that is compiled into JavaScript.
+val x = remote.foo(123, "RPC rocks.")
+
+remote.asyncFoo(123, "RPC rocks.") { result: Int =>
+	window.alert("Method asyncFoo returned " + result)
+} { throwable: Throwable =>
+	window.alert("Exception " + throwable.message)
+}
+```
+
+> compiles into: 
+
+```
+// Somewhere in the compiled object or class.
+s2js.runtime.client.rpc.Wrapper.callSync(
+	'remote.foo', 
+	[123, 'RPC rocks.'], 
+	['scala.Int', 'java.lang.String']
+);
+
+s2js.runtime.client.rpc.Wrapper.callAsync(
+	'remote.asyncFoo',
+	[123, 'RPC rocks.'], 
+	['scala.Int', 'java.lang.String'],
+	function(i) { window.alert('Method asyncFoo returned ' + i); },
+	function(e) { window.alert('Exception ' + e.message); }
+}
+```
+
+The array with types (```['scala.Int', 'java.lang.String']```) is there because Scala 2.9.1 doesn't provide full reflection support and the server-side runtime can't distinguish between ```List[Double]``` and ```List[Int]```.
+
+Another related annotation is the ```@secured``` which can be used both on remote methods or remote objects. If used on a method or a method is declared within an object that is marked with that annotation, then the method is considered a secured remote method. The consequence is, that the last parameter is regarded as a security context, which isn't sent from the client, so the server-side runtime has to resolve it by itself (e.g. retrieve an user from the database by his id, which is stored in the cookie).
+
+> Scala code: 
+
+```
+@remote @secured def foo(bar: Int, baz: String, user: User = null): Int = bar * baz.length
+```
+
+> compiles into: 
+
+```
+s2js.runtime.client.rpc.Wrapper.callSync(
+	'remote.foo', 
+	[123, 'RPC rocks.'], 
+	['scala.Int', 'java.lang.String']
+);
+```
 
 <a name="adapters"></a>
 ### Package s2js.adapters
