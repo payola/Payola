@@ -57,6 +57,32 @@ label {
     left: 0;
 }
 
+.tabbable {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.tabbable .btn-toolbar {
+    padding: 0 15px;
+}
+
+.tabbable .tab-pane:first-child {
+    padding: 15px;
+}
+
+.tabbable .nav-tabs li {
+    position: relative;
+    left: 21px;
+}
+
+.tabbable .control-group {
+    display: inline-block;
+    width: 280px;
+    float: left;
+}
+
 .tabbable .plugin-space {
     position: relative;
 }

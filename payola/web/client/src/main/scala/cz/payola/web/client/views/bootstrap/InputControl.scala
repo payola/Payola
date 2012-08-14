@@ -8,7 +8,7 @@ import cz.payola.web.client.events.SimpleUnitEvent
 import cz.payola.web.client.views.elements.form._
 import scala.Some
 
-class InputControl[A <: Field[_]](val label: String, val field: A)
+class InputControl[A <: Field[_]](val label: String, val field: A, labelClass: Option[String] = Some("span2"))
     extends ComposedView
 {
     val delayedChanged = new SimpleUnitEvent[this.type]
@@ -18,7 +18,7 @@ class InputControl[A <: Field[_]](val label: String, val field: A)
     private val infoText = new Text("")
 
     val controlGroup = new Div(List(
-        new Label(label, field.formHtmlElement, "span2"),
+        new Label(label, field.formHtmlElement, labelClass.getOrElse("")),
         new Div(List(
             field,
             new Span(List(infoText), "help-inline")),
