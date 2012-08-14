@@ -16,11 +16,10 @@ class PluginCompiler(val libDirectory: java.io.File, val pluginClassDirectory: j
     private val classpath = new Directory(libDirectory).files.map(_.path).mkString(java.io.File.pathSeparator)
 
     private val settings = new Settings()
-
-    private val compiler = new InternalCompiler(settings, new ExceptionReporter)
-
     settings.classpath.value = classpath
     settings.outdir.value = pluginClassDirectory.getAbsolutePath
+
+    private val compiler = new InternalCompiler(settings, new ExceptionReporter)
 
     /**
       * Compiles the specified plugin from the source code.

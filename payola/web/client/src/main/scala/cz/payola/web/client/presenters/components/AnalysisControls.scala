@@ -22,7 +22,8 @@ class AnalysisControls(timeoutSeconds: Int) extends ComposedView
 
     val timeoutControl = new InputControl(
         "Set evaluation timeout [sec.]:",
-        new NumericInput("timeout", timeoutSeconds, "Set timeout", "input-mini timeout-control")
+        new NumericInput("timeout", timeoutSeconds, "Set timeout", "input-mini timeout-control"),
+        None
     )
 
     private val timeoutInfoCaptionPre = new Text("The evaluation will timeout in [sec.]: ")

@@ -15,14 +15,10 @@ trait PluginModelComponent extends EntityModelComponent
             val compiler = self.pluginCompiler
             val className = compiler.compile(source)
             val loader = self.pluginClassLoader
+
             val plugin = loader.instantiatePlugin(className)
-
-            if (getByName(plugin.name).isDefined) {
-                throw new ModelException("Plugin with this name already exists!")
-            }
-
             plugin.owner = Some(user)
-            user.addOwnedPlugin(plugin)
+            persist(plugin)
             plugin
         }
 

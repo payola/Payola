@@ -23,7 +23,7 @@ class AnalysisTest extends FlatSpec with ShouldMatchers {
         a.pluginInstances.size should equal (0)
 
         val plugin: Plugin = new PseudoPlugin("MyPlugin")
-        val instance1: PluginInstance = new PluginInstance(plugin, List(plugin.getParameter("Time").get.createValue().asInstanceOf[StringParameterValue]))
+        val instance1: PluginInstance = new PluginInstance(plugin, List(plugin.getParameter("Time").get.asInstanceOf[StringParameterValue]))
         a.addPluginInstance(instance1)
         a.pluginInstances.size should equal (1)
 

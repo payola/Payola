@@ -13,7 +13,7 @@ class PrivateDataUploader(fileUploaderDivID: String,
                                         redirectURL: String) extends Presenter
 {
     val fileUploadDiv = document.getElementById(fileUploaderDivID)
-    val fileInput = new InputControl("File: ", new FileInput("graphFile", "", "span10"))
+    val fileInput = new InputControl("File: ", new FileInput("graphFile", "", "span10"), Some("span2"))
     val fileUploadButton = new Button(new Text(" Upload File"), "btn-primary span2", new Icon(Icon.upload, true))
 
     fileInput.field.setAttribute("accept", "application/rdf+xml, application/xml,text/turtle")
@@ -30,7 +30,7 @@ class PrivateDataUploader(fileUploaderDivID: String,
     fileUploadButton.render(fileUploadDiv)
 
     val urlUploadDiv = document.getElementById(urlUploaderDivID)
-    val urlField = new InputControl("Graph URL:", new TextInput("graphURL", "", "", "span10"))
+    val urlField = new InputControl("Graph URL:", new TextInput("graphURL", "", "", "span10"), Some("span2"))
     val urlUploadButton = new Button(new Span(List(new Icon(Icon.upload, true), new Text(" Upload from URL"))), "btn-primary span2")
     urlField.render(urlUploadDiv)
 
