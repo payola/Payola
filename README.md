@@ -720,17 +720,19 @@ Just like with the `cz.payola.domain.rdf` package, the ontology package adds the
 
 This whole package represents the data layer. Trait `DataContextComponent` defines API for communication between data layer and other Payola components. The two vital tasks of the data layer are:
 
-- store and fetch entities from the [domain layer](#domain) in and out of the database
-- usage of [Virtuoso](http://virtuoso.openlinksw.com/) server as a private RDF data storage
+- to store and fetch the [domain layer](#domain) entities
+- to use [Virtuoso](http://virtuoso.openlinksw.com/) server as a private RDF data storage
 
-Architecture of Payola implies that the domain layer is independent from the data layer and since Payola is an open-source project, the data layer can be implemented specifically to fit different platform-specific needs. 
+Architecture of Payola implies that the domain layer is independent from the data layer and since Payola is an open-source project, the data layer can be replaced by another implemenation that fits different platform-specific needs. 
 
 ### Package cz.payola.data.squeryl
 
-In this version Payola uses [Squeryl](http://squeryl.org) (an ORM for Scala) for persisting entities into H2 database. Squeryl generates a database schema from the structure of objects to be stored. Every persisted entity is persisted in its own table, definition of this table is derived from entity object structure. In order to have the domain layer independent from the data layer, [entities](#squeryl-entities) were implemented that:
+In this version Payola uses [Squeryl](http://squeryl.org) (an ORM for Scala) for persisting entities into H2 database. Squeryl generates a database schema from the structure of objects to be stored. Every persisted entity is persisted in its own table, definition of this table is derived from entity object structure. In order to have the domain layer independent from the data layer, there were implemented [entities](#squeryl-entities) that:
 
 - represent entities from the domain layer and 
 - can be stored and loaded via Squeryl ORM into and from the database
+
+Every entity in this packages extends trait `Entity`, which provides Squeryl fuctionality to them. It could be compared to [Adapter](#http://en.wikipedia.org/wiki/Adapter_pattern) design pattern, where `Entity` from [`common`](#common) package is the Adaptee, `Entity` in this package is the Adapter, and Squeryl functionality is the Target.
 
 ##### Why Squeryl?
 
@@ -743,8 +745,9 @@ Squeryl is an existing, tested, functional and simple ORM for Scala applications
 
 A database structure needs to be defined in an object extending `org.squeryl.Schema`  object. This object contains definition of tables - definition that says what entity is persisted in what table. Squeryl enables to redefine column types of tables, to declare 1:N and M:N relations between entities, to define foreign key constraints for those relations.
 
-Squeryl provides lazy fetching of entities from "N" side of 1:N or M:N relations, which is a desirable feature of ORM tool. The query that fetches the entities of a relation is defined in a lazy field of related entity, on the first request for data is the query evaluated. There is a method `associate` in Squeryl for creating a relation between entities. The code could look like this:
+Squeryl provides lazy fetching of entities from "N" side of 1:N or M:N relations, which is a desirable feature of ORM tool. The query that fetches the entities of a relation is defined in a lazy field of related entity, on the first request for data is the query evaluated. There is a method `associate` in Squeryl for creating a relation between entities. The simplified code could look like this:
 
+<a name="squeryl-code-examle"></a>
 ```
 	// Definition of lazy field with query fetching groups owned by user
 	// The relation between groups and user is defined in schema.groupOwnership
@@ -762,6 +765,8 @@ Squeryl provides lazy fetching of entities from "N" side of 1:N or M:N relations
 		inTransaction {
 			_ownedGroupsQuery.associate(group)
 		}	
+
+		super.addOwnedGroup(group)
 	}	
 ```
 
@@ -776,14 +781,14 @@ Every data layer entity has a corresponding companion object (extending `EntityC
 
 Every data layer entity extends the represented domain layer entity (with two exceptions that will be explained later), which allows to treat data layer entities like domain layer entities. There is no added business logic in data layer entities - their only purpose is to be stored and loaded into and from the database.
 
-The two mentioned exceptions are `PluginDbRepresentation` and `PrivilegeDbRepresentation`. These data layer entities do not extend `Plugin` and `Privilege` from the domain layer, because the real plugins and privileges may be added at the runtime (even by a user). Instead, these domain layer entities are just abstract parents of the real plugins and privileges, so that they are simply wrapped into data layer entities. The data layer entities are persisted and the domain layer entities are reconstructed from them using reflection.
+The two mentioned exceptions are `PluginDbRepresentation` and `PrivilegeDbRepresentation`. These data layer entities do not extend `Plugin` and `Privilege` from the domain layer, because the real plugins and privileges may be added at the runtime (even by a user). These domain layer entities are just abstract parents of the real plugins and privileges, so that they are simply wrapped into data layer entities. The data layer entities are persisted and the domain layer entities are reconstructed from them via java reflection.
 
-Domain layer entities allow adding another entities into their internal collections (e.g. an plugin instance can be added to an analysis via `analysis.addPluginInstance(pluginInstance)` statement). The data layer entities override this behavior by adding a code to persist this new relation into the database and leaving the domain layer behavior unchanged. 
+Domain layer entities allow adding another entities into some collections (e.g. an plugin instance can be added to an analysis via `analysis.addPluginInstance(pluginInstance)` statement). The data layer entities override this behavior by adding a code to persist this relation into the database and leaving the domain layer behavior unchanged (as shown in this [example](#squeryl-code-examle)). 
 
 <a name="squeryl-repositories"></a>
 #### Package cz.payola.data.squeryl.repositories
 
-> TODO: O.H.
+Repositories provides persistence and fetching of entities (entities must extend `Entity` trait in [squeryl](#squeryl) package. API for repositories is defined in trait `DataContextComponent` in [data](#data) package. Methods are implmented in trait `TableRepositoryComponent`. Every repository provides methods to persist entity, to fetch entities by IDs and to remove entity by ID; those methods are implemted in `TableRepository` abstract class. More concrete repositories extend this class and add some specialized functionality.
 
 <a name="virtuoso"></a>
 ### Package cz.payola.data.virtuoso
