@@ -15,11 +15,7 @@ class AnalysisControls(timeoutSeconds: Int) extends ComposedView
 
     val runBtn = new Button(runBtnCaption, "btn btn-success span2", runBtnIcon)
 
-    val progressValueBar = new Div(List(), "bar")
-
-    progressValueBar.setAttribute("style", "width: 0%; height: 40px")
-
-    val progressDiv = new Div(List(progressValueBar), "progress progress-striped progress-success active span5")
+    val progressBar = new ProgressBar()
 
     val stopButton = new Button(new Text("Stop"), "btn-danger disabled span2", new Icon(Icon.stop, true))
     stopButton.setIsEnabled(false)
@@ -34,7 +30,7 @@ class AnalysisControls(timeoutSeconds: Int) extends ComposedView
 
     val timeoutInfoBar = new Span(List(timeoutInfoCaptionPre, timeoutInfo), "span3 none")
 
-    private val wrap = new Div(List(runBtn, stopButton, progressDiv, timeoutControl, timeoutInfoBar), "well analysis-controls")
+    private val wrap = new Div(List(runBtn, stopButton, progressBar, timeoutControl, timeoutInfoBar), "well analysis-controls")
 
     def createSubViews = List(wrap)
 }

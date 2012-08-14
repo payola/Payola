@@ -513,7 +513,7 @@ In terms of code lines, the ```ClassDefCompiler``` is the largest class of the p
 Compilation of a ```ClassDef``` is composed of the three following steps:
 
 1. Compile the ```ClassDef``` constructor.
-2. Compile the members (fields, methods) of the ```ClassDef```. Inner classes or objects are currently supported.
+2. Compile the members (fields, methods) of the ```ClassDef```. Inner classes or objects aren't currently supported.
 3. Bind the ```ClassDef``` JavaScript prototype with an instance of the  [```s2js.runtime.core.Class```](#Class) class, so all instances of the ```ClassDef``` have a refence it.
 
 Most of the Scala language constructs are compiled into JavaScript pretty naturally, majority of them have direct equivalents in the target language, so these naturally translated constructs won't be described here, as it would be a waste of space. We'll concentrate on how the differences between the languages are solved and on some other interesting details or extensions.
@@ -522,13 +522,13 @@ Most of the Scala language constructs are compiled into JavaScript pretty natura
 
 In Scala, everything is an expression with return value, even if the return value is the ```Unit``` (void). As a consequence, return values of statements can be directly assigned to a variable. For example the ```if-then-else``` statement has a return value in Scala, yet in JavaScript, it doesn't. This is solved by wrapping the statement in an anonymous function, which is immediately invoked.
 
-> *Scala code*:
+> Scala code:
 
-> ```val x = if (a) { b } else { c }```
+```val x = if (a) { b } else { c }```
 
 > compiles into:
 
-> ```var x = (function() { if (a) { return b; } else { return c; } })();```
+```var x = (function() { if (a) { return b; } else { return c; } })();```
 
 ###### Operators
 
@@ -553,11 +553,80 @@ This annotation can be used on a method or a field, enabling the programmer to i
 
 ###### Annotation ```@remote```
 
-An object or class marked with this annotation isn't compiled to JavaScript. From the first point of view, it may look useless, but combined with the RPC that is described in the following section, it really simplifies client-server communication.
+An object or class marked with this annotation isn't compiled to JavaScript.  
 
-###### RPC
+###### RPC (Remote Procedure Call)
 
-> TODO
+In order to simplify the client-server communication and to hide the low-level JavaScript constructs necessary for it (```XmlHttpRequest``` or ```ActiveXObject```) from the programmer, a [RPC mechanism](http://en.wikipedia.org/wiki/Remote_procedure_call) is used. The compiler takes a small but irreplacable part in the whole process, the rest is done in the [server-side runtime](#runtime-server) and [client-side runtime](#runtime-client). 
+
+All methods that are marked with the ```@remote``` annotation or defined on an object with the ```@remote``` annotation are considered RPC methods (remote methods), so their invocations are compiled to JavaScript in a different way. Remote methods may also be marked with the ```@async``` annotation, which makes them behave asynchronously, but introduces additional constraints on them (i.e. they must have the success callback function and fail callback function parameters and Unit return type). The compilation of a remote method invocation can be seen in the following example:
+
+> Scala code: 
+
+```
+@remote object remote {
+    def foo(bar: Int, baz: String): Int = bar * baz.length
+
+	@async def asyncFoo(bar: Int, baz: String)
+		(successCallback: Int => Unit)
+		(errorCallback: Throwable => Unit) {
+                                
+		successCallback(bar * baz.length)
+	}
+}
+
+.
+.
+.
+
+// Somewhere in an object or class that is compiled into JavaScript.
+val x = remote.foo(123, "RPC rocks.")
+
+remote.asyncFoo(123, "RPC rocks.") { result: Int =>
+	window.alert("Method asyncFoo returned " + result)
+} { throwable: Throwable =>
+	window.alert("Exception " + throwable.message)
+}
+```
+
+> compiles into: 
+
+```
+// Somewhere in the compiled object or class.
+s2js.runtime.client.rpc.Wrapper.callSync(
+	'remote.foo', 
+	[123, 'RPC rocks.'], 
+	['scala.Int', 'java.lang.String']
+);
+
+s2js.runtime.client.rpc.Wrapper.callAsync(
+	'remote.asyncFoo',
+	[123, 'RPC rocks.'], 
+	['scala.Int', 'java.lang.String'],
+	function(i) { window.alert('Method asyncFoo returned ' + i); },
+	function(e) { window.alert('Exception ' + e.message); }
+}
+```
+
+The array with types (```['scala.Int', 'java.lang.String']```) is there because Scala 2.9.1 doesn't provide full reflection support and the server-side runtime can't distinguish between ```List[Double]``` and ```List[Int]```.
+
+Another related annotation is the ```@secured``` which can be used both on remote methods or remote objects. If used on a method or a method is declared within an object that is marked with that annotation, then the method is considered a secured remote method. The consequence is, that the last parameter is regarded as a security context, which isn't sent from the client, so the server-side runtime has to resolve it by itself (e.g. retrieve an user from the database by his id, which is stored in the cookie).
+
+> Scala code: 
+
+```
+@remote @secured def foo(bar: Int, baz: String, user: User = null): Int = bar * baz.length
+```
+
+> compiles into: 
+
+```
+s2js.runtime.client.rpc.Wrapper.callSync(
+	'remote.foo', 
+	[123, 'RPC rocks.'], 
+	['scala.Int', 'java.lang.String']
+);
+```
 
 <a name="adapters"></a>
 ### Package s2js.adapters
@@ -642,9 +711,11 @@ This package contains classes representing RDF graphs and ontologies. Only core 
 
 The `domain` project builds on the [`common`](#common) project, inheriting from classes and traits in the `common` project. Additional functionality and logic is hence added as well as dependencies on other libraries, such as [Jena](http://jena.apache.org) for parsing RDF/XML files into Graph objects.
 
+The idea behind the `domain` project is to be fully independent on other projects within Payola (other than `common`) - you can take the domain project and use it in a different project without any modification.
+
 ### Package cz.payola.domain.entities
 
-> TODO: C.M.
+Domain entities extend the `common` entities that are mostly traits and fully functional classes are formed - as with the whole package, you can take the `domain.entities` package and use it completely elsewhere - outside of Payola without any modification.
 
 ### Package cz.payola.domain.entities.analyses
 
@@ -656,11 +727,11 @@ The `domain` project builds on the [`common`](#common) project, inheriting from 
 
 ### Package cz.payola.domain.rdf
 
-> TODO: C.M.
+The `common` Graph class is enriched by the ability to execute SPARQL queries on the graph as well as to convert the Graph object to a RDF/XML or TTL textual representation. A companion object is present as well for creating Graph objects from RDF/XML or TTL representation. To perform these tasks, [Jena](http://jena.apache.org) library is used.
 
 ### Package cz.payola.domain.rdf.ontology
 
-> TODO: C.M.
+Just like with the `cz.payola.domain.rdf` package, the ontology package adds the ability to create Ontology objects from OWL or RDFS formats. No reverse conversion from Ontology object to textual representation is supported in this case currently, however.
 
 ### Package cz.payola.domain.sparql
 
@@ -671,17 +742,19 @@ The `domain` project builds on the [`common`](#common) project, inheriting from 
 
 This whole package represents the data layer. Trait `DataContextComponent` defines API for communication between data layer and other Payola components. The two vital tasks of the data layer are:
 
-- store and fetch entities from the [domain layer](#domain) in and out of the database
-- usage of [Virtuoso](http://virtuoso.openlinksw.com/) server as a private RDF data storage
+- to store and fetch the [domain layer](#domain) entities
+- to use [Virtuoso](http://virtuoso.openlinksw.com/) server as a private RDF data storage
 
-Architecture of Payola implies that the domain layer is independent from the data layer and since Payola is an open-source project, the data layer can be implemented specifically to fit different platform-specific needs. 
+Architecture of Payola implies that the domain layer is independent from the data layer and since Payola is an open-source project, the data layer can be replaced by another implemenation that fits different platform-specific needs. 
 
 ### Package cz.payola.data.squeryl
 
-In this version Payola uses [Squeryl](http://squeryl.org) (an ORM for Scala) for persisting entities into H2 database. Squeryl generates a database schema from the structure of objects to be stored. Every persisted entity is persisted in its own table, definition of this table is derived from entity object structure. In order to have the domain layer independent from the data layer, [entities](#squeryl-entities) were implemented that:
+In this version Payola uses [Squeryl](http://squeryl.org) (an ORM for Scala) for persisting entities into H2 database. Squeryl generates a database schema from the structure of objects to be stored. Every persisted entity is persisted in its own table, definition of this table is derived from entity object structure. In order to have the domain layer independent from the data layer, there were implemented [entities](#squeryl-entities) that:
 
 - represent entities from the domain layer and 
 - can be stored and loaded via Squeryl ORM into and from the database
+
+Every entity in this packages extends trait `Entity`, which provides Squeryl fuctionality to them. It could be compared to [Adapter](#http://en.wikipedia.org/wiki/Adapter_pattern) design pattern, where `Entity` from [`common`](#common) package is the Adaptee, `Entity` in this package is the Adapter, and Squeryl functionality is the Target.
 
 ##### Why Squeryl?
 
@@ -694,8 +767,9 @@ Squeryl is an existing, tested, functional and simple ORM for Scala applications
 
 A database structure needs to be defined in an object extending `org.squeryl.Schema`  object. This object contains definition of tables - definition that says what entity is persisted in what table. Squeryl enables to redefine column types of tables, to declare 1:N and M:N relations between entities, to define foreign key constraints for those relations.
 
-Squeryl provides lazy fetching of entities from "N" side of 1:N or M:N relations, which is a desirable feature of ORM tool. The query that fetches the entities of a relation is defined in a lazy field of related entity, on the first request for data is the query evaluated. There is a method `associate` in Squeryl for creating a relation between entities. The code could look like this:
+Squeryl provides lazy fetching of entities from "N" side of 1:N or M:N relations, which is a desirable feature of ORM tool. The query that fetches the entities of a relation is defined in a lazy field of related entity, on the first request for data is the query evaluated. There is a method `associate` in Squeryl for creating a relation between entities. The simplified code could look like this:
 
+<a name="squeryl-code-examle"></a>
 ```
 	// Definition of lazy field with query fetching groups owned by user
 	// The relation between groups and user is defined in schema.groupOwnership
@@ -713,6 +787,8 @@ Squeryl provides lazy fetching of entities from "N" side of 1:N or M:N relations
 		inTransaction {
 			_ownedGroupsQuery.associate(group)
 		}	
+
+		super.addOwnedGroup(group)
 	}	
 ```
 
@@ -721,20 +797,35 @@ Every query that fetches any data from database needs to be wrapped inside some 
 <a name="squeryl-entities"></a>
 #### Package cz.payola.data.squeryl.entities
 
-For every entity in the [domain layer](#domain) that needs to be persisted, a class exists in the [data layer](#data) that provides database persistence to the corresponding domain layer entity.
+For every entity in the [domain layer](#domain) that needs to be persisted, a class exists in the [data layer](#data) that provides database persistence to the corresponding domain layer entity, as is shown on the following picture:
+
+![Data layer entities](https://raw.github.com/siroky/Payola/develop/docs/img/data_entities.png) 
 
 Every data layer entity has a corresponding companion object (extending `EntityConverter`) that provides conversion from the domain layer entity. When the conversion fails, a `DataException` is thrown.
 
 Every data layer entity extends the represented domain layer entity (with two exceptions that will be explained later), which allows to treat data layer entities like domain layer entities. There is no added business logic in data layer entities - their only purpose is to be stored and loaded into and from the database.
 
-The two mentioned exceptions are `PluginDbRepresentation` and `PrivilegeDbRepresentation`. These data layer entities do not extend `Plugin` and `Privilege` from the domain layer, because the real plugins and privileges may be added at the runtime (even by a user). Instead, these domain layer entities are just abstract parents of the real plugins and privileges, so that they are simply wrapped into data layer entities. The data layer entities are persisted and the domain layer entities are reconstructed from them using reflection.
+The two mentioned exceptions are `PluginDbRepresentation` and `PrivilegeDbRepresentation`. These data layer entities do not extend `Plugin` and `Privilege` from the domain layer, because the real plugins and privileges may be added at the runtime (even by a user). These domain layer entities are just abstract parents of the real plugins and privileges, so that they are simply wrapped into data layer entities. The data layer entities are persisted and the domain layer entities are reconstructed from them via java reflection.
 
-Domain layer entities allow adding another entities into their internal collections (e.g. an plugin instance can be added to an analysis via `analysis.addPluginInstance(pluginInstance)` statement). The data layer entities override this behavior by adding a code to persist this new relation into the database and leaving the domain layer behavior unchanged. 
+Domain layer entities allow adding another entities into some collections (e.g. an plugin instance can be added to an analysis via `analysis.addPluginInstance(pluginInstance)` statement). The data layer entities override this behavior by adding a code to persist this relation into the database and leaving the domain layer behavior unchanged (as shown in this [example](#squeryl-code-examle)). 
 
 <a name="squeryl-repositories"></a>
 #### Package cz.payola.data.squeryl.repositories
 
-> TODO: O.H.
+Repositories provides persistence and fetching of entities (entities must extend `Entity` trait in [squeryl](#squeryl) package. The API for repositories is defined in trait `DataContextComponent` in [data](#data) package. The API is a set of traits, their structure is shown in the nex picture:
+
+![Data layer repositories](https://raw.github.com/siroky/Payola/develop/docs/img/data_repositories.png)
+
+For every repository defined in API there exists a repository component, that implements the repository. Traits `Repository`, `NamedEntityRepository`, `OptionallyOwnedEntityRepository`, `ShareableEntityRepository` are implemented within `TableRepositoryComponent` trait. The rest of API repositories is implmented by corresponding repository components (e.g. `UserRepository` is implemented by `UserRepositorComponent`).
+
+##### Eager vs Lazy loading
+Squeryl privides only lazy fetchig data from database. The lazy fetching is used when loading users, privileges and plugin instance bindings from database. Those entities are loaded in the most simplified form: 
+
+- plugin instance bindings are loaded only with IDs of target and source plugin instances, those plugin insances are loaded on the first access to then
+- users are loaded with no data, all their groups, privileges, analyses, plugins, datasourced are loaded only when needed
+
+
+The rest of entities is loaded eagerly
 
 <a name="virtuoso"></a>
 ### Package cz.payola.data.virtuoso

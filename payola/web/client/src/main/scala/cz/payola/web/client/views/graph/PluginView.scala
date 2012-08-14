@@ -2,6 +2,7 @@ package cz.payola.web.client.views.graph
 
 import s2js.adapters.html
 import cz.payola.web.client.views._
+import cz.payola.web.client.views.elements._
 
 /**
  * A graph visualization plugin view.
@@ -19,4 +20,9 @@ abstract class PluginView(val name: String) extends GraphView with ComposedView
      * Destroys the plugin-specific controls.
      */
     def destroyControls() {}
+
+    protected def renderMessage(parent: html.Element, message: String, description: String = "") {
+        new Div(List(new Text(message)), "plugin-message large").render(parent)
+        new Div(List(new Text(description)), "plugin-message small").render(parent)
+    }
 }

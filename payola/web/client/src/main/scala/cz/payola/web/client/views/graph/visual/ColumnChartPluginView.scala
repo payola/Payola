@@ -1,20 +1,18 @@
 package cz.payola.web.client.views.graph.visual
 
+import s2js.compiler.javascript
+import s2js.adapters.browser._
+import s2js.adapters.html
 import cz.payola.web.client.views.graph.PluginView
 import cz.payola.web.client.views.elements._
 import cz.payola.common.rdf._
-import s2js.compiler.javascript
-import s2js.adapters.browser._
 
 class ColumnChartPluginView extends PluginView("Column Chart")
 {
-    private val chartWrapper = new Div(Nil)
-    chartWrapper.setAttribute("id", "chart-wrapper")
+    private val chartWrapper = new Div
+    chartWrapper.id = "chart-wrapper"
 
-    private val pluginWrapper = new Div(List(chartWrapper), "column-chart-wrapper")
-
-    // Used in drawChart()'s @javascript annotation. Beware before renaming
-    private val chartWrapperElement = chartWrapper.htmlElement
+    private val wrapper = new Div(List(chartWrapper))
 
     /**Adds a bars to the chart. Is a list of list with two values - title and value.
      *
@@ -28,6 +26,9 @@ class ColumnChartPluginView extends PluginView("Column Chart")
            var counter = 0;
            arr.foreach(function(x){
                 var title = x[0];
+                if (title.length > 50){
+                    title = $.trim(title.substring(0, 50)) + "...";
+                }
                 var value = x[1];
                 rawData.push([ counter, value ]);
                 titles.push([ counter, title ]);
@@ -43,9 +44,29 @@ class ColumnChartPluginView extends PluginView("Column Chart")
                     align: "center"
                 }
            }];
-          $.plot($("#chart-wrapper"), data, { label: legendTitle, xaxis: { ticks: titles }, grid: { hoverable: true, clickable: true } });
+
+          var options = {
+                label: legendTitle,
+                xaxis: {
+                    ticks: titles
+                },
+                grid: {
+                    hoverable: true,
+                    clickable: true
+                }
+          };
+          $.plot($("#chart-wrapper"), data, options);
         """)
     private def createDataTable(arr: List[List[Any]], legendTitle: String) {
+
+    }
+
+    override def render(parent: html.Element) {
+        super.render(parent)
+        val width = window.innerWidth
+        val height = window.innerHeight - wrapper.offset.y
+        val sizeStyle = "width: " + width + "px; height: " + height + "px;"
+        wrapper.setAttribute("style", sizeStyle + " overflow: auto;")
     }
 
     def createPhonyGraph: Graph = {
@@ -83,11 +104,7 @@ class ColumnChartPluginView extends PluginView("Column Chart")
     }
 
     def createSubViews = {
-        // Update width and height of the pluginWrapper
-        val width = window.innerWidth - 220
-        val styleString = "width: " + width + "px;"
-        pluginWrapper.setAttribute("style", styleString)
-        List(pluginWrapper)
+        List(wrapper)
     }
 
     def findInitialVertexForColumnChart(g: Graph): Option[IdentifiedVertex] = {
@@ -119,7 +136,7 @@ class ColumnChartPluginView extends PluginView("Column Chart")
             val outgoingEdges = g.getOutgoingEdges(v.uri)
             val literals = outgoingEdges.filter(_.destination.isInstanceOf[LiteralVertex]).map(_.destination.asInstanceOf[LiteralVertex])
 
-            val title = literals.find(litVertex => variableIsString(litVertex.value)).get.value
+            val title: String = literals.find(litVertex => variableIsString(litVertex.value)).get.value.toString
             val valueVertex = literals.find(litVertex => variableIsNumber(litVertex.value)).get
             val value = valueVertex.value
             legendTitle = outgoingEdges.find(_.destination == valueVertex).get.uri
@@ -127,17 +144,8 @@ class ColumnChartPluginView extends PluginView("Column Chart")
         }.toList
 
         setupDivSizeForColumns(values)
-        setupTooltip()
+        setupTooltipsWithTitles(values.map(_(0)))
         createDataTable(values, legendTitle)
-    }
-
-    private def setTextualContent(message: String, details: String) {
-        val messageDiv = new
-                Div(List(new Text(message)), "column-chart-textual-content column-chart-textual-content-large")
-        val descriptionDiv = new
-                Div(List(new Text(details)), "column-chart-textual-content column-chart-textual-content-small")
-        messageDiv.render(chartWrapperElement)
-        descriptionDiv.render(chartWrapperElement)
     }
 
     @javascript(
@@ -151,7 +159,7 @@ class ColumnChartPluginView extends PluginView("Column Chart")
                           $("#tooltip").remove();
                           var x = item.pageX,
                               y = item.pageY;
-                          $('<div id="tooltip">' + "Value: " + item.datapoint[1] + '</div>').css( {
+                          $('<div id="tooltip">Title: ' + titles.internalJsArray[item.dataIndex]+ '<br/>Value: ' + item.datapoint[1] + '</div>').css( {
                                       position: 'absolute',
                                       display: 'none',
                                       top: y + 5,
@@ -171,7 +179,7 @@ class ColumnChartPluginView extends PluginView("Column Chart")
                   }
               });
         """)
-    private def setupTooltip(){
+    private def setupTooltipsWithTitles(titles: List[Any]){
 
     }
 
@@ -181,9 +189,9 @@ class ColumnChartPluginView extends PluginView("Column Chart")
         if (width < 500) {
             width = 500
         }
-        val height = 400
+        val height = window.innerHeight - chartWrapper.offset.y - 20 // The 20 is for potential horizontal scrollbar.
 
-        val styleString = "width: " + width + "px; height: " + height + "px;"
+        val styleString = "width: " + width + "px; height: " + height + "px; margin: 0 20px;"
         chartWrapper.setAttribute("style", styleString)
     }
 
@@ -193,15 +201,17 @@ class ColumnChartPluginView extends PluginView("Column Chart")
             chartWrapper.removeAllChildNodes()
 
             if (graph.isEmpty) {
-                // Add a 'No graph' title
-                setTextualContent("No graph available...", "Load a graph to begin.")
+                renderMessage(chartWrapper.htmlElement, "The graph is empty...")
             } else {
                 val initialVertex = findInitialVertexForColumnChart(graph.get)
                 if (initialVertex.isDefined) {
                     setGraphContentWithInitialVertex(graph.get, initialVertex.get)
                 } else {
-                    setTextualContent("This graph can't be displayed as a column chart...",
-                        "Choose a different visualization plugin.")
+                    renderMessage(
+                        chartWrapper.htmlElement,
+                        "This graph can't be displayed as a column chart...",
+                        "Choose a different visualization plugin."
+                    )
                 }
             }
         }
