@@ -106,7 +106,7 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
         }
 
         drawArrow(context, originView.position, destinationView.position,
-            originView.radius, destinationView.radius, width, colorToUse)
+            originView.radius  + 5, destinationView.radius + 5, width, colorToUse)
     }
 
     override def toString: String = {
