@@ -55,6 +55,7 @@ label {
 .plugin-space {
     position: absolute;
     left: 0;
+    width: 100%;
 }
 
 .tabbable .plugin-space {
@@ -63,10 +64,6 @@ label {
 
 .tabbable canvas:first-of-type {
     position: relative;
-}
-
-.plugin-space > div {
-    margin: 0 20px;
 }
 
 .plugin-space canvas {
@@ -203,24 +200,24 @@ input[type="checkbox"].active:after {
     overflow: visible;
 }
 
-.column-chart-textual-content {
+.plugin-message {
     font-weight: bolder;
-    color: #333;
-    text-shadow: 2px 2px #BCBCBC;
     text-align: center;
     vertical-align: center;
 }
 
-.column-chart-textual-content-large {
+.plugin-message.large {
     padding-top: 150px;
     font-size: 32pt;
+    color: #333;
+    text-shadow: 2px 2px #BCBCBC;
 }
 
-.column-chart-textual-content-small {
-    color: #666;
-    text-shadow: 1px 1px #DEDEDE;
+.plugin-message.small {
     padding-top: 30px;
     font-size: 24px;
+    color: #666;
+    text-shadow: 1px 1px #DEDEDE;
 }
 
 .timeout-control label {
@@ -271,17 +268,6 @@ input[type="checkbox"].active:after {
 .successors .alert {
     z-index: 1;
     margin-bottom: 0px;
-}
-
-.column-chart-wrapper {
-    overflow: auto;
-    padding-left: 40px;
-    padding-right: 40px;
-    min-height: 250px;
-    min-width: 500px;
-
-    height: 100%;
-    width: 100%;
 }
 
 .vitable {

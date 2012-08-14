@@ -1,4 +1,4 @@
-package cz.payola.web.client.presenters
+package cz.payola.web.client.presenters.entity.analyses
 
 import s2js.adapters.browser._
 import cz.payola.web.client._
@@ -33,7 +33,6 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
     var intervalHandler: Option[Int] = None
 
-
     def initialize() {
         blockPage("Loading analysis data")
         DomainData.getAnalysisById(analysisId) {
@@ -45,7 +44,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         }
     }
 
-    def initUI(analysis: Analysis) : AnalysisRunnerView = {
+    def initUI(analysis: Analysis): AnalysisRunnerView = {
         val view = new AnalysisRunnerView(analysis, 30)
         view.render(parentElement)
         view.tabs.hideTab(1)
@@ -58,8 +57,11 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
                 analysisRunning = false
                 intervalHandler.foreach(window.clearInterval(_))
                 view.overviewView.controls.stopButton.setIsEnabled(false)
+                view.overviewView.controls.timeoutControl.controlGroup.removeCssClass("none")
+                view.overviewView.controls.timeoutInfoBar.addCssClass("none")
+                view.overviewView.controls.progressBar.setStyleToSuccess()
+                view.overviewView.controls.progressBar.setProgress(0.0)
 
-                // First initialization
                 graphPresenter = new GraphPresenter(view.resultsView.htmlElement)
                 graphPresenter.initialize()
 
@@ -114,7 +116,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
                     }, 1000))
 
                     evaluationId = id
-                    view.overviewView.controls.progressValueBar.setAttribute("style", "width: 2%; height: 40px")
+                    view.overviewView.controls.progressBar.setProgress(0.02)
                     schedulePolling(view, analysis)
             } {
                 error => fatalErrorHandler(error)
@@ -129,6 +131,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
     private def uiAdaptAnalysisRunning(view: AnalysisRunnerView, initUI: (Analysis) => Unit, analysis: Analysis) {
         view.overviewView.controls.runBtn.setIsEnabled(false)
+        view.overviewView.controls.runBtnCaption.text = "Running Analysis..."
         view.overviewView.controls.stopButton.setIsEnabled(true)
         view.overviewView.controls.timeoutControl.controlGroup.addCssClass("none")
         view.overviewView.controls.timeoutInfoBar.removeCssClass("none")
@@ -200,10 +203,9 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
     }
 
     def evaluationErrorHandler(error: EvaluationError, view: AnalysisRunnerView, analysis: Analysis) {
-        view.overviewView.controls.progressDiv.addCssClass("progress-danger")
-        view.overviewView.controls.progressDiv.removeCssClass("progress-success")
-        view.overviewView.controls.progressDiv.removeCssClass("active")
-        view.overviewView.controls.progressValueBar.setAttribute("style", "width:100%; height: 40px")
+        view.overviewView.controls.progressBar.setStyleToFailure()
+        view.overviewView.controls.progressBar.setActive(false)
+        view.overviewView.controls.progressBar.setProgress(1.0)
         analysisDone = true
         view.overviewView.controls.stopButton.setIsEnabled(false)
         intervalHandler.foreach(window.clearInterval(_))
@@ -216,9 +218,8 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
     }
 
     def evaluationTimeout(view: AnalysisRunnerView, analysis: Analysis) {
-        view.overviewView.controls.progressDiv.addCssClass("progress-danger")
-        view.overviewView.controls.progressDiv.removeCssClass("progress-success")
-        view.overviewView.controls.progressDiv.removeCssClass("active")
+        view.overviewView.controls.progressBar.setStyleToFailure()
+        view.overviewView.controls.progressBar.setActive(false)
         analysisDone = true
         view.overviewView.controls.stopButton.setIsEnabled(false)
         intervalHandler.foreach(window.clearInterval(_))
@@ -244,8 +245,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
     }
 
     def evaluationSuccessHandler(success: EvaluationSuccess, analysis: Analysis, view: AnalysisRunnerView) {
-        view.overviewView.controls.progressValueBar.addCssClass("progress-danger")
-        view.overviewView.controls.progressValueBar.removeCssClass("progress-success")
+        view.overviewView.controls.progressBar.setStyleToFailure()
         analysisDone = true
         view.overviewView.controls.stopButton.setIsEnabled(false)
         intervalHandler.foreach(window.clearInterval(_))
@@ -260,19 +260,14 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         }
 
         view.overviewView.controls.runBtn.addCssClass("btn-success")
-        view.overviewView.controls.progressDiv.removeCssClass("active")
+        view.overviewView.controls.progressBar.setActive(false)
 
         analysisEvaluationSuccess.trigger(new EvaluationSuccessEventArgs(analysis, success.outputGraph))
     }
 
     def renderEvaluationProgress(progress: EvaluationInProgress, view: AnalysisRunnerView) {
-        val percent = (progress.value * 100)
-        val display = if (percent > 2) {
-            percent
-        } else {
-            2
-        }
-        view.overviewView.controls.progressValueBar.setAttribute("style", "width: " + display + "%; height: 40px")
+        val progressValue = if (progress.value < 0.02) 0.02 else progress.value
+        view.overviewView.controls.progressBar.setProgress(progressValue)
 
         progress.evaluatedInstances.map {
             inst => view.overviewView.analysisVisualizer.setInstanceEvaluated(inst.id)

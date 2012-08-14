@@ -2,11 +2,14 @@
 
 @main(user, "Analysis "+analysis.name+" :: Payola!") {
 <div class="container-fluid">
-    <h1>
-        Detail of analysis: @analysis.name @if(analysis.owner == user) {
-            <a href="@routes.Analysis.edit(analysis.id)" class="btn btn-small" style="margin-bottom: 5px; margin-left: 10px;"><i class="icon-pencil"></i> Edit</a>
+    <div class="row-fluid">
+        <h1 class="span11">
+            Detail of analysis: @analysis.name
+        </h1>
+        @if(analysis.owner == user) {
+            <a href="@routes.Analysis.edit(analysis.id)" class="span1 btn btn-small" style="margin-bottom: 5px; margin-left: 10px;"><i class="icon-pencil"></i> Edit</a>
         }
-    </h1>
+    </div>
 
     <div class="row-fluid" id="client-canvas">
 
