@@ -26,6 +26,9 @@ class ColumnChartPluginView extends PluginView("Column Chart")
            var counter = 0;
            arr.foreach(function(x){
                 var title = x[0];
+                if (title.length > 50){
+                    title = $.trim(title.substring(0, 50)) + "...";
+                }
                 var value = x[1];
                 rawData.push([ counter, value ]);
                 titles.push([ counter, title ]);
@@ -41,7 +44,18 @@ class ColumnChartPluginView extends PluginView("Column Chart")
                     align: "center"
                 }
            }];
-          $.plot($("#chart-wrapper"), data, { label: legendTitle, xaxis: { ticks: titles }, grid: { hoverable: true, clickable: true } });
+
+          var options = {
+                label: legendTitle,
+                xaxis: {
+                    ticks: titles
+                },
+                grid: {
+                    hoverable: true,
+                    clickable: true
+                }
+          };
+          $.plot($("#chart-wrapper"), data, options);
         """)
     private def createDataTable(arr: List[List[Any]], legendTitle: String) {
 
@@ -122,7 +136,7 @@ class ColumnChartPluginView extends PluginView("Column Chart")
             val outgoingEdges = g.getOutgoingEdges(v.uri)
             val literals = outgoingEdges.filter(_.destination.isInstanceOf[LiteralVertex]).map(_.destination.asInstanceOf[LiteralVertex])
 
-            val title = literals.find(litVertex => variableIsString(litVertex.value)).get.value
+            val title: String = literals.find(litVertex => variableIsString(litVertex.value)).get.value.toString
             val valueVertex = literals.find(litVertex => variableIsNumber(litVertex.value)).get
             val value = valueVertex.value
             legendTitle = outgoingEdges.find(_.destination == valueVertex).get.uri
@@ -130,7 +144,7 @@ class ColumnChartPluginView extends PluginView("Column Chart")
         }.toList
 
         setupDivSizeForColumns(values)
-        setupTooltip()
+        setupTooltipsWithTitles(values.map(_(0)))
         createDataTable(values, legendTitle)
     }
 
@@ -145,7 +159,7 @@ class ColumnChartPluginView extends PluginView("Column Chart")
                           $("#tooltip").remove();
                           var x = item.pageX,
                               y = item.pageY;
-                          $('<div id="tooltip">' + "Value: " + item.datapoint[1] + '</div>').css( {
+                          $('<div id="tooltip">Title: ' + titles.internalJsArray[item.dataIndex]+ '<br/>Value: ' + item.datapoint[1] + '</div>').css( {
                                       position: 'absolute',
                                       display: 'none',
                                       top: y + 5,
@@ -165,7 +179,7 @@ class ColumnChartPluginView extends PluginView("Column Chart")
                   }
               });
         """)
-    private def setupTooltip(){
+    private def setupTooltipsWithTitles(titles: List[Any]){
 
     }
 
