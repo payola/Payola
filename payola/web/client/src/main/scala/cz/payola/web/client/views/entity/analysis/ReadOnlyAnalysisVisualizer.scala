@@ -23,4 +23,10 @@ class ReadOnlyAnalysisVisualizer(analysis: Analysis) extends AnalysisVisualizer(
     def setInstanceRunning(instanceId: String) {
         instancesMap.get(instanceId).map(_.setRunning())
     }
+
+    def clearAllAttributes() {
+        instancesMap foreach { case (key, view) =>
+            view.clearStyle()
+        }
+    }
 }
