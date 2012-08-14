@@ -44,7 +44,7 @@ class EditablePluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[P
                 case _ => new TextInput(param.id, v.toString, "Enter parameter value")
             }
 
-            val inputControl = new InputControl(param.name, field)
+            val inputControl = new InputControl(param.name, field, Some("span2"))
             inputControl.delayedChanged += { _ =>
                 parameterValueChanged.triggerDirectly(new ParameterValue(getId, param.id, param.name,
                     field.value.toString, inputControl))

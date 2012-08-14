@@ -8,7 +8,7 @@ import cz.payola.web.client.events.SimpleUnitEvent
 import cz.payola.web.client.views.elements.form._
 import scala.Some
 
-class InputControl[A <: Field[_]](val label: String, val field: A, labelClass: Option[String] = Some("span2"))
+class InputControl[A <: Field[_]](val label: String, val field: A, labelClass: Option[String])
     extends ComposedView
 {
     val delayedChanged = new SimpleUnitEvent[this.type]

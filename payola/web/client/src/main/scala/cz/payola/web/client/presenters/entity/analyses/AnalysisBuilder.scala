@@ -33,7 +33,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
 
     protected var nameComponent = new InputControl(
         "Analysis name",
-        new TextInput("init-name", "", "Enter analysis name")
+        new TextInput("init-name", "", "Enter analysis name"), Some("span2")
     )
 
     protected val instancesMap = new mutable.HashMap[String, PluginInstanceView]

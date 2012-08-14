@@ -2,7 +2,7 @@
 
 @main(None, "Payola login page", Some("Sign in")) {
     <div class="container">
-        <form action="@routes.Application.authenticate" class="form-horizontal">
+        <form action="@routes.Application.authenticate" class="form-horizontal" method="post">
 
             @form.globalError.map { error =>
             <p class="alert alert-error">
@@ -27,7 +27,7 @@
                     </div>
                     <div>
                         <span class="controls">
-                            <button type="submit" id="loginbutton" class="input btn btn-primary">Sign up</button>
+                            <button type="submit" id="loginbutton" class="input btn btn-primary">Sign in</button>
                         </span>
                     </div>
                 </fieldset>

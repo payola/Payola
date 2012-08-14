@@ -377,3 +377,16 @@ input.glyph {
 .relative {
     position: relative;
 }
+
+.inline-block {
+    display: inline-block;
+}
+
+.button-row .control-group {
+    width: 50%;
+    display: inline-block;
+}
+
+.button-row .inline-block {
+    margin-left: 5px;
+}

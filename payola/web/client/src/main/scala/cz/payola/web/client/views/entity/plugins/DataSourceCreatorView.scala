@@ -9,13 +9,13 @@ import cz.payola.web.client.views.bootstrap.InputControl
 
 class DataSourceCreatorView(plugins: Seq[Plugin]) extends ComposedView
 {
-    val name = new InputControl("Name", new TextInput("", "", ""))
+    val name = new InputControl("Name", new TextInput("", "", ""), Some("span2"))
 
-    val description = new InputControl("Description", new TextInput("", "", ""))
+    val description = new InputControl("Description", new TextInput("", "", ""), Some("span2"))
 
     val plugin = new InputControl(
         "Plugin",
-        new Select("", "", "", plugins.map(p => new SelectOption(p.name, p.id)))
+        new Select("", "", "", plugins.map(p => new SelectOption(p.name, p.id))), Some("span2")
     )
 
     val parameterInputsSpace = new Div
@@ -44,7 +44,7 @@ class DataSourceCreatorView(plugins: Seq[Plugin]) extends ComposedView
     private def renderPluginParameters(plugin: Plugin) {
         parameters.foreach(_.destroy())
         parameters = plugin.parameters.map { p =>
-            new InputControl(p.name, new TextInput(p.id, p.defaultValue.toString, ""))
+            new InputControl(p.name, new TextInput(p.id, p.defaultValue.toString, ""), Some("span2"))
         }
         parameters.foreach(_.render(parameterInputsSpace.htmlElement))
     }
