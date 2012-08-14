@@ -1,20 +1,18 @@
 package cz.payola.web.client.views.graph.visual
 
+import s2js.compiler.javascript
+import s2js.adapters.browser._
+import s2js.adapters.html
 import cz.payola.web.client.views.graph.PluginView
 import cz.payola.web.client.views.elements._
 import cz.payola.common.rdf._
-import s2js.compiler.javascript
-import s2js.adapters.browser._
 
 class ColumnChartPluginView extends PluginView("Column Chart")
 {
-    private val chartWrapper = new Div(Nil)
-    chartWrapper.setAttribute("id", "chart-wrapper")
+    private val chartWrapper = new Div
+    chartWrapper.id = "chart-wrapper"
 
-    private val pluginWrapper = new Div(List(chartWrapper), "column-chart-wrapper")
-
-    // Used in drawChart()'s @javascript annotation. Beware before renaming
-    private val chartWrapperElement = chartWrapper.htmlElement
+    private val wrapper = new Div(List(chartWrapper))
 
     /**Adds a bars to the chart. Is a list of list with two values - title and value.
      *
@@ -46,6 +44,15 @@ class ColumnChartPluginView extends PluginView("Column Chart")
           $.plot($("#chart-wrapper"), data, { label: legendTitle, xaxis: { ticks: titles }, grid: { hoverable: true, clickable: true } });
         """)
     private def createDataTable(arr: List[List[Any]], legendTitle: String) {
+
+    }
+
+    override def render(parent: html.Element) {
+        super.render(parent)
+        val width = window.innerWidth
+        val height = window.innerHeight - wrapper.offset.y
+        val sizeStyle = "width: " + width + "px; height: " + height + "px;"
+        wrapper.setAttribute("style", sizeStyle + " overflow: auto;")
     }
 
     def createPhonyGraph: Graph = {
@@ -83,11 +90,7 @@ class ColumnChartPluginView extends PluginView("Column Chart")
     }
 
     def createSubViews = {
-        // Update width and height of the pluginWrapper
-        val width = window.innerWidth - 220
-        val styleString = "width: " + width + "px;"
-        pluginWrapper.setAttribute("style", styleString)
-        List(pluginWrapper)
+        List(wrapper)
     }
 
     def findInitialVertexForColumnChart(g: Graph): Option[IdentifiedVertex] = {
@@ -131,15 +134,6 @@ class ColumnChartPluginView extends PluginView("Column Chart")
         createDataTable(values, legendTitle)
     }
 
-    private def setTextualContent(message: String, details: String) {
-        val messageDiv = new
-                Div(List(new Text(message)), "column-chart-textual-content column-chart-textual-content-large")
-        val descriptionDiv = new
-                Div(List(new Text(details)), "column-chart-textual-content column-chart-textual-content-small")
-        messageDiv.render(chartWrapperElement)
-        descriptionDiv.render(chartWrapperElement)
-    }
-
     @javascript(
         """
           var previousPoint = null;
@@ -181,9 +175,9 @@ class ColumnChartPluginView extends PluginView("Column Chart")
         if (width < 500) {
             width = 500
         }
-        val height = 400
+        val height = window.innerHeight - chartWrapper.offset.y - 20 // The 20 is for potential horizontal scrollbar.
 
-        val styleString = "width: " + width + "px; height: " + height + "px;"
+        val styleString = "width: " + width + "px; height: " + height + "px; margin: 0 20px;"
         chartWrapper.setAttribute("style", styleString)
     }
 
@@ -193,15 +187,17 @@ class ColumnChartPluginView extends PluginView("Column Chart")
             chartWrapper.removeAllChildNodes()
 
             if (graph.isEmpty) {
-                // Add a 'No graph' title
-                setTextualContent("No graph available...", "Load a graph to begin.")
+                renderMessage(chartWrapper.htmlElement, "The graph is empty...")
             } else {
                 val initialVertex = findInitialVertexForColumnChart(graph.get)
                 if (initialVertex.isDefined) {
                     setGraphContentWithInitialVertex(graph.get, initialVertex.get)
                 } else {
-                    setTextualContent("This graph can't be displayed as a column chart...",
-                        "Choose a different visualization plugin.")
+                    renderMessage(
+                        chartWrapper.htmlElement,
+                        "This graph can't be displayed as a column chart...",
+                        "Choose a different visualization plugin."
+                    )
                 }
             }
         }

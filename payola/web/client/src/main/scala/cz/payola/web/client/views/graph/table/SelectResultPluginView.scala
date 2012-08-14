@@ -58,33 +58,42 @@ class SelectResultPluginView extends TablePluginView("Select Result Table")
                 }
             }
 
-            // Retrieve the binding values.
-            g.edges.foreach { e =>
-                e.uri match {
-                    case "http://www.w3.org/2005/sparql-results#value" => {
-                        bindings(e.origin.toString).value = e.destination
-                    }
-                    case "http://www.w3.org/2005/sparql-results#variable" => {
-                        bindings(e.origin.toString).variable = e.destination.toString
+            if (variables.isEmpty) {
+                tableWrapper.removeAllChildNodes()
+                renderMessage(
+                    tableWrapper.htmlElement,
+                    "The graph isn't a result of a Select SPARQL Query...",
+                    "Choose a different visualization plugin."
+                )
+            } else {
+                // Retrieve the binding values.
+                g.edges.foreach { e =>
+                    e.uri match {
+                        case "http://www.w3.org/2005/sparql-results#value" => {
+                            bindings(e.origin.toString).value = e.destination
+                        }
+                        case "http://www.w3.org/2005/sparql-results#variable" => {
+                            bindings(e.origin.toString).variable = e.destination.toString
+                        }
                     }
                 }
-            }
 
-            // Create the headers.
-            val headerRow = addRow(tableHead)
-            variables.foreach { variable =>
-                val cell = addCell(headerRow, isHeader = true)
-                cell.innerHTML = variable
-            }
-
-            // Create the body.
-            solutions.foreach { s =>
-                val row = addRow(tableBody)
+                // Create the headers.
+                val headerRow = addRow(tableHead)
                 variables.foreach { variable =>
-                    val cell = addCell(row)
-                    s._2.find(_.variable == variable).map(_.value).foreach {
-                        case i: IdentifiedVertex => createVertexView(i).render(cell)
-                        case v => new Text(v.toString).render(cell)
+                    val cell = addCell(headerRow, isHeader = true)
+                    cell.innerHTML = variable
+                }
+
+                // Create the body.
+                solutions.foreach { s =>
+                    val row = addRow(tableBody)
+                    variables.foreach { variable =>
+                        val cell = addCell(row)
+                        s._2.find(_.variable == variable).map(_.value).foreach {
+                            case i: IdentifiedVertex => createVertexView(i).render(cell)
+                            case v => new Text(v.toString).render(cell)
+                        }
                     }
                 }
             }
