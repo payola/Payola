@@ -299,13 +299,21 @@ input[type="checkbox"].active:after {
     position: relative;
 }
 
+.glyphed-element {
+    position: absolute;
+    font-family: "EntypoRegular";
+    font-size: 57px;
+    width: auto;
+    height: auto;
+    align: center;
+}
+
 .glyph {
     position: relative;
     font-family: "EntypoRegular";
     font-size: 57px;
     width: auto;
     height: auto;
-    z-index: -1;
 }
 
 input.glyph {
