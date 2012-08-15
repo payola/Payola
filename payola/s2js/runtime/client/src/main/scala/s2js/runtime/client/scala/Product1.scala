@@ -42,5 +42,5 @@ trait Product1[+T1] extends Product
     /** A projection of element 1 of this Product.
       * @return   A projection of element 1.
       */
-    def _1: T1
+    val _1: T1
 }
