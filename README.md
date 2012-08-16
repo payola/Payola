@@ -785,7 +785,7 @@ Squeryl provides lazy fetching of entities from "N" side of 1:N or M:N relations
 class Analysis extends cz.payola.domain.entities.Analysis {
 
 	// Definition of a lazy field with a query fetching plugin instances of this analysis
-	// The relation between analyses and plugin instances is defined in schema.pluginInstancesOfAnalyises in [SchemaComponent](#schema-component) trait
+	// The relation between analyses and plugin instances is defined in SchemaComponent.pluginInstancesOfAnalyises
 	private lazy val _pluginInstancesQuery = schema.pluginInstancesOfAnalyises.left(this)
 
     // Returns plugin instances of this analysis
