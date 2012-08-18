@@ -30,6 +30,12 @@ trait Presenter
         View.unblockPage()
     }
 
+    /**
+     * Sets a timeout and performs the f function after the delayInMilliseconds runs out.
+     * @param delayInMilliseconds how long to wait before function is performed
+     * @param f run this function after the timeout
+     * @return number of the javascript timeout function
+     */
     def delayed(delayInMilliseconds: Int)(f: () => Unit): Int = {
         window.setTimeout(f, delayInMilliseconds)
     }
