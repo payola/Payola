@@ -19,7 +19,6 @@ class GraphPresenter(val viewElement: html.Element) extends Presenter
     private var currentOntologyCustomization: Option[OntologyCustomization] = None
 
     def initialize() {
-        delayed(100)(()=>{val a = 1})
         Model.ontologyCustomizationsChanged += onOntologyCustomizationsChanged _
         view.vertexBrowsingDataSource += onVertexBrowsingDataSource _
         view.ontologyCustomizationsButton.mouseClicked += onOntologyCustomizationsButtonClicked _
