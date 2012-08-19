@@ -61,7 +61,7 @@ class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) e
       *
       * @param s Success string.
       */
-    private def postWasSuccessfulCallback(s: String) {
+    private def postWasSuccessfulCallback() {
         val alert = new AlertModal("Success!", "Plugin uploaded successfully!", "alert-success")
         alert.confirming += { e =>
             window.location.href = listPluginsURL
@@ -75,13 +75,13 @@ class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) e
       * @param code Code of the plugin.
       */
     private def postCodeToServer(code: String) {
-        blockPage("Compiling plugin...")
-       PluginManager.uploadPlugin(code) {
-            s => postWasSuccessfulCallback(s)
-               unblockPage()
-        } {
-            t => postFailedCallback(t)
-               unblockPage()
+       blockPage("Compiling plugin...")
+       PluginManager.uploadPlugin(code) { () =>
+           postWasSuccessfulCallback()
+           unblockPage()
+        } { t =>
+           postFailedCallback(t)
+           unblockPage()
         }
     }
 }
