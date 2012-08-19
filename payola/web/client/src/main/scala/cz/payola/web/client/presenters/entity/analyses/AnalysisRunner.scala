@@ -213,6 +213,8 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
             view.overviewView.analysisVisualizer.setInstanceError(err._1.id, err._2)
         }
 
+        AlertModal.display("Analysis evaluation error",error.error)
+
         initReRun(view, analysis)
     }
 
