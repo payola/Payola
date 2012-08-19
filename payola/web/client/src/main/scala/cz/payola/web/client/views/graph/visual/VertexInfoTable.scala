@@ -11,7 +11,19 @@ import cz.payola.web.client.events._
 import cz.payola.web.client.views.algebra.Point2D
 import cz.payola.web.client.views.elements.lists._
 
-class VertexInfoTable(vertex: IdentifiedVertex, values: mutable.HashMap[String, Seq[String]], position: Point2D)
+object VertexInfoTablePosition
+{
+    val right = 0
+
+    val bottom = 1
+
+    val left = 2
+
+    val top = 3
+}
+
+class VertexInfoTable(vertex: IdentifiedVertex, values: mutable.HashMap[String, Seq[String]], position: Point2D,
+    positionType: Int = VertexInfoTablePosition.right)
     extends ComposedView
 {
     var vertexBrowsingDataSource = new SimpleUnitEvent[IdentifiedVertex]
@@ -33,25 +45,33 @@ class VertexInfoTable(vertex: IdentifiedVertex, values: mutable.HashMap[String, 
             false
         }
 
-        var even = true
         values.foreach { x =>
             buffer += new DefinitionTerm(List(new Text(x._1)))
 
             x._2.foreach { string =>
                 buffer += new DefinitionDefinition(List(new Text(string)))
             }
-
-            even = !even
         }
 
-        val popoverTitle = new Heading(List(dataSourceAnchor, new Span(List(new Text(" "))), browsingAnchor),3,"popover-title")
-        val popoverContent = new Div(List(new DefinitionList(buffer, "unstyled well")),"popover-content")
+        val popoverTitle = new
+                Heading(List(dataSourceAnchor, new Span(List(new Text(" "))), browsingAnchor), 3, "popover-title")
+        val popoverContent = new Div(List(new DefinitionList(buffer, "unstyled well")), "popover-content")
         val popoverInner = new Div(List(popoverTitle, popoverContent), "popover-inner")
         val popoverArrow = new Div(Nil, "arrow")
         popoverArrow.setAttribute("style", "top: 15px;")
         val div = new Div(List(popoverArrow, popoverInner))
-        div.setAttribute("class", "popover fade right in vitable")
+        div.setAttribute("class", "popover fade in vitable " + positionTypeCssClass(positionType))
         div.setAttribute("style", "top: " + (position.y - 10).toString() + "px; left: " + position.x.toString() + "px;")
         List(div)
+    }
+
+    private def positionTypeCssClass(positionType: Int) {
+        positionType match {
+            case VertexInfoTablePosition.right => "right"
+            case VertexInfoTablePosition.left => "left"
+            case VertexInfoTablePosition.top => "top"
+            case VertexInfoTablePosition.bottom => "bottom"
+            case _ => "right"
+        }
     }
 }
