@@ -34,7 +34,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
     var intervalHandler: Option[Int] = None
 
     def initialize() {
-        blockPage("Loading analysis data")
+        blockPage("Loading analysis data...")
         DomainData.getAnalysisById(analysisId) {
             analysis =>
                 initUI(analysis)

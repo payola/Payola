@@ -53,7 +53,7 @@ class ShareButtonPresenter(
     }
 
     private def onShareButtonClicked(granteeClassName: String, granteeClassNameText: String) {
-        blockView("Fetching share data.")
+        blockView("Fetching share data...")
         SharingData.getEntityGrantees(entityClassName, entityId, granteeClassName) { grantees =>
             unblockView()
 
@@ -64,7 +64,7 @@ class ShareButtonPresenter(
                 }(fatalErrorHandler(_))
             }
             shareModal.confirming += { e =>
-                blockView("Sharing.")
+                blockView("Sharing...")
                 val granteeIds = shareModal.granteeSelection.field.value
                 SharingData.shareEntity(entityClassName, entityId, granteeClassName, granteeIds) { () =>
                     unblockView()

@@ -42,7 +42,7 @@ class DataSourceBrowser(
 
         // If the default URI isn't specified, display the initial graph.
         if (initialVertexUri == "") {
-            blockPage("Fetching the initial graph.")
+            blockPage("Fetching the initial graph...")
             DataSourceManager.getInitialGraph(dataSourceId) { graph =>
                 graphPresenter.view.updateGraph(graph)
                 updateNavigationView()
@@ -131,7 +131,7 @@ class DataSourceBrowser(
         view.nodeUriInput.value = uri
         view.nodeUriInput.setIsEnabled(false)
 
-        blockPage("Fetching the node neighbourhood.")
+        blockPage("Fetching the node neighbourhood...")
         DataSourceManager.getNeighbourhood(dataSourceId, uri) {
             graph =>
                 graphPresenter.view.updateGraph(graph)
