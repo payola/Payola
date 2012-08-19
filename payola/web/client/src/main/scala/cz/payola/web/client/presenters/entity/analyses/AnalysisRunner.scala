@@ -60,8 +60,6 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
                 view.overviewView.controls.timeoutControl.controlGroup.removeCssClass("none")
                 view.overviewView.controls.timeoutInfoBar.addCssClass("none")
                 view.overviewView.controls.progressBar.setStyleToSuccess()
-                view.overviewView.controls.progressBar.setProgress(0.0)
-                view.overviewView.analysisVisualizer.clearAllAttributes()
 
                 graphPresenter = new GraphPresenter(view.resultsView.htmlElement)
                 graphPresenter.initialize()
@@ -246,7 +244,8 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
     }
 
     def evaluationSuccessHandler(success: EvaluationSuccess, analysis: Analysis, view: AnalysisRunnerView) {
-        view.overviewView.controls.progressBar.setStyleToFailure()
+        view.overviewView.controls.progressBar.setStyleToSuccess()
+        view.overviewView.controls.progressBar.setProgress(100)
         analysisDone = true
         view.overviewView.controls.stopButton.setIsEnabled(false)
         intervalHandler.foreach(window.clearInterval(_))
@@ -254,6 +253,8 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         initReRun(view, analysis)
 
         window.onunload = null
+
+        view.overviewView.analysisVisualizer.setAllDone()
 
         success.instanceErrors.foreach {
             err =>
