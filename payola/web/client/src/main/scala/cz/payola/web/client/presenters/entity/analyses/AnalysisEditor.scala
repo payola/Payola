@@ -11,7 +11,7 @@ class AnalysisEditor(parentElementId: String, analysisIdParam: String)
     analysisId = analysisIdParam
 
     override def initialize() {
-        blockPage("Loading analysis data")
+        blockPage("Loading analysis data...")
         AnalysisBuilderData.getAnalysis(analysisId) { analysis =>
 
             lockAnalysisAndLoadPlugins()
