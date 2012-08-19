@@ -6,19 +6,38 @@ import cz.payola.domain.entities.plugins._
 import cz.payola.domain.entities.plugins.concrete.DataFetcher
 import cz.payola.domain.entities.plugins.parameters.StringParameter
 import cz.payola.domain.rdf._
-import cz.payola.domain.net.Downloader
+import com.hp.hpl.jena.query.QueryFactory
 
 sealed class SparqlEndpointFetcher(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
     extends DataFetcher(name, inputCount, parameters, id)
 {
     def this() = {
-        this("SPARQL Endpoint", 0, List(new StringParameter("EndpointURL", "", false)), IDGenerator.newId)
-        isPublic = true
+        this("SPARQL Endpoint", 0, List(
+            new StringParameter(SparqlEndpointFetcher.endpointURLParameter, "", false),
+            new StringParameter(SparqlEndpointFetcher.graphURIsParameter, "", true)
+        ), IDGenerator.newId)
+    }
+
+    def getEndpointURL(instance: PluginInstance): Option[String] = {
+        instance.getStringParameter(SparqlEndpointFetcher.endpointURLParameter)
+    }
+
+    def getGraphURIs(instance: PluginInstance): Option[Seq[String]] = {
+        instance.getStringParameter(SparqlEndpointFetcher.graphURIsParameter).map(_.split("\n").filter(_ != "").toList)
     }
 
     def executeQuery(instance: PluginInstance, query: String): Graph = {
-        usingDefined(instance.getStringParameter("EndpointURL")) { endpointURL =>
-            new SparqlEndpoint(endpointURL).executeQuery(query)
+        usingDefined(getEndpointURL(instance), getGraphURIs(instance)) { (endpointURL, graphURIs) =>
+            val sparqlQuery = QueryFactory.create(query)
+            graphURIs.foreach(sparqlQuery.addGraphURI(_))
+            new SparqlEndpoint(endpointURL).executeQuery(sparqlQuery.toString)
         }
     }
+}
+
+object SparqlEndpointFetcher
+{
+    val endpointURLParameter = "Endpoint URL"
+
+    val graphURIsParameter = "Graph URIs"
 }

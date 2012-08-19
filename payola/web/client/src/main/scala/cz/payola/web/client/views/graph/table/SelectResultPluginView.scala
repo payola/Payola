@@ -46,10 +46,10 @@ class SelectResultPluginView extends TablePluginView("Select Result Table")
             // Retrieve the bindings.
             g.edges.foreach { e =>
                 e.uri match {
-                    case "http://www.w3.org/2005/sparql-results#resultVariable" => {
+                    case u if u.endsWith("#resultVariable") => {
                         variables += e.destination.toString
                     }
-                    case "http://www.w3.org/2005/sparql-results#binding" => {
+                    case u if u.endsWith("#binding") => {
                         val solutionBindings = solutions.getOrElseUpdate(e.origin.uri, mutable.ListBuffer.empty[Binding])
                         val binding = new Binding
                         solutionBindings += binding
@@ -69,10 +69,10 @@ class SelectResultPluginView extends TablePluginView("Select Result Table")
                 // Retrieve the binding values.
                 g.edges.foreach { e =>
                     e.uri match {
-                        case "http://www.w3.org/2005/sparql-results#value" => {
+                        case u if u.endsWith("#value") => {
                             bindings(e.origin.toString).value = e.destination
                         }
-                        case "http://www.w3.org/2005/sparql-results#variable" => {
+                        case u if u.endsWith("#variable") => {
                             bindings(e.origin.toString).variable = e.destination.toString
                         }
                     }

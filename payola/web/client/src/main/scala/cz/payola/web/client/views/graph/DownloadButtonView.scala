@@ -7,7 +7,7 @@ import cz.payola.web.client.views.elements.lists.ListItem
 
 class DownloadButtonView extends ComposedView
 {
-    val rdfDownloadAnchor = new Anchor(List(new Text("Download As RDF")))
+    val rdfDownloadAnchor = new Anchor(List(new Text("Download As RDF/XML")))
 
     val ttlDownloadAnchor = new Anchor(List(new Text(" Download As TTL")))
 

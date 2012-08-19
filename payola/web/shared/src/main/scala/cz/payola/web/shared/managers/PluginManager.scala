@@ -27,14 +27,13 @@ import s2js.runtime.shared.rpc.RpcException
       */
     @async def uploadPlugin(pluginCode: String, user: User = null)(successCallback: (String => Unit))
         (failCallback: (Throwable => Unit)) {
-        // Sanity check
-        assert(user != null, "Not logged in, or some other error")
 
         // Try to compile code
+        // TODO use validation exceptions.
         try {
             Payola.model.pluginModel.createPluginFromSource(pluginCode, user)
             successCallback("Plugin saved.")
-        }catch{
+        } catch {
             case e: Exception => {
                 failCallback(new RpcException("Couldn't save plugin.\n\nDetails: " + e.getMessage))
             }

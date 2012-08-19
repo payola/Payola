@@ -23,8 +23,9 @@ class OntologicalFilter(name: String, inputCount: Int, parameters: immutable.Seq
     extends SparqlQuery(name, inputCount, parameters, id)
 {
     def this() = {
-        this("Ontological Filter", 1, List(new StringParameter("OntologyURLs", "", false)), IDGenerator.newId)
-        isPublic = true
+        this("Ontological Filter", 1, List(
+            new StringParameter(OntologicalFilter.ontologyURLsParameter, "", false)
+        ), IDGenerator.newId)
     }
 
     /** Creates a new SPARQL query that filters the graph according to the ontology.
@@ -61,16 +62,8 @@ class OntologicalFilter(name: String, inputCount: Int, parameters: immutable.Seq
         query
     }
 
-    /** See superclass.
-      *
-      * @param instance The evaluated plugin instance.
-      * @return The query.
-      */
     override def getQuery(instance: PluginInstance): String = {
         val ontology = getOntologyWithPluginInstance(instance)
-
-        assert(ontology != null, "Ontology couldn't be created")
-
         getOntologyFilteringSPARQLQuery(ontology).toString
     }
 
@@ -80,14 +73,18 @@ class OntologicalFilter(name: String, inputCount: Int, parameters: immutable.Seq
       * @return Output graph.
       */
     private def getOntologyWithPluginInstance(instance: PluginInstance): Ontology = {
-        usingDefined(instance.getStringParameter("OntologyURLs")) { (ontologyURLs: String) =>
+        usingDefined(instance.getStringParameter(OntologicalFilter.ontologyURLsParameter)) { ontologyURLs =>
             // Assume that there can be more ontology urls separated by a newline.
-            val urls = ontologyURLs.split("\n").toList.filter(!_.isEmpty)
+            val urls = ontologyURLs.split("\n").toList.filter(_.nonEmpty)
 
             // Download and merge all ontologies in parallel.
             val ontologies = urls.par.map(url => Ontology(new Downloader(url, accept = "application/rdf+xml").result))
             ontologies.fold(Ontology.empty)(_ + _)
         }
     }
+}
 
+object OntologicalFilter
+{
+    val ontologyURLsParameter = "Ontology URLs"
 }

@@ -14,28 +14,17 @@ class Join(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]
 {
     def this() = {
         this("Join", 2, List(
-            new StringParameter("JoinPropertyURI", "", false),
-            new BooleanParameter("IsInner", true)),
-            IDGenerator.newId)
-        isPublic = true
+            new StringParameter(Join.propertyURIParameter, "", false),
+            new BooleanParameter(Join.isInnerParameter, true)
+        ), IDGenerator.newId)
     }
 
-    /**
-      * Returns "JoinPropertyURI" parameter value.
-      * @param instance Plugin Instance.
-      * @return The parameter value.
-      */
     def getJoinPropertyURI(instance: PluginInstance): Option[String] = {
-        instance.getStringParameter("JoinPropertyURI")
+        instance.getStringParameter(Join.propertyURIParameter)
     }
 
-    /**
-      * Returns "IsInner" parameter value.
-      * @param instance Plugin instance.
-      * @return The parameter value.
-      */
     def getIsInner(instance: PluginInstance): Option[Boolean] = {
-        instance.getBooleanParameter("IsInner")
+        instance.getBooleanParameter(Join.isInnerParameter)
     }
 
     def evaluate(instance: PluginInstance, inputs: IndexedSeq[Option[Graph]], progressReporter: Double => Unit) = {
@@ -58,8 +47,8 @@ class Join(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]
       * @param isInner Whether the join is inner (a vertex S from the first graph is included in the result only if
       *                there exists a vertex O in the second graph such that there exists an edge in the first graph
       *                with the specified URI connecting S and O) or outer (all vertices from the first graph are
-      *                included in the result, but only those edges, that satisfy the condition of inner join mentioned above are
-      *                included).
+      *                included in the result, but only those edges, that satisfy the condition of inner join mentioned
+     *                 above are included).
       * @return The joined graph.
       */
     private def joinGraphs(graph1: Graph, graph2: Graph, propertyURI: String, isInner: Boolean): Graph = {
@@ -85,4 +74,11 @@ class Join(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]
 
         new Graph(resultVertices.toList, resultEdges.toList)
     }
+}
+
+object Join
+{
+    val propertyURIParameter = "Join Property URI"
+
+    val isInnerParameter = "Is Inner"
 }

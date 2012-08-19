@@ -49,20 +49,21 @@ object Color
      * @return Represented color or None
      */
     def apply(rgbString: String): Option[Color] = {
-        val rgbRegExp = "^rgb\\([0-9]{1,3},[0-9]{1,3},[0-9]{1,3}\\)$"
+        val rgbRegExp = "^rgba\\([0-9]{1,3},[0-9]{1,3},[0-9]{1,3},[0-9.]+\\)$"
         val colorValue = rgbString.toLowerCase.replace(" ", "")
 
         if (colorValue.matches(rgbRegExp)) {
             // Get RGB parts
-            val parts = colorValue.replace("rgb(", "").replace(")", "").split(",")
+            val parts = colorValue.replace("rgba(", "").replace(")", "").split(",")
 
             val r = parts(0).toInt
             val g = parts(1).toInt
             val b = parts(2).toInt
+            val a = parts(3).toDouble
 
             // Validate
-            if (r < 256 && g < 256 && b < 256) {
-                Some(new Color(r, g, b))
+            if (r < 256 && g < 256 && b < 256 && a >= 0 && a <= 1) {
+                Some(new Color(r, g, b, a))
             } else {
                 None
             }

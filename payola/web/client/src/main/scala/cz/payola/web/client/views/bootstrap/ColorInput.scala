@@ -62,7 +62,7 @@ class ColorInput(name: String, initialValue: Option[Color], cssClass: String = "
     }
 
     private def colorToRgb(color: Option[Color]): String = {
-        color.map(_.toString).getOrElse("rgba(0, 0, 0, 0)")
+        color.map(_.toString).getOrElse("rgb(0, 0, 0)")
     }
 
     private def colorToText(color: Option[Color]): String = {

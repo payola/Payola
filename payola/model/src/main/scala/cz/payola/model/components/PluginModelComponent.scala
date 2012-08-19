@@ -24,6 +24,4 @@ trait PluginModelComponent extends EntityModelComponent
 
         def getByName(name: String): Option[Plugin] = pluginRepository.getByName(name)
     }
-
-
 }
