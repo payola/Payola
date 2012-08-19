@@ -49,45 +49,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         view.render(parentElement)
         view.tabs.hideTab(1)
 
-        successEventHandler = {
-            evt: EvaluationSuccessEventArgs =>
-                blockPage("Loading result...")
-
-                analysisDone = true
-                analysisRunning = false
-                intervalHandler.foreach(window.clearInterval(_))
-                view.overviewView.controls.stopButton.setIsEnabled(false)
-                view.overviewView.controls.timeoutControl.controlGroup.removeCssClass("none")
-                view.overviewView.controls.timeoutInfoBar.addCssClass("none")
-                view.overviewView.controls.progressBar.setStyleToSuccess()
-
-                graphPresenter = new GraphPresenter(view.resultsView.htmlElement)
-                graphPresenter.initialize()
-
-                val downloadButtonView = new DownloadButtonView()
-                downloadButtonView.render(graphPresenter.view.toolbar.htmlElement)
-
-                downloadButtonView.rdfDownloadAnchor.mouseClicked += {
-                    e =>
-                        downloadResultAsRDF()
-                        true
-                }
-
-                downloadButtonView.ttlDownloadAnchor.mouseClicked += {
-                    e =>
-                        downloadResultAsTTL()
-                        true
-                }
-
-                graphPresenter.view.updateGraph(Some(evt.graph))
-
-                view.tabs.showTab(1)
-                view.tabs.switchTab(1)
-
-                analysisEvaluationSuccess -= successEventHandler
-
-                unblockPage()
-        }
+        successEventHandler = getSuccessEventHandler(analysis, view)
         analysisEvaluationSuccess += successEventHandler
 
         view.overviewView.controls.runBtn.mouseClicked += {
@@ -95,6 +57,46 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         }
 
         view
+    }
+
+    def getSuccessEventHandler(analysis: Analysis, view: AnalysisRunnerView) : (EvaluationSuccessEventArgs => Unit) = {
+        evt: EvaluationSuccessEventArgs =>
+            blockPage("Loading result...")
+
+            analysisDone = true
+            analysisRunning = false
+            intervalHandler.foreach(window.clearInterval(_))
+            view.overviewView.controls.stopButton.setIsEnabled(false)
+            view.overviewView.controls.timeoutControl.controlGroup.removeCssClass("none")
+            view.overviewView.controls.timeoutInfoBar.addCssClass("none")
+            view.overviewView.controls.progressBar.setStyleToSuccess()
+
+            graphPresenter = new GraphPresenter(view.resultsView.htmlElement)
+            graphPresenter.initialize()
+
+            val downloadButtonView = new DownloadButtonView()
+            downloadButtonView.render(graphPresenter.view.toolbar.htmlElement)
+
+            downloadButtonView.rdfDownloadAnchor.mouseClicked += {
+                e =>
+                    downloadResultAsRDF()
+                    true
+            }
+
+            downloadButtonView.ttlDownloadAnchor.mouseClicked += {
+                e =>
+                    downloadResultAsTTL()
+                    true
+            }
+
+            graphPresenter.view.updateGraph(Some(evt.graph))
+
+            view.tabs.showTab(1)
+            view.tabs.switchTab(1)
+
+            analysisEvaluationSuccess -= successEventHandler
+
+            unblockPage()
     }
 
     def runButtonClickHandler(view: AnalysisRunnerView, analysis: Analysis) = {
@@ -243,6 +245,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
             val newView = initUI(analysis)
             runButtonClickHandler(newView, analysis)
         }
+        successEventHandler = getSuccessEventHandler(analysis, view)
     }
 
     def evaluationSuccessHandler(success: EvaluationSuccess, analysis: Analysis, view: AnalysisRunnerView) {
