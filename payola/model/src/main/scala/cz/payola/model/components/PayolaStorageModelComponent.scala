@@ -29,7 +29,7 @@ trait PayolaStorageModelComponent
             rdfStorage.createGroup(groupURI)
 
             // Create the corresponding data source.
-            val instance = plugin.createInstance().setParameter(PayolaStorage.groupURIParameterName, groupURI)
+            val instance = plugin.createInstance().setParameter(PayolaStorage.groupURIParameter, groupURI)
             val dataSource = DataSource("Private Storage of " + user.name, Some(user), instance)
             dataSource.isEditable = false
             dataSourceModel.persist(dataSource)

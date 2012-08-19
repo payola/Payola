@@ -14,7 +14,6 @@ sealed class OpenDataCleanStorage(name: String, inputCount: Int, parameters: imm
 {
     def this() = {
         this("Open Data Clean Storage", 0, List(new StringParameter("Server", "", false)), IDGenerator.newId)
-        isPublic = true
     }
 
     def executeQuery(instance: PluginInstance, query: String): Graph = {

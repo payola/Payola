@@ -31,7 +31,7 @@ class PluginCompilerSpec extends FlatSpec with ShouldMatchers
                     extends Plugin(name, inputCount, parameters, id)
                 {
                     def this() = {
-                        this("Delay in seconds", 1, List(new IntParameter("Delay", 1)), IDGenerator.newId)
+                        this("Time Delay in seconds", 1, List(new IntParameter("Delay", 1)), IDGenerator.newId)
                     }
 
                     def evaluate(instance: PluginInstance, inputs: IndexedSeq[Option[Graph]], progressReporter: Double => Unit) = {
@@ -47,7 +47,7 @@ class PluginCompilerSpec extends FlatSpec with ShouldMatchers
             """)
 
         val plugin = loader.instantiatePlugin(pluginClassName)
-        assert(plugin.name == "Delay in seconds", "The plugin name is invalid.")
+        assert(plugin.name == "Time Delay in seconds", "The plugin name is invalid.")
         assert(plugin.inputCount == 1, "The plugin input count is invalid.")
         assert(plugin.parameters.length == 1, "The plugin parameter count is invalid.")
         assert(plugin.parameters.head.name == "Delay", "The plugin parameter is invalid.")

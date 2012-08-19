@@ -7,24 +7,12 @@ import cz.payola.domain.entities.plugins.concrete.query._
 import cz.payola.data.squeryl.SquerylDataContextComponent
 import cz.payola.web.shared.Payola
 import cz.payola.domain.entities.settings.OntologyCustomization
-import cz.payola.common.entities.User
 
 /**
- * Runing this object will drop existing database, create new database and fill it with initial data.
+ * Running this object will drop the existing database, create a new one and fill it with the initial data.
  */
 object DatabaseInitializer extends App
 {
-
-    val columnChartSPARQLQuery = """CONSTRUCT {
-                                   |	?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/procurement/public-contracts#Contract> .
-                                   |	?s <http://purl.org/goodrelations/v1#hasCurrencyValue> ?d .
-                                   |	?s <http://purl.org/dc/terms/title> ?e .
-                                   |} WHERE {
-                                   |	?s <http://purl.org/procurement/public-contracts#agreedPrice> ?o .
-                                   |	?o <http://purl.org/goodrelations/v1#hasCurrencyValue> ?d . FILTER (?d > 20000000000)
-                                   |	?s <http://purl.org/dc/terms/title> ?e .
-                                   |}""".stripMargin
-
     private val model = Payola.model.asInstanceOf[SquerylDataContextComponent]
 
     model.schema.wrapInTransaction {
@@ -40,7 +28,6 @@ object DatabaseInitializer extends App
     private def persistInitialData() {
         val sparqlEndpointPlugin = new SparqlEndpointFetcher
         val payolaStoragePlugin = new PayolaStorage
-        val openDataCleanStoragePlugin = new OpenDataCleanStorage
         val concreteSparqlQueryPlugin = new ConcreteSparqlQuery
         val projectionPlugin = new Projection
         val selectionPlugin = new Selection
@@ -50,10 +37,8 @@ object DatabaseInitializer extends App
         val ontologicalFilterPlugin = new OntologicalFilter
         val shortestPathPlugin = new ShortestPath
 
-        // Persist plugins.
-        List(
+        val publicPlugins = List(
             sparqlEndpointPlugin,
-            payolaStoragePlugin,
             concreteSparqlQueryPlugin,
             concreteSparqlQueryPlugin,
             projectionPlugin,
@@ -62,108 +47,126 @@ object DatabaseInitializer extends App
             join,
             unionPlugin,
             ontologicalFilterPlugin,
-            shortestPathPlugin,
-            openDataCleanStoragePlugin
-        ).foreach { p =>
-            model.pluginRepository.persist(p)
-        }
+            shortestPathPlugin
+        )
+
+        val privatePlugins = List(
+            payolaStoragePlugin
+        )
+
+        val plugins = publicPlugins ++ privatePlugins
+
+        // Persist the plugins.
+        publicPlugins.foreach(_.isPublic = true)
+        privatePlugins.foreach(_.isPublic = false)
+        plugins.foreach(model.pluginRepository.persist(_))
 
         // Create the admin.
         val admin = Payola.model.userModel.create("admin@payola.cz", "payola!")
 
-        // Persist data sources.
+        // Persist the data sources.
         List(
-            DataSource("DBpedia.org", Some(admin),
-                sparqlEndpointPlugin.createInstance().setParameter("EndpointURL", "http://dbpedia.org/sparql")),
-            DataSource("Opendata.cz", Some(admin),
-                sparqlEndpointPlugin.createInstance().setParameter("EndpointURL", "http://ld.opendata.cz:8894/sparql"))
+            DataSource("DBpedia.org", Some(admin), sparqlEndpointPlugin.createInstance().setParameter(
+                SparqlEndpointFetcher.endpointURLParameter, "http://dbpedia.org/sparql")),
+            DataSource("Opendata.cz", Some(admin), sparqlEndpointPlugin.createInstance().setParameter(
+                SparqlEndpointFetcher.endpointURLParameter, "http://ld.opendata.cz:8894/sparql"))
         ).foreach { d =>
             d.isPublic = true
             model.dataSourceRepository.persist(d)
         }
 
-        // persist analysis
-        val a = new cz.payola.domain.entities.Analysis(
-            "DB: Cities with more than 2 million habitants with countries",
-            Some(admin))
-        a.isPublic = true
-        val analysis = model.analysisRepository.persist(a)
+        // Persist the analyses
+        val bigCities = new cz.payola.domain.entities.Analysis("Big cities with countries", Some(admin))
+        bigCities.isPublic = true
+        val bigCitiesPersisted = model.analysisRepository.persist(bigCities)
 
-        val citiesFetcher = sparqlEndpointPlugin.createInstance()
-            .setParameter("EndpointURL", "http://dbpedia.org/sparql")
-        val citiesTyped = typedPlugin.createInstance().setParameter("TypeURI", "http://dbpedia.org/ontology/City")
-        val citiesProjection = projectionPlugin.createInstance().setParameter("PropertyURIs", List(
-            "http://dbpedia.org/ontology/populationDensity", "http://dbpedia.org/ontology/populationTotal"
-        ).mkString("\n"))
+        val citiesFetcher = sparqlEndpointPlugin.createInstance().setParameter(
+            SparqlEndpointFetcher.endpointURLParameter, "http://dbpedia.org/sparql")
+        val citiesTyped = typedPlugin.createInstance().setParameter(
+            Typed.typeURIParameter, "http://dbpedia.org/ontology/City")
+        val citiesProjection = projectionPlugin.createInstance().setParameter(
+            Projection.propertyURIsParameter,
+            "http://dbpedia.org/ontology/populationDensity\nhttp://dbpedia.org/ontology/populationTotal")
         val citiesSelection = selectionPlugin.createInstance().setParameter(
-            "PropertyURI", "http://dbpedia.org/ontology/populationTotal"
+            Selection.propertyURIParameter, "http://dbpedia.org/ontology/populationTotal"
         ).setParameter(
-            "Operator", ">"
+            Selection.operatorParameter, ">"
         ).setParameter(
-            "Value", "2000000"
+            Selection.valueParameter, "2000000"
         )
-        analysis.addPluginInstances(citiesFetcher, citiesTyped, citiesProjection, citiesSelection)
-        analysis.addBinding(citiesFetcher, citiesTyped)
-        analysis.addBinding(citiesTyped, citiesProjection)
-        analysis.addBinding(citiesProjection, citiesSelection)
+        bigCitiesPersisted.addPluginInstances(citiesFetcher, citiesTyped, citiesProjection, citiesSelection)
+        bigCitiesPersisted.addBinding(citiesFetcher, citiesTyped)
+        bigCitiesPersisted.addBinding(citiesTyped, citiesProjection)
+        bigCitiesPersisted.addBinding(citiesProjection, citiesSelection)
 
-        val countriesFetcher = sparqlEndpointPlugin.createInstance()
-            .setParameter("EndpointURL", "http://dbpedia.org/sparql")
-        val countriesTyped = typedPlugin.createInstance().setParameter("TypeURI", "http://dbpedia.org/ontology/Country")
-        val countriesProjection = projectionPlugin.createInstance().setParameter("PropertyURIs", List(
-            "http://dbpedia.org/ontology/areaTotal"
-        ).mkString("\n"))
-        analysis.addPluginInstances(countriesFetcher, countriesTyped, countriesProjection)
-        analysis.addBinding(countriesFetcher, countriesTyped)
-        analysis.addBinding(countriesTyped, countriesProjection)
+        val countriesFetcher = sparqlEndpointPlugin.createInstance().setParameter(
+            SparqlEndpointFetcher.endpointURLParameter, "http://dbpedia.org/sparql")
+        val countriesTyped = typedPlugin.createInstance().setParameter(
+            Typed.typeURIParameter, "http://dbpedia.org/ontology/Country")
+        val countriesProjection = projectionPlugin.createInstance().setParameter(
+            Projection.propertyURIsParameter, "http://dbpedia.org/ontology/areaTotal")
+        bigCitiesPersisted.addPluginInstances(countriesFetcher, countriesTyped, countriesProjection)
+        bigCitiesPersisted.addBinding(countriesFetcher, countriesTyped)
+        bigCitiesPersisted.addBinding(countriesTyped, countriesProjection)
 
         val citiesCountriesJoin = join.createInstance().setParameter(
-            "JoinPropertyURI", "http://dbpedia.org/ontology/country"
+            Join.propertyURIParameter, "http://dbpedia.org/ontology/country"
         ).setParameter(
-            "IsInner", false
+            Join.isInnerParameter, false
         )
-        analysis.addPluginInstances(citiesCountriesJoin)
-        analysis.addBinding(citiesSelection, citiesCountriesJoin, 0)
-        analysis.addBinding(countriesProjection, citiesCountriesJoin, 1)
+        bigCitiesPersisted.addPluginInstances(citiesCountriesJoin)
+        bigCitiesPersisted.addBinding(citiesSelection, citiesCountriesJoin, 0)
+        bigCitiesPersisted.addBinding(countriesProjection, citiesCountriesJoin, 1)
 
+
+        val expensiveContracts = new cz.payola.domain.entities.Analysis("Really expensive public contracts", Some(admin))
+        expensiveContracts.isPublic = true
+        val expensiveContractsPersisted = model.analysisRepository.persist(expensiveContracts)
+
+        val expensiveContractsFetcher = sparqlEndpointPlugin.createInstance().setParameter(
+            SparqlEndpointFetcher.endpointURLParameter, "http://ld.opendata.cz:8894/sparql")
+        val expensiveContractsQuery = concreteSparqlQueryPlugin.createInstance().setParameter(
+            ConcreteSparqlQuery.queryParameter,
+            """
+                CONSTRUCT {
+                	?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/procurement/public-contracts#Contract> .
+                	?s <http://purl.org/goodrelations/v1#hasCurrencyValue> ?d .
+                	?s <http://purl.org/dc/terms/title> ?e .
+                } WHERE {
+                	?s <http://purl.org/procurement/public-contracts#agreedPrice> ?o .
+                	?o <http://purl.org/goodrelations/v1#hasCurrencyValue> ?d . FILTER (?d > 20000000000)
+                	?s <http://purl.org/dc/terms/title> ?e .
+                }
+            """)
+        expensiveContractsPersisted.addPluginInstances(expensiveContractsFetcher, expensiveContractsQuery)
+        expensiveContractsPersisted.addBinding(expensiveContractsFetcher, expensiveContractsQuery)
+
+
+        val manyTenders = new cz.payola.domain.entities.Analysis("Contracts with many tenders", Some(admin))
+        manyTenders.isPublic = true
+        val manyTendersPersisted = model.analysisRepository.persist(manyTenders)
+
+        val contractFetcher = sparqlEndpointPlugin.createInstance().setParameter(
+            SparqlEndpointFetcher.endpointURLParameter, "http://ld.opendata.cz:8894/sparql")
+        val contractTyped = typedPlugin.createInstance().setParameter(
+            Typed.typeURIParameter, "http://purl.org/procurement/public-contracts#Contract")
+        val contractSelection = selectionPlugin.createInstance().setParameter(
+            Selection.propertyURIParameter, "http://purl.org/procurement/public-contracts#numberOfTenders"
+        ).setParameter(
+            Selection.operatorParameter, ">"
+        ).setParameter(
+            Selection.valueParameter, "120"
+        )
+
+        manyTendersPersisted.addPluginInstances(contractFetcher, contractTyped, contractSelection)
+        manyTendersPersisted.addBinding(contractFetcher, contractTyped)
+        manyTendersPersisted.addBinding(contractTyped, contractSelection)
+
+
+        // Persist the ontology customizations.
         val url = "http://opendata.cz/pco/public-contracts.xml"
         val customization = OntologyCustomization.empty(url, "Public contracts", Some(admin))
         model.ontologyCustomizationRepository.persist(customization)
-
-        // Column-chart analyses
-        val cca1 = new cz.payola.domain.entities.Analysis(
-            "Really expensive public contracts",
-            Some(admin))
-        a.isPublic = true
-        val columnChartAnalysis1 = model.analysisRepository.persist(cca1)
-        val columnFetcher1 = sparqlEndpointPlugin.createInstance().
-            setParameter("EndpointURL", "http://ld.opendata.cz:8894/sparql")
-        val sparqlQuery = concreteSparqlQueryPlugin.createInstance().setParameter("Query", columnChartSPARQLQuery)
-
-        columnChartAnalysis1.addPluginInstances(columnFetcher1, sparqlQuery)
-        columnChartAnalysis1.addBinding(columnFetcher1, sparqlQuery)
-
-
-
-        val cca2 = new cz.payola.domain.entities.Analysis(
-            "Many tenders",
-            Some(admin))
-        a.isPublic = true
-        val columnChartAnalysis2 = model.analysisRepository.persist(cca2)
-        val columnFetcher2 = sparqlEndpointPlugin.createInstance().
-            setParameter("EndpointURL", "http://ld.opendata.cz:8894/sparql")
-        val contractTyped = typedPlugin.createInstance().setParameter("TypeURI", "http://purl.org/procurement/public-contracts#Contract")
-        val contractSelection = selectionPlugin.createInstance().setParameter(
-            "PropertyURI", "http://purl.org/procurement/public-contracts#numberOfTenders"
-        ).setParameter(
-            "Operator", ">"
-        ).setParameter("Value", "120")
-
-        columnChartAnalysis2.addPluginInstances(columnFetcher2, contractTyped, contractSelection)
-        columnChartAnalysis2.addBinding(columnFetcher2, contractTyped)
-        columnChartAnalysis2.addBinding(contractTyped, contractSelection)
-
     }
-
 }
 

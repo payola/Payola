@@ -11,18 +11,22 @@ class Typed(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_
     extends Construct(name, inputCount, parameters, id)
 {
     def this() = {
-        this("Typed", 1, List(new StringParameter("TypeURI", "", false)), IDGenerator.newId)
-        isPublic = true
+        this("Typed", 1, List(new StringParameter(Typed.typeURIParameter, "", false)), IDGenerator.newId)
     }
 
     def getTypeURI(instance: PluginInstance): Option[String] = {
-        instance.getStringParameter("TypeURI")
+        instance.getStringParameter(Typed.typeURIParameter)
     }
 
     def getConstructQuery(instance: PluginInstance, subject: Subject, variableGetter: () => Variable) = {
         usingDefined(getTypeURI(instance)) { uri =>
             val triples = List(TriplePattern(subject, Uri(Edge.rdfTypeEdge), Uri(uri)))
-            ConstructQuery(GraphPattern(triples, GraphPattern.optionalProperties(subject, variableGetter)))
+            ConstructQuery(GraphPattern(triples))
         }
     }
+}
+
+object Typed
+{
+    val typeURIParameter = "RDF Type URI"
 }

@@ -11,7 +11,6 @@ class Union(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_
 {
     def this() = {
         this("Union", 2, Nil, IDGenerator.newId)
-        isPublic = true
     }
 
     def evaluate(instance: PluginInstance, inputs: IndexedSeq[Option[Graph]], progressReporter: Double => Unit) = {

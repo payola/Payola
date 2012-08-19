@@ -56,7 +56,11 @@ trait PrivilegeModelComponent extends EntityModelComponent
         }
 
         def getSharingPrivilegeClass(objectEntity: ShareableEntity): Class[_] = {
-            getSharingPrivilegeClass(objectEntity.getClass)
+            val objectClass = objectEntity match {
+                case _: Plugin => classOf[Plugin]
+                case _ => objectEntity.getClass
+            }
+            getSharingPrivilegeClass(objectClass)
         }
 
         private def createSharingPrivilege(granter: User, grantee: PrivilegableEntity, objectEntity: ShareableEntity):

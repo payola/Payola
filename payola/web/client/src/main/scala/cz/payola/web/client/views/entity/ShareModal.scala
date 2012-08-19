@@ -32,7 +32,7 @@ class ShareModal(
     }
 
     @javascript( """
-        jQuery(self.granteeSelection.input.htmlElement).select2({
+        jQuery(self.granteeSelection.field.formHtmlElement()).select2({
             minimumInputLength: 1,
             multiple: true,
             initSelection: function(element) {

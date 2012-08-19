@@ -18,10 +18,9 @@ class ShortestPath(name: String, inputCount: Int, parameters: immutable.Seq[Para
 {
     def this() = {
         this("Shortest Path", 1, List(
-            new StringParameter("OriginURI", "", false),
-            new StringParameter("DestinationURI", "", false)),
-            IDGenerator.newId)
-        isPublic = true
+            new StringParameter(ShortestPath.originURIParameter, "", false),
+            new StringParameter(ShortestPath.destinationURIParameter, "", false)
+        ), IDGenerator.newId)
     }
 
     /** Creates and returns a new graph that only contains nodes and edges
@@ -138,7 +137,7 @@ class ShortestPath(name: String, inputCount: Int, parameters: immutable.Seq[Para
       * @return Destination URI.
       */
     def getDestinationURI(instance: PluginInstance): String = {
-        val origin = instance.getStringParameter("DestinationURI")
+        val origin = instance.getStringParameter(ShortestPath.destinationURIParameter)
         assert(origin.isDefined, "DestinationURI parameter must be defined")
         origin.get
     }
@@ -149,7 +148,7 @@ class ShortestPath(name: String, inputCount: Int, parameters: immutable.Seq[Para
       * @return OriginURI.
       */
     def getOriginURI(instance: PluginInstance): String = {
-        val origin = instance.getStringParameter("OriginURI")
+        val origin = instance.getStringParameter(ShortestPath.originURIParameter)
         assert(origin.isDefined, "OriginURI parameter must be defined")
         origin.get
     }
@@ -158,8 +157,8 @@ class ShortestPath(name: String, inputCount: Int, parameters: immutable.Seq[Para
       *
       * @param inGraph Graph.
       * @param vertex Vertex.
-      * @return Neighbors.
-      */
+        * @return Neighbors.
+    */
     private def getVertexNeighbors(inGraph: Graph, vertex: IdentifiedVertex): TraversableOnce[IdentifiedVertex] = {
         // First get just the edges that go to identified vertices
         val edges: collection.Seq[Edge] = inGraph.getOutgoingEdges(vertex.uri)
@@ -168,11 +167,11 @@ class ShortestPath(name: String, inputCount: Int, parameters: immutable.Seq[Para
     }
 
     /** Returns the vertex with smallest distance or null if the withinVertices is empty.
-      *
-      * @param withinVertices Vertices, within which to search.
-      * @param withDistances Distances hash map.
-      * @return Vertex with smallest distance.
-      */
+     *
+     * @param withinVertices Vertices, within which to search.
+     * @param withDistances Distances hash map.
+     * @return Vertex with smallest distance.
+     */
     private def getVertexWithSmallestDistance(withinVertices: Iterable[IdentifiedVertex],
         withDistances: mutable.HashMap[IdentifiedVertex, Int]): IdentifiedVertex = {
         var smallest: IdentifiedVertex = null
@@ -185,4 +184,11 @@ class ShortestPath(name: String, inputCount: Int, parameters: immutable.Seq[Para
         }
         smallest
     }
+}
+
+object ShortestPath
+{
+    val originURIParameter = "Origin URI"
+
+    val destinationURIParameter = "Destination URI"
 }

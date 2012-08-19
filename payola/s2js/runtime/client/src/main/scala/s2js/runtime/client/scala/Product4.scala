@@ -45,20 +45,20 @@ trait Product4[+T1, +T2, +T3, +T4] extends Product
     /** A projection of element 1 of this Product.
       * @return   A projection of element 1.
       */
-    def _1: T1
+    val _1: T1
 
     /** A projection of element 2 of this Product.
       * @return   A projection of element 2.
       */
-    def _2: T2
+    val _2: T2
 
     /** A projection of element 3 of this Product.
       * @return   A projection of element 3.
       */
-    def _3: T3
+    val _3: T3
 
     /** A projection of element 4 of this Product.
       * @return   A projection of element 4.
       */
-    def _4: T4
+    val _4: T4
 }

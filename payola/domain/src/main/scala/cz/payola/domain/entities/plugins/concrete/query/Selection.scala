@@ -11,23 +11,22 @@ class Selection(name: String, inputCount: Int, parameters: immutable.Seq[Paramet
 {
     def this() = {
         this("Selection", 1, List(
-            new StringParameter("PropertyURI", "", false),
-            new StringParameter("Operator", "", false),
-            new StringParameter("Value", "", false)),
-            IDGenerator.newId)
-        isPublic = true
+            new StringParameter(Selection.propertyURIParameter, "", false),
+            new StringParameter(Selection.operatorParameter, "", false),
+            new StringParameter(Selection.valueParameter, "", false)
+        ), IDGenerator.newId)
     }
 
     def getPropertyURI(instance: PluginInstance): Option[String] = {
-        instance.getStringParameter("PropertyURI")
+        instance.getStringParameter(Selection.propertyURIParameter)
     }
 
     def getOperator(instance: PluginInstance): Option[String] = {
-        instance.getStringParameter("Operator")
+        instance.getStringParameter(Selection.operatorParameter)
     }
 
     def getValue(instance: PluginInstance): Option[String] = {
-        instance.getStringParameter("Value")
+        instance.getStringParameter(Selection.valueParameter)
     }
 
     def getConstructQuery(instance: PluginInstance, subject: Subject, variableGetter: () => Variable) = {
@@ -39,3 +38,13 @@ class Selection(name: String, inputCount: Int, parameters: immutable.Seq[Paramet
         }
     }
 }
+
+object Selection
+{
+    val propertyURIParameter = "Property URI"
+
+    val operatorParameter = "Operator"
+
+    val valueParameter = "Value"
+}
+

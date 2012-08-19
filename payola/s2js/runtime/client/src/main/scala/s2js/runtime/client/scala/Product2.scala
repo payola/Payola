@@ -43,10 +43,10 @@ trait Product2[+T1, +T2] extends Product
     /** A projection of element 1 of this Product.
       * @return   A projection of element 1.
       */
-    def _1: T1
+    val _1: T1
 
     /** A projection of element 2 of this Product.
       * @return   A projection of element 2.
       */
-    def _2: T2
+    val _2: T2
 }
