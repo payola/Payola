@@ -105,6 +105,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
             uiAdaptAnalysisRunning(view, initUI _, analysis)
             var timeout = view.overviewView.controls.timeoutControl.field.value
+            view.overviewView.controls.timeoutInfo.text = timeout.toString
 
             analysisRunning = true
             AnalysisRunner.runAnalysisById(analysisId, timeout) {
