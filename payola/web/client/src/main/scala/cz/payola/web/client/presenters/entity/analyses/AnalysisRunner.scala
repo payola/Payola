@@ -250,7 +250,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
     def evaluationSuccessHandler(success: EvaluationSuccess, analysis: Analysis, view: AnalysisRunnerView) {
         view.overviewView.controls.progressBar.setStyleToSuccess()
-        view.overviewView.controls.progressBar.setProgress(100)
+        view.overviewView.controls.progressBar.setProgress(1.0)
         analysisDone = true
         view.overviewView.controls.stopButton.setIsEnabled(false)
         intervalHandler.foreach(window.clearInterval(_))
