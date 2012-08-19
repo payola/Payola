@@ -44,35 +44,36 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
 
         nameDialog.confirming += {
             e =>
-                AnalysisBuilderData.setAnalysisName(analysisId, nameComponent.field.value) {
-                    success =>
-
-                        AnalysisBuilderData.createEmptyAnalysis(nameComponent.field.value) {
-                            analysis =>
-                                analysisId = analysis.id
-                                lockAnalysisAndLoadPlugins()
-                                val view = new AnalysisEditorView(analysis, Some(nameComponent.field.value), None)
-                                view.visualizer.pluginInstanceRendered += {
-                                    e => instancesMap.put(e.target.pluginInstance.id, e.target)
-                                }
-                                view.render(parentElement)
-                                view.setName(nameComponent.field.value)
-
-                                bindMenuEvents(view)
-
-                                nameDialog.destroy()
-                        } {
-                            error =>
-                                error match {
-                                    case rpc: ValidationException => {
-                                        AlertModal.display("Validation failed", rpc.message)
-                                        false
-                                    }
-                                    case _ => fatalErrorHandler(error)
-                                }
+                blockPage("Initializing analysis...")
+                AnalysisBuilderData.setAnalysisName(analysisId, nameComponent.field.value) { success =>
+                    AnalysisBuilderData.createEmptyAnalysis(nameComponent.field.value) { analysis =>
+                        analysisId = analysis.id
+                        lockAnalysisAndLoadPlugins()
+                        val view = new AnalysisEditorView(analysis, Some(nameComponent.field.value), None)
+                        view.visualizer.pluginInstanceRendered += {
+                            e => instancesMap.put(e.target.pluginInstance.id, e.target)
                         }
-                } {
-                    error => fatalErrorHandler(error)
+                        view.render(parentElement)
+                        view.setName(nameComponent.field.value)
+
+                        bindMenuEvents(view)
+
+                        nameDialog.destroy()
+                        unblockPage()
+                    } {
+                        error =>
+                            error match {
+                                case rpc: ValidationException => {
+                                    AlertModal.display("Validation failed", rpc.message)
+                                    false
+                                }
+                                case _ => fatalErrorHandler(error)
+                            }
+                        unblockPage()
+                    }
+                } { error =>
+                    fatalErrorHandler(error)
+                    unblockPage()
                 }
                 false
         }
@@ -344,8 +345,11 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
     }
 
     def bind(a: PluginInstanceView, b: PluginInstanceView, inputIndex: Int) {
+        blockPage("Working...")
         AnalysisBuilderData.saveBinding(analysisId, a.pluginInstance.id, b.pluginInstance.id, inputIndex) {
-            _ =>
-        }(fatalErrorHandler(_))
+            _ => unblockPage()
+        }{ e => unblockPage()
+                fatalErrorHandler(e)
+        }
     }
 }
