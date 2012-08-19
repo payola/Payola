@@ -108,18 +108,17 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
             view.overviewView.controls.timeoutInfo.text = timeout.toString
 
             analysisRunning = true
-            AnalysisRunner.runAnalysisById(analysisId, timeout) {
-                id =>
-                    unblockPage()
+            AnalysisRunner.runAnalysisById(analysisId, timeout, evaluationId) { id =>
+                unblockPage()
 
-                    intervalHandler = Some(window.setInterval(() => {
-                        view.overviewView.controls.timeoutInfo.text = timeout.toString
-                        timeout -= 1
-                    }, 1000))
+                intervalHandler = Some(window.setInterval(() => {
+                    view.overviewView.controls.timeoutInfo.text = timeout.toString
+                    timeout -= 1
+                }, 1000))
 
-                    evaluationId = id
-                    view.overviewView.controls.progressBar.setProgress(0.02)
-                    schedulePolling(view, analysis)
+                evaluationId = id
+                view.overviewView.controls.progressBar.setProgress(0.02)
+                schedulePolling(view, analysis)
             } {
                 error => fatalErrorHandler(error)
             }
