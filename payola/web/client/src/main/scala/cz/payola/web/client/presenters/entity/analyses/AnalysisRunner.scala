@@ -44,8 +44,8 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         }
     }
 
-    def initUI(analysis: Analysis): AnalysisRunnerView = {
-        val view = new AnalysisRunnerView(analysis, 30)
+    def initUI(analysis: Analysis, timeout: Int = 30): AnalysisRunnerView = {
+        val view = new AnalysisRunnerView(analysis, timeout)
         view.render(parentElement)
         view.tabs.hideTab(1)
 
@@ -130,7 +130,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         false
     }
 
-    private def uiAdaptAnalysisRunning(view: AnalysisRunnerView, initUI: (Analysis) => Unit, analysis: Analysis) {
+    private def uiAdaptAnalysisRunning(view: AnalysisRunnerView, initUI: (Analysis, Int) => Unit, analysis: Analysis) {
         view.overviewView.controls.runBtn.setIsEnabled(false)
         view.overviewView.controls.runBtnCaption.text = "Running Analysis..."
         view.overviewView.controls.stopButton.setIsEnabled(true)
@@ -142,13 +142,14 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         }
     }
 
-    private def onStopClick(view: AnalysisRunnerView, initUI: (Analysis) => Unit, analysis: Analysis) {
+    private def onStopClick(view: AnalysisRunnerView, initUI: (Analysis, Int) => Unit, analysis: Analysis) {
         if (!analysisDone) {
             analysisRunning = false
             analysisDone = false
             intervalHandler.foreach(window.clearInterval(_))
+            val timeout = view.overviewView.controls.timeoutControl.field.value
             view.destroy()
-            initUI(analysis)
+            initUI(analysis, timeout)
             window.onunload = null
         }
     }
@@ -226,6 +227,8 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         analysisDone = true
         view.overviewView.controls.stopButton.setIsEnabled(false)
         intervalHandler.foreach(window.clearInterval(_))
+        view.overviewView.controls.timeoutControl.controlGroup.removeCssClass("none")
+        view.overviewView.controls.timeoutInfoBar.hide()
 
         AlertModal.display("Time out", "The analysis evaluation has timed out.")
 
@@ -242,7 +245,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
             analysisDone = false
             analysisRunning = false
 
-            val newView = initUI(analysis)
+            val newView = initUI(analysis, view.overviewView.controls.timeoutControl.field.value)
             runButtonClickHandler(newView, analysis)
         }
         successEventHandler = getSuccessEventHandler(analysis, view)
