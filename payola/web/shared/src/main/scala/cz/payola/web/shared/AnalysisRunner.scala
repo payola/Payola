@@ -31,7 +31,7 @@ import cz.payola.domain.entities.analyses.evaluation.Success
         val evaluationId = IDGenerator.newId
         val timeout = scala.math.min(1800, timeoutSeconds)
         runningEvaluations
-            .put(evaluationId, (user, analysis.evaluate(Some(timeout * 10)), (new java.util.Date).getTime))
+            .put(evaluationId, (user, analysis.evaluate(Some(timeout * 1000)), (new java.util.Date).getTime))
 
         successCallback(evaluationId)
     }
