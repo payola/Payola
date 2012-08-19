@@ -68,7 +68,6 @@ object RPCTester
     }
 
     def testGraph: Graph = {
-        // TODO (new DataFacade).getGraph("http://payola.cz")
         Graph.empty
     }
     
