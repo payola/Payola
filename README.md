@@ -983,9 +983,44 @@ Response Headersview source
 Content-Length:11464
 Content-Type:text/plain; charset=utf-8
 ```
-As you can see, the `POST` request which represents an asynchronous RPC call conatins the name of the remote method which should be invoked by the RPC controller / RPC Dispatcher. Since one can make his own RPC call very simply, we restricted the "invokable" methods to those that are defined in the body of an object annotated with the `s2js.compiler.remote` annotation. If you try to invoke a method which does not belong to an remote object, an exception will be thrown and sent as a response to such a call.
 
-> One could ask now, why we did not use the standard Scala @remote annotation, or, moreover, why we did use a Java annotation.
+As you can see, the `POST` request which represents an asynchronous RPC call conatins the name of the remote method which should be invoked by the RPC controller (which delegates most of the work to a class called `RPCDispatcher`). Since one can make his own RPC call very simply, we restricted the "invokable" methods to those that are defined in the body of an object annotated with the `s2js.compiler.remote` annotation. If you try to invoke a method which does not belong to an remote object, an exception will be thrown and sent as a response to such a call.
+
+> One could ask now, why we did not use the standard Scala @remote annotation, or, moreover, why we did use a Java annotation. Since scala annotations [are not visible during runtime](http://stackoverflow.com/questions/5177010/how-to-create-annotations-and-get-them-in-scala), we were forced to use a Java annotation with a special retention policy to get this done.
+
+package s2js.compiler;
+import java.lang.annotation.*;
+
+```
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface remote
+{
+
+}
+```
+
+> As you can see, we need to explicitly set the RetentionPolicy to `RUNTIME` to make annotations visible for the RPC Dispatcher.
+
+
+> On the second hand, this is more secure. We protect the standard scala @remote objects from being executed.
+
+You can also notice the `paramTypes` field, which holds a JSON-serialized array of types of invokation paramters. This helps the RPC Dispatcher to parse the parameters and make them properly typed on the server. In the example, the `paramTypes:["java.lang.String"]` means that the first parameter will be parsed as String, which is the most simple case.
+
+If you look closely, you can see the `0:4d1c0607-3652-4ad4-9628-a643bfba58b7` fragment in the request body. That means that the first parameter of the invoked method will be `4d1c0607-3652-4ad4-9628-a643bfba58b7`.
+
+Since the RPC Dispatcher needs to parse the parameters and make them typed properly, it is the dispatcher who constraints the RPC and defines the types that could be sent from client to the server. Since complex type deserialization is not an easy task and we did not need it as much as we needed to make other things working, only the following types are supported right now:
+
+- scala.collection (types derived from sequences, more specifically, sequences of the types described below)
+- Boolean
+- Int
+- Long
+- String
+- Char
+- Float
+
+And Java equivalents.
+
 
 <a name="client"></a>
 ### Package cz.payola.web.client
