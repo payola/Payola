@@ -16,6 +16,8 @@ class PluginVerifier(val global: Global) extends Plugin
 
     val components = List[PluginComponent](PluginVerifierComponent, PluginNameTransformerComponent)
 
+    var pluginName: Option[String] = None
+
     var pluginPackageName: Option[String] = None
 
     var pluginClassName: Option[String] = None
@@ -68,8 +70,17 @@ class PluginVerifier(val global: Global) extends Plugin
                         }
 
                         // Verify that the plugin has a parameterless constructor.
-                        if (!constructors.exists(_.vparamss.flatten.isEmpty)) {
+                        val constructor = constructors.find(_.vparamss.flatten.isEmpty)
+                        if (constructor.isEmpty) {
                             error("The plugin must have a parameterless constructor.")
+                        }
+
+                        // Retrieve the plugin name from the parameterless constructor.
+                        constructor.get.rhs match {
+                            case Block(superCall@Apply(_, Literal(Constant(name: String)) :: _) :: _, _) => {
+                                 pluginName = Some(name)
+                            }
+                            case _ => error("The parameterless constructor doesn't specify the plugin name.")
                         }
 
                         // Verify that the plugin has the setter constructor.

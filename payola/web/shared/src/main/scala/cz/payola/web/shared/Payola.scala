@@ -11,7 +11,7 @@ import cz.payola.domain.entities.plugins.compiler.PluginCompiler
 
 @remote object Payola
 {
-    private[shared] lazy val settings = new Settings(ConfigFactory.load("payola"))
+    lazy val settings = new Settings(ConfigFactory.load("payola"))
 
     lazy val model: ModelComponent = new ModelComponent
         with SquerylDataContextComponent
