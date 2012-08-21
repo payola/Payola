@@ -13,10 +13,10 @@ trait PluginModelComponent extends EntityModelComponent
     {
         def createPluginFromSource(source: String, user: User): Plugin = {
             val compiler = self.pluginCompiler
-            val className = compiler.compile(source)
+            val pluginInfo = compiler.compile(source)
             val loader = self.pluginClassLoader
 
-            val plugin = loader.instantiatePlugin(className)
+            val plugin = loader.instantiatePlugin(pluginInfo.className)
             plugin.owner = Some(user)
             persist(plugin)
             plugin
