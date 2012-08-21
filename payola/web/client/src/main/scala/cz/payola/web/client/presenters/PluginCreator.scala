@@ -62,7 +62,8 @@ class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) e
       * @param s Success string.
       */
     private def postWasSuccessfulCallback() {
-        val alert = new AlertModal("Success!", "Plugin uploaded successfully!", "alert-success")
+        val alert = new AlertModal("Success!", "Plugin compiled without an error. In order for it to be used, " +
+            "though, it needs to go through a review by the admin. He's been notified by an email.", "alert-success")
         alert.confirming += { e =>
             window.location.href = listPluginsURL
             true

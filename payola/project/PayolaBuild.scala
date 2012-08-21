@@ -223,7 +223,8 @@ object PayolaBuild extends Build
         "shared", "web/shared", WebSettings.javaScriptsDir,
         settings = payolaSettings ++ Seq(
             libraryDependencies ++= Seq(
-                "com.typesafe" % "config" % "0.5.0"
+                "com.typesafe" % "config" % "0.5.0",
+                "org.apache.commons" % "commons-email" % "1.2"
             )
         )
     ).dependsOn(

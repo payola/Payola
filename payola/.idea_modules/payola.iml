@@ -20,8 +20,6 @@
       <sourceFolder url="file://$MODULE_DIR$/../src/test/scala" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../src/test/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../src/test/resources" isTestSource="true" />
-      <excludeFolder url="file://$MODULE_DIR$/../.idea" />
-      <excludeFolder url="file://$MODULE_DIR$" />
       <excludeFolder url="file://$MODULE_DIR$/../target" />
     </content>
     <orderEntry type="inheritedJdk" />
@@ -35,6 +33,9 @@
     <orderEntry type="library" name="data_2.9.1-0.1.jar" level="project" />
     <orderEntry type="library" name="domain_2.9.1-0.1.jar" level="project" />
     <orderEntry type="library" name="initializer_2.9.1-0.1.jar" level="project" />
+    <orderEntry type="library" name="jena-arq-2.9.0-incubating.jar" level="project" />
+    <orderEntry type="library" name="jena-core-2.7.0-incubating.jar" level="project" />
+    <orderEntry type="library" name="jena-iri-0.9.0-incubating.jar" level="project" />
     <orderEntry type="library" name="model_2.9.1-0.1.jar" level="project" />
     <orderEntry type="library" name="payola_2.9.1-0.1.jar" level="project" />
     <orderEntry type="library" name="runtime-client_2.9.1-0.2.jar" level="project" />
