@@ -7,6 +7,7 @@ import cz.payola.domain.entities.plugins.concrete.query._
 import cz.payola.data.squeryl.SquerylDataContextComponent
 import cz.payola.web.shared.Payola
 import cz.payola.domain.entities.settings.OntologyCustomization
+import java.io.File
 
 /**
  * Running this object will drop the existing database, create a new one and fill it with the initial data.
@@ -61,8 +62,14 @@ object DatabaseInitializer extends App
         privatePlugins.foreach(_.isPublic = false)
         plugins.foreach(model.pluginRepository.persist(_))
 
+        // Create plugins directory
+        val pluginsDirectory = Payola.settings.pluginDirectory
+        if (!pluginsDirectory.exists()){
+            pluginsDirectory.mkdirs()
+        }
+
         // Create the admin.
-        val admin = Payola.model.userModel.create("admin@payola.cz", "payola!")
+        val admin = Payola.model.userModel.create(Payola.settings.adminEmail, "payola!")
 
         // Persist the data sources.
         List(

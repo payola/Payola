@@ -7,6 +7,7 @@ import cz.payola.web.shared.managers.PluginManager
 import cz.payola.web.client._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
+import cz.payola.common.ValidationException
 
 // Can't pass the editor's pre ID as we're using it in the native JS, which needs to
 // be compile-time ready
@@ -52,7 +53,7 @@ class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) e
       */
     private def postFailedCallback(t: Throwable){
         t match {
-            case exc: RpcException => AlertModal.display("Failed to upload plugin!", exc.message)
+            case exc: ValidationException => AlertModal.display("Failed to upload plugin!", exc.fieldName)
             case t: Throwable => fatalErrorHandler(t)
         }
     }
