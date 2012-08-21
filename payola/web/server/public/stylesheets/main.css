@@ -408,3 +408,9 @@ input.glyph {
 pre#editor {
     max-height: 100000px !important;
 }
+
+table .btn-toolbar .badge {
+    margin-right: 10px;
+    top: -9px;
+    position: relative;
+}
