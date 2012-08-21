@@ -17,7 +17,7 @@ import cz.payola.domain.entities.analyses.optimization.phases._
   * @param analysis The analysis to evaluate.
   * @param timeout The maximal time limit allowed for the evaluation to take in milliseconds.
   */
-class AnalysisEvaluation(private val analysis: Analysis, private val timeout: Option[Long]) extends Actor
+class AnalysisEvaluation(val analysis: Analysis, private val timeout: Option[Long]) extends Actor
 {
     private val timer = new Timer(timeout, this)
 

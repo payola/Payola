@@ -19,7 +19,6 @@ class GraphPresenter(val viewElement: html.Element) extends Presenter
     private var currentOntologyCustomization: Option[OntologyCustomization] = None
 
     def initialize() {
-        delayed(100)(()=>{val a = 1})
         Model.ontologyCustomizationsChanged += onOntologyCustomizationsChanged _
         view.vertexBrowsingDataSource += onVertexBrowsingDataSource _
         view.ontologyCustomizationsButton.mouseClicked += onOntologyCustomizationsButtonClicked _
@@ -35,7 +34,7 @@ class GraphPresenter(val viewElement: html.Element) extends Presenter
     }
 
     private def onOntologyCustomizationsButtonClicked(e: EventArgs[_]): Boolean = {
-        blockPage("Fetching accessible ontology customizations.")
+        blockPage("Fetching accessible ontology customizations...")
         Model.ontologyCustomizationsByOwnership { o =>
             view.updateOntologyCustomizations(o)
             unblockPage()
@@ -62,7 +61,7 @@ class GraphPresenter(val viewElement: html.Element) extends Presenter
     }
 
     private def onVertexBrowsingDataSource(e: VertexEventArgs[_]) {
-        blockPage("Fetching accessible data sources.")
+        blockPage("Fetching accessible data sources...")
         Model.accessibleDataSources { ds =>
             unblockPage()
             val selector = new DataSourceSelector("Browse in different data source: " + e.vertex.uri, ds)

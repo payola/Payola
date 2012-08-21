@@ -21,15 +21,16 @@ class AnalysisControls(timeoutSeconds: Int) extends ComposedView
     stopButton.setIsEnabled(false)
 
     val timeoutControl = new InputControl(
-        "Set evaluation timeout [sec.]:",
+        "Set timeout [sec.]:",
         new NumericInput("timeout", timeoutSeconds, "Set timeout", "input-mini timeout-control"),
         None
     )
+    timeoutControl.controlGroup.addCssClass("span3")
 
     private val timeoutInfoCaptionPre = new Text("The evaluation will timeout in [sec.]: ")
     val timeoutInfo = new Text(timeoutSeconds.toString)
 
-    val timeoutInfoBar = new Span(List(timeoutInfoCaptionPre, timeoutInfo), "span3 none")
+    val timeoutInfoBar = new Span(List(timeoutInfoCaptionPre, timeoutInfo), "none span3")
 
     private val wrap = new Div(List(runBtn, stopButton, progressBar, timeoutControl, timeoutInfoBar), "well analysis-controls")
 

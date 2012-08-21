@@ -11,12 +11,12 @@ import cz.payola.web.shared.managers.DataSourceManager
 class DataSourceCreator(val viewElement: html.Element) extends Presenter
 {
     def initialize() {
-        blockPage("Fetching accessible data fetcher plugins.")
+        blockPage("Fetching accessible data fetcher plugins...")
         Model.accessibleDataFetchers { d =>
             val view = new DataSourceCreatorView(d)
 
             view.createButton.mouseClicked += { _ =>
-                blockPage("Creating.")
+                blockPage("Creating...")
                 val name = view.name.field.value
                 val description = view.description.field.value
                 val plugin = view.plugin.field.value

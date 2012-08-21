@@ -246,14 +246,22 @@ class GraphView extends View[CanvasPack] {
                         case i: IdentifiedVertex =>
                             i
                     }
-                //find the view vertex of the identified vertex neighbour
+
+                // get all edges that are with the same uri as the edgeToIdentVertex and are connected to the
+                // identNeighbourVertex
+                val edgesToTheIdentVertex = graphModel.edges.filter{ edge =>
+                    edge.uri == edgeToIdentVertex.get.uri && (
+                        edge.destination == identNeighborVertex || edge.origin == identNeighborVertex)}
+
+
+                val literals = edgesToTheIdentVertex.map(_.destination)
+
+                //find the vertexView of the identified vertex neighbour
                 val identNeighbourVertexView =
                     vertexViews.find { vertexView => vertexView.vertexModel == identNeighborVertex}
+
                 if (identNeighbourVertexView.isDefined) {
-                    identNeighbourVertexView.get.addLiteralVertex(literalVertex,
-                        graphModel.edges.filter {
-                            edge => (edge.origin == literalVertex || edge.destination == literalVertex)
-                        })
+                    identNeighbourVertexView.get.addLiteralVertex(edgeToIdentVertex.get, literals)
                 } else {
                     //this should never happen
                 }

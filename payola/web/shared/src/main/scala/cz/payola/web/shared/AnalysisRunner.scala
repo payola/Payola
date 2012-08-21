@@ -7,8 +7,6 @@ import cz.payola.model.ModelException
 import cz.payola.domain.IDGenerator
 import cz.payola.domain.entities.User
 import cz.payola.domain.entities.analyses.evaluation.Success
-import cz.payola.domain.entities.plugins.PluginInstance
-import cz.payola.common.ValidationException
 
 // TODO move the logic to the model.
 @remote
@@ -17,25 +15,31 @@ import cz.payola.common.ValidationException
     val runningEvaluations: HashMap[String, (Option[User], AnalysisEvaluation, Long)] = new
             HashMap[String, (Option[User], AnalysisEvaluation, Long)]
 
-    @async def runAnalysisById(id: String, timeoutSeconds: Long, user: Option[User] = None)
+    @async def runAnalysisById(id: String, timeoutSeconds: Long, oldEvaluationId: String, user: Option[User] = None)
         (successCallback: (String => Unit))
         (failCallback: (Throwable => Unit)) {
         val analysis = Payola.model.analysisModel.getAccessibleToUserById(user, id).getOrElse {
             throw new ModelException("The analysis doesn't exist.") // TODO
         }
 
+        if (runningEvaluations.isDefinedAt(oldEvaluationId)) {
+            if (!runningEvaluations.get(oldEvaluationId).filter(_._2.analysis.id == id).isEmpty) {
+                runningEvaluations.remove(oldEvaluationId)
+            }
+        }
+
         val evaluationId = IDGenerator.newId
         val timeout = scala.math.min(1800, timeoutSeconds)
-        runningEvaluations.put(evaluationId, (user, analysis.evaluate(Some(timeout*1000)), (new java.util.Date).getTime))
+        runningEvaluations
+            .put(evaluationId, (user, analysis.evaluate(Some(timeout * 1000)), (new java.util.Date).getTime))
 
         successCallback(evaluationId)
     }
 
     private def getEvaluationTupleForID(id: String) = {
-
         val date = new java.util.Date
-        runningEvaluations.foreach{ tuple =>
-            if (tuple._2._3+(20*60*1000) < date.getTime){
+        runningEvaluations.foreach { tuple =>
+            if (tuple._2._3 + (20 * 60 * 1000) < date.getTime) {
                 runningEvaluations.remove(tuple._1)
             }
         }
@@ -75,22 +79,24 @@ import cz.payola.common.ValidationException
         val evaluation = evaluationTuple._2
 
         val response = evaluation.getResult.map {
-            case r: Error => EvaluationError(transformException(r.error), r.instanceErrors.toList.map{e => (e._1,transformException(e._2))})
-            case r: Success => EvaluationSuccess(r.outputGraph, r.instanceErrors.toList.map{e => (e._1,transformException(e._2))})
+            case r: Error => EvaluationError(transformException(r.error),
+                r.instanceErrors.toList.map { e => (e._1, transformException(e._2))})
+            case r: Success => EvaluationSuccess(r.outputGraph,
+                r.instanceErrors.toList.map { e => (e._1, transformException(e._2))})
             case Timeout => new EvaluationTimeout
             case _ => throw new Exception("Unhandled evaluation state")
         }.getOrElse {
             val progress = evaluation.getProgress
             EvaluationInProgress(progress.value, progress.evaluatedInstances, progress.runningInstances.toList,
-                progress.errors.toList.map{e => (e._1,transformException(e._2))})
+                progress.errors.toList.map { e => (e._1, transformException(e._2))})
         }
 
         successCallback(response)
     }
 
-    private def transformException(t: Throwable) : String = {
+    private def transformException(t: Throwable): String = {
         t match {
-            case e:Exception => e.getMessage
+            case e: Exception => e.getMessage
             case _ => "Unknown error."
         }
     }
