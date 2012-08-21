@@ -391,3 +391,16 @@ input.glyph {
 .button-row .inline-block {
     margin-left: 5px;
 }
+
+.plugin-canvas .alert {
+    padding-right: 15px;
+}
+
+.plugin-canvas .parameters {
+    margin-right: 0px;
+    width: 100%;
+}
+
+.plugin-canvas input, .plugin-canvas textarea {
+    width: 96%;
+}
