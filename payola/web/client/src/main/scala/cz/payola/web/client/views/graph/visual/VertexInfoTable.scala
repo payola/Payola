@@ -53,7 +53,7 @@ class VertexInfoTable(vertex: IdentifiedVertex, values: mutable.HashMap[String, 
             }
         }
 
-        if (values.size > 0){
+        if (values.size > 0) {
             val popoverTitle = new
                     Heading(List(dataSourceAnchor, new Span(List(new Text(" "))), browsingAnchor), 3, "popover-title")
             val popoverContent = new Div(List(new DefinitionList(buffer, "unstyled well")), "popover-content")
@@ -62,12 +62,19 @@ class VertexInfoTable(vertex: IdentifiedVertex, values: mutable.HashMap[String, 
             popoverArrow.setAttribute("style", "top: 15px;")
             val div = new Div(List(popoverArrow, popoverInner))
             div.setAttribute("class", "popover fade in vitable " + positionTypeCssClass(positionType))
-            div.setAttribute("style", "top: " + (position.y - 10).toString() + "px; left: " + position.x.toString() + "px;" +
-                "z-index: 1000;")
+            div.setAttribute("style",
+                "top: " + (position.y - 10).toString() + "px; left: " + position.x.toString() + "px;" +
+                    "z-index: 1000;")
             List(div)
-        }else{
+        } else {
             List(new Div())
         }
+    }
+
+    def setPosition(position: Point2D) {
+        createSubViews.head.blockHtmlElement.setAttribute("style",
+            "top: " + (position.y - 10).toString() + "px; left: " + position.x.toString() + "px;" +
+                "z-index: 1000;")
     }
 
     private def positionTypeCssClass(positionType: Int) {
