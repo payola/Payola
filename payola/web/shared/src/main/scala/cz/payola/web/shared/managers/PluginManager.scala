@@ -9,32 +9,7 @@ import cz.payola.common.ValidationException
 @remote @secured object PluginManager
     extends ShareableEntityManager[Plugin, cz.payola.common.entities.Plugin](Payola.model.pluginModel)
 {
-
-    def approvePluginByUser(className: String, owner: User, admin: User) = {
-        if (admin.email == Payola.settings.adminEmail) {
-            val result = Some(Payola.model.pluginModel.approvePluginWithClassName(className, owner))
-
-            val email = new Email("Plugin Approved", "Your plugin (%s) has been approved.".format(result.get.name), "no-reply@payola.cz", List(owner.email))
-            email.send()
-
-            result
-        }else{
-            None
-        }
-    }
-
-    def rejectPlugin(className: String, owner: User, admin: User): Boolean = {
-        // Currently, only send an email to the owner. Maybe in the future delete the plugin?
-        if (admin.email == Payola.settings.adminEmail) {
-            val email = new Email("Plugin Rejected", "Sorry, but your plugin has been rejected.", "no-reply@payola.cz", List(owner.email))
-            email.send()
-            true
-        }else{
-            false
-        }
-    }
-
-    @secured @async def getAccessibleDataFetchers(user: Option[User] = null)
+    @async def getAccessibleDataFetchers(user: Option[User] = null)
         (successCallback: Seq[cz.payola.common.entities.Plugin] => Unit)
         (errorCallback: Throwable => Unit) {
 
@@ -55,8 +30,8 @@ import cz.payola.common.ValidationException
         (failCallback: (Throwable => Unit)) {
 
         val className = Payola.model.pluginModel.compilePluginFromSource(pluginCode)
-        val approveLink = "http://%s/plugin/approve/%s/%s".format(Payola.settings.websiteURL, className, user.id)
-        val declineLink = "http://%s/plugin/reject/%s/%s".format(Payola.settings.websiteURL, className, user.id)
+        val approveLink = "%s/plugin/approve/%s/%s".format(Payola.settings.websiteURL, className, user.id)
+        val declineLink = "%s/plugin/reject/%s/%s".format(Payola.settings.websiteURL, className, user.id)
 
         val emailText =
             """Dear admin,
@@ -71,9 +46,43 @@ import cz.payola.common.ValidationException
               |
             """.stripMargin.format(pluginCode, approveLink, declineLink)
 
-        val email = new Email("Plugin Approval", emailText, "no-reply@payola.cz", List(Payola.settings.adminEmail))
-        email.send()
+        Email(
+            "Plugin Approval",
+            emailText,
+            Payola.settings.websiteNoReplyEmail,
+            List(Payola.settings.adminEmail)
+        ).send()
 
         successCallback()
+    }
+
+    def approvePluginByUser(className: String, owner: User, admin: User) = {
+        if (admin.email == Payola.settings.adminEmail) {
+            val plugin = Some(Payola.model.pluginModel.approvePluginWithClassName(className, owner))
+            Email(
+                "Plugin Approved",
+                "Your plugin (%s) has been approved.".format(plugin.get.name),
+                Payola.settings.websiteNoReplyEmail,
+                List(owner.email)
+            ).send()
+
+            plugin
+        } else {
+            None
+        }
+    }
+
+    def rejectPlugin(className: String, owner: User, admin: User): Boolean = {
+        // Currently, only send an email to the owner. Maybe in the future delete the plugin?
+        val isAdmin = admin.email == Payola.settings.adminEmail
+        if (isAdmin) {
+            Email(
+                "Plugin Rejected",
+                "Sorry, but your plugin has been rejected.",
+                Payola.settings.websiteNoReplyEmail,
+                List(owner.email)
+            ).send()
+        }
+        isAdmin
     }
 }

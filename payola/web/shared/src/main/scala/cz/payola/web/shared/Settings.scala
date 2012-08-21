@@ -27,6 +27,8 @@ import s2js.compiler.remote
 
     val websiteURL = config.getString("web.url")
 
+    val websiteNoReplyEmail = config.getString("web.email.noreply")
+
     val smtpServer = config.getString("mail.smtp.server")
 
     val smtpPort = config.getInt("mail.smtp.port")

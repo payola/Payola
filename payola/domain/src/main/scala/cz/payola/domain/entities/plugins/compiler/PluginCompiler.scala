@@ -24,7 +24,7 @@ class PluginCompiler(val libDirectory: java.io.File, val pluginClassDirectory: j
     /**
       * Compiles the specified plugin from the source code.
       * @param pluginSourceCode The plugin scala source code.
-      * @return Information about the compile plugin.
+      * @return Information about the compiled plugin.
       */
     def compile(pluginSourceCode: String): PluginInfo = {
         // Create the temporary plugin source file.
