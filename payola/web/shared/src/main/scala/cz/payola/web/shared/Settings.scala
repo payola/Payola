@@ -26,6 +26,8 @@ import com.typesafe.config._
 
     val websiteURL = config.getString("web.url")
 
+    val websiteNoReplyEmail = config.getString("web.email.noreply")
+
     val smtpServer = config.getString("mail.smtp.server")
 
     val smtpPort = config.getInt("mail.smtp.port")

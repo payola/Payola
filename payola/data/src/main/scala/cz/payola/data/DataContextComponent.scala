@@ -138,7 +138,7 @@ trait DataContextComponent
       * @tparam A Type of the entities in the repository.
       */
     trait ShareableEntityRepository[+A <: ShareableEntity with OptionallyOwnedEntity with NamedEntity]
-        extends OptionallyOwnedEntityRepository[A]
+        extends OptionallyOwnedEntityRepository[A] with NamedEntityRepository[A]
     {
         /**
           * Returns all public entities.
