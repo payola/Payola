@@ -20,7 +20,7 @@ class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) e
 
     // Create submit button
     val buttonContainer = document.getElementById(buttonContainerID)
-    val submitButton = new Button(new Text("Create Plugin"),"btn-primary", Icon.plus)
+    val submitButton = new Button(new Text("Create Plugin"),"btn-primary", new Icon(Icon.plus))
     submitButton.mouseClicked += { e =>
         postCodeToServer(getCode)
         false
