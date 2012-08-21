@@ -8,6 +8,7 @@ import cz.payola.web.client._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
 import cz.payola.common.ValidationException
+import cz.payola.web.client.views.bootstrap.Icon
 
 // Can't pass the editor's pre ID as we're using it in the native JS, which needs to
 // be compile-time ready
@@ -19,7 +20,7 @@ class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) e
 
     // Create submit button
     val buttonContainer = document.getElementById(buttonContainerID)
-    val submitButton = new Button(new Text("Create Plugin"))
+    val submitButton = new Button(new Text("Create Plugin"),"btn-primary", new Icon(Icon.plus, true))
     submitButton.mouseClicked += { e =>
         postCodeToServer(getCode)
         false

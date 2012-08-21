@@ -19,6 +19,8 @@ class EditablePluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[P
 
     val parameterValueChanged = new SimpleUnitEvent[ParameterValue]
 
+    alertDiv.addCssClass("editable")
+
     def getAdditionalControlsViews: Seq[View] = {
         val connect = new Button(new Text("Add Connection"))
         connect.mouseClicked += { e =>
@@ -44,7 +46,7 @@ class EditablePluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[P
                 case _ => new TextInput(param.id, v.toString, "Enter parameter value")
             }
 
-            val inputControl = new InputControl(param.name, field, Some("span2"))
+            val inputControl = new InputControl(param.name, field, None)
             inputControl.delayedChanged += { _ =>
                 parameterValueChanged.triggerDirectly(new ParameterValue(getId, param.id, param.name,
                     field.value.toString, inputControl))
