@@ -22,6 +22,18 @@ import com.typesafe.config._
 
     val databasePassword = config.getString("database.password")
 
+    val adminEmail = config.getString("admin.email")
+
+    val websiteURL = config.getString("web.url")
+
+    val smtpServer = config.getString("mail.smtp.server")
+
+    val smtpPort = config.getInt("mail.smtp.port")
+
+    val smtpUsername = config.getString("mail.smtp.user")
+
+    val smtpPassword = config.getString("mail.smtp.password")
+
     val libDirectory = new java.io.File(config.getString("lib.directory"))
 
     val pluginDirectory = new java.io.File(config.getString("plugin.directory"))

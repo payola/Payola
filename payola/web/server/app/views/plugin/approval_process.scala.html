@@ -1,0 +1,8 @@
+@(user: cz.payola.domain.entities.User, pluginName: String, result: String)
+
+@main(Some(user), "Plugin " + result) {
+
+<div class="container-fluid">
+    <h1>Plugin @pluginName has been @result.</h1>
+</div>
+}

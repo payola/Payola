@@ -29,6 +29,7 @@ object Graph
         val jenaLanguage = representation match {
             case RdfRepresentation.RdfXml => Lang.RDFXML
             case RdfRepresentation.Turtle => Lang.TURTLE
+            case RdfRepresentation.Trig => Lang.TRIG
         }
 
         val jenaGraphs = representation match {
