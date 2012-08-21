@@ -82,12 +82,10 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var r
 
     /**
      * Appends a literalVertex (attribute of this identifiedVertex) identifying types of relations (Edges)
-     * @param vertex
-     * @param vertexEdges
      */
-    def addLiteralVertex(vertex: LiteralVertex, vertexEdges: Seq[Edge]) {
-        val vertexEdgesContents = vertexEdges.map(_.uri)
-        literalVertices.put(vertex.toString, vertexEdgesContents)
+    def addLiteralVertex(typeOfAttribute: Edge, valueOfAttribute: Seq[Vertex]) {
+        val values = valueOfAttribute.map(_.toString)
+        literalVertices.put(typeOfAttribute.toString, values)
     }
 
     /**

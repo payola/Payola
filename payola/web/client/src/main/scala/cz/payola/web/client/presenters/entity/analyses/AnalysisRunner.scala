@@ -44,52 +44,12 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         }
     }
 
-    def initUI(analysis: Analysis): AnalysisRunnerView = {
-        val view = new AnalysisRunnerView(analysis, 30)
+    def initUI(analysis: Analysis, timeout: Int = 30): AnalysisRunnerView = {
+        val view = new AnalysisRunnerView(analysis, timeout)
         view.render(parentElement)
         view.tabs.hideTab(1)
 
-        successEventHandler = {
-            evt: EvaluationSuccessEventArgs =>
-                blockPage("Loading result...")
-
-                analysisDone = true
-                analysisRunning = false
-                intervalHandler.foreach(window.clearInterval(_))
-                view.overviewView.controls.stopButton.setIsEnabled(false)
-                view.overviewView.controls.timeoutControl.controlGroup.removeCssClass("none")
-                view.overviewView.controls.timeoutInfoBar.addCssClass("none")
-                view.overviewView.controls.progressBar.setStyleToSuccess()
-                view.overviewView.controls.progressBar.setProgress(0.0)
-                view.overviewView.analysisVisualizer.clearAllAttributes()
-
-                graphPresenter = new GraphPresenter(view.resultsView.htmlElement)
-                graphPresenter.initialize()
-
-                val downloadButtonView = new DownloadButtonView()
-                downloadButtonView.render(graphPresenter.view.toolbar.htmlElement)
-
-                downloadButtonView.rdfDownloadAnchor.mouseClicked += {
-                    e =>
-                        downloadResultAsRDF()
-                        true
-                }
-
-                downloadButtonView.ttlDownloadAnchor.mouseClicked += {
-                    e =>
-                        downloadResultAsTTL()
-                        true
-                }
-
-                graphPresenter.view.updateGraph(Some(evt.graph))
-
-                view.tabs.showTab(1)
-                view.tabs.switchTab(1)
-
-                analysisEvaluationSuccess -= successEventHandler
-
-                unblockPage()
-        }
+        successEventHandler = getSuccessEventHandler(analysis, view)
         analysisEvaluationSuccess += successEventHandler
 
         view.overviewView.controls.runBtn.mouseClicked += {
@@ -99,26 +59,66 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         view
     }
 
+    def getSuccessEventHandler(analysis: Analysis, view: AnalysisRunnerView) : (EvaluationSuccessEventArgs => Unit) = {
+        evt: EvaluationSuccessEventArgs =>
+            blockPage("Loading result...")
+
+            analysisDone = true
+            analysisRunning = false
+            intervalHandler.foreach(window.clearInterval(_))
+            view.overviewView.controls.stopButton.setIsEnabled(false)
+            view.overviewView.controls.timeoutControl.controlGroup.removeCssClass("none")
+            view.overviewView.controls.timeoutInfoBar.addCssClass("none")
+            view.overviewView.controls.progressBar.setStyleToSuccess()
+
+            graphPresenter = new GraphPresenter(view.resultsView.htmlElement)
+            graphPresenter.initialize()
+
+            val downloadButtonView = new DownloadButtonView()
+            downloadButtonView.render(graphPresenter.view.toolbar.htmlElement)
+
+            downloadButtonView.rdfDownloadAnchor.mouseClicked += {
+                e =>
+                    downloadResultAsRDF()
+                    true
+            }
+
+            downloadButtonView.ttlDownloadAnchor.mouseClicked += {
+                e =>
+                    downloadResultAsTTL()
+                    true
+            }
+
+            graphPresenter.view.updateGraph(Some(evt.graph))
+
+            view.tabs.showTab(1)
+            view.tabs.switchTab(1)
+
+            analysisEvaluationSuccess -= successEventHandler
+
+            unblockPage()
+    }
+
     def runButtonClickHandler(view: AnalysisRunnerView, analysis: Analysis) = {
         if (!analysisRunning) {
             blockPage("Starting analysis...")
 
             uiAdaptAnalysisRunning(view, initUI _, analysis)
             var timeout = view.overviewView.controls.timeoutControl.field.value
+            view.overviewView.controls.timeoutInfo.text = timeout.toString
 
             analysisRunning = true
-            AnalysisRunner.runAnalysisById(analysisId, timeout) {
-                id =>
-                    unblockPage()
+            AnalysisRunner.runAnalysisById(analysisId, timeout, evaluationId) { id =>
+                unblockPage()
 
-                    intervalHandler = Some(window.setInterval(() => {
-                        view.overviewView.controls.timeoutInfo.text = timeout.toString
-                        timeout -= 1
-                    }, 1000))
+                intervalHandler = Some(window.setInterval(() => {
+                    view.overviewView.controls.timeoutInfo.text = timeout.toString
+                    timeout -= 1
+                }, 1000))
 
-                    evaluationId = id
-                    view.overviewView.controls.progressBar.setProgress(0.02)
-                    schedulePolling(view, analysis)
+                evaluationId = id
+                view.overviewView.controls.progressBar.setProgress(0.02)
+                schedulePolling(view, analysis)
             } {
                 error => fatalErrorHandler(error)
             }
@@ -130,7 +130,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         false
     }
 
-    private def uiAdaptAnalysisRunning(view: AnalysisRunnerView, initUI: (Analysis) => Unit, analysis: Analysis) {
+    private def uiAdaptAnalysisRunning(view: AnalysisRunnerView, initUI: (Analysis, Int) => Unit, analysis: Analysis) {
         view.overviewView.controls.runBtn.setIsEnabled(false)
         view.overviewView.controls.runBtnCaption.text = "Running Analysis..."
         view.overviewView.controls.stopButton.setIsEnabled(true)
@@ -142,13 +142,14 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         }
     }
 
-    private def onStopClick(view: AnalysisRunnerView, initUI: (Analysis) => Unit, analysis: Analysis) {
+    private def onStopClick(view: AnalysisRunnerView, initUI: (Analysis, Int) => Unit, analysis: Analysis) {
         if (!analysisDone) {
             analysisRunning = false
             analysisDone = false
             intervalHandler.foreach(window.clearInterval(_))
+            val timeout = view.overviewView.controls.timeoutControl.field.value
             view.destroy()
-            initUI(analysis)
+            initUI(analysis, timeout)
             window.onunload = null
         }
     }
@@ -215,6 +216,8 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
             view.overviewView.analysisVisualizer.setInstanceError(err._1.id, err._2)
         }
 
+        AlertModal.display("Analysis evaluation error",error.error)
+
         initReRun(view, analysis)
     }
 
@@ -224,6 +227,8 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         analysisDone = true
         view.overviewView.controls.stopButton.setIsEnabled(false)
         intervalHandler.foreach(window.clearInterval(_))
+        view.overviewView.controls.timeoutControl.controlGroup.removeCssClass("none")
+        view.overviewView.controls.timeoutInfoBar.hide()
 
         AlertModal.display("Time out", "The analysis evaluation has timed out.")
 
@@ -240,13 +245,15 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
             analysisDone = false
             analysisRunning = false
 
-            val newView = initUI(analysis)
+            val newView = initUI(analysis, view.overviewView.controls.timeoutControl.field.value)
             runButtonClickHandler(newView, analysis)
         }
+        successEventHandler = getSuccessEventHandler(analysis, view)
     }
 
     def evaluationSuccessHandler(success: EvaluationSuccess, analysis: Analysis, view: AnalysisRunnerView) {
-        view.overviewView.controls.progressBar.setStyleToFailure()
+        view.overviewView.controls.progressBar.setStyleToSuccess()
+        view.overviewView.controls.progressBar.setProgress(1.0)
         analysisDone = true
         view.overviewView.controls.stopButton.setIsEnabled(false)
         intervalHandler.foreach(window.clearInterval(_))
@@ -254,6 +261,8 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         initReRun(view, analysis)
 
         window.onunload = null
+
+        view.overviewView.analysisVisualizer.setAllDone()
 
         success.instanceErrors.foreach {
             err =>

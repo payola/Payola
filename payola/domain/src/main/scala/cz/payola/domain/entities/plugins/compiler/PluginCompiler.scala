@@ -24,9 +24,9 @@ class PluginCompiler(val libDirectory: java.io.File, val pluginClassDirectory: j
     /**
       * Compiles the specified plugin from the source code.
       * @param pluginSourceCode The plugin scala source code.
-      * @return The compiled plugin class name.
+      * @return Information about the compile plugin.
       */
-    def compile(pluginSourceCode: String): String = {
+    def compile(pluginSourceCode: String): PluginInfo = {
         // Create the temporary plugin source file.
         val pluginFileName = UUID.randomUUID.toString + ".scala"
         val pluginFile = new java.io.File(pluginFileName)
@@ -35,7 +35,7 @@ class PluginCompiler(val libDirectory: java.io.File, val pluginClassDirectory: j
         try {
             val run = new compiler.Run()
             run.compile(List(pluginFileName))
-            compiler.pluginVerifier.pluginClassName.get
+            new PluginInfo(compiler.pluginVerifier.pluginName.get, compiler.pluginVerifier.pluginClassName.get)
         } finally {
             pluginFile.delete()
         }

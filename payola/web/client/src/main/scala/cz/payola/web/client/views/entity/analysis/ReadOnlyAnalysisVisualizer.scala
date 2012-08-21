@@ -24,6 +24,10 @@ class ReadOnlyAnalysisVisualizer(analysis: Analysis) extends AnalysisVisualizer(
         instancesMap.get(instanceId).map(_.setRunning())
     }
 
+    def setAllDone() {
+        instancesMap.foreach(_._2.setEvaluated())
+    }
+
     def clearAllAttributes() {
         instancesMap foreach { case (key, view) =>
             view.clearStyle()

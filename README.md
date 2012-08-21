@@ -862,13 +862,15 @@ Some of these tasks are performed at Virtuoso's SPARQL endpoint which is as simp
 
 The classes in this package build up a wrapper which encapsulates all the business and data access logic. The goal of the code in this package is to decouple any presentation layer from the application logic and data access. In fact, all of the existing presentation layers (web application controllers and RPC remote objects) are built on top of this package.
 
-It is crucial to mention, that the model package does not make up the whole model. The model is spread into more packages, the domain, data, and common. All of those packages provide model capabilities and the model package itself uses them all to get specific tasks done.
+It is crucial to mention, that the model package does not make up the whole model. The model is spread into more packages, the domain, data, and common. All of those packages provide some capabilities and the model package itself uses them all to get specific tasks done.
 
 If you want to understand the following text (and the code) better, please, get familiar with the [Scala Cake pattern for DI](http://jonasboner.com/2008/10/06/real-world-scala-dependency-injection-di/).
 
-There exists an object, however, which should belong to this package, but is to be found elsewhere - the `cz.payola.web.shared.Payola` object. It represents an entry point to the model, in the classic DI architecture, you would probably call it a container. It is a place, where all the configuration is done and an instance of ModelComponent is created. Since objects behave in certain situations like Singletons, XXXXXXXXX
+The whole model is divided into a several components. Each component has its own data subdomain which it wraps up. E.g. `DataSourceModelComponent` for data sources, `UserModelComponent` for users, etc. As you can see, the components bring us an API which makes us able to work with the data stored in the relational DB.
 
+While utilizing the subcomponents the `ModelComponent` trait is build up to provide a single entrypoint to the model infrastructure. While utilizing the cake pattern, dependencies like persistance layer, RDF data storage layer and plugin compiler are injected to the model components.
 
+Later on, when you will get familiar with the `cz.payola.web.shared` package, you will find out something more about an object named `cz.payola.web.shared.Payola`. This is an example implementation of the `ModelComponent` trait.
 
 <a name="web"></a>
 ## Package cz.payola.web

@@ -14,7 +14,7 @@ import cz.payola.common.entities.plugins._
     }
 
     @async def getPlugins(user: User = null)(successCallback: (Seq[Plugin] => Unit))(failCallback: (Throwable => Unit)) {
-        successCallback(Payola.model.pluginModel.getAll())
+        successCallback(Payola.model.pluginModel.getAccessibleToUser(Some(user)))
     }
 
     @async def cloneDataSource(dataSourceId: String, analysisId: String, user: User = null)(successCallback: (PluginInstance => Unit))

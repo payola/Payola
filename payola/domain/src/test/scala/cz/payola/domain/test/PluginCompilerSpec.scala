@@ -16,7 +16,7 @@ class PluginCompilerSpec extends FlatSpec with ShouldMatchers
     val loader = new PluginClassLoader(pluginClassDirectory, getClass.getClassLoader)
 
     "Plugin compiler" should "compile simple plugins" in {
-        val pluginClassName = compiler.compile(
+        val pluginInfo = compiler.compile(
             """
                 package my.custom.plugin
 
@@ -30,9 +30,7 @@ class PluginCompilerSpec extends FlatSpec with ShouldMatchers
                 class DelayInSeconds(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
                     extends Plugin(name, inputCount, parameters, id)
                 {
-                    def this() = {
-                        this("Time Delay in seconds", 1, List(new IntParameter("Delay", 1)), IDGenerator.newId)
-                    }
+                    def this() = this("Time Delay in seconds", 1, List(new IntParameter("Delay", 1)), IDGenerator.newId)
 
                     def evaluate(instance: PluginInstance, inputs: IndexedSeq[Option[Graph]], progressReporter: Double => Unit) = {
                         usingDefined(instance.getIntParameter("Delay")) { d =>
@@ -46,8 +44,9 @@ class PluginCompilerSpec extends FlatSpec with ShouldMatchers
                 }
             """)
 
-        val plugin = loader.instantiatePlugin(pluginClassName)
-        assert(plugin.name == "Time Delay in seconds", "The plugin name is invalid.")
+        val plugin = loader.instantiatePlugin(pluginInfo.className)
+        assert(pluginInfo.name == "Time Delay in seconds", "The plugin name is invalid.")
+        assert(pluginInfo.name == plugin.name, "The plugin name doesn't match the name in the plugin info.")
         assert(plugin.inputCount == 1, "The plugin input count is invalid.")
         assert(plugin.parameters.length == 1, "The plugin parameter count is invalid.")
         assert(plugin.parameters.head.name == "Delay", "The plugin parameter is invalid.")
@@ -55,7 +54,7 @@ class PluginCompilerSpec extends FlatSpec with ShouldMatchers
 
     it should "throw exceptions when the compilation fails" in {
         try {
-            val plugin = compiler.compile(
+            val pluginInfo = compiler.compile(
                 """
                     package my.custom.plugin
 
