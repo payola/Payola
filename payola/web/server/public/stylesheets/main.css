@@ -404,3 +404,7 @@ input.glyph {
 .plugin-canvas input, .plugin-canvas textarea {
     width: 96%;
 }
+
+pre#editor {
+    max-height: 100000px !important;
+}
