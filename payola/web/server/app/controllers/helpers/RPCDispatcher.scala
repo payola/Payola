@@ -1,8 +1,6 @@
 package controllers.helpers
 
 import controllers.InvocationInfo
-import s2js.runtime.shared.rpc
-import cz.payola.domain.entities.User
 import scala.collection.mutable
 import cz.payola.domain.entities.User
 import s2js.runtime.shared.rpc.RpcException
@@ -10,20 +8,19 @@ import s2js.runtime.shared.rpc.RpcException
 class RPCDispatcher(jsonSerializer: RPCSerializer)
 {
     /**
-      * Processes the given HTTP request and returns a response. The expected result is a serialized JSON object. See
-      * s2js.runtime.s2js.RPCWrapper to see, how a object is deserialized to a JSON string and for more information
-      * on a possibility of a custom deserialisation (currently not available).
-      *
-      * It expects a classic form/www-data POST request with a mandatory field named "method". It maps the request to
-      * a Scala Map[String, Seq[String] ] instance which is transformed to a typed parameters list. The list is used
-      * to invoke a method named with the value of the POST field "method".
-      *
-      * @param params request parameters
-      * @param asynchronous Whether the call is ment to be synchronous (false) or asynchronous (true)
-      * @return JSON-encoded response object
-      */
+     * Processes the given HTTP request and returns a response. The expected result is a serialized JSON object. See
+     * s2js.runtime.s2js.RPCWrapper to see, how a object is deserialized to a JSON string and for more information
+     * on a possibility of a custom deserialisation (currently not available).
+     *
+     * It expects a classic form/www-data POST request with a mandatory field named "method". It maps the request to
+     * a Scala Map[String, Seq[String] ] instance which is transformed to a typed parameters list. The list is used
+     * to invoke a method named with the value of the POST field "method".
+     *
+     * @param params request parameters
+     * @param asynchronous Whether the call is ment to be synchronous (false) or asynchronous (true)
+     * @return JSON-encoded response object
+     */
     def dispatchRequest(params: Map[String, Seq[String]], asynchronous: Boolean = false, user: Option[User]): String = {
-
         // get the name of the method
         // when empty, throw an exception
         val fqdn = params.get("method").flatMap(_.headOption).getOrElse(throw new RpcException("TODO"))
@@ -40,10 +37,9 @@ class RPCDispatcher(jsonSerializer: RPCSerializer)
 
         val paramBuffer = mutable.Buffer.empty[Seq[String]]
 
-        val limit = params.values.size-2
+        val limit = params.values.size - 2
         var i = 0
-        while (i < limit)
-        {
+        while (i < limit) {
             paramBuffer.append(params(i.toString()))
             i += 1
         }
@@ -67,35 +63,38 @@ class RPCDispatcher(jsonSerializer: RPCSerializer)
     }
 
     /**
-      * Invokes the remote method asynchronously. The remote method is designated with objectName, methodName.
-      *
-      * It internally calls the RPCActionExecutor, which is a Scala actor to avoid errors when the underlying
-      * remote method calls the RPC successCallback in an nested thread. The callback is in-place-defined in
-      * this method - it just sends a message to the RPCActionExecutor actor to tell him what to return.
-      *
-      * Despite the name of the method, the method is synchronous.
-      *
-      * The method adds two parameters into the parameter list - success callback and fail callback - in this order.
-      * Therefore those callbacks will be always the last two parameters of a remote asynchronous method.
-      *
-      * @param objectName Name of the remote object containing the remote method
-      * @param methodName Name of the remote method you want to call
-      * @param params List of parameters - Sequences of Strings
-      * @return Response encoded into JSON string
-      */
+     * Invokes the remote method asynchronously. The remote method is designated with objectName, methodName.
+     *
+     * It internally calls the RPCActionExecutor, which is a Scala actor to avoid errors when the underlying
+     * remote method calls the RPC successCallback in an nested thread. The callback is in-place-defined in
+     * this method - it just sends a message to the RPCActionExecutor actor to tell him what to return.
+     *
+     * Despite the name of the method, the method is synchronous.
+     *
+     * The method adds two parameters into the parameter list - success callback and fail callback - in this order.
+     * Therefore those callbacks will be always the last two parameters of a remote asynchronous method.
+     *
+     * @param objectName Name of the remote object containing the remote method
+     * @param methodName Name of the remote method you want to call
+     * @param params List of parameters - Sequences of Strings
+     * @return Response encoded into JSON string
+     */
     private def invokeAsync(objectName: String, methodName: String, params: Iterable[Seq[String]],
         paramTypes: Seq[String], user: Option[User]): String = {
-
         val dto = getReflectionObjects(objectName, methodName, user)
 
         val paramsSize = params.size
 
-        val extraSpace = if (dto.methodIsSecured) { 3 } else { 2 }
+        val extraSpace = if (dto.methodIsSecured) {
+            3
+        } else {
+            2
+        }
 
         // allocate an array of objects for the parameters (adding 2 for callbacks)
         val paramArray = constructParamArray(paramsSize, extraSpace, params, dto.methodToRun, paramTypes)
 
-        conditionallySetAuthorizationInfo(dto, paramArray, paramArray.size-extraSpace, user)
+        conditionallySetAuthorizationInfo(dto, paramArray, paramArray.size - extraSpace, user)
 
         val result = executeWithActors(paramArray, paramsSize, dto)
 
@@ -104,23 +103,26 @@ class RPCDispatcher(jsonSerializer: RPCSerializer)
     }
 
     /**
-      * Invokes the remote method synchronously.
-      * @param objectName Name of the remote object containing the remote method
-      * @param methodName Name of the remote method you want to call
-      * @param params List of parameters - Sequences of Strings
-      * @return Response encoded into JSON string
-      */
+     * Invokes the remote method synchronously.
+     * @param objectName Name of the remote object containing the remote method
+     * @param methodName Name of the remote method you want to call
+     * @param params List of parameters - Sequences of Strings
+     * @return Response encoded into JSON string
+     */
     private def invoke(objectName: String, methodName: String, params: Iterable[Seq[String]],
         paramTypes: Seq[String], user: Option[User]): String = {
-
         val dto = getReflectionObjects(objectName, methodName, user)
 
-        val extraSpace = if (dto.methodIsSecured) { 1 } else { 0 }
+        val extraSpace = if (dto.methodIsSecured) {
+            1
+        } else {
+            0
+        }
 
         // update each parameter and replace it with its properly typed representation
         val paramArray = constructParamArray(params.size, extraSpace, params, dto.methodToRun, paramTypes)
 
-        conditionallySetAuthorizationInfo(dto, paramArray, paramArray.size-extraSpace, user)
+        conditionallySetAuthorizationInfo(dto, paramArray, paramArray.size - extraSpace, user)
 
         // invoke the remote method (!? for synchronous behaviour)
         val result = dto.methodToRun.invoke(dto.runnableObj, paramArray: _*)
@@ -129,7 +131,8 @@ class RPCDispatcher(jsonSerializer: RPCSerializer)
         serialized
     }
 
-    private def conditionallySetAuthorizationInfo(dto: InvocationInfo, paramArray: Array[Object], paramIndex: Int, user: Option[User]) {
+    private def conditionallySetAuthorizationInfo(dto: InvocationInfo, paramArray: Array[Object], paramIndex: Int,
+        user: Option[User]) {
         if (dto.methodIsSecured) {
             if (dto.authorizationRequired) {
                 paramArray.update(paramIndex, user.get)
@@ -140,14 +143,14 @@ class RPCDispatcher(jsonSerializer: RPCSerializer)
     }
 
     /**
-      *
-      * @param paramsSize
-      * @param extraSpace
-      * @param params
-      * @param methodToRun
-      * @param paramTypes
-      * @return
-      */
+     *
+     * @param paramsSize
+     * @param extraSpace
+     * @param params
+     * @param methodToRun
+     * @param paramTypes
+     * @return
+     */
     private def constructParamArray(paramsSize: Int, extraSpace: Int, params: Iterable[Seq[String]],
         methodToRun: java.lang.reflect.Method, paramTypes: Seq[String]) = {
         val paramArray = new Array[java.lang.Object](paramsSize + extraSpace)
@@ -163,14 +166,14 @@ class RPCDispatcher(jsonSerializer: RPCSerializer)
     }
 
     /**
-      *
-      * @param objectName
-      * @param methodName
-      * @return
-      */
+     *
+     * @param objectName
+     * @param methodName
+     * @return
+     */
     private def getReflectionObjects(objectName: String, methodName: String, user: Option[User]) = {
         // while objects are not really a Java thing, they are compiled into static classes named with trailing $ sign
-        try{
+        try {
             val clazz = Class.forName(objectName + "$");
 
             // get the desired method on the object
@@ -185,69 +188,86 @@ class RPCDispatcher(jsonSerializer: RPCSerializer)
             val methodToRun: java.lang.reflect.Method = methodOption.getOrElse(null)
             val runnableObj = clazz.getField("MODULE$").get(objectName)
 
+            if (!isRemoteMethod(clazz, methodToRun)) {
+                throw new java.lang.ClassNotFoundException
+            }
+
             var authorizedUser: Option[User] = None
             val methodIsSecured = isSecuredMethod(clazz, methodToRun)
             val authorizationRequired = isAuthorizationRequired(methodIsSecured, methodToRun)
 
-            if (methodIsSecured){
-                if (authorizationRequired)
-                {
+            if (methodIsSecured) {
+                if (authorizationRequired) {
                     checkAuthorization(user)
                 }
                 authorizedUser = user
             }
 
-            val dto = new InvocationInfo(methodToRun, clazz, runnableObj, methodIsSecured, authorizationRequired, authorizedUser)
+            val dto = new InvocationInfo(methodToRun, clazz, runnableObj, methodIsSecured, authorizationRequired,
+                authorizedUser)
             dto
-        }catch{
+        } catch {
             case e: java.lang.ClassNotFoundException => throw new RpcException("Invalid remote object name.")
         }
     }
 
-    def lastParameterIsOfTypeUser(methodToRun: java.lang.reflect.Method) : Boolean = {
-        methodToRun.getParameterTypes.find{_.getName.equals("cz.payola.domain.entities.User")}.isDefined
+    def lastParameterIsOfTypeUser(methodToRun: java.lang.reflect.Method): Boolean = {
+        methodToRun.getParameterTypes.find {
+            _.getName.equals("cz.payola.domain.entities.User")
+        }.isDefined
     }
 
-    def isAuthorizationRequired(methodIsSecured: Boolean, methodToRun: java.lang.reflect.Method) : Boolean = {
-        if (!methodIsSecured){
+    def isAuthorizationRequired(methodIsSecured: Boolean, methodToRun: java.lang.reflect.Method): Boolean = {
+        if (!methodIsSecured) {
             false
         } else {
             lastParameterIsOfTypeUser(methodToRun)
         }
     }
 
-    def isAuthorizationAnnotationPresent(annotations: Array[java.lang.annotation.Annotation], authorizationClassName: String) : Boolean = {
-        return annotations.find{a => a.annotationType().getName().equals(authorizationClassName)}.isDefined
+    def isAnnotationPresent(annotations: Array[java.lang.annotation.Annotation],
+        authorizationClassName: String): Boolean = {
+        return annotations.find { a => a.annotationType().getName().equals(authorizationClassName)}.isDefined
     }
 
-    def isSecuredMethod(clazz: java.lang.Class[_], methodToRun: java.lang.reflect.Method) : Boolean = {
+    def isRemoteMethod(clazz: java.lang.Class[_], methodToRun: java.lang.reflect.Method): Boolean = {
         val classAnotations = clazz.getAnnotations
 
-        if (isAuthorizationAnnotationPresent(classAnotations, "s2js.compiler.secured")){
+        if (isAnnotationPresent(classAnotations, "s2js.compiler.remote")) {
+            true
+        } else {
+            false
+        }
+    }
+
+    def isSecuredMethod(clazz: java.lang.Class[_], methodToRun: java.lang.reflect.Method): Boolean = {
+        val classAnotations = clazz.getAnnotations
+
+        if (isAnnotationPresent(classAnotations, "s2js.compiler.secured")) {
             true
         } else {
             val methodAnnotations = methodToRun.getAnnotations()
-            if (isAuthorizationAnnotationPresent(methodAnnotations,"s2js.compiler.secured")){
+            if (isAnnotationPresent(methodAnnotations, "s2js.compiler.secured")) {
                 true
-            }else{
+            } else {
                 false
             }
         }
     }
 
     def checkAuthorization(user: Option[User]) = {
-        if (!user.isDefined){
+        if (!user.isDefined) {
             throw new RpcException("Not authorized.")
         }
     }
 
     /**
-      *
-      * @param paramArray
-      * @param paramsSize
-      * @param dto
-      * @return
-      */
+     *
+     * @param paramArray
+     * @param paramsSize
+     * @param dto
+     * @return
+     */
     private def executeWithActors(paramArray: Array[java.lang.Object], paramsSize: Int, dto: InvocationInfo) = {
         // create and start the actor
         val executor = new RPCActionExecutor()
@@ -263,16 +283,16 @@ class RPCDispatcher(jsonSerializer: RPCSerializer)
     }
 
     /**
-      * The method parses the given sequence of strings into a typed parameter. The type is passed
-      * as the paramType parameter.
-      *
-      * If the parameter is something simple (Bool, Char, Int, Long, ...), the head of the sequence is
-      * parsed into the result. If it is an array, all of them are recursively parsed.
-      *
-      * @param input Sequence of string values to be transformed into a object representation
-      * @param paramType Type of the parsed parameter
-      * @return typed parameter
-      */
+     * The method parses the given sequence of strings into a typed parameter. The type is passed
+     * as the paramType parameter.
+     *
+     * If the parameter is something simple (Bool, Char, Int, Long, ...), the head of the sequence is
+     * parsed into the result. If it is an array, all of them are recursively parsed.
+     *
+     * @param input Sequence of string values to be transformed into a object representation
+     * @param paramType Type of the parsed parameter
+     * @return typed parameter
+     */
     private def parseParam(input: Seq[String], paramType: Class[_], paramTypeClient: String): java.lang.Object = {
         if (paramType.getName.startsWith("scala.collection")) {
             parseSequence(input, paramType, paramTypeClient)
@@ -295,25 +315,25 @@ class RPCDispatcher(jsonSerializer: RPCSerializer)
     }
 
     /**
-      *
-      * @param input
-      * @param paramType
-      * @param paramTypeClient
-      * @return
-      */
+     *
+     * @param input
+     * @param paramType
+     * @param paramTypeClient
+     * @return
+     */
     private def parseSequence(input: Seq[String], paramType: Class[_], paramTypeClient: String): java.lang.Object = {
         val seqString = input.head
 
         if (paramTypeClient.endsWith("[scala.Int]")) {
-            util.parsing.json.JSON.perThreadNumberParser = {input: String => input.toInt}
+            util.parsing.json.JSON.perThreadNumberParser = { input: String => input.toInt}
         } else if (paramTypeClient.endsWith("[scala.Float]")) {
-            util.parsing.json.JSON.perThreadNumberParser = {input: String => input.toFloat}
+            util.parsing.json.JSON.perThreadNumberParser = { input: String => input.toFloat}
         } else if (paramTypeClient.endsWith("[scala.Short]")) {
-            util.parsing.json.JSON.perThreadNumberParser = {input: String => input.toShort}
+            util.parsing.json.JSON.perThreadNumberParser = { input: String => input.toShort}
         } else if (paramTypeClient.endsWith("[scala.Double]")) {
-            util.parsing.json.JSON.perThreadNumberParser = {input: String => input.toDouble}
+            util.parsing.json.JSON.perThreadNumberParser = { input: String => input.toDouble}
         } else if (paramTypeClient.endsWith("[scala.Long]")) {
-            util.parsing.json.JSON.perThreadNumberParser = {input: String => input.toLong}
+            util.parsing.json.JSON.perThreadNumberParser = { input: String => input.toLong}
         }
 
         val collection = util.parsing.json.JSON.parseFull(seqString).get.asInstanceOf[Seq[AnyVal]]

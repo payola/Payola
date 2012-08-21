@@ -1,6 +1,7 @@
 package cz.payola.web.shared
 
 import com.typesafe.config._
+import s2js.compiler.remote
 
 @remote private[shared] class Settings(config: Config)
 {
@@ -25,6 +26,8 @@ import com.typesafe.config._
     val adminEmail = config.getString("admin.email")
 
     val websiteURL = config.getString("web.url")
+
+    val websiteNoReplyEmail = config.getString("web.email.noreply")
 
     val smtpServer = config.getString("mail.smtp.server")
 

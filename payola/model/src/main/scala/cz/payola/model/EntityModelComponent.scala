@@ -72,6 +72,10 @@ trait EntityModelComponent
             (publicEntities ++ entitiesOfOwner).distinct.sortBy(_.name)
         }
 
+        def getByName(name: String): Option[A] = {
+            repository.getByName(name)
+        }
+
         private def getGrantedToUser(user: Option[User], groups: Seq[Group]): Seq[A] = {
             user.map { u =>
                 val granteeIds = u.id +: groups.filter(_.hasMember(u)).map(_.id)
