@@ -11,7 +11,7 @@ import cz.payola.web.client.views.graph.PluginView
 
 abstract class TablePluginView(name: String) extends PluginView(name)
 {
-    protected val tableWrapper = new Div().setAttribute("style", "padding: 0 20px;")
+    protected val tableWrapper = new Div().setAttribute("style", "padding: 0 20px; min-height: 200px;")
 
     def createSubViews = List(tableWrapper)
 
