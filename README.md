@@ -11,7 +11,7 @@ Since Payola is rather a platform than a closed project, you can fork the projec
 
 Payola requires a [Scala](http://www.scala-lang.org) environment, which is supported on virtually any platform capable of running Java code - both Unix and Windows-based systems are fully supported. The system should have at least 1GB of memory dedicated to Payola itself.
 
-Aside from the actual Payola server, you need to have a running [Squeryl-compatible](http://squeryl.org) relational database for storing user data and a [Virtuoso](http://virtuoso.openlinksw.com) server for storing personal RDF data. Neither of these need to  necessarily be running on the same system as Payola itself (this is configurable in the `payola.conf` file as described later on).
+Aside from the actual Payola server, you need to have a running [Squeryl-compatible](http://squeryl.org) relational database for storing user data, a [Virtuoso](http://virtuoso.openlinksw.com) server for storing personal RDF data and a SMTP server for the plugin approval process. Neither of these need to necessarily be running on the same system as Payola itself (this is configurable in the `payola.conf` file as described later on).
 
 To work with Payola, a web browser capable of displaying HTML5 web pages is required. Payola takes advantage of many HTML5 features - keep your web browser up-to-date all the time. Recommended are the *latest versions* of WebKit-based browsers (e.g. Chrome, Safari), Firefox, Opera, or IE. A 1440x900 or larger display is highly recommended.
 
@@ -50,6 +50,36 @@ Payola comes pre-configured to work with default settings of a Virtuoso server a
 > *database.user* - database login name
 
 > *database.password* - database login password
+
+> ** **
+
+> **User**
+
+> ** **
+
+> *admin.email* - Email of the admin user. A user with this email address also gets created when the initializer project is run.
+
+> ** **
+
+> **Web**
+
+> ** **
+
+> *web.url* - URL of the website, by default `http://localhost:9000`. The URL must start with `http://` or `https://` and mustn't end with a trailing `/`.
+
+> ** **
+
+> **Email**
+
+> ** **
+
+> *mail.smtp.server* - Mail server.
+
+> *mail.smtp.port* - Mail server port.
+
+> *mail.smtp.user* - Username.
+
+> *mail.smtp.password* - Password.
 
 > ** **
 
@@ -317,9 +347,11 @@ class ValuesInbetween(name: String, inputCount: Int, parameters:
 }
 ```
 
-In this example, a new plugin named `Filter Values in Between` is created`. The parameterless constructor `this()` is called to fill in values to the default constructor. Here you set up required parameters as well.
+In this example, a new plugin named `Filter Values in Between` is created. The parameterless constructor `this()` is called to fill in values to the default constructor. Here you set up required parameters as well.
 
 The `evaluate` method is the one doing all the work. Here would be your code filtering the input graph. The `instance` variable contains all parameter values, `inputs` is a sequence of `Option[Graph]`'s - in our case just one as defined in `this()`. You can optionally report progress using the `progressReporter` function passed, which reports the progress to the user (values between 0.0 and 1.0).
+
+Once you upload the plugin, an email is sent to the admin to review the plugin source code for security reasons. After he reviews it, you will receive an email with the admin's decision.
 
 More information about plugin architecture can be found in the [Developer Guide](#developer). If you intend to write your own plugin, please, refer there.
 
