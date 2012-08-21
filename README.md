@@ -988,10 +988,10 @@ As you can see, the `POST` request which represents an asynchronous RPC call con
 
 > One could ask now, why we did not use the standard Scala @remote annotation, or, moreover, why we did use a Java annotation. Since scala annotations [are not visible during runtime](http://stackoverflow.com/questions/5177010/how-to-create-annotations-and-get-them-in-scala), we were forced to use a Java annotation with a special retention policy to get this done.
 
+```
 package s2js.compiler;
 import java.lang.annotation.*;
 
-```
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface remote
