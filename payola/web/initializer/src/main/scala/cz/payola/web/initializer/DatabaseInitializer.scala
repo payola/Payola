@@ -164,10 +164,16 @@ object DatabaseInitializer extends App
         ).setParameter(
             Selection.valueParameter, "120"
         )
+        val contractTitleProjection = projectionPlugin.createInstance().setParameter(
+            Projection.selectPropertyInfoParameter, false
+        ).setParameter(
+            Projection.propertyURIsParameter, "http://purl.org/dc/terms/title"
+        )
 
-        manyTendersPersisted.addPluginInstances(contractFetcher, contractTyped, contractSelection)
+        manyTendersPersisted.addPluginInstances(contractFetcher, contractTyped, contractSelection, contractTitleProjection)
         manyTendersPersisted.addBinding(contractFetcher, contractTyped)
         manyTendersPersisted.addBinding(contractTyped, contractSelection)
+        manyTendersPersisted.addBinding(contractSelection, contractTitleProjection)
 
 
         // Persist the ontology customizations.
