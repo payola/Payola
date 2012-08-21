@@ -49,6 +49,8 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         view.render(parentElement)
         view.tabs.hideTab(1)
 
+        view.overviewView.controls.timeoutControl.field.value = timeout
+
         successEventHandler = getSuccessEventHandler(analysis, view)
         analysisEvaluationSuccess += successEventHandler
 

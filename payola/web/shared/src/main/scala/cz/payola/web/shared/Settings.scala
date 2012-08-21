@@ -1,6 +1,7 @@
 package cz.payola.web.shared
 
 import com.typesafe.config._
+import s2js.compiler.remote
 
 @remote private[shared] class Settings(config: Config)
 {

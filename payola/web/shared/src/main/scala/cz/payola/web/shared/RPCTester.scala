@@ -1,6 +1,7 @@
 package cz.payola.web.shared
 
 import s2js.compiler.async
+import s2js.compiler.remote
 import cz.payola.domain.rdf.Graph
 
 @remote
@@ -68,7 +69,6 @@ object RPCTester
     }
 
     def testGraph: Graph = {
-        // TODO (new DataFacade).getGraph("http://payola.cz")
         Graph.empty
     }
     

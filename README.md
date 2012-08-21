@@ -11,7 +11,7 @@ Since Payola is rather a platform than a closed project, you can fork the projec
 
 Payola requires a [Scala](http://www.scala-lang.org) environment, which is supported on virtually any platform capable of running Java code - both Unix and Windows-based systems are fully supported. The system should have at least 1GB of memory dedicated to Payola itself.
 
-Aside from the actual Payola server, you need to have a running [Squeryl-compatible](http://squeryl.org) relational database for storing user data and a [Virtuoso](http://virtuoso.openlinksw.com) server for storing personal RDF data. Neither of these need to  necessarily be running on the same system as Payola itself (this is configurable in the `payola.conf` file as described later on).
+Aside from the actual Payola server, you need to have a running [Squeryl-compatible](http://squeryl.org) relational database for storing user data, a [Virtuoso](http://virtuoso.openlinksw.com) server for storing personal RDF data and a SMTP server for the plugin approval process. Neither of these need to necessarily be running on the same system as Payola itself (this is configurable in the `payola.conf` file as described later on).
 
 To work with Payola, a web browser capable of displaying HTML5 web pages is required. Payola takes advantage of many HTML5 features - keep your web browser up-to-date all the time. Recommended are the *latest versions* of WebKit-based browsers (e.g. Chrome, Safari), Firefox, Opera, or IE. A 1440x900 or larger display is highly recommended.
 
@@ -50,6 +50,36 @@ Payola comes pre-configured to work with default settings of a Virtuoso server a
 > *database.user* - database login name
 
 > *database.password* - database login password
+
+> ** **
+
+> **User**
+
+> ** **
+
+> *admin.email* - Email of the admin user. A user with this email address also gets created when the initializer project is run.
+
+> ** **
+
+> **Web**
+
+> ** **
+
+> *web.url* - URL of the website, by default `http://localhost:9000`. The URL must start with `http://` or `https://` and mustn't end with a trailing `/`.
+
+> ** **
+
+> **Email**
+
+> ** **
+
+> *mail.smtp.server* - Mail server.
+
+> *mail.smtp.port* - Mail server port.
+
+> *mail.smtp.user* - Username.
+
+> *mail.smtp.password* - Password.
 
 > ** **
 
@@ -317,9 +347,11 @@ class ValuesInbetween(name: String, inputCount: Int, parameters:
 }
 ```
 
-In this example, a new plugin named `Filter Values in Between` is created`. The parameterless constructor `this()` is called to fill in values to the default constructor. Here you set up required parameters as well.
+In this example, a new plugin named `Filter Values in Between` is created. The parameterless constructor `this()` is called to fill in values to the default constructor. Here you set up required parameters as well.
 
 The `evaluate` method is the one doing all the work. Here would be your code filtering the input graph. The `instance` variable contains all parameter values, `inputs` is a sequence of `Option[Graph]`'s - in our case just one as defined in `this()`. You can optionally report progress using the `progressReporter` function passed, which reports the progress to the user (values between 0.0 and 1.0).
+
+Once you upload the plugin, an email is sent to the admin to review the plugin source code for security reasons. After he reviews it, you will receive an email with the admin's decision.
 
 More information about plugin architecture can be found in the [Developer Guide](#developer). If you intend to write your own plugin, please, refer there.
 
@@ -875,7 +907,17 @@ Later on, when you will get familiar with the `cz.payola.web.shared` package, yo
 <a name="web"></a>
 ## Package cz.payola.web
 
-> TODO: J.H.
+All the code connected with the web presentation layer could be found in this package. The web application is, as the rest of the project written in the Scala language. To make the job easier, we built up the presentation layer on top of the [Play 2.0 framework](http://www.playframework.org/), which is also completely written in the Scala language, so it was easy to integrate with our appliaction.
+
+Since we started to use the framework in the stage of early access preview, we currently do not take advantage of all the features provided by its API. If you want to know, what can be done better nowadays, just look into the Future work section of the documentation. As an example, one can mention utilizing the Promise API. When fully available (depends on Servlet 3.0 implementation in a wide spectrum of Java web servers), we should also take advantage of the possibility of exporting the web application into a single WAR file which can be deployed into a servlet conatiner.
+
+Since the Play framework is a MVC framework,our web presentation layer build on top of it also uses the MVC pattern. If you look closely into the `cz.payola.web.server`, you can see a classic code separation in there - controllers and views, model is imported from its own separate package.
+
+Since it crucially improves the usability of the application, a rather high count of functionalities is built on top of the AJAX technology, so the calls from the client side of the appliaction to the server side of the application are realized via XHR requests. Since we knew from the past, that in many appliactions, the AJAX technology is a weak spot in the application architecture and security (and the code style is often terrible), we decided to make a standard for our XHR calls and came up with an idea of JavaScript RPC. Inspired by [Google Web Toolkit](https://developers.google.com/web-toolkit/) technology, we wanted to introduce a simple-to-use standard with a minimal overhead for the developer. Also, we wanted the RPC to be as secure as standard HTTP request via controller is. Moreover, since the application can be extended in a several ways, we wanted the RPC to be based on a single programming language. This is how we came up with the idea of the s2js compiler which enabled us to do all the things described in this paragraph. If you want to know more about how the RPC works, read the appropriate section.
+
+Since the web application is not based on a monolithic architecture, we divide the code into several packages - client, initializer, server and shared. The initializer subproject is responsible for initialization of databases used by the web application. The rest builds up the web application itself. The server pacage contains the code which runs on the server side, the client package the code which runs on the client side. The code in the shared package could be run on both the client side and the server side. Also *remote objects* should be placed into this package, since they run on server and can be called from the client side.
+
+This is also one of the restrictions of our RPC. You need to separate code which is executed on the client side from the code which is executed on the server side. But you can make a call from the client side to the server side as there is no such thing as client-server architecture. 
 
 <a name="initializer"></a>
 ### Package cz.payola.web.initializer
@@ -893,12 +935,57 @@ Created database contains:
 <a name="shared"></a>
 ### Package cz.payola.web.shared
 
-> TODO: J.H.
+As described before, in this package, you can find the code which could be executed on both the client side and the server side, or the code which is executed on the server side, but called from the client side. The so-called *remote objects* are further described in the section about s2js compiler. One can see the remote objects as controllers for the RPC calls. You just define an action in the remote object and call it from the client side. 
+
+The code in this package is a collection of remote objects and code shared between the client side and the server side as our web application needed it. 
+
+The most important object in this package is the `Payola` object. It is an instance of the previously mentioned `ModelComponent` trait. It serves as an entrypoint to the whole model of the application. Since it is not a remote object, you cannot use it on the client side, but it is heavily used by the remote objects on the server side. Also, controllers from the package `cz.payola.web.server` uses the `Payola` object to gain access to the data and business logic of the application. Since it is a `Scala object`, it behaves as an Java singleton in the right point of view. So you have exactly one instance in the application and you don't need to create it, it is given to you for free by the Scala runtime. If it reminds you of something, you are kind of right, it is very similiar to a classic DI container (but affected a lot with the `Scala cake pattern for DI`).
 
 <a name="server"></a>
 ### Package cz.payola.web.server
 
-> TODO: J.H.
+The code in this package is built on top of the MVC API of the Play 2.0 framework. Since we don't use their standard DAL (Anorm) and since we have a custom model, you will not be able to find a package named model nowhere in this package.
+
+What you can find is a directory named app which contains controllers and views of the web application. They are standard controllers and scala templates as introduced int the Play 2.0 framework docs.
+
+There are two special controllers you should know more about:
+
+- PayolaController, which is the base controller of all the others, since it contains code which is more or less used by all the controllers
+- RPC, which is controller that processes the XHR calls from the client side
+
+Since the RPC controller is not a simple thing, we will dicuss the controller a bit more. When the RPC call arrives from the client side, it holds the information about which remote method should be invoked on the server and, more important, invokation parameters. Example of such a call follows:
+
+```
+Request URL:http://localhost:9000/RPC/async
+Request Method:POST
+Status Code:200 OK
+Request Headersview source
+
+Accept:*/*
+Accept-Charset:ISO-8859-1,utf-8;q=0.7,*;q=0.3
+Accept-Encoding:gzip,deflate,sdch
+Accept-Language:en-US,en;q=0.8,cs;q=0.6
+Cache-Control:no-cache
+Connection:keep-alive
+Content-Length:133
+Content-Type:application/x-www-form-urlencoded
+Cookie:__utma=1.992379703.1320156835.1320156835.1320156835.1; COOKIE_SUPPORT=true; LOGIN=74657374406c6966657261792e636f6d; SCREEN_NAME=6c4878796f336d694e4832672f39694238436f4a71773d3d; GUEST_LANGUAGE_ID=en_US
+Host:localhost:9000
+Origin:http://localhost:9000
+Pragma:no-cache
+Referer:http://localhost:9000/analysis/4d1c0607-3652-4ad4-9628-a643bfba58b7
+User-Agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_0) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.79 Safari/537.1
+Form Dataview URL encoded
+method:cz.payola.web.shared.DomainData.getAnalysisById
+paramTypes:["java.lang.String"]
+0:4d1c0607-3652-4ad4-9628-a643bfba58b7
+Response Headersview source
+Content-Length:11464
+Content-Type:text/plain; charset=utf-8
+```
+As you can see, the `POST` request which represents an asynchronous RPC call conatins the name of the remote method which should be invoked by the RPC controller / RPC Dispatcher. Since one can make his own RPC call very simply, we restricted the "invokable" methods to those that are defined in the body of an object annotated with the `s2js.compiler.remote` annotation. If you try to invoke a method which does not belong to an remote object, an exception will be thrown and sent as a response to such a call.
+
+> One could ask now, why we did not use the standard Scala @remote annotation, or, moreover, why we did use a Java annotation.
 
 <a name="client"></a>
 ### Package cz.payola.web.client

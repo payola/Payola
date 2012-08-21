@@ -92,7 +92,7 @@ class DependencyManager(private val packageDefCompiler: PackageDefCompiler)
         addProvidedSymbol(classDef.symbol)
 
         // Remote objects aren't compiled.
-        if (packageDefCompiler.getSymbolAnnotations(classDef.symbol, "remote").nonEmpty) {
+        if (packageDefCompiler.getSymbolAnnotations(classDef.symbol, "s2js.compiler.remote").nonEmpty) {
             packageDefStructure.remoteObjects += classDef
         } else {
             // Non-remote object should be added into the dependency graph.

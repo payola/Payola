@@ -2,6 +2,7 @@ package s2js.runtime.shared
 
 import collection.mutable
 import io.Source
+import s2js.compiler.remote
 import scala.util.matching.Regex
 
 @remote object DependencyProvider
