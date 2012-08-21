@@ -1134,7 +1134,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
      * @return True if the select is invoked on a remote object.
      */
     private def selectIsOnRemote(select: Global#Select): Boolean = {
-        select.qualifier.hasSymbolWhich(packageDefCompiler.symbolHasAnnotation(_, "remote"))
+        select.qualifier.hasSymbolWhich(packageDefCompiler.symbolHasAnnotation(_, "s2js.compiler.remote"))
     }
 
     /**

@@ -875,7 +875,17 @@ Later on, when you will get familiar with the `cz.payola.web.shared` package, yo
 <a name="web"></a>
 ## Package cz.payola.web
 
-> TODO: J.H.
+All the code connected with the web presentation layer could be found in this package. The web application is, as the rest of the project written in the Scala language. To make the job easier, we built up the presentation layer on top of the [Play 2.0 framework](http://www.playframework.org/), which is also completely written in the Scala language, so it was easy to integrate with our appliaction.
+
+Since we started to use the framework in the stage of early access preview, we currently do not take advantage of all the features provided by its API. If you want to know, what can be done better nowadays, just look into the Future work section of the documentation. As an example, one can mention utilizing the Promise API. When fully available (depends on Servlet 3.0 implementation in a wide spectrum of Java web servers), we should also take advantage of the possibility of exporting the web application into a single WAR file which can be deployed into a servlet conatiner.
+
+Since the Play framework is a MVC framework,our web presentation layer build on top of it also uses the MVC pattern. If you look closely into the `cz.payola.web.server`, you can see a classic code separation in there - controllers and views, model is imported from its own separate package.
+
+Since it crucially improves the usability of the application, a rather high count of functionalities is built on top of the AJAX technology, so the calls from the client side of the appliaction to the server side of the application are realized via XHR requests. Since we knew from the past, that in many appliactions, the AJAX technology is a weak spot in the application architecture and security (and the code style is often terrible), we decided to make a standard for our XHR calls and came up with an idea of JavaScript RPC. Inspired by [Google Web Toolkit](https://developers.google.com/web-toolkit/) technology, we wanted to introduce a simple-to-use standard with a minimal overhead for the developer. Also, we wanted the RPC to be as secure as standard HTTP request via controller is. Moreover, since the application can be extended in a several ways, we wanted the RPC to be based on a single programming language. This is how we came up with the idea of the s2js compiler which enabled us to do all the things described in this paragraph. If you want to know more about how the RPC works, read the appropriate section.
+
+Since the web application is not based on a monolithic architecture, we divide the code into several packages - client, initializer, server and shared. The initializer subproject is responsible for initialization of databases used by the web application. The rest builds up the web application itself. The server pacage contains the code which runs on the server side, the client package the code which runs on the client side. The code in the shared package could be run on both the client side and the server side. Also *remote objects* should be placed into this package, since they run on server and can be called from the client side.
+
+This is also one of the restrictions of our RPC. You need to separate code which is executed on the client side from the code which is executed on the server side. But you can make a call from the client side to the server side as there is no such thing as client-server architecture. 
 
 <a name="initializer"></a>
 ### Package cz.payola.web.initializer
@@ -893,12 +903,55 @@ Created database contains:
 <a name="shared"></a>
 ### Package cz.payola.web.shared
 
-> TODO: J.H.
+As described before, in this package, you can find the code which could be executed on both the client side and the server side, or the code which is executed on the server side, but called from the client side. The so-called *remote objects* are further described in the section about s2js compiler. One can see the remote objects as controllers for the RPC calls. You just define an action in the remote object and call it from the client side. 
+
+The code in this package is a collection of remote objects and code shared between the client side and the server side as our web application needed it. 
+
+The most important object in this package is the `Payola` object. It is an instance of the previously mentioned `ModelComponent` trait. It serves as an entrypoint to the whole model of the application. Since it is not a remote object, you cannot use it on the client side, but it is heavily used by the remote objects on the server side. Also, controllers from the package `cz.payola.web.server` uses the `Payola` object to gain access to the data and business logic of the application. Since it is a `Scala object`, it behaves as an Java singleton in the right point of view. So you have exactly one instance in the application and you don't need to create it, it is given to you for free by the Scala runtime. If it reminds you of something, you are kind of right, it is very similiar to a classic DI container (but affected a lot with the `Scala cake pattern for DI`).
 
 <a name="server"></a>
 ### Package cz.payola.web.server
 
-> TODO: J.H.
+The code in this package is built on top of the MVC API of the Play 2.0 framework. Since we don't use their standard DAL (Anorm) and since we have a custom model, you will not be able to find a package named model nowhere in this package.
+
+What you can find is a directory named app which contains controllers and views of the web application. They are standard controllers and scala templates as introduced int the Play 2.0 framework docs.
+
+There are two special controllers you should know more about:
+
+- PayolaController, which is the base controller of all the others, since it contains code which is more or less used by all the controllers
+- RPC, which is controller that processes the XHR calls from the client side
+
+Since the RPC controller is not a simple thing, we will dicuss the controller a bit more. When the RPC call arrives from the client side, it holds the information about which remote method should be invoked on the server and, more important, invokation parameters. Example of such a call follows:
+
+```
+Request URL:http://localhost:9000/RPC/async
+Request Method:POST
+Status Code:200 OK
+Request Headersview source
+
+Accept:*/*
+Accept-Charset:ISO-8859-1,utf-8;q=0.7,*;q=0.3
+Accept-Encoding:gzip,deflate,sdch
+Accept-Language:en-US,en;q=0.8,cs;q=0.6
+Cache-Control:no-cache
+Connection:keep-alive
+Content-Length:133
+Content-Type:application/x-www-form-urlencoded
+Cookie:__utma=1.992379703.1320156835.1320156835.1320156835.1; COOKIE_SUPPORT=true; LOGIN=74657374406c6966657261792e636f6d; SCREEN_NAME=6c4878796f336d694e4832672f39694238436f4a71773d3d; GUEST_LANGUAGE_ID=en_US
+Host:localhost:9000
+Origin:http://localhost:9000
+Pragma:no-cache
+Referer:http://localhost:9000/analysis/4d1c0607-3652-4ad4-9628-a643bfba58b7
+User-Agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_0) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.79 Safari/537.1
+Form Dataview URL encoded
+method:cz.payola.web.shared.DomainData.getAnalysisById
+paramTypes:["java.lang.String"]
+0:4d1c0607-3652-4ad4-9628-a643bfba58b7
+Response Headersview source
+Content-Length:11464
+Content-Type:text/plain; charset=utf-8
+```
+As you can see, the `POST` request which represents an asynchronous RPC call conatins the name of the remote method which should be invoked by the 
 
 <a name="client"></a>
 ### Package cz.payola.web.client

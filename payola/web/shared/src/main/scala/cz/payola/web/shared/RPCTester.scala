@@ -1,6 +1,7 @@
 package cz.payola.web.shared
 
 import s2js.compiler.async
+import s2js.compiler.remote
 import cz.payola.domain.rdf.Graph
 
 @remote

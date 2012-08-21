@@ -1,6 +1,7 @@
 package cz.payola.web.shared
 
 import cz.payola.data.squeryl.SquerylDataContextComponent
+import s2js.compiler.remote
 import cz.payola.domain._
 import cz.payola.domain.virtuoso.VirtuosoStorage
 import cz.payola.model.ModelComponent
