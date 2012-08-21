@@ -983,7 +983,9 @@ Response Headersview source
 Content-Length:11464
 Content-Type:text/plain; charset=utf-8
 ```
-As you can see, the `POST` request which represents an asynchronous RPC call conatins the name of the remote method which should be invoked by the 
+As you can see, the `POST` request which represents an asynchronous RPC call conatins the name of the remote method which should be invoked by the RPC controller / RPC Dispatcher. Since one can make his own RPC call very simply, we restricted the "invokable" methods to those that are defined in the body of an object annotated with the `s2js.compiler.remote` annotation. If you try to invoke a method which does not belong to an remote object, an exception will be thrown and sent as a response to such a call.
+
+> One could ask now, why we did not use the standard Scala @remote annotation, or, moreover, why we did use a Java annotation.
 
 <a name="client"></a>
 ### Package cz.payola.web.client

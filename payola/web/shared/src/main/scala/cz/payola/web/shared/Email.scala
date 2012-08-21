@@ -1,6 +1,7 @@
 package cz.payola.web.shared
 
 import org.apache.commons.mail.SimpleEmail
+import s2js.compiler.remote
 
 @remote private[shared] case class Email(subject: String, content: String = "", from: String, to: Seq[String] = Seq.empty) {
 
