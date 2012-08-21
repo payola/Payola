@@ -714,6 +714,8 @@ Adapters of web browser related objects (```Window```, ```History``` etc.), base
 <a name="common"></a>
 ## Package cz.payola.common
 
+![Common entites model](https://raw.github.com/siroky/Payola/develop/docs/img/common_entities.png)
+
 > TODO: H.S.
 
 ### Package cz.payola.common.entities
