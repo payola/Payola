@@ -19,6 +19,8 @@ class EditablePluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[P
 
     val parameterValueChanged = new SimpleUnitEvent[ParameterValue]
 
+    alertDiv.addCssClass("editable")
+
     def getAdditionalControlsViews: Seq[View] = {
         val connect = new Button(new Text("Add Connection"))
         connect.mouseClicked += { e =>

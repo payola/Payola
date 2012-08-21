@@ -21,7 +21,7 @@ abstract class PluginInstanceView(
 
     private val additionalControls = new Div(controlViews, "controls")
 
-    private val alertDiv = new Div(List(heading, paramsDiv, additionalControls), "alert alert-info instance")
+    protected val alertDiv = new Div(List(heading, paramsDiv, additionalControls), "alert alert-info instance")
 
     private val clearSpan = new Span(List(), "clear")
 

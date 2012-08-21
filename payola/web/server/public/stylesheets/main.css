@@ -396,7 +396,7 @@ input.glyph {
     padding-right: 15px;
 }
 
-.plugin-canvas .parameters {
+.plugin-canvas .alert.editable .parameters {
     margin-right: 0px;
     width: 100%;
 }
