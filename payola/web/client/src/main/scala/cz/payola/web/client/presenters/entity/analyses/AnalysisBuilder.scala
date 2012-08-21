@@ -304,9 +304,14 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
         { () =>
             parameterInfo.control.setOk()
             parameterInfo.control.isActive = false
-        } { _ =>
-            parameterInfo.control.setError("Wrong parameter value.")
-            parameterInfo.control.isActive = false
+        } { e =>
+            e match {
+                case ex: ValidationException => {
+                    parameterInfo.control.setError("Wrong parameter value.")
+                    parameterInfo.control.isActive = false
+                }
+                case _ => fatalErrorHandler(e)
+            }
         }
     }
 
