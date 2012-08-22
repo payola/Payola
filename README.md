@@ -688,15 +688,28 @@ Another helper class is the ```JsonTraverser``` which defines an interface of ge
 
 ##### Package s2js.runtime.client.scala
 
-In order to allow the programmer to use classes and object that are available in the standard Scala Library (e.g. ```Option```, ```List```, ```Map``` etc.), an equivalent of it had to be created in JavaScript. An ideal way would be to take the sources of the Scala Library and compile them into JavaScript using the [compiler](#compiler). But this task is too complex to accomplish, so another approach was used.
+In order to allow the programmer to use classes and objects that are available in the standard Scala Library (e.g. ```Option```, ```List```, ```Map``` etc.), an equivalent of it had to be created in JavaScript. An ideal way would be to take the sources of the Scala Library and compile them into JavaScript using the [compiler](#compiler). But this task is too complex to accomplish, so another approach was used.
 
 The sources from the Scala Library that were fully or with minor changes compilable to JavaScript were used as is. That's the case of most of the simple classes like ```Option```, ```Tuple``` or ```Product```. The complex classes, mainly in the collection library were partially written from scratch, but most of the logic was ported from the Scala Library sources.
 
-> The classes and objects in this package were written when they were needed, not in advance, so there aren't any other. Therefore this package can be hardly seen as a port of the Scala Library to JavaScript. So when a programmer uses a class from the standard library and isn't sure, whether it's supported in the runtime or not, then he should examine the ```s2js.runtime.client.scala``` package. If it's not there, then there is only way to solve this - he should port the class by himself.
+> The classes and objects in this package were written when they were needed, not in advance, so there aren't any unnecessary. Therefore this package can be hardly seen as a port of the Scala Library to JavaScript. So when a programmer uses a class from the standard library and isn't sure, whether it's supported in the runtime or not, then he should examine the ```s2js.runtime.client.scala``` package. If it's not there, then there is only way to solve this - he should port the class by himself.
 
 ##### Package s2js.runtime.client.rpc
 
-> TODO: H.S.
+Rather than describing classes in this package one by one, an example RPC call will be examined:
+
+1. From the runtime point of view, it starts with a call on the ```Wrapper``` object like this: ```s2js.runtime.client.rpc.Wrapper.callSync('remote.foo', [123], ['scala.Int']);```
+2. The ```Wrapper``` processes the parameters and creates a ```XmlHttpRequest```.
+3. The request body is filled with the method name and parameters and the request is sent to the [RPC controller](#TODO) on the server.
+4. The RPC controller processes the request and returns the result serialized using the [scala2json](#scala2json).
+5. If an error occurs, an ```RpcException``` is thrown. Otherwise the result is deserialized with the ```Deserializer```:
+	1. The JSON string is transformed to an object using the ```eval``` function.
+	2. The object is traversed using the ```ClassNameRetriever``` subclass of the ```JSONTraverser```. So classes of all instances in the result are known.
+	3. All classes that aren't yet loaded in the class loader are retrieved from the server via a RPC call on the ```s2js.runtime.shared.DependencyProvider``` object.
+	4. The classes are declared using the ```eval``` function.
+	5. By now, all the classes that are used in the result object, have already been loaded. So the result object is traversed again using the ```Deserializer```, which instantiates classes corresponding to the objects in the result and copies field values from the result to the newly created instances. If the field value is a reference to an object (```__ref__```), the reference is tracked as a ```ReferenceToResolve```, because the reference target may have not been instantiated yet.
+	6. By now, all the objects from the result have been instantiated, so the references are resolved.
+6. If the deserialized object is an instance of the ```Throwable``` trait, then it's thrown (or passed to the ```failCallback``` in case of an asynchronous RPC call). Otherwise the result is returned (or passed to the ```successCallback```).
 
 <a name="runtime-shared"></a>
 #### Package s2js.runtime.shared
