@@ -377,6 +377,7 @@ This project contains only two files: ```plugins.sbt``` and ```PayolaBuild.scala
 
 The ```PayolaBuild.scala``` is a [build definition file](https://github.com/harrah/xsbt/wiki/Getting-Started-Full-Def) of the whole solution. The solution structure, projects, dependencies, compilation, test settings and other concepts used there are described in depth in the [SBT Wiki](https://github.com/harrah/xsbt/wiki). Moreover, there is a template for all projects that should be compiled to JavaScript, that adds the [s2js](#s2js) compiler plugin to the standard Scala compiler. To create a project that should be compiled to JavaScript, use ```ScalaToJsProject(...)``` instead of the standard ```Project(...)```.
 
+<a name="cp"></a>
 ### The cp task
 
 The build file defines a custom SBT Task called ```cp``` which is an abbreviation for 'compile and package'. In order to support compilation of the payola solution in one step, we had to introduce this non-standard task. Because the solution contains both the [s2js](#s2js) compiler plugin project and also projects that use that compiler plugin, it's not sufficient to mark the compiler plugin project as a dependency of projects that should be compiled to Javascript. The Scala compiler accepts only ```.jar``` plugin files so the compiler plugin project has to be not only compiled, but also packed into a ```.jar``` package before it can be used.
@@ -564,6 +565,7 @@ This annotation can be used on a method or a field, enabling the programmer to i
 
 An object or class marked with this annotation isn't compiled to JavaScript.  
 
+<a name="s2js_rpc"></a>
 ###### RPC (Remote Procedure Call)
 
 In order to simplify the client-server communication and to hide the low-level JavaScript constructs necessary for it (```XmlHttpRequest``` or ```ActiveXObject```) from the programmer, an [RPC mechanism](http://en.wikipedia.org/wiki/Remote_procedure_call) is used. The compiler takes a small but irreplaceable part in the whole process, the rest is done in the [server-side runtime](#runtime-server) and [client-side runtime](#runtime-client). 
@@ -688,42 +690,54 @@ Another helper class is the ```JsonTraverser``` which defines an interface of ge
 
 ##### Package s2js.runtime.client.scala
 
-In order to allow the programmer to use classes and object that are available in the standard Scala Library (e.g. ```Option```, ```List```, ```Map``` etc.), an equivalent of it had to be created in JavaScript. An ideal way would be to take the sources of the Scala Library and compile them into JavaScript using the [compiler](#compiler). But this task is too complex to accomplish, so another approach was used.
+In order to allow the programmer to use classes and objects that are available in the standard Scala Library (e.g. ```Option```, ```List```, ```Map``` etc.), an equivalent of it had to be created in JavaScript. An ideal way would be to take the sources of the Scala Library and compile them into JavaScript using the [compiler](#compiler). But this task is too complex to accomplish, so another approach was used.
 
 The sources from the Scala Library that were fully or with minor changes compilable to JavaScript were used as is. That's the case of most of the simple classes like ```Option```, ```Tuple``` or ```Product```. The complex classes, mainly in the collection library were partially written from scratch, but most of the logic was ported from the Scala Library sources.
 
-> The classes and objects in this package were written when they were needed, not in advance, so there aren't any other. Therefore this package can be hardly seen as a port of the Scala Library to JavaScript. So when a programmer uses a class from the standard library and isn't sure, whether it's supported in the runtime or not, then he should examine the ```s2js.runtime.client.scala``` package. If it's not there, then there is only way to solve this - he should port the class by himself.
+> The classes and objects in this package were written when they were needed, not in advance, so there aren't any unnecessary. Therefore this package can be hardly seen as a port of the Scala Library to JavaScript. So when a programmer uses a class from the standard library and isn't sure, whether it's supported in the runtime or not, then he should examine the ```s2js.runtime.client.scala``` package. If it's not there, then there is only way to solve this - he should port the class by himself.
 
 ##### Package s2js.runtime.client.rpc
 
-> TODO: H.S.
+Rather than describing classes in this package one by one, an example RPC call will be examined:
+
+1. From the runtime point of view, it starts with a call on the ```Wrapper``` object like this: ```s2js.runtime.client.rpc.Wrapper.callSync('remote.foo', [123], ['scala.Int']);```
+2. The ```Wrapper``` processes the parameters and creates a ```XmlHttpRequest```.
+3. The request body is filled with the method name and parameters and the request is sent to the [RPC controller](#TODO) on the server.
+4. The RPC controller processes the request and returns the result serialized using the [scala2json](#scala2json).
+5. If an error occurs, an ```RpcException``` is thrown. Otherwise the result is deserialized with the ```Deserializer```:
+	1. The JSON string is transformed to an object using the ```eval``` function.
+	2. The object is traversed using the ```ClassNameRetriever``` subclass of the ```JSONTraverser```. So classes of all instances in the result are known.
+	3. All classes that aren't yet loaded in the class loader are retrieved from the server via a RPC call on the ```s2js.runtime.shared.DependencyProvider``` object.
+	4. The classes are declared using the ```eval``` function.
+	5. By now, all the classes that are used in the result object, have already been loaded. So the result object is traversed again using the ```Deserializer```, which instantiates classes corresponding to the objects in the result and copies field values from the result to the newly created instances. If the field value is a reference to an object (```__ref__```), the reference is tracked as a ```ReferenceToResolve```, because the reference target may have not been instantiated yet.
+	6. By now, all the objects from the result have been instantiated, so the references are resolved.
+6. If the deserialized object is an instance of the ```Throwable``` trait, then it's thrown (or passed to the ```failCallback``` in case of an asynchronous RPC call). Otherwise the result is returned (or passed to the ```successCallback```).
 
 <a name="runtime-shared"></a>
 #### Package s2js.runtime.shared
 
-> TODO: H.S.
+Currently, there is only one class - the ```DependencyProvider```. It provides just one method ```get```, which returns a ```DependencyPackage``` containing the JavaScript source code of symbols specified in the ```symbols``` parameter and all their dependencies. The sources of ```symbolsToIgnore``` aren't included in the dependency package. Moreover, the order of symbol source codes is determined by dependencies among them which can be found in the generated dependency file (which is generated during the [```cp```](#cp) SBT task). So for example a class isn't declared before its super-class. 
+
+> There is a tight coupling between the ```s2js``` project and other projects (e.g. hardcoded path to the dependency package in the ```DependencyProvider```, RPC controller logic defined in the [```web```](#web) project), so it can't be used as a standalone library/toolchain. However, making the ```s2js``` standalone wouldn't be much work, it just wasn't our priority to make it completely reusable.
 
 <a name="common"></a>
-## Package cz.payola.common
+## Project cz.payola.common
 
-![Common entites model](https://raw.github.com/siroky/Payola/develop/docs/img/common_entities.png)
-
-This image captures the most important classes of the `common` package. The `User` entity stands in the middle of everything - a user can own groups (and be their member as well), plugins, analyses, data sources and ontology customizations. Each `OntologyCustomization` instance consists of several `ClassCustomization`s, each consisting of `PropertyCustomization`s. A `DataSource` is simply a special subclass of `PluginInstance` which fetches data. Then there's the `Plugin` class where it starts to be slightly more complicated.
-
-The `Plugin` class represents the plugin itself with all the logic. Each `Plugin` may have some `Parameter`s which define which values the plugin requires on the input. For example, the `Typed` plugin which comes pre-installed with Payola has one `Parameter` named `RDF Type URI`. When a `Plugin` is to be evaluated, it receives a corresponding `PluginInstance` and a sequence of `Graph`s as its input.
-
-A `PluginInstance` is a container for `ParameterValue`s: a `ParameterValue` contains the concrete value for that particular `Parameter` (a string, numeric value, ...). Hence when a `Plugin` is being evaluated, it queries the `PluginInstance` for all required parameter values.
-
-An `Analysis` forms various plugin instances into a tree-like structure using `PluginInstanceBinding`s. A `PluginInstanceBinding` can be viewed on as an edge in the resulting tree structure (`PluginInstance`s being vertices). When an `Analysis` is run, each `PluginInstance` is evaluated by its peer `Plugin`. The evaluation process begins at the leaf vertices and forms a chain taking output of one or more plugins and passing it to the next plugin as input. Because a valid `Analysis` forms a tree, the output is just one `Graph`. For more information about the analysis evaluation process see the [plugins section](#domain.plugins).
-
+As the name of the project suggests, common classes that can be accessed from all other projects are defined here. And because the project is also compiled into JavaScript, they may be accessed and used even on the client side. The classes and traits were designed with that in mind so they don't provide any sensitive information. The main aim of this project is to reduce code duplication among client-side and server-side projects.
 
 ### Package cz.payola.common.entities
 
 This package includes classes representing the basic entities (user, analysis, plugin, etc.) that ensure the core functionality of Payola. Each entity has its own ID (string-based, 128-bit UUID) and can be stored in a relational database (see the [data package](#data) for more information).
 
-#### Package cz.payola.common.entities.plugins
+![Common entites model](https://raw.github.com/siroky/Payola/develop/docs/img/common_entities.png)
 
-> TODO: H.S.
+This image captures the most important classes of the `entities` package. The `User` entity stands in the middle of everything - a user can own groups (and be their member as well), plugins, analyses, data sources and ontology customizations. Each `OntologyCustomization` instance consists of several `ClassCustomization`s, each consisting of `PropertyCustomization`s. A `DataSource` is simply a special subclass of `PluginInstance` which fetches data. Then there's the `Plugin` class where it starts to be slightly more complicated.
+
+The `Plugin` class represents the plugin itself with all the logic. Each `Plugin` may have some `Parameter`s which define which values the plugin requires on the input. For example, the `Typed` plugin which comes pre-installed with Payola has one `Parameter` named `RDF Type URI`. When a `Plugin` is to be evaluated, it receives a corresponding `PluginInstance` and a sequence of `Graph`s as its input.
+
+A `PluginInstance` is a container for `ParameterValue`s: a `ParameterValue` contains the concrete value for that particular `Parameter` (a string, numeric value, ...). Hence when a `Plugin` is being evaluated, it queries the `PluginInstance` for all required parameter values.
+
+An `Analysis` forms various plugin instances into a tree-like structure using `PluginInstanceBinding`s. A `PluginInstanceBinding` can be viewed on as an edge in the resulting tree structure (`PluginInstance`s being vertices). When an `Analysis` is run, each `PluginInstance` is evaluated by its peer `Plugin`. The evaluation process begins at the leaf vertices and forms a chain taking output of one or more plugins and passing it to the next plugin as input. Because a valid `Analysis` forms a tree, the output is just one `Graph`. For more information about the analysis evaluation process see the [domain section](#domain).
 
 #### Package cz.payola.common.entities.privileges
 
@@ -731,9 +745,9 @@ This package includes classes representing the basic entities (user, analysis, p
 
 To share entities between users, privileges are used. This makes it easy to extend the model in the future, or to change the granularity of privilege granting. Currently, there are only privileges granting access to a resource - analysis, data source, ontology customization and plugin; however, a privilege type that grants a user the right to edit some entity, for instance, can be easily added.
 
-As can be seen in the picture above, each entity that needs to be shared, has to have the ShareableEntity trait mixed in which adds a `isPublic` field to the object (denoting whether the entity may be seen by everyone or just those you share it to).
+As can be seen in the picture above, each entity that needs to be shared, has to have the `ShareableEntity` trait mixed in which adds a `isPublic` field to the object (denoting whether the entity may be seen by everyone or just those you share it to).
 
-Each user has a collection of privileges. A `Privilege` is a simple class containing three fields: the granter (i.e. the user who issued this privilege), the grantee (a `PrivilegeableEntity` that the privilege is issued to) and an object of the privilege (e.g. an analysis).
+Each `PrivilegeableEntity` has a collection of privileges. A `Privilege` is a simple class containing three fields: the granter (i.e. the user who issued this privilege), the grantee (a `PrivilegeableEntity` that the privilege is issued to) and an object of the privilege (e.g. an analysis).
 
 For each class that can be currently shared (`Analysis`, `DataSource`, `OntologyCustomization` and `Plugin`), a corresponding `Privilege` subclass exists. But this model can be obviously very easily extended to other classes.
 
@@ -761,7 +775,6 @@ Domain entities extend the `common` entities that are mostly traits and fully fu
 
 > TODO: H.S.
 
-<a name="domain.plugins">
 ### Package cz.payola.domain.entities.plugins
 
 > TODO: H.S.
@@ -925,11 +938,11 @@ All the code connected with the web presentation layer could be found in this pa
 
 Since we started to use the framework in the stage of early access preview, we currently do not take advantage of all the features provided by its API. If you want to know, what can be done better nowadays, just look into the Future work section of the documentation. As an example, one can mention utilizing the Promise API. When fully available (depends on Servlet 3.0 implementation in a wide spectrum of Java web servers), we should also take advantage of the possibility of exporting the web application into a single WAR file which can be deployed into a servlet conatiner.
 
-Since the Play framework is a MVC framework,our web presentation layer build on top of it also uses the MVC pattern. If you look closely into the `cz.payola.web.server`, you can see a classic code separation in there - controllers and views, model is imported from its own separate package.
+Since the Play framework is a MVC framework, our web presentation layer build on top of it also uses the MVC pattern. If you look closely into the `cz.payola.web.server` package, you can see a classic code separation in there - controllers and views, model is imported from its own separate package.
 
 Since it crucially improves the usability of the application, a rather high count of functionalities is built on top of the AJAX technology, so the calls from the client side of the appliaction to the server side of the application are realized via XHR requests. Since we knew from the past, that in many appliactions, the AJAX technology is a weak spot in the application architecture and security (and the code style is often terrible), we decided to make a standard for our XHR calls and came up with an idea of JavaScript RPC. Inspired by [Google Web Toolkit](https://developers.google.com/web-toolkit/) technology, we wanted to introduce a simple-to-use standard with a minimal overhead for the developer. Also, we wanted the RPC to be as secure as standard HTTP request via controller is. Moreover, since the application can be extended in a several ways, we wanted the RPC to be based on a single programming language. This is how we came up with the idea of the s2js compiler which enabled us to do all the things described in this paragraph. If you want to know more about how the RPC works, read the appropriate section.
 
-Since the web application is not based on a monolithic architecture, we divide the code into several packages - client, initializer, server and shared. The initializer subproject is responsible for initialization of databases used by the web application. The rest builds up the web application itself. The server pacage contains the code which runs on the server side, the client package the code which runs on the client side. The code in the shared package could be run on both the client side and the server side. Also *remote objects* should be placed into this package, since they run on server and can be called from the client side.
+Since the web application is not based on a monolithic architecture, we divide the code into several packages - client, initializer, server and shared. The initializer subproject is responsible for initialization of databases used by the web application. The rest builds up the web application itself. The server package contains the code which runs on the server side, the client package the code which runs on the client side. The code in the shared package could be run on both the client side and the server side. Also *remote objects* should be placed into this package, since they run on server and can be called from the client side.
 
 This is also one of the restrictions of our RPC. You need to separate code which is executed on the client side from the code which is executed on the server side. But you can make a call from the client side to the server side as there is no such thing as client-server architecture. 
 
@@ -960,7 +973,7 @@ The most important object in this package is the `Payola` object. It is an insta
 
 The code in this package is built on top of the MVC API of the Play 2.0 framework. Since we don't use their standard DAL (Anorm) and since we have a custom model, you will not be able to find a package named model nowhere in this package.
 
-What you can find is a directory named app which contains controllers and views of the web application. They are standard controllers and scala templates as introduced int the Play 2.0 framework docs.
+What you can find is a directory named app which contains controllers and views of the web application. They are standard controllers and scala templates as introduced int the [Play 2.0 framework docs](http://www.playframework.org/documentation/2.0.2/Home).
 
 There are two special controllers you should know more about:
 
@@ -998,7 +1011,7 @@ Content-Length:11464
 Content-Type:text/plain; charset=utf-8
 ```
 
-As you can see, the `POST` request which represents an asynchronous RPC call conatins the name of the remote method which should be invoked by the RPC controller (which delegates most of the work to a class called `RPCDispatcher`). Since one can make his own RPC call very simply, we restricted the "invokable" methods to those that are defined in the body of an object annotated with the `s2js.compiler.remote` annotation. If you try to invoke a method which does not belong to an remote object, an exception will be thrown and sent as a response to such a call.
+As you can see, the `POST` request, which represents an asynchronous RPC call, conatins the name of the remote method which should be invoked by the RPC controller (which delegates most of the work to a class called `RPCDispatcher`). Since one can make his own RPC call very simply, we restricted the "invokable" methods to those that are defined in the body of an object annotated with the `s2js.compiler.remote` annotation. If you try to invoke a method which does not belong to an remote object, an exception will be thrown and sent as a response to such a call.
 
 > One could ask now, why we did not use the standard Scala @remote annotation, or, moreover, why we did use a Java annotation. Since scala annotations [are not visible during runtime](http://stackoverflow.com/questions/5177010/how-to-create-annotations-and-get-them-in-scala), we were forced to use a Java annotation with a special retention policy to get this done.
 
@@ -1035,6 +1048,7 @@ Since the RPC Dispatcher needs to parse the parameters and make them typed prope
 
 And Java equivalents.
 
+If you want to learn more about the RPC mechanism on the client-side, please, see the correspondent section in the [text about s2js.rpc package](#s2js_rpc).
 
 <a name="client"></a>
 ### Package cz.payola.web.client
