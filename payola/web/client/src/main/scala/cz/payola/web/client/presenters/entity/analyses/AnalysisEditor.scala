@@ -4,6 +4,7 @@ import cz.payola.web.shared.AnalysisBuilderData
 import cz.payola.web.client.views.entity.analysis._
 import cz.payola.web.client.presenters.models.ParameterValue
 import cz.payola.common.entities.Analysis
+import cz.payola.common.ValidationException
 
 class AnalysisEditor(parentElementId: String, analysisIdParam: String)
     extends AnalysisBuilder(parentElementId)
@@ -66,8 +67,13 @@ class AnalysisEditor(parentElementId: String, analysisIdParam: String)
             pv.control.isActive = false
             pv.control.setOk()
         } { error =>
-            pv.control.isActive = false
-            pv.control.setError("Invalid value")
+            error match {
+                case e: ValidationException => {
+                    pv.control.isActive = false
+                    pv.control.setError("Invalid value")
+                }
+                case _ => fatalErrorHandler(error)
+            }
         }
     }
 }

@@ -44,7 +44,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
 
         nameDialog.confirming += {
             e =>
-                blockPage("Initializing analysis...")
+                nameDialog.block("Initializing analysis...")
                 AnalysisBuilderData.setAnalysisName(analysisId, nameComponent.field.value) { success =>
                     AnalysisBuilderData.createEmptyAnalysis(nameComponent.field.value) { analysis =>
                         analysisId = analysis.id
@@ -57,11 +57,12 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                         view.setName(nameComponent.field.value)
 
                         bindMenuEvents(view)
-
+                        nameDialog.unblock()
                         nameDialog.destroy()
-                        unblockPage()
                     } {
                         error =>
+                            nameDialog.unblock()
+                            nameDialog.destroy()
                             error match {
                                 case rpc: ValidationException => {
                                     AlertModal.display("Validation failed", rpc.message)
@@ -184,6 +185,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
             i = i + 1
         }
 
+        mergeDialog.block("Merging branches ...")
         AnalysisBuilderData.createPluginInstance(evt.target.id, analysisId) { createdInstance =>
             val mergeInstance = new
                     EditablePluginInstanceView(createdInstance, buffer.asInstanceOf[Seq[PluginInstanceView]])
@@ -206,9 +208,13 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
             }
 
             branches += mergeInstance
+            mergeDialog.unblock()
             mergeDialog.destroy()
         } {
-            _ =>
+            e =>
+                mergeDialog.unblock()
+                mergeDialog.destroy()
+                fatalErrorHandler(e)
         }
     }
 
@@ -304,9 +310,14 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
         { () =>
             parameterInfo.control.setOk()
             parameterInfo.control.isActive = false
-        } { _ =>
-            parameterInfo.control.setError("Wrong parameter value.")
-            parameterInfo.control.isActive = false
+        } { e =>
+            e match {
+                case ex: ValidationException => {
+                    parameterInfo.control.setError("Wrong parameter value.")
+                    parameterInfo.control.isActive = false
+                }
+                case _ => fatalErrorHandler(e)
+            }
         }
     }
 

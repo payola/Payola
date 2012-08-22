@@ -391,3 +391,26 @@ input.glyph {
 .button-row .inline-block {
     margin-left: 5px;
 }
+
+.plugin-canvas .alert {
+    padding-right: 15px;
+}
+
+.plugin-canvas .alert.editable .parameters {
+    margin-right: 0px;
+    width: 100%;
+}
+
+.plugin-canvas input, .plugin-canvas textarea {
+    width: 96%;
+}
+
+pre#editor {
+    max-height: 100000px !important;
+}
+
+table .btn-toolbar .badge {
+    margin-right: 10px;
+    top: -9px;
+    position: relative;
+}
