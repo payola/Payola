@@ -7,7 +7,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.Modal
-import cz.payola.web.client.views.todo.PluginInstanceView
+import cz.payola.web.client.views.entity.plugins.PluginInstanceView
 import cz.payola.web.client.views.elements.Div
 
 class MergeAnalysisBranchesDialog(instances: ArrayBuffer[PluginInstanceView], inputsCount: Int)

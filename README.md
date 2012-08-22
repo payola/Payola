@@ -932,6 +932,8 @@ Later on, when you will get familiar with the `cz.payola.web.shared` package, yo
 <a name="web"></a>
 ## Package cz.payola.web
 
+![Client-server-structure](https://raw.github.com/siroky/Payola/develop/docs/img/client_server.png)
+
 All the code connected with the web presentation layer could be found in this package. The web application is, as the rest of the project written in the Scala language. To make the job easier, we built up the presentation layer on top of the [Play 2.0 framework](http://www.playframework.org/), which is also completely written in the Scala language, so it was easy to integrate with our appliaction.
 
 Since we started to use the framework in the stage of early access preview, we currently do not take advantage of all the features provided by its API. If you want to know, what can be done better nowadays, just look into the Future work section of the documentation. As an example, one can mention utilizing the Promise API. When fully available (depends on Servlet 3.0 implementation in a wide spectrum of Java web servers), we should also take advantage of the possibility of exporting the web application into a single WAR file which can be deployed into a servlet conatiner.
