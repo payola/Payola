@@ -3,9 +3,9 @@ package cz.payola.data.squeryl.entities
 import cz.payola.data.squeryl._
 
 /**
-  * Provides persistence to [[cz.payola.domain.entities.PrivilegableEntity]] entities.
+  * Provides persistence to [[cz.payola.domain.entities.PrivilegeableEntity]] entities.
   */
-trait PrivilegableEntity extends Entity with cz.payola.domain.entities.PrivilegableEntity
+trait PrivilegeableEntity extends Entity with cz.payola.domain.entities.PrivilegeableEntity
 {
     _privileges = null
 

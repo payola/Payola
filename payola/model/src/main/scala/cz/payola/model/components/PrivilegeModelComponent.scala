@@ -20,7 +20,7 @@ trait PrivilegeModelComponent extends EntityModelComponent
             privilegeRepository.getAllByObjectIdAndPrivilegeClass(objectId, privilegeClass)
         }
 
-        def getPotentialGrantees(granteeClassName: String, user: User): Seq[PrivilegableEntity] = {
+        def getPotentialGrantees(granteeClassName: String, user: User): Seq[PrivilegeableEntity] = {
             Map(
                 Entity.getClassName(classOf[User]) -> (() => userModel.getAll()),
                 Entity.getClassName(classOf[Group]) -> (() => user.ownedGroups)
@@ -63,7 +63,7 @@ trait PrivilegeModelComponent extends EntityModelComponent
             getSharingPrivilegeClass(objectClass)
         }
 
-        private def createSharingPrivilege(granter: User, grantee: PrivilegableEntity, objectEntity: ShareableEntity):
+        private def createSharingPrivilege(granter: User, grantee: PrivilegeableEntity, objectEntity: ShareableEntity):
             Privilege[_ <: Entity with ShareableEntity] = {
 
             objectEntity match {

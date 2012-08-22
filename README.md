@@ -25,8 +25,6 @@ Payola comes pre-configured to work with default settings of a Virtuoso server a
 
 > **Virtuoso Settings**
 
-> ** **
-
 > *virtuoso.server* - address of the Virtuoso server
 
 > *virtuoso.endpoint.port* - port of the Virtuoso server's SPARQL endpoint
@@ -39,11 +37,7 @@ Payola comes pre-configured to work with default settings of a Virtuoso server a
 
 > *virtuoso.sql.password* - SQL database login password
 
-> ** **
-
 > **Relational Database Settings**
-
-> ** **
 
 > *database.location* - JDBC URL of the database
 
@@ -51,27 +45,17 @@ Payola comes pre-configured to work with default settings of a Virtuoso server a
 
 > *database.password* - database login password
 
-> ** **
-
 > **User**
-
-> ** **
 
 > *admin.email* - Email of the admin user. A user with this email address also gets created when the initializer project is run.
 
-> ** **
-
 > **Web**
-
-> ** **
 
 > *web.url* - URL of the website, by default `http://localhost:9000`. The URL must start with `http://` or `https://` and mustn't end with a trailing `/`.
 
-> ** **
+> *web.mail.noreply* - Email that will be used as a no-reply email of the web application.
 
 > **Email**
-
-> ** **
 
 > *mail.smtp.server* - Mail server.
 
@@ -81,19 +65,11 @@ Payola comes pre-configured to work with default settings of a Virtuoso server a
 
 > *mail.smtp.password* - Password.
 
-> ** **
-
 > **Libraries**
-
-> ** **
 
 > *lib.directory* - storage for 3rd-party libraries
 
-> ** **
-
 > **Plugins Directory**
-
-> ** **
 
 > *plugin.directory* - where to store plugins uploaded by users
 
@@ -316,7 +292,7 @@ If the evaluation fails, the plugin boxes turn red and an error description is s
 <a name="plugins"></a>
 ### Plugins
 
-Creating a new plugin requires at least basic programming skills in Scala. A detailed reference of the Plugin class is described in the [Developer Guide](#developer) and in the [generated docs](#gen-docs). Here is a code of a sample plugin:
+Creating a new plugin requires at least basic programming skills in Scala. A detailed reference of the Plugin class is described in the [Developer Guide](#developer) and in the generated documentation. Here is a code of a sample plugin:
 
 ```
 package my.custom.plugin
@@ -386,6 +362,8 @@ The solution is defined using the [SBT](https://github.com/harrah/xsbt/wiki/ "SB
 		- [```shared```](#shared)
 		- [```server```](#server)
 
+![Project depedencies](https://raw.github.com/siroky/Payola/develop/docs/img/project_dependencies.png)
+
 Briefly, the project [```payola/project```](#project) defines this structure, dependencies between the projects, external dependencies and the build process, so it can be understood as a Makefile equivalent. Somewhat standalone libraries are the [```payola/scala2json```](#scala2json) project which provides means of Scala object serialization into the JSON format and [```payola/s2js```](#s2js) project which with all its subprojects enables us to write web applications in Scala (to compile Scala code to equivalent JavaScript code).
 
 The Payola application itself is spread within the rest of the projects, namely [```payola/common```](#common) that defines classes that are used throughout all layers and even on the client side. The [```payola/domain```](#domain) mostly extends classes from the [```payola/common```](#common) with backend logic. The [```payola/data```](#data) is a persistence, data access layer. The [```payola/model```](#model) wraps up the previous three modules with a uniform interface. It's meant as a standard programmatic access point to Payola. Finally, the web application itself consists of the [```payola/web/initializer```](#initializer) which is a console application initializing the database (i.e an installer), [```payola/web/server```](#server) that is a [Play](http://www.playframework.org/) web application, the [```payola/web/client```](#client) which contains a browser MVP application (compiled to JavaScript) and last but not least the [```payola/web/shared```](#shared) which consists of objects that are called from the client, but executed on the server.
@@ -399,6 +377,7 @@ This project contains only two files: ```plugins.sbt``` and ```PayolaBuild.scala
 
 The ```PayolaBuild.scala``` is a [build definition file](https://github.com/harrah/xsbt/wiki/Getting-Started-Full-Def) of the whole solution. The solution structure, projects, dependencies, compilation, test settings and other concepts used there are described in depth in the [SBT Wiki](https://github.com/harrah/xsbt/wiki). Moreover, there is a template for all projects that should be compiled to JavaScript, that adds the [s2js](#s2js) compiler plugin to the standard Scala compiler. To create a project that should be compiled to JavaScript, use ```ScalaToJsProject(...)``` instead of the standard ```Project(...)```.
 
+<a name="cp"></a>
 ### The cp task
 
 The build file defines a custom SBT Task called ```cp``` which is an abbreviation for 'compile and package'. In order to support compilation of the payola solution in one step, we had to introduce this non-standard task. Because the solution contains both the [s2js](#s2js) compiler plugin project and also projects that use that compiler plugin, it's not sufficient to mark the compiler plugin project as a dependency of projects that should be compiled to Javascript. The Scala compiler accepts only ```.jar``` plugin files so the compiler plugin project has to be not only compiled, but also packed into a ```.jar``` package before it can be used.
@@ -466,7 +445,7 @@ o.obj = o
 
 For some purposes, customizing the serialization process is necessary - it has proven useful to skip or add some fields of the object, etc. - this lead to serialization rules. For example, you might want to hide an implementation detail that a class' private fields are prefixed with an underscore (`_`) - it is possible to do so simply by adding a new `BasicSerializationRule`, where you can define a class (or trait) whose fields should be serialized (e.g. you want to serialize only fields of a common superclass, ignoring fields of subclasses), a list of fields that should be omitted (transient fields) and a list of field name aliases (a map of string &rarr; string translations).
 
-The rules are applied in the same order as they are added to the serializer. You can explore additional serialization rules in our generated [docset](#gen-doc).
+The rules are applied in the same order as they are added to the serializer. You can explore additional serialization rules in generated documentation.
 
 <a name="s2js"></a>
 ## Project payola/s2js
@@ -688,34 +667,72 @@ Adapters of web browser related objects (```Window```, ```History``` etc.), base
 <a name="runtime"></a>
 ### Project payola/s2js/runtime
 
-> TODO: H.S.
+Unlike the compiler and adapters which are used during compile time, the runtime project defines classes and object that are necessary during runtime of an s2js application. There are actually two kinds of runtime: the client-side runtime and the server side runtime. Subprojects of the runtime project correspond to this separation.
 
 <a name="runtime-client"></a>
 #### Package s2js.runtime.client
 
-> TODO: H.S.
+Code of this project is compiled into JavaScript and is executed only on the client side. 
+
+##### Package s2js.runtime.client.core
+
+The package object ```s2js.runtime.client.core``` defines the core methods, that are required by the compiler (almost any compiled code requires them). They're mainly used when emulating some features of Scala in JavaScript, for example ```inherit```, ```mixIn```, ```isInstanceOf``` etc. Most of them are implemented natively, some of them may be percieved as 'smart adapters' (e.g. ```isUndefined``` or ```isObject```).
+
+There is also the class ```Class``` which stores information about a class (name, super classes) and is used for type-checks and type-conversions.
+
+The ```ClassLoader``` keeps track of declared (= loaded) classes and makes sure that a class is already declared when it's declaration-required. Otherwise it throws an exception. Interesting thing is, that the ```ClassLoader``` is also a class so before it's declared, it notifies the current class loader that the ```ClassLoader``` class is being declared. To overcome this 'ad-infinitum' issue, a temporary class loader, which is declared natively in JavaScript, was introduced. It serves the purpose of the full-featured class loader. When the ```ClassLoader``` is declared (so it may be used), all classes that are registered in the temporary class loader are also registered in the full-featured classs loader and the current class loader is set to the full-featured one.
 
 ##### Package s2js.runtime.client.js
 
-> TODO: H.S.
+The ```JsObject``` and ```JsArray``` arre just wrappers around native JavaScript objects and arrays, so their dynamic properties may be retrieved and set in Scala code.
 
-##### Package s2js.runtime.client.rpc
-
-> TODO: H.S.
+Another helper class is the ```JsonTraverser``` which defines an interface of generic JSON traverser. It however doesn't traverse the string representation of JSON, it's used to traverse an object, that may have been created using the ```eval``` function on the JSON string representation. There is just one method ```traverse``` which visits all the properties and items of the object and invokes the abstract visitor methods corresponding to the visited object types. Subclasses of the ```JsonTraverser``` must implement the visitor methods.
 
 ##### Package s2js.runtime.client.scala
 
-> TODO: H.S.
+In order to allow the programmer to use classes and objects that are available in the standard Scala Library (e.g. ```Option```, ```List```, ```Map``` etc.), an equivalent of it had to be created in JavaScript. An ideal way would be to take the sources of the Scala Library and compile them into JavaScript using the [compiler](#compiler). But this task is too complex to accomplish, so another approach was used.
+
+The sources from the Scala Library that were fully or with minor changes compilable to JavaScript were used as is. That's the case of most of the simple classes like ```Option```, ```Tuple``` or ```Product```. The complex classes, mainly in the collection library were partially written from scratch, but most of the logic was ported from the Scala Library sources.
+
+> The classes and objects in this package were written when they were needed, not in advance, so there aren't any unnecessary. Therefore this package can be hardly seen as a port of the Scala Library to JavaScript. So when a programmer uses a class from the standard library and isn't sure, whether it's supported in the runtime or not, then he should examine the ```s2js.runtime.client.scala``` package. If it's not there, then there is only way to solve this - he should port the class by himself.
+
+##### Package s2js.runtime.client.rpc
+
+Rather than describing classes in this package one by one, an example RPC call will be examined:
+
+1. From the runtime point of view, it starts with a call on the ```Wrapper``` object like this: ```s2js.runtime.client.rpc.Wrapper.callSync('remote.foo', [123], ['scala.Int']);```
+2. The ```Wrapper``` processes the parameters and creates a ```XmlHttpRequest```.
+3. The request body is filled with the method name and parameters and the request is sent to the [RPC controller](#TODO) on the server.
+4. The RPC controller processes the request and returns the result serialized using the [scala2json](#scala2json).
+5. If an error occurs, an ```RpcException``` is thrown. Otherwise the result is deserialized with the ```Deserializer```:
+	1. The JSON string is transformed to an object using the ```eval``` function.
+	2. The object is traversed using the ```ClassNameRetriever``` subclass of the ```JSONTraverser```. So classes of all instances in the result are known.
+	3. All classes that aren't yet loaded in the class loader are retrieved from the server via a RPC call on the ```s2js.runtime.shared.DependencyProvider``` object.
+	4. The classes are declared using the ```eval``` function.
+	5. By now, all the classes that are used in the result object, have already been loaded. So the result object is traversed again using the ```Deserializer```, which instantiates classes corresponding to the objects in the result and copies field values from the result to the newly created instances. If the field value is a reference to an object (```__ref__```), the reference is tracked as a ```ReferenceToResolve```, because the reference target may have not been instantiated yet.
+	6. By now, all the objects from the result have been instantiated, so the references are resolved.
+6. If the deserialized object is an instance of the ```Throwable``` trait, then it's thrown (or passed to the ```failCallback``` in case of an asynchronous RPC call). Otherwise the result is returned (or passed to the ```successCallback```).
 
 <a name="runtime-shared"></a>
 #### Package s2js.runtime.shared
 
-> TODO: H.S.
+Currently, there is only one class - the ```DependencyProvider```. It provides just one method ```get```, which returns a ```DependencyPackage``` containing the JavaScript source code of symbols specified in the ```symbols``` parameter and all their dependencies. The sources of ```symbolsToIgnore``` aren't included in the dependency package. Moreover, the order of symbol source codes is determined by dependencies among them which can be found in the generated dependency file (which is generated during the [```cp```](#cp) SBT task). So for example a class isn't declared before its super-class. 
+
+> There is a tight coupling between the ```s2js``` project and other projects (e.g. hardcoded path to the dependency package in the ```DependencyProvider```, RPC controller logic defined in the [```web```](#web) project), so it can't be used as a standalone library/toolchain. However, making the ```s2js``` standalone wouldn't be much work, it just wasn't our priority to make it completely reusable.
 
 <a name="common"></a>
 ## Package cz.payola.common
 
-> TODO: H.S.
+![Common entites model](https://raw.github.com/siroky/Payola/develop/docs/img/common_entities.png)
+
+This image captures the most important classes of the `common` package. The `User` entity stands in the middle of everything - a user can own groups (and be their member as well), plugins, analyses, data sources and ontology customizations. Each `OntologyCustomization` instance consists of several `ClassCustomization`s, each consisting of `PropertyCustomization`s. A `DataSource` is simply a special subclass of `PluginInstance` which fetches data. Then there's the `Plugin` class where it starts to be slightly more complicated.
+
+The `Plugin` class represents the plugin itself with all the logic. Each `Plugin` may have some `Parameter`s which define which values the plugin requires on the input. For example, the `Typed` plugin which comes pre-installed with Payola has one `Parameter` named `RDF Type URI`. When a `Plugin` is to be evaluated, it receives a corresponding `PluginInstance` and a sequence of `Graph`s as its input.
+
+A `PluginInstance` is a container for `ParameterValue`s: a `ParameterValue` contains the concrete value for that particular `Parameter` (a string, numeric value, ...). Hence when a `Plugin` is being evaluated, it queries the `PluginInstance` for all required parameter values.
+
+An `Analysis` forms various plugin instances into a tree-like structure using `PluginInstanceBinding`s. A `PluginInstanceBinding` can be viewed on as an edge in the resulting tree structure (`PluginInstance`s being vertices). When an `Analysis` is run, each `PluginInstance` is evaluated by its peer `Plugin`. The evaluation process begins at the leaf vertices and forms a chain taking output of one or more plugins and passing it to the next plugin as input. Because a valid `Analysis` forms a tree, the output is just one `Graph`. For more information about the analysis evaluation process see the [plugins section](#domain.plugins).
+
 
 ### Package cz.payola.common.entities
 
@@ -727,7 +744,15 @@ This package includes classes representing the basic entities (user, analysis, p
 
 #### Package cz.payola.common.entities.privileges
 
+![Privilege model](https://raw.github.com/siroky/Payola/develop/docs/img/common_privileges.png)
+
 To share entities between users, privileges are used. This makes it easy to extend the model in the future, or to change the granularity of privilege granting. Currently, there are only privileges granting access to a resource - analysis, data source, ontology customization and plugin; however, a privilege type that grants a user the right to edit some entity, for instance, can be easily added.
+
+As can be seen in the picture above, each entity that needs to be shared, has to have the ShareableEntity trait mixed in which adds a `isPublic` field to the object (denoting whether the entity may be seen by everyone or just those you share it to).
+
+Each user has a collection of privileges. A `Privilege` is a simple class containing three fields: the granter (i.e. the user who issued this privilege), the grantee (a `PrivilegeableEntity` that the privilege is issued to) and an object of the privilege (e.g. an analysis).
+
+For each class that can be currently shared (`Analysis`, `DataSource`, `OntologyCustomization` and `Plugin`), a corresponding `Privilege` subclass exists. But this model can be obviously very easily extended to other classes.
 
 #### Package cz.payola.common.entities.settings
 
@@ -753,6 +778,7 @@ Domain entities extend the `common` entities that are mostly traits and fully fu
 
 > TODO: H.S.
 
+<a name="domain.plugins">
 ### Package cz.payola.domain.entities.plugins
 
 > TODO: H.S.
@@ -787,12 +813,12 @@ In this version of Payola, [Squeryl](http://squeryl.org) (an ORM for Scala) is u
 - can be stored/loaded via Squeryl ORM into/from the database
 
 <a name="schema-component"></a>
-The relational database schema definition is placed in `SchemaComponent` trait that uses `org.squeryl.Schema` object. This trait defines:
+The relational database schema definition is placed in `SchemaComponent` trait that uses `org.squeryl.Schema` object to define defines:
 
 - session with connection to the database
-- table for every entitiy that is persisted
-	- the table structure is based on entity that is persisted in the table
-	- contraints (such as PrimaryKey, Unique contraint)or column types of some fields are defined manually to match the Payola project requirements exactly
+- table for every entitiy class that is persisted
+	- the table structure is based on entity public fields
+	- constraints (such as PrimaryKey, Unique contraint)or column types of some fields are defined manually to match the Payola project requirements exactly
 - foreign-key constraints for relations between entities
 	- including the reaction on removing related entity
 - factory for every persisted entity
@@ -802,7 +828,7 @@ The relational database schema definition is placed in `SchemaComponent` trait t
 
 ##### Why Squeryl?
 
-Squeryl is an existing, tested, functional and simple ORM for Scala applications that had met the needs of Payola during the process of making a decision whether to use an existing ORM or implement our own ORM tool.
+Squeryl is an existing, tested, functional and easy to use ORM for Scala applications that had met the needs of Payola during the process of making a decision whether to use an existing ORM or implement our own ORM tool.
 
 <a name="about-squeryl"></a>
 ##### Briefly about Squeryl
@@ -811,7 +837,7 @@ Squeryl is an existing, tested, functional and simple ORM for Scala applications
 
 A database structure needs to be defined in an object extending `org.squeryl.Schema` object. This object contains definition of tables - definition that says which entity is persisted in which table. Squeryl allows to redefine column types of tables, to declare 1:N and M:N relations between entities, to define foreign key constraints for those relations.
 
-Squeryl provides lazy fetching of entities from "N" side of 1:N or M:N relations, which is a desirable feature of an ORM tool. The query that fetches the entities of a relation is defined in a lazy field of the related entity, on the first data request, the query is evaluated. There is a method `associate` in Squeryl for creating a relation between entities. Simplified code may look something like this:
+Squeryl provides lazy fetching of entities from "N" side of 1:N or M:N relations, which is a desirable feature of an ORM tool. The query that fetches the entities of a relation is defined in a lazy field of the related entity, on the first data request, the query is evaluated. There is an `associate` method in Squeryl for creating a relation between entities. Simplified code may look something like this:
 
 <a name="squeryl-code-examle"></a>
 ```
@@ -839,7 +865,7 @@ class Analysis extends cz.payola.domain.entities.Analysis {
 }
 ```
 
-Every query that fetches any data from database needs to be wrapped inside a transaction block (as can be seen in the previous sample code). Squeryl provides `transaction { ... }` and `inTransaction { ... }` blocks. Every `transaction` block creates a new transaction which establishes a new database connection, whereas `inTransaction` block nests transactions together.
+Every query that fetches any data from database needs to be wrapped inside a transaction block (as can be seen in the previous sample code). Squeryl provides two ways to wrap code into a transaction - `transaction { ... }` and `inTransaction { ... }` blocks. Every `transaction` block creates a new transaction which establishes a new database connection, whereas `inTransaction` block nests transactions together. If there is no parent transaction the `inTransaction` block behaves as a `transaction` block.
 
 <a name="squeryl-entities"></a>
 #### Package cz.payola.data.squeryl.entities
@@ -850,7 +876,7 @@ All higher layers of Payola work with [domain layer](#domain) entities, but thos
 
 Every entity in this package extends the trait `Entity`, which provides Squeryl functionality. It could be compared to [Adapter](#http://en.wikipedia.org/wiki/Adapter_pattern) design pattern, where `Entity` from [`common`](#common) package is the Adaptee, `Entity` in this package is the Adapter, and Squeryl functionality is the Target.
 
-Data layer entities extend the represented domain layer entities (with two exceptions that will be explained later), which allows to treat data layer entities like domain layer entities. There is no added business logic in data layer entities - their only purpose is to store/load domain layer entities into/from the database.
+Data layer entities extend the represented domain layer entities (with two exceptions that will be explained later - in the picture above they are displayed with the discontinuous arrow), which allows to treat data layer entities like domain layer entities. There is no added business logic in data layer entities - their only purpose is to store/load domain layer entities into/from the database. In order to ensure the proper persistence, data entities had duplicated some protected fields on domain layer entities.
 
 In order to persist a domain layer entity, the entity must be converted to a data layer entity. The conversion is run by companion object (extending `EntityConverter`) of data layer entity. Every data layer entity has its own converter. When the conversion fails, a `DataException` is thrown. Since every data layer entity extends a domain layer entity, there is no need for reverse conversion. Data layer returns data layer entities, which can be handled as domain layer entities in higher application layers.
 
@@ -861,7 +887,7 @@ Domain layer entities allow adding other entities into collections (e.g. a plugi
 <a name="squeryl-repositories"></a>
 #### Package cz.payola.data.squeryl.repositories
 
-Repositories provide persistence and fetching of entities (entities must extend `Entity` trait in the [squeryl](#squeryl) package. The API for repositories is defined in trait `DataContextComponent` in [data](#data) package. The API is a set of traits, their structure is shown in the next picture:
+Repositories provide entity persistence and fetching (entities must extend `Entity` trait in the [squeryl](#squeryl) package. The API for repositories is defined in trait `DataContextComponent` in [data](#data) package. The API is a set of traits, their structure is shown in the next picture:
 
 ![Data layer repositories](https://raw.github.com/siroky/Payola/develop/docs/img/data_repositories.png)
 
@@ -870,18 +896,20 @@ For every repository defined in the API there exists a repository component, tha
 ##### Eager vs Lazy loading
 Squeryl provides only lazy data fetching from the database. The lazy fetching is used when loading usersplugin instance bindings from the database. These entities are loaded in the most simple fashion: 
 
-- **plugin instance bindings** are loaded only with IDs of the target and source *plugin instances*, those *plugin instances* are loaded only when needed
-- **users** are loaded with no data, all their *groups*, *privileges*, *analyses*, *plugins*, *data sources* are loaded only when needed
+- plugin instance bindings are loaded only with IDs of the target and source plugin instances, those plugin instances are loaded only when needed
+- users are loaded with no data, all their groups, privileges, analyses, plugins, data sources are loaded only when needed
 
 The rest of entities is loaded eagerly (i.e. entity is loaded with some of its relations evaluated). Eager-loading is provided by `TableRepository` abstract class. Every repository component that extends `TableRepository` must implement `getSelectQuery` and `processSelectResults` methods. `getSelectQuery` method defines a query to load the entity (and all related entities) from the database, `processSelectResults` method evaluates the defined query result and returns loaded entities. Entities are loaded by their repositories in the following way:
 
-- **groups** are loaded only with their *owner*
-- **privileges** are loaded in `PrivilegeDbRepresentation` form, the the *granter*, *grantee* and *object* are lazy-loded from database, finally the whole privilege is instantiated using Java reflection API
-- **plugins** are loaded in the `PluginDbRepresentation` form with *parameters* and *owner* and then they are instantiated using Java reflection API
-- **plugin instances** are loaded with *parameter values* and with related *plugins* and *parameters*
-- **data sources** are loaded with *owner* and *parameter values* and with related domain layer `DataFetcher` plugin with its *parameters*
-- **analyses** are loaded only with their *owner*
-	- when there is an access to *plugin instances* or to *plugin instance bindings*, the complete analysis is loaded (i.e. no further fetching-query to database will be needed)
+- groups are loaded only with their owner
+- privileges are loaded in `PrivilegeDbRepresentation` form, the the granter, grantee and object are lazy-loded from database, finally the whole privilege is instantiated using Java reflection API
+- plugins are loaded in the `PluginDbRepresentation` form with parameters and owner and then they are instantiated using Java reflection API
+- plugin instances are loaded with parameter values and with related plugins and parameters
+- data sources are loaded with owner and parameter values and with related domain layer `DataFetcher` plugin with its parameters
+- analyses are loaded only with their owner
+	- when there is an access to plugin instances or to plugin instance bindings, the complete analysis is loaded (i.e. no further fetching-query to database will be needed)
+
+It is crucial to mention that two queries loading entity from repository by the same id (`getById()` method) gets two different objects representing the same entity. That is why the standard `equals` method needed to be overriden - the two entities are equal when they have the same ID (since ID is an UUID, which is unique though the whole database, the method is valid)
 
 <a name="virtuoso"></a>
 ### Package cz.payola.data.virtuoso

@@ -34,8 +34,8 @@ object PrivilegeDbRepresentation extends EntityConverter[PrivilegeDbRepresentati
   *
   * @param id -ID of the privilege
   * @param granterId ID of [[cz.payola.common.entities.User]] that granted the Privilege
-  * @param granteeId ID of [[cz.payola.common.entities.PrivilegableEntity]] that is being granted the Privilege
-  * @param granteeClassName Stripped class name of this PrivilegableEntity
+  * @param granteeId ID of [[cz.payola.common.entities.PrivilegeableEntity]] that is being granted the Privilege
+  * @param granteeClassName Stripped class name of this PrivilegeableEntity
   * @param privilegeClass Class of the Privilege
   * @param objectId ID of [[cz.payola.common.entities.Entity]] that is object of the Privilede
   * @param objectClassName Stripped class name of this Object
