@@ -66,7 +66,8 @@ class GraphPresenter(val viewElement: html.Element) extends Presenter
             unblockPage()
             val selector = new DataSourceSelector("Browse in different data source: " + e.vertex.uri, ds)
             selector.dataSourceSelected += { d =>
-                window.location.href = "/datasource/" + d.target.id + "?uri=" + s2js.adapters.js.encodeURI(e.vertex.uri)
+                window.location.href = "/datasource/" + d.target.id + "?uri=" +
+                    s2js.adapters.js.encodeURIComponent(e.vertex.uri)
             }
             selector.render()
         }(fatalErrorHandler(_))

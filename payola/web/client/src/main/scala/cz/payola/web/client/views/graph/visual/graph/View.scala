@@ -307,7 +307,7 @@ trait View[A]
                     //window.alert("D < 0 while getting sides of an arrow")
                 }
             } else {
-                val y = destination.y
+                val y = if(u.y > 0) { destination.y - arrowSize.y } else { destination.y + arrowSize.y }
                 val x1 = arrowSize.y + originPoint.get.x
                 val x2 = -arrowSize.x + originPoint.get.x
 
