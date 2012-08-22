@@ -25,8 +25,6 @@ Payola comes pre-configured to work with default settings of a Virtuoso server a
 
 > **Virtuoso Settings**
 
-> ** **
-
 > *virtuoso.server* - address of the Virtuoso server
 
 > *virtuoso.endpoint.port* - port of the Virtuoso server's SPARQL endpoint
@@ -39,11 +37,7 @@ Payola comes pre-configured to work with default settings of a Virtuoso server a
 
 > *virtuoso.sql.password* - SQL database login password
 
-> ** **
-
 > **Relational Database Settings**
-
-> ** **
 
 > *database.location* - JDBC URL of the database
 
@@ -51,27 +45,17 @@ Payola comes pre-configured to work with default settings of a Virtuoso server a
 
 > *database.password* - database login password
 
-> ** **
-
 > **User**
-
-> ** **
 
 > *admin.email* - Email of the admin user. A user with this email address also gets created when the initializer project is run.
 
-> ** **
-
 > **Web**
-
-> ** **
 
 > *web.url* - URL of the website, by default `http://localhost:9000`. The URL must start with `http://` or `https://` and mustn't end with a trailing `/`.
 
-> ** **
+> *web.mail.noreply* - Email that will be used as a no-reply email of the web application.
 
 > **Email**
-
-> ** **
 
 > *mail.smtp.server* - Mail server.
 
@@ -81,19 +65,11 @@ Payola comes pre-configured to work with default settings of a Virtuoso server a
 
 > *mail.smtp.password* - Password.
 
-> ** **
-
 > **Libraries**
-
-> ** **
 
 > *lib.directory* - storage for 3rd-party libraries
 
-> ** **
-
 > **Plugins Directory**
-
-> ** **
 
 > *plugin.directory* - where to store plugins uploaded by users
 
@@ -687,22 +663,36 @@ Adapters of web browser related objects (```Window```, ```History``` etc.), base
 <a name="runtime"></a>
 ### Project payola/s2js/runtime
 
-> TODO: H.S.
+Unlike the compiler and adapters which are used during compile time, the runtime project defines classes and object that are necessary during runtime of an s2js application. There are actually two kinds of runtime: the client-side runtime and the server side runtime. Subprojects of the runtime project correspond to this separation.
 
 <a name="runtime-client"></a>
 #### Package s2js.runtime.client
 
-> TODO: H.S.
+Code of this project is compiled into JavaScript and is executed only on the client side. 
+
+##### Package s2js.runtime.client.core
+
+The package object ```s2js.runtime.client.core``` defines the core methods, that are required by the compiler (almost any compiled code requires them). They're mainly used when emulating some features of Scala in JavaScript, for example ```inherit```, ```mixIn```, ```isInstanceOf``` etc. Most of them are implemented natively, some of them may be percieved as 'smart adapters' (e.g. ```isUndefined``` or ```isObject```).
+
+There is also the class ```Class``` which stores information about a class (name, super classes) and is used for type-checks and type-conversions.
+
+The ```ClassLoader``` keeps track of declared (= loaded) classes and makes sure that a class is already declared when it's declaration-required. Otherwise it throws an exception. Interesting thing is, that the ```ClassLoader``` is also a class so before it's declared, it notifies the current class loader that the ```ClassLoader``` class is being declared. To overcome this 'ad-infinitum' issue, a temporary class loader, which is declared natively in JavaScript, was introduced. It serves the purpose of the full-featured class loader. When the ```ClassLoader``` is declared (so it may be used), all classes that are registered in the temporary class loader are also registered in the full-featured classs loader and the current class loader is set to the full-featured one.
 
 ##### Package s2js.runtime.client.js
 
-> TODO: H.S.
+The ```JsObject``` and ```JsArray``` arre just wrappers around native JavaScript objects and arrays, so their dynamic properties may be retrieved and set in Scala code.
 
-##### Package s2js.runtime.client.rpc
-
-> TODO: H.S.
+Another helper class is the ```JsonTraverser``` which defines an interface of generic JSON traverser. It however doesn't traverse the string representation of JSON, it's used to traverse an object, that may have been created using the ```eval``` function on the JSON string representation. There is just one method ```traverse``` which visits all the properties and items of the object and invokes the abstract visitor methods corresponding to the visited object types. Subclasses of the ```JsonTraverser``` must implement the visitor methods.
 
 ##### Package s2js.runtime.client.scala
+
+In order to allow the programmer to use classes and object that are available in the standard Scala Library (e.g. ```Option```, ```List```, ```Map``` etc.), an equivalent of it had to be created in JavaScript. An ideal way would be to take the sources of the Scala Library and compile them into JavaScript using the [compiler](#compiler). But this task is too complex to accomplish, so another approach was used.
+
+The sources from the Scala Library that were fully or with minor changes compilable to JavaScript were used as is. That's the case of most of the simple classes like ```Option```, ```Tuple``` or ```Product```. The complex classes, mainly in the collection library were partially written from scratch, but most of the logic was ported from the Scala Library sources.
+
+> The classes and objects in this package were written when they were needed, not in advance, so there aren't any other. Therefore this package can be hardly seen as a port of the Scala Library to JavaScript. So when a programmer uses a class from the standard library and isn't sure, whether it's supported in the runtime or not, then he should examine the ```s2js.runtime.client.scala``` package. If it's not there, then there is only way to solve this - he should port the class by himself.
+
+##### Package s2js.runtime.client.rpc
 
 > TODO: H.S.
 

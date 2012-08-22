@@ -77,7 +77,7 @@ class PluginVerifier(val global: Global) extends Plugin
 
                         // Retrieve the plugin name from the parameterless constructor.
                         constructor.get.rhs match {
-                            case Block(superCall@Apply(_, Literal(Constant(name: String)) :: _) :: _, _) => {
+                            case Block(Apply(_, Literal(Constant(name: String)) :: _) :: _, _) => {
                                  pluginName = Some(name)
                             }
                             case _ => error("The parameterless constructor doesn't specify the plugin name.")
