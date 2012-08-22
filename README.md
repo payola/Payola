@@ -720,26 +720,23 @@ Currently, there is only one class - the ```DependencyProvider```. It provides j
 > There is a tight coupling between the ```s2js``` project and other projects (e.g. hardcoded path to the dependency package in the ```DependencyProvider```, RPC controller logic defined in the [```web```](#web) project), so it can't be used as a standalone library/toolchain. However, making the ```s2js``` standalone wouldn't be much work, it just wasn't our priority to make it completely reusable.
 
 <a name="common"></a>
-## Package cz.payola.common
+## Project cz.payola.common
 
-![Common entites model](https://raw.github.com/siroky/Payola/develop/docs/img/common_entities.png)
-
-This image captures the most important classes of the `common` package. The `User` entity stands in the middle of everything - a user can own groups (and be their member as well), plugins, analyses, data sources and ontology customizations. Each `OntologyCustomization` instance consists of several `ClassCustomization`s, each consisting of `PropertyCustomization`s. A `DataSource` is simply a special subclass of `PluginInstance` which fetches data. Then there's the `Plugin` class where it starts to be slightly more complicated.
-
-The `Plugin` class represents the plugin itself with all the logic. Each `Plugin` may have some `Parameter`s which define which values the plugin requires on the input. For example, the `Typed` plugin which comes pre-installed with Payola has one `Parameter` named `RDF Type URI`. When a `Plugin` is to be evaluated, it receives a corresponding `PluginInstance` and a sequence of `Graph`s as its input.
-
-A `PluginInstance` is a container for `ParameterValue`s: a `ParameterValue` contains the concrete value for that particular `Parameter` (a string, numeric value, ...). Hence when a `Plugin` is being evaluated, it queries the `PluginInstance` for all required parameter values.
-
-An `Analysis` forms various plugin instances into a tree-like structure using `PluginInstanceBinding`s. A `PluginInstanceBinding` can be viewed on as an edge in the resulting tree structure (`PluginInstance`s being vertices). When an `Analysis` is run, each `PluginInstance` is evaluated by its peer `Plugin`. The evaluation process begins at the leaf vertices and forms a chain taking output of one or more plugins and passing it to the next plugin as input. Because a valid `Analysis` forms a tree, the output is just one `Graph`. For more information about the analysis evaluation process see the [plugins section](#domain.plugins).
-
+As the name of the project suggests, common classes that can be accessed from all other projects are defined here. And because the project is also compiled into JavaScript, they may be accessed and used even on the client side. The classes and traits were designed with that in mind so they don't provide any sensitive information. The main aim of this project is to reduce code duplication among client-side and server-side projects.
 
 ### Package cz.payola.common.entities
 
 This package includes classes representing the basic entities (user, analysis, plugin, etc.) that ensure the core functionality of Payola. Each entity has its own ID (string-based, 128-bit UUID) and can be stored in a relational database (see the [data package](#data) for more information).
 
-#### Package cz.payola.common.entities.plugins
+![Common entites model](https://raw.github.com/siroky/Payola/develop/docs/img/common_entities.png)
 
-> TODO: H.S.
+This image captures the most important classes of the `entities` package. The `User` entity stands in the middle of everything - a user can own groups (and be their member as well), plugins, analyses, data sources and ontology customizations. Each `OntologyCustomization` instance consists of several `ClassCustomization`s, each consisting of `PropertyCustomization`s. A `DataSource` is simply a special subclass of `PluginInstance` which fetches data. Then there's the `Plugin` class where it starts to be slightly more complicated.
+
+The `Plugin` class represents the plugin itself with all the logic. Each `Plugin` may have some `Parameter`s which define which values the plugin requires on the input. For example, the `Typed` plugin which comes pre-installed with Payola has one `Parameter` named `RDF Type URI`. When a `Plugin` is to be evaluated, it receives a corresponding `PluginInstance` and a sequence of `Graph`s as its input.
+
+A `PluginInstance` is a container for `ParameterValue`s: a `ParameterValue` contains the concrete value for that particular `Parameter` (a string, numeric value, ...). Hence when a `Plugin` is being evaluated, it queries the `PluginInstance` for all required parameter values.
+
+An `Analysis` forms various plugin instances into a tree-like structure using `PluginInstanceBinding`s. A `PluginInstanceBinding` can be viewed on as an edge in the resulting tree structure (`PluginInstance`s being vertices). When an `Analysis` is run, each `PluginInstance` is evaluated by its peer `Plugin`. The evaluation process begins at the leaf vertices and forms a chain taking output of one or more plugins and passing it to the next plugin as input. Because a valid `Analysis` forms a tree, the output is just one `Graph`. For more information about the analysis evaluation process see the [domain section](#domain).
 
 #### Package cz.payola.common.entities.privileges
 
@@ -747,9 +744,9 @@ This package includes classes representing the basic entities (user, analysis, p
 
 To share entities between users, privileges are used. This makes it easy to extend the model in the future, or to change the granularity of privilege granting. Currently, there are only privileges granting access to a resource - analysis, data source, ontology customization and plugin; however, a privilege type that grants a user the right to edit some entity, for instance, can be easily added.
 
-As can be seen in the picture above, each entity that needs to be shared, has to have the ShareableEntity trait mixed in which adds a `isPublic` field to the object (denoting whether the entity may be seen by everyone or just those you share it to).
+As can be seen in the picture above, each entity that needs to be shared, has to have the `ShareableEntity` trait mixed in which adds a `isPublic` field to the object (denoting whether the entity may be seen by everyone or just those you share it to).
 
-Each user has a collection of privileges. A `Privilege` is a simple class containing three fields: the granter (i.e. the user who issued this privilege), the grantee (a `PrivilegeableEntity` that the privilege is issued to) and an object of the privilege (e.g. an analysis).
+Each `PrivilegeableEntity` has a collection of privileges. A `Privilege` is a simple class containing three fields: the granter (i.e. the user who issued this privilege), the grantee (a `PrivilegeableEntity` that the privilege is issued to) and an object of the privilege (e.g. an analysis).
 
 For each class that can be currently shared (`Analysis`, `DataSource`, `OntologyCustomization` and `Plugin`), a corresponding `Privilege` subclass exists. But this model can be obviously very easily extended to other classes.
 
@@ -777,7 +774,6 @@ Domain entities extend the `common` entities that are mostly traits and fully fu
 
 > TODO: H.S.
 
-<a name="domain.plugins">
 ### Package cz.payola.domain.entities.plugins
 
 > TODO: H.S.
