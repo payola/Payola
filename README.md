@@ -6,6 +6,13 @@ Payola is a HTML5 web application which lets you work with graph data in a compl
 
 Since Payola is rather a platform than a closed project, you can fork the project and write your own plugins, extensions and more on [https://github.com/siroky/Payola](https://github.com/siroky/Payola).
 
+# 3rd party technologies
+While developing the Payola, we used the following technologies:
+
+- jQuery JavaScript framework
+- Twitter Bootstrap (collection of CSS and JS code from Twitter)
+- 
+
 # Setting up Payola
 ## System Requirements
 
@@ -944,7 +951,105 @@ Since it crucially improves the usability of the application, a rather high coun
 
 Since the web application is not based on a monolithic architecture, we divide the code into several packages - client, initializer, server and shared. The initializer subproject is responsible for initialization of databases used by the web application. The rest builds up the web application itself. The server package contains the code which runs on the server side, the client package the code which runs on the client side. The code in the shared package could be run on both the client side and the server side. Also *remote objects* should be placed into this package, since they run on server and can be called from the client side.
 
-This is also one of the restrictions of our RPC. You need to separate code which is executed on the client side from the code which is executed on the server side. But you can make a call from the client side to the server side as there is no such thing as client-server architecture. 
+This is also one of the restrictions of our RPC. You need to separate code which is executed on the client side from the code which is executed on the server side. But you can make a call from the client side to the server side as there is no such thing as client-server architecture.
+
+How to write a remote object? See the following commented example:
+
+```
+package cz.payola.web.shared
+
+import s2js.compiler.async
+import s2js.compiler.remote
+import cz.payola.domain.rdf.Graph
+import cz.payola.domain.entities.User
+
+@remote
+object RPCTester
+{
+    def procedure : Int = {
+        1
+    }
+    
+    def testString : String = {
+        """te"st"""
+    }
+
+    def testBoolean : Boolean = {
+        true
+    }
+
+    def testParamInt (param: Int) : Int = {
+        (param*2)
+    }
+
+    def testParamString (param: String): String = {
+         param.reverse
+    }
+
+    def testParamChar (param: Char): Char = {
+        param
+    }
+
+    def testParamBoolean (param: Boolean): Boolean = {
+        !param
+    }
+
+    def testParamDouble (param: Double): Double = {
+        param
+    }
+
+    def testParamFloat (param: Float): Float = {
+        param
+    }
+
+    def testParamArray (param: List[Int]): Int = {
+        param.sum
+    }
+
+    @async
+    def testParamArrayAsync (param: List[Int])(successCallback: (Int => Unit))(failCallback: (Throwable => Unit)) = {
+        successCallback(param.sum)
+    }
+
+    def testParamArrayDouble (param: List[Double]): Double = {
+        param.sum
+    }
+
+    def testParamArrayString (param: List[String]): String = {
+        param.mkString("")
+    }
+
+    def throwException: Graph = {
+        throw new Exception("Was lazy to do this.")
+    }
+
+    def throwCustomException: Graph = {
+        throw new RPCTestException()
+    }
+
+    def testGraph: Graph = {
+        Graph.empty
+    }
+    
+    def testException : Int = {
+        7
+    }
+    
+    @secured def secureAdd(first: Int, second: Int, user: User = null) : Int = {
+    	first + second
+    }
+    
+    @secured def maybeSecureAdd(first: Int, second: Int, user: Option[User] = None) : Int = {
+    	first + second
+    }
+}
+
+```
+
+
+What happens if a presenter on client side calls a method of a remote object? Learn more on the following diagram:
+
+![Asynchronous RPC call](https://raw.github.com/siroky/Payola/develop/docs/img/rpc_call_async.png)
 
 <a name="initializer"></a>
 ### Package cz.payola.web.initializer
