@@ -316,7 +316,7 @@ If the evaluation fails, the plugin boxes turn red and an error description is s
 <a name="plugins"></a>
 ### Plugins
 
-Creating a new plugin requires at least basic programming skills in Scala. A detailed reference of the Plugin class is described in the [Developer Guide](#developer) and in the [generated docs](#gen-docs). Here is a code of a sample plugin:
+Creating a new plugin requires at least basic programming skills in Scala. A detailed reference of the Plugin class is described in the [Developer Guide](#developer) and in the generated documentation. Here is a code of a sample plugin:
 
 ```
 package my.custom.plugin
@@ -468,7 +468,7 @@ o.obj = o
 
 For some purposes, customizing the serialization process is necessary - it has proven useful to skip or add some fields of the object, etc. - this lead to serialization rules. For example, you might want to hide an implementation detail that a class' private fields are prefixed with an underscore (`_`) - it is possible to do so simply by adding a new `BasicSerializationRule`, where you can define a class (or trait) whose fields should be serialized (e.g. you want to serialize only fields of a common superclass, ignoring fields of subclasses), a list of fields that should be omitted (transient fields) and a list of field name aliases (a map of string &rarr; string translations).
 
-The rules are applied in the same order as they are added to the serializer. You can explore additional serialization rules in our generated [docset](#gen-doc).
+The rules are applied in the same order as they are added to the serializer. You can explore additional serialization rules in generated documentation.
 
 <a name="s2js"></a>
 ## Project payola/s2js
