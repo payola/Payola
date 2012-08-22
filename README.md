@@ -586,6 +586,7 @@ This annotation can be used on a method or a field, enabling the programmer to i
 
 An object or class marked with this annotation isn't compiled to JavaScript.  
 
+<a name="s2js_rpc"></a>
 ###### RPC (Remote Procedure Call)
 
 In order to simplify the client-server communication and to hide the low-level JavaScript constructs necessary for it (```XmlHttpRequest``` or ```ActiveXObject```) from the programmer, an [RPC mechanism](http://en.wikipedia.org/wiki/Remote_procedure_call) is used. The compiler takes a small but irreplaceable part in the whole process, the rest is done in the [server-side runtime](#runtime-server) and [client-side runtime](#runtime-client). 
@@ -911,11 +912,11 @@ All the code connected with the web presentation layer could be found in this pa
 
 Since we started to use the framework in the stage of early access preview, we currently do not take advantage of all the features provided by its API. If you want to know, what can be done better nowadays, just look into the Future work section of the documentation. As an example, one can mention utilizing the Promise API. When fully available (depends on Servlet 3.0 implementation in a wide spectrum of Java web servers), we should also take advantage of the possibility of exporting the web application into a single WAR file which can be deployed into a servlet conatiner.
 
-Since the Play framework is a MVC framework,our web presentation layer build on top of it also uses the MVC pattern. If you look closely into the `cz.payola.web.server`, you can see a classic code separation in there - controllers and views, model is imported from its own separate package.
+Since the Play framework is a MVC framework, our web presentation layer build on top of it also uses the MVC pattern. If you look closely into the `cz.payola.web.server` package, you can see a classic code separation in there - controllers and views, model is imported from its own separate package.
 
 Since it crucially improves the usability of the application, a rather high count of functionalities is built on top of the AJAX technology, so the calls from the client side of the appliaction to the server side of the application are realized via XHR requests. Since we knew from the past, that in many appliactions, the AJAX technology is a weak spot in the application architecture and security (and the code style is often terrible), we decided to make a standard for our XHR calls and came up with an idea of JavaScript RPC. Inspired by [Google Web Toolkit](https://developers.google.com/web-toolkit/) technology, we wanted to introduce a simple-to-use standard with a minimal overhead for the developer. Also, we wanted the RPC to be as secure as standard HTTP request via controller is. Moreover, since the application can be extended in a several ways, we wanted the RPC to be based on a single programming language. This is how we came up with the idea of the s2js compiler which enabled us to do all the things described in this paragraph. If you want to know more about how the RPC works, read the appropriate section.
 
-Since the web application is not based on a monolithic architecture, we divide the code into several packages - client, initializer, server and shared. The initializer subproject is responsible for initialization of databases used by the web application. The rest builds up the web application itself. The server pacage contains the code which runs on the server side, the client package the code which runs on the client side. The code in the shared package could be run on both the client side and the server side. Also *remote objects* should be placed into this package, since they run on server and can be called from the client side.
+Since the web application is not based on a monolithic architecture, we divide the code into several packages - client, initializer, server and shared. The initializer subproject is responsible for initialization of databases used by the web application. The rest builds up the web application itself. The server package contains the code which runs on the server side, the client package the code which runs on the client side. The code in the shared package could be run on both the client side and the server side. Also *remote objects* should be placed into this package, since they run on server and can be called from the client side.
 
 This is also one of the restrictions of our RPC. You need to separate code which is executed on the client side from the code which is executed on the server side. But you can make a call from the client side to the server side as there is no such thing as client-server architecture. 
 
@@ -946,7 +947,7 @@ The most important object in this package is the `Payola` object. It is an insta
 
 The code in this package is built on top of the MVC API of the Play 2.0 framework. Since we don't use their standard DAL (Anorm) and since we have a custom model, you will not be able to find a package named model nowhere in this package.
 
-What you can find is a directory named app which contains controllers and views of the web application. They are standard controllers and scala templates as introduced int the Play 2.0 framework docs.
+What you can find is a directory named app which contains controllers and views of the web application. They are standard controllers and scala templates as introduced int the [Play 2.0 framework docs](http://www.playframework.org/documentation/2.0.2/Home).
 
 There are two special controllers you should know more about:
 
@@ -984,7 +985,7 @@ Content-Length:11464
 Content-Type:text/plain; charset=utf-8
 ```
 
-As you can see, the `POST` request which represents an asynchronous RPC call conatins the name of the remote method which should be invoked by the RPC controller (which delegates most of the work to a class called `RPCDispatcher`). Since one can make his own RPC call very simply, we restricted the "invokable" methods to those that are defined in the body of an object annotated with the `s2js.compiler.remote` annotation. If you try to invoke a method which does not belong to an remote object, an exception will be thrown and sent as a response to such a call.
+As you can see, the `POST` request, which represents an asynchronous RPC call, conatins the name of the remote method which should be invoked by the RPC controller (which delegates most of the work to a class called `RPCDispatcher`). Since one can make his own RPC call very simply, we restricted the "invokable" methods to those that are defined in the body of an object annotated with the `s2js.compiler.remote` annotation. If you try to invoke a method which does not belong to an remote object, an exception will be thrown and sent as a response to such a call.
 
 > One could ask now, why we did not use the standard Scala @remote annotation, or, moreover, why we did use a Java annotation. Since scala annotations [are not visible during runtime](http://stackoverflow.com/questions/5177010/how-to-create-annotations-and-get-them-in-scala), we were forced to use a Java annotation with a special retention policy to get this done.
 
@@ -1021,6 +1022,7 @@ Since the RPC Dispatcher needs to parse the parameters and make them typed prope
 
 And Java equivalents.
 
+If you want to learn more about the RPC mechanism on the client-side, please, see the correspondent section in the [text about s2js.rpc package](#s2js_rpc).
 
 <a name="client"></a>
 ### Package cz.payola.web.client
