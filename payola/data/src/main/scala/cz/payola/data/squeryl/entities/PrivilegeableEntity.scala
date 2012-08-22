@@ -5,7 +5,7 @@ import cz.payola.data.squeryl._
 /**
   * Provides persistence to [[cz.payola.domain.entities.PrivilegableEntity]] entities.
   */
-trait PrivilegableEntity extends Entity with cz.payola.domain.entities.PrivilegableEntity
+trait PrivilegeableEntity extends Entity with cz.payola.domain.entities.PrivilegableEntity
 {
     _privileges = null
 
