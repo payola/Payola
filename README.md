@@ -377,6 +377,7 @@ This project contains only two files: ```plugins.sbt``` and ```PayolaBuild.scala
 
 The ```PayolaBuild.scala``` is a [build definition file](https://github.com/harrah/xsbt/wiki/Getting-Started-Full-Def) of the whole solution. The solution structure, projects, dependencies, compilation, test settings and other concepts used there are described in depth in the [SBT Wiki](https://github.com/harrah/xsbt/wiki). Moreover, there is a template for all projects that should be compiled to JavaScript, that adds the [s2js](#s2js) compiler plugin to the standard Scala compiler. To create a project that should be compiled to JavaScript, use ```ScalaToJsProject(...)``` instead of the standard ```Project(...)```.
 
+<a name="cp"></a>
 ### The cp task
 
 The build file defines a custom SBT Task called ```cp``` which is an abbreviation for 'compile and package'. In order to support compilation of the payola solution in one step, we had to introduce this non-standard task. Because the solution contains both the [s2js](#s2js) compiler plugin project and also projects that use that compiler plugin, it's not sufficient to mark the compiler plugin project as a dependency of projects that should be compiled to Javascript. The Scala compiler accepts only ```.jar``` plugin files so the compiler plugin project has to be not only compiled, but also packed into a ```.jar``` package before it can be used.
@@ -714,7 +715,9 @@ Rather than describing classes in this package one by one, an example RPC call w
 <a name="runtime-shared"></a>
 #### Package s2js.runtime.shared
 
-> TODO: H.S.
+Currently, there is only one class - the ```DependencyProvider```. It provides just one method ```get```, which returns a ```DependencyPackage``` containing the JavaScript source code of symbols specified in the ```symbols``` parameter and all their dependencies. The sources of ```symbolsToIgnore``` aren't included in the dependency package. Moreover, the order of symbol source codes is determined by dependencies among them which can be found in the generated dependency file (which is generated during the [```cp```](#cp) SBT task). So for example a class isn't declared before its super-class. 
+
+> There is a tight coupling between the ```s2js``` project and other projects (e.g. hardcoded path to the dependency package in the ```DependencyProvider```, RPC controller logic defined in the [```web```](#web) project), so it can't be used as a standalone library/toolchain. However, making the ```s2js``` standalone wouldn't be much work, it just wasn't our priority to make it completely reusable.
 
 <a name="common"></a>
 ## Package cz.payola.common
