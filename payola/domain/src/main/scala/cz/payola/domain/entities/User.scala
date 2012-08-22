@@ -13,7 +13,7 @@ import cz.payola.domain.DomainException
 class User(protected var _name: String)
     extends cz.payola.domain.Entity
     with NamedEntity
-    with PrivilegableEntity
+    with PrivilegeableEntity
     with cz.payola.common.entities.User
 {
     checkConstructorPostConditions()

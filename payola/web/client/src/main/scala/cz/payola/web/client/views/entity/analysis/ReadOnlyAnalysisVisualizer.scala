@@ -1,8 +1,8 @@
 package cz.payola.web.client.views.entity.analysis
 
 import cz.payola.common.entities.Analysis
-import cz.payola.web.client.views.todo._
 import cz.payola.common.entities.plugins.PluginInstance
+import cz.payola.web.client.views.entity.plugins.{PluginInstanceView, ReadOnlyPluginInstanceView}
 
 class ReadOnlyAnalysisVisualizer(analysis: Analysis) extends AnalysisVisualizer(analysis)
 {

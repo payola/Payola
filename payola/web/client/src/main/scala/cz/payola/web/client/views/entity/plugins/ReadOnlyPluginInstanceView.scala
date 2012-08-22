@@ -1,4 +1,4 @@
-package cz.payola.web.client.views.todo
+package cz.payola.web.client.views.entity.plugins
 
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.View
@@ -12,9 +12,9 @@ class ReadOnlyPluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[P
     def getAdditionalControlsViews: Seq[View] = List()
 
     def getParameterViews: Seq[View] = {
-        val listItems = getPlugin.parameters.flatMap { param =>
-            pluginInstance.getParameter(param.name).map { v =>
-                new ListItem(List(new Strong(List(new Text(param.name))),new Text(": " + v.toString)))
+        val listItems = getPlugin.parameters.flatMap {param =>
+            pluginInstance.getParameter(param.name).map {v =>
+                new ListItem(List(new Strong(List(new Text(param.name))), new Text(": " + v.toString)))
             }
         }
 

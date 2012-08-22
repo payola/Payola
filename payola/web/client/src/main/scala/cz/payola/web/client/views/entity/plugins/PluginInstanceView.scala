@@ -1,4 +1,4 @@
-package cz.payola.web.client.views.todo
+package cz.payola.web.client.views.entity.plugins
 
 import s2js.adapters.html
 import s2js.compiler.javascript
@@ -46,21 +46,21 @@ abstract class PluginInstanceView(
         }
 
         var w = 0.0
-        predecessors.foreach { p =>
+        predecessors.foreach {p =>
             successors.htmlElement.insertBefore(p.htmlElement, clearSpan.htmlElement)
 
-            if (w > 0){
+            if (w > 0) {
                 w += 10
             }
             w += p.htmlElement.offsetWidth
-            val pos = w-(p.htmlElement.offsetWidth/2)-4
+            val pos = w - (p.htmlElement.offsetWidth / 2) - 4
 
-            val conn = new Div(Nil,"connector")
-            conn.setAttribute("style","left:"+(pos)+"px")
+            val conn = new Div(Nil, "connector")
+            conn.setAttribute("style", "left:" + (pos) + "px")
             conn.render(successors.htmlElement)
 
-            val plumb = new Div(Nil,"plumb")
-            plumb.setAttribute("style","left:"+(pos-3)+"px")
+            val plumb = new Div(Nil, "plumb")
+            plumb.setAttribute("style", "left:" + (pos - 3) + "px")
             plumb.render(alertDiv.htmlElement)
         }
     }
@@ -115,7 +115,7 @@ abstract class PluginInstanceView(
         }
     }
 
-    @javascript( """jQuery(e).popover()""")
+    @javascript("""jQuery(e).popover()""")
     def activatePopover(e: html.Element) {}
 
     def clearStyle() {
@@ -127,12 +127,11 @@ abstract class PluginInstanceView(
 
     def blockHtmlElement: html.Element = successors.htmlElement
 
-    def addCssClass(cssClass: String){
+    def addCssClass(cssClass: String) {
         successors.addCssClass(cssClass)
     }
 
-    def removeCssClass(cssClass: String){
+    def removeCssClass(cssClass: String) {
         successors.removeCssClass(cssClass)
     }
-
 }

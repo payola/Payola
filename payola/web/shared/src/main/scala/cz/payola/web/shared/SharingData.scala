@@ -7,7 +7,7 @@ import cz.payola.common.entities.ShareableEntity
 
 @remote @secured object SharingData
 {
-    private type GranteeType = cz.payola.common.Entity with cz.payola.common.entities.PrivilegableEntity
+    private type GranteeType = cz.payola.common.Entity with cz.payola.common.entities.PrivilegeableEntity
 
     @async def getEntityGrantees(entityClassName: String, entityId: String, granteeClassName: String, user: User = null)
         (successCallback: Seq[GranteeType] => Unit)

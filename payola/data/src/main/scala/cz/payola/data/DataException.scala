@@ -23,17 +23,9 @@ object DataException
             body
         } catch {
             case dataException: DataException => {
-                println(dataException.message) // TODO
-
                 throw dataException
             }
             case throwable: Throwable => {
-                throwable match {
-                    case e: Exception => {
-                        // TODO
-                        e.printStackTrace()
-                    }
-                }
                 throw new DataException("An exception was thrown in the data layer.", throwable)
             }
         }

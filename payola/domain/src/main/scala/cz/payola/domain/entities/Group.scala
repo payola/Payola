@@ -9,7 +9,7 @@ import cz.payola.domain.Entity
 class Group(protected var _name: String, protected var _owner: User)
     extends Entity
     with NamedEntity
-    with PrivilegableEntity
+    with PrivilegeableEntity
     with cz.payola.common.entities.Group
 {
     checkConstructorPostConditions()

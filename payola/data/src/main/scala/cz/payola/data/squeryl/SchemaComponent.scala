@@ -36,8 +36,6 @@ trait SchemaComponent
     {
         // Initialize the session factory.
         java.lang.Class.forName("org.h2.Driver")
-
-        // TODO just hypothetically - what about multiple sessions?
         SessionFactory.concreteFactory = Some(() => DataException.wrap {
             Session.create(java.sql.DriverManager.getConnection(databaseURL, userName, password), new H2Adapter)
         })
