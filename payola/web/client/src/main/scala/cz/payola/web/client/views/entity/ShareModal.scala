@@ -10,7 +10,7 @@ import cz.payola.web.client.views.elements.form.fields.TextInput
 class ShareModal(
     val entityName: String,
     val granteeClassNameText: String,
-    val grantees: Seq[PrivilegableEntity])
+    val grantees: Seq[PrivilegeableEntity])
     extends Modal("Share " + entityName + " to " + granteeClassNameText + "s", Nil, Some("Share"))
 {
     val granteeSearching = new UnitEvent[ShareModal, GranteeSearchEventArgs]
@@ -27,7 +27,7 @@ class ShareModal(
         initializeGranteeSelection()
     }
 
-    private def triggerGranteeSearching(searchTerm: String, successCallback: Seq[PrivilegableEntity] => Unit) {
+    private def triggerGranteeSearching(searchTerm: String, successCallback: Seq[PrivilegeableEntity] => Unit) {
         granteeSearching.trigger(new GranteeSearchEventArgs(this, searchTerm, successCallback))
     }
 
@@ -48,11 +48,11 @@ class ShareModal(
     private def initializeGranteeSelection() {}
 
     @javascript("return grantees.map(function(g) { return { id: g.id, text: g.name() }; }).getInternalJsArray();")
-    private def granteesToSelectObjects(grantees: Seq[PrivilegableEntity]): Any = ""
+    private def granteesToSelectObjects(grantees: Seq[PrivilegeableEntity]): Any = ""
 }
 
 class GranteeSearchEventArgs(
     target: ShareModal,
     val searchTerm: String,
-    val successCallback: Seq[PrivilegableEntity] => Unit)
+    val successCallback: Seq[PrivilegeableEntity] => Unit)
     extends EventArgs[ShareModal](target)

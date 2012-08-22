@@ -8,7 +8,7 @@ import cz.payola.common.Entity
 /**
   * An user of the application.
   */
-trait User extends Entity with NamedEntity with PrivilegableEntity
+trait User extends Entity with NamedEntity with PrivilegeableEntity
 {
     /** Type of the groups that the user can own or be member of. */
     type GroupType <: Group
