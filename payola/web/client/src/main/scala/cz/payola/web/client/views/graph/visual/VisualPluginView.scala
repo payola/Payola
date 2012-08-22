@@ -22,10 +22,6 @@ import cz.payola.common.entities.settings.OntologyCustomization
 abstract class VisualPluginView(name: String) extends PluginView(name)
 {
 
-    private var controlsAvailable = false
-
-    protected def allowControlsAvailable() { controlsAvailable = true }
-
     /**
      * Value used during vertex selection process.
      */
@@ -69,13 +65,14 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
      */
     protected var animationStopForced = false
 
+    private def endAnimation() {
+        animationStopForced = true
+        Animation.clearCurrentTimeout()
+        animationStopButton.setIsEnabled(false)
+    }
 
     animationStopButton.mouseClicked += { e =>
-        if(controlsAvailable) {
-            animationStopForced = true
-            Animation.clearCurrentTimeout()
-            animationStopButton.setIsEnabled(false)
-        }
+        endAnimation()
         false
     }
 
@@ -96,65 +93,64 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
         new Icon(Icon.download)).setAttribute("style", "margin: 0 5px;")
 
     topLayer.mousePressed += { e =>
-        if(controlsAvailable) {
-            mouseIsDragging = false
-            mouseDownPosition = getPosition(e)
-            onMouseDown(e)
-        }
+        endAnimation()
+        mouseIsDragging = false
+        mouseDownPosition = getPosition(e)
+        onMouseDown(e)
         false
     }
 
     topLayer.mouseReleased += { e =>
-        if(controlsAvailable) { onMouseUp(e) }
+        endAnimation()
+        onMouseUp(e)
         false
     }
 
     topLayer.mouseDragged += { e =>
-        if(controlsAvailable) {
-            triggerDestroyVertexInfo()
-            mouseIsDragging = true
-            onMouseDrag(e)
-        }
+        endAnimation()
+        triggerDestroyVertexInfo()
+        mouseIsDragging = true
+        onMouseDrag(e)
+
         false
     }
 
     topLayer.mouseDoubleClicked += { event =>
-        if(controlsAvailable) {
-            triggerDestroyVertexInfo()
-            graphView.foreach { g =>
-                val vertex = g.getTouchedVertex(getPosition(event))
-                vertex.foreach { v =>
-                    g.selectVertex(vertex.get)
-                    vertexBrowsing.trigger(new VertexEventArgs[this.type](this, v.vertexModel))
-                }
+        endAnimation()
+        triggerDestroyVertexInfo()
+        graphView.foreach { g =>
+            val vertex = g.getTouchedVertex(getPosition(event))
+            vertex.foreach { v =>
+                g.selectVertex(vertex.get)
+                vertexBrowsing.trigger(new VertexEventArgs[this.type](this, v.vertexModel))
             }
         }
         false
     }
 
     topLayer.mouseWheelRotated += { event => //zoom - invoked by mouse
-        if(controlsAvailable) {
-            triggerDestroyVertexInfo()
-            val mousePosition = getPosition(event)
-            val scrolled = event.wheelDelta
+        endAnimation()
+        triggerDestroyVertexInfo()
+        val mousePosition = getPosition(event)
+        val scrolled = event.wheelDelta
 
-            if (scrolled < 0) {
-                if (zoomControls.canZoomIn) {
-                    zoomIn(mousePosition)
-                    zoomControls.increaseZoomInfo()
-                }
-            } else {
-                if (zoomControls.canZoomOut) {
-                    zoomOut(mousePosition)
-                    zoomControls.decreaseZoomInfo()
-                }
+        if (scrolled < 0) {
+            if (zoomControls.canZoomIn) {
+                zoomIn(mousePosition)
+                zoomControls.increaseZoomInfo()
+            }
+        } else {
+            if (zoomControls.canZoomOut) {
+                zoomOut(mousePosition)
+                zoomControls.decreaseZoomInfo()
             }
         }
         false
     }
 
     zoomControls.zoomDecreased += { e =>
-        if (controlsAvailable && graphView.isDefined && zoomControls.canZoomOut) {
+        endAnimation()
+        if (graphView.isDefined && zoomControls.canZoomOut) {
             triggerDestroyVertexInfo()
             zoomOut(graphView.get.getGraphCenter) //zooming from the center of the graph
             zoomControls.decreaseZoomInfo()
@@ -163,7 +159,8 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
     }
 
     zoomControls.zoomIncreased += { event => //zoom - invoked by zoom control button
-        if (controlsAvailable && graphView.isDefined && zoomControls.canZoomIn) {
+        endAnimation()
+        if (graphView.isDefined && zoomControls.canZoomIn) {
             triggerDestroyVertexInfo()
             zoomIn(graphView.get.getGraphCenter) //zooming to the center of the graph
             zoomControls.increaseZoomInfo()
@@ -220,8 +217,6 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
     override def render(parent: html.Element) {
         super.render(parent)
 
-        controlsAvailable = false
-
         window.onresize = { _ =>
             updateCanvasSize()
             redraw()
@@ -239,7 +234,6 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
             graphView.get.destroy()
         }
 
-        controlsAvailable = false
         graphView = None
         mouseIsDragging = false
         mousePressedVertex = false
