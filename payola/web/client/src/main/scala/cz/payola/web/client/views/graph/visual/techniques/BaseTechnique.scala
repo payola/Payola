@@ -60,6 +60,10 @@ abstract class BaseTechnique(name: String) extends VisualPluginView(name)
                 Animation.emptyAnimation, new AfterAnimationWithParams(animationStopButton.setIsEnabled, false), None,
                 redrawQuick, redraw, None))
 
+            firstAnimation.get.addFollowingAnimation(new Animation(
+                Animation.emptyAnimation, new AfterAnimationParamLess(allowControlsAvailable), None,
+                redrawQuick, redraw, None))
+
             animationStopButton.setIsEnabled(true)
             firstAnimation.get.run()
         }

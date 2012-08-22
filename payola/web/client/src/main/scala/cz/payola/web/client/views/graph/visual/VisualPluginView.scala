@@ -21,6 +21,11 @@ import cz.payola.common.entities.settings.OntologyCustomization
  */
 abstract class VisualPluginView(name: String) extends PluginView(name)
 {
+
+    private var controlsAvailable = false
+
+    protected def allowControlsAvailable() { controlsAvailable = true }
+
     /**
      * Value used during vertex selection process.
      */
@@ -66,9 +71,11 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
 
 
     animationStopButton.mouseClicked += { e =>
-        animationStopForced = true
-        Animation.clearCurrentTimeout()
-        animationStopButton.setIsEnabled(false)
+        if(controlsAvailable) {
+            animationStopForced = true
+            Animation.clearCurrentTimeout()
+            animationStopButton.setIsEnabled(false)
+        }
         false
     }
 
@@ -89,57 +96,65 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
         new Icon(Icon.download)).setAttribute("style", "margin: 0 5px;")
 
     topLayer.mousePressed += { e =>
-        mouseIsDragging = false
-        mouseDownPosition = getPosition(e)
-        onMouseDown(e)
+        if(controlsAvailable) {
+            mouseIsDragging = false
+            mouseDownPosition = getPosition(e)
+            onMouseDown(e)
+        }
         false
     }
 
     topLayer.mouseReleased += { e =>
-        onMouseUp(e)
+        if(controlsAvailable) { onMouseUp(e) }
         false
     }
 
     topLayer.mouseDragged += { e =>
-        triggerDestroyVertexInfo()
-        mouseIsDragging = true
-        onMouseDrag(e)
+        if(controlsAvailable) {
+            triggerDestroyVertexInfo()
+            mouseIsDragging = true
+            onMouseDrag(e)
+        }
         false
     }
 
     topLayer.mouseDoubleClicked += { event =>
-        triggerDestroyVertexInfo()
-        graphView.foreach { g =>
-            val vertex = g.getTouchedVertex(getPosition(event))
-            vertex.foreach { v =>
-                g.selectVertex(vertex.get)
-                vertexBrowsing.trigger(new VertexEventArgs[this.type](this, v.vertexModel))
+        if(controlsAvailable) {
+            triggerDestroyVertexInfo()
+            graphView.foreach { g =>
+                val vertex = g.getTouchedVertex(getPosition(event))
+                vertex.foreach { v =>
+                    g.selectVertex(vertex.get)
+                    vertexBrowsing.trigger(new VertexEventArgs[this.type](this, v.vertexModel))
+                }
             }
         }
         false
     }
 
     topLayer.mouseWheelRotated += { event => //zoom - invoked by mouse
-        triggerDestroyVertexInfo()
-        val mousePosition = getPosition(event)
-        val scrolled = event.wheelDelta
+        if(controlsAvailable) {
+            triggerDestroyVertexInfo()
+            val mousePosition = getPosition(event)
+            val scrolled = event.wheelDelta
 
-        if (scrolled < 0) {
-            if (zoomControls.canZoomIn) {
-                zoomIn(mousePosition)
-                zoomControls.increaseZoomInfo()
-            }
-        } else {
-            if (zoomControls.canZoomOut) {
-                zoomOut(mousePosition)
-                zoomControls.decreaseZoomInfo()
+            if (scrolled < 0) {
+                if (zoomControls.canZoomIn) {
+                    zoomIn(mousePosition)
+                    zoomControls.increaseZoomInfo()
+                }
+            } else {
+                if (zoomControls.canZoomOut) {
+                    zoomOut(mousePosition)
+                    zoomControls.decreaseZoomInfo()
+                }
             }
         }
         false
     }
 
     zoomControls.zoomDecreased += { e =>
-        if (graphView.isDefined && zoomControls.canZoomOut) {
+        if (controlsAvailable && graphView.isDefined && zoomControls.canZoomOut) {
             triggerDestroyVertexInfo()
             zoomOut(graphView.get.getGraphCenter) //zooming from the center of the graph
             zoomControls.decreaseZoomInfo()
@@ -148,7 +163,7 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
     }
 
     zoomControls.zoomIncreased += { event => //zoom - invoked by zoom control button
-        if (graphView.isDefined && zoomControls.canZoomIn) {
+        if (controlsAvailable && graphView.isDefined && zoomControls.canZoomIn) {
             triggerDestroyVertexInfo()
             zoomIn(graphView.get.getGraphCenter) //zooming to the center of the graph
             zoomControls.increaseZoomInfo()
@@ -204,6 +219,9 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
 
     override def render(parent: html.Element) {
         super.render(parent)
+
+        controlsAvailable = false
+
         window.onresize = { _ =>
             updateCanvasSize()
             redraw()
@@ -220,6 +238,8 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
         if(graphView.isDefined) {
             graphView.get.destroy()
         }
+
+        controlsAvailable = false
         graphView = None
         mouseIsDragging = false
         mousePressedVertex = false
@@ -334,8 +354,24 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
 
                 vertex.foreach { v =>
                     if (v.selected) {
-                        val infoTable = new VertexInfoTable(v.vertexModel, v.getLiteralVertices,
-                            v.position + Vector2D(v.radius, 0))
+
+                        var position = v.position + Vector2D(v.radius, 0)
+                        position = if(position.x - 506 < 0) {
+                            if(position.y - 330 < 0) {
+                                v.position + Vector2D(v.radius, 0)
+                            } else {
+                                v.position + Vector2D(v.radius, -v.radius - 335)
+                            }
+                        } else {
+                            if(position.y - 330 < 0) {
+                                v.position + Vector2D(-521 - v.radius, 0)
+                            } else {
+                                v.position + Vector2D(-521 - v.radius, -v.radius - 335)
+                            }
+                        }
+
+                        val infoTable = new VertexInfoTable(v.vertexModel, v.getLiteralVertices,position)
+
                         infoTable.vertexBrowsing += { a =>
                             triggerDestroyVertexInfo()
                             vertexBrowsing.trigger(new VertexEventArgs[this.type](this, vertex.get.vertexModel))

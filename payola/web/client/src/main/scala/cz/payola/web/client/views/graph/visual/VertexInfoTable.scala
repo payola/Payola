@@ -53,37 +53,27 @@ class VertexInfoTable(vertex: IdentifiedVertex, values: mutable.HashMap[String, 
             }
         }
 
-        if (values.size > 0) {
+
             val popoverTitle = new
                     Heading(List(dataSourceAnchor, new Span(List(new Text(" "))), browsingAnchor), 3, "popover-title")
-            val popoverContent = new Div(List(new DefinitionList(buffer, "unstyled well")), "popover-content")
+            val popoverContent = if(!values.isEmpty) {
+                new Div(List( new DefinitionList(buffer, "unstyled well")), "popover-content")
+            } else {
+                new Div(List(), "popover-content")
+            }
             val popoverInner = new Div(List(popoverTitle, popoverContent), "popover-inner")
-            val popoverArrow = new Div(Nil, "arrow")
-            popoverArrow.setAttribute("style", "top: 15px;")
-            val div = new Div(List(popoverArrow, popoverInner))
-            div.setAttribute("class", "popover fade in vitable " + positionTypeCssClass(positionType))
+            val div = new Div(List(popoverInner))
+            div.setAttribute("class", "popover fade in vitable")
             div.setAttribute("style",
                 "top: " + (position.y - 10).toString() + "px; left: " + position.x.toString() + "px;" +
                     "z-index: 1000;")
             List(div)
-        } else {
-            List(new Div())
-        }
+
     }
 
     def setPosition(position: Point2D) {
         createSubViews.head.blockHtmlElement.setAttribute("style",
             "top: " + (position.y - 10).toString() + "px; left: " + position.x.toString() + "px;" +
                 "z-index: 1000;")
-    }
-
-    private def positionTypeCssClass(positionType: Int) {
-        positionType match {
-            case VertexInfoTablePosition.right => "right"
-            case VertexInfoTablePosition.left => "left"
-            case VertexInfoTablePosition.top => "top"
-            case VertexInfoTablePosition.bottom => "bottom"
-            case _ => "right"
-        }
     }
 }
