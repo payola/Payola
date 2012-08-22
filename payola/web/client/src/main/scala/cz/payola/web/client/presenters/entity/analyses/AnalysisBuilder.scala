@@ -1,8 +1,7 @@
 package cz.payola.web.client.presenters.entity.analyses
 
 import s2js.adapters.browser._
-import cz.payola.web.client.views.todo.PluginInstanceView
-import cz.payola.web.client.views.todo.EditablePluginInstanceView
+import cz.payola.web.client.views.entity.plugins.{EditablePluginInstanceView, PluginInstanceView, DataSourceSelector}
 import cz.payola.web.client.presenters.components._
 import cz.payola.web.shared.AnalysisBuilderData
 import cz.payola.common.entities.Plugin
@@ -14,7 +13,6 @@ import cz.payola.web.client.Presenter
 import cz.payola.web.client.views.entity.analysis.AnalysisEditorView
 import cz.payola.common.entities.plugins.DataSource
 import scala.collection.mutable
-import cz.payola.web.client.views.entity.plugins.DataSourceSelector
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
 import cz.payola.common.ValidationException
 import cz.payola.web.client.views.elements.form.fields.TextInput

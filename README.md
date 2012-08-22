@@ -917,7 +917,9 @@ While utilizing the subcomponents the `ModelComponent` trait is build up to prov
 Later on, when you will get familiar with the `cz.payola.web.shared` package, you will find out something more about an object named `cz.payola.web.shared.Payola`. This is an example implementation of the `ModelComponent` trait.
 
 <a name="web"></a>
-## Package cz.payola.web
+## Package cz.payola.web!
+
+[Client-server-structure](https://raw.github.com/siroky/Payola/develop/docs/img/client_server.png)
 
 All the code connected with the web presentation layer could be found in this package. The web application is, as the rest of the project written in the Scala language. To make the job easier, we built up the presentation layer on top of the [Play 2.0 framework](http://www.playframework.org/), which is also completely written in the Scala language, so it was easy to integrate with our appliaction.
 

@@ -5,12 +5,12 @@ import cz.payola.common.entities.Analysis
 import cz.payola.web.client.View
 import s2js.adapters.html
 import scala.collection.mutable.ArrayBuffer
-import cz.payola.web.client.views.todo._
 import cz.payola.common.entities
 import scala.collection.mutable.HashMap
 import cz.payola.web.client.events.SimpleUnitEvent
 import cz.payola.common.entities.plugins.PluginInstance
 import cz.payola.web.client.views.ComposedView
+import cz.payola.web.client.views.entity.plugins.PluginInstanceView
 
 abstract class AnalysisVisualizer(analysis: Analysis) extends ComposedView
 {
