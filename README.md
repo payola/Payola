@@ -712,7 +712,7 @@ This image captures the most important classes of the `common` package. The `Use
 
 The `Plugin` class represents the plugin itself with all the logic. Each `Plugin` may have some `Parameter`s which define which values the plugin requires on the input. For example, the `Typed` plugin which comes pre-installed with Payola has one `Parameter` named `RDF Type URI`. When a `Plugin` is to be evaluated, it receives a corresponding `PluginInstance` and a sequence of `Graph`s as its input.
 
-A `PluginInstance` is a container for `ParameterValue`s: a `ParameterValue` contains the concrete value for that particular `Parameter` (a string, numeric value, ...). Hence when a `Plugin` is being evaluated, it queries the `PluginInstance` it gets on the input for all the required parameter values.
+A `PluginInstance` is a container for `ParameterValue`s: a `ParameterValue` contains the concrete value for that particular `Parameter` (a string, numeric value, ...). Hence when a `Plugin` is being evaluated, it queries the `PluginInstance` for all required parameter values.
 
 An `Analysis` forms various plugin instances into a tree-like structure using `PluginInstanceBinding`s. A `PluginInstanceBinding` can be viewed on as an edge in the resulting tree structure (`PluginInstance`s being vertices). When an `Analysis` is run, each `PluginInstance` is evaluated by its peer `Plugin`. The evaluation process begins at the leaf vertices and forms a chain taking output of one or more plugins and passing it to the next plugin as input. Because a valid `Analysis` forms a tree, the output is just one `Graph`. For more information about the analysis evaluation process see the [plugins section](#domain.plugins).
 
@@ -891,6 +891,8 @@ The rest of entities is loaded eagerly (i.e. entity is loaded with some of its r
 - data sources are loaded with owner and parameter values and with related domain layer `DataFetcher` plugin with its parameters
 - analyses are loaded only with their owner
 	- when there is an access to plugin instances or to plugin instance bindings, the complete analysis is loaded (i.e. no further fetching-query to database will be needed)
+
+It is crucial to mention that two queries loading entity from repository by the same id (`getById()` method) gets two different objects representing the same entity. That is why the standard `equals` method needed to be overriden - the two entities are equal when they have the same ID (since ID is an UUID, which is unique though the whole database, the method is valid)
 
 <a name="virtuoso"></a>
 ### Package cz.payola.data.virtuoso
