@@ -2,7 +2,7 @@ package cz.payola.domain.entities
 
 import cz.payola.common.Entity
 
-trait PrivilegableEntity extends NamedEntity with cz.payola.common.entities.PrivilegableEntity
+trait PrivilegeableEntity extends NamedEntity with cz.payola.common.entities.PrivilegeableEntity
 {
     type PrivilegeType = Privilege[_ <: Entity]
 

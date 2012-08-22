@@ -292,7 +292,7 @@ If the evaluation fails, the plugin boxes turn red and an error description is s
 <a name="plugins"></a>
 ### Plugins
 
-Creating a new plugin requires at least basic programming skills in Scala. A detailed reference of the Plugin class is described in the [Developer Guide](#developer) and in the [generated docs](#gen-docs). Here is a code of a sample plugin:
+Creating a new plugin requires at least basic programming skills in Scala. A detailed reference of the Plugin class is described in the [Developer Guide](#developer) and in the generated documentation. Here is a code of a sample plugin:
 
 ```
 package my.custom.plugin
@@ -444,7 +444,7 @@ o.obj = o
 
 For some purposes, customizing the serialization process is necessary - it has proven useful to skip or add some fields of the object, etc. - this lead to serialization rules. For example, you might want to hide an implementation detail that a class' private fields are prefixed with an underscore (`_`) - it is possible to do so simply by adding a new `BasicSerializationRule`, where you can define a class (or trait) whose fields should be serialized (e.g. you want to serialize only fields of a common superclass, ignoring fields of subclasses), a list of fields that should be omitted (transient fields) and a list of field name aliases (a map of string &rarr; string translations).
 
-The rules are applied in the same order as they are added to the serializer. You can explore additional serialization rules in our generated [docset](#gen-doc).
+The rules are applied in the same order as they are added to the serializer. You can explore additional serialization rules in generated documentation.
 
 <a name="s2js"></a>
 ## Project payola/s2js
@@ -721,9 +721,14 @@ Rather than describing classes in this package one by one, an example RPC call w
 
 ![Common entites model](https://raw.github.com/siroky/Payola/develop/docs/img/common_entities.png)
 
-![Privilege model](https://raw.github.com/siroky/Payola/develop/docs/img/common_privileges.png)
+This image captures the most important classes of the `common` package. The `User` entity stands in the middle of everything - a user can own groups (and be their member as well), plugins, analyses, data sources and ontology customizations. Each `OntologyCustomization` instance consists of several `ClassCustomization`s, each consisting of `PropertyCustomization`s. A `DataSource` is simply a special subclass of `PluginInstance` which fetches data. Then there's the `Plugin` class where it starts to be slightly more complicated.
 
-> TODO: H.S.
+The `Plugin` class represents the plugin itself with all the logic. Each `Plugin` may have some `Parameter`s which define which values the plugin requires on the input. For example, the `Typed` plugin which comes pre-installed with Payola has one `Parameter` named `RDF Type URI`. When a `Plugin` is to be evaluated, it receives a corresponding `PluginInstance` and a sequence of `Graph`s as its input.
+
+A `PluginInstance` is a container for `ParameterValue`s: a `ParameterValue` contains the concrete value for that particular `Parameter` (a string, numeric value, ...). Hence when a `Plugin` is being evaluated, it queries the `PluginInstance` for all required parameter values.
+
+An `Analysis` forms various plugin instances into a tree-like structure using `PluginInstanceBinding`s. A `PluginInstanceBinding` can be viewed on as an edge in the resulting tree structure (`PluginInstance`s being vertices). When an `Analysis` is run, each `PluginInstance` is evaluated by its peer `Plugin`. The evaluation process begins at the leaf vertices and forms a chain taking output of one or more plugins and passing it to the next plugin as input. Because a valid `Analysis` forms a tree, the output is just one `Graph`. For more information about the analysis evaluation process see the [plugins section](#domain.plugins).
+
 
 ### Package cz.payola.common.entities
 
@@ -735,7 +740,15 @@ This package includes classes representing the basic entities (user, analysis, p
 
 #### Package cz.payola.common.entities.privileges
 
+![Privilege model](https://raw.github.com/siroky/Payola/develop/docs/img/common_privileges.png)
+
 To share entities between users, privileges are used. This makes it easy to extend the model in the future, or to change the granularity of privilege granting. Currently, there are only privileges granting access to a resource - analysis, data source, ontology customization and plugin; however, a privilege type that grants a user the right to edit some entity, for instance, can be easily added.
+
+As can be seen in the picture above, each entity that needs to be shared, has to have the ShareableEntity trait mixed in which adds a `isPublic` field to the object (denoting whether the entity may be seen by everyone or just those you share it to).
+
+Each user has a collection of privileges. A `Privilege` is a simple class containing three fields: the granter (i.e. the user who issued this privilege), the grantee (a `PrivilegeableEntity` that the privilege is issued to) and an object of the privilege (e.g. an analysis).
+
+For each class that can be currently shared (`Analysis`, `DataSource`, `OntologyCustomization` and `Plugin`), a corresponding `Privilege` subclass exists. But this model can be obviously very easily extended to other classes.
 
 #### Package cz.payola.common.entities.settings
 
@@ -761,6 +774,7 @@ Domain entities extend the `common` entities that are mostly traits and fully fu
 
 > TODO: H.S.
 
+<a name="domain.plugins">
 ### Package cz.payola.domain.entities.plugins
 
 > TODO: H.S.
@@ -890,6 +904,8 @@ The rest of entities is loaded eagerly (i.e. entity is loaded with some of its r
 - data sources are loaded with owner and parameter values and with related domain layer `DataFetcher` plugin with its parameters
 - analyses are loaded only with their owner
 	- when there is an access to plugin instances or to plugin instance bindings, the complete analysis is loaded (i.e. no further fetching-query to database will be needed)
+
+It is crucial to mention that two queries loading entity from repository by the same id (`getById()` method) gets two different objects representing the same entity. That is why the standard `equals` method needed to be overriden - the two entities are equal when they have the same ID (since ID is an UUID, which is unique though the whole database, the method is valid)
 
 <a name="virtuoso"></a>
 ### Package cz.payola.data.virtuoso

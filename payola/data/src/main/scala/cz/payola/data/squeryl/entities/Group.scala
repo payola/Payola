@@ -19,7 +19,7 @@ object Group extends EntityConverter[Group]
 
 class Group(override val id: String, name: String, o: User)(implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.Group(name, o)
-    with Entity with PrivilegableEntity
+    with Entity with PrivilegeableEntity
 {
     var ownerId: String = Option(o).map(_.id).getOrElse(null)
 
