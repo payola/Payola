@@ -340,14 +340,12 @@ class GraphView extends View[CanvasPack] {
         if (vertexViews.isEmpty) {
             ListBuffer[EdgeView]()
         }
-
         val newOldEdgeViews = ListBuffer[EdgeView]()
         getAllEdges.foreach { oldEdgeView =>
 
-            val edgeInNews = newEdgeViews.find(_ isEqual oldEdgeView)
+            val edgeInNews = newEdgeViews.find(_.edgeModel eq oldEdgeView.edgeModel)
 
             if (edgeInNews.isEmpty) {
-
                 createEdgeView(oldEdgeView.edgeModel, vertexViews).foreach {
                     created => newOldEdgeViews += created
                 }
@@ -383,7 +381,7 @@ class GraphView extends View[CanvasPack] {
      */
     private def getVertexForEdgeConstruct(vertex: Vertex, vertexViews: ListBuffer[VertexView]): Option[VertexView] = {
         val foundVertices = vertexViews.filter {
-            _.vertexModel eq vertex
+            _.vertexModel.toString eq vertex.toString
         }
 
         foundVertices.length match {
