@@ -49,18 +49,18 @@ class DataSourceBrowser(
                 unblockPage()
             }(fatalErrorHandler(_))
         } else {
-            addToHistoryAndGo(initialVertexUri)
+            addToHistoryAndGo(initialVertexUri, false)
         }
     }
 
     private def onVertexBrowsing(e: VertexEventArgs[_]) {
-        addToHistoryAndGo(e.vertex.uri)
+        addToHistoryAndGo(e.vertex.uri, false)
     }
 
     private def onBackButtonClicked(e: EventArgs[_]): Boolean = {
         if (canGoBack) {
             historyPosition -= 1
-            updateView()
+            updateView(true)
         }
         false
     }
@@ -68,14 +68,13 @@ class DataSourceBrowser(
     private def onNextButtonClicked(e: EventArgs[_]): Boolean = {
         if (canGoNext) {
             historyPosition += 1
-            updateView()
+            updateView(true)
         }
         false
     }
 
     private def onGoButtonClicked(e: EventArgs[_]): Boolean = {
-        graphPresenter.view.updateGraph(None)
-        addToHistoryAndGo(view.nodeUriInput.value)
+        addToHistoryAndGo(view.nodeUriInput.value, true)
         false
     }
 
@@ -91,6 +90,7 @@ class DataSourceBrowser(
                 historyPosition = -1
                 updateNavigationView()
 
+                graphPresenter.view.clear()
                 graphPresenter.view.updateGraph(g)
             } { error =>
                 modal.unblock()
@@ -113,7 +113,7 @@ class DataSourceBrowser(
         }
     }
 
-    private def addToHistoryAndGo(uri: String) {
+    private def addToHistoryAndGo(uri: String, clearGraph: Boolean) {
         // Remove all next items from the history.
         while (historyPosition < history.length - 1) {
             history.remove(historyPosition + 1)
@@ -123,22 +123,24 @@ class DataSourceBrowser(
         history += uri
         historyPosition += 1
 
-        updateView()
+        updateView(clearGraph)
     }
 
-    private def updateView() {
+    private def updateView(clearGraph: Boolean) {
         val uri = history(historyPosition)
         view.nodeUriInput.value = uri
         view.nodeUriInput.setIsEnabled(false)
 
         blockPage("Fetching the node neighbourhood...")
-        DataSourceManager.getNeighbourhood(dataSourceId, uri) {
-            graph =>
-                graphPresenter.view.updateGraph(graph)
-                updateNavigationView()
+        DataSourceManager.getNeighbourhood(dataSourceId, uri) { graph =>
+            if (clearGraph) {
+                graphPresenter.view.clear()
+            }
+            graphPresenter.view.updateGraph(graph)
+            updateNavigationView()
 
-                view.nodeUriInput.setIsEnabled(true)
-                unblockPage()
+            view.nodeUriInput.setIsEnabled(true)
+            unblockPage()
         }(fatalErrorHandler(_))
     }
 

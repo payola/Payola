@@ -721,7 +721,7 @@ Currently, there is only one class - the ```DependencyProvider```. It provides j
 > There is a tight coupling between the ```s2js``` project and other projects (e.g. hardcoded path to the dependency package in the ```DependencyProvider```, RPC controller logic defined in the [```web```](#web) project), so it can't be used as a standalone library/toolchain. However, making the ```s2js``` standalone wouldn't be much work, it just wasn't our priority to make it completely reusable.
 
 <a name="common"></a>
-## Project cz.payola.common
+## Package cz.payola.common
 
 As the name of the project suggests, common classes that can be accessed from all other projects are defined here. And because the project is also compiled into JavaScript, they may be accessed and used even on the client side. The classes and traits were designed with that in mind so they don't provide any sensitive information. The main aim of this project is to reduce code duplication among client-side and server-side projects.
 
