@@ -991,7 +991,11 @@ Since it crucially improves the usability of the application, a rather high coun
 
 Since the web application is not based on a monolithic architecture, we divide the code into several packages - client, initializer, server and shared. The initializer subproject is responsible for initialization of databases used by the web application. The rest builds up the web application itself. The server package contains the code which runs on the server side, the client package the code which runs on the client side. The code in the shared package could be run on both the client side and the server side. Also *remote objects* should be placed into this package, since they run on server and can be called from the client side.
 
-This is also one of the restrictions of our RPC. You need to separate code which is executed on the client side from the code which is executed on the server side. But you can make a call from the client side to the server side as there is no such thing as client-server architecture.
+###RPC
+
+The code separation is also one of the restrictions of our RPC (with benefits). You need to separate code which is executed on the client side from the code which is executed on the server side. But you can make a call from the client side to the server side as there is no such thing as client-server architecture.
+
+####Remote object example
 
 How to write a remote object? See the following commented example:
 
@@ -1085,11 +1089,101 @@ object RPCTester
 }
 
 ```
+    
+In the example, you can see how to define a remote object. There are just a few things you need to know before writing you first own remote object. Since it is called an `object`, you really need to define it as an `object`, not as a `class`. This is very important. Since objects beahve as Singletons in a certain point of view and they are created automatically and has only one "instance", it is much easier for the RPC to work with them. It prevents the RPC from a big overhead while working with classes and instances. That's why classes are not supported, so, please, do not use them.
+
+#####Synchronous vs. asynchronous remote methods
+
+You also need to annonate the whole object with the `@remote` annotation. Only with the proper annotation, the object gets available to the client side code and may be invoked by the RPC Dispatcher.
+
+While speaking about XHR requests, we define two categories:
+
+- synchronous
+- asynchronous
+
+A synchronous call should be used n a very few use cases. Such a call completely blocks UI on the current page in the browser. That means, that user cannot do a thing until the request gets completed. That is not advised.
+
+An asynchronous call gets proccessed on background and fires a callback when completed. This is not conflicting with the UI in the browser. But there are moments when you need to make a call which should appear to the user as a synchronous one. You are strongly recommended to invoke an asynchronous call and block UI somehow in a user friendly way.
+
+> You can use the **blockPage** method of the **View** class.
+
+If you make a synchronous call, e.g. the method `testParamArray`, the code on the client side will look as follows:
+
+```
+val sum = RPCTester.testParamArray(List(1,2,3))
+doSomethingWithSum(sum)
+```
+
+Which is quite a standard fragment of code. That differs a lot from the asynchronous variant:
+
+```
+RPCTester.testParamArray(List(1,2,3))
+{
+	sum => doSomethingWithSum(sum)
+}{
+	err => handlerErr(err)
+}
+```
+
+> Thanks to Scala, the syntax is more simple than the same fragment written in JavaScript. In fact, what is utilized here is multiple parameter lists currying.
+
+You should keep in mind that the asynchronous call invokation returns immediately. So the code that should be executed after the call gets completed has to be invoked in the call callback.
+
+Let's discuss an example of an asynchronous method definition:
+
+```
+@async
+    def testParamArrayAsync (param: List[Int])
+    (successCallback: (Int => Unit))
+    (failCallback: (Throwable => Unit)) = {
+        successCallback(param.sum)
+    }
+```
+First of all, you need to specify the `@async` annotation. It makes the compiler to compile the method to the JavaScript correctly. After doing that, there are three mandatory parameters lists you need to define:
+
+- The first one is the parameter list which contains parameters you need to work with in the body of the method.
+- The second one defines the type of the success callback. When you invoke the `sucessCallback`, its parameter gets serialized into JSON and it is sent as a response to the client. On the client, the parameter is deserialized and passed as a parameter of the `successCallback` you specified while writing the client code. Basically, if you return a String, the type would be `(String => _)`, if you return a graph, it would be `(Graph => _)`.
+- The last one is the failCallback definition. Its type is always `(Throwable => Unit)` and works very similar to the successCallback.
+
+
+
+#####Security
+The RPC mechanism provides you an API to makes you able to secure the RPC calls. That means, that you can (while utilizing the Play! security) get an instance which represents the authenticated user who invoked the RPC call. 
+
+To enable this, you need to annotate your remote method with the `@secured` annotation. If all the methods in a remote object should be secured, you can annotate just the object itself. If a method is annotated with the secured annotation, it is expected to have one more parameter of one of the following types:
+
+- Option[User] (with default value scala.None)
+- User (with default value null)
+
+> The User class is from the package cz.payola.domain.entities
+> 
+> **The parameter needs to be always the last one!**
+
+Now, you probably know, which one use in which use cases. But here are some scenarios:
+
+- User has to be logged in, we need to authenticate the RPC call and verify access to the requested resources. We use `User`. We get instance of the logged in User. If no user is logged in, **the method will never get executed**.
+- User might be logged in, the response depends on which user is logged in (while no user means e.g. guest). We use `Option[User]`, we get `Some(User)` if the user is logged in, we get `None` if no user is logged in.
+
+You are also probably getting idea why the default parameters are needed. If you do not define a default value, the parameter becames mandatory. That means, you need to specify the parameter when invoking the method. It would be strongly uncomfortable to pass the logged in user on client side for each RPC call. Moreover, the parameter gets overridden by the request binder on the server whether you specify it on client side or not. If it has a default value, you don't need to specify it at all.
+
+#####How it works
+
+> If you look closely into the RPC Dispatcher source code, you will find out, that it heavily uses standard Java reflection to invoke the specified method on the specified remote object. While objects compile in a very specific way, you will find fragments of code which might seem like some kind of magic. Especially the following one:
+
+```
+val runnableObj = clazz.getField("MODULE$").get(objectName)
+``` 
+
+> In fact, that is the only way, how to get the reference to the object during runtime. It it placed under a special field `MODULE$` on the `Class` instance of the class which you made a companion object of.
 
 
 What happens if a presenter on client side calls a method of a remote object? Learn more on the following diagram:
 
 ![Asynchronous RPC call](https://raw.github.com/siroky/Payola/develop/docs/img/rpc_call_async.png)
+
+When you call a remote method from a presenter on the client side, you in fact trigger a XHR request to the server. The request gets parsed by the RPC controller and delegated to the RPC Dispatcher. The dispacther extracts parameters for the remote method, transforms them into the right data types and gets the method which should be invoked via reflection. While this is done, it checks, if the method's object has the `@remote` annotation. After that, the `@secured` annotation presence is checked. If present on the method or its object, authorization takes place. If all goes well, the remote method gets executed and the result is returned.
+
+Since we use Scala Actors to make an asynchronous call synchronous in the RPC controller (we need to send the result as a response to the same request which activated the call), you can use whatever you need to use on the serverside, including threads. Just do not forget to call one of the `successCallback` or `failCallback` when you are done. If no callback is invoked during the lifetime of a RPC call, an exception is thrown (and serialized to the client where it gets rethrown).
 
 <a name="initializer"></a>
 ### Package cz.payola.web.initializer
