@@ -9,9 +9,11 @@ Since Payola is rather a platform than a closed project, you can fork the projec
 # 3rd party technologies
 While developing the Payola, we used the following technologies:
 
-- jQuery JavaScript framework
-- Twitter Bootstrap (collection of CSS and JS code from Twitter)
-- 
+- [Play! 2.0](http://www.playframework.org/) Scala MVC web framework
+- [jQuery](http://jquery.com/) JavaScript Library
+- [Twitter Bootstrap](http://twitter.github.com/bootstrap/) (collection of CSS and JS code from Twitter)
+- [Colorpicker for bootstrap](http://www.eyecon.ro/bootstrap-colorpicker/) JS module for Twitter Bootstrap
+- [Ace](http://ace.ajax.org/) (web editor for programming languages with syntax highliht)
 
 # Setting up Payola
 ## System Requirements
