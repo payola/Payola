@@ -134,6 +134,8 @@ As the cloned repository contains just source codes, it is necessary to compile 
 
 Voilà! Your Payola server is running. The `initializer` project sets up your database to include an admin user (login `admin@payola.cz`, password `payola!`), a sample analysis and some data sources. You can, of course, remove those and create your own later.
 
+![Installing and running Payola](https://raw.github.com/siroky/Payola/develop/docs/img/installscreen.png)
+
 > <a name="drop-create-warning"></a> **WARNING:** The `initializer` project drop-creates all required tables - hence all previous data will be lost. Run this project only when installing Payola or if you want to reset Payola to factory settings.
 
 ### Security
