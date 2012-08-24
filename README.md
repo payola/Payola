@@ -2,7 +2,24 @@
 <a name="user"></a>
 # Payola!
 ---
-Payola is a HTML5 web application which lets you work with graph data in a completely new way. You can visualize Linked Data using several plugins (which produce a table, graph, etc.). That also means, that you no longer needs Pubby to browse through a Linked Data storage (via its SPARQL endpoint). Moreover, you can create an analysis and run it against a set of SPARQL endpoints without any knowledge of SPARQL language itself. Analysis results are processed and visualized using the embedded visualization plugins.
+![image](http://)
+
+Payola is a HTML5 web application which lets you work with graph data in a completely new way. While using several prepared plugins, you can visualize [Linked Data](http://linkeddata.org/) as graphs, tables, etc. That also means, that you no longer needs [Pubby](http://www4.wiwiss.fu-berlin.de/pubby/) to browse through a Linked Data storage (via its [SPARQL](http://www.w3.org/TR/rdf-sparql-query/) endpoint). Moreover, you can create an analysis and run it against a set of SPARQL endpoints without any knowledge of SPARQL language itself. Analysis results are processed and visualized using the embedded visualization plugins.
+
+If you know, what Linked Data means, you probably already have an idea, what Payola does. If you do not, read more. Just let us introduce a real-life example. You, as a person, have some friends. Let's suppose, you have a friend named John. Since you are friends, you have a connection. For a computer, one could introduce the following notation:
+
+```
+Me | is friend with | John
+```
+
+Which, in this example, also means:
+
+```
+John | is friend with | Me
+```
+Actually, this is almost a Linked Data Turtle notation. It describes relations between entities. What we do is that we analyze those relations and visualize them. As an example of such a visualization, see the following picture, which is a sample visualization of analysis of relations on social networks for a particular person.
+
+TODO JH - masek data image
 
 Since Payola is rather a platform than a closed project, you can fork the project and write your own plugins, extensions and more on [https://github.com/siroky/Payola](https://github.com/siroky/Payola).
 
