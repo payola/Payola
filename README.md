@@ -1177,3 +1177,21 @@ If you want to learn more about the RPC mechanism on the client-side, please, se
 #### Package cz.payola.web.client.presenters
 
 > TODO: O.K.
+
+#Known bugs
+You can find the complete list of issues on [GitHub](https://github.com/siroky/Payola/issues?sort=updated&state=open). In the time of writing this documentation, the list conained the following issues:
+
+TODO
+
+#Future work
+Since there is always something what you can do better or more sophisticated, we also have a list of things which we are looking forward to change in Payola. Here are some examples:
+
+- Fully implement the Play! 2.0 Promise API
+- Improve Continuous Integration workflow, including autodeploy
+- Prepare build script for WAR packages
+- Enable the user to start an analysis evaluation, close the browser window and come back later for the results (generally support for really long-running analyses)
+- Administration panel (user management, statistics, etc.)
+- Implement more visualisation plugins (pie charts, more universal bar charts, 3D visualisation)
+- Perform a security audit to prevent CSRF, XSS and more web-specific attacks
+- Add mechanism which determines the version of user's browser, especially advise users of incompatible browsers for update
+- Implement analysis result persistance into the personal Data Source
