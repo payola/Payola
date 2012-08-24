@@ -115,11 +115,12 @@ Payola comes pre-configured to work with default settings of a Virtuoso server a
 
 > *plugin.directory* - where to store plugins uploaded by users
 
+**Payola will not start Virtuoso or H2 on its own. You need to configure it and run by yourself.**
 
 <a name="compiling"></a>
 ### Compiling and Running Payola
 
-As the cloned repository contains just source codes, it is necessary to compile Payola in order to run it. To do so, you need to have SBT installed as noted above. Open a command line (console, terminal) and make `payola` subdirectory the current working directory (e.g. by `cd payola`). Launch SBT (most likely using the `sbt` command) and enter the following commands:
+As the cloned repository contains just source code, it is necessary to compile Payola in order to run it. To do so, you need to have SBT installed as noted above. Open a command line (console, terminal) and make `payola` subdirectory the current working directory (e.g. by `cd payola`). Launch SBT (most likely using the `sbt` command) and enter the following commands:
 
 <a name="run-initializer"></a>
 ```
@@ -170,6 +171,8 @@ Of course, the port may be different depending on your configuration file (see s
 ## Basic usage
 
 You can use Payola both as a guest and a logged-in user. A guest is limited to analyses and data sources marked as public by other users and only in a read-only mode (i.e. can't edit them).
+
+![Guest Dashboard](https://raw.github.com/siroky/Payola/develop/docs/img/guest-dashboard.png)
 
 A logged-in user can create new data sources, analyses, plugins (you can actually write your own plugin, more about that [later](#plugins)), edit them and share them; and upload your own private RDF data.
 
