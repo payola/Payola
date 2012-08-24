@@ -1195,3 +1195,5 @@ Since there is always something what you can do better or more sophisticated, we
 - Perform a security audit to prevent CSRF, XSS and more web-specific attacks
 - Add mechanism which determines the version of user's browser, especially advise users of incompatible browsers for update
 - Implement analysis result persistance into the personal Data Source
+- Make the s2js compiler a completely standalone product
+- 
