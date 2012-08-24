@@ -13,19 +13,37 @@ sealed class OpenDataCleanStorage(name: String, inputCount: Int, parameters: imm
     extends DataFetcher(name, inputCount, parameters, id)
 {
     def this() = {
-        this("Open Data Clean Storage", 0, List(new StringParameter("Server", "", false)), IDGenerator.newId)
+        this("Open Data Clean Storage", 0, List(
+            new StringParameter(OpenDataCleanStorage.serviceURLParameter, "", false),
+            new StringParameter(OpenDataCleanStorage.endpointURLParameter, "", false)
+        ), IDGenerator.newId)
+    }
+
+    def getServiceURLParameter(instance: PluginInstance): Option[String] = {
+        instance.getStringParameter(OpenDataCleanStorage.serviceURLParameter)
+    }
+
+    def getEndpointURLParameter(instance: PluginInstance): Option[String] = {
+        instance.getStringParameter(OpenDataCleanStorage.endpointURLParameter)
     }
 
     def executeQuery(instance: PluginInstance, query: String): Graph = {
-        usingDefined(instance.getStringParameter("Server")) { server =>
-            new SparqlEndpoint(server + "/sparql").executeQuery(query)
+        usingDefined(getEndpointURLParameter(instance)) { endpointURL =>
+            new SparqlEndpoint(endpointURL).executeQuery(query)
         }
     }
 
     override def getNeighbourhood(instance: PluginInstance, vertexURI: String): Graph = {
-        usingDefined(instance.getStringParameter("Server")) { server =>
-            val neighbourhoodUrl = server + "/uri?format=trig&uri=" + URLEncoder.encode(vertexURI, "UTF-8")
-            Graph(RdfRepresentation.Trig, new Downloader(neighbourhoodUrl).result)
+        usingDefined(getServiceURLParameter(instance)) { serviceURL =>
+            val neighbourhoodUrl = serviceURL + "/uri?format=trig&uri=" + URLEncoder.encode(vertexURI, "UTF-8")
+            Graph(RdfRepresentation.Trig, new Downloader(neighbourhoodUrl, "application/x-trig").result)
         }
     }
+}
+
+object OpenDataCleanStorage
+{
+    val serviceURLParameter = "Output Webservice URL"
+
+    val endpointURLParameter = "Sparql Endpoint URL"
 }

@@ -10,7 +10,13 @@ class Select(
     cssClass: String = "")
     extends InputLikeView[html.elements.Select, String]("select", options, name, initialValue, title, cssClass)
 {
-    def value: String = options(htmlElement.selectedIndex).htmlElement.value
+    def value: String = {
+        if (htmlElement.selectedIndex >= 0) {
+            options(htmlElement.selectedIndex).htmlElement.value
+        } else {
+            ""
+        }
+    }
 
     def updateValue(newValue: String) {
         options.find(_.htmlElement.value == newValue).foreach(o => htmlElement.selectedIndex = options.indexOf(o))

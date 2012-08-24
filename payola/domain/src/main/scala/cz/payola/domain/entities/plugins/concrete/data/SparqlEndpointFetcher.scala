@@ -28,8 +28,11 @@ sealed class SparqlEndpointFetcher(name: String, inputCount: Int, parameters: im
 
     def executeQuery(instance: PluginInstance, query: String): Graph = {
         usingDefined(getEndpointURL(instance), getGraphURIs(instance)) { (endpointURL, graphURIs) =>
+            // Remove the graph URIs specified directly in the query and use the ones specified in the endpoint.
             val sparqlQuery = QueryFactory.create(query)
+            sparqlQuery.getGraphURIs.clear()
             graphURIs.foreach(sparqlQuery.addGraphURI(_))
+
             new SparqlEndpoint(endpointURL).executeQuery(sparqlQuery.toString)
         }
     }
