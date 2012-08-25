@@ -67,14 +67,18 @@ In companies, Payola will probably have many non-technical users and a developer
 While developing the Payola, we used the following technologies:
 
 - [Play! 2.0](http://www.playframework.org/) Scala MVC web framework
+- [Squeryl](http://squeryl.org/) (Scala ORM)
+- [Apache Jena](http://jena.apache.org/) (Java framework for building Semantic Web applications)
 - [jQuery](http://jquery.com/) JavaScript Library
 - [Twitter Bootstrap](http://twitter.github.com/bootstrap/) (collection of CSS and JS code from Twitter)
 - [Colorpicker for bootstrap](http://www.eyecon.ro/bootstrap-colorpicker/) JS module for Twitter Bootstrap
 - [Ace](http://ace.ajax.org/) (web editor for programming languages with syntax highliht)
 - [Select2](http://ivaynberg.github.com/select2/) (JavaScript autocomplete plugin)
-- [Apache Jena](http://jena.apache.org/) (Java framework for building Semantic Web applications)
 - [sprintf](http://code.google.com/p/sprintf/) (SprintF implementation for JS)
-- [Squeryl](http://squeryl.org/) (Scala ORM)
+- [Flot](http://code.google.com/p/flot/) (JavaScript charts plugin)
+- [jQuery autosize](http://www.jacklmoore.com/autosize) (jQuery plugin for autosizing textareas)
+- [jQuery blockUI](http://jquery.malsup.com/block/) (jQuery plugin for blocking UI nicely)
+- [LiveQuery](http://docs.jquery.com/Plugins/livequery) (jQuery plugin)
 
 # Setting up Payola
 ## System Requirements
