@@ -1010,80 +1010,21 @@ import cz.payola.domain.entities.User
 @remote
 object RPCTester
 {
-    def procedure : Int = {
-        1
-    }
-    
-    def testString : String = {
-        """te"st"""
-    }
 
-    def testBoolean : Boolean = {
-        true
-    }
-
-    def testParamInt (param: Int) : Int = {
-        (param*2)
-    }
-
-    def testParamString (param: String): String = {
-         param.reverse
-    }
-
-    def testParamChar (param: Char): Char = {
-        param
-    }
-
-    def testParamBoolean (param: Boolean): Boolean = {
-        !param
-    }
-
-    def testParamDouble (param: Double): Double = {
-        param
-    }
-
-    def testParamFloat (param: Float): Float = {
-        param
-    }
-
-    def testParamArray (param: List[Int]): Int = {
+    def testParamArray(param: List[Int]): Int = {
         param.sum
     }
 
     @async
-    def testParamArrayAsync (param: List[Int])(successCallback: (Int => Unit))(failCallback: (Throwable => Unit)) = {
+    def testParamArrayAsync(param: List[Int])(successCallback: (Int => Unit))(failCallback: (Throwable => Unit)) = {
         successCallback(param.sum)
     }
-
-    def testParamArrayDouble (param: List[Double]): Double = {
-        param.sum
-    }
-
-    def testParamArrayString (param: List[String]): String = {
-        param.mkString("")
-    }
-
-    def throwException: Graph = {
-        throw new Exception("Was lazy to do this.")
-    }
-
-    def throwCustomException: Graph = {
-        throw new RPCTestException()
-    }
-
-    def testGraph: Graph = {
-        Graph.empty
-    }
     
-    def testException : Int = {
-        7
-    }
-    
-    @secured def secureAdd(first: Int, second: Int, user: User = null) : Int = {
+    @secured def secureAdd(first: Int, second: Int, user: User = null): Int = {
     	first + second
     }
     
-    @secured def maybeSecureAdd(first: Int, second: Int, user: Option[User] = None) : Int = {
+    @secured def maybeSecureAdd(first: Int, second: Int, user: Option[User] = None): Int = {
     	first + second
     }
 }
@@ -1117,11 +1058,10 @@ doSomethingWithSum(sum)
 Which is quite a standard fragment of code. That differs a lot from the asynchronous variant:
 
 ```
-RPCTester.testParamArray(List(1,2,3))
-{
-	sum => doSomethingWithSum(sum)
-}{
-	err => handlerErr(err)
+RPCTester.testParamArray(List(1,2,3)){ sum =>
+	doSomethingWithSum(sum)
+}{ error =>
+	errorHandler(error)
 }
 ```
 
