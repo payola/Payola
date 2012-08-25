@@ -414,3 +414,7 @@ table .btn-toolbar .badge {
     top: -9px;
     position: relative;
 }
+
+.dashboard .row-fluid .span3.btn {
+    min-height: 0px !important;
+}
