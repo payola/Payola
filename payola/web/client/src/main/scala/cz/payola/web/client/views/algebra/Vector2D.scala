@@ -73,10 +73,10 @@ case class Vector2D(x: Double, y: Double)
 
     /**
      * Creates String representation of this vector.
-     * @return "[" + x + "; " + y + "]"
+     * @return [x; y]
      */
     override def toString: String = {
-        "[" + x + "; " + y + "]"
+        "[%d; %d]".format(x, y)
     }
 }
 

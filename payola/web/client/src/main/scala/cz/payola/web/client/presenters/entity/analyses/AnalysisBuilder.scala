@@ -143,8 +143,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                         val inputsCount = evt.target.inputCount
                         if (inputsCount > branches.size) {
                             AlertModal.display(
-                                "The plugin can't be used", "The merge plugin has " + inputsCount.toString +
-                                    " inputs, but only " + branches.size + " branches are available."
+                                "The plugin can't be used", "The merge plugin has %d inputs, but only %d branches are available.".format(inputsCount, branches.size)
                             )
                         } else {
                             val mergeDialog = new MergeAnalysisBranchesDialog(branches, inputsCount)

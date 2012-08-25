@@ -10,7 +10,6 @@ import cz.payola.common.entities.Analysis
 import cz.payola.web.client.presenters.graph.GraphPresenter
 import cz.payola.web.client.views.graph.DownloadButtonView
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
-import scala.Some
 import cz.payola.web.shared.EvaluationInProgress
 import cz.payola.web.shared.EvaluationError
 import cz.payola.web.shared.EvaluationSuccess
@@ -174,7 +173,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
     private def downloadResultAs(extension: String) {
         if (getAnalysisEvaluationID.isDefined) {
             window.open(
-                "/analysis/" + analysisId + "/evaluation/" + getAnalysisEvaluationID.get + "/download." + extension)
+                "/analysis/%s/evaluation/%s/download.%s".format(analysisId, getAnalysisEvaluationID.get, extension))
         } else {
             AlertModal.display("Evaluation hasn't finished yet.", "")
         }

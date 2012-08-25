@@ -4,7 +4,6 @@ import cz.payola.web.client.views.ComposedView
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap._
 import cz.payola.web.client.views.elements.form.fields._
-import scala.Some
 
 class DataSourceBrowserView(dataSourceName: String) extends ComposedView
 {

@@ -68,8 +68,8 @@ class ShareButtonPresenter(
                 val granteeIds = shareModal.granteeSelection.field.value
                 SharingData.shareEntity(entityClassName, entityId, granteeClassName, granteeIds) { () =>
                     unblockView()
-                    AlertModal.display("Success", "The entity was successfully shared to selected " +
-                        granteeClassNameText + "s.", "alert-success", Some(4000))
+                    AlertModal.display("Success", "The entity was successfully shared to selected %ss.".format(granteeClassNameText),
+                        "alert-success", Some(4000))
                 }(fatalErrorHandler(_))
                 true
             }

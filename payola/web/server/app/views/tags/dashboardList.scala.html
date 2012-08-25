@@ -26,27 +26,31 @@
         </div>
     }else{
         <div class="@boxClass">
-            <h2 class="span@if(createCall.isDefined){6}else{9}">@title</h2>
-            @if(entities.size > 5){
-                <a class="btn btn-primary span3" href="@listCall"><i class="icon-list icon-white"></i> View all &raquo;</a>
-            }else{
-                @if(createCall.isDefined){
-                    <span class="span3"></span>
+            <div class="row-fluid">
+                <h2 class="span@if(createCall.isDefined){6}else{9}">@title</h2>
+                @if(entities.size > 5){
+                    <a class="btn btn-primary span3" href="@listCall"><i class="icon-list icon-white"></i> View all &raquo;</a>
+                }else{
+                    @if(createCall.isDefined){
+                        <span class="span3"></span>
+                    }
                 }
-            }
 
-            @if(createCall.isDefined){
-                <a class="btn btn-success span3" href="@createCall">
-                    <i class="icon-plus icon-white"></i> Create
-                </a>
-            }
-            <table class="table table-striped">
-                @entities.take(5).map{e =>
-                <tr>
-                    @entityLister(e)
-                </tr>
+                @if(createCall.isDefined){
+                    <a class="btn btn-success span3" href="@createCall">
+                        <i class="icon-plus icon-white"></i> Create
+                    </a>
                 }
-            </table>
+            </div>
+            <div class="row-fluid">
+                <table class="table table-striped">
+                    @entities.take(5).map{e =>
+                    <tr>
+                        @entityLister(e)
+                    </tr>
+                    }
+                </table>
+            </div>
         </div>
     }
 </div><!--/span-->

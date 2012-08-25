@@ -5,7 +5,6 @@ import s2js.adapters.html
 import cz.payola.web.client.View
 import cz.payola.web.client.views.elements.Text
 import s2js._
-import scala.Some
 
 /**
  * Representation of structured View.

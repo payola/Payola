@@ -2,11 +2,11 @@
 <a name="user"></a>
 # Payola!
 ---
-Payola is a HTML5 web application which lets you work with graph data in a completely new way. While using several prepared plugins, you can visualize [Linked Data](http://linkeddata.org/) as graphs, tables, etc. That also means, that you no longer needs [Pubby](http://www4.wiwiss.fu-berlin.de/pubby/) to browse through a Linked Data storage (via its [SPARQL](http://www.w3.org/TR/rdf-sparql-query/) endpoint). Moreover, you can create an analysis and run it against a set of SPARQL endpoints without deep knowledge of SPARQL language itself. Analysis results are processed and visualized using the embedded visualization plugins.
+Payola is an HTML5 web application which lets you work with graph data in a completely new way. You can visualize [Linked Data](http://linkeddata.org/) using several preinstalled plugins as graphs, tables, etc. This also means, that you no longer need [Pubby](http://www4.wiwiss.fu-berlin.de/pubby/) to browse through a Linked Data storage (via its [SPARQL](http://www.w3.org/TR/rdf-sparql-query/) endpoint). Moreover, you can create an analysis and run it against a set of SPARQL endpoints without deep knowledge of SPARQL language itself. Analysis results are processed and visualized using the embedded visualization plugins.
 
 ![Payola logo (credits Martin Mraz)](https://raw.github.com/siroky/Payola/develop/docs/img/logo.png)
 
-If you **do** know, what Linked Data means, you probably already have an idea, what Payola does. If you **do not**, read more. Just let us introduce a real-life example. You, as a person, have some friends. Let's suppose, you have a friend named John. Since you are friends, you have a connection. For a computer, one could introduce the following notation:
+If you **do** know, what Linked Data means, you probably already have an idea, what Payola does. If you **do not**, read more. Let us give you a real-life example. You, as a person, have some friends. Let's suppose, you have a friend named John. Since you are friends, you have a connection. For a computer, one could introduce the following notation:
 
 ```
 Me | is friend with | John
@@ -17,17 +17,17 @@ Which, in this example, also means:
 ```
 John | is friend with | Me
 ```
-Actually, this is almost a Linked Data [Turtle](http://www.w3.org/TeamSubmission/turtle/) notation. It describes relations (e.g. friendship) between entities (you and John). What we do is that we analyze those relations and visualize them. As an example of such a visualization, see the following picture, which is a sample visualization of analysis of relations on social networks for a particular person.
+Actually, this is almost a Linked Data [Turtle](http://www.w3.org/TeamSubmission/turtle/) notation. It describes relations (e.g. friendship) between entities (you and John). What we do is that we analyze those relations and visualize them. As an example of such a visualization, see the following picture, which is a sample visualization of an analysis of relations on social networks for a particular person.
 
 TODO JH - masek data image
 
 For a more complex and sophisticated description of Linked Data, please visit the following [website](http://linkeddata.org/).
 
-Of course, our software is capable of performing analyses on a bit more complicated data. Actually, the first impulse to write such a tool was to came up with a tool which makes the user capable to build analyses which are capable of targetting people involved in corruption.
+Of course, our software is capable of performing analyses on a bit more complicated data. Actually, the first impulse to write such a tool was to come up with a tool which makes the user capable of building analyses which could help him or her to target people involved in corruption.
 
 > And is it?
 > 
-> In general, yes, it is. But nowadays, machine processing of related data is in conflict with  the laws of privacy in our country. So nobody is going to build such an analysis.
+> In general, yes, it is. But at the time of writing, machine processing of related data is in a conflict with the privacy laws in our country. So nobody is going to build such an analysis.
 <!---->
 > So that's why the project's name is Payola?
 > 
@@ -35,18 +35,55 @@ Of course, our software is capable of performing analyses on a bit more complica
 
 > **Payola: the practice of bribing someone in return for the unofficial promotion of a product in the media: if a record company spends enough money on payola, it can make any record a hit**
 
-The main goal is to come up with a prototype of a Linked Data tool for common users. To make them able to work with [RDF](http://www.w3.org/RDF/) data, explore them, analyze them. And integrate into [OpenData.cz transparent data infrastructure](http://opendata.cz/) which is being developed mostly on the [Faculty of Mathematics and Physics, Charles University](http://www.mff.cuni.cz/). We would also like to make it into the [LOD2](http://lod2.eu/Welcome.html) technology stack, which is, by the way, on of the reasons, why we've chosen the Scala programming language.
+The main goal is to come up with a prototype of a Linked Data tool for common users. To make them able to work with [RDF](http://www.w3.org/RDF/) data, explore them, analyze them, and to integrate into [OpenData.cz transparent data infrastructure](http://opendata.cz/) which is being developed mostly on the [Faculty of Mathematics and Physics, Charles University](http://www.mff.cuni.cz/). We would also like to make it into the [LOD2](http://lod2.eu/Welcome.html) technology stack, which is, by the way, one of the reasons, why we've chosen the Scala programming language.
 
 Since Payola is rather a platform (or kind of framework, if you want), not a closed project, you can fork the project and write your own plugins, extensions and more on [https://github.com/siroky/Payola](https://github.com/siroky/Payola).
+
+##Why Payola?
+During our studies on the University, we've met several tools for working with Linked Data. Many of them are really useful, but it is rather hard to work with them. Especially if you want to process some data and visualise them. You need to install and configure several tools. Morever, those tools work separately, so you need to get an RDF file from each of them and put it into the next one. Some of them are on the web, some of them works under Linux, some of them on Windows.
+
+We wanted to bring a single tool which will be able to do it all. We also wanted to make a web application which is, we think, a new synonymum for platform-independent software. That's also why we take advantage of the new HTML5 standard and avoid using Flash platform.
+
+We also wanted to present a tool which will be capable of sharing the RDF data between its users, visualisations included. Nowadays, if you share an RDF visualisation to somebody, you probably share a screenshot with him. If it is a result of an analysis, it changes over a time, but the screenshot does not. With Payola, you don't share a static visualisation, you share the right to create the visualisation whenever the user want. And he gets the most current results.
+
+###Am I interested in Payola?
+If you work with RDF data, yes, you are. 
+
+If you just work with RDF data - we will help to access you data sources, browse through them, analyze the data and visualise them. We've tried to minimize the need to learn the SPARQL language to work with SPARQL data.
+
+If you are a developer, you can also contribute your own analytical plugin and share it with the users of your Payola installation. You can also come up with your own visualisation plugin and compile your own version of Payola.
+
+###What are the most common use cases?
+Until now, we have thought and discussed the following use cases:
+
+- private tool to work with RDF data
+- company tool to work with internal RDF data
+- public website with community around a specific type of RDF data
+- company/government website to present RDF data to the public
+
+In companies, Payola will probably have many non-technical users and a developer who will write new plugins and administer the application. 
 
 # 3rd party technologies
 While developing the Payola, we used the following technologies:
 
 - [Play! 2.0](http://www.playframework.org/) Scala MVC web framework
+- [Squeryl](http://squeryl.org/) (Scala ORM)
+- [Apache Jena](http://jena.apache.org/) (Java framework for building Semantic Web applications)
 - [jQuery](http://jquery.com/) JavaScript Library
 - [Twitter Bootstrap](http://twitter.github.com/bootstrap/) (collection of CSS and JS code from Twitter)
 - [Colorpicker for bootstrap](http://www.eyecon.ro/bootstrap-colorpicker/) JS module for Twitter Bootstrap
-- [Ace](http://ace.ajax.org/) (web editor for programming languages with syntax highliht)
+- [Ace](http://ace.ajax.org/) (web editor for programming languages with syntax highlighting)
+- [Select2](http://ivaynberg.github.com/select2/) (JavaScript autocomplete plugin)
+- [sprintf](http://code.google.com/p/sprintf/) (SprintF implementation for JS)
+- [Flot](http://code.google.com/p/flot/) (JavaScript charts plugin)
+- [jQuery autosize](http://www.jacklmoore.com/autosize) (jQuery plugin for autosizing textareas)
+- [jQuery blockUI](http://jquery.malsup.com/block/) (jQuery plugin for blocking UI nicely)
+- [LiveQuery](http://docs.jquery.com/Plugins/livequery) (jQuery plugin)
+
+#Related Work
+- http://www.visualdataweb.org/relfinder.php
+- http://catalogus-professorum.org/graphicalquerybuilder
+- http://data.gov.uk/linked-data
 
 # Setting up Payola
 ## System Requirements
@@ -258,6 +295,12 @@ Here you are presented with two options: to upload an RDF/XML or TTL file, or lo
 
 ---
 ### Analyses
+
+> TODO The predefined data fetcher plugins are:
+
+> - ```SparqlEndpointFetcher``` which can operate against any public [SPARQL endpoint](http://www.w3.org/wiki/SparqlEndpoints).
+> - ```PayolaStorage``` that is used when accessing the users private data.
+> - ```OpenDataCleanStorage``` is currently an experimental plugin that communicates with the [Open Data Clean Store](http://sourceforge.net/projects/odcleanstore/) output web service.
 
 Creating a new analysis is similar to creating any other resource - in the toolbar, select `Create New` from `My Analyses` button's menu. You will be prompted to enter a name - enter the analysis' name - you can change it later on.
 
@@ -818,13 +861,46 @@ The idea behind the `domain` project is for it to be fully independent on other 
 
 Domain entities extend the `common` entities that are mostly traits and fully functional classes are formed - as with the whole package, you can take the `domain.entities` package and use it completely elsewhere - outside of Payola without any modification.
 
-### Package cz.payola.domain.entities.analyses
-
-> TODO: H.S.
-
 ### Package cz.payola.domain.entities.plugins
 
-> TODO: H.S.
+One of the crucial features is to allow the users to create their own plugins and use them in their analyses later. That's what the subpackage ```compiler``` is for. There are also some predefined plugins in the subpackage ```concrete```.
+
+#### Package cz.payola.domain.entities.plugins.compiler
+
+The ```PluginCompier``` is a wrapper of the Scala compiler, that is tweaked to support compilation of analytical plugins. It provides just one method ```compile``` that, given the plugin source code, compiles the plugin and returns information anbout the compiled plugin ```PluginInfo```.
+
+The internal Scala compiler, that actually performs the compilation is plugged with the ```PluginVerifier``` [Scala compiler plugin](http://www.scala-lang.org/node/140). So the compilation process consists of the standard Scala compiler phases and two more additional phases that are defined in the ```PluginVerifier```:
+
+1. Verification phase which checks whether the compilation unit contains a package with one subclass of the ```Plugin``` class, whether the plugin class has both the parameterless constructor and the setter constructor and whether the constructors have proper parameter types. If any of these assumptions is broken, an exception is thrown.
+2. Name transformer phase that changes name of the plugin class to the ```Plugin_[randomUUID]```. So plugin class name uniqueness is ensured and it's not a problem when two users upload plugins with the same name.
+
+The last piece in the puzzle is the ```cz.payola.domain.entities.plugins.PluginClassLoader``` which has to be used when instantiating plugin classes. The method ```instantiatePlugin``` on the ```PluginClassLoader``` should be used instead of standard means of reflection instantiation.
+
+#### Package cz.payola.domain.entities.plugins.concrete
+
+There are basically two types of plugins - the data fetchers and the rest. A ```DataFetcher``` doesn't have any inputs and is capable of SPARQL query execution and node neighbourhood fetching. So it can be used as a plugin of a data source. Implementation of the plugins is quite straightforward, please refer to the user guide on what they do.
+
+### Package cz.payola.domain.entities.analyses
+
+The second big part of the domain package are analyses and whole process of their validation, optimization and evaluation. An ```Analysis``` is composed of ```PluginInstance```s and ```PluginInstanceBindng```s, which specify connections between ```PluginInstance```s. The analyses in the system don't necessarily have to be always valid (in order to support interrupted analysis creation).
+
+### Package cz.payola.domain.entities.analyses.evaluation
+
+Evaluation of an analysis isn't a trivial process, because it introduces parallelism. Everything starts with ```evaluate``` method call on an ```Analysis``` instance which creates a new instance of the ```AnalysisEvaluation``` and starts it. From now on, the evaluation runs in parallel to the thread which started the evaluation, because it's an [```scala.actors.Actor```](http://www.scala-lang.org/node/242). The ```AnalysisEvaluation``` object can however be queried about its current state (using methods ```getProgress```, ```getResult```, ```isFinished```). An ```AnalysisEvaluation``` works in the following steps:
+
+1. Validity of the analysis is checked (whether it's not empty, whether there aren't invalid bindings, whether the analysis has one output etc.).
+2. The analysis is optimized using the ```AnalysisOptimizer```. It consists of phases, that usually merge plugin instances together. The phases that are sequentially executed and produce an ```OptimizedAnalysis```. For more information about the phases and what they do, please refer to the API documentation of the ```cz.payola.domain.entities.analyses.optimization``` package.
+3. The ```Timer``` actor is started, so the evaluation is notified in case of timeout.
+4. For each ```PluginInstance```, an ```PluginInstanceEvaluation``` actor is created and started. Within the constructor, it receives a method ```outputProcessor```, that should be used to return the result. The ```PluginInstanceEvaluation``` does the following:
+	1. Wait until all input graphs are received (if the plugin has no inputs, immediately proceed to the next step).
+	2. Evaluate the plugin.
+	3. Return the result using the ```outputProcessor```. If output of the plugin instance is bound to another plugin instance, it actually sends a message with the result to the ```PluginInstanceEvaluation``` actor corresponding to the plugin instance. Otherwise, the plugin instance is the last one, so the result is sent to the ```AnalysisEvaluation``` actor.
+5. Wait until the message with result is received from the output plugin instance. During that time, process messages that report plugin instance evaluation progress or errors. Also reply to messages that query for the current state of evaluation.
+6. Process the ```AnalysisEvaluationControl``` messages.
+
+An example of the analysis evaluation process, that succeeds without any errors can found on the following picture. The messages 1, 1.1 and 1.2 can be interleaved with messages 2, 2.1, 2.2, 3, 3.1, 3.2, 3.3, because these two branches of the evaluation can run in parallel.
+
+![Analysis evaluation using actors](https://raw.github.com/siroky/Payola/develop/docs/img/analysis_evaluation_actors.png)
 
 ### Package cz.payola.domain.rdf
 
@@ -836,7 +912,9 @@ Just like with the `cz.payola.domain.rdf` package, the ontology package adds the
 
 ### Package cz.payola.domain.sparql
 
-> TODO: H.S.
+Because the [SPARQL](http://www.w3.org/TR/rdf-sparql-query/) is used throughout the application (mainly in plugins) and queries are often programatically constructed, it's been decided to use object oriented query abstraction instead of string concatenation. So there are classes that somehow correspond to rules in the [SPARQL query grammar](http://www.w3.org/TR/rdf-sparql-query/#grammar). A query is built by composition of these classes; to obtain it's string representation, the ```toString``` method can be called on the ```ConstructQuery``` instance. As a benefit of this representation, ```GraphPattern```s can be easily merged together, which wouldn't be that trivial if they were represented as strings.
+
+> The only supported query type is the CONSTRUCT, because other types weren't needed. However it's easy to implement them in similar fashion.
 
 <a name="data"></a>
 ## Package cz.payola.data
@@ -1010,80 +1088,21 @@ import cz.payola.domain.entities.User
 @remote
 object RPCTester
 {
-    def procedure : Int = {
-        1
-    }
-    
-    def testString : String = {
-        """te"st"""
-    }
 
-    def testBoolean : Boolean = {
-        true
-    }
-
-    def testParamInt (param: Int) : Int = {
-        (param*2)
-    }
-
-    def testParamString (param: String): String = {
-         param.reverse
-    }
-
-    def testParamChar (param: Char): Char = {
-        param
-    }
-
-    def testParamBoolean (param: Boolean): Boolean = {
-        !param
-    }
-
-    def testParamDouble (param: Double): Double = {
-        param
-    }
-
-    def testParamFloat (param: Float): Float = {
-        param
-    }
-
-    def testParamArray (param: List[Int]): Int = {
+    def testParamArray(param: List[Int]): Int = {
         param.sum
     }
 
     @async
-    def testParamArrayAsync (param: List[Int])(successCallback: (Int => Unit))(failCallback: (Throwable => Unit)) = {
+    def testParamArrayAsync(param: List[Int])(successCallback: (Int => Unit))(failCallback: (Throwable => Unit)) = {
         successCallback(param.sum)
     }
-
-    def testParamArrayDouble (param: List[Double]): Double = {
-        param.sum
-    }
-
-    def testParamArrayString (param: List[String]): String = {
-        param.mkString("")
-    }
-
-    def throwException: Graph = {
-        throw new Exception("Was lazy to do this.")
-    }
-
-    def throwCustomException: Graph = {
-        throw new RPCTestException()
-    }
-
-    def testGraph: Graph = {
-        Graph.empty
-    }
     
-    def testException : Int = {
-        7
-    }
-    
-    @secured def secureAdd(first: Int, second: Int, user: User = null) : Int = {
+    @secured def secureAdd(first: Int, second: Int, user: User = null): Int = {
     	first + second
     }
     
-    @secured def maybeSecureAdd(first: Int, second: Int, user: Option[User] = None) : Int = {
+    @secured def maybeSecureAdd(first: Int, second: Int, user: Option[User] = None): Int = {
     	first + second
     }
 }
@@ -1117,11 +1136,10 @@ doSomethingWithSum(sum)
 Which is quite a standard fragment of code. That differs a lot from the asynchronous variant:
 
 ```
-RPCTester.testParamArray(List(1,2,3))
-{
-	sum => doSomethingWithSum(sum)
-}{
-	err => handlerErr(err)
+RPCTester.testParamArray(List(1,2,3)){ sum =>
+	doSomethingWithSum(sum)
+}{ error =>
+	errorHandler(error)
 }
 ```
 
@@ -1132,8 +1150,7 @@ You should keep in mind that the asynchronous call invokation returns immediatel
 Let's discuss an example of an asynchronous method definition:
 
 ```
-@async
-    def testParamArrayAsync (param: List[Int])
+@async def testParamArrayAsync(param: List[Int])
     (successCallback: (Int => Unit))
     (failCallback: (Throwable => Unit)) = {
         successCallback(param.sum)
@@ -1340,6 +1357,31 @@ The most important decision for animations was whether to use HTML5 Web Workers 
 #### Package cz.payola.web.client.presenters
 
 > TODO: O.K. mention the SPARQL query execution tool
+
+#Continuous integration
+In order to have the code in the repository comiplable all the time, we use a [TeamCity](http://www.jetbrains.com/teamcity/) as continuous integration tool. Since the iontegration rules are currently set that the only rule is that the application should compile, only a simple build ant script is used.
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Application" default="build" basedir="payola">
+	
+	<target name="build" depends="sbt" />	
+	
+	<!-- New directories -->
+	<property name="sbtloc" value="E:\sbt.bat" />
+
+	<target name="sbt" description="simple build tool">
+		<exec executable="${sbtloc}">
+			<arg line="cp" />
+		</exec>
+	</target>
+</project>
+```
+This prevent us from situations, when somebody makes a commit and does not test it properly. It may prevent the application from compiling, so that the rest of the team can pull a broken code from the repository. With TeamCity, such a broken commit is revealed in about 2 minutes and the whole team gets noticed about it. It takes us just a few moment to get it right.
+
+![TeamCity](https://raw.github.com/siroky/Payola/develop/docs/img/teamcity.png)
+
+In the future, we will work hardly to integrate test suites into the continuous integration process, as well as automatic deployment to our production server.
 
 #Known bugs
 You can find the complete list of issues on [GitHub](https://github.com/siroky/Payola/issues?sort=updated&state=open). In the time of writing this documentation, the list contained the following issues:
