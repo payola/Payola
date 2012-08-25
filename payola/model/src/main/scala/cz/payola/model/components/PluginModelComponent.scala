@@ -6,7 +6,6 @@ import cz.payola.model._
 import cz.payola.domain.PluginCompilerComponent
 import cz.payola.domain.entities.plugins.compiler._
 import cz.payola.common.ValidationException
-import scala.Some
 
 trait PluginModelComponent extends EntityModelComponent
 {

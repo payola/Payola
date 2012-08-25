@@ -10,7 +10,6 @@ import cz.payola.web.client.presenters.entity.settings._
 import cz.payola.web.client.views.elements.lists._
 import cz.payola.web.client.views.elements.form.fields._
 import cz.payola.common.visual.Color
-import scala.Some
 
 class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomization)
     extends Modal("Edit ontology customization", Nil, Some("Done"), None, false, "large-modal")

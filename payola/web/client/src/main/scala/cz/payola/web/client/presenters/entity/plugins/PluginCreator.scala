@@ -1,4 +1,4 @@
-package cz.payola.web.client.presenters
+package cz.payola.web.client.presenters.entity.plugins
 
 import s2js.compiler.javascript
 import s2js.adapters.browser._
@@ -14,55 +14,54 @@ import cz.payola.web.client.views.bootstrap.Icon
 // be compile-time ready
 class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) extends Presenter
 {
-
     // Create the ACE editor
     createEditor()
 
     // Create submit button
     val buttonContainer = document.getElementById(buttonContainerID)
-    val submitButton = new Button(new Text("Create Plugin"),"btn-primary", new Icon(Icon.plus, true))
+
+    val submitButton = new Button(new Text("Create Plugin"), "btn-primary", new Icon(Icon.plus, true))
+
     submitButton.mouseClicked += { e =>
         postCodeToServer(getCode)
         false
     }
     submitButton.render(buttonContainer)
 
-    /** Creates a new editor.
-      *
-      */
+    /**Creates a new editor.
+     *
+     */
     @javascript("window.ace_editor = ace.edit(\"editor\"); window.ace_editor.setTheme(\"ace/theme/clouds\");" +
         " var ScalaMode = require(\"ace/mode/scala\").Mode; window.ace_editor.getSession().setMode(new ScalaMode());")
     private def createEditor() {
-
     }
 
-    /** Gets code from the editor.
-      *
-      */
+    /**Gets code from the editor.
+     *
+     */
     @javascript("return window.ace_editor.getSession().getValue();")
     private def getCode: String = {
         ""
     }
 
     def initialize() {
-
     }
 
-    /** A post fail callback. Shows an alert that the upload failed.
-      *
-      * @param t An instance of Throwable.
-      */
-    private def postFailedCallback(t: Throwable){
+    /**A post fail callback. Shows an alert that the upload failed.
+     *
+     * @param t An instance of Throwable.
+     */
+    private def postFailedCallback(t: Throwable) {
         t match {
             case exc: ValidationException => AlertModal.display("Failed to upload plugin!", exc.fieldName)
             case t: Throwable => fatalErrorHandler(t)
         }
     }
 
-    /** Post success callback. Shows a success alert and redirects back to listing.
-      *
-      * @param s Success string.
-      */
+    /**Post success callback. Shows a success alert and redirects back to listing.
+     *
+     * @param s Success string.
+     */
     private def postWasSuccessfulCallback() {
         val alert = new AlertModal("Success!", "Plugin compiled without an error. In order for it to be used, " +
             "though, it needs to go through a review by the admin. He's been notified by an email.", "alert-success")
@@ -73,18 +72,18 @@ class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) e
         alert.render()
     }
 
-    /** Posts code to the server to be compiled and a new plugin created.
-      *
-      * @param code Code of the plugin.
-      */
+    /**Posts code to the server to be compiled and a new plugin created.
+     *
+     * @param code Code of the plugin.
+     */
     private def postCodeToServer(code: String) {
-       blockPage("Compiling plugin...")
-       PluginManager.uploadPlugin(code) { () =>
-           postWasSuccessfulCallback()
-           unblockPage()
+        blockPage("Compiling plugin...")
+        PluginManager.uploadPlugin(code) { () =>
+            postWasSuccessfulCallback()
+            unblockPage()
         } { t =>
-           postFailedCallback(t)
-           unblockPage()
+            postFailedCallback(t)
+            unblockPage()
         }
     }
 }
