@@ -1358,6 +1358,29 @@ The most important decision for animations was whether to use HTML5 Web Workers 
 
 > TODO: O.K. mention the SPARQL query execution tool
 
+#Continuous integration
+In order to have the code in the repository comiplable all the time, we use a [TeamCity](http://www.jetbrains.com/teamcity/) as continuous integration tool. Since the iontegration rules are currently set that the only rule is that the application should compile, only a simple build ant script is used.
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Application" default="build" basedir="payola">
+	
+	<target name="build" depends="sbt" />	
+	
+	<!-- New directories -->
+	<property name="sbtloc" value="E:\sbt.bat" />
+
+	<target name="sbt" description="simple build tool">
+		<exec executable="${sbtloc}">
+			<arg line="cp" />
+		</exec>
+	</target>
+</project>
+```
+This prevent us from situations, when somebody makes a commit and does not test it properly. It may prevent the application from compiling, so that the rest of the team can pull a broken code from the repository. With TeamCity, such a broken commit is revealed in about 2 minutes and the whole team gets noticed about it.
+
+In the future, we will work hardly to integrate test suites into the continuous integration process, as well as automatic deployment to our production server.
+
 #Known bugs
 You can find the complete list of issues on [GitHub](https://github.com/siroky/Payola/issues?sort=updated&state=open). In the time of writing this documentation, the list contained the following issues:
 
