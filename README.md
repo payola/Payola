@@ -1109,8 +1109,7 @@ You should keep in mind that the asynchronous call invokation returns immediatel
 Let's discuss an example of an asynchronous method definition:
 
 ```
-@async
-    def testParamArrayAsync (param: List[Int])
+@async def testParamArrayAsync(param: List[Int])
     (successCallback: (Int => Unit))
     (failCallback: (Throwable => Unit)) = {
         successCallback(param.sum)
