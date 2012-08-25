@@ -9,25 +9,33 @@ import cz.payola.web.client.views.algebra._
  * @param componentsCount count of components of the whole graph
  * @param previousComponent component that was drawn previously
  */
-class ComponentPositionHelper(val componentsCount: Int, val previousComponent: Option[Component])
-    extends PositionHelper
-{
+class ComponentPositionHelper(drawingSpaceSizeGetter: () => Vector2D, componentCenterGetter: () => Point2D,
+    val previousComponent: Option[Component]) extends PositionHelper {
+
     def getPositionCorrection(): Vector2D = {
         val componentSpacing = 50.0
 
-        val componentNumber = previousComponent.map(_.componentNumber).filter(_ >= 0).getOrElse(0) + 1
 
-        val bottomRight = if (previousComponent.isDefined) {
-            previousComponent.get.getBottomRight()
+        val drawingSpaceSize = drawingSpaceSizeGetter()
+        val drawingSpaceCenter = Point2D(drawingSpaceSize.x / 2, drawingSpaceSize.y / 2)
+
+        val componentCenter = componentCenterGetter()
+        val spacing = if(previousComponent.isDefined) {
+            Vector2D(0, componentSpacing)
         } else {
-            Point2D(0, 0)
+            Vector2D.Zero
         }
-        val topRight = if (previousComponent.isDefined) {
-            previousComponent.get.getTopRight()
+        componentCenter.createVector(drawingSpaceCenter) + spacing
+
+
+        /*val componentNumber = previousComponent.map(_.componentNumber).filter(_ >= 0).getOrElse(0) + 1
+
+
+        val prevComponentCenter = if(previousComponent.isDefined) {
+            previousComponent.get.getCenter()
         } else {
-            Point2D(0, 0)
+            centerGetter()
         }
-        val previousComponentBottomRight = bottomRight.toVector + Vector2D(50, 100)
 
 
         val componentsInRowCount =
@@ -47,6 +55,6 @@ class ComponentPositionHelper(val componentsCount: Int, val previousComponent: O
         } else {
             //continue in the current row
             Vector2D(previousComponentBottomRight.x + componentSpacing, topRight.y)
-        }
+        }*/
     }
 }

@@ -33,7 +33,8 @@ abstract class BaseTechnique(name: String) extends VisualPluginView(name)
                 firstAnimation.get.addFollowingAnimation(getTechniquePerformer(component, true))
             }
 
-            val componentPositionDesc = new ComponentPositionHelper(graphView.components.length, previousComponent)
+            val componentPositionDesc = new ComponentPositionHelper(() => topLayer.size, component.getCenter,
+                previousComponent)
 
             firstAnimation.get.addFollowingAnimation(new Animation(
                 Animation.flipGraph, ((new GraphCenterHelper(graphView.getGraphCenter), component.vertexViews)), None,
