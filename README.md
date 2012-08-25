@@ -259,6 +259,12 @@ Here you are presented with two options: to upload an RDF/XML or TTL file, or lo
 ---
 ### Analyses
 
+> TODO The predefined data fetcher plugins are:
+
+> - ```SparqlEndpointFetcher``` which can operate against any public [SPARQL endpoint](http://www.w3.org/wiki/SparqlEndpoints).
+> - ```PayolaStorage``` that is used when accessing the users private data.
+> - ```OpenDataCleanStorage``` is currently an experimental plugin that communicates with the [Open Data Clean Store](http://sourceforge.net/projects/odcleanstore/) output web service.
+
 Creating a new analysis is similar to creating any other resource - in the toolbar, select `Create New` from `My Analyses` button's menu. You will be prompted to enter a name - enter the analysis' name - you can change it later on.
 
 You will be presented with a blank page with a control box in the top-left corner. Start by filling in the analysis description.
@@ -818,13 +824,46 @@ The idea behind the `domain` project is for it to be fully independent on other 
 
 Domain entities extend the `common` entities that are mostly traits and fully functional classes are formed - as with the whole package, you can take the `domain.entities` package and use it completely elsewhere - outside of Payola without any modification.
 
-### Package cz.payola.domain.entities.analyses
-
-> TODO: H.S.
-
 ### Package cz.payola.domain.entities.plugins
 
-> TODO: H.S.
+One of the crucial features is to allow the users to create their own plugins and use them in their analyses later. That's what the subpackage ```compiler``` is for. There are also some predefined plugins in the subpackage ```concrete```.
+
+#### Package cz.payola.domain.entities.plugins.compiler
+
+The ```PluginCompier``` is a wrapper of the Scala compiler, that is tweaked to support compilation of analytical plugins. It provides just one method ```compile``` that, given the plugin source code, compiles the plugin and returns information anbout the compiled plugin ```PluginInfo```.
+
+The internal Scala compiler, that actually performs the compilation is plugged with the ```PluginVerifier``` [Scala compiler plugin](http://www.scala-lang.org/node/140). So the compilation process consists of the standard Scala compiler phases and two more additional phases that are defined in the ```PluginVerifier```:
+
+1. Verification phase which checks whether the compilation unit contains a package with one subclass of the ```Plugin``` class, whether the plugin class has both the parameterless constructor and the setter constructor and whether the constructors have proper parameter types. If any of these assumptions is broken, an exception is thrown.
+2. Name transformer phase that changes name of the plugin class to the ```Plugin_[randomUUID]```. So plugin class name uniqueness is ensured and it's not a problem when two users upload plugins with the same name.
+
+The last piece in the puzzle is the ```cz.payola.domain.entities.plugins.PluginClassLoader``` which has to be used when instantiating plugin classes. The method ```instantiatePlugin``` on the ```PluginClassLoader``` should be used instead of standard means of reflection instantiation.
+
+#### Package cz.payola.domain.entities.plugins.concrete
+
+There are basically two types of plugins - the data fetchers and the rest. A ```DataFetcher``` doesn't have any inputs and is capable of SPARQL query execution and node neighbourhood fetching. So it can be used as a plugin of a data source. Implementation of the plugins is quite straightforward, please refer to the user guide on what they do.
+
+### Package cz.payola.domain.entities.analyses
+
+The second big part of the domain package are analyses and whole process of their validation, optimization and evaluation. An ```Analysis``` is composed of ```PluginInstance```s and ```PluginInstanceBindng```s, which specify connections between ```PluginInstance```s. The analyses in the system don't necessarily have to be always valid (in order to support interrupted analysis creation).
+
+### Package cz.payola.domain.entities.analyses.evaluation
+
+Evaluation of an analysis isn't a trivial process, because it introduces parallelism. Everything starts with ```evaluate``` method call on an ```Analysis``` instance which creates a new instance of the ```AnalysisEvaluation``` and starts it. From now on, the evaluation runs in parallel to the thread which started the evaluation, because it's an [```scala.actors.Actor```](http://www.scala-lang.org/node/242). The ```AnalysisEvaluation``` object can however be queried about its current state (using methods ```getProgress```, ```getResult```, ```isFinished```). An ```AnalysisEvaluation``` works in the following steps:
+
+1. Validity of the analysis is checked (whether it's not empty, whether there aren't invalid bindings, whether the analysis has one output etc.).
+2. The analysis is optimized using the ```AnalysisOptimizer```. It consists of phases, that usually merge plugin instances together. The phases that are sequentially executed and produce an ```OptimizedAnalysis```. For more information about the phases and what they do, please refer to the API documentation of the ```cz.payola.domain.entities.analyses.optimization``` package.
+3. The ```Timer``` actor is started, so the evaluation is notified in case of timeout.
+4. For each ```PluginInstance```, an ```PluginInstanceEvaluation``` actor is created and started. Within the constructor, it receives a method ```outputProcessor```, that should be used to return the result. The ```PluginInstanceEvaluation``` does the following:
+	1. Wait until all input graphs are received (if the plugin has no inputs, immediately proceed to the next step).
+	2. Evaluate the plugin.
+	3. Return the result using the ```outputProcessor```. If output of the plugin instance is bound to another plugin instance, it actually sends a message with the result to the ```PluginInstanceEvaluation``` actor corresponding to the plugin instance. Otherwise, the plugin instance is the last one, so the result is sent to the ```AnalysisEvaluation``` actor.
+5. Wait until the message with result is received from the output plugin instance. During that time, process messages that report plugin instance evaluation progress or errors. Also reply to messages that query for the current state of evaluation.
+6. Process the ```AnalysisEvaluationControl``` messages.
+
+An example of the analysis evaluation process, that succeeds without any errors can found on the following picture. The messages 1, 1.1 and 1.2 can be interleaved with messages 2, 2.1, 2.2, 3, 3.1, 3.2, 3.3, because these two branches of the evaluation can run in parallel.
+
+![Analysis evaluation using actors](https://raw.github.com/siroky/Payola/develop/docs/img/analysis_evaluation_actors.png)
 
 ### Package cz.payola.domain.rdf
 
