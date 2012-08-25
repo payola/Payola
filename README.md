@@ -80,6 +80,12 @@ While developing the Payola, we used the following technologies:
 - [jQuery blockUI](http://jquery.malsup.com/block/) (jQuery plugin for blocking UI nicely)
 - [LiveQuery](http://docs.jquery.com/Plugins/livequery) (jQuery plugin)
 
+#Related Work
+- http://www.visualdataweb.org/relfinder.php
+- http://catalogus-professorum.org/graphicalquerybuilder
+- http://data.gov.uk/linked-data
+
+
 # Setting up Payola
 ## System Requirements
 
