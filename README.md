@@ -912,7 +912,9 @@ Just like with the `cz.payola.domain.rdf` package, the ontology package adds the
 
 ### Package cz.payola.domain.sparql
 
-> TODO: H.S.
+Because the [SPARQL](http://www.w3.org/TR/rdf-sparql-query/) is used throughout the application (mainly in plugins) and queries are often programatically constructed, it's been decided to use object oriented query abstraction instead of string concatenation. So there are classes that somehow correspond to rules in the [SPARQL query grammar](http://www.w3.org/TR/rdf-sparql-query/#grammar). A query is built by composition of these classes; to obtain it's string representation, the ```toString``` method can be called on the ```ConstructQuery``` instance. As a benefit of this representation, ```GraphPattern```s can be easily merged together, which wouldn't be that trivial if they were represented as strings.
+
+> The only supported query type is the CONSTRUCT, because other types weren't needed. However it's easy to implement them in similar fashion.
 
 <a name="data"></a>
 ## Package cz.payola.data
