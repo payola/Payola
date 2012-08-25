@@ -8,7 +8,7 @@ import cz.payola.web.client.views.elements.form.Field
 abstract class InputLikeView[A <: html.Element with html.elements.InputLike, B](
     htmlElementName: String,
     subViews: Seq[View],
-    name: String,
+    val name: String,
     initialValue: B,
     title: String,
     cssClass: String)

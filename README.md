@@ -1232,23 +1232,54 @@ If you want to learn more about the RPC mechanism on the client-side, please, se
 <a name="client"></a>
 ### Package cz.payola.web.client
 
-> TODO: O.K.
+Structures in this package describe graph visualization - the front-end part of the application. Contains encapsulations of HTML elements and events structure connected to the DOM elements events. The elements of the user interface (UI) are based on the View trait. It provides routines for dynamically changing the currently shown web page.
+
+The elements that the HTML consists of are based on the Twitter Bootstrap framework. It was implemented to support HTML5 and simplify the UI.
+> TODO something more about bootstrap and why we have chosen it
 
 #### Package cz.payola.web.client.events
 
-> TODO: O.K.
+Classes in this package simulate events of the HTML elements. It allows the client to trigger functions not only by DOM element events.
+
+This example shows the structure of events logic: The Button class (from [elements](#elements) package) represents a button in the generated web page. It serves as a trigger of some operation. Its super class ElementView contains a HTML element (an [adapter](#adapters)) - the button DOM element; and an event handler - a list of functions to be performed, if the button is pressed. In the generated web page with the button, pressing it triggers a DOM element event, which calls a function of the ElementView class. This function triggers all event handlers added to the button's mousePressed event handler (a container of the handler functions).
+
+Package contains a main abstract class Event providing adition and removal of event handlers and a trigger function that launches all the event handlers. EventArgs classes provide an unified container of event's attributes.
 
 #### Package cz.payola.web.client.models
 
-> TODO: O.K.
+The Model object in this package provides communication with the server side of the application. Its routines take care of getting available datasources or getting, creating or editing ontology customizations.
 
 #### Package cz.payola.web.client.views
 
-> TODO: O.K.
+This package contains structures describing the user interface for graph viewing.
+
+The UI is a HTML web page with JavaScript language functions handling its logic. The base of the viewing structure is the trait View. It is an encapsulation of a HTML element with basic render and destroy routines for adding and removing the element to and from the web page. Every section of the web page is based on this trait. An abstract class ElementView is its successor providing more tools for manipulation of the HTML element it represents. It contains event handlers binded to the event listeners of the element, attributes getter and setter and it implements the render and destroy routines. To simulate the HTML document structure ElementView contains a list of its sub-views - structured or basic View object (objects representing basic HTML elements of web page, e.g. Anchor, Div, Span). The render operation calls render of every sub-view recursively, that the rendered result appears is a structured HTML document.
+
+The visualization of a graph is done by visual plugins based on an abstract class PluginView. It is a View and GraphView implementation. The abstract class GraphView defines handeling of the visualized graph. The available plugins are textual, graphical and charts.
+
+###### Textual plugins
+
+Base abstract class is TablePluginView. It defines the shown graph updating and generation of a table listing the verices of the graph and their attribute types and values. There are available two textual plugins. Triple Table shows the graph data structure. Select Result Table shows database select queries results.
+
+###### Chart plugins
+
+The only available chart plugin is the Column Chart, which shows the graph as an enumeration of bars representing the values of vertices. Its structure is desribed in the class ColumnChartPlugin which extends the PluginView abstract class. For this plugin the graph has to be in certain structure. It must be a tree graph (without circles) consisting of three levels. The first level is the root of the tree. The second level contains vertices representing the bars of the drawn chart and the third level contains title and value of every vertex in the second level. The values are processed as sizes of bars and titles are labels of bars. Graphs in this structure are accesible by SPARQL query execution tool (see package [presenters](#presenters)).
+
+###### Graphical plugins
+
+The graph is visualized as a HTML5 Canvas drawing. The base abstract class is VisualPluginView. It defines the structure of the drawing space - the controls and the multiple Canvas elements used for drawing - and the event handlers - defining mouse and keyboard operations controling the visualization. It is extended by an abstract class BaseTechnique that defines basic routine for performing initial vertices positioning animation. During update of graph this routine creates a chain of animations. Its implementions CircleTechnique, TreeTechnique and GraphTechnique provide a plugin specific animation.
+
+To visualize a graph structure a pack of classes based on a trait View is provided (the trait is in sub-package views.graph.visual.graph and is not the same as the base trait for visualization plugins). This trait contains drawing routines - e.g. drawArrow, drawCircle, drawText - that are used to draw the graph visualization to the HTML5 element Canvas and its surface CanvasRenderingContext2D. It provides an abstraction over the basic Canvas draw functions - e.g. arc, lineTo, fillText. The View class is extended by InformationView - a label visualization; VertexView - a graphical representation of the [IdentifiedVertex](#cz.payola.common.rdf); EdgeView - the [Edge](#cz.payola.common.rdf) representation; and GraphView - a container of Component classes that contain VertexViews and EdgeViews of a logical graph components (parts of a graph that are not conected with each other by edges).
+
+Every View implementation contains a draw function that draws the object to a canvas and a drawQuick function that is used for redrawing the object during animation. This drawQuick function is supposed to leave out drawing of unimportant elements of the graph visualization, e.g. labels (InfomationViews) of vertices. The GraphView's draw and drawQuick functions require, in contrary to other View implementations, a container of Canvas objects. The GraphView's draw and drawQuick functions decide which element is drawn to which canvas. Spliting the View objects to distinct Canvas elements speeds up redrawing of the whole graph during movement of selected elements. The selected elements are drawn to one set of canvases and the deselected elements are to another one. This allows to redraw only the canavses for selected elements during movement operation. The View implementations also contain its basic configuration and an ontology customization setter. The ontology defines a specific drawing configuration for certain types - based URI of the graph element.
+
+The animations used to move the visualized vertices to their initial position are based on the JavaScript setTimeout function. An animation function e.g. flipGraph calculates the destination of every vertex and creates a list of AnimationVertexView objects, which contain a VertexView object, a translation vector - a vector translating the vertex to its calculated destination - and a speed value - that determines a step size in one animation's iteration. The function that performs the animation is animateTranslation. It takes a part of the vertice's translation vector according to its speed value, adds the part of the vector to the vertice's position, increases the vertice's speed value, redraws the graph and sets a timeout for the next iteration. The translation animation stops when all the vertices are moved to their destination. The movement of vertices ends at the same time since the step in every animation depends on the vertice's speed value, which is the same for all translated vertices.
+
+The most important decision for animations was whether to use HTML5 Web Workers standard to simulate threads. Using this standard would allow to perform animations and their computations of vertices positions at the same time (from the user's perspective). This would not block the browser during long running calculation. For example the Gravity visualization recalculates in each of its iterations forces between vertices and applies them to their positions. Because of that the calculation can not be performed discretely, but has to count every position of all vertices before their final location can be calculated. For graphs with over hundred vertices the gravity animation requires more time than for graph with ten vertices. Web workers would allow to run a background computation of vertices positions and redraw the graph regularly without blocking the web browser's input. Without using the standard the calculation has to be regularly stopped to provide time for the redrawing and processing of the browser's input. The use of the web workers standard appears to be a better decision, but since it is not yet supported by the usual web browsers (Microsoft Internet Explorer, Mozilla Firefox, Google Chrome, Opera), the standard was not implemented.
 
 #### Package cz.payola.web.client.presenters
 
-> TODO: O.K.
+> TODO: O.K. mention the SPARQL query execution tool
 
 #Known bugs
 You can find the complete list of issues on [GitHub](https://github.com/siroky/Payola/issues?sort=updated&state=open). In the time of writing this documentation, the list contained the following issues:

@@ -6,6 +6,7 @@ import cz.payola.domain.entities.plugins._
 import cz.payola.domain.entities.plugins.concrete.DataFetcher
 import cz.payola.domain.entities.plugins.parameters.StringParameter
 import cz.payola.domain.rdf._
+import com.hp.hpl.jena.query.QueryFactory
 
 sealed class PayolaStorage(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
     (implicit val storageComponent: RdfStorageComponent)
@@ -24,7 +25,12 @@ sealed class PayolaStorage(name: String, inputCount: Int, parameters: immutable.
                 throw new PluginException("The storage component is null. " +
                     "The plugin has to be instantiated with non-null storage component.")
             }
-            storageComponent.rdfStorage.executeSPARQLQuery(query, groupURI)
+
+            // Don't allow the users to specify other graph URIs.
+            val sparqlQuery = QueryFactory.create(query)
+            sparqlQuery.getGraphURIs.clear()
+
+            storageComponent.rdfStorage.executeSPARQLQuery(sparqlQuery.toString, groupURI)
         }
     }
 }
