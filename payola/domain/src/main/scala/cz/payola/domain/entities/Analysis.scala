@@ -102,7 +102,7 @@ class Analysis(protected var _name: String, protected var _owner: Option[User])
             throw new AnalysisException(("The analysis contains a data fetcher plugin (%s) that is directly " +
                 "connected to a non SPARQL query plugin (%s). That kind of connection isn't currently supported, " +
                 "because it would cause a selection of everything from the storage corresponding to the data " +
-                "fatcher.").format(b.sourcePluginInstance.plugin.name, b.targetPluginInstance.plugin.name))
+                "fetcher.").format(b.sourcePluginInstance.plugin.name, b.targetPluginInstance.plugin.name))
         }
     }
 
