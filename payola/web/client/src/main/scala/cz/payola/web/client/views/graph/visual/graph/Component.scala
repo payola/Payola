@@ -170,6 +170,13 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
         result
     }
 
+    def getCenter(): Point2D = {
+        val topLeft = getTopLeft()
+        val bottomRight = getBottomRight()
+
+        Point2D(topLeft.x + (bottomRight.x - topLeft.x) / 2, topLeft.y + (bottomRight.y - topLeft.y) / 2)
+    }
+
     /**
      * Moves all selected vertexViews in this component by the difference vector2D
      * @param difference to move vertexViews by

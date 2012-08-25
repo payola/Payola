@@ -21,7 +21,7 @@ abstract class BaseTechnique(name: String) extends VisualPluginView(name)
 
     private def performPositioning(graphView: GraphView) {
 
-        var firstAnimation: Option[Animation[ListBuffer[(VertexView, Point2D)]]] = None
+        var firstAnimation: Option[Animation[_]] = None
 
         var previousComponent: Option[Component] = None
 
@@ -69,7 +69,7 @@ abstract class BaseTechnique(name: String) extends VisualPluginView(name)
      * Runs the vertex positioning algorithm and moves the vertices to "more suitable" positions.
      */
     protected def getTechniquePerformer(component: Component,
-        animated: Boolean): Animation[ListBuffer[(VertexView, Point2D)]]
+        animated: Boolean): Animation[_]
 
     /**
      * Moves the vertices to a tree like structure. The first element of input is placed in the root located
