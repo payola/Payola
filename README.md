@@ -39,14 +39,51 @@ The main goal is to come up with a prototype of a Linked Data tool for common us
 
 Since Payola is rather a platform (or kind of framework, if you want), not a closed project, you can fork the project and write your own plugins, extensions and more on [https://github.com/siroky/Payola](https://github.com/siroky/Payola).
 
+##Why Payola?
+During our studies on the University, we've met several tools for working with Linked Data. Many of them are really useful, but it is rather hard to work with them. Especially if you want to process some data and visualise them. You need to install and configure several tools. Morever, those tools work separately, so you need to get an RDF file from each of them and put it into the next one. Some of them are on the web, some of them works under Linux, some of them on Windows.
+
+We wanted to bring a single tool which will be able to do it all. We also wanted to make a web application which is, we think, a new synonymum for platform-independent software. That's also why we take advantage of the new HTML5 standard and avoid using Flash platform.
+
+We also wanted to present a tool which will be capable of sharing the RDF data between its users, visualisations included. Nowadays, if you share an RDF visualisation to somebody, you probably share a screenshot with him. If it is a result of an analysis, it changes over a time, but the screenshot does not. With Payola, you don't share a static visualisation, you share the right to create the visualisation whenever the user want. And he gets the most current results.
+
+###Am I interested in Payola?
+If you work with RDF data, yes, you are. 
+
+If you just work with RDF data - we will help to access you data sources, browse through them, analyze the data and visualise them. We've tried to minimize the need to learn the SPARQL language to work with SPARQL data.
+
+If you are a developer, you can also contribute your own analytical plugin and share it with the users of your Payola installation. You can also come up with your own visualisation plugin and compile your own version of Payola.
+
+###What are the most common use cases?
+Until now, we have thought and discussed the following use cases:
+
+- private tool to work with RDF data
+- company tool to work with internal RDF data
+- public website with community around a specific type of RDF data
+- company/government website to present RDF data to the public
+
+In companies, Payola will probably have many non-technical users and a developer who will write new plugins and administer the application. 
+
 # 3rd party technologies
 While developing the Payola, we used the following technologies:
 
 - [Play! 2.0](http://www.playframework.org/) Scala MVC web framework
+- [Squeryl](http://squeryl.org/) (Scala ORM)
+- [Apache Jena](http://jena.apache.org/) (Java framework for building Semantic Web applications)
 - [jQuery](http://jquery.com/) JavaScript Library
 - [Twitter Bootstrap](http://twitter.github.com/bootstrap/) (collection of CSS and JS code from Twitter)
 - [Colorpicker for bootstrap](http://www.eyecon.ro/bootstrap-colorpicker/) JS module for Twitter Bootstrap
-- [Ace](http://ace.ajax.org/) (web editor for programming languages with syntax highlihting)
+- [Ace](http://ace.ajax.org/) (web editor for programming languages with syntax highlighting)
+- [Select2](http://ivaynberg.github.com/select2/) (JavaScript autocomplete plugin)
+- [sprintf](http://code.google.com/p/sprintf/) (SprintF implementation for JS)
+- [Flot](http://code.google.com/p/flot/) (JavaScript charts plugin)
+- [jQuery autosize](http://www.jacklmoore.com/autosize) (jQuery plugin for autosizing textareas)
+- [jQuery blockUI](http://jquery.malsup.com/block/) (jQuery plugin for blocking UI nicely)
+- [LiveQuery](http://docs.jquery.com/Plugins/livequery) (jQuery plugin)
+
+#Related Work
+- http://www.visualdataweb.org/relfinder.php
+- http://catalogus-professorum.org/graphicalquerybuilder
+- http://data.gov.uk/linked-data
 
 # Setting up Payola
 ## System Requirements
