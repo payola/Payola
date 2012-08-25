@@ -61,7 +61,7 @@ Until now, we have thought and discussed the following use cases:
 - public website with community around a specific type of RDF data
 - company/government website to present RDF data to the public
 
-In companies, Payola will probably have many non-technical users and a developer who will write new plugins and administer the application.
+In companies, Payola will probably have many non-technical users and a developer who will write new plugins and administer the application. 
 
 # 3rd party technologies
 While developing the Payola, we used the following technologies:
@@ -73,6 +73,8 @@ While developing the Payola, we used the following technologies:
 - [Ace](http://ace.ajax.org/) (web editor for programming languages with syntax highliht)
 - [Select2](http://ivaynberg.github.com/select2/) (JavaScript autocomplete plugin)
 - [Apache Jena](http://jena.apache.org/) (Java framework for building Semantic Web applications)
+- [sprintf](http://code.google.com/p/sprintf/) (SprintF implementation for JS)
+- [Squeryl](http://squeryl.org/) (Scala ORM)
 
 # Setting up Payola
 ## System Requirements
