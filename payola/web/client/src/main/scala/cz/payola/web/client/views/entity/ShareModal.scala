@@ -11,12 +11,12 @@ class ShareModal(
     val entityName: String,
     val granteeClassNameText: String,
     val grantees: Seq[PrivilegeableEntity])
-    extends Modal("Share " + entityName + " to " + granteeClassNameText + "s", Nil, Some("Share"))
+    extends Modal("Share %s to %ss".format(entityName, granteeClassNameText), Nil, Some("Share"))
 {
     val granteeSearching = new UnitEvent[ShareModal, GranteeSearchEventArgs]
 
     val granteeSelection = new InputControl(
-        "Share to " + granteeClassNameText + "s",
+        "Share to %ss".format(granteeClassNameText),
         new TextInput("", "init", "Enter name") , Some("span2")
     )
 

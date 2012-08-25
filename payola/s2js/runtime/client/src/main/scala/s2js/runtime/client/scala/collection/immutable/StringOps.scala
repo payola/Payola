@@ -48,5 +48,16 @@ class StringOps(val str: java.lang.String) extends s2js.runtime.client.scala.col
     @javascript("return self.x.replace(pattern, replacement);")
     def replaceAllLiterally(pattern: String, replacement: String) = null
 
+    @javascript(
+        """
+         var copiedArgs = [];
+          for(var i=0; i<arguments.length; i++){
+              copiedArgs.push(arguments[i]);
+          }
+          return vsprintf(self.str, copiedArgs);
+        """
+    )
+    def format(args: Array[Any]) = ""
+
     override def toString = repr
 }

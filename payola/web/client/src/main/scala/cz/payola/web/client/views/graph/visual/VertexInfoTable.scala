@@ -64,15 +64,13 @@ class VertexInfoTable(vertex: IdentifiedVertex, values: mutable.HashMap[String, 
         val div = new Div(List(popoverInner))
         div.setAttribute("class", "popover fade in vitable")
         div.setAttribute("style",
-            "top: " + (position.y - 10).toString() + "px; left: " + position.x.toString() + "px;" +
-                "z-index: 1000;")
+            "top: %dpx; left: %dpx; z-index: 1000;".format(position.y - 10, position.x))
         List(div)
 
     }
 
     def setPosition(position: Point2D) {
         createSubViews.head.blockHtmlElement.setAttribute("style",
-            "top: " + (position.y - 10).toString() + "px; left: " + position.x.toString() + "px;" +
-                "z-index: 1000;")
+            "top: %dpx; left: %dpx; z-index: 1000;".format(position.y - 10, position.x))
     }
 }

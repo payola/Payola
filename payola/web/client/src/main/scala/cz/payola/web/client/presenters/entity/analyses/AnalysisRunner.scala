@@ -173,7 +173,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
     private def downloadResultAs(extension: String) {
         if (getAnalysisEvaluationID.isDefined) {
             window.open(
-                "/analysis/" + analysisId + "/evaluation/" + getAnalysisEvaluationID.get + "/download." + extension)
+                "/analysis/%s/evaluation/%s/download.%s".format(analysisId, getAnalysisEvaluationID.get, extension))
         } else {
             AlertModal.display("Evaluation hasn't finished yet.", "")
         }

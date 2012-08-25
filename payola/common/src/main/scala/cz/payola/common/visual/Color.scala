@@ -21,8 +21,7 @@ class Color(val red: Int, val green: Int, val blue: Int, val alpha: Double = 1.0
      * @return rgb("red","green","blue")
      */
     override def toString: String = {
-        // TODO use String.format when it's supported by the js runtime.
-        "rgba(" + red + "," + green + "," + blue + "," + alpha + ")"
+        "rgba(%d,%d,%d,%0.1f)".format(red, green, blue, alpha)
     }
 }
 
@@ -41,7 +40,7 @@ object Color
 
     val Blue = new Color(0, 0, 255)
 
-    val Transparent = new Color(0, 0, 0, 0)
+    val Transparent = new Color(0, 0, 0, 0.0)
 
     /**
      * Converts color from rgb string
