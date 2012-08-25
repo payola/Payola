@@ -65,8 +65,8 @@ class ColumnChartPluginView extends PluginView("Column Chart")
         super.render(parent)
         val width = window.innerWidth
         val height = window.innerHeight - wrapper.offset.y
-        val sizeStyle = "width: " + width + "px; height: " + height + "px;"
-        wrapper.setAttribute("style", sizeStyle + " overflow: auto;")
+        val sizeStyle = "width: %dpx; height: %dpx; overflow: auto;".format(width, height)
+        wrapper.setAttribute("style", sizeStyle)
     }
 
     def createPhonyGraph: Graph = {
@@ -191,7 +191,7 @@ class ColumnChartPluginView extends PluginView("Column Chart")
         }
         val height = window.innerHeight - chartWrapper.offset.y - 20 // The 20 is for potential horizontal scrollbar.
 
-        val styleString = "width: " + width + "px; height: " + height + "px; margin: 0 20px;"
+        val styleString = "width: %dpx; height: %dpx; margin: 0 20px;".format(width, height)
         chartWrapper.setAttribute("style", styleString)
     }
 

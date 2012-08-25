@@ -22,7 +22,7 @@ class ProgressBar extends Div(Nil, "progress span5")
     }
 
     def setProgress(value: Double) {
-        progressValueBar.setAttribute("style", "width: " + value * 100 + "%; height: 40px")
+        progressValueBar.setAttribute("style", "width: %d%%; height: 40px".format(value * 100))
     }
 
     def setStriped(striped: Boolean) {

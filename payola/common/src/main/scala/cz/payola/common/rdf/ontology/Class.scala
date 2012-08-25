@@ -21,10 +21,10 @@ class Class(val uri: String, val label: String, val comment: String, val propert
     }
 
     override def toString: String = {
-        super.toString + " {\n\t" +
-            label + " (" + comment + ")\n\t"
-            "URI: " + uri + "\n\t" +
-            "Properties: " + properties.toString + "\n" +
-        "}"
+        """%s {\n\t
+            %s (%s)\n\t
+            URI: %s\n\t"
+            Properties: %s\n
+         }""".format(super.toString, label, comment, uri, properties.toString())
     }
 }
