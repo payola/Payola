@@ -56,11 +56,11 @@ abstract class PluginInstanceView(
             val pos = w - (p.htmlElement.offsetWidth / 2) - 4
 
             val conn = new Div(Nil, "connector")
-            conn.setAttribute("style", "left:" + (pos) + "px")
+            conn.setAttribute("style", "left %dpx".format(pos))
             conn.render(successors.htmlElement)
 
             val plumb = new Div(Nil, "plumb")
-            plumb.setAttribute("style", "left:" + (pos - 3) + "px")
+            plumb.setAttribute("style", "left: %dpx".format(pos - 3))
             plumb.render(alertDiv.htmlElement)
         }
     }

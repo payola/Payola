@@ -111,8 +111,7 @@ object DataSource extends PayolaController with Secured
       */
     def edit(id: String) = authenticated { user: User =>
         Payola.model.dataSourceModel.getAccessibleToUserById(Some(user), id).map { d =>
-            val availableDataFetchers = Payola.model.pluginModel.getAccessibleToUser(Some(user)).filter(p => p.isInstanceOf[DataFetcher]).asInstanceOf[Seq[DataFetcher]]
-            Ok(views.html.datasource.edit(user, d, availableDataFetchers))
+            Ok(views.html.datasource.edit(user, d))
         }.getOrElse {
             NotFound(views.html.errors.err404("The data source does not exist."))
         }

@@ -85,10 +85,10 @@ case class Point2D(var x: Double, var y: Double)
 
     /**
      * Creates String representation of this point.
-     * @return "[" + math.round(x) + "; " + math.round(y) + "]"
+     * @return [x; y]
      */
     override def toString: String = {
-        "[" + math.round(x) + "; " + math.round(y) + "]"
+        "[%d; %d]".format(x, y)
     }
 }
 

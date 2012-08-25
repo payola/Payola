@@ -56,6 +56,10 @@ object Model
         }
     }
 
+    def getOwnedDataSourceByID(dataSourceID: String)(successCallback: DataSource => Unit)(errorCallback: Throwable => Unit) {
+        DataSourceManager.getOwnedDataSourceByID(dataSourceID) { ds => successCallback(ds) } { t => errorCallback(t)}
+    }
+
     def ontologyCustomizationsByOwnership(successCallback: OntologyCustomizationsByOwnership => Unit)
         (errorCallback: Throwable => Unit) {
 

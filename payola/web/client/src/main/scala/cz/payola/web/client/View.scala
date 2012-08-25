@@ -39,14 +39,14 @@ object View
         } else {
             """
                 <div class="row-fluid">
-                    <h3 style="padding: 20px;">""" + message + """</h3>
+                    <h3 style="padding: 20px;">%s</h3>
                 </div>
                 <div class="row-fluid">
                     <div class="progress progress-striped active">
                         <div class="bar" style="width: 100%"></div>
                     </div>
                 </div>
-            """
+            """.format(message)
         }
     }
 }

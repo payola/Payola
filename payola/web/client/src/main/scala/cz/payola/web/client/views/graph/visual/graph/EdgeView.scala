@@ -110,7 +110,7 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
     }
 
     override def toString: String = {
-        "[" + originView.toString + "-" + edgeModel.toString + "-" + destinationView.toString + "]"
+        "[%s - %s - %s]".format(originView.toString(), edgeModel.toString(), destinationView.toString())
     }
 
     /**
