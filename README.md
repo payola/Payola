@@ -1377,7 +1377,9 @@ In order to have the code in the repository comiplable all the time, we use a [T
 	</target>
 </project>
 ```
-This prevent us from situations, when somebody makes a commit and does not test it properly. It may prevent the application from compiling, so that the rest of the team can pull a broken code from the repository. With TeamCity, such a broken commit is revealed in about 2 minutes and the whole team gets noticed about it.
+This prevent us from situations, when somebody makes a commit and does not test it properly. It may prevent the application from compiling, so that the rest of the team can pull a broken code from the repository. With TeamCity, such a broken commit is revealed in about 2 minutes and the whole team gets noticed about it. It takes us just a few moment to get it right.
+
+![TeamCity](https://raw.github.com/siroky/Payola/develop/docs/img/teamcity.png)
 
 In the future, we will work hardly to integrate test suites into the continuous integration process, as well as automatic deployment to our production server.
 
