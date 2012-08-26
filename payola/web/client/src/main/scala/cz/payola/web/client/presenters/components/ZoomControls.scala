@@ -60,7 +60,7 @@ class ZoomControls(var currentZoom: Double) extends ComposedView
     private def getStatusCaption = {
         val wholeNum = math.round(currentZoom)
 
-        "%2d %%".format(wholeNum)
+        "%3d %%".format(wholeNum)
     }
 
     def setZoom(zoom: Double) {
