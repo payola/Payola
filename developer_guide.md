@@ -938,10 +938,10 @@ public Form1()
     InitializeComponent();
     // Use a lambda expression to define an event handler.
     this.Click += (s,e) => { MessageBox.Show(
-       ((MouseEventArgs)e).Location.ToString());}
-;
+       ((MouseEventArgs)e).Location.ToString());};
 }
 ```
+Example taken from [http://msdn.microsoft.com/en-us/library/ms366768.aspx](http://msdn.microsoft.com/en-us/library/ms366768.aspx).
 That is much better, we especially loves the `+=` operator usage. That is basically the syntax we will use:
 
 ```
@@ -961,7 +961,7 @@ def trigger(eventArgs: B): C = {
    handlers.map(_(eventArgs)).fold(resultsFolderInitializer)(resultsFolderReducer _)
 }
 ```
-On this one line of Scala magic, all the listeners are executed (in the order they have registered) and their results are aggregated by the `resultsFolderInitializer` and `resultsFolderReducer` methods which you define when introducing a new event. The `resultsFolderInitializer` defines, how the fold stack gets initialized. The `resultsFolderReducer` method than defines, how results of two listeners, more accurately, how the result of the currently executed listener should be processed. To make it clear, let's see the following example (the `Boolean` event implementation):
+On this one line of Scala magic, all the handlers are executed (in the order they have registered) and their results are aggregated by the `resultsFolderInitializer` and `resultsFolderReducer` methods which you define when introducing a new event. The `resultsFolderInitializer` defines, how the fold stack gets initialized. The `resultsFolderReducer` method than defines, how results of two handlers, more accurately, how the result of the currently executed handler should be processed. To make it clear, let's see the following example (the `Boolean` event implementation):
 
 ```
 protected def resultsFolderInitializer: Boolean = {
