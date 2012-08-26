@@ -51,6 +51,7 @@ class VirtuosoStorage(
     }
 
     def storeGraphFromFile(graphURI: String, file: File){
+        println(file.getAbsolutePath)
         executeSQL("DB.DBA.RDF_LOAD_RDFXML(file_to_string('%s'), '', '%s')".format(escapeString(file.getAbsolutePath), escapeString(graphURI)))
     }
 
