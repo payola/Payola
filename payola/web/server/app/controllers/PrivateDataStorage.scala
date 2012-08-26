@@ -67,7 +67,11 @@ object PrivateDataStorage extends PayolaController with Secured
             Payola.model.payolaStorageModel.addGraphToUser(file, user)
             Redirect(routes.PrivateDataStorage.add()).flashing("success" -> "Successfully saved graph.")
         }catch{
-            case t: Throwable => Redirect(routes.PrivateDataStorage.add()).flashing("error" -> t.getMessage)
+            // Change the message to something meaningful - Virtuoso typically
+            // returns something like 'input length = 1' which is not very user friendly
+            case t: Throwable => Redirect(routes.PrivateDataStorage.add()).flashing(
+                "error" -> "The uploaded file is not a valid RDF/XML or TTL file."
+            )
         }
     }
 
