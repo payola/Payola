@@ -16,7 +16,6 @@ class PrivateDataUploader(fileUploaderDivID: String,
     val fileInput = new InputControl("File: ", new FileInput("graphFile", "", "span10"), Some("span2"))
     val fileUploadButton = new Button(new Text(" Upload File"), "btn-primary input", new Icon(Icon.upload, true))
 
-    fileInput.field.setAttribute("accept", "application/rdf+xml, application/xml,text/turtle")
     fileInput.render(fileUploadDiv)
 
     fileUploadButton.mouseClicked += { event =>
