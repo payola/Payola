@@ -1,6 +1,5 @@
 <a name="top"></a>
 <a name="developer"></a>
-##### TODO - information about which libraries are used (where, why)
 
 # Developer Guide
 
