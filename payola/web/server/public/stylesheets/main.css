@@ -158,8 +158,9 @@ input[type="checkbox"].active:after {
 }
 
 .successors {
-    float: left;
+    display: inline-block;
     min-width: 300px;
+    vertical-align: top;
 }
 
 .successors .parameters {
@@ -417,4 +418,9 @@ table .btn-toolbar .badge {
 
 .dashboard .row-fluid .span3.btn {
     min-height: 0px !important;
+}
+
+.plugin-canvas {
+    overflow-x: auto;
+    white-space: nowrap;
 }
