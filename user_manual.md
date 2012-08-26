@@ -101,7 +101,7 @@ A data source is - as its name hints - a source of data. Payola needs to know wh
 
 Let's start by creating a new data source. In the toolbar, click on the `My Data Sources` button and select `Create New`. You will need to enter a data source name and description and which data fetcher to use.
 
-![Creating a Data Source](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/creating_data_source.png)
+![Creating a Data Source](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_data_source.png)
 
 A data fetcher is a plugin which can communicate with a data source of a specific type. For example, `SPARQL Endpoint` is a data fetcher. SPARQL is a query language for fetching data and such a data fetcher can work with any SPARQL endpoint.
 
@@ -144,8 +144,6 @@ You can, however, change the visualization plugin using the `Change visualizatio
 ![Select Table](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/select_table_no_result.png)
 
 `Circle`, `Gravity` and `Tree` visualizations will display a regular graph using vertices and edges and differ only in the way they lay out the vertices.
-
-![Graph Chart](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/graph_chart.png)
 
 > TODO - OK describe what can be done with a graph
 
