@@ -922,7 +922,7 @@ element.addEventListener('click',function () {
 },false)
 ```
 
-This is a typical example of adding an event listener in JavaStript. It has many disadvantages we don't like very much:
+This is a typical example of registering an event listener in JavaScript. It has many disadvantages we don't like very much:
 - it is not strongly typed as the whole JavaScript language is dynamic
 - it is very easy to mistype the name of the event
 - a very few people does know, what the last boolean parameter does - [do you?](http://www.quirksmode.org/js/events_advanced.html)
@@ -930,7 +930,7 @@ This is a typical example of adding an event listener in JavaStript. It has many
 - one is not able to aggregate the result of all the event listeners
 - it is not Scala
 
-Since we told you, we've based our system on what you can know from the world of C# programming language, let`s us present a short example of events from C#:
+As we told you, we've based our system on what you can know from the world of C# programming language. So, let`s us present a short example of events from C#:
 
 ```
 public Form1()
@@ -942,7 +942,7 @@ public Form1()
 }
 ```
 Example taken from [http://msdn.microsoft.com/en-us/library/ms366768.aspx](http://msdn.microsoft.com/en-us/library/ms366768.aspx).
-That is much better, we especially loves the `+=` operator usage. That is basically the syntax we will use:
+That is much better, we especially love the `+=` operator usage. That is basically the syntax we will use:
 
 ```
 div.mouseMoved += { e =>
@@ -961,7 +961,7 @@ def trigger(eventArgs: B): C = {
    handlers.map(_(eventArgs)).fold(resultsFolderInitializer)(resultsFolderReducer _)
 }
 ```
-On this one line of Scala magic, all the handlers are executed (in the order they have registered) and their results are aggregated by the `resultsFolderInitializer` and `resultsFolderReducer` methods which you define when introducing a new event. The `resultsFolderInitializer` defines, how the fold stack gets initialized. The `resultsFolderReducer` method than defines, how results of two handlers, more accurately, how the result of the currently executed handler should be processed. To make it clear, let's see the following example (the `Boolean` event implementation):
+On this one line of Scala magic, all the handlers are executed (in the order they have registered) and their results are aggregated by the `resultsFolderInitializer` and `resultsFolderReducer` methods which you define when introducing a new event. The `resultsFolderInitializer` defines, how the fold stack gets initialized. The `resultsFolderReducer` method defines than, how results of two handlers, more accurately, how the result of the currently executed handler should be processed. To make it clear, let's see the following example (the `Boolean` event implementation):
 
 ```
 protected def resultsFolderInitializer: Boolean = {
@@ -972,7 +972,7 @@ protected def resultsFolderReducer(stackTop: Boolean, currentHandlerResult: Bool
    stackTop && currentHandlerResult
 }
 ```
-We just initialize the stack to `true`, and boolean-and the value of every next event handler. Effectively, if any of handlers returns `false`, the result will be `false`.
+We just initialize the stack to `true`, and boolean-and the value of every next event handler. Effectively, if any of handlers returns `false`, the result will be `false`. In other words, the trigger method will return `true` if and only if all the handlers return `true`.
 
 This example shows the structure of events logic: The Button class (from [elements](#elements) package) represents a button in the generated web page. It serves as a trigger of some operation. Its super class ElementView contains a HTML element (an [adapter](#adapters)) - the button DOM element; and an event handler - a list of functions to be performed, if the button is pressed. In the generated web page with the button, pressing it triggers a DOM element event, which calls a function of the ElementView class. This function triggers all event handlers added to the button's mousePressed event handler (a container of the handler functions).
 
