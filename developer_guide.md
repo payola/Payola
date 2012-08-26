@@ -996,7 +996,7 @@ Since we have already done that, you can just use the prepared classes in the `c
 
 #### Package cz.payola.web.client.models
 
-The Model object in this package provides communication with the server side of the application. Its routines take care of getting available datasources or getting, creating or editing ontology customizations.
+The Model object in this package provides communication with the server side of the application. Its routines take care of getting available datasources or getting, creating or editing ontology customizations. All the classes conatins methods which calls the remote objects with apropriate parameters and returns results of such calls.
 
 #### Package cz.payola.web.client.views
 
