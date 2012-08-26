@@ -53,9 +53,8 @@ trait PayolaStorageModelComponent
           * @param user User.
           */
         def addGraphToUser(file: File, user: User) {
-            val graphXML = Source.fromFile(file, "UTF-8").mkString
             val graphID = IDGenerator.newId
-            rdfStorage.storeGraph(graphID, graphXML)
+            rdfStorage.storeGraphFromFile(graphID, file)
             rdfStorage.addGraphToGroup(graphID, user.id)
         }
     }
