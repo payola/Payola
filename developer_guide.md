@@ -904,8 +904,7 @@ If you want to learn more about the RPC mechanism on the client-side, please, se
 
 Structures in this package describe graph visualization - the front-end part of the application. Contains encapsulations of HTML elements and events structure connected to the DOM elements events. The elements of the user interface (UI) are based on the View trait. It provides routines for dynamically changing the currently shown web page.
 
-The elements that the HTML consists of are based on the Twitter Bootstrap framework. It was implemented to support HTML5 and simplify the UI.
-> TODO something more about bootstrap and why we have chosen it
+To bring better browser compatibility and basic responsive web support, we've decided to use [Twitter Bootstrap](http://twitter.github.com/bootstrap), a great frontend framework, which is a collection of CSS and JS code. It comes with basic support of CSS grids. Moreover, it comes with a bunch of prepared components like buttons, menus, tabs, progress bars and more. In order to use those components comfortably from the Scala client code, we've introduced some additional views. You can find them in the `cz.payola.web.client.views.bootstrap` package.
 
 #### Package cz.payola.web.client.events
 
