@@ -912,7 +912,56 @@ To bring better browser compatibility and basic responsive web support, we've de
 
 #### Package cz.payola.web.client.events
 
-Classes in this package simulate events of the HTML elements. It allows the client to trigger functions not only by DOM element events.
+The whole event processing system for the client-side code resides in this package. As stated before, we introduce here a completely new (but probably not unique) system of event processing. Let us walk you through our decision process to get the idea why we did what we did.
+
+All starts with the following code fragment:
+
+```
+element.addEventListener('click',function () {
+	this.style.backgroundColor = '#cc0000'
+},false)
+```
+
+This is a typical example of adding an event listener in JavaStript. It has many disadvantages we don't like very much:
+- it is not strongly typed as the whole JavaScript language is dynamic
+- it is very easy to mistype the name of the event
+- a very few people does know, what the last boolean parameter does - [do you?](http://www.quirksmode.org/js/events_advanced.html)
+- preventing the triggered event from bubbling is a little bit more complicated
+- one is not able to aggregate the result of all the event listeners
+- it is not Scala
+
+Since we told you, we've based our system on what you can know from the world of C# programming language, let`s us present a short example of events from C#:
+
+```
+public Form1()
+{
+    InitializeComponent();
+    // Use a lambda expression to define an event handler.
+    this.Click += (s,e) => { MessageBox.Show(
+       ((MouseEventArgs)e).Location.ToString());}
+;
+}
+```
+That is much better, we especially loves the `+=` operator usage. That is basically the syntax we will use:
+
+```
+div.mouseMoved += { e =>
+    instance.addCssClass("highlight")
+    false
+}
+``` 
+We can fully utilize the closure mechanism of the Scala language. Since the `div.mouseMoved` has a declared type, we don't need to repeat ourselves, the Scala compiler will know, which type to use. We can just create the handler in-place.
+
+> OK. Nice. But what is the breathtaker?
+
+Look at the implementation of the implementation of the `cz.payola.web.client.events.Event` class, especially the `trigger` method:
+
+```
+def trigger(eventArgs: B): C = {
+   handlers.map(_(eventArgs)).fold(resultsFolderInitializer)(resultsFolderReducer _)
+}
+```
+On this one line of Scala magic, all the listeners are executed (in the order they have registered) and their results are aggregated by the `resultsFolderInitializer` and `resultsFolderReducer` methods which you define when introducing a new event. The `resultsFolderInitializer`
 
 This example shows the structure of events logic: The Button class (from [elements](#elements) package) represents a button in the generated web page. It serves as a trigger of some operation. Its super class ElementView contains a HTML element (an [adapter](#adapters)) - the button DOM element; and an event handler - a list of functions to be performed, if the button is pressed. In the generated web page with the button, pressing it triggers a DOM element event, which calls a function of the ElementView class. This function triggers all event handlers added to the button's mousePressed event handler (a container of the handler functions).
 
