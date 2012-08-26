@@ -91,6 +91,8 @@ class GraphView extends View[CanvasPack] {
         components = ListBuffer[Component]()
 
         var remainingVertices = vertexViews
+        var componentNumber = 0
+
         while (!remainingVertices.isEmpty) {
 
             var currentVertex = remainingVertices.head
@@ -99,8 +101,6 @@ class GraphView extends View[CanvasPack] {
             var currentNeighbours = ListBuffer[VertexView]()
             var currentComponentsVertices = ListBuffer[VertexView]()
             var currentComponentsEdges = ListBuffer[EdgeView]()
-
-            var componentNumber = 0
 
             var run = true
             while (run) {

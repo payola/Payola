@@ -1,12 +1,13 @@
 package cz.payola.web.client.views.graph.visual.techniques
 
 import collection.mutable.ListBuffer
-import cz.payola.web.client.views.algebra.Point2D
+import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.graph.visual.VisualPluginView
 import cz.payola.common.rdf.Graph
 import cz.payola.web.client.views.graph.visual.graph._
 import cz.payola.web.client.views.graph.visual.graph.positioning._
 import cz.payola.web.client.views.graph.visual.animation._
+import scala.Some
 
 abstract class BaseTechnique(name: String) extends VisualPluginView(name)
 {
@@ -33,14 +34,14 @@ abstract class BaseTechnique(name: String) extends VisualPluginView(name)
                 firstAnimation.get.addFollowingAnimation(getTechniquePerformer(component, true))
             }
 
-            val componentPositionDesc = new ComponentPositionHelper(() => topLayer.size, component.getCenter,
-                previousComponent)
-
             firstAnimation.get.addFollowingAnimation(new Animation(
                 Animation.flipGraph, ((new GraphCenterHelper(graphView.getGraphCenter), component.vertexViews)), None,
                 redrawQuick, redraw, None))
 
             if (graphView.components.length != 1) {
+                val componentPositionDesc = new ComponentPositionHelper(() => topLayer.size,
+                    component.getCenter, previousComponent)
+
                 firstAnimation.get.addFollowingAnimation(new Animation(
                     Animation.moveGraphByFunction, (componentPositionDesc, component.vertexViews), None, redrawQuick,
                     redraw, None))
