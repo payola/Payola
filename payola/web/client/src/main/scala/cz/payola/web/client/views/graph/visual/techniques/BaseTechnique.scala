@@ -43,8 +43,7 @@ abstract class BaseTechnique(name: String) extends VisualPluginView(name)
             if (graphView.components.length != 1) {
                 firstAnimation.get.addFollowingAnimation(new Animation(
                     Animation.moveGraphByFunction, (componentPositionDesc, component.vertexViews), None, redrawQuick,
-                    redraw,
-                    None))
+                    redraw, None))
             }
 
             previousComponent = Some(component)
@@ -85,8 +84,9 @@ abstract class BaseTechnique(name: String) extends VisualPluginView(name)
      * @param animationStepLength defining this parameter with 0 makes the animation to perform the operation instantly
      *                            (skipping the animation)
      */
-    def basicTreeStructure(vViews: ListBuffer[VertexView], nextAnimation: Option[Animation[_]], quickDraw: () => Unit,
-        finalDraw: () => Unit, animationStepLength: Option[Int]): Animation[ListBuffer[(VertexView, Point2D)]] = {
+    def basicTreeStructure(vViews: ListBuffer[VertexView], nextAnimation: Option[Animation[_]],
+        quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
+
         var levels = ListBuffer[ListBuffer[VertexView]]()
         var level = ListBuffer[VertexView]()
         var levelNext = ListBuffer[VertexView]()
@@ -135,10 +135,10 @@ abstract class BaseTechnique(name: String) extends VisualPluginView(name)
             val currentLevelSize = elements.length
             elements.foreach { element =>
 
-                val destination = Point2D(/*scala.math.random / 10 +*/ origin.x +
+                val destination = Point2D(origin.x +
                     (vertexNumInLevel * treeVerticesDistance) + treeVerticesDistance * (lastLevelSize -
                     currentLevelSize) / 2,
-                    /*scala.math.random / 10 +*/ origin.y + (levelNum * treeVerticesDistance))
+                    origin.y + (levelNum * treeVerticesDistance))
 
                 toMove += ((element, destination))
 
@@ -147,7 +147,7 @@ abstract class BaseTechnique(name: String) extends VisualPluginView(name)
             levelNum += 1
         }
 
-        new Animation(Animation.moveVertices, toMove, nextAnimation, quickDraw, finalDraw, animationStepLength)
+        Animation.moveVertices(toMove, nextAnimation, quickDraw, finalDraw, animationStepLength)
     }
 
     /**
