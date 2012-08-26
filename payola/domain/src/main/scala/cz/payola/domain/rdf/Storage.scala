@@ -1,6 +1,7 @@
 package cz.payola.domain.rdf
 
 import com.hp.hpl.jena.query.QueryFactory
+import java.io.File
 
 trait Storage
 {
@@ -29,6 +30,13 @@ trait Storage
       * @param graphURL URL at which to fetch the graph.
       */
     def storeGraphAtURL(graphURI: String, graphURL: String)
+
+    /**
+     * Stores the graph in the storage.
+     * @param graphURI URI of the graph.
+     * @param file File with RDF/XML or TTL.
+     */
+    def storeGraphFromFile(graphURI: String, file: File)
 
     /**
       * Adds a graph with the specified URI to the specified group. A graph with must already exist on the server.

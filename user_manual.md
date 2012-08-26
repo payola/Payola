@@ -73,9 +73,21 @@ In companies, Payola will probably have many non-technical users and a developer
 
 You can use Payola both as a guest and a logged-in user. A guest is limited to analyses and data sources marked as public by other users and only in a read-only mode (i.e. can't edit them).
 
-![Guest Dashboard](https://raw.github.com/siroky/Payola/develop/docs/img/guest-dashboard.png)
+![Guest Dashboard](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/guest_dashboard.png)
 
-A logged-in user can create new data sources, analyses, plugins (you can actually write your own plugin, more about that [later](#plugins)), edit them and share them; and upload your own private RDF data.
+Follow the `Log In` link in the top-right corner of the page. If you have already signed up, simply fill in your email and password and press Log In. Otherwise, click `Sign Up`.
+
+![Sign In](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/sign_in.png)
+
+To sign up, fill in your email and password.
+
+![Sign Up](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/sign_up_credentials.png)
+
+You will be automatically logged in and redirected to your Dashboard.
+
+
+
+As a logged-in user, you can now create new data sources, analyses, plugins (you can actually write your own plugin, more about that [later](#plugins)), edit them and share them; and upload your own private RDF data.
 
 ---
 
