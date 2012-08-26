@@ -60,7 +60,7 @@ abstract class PluginInstanceView(
             conn.render(successors.htmlElement)
 
             val plumb = new Div(Nil, "plumb")
-            plumb.setAttribute("style", "left: %dpx".format(pos - 3))
+            plumb.setAttribute("style", "left: %dpx %".format(pos - 3))
             plumb.render(alertDiv.htmlElement)
         }
     }

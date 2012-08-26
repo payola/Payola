@@ -54,7 +54,12 @@ class StringOps(val str: java.lang.String) extends s2js.runtime.client.scala.col
           for(var i=0; i<arguments.length; i++){
               copiedArgs.push(arguments[i]);
           }
-          return vsprintf(self.str, copiedArgs);
+         try {
+             return vsprintf(self.str, copiedArgs);
+         }catch(err){
+            console.error("Error evaluating sprinf on '%s'", self.str);
+            return self.str;
+         }
         """
     )
     def format(args: Array[Any]) = ""
