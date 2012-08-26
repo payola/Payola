@@ -976,7 +976,23 @@ We just initialize the stack to `true`, and boolean-and the value of every next 
 
 This example shows the structure of events logic: The Button class (from [elements](#elements) package) represents a button in the generated web page. It serves as a trigger of some operation. Its super class ElementView contains a HTML element (an [adapter](#adapters)) - the button DOM element; and an event handler - a list of functions to be performed, if the button is pressed. In the generated web page with the button, pressing it triggers a DOM element event, which calls a function of the ElementView class. This function triggers all event handlers added to the button's mousePressed event handler (a container of the handler functions).
 
-Package contains a main abstract class Event providing adition and removal of event handlers and a trigger function that launches all the event handlers. EventArgs classes provide an unified container of event's attributes.
+You are advised to derive all your new events from the `cz.payola.web.client.events.Event` abstract class. It contains the implementation of the `+=` and `-=` operators, so you don't need to reimplement those. There is one more thing you should understand before writing a new event - the type arguments of the Event class. Each event is triggered with an instance of `cz.payola.web.client.events.EventArgs` class which carries at least information on which element was the event triggered.
+
+```
+class EventArgs[+A](val target: A)
+```
+
+Yes, that's it. Let's continue with an example - we will prepare `Clicked` event for a `Div` element. Since you are clicking on the `Div`, which is the event target, you will trigger the event with something like:
+```
+new EventArgs[Div](this)
+```
+Therefore, the definition of the event will look like this:
+```
+val clicked = new Event[Div, EventArgs[Div], Boolean]
+```
+Note that the first generic parameter of the event is used as a generic parameter of the EventArgs type (second parameter of the Event). The third parameter is the return type of each of registered handlers.
+
+Since we have already done that, you can just use the prepared classes in the `cz.payola.web.client.event` package.
 
 #### Package cz.payola.web.client.models
 
