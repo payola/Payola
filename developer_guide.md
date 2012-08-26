@@ -517,22 +517,22 @@ This whole package represents the data layer. Trait `DataContextComponent` defin
 - to store and fetch the [domain layer](#domain) entities
 - to use [Virtuoso](http://virtuoso.openlinksw.com/) server as a private RDF data storage
 
-Architecture of Payola implies that the domain layer is independent on the data layer and since Payola is an open-source project, the data layer can be replaced by another implementation that fits different platform-specific needs. 
+Architecture of Payola implies that the domain layer is independent on the data layer and since Payola is an open-source project, the data layer can be replaced by another implementation (implementing data layer API) that fits different platform-specific needs.
 
 ### Package cz.payola.data.squeryl
 
-In this version of Payola, [Squeryl](http://squeryl.org) (an ORM for Scala) is used for persisting entities into an H2 database. Squeryl generates a database schema from the structure of objects to be stored. Every persistable entity is persisted in its own table, definition of this table is derived from the entity's object structure. In order to have the domain layer independent of the data layer, were implemented [entities](#squeryl-entities) that:
+In this version of Payola, [Squeryl](http://squeryl.org) (an ORM for Scala) is used for persisting entities into an H2 database. Squeryl generates a database schema from the structure of objects to be stored. Every class of entity is persisted in its own table, definition of this table is derived from the entity's object structure. In order to have the domain layer independent on the data layer, were implemented [entities](#squeryl-entities) that:
 
 - represent entities from the domain layer and 
 - can be stored/loaded via Squeryl ORM into/from the database
 
 <a name="schema-component"></a>
-The relational database schema definition is placed in `SchemaComponent` trait that uses `org.squeryl.Schema` object to define defines:
+The relational database schema definition locates in `SchemaComponent` trait that uses `org.squeryl.Schema` object to define:
 
 - session with connection to the database
-- table for every entitiy class that is persisted
+- table for every class of entity to be persisted
 	- the table structure is based on entity public fields
-	- constraints (such as PrimaryKey, Unique contraint)or column types of some fields are defined manually to match the Payola project requirements exactly
+	- constraints (such as PrimaryKey, Unique constraint) or column types of some fields are defined manually to match the Payola project requirements exactly
 - foreign-key constraints for relations between entities
 	- including the reaction on removing related entity
 - factory for every persisted entity
@@ -547,7 +547,7 @@ Squeryl is an existing, tested, functional and easy to use ORM for Scala applica
 <a name="about-squeryl"></a>
 ##### Briefly about Squeryl
 
-[Squeryl](http://squeryl.org) is a free ORM tool for Scala projects, it can be connected to any relational database supported by JDBC drivers.
+[Squeryl](http://squeryl.org) is a free ORM tool for Scala projects, it can use any relational database supported by JDBC drivers.
 
 A database structure needs to be defined in an object extending `org.squeryl.Schema` object. This object contains definition of tables - definition that says which entity is persisted in which table. Squeryl allows to redefine column types of tables, to declare 1:N and M:N relations between entities, to define foreign key constraints for those relations.
 
@@ -579,18 +579,18 @@ class Analysis extends cz.payola.domain.entities.Analysis {
 }
 ```
 
-Every query that fetches any data from database needs to be wrapped inside a transaction block (as can be seen in the previous sample code). Squeryl provides two ways to wrap code into a transaction - `transaction { ... }` and `inTransaction { ... }` blocks. Every `transaction` block creates a new transaction which establishes a new database connection, whereas `inTransaction` block nests transactions together. If there is no parent transaction the `inTransaction` block behaves as a `transaction` block.
+Every query that fetches any data from database needs to be wrapped inside a transaction block (as can be seen in the previous sample code). Squeryl provides two ways to wrap code into a transaction - `transaction { ... }` and `inTransaction { ... }` blocks. Every `transaction` block creates a new transaction which establishes a new database connection, whereas `inTransaction` block nests transactions together. If there is no parent transaction the top level `inTransaction` block behaves as a `transaction` block.
 
 <a name="squeryl-entities"></a>
 #### Package cz.payola.data.squeryl.entities
 
-All higher layers of Payola work with [domain layer](#domain) entities, but those entities can't be persisted in data layer. For every class of domain layer entity that should be persisted, there exists a class in the data layer that provides database persistence to the corresponding domain layer entity, as is shown in the following picture:
+All higher layers of Payola work with [domain layer](#domain) entities, but those entities aren't be persisted in data layer direcly. For every class of domain layer entity that should be persisted, there exists a class in the data layer that provides database persistence to the corresponding domain layer entity, as is shown in the following picture:
 
 ![Data layer entities](https://raw.github.com/siroky/Payola/develop/docs/img/data_entities.png) 
 
 Every entity in this package extends the trait `Entity`, which provides Squeryl functionality. It could be compared to [Adapter](#http://en.wikipedia.org/wiki/Adapter_pattern) design pattern, where `Entity` from [`common`](#common) package is the Adaptee, `Entity` in this package is the Adapter, and Squeryl functionality is the Target.
 
-Data layer entities extend the represented domain layer entities (with two exceptions that will be explained later - in the picture above they are displayed with the discontinuous arrow), which allows to treat data layer entities like domain layer entities. There is no added business logic in data layer entities - their only purpose is to store/load domain layer entities into/from the database. In order to ensure the proper persistence, data entities had duplicated some protected fields on domain layer entities.
+Data layer entities extend the represented domain layer entities (with two exceptions that will be explained later - in the picture above they are displayed with the discontinuous arrow), which allows to treat data layer entities like domain layer entities. There is no added business logic in data layer entities - their only purpose is to store/load domain layer entities into/from the database. In order to ensure the proper persistence, data entities had duplicated some protected fields of domain layer entities.
 
 In order to persist a domain layer entity, the entity must be converted to a data layer entity. The conversion is run by companion object (extending `EntityConverter`) of data layer entity. Every data layer entity has its own converter. When the conversion fails, a `DataException` is thrown. Since every data layer entity extends a domain layer entity, there is no need for reverse conversion. Data layer returns data layer entities, which can be handled as domain layer entities in higher application layers.
 
@@ -608,22 +608,22 @@ Repositories provide entity persistence and fetching (entities must extend `Enti
 For every repository defined in the API there exists a repository component, that implements the repository. Traits `Repository`, `NamedEntityRepository`, `OptionallyOwnedEntityRepository`, `ShareableEntityRepository` are implemented within the `TableRepositoryComponent` trait. The rest of the API repositories are implemented by the corresponding repository components (e.g. `UserRepository` is implemented by `UserRepositorComponent`).
 
 ##### Eager vs Lazy loading
-Squeryl provides only lazy data fetching from the database. The lazy fetching is used when loading usersplugin instance bindings from the database. These entities are loaded in the most simple fashion: 
+Squeryl provides only lazy fetching from the database. The lazy fetching is used when loading users or plugin instance bindings from the database. These entities are loaded in the most simple fashion: 
 
 - plugin instance bindings are loaded only with IDs of the target and source plugin instances, those plugin instances are loaded only when needed
-- users are loaded with no data, all their groups, privileges, analyses, plugins, data sources are loaded only when needed
+- users are loaded with unevaluated queries for related items, all their groups, privileges, analyses, plugins, data sources are loaded only when needed
 
 The rest of entities is loaded eagerly (i.e. entity is loaded with some of its relations evaluated). Eager-loading is provided by `TableRepository` abstract class. Every repository component that extends `TableRepository` must implement `getSelectQuery` and `processSelectResults` methods. `getSelectQuery` method defines a query to load the entity (and all related entities) from the database, `processSelectResults` method evaluates the defined query result and returns loaded entities. Entities are loaded by their repositories in the following way:
 
 - groups are loaded only with their owner
-- privileges are loaded in `PrivilegeDbRepresentation` form, the the granter, grantee and object are lazy-loded from database, finally the whole privilege is instantiated using Java reflection API
-- plugins are loaded in the `PluginDbRepresentation` form with parameters and owner and then they are instantiated using Java reflection API
+- privileges are loaded in their `PrivilegeDbRepresentation` form, the the granter, grantee and object are lazy-loded from database, finally the whole privilege is instantiated using Java reflection API
+- plugins are loaded in the their `PluginDbRepresentation` form with parameters and owner and then they are instantiated using Java reflection API
 - plugin instances are loaded with parameter values and with related plugins and parameters
 - data sources are loaded with owner and parameter values and with related domain layer `DataFetcher` plugin with its parameters
 - analyses are loaded only with their owner
 	- when there is an access to plugin instances or to plugin instance bindings, the complete analysis is loaded (i.e. no further fetching-query to database will be needed)
 
-It is crucial to mention that two queries loading entity from repository by the same id (`getById()` method) gets two different objects representing the same entity. That is why the standard `equals` method needed to be overriden - the two entities are equal when they have the same ID (since ID is an UUID, which is unique though the whole database, the method is valid)
+It is crucial to mention that two queries loading entity from repository by the same id (`getById()` method) gets two different objects representing the same entity. That is why the standard `equals` method needed to be overriden - the two entities are equal when they have the same ID (since ID is an UUID, which is unique though the whole database, the override `equals` method is valid)
 
 <a name="virtuoso"></a>
 ### Package cz.payola.data.virtuoso
@@ -998,3 +998,5 @@ Since there is always something that you can do better or more sophisticated, we
 - Implement analysis result persistence into the personal Data Source
 - Make the s2js compiler a completely standalone product
 - Support for large graphs that wouldn't fit into the memory (i.e. lazy loading of vertices)
+- Add full support for all squeryl-supported databases
+- Allow update databse stucture in a way that preserves stored data (currently - running database initializer with a new database structure drops existing schema)
