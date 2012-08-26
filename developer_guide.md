@@ -902,7 +902,11 @@ If you want to learn more about the RPC mechanism on the client-side, please, se
 <a name="client"></a>
 ### Package cz.payola.web.client
 
-Structures in this package describe graph visualization - the front-end part of the application. Contains encapsulations of HTML elements and events structure connected to the DOM elements events. The elements of the user interface (UI) are based on the View trait. It provides routines for dynamically changing the currently shown web page.
+This package contains all the code which is converted into JavaScript while using the `s2js` compiler. Since the architectonic style of the client side application is [Model-View-Presenter](http://martinfowler.com/eaaDev/ModelViewPresenter.html), one can find here models, views and controllers. In order to be able to use HTML DOM Elements in the Scala code, classes in this package heavily use a series of adapters, which works as wrappers of the original classes described in the [MDN](https://developer.mozilla.org/en-US/docs/DOM). See the package `s2js.adapters` to learn more.
+
+To avoid using jQuery as much as possible (using jQuery often leads to writing spaghetti code), we also needed to come up with a way of wrapping browser events and propagating them into presenters. in order to achieve this, we've built up a completely new system of events. Its design is based on events as known from the C# programming language, flavoured by the benefits of the Scala language. Learn more in the section dedicated to the `cz.payola.web.client.events` package.
+
+Many of the views in the corresponding subpackage describe all the implemented types of visualization. All the views used to render the user interface are based on the `View` trait, you should definitely get familiar with it, as well as with the derived `ComposedView` trait.
 
 To bring better browser compatibility and basic responsive web support, we've decided to use [Twitter Bootstrap](http://twitter.github.com/bootstrap), a great frontend framework, which is a collection of CSS and JS code. It comes with basic support of CSS grids. Moreover, it comes with a bunch of prepared components like buttons, menus, tabs, progress bars and more. In order to use those components comfortably from the Scala client code, we've introduced some additional views. You can find them in the `cz.payola.web.client.views.bootstrap` package.
 
