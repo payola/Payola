@@ -57,6 +57,23 @@ label {
     position: absolute;
     left: 0;
     width: 100%;
+    line-height: 0;
+    overflow: hidden;
+}
+
+.plugin-space * {
+    line-height: 18px;
+}
+
+.plugin-space canvas {
+    border: 0px;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.plugin-space canvas:first-of-type {
+    position: relative;
 }
 
 .tabbable {
@@ -87,17 +104,6 @@ label {
 
 .tabbable .plugin-space {
     position: relative;
-}
-
-.tabbable canvas:first-of-type {
-    position: relative;
-}
-
-.plugin-space canvas {
-    border: 0px;
-    position: absolute;
-    top: 0;
-    left: 0;
 }
 
 #plugin_create_button_container {

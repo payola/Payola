@@ -11,13 +11,13 @@ class MinimalizationTechnique extends BaseTechnique("Tree ECM Visualization")
     //TODO add some computation branch cutting...this algorithm is quite complex
 
     protected def getTechniquePerformer(component: Component,
-        animate: Boolean): Animation[ListBuffer[(VertexView, Point2D)]] = {
+        animate: Boolean): Animation[_] = {
         minimizeEdgeCrossing(component.vertexViews) //TODO this is impossible to combine with animation
 
         if (animate) {
-            basicTreeStructure(component.vertexViews, None, redrawQuick, redraw, None)
+            new Animation(basicTreeStructure, component.vertexViews, None, redrawQuick, redraw, None)
         } else {
-            basicTreeStructure(component.vertexViews, None, redrawQuick, redraw, Some(0))
+            new Animation(basicTreeStructure, component.vertexViews, None, redrawQuick, redraw, Some(0))
         }
     }
 

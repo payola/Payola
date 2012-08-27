@@ -40,11 +40,23 @@ class GravityTechnique extends BaseTechnique("Gravity Visualization")
         if (animate) {
             val animationOfThis = new Animation(
                 runningAnimation, component, None, redrawQuick, redrawQuick, Some(70))
-            basicTreeStructure(component.vertexViews, Some(animationOfThis), redrawQuick, redraw, None)
+
+            val graphCenterCorrector = new GraphPositionHelper(() => topLayer.size, component.getCenter)
+            val centeringAnimation = new Animation(Animation.moveGraphByFunction,
+                (graphCenterCorrector, component.vertexViews), Some(animationOfThis), redrawQuick, redraw, None)
+
+            new Animation(basicTreeStructure, component.vertexViews, Some(centeringAnimation),
+                redrawQuick, redraw, None)
         } else {
             val animationOfThis = new Animation(
                 runningAnimation, component, None, redrawQuick, redrawQuick, Some(0))
-            basicTreeStructure(component.vertexViews, Some(animationOfThis), redrawQuick, redraw, Some(0))
+
+            val graphCenterCorrector = new GraphPositionHelper(() => topLayer.size, component.getCenter)
+            val centeringAnimation = new Animation(Animation.moveGraphByFunction,
+                (graphCenterCorrector, component.vertexViews), Some(animationOfThis), redrawQuick, redraw,
+                Some(0))
+
+            new Animation(basicTreeStructure, component.vertexViews, Some(centeringAnimation), redrawQuick, redraw, Some(0))
         }
     }
 
@@ -92,8 +104,14 @@ class GravityTechnique extends BaseTechnique("Gravity Visualization")
         if (needToContinue && !animationStopForced) {
             //if the calculation is not finished yet
 
-            val nextRoundAnimation = new Animation(runningAnimation, componentToAnimate, followingAnimation,
-                redrawQuick, redrawQuick, animationStepLength)
+            //center the graph
+            val graphCenterCorrector = new GraphPositionHelper(() => topLayer.size, componentToAnimate.getCenter)
+            val nextRoundAnimation = new Animation(Animation.moveGraphByFunction,
+                    (graphCenterCorrector, componentToAnimate.vertexViews), None, redrawQuick, redraw, None)
+            //add next round of gravity animation
+            nextRoundAnimation.addFollowingAnimation(
+                new Animation(runningAnimation, componentToAnimate, followingAnimation,
+                redrawQuick, redrawQuick, animationStepLength))
             moveVerticesAnimation.setFollowingAnimation(nextRoundAnimation)
             moveVerticesAnimation.run()
         } else {
