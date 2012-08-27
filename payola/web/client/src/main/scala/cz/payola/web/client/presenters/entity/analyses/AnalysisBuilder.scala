@@ -46,17 +46,18 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                 AnalysisBuilderData.setAnalysisName(analysisId, nameComponent.field.value) { success =>
                     AnalysisBuilderData.createEmptyAnalysis(nameComponent.field.value) { analysis =>
                         analysisId = analysis.id
-                        lockAnalysisAndLoadPlugins()
-                        val view = new AnalysisEditorView(analysis, Some(nameComponent.field.value), None)
-                        view.visualizer.pluginInstanceRendered += {
-                            e => instancesMap.put(e.target.pluginInstance.id, e.target)
-                        }
-                        view.render(parentElement)
-                        view.setName(nameComponent.field.value)
+                        lockAnalysisAndLoadPlugins({() =>
+                            val view = new AnalysisEditorView(analysis, Some(nameComponent.field.value), None)
+                            view.visualizer.pluginInstanceRendered += {
+                                e => instancesMap.put(e.target.pluginInstance.id, e.target)
+                            }
+                            view.render(parentElement)
+                            view.setName(nameComponent.field.value)
 
-                        bindMenuEvents(view)
-                        nameDialog.unblock()
-                        nameDialog.destroy()
+                            bindMenuEvents(view)
+                            nameDialog.unblock()
+                            nameDialog.destroy()
+                        })
                     } {
                         error =>
                             nameDialog.unblock()
@@ -215,18 +216,21 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
         }
     }
 
-    protected def lockAnalysisAndLoadPlugins() = {
+    protected def lockAnalysisAndLoadPlugins(callback: (() => Unit)) {
         AnalysisBuilderData.lockAnalysis(analysisId) { () =>
             AnalysisBuilderData.getPlugins() {
                 plugins => allPlugins = plugins
+
+                AnalysisBuilderData.getDataSources() {
+                    sources => allSources = sources
+                    callback()
+                } {
+                    error => fatalErrorHandler(error)
+                }
             } {
                 error => fatalErrorHandler(error)
             }
-            AnalysisBuilderData.getDataSources() {
-                sources => allSources = sources
-            } {
-                error => fatalErrorHandler(error)
-            }
+
         } {
             error => fatalErrorHandler(error)
         }

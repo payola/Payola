@@ -15,17 +15,17 @@ class AnalysisEditor(parentElementId: String, analysisIdParam: String)
         blockPage("Loading analysis data...")
         AnalysisBuilderData.getAnalysis(analysisId) { analysis =>
 
-            lockAnalysisAndLoadPlugins()
-            val view = new AnalysisEditorView(analysis, None, None)
-            view.visualizer.pluginInstanceRendered += { e => instancesMap.put(e.target.pluginInstance.id, e.target)}
-            view.render(parentElement)
-            bindParameterChangedEvent(view.visualizer)
-            bindConnectButtonClickedEvent(view)
-            bindDeleteButtonClickedEvent(view.visualizer)
-            constructBranches(analysis)
-            bindMenuEvents(view)
-            unblockPage()
-
+            lockAnalysisAndLoadPlugins({ () =>
+                val view = new AnalysisEditorView(analysis, None, None)
+                view.visualizer.pluginInstanceRendered += { e => instancesMap.put(e.target.pluginInstance.id, e.target)}
+                view.render(parentElement)
+                bindParameterChangedEvent(view.visualizer)
+                bindConnectButtonClickedEvent(view)
+                bindDeleteButtonClickedEvent(view.visualizer)
+                constructBranches(analysis)
+                bindMenuEvents(view)
+                unblockPage()
+            })
             true
         } { error => fatalErrorHandler(error)}
     }
