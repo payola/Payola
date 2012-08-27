@@ -16,6 +16,8 @@ import scala.collection.mutable
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
 import cz.payola.common.ValidationException
 import cz.payola.web.client.views.elements.form.fields.TextInput
+import cz.payola.web.client.views.elements._
+import scala.Some
 
 class AnalysisBuilder(parentElementId: String) extends Presenter
 {
@@ -46,6 +48,17 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                 AnalysisBuilderData.setAnalysisName(analysisId, nameComponent.field.value) { success =>
                     AnalysisBuilderData.createEmptyAnalysis(nameComponent.field.value) { analysis =>
                         analysisId = analysis.id
+
+                        val h1 = document.getElementById("main-header")
+                        h1.setAttribute("class", h1.getAttribute("class") + " span10")
+
+                        val runButton = new Button(new Text("Run"), "span1", new Icon(Icon.play))
+                        runButton.render(document.getElementById("main-header-div"))
+                        runButton.mouseClicked += { args =>
+                            window.location.href = "/analysis/" + analysisId
+                            true
+                        }
+
                         lockAnalysisAndLoadPlugins()
                         val view = new AnalysisEditorView(analysis, Some(nameComponent.field.value), None)
                         view.visualizer.pluginInstanceRendered += {
