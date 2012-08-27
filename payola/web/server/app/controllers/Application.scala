@@ -40,13 +40,13 @@ object Application extends PayolaController with Secured
     }
 
     def resetPassword = maybeAuthenticated{ user =>
-        Ok(views.html.application.reset_password(user))
+        Ok(views.html.application.reset_password(user)(new Flash()))
     }
 
     def reallyResetPassword = Action { implicit request =>
         val reqOpt = request.body.asFormUrlEncoded
         if (reqOpt.isEmpty){
-            Ok(views.html.application.reset_password(None)).flashing("error" -> "Couldn't reset password for an unexpected error.")
+            Ok(views.html.application.reset_password(None)(new Flash(Map("error" -> "Couldn't reset password for an unexpected error."))))
         }else{
             val req = reqOpt.get
             val email = req("email")(0)
@@ -54,19 +54,19 @@ object Application extends PayolaController with Secured
 
             val userOpt = Payola.model.userModel.getByName(email)
             if (userOpt.isEmpty){
-                Ok(views.html.application.reset_password(None)).flashing("error" -> "The email you've entered isn't associated with any user in our database.")
+                Ok(views.html.application.reset_password(None)(new Flash(Map("error" -> "The email you've entered isn't associated with any user in our database."))))
             }else{
                 PasswordManager.sendRecoveryEmailToUser(IDGenerator.newId,userOpt.get, password)
-                Ok(views.html.application.reset_password(None)).flashing("success" -> "A confirmation link has been emailed to you.")
+                Ok(views.html.application.reset_password(None)(new Flash(Map("success" -> "A confirmation link has been emailed to you."))))
             }
         }
     }
 
     def confirmReset(uuid: String) = maybeAuthenticated { user =>
         if (PasswordManager.confirmPasswordReset(uuid)){
-            Ok(views.html.application.reset_password(user)).flashing("success" -> "Your password has been successfully reset.")
+            Ok(views.html.application.reset_password(user)(new Flash(Map("success" -> "Your password has been successfully reset."))))
         }else{
-            Ok(views.html.application.reset_password(user)).flashing("error" -> "Your reset token has expired.")
+            Ok(views.html.application.reset_password(user)(new Flash(Map("error" -> "Your reset token has expired."))))
         }
     }
 
