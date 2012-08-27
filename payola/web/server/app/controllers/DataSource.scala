@@ -110,9 +110,10 @@ object DataSource extends PayolaController with Secured
       * @return Edit page of the data source or 404 if the resource doesn't exist.
       */
     def edit(id: String) = authenticated { user: User =>
-        Payola.model.dataSourceModel.getAccessibleToUserById(Some(user), id).map { d =>
-            Ok(views.html.datasource.edit(user, d))
-        }.getOrElse {
+        val dataSourceOpt = Payola.model.dataSourceModel.getAccessibleToUserById(Some(user), id)
+        if (dataSourceOpt.isDefined && dataSourceOpt.get.isEditable) {
+            Ok(views.html.datasource.edit(user, dataSourceOpt.get))
+        }else{
             NotFound(views.html.errors.err404("The data source does not exist."))
         }
     }
