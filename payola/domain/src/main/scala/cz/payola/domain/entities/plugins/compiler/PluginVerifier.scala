@@ -37,7 +37,11 @@ class PluginVerifier(val global: Global) extends Plugin
 
         def newPhase(prev: Phase): Phase = new StdPhase(prev)
         {
-            val pluginParentClassName = classOf[cz.payola.domain.entities.Plugin].getName
+            val pluginParentClassNames = List(
+                classOf[cz.payola.domain.entities.Plugin],
+                classOf[cz.payola.domain.entities.plugins.concrete.DataFetcher],
+                classOf[cz.payola.domain.entities.plugins.concrete.SparqlQuery]
+            ).map(_.getName)
 
             def apply(unit: CompilationUnit) {
                 // Verify that the unit contains one package definition.
@@ -57,8 +61,10 @@ class PluginVerifier(val global: Global) extends Plugin
                         }
 
                         // Verify that the plugin extends the plugin class.
-                        if (!classDef.impl.parents.exists(tree => tree.symbol.fullName == pluginParentClassName)) {
-                            error("The plugin must extend the %s class.".format(pluginParentClassName))
+                        if (!classDef.impl.parents.exists(t => pluginParentClassNames.exists(_ == t.symbol.fullName))) {
+                            error("The plugin must extend one of the following classes: %s.".format(
+                                pluginParentClassNames.mkString(", ")
+                            ))
                         }
 
                         // Verify that the plugin has valid constructors.
