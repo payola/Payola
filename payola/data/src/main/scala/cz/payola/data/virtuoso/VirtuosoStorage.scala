@@ -1,9 +1,10 @@
-package cz.payola.domain.virtuoso
+package cz.payola.data.virtuoso
 
 import java.sql._
 import com.hp.hpl.jena.query.QueryFactory
 import cz.payola.domain.net.Downloader
 import cz.payola.domain.rdf._
+import java.io.File
 
 /**
   * A Virtuoso data store that performs operations above both of the RDF data store and the Virtuoso SQL database.
@@ -47,6 +48,11 @@ class VirtuosoStorage(
 
     def storeGraphAtURL(graphURI: String, graphURL: String) {
         executeSQL("DB.DBA.RDF_LOAD_RDFXML(http_get('%s'), '', '%s')".format(graphURL, escapeString(graphURI)))
+    }
+
+    def storeGraphFromFile(graphURI: String, file: File){
+        println(file.getAbsolutePath)
+        executeSQL("DB.DBA.RDF_LOAD_RDFXML(file_to_string('%s'), '', '%s')".format(escapeString(file.getAbsolutePath), escapeString(graphURI)))
     }
 
     def addGraphToGroup(graphURI: String, groupURI: String) {

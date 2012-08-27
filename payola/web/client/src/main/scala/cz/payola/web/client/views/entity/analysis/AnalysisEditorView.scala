@@ -9,7 +9,7 @@ import cz.payola.web.client.views.elements.form.fields._
 
 class AnalysisEditorView(analysis: Analysis, newName: Option[String], newDesc: Option[String]) extends ComposedView
 {
-    val name = new InputControl("Analysis name:", new TextInput("name", if(newName.isDefined){newName.get}else{analysis.name}, "Analysis name"), Some("span2"))
+    val name = new InputControl("Analysis name:", new TextInput("name", if(newName.isDefined){newName.get}else{analysis.name}, "Analysis name"), None)
 
     val description = new InputControl("Description:", new TextArea("description",  if(newDesc.isDefined){newDesc.get}else{analysis.description}, "Anaylsis description"), Some("span2"))
 

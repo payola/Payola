@@ -6,6 +6,7 @@ import cz.payola.web.client.views.graph.visual.graph._
 import cz.payola.web.client.views.graph.visual.animation.Animation
 import cz.payola.web.client.views.graph.visual.techniques.BaseTechnique
 import cz.payola.web.client.views.algebra._
+import cz.payola.web.client.views.graph.visual.graph.positioning.GraphPositionHelper
 
 /**
  * Visual plug-in technique that places the vertices based on their edges.
@@ -35,20 +36,33 @@ class GravityTechnique extends BaseTechnique("Gravity Visualization")
     private val velocitiesStabilization = 3
 
     protected def getTechniquePerformer(component: Component,
-        animate: Boolean): Animation[ListBuffer[(VertexView, Point2D)]] = {
+        animate: Boolean): Animation[_] = {
         if (animate) {
             val animationOfThis = new Animation(
                 runningAnimation, component, None, redrawQuick, redrawQuick, Some(70))
-            basicTreeStructure(component.vertexViews, Some(animationOfThis), redrawQuick, redraw, None)
+
+            val graphCenterCorrector = new GraphPositionHelper(() => topLayer.size, component.getCenter)
+            val centeringAnimation = new Animation(Animation.moveGraphByFunction,
+                (graphCenterCorrector, component.vertexViews), Some(animationOfThis), redrawQuick, redraw, None)
+
+            new Animation(basicTreeStructure, component.vertexViews, Some(centeringAnimation),
+                redrawQuick, redraw, None)
         } else {
             val animationOfThis = new Animation(
                 runningAnimation, component, None, redrawQuick, redrawQuick, Some(0))
-            basicTreeStructure(component.vertexViews, Some(animationOfThis), redrawQuick, redraw, Some(0))
+
+            val graphCenterCorrector = new GraphPositionHelper(() => topLayer.size, component.getCenter)
+            val centeringAnimation = new Animation(Animation.moveGraphByFunction,
+                (graphCenterCorrector, component.vertexViews), Some(animationOfThis), redrawQuick, redraw,
+                Some(0))
+
+            new Animation(basicTreeStructure, component.vertexViews, Some(centeringAnimation), redrawQuick, redraw, Some(0))
         }
     }
 
     private def runningAnimation(componentToAnimate: Component, followingAnimation: Option[Animation[_]],
         redrawQuick: () => Unit, redrawFinal: () => Unit, animationStepLength: Option[Int]) {
+
         val vertexViewPacks = buildVertexViewsWorkingStructure(componentToAnimate.vertexViews)
         val edgeViewPacks = buildEdgeViewsWorkingStructure(vertexViewPacks, componentToAnimate.edgeViews)
 
@@ -79,14 +93,25 @@ class GravityTechnique extends BaseTechnique("Gravity Visualization")
             toMove += ((vVPack.value, vVPack.currentPosition))
         }
 
+        //create animation to center the graph
+        val graphCenterCorrector = new GraphPositionHelper(() => topLayer.size, componentToAnimate.getCenter)
+        val centeringAnimation = new Animation(Animation.moveGraphByFunction,
+            (graphCenterCorrector, componentToAnimate.vertexViews), followingAnimation, redrawQuick, redraw, None)
+
         val moveVerticesAnimation =
-            new Animation(Animation.moveVertices, toMove, followingAnimation, redrawQuick, redrawQuick,
+            new Animation(Animation.moveVertices, toMove, Some(centeringAnimation), redrawQuick, redrawQuick,
                 animationStepLength)
         if (needToContinue && !animationStopForced) {
             //if the calculation is not finished yet
 
-            val nextRoundAnimation = new Animation(runningAnimation, componentToAnimate, followingAnimation,
-                redrawQuick, redrawQuick, animationStepLength)
+            //center the graph
+            val graphCenterCorrector = new GraphPositionHelper(() => topLayer.size, componentToAnimate.getCenter)
+            val nextRoundAnimation = new Animation(Animation.moveGraphByFunction,
+                    (graphCenterCorrector, componentToAnimate.vertexViews), None, redrawQuick, redraw, None)
+            //add next round of gravity animation
+            nextRoundAnimation.addFollowingAnimation(
+                new Animation(runningAnimation, componentToAnimate, followingAnimation,
+                redrawQuick, redrawQuick, animationStepLength))
             moveVerticesAnimation.setFollowingAnimation(nextRoundAnimation)
             moveVerticesAnimation.run()
         } else {

@@ -56,7 +56,7 @@ abstract class PluginInstanceView(
             val pos = w - (p.htmlElement.offsetWidth / 2) - 4
 
             val conn = new Div(Nil, "connector")
-            conn.setAttribute("style", "left %dpx".format(pos))
+            conn.setAttribute("style", "left: %dpx".format(pos))
             conn.render(successors.htmlElement)
 
             val plumb = new Div(Nil, "plumb")

@@ -43,7 +43,7 @@ object View
                 </div>
                 <div class="row-fluid">
                     <div class="progress progress-striped active">
-                        <div class="bar" style="width: 100%"></div>
+                        <div class="bar" style="width: 100%%"></div>
                     </div>
                 </div>
             """.format(message)

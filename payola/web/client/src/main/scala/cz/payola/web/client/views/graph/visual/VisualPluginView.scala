@@ -197,6 +197,40 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
         }
     }
 
+    private def createInfoTable(vertexView: VertexView) {
+
+        var position = vertexView.position + Vector2D(vertexView.radius, 0)
+        position = if(position.x - 506 < 0) {
+            if(position.y - 330 < 0) {
+                vertexView.position + Vector2D(vertexView.radius, 0)
+            } else {
+                vertexView.position + Vector2D(vertexView.radius, -vertexView.radius - 335)
+            }
+        } else {
+            if(position.y - 330 < 0) {
+                vertexView.position + Vector2D(-521 - vertexView.radius, 0)
+            } else {
+                vertexView.position + Vector2D(-521 - vertexView.radius, -vertexView.radius - 335)
+            }
+        }
+
+        val infoTable = new VertexInfoTable(vertexView.vertexModel, vertexView.getLiteralVertices, position)
+
+        infoTable.vertexBrowsing += { a =>
+            triggerDestroyVertexInfo()
+            vertexBrowsing.trigger(new VertexEventArgs[this.type](this, vertexView.vertexModel))
+        }
+        infoTable.vertexBrowsingDataSource += { a =>
+            triggerDestroyVertexInfo()
+            vertexBrowsingDataSource
+                .trigger(new VertexEventArgs[this.type](this, vertexView.vertexModel))
+        }
+
+        currentInfoTable = Some(infoTable)
+
+        infoTable.render(_parentHtmlElement.getOrElse(document.body))
+    }
+
     override def updateOntologyCustomization(newCustomization: Option[OntologyCustomization]) {
         currentCustomization = newCustomization
 
@@ -349,36 +383,7 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
                 vertex.foreach { v =>
                     if (v.selected) {
 
-                        var position = v.position + Vector2D(v.radius, 0)
-                        position = if(position.x - 506 < 0) {
-                            if(position.y - 330 < 0) {
-                                v.position + Vector2D(v.radius, 0)
-                            } else {
-                                v.position + Vector2D(v.radius, -v.radius - 335)
-                            }
-                        } else {
-                            if(position.y - 330 < 0) {
-                                v.position + Vector2D(-521 - v.radius, 0)
-                            } else {
-                                v.position + Vector2D(-521 - v.radius, -v.radius - 335)
-                            }
-                        }
-
-                        val infoTable = new VertexInfoTable(v.vertexModel, v.getLiteralVertices,position)
-
-                        infoTable.vertexBrowsing += { a =>
-                            triggerDestroyVertexInfo()
-                            vertexBrowsing.trigger(new VertexEventArgs[this.type](this, vertex.get.vertexModel))
-                        }
-                        infoTable.vertexBrowsingDataSource += { a =>
-                            triggerDestroyVertexInfo()
-                            vertexBrowsingDataSource
-                                .trigger(new VertexEventArgs[this.type](this, vertex.get.vertexModel))
-                        }
-
-                        currentInfoTable = Some(infoTable)
-
-                        infoTable.render(_parentHtmlElement.getOrElse(document.body))
+                        createInfoTable(v)
 
                         vertexSelected.trigger(new VertexEventArgs[this.type](this, v.vertexModel))
                     }
@@ -412,11 +417,22 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
      * Description of mouse-released event.
      */
     private def onMouseUp(eventArgs: MouseEventArgs[Canvas]) {
+        val selectedVertices = if(graphView.isDefined) {
+            graphView.get.getAllVertices.filter(_.selected)
+        } else {
+            List()
+        }
+
         if (!mouseIsDragging && !mousePressedVertex && !eventArgs.shiftKey) {
             //deselect all
 
             graphView.get.deselectAll()
             redrawSelection()
+        } else if(mouseIsDragging && selectedVertices.length == 1) {
+            //if mouse was drawgging only one vertex display the vertexInfoTable again
+
+            val selectedVertex = selectedVertices(0)
+            createInfoTable(selectedVertex)
         }
     }
 

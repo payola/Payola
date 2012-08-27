@@ -2,51 +2,33 @@ package cz.payola.web.client.views.graph.visual.graph.positioning
 
 import cz.payola.web.client.views.graph.visual.graph.Component
 import cz.payola.web.client.views.algebra._
+import  s2js.adapters.browser._
 
 /**
  * Helper for getting vector correcting the position of a component in the context of other components in a whole graph.
  * Is used during components placement of the graph by move graph by function animation function.
- * @param componentsCount count of components of the whole graph
+ * @param drawingSpaceSizeGetter for getting size of the drawing space
+ * @param componentCenterGetter for getting the center of the component that has to be placed
  * @param previousComponent component that was drawn previously
  */
-class ComponentPositionHelper(val componentsCount: Int, val previousComponent: Option[Component])
-    extends PositionHelper
-{
+class ComponentPositionHelper(drawingSpaceSizeGetter: () => Vector2D, componentCenterGetter: () => Point2D,
+    val previousComponent: Option[Component]) extends PositionHelper {
+
     def getPositionCorrection(): Vector2D = {
-        val componentSpacing = 50.0
 
-        val componentNumber = previousComponent.map(_.componentNumber).filter(_ >= 0).getOrElse(0) + 1
+        val componentSpacing = 100.0
+        val componentFirstIndent = 50.0
 
-        val bottomRight = if (previousComponent.isDefined) {
-            previousComponent.get.getBottomRight()
+        val drawingSpaceSize = drawingSpaceSizeGetter()
+        val drawingSpaceCenter = Point2D(drawingSpaceSize.x / 2, drawingSpaceSize.y / 2)
+
+        val componentCenter = componentCenterGetter()
+
+        if(previousComponent.isDefined) {
+            componentCenter.createVector(Point2D(drawingSpaceCenter.x,
+                componentSpacing + previousComponent.get.getBottomLeft().y))
         } else {
-            Point2D(0, 0)
-        }
-        val topRight = if (previousComponent.isDefined) {
-            previousComponent.get.getTopRight()
-        } else {
-            Point2D(0, 0)
-        }
-        val previousComponentBottomRight = bottomRight.toVector + Vector2D(50, 100)
-
-
-        val componentsInRowCount =
-            if (componentsCount <= 4) {
-                2.0
-            } else {
-                math.ceil(math.sqrt(componentsCount))
-            }
-
-        //lets enjoy some little math :-)
-        val numberOfCurrentLine = math.ceil((componentNumber) / componentsInRowCount)
-        val positionInRow = (componentNumber) - ((numberOfCurrentLine - 1) * componentsInRowCount)
-
-        if (positionInRow == 1) {
-            //next row
-            Vector2D(componentSpacing, previousComponentBottomRight.y + componentSpacing)
-        } else {
-            //continue in the current row
-            Vector2D(previousComponentBottomRight.x + componentSpacing, topRight.y)
+            componentCenter.createVector(Point2D(drawingSpaceCenter.x, componentFirstIndent))
         }
     }
 }

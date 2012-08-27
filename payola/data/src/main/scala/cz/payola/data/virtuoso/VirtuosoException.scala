@@ -1,4 +1,4 @@
-package cz.payola.domain.virtuoso
+package cz.payola.data.virtuoso
 
 import cz.payola.domain.DomainException
 

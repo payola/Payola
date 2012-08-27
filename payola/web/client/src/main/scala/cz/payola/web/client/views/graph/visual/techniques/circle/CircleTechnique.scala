@@ -12,7 +12,7 @@ import cz.payola.web.client.views.algebra.Point2D
 class CircleTechnique extends BaseTechnique("Circle Visualization")
 {
     protected def getTechniquePerformer(component: Component,
-        animate: Boolean): Animation[ListBuffer[(VertexView, Point2D)]] = {
+        animate: Boolean): Animation[_] = {
         if (animate) {
             basicTreeCircledStructure(component.vertexViews, None, redrawQuick, redraw, None)
         } else {
