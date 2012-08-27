@@ -3,7 +3,7 @@ package s2js.compiler
 class StatementSpecs extends CompilerFixtureSpec
 {
     describe("Statements") {
-        ignore("are terminated by semicolons") {
+        it("are terminated by semicolons") {
             configMap =>
                 scalaCode {
                     """
@@ -19,7 +19,7 @@ class StatementSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('a');
+                        s2js.runtime.client.core.get().classLoader.provide('a');
 
                         a.m1 = function() {
                             var self = this;
@@ -27,12 +27,12 @@ class StatementSpecs extends CompilerFixtureSpec
                             var y = (x + 'foo');
                             window.alert(y);
                         };
-                        a.__class__ = new s2js.runtime.client.Class('a', []);
+                        a.__class__ = new s2js.runtime.client.core.Class('a', []);
                     """
                 }
         }
 
-        ignore("assignments are supported") {
+        it("assignments are supported") {
             configMap =>
                 scalaCode {
                     """
@@ -79,18 +79,18 @@ class StatementSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('B');
-                        s2js.runtime.client.ClassLoader.provide('a');
-                        s2js.runtime.client.ClassLoader.provide('c');
+                        s2js.runtime.client.core.get().classLoader.provide('B');
+                        s2js.runtime.client.core.get().classLoader.provide('a');
+                        s2js.runtime.client.core.get().classLoader.provide('c');
 
                         B = function() {
                             var self = this;
                             self.x = '';
                         };
-                        B.prototype.__class__ = new s2js.runtime.client.Class('B', []);
+                        B.prototype.__class__ = new s2js.runtime.client.core.Class('B', []);
 
                         a.x = 'bar';
-                        a.__class__ = new s2js.runtime.client.Class('a', []);
+                        a.__class__ = new s2js.runtime.client.core.Class('a', []);
 
                         c.x = 'foo';
 
@@ -124,12 +124,12 @@ class StatementSpecs extends CompilerFixtureSpec
                             self.x = a.x;
                             self.x = b.x;
                         };
-                        c.__class__ = new s2js.runtime.client.Class('c', []);
+                        c.__class__ = new s2js.runtime.client.core.Class('c', []);
                     """
                 }
         }
 
-        ignore("not operator is supported") {
+        it("not operator is supported") {
             configMap =>
                 scalaCode {
                     """
@@ -144,7 +144,7 @@ class StatementSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('o');
+                        s2js.runtime.client.core.get().classLoader.provide('o');
 
                         o.m1 = function() {
                             var self = this;
@@ -156,7 +156,7 @@ class StatementSpecs extends CompilerFixtureSpec
                             var v2 = (! v1);
                             var v3 = (! self.m1());
                         };
-                        o.__class__ = new s2js.runtime.client.Class('o', []);
+                        o.__class__ = new s2js.runtime.client.core.Class('o', []);
                     """
                 }
         }

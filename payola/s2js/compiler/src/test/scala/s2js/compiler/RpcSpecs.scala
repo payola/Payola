@@ -2,7 +2,7 @@ package s2js.compiler
 
 class RpcSpecs extends CompilerFixtureSpec
 {
-    ignore("remote objects aren't compiled") {
+    it("remote objects aren't compiled") {
         configMap =>
             scalaCode {
                 """
@@ -14,12 +14,12 @@ class RpcSpecs extends CompilerFixtureSpec
                 """
             } shouldCompileTo {
                 """
-                    s2js.runtime.client.ClassLoader.provide('server.o');
+                    s2js.runtime.client.core.get().classLoader.provide('server.o');
                 """
             }
     }
 
-    ignore("synchronous remote method call gets translated into a synchronous rpc call") {
+    it("synchronous remote method call gets translated into a synchronous rpc call") {
         configMap =>
             scalaCode {
                 """
@@ -37,20 +37,20 @@ class RpcSpecs extends CompilerFixtureSpec
                 """
             } shouldCompileTo {
                 """
-                    s2js.runtime.client.ClassLoader.provide('client');
-                    s2js.runtime.client.ClassLoader.provide('server.o');
+                    s2js.runtime.client.core.get().classLoader.provide('client');
+                    s2js.runtime.client.core.get().classLoader.provide('server.o');
 
                     client.main = function() {
                         var self = this;
                         var fooValue = s2js.runtime.client.rpc.Wrapper.callSync('server.o.foo', [2, 'xyz'],
                             ['scala.Int', 'java.lang.String']);
                     };
-                    client.__class__ = new s2js.runtime.client.Class('client', []);
+                    client.__class__ = new s2js.runtime.client.core.Class('client', []);
                 """
             }
     }
 
-    ignore("parameters of collection types are supported") {
+    it("parameters of collection types are supported") {
         configMap =>
             scalaCode {
                 """
@@ -70,9 +70,9 @@ class RpcSpecs extends CompilerFixtureSpec
                 """
             } shouldCompileTo {
                 """
-                    s2js.runtime.client.ClassLoader.provide('client');
-                    s2js.runtime.client.ClassLoader.provide('server.o');
-                    s2js.runtime.client.ClassLoader.require('scala.collection.immutable.List');
+                    s2js.runtime.client.core.get().classLoader.provide('client');
+                    s2js.runtime.client.core.get().classLoader.provide('server.o');
+                    s2js.runtime.client.core.get().classLoader.require('scala.collection.immutable.List');
 
                     client.main = function() {
                         var self = this;
@@ -84,12 +84,12 @@ class RpcSpecs extends CompilerFixtureSpec
                             'scala.collection.immutable.List[java.lang.String]',
                             'scala.collection.immutable.List[scala.Double]']);
                     };
-                    client.__class__ = new s2js.runtime.client.Class('client', []);
+                    client.__class__ = new s2js.runtime.client.core.Class('client', []);
                 """
             }
     }
 
-    ignore("asynchronous remote method call gets translated into an asynchronous rpc call") {
+    it("asynchronous remote method call gets translated into an asynchronous rpc call") {
         configMap =>
             scalaCode {
                 """
@@ -117,8 +117,8 @@ class RpcSpecs extends CompilerFixtureSpec
                 """
             } shouldCompileTo {
                 """
-                    s2js.runtime.client.ClassLoader.provide('client');
-                    s2js.runtime.client.ClassLoader.provide('server.o');
+                    s2js.runtime.client.core.get().classLoader.provide('client');
+                    s2js.runtime.client.core.get().classLoader.provide('server.o');
 
                     client.main = function() {
                         var self = this;
@@ -130,12 +130,12 @@ class RpcSpecs extends CompilerFixtureSpec
                             function() { x = 1; },
                             function(e) { x = 0; });
                     };
-                    client.__class__ = new s2js.runtime.client.Class('client', []);
+                    client.__class__ = new s2js.runtime.client.core.Class('client', []);
                 """
             }
     }
 
-    ignore("synchronous and asynchronous secured remote methods are supported") {
+    it("synchronous and asynchronous secured remote methods are supported") {
         configMap =>
             scalaCode {
                 """
@@ -164,8 +164,8 @@ class RpcSpecs extends CompilerFixtureSpec
                 """
             } shouldCompileTo {
                 """
-                    s2js.runtime.client.ClassLoader.provide('client');
-                    s2js.runtime.client.ClassLoader.provide('server.o');
+                    s2js.runtime.client.core.get().classLoader.provide('client');
+                    s2js.runtime.client.core.get().classLoader.provide('server.o');
 
                     client.main = function() {
                         var self = this;
@@ -174,12 +174,12 @@ class RpcSpecs extends CompilerFixtureSpec
                         s2js.runtime.client.rpc.Wrapper.callAsync('server.o.bar', ['xyz'], ['java.lang.String'],
                             function(i) { x = i; }, function(e) { x = -1; });
                     };
-                    client.__class__ = new s2js.runtime.client.Class('client', []);
+                    client.__class__ = new s2js.runtime.client.core.Class('client', []);
                 """
             }
     }
 
-    ignore("secured remote objects are supported") {
+    it("secured remote objects are supported") {
         configMap =>
             scalaCode {
                 """
@@ -208,8 +208,8 @@ class RpcSpecs extends CompilerFixtureSpec
                 """
             } shouldCompileTo {
                 """
-                    s2js.runtime.client.ClassLoader.provide('client');
-                    s2js.runtime.client.ClassLoader.provide('server.o');
+                    s2js.runtime.client.core.get().classLoader.provide('client');
+                    s2js.runtime.client.core.get().classLoader.provide('server.o');
 
                     client.main = function() {
                         var self = this;
@@ -218,7 +218,7 @@ class RpcSpecs extends CompilerFixtureSpec
                         s2js.runtime.client.rpc.Wrapper.callAsync('server.o.bar', ['xyz'], ['java.lang.String'],
                             function(i) { x = i; }, function(e) { x = -1; });
                     };
-                    client.__class__ = new s2js.runtime.client.Class('client', []);
+                    client.__class__ = new s2js.runtime.client.core.Class('client', []);
                 """
             }
     }

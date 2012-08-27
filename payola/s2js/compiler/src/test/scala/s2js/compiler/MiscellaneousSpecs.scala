@@ -2,7 +2,7 @@ package s2js.compiler
 
 class MiscellaneousSpecs extends CompilerFixtureSpec
 {
-    ignore("conversion methods between numeric types are ignored") {
+    it("conversion methods between numeric types are ignored") {
         configMap =>
             scalaCode {
                 """
@@ -21,7 +21,7 @@ class MiscellaneousSpecs extends CompilerFixtureSpec
                 """
             } shouldCompileTo {
                 """
-                    s2js.runtime.client.ClassLoader.provide('o');
+                    s2js.runtime.client.core.get().classLoader.provide('o');
 
                     o.c = 1;
                     o.x6 = function() {
@@ -33,12 +33,12 @@ class MiscellaneousSpecs extends CompilerFixtureSpec
                         var x5 = self.c;
                         var x6 = self.c;
                     };
-                    o.__class__ = new s2js.runtime.client.Class('o', []);
+                    o.__class__ = new s2js.runtime.client.core.Class('o', []);
                 """
             }
     }
 
-    ignore("Custom operators are supported and default operators are not overriden.") {
+    it("Custom operators are supported and default operators are not overriden.") {
         configMap =>
             scalaCode {
                 """
@@ -62,8 +62,8 @@ class MiscellaneousSpecs extends CompilerFixtureSpec
                     """
             } shouldCompileTo {
                 """
-                        s2js.runtime.client.ClassLoader.provide('A');
-                        s2js.runtime.client.ClassLoader.provide('o');
+                        s2js.runtime.client.core.get().classLoader.provide('A');
+                        s2js.runtime.client.core.get().classLoader.provide('o');
 
                         A = function() {
                             var self = this;
@@ -84,7 +84,7 @@ class MiscellaneousSpecs extends CompilerFixtureSpec
                             var self = this;
                             return new A();
                         };
-                        A.prototype.__class__ = new s2js.runtime.client.Class('A', []);
+                        A.prototype.__class__ = new s2js.runtime.client.core.Class('A', []);
 
                         o.m = function() {
                             var self = this;
@@ -95,12 +95,12 @@ class MiscellaneousSpecs extends CompilerFixtureSpec
                             var e = (a == b);
                             var f = (a != b);
                         };
-                        o.__class__ = new s2js.runtime.client.Class('o', []);
+                        o.__class__ = new s2js.runtime.client.core.Class('o', []);
                     """
             }
     }
 
-    ignore("field and method names of adapter objects are preserved") {
+    it("field and method names of adapter objects are preserved") {
         configMap =>
             scalaCode {
                 """
@@ -116,14 +116,14 @@ class MiscellaneousSpecs extends CompilerFixtureSpec
                 """
             } shouldCompileTo {
                 """
-                    s2js.runtime.client.ClassLoader.provide('o');
+                    s2js.runtime.client.core.get().classLoader.provide('o');
 
                     o.foo = function() {
                         var self = this;
                         var e = document.createElement('div');
                         var l = e.childNodes.length;
                     };
-                    o.__class__ = new s2js.runtime.client.Class('o', []);
+                    o.__class__ = new s2js.runtime.client.core.Class('o', []);
                 """
             }
     }

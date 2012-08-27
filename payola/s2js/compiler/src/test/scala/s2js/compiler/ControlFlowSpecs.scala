@@ -3,13 +3,13 @@ package s2js.compiler
 class ControlFlowSpecs extends CompilerFixtureSpec
 {
     describe("Loop statements") {
-        ignore("while is supported") {
+        it("while is supported") {
             configMap =>
                 scalaCode {
                     """
                         import s2js.adapters.browser._
 
-                        object a {
+                        class a {
                             def m1() {
                                 var x = 0
                                 while(x < 10) {
@@ -21,9 +21,10 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('a');
+                        s2js.runtime.client.core.get().classLoader.provide('a');
 
-                        a.m1 = function() {
+                        a = function() { var self = this; };
+                        a.prototype.m1 = function() {
                             var self = this;
                             var x = 0;
                             while((x < 10)) {
@@ -31,18 +32,18 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 window.alert(x);
                             };
                         };
-                        a.__class__ = new s2js.runtime.client.Class('a', []);
+                        a.prototype.__class__ = new s2js.runtime.client.core.Class('a', []);
                     """
                 }
         }
 
-        ignore("for is supported") {
+        it("for is supported") {
             configMap =>
                 scalaCode {
                     """
                         import s2js.adapters.browser._
 
-                        object a {
+                        class a {
                             def m1() = {
                                 for(x <- 0 to 2) {
                                     window.alert("foo" + x)
@@ -52,24 +53,25 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('a');
+                        s2js.runtime.client.core.get().classLoader.provide('a');
 
-                        a.m1 = function() {
+                        a = function() { var self = this; };
+                        a.prototype.m1 = function() {
                             var self = this;
-                            scala.Predef.intWrapper(0).to(2).foreach(function(x) { window.alert(('foo' + x)); });
+                            scala.Predef.get().intWrapper(0).to(2).foreach(function(x) { window.alert(('foo' + x)); });
                         };
-                        a.__class__ = new s2js.runtime.client.Class('a', []);
+                        a.prototype.__class__ = new s2js.runtime.client.core.Class('a', []);
                     """
                 }
         }
     }
 
     describe("If statements") {
-        ignore("are supported") {
+        it("are supported") {
             configMap =>
                 scalaCode {
                     """
-                        object o1 {
+                        class o1 {
                             def m1() {
                                 var x = ""
                                 if(x == "") {
@@ -86,9 +88,10 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('o1');
+                        s2js.runtime.client.core.get().classLoader.provide('o1');
 
-                        o1.m1 = function() {
+                        o1 = function() { var self = this; };
+                        o1.prototype.m1 = function() {
                             var self = this;
                             var x = '';
                             if ((x == '')) {
@@ -101,18 +104,18 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 x = 'defaultconfirmed';
                             }
                         };
-                       o1.__class__ = new s2js.runtime.client.Class('o1', []);
+                        o1.prototype.__class__ = new s2js.runtime.client.core.Class('o1', []);
                     """
                 }
         }
 
-        ignore("can return values") {
+        it("can return values") {
             configMap =>
                 scalaCode {
                     """
                         import s2js.adapters.browser._
 
-                        object o1 {
+                        class o1 {
                             def m1(): String = "fooy"
                             def m2(x: String) {
                                 val y: String = if(x == "foo") {
@@ -127,13 +130,14 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('o1');
+                        s2js.runtime.client.core.get().classLoader.provide('o1');
 
-                        o1.m1 = function() {
+                        o1 = function() { var self = this; };
+                        o1.prototype.m1 = function() {
                             var self = this;
                             return 'fooy';
                         };
-                        o1.m2 = function(x) {
+                        o1.prototype.m2 = function(x) {
                             var self = this;
                             var y = (function() {
                                 if ((x == 'foo')) {
@@ -145,16 +149,16 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 }
                             })();
                         };
-                        o1.__class__ = new s2js.runtime.client.Class('o1', []);
+                        o1.prototype.__class__ = new s2js.runtime.client.core.Class('o1', []);
                     """
                 }
         }
 
-        ignore("can have else if statements") {
+        it("can have else if statements") {
             configMap =>
                 scalaCode {
                     """
-                        object o1 {
+                        class o1 {
                             def m(x: String): String = {
                                 if (x == "foo") {
                                     "it was foo"
@@ -170,9 +174,10 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('o1');
+                        s2js.runtime.client.core.get().classLoader.provide('o1');
 
-                        o1.m = function(x) {
+                        o1 = function() { var self = this; };
+                        o1.prototype.m = function(x) {
                             var self = this;
                             return (function() {
                                 if ((x == 'foo')) {
@@ -194,14 +199,14 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 }
                             })();
                         };
-                        o1.__class__ = new s2js.runtime.client.Class('o1', []);
+                        o1.prototype.__class__ = new s2js.runtime.client.core.Class('o1', []);
                     """
                 }
         }
     }
 
     describe("Exceptions") {
-        ignore("can be thrown") {
+        it("can be thrown") {
             configMap =>
                 scalaCode {
                     """
@@ -213,8 +218,8 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('A');
-                        s2js.runtime.client.ClassLoader.require('scala.Exception');
+                        s2js.runtime.client.core.get().classLoader.provide('A');
+                        s2js.runtime.client.core.get().classLoader.require('scala.Exception');
 
                         A = function() {
                             var self = this;
@@ -225,12 +230,12 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 throw new scala.Exception('something bad happened');
                             })();
                         };
-                        A.prototype.__class__ = new s2js.runtime.client.Class('A', []);
+                        A.prototype.__class__ = new s2js.runtime.client.core.Class('A', []);
                     """
                 }
         }
 
-        ignore("try is supported") {
+        it("try is supported") {
             configMap =>
                 scalaCode {
                     """
@@ -244,8 +249,8 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('A');
-                        s2js.runtime.client.ClassLoader.require('scala.Exception');
+                        s2js.runtime.client.core.get().classLoader.provide('A');
+                        s2js.runtime.client.core.get().classLoader.require('scala.Exception');
 
                         A = function() { var self = this; };
                         A.prototype.m = function() {
@@ -260,12 +265,12 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 })();
                             }
                         };
-                        A.prototype.__class__ = new s2js.runtime.client.Class('A', []);
+                        A.prototype.__class__ = new s2js.runtime.client.core.Class('A', []);
                     """
                 }
         }
 
-        ignore("catch is supported") {
+        it("catch is supported") {
             configMap =>
                 scalaCode {
                     """
@@ -284,8 +289,8 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('A');
-                        s2js.runtime.client.ClassLoader.require('scala.Exception');
+                        s2js.runtime.client.core.get().classLoader.provide('A');
+                        s2js.runtime.client.core.get().classLoader.require('scala.Exception');
 
                         A = function() {
                             var self = this;
@@ -299,11 +304,11 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 })();
                             } catch ($ex$1) {
                                 (function() {
-                                    if (s2js.runtime.client.isInstanceOf($ex$1, 'scala.RuntimeException')) {
+                                    if (s2js.runtime.client.core.get().isInstanceOf($ex$1, 'scala.RuntimeException')) {
                                         x = 'runtime exception';
                                         return;
                                     }
-                                    if (s2js.runtime.client.isInstanceOf($ex$1, 'scala.Exception')) {
+                                    if (s2js.runtime.client.core.get().isInstanceOf($ex$1, 'scala.Exception')) {
                                         x = 'exeption';
                                         return;
                                     }
@@ -315,12 +320,12 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 })();
                             }
                         };
-                        A.prototype.__class__ = new s2js.runtime.client.Class('A', []);
+                        A.prototype.__class__ = new s2js.runtime.client.core.Class('A', []);
                     """
                 }
         }
 
-        ignore("try/catch with return value is supported") {
+        it("try/catch with return value is supported") {
             configMap =>
                 scalaCode {
                     """
@@ -338,7 +343,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('A');
+                        s2js.runtime.client.core.get().classLoader.provide('A');
 
                         A = function() { var self = this; };
 
@@ -352,10 +357,10 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                     })();
                                 } catch ($ex$2) {
                                     $tryReturnValue$1 = (function() {
-                                        if (s2js.runtime.client.isInstanceOf($ex$2, 'scala.RuntimeException')) {
+                                        if (s2js.runtime.client.core.get().isInstanceOf($ex$2, 'scala.RuntimeException')) {
                                             return 'runtime exception';
                                         }
-                                        if (s2js.runtime.client.isInstanceOf($ex$2, 'scala.Exception')) {
+                                        if (s2js.runtime.client.core.get().isInstanceOf($ex$2, 'scala.Exception')) {
                                             return 'exeption';
                                         } if (true) {
                                             return 'unknown exception';
@@ -366,18 +371,18 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 return $tryReturnValue$1;
                             })();
                         };
-                        A.prototype.__class__ = new s2js.runtime.client.Class('A', []);
+                        A.prototype.__class__ = new s2js.runtime.client.core.Class('A', []);
                     """
                 }
         }
     }
 
     describe("Match statements") {
-        ignore("are supported") {
+        it("are supported") {
             configMap =>
                 scalaCode {
                     """
-                        object o {
+                        class o {
                             def m() {
                                 "abc" match {
                                     case "a" => 1
@@ -389,9 +394,10 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('o');
+                        s2js.runtime.client.core.get().classLoader.provide('o');
 
-                        o.m = function() {
+                        o = function() { var self = this; };
+                        o.prototype.m = function() {
                             var self = this;
                             (function($selector$1) {
                                 if ($selector$1 === 'a') {
@@ -408,16 +414,16 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 }
                             })('abc');
                         };
-                        o.__class__ = new s2js.runtime.client.Class('o', []);
+                        o.prototype.__class__ = new s2js.runtime.client.core.Class('o', []);
                     """
                 }
         }
 
-        ignore("can return value") {
+        it("can return value") {
             configMap =>
                 scalaCode {
                     """
-                        object o {
+                        class o {
                             def m(): Int = {
                                 "abc" match {
                                     case "a" => 123
@@ -428,9 +434,10 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('o');
+                        s2js.runtime.client.core.get().classLoader.provide('o');
 
-                        o.m = function() {
+                        o = function() { var self = this; };
+                        o.prototype.m = function() {
                             var self = this;
                             return (function($selector$1) {
                                 if ($selector$1 === 'a') {
@@ -441,16 +448,16 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 }
                             })('abc');
                         };
-                        o.__class__ = new s2js.runtime.client.Class('o', []);
+                        o.prototype.__class__ = new s2js.runtime.client.core.Class('o', []);
                     """
                 }
         }
 
-        ignore("can have alternative patterns") {
+        it("can have alternative patterns") {
             configMap =>
                 scalaCode {
                     """
-                        object o {
+                        class o {
                             def m(): Int = {
                                 "abc" match {
                                     case "a" | "b" | "c" => 123
@@ -461,9 +468,10 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('o');
+                        s2js.runtime.client.core.get().classLoader.provide('o');
 
-                        o.m = function() {
+                        o = function() { var self = this; };
+                        o.prototype.m = function() {
                             var self = this;
                             return (function($selector$1) {
                                 if (($selector$1 === 'a') || ($selector$1 === 'b') || ($selector$1 === 'c')) {
@@ -474,16 +482,16 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 }
                             })('abc');
                         };
-                        o.__class__ = new s2js.runtime.client.Class('o', []);
+                        o.prototype.__class__ = new s2js.runtime.client.core.Class('o', []);
                     """
                 }
         }
 
-        ignore("can have guards") {
+        it("can have guards") {
             configMap =>
                 scalaCode {
                     """
-                        object o {
+                        class o {
                             def m(): Int = {
                                 val x = false
                                 "abc" match {
@@ -495,9 +503,10 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('o');
+                        s2js.runtime.client.core.get().classLoader.provide('o');
 
-                        o.m = function() {
+                        o = function() { var self = this; };
+                        o.prototype.m = function() {
                             var self = this;
                             var x = false;
                             return (function($selector$1) {
@@ -511,16 +520,16 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 }
                             })('abc');
                         };
-                        o.__class__ = new s2js.runtime.client.Class('o', []);
+                        o.prototype.__class__ = new s2js.runtime.client.core.Class('o', []);
                     """
                 }
         }
 
-        ignore("typed patterns are supported") {
+        it("typed patterns are supported") {
             configMap =>
                 scalaCode {
                     """
-                        object o {
+                        class o {
                             def m(p: Any): Int = {
                                 p match {
                                     case _: String => 123
@@ -532,15 +541,16 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('o');
+                        s2js.runtime.client.core.get().classLoader.provide('o');
 
-                        o.m = function(p) {
+                        o = function() { var self = this; };
+                        o.prototype.m = function(p) {
                             var self = this;
                             return (function($selector$1) {
-                                if (s2js.runtime.client.isInstanceOf($selector$1, 'scala.String')) {
+                                if (s2js.runtime.client.core.get().isInstanceOf($selector$1, 'scala.String')) {
                                     return 123;
                                 }
-                                if (s2js.runtime.client.isInstanceOf($selector$1, 'scala.Int')) {
+                                if (s2js.runtime.client.core.get().isInstanceOf($selector$1, 'scala.Int')) {
                                     return 456;
                                 }
                                 if (true) {
@@ -548,16 +558,16 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 }
                             })(p);
                         };
-                        o.__class__ = new s2js.runtime.client.Class('o', []);
+                        o.prototype.__class__ = new s2js.runtime.client.core.Class('o', []);
                     """
                 }
         }
 
-        ignore("basic binding is supported") {
+        it("basic binding is supported") {
             configMap =>
                 scalaCode {
                     """
-                        object o {
+                        class o {
                             def m(p: Any): Int = {
                                 p match {
                                     case x: String => 123
@@ -569,16 +579,17 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('o');
+                        s2js.runtime.client.core.get().classLoader.provide('o');
 
-                        o.m = function(p) {
+                        o = function() { var self = this; };
+                        o.prototype.m = function(p) {
                             var self = this;
                             return (function($selector$1) {
-                                if (s2js.runtime.client.isInstanceOf($selector$1, 'scala.String')) {
+                                if (s2js.runtime.client.core.get().isInstanceOf($selector$1, 'scala.String')) {
                                     var x = $selector$1;
                                     return 123;
                                 }
-                                if (s2js.runtime.client.isInstanceOf($selector$1, 'scala.Int')) {
+                                if (s2js.runtime.client.core.get().isInstanceOf($selector$1, 'scala.Int')) {
                                     var y = $selector$1;
                                     return 456;
                                 }
@@ -587,16 +598,16 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 }
                             })(p);
                         };
-                        o.__class__ = new s2js.runtime.client.Class('o', []);
+                        o.prototype.__class__ = new s2js.runtime.client.core.Class('o', []);
                     """
                 }
         }
 
-        ignore("case class binding is supported") {
+        it("case class binding is supported") {
             configMap =>
                 scalaCode {
                     """
-                        object o {
+                        class o {
                             def m(p: Any): Int = {
                                 p match {
                                     case (_, _, (_, (bound1: Int, bound2@ _))) => 123
@@ -608,24 +619,25 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('o');
+                        s2js.runtime.client.core.get().classLoader.provide('o');
 
-                        o.m = function(p) {
+                        o = function() { var self = this; };
+                        o.prototype.m = function(p) {
                             var self = this;
                             return (function($selector$1) {
-                                if (s2js.runtime.client.isInstanceOf($selector$1, 'scala.Tuple3') && (true) && (true) &&
-                                (s2js.runtime.client.isInstanceOf($selector$1.productElement(2), 'scala.Tuple2') && (true) &&
-                                (s2js.runtime.client.isInstanceOf($selector$1.productElement(2).productElement(1), 'scala.Tuple2') &&
-                                (s2js.runtime.client.isInstanceOf($selector$1.productElement(2).productElement(1).productElement(0),
+                                if (s2js.runtime.client.core.get().isInstanceOf($selector$1, 'scala.Tuple3') && (true) && (true) &&
+                                (s2js.runtime.client.core.get().isInstanceOf($selector$1.productElement(2), 'scala.Tuple2') && (true) &&
+                                (s2js.runtime.client.core.get().isInstanceOf($selector$1.productElement(2).productElement(1), 'scala.Tuple2') &&
+                                (s2js.runtime.client.core.get().isInstanceOf($selector$1.productElement(2).productElement(1).productElement(0),
                                 'scala.Int')) && (true)))) {
                                     var bound1 = $selector$1.productElement(2).productElement(1).productElement(0);
                                     var bound2 = $selector$1.productElement(2).productElement(1).productElement(1);
                                     return 123;
                                 }
-                                if (s2js.runtime.client.isInstanceOf($selector$1, 'scala.Some') &&
-                                (s2js.runtime.client.isInstanceOf($selector$1.productElement(0), 'scala.Tuple2') && (true) &&
-                                (s2js.runtime.client.isInstanceOf($selector$1.productElement(0).productElement(1), 'scala.Some') &&
-                                (s2js.runtime.client.isInstanceOf($selector$1.productElement(0).productElement(1).productElement(0),
+                                if (s2js.runtime.client.core.get().isInstanceOf($selector$1, 'scala.Some') &&
+                                (s2js.runtime.client.core.get().isInstanceOf($selector$1.productElement(0), 'scala.Tuple2') && (true) &&
+                                (s2js.runtime.client.core.get().isInstanceOf($selector$1.productElement(0).productElement(1), 'scala.Some') &&
+                                (s2js.runtime.client.core.get().isInstanceOf($selector$1.productElement(0).productElement(1).productElement(0),
                                 'scala.Tuple5') && (true) && (true) && (true) && (true) && (true))))) {
 
                             var q = $selector$1.productElement(0).productElement(1).productElement(0).productElement(2);
@@ -636,7 +648,7 @@ class ControlFlowSpecs extends CompilerFixtureSpec
                                 }
                             })(p);
                         };
-                        o.__class__ = new s2js.runtime.client.Class('o', []);
+                        o.prototype.__class__ = new s2js.runtime.client.core.Class('o', []);
                     """
                 }
         }

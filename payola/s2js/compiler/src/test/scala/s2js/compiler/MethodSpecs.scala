@@ -3,7 +3,7 @@ package s2js.compiler
 class MethodSpecs extends CompilerFixtureSpec
 {
     describe("Method calls") {
-        ignore("parentheses can be omitted") {
+        it("parentheses can be omitted") {
             configMap =>
                 scalaCode {
                     """
@@ -25,15 +25,15 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('o1');
-                        s2js.runtime.client.ClassLoader.provide('o2');
-                        s2js.runtime.client.ClassLoader.require('scala.collection.immutable.List');
+                        s2js.runtime.client.core.get().classLoader.provide('o1');
+                        s2js.runtime.client.core.get().classLoader.provide('o2');
+                        s2js.runtime.client.core.get().classLoader.require('scala.collection.immutable.List');
 
                         o1.m = function() {
                             var self = this;
                             return 'foo';
                         };
-                        o1.__class__ = new s2js.runtime.client.Class('o1', []);
+                        o1.__class__ = new s2js.runtime.client.core.Class('o1', []);
 
                         o2.m = function() {
                             var self = this;
@@ -48,12 +48,12 @@ class MethodSpecs extends CompilerFixtureSpec
                             var z = o1.m().$length();
                             var emptyList = scala.collection.immutable.List.empty();
                         };
-                        o2.__class__ = new s2js.runtime.client.Class('o2', []);
+                        o2.__class__ = new s2js.runtime.client.core.Class('o2', []);
                     """
                 }
         }
 
-        ignore("default parameters are supported") {
+        it("default parameters are supported") {
             configMap =>
                 scalaCode {
                     """
@@ -69,7 +69,7 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('o1');
+                        s2js.runtime.client.core.get().classLoader.provide('o1');
 
                         o1.m1 = function(v1, v2) {
                             var self = this;
@@ -85,12 +85,12 @@ class MethodSpecs extends CompilerFixtureSpec
                             self.m1('foo', 'bar');
                             self.m2('foo', undefined);
                         };
-                        o1.__class__ = new s2js.runtime.client.Class('o1', []);
+                        o1.__class__ = new s2js.runtime.client.core.Class('o1', []);
                     """
                 }
         }
 
-        ignore("default parameters can reference fields") {
+        it("default parameters can reference fields") {
             configMap =>
                 scalaCode {
                     """
@@ -106,11 +106,11 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('o1');
-                        s2js.runtime.client.ClassLoader.provide('o2');
+                        s2js.runtime.client.core.get().classLoader.provide('o1');
+                        s2js.runtime.client.core.get().classLoader.provide('o2');
 
                         o1.x = 'o1';
-                        o1.__class__ = new s2js.runtime.client.Class('o1', []);
+                        o1.__class__ = new s2js.runtime.client.core.Class('o1', []);
 
                         o2.x = 'o2';
                         o2.m = function(a, x, y) {
@@ -119,12 +119,12 @@ class MethodSpecs extends CompilerFixtureSpec
                             if (typeof(x) === 'undefined') { x = self.x; }
                             if (typeof(y) === 'undefined') { y = o1.x; }
                         };
-                        o2.__class__ = new s2js.runtime.client.Class('o2', []);
+                        o2.__class__ = new s2js.runtime.client.core.Class('o2', []);
                     """
                 }
         }
 
-        ignore("can have a return value") {
+        it("can have a return value") {
             configMap =>
                 scalaCode {
                     """
@@ -146,7 +146,7 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('a');
+                        s2js.runtime.client.core.get().classLoader.provide('a');
 
                         a.m1 = function() {
                             var self = this;
@@ -165,12 +165,12 @@ class MethodSpecs extends CompilerFixtureSpec
                             var self = this;
                             'foobar';
                         };
-                        a.__class__ = new s2js.runtime.client.Class('a', []);
+                        a.__class__ = new s2js.runtime.client.core.Class('a', []);
                     """
                 }
         }
 
-        ignore("generic methods can be called") {
+        it("generic methods can be called") {
             configMap =>
                 scalaCode {
                     """
@@ -183,7 +183,7 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('a');
+                        s2js.runtime.client.core.get().classLoader.provide('a');
 
                         a.m1 = function(t) {
                             var self = this;
@@ -192,12 +192,12 @@ class MethodSpecs extends CompilerFixtureSpec
                             var self = this;
                             self.m1('foo');
                         };
-                        a.__class__ = new s2js.runtime.client.Class('a', []);
+                        a.__class__ = new s2js.runtime.client.core.Class('a', []);
                     """
                 }
         }
 
-        ignore("can call a method of returned object") {
+        it("can call a method of returned object") {
             configMap =>
                 scalaCode {
                     """
@@ -214,8 +214,8 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('A');
-                        s2js.runtime.client.ClassLoader.provide('b');
+                        s2js.runtime.client.core.get().classLoader.provide('A');
+                        s2js.runtime.client.core.get().classLoader.provide('b');
 
                         A = function() {
                             var self = this;
@@ -224,7 +224,7 @@ class MethodSpecs extends CompilerFixtureSpec
                             var self = this;
                             return ('foo' + x);
                         };
-                        A.prototype.__class__ = new s2js.runtime.client.Class('A', []);
+                        A.prototype.__class__ = new s2js.runtime.client.core.Class('A', []);
 
                         b.m1 = function() {
                             var self = this;
@@ -234,12 +234,12 @@ class MethodSpecs extends CompilerFixtureSpec
                             var self = this;
                             var x = self.m1().go('bar').toString();
                         };
-                        b.__class__ = new s2js.runtime.client.Class('b', []);
+                        b.__class__ = new s2js.runtime.client.core.Class('b', []);
                     """
                 }
         }
 
-        ignore("can have multiple parameter lists") {
+        it("can have multiple parameter lists") {
             configMap =>
                 scalaCode {
                     """
@@ -258,7 +258,7 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('o1');
+                        s2js.runtime.client.core.get().classLoader.provide('o1');
 
                         o1.m1 = function(name, fn) {
                             var self = this;
@@ -269,12 +269,12 @@ class MethodSpecs extends CompilerFixtureSpec
                             var self = this;
                             self.m1('foo', function(x) { window.alert(x); });
                         };
-                        o1.__class__ = new s2js.runtime.client.Class('o1', []);
+                        o1.__class__ = new s2js.runtime.client.core.Class('o1', []);
                     """
                 }
         }
 
-        ignore("methods can have other methods as parameters") {
+        it("methods can have other methods as parameters") {
             configMap =>
                 scalaCode {
                     """
@@ -305,9 +305,9 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('C1');
-                        s2js.runtime.client.ClassLoader.provide('C2');
-                        s2js.runtime.client.ClassLoader.provide('o1');
+                        s2js.runtime.client.core.get().classLoader.provide('C1');
+                        s2js.runtime.client.core.get().classLoader.provide('C2');
+                        s2js.runtime.client.core.get().classLoader.provide('o1');
 
                         C1 = function() {
                             var self = this;
@@ -318,7 +318,7 @@ class MethodSpecs extends CompilerFixtureSpec
                             window.alert(self.f1);
                             fn(self.f1);
                         };
-                        C1.prototype.__class__ = new s2js.runtime.client.Class('C1', []);
+                        C1.prototype.__class__ = new s2js.runtime.client.core.Class('C1', []);
 
                         C2 = function() {
                             var self = this;
@@ -328,7 +328,7 @@ class MethodSpecs extends CompilerFixtureSpec
                             var self = this;
                             window.alert((v1 + self.f1));
                         };
-                        C2.prototype.__class__ = new s2js.runtime.client.Class('C2', []);
+                        C2.prototype.__class__ = new s2js.runtime.client.core.Class('C2', []);
 
                         o1.m1 = function() {
                             var self = this;
@@ -336,12 +336,12 @@ class MethodSpecs extends CompilerFixtureSpec
                             var c2 = new C2();
                             c1.m1(function($v1) { c2.m1($v1); });
                         };
-                        o1.__class__ = new s2js.runtime.client.Class('o1', []);
+                        o1.__class__ = new s2js.runtime.client.core.Class('o1', []);
                     """
                 }
         }
 
-        ignore("can override base class methods") {
+        it("can override base class methods") {
             configMap =>
                 scalaCode {
                     """
@@ -358,8 +358,8 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('$pkg.a');
-                        s2js.runtime.client.ClassLoader.provide('$pkg.b');
+                        s2js.runtime.client.core.get().classLoader.provide('$pkg.a');
+                        s2js.runtime.client.core.get().classLoader.provide('$pkg.b');
 
                         $pkg.a = function() {
                             var self = this;
@@ -370,13 +370,13 @@ class MethodSpecs extends CompilerFixtureSpec
                         $pkg.a.prototype.m2 = function(x) {
                             var self = this;
                         };
-                        $pkg.a.prototype.__class__ = new s2js.runtime.client.Class('$pkg.a', []);
+                        $pkg.a.prototype.__class__ = new s2js.runtime.client.core.Class('$pkg.a', []);
 
                         $pkg.b = function() {
                             var self = this;
                             $pkg.a.apply(self, []);
                         };
-                        goog.inherits($pkg.b, $pkg.a);
+                        s2js.runtime.client.core.get().inherit($pkg.b, $pkg.a);
                         $pkg.b.prototype.m1 = function() {
                             var self = this;
                             $pkg.a.prototype.m1.apply(self, []);
@@ -385,12 +385,12 @@ class MethodSpecs extends CompilerFixtureSpec
                             var self = this;
                             $pkg.a.prototype.m2.apply(self, ['foo']);
                         };
-                        $pkg.b.prototype.__class__ = new s2js.runtime.client.Class('$pkg.b', [$pkg.a]);
+                        $pkg.b.prototype.__class__ = new s2js.runtime.client.core.Class('$pkg.b', [$pkg.a]);
                     """
                 }
         }
 
-        ignore("variadic methods are supported") {
+        it("variadic methods are supported") {
             configMap =>
                 scalaCode {
                     """
@@ -422,8 +422,8 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('o');
-                        s2js.runtime.client.ClassLoader.require('scala.collection.immutable.List');
+                        s2js.runtime.client.core.get().classLoader.provide('o');
+                        s2js.runtime.client.core.get().classLoader.require('scala.collection.immutable.List');
 
                         o.m1 = function() {
                             var self = this;
@@ -447,7 +447,7 @@ class MethodSpecs extends CompilerFixtureSpec
                             self.m2('test', 5, 6);
                             self.m2('test', 5, 6, 7, 8);
                         };
-                        o.__class__ = new s2js.runtime.client.Class('o', []);
+                        o.__class__ = new s2js.runtime.client.core.Class('o', []);
                     """
                 }
         }

@@ -3,7 +3,7 @@ package s2js.compiler
 class LiteralSpecs extends CompilerFixtureSpec
 {
     describe("Literals") {
-        ignore("null is supported") {
+        it("null is supported") {
             configMap =>
                 scalaCode {
                     """
@@ -16,18 +16,18 @@ class LiteralSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('p');
+                        s2js.runtime.client.core.get().classLoader.provide('p');
 
                         p.a = function() {
                             var self = this;
                             null;
                         };
-                        p.__class__ = new s2js.runtime.client.Class('p', []);
+                        p.__class__ = new s2js.runtime.client.core.Class('p', []);
                     """
                 }
         }
 
-        ignore("booleans are supported") {
+        it("booleans are supported") {
             configMap =>
                 scalaCode {
                     """
@@ -41,19 +41,19 @@ class LiteralSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('p');
+                        s2js.runtime.client.core.get().classLoader.provide('p');
 
                         p.a = function() {
                             var self = this;
                             true;
                             false;
                         };
-                        p.__class__ = new s2js.runtime.client.Class('p', []);
+                        p.__class__ = new s2js.runtime.client.core.Class('p', []);
                     """
                 }
         }
 
-        ignore("numbers are supported") {
+        it("numbers are supported") {
             configMap =>
                 scalaCode {
                     """
@@ -70,7 +70,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('p');
+                        s2js.runtime.client.core.get().classLoader.provide('p');
 
                         p.a = function() {
                             var self = this;
@@ -80,12 +80,12 @@ class LiteralSpecs extends CompilerFixtureSpec
                             -5;
                             -424.45;
                         };
-                        p.__class__ = new s2js.runtime.client.Class('p', []);
+                        p.__class__ = new s2js.runtime.client.core.Class('p', []);
                     """
                 }
         }
 
-        ignore("chars are supported") {
+        it("chars are supported") {
             configMap =>
                 scalaCode {
                     """
@@ -103,7 +103,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                     }
                     """
                 } shouldExactlyCompileTo {
-                    """s2js.runtime.client.ClassLoader.provide('a');""" + "\n" +
+                    """s2js.runtime.client.core.get().classLoader.provide('a');""" + "\n" +
                     """a.a = 'a';""" + "\n" +
                     """a.b = 'b';""" + "\n" +
                     """a.c = '\b';""" + "\n" +
@@ -114,12 +114,12 @@ class LiteralSpecs extends CompilerFixtureSpec
                     """a.h = '\'';""" + "\n" +
                     """a.i = '\"';""" + "\n" +
                     """a.j = '\\';""" + "\n" +
-                    """a.__class__ = new s2js.runtime.client.Class('a', []);""" + "\n" +
+                    """a.__class__ = new s2js.runtime.client.core.Class('a', []);""" + "\n" +
                     """"""
                 }
         }
 
-        ignore("strings are supported") {
+        it("strings are supported") {
             configMap =>
                 scalaCode {
                     """
@@ -141,7 +141,7 @@ class LiteralSpecs extends CompilerFixtureSpec
                         }
                     """
                 } shouldExactlyCompileTo {
-                    """s2js.runtime.client.ClassLoader.provide('a');""" + "\n" +
+                    """s2js.runtime.client.core.get().classLoader.provide('a');""" + "\n" +
                     """a.a = 'asdfghjkl';""" + "\n" +
                     """a.b = '12345';""" + "\n" +
                     """a.c = '';""" + "\n" +
@@ -154,12 +154,12 @@ class LiteralSpecs extends CompilerFixtureSpec
                     """a.k = '\"';""" + "\n" +
                     """a.l = '\\';""" + "\n" +
                     """a.m = 'multiline\nstring\n';""" + "\n" +
-                    """a.__class__ = new s2js.runtime.client.Class('a', []);""" + "\n" +
+                    """a.__class__ = new s2js.runtime.client.core.Class('a', []);""" + "\n" +
                     """"""
                 }
         }
 
-        ignore("classOf is supported") {
+        it("classOf is supported") {
             configMap =>
                 scalaCode {
                     """
@@ -173,13 +173,13 @@ class LiteralSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo  {
                     """
-                        s2js.runtime.client.ClassLoader.provide('p.A');
-                        s2js.runtime.client.ClassLoader.provide('p.a');
+                        s2js.runtime.client.core.get().classLoader.provide('p.A');
+                        s2js.runtime.client.core.get().classLoader.provide('p.a');
 
                         p.A = function() { var self = this; };
-                        p.A.prototype.__class__ = new s2js.runtime.client.Class('p.A', []);
+                        p.A.prototype.__class__ = new s2js.runtime.client.core.Class('p.A', []);
                         p.a.a = p.A.prototype.__class__;
-                        p.a.__class__ = new s2js.runtime.client.Class('p.a', []);
+                        p.a.__class__ = new s2js.runtime.client.core.Class('p.a', []);
                     """
                 }
         }

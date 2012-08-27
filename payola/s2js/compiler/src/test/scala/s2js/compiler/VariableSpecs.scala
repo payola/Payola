@@ -3,7 +3,7 @@ package s2js.compiler
 class VariableSpecs extends CompilerFixtureSpec
 {
     describe("Variables") {
-        ignore("can have literal values") {
+        it("can have literal values") {
             configMap =>
                 scalaCode {
                     """
@@ -20,7 +20,7 @@ class VariableSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('foo.A');
+                        s2js.runtime.client.core.get().classLoader.provide('foo.A');
 
                         foo.A = function() {
                             var self = this;
@@ -33,12 +33,12 @@ class VariableSpecs extends CompilerFixtureSpec
                             var c = true;
                             var d = 1.0;
                         };
-                        foo.A.prototype.__class__ = new s2js.runtime.client.Class('foo.A', []);
+                        foo.A.prototype.__class__ = new s2js.runtime.client.core.Class('foo.A', []);
                     """
                 }
         }
 
-        ignore("can have instance values") {
+        it("can have instance values") {
             configMap =>
                 scalaCode {
                     """
@@ -54,8 +54,8 @@ class VariableSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('foo.A');
-                        s2js.runtime.client.ClassLoader.provide('foo.B');
+                        s2js.runtime.client.core.get().classLoader.provide('foo.A');
+                        s2js.runtime.client.core.get().classLoader.provide('foo.B');
 
                         foo.A = function() {
                             var self = this;
@@ -64,17 +64,17 @@ class VariableSpecs extends CompilerFixtureSpec
                             var self = this;
                             var a = new foo.B();
                         };
-                        foo.A.prototype.__class__ = new s2js.runtime.client.Class('foo.A', []);
+                        foo.A.prototype.__class__ = new s2js.runtime.client.core.Class('foo.A', []);
                         
                         foo.B = function() {
                             var self = this;
                         };
-                        foo.B.prototype.__class__ = new s2js.runtime.client.Class('foo.B', []);
+                        foo.B.prototype.__class__ = new s2js.runtime.client.core.Class('foo.B', []);
                     """
                 }
         }
 
-        ignore("can have parameter values") {
+        it("can have parameter values") {
             configMap =>
                 scalaCode {
                     """
@@ -88,7 +88,7 @@ class VariableSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('foo.A');
+                        s2js.runtime.client.core.get().classLoader.provide('foo.A');
 
                         foo.A = function() {
                             var self = this;
@@ -97,12 +97,12 @@ class VariableSpecs extends CompilerFixtureSpec
                             var self = this;
                             var a = y;
                         };
-                        foo.A.prototype.__class__ = new s2js.runtime.client.Class('foo.A', []);
+                        foo.A.prototype.__class__ = new s2js.runtime.client.core.Class('foo.A', []);
                     """
                 }
         }
 
-        ignore("can have function return values") {
+        it("can have function return values") {
             configMap =>
                 scalaCode {
                     """
@@ -117,7 +117,7 @@ class VariableSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('foo.A');
+                        s2js.runtime.client.core.get().classLoader.provide('foo.A');
 
                         foo.A = function() {
                             var self = this;
@@ -130,12 +130,12 @@ class VariableSpecs extends CompilerFixtureSpec
                             var self = this;
                             var a = self.m1();
                         };
-                        foo.A.prototype.__class__ = new s2js.runtime.client.Class('foo.A', []);
+                        foo.A.prototype.__class__ = new s2js.runtime.client.core.Class('foo.A', []);
                     """
                 }
         }
 
-        ignore("can have expression values") {
+        it("can have expression values") {
             configMap =>
                 scalaCode {
                     """
@@ -151,7 +151,7 @@ class VariableSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('foo.A');
+                        s2js.runtime.client.core.get().classLoader.provide('foo.A');
 
                         foo.A = function() {
                             var self = this;
@@ -162,12 +162,12 @@ class VariableSpecs extends CompilerFixtureSpec
                             var b = (x == 5);
                             var c = ((9 * a) / (2 + a));
                         };
-                        foo.A.prototype.__class__ = new s2js.runtime.client.Class('foo.A', []);
+                        foo.A.prototype.__class__ = new s2js.runtime.client.core.Class('foo.A', []);
                     """
                 }
         }
 
-        ignore("can have function values") {
+        it("can have function values") {
             configMap =>
                 scalaCode {
                     """
@@ -181,7 +181,7 @@ class VariableSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('foo.A');
+                        s2js.runtime.client.core.get().classLoader.provide('foo.A');
 
                         foo.A = function() {
                             var self = this;
@@ -190,7 +190,7 @@ class VariableSpecs extends CompilerFixtureSpec
                             var self = this;
                             var a = function(b) { return ('foo' + b); };
                         };
-                        foo.A.prototype.__class__ = new s2js.runtime.client.Class('foo.A', []);
+                        foo.A.prototype.__class__ = new s2js.runtime.client.core.Class('foo.A', []);
                     """
                 }
         }

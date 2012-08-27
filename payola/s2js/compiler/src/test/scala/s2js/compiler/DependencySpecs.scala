@@ -3,7 +3,7 @@ package s2js.compiler
 class DependencySpecs extends CompilerFixtureSpec
 {
     describe("Requires") {
-        ignore("avoid requiring deep packages") {
+        it("avoid requiring deep packages") {
             configMap =>
                 scalaCode {
                     """
@@ -15,17 +15,17 @@ class DependencySpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('a.b.c.d');
+                        s2js.runtime.client.core.get().classLoader.provide('a.b.c.d');
 
                         a.b.c.d.m1 = function() {
                             var self = this;
                         };
-                        a.b.c.d.__class__ = new s2js.runtime.client.Class('a.b.c.d', []);
+                        a.b.c.d.__class__ = new s2js.runtime.client.core.Class('a.b.c.d', []);
                     """
                 }
         }
 
-        ignore("add require for used classes") {
+        it("add require for used classes") {
             configMap =>
                 scalaCode {
                     """
@@ -44,11 +44,11 @@ class DependencySpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('foo.a');
+                        s2js.runtime.client.core.get().classLoader.provide('foo.a');
 
-                        s2js.runtime.client.ClassLoader.require('java.util.ArrayList');
-                        s2js.runtime.client.ClassLoader.require('java.util.Date');
-                        s2js.runtime.client.ClassLoader.require('java.util.Random');
+                        s2js.runtime.client.core.get().classLoader.require('java.util.ArrayList');
+                        s2js.runtime.client.core.get().classLoader.require('java.util.Date');
+                        s2js.runtime.client.core.get().classLoader.require('java.util.Random');
 
                         foo.a.x = new java.util.Date();
 
@@ -57,12 +57,12 @@ class DependencySpecs extends CompilerFixtureSpec
                             var y = new java.util.Random();
                             var z = new java.util.ArrayList();
                         };
-                        foo.a.__class__ = new s2js.runtime.client.Class('foo.a', []);
+                        foo.a.__class__ = new s2js.runtime.client.core.Class('foo.a', []);
                     """
                 }
         }
 
-        ignore("ignore implicit browser imports") {
+        it("ignore implicit browser imports") {
             configMap =>
                 scalaCode {
                     """
@@ -77,19 +77,19 @@ class DependencySpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('o1');
+                        s2js.runtime.client.core.get().classLoader.provide('o1');
 
                         o1.f1 = 'aaaa';
                         o1.m1 = function() {
                             var self = this;
                             window.alert(self.f1);
                         };
-                        o1.__class__ = new s2js.runtime.client.Class('o1', []);
+                        o1.__class__ = new s2js.runtime.client.core.Class('o1', []);
                     """
                 }
         }
 
-        ignore("ignore explicit browser imports") {
+        it("ignore explicit browser imports") {
             configMap =>
                 scalaCode {
                     """
@@ -101,10 +101,10 @@ class DependencySpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('o1');
+                        s2js.runtime.client.core.get().classLoader.provide('o1');
 
                         o1.f1 = window.location;
-                        o1.__class__ = new s2js.runtime.client.Class('o1', []);
+                        o1.__class__ = new s2js.runtime.client.core.Class('o1', []);
                     """
                 }
         }

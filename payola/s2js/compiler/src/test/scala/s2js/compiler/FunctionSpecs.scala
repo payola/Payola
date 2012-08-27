@@ -3,7 +3,7 @@ package s2js.compiler
 class FunctionSpecs extends CompilerFixtureSpec
 {
     describe("Functions") {
-        ignore("can be higher-ordered") {
+        it("can be higher-ordered") {
             configMap =>
                 scalaCode {
                     """
@@ -31,8 +31,8 @@ class FunctionSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('F');
-                        s2js.runtime.client.ClassLoader.provide('o');
+                        s2js.runtime.client.core.get().classLoader.provide('F');
+                        s2js.runtime.client.core.get().classLoader.provide('o');
 
                         F = function() {
                             var self = this;
@@ -42,7 +42,7 @@ class FunctionSpecs extends CompilerFixtureSpec
                             var self = this;
                             return (self.v1 + x.toUpperCase());
                         };
-                        F.prototype.__class__ = new s2js.runtime.client.Class('F', []);
+                        F.prototype.__class__ = new s2js.runtime.client.core.Class('F', []);
 
                         o.f2 = function(f) {
                             var self = this;
@@ -59,12 +59,12 @@ class FunctionSpecs extends CompilerFixtureSpec
                             self.f2(function($x) { return self.f3($x); });
                             self.f2(function(x) { return ('no' + x); });
                         };
-                        o.__class__ = new s2js.runtime.client.Class('o', []);
+                        o.__class__ = new s2js.runtime.client.core.Class('o', []);
                     """
                 }
         }
 
-        ignore("anonymous functions can be assigned to variables") {
+        it("anonymous functions can be assigned to variables") {
             configMap =>
                 scalaCode {
                     """
@@ -76,10 +76,10 @@ class FunctionSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('a');
+                        s2js.runtime.client.core.get().classLoader.provide('a');
 
                         a.x = function(y) { window.alert(y); };
-                        a.__class__ = new s2js.runtime.client.Class('a', []);
+                        a.__class__ = new s2js.runtime.client.core.Class('a', []);
                     """
                 }
         }
