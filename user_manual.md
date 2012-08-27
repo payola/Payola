@@ -413,7 +413,17 @@ A plugin must always have two constructors declared:
 
 > If you wonder why such constraints are used, note that there is only one instance of each plugin class living in the application in every moment. In fact, there may be more than one instance of the plugin class, however all these instances are identical, so they have same IDs and parameters with same IDs. The parameterless constructor is therefore used to create the first instance of the plugin class. The instance is consecutively persisted into the database and whenever it's is accessed by that moment, it's instantiated using the default constructor with the values retrieved from the database.
 
-The second constrait on the plugin is that it must implement the abstract method ```evaluate(instance: PluginInstance, inputs: IndexedSeq[Option[Graph]], progressReporter: Double => Unit)```. The `instance` parameter contains all parameter values, `inputs` is a sequence of `Option[Graph]`'s - in this case just one as defined in `this()`. You can optionally report progress using the `progressReporter` function passed, which reports the progress to the user (values from the interval (0.0, 1.0]). Refer to the API documentation to explore which methods you can call on the `instance` or within the plugin class scope (e.g. helper methods like `usingDefined`).
+The second constrait on the plugin is that it must implement the abstract method ```evaluate(instance: PluginInstance, inputs: IndexedSeq[Option[Graph]], progressReporter: Double => Unit)```. The `instance` parameter contains all parameter values, `inputs` is a sequence of `Option[Graph]`'s - in this case just one as defined in `this()`. You can optionally report progress using the `progressReporter` function passed, which reports the progress to the user (0.0 < progress <= 1.0). Refer to the API documentation to explore which methods you can call on the `instance` or within the plugin class scope (e.g. helper methods like `usingDefined`).
+
+![Plugin Source](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_source.png)
+
+Once you post the plugin source code, it gets compiled to check for syntax errors and that the code is indeed a Plugin subclass.
+
+![Plugin Compiling](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_compiling.png)
+
+After that an email is sent to the admin to review the plugin source code for security reasons. After he reviews it, you will receive an email with the admin's decision.
+
+![Plugin Compiling](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_submitted.png)
 
 #### Other plugin types
 
@@ -463,21 +473,7 @@ class TopTriples(name: String, inputCount: Int, parameters: immutable.Seq[Parame
 
 	def getQuery(instance: PluginInstance): String = {
 		val limit = instance.getIntParameter("Count").map(l => math.min(math.max(0, l), 1000)).getOrElse(30)
-		"""
-			CONSTRUCT { ?x ?y ?z }
-			WHERE { ?x ?y ?z }
-			LIMIT %s
-		""".format(limit)
+		"CONSTRUCT { ?x ?y ?z } WHERE { ?x ?y ?z } LIMIT %s".format(limit)
 	}
 }
 ```
-
-![Plugin Source](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_source.png)
-
-Once you post the plugin source code, it gets compiled to check for syntax errors and that the code is indeed a Plugin subclass.
-
-![Plugin Compiling](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_compiling.png)
-
-After that an email is sent to the admin to review the plugin source code for security reasons. After he reviews it, you will receive an email with the admin's decision.
-
-![Plugin Compiling](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_submitted.png)
