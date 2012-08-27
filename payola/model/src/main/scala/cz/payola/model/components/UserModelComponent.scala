@@ -38,6 +38,10 @@ trait UserModelComponent extends EntityModelComponent
             userRepository.getAllWithNameLike(name)
         }
 
+        def changePasswordForUser(user: User, newPassword: String) {
+            user.password = cryptPassword(newPassword)
+        }
+
         def cryptPassword(password: String, method: String = "SHA-1"): String = {
             // TODO bcrypt
             val md = java.security.MessageDigest.getInstance(method)
