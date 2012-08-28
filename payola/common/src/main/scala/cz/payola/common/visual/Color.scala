@@ -1,5 +1,7 @@
 package cz.payola.common.visual
 
+import cz.payola.common.ValidationException
+
 /**
  * RGB representation of colors used by visual plug-ins
  * @param red component of the color
@@ -58,7 +60,12 @@ object Color
             val r = parts(0).toInt
             val g = parts(1).toInt
             val b = parts(2).toInt
-            val a = parts(3).toDouble
+            val a = try {
+                parts(3).toDouble
+            }
+            catch {
+                case e: Exception => throw new ValidationException("color", e.getMessage())
+            }
 
             // Validate
             if (r < 256 && g < 256 && b < 256 && a >= 0 && a <= 1) {
