@@ -61,6 +61,16 @@ class DataSource(protected var _name: String, protected var _owner: Option[User]
         plugin.asInstanceOf[DataFetcher].getNeighbourhood(this, vertexURI)
     }
 
+    /**
+     * Returns a plugin instance corresponding to the DataSource.
+     */
+    def toInstance: PluginInstance = {
+        val instance = plugin.createInstance()
+        plugin.parameters.foreach(n => getParameter(n.name).foreach(instance.setParameter(n.name, _)))
+        instance.isEditable = isEditable
+        instance
+    }
+
     override def canEqual(other: Any): Boolean = {
         other.isInstanceOf[DataSource]
     }

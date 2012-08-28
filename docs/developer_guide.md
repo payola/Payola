@@ -3,75 +3,58 @@
 
 # Developer Guide
 
-The Payola application consists of several layers and libraries that are all enclosed within a solution project ```payola```. The following sections describe structure of the solution, the functionality hidden within the layers and libraries and their relations.
-
-## 3rd party technologies
-While developing the Payola, we used the following technologies:
-
-- [Play! 2.0](http://www.playframework.org/) Scala MVC web framework
-- [Squeryl](http://squeryl.org/) (Scala ORM)
-- [Apache Jena](http://jena.apache.org/) (Java framework for building Semantic Web applications)
-- [jQuery](http://jquery.com/) JavaScript Library
-- [Twitter Bootstrap](http://twitter.github.com/bootstrap/) (collection of CSS and JS code from Twitter)
-- [Colorpicker for bootstrap](http://www.eyecon.ro/bootstrap-colorpicker/) JS module for Twitter Bootstrap
-- [Ace](http://ace.ajax.org/) (web editor for programming languages with syntax highlighting)
-- [Select2](http://ivaynberg.github.com/select2/) (JavaScript autocomplete plugin)
-- [sprintf](http://code.google.com/p/sprintf/) (SprintF implementation for JS)
-- [Flot](http://code.google.com/p/flot/) (JavaScript charts plugin)
-- [jQuery autosize](http://www.jacklmoore.com/autosize) (jQuery plugin for autosizing textareas)
-- [jQuery blockUI](http://jquery.malsup.com/block/) (jQuery plugin for blocking UI nicely)
-- [LiveQuery](http://docs.jquery.com/Plugins/livequery) (jQuery plugin)
+The Payola application consists of several layers and libraries that are all enclosed within a solution project `payola`. The following sections describe structure of the solution, the functionality hidden within the layers and libraries and their relations. For information how to install, compile and run the Payola, please refer to the [Installation Manual](https://raw.github.com/siroky/Payola/develop/docs/installation_manual.md).
 
 ## Solution structure
 
-The solution is defined using the [SBT](https://github.com/harrah/xsbt/wiki/ "SBT") which isn't tightly bound to any particular IDE, so you may generate corresponding project files for the most commonly used IDEs (e.g. [IntelliJ IDEA](http://www.jetbrains.com/idea/), [Eclipse](http://www.eclipse.org)). SBT doesn't support any concept that can be directly used as a solution, but it can be emulated using projects and subprojects. In our case, the ```payola``` solution is just a project with no source files. The solution structure is:
+The solution is defined using the [SBT](https://github.com/harrah/xsbt/wiki/ "SBT") build file which isn't tightly bound to any particular IDE, so you may generate corresponding project files for the most commonly used IDEs (e.g. [IntelliJ IDEA](http://www.jetbrains.com/idea/), [Eclipse](http://www.eclipse.org)). SBT doesn't support any concept that can be directly used as a solution, but it can be emulated using projects and subprojects. In our case, the `payola` solution is just a project with no source files. The solution structure is:
 
-- ```payola```
-	- [```common```](#common)
-	- [```data```](#data)
-	- [```domain```](#domain)
-	- [```model```](#model)
-	- [```project```](#project)
-	- [```s2js```](#s2js)
-		- [```adapters```](#adapters)
-		- [```compiler```](#compiler)
-		- [```runtime```](#runtime)
-			- [```client```](#runtime-client)
-			- [```shared```](#runtime-shared)
-	- [```scala2json```](#scala2json)
-	- [```web```](#web)
-		- [```client```](#client)
-		- [```initializer```](#initializer)
-		- [```shared```](#shared)
-		- [```server```](#server)
+- `payola`
+	- [`common`](#common)
+	- [`data`](#data)
+	- [`domain`](#domain)
+	- [`model`](#model)
+	- [`project`](#project)
+	- [`s2js`](#s2js)
+		- [`adapters`](#adapters)
+		- [`compiler`](#compiler)
+		- [`runtime`](#runtime)
+			- [`client`](#runtime-client)
+			- [`shared`](#runtime-shared)
+	- [`scala2json`](#scala2json)
+	- [`web`](#web)
+		- [`client`](#client)
+		- [`initializer`](#initializer)
+		- [`shared`](#shared)
+		- [`server`](#server)
 
 ![Project depedencies](https://raw.github.com/siroky/Payola/develop/docs/img/project_dependencies.png)
 
-Briefly, the project [```payola/project```](#project) defines this structure, dependencies between the projects, external dependencies and the build process, so it can be understood as a Makefile equivalent. Somewhat standalone libraries are the [```payola/scala2json```](#scala2json) project which provides means of Scala object serialization into the JSON format and [```payola/s2js```](#s2js) project which with all its subprojects enables us to write web applications in Scala (to compile Scala code to equivalent JavaScript code).
+Briefly, the project [`payola/project`](#project) defines this structure, dependencies between the projects, external dependencies and the build process, so it can be understood as a Makefile equivalent. Somewhat standalone libraries are the [`payola/scala2json`](#scala2json) project which provides means of Scala object serialization into the JSON format and [`payola/s2js`](#s2js) project which with all its subprojects enables us to write web applications in Scala (to compile Scala code to equivalent JavaScript code).
 
-The Payola application itself is spread within the rest of the projects, namely [```payola/common```](#common) that defines classes that are used throughout all layers and even on the client side. The [```payola/domain```](#domain) mostly extends classes from the [```payola/common```](#common) with backend logic. The [```payola/data```](#data) is a persistence, data access layer. The [```payola/model```](#model) wraps up the previous three modules with a uniform interface. It's meant as a standard programmatic access point to Payola. Finally, the web application itself consists of the [```payola/web/initializer```](#initializer) which is a console application initializing the database (i.e an installer), [```payola/web/server```](#server) that is a [Play](http://www.playframework.org/) web application, the [```payola/web/client```](#client) which contains a browser MVP application (compiled to JavaScript) and last but not least the [```payola/web/shared```](#shared) which consists of objects that are called from the client, but executed on the server.
+The Payola application itself is spread within the rest of the projects, namely [`payola/common`](#common) that defines classes that are used throughout all layers and even on the client side. The [`payola/domain`](#domain) mostly extends classes from the [`payola/common`](#common) with backend logic. The [`payola/data`](#data) is a persistence, data access layer. The [`payola/model`](#model) wraps up the previous three modules with a uniform interface. It's meant as a standard programmatic access point to Payola. Finally, the web application itself consists of the [`payola/web/initializer`](#initializer) which is a console application initializing the database (i.e an installer), [`payola/web/server`](#server) that is a [Play](http://www.playframework.org/) web application, the [`payola/web/client`](#client) which contains a browser MVP application (compiled to JavaScript) and last but not least the [`payola/web/shared`](#shared) which consists of objects that are called from the client, but executed on the server.
 
-This structure also determines package names, which follow the pattern ```cz.payola.[project path where '/' is replaced with '.']```. So, for example, a class declared in the ```payola/web/client``` project can be found in the ```cz.payola.web.client``` package or one of its subpackages. The [```payola/s2js```](#s2js) project uses different package naming conventions, all packages and subpackages have the ```cz.payola``` prefix left out, so they start with ```s2js```.
+This structure also determines package names, which follow the pattern `cz.payola.[project path where '/' is replaced with '.']`. So, for example, a class declared in the `payola/web/client` project can be found in the `cz.payola.web.client` package or one of its subpackages. The [`payola/s2js`](#s2js) project uses different package naming conventions, all packages and subpackages have the `cz.payola` prefix left out, so they start with `s2js`.
 
 <a name="project"></a>
 ## Project payola/project
 
-This project contains only two files: ```plugins.sbt``` and ```PayolaBuild.scala```. The former one is just a configuration SBT file, i.e. SBT plugins that should be used on top of standard SBT and additional Maven repository declarations to download dependencies from.
+This project contains only two files: `plugins.sbt` and `PayolaBuild.scala`. The former one is just a configuration SBT file, i.e. SBT plugins that should be used on top of standard SBT and additional Maven repository declarations to download dependencies from.
 
-The ```PayolaBuild.scala``` is a [build definition file](https://github.com/harrah/xsbt/wiki/Getting-Started-Full-Def) of the whole solution. The solution structure, projects, dependencies, compilation, test settings and other concepts used there are described in depth in the [SBT Wiki](https://github.com/harrah/xsbt/wiki). Moreover, there is a template for all projects that should be compiled to JavaScript, that adds the [s2js](#s2js) compiler plugin to the standard Scala compiler. To create a project that should be compiled to JavaScript, use ```ScalaToJsProject(...)``` instead of the standard ```Project(...)```.
+The `PayolaBuild.scala` is a [build definition file](https://github.com/harrah/xsbt/wiki/Getting-Started-Full-Def) of the whole solution. The solution structure, projects, dependencies, compilation, test settings and other concepts used there are described in depth in the [SBT Wiki](https://github.com/harrah/xsbt/wiki). Moreover, there is a template for all projects that should be compiled to JavaScript, that adds the [s2js](#s2js) compiler plugin to the standard Scala compiler. To create a project that should be compiled to JavaScript, use `ScalaToJsProject(...)` instead of the standard `Project(...)`.
 
 <a name="cp"></a>
 ### The cp task
 
-The build file defines a custom SBT Task called ```cp``` which is an abbreviation for 'compile and package'. In order to support compilation of the payola solution in one step, we had to introduce this non-standard task. Because the solution contains both the [s2js](#s2js) compiler plugin project and also projects that use that compiler plugin, it's not sufficient to mark the compiler plugin project as a dependency of projects that should be compiled to Javascript. The Scala compiler accepts only ```.jar``` plugin files so the compiler plugin project has to be not only compiled, but also packed into a ```.jar``` package before it can be used.
+The build file defines a custom SBT Task called `cp` which is an abbreviation for 'compile and package'. In order to support compilation of the payola solution in one step, we had to introduce this non-standard task. Because the solution contains both the [s2js](#s2js) compiler plugin project and also projects that use that compiler plugin, it's not sufficient to mark the compiler plugin project as a dependency of projects that should be compiled to Javascript. The Scala compiler accepts only `.jar` plugin files so the compiler plugin project has to be not only compiled, but also packed into a `.jar` package before it can be used.
 
 ### Compilation of payola/web/server using cp
 
-Another compilation customization required by [s2js](#s2js) is added to the compilation process of the [server project](#server). During compilation of a ```ScalaToJsProject```, the generated ```.js``` files are written to the ```payola/web/server/public/javascripts``` directory. Each file provides some symbols (classes and objects declared in the file) and requires some (classes and objects used in the file). All files in the previously mentioned directory are traversed, while extracting the dependency declarations to the ```payola/web/server/public/dependencies``` file, which is used later.
+Another compilation customization required by [s2js](#s2js) is added to the compilation process of the [server project](#server). During compilation of a `ScalaToJsProject`, the generated `.js` files are written to the `payola/web/server/public/javascripts` directory. Each file provides some symbols (classes and objects declared in the file) and requires some (classes and objects used in the file). All files in the previously mentioned directory are traversed, while extracting the dependency declarations to the `payola/web/server/public/dependencies` file, which is used later.
 
 ### The clean task
 
-The ```clean``` SBT task is overridden to ensure all generated files are deleted in addition to the standard behavior of ```clean```.
+The `clean` SBT task is overridden to ensure all generated files are deleted in addition to the standard behavior of `clean`.
 
 <a name="scala2json"></a>
 ## Package cz.payola.scala2json
@@ -87,13 +70,13 @@ The serialization process has to deal with a few obstacles, such as cyclic objec
 - **Cyclic dependencies**: The serializer has an option to either serialize objects in depth (this means that a cyclic dependency will cause an exception), or to handle cycles using object references. The first option has an advantage that no references need to be created, hence the resulting JSON is exactly the object's representation, with no additional fields and is very easy to deserialize into the resulting object.<br/><br/>A cyclic dependency, however, is fairly common, hence it had to be dealt with: the serializer keeps a list of objects it encounters during serialization - each object is then assigned an object ID which is simply an index of the object in the encountered-objects list. The object ID is then appended to the serialized object as an `__objectID__` field . Once the object is encountered for the second time, instead of serializing the object again, such a construct is used: `"object_for_the_second_time": { "__ref__": 4 }` - i.e. a reference to an object with an object ID `4`.
 - **Classes**: when deserializing the object on the client, a class of the object is required, so it needs to be included in the serialized object:
 	- *Regular objects*: For regular objects, `__class__` field is added which contains the class name: `"some_obj": { "__class__": "cz.payola.some.class", ... }`
-	- *Maps*: Even for maps and other collection, a class name is needed. Maps are translated to a JSON object with two field: `__class__` and `__value__`: ```{ "map": { "__class__": "scala.collection.Map", "__value__": { "key": "value", ... } } }```
-	- *Collections*: Other collections get translated to a JSON object with two fields as well: ```{ "collection": { "__arrayClass__": "scala.collection.mutable.ArrayBuffer", "__value__": [ "obj1", ... ] } }```
+	- *Maps*: Even for maps and other collection, a class name is needed. Maps are translated to a JSON object with two field: `__class__` and `__value__`: `{ "map": { "__class__": "scala.collection.Map", "__value__": { "key": "value", ... } } }`
+	- *Collections*: Other collections get translated to a JSON object with two fields as well: `{ "collection": { "__arrayClass__": "scala.collection.mutable.ArrayBuffer", "__value__": [ "obj1", ... ] } }`
 	- *Arrays*: Regular array (i.e. `scala.Array`) is translated directly to a JSON array without any wrapper.
 - **Fields**: As the Scala language doesn't have its own reflection API yet, [Java reflection API](http://docs.oracle.com/javase/tutorial/reflect/index.html) has to be used. This presents several problems regarding retrieving the object fields: some fields in Scala are translated into methods - a getter with no parameters and a setter with one parameter, in case it's a `var` field. The serializer must therefore look for fields even within methods when looking for a field of a particular name. Also, when requesting fields on an object, an empty array is returned - only declared fields get listed, so the serializer must go through the whole class hierarchy itself, listing fields of all interfaces and superclasses.
 
 > Example: Assume this code:
->```
+>```scala
 class Class1 {
     val map = Map("my key" -> "my value", "key2" -> "value")
     val list = List("Hello")
@@ -103,7 +86,7 @@ val o = new Class1
 o.obj = o
 ```
 >It will be translated to:
->```
+>```js
 {
 	"__class__": "cz.payola.scala2json.test.Class1",
 	"__objectID__": 0,
@@ -153,111 +136,115 @@ The heart of the Scala to JavaScript process is surely the compiler. In fact, it
 
 #### Class s2js.compiler.ScalaToJsPlugin
 
-This is the definition of the scala compier plugin, its only phase ```ScalaToJsPhase``` and its components as it's descried it the official [Scala Compiler Plugin tutorial](http://www.scala-lang.org/node/140). The plugin doesn't change the input AST at all, it behaves like an identity function. But as a side-effect, it generates JavaScript code that should be equivalent to the input AST. The following custom plugin options are defined here:
+This is the definition of the scala compier plugin, its only phase `ScalaToJsPhase` and its components as it's descried it the official [Scala Compiler Plugin tutorial](http://www.scala-lang.org/node/140). The plugin doesn't change the input AST at all, it behaves like an identity function. But as a side-effect, it generates JavaScript code that should be equivalent to the input AST. The following custom plugin options are defined here:
 
-- ```outputDirectory```: The directory where the generated JavaScript files are placed. Default value is the current directory.
-- ```createPackageStructure```: If set to ```true``` a directory structure mirroring the packages in compiled files is created in the output directory. If set to ```false```, all generated files are created right in the output directory, which is taken advantage of during the compiler plugin tests.
+- `outputDirectory`: The directory where the generated JavaScript files are placed. Default value is the current directory.
+- `createPackageStructure`: If set to `true` a directory structure mirroring the packages in compiled files is created in the output directory. If set to `false`, all generated files are created right in the output directory, which is taken advantage of during the compiler plugin tests.
 
-Usage of the options can be found in the ```PayolaBuild.scala``` within the 
-[```project```](#project) project.
+Usage of the options can be found in the `PayolaBuild.scala` within the 
+[`project`](#project) project.
 
 #### Class s2js.compiler.ScalaToJsCompiler
 
-An extension of the Scala compiler, that has the ```ScalaToJsPlugin``` plugged in, so the compilation of Scala files into JavaScript can be invoked programatically.
+An extension of the Scala compiler, that has the `ScalaToJsPlugin` plugged in, so the compilation of Scala files into JavaScript can be invoked programatically.
 
 #### Package s2js.compiler.components
 
-The previous two classes are utility classes, that don't participate in the compilation. They just invoke it. On the other hand, classes from the ```s2js.compiler.components``` directly take part in the compilation process. 
+The previous two classes are utility classes, that don't participate in the compilation. They just invoke it. On the other hand, classes from the `s2js.compiler.components` directly take part in the compilation process. 
 
 ##### Class s2js.compiler.components.PackageDefCompiler
 
-Purpose of this class is to compile the ```PackageDef``` AST nodes (representation of a package and all its content within a file) into JavaScript. Because the plugin compiler input AST is always a ```PackageDef``` node, the class is used as an entry point to the compilation process. 
+Purpose of this class is to compile the `PackageDef` AST nodes (representation of a package and all its content within a file) into JavaScript. Because the plugin compiler input AST is always a `PackageDef` node, the class is used as an entry point to the compilation process. 
 
-> *Note*: The ```ClassDef``` is a type an AST node, that defines a class, a trait, an object or a package object.
+> *Note*: The `ClassDef` is a type an AST node, that defines a class, a trait, an object or a package object.
 
 The compilation algorithm works basically in the following way:
 
-1. Retrieve the structure of the package using the [```s2js.compiler.components.DependencyManager```](#DependencyManager). It traverses the AST, finds all ```ClassDef```s and initializes the dependency graph of them. 
-2. Compile the ```ClassDef```s using the [```s2js.compiler.components.ClassDefCompiler```](#ClassDefCompiler) in the topological ordering determined by the ```ClassDef``` dependency graph. If there is a cycle in the dependency graph, an exception is thrown. During the compilation of ```ClassDef```s, the ```DependencyManager``` is informed about the inter-file dependencies (e.g. when a compiled class extends a class that is not part of the current compilation unit ~ file).
+1. Retrieve the structure of the package using the [`s2js.compiler.components.DependencyManager`](#DependencyManager). It traverses the AST, finds all `ClassDef`s and initializes the dependency graph of them. 
+2. Compile the `ClassDef`s using the [`s2js.compiler.components.ClassDefCompiler`](#ClassDefCompiler) in the topological ordering determined by the `ClassDef` dependency graph. If there is a cycle in the dependency graph, an exception is thrown. During the compilation of `ClassDef`s, the `DependencyManager` is informed about the inter-file dependencies (e.g. when a compiled class extends a class that is not part of the current compilation unit ~ file).
 3. Add the inter-file dependency declarations to the beginning of the compiled JavaScript file.
 
-Moreover, the ```PackageDefCompiler``` defines additional public service methods (e.g. ```symbolHasAnnotation```, ```typeIsFunction``` etc.) that can be used by other components with a reference to the ```PackageDefCompiler```.
+Moreover, the `PackageDefCompiler` defines additional public service methods (e.g. `symbolHasAnnotation`, `typeIsFunction` etc.) that can be used by other components with a reference to the `PackageDefCompiler`.
 
 <a name="DependencyManager"></a>
 ##### Class s2js.compiler.components.DependencyManager
 
-Tracks all kinds of so-called dependencies among symbols that are declared inside a ```PackageDef``` node:
+Tracks all kinds of so-called dependencies among symbols that are declared inside a `PackageDef` node:
 
-- *ClassDef dependency graph*: Dependencies among ```ClassDef```s among the current compilation unit (```ClassDef``` ```A``` depends on ```ClassDef``` ```B``` if ```A``` extends or mixins ```B```). The graph is used to determine an order of the class compilation. 
+- *ClassDef dependency graph*: Dependencies among `ClassDef`s among the current compilation unit (`ClassDef` `A` depends on `ClassDef` `B` if `A` extends or mixins `B`). The graph is used to determine an order of the class compilation. 
 - *Inter-file dependencies*
-	- *Provided symbols*: The ```ClassDef```s that the current compilation unit provides (i.e. the API). Some other compilation units may require them.
-	- *Declaration-required symbols*: The ```ClassDef```s that have to be declared in the generated JavaScript before the ```ClassDef```s from the current compilation unit are declared.
-	- *Runtime-required symbols*: The ```ClassDef```s that have to be declared in the generated JavaScript so that the current compilation unit can run (they're not needed when declaring the current compilation unit in generated JavaScript).
+	- *Provided symbols*: The `ClassDef`s that the current compilation unit provides (i.e. the API). Some other compilation units may require them.
+	- *Declaration-required symbols*: The `ClassDef`s that have to be declared in the generated JavaScript before the `ClassDef`s from the current compilation unit are declared.
+	- *Runtime-required symbols*: The `ClassDef`s that have to be declared in the generated JavaScript so that the current compilation unit can run (they're not needed when declaring the current compilation unit in generated JavaScript).
 
 <a name="ClassDefCompiler"></a>
 ##### Class s2js.compiler.components.ClassDefCompiler
 
-In terms of code lines, the ```ClassDefCompiler``` is the largest class of the project, with objective to compile ```ClassDef``` AST nodes with everything they contain. The ```ClassDefCompiler``` has subclasses for some types of ```ClassDef```s that slightly alter behavior of the compiler to fit the particular ```ClassDef``` needs:
+In terms of code lines, the `ClassDefCompiler` is the largest class of the project, with objective to compile `ClassDef` AST nodes with everything they contain. The `ClassDefCompiler` has subclasses for some types of `ClassDef`s that slightly alter behavior of the compiler to fit the particular `ClassDef` needs:
 
-- ```ClassCompiler``` for classes and traits.
-- ```ObjectCompiler``` for objects.
-- ```PackageObjectCompiler``` for package objects.
+- `ClassCompiler` for classes and traits.
+- `ObjectCompiler` for objects.
+- `PackageObjectCompiler` for package objects.
 
-Compilation of a ```ClassDef``` is composed of the three following steps:
+Compilation of a `ClassDef` is composed of the three following steps:
 
-1. Compile the ```ClassDef``` constructor.
-2. Compile the members (fields, methods) of the ```ClassDef```. Inner classes or objects aren't currently supported.
-3. Bind the ```ClassDef``` JavaScript prototype to an instance of the  [```s2js.runtime.core.Class```](#Class) class, so all instances of the ```ClassDef``` reference it.
+1. Compile the `ClassDef` constructor.
+2. Compile the members (fields, methods) of the `ClassDef`. Inner classes or objects aren't currently supported.
+3. Bind the `ClassDef` JavaScript prototype to an instance of the  [`s2js.runtime.core.Class`](#Class) class, so all instances of the `ClassDef` reference it.
 
 Most of the Scala language constructs are compiled into JavaScript pretty naturally, majority of them have direct equivalents in the target language, so these naturally translated constructs won't be described here, as it would be a waste of space. We'll concentrate on how the differences between the languages are solved and on some other interesting details or extensions.
 
 ###### Expressions
 
-In Scala, everything is an expression with a return value, even if the return value is ```Unit``` (void). As a consequence, return values of statements can be directly assigned to a variable. For example the ```if-then-else``` statement has a return value in Scala, yet in JavaScript, it doesn't. This is solved by wrapping the statement in an anonymous function, which is immediately invoked.
+In Scala, everything is an expression with a return value, even if the return value is `Unit` (void). As a consequence, return values of statements can be directly assigned to a variable. For example the `if-then-else` statement has a return value in Scala, yet in JavaScript, it doesn't. This is solved by wrapping the statement in an anonymous function, which is immediately invoked.
 
 > Scala code:
 
-```val x = if (a) { b } else { c }```
+```scala
+val x = if (a) { b } else { c }
+````
 
 > compiles into:
 
-```var x = (function() { if (a) { return b; } else { return c; } })();```
+```js
+var x = (function() { if (a) { return b; } else { return c; } })();
+````
 
 ###### Operators
 
-There are no operators in Scala, only methods with names like ```+``` or ```<=``` that the Scala compiler transforms into ```$plus``` or ```$less$eq```. On primitive types that are compiled into JavaScript primitive types (```Number```, ```String``` and ```Boolean```), those methods are compiled as the JavaScript operators. On other types, the methods are left untouched.
+There are no operators in Scala, only methods with names like `+` or `<=` that the Scala compiler transforms into `$plus` or `$less$eq`. On primitive types that are compiled into JavaScript primitive types (`Number`, `String` and `Boolean`), those methods are compiled as the JavaScript operators. On other types, the methods are left untouched.
 
 ###### Match statement
 
-JavaScript has no usable equivalent of the Scala match expression, so a sequence of ```if-then``` statements, that correspond to the match cases, is used instead. A lot of technical details has to be taken into account as there are a few pattern types, variable bindings, guards, etc.
+JavaScript has no usable equivalent of the Scala match expression, so a sequence of `if-then` statements, that correspond to the match cases, is used instead. A lot of technical details has to be taken into account as there are a few pattern types, variable bindings, guards, etc.
 
 ###### Classes and inheritance
 
-JavaScript is a prototype-based language, so it has no notion of classes at all. But it can be emulated using object constructor functions and prototypes. The constructor function defines and initializes fields of the object (```val```s and ```var```s) and executes the class constructor body. Methods of the class are set to the object constructor prototype. When the JavaScript runtime resolves object properties (fields, methods), it first looks directly into the object and then it traverses the object prototype chain so all class methods are found there. 
+JavaScript is a prototype-based language, so it has no notion of classes at all. But it can be emulated using object constructor functions and prototypes. The constructor function defines and initializes fields of the object (`val`s and `var`s) and executes the class constructor body. Methods of the class are set to the object constructor prototype. When the JavaScript runtime resolves object properties (fields, methods), it first looks directly into the object and then it traverses the object prototype chain so all class methods are found there. 
 
 Inheritance is implemented by setting the prototype of the sub-class prototype to the super-class prototype (i.e. linking the prototypes to a chain). Trait inheritance is divided into two steps. First of all, references to all methods of the trait prototype are copied into the class prototype. Secondly, within the class constructor, the trait is instantiated and all fields of the trait instance are copied to the class instance that is being constructed.
 
 A little problem arises with the objects and package objects whose declaration is also their initialization (correspondence to a static constructor). The problem is, that the objects may access other objects during their initialization. What's even worse is, that this access may be indirect by for example instantiation a class that accesses other object in its constructor. So it's almost impossible to determine the object initialization order. We've solved this by introducing the [lazy pattern](http://en.wikipedia.org/wiki/Lazy_initialization); the object initialization is delayed till the moment when it's actually accessed for the first time. This ensures that the objects are initialized in the proper order.
 
-###### Annotation ```@javascript```
+###### Annotation `@javascript`
 
 This annotation can be used on a method or a field, enabling the programmer to implement the method body or the field value directly in JavaScript. The method body or field value can be anything in Scala, because it gets replaced with the value provided to the annotation.
 
 
-###### Annotation ```@remote```
+###### Annotation `@remote`
 
 An object or class marked with this annotation isn't compiled to JavaScript.  
 
 <a name="s2js_rpc"></a>
 ###### RPC (Remote Procedure Call)
 
-In order to simplify the client-server communication and to hide the low-level JavaScript constructs necessary for it (```XmlHttpRequest``` or ```ActiveXObject```) from the programmer, an [RPC mechanism](http://en.wikipedia.org/wiki/Remote_procedure_call) is used. The compiler takes a small but irreplaceable part in the whole process, the rest is done in the [server-side runtime](#runtime-server) and [client-side runtime](#runtime-client). 
+In order to simplify the client-server communication and to hide the low-level JavaScript constructs necessary for it (`XmlHttpRequest` or `ActiveXObject`) from the programmer, an [RPC mechanism](http://en.wikipedia.org/wiki/Remote_procedure_call) is used. The compiler takes a small but irreplaceable part in the whole process, the rest is done in the [server-side runtime](#runtime-server) and [client-side runtime](#runtime-client). 
 
-All methods that are marked with the ```@remote``` annotation or defined on an object with the ```@remote``` annotation are considered RPC methods (remote methods), so their invocations are compiled to JavaScript in a different way. Remote methods may also be marked with the ```@async``` annotation, which makes them behave asynchronously, but introduces additional constraints on them (i.e. they must have the success callback function and fail callback function parameters and Unit return type). The compilation of a remote method invocation can be seen in the following example:
+All methods that are marked with the `@remote` annotation or defined on an object with the `@remote` annotation are considered RPC methods (remote methods), so their invocations are compiled to JavaScript in a different way. Remote methods may also be marked with the `@async` annotation, which makes them behave asynchronously, but introduces additional constraints on them (i.e. they must have the success callback function and fail callback function parameters and Unit return type). The compilation of a remote method invocation can be seen in the following example:
 
 > Scala code: 
 
-```
+```scala
 @remote object remote {
     def foo(bar: Int, baz: String): Int = bar * baz.length
 
@@ -285,7 +272,7 @@ remote.asyncFoo(123, "RPC rocks.") { result: Int =>
 
 > compiles into: 
 
-```
+```js
 // Somewhere in the compiled object or class.
 s2js.runtime.client.rpc.Wrapper.callSync(
 	'remote.foo', 
@@ -302,19 +289,19 @@ s2js.runtime.client.rpc.Wrapper.callAsync(
 }
 ```
 
-The array with types (```['scala.Int', 'java.lang.String']```) is there because Scala 2.9.1 doesn't provide full reflection support and the server-side runtime can't distinguish between ```List[Double]``` and ```List[Int]```.
+The array with types (`['scala.Int', 'java.lang.String']`) is there because Scala 2.9.1 doesn't provide full reflection support and the server-side runtime can't distinguish between `List[Double]` and `List[Int]`.
 
-Another related annotation is ```@secured``` which can be used both on remote methods or remote objects. If used on a method or if a method is declared within an object that is marked with that annotation, then the method is considered a secured remote method. The consequence is, that the last parameter is regarded as a security context, which isn't sent from the client, so the server-side runtime has to resolve it by itself (e.g. retrieve a user from the database by his id, which is stored in the cookie).
+Another related annotation is `@secured` which can be used both on remote methods or remote objects. If used on a method or if a method is declared within an object that is marked with that annotation, then the method is considered a secured remote method. The consequence is, that the last parameter is regarded as a security context, which isn't sent from the client, so the server-side runtime has to resolve it by itself (e.g. retrieve a user from the database by his id, which is stored in the cookie).
 
 > Scala code: 
 
-```
+```scala
 @remote @secured def foo(bar: Int, baz: String, user: User = null): Int = bar * baz.length
 ```
 
 > compiles into: 
 
-```
+```js
 s2js.runtime.client.rpc.Wrapper.callSync(
 	'remote.foo', 
 	[123, 'RPC rocks.'], 
@@ -325,7 +312,7 @@ s2js.runtime.client.rpc.Wrapper.callSync(
 <a name="adapters"></a>
 ### Package s2js.adapters
 
-As mentioned before, the adapters are defined to allow a programmer to access core JavaScript functionality or use already existing JavaScript libraries. Without them, it would be impossible to use for example ```document.getElementById``` method in the Scala code that will be compiled into JavaScript, because there is no such object ```document``` in the Scala standard library. The adapter classes don't have to contain any implementation, therefore they're mostly abstract classes or traits. They're not compiled to JavaScript, and neither are they used anywhere during Scala application runtime. The class and method names have to be exactly the same as in the adapted libraries.
+As mentioned before, the adapters are defined to allow a programmer to access core JavaScript functionality or use already existing JavaScript libraries. Without them, it would be impossible to use for example `document.getElementById` method in the Scala code that will be compiled into JavaScript, because there is no such object `document` in the Scala standard library. The adapter classes don't have to contain any implementation, therefore they're mostly abstract classes or traits. They're not compiled to JavaScript, and neither are they used anywhere during Scala application runtime. The class and method names have to be exactly the same as in the adapted libraries.
 
 #### Package s2js.adapters.js
 
@@ -333,19 +320,19 @@ Adapters of some of the JavaScript core classes and the global functions, object
 
 #### Package s2js.adapters.dom
 
-Adapters of all interfaces and objects (```Node```, ```Element``` etc.) defined in the [DOM Level 3 Core Specification](http://www.w3.org/TR/DOM-Level-3-Core/).
+Adapters of all interfaces and objects (`Node`, `Element` etc.) defined in the [DOM Level 3 Core Specification](http://www.w3.org/TR/DOM-Level-3-Core/).
 
 #### Package s2js.adapters.events
 
-Adapters of all interfaces and objects (```Event```, ```MouseEvent``` etc.) defined in the [DOM Level 3 Events Specification](http://www.w3.org/TR/DOM-Level-3-Events/) including some of the the [DOM Level 4 Events](http://www.w3.org/TR/dom/#events) extensions.
+Adapters of all interfaces and objects (`Event`, `MouseEvent` etc.) defined in the [DOM Level 3 Events Specification](http://www.w3.org/TR/DOM-Level-3-Events/) including some of the the [DOM Level 4 Events](http://www.w3.org/TR/dom/#events) extensions.
 
 #### Package s2js.adapters.html
 
-Selected HTML related interfaces and elements (```Document```, ```Anchor```, ```Canvas``` etc.), based both on the [HTML Standard](http://www.whatwg.org/html) and on the 'HTML DOM Objects' section of the [JavaSript and HTML DOM Reference](http://www.w3schools.com/jsref/default.asp)
+Selected HTML related interfaces and elements (`Document`, `Anchor`, `Canvas` etc.), based both on the [HTML Standard](http://www.whatwg.org/html) and on the 'HTML DOM Objects' section of the [JavaSript and HTML DOM Reference](http://www.w3schools.com/jsref/default.asp)
 
 #### Package s2js.adapters.browser
 
-Adapters of web browser related objects (```Window```, ```History``` etc.), based on the 'Browser Objects' section of the [JavaSript and HTML DOM Reference](http://www.w3schools.com/jsref/default.asp) and also on the same resources as the ```s2js.adapters.html``` package.
+Adapters of web browser related objects (`Window`, `History` etc.), based on the 'Browser Objects' section of the [JavaSript and HTML DOM Reference](http://www.w3schools.com/jsref/default.asp) and also on the same resources as the `s2js.adapters.html` package.
 
 <a name="runtime"></a>
 ### Project payola/s2js/runtime
@@ -359,49 +346,49 @@ Code of this project is compiled into JavaScript and is executed only on the cli
 
 ##### Package s2js.runtime.client.core
 
-The package object ```s2js.runtime.client.core``` defines the core methods, that are required by the compiler (almost any compiled code requires them). They're mainly used when emulating some features of Scala in JavaScript, for example ```inherit```, ```mixIn```, ```isInstanceOf``` etc. Most of them are implemented natively, some of them may be percieved as 'smart adapters' (e.g. ```isUndefined``` or ```isObject```).
+The package object `s2js.runtime.client.core` defines the core methods, that are required by the compiler (almost any compiled code requires them). They're mainly used when emulating some features of Scala in JavaScript, for example `inherit`, `mixIn`, `isInstanceOf` etc. Most of them are implemented natively, some of them may be percieved as 'smart adapters' (e.g. `isUndefined` or `isObject`).
 
-There is also the class ```Class``` which stores information about a class (name, super classes) and is used for type-checks and type-conversions.
+There is also the class `Class` which stores information about a class (name, super classes) and is used for type-checks and type-conversions.
 
-The ```ClassLoader``` keeps track of declared (= loaded) classes and makes sure that a class is already declared when it's declaration-required. Otherwise it throws an exception. Interesting thing is, that the ```ClassLoader``` is also a class so before it's declared, it notifies the current class loader that the ```ClassLoader``` class is being declared. To overcome this 'ad-infinitum' issue, a temporary class loader, which is declared natively in JavaScript, was introduced. It serves the purpose of the full-featured class loader. When the ```ClassLoader``` is declared (so it may be used), all classes that are registered in the temporary class loader are also registered in the full-featured classs loader and the current class loader is set to the full-featured one.
+The `ClassLoader` keeps track of declared (= loaded) classes and makes sure that a class is already declared when it's declaration-required. Otherwise it throws an exception. Interesting thing is, that the `ClassLoader` is also a class so before it's declared, it notifies the current class loader that the `ClassLoader` class is being declared. To overcome this 'ad-infinitum' issue, a temporary class loader, which is declared natively in JavaScript, was introduced. It serves the purpose of the full-featured class loader. When the `ClassLoader` is declared (so it may be used), all classes that are registered in the temporary class loader are also registered in the full-featured classs loader and the current class loader is set to the full-featured one.
 
 ##### Package s2js.runtime.client.js
 
-The ```JsObject``` and ```JsArray``` arre just wrappers around native JavaScript objects and arrays, so their dynamic properties may be retrieved and set in Scala code.
+The `JsObject` and `JsArray` arre just wrappers around native JavaScript objects and arrays, so their dynamic properties may be retrieved and set in Scala code.
 
-Another helper class is the ```JsonTraverser``` which defines an interface of generic JSON traverser. It however doesn't traverse the string representation of JSON, it's used to traverse an object, that may have been created using the ```eval``` function on the JSON string representation. There is just one method ```traverse``` which visits all the properties and items of the object and invokes the abstract visitor methods corresponding to the visited object types. Subclasses of the ```JsonTraverser``` must implement the visitor methods.
+Another helper class is the `JsonTraverser` which defines an interface of generic JSON traverser. It however doesn't traverse the string representation of JSON, it's used to traverse an object, that may have been created using the `eval` function on the JSON string representation. There is just one method `traverse` which visits all the properties and items of the object and invokes the abstract visitor methods corresponding to the visited object types. Subclasses of the `JsonTraverser` must implement the visitor methods.
 
 ##### Package s2js.runtime.client.scala
 
-In order to allow the programmer to use classes and objects that are available in the standard Scala Library (e.g. ```Option```, ```List```, ```Map``` etc.), an equivalent of it had to be created in JavaScript. An ideal way would be to take the sources of the Scala Library and compile them into JavaScript using the [compiler](#compiler). But this task is too complex to accomplish, so another approach was used.
+In order to allow the programmer to use classes and objects that are available in the standard Scala Library (e.g. `Option`, `List`, `Map` etc.), an equivalent of it had to be created in JavaScript. An ideal way would be to take the sources of the Scala Library and compile them into JavaScript using the [compiler](#compiler). But this task is too complex to accomplish, so another approach was used.
 
-The sources from the Scala Library that were fully or with minor changes compilable to JavaScript were used as is. That's the case of most of the simple classes like ```Option```, ```Tuple``` or ```Product```. The complex classes, mainly in the collection library were partially written from scratch, but most of the logic was ported from the Scala Library sources.
+The sources from the Scala Library that were fully or with minor changes compilable to JavaScript were used as is. That's the case of most of the simple classes like `Option`, `Tuple` or `Product`. The complex classes, mainly in the collection library were partially written from scratch, but most of the logic was ported from the Scala Library sources.
 
-> The classes and objects in this package were written when they were needed, not in advance, so there aren't any unnecessary. Therefore this package can be hardly seen as a port of the Scala Library to JavaScript. So when a programmer uses a class from the standard library and isn't sure, whether it's supported in the runtime or not, then he should examine the ```s2js.runtime.client.scala``` package. If it's not there, then there is only way to solve this - he should port the class by himself.
+> The classes and objects in this package were written when they were needed, not in advance, so there aren't any unnecessary. Therefore this package can be hardly seen as a port of the Scala Library to JavaScript. So when a programmer uses a class from the standard library and isn't sure, whether it's supported in the runtime or not, then he should examine the `s2js.runtime.client.scala` package. If it's not there, then there is only way to solve this - he should port the class by himself.
 
 ##### Package s2js.runtime.client.rpc
 
 Rather than describing classes in this package one by one, an example RPC call will be examined:
 
-1. From the runtime point of view, it starts with a call on the ```Wrapper``` object like this: ```s2js.runtime.client.rpc.Wrapper.callSync('remote.foo', [123], ['scala.Int']);```
-2. The ```Wrapper``` processes the parameters and creates a ```XmlHttpRequest```.
+1. From the runtime point of view, it starts with a call on the `Wrapper` object like this: `s2js.runtime.client.rpc.Wrapper.callSync('remote.foo', [123], ['scala.Int']);`
+2. The `Wrapper` processes the parameters and creates a `XmlHttpRequest`.
 3. The request body is filled with the method name and parameters and the request is sent to the [RPC controller](#TODO) on the server.
 4. The RPC controller processes the request and returns the result serialized using the [scala2json](#scala2json).
-5. If an error occurs, an ```RpcException``` is thrown. Otherwise the result is deserialized with the ```Deserializer```:
-	1. The JSON string is transformed to an object using the ```eval``` function.
-	2. The object is traversed using the ```ClassNameRetriever``` subclass of the ```JSONTraverser```. So classes of all instances in the result are known.
-	3. All classes that aren't yet loaded in the class loader are retrieved from the server via a RPC call on the ```s2js.runtime.shared.DependencyProvider``` object.
-	4. The classes are declared using the ```eval``` function.
-	5. By now, all the classes that are used in the result object, have already been loaded. So the result object is traversed again using the ```Deserializer```, which instantiates classes corresponding to the objects in the result and copies field values from the result to the newly created instances. If the field value is a reference to an object (```__ref__```), the reference is tracked as a ```ReferenceToResolve```, because the reference target may have not been instantiated yet.
+5. If an error occurs, an `RpcException` is thrown. Otherwise the result is deserialized with the `Deserializer`:
+	1. The JSON string is transformed to an object using the `eval` function.
+	2. The object is traversed using the `ClassNameRetriever` subclass of the `JSONTraverser`. So classes of all instances in the result are known.
+	3. All classes that aren't yet loaded in the class loader are retrieved from the server via a RPC call on the `s2js.runtime.shared.DependencyProvider` object.
+	4. The classes are declared using the `eval` function.
+	5. By now, all the classes that are used in the result object, have already been loaded. So the result object is traversed again using the `Deserializer`, which instantiates classes corresponding to the objects in the result and copies field values from the result to the newly created instances. If the field value is a reference to an object (`__ref__`), the reference is tracked as a `ReferenceToResolve`, because the reference target may have not been instantiated yet.
 	6. By now, all the objects from the result have been instantiated, so the references are resolved.
-6. If the deserialized object is an instance of the ```Throwable``` trait, then it's thrown (or passed to the ```failCallback``` in case of an asynchronous RPC call). Otherwise the result is returned (or passed to the ```successCallback```).
+6. If the deserialized object is an instance of the `Throwable` trait, then it's thrown (or passed to the `failCallback` in case of an asynchronous RPC call). Otherwise the result is returned (or passed to the `successCallback`).
 
 <a name="runtime-shared"></a>
 #### Package s2js.runtime.shared
 
-Currently, there is only one class - the ```DependencyProvider```. It provides just one method ```get```, which returns a ```DependencyPackage``` containing the JavaScript source code of symbols specified in the ```symbols``` parameter and all their dependencies. The sources of ```symbolsToIgnore``` aren't included in the dependency package. Moreover, the order of symbol source codes is determined by dependencies among them which can be found in the generated dependency file (which is generated during the [```cp```](#cp) SBT task). So for example a class isn't declared before its super-class. 
+Currently, there is only one class - the `DependencyProvider`. It provides just one method `get`, which returns a `DependencyPackage` containing the JavaScript source code of symbols specified in the `symbols` parameter and all their dependencies. The sources of `symbolsToIgnore` aren't included in the dependency package. Moreover, the order of symbol source codes is determined by dependencies among them which can be found in the generated dependency file (which is generated during the [`cp`](#cp) SBT task). So for example a class isn't declared before its super-class. 
 
-> There is a tight coupling between the ```s2js``` project and other projects (e.g. hardcoded path to the dependency package in the ```DependencyProvider```, RPC controller logic defined in the [```web```](#web) project), so it can't be used as a standalone library/toolchain. However, making the ```s2js``` standalone wouldn't be much work, it just wasn't our priority to make it completely reusable.
+> There is a tight coupling between the `s2js` project and other projects (e.g. hardcoded path to the dependency package in the `DependencyProvider`, RPC controller logic defined in the [`web`](#web) project), so it can't be used as a standalone library/toolchain. However, making the `s2js` standalone wouldn't be much work, it just wasn't our priority to make it completely reusable.
 
 <a name="common"></a>
 ## Package cz.payola.common
@@ -456,40 +443,40 @@ Domain entities extend the `common` entities that are mostly traits and fully fu
 
 ### Package cz.payola.domain.entities.plugins
 
-One of the crucial features is to allow the users to create their own plugins and use them in their analyses later. That's what the subpackage ```compiler``` is for. There are also some predefined plugins in the subpackage ```concrete```.
+One of the crucial features is to allow the users to create their own plugins and use them in their analyses later. That's what the subpackage `compiler` is for. There are also some predefined plugins in the subpackage `concrete`.
 
 #### Package cz.payola.domain.entities.plugins.compiler
 
-The ```PluginCompier``` is a wrapper of the Scala compiler, that is tweaked to support compilation of analytical plugins. It provides just one method ```compile``` that, given the plugin source code, compiles the plugin and returns information anbout the compiled plugin ```PluginInfo```.
+The `PluginCompier` is a wrapper of the Scala compiler, that is tweaked to support compilation of analytical plugins. It provides just one method `compile` that, given the plugin source code, compiles the plugin and returns information anbout the compiled plugin `PluginInfo`.
 
-The internal Scala compiler, that actually performs the compilation is plugged with the ```PluginVerifier``` [Scala compiler plugin](http://www.scala-lang.org/node/140). So the compilation process consists of the standard Scala compiler phases and two more additional phases that are defined in the ```PluginVerifier```:
+The internal Scala compiler, that actually performs the compilation is plugged with the `PluginVerifier` [Scala compiler plugin](http://www.scala-lang.org/node/140). So the compilation process consists of the standard Scala compiler phases and two more additional phases that are defined in the `PluginVerifier`:
 
-1. Verification phase which checks whether the compilation unit contains a package with one subclass of the ```Plugin``` class, whether the plugin class has both the parameterless constructor and the setter constructor and whether the constructors have proper parameter types. If any of these assumptions is broken, an exception is thrown.
-2. Name transformer phase that changes name of the plugin class to the ```Plugin_[randomUUID]```. So plugin class name uniqueness is ensured and it's not a problem when two users upload plugins with the same name.
+1. Verification phase which checks whether the compilation unit contains a package with one subclass of the `Plugin` class, whether the plugin class has both the parameterless constructor and the setter constructor and whether the constructors have proper parameter types. If any of these assumptions is broken, an exception is thrown.
+2. Name transformer phase that changes name of the plugin class to the `Plugin_[randomUUID]`. So plugin class name uniqueness is ensured and it's not a problem when two users upload plugins with the same name.
 
-The last piece in the puzzle is the ```cz.payola.domain.entities.plugins.PluginClassLoader``` which has to be used when instantiating plugin classes. The method ```instantiatePlugin``` on the ```PluginClassLoader``` should be used instead of standard means of reflection instantiation.
+The last piece in the puzzle is the `cz.payola.domain.entities.plugins.PluginClassLoader` which has to be used when instantiating plugin classes. The method `instantiatePlugin` on the `PluginClassLoader` should be used instead of standard means of reflection instantiation.
 
 #### Package cz.payola.domain.entities.plugins.concrete
 
-There are basically two types of plugins - the data fetchers and the rest. A ```DataFetcher``` doesn't have any inputs and is capable of SPARQL query execution and node neighbourhood fetching. So it can be used as a plugin of a data source. Implementation of the plugins is quite straightforward, please refer to the user guide on what they do.
+There are basically two types of plugins - the data fetchers and the rest. A `DataFetcher` doesn't have any inputs and is capable of SPARQL query execution and node neighbourhood fetching. So it can be used as a plugin of a data source. Implementation of the plugins is quite straightforward, please refer to the user guide on what they do.
 
 ### Package cz.payola.domain.entities.analyses
 
-The second big part of the domain package are analyses and whole process of their validation, optimization and evaluation. An ```Analysis``` is composed of ```PluginInstance```s and ```PluginInstanceBindng```s, which specify connections between ```PluginInstance```s. The analyses in the system don't necessarily have to be always valid (in order to support interrupted analysis creation).
+The second big part of the domain package are analyses and whole process of their validation, optimization and evaluation. An `Analysis` is composed of `PluginInstance`s and `PluginInstanceBindng`s, which specify connections between `PluginInstance`s. The analyses in the system don't necessarily have to be always valid (in order to support interrupted analysis creation).
 
 ### Package cz.payola.domain.entities.analyses.evaluation
 
-Evaluation of an analysis isn't a trivial process, because it introduces parallelism. Everything starts with ```evaluate``` method call on an ```Analysis``` instance which creates a new instance of the ```AnalysisEvaluation``` and starts it. From now on, the evaluation runs in parallel to the thread which started the evaluation, because it's an [```scala.actors.Actor```](http://www.scala-lang.org/node/242). The ```AnalysisEvaluation``` object can however be queried about its current state (using methods ```getProgress```, ```getResult```, ```isFinished```). An ```AnalysisEvaluation``` works in the following steps:
+Evaluation of an analysis isn't a trivial process, because it introduces parallelism. Everything starts with `evaluate` method call on an `Analysis` instance which creates a new instance of the `AnalysisEvaluation` and starts it. From now on, the evaluation runs in parallel to the thread which started the evaluation, because it's an [`scala.actors.Actor`](http://www.scala-lang.org/node/242). The `AnalysisEvaluation` object can however be queried about its current state (using methods `getProgress`, `getResult`, `isFinished`). An `AnalysisEvaluation` works in the following steps:
 
 1. Validity of the analysis is checked (whether it's not empty, whether there aren't invalid bindings, whether the analysis has one output etc.).
-2. The analysis is optimized using the ```AnalysisOptimizer```. It consists of phases, that usually merge plugin instances together. The phases that are sequentially executed and produce an ```OptimizedAnalysis```. For more information about the phases and what they do, please refer to the API documentation of the ```cz.payola.domain.entities.analyses.optimization``` package.
-3. The ```Timer``` actor is started, so the evaluation is notified in case of timeout.
-4. For each ```PluginInstance```, an ```PluginInstanceEvaluation``` actor is created and started. Within the constructor, it receives a method ```outputProcessor```, that should be used to return the result. The ```PluginInstanceEvaluation``` does the following:
+2. The analysis is optimized using the `AnalysisOptimizer`. It consists of phases, that usually merge plugin instances together. The phases that are sequentially executed and produce an `OptimizedAnalysis`. For more information about the phases and what they do, please refer to the API documentation of the `cz.payola.domain.entities.analyses.optimization` package.
+3. The `Timer` actor is started, so the evaluation is notified in case of timeout.
+4. For each `PluginInstance`, an `PluginInstanceEvaluation` actor is created and started. Within the constructor, it receives a method `outputProcessor`, that should be used to return the result. The `PluginInstanceEvaluation` does the following:
 	1. Wait until all input graphs are received (if the plugin has no inputs, immediately proceed to the next step).
 	2. Evaluate the plugin.
-	3. Return the result using the ```outputProcessor```. If output of the plugin instance is bound to another plugin instance, it actually sends a message with the result to the ```PluginInstanceEvaluation``` actor corresponding to the plugin instance. Otherwise, the plugin instance is the last one, so the result is sent to the ```AnalysisEvaluation``` actor.
+	3. Return the result using the `outputProcessor`. If output of the plugin instance is bound to another plugin instance, it actually sends a message with the result to the `PluginInstanceEvaluation` actor corresponding to the plugin instance. Otherwise, the plugin instance is the last one, so the result is sent to the `AnalysisEvaluation` actor.
 5. Wait until the message with result is received from the output plugin instance. During that time, process messages that report plugin instance evaluation progress or errors. Also reply to messages that query for the current state of evaluation.
-6. Process the ```AnalysisEvaluationControl``` messages.
+6. Process the `AnalysisEvaluationControl` messages.
 
 An example of the analysis evaluation process, that succeeds without any errors can found on the following picture. The messages 1, 1.1 and 1.2 can be interleaved with messages 2, 2.1, 2.2, 3, 3.1, 3.2, 3.3, because these two branches of the evaluation can run in parallel.
 
@@ -505,7 +492,7 @@ Just like with the `cz.payola.domain.rdf` package, the ontology package adds the
 
 ### Package cz.payola.domain.sparql
 
-Because the [SPARQL](http://www.w3.org/TR/rdf-sparql-query/) is used throughout the application (mainly in plugins) and queries are often programatically constructed, it's been decided to use object oriented query abstraction instead of string concatenation. So there are classes that somehow correspond to rules in the [SPARQL query grammar](http://www.w3.org/TR/rdf-sparql-query/#grammar). A query is built by composition of these classes; to obtain it's string representation, the ```toString``` method can be called on the ```ConstructQuery``` instance. As a benefit of this representation, ```GraphPattern```s can be easily merged together, which wouldn't be that trivial if they were represented as strings.
+Because the [SPARQL](http://www.w3.org/TR/rdf-sparql-query/) is used throughout the application (mainly in plugins) and queries are often programatically constructed, it's been decided to use object oriented query abstraction instead of string concatenation. So there are classes that somehow correspond to rules in the [SPARQL query grammar](http://www.w3.org/TR/rdf-sparql-query/#grammar). A query is built by composition of these classes; to obtain it's string representation, the `toString` method can be called on the `ConstructQuery` instance. As a benefit of this representation, `GraphPattern`s can be easily merged together, which wouldn't be that trivial if they were represented as strings.
 
 > The only supported query type is the CONSTRUCT, because other types weren't needed. However it's easy to implement them in similar fashion.
 
@@ -554,7 +541,7 @@ A database structure needs to be defined in an object extending `org.squeryl.Sch
 Squeryl provides lazy fetching of entities from "N" side of 1:N or M:N relations, which is a desirable feature of an ORM tool. The query that fetches the entities of a relation is defined in a lazy field of the related entity, on the first data request, the query is evaluated. There is an `associate` method in Squeryl for creating a relation between entities. Simplified code may look something like this:
 
 <a name="squeryl-code-examle"></a>
-```
+```scala
 class Analysis extends cz.payola.domain.entities.Analysis {
 
 	// Definition of a lazy field with a query fetching plugin instances of this analysis
@@ -670,7 +657,7 @@ The code separation is also one of the restrictions of our RPC (with benefits). 
 
 How to write a remote object? See the following commented example:
 
-```
+```scala
 package cz.payola.web.shared
 
 import s2js.compiler.async
@@ -721,19 +708,17 @@ An asynchronous call gets proccessed on background and fires a callback when com
 
 If you make a synchronous call, e.g. the method `testParamArray`, the code on the client side will look as follows:
 
-```
+```scala
 val sum = RPCTester.testParamArray(List(1,2,3))
 doSomethingWithSum(sum)
 ```
 
 Which is quite a standard fragment of code. That differs a lot from the asynchronous variant:
 
-```
-RPCTester.testParamArray(List(1,2,3)){ sum =>
+```scala
+RPCTester.testParamArray(List(1,2,3)) { sum =>
 	doSomethingWithSum(sum)
-}{ error =>
-	errorHandler(error)
-}
+}(errorHandler(_))
 ```
 
 > Thanks to Scala, the syntax is more simple than the same fragment written in JavaScript. In fact, what is utilized here is multiple parameter lists currying.
@@ -742,10 +727,10 @@ You should keep in mind that the asynchronous call invokation returns immediatel
 
 Let's discuss an example of an asynchronous method definition:
 
-```
+```scala
 @async def testParamArrayAsync(param: List[Int])
     (successCallback: (Int => Unit))
-    (failCallback: (Throwable => Unit)) = {
+    (failCallback: (Throwable => Unit)) {
         successCallback(param.sum)
     }
 ```
@@ -780,7 +765,7 @@ You are also probably getting idea why the default parameters are needed. If you
 
 > If you look closely into the RPC Dispatcher source code, you will find out, that it heavily uses standard Java reflection to invoke the specified method on the specified remote object. While objects compile in a very specific way, you will find fragments of code which might seem like some kind of magic. Especially the following one:
 
-```
+```scala
 val runnableObj = clazz.getField("MODULE$").get(objectName)
 ``` 
 
@@ -864,7 +849,7 @@ As you can see, the `POST` request, which represents an asynchronous RPC call, c
 
 > One could ask now, why we did not use the standard Scala @remote annotation, or, moreover, why we did use a Java annotation. Since scala annotations [are not visible during runtime](http://stackoverflow.com/questions/5177010/how-to-create-annotations-and-get-them-in-scala), we were forced to use a Java annotation with a special retention policy to get this done.
 
-```
+```java
 package s2js.compiler;
 import java.lang.annotation.*;
 
@@ -916,7 +901,7 @@ The whole event processing system for the client-side code resides in this packa
 
 All starts with the following code fragment:
 
-```
+```js
 element.addEventListener('click',function () {
 	this.style.backgroundColor = '#cc0000'
 },false)
@@ -932,7 +917,7 @@ This is a typical example of registering an event listener in JavaScript. It has
 
 As we told you, we've based our system on what you can know from the world of C# programming language. So, let`s us present a short example of events from C#:
 
-```
+```csharp
 public Form1()
 {
     InitializeComponent();
@@ -944,7 +929,7 @@ public Form1()
 Example taken from [http://msdn.microsoft.com/en-us/library/ms366768.aspx](http://msdn.microsoft.com/en-us/library/ms366768.aspx).
 That is much better, we especially love the `+=` operator usage. That is basically the syntax we will use:
 
-```
+```scala
 div.mouseMoved += { e =>
     instance.addCssClass("highlight")
     false
@@ -956,14 +941,14 @@ We can fully utilize the closure mechanism of the Scala language. Since the `div
 
 Look at the implementation of the implementation of the `cz.payola.web.client.events.Event` class, especially the `trigger` method:
 
-```
+```scala
 def trigger(eventArgs: B): C = {
    handlers.map(_(eventArgs)).fold(resultsFolderInitializer)(resultsFolderReducer _)
 }
 ```
 On this one line of Scala magic, all the handlers are executed (in the order they have registered) and their results are aggregated by the `resultsFolderInitializer` and `resultsFolderReducer` methods which you define when introducing a new event. The `resultsFolderInitializer` defines, how the fold stack gets initialized. The `resultsFolderReducer` method defines than, how results of two handlers, more accurately, how the result of the currently executed handler should be processed. To make it clear, let's see the following example (the `Boolean` event implementation):
 
-```
+```scala
 protected def resultsFolderInitializer: Boolean = {
    true
 }
@@ -978,16 +963,16 @@ This example shows the structure of events logic: The Button class (from [elemen
 
 You are advised to derive all your new events from the `cz.payola.web.client.events.Event` abstract class. It contains the implementation of the `+=` and `-=` operators, so you don't need to reimplement those. There is one more thing you should understand before writing a new event - the type arguments of the Event class. Each event is triggered with an instance of `cz.payola.web.client.events.EventArgs` class which carries at least information on which element was the event triggered.
 
-```
+```scala
 class EventArgs[+A](val target: A)
 ```
 
 Yes, that's it. Let's continue with an example - we will prepare `Clicked` event for a `Div` element. Since you are clicking on the `Div`, which is the event target, you will trigger the event with something like:
-```
+```scala
 new EventArgs[Div](this)
 ```
 Therefore, the definition of the event will look like this:
-```
+```scala
 val clicked = new Event[Div, EventArgs[Div], Boolean]
 ```
 Note that the first generic parameter of the event is used as a generic parameter of the EventArgs type (second parameter of the Event). The third parameter is the return type of each of registered handlers.
@@ -1030,10 +1015,32 @@ The most important decision for animations was whether to use HTML5 Web Workers 
 
 > TODO: O.K. mention the SPARQL query execution tool
 
-#Continuous integration
+## Used libraries, frameworks & tools
+While developing the Payola, we used the following technologies:
+
+- [SBT 0.11.2](https://github.com/harrah/xsbt/wiki/) (Scala Build Tool) 
+- [Apache Jena 2.7.0-incubating](http://jena.apache.org/) (Java framework for building Semantic Web applications)
+- [Squeryl](http://squeryl.org/) (Scala ORM)
+- [Play! 2.0](http://www.playframework.org/) Scala MVC web framework
+- [jQuery](http://jquery.com/) JavaScript Library
+- [jQuery autosize](http://www.jacklmoore.com/autosize) (jQuery plugin for autosizing textareas)
+- [jQuery blockUI](http://jquery.malsup.com/block/) (jQuery plugin for blocking UI nicely)
+- [LiveQuery](http://docs.jquery.com/Plugins/livequery) (jQuery plugin)
+- [Twitter Bootstrap](http://twitter.github.com/bootstrap/) (collection of CSS and JS code from Twitter)
+- [Colorpicker for bootstrap](http://www.eyecon.ro/bootstrap-colorpicker/) JS module for Twitter Bootstrap
+- [Ace](http://ace.ajax.org/) (web editor for programming languages with syntax highlighting)
+- [Select2](http://ivaynberg.github.com/select2/) (JavaScript autocomplete plugin)
+- [sprintf](http://code.google.com/p/sprintf/) (SprintF implementation for JS)
+- [Flot](http://code.google.com/p/flot/) (JavaScript charts plugin)
+
+## Unit tests
+
+To run all tests, use the `test` SBT task on the root project. Or if you want to run tests for a concrete project, switch to the project in the SBT using `project [projectName]` (e.g. `project compiler`). The tests don't cover everything, only some portion of the code is unit tested. Tests of the data project might be quite useful in case you'd like to use different database server. They verify that persistance of all entities and their properties work.
+
+## Continuous integration
 In order to have the code in the repository comiplable all the time, we use a [TeamCity](http://www.jetbrains.com/teamcity/) as continuous integration tool. Since the iontegration rules are currently set that the only rule is that the application should compile, only a simple build ant script is used.
 
-```
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Application" default="build" basedir="payola">
 	
@@ -1055,12 +1062,10 @@ This prevent us from situations, when somebody makes a commit and does not test 
 
 In the future, we will work hardly to integrate test suites into the continuous integration process, as well as automatic deployment to our production server.
 
-#Known bugs
+## Known bugs
 You can find the complete list of issues on [GitHub](https://github.com/siroky/Payola/issues?sort=updated&state=open). In the time of writing this documentation, the list contained the following issues:
 
-TODO
-
-#Future work
+## Future work
 Since there is always something that you can do better or more sophisticated, we also have a list of things which we are looking forward to change in Payola. Here are some examples:
 
 - Fully implement the Play! 2.0 Promise API

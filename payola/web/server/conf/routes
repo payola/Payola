@@ -15,7 +15,6 @@ GET    /reset/:id                 controllers.Application.confirmReset(id)
 
 GET     /javaScriptPackage/:symbol  controllers.Application.javaScriptPackage(symbol: String)
 POST    /RPC                        controllers.RPC.index()
-GET     /test/RPC                   controllers.Application.rpcTest()
 POST    /RPC/async                  controllers.RPC.async()
 
 GET     /analysis/accessible        controllers.Analysis.listAccessible(page: Int ?= 1)
@@ -58,6 +57,9 @@ POST    /group/save                 controllers.Group.save(id)
 GET     /profile/edit               controllers.Profile.edit()
 GET     /profile/:username          controllers.Profile.index(username)
 POST    /saveprofile                controllers.Profile.save()
+
+GET     /error                      controllers.ErrorHandler.error()
+GET     /404.html                   controllers.ErrorHandler.notFound()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

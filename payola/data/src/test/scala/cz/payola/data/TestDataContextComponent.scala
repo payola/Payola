@@ -4,7 +4,7 @@ import cz.payola.domain._
 import cz.payola.domain.entities.plugins.PluginClassLoader
 import cz.payola.domain.entities.plugins.compiler.PluginCompiler
 import cz.payola.data.squeryl.SquerylDataContextComponent
-import virtuoso.VirtuosoStorage
+import cz.payola.data.virtuoso.VirtuosoStorage
 
 abstract class TestDataContextComponent(name: String, trace: Boolean = false)
     extends SquerylDataContextComponent

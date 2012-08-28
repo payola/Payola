@@ -13,16 +13,7 @@ object GraphDownloader extends PayolaController with Secured
 {
 
     private def getAnalysisEvaluationForID(id: String, user: Option[User]) = {
-        val opt = AnalysisRunner.runningEvaluations.get(id)
-        if (opt.isDefined){
-            if (opt.get._1 == user){
-                Some(opt.get._2)
-            }else{
-                None
-            }
-        }else{
-            None
-        }
+        Some(Payola.model.analysisModel.getEvaluationTupleForIDAndPerformSecurityChecks(id,user)._2)
     }
 
     private def getAnalysisSuccessForEvaluationID(id: String, user: Option[User]) = {

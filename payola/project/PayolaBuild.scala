@@ -40,7 +40,7 @@ object PayolaBuild extends Build
     /** Common settings of the Payola projects. */
     object PayolaSettings
     {
-        val version = "0.1"
+        val version = "1.0"
 
         val organization = "Payola"
     }
