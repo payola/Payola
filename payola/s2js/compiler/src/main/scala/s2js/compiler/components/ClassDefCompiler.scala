@@ -480,7 +480,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
      * @param thisAst The This reference AST.
      */
     private def compileThis(thisAst: Global#This) {
-        if (thisAst.hasSymbolWhich(_.isModule)) {
+        if (thisAst.hasSymbolWhich(s => s.isModule || s.isModuleClass)) {
             buffer += packageDefCompiler.getSymbolFullJsName(thisAst.symbol)
             buffer += ".get()"
         } else {
@@ -493,7 +493,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
      * @param identifier The Ident to compile.
      */
     private def compileIdentifier(identifier: Global#Ident) {
-        if (identifier.hasSymbolWhich(_.isModule)) {
+        if (identifier.hasSymbolWhich(s => s.isModule || s.isModuleClass)) {
             buffer += packageDefCompiler.getSymbolFullJsName(identifier.symbol)
             buffer += ".get()"
         } else if (identifier.symbol.isGetter) {
@@ -544,7 +544,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
             case select@Select(qualifier, _) if symbolIsOperator(select.symbol) => {
                 compileOperator(qualifier, None, name)
             }
-            case _ if select.hasSymbolWhich(_.isModule) => {
+            case _ if select.hasSymbolWhich(s => s.isModule || s.isModuleClass) => {
                 val jsName = packageDefCompiler.getSymbolFullJsName(select.symbol)
                 if (jsName != "") {
                     buffer += jsName

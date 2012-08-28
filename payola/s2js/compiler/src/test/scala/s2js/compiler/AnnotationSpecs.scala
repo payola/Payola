@@ -3,7 +3,7 @@ package s2js.compiler
 class AnnotationSpecs extends CompilerFixtureSpec
 {
     describe("Annotations") {
-        ignore("native class implementation is supported") {
+        it("native class implementation is supported") {
             configMap =>
                 scalaCode {
                     """
@@ -17,7 +17,7 @@ class AnnotationSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('A');
+                        s2js.runtime.client.core.get().classLoader.provide('A');
 
                         A = function() {
                             this.x = 'foo';
@@ -27,7 +27,7 @@ class AnnotationSpecs extends CompilerFixtureSpec
                 }
         }
 
-        ignore("native method implementation is supported") {
+        it("native method implementation is supported") {
             configMap =>
                 scalaCode {
                     """
@@ -43,7 +43,7 @@ class AnnotationSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('A');
+                        s2js.runtime.client.core.get().classLoader.provide('A');
 
                         A = function() {
                             var self = this;
@@ -54,12 +54,12 @@ class AnnotationSpecs extends CompilerFixtureSpec
                             var self = this;
                             console.log(self.x + self.y.toString + x);
                         };
-                        A.prototype.__class__ = new s2js.runtime.client.Class('A', []);
+                        A.prototype.__class__ = new s2js.runtime.client.core.Class('A', []);
                     """
                 }
         }
 
-        ignore("native val value is supported") {
+        it("native val value is supported") {
             configMap =>
                 scalaCode {
                     """
@@ -70,13 +70,13 @@ class AnnotationSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('A');
+                        s2js.runtime.client.core.get().classLoader.provide('A');
 
                         A = function() {
                             var self = this;
                             self.x = [1, 2, 3];
                         };
-                        A.prototype.__class__ = new s2js.runtime.client.Class('A', []);
+                        A.prototype.__class__ = new s2js.runtime.client.core.Class('A', []);
                     """
                 }
         }
