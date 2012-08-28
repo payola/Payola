@@ -9,7 +9,6 @@ case class SeqSerializationClass(seqClass: Class[_], itemSerializationClass: Ser
     extends SerializationClass
 {
     def isClassOf(anObject: Any): Boolean = {
-        // TODO: Check all items for type?
         seqClass.isInstance(anObject)
     }
 }

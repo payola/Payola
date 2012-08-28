@@ -34,7 +34,7 @@ class ObjectCompiler(packageDefCompiler: PackageDefCompiler, classDef: Global#Cl
                 packageDefCompiler.getSymbolJsName(parentClass.get.symbol)
             )
             compileParameterValues(parentConstructorCall.get.args)
-            buffer += "\n"
+            buffer += ";\n"
         }
 
         // Mix in the inherited traits.

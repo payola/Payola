@@ -5,13 +5,13 @@
 
 Payola requires a [Scala](http://www.scala-lang.org) environment, which is supported on virtually any platform capable of running Java code - both Unix and Windows-based systems are fully supported. The system should have at least 1GB of memory dedicated to Payola itself.
 
-Aside from the actual Payola server, you need to have a running [Squeryl-compatible](http://squeryl.org) relational database for storing user data, a [Virtuoso](http://virtuoso.openlinksw.com) server for storing personal RDF data and a SMTP server for the plugin approval process. Neither of these need to necessarily be running on the same system as Payola itself (this is configurable in the `payola.conf` file as described later on).
+Aside from the actual Payola server, you need to have a running [Squeryl-compatible](http://squeryl.org) relational database for storing user data, a [Virtuoso](http://virtuoso.openlinksw.com) server for storing personal RDF data and a SMTP server for the plugin approval process. The Virtuoso server needs to be running on the same server as Payola is, or at least share the file system - when uploading private data, a path to a temporary file is passed to Virtuoso. The SMTP and relational database, may be running on a different server (this is configurable in the `payola.conf` file as described later on).
 
 To work with Payola, a web browser capable of displaying HTML5 web pages is required. Payola takes advantage of many HTML5 features - keep your web browser up-to-date all the time. Recommended are the *latest versions* of WebKit-based browsers (e.g. Chrome, Safari), Firefox, Opera, or IE. A 1440x900 or larger display is highly recommended.
 
 ## Installation Guide
 
-You need to have a working Scala environment with [SBT (Scala Build Tool)](https://github.com/harrah/xsbt/wiki/) installed to run Payola. Clone Payola git repository: `git://github.com/siroky/Payola.git` to a local folder.
+First of all, clone the Payola git repository: `git://github.com/siroky/Payola.git` to a local folder.
 
 ### <a name="configuration"></a>Configuration 
 
@@ -72,7 +72,7 @@ Payola comes pre-configured to work with default settings of a Virtuoso server a
 <a name="compiling"></a>
 ### Compiling and Running Payola
 
-As the cloned repository contains just source code, it is necessary to compile Payola in order to run it. To do so, you need to have SBT installed as noted above. Open a command line (console, terminal) and make `payola` subdirectory the current working directory (e.g. by `cd payola`). Launch SBT (most likely using the `sbt` command) and enter the following commands:
+As the cloned repository contains just source code, it is necessary to compile Payola in order to run it. Open a command line (console, terminal) and make `payola` subdirectory the current working directory (e.g. by `cd payola`). Launch SBT (using the `sbt` command or the `sbt.bat` on Windows) and enter the following commands:
 
 <a name="run-initializer"></a>
 ```

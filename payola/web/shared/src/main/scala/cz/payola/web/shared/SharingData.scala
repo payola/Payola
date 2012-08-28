@@ -15,8 +15,7 @@ import cz.payola.common.entities.ShareableEntity
 
         val entity = getShareableEntity(user, entityClassName, entityId)
         val privilegeClass = Payola.model.privilegeModel.getSharingPrivilegeClass(entity)
-        val privileges = Payola.model.privilegeModel.getAllByObjectIdAndPrivilegeClass(entity.id, privilegeClass)
-        successCallback(privileges.map(_.grantee))
+        successCallback(Payola.model.privilegeModel.getEntityGrantees(entity, privilegeClass, granteeClassName))
     }
 
     @async def getPotentialGrantees(granteeClassName: String, user: User = null)

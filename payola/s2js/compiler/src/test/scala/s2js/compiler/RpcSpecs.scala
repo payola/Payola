@@ -2,29 +2,29 @@ package s2js.compiler
 
 class RpcSpecs extends CompilerFixtureSpec
 {
-    ignore("remote objects aren't compiled") {
+    it("remote objects aren't compiled") {
         configMap =>
             scalaCode {
                 """
                     package server {
-                        @remote object o {
+                        @s2js.compiler.remote object o {
                             def foo(bar: Int, baz: String): Int = bar * baz.length
                         }
                     }
                 """
             } shouldCompileTo {
                 """
-                    s2js.runtime.client.ClassLoader.provide('server.o');
+                    s2js.runtime.client.core.get().classLoader.provide('server.o');
                 """
             }
     }
 
-    ignore("synchronous remote method call gets translated into a synchronous rpc call") {
+    it("synchronous remote method call gets translated into a synchronous rpc call") {
         configMap =>
             scalaCode {
                 """
                     package server {
-                        @remote object o {
+                        @s2js.compiler.remote object o {
                             def foo(bar: Int, baz: String): Int = bar * baz.length
                         }
                     }
@@ -37,25 +37,28 @@ class RpcSpecs extends CompilerFixtureSpec
                 """
             } shouldCompileTo {
                 """
-                    s2js.runtime.client.ClassLoader.provide('client');
-                    s2js.runtime.client.ClassLoader.provide('server.o');
-
-                    client.main = function() {
-                        var self = this;
-                        var fooValue = s2js.runtime.client.rpc.Wrapper.callSync('server.o.foo', [2, 'xyz'],
-                            ['scala.Int', 'java.lang.String']);
-                    };
-                    client.__class__ = new s2js.runtime.client.Class('client', []);
+                    s2js.runtime.client.core.get().classLoader.provide('client');
+                    s2js.runtime.client.core.get().classLoader.provide('server.o');
+                    s2js.runtime.client.core.get().mixIn(client, new s2js.runtime.client.core.Lazy(function() {
+                        var obj = {};
+                        obj.main = function() {
+                            var self = this;
+                            var fooValue = s2js.runtime.client.rpc.Wrapper.get().callSync('server.o.foo', [2, 'xyz'],
+                                ['scala.Int', 'java.lang.String']);
+                        };
+                        obj.__class__ = new s2js.runtime.client.core.Class('client', []);
+                        return obj;
+                    }), true);
                 """
             }
     }
 
-    ignore("parameters of collection types are supported") {
+    it("parameters of collection types are supported") {
         configMap =>
             scalaCode {
                 """
                     package server {
-                        @remote object o {
+                        @s2js.compiler.remote object o {
                             def foo(bar: List[Int], baz: List[String], bat: List[Double]): Int = {
                                 bar.length + baz.length + bat.length
                             }
@@ -70,33 +73,36 @@ class RpcSpecs extends CompilerFixtureSpec
                 """
             } shouldCompileTo {
                 """
-                    s2js.runtime.client.ClassLoader.provide('client');
-                    s2js.runtime.client.ClassLoader.provide('server.o');
-                    s2js.runtime.client.ClassLoader.require('scala.collection.immutable.List');
-
-                    client.main = function() {
-                        var self = this;
-                        var fooValue = s2js.runtime.client.rpc.Wrapper.callSync('server.o.foo',
-                            [scala.collection.immutable.List.$apply(1, 2, 3),
-                            scala.collection.immutable.List.$apply('aaa', 'bbb', 'ccc'),
-                            scala.collection.immutable.List.$apply(1.1, 2.2, 3.0)],
-                            ['scala.collection.immutable.List[scala.Int]',
-                            'scala.collection.immutable.List[java.lang.String]',
-                            'scala.collection.immutable.List[scala.Double]']);
-                    };
-                    client.__class__ = new s2js.runtime.client.Class('client', []);
+                    s2js.runtime.client.core.get().classLoader.provide('client');
+                    s2js.runtime.client.core.get().classLoader.provide('server.o');
+                    s2js.runtime.client.core.get().classLoader.require('scala.collection.immutable.List');
+                    s2js.runtime.client.core.get().mixIn(client, new s2js.runtime.client.core.Lazy(function() {
+                        var obj = {};
+                        obj.main = function() {
+                            var self = this;
+                            var fooValue = s2js.runtime.client.rpc.Wrapper.get().callSync('server.o.foo',
+                                [scala.collection.immutable.List.get().$apply(1, 2, 3),
+                                scala.collection.immutable.List.get().$apply('aaa', 'bbb', 'ccc'),
+                                scala.collection.immutable.List.get().$apply(1.1, 2.2, 3.0)],
+                                ['scala.collection.immutable.List[scala.Int]',
+                                    'scala.collection.immutable.List[java.lang.String]',
+                                    'scala.collection.immutable.List[scala.Double]']);
+                        };
+                        obj.__class__ = new s2js.runtime.client.core.Class('client', []);
+                        return obj;
+                    }), true);
                 """
             }
     }
 
-    ignore("asynchronous remote method call gets translated into an asynchronous rpc call") {
+    it("asynchronous remote method call gets translated into an asynchronous rpc call") {
         configMap =>
             scalaCode {
                 """
                     import s2js.compiler.async
 
                     package server {
-                        @remote object o {
+                        @s2js.compiler.remote object o {
                             @async def foo(bar: String)(successCallback: Int => Unit)(errorCallback: Throwable => Unit) {
                                 successCallback(bar.length)
                             }
@@ -117,25 +123,26 @@ class RpcSpecs extends CompilerFixtureSpec
                 """
             } shouldCompileTo {
                 """
-                    s2js.runtime.client.ClassLoader.provide('client');
-                    s2js.runtime.client.ClassLoader.provide('server.o');
-
-                    client.main = function() {
-                        var self = this;
-                        var x = 0;
-                        s2js.runtime.client.rpc.Wrapper.callAsync('server.o.foo', ['xyz'], ['java.lang.String'],
-                            function(i) { x = i; },
-                            function(e) { x = -1; });
-                        s2js.runtime.client.rpc.Wrapper.callAsync('server.o.bar', [], [],
-                            function() { x = 1; },
-                            function(e) { x = 0; });
-                    };
-                    client.__class__ = new s2js.runtime.client.Class('client', []);
+                    s2js.runtime.client.core.get().classLoader.provide('client');
+                    s2js.runtime.client.core.get().classLoader.provide('server.o');
+                    s2js.runtime.client.core.get().mixIn(client, new s2js.runtime.client.core.Lazy(function() {
+                        var obj = {};
+                        obj.main = function() {
+                            var self = this;
+                            var x = 0;
+                            s2js.runtime.client.rpc.Wrapper.get().callAsync('server.o.foo', ['xyz'],
+                                ['java.lang.String'], function(i) { x = i; }, function(e) { x = -1; });
+                            s2js.runtime.client.rpc.Wrapper.get().callAsync('server.o.bar', [], [],
+                                function() { x = 1; }, function(e) { x = 0; });
+                        };
+                        obj.__class__ = new s2js.runtime.client.core.Class('client', []);
+                        return obj;
+                    }), true);
                 """
             }
     }
 
-    ignore("synchronous and asynchronous secured remote methods are supported") {
+    it("synchronous and asynchronous secured remote methods are supported") {
         configMap =>
             scalaCode {
                 """
@@ -143,7 +150,7 @@ class RpcSpecs extends CompilerFixtureSpec
 
                     package server
                     {
-                        @remote object o
+                        @s2js.compiler.remote object o
                         {
                             @secured def foo(bar: Int, securityContext: AnyRef = null): Int = bar * 42
 
@@ -164,22 +171,24 @@ class RpcSpecs extends CompilerFixtureSpec
                 """
             } shouldCompileTo {
                 """
-                    s2js.runtime.client.ClassLoader.provide('client');
-                    s2js.runtime.client.ClassLoader.provide('server.o');
-
-                    client.main = function() {
-                        var self = this;
-                        s2js.runtime.client.rpc.Wrapper.callSync('server.o.foo', [123], ['scala.Int']);
-                        var x = 0;
-                        s2js.runtime.client.rpc.Wrapper.callAsync('server.o.bar', ['xyz'], ['java.lang.String'],
-                            function(i) { x = i; }, function(e) { x = -1; });
-                    };
-                    client.__class__ = new s2js.runtime.client.Class('client', []);
+                    s2js.runtime.client.core.get().classLoader.provide('client');
+                    s2js.runtime.client.core.get().classLoader.provide('server.o');
+                    s2js.runtime.client.core.get().mixIn(client, new s2js.runtime.client.core.Lazy(function() {
+                        var obj = {};
+                        obj.main = function() {
+                            var self = this;
+                            s2js.runtime.client.rpc.Wrapper.get().callSync('server.o.foo', [123], ['scala.Int']);
+                            var x = 0; s2js.runtime.client.rpc.Wrapper.get().callAsync('server.o.bar', ['xyz'],
+                                ['java.lang.String'], function(i) { x = i; }, function(e) { x = -1; });
+                        };
+                        obj.__class__ = new s2js.runtime.client.core.Class('client', []);
+                        return obj;
+                    }), true);
                 """
             }
     }
 
-    ignore("secured remote objects are supported") {
+    it("secured remote objects are supported") {
         configMap =>
             scalaCode {
                 """
@@ -187,7 +196,7 @@ class RpcSpecs extends CompilerFixtureSpec
 
                     package server
                     {
-                        @remote @secured object o
+                        @s2js.compiler.remote @secured object o
                         {
                             def foo(bar: Int, securityContext: AnyRef = null): Int = bar * 42
 
@@ -208,17 +217,20 @@ class RpcSpecs extends CompilerFixtureSpec
                 """
             } shouldCompileTo {
                 """
-                    s2js.runtime.client.ClassLoader.provide('client');
-                    s2js.runtime.client.ClassLoader.provide('server.o');
-
-                    client.main = function() {
-                        var self = this;
-                        s2js.runtime.client.rpc.Wrapper.callSync('server.o.foo', [123], ['scala.Int']);
-                        var x = 0;
-                        s2js.runtime.client.rpc.Wrapper.callAsync('server.o.bar', ['xyz'], ['java.lang.String'],
-                            function(i) { x = i; }, function(e) { x = -1; });
-                    };
-                    client.__class__ = new s2js.runtime.client.Class('client', []);
+                    s2js.runtime.client.core.get().classLoader.provide('client');
+                    s2js.runtime.client.core.get().classLoader.provide('server.o');
+                    s2js.runtime.client.core.get().mixIn(client, new s2js.runtime.client.core.Lazy(function() {
+                        var obj = {};
+                        obj.main = function() {
+                            var self = this;
+                            s2js.runtime.client.rpc.Wrapper.get().callSync('server.o.foo', [123], ['scala.Int']);
+                            var x = 0;
+                            s2js.runtime.client.rpc.Wrapper.get().callAsync('server.o.bar', ['xyz'],
+                                ['java.lang.String'], function(i) { x = i; }, function(e) { x = -1; });
+                        };
+                        obj.__class__ = new s2js.runtime.client.core.Class('client', []);
+                        return obj;
+                    }), true);
                 """
             }
     }

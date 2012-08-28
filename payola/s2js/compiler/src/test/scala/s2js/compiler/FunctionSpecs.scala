@@ -3,7 +3,7 @@ package s2js.compiler
 class FunctionSpecs extends CompilerFixtureSpec
 {
     describe("Functions") {
-        ignore("can be higher-ordered") {
+        it("can be higher-ordered") {
             configMap =>
                 scalaCode {
                     """
@@ -31,40 +31,32 @@ class FunctionSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('F');
-                        s2js.runtime.client.ClassLoader.provide('o');
+                        s2js.runtime.client.core.get().classLoader.provide('F');
+                        s2js.runtime.client.core.get().classLoader.provide('o');
 
-                        F = function() {
-                            var self = this;
-                            self.v1 = 'v1';
-                        };
-                        F.prototype.f1 = function(x) {
-                            var self = this;
-                            return (self.v1 + x.toUpperCase());
-                        };
-                        F.prototype.__class__ = new s2js.runtime.client.Class('F', []);
+                        F = function() { var self = this; self.v1 = 'v1'; };
+                        F.prototype.f1 = function(x) { var self = this; return (self.v1 + x.toUpperCase()); };
+                        F.prototype.__class__ = new s2js.runtime.client.core.Class('F', []);
 
-                        o.f2 = function(f) {
-                            var self = this;
-                             window.alert(f('m1'));
-                        };
-                        o.f3 = function(x) {
-                            var self = this;
-                            return ('what' + x);
-                        };
-                        o.start = function() {
-                            var self = this;
-                            var x = new F();
-                            self.f2(function($x) { return x.f1($x); });
-                            self.f2(function($x) { return self.f3($x); });
-                            self.f2(function(x) { return ('no' + x); });
-                        };
-                        o.__class__ = new s2js.runtime.client.Class('o', []);
+                        s2js.runtime.client.core.get().mixIn(o, new s2js.runtime.client.core.Lazy(function() {
+                            var obj = {};
+                            obj.f2 = function(f) { var self = this; window.alert(f('m1')); };
+                            obj.f3 = function(x) { var self = this; return ('what' + x); };
+                            obj.start = function() {
+                                var self = this;
+                                var x = new F();
+                                o.get().f2(function($x) { return x.f1($x); });
+                                o.get().f2(function($x) { return o.get().f3($x); });
+                                o.get().f2(function(x) { return ('no' + x); });
+                            };
+                            obj.__class__ = new s2js.runtime.client.core.Class('o', []);
+                            return obj;
+                        }), true);
                     """
                 }
         }
 
-        ignore("anonymous functions can be assigned to variables") {
+        it("anonymous functions can be assigned to variables") {
             configMap =>
                 scalaCode {
                     """
@@ -76,10 +68,13 @@ class FunctionSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('a');
-
-                        a.x = function(y) { window.alert(y); };
-                        a.__class__ = new s2js.runtime.client.Class('a', []);
+                        s2js.runtime.client.core.get().classLoader.provide('a');
+                        s2js.runtime.client.core.get().mixIn(a, new s2js.runtime.client.core.Lazy(function() {
+                            var obj = {};
+                            obj.x = function(y) { window.alert(y); };
+                            obj.__class__ = new s2js.runtime.client.core.Class('a', []);
+                            return obj;
+                        }), true);
                     """
                 }
         }

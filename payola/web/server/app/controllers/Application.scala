@@ -18,10 +18,6 @@ object Application extends PayolaController with Secured
         Ok(views.html.application.index(user))
     }
 
-    def rpcTest = Action {
-        Ok(views.html.test())
-    }
-
     def javaScriptPackage(symbol: String) = Action {
         val javaScript = try {
             DependencyProvider.get(List("s2js.bootstrap", symbol), Nil).javaScript

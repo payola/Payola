@@ -82,11 +82,6 @@ class Scala2JSONTest extends FlatSpec with ShouldMatchers {
 
         serializer.serialize(u) should equal ("""{"__class__":"cz.payola.scala2json.test.User","__objectID__":0,"name":"Franta","groups":{"__arrayClass__":"scala.collection.mutable.ArrayBuffer","__value__":[{"__class__":"cz.payola.scala2json.test.GroupTrait","__objectID__":2,"name":"My group","users":{"__arrayClass__":"scala.collection.mutable.ArrayBuffer","__value__":[{"__ref__":0}]}}]}}""")
         serializer.serialize(g) should equal ("""{"__class__":"cz.payola.scala2json.test.GroupTrait","__objectID__":0,"name":"My group","users":{"__arrayClass__":"scala.collection.mutable.ArrayBuffer","__value__":[{"__class__":"cz.payola.scala2json.test.User","__objectID__":2,"name":"Franta","groups":{"__arrayClass__":"scala.collection.mutable.ArrayBuffer","__value__":[{"__ref__":0}]}}]}}""")
-
-        val map = new mutable.HashMap[String, String]()
-        map.put("key", "value")
-        serializer.outputFormat = OutputFormat.PrettyPrinted
-        println(serializer.serialize(map))
     }
 
     "escapeString" should "escape string" in {
@@ -97,15 +92,10 @@ class Scala2JSONTest extends FlatSpec with ShouldMatchers {
         val serializer: ExceptionSerializer = new ExceptionSerializer()
         val exc = new IllegalArgumentException("Hello")
 
-        //val rule = new CustomValueSerializationRule[Exception2]("message", { (_, exc) => exc.message })
-        //serializer.addSerializationRule(new SimpleSerializationClass(classOf[Exception2]), rule)
+        val rule = new CustomValueSerializationRule[Exception2]("message", { (_, exc) => exc.message })
+        serializer.addSerializationRule(new SimpleSerializationClass(classOf[Exception2]), rule)
 
-       // val rule = new BasicSerializationRule(Some(classOf[CommonException]), Some(List("serialVersionUID")), None)
-       // serializer.addSerializationRule(new SimpleSerializationClass(classOf[CommonException]), rule)
-
-        println(serializer.serialize(exc))
-
-        //assume(serializer.serialize(exc).contains("Hello"))
+        assume(serializer.serialize(exc).contains("Hello"))
     }
 
 }

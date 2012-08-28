@@ -61,7 +61,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
     /**The constructor DefDef objects. */
     protected val constructors = classDef.impl.body.filter(_.hasSymbolWhich(_.isPrimaryConstructor))
 
-    /**The first and currently the only used constructor. TODO support multiple constructors. */
+    /**The first and currently the only used constructor. */
     protected val constructorDefDef: Option[Global#DefDef] = constructors.headOption.map(_.asInstanceOf[Global#DefDef])
 
     /**Parameters of the constructor. */
@@ -480,7 +480,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
      * @param thisAst The This reference AST.
      */
     private def compileThis(thisAst: Global#This) {
-        if (thisAst.hasSymbolWhich(_.isModule)) {
+        if (thisAst.hasSymbolWhich(s => s.isModule || s.isModuleClass)) {
             buffer += packageDefCompiler.getSymbolFullJsName(thisAst.symbol)
             buffer += ".get()"
         } else {
@@ -493,7 +493,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
      * @param identifier The Ident to compile.
      */
     private def compileIdentifier(identifier: Global#Ident) {
-        if (identifier.hasSymbolWhich(_.isModule)) {
+        if (identifier.hasSymbolWhich(s => s.isModule || s.isModuleClass)) {
             buffer += packageDefCompiler.getSymbolFullJsName(identifier.symbol)
             buffer += ".get()"
         } else if (identifier.symbol.isGetter) {
@@ -544,7 +544,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
             case select@Select(qualifier, _) if symbolIsOperator(select.symbol) => {
                 compileOperator(qualifier, None, name)
             }
-            case _ if select.hasSymbolWhich(_.isModule) => {
+            case _ if select.hasSymbolWhich(s => s.isModule || s.isModuleClass) => {
                 val jsName = packageDefCompiler.getSymbolFullJsName(select.symbol)
                 if (jsName != "") {
                     buffer += jsName
@@ -606,10 +606,8 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
                 // Apply of a function with multiple parameter lists.
                 compileApply(subApply)
 
-                // TODO non ad-hoc solution for the ClassManifest problem.
-                val ignoreApply = args.isEmpty || args.head.toString.startsWith("reflect.this.ClassManifest")
-
                 // Add the additional parameters to the subApply method call.
+                val ignoreApply = args.isEmpty || args.head.toString.startsWith("reflect.this.ClassManifest")
                 if (!ignoreApply) {
                     buffer.update(buffer.length - 1, buffer.last.dropRight(1))
                     buffer += ", "
@@ -1090,7 +1088,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
             symbolIsInternalMember(member) || // A member inherited from an internal Type
             member.owner != classDef.symbol || // A member that isn't directly owned by the class
             member.isDeferred || // An abstract member without implementation
-            member.isConstructor || // TODO support multiple constructors
+            member.isConstructor || // Multiple constructors aren't currently supported.
             member.isParameter || // A parameter of a member method
             member.hasAccessorFlag || // A generated accesor method
             member.nameString.matches( """^.*\$default\$[0-9]+$""") // A member generated for default parameter value

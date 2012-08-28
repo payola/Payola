@@ -16,8 +16,13 @@ trait PrivilegeModelComponent extends EntityModelComponent
 
     lazy val privilegeModel = new
     {
-        def getAllByObjectIdAndPrivilegeClass(objectId: String, privilegeClass: Class[_]) = {
-            privilegeRepository.getAllByObjectIdAndPrivilegeClass(objectId, privilegeClass)
+        def getEntityGrantees(objectEntity: ShareableEntity, privilegeClass: Class[_],
+            granteeClassName: String): Seq[PrivilegeableEntity] = {
+
+            val privileges = privilegeRepository.getAllByObjectIdAndPrivilegeClass(objectEntity.id, privilegeClass)
+            val grantees = privileges.map(_.grantee)
+            val entities = repositoryRegistry(granteeClassName).getByIds(grantees.map(_.id))
+            grantees.filter(entities.contains(_))
         }
 
         def getPotentialGrantees(granteeClassName: String, user: User): Seq[PrivilegeableEntity] = {
@@ -31,11 +36,12 @@ trait PrivilegeModelComponent extends EntityModelComponent
 
         def shareEntity(entity: ShareableEntity, granteeClassName: String, granteeIds: Seq[String], user: User) {
             val grantees = getPotentialGrantees(granteeClassName, user).filter(g => granteeIds.contains(g.id))
-            val privileges = getAllByObjectIdAndPrivilegeClass(entity.id, getSharingPrivilegeClass(entity))
+            val privilegeClass = getSharingPrivilegeClass(entity)
+            val privileges = privilegeRepository.getAllByObjectIdAndPrivilegeClass(entity.id, privilegeClass)
 
             // Remove the removed privileges.
-            privileges.filter(p => !grantees.contains(p.grantee)).foreach { p =>
-                p.grantee.removePrivilege(p)
+            privileges.filter(p => !grantees.contains(p.grantee) && p.grantee.className == granteeClassName).foreach {
+                p => p.grantee.removePrivilege(p)
             }
 
             // Grant the new ones.

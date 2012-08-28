@@ -10,9 +10,11 @@ import cz.payola.common.entities.Analysis
 import cz.payola.web.client.presenters.graph.GraphPresenter
 import cz.payola.web.client.views.graph.DownloadButtonView
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
-import cz.payola.web.shared.EvaluationInProgress
-import cz.payola.web.shared.EvaluationError
-import cz.payola.web.shared.EvaluationSuccess
+import cz.payola.common._
+import scala.Some
+import cz.payola.common.EvaluationInProgress
+import cz.payola.common.EvaluationError
+import cz.payola.common.EvaluationSuccess
 
 class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presenter
 {
