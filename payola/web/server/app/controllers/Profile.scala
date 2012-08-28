@@ -32,11 +32,14 @@ object Profile extends PayolaController with Secured
                 "email" -> text,
                 "oldpassword" -> text,
                 "password" -> text
-            ) verifying("Invalid email or password", _ match {
-                case (email, oldpassword, password) =>
-                    (Payola.model.userModel
-                        .getByCredentials(user.name, Payola.model.userModel.cryptPassword(oldpassword)).isEmpty
-                        || (email == user.name || Payola.model.userModel.getByName(email).isEmpty))
+            ) verifying("Current password does not match", _ match {
+                case (email, oldpassword, password) => {
+                    Payola.model.userModel.getByCredentials(user.name, oldpassword).isDefined
+                }
+            }) verifying("E-mail already taken", _ match {
+                case (email, oldpassword, password) => {
+                    (email == user.email || Payola.model.userModel.getByEmail(email).isEmpty)
+                }
             })
         )
     }

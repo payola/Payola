@@ -23,6 +23,10 @@ trait UserRepositoryComponent extends TableRepositoryComponent
             selectWhere(_.name like "%" + name + "%", pagination)
         }
 
+        def getByEmail(email: String): Option[User] = {
+            selectOneWhere(_.email === email)
+        }
+
         def getByCredentials(name: String, password: String): Option[User] = {
             selectOneWhere(u => u.name === name and u.password === password)
         }

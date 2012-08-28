@@ -34,6 +34,10 @@ trait UserModelComponent extends EntityModelComponent
             userRepository.getByName(name)
         }
 
+        def getByEmail(email: String): Option[User] = {
+            userRepository.getByEmail(email)
+        }
+
         def getByNameLike(name: String): Seq[User] = {
             userRepository.getAllWithNameLike(name)
         }
@@ -43,7 +47,7 @@ trait UserModelComponent extends EntityModelComponent
         }
 
         def cryptPassword(password: String, method: String = "SHA-1"): String = {
-            // TODO bcrypt
+            // TODO use bcrypt?
             val md = java.security.MessageDigest.getInstance(method)
             val digest = md.digest(password.toCharArray.map(_.toByte))
             new String(digest.map(_.toChar))

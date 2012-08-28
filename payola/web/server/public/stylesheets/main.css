@@ -434,3 +434,7 @@ table .btn-toolbar .badge {
 .successors .editable.instance label {
     float: none;
 }
+
+.profile-edit-div {
+    margin-bottom: 10px;
+}
