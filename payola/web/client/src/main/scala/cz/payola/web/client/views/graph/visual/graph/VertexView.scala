@@ -227,19 +227,19 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var r
 
         if(glyphSpan.isDefined) {
 
-            val halfSize = math.max(glyphSpan.get.htmlElement.getBoundingClientRect.height,
-                glyphSpan.get.htmlElement.getBoundingClientRect.width) / 2
-
-            val left = position.x + context.canvas.getBoundingClientRect.left + context.canvas.offsetLeft +
-                positionCorrection.x - halfSize
-
-            val top = position.y + context.canvas.getBoundingClientRect.top + context.canvas.offsetTop +
-                positionCorrection.y - halfSize
-
             if(0 < position.y - radius && position.y + radius < context.canvas.clientHeight &&
                 0 < position.x - radius && position.x + radius < context.canvas.clientWidth) {
 
-                glyphSpan.get.show("block")
+                glyphSpan.get.show("inline")
+
+                val halfSize = math.max(glyphSpan.get.htmlElement.getBoundingClientRect.height,
+                    glyphSpan.get.htmlElement.getBoundingClientRect.width) / 2
+
+                val left = position.x + context.canvas.getBoundingClientRect.left + context.canvas.offsetLeft +
+                    positionCorrection.x - halfSize
+
+                val top = position.y + context.canvas.getBoundingClientRect.top + context.canvas.offsetTop +
+                    positionCorrection.y - halfSize
 
                 glyphSpan.get.setAttribute("style",
                     "left: "+left.toString+"px; top: "+top.toString+
