@@ -15,11 +15,20 @@ abstract class CompilerFixtureSpec extends FixtureSpec with ConfigMapFixture wit
     var testId = 0
 
     override def beforeAll(configMap: Map[String, Any]) {
-        workingDirectory = new File(configMap("wd").toString + "/" + this.getClass.getName)
+        val fixtureDirectoyrName = configMap("wd").toString + "/" + this.getClass.getName
+        workingDirectory = new File(fixtureDirectoyrName)
         workingDirectory.mkdirs()
 
-        // The packages should be ignored so we know exactly, where the js file will be placed.
-        compiler = new ScalaToJsCompiler(configMap("cp").toString, workingDirectory.getAbsolutePath, false)
+        val targetDirectory = new File(fixtureDirectoyrName + "/target")
+        targetDirectory.mkdirs()
+
+        // The packages should be itd so we know exactly, where the js file will be placed.
+        compiler = new ScalaToJsCompiler(
+            configMap("cp").toString,
+            targetDirectory.getAbsolutePath,
+            workingDirectory.getAbsolutePath,
+            false
+        )
     }
 
     def scalaCode(scalaSource: String): Expector = {

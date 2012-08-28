@@ -3,7 +3,7 @@ package s2js.compiler
 class PackageSpecs extends CompilerFixtureSpec
 {
     describe("Packages") {
-        ignore("can be used") {
+        it("can be used") {
             configMap =>
                 scalaCode {
                     """
@@ -13,17 +13,17 @@ class PackageSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('pkg.A');
+                        s2js.runtime.client.core.get().classLoader.provide('pkg.A');
 
                         pkg.A = function() {
                             var self = this;
                         };
-                        pkg.A.prototype.__class__ = new s2js.runtime.client.Class('pkg.A', []);
+                        pkg.A.prototype.__class__ = new s2js.runtime.client.core.Class('pkg.A', []);
                     """
                 }
         }
 
-        ignore("can be nested using multiple package statements") {
+        it("can be nested using multiple package statements") {
             configMap =>
                 scalaCode {
                     """
@@ -35,17 +35,17 @@ class PackageSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('pkg.sub.nested.A');
+                        s2js.runtime.client.core.get().classLoader.provide('pkg.sub.nested.A');
 
                         pkg.sub.nested.A = function() {
                             var self = this;
                         };
-                        pkg.sub.nested.A.prototype.__class__ = new s2js.runtime.client.Class('pkg.sub.nested.A', []);
+                        pkg.sub.nested.A.prototype.__class__ = new s2js.runtime.client.core.Class('pkg.sub.nested.A', []);
                     """
                 }
         }
 
-        ignore("can be nested using encapsulation") {
+        it("can be nested using encapsulation") {
             configMap =>
                 scalaCode {
                     """
@@ -59,17 +59,17 @@ class PackageSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('pkg.sub.nested.A');
+                        s2js.runtime.client.core.get().classLoader.provide('pkg.sub.nested.A');
 
                         pkg.sub.nested.A = function() {
                             var self = this;
                         };
-                        pkg.sub.nested.A.prototype.__class__ = new s2js.runtime.client.Class('pkg.sub.nested.A', []);
+                        pkg.sub.nested.A.prototype.__class__ = new s2js.runtime.client.core.Class('pkg.sub.nested.A', []);
                     """
                 }
         }
 
-        ignore("can be nested using package name with '.' separators") {
+        it("can be nested using package name with '.' separators") {
             configMap =>
                 scalaCode {
                     """
@@ -79,17 +79,17 @@ class PackageSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('pkg.sub.nested.A');
+                        s2js.runtime.client.core.get().classLoader.provide('pkg.sub.nested.A');
 
                         pkg.sub.nested.A = function() {
                             var self = this;
                         };
-                        pkg.sub.nested.A.prototype.__class__ = new s2js.runtime.client.Class('pkg.sub.nested.A', []);
+                        pkg.sub.nested.A.prototype.__class__ = new s2js.runtime.client.core.Class('pkg.sub.nested.A', []);
                     """
                 }
         }
 
-        ignore("can be declared multiple times") {
+        it("can be declared multiple times") {
             configMap =>
                 scalaCode {
                     """
@@ -108,27 +108,27 @@ class PackageSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.ClassLoader.provide('pkg.A');
-                        s2js.runtime.client.ClassLoader.provide('pkg.B');
-                        s2js.runtime.client.ClassLoader.provide('pkg.sub1.X');
-                        s2js.runtime.client.ClassLoader.provide('pkg.sub2.Y');
+                        s2js.runtime.client.core.get().classLoader.provide('pkg.A');
+                        s2js.runtime.client.core.get().classLoader.provide('pkg.B');
+                        s2js.runtime.client.core.get().classLoader.provide('pkg.sub1.X');
+                        s2js.runtime.client.core.get().classLoader.provide('pkg.sub2.Y');
 
                         pkg.A = function() {
                             var self = this;
                         };
-                        pkg.A.prototype.__class__ = new s2js.runtime.client.Class('pkg.A', []);
+                        pkg.A.prototype.__class__ = new s2js.runtime.client.core.Class('pkg.A', []);
                         pkg.B = function() {
                             var self = this;
                         };
-                        pkg.B.prototype.__class__ = new s2js.runtime.client.Class('pkg.B', []);
+                        pkg.B.prototype.__class__ = new s2js.runtime.client.core.Class('pkg.B', []);
                         pkg.sub1.X = function() {
                             var self = this;
                         };
-                        pkg.sub1.X.prototype.__class__ = new s2js.runtime.client.Class('pkg.sub1.X', []);
+                        pkg.sub1.X.prototype.__class__ = new s2js.runtime.client.core.Class('pkg.sub1.X', []);
                         pkg.sub2.Y = function() {
                             var self = this;
                         };
-                        pkg.sub2.Y.prototype.__class__ = new s2js.runtime.client.Class('pkg.sub2.Y', []);
+                        pkg.sub2.Y.prototype.__class__ = new s2js.runtime.client.core.Class('pkg.sub2.Y', []);
                     """
                 }
         }
@@ -160,17 +160,29 @@ class PackageSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.core.classLoader.provide('a.b.c');
-                        s2js.runtime.client.core.classLoader.provide('a.b.c.bar');
+                        s2js.runtime.client.core.get().classLoader.provide('a.b.c');
+                        s2js.runtime.client.core.get().classLoader.provide('a.b.c.bar');
+                        s2js.runtime.client.core.get().classLoader.require('scala.None');
+                        s2js.runtime.client.core.get().classLoader.require('scala.collection.immutable.List');
+                        s2js.runtime.client.core.get().mixIn(a.b.c.bar, new s2js.runtime.client.core.Lazy(function() {
+                            var obj = {};
+                            obj.bar = function() { var self = this; a.b.c.get().foo(); };
+                            obj.baz = function() { var self = this; a.b.c.bar.get().bar(); };
+                            obj.__class__ = new s2js.runtime.client.core.Class('a.b.c.bar', []);
+                            return obj;
+                        }), true);
 
-                        a.b.c.bar.bar = function() {
-                            var self = this;
-                            a.b.c.foo();
-                        };
-                        a.b.c.bar.__class__ = new s2js.runtime.client.core.Class('a.b.c.bar', []);
-
-                        a.b.c.foo = function() { var self = this; };
-                        a.b.c.__class__ = new s2js.runtime.client.core.Class('a.b.c', []);
+                        s2js.runtime.client.core.get().mixIn(a.b.c, new s2js.runtime.client.core.Lazy(function() {
+                            var obj = {};
+                            obj.foo = function() {
+                                var self = this;
+                                var a = scala.collection.immutable.List.get().$apply('X');
+                                var b = scala.collection.immutable.List.get().empty();
+                            };
+                            obj.empty = function() { var self = this; return scala.None.get(); };
+                            obj.__class__ = new s2js.runtime.client.core.Class('a.b.c', []);
+                            return obj;
+                        }), true);
                     """
                 }
         }
