@@ -95,7 +95,7 @@ trait SchemaComponent
         val classCustomizations = table[ClassCustomization]("classCustomizations")
 
         /** Table of [[cz.payola.data.squeryl.entities.settings.PropertyCustomization]]s */
-        val propertyCustomizations = table[PropertyCustomization]("properyCustomizations")
+        val propertyCustomizations = table[PropertyCustomization]("propertyCustomizations")
 
         /**
           * Relation that associates members ([[cz.payola.data.squeryl.entities.User]]s)
