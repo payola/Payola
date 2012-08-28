@@ -8,6 +8,9 @@ import cz.payola.model.ModelComponent
 import com.typesafe.config.ConfigFactory
 import cz.payola.domain.entities.plugins.PluginClassLoader
 import cz.payola.domain.entities.plugins.compiler.PluginCompiler
+import scala.collection.mutable.HashMap
+import cz.payola.domain.entities.User
+import cz.payola.domain.entities.analyses.evaluation.AnalysisEvaluation
 
 @remote object Payola
 {
