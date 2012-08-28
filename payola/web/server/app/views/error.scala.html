@@ -1,0 +1,39 @@
+@(problem: String){
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("fonts/font-face/stylesheet.css")"/>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/bootstrap.css")"/>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/bootstrap-responsive.css")"/>
+        <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")"/>
+        <title>@problem</title>
+    </head>
+    <body>
+
+    <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+            <div class="container-fluid">
+                <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </a>
+                <a class="brand" href="@routes.Application.dashboard"><img src="@routes.Assets.at("img/payola-logo-small.png")" /></a>
+                <div class="nav-collapse">
+                    <ul class="nav">
+                        <li>
+                            <a href="@routes.Application.dashboard"><i class="icon-home icon-white"></i> Dashboard</a>
+                        </li>
+                    </ul>
+                </div><!--/.nav-collapse -->
+                <div class="pull-right">&nbsp;</div>
+            </div>
+        </div>
+    </div>
+        <div class="container hero-unit alert-danger" style="margin-top: 60px;">
+                <h1>@problem</h1>
+                <p>We are terribly sorry.</p>
+        </div>
+    </body>
+</html>
+}
