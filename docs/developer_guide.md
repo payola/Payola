@@ -3,28 +3,11 @@
 
 # Developer Guide
 
-The Payola application consists of several layers and libraries that are all enclosed within a solution project ```payola```. The following sections describe structure of the solution, the functionality hidden within the layers and libraries and their relations.
-
-## 3rd party technologies
-While developing the Payola, we used the following technologies:
-
-- [Play! 2.0](http://www.playframework.org/) Scala MVC web framework
-- [Squeryl](http://squeryl.org/) (Scala ORM)
-- [Apache Jena](http://jena.apache.org/) (Java framework for building Semantic Web applications)
-- [jQuery](http://jquery.com/) JavaScript Library
-- [Twitter Bootstrap](http://twitter.github.com/bootstrap/) (collection of CSS and JS code from Twitter)
-- [Colorpicker for bootstrap](http://www.eyecon.ro/bootstrap-colorpicker/) JS module for Twitter Bootstrap
-- [Ace](http://ace.ajax.org/) (web editor for programming languages with syntax highlighting)
-- [Select2](http://ivaynberg.github.com/select2/) (JavaScript autocomplete plugin)
-- [sprintf](http://code.google.com/p/sprintf/) (SprintF implementation for JS)
-- [Flot](http://code.google.com/p/flot/) (JavaScript charts plugin)
-- [jQuery autosize](http://www.jacklmoore.com/autosize) (jQuery plugin for autosizing textareas)
-- [jQuery blockUI](http://jquery.malsup.com/block/) (jQuery plugin for blocking UI nicely)
-- [LiveQuery](http://docs.jquery.com/Plugins/livequery) (jQuery plugin)
+The Payola application consists of several layers and libraries that are all enclosed within a solution project ```payola```. The following sections describe structure of the solution, the functionality hidden within the layers and libraries and their relations. For information how to install, compile and run the Payola, please refer to the [Installation Manual](https://raw.github.com/siroky/Payola/develop/docs/installation_manual.png).
 
 ## Solution structure
 
-The solution is defined using the [SBT](https://github.com/harrah/xsbt/wiki/ "SBT") which isn't tightly bound to any particular IDE, so you may generate corresponding project files for the most commonly used IDEs (e.g. [IntelliJ IDEA](http://www.jetbrains.com/idea/), [Eclipse](http://www.eclipse.org)). SBT doesn't support any concept that can be directly used as a solution, but it can be emulated using projects and subprojects. In our case, the ```payola``` solution is just a project with no source files. The solution structure is:
+The solution is defined using the [SBT](https://github.com/harrah/xsbt/wiki/ "SBT") build file which isn't tightly bound to any particular IDE, so you may generate corresponding project files for the most commonly used IDEs (e.g. [IntelliJ IDEA](http://www.jetbrains.com/idea/), [Eclipse](http://www.eclipse.org)). SBT doesn't support any concept that can be directly used as a solution, but it can be emulated using projects and subprojects. In our case, the ```payola``` solution is just a project with no source files. The solution structure is:
 
 - ```payola```
 	- [```common```](#common)
@@ -1030,7 +1013,29 @@ The most important decision for animations was whether to use HTML5 Web Workers 
 
 > TODO: O.K. mention the SPARQL query execution tool
 
-#Continuous integration
+## Used libraries, frameworks & tools
+While developing the Payola, we used the following technologies:
+
+- [SBT 0.11.2](https://github.com/harrah/xsbt/wiki/) (Scala Build Tool) 
+- [Apache Jena 2.7.0-incubating](http://jena.apache.org/) (Java framework for building Semantic Web applications)
+- [Squeryl](http://squeryl.org/) (Scala ORM)
+- [Play! 2.0](http://www.playframework.org/) Scala MVC web framework
+- [jQuery](http://jquery.com/) JavaScript Library
+- [jQuery autosize](http://www.jacklmoore.com/autosize) (jQuery plugin for autosizing textareas)
+- [jQuery blockUI](http://jquery.malsup.com/block/) (jQuery plugin for blocking UI nicely)
+- [LiveQuery](http://docs.jquery.com/Plugins/livequery) (jQuery plugin)
+- [Twitter Bootstrap](http://twitter.github.com/bootstrap/) (collection of CSS and JS code from Twitter)
+- [Colorpicker for bootstrap](http://www.eyecon.ro/bootstrap-colorpicker/) JS module for Twitter Bootstrap
+- [Ace](http://ace.ajax.org/) (web editor for programming languages with syntax highlighting)
+- [Select2](http://ivaynberg.github.com/select2/) (JavaScript autocomplete plugin)
+- [sprintf](http://code.google.com/p/sprintf/) (SprintF implementation for JS)
+- [Flot](http://code.google.com/p/flot/) (JavaScript charts plugin)
+
+## Unit tests
+
+To run all tests, use the `test` SBT task on the root project. Or if you want to run tests for a concrete project, switch to the project in the SBT using `project [projectName]` (e.g. `project compiler`). The tests don't cover everything, only some portion of the code is unit tested. Tests of the data project might be quite useful in case you'd like to use different database server. They verify that persistance of all entities and their properties work.
+
+## Continuous integration
 In order to have the code in the repository comiplable all the time, we use a [TeamCity](http://www.jetbrains.com/teamcity/) as continuous integration tool. Since the iontegration rules are currently set that the only rule is that the application should compile, only a simple build ant script is used.
 
 ```
@@ -1055,12 +1060,10 @@ This prevent us from situations, when somebody makes a commit and does not test 
 
 In the future, we will work hardly to integrate test suites into the continuous integration process, as well as automatic deployment to our production server.
 
-#Known bugs
+## Known bugs
 You can find the complete list of issues on [GitHub](https://github.com/siroky/Payola/issues?sort=updated&state=open). In the time of writing this documentation, the list contained the following issues:
 
-TODO
-
-#Future work
+## Future work
 Since there is always something that you can do better or more sophisticated, we also have a list of things which we are looking forward to change in Payola. Here are some examples:
 
 - Fully implement the Play! 2.0 Promise API
