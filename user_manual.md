@@ -97,6 +97,7 @@ If you forget your password, you can click on the `Forgot Password` link on the 
 
 ---
 
+<a name="data-source"></a>
 ### Data Sources
 
 A data source is - as its name hints - a source of data. Payola needs to know where to get its data from for evaluating analyses, etc. - data sources.
@@ -107,7 +108,13 @@ Let's start by creating a new data source. In the toolbar, click on the `My Data
 
 ![Creating a Data Source](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_data_source.png)
 
-A data fetcher is a plugin which can communicate with a data source of a specific type. For example, `SPARQL Endpoint` is a data fetcher. SPARQL is a query language for fetching data and such a data fetcher can work with any SPARQL endpoint.
+A data fetcher is a plugin which can communicate with a data source of a specific type. For example, `SPARQL Endpoint` is a data fetcher. SPARQL is a query language for fetching data and such a data fetcher can work with any SPARQL endpoint. Currently, only two data fetchers are shipped with Payola:
+
+######```SPARQL Endpoint```
+Which can operate against any public [SPARQL endpoint](http://www.w3.org/wiki/SparqlEndpoints).
+
+######```Open Data Clean Storage```
+This is currently an experimental plugin that communicates with the [Open Data Clean Store](http://sourceforge.net/projects/odcleanstore/) web service.
 
 Select a data fetcher of your choice, fill in the data fetcher's parameters (for example, `EndpointURL` parameter in `SPARQL Endpoint` data fetcher's case) and press the `Create Data Source` button. You have just created your first data source.
 
@@ -250,12 +257,6 @@ Press the `Upload File` button. You will be redirected back to the same page aft
 ---
 ### Analyses
 
-> TODO The predefined data fetcher plugins are:
-
-> - ```SparqlEndpointFetcher``` which can operate against any public [SPARQL endpoint](http://www.w3.org/wiki/SparqlEndpoints).
-> - ```PayolaStorage``` that is used when accessing the users private data.
-> - ```OpenDataCleanStorage``` is currently an experimental plugin that communicates with the [Open Data Clean Store](http://sourceforge.net/projects/odcleanstore/) output web service.
-
 Creating a new analysis is similar to creating any other resource - in the toolbar, select `Create New` from `My Analyses` button's menu. You will be prompted to enter a name - enter the analysis' name - you can change it later on.
 
 ![Create Analysis Dialog](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_dialog.png)
@@ -264,7 +265,7 @@ You will be presented with a blank page with a control box in the top-left corne
 
 ![Create Analysis Page](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_page.png)
 
-First, you'll need a data source to start with. You can do so either using the `Add data source` button which will offer you available data sources, or `Add plugin` which lets you add a data fetcher - an anonymous data source. This can be useful if you decide to use a data source that you don't want to save right away (e.g. you know you'll use it just once).
+First, you'll need a data source to start with. You can do so either using the `Add data source` button which will offer you available data sources, or `Add plugin` which lets you add a data fetcher - an anonymous data source (see [Data Source documentation](#data-source) for more information). This can be useful if you decide to use a data source that you don't want to save right away (e.g. you know you'll use it just once).
 
 
 ![Create Analysis - Adding Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_adding_plugin.png)
