@@ -430,3 +430,7 @@ table .btn-toolbar .badge {
     overflow-x: auto;
     white-space: nowrap;
 }
+
+.successors .editable.instance label {
+    float: none;
+}

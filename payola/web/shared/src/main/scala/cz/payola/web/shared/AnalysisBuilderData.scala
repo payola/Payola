@@ -17,12 +17,20 @@ import cz.payola.common.entities.plugins._
         successCallback(Payola.model.pluginModel.getAccessibleToUser(Some(user)))
     }
 
-    @async def cloneDataSource(dataSourceId: String, analysisId: String, user: User = null)(successCallback: (PluginInstance => Unit))
+    @async def cloneDataSourceAndBindToAnalysis(dataSourceId: String, analysisId: String, user: User = null)(successCallback: (PluginInstance => Unit))
         (failCallback: (Throwable => Unit)) {
         val dataSource = Payola.model.dataSourceModel.getAccessibleToUserById(Some(user),dataSourceId).getOrElse {
             throw new Exception("DataSource not found.")
         }
-        successCallback(Payola.model.analysisModel.cloneDataSource(dataSource, analysisId))
+
+        val analysis = Payola.model.analysisModel.getById(analysisId).getOrElse{
+            throw new Exception("Analysis not found.")
+        }
+
+        val copy = dataSource.toInstance
+        analysis.addPluginInstance(copy)
+
+        successCallback(copy)
     }
 
     @async def lockAnalysis(id: String, user: User = null)(successCallback: (() => Unit))(failCallback: (Throwable => Unit)) {
