@@ -24,6 +24,12 @@
     </p>
     }
 
+    @flash.get("error").map { message =>
+    <p class="alert alert-danger">
+        @message
+    </p>
+    }
+
     <div class="well">
         <fieldset>
             <legend>Sign up to Payola</legend>

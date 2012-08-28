@@ -36,7 +36,8 @@ object Group extends PayolaController with Secured
                     Redirect(routes.Group.list()).flashing("error" -> "The group could not be created.")
                 }
             }catch {
-                case validationExc: ValidationException => Redirect(routes.Group.create()).flashing("error" -> validationExc.message)
+                case validationExc: ValidationException =>
+                    Redirect(routes.Group.create()).flashing("error" -> validationExc.message)
                 // Otherwise, let the exception bubble up
             }
     }

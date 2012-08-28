@@ -1,7 +1,14 @@
-@(user: cz.payola.domain.entities.User, form: Form[(String,String, String)])
+@(user: cz.payola.domain.entities.User, form: Form[(String,String, String)], flash: Flash)
 
 @main(Some(user), "Payola login page", Some("Edit your profile")) {
 <div class="container">
+
+
+    @flash.get("error").map { message =>
+    <p class="alert alert-danger">
+        @message
+    </p>
+    }
 
     @helper.form(routes.Profile.save()) {
 
