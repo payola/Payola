@@ -13,7 +13,6 @@ import s2js.adapters.events
 abstract class ElementView[A <: html.Element](htmlElementName: String, val subViews: Seq[View], cssClass: String)
     extends View
 {
-
     /**
      * Value used to indicate mouse dragging.
      */

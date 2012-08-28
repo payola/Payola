@@ -5,6 +5,7 @@ import cz.payola.web.client.views.entity.analysis._
 import cz.payola.web.client.presenters.models.ParameterValue
 import cz.payola.common.entities.Analysis
 import cz.payola.common.ValidationException
+import s2js.adapters.browser.`package`._
 
 class AnalysisEditor(parentElementId: String, analysisIdParam: String)
     extends AnalysisBuilder(parentElementId)
@@ -15,17 +16,23 @@ class AnalysisEditor(parentElementId: String, analysisIdParam: String)
         blockPage("Loading analysis data...")
         AnalysisBuilderData.getAnalysis(analysisId) { analysis =>
 
-            lockAnalysisAndLoadPlugins()
-            val view = new AnalysisEditorView(analysis, None, None)
-            view.visualizer.pluginInstanceRendered += { e => instancesMap.put(e.target.pluginInstance.id, e.target)}
-            view.render(parentElement)
-            bindParameterChangedEvent(view.visualizer)
-            bindConnectButtonClickedEvent(view)
-            bindDeleteButtonClickedEvent(view.visualizer)
-            constructBranches(analysis)
-            bindMenuEvents(view)
-            unblockPage()
+            lockAnalysisAndLoadPlugins({ () =>
+                val view = new AnalysisEditorView(analysis, None, None, "Edit analysis")
+                view.visualizer.pluginInstanceRendered += { e => instancesMap.put(e.target.pluginInstance.id, e.target)}
+                view.render(parentElement)
+                bindParameterChangedEvent(view.visualizer)
+                bindConnectButtonClickedEvent(view)
+                bindDeleteButtonClickedEvent(view.visualizer)
+                constructBranches(analysis)
+                bindMenuEvents(view)
 
+                view.runButton.mouseClicked += { args =>
+                    window.location.href = "/analysis/" + analysisId
+                    true
+                }
+
+                unblockPage()
+            })
             true
         } { error => fatalErrorHandler(error)}
     }

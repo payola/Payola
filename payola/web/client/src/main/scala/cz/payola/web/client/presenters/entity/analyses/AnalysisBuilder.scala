@@ -16,6 +16,9 @@ import scala.collection.mutable
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
 import cz.payola.common.ValidationException
 import cz.payola.web.client.views.elements.form.fields.TextInput
+import cz.payola.web.client.views.elements._
+import scala.Some
+import s2js.runtime.shared.rpc.RpcException
 
 class AnalysisBuilder(parentElementId: String) extends Presenter
 {
@@ -46,27 +49,37 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                 AnalysisBuilderData.setAnalysisName(analysisId, nameComponent.field.value) { success =>
                     AnalysisBuilderData.createEmptyAnalysis(nameComponent.field.value) { analysis =>
                         analysisId = analysis.id
-                        lockAnalysisAndLoadPlugins()
-                        val view = new AnalysisEditorView(analysis, Some(nameComponent.field.value), None)
-                        view.visualizer.pluginInstanceRendered += {
-                            e => instancesMap.put(e.target.pluginInstance.id, e.target)
-                        }
-                        view.render(parentElement)
-                        view.setName(nameComponent.field.value)
 
-                        bindMenuEvents(view)
-                        nameDialog.unblock()
-                        nameDialog.destroy()
+                        lockAnalysisAndLoadPlugins({() =>
+                            val view = new AnalysisEditorView(analysis, Some(nameComponent.field.value), None,"Create analysis")
+                            view.visualizer.pluginInstanceRendered += {
+                                e => instancesMap.put(e.target.pluginInstance.id, e.target)
+                            }
+                            view.render(parentElement)
+                            view.setName(nameComponent.field.value)
+
+                            view.runButton.mouseClicked += { args =>
+                                window.location.href = "/analysis/" + analysisId
+                                true
+                            }
+
+                            bindMenuEvents(view)
+                            nameDialog.unblock()
+                            nameDialog.destroy()
+                        })
                     } {
                         error =>
                             nameDialog.unblock()
-                            nameDialog.destroy()
                             error match {
                                 case rpc: ValidationException => {
-                                    AlertModal.display("Validation failed", rpc.message)
+                                    nameComponent.setError(rpc.message)
                                     false
                                 }
-                                case _ => fatalErrorHandler(error)
+                                case error: RpcException => {
+                                    AlertModal.display("Validation failed", error.message)
+                                    nameDialog.destroy()
+                                }
+                                case _ => fatalErrorHandler(_)
                             }
                         unblockPage()
                     }
@@ -215,18 +228,21 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
         }
     }
 
-    protected def lockAnalysisAndLoadPlugins() = {
+    protected def lockAnalysisAndLoadPlugins(callback: (() => Unit)) {
         AnalysisBuilderData.lockAnalysis(analysisId) { () =>
             AnalysisBuilderData.getPlugins() {
                 plugins => allPlugins = plugins
+
+                AnalysisBuilderData.getDataSources() {
+                    sources => allSources = sources
+                    callback()
+                } {
+                    error => fatalErrorHandler(error)
+                }
             } {
                 error => fatalErrorHandler(error)
             }
-            AnalysisBuilderData.getDataSources() {
-                sources => allSources = sources
-            } {
-                error => fatalErrorHandler(error)
-            }
+
         } {
             error => fatalErrorHandler(error)
         }

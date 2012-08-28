@@ -29,7 +29,13 @@ class GraphPresenter(val viewElement: html.Element) extends Presenter
     }
 
     private def onOntologyCustomizationsChanged(e: EventArgs[_]) {
-        Model.ontologyCustomizationsByOwnership(view.updateOntologyCustomizations(_))(fatalErrorHandler(_))
+        Model.ontologyCustomizationsByOwnership { o =>
+            view.updateOntologyCustomizations(o)
+            if (currentOntologyCustomization.exists(c => !o.ownedCustomizations.exists(_.contains(c)))) {
+                currentOntologyCustomization = None
+                view.updateOntologyCustomization(None)
+            }
+        }(fatalErrorHandler(_))
     }
 
     private def onOntologyCustomizationsButtonClicked(e: EventArgs[_]): Boolean = {
