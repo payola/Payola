@@ -17,12 +17,12 @@ class LiteralSpecs extends CompilerFixtureSpec
                 } shouldCompileTo {
                     """
                         s2js.runtime.client.core.get().classLoader.provide('p');
-
-                        p.a = function() {
-                            var self = this;
-                            null;
-                        };
-                        p.__class__ = new s2js.runtime.client.core.Class('p', []);
+                        s2js.runtime.client.core.get().mixIn(p, new s2js.runtime.client.core.Lazy(function() {
+                            var obj = {};
+                            obj.a = function() { var self = this; null; };
+                            obj.__class__ = new s2js.runtime.client.core.Class('p', []);
+                            return obj;
+                        }), true);
                     """
                 }
         }
@@ -42,13 +42,12 @@ class LiteralSpecs extends CompilerFixtureSpec
                 } shouldCompileTo {
                     """
                         s2js.runtime.client.core.get().classLoader.provide('p');
-
-                        p.a = function() {
-                            var self = this;
-                            true;
-                            false;
-                        };
-                        p.__class__ = new s2js.runtime.client.core.Class('p', []);
+                        s2js.runtime.client.core.get().mixIn(p, new s2js.runtime.client.core.Lazy(function() {
+                            var obj = {};
+                            obj.a = function() { var self = this; true; false; };
+                            obj.__class__ = new s2js.runtime.client.core.Class('p', []);
+                            return obj;
+                        }), true);
                     """
                 }
         }
@@ -71,16 +70,12 @@ class LiteralSpecs extends CompilerFixtureSpec
                 } shouldCompileTo {
                     """
                         s2js.runtime.client.core.get().classLoader.provide('p');
-
-                        p.a = function() {
-                            var self = this;
-                            1234;
-                            574.432;
-                            0;
-                            -5;
-                            -424.45;
-                        };
-                        p.__class__ = new s2js.runtime.client.core.Class('p', []);
+                        s2js.runtime.client.core.get().mixIn(p, new s2js.runtime.client.core.Lazy(function() {
+                            var obj = {};
+                            obj.a = function() { var self = this; 1234; 574.432; 0; -5; -424.45; };
+                            obj.__class__ = new s2js.runtime.client.core.Class('p', []);
+                            return obj;
+                        }), true);
                     """
                 }
         }
@@ -104,18 +99,21 @@ class LiteralSpecs extends CompilerFixtureSpec
                     """
                 } shouldExactlyCompileTo {
                     """s2js.runtime.client.core.get().classLoader.provide('a');""" + "\n" +
-                    """a.a = 'a';""" + "\n" +
-                    """a.b = 'b';""" + "\n" +
-                    """a.c = '\b';""" + "\n" +
-                    """a.d = '\f';""" + "\n" +
-                    """a.e = '\n';""" + "\n" +
-                    """a.f = '\r';""" + "\n" +
-                    """a.g = '\t';""" + "\n" +
-                    """a.h = '\'';""" + "\n" +
-                    """a.i = '\"';""" + "\n" +
-                    """a.j = '\\';""" + "\n" +
-                    """a.__class__ = new s2js.runtime.client.core.Class('a', []);""" + "\n" +
-                    """"""
+                    """s2js.runtime.client.core.get().mixIn(a, new s2js.runtime.client.core.Lazy(function() {""" + "\n" +
+                    """var obj = {};""" + "\n" +
+                    """obj.a = 'a';""" + "\n" +
+                    """obj.b = 'b';""" + "\n" +
+                    """obj.c = '\b';""" + "\n" +
+                    """obj.d = '\f';""" + "\n" +
+                    """obj.e = '\n';""" + "\n" +
+                    """obj.f = '\r';""" + "\n" +
+                    """obj.g = '\t';""" + "\n" +
+                    """obj.h = '\'';""" + "\n" +
+                    """obj.i = '\"';""" + "\n" +
+                    """obj.j = '\\';""" + "\n" +
+                    """obj.__class__ = new s2js.runtime.client.core.Class('a', []);""" + "\n" +
+                    """return obj;""" + "\n" +
+                    """}), true);""" + "\n"
                 }
         }
 
@@ -142,19 +140,23 @@ class LiteralSpecs extends CompilerFixtureSpec
                     """
                 } shouldExactlyCompileTo {
                     """s2js.runtime.client.core.get().classLoader.provide('a');""" + "\n" +
-                    """a.a = 'asdfghjkl';""" + "\n" +
-                    """a.b = '12345';""" + "\n" +
-                    """a.c = '';""" + "\n" +
-                    """a.d = '\b';""" + "\n" +
-                    """a.f = '\f';""" + "\n" +
-                    """a.g = '\n';""" + "\n" +
-                    """a.h = '\r';""" + "\n" +
-                    """a.i = '\t';""" + "\n" +
-                    """a.j = '\'';""" + "\n" +
-                    """a.k = '\"';""" + "\n" +
-                    """a.l = '\\';""" + "\n" +
-                    """a.m = 'multiline\nstring\n';""" + "\n" +
-                    """a.__class__ = new s2js.runtime.client.core.Class('a', []);""" + "\n" +
+                    """s2js.runtime.client.core.get().mixIn(a, new s2js.runtime.client.core.Lazy(function() {""" + "\n" +
+                    """var obj = {};""" + "\n" +
+                    """obj.a = 'asdfghjkl';""" + "\n" +
+                    """obj.b = '12345';""" + "\n" +
+                    """obj.c = '';""" + "\n" +
+                    """obj.d = '\b';""" + "\n" +
+                    """obj.f = '\f';""" + "\n" +
+                    """obj.g = '\n';""" + "\n" +
+                    """obj.h = '\r';""" + "\n" +
+                    """obj.i = '\t';""" + "\n" +
+                    """obj.j = '\'';""" + "\n" +
+                    """obj.k = '\"';""" + "\n" +
+                    """obj.l = '\\';""" + "\n" +
+                    """obj.m = 'multiline\nstring\n';""" + "\n" +
+                    """obj.__class__ = new s2js.runtime.client.core.Class('a', []);""" + "\n" +
+                    """return obj;""" + "\n" +
+                    """}), true);""" + "\n" +
                     """"""
                 }
         }
@@ -178,8 +180,13 @@ class LiteralSpecs extends CompilerFixtureSpec
 
                         p.A = function() { var self = this; };
                         p.A.prototype.__class__ = new s2js.runtime.client.core.Class('p.A', []);
-                        p.a.a = p.A.prototype.__class__;
-                        p.a.__class__ = new s2js.runtime.client.core.Class('p.a', []);
+
+                        s2js.runtime.client.core.get().mixIn(p.a, new s2js.runtime.client.core.Lazy(function() {
+                            var obj = {};
+                            obj.a = p.A.prototype.__class__;
+                            obj.__class__ = new s2js.runtime.client.core.Class('p.a', []);
+                            return obj;
+                        }), true);
                     """
                 }
         }

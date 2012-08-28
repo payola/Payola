@@ -5,15 +5,20 @@ import tools.nsc.{Global, Settings}
 /**
   * A Scala to JavaScript compiler.
   */
-class ScalaToJsCompiler(val classPath: String, val outputDirectory: String, val createPackageStructure: Boolean = true)
+class ScalaToJsCompiler(
+    val classPath: String,
+    val targetDirectory: String,
+    val javaScriptDirectory: String,
+    val createPackageStructure: Boolean = true)
 {
     private val options = List(
-        "outputDirectory:" + outputDirectory,
+        "outputDirectory:" + javaScriptDirectory,
         "createPackageStructure:" + createPackageStructure.toString
     )
 
     private val settings = new Settings()
     settings.classpath.value = classPath
+    settings.outdir.value = targetDirectory
 
     /**
       * Compiles the specified Scala source files into JavaScript.

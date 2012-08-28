@@ -160,17 +160,29 @@ class PackageSpecs extends CompilerFixtureSpec
                     """
                 } shouldCompileTo {
                     """
-                        s2js.runtime.client.core.classLoader.provide('a.b.c');
-                        s2js.runtime.client.core.classLoader.provide('a.b.c.bar');
+                        s2js.runtime.client.core.get().classLoader.provide('a.b.c');
+                        s2js.runtime.client.core.get().classLoader.provide('a.b.c.bar');
+                        s2js.runtime.client.core.get().classLoader.require('scala.None');
+                        s2js.runtime.client.core.get().classLoader.require('scala.collection.immutable.List');
+                        s2js.runtime.client.core.get().mixIn(a.b.c.bar, new s2js.runtime.client.core.Lazy(function() {
+                            var obj = {};
+                            obj.bar = function() { var self = this; a.b.c.get().foo(); };
+                            obj.baz = function() { var self = this; a.b.c.bar.get().bar(); };
+                            obj.__class__ = new s2js.runtime.client.core.Class('a.b.c.bar', []);
+                            return obj;
+                        }), true);
 
-                        a.b.c.bar.bar = function() {
-                            var self = this;
-                            a.b.c.foo();
-                        };
-                        a.b.c.bar.__class__ = new s2js.runtime.client.core.Class('a.b.c.bar', []);
-
-                        a.b.c.foo = function() { var self = this; };
-                        a.b.c.__class__ = new s2js.runtime.client.core.Class('a.b.c', []);
+                        s2js.runtime.client.core.get().mixIn(a.b.c, new s2js.runtime.client.core.Lazy(function() {
+                            var obj = {};
+                            obj.foo = function() {
+                                var self = this;
+                                var a = scala.collection.immutable.List.get().$apply('X');
+                                var b = scala.collection.immutable.List.get().empty();
+                            };
+                            obj.empty = function() { var self = this; return scala.None.get(); };
+                            obj.__class__ = new s2js.runtime.client.core.Class('a.b.c', []);
+                            return obj;
+                        }), true);
                     """
                 }
         }

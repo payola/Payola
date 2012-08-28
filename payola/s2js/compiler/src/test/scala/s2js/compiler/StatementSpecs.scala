@@ -20,14 +20,17 @@ class StatementSpecs extends CompilerFixtureSpec
                 } shouldCompileTo {
                     """
                         s2js.runtime.client.core.get().classLoader.provide('a');
-
-                        a.m1 = function() {
-                            var self = this;
-                            var x = 'bar';
-                            var y = (x + 'foo');
-                            window.alert(y);
-                        };
-                        a.__class__ = new s2js.runtime.client.core.Class('a', []);
+                        s2js.runtime.client.core.get().mixIn(a, new s2js.runtime.client.core.Lazy(function() {
+                            var obj = {};
+                            obj.m1 = function() {
+                                var self = this;
+                                var x = 'bar';
+                                var y = (x + 'foo');
+                                window.alert(y);
+                            };
+                            obj.__class__ = new s2js.runtime.client.core.Class('a', []);
+                            return obj;
+                        }), true);
                     """
                 }
         }
@@ -83,48 +86,47 @@ class StatementSpecs extends CompilerFixtureSpec
                         s2js.runtime.client.core.get().classLoader.provide('a');
                         s2js.runtime.client.core.get().classLoader.provide('c');
 
-                        B = function() {
-                            var self = this;
-                            self.x = '';
-                        };
+                        B = function() { var self = this; self.x = ''; };
                         B.prototype.__class__ = new s2js.runtime.client.core.Class('B', []);
 
-                        a.x = 'bar';
-                        a.__class__ = new s2js.runtime.client.core.Class('a', []);
+                        s2js.runtime.client.core.get().mixIn(a, new s2js.runtime.client.core.Lazy(function() {
+                            var obj = {};
+                            obj.x = 'bar';
+                            obj.__class__ = new s2js.runtime.client.core.Class('a', []);
+                            return obj;
+                        }), true);
 
-                        c.x = 'foo';
-
-                        c.m1 = function(param) {
-                            var self = this;
-                            var b = new B();
-                            var local = 'bar';
-
-                            a.x = 'fooA';
-                            b.x = 'fooB';
-                            self.x = 'fooC';
-                            local = 'fooLocal';
-
-                            local = param;
-                            local = self.x;
-                            local = a.x;
-                            local = b.x;
-
-                            a.x = param;
-                            a.x = local;
-                            a.x = self.x;
-                            a.x = b.x;
-
-                            b.x = param;
-                            b.x = local;
-                            b.x = self.x;
-                            b.x = a.x;
-
-                            self.x = param;
-                            self.x = local;
-                            self.x = a.x;
-                            self.x = b.x;
-                        };
-                        c.__class__ = new s2js.runtime.client.core.Class('c', []);
+                        s2js.runtime.client.core.get().mixIn(c, new s2js.runtime.client.core.Lazy(function() {
+                            var obj = {};
+                            obj.x = 'foo';
+                            obj.m1 = function(param) {
+                                var self = this;
+                                var b = new B();
+                                var local = 'bar';
+                                a.get().x = 'fooA';
+                                b.x = 'fooB';
+                                c.get().x = 'fooC';
+                                local = 'fooLocal';
+                                local = param;
+                                local = c.get().x;
+                                local = a.get().x;
+                                local = b.x;
+                                a.get().x = param;
+                                a.get().x = local;
+                                a.get().x = c.get().x;
+                                a.get().x = b.x;
+                                b.x = param;
+                                b.x = local;
+                                b.x = c.get().x;
+                                b.x = a.get().x;
+                                c.get().x = param;
+                                c.get().x = local;
+                                c.get().x = a.get().x;
+                                c.get().x = b.x;
+                            };
+                            obj.__class__ = new s2js.runtime.client.core.Class('c', []);
+                            return obj;
+                        }), true);
                     """
                 }
         }
@@ -145,18 +147,18 @@ class StatementSpecs extends CompilerFixtureSpec
                 } shouldCompileTo {
                     """
                         s2js.runtime.client.core.get().classLoader.provide('o');
-
-                        o.m1 = function() {
-                            var self = this;
-                            return true;
-                        };
-                        o.m2 = function() {
-                            var self = this;
-                            var v1 = true;
-                            var v2 = (! v1);
-                            var v3 = (! self.m1());
-                        };
-                        o.__class__ = new s2js.runtime.client.core.Class('o', []);
+                        s2js.runtime.client.core.get().mixIn(o, new s2js.runtime.client.core.Lazy(function() {
+                            var obj = {};
+                            obj.m1 = function() { var self = this; return true; };
+                            obj.m2 = function() {
+                                var self = this;
+                                var v1 = true;
+                                var v2 = (! v1);
+                                var v3 = (! o.get().m1());
+                            };
+                            obj.__class__ = new s2js.runtime.client.core.Class('o', []);
+                            return obj;
+                        }), true);
                     """
                 }
         }

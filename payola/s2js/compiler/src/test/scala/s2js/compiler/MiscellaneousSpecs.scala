@@ -2,7 +2,7 @@ package s2js.compiler
 
 class MiscellaneousSpecs extends CompilerFixtureSpec
 {
-    it("conversion methods between numeric types are ignored") {
+    it("conversion methods between numeric types are itd") {
         configMap =>
             scalaCode {
                 """
@@ -22,18 +22,21 @@ class MiscellaneousSpecs extends CompilerFixtureSpec
             } shouldCompileTo {
                 """
                     s2js.runtime.client.core.get().classLoader.provide('o');
-
-                    o.c = 1;
-                    o.x6 = function() {
-                        var self = this;
-                        var x1 = self.c;
-                        var x2 = self.c;
-                        var x3 = self.c;
-                        var x4 = self.c;
-                        var x5 = self.c;
-                        var x6 = self.c;
-                    };
-                    o.__class__ = new s2js.runtime.client.core.Class('o', []);
+                    s2js.runtime.client.core.get().mixIn(o, new s2js.runtime.client.core.Lazy(function() {
+                        var obj = {};
+                        obj.c = 1;
+                        obj.x6 = function() {
+                            var self = this;
+                            var x1 = o.get().c;
+                            var x2 = o.get().c;
+                            var x3 = o.get().c;
+                            var x4 = o.get().c;
+                            var x5 = o.get().c;
+                            var x6 = o.get().c;
+                        };
+                        obj.__class__ = new s2js.runtime.client.core.Class('o', []);
+                        return obj;
+                    }), true);
                 """
             }
     }
@@ -62,31 +65,18 @@ class MiscellaneousSpecs extends CompilerFixtureSpec
                     """
             } shouldCompileTo {
                 """
-                        s2js.runtime.client.core.get().classLoader.provide('A');
-                        s2js.runtime.client.core.get().classLoader.provide('o');
+                    s2js.runtime.client.core.get().classLoader.provide('A');
+                    s2js.runtime.client.core.get().classLoader.provide('o');
 
-                        A = function() {
-                            var self = this;
-                        };
-                        A.prototype.$plus = function(x) {
-                            var self = this;
-                            return new A();
-                        };
-                        A.prototype.$minus = function(x) {
-                            var self = this;
-                            return new A();
-                        };
-                        A.prototype.$times = function(x) {
-                            var self = this;
-                            return new A();
-                        };
-                        A.prototype.unary_$bang = function() {
-                            var self = this;
-                            return new A();
-                        };
-                        A.prototype.__class__ = new s2js.runtime.client.core.Class('A', []);
-
-                        o.m = function() {
+                    A = function() { var self = this; };
+                    A.prototype.$plus = function(x) { var self = this; return new A(); };
+                    A.prototype.$minus = function(x) { var self = this; return new A(); };
+                    A.prototype.$times = function(x) { var self = this; return new A(); };
+                    A.prototype.unary_$bang = function() { var self = this; return new A(); };
+                    A.prototype.__class__ = new s2js.runtime.client.core.Class('A', []);
+                    s2js.runtime.client.core.get().mixIn(o, new s2js.runtime.client.core.Lazy(function() {
+                        var obj = {};
+                        obj.m = function() {
                             var self = this;
                             var a = new A().$plus(new A()).$minus(new A().$times(new A()));
                             var b = new A().unary_$bang();
@@ -95,8 +85,10 @@ class MiscellaneousSpecs extends CompilerFixtureSpec
                             var e = (a == b);
                             var f = (a != b);
                         };
-                        o.__class__ = new s2js.runtime.client.core.Class('o', []);
-                    """
+                        obj.__class__ = new s2js.runtime.client.core.Class('o', []);
+                       return obj;
+                    }), true);
+                """
             }
     }
 
@@ -117,13 +109,16 @@ class MiscellaneousSpecs extends CompilerFixtureSpec
             } shouldCompileTo {
                 """
                     s2js.runtime.client.core.get().classLoader.provide('o');
-
-                    o.foo = function() {
-                        var self = this;
-                        var e = document.createElement('div');
-                        var l = e.childNodes.length;
-                    };
-                    o.__class__ = new s2js.runtime.client.core.Class('o', []);
+                    s2js.runtime.client.core.get().mixIn(o, new s2js.runtime.client.core.Lazy(function() {
+                        var obj = {};
+                        obj.foo = function() {
+                            var self = this;
+                            var e = document.createElement('div');
+                            var l = e.childNodes.length;
+                        };
+                        obj.__class__ = new s2js.runtime.client.core.Class('o', []);
+                        return obj;
+                    }), true);
                 """
             }
     }

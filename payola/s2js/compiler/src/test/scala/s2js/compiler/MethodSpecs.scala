@@ -28,27 +28,27 @@ class MethodSpecs extends CompilerFixtureSpec
                         s2js.runtime.client.core.get().classLoader.provide('o1');
                         s2js.runtime.client.core.get().classLoader.provide('o2');
                         s2js.runtime.client.core.get().classLoader.require('scala.collection.immutable.List');
+                        s2js.runtime.client.core.get().mixIn(o1, new s2js.runtime.client.core.Lazy(function() {
+                            var obj = {};
+                            obj.m = function() { var self = this; return 'foo'; };
+                            obj.__class__ = new s2js.runtime.client.core.Class('o1', []);
+                            return obj;
+                        }), true);
 
-                        o1.m = function() {
-                            var self = this;
-                            return 'foo';
-                        };
-                        o1.__class__ = new s2js.runtime.client.core.Class('o1', []);
-
-                        o2.m = function() {
-                            var self = this;
-                            return 'bar';
-                        };
-                        o2.n = function() { var self = this; };
-                        o2.m3 = function() {
-                            var self = this;
-                            self.n();
-                            var x = self.m();
-                            var y = o1.m();
-                            var z = o1.m().$length();
-                            var emptyList = scala.collection.immutable.List.empty();
-                        };
-                        o2.__class__ = new s2js.runtime.client.core.Class('o2', []);
+                        s2js.runtime.client.core.get().mixIn(o2, new s2js.runtime.client.core.Lazy(function() {
+                            var obj = {}; obj.m = function() { var self = this; return 'bar'; };
+                            obj.n = function() { var self = this; };
+                            obj.m3 = function() {
+                                var self = this;
+                                o2.get().n();
+                                var x = o2.get().m();
+                                var y = o1.get().m();
+                                var z = o1.get().m().$length();
+                                var emptyList = scala.collection.immutable.List.get().empty();
+                            };
+                            obj.__class__ = new s2js.runtime.client.core.Class('o2', []);
+                            return obj;
+                        }), true);
                     """
                 }
         }
@@ -71,21 +71,25 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                         s2js.runtime.client.core.get().classLoader.provide('o1');
 
-                        o1.m1 = function(v1, v2) {
-                            var self = this;
-                            if (typeof(v2) === 'undefined') { v2 = ''; }
-                        };
-                        o1.m2 = function(v1, v2) {
-                            var self = this;
-                            if (typeof(v2) === 'undefined') { v2 = null; }
-                        };
-                        o1.m3 = function() {
-                            var self = this;
-                            self.m1('foo', undefined);
-                            self.m1('foo', 'bar');
-                            self.m2('foo', undefined);
-                        };
-                        o1.__class__ = new s2js.runtime.client.core.Class('o1', []);
+                        s2js.runtime.client.core.get().mixIn(o1, new s2js.runtime.client.core.Lazy(function() {
+                            var obj = {};
+                            obj.m1 = function(v1, v2) {
+                                var self = this;
+                                if (typeof(v2) === 'undefined') { v2 = ''; }
+                            };
+                            obj.m2 = function(v1, v2) {
+                                var self = this;
+                                if (typeof(v2) === 'undefined') { v2 = null; }
+                            };
+                            obj.m3 = function() {
+                                var self = this;
+                                o1.get().m1('foo', undefined);
+                                o1.get().m1('foo', 'bar');
+                                o1.get().m2('foo', undefined);
+                            };
+                            obj.__class__ = new s2js.runtime.client.core.Class('o1', []);
+                            return obj;
+                        }), true);
                     """
                 }
         }
@@ -108,18 +112,25 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                         s2js.runtime.client.core.get().classLoader.provide('o1');
                         s2js.runtime.client.core.get().classLoader.provide('o2');
+                        s2js.runtime.client.core.get().mixIn(o1, new s2js.runtime.client.core.Lazy(function() {
+                            var obj = {};
+                            obj.x = 'o1';
+                            obj.__class__ = new s2js.runtime.client.core.Class('o1', []);
+                            return obj;
+                        }), true);
 
-                        o1.x = 'o1';
-                        o1.__class__ = new s2js.runtime.client.core.Class('o1', []);
-
-                        o2.x = 'o2';
-                        o2.m = function(a, x, y) {
-                            var self = this;
-                            if (typeof(a) === 'undefined') { a = self.x; }
-                            if (typeof(x) === 'undefined') { x = self.x; }
-                            if (typeof(y) === 'undefined') { y = o1.x; }
-                        };
-                        o2.__class__ = new s2js.runtime.client.core.Class('o2', []);
+                        s2js.runtime.client.core.get().mixIn(o2, new s2js.runtime.client.core.Lazy(function() {
+                            var obj = {};
+                            obj.x = 'o2';
+                            obj.m = function(a, x, y) {
+                                var self = this;
+                                if (typeof(a) === 'undefined') { a = self.x; }
+                                if (typeof(x) === 'undefined') { x = self.x; }
+                                if (typeof(y) === 'undefined') { y = o1.get().x; }
+                            };
+                            obj.__class__ = new s2js.runtime.client.core.Class('o2', []);
+                            return obj;
+                        }), true);
                     """
                 }
         }
@@ -147,25 +158,15 @@ class MethodSpecs extends CompilerFixtureSpec
                 } shouldCompileTo {
                     """
                         s2js.runtime.client.core.get().classLoader.provide('a');
-
-                        a.m1 = function() {
-                            var self = this;
-                            var x = 'foo';
-                            return (x + 'bar');
-                        };
-                        a.m2 = function() {
-                            var self = this;
-                            return 'foo';
-                        };
-                        a.m3 = function() {
-                            var self = this;
-                            return 'foobar';
-                        };
-                        a.m4 = function() {
-                            var self = this;
-                            'foobar';
-                        };
-                        a.__class__ = new s2js.runtime.client.core.Class('a', []);
+                        s2js.runtime.client.core.get().mixIn(a, new s2js.runtime.client.core.Lazy(function() {
+                            var obj = {};
+                            obj.m1 = function() { var self = this; var x = 'foo'; return (x + 'bar'); };
+                            obj.m2 = function() { var self = this; return 'foo'; };
+                            obj.m3 = function() { var self = this; return 'foobar'; };
+                            obj.m4 = function() { var self = this; 'foobar'; };
+                            obj.__class__ = new s2js.runtime.client.core.Class('a', []);
+                            return obj;
+                        }), true);
                     """
                 }
         }
@@ -184,15 +185,13 @@ class MethodSpecs extends CompilerFixtureSpec
                 } shouldCompileTo {
                     """
                         s2js.runtime.client.core.get().classLoader.provide('a');
-
-                        a.m1 = function(t) {
-                            var self = this;
-                        };
-                        a.m2 = function() {
-                            var self = this;
-                            self.m1('foo');
-                        };
-                        a.__class__ = new s2js.runtime.client.core.Class('a', []);
+                        s2js.runtime.client.core.get().mixIn(a, new s2js.runtime.client.core.Lazy(function() {
+                            var obj = {};
+                            obj.m1 = function(t) { var self = this; };
+                            obj.m2 = function() { var self = this; a.get().m1('foo'); };
+                            obj.__class__ = new s2js.runtime.client.core.Class('a', []);
+                            return obj;
+                        }), true);
                     """
                 }
         }
@@ -217,24 +216,17 @@ class MethodSpecs extends CompilerFixtureSpec
                         s2js.runtime.client.core.get().classLoader.provide('A');
                         s2js.runtime.client.core.get().classLoader.provide('b');
 
-                        A = function() {
-                            var self = this;
-                        };
-                        A.prototype.go = function(x) {
-                            var self = this;
-                            return ('foo' + x);
-                        };
+                        A = function() { var self = this; };
+                        A.prototype.go = function(x) { var self = this; return ('foo' + x); };
                         A.prototype.__class__ = new s2js.runtime.client.core.Class('A', []);
 
-                        b.m1 = function() {
-                            var self = this;
-                            return new A();
-                        };
-                        b.m2 = function() {
-                            var self = this;
-                            var x = self.m1().go('bar').toString();
-                        };
-                        b.__class__ = new s2js.runtime.client.core.Class('b', []);
+                        s2js.runtime.client.core.get().mixIn(b, new s2js.runtime.client.core.Lazy(function() {
+                            var obj = {};
+                            obj.m1 = function() { var self = this; return new A(); };
+                            obj.m2 = function() { var self = this; var x = b.get().m1().go('bar').toString(); };
+                            obj.__class__ = new s2js.runtime.client.core.Class('b', []);
+                            return obj;
+                        }), true);
                     """
                 }
         }
@@ -259,17 +251,16 @@ class MethodSpecs extends CompilerFixtureSpec
                 } shouldCompileTo {
                     """
                         s2js.runtime.client.core.get().classLoader.provide('o1');
-
-                        o1.m1 = function(name, fn) {
-                            var self = this;
-                            fn(name);
-                        };
-
-                        o1.m3 = function() {
-                            var self = this;
-                            self.m1('foo', function(x) { window.alert(x); });
-                        };
-                        o1.__class__ = new s2js.runtime.client.core.Class('o1', []);
+                        s2js.runtime.client.core.get().mixIn(o1, new s2js.runtime.client.core.Lazy(function() {
+                            var obj = {};
+                            obj.m1 = function(name, fn) { var self = this; fn(name); };
+                            obj.m3 = function() {
+                                var self = this;
+                                o1.get().m1('foo', function(x) { window.alert(x); });
+                            };
+                            obj.__class__ = new s2js.runtime.client.core.Class('o1', []);
+                            return obj;
+                        }), true);
                     """
                 }
         }
@@ -309,34 +300,25 @@ class MethodSpecs extends CompilerFixtureSpec
                         s2js.runtime.client.core.get().classLoader.provide('C2');
                         s2js.runtime.client.core.get().classLoader.provide('o1');
 
-                        C1 = function() {
-                            var self = this;
-                            self.f1 = 'c1';
-                        };
-                        C1.prototype.m1 = function(fn) {
-                            var self = this;
-                            window.alert(self.f1);
-                            fn(self.f1);
-                        };
+                        C1 = function() { var self = this; self.f1 = 'c1'; };
+                        C1.prototype.m1 = function(fn) { var self = this; window.alert(self.f1); fn(self.f1); };
                         C1.prototype.__class__ = new s2js.runtime.client.core.Class('C1', []);
 
-                        C2 = function() {
-                            var self = this;
-                            self.f1 = 'c2';
-                        };
-                        C2.prototype.m1 = function(v1) {
-                            var self = this;
-                            window.alert((v1 + self.f1));
-                        };
+                        C2 = function() { var self = this; self.f1 = 'c2'; };
+                        C2.prototype.m1 = function(v1) { var self = this; window.alert((v1 + self.f1)); };
                         C2.prototype.__class__ = new s2js.runtime.client.core.Class('C2', []);
 
-                        o1.m1 = function() {
-                            var self = this;
-                            var c1 = new C1();
-                            var c2 = new C2();
-                            c1.m1(function($v1) { c2.m1($v1); });
-                        };
-                        o1.__class__ = new s2js.runtime.client.core.Class('o1', []);
+                        s2js.runtime.client.core.get().mixIn(o1, new s2js.runtime.client.core.Lazy(function() {
+                            var obj = {};
+                            obj.m1 = function() {
+                                var self = this;
+                                var c1 = new C1();
+                                var c2 = new C2();
+                                c1.m1(function($v1) { c2.m1($v1); });
+                            };
+                            obj.__class__ = new s2js.runtime.client.core.Class('o1', []);
+                            return obj;
+                        }), true);
                     """
                 }
         }
@@ -361,30 +343,15 @@ class MethodSpecs extends CompilerFixtureSpec
                         s2js.runtime.client.core.get().classLoader.provide('$pkg.a');
                         s2js.runtime.client.core.get().classLoader.provide('$pkg.b');
 
-                        $pkg.a = function() {
-                            var self = this;
-                        };
-                        $pkg.a.prototype.m1 = function() {
-                            var self = this;
-                        };
-                        $pkg.a.prototype.m2 = function(x) {
-                            var self = this;
-                        };
+                        $pkg.a = function() { var self = this; };
+                        $pkg.a.prototype.m1 = function() { var self = this; };
+                        $pkg.a.prototype.m2 = function(x) { var self = this; };
                         $pkg.a.prototype.__class__ = new s2js.runtime.client.core.Class('$pkg.a', []);
+                        $pkg.b = function() { var self = this; $pkg.a.apply(self, []); };
 
-                        $pkg.b = function() {
-                            var self = this;
-                            $pkg.a.apply(self, []);
-                        };
                         s2js.runtime.client.core.get().inherit($pkg.b, $pkg.a);
-                        $pkg.b.prototype.m1 = function() {
-                            var self = this;
-                            $pkg.a.prototype.m1.apply(self, []);
-                        };
-                        $pkg.b.prototype.m2 = function(x) {
-                            var self = this;
-                            $pkg.a.prototype.m2.apply(self, ['foo']);
-                        };
+                        $pkg.b.prototype.m1 = function() { var self = this; $pkg.a.prototype.m1.apply(self, []); };
+                        $pkg.b.prototype.m2 = function(x) { var self = this; $pkg.a.prototype.m2.apply(self, ['foo']); };
                         $pkg.b.prototype.__class__ = new s2js.runtime.client.core.Class('$pkg.b', [$pkg.a]);
                     """
                 }
@@ -424,30 +391,32 @@ class MethodSpecs extends CompilerFixtureSpec
                     """
                         s2js.runtime.client.core.get().classLoader.provide('o');
                         s2js.runtime.client.core.get().classLoader.require('scala.collection.immutable.List');
-
-                        o.m1 = function() {
-                            var self = this;
-                            var x = scala.collection.immutable.List.fromJsArray([].splice.call(arguments, 0,
-                            arguments.length - 0));
-                            x.foreach(function(i) { window.alert(i); });
-                        };
-                        o.m2 = function(a, b) {
-                            var self = this;
-                            var x = scala.collection.immutable.List.fromJsArray([].splice.call(arguments, 2,
-                            arguments.length - 2));
-                            x.foreach(function(i) { window.alert((a + (b + i))); });
-                        };
-                        o.test = function() {
-                            var self = this;
-                            self.m1();
-                            self.m1(1);
-                            self.m1(1, 2);
-                            self.m1(1, 2, 3, 4, 5, 6, 7);
-                            self.m2('test', 5);
-                            self.m2('test', 5, 6);
-                            self.m2('test', 5, 6, 7, 8);
-                        };
-                        o.__class__ = new s2js.runtime.client.core.Class('o', []);
+                        s2js.runtime.client.core.get().mixIn(o, new s2js.runtime.client.core.Lazy(function() {
+                            var obj = {};
+                            obj.m1 = function() {
+                                var self = this;
+                                var x = scala.collection.immutable.List.get().fromJsArray([].splice.call(arguments, 0,
+                                    arguments.length - 0));
+                                x.foreach(function(i) { window.alert(i); });
+                            };
+                            obj.m2 = function(a, b) {
+                                var self = this;
+                                var x = scala.collection.immutable.List.get().fromJsArray([].splice.call(arguments, 2,
+                                    arguments.length - 2));
+                                x.foreach(function(i) { window.alert((a + (b + i))); });
+                            };
+                            obj.test = function() {
+                                var self = this;
+                                o.get().m1();
+                                o.get().m1(1);
+                                o.get().m1(1, 2);
+                                o.get().m1(1, 2, 3, 4, 5, 6, 7);
+                                o.get().m2('test', 5); o.get().m2('test', 5, 6);
+                                o.get().m2('test', 5, 6, 7, 8);
+                            };
+                            obj.__class__ = new s2js.runtime.client.core.Class('o', []);
+                            return obj;
+                        }), true);
                     """
                 }
         }
