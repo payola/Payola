@@ -57,7 +57,7 @@
                                 <li><a href=@{ "?page=" + (page - 1) }>Prev</a></li>
                             }
                             @for(i <- 0 until numberOfPage){
-                                <li>@if((i + 1) == page){ class="active"}>
+                                <li @if((i + 1) == page){ class="active"}>
                                         @if((i + 1) == page){
                                             <a class="selected-page" href="#">@page</a>
                                         }else{

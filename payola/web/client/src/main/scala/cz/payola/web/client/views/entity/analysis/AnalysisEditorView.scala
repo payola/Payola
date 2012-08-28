@@ -6,8 +6,10 @@ import cz.payola.web.client.views.ComposedView
 import cz.payola.common.entities.Analysis
 import cz.payola.web.client.views.elements.lists._
 import cz.payola.web.client.views.elements.form.fields._
+import s2js.adapters.browser.`package`._
+import scala.Some
 
-class AnalysisEditorView(analysis: Analysis, newName: Option[String], newDesc: Option[String]) extends ComposedView
+class AnalysisEditorView(analysis: Analysis, newName: Option[String], newDesc: Option[String], pageTitle: String) extends ComposedView
 {
     val name = new InputControl("Analysis name:", new TextInput("name", if(newName.isDefined){newName.get}else{analysis.name}, "Analysis name"), None)
 
@@ -39,7 +41,12 @@ class AnalysisEditorView(analysis: Analysis, newName: Option[String], newDesc: O
 
     protected val rightCol = new Div(List(analysisCanvas), "span9 relative")
 
-    protected val container = new Div(List(leftCol, rightCol))
+    val h1 = new Heading(List(new Text(pageTitle)),1,"span10")
+    val runButton = new Button(new Text("Run"), "span1", new Icon(Icon.play))
+
+    val mainHeader = new Div(List(h1, runButton),"main-header row-fluid")
+    val row = new Div(List(leftCol, rightCol))
+    protected val container = new Div(List(mainHeader, row))
 
     name.field.addCssClass("span12")
     description.field.addCssClass("span12")

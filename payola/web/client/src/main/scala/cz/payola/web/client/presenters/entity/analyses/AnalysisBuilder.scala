@@ -18,6 +18,7 @@ import cz.payola.common.ValidationException
 import cz.payola.web.client.views.elements.form.fields.TextInput
 import cz.payola.web.client.views.elements._
 import scala.Some
+import s2js.runtime.shared.rpc.RpcException
 
 class AnalysisBuilder(parentElementId: String) extends Presenter
 {
@@ -49,23 +50,18 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                     AnalysisBuilderData.createEmptyAnalysis(nameComponent.field.value) { analysis =>
                         analysisId = analysis.id
 
-                        val h1 = document.getElementById("main-header")
-                        h1.setAttribute("class", h1.getAttribute("class") + " span10")
-
-                        val runButton = new Button(new Text("Run"), "span1", new Icon(Icon.play))
-                        runButton.render(document.getElementById("main-header-div"))
-                        runButton.mouseClicked += { args =>
-                            window.location.href = "/analysis/" + analysisId
-                            true
-                        }
-
                         lockAnalysisAndLoadPlugins({() =>
-                            val view = new AnalysisEditorView(analysis, Some(nameComponent.field.value), None)
+                            val view = new AnalysisEditorView(analysis, Some(nameComponent.field.value), None,"Create analysis")
                             view.visualizer.pluginInstanceRendered += {
                                 e => instancesMap.put(e.target.pluginInstance.id, e.target)
                             }
                             view.render(parentElement)
                             view.setName(nameComponent.field.value)
+
+                            view.runButton.mouseClicked += { args =>
+                                window.location.href = "/analysis/" + analysisId
+                                true
+                            }
 
                             bindMenuEvents(view)
                             nameDialog.unblock()
@@ -74,13 +70,16 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                     } {
                         error =>
                             nameDialog.unblock()
-                            nameDialog.destroy()
                             error match {
                                 case rpc: ValidationException => {
-                                    AlertModal.display("Validation failed", rpc.message)
+                                    nameComponent.setError(rpc.message)
                                     false
                                 }
-                                case _ => fatalErrorHandler(error)
+                                case error: RpcException => {
+                                    AlertModal.display("Validation failed", error.message)
+                                    nameDialog.destroy()
+                                }
+                                case _ => fatalErrorHandler(_)
                             }
                         unblockPage()
                     }
