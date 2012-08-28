@@ -312,7 +312,7 @@ After selecting one (each is described below), you need to specify which branche
 
 At the top of the dialog, you have each branch represented by the name of the last plugin in each branch. If you hover your mouse over the box representing a branch, that particular branch gets highlighted in the background. You need to drag the branch boxes to the input boxes.
 
-![Create Analysis - Merging Branches](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_merge_final.png)
+![Create Analysis - Merging Branches](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/sample_analysis_merged.png)
 
 ##### Union
 
@@ -376,9 +376,7 @@ Now fill in the `Join Property URI` with `http://dbpedia.org/ontology/country` a
 
 ![Create Analysis - Merged](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/sample_analysis_merged.png)
 
-Now it's really done and ready to be run - scroll up the page and press the run button.
-
-![Create Analysis - Sample Analysis](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_sample_analysis.png)
+Now it's really done and ready to be run - scroll up the page and press the `Run` button.
 
 #### Running Analyses
 
@@ -388,7 +386,7 @@ Either on your dashboard, or on analyses listing, click on an analysis to displa
 
 As some analyses can take a really long time to finish (some may be theoretically infinite), there's a timeout field in the top-right corner as well as a `Stop` button. By default, an analysis times out in 30 seconds. If you find it's too short time to evaluate your analysis, change it to a higher value.
 
-Now press the `Run Analysis` button. The plugin wells will turn yellow.
+Now press the `Run Analysis` button. The wells of plugins which are being evaluated will turn yellow (if the analysis is being executed in one single step, you will be switched right to the results).
 
 ![Running Analysis](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/analysis_running.png)
 
