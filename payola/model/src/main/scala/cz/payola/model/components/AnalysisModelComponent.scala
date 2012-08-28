@@ -50,30 +50,6 @@ trait AnalysisModelComponent extends EntityModelComponent
             instance
         }
 
-        def cloneDataSource(dataSource: DataSource, analysisId: String): PluginInstance = {
-
-            val analysis = analysisRepository.getById(analysisId).getOrElse{
-                throw new Exception("Analysis not found.")
-            }
-
-            val paramValues = dataSource.parameterValues.map {
-                value =>
-                    value match {
-                        case v:StringParameterValue => new StringParameterValue(v.parameter.asInstanceOf[StringParameter],v.value)
-                        case v:FloatParameterValue => new FloatParameterValue(v.parameter.asInstanceOf[FloatParameter],v.value)
-                        case v:IntParameterValue => new IntParameterValue(v.parameter.asInstanceOf[IntParameter],v.value)
-                        case v:BooleanParameterValue => new BooleanParameterValue(v.parameter.asInstanceOf[BooleanParameter],v.value)
-                        case _ => throw new Exception("Unsupported parameter value type.")
-                    }
-            }
-
-            val clone = new PluginInstance(dataSource.plugin, paramValues)
-            clone.isEditable_=(true)
-            analysis.addPluginInstance(clone)
-
-            clone
-        }
-
         def setParameterValue(user: User, analysisId: String, pluginInstanceId: String, parameterName: String,
             value: String) {
             val analysis = user.ownedAnalyses
@@ -84,6 +60,10 @@ trait AnalysisModelComponent extends EntityModelComponent
 
             pluginInstance.map {
                 i =>
+
+                    if (!i.isEditable){
+                        throw new ModelException("The plugin instance is not editable.")
+                    }
 
                     val option = i.getParameterValue(parameterName)
 

@@ -250,7 +250,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
 
     def onDataSourceSelected(dataSource: DataSource, view: AnalysisEditorView) {
         blockPage("Making the data source available...")
-        AnalysisBuilderData.cloneDataSource(dataSource.id, analysisId) { pi =>
+        AnalysisBuilderData.cloneDataSourceAndBindToAnalysis(dataSource.id, analysisId) { pi =>
             val map = new mutable.HashMap[String, String]
 
             pi.parameterValues.foreach {
