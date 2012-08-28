@@ -18,17 +18,17 @@ class AnalysisEvaluationSpec extends FlatSpec with ShouldMatchers
 
         val analysis = new Analysis("Cities with more than 2 million habitants", None)
         val citiesFetcher = sparqlEndpointPlugin.createInstance()
-            .setParameter("EndpointURL", "http://dbpedia.org/sparql")
-        val citiesTyped = typedPlugin.createInstance().setParameter("TypeURI", "http://dbpedia.org/ontology/City")
-        val citiesProjection = projectionPlugin.createInstance().setParameter("PropertyURIs", List(
+            .setParameter(SparqlEndpointFetcher.endpointURLParameter, "http://dbpedia.org/sparql")
+        val citiesTyped = typedPlugin.createInstance().setParameter(Typed.typeURIParameter, "http://dbpedia.org/ontology/City")
+        val citiesProjection = projectionPlugin.createInstance().setParameter(Projection.propertyURIsParameter, List(
             "http://dbpedia.org/ontology/populationDensity", "http://dbpedia.org/ontology/populationTotal"
         ).mkString("\n"))
         val citiesSelection = selectionPlugin.createInstance().setParameter(
-            "PropertyURI", "http://dbpedia.org/ontology/populationTotal"
+            Selection.propertyURIParameter, "http://dbpedia.org/ontology/populationTotal"
         ).setParameter(
-            "Operator", ">"
+            Selection.operatorParameter, ">"
         ).setParameter(
-            "Value", "2000000"
+            Selection.valueParameter, "2000000"
         )
         analysis.addPluginInstances(citiesFetcher, citiesTyped, citiesProjection, citiesSelection)
         analysis.addBinding(citiesFetcher, citiesTyped)

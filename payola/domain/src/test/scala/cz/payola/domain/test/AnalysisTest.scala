@@ -3,8 +3,10 @@ package cz.payola.domain.test
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.FlatSpec
 import cz.payola.domain.entities._
-import cz.payola.domain.entities.plugins.PluginInstance
-import cz.payola.domain.entities.plugins.parameters.StringParameterValue
+import cz.payola.domain.entities.plugins._
+import cz.payola.domain.entities.plugins.parameters._
+import scala.Some
+import scala.Some
 
 class AnalysisTest extends FlatSpec with ShouldMatchers {
 
@@ -23,7 +25,7 @@ class AnalysisTest extends FlatSpec with ShouldMatchers {
         a.pluginInstances.size should equal (0)
 
         val plugin: Plugin = new PseudoPlugin("MyPlugin")
-        val instance1: PluginInstance = new PluginInstance(plugin, List(plugin.getParameter("Time").get.asInstanceOf[StringParameterValue]))
+        val instance1: PluginInstance = new PluginInstance(plugin, List(plugin.getParameter("Time").get.asInstanceOf[StringParameter].createValue(Some("value"))))
         a.addPluginInstance(instance1)
         a.pluginInstances.size should equal (1)
 

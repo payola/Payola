@@ -8,7 +8,7 @@ import cz.payola.domain.entities.plugins.concrete.data.SparqlEndpointFetcher
 
 class DataSourceSpec extends FlatSpec with ShouldMatchers
 {
-    val instance = (new SparqlEndpointFetcher).createInstance().setParameter("EndpointURL", "http://ld.opendata.cz:8894/sparql")
+    val instance = (new SparqlEndpointFetcher).createInstance().setParameter(SparqlEndpointFetcher.endpointURLParameter, "http://ld.opendata.cz:8894/sparql")
 
     val dataSource = DataSource("DBPedia", None, instance)
 
