@@ -200,11 +200,15 @@ In Scala, everything is an expression with a return value, even if the return va
 
 > Scala code:
 
-`val x = if (a) { b } else { c }`
+```scala
+val x = if (a) { b } else { c }
+````
 
 > compiles into:
 
-`var x = (function() { if (a) { return b; } else { return c; } })();`
+```js
+var x = (function() { if (a) { return b; } else { return c; } })();
+````
 
 ###### Operators
 
@@ -712,7 +716,7 @@ doSomethingWithSum(sum)
 Which is quite a standard fragment of code. That differs a lot from the asynchronous variant:
 
 ```scala
-RPCTester.testParamArray(List(1,2,3)){ sum =>
+RPCTester.testParamArray(List(1,2,3)) { sum =>
 	doSomethingWithSum(sum)
 }(errorHandler(_))
 ```
@@ -726,7 +730,7 @@ Let's discuss an example of an asynchronous method definition:
 ```scala
 @async def testParamArrayAsync(param: List[Int])
     (successCallback: (Int => Unit))
-    (failCallback: (Throwable => Unit)) = {
+    (failCallback: (Throwable => Unit)) {
         successCallback(param.sum)
     }
 ```
