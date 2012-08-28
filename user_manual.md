@@ -91,6 +91,10 @@ As a logged-in user, you can now create new data sources, analyses, plugins (you
 
 ![User Page](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/user_page.png)
 
+If you forget your password, you can click on the `Forgot Password` link on the login page. Enter your email and a new password - you will be emailed with a confirmation link. When you click on it, the new password will be put into effect. Note that the confirmation link is valid for two hours only.
+
+![Password Reset](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/forgot_password.png)
+
 ---
 
 ### Data Sources
