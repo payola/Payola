@@ -223,6 +223,8 @@ Then there's the `Share` button. When you click on it, a menu pops up, allowing 
 
 The other option is to share the data source to groups - again a dialog will appear, letting you select multiple groups using the suggestion box. Add groups you want and confirm the dialog. All users within the selected groups will be now able to use this data source.
 
+![Share to Groups](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/share_to_groups.png)
+
 If you no longer want to share a resource with a group or a user, follow the same steps as if you wanted to share it with someone - the dialog which appears will contain the users or groups whom you've shared the resource to previously. Press the `Share` button to confirm the dialog. The list of users and groups allowed to access the resource will be updated accordingly.
 
 ---
@@ -265,7 +267,6 @@ You will be presented with a blank page with a control box in the top-left corne
 First, you'll need a data source to start with. You can do so either using the `Add data source` button which will offer you available data sources, or `Add plugin` which lets you add a data fetcher - an anonymous data source. This can be useful if you decide to use a data source that you don't want to save right away (e.g. you know you'll use it just once).
 
 
-![Create Analysis - Adding Data Source](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_adding_data_source.png)
 ![Create Analysis - Adding Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_adding_plugin.png)
 
 ![Create Analysis - Filling Plugin Parameters](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_plugin_parameters.png)
@@ -278,23 +279,14 @@ Now that you've added a data source, you need to do something with the data. Cli
 
 This plugin selects vertices of a type that's filled in as a parameter `TypeURI` from its input graph.
 
-![Typed Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_typed.png)
-
 ##### Projection
 
 Projection plugin takes property URIs separated by a newline as a single parameter. It will select vertices that are connected to other vertices using one of the listed URIs. 
 > **Note:** Payola performs some optimizations, potentially merging several consecutive plugins together. For example, two consecutive projection plugins are always merged - hence their result isn't an empty graph as one could expect even if each of them lists completely different set of URIs, but a graph that contains both projections (if this optimization hadn't taken place, the first plugin would create a graph containing vertices connected to each other using URIs declared in the first plugin, which would then be filtered using the second plugin, resulting in an empty intersection).
 
-![Projection Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_projection.png)
-
 ##### Selection
 
 Selection plugin lets you select vertices with a particular attribute - for example select cities with more than 2 million inhabitants.
-
-![Selection Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_selection.png)
-
-> *Example:* Let's create an analysis which selects all cities with more than 2 million inhabitants. First, add a `DBpedia.org` data source, then connect a new `Typed` plugin with `TypeURI` `http://dbpedia.org/ontology/City`. Continue with a `Projection` plugin with `PropertyURIs` `http://dbpedia.org/ontology/populationTotal`, then a `Selection` plugin with `PropertyURI` `http://dbpedia.org/ontology/populationTotal`, `Operator` `>` and `Value` `2000000`. And that's it: your first analysis.
-![Create Analysis - Sample Analysis](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_sample_analysis.png)
 
 ##### Ontological Filter
 
@@ -320,7 +312,7 @@ After selecting one (each is described below), you need to specify which branche
 
 At the top of the dialog, you have each branch represented by the name of the last plugin in each branch. If you hover your mouse over the box representing a branch, that particular branch gets highlighted in the background. You need to drag the branch boxes to the input boxes.
 
-![Create Analysis - Merging Branches](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_merge_final.png)
+![Create Analysis - Merging Branches](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/sample_analysis_merged.png)
 
 ##### Union
 
@@ -349,6 +341,43 @@ Join can be either inner or outer (default).
 
 > *Example:* Using the same graphs as before, merging graph A with graph B will yield in the same result. Merging B with A, however, will include a single vertex `payola.cz/wolf` and no edges.
 
+
+##### Example
+
+Let's create an analysis which selects all cities with more than 2 million inhabitants. First, add a `DBpedia.org` data source.
+
+![Create Analysis - Adding Data Source](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_adding_data_source.png)
+
+![Create Analysis - Added Data Source](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_added_data_source.png)
+
+Then connect a new `Typed` plugin with `TypeURI` `http://dbpedia.org/ontology/City`.
+
+![Typed Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_typed.png)
+
+Continue with a `Projection` plugin with `PropertyURIs` `http://dbpedia.org/ontology/populationTotal`.
+
+![Projection Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_projection.png)
+
+And a `Selection` plugin with `PropertyURI` `http://dbpedia.org/ontology/populationTotal`, `Operator` `>` and `Value` `2000000`.
+
+![Selection Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_selection.png)
+
+And that's it: your first analysis. Now let's fetch countries of the cities as well.
+
+Add a one more `DBPedia.org` data source and connect a `Typed` plugin with `http://dbpedia.org/ontology/Country` `Type URI` parameter and a `Projection` plugin with `http://dbpedia.org/ontology/areaTotal` `Property URIs` parameter as seen on the picture below.
+
+![Two Branches](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/two_branches.png)
+
+Click on the `Merge Branches` link and select `Join`. Place the branches on the input wells as seen below.
+
+![Create Analysis - Merging](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/sample_analysis_merging.png)
+
+Now fill in the `Join Property URI` with `http://dbpedia.org/ontology/country` and make sure the `Is Inner` checkbox isn't checked.
+
+![Create Analysis - Merged](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/sample_analysis_merged.png)
+
+Now it's really done and ready to be run - scroll up the page and press the `Run` button.
+
 #### Running Analyses
 
 Either on your dashboard, or on analyses listing, click on an analysis to display details of it. You are presented with an overview of the analysis (which plugins with which parameters and bindings are going to be used).
@@ -357,7 +386,7 @@ Either on your dashboard, or on analyses listing, click on an analysis to displa
 
 As some analyses can take a really long time to finish (some may be theoretically infinite), there's a timeout field in the top-right corner as well as a `Stop` button. By default, an analysis times out in 30 seconds. If you find it's too short time to evaluate your analysis, change it to a higher value.
 
-Now press the `Run Analysis` button. The plugin wells will turn yellow.
+Now press the `Run Analysis` button. The wells of plugins which are being evaluated will turn yellow (if the analysis is being executed in one single step, you will be switched right to the results).
 
 ![Running Analysis](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/analysis_running.png)
 

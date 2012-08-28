@@ -25,8 +25,6 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
     val propertyStrokeWidthDelayedChanged =
         new UnitEvent[InputControl[_], PropertyCustomizationEventArgs[InputControl[_]]]
 
-
-
     val ontologyCustomizationName = new InputControl(
         "Name:",
         new TextInput("name", ontologyCustomization.name, "", "span6"),
