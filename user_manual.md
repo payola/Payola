@@ -362,7 +362,22 @@ And a `Selection` plugin with `PropertyURI` `http://dbpedia.org/ontology/populat
 
 ![Selection Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_selection.png)
 
-And that's it: your first analysis.
+And that's it: your first analysis. Now let's fetch countries of the cities as well.
+
+Add a one more `DBPedia.org` data source and connect a `Typed` plugin with `http://dbpedia.org/ontology/Country` `Type URI` parameter and a `Projection` plugin with `http://dbpedia.org/ontology/areaTotal` `Property URIs` parameter as seen on the picture below.
+
+![Two Branches](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/two_branches.png)
+
+Click on the `Merge Branches` link and select `Join`. Place the branches on the input wells as seen below.
+
+![Create Analysis - Merging](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/sample_analysis_merging.png)
+
+Now fill in the `Join Property URI` with `http://dbpedia.org/ontology/country` and make sure the `Is Inner` checkbox isn't checked.
+
+![Create Analysis - Merged](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/sample_analysis_merged.png)
+
+Now it's really done and ready to be run - scroll up the page and press the run button.
+
 ![Create Analysis - Sample Analysis](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_sample_analysis.png)
 
 #### Running Analyses
