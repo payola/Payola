@@ -90,9 +90,9 @@
                             <p class="navbar-text pull-right">
                                 @if(user.isDefined){
                                     Logged in as <a href="@routes.Profile.index(user.get.name)">@user.get.name</a>
-                                    (<a href="@routes.Application.logout">Logout</a>)
+                                    (<a href="@routes.Application.logout">Sign out</a>)
                                 }else{
-                                    <a href="@routes.Application.login">Login</a>
+                                    <a href="@routes.Application.login">Sign in</a>
                                 }
                             </p>
                         </div><!--/.nav-collapse -->

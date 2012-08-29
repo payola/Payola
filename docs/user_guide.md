@@ -97,17 +97,47 @@ In companies, Payola will probably have many non-technical users and a developer
 - http://catalogus-professorum.org/graphicalquerybuilder
 - http://data.gov.uk/linked-data
 
+## Vocabulary
+Before reading further, you shoudl get familiar with some terms we user regulary to describe the Payola functionalities:
+
+### Data source
+A data source is not just a regular data storage. It is a data storage with a defined interface like SPARQL endpoint. If we talk about a data source, we almost always think of a RDF data source.
+
+### Analysis
+An analysis is a kind of algorithm which tells Payola, how to proccess your data. With Payola, you can visually assmeble analyses, which is a way, how you define, what should Payola do with your data before making a visualisation.
+
+Let's suppose you have a data set stored on the `http://jergym.cz/sparql` endpoint. The data set describes relations between teachers and students. Every of those relations defines, which teacher is a class teacher of which student; e.g.:
+
+```
+http://jergym.cz/John_Smith | is a class teacher of | http://jergym.cz/Peter_White
+```
+
+The analysis gives you a tool, how to specify, that you want to procces a data set from the `http://jergym.cz/sparql` endpoint, filter the data, constraint them on properties and mainly, define relation patterns. In the most simple case, by assembling an analysis, you can create a SPARQL query. The more complex analysis you construct, the more SPARQL queries and dependecies between them are created on the background.
+
+### Graph
+when mentioning a **graph** we probably don't mean a plot chart or a pie chart. Despite the fact, that Payola is in a limited way capable of producing such graphs, the main form of Payola output is a set of vertices and edges, which is, in graph theory, called a [graph](http://en.wikipedia.org/wiki/Graph_(mathematics\)). A vertex stands for an entity and an edge represents a relation between two entities.
+
+### Plugin
+Since Payola is a platform, you can build your own modules which you can integrate into it. Those modules are called plugins. In the documentation we talk about two different types of plugins:
+- analytical plugins: They are modules that can be integrated into an analysis. They get a graph on input, transform it into another as they need and return another graph.
+- visual plugins: They receive a graph and visualise it by the implemented set of rules.
+
+
 ## Basic usage
 
 You can use Payola both as a guest and a logged-in user. A guest is limited to view analyses and data sources marked as public by teh other users and only in a read-only mode (i.e. can't edit them). This make it easier for companies to use Payola in two different modes at a time. In the first one, they internally share data and analyses and control the access to such data. The second mode makes it easy to share any analysis of datasource to the public in a single click.
 
 ![Guest Dashboard](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/guest_dashboard.png)
 
-To log in, please, follow the `Log In` link in the top-right corner of the page. If you have already signed up, simply fill in your email and password and press the `Log In` button. Otherwise, click `Sign Up` to create a new profile.
+TODO repair screenshot sign in
+
+To sign in, please, follow the `Sign in` link in the top-right corner of the page. If you have already signed up, simply fill in your email and password and press the `Sign In` button. Otherwise, click `Sign Up` to create a new profile.
 
 ![Sign In](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/sign_in.png)
 
 To sign up, fill in your email and password. The e-mail will be used as your username, as well as the contact e-mail. We will use this e-mail address to reset your password, if neccessary. We don't store the password itself, just its hash. Therefore, we will **never** send you your password in a plaintext. That's also the reason why we cannot tell you your password if you accidentaly forget it. We just don't know, what the password is.
+
+Payola will make sure that the provided e-mail address is not used already. If it is, you probably have an active account already. Otherwise, you will need to register using a different e-mail address.
 
 ![Sign Up](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/sign_up_credentials.png)
 
@@ -127,6 +157,8 @@ If you forget your password, you can click on the `Forgot Password` link on the 
 ### Data Sources
 
 A data source is - as its name hints - a source of data. In our case, RDF data. Payola needs to know where to get its data from for evaluating analyses, etc. - data sources. It is a way how to make Payola able to access your Linked data.
+
+Since 
 
 #### Creating
 
