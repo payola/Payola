@@ -10,6 +10,7 @@ import cz.payola.domain.entities.User
 import cz.payola.web.shared.Payola
 import cz.payola.web.shared.managers.PasswordManager
 import cz.payola.domain.IDGenerator
+import cz.payola.common.ValidationException
 
 object Application extends PayolaController with Secured
 {
@@ -48,7 +49,7 @@ object Application extends PayolaController with Secured
             val email = req("email")(0)
             val password = req("password")(0)
 
-            val userOpt = Payola.model.userModel.getByName(email)
+            val userOpt = Payola.model.userModel.getByEmail(email)
             if (userOpt.isEmpty){
                 Ok(views.html.application.reset_password(None)(new Flash(Map("error" -> "The email you've entered isn't associated with any user in our database."))))
             }else{
@@ -128,8 +129,16 @@ object Application extends PayolaController with Secured
         signupForm.bindFromRequest.fold(
             formWithErrors => BadRequest(html.application.signup(formWithErrors)),
             user =>
-            {   Payola.model.userModel.create(user._1, user._2)
-                Redirect(routes.Application.dashboard).withSession("email" -> user._1) }
+            {   try {
+                    Payola.model.userModel.create(user._1, user._2)
+                    Redirect(routes.Application.dashboard).withSession("email" -> user._1)
+                } catch {
+                    case v: ValidationException =>
+                        Redirect(routes.Application.signup)
+                        .withSession("email" -> "sdsdsdsd")
+                            .flashing("error" -> v.message)
+                }
+            }
         )
     }
 }

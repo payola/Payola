@@ -160,11 +160,17 @@ trait DataContextComponent
         with NamedEntityRepository[User]
     {
         /**
-          * Returns an user with the specified name and password.
-          * @param name Name of the user to search for.
-          * @param password Password of the user to search for.
-          */
+         * Returns an user with the specified name and password.
+         * @param name Name of the user to search for.
+         * @param password Password of the user to search for.
+         */
         def getByCredentials(name: String, password: String): Option[User]
+
+        /**
+         * Returns an user with the specified email.
+         * @param email Email of the user to search for.
+         */
+        def getByEmail(email: String): Option[User]
 
         /**
           * Returns all users whose names contain the specified name part as a substring.

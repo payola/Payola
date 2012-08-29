@@ -110,11 +110,23 @@ Let's start by creating a new data source. In the toolbar, click on the `My Data
 
 A data fetcher is a plugin which can communicate with a data source of a specific type. For example, `SPARQL Endpoint` is a data fetcher. SPARQL is a query language for fetching data and such a data fetcher can work with any SPARQL endpoint. Currently, only two data fetchers are shipped with Payola:
 
+---
+
+### Pre-installed Data Fetchers
+
 ######```SPARQL Endpoint```
 Which can operate against any public [SPARQL endpoint](http://www.w3.org/wiki/SparqlEndpoints).
 
+- **Endpoint URL** - an absolute URL of a SPARQL endpoint - e.g. `http://dbpedia.org/sparql`. This endpoint URL must respond to a `?query=##SPARQL_query##` GET request.
+- **Graph URIs** - URIs of graphs that the queries should be performed on. If you leave the parameter empty, all graphs will be included.
+
 ######```Open Data Clean Storage```
 This is currently an experimental plugin that communicates with the [Open Data Clean Store](http://sourceforge.net/projects/odcleanstore/) web service.
+
+- **Output Webservice URL** - URL of the output web service without trailing `/` - `/uri?format=trig&uri=##Vertex_URI##` is appended to the URL in order to fetcher the vertex neighborhood.
+- **Sparql Endpoint URL** - a SPARQL endpoint URL. The same rules apply as with the `Endpoint URL` parameter or the `SPARQL Endpoint` data fetcher.
+
+---
 
 Select a data fetcher of your choice, fill in the data fetcher's parameters (for example, `EndpointURL` parameter in `SPARQL Endpoint` data fetcher's case) and press the `Create Data Source` button. You have just created your first data source.
 
@@ -278,24 +290,38 @@ Now that you've added a data source, you need to do something with the data. Cli
 
 ##### Typed
 
-This plugin selects vertices of a type that's filled in as a parameter `TypeURI` from its input graph.
+This plugin selects vertices of a type that's filled in as a parameter `RDF Type URI` from its input graph.
+
+- **RDF Type URI** - A single URI of a vertex RDF type, e.g. `http://dbpedia.org/ontology/City`.
 
 ##### Projection
 
-Projection plugin takes property URIs separated by a newline as a single parameter. It will select vertices that are connected to other vertices using one of the listed URIs. 
+Projection plugin takes property URIs separated by a newline as a single parameter. It will select vertices that are connected to other vertices using one of the listed URIs.
+
+- **Property URIs** - A list of URIs (each on a new line) of a property RDF type, e.g. `http://dbpedia.org/ontology/populationTotal`.
+- **Select property types and labels** - When checked, all properties are also added to the `OPTIONAL` section of the query, fetching each property's type and label.
+
 > **Note:** Payola performs some optimizations, potentially merging several consecutive plugins together. For example, two consecutive projection plugins are always merged - hence their result isn't an empty graph as one could expect even if each of them lists completely different set of URIs, but a graph that contains both projections (if this optimization hadn't taken place, the first plugin would create a graph containing vertices connected to each other using URIs declared in the first plugin, which would then be filtered using the second plugin, resulting in an empty intersection).
 
 ##### Selection
 
 Selection plugin lets you select vertices with a particular attribute - for example select cities with more than 2 million inhabitants.
 
+- **Property URI** - A URI of the property, e.g. `http://dbpedia.org/ontology/populationTotal`.
+- **Operator** - An operator - `<`, `>`, `=`, ... (see the *Value* parameter below for details).
+- **Value** - The value for the property to be compared to, e.g. `20000000`. These three parameters get combined to create a `FILTER` statement in the SPARQL query - with the examples provided, this plugin gets translated to this part of the resulting SPARQL query: `FILTER (?v > 20000000)`.
+
 ##### Ontological Filter
 
 Ontological Filter plugin filters a graph using ontologies located at URLs listed in the OntologyURLs parameter.
 
+- **Ontology URLs** - URLs of ontologies - each on a new line.
+
 ##### SPARQL Query
 
 This is a more advanced plugin letting you perform your own custom SPARQL query on the output of the previous plugin.
+
+- **SPARQL Query** - An actual SPARQL query.
 
 #### Branches
 
@@ -351,11 +377,11 @@ Let's create an analysis which selects all cities with more than 2 million inhab
 
 ![Create Analysis - Added Data Source](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_added_data_source.png)
 
-Then connect a new `Typed` plugin with `TypeURI` `http://dbpedia.org/ontology/City`.
+Then connect a new `Typed` plugin with `RDF Type URI` `http://dbpedia.org/ontology/City`.
 
 ![Typed Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_typed.png)
 
-Continue with a `Projection` plugin with `PropertyURIs` `http://dbpedia.org/ontology/populationTotal`.
+Continue with a `Projection` plugin with `Property URIs` `http://dbpedia.org/ontology/populationTotal`.
 
 ![Projection Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_projection.png)
 
@@ -365,7 +391,7 @@ And a `Selection` plugin with `PropertyURI` `http://dbpedia.org/ontology/populat
 
 And that's it: your first analysis. Now let's fetch countries of the cities as well.
 
-Add a one more `DBPedia.org` data source and connect a `Typed` plugin with `http://dbpedia.org/ontology/Country` `Type URI` parameter and a `Projection` plugin with `http://dbpedia.org/ontology/areaTotal` `Property URIs` parameter as seen on the picture below.
+Add a one more `DBPedia.org` data source and connect a `Typed` plugin with `http://dbpedia.org/ontology/Country` `RDF Type URI` parameter and a `Projection` plugin with `http://dbpedia.org/ontology/areaTotal` `Property URIs` parameter as seen on the picture below.
 
 ![Two Branches](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/two_branches.png)
 
