@@ -7,8 +7,8 @@ analyses: Seq[cz.payola.domain.entities.Analysis], dataSources: Seq[cz.payola.do
 <div class="container">
 
     @if(user.isDefined && (user.get.id == owner.id)){
-    <div class="row-fluid well">
-        <a href="@routes.Profile.edit()" class="btn btn-primary span3"><i class="icon-white icon-pencil"></i> Edit profile</a>
+    <div class="row-fluid profile-edit-div">
+        <a href="@routes.Profile.edit()" class="btn btn-primary input pull-right"><i class="icon-white icon-pencil"></i> Edit profile</a>
     </div>
     }
 

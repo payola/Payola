@@ -9,7 +9,7 @@ import cz.payola.common.rdf._
 import scala.collection.mutable
 import cz.payola.web.client.views.elements._
 import cz.payola.common.entities.settings.OntologyCustomization
-import s2js.adapters.browser._
+import s2js.adapters.html
 
 /**
  * Graphical representation of IdentifiedVertex object in the drawn graph.
@@ -31,6 +31,8 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var r
     var glyph: String = ""
 
     private var glyphSpan: Option[Span] = None
+
+    private var glyphRendered = false
 
     /**
      * Neighbouring literal vertices of this vertex describing attributes of this vertex.
@@ -120,7 +122,6 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var r
 
     /**
      * Sets count of parent graph update cycles.
-     * @param newAge
      */
     def setCurrentAge(newAge: Int) {
         age = newAge
@@ -154,8 +155,16 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var r
         color = newColor.getOrElse(new Color(51, 204, 255, 0.25))
     }
 
+    def render(parent: html.Element) {
+        glyphSpan.foreach{ gS =>
+            gS.render(parent)
+            gS.hide()
+        }
+    }
+
     def destroy() {
         glyphSpan.foreach(_.destroy())
+        glyphRendered = false
     }
 
     def setGlyph(newGlyph: Option[String]) {
@@ -172,7 +181,6 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var r
             }
 
             glyphSpan = Some(new Span(List(new Text(glyph)), "glyphed-element"))
-            glyphSpan.get.render(document.body)
         }
     }
 
@@ -235,11 +243,9 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var r
                 val halfSize = math.max(glyphSpan.get.htmlElement.getBoundingClientRect.height,
                     glyphSpan.get.htmlElement.getBoundingClientRect.width) / 2
 
-                val left = position.x + context.canvas.getBoundingClientRect.left + context.canvas.offsetLeft +
-                    positionCorrection.x - halfSize
+                val left = position.x + positionCorrection.x - halfSize
 
-                val top = position.y + context.canvas.getBoundingClientRect.top + context.canvas.offsetTop +
-                    positionCorrection.y - halfSize
+                val top = position.y + positionCorrection.y - halfSize
 
                 glyphSpan.get.setAttribute("style",
                     "left: "+left.toString+"px; top: "+top.toString+

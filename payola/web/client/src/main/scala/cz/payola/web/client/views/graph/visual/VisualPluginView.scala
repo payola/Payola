@@ -234,8 +234,9 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
     override def updateOntologyCustomization(newCustomization: Option[OntologyCustomization]) {
         currentCustomization = newCustomization
 
-        if (graphView.isDefined) {
-            graphView.get.setConfiguration(newCustomization)
+        graphView.foreach{gV =>
+            gV.setConfiguration(newCustomization)
+            _parentHtmlElement.foreach(gV.render(_))
         }
 
         redraw()
@@ -285,6 +286,10 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
                     graphView = Some(new views.graph.visual.graph.GraphView)
                 }
                 graphView.get.update(graph.get, topLayer.getCenter)
+                graphView.foreach{gV =>
+                    gV.setConfiguration(currentCustomization)
+                    _parentHtmlElement.foreach(gV.render(_))
+                }
             } else {
                 if (graphView.isDefined) {
                     layerPack.getLayers.foreach(_.clear())
@@ -296,8 +301,6 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
                 }
             }
         }
-
-        super.updateGraph(graph)
     }
 
     override def renderControls(toolbar: html.Element) {

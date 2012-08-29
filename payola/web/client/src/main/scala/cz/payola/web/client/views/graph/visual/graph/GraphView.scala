@@ -5,7 +5,7 @@ import cz.payola.common.rdf._
 import cz.payola.web.client.views.graph.visual._
 import cz.payola.web.client.views.algebra._
 import cz.payola.common.entities.settings.OntologyCustomization
-import s2js.adapters.browser.window
+import s2js.adapters.html
 
 /**
  * Graphical representation of a Graph object.
@@ -23,8 +23,12 @@ class GraphView extends View[CanvasPack] {
      */
     var components = ListBuffer[Component]()
 
+    def render(parent: html.Element) {
+        getAllVertices.foreach(_.render(parent))
+    }
+
     def destroy() {
-        getAllVertices.foreach{ _.destroy() }
+        getAllVertices.foreach(_.destroy())
     }
 
     def resetConfiguration() {
@@ -41,15 +45,13 @@ class GraphView extends View[CanvasPack] {
         components.find { component => !component.isSelected}.isEmpty
     }
 
-    //###################################################################################################################
-    //graph construction and update routines#############################################################################
-    //###################################################################################################################
-
     /**
       * Updates the represented graph. VertexViews with age value higher than vertexHighestAge are destryed, other
       * vertexViews have their age increased and vertices in the graph parameter are added to the graphView
       * representation. VertexViews that are already in the graphView are refreshed (their age is set to 0).
       * @param graph to update the current representation
+      * @param vertexInitPosition positions of newly created vertices
+      * @param newCustomization visualization settings
       */
     def update(graph: Graph, vertexInitPosition: Point2D) {
         if (graph == null) {
@@ -431,10 +433,6 @@ class GraphView extends View[CanvasPack] {
         }
     }
 
-    //###################################################################################################################
-    //selection and whatever routines####################################################################################
-    //###################################################################################################################
-
     /**
      * Searches the graphView for an vertexView which has the position inside of its graphical representation.
      * @param position to compare vertexViews' positions with
@@ -515,10 +513,6 @@ class GraphView extends View[CanvasPack] {
             component.deselectAll()
         }
     }
-
-    //###################################################################################################################
-    //drawing############################################################################################################
-    //###################################################################################################################
 
     def draw(canvasPack: CanvasPack, positionCorrection: Vector2D) {
 
@@ -663,10 +657,6 @@ class GraphView extends View[CanvasPack] {
         draw(canvasPack, Vector2D.Zero)
         //^because elements are drawn into separate layers, redraw(..) does not know to which context to draw
     }
-
-    //###################################################################################################################
-    //component together putters#########################################################################################
-    //###################################################################################################################
 
     /**
      * @return all vetexViews in this graphView

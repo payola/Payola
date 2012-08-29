@@ -1,8 +1,8 @@
-package cz.payola.web.shared
+package cz.payola.common
 
-import cz.payola.domain.rdf.Graph
+import cz.payola.common.rdf.Graph
 import scala.collection.immutable
-import cz.payola.domain.entities.plugins.PluginInstance
+import cz.payola.common.entities.plugins.PluginInstance
 
 /**
  * Result of an analysis evaluation.

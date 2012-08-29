@@ -149,4 +149,11 @@ class User(protected var _name: String)
         super[Entity].checkInvariants()
         super[NamedEntity].checkInvariants()
     }
+
+    override def email_=(value: String) {
+        val emailRegEx = "^[_a-z0-9-]+(\\.[_a-z0-9-]+)*@[a-z0-9-]+(\\.[a-z0-9-]+)*(\\.[a-z]{2,4})$"
+        validate(value.length == 0 || value.matches(emailRegEx), "email", "This is not valid email address.")
+
+        super.email = value
+    }
 }

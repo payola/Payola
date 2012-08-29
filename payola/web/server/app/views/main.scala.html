@@ -89,7 +89,7 @@
 
                             <p class="navbar-text pull-right">
                                 @if(user.isDefined){
-                                    Logged in as <a href="@routes.Profile.index(user.get.email)">@user.get.name</a>
+                                    Logged in as <a href="@routes.Profile.index(user.get.name)">@user.get.name</a>
                                     (<a href="@routes.Application.logout">Logout</a>)
                                 }else{
                                     <a href="@routes.Application.login">Login</a>
