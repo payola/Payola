@@ -48,7 +48,7 @@ object Application extends PayolaController with Secured
             val email = req("email")(0)
             val password = req("password")(0)
 
-            val userOpt = Payola.model.userModel.getByName(email)
+            val userOpt = Payola.model.userModel.getByEmail(email)
             if (userOpt.isEmpty){
                 Ok(views.html.application.reset_password(None)(new Flash(Map("error" -> "The email you've entered isn't associated with any user in our database."))))
             }else{
