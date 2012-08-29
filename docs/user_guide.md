@@ -122,6 +122,10 @@ Since Payola is a platform, you can build your own modules which you can integra
 - analytical plugins: They are modules that can be integrated into an analysis. They get a graph on input, transform it into another as they need and return another graph.
 - visual plugins: They receive a graph and visualise it by the implemented set of rules.
 
+### Data fetcher
+A data fecther is a subsystem, which is responsible for querying a data source for a data set. E.g, if you want to work with a set of data from the DBPedia, a data fecther will connect to the DBPedia SPARQL endpoint, query it with a SPARQL query and download the query result into the Payola for further proccessing.
+
+
 
 ## Basic usage
 
@@ -139,30 +143,35 @@ To sign up, fill in your email and password. The e-mail will be used as your use
 
 Payola will make sure that the provided e-mail address is not used already. If it is, you probably have an active account already. Otherwise, you will need to register using a different e-mail address.
 
+Currently, there is no integration with external authorization services in Payola.
+
 ![Sign Up](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/sign_up_credentials.png)
 
-You will be automatically logged in and redirected to your Dashboard. The dashboard is the initial page of the Payola website. You can see content shared to you on the dashboard, as well as the content you have created. Especially analyses and data sources. On the dashboard, there are only first 5 items of each list. If there are more to be displayed, the 'View all' button will appear to make you able to list them all.
+After signing up successfully, you will be automatically logged in and redirected to your Dashboard. The dashboard is the initial page of the Payola website. You can see content shared to you on the dashboard, as well as the content you have created. Especially analyses and data sources. On the dashboard, there are only first 5 items of each list. If there are more to be displayed, the 'View all' button will appear to make you able to list them all.
+
+By clicking the name of any of the displayed items, you will display its detail page.
+
+Those listings, which show data shared to you by another users contains the information about the user who shared the entity with you. On the sreenshot below, you can see two sections - 'Accessible analyses' and 'Accessible data sources'. These are the listings of entities shared to you. You can see, that all of those entities are shared by the 'admin@payola.cz' user.
 
 ![Logged In Dashboard](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/logged_in_dashboard.png)
 
-As a logged-in user, you can now create new data sources, analyses, plugins (you can actually write your own plugin, more about that [later](#plugins)), edit them and share them; and upload your own private RDF data. You can also view your personal page by clicking on your email in the top-right corner next to the log out link. Please, look into the menu to see all the possibilites.
+As a logged-in user, you can now create new data sources, analyses, plugins (you can actually write your own plugin, more about that [later](#plugins)), edit them and share them. You can also upload your own private RDF data (and share them later). You can also view your profile page by clicking on your email in the top-right corner next to the log out link. Please, look into the menu to see all the possibilites.
 
 ![User Page](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/user_page.png)
 
-If you forget your password, you can click on the `Forgot Password` link on the login page. Enter your email and a new password - you will be emailed with a confirmation link. When you click on it, the new password will be put into effect. Note that the confirmation link is valid for two hours only. As stated before, we don't store the original password, just its hash which cannot be decoded back. That's why we cannot send you the lost password.
+If you forget your password, you can click on the `Forgot Password` link on the login page. Enter your email and a new password - you will be emailed with a confirmation link. When you click on it, the new password will be put into effect. Note that the confirmation link is valid for **two hours only**. As stated before, we don't store the original password, just its hash which cannot be decoded back. That's why we cannot send you the lost password.
 
 ![Password Reset](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/forgot_password.png)
 
 <a name="data-source"></a>
 ### Data Sources
 
-A data source is - as its name hints - a source of data. In our case, RDF data. Payola needs to know where to get its data from for evaluating analyses, etc. - data sources. It is a way how to make Payola able to access your Linked data.
+A data source is - as its name hints - a source of data. Payola needs to know where to get its data from for evaluating analyses or visualisations. That's how you provide them:
 
-Since 
 
 #### Creating
 
-Let's start by creating a new data source. In the toolbar, click on the `My Data Sources` button and select `Create New`. You will need to enter a data source name and description and which data fetcher to use.
+Let's start by creating a new data source. In the toolbar, click on the `My Data Sources` button and select `Create New`. You will need to enter a data source name, a brief description and which 'data fetcher' to use.
 
 ![Creating a Data Source](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_data_source.png)
 
@@ -174,14 +183,14 @@ Currently, only two data fetchers are shipped with Payola:
 
 ##### SPARQL Endpoint
 
-Which can operate against any public [SPARQL endpoint](http://www.w3.org/wiki/SparqlEndpoints).
+The basich data fetcher, which can operate against any public [SPARQL endpoint](http://www.w3.org/wiki/SparqlEndpoints). It has the following parameters:
 
 - **Endpoint URL** - an absolute URL of a SPARQL endpoint - e.g. `http://dbpedia.org/sparql`. This endpoint URL must respond to a `?query=##SPARQL_query##` GET request.
 - **Graph URIs** - URIs of graphs that the queries should be performed on. If you leave the parameter empty, all graphs will be included.
 
 ##### Open Data Clean Storage
 
-This is currently an experimental plugin that communicates with the [Open Data Clean Store](http://sourceforge.net/projects/odcleanstore/) web service.
+This is currently an experimental plugin that communicates with an testing instance of the [Open Data Clean Store](http://sourceforge.net/projects/odcleanstore/) web service.
 
 - **Output Webservice URL** - URL of the output web service without trailing `/` - `/uri?format=trig&uri=##Vertex_URI##` is appended to the URL in order to fetcher the vertex neighborhood.
 - **Sparql Endpoint URL** - a SPARQL endpoint URL. The same rules apply as with the `Endpoint URL` parameter or the `SPARQL Endpoint` data fetcher.
@@ -198,15 +207,15 @@ The same steps to list and edit apply to any other entity in the system (analyse
 
 #### Viewing
 
-When on the Dashboard, or listing all available data sources, click on a data source to view it.
+When on the Dashboard, or listing all available data sources, click on a data source to view its details. In the case of a data source, you will switch into a browse mode, where you are able to explore the data stored in the data source.
 
 ![Loading Initial Vertex](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/loading_initial_vertex.png)
 
-You'll be presented with a neighborhood of an initial vertex.
+You'll be presented with a neighborhood of an initial vertex. What is an initial vertex depends on implementation of the underlying data fetcher. Those, which comes bundled with Payola just choose one random entity from the data source and use it as the starting point of the data source exploration.
 
 ![Initial Vertex](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/initial_vertex.png)
 
-Such a subgraph can be viewed in many ways. The default one, presented to you, is a simple table.
+The initial graph (neighborhood of the initial vertex) can be viewed in many ways. Payola comes bundled with several visualisation plugins. By default, a graph is visualised as a table of tripples. Each tripple represents a relation between two entities. This makes you able to quickly determine the contents of the graph as well as its size. Later, you can switch to a mode which renders a graph on your screen.
 
 You can navigate through the graph by following the vertex links in the table. Click on the 'server' icon in front of the link to view the vertex using a different data source.
 
@@ -222,7 +231,7 @@ You can, however, change the visualization plugin using the `Change visualizatio
 
 ![Select Table](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/select_table_no_result.png)
 
-`Circle`, `Gravity` and `Tree` visualizations will display a regular graph using vertices and edges and differ only in the way they lay out the vertices.
+`Circle`, `Gravity` and `Tree` visualizations will display a regular graph using vertices and edges and differ only in the way they lay out the vertices. Based on the size of operating memory and the speed of your CPU, the speed of the visualisations can differ a lot on different systems. That's why you can always skip some animations to speed the proccess up by clicking the 'Stop animation' button.
 
 > TODO - OK describe what can be done with a graph
 
@@ -242,7 +251,7 @@ While viewing a graph, press the `Change appearance using ontologies` button. If
 
 ![Create Ontology Customization](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_customization.png)
 
-Enter the customization name and URL of that ontology.
+Enter the customization name and URL of that ontology, e.g. [http://opendata.cz/pco/public-contracts.xml](http://opendata.cz/pco/public-contracts.xml).
 
 ![Create Ontology Customization Dialog](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_customization_dialog.png)
 
@@ -258,11 +267,13 @@ Or add a glyph to a vertex:
 
 ![Editing Customization - Glyph](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/customization_edit_glyph.png)
 
-When done, simply press the `Done` button. If you want to further modify the customization, click on the `Edit` button in the `Change appearance using ontologies` button's menu. Now select the ontology using the `Change appearance using ontologies` button.
+> This feature require your browser to support the FontFace standard.
+
+When done, just press the `Done` button. If you want to further modify the customization, click on the `Edit` button in the `Change appearance using ontologies` button's menu. Now select the ontology using the `Change appearance using ontologies` button.
 
 ![Select Ontology Customization](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/select_customization.png)
 
-Your graph will be redrawn according to the customization selected.
+Your graph will be redrawn automatically according to the customization selected/modified.
 
 ![Ontology Customization Graph](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/customization_graph.png)
 
@@ -320,6 +331,8 @@ Press the `Upload File` button. You will be redirected back to the same page aft
 ![Successful Upload](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/successful_upload.png)
 ![Upload Failed](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/upload_failed.png)
 
+If the upload fails, please, use the [RDF validator](http://www.w3.org/RDF/Validator/) to verify that your data is correct.
+
 ### Analyses
 
 Creating a new analysis is similar to creating any other resource - in the toolbar, select `Create New` from `My Analyses` button's menu. You will be prompted to enter a name - enter the analysis' name - you can change it later on.
@@ -330,7 +343,7 @@ You will be presented with a blank page with a control box in the top-left corne
 
 ![Create Analysis Page](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_page.png)
 
-First, you'll need a data source to start with. You can do so either using the `Add data source` button which will offer you available data sources, or `Add plugin` which lets you add a data fetcher - an anonymous data source (see [Data Source documentation](#data-source) for more information). This can be useful if you decide to use a data source that you don't want to save right away (e.g. you know you'll use it just once).
+First, you'll need a data source to start with. You can do so either using the `Add data source` button which will offer you available data sources (including those that are shared to you), or `Add plugin` which lets you add a data fetcher - an anonymous data source (see [Data Source documentation](#data-source) for more information). This can be useful if you decide to use a data source that you don't want to save right away (e.g. you know you'll use it just once).
 
 
 ![Create Analysis - Adding Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_adding_plugin.png)
@@ -339,7 +352,11 @@ First, you'll need a data source to start with. You can do so either using the `
 
 Now that you've added a data source, you need to do something with the data. Click on the `Add Connection` button on your data source box. Payola comes with pre-installed plugins, which are described one by one below. Of course, you can add your own plugin (see [section Plugins](#plugins)). Plugins are ordered in a sequence (though more branches can be created, see below) - a plugin always gets the result of the previous one as its input.
 
+If you are familiar with the architectional style 'pipe and filters', our analysis is an instace of the pattern. Each plugin represents a filter which alters the graph it gets on input and returns the resulting graph.
+
 ![Create Analysis - Connecting Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_connecting_plugin.png)
+
+> Be aware when editing a shared analysis. Currently, Payola does not lock your analysis or does not duplicate it while being edited. Therefore nobody is prevented from running an evaluation of such an analysis. Because of this fact, we strongly recommends you to stop sharing your analysis before editing it.
 
 #### Pre-installed Plugins
 
