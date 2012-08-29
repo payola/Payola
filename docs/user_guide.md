@@ -1,60 +1,87 @@
 <a name="top"></a>
 <a name="user"></a>
 
-# Payola!
----
-Payola is an HTML5 web application which lets you work with graph data in a completely new way. You can visualize [Linked Data](http://linkeddata.org/) using several preinstalled plugins as graphs, tables, etc. This also means, that you no longer need [Pubby](http://www4.wiwiss.fu-berlin.de/pubby/) to browse through a Linked Data storage (via its [SPARQL](http://www.w3.org/TR/rdf-sparql-query/) endpoint). Moreover, you can create an analysis and run it against a set of SPARQL endpoints without deep knowledge of SPARQL language itself. Analysis results are processed and visualized using the embedded visualization plugins.
+![Payola logo (credits Martin Mraz)](https://raw.github.com/siroky/Payola/develop/docs/img/logo_medium.png)
 
-![Payola logo (credits Martin Mraz)](https://raw.github.com/siroky/Payola/develop/docs/img/logo.png)
+Payola is a HTML5 web application which lets you work with graph data in a completely new way. You can display [Linked Data](http://linkeddata.org/) using several preinstalled visualization plugins as graphs, tables, etc. This also means, that you no longer need [Pubby](http://www4.wiwiss.fu-berlin.de/pubby/) to browse through a Linked Data storage (via its [SPARQL](http://www.w3.org/TR/rdf-sparql-query/) endpoint). Moreover, you can create an analysis and run it against a set of SPARQL endpoints without deep knowledge of SPARQL language itself. Analysis results are processed and visualized using the embedded visualization plugins.
 
-If you **do** know, what Linked Data means, you probably already have an idea, what Payola does. If you **do not**, read more. Let us give you a real-life example. You, as a person, have some friends. Let's suppose, you have a friend named John. Since you are friends, you have a connection. For a computer, one could introduce the following notation:
+## Linked Data
 
-```
-Me | is friend with | John
-```
-
-Which, in this example, also means:
+If you **do** know, what Linked Data means, you probably already have an idea, what Payola does, so you may skip the following section. If you **do not**, let us give you a real-life example. People have their profiles on social networks and they can mark other people as their friends. To store information like this in a machine-readable format, a notation has to be introduced. For example purposes, suppose there is the following notation:
 
 ```
-John | is friend with | Me
+Bob | is friend with | Alice
 ```
-Actually, this is almost a Linked Data [Turtle](http://www.w3.org/TeamSubmission/turtle/) notation. It describes relations (e.g. friendship) between entities (you and John). What we do is that we analyze those relations and visualize them. As an example of such a visualization, see the following picture, which is a sample visualization of an analysis of relations on social networks for a particular person.
+
+Because there are many Bobs and many Alices, each person (generally speaking entity) must have an unique identifier assigned so we don't confuse one Bob for another. The [URI](http://cs.wikipedia.org/wiki/Uniform_Resource_Identifier) serves this purpose pretty well. So we have to alter the previous example to:
+
+```
+http://facebook.com/Bob | is friend with | http://facebook.com/Alice
+```
+
+If you think about it, almost everything can be expressed using this notation, because generally speaking, every fact can be expressed as:
+
+```
+Entity | Relation | Value
+```
+
+For example:
+
+```
+http://facebook.com/Bob | has full name | Bob Doe
+http://facebook.com/Bob | was born | 1980
+http://facebook.com/Bob | is friend with | http://facebook.com/Alice
+http://facebook.com/Bob | is friend with | http://facebook.com/Tom
+```
+
+The uniqueness problem arises even with the relations, because friendship on a social network can be smething different from real-life friendship. So the relations are assigned unique identifiers as well. That turns the first example into:
+
+```
+http://facebook.com/Bob | http://facebook.com/relations/friendship | http://facebook.com/Alice
+```
+
+Actually, this is almost a [Turtle](http://www.w3.org/TeamSubmission/turtle/) notation, which is one of many [RDF model](http://www.w3.org/RDF/) notations. The RDF is a standard which specifies what the entities, relations and values may be.
+
+Having this context in mind, we provide a tool that makes it easy to analyze sets of facts (usually stored in a database) and visualize them. As an example of such a visualization, see the following picture, which is a sample visualization of an analysis of relations on social networks for a particular person.
 
 TODO JH - masek data image
 
 For a more complex and sophisticated description of Linked Data, please visit the following [website](http://linkeddata.org/).
 
-Of course, our software is capable of performing analyses on a bit more complicated data. Actually, the first impulse to write such a tool was to come up with a tool which makes the user capable of building analyses which could help him or her to target people involved in corruption.
+## Motivation
+
+Of course, our software is capable of performing analyses on bit more complicated data. Actually, the first impulse to write such a tool was to come up with an application which makes the user capable of building analyses which could help him or her to target people involved in corruption.
 
 > And is it?
 > 
 > In general, yes, it is. But at the time of writing, machine processing of related data is in a conflict with the privacy laws in our country. So nobody is going to build such an analysis.
-<!---->
+
 > So that's why the project's name is Payola?
 > 
 > Yes. We've just inspired ourselves in a dictionary:
-
+>
 > **Payola: the practice of bribing someone in return for the unofficial promotion of a product in the media: if a record company spends enough money on payola, it can make any record a hit**
 
-The main goal is to come up with a prototype of a Linked Data tool for common users. To make them able to work with [RDF](http://www.w3.org/RDF/) data, explore them, analyze them, and to integrate into [OpenData.cz transparent data infrastructure](http://opendata.cz/) which is being developed mostly on the [Faculty of Mathematics and Physics, Charles University](http://www.mff.cuni.cz/). We would also like to make it into the [LOD2](http://lod2.eu/Welcome.html) technology stack, which is, by the way, one of the reasons, why we've chosen the Scala programming language.
-
-Since Payola is rather a platform (or kind of framework, if you want), not a closed project, you can fork the project and write your own plugins, extensions and more on [https://github.com/siroky/Payola](https://github.com/siroky/Payola).
-
-##Why Payola?
 During our studies on the University, we've met several tools for working with Linked Data. Many of them are really useful, but it is rather hard to work with them. Especially if you want to process some data and visualise them. You need to install and configure several tools. Morever, those tools work separately, so you need to get an RDF file from each of them and put it into the next one. Some of them are on the web, some of them works under Linux, some of them on Windows.
 
 We wanted to bring a single tool which will be able to do it all. We also wanted to make a web application which is, we think, a new synonymum for platform-independent software. That's also why we take advantage of the new HTML5 standard and avoid using Flash platform.
 
 We also wanted to present a tool which will be capable of sharing the RDF data between its users, visualisations included. Nowadays, if you share an RDF visualisation to somebody, you probably share a screenshot with him. If it is a result of an analysis, it changes over a time, but the screenshot does not. With Payola, you don't share a static visualisation, you share the right to create the visualisation whenever the user want. And he gets the most current results.
 
-###Am I interested in Payola?
-If you work with RDF data, yes, you are. 
+The main goal was to come up with a prototype of a Linked Data tool for common users. To make them able to work with [RDF](http://www.w3.org/RDF/) data, explore them, analyze them, and to integrate into [OpenData.cz transparent data infrastructure](http://opendata.cz/) which is being developed mostly on the [Faculty of Mathematics and Physics, Charles University](http://www.mff.cuni.cz/). We would also like to make it into the [LOD2](http://lod2.eu/Welcome.html) technology stack, which is, by the way, one of the reasons, why we've chosen the Scala programming language.
 
-If you just work with RDF data - we will help to access you data sources, browse through them, analyze the data and visualise them. We've tried to minimize the need to learn the SPARQL language to work with SPARQL data.
+Since Payola is rather a platform (or kind of framework, if you want), not a closed project, more advanced users may write their own analytical plugins and incorporate them into their analyses. You can also fork the project on [https://github.com/siroky/Payola](https://github.com/siroky/Payola) and easily integrate your own visualization methods, extensions and more.
+
+### Should you be interested in Payola?
+
+If you work with RDF data, yes, you should. 
+
+If you just work with RDF data - we will help to access you data sources, browse through them, analyze the data and visualise them. We've tried to minimize the need to learn the SPARQL language to work with linked data.
 
 If you are a developer, you can also contribute your own analytical plugin and share it with the users of your Payola installation. You can also come up with your own visualisation plugin and compile your own version of Payola.
 
-###What are the most common use cases?
+### What are the most common use cases?
+
 Until now, we have thought and discussed the following use cases:
 
 - private tool to work with RDF data
@@ -64,7 +91,8 @@ Until now, we have thought and discussed the following use cases:
 
 In companies, Payola will probably have many non-technical users and a developer who will write new plugins and administer the application.
 
-#Related Work
+## Related Work
+
 - http://www.visualdataweb.org/relfinder.php
 - http://catalogus-professorum.org/graphicalquerybuilder
 - http://data.gov.uk/linked-data
