@@ -38,8 +38,7 @@ object Profile extends PayolaController with Secured
                 }
             }) verifying("E-mail already taken", _ match {
                 case (email, oldpassword, password) => {
-                    (!email.isEmpty)
-                    && (email == user.email || Payola.model.userModel.getByEmail(email).isEmpty)
+                    (!email.isEmpty) && (email == user.email || Payola.model.userModel.getByEmail(email).isEmpty)
                 }
             })
         )

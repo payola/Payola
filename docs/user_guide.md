@@ -141,7 +141,7 @@ Payola will make sure that the provided e-mail address is not used already. If i
 
 ![Sign Up](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/sign_up_credentials.png)
 
-You will be automatically logged in and redirected to your Dashboard. The dashboard is the initial page of the Payola website. You can see content shared to you on the dashboard, as well as the content you created. Especially analyses and data sources. On the dashboard, there are only first 5 items of each list. If there are more to be displayed, the 'View all' button will appear.
+You will be automatically logged in and redirected to your Dashboard. The dashboard is the initial page of the Payola website. You can see content shared to you on the dashboard, as well as the content you have created. Especially analyses and data sources. On the dashboard, there are only first 5 items of each list. If there are more to be displayed, the 'View all' button will appear to make you able to list them all.
 
 ![Logged In Dashboard](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/logged_in_dashboard.png)
 
