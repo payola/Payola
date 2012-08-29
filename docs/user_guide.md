@@ -3,7 +3,7 @@
 
 ![Payola logo (credits Martin Mraz)](https://raw.github.com/siroky/Payola/develop/docs/img/logo_medium.png)
 
-Payola is a HTML5 web application which lets you work with graph data in a completely new way. You can display [Linked Data](http://linkeddata.org/) using several preinstalled visualization plugins as graphs, tables, etc. This also means, that you no longer need [Pubby](http://www4.wiwiss.fu-berlin.de/pubby/) to browse through a Linked Data storage (via its [SPARQL](http://www.w3.org/TR/rdf-sparql-query/) endpoint). Moreover, you can create an analysis and run it against a set of SPARQL endpoints without deep knowledge of SPARQL language itself. Analysis results are processed and visualized using the embedded visualization plugins.
+Payola is a HTML5 web application which lets you work with graph data in a completely new way. You can display [Linked Data](http://linkeddata.org/) using several preinstalled visualization plugins as graphs, tables, etc. This also means, that you no longer need [Pubby](http://www4.wiwiss.fu-berlin.de/pubby/) to browse through a Linked Data storage (via its [SPARQL](http://www.w3.org/TR/rdf-sparql-query/) endpoint). Moreover, you can create an analysis and run it against a set of SPARQL endpoints without deep knowledge of the SPARQL language itself. Analysis results are processed and visualized using the embedded visualization plugins.
 
 ## Linked Data
 
@@ -44,7 +44,7 @@ Actually, this is almost a [Turtle](http://www.w3.org/TeamSubmission/turtle/) no
 
 Having this context in mind, we provide a tool that makes it easy to analyze sets of facts (usually stored in a database) and visualize them. As an example of such a visualization, see the following picture, which is a sample visualization of an analysis of relations on social networks for a particular person.
 
-TODO JH - masek data image
+TODO JH - data image
 
 For a more complex and sophisticated description of Linked Data, please visit the following [website](http://linkeddata.org/).
 
@@ -99,34 +99,34 @@ In companies, Payola will probably have many non-technical users and a developer
 
 ## Basic usage
 
-You can use Payola both as a guest and a logged-in user. A guest is limited to analyses and data sources marked as public by other users and only in a read-only mode (i.e. can't edit them).
+You can use Payola both as a guest and a logged-in user. A guest is limited to view analyses and data sources marked as public by teh other users and only in a read-only mode (i.e. can't edit them). This make it easier for companies to use Payola in two different modes at a time. In the first one, they internally share data and analyses and control the access to such data. The second mode makes it easy to share any analysis of datasource to the public in a single click.
 
 ![Guest Dashboard](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/guest_dashboard.png)
 
-Follow the `Log In` link in the top-right corner of the page. If you have already signed up, simply fill in your email and password and press Log In. Otherwise, click `Sign Up`.
+To log in, please, follow the `Log In` link in the top-right corner of the page. If you have already signed up, simply fill in your email and password and press the `Log In` button. Otherwise, click `Sign Up` to create a new profile.
 
 ![Sign In](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/sign_in.png)
 
-To sign up, fill in your email and password.
+To sign up, fill in your email and password. The e-mail will be used as your username, as well as the contact e-mail. We will use this e-mail address to reset your password, if neccessary. We don't store the password itself, just its hash. Therefore, we will **never** send you your password in a plaintext. That's also the reason why we cannot tell you your password if you accidentaly forget it. We just don't know, what the password is.
 
 ![Sign Up](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/sign_up_credentials.png)
 
-You will be automatically logged in and redirected to your Dashboard.
+You will be automatically logged in and redirected to your Dashboard. The dashboard is the initial page of the Payola website. You can see content shared to you on the dashboard, as well as the content you created. Especially analyses and data sources. On the dashboard, there are only first 5 items of each list. If there are more to be displayed, the 'View all' button will appear.
 
 ![Logged In Dashboard](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/logged_in_dashboard.png)
 
-As a logged-in user, you can now create new data sources, analyses, plugins (you can actually write your own plugin, more about that [later](#plugins)), edit them and share them; and upload your own private RDF data. You can also view your personal page by clicking on your email in the top-right corner next to the log out link.
+As a logged-in user, you can now create new data sources, analyses, plugins (you can actually write your own plugin, more about that [later](#plugins)), edit them and share them; and upload your own private RDF data. You can also view your personal page by clicking on your email in the top-right corner next to the log out link. Please, look into the menu to see all the possibilites.
 
 ![User Page](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/user_page.png)
 
-If you forget your password, you can click on the `Forgot Password` link on the login page. Enter your email and a new password - you will be emailed with a confirmation link. When you click on it, the new password will be put into effect. Note that the confirmation link is valid for two hours only.
+If you forget your password, you can click on the `Forgot Password` link on the login page. Enter your email and a new password - you will be emailed with a confirmation link. When you click on it, the new password will be put into effect. Note that the confirmation link is valid for two hours only. As stated before, we don't store the original password, just its hash which cannot be decoded back. That's why we cannot send you the lost password.
 
 ![Password Reset](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/forgot_password.png)
 
 <a name="data-source"></a>
 ### Data Sources
 
-A data source is - as its name hints - a source of data. Payola needs to know where to get its data from for evaluating analyses, etc. - data sources.
+A data source is - as its name hints - a source of data. In our case, RDF data. Payola needs to know where to get its data from for evaluating analyses, etc. - data sources. It is a way how to make Payola able to access your Linked data.
 
 #### Creating
 
