@@ -48,31 +48,33 @@ class Join(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]
       *                there exists a vertex O in the second graph such that there exists an edge in the first graph
       *                with the specified URI connecting S and O) or outer (all vertices from the first graph are
       *                included in the result, but only those edges, that satisfy the condition of inner join mentioned
-     *                 above are included).
+      *                above are included).
       * @return The joined graph.
       */
     private def joinGraphs(graph1: Graph, graph2: Graph, propertyURI: String, isInner: Boolean): Graph = {
-        val resultVertices = new mutable.ListBuffer[Vertex]()
-        val resultEdges = new mutable.ListBuffer[Edge]()
+        val resultVertices = mutable.HashMap.empty[IdentifiedVertex, IdentifiedVertex]
+        val resultEdges = mutable.HashSet.empty[Edge]
+        def getOrElseInsertResultVertex(vertex: IdentifiedVertex) = resultVertices.getOrElseUpdate(vertex, vertex)
 
-        val edges = graph1.edges.filter(_.uri == propertyURI)
-        edges.foreach { e: Edge =>
-            if (graph2.vertices.contains(e.origin)) {
-                if (!resultVertices.contains(e.origin)) {
-                    resultVertices += e.origin
+        graph1.edges.filter(_.uri == propertyURI).foreach { e =>
+            if (graph2.vertices.contains(e.destination)) {
+                e.destination match {
+                    case i: IdentifiedVertex => {
+                        val origin = getOrElseInsertResultVertex(e.origin)
+                        val destination = getOrElseInsertResultVertex(i)
+                        val resultEdge = new Edge(origin, destination, e.uri)
+                        if (!resultEdges.contains(resultEdge)) {
+                            resultEdges += resultEdge
+                        }
+                    }
+                    case _ => // The destination isn't an identified vertex, therefore it's not joined.
                 }
-                if (!resultVertices.contains(e.destination)) {
-                    resultVertices += e.destination
-                }
-                resultEdges += e
             } else if (!isInner) {
-                if (!resultVertices.contains(e.origin)) {
-                    resultVertices += e.origin
-                }
+                getOrElseInsertResultVertex(e.origin)
             }
         }
 
-        new Graph(resultVertices.toList, resultEdges.toList)
+        new Graph(resultVertices.keys.toList, resultEdges.toList)
     }
 }
 
