@@ -372,16 +372,13 @@ Union simply merges two graphs together as one would expect. Vertices with the s
 
 The join plugin can be a little bit tricky. If the joined branches consist of `Typed`, `Selection` and `Projection` plugins and the data are fetched from identical data fetchers (same type and parameter values), then then an analysis optimization is performed. Both branches and the join plugin are treated as one data fetcher which is connected to a SPARQL query plugin. So the join actually behaves similarly to a relational database join - the first branch selects enitites, which are related to entities specified by the second branch (in case of inner join). In case of outer join, all entities of the first branch are selected, even though they aren't related to any entity from the second branch.
 
-On the other hand, if the two joined branches are unrelated, so an optimization cannot be performed, the join behaves differently:
-
-In case of an inner join, only edges from the first graph with URI defined in the `Property URI` parameter are included. Also, the destination of the edge must be present in the second graph. Otherwise, the edge is omitted.
+On the other hand, if the two joined branches are unrelated, so an optimization cannot be performed, the join behaves differently. In case of an inner join, only edges from the first graph with URI defined in the `Property URI` parameter are included. Also, the destination of the edge must be present in the second graph. Otherwise, the edge is omitted.
 
 > *Example:*
-> **Graph A**
-> `payola.cz/dog - payola.cz/barks-at - payola.cz/tree`
 >
-> **Graph B**
-> `payola.cz/wolf - payola.cz/evolved-to - payola.cz/dog` 
+> **Graph A**: `payola.cz/dog - payola.cz/barks-at - payola.cz/tree`
+>
+> **Graph B**: `payola.cz/wolf - payola.cz/evolved-to - payola.cz/dog` 
 >
 > If graph A is joined with graph B using the `payola.cz/barks-at` property, an empty graph is returned because `payola.cz/tree` isn't a vertex in the graph B.
 >
@@ -418,7 +415,7 @@ Add a one more `DBPedia.org` data source and connect a `Typed` plugin with `http
 
 ![Two Branches](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/two_branches.png)
 
-Click on the `Merge Branches` link and select `Join`. Place the branches on the input wells as seen below.
+Click on the `Merge Branches` link and select `Join`. Place the branches on the input boxes as seen below.
 
 ![Create Analysis - Merging](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/sample_analysis_merging.png)
 
@@ -436,7 +433,7 @@ Either on your dashboard, or on analyses listing, click on an analysis to displa
 
 As some analyses can take a really long time to finish (some may be theoretically infinite), there's a timeout field in the top-right corner as well as a `Stop` button. By default, an analysis times out in 30 seconds. If you find it's too short time to evaluate your analysis, change it to a higher value.
 
-Now press the `Run Analysis` button. The wells of plugins which are being evaluated will turn yellow (if the analysis is being executed in one single step, you will be switched right to the results).
+Now press the `Run Analysis` button. The boxes of plugins which are being evaluated will turn yellow (if the analysis is being executed in one single step, you will be switched right to the results).
 
 ![Running Analysis](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/analysis_running.png)
 
