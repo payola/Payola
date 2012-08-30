@@ -3,7 +3,7 @@
 
 # Developer Guide
 
-The Payola application consists of several layers and libraries that are all enclosed within a solution project `payola`. The following sections describe structure of the solution, the functionality hidden within the layers and libraries and their relations. For information how to install, compile and run the Payola, please refer to the [Installation Manual](https://raw.github.com/siroky/Payola/develop/docs/installation_manual.md).
+The Payola application consists of several layers and libraries that are all enclosed within a solution project `payola`. The following sections describe structure of the solution, the functionality hidden within the layers and libraries and their relations. For information how to install, compile and run the Payola, please refer to the [Installation Guide](https://raw.github.com/siroky/Payola/develop/docs/installation_guide.md).
 
 ## Solution structure
 
@@ -75,7 +75,7 @@ The serialization process has to deal with a few obstacles, such as cyclic objec
 	- *Arrays*: Regular array (i.e. `scala.Array`) is translated directly to a JSON array without any wrapper.
 - **Fields**: As the Scala language doesn't have its own reflection API yet, [Java reflection API](http://docs.oracle.com/javase/tutorial/reflect/index.html) has to be used. This presents several problems regarding retrieving the object fields: some fields in Scala are translated into methods - a getter with no parameters and a setter with one parameter, in case it's a `var` field. The serializer must therefore look for fields even within methods when looking for a field of a particular name. Also, when requesting fields on an object, an empty array is returned - only declared fields get listed, so the serializer must go through the whole class hierarchy itself, listing fields of all interfaces and superclasses.
 
-> Example: Assume this code:
+> Assume this code:
 >```scala
 class Class1 {
     val map = Map("my key" -> "my value", "key2" -> "value")
@@ -85,13 +85,13 @@ class Class1 {
 val o = new Class1
 o.obj = o
 ```
->It will be translated to:
+> The object `o` will be serialized to:
 >```js
 {
 	"__class__": "cz.payola.scala2json.test.Class1",
 	"__objectID__": 0,
 	"map": {
-		"__class__": scala.collection.immutable.Map$Map2,
+		"__class__": "scala.collection.immutable.Map$Map2",
 		"__value__": {
 			"my key": "my value",
 			"key2": "value"
@@ -109,9 +109,9 @@ o.obj = o
 }
 ```
 
-For some purposes, customizing the serialization process is necessary - it has proven useful to skip or add some fields of the object, etc. - this lead to serialization rules. For example, you might want to hide an implementation detail that a class' private fields are prefixed with an underscore (`_`) - it is possible to do so simply by adding a new `BasicSerializationRule`, where you can define a class (or trait) whose fields should be serialized (e.g. you want to serialize only fields of a common superclass, ignoring fields of subclasses), a list of fields that should be omitted (transient fields) and a list of field name aliases (a map of string &rarr; string translations).
+For some purposes, customizing the serialization process is necessary - it has proven useful to skip or add some fields of the object, etc. - this leads to serialization rules. For example, you might want to hide an implementation detail that a class' private fields are prefixed with an underscore (`_`) - it is possible to do so simply by adding a new `BasicSerializationRule`, where you can define a class (or trait) whose fields should be serialized (e.g. you want to serialize only fields of a common superclass, ignoring fields of subclasses), a list of fields that should be omitted (transient fields) and a list of field name aliases (a map of string &rarr; string translations).
 
-The rules are applied in the same order as they are added to the serializer. You can explore additional serialization rules in generated documentation.
+The rules are applied in the same order as they are added to the serializer. You can explore additional serialization rules in the generated API documentation.
 
 <a name="s2js"></a>
 ## Project payola/s2js
@@ -122,6 +122,7 @@ In order to implement the whole application in one language and to avoid code du
 - [http://scalagwt.github.com/](http://scalagwt.github.com/)
 - [https://github.com/efleming969/scalosure](https://github.com/efleming969/scalosure)
 
+The first two unfortunately didn't match our needs, mostly because they're still in a development phase and could be marked experimental. The build process of Scala+GWT seemed to be integrable into our build system only with huge difficulties and complexity of the tool (e.g. the compilation process) discouraged us from potential modifications of our own. The third one, Scalosure, successor of the s2js, appealed to us the most thanks to its integration of [Google Closure Library](http://closure-library.googlecode.com/svn/docs/index.html) and relative lightweightness. Abandoned development of the Scalosure, however, was definitely disadvantage number one.
 
 We have commenced with Scalosure, but rather sooner than later, we got to a point where we had to modify and extend the tool itself. As we dug deeper and deeper into the Scalosure, we started to dislike its implementation. Having in mind that the core of Scalosure was just about 1000 LOC (including many duplicities), we have decided to start fresh and implement our own tool, heavily inspired by Scalosure.
 
@@ -156,7 +157,7 @@ The previous two classes are utility classes, that don't participate in the comp
 
 Purpose of this class is to compile the `PackageDef` AST nodes (representation of a package and all its content within a file) into JavaScript. Because the plugin compiler input AST is always a `PackageDef` node, the class is used as an entry point to the compilation process. 
 
-> *Note*: The `ClassDef` is a type an AST node, that defines a class, a trait, an object or a package object.
+> **Note**: The `ClassDef` is a type of an AST node, that defines a class, a trait, an object or a package object.
 
 The compilation algorithm works basically in the following way:
 
@@ -171,7 +172,7 @@ Moreover, the `PackageDefCompiler` defines additional public service methods (e.
 
 Tracks all kinds of so-called dependencies among symbols that are declared inside a `PackageDef` node:
 
-- *ClassDef dependency graph*: Dependencies among `ClassDef`s among the current compilation unit (`ClassDef` `A` depends on `ClassDef` `B` if `A` extends or mixins `B`). The graph is used to determine an order of the class compilation. 
+- *ClassDef dependency graph*: Dependencies among `ClassDef`s within the current compilation unit (`ClassDef` `A` depends on `ClassDef` `B` if `A` extends or mixins `B`). The graph is used to determine an order of the class compilation. 
 - *Inter-file dependencies*
 	- *Provided symbols*: The `ClassDef`s that the current compilation unit provides (i.e. the API). Some other compilation units may require them.
 	- *Declaration-required symbols*: The `ClassDef`s that have to be declared in the generated JavaScript before the `ClassDef`s from the current compilation unit are declared.
@@ -238,7 +239,7 @@ An object or class marked with this annotation isn't compiled to JavaScript.
 <a name="s2js_rpc"></a>
 ###### RPC (Remote Procedure Call)
 
-In order to simplify the client-server communication and to hide the low-level JavaScript constructs necessary for it (`XmlHttpRequest` or `ActiveXObject`) from the programmer, an [RPC mechanism](http://en.wikipedia.org/wiki/Remote_procedure_call) is used. The compiler takes a small but irreplaceable part in the whole process, the rest is done in the [server-side runtime](#runtime-server) and [client-side runtime](#runtime-client). 
+In order to simplify the client-server communication and to hide the low-level JavaScript constructs necessary for it (`XmlHttpRequest` or `ActiveXObject`) from the programmer, an [RPC mechanism](http://en.wikipedia.org/wiki/Remote_procedure_call) is used. The compiler takes a small but irreplaceable part in the whole process, the rest is done in the [shared runtime](#runtime-shared) and [client-side runtime](#runtime-client). 
 
 All methods that are marked with the `@remote` annotation or defined on an object with the `@remote` annotation are considered RPC methods (remote methods), so their invocations are compiled to JavaScript in a different way. Remote methods may also be marked with the `@async` annotation, which makes them behave asynchronously, but introduces additional constraints on them (i.e. they must have the success callback function and fail callback function parameters and Unit return type). The compilation of a remote method invocation can be seen in the following example:
 
@@ -335,9 +336,9 @@ Selected HTML related interfaces and elements (`Document`, `Anchor`, `Canvas` et
 Adapters of web browser related objects (`Window`, `History` etc.), based on the 'Browser Objects' section of the [JavaSript and HTML DOM Reference](http://www.w3schools.com/jsref/default.asp) and also on the same resources as the `s2js.adapters.html` package.
 
 <a name="runtime"></a>
-### Project payola/s2js/runtime
+### Package s2js.runtime
 
-Unlike the compiler and adapters which are used during compile time, the runtime project defines classes and object that are necessary during runtime of an s2js application. There are actually two kinds of runtime: the client-side runtime and the server side runtime. Subprojects of the runtime project correspond to this separation.
+Unlike the compiler and adapters which are used during compile time, the runtime project defines classes and object that are necessary during runtime of an s2js application. There are actually two kinds of runtime: the client-side runtime and the shared runtime, whose code can be executed both on the server side and on the client side. Subprojects of the runtime project correspond to this separation.
 
 <a name="runtime-client"></a>
 #### Package s2js.runtime.client
@@ -372,7 +373,7 @@ Rather than describing classes in this package one by one, an example RPC call w
 
 1. From the runtime point of view, it starts with a call on the `Wrapper` object like this: `s2js.runtime.client.rpc.Wrapper.callSync('remote.foo', [123], ['scala.Int']);`
 2. The `Wrapper` processes the parameters and creates a `XmlHttpRequest`.
-3. The request body is filled with the method name and parameters and the request is sent to the [RPC controller](#TODO) on the server.
+3. The request body is filled with the method name and parameters and the request is sent to the [RPC controller](#server) on the server.
 4. The RPC controller processes the request and returns the result serialized using the [scala2json](#scala2json).
 5. If an error occurs, an `RpcException` is thrown. Otherwise the result is deserialized with the `Deserializer`:
 	1. The JSON string is transformed to an object using the `eval` function.

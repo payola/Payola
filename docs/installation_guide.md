@@ -1,6 +1,6 @@
 <a name="top"></a>
 
-# Payola Installation Guide
+# Installation Guide
 
 ## System Requirements
 
