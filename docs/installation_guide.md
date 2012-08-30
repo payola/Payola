@@ -14,8 +14,8 @@ To work with Payola, a web browser capable of displaying HTML5 web pages is requ
 
 First of all, clone the Payola git repository: `git://github.com/siroky/Payola.git` to a local folder.
 
-### <a name="configuration"></a>
-Configuration 
+<a name="configuration"></a>
+### Configuration 
 
 Payola comes pre-configured to work with default settings of a Virtuoso server and an H2 database installed on the same server as Payola is running (i.e. localhost). To change this configuration, edit `payola/web/shared/src/main/resources/payola.conf` - it’s a regular text file with various key-value options separated by an equal sign (`=`) on each line. Comment lines start with a hash symbol (`#`).
 
@@ -69,10 +69,10 @@ Payola comes pre-configured to work with default settings of a Virtuoso server a
 
 `plugin.directory` - where to store plugins uploaded by users
 
-> **Payola will not start Virtuoso or H2 on its own. You need to configure it and run by yourself.**
-
 <a name="compiling"></a>
 ### Compiling and Running Payola
+
+> **Payola will not start Virtuoso or H2 on its own. You need to configure them and run them by yourself.**
 
 As the cloned repository contains just source code, it is necessary to compile Payola in order to run it. Open a command line (console, terminal) and make `payola` subdirectory the current working directory (e.g. by `cd payola`). Launch SBT (using the `sbt` command or the `sbt.bat` on Windows) and enter the following commands:
 
