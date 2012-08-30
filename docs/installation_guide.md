@@ -74,7 +74,7 @@ Payola comes pre-configured to work with default settings of a Virtuoso server a
 
 > **Payola will not start Virtuoso or H2 on its own. You need to configure them and run them by yourself.**
 
-As the cloned repository contains just source code, it is necessary to compile Payola in order to run it. Open a command line (console, terminal) and make `payola` subdirectory the current working directory (e.g. by `cd payola`). Launch SBT (using the `sbt` command or the `sbt.bat` on Windows) and enter the following commands:
+As the cloned repository contains just source code, it is necessary to compile Payola in order to run it. Open a command line (console, terminal) and make `payola` subdirectory the current working directory (e.g. by `cd payola`). Launch SBT (using the `sbt.sh` command or the `sbt.bat` on Windows) and enter the following commands:
 
 <a name="run-initializer"></a>
 ```
@@ -90,6 +90,8 @@ As the cloned repository contains just source code, it is necessary to compile P
 Voilà! Your Payola server is running. The `initializer` project sets up your database to include an admin user (login `admin@payola.cz`, password `payola!`), a sample analysis and some data sources. You can, of course, remove those and create your own later.
 
 ![Installing and running Payola](https://raw.github.com/siroky/Payola/develop/docs/img/installscreen.png)
+
+You can edit these commands in a text editor to change the amount of memory given to Payola. By default, Payola uses 1GB of memory (the `-Xmx` argument), 512MB of memory for the [permgen](http://en.wikipedia.org/wiki/Java_virtual_machine#Heap) (the `-XX:MaxPermSize` argument) and 2MB stack size (the `-Xss` argument).
 
 > <a name="drop-create-warning"></a> **Warning:** The `initializer` project drops and recreates all tables in the database - hence all previous data will be lost. Run this project only when installing Payola for the first time or if you want to reset Payola to factory settings.
 
