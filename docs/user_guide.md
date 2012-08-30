@@ -383,7 +383,7 @@ Selection plugin lets you select vertices with a particular attribute - for exam
 
 - **Property URI** - A URI of the property, e.g. `http://dbpedia.org/ontology/populationTotal`.
 - **Operator** - An operator - `<`, `>`, `=`, ... (see the *Value* parameter below for details).
-- **Value** - The value for the property to be compared to, e.g. `20000000`. These three parameters get combined to create a `FILTER` statement in the SPARQL query - with the examples provided, this plugin gets translated to this part of the resulting SPARQL query: `FILTER (?v > 20000000)`.
+- **Value** - The value for the property to be compared to, e.g. `20000000`. These three parameters get combined to create a `FILTER` statement in the SPARQL query - with the examples provided, this plugin gets translated to this part of the resulting SPARQL query: `FILTER (?v > 20000000)`. Note that if the value should be handled as a string, it needs to be wrapped in quotes (e.g. `"John Doe"`).
 
 ##### Ontological Filter
 
