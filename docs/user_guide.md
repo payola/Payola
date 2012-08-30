@@ -362,7 +362,7 @@ If you are familiar with the architectional style 'pipe and filters', our analys
 
 ##### Typed
 
-This plugin selects vertices of a type that's filled in as a parameter `RDF Type URI` from its input graph.
+This plugin selects vertices of a RDF type that's filled in as a parameter `RDF Type URI` from its input graph.
 
 - **RDF Type URI** - A single URI of a vertex RDF type, e.g. `http://dbpedia.org/ontology/City`.
 
@@ -389,6 +389,8 @@ Ontological Filter plugin filters a graph using ontologies located at URLs liste
 
 - **Ontology URLs** - URLs of ontologies - each on a new line.
 
+TODO KV: what it does? it filters the graph to contain only entities definded in the ontology? Differences between this and RDF type.
+
 ##### SPARQL Query
 
 This is a more advanced plugin letting you perform your own custom SPARQL query on the output of the previous plugin.
@@ -401,7 +403,7 @@ You can add multiple data sources, creating numerous branches that need to be me
 
 ![Create Analysis - Multiple Branches](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_multiple_branches.png)
 
-Merging branches can be done using the `Merge branches` button. You will be given a choice to use either Join or Union.
+Merging branches can be done using the `Merge branches` button. You will be given a choice to choos a plugin for merging branches. Since a plugin has a predefined number of inputs, Payola will list show you all plugins with more than one input. You can, for example, write your own merge plugin which will have 4 inputs, so you can merge 4 branches into one using a single plugin. Currently, Payola comes only with 2 merge plugins so you will be asked to use either Join or Union.
 
 ![Create Analysis - Merging Branches Dialog](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_merge_dialog_choose.png)
 
@@ -412,6 +414,8 @@ After selecting one (each is described below), you need to specify which branche
 At the top of the dialog, you have each branch represented by the name of the last plugin in each branch. If you hover your mouse over the box representing a branch, that particular branch gets highlighted in the background. You need to drag the branch boxes to the input boxes.
 
 ![Create Analysis - Merging Branches](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/sample_analysis_merged.png)
+
+All the inputs needs to be connected to a branch, otherwise, the dialog won't let you to add a merge plugin to your analysis.
 
 ##### Union
 
@@ -483,6 +487,13 @@ Either on your dashboard, or on analyses listing, click on an analysis to displa
 As some analyses can take a really long time to finish (some may be theoretically infinite), there's a timeout field in the top-right corner as well as a `Stop` button. By default, an analysis times out in 30 seconds. If you find it's too short time to evaluate your analysis, change it to a higher value.
 
 Now press the `Run Analysis` button. The boxes of plugins which are being evaluated will turn yellow (if the analysis is being executed in one single step, you will be switched right to the results).
+
+As the evaluation is being executed, the progress is indicated in a two different ways simultaneously. Firstly, on the top of the page, you can see a progress bar which indicates the percentage of the evaluated plugins (it does not indicate time since that cannot be estimated). Secondly, background color of plugins changes:
+
+- blue means that the plugin is pending to be evaluated
+- yellow means that the plugin is being evaluated right now
+- red means that there was an error while evaluating the plugin
+- green means that the evaluation of the plugin is done without errors
 
 ![Running Analysis](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/analysis_running.png)
 
