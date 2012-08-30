@@ -382,18 +382,16 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
                     graphView.get.deselectAll()
                 }
                 graphView.get.selectVertex(vertex.get)
-
-                vertex.foreach { v =>
-                    if (v.selected) {
-
-                        createInfoTable(v)
-
-                        vertexSelected.trigger(new VertexEventArgs[this.type](this, v.vertexModel))
-                    }
-                }
-
-
                 redrawSelection()
+            }
+
+            vertex.foreach { v =>
+                if (v.selected && graphView.get.getAllSelectedVerticesCount == 1) {
+
+                    createInfoTable(v)
+
+                    vertexSelected.trigger(new VertexEventArgs[this.type](this, v.vertexModel))
+                }
             }
             mousePressedVertex = true
         } else {
