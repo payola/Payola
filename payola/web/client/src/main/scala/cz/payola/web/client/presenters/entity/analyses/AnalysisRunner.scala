@@ -20,7 +20,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 {
     val parentElement = document.getElementById(elementToDrawIn)
 
-    val analysisEvaluationSuccess = new UnitEvent[Analysis, EvaluationSuccessEventArgs]
+    var analysisEvaluationSuccess = new UnitEvent[Analysis, EvaluationSuccessEventArgs]
 
     var analysisRunning = false
 
@@ -38,14 +38,14 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         blockPage("Loading analysis data...")
         DomainData.getAnalysisById(analysisId) {
             analysis =>
-                initUI(analysis)
+                createViewAndInit(analysis)
                 unblockPage()
         } {
             err => fatalErrorHandler(err)
         }
     }
 
-    def initUI(analysis: Analysis, timeout: Int = 30): AnalysisRunnerView = {
+    def createViewAndInit(analysis: Analysis, timeout: Int = 30): AnalysisRunnerView = {
         val view = new AnalysisRunnerView(analysis, timeout)
         view.render(parentElement)
         view.tabs.hideTab(1)
@@ -53,6 +53,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         view.overviewView.controls.timeoutControl.field.value = timeout
 
         successEventHandler = getSuccessEventHandler(analysis, view)
+        analysisEvaluationSuccess = new UnitEvent[Analysis, EvaluationSuccessEventArgs]
         analysisEvaluationSuccess += successEventHandler
 
         view.overviewView.controls.runBtn.mouseClicked += {
@@ -104,13 +105,13 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
     def runButtonClickHandler(view: AnalysisRunnerView, analysis: Analysis) = {
         if (!analysisRunning) {
+            analysisRunning = true
             blockPage("Starting analysis...")
 
-            uiAdaptAnalysisRunning(view, initUI _, analysis)
+            uiAdaptAnalysisRunning(view, createViewAndInit _, analysis)
             var timeout = view.overviewView.controls.timeoutControl.field.value
             view.overviewView.controls.timeoutInfo.text = timeout.toString
 
-            analysisRunning = true
             AnalysisRunner.runAnalysisById(analysisId, timeout, evaluationId) { id =>
                 unblockPage()
 
@@ -127,7 +128,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
             }
 
             window.onunload = { _ =>
-                onStopClick(view, initUI, analysis)
+                onStopClick(view, createViewAndInit, analysis)
             }
         }
         false
@@ -242,13 +243,15 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         view.overviewView.controls.runBtn.setIsEnabled(true)
         view.overviewView.controls.runBtnCaption.text = "Run Again"
         window.onunload = null
+
+        view.overviewView.controls.runBtn.mouseClicked.clear()
         view.overviewView.controls.runBtn.mouseClicked += { e =>
             view.destroy()
 
             analysisDone = false
             analysisRunning = false
 
-            val newView = initUI(analysis, view.overviewView.controls.timeoutControl.field.value)
+            val newView = createViewAndInit(analysis, view.overviewView.controls.timeoutControl.field.value)
             runButtonClickHandler(newView, analysis)
         }
         successEventHandler = getSuccessEventHandler(analysis, view)
