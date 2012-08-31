@@ -438,3 +438,7 @@ table .btn-toolbar .badge {
 .profile-edit-div {
     margin-bottom: 10px;
 }
+
+.well.ui-state-hover {
+    border: 1px solid black !important;
+}
