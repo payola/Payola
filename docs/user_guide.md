@@ -375,18 +375,18 @@ This plugin selects vertices of an RDF type that's filled in as a parameter call
 
 - **RDF Type URI** - A single URI of a vertex RDF type, e.g. `http://dbpedia.org/ontology/City`.
 
-##### Projection
+##### Property Selection
 
-Projection plugin takes property URIs separated by a newline as a single parameter. It will select vertices that are connected to other vertices using one of the listed URIs.
+Property Selection plugin takes property URIs separated by a newline as a single parameter. It will select vertices that are connected to other vertices using one of the listed URIs.
 
 - **Property URIs** - A list of URIs (each on a new line) of a property RDF type, e.g. `http://dbpedia.org/ontology/populationTotal`.
 - **Select property types and labels** - When checked, all properties are also added to the `OPTIONAL` section of the query, fetching each property's type and label.
 
-> **Note:** Payola performs some optimizations, potentially merging several consecutive plugins together. For example, two consecutive projection plugins are always merged - hence their result isn't an empty graph as one could expect even if each of them lists completely different set of URIs, but a graph that contains both projections (if this optimization hadn't taken place, the first plugin would create a graph containing vertices connected to each other using URIs declared in the first plugin, which would then be filtered out using the second plugin, resulting in an empty intersection).
+> **Note:** Payola performs some optimizations, potentially merging several consecutive plugins together. For example, two consecutive property selection plugins are always merged - hence their result isn't an empty graph as one could expect even if each of them lists completely different set of URIs, but a graph that contains both property selections (if this optimization hadn't taken place, the first plugin would create a graph containing vertices connected to each other using URIs declared in the first plugin, which would then be filtered out using the second plugin, resulting in an empty intersection).
 
-##### Selection
+##### Filter
 
-Selection plugin lets you select vertices with an attribute of particular value or property - for example select cities with more than 2 million inhabitants.
+Filter plugin lets you select vertices with an attribute of particular value or property - for example select cities with more than 2 million inhabitants.
 
 - **Property URI** - A URI of the property, e.g. `http://dbpedia.org/ontology/populationTotal`.
 - **Operator** - An operator - `<`, `>`, `=`, ... (see the *Value* parameter below for details).
@@ -430,7 +430,7 @@ Union simply merges two graphs together as one would expect. Vertices with the s
 
 ##### Join
 
-The join plugin can be a little bit tricky. If the joined branches consist of `Typed`, `Selection` and `Projection` plugins and the data are fetched from identical data fetchers (same type and parameter values), then an analysis optimization is performed. Both branches and the join plugin are treated as one data fetcher which is connected to a SPARQL query plugin. So the join actually behaves similarly to a relational database join - the first branch selects entities, which are related to entities specified by the second branch (in case of inner join). In case of outer join, all entities of the first branch are selected, even though they aren't related to any entity from the second branch.
+The join plugin can be a little bit tricky. If the joined branches consist of `Typed`, `Filter` and `Property Selection` plugins and the data are fetched from identical data fetchers (same type and parameter values), then an analysis optimization is performed. Both branches and the join plugin are treated as one data fetcher which is connected to a SPARQL query plugin. So the join actually behaves similarly to a relational database join - the first branch selects entities, which are related to entities specified by the second branch (in case of inner join). In case of outer join, all entities of the first branch are selected, even though they aren't related to any entity from the second branch.
 
 On the other hand, if the two joined branches are unrelated, so no optimization can be performed, the join behaves differently. In case of an inner join, only edges from the first graph with URI defined in the `Property URI` parameter are included. Also, the destination of the edge must be present in the second graph. Otherwise, the edge is omitted.
 
@@ -461,17 +461,17 @@ Then connect a new `Typed` plugin with `RDF Type URI` `http://dbpedia.org/ontolo
 
 ![Typed Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_typed.png)
 
-Continue with a `Projection` plugin with `Property URIs` `http://dbpedia.org/ontology/populationTotal`.
+Continue with a `Property Selection` plugin with `Property URIs` `http://dbpedia.org/ontology/populationTotal`.
 
-![Projection Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_projection.png)
+![Property Selection Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_projection.png)
 
-And a `Selection` plugin with `PropertyURI` `http://dbpedia.org/ontology/populationTotal`, `Operator` `>` and `Value` `2000000`.
+And a `Filter` plugin with `PropertyURI` `http://dbpedia.org/ontology/populationTotal`, `Operator` `>` and `Value` `2000000`.
 
-![Selection Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_selection.png)
+![Filter Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_selection.png)
 
 And that's it: your first analysis. Now let's fetch countries of the cities as well.
 
-Add a one more `DBPedia.org` data source and connect a `Typed` plugin with `http://dbpedia.org/ontology/Country` `RDF Type URI` parameter and a `Projection` plugin with `http://dbpedia.org/ontology/areaTotal` `Property URIs` parameter as seen on the picture below.
+Add a one more `DBPedia.org` data source and connect a `Typed` plugin with `http://dbpedia.org/ontology/Country` `RDF Type URI` parameter and a `Property Selection` plugin with `http://dbpedia.org/ontology/areaTotal` `Property URIs` parameter as seen on the picture below.
 
 ![Two Branches](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/two_branches.png)
 
