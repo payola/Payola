@@ -12,28 +12,30 @@ class AnalysisEvaluationSpec extends FlatSpec with ShouldMatchers
 {
     "Analysis evaluation" should "work" in {
         val sparqlEndpointPlugin = new SparqlEndpointFetcher
-        val projectionPlugin = new Projection
-        val selectionPlugin = new Selection
+        val propertySelectionPlugin = new PropertySelection
+        val filterPlugin = new Filter
         val typedPlugin = new Typed
 
         val analysis = new Analysis("Cities with more than 2 million habitants", None)
         val citiesFetcher = sparqlEndpointPlugin.createInstance()
             .setParameter(SparqlEndpointFetcher.endpointURLParameter, "http://dbpedia.org/sparql")
-        val citiesTyped = typedPlugin.createInstance().setParameter(Typed.typeURIParameter, "http://dbpedia.org/ontology/City")
-        val citiesProjection = projectionPlugin.createInstance().setParameter(Projection.propertyURIsParameter, List(
-            "http://dbpedia.org/ontology/populationDensity", "http://dbpedia.org/ontology/populationTotal"
+        val citiesTyped = typedPlugin.createInstance().setParameter(Typed.typeURIParameter,
+            "http://dbpedia.org/ontology/City")
+        val citiesPropertySelection = propertySelectionPlugin.createInstance().setParameter(
+            PropertySelection.propertyURIsParameter,
+            List("http://dbpedia.org/ontology/populationDensity", "http://dbpedia.org/ontology/populationTotal"
         ).mkString("\n"))
-        val citiesSelection = selectionPlugin.createInstance().setParameter(
-            Selection.propertyURIParameter, "http://dbpedia.org/ontology/populationTotal"
+        val citiesFilter = filterPlugin.createInstance().setParameter(
+            Filter.propertyURIParameter, "http://dbpedia.org/ontology/populationTotal"
         ).setParameter(
-            Selection.operatorParameter, ">"
+            Filter.operatorParameter, ">"
         ).setParameter(
-            Selection.valueParameter, "2000000"
+            Filter.valueParameter, "2000000"
         )
-        analysis.addPluginInstances(citiesFetcher, citiesTyped, citiesProjection, citiesSelection)
+        analysis.addPluginInstances(citiesFetcher, citiesTyped, citiesPropertySelection, citiesFilter)
         analysis.addBinding(citiesFetcher, citiesTyped)
-        analysis.addBinding(citiesTyped, citiesProjection)
-        analysis.addBinding(citiesProjection, citiesSelection)
+        analysis.addBinding(citiesTyped, citiesPropertySelection)
+        analysis.addBinding(citiesPropertySelection, citiesFilter)
 
         val evaluation = analysis.evaluate()
         while (!evaluation.isFinished) {

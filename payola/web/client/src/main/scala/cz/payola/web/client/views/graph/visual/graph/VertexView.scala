@@ -32,8 +32,6 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var r
 
     private var glyphSpan: Option[Span] = None
 
-    private var glyphRendered = false
-
     /**
      * Neighbouring literal vertices of this vertex describing attributes of this vertex.
      */
@@ -164,7 +162,6 @@ class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var r
 
     def destroy() {
         glyphSpan.foreach(_.destroy())
-        glyphRendered = false
     }
 
     def setGlyph(newGlyph: Option[String]) {

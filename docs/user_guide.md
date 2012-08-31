@@ -3,7 +3,7 @@
 
 ![Payola logo (credits Martin Mraz)](https://raw.github.com/siroky/Payola/develop/docs/img/logo_medium.png)
 
-Payola is a HTML5 web application which lets you work with graph data in a completely new way. You can display [Linked Data](http://linkeddata.org/) using several preinstalled visualization plugins as graphs, tables, etc. This also means, that you no longer need [Pubby](http://www4.wiwiss.fu-berlin.de/pubby/) to browse through a Linked Data storage (via its [SPARQL](http://www.w3.org/TR/rdf-sparql-query/) endpoint). Moreover, you can create an analysis and run it against a set of SPARQL endpoints without deep knowledge of the SPARQL language itself. Analysis results are processed and visualized using the embedded visualization plugins.
+Payola is an HTML5 web application which lets you work with graph data in a completely new way. You can display [Linked Data](http://linkeddata.org/) using several preinstalled visualization plugins as graphs, tables, etc. This also means, that you no longer need [Pubby](http://www4.wiwiss.fu-berlin.de/pubby/) to browse through a Linked Data storage (via its [SPARQL](http://www.w3.org/TR/rdf-sparql-query/) endpoint). Moreover, you can create an analysis and run it against a set of SPARQL endpoints without a deep knowledge of the SPARQL language itself. Analysis results are processed and visualized using the embedded visualization plugins.
 
 ## Linked Data
 
@@ -13,13 +13,13 @@ If you **do** know, what Linked Data means, you probably already have an idea, w
 Bob | is friend with | Alice
 ```
 
-Because there are many Bobs and many Alices, each person (generally speaking entity) must have an unique identifier assigned so we don't confuse one Bob for another. The [URI](http://cs.wikipedia.org/wiki/Uniform_Resource_Identifier) serves this purpose pretty well. So we have to alter the previous example to:
+Because there are many Bobs and many Alices, each person (generally speaking entity) must have a unique identifier assigned so we don't confuse one Bob for another. The [URI](http://cs.wikipedia.org/wiki/Uniform_Resource_Identifier) serves this purpose pretty well. So we have to alter the previous example to:
 
 ```
 http://facebook.com/Bob | is friend with | http://facebook.com/Alice
 ```
 
-If you think about it, almost everything can be expressed using this notation, because generally speaking, every fact can be expressed as:
+If you think about it, almost anything can be expressed using this notation, because generally speaking, every fact can be expressed as:
 
 ```
 Entity | Relation | Value
@@ -34,13 +34,13 @@ http://facebook.com/Bob | is friend with | http://facebook.com/Alice
 http://facebook.com/Bob | is friend with | http://facebook.com/Tom
 ```
 
-The uniqueness problem arises even with the relations, because friendship on a social network can be smething different from real-life friendship. So the relations are assigned unique identifiers as well. That turns the first example into:
+The uniqueness problem arises even with the relations, because friendship on a social network can be something different from a real-life friendship. So the relations are assigned unique identifiers as well. That turns the first example into:
 
 ```
 http://facebook.com/Bob | http://facebook.com/relations/friendship | http://facebook.com/Alice
 ```
 
-Actually, this is almost a [Turtle](http://www.w3.org/TeamSubmission/turtle/) notation, which is one of many [RDF model](http://www.w3.org/RDF/) notations. The RDF is a standard which specifies what the entities, relations and values may be.
+Actually, this is almost a [Turtle](http://www.w3.org/TeamSubmission/turtle/) notation, which is one of many [RDF model](http://www.w3.org/RDF/) notations. RDF is a standard which specifies what the entities, relations and values may be.
 
 Having this context in mind, we provide a tool that makes it easy to analyze sets of facts (usually stored in a database) and visualize them. As an example of such a visualization, see the following picture, which is a sample visualization of an analysis of relations on social networks for a particular person.
 
@@ -50,11 +50,11 @@ For a more complex and sophisticated description of Linked Data, please visit th
 
 ## Motivation
 
-Of course, our software is capable of performing analyses on bit more complicated data. Actually, the first impulse to write such a tool was to come up with an application which makes the user capable of building analyses which could help him or her to target people involved in corruption.
+Of course, our software is capable of performing analyses on a bit more complicated data. Actually, the first impulse to write such a tool was to come up with an application which would allow the user to build analyses that could help him or her to find people involved in corruption.
 
-> And is it?
+> And does it?
 > 
-> In general, yes, it is. But at the time of writing, machine processing of related data is in a conflict with the privacy laws in our country. So nobody is going to build such an analysis.
+> In general, yes, it does. But at the time of writing, machine processing of related data is in conflict with the privacy laws of our country. So no one may legally build such an analysis.
 
 > So that's why the project's name is Payola?
 > 
@@ -62,23 +62,23 @@ Of course, our software is capable of performing analyses on bit more complicate
 >
 > *Payola - the practice of bribing someone in return for the unofficial promotion of a product in the media: if a record company spends enough money on payola, it can make any record a hit*
 
-During our studies on the University, we've met several tools for working with Linked Data. Many of them are really useful, but it is rather hard to work with them. Especially if you want to process some data and visualise them. You need to install and configure several tools. Morever, those tools work separately, so you need to get a RDF file from each of them and put it into the next one. Some of them are on the web, some of them work under Linux, some of them on Windows.
+During our studies on the University, we've come across several tools for working with Linked Data. Many of them are really useful, but rather clumsy. Especially if you want to process some data and then visualize them. You need to install and configure several tools to do so. Moreover, these tools work separately - you need to save an RDF file from each of the tools and open it from the next one. Some of them are web-based, some of them only work on Linux, some of them on Windows.
 
-We wanted to bring a single tool which will be able to do it all. We also wanted to make a web application which is, we think, a new synonymum for platform-independent software. That's also why we take advantage of the new HTML5 standard and avoid using Flash platform.
+We wanted to bring a single tool which would be able to do it all. We also wanted to make a web application which is, we think, a new synonym for platform-independent (or cross-platform) software. That's also why we take advantage of the new HTML5 standard and avoid using the Flash platform.
 
-We also wanted to present a tool which will be capable of sharing the RDF data between its users, visualisations included. Nowadays, if you share an RDF visualisation to somebody, you probably share a screenshot with him. If it is a result of an analysis, it changes over a time, but the screenshot does not. With Payola, you don't share a static visualisation, you share the right to create the visualisation whenever the user want. And he gets the most current results.
+We also wanted to present a tool which would be capable of sharing the RDF data between its users, visualizations included. Nowadays, if you share an RDF visualization to somebody, you probably share a screenshot with him or her. If it is a result of an analysis, it changes over time, but the screenshot does not. With Payola, you don't share a static visualization, you share the right to create the visualization whenever the user want. And the person you share it with gets always the most recent results.
 
-The main goal was to come up with a prototype of a Linked Data tool for common users. To make them able to work with [RDF](http://www.w3.org/RDF/) data, explore them, analyze them, and to integrate into [OpenData.cz transparent data infrastructure](http://opendata.cz/) which is being developed mostly on the [Faculty of Mathematics and Physics, Charles University](http://www.mff.cuni.cz/). We would also like to make it into the [LOD2](http://lod2.eu/Welcome.html) technology stack, which is, by the way, one of the reasons, why we've chosen the Scala programming language.
+The main goal was to come up with a prototype of a Linked Data tool for common users. To make them able to work with [RDF](http://www.w3.org/RDF/) data, explore them, analyze them, and to integrate the [OpenData.cz transparent data infrastructure](http://opendata.cz/) which is being developed mostly at the [Faculty of Mathematics and Physics, Charles University](http://www.mff.cuni.cz/). We would also like to make it into the [LOD2](http://lod2.eu/Welcome.html) technology stack, which is, by the way, one of the reasons, why we've chosen the Scala programming language.
 
-Since Payola is rather a platform (or kind of framework, if you want), not a closed project, more advanced users may write their own analytical plugins and incorporate them into their analyses. You can also fork the project on [https://github.com/siroky/Payola](https://github.com/siroky/Payola) and easily integrate your own visualization methods, extensions and more.
+Since Payola is rather a platform (or kind of framework, if you wish), not a closed project, more advanced users may write their own analytical plugins and incorporate them into their analyses. You can also fork the project on [https://github.com/siroky/Payola](https://github.com/siroky/Payola) and easily integrate your own visualization methods, extensions and more.
 
 ### Should you be interested in Payola?
 
-If you work with RDF data on daily basis, yes, you should. Payola may help you simplify or automatize some tasks. Also the visualizations may be used when describing linked data to people who are not that familiar with them.
+If you work with RDF data on a daily basis, yes, you should. Payola may help you simplify or automatize some tasks. Also the visualizations may be used when describing linked data to people who are not that familiar with them.
 
-If you just work with RDF data - we will help to access you data sources, browse through them, analyze the data and visualise them. We've tried to minimize the need to learn the SPARQL language to work with linked data.
+If you just work with RDF data - it will help you access your data sources, browse them, visualize them and analyze the data. We've tried to minimize the need to learn the SPARQL language to work with linked data.
 
-If you are a developer, you can also contribute your own analytical plugin and share it with the users of your Payola installation. You can also come up with your own visualisation plugin and compile your own version of Payola.
+If you are a developer, you can also contribute with your own analytical plugin and share it to the users of your Payola installation. You can also come up with your own visualization plugin and compile your own version of Payola.
 
 ### What are the most common use cases?
 
@@ -98,75 +98,73 @@ In companies, Payola will probably have many non-technical users and a developer
 - http://data.gov.uk/linked-data
 
 ## Vocabulary
-Before reading further, you shoudl get familiar with some terms we user regulary to describe the Payola functionalities:
+Before reading further, you should get familiar with some terms we use frequently to describe the Payola functionalities:
 
 ### Data source
-A data source is not just a regular data storage. It is a data storage with a defined interface like SPARQL endpoint. If we talk about a data source, we almost always think of a RDF data source.
+A data source is not just a regular data storage. It is a data storage with a defined interface, like a SPARQL endpoint. If we talk about a data source, we almost always think of a RDF data source.
 
 ### Analysis
-An analysis is a kind of algorithm which tells Payola, how to proccess your data. With Payola, you can visually assmeble analyses, which is a way, how you define, what should Payola do with your data before making a visualisation.
+An analysis is a kind of an algorithm which tells Payola, how to process your data. With Payola, you can assemble analyses in a visual manner, which is a way, how you define, what should Payola do with your data before making a visualization.
 
-Let's suppose you have a data set stored on the `http://jergym.cz/sparql` endpoint. The data set describes relations between teachers and students. Every of those relations defines, which teacher is a class teacher of which student; e.g.:
+Let's suppose you have a data set stored at the `http://jergym.cz/sparql` endpoint. The data set describes relations between teachers and students. Each of these relations defines which teacher is a class teacher of which student; e.g.:
 
 ```
 http://jergym.cz/John_Smith | is a class teacher of | http://jergym.cz/Peter_White
 ```
 
-The analysis gives you a tool, how to specify, that you want to procces a data set from the `http://jergym.cz/sparql` endpoint, filter the data, constraint them on properties and mainly, define relation patterns. In the most simple case, by assembling an analysis, you can create a SPARQL query. The more complex analysis you construct, the more SPARQL queries and dependecies between them are created on the background.
+The analysis is a tool, how to specify that you want to process a data set from the `http://jergym.cz/sparql` endpoint, filter the data, constrain them on properties and mainly, define relation patterns. In the most simple case, by assembling an analysis, you can create a SPARQL query. The more complex analysis you construct, the more SPARQL queries and dependencies between them are created on the background.
 
 ### Graph
-when mentioning a **graph** we probably don't mean a plot chart or a pie chart. Despite the fact, that Payola is in a limited way capable of producing such graphs, the main form of Payola output is a set of vertices and edges, which is, in graph theory, called a [graph](http://en.wikipedia.org/wiki/Graph_(mathematics\)). A vertex stands for an entity and an edge represents a relation between two entities.
+When mentioning a **graph** we probably don't mean a plot chart or a pie chart. Despite the fact, that Payola is in a limited way capable of producing such graphs, the main form of Payola output is a set of vertices and edges, which is, in graph theory, called a [graph](http://en.wikipedia.org/wiki/Graph_(mathematics\)). A vertex stands for an entity and an edge represents a relation between two entities.
 
 ### Plugin
 Since Payola is a platform, you can build your own modules which you can integrate into it. Those modules are called plugins. In the documentation we talk about two different types of plugins:
-- analytical plugins: They are modules that can be integrated into an analysis. They get a graph on input, transform it into another as they need and return another graph.
-- visual plugins: They receive a graph and visualise it by the implemented set of rules.
+- analytical plugins: These modules can be integrated into analyses. They get a graph on the input, transform it as needed and return an output graph.
+- visual plugins: They receive a graph and visualize it by the implemented set of rules.
 
 ### Data fetcher
-A data fecther is a subsystem, which is responsible for querying a data source for a data set. E.g, if you want to work with a set of data from the DBPedia, a data fecther will connect to the DBPedia SPARQL endpoint, query it with a SPARQL query and download the query result into the Payola for further proccessing.
+A data fetcher is a subsystem, which is responsible for querying a data source for a data set. For example, if you want to work with a set of data from the DBPedia, a data fetcher will connect to the DBPedia SPARQL endpoint, query it with a SPARQL query and download the query result into the Payola for further processing.
 
 
 
 ## Basic usage
 
-You can use Payola both as a guest and a logged-in user. A guest is limited to view analyses and data sources marked as public by teh other users and only in a read-only mode (i.e. can't edit them). This make it easier for companies to use Payola in two different modes at a time. In the first one, they internally share data and analyses and control the access to such data. The second mode makes it easy to share any analysis of datasource to the public in a single click.
+You can use Payola both as a guest and a logged-in user. A guest is limited to viewing analyses and data sources marked as public by other users in a read-only mode (i.e. can't edit them). This makes it easier for companies to use Payola in two different modes at a time. In the first one, they internally share data and analyses and control the access to such data. The second mode makes it easy to share any analysis or datasource to the public with a single click.
 
 ![Guest Dashboard](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/guest_dashboard.png)
-
-TODO repair screenshot sign in
 
 To sign in, please, follow the `Sign in` link in the top-right corner of the page. If you have already signed up, simply fill in your email and password and press the `Sign In` button. Otherwise, click `Sign Up` to create a new profile.
 
 ![Sign In](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/sign_in.png)
 
-To sign up, fill in your email and password. The e-mail will be used as your username, as well as the contact e-mail. We will use this e-mail address to reset your password, if neccessary. We don't store the password itself, just its hash. Therefore, we will **never** send you your password in a plaintext. That's also the reason why we cannot tell you your password if you accidentaly forget it. We just don't know, what the password is.
+To sign up, fill in your email and password. This email will be used as your username, as well as the contact email. We will use this email address to reset your password, if necessary, as well. We don't store the password itself, just its hash. Therefore, we will **never** send you your password in a plaintext. That's also the reason why we cannot tell you your password if you accidentally forget it. We just don't know, what the password is.
 
-Payola will make sure that the provided e-mail address is not used already. If it is, you probably have an active account already. Otherwise, you will need to register using a different e-mail address.
+Payola will make sure that the provided email address is not used already. If it is, you probably have an active account already. Otherwise, you will need to register using a different email address.
 
-Currently, there is no integration with external authorization services in Payola.
+Currently, there is no integration with any external authorization services in Payola.
 
 ![Sign Up](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/sign_up_credentials.png)
 
-After signing up successfully, you will be automatically logged in and redirected to your Dashboard. The dashboard is the initial page of the Payola website. You can see content shared to you on the dashboard, as well as the content you have created. Especially analyses and data sources. On the dashboard, there are only first 5 items of each list. If there are more to be displayed, the 'View all' button will appear to make you able to list them all.
+After signing up successfully, you will be automatically logged in and redirected to your Dashboard. The dashboard is the initial page. You can see the content shared to you there, as well as the content you have created. Especially analyses and data sources. On the dashboard, there are only first 5 items of each list. If there is more to be displayed, the 'View all' button will appear to make you able to list them all.
 
-By clicking the name of any of the displayed items, you will display its detail page.
+By clicking on the name of any of the displayed items, you will display its detail page.
 
-Those listings, which show data shared to you by another users contains the information about the user who shared the entity with you. On the sreenshot below, you can see two sections - 'Accessible analyses' and 'Accessible data sources'. These are the listings of entities shared to you. You can see, that all of those entities are shared by the 'admin@payola.cz' user.
+The listings showing the data shared to you by other users contain the information about the user who has shared the entity with you. On the screenshot below, you can see two sections - 'Accessible analyses' and 'Accessible data sources'. These are the listings of entities shared to you. As you can see, all of these entities are shared by the 'admin@payola.cz' user.
 
 ![Logged In Dashboard](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/logged_in_dashboard.png)
 
-As a logged-in user, you can now create new data sources, analyses, plugins (you can actually write your own plugin, more about that [later](#plugins)), edit them and share them. You can also upload your own private RDF data (and share them later). You can also view your profile page by clicking on your email in the top-right corner next to the log out link. Please, look into the menu to see all the possibilites.
+As a logged-in user, you can now create new data sources, analyses, plugins (you can actually write your own plugin, more about that [later](#plugins)), edit them and share them. You can also upload your own private RDF data (and share it). You can also view your profile page by clicking on your email address in the top-right corner next to the log out link. Please, look into the toolbar for all the possibilities.
 
 ![User Page](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/user_page.png)
 
-If you forget your password, you can click on the `Forgot Password` link on the login page. Enter your email and a new password - you will be emailed with a confirmation link. When you click on it, the new password will be put into effect. Note that the confirmation link is valid for **two hours only**. As stated before, we don't store the original password, just its hash which cannot be decoded back. That's why we cannot send you the lost password.
+If you forget your password, you can click on the `Forgot Password` link on the login page. Enter your email and a new password - you will be emailed with a confirmation link. When you click on the confirmation link, the new password will be put into effect. Note that the confirmation link is valid for **two hours only**. As stated before, we don't store the original password, just its hash which cannot be decoded back. That's why we cannot send you the lost password and you need to choose a new one instead.
 
 ![Password Reset](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/forgot_password.png)
 
 <a name="data-source"></a>
 ### Data Sources
 
-A data source is - as its name hints - a source of data. Payola needs to know where to get its data from for evaluating analyses or visualisations. That's how you provide them:
+A data source is - as its name hints - a source of data. Payola needs to know where to get its data from for evaluating analyses or displaying visualizations. That's how you provide them:
 
 
 #### Creating
@@ -183,14 +181,14 @@ Currently, only two data fetchers are shipped with Payola:
 
 ##### SPARQL Endpoint
 
-The basich data fetcher, which can operate against any public [SPARQL endpoint](http://www.w3.org/wiki/SparqlEndpoints). It has the following parameters:
+The basic data fetcher, which can operate against any public [SPARQL endpoint](http://www.w3.org/wiki/SparqlEndpoints). It has the following parameters:
 
 - **Endpoint URL** - an absolute URL of a SPARQL endpoint - e.g. `http://dbpedia.org/sparql`. This endpoint URL must respond to a `?query=##SPARQL_query##` GET request.
 - **Graph URIs** - URIs of graphs that the queries should be performed on. If you leave the parameter empty, all graphs will be included.
 
 ##### Open Data Clean Storage
 
-This is currently an experimental plugin that communicates with an testing instance of the [Open Data Clean Store](http://sourceforge.net/projects/odcleanstore/) web service.
+This is currently an experimental plugin that communicates with a testing instance of the [Open Data Clean Store](http://sourceforge.net/projects/odcleanstore/) web service.
 
 - **Output Webservice URL** - URL of the output web service without trailing `/` - `/uri?format=trig&uri=##Vertex_URI##` is appended to the URL in order to fetcher the vertex neighborhood.
 - **Sparql Endpoint URL** - a SPARQL endpoint URL. The same rules apply as with the `Endpoint URL` parameter or the `SPARQL Endpoint` data fetcher.
@@ -201,21 +199,21 @@ Use the toolbar at the top of the page to list available data sources (click on 
 
 ![Listing Data Sources](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/list_data_sources.png)
 
-You can view all data sources available to you. If you wish to edit one (e.g. change its name or description), click on the Edit button on the same row. You'll be redirected to the edit page which contains a delete button as well, for removing the data source. The sharing functionality will be described in the [Sharing section](#sharing).
+You can view all the data sources available to you. If you wish to edit one (e.g. change its name or description), click on the Edit button on the same row. You'll be redirected to the edit page which contains a delete button as well, for removing the data source. The sharing functionality will be described in the [Sharing section](#sharing).
 
-The same steps to list and edit apply to any other entity in the system (analyses, plugins, etc.).
+The same steps to list and edit apply to any other entity in Payola (analyses, plugins, etc.).
 
 #### Viewing
 
-When on the Dashboard, or listing all available data sources, click on a data source to view its details. In the case of a data source, you will switch into a browse mode, where you are able to explore the data stored in the data source.
+When on the Dashboard, or listing all available data sources, click on a data source to view its details. In the case of a data source, you will be switched into a browse mode, where you are able to explore the data stored in the data source.
 
 ![Loading Initial Vertex](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/loading_initial_vertex.png)
 
-You'll be presented with a neighborhood of an initial vertex. What is an initial vertex depends on implementation of the underlying data fetcher. Those, which comes bundled with Payola just choose one random entity from the data source and use it as the starting point of the data source exploration.
+You'll be presented with a neighborhood of an initial vertex. What is an initial vertex depends on the implementation of the underlying data fetcher. Those, which come bundled with Payola simply choose one random entity from the data source and use it as the starting point of the data source exploration.
 
 ![Initial Vertex](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/initial_vertex.png)
 
-The initial graph (neighborhood of the initial vertex) can be viewed in many ways. Payola comes bundled with several visualisation plugins. By default, a graph is visualised as a table of tripples. Each tripple represents a relation between two entities. This makes you able to quickly determine the contents of the graph as well as its size. Later, you can switch to a mode which renders a graph on your screen.
+The initial graph (neighborhood of the initial vertex) can be viewed in many ways. Payola comes bundled with several visualization plugins. By default, a graph is visualized as a table of triples. Each triple represents a relation between two entities. This makes you able to quickly determine the contents of the graph as well as its size. Later, you can switch to a mode which renders a graph on your screen.
 
 You can navigate through the graph by following the vertex links in the table. Click on the 'server' icon in front of the link to view the vertex using a different data source.
 
@@ -231,13 +229,21 @@ You can, however, change the visualization plugin using the `Change visualizatio
 
 ![Select Table](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/select_table_no_result.png)
 
-`Circle`, `Gravity` and `Tree` visualizations will display a regular graph using vertices and edges and differ only in the way they lay out the vertices. Based on the size of operating memory and the speed of your CPU, the speed of the visualisations can differ a lot on different systems. That's why you can always skip some animations to speed the proccess up by clicking the 'Stop animation' button.
+`Circle`, `Gravity` and `Tree` visualizations display a regular graph. They represent the entities as circles (identified vertices - entities with a definite URI) interconnected by arrows (relations - oriented edges). Literal vertices (entities not containing a URI) are not displayed, but are identified vertices' attributes and are shown in a table and only if the particular identified vertex is selected. The visualizations also show vertex URIs (or labels if a vertex has such an attribute) and edge URIs (if one of the edge's vertices is selected). The difference between the plugins is only in the initial animated layout. Controls for handling the graph are the same for all three plugins.
 
-> TODO - OK describe what can be done with a graph
+These visualizations allow you to select vertices. Single vertex can be selected by pressing a mouse button over it. Multiple vertices can be selected by holding the Shift key while selecting vertices. Deselecting vertices can be done by holding Shift and pressing a mouse button over a selected vertex or simply by selecting vertex that isn't currently selected without holding the Shift key. Deselecting all vertices is done by pressing mouse between vertices (not over a vertex). These visualizations also allow you to move selected vertices around. By pressing and holding down a mouse button over a vertex and moving it (dragging) you can move all selected vertices of the graph. Whole graph can also be moved by dragging mouse between vertices.
+
+A zooming tool is provided as well. Zooming in or out can be done by rolling the wheel of your mouse or by pressing the `Zoom in` or `Zoom out` buttons in the control bar shown on the top of the graph. Between the buttons in the control bar the current zoom status is shown. Its default value is set to 100%.
+
+The control bar also contains a `Stop animation` button. This button can effect the initial layout animation. If the animation takes a long time to finish, this button stops it. The animation is also stopped if any of the other controls are used. Pressing a mouse button or zooming interrupts the animation as well and allows you to control the visualization.
+
+Another button specific for these three visualizations is `Download as PNG`. Pressing this button saves the image of the graph in the PNG format.
+
+The reaction time of the controls and speed of the initial animations may be effected by hardware configuration of your computer. It also may be affected by the web browser you are using.
 
 ![PNG Download](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/graph_png_download.png)
 
-The `Column Chart` visualization will display a column bar graph, but works only with graphs of a specific structure. The graph must have one identified vertex, whose incoming edges are of a [`rdf:type`](http://www.w3.org/1999/02/22-rdf-syntax-ns#type) URI - the source of each edge must then have exactly three edges - one going to the aforementioned vertex and then two directed to a literal vertex, one with a string value (name of the column), the second one with a numeric value.
+The `Column Chart` visualization will display a column bar graph, but works only with graphs of a specific structure. The graph must have one identified vertex, whose incoming edges are of a [`rdf:type`](http://www.w3.org/1999/02/22-rdf-syntax-ns#type) URI - the source of each edge must then have exactly three edges - one going to the aforementioned vertex and then two directed to literal vertices, one with a string value (name of the column), the second one with a numeric value.
 
 ![Column Chart Graph Representation](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/column_chart_data.png)
 
@@ -245,13 +251,13 @@ The `Column Chart` visualization will display a column bar graph, but works only
 
 ### Ontology Customization
 
-By default, each vertex and edge is of the same color and has the same size (width) when viewed using the graph-based visualizations. To emphasize or diminish some parts of the graph, you can customize the visual appearance using an ontology customization.
+By default, each vertex and edge is of the same color and has the same size (radius) when viewed using the graph-based visualizations. To emphasize or diminish some parts of the graph, you can customize the visual appearance using an ontology customization.
 
-While viewing a graph, press the `Change appearance using ontologies` button. If you have already saved some customizations, they are listed here - if you haven't created any yet, select the `Create New` menu item. Enter name of the customization, ontology URL and press `Create`.
+While viewing a graph, press the `Change appearance using ontologies` button. If you have already saved some customizations, they are listed here - if you haven't created any yet, select the `Create New` menu item.
 
 ![Create Ontology Customization](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_customization.png)
 
-Enter the customization name and URL of that ontology, e.g. [http://opendata.cz/pco/public-contracts.xml](http://opendata.cz/pco/public-contracts.xml).
+Enter the customization name and URL of that ontology, e.g. [http://opendata.cz/pco/public-contracts.xml](http://opendata.cz/pco/public-contracts.xml), and press `Create`.
 
 ![Create Ontology Customization Dialog](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_customization_dialog.png)
 
@@ -259,7 +265,7 @@ You will be presented with a customization dialog. On the left, ontology classes
 
 ![Editing Customization](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/customization_edit.png)
 
-Below, you can modify appearance of that property (in the graph displayed as edges). You can change color of the vertex or edge:
+Below, you can modify appearance of that class' property (in the graph displayed as edges). You can change color of the vertex or edge:
 
 ![Editing Customization - Color](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/customization_edit_color.png)
 
@@ -267,9 +273,9 @@ Or add a glyph to a vertex:
 
 ![Editing Customization - Glyph](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/customization_edit_glyph.png)
 
-> This feature require your browser to support the FontFace standard.
+> This feature requires your browser to support the FontFace standard.
 
-When done, just press the `Done` button. If you want to further modify the customization, click on the `Edit` button in the `Change appearance using ontologies` button's menu. Now select the ontology using the `Change appearance using ontologies` button.
+When done, just press the `Done` button. If you want to modify the customization further, click on the `Edit` button in the `Change appearance using ontologies` button's menu. Now select the ontology using the `Change appearance using ontologies` button.
 
 ![Select Ontology Customization](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/select_customization.png)
 
@@ -285,7 +291,7 @@ Enter the group name (e.g. 'My co-workers') and press the `Create Group` button.
 
 ![Group Create Dialog](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/group_create_dialog.png)
 
-After the group has been created, you can start adding members to the group. To do so, make the `Members` field active and start typing - a suggestion box will appear offering users whose name matches the entered text.
+After the group has been created, you can start adding members to the group. To do so, make the `Members` field active and start typing - a suggestion box will appear offering users whose names match the entered text.
 
 ![Group Create AutoFill](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/group_create_autofill.png)
 
@@ -300,13 +306,15 @@ To delete a group, use the `Delete` button at the top-right corner of the edit p
 <a name="sharing"></a>
 ### Sharing
 
-Now that you know how to create a group, let's share a data source. In the toolbar, click on the `My Data Sources` button and select `View All`. This lists all your data sources. You can use the `Edit` button to edit the data source, the `Private`/`Public` button to toggle whether the data source is private (only you and people you share it to can use it), or public - anyone can use it, even people who are not logged in; or use the delete button to remove the data source.
+Now that you know how to create a group, let's share a data source. In the toolbar, click on the `My Data Sources` button and select `View All`. This lists all your data sources. You can use the `Edit` button to edit the data source, use the `Private`/`Public` button to toggle whether the data source is private (only you and people you share it to can use it), or public - anyone can use it, even people who are not logged in; or use the delete button to remove the data source.
+
+> You can only share entities owned by you.
 
 ![Share Button](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/share_button.png)
 
 Then there's the `Share` button. When you click on it, a menu pops up, allowing you to share the data source either to users or groups. When you select the `To Users` menu item, a dialog is shown with a text field which will suggest users as you type just like when you were adding members to a group. 
 
-The other option is to share the data source to groups - again a dialog will appear, letting you select multiple groups using the suggestion box. Add groups you want and confirm the dialog. All users within the selected groups will be now able to use this data source.
+The other option is to share the data source to groups - again a dialog will appear, letting you select multiple groups using the suggestion box. Add groups you want and confirm the dialog. All users within the selected groups will now be able to use this data source.
 
 ![Share to Groups](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/share_to_groups.png)
 
@@ -322,20 +330,22 @@ To add data to your private data storage, use toolbar's `Private RDF Storage` bu
 
 Here you are presented with two options: to upload an RDF/XML or TTL file, or load the RDF/XML from a URL. Retrieving a graph in a TTL format from a URL isn't currently supported.
 
+> The file must be UTF-8 encoded.
+
 Press the `Choose File` button.
 
 ![Select File to Upload](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/file_to_upload.png)
 
-Press the `Upload File` button. You will be redirected back to the same page after the upload, with information how the upload went.
+Press the `Upload File` button. You will be redirected back to the same page after the upload, with the upload result (denoting either success or failure).
 
 ![Successful Upload](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/successful_upload.png)
 ![Upload Failed](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/upload_failed.png)
 
-If the upload fails, please, use the [RDF validator](http://www.w3.org/RDF/Validator/) to verify that your data is correct.
+If the upload fails, please, use the [RDF validator](http://www.w3.org/RDF/Validator/) to verify that your data is correct and make sure it's UTF-8 encoded as noted above.
 
 ### Analyses
 
-Creating a new analysis is similar to creating any other resource - in the toolbar, select `Create New` from `My Analyses` button's menu. You will be prompted to enter a name - enter the analysis' name - you can change it later on.
+Creating a new analysis is similar to creating any other resource - in the toolbar, select `Create New` from the `My Analyses` button's menu. You will be prompted to enter a name - enter the analysis' name - you can change it later on.
 
 ![Create Analysis Dialog](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_dialog.png)
 
@@ -343,53 +353,50 @@ You will be presented with a blank page with a control box in the top-left corne
 
 ![Create Analysis Page](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_page.png)
 
-First, you'll need a data source to start with. You can do so either using the `Add data source` button which will offer you available data sources (including those that are shared to you), or `Add plugin` which lets you add a data fetcher - an anonymous data source (see [Data Source documentation](#data-source) for more information). This can be useful if you decide to use a data source that you don't want to save right away (e.g. you know you'll use it just once).
-
+First, you'll need a data source to start with. You can do so either using the `Add data source` button which will offer you all available existing data sources (including those that are shared to you), or `Add plugin` which lets you add a data fetcher - an anonymous data source (see [Data Source documentation](#data-source) for more information). This can be useful if you decide to use a data source that you don't want to save right away (e.g. you know you'll use it just once).
 
 ![Create Analysis - Adding Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_adding_plugin.png)
 
 ![Create Analysis - Filling Plugin Parameters](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_plugin_parameters.png)
 
-Now that you've added a data source, you need to do something with the data. Click on the `Add Connection` button on your data source box. Payola comes with pre-installed plugins, which are described one by one below. Of course, you can add your own plugin (see [section Plugins](#plugins)). Plugins are ordered in a sequence (though more branches can be created, see below) - a plugin always gets the result of the previous one as its input.
+Now that you've added a data source, you need to do something with the data. Click on the `Add Connection` button on your data source box. Payola comes with pre-installed plugins, which are described one by one below. Of course, you can add your own plugin (see [section Plugins](#plugins)). Plugins are ordered in a sequence (though more branches can be created, see below) - a plugin always gets the result of the previous one as its input and passes its result to the next one (unless it's the last plugin, then it's the result of the whole analysis).
 
-If you are familiar with the architectional style 'pipe and filters', our analysis is an instace of the pattern. Each plugin represents a filter which alters the graph it gets on input and returns the resulting graph.
+If you are familiar with the architectonic style 'pipe and filters', our analysis is an instance of this pattern. Each plugin represents a filter which alters the graph it gets on input and returns a resulting graph.
 
 ![Create Analysis - Connecting Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_connecting_plugin.png)
 
-> Be aware when editing a shared analysis. Currently, Payola does not lock your analysis or does not duplicate it while being edited. Therefore nobody is prevented from running an evaluation of such an analysis. Because of this fact, we strongly recommends you to stop sharing your analysis before editing it.
+> Beware when editing a shared analysis. Currently, Payola does not lock your analysis nor does it duplicate while being edited. Therefore nobody is prevented from running an evaluation of such an analysis. Because of this fact, we strongly recommend you to stop sharing your analysis before editing it.
 
 #### Pre-installed Plugins
 
 ##### Typed
 
-This plugin selects vertices of a RDF type that's filled in as a parameter `RDF Type URI` from its input graph.
+This plugin selects vertices of an RDF type that's filled in as a parameter called `RDF Type URI` from its input graph.
 
 - **RDF Type URI** - A single URI of a vertex RDF type, e.g. `http://dbpedia.org/ontology/City`.
 
-##### Projection
+##### Property Selection
 
-Projection plugin takes property URIs separated by a newline as a single parameter. It will select vertices that are connected to other vertices using one of the listed URIs.
+Property Selection plugin takes property URIs separated by a newline as a single parameter. It will select vertices that are connected to other vertices using one of the listed URIs.
 
 - **Property URIs** - A list of URIs (each on a new line) of a property RDF type, e.g. `http://dbpedia.org/ontology/populationTotal`.
 - **Select property types and labels** - When checked, all properties are also added to the `OPTIONAL` section of the query, fetching each property's type and label.
 
-> **Note:** Payola performs some optimizations, potentially merging several consecutive plugins together. For example, two consecutive projection plugins are always merged - hence their result isn't an empty graph as one could expect even if each of them lists completely different set of URIs, but a graph that contains both projections (if this optimization hadn't taken place, the first plugin would create a graph containing vertices connected to each other using URIs declared in the first plugin, which would then be filtered using the second plugin, resulting in an empty intersection).
+> **Note:** Payola performs some optimizations, potentially merging several consecutive plugins together. For example, two consecutive property selection plugins are always merged - hence their result isn't an empty graph as one could expect even if each of them lists completely different set of URIs, but a graph that contains both property selections (if this optimization hadn't taken place, the first plugin would create a graph containing vertices connected to each other using URIs declared in the first plugin, which would then be filtered out using the second plugin, resulting in an empty intersection).
 
-##### Selection
+##### Filter
 
-Selection plugin lets you select vertices with a particular attribute - for example select cities with more than 2 million inhabitants.
+Filter plugin lets you select vertices with an attribute of particular value or property - for example select cities with more than 2 million inhabitants.
 
 - **Property URI** - A URI of the property, e.g. `http://dbpedia.org/ontology/populationTotal`.
 - **Operator** - An operator - `<`, `>`, `=`, ... (see the *Value* parameter below for details).
-- **Value** - The value for the property to be compared to, e.g. `20000000`. These three parameters get combined to create a `FILTER` statement in the SPARQL query - with the examples provided, this plugin gets translated to this part of the resulting SPARQL query: `FILTER (?v > 20000000)`.
+- **Value** - The value for the attribute to be compared to, e.g. `20000000`. These three parameters get combined to create a `FILTER` statement in the SPARQL query - with the examples provided, this plugin gets translated to this part of the resulting SPARQL query: `FILTER (?v > 20000000)`. Note that if the value should be handled as a string, it needs to quoted (e.g. `"John Doe"`).
 
 ##### Ontological Filter
 
-Ontological Filter plugin filters a graph using ontologies located at URLs listed in the OntologyURLs parameter.
+Ontological Filter plugin filters a graph using ontologies located at URLs listed in the `Ontology URLs` parameter.
 
-- **Ontology URLs** - URLs of ontologies - each on a new line.
-
-TODO KV: what it does? it filters the graph to contain only entities definded in the ontology? Differences between this and RDF type.
+- **Ontology URLs** - URLs of ontologies - each on a new line. The resulting graph only contains vertices of classes defined in these ontologies as well as properties defined by them.
 
 ##### SPARQL Query
 
@@ -403,11 +410,11 @@ You can add multiple data sources, creating numerous branches that need to be me
 
 ![Create Analysis - Multiple Branches](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_multiple_branches.png)
 
-Merging branches can be done using the `Merge branches` button. You will be given a choice to choos a plugin for merging branches. Since a plugin has a predefined number of inputs, Payola will list show you all plugins with more than one input. You can, for example, write your own merge plugin which will have 4 inputs, so you can merge 4 branches into one using a single plugin. Currently, Payola comes only with 2 merge plugins so you will be asked to use either Join or Union.
+Merging branches can be done using the `Merge branches` button. You will be prompted to select a plugin for merging branches. Since a plugin has a predefined number of inputs, Payola will list all plugins with more than one input. You can, for example, write your own merge plugin which will have 4 inputs, so you can merge 4 branches into one using a single plugin. Currently, Payola comes only with 2 merge plugins so you will be asked to use either Join or Union.
 
 ![Create Analysis - Merging Branches Dialog](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_merge_dialog_choose.png)
 
-After selecting one (each is described below), you need to specify which branches to be merged - at the bottom of the dialog, there are wells for each input of the merged plugin.
+After selecting one (each is described below), you need to specify which branches to be merge - at the bottom of the dialog, there are wells for each input of the merge plugin.
 
 ![Create Analysis - Merging Branches](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_merge_dialog_initial.png)
 
@@ -415,7 +422,7 @@ At the top of the dialog, you have each branch represented by the name of the la
 
 ![Create Analysis - Merging Branches](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/sample_analysis_merged.png)
 
-All the inputs needs to be connected to a branch, otherwise, the dialog won't let you to add a merge plugin to your analysis.
+All the inputs need to have a branch connected, otherwise, the dialog won't let you to add a merge plugin to your analysis.
 
 ##### Union
 
@@ -423,9 +430,9 @@ Union simply merges two graphs together as one would expect. Vertices with the s
 
 ##### Join
 
-The join plugin can be a little bit tricky. If the joined branches consist of `Typed`, `Selection` and `Projection` plugins and the data are fetched from identical data fetchers (same type and parameter values), then then an analysis optimization is performed. Both branches and the join plugin are treated as one data fetcher which is connected to a SPARQL query plugin. So the join actually behaves similarly to a relational database join - the first branch selects enitites, which are related to entities specified by the second branch (in case of inner join). In case of outer join, all entities of the first branch are selected, even though they aren't related to any entity from the second branch.
+The join plugin can be a little bit tricky. If the joined branches consist of `Typed`, `Filter` and `Property Selection` plugins and the data are fetched from identical data fetchers (same type and parameter values), then an analysis optimization is performed. Both branches and the join plugin are treated as one data fetcher which is connected to a SPARQL query plugin. So the join actually behaves similarly to a relational database join - the first branch selects entities, which are related to entities specified by the second branch (in case of inner join). In case of outer join, all entities of the first branch are selected, even though they aren't related to any entity from the second branch.
 
-On the other hand, if the two joined branches are unrelated, so an optimization cannot be performed, the join behaves differently. In case of an inner join, only edges from the first graph with URI defined in the `Property URI` parameter are included. Also, the destination of the edge must be present in the second graph. Otherwise, the edge is omitted.
+On the other hand, if the two joined branches are unrelated, so no optimization can be performed, the join behaves differently. In case of an inner join, only edges from the first graph with URI defined in the `Property URI` parameter are included. Also, the destination of the edge must be present in the second graph. Otherwise, the edge is omitted.
 
 > *Example:*
 >
@@ -454,17 +461,17 @@ Then connect a new `Typed` plugin with `RDF Type URI` `http://dbpedia.org/ontolo
 
 ![Typed Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_typed.png)
 
-Continue with a `Projection` plugin with `Property URIs` `http://dbpedia.org/ontology/populationTotal`.
+Continue with a `Property Selection` plugin with `Property URIs` `http://dbpedia.org/ontology/populationTotal`.
 
-![Projection Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_projection.png)
+![Property Selection Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_projection.png)
 
-And a `Selection` plugin with `PropertyURI` `http://dbpedia.org/ontology/populationTotal`, `Operator` `>` and `Value` `2000000`.
+And a `Filter` plugin with `PropertyURI` `http://dbpedia.org/ontology/populationTotal`, `Operator` `>` and `Value` `2000000`.
 
-![Selection Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_selection.png)
+![Filter Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_selection.png)
 
 And that's it: your first analysis. Now let's fetch countries of the cities as well.
 
-Add a one more `DBPedia.org` data source and connect a `Typed` plugin with `http://dbpedia.org/ontology/Country` `RDF Type URI` parameter and a `Projection` plugin with `http://dbpedia.org/ontology/areaTotal` `Property URIs` parameter as seen on the picture below.
+Add a one more `DBPedia.org` data source and connect a `Typed` plugin with `http://dbpedia.org/ontology/Country` `RDF Type URI` parameter and a `Property Selection` plugin with `http://dbpedia.org/ontology/areaTotal` `Property URIs` parameter as seen on the picture below.
 
 ![Two Branches](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/two_branches.png)
 
@@ -480,13 +487,13 @@ Now it's really done and ready to be run - scroll up the page and press the `Run
 
 #### Running Analyses
 
-Either on your dashboard, or on analyses listing, click on an analysis to display details of it. You are presented with an overview of the analysis (which plugins with which parameters and bindings are going to be used).
+Either on your dashboard, or on analyses listing, click on an analysis to display its details. You are then presented with an overview of the analysis (which plugins with which parameters and bindings are going to be used).
 
 ![Analysis Overview](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/analysis_overview.png)
 
-As some analyses can take a really long time to finish (some may be theoretically infinite), there's a timeout field in the top-right corner as well as a `Stop` button. By default, an analysis times out in 30 seconds. If you find it's too short time to evaluate your analysis, change it to a higher value.
+As some analyses can take a really long time to finish (some may be theoretically infinite), there's a timeout field in the top-right corner as well as a `Stop` button. By default, an analysis times out in 30 seconds. If you find it's too short to evaluate your analysis, change it to a higher value.
 
-Now press the `Run Analysis` button. The boxes of plugins which are being evaluated will turn yellow (if the analysis is being executed in one single step, you will be switched right to the results).
+Now press the `Run Analysis` button. The boxes of plugins which are being evaluated will turn yellow (if the analysis is being executed in one single step, you will be switched to the results right away).
 
 As the evaluation is being executed, the progress is indicated in a two different ways simultaneously. Firstly, on the top of the page, you can see a progress bar which indicates the percentage of the evaluated plugins (it does not indicate time since that cannot be estimated). Secondly, background color of plugins changes:
 
@@ -497,11 +504,11 @@ As the evaluation is being executed, the progress is indicated in a two differen
 
 ![Running Analysis](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/analysis_running.png)
 
-If the analysis succeeds, you will be automatically switched to a result tab - you can browse the resulting graph here just as when browsing a data source.
+If the analysis succeeds, you will be automatically switched to the result tab - you can browse the resulting graph here just as when browsing a data source.
 
 ![Running Analysis](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/analysis_finished.png)
 
-Moreover, you can also download the result of the analysis as RDF/XML or TTL.
+Moreover, you can also download the result of the analysis as an RDF/XML or TTL file.
 
 ![Downloading Analysis Result](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/analysis_download.png)
 
@@ -548,11 +555,11 @@ class DelayInSeconds(name: String, inputCount: Int, parameters: immutable.Seq[Pa
 A plugin must always have two constructors declared:
 
 - The default constructor (```DelayInSeconds(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)```) is required to have these parameters of exactly these types. It should just pass those parameters to the super class constructor (```Plugin(name, inputCount, parameters, id)```).
-- The parameterless constructor (```def this()```) is used to instantiate the plugin for the first time, so this is the place where you can set the plugin name, count of its inputs, and the parameters. A new ID of the plugin should be obtained using the ```IDGenerator.newId``` method.
+- The parameterless constructor (```def this()```) is used to instantiate the plugin for the first time, so this is the place where you can set the plugin name, number of its inputs, and the parameters. A new ID of the plugin should be obtained using the ```IDGenerator.newId``` method.
 
-> If you wonder why such constraints are used, note that there is only one instance of each plugin class living in the application in every moment. In fact, there may be more than one instance of the plugin class, however all these instances are identical, so they have same IDs and parameters with same IDs. The parameterless constructor is therefore used to create the first instance of the plugin class. The instance is consecutively persisted into the database and whenever it's is accessed by that moment, it's instantiated using the default constructor with the values retrieved from the database.
+> If you wonder why such constraints are used, note that there is only one instance of each plugin class living in the application in every moment. In fact, there may be more than one instance of the plugin class, however all these instances are identical, so they have same IDs and parameters with same IDs. The parameterless constructor is therefore used to create the first instance of the plugin class. The instance is consecutively persisted into the database and whenever it is accessed, it's instantiated using the default constructor with the values retrieved from the database.
 
-The second constrait on the plugin is that it must implement the abstract method ```evaluate(instance: PluginInstance, inputs: IndexedSeq[Option[Graph]], progressReporter: Double => Unit)```. The `instance` parameter contains all parameter values, `inputs` is a sequence of `Option[Graph]`'s - in this case just one as defined in `this()`. You can optionally report progress using the `progressReporter` function passed, which reports the progress to the user (0.0 < progress <= 1.0). Refer to the API documentation to explore which methods you can call on the `instance` or within the plugin class scope (e.g. helper methods like `usingDefined`).
+The second constraint on the plugin is that it must implement the abstract method ```evaluate(instance: PluginInstance, inputs: IndexedSeq[Option[Graph]], progressReporter: Double => Unit)```. The `instance` parameter contains all parameter values, `inputs` is a sequence of `Option[Graph]`'s - in this case just one as defined in `this()`. You can optionally report progress using the `progressReporter` function passed, which reports the progress to the user (0.0 < progress <= 1.0). Refer to the API documentation to explore which methods you can call on the `instance` or within the plugin class scope (e.g. helper methods like `usingDefined`).
 
 ![Plugin Source](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_source.png)
 
@@ -566,7 +573,7 @@ After that an email is sent to the admin to review the plugin source code for se
 
 #### Other plugin types
 
-You're not required to extend directly the `Plugin` class, you may also extend the `cz.payola.domain.entities.plugins.concrete.DataFetcher` or `cz.payola.domain.entities.plugins.concrete.SparqlQuery`. The former one in case you want to create a data fetcher which may be used as a data source plugin. The second one in case the plugin evaluation function can be expressed as an application of SPARQL query on the input graph. Both have the method `evaluate` already implemented, but they introduce other abstract methods that have to be implemeted. You can get the best insight on how they work from the following examples or from the sources of predefined `DataFetcher`s or `SparqlQuery`s.
+You're not required to extend directly the `Plugin` class, you may also extend the `cz.payola.domain.entities.plugins.concrete.DataFetcher` or `cz.payola.domain.entities.plugins.concrete.SparqlQuery`. The former one in case you want to create a data fetcher which may be used as a data source plugin. The second one in case the plugin evaluation function can be expressed as an application of a SPARQL query on the input graph. Both have the method `evaluate` already implemented, but they introduce other abstract methods that have to be implemented. You can get the best insight on how they work from the following examples or from the sources of predefined `DataFetcher`s or `SparqlQuery`s.
 
 ```scala
 package my.custom.plugin

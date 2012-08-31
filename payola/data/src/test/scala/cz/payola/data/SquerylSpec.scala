@@ -34,8 +34,8 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     private val params = List(new StringParameter("EndpointURL", "http://ld.opendata.cz:1111", true))
     val sparqlEndpointPlugin = new SparqlEndpointFetcher("SPARQL Endpoint", 0, params, IDGenerator.newId)
     val concreteSparqlQueryPlugin = new ConcreteSparqlQuery
-    val projectionPlugin = new Projection
-    val selectionPlugin = new Selection
+    val propertySelectionPlugin = new PropertySelection
+    val filterPlugin = new Filter
     val typedPlugin = new Typed
     val join = new Join
     val unionPlugin = new Union
@@ -43,8 +43,8 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     val plugins = List(
         sparqlEndpointPlugin,
         concreteSparqlQueryPlugin,
-        projectionPlugin,
-        selectionPlugin,
+        propertySelectionPlugin,
+        filterPlugin,
         typedPlugin,
         join,
         unionPlugin
@@ -68,7 +68,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         users.foreach(userRepository.persist(_))
 
         // Update test
-        u1.email = "email"
+        u1.email = "email@gmail.com"
         u1.password = "password"
         userRepository.persist(u1)
 
@@ -80,7 +80,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         }
 
         val user2_1 = userRepository.getById(u2.id).get
-        user2_1.email = "email2"
+        user2_1.email = "email2@gmail.com"
         user2_1.password = "password2"
         userRepository.persist(user2_1)
 
@@ -219,10 +219,10 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         val citiesFetcher = sparqlEndpointPlugin.createInstance()
             .setParameter("EndpointURL", "http://dbpedia.org/sparql")
         val citiesTyped = typedPlugin.createInstance().setParameter("TypeURI", "http://dbpedia.org/ontology/City")
-        val citiesProjection = projectionPlugin.createInstance().setParameter("PropertyURIs", List(
+        val citiesPropertySelection = propertySelectionPlugin.createInstance().setParameter("PropertyURIs", List(
             "http://dbpedia.org/ontology/populationDensity", "http://dbpedia.org/ontology/populationTotal"
         ).mkString("\n"))
-        val citiesSelection = selectionPlugin.createInstance().setParameter(
+        val citiesFilter = filterPlugin.createInstance().setParameter(
             "PropertyURI", "http://dbpedia.org/ontology/populationTotal"
         ).setParameter(
             "Operator", ">"
@@ -234,10 +234,10 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         citiesFetcher.isEditable = true
 
         // Try that defined analysis can be persisted
-        a.addPluginInstances(citiesFetcher, citiesTyped, citiesProjection, citiesSelection)
+        a.addPluginInstances(citiesFetcher, citiesTyped, citiesPropertySelection, citiesFilter)
         a.addBinding(citiesFetcher, citiesTyped)
-        a.addBinding(citiesTyped, citiesProjection)
-        a.addBinding(citiesProjection, citiesSelection)
+        a.addBinding(citiesTyped, citiesPropertySelection)
+        a.addBinding(citiesPropertySelection, citiesFilter)
 
         // Persist partially defined analysis
         println("      persisting defined analysis")
@@ -258,13 +258,13 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         val countriesFetcher = sparqlEndpointPlugin.createInstance()
             .setParameter("EndpointURL", "http://dbpedia.org/sparql")
         val countriesTyped = typedPlugin.createInstance().setParameter("TypeURI", "http://dbpedia.org/ontology/Country")
-        val countriesProjection = projectionPlugin.createInstance().setParameter("PropertyURIs", List(
+        val countriesPropertySelection = propertySelectionPlugin.createInstance().setParameter("PropertyURIs", List(
             "http://dbpedia.org/ontology/areaTotal"
         ).mkString("\n"))
 
-            analysis.addPluginInstances(countriesFetcher, countriesTyped, countriesProjection)
+            analysis.addPluginInstances(countriesFetcher, countriesTyped, countriesPropertySelection)
             analysis.addBinding(countriesFetcher, countriesTyped)
-            analysis.addBinding(countriesTyped, countriesProjection)
+            analysis.addBinding(countriesTyped, countriesPropertySelection)
 
         val citiesCountriesJoin = join.createInstance().setParameter(
             "JoinPropertyURI", "http://dbpedia.org/ontology/country"
@@ -273,8 +273,8 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         )
 
             analysis.addPluginInstances(citiesCountriesJoin)
-            analysis.addBinding(citiesSelection, citiesCountriesJoin, 0)
-            analysis.addBinding(countriesProjection, citiesCountriesJoin, 1)
+            analysis.addBinding(citiesFilter, citiesCountriesJoin, 0)
+            analysis.addBinding(countriesPropertySelection, citiesCountriesJoin, 1)
 
         println("      asserting persisted analysis")
 
@@ -292,11 +292,11 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         List(
             citiesFetcher,
             citiesTyped,
-            citiesProjection,
-            citiesSelection,
+            citiesPropertySelection,
+            citiesFilter,
             countriesFetcher,
             countriesTyped,
-            countriesProjection,
+            countriesPropertySelection,
             citiesCountriesJoin
         ).foreach { pi =>
             val pi2 = persistedAnalysis.pluginInstances.find(_.id == pi.id).get

@@ -685,7 +685,7 @@ class GraphView extends View[CanvasPack] {
     /**
      * @return count of selected vertexViews in this graphView
      */
-    private def getAllSelectedVerticesCount: Int = {
+    def getAllSelectedVerticesCount: Int = {
         var allSelectedCount = 0
         components.foreach { component =>
             allSelectedCount += component.getSelectedCount

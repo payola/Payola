@@ -1,13 +1,13 @@
 package cz.payola.web.initializer
 
+import cz.payola.domain.entities.Analysis
 import cz.payola.domain.entities.plugins.DataSource
 import cz.payola.domain.entities.plugins.concrete._
 import cz.payola.domain.entities.plugins.concrete.data._
 import cz.payola.domain.entities.plugins.concrete.query._
+import cz.payola.domain.entities.settings.OntologyCustomization
 import cz.payola.data.squeryl.SquerylDataContextComponent
 import cz.payola.web.shared.Payola
-import cz.payola.domain.entities.settings.OntologyCustomization
-import java.io.File
 
 /**
  * Running this object will drop the existing database, create a new one and fill it with the initial data.
@@ -31,8 +31,8 @@ object DatabaseInitializer extends App
         val payolaStoragePlugin = new PayolaStorage
         val cleanStoragePlugin = new OpenDataCleanStorage
         val concreteSparqlQueryPlugin = new ConcreteSparqlQuery
-        val projectionPlugin = new Projection
-        val selectionPlugin = new Selection
+        val propertySelectionPlugin = new PropertySelection
+        val filterPlugin = new Filter
         val typedPlugin = new Typed
         val join = new Join
         val unionPlugin = new Union
@@ -44,8 +44,8 @@ object DatabaseInitializer extends App
             cleanStoragePlugin,
             concreteSparqlQueryPlugin,
             concreteSparqlQueryPlugin,
-            projectionPlugin,
-            selectionPlugin,
+            propertySelectionPlugin,
+            filterPlugin,
             typedPlugin,
             join,
             unionPlugin,
@@ -93,30 +93,30 @@ object DatabaseInitializer extends App
             SparqlEndpointFetcher.endpointURLParameter, "http://dbpedia.org/sparql")
         val citiesTyped = typedPlugin.createInstance().setParameter(
             Typed.typeURIParameter, "http://dbpedia.org/ontology/City")
-        val citiesProjection = projectionPlugin.createInstance().setParameter(
-            Projection.propertyURIsParameter,
+        val citiesPropertySelection = propertySelectionPlugin.createInstance().setParameter(
+            PropertySelection.propertyURIsParameter,
             "http://dbpedia.org/ontology/populationDensity\nhttp://dbpedia.org/ontology/populationTotal")
-        val citiesSelection = selectionPlugin.createInstance().setParameter(
-            Selection.propertyURIParameter, "http://dbpedia.org/ontology/populationTotal"
+        val citiesFilter = filterPlugin.createInstance().setParameter(
+            Filter.propertyURIParameter, "http://dbpedia.org/ontology/populationTotal"
         ).setParameter(
-            Selection.operatorParameter, ">"
+            Filter.operatorParameter, ">"
         ).setParameter(
-            Selection.valueParameter, "2000000"
+            Filter.valueParameter, "2000000"
         )
-        bigCitiesPersisted.addPluginInstances(citiesFetcher, citiesTyped, citiesProjection, citiesSelection)
+        bigCitiesPersisted.addPluginInstances(citiesFetcher, citiesTyped, citiesPropertySelection, citiesFilter)
         bigCitiesPersisted.addBinding(citiesFetcher, citiesTyped)
-        bigCitiesPersisted.addBinding(citiesTyped, citiesProjection)
-        bigCitiesPersisted.addBinding(citiesProjection, citiesSelection)
+        bigCitiesPersisted.addBinding(citiesTyped, citiesPropertySelection)
+        bigCitiesPersisted.addBinding(citiesPropertySelection, citiesFilter)
 
         val countriesFetcher = sparqlEndpointPlugin.createInstance().setParameter(
             SparqlEndpointFetcher.endpointURLParameter, "http://dbpedia.org/sparql")
         val countriesTyped = typedPlugin.createInstance().setParameter(
             Typed.typeURIParameter, "http://dbpedia.org/ontology/Country")
-        val countriesProjection = projectionPlugin.createInstance().setParameter(
-            Projection.propertyURIsParameter, "http://dbpedia.org/ontology/areaTotal")
-        bigCitiesPersisted.addPluginInstances(countriesFetcher, countriesTyped, countriesProjection)
+        val countriesPropertySelection = propertySelectionPlugin.createInstance().setParameter(
+            PropertySelection.propertyURIsParameter, "http://dbpedia.org/ontology/areaTotal")
+        bigCitiesPersisted.addPluginInstances(countriesFetcher, countriesTyped, countriesPropertySelection)
         bigCitiesPersisted.addBinding(countriesFetcher, countriesTyped)
-        bigCitiesPersisted.addBinding(countriesTyped, countriesProjection)
+        bigCitiesPersisted.addBinding(countriesTyped, countriesPropertySelection)
 
         val citiesCountriesJoin = join.createInstance().setParameter(
             Join.propertyURIParameter, "http://dbpedia.org/ontology/country"
@@ -124,11 +124,11 @@ object DatabaseInitializer extends App
             Join.isInnerParameter, false
         )
         bigCitiesPersisted.addPluginInstances(citiesCountriesJoin)
-        bigCitiesPersisted.addBinding(citiesSelection, citiesCountriesJoin, 0)
-        bigCitiesPersisted.addBinding(countriesProjection, citiesCountriesJoin, 1)
+        bigCitiesPersisted.addBinding(citiesFilter, citiesCountriesJoin, 0)
+        bigCitiesPersisted.addBinding(countriesPropertySelection, citiesCountriesJoin, 1)
 
 
-        val expensiveContracts = new cz.payola.domain.entities.Analysis("Really expensive public contracts", Some(admin))
+        val expensiveContracts = new Analysis("Really expensive public contracts", Some(admin))
         expensiveContracts.isPublic = true
         val expensiveContractsPersisted = model.analysisRepository.persist(expensiveContracts)
 
@@ -159,23 +159,28 @@ object DatabaseInitializer extends App
             SparqlEndpointFetcher.endpointURLParameter, "http://ld.opendata.cz:8894/sparql")
         val contractTyped = typedPlugin.createInstance().setParameter(
             Typed.typeURIParameter, "http://purl.org/procurement/public-contracts#Contract")
-        val contractSelection = selectionPlugin.createInstance().setParameter(
-            Selection.propertyURIParameter, "http://purl.org/procurement/public-contracts#numberOfTenders"
+        val contractFilter = filterPlugin.createInstance().setParameter(
+            Filter.propertyURIParameter, "http://purl.org/procurement/public-contracts#numberOfTenders"
         ).setParameter(
-            Selection.operatorParameter, ">"
+            Filter.operatorParameter, ">"
         ).setParameter(
-            Selection.valueParameter, "120"
+            Filter.valueParameter, "120"
         )
-        val contractTitleProjection = projectionPlugin.createInstance().setParameter(
-            Projection.selectPropertyInfoParameter, false
+        val contractTitlePropertySelection = propertySelectionPlugin.createInstance().setParameter(
+            PropertySelection.selectPropertyInfoParameter, false
         ).setParameter(
-            Projection.propertyURIsParameter, "http://purl.org/dc/terms/title"
+            PropertySelection.propertyURIsParameter, "http://purl.org/dc/terms/title"
         )
 
-        manyTendersPersisted.addPluginInstances(contractFetcher, contractTyped, contractSelection, contractTitleProjection)
+        manyTendersPersisted.addPluginInstances(
+            contractFetcher,
+            contractTyped,
+            contractFilter,
+            contractTitlePropertySelection
+        )
         manyTendersPersisted.addBinding(contractFetcher, contractTyped)
-        manyTendersPersisted.addBinding(contractTyped, contractSelection)
-        manyTendersPersisted.addBinding(contractSelection, contractTitleProjection)
+        manyTendersPersisted.addBinding(contractTyped, contractFilter)
+        manyTendersPersisted.addBinding(contractFilter, contractTitlePropertySelection)
 
 
         // Persist the ontology customizations.
