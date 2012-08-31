@@ -3,7 +3,27 @@
 
 # Developer Guide
 
+Purpose of this document is to describe in depth implementation ideas behind the Payola and help the developers, who'd like to extend or modify the application, to get familiar with the project. 
+
 The Payola application consists of several layers and libraries that are all enclosed within a solution project `payola`. The following sections describe structure of the solution, the functionality hidden within the layers and libraries and their relations. For information how to install, compile and run the Payola, please refer to the [Installation Guide](https://raw.github.com/siroky/Payola/develop/docs/installation_guide.md).
+
+## Motivation
+
+The term *graph data* describes data consisting of entities and relations among them. Their main property is, that they have no or loosely defined (and abided) schema, which distincts them from the strictly defined data stored in the relational databases. Graph data are for example RDF data that are accessible on the internet as so called [Linked Data](http://linkeddata.org), or data that are provided by social networks such as Facebook or LinkedIn. Many companies also have their internal data in the form of graph data.
+
+So a tool that could interconnect, analyze and visualize the graph data is desired by many people nowadays. There already are some applications that provide such functions (<http://www.gooddata.com>, <http://www.google.com/publicdata/>, <http://opendata.socrata.com>), however those tools support only data in table-like format. They also have many general features, that may be applied even on graph data, e.g. allowing the users to create their analyses of the data and share or sell the analyses to others.
+
+There are already some tools, that are capable of visualizing the graph data, yet they're usually strictly fixed to just one data set. For example <http://obchodni-rejstrik.podnikani.cz/applet>.
+
+## Aim of the project
+
+The Payola is a web application, that allows its users to work with any graph data. That is to import the data to the application, analyze them and visualize them. The main functions are:
+
+- The user owns and manages his private data space. He can upload graph data there from his computer or provide an URL from which the data should be imported.
+- The user can share his data with other users.
+- The user can create and share data sources (entities that provide access to the graph data, for example a SPARQL endpoint).
+- The user can create, edit and share an analyses (tree-like structures where the data flow from the leaves to the root and are processed when passing through a node).
+- The user can browse through the data sources and the analysis results using a generic visualization tool. He can also alter the visualization using ontologies.
 
 ## Solution structure
 
