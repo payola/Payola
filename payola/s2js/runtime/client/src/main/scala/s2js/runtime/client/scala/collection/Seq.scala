@@ -22,6 +22,14 @@ trait Seq extends Iterable
     }
 
     @javascript("""
+        return self.getInternalJsArray().sort(function(a,b){
+            if (f(a,b)){ return -1; }
+            return 1;
+        });
+                """)
+    def sortWith(f: (Double, Double) => Boolean): Iterable = newInstance
+
+    @javascript("""
         for (var i in self.getInternalJsArray()) {
             f(self.getInternalJsArray()[i]);
         }

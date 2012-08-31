@@ -61,37 +61,32 @@ abstract class AnalysisVisualizer(analysis: Analysis) extends ComposedView
     }
 
     def renderSources(sources: ArrayBuffer[PluginInstanceView], renderBuffer: ArrayBuffer[PluginInstanceView]) {
-        sources.map {
-            s =>
-                renderPluginInstanceView(s)
-                renderBuffer -= s
+        sources.map { s =>
+            renderPluginInstanceView(s)
+            renderBuffer -= s
         }
     }
 
     private def setPredecessorsFromBindings(analysis: entities.Analysis) {
-        analysis.pluginInstanceBindings.map {
-            b =>
-                val buff = new ArrayBuffer[PluginInstanceView]()
-                instancesMap(b.targetPluginInstance.id).predecessors.map(buff.append(_))
-                buff.append(instancesMap(b.sourcePluginInstance.id))
-                instancesMap(b.targetPluginInstance.id).predecessors = buff
+        analysis.pluginInstanceBindings.sortWith((a,b) => (a.targetInputIndex < b.targetInputIndex)).map { b =>
+            val buff = new ArrayBuffer[PluginInstanceView]()
+            instancesMap(b.targetPluginInstance.id).predecessors.map(buff.append(_))
+            buff.append(instancesMap(b.sourcePluginInstance.id))
+            instancesMap(b.targetPluginInstance.id).predecessors = buff
         }
     }
 
     protected def fillRenderBuffers(analysis: entities.Analysis, sources: ArrayBuffer[PluginInstanceView],
         renderBuffer: ArrayBuffer[PluginInstanceView]) {
-        analysis.pluginInstances.map {
-            instance =>
+        analysis.pluginInstances.map { instance =>
+            val clientInstance = createPluginInstanceView(instance)
+            instancesMap.put(instance.id, clientInstance)
 
-                val clientInstance = createPluginInstanceView(instance)
+            if (isSource(instance, analysis)) {
+                sources += clientInstance
+            }
 
-                instancesMap.put(instance.id, clientInstance)
-
-                if (isSource(instance, analysis)) {
-                    sources += clientInstance
-                }
-
-                renderBuffer += clientInstance
+            renderBuffer += clientInstance
         }
     }
 
