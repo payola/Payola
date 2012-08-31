@@ -14,7 +14,7 @@ private object Wrapper
 
     val parameterSeparator = "&"
 
-    val requestStatusDone = 4
+    val requestReadyStateDone = 4
 
     def callSync(procedureName: String, parameters: ArrayBuffer[Any], parameterTypes: ArrayBuffer[String]): Any = {
         val request = createXmlHttpRequest("/RPC", isAsync = false)
@@ -27,7 +27,7 @@ private object Wrapper
 
         val request = createXmlHttpRequest("/RPC/async", isAsync = true)
         request.onreadystatechange = { _ =>
-            if (request.readyState == 4) {
+            if (request.readyState == requestReadyStateDone && request.status != 0) {
                 processRequestResult(request, successCallback, exceptionCallback)
             }
         }
@@ -46,25 +46,25 @@ private object Wrapper
         request
     }
 
-    private def processRequestResult(request: XMLHttpRequest, onSuccess: (Any => Unit),
-        onException: (Throwable => Unit)): Any = {
+    private def processRequestResult(request: XMLHttpRequest, onSuccess: Any => Unit,
+        onException: Throwable => Unit): Any = {
 
-        val validStatuses = List(200, 500)
-        val result = if (request.readyState == requestStatusDone && (validStatuses.contains(request.status))) {
-            try {
-                deserializer.deserialize(js.eval("(" + request.responseText + ")"))
-            } catch {
-                case error => {
-                    val description = error match {
-                        case e: RpcException => e.message
-                        case _ => error.toString
+        val result =
+            if (List(200, 500).contains(request.status)) {
+                try {
+                    deserializer.deserialize(js.eval("(" + request.responseText + ")"))
+                } catch {
+                    case error => {
+                        val description = error match {
+                            case e: RpcException => e.message
+                            case _ => error.toString
+                        }
+                        new RpcException("Exception during deserialization of the remote method result.", description)
                     }
-                    new RpcException("Exception during deserialization of the remote method result.", description)
                 }
+            } else {
+                new RpcException("The RPC call exited with status code " + request.status + ".")
             }
-        } else if (request.readyState == requestStatusDone) {
-            new RpcException("The RPC call exited with status code " + request.status + ".")
-        }
 
         result match {
             case throwable: Throwable => {
