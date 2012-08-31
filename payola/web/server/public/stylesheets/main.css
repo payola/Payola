@@ -169,8 +169,14 @@ input[type="checkbox"].active:after {
     vertical-align: top;
 }
 
-.successors .parameters {
-    width: 250px;
+.successors .params-wrapper {
+    width: 100%;
+    display: table !important;
+    table-layout: fixed;
+}
+
+.params-wrapper .parameters {
+    display: table-cell;
     overflow-x: auto;
 }
 
@@ -445,4 +451,9 @@ table .btn-toolbar .badge {
 
 .well.ui-state-hover {
     border: 1px solid black !important;
+}
+
+.successors .instance ul {
+    list-style-type: none;
+    margin: 0;
 }
