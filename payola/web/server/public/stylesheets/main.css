@@ -311,14 +311,18 @@ input[type="checkbox"].active:after {
 }
 
 .vitable .popover-content {
-    width: 472px;
-    height: 300px;
+    width: 292px;
+    height: 172px;
     overflow: auto;
 }
 
 .vitable .popover-inner {
-    width: 500px;
-    max-height: 375px;
+    width: 320px;
+    max-height: 270px;
+}
+
+.vitable dd, .vitable dt {
+    word-wrap: break-word;
 }
 
 .vitable .popover-title a {
@@ -437,4 +441,8 @@ table .btn-toolbar .badge {
 
 .profile-edit-div {
     margin-bottom: 10px;
+}
+
+.well.ui-state-hover {
+    border: 1px solid black !important;
 }
