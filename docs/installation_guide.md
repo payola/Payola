@@ -6,9 +6,9 @@
 
 Payola requires a [Scala](http://www.scala-lang.org) environment, which is supported on virtually any platform capable of running Java code - both Unix and Windows-based systems are fully supported. The system should have at least 1GB of memory dedicated to Payola itself.
 
-Aside from the actual Payola server, you need to have a running [Squeryl-compatible](http://squeryl.org) relational database for storing user data, a [Virtuoso](http://virtuoso.openlinksw.com) server for storing personal RDF data and a SMTP server for the plugin approval process. The Virtuoso server needs to be running on the same server as Payola is, or at least share the file system - when uploading private data, a path to a temporary file is passed to Virtuoso. The SMTP and relational database, may be running on a different server (this is configurable in the `payola.conf` file as described later on).
+Aside from the actual Payola server, you need to have a running [Squeryl-compatible](http://squeryl.org) relational database for storing user data, a [Virtuoso](http://virtuoso.openlinksw.com) server for storing personal RDF data and an SMTP server for the plugin approval process. The Virtuoso server needs to be running on the same server as Payola is, or at least share the same file system - when uploading private data, a path to a temporary file is passed to Virtuoso. The SMTP server and the relational database may be running on a different server (this is configurable in the `payola.conf` file as described later on).
 
-To work with Payola, a web browser capable of displaying HTML5 web pages is required. Payola takes advantage of many HTML5 features - keep your web browser up-to-date all the time. Recommended are the *latest versions* of WebKit-based browsers (e.g. Chrome, Safari), Firefox, Opera, or IE. A 1440x900 or larger display is highly recommended.
+To work with Payola, a web browser capable of displaying HTML5 web pages is required. Payola takes an advantage of many HTML5 features - keep your web browser up-to-date all the time. Recommended are the *latest versions* of WebKit-based browsers (e.g. Chrome, Safari), Firefox, Opera, or IE. A 1440x900 or larger display is highly recommended.
 
 ## Installation
 
@@ -43,13 +43,13 @@ Payola comes pre-configured to work with default settings of a Virtuoso server a
 
 #### User
 
-`admin.email` - Email of the admin user. A user with this email address also gets created when the initializer project is run.
+`admin.email` - Email of the admin user. A user with this email address also gets created when the initializer project is run. When a user uploads a plugin an email is sent to this address for the admin to approve the plugin, as well.
 
 #### Web
 
 `web.url` - URL of the website, by default `http://localhost:9000`. The URL must start with `http://` or `https://` and mustn't end with a trailing `/`.
 
-`web.mail.noreply` - Email that will be used as a no-reply email of the web application.
+`web.mail.noreply` - Email that will be used as a no-reply email address of the web application.
 
 #### Email
 
@@ -74,7 +74,11 @@ Payola comes pre-configured to work with default settings of a Virtuoso server a
 
 > **Payola will not start Virtuoso or H2 on its own. You need to configure them and run them by yourself.**
 
-As the cloned repository contains just source code, it is necessary to compile Payola in order to run it. Open a command line (console, terminal) and make `payola` subdirectory the current working directory (e.g. by `cd payola`). Launch SBT (using the `sbt.sh` command or the `sbt.bat` on Windows) and enter the following commands:
+As the cloned repository contains just source code, it is necessary to compile Payola in order to run it. Open a command line (console, terminal) and make `payola` subdirectory the current working directory (e.g. by `cd payola`). Launch SBT (using the `sbt.sh` command or the `sbt.bat` on Windows) ...
+
+>You can edit these commands in a text editor to change the amount of memory given to Payola. By default, Payola uses 1GB of memory (the `-Xmx` argument), 512MB of memory for the [permgen](http://en.wikipedia.org/wiki/Java_virtual_machine#Heap) (the `-XX:MaxPermSize` argument) and 2MB stack size (the `-Xss` argument).
+
+... and enter the following commands:
 
 <a name="run-initializer"></a>
 ```
@@ -90,8 +94,6 @@ As the cloned repository contains just source code, it is necessary to compile P
 Voilà! Your Payola server is running. The `initializer` project sets up your database to include an admin user (login `admin@payola.cz`, password `payola!`), a sample analysis and some data sources. You can, of course, remove those and create your own later.
 
 ![Installing and running Payola](https://raw.github.com/siroky/Payola/develop/docs/img/installscreen.png)
-
-You can edit these commands in a text editor to change the amount of memory given to Payola. By default, Payola uses 1GB of memory (the `-Xmx` argument), 512MB of memory for the [permgen](http://en.wikipedia.org/wiki/Java_virtual_machine#Heap) (the `-XX:MaxPermSize` argument) and 2MB stack size (the `-Xss` argument).
 
 > <a name="drop-create-warning"></a> **Warning:** The `initializer` project drops and recreates all tables in the database - hence all previous data will be lost. Run this project only when installing Payola for the first time or if you want to reset Payola to factory settings.
 
@@ -119,4 +121,4 @@ Once the server is running, enter the following address in your web browser:
 
 ><http://localhost:9000/>
 
-Of course, the port may be different depending on your configuration file (see section [Configuration](#configuration) for details).
+Of course, the port may vary depending on your configuration file (see section [Configuration](#configuration) for details).
