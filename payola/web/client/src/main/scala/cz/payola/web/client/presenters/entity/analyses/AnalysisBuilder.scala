@@ -28,21 +28,15 @@ import scala.Some
 class AnalysisBuilder(parentElementId: String) extends Presenter
 {
     protected val parentElement = document.getElementById(parentElementId)
-
     protected var allPlugins: Seq[Plugin] = List()
-
     protected var allSources: Seq[DataSource] = List()
-
+    protected val instancesMap = new mutable.HashMap[String, PluginInstanceView]
     protected var analysisId = ""
-
     protected var branches = new ArrayBuffer[PluginInstanceView]
-
     protected var nameComponent = new InputControl(
         "Analysis name",
         new TextInput("init-name", "", "Enter analysis name"), Some("span2")
     )
-
-    protected val instancesMap = new mutable.HashMap[String, PluginInstanceView]
 
     def initialize() {
         val nameDialog = new Modal("Please, enter the name of the new analysis", List(nameComponent))
@@ -102,7 +96,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
         }
     }
 
-    def mergeBranches(instances: mutable.HashMap[Int, PluginInstanceView], buffer: ArrayBuffer[PluginInstanceView],
+    private def mergeBranches(instances: mutable.HashMap[Int, PluginInstanceView], buffer: ArrayBuffer[PluginInstanceView],
         target: Plugin, view: AnalysisEditorView, mergeDialog: MergeAnalysisBranchesDialog) {
 
         var i = 0
