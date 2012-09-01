@@ -13,7 +13,6 @@ import cz.payola.domain.entities.settings.OntologyCustomization
 trait AnalysisRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
-
     private lazy val pluginInstanceBindingRepository = new LazyTableRepository[PluginInstanceBinding](
         schema.pluginInstanceBindings, PluginInstanceBinding)
 
@@ -30,11 +29,15 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
         with PluginInstanceTableRepository[PluginInstance]
     {
         protected val pluginInstanceLikeTable = schema.pluginInstances
+
         protected val pluginInstanceLikeEntityConverter = PluginInstance
 
         val booleanParameterValuesRelation = schema.booleanParameterValuesOfPluginInstances
+
         val floatParameterValuesRelation = schema.floatParameterValuesOfPluginInstances
+
         val intParameterValuesRelation = schema.intParameterValuesOfPluginInstances
+
         val stringParameterValuesRelation = schema.stringParameterValuesOfPluginInstances
 
         protected def getPluginInstanceLikeId(parameterValue: Option[ParameterValue[_]]) = {
@@ -42,11 +45,11 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
         }
 
         /**
-          * When an OntologyCustomization is removed, it should be removed as Default customization from analyses
-          * @param customizationId ID of removed OntologyCustomizations
-          */
+         * When an OntologyCustomization is removed, it should be removed as Default customization from analyses
+         * @param customizationId ID of removed OntologyCustomizations
+         */
         def ontologyCustomizationIsRemoved(customizationId: String) {
-            selectWhere(_.defaultCustomizationId === Some(customizationId)).foreach{ a =>
+            selectWhere(_.defaultCustomizationId === Some(customizationId)).foreach {a =>
                 a.defaultOntologyCustomization = None
                 persist(a)
             }
@@ -61,7 +64,7 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
                 case a: cz.payola.domain.entities.Analysis => {
                     a.pluginInstances.map(pi => analysis.associatePluginInstance(PluginInstance(pi)))
                     a.pluginInstanceBindings.map(b => analysis.associatePluginInstanceBinding(PluginInstanceBinding(b)))
-                    analysis.defaultOntologyCustomization =  a.defaultOntologyCustomization
+                    analysis.defaultOntologyCustomization = a.defaultOntologyCustomization
                 }
             }
 
@@ -90,14 +93,14 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
         }
 
         private def _loadAnalysis(analysis: Analysis) {
-            wrapInTransaction{
+            wrapInTransaction {
                 val pluginInstancesByIds =
                     loadPluginInstancesByFilter(pi => pi.asInstanceOf[PluginInstance].analysisId === analysis.id)
                         .map(p => (p.id, p.asInstanceOf[PluginInstance])).toMap
                 val instanceBindings = pluginInstanceBindingRepository.selectWhere(b => b.analysisId === analysis.id)
 
                 // Set plugin instances to bindings
-                instanceBindings.foreach{ b =>
+                instanceBindings.foreach {b =>
                     b.sourcePluginInstance = pluginInstancesByIds(b.sourcePluginInstanceId)
                     b.targetPluginInstance = pluginInstancesByIds(b.targetPluginInstanceId)
                 }
@@ -105,7 +108,8 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
                 // Set loaded plugins, plugin instances and its bindings to analysis, load default customization
                 analysis.pluginInstances = pluginInstancesByIds.values.toSeq
                 analysis.pluginInstanceBindings = instanceBindings
-                analysis.defaultOntologyCustomization = _getDefaultOntologyCustomization(analysis.defaultCustomizationId)
+                analysis.defaultOntologyCustomization = _getDefaultOntologyCustomization(analysis
+                    .defaultCustomizationId)
             }
         }
 
@@ -113,4 +117,5 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
             id.flatMap(ontologyCustomizationRepository.getById(_))
         }
     }
+
 }

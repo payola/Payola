@@ -4,9 +4,9 @@ import cz.payola.data.squeryl.entities.plugins.Parameter
 import cz.payola.data.squeryl.SquerylDataContextComponent
 
 /**
-  * This object converts [[cz.payola.common.entities.plugins.parameters.IntParameter]]
-  * to [[cz.payola.data.squeryl.entities.plugins.parameters.IntParameter]]
-  */
+ * This object converts [[cz.payola.common.entities.plugins.parameters.IntParameter]]
+ * to [[cz.payola.data.squeryl.entities.plugins.parameters.IntParameter]]
+ */
 object IntParameter
 {
     def apply(p: cz.payola.common.entities.plugins.parameters.IntParameter)
@@ -32,13 +32,15 @@ class IntParameter(
 
     override def defaultValue = _defaultValueDb
 
-    def parameterValues: Seq[IntParameterValue] = wrapInTransaction { _valuesQuery.toList }
+    def parameterValues: Seq[IntParameterValue] = wrapInTransaction {
+        _valuesQuery.toList
+    }
 
     /**
-      * Associates specified [[cz.payola.data.squeryl.entities.plugins.parameters.IntParameter]].
-      *
-      * @param p - [[cz.payola.data.squeryl.entities.plugins.parameters.IntParameter]] to associate
-      */
+     * Associates specified [[cz.payola.data.squeryl.entities.plugins.parameters.IntParameter]].
+     *
+     * @param p - [[cz.payola.data.squeryl.entities.plugins.parameters.IntParameter]] to associate
+     */
     def associateParameterValue(p: IntParameterValue) {
         context.schema.associate(p, _valuesQuery)
     }

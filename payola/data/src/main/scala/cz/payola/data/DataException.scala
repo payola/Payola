@@ -42,9 +42,9 @@ object DataException
 class DataException(message: String = "", cause: Throwable = null) extends PayolaException(message, cause)
 {
     /**
-      * Returns whether the cause is a violation of an unique key in the database.
-      * @see ftp://ftp.software.ibm.com/ps/products/db2/info/vr6/htm/db2m0/db2m002.htm#ToC_82
-      */
+     * Returns whether the cause is a violation of an unique key in the database.
+     * @see ftp://ftp.software.ibm.com/ps/products/db2/info/vr6/htm/db2m0/db2m002.htm#ToC_82
+     */
     def isUniqueKeyViolation: Boolean = {
         cause match {
             case r: RuntimeException => r.getCause match {

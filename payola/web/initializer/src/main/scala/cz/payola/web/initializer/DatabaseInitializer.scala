@@ -66,7 +66,7 @@ object DatabaseInitializer extends App
 
         // Create plugins directory
         val pluginsDirectory = Payola.settings.pluginDirectory
-        if (!pluginsDirectory.exists()){
+        if (!pluginsDirectory.exists()) {
             pluginsDirectory.mkdirs()
         }
 
@@ -138,7 +138,8 @@ object DatabaseInitializer extends App
             ConcreteSparqlQuery.queryParameter,
             """
                 CONSTRUCT {
-                	?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/procurement/public-contracts#Contract> .
+                	?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+                	    <http://purl.org/procurement/public-contracts#Contract> .
                 	?s <http://purl.org/goodrelations/v1#hasCurrencyValue> ?d .
                 	?s <http://purl.org/dc/terms/title> ?e .
                 } WHERE {
@@ -182,13 +183,55 @@ object DatabaseInitializer extends App
         manyTendersPersisted.addBinding(contractTyped, contractFilter)
         manyTendersPersisted.addBinding(contractFilter, contractTitlePropertySelection)
 
-
         // Persist the ontology customizations with some default colors and strokes.
         val url = "http://opendata.cz/pco/public-contracts.xml"
         val customization = OntologyCustomization.empty(url, "Public contracts", Some(admin))
         customization.isPublic = true;
 
+        getPublicContractsOntologySettings.foreach { classSettings =>
+            val classCustomization = customization.classCustomizations.find(_.uri == classSettings._1).get
+            classCustomization.fillColor = classSettings._2._1._1
+            classCustomization.radius = classSettings._2._1._2
+            classCustomization.glyph = classSettings._2._1._3
+
+            classSettings._2._2.foreach { propertySettings =>
+                val propCustomization = classCustomization.propertyCustomizations.find(_.uri == propertySettings._1).get
+                propCustomization.strokeColor = propertySettings._2._1
+                propCustomization.strokeWidth = propertySettings._2._2
+            }
+        }
+
         model.ontologyCustomizationRepository.persist(customization)
     }
+
+    /*
+      This returns list contains settings for the Public contracts ontology, the form is:
+      List of (classUrl, ClassCustomizationSettings) tuples, where
+          ClassCustomizationSettings is tuple of ( (color, radius, glyph), List of PropertyCustomizationSettings ),
+              where PropertyCustomizationSetting is tuple of ( propertyUrl, tuple of (strokeColor, strokeWidth) ).
+    */
+    private def getPublicContractsOntologySettings = List(
+        (
+            "http://purl.org/procurement/public-contracts#Tender",
+            (
+                ("rgba(154,50,205,1.0)", 25, "%"),
+                List(
+                    ("http://purl.org/procurement/public-contracts#offeredPrice", ("rgba(176,23,31,1.0)", 3)),
+                    ("http://purl.org/procurement/public-contracts#supplier", ("rgba(255,174,185,1.0)", 2))
+                )
+            )
+        ),
+        (
+            "http://purl.org/procurement/public-contracts#Contract",
+            (
+                ("rgba(34,139,34,1.0)", 30, "'"),
+                List(
+                    ("http://purl.org/procurement/public-contracts#numberOfTenders", ("rgba(0,191,255,1.0)", 2)),
+                    ("http://purl.org/procurement/public-contracts#contractingAuthority", ("rgba(238,238,0,1.0)", 3)),
+                    ("http://purl.org/procurement/public-contracts#contractPrice", ("rgba(176,23,31,1.0)", 2))
+                )
+            )
+        )
+    )
 }
 

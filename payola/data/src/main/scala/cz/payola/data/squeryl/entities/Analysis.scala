@@ -7,15 +7,15 @@ import scala.collection.mutable
 import cz.payola.data.squeryl._
 
 /**
-  * This object converts [[cz.payola.common.entities.Analysis]] to [[cz.payola.data.squeryl.entities.Analysis]]
-  */
+ * This object converts [[cz.payola.common.entities.Analysis]] to [[cz.payola.data.squeryl.entities.Analysis]]
+ */
 object Analysis extends EntityConverter[Analysis]
 {
     def convert(entity: AnyRef)(implicit context: SquerylDataContextComponent): Option[Analysis] = {
         entity match {
             case e: Analysis => Some(e)
             case e: cz.payola.common.entities.Analysis
-                    => Some(new Analysis(e.id, e.name, e.owner.map(User(_)), e.isPublic, e.description))
+            => Some(new Analysis(e.id, e.name, e.owner.map(User(_)), e.isPublic, e.description))
             case _ => None
         }
     }
@@ -38,11 +38,13 @@ class Analysis(override val id: String, name: String, o: Option[User], var _isPu
     type DomainParameterValueType = plugins.ParameterValue[_]
 
     _pluginInstances = null;
+
     private lazy val _pluginInstancesQuery = context.schema.analysesPluginInstances.left(this)
 
     _pluginInstanceBindings = null
+
     private lazy val _pluginInstancesBindingsQuery = context.schema.analysesPluginInstancesBindings.left(this)
-    
+
     _defaultCustomization = null
 
     var defaultCustomizationId: Option[String] = None
@@ -73,7 +75,7 @@ class Analysis(override val id: String, name: String, o: Option[User], var _isPu
     }
 
     def pluginInstances_=(value: Seq[PluginInstanceType]) {
-        _pluginInstances =  mutable.ArrayBuffer(value: _*)
+        _pluginInstances = mutable.ArrayBuffer(value: _*)
     }
 
     override def pluginInstanceBindings: immutable.Seq[PluginInstanceBindingType] = {
@@ -84,7 +86,7 @@ class Analysis(override val id: String, name: String, o: Option[User], var _isPu
         _pluginInstanceBindings.toList
     }
 
-    def pluginInstanceBindings_=(value: Seq[PluginInstanceBindingType]){
+    def pluginInstanceBindings_=(value: Seq[PluginInstanceBindingType]) {
         _pluginInstanceBindings = mutable.ArrayBuffer(value: _*)
     }
 

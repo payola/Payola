@@ -12,12 +12,12 @@ trait TableRepositoryComponent
     self: SquerylDataContextComponent =>
 
     /**
-      * A repository that fetches the entities from a Squeryl table.
-      * @param table The corresponding table with the entities.
-      * @param entityConverter A converter that converts to instances that can be stored into the table.
-      * @tparam A Type of the entities in the repository.
-      * @tparam B Type of select query result.
-      */
+     * A repository that fetches the entities from a Squeryl table.
+     * @param table The corresponding table with the entities.
+     * @param entityConverter A converter that converts to instances that can be stored into the table.
+     * @tparam A Type of the entities in the repository.
+     * @tparam B Type of select query result.
+     */
     abstract class TableRepository[A <: Entity, B](val table: Table[A],
         val entityConverter: EntityConverter[A])
         extends Repository[A]
@@ -45,57 +45,57 @@ trait TableRepositoryComponent
         }
 
         /**
-          * Selects all entities that pass the specified entity filter.
-          * @param entityFilter A filter that excludes entities from the result.
-          * @return The selected entities.
-          */
+         * Selects all entities that pass the specified entity filter.
+         * @param entityFilter A filter that excludes entities from the result.
+         * @return The selected entities.
+         */
         private[squeryl] def selectWhere(entityFilter: A => LogicalBoolean, pagination: Option[PaginationInfo] = None):
-            Seq[A] = wrapInTransaction {
-                // Define select query
-                val query = select(getSelectQuery(entityFilter))
+        Seq[A] = wrapInTransaction {
+            // Define select query
+            val query = select(getSelectQuery(entityFilter))
 
-                // Simple pagination
-                pagination.map(p => query.drop(p.skip).take(p.limit)).getOrElse(query)
+            // Simple pagination
+            pagination.map(p => query.drop(p.skip).take(p.limit)).getOrElse(query)
         }
 
         /**
-          * Selects the first entity that passes the specified entity filter.
-          * @param entityFilter A filter that excludes entites from the result.
-          * @return The selected entity.
-          */
+         * Selects the first entity that passes the specified entity filter.
+         * @param entityFilter A filter that excludes entites from the result.
+         * @return The selected entity.
+         */
         private[squeryl] def selectOneWhere(entityFilter: A => LogicalBoolean): Option[A] = {
             selectWhere(entityFilter).headOption
         }
 
         /**
-          * Executes the specified query and returns its results.
-          * @param query The query to execute.
-          * @return Results of the query.
-          */
+         * Executes the specified query and returns its results.
+         * @param query The query to execute.
+         * @return Results of the query.
+         */
         protected def select(query: Query[B]): Seq[A] = schema.wrapInTransaction {
             processSelectResults(query.toList)
         }
 
         /**
-          * Returns a query that should be used when selecting entities from the database.
-          * @param entityFilter Filters entities that should be selected.
-          * @return The select query.
-          */
+         * Returns a query that should be used when selecting entities from the database.
+         * @param entityFilter Filters entities that should be selected.
+         * @return The select query.
+         */
         protected def getSelectQuery(entityFilter: A => LogicalBoolean): Query[B]
 
         /**
-          * Processes results of the select query.
-          * @param results The results to process.
-          * @return Entities based on the selection results.
-          */
+         * Processes results of the select query.
+         * @param results The results to process.
+         * @return Entities based on the selection results.
+         */
         protected def processSelectResults(results: Seq[B]): Seq[A]
 
         /**
-          * Persists the specified entity to the specified table.
-          * @param entity The entity to persist.
-          * @param table Tha table to persist the entity int.
-          * @tparam C Type of the entity.
-          */
+         * Persists the specified entity to the specified table.
+         * @param entity The entity to persist.
+         * @param table Tha table to persist the entity int.
+         * @tparam C Type of the entity.
+         */
         protected def persist[C <: Entity](entity: C, table: Table[C]) {
             schema.persist(entity, table)
         }
@@ -121,7 +121,6 @@ trait TableRepositoryComponent
         extends NamedEntityRepository[A]
     {
         self: TableRepository[A, _] =>
-
         def getByName(name: String): Option[A] = selectOneWhere(_.name === name)
     }
 
@@ -134,7 +133,6 @@ trait TableRepositoryComponent
         extends OptionallyOwnedEntityRepository[A]
     {
         self: TableRepository[A, B] =>
-
         def getAllByOwnerId(ownerId: Option[String]): Seq[A] = selectWhere(_.ownerId === ownerId).sortBy(_.name)
     }
 
@@ -144,19 +142,18 @@ trait TableRepositoryComponent
      * @tparam B Result type of database query, when entity is load, in most cases it is type [(A, Option[User])]
      */
     trait ShareableEntityTableRepository[A <: Entity
-            with ShareableEntity with OptionallyOwnedEntity with NamedEntity, B]
+        with ShareableEntity with OptionallyOwnedEntity with NamedEntity, B]
         extends OptionallyOwnedEntityTableRepository[A, B]
         with ShareableEntityRepository[A]
     {
         self: TableRepository[A, B] =>
-
         def getAllPublic: Seq[A] = selectWhere(_.isPublic === true).sortBy(_.name)
     }
 
     /**
-      * A repository that doesn't use any special select query for entity selection. No related entities are selected,
-      * therefore it's called lazy.
-      */
+     * A repository that doesn't use any special select query for entity selection. No related entities are selected,
+     * therefore it's called lazy.
+     */
     class LazyTableRepository[A <: Entity](table: Table[A], entityConverter: EntityConverter[A])
         extends TableRepository[A, A](table, entityConverter)
     {
@@ -183,13 +180,13 @@ trait TableRepositoryComponent
         protected def getSelectQuery(entityFilter: A => LogicalBoolean): Query[(A, Option[User])] = {
             join(table, schema.users.leftOuter)((e, o) =>
                 where(entityFilter(e))
-                select(e, o)
-                on(e.ownerId === o.map(_.id))
+                    select(e, o)
+                    on (e.ownerId === o.map(_.id))
             )
         }
 
         protected def processSelectResults(results: Seq[(A, Option[User])]): Seq[A] = {
-            results.groupBy(_._1).map { r =>
+            results.groupBy(_._1).map {r =>
                 val entity = r._1
                 entity.owner = r._2.head._2
 
@@ -197,4 +194,5 @@ trait TableRepositoryComponent
             }(collection.breakOut)
         }
     }
+
 }

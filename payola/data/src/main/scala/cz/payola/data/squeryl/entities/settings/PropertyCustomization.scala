@@ -13,7 +13,7 @@ object PropertyCustomization extends EntityConverter[PropertyCustomization]
         entity match {
             case p: PropertyCustomization => Some(p)
             case p: cz.payola.common.entities.settings.PropertyCustomization
-                    => Some(new PropertyCustomization(p.id, p.uri, p.strokeColor, p.strokeWidth))
+            => Some(new PropertyCustomization(p.id, p.uri, p.strokeColor, p.strokeWidth))
             case _ => None
         }
     }

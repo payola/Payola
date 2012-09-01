@@ -5,10 +5,10 @@ import cz.payola.data.squeryl.entities.plugins.parameters._
 import cz.payola.data.squeryl._
 
 /**
-  * This object converts [[cz.payola.common.entities.plugins.ParameterValue]] to proper parameter value
-  * in [[cz.payola.data.squeryl.entities.plugins.parameters]] package.
-  *
-  */
+ * This object converts [[cz.payola.common.entities.plugins.ParameterValue]] to proper parameter value
+ * in [[cz.payola.data.squeryl.entities.plugins.parameters]] package.
+ *
+ */
 object ParameterValue extends EntityConverter[ParameterValue[_]]
 {
     def convert(entity: AnyRef)
@@ -52,5 +52,7 @@ trait ParameterValue[A] extends cz.payola.domain.entities.plugins.ParameterValue
      * Sets the parameter from which this parameter value is derived. Called when parameter value is fetched from DB.
      * @param value Parameter from which this parameter value is derived
      */
-    def parameter_=(value: Parameter[_]) { _parameter = value.asInstanceOf[ParameterType] }
+    def parameter_=(value: Parameter[_]) {
+        _parameter = value.asInstanceOf[ParameterType]
+    }
 }

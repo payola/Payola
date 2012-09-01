@@ -22,7 +22,6 @@ trait SquerylDataContextComponent
     with OntologyRepositoryComponent
 {
     self: RdfStorageComponent with PluginCompilerComponent =>
-
     /**
      * Implicit context
      */
