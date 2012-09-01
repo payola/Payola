@@ -1,11 +1,14 @@
-package cz.payola.web.client.presenters
+package cz.payola.web.client.presenters.entity
 
 import s2js.compiler.javascript
 import cz.payola.web.shared.DomainData
+import cz.payola.web.client.Presenter
 
-class GroupEdit(groupId: String)
+class GroupEdit(groupId: String) extends Presenter
 {
-    bindSelect
+    def initialize {
+        bindSelect
+    }
 
     @javascript(
         """
@@ -32,13 +35,12 @@ class GroupEdit(groupId: String)
         """)
     def bindSelect {}
 
-    def fetchUsersByQuery(term: String, itemCallback: (String, String) => Unit, callback: () => Unit){
-        DomainData.searchMembersAvailableForGroup(groupId, term){ users =>
-            users.map{ u =>
+    def fetchUsersByQuery(term: String, itemCallback: (String, String) => Unit, callback: () => Unit) {
+        DomainData.searchMembersAvailableForGroup(groupId, term) { users =>
+            users.map { u =>
                 itemCallback(u.id, u.name)
             }
             callback()
-        }{ _ => }
+        } { _ =>}
     }
-
 }

@@ -7,8 +7,17 @@ import cz.payola.common.PayolaException
 
 trait Presenter
 {
+    /**
+     * This method should contain code needed to initialize the presenter, moreover, it should be called after
+     * creation of a new Presenter instance.
+     */
     def initialize()
 
+    /**
+     * Displays a Modal dialog which cannot be closed. The dialog contains an error message, which is taken from the
+     * passed Throwable parameter and a stacktrace, if available.
+     * @param error Cause of the fatal error.
+     */
     def fatalErrorHandler(error: Throwable) {
         // Unblock the page so the error description can be selected.
         unblockPage()

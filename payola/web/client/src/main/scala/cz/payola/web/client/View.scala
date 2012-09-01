@@ -51,6 +51,19 @@ object View
     }
 }
 
+/**
+ * The View trait is a base trait for all the components which one can implement. All such components should be derived
+ * from this trait. By doing that, you'll get common interface for all the view components, as well as some
+ * expected behaviour.
+ *
+ * The trait needs you to implement methods which defines:
+ * - how the view is rendered
+ * - how the view is destroyed
+ * - how the DOM element representing the view can be reached
+ *
+ * It comes with implemented functionality - blocking and unblocking the UI of the view. This is done while using
+ * the companion object of this trait.
+ */
 trait View
 {
     /**
@@ -64,12 +77,23 @@ trait View
      */
     def destroy()
 
+    /**
+     * This method should return the DOM element which contains the whole view. It is used to block the user
+     * interface to avoid the user to click on nested elements, etc.
+     */
     def blockHtmlElement: html.Element
 
+    /**
+     * Prevents the user from interacting with the view
+     * @param message Message which is displayed to the user
+     */
     def block(message: String = "") {
         View.block(blockHtmlElement, message)
     }
 
+    /**
+     * Stop blocking the UI
+     */
     def unblock() {
         View.unblock(blockHtmlElement)
     }
