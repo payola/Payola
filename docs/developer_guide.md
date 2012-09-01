@@ -769,8 +769,8 @@ The RPC mechanism provides an API to make you able to secure the RPC calls. This
 
 To enable this, you need to annotate your remote method with the `@secured` annotation. If all the methods in a remote object should be secured, you can annotate just the object itself. If a method is annotated with the secured annotation, it is expected to have one more parameter of one of the following types:
 
-- Option&#91;User&#93; (with default value scala.None)
-- User (with default value null)
+- `Option[User]`(with default value scala.None)
+- `User` (with default value null)
 
 > The User class is from the package cz.payola.domain.entities
 > 
