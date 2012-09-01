@@ -23,7 +23,7 @@ If you are a developer, you can also contribute with your own analytical plugin 
 - Public website with community around a specific type of RDF data.
 - Company/government website to present RDF data to the public.
 
-## Installation & Running
+## Setting up
 
 Prerequisities of the Payola are installed and running local Virtuoso server and H2 database. The following text assumes, that both are installed with default settings. It's just a head start, for complete description of installation and configuration, see the [Installation Guide](https://github.com/siroky/Payola/blob/develop/docs/installation_guide.md)
 
@@ -40,3 +40,11 @@ First of all, clone the Payola git repository: `git://github.com/siroky/Payola.g
 ```
 
 Voilà! Your Payola server is running. The initializer project sets up your database to include an admin user (login admin@payola.cz, password payola!), a sample analysis and some data sources. You can, of course, remove those and create your own later.
+
+## Authors & License
+
+- [Jirka Helmich](https://github.com/teuzz)
+- [Ondra Heřmánek](https://github.com/onashackem)
+- [Ondřej Kudláček](https://github.com/kudlondr)
+- [Honza Široký](https://github.com/siroky)
+- [Kryštof Váša](https://github.com/charlieMonroe)
