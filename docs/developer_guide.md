@@ -1040,23 +1040,25 @@ The most important decision for animations was whether to use HTML5 Web Workers 
 
 > TODO: O.K. mention the SPARQL query execution tool
 
+<a name="used_libraries"></a>
 ## Used libraries, frameworks & tools
+
 While developing the Payola, we used the following technologies:
 
-- [SBT 0.11.2](https://github.com/harrah/xsbt/wiki/) (Scala Build Tool) 
-- [Apache Jena 2.7.0-incubating](http://jena.apache.org/) (Java framework for building Semantic Web applications)
-- [Squeryl](http://squeryl.org/) (Scala ORM)
-- [Play! 2.0](http://www.playframework.org/) Scala MVC web framework
-- [jQuery](http://jquery.com/) JavaScript Library
-- [jQuery autosize](http://www.jacklmoore.com/autosize) (jQuery plugin for autosizing textareas)
+- [SBT 0.11.2](https://github.com/harrah/xsbt/wiki/) (Scala Build Tool) - [License](https://github.com/harrah/xsbt/blob/0.11/LICENSE)
+- [Apache Jena 2.7.0-incubating](http://jena.apache.org/) (Java framework for building Semantic Web applications) - [License](http://jena.sourceforge.net/license.html)
+- [Squeryl](http://squeryl.org/) (Scala ORM) - [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0.html)
+- [Play! 2.0](http://www.playframework.org/) (Scala MVC web framework)- [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0.html)
+- [jQuery](http://jquery.com/) (JavaScript Library) - [MIT License](https://github.com/jquery/jquery/blob/master/MIT-LICENSE.txt)
+- [jQuery autosize](http://www.jacklmoore.com/autosize) (jQuery plugin for autosizing textareas) - [MIT License](http://opensource.org/licenses/mit-license.php)
 - [jQuery blockUI](http://jquery.malsup.com/block/) (jQuery plugin for blocking UI nicely)
-- [LiveQuery](http://docs.jquery.com/Plugins/livequery) (jQuery plugin)
-- [Twitter Bootstrap](http://twitter.github.com/bootstrap/) (collection of CSS and JS code from Twitter)
-- [Colorpicker for bootstrap](http://www.eyecon.ro/bootstrap-colorpicker/) JS module for Twitter Bootstrap
-- [Ace](http://ace.ajax.org/) (web editor for programming languages with syntax highlighting)
-- [Select2](http://ivaynberg.github.com/select2/) (JavaScript autocomplete plugin)
-- [sprintf](http://code.google.com/p/sprintf/) (SprintF implementation for JS)
-- [Flot](http://code.google.com/p/flot/) (JavaScript charts plugin)
+- [LiveQuery](http://docs.jquery.com/Plugins/livequery) (jQuery plugin) - [MIT License](http://opensource.org/licenses/mit-license.php)
+- [Twitter Bootstrap](http://twitter.github.com/bootstrap/) (collection of CSS and JS code from Twitter) - [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0.html)
+- [Colorpicker for bootstrap](http://www.eyecon.ro/bootstrap-colorpicker/) (JS module for Twitter Bootstrap)
+- [Ace](http://ace.ajax.org/) (web editor for programming languages with syntax highlighting) - [Mozilla tri-license](http://www.mozilla.org/MPL/)
+- [Select2](http://ivaynberg.github.com/select2/) (JavaScript autocomplete plugin) - [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0.html)
+- [sprintf](http://code.google.com/p/sprintf/) (SprintF implementation for JS) - [BSD License](http://opensource.org/licenses/bsd-license.php)
+- [Flot](http://code.google.com/p/flot/) (JavaScript charts plugin) - [MIT License](http://opensource.org/licenses/mit-license.php)
 
 ## Unit tests
 

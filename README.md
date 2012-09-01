@@ -25,7 +25,7 @@ If you are a developer, you can also contribute with your own analytical plugin 
 
 ## Setting up
 
-Prerequisities of the Payola are installed and running local Virtuoso server and H2 database. The following text assumes, that both are installed with default settings. It's just a head start, for complete description of installation and configuration, see the [Installation Guide](https://github.com/siroky/Payola/blob/develop/docs/installation_guide.md)
+Prerequisities of the Payola are installed and running local Virtuoso server and H2 database. The following text assumes, that both are installed with default settings. It's just a head start, for complete description of installation and configuration, see the [Installation Guide](https://github.com/siroky/Payola/blob/develop/docs/installation_guide.md).
 
 First of all, clone the Payola git repository: `git://github.com/siroky/Payola.git` to a local folder. As the cloned repository contains just source code, it is necessary to compile Payola in order to run it. Open a command line (console, terminal) and make payola subdirectory the current working directory (e.g. by `cd payola`). Launch SBT (using the sbt.sh command or the sbt.bat on Windows) and enter the following commands:
 
@@ -43,8 +43,24 @@ Voilà! Your Payola server is running. The initializer project sets up your data
 
 ## Authors & License
 
+© Copyright 2012
+
 - [Jirka Helmich](https://github.com/teuzz)
 - [Ondra Heřmánek](https://github.com/onashackem)
 - [Ondřej Kudláček](https://github.com/kudlondr)
 - [Honza Široký](https://github.com/siroky)
 - [Kryštof Váša](https://github.com/charlieMonroe)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+### License acknowledgements
+
+Payola is built on top of other libraries and tools which we gratefully acknowledge: [details of these libraries, their version numbers and licenses](https://github.com/siroky/Payola/blob/develop/docs/developer_guide.md#used_libraries).
