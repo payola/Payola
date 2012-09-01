@@ -180,6 +180,10 @@ input[type="checkbox"].active:after {
     overflow-x: auto;
 }
 
+.editable.instance .params-wrapper .parameters {
+    overflow-x: hidden;
+}
+
 .successors+.successors {
     margin-left: 10px;
 }
@@ -456,4 +460,10 @@ table .btn-toolbar .badge {
 .successors .instance ul {
     list-style-type: none;
     margin: 0;
+}
+
+.main-header {
+    margin: 0px;
+    padding: 0px;
+    padding-bottom: 15px;
 }
