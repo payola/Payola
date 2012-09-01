@@ -1,6 +1,7 @@
 package cz.payola.domain.entities.plugins.concrete.data
 
 import scala.collection.immutable
+import scala.collection.JavaConversions._
 import cz.payola.domain.IDGenerator
 import cz.payola.domain.entities.plugins._
 import cz.payola.domain.entities.plugins.concrete.DataFetcher
@@ -27,13 +28,31 @@ sealed class SparqlEndpointFetcher(name: String, inputCount: Int, parameters: im
     }
 
     def executeQuery(instance: PluginInstance, query: String): Graph = {
-        usingDefined(getEndpointURL(instance), getGraphURIs(instance)) { (endpointURL, graphURIs) =>
-            // Remove the graph URIs specified directly in the query and use the ones specified in the endpoint.
+        usingDefined(getEndpointURL(instance), getGraphURIs(instance)) { (endpointURL, endpointGraphURIs) =>
             val sparqlQuery = QueryFactory.create(query)
-            sparqlQuery.getGraphURIs.clear()
-            graphURIs.foreach(sparqlQuery.addGraphURI(_))
+            val queryGraphURIs = sparqlQuery.getGraphURIs.toList
 
-            new SparqlEndpoint(endpointURL).executeQuery(sparqlQuery.toString)
+            // Replace the graph URIs with intersection of them and URIs specified in the endpoint. If any of the two
+            // collections is empty, then it represents all graphs.
+            val union = endpointGraphURIs.union(queryGraphURIs)
+            val intersection = endpointGraphURIs.intersect(queryGraphURIs)
+            val graphURIs =
+                if (endpointGraphURIs.isEmpty || queryGraphURIs.isEmpty) {
+                    Some(union)
+                } else if (intersection.nonEmpty) {
+                    Some(intersection)
+                } else {
+                    None
+                }
+
+            // Execute the query only if the intersection wasn't empty.
+            val result = graphURIs.map { uris =>
+                sparqlQuery.getGraphURIs.clear()
+                uris.foreach(sparqlQuery.addGraphURI(_))
+                new SparqlEndpoint(endpointURL).executeQuery(sparqlQuery.toString)
+            }
+
+            result.getOrElse(Graph.empty)
         }
     }
 }
