@@ -6,22 +6,22 @@ import cz.payola.domain.entities.plugins._
 import cz.payola.domain.entities.plugins.parameters._
 import cz.payola.domain.sparql._
 
-class Projection(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
+class PropertySelection(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
     extends Construct(name, inputCount, parameters, id)
 {
     def this() = {
-        this("Projection", 1, List(
-            new StringParameter(Projection.propertyURIsParameter, "", true),
-            new BooleanParameter(Projection.selectPropertyInfoParameter, false)
+        this("Property Selection", 1, List(
+            new StringParameter(PropertySelection.propertyURIsParameter, "", true),
+            new BooleanParameter(PropertySelection.selectPropertyInfoParameter, false)
         ), IDGenerator.newId)
     }
 
     def getPropertyURIs(instance: PluginInstance): Option[Seq[String]] = {
-        instance.getStringParameter(Projection.propertyURIsParameter).map(_.split("\n").filter(_ != "").toList)
+        instance.getStringParameter(PropertySelection.propertyURIsParameter).map(_.split("\n").filter(_ != "").toList)
     }
 
     def getSelectPropertyInfo(instance: PluginInstance): Option[Boolean] = {
-        instance.getBooleanParameter(Projection.selectPropertyInfoParameter)
+        instance.getBooleanParameter(PropertySelection.selectPropertyInfoParameter)
     }
 
     def getConstructQuery(instance: PluginInstance, subject: Subject, variableGetter: () => Variable) = {
@@ -37,9 +37,9 @@ class Projection(name: String, inputCount: Int, parameters: immutable.Seq[Parame
     }
 }
 
-object Projection
+object PropertySelection
 {
     val propertyURIsParameter = "Property URIs"
 
-    val selectPropertyInfoParameter = "Select property types and labels"
+    val selectPropertyInfoParameter = "Select type and label of properties"
 }

@@ -169,9 +169,19 @@ input[type="checkbox"].active:after {
     vertical-align: top;
 }
 
-.successors .parameters {
-    width: 250px;
+.successors .params-wrapper {
+    width: 100%;
+    display: table !important;
+    table-layout: fixed;
+}
+
+.params-wrapper .parameters {
+    display: table-cell;
     overflow-x: auto;
+}
+
+.editable.instance .params-wrapper .parameters {
+    overflow-x: hidden;
 }
 
 .successors+.successors {
@@ -311,14 +321,18 @@ input[type="checkbox"].active:after {
 }
 
 .vitable .popover-content {
-    width: 472px;
-    height: 300px;
+    width: 292px;
+    height: 172px;
     overflow: auto;
 }
 
 .vitable .popover-inner {
-    width: 500px;
-    max-height: 375px;
+    width: 320px;
+    max-height: 270px;
+}
+
+.vitable dd, .vitable dt {
+    word-wrap: break-word;
 }
 
 .vitable .popover-title a {
@@ -437,4 +451,19 @@ table .btn-toolbar .badge {
 
 .profile-edit-div {
     margin-bottom: 10px;
+}
+
+.well.ui-state-hover {
+    border: 1px solid black !important;
+}
+
+.successors .instance ul {
+    list-style-type: none;
+    margin: 0;
+}
+
+.main-header {
+    margin: 0px;
+    padding: 0px;
+    padding-bottom: 15px;
 }

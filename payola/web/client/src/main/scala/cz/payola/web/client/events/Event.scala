@@ -49,6 +49,6 @@ abstract class Event[A, B <: EventArgs[A], C]
      * Removes all event handlers from the event.
      */
     def clear(){
-        handlers.clear()
+        handlers.foreach(-=(_))
     }
 }

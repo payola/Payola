@@ -52,29 +52,39 @@ class Join(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]
       * @return The joined graph.
       */
     private def joinGraphs(graph1: Graph, graph2: Graph, propertyURI: String, isInner: Boolean): Graph = {
-        val resultVertices = mutable.HashMap.empty[IdentifiedVertex, IdentifiedVertex]
+        val mergedGraph = graph1 + graph2
+        val edgesByOrigin = mergedGraph.edges.groupBy(_.origin)
+        val resultIdentifiedVertices = mutable.HashMap.empty[IdentifiedVertex, IdentifiedVertex]
+        val resultLiteralVertices = mutable.ListBuffer.empty[LiteralVertex]
         val resultEdges = mutable.HashSet.empty[Edge]
-        def getOrElseInsertResultVertex(vertex: IdentifiedVertex) = resultVertices.getOrElseUpdate(vertex, vertex)
 
-        graph1.edges.filter(_.uri == propertyURI).foreach { e =>
-            if (graph2.vertices.contains(e.destination)) {
-                e.destination match {
-                    case i: IdentifiedVertex => {
-                        val origin = getOrElseInsertResultVertex(e.origin)
-                        val destination = getOrElseInsertResultVertex(i)
-                        val resultEdge = new Edge(origin, destination, e.uri)
-                        if (!resultEdges.contains(resultEdge)) {
-                            resultEdges += resultEdge
-                        }
-                    }
-                    case _ => // The destination isn't an identified vertex, therefore it's not joined.
+        def addLiteralVertexToResult(vertex: LiteralVertex): LiteralVertex = {
+            resultLiteralVertices += vertex
+            vertex
+        }
+
+        def addIdentifiedVertexToResult(vertex: IdentifiedVertex): IdentifiedVertex = {
+            val origin = resultIdentifiedVertices.getOrElseUpdate(vertex, vertex)
+
+            // Add all edges going from the vertex.
+            edgesByOrigin.get(origin).getOrElse(Nil).foreach { e =>
+                val destination = e.destination match {
+                    case l: LiteralVertex => addLiteralVertexToResult(l)
+                    case i: IdentifiedVertex => addIdentifiedVertexToResult(i)
                 }
-            } else if (!isInner) {
-                getOrElseInsertResultVertex(e.origin)
+                resultEdges += new Edge(origin, destination, e.uri)
+            }
+            origin
+        }
+
+        // Add only those vertices from the first graph, that pass the join condition.
+        graph1.edges.filter(_.uri == propertyURI).foreach { e =>
+            if (graph2.vertices.contains(e.destination) || !isInner) {
+                addIdentifiedVertexToResult(e.origin)
             }
         }
 
-        new Graph(resultVertices.keys.toList, resultEdges.toList)
+        new Graph(resultIdentifiedVertices.keys.toList ++ resultLiteralVertices.toList, resultEdges.toList)
     }
 }
 

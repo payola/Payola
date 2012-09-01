@@ -8,22 +8,10 @@ import cz.payola.web.client.views.bootstrap.Icon
 import cz.payola.web.client.views._
 import cz.payola.common.rdf.IdentifiedVertex
 import cz.payola.web.client.events._
-import cz.payola.web.client.views.algebra.Point2D
+import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.elements.lists._
 
-object VertexInfoTablePosition
-{
-    val right = 0
-
-    val bottom = 1
-
-    val left = 2
-
-    val top = 3
-}
-
-class VertexInfoTable(vertex: IdentifiedVertex, values: mutable.HashMap[String, Seq[String]], position: Point2D,
-    positionType: Int = VertexInfoTablePosition.right)
+class VertexInfoTable(vertex: IdentifiedVertex, values: mutable.HashMap[String, Seq[String]], position: Point2D)
     extends ComposedView
 {
     var vertexBrowsingDataSource = new SimpleUnitEvent[IdentifiedVertex]
@@ -64,13 +52,16 @@ class VertexInfoTable(vertex: IdentifiedVertex, values: mutable.HashMap[String, 
         val div = new Div(List(popoverInner))
         div.setAttribute("class", "popover fade in vitable")
         div.setAttribute("style",
-            "top: %dpx; left: %dpx; z-index: 1000;".format(position.y - 10, position.x))
+            "top: %dpx; left: %dpx; z-index: 1000;".format(position.y, position.x))
         List(div)
+    }
 
+    def getSize: Vector2D = {
+        Vector2D(this.blockHtmlElement.clientWidth, this.blockHtmlElement.clientHeight)
     }
 
     def setPosition(position: Point2D) {
-        createSubViews.head.blockHtmlElement.setAttribute("style",
-            "top: %dpx; left: %dpx; z-index: 1000;".format(position.y - 10, position.x))
+        blockHtmlElement.setAttribute("style",
+            "top: %dpx; left: %dpx; z-index: 1000;".format(position.y, position.x))
     }
 }
