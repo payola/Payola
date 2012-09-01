@@ -7,8 +7,8 @@ import cz.payola.data.squeryl._
 import cz.payola.data.squeryl.entities.settings.OntologyCustomization
 
 /**
-  * This object converts [[cz.payola.common.entities.User]] to [[cz.payola.common.entities.User]].
-  */
+ * This object converts [[cz.payola.common.entities.User]] to [[cz.payola.common.entities.User]].
+ */
 object User extends EntityConverter[User]
 {
     def convert(entity: AnyRef)(implicit context: SquerylDataContextComponent): Option[User] = {
@@ -37,18 +37,23 @@ class User(override val id: String, name: String, pwd: String, mail: String)
     email = mail
 
     _ownedGroups = null
+
     private lazy val _ownedGroupsQuery = context.schema.groupOwnership.left(this)
 
     _ownedAnalyses = null
+
     private lazy val _ownedAnalysesQuery = context.schema.analysisOwnership.left(this)
 
     _ownedPlugins = null
+
     private lazy val _ownedPluginsQuery = context.schema.pluginOwnership.left(this)
 
     _ownedDataSources = null
+
     private lazy val _ownedDataSourcesQuery = context.schema.dataSourceOwnership.left(this)
 
     _ontologyCustomizations = null
+
     private lazy val _ownedCustomizationsQuery = context.schema.customizationOwnership.left(this)
 
     override def ownedGroups: immutable.Seq[GroupType] = {
@@ -74,7 +79,6 @@ class User(override val id: String, name: String, pwd: String, mail: String)
 
         _ownedAnalyses.toList
     }
-
 
     override def ownedDataSources: immutable.Seq[DataSourceType] = {
         if (_ownedDataSources == null) {
@@ -129,7 +133,7 @@ class User(override val id: String, name: String, pwd: String, mail: String)
 
         super.storeOwnedPlugin(plugin)
     }
-    
+
     override protected def storeOntologyCustomization(customization: User#OntologyCustomizationType) {
         super.storeOntologyCustomization(
             context.schema.associate(OntologyCustomization(customization), _ownedCustomizationsQuery)
@@ -141,7 +145,7 @@ class User(override val id: String, name: String, pwd: String, mail: String)
         super.discardOwnedAnalysis(analysis)
     }
 
-    override protected def discardOwnedGroup(group: User#GroupType)  {
+    override protected def discardOwnedGroup(group: User#GroupType) {
         context.groupRepository.removeById(group.id)
         super.discardOwnedGroup(group)
     }
@@ -150,7 +154,7 @@ class User(override val id: String, name: String, pwd: String, mail: String)
         context.dataSourceRepository.removeById(source.id)
         super.discardOwnedDataSource(source)
     }
-    
+
     override protected def discardOwnedPlugin(plugin: User#PluginType) {
         context.pluginRepository.removeById(plugin.id)
 

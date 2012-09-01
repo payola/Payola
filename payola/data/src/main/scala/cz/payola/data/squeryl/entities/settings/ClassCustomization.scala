@@ -34,7 +34,7 @@ object ClassCustomization extends EntityConverter[ClassCustomization]
  */
 class ClassCustomization(
     override val id: String, uri: String, fillColor: String, radius: Int,
-    glyph: String,customizations: immutable.Seq[PropertyCustomization])
+    glyph: String, customizations: immutable.Seq[PropertyCustomization])
     (implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.settings.ClassCustomization(
         uri, fillColor, radius, glyph, customizations)
@@ -42,5 +42,7 @@ class ClassCustomization(
 {
     var ontologyCustomizationId: String = null
 
-    def propertyCustomizations_=(value: Seq[PropertyCustomizationType]) { _propertyCustomizations = value.toList}
+    def propertyCustomizations_=(value: Seq[PropertyCustomizationType]) {
+        _propertyCustomizations = value.toList
+    }
 }

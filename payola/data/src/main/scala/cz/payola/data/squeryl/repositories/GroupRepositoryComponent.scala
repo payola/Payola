@@ -14,7 +14,6 @@ import org.squeryl.dsl.ast.LogicalBoolean
 trait GroupRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
-
     /**
      * A repository to access persisted groups
      */
@@ -28,13 +27,13 @@ trait GroupRepositoryComponent extends TableRepositoryComponent
         protected def getSelectQuery(entityFilter: Group => LogicalBoolean) = {
             join(schema.groups, schema.users, schema.groupMembership.leftOuter, schema.users.leftOuter)((g, o, a, u) =>
                 where(entityFilter(g))
-                select(g, o, u)
-                on(g.ownerId === o.id, Option(g.id) === a.map(_.groupId), a.map(_.memberId) === u.map(_.id))
+                    select(g, o, u)
+                    on(g.ownerId === o.id, Option(g.id) === a.map(_.groupId), a.map(_.memberId) === u.map(_.id))
             )
         }
 
         protected def processSelectResults(results: Seq[(Group, User, Option[User])]): Seq[Group] = {
-            results.groupBy(_._1).map { r =>
+            results.groupBy(_._1).map {r =>
                 val group = r._1
                 group.owner = r._2.head._2
                 group.members = r._2.flatMap(_._3)

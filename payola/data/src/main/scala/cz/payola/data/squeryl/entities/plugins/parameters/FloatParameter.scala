@@ -4,9 +4,9 @@ import cz.payola.data.squeryl.entities.plugins.Parameter
 import cz.payola.data.squeryl.SquerylDataContextComponent
 
 /**
-  * This objects converts [[cz.payola.common.entities.plugins.parameters.FloatParameter]]
-  * to [[cz.payola.data.squeryl.entities.plugins.parameters.FloatParameter]]
-  */
+ * This objects converts [[cz.payola.common.entities.plugins.parameters.FloatParameter]]
+ * to [[cz.payola.data.squeryl.entities.plugins.parameters.FloatParameter]]
+ */
 object FloatParameter
 {
     def apply(p: cz.payola.common.entities.plugins.parameters.FloatParameter)
@@ -32,13 +32,15 @@ class FloatParameter(
 
     override def defaultValue = _defaultValueDb
 
-    def parameterValues: Seq[FloatParameterValue] = wrapInTransaction { _valuesQuery.toList }
+    def parameterValues: Seq[FloatParameterValue] = wrapInTransaction {
+        _valuesQuery.toList
+    }
 
     /**
-      * Associates specified [[cz.payola.data.squeryl.entities.plugins.parameters.FloatParameter]].
-      *
-      * @param p - [[cz.payola.data.squeryl.entities.plugins.parameters.FloatParameter]] to associate
-      */
+     * Associates specified [[cz.payola.data.squeryl.entities.plugins.parameters.FloatParameter]].
+     *
+     * @param p - [[cz.payola.data.squeryl.entities.plugins.parameters.FloatParameter]] to associate
+     */
     def associateParameterValue(p: FloatParameterValue) {
         context.schema.associate(p, _valuesQuery)
     }

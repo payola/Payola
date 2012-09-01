@@ -3,8 +3,8 @@ package cz.payola.data.squeryl.entities
 import cz.payola.data.squeryl._
 
 /**
-  * Provides persistence to [[cz.payola.domain.entities.PrivilegeableEntity]] entities.
-  */
+ * Provides persistence to [[cz.payola.domain.entities.PrivilegeableEntity]] entities.
+ */
 trait PrivilegeableEntity extends Entity with cz.payola.domain.entities.PrivilegeableEntity
 {
     _privileges = null
@@ -23,7 +23,6 @@ trait PrivilegeableEntity extends Entity with cz.payola.domain.entities.Privileg
         // Call domain method to preserve functionality
         super.storePrivilege(context.privilegeRepository.persist(privilege))
     }
-
 
     override def discardPrivilege(privilege: PrivilegeType) {
         // Call domain method to preserve functionality
