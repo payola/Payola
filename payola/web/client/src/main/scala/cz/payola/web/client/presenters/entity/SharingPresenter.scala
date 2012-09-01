@@ -4,6 +4,12 @@ import cz.payola.web.client.Presenter
 import s2js.adapters.dom
 import s2js.adapters.html
 
+/**
+ * Presenter which controls the logic of a bunch of ShareButtons. It creates an instance of ShareButtonPresenter for
+ * each of the passed placeHolder passed in the first parameter.
+ * @param placeHolders List of HTML elements which should contain a sharing button.
+ * @param entityType Type of entity which will be shared on button click. {A <: ShareableEntity}
+ */
 class SharingPresenter(placeHolders: dom.NodeList[html.Element], entityType: String) extends Presenter
 {
     def initialize() {
