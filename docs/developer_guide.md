@@ -795,7 +795,7 @@ val runnableObj = clazz.getField("MODULE$").get(objectName)
 
 What happens if a presenter on client side calls a method of a remote object? Learn more from the following diagram:
 
-![Asynchronous RPC call](https://raw.github.com/siroky/Payola/develop/docs/img/rpc_call_async.png)
+![Asynchronous RPC call](https://raw.github.com/siroky/Payola/develop/docs/img/rpc_call_sync.png)
 
 When you call a remote method from a presenter on the client side, you in fact trigger an XHR request to the server. The request gets parsed by the RPC controller and delegated to the RPC Dispatcher. The dispatcher extracts parameters for the remote method, transforms them into the right data types and gets the method which should be invoked via reflection. While this is being done, it checks, if the method's object has the `@remote` annotation. After that, the `@secured` annotation presence is checked. If present on the method or its object, authorization takes place. If all goes well, the remote method gets executed and the result is returned.
 
