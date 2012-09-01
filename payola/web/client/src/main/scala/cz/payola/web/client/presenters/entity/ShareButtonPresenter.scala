@@ -9,6 +9,16 @@ import cz.payola.web.client.events._
 import cz.payola.common.Entity
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
 
+/**
+ * A presenter which controls the behaviour of a sharing button. The button is created by the presenter and placed
+ * into the passed viewElement.
+ * @param viewElement A placeholder for the created button.
+ * @param entityClassName ClassName of the shared entity.
+ * @param entityId Id of the entity which could be shared.
+ * @param entityName Name (title) of the entity.
+ * @param entityIsPublic A flag which determines if the entity is set to be public.
+ * @param viewToBlock Which view has to be blocked while the button is working.
+ */
 class ShareButtonPresenter(
     val viewElement: html.Element,
     val entityClassName: String,
