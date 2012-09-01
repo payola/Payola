@@ -5,11 +5,18 @@ import s2js.runtime.shared.rpc.RpcException
 import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
 import cz.payola.common.PayolaException
 
+/**
+ * The base presenter trait. All the presenters should be derived from this trait. It defines the initialize method
+ * which is meant to be called after the presenter is created. It also defines fatal error handler behaviour, methods
+ * for blocking and unblocking the UI of the page. There is also syntactic sugar method delayed which is a wrapper for
+ * window.setTimeout call.
+ */
 trait Presenter
 {
     /**
      * This method should contain code needed to initialize the presenter, moreover, it should be called after
-     * creation of a new Presenter instance.
+     * creation of a new Presenter instance. This method is not called automatically, you need to call it by
+     * yourself!
      */
     def initialize()
 
@@ -31,10 +38,17 @@ trait Presenter
         modal.render()
     }
 
+    /**
+     * Blocks the whole page.
+     * @param message Message displayed on page while being blocked.
+     */
     def blockPage(message: String = "") {
         View.blockPage(message)
     }
 
+    /**
+     * Unblocks the UI.
+     */
     def unblockPage() {
         View.unblockPage()
     }
