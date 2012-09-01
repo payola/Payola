@@ -7,6 +7,11 @@ import cz.payola.common.entities.settings.OntologyCustomization
 import cz.payola.web.client.events.SimpleUnitEvent
 import scala.collection.mutable
 
+/**
+ * Model object which contains calls to the remote objects on server. Most of the calls are provided with caching
+ * capabilities to prevent triggering the same call on the same page twice in the page lifetime (which is not always
+ * wanted).
+ */
 object Model
 {
     val ontologyCustomizationsChanged = new SimpleUnitEvent[this.type]

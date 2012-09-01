@@ -16,23 +16,23 @@ import cz.payola.common.EvaluationInProgress
 import cz.payola.common.EvaluationError
 import cz.payola.common.EvaluationSuccess
 
+/**
+ * Presenter responsible for the logic around running an analysis evaluation.
+ * @param elementToDrawIn ID of the element to render view into
+ * @param analysisId ID of the analysis which will be run
+ */
 class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presenter
 {
     val parentElement = document.getElementById(elementToDrawIn)
-
     var analysisEvaluationSuccess = new UnitEvent[Analysis, EvaluationSuccessEventArgs]
-
     var analysisRunning = false
-
     var analysisDone = false
-
     var graphPresenter: GraphPresenter = null
-
     var successEventHandler: (EvaluationSuccessEventArgs => Unit) = null
-
     var evaluationId = ""
-
     var intervalHandler: Option[Int] = None
+
+    private val pollingPeriod = 500
 
     def initialize() {
         blockPage("Loading analysis data...")
@@ -45,7 +45,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         }
     }
 
-    def createViewAndInit(analysis: Analysis, timeout: Int = 30): AnalysisRunnerView = {
+    private def createViewAndInit(analysis: Analysis, timeout: Int = 30): AnalysisRunnerView = {
         val view = new AnalysisRunnerView(analysis, timeout)
         view.render(parentElement)
         view.tabs.hideTab(1)
@@ -63,7 +63,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         view
     }
 
-    def getSuccessEventHandler(analysis: Analysis, view: AnalysisRunnerView): (EvaluationSuccessEventArgs => Unit) = {
+    private def getSuccessEventHandler(analysis: Analysis, view: AnalysisRunnerView): (EvaluationSuccessEventArgs => Unit) = {
         evt: EvaluationSuccessEventArgs =>
             blockPage("Loading result...")
 
@@ -81,16 +81,14 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
             val downloadButtonView = new DownloadButtonView()
             downloadButtonView.render(graphPresenter.view.toolbar.htmlElement)
 
-            downloadButtonView.rdfDownloadAnchor.mouseClicked += {
-                e =>
-                    downloadResultAsRDF()
-                    true
+            downloadButtonView.rdfDownloadAnchor.mouseClicked += { e =>
+                downloadResultAsRDF()
+                true
             }
 
-            downloadButtonView.ttlDownloadAnchor.mouseClicked += {
-                e =>
-                    downloadResultAsTTL()
-                    true
+            downloadButtonView.ttlDownloadAnchor.mouseClicked += { e =>
+                downloadResultAsTTL()
+                true
             }
 
             graphPresenter.view.updateGraph(Some(evt.graph))
@@ -103,7 +101,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
             unblockPage()
     }
 
-    def runButtonClickHandler(view: AnalysisRunnerView, analysis: Analysis) = {
+    private def runButtonClickHandler(view: AnalysisRunnerView, analysis: Analysis) = {
         if (!analysisRunning) {
             analysisRunning = true
             blockPage("Starting analysis...")
@@ -167,10 +165,10 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         }
     }
 
-    def schedulePolling(view: AnalysisRunnerView, analysis: Analysis) = {
+    private def schedulePolling(view: AnalysisRunnerView, analysis: Analysis) = {
         window.setTimeout(() => {
             pollingHandler(view, analysis)
-        }, 500)
+        }, pollingPeriod)
     }
 
     private def getAnalysisEvaluationID: Option[String] = {
@@ -199,7 +197,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         downloadResultAs("ttl")
     }
 
-    def pollingHandler(view: AnalysisRunnerView, analysis: Analysis) {
+    private def pollingHandler(view: AnalysisRunnerView, analysis: Analysis) {
         AnalysisRunner.getEvaluationState(evaluationId) {
             state =>
                 state match {
@@ -217,7 +215,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         }
     }
 
-    def evaluationErrorHandler(error: EvaluationError, view: AnalysisRunnerView, analysis: Analysis) {
+    private def evaluationErrorHandler(error: EvaluationError, view: AnalysisRunnerView, analysis: Analysis) {
         view.overviewView.controls.progressBar.setStyleToFailure()
         view.overviewView.controls.progressBar.setActive(false)
         view.overviewView.controls.progressBar.setProgress(1.0)
@@ -234,7 +232,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         initReRun(view, analysis)
     }
 
-    def evaluationTimeout(view: AnalysisRunnerView, analysis: Analysis) {
+    private def evaluationTimeout(view: AnalysisRunnerView, analysis: Analysis) {
         view.overviewView.controls.progressBar.setStyleToFailure()
         view.overviewView.controls.progressBar.setActive(false)
         analysisDone = true
@@ -248,7 +246,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         initReRun(view, analysis)
     }
 
-    def initReRun(view: AnalysisRunnerView, analysis: Analysis) {
+    private def initReRun(view: AnalysisRunnerView, analysis: Analysis) {
         view.overviewView.controls.runBtn.setIsEnabled(true)
         view.overviewView.controls.runBtnCaption.text = "Run Again"
         window.onunload = null
@@ -266,7 +264,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         successEventHandler = getSuccessEventHandler(analysis, view)
     }
 
-    def evaluationSuccessHandler(success: EvaluationSuccess, analysis: Analysis, view: AnalysisRunnerView) {
+    private def evaluationSuccessHandler(success: EvaluationSuccess, analysis: Analysis, view: AnalysisRunnerView) {
         view.overviewView.controls.progressBar.setStyleToSuccess()
         view.overviewView.controls.progressBar.setProgress(1.0)
         analysisDone = true
@@ -290,7 +288,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         analysisEvaluationSuccess.trigger(new EvaluationSuccessEventArgs(analysis, success.outputGraph))
     }
 
-    def renderEvaluationProgress(progress: EvaluationInProgress, view: AnalysisRunnerView) {
+    private def renderEvaluationProgress(progress: EvaluationInProgress, view: AnalysisRunnerView) {
         val progressValue = if (progress.value < 0.02) 0.02 else progress.value
         view.overviewView.controls.progressBar.setProgress(progressValue)
 

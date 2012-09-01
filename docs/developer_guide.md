@@ -557,9 +557,13 @@ Squeryl is an existing, tested, functional and easy to use ORM for Scala applica
 
 [Squeryl](http://squeryl.org) is a free ORM tool for Scala projects, it can use any relational database supported by JDBC drivers.
 
-A database structure needs to be defined in an object extending the `org.squeryl.Schema` object. This object contains a table definition - definition that says which entity is persisted in which table. Squeryl allows to redefine column types of tables, to declare 1:N and M:N relations between entities, to define foreign key constraints for those relations.
+A database structure needs to be defined in an object extending the `org.squeryl.Schema` object. This object contains a table definition - definition that says which entity is persisted in which table. Squeryl allows to:
 
-Squeryl provides lazy fetching of entities from "N" side of 1:N or M:N relations, which is a desirable feature of an ORM tool. The query that fetches the entities of a relation is defined in a lazy field of the related entity, on the first data request, the query is evaluated. There is an `associate` method in Squeryl for creating a relation between entities. Simplified code may look something like this:
+- redefine column types of tables
+- declare 1:N and M:N relations between entities
+- define foreign key constraints for those relations.
+
+Squeryl provides lazy fetching of entities from "N" side of 1:N or M:N relations, which is a desirable feature of an ORM tool. The query that fetches the entities of a relation is defined in a lazy field of the related entity, on the first data request, the query is evaluated. There is an `associate` method in Squeryl for creating a relation between entities. Simplified code may look like this:
 
 <a name="squeryl-code-examle"></a>
 ```scala
@@ -712,6 +716,7 @@ object RPCTester
     
 In thix example, you can see how to define a remote object. There are just a few things you need to know before writing your first remote object. Since it is called an `object`, you really need to define it as an `object`, not as a `class`. This is very important. Since objects behave as singletons in a certain point of view, they are created automatically and have only one "instance", it is much easier for the RPC to work with them. It prevents the RPC from a big overhead while working with classes and instances. That's why classes are not supported, so, please, do not use them.
 
+<a name="sync-async"></a>
 #####Synchronous vs. asynchronous remote methods
 
 You also need to annotate the whole object with the `@remote` annotation. Only with the proper annotation, the object gets available to the client side code and may be invoked by the RPC Dispatcher.
@@ -768,8 +773,8 @@ The RPC mechanism provides an API to make you able to secure the RPC calls. This
 
 To enable this, you need to annotate your remote method with the `@secured` annotation. If all the methods in a remote object should be secured, you can annotate just the object itself. If a method is annotated with the secured annotation, it is expected to have one more parameter of one of the following types:
 
-- Option[User] (with default value scala.None)
-- User (with default value null)
+- `Option[User]`(with default value scala.None)
+- `User` (with default value null)
 
 > The User class is from the package cz.payola.domain.entities
 > 
@@ -796,9 +801,9 @@ val runnableObj = clazz.getField("MODULE$").get(objectName)
 
 What happens if a presenter on client side calls a method of a remote object? Learn more from the following diagram:
 
-![Asynchronous RPC call](https://raw.github.com/siroky/Payola/develop/docs/img/rpc_call_sync.png)
+![Synchronous RPC call](https://raw.github.com/siroky/Payola/develop/docs/img/rpc_call_sync.png)
 
-When you call a remote method from a presenter on the client side, you in fact trigger an XHR request to the server. The request gets parsed by the RPC controller and delegated to the RPC Dispatcher. The dispatcher extracts parameters for the remote method, transforms them into the right data types and gets the method which should be invoked via reflection. While this is being done, it checks, if the method's object has the `@remote` annotation. After that, the `@secured` annotation presence is checked. If present on the method or its object, authorization takes place. If all goes well, the remote method gets executed and the result is returned.
+When you call a remote method from a presenter on the client side, you in fact trigger an XHR request to the server. The request gets parsed by the RPC controller and delegated to the RPC Dispatcher. The dispatcher extracts parameters for the remote method, transforms them into the right data types and gets the method which should be invoked via reflection. While this is being done, it checks, if the method's object has the `@remote` annotation. After that, the `@secured` annotation presence is checked. If present on the method or its object, authorization takes place. If all goes well, the remote method gets executed and the result is returned. By default every XHR request is synchronous, asynchronous call can be triggered using `@async` annotation, more [here](#sync-async). The diagram above shows synchronous call.
 
 Since we use Scala Actors to make an asynchronous call synchronous in the RPC controller (we need to send the result as a response to the same request which activated the call), you can use whatever you need to use on the server side, including threads. Just do not forget to call one of the `successCallback` or `failCallback` when you are done. If no callback is invoked during the lifetime of a RPC call, an exception is thrown (and serialized to the client where it gets rethrown).
 
@@ -1047,23 +1052,25 @@ The package contains e.g. GraphPresenter, AnalysisBuilder, PluginCreator  presen
 
 To see how is the request to the model processed go to [How it works](#how_it_works) in [web](#web).
 
+<a name="used_libraries"></a>
 ## Used libraries, frameworks & tools
+
 While developing the Payola, we used the following technologies:
 
-- [SBT 0.11.2](https://github.com/harrah/xsbt/wiki/) (Scala Build Tool) 
-- [Apache Jena 2.7.0-incubating](http://jena.apache.org/) (Java framework for building Semantic Web applications)
-- [Squeryl](http://squeryl.org/) (Scala ORM)
-- [Play! 2.0](http://www.playframework.org/) Scala MVC web framework
-- [jQuery](http://jquery.com/) JavaScript Library
-- [jQuery autosize](http://www.jacklmoore.com/autosize) (jQuery plugin for autosizing textareas)
+- [SBT 0.11.2](https://github.com/harrah/xsbt/wiki/) (Scala Build Tool) - [License](https://github.com/harrah/xsbt/blob/0.11/LICENSE)
+- [Apache Jena 2.7.0-incubating](http://jena.apache.org/) (Java framework for building Semantic Web applications) - [License](http://jena.sourceforge.net/license.html)
+- [Squeryl](http://squeryl.org/) (Scala ORM) - [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0.html)
+- [Play! 2.0](http://www.playframework.org/) (Scala MVC web framework)- [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0.html)
+- [jQuery](http://jquery.com/) (JavaScript Library) - [MIT License](https://github.com/jquery/jquery/blob/master/MIT-LICENSE.txt)
+- [jQuery autosize](http://www.jacklmoore.com/autosize) (jQuery plugin for autosizing textareas) - [MIT License](http://opensource.org/licenses/mit-license.php)
 - [jQuery blockUI](http://jquery.malsup.com/block/) (jQuery plugin for blocking UI nicely)
-- [LiveQuery](http://docs.jquery.com/Plugins/livequery) (jQuery plugin)
-- [Twitter Bootstrap](http://twitter.github.com/bootstrap/) (collection of CSS and JS code from Twitter)
-- [Colorpicker for bootstrap](http://www.eyecon.ro/bootstrap-colorpicker/) JS module for Twitter Bootstrap
-- [Ace](http://ace.ajax.org/) (web editor for programming languages with syntax highlighting)
-- [Select2](http://ivaynberg.github.com/select2/) (JavaScript autocomplete plugin)
-- [sprintf](http://code.google.com/p/sprintf/) (SprintF implementation for JS)
-- [Flot](http://code.google.com/p/flot/) (JavaScript charts plugin)
+- [LiveQuery](http://docs.jquery.com/Plugins/livequery) (jQuery plugin) - [MIT License](http://opensource.org/licenses/mit-license.php)
+- [Twitter Bootstrap](http://twitter.github.com/bootstrap/) (collection of CSS and JS code from Twitter) - [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0.html)
+- [Colorpicker for bootstrap](http://www.eyecon.ro/bootstrap-colorpicker/) (JS module for Twitter Bootstrap)
+- [Ace](http://ace.ajax.org/) (web editor for programming languages with syntax highlighting) - [Mozilla tri-license](http://www.mozilla.org/MPL/)
+- [Select2](http://ivaynberg.github.com/select2/) (JavaScript autocomplete plugin) - [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0.html)
+- [sprintf](http://code.google.com/p/sprintf/) (SprintF implementation for JS) - [BSD License](http://opensource.org/licenses/bsd-license.php)
+- [Flot](http://code.google.com/p/flot/) (JavaScript charts plugin) - [MIT License](http://opensource.org/licenses/mit-license.php)
 
 ## Unit tests
 

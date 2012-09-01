@@ -23,7 +23,7 @@ import scala.Some
 
 /**
  * Presenter responsible for the logic of the Analysis Builder editor.
- * @param parentElementId
+ * @param parentElementId ID of the DOM element to render views into
  */
 class AnalysisBuilder(parentElementId: String) extends Presenter
 {
