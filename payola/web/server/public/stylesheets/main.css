@@ -169,19 +169,25 @@ input[type="checkbox"].active:after {
     vertical-align: top;
 }
 
-.successors .params-wrapper {
-    width: 100%;
-    display: table !important;
-    table-layout: fixed;
-}
-
 .params-wrapper .parameters {
-    display: table-cell;
+    width: 269px;
     overflow-x: auto;
 }
 
 .editable.instance .params-wrapper .parameters {
     overflow-x: hidden;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+    .params-wrapper{
+        display: table !important;
+        table-layout: fixed;
+        width: 100%
+    }
+    .params-wrapper .parameters {
+        display: table-cell;
+        overflow-x: auto;
+    }
 }
 
 .successors+.successors {
