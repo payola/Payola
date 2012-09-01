@@ -63,7 +63,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         view
     }
 
-    def getSuccessEventHandler(analysis: Analysis, view: AnalysisRunnerView) : (EvaluationSuccessEventArgs => Unit) = {
+    def getSuccessEventHandler(analysis: Analysis, view: AnalysisRunnerView): (EvaluationSuccessEventArgs => Unit) = {
         evt: EvaluationSuccessEventArgs =>
             blockPage("Loading result...")
 
@@ -116,7 +116,16 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
                 unblockPage()
 
                 intervalHandler = Some(window.setInterval(() => {
-                    view.overviewView.controls.timeoutInfo.text = timeout.toString
+                    if (timeout >= 0) {
+                        view.overviewView.controls.timeoutInfo.text = timeout.toString
+                    }
+
+                    if (timeout < -10) {
+                        fatalErrorHandler(new PayolaException("The connection to the server has been lost."))
+                        intervalHandler.map(window.clearInterval(_))
+                        intervalHandler = None
+                    }
+
                     timeout -= 1
                 }, 1000))
 
@@ -220,7 +229,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
             view.overviewView.analysisVisualizer.setInstanceError(err._1.id, err._2)
         }
 
-        AlertModal.display("Analysis evaluation error",error.error)
+        AlertModal.display("Analysis evaluation error", error.error)
 
         initReRun(view, analysis)
     }
