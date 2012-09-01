@@ -4,11 +4,11 @@ import cz.payola.data.squeryl.entities.plugins.Parameter
 import cz.payola.data.squeryl.SquerylDataContextComponent
 
 /**
-  * This object converts [[cz.payola.common.entities.plugins.parameters.BooleanParameter]]
-  * to [[cz.payola.common.entities.plugins.parameters.BooleanParameter]]
-  */
-object BooleanParameter {
-
+ * This object converts [[cz.payola.common.entities.plugins.parameters.BooleanParameter]]
+ * to [[cz.payola.common.entities.plugins.parameters.BooleanParameter]]
+ */
+object BooleanParameter
+{
     def apply(p: cz.payola.common.entities.plugins.parameters.BooleanParameter)
         (implicit context: SquerylDataContextComponent): BooleanParameter = {
         p match {
@@ -32,13 +32,15 @@ class BooleanParameter(
 
     override def defaultValue = _defaultValueDb
 
-    def parameterValues: Seq[BooleanParameterValue] = wrapInTransaction { _valuesQuery.toList }
+    def parameterValues: Seq[BooleanParameterValue] = wrapInTransaction {
+        _valuesQuery.toList
+    }
 
     /**
-      * Associates specified [[cz.payola.data.squeryl.entities.plugins.parameters.BooleanParameter]].
-      *
-      * @param p - [[cz.payola.data.squeryl.entities.plugins.parameters.BooleanParameter]] to associate
-      */
+     * Associates specified [[cz.payola.data.squeryl.entities.plugins.parameters.BooleanParameter]].
+     *
+     * @param p - [[cz.payola.data.squeryl.entities.plugins.parameters.BooleanParameter]] to associate
+     */
     def associateParameterValue(p: BooleanParameterValue) {
         context.schema.associate(p, _valuesQuery)
     }

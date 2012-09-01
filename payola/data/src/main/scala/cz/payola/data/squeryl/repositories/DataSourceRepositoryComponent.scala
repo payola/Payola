@@ -12,7 +12,6 @@ import cz.payola.data.squeryl.entities._
 trait DataSourceRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
-
     /**
      * A repository to access persisted data sources
      */
@@ -26,11 +25,15 @@ trait DataSourceRepositoryComponent extends TableRepositoryComponent
         with PluginInstanceTableRepository[DataSource]
     {
         protected val pluginInstanceLikeTable = schema.dataSources
+
         protected val pluginInstanceLikeEntityConverter = DataSource
 
         val booleanParameterValuesRelation = schema.booleanParameterValuesOfDataSources
+
         val floatParameterValuesRelation = schema.floatParameterValuesOfDataSources
+
         val intParameterValuesRelation = schema.intParameterValuesOfDataSources
+
         val stringParameterValuesRelation = schema.stringParameterValuesOfDataSources
 
         protected def getPluginInstanceLikeId(parameterValue: Option[ParameterValue[_]]) = {
@@ -55,10 +58,11 @@ trait DataSourceRepositoryComponent extends TableRepositoryComponent
 
         private def _loadDataSource(dataSource: DataSource) {
             // Load DataSource with plugin and its plugin and parameter values (all mapped together)
-            loadPluginInstancesByFilter(ds => ds.id === dataSource.id).headOption.map{ ds =>
+            loadPluginInstancesByFilter(ds => ds.id === dataSource.id).headOption.map {ds =>
                 dataSource.plugin = ds.asInstanceOf[DataSource].plugin
                 dataSource.parameterValues = ds.asInstanceOf[DataSource].parameterValues
             }
         }
     }
+
 }

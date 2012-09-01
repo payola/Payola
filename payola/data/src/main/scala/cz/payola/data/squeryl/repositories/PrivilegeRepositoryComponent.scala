@@ -14,7 +14,6 @@ import org.squeryl.PrimitiveTypeMode._
 trait PrivilegeRepositoryComponent extends TableRepositoryComponent
 {
     self: SquerylDataContextComponent =>
-
     private type PrivilegeType = Privilege[_ <: Entity]
 
     /**
@@ -57,12 +56,11 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
         }
 
         def getAllByObjectIdAndPrivilegeClass(objId: String, privilegeClass: Class[_]): Seq[PrivilegeType] = {
-
             schema.wrapInTransaction {
                 instantiate(
                     representationRepository.selectWhere(p =>
                         p.objectId === objId
-                        and p.privilegeClass === privilegeClass.getName)
+                            and p.privilegeClass === privilegeClass.getName)
                 )
             }
         }
@@ -82,7 +80,7 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
                 val repositories = mutable.Map[Repository[_], mutable.HashSet[String]]()
 
                 // Fill the map
-                privileges.foreach { p =>
+                privileges.foreach {p =>
                 // Add grantee
                     val granteeRepository = repositoryRegistry(p.granteeClassName)
                     repositories.getOrElseUpdate(granteeRepository, mutable.HashSet.empty[String]) += p.granteeId
@@ -96,11 +94,11 @@ trait PrivilegeRepositoryComponent extends TableRepositoryComponent
                 }
 
                 // Create Map (EntityId -> Entity) to simplify getting entities from Db
-                val entities = repositories.par.flatMap { r =>
+                val entities = repositories.par.flatMap {r =>
                     r._1.getByIds(r._2.toSeq).map(e => (e.asInstanceOf[cz.payola.domain.Entity].id, e))
                 }
 
-                privileges.map { p =>
+                privileges.map {p =>
                 // Get granter, grantee, object from entities set
                     val granter = entities(p.granterId).asInstanceOf[java.lang.Object]
                     val grantee = entities(p.granteeId).asInstanceOf[java.lang.Object]

@@ -49,16 +49,16 @@ class PluginDbRepresentation(
     val ownerId: Option[String] = o.map(_.id)
 
     var owner: Option[User] = None
-    
+
     var parameters: Seq[Parameter[_]] = Seq()
 
     override def classNameText = "plugin database representation"
 
     /**
-      * Represented plugin is instantiated.
-      *
-      * @return Returns represented plugin.
-      */
+     * Represented plugin is instantiated.
+     *
+     * @return Returns represented plugin.
+     */
     def toPlugin: Plugin = {
         val pluginClass = context.asInstanceOf[PluginCompilerComponent].pluginClassLoader.loadClass(pluginClassName)
 

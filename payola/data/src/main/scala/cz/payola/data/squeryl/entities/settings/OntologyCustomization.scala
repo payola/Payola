@@ -9,7 +9,7 @@ import cz.payola.data.squeryl._
  * [[cz.payola.data.squeryl.entities.settings.PropertyCustomization]]
  */
 object OntologyCustomization extends EntityConverter[OntologyCustomization]
-{    
+{
     def convert(entity: AnyRef)(implicit context: SquerylDataContextComponent): Option[OntologyCustomization] = {
         entity match {
             case o: OntologyCustomization => Some(o)
@@ -40,5 +40,7 @@ class OntologyCustomization(
     extends cz.payola.domain.entities.settings.OntologyCustomization(u, n, o, c)
     with Entity with OptionallyOwnedEntity with ShareableEntity
 {
-    def classCustomizations_=(value: immutable.Seq[ClassCustomizationType]) { _classCustomizations = value }
+    def classCustomizations_=(value: immutable.Seq[ClassCustomizationType]) {
+        _classCustomizations = value
+    }
 }

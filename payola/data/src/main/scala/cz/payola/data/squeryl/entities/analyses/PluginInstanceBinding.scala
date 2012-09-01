@@ -5,9 +5,9 @@ import cz.payola.data.squeryl.entities.plugins.PluginInstance
 import cz.payola.data.squeryl._
 
 /**
-  * This objects converts [[cz.payola.common.entities.analyses.PluginInstanceBinding]]
-  * to [[cz.payola.data.squeryl.entities.analyses.PluginInstanceBinding]]
-  */
+ * This objects converts [[cz.payola.common.entities.analyses.PluginInstanceBinding]]
+ * to [[cz.payola.data.squeryl.entities.analyses.PluginInstanceBinding]]
+ */
 object PluginInstanceBinding extends EntityConverter[PluginInstanceBinding]
 {
     def convert(entity: AnyRef)(implicit context: SquerylDataContextComponent): Option[PluginInstanceBinding] = {

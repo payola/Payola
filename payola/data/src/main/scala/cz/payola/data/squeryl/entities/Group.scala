@@ -4,8 +4,8 @@ import scala.collection._
 import cz.payola.data.squeryl._
 
 /**
-  * This object converts [[cz.payola.common.entities.Group]] to [[cz.payola.data.squeryl.entities.Group]]
-  */
+ * This object converts [[cz.payola.common.entities.Group]] to [[cz.payola.data.squeryl.entities.Group]]
+ */
 object Group extends EntityConverter[Group]
 {
     def convert(entity: AnyRef)(implicit context: SquerylDataContextComponent): Option[Group] = {

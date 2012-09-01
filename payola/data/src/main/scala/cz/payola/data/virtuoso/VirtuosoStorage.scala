@@ -7,14 +7,14 @@ import cz.payola.domain.rdf._
 import java.io.File
 
 /**
-  * A Virtuoso data store that performs operations above both of the RDF data store and the Virtuoso SQL database.
-  * @param server The Virtuoso server.
-  * @param endpointPort Port of the Virtuoso SPARQL endpoint.
-  * @param endpointUsesSSL Whether the SSL is used when accessing the SPARQL endpoint.
-  * @param sqlPort The Virtuoso SQL database port.
-  * @param sqlUsername User name for the Virtuoso SQL database.
-  * @param sqlPassword Password for the Virtuoso SQL database.
-  */
+ * A Virtuoso data store that performs operations above both of the RDF data store and the Virtuoso SQL database.
+ * @param server The Virtuoso server.
+ * @param endpointPort Port of the Virtuoso SPARQL endpoint.
+ * @param endpointUsesSSL Whether the SSL is used when accessing the SPARQL endpoint.
+ * @param sqlPort The Virtuoso SQL database port.
+ * @param sqlUsername User name for the Virtuoso SQL database.
+ * @param sqlPassword Password for the Virtuoso SQL database.
+ */
 class VirtuosoStorage(
     val server: String = "localhost",
     val endpointPort: Int = 8890,
@@ -27,7 +27,7 @@ class VirtuosoStorage(
     // Register the driver in the driver manager.
     Class.forName("virtuoso.jdbc3.Driver")
 
-    /** The private storage SPARQL endpoint. */
+    /**The private storage SPARQL endpoint. */
     val sparqlEndpoint = new SparqlEndpoint("%s://%s:%s/sparql".format(
         if (endpointUsesSSL) "https" else "http",
         server,
@@ -50,9 +50,10 @@ class VirtuosoStorage(
         executeSQL("DB.DBA.RDF_LOAD_RDFXML(http_get('%s'), '', '%s')".format(graphURL, escapeString(graphURI)))
     }
 
-    def storeGraphFromFile(graphURI: String, file: File){
+    def storeGraphFromFile(graphURI: String, file: File) {
         println(file.getAbsolutePath)
-        executeSQL("DB.DBA.RDF_LOAD_RDFXML(file_to_string('%s'), '', '%s')".format(escapeString(file.getAbsolutePath), escapeString(graphURI)))
+        executeSQL("DB.DBA.RDF_LOAD_RDFXML(file_to_string('%s'), '', '%s')"
+            .format(escapeString(file.getAbsolutePath), escapeString(graphURI)))
     }
 
     def addGraphToGroup(graphURI: String, groupURI: String) {
@@ -68,36 +69,36 @@ class VirtuosoStorage(
     }
 
     /**
-      * Creates a connection to the Virtuoso SQL database.
-      * @return
-      */
+     * Creates a connection to the Virtuoso SQL database.
+     * @return
+     */
     private def createSQLConnection(): Connection = {
         DriverManager.getConnection("jdbc:virtuoso://" + server + ":" + sqlPort, sqlUsername, sqlPassword)
     }
 
     /**
-      * Executes the specified SQL query.
-      * @param query The query to execute.
-      * @return The query result.
-      */
+     * Executes the specified SQL query.
+     * @param query The query to execute.
+     * @return The query result.
+     */
     private def executeSQLQuery(query: String): ResultSet = {
         executeOnSQLStatement(_.executeQuery(query))
     }
 
     /**
-      * Executes the specified batch SQL.
-      * @param sql The SQL to execute.
-      */
+     * Executes the specified batch SQL.
+     * @param sql The SQL to execute.
+     */
     private def executeSQL(sql: String) {
         executeOnSQLStatement(_.execute(sql))
     }
 
     /**
-      * Executes the specified function on the SQL statement.
-      * @param f The function to execute.
-      * @tparam A Type of the function return value.
-      * @return Return value of the function.
-      */
+     * Executes the specified function on the SQL statement.
+     * @param f The function to execute.
+     * @tparam A Type of the function return value.
+     * @return Return value of the function.
+     */
     private def executeOnSQLStatement[A](f: Statement => A): A = {
         val connection = createSQLConnection()
         try {
@@ -113,10 +114,10 @@ class VirtuosoStorage(
     }
 
     /**
-      * Escapes the specified value so it can be used as a string in SQL queries.
-      * @param value The value to escape.
-      * @return The escaped value.
-      */
+     * Escapes the specified value so it can be used as a string in SQL queries.
+     * @param value The value to escape.
+     * @return The escaped value.
+     */
     private def escapeString(value: String): String = {
         value.replaceAllLiterally("'", "\\'")
     }

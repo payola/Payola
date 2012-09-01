@@ -4,17 +4,18 @@ import cz.payola.data.squeryl.entities.plugins._
 import cz.payola.data.squeryl.SquerylDataContextComponent
 
 /**
-  * This object converts [[cz.payola.domain.entities.plugins.parameters.FloatParameterValue]]
-  * to [[cz.payola.data.squeryl.entities.plugins.parameters.FloatParameterValue]]
-  */
-object FloatParameterValue {
-
+ * This object converts [[cz.payola.domain.entities.plugins.parameters.FloatParameterValue]]
+ * to [[cz.payola.data.squeryl.entities.plugins.parameters.FloatParameterValue]]
+ */
+object FloatParameterValue
+{
     def apply(p: cz.payola.domain.entities.plugins.parameters.FloatParameterValue)
         (implicit context: SquerylDataContextComponent): FloatParameterValue = {
         p match {
             case param: FloatParameterValue => param
             case _ => {
-                val parameter = FloatParameter(p.parameter.asInstanceOf[cz.payola.domain.entities.plugins.parameters.FloatParameter])
+                val parameter = FloatParameter(
+                    p.parameter.asInstanceOf[cz.payola.domain.entities.plugins.parameters.FloatParameter])
                 val parameterValue = new FloatParameterValue(p.id, parameter, p.value)
 
                 parameter.associateParameterValue(parameterValue)

@@ -5,9 +5,9 @@ import cz.payola.data.squeryl._
 import cz.payola.data.squeryl.entities._
 
 /**
-  * This object converts [[cz.payola.common.entities.Privilege]] to
+ * This object converts [[cz.payola.common.entities.Privilege]] to
  * [[cz.payola.data.squeryl.entities.PrivilegeDbRepresentation]] in order to be persisted in database.
-  */
+ */
 object PrivilegeDbRepresentation extends EntityConverter[PrivilegeDbRepresentation]
 {
     def convert(entity: AnyRef)(implicit context: SquerylDataContextComponent) = {
@@ -30,16 +30,16 @@ object PrivilegeDbRepresentation extends EntityConverter[PrivilegeDbRepresentati
 }
 
 /**
-  * Represents [[cz.payola.common.entities.Privilege]] in order to be persisted in database.
-  *
-  * @param id -ID of the privilege
-  * @param granterId ID of [[cz.payola.common.entities.User]] that granted the Privilege
-  * @param granteeId ID of [[cz.payola.common.entities.PrivilegeableEntity]] that is being granted the Privilege
-  * @param granteeClassName Stripped class name of this PrivilegeableEntity
-  * @param privilegeClass Class of the Privilege
-  * @param objectId ID of [[cz.payola.common.entities.Entity]] that is object of the Privilede
-  * @param objectClassName Stripped class name of this Object
-  */
+ * Represents [[cz.payola.common.entities.Privilege]] in order to be persisted in database.
+ *
+ * @param id -ID of the privilege
+ * @param granterId ID of [[cz.payola.common.entities.User]] that granted the Privilege
+ * @param granteeId ID of [[cz.payola.common.entities.PrivilegeableEntity]] that is being granted the Privilege
+ * @param granteeClassName Stripped class name of this PrivilegeableEntity
+ * @param privilegeClass Class of the Privilege
+ * @param objectId ID of [[cz.payola.common.entities.Entity]] that is object of the Privilede
+ * @param objectClassName Stripped class name of this Object
+ */
 class PrivilegeDbRepresentation(
     override val id: String,
     val granterId: String,
@@ -53,9 +53,9 @@ class PrivilegeDbRepresentation(
     override def classNameText = "privilege database representation"
 
     /**
-      * Instantiates represented [[cz.payola.common.entities.Privilege]]
-      * @return Returns instantiated privilege
-      */
+     * Instantiates represented [[cz.payola.common.entities.Privilege]]
+     * @return Returns instantiated privilege
+     */
     def toPrivilege: cz.payola.common.entities.Privilege[_] = {
         context.privilegeRepository.getById(id).getOrElse(null)
     }

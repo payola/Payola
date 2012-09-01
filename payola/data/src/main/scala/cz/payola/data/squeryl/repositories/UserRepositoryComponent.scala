@@ -14,7 +14,6 @@ trait UserRepositoryComponent extends TableRepositoryComponent
      * A repository to access persisted users
      */
     self: SquerylDataContextComponent =>
-
     lazy val userRepository = new LazyTableRepository[User](schema.users, User)
         with UserRepository
         with NamedEntityTableRepository[User]

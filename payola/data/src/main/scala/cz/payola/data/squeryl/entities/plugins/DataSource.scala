@@ -6,9 +6,9 @@ import cz.payola.data.squeryl._
 import cz.payola.domain.entities.plugins.concrete.DataFetcher
 
 /**
-  * This object converts [[cz.payola.common.entities.plugins.DataSource]]
-  * to [[cz.payola.data.squeryl.entities.plugins.DataSource]]
-  */
+ * This object converts [[cz.payola.common.entities.plugins.DataSource]]
+ * to [[cz.payola.data.squeryl.entities.plugins.DataSource]]
+ */
 object DataSource extends EntityConverter[DataSource]
 {
     def convert(entity: AnyRef)(implicit context: SquerylDataContextComponent): Option[DataSource] = {
@@ -51,9 +51,9 @@ class DataSource(
     with PluginInstanceLike
 {
     var pluginId: String = Option(df).map(_.id).getOrElse(null)
-    
+
     override def plugin = {
-        if (_plugin == null){
+        if (_plugin == null) {
             wrapInTransaction {
                 context.dataSourceRepository.loadPlugin(this)
             }

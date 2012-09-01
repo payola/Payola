@@ -7,8 +7,8 @@ import cz.payola.domain.entities.plugins._
 import cz.payola.domain.entities.settings.OntologyCustomization
 
 /**
-  * A component that provides access to a storage with persisted entities.
-  */
+ * A component that provides access to a storage with persisted entities.
+ */
 trait DataContextComponent
 {
     /**
@@ -66,89 +66,89 @@ trait DataContextComponent
     trait Repository[+A]
     {
         /**
-          * Returns an entity with the specified ID.
-          * @param id Id of an entity to search for.
-          */
+         * Returns an entity with the specified ID.
+         * @param id Id of an entity to search for.
+         */
         def getById(id: String): Option[A] = getByIds(Seq(id)).headOption
-        
+
         /**
-          * Returns entities with the specified IDs.
-          * @param ids List of IDs of entities to search for.
-          */
+         * Returns entities with the specified IDs.
+         * @param ids List of IDs of entities to search for.
+         */
         def getByIds(ids: Seq[String]): Seq[A]
 
         /**
-          * Removes an entity with the specified ID from the repository.
-          * @param id Id of the entity to remove.
-          * @return True if the entity was removed, false otherwise.
-          */
+         * Removes an entity with the specified ID from the repository.
+         * @param id Id of the entity to remove.
+         * @return True if the entity was removed, false otherwise.
+         */
         def removeById(id: String): Boolean
 
         /**
-          * Returns all entities from the repository.
-          * @param pagination Optionally specified pagination.
-          */
+         * Returns all entities from the repository.
+         * @param pagination Optionally specified pagination.
+         */
         def getAll(pagination: Option[PaginationInfo] = None): Seq[A]
 
         /**
-          * Persists the specified entity into the repository. If it already exists in the repository, then the entity
-          * is updated.
-          * @param entity The entity to persist.
-          * @return The persisted entity.
-          */
+         * Persists the specified entity into the repository. If it already exists in the repository, then the entity
+         * is updated.
+         * @param entity The entity to persist.
+         * @return The persisted entity.
+         */
         def persist(entity: AnyRef): A
 
         /**
-          * @return Returns number of persisted entities
-          */
+         * @return Returns number of persisted entities
+         */
         def getCount: Long
     }
 
     /**
-      * Defines operations common to all repositories accessing entities that extend
-      * [[cz.payola.domain.entities.NamedEntity]].
-      * @tparam A Type of the entities in the repository.
-      */
+     * Defines operations common to all repositories accessing entities that extend
+     * [[cz.payola.domain.entities.NamedEntity]].
+     * @tparam A Type of the entities in the repository.
+     */
     trait NamedEntityRepository[+A <: NamedEntity] extends Repository[A]
     {
         /**
-          * Returns an entity with the specified name.
-          * @param name Name of the entity to search for.
-          */
+         * Returns an entity with the specified name.
+         * @param name Name of the entity to search for.
+         */
         def getByName(name: String): Option[A]
     }
 
     /**
-      * Defines operations common to all repositories accessing entities that extend
-      * [[cz.payola.domain.entities.OptionallyOwnedEntity]].
-      * @tparam A Type of the entities in the repository.
-      */
+     * Defines operations common to all repositories accessing entities that extend
+     * [[cz.payola.domain.entities.OptionallyOwnedEntity]].
+     * @tparam A Type of the entities in the repository.
+     */
     trait OptionallyOwnedEntityRepository[+A <: OptionallyOwnedEntity] extends Repository[A]
     {
         /**
-          * Returns all entities with the specified owner.
-          * @param ownerId Owner id of the entities to search for.
-          */
+         * Returns all entities with the specified owner.
+         * @param ownerId Owner id of the entities to search for.
+         */
         def getAllByOwnerId(ownerId: Option[String]): Seq[A]
     }
 
     /**
-      * Defines operations common to all repositories accessing entities that extend
-      * [[cz.payola.common.entities.ShareableEntity]].
-      * @tparam A Type of the entities in the repository.
-      */
+     * Defines operations common to all repositories accessing entities that extend
+     * [[cz.payola.common.entities.ShareableEntity]].
+     * @tparam A Type of the entities in the repository.
+     */
     trait ShareableEntityRepository[+A <: ShareableEntity with OptionallyOwnedEntity with NamedEntity]
         extends OptionallyOwnedEntityRepository[A] with NamedEntityRepository[A]
     {
         /**
-          * Returns all public entities.
-          */
+         * Returns all public entities.
+         */
         def getAllPublic: Seq[A]
 
         /**
-          * Returns all public entities with the specified owner.
-          * @param ownerId Owner id of the entities to search for.
-          */
+         * Returns all public entities with the specified owner.
+         * @param ownerId Owner id of the entities to search for.
+         */
         def getAllPublicByOwnerId(ownerId: Option[String]): Seq[A] = getAllByOwnerId(ownerId).filter(_.isPublic)
     }
 
@@ -173,10 +173,10 @@ trait DataContextComponent
         def getByEmail(email: String): Option[User]
 
         /**
-          * Returns all users whose names contain the specified name part as a substring.
-          * @param namePart Name part the users names must contain.
-          * @param pagination Optionally specified pagination of the result.
-          */
+         * Returns all users whose names contain the specified name part as a substring.
+         * @param namePart Name part the users names must contain.
+         * @param pagination Optionally specified pagination of the result.
+         */
         def getAllWithNameLike(namePart: String, pagination: Option[PaginationInfo] = None): Seq[User]
     }
 
@@ -186,11 +186,11 @@ trait DataContextComponent
     trait GroupRepository extends Repository[Group]
     {
         /**
-          * Returns for all groups with the specified owner ID.
-          * @param ownerId ID of the group owner.
-          * @param pagination Optionally specified pagination of the result.
-          */
-        def getAllByOwnerId(ownerId: String, pagination: Option[PaginationInfo] = None) : Seq[Group]
+         * Returns for all groups with the specified owner ID.
+         * @param ownerId ID of the group owner.
+         * @param pagination Optionally specified pagination of the result.
+         */
+        def getAllByOwnerId(ownerId: String, pagination: Option[PaginationInfo] = None): Seq[Group]
     }
 
     /**
@@ -199,23 +199,23 @@ trait DataContextComponent
     trait PrivilegeRepository extends Repository[Privilege[_ <: Entity]]
     {
         /**
-          * Returns all privileges of the specified type granted to the specified grantees.
-          * @param granteeIds The entities whose privileges should be returned.
-          * @param privilegeClass Type of the privilege.
-          */
+         * Returns all privileges of the specified type granted to the specified grantees.
+         * @param granteeIds The entities whose privileges should be returned.
+         * @param privilegeClass Type of the privilege.
+         */
         def getAllByGranteeIds(granteeIds: Seq[String], privilegeClass: Class[_]): Seq[Privilege[_ <: Entity]]
 
         /**
-          * Returns all privileges granted to the specified grantee.
-          * @param granteeId ID of the privilege grantee.
-          */
+         * Returns all privileges granted to the specified grantee.
+         * @param granteeId ID of the privilege grantee.
+         */
         def getAllByGranteeId(granteeId: String): Seq[Privilege[_ <: Entity]]
 
         /**
-          * Gets a list of privileges of the specified type to the specified object.
-          * @param objId ID of the privileged object
-          * @param privilegeClass Class of the privilege.
-          */
+         * Gets a list of privileges of the specified type to the specified object.
+         * @param objId ID of the privileged object
+         * @param privilegeClass Class of the privilege.
+         */
         def getAllByObjectIdAndPrivilegeClass(objId: String, privilegeClass: Class[_]): Seq[Privilege[_ <: Entity]]
     }
 
@@ -229,15 +229,15 @@ trait DataContextComponent
         with ShareableEntityRepository[Analysis]
     {
         /**
-          * Persists specified PluginInstance of Analysis
-          * @param pluginInstance PluginInstance to persist
-          */
+         * Persists specified PluginInstance of Analysis
+         * @param pluginInstance PluginInstance to persist
+         */
         def persistPluginInstance(pluginInstance: PluginInstance)
 
         /**
-          * Persists given ParameterValue
-          * @param parameterValue ParameterValue to persist
-          */
+         * Persists given ParameterValue
+         * @param parameterValue ParameterValue to persist
+         */
         def persistParameterValue(parameterValue: ParameterValue[_])
     }
 
@@ -251,15 +251,15 @@ trait DataContextComponent
         with ShareableEntityRepository[OntologyCustomization]
     {
         /**
-          * Persists given ClassCustomization
-          * @param classCustomization ClassCustomization to persist
-          */
+         * Persists given ClassCustomization
+         * @param classCustomization ClassCustomization to persist
+         */
         def persistClassCustomization(classCustomization: AnyRef)
 
         /**
-          * Persists given PropertyCustomization
-          * @param propertyCustomization PropertyCustomization to persist
-          */
+         * Persists given PropertyCustomization
+         * @param propertyCustomization PropertyCustomization to persist
+         */
         def persistPropertyCustomization(propertyCustomization: AnyRef)
     }
 
@@ -279,20 +279,20 @@ trait DataContextComponent
         with ShareableEntityRepository[DataSource]
     {
         /**
-          * Persists ParameterValue of DataSource
-          * @param parameterValue ParameterValue to persist
-          */
+         * Persists ParameterValue of DataSource
+         * @param parameterValue ParameterValue to persist
+         */
         def persistParameterValue(parameterValue: ParameterValue[_])
     }
 
     /**
-      * A registry providing repositories by entity class names.
-      * @param repositoriesByClass The repositories to store in the registry indexed by classes whose instances the
+     * A registry providing repositories by entity class names.
+     * @param repositoriesByClass The repositories to store in the registry indexed by classes whose instances the
      *                            repositories contain.
-      */
+     */
     class RepositoryRegistry(repositoriesByClass: Map[Class[_], Repository[_]])
     {
-        private val repositoriesByClassName = repositoriesByClass.map { r =>
+        private val repositoriesByClassName = repositoriesByClass.map {r =>
             cz.payola.common.Entity.getClassName(r._1) -> r._2
         }
 
@@ -306,9 +306,9 @@ trait DataContextComponent
         }
 
         /**
-          * Returns a repository by an entity class.
-          * @param entityClass Class whose instances the repository contains.
-          */
+         * Returns a repository by an entity class.
+         * @param entityClass Class whose instances the repository contains.
+         */
         def apply(entityClass: Class[_]): Repository[_] = {
             apply(cz.payola.common.Entity.getClassName(entityClass))
         }
@@ -321,4 +321,5 @@ trait DataContextComponent
             apply(entity.className)
         }
     }
+
 }
