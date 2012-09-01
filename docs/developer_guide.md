@@ -557,9 +557,13 @@ Squeryl is an existing, tested, functional and easy to use ORM for Scala applica
 
 [Squeryl](http://squeryl.org) is a free ORM tool for Scala projects, it can use any relational database supported by JDBC drivers.
 
-A database structure needs to be defined in an object extending the `org.squeryl.Schema` object. This object contains a table definition - definition that says which entity is persisted in which table. Squeryl allows to redefine column types of tables, to declare 1:N and M:N relations between entities, to define foreign key constraints for those relations.
+A database structure needs to be defined in an object extending the `org.squeryl.Schema` object. This object contains a table definition - definition that says which entity is persisted in which table. Squeryl allows to:
 
-Squeryl provides lazy fetching of entities from "N" side of 1:N or M:N relations, which is a desirable feature of an ORM tool. The query that fetches the entities of a relation is defined in a lazy field of the related entity, on the first data request, the query is evaluated. There is an `associate` method in Squeryl for creating a relation between entities. Simplified code may look something like this:
+- redefine column types of tables
+- declare 1:N and M:N relations between entities
+- define foreign key constraints for those relations.
+
+Squeryl provides lazy fetching of entities from "N" side of 1:N or M:N relations, which is a desirable feature of an ORM tool. The query that fetches the entities of a relation is defined in a lazy field of the related entity, on the first data request, the query is evaluated. There is an `associate` method in Squeryl for creating a relation between entities. Simplified code may look like this:
 
 <a name="squeryl-code-examle"></a>
 ```scala
