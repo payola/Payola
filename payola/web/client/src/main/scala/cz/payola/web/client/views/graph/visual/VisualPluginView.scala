@@ -198,23 +198,7 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
     }
 
     private def createInfoTable(vertexView: VertexView) {
-
-        var position = vertexView.position + Vector2D(vertexView.radius, 0)
-        position = if(position.x - 506 < 0) {
-            if(position.y - 330 < 0) {
-                vertexView.position + Vector2D(vertexView.radius, 0)
-            } else {
-                vertexView.position + Vector2D(vertexView.radius, -vertexView.radius - 335)
-            }
-        } else {
-            if(position.y - 330 < 0) {
-                vertexView.position + Vector2D(-521 - vertexView.radius, 0)
-            } else {
-                vertexView.position + Vector2D(-521 - vertexView.radius, -vertexView.radius - 335)
-            }
-        }
-
-        val infoTable = new VertexInfoTable(vertexView.vertexModel, vertexView.getLiteralVertices, position)
+        val infoTable = new VertexInfoTable(vertexView.vertexModel, vertexView.getLiteralVertices, Point2D.Zero)
 
         infoTable.vertexBrowsing += { a =>
             triggerDestroyVertexInfo()
@@ -227,8 +211,26 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
         }
 
         currentInfoTable = Some(infoTable)
-
         infoTable.render(_parentHtmlElement.getOrElse(document.body))
+
+        val tableSize = infoTable.getSize
+
+        var position = vertexView.position + Vector2D(vertexView.radius, 0)
+        position = if(position.x - tableSize.x < 0) {
+            if(position.y - tableSize.y < 0) {
+                vertexView.position + Vector2D(vertexView.radius, 0)
+            } else {
+                vertexView.position + Vector2D(vertexView.radius, - tableSize.y)
+            }
+        } else {
+            if(position.y - tableSize.y < 0) {
+                vertexView.position + Vector2D(-tableSize.x - vertexView.radius, 0)
+            } else {
+                vertexView.position + Vector2D(-tableSize.x - vertexView.radius, - tableSize.y)
+            }
+        }
+
+        infoTable.setPosition(position)
     }
 
     override def updateOntologyCustomization(newCustomization: Option[OntologyCustomization]) {
