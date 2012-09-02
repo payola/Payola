@@ -51,8 +51,8 @@ object PrivateDataStorage extends PayolaController with Secured
         }
     }
 
-    /**Saves a graph to the user's private data storage.
-     *
+    /**
+     * Saves a graph to the user's private data storage.
      * @param graphURL Graph URL.
      * @param user User.
      */
@@ -65,8 +65,8 @@ object PrivateDataStorage extends PayolaController with Secured
         }
     }
 
-    /**Saves a graph to the user's private data storage.
-     *
+    /**
+     * Saves a graph to the user's private data storage.
      * @param file File containing RDF/XML representation of the graph.
      * @param user User.
      */
@@ -75,8 +75,6 @@ object PrivateDataStorage extends PayolaController with Secured
             Payola.model.payolaStorageModel.addGraphToUser(file, user, rdfType)
             Redirect(routes.PrivateDataStorage.add()).flashing("success" -> "Successfully saved graph.")
         } catch {
-            // Change the message to something meaningful - Virtuoso typically
-            // returns something like 'input length = 1' which is not very user friendly
             case t: Throwable => {
                 Redirect(routes.PrivateDataStorage.add()).flashing(
                     "error" -> "The uploaded file is not a valid RDF/XML or TTL file (%s).".format(t.getMessage)

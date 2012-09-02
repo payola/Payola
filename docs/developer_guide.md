@@ -1073,6 +1073,10 @@ While developing the Payola, we used the following technologies:
 
 To run all tests, use the `test` SBT task on the root project. Or if you want to run tests for a concrete project, switch to the project in the SBT using `project [projectName]` (e.g. `project compiler`). The tests don't cover everything, only some portions of the code are unit tested. Tests of the data project might be quite useful in case you'd like to use different database server. They verify that persistence of all entities and their properties work.
 
+## API documentation
+
+The generated API documentation isn't included, however you can generate it using the SBT. To generate API documentation, use the `doc` SBT task on the root project. Each project has its own API documentation which can be found in the `target/scala-2.9.1/api` subdirectory of the project.
+
 ## Continuous integration
 In order to have the code in the repository compilable all the time, we use a [TeamCity](http://www.jetbrains.com/teamcity/) as continuous integration tool. Since the integration rules are currently set that the only rule is that the application should compile, only a simple build ant script is used.
 
