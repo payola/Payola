@@ -269,7 +269,6 @@ All methods that are marked with the `@remote` annotation or defined on an objec
 @remote object remote {
     def foo(bar: Int, baz: String): Int = bar * baz.length
 
-	@async def asyncFoo(bar: Int, baz: String)
 		(successCallback: Int => Unit)
 		(errorCallback: Throwable => Unit) {
                                 
@@ -520,7 +519,7 @@ Because the [SPARQL](http://www.w3.org/TR/rdf-sparql-query/) is used throughout 
 <a name="data"></a>
 ## Package cz.payola.data
 
-This whole package represents the data layer. Trait `DataContextComponent` defines an API for communication between the data layer and other Payola components. The two vital tasks of the data layer are:
+This whole package represents the data layer. Trait `DataContextComponent` defines an API for communication between the data layer and Payola [model](#model) component. The two vital tasks of the data layer are:
 
 - to store and fetch the [domain layer](#domain) entities
 - to use the [Virtuoso](http://virtuoso.openlinksw.com/) server as a private RDF data storage
@@ -657,7 +656,7 @@ The whole model is divided into several components. Each component has its own d
 
 While utilizing the subcomponents the `ModelComponent` trait is built up to provide a single entry point to the model infrastructure. While utilizing the cake pattern, dependencies like the persistence layer, RDF data storage layer and plugin compiler are injected to the model components.
 
-Later on, when you get familiar with the `cz.payola.web.shared` package, you will find out more about an object named `cz.payola.web.shared.Payola`. This is an example implementation of the `ModelComponent` trait.
+Later on, when you get familiar with the `cz.payola.web.shared` package, you will find out more about an object named `cz.payola.web.shared.Payola`, whicg is an example implementation of the `ModelComponent` trait.
 
 <a name="web"></a>
 ## Package cz.payola.web
@@ -824,8 +823,6 @@ Created database contains:
 ### Package cz.payola.web.shared
 
 As described before, in this package, you can find the code which could be executed on both the client side and the server side, or the code which is executed on the server side, but called from the client side. The so-called *remote objects* are further described in the section about s2js compiler. One can see the remote objects as controllers for the RPC calls. You just define an action in the remote object and call it from the client side.
-
-The code in this package is a collection of remote objects and code shared between the client side and the server side as our web application needed it. 
 
 The most important object in this package is the `Payola` object. It is an instance of the previously mentioned `ModelComponent` trait. It serves as an entry point to the whole model of the application. Since it is not a remote object, you cannot use it on the client side, but it is heavily used by the remote objects on the server side. Also, controllers from the package `cz.payola.web.server` use the `Payola` object to gain access to the data and business logic of the application. Since it is a `Scala object`, it behaves as a Java singleton in the right point of view - exactly one instance exists in the whole application and you don't need to create it, it is given to you for free by the Scala runtime. If it reminds you of something, you are kind of right, it is very similar to a classic DI container (but affected a lot with the `Scala cake pattern for DI`).
 
@@ -1119,5 +1116,7 @@ Since there is always something that you can do better or more sophisticated, we
 - Implement analysis result persistence into the personal Data Source
 - Make the s2js compiler a completely standalone product
 - Support for large graphs that wouldn't fit into the memory (i.e. lazy loading of vertices)
-- Add full support for all squeryl-supported databases
+- Add full support for all [Squeryl-compatible](http://squeryl.org/supported-databases.html)databases
 - Allow update database structure in a way that preserves stored data (currently - running database initializer with a new database structure drops existing schema)
+
+On [GitHub](https://github.com/siroky/Payola/issues?sort=updated&state=open) you can find list of issues that we currently work on.
