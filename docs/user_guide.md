@@ -44,7 +44,7 @@ Actually, this is almost a [Turtle](http://www.w3.org/TeamSubmission/turtle/) no
 
 Having this context in mind, we provide a tool that makes it easy to analyze sets of facts (usually stored in a database) and visualize them. As an example of such a visualization, see the following picture, which is a sample visualization of an analysis of relations on social networks for a particular person.
 
-TODO JH - data image
+![RDF visualisation example](https://raw.github.com/siroky/Payola/develop/docs/img/fb_graph.png)
 
 For a more complex and sophisticated description of Linked Data, please visit the following [website](http://linkeddata.org/).
 
