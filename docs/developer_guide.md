@@ -1143,7 +1143,15 @@ In the future, we will work hard to integrate test suites into the continuous in
 
 ### Jena
 
+As RDF-related technologies are still relatively young, at least in the real world (i.e. not in research), there aren't many choices when it comes to libraries for parsing RDF/XML or TTL files in Scala (or Java). Jena was our choice number one as it is being actively developed by the [Apache Software Foundation](http://www.apache.org) and was likely to be well-debugged.
+
+Other options were either [JRDF](http://jrdf.sourceforge.net) which is no longer maintained as of May, 2011; or [Sesame](http://www.openrdf.org) which, however, lacks support for ontologies (OWL, ...).
+
 ### Virtuoso
+
+In general, there are three (actively developed) different RDF databases available - [Virtuoso](http://virtuoso.openlinksw.com), [Dydra](http://dydra.com) and [4store](http://4store.org). At the time of deciding, we hadn't had any experience with either of them and we've eventually decided to go with Virtuoso as it is being used by [OpenData.cz](http://opendata.cz), which we were aware of.
+
+Nevertheless, switching to a different RDF database isn't a hard task, simply replacing the `VirtuosoStorage` class with another `Storage` subclass is sufficient.
 
 ### Play 2.0
 Since the list of available Scala web frameworks is not really a long one, we've chosen Play 2.0 rather quickly. The other web frameworks for Scala more or less tried to brake the MVC pattern (e.g. Lift) so it was clear we will choose this one. When we started to develop Payola, the Play 2.0 wasn't even in release candidate stage, so from time to time, it was a little bit hard to maintain the changes between versions. The most difficult part was to find a solution for a problem since not many people have used the Play 2.0, at least in the beginning. After a while, some documentation became available so the work with the framework was more comfortable.
@@ -1186,5 +1194,6 @@ Since there is always something that you can do better or more sophisticated, we
 - Support for large graphs that wouldn't fit into the memory (i.e. lazy loading of vertices)
 - Add full support for all [Squeryl-compatible](http://squeryl.org/supported-databases.html)databases
 - Allow update database structure in a way that preserves stored data (currently - running database initializer with a new database structure drops existing schema)
+- Support for other RDF databases besides Virtuoso
 
 > You can find a list of improvements that is currently being worked on at [GitHub](https://github.com/siroky/Payola/issues?sort=updated&state=open).
