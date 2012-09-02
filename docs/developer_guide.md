@@ -1103,6 +1103,63 @@ This prevents us from situations, when somebody pushes a commit and does not tes
 
 In the future, we will work hard to integrate test suites into the continuous integration process, as well as automatic deployment to our production server.
 
+##Chronologically ordered description of work progress:
+1. Analysis of existing implementations and approaches [M1-M2]
+2. Detailed specification of concrete system functions, architecture and interfaces between modules [M1-M3]
+3. definition of application type
+    a. overall application design (client-server architecture)
+    b. definition of server-side application architecture
+    c. domain entities specification
+    d. definition of analysis evaluation subsystem architecture
+    e. client-side architecture
+    f. definition of client-server communication; architecture of corresponding systems
+4. Prototype implementation [M1-M8]
+    a. creating an empty web application based on Play 2.0 RC
+    b. s2js
+    c. domain entities implementation
+    d. data layer implementation
+    e. RPC
+    f. JENA integration
+    g. squeryl integration
+    h. creating web application prototype based on fake data
+    i. integrating squeryl and data layer
+    j. integrating data layer into the web application
+    k. virtuoso DB communication
+    l. analysis evaluation
+    m. RPC security
+    n. DB initializer
+    o. plugin compiler
+    p. client-side code development
+    q. entity sharing
+    r. ontology parser
+    s. ontology customizations
+    t. error handling
+    u. Tests on real data, debugging [M8-M9]
+5. Documentation (developer, user, installation) [M7-M9]
+
+## Critical evaluation of accepted solutions and technologies
+
+### Scala language, sbt
+
+### Jena
+
+### Virtuoso
+
+### Play 2.0
+
+### s2js
+
+### RPC
+
+### HTML5 (<canvas\>)
+
+### Actors
+
+### Squeryl
+
+### Custom Events
+
+
 ## Future work
 Since there is always something that you can do better or more sophisticated, we also have a list of things which we are looking forward to change in Payola. Here are some examples:
 
