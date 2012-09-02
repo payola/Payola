@@ -190,7 +190,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
     }
 
     private def downloadResultAsRDF() {
-        downloadResultAs("xml")
+        downloadResultAs("rdf")
     }
 
     private def downloadResultAsTTL() {

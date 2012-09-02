@@ -2,7 +2,6 @@ package controllers
 
 import cz.payola.domain.rdf._
 import play.api.mvc._
-import scala.io.Source
 import cz.payola.web.shared._
 import cz.payola.domain.entities.User
 import controllers.helpers.Secured
@@ -29,9 +28,6 @@ object GraphDownloader extends PayolaController with Secured
         val analysis = Payola.model.analysisModel.getAccessibleToUserById(u, analysisID)
         if (success.isDefined && analysis.isDefined) {
             val graph = success.get.outputGraph
-            val source = Source.fromString(graph.toStringRepresentation(format))
-            val downloadResult = source.map(_.toByte).toArray
-            source.close()
 
             val mimeType = format match {
                 case RdfRepresentation.RdfXml => "application/rdf+xml"
@@ -43,7 +39,7 @@ object GraphDownloader extends PayolaController with Secured
                 case RdfRepresentation.Turtle => "ttl"
             }
 
-            Ok(downloadResult).as(mimeType).withHeaders {
+            Ok(graph.toStringRepresentation(format)).as(mimeType).withHeaders {
                 CONTENT_DISPOSITION -> "attachment; filename=%s.%s".format(analysis.get.name, fileExtension)
             }
         } else {
@@ -56,14 +52,6 @@ object GraphDownloader extends PayolaController with Secured
     }
 
     private def getAnalysisSuccessForEvaluationID(id: String, user: Option[User]) = {
-        val evaluationOpt = getAnalysisEvaluationForID(id, user)
-        if (evaluationOpt.isDefined) {
-            evaluationOpt.get.getResult match {
-                case Some(s: Success) => Some(s)
-                case _ => None
-            }
-        } else {
-            None
-        }
+        getAnalysisEvaluationForID(id, user).flatMap(_.getResult).collect { case s: Success => s }
     }
 }
