@@ -1147,17 +1147,30 @@ The SBT (Scala Build Tool) was the choice number one in the Scala ecosystem, bec
 
 ### Jena
 
+As RDF-related technologies are still relatively young, at least in the real world (i.e. not in research), there aren't many choices when it comes to libraries for parsing RDF/XML or TTL files in Scala (or Java). Jena was our choice number one as it is being actively developed by the [Apache Software Foundation](http://www.apache.org) and was likely to be well-debugged.
+
+Other options were either [JRDF](http://jrdf.sourceforge.net) which is no longer maintained as of May, 2011; or [Sesame](http://www.openrdf.org) which, however, lacks support for ontologies (OWL, ...).
+
 ### Virtuoso
 
+In general, there are three (actively developed) different RDF databases available - [Virtuoso](http://virtuoso.openlinksw.com), [Dydra](http://dydra.com) and [4store](http://4store.org). At the time of deciding, we hadn't had any experience with either of them and we've eventually decided to go with Virtuoso as it is being used by [OpenData.cz](http://opendata.cz), which we were aware of.
+
+Nevertheless, switching to a different RDF database isn't a hard task, simply replacing the `VirtuosoStorage` class with another `Storage` subclass is sufficient.
+
 ### Play 2.0
+Since the list of available Scala web frameworks is not really a long one, we've chosen Play 2.0 rather quickly. The other web frameworks for Scala more or less tried to brake the MVC pattern (e.g. Lift) so it was clear we will choose this one. When we started to develop Payola, the Play 2.0 wasn't even in release candidate stage, so from time to time, it was a little bit hard to maintain the changes between versions. The most difficult part was to find a solution for a problem since not many people have used the Play 2.0, at least in the beginning. After a while, some documentation became available so the work with the framework was more comfortable.
+
+The API of the framework is good, the only negative thing was that we had to write some custom action wrappers to acheive secured functionalities.
 
 ### s2js
 
 To use our own Scala to JavaScript compiler seemed to be risky, we had to spend not a small amount of time on it and several bugs appeared during the development. The debugging is slower and much less developer friendly. The advantages, on the other hand, are full intellisense and refactoring support in the IDE, the fact that whole project is written in one language and, not to forget, RPC. Looking back, it's undecidable whether writing the client side in Scala and not directly in JavaScript was pro or con.
 
 ### RPC
+It may seem odd that while developing a graph visualisation tool, we came up with Scala to JavaScript compiler and RPC implementation. But it was worth it. After the s2js was done and RPC implemented, it was much easier to implement Payola. As we expected, it made the code transparent. The typed client-server call architecture prevented us from a lot of debugging, as well as standardized call to server and global error handling on client RPC wrapper did. In conclusion, the RPC saved us a lot of time.
 
 ### HTML5 (<canvas\>)
+It was a good decision to make a web application because we can target many platforms, including mobile ones (after some more work). This is way avoid using Flash was a great decision. But we are not really sure if we shouldn't start visualising graphs with SVG instead of canvas HTML5 element. It is still a rather new technology and it has got some limitations. E.g., in Firefox, it is not possible to use font-face fonts in canvas, because the rendering of the text depends on time which browser spends on loading the font from the webserver. If it takes a long time, the browser won't use the fonr while rendering. It is a known and annoying issue of Firefox but it has no known solution, even preloading does not work properly. That's why we had to render glyphs over vertices as <span\> elements. Maybe, SVG would have solved some our problems, but, as we haven't tried using it, some other could have arisen.
 
 ### Actors
 
@@ -1165,8 +1178,13 @@ Scala provides many means to handle concurrency and issues connected to it, we u
 
 ### Squeryl
 
-### Custom Events
+### Custom events vs. JS libraries
 
+At first, some members of our team were a little bit sceptic about using our custom MVP implementation instead of an out-of-the box MVC JavaScript framework with automatic data and events binding. Over some time, they recognized that it was a great way how to do this. Those MVC frameworks are still in an early development stage and does not have a very good documentation. Moreover it took several hours to write our own event handling system or implement the MVP pattern. As a bonus, we do not rely on 3rd party library which would mean a lot of additional unused code as we would not use the whole library.
+
+On the other hand, Payola depends on some other JavaScript libraries. Besides jQuery, which is rather a dependency for another libraries, we use them completely. That's becuase they help us accomplish smll specific tasks (colorpicker, modal dialogs, syntax highlight, ...). It saved us a lot of time to use them instead of writing our own solution. Especially because they are small and have simple APIs.
+
+The event system also simplified our code and made it more readable because, while utilizing Scala syntactic sugar, it minimizes boilerplate code.
 
 ## Future work
 Since there is always something that you can do better or more sophisticated, we also have a list of things which we are looking forward to change in Payola. Here are some examples:
@@ -1184,5 +1202,6 @@ Since there is always something that you can do better or more sophisticated, we
 - Support for large graphs that wouldn't fit into the memory (i.e. lazy loading of vertices)
 - Add full support for all [Squeryl-compatible](http://squeryl.org/supported-databases.html)databases
 - Allow update database structure in a way that preserves stored data (currently - running database initializer with a new database structure drops existing schema)
+- Support for other RDF databases besides Virtuoso
 
 > You can find a list of improvements that is currently being worked on at [GitHub](https://github.com/siroky/Payola/issues?sort=updated&state=open).
