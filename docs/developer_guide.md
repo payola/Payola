@@ -1139,7 +1139,11 @@ In the future, we will work hard to integrate test suites into the continuous in
 
 ## Critical evaluation of accepted solutions and technologies
 
-### Scala language, sbt
+### Scala language, SBT
+
+The first decision, our team faced, was the programming language and platform to use. Our team was quite diverse in terms of programming language symphaties, we wanted to learn something during the project implementation and to use a state-of-the-art technology. The project also had to be platform independent, which practically narrowed our choices to Java and languages based on the top of JRE. And because Scala seemed to be the most mature one (besides Java), we chose it. Nobody had any experience with it, but we got used to it quite quickly and now, we don't regret that choice. The only problem was that as we were getting more and more familiar with the language and the functional programming paradigms, the code that was written at the beginning became obsolete after couple of months, so we refactored a lot.
+
+The SBT (Scala Build Tool) was the choice number one in the Scala ecosystem, because everything is done in Scala and nobody needs to learn a new language or notation in order to configure the build. It was going through rapid development at the time we started using it, so there were some problems at the beginning, but they went away with the new versions.
 
 ### Jena
 
@@ -1149,11 +1153,15 @@ In the future, we will work hard to integrate test suites into the continuous in
 
 ### s2js
 
+To use our own Scala to JavaScript compiler seemed to be risky, we had to spend not a small amount of time on it and several bugs appeared during the development. The debugging is slower and much less developer friendly. The advantages, on the other hand, are full intellisense and refactoring support in the IDE, the fact that whole project is written in one language and, not to forget, RPC. Looking back, it's undecidable whether writing the client side in Scala and not directly in JavaScript was pro or con.
+
 ### RPC
 
 ### HTML5 (<canvas\>)
 
 ### Actors
+
+Scala provides many means to handle concurrency and issues connected to it, we used parallel collection quite a few times, but the best choice was to use actors within the analysis evaluation process. The actors almost naturally fitted to the problem, the implementation was therefore straightforward. In our opinion, implementing the same thing using just threads would take much more time, lines of code and debugging time.
 
 ### Squeryl
 
