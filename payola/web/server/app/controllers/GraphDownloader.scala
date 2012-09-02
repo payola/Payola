@@ -8,6 +8,7 @@ import cz.payola.web.shared._
 import cz.payola.domain.entities.User
 import controllers.helpers.Secured
 import cz.payola.domain.entities.analyses.evaluation.Success
+import cz.payola.common.PayolaException
 
 object GraphDownloader extends PayolaController with Secured
 {
@@ -29,46 +30,38 @@ object GraphDownloader extends PayolaController with Secured
     }
 
     def downloadAnalysisEvaluationResultAsXML(analysisID: String, evaluationID: String) = maybeAuthenticated { u: Option[User] =>
-        val success = getAnalysisSuccessForEvaluationID(evaluationID, u)
-        val analysis = Payola.model.analysisModel.getAccessibleToUserById(u, analysisID)
-        if (success.isDefined && analysis.isDefined){
-            downloadAnalysisResult(success.get, fileName = analysis.get.name)
-        }else{
-            NotFound(views.html.errors.err404("The data source does not exist."))
-        }
+        downloadAnalysisEvaluationResultAs(analysisID, evaluationID, RdfRepresentation.RdfXml, u)
     }
 
     def downloadAnalysisEvaluationResultAsTTL(analysisID: String, evaluationID: String) = maybeAuthenticated { u: Option[User] =>
+        downloadAnalysisEvaluationResultAs(analysisID, evaluationID, RdfRepresentation.Turtle, u)
+    }
+
+    private def downloadAnalysisEvaluationResultAs(analysisID: String, evaluationID: String, format: RdfRepresentation.Type, u: Option[User]): Result = {
         val success = getAnalysisSuccessForEvaluationID(evaluationID, u)
         val analysis = Payola.model.analysisModel.getAccessibleToUserById(u, analysisID)
         if (success.isDefined && analysis.isDefined){
-            downloadAnalysisResult(success.get, RdfRepresentation.Turtle, analysis.get.name)
+            val graph = success.get.outputGraph
+            val stringRepresentation = graph.textualRepresentation(format)
+            val source = Source.fromString(stringRepresentation)
+            val byteArray = source.map(_.toByte).toArray
+            val mimeType = format match {
+                case RdfRepresentation.RdfXml => "application/rdf+xml"
+                case RdfRepresentation.Turtle => "text/turtle"
+                case _ => throw new PayolaException("Unsupported RDF Format")
+            }
+            val fileExtension = format match {
+                case RdfRepresentation.RdfXml => "rdf"
+                case RdfRepresentation.Turtle => "ttl"
+                case _ => throw new PayolaException("Unsupported RDF Format")
+            }
+
+            source.close()
+            Ok(byteArray).as(mimeType).withHeaders {
+                CONTENT_DISPOSITION -> "attachment; filename=%s.%s".format(analysis.get.name, fileExtension)
+            }
         }else{
             NotFound(views.html.errors.err404("The data source does not exist."))
         }
-    }
-
-    def downloadAnalysisResult(result: Success, representation: RdfRepresentation.Type = RdfRepresentation.RdfXml, fileName: String = "graph"): Result = {
-        representation match {
-            case RdfRepresentation.RdfXml => downloadGraphAsRDF(result.outputGraph, fileName)
-            case RdfRepresentation.Turtle => downloadGraphAsTTL(result.outputGraph, fileName)
-        }
-    }
-
-    def downloadGraphAsRDF(graph: Graph, fileName: String = "graph"): Result = downloadGraphAsRepresentationResult(graph, RdfRepresentation.RdfXml, "application/rdf+xml", fileName, "rdf")
-    def downloadGraphAsTTL(graph: Graph, fileName: String = "graph"): Result = downloadGraphAsRepresentationResult(graph, RdfRepresentation.Turtle, "text/turtle", fileName, "ttl")
-
-    def downloadGraphAsRepresentationResult(graph: Graph, representation: RdfRepresentation.Type, mimeType: String, fileName: String, fileExtension: String): Result = {
-        val stringRepresentation = graph.textualRepresentation(representation)
-        val source = Source.fromString(stringRepresentation)
-        val byteArray = source.map(_.toByte).toArray
-        source.close()
-        Ok(byteArray).as(mimeType).withHeaders {
-            CONTENT_DISPOSITION -> "attachment; filename=%s.%s".format(fileName, fileExtension)
-        }
-    }
-
-    def downloadGraphAsRepresentation(graph: Graph, representation: RdfRepresentation.Type, mimeType: String, fileName: String, fileExtension: String) = Action {
-        downloadGraphAsRepresentationResult(graph, representation, mimeType, fileName, fileExtension)
     }
 }
