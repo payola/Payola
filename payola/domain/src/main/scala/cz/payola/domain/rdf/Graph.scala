@@ -14,16 +14,16 @@ import cz.payola.common.rdf._
 object Graph
 {
     /**
-      * Returns a new empty graph.
-      */
+     * Returns a new empty graph.
+     */
     def empty: Graph = new Graph(Nil, Nil)
 
     /**
-      * Takes a string representing a RDF data and returns an instance of Graph representing that particular graph.
-      * @param representation Type of the RDF data representation.
-      * @param data The RDF data of the graph.
-      * @return A new graph instance.
-      */
+     * Takes a string representing a RDF data and returns an instance of Graph representing that particular graph.
+     * @param representation Type of the RDF data representation.
+     * @param data The RDF data of the graph.
+     * @return A new graph instance.
+     */
     def apply(representation: RdfRepresentation.Type, data: String): Graph = {
         val dataInputStream = new ByteArrayInputStream(data.getBytes("UTF-8"))
         val jenaLanguage = representation match {
@@ -48,10 +48,10 @@ object Graph
     }
 
     /**
-      * Creates a new Graph instance from an instance of [[com.hp.hpl.jena.rdf.model.Model]].
-      * @param model The model to create the graph from.
-      * @return A new graph instance.
-      */
+     * Creates a new Graph instance from an instance of [[com.hp.hpl.jena.rdf.model.Model]].
+     * @param model The model to create the graph from.
+     * @return A new graph instance.
+     */
     private def apply(model: Model): Graph = {
         val literalVertices = mutable.ListBuffer.empty[LiteralVertex]
         val edges = mutable.HashSet.empty[Edge]
@@ -100,9 +100,9 @@ class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge])
     def +(otherGraph: Graph): Graph = {
         val mergedVertices = (vertices.toSet ++ otherGraph.vertices).toList
         val mergedEdges = (edges.toSet ++ otherGraph.edges).toList.map { e =>
-            // We have to make sure that all edges reference vertices from the mergedVertices collection. It's sure
-            // that vertices equal to origin and destination would be found in the mergedVertices, because edges in the
-            // original graphs surely had origin and destination present in the graph vertices.
+        // We have to make sure that all edges reference vertices from the mergedVertices collection. It's sure
+        // that vertices equal to origin and destination would be found in the mergedVertices, because edges in the
+        // original graphs surely had origin and destination present in the graph vertices.
             val origin = mergedVertices.find(_ == e.origin).get.asInstanceOf[IdentifiedVertex]
             val destination = mergedVertices.find(_ == e.destination).get
             new Edge(origin, destination, e.uri)
@@ -111,10 +111,10 @@ class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge])
     }
 
     /**
-      * Executes the specified SPARQL query.
-      * @param query The query to execute.
-      * @return A graph that corresponds to the executed query result.
-      */
+     * Executes the specified SPARQL query.
+     * @param query The query to execute.
+     * @return A graph that corresponds to the executed query result.
+     */
     def executeSPARQLQuery(query: String): Graph = {
         val sparqlQuery = QueryFactory.create(query)
         val model = getModel
@@ -135,10 +135,24 @@ class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge])
     }
 
     /**
-      * Processes a query execution corresponding to a SPARQL select query.
-      * @param execution The query execution to process.
-      * @return A graph containing the result of the query.
-      */
+     * Returns a string representation of the graph - either in RDF/XML or TTL.
+     * @param representationFormat Output format.
+     */
+    def toStringRepresentation(representationFormat: RdfRepresentation.Type): String = {
+        val outputStream = new ByteArrayOutputStream()
+        representationFormat match {
+            case RdfRepresentation.RdfXml => getModel.write(outputStream)
+            case RdfRepresentation.Turtle => getModel.write(outputStream, "TURTLE")
+        }
+
+        Source.fromInputStream(new ByteArrayInputStream(outputStream.toByteArray), "UTF-8").mkString
+    }
+
+    /**
+     * Processes a query execution corresponding to a SPARQL select query.
+     * @param execution The query execution to process.
+     * @return A graph containing the result of the query.
+     */
     private def processSelectQueryExecution(execution: QueryExecution): Graph = {
         val results = execution.execSelect
         val output = new java.io.ByteArrayOutputStream()
@@ -147,19 +161,19 @@ class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge])
     }
 
     /**
-      * Processes a query execution corresponding to a SPARQL construct query.
-      * @param execution The query execution to process.
-      * @return A graph containing the result of the query.
-      */
+     * Processes a query execution corresponding to a SPARQL construct query.
+     * @param execution The query execution to process.
+     * @return A graph containing the result of the query.
+     */
     private def processConstructQueryExecution(execution: QueryExecution): Graph = {
         Graph(execution.execConstruct)
     }
 
     /**
-      * Creates a Jena model out of the graph. The model has to be closed using the 'close' method, after working with
-      * it is done.
-      * @return Model representing this graph.
-      */
+     * Creates a Jena model out of the graph. The model has to be closed using the 'close' method, after working with
+     * it is done.
+     * @return Model representing this graph.
+     */
     private def getModel: Model = {
         val model = ModelFactory.createDefaultModel()
 
@@ -191,24 +205,5 @@ class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge])
         }
 
         model
-    }
-
-    /** Returns a textual representation of the graph - either in RDF/XML or TTL.
-      *
-      * @param representationFormat Output format.
-      * @return String representation.
-      */
-    def textualRepresentation(representationFormat: RdfRepresentation.Type): String = {
-        val outputStream = new ByteArrayOutputStream()
-        representationFormat match {
-            case RdfRepresentation.RdfXml => {
-                this.getModel.write(outputStream)
-            }
-            case RdfRepresentation.Turtle => {
-                this.getModel.write(outputStream, "TURTLE")
-            }
-        }
-
-        Source.fromInputStream(new ByteArrayInputStream(outputStream.toByteArray), "UTF-8").mkString
     }
 }
