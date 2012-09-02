@@ -1164,7 +1164,7 @@ The API of the framework is good, the only negative thing was that we had to wri
 
 ### s2js
 
-To use our own Scala to JavaScript compiler seemed to be risky, we had to spend not a small amount of time on it and several bugs appeared during the development. The debugging is slower and much less developer friendly. The advantages, on the other hand, are full intellisense and refactoring support in the IDE, the fact that whole project is written in one language and, not to forget, RPC. We also exactly know how it works, so questions about supported language constructs and bug fixes were resolved rather immediately (unlike third-party tools). Looking back, it's undecidable whether writing the client side in Scala and not directly in JavaScript was a pro or con.
+To use our own Scala to JavaScript compiler seemed to be risky, we had to spend not a small amount of time on it and several bugs appeared during the development. The debugging is slower and much less developer friendly. The advantages, on the other hand, are full intellisense and refactoring support in the IDE, the fact that whole project is written in one language and, not to forget, RPC. We also exactly know how it works, so questions about supported language constructs and bug fixes were resolved rather immediately (unlike in case of third-party tools). Looking back, it's undecidable whether writing the client side in Scala and not directly in JavaScript was a pro or con.
 
 The next step is to separate the s2js from the Payola and develop it independently as a standalone project. 
 
