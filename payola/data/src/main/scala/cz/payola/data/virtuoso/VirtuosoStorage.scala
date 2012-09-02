@@ -1,8 +1,6 @@
 package cz.payola.data.virtuoso
 
 import java.sql._
-import com.hp.hpl.jena.query.QueryFactory
-import cz.payola.domain.net.Downloader
 import cz.payola.domain.rdf._
 import java.io.File
 
@@ -51,15 +49,18 @@ class VirtuosoStorage(
     }
 
     def storeGraphFromFile(graphURI: String, file: File, fileType: RdfRepresentation.Type) {
-        val executionString = if (fileType == RdfRepresentation.Turtle) {
-            "DB.DBA.TTLP(file_to_string('%s'), '', '%s', 1023)"
-                .format(escapeString(file.getAbsolutePath), escapeString(graphURI))
-        }else{
-            // Assume RDF/XML
-            "DB.DBA.RDF_LOAD_RDFXML(file_to_string('%s'), '', '%s')"
-                .format(escapeString(file.getAbsolutePath), escapeString(graphURI))
-        }
+        val executionStringTemplate =
+            if (fileType == RdfRepresentation.Turtle) {
+                "DB.DBA.TTLP(file_to_string('%s'), '', '%s', 1023)"
+            } else {
+                // Assume RDF/XML
+                "DB.DBA.RDF_LOAD_RDFXML(file_to_string('%s'), '', '%s')"
+            }
 
+        val executionString = executionStringTemplate.format(
+            escapeString(file.getAbsolutePath),
+            escapeString(graphURI)
+        )
         executeSQL(executionString)
     }
 
@@ -77,7 +78,6 @@ class VirtuosoStorage(
 
     /**
      * Creates a connection to the Virtuoso SQL database.
-     * @return
      */
     private def createSQLConnection(): Connection = {
         DriverManager.getConnection("jdbc:virtuoso://" + server + ":" + sqlPort, sqlUsername, sqlPassword)
@@ -126,6 +126,6 @@ class VirtuosoStorage(
      * @return The escaped value.
      */
     private def escapeString(value: String): String = {
-        value.replaceAllLiterally("'", "\\'")
+        value.replaceAllLiterally("\\", "\\\\").replaceAllLiterally("'", "\\'")
     }
 }
