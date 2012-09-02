@@ -51,7 +51,7 @@ class VirtuosoStorage(
     def storeGraphFromFile(graphURI: String, file: File, fileType: RdfRepresentation.Type) {
         val executionStringTemplate =
             if (fileType == RdfRepresentation.Turtle) {
-                "DB.DBA.TTLP(file_to_string('%s'), '', '%s', 1023)"
+                "DB.DBA.TTLP(file_to_string('%s'), '', '%s', 0)"
             } else {
                 // Assume RDF/XML
                 "DB.DBA.RDF_LOAD_RDFXML(file_to_string('%s'), '', '%s')"
