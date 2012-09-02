@@ -31,10 +31,14 @@ class PluginCreator(val buttonContainerID: String, val listPluginsURL: String) e
     /**Creates a new editor.
      *
      */
-    @javascript("window.ace_editor = ace.edit(\"editor\"); window.ace_editor.setTheme(\"ace/theme/clouds\");" +
-        " var ScalaMode = require(\"ace/mode/scala\").Mode; window.ace_editor.getSession().setMode(new ScalaMode());")
-    private def createEditor() {
-    }
+    @javascript(
+        """
+            window.ace_editor = ace.edit('editor');
+            window.ace_editor.setTheme('ace/theme/clouds');
+            var ScalaMode = require('ace/mode/scala').Mode;
+            window.ace_editor.getSession().setMode(new ScalaMode());
+        """)
+    private def createEditor() { }
 
     /**Gets code from the editor.
      *
