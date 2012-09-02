@@ -1099,9 +1099,6 @@ This prevents us from situations, when somebody pushes a commit and does not tes
 
 In the future, we will work hard to integrate test suites into the continuous integration process, as well as automatic deployment to our production server.
 
-## Known bugs
-You can find the complete list of issues on [GitHub](https://github.com/siroky/Payola/issues?sort=updated&state=open). In the time of writing this documentation, the list contained the following issues:
-
 ## Future work
 Since there is always something that you can do better or more sophisticated, we also have a list of things which we are looking forward to change in Payola. Here are some examples:
 
@@ -1119,4 +1116,4 @@ Since there is always something that you can do better or more sophisticated, we
 - Add full support for all [Squeryl-compatible](http://squeryl.org/supported-databases.html)databases
 - Allow update database structure in a way that preserves stored data (currently - running database initializer with a new database structure drops existing schema)
 
-On [GitHub](https://github.com/siroky/Payola/issues?sort=updated&state=open) you can find list of issues that we currently work on.
+> You can find a list of improvements that is currently being worked on at [GitHub](https://github.com/siroky/Payola/issues?sort=updated&state=open).

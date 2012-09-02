@@ -7,6 +7,7 @@ import cz.payola.domain.entities.plugins.DataSource
 import cz.payola.model.ModelException
 import java.io._
 import scala.io.Source
+import cz.payola.domain.rdf.RdfRepresentation
 
 trait PayolaStorageModelComponent
 {
@@ -52,9 +53,9 @@ trait PayolaStorageModelComponent
           * @param file File with graph.
           * @param user User.
           */
-        def addGraphToUser(file: File, user: User) {
+        def addGraphToUser(file: File, user: User, rdfType: RdfRepresentation.Type) {
             val graphID = IDGenerator.newId
-            rdfStorage.storeGraphFromFile(graphID, file)
+            rdfStorage.storeGraphFromFile(graphID, file, rdfType)
             rdfStorage.addGraphToGroup(graphID, user.id)
         }
     }

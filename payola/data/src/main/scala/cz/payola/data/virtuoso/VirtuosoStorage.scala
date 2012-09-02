@@ -50,10 +50,17 @@ class VirtuosoStorage(
         executeSQL("DB.DBA.RDF_LOAD_RDFXML(http_get('%s'), '', '%s')".format(graphURL, escapeString(graphURI)))
     }
 
-    def storeGraphFromFile(graphURI: String, file: File) {
-        println(file.getAbsolutePath)
-        executeSQL("DB.DBA.RDF_LOAD_RDFXML(file_to_string('%s'), '', '%s')"
-            .format(escapeString(file.getAbsolutePath), escapeString(graphURI)))
+    def storeGraphFromFile(graphURI: String, file: File, fileType: RdfRepresentation.Type) {
+        val executionString = if (fileType == RdfRepresentation.Turtle) {
+            "DB.DBA.TTLP(file_to_string('%s'), '', '%s', 1023)"
+                .format(escapeString(file.getAbsolutePath), escapeString(graphURI))
+        }else{
+            // Assume RDF/XML
+            "DB.DBA.RDF_LOAD_RDFXML(file_to_string('%s'), '', '%s')"
+                .format(escapeString(file.getAbsolutePath), escapeString(graphURI))
+        }
+
+        executeSQL(executionString)
     }
 
     def addGraphToGroup(graphURI: String, groupURI: String) {
