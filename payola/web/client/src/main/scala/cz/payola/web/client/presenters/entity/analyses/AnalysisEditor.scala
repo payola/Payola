@@ -7,6 +7,11 @@ import cz.payola.common.entities.Analysis
 import cz.payola.common.ValidationException
 import s2js.adapters.browser.`package`._
 
+/**
+ * A variant of AnalysisBuilder for editing an existing analysis. Overrides initialize method.
+ * @param parentElementId ID of the DOM element to render views into
+ * @param analysisIdParam ID of the edited analysis
+ */
 class AnalysisEditor(parentElementId: String, analysisIdParam: String)
     extends AnalysisBuilder(parentElementId)
 {

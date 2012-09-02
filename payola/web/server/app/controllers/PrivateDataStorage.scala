@@ -5,6 +5,7 @@ import cz.payola.domain.entities.User
 import java.io.File
 import cz.payola.web.shared.Payola
 import play.api.mvc.Action
+import cz.payola.domain.rdf.RdfRepresentation
 
 object PrivateDataStorage extends PayolaController with Secured
 {
@@ -25,7 +26,16 @@ object PrivateDataStorage extends PayolaController with Secured
             val fileOption = form.file("graphFile")
             assert(fileOption.isDefined, "No graph XML file!")
 
-            saveGraphFromFile(fileOption.get.ref.file, user)
+            val t = if (fileOption.get.filename.endsWith(".ttl")) {
+                RdfRepresentation.Turtle
+            }else{
+                // We currently support only TTL and RDF/XML. Anything that's not
+                // one of those formats can be treated as RDF/XML as the upload's going
+                // to fail anyway.
+                RdfRepresentation.RdfXml
+            }
+
+            saveGraphFromFile(fileOption.get.ref.file, user, t)
         }else{
             Redirect(routes.PrivateDataStorage.add()).flashing("error" -> "Wrong form.")
         }
@@ -62,16 +72,19 @@ object PrivateDataStorage extends PayolaController with Secured
       * @param file File containing RDF/XML representation of the graph.
       * @param user User.
       */
-    private def saveGraphFromFile(file: File, user: User) = {
+    private def saveGraphFromFile(file: File, user: User, rdfType: RdfRepresentation.Type) = {
         try {
-            Payola.model.payolaStorageModel.addGraphToUser(file, user)
+            Payola.model.payolaStorageModel.addGraphToUser(file, user, rdfType)
             Redirect(routes.PrivateDataStorage.add()).flashing("success" -> "Successfully saved graph.")
         }catch{
             // Change the message to something meaningful - Virtuoso typically
             // returns something like 'input length = 1' which is not very user friendly
-            case t: Throwable => Redirect(routes.PrivateDataStorage.add()).flashing(
-                "error" -> "The uploaded file is not a valid RDF/XML or TTL file."
-            )
+            case t: Throwable => {
+                println(t.getMessage)
+                Redirect(routes.PrivateDataStorage.add()).flashing(
+                    "error" -> "The uploaded file is not a valid RDF/XML or TTL file."
+                )
+            }
         }
     }
 

@@ -36,7 +36,7 @@ trait Storage
      * @param graphURI URI of the graph.
      * @param file File with RDF/XML or TTL.
      */
-    def storeGraphFromFile(graphURI: String, file: File)
+    def storeGraphFromFile(graphURI: String, file: File, fileType: RdfRepresentation.Type)
 
     /**
       * Adds a graph with the specified URI to the specified group. A graph with must already exist on the server.

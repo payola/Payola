@@ -269,7 +269,6 @@ All methods that are marked with the `@remote` annotation or defined on an objec
 @remote object remote {
     def foo(bar: Int, baz: String): Int = bar * baz.length
 
-	@async def asyncFoo(bar: Int, baz: String)
 		(successCallback: Int => Unit)
 		(errorCallback: Throwable => Unit) {
                                 
@@ -520,7 +519,7 @@ Because the [SPARQL](http://www.w3.org/TR/rdf-sparql-query/) is used throughout 
 <a name="data"></a>
 ## Package cz.payola.data
 
-This whole package represents the data layer. Trait `DataContextComponent` defines an API for communication between the data layer and other Payola components. The two vital tasks of the data layer are:
+This whole package represents the data layer. Trait `DataContextComponent` defines an API for communication between the data layer and Payola [model](#model) component. The two vital tasks of the data layer are:
 
 - to store and fetch the [domain layer](#domain) entities
 - to use the [Virtuoso](http://virtuoso.openlinksw.com/) server as a private RDF data storage
@@ -657,7 +656,7 @@ The whole model is divided into several components. Each component has its own d
 
 While utilizing the subcomponents the `ModelComponent` trait is built up to provide a single entry point to the model infrastructure. While utilizing the cake pattern, dependencies like the persistence layer, RDF data storage layer and plugin compiler are injected to the model components.
 
-Later on, when you get familiar with the `cz.payola.web.shared` package, you will find out more about an object named `cz.payola.web.shared.Payola`. This is an example implementation of the `ModelComponent` trait.
+Later on, when you get familiar with the `cz.payola.web.shared` package, you will find out more about an object named `cz.payola.web.shared.Payola`, whicg is an example implementation of the `ModelComponent` trait.
 
 <a name="web"></a>
 ## Package cz.payola.web
@@ -787,6 +786,7 @@ Now, you probably know, which one use in which use case. But here are some scena
 
 You are also probably getting an idea why the default parameters are needed. If you do not define a default value, the parameter becomes mandatory. That means, you need to specify the parameter when invoking the method. It would be strongly uncomfortable to pass the logged in user on client side for each RPC call. Moreover, the parameter gets overridden by the request binder on the server whether you specify it on client side or not. If it has a default value, you don't need to specify it at all.
 
+<a name="how_it_works"></a>
 #####How it works
 
 > If you look closely into the RPC Dispatcher source code, you will find out, that it heavily uses the standard Java reflection to invoke the specified method on the specified remote object. While objects compile in a very specific way, you will find fragments of code which might seem like some kind of magic. Especially the following one:
@@ -823,8 +823,6 @@ Created database contains:
 ### Package cz.payola.web.shared
 
 As described before, in this package, you can find the code which could be executed on both the client side and the server side, or the code which is executed on the server side, but called from the client side. The so-called *remote objects* are further described in the section about s2js compiler. One can see the remote objects as controllers for the RPC calls. You just define an action in the remote object and call it from the client side.
-
-The code in this package is a collection of remote objects and code shared between the client side and the server side as our web application needed it. 
 
 The most important object in this package is the `Payola` object. It is an instance of the previously mentioned `ModelComponent` trait. It serves as an entry point to the whole model of the application. Since it is not a remote object, you cannot use it on the client side, but it is heavily used by the remote objects on the server side. Also, controllers from the package `cz.payola.web.server` use the `Payola` object to gain access to the data and business logic of the application. Since it is a `Scala object`, it behaves as a Java singleton in the right point of view - exactly one instance exists in the whole application and you don't need to create it, it is given to you for free by the Scala runtime. If it reminds you of something, you are kind of right, it is very similar to a classic DI container (but affected a lot with the `Scala cake pattern for DI`).
 
@@ -921,6 +919,7 @@ Many of the views in the corresponding subpackage describe all the implemented t
 
 To bring better browser compatibility and basic responsive web support, we've decided to use [Twitter Bootstrap](http://twitter.github.com/bootstrap), a great front end framework, which is a collection of CSS and JS code. It comes with basic support of CSS grids. Moreover, it comes with a bunch of prepared components like buttons, menus, tabs, progress bars and more. In order to use those components comfortably from the Scala client code, we've introduced some additional views. You can find them in the `cz.payola.web.client.views.bootstrap` package.
 
+<a name="events"></a>
 #### Package cz.payola.web.client.events
 
 The whole event processing system for the client-side code resides in this package. As stated before, we have introduced here a completely new (but probably not unique) system of event processing. Let us walk you through our decision process to get the idea why we did what we did.
@@ -1013,6 +1012,7 @@ Since we have already done that, you can just use the prepared classes in the `c
 
 The Model object in this package provides communication with the server side of the application. Its routines take care of getting available datasources or getting, creating or editing ontology customizations. All the classes contain methods which call the remote objects with appropriate parameters and return results of such calls.
 
+<a name="view"></a>
 #### Package cz.payola.web.client.views
 
 This package contains structures describing the user interface for graph viewing.
@@ -1027,13 +1027,13 @@ Base abstract class is TablePluginView. It defines the shown graph updating and 
 
 ###### Chart plugins
 
-The only available chart plugin is the Column Chart, which shows the graph as an enumeration of bars representing the values of vertices. Its structure is described in the class ColumnChartPlugin which extends the PluginView abstract class. For this plugin the graph has to be in certain structure. It must be a tree graph (without cycles) consisting of three levels. The first level is the root of the tree. The second level contains vertices representing the bars of the drawn chart and the third level contains title and value of every vertex in the second level. The values are processed as sizes of bars and titles are labels of bars. Graphs in this structure are accessible by SPARQL query execution tool (see package [presenters](#presenters)).
+The only available chart plugin is the Column Chart, which shows the graph as an enumeration of bars representing the values of vertices. Its structure is described in the class ColumnChartPlugin which extends the PluginView abstract class. For this plugin the graph has to be in certain structure. It must be a tree graph (without cycles) consisting of three levels. The first level is the root of the tree. The second level contains vertices representing the bars of the drawn chart and the third level contains title and value of every vertex in the second level. The values are processed as sizes of bars and titles are labels of bars. Graphs in this structure are accessible by SPARQL query execution tool.
 
 ###### Graphical plugins
 
 The graph is visualized as an HTML5 Canvas drawing. The base abstract class is VisualPluginView. It defines the structure of the drawing space - the controls and the multiple Canvas elements used for drawing - and the event handlers - defining mouse and keyboard operations controlling the visualization. It is extended by an abstract class BaseTechnique that defines basic routine for performing initial vertex positioning animation. During the update of the graph, this routine creates a chain of animations. Its implementations CircleTechnique, TreeTechnique and GraphTechnique provide a plugin specific animation.
 
-To visualize a graph structure, a pack of classes based on a trait View is provided (the trait is in sub-package views.graph.visual.graph and is not the same as the base trait for visualization plugins). This trait contains drawing routines - e.g. drawArrow, drawCircle, drawText - that are used to draw the graph visualization to the HTML5 element Canvas and its surface CanvasRenderingContext2D. It provides an abstraction over the basic Canvas draw functions - e.g. arc, lineTo, fillText. The View class is extended by InformationView - a label visualization; VertexView - a graphical representation of the [IdentifiedVertex](#cz.payola.common.rdf); EdgeView - the [Edge](#cz.payola.common.rdf) representation; and GraphView - a container of Component classes that contain VertexViews and EdgeViews of a logical graph components (parts of a graph that are not connected with each other by edges).
+To visualize a graph structure, a pack of classes based on a trait View is provided (the trait is in sub-package views.graph.visual.graph and is not the same as the base trait for visualization plugins). This trait contains drawing routines - e.g. drawArrow, drawCircle, drawText - that are used to draw the graph visualization to the HTML5 element Canvas and its surface CanvasRenderingContext2D. It provides an abstraction over the basic Canvas draw functions - e.g. arc, lineTo, fillText. The View class is extended by InformationView - a label visualization; VertexView - a graphical representation of the [IdentifiedVertex](#rdf-common); EdgeView - the [Edge](#rdf-common) representation; and GraphView - a container of Component classes that contain VertexViews and EdgeViews of a logical graph components (parts of a graph that are not connected with each other by edges).
 
 Every View implementation contains a draw function that draws the object to a canvas and a drawQuick function that is used for redrawing the object during animation. This drawQuick function is supposed to leave out drawing of unimportant elements of the graph visualization, e.g. labels (InformationViews) of vertices. The GraphView's draw and drawQuick functions require, in contrary to other View implementations, a container of Canvas objects. The GraphView's draw and drawQuick functions decide which element is drawn to which canvas. Splitting the View objects to distinct Canvas elements speeds up redrawing of the whole graph during movement of selected elements. The selected elements are drawn to one set of canvases and the deselected elements are to another one. This allows to redraw only the canvases for selected elements during movement operation. The View implementations also contain its basic configuration and an ontology customization setter. The ontology defines a specific drawing configuration for certain types - based URI of the graph element.
 
@@ -1043,7 +1043,11 @@ The most important decision for animations was whether to use HTML5 Web Workers 
 
 #### Package cz.payola.web.client.presenters
 
-> TODO: O.K. mention the SPARQL query execution tool
+As was already mentioned, the client HTML application is based on the MVP (Model-View-Presenter) pattern. This means that it is separated into three logical parts. The [model](#model) contains the data accessing tools. The [view](#view) describes how are the data shown to user. The presenter defines the logic of the data representation in the view. It describes which view is used for which data and how is handled the user input and output.
+
+The package contains e.g. GraphPresenter, AnalysisBuilder, PluginCreator  presenters. We will take DataSourceBrowser as an example to describe the funcionality. The DataSourceBrowser class contains a PluginView object. Looking as an user at the application, you can see the view - a drop-down list of visualization plugins, a controls menu and a currently selected visual plugin. The one difference between our MVP pattern and the usual one is that we used [events](#events) system. DataSourceBrowser defines event handlers and adds them to the view object. If for example a graphBrowsing event of the PluginView is triggered, the presenter tells the view that it has to wait for a response (the view shows a loading dialog). The presenter asks the model for neighbours of a vertex that user has selected, which creates a request to the server and finally it tells the view that the operation has finished and gives the recieved data from the model - server response - to the view to update itself. This whole operation is described in an event handler.
+
+To see how is the request to the model processed go to [How it works](#how_it_works) in [web](#web).
 
 <a name="used_libraries"></a>
 ## Used libraries, frameworks & tools
@@ -1095,9 +1099,6 @@ This prevents us from situations, when somebody pushes a commit and does not tes
 
 In the future, we will work hard to integrate test suites into the continuous integration process, as well as automatic deployment to our production server.
 
-## Known bugs
-You can find the complete list of issues on [GitHub](https://github.com/siroky/Payola/issues?sort=updated&state=open). In the time of writing this documentation, the list contained the following issues:
-
 ## Future work
 Since there is always something that you can do better or more sophisticated, we also have a list of things which we are looking forward to change in Payola. Here are some examples:
 
@@ -1112,5 +1113,7 @@ Since there is always something that you can do better or more sophisticated, we
 - Implement analysis result persistence into the personal Data Source
 - Make the s2js compiler a completely standalone product
 - Support for large graphs that wouldn't fit into the memory (i.e. lazy loading of vertices)
-- Add full support for all squeryl-supported databases
+- Add full support for all [Squeryl-compatible](http://squeryl.org/supported-databases.html)databases
 - Allow update database structure in a way that preserves stored data (currently - running database initializer with a new database structure drops existing schema)
+
+> You can find a list of improvements that is currently being worked on at [GitHub](https://github.com/siroky/Payola/issues?sort=updated&state=open).
