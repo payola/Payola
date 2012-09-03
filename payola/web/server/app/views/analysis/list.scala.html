@@ -1,4 +1,4 @@
-@(user: Option[cz.payola.domain.entities.User], analyses: Seq[cz.payola.domain.entities.Analysis], page: Int = 1)
+@(user: Option[cz.payola.domain.entities.User], analyses: Seq[cz.payola.domain.entities.Analysis], page: Int = 1, title: Option[String] = None)
 
 @import tags._
 
@@ -48,7 +48,7 @@ val analysis = e.asInstanceOf[cz.payola.domain.entities.Analysis]
     }
 </td>
 },
-routes.Analysis.create(), page)
+routes.Analysis.create(), page, title)
 
 <script language="javascript" type="text/javascript" src="/javaScriptPackage/cz.payola.web.client.presenters.entity.SharingPresenter"></script>
 <script type="text/javascript">

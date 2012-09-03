@@ -1,4 +1,4 @@
-@(user: Option[cz.payola.domain.entities.User], dataSources: Seq[cz.payola.domain.entities.plugins.DataSource], page: Int = 1)
+@(user: Option[cz.payola.domain.entities.User], dataSources: Seq[cz.payola.domain.entities.plugins.DataSource], page: Int = 1, customTitle: Option[String] = None)
 
 @import cz.payola.web.shared._
 @import tags._
@@ -59,7 +59,8 @@
         }</div></td>
     },
     routes.DataSource.create(),
-    page)
+    page,
+    customTitle)
 
 <script language="javascript" type="text/javascript" src="/javaScriptPackage/cz.payola.web.client.presenters.entity.SharingPresenter"></script>
 <script type="text/javascript">

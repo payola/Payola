@@ -131,7 +131,7 @@ object DataSource extends PayolaController with Secured
      * @return Listing page.
      */
     def listAccessible(page: Int = 1) = maybeAuthenticated { user: Option[User] =>
-        Ok(views.html.datasource.list(user, Payola.model.dataSourceModel.getAccessibleToUser(user), page))
+        Ok(views.html.datasource.list(user, Payola.model.dataSourceModel.getAccessibleToUser(user), page, Some("Accessible data sources")))
     }
 
     /** Saves the edited data source.
