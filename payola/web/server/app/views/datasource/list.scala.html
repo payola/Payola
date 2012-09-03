@@ -42,20 +42,21 @@
         }</td>
         <td><div class="btn-toolbar">{
             val dataSource = e.asInstanceOf[cz.payola.domain.entities.plugins.DataSource]
-            if (dataSource.isEditable){
-                if (dataSource.owner == user){
-                    val buff = editLinkForID(e.id)
-                    buff += {shareLinkForID(e.id, dataSource.name, dataSource.isPublic)}
-                    buff ++= deleteLinkForID(e.id)
-                    buff
-                }else{
-                    new scala.xml.NodeBuffer()
+            val buff = new scala.xml.NodeBuffer()
+
+            if (dataSource.owner == user) {
+                if (dataSource.isEditable) {
+                    buff ++= {editLinkForID(e.id)}
                 }
-            }else{
-                val buff = new scala.xml.NodeBuffer() += <span class="badge">Not editable</span>
-                buff += shareLinkForID(e.id, dataSource.name, dataSource.isPublic)
-                buff
+                buff += {shareLinkForID(e.id, dataSource.name, dataSource.isPublic)}
+                if (dataSource.isEditable) {
+                    buff ++= deleteLinkForID(e.id)
+                }
+            } else {
+                buff += <span class="badge">Not editable</span>
             }
+
+            buff
         }</div></td>
     },
     routes.DataSource.create(),
