@@ -19,7 +19,7 @@ accessibleDataSources: Seq[cz.payola.domain.entities.plugins.DataSource]
             <span class="badge badge-warning">Public</span>
             }}
         </td>
-        }, "alert alert-info", routes.Analysis.list(1))
+        }, "alert alert-info", routes.Analysis.listAccessible(1))
 
 
         @tags.dashboardList("Accessible data sources", "data sources", accessibleDataSources,None,
@@ -35,7 +35,7 @@ accessibleDataSources: Seq[cz.payola.domain.entities.plugins.DataSource]
             <span class="badge badge-warning">Public</span>
             }}
         </td>
-        }, "alert alert-success", routes.DataSource.list(1))
+        }, "alert alert-success", routes.DataSource.listAccessible(1))
     </div>
 
     @if(user.isDefined){
@@ -47,7 +47,7 @@ accessibleDataSources: Seq[cz.payola.domain.entities.plugins.DataSource]
             <a href={routes.Analysis.detail(a.id).toString}>{a.name}</a>
         </td>
         <td><a href={routes.Analysis.edit(a.id).toString} class="btn"><i class="icon-pencil"></i> Edit</a></td>
-        }, "", routes.Analysis.listAccessible(1))
+        }, "", routes.Analysis.list(1))
 
         @tags.dashboardList("My data sources", "data sources", user.get.ownedDataSources,Some(routes.DataSource.create),
         { e: cz.payola.domain.Entity =>
@@ -62,7 +62,7 @@ accessibleDataSources: Seq[cz.payola.domain.entities.plugins.DataSource]
             <span class="badge badge-inverse">Not editable</span>
             }}
         </td>
-        }, "", routes.DataSource.listAccessible(1))
+        }, "", routes.DataSource.list(1))
 
     </div>
     <!--/row-->

@@ -467,3 +467,7 @@ table .btn-toolbar .badge {
     list-style-type: none;
     margin: 0;
 }
+
+#client-canvas .well label{
+    float: none;
+}
