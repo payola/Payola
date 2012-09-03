@@ -3,7 +3,7 @@ analyses: Seq[cz.payola.domain.entities.Analysis], dataSources: Seq[cz.payola.do
 )
 @import tags._
 
-@main(user, "User profile") {
+@main(user, "User profile :: Payola!") {
 <div class="container">
 
     @if(user.isDefined && (user.get.id == owner.id)){

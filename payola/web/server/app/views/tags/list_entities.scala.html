@@ -6,7 +6,8 @@
     headerWriter: (Unit) => scala.xml.NodeBuffer,
     entityLister: (cz.payola.domain.Entity) => scala.xml.NodeBuffer,
     newEntityCall: play.api.mvc.Call,
-    page: Int = 1)
+    page: Int = 1,
+    title: Option[String] = None)
 
 @entitiesPerPage = @{
         5
@@ -24,12 +25,20 @@
     }
 }
 
-@main(user, "List " + entityNamePlural + " - Payola!") {
+@getTitle = @{
+    if(title.isDefined){
+        title.get
+    }else{
+        "My " + entityNamePlural
+    }
+}
+
+@main(user, getTitle + " :: Payola!") {
 
 <div class="container-fluid">
     <div class="entity-container">
         <div class="row-fluid">
-            <h1 class="span10">List @entityNamePlural</h1>
+            <h1 class="span10">@getTitle</h1>
             <a href="@newEntityCall" class="btn btn-success span2"><i class="icon-plus icon-white"></i> Create
                 @entityName &raquo;</a>
         </div>

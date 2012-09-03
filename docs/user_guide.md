@@ -221,6 +221,8 @@ You can navigate through the graph by following the vertex links in the table. C
 
 Alternatively, you may use the `SPARQL` button at the top-right to enter your own custom SPARQL query to be evaluated and displayed.
 
+> *Note:* The DBpedia.org data source puts quite heavy restrictions in place on SPARQL queries that may be executed on the data source. Hence, not all queries may be successfully executed. This applies to analyses as well.
+
 ![Entering SPARQL Query](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/enter_sparql_query.png)
 
 You can, however, change the visualization plugin using the `Change visualization plugin` button. 
