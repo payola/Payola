@@ -471,3 +471,7 @@ table .btn-toolbar .badge {
 #client-canvas .well label{
     float: none;
 }
+
+noindex:-o-prefocus, .btn-group.share-button {
+    top: 4px;
+}
