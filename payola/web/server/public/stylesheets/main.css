@@ -179,11 +179,12 @@ input[type="checkbox"].active:after {
 }
 
 @media screen and (-webkit-min-device-pixel-ratio:0) {
-    .params-wrapper{
+    .params-wrapper {
         display: table !important;
         table-layout: fixed;
         width: 100%
     }
+
     .params-wrapper .parameters {
         display: table-cell;
         overflow-x: auto;
@@ -468,7 +469,7 @@ table .btn-toolbar .badge {
     margin: 0;
 }
 
-#client-canvas .well label{
+label.nofloat {
     float: none;
 }
 
