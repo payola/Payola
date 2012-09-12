@@ -15,6 +15,7 @@ import scala.Some
 import cz.payola.common.EvaluationInProgress
 import cz.payola.common.EvaluationError
 import cz.payola.common.EvaluationSuccess
+import cz.payola.web.client.views.VertexEventArgs
 
 /**
  * Presenter responsible for the logic around running an analysis evaluation.
@@ -77,6 +78,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
             graphPresenter = new GraphPresenter(view.resultsView.htmlElement)
             graphPresenter.initialize()
+            graphPresenter.view.vertexBrowsing += onVertexBrowsing
 
             val downloadButtonView = new DownloadButtonView()
             downloadButtonView.render(graphPresenter.view.toolbar.htmlElement)
@@ -99,6 +101,10 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
             analysisEvaluationSuccess -= successEventHandler
 
             unblockPage()
+    }
+
+    private def onVertexBrowsing(e: VertexEventArgs[_]) {
+        graphPresenter.onVertexBrowsingDataSource(e)
     }
 
     private def runButtonClickHandler(view: AnalysisRunnerView, analysis: Analysis) = {

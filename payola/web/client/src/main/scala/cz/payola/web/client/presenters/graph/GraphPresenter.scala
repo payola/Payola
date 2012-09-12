@@ -65,7 +65,7 @@ class GraphPresenter(val viewElement: html.Element) extends Presenter
         view.updateOntologyCustomization(Some(e.target))
     }
 
-    private def onVertexBrowsingDataSource(e: VertexEventArgs[_]) {
+    def onVertexBrowsingDataSource(e: VertexEventArgs[_]) {
         blockPage("Fetching accessible data sources...")
         Model.accessibleDataSources { ds =>
             unblockPage()
