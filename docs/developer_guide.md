@@ -269,11 +269,12 @@ All methods that are marked with the `@remote` annotation or defined on an objec
 @remote object remote {
     def foo(bar: Int, baz: String): Int = bar * baz.length
 
-		(successCallback: Int => Unit)
-		(errorCallback: Throwable => Unit) {
+    @async def asyncFoo(bar: Int, baz: String)
+        (successCallback: Int => Unit)
+        (errorCallback: Throwable => Unit) {
                                 
-		successCallback(bar * baz.length)
-	}
+        successCallback(bar * baz.length)
+    }
 }
 
 .
@@ -284,9 +285,9 @@ All methods that are marked with the `@remote` annotation or defined on an objec
 val x = remote.foo(123, "RPC rocks.")
 
 remote.asyncFoo(123, "RPC rocks.") { result: Int =>
-	window.alert("Method asyncFoo returned " + result)
+    window.alert("Method asyncFoo returned " + result)
 } { throwable: Throwable =>
-	window.alert("Exception " + throwable.message)
+    window.alert("Exception " + throwable.message)
 }
 ```
 
