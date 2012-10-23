@@ -5,6 +5,8 @@ accessibleDataSources: Seq[cz.payola.domain.entities.plugins.DataSource]
 @main(user, "Dashboard :: Payola!") {
 <div class="container-fluid dashboard">
 
+    <div class="breadcrumb">Try visualizing dataset-wide statistics in <a href="http://lodvisualization.appspot.com/">LOD Visualization</a></div>
+
     <div class="row-fluid">
         @tags.dashboardList("Accessible analyses", "analyses", accessibleAnalysis,None,
         { e: cz.payola.domain.Entity =>
