@@ -251,6 +251,7 @@ object PayolaBuild extends Build
             val dependencyExtensions = List("js", "css")
             val dependencyDirectory = new io.Directory(WebSettings.dependencyDir)
             val files = dependencyDirectory.deepFiles.filter(f => dependencyExtensions.contains(f.extension))
+                .filterNot(f => f.path.contains("javascripts/lib"))
 
             val symbolFiles = new mutable.HashMap[String, String]
             val fileProvides = new mutable.HashMap[String, mutable.ArrayBuffer[String]]

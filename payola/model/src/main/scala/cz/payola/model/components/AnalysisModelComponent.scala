@@ -2,7 +2,7 @@ package cz.payola.model.components
 
 import cz.payola.data._
 import cz.payola.domain.entities._
-import cz.payola.domain.entities.plugins.PluginInstance
+import cz.payola.domain.entities.plugins._
 import cz.payola.model._
 import cz.payola.domain.entities.plugins.parameters._
 import cz.payola.domain.entities.plugins.parameters.StringParameterValue
@@ -10,10 +10,14 @@ import scala.collection.mutable.HashMap
 import cz.payola.domain.entities.analyses.evaluation._
 import cz.payola.domain.IDGenerator
 import cz.payola.common._
+import cz.payola.domain.entities.plugins.concrete.data.SparqlEndpointFetcher
+import cz.payola.domain.entities.plugins.concrete.query._
 import scala.Some
+import cz.payola.common.EvaluationInProgress
 import cz.payola.common.EvaluationError
 import cz.payola.domain.entities.analyses.evaluation.Success
 import cz.payola.domain.entities.analyses.evaluation.Error
+import cz.payola.common.EvaluationSuccess
 
 trait AnalysisModelComponent extends EntityModelComponent
 {
@@ -65,34 +69,35 @@ trait AnalysisModelComponent extends EntityModelComponent
                 .get
 
             val pluginInstance = analysis.pluginInstances.find(_.id == pluginInstanceId)
-
-            pluginInstance.map {
-                i =>
-
-                    if (!i.isEditable) {
-                        throw new ModelException("The plugin instance is not editable.")
-                    }
-
-                    val option = i.getParameterValue(parameterName)
-
-                    if (!option.isDefined) {
-                        throw new Exception("Unknown parameter name: " + parameterName + ".")
-                    }
-
-                    val parameterValue = option.get
-
-                    parameterValue match {
-                        case v: BooleanParameterValue => v.value = value.toBoolean
-                        case v: FloatParameterValue => v.value = value.toFloat
-                        case v: IntParameterValue => v.value = value.toInt
-                        case v: StringParameterValue => v.value = value
-                        case _ => throw new Exception("Unknown parameter type.")
-                    }
-
-                    analysisRepository.persistParameterValue(parameterValue)
+            pluginInstance.map { i =>
+                setParameterValue(i, parameterName, value)
             }.getOrElse {
                 throw new ModelException("Unknown plugin instance ID.")
             }
+        }
+
+        def setParameterValue(pluginInstance: PluginInstance, parameterName: String, value: String) {
+            if (!pluginInstance.isEditable) {
+                throw new ModelException("The plugin instance is not editable.")
+            }
+
+            val option = pluginInstance.getParameterValue(parameterName)
+
+            if (!option.isDefined) {
+                throw new Exception("Unknown parameter name: " + parameterName + ".")
+            }
+
+            val parameterValue = option.get
+
+            parameterValue match {
+                case v: BooleanParameterValue => v.value = value.toBoolean
+                case v: FloatParameterValue => v.value = value.toFloat
+                case v: IntParameterValue => v.value = value.toInt
+                case v: StringParameterValue => v.value = value
+                case _ => throw new Exception("Unknown parameter type.")
+            }
+
+            analysisRepository.persistParameterValue(parameterValue)
         }
 
         def removePluginInstanceById(analysisId: String, pluginInstanceId: String): Boolean = {
@@ -183,6 +188,65 @@ trait AnalysisModelComponent extends EntityModelComponent
                 evaluationTuple
             } else {
                 throw new ModelException("Forbidden evaluation.")
+            }
+        }
+
+        def createAnonymousAnalysis(user: Option[User], endpointUri: String, graphUri: Option[String],
+            classUri: Option[String], propertyUri: Option[String]) = {
+            lazy val endpointPluginId = pluginRepository.getByName("SPARQL Endpoint").map(_.id).getOrElse("")
+            lazy val typedPluginId = pluginRepository.getByName("Typed").map(_.id).getOrElse("")
+            lazy val propertyPluginId = pluginRepository.getByName("Property Selection").map(_.id).getOrElse("")
+
+            val analysis = new Analysis(IDGenerator.newId, user)
+            analysis.isPublic = true
+            analysis.token = Some(IDGenerator.newId)
+            persist(analysis)
+
+            val endpointInstance = createPluginInstance(endpointPluginId, analysis.id)
+
+            val typedInstance = classUri.map { u =>
+                val typedInstance = createPluginInstance(typedPluginId, analysis.id)
+                addBinding(analysis.id, endpointInstance.id, typedInstance.id, 0)
+                typedInstance
+            }
+
+            val propertyInstance = propertyUri.map { u =>
+                val propertyInstance = createPluginInstance(propertyPluginId, analysis.id)
+                val instanceId = typedInstance.getOrElse(endpointInstance).id
+                addBinding(analysis.id, instanceId, propertyInstance.id, 0)
+                propertyInstance
+            }
+
+            val persistedAnalysis = analysisRepository.getById(analysis.id)
+            persistedAnalysis.map{ a =>
+
+                val persistedInstances = a.pluginInstances
+
+                persistedInstances.find(_.id == endpointInstance.id).map{ e =>
+                    setParameterValue(e,SparqlEndpointFetcher.endpointURLParameter, endpointUri)
+                    graphUri.map(setParameterValue(e,SparqlEndpointFetcher.graphURIsParameter, _))
+                }
+
+                typedInstance.map {t =>
+                    persistedInstances.find(_.id == t.id).map(setParameterValue(_,Typed.typeURIParameter, classUri.get))
+                }
+                propertyInstance.map {p =>
+                    persistedInstances.find(_.id == p.id).map(setParameterValue(_,PropertySelection.propertyURIsParameter, propertyUri.get))
+                }
+            }
+
+            analysis
+        }
+
+        def takeOwnership(analysisId: String, user: User, availableTokens: Seq[String]) {
+            getById(analysisId).map { a =>
+                val canTakeOwnership = a.token.isDefined && availableTokens.contains(a.token.get)
+
+                if (canTakeOwnership){
+                    a.owner = Some(user)
+                    a.token = None
+                    persist(a)
+                }
             }
         }
     }

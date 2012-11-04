@@ -1,13 +1,16 @@
-@(user: Option[cz.payola.domain.entities.User], analysis: cz.payola.domain.entities.Analysis)
+@(user: Option[cz.payola.domain.entities.User], analysis: cz.payola.domain.entities.Analysis, canTakeOwnership: Boolean)
 
 @main(user, "Analysis "+analysis.name+" :: Payola!") {
 <div class="container-fluid">
     <div class="row-fluid">
-        <h1 class="span11">
+        <h1 class="span10">
             Detail of analysis: @analysis.name
         </h1>
-        @if(analysis.owner == user) {
+        @if(analysis.owner != None && analysis.owner == user) {
             <a href="@routes.Analysis.edit(analysis.id)" class="input btn btn-small" style="margin-bottom: 5px; margin-left: 10px;"><i class="icon-pencil"></i> Edit</a>
+        }
+        @if(canTakeOwnership){
+            <a href="@routes.Analysis.takeOwnership(analysis.id)" class="input btn btn-small" style="margin-bottom: 5px; margin-left: 10px;"><i class="icon-magnet"></i> Take ownership</a>
         }
     </div>
 
