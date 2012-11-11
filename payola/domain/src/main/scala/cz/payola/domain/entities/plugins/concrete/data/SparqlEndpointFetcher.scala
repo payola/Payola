@@ -24,7 +24,7 @@ sealed class SparqlEndpointFetcher(name: String, inputCount: Int, parameters: im
     }
 
     def getGraphURIs(instance: PluginInstance): Option[Seq[String]] = {
-        instance.getStringParameter(SparqlEndpointFetcher.graphURIsParameter).map(_.split("\n").filter(_ != "").toList)
+        instance.getStringParameter(SparqlEndpointFetcher.graphURIsParameter).map(_.split("\\s+").filter(_ != "").toList)
     }
 
     def executeQuery(instance: PluginInstance, query: String): Graph = {
