@@ -16,7 +16,7 @@ object PayolaBuild extends Build
     /** Common settings of all projects. */
     object Settings
     {
-        val scalaVersion = "2.9.1"
+        val scalaVersion = "2.9.2"
 
         val libDir = file("lib")
 

@@ -54,17 +54,17 @@ object Analysis extends PayolaController with Secured
         Ok(views.html.analysis.list(user, analyses, page))
     }
 
-    def visualizeAnonymously(endpointUri: String, graphUri: Option[String], classUri: Option[String],
+    def visualizeAnonymously(endpointUri: String, graphUri: List[String], classUri: Option[String],
         propertyUri: Option[String]) = maybeAuthenticatedWithRequest { (user, request) =>
 
         val decodeBase64 = { uri: String => new String(new sun.misc.BASE64Decoder().decodeBuffer(uri))}
 
         val decodedEndpointUri = decodeBase64(endpointUri)
-        val decodedGraphUri = graphUri.map(decodeBase64(_))
+        val decodedGraphUris = graphUri.map(decodeBase64(_))
         val decodedClassUri = classUri.map(decodeBase64(_))
         val decodedPropertyUri = propertyUri.map(decodeBase64(_))
 
-        val analysis = Payola.model.analysisModel.createAnonymousAnalysis(user, decodedEndpointUri, decodedGraphUri,
+        val analysis = Payola.model.analysisModel.createAnonymousAnalysis(user, decodedEndpointUri, decodedGraphUris,
             decodedClassUri, decodedPropertyUri)
 
         analysis.token.map { token =>

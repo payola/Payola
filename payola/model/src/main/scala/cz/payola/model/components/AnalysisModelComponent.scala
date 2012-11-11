@@ -191,7 +191,7 @@ trait AnalysisModelComponent extends EntityModelComponent
             }
         }
 
-        def createAnonymousAnalysis(user: Option[User], endpointUri: String, graphUri: Option[String],
+        def createAnonymousAnalysis(user: Option[User], endpointUri: String, graphUris: List[String],
             classUri: Option[String], propertyUri: Option[String]) = {
             lazy val endpointPluginId = pluginRepository.getByName("SPARQL Endpoint").map(_.id).getOrElse("")
             lazy val typedPluginId = pluginRepository.getByName("Typed").map(_.id).getOrElse("")
@@ -224,7 +224,7 @@ trait AnalysisModelComponent extends EntityModelComponent
 
                 persistedInstances.find(_.id == endpointInstance.id).map{ e =>
                     setParameterValue(e,SparqlEndpointFetcher.endpointURLParameter, endpointUri)
-                    graphUri.map(setParameterValue(e,SparqlEndpointFetcher.graphURIsParameter, _))
+                    setParameterValue(e,SparqlEndpointFetcher.graphURIsParameter, graphUris.mkString("\n"))
                 }
 
                 typedInstance.map {t =>
