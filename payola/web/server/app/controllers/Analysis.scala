@@ -28,6 +28,11 @@ object Analysis extends PayolaController with Secured
         Ok(views.html.analysis.edit(user, id))
     }
 
+    def cloneAndEdit(id: String) = authenticated { user =>
+        val analysis = Payola.model.analysisModel.cloneAndEdit(id, user)
+        Redirect(routes.Analysis.edit(analysis.id))
+    }
+
     def delete(id: String) = authenticatedWithRequest { (user, request) =>
         user.ownedAnalyses.find(_.id == id).map(Payola.model.analysisModel.remove(_))
             .getOrElse(NotFound("Analysis not found."))

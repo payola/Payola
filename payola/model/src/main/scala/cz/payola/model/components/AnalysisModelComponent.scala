@@ -43,6 +43,36 @@ trait AnalysisModelComponent extends EntityModelComponent
             }
         }
 
+        def cloneAndEdit(analysisId: String, newOwner: User) : Analysis = {
+            newOwner.ownedAnalyses.find(_.id == analysisId).map { a =>
+                val newAnalysis = new Analysis(a.name+IDGenerator.newId, Some(newOwner))
+                persist(newAnalysis)
+
+                val translateMap = HashMap[String, String]()
+
+                a.pluginInstances.map {p =>
+                    val instance = createPluginInstance(p.plugin.id, newAnalysis.id)
+                    translateMap.put(p.id, instance.id)
+
+                    analysisRepository.getById(newAnalysis.id).map{ a =>
+                        a.pluginInstances.find(_.id == instance.id).map{ pi =>
+                            p.parameterValues.map {v =>
+                                setParameterValue(pi, v.parameter.name, v.value.toString)
+                            }
+                        }
+                    }
+                }
+
+                a.pluginInstanceBindings.map { b =>
+                    addBinding(newAnalysis.id, translateMap.get(b.sourcePluginInstance.id).get, translateMap.get(b.targetPluginInstance.id).get, b.targetInputIndex)
+                }
+
+                newAnalysis
+            }.getOrElse{
+                throw new ModelException("Unknown analysis ID.")
+            }
+        }
+
         def create(owner: User, name: String): Analysis = {
             val analysis = new Analysis(name, Some(owner))
             persist(analysis)
