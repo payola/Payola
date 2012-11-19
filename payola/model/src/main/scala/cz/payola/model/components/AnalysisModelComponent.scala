@@ -44,7 +44,7 @@ trait AnalysisModelComponent extends EntityModelComponent
         }
 
         def cloneAndEdit(analysisId: String, newOwner: User) : Analysis = {
-            newOwner.ownedAnalyses.find(_.id == analysisId).map { a =>
+            getAccessibleToUser(Some(newOwner)).find(_.id == analysisId).map { a =>
                 val newAnalysis = new Analysis(a.name+IDGenerator.newId, Some(newOwner))
                 persist(newAnalysis)
 
