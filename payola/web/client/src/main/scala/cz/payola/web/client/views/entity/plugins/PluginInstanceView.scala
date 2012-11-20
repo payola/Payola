@@ -21,8 +21,11 @@ abstract class PluginInstanceView(
 
     private val additionalControls = new Div(controlViews, "controls")
 
+    private val footerViews = getFooterViews
+    private val footer = new Div(footerViews, "footer")
+
     protected val paramsWrapper = new Div(List(paramsDiv),"params-wrapper")
-    protected val alertDiv = new Div(List(heading, paramsWrapper, additionalControls), "alert alert-info instance")
+    protected val alertDiv = new Div(List(heading, paramsWrapper, additionalControls, footer), "alert alert-info instance")
 
     private val clearSpan = new Span(List(), "clear")
 
@@ -31,6 +34,8 @@ abstract class PluginInstanceView(
     def getParameterViews: Seq[View]
 
     def getAdditionalControlsViews: Seq[View]
+
+    def getFooterViews: Seq[View]
 
     def getPlugin: Plugin = pluginInstance.plugin
 

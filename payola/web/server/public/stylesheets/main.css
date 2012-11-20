@@ -476,3 +476,7 @@ label.nofloat {
 noindex:-o-prefocus, .btn-group.share-button {
     top: 4px;
 }
+
+.instance .footer {
+    text-align: right;
+}

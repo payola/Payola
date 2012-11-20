@@ -19,6 +19,8 @@ class EditablePluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[P
 
     val parameterValueChanged = new SimpleUnitEvent[ParameterValue]
 
+    def getFooterViews: Seq[View] = List()
+
     alertDiv.addCssClass("editable")
 
     def getAdditionalControlsViews: Seq[View] = {

@@ -11,11 +11,21 @@ class ReadOnlyPluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[P
 {
     def getAdditionalControlsViews: Seq[View] = List()
 
+    def getFooterViews: Seq[View] = {
+        if (pluginInstance.plugin.name == "SPARQL Endpoint") {
+            val graphUris = pluginInstance.getParameter("Graph URIs").get.toString
+            val endpointURL = pluginInstance.getParameter("Endpoint URL").get.toString
+            List(new Anchor(List(new Span(List(new Text("LODVis")),"label label-inverse")), "http://lodvisualization.appspot.com/?graphUri="+graphUris+"&endpointUri="+endpointURL))
+        } else {
+            List()
+        }
+    }
+
     def getParameterViews: Seq[View] = {
-        val listItems = getPlugin.parameters.flatMap {param =>
-            pluginInstance.getParameter(param.name).map {v =>
+        val listItems = getPlugin.parameters.flatMap { param =>
+            pluginInstance.getParameter(param.name).map { v =>
                 val item = new ListItem(List(new Strong(List(new Text(param.name))), new Text(": " + v.toString)))
-                item.setAttribute("title",v.toString)
+                item.setAttribute("title", v.toString)
                 item
             }
         }
