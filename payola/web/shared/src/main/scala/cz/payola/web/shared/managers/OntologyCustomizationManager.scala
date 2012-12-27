@@ -32,11 +32,11 @@ class OntologyCustomizationsByOwnership(
         successCallback(new OntologyCustomizationsByOwnership(user.map(_ => owned), others))
     }
 
-    @async def create(name: String, ontologyURL: String, owner: User = null)
+    @async def create(name: String, ontologyURLs: String, owner: User = null)
         (successCallback: cz.payola.common.entities.settings.OntologyCustomization => Unit)
         (failCallback: Throwable => Unit) {
 
-        successCallback(Payola.model.ontologyCustomizationModel.create(name, ontologyURL, owner))
+        successCallback(Payola.model.ontologyCustomizationModel.create(name, ontologyURLs.split(","), owner))
     }
 
     @async @secured def getCustomizationByID(id: String, user: User = null)

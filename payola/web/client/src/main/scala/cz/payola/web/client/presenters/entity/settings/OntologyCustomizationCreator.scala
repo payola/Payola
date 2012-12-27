@@ -15,7 +15,7 @@ class OntologyCustomizationCreator extends Presenter
         val modal = new OntologyCustomizationCreateModal
         modal.confirming += { e =>
             modal.block("Creating the ontology customization.")
-            Model.createOntologyCustomization(modal.name.field.value, modal.url.field.value) { o =>
+            Model.createOntologyCustomization(modal.name.field.value, modal.urls.field.value) { o =>
                 modal.unblock()
                 modal.destroy()
                 ontologyCustomizationCreated.triggerDirectly(o)
@@ -24,7 +24,7 @@ class OntologyCustomizationCreator extends Presenter
                 error match {
                     case v: ValidationException => {
                         modal.name.setState(v, "name")
-                        modal.url.setState(v, "ontologyURL")
+                        modal.urls.setState(v, "ontologyURLs")
                     }
                     case _ => {
                         modal.destroy()

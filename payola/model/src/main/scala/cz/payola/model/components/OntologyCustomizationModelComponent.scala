@@ -15,8 +15,8 @@ trait OntologyCustomizationModelComponent extends EntityModelComponent
     lazy val ontologyCustomizationModel = new ShareableEntityModel(ontologyCustomizationRepository,
         classOf[OntologyCustomization])
     {
-        def create(name: String, ontologyURL: String, owner: User): OntologyCustomization = {
-            val customization = OntologyCustomization.empty(ontologyURL, name, Some(owner))
+        def create(name: String, ontologyURLs: Seq[String], owner: User): OntologyCustomization = {
+            val customization = OntologyCustomization.empty(ontologyURLs, name, Some(owner))
             persist(customization)
             customization
         }

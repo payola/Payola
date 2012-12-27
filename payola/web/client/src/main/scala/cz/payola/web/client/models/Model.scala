@@ -87,13 +87,13 @@ object Model
         }(errorCallback)
     }
 
-    def createOntologyCustomization(name: String, ontologyURL: String)
+    def createOntologyCustomization(name: String, ontologyURLs: String)
         (successCallback: OntologyCustomization => Unit)
         (errorCallback: Throwable => Unit) {
 
         fetchOntologyCustomizations { () =>
             _ownedOntologyCustomizations.foreach { ownedCustomizations =>
-                OntologyCustomizationManager.create(name, ontologyURL) { newCustomization =>
+                OntologyCustomizationManager.create(name, ontologyURLs) { newCustomization =>
                     ownedCustomizations += newCustomization
                     ontologyCustomizationsChanged.triggerDirectly(this)
                     successCallback(newCustomization)

@@ -548,7 +548,7 @@ trait SchemaComponent
                     c.id is(primaryKey, (dbType(COLUMN_TYPE_ID))),
                     c.name is (dbType(COLUMN_TYPE_NAME)),
                     c.ownerId is (dbType(COLUMN_TYPE_ID)),
-                    c.ontologyURL is (dbType(COLUMN_TYPE_URI)),
+                    c.ontologyURLs is (dbType(COLUMN_TYPE_URI)),
                     columns(c.name, c.ownerId) are (unique)
                 ))
 

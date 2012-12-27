@@ -11,31 +11,34 @@ object OntologyCustomization
 {
     /**
       * Crates an empty ontology customization for the specified ontology.
-      * @param ontologyURL URL of the ontology.
+      * @param ontologyURLs URLs of ontologies.
       * @param name Name of the customization.
       * @param owner Owner of the customization.
       * @return The customization.
       */
-    def empty(ontologyURL: String, name: String, owner: Option[User]): OntologyCustomization = {
-        val ontology = try {
-             Ontology(new Downloader(ontologyURL, accept = "application/rdf+xml").result)
+    def empty(ontologyURLs: Seq[String], name: String, owner: Option[User]): OntologyCustomization = {
+        try {
+             val classCustomizations = ontologyURLs.map{ url =>
+                 val ontology = Ontology(new Downloader(url, accept = "application/rdf+xml").result)
+
+
+                 ontology.classes.values.map { c =>
+                     val propertyCustomizations = c.properties.values.map { p =>
+                         new PropertyCustomization(p.uri, "", 0)
+                     }
+                     new ClassCustomization(c.uri, "", 0, "", propertyCustomizations.toList)
+                 }
+             }.flatten
+
+             new OntologyCustomization(ontologyURLs.mkString(","), name, owner, classCustomizations.toList)
         } catch {
-            case _ => throw new ValidationException("ontologyURL", "Couldn't fetch an ontology from the specified URL.")
+            case _ => throw new ValidationException("ontologyURL", "Couldn't fetch an ontology from one of the specified URLs.")
         }
-
-        val classCustomizations =ontology.classes.values.map { c =>
-            val propertyCustomizations = c.properties.values.map { p =>
-                new PropertyCustomization(p.uri, "", 0)
-            }
-            new ClassCustomization(c.uri, "", 0, "", propertyCustomizations.toList)
-        }
-
-        new OntologyCustomization(ontologyURL, name, owner, classCustomizations.toList)
     }
 }
 
 class OntologyCustomization(
-    val ontologyURL: String,
+    val ontologyURLs: String,
     protected var _name: String,
     protected var _owner: Option[User],
     protected var _classCustomizations: immutable.Seq[ClassCustomization])

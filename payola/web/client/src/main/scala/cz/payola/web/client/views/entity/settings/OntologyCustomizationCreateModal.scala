@@ -7,7 +7,7 @@ class OntologyCustomizationCreateModal extends Modal("Create a new ontology cust
 {
     val name = new InputControl("Name", new TextInput("customizationName", "", ""), Some("span2"))
 
-    val url = new InputControl("Ontology URL", new TextInput("ontologyUrl", "http://", ""), Some("span2"))
+    val urls = new InputControl("Ontology URLs", new TextInput("ontologyUrls", "http://", ""), Some("span2"))
 
-    override val body = List(name, url)
+    override val body = List(name, urls)
 }
