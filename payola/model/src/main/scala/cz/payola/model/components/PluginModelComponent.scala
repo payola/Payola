@@ -6,11 +6,12 @@ import cz.payola.model._
 import cz.payola.domain.PluginCompilerComponent
 import cz.payola.domain.entities.plugins.compiler._
 import cz.payola.common.ValidationException
+import cz.payola.common.rdf.DataCubeDataStructureDefinition
+import cz.payola.domain.entities.plugins.concrete.DataCube
 
 trait PluginModelComponent extends EntityModelComponent
 {
     self: DataContextComponent with PluginCompilerComponent with PrivilegeModelComponent =>
-
     lazy val pluginModel = new ShareableEntityModel(pluginRepository, classOf[Plugin])
     {
         /**
@@ -42,6 +43,17 @@ trait PluginModelComponent extends EntityModelComponent
             plugin.owner = Some(user)
             persist(plugin)
             plugin
+        }
+
+        def createDataCubeInstance(dataCubeDataStructure: DataCubeDataStructureDefinition, owner: User): Plugin = {
+
+            pluginRepository.getByName(dataCubeDataStructure.uri).getOrElse {
+                val plugin = new DataCube(dataCubeDataStructure)
+                plugin.owner = None
+                plugin.isPublic = true
+                pluginRepository.persist(plugin)
+                plugin
+            }
         }
     }
 }

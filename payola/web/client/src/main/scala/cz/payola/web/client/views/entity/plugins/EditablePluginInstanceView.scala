@@ -13,6 +13,7 @@ import cz.payola.web.client.views.bootstrap.InputControl
 class EditablePluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[PluginInstanceView] = List())
     extends PluginInstanceView(pluginInst, predecessors)
 {
+
     val connectButtonClicked = new SimpleUnitEvent[EditablePluginInstanceView]
 
     val deleteButtonClicked = new SimpleUnitEvent[EditablePluginInstanceView]
@@ -39,11 +40,12 @@ class EditablePluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[P
         List(connect, delete)
     }
 
-    def getParameterViews = getPlugin.parameters.flatMap { param =>
+    def getParameterViews : Seq[View] = getPlugin.parameters.flatMap { param =>
         pluginInstance.getParameter(param.name).map { v =>
             val field = param match {
                 case p: BooleanParameter => new CheckBox(param.id, v.asInstanceOf[Boolean], "Enter parameter value")
                 case p: IntParameter => new NumericInput(param.id, v.asInstanceOf[Int], "Enter parameter value")
+                case p: StringParameter if p.isPattern => new TextArea(param.id, v.toString, "Enter parameter value")
                 case p: StringParameter if p.isMultiline => new TextArea(param.id, v.toString, "Enter parameter value")
                 case _ => new TextInput(param.id, v.toString, "Enter parameter value")
             }

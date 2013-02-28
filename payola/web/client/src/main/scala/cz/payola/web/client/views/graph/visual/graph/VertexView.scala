@@ -17,7 +17,7 @@ import s2js.adapters.html
  * @param position of this graphical representation in drawing space
  * @param rdfType type of the vertex used to identify drawing settings in an ontology
  */
-class VertexView(val vertexModel: IdentifiedVertex, var position: Point2D, var rdfType: String)
+class VertexView(val vertexModel: Vertex, var position: Point2D, var rdfType: String)
     extends View[CanvasRenderingContext2D] {
 
     var radius = 25

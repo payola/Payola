@@ -13,7 +13,7 @@ object StringParameter
         (implicit context: SquerylDataContextComponent): StringParameter = {
         p match {
             case param: StringParameter => param
-            case _ => new StringParameter(p.id, p.name, p.defaultValue, p.isMultiline)
+            case _ => new StringParameter(p.id, p.name, p.defaultValue, p.isMultiline, p.isPattern)
         }
     }
 }
@@ -22,8 +22,8 @@ class StringParameter(
     override val id: String,
     name: String,
     defaultVal: String,
-    isMultiline: Boolean)(implicit val context: SquerylDataContextComponent)
-    extends cz.payola.domain.entities.plugins.parameters.StringParameter(name, defaultVal, isMultiline)
+    isMultiline: Boolean, isPattern: Boolean)(implicit val context: SquerylDataContextComponent)
+    extends cz.payola.domain.entities.plugins.parameters.StringParameter(name, defaultVal, isMultiline, isPattern)
     with Parameter[String]
 {
     private lazy val _valuesQuery = context.schema.valuesOfStringParameters.left(this)

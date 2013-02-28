@@ -5,6 +5,9 @@ import s2js.runtime.client.scala.collection.immutable.StringOps
 
 class String
 {
+    @javascript("""return (self.indexOf(sequence) !== -1)""")
+    def contains(sequence: String) : Boolean = false
+
     @javascript("return self.length;")
     def length = 0
 

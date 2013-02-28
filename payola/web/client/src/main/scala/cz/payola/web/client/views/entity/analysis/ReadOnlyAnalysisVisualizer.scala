@@ -2,12 +2,27 @@ package cz.payola.web.client.views.entity.analysis
 
 import cz.payola.common.entities.Analysis
 import cz.payola.common.entities.plugins.PluginInstance
-import cz.payola.web.client.views.entity.plugins.{PluginInstanceView, ReadOnlyPluginInstanceView}
+import cz.payola.web.client.views.entity.plugins._
+import cz.payola.common.entities.plugins.parameters.StringParameter
 
 class ReadOnlyAnalysisVisualizer(analysis: Analysis) extends AnalysisVisualizer(analysis)
 {
     def createPluginInstanceView(instance: PluginInstance): PluginInstanceView = {
-        val result = new ReadOnlyPluginInstanceView(instance, List())
+
+        val patterns = instance.plugin.parameters.forall {
+            x =>
+                x match {
+                    case p: StringParameter => p.isPattern
+                    case _ => false
+                }
+        }
+
+        val result = if (patterns) {
+            new DataCubePluginInstanceView(analysis, instance, List())
+        } else {
+            new ReadOnlyPluginInstanceView(instance, List())
+        }
+
         instancesMap.put(instance.id, result)
         result
     }

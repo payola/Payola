@@ -15,6 +15,7 @@ import cz.payola.web.client.views.graph.visual.graph._
 import cz.payola.web.client.views._
 import cz.payola.web.client.views.bootstrap.Icon
 import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.common.visual.Color
 
 /**
  * Representation of visual based output drawing plugin
@@ -38,7 +39,7 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
     private var mouseDownPosition = Point2D(0, 0)
 
     /**
-     * Graph visualized by the pligin.
+     * Graph visualized by the plugin.
      */
     var graphView: Option[views.graph.visual.graph.GraphView] = None
 
@@ -121,7 +122,7 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
         graphView.foreach { g =>
             val vertex = g.getTouchedVertex(getPosition(event))
             vertex.foreach { v =>
-                g.selectVertex(vertex.get)
+                g.selectVertex(v)
                 vertexBrowsing.trigger(new VertexEventArgs[this.type](this, v.vertexModel))
             }
         }
@@ -198,39 +199,45 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
     }
 
     private def createInfoTable(vertexView: VertexView) {
-        val infoTable = new VertexInfoTable(vertexView.vertexModel, vertexView.getLiteralVertices, Point2D.Zero)
+        if (!vertexView.getLiteralVertices.isEmpty){
+            vertexView.vertexModel match {
+                case vm: IdentifiedVertex => {
+                    val infoTable = new VertexInfoTable(vm, vertexView.getLiteralVertices, Point2D.Zero)
 
-        infoTable.vertexBrowsing += { a =>
-            triggerDestroyVertexInfo()
-            vertexBrowsing.trigger(new VertexEventArgs[this.type](this, vertexView.vertexModel))
-        }
-        infoTable.vertexBrowsingDataSource += { a =>
-            triggerDestroyVertexInfo()
-            vertexBrowsingDataSource
-                .trigger(new VertexEventArgs[this.type](this, vertexView.vertexModel))
-        }
+                    infoTable.vertexBrowsing += { a =>
+                        triggerDestroyVertexInfo()
+                        vertexBrowsing.trigger(new VertexEventArgs[this.type](this, vertexView.vertexModel))
+                    }
+                    infoTable.vertexBrowsingDataSource += { a =>
+                        triggerDestroyVertexInfo()
+                        vertexBrowsingDataSource
+                            .trigger(new VertexEventArgs[this.type](this, vertexView.vertexModel))
+                    }
 
-        currentInfoTable = Some(infoTable)
-        infoTable.render(_parentHtmlElement.getOrElse(document.body))
+                    currentInfoTable = Some(infoTable)
+                    infoTable.render(_parentHtmlElement.getOrElse(document.body))
 
-        val tableSize = infoTable.getSize
+                    val tableSize = infoTable.getSize
 
-        var position = vertexView.position + Vector2D(vertexView.radius, 0)
-        position = if(position.x - tableSize.x < 0) {
-            if(position.y - tableSize.y < 0) {
-                vertexView.position + Vector2D(vertexView.radius, 0)
-            } else {
-                vertexView.position + Vector2D(vertexView.radius, - tableSize.y)
+                    var position = vertexView.position + Vector2D(vertexView.radius, 0)
+                    position = if(position.x - tableSize.x < 0) {
+                        if(position.y - tableSize.y < 0) {
+                            vertexView.position + Vector2D(vertexView.radius, 0)
+                        } else {
+                            vertexView.position + Vector2D(vertexView.radius, - tableSize.y)
+                        }
+                    } else {
+                        if(position.y - tableSize.y < 0) {
+                            vertexView.position + Vector2D(-tableSize.x - vertexView.radius, 0)
+                        } else {
+                            vertexView.position + Vector2D(-tableSize.x - vertexView.radius, - tableSize.y)
+                        }
+                    }
+
+                    infoTable.setPosition(position)
+                }
             }
-        } else {
-            if(position.y - tableSize.y < 0) {
-                vertexView.position + Vector2D(-tableSize.x - vertexView.radius, 0)
-            } else {
-                vertexView.position + Vector2D(-tableSize.x - vertexView.radius, - tableSize.y)
-            }
         }
-
-        infoTable.setPosition(position)
     }
 
     override def updateOntologyCustomization(newCustomization: Option[OntologyCustomization]) {
@@ -238,6 +245,15 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
 
         graphView.foreach{gV =>
             gV.setConfiguration(newCustomization)
+            _parentHtmlElement.foreach(gV.render(_))
+        }
+
+        redraw()
+    }
+
+    override def updateVertexColor(vertex: Vertex, color: Option[Color]){
+        graphView.foreach{gV =>
+            gV.setVertexColor(vertex, color)
             _parentHtmlElement.foreach(gV.render(_))
         }
 
@@ -279,13 +295,13 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
         currentInfoTable.foreach(_.destroy())
     }
 
-    override def updateGraph(graph: Option[Graph]) {
+    override def updateGraph(graph: Option[Graph], contractLiterals: Boolean = true) {
         // If the graph has changed, update the graph view.
         zoomControls.reset()
         if (graph != currentGraph) {
             if (graph.isDefined) {
                 if (graphView.isEmpty) {
-                    graphView = Some(new views.graph.visual.graph.GraphView)
+                    graphView = Some(new views.graph.visual.graph.GraphView(contractLiterals))
                 }
                 graphView.get.update(graph.get, topLayer.getCenter)
                 graphView.foreach{gV =>
@@ -496,13 +512,13 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
      * @return
      */
     private def getPosition(eventArgs: MouseEventArgs[Canvas]): Point2D = {
-        Point2D(eventArgs.clientX - layerPack.offset.x, eventArgs.clientY - layerPack.offset.y)
+        Point2D(eventArgs.clientX - layerPack.offset.x, eventArgs.clientY - layerPack.offset.y + window.scrollY)
     }
 
     /**
      * Routine called on window resize event.
      */
     private def updateCanvasSize() {
-        layerPack.size = Vector2D(window.innerWidth, window.innerHeight) - topLayer.offset
+        layerPack.size = Vector2D(window.innerWidth, window.innerHeight) - (topLayer.offset - Vector2D(0,window.scrollY))
     }
 }

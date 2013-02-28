@@ -13,6 +13,7 @@ import cz.payola.web.client.views.graph.visual.techniques.gravity.GravityTechniq
 import cz.payola.web.shared.managers._
 import cz.payola.web.client.events._
 import cz.payola.web.client.views.elements.lists.ListItem
+import cz.payola.web.client.views.graph.datacube.TimeHeatmap
 
 class PluginSwitchView extends GraphView with ComposedView
 {
@@ -40,7 +41,8 @@ class PluginSwitchView extends GraphView with ComposedView
         new CircleTechnique,
         new TreeTechnique,
         new GravityTechnique,
-        new ColumnChartPluginView
+        new ColumnChartPluginView,
+        new TimeHeatmap
     )
 
     /**
@@ -105,9 +107,9 @@ class PluginSwitchView extends GraphView with ComposedView
         currentPlugin.update(graph, customization)
     }
 
-    override def updateGraph(graph: Option[Graph]) {
-        super.updateGraph(graph)
-        currentPlugin.updateGraph(graph)
+    override def updateGraph(graph: Option[Graph], contractLiterals: Boolean) {
+        super.updateGraph(graph, contractLiterals)
+        currentPlugin.updateGraph(graph, contractLiterals)
     }
 
     override def updateOntologyCustomization(customization: Option[OntologyCustomization]) {
@@ -199,7 +201,7 @@ class PluginSwitchView extends GraphView with ComposedView
         }
     }
 
-    private def createVertexEventArgs(vertex: IdentifiedVertex): VertexEventArgs[this.type] = {
+    private def createVertexEventArgs(vertex: Vertex): VertexEventArgs[this.type] = {
         new VertexEventArgs[this.type](this, vertex)
     }
 }

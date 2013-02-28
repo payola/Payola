@@ -12,10 +12,12 @@ import cz.payola.domain.IDGenerator
 import cz.payola.common._
 import cz.payola.domain.entities.plugins.concrete.data.SparqlEndpointFetcher
 import cz.payola.domain.entities.plugins.concrete.query._
+import scala.collection.mutable
+import cz.payola.common.entities.analyses.PluginInstanceBinding
 import scala.Some
-import cz.payola.common.EvaluationInProgress
 import cz.payola.common.EvaluationError
 import cz.payola.domain.entities.analyses.evaluation.Success
+import cz.payola.common.EvaluationInProgress
 import cz.payola.domain.entities.analyses.evaluation.Error
 import cz.payola.common.EvaluationSuccess
 
@@ -43,32 +45,46 @@ trait AnalysisModelComponent extends EntityModelComponent
             }
         }
 
-        def cloneAndEdit(analysisId: String, newOwner: User) : Analysis = {
-            getAccessibleToUser(Some(newOwner)).find(_.id == analysisId).map { a =>
-                val newAnalysis = new Analysis(a.name+IDGenerator.newId, Some(newOwner))
-                persist(newAnalysis)
+        private def clonePluginInstances(original: Seq[PluginInstance], bindings: Seq[PluginInstanceBinding],
+            targetAnalysis: Analysis) : HashMap[String, String] = {
+            val translateMap = HashMap[String, String]()
 
-                val translateMap = HashMap[String, String]()
-
-                a.pluginInstances.map {p =>
-                    val instance = createPluginInstance(p.plugin.id, newAnalysis.id)
+            original.map {
+                p =>
+                    val instance = createPluginInstance(p.plugin.id, targetAnalysis.id)
                     translateMap.put(p.id, instance.id)
 
-                    analysisRepository.getById(newAnalysis.id).map{ a =>
-                        a.pluginInstances.find(_.id == instance.id).map{ pi =>
-                            p.parameterValues.map {v =>
-                                setParameterValue(pi, v.parameter.name, v.value.toString)
+                    analysisRepository.getById(targetAnalysis.id).map {
+                        a =>
+                            a.pluginInstances.find(_.id == instance.id).map {
+                                pi =>
+                                    p.parameterValues.map {
+                                        v =>
+                                            setParameterValue(pi, v.parameter.name, v.value.toString)
+                                    }
                             }
-                        }
                     }
-                }
+            }
 
-                a.pluginInstanceBindings.map { b =>
-                    addBinding(newAnalysis.id, translateMap.get(b.sourcePluginInstance.id).get, translateMap.get(b.targetPluginInstance.id).get, b.targetInputIndex)
-                }
+            bindings.map {
+                b =>
+                    addBinding(targetAnalysis.id, translateMap.get(b.sourcePluginInstance.id).get,
+                        translateMap.get(b.targetPluginInstance.id).get, b.targetInputIndex)
+            }
 
-                newAnalysis
-            }.getOrElse{
+            translateMap
+        }
+
+        def cloneAndEdit(analysisId: String, newOwner: User): Analysis = {
+            getAccessibleToUser(Some(newOwner)).find(_.id == analysisId).map {
+                a =>
+                    val newAnalysis = new Analysis(a.name + IDGenerator.newId, Some(newOwner))
+                    persist(newAnalysis)
+
+                    clonePluginInstances(a.pluginInstances, a.pluginInstanceBindings, newAnalysis)
+
+                    newAnalysis
+            }.getOrElse {
                 throw new ModelException("Unknown analysis ID.")
             }
         }
@@ -99,8 +115,9 @@ trait AnalysisModelComponent extends EntityModelComponent
                 .get
 
             val pluginInstance = analysis.pluginInstances.find(_.id == pluginInstanceId)
-            pluginInstance.map { i =>
-                setParameterValue(i, parameterName, value)
+            pluginInstance.map {
+                i =>
+                    setParameterValue(i, parameterName, value)
             }.getOrElse {
                 throw new ModelException("Unknown plugin instance ID.")
             }
@@ -173,10 +190,11 @@ trait AnalysisModelComponent extends EntityModelComponent
 
         private def getEvaluationTupleForID(id: String) = {
             val date = new java.util.Date
-            runningEvaluations.foreach { tuple =>
-                if (tuple._2._3 + (20 * 60 * 1000) < date.getTime) {
-                    runningEvaluations.remove(tuple._1)
-                }
+            runningEvaluations.foreach {
+                tuple =>
+                    if (tuple._2._3 + (20 * 60 * 1000) < date.getTime) {
+                        runningEvaluations.remove(tuple._1)
+                    }
             }
 
             runningEvaluations.get(id).getOrElse {
@@ -193,15 +211,21 @@ trait AnalysisModelComponent extends EntityModelComponent
 
             evaluation.getResult.map {
                 case r: Error => EvaluationError(transformException(r.error),
-                    r.instanceErrors.toList.map { e => (e._1, transformException(e._2))})
+                    r.instanceErrors.toList.map {
+                        e => (e._1, transformException(e._2))
+                    })
                 case r: Success => EvaluationSuccess(r.outputGraph,
-                    r.instanceErrors.toList.map { e => (e._1, transformException(e._2))})
+                    r.instanceErrors.toList.map {
+                        e => (e._1, transformException(e._2))
+                    })
                 case Timeout => new EvaluationTimeout
                 case _ => throw new Exception("Unhandled evaluation state")
             }.getOrElse {
                 val progress = evaluation.getProgress
                 EvaluationInProgress(progress.value, progress.evaluatedInstances, progress.runningInstances.toList,
-                    progress.errors.toList.map { e => (e._1, transformException(e._2))})
+                    progress.errors.toList.map {
+                        e => (e._1, transformException(e._2))
+                    })
             }
         }
 
@@ -234,50 +258,121 @@ trait AnalysisModelComponent extends EntityModelComponent
 
             val endpointInstance = createPluginInstance(endpointPluginId, analysis.id)
 
-            val typedInstance = classUri.map { u =>
-                val typedInstance = createPluginInstance(typedPluginId, analysis.id)
-                addBinding(analysis.id, endpointInstance.id, typedInstance.id, 0)
-                typedInstance
+            val typedInstance = classUri.map {
+                u =>
+                    val typedInstance = createPluginInstance(typedPluginId, analysis.id)
+                    addBinding(analysis.id, endpointInstance.id, typedInstance.id, 0)
+                    typedInstance
             }
 
-            val propertyInstance = propertyUri.map { u =>
-                val propertyInstance = createPluginInstance(propertyPluginId, analysis.id)
-                val instanceId = typedInstance.getOrElse(endpointInstance).id
-                addBinding(analysis.id, instanceId, propertyInstance.id, 0)
-                propertyInstance
+            val propertyInstance = propertyUri.map {
+                u =>
+                    val propertyInstance = createPluginInstance(propertyPluginId, analysis.id)
+                    val instanceId = typedInstance.getOrElse(endpointInstance).id
+                    addBinding(analysis.id, instanceId, propertyInstance.id, 0)
+                    propertyInstance
             }
 
             val persistedAnalysis = analysisRepository.getById(analysis.id)
-            persistedAnalysis.map{ a =>
+            persistedAnalysis.map {
+                a =>
 
-                val persistedInstances = a.pluginInstances
+                    val persistedInstances = a.pluginInstances
 
-                persistedInstances.find(_.id == endpointInstance.id).map{ e =>
-                    setParameterValue(e,SparqlEndpointFetcher.endpointURLParameter, endpointUri)
-                    setParameterValue(e,SparqlEndpointFetcher.graphURIsParameter, graphUris.mkString("\n"))
-                }
+                    persistedInstances.find(_.id == endpointInstance.id).map {
+                        e =>
+                            setParameterValue(e, SparqlEndpointFetcher.endpointURLParameter, endpointUri)
+                            setParameterValue(e, SparqlEndpointFetcher.graphURIsParameter, graphUris.mkString("\n"))
+                    }
 
-                typedInstance.map {t =>
-                    persistedInstances.find(_.id == t.id).map(setParameterValue(_,Typed.typeURIParameter, classUri.get))
-                }
-                propertyInstance.map {p =>
-                    persistedInstances.find(_.id == p.id).map(setParameterValue(_,PropertySelection.propertyURIsParameter, propertyUri.get))
-                }
+                    typedInstance.map {
+                        t =>
+                            persistedInstances.find(_.id == t.id)
+                                .map(setParameterValue(_, Typed.typeURIParameter, classUri.get))
+                    }
+                    propertyInstance.map {
+                        p =>
+                            persistedInstances.find(_.id == p.id)
+                                .map(setParameterValue(_, PropertySelection.propertyURIsParameter, propertyUri.get))
+                    }
             }
 
             analysis
         }
 
         def takeOwnership(analysisId: String, user: User, availableTokens: Seq[String]) {
-            getById(analysisId).map { a =>
-                val canTakeOwnership = a.token.isDefined && availableTokens.contains(a.token.get)
+            getById(analysisId).map {
+                a =>
+                    val canTakeOwnership = a.token.isDefined && availableTokens.contains(a.token.get)
 
-                if (canTakeOwnership){
-                    a.owner = Some(user)
-                    a.token = None
-                    persist(a)
-                }
+                    if (canTakeOwnership) {
+                        a.owner = Some(user)
+                        a.token = None
+                        persist(a)
+                    }
             }
+        }
+
+        def makePartial(analysis: Analysis, pluginInstanceId: String): Option[String] = {
+            val lastOutput = analysis.pluginInstanceBindings.find(_.targetPluginInstance.id == pluginInstanceId)
+
+            lastOutput.map {
+                o =>
+                    val waiting = mutable.Queue(o.sourcePluginInstance)
+                    val instances = new mutable.ListBuffer[PluginInstance]
+                    val bindings = new mutable.ListBuffer[PluginInstanceBinding]
+
+                    while (!waiting.isEmpty) {
+                        val current = waiting.dequeue()
+                        instances += current
+
+                        val pre = analysis.pluginInstanceBindings.filter(_.targetPluginInstance == current)
+                        pre.map {
+                            b =>
+                                waiting.enqueue(b.sourcePluginInstance)
+                                bindings += b
+                        }
+                    }
+
+                    val partial = new Analysis(pluginInstanceId, analysis.owner)
+                    partial.isPublic = false
+                    partial.token = None
+                    try {
+                        persist(partial)
+                    } catch {
+                        case e: ValidationException =>
+                            val analysis = analysisRepository.getByName(pluginInstanceId)
+                            analysis.map {
+                                a =>
+                                    analysisRepository.removeById(a.id)
+                                    persist(partial)
+                            }
+                    }
+
+                    val translateMap = clonePluginInstances(instances, bindings, partial)
+
+                    //to make a sensible limit, we need to append sparql construct query with a limit param
+                    //CONSTRUCT { ?x ?y ?z } WHERE { ?x ?y ?z  } LIMIT 2
+
+                    lazy val sparqlQueryPluginId = pluginRepository.getByName("SPARQL Query").map(_.id).getOrElse("")
+                    val queryInstance = createPluginInstance(sparqlQueryPluginId, partial.id)
+
+                    val persistedAnalysis = analysisRepository.getById(partial.id)
+                    persistedAnalysis.map {
+                        a =>
+
+                            val persistedInstances = a.pluginInstances
+
+                            persistedInstances.find(_.id == queryInstance.id).map {
+                                e =>
+                                    setParameterValue(e, ConcreteSparqlQuery.queryParameter, "CONSTRUCT { ?x ?y ?z } WHERE { ?x ?y ?z  } LIMIT 20")
+                                    addBinding(partial.id, translateMap.get(o.sourcePluginInstance.id).get, e.id, 0)
+                            }
+                    }
+
+
+                    Some(partial.id)
+            }.getOrElse(None)
         }
     }
 }

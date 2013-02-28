@@ -1,4 +1,4 @@
-package cz.payola.web.client.presenters.entity.analyses
+package cz.payola.web.client.presenters.entity.analysis
 
 import s2js.adapters.browser._
 import cz.payola.web.client._
@@ -91,7 +91,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
                 true
             }
 
-            graphPresenter.view.updateGraph(Some(evt.graph))
+            graphPresenter.view.updateGraph(Some(evt.graph), true)
 
             view.tabs.showTab(1)
             view.tabs.switchTab(1)

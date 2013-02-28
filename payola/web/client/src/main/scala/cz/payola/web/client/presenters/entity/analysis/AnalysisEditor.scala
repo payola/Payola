@@ -1,4 +1,4 @@
-package cz.payola.web.client.presenters.entity.analyses
+package cz.payola.web.client.presenters.entity.analysis
 
 import cz.payola.web.shared.AnalysisBuilderData
 import cz.payola.web.client.views.entity.analysis._
@@ -26,10 +26,10 @@ class AnalysisEditor(parentElementId: String, analysisIdParam: String)
                 view.visualizer.pluginInstanceRendered += { e => instancesMap.put(e.target.pluginInstance.id, e.target)}
                 view.render(parentElement)
                 bindParameterChangedEvent(view.visualizer)
-                bindConnectButtonClickedEvent(view)
+                bindConnectButtonClickedEvent(view, analysis)
                 bindDeleteButtonClickedEvent(view.visualizer)
                 constructBranches(analysis)
-                bindMenuEvents(view)
+                bindMenuEvents(view, analysis)
 
                 view.runButton.mouseClicked += { args =>
                     window.location.href = "/analysis/" + analysisId
@@ -58,8 +58,8 @@ class AnalysisEditor(parentElementId: String, analysisIdParam: String)
         }
     }
 
-    private def bindConnectButtonClickedEvent(view: AnalysisEditorView) {
-        view.visualizer.connectButtonClicked += onConnectClicked(view)
+    private def bindConnectButtonClickedEvent(view: AnalysisEditorView, analysis: Analysis) {
+        view.visualizer.connectButtonClicked += onConnectClicked(view, analysis)
     }
 
     private def bindDeleteButtonClickedEvent(visualizer: EditableAnalysisVisualizer) {
