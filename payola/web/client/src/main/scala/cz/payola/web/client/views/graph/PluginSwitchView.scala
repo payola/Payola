@@ -41,8 +41,8 @@ class PluginSwitchView extends GraphView with ComposedView
         new CircleTechnique,
         new TreeTechnique,
         new GravityTechnique,
-        new ColumnChartPluginView,
-        new TimeHeatmap
+        new ColumnChartPluginView
+//        new TimeHeatmap
     )
 
     /**
