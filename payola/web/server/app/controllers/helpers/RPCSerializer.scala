@@ -10,6 +10,7 @@ import cz.payola.common.entities.settings._
 import cz.payola.scala2json.rules.BasicSerializationRule
 import cz.payola.scala2json.classes.SimpleSerializationClass
 import cz.payola.scala2json.rules.CustomValueSerializationRule
+import cz.payola.common.geo.Coordinates
 
 class RPCSerializer extends JSONSerializer
 {
@@ -117,5 +118,9 @@ class RPCSerializer extends JSONSerializer
     val propertyCustomizationClass = new SimpleSerializationClass(classOf[PropertyCustomization])
     val propertyCustomizationRule = new BasicSerializationRule(Some(classOf[PropertyCustomization]))
     this.addSerializationRule(propertyCustomizationClass, propertyCustomizationRule)
+
+    val geoCustomizationClass = new SimpleSerializationClass(classOf[Coordinates])
+    val geoCustomizationRule = new BasicSerializationRule(Some(classOf[Coordinates]))
+    this.addSerializationRule(geoCustomizationClass, geoCustomizationRule)
 
 }

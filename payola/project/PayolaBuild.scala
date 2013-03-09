@@ -208,7 +208,10 @@ object PayolaBuild extends Build
     ).settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
 
     lazy val modelProject = Project(
-        "model", file("model"), settings = payolaSettings
+        "model", file("model"),
+        settings = payolaSettings ++ Seq(
+            libraryDependencies ++= Seq("org.apache.commons" % "commons-lang3" % "3.1")
+        )
     ).dependsOn(
         commonProject, domainProject, dataProject
     ).settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)

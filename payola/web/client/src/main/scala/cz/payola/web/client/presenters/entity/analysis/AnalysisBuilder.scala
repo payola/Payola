@@ -20,9 +20,6 @@ import s2js.runtime.shared.rpc.RpcException
 import cz.payola.web.shared.managers._
 import cz.payola.web.client.views.elements.lists.ListItem
 import cz.payola.web.client.views.elements._
-import scala.Some
-import cz.payola.common.rdf.DataCubeVocabulary
-import cz.payola.common.rdf.DataCubeDataStructureDefinition
 import cz.payola.common.entities.plugins.parameters.StringParameter
 import scala.Some
 import cz.payola.common.rdf.DataCubeVocabulary
@@ -190,7 +187,8 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
         }
     }
 
-    private def bindInstanceViewActions(instanceView: EditablePluginInstanceView, view: AnalysisEditorView, analysis: Analysis) {
+    private def bindInstanceViewActions(instanceView: EditablePluginInstanceView, view: AnalysisEditorView,
+        analysis: Analysis) {
         instanceView.connectButtonClicked += {
             evt =>
                 connectPlugin(evt.target, view, analysis)
@@ -203,12 +201,16 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
 
     private def onInstanceCreated(createdInstance: PluginInstance, predecessor: Option[PluginInstanceView],
         view: AnalysisEditorView, analysis: Analysis) {
-        val patterns = createdInstance.plugin.parameters.forall {
-            x =>
-                x match {
-                    case p: StringParameter => p.isPattern
-                    case _ => false
-                }
+        val patterns = if (createdInstance.plugin.parameters.size > 0) {
+            createdInstance.plugin.parameters.forall {
+                x =>
+                    x match {
+                        case p: StringParameter => p.isPattern
+                        case _ => false
+                    }
+            }
+        } else {
+            false
         }
 
         val instanceView = if (patterns) {
@@ -243,7 +245,8 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
         }
     }
 
-    private def onCreateDataCubePluginClicked(predecessor: PluginInstanceView, view: AnalysisEditorView, analysis: Analysis) {
+    private def onCreateDataCubePluginClicked(predecessor: PluginInstanceView, view: AnalysisEditorView,
+        analysis: Analysis) {
         val dialog = new DataCubeDialog()
 
         var okClicked = false
@@ -260,11 +263,13 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                             val list = buildDataCubeDataStructuresList(vocabulary, predecessor, view, analysis)
                             val definitionsDialog = new DataCubeDefinitionsDialog(list)
 
-                            list.map { item =>
-                                item.mouseClicked += { e =>
-                                    definitionsDialog.destroy()
-                                    false
-                                }
+                            list.map {
+                                item =>
+                                    item.mouseClicked += {
+                                        e =>
+                                            definitionsDialog.destroy()
+                                            false
+                                    }
                             }
 
                             definitionsDialog.render()
@@ -382,7 +387,8 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
         }
     }
 
-    protected def onConnectClicked(view: AnalysisEditorView, analysis: Analysis): (EventArgs[PluginInstanceView]) => Unit = {
+    protected def onConnectClicked(view: AnalysisEditorView,
+        analysis: Analysis): (EventArgs[PluginInstanceView]) => Unit = {
         evt =>
             connectPlugin(evt.target, view, analysis)
             false
@@ -472,7 +478,8 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
         }
     }
 
-    protected def createAndShowMergeDialog(inputsCount: Int, targetPlugin: Plugin, view: AnalysisEditorView, analysis: Analysis) {
+    protected def createAndShowMergeDialog(inputsCount: Int, targetPlugin: Plugin, view: AnalysisEditorView,
+        analysis: Analysis) {
         val mergeDialog = new MergeAnalysisBranchesDialog(branches, inputsCount)
         mergeDialog.confirming += {
             e =>

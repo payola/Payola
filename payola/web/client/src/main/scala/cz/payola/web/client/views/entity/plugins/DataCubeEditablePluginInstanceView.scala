@@ -73,7 +73,7 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
                                             "        SELECT DISTINCT " + args.target.getSignificantVertices
                                             .mkString(" ") + " { " +
                                             args.target.getPattern +
-                                            "        } LIMIT 10 " +
+                                            "        } " +
                                             "    } " +
                                             "} "
 

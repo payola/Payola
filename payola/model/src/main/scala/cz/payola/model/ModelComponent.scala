@@ -15,6 +15,7 @@ trait ModelComponent
     with PayolaStorageModelComponent
     with PrivilegeModelComponent
     with DataCubeModelComponent
+    with GeocodeModelComponent
 {
     self: DataContextComponent with RdfStorageComponent with PluginCompilerComponent =>
 

@@ -8,13 +8,16 @@ import cz.payola.common.entities.plugins.parameters.StringParameter
 class ReadOnlyAnalysisVisualizer(analysis: Analysis) extends AnalysisVisualizer(analysis)
 {
     def createPluginInstanceView(instance: PluginInstance): PluginInstanceView = {
-
-        val patterns = instance.plugin.parameters.forall {
-            x =>
-                x match {
-                    case p: StringParameter => p.isPattern
-                    case _ => false
-                }
+        val patterns = if (instance.plugin.parameters.size > 0) {
+            instance.plugin.parameters.forall {
+                x =>
+                    x match {
+                        case p: StringParameter => p.isPattern
+                        case _ => false
+                    }
+            }
+        } else {
+            false
         }
 
         val result = if (patterns) {
@@ -44,8 +47,9 @@ class ReadOnlyAnalysisVisualizer(analysis: Analysis) extends AnalysisVisualizer(
     }
 
     def clearAllAttributes() {
-        instancesMap foreach { case (key, view) =>
-            view.clearStyle()
+        instancesMap foreach {
+            case (key, view) =>
+                view.clearStyle()
         }
     }
 }

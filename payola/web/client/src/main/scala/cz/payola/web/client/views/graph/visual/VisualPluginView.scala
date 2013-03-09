@@ -22,7 +22,6 @@ import cz.payola.common.visual.Color
  */
 abstract class VisualPluginView(name: String) extends PluginView(name)
 {
-
     /**
      * Value used during vertex selection process.
      */
@@ -47,7 +46,9 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
      * Canvas with binded event listeners.
      */
     protected val topLayer = new Canvas()
+
     topLayer.setAttribute("style", "z-index: 500;")
+
     //^THANKS to this glyphs of VertexViews are visible but are hidden under the topLayer
 
     /**
@@ -72,15 +73,16 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
         animationStopButton.setIsEnabled(false)
     }
 
-    animationStopButton.mouseClicked += { e =>
-        endAnimation()
-        false
+    animationStopButton.mouseClicked += {
+        e =>
+            endAnimation()
+            false
     }
 
     /**
      * Vertex info table currently rendered over the visual plugin view
      */
-    private var currentInfoTable : Option[VertexInfoTable] = None
+    private var currentInfoTable: Option[VertexInfoTable] = None
 
     /**
      * Object responsible for graph visualization zooming.
@@ -93,125 +95,137 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
     private val pngDownloadButton = new Button(new Text("Download as PNG"), "pull-right",
         new Icon(Icon.download)).setAttribute("style", "margin: 0 5px;")
 
-    topLayer.mousePressed += { e =>
-        endAnimation()
-        mouseIsDragging = false
-        mouseDownPosition = getPosition(e)
-        onMouseDown(e)
-        false
+    topLayer.mousePressed += {
+        e =>
+            endAnimation()
+            mouseIsDragging = false
+            mouseDownPosition = getPosition(e)
+            onMouseDown(e)
+            false
     }
 
-    topLayer.mouseReleased += { e =>
-        endAnimation()
-        onMouseUp(e)
-        false
+    topLayer.mouseReleased += {
+        e =>
+            endAnimation()
+            onMouseUp(e)
+            false
     }
 
-    topLayer.mouseDragged += { e =>
-        endAnimation()
-        triggerDestroyVertexInfo()
-        mouseIsDragging = true
-        onMouseDrag(e)
+    topLayer.mouseDragged += {
+        e =>
+            endAnimation()
+            triggerDestroyVertexInfo()
+            mouseIsDragging = true
+            onMouseDrag(e)
 
-        false
+            false
     }
 
-    topLayer.mouseDoubleClicked += { event =>
-        endAnimation()
-        triggerDestroyVertexInfo()
-        graphView.foreach { g =>
-            val vertex = g.getTouchedVertex(getPosition(event))
-            vertex.foreach { v =>
-                g.selectVertex(v)
-                vertexBrowsing.trigger(new VertexEventArgs[this.type](this, v.vertexModel))
+    topLayer.mouseDoubleClicked += {
+        event =>
+            endAnimation()
+            triggerDestroyVertexInfo()
+            graphView.foreach {
+                g =>
+                    val vertex = g.getTouchedVertex(getPosition(event))
+                    vertex.foreach {
+                        v =>
+                            g.selectVertex(v)
+                            vertexBrowsing.trigger(new VertexEventArgs[this.type](this, v.vertexModel))
+                    }
             }
-        }
-        false
+            false
     }
 
-    topLayer.mouseWheelRotated += { event => //zoom - invoked by mouse
-        endAnimation()
-        triggerDestroyVertexInfo()
-        val mousePosition = getPosition(event)
-        val scrolled = event.wheelDelta
+    topLayer.mouseWheelRotated += {
+        event => //zoom - invoked by mouse
+            endAnimation()
+            triggerDestroyVertexInfo()
+            val mousePosition = getPosition(event)
+            val scrolled = event.wheelDelta
 
-        if (scrolled < 0) {
-            if (zoomControls.canZoomIn) {
-                zoomIn(mousePosition)
-                zoomControls.increaseZoomInfo()
+            if (scrolled < 0) {
+                if (zoomControls.canZoomIn) {
+                    zoomIn(mousePosition)
+                    zoomControls.increaseZoomInfo()
+                }
+            } else {
+                if (zoomControls.canZoomOut) {
+                    zoomOut(mousePosition)
+                    zoomControls.decreaseZoomInfo()
+                }
             }
-        } else {
-            if (zoomControls.canZoomOut) {
-                zoomOut(mousePosition)
+            false
+    }
+
+    zoomControls.zoomDecreased += {
+        e =>
+            endAnimation()
+            if (graphView.isDefined && zoomControls.canZoomOut) {
+                triggerDestroyVertexInfo()
+                zoomOut(graphView.get.getGraphCenter) //zooming from the center of the graph
                 zoomControls.decreaseZoomInfo()
             }
-        }
-        false
+            false
     }
 
-    zoomControls.zoomDecreased += { e =>
-        endAnimation()
-        if (graphView.isDefined && zoomControls.canZoomOut) {
-            triggerDestroyVertexInfo()
-            zoomOut(graphView.get.getGraphCenter) //zooming from the center of the graph
-            zoomControls.decreaseZoomInfo()
-        }
-        false
+    zoomControls.zoomIncreased += {
+        event => //zoom - invoked by zoom control button
+            endAnimation()
+            if (graphView.isDefined && zoomControls.canZoomIn) {
+                triggerDestroyVertexInfo()
+                zoomIn(graphView.get.getGraphCenter) //zooming to the center of the graph
+                zoomControls.increaseZoomInfo()
+            }
+            false
     }
 
-    zoomControls.zoomIncreased += { event => //zoom - invoked by zoom control button
-        endAnimation()
-        if (graphView.isDefined && zoomControls.canZoomIn) {
-            triggerDestroyVertexInfo()
-            zoomIn(graphView.get.getGraphCenter) //zooming to the center of the graph
-            zoomControls.increaseZoomInfo()
-        }
-        false
-    }
+    pngDownloadButton.mouseClicked += {
+        e =>
+            val c = new Canvas()
+            c.htmlElement.width = topLayer.htmlElement.width
+            c.htmlElement.height = topLayer.htmlElement.height
 
-    pngDownloadButton.mouseClicked += { e =>
-        val c = new Canvas()
-        c.htmlElement.width = topLayer.htmlElement.width
-        c.htmlElement.height = topLayer.htmlElement.height
+            c.htmlElement.getContext[html.elements.CanvasContext]("2d")
+                .drawImage(layerPack.edgesDeselected.htmlElement, 0, 0)
+            c.htmlElement.getContext[html.elements.CanvasContext]("2d")
+                .drawImage(layerPack.edgesSelected.htmlElement, 0, 0)
+            c.htmlElement.getContext[html.elements.CanvasContext]("2d")
+                .drawImage(layerPack.verticesDeselected.htmlElement, 0, 0)
+            c.htmlElement.getContext[html.elements.CanvasContext]("2d")
+                .drawImage(layerPack.verticesSelected.htmlElement, 0, 0)
+            c.htmlElement.getContext[html.elements.CanvasContext]("2d").drawImage(topLayer.htmlElement, 0, 0)
 
-        c.htmlElement.getContext[html.elements.CanvasContext]("2d")
-            .drawImage(layerPack.edgesDeselected.htmlElement, 0, 0)
-        c.htmlElement.getContext[html.elements.CanvasContext]("2d")
-            .drawImage(layerPack.edgesSelected.htmlElement, 0, 0)
-        c.htmlElement.getContext[html.elements.CanvasContext]("2d")
-            .drawImage(layerPack.verticesDeselected.htmlElement, 0, 0)
-        c.htmlElement.getContext[html.elements.CanvasContext]("2d")
-            .drawImage(layerPack.verticesSelected.htmlElement, 0, 0)
-        c.htmlElement.getContext[html.elements.CanvasContext]("2d").drawImage(topLayer.htmlElement, 0, 0)
-
-        window.open(c.htmlElement.toDataURL("image/png"))
-        false
+            window.open(c.htmlElement.toDataURL("image/png"))
+            false
     }
 
     /**
      * Function for destroying the current vertex info table.
      */
     private def triggerDestroyVertexInfo() {
-        if(currentInfoTable.isDefined) {
+        if (currentInfoTable.isDefined) {
             currentInfoTable.get.destroy()
             currentInfoTable = None
         }
     }
 
     private def createInfoTable(vertexView: VertexView) {
-        if (!vertexView.getLiteralVertices.isEmpty){
+        if (!vertexView.getLiteralVertices.isEmpty) {
             vertexView.vertexModel match {
                 case vm: IdentifiedVertex => {
                     val infoTable = new VertexInfoTable(vm, vertexView.getLiteralVertices, Point2D.Zero)
 
-                    infoTable.vertexBrowsing += { a =>
-                        triggerDestroyVertexInfo()
-                        vertexBrowsing.trigger(new VertexEventArgs[this.type](this, vertexView.vertexModel))
+                    infoTable.vertexBrowsing += {
+                        a =>
+                            triggerDestroyVertexInfo()
+                            vertexBrowsing.trigger(new VertexEventArgs[this.type](this, vertexView.vertexModel))
                     }
-                    infoTable.vertexBrowsingDataSource += { a =>
-                        triggerDestroyVertexInfo()
-                        vertexBrowsingDataSource
-                            .trigger(new VertexEventArgs[this.type](this, vertexView.vertexModel))
+                    infoTable.vertexBrowsingDataSource += {
+                        a =>
+                            triggerDestroyVertexInfo()
+                            vertexBrowsingDataSource
+                                .trigger(new VertexEventArgs[this.type](this, vertexView.vertexModel))
                     }
 
                     currentInfoTable = Some(infoTable)
@@ -220,17 +234,17 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
                     val tableSize = infoTable.getSize
 
                     var position = vertexView.position + Vector2D(vertexView.radius, 0)
-                    position = if(position.x - tableSize.x < 0) {
-                        if(position.y - tableSize.y < 0) {
+                    position = if (position.x - tableSize.x < 0) {
+                        if (position.y - tableSize.y < 0) {
                             vertexView.position + Vector2D(vertexView.radius, 0)
                         } else {
-                            vertexView.position + Vector2D(vertexView.radius, - tableSize.y)
+                            vertexView.position + Vector2D(vertexView.radius, -tableSize.y)
                         }
                     } else {
-                        if(position.y - tableSize.y < 0) {
+                        if (position.y - tableSize.y < 0) {
                             vertexView.position + Vector2D(-tableSize.x - vertexView.radius, 0)
                         } else {
-                            vertexView.position + Vector2D(-tableSize.x - vertexView.radius, - tableSize.y)
+                            vertexView.position + Vector2D(-tableSize.x - vertexView.radius, -tableSize.y)
                         }
                     }
 
@@ -243,18 +257,20 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
     override def updateOntologyCustomization(newCustomization: Option[OntologyCustomization]) {
         currentCustomization = newCustomization
 
-        graphView.foreach{gV =>
-            gV.setConfiguration(newCustomization)
-            _parentHtmlElement.foreach(gV.render(_))
+        graphView.foreach {
+            gV =>
+                gV.setConfiguration(newCustomization)
+                _parentHtmlElement.foreach(gV.render(_))
         }
 
         redraw()
     }
 
-    override def updateVertexColor(vertex: Vertex, color: Option[Color]){
-        graphView.foreach{gV =>
-            gV.setVertexColor(vertex, color)
-            _parentHtmlElement.foreach(gV.render(_))
+    override def updateVertexColor(vertex: Vertex, color: Option[Color]) {
+        graphView.foreach {
+            gV =>
+                gV.setVertexColor(vertex, color)
+                _parentHtmlElement.foreach(gV.render(_))
         }
 
         redraw()
@@ -270,9 +286,10 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
     override def render(parent: html.Element) {
         super.render(parent)
 
-        window.onresize = { _ =>
-            updateCanvasSize()
-            redraw()
+        window.onresize = {
+            _ =>
+                updateCanvasSize()
+                redraw()
         }
 
         _parentHtmlElement = Some(parent)
@@ -281,9 +298,11 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
 
     override def destroy() {
         super.destroy()
-        window.onresize = { _ => }
+        window.onresize = {
+            _ =>
+        }
 
-        if(graphView.isDefined) {
+        if (graphView.isDefined) {
             graphView.get.destroy()
         }
 
@@ -304,9 +323,10 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
                     graphView = Some(new views.graph.visual.graph.GraphView(contractLiterals))
                 }
                 graphView.get.update(graph.get, topLayer.getCenter)
-                graphView.foreach{gV =>
-                    gV.setConfiguration(currentCustomization)
-                    _parentHtmlElement.foreach(gV.render(_))
+                graphView.foreach {
+                    gV =>
+                        gV.setConfiguration(currentCustomization)
+                        _parentHtmlElement.foreach(gV.render(_))
                 }
             } else {
                 if (graphView.isDefined) {
@@ -338,27 +358,21 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
      * Redraw method for during-animation-redrawing.
      */
     protected def redrawQuick() {
-        if (!graphView.isEmpty) {
-            graphView.get.redraw(layerPack, RedrawOperation.Animation)
-        }
+        graphView.map(_.redraw(layerPack, RedrawOperation.Animation))
     }
 
     /**
      * Full graph redraw.
      */
     def redraw() {
-        if (!graphView.isEmpty) {
-            graphView.get.redrawAll(layerPack)
-        }
+        graphView.map(_.redrawAll(layerPack))
     }
 
     /**
      * Specific redraw method for vertex selection.
      */
     def redrawSelection() {
-        if (graphView.isDefined) {
-            graphView.get.redraw(layerPack, RedrawOperation.Selection)
-        }
+        graphView.map(_.redraw(layerPack, RedrawOperation.Selection))
     }
 
     /**
@@ -403,13 +417,14 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
                 redrawSelection()
             }
 
-            vertex.foreach { v =>
-                if (v.selected && graphView.get.getAllSelectedVerticesCount == 1) {
+            vertex.foreach {
+                v =>
+                    if (v.selected && graphView.get.getAllSelectedVerticesCount == 1) {
 
-                    createInfoTable(v)
+                        createInfoTable(v)
 
-                    vertexSelected.trigger(new VertexEventArgs[this.type](this, v.vertexModel))
-                }
+                        vertexSelected.trigger(new VertexEventArgs[this.type](this, v.vertexModel))
+                    }
             }
             mousePressedVertex = true
         } else {
@@ -424,10 +439,11 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
      */
     private def getEdgesInformations(vertexView: VertexView): mutable.ListBuffer[InformationView] = {
         val result = mutable.ListBuffer[InformationView]()
-        vertexView.edges.foreach { edgeView =>
-            if (edgeView.originView.selected && edgeView.destinationView.selected) {
-                result += edgeView.information
-            }
+        vertexView.edges.foreach {
+            edgeView =>
+                if (edgeView.originView.selected && edgeView.destinationView.selected) {
+                    result += edgeView.information
+                }
         }
         result
     }
@@ -436,7 +452,7 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
      * Description of mouse-released event.
      */
     private def onMouseUp(eventArgs: MouseEventArgs[Canvas]) {
-        val selectedVertices = if(graphView.isDefined) {
+        val selectedVertices = if (graphView.isDefined) {
             graphView.get.getAllVertices.filter(_.selected)
         } else {
             List()
@@ -447,7 +463,7 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
 
             graphView.get.deselectAll()
             redrawSelection()
-        } else if(mouseIsDragging && selectedVertices.length == 1) {
+        } else if (mouseIsDragging && selectedVertices.length == 1) {
             //if mouse was drawgging only one vertex display the vertexInfoTable again
 
             val selectedVertex = selectedVertices(0)
@@ -464,16 +480,18 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
             Animation.clearCurrentTimeout()
             val difference = end - mouseDownPosition
 
-            graphView.get.moveAllSelectedVertices(difference)
-
-            graphView.get.redraw(layerPack, RedrawOperation.Movement)
+            graphView.map { gv =>
+                gv.moveAllSelectedVertices(difference)
+                gv.redraw(layerPack, RedrawOperation.Movement)
+            }
         } else {
             Animation.clearCurrentTimeout()
             val difference = end - mouseDownPosition
 
-            graphView.get.moveAllVertices(difference)
-
-            graphView.get.redraw(layerPack, RedrawOperation.All)
+            graphView.map { gv =>
+                gv.moveAllVertices(difference)
+                gv.redraw(layerPack, RedrawOperation.All)
+            }
         }
         mouseDownPosition = end
     }
@@ -500,8 +518,9 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
      * @param positionCorrection corresponding to the position of the mouse
      */
     private def alterVertexPositions(positionMultiplier: Double, positionCorrection: Vector2D) {
-        graphView.get.getAllVertices.foreach { vv =>
-            vv.position = (vv.position * positionMultiplier) + positionCorrection
+        graphView.get.getAllVertices.foreach {
+            vv =>
+                vv.position = (vv.position * positionMultiplier) + positionCorrection
         }
         redraw()
     }
@@ -519,6 +538,7 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
      * Routine called on window resize event.
      */
     private def updateCanvasSize() {
-        layerPack.size = Vector2D(window.innerWidth, window.innerHeight) - (topLayer.offset - Vector2D(0,window.scrollY))
+        layerPack.size = Vector2D(window.innerWidth, window.innerHeight) - (topLayer.offset - Vector2D(0,
+            window.scrollY))
     }
 }
