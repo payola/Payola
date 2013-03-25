@@ -9,9 +9,9 @@ trait Element extends dom.Element with EventTarget
 
     var className: String
 
-    val clientHeight: Double
+    var clientHeight: Double
 
-    val clientWidth: Double
+    var clientWidth: Double
 
     var dir: String
 
