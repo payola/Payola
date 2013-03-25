@@ -21,10 +21,6 @@ class MinimalizationTechnique extends BaseTechnique("Tree ECM Visualization")
         }
     }
 
-    override def destroy() {
-        super.destroy()
-    }
-
     /**
      * Builds structure for easier vertexViews handling
      * @param rootVertexView
