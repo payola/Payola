@@ -53,7 +53,7 @@ class DataSourceDetailView(plugins: Seq[Plugin], pluginFieldEditable: Boolean, a
     }
 
     def selectDataFetcherWithID(fetcherID: String) {
-        plugin.field.value = "HHAHAHAHA"
+        plugin.field.updateValue(fetcherID)
         plugins.find(_.id == fetcherID).foreach(renderPluginParameters(_))
 
     }

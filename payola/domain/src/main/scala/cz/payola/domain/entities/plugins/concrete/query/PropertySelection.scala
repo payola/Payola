@@ -6,7 +6,7 @@ import cz.payola.domain.entities.plugins._
 import cz.payola.domain.entities.plugins.parameters._
 import cz.payola.domain.sparql._
 
-class PropertySelection(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
+class  PropertySelection(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
     extends Construct(name, inputCount, parameters, id)
 {
     def this() = {

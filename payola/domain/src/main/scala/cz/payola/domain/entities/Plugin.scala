@@ -39,7 +39,7 @@ abstract class Plugin(
       * Sets the owner of the plugin.
       * @param value The new owner of the plugin.
       */
-    final def owner_=(value: Option[UserType]) {
+    final override def owner_=(value: Option[UserType]) {
         _owner = value
         super[OptionallyOwnedEntity].checkInvariants()
     }

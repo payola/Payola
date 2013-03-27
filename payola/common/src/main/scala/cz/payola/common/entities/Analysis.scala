@@ -28,6 +28,8 @@ trait Analysis extends Entity with NamedEntity with OptionallyOwnedEntity with S
 
     protected var _defaultCustomization: Option[OntologyCustomizationType] = None
 
+    var token: Option[String] = None
+
     /** Analytical plugin instances the analysis consists of.*/
     def pluginInstances: immutable.Seq[PluginInstanceType] = _pluginInstances.toList
 

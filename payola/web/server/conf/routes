@@ -22,8 +22,11 @@ GET     /analysis/accessible/:uid   controllers.Analysis.listAccessibleByOwner(u
 GET     /analysis/list              controllers.Analysis.list(page: Int ?= 1)
 GET     /analysis/create            controllers.Analysis.create
 GET     /analysis/edit/:id          controllers.Analysis.edit(id)
+GET     /analysis/take-ownership/:id          controllers.Analysis.takeOwnership(id)
 GET     /analysis/delete/:id        controllers.Analysis.delete(id)
+GET     /analysis/clone/:id         controllers.Analysis.cloneAndEdit(id)
 GET     /analysis/:id               controllers.Analysis.detail(id)
+GET     /visualize                  controllers.Analysis.visualizeAnonymously(endpointUri: String, graphUri: List[String], classUri: Option[String] ?= None, propertyUri: Option[String] ?= None)
 
 GET     /analysis/:analysisID/evaluation/:evaluationID/download.rdf   controllers.GraphDownloader.downloadAnalysisEvaluationResultAsXML(analysisID, evaluationID)
 GET     /analysis/:analysisID/evaluation/:evaluationID/download.ttl   controllers.GraphDownloader.downloadAnalysisEvaluationResultAsTTL(analysisID, evaluationID)

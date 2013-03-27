@@ -15,7 +15,7 @@ abstract class TablePluginView(name: String) extends PluginView(name)
 
     def createSubViews = List(tableWrapper)
 
-    override def updateGraph(graph: Option[Graph]) {
+    override def updateGraph(graph: Option[Graph], contractLiterals: Boolean = true) {
         if (graph != currentGraph) {
             // Remove the old table.
             tableWrapper.removeAllChildNodes()
@@ -30,7 +30,7 @@ abstract class TablePluginView(name: String) extends PluginView(name)
             }
         }
 
-        super.updateGraph(graph)
+        super.updateGraph(graph, true)
     }
 
     def fillTable(graph: Option[Graph], tableHead: html.Element, tableBody: html.Element)

@@ -195,7 +195,7 @@ class ColumnChartPluginView extends PluginView("Column Chart")
         chartWrapper.setAttribute("style", styleString)
     }
 
-    override def updateGraph(graph: Option[Graph]) {
+    override def updateGraph(graph: Option[Graph], conractLiterals: Boolean = true) {
         if (graph != currentGraph) {
             // Clear the wrapper
             chartWrapper.removeAllChildNodes()
@@ -215,7 +215,7 @@ class ColumnChartPluginView extends PluginView("Column Chart")
                 }
             }
         }
-        super.updateGraph(graph)
+        super.updateGraph(graph, true)
     }
 
     private def validateLiteralVerticesOnEdges(edges: Seq[Edge]): Boolean = {

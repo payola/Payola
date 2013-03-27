@@ -15,8 +15,8 @@ abstract class BaseTechnique(name: String) extends VisualPluginView(name)
 
     private val circleLevelsDistance = 150
 
-    override def updateGraph(graph: Option[Graph]) {
-        super.updateGraph(graph)
+    override def updateGraph(graph: Option[Graph], contractLiterals: Boolean = true) {
+        super.updateGraph(graph, contractLiterals)
         graphView.foreach(performPositioning(_))
     }
 

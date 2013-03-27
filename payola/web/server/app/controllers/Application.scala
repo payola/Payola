@@ -96,7 +96,7 @@ object Application extends PayolaController with Secured
     def authenticate = Action {implicit request =>
         loginForm.bindFromRequest.fold(
             formWithErrors => BadRequest(html.login(formWithErrors)),
-            user => Redirect(routes.Application.dashboard).withSession("email" -> user._1)
+            user => Redirect(routes.Application.dashboard).withSession( session + ("email" -> user._1))
         )
     }
 
@@ -131,7 +131,7 @@ object Application extends PayolaController with Secured
             user =>
             {   try {
                     Payola.model.userModel.create(user._1, user._2)
-                    Redirect(routes.Application.dashboard).withSession("email" -> user._1)
+                    Redirect(routes.Application.dashboard).withSession(session + ("email" -> user._1))
                 } catch {
                     case v: ValidationException =>
                         Redirect(routes.Application.signup)

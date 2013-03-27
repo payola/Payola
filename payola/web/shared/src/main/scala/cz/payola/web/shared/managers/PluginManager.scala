@@ -4,15 +4,16 @@ import s2js.compiler._
 import cz.payola.web.shared._
 import cz.payola.domain.entities._
 import cz.payola.domain.entities.plugins.concrete.DataFetcher
-import cz.payola.common.ValidationException
+import scala.Some
+import cz.payola.web.shared.Email
 
-@remote @secured object PluginManager
+@remote
+@secured object PluginManager
     extends ShareableEntityManager[Plugin, cz.payola.common.entities.Plugin](Payola.model.pluginModel)
 {
     @async def getAccessibleDataFetchers(user: Option[User] = null)
         (successCallback: Seq[cz.payola.common.entities.Plugin] => Unit)
         (errorCallback: Throwable => Unit) {
-
         successCallback(model.getAccessibleToUser(user).filter(_.isInstanceOf[DataFetcher]))
     }
 
@@ -28,7 +29,6 @@ import cz.payola.common.ValidationException
     @async def uploadPlugin(pluginCode: String, user: User = null)
         (successCallback: (() => Unit))
         (failCallback: (Throwable => Unit)) {
-
         val className = Payola.model.pluginModel.compilePluginFromSource(pluginCode)
         val approveLink = "%s/plugin/approve/%s/%s".format(Payola.settings.websiteURL, className, user.id)
         val declineLink = "%s/plugin/reject/%s/%s".format(Payola.settings.websiteURL, className, user.id)
@@ -84,5 +84,19 @@ import cz.payola.common.ValidationException
             ).send()
         }
         isAdmin
+    }
+
+    @async def createDataCubeInstance(vocabularyURI: String, dataStructureURI: String, owner: User = null)
+        (successCallback: (cz.payola.common.entities.Plugin => Unit))
+        (failCallback: (Throwable => Unit)) {
+
+        Payola.model.dataCubeModel.loadVocabulary(vocabularyURI)
+            .dataStructureDefinitions
+            .find(_.uri == dataStructureURI).map { d =>
+                val plugin = Payola.model.pluginModel.createDataCubeInstance(d, owner)
+                successCallback(plugin)
+            }.getOrElse {
+                failCallback(new Exception)
+            }
     }
 }

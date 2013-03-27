@@ -15,7 +15,7 @@ object Analysis extends EntityConverter[Analysis]
         entity match {
             case e: Analysis => Some(e)
             case e: cz.payola.common.entities.Analysis
-            => Some(new Analysis(e.id, e.name, e.owner.map(User(_)), e.isPublic, e.description))
+            => Some(new Analysis(e.id, e.name, e.owner.map(User(_)), e.isPublic, e.description, e.token))
             case _ => None
         }
     }
@@ -30,14 +30,14 @@ object Analysis extends EntityConverter[Analysis]
  * @param _desc Description of the analysis
  * @param context Implicit context
  */
-class Analysis(override val id: String, name: String, o: Option[User], var _isPub: Boolean, var _desc: String)
+class Analysis(override val id: String, name: String, o: Option[User], var _isPub: Boolean, var _desc: String, var _token: Option[String])
     (implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.Analysis(name, o)
     with Entity with OptionallyOwnedEntity with ShareableEntity with DescribedEntity
 {
     type DomainParameterValueType = plugins.ParameterValue[_]
 
-    _pluginInstances = null;
+    _pluginInstances = null
 
     private lazy val _pluginInstancesQuery = context.schema.analysesPluginInstances.left(this)
 
@@ -48,6 +48,8 @@ class Analysis(override val id: String, name: String, o: Option[User], var _isPu
     _defaultCustomization = null
 
     var defaultCustomizationId: Option[String] = None
+
+    token = _token
 
     override def defaultOntologyCustomization_=(value: Option[Analysis#OntologyCustomizationType]) {
         defaultCustomizationId = value.map(_.id)
@@ -112,7 +114,6 @@ class Analysis(override val id: String, name: String, o: Option[User], var _isPu
 
     def associatePluginInstance(instance: PluginInstance): PluginInstance = {
         context.schema.associate(instance, _pluginInstancesQuery)
-
         context.analysisRepository.persistPluginInstance(instance)
 
         instance

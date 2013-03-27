@@ -181,7 +181,6 @@ input[type="checkbox"].active:after {
 @media screen and (-webkit-min-device-pixel-ratio:0) {
     .params-wrapper {
         display: table !important;
-        table-layout: fixed;
         width: 100%
     }
 
@@ -433,6 +432,10 @@ input.glyph {
     width: 96%;
 }
 
+.plugin-canvas input.tiny {
+    width: 26%;
+}
+
 pre#editor {
     max-height: 100000px !important;
 }
@@ -475,4 +478,61 @@ label.nofloat {
 
 noindex:-o-prefocus, .btn-group.share-button {
     top: 4px;
+}
+
+.instance .footer {
+    text-align: right;
+}
+
+.datacube-preview {
+    position: relative;
+}
+
+.datacube-preview canvas {
+    border: 0px;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+.datacube-preview canvas:first-of-type {
+   position: relative;
+}
+
+textarea.datacube {
+    display: block;
+    margin-top: 20px;
+    height: 100px;
+}
+
+button.datacube {
+    margin-top: 20px;
+}
+
+.datacube-preview-dialog.modal {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    margin: 0px;
+    width: 100%;
+    height: 100%;
+}
+
+.datacube-preview-dialog.modal .modal-body {
+    max-height: 200000px;
+    padding: 1px;
+    position: relative;
+}
+
+.datacube-infobar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: white;
+    width: 100%;
+    padding: 2px;
+}
+
+.map-placeholder {
+    width: 100%;
+    height: 500px;
 }

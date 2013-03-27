@@ -327,7 +327,7 @@ trait SchemaComponent
                 new Group("", "", null)
             },
             factoryFor(analyses) is {
-                new Analysis("", "", None, false, "")
+                new Analysis("", "", None, false, "", None)
             },
             factoryFor(plugins) is {
                 new PluginDbRepresentation("", "", "", 0, None, false)
@@ -357,7 +357,7 @@ trait SchemaComponent
                 new IntParameterValue("", null, 0)
             },
             factoryFor(stringParameters) is {
-                new StringParameter("", "", "", false)
+                new StringParameter("", "", "", false, false)
             },
             factoryFor(stringParameterValues) is {
                 new StringParameterValue("", null, "")
@@ -384,6 +384,7 @@ trait SchemaComponent
          */
         private def declareKeys() {
             val COLUMN_TYPE_ID = "varchar(36)"
+            val COLUMN_TYPE_TOKEN = "varchar(36)"
             val COLUMN_TYPE_NAME = "varchar(128)"
             val COLUMN_TYPE_DESCRIPTION = "text"
             val COLUMN_TYPE_URI = "text"
@@ -526,6 +527,7 @@ trait SchemaComponent
                     analysis.defaultCustomizationId is (dbType(COLUMN_TYPE_ID)),
                     analysis._desc is (dbType(COLUMN_TYPE_DESCRIPTION)),
                     analysis.description is (dbType(COLUMN_TYPE_DESCRIPTION)),
+                    analysis.token is (dbType(COLUMN_TYPE_TOKEN)),
                     columns(analysis.name, analysis.ownerId) are (unique)
                 ))
 
@@ -546,7 +548,7 @@ trait SchemaComponent
                     c.id is(primaryKey, (dbType(COLUMN_TYPE_ID))),
                     c.name is (dbType(COLUMN_TYPE_NAME)),
                     c.ownerId is (dbType(COLUMN_TYPE_ID)),
-                    c.ontologyURL is (dbType(COLUMN_TYPE_URI)),
+                    c.ontologyURLs is (dbType(COLUMN_TYPE_URI)),
                     columns(c.name, c.ownerId) are (unique)
                 ))
 

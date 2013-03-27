@@ -63,7 +63,7 @@ abstract class SigmaPluginView(name: String) extends PluginView(name){
         }
     }
 
-    override def updateGraph(graph: Option[rdf.Graph]) {
+    override def updateGraph(graph: Option[rdf.Graph], contractLiterals: Boolean) {
 
         if (sigmaInstance.isEmpty && graph.isEmpty) {
             renderMessage(sigmaPluginWrapper.htmlElement, "The graph is empty...")
@@ -78,7 +78,7 @@ abstract class SigmaPluginView(name: String) extends PluginView(name){
             sigmaInstance.get.draw()
         }
 
-        super.updateGraph(graph)
+        super.updateGraph(graph, false)
     }
 
     def setDrawingProperties()
