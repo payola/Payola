@@ -9,4 +9,11 @@ trait OptionallyOwnedEntity extends Entity with cz.payola.common.entities.Option
     protected override def checkInvariants() {
         validate(owner != null, "owner", "Owner of the %s mustn't be null.".format(classNameText))
     }
+
+    /**
+     * @param value New owner of entity
+     */
+    def owner_=(value: Option[User]) {
+        _owner = value
+    }
 }

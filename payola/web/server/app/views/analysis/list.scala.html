@@ -36,7 +36,7 @@ val analysis = e.asInstanceOf[cz.payola.domain.entities.Analysis]
     }
 </td>
 <td>{
-        if (user == analysis.owner){
+        if (analysis.owner.isDefined && (user == analysis.owner)){
             <div class="btn-toolbar">
                 {val buff = new scala.xml.NodeBuffer() += (editLinkForID(e.id),{<span> </span>})
                 buff ++= shareLinkForID(e.id, analysis.name, analysis.isPublic)

@@ -16,7 +16,7 @@ object OntologyCustomization extends EntityConverter[OntologyCustomization]
             case o: cz.payola.common.entities.settings.OntologyCustomization => {
                 val customizations = o.classCustomizations.map(ClassCustomization(_))
                 Some(new OntologyCustomization(
-                    o.id, o.ontologyURL, o.name, o.owner.map(User(_)), customizations, o.isPublic))
+                    o.id, o.ontologyURLs, o.name, o.owner.map(User(_)), customizations, o.isPublic))
             }
             case _ => None
         }

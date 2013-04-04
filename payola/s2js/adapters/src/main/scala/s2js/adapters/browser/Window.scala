@@ -17,6 +17,8 @@ trait Window extends EventTarget
 
     var innerWidth: Double
 
+    var scrollY: Double
+
     val location: Location
 
     var name: String

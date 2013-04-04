@@ -21,6 +21,10 @@ class AnalysisEditorView(analysis: Analysis, newName: Option[String], newDesc: O
 
     protected val addPluginLinkLi = new ListItem(List(addPluginLink))
 
+    val addDataCubeLink = new Anchor(List(new Icon(Icon.hdd), new Text(" Add DataCube plugin")))
+
+    protected val addDataCubeLinkLi = new ListItem(List(addDataCubeLink))
+
     val addDataSourceLink = new Anchor(List(new Icon(Icon.hdd), new Text(" Add data source")))
 
     protected val addDataSourceLinkLi = new ListItem(List(addDataSourceLink))

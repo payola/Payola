@@ -13,7 +13,7 @@ abstract class PluginInstanceView(
     var predecessors: Seq[PluginInstanceView] = Nil)
     extends View
 {
-    private val heading = new Heading(List(new Text(pluginInstance.plugin.name)), 3)
+    private val heading = getHeading
 
     private val paramsDiv = new Div(getParameterViews, "parameters")
 
@@ -21,16 +21,23 @@ abstract class PluginInstanceView(
 
     private val additionalControls = new Div(controlViews, "controls")
 
+    private val footerViews = getFooterViews
+    private val footer = new Div(footerViews, "footer")
+
     protected val paramsWrapper = new Div(List(paramsDiv),"params-wrapper")
-    protected val alertDiv = new Div(List(heading, paramsWrapper, additionalControls), "alert alert-info instance")
+    protected val alertDiv = new Div(heading ++ List(paramsWrapper, additionalControls, footer), "alert alert-info instance")
 
     private val clearSpan = new Span(List(), "clear")
 
     private val successors = new Div(List(clearSpan, alertDiv), "successors")
 
+    def getHeading: Seq[View] = List(new Heading(List(new Text(pluginInstance.plugin.name)), 3))
+
     def getParameterViews: Seq[View]
 
     def getAdditionalControlsViews: Seq[View]
+
+    def getFooterViews: Seq[View]
 
     def getPlugin: Plugin = pluginInstance.plugin
 

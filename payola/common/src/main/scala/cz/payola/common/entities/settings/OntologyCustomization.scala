@@ -13,7 +13,7 @@ trait OntologyCustomization extends Entity with NamedEntity with OptionallyOwned
     type ClassCustomizationType <: ClassCustomization
 
     /** URL of the ontology that is used for customization. */
-    val ontologyURL: String
+    val ontologyURLs: String
 
     protected var _classCustomizations: immutable.Seq[ClassCustomizationType]
 

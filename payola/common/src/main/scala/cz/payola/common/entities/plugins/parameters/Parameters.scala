@@ -23,6 +23,10 @@ trait IntParameter extends Parameter[Int]
 trait StringParameter extends Parameter[String]
 {
     protected val _isMultiline: Boolean
+    protected val _isPattern: Boolean
     
+    def isPattern: Boolean = _isPattern
     def isMultiline: Boolean = _isMultiline
 }
+
+

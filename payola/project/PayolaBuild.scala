@@ -16,7 +16,7 @@ object PayolaBuild extends Build
     /** Common settings of all projects. */
     object Settings
     {
-        val scalaVersion = "2.9.1"
+        val scalaVersion = "2.9.2"
 
         val libDir = file("lib")
 
@@ -208,7 +208,10 @@ object PayolaBuild extends Build
     ).settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
 
     lazy val modelProject = Project(
-        "model", file("model"), settings = payolaSettings
+        "model", file("model"),
+        settings = payolaSettings ++ Seq(
+            libraryDependencies ++= Seq("org.apache.commons" % "commons-lang3" % "3.1")
+        )
     ).dependsOn(
         commonProject, domainProject, dataProject
     ).settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
@@ -257,6 +260,7 @@ object PayolaBuild extends Build
             val dependencyExtensions = List("js", "css")
             val dependencyDirectory = new io.Directory(WebSettings.dependencyDir)
             val files = dependencyDirectory.deepFiles.filter(f => dependencyExtensions.contains(f.extension))
+                .filterNot(f => f.path.contains("javascripts/lib"))
 
             val symbolFiles = new mutable.HashMap[String, String]
             val fileProvides = new mutable.HashMap[String, mutable.ArrayBuffer[String]]

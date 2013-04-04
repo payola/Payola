@@ -4,7 +4,7 @@
 
 ## System Requirements
 
-Payola requires a [Scala](http://www.scala-lang.org) environment, which is supported on virtually any platform capable of running Java code - both Unix and Windows-based systems are fully supported. The system should have at least 1GB of memory dedicated to Payola itself.
+Payola requires a [Scala](http://www.scala-lang.org) environment, which is supported on virtually any platform capable of running Java code (requires JRE 1.6 and higher). Currently supported systems are: Mac OS X 10.7+, Windows 7, Windows Server 2008 R2. While Payola does run on Linux and Unix based platforms as well, our team had limited opportunities to test Payola on various distributions. The system should have at least 1GB of memory dedicated to Payola itself.
 
 Aside from the actual Payola server, you need to have a running [Squeryl-compatible](http://squeryl.org/supported-databases.html) relational database for storing user data, a [Virtuoso](http://virtuoso.openlinksw.com) server for storing personal RDF data and an SMTP server for the plugin approval process. The Virtuoso server needs to be running on the same server as Payola is, or at least share the same file system - when uploading private data, a path to a temporary file is passed to Virtuoso. The SMTP server and the relational database may be running on a different server (this is configurable in the `payola.conf` file as described later on).
 

@@ -12,8 +12,8 @@ trait OptionallyOwnedEntity extends Entity with cz.payola.domain.entities.Option
     /**
      * @param value New owner of entity
      */
-    def owner_=(value: Option[User]) {
+    override def owner_=(value: Option[UserType]) {
         ownerId = value.map(_.id)
-        _owner = value
+        super.owner_=(value)
     }
 }

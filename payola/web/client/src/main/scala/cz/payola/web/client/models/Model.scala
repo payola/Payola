@@ -65,6 +65,10 @@ object Model
         DataSourceManager.getOwnedDataSourceByID(dataSourceID) { ds => successCallback(ds) } { t => errorCallback(t)}
     }
 
+    def getOwnedAnalysisById(analysisId: String)(successCallback: Analysis => Unit)(errorCallback: Throwable => Unit) {
+
+    }
+
     def ontologyCustomizationsByOwnership(successCallback: OntologyCustomizationsByOwnership => Unit)
         (errorCallback: Throwable => Unit) {
 
@@ -87,13 +91,13 @@ object Model
         }(errorCallback)
     }
 
-    def createOntologyCustomization(name: String, ontologyURL: String)
+    def createOntologyCustomization(name: String, ontologyURLs: String)
         (successCallback: OntologyCustomization => Unit)
         (errorCallback: Throwable => Unit) {
 
         fetchOntologyCustomizations { () =>
             _ownedOntologyCustomizations.foreach { ownedCustomizations =>
-                OntologyCustomizationManager.create(name, ontologyURL) { newCustomization =>
+                OntologyCustomizationManager.create(name, ontologyURLs) { newCustomization =>
                     ownedCustomizations += newCustomization
                     ontologyCustomizationsChanged.triggerDirectly(this)
                     successCallback(newCustomization)

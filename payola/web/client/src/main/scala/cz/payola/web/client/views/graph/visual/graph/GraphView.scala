@@ -6,11 +6,13 @@ import cz.payola.web.client.views.graph.visual._
 import cz.payola.web.client.views.algebra._
 import cz.payola.common.entities.settings.OntologyCustomization
 import s2js.adapters.html
+import cz.payola.common.visual.Color
 
 /**
  * Graphical representation of a Graph object.
  */
-class GraphView extends View[CanvasPack] {
+class GraphView(contractLiterals: Boolean = true) extends View[CanvasPack]
+{
     /**
      * During update vertices with higher age than this value are removed from this graph.
      */
@@ -41,18 +43,28 @@ class GraphView extends View[CanvasPack] {
         getAllVertices.foreach(_.setConfiguration(newCustomization))
     }
 
+    def setVertexColor(vertex: Vertex, color: Option[Color]) {
+        getAllVertices.foreach { v =>
+
+            if (v.vertexModel == vertex) {
+                v.setColor(color)
+            }
+        }
+    }
+
     def isSelected: Boolean = {
-        components.find { component => !component.isSelected}.isEmpty
+        components.find {
+            component => !component.isSelected
+        }.isEmpty
     }
 
     /**
-      * Updates the represented graph. VertexViews with age value higher than vertexHighestAge are destryed, other
-      * vertexViews have their age increased and vertices in the graph parameter are added to the graphView
-      * representation. VertexViews that are already in the graphView are refreshed (their age is set to 0).
-      * @param graph to update the current representation
-      * @param vertexInitPosition positions of newly created vertices
-      * @param newCustomization visualization settings
-      */
+     * Updates the represented graph. VertexViews with age value higher than vertexHighestAge are destryed, other
+     * vertexViews have their age increased and vertices in the graph parameter are added to the graphView
+     * representation. VertexViews that are already in the graphView are refreshed (their age is set to 0).
+     * @param graph to update the current representation
+     * @param vertexInitPosition positions of newly created vertices
+     */
     def update(graph: Graph, vertexInitPosition: Point2D) {
         if (graph == null) {
             return
@@ -76,8 +88,9 @@ class GraphView extends View[CanvasPack] {
 
         //if this is the first drawn graph, make some vertices selected from the start
         if (oldVertexViews.isEmpty) {
-            components.foreach { component =>
-                component.selectVertex(component.vertexViews.head)
+            components.foreach {
+                component =>
+                    component.selectVertex(component.vertexViews.head)
             }
         }
     }
@@ -141,44 +154,53 @@ class GraphView extends View[CanvasPack] {
     private def getNeighbours(ofVertex: VertexView): ListBuffer[VertexView] = {
         var neighbours = ListBuffer[VertexView]()
 
-        ofVertex.edges.foreach { edgeOfCurrentVertex =>
+        ofVertex.edges.foreach {
+            edgeOfCurrentVertex =>
 
-            if (edgeOfCurrentVertex.originView.vertexModel eq ofVertex.vertexModel) {
-                neighbours += edgeOfCurrentVertex.destinationView
-            } else {
-                neighbours += edgeOfCurrentVertex.originView
-            }
+                if (edgeOfCurrentVertex.originView.vertexModel eq ofVertex.vertexModel) {
+                    neighbours += edgeOfCurrentVertex.destinationView
+                } else {
+                    neighbours += edgeOfCurrentVertex.originView
+                }
         }
 
         neighbours
     }
 
     /**
-      * Constructs a list of vertexViews based on the graphModel parameter.
-      * @param graphModel to build from
-      * @param vertexInitPosition where created vertices are positioned
-      * @return container with packed Vertex objects in VertexView objects
-      */
-    private def createVertexViews(graphModel: Graph, vertexInitPosition: Point2D): ListBuffer[VertexView] = {
+     * Constructs a list of vertexViews based on the graphModel parameter.
+     * @param graphModel to build from
+     * @param vertexInitPosition where created vertices are positioned
+     * @return container with packed Vertex objects in VertexView objects
+     */
+    protected def createVertexViews(graphModel: Graph, vertexInitPosition: Point2D): ListBuffer[VertexView] = {
         val buffer = ListBuffer[VertexView]()
         val literalVertices = ListBuffer[LiteralVertex]()
 
-        graphModel.vertices.foreach { vertexModel =>
+        graphModel.vertices.foreach {
+            vertexModel =>
 
-            vertexModel match {
-                case i: IdentifiedVertex => {
-                    val newVertexView = new VertexView(i, vertexInitPosition, null)
+                vertexModel match {
+                    case i: IdentifiedVertex => {
+                        val newVertexView = new VertexView(i, vertexInitPosition, null)
 
-                    newVertexView.rdfType = getRdfTypeForVertexView(graphModel.edges, i)
-                    newVertexView.setInformation(getInformationForVertexView(graphModel, i))
+                        newVertexView.rdfType = getRdfTypeForVertexView(graphModel.edges, i)
+                        newVertexView.setInformation(getInformationForVertexView(graphModel, i))
 
 
-                    buffer += newVertexView
+                        buffer += newVertexView
+                    }
+                    case i: LiteralVertex => {
+                        if (contractLiterals){
+                            literalVertices += i
+                        }else{
+                            val newVertexView = new VertexView(i, vertexInitPosition, null)
+                            newVertexView.rdfType = "http://payola.cz/property"//getRdfTypeForVertexView(graphModel.edges, i)
+
+                            buffer += newVertexView
+                        }
+                    }
                 }
-                case i: LiteralVertex => {
-                    literalVertices += i
-                }
-            }
         }
 
         addLiteralVerticesToVertexViews(graphModel, buffer, literalVertices)
@@ -192,8 +214,9 @@ class GraphView extends View[CanvasPack] {
      * @return
      */
     private def getInformationForVertexView(graphModel: Graph, vertexModel: IdentifiedVertex): Option[Vertex] = {
-        val foundEdge = graphModel.edges.find { edge =>
-            vertexModel.uri == edge.origin.uri && Edge.rdfLabelEdges.find(_ == edge.uri).isDefined
+        val foundEdge = graphModel.edges.find {
+            edge =>
+                vertexModel.uri == edge.origin.uri && Edge.rdfLabelEdges.find(_ == edge.uri).isDefined
         }
         if (foundEdge.isDefined) {
             Some(foundEdge.get.destination)
@@ -208,20 +231,10 @@ class GraphView extends View[CanvasPack] {
      * @param vertexModel for which the type is being searched
      * @return the found type or an empty string
      */
-    private def getRdfTypeForVertexView(edges: Seq[Edge], vertexModel: IdentifiedVertex): String = {
-        var rdfTypeEdge: Option[Edge] = None
-        edges.foreach { edge =>
+    private def getRdfTypeForVertexView(edges: Seq[Edge], vertexModel: Vertex): String = {
 
-            if (edge.origin == vertexModel && edge.uri == Edge.rdfTypeEdge) {
-                rdfTypeEdge = Some(edge)
-            }
-        }
+        edges.find { e => (e.origin == vertexModel) && (e.uri == Edge.rdfTypeEdge) }.map(_.destination.toString).getOrElse("")
 
-        if (rdfTypeEdge.isDefined) {
-            rdfTypeEdge.get.destination.toString //getting rdf type
-        } else {
-            ""
-        }
     }
 
     /**
@@ -233,43 +246,43 @@ class GraphView extends View[CanvasPack] {
      */
     private def addLiteralVerticesToVertexViews(graphModel: Graph,
         vertexViews: ListBuffer[VertexView], literalVertices: ListBuffer[LiteralVertex]): ListBuffer[VertexView] = {
-        literalVertices.foreach { literalVertex =>
-        // find edge by which the vertex is connected to the rest of the graph and add it to the identified vertex
-        // on the other side of the edge
+        literalVertices.foreach {
+            literalVertex =>
+            // find edge by which the vertex is connected to the rest of the graph and add it to the identified vertex
+            // on the other side of the edge
 
-            val edgeToIdentVertex =
-                graphModel.edges.find { edge => (edge.origin == literalVertex || edge.destination == literalVertex)}
-            if (edgeToIdentVertex.isDefined) {
-                //get identified vertex neighbour
-                val identNeighborVertex =
-                    edgeToIdentVertex.get.origin match {
-                        case i: LiteralVertex =>
-                            edgeToIdentVertex.get.destination.asInstanceOf[IdentifiedVertex]
-                        case i: IdentifiedVertex =>
-                            i
+                val edgeToIdentVertex =
+                    graphModel.edges.find {
+                        edge => (edge.origin == literalVertex || edge.destination == literalVertex)
                     }
 
-                // get all edges that are with the same uri as the edgeToIdentVertex and are connected to the
-                // identNeighbourVertex
-                val edgesToTheIdentVertex = graphModel.edges.filter{ edge =>
-                    edge.uri == edgeToIdentVertex.get.uri && (
-                        edge.destination == identNeighborVertex || edge.origin == identNeighborVertex)}
+                edgeToIdentVertex.map { e =>
+                    //get identified vertex neighbour
+                    val identNeighborVertex =
+                        e.origin match {
+                            case i: LiteralVertex => e.destination.asInstanceOf[IdentifiedVertex]
+                            case i: IdentifiedVertex => i
+                        }
+
+                    // get all edges that are with the same uri as the edgeToIdentVertex and are connected to the
+                    // identNeighbourVertex
+                    val edgesToTheIdentVertex = graphModel.edges.filter {
+                        edge =>
+                            edge.uri == e.uri && (
+                                edge.destination == identNeighborVertex || edge.origin == identNeighborVertex)
+                    }
 
 
-                val literals = edgesToTheIdentVertex.map(_.destination)
+                    val literals = edgesToTheIdentVertex.map(_.destination)
 
-                //find the vertexView of the identified vertex neighbour
-                val identNeighbourVertexView =
-                    vertexViews.find { vertexView => vertexView.vertexModel == identNeighborVertex}
+                    //find the vertexView of the identified vertex neighbour
+                    val identNeighbourVertexView =
+                        vertexViews.find {
+                            vertexView => vertexView.vertexModel == identNeighborVertex
+                        }
 
-                if (identNeighbourVertexView.isDefined) {
-                    identNeighbourVertexView.get.addLiteralVertex(edgeToIdentVertex.get, literals)
-                } else {
-                    //this should never happen
+                    identNeighbourVertexView.map(_.addLiteralVertex(edgeToIdentVertex.get, literals))
                 }
-            } else {
-                //this should never happen
-            }
         }
         vertexViews
     }
@@ -286,22 +299,23 @@ class GraphView extends View[CanvasPack] {
         var newOldVertexViews = ListBuffer[VertexView]()
         var allVertices = newVertexViews ++ newOldVertexViews
 
-        getAllVertices.foreach { oldVertexView =>
+        getAllVertices.foreach {
+            oldVertexView =>
 
-            val vertexInNews = allVertices.find {
-                _ isEqual oldVertexView
-            }
+                val vertexInNews = allVertices.find {
+                    _ isEqual oldVertexView
+                }
 
-            if (vertexInNews.isDefined) {
-                vertexInNews.get.selected = oldVertexView.selected
-                vertexInNews.get.position = oldVertexView.position
-            } else if (vertexInNews.isEmpty && oldVertexView.getCurrentAge + 1 <= vertexHighestAge) {
-                //filter out too old vertices
+                if (vertexInNews.isDefined) {
+                    vertexInNews.get.selected = oldVertexView.selected
+                    vertexInNews.get.position = oldVertexView.position
+                } else if (vertexInNews.isEmpty && oldVertexView.getCurrentAge + 1 <= vertexHighestAge) {
+                    //filter out too old vertices
 
-                oldVertexView.increaseCurrentAge()
-                newOldVertexViews += oldVertexView
-                allVertices += oldVertexView
-            }
+                    oldVertexView.increaseCurrentAge()
+                    newOldVertexViews += oldVertexView
+                    allVertices += oldVertexView
+                }
         }
 
         newOldVertexViews
@@ -321,10 +335,11 @@ class GraphView extends View[CanvasPack] {
         val newEdgeViews = ListBuffer[EdgeView]()
 
         //create new edgeViews
-        newGraphModel.edges.foreach { edgeModel =>
-            createEdgeView(edgeModel, vertexViews).foreach {
-                created => newEdgeViews += created
-            }
+        newGraphModel.edges.foreach {
+            edgeModel =>
+                createEdgeView(edgeModel, vertexViews).foreach {
+                    created => newEdgeViews += created
+                }
         }
 
         newEdgeViews
@@ -343,15 +358,16 @@ class GraphView extends View[CanvasPack] {
             ListBuffer[EdgeView]()
         }
         val newOldEdgeViews = ListBuffer[EdgeView]()
-        getAllEdges.foreach { oldEdgeView =>
+        getAllEdges.foreach {
+            oldEdgeView =>
 
-            val edgeInNews = newEdgeViews.find(_.edgeModel eq oldEdgeView.edgeModel)
+                val edgeInNews = newEdgeViews.find(_.edgeModel eq oldEdgeView.edgeModel)
 
-            if (edgeInNews.isEmpty) {
-                createEdgeView(oldEdgeView.edgeModel, vertexViews).foreach {
-                    created => newOldEdgeViews += created
+                if (edgeInNews.isEmpty) {
+                    createEdgeView(oldEdgeView.edgeModel, vertexViews).foreach {
+                        created => newOldEdgeViews += created
+                    }
                 }
-            }
         }
         newOldEdgeViews
     }
@@ -414,8 +430,9 @@ class GraphView extends View[CanvasPack] {
      * @param edgeViews awailable for setting
      */
     private def fillVertexViewsEdges(vertexViews: ListBuffer[VertexView], edgeViews: ListBuffer[EdgeView]) {
-        vertexViews.foreach { vertexView =>
-            vertexView.edges = getEdgesOfVertex(vertexView, edgeViews)
+        vertexViews.foreach {
+            vertexView =>
+                vertexView.edges = getEdgesOfVertex(vertexView, edgeViews)
         }
     }
 
@@ -427,9 +444,10 @@ class GraphView extends View[CanvasPack] {
      * @return container with found edges
      */
     private def getEdgesOfVertex(vertexView: VertexView, edgeViews: ListBuffer[EdgeView]): ListBuffer[EdgeView] = {
-        edgeViews.filter { edgeView =>
-            ((edgeView.originView.vertexModel.toString eq vertexView.vertexModel.toString) ||
-                (edgeView.destinationView.vertexModel.toString eq vertexView.vertexModel.toString))
+        edgeViews.filter {
+            edgeView =>
+                ((edgeView.originView.vertexModel.toString eq vertexView.vertexModel.toString) ||
+                    (edgeView.destinationView.vertexModel.toString eq vertexView.vertexModel.toString))
         }
     }
 
@@ -508,32 +526,33 @@ class GraphView extends View[CanvasPack] {
      * Marks all the vertexViews in this graphView as NOT selected.
      */
     def deselectAll() {
-        components.foreach { component =>
+        components.foreach {
+            component =>
 
-            component.deselectAll()
+                component.deselectAll()
         }
     }
 
     def draw(canvasPack: CanvasPack, positionCorrection: Vector2D) {
-
         val vertexViews = getAllVertices
         val edgeViews = getAllEdges
 
         var selectedVerticesDrawn = false
         var deselectedVerticesDrawn = false
-        vertexViews.foreach { vertexView =>
+        vertexViews.foreach {
+            vertexView =>
 
-            if (vertexView.isSelected) {
-                if (canvasPack.verticesSelected.isClear) {
-                    vertexView.draw(canvasPack.verticesSelected.context, positionCorrection)
-                    selectedVerticesDrawn = true
+                if (vertexView.isSelected) {
+                    if (canvasPack.verticesSelected.isClear) {
+                        vertexView.draw(canvasPack.verticesSelected.context, positionCorrection)
+                        selectedVerticesDrawn = true
+                    }
+                } else {
+                    if (canvasPack.verticesDeselected.isClear) {
+                        vertexView.draw(canvasPack.verticesDeselected.context, positionCorrection)
+                        deselectedVerticesDrawn = true
+                    }
                 }
-            } else {
-                if (canvasPack.verticesDeselected.isClear) {
-                    vertexView.draw(canvasPack.verticesDeselected.context, positionCorrection)
-                    deselectedVerticesDrawn = true
-                }
-            }
         }
         if (selectedVerticesDrawn) {
             canvasPack.verticesSelected.dirty()
@@ -545,19 +564,20 @@ class GraphView extends View[CanvasPack] {
 
         var selectedEdgesDrawn = false
         var deselectedEdgesDrawn = false
-        edgeViews.foreach { edgeView =>
+        edgeViews.foreach {
+            edgeView =>
 
-            if (edgeView.isSelected) {
-                if (canvasPack.edgesSelected.isClear) {
-                    edgeView.draw(canvasPack.edgesSelected.context, positionCorrection)
-                    selectedEdgesDrawn = true
+                if (edgeView.isSelected) {
+                    if (canvasPack.edgesSelected.isClear) {
+                        edgeView.draw(canvasPack.edgesSelected.context, positionCorrection)
+                        selectedEdgesDrawn = true
+                    }
+                } else {
+                    if (canvasPack.edgesDeselected.isClear) {
+                        edgeView.draw(canvasPack.edgesDeselected.context, positionCorrection)
+                        deselectedEdgesDrawn = true
+                    }
                 }
-            } else {
-                if (canvasPack.edgesDeselected.isClear) {
-                    edgeView.draw(canvasPack.edgesDeselected.context, positionCorrection)
-                    deselectedEdgesDrawn = true
-                }
-            }
         }
         if (selectedEdgesDrawn) {
             canvasPack.edgesSelected.dirty()
@@ -573,19 +593,20 @@ class GraphView extends View[CanvasPack] {
 
         var selectedVerticesDrawn = false
         var deselectedVerticesDrawn = false
-        vertexViews.foreach { vertexView =>
+        vertexViews.foreach {
+            vertexView =>
 
-            if (vertexView.isSelected) {
-                if (canvasPack.verticesSelected.isClear) {
-                    vertexView.drawQuick(canvasPack.verticesSelected.context, positionCorrection)
-                    selectedVerticesDrawn = true
+                if (vertexView.isSelected) {
+                    if (canvasPack.verticesSelected.isClear) {
+                        vertexView.drawQuick(canvasPack.verticesSelected.context, positionCorrection)
+                        selectedVerticesDrawn = true
+                    }
+                } else {
+                    if (canvasPack.verticesDeselected.isClear) {
+                        vertexView.drawQuick(canvasPack.verticesDeselected.context, positionCorrection)
+                        deselectedVerticesDrawn = true
+                    }
                 }
-            } else {
-                if (canvasPack.verticesDeselected.isClear) {
-                    vertexView.drawQuick(canvasPack.verticesDeselected.context, positionCorrection)
-                    deselectedVerticesDrawn = true
-                }
-            }
         }
         if (selectedVerticesDrawn) {
             canvasPack.verticesSelected.dirty()
@@ -597,19 +618,20 @@ class GraphView extends View[CanvasPack] {
 
         var selectedEdgesDrawn = false
         var deselectedEdgesDrawn = false
-        edgeViews.foreach { edgeView =>
+        edgeViews.foreach {
+            edgeView =>
 
-            if (edgeView.isSelected) {
-                if (canvasPack.edgesSelected.isClear) {
-                    edgeView.drawQuick(canvasPack.edgesSelected.context, positionCorrection)
-                    selectedEdgesDrawn = true
+                if (edgeView.isSelected) {
+                    if (canvasPack.edgesSelected.isClear) {
+                        edgeView.drawQuick(canvasPack.edgesSelected.context, positionCorrection)
+                        selectedEdgesDrawn = true
+                    }
+                } else {
+                    if (canvasPack.edgesDeselected.isClear) {
+                        edgeView.drawQuick(canvasPack.edgesDeselected.context, positionCorrection)
+                        deselectedEdgesDrawn = true
+                    }
                 }
-            } else {
-                if (canvasPack.edgesDeselected.isClear) {
-                    edgeView.drawQuick(canvasPack.edgesDeselected.context, positionCorrection)
-                    deselectedEdgesDrawn = true
-                }
-            }
         }
         if (selectedEdgesDrawn) {
             canvasPack.edgesSelected.dirty()
@@ -663,8 +685,9 @@ class GraphView extends View[CanvasPack] {
      */
     def getAllVertices: ListBuffer[VertexView] = {
         var allVertices = ListBuffer[VertexView]()
-        components.foreach { component =>
-            allVertices ++= component.vertexViews
+        components.foreach {
+            component =>
+                allVertices ++= component.vertexViews
         }
 
         allVertices
@@ -675,8 +698,9 @@ class GraphView extends View[CanvasPack] {
      */
     def getAllEdges: ListBuffer[EdgeView] = {
         var allEdges = ListBuffer[EdgeView]()
-        components.foreach { component =>
-            allEdges ++= component.edgeViews
+        components.foreach {
+            component =>
+                allEdges ++= component.edgeViews
         }
 
         allEdges
@@ -687,8 +711,9 @@ class GraphView extends View[CanvasPack] {
      */
     def getAllSelectedVerticesCount: Int = {
         var allSelectedCount = 0
-        components.foreach { component =>
-            allSelectedCount += component.getSelectedCount
+        components.foreach {
+            component =>
+                allSelectedCount += component.getSelectedCount
         }
         allSelectedCount
     }
@@ -699,8 +724,9 @@ class GraphView extends View[CanvasPack] {
      */
     def isEmpty: Boolean = {
         var result = true
-        components.foreach { component =>
-            result = component.isEmpty && result
+        components.foreach {
+            component =>
+                result = component.isEmpty && result
         }
 
         result
@@ -724,10 +750,11 @@ class GraphView extends View[CanvasPack] {
      */
     def getGraphTop: Point2D = {
         var top = Point2D(0, Double.MaxValue)
-        getAllVertices.foreach { vv =>
-            if (vv.position.y < top.y) {
-                top = vv.position
-            }
+        getAllVertices.foreach {
+            vv =>
+                if (vv.position.y < top.y) {
+                    top = vv.position
+                }
         }
         top
     }
@@ -737,10 +764,11 @@ class GraphView extends View[CanvasPack] {
      */
     def getGraphLeft: Point2D = {
         var left = Point2D(Double.MaxValue, 0)
-        getAllVertices.foreach { vv =>
-            if (vv.position.x < left.x) {
-                left = vv.position
-            }
+        getAllVertices.foreach {
+            vv =>
+                if (vv.position.x < left.x) {
+                    left = vv.position
+                }
         }
         left
     }
@@ -750,10 +778,11 @@ class GraphView extends View[CanvasPack] {
      */
     def getGraphBottom: Point2D = {
         var bottom = Point2D(0, Double.MinValue)
-        getAllVertices.foreach { vv =>
-            if (vv.position.y > bottom.y) {
-                bottom = vv.position
-            }
+        getAllVertices.foreach {
+            vv =>
+                if (vv.position.y > bottom.y) {
+                    bottom = vv.position
+                }
         }
         bottom
     }
@@ -763,10 +792,11 @@ class GraphView extends View[CanvasPack] {
      */
     def getGraphRight: Point2D = {
         var right = Point2D(Double.MinValue, 0)
-        getAllVertices.foreach { vv =>
-            if (vv.position.x > right.x) {
-                right = vv.position
-            }
+        getAllVertices.foreach {
+            vv =>
+                if (vv.position.x > right.x) {
+                    right = vv.position
+                }
         }
         right
     }

@@ -10,6 +10,9 @@ import cz.payola.web.client.views.entity.plugins._
 import cz.payola.common.ValidationException
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
 import cz.payola.web.client.events._
+import cz.payola.common.rdf.IdentifiedVertex
+import s2js.adapters.browser.window
+import s2js.compiler.javascript
 
 class DataSourceBrowser(
     val viewElement: html.Element,
@@ -26,6 +29,12 @@ class DataSourceBrowser(
 
     private var historyPosition = -1
 
+    @javascript("""return encodeURIComponent(uri)""")
+    def encodeURIComponent(uri: String) : String = ""
+
+    @javascript("""return decodeURIComponent(uri)""")
+    def decodeURIComponent(uri: String) : String = ""
+
     def initialize() {
         // Initialize the sub presenters.
         graphPresenter.initialize()
@@ -40,21 +49,27 @@ class DataSourceBrowser(
 
         view.render(viewElement)
 
-        // If the default URI isn't specified, display the initial graph.
-        if (initialVertexUri == "") {
-            blockPage("Fetching the initial graph...")
-            DataSourceManager.getInitialGraph(dataSourceId) { graph =>
-                graphPresenter.view.updateGraph(graph)
-                updateNavigationView()
-                unblockPage()
-            }(fatalErrorHandler(_))
+        if (window.location.hash.size == 0) {
+            // If the default URI isn't specified, display the initial graph.
+            if (initialVertexUri == "") {
+                blockPage("Fetching the initial graph...")
+                DataSourceManager.getInitialGraph(dataSourceId) { graph =>
+                    graphPresenter.view.updateGraph(graph, true)
+                    updateNavigationView()
+                    unblockPage()
+                }(fatalErrorHandler(_))
+            } else {
+                addToHistoryAndGo(initialVertexUri, false)
+            }
         } else {
-            addToHistoryAndGo(initialVertexUri, false)
+            addToHistoryAndGo(decodeURIComponent(window.location.hash.substring(1)), false)
         }
     }
 
     private def onVertexBrowsing(e: VertexEventArgs[_]) {
-        addToHistoryAndGo(e.vertex.uri, false)
+        e.vertex match {
+            case i: IdentifiedVertex => addToHistoryAndGo(i.uri, false)
+        }
     }
 
     private def onBackButtonClicked(e: EventArgs[_]): Boolean = {
@@ -91,7 +106,7 @@ class DataSourceBrowser(
                 updateNavigationView()
 
                 graphPresenter.view.clear()
-                graphPresenter.view.updateGraph(g)
+                graphPresenter.view.updateGraph(g, true)
             } { error =>
                 modal.unblock()
                 error match {
@@ -123,6 +138,8 @@ class DataSourceBrowser(
         history += uri
         historyPosition += 1
 
+        window.location.hash = encodeURIComponent(uri)
+
         updateView(clearGraph)
     }
 
@@ -136,7 +153,7 @@ class DataSourceBrowser(
             if (clearGraph) {
                 graphPresenter.view.clear()
             }
-            graphPresenter.view.updateGraph(graph)
+            graphPresenter.view.updateGraph(graph, true)
             updateNavigationView()
 
             view.nodeUriInput.setIsEnabled(true)

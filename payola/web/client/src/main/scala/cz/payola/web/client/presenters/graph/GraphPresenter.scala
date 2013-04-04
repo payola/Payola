@@ -10,6 +10,7 @@ import cz.payola.web.client.models.Model
 import cz.payola.web.client.views.entity.plugins.DataSourceSelector
 import cz.payola.common.entities.settings.OntologyCustomization
 import cz.payola.web.client.presenters.entity.settings._
+import cz.payola.common.rdf.IdentifiedVertex
 
 class GraphPresenter(val viewElement: html.Element) extends Presenter
 {
@@ -66,16 +67,21 @@ class GraphPresenter(val viewElement: html.Element) extends Presenter
     }
 
     def onVertexBrowsingDataSource(e: VertexEventArgs[_]) {
-        blockPage("Fetching accessible data sources...")
-        Model.accessibleDataSources { ds =>
-            unblockPage()
-            val selector = new DataSourceSelector("Browse in different data source: " + e.vertex.uri, ds)
-            selector.dataSourceSelected += { d =>
-                window.location.href = "/datasource/%s?uri=%s".format(d.target.id,
-                                                                    s2js.adapters.js.encodeURIComponent(e.vertex.uri))
+
+        e.vertex match {
+            case i: IdentifiedVertex => {
+                blockPage("Fetching accessible data sources...")
+                Model.accessibleDataSources { ds =>
+                    unblockPage()
+                    val selector = new DataSourceSelector("Browse in different data source: " + i.uri, ds)
+                    selector.dataSourceSelected += { d =>
+                        window.location.href = "/datasource/%s?uri=%s".format(d.target.id,
+                                                                            s2js.adapters.js.encodeURIComponent(i.uri))
+                    }
+                    selector.render()
+                }(fatalErrorHandler(_))
             }
-            selector.render()
-        }(fatalErrorHandler(_))
+        }
     }
 
     private def editOntologyCustomization(customization: OntologyCustomization) {

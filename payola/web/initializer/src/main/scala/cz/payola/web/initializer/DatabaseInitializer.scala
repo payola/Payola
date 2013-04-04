@@ -184,8 +184,8 @@ object DatabaseInitializer extends App
         manyTendersPersisted.addBinding(contractFilter, contractTitlePropertySelection)
 
         // Persist the ontology customizations with some default colors and strokes.
-        val url = "http://opendata.cz/pco/public-contracts.xml"
-        val customization = OntologyCustomization.empty(url, "Public contracts", Some(admin))
+        val urls = List("http://opendata.cz/pco/public-contracts.xml")
+        val customization = OntologyCustomization.empty(urls, "Public contracts", Some(admin))
         customization.isPublic = true;
 
         getPublicContractsOntologySettings.foreach { classSettings =>
