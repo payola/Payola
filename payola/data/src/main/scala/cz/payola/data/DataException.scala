@@ -27,6 +27,7 @@ object DataException
             }
             case throwable: Throwable => {
                 println(throwable.getMessage)
+                throwable.printStackTrace()
                 throw new DataException("An exception was thrown in the data layer.", throwable)
             }
         }
