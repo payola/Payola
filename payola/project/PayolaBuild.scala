@@ -246,6 +246,12 @@ object PayolaBuild extends Build
         domainProject, dataProject, webSharedProject
     ).settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
 
+    lazy val webRunnerProject = Project(
+        "runner", file("web/runner"), settings = payolaSettings
+    ).dependsOn(
+        webSharedProject
+    ).settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
+
     lazy val webServerProject = PlayProject(
         "server", PayolaSettings.version, Nil, path = file("web/server"), mainLang = SCALA
     ).settings(

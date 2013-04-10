@@ -66,7 +66,7 @@ class GraphPresenter(val viewElement: html.Element) extends Presenter
         view.updateOntologyCustomization(Some(e.target))
     }
 
-    private def onVertexBrowsingDataSource(e: VertexEventArgs[_]) {
+    def onVertexBrowsingDataSource(e: VertexEventArgs[_]) {
 
         e.vertex match {
             case i: IdentifiedVertex => {
