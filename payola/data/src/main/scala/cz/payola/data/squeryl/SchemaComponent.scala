@@ -97,6 +97,9 @@ trait SchemaComponent
         /**Table of [[cz.payola.data.squeryl.entities.settings.PropertyCustomization]]s */
         val propertyCustomizations = table[PropertyCustomization]("propertyCustomizations")
 
+        /**Table of [[cz.payola.data.squeryl.entities.Prefix]]es */
+        val prefixes = table[Prefix]("prefixes")
+
         /**
          * Relation that associates members ([[cz.payola.data.squeryl.entities.User]]s)
          * to [[cz.payola.data.squeryl.entities.Group]]s
@@ -567,6 +570,16 @@ trait SchemaComponent
                     c.strokeColor is (dbType(COLUMN_TYPE_COLOR)),
                     c.classCustomizationId is (dbType(COLUMN_TYPE_ID)),
                     c.uri is (dbType(COLUMN_TYPE_URI))
+                ))
+
+            on(prefixes)(p =>
+                declare(
+                    p.id is(primaryKey, (dbType(COLUMN_TYPE_ID))),
+                    p.name is (dbType(COLUMN_TYPE_NAME)),
+                    p.prefix is (dbType(COLUMN_TYPE_TOKEN)),
+                    p.url is (dbType(COLUMN_TYPE_URI)),
+                    p.ownerId is (dbType(COLUMN_TYPE_ID)),
+                    columns(p.name, p.ownerId) are (unique)
                 ))
 
             // When a PluginDbRepresentation is deleted, all of the its instances and data sources will get deleted.
