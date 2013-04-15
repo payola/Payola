@@ -11,18 +11,24 @@ object Prefix extends EntityConverter[Prefix]
     def convert(entity: AnyRef)(implicit context: SquerylDataContextComponent): Option[Prefix] = {
         entity match {
             case e: Prefix => Some(e)
-            case e: cz.payola.common.entities.Prefix => Some(new Prefix(e.id, e.name, e.prefix, e.url))
+            case e: cz.payola.common.entities.Prefix
+                    => Some(new Prefix(e.id, e.name, e.prefix, e.url, e.owner.map(User(_)), e.isPublic))
             case _ => None
         }
     }
 }
 
 /**
- * @author Ondřej Heřmánek (ondra.hermanek@gmail.com)
+ * Provides database persistence to [[cz.payola.domain.entities.Prefix]] entities.
+ * @param id ID of the prefix
+ * @param name Name of the prefix
+ * @param o Owner of the prefix
+ * @param _isPub Whether the prefix is public or not
+ * @param context Implicit context
  */
-class Prefix (override val id: String, name: String, p: String, u: String)
+class Prefix (override val id: String, name: String, p: String, u: String, o: Option[User], var _isPub: Boolean)
     (implicit val context: SquerylDataContextComponent)
-    extends cz.payola.domain.entities.Prefix(name, p, u, id)
+    extends cz.payola.domain.entities.Prefix(name, p, u, o, id)
     with Entity with OptionallyOwnedEntity with ShareableEntity
 {
     prefix = p

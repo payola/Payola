@@ -9,15 +9,13 @@ class Prefix(
     protected var _name: String,
     protected override var _prefix: String,
     protected override var _url: String,
+    protected override var _owner: Option[User],
     override val id: String = IDGenerator.newId)
     extends Entity
     with OptionallyOwnedEntity
     with NamedEntity
     with cz.payola.common.entities.Prefix
 {
-    // The owner has to be declared before the checkConstructorPostConditions invocation, which verifies it's not null.
-    final var _owner: Option[UserType] = None
-
     checkConstructorPostConditions()
 
     def shortenUri(uri:String): Option[String] = {
@@ -31,7 +29,7 @@ class Prefix(
       * Sets the owner of the prefix.
       * @param value The new owner of the prefix.
       */
-    final override def owner_=(value: Option[UserType]) {
+    override def owner_=(value: Option[UserType]) {
         _owner = value
         super[OptionallyOwnedEntity].checkInvariants()
     }

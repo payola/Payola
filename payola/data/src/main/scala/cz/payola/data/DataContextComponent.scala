@@ -272,6 +272,9 @@ trait DataContextComponent
         with OptionallyOwnedEntityRepository[Plugin]
         with ShareableEntityRepository[Plugin]
 
+    /**
+     * Defines operations of repository accessing data sources
+     */
     trait DataSourceRepository
         extends Repository[DataSource]
         with NamedEntityRepository[DataSource]
@@ -284,6 +287,14 @@ trait DataContextComponent
          */
         def persistParameterValue(parameterValue: ParameterValue[_])
     }
+
+    /**
+     * Defines operations of repository accessing prefixes
+     */
+    trait PrefixRepository
+        extends Repository[Prefix]
+        with NamedEntityRepository[Prefix]
+        with OptionallyOwnedEntityRepository[Prefix]
 
     /**
      * A registry providing repositories by entity class names.

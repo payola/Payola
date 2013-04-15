@@ -143,6 +143,13 @@ trait SchemaComponent
             (u, ds) => Option(u.id) === ds.ownerId)
 
         /**
+         * Relation that associates [[cz.payola.data.squeryl.entities.Prefix]] to its owner
+         * ([[cz.payola.data.squeryl.entities.User]]s)
+         */
+        lazy val prefixOwnership = oneToManyRelation(users, prefixes).via(
+            (u, p) => Option(u.id) === p.ownerId)
+
+        /**
          * Relation that associates [[cz.payola.data.squeryl.entities.analyses.PluginDbRepresentation]] to a
          * [[cz.payola.data.squeryl.entities.PluginDbRepresentation]]
          */
@@ -379,6 +386,9 @@ trait SchemaComponent
             },
             factoryFor(propertyCustomizations) is {
                 new PropertyCustomization("", "", "", 0)
+            },
+            factoryFor(prefixes) is {
+                new Prefix("", "", "", "", None, false)
             }
         )
 
@@ -388,6 +398,7 @@ trait SchemaComponent
         private def declareKeys() {
             val COLUMN_TYPE_ID = "varchar(36)"
             val COLUMN_TYPE_TOKEN = "varchar(36)"
+            val COLUMN_TYPE_PREFIX = "varchar(10)"
             val COLUMN_TYPE_NAME = "varchar(128)"
             val COLUMN_TYPE_DESCRIPTION = "text"
             val COLUMN_TYPE_URI = "text"
@@ -576,10 +587,11 @@ trait SchemaComponent
                 declare(
                     p.id is(primaryKey, (dbType(COLUMN_TYPE_ID))),
                     p.name is (dbType(COLUMN_TYPE_NAME)),
-                    p.prefix is (dbType(COLUMN_TYPE_TOKEN)),
+                    p.prefix is (dbType(COLUMN_TYPE_PREFIX)),
                     p.url is (dbType(COLUMN_TYPE_URI)),
                     p.ownerId is (dbType(COLUMN_TYPE_ID)),
-                    columns(p.name, p.ownerId) are (unique)
+                    columns(p.name, p.ownerId) are (unique),
+                    columns(p.prefix, p.ownerId) are (unique)
                 ))
 
             // When a PluginDbRepresentation is deleted, all of the its instances and data sources will get deleted.
