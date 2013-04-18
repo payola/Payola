@@ -47,6 +47,11 @@ trait DataContextComponent
     val ontologyCustomizationRepository: OntologyCustomizationRepository
 
     /**
+     * A repository to access persisted prefixes
+     */
+    val prefixRepository: PrefixRepository
+
+    /**
      * A registry that provides repositories by class name of persisted entity
      */
     lazy val repositoryRegistry = new RepositoryRegistry(Map(
@@ -56,7 +61,8 @@ trait DataContextComponent
         classOf[Analysis] -> analysisRepository,
         classOf[Plugin] -> pluginRepository,
         classOf[DataSource] -> dataSourceRepository,
-        classOf[OntologyCustomization] -> ontologyCustomizationRepository
+        classOf[OntologyCustomization] -> ontologyCustomizationRepository,
+        classOf[Prefix] -> prefixRepository
     ))
 
     /**
