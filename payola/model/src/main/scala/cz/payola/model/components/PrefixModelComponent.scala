@@ -9,7 +9,7 @@ import cz.payola.domain.RdfStorageComponent
  */
 trait PrefixModelComponent extends EntityModelComponent
 {
-    self: DataContextComponent =>
+    self: DataContextComponent with PrivilegeModelComponent =>
 
     lazy val prefixModel = new EntityModel(prefixRepository)
     {
