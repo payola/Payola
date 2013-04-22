@@ -15,11 +15,11 @@ trait PrefixModelComponent extends EntityModelComponent
     lazy val prefixModel = new EntityModel(prefixRepository)
     {
         /**
-         * Gets all public prefixes accessible to user - default (unowned) and his own.
-         * @param ownerId Id of a user to search prefixes for
-         * @return Returns prefixes accessible to user
+         * Gets all public prefixes available to user - default (unowned) and his own.
+         * @param userId Id of a user to search prefixes for
+         * @return Returns prefixes available to user
          */
-        def getAllAccessibleToOwner(ownerId: Option[String]): Seq[Prefix] =
-            prefixRepository.getAllAccessibleToOwner(ownerId)
+        def getAllAvailableToUser(userId: Option[String]): Seq[Prefix] =
+            prefixRepository.getAllAvailableToUser(userId)
     }
 }

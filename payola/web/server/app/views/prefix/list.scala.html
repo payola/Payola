@@ -1,0 +1,61 @@
+@(user: Option[cz.payola.domain.entities.User], prefixes: Seq[cz.payola.domain.entities.Prefix], page: Int = 1, title: Option[String] = None)
+
+@import tags._
+
+@detailsLinkForID(id: String, name: String) = @{
+<a href={routes.Prefix.detail(id).toString}>{name}</a>
+}
+
+@editLinkForID(id: String) = @{
+<div class="btn-group">
+    <a href={routes.Prefix.edit(id).toString} class="btn"><i class="icon-pencil"></i> Edit</a>
+</div>
+}
+
+@deleteLinkForID(id: String) = @{
+<div class="btn-group">
+    <a href={routes.Prefix.delete(id).toString} class="btn btn-danger" onclick="return confirm('Are you sure?')"><i class="icon-remove-sign icon-white"></i> Delete</a>
+</div>
+}
+
+@list_entities(user,
+    "prefix",
+    "prefixes",
+    prefixes.size,
+    {
+        case (page, itemsPerPage) =>
+            val subseq = prefixes.drop((page - 1) * itemsPerPage)
+
+            if (itemsPerPage > subseq.size){
+                subseq
+            } else {
+                subseq.take(itemsPerPage)
+        }
+    },
+    {
+        Unit =>
+            val buffer = new scala.xml.NodeBuffer()
+            buffer += <td>Name</td>
+            buffer += <td>Prefix</td>
+            buffer += <td>Url</td>
+
+            buffer
+    },
+    {
+        e: cz.payola.domain.Entity =>
+            <td class="listing-column-medium">{
+                detailsLinkForID(e.id, e.asInstanceOf[cz.payola.domain.entities.Prefix].name)
+            }
+            </td>
+            <td class="listing-column-medium">{e.asInstanceOf[cz.payola.domain.entities.Prefix].url}</td>
+            <td class="listing-column-tiny">{e.asInstanceOf[cz.payola.domain.entities.Prefix].prefix}</td>
+            <td>
+                <div class="btn-toolbar">{
+                    editLinkForID(e.id) ++ deleteLinkForID(e.id)
+                }
+                </div>
+            </td>
+    },
+    routes.Prefix.create(),
+    page
+)

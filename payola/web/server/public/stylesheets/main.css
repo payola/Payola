@@ -53,6 +53,14 @@ label {
     width: 600px;
 }
 
+.listing-column-medium {
+    width: 300px;
+}
+
+.listing-column-tiny {
+    width: 100px;
+}
+
 .plugin-space {
     position: absolute;
     left: 0;
