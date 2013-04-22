@@ -20,4 +20,8 @@ trait PrefixRepositoryComponent extends TableRepositoryComponent {
         extends OptionallyOwnedEntityDefaultTableRepository[Prefix](schema.prefixes, Prefix)
         with PrefixRepository
         with NamedEntityTableRepository[Prefix]
+    {
+        def getAllAccessibleToOwner(ownerId: Option[String]): Seq[Prefix] =
+            selectWhere(p => (p.ownerId === None or p.ownerId === ownerId) and p.isPublic === true).sortBy(_.name)
+    }
 }

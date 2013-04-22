@@ -5,6 +5,7 @@ import cz.payola.common.entities.ShareableEntity
 import cz.payola.domain.entities._
 import cz.payola.domain.entities.plugins._
 import cz.payola.domain.entities.settings.OntologyCustomization
+import cz.payola.domain.entities.Prefix
 
 /**
  * A component that provides access to a storage with persisted entities.
@@ -301,6 +302,14 @@ trait DataContextComponent
         extends Repository[Prefix]
         with NamedEntityRepository[Prefix]
         with OptionallyOwnedEntityRepository[Prefix]
+    {
+        /**
+         * Gets all public prefixes accessible to user - default (unowned) and his own.
+         * @param ownerId Id of a user to search prefixes for
+         * @return Returns prefixes accessible to user
+         */
+        def getAllAccessibleToOwner(ownerId: Option[String]): Seq[Prefix]
+    }
 
     /**
      * A registry providing repositories by entity class names.

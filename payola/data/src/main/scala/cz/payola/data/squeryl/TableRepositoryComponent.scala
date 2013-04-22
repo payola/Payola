@@ -60,7 +60,7 @@ trait TableRepositoryComponent
 
         /**
          * Selects the first entity that passes the specified entity filter.
-         * @param entityFilter A filter that excludes entites from the result.
+         * @param entityFilter A filter that excludes entities from the result.
          * @return The selected entity.
          */
         private[squeryl] def selectOneWhere(entityFilter: A => LogicalBoolean): Option[A] = {
