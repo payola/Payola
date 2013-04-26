@@ -13,6 +13,7 @@ import cz.payola.web.client.views.graph.visual.techniques.gravity.GravityTechniq
 import cz.payola.web.shared.managers._
 import cz.payola.web.client.events._
 import cz.payola.web.client.views.elements.lists.ListItem
+import cz.payola.web.client.views.graph.sigma.GraphSigmaPluginView
 import cz.payola.web.client.views.graph.datacube.TimeHeatmap
 
 class PluginSwitchView extends GraphView with ComposedView
@@ -42,6 +43,7 @@ class PluginSwitchView extends GraphView with ComposedView
         new TreeTechnique,
         new GravityTechnique,
         new ColumnChartPluginView,
+        new GraphSigmaPluginView,
         new TimeHeatmap
     )
 

@@ -61,7 +61,10 @@ class AnalysisEvaluation(val analysis: Analysis, private val timeout: Option[Lon
                 }
                 case InstanceEvaluationInput(_, graph) => {
                     finishEvaluation(graph.map(g => Success(g, progress.errors)).getOrElse {
-                        Error(new AnalysisException("The analysis ended with an empty result."), progress.errors)
+                        Error(
+                            new AnalysisException("An error occured during evaluation of the analysis."),
+                            progress.errors
+                        )
                     })
                 }
                 case TIMEOUT => finishEvaluation(Timeout)
