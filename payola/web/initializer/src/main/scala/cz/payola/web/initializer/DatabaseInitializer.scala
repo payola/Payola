@@ -37,7 +37,7 @@ object DatabaseInitializer extends App
         val join = new Join
         val unionPlugin = new Union
         val ontologicalFilterPlugin = new OntologicalFilter
-        val shortestPathPlugin = new ShortestPath,
+        val shortestPathPlugin = new ShortestPath
         val virtuosoSecuredPlugin = new VirtuosoSecuredEndpointFetcher
 
         val publicPlugins = List(
