@@ -2,6 +2,7 @@ package cz.payola.domain.rdf
 
 import cz.payola.domain.DomainException
 import cz.payola.domain.net.Downloader
+import com.hp.hpl.jena.query._
 
 class VirtuosoSecuredEndpoint(val endpointURL: String, val username: String, val password: String)
 {
