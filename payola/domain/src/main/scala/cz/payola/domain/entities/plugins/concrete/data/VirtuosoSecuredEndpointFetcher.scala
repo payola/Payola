@@ -6,6 +6,8 @@ import cz.payola.domain.entities.plugins._
 import cz.payola.domain.entities.plugins.concrete.DataFetcher
 import cz.payola.domain.entities.plugins.parameters.StringParameter
 import cz.payola.domain.rdf._
+import com.hp.hpl.jena.query.QueryFactory
+import scala.collection.JavaConversions._
 
 sealed class VirtuosoSecuredEndpointFetcher(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]],
     id: String)
