@@ -128,6 +128,11 @@ abstract class Plugin(
             throw new PluginException("One of the used values isn't defined.")
         }
     }
+    protected final def usingDefined[A, B, C, D, R](p1: Option[A], p2: Option[B], p3: Option[C], p4: Option[D])(f: (A, B, C, D) => R): R = {
+        p1.flatMap(value1 => p2.flatMap(value2 => p3.flatMap(value3 => p4.map(value4 => f(value1, value2, value3, value4))))).getOrElse {
+            throw new PluginException("One of the used values isn't defined.")
+        }
+    }
 
     override protected final def checkInvariants() {
         super[Entity].checkInvariants()
