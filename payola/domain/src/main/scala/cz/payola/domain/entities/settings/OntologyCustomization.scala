@@ -45,7 +45,7 @@ object OntologyCustomization
     def userDefined(name: String, owner: Option[User]): OntologyCustomization = {
 
         new OntologyCustomization(
-            "http://user_"+owner.get.id+"/"+owner.get.name, name, owner, List[ClassCustomization]())
+            "http://user_"+owner.get.id+"/"+owner.get.name+"/"+name, name, owner, List[ClassCustomization]())
     }
 }
 

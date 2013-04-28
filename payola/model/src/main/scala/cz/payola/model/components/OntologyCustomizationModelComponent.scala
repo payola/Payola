@@ -2,10 +2,12 @@ package cz.payola.model.components
 
 import cz.payola.data._
 import cz.payola.domain.RdfStorageComponent
-import cz.payola.domain.entities.settings.OntologyCustomization
+import cz.payola.domain.entities.privileges._
+import cz.payola.domain.entities.settings._
 import cz.payola.model.EntityModelComponent
 import cz.payola.domain.entities.User
-import cz.payola.common.entities.settings._
+import cz.payola.domain.entities.settings.OntologyCustomization
+import scala.Some
 
 trait OntologyCustomizationModelComponent extends EntityModelComponent
 {

@@ -24,7 +24,7 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
         userClassCust.asInstanceOf[ClassCustomization]
     }
 
-    private var selectedClassCustomization = classCustomizations.head
+    private var selectedClassCustomization = if(classCustomizations.isEmpty) None else Some(classCustomizations.head)
 
     val classFillColorChanged = new UnitEvent[InputControl[_], ClassCustomizationEventArgs[InputControl[_]]]
 
@@ -66,6 +66,7 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
                 case _ => false
             }
         }.map{vertex => vertex.asInstanceOf[IdentifiedVertex].uri}
+        appendClassButton.openPopup()
         false
     }
 
@@ -73,14 +74,18 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
         "Append Property", "Properties available in the current graph: ", "", onAppendProperty)
 
     appendPropertyButton.appendButton.mouseClicked += { e =>
-        val availablePropertyURIs = currentGraph.get.edges.filter{ edge =>
-            //all properties (edges) of the selectedClassCustomization (vertex in graph)
-            //that is not already in its (selectedClassCustomization) propertyCustomizations list
-            edge.origin.uri == selectedClassCustomization.uri && !selectedClassCustomization.propertyCustomizations.exists(_.uri == edge.uri)
-        }.map(_.uri)
+        if (selectedClassCustomization.isDefined) {
+            val availablePropertyURIs = currentGraph.get.edges.filter{ edge =>
+                //all properties (edges) of the selectedClassCustomization (vertex in graph)
+                //that is not already in its (selectedClassCustomization) propertyCustomizations list
+                edge.origin.uri == selectedClassCustomization.get.uri && !selectedClassCustomization.get.propertyCustomizations.exists(_.uri == edge.uri)
+            }.map(_.uri)
 
-        appendPropertyButton.availableURIs = availablePropertyURIs
-        appendPropertyButton.openPopup()
+            appendPropertyButton.availableURIs = availablePropertyURIs
+            appendPropertyButton.openPopup()
+        } else {
+            AlertModal.display("Information", "Select a class customization first.", "", Some(4000))
+        }
         false
     }
 
@@ -124,16 +129,20 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
         if(!classCustomizations.exists{ customization => //if this name does not already exist
             customization.uri == newClassURI
         }) {
+            classCustomizationListItems.foreach(_.removeCssClass("active"))
             propertiesDiv.removeAllChildNodes()
+            selectedClassCustomization = None
+            block("Creating class...")
 
             //create the class
             OntologyCustomizationManager.createClassCustomization(
                 userCustomization.id, newClassURI, List[String]()) { ontologyCustomization =>
-
+                unblock()
                 val newClass = ontologyCustomization.classCustomizations.last.asInstanceOf[ClassCustomization]
                 classCustomizations ++= List(newClass)
                 renderDefinedClass(newClass)
             }{ error =>
+                unblock()
                 //TODO what shall I do if a class customization can not be created??
             }
             true
@@ -144,26 +153,33 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
     }
 
     private def onAppendProperty(newPropertyURI: String): Boolean = {
-        if(!selectedClassCustomization.propertyCustomizations.exists{ propCust => //if this name does not already exist
-            propCust.uri == newPropertyURI
-        }) {
-            propertiesDiv.removeAllChildNodes()
+        if(selectedClassCustomization.isDefined) {
+            if(!selectedClassCustomization.get.propertyCustomizations.exists{ propCust => //if this name does not already exist
+                propCust.uri == newPropertyURI
+            }) {
+                propertiesDiv.removeAllChildNodes()
+                block("Creating property...")
 
-            //create the class
-            OntologyCustomizationManager.createPropertyCustomization(
-                userCustomization.id, selectedClassCustomization.uri, newPropertyURI) { ontologyCustomization =>
-
-                val updatedCurrentClassOpt = ontologyCustomization.classCustomizations.find(_.uri == selectedClassCustomization.uri)
-                if (updatedCurrentClassOpt.isDefined) {
-                    onClassCustomizationSelected(updatedCurrentClassOpt.get,
-                        renderDefinedProperty(updatedCurrentClassOpt.get))
+                //create the class
+                OntologyCustomizationManager.createPropertyCustomization(
+                    userCustomization.id, selectedClassCustomization.get.uri, newPropertyURI) { ontologyCustomization =>
+                    unblock()
+                    val updatedCurrentClassOpt = ontologyCustomization.classCustomizations.find(_.uri == selectedClassCustomization.get.uri)
+                    if (updatedCurrentClassOpt.isDefined) {
+                        onClassCustomizationSelected(updatedCurrentClassOpt.get,
+                            renderDefinedProperty(updatedCurrentClassOpt.get))
+                    }
+                }{ error =>
+                    unblock()
+                    //TODO what shall I do if a class customization can not be created??
                 }
-            }{ error =>
-                //TODO what shall I do if a class customization can not be created??
+                true
+            } else {
+                AlertModal.display("Information", newPropertyURI + " is already defined.", "", Some(4000))
+                false
             }
-            true
         } else {
-            AlertModal.display("Information", newPropertyURI + " is already defined.", "", Some(4000))
+            AlertModal.display("Information", "Select a class customization first.", "", Some(4000))
             false
         }
     }
@@ -183,8 +199,6 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
             onClassCustomizationSelected(definedClass, classListItem)
             false
         }
-
-        classListItem.mouseClicked.clear()
 
         classCustomizationListItems ++= List(classListItem)
         classesDiv.removeAllChildNodes()
@@ -224,7 +238,7 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
     private def onClassCustomizationSelected(classCustomization: ClassCustomization, listItem: ListItem) {
         classCustomizationListItems.foreach(_.removeCssClass("active"))
         listItem.addCssClass("active")
-        selectedClassCustomization = classCustomization
+        selectedClassCustomization = Some(classCustomization)
 
         propertiesDiv.removeAllChildNodes()
         renderClassCustomizationViews(classCustomization)
