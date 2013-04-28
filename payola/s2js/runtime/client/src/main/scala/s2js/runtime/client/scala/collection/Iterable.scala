@@ -382,6 +382,8 @@ trait Iterable
     // From TraversableLike
     def take(n: Int): Iterable = slice(0, n)
 
+    def takeRight(n: Int): Iterable = slice(this.size - n, this.size)
+
     // From TraversableLike
     def drop(n: Int): Iterable = {
         if (n <= 0) {

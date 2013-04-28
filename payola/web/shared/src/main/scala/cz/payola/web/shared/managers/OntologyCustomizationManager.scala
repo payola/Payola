@@ -36,7 +36,51 @@ class OntologyCustomizationsByOwnership(
         (successCallback: cz.payola.common.entities.settings.OntologyCustomization => Unit)
         (failCallback: Throwable => Unit) {
 
-        successCallback(Payola.model.ontologyCustomizationModel.create(name, ontologyURLs.split(","), owner))
+        if(ontologyURLs.isEmpty)
+            successCallback(Payola.model.ontologyCustomizationModel.create(name, None, owner))
+        else
+            successCallback(Payola.model.ontologyCustomizationModel.create(name, Some(ontologyURLs.split(",")), owner))
+    }
+
+    @async def createClassCustomization(customizationID: String, classURI: String, propertiesURIs: collection.immutable.Seq[String], owner: User = null)
+        (successCallback: cz.payola.common.entities.settings.OntologyCustomization => Unit)
+        (failCallback: Throwable => Unit)
+    {
+        val propertyCustomizations = propertiesURIs.map { propertyURI =>
+            new PropertyCustomization(propertyURI, "", 0)
+        }
+        val classCustomization = new ClassCustomization(classURI, "", 0, "", propertyCustomizations.toList)
+
+        val optCustomization = Payola.model.ontologyCustomizationModel.getAccessibleToUserById(Some(owner), customizationID)
+        if (optCustomization.isEmpty){
+            failCallback(new RpcException("No such customization found!"))
+        } else {
+            optCustomization.get.appendClassCustomization(classCustomization) //append the new class
+            Payola.model.ontologyCustomizationModel.persistUserDefined(optCustomization.get) //add the extended ontologyCustomization
+            successCallback(optCustomization.get)
+        }
+    }
+
+    @async def createPropertyCustomization(customizationID: String, classURI: String, propertyURI: String, owner: User = null)
+        (successCallback: cz.payola.common.entities.settings.OntologyCustomization => Unit)
+        (failCallback: Throwable => Unit)
+    {
+        val optCustomization = Payola.model.ontologyCustomizationModel.getAccessibleToUserById(Some(owner), customizationID)
+        if (optCustomization.isEmpty){
+            failCallback(new RpcException("No such customization found!"))
+        } else {
+
+            val classCustomizationOpt = optCustomization.get.classCustomizations.find(_.uri == classURI) //search for the class
+            if (classCustomizationOpt.isEmpty) {
+                failCallback(new RpcException("No such class customization found!"))
+            } else {
+                val propertyCustomization = new PropertyCustomization(propertyURI, "", 0)
+                classCustomizationOpt.get.appendPropertyCustomization(propertyCustomization)
+
+                Payola.model.ontologyCustomizationModel.persistUserDefined(optCustomization.get) //add the extended ontologyCustomization
+                successCallback(optCustomization.get)
+            }
+        }
     }
 
     @async @secured def getCustomizationByID(id: String, user: User = null)

@@ -10,6 +10,7 @@ import cz.payola.data.squeryl._
  */
 object ClassCustomization extends EntityConverter[ClassCustomization]
 {
+
     def convert(entity: AnyRef)(implicit context: SquerylDataContextComponent): Option[ClassCustomization] = {
         entity match {
             case c: ClassCustomization => Some(c)
@@ -17,7 +18,13 @@ object ClassCustomization extends EntityConverter[ClassCustomization]
                 val customizations = c.propertyCustomizations.map(PropertyCustomization(_))
                 Some(new ClassCustomization(c.id, c.uri, c.fillColor, c.radius, c.glyph, customizations))
             }
-            case _ => None
+            case c: scala.Some[_] =>
+                c match {
+                    case s: ClassCustomization => Some(s)
+                    case _ => None
+                }
+            case _ =>
+                None
         }
     }
 }

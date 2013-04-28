@@ -21,4 +21,8 @@ trait OntologyCustomization extends Entity with NamedEntity with OptionallyOwned
 
     /** Customizations of classes in the ontology. */
     def classCustomizations = _classCustomizations
+
+    def isUserDefined: Boolean = {
+        ontologyURLs.startsWith("http://user_")
+    }
 }

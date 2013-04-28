@@ -1,4 +1,4 @@
-package cz.payola.web.client.views.graph.sigma
+package cz.payola.web.client.views.graph.sigma.properties
 
 import s2js.adapters.js.sigma
 
@@ -9,4 +9,5 @@ class NodeProperties extends sigma.NodeProperties {
     var color: String = "green"
     var value: Any = null
     var label: String = ""
+    var cluster: Int = 0
 }
