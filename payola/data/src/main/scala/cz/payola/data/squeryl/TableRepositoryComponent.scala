@@ -114,7 +114,7 @@ trait TableRepositoryComponent
     }
 
     /**
-     * Repository that fetches entites with name
+     * Repository that fetches entities with name
      * @tparam A Type of the named entities in the repository.
      */
     trait NamedEntityTableRepository[A <: Entity with NamedEntity]

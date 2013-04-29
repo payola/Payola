@@ -22,6 +22,6 @@ trait PrefixRepositoryComponent extends TableRepositoryComponent {
         with NamedEntityTableRepository[Prefix]
     {
         def getAllAvailableToUser(userId: Option[String]): Seq[Prefix] =
-            selectWhere(p => (p.ownerId === None or p.ownerId === userId) and p.isPublic === true).sortBy(_.name)
+            selectWhere(p => p.ownerId === None or p.ownerId === userId)
     }
 }

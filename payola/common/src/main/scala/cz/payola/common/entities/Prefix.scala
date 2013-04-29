@@ -5,7 +5,7 @@ import cz.payola.common.Entity
 /**
  * @author Ondřej Heřmánek (ondra.hermanek@gmail.com)
  */
-trait Prefix extends Entity with ShareableEntity with OptionallyOwnedEntity with NamedEntity {
+trait Prefix extends Entity with OptionallyOwnedEntity with NamedEntity {
     protected var _prefix: String
 
     protected var _url: String

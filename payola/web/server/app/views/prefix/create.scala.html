@@ -1,0 +1,45 @@
+@(user: cz.payola.domain.entities.User, form: Form[(String)])(flash: Flash)
+
+@import tags._
+
+@main(Some(user), "Create a new prefix :: Payola!", Some("Create a new prefix")) {
+
+<div class="container">
+
+    @helper.form(routes.Prefix.saveCreate()) {
+
+    @render_flash(flash)
+
+    <div class="well">
+        <fieldset>
+            <legend>Enter the prefix name</legend>
+            <div class="control-group">
+                <label class="control-label" for="name">Name</label>
+                <span class="controls">
+                    <input type="text" name="name" placeholder="Prefix name" id="name" value="@form("name").value" class="input span3">
+                </span>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="prefix">Prefix</label>
+                <span class="controls">
+                    <input type="text" name="prefix" placeholder="Prefix name" id="prefix" value="@form("prefix").value" class="input span3">
+                </span>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="URL">Url</label>
+                <span class="controls">
+                    <input type="text" name="url" placeholder="Prefix name" id="url" value="@form("url").value" class="input span3">
+                </span>
+            </div>
+            <div class="control-group">
+                <span class="controls">
+                    <button type="submit" id="savebutton" class="btn btn-primary">Create Prefix</button>
+                </span>
+            </div>
+        </fieldset>
+    </div>
+
+    }
+</div>
+
+}

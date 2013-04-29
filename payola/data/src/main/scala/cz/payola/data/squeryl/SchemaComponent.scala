@@ -388,7 +388,7 @@ trait SchemaComponent
                 new PropertyCustomization("", "", "", 0)
             },
             factoryFor(prefixes) is {
-                new Prefix("", "", "", "", None, false)
+                new Prefix("", "", "", "", None)
             }
         )
 
@@ -590,8 +590,9 @@ trait SchemaComponent
                     p.prefix is (dbType(COLUMN_TYPE_PREFIX)),
                     p.url is (dbType(COLUMN_TYPE_URI)),
                     p.ownerId is (dbType(COLUMN_TYPE_ID)),
-                    columns(p.name, p.ownerId) are (unique),
-                    columns(p.prefix, p.ownerId) are (unique)
+                    columns(p.ownerId, p.name) are (unique),
+                    columns(p.ownerId, p.prefix) are (unique),
+                    columns(p.ownerId, p.url) are (unique)
                 ))
 
             // When a PluginDbRepresentation is deleted, all of the its instances and data sources will get deleted.

@@ -74,15 +74,10 @@ object DatabaseInitializer extends App
         // Create the admin.
         val admin = Payola.model.userModel.create(Payola.settings.adminEmail, "payola!")
 
-        val prefixes = List(
+        List(
             new Prefix("prefix 1", "@pc", "http://purl.org/procurement/public-contracts", None),
             new Prefix("prefix 2", "@pc2", "http://purl.org/procurement/public-contracts", Some(admin))
-        )
-
-        prefixes.foreach { p =>
-            p.isPublic = true
-            model.prefixRepository.persist(p)
-        }
+        ).foreach(model.prefixRepository.persist(_))
 
         // Persist the data sources.
         List(

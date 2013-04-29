@@ -4,6 +4,8 @@ import cz.payola.model.EntityModelComponent
 import cz.payola.data.DataContextComponent
 import cz.payola.domain.RdfStorageComponent
 import cz.payola.domain.entities.Prefix
+import cz.payola.domain.Entity
+import cz.payola.domain.entities.User
 
 /**
  *
@@ -14,6 +16,24 @@ trait PrefixModelComponent extends EntityModelComponent
 
     lazy val prefixModel = new EntityModel(prefixRepository)
     {
+        override def persist(entity: Entity) {
+            uniqueKeyCheckedPersist(entity, "name, prefix or url")
+        }
+
+        /**
+         * Creates new prefix with specified values
+         * @param name Name for prefix
+         * @param prefix Prefix
+         * @param url Url
+         * @param owner Prefix owner
+         * @return Returns persisted prefix
+         */
+        def create(name: String, prefix: String, url: String, owner: User): Prefix = {
+            val p = new Prefix(name, prefix, url, Some(owner))
+            persist(p)
+            p
+        }
+
         /**
          * Gets all public prefixes available to user - default (unowned) and his own.
          * @param userId Id of a user to search prefixes for

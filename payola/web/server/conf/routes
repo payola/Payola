@@ -65,7 +65,6 @@ GET     /prefix/create               controllers.Prefix.create()
 GET     /prefix/list                 controllers.Prefix.list()
 GET     /prefix/delete/:id           controllers.Prefix.delete(id)
 GET     /prefix/edit/:id             controllers.Prefix.edit(id)
-GET     /prefix/detail/:id             controllers.Prefix.detail(id)
 POST    /prefix/save-create          controllers.Prefix.saveCreate()
 POST    /prefix/save                 controllers.Prefix.save(id)
 
