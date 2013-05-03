@@ -180,6 +180,8 @@ trait AnalysisModelComponent extends EntityModelComponent
                 }
             }
 
+            analysis.expand(getAccessibleToUser(user))
+
             val evaluationId = IDGenerator.newId
             val timeout = scala.math.min(1800, timeoutSeconds)
             runningEvaluations

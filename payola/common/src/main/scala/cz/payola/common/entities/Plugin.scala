@@ -22,6 +22,8 @@ trait Plugin extends Entity with OptionallyOwnedEntity with NamedEntity with Sha
 
     protected val _parameters: immutable.Seq[ParameterType]
 
+    val originalClassName : String
+
     /** Count of the plugin inputs. */
     def inputCount: Int = _inputCount
 

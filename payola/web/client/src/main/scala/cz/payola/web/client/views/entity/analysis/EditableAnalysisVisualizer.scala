@@ -6,6 +6,7 @@ import cz.payola.web.client.events.SimpleUnitEvent
 import cz.payola.web.client.presenters.models.ParameterValue
 import cz.payola.common.entities.plugins.PluginInstance
 import cz.payola.web.client.views.entity.plugins._
+import custom.DataCubeEditablePluginInstanceView
 import cz.payola.common.entities.plugins.parameters.StringParameter
 
 class EditableAnalysisVisualizer(analysis: Analysis) extends AnalysisVisualizer(analysis)

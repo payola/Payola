@@ -44,6 +44,35 @@ class Analysis(protected var _name: String, protected var _owner: Option[User])
         evaluation
     }
 
+    def expand(accessibleAnalyses: Seq[Analysis]) {
+        pluginInstances.foreach{ i =>
+            i.plugin match {
+                case a : AnalysisPlugin => {
+                    val analysisId = i.getStringParameter("Analysis ID")
+                    analysisId.map { idParam =>
+                        accessibleAnalyses.find(_.id == idParam).map { analysis =>
+                            analysis.expand(accessibleAnalyses)
+
+                            _pluginInstances ++= analysis.pluginInstances
+                            _pluginInstanceBindings ++= analysis.pluginInstanceBindings
+
+                            pluginInstanceBindings.find(_.sourcePluginInstance == i).map { b =>
+
+                                analysis.outputInstance.map{ o =>
+                                    _pluginInstanceBindings ++= Seq(new PluginInstanceBinding(o, b.targetPluginInstance, b.targetInputIndex))
+                                }
+                            }
+                        }
+                    }
+
+                    _pluginInstanceBindings --= pluginInstanceBindings.filter(_.sourcePluginInstance == i)
+                    _pluginInstances --= Seq(i)
+                }
+                case _ =>
+            }
+        }
+    }
+
     /**
       * Checks whether the analysis is valid (i.e. it can be evaluated). If not, then
       * [[cz.payola.domain.entities.analyses.AnalysisException]] is thrown.

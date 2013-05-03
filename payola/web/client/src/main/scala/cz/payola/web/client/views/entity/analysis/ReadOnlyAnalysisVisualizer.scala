@@ -3,6 +3,7 @@ package cz.payola.web.client.views.entity.analysis
 import cz.payola.common.entities.Analysis
 import cz.payola.common.entities.plugins.PluginInstance
 import cz.payola.web.client.views.entity.plugins._
+import custom.DataCubePluginInstanceView
 import cz.payola.common.entities.plugins.parameters.StringParameter
 
 class ReadOnlyAnalysisVisualizer(analysis: Analysis) extends AnalysisVisualizer(analysis)
@@ -21,7 +22,7 @@ class ReadOnlyAnalysisVisualizer(analysis: Analysis) extends AnalysisVisualizer(
         }
 
         val result = if (patterns) {
-            new DataCubePluginInstanceView(analysis, instance, List())
+            new DataCubePluginInstanceView(instance, List())
         } else {
             new ReadOnlyPluginInstanceView(instance, List())
         }

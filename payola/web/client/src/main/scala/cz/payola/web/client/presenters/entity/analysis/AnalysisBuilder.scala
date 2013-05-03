@@ -2,6 +2,7 @@ package cz.payola.web.client.presenters.entity.analysis
 
 import s2js.adapters.browser._
 import cz.payola.web.client.views.entity.plugins._
+import custom.DataCubeEditablePluginInstanceView
 import cz.payola.web.client.presenters.components._
 import cz.payola.web.shared.AnalysisBuilderData
 import cz.payola.common.entities._
@@ -42,6 +43,8 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
     protected var analysisId = ""
 
     protected var branches = new ArrayBuffer[PluginInstanceView]
+
+    protected val instanceViewFactory = new PluginInstanceViewFactory
 
     protected var nameComponent = new InputControl(
         "Analysis name",
@@ -201,23 +204,8 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
 
     private def onInstanceCreated(createdInstance: PluginInstance, predecessor: Option[PluginInstanceView],
         view: AnalysisEditorView, analysis: Analysis) {
-        val patterns = if (createdInstance.plugin.parameters.size > 0) {
-            createdInstance.plugin.parameters.forall {
-                x =>
-                    x match {
-                        case p: StringParameter => p.isPattern
-                        case _ => false
-                    }
-            }
-        } else {
-            false
-        }
 
-        val instanceView = if (patterns) {
-            new DataCubeEditablePluginInstanceView(analysis, createdInstance, predecessor.map(List(_)).getOrElse(List()))
-        } else {
-            new EditablePluginInstanceView(createdInstance, predecessor.map(List(_)).getOrElse(List()))
-        }
+        val instanceView = instanceViewFactory.createEditable(createdInstance.plugin.originalClassName, analysis, createdInstance, predecessor.map(List(_)).getOrElse(List()))
 
         branches.append(instanceView)
         view.visualizer.renderPluginInstanceView(instanceView)

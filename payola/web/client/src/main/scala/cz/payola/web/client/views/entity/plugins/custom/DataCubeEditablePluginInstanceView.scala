@@ -1,8 +1,6 @@
-package cz.payola.web.client.views.entity.plugins
+package cz.payola.web.client.views.entity.plugins.custom
 
-import cz.payola.common.entities.plugins.parameters._
 import cz.payola.web.client.presenters.models.ParameterValue
-import scala.collection._
 import cz.payola.web.client.events._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.View
@@ -11,32 +9,22 @@ import cz.payola.web.client.views.elements.form.fields._
 import cz.payola.web.client.views.bootstrap._
 import cz.payola.web.shared.AnalysisRunner
 import cz.payola.common.entities.Analysis
-import cz.payola.web.client.views.entity.analysis.AnalysisRunnerView
-import s2js.adapters.browser.`package`._
 import cz.payola.common._
-import cz.payola.common.EvaluationError
-import cz.payola.common.EvaluationSuccess
-import cz.payola.common.EvaluationInProgress
-import cz.payola.web.client.views.algebra.Point2D
-import cz.payola.web.client.views.GraphView
 import cz.payola.web.client.views.graph.SimpleGraphView
-import cz.payola.common.EvaluationError
-import cz.payola.common.EvaluationSuccess
 import scala._
-import cz.payola.common.EvaluationInProgress
 import scala.collection.mutable.ArrayBuffer
+import scala.collection.Seq
+import cz.payola.web.client.views.entity.plugins._
 import scala.Some
 import cz.payola.common.EvaluationInProgress
 import cz.payola.common.EvaluationError
-import scala.collection.Seq
 import cz.payola.common.EvaluationSuccess
-import s2js.compiler.javascript
+import s2js.adapters.browser._
 
 class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginInstance,
     predecessors: Seq[PluginInstanceView] = List())
     extends EditablePluginInstanceView(pluginInst, predecessors)
 {
-
     private def name = {
         val nameParts = pluginInstance.plugin.name.split("#")
         if (nameParts.length > 1) nameParts(1) else pluginInstance.plugin.name
@@ -66,7 +54,7 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
                                         val query = "CONSTRUCT { " +
                                             "[] a <http://purl.org/linked-data/cube#Observation> ; " +
                                             "<http://purl.org/linked-data/cube#dataSet> <http://live.payola" +
-                                             ".cz/analysis/UUID> ; " +
+                                            ".cz/analysis/UUID> ; " +
                                             getPattern(args.target.getSignificantVertices).mkString(" ; ") + " . " +
                                             "} where { " +
                                             "    { " +
@@ -118,12 +106,13 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
                     case s: EvaluationError =>
                     case s: EvaluationSuccess => {
 
-                        val messages = getPlugin.parameters.map { p =>
-                            new Div(List(
-                                new Text("Please, select a vertex corresponding to the "+p.name+" component:")
-                            ), "message")
+                        val messages = getPlugin.parameters.map {
+                            p =>
+                                new Div(List(
+                                    new Text("Please, select a vertex corresponding to the " + p.name + " component:")
+                                ), "message")
                         }
-                        val infoBar = new Div(messages,"datacube-infobar")
+                        val infoBar = new Div(messages, "datacube-infobar")
                         val graphPlaceholder = new Div(List(infoBar), "datacube-preview")
 
                         val modal = new Modal("Analysis preview", List(graphPlaceholder), None, None, true,
