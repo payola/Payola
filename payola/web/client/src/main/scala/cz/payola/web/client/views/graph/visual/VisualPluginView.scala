@@ -20,7 +20,7 @@ import cz.payola.common.visual.Color
 /**
  * Representation of visual based output drawing plugin
  */
-abstract class VisualPluginView(name: String) extends PluginView(name)
+abstract class VisualPluginView(mainVertexAvailable: Boolean, name: String) extends PluginView(name)
 {
     /**
      * Value used during vertex selection process.
@@ -214,7 +214,8 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
         if (!vertexView.getLiteralVertices.isEmpty) {
             vertexView.vertexModel match {
                 case vm: IdentifiedVertex => {
-                    val infoTable = new VertexInfoTable(vm, vertexView.getLiteralVertices, Point2D.Zero)
+                    val infoTable =
+                        new VertexInfoTable(vm, vertexView.getLiteralVertices, Point2D.Zero, mainVertexAvailable)
 
                     infoTable.vertexBrowsing += {
                         a =>
@@ -226,6 +227,11 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
                             triggerDestroyVertexInfo()
                             vertexBrowsingDataSource
                                 .trigger(new VertexEventArgs[this.type](this, vertexView.vertexModel))
+                    }
+                    infoTable.vertexSetMain += {
+                        a =>
+                            triggerDestroyVertexInfo()
+                            vertexSetMain.trigger(new VertexEventArgs[this.type](this, vertexView.vertexModel))
                     }
 
                     currentInfoTable = Some(infoTable)
@@ -274,6 +280,10 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
         }
 
         redraw()
+    }
+
+    override def setMainVertex(vertex: IdentifiedVertex) {
+
     }
 
     def createSubViews = layerPack.getLayers

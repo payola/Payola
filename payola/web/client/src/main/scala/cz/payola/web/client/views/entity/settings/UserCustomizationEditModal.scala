@@ -57,7 +57,7 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
                 case _ => false
             }
         }.map{vertex => vertex.asInstanceOf[IdentifiedVertex].uri},
-        "Append class", "Classes available in the current graph: ", "", onAppendClass)
+        "Append class", "Vertices available in the current graph: ", "", onAppendClass)
 
     appendClassButton.appendButton.mouseClicked += { e =>
         appendClassButton.availableURIs = currentGraph.get.vertices.filter{ vertex =>
@@ -71,7 +71,7 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
     }
 
     val appendPropertyButton = new AppendToUserCustButton(classCustomizations.map(_.uri),
-        "Append Property", "Properties available in the current graph: ", "", onAppendProperty)
+        "Append Property", "Attributes available in the current graph: ", "", onAppendProperty)
 
     appendPropertyButton.appendButton.mouseClicked += { e =>
         if (selectedClassCustomization.isDefined) {
@@ -260,17 +260,17 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
         )
 
         fillColor.delayedChanged += { _ =>
-            classCustomization.fillColor = fillColor.field.value.map(_.toString).getOrElse("")
+            //classCustomization.fillColor = fillColor.field.value.map(_.toString).getOrElse("")
             classFillColorChanged.trigger(new ClassCustomizationEventArgs(fillColor, classCustomization,
                 fillColor.field.value.map(_.toString).getOrElse("")))
         }
         radius.delayedChanged += { _ =>
-            classCustomization.radius = validateInt(radius.field.value.toString, "radius")
+            //classCustomization.radius = validateInt(radius.field.value.toString, "radius")
             classRadiusDelayedChanged.trigger(new ClassCustomizationEventArgs(radius, classCustomization,
                 radius.field.value.toString))
         }
         glyph.field.changed += { _ =>
-            classCustomization.glyph = glyph.field.value.getOrElse("")
+            //classCustomization.glyph = glyph.field.value.getOrElse("")
             classGlyphChanged.trigger(new ClassCustomizationEventArgs(glyph, classCustomization,
                 glyph.field.value.getOrElse("")))
         }

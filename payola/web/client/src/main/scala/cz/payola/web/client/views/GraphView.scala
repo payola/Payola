@@ -27,6 +27,11 @@ abstract class GraphView
     /** Triggered when the vertex is selected as a start of browsing in a particular data source. */
     val vertexBrowsingDataSource = new UnitEvent[this.type, VertexEventArgs[this.type]]
 
+    /** Triggered when a vertex is selected to represent the main vertex in a visualization. */
+    val vertexSetMain = new UnitEvent[this.type , VertexEventArgs[this.type]]
+
+    def setMainVertex(vertex: IdentifiedVertex) { }
+
     /**
      * Updates both the graph that should be visualized and the customization that should be used.
      * @param graph The graph to visualize.

@@ -86,6 +86,9 @@ trait Seq extends Iterable
     @javascript("""self.getInternalJsArray().splice(0, 0, x);""")
     def prepend(x: Any) {}
 
+    @javascript("""self.getInternalJsArray().splice(n, 0, x);""")
+    def insert(n: Int, x: Any) {}
+
     @javascript("""
         var index = self.getInternalJsArray().indexOf(x);
         if (index != -1) {

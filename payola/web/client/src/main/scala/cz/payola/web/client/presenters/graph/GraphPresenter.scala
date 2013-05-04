@@ -21,10 +21,12 @@ class GraphPresenter(val viewElement: html.Element) extends Presenter
     def initialize() {
         Model.ontologyCustomizationsChanged += onOntologyCustomizationsChanged _
         view.vertexBrowsingDataSource += onVertexBrowsingDataSource _
+        view.vertexSetMain += onVertexSetMain _
         view.customizationsButton.mouseClicked += onCustomizationsButtonClicked _
         view.ontologyCustomizationSelected += onOntologyCustomizationSelected _
         view.ontologyCustomizationEditClicked += onOntologyCustomizationEditClicked _
         view.ontologyCustomizationCreateClicked += onOntologyCustomizationCreateClicked _
+        view.userCustomizationSelected += onOntologyCustomizationSelected _
         view.userCustomizationCreateClicked += onUserCustomizationCreateClicked _
         view.userCustomizationEditClicked += onUserCustomizationEditClicked _
 
@@ -97,6 +99,14 @@ class GraphPresenter(val viewElement: html.Element) extends Presenter
                 }(fatalErrorHandler(_))
             }
         }
+    }
+
+    def onVertexSetMain(e: VertexEventArgs[_]) {
+         e.vertex match  {
+             case i: IdentifiedVertex => {
+                 view.setMainVertex(i)
+             }
+         }
     }
 
     private def editOntologyCustomization(customization: OntologyCustomization) {

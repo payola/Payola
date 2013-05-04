@@ -16,7 +16,7 @@ import cz.payola.web.client.views.graph.visual.graph.positioning.GraphPositionHe
  * closer. The final positions of the vertices is reached when all vertices
  * have "small enough" velocity.
  */
-class GravityTechnique extends BaseTechnique("Gravity Visualization")
+class GravityTechnique extends BaseTechnique(false, "Gravity Visualization")
 {
     /**
      * How much vertices push away each other

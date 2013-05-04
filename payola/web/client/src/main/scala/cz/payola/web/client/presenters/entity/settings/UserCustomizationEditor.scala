@@ -21,21 +21,15 @@ class UserCustomizationEditor (currentGraph: Option[Graph], userCustomization: O
     private val view = new UserCustomizationEditModal(currentGraph, userCustomization, onClose)
 
     def initialize() {
-        if(currentGraph.isEmpty) { //user config without a graph is nonsense
-            AlertModal.display("Information", "Can not edit a user configuration without a loaded graph. " +
-                "Please, display a graph via analysis or datasource browsing first", "",
-                Some(4000))
-        } else {
-            view.userCustomizationName.delayedChanged += onUserCustomizationNameChanged _
-            view.deleteButton.mouseClicked += onDeleteButtonClicked _
-            view.classFillColorChanged += onClassFillColorChanged _
-            view.classRadiusDelayedChanged += onClassRadiusChanged _
-            view.classGlyphChanged += onClassGlyphChanged _
-            view.propertyStrokeColorChanged += onPropertyStrokeColorChanged _
-            view.propertyStrokeWidthDelayedChanged += onPropertyStrokeWidthChanged _
+        view.userCustomizationName.delayedChanged += onUserCustomizationNameChanged _
+        view.deleteButton.mouseClicked += onDeleteButtonClicked _
+        view.classFillColorChanged += onClassFillColorChanged _
+        view.classRadiusDelayedChanged += onClassRadiusChanged _
+        view.classGlyphChanged += onClassGlyphChanged _
+        view.propertyStrokeColorChanged += onPropertyStrokeColorChanged _
+        view.propertyStrokeWidthDelayedChanged += onPropertyStrokeWidthChanged _
 
-            view.render()
-        }
+        view.render()
     }
 
     private def onUserCustomizationNameChanged(e: EventArgs[InputControl[_ <: TextInput]]) {

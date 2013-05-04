@@ -34,6 +34,11 @@ class PluginSwitchView extends GraphView with ComposedView
     val ontologyCustomizationEditClicked = new SimpleUnitEvent[OntologyCustomization]
 
     /**
+     * Event triggered when user customization is selected.
+     */
+    val userCustomizationSelected = new SimpleUnitEvent[OntologyCustomization]
+
+    /**
      * Event triggered when user customization is created.
      */
     val userCustomizationCreateClicked = new SimpleUnitEvent[this.type]
@@ -104,6 +109,7 @@ class PluginSwitchView extends GraphView with ComposedView
     plugins.foreach { plugin =>
         plugin.vertexSelected += { e => vertexSelected.trigger(createVertexEventArgs(e.vertex))}
         plugin.vertexBrowsing += { e => vertexBrowsing.trigger(createVertexEventArgs(e.vertex))}
+        plugin.vertexSetMain += { e => vertexSetMain.trigger(createVertexEventArgs(e.vertex))}
         plugin.vertexBrowsingDataSource += { e => vertexBrowsingDataSource.trigger(createVertexEventArgs(e.vertex))}
     }
 
@@ -128,6 +134,11 @@ class PluginSwitchView extends GraphView with ComposedView
         super.updateOntologyCustomization(customization)
         currentPlugin.updateOntologyCustomization(customization)
     }
+
+    override def setMainVertex(vertex: IdentifiedVertex) {
+        currentPlugin.setMainVertex(vertex)
+    }
+
 
     /**
      * Updates the list of ontology customizations showed in the ontologyCustomizationButton drop-down button.

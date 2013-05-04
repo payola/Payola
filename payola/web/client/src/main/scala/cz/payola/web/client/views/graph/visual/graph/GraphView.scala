@@ -58,6 +58,11 @@ class GraphView(contractLiterals: Boolean = true) extends View[CanvasPack]
         }.isEmpty
     }
 
+    def putVertexToTop(vertex: IdentifiedVertex) {
+        components.exists(_.moveVertexToTop(vertex.uri))
+        //exists function allows to skip the rest of the components, when the component containing the vertex.uri is found
+    }
+
     /**
      * Updates the represented graph. VertexViews with age value higher than vertexHighestAge are destryed, other
      * vertexViews have their age increased and vertices in the graph parameter are added to the graphView
@@ -182,9 +187,9 @@ class GraphView(contractLiterals: Boolean = true) extends View[CanvasPack]
 
                 vertexModel match {
                     case i: IdentifiedVertex => {
-                        val newVertexView = new VertexView(i, vertexInitPosition, null)
+                        val newVertexView = new VertexView(i, vertexInitPosition, i.uri)
 
-                        newVertexView.rdfType = getRdfTypeForVertexView(graphModel.edges, i)
+                        newVertexView.rdfType = getRdfTypeForVertexView(graphModel.edges, i) //TODO proc je tu ohle a ne i.uri !?!?
                         newVertexView.setInformation(getInformationForVertexView(graphModel, i))
 
 
