@@ -3,9 +3,10 @@ package cz.payola.web.client.models
 import cz.payola.common.entities._
 import cz.payola.common.entities.plugins.DataSource
 import cz.payola.web.shared.managers._
-import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.common.entities.settings._
 import cz.payola.web.client.events.SimpleUnitEvent
 import scala.collection.mutable
+import scala.Some
 
 /**
  * Model object which contains calls to the remote objects on server. Most of the calls are provided with caching
@@ -80,6 +81,13 @@ object Model
         }(errorCallback)
     }
 
+    def forceOntologyCustomizationsByOwnershipUpdate(successCallback: OntologyCustomizationsByOwnership => Unit)
+        (errorCallback: Throwable => Unit) {
+
+        _ontologyCustomizationsAreLoaded = false
+        ontologyCustomizationsByOwnership(successCallback)(errorCallback)
+    }
+
     def changeOntologyCustomizationName(customization: OntologyCustomization, newName: String)
         (successCallback: () => Unit)
         (errorCallback: Throwable => Unit) {
@@ -88,6 +96,21 @@ object Model
             customization.name = newName
             ontologyCustomizationsChanged.triggerDirectly(this)
             successCallback()
+        }(errorCallback)
+    }
+
+    def createUserCustomization(name: String)
+        (successCallback: OntologyCustomization => Unit)
+        (errorCallback: Throwable => Unit) {
+
+        fetchOntologyCustomizations { () =>
+            _ownedOntologyCustomizations.foreach { ownedCustomizations =>
+                OntologyCustomizationManager.create(name, "") { newCustomization =>
+                    ownedCustomizations += newCustomization
+                    ontologyCustomizationsChanged.triggerDirectly(this)
+                    successCallback(newCustomization)
+                }(errorCallback)
+            }
         }(errorCallback)
     }
 

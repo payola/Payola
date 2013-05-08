@@ -26,20 +26,45 @@ trait OntologyRepositoryComponent extends TableRepositoryComponent
             with ShareableEntityTableRepository[OntologyCustomization, QueryType]
         {
             override def persist(entity: AnyRef) = wrapInTransaction {
-                val persistedOntologyCustomization = super.persist(entity)
+                val inDbOntologyOpt = entity match {
+                    case o: cz.payola.common.entities.settings.OntologyCustomization => {
+                        getById(o.id)
+                    }
+                    case _ => None
+                }
+
+                val persistedOntologyCustomization = inDbOntologyOpt.getOrElse( super.persist(entity) )
+
                 entity match {
-                    case o: OntologyCustomization => // The entity is already in the database,
-                    // so classes are already there.
+                    //case o: OntologyCustomization =>
+                        // The entity is already in the database, but classes/properties may need an update
                     case o: cz.payola.common.entities.settings.OntologyCustomization => {
                         // Associate and persist the classes.
-                        o.classCustomizations.foreach {classCustomization =>
-                            val persistedClassCustomization = schema.associate(ClassCustomization(classCustomization),
-                                schema.classCustomizationsOfOntologies.left(persistedOntologyCustomization))
+                        o.classCustomizations.foreach { classCustomization =>
+
+                            val inDbClassCustomization =
+                                if(inDbOntologyOpt.isDefined) {
+                                    inDbOntologyOpt.get.classCustomizations.find{
+                                        inDbClassCust => classCustomization.id == inDbClassCust.id
+                                    }
+                                } else {
+                                    None
+                               }
+                            val persistedClassCustomization = if(inDbClassCustomization.isDefined) {
+                                ClassCustomization.convert(inDbClassCustomization).get
+                            } else {
+                                schema.associate(ClassCustomization(classCustomization),
+                                    schema.classCustomizationsOfOntologies.left(persistedOntologyCustomization))
+                            }
 
                             // Associate and persist the properties
-                            persistedClassCustomization.propertyCustomizations.foreach {propertyCustomization =>
-                                schema.associate(PropertyCustomization(propertyCustomization),
-                                    schema.propertyCustomizationsOfClasses.left(persistedClassCustomization))
+                            classCustomization.propertyCustomizations.foreach { propertyCustomization =>
+                                if(inDbClassCustomization.isEmpty
+                                    || !inDbClassCustomization.get.propertyCustomizations.exists{inDbProp => inDbProp.id == propertyCustomization.id}) {
+
+                                    schema.associate(PropertyCustomization(propertyCustomization),
+                                        schema.propertyCustomizationsOfClasses.left(persistedClassCustomization))
+                                }
                             }
                         }
                     }

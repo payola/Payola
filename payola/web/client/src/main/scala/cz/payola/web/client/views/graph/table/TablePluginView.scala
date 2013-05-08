@@ -52,9 +52,17 @@ abstract class TablePluginView(name: String) extends PluginView(name)
 
     protected def addRow(table: html.Element): html.Element = addElement(table, "tr")
 
+    protected def insertRow(table: html.Element, insertBefore: html.Element): html.Element = insertElement(table, insertBefore, "tr")
+
     protected def addCell(row: html.Element, isHeader: Boolean = false) = addElement(row, if (isHeader) "th" else "td")
 
-    protected def addElement(parent: html.Element, name: String): html.Element = {
+    private def insertElement(parent: html.Element, followingSibling: html.Element, name: String): html.Element = {
+        val element = document.createElement[html.Element](name)
+        parent.insertBefore(element, followingSibling)
+        element
+    }
+
+    private def addElement(parent: html.Element, name: String): html.Element = {
         val element = document.createElement[html.Element](name)
         parent.appendChild(element)
         element

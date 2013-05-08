@@ -155,5 +155,21 @@ class Sigma {
 
     @native def bind(eventName: String, eventProcedure: Unit => Unit): Sigma
 
+    /**
+     * Activates the Fish Eye feature of the Sigma.js plugin. Requires sigma.fisheye.js plugin library for Sigma.js
+     * @return instance of the Sigma plugin (chaining support)
+     */
     @native def activateFishEye(): Sigma
+
+    /**
+     * Activates the Force positioning feature of the Sigma.js plugin. Requires sigma.forceatlas2.js plugin library for Sigma.js
+     * @return instance of the Sigma plugin (chaining support)
+     */
+    @native def startForceAtlas2()
+
+    /**
+     * Deactivates the Force positioning feature of the Sigma.js plugin. Requires sigma.forceatlas2.js plugin library for Sigma.js
+     * @return instance of the Sigma plugin (chaining support)
+     */
+    @native def stopForceAtlas2()
 }

@@ -536,3 +536,11 @@ button.datacube {
     width: 100%;
     height: 500px;
 }
+
+
+.append-popup {
+    padding: 10px !important;
+    top: -15px !important;
+    left: -574px !important;
+    min-height: 340px;
+}
