@@ -54,7 +54,7 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
                                         val query = "CONSTRUCT { " +
                                             "[] a <http://purl.org/linked-data/cube#Observation> ; " +
                                             "<http://purl.org/linked-data/cube#dataSet> <http://live.payola" +
-                                            ".cz/analysis/UUID> ; " +
+                                            ".cz/analysis/"+analysis.id+"> ; " +
                                             getPattern(args.target.getSignificantVertices).mkString(" ; ") + " . " +
                                             "} where { " +
                                             "    { " +
@@ -116,7 +116,7 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
                         val graphPlaceholder = new Div(List(infoBar), "datacube-preview")
 
                         val modal = new Modal("Analysis preview", List(graphPlaceholder), None, None, true,
-                            "datacube-preview-dialog")
+                            "preview-dialog")
                         modal.render()
 
                         val view = new SimpleGraphView(graphPlaceholder, getPlugin.parameters.size)

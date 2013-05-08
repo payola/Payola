@@ -17,24 +17,10 @@ class EditableAnalysisVisualizer(analysis: Analysis) extends AnalysisVisualizer(
 
     val deleteButtonClicked = new SimpleUnitEvent[EditablePluginInstanceView]
 
-    def createPluginInstanceView(instance: PluginInstance): PluginInstanceView = {
-        val patterns = if (instance.plugin.parameters.size > 0) {
-            instance.plugin.parameters.forall {
-                x =>
-                    x match {
-                        case p: StringParameter => p.isPattern
-                        case _ => false
-                    }
-            }
-        } else {
-            false
-        }
+    val instanceFactory = new PluginInstanceViewFactory
 
-        val view = if (patterns) {
-            new DataCubeEditablePluginInstanceView(analysis, instance, List())
-        } else {
-            new EditablePluginInstanceView(instance, List())
-        }
+    def createPluginInstanceView(instance: PluginInstance): PluginInstanceView = {
+        val view = instanceFactory.createEditable(analysis, instance, List())
 
         initializeEditableInstance(view, instance, analysis)
         view

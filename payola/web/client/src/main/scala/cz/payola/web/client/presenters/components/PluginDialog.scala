@@ -11,6 +11,7 @@ class PluginDialog(plugins: Seq[Plugin]) extends Modal("Choose a type of plugin"
 {
     val pluginNameClicked = new SimpleUnitEvent[Plugin]
     val createDataCubePluginClicked = new SimpleUnitEvent[PluginDialog]
+    val createAnalysisPluginClicked = new SimpleUnitEvent[PluginDialog]
 
     private val pluginListItems = plugins.map { plugin =>
         val anchor = new Anchor(List(new Text(plugin.name)))
@@ -29,7 +30,15 @@ class PluginDialog(plugins: Seq[Plugin]) extends Modal("Choose a type of plugin"
         false
     }
 
-    private val createDcvPlugin = new Paragraph(List(new Text("... or "),createDcvPluginAnchor,new Text(" a new DataCube Vocabulary plugin")))
+    private val createAnalysisPluginAnchor = new Anchor(List(new Text("create")))
 
-    override val body = List(new UnorderedList(pluginListItems), new Div(List(createDcvPlugin)))
+    createAnalysisPluginAnchor.mouseClicked += { e =>
+        createAnalysisPluginClicked.triggerDirectly(this)
+        false
+    }
+
+    private val createDcvPlugin = new Paragraph(List(new Text("... or "),createDcvPluginAnchor,new Text(" a new DataCube Vocabulary plugin")))
+    private val createAnalysisPlugin = new Paragraph(List(new Text("... or "),createAnalysisPluginAnchor,new Text(" a new plugin from an existing analysis")))
+
+    override val body = List(new UnorderedList(pluginListItems), new Div(List(createAnalysisPlugin, createDcvPlugin)))
 }

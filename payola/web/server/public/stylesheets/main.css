@@ -508,7 +508,7 @@ button.datacube {
     margin-top: 20px;
 }
 
-.datacube-preview-dialog.modal {
+.preview-dialog.modal {
     position: fixed;
     top: 0px;
     left: 0px;
@@ -517,7 +517,7 @@ button.datacube {
     height: 100%;
 }
 
-.datacube-preview-dialog.modal .modal-body {
+.preview-dialog.modal .modal-body {
     max-height: 200000px;
     padding: 1px;
     position: relative;

@@ -99,4 +99,15 @@ import cz.payola.web.shared.Email
                 failCallback(new Exception)
             }
     }
+
+    @async def createAnalysisInstance(paramIds: Seq[String], analysisId: String, user: Option[User] = None)
+        (successCallback: (cz.payola.common.entities.Plugin => Unit))
+        (failCallback: (Throwable => Unit)) {
+
+        Payola.model.analysisModel.getAccessibleToUser(user).find(_.id == analysisId).map{ analysis =>
+            val plugin = Payola.model.pluginModel.createAnalysisInstance(paramIds, analysis, user)
+            successCallback(plugin)
+        }.getOrElse{ failCallback(new Exception) }
+
+    }
 }

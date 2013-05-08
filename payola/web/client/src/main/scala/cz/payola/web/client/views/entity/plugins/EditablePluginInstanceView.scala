@@ -40,7 +40,7 @@ class EditablePluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[P
         List(connect, delete)
     }
 
-    def getParameterViews : Seq[View] = getPlugin.parameters.flatMap { param =>
+    def getParameterViews : Seq[View] = filterParams(getPlugin.parameters).flatMap { param =>
         pluginInstance.getParameter(param.name).map { v =>
             val field = param match {
                 case p: BooleanParameter => new CheckBox(param.id, v.asInstanceOf[Boolean], "Enter parameter value")
@@ -50,7 +50,7 @@ class EditablePluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[P
                 case _ => new TextInput(param.id, v.toString, "Enter parameter value")
             }
 
-            val inputControl = new InputControl(param.name, field, None)
+            val inputControl = new InputControl(parameterName(param), field, None)
             inputControl.delayedChanged += { _ =>
                 parameterValueChanged.triggerDirectly(new ParameterValue(getId, param.id, param.name,
                     field.value.toString, inputControl))

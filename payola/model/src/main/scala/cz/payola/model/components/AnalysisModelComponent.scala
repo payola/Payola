@@ -75,15 +75,13 @@ trait AnalysisModelComponent extends EntityModelComponent
             translateMap
         }
 
-        def cloneAndEdit(analysisId: String, newOwner: User): Analysis = {
-            getAccessibleToUser(Some(newOwner)).find(_.id == analysisId).map {
+        def clone(analysisId: String, newOwner: Option[User]): Analysis = {
+            getAccessibleToUser(newOwner).find(_.id == analysisId).map {
                 a =>
-                    val newAnalysis = new Analysis(a.name + IDGenerator.newId, Some(newOwner))
+                    val newAnalysis = new Analysis(a.name +"_"+ IDGenerator.newId, newOwner)
                     persist(newAnalysis)
-
                     clonePluginInstances(a.pluginInstances, a.pluginInstanceBindings, newAnalysis)
-
-                    newAnalysis
+                    getById(newAnalysis.id).get
             }.getOrElse {
                 throw new ModelException("Unknown analysis ID.")
             }
