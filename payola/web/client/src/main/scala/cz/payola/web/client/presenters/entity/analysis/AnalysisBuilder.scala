@@ -246,6 +246,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                 val analysisDialog = new AnalysisParamSelectorDialog(clonedAnalysis)
                 analysisDialog.confirming += { e =>
                     createAnalysisPluginAndInsert(analysisDialog.paramIds, clonedAnalysis.id, view, analysis)
+                    analysisDialog.destroy()
                     false
                 }
 

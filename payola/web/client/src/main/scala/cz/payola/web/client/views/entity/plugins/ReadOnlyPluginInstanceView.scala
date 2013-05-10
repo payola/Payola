@@ -27,9 +27,9 @@ class ReadOnlyPluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[P
                 pluginInstance.getParameter(param.name).map {
                     v =>
                         val strong = new Strong(List(new Text(parameterName(param))))
-                        strong.addCssClass("param-clicked")
                         strong.mouseClicked += {
                             e =>
+                                strong.addCssClass("param-clicked")
                                 parameterNameClicked.triggerDirectly(param)
                                 false
                         }

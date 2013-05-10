@@ -14,7 +14,7 @@ class AnalysisPlugin(name: String, inputCount: Int, parameters: immutable.Seq[Pa
 {
 
     def this(analysis: Analysis, parameters: immutable.Seq[Parameter[_]]) = {
-        this("Analysis "+analysis.name, 1, parameters, IDGenerator.newId)
+        this("Analysis "+analysis.name, 0, parameters, IDGenerator.newId)
     }
 
     def evaluate(instance: PluginInstance, inputs: IndexedSeq[Option[Graph]], progressReporter: Double => Unit) = {
