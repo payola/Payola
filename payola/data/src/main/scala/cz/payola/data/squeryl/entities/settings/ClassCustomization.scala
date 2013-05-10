@@ -18,12 +18,12 @@ object ClassCustomization extends EntityConverter[ClassCustomization]
                 val customizations = c.propertyCustomizations.map(PropertyCustomization(_))
                 Some(new ClassCustomization(c.id, c.uri, c.fillColor, c.radius, c.glyph, customizations))
             }
-            case c: scala.Some[ClassCustomization] =>
-                c
-                /*c match {
-                    case s: ClassCustomization => Some(s)
+            case c: Some[_] =>
+                c.get match {
+                    case d: ClassCustomization =>
+                        Some(d) //in case, there is nothing to convert
                     case _ => None
-                }*/
+                }
             case _ =>
                 None
         }
