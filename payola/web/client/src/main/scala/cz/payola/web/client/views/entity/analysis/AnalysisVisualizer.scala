@@ -15,7 +15,7 @@ import cz.payola.web.client.views.entity.plugins.PluginInstanceView
 abstract class AnalysisVisualizer(analysis: Analysis) extends ComposedView
 {
     val pluginInstanceRendered = new SimpleUnitEvent[PluginInstanceView]
-    val paramNameClicked = new SimpleUnitEvent[Parameter[_]]
+    val paramNameClicked = new SimpleUnitEvent[ParameterValue[_]]
 
     private val pluginCanvas = new Div(Nil, "plugin-canvas")
 

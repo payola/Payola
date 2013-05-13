@@ -30,7 +30,7 @@ class ReadOnlyPluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[P
                         strong.mouseClicked += {
                             e =>
                                 strong.addCssClass("param-clicked")
-                                parameterNameClicked.triggerDirectly(param)
+                                pluginInstance.getParameterValue(param.name).foreach(parameterNameClicked.triggerDirectly(_))
                                 false
                         }
 

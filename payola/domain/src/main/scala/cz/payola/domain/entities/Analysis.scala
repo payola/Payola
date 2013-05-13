@@ -53,15 +53,15 @@ class Analysis(protected var _name: String, protected var _owner: Option[User])
                 case a : AnalysisPlugin => {
                     val analysisId = i.getStringParameter("Analysis ID")
 
-                    val remappedParams = new mutable.HashMap[String, ParameterValue[_]]()
+                    val remappedParamValues = new mutable.HashMap[String, ParameterValue[_]]()
                     i.parameterValues.filter(_.parameter.name.contains("$")).foreach { p =>
-                        remappedParams += (p.parameter.name.split("""\$""").apply(1) -> p)
+                        remappedParamValues += (p.parameter.name.split("""\$""").apply(1) -> p)
                     }
 
                     def remapParams {
                         _pluginInstances.foreach{pi =>
                             pi.parameterValues.map { pv =>
-                                remappedParams.get(pv.parameter.id).foreach{ paramVal =>
+                                remappedParamValues.get(pv.id).foreach{ paramVal =>
 
                                     (pv, paramVal) match {
                                         case (o: StringParameterValue, n: StringParameterValue) => o.value = n.value

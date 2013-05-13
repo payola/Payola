@@ -16,7 +16,7 @@ abstract class PluginInstanceView(
 {
     private val heading = getHeading
 
-    val parameterNameClicked = new SimpleUnitEvent[Parameter[_]]
+    val parameterNameClicked = new SimpleUnitEvent[ParameterValue[_]]
 
     private val paramsDiv = new Div(getParameterViews, "parameters")
 

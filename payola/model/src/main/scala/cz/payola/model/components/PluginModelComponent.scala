@@ -7,7 +7,7 @@ import cz.payola.domain._
 import cz.payola.domain.entities.plugins.compiler._
 import cz.payola.common.ValidationException
 import plugins.concrete._
-import plugins.Parameter
+import cz.payola.domain.entities.plugins._
 import plugins.parameters._
 import cz.payola.common.rdf.DataCubeDataStructureDefinition
 import scala.Some
@@ -58,26 +58,27 @@ trait PluginModelComponent extends EntityModelComponent
             }
         }
 
-        def cloneParameter(parameter: Parameter[_]): Parameter[_] = {
+        def cloneParameter(parameterValue: ParameterValue[_]): Parameter[_] = {
+            val parameter = parameterValue.parameter
+
             parameter match {
                 case x: StringParameter => new
-                        StringParameter(x.name+"$"+x.id, x.defaultValue, x.isMultiline, x.isPattern, x.isMultiline)
-                case x: BooleanParameter => new BooleanParameter(x.name+"$"+x.id, x.defaultValue)
-                case x: FloatParameter => new FloatParameter(x.name+"$"+x.id, x.defaultValue)
-                case x: IntParameter => new IntParameter(x.name+"$"+x.id, x.defaultValue)
+                        StringParameter(x.name+"$"+parameterValue.id, x.defaultValue, x.isMultiline, x.isPattern, x.isMultiline)
+                case x: BooleanParameter => new BooleanParameter(x.name+"$"+parameterValue.id, x.defaultValue)
+                case x: FloatParameter => new FloatParameter(x.name+"$"+parameterValue.id, x.defaultValue)
+                case x: IntParameter => new IntParameter(x.name+"$"+parameterValue.id, x.defaultValue)
                 case _ => throw new Exception
             }
         }
 
-        def createAnalysisInstance(paramIds: Seq[String], analysis: Analysis, owner: Option[User]): Plugin = {
+        def createAnalysisInstance(paramValIds: Seq[String], analysis: Analysis, owner: Option[User]): Plugin = {
+
             val parameters = List(
                 new StringParameter("Analysis ID", analysis.id, false, false, false)) ++
-                analysis.pluginInstances
-                    .map(_.plugin)
-                    .flatMap(_.parameters)
-                    .filter {
-                    p => paramIds.exists(_ == p.id)
+                analysis.pluginInstances.flatMap(_.parameterValues).filter { p =>
+                    paramValIds.exists(_ == p.id)
                 }.map(cloneParameter(_))
+
 
             val plugin = new AnalysisPlugin(analysis, parameters.toSeq)
             plugin.owner = owner
