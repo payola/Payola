@@ -18,6 +18,10 @@
 </div>
 }
 
+@globalPrefixBadge() = @{
+<span class="badge">Global prefix</span>
+}
+
 @render_flash(flash)
 
 @list_entities(user,
@@ -59,7 +63,7 @@
                     if (e.asInstanceOf[cz.payola.domain.entities.Prefix].owner == user)
                         editLinkForID(e.id) ++ deleteLinkForID(e.id)
                     else
-                        "(Global prefix)"
+                        globalPrefixBadge()
                 }
                 </div>
             </td>
