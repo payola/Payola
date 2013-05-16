@@ -43,10 +43,8 @@ class Prefix(
         super[NamedEntity].checkInvariants()
         super[OptionallyOwnedEntity].checkInvariants()
 
-        /* TODO: validate
-        validate(inputCount >= 0, "inputCount", "The inputCount of the plugin must be a non-negative number.")
-        validate(parameters != null, "parameters", "The parameters of the plugin mustn't be null.")
-        validate(!parameters.contains(null), "parameters", "The parameters of the plugin mustn't contain null.")
-        */
+        validate(name.length > 0, "name", "Name has to be specified")
+        validate(url.length > 0, "url", "URL has to be specified")
+        validate(prefix.length > 1 && prefix.startsWith("@"), "prefix", "Prefix must start with '@' character")
     }
 }

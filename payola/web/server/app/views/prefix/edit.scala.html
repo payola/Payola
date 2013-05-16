@@ -1,7 +1,11 @@
-@(user: cz.payola.domain.entities.User, prefix: cz.payola.domain.entities.Prefix)
+@(user: cz.payola.domain.entities.User, prefix: cz.payola.domain.entities.Prefix)(flash: Flash)
+
+@import tags._
 
 @main(Some(user), "Edit prefix "+ prefix.name + " :: Payola!") {
 <div class="container">
+
+    @render_flash(flash)
 
     <div class="row-fluid">
         <h1 class="span7">Edit prefix @prefix.name</h1><span class="span5" style="text-align: right;"><a href="@routes.Prefix.delete(prefix.id)" onclick="return confirm('Are you sure?');" class="btn btn-danger"><i class="icon-remove-circle icon-white"></i> Delete '@prefix.name'</a></span>
