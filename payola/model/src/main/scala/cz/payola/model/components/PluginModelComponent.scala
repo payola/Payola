@@ -58,27 +58,29 @@ trait PluginModelComponent extends EntityModelComponent
             }
         }
 
-        def cloneParameter(parameterValue: ParameterValue[_]): Parameter[_] = {
+        def cloneParameter(parameterValue: ParameterValue[_], name: String): Parameter[_] = {
             val parameter = parameterValue.parameter
 
             parameter match {
                 case x: StringParameter => new
-                        StringParameter(x.name+"$"+parameterValue.id, x.defaultValue, x.isMultiline, x.isPattern, x.isMultiline)
-                case x: BooleanParameter => new BooleanParameter(x.name+"$"+parameterValue.id, x.defaultValue)
-                case x: FloatParameter => new FloatParameter(x.name+"$"+parameterValue.id, x.defaultValue)
-                case x: IntParameter => new IntParameter(x.name+"$"+parameterValue.id, x.defaultValue)
+                        StringParameter(name+"$"+parameterValue.id, x.defaultValue, x.isMultiline, x.isPattern, x.isMultiline)
+                case x: BooleanParameter => new BooleanParameter(name+"$"+parameterValue.id, x.defaultValue)
+                case x: FloatParameter => new FloatParameter(name+"$"+parameterValue.id, x.defaultValue)
+                case x: IntParameter => new IntParameter(name+"$"+parameterValue.id, x.defaultValue)
                 case _ => throw new Exception
             }
         }
 
         def createAnalysisInstance(paramValIds: Seq[String], analysis: Analysis, owner: Option[User]): Plugin = {
-
+            def iterateParams: Seq[Parameter[_]] = {
+                paramValIds.map(_.split(":~:")).map {
+                    t => analysis.pluginInstances.flatMap(_.parameterValues).find(_.id == t(0))
+                        .map(cloneParameter(_, t(1)))
+                }.flatten
+            }
             val parameters = List(
                 new StringParameter("Analysis ID", analysis.id, false, false, false)) ++
-                analysis.pluginInstances.flatMap(_.parameterValues).filter { p =>
-                    paramValIds.exists(_ == p.id)
-                }.map(cloneParameter(_))
-
+                iterateParams
 
             val plugin = new AnalysisPlugin(analysis, parameters.toSeq)
             plugin.owner = owner

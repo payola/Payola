@@ -12,10 +12,20 @@ import scala.Some
 class AnalysisParamSelectorDialog(analysis: Analysis)
     extends Modal("Choose analysis params to be dynamic", Nil, Some("OK"), None, false, "preview-dialog")
 {
-    val paramIds = new ArrayBuffer[String]
+    val paramIds = new ArrayBuffer[(String, String)]
 
     val visualizer = new ReadOnlyAnalysisVisualizer(analysis)
-    visualizer.paramNameClicked += { eventArg => paramIds += eventArg.target.id }
+    visualizer.paramNameClicked += { eventArg =>
+
+        val dialog = new PromptDialog("Enter a new name of the parameter")
+        dialog.render()
+
+        dialog.confirming += { x =>
+            paramIds += ((eventArg.target.id, dialog.prompt.value))
+            dialog.destroy()
+            true
+        }
+    }
 
     val placeholder = new Div(List())
 

@@ -305,9 +305,9 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
         dialog.render()
     }
 
-    private def createAnalysisPluginAndInsert(paramIds: Seq[String], analysisId: String, view: AnalysisEditorView, analysis: Analysis){
+    private def createAnalysisPluginAndInsert(paramIds: Seq[(String, String)], analysisId: String, view: AnalysisEditorView, analysis: Analysis){
         blockPage("Creating the plugin")
-        PluginManager.createAnalysisInstance(paramIds, analysisId){
+        PluginManager.createAnalysisInstance(paramIds.map{ t => t._1+":~:"+t._2 }, analysisId){
             plugin => onPluginNameClicked(plugin, None, view, analysis)
         } { _ => unblockPage() }
     }
