@@ -11,6 +11,7 @@ import cz.payola.web.client.views.entity.plugins.DataSourceSelector
 import cz.payola.common.entities.settings.OntologyCustomization
 import cz.payola.web.client.presenters.entity.settings._
 import cz.payola.common.rdf.IdentifiedVertex
+import cz.payola.web.client.presenters.entity.PrefixPresenter
 
 class GraphPresenter(val viewElement: html.Element) extends Presenter
 {
@@ -18,7 +19,12 @@ class GraphPresenter(val viewElement: html.Element) extends Presenter
 
     private var currentOntologyCustomization: Option[OntologyCustomization] = None
 
+    private val prefixPresenter = new PrefixPresenter()
+
     def initialize() {
+        // Load prefixes first
+        prefixPresenter.initialize()
+
         Model.ontologyCustomizationsChanged += onOntologyCustomizationsChanged _
         view.vertexBrowsingDataSource += onVertexBrowsingDataSource _
         view.ontologyCustomizationsButton.mouseClicked += onOntologyCustomizationsButtonClicked _

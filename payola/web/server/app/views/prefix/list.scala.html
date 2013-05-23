@@ -2,8 +2,8 @@
 
 @import tags._
 
-@detailsLinkForID(id: String, name: String) = @{
-<a href={routes.Prefix.edit(id).toString}>{name}</a>
+@detailsLinkForID(id: String, prefix: String) = @{
+<a href={routes.Prefix.edit(id).toString}>{prefix}</a>
 }
 
 @editLinkForID(id: String) = @{
@@ -41,26 +41,18 @@
     {
         Unit =>
             val buffer = new scala.xml.NodeBuffer()
-            buffer += <td>Name</td>
-            buffer += <td>Url</td>
             buffer += <td>Prefix</td>
+            buffer += <td>Url</td>
 
             buffer
     },
     {
         e: cz.payola.domain.Entity =>
-            <td class="listing-column-medium">{
-                if (e.asInstanceOf[cz.payola.domain.entities.Prefix].owner == user)
-                    detailsLinkForID(e.id, e.asInstanceOf[cz.payola.domain.entities.Prefix].name)
-                 else
-                    e.asInstanceOf[cz.payola.domain.entities.Prefix].name
-            }
-            </td>
             <td class="listing-column-tiny">{ e.asInstanceOf[cz.payola.domain.entities.Prefix].prefix }</td>
-            <td class="listing-column-medium">{ e.asInstanceOf[cz.payola.domain.entities.Prefix].url }</td>
+            <td class="listing-column-name">{ e.asInstanceOf[cz.payola.domain.entities.Prefix].url }</td>
             <td>
                 <div class="btn-toolbar">{
-                    if (e.asInstanceOf[cz.payola.domain.entities.Prefix].owner == user)
+                    if (user != None && e.asInstanceOf[cz.payola.domain.entities.Prefix].owner == user)
                         editLinkForID(e.id) ++ deleteLinkForID(e.id)
                     else
                         globalPrefixBadge()

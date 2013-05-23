@@ -55,11 +55,10 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     private val ownedCustomization = OntologyCustomization.empty(urls, "Name2", Some(u1))
     private val customizations = List(customization, ownedCustomization)
 
-    private val ownedPrefix = new cz.payola.domain.entities.Prefix("prefix1", "p1", urls(0), Some(u1))
-    private val commonPrefix = new cz.payola.domain.entities.Prefix("prefix2", "p2", urls(0), None)
-    commonPrefix.isPublic = true
+    private val ownedPrefix = new cz.payola.domain.entities.Prefix("prefix1", "@p1", urls(0), Some(u1))
+    private val commonPrefix = new cz.payola.domain.entities.Prefix("prefix2", "@p2", urls(0), None)
 
-    private val prefixes = List(ownedPrefix, commonPrefix)
+    private var prefixes = List(ownedPrefix, commonPrefix)
 
     "Schema" should "be created" in {
         schema.wrapInTransaction { schema.recreate }
@@ -499,6 +498,10 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     }
 
     "Prefixes" should "be stored and loaded properly" in {
+        schema.wrapInTransaction { persistPrefixes }
+    }
+
+    private def persistPrefixes {
         println("Persisting prefixes")
 
         prefixRepository.persist(ownedPrefix)
@@ -517,15 +520,11 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         }
 
         // Change data
-        ownedPrefix.name = "newName"
         ownedPrefix.url = "newUrl"
-        ownedPrefix.prefix = "newPrexix"
+        ownedPrefix.prefix = "newPrefix"
 
         ownedPrefix.owner = None
         commonPrefix.owner = Some(u4)
-
-        ownedPrefix.isPublic = true
-        commonPrefix.isPublic = false
 
         // Persist saved prefixes
         prefixRepository.persist(ownedPrefix)
@@ -540,12 +539,45 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
 
             assert(persistedPrefix.url == prefix.url)
             assert(persistedPrefix.prefix == prefix.prefix)
-            assert(persistedPrefix.name == prefix.name)
             assert(persistedPrefix.owner.map(_.id) == prefix.owner.map(_.id))
         }
+
+        val u1_data = userRepository.getById(u1.id).get
+        val commonURL = "commonURL"
+        val ownedURL = "ownedULR"
+        val generalURL = "generalURL"
+
+        val ownedPrefixes = List(
+            new cz.payola.domain.entities.Prefix("prefix3", "@p3", commonURL, Some(u1)),
+            new cz.payola.domain.entities.Prefix("prefix4", "@p4", ownedURL, Some(u1))
+        )
+
+        ownedPrefixes.foreach(u1_data.addOwnedPrefix(_))
+
+        val generalPrefixes = List(
+            new cz.payola.domain.entities.Prefix("prefix5", "@p5", generalURL, None),
+            new cz.payola.domain.entities.Prefix("prefix6", "@p6", commonURL, None)
+        )
+        generalPrefixes.foreach(prefixRepository.persist(_))
+
+        val available = u1_data.availablePrefixes
+
+        println("     Available prefixes of user1: " + available.length + "/" + prefixRepository.getCount)
+        available.foreach(p => println("         - %s".format(p.name)))
+
+        prefixes ++= generalPrefixes ++ ownedPrefixes
+
+        val prefixesForCommonURL = u1_data.availablePrefixes.filter(_.url == commonURL)
+        val prefixesForGeneralURL = u1_data.availablePrefixes.filter(_.url == generalURL)
+        val prefixesForOwnedURL = u1_data.availablePrefixes.filter(_.url == ownedURL)
+
+        println("     Prefixes for 'commonURL' count: " + prefixesForCommonURL.length)
+        println("     Prefixes for 'generalURL' count: " + prefixesForGeneralURL.length)
+        println("     Prefixes for 'ownedURL' count: " + prefixesForOwnedURL.length)
+
     }
 
-    "Pagionation" should "work" in {
+    "Pagination" should "work" in {
         schema.wrapInTransaction { testPagination }
     }
 

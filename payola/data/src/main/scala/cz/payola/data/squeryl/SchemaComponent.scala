@@ -401,7 +401,8 @@ trait SchemaComponent
             val COLUMN_TYPE_PREFIX = "varchar(10)"
             val COLUMN_TYPE_NAME = "varchar(128)"
             val COLUMN_TYPE_DESCRIPTION = "text"
-            val COLUMN_TYPE_URI = "text"
+            val COLUMN_TYPE_URIS = "text"
+            val COLUMN_TYPE_URI = "varchar(256)"
             val COLUMN_TYPE_VALUE = "text"
             val COLUMN_TYPE_COLOR = "varchar(128)"
             val COLUMN_TYPE_CLASSNAME = "varchar(64)"
@@ -562,14 +563,14 @@ trait SchemaComponent
                     c.id is(primaryKey, (dbType(COLUMN_TYPE_ID))),
                     c.name is (dbType(COLUMN_TYPE_NAME)),
                     c.ownerId is (dbType(COLUMN_TYPE_ID)),
-                    c.ontologyURLs is (dbType(COLUMN_TYPE_URI)),
+                    c.ontologyURLs is (dbType(COLUMN_TYPE_URIS)),
                     columns(c.name, c.ownerId) are (unique)
                 ))
 
             on(classCustomizations)(c =>
                 declare(
                     c.id is(primaryKey, (dbType(COLUMN_TYPE_ID))),
-                    c.uri is (dbType(COLUMN_TYPE_URI)),
+                    c.uri is (dbType(COLUMN_TYPE_URIS)),
                     c.glyph is (dbType("varchar(1)")),
                     c.fillColor is (dbType(COLUMN_TYPE_COLOR)),
                     c.ontologyCustomizationId is (dbType(COLUMN_TYPE_ID))
@@ -580,7 +581,7 @@ trait SchemaComponent
                     c.id is(primaryKey, (dbType(COLUMN_TYPE_ID))),
                     c.strokeColor is (dbType(COLUMN_TYPE_COLOR)),
                     c.classCustomizationId is (dbType(COLUMN_TYPE_ID)),
-                    c.uri is (dbType(COLUMN_TYPE_URI))
+                    c.uri is (dbType(COLUMN_TYPE_URIS))
                 ))
 
             on(prefixes)(p =>
@@ -590,7 +591,6 @@ trait SchemaComponent
                     p.prefix is (dbType(COLUMN_TYPE_PREFIX)),
                     p.url is (dbType(COLUMN_TYPE_URI)),
                     p.ownerId is (dbType(COLUMN_TYPE_ID)),
-                    columns(p.ownerId, p.name) are (unique),
                     columns(p.ownerId, p.prefix) are (unique),
                     columns(p.ownerId, p.url) are (unique)
                 ))

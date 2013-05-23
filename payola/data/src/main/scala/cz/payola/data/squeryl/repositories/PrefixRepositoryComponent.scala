@@ -1,8 +1,9 @@
 package cz.payola.data.squeryl.repositories
 
 import cz.payola.data.squeryl._
-import cz.payola.data.squeryl.entities.analyses._
+import org.squeryl._
 import org.squeryl.PrimitiveTypeMode._
+import org.squeryl.dsl.ast.LogicalBoolean
 import cz.payola.data.squeryl.entities._
 
 /**
@@ -21,7 +22,8 @@ trait PrefixRepositoryComponent extends TableRepositoryComponent {
         with PrefixRepository
         with NamedEntityTableRepository[Prefix]
     {
-        def getAllAvailableToUser(userId: Option[String]): Seq[Prefix] =
-            selectWhere(p => p.ownerId === None or p.ownerId === userId)
+        def getAllAvailableToUser(userId: Option[String]): Seq[Prefix] = {
+            selectWhere(p => p.ownerId === userId or p.ownerId === None)
+        }
     }
 }

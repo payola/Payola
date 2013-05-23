@@ -23,6 +23,26 @@ trait Prefix extends Entity with OptionallyOwnedEntity with NamedEntity {
 
     /** Sets prefixed url */
     def url_=(value: String) {
-        _url = value;
+        _url = value
+    }
+
+    /**
+     * Applies prefix if prefix shortens uri
+     * @param uri Uri to shorten
+     * @return Returns None if prefix doesn't shorten uri, Some(shorted uri) otherwise
+     */
+    def applyPrefix(uri:String): Option[String] = {
+        replaceInUri(uri, url, prefix + ":")
+    }
+
+    def disapplyPrefix(uri:String): Option[String] = {
+        replaceInUri(uri, prefix + ":", url)
+    }
+
+    private def replaceInUri(uri: String, lookFor: String, replaceWith: String): Option[String] = {
+        if (uri.startsWith(lookFor))
+            Some(uri.replace(lookFor, replaceWith))
+        else
+            None
     }
 }

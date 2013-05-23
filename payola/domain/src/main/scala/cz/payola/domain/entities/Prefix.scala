@@ -18,13 +18,6 @@ class Prefix(
 {
     checkConstructorPostConditions()
 
-    def shortenUri(uri:String): Option[String] = {
-        if (uri.startsWith(url))
-            Some(uri.replace(url, "@" + prefix))
-        else
-            None
-    }
-
     /**
       * Sets the owner of the prefix.
       * @param value The new owner of the prefix.

@@ -13,6 +13,7 @@ import cz.payola.web.client.events._
 import cz.payola.common.rdf.IdentifiedVertex
 import s2js.adapters.browser.window
 import s2js.compiler.javascript
+import cz.payola.web.client.presenters.entity.PrefixPresenter
 
 class DataSourceBrowser(
     val viewElement: html.Element,
@@ -29,6 +30,8 @@ class DataSourceBrowser(
 
     private var historyPosition = -1
 
+    private val prefixPresenter = new PrefixPresenter()
+
     @javascript("""return encodeURIComponent(uri)""")
     def encodeURIComponent(uri: String) : String = ""
 
@@ -36,6 +39,9 @@ class DataSourceBrowser(
     def decodeURIComponent(uri: String) : String = ""
 
     def initialize() {
+        // First init prefixes
+        prefixPresenter.initialize();
+
         // Initialize the sub presenters.
         graphPresenter.initialize()
 
@@ -128,11 +134,13 @@ class DataSourceBrowser(
         }
     }
 
-    private def addToHistoryAndGo(uri: String, clearGraph: Boolean) {
+    private def addToHistoryAndGo(prefixedUri: String, clearGraph: Boolean) {
         // Remove all next items from the history.
         while (historyPosition < history.length - 1) {
             history.remove(historyPosition + 1)
         }
+
+        val uri = prefixPresenter.disapplyPrefix(prefixedUri)
 
         // Add the new item.
         history += uri
@@ -144,8 +152,8 @@ class DataSourceBrowser(
     }
 
     private def updateView(clearGraph: Boolean) {
-        val uri = history(historyPosition)
-        view.nodeUriInput.value = uri
+        val uri =  history(historyPosition)
+        view.nodeUriInput.value = prefixPresenter.applyPrefix(uri)
         view.nodeUriInput.setIsEnabled(false)
 
         blockPage("Fetching the node neighbourhood...")

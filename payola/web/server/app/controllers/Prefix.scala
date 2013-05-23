@@ -17,8 +17,9 @@ object Prefix extends PayolaController with Secured
     def list(page: Int = 1) = maybeAuthenticatedWithRequest { (user: Option[User], request) =>
         // Get prefixes from logged user / only general prefixes in proper order (first users, then general)
         val prefixes =
-            user.map(_.availablePrefixes).getOrElse(Payola.model.prefixModel.getAllAvailableToUser(None))
-                .sortBy(_.name).reverse.sortBy(_.owner.map(o => o.id)).reverse
+            user.map(_.availablePrefixes)
+                .getOrElse(Payola.model.prefixModel.getAllAvailableToUser(None))
+                    .sortBy(_.prefix).reverse.sortBy(p => p.owner.map(_.id)).reverse
 
         Ok(views.html.prefix.list(user, prefixes, page)(request.flash))
     }
@@ -33,12 +34,12 @@ object Prefix extends PayolaController with Secured
             case _ => Map.empty[String, Seq[String]]
         }
 
-        val name = data.getOrElse("name", Nil).head
         val pref = data.getOrElse("prefix", Nil).head
         val url = data.getOrElse("url", Nil).head
 
         try {
-            val prefix = Payola.model.prefixModel.create(name, pref, url, user)
+             // Use prefix as a name
+            val prefix = Payola.model.prefixModel.create(pref, pref, url, user)
 
             // If available prefixes are not loaded yet, this will ensure that this prefix will be available too
             if (!user.availablePrefixes.contains(prefix))
@@ -66,13 +67,11 @@ object Prefix extends PayolaController with Secured
 
             try {
                 val p = prefix.get
-                p.name = data.getOrElse("name", Nil).head
+                p.name = data.getOrElse("prefix", Nil).head // Realy use prefix as a name
                 p.prefix = data.getOrElse("prefix", Nil).head
                 p.url = data.getOrElse("url", Nil).head
 
                 // Validate data here ... ugly
-                if (p.name.length == 0)
-                    throw new ValidationException("name", "Name has to be specified.")
                 if (p.prefix.length < 2 || !p.prefix.startsWith("@"))
                     throw new ValidationException("prefix", "Prefix has to start with '@' character.")
                 if (p.url.length == 0)
