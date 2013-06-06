@@ -3,7 +3,7 @@ package cz.payola.web.client.presenters.entity.analysis
 import s2js.adapters.browser._
 import cz.payola.web.client.views.entity.plugins._
 import cz.payola.web.client.presenters.components._
-import cz.payola.web.shared.AnalysisBuilderData
+import cz.payola.web.shared._
 import cz.payola.common.entities._
 import scala.collection.mutable.ArrayBuffer
 import cz.payola.web.client.presenters.models.ParameterValue
@@ -20,7 +20,6 @@ import s2js.runtime.shared.rpc.RpcException
 import cz.payola.web.shared.managers._
 import cz.payola.web.client.views.elements.lists.ListItem
 import cz.payola.web.client.views.elements._
-import cz.payola.common.entities.plugins.parameters.StringParameter
 import scala.Some
 import cz.payola.common.rdf.DataCubeVocabulary
 import cz.payola.common.rdf.DataCubeDataStructureDefinition
@@ -42,6 +41,8 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
     protected var analysisId = ""
 
     protected var branches = new ArrayBuffer[PluginInstanceView]
+
+    protected val instanceViewFactory = new PluginInstanceViewFactory
 
     protected var nameComponent = new InputControl(
         "Analysis name",
@@ -169,7 +170,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                         map.put(paramValue.parameter.name, paramValue.value.toString)
                 }
 
-                val instance = new EditablePluginInstanceView(pi, List())
+                val instance = instanceViewFactory.createEditable(analysis, pi, List())
 
                 branches.append(instance)
                 view.visualizer.renderPluginInstanceView(instance)
@@ -201,23 +202,8 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
 
     private def onInstanceCreated(createdInstance: PluginInstance, predecessor: Option[PluginInstanceView],
         view: AnalysisEditorView, analysis: Analysis) {
-        val patterns = if (createdInstance.plugin.parameters.size > 0) {
-            createdInstance.plugin.parameters.forall {
-                x =>
-                    x match {
-                        case p: StringParameter => p.isPattern
-                        case _ => false
-                    }
-            }
-        } else {
-            false
-        }
 
-        val instanceView = if (patterns) {
-            new DataCubeEditablePluginInstanceView(analysis, createdInstance, predecessor.map(List(_)).getOrElse(List()))
-        } else {
-            new EditablePluginInstanceView(createdInstance, predecessor.map(List(_)).getOrElse(List()))
-        }
+        val instanceView = instanceViewFactory.createEditable(analysis, createdInstance, predecessor.map(List(_)).getOrElse(List()))
 
         branches.append(instanceView)
         view.visualizer.renderPluginInstanceView(instanceView)
@@ -243,6 +229,35 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                 }
                 new ListItem(List(link))
         }
+    }
+
+    private def onCreateAnalysisPluginClicked(view: AnalysisEditorView,
+        analysis: Analysis){
+
+        val dialog = new AnalysisPluginDialog()
+
+        dialog.confirming += { evtArgs =>
+            val analysisId = dialog.getChosenAnalysisID
+            dialog.destroy()
+            blockPage("Cloning the selected analysis")
+
+            DomainData.cloneAnalysis(analysisId){ clonedAnalysis =>
+                unblockPage()
+                val analysisDialog = new AnalysisParamSelectorDialog(clonedAnalysis)
+                analysisDialog.confirming += { e =>
+                    createAnalysisPluginAndInsert(analysisDialog.paramIds, clonedAnalysis.id, view, analysis)
+                    analysisDialog.destroy()
+                    false
+                }
+
+                analysisDialog.render()
+
+            } { _ => unblockPage() }
+            false
+        }
+
+        dialog.render()
+
     }
 
     private def onCreateDataCubePluginClicked(predecessor: PluginInstanceView, view: AnalysisEditorView,
@@ -288,6 +303,13 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
         }
 
         dialog.render()
+    }
+
+    private def createAnalysisPluginAndInsert(paramIds: Seq[(String, String)], analysisId: String, view: AnalysisEditorView, analysis: Analysis){
+        blockPage("Creating the plugin")
+        PluginManager.createAnalysisInstance(paramIds.map{ t => t._1+":~:"+t._2 }, analysisId){
+            plugin => onPluginNameClicked(plugin, None, view, analysis)
+        } { _ => unblockPage() }
     }
 
     private def createDataCubePluginAndInsert(dataStructureDefiniton: DataCubeDataStructureDefinition,
@@ -459,6 +481,13 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                         dialog.destroy()
                         false
                 }
+
+                dialog.createAnalysisPluginClicked += { evtArgs =>
+                    dialog.destroy()
+                    onCreateAnalysisPluginClicked(view, analysis)
+                    false
+                }
+
                 dialog.render()
                 false
         }

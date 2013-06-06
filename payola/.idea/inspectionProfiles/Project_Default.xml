@@ -55,6 +55,8 @@
       <option name="excludeDeprecated" value="true" />
       <option name="excludeEnum" value="false" />
       <option name="excludeAbstract" value="false" />
+      <option name="excludeTestCode" value="false" />
+      <option name="excludeInnerClasses" value="false" />
     </inspection_tool>
     <inspection_tool class="ClassIndependentOfModule" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="ClassInheritanceDepth" enabled="true" level="WARNING" enabled_by_default="true">
@@ -92,6 +94,7 @@
     <inspection_tool class="CloneableClassInSecureContext" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="ComparatorNotSerializable" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="ConstructorCount" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoreDeprecatedConstructors" value="false" />
       <option name="m_limit" value="5" />
     </inspection_tool>
     <inspection_tool class="CustomClassloader" enabled="true" level="WARNING" enabled_by_default="true" />

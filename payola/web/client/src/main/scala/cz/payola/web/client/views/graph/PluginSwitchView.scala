@@ -34,6 +34,16 @@ class PluginSwitchView extends GraphView with ComposedView
     val ontologyCustomizationEditClicked = new SimpleUnitEvent[OntologyCustomization]
 
     /**
+     * Event triggered when user customization is created.
+     */
+    val userCustomizationCreateClicked = new SimpleUnitEvent[this.type]
+
+    /**
+     * Event triggered when user customization is edited.
+     */
+    val userCustomizationEditClicked = new SimpleUnitEvent[OntologyCustomization]
+
+    /**
      * List of available visualization plugins.
      */
     private val plugins = List[PluginView](
@@ -76,18 +86,18 @@ class PluginSwitchView extends GraphView with ComposedView
     )
 
     /**
-     * Drop down button for selection of ontology.
+     * Drop down button for selection of customization.
      */
-    val ontologyCustomizationsButton = new DropDownButton(List(
+    val customizationsButton = new DropDownButton(List(
         new Icon(Icon.wrench),
-        new Text("Change appearance using ontologies")),
+        new Text("Change appearance")),
         Nil
     )
 
     /**
      * Toolbar containing  pluginChange ontology customization buttons
      */
-    val toolbar = new Div(List(pluginChangeButton, ontologyCustomizationsButton), "btn-toolbar").setAttribute(
+    val toolbar = new Div(List(pluginChangeButton, customizationsButton), "btn-toolbar").setAttribute(
         "style", "margin-bottom: 15px;")
 
     // Re-trigger all events when the corresponding events are triggered in the plugins.
@@ -133,19 +143,27 @@ class PluginSwitchView extends GraphView with ComposedView
         // A separator between owned and others customizations.
         val separator1 = if (owned.nonEmpty && others.nonEmpty) List(new ListItem(Nil, "divider")) else Nil
 
-        // The create new button.
-        val createButton = new Anchor(List(new Icon(Icon.plus), new Text("Create New Customization")))
-        createButton.mouseClicked += { e =>
+        // The create new ontology based button.
+        val createButtonByOntology = new Anchor(List(new Icon(Icon.plus), new Text("Create New Ontology Customization")))
+        createButtonByOntology.mouseClicked += { e =>
             ontologyCustomizationCreateClicked.triggerDirectly(this)
             false
         }
-        val createNew = customizations.ownedCustomizations.map { _ =>
+
+        // The create new user defined customization button.
+        val createButtonCustom = new Anchor(List(new Icon(Icon.plus), new Text("Create New User Customization")))
+        createButtonCustom.mouseClicked += { e =>
+            userCustomizationCreateClicked.triggerDirectly(this)
+            false
+        }
+
+        val createNewCustomization = customizations.ownedCustomizations.map { _ =>
             val separator2 = if (owned.nonEmpty || others.nonEmpty) List(new ListItem(Nil, "divider")) else Nil
-            separator2 ++ List(new ListItem(List(createButton)))
+            separator2 ++ List(new ListItem(List(createButtonByOntology)), new ListItem(List(createButtonCustom)))
         }.getOrElse(Nil)
 
         // All the items merged together.
-        val allItems = owned ++ separator1 ++ others ++ createNew
+        val allItems = owned ++ separator1 ++ others ++ createNewCustomization
         val items = if (allItems.nonEmpty) {
             allItems
         } else {
@@ -154,7 +172,7 @@ class PluginSwitchView extends GraphView with ComposedView
             List(listItem)
         }
 
-        ontologyCustomizationsButton.items = items
+        customizationsButton.items = items
     }
 
     /**
@@ -167,7 +185,11 @@ class PluginSwitchView extends GraphView with ComposedView
         val editButton = new Button(new Text("Edit"), "btn-mini", new Icon(Icon.pencil)).setAttribute(
             "style", "position: absolute; right: 5px;")
         editButton.mouseClicked += { e =>
-            ontologyCustomizationEditClicked.triggerDirectly(customization)
+            if (customization.isUserDefined) {
+                userCustomizationEditClicked.triggerDirectly(customization)
+            } else {
+                ontologyCustomizationEditClicked.triggerDirectly(customization)
+            }
             false
         }
 
@@ -206,4 +228,6 @@ class PluginSwitchView extends GraphView with ComposedView
     private def createVertexEventArgs(vertex: Vertex): VertexEventArgs[this.type] = {
         new VertexEventArgs[this.type](this, vertex)
     }
+
+    def getCurrentGraph = this.currentGraph
 }

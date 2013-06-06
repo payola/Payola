@@ -26,4 +26,8 @@ class ClassCustomization(
         validate(value.length == 0 || Color(value).isDefined, "fillColor", "Value doesn't represent any color")
         super.fillColor = value.replace(" ", "")
     }
+
+    def appendPropertyCustomization(propertyCust: PropertyCustomization) {
+        _propertyCustomizations = _propertyCustomizations ++ Seq(propertyCust)
+    }
 }

@@ -35,6 +35,18 @@ object OntologyCustomization
             case _ => throw new ValidationException("ontologyURL", "Couldn't fetch an ontology from one of the specified URLs.")
         }
     }
+
+    /**
+     * Crates an empty ontology customization for the specified ontology.
+     * @param name Name of the customization.
+     * @param owner Owner of the customization.
+     * @return The customization.
+     */
+    def userDefined(name: String, owner: Option[User]): OntologyCustomization = {
+
+        new OntologyCustomization(
+            "http://user_"+owner.get.id+"/"+owner.get.name+"/"+name, name, owner, List[ClassCustomization]())
+    }
 }
 
 class OntologyCustomization(
@@ -53,6 +65,10 @@ class OntologyCustomization(
 
     override def canEqual(other: Any): Boolean = {
         other.isInstanceOf[OntologyCustomization]
+    }
+
+    def appendClassCustomization(classCust: ClassCustomization) {
+        _classCustomizations = _classCustomizations ++ Seq(classCust)
     }
 
     override protected def checkInvariants() {

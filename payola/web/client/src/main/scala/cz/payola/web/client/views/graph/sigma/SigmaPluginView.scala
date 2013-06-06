@@ -2,12 +2,15 @@ package cz.payola.web.client.views.graph.sigma
 
 import cz.payola.web.client.views.graph.PluginView
 import cz.payola.common.rdf
-import cz.payola.web.client.views.elements.Div
+import cz.payola.web.client.views.elements._
 import s2js.adapters.js.sigma
 import s2js.adapters._
 import s2js.adapters.browser.window
 import scala.collection.mutable.ListBuffer
 import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.web.client.views.bootstrap.Icon
+import cz.payola.web.client.views.graph.sigma.properties._
+import scala.Some
 
 abstract class SigmaPluginView(name: String) extends PluginView(name){
     protected var sigmaPluginWrapper = new Div().setAttribute("style", "padding: 0 5px; min-width: 200px; min-height: 200px;")
@@ -16,11 +19,23 @@ abstract class SigmaPluginView(name: String) extends PluginView(name){
 
     protected var sigmaInstance: Option[sigma.Sigma] = None
 
+    protected val animationStartStopButton = new Button(new Text("Start"), "pull-right",
+        new Icon(Icon.refresh)).setAttribute("style", "margin: 0 5px;")
+
     def createSubViews = List(sigmaPluginWrapper)
 
     override def render(parent: html.Element) {
         super.render(parent)
         updateSigmaPluginSize(parent)
+    }
+
+    override def renderControls(toolbar: html.Element) {
+        animationStartStopButton.render(toolbar)
+        animationStartStopButton.setIsEnabled(true)
+    }
+
+    override def destroyControls() {
+        animationStartStopButton.destroy()
     }
 
     private def updateSigmaPluginSize(parent: html.Element) {

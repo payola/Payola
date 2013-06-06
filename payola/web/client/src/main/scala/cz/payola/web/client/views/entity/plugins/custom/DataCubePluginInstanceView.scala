@@ -1,4 +1,4 @@
-package cz.payola.web.client.views.entity.plugins
+package cz.payola.web.client.views.entity.plugins.custom
 
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.View
@@ -7,8 +7,9 @@ import cz.payola.common.entities.Analysis
 import scala._
 import scala.collection.Seq
 import cz.payola.web.client.views.elements.lists._
+import cz.payola.web.client.views.entity.plugins._
 
-class DataCubePluginInstanceView(analysis: Analysis, pluginInst: PluginInstance,
+class DataCubePluginInstanceView(pluginInst: PluginInstance,
     predecessors: Seq[PluginInstanceView] = List())
     extends ReadOnlyPluginInstanceView(pluginInst, predecessors)
 {

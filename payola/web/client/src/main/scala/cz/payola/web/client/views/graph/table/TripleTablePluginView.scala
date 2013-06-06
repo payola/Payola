@@ -5,6 +5,7 @@ import s2js.adapters.html
 import cz.payola.common.rdf._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.elements.lists._
+import cz.payola.web.client.views.bootstrap.Icon
 
 /**
  * A plugin that displays all edges in the graph as a table. The edges are firstly grouped by the edge origins,
@@ -12,6 +13,10 @@ import cz.payola.web.client.views.elements.lists._
  */
 class TripleTablePluginView extends TablePluginView("Triple Table")
 {
+
+    private val countOfProperties = 5
+    private val showMoreLabel = "Show more"
+
     def fillTable(graph: Option[Graph], tableHead: html.Element, tableBody: html.Element) {
         // Create the headers.
         val headerRow = addRow(tableHead)
@@ -25,37 +30,67 @@ class TripleTablePluginView extends TablePluginView("Triple Table")
             var originCell: html.Element = null
             var originRowCount = 0
 
-            edgesByOrigin._2.foreach { edgesByEdgeType =>
-                val edgeUri = edgesByEdgeType._1
-                val edges = edgesByEdgeType._2
-                val origin = edges.head.origin
+
+            edgesByOrigin._2.take(countOfProperties).foreach{ edgesByEdgeType =>
                 val row = addRow(tableBody)
 
-                // The origin vertex cell.
                 originRowCount += 1
                 if (originCell == null) {
                     originCell = addCell(row)
-                    createVertexView(origin).render(originCell)
+                    createVertexView(edgesByEdgeType._2.head.origin).render(originCell)
                 }
 
-                // The edge cell.
-                val edgeCell = addCell(row)
-                new Text(edgeUri).render(edgeCell)
-
-                // The destinations cell.
-                val destinationsCell = addCell(row)
-                val destinationListItems = edges.map { (edge: Edge) =>
-                    val vertexElement = edge.destination match {
-                        case iv: IdentifiedVertex => createVertexView(iv)
-                        case lv: LiteralVertex => new Text(lv.value.toString)
-                        case v => new Text(v.toString)
-                    }
-                    new ListItem(List(vertexElement))
-                }
-                new UnorderedList(destinationListItems, "unstyled").render(destinationsCell)
+                createVertexDetailRow(edgesByEdgeType._1, edgesByEdgeType._2, row)
             }
+
+            if(edgesByOrigin._2.size > countOfProperties) {
+                //add a row and a "show more" button in the property column
+                val row = addRow(tableBody)
+                val cell = addCell(row)
+                val showMoreLink = new Anchor(List(new Icon(Icon.plus), new Text(showMoreLabel)))
+
+                showMoreLink.render(cell)
+                cell.setAttribute("colspan", "2")
+                originRowCount += 1
+
+                showMoreLink.mouseClicked += { e =>
+
+                    val hiddenEdgesCount = edgesByOrigin._2.size - countOfProperties;
+
+                    edgesByOrigin._2.takeRight(hiddenEdgesCount).foreach{ edgesByEdgeType =>
+                        val appendedRow = insertRow(tableBody, row)
+
+                        createVertexDetailRow(edgesByEdgeType._1, edgesByEdgeType._2, appendedRow)
+                    }
+
+                    originCell.setAttribute("rowspan", edgesByOrigin._2.size.toString)
+                    tableBody.removeChild(row)
+
+                    false
+                }
+            }
+
             originCell.setAttribute("rowspan", originRowCount.toString)
         }
+    }
+
+    private def createVertexDetailRow(edgeUri: String, edges: Seq[Edge], row: html.Element) {
+
+        // The edge cell.
+        val edgeCell = addCell(row)
+        new Text(edgeUri).render(edgeCell)
+
+        // The destinations cell.
+        val destinationsCell = addCell(row)
+        val destinationListItems = edges.map { edge =>
+            val vertexElement = edge.destination match {
+                case iv: IdentifiedVertex => createVertexView(iv)
+                case lv: LiteralVertex => new Text(lv.value.toString)
+                case v => new Text(v.toString)
+            }
+            new ListItem(List(vertexElement))
+        }
+        new UnorderedList(destinationListItems, "unstyled").render(destinationsCell)
     }
 
     private def groupEdges(graph: Option[Graph]): Map[String, Map[String, Seq[Edge]]] = {

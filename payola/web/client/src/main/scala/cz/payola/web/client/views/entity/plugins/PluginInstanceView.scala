@@ -7,6 +7,7 @@ import cz.payola.web.client.views.elements._
 import cz.payola.web.client.View
 import cz.payola.web.client.views.elements.Div
 import cz.payola.common.entities.plugins._
+import cz.payola.web.client.events.SimpleUnitEvent
 
 abstract class PluginInstanceView(
     val pluginInstance: PluginInstance,
@@ -14,6 +15,8 @@ abstract class PluginInstanceView(
     extends View
 {
     private val heading = getHeading
+
+    val parameterNameClicked = new SimpleUnitEvent[ParameterValue[_]]
 
     private val paramsDiv = new Div(getParameterViews, "parameters")
 
@@ -142,4 +145,8 @@ abstract class PluginInstanceView(
     def removeCssClass(cssClass: String) {
         successors.removeCssClass(cssClass)
     }
+
+    def parameterName(param: Parameter[_]): String = param.name
+
+    def filterParams(parameters: Seq[Parameter[_]]): Seq[Parameter[_]] = parameters
 }

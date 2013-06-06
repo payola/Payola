@@ -3,11 +3,14 @@ package cz.payola.model.components
 import cz.payola.data._
 import cz.payola.domain.entities._
 import cz.payola.model._
-import cz.payola.domain.PluginCompilerComponent
+import cz.payola.domain._
 import cz.payola.domain.entities.plugins.compiler._
 import cz.payola.common.ValidationException
+import plugins.concrete._
+import cz.payola.domain.entities.plugins._
+import plugins.parameters._
 import cz.payola.common.rdf.DataCubeDataStructureDefinition
-import cz.payola.domain.entities.plugins.concrete.DataCube
+import scala.Some
 
 trait PluginModelComponent extends EntityModelComponent
 {
@@ -46,7 +49,6 @@ trait PluginModelComponent extends EntityModelComponent
         }
 
         def createDataCubeInstance(dataCubeDataStructure: DataCubeDataStructureDefinition, owner: User): Plugin = {
-
             pluginRepository.getByName(dataCubeDataStructure.uri).getOrElse {
                 val plugin = new DataCube(dataCubeDataStructure)
                 plugin.owner = None
@@ -54,6 +56,37 @@ trait PluginModelComponent extends EntityModelComponent
                 pluginRepository.persist(plugin)
                 plugin
             }
+        }
+
+        def cloneParameter(parameterValue: ParameterValue[_], name: String): Parameter[_] = {
+            val parameter = parameterValue.parameter
+
+            parameter match {
+                case x: StringParameter => new
+                        StringParameter(name+"$"+parameterValue.id, x.defaultValue, x.isMultiline, x.isPattern, x.isMultiline)
+                case x: BooleanParameter => new BooleanParameter(name+"$"+parameterValue.id, x.defaultValue)
+                case x: FloatParameter => new FloatParameter(name+"$"+parameterValue.id, x.defaultValue)
+                case x: IntParameter => new IntParameter(name+"$"+parameterValue.id, x.defaultValue)
+                case _ => throw new Exception
+            }
+        }
+
+        def createAnalysisInstance(paramValIds: Seq[String], analysis: Analysis, owner: Option[User]): Plugin = {
+            def iterateParams: Seq[Parameter[_]] = {
+                paramValIds.map(_.split(":~:")).map {
+                    t => analysis.pluginInstances.flatMap(_.parameterValues).find(_.id == t(0))
+                        .map(cloneParameter(_, t(1)))
+                }.flatten
+            }
+            val parameters = List(
+                new StringParameter("Analysis ID", analysis.id, false, false, false)) ++
+                iterateParams
+
+            val plugin = new AnalysisPlugin(analysis, parameters.toSeq)
+            plugin.owner = owner
+            plugin.isPublic = false
+            pluginRepository.persist(plugin)
+            plugin
         }
     }
 }

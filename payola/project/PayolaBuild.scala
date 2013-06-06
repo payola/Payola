@@ -185,7 +185,9 @@ object PayolaBuild extends Build
         settings = payolaSettings ++ Seq(
             libraryDependencies ++= Seq(
                 "org.apache.jena" % "jena-core" % "2.7.0-incubating",
-                "org.apache.jena" % "jena-arq" % "2.9.0-incubating"
+                "org.apache.jena" % "jena-arq" % "2.9.0-incubating",
+                "org.apache.httpcomponents" % "httpclient" % "4.2.4",
+                "commons-io" % "commons-io" % "2.4"
             )
         )
     ).dependsOn(
