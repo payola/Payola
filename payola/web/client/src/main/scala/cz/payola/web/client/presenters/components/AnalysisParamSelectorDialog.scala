@@ -8,13 +8,14 @@ import collection.mutable.ArrayBuffer
 import s2js.adapters.html
 import s2js.adapters.browser._
 import scala.Some
+import cz.payola.web.client.models.PrefixApplier
 
 class AnalysisParamSelectorDialog(analysis: Analysis)
     extends Modal("Choose analysis params to be dynamic", Nil, Some("OK"), None, false, "preview-dialog")
 {
     val paramIds = new ArrayBuffer[(String, String)]
 
-    val visualizer = new ReadOnlyAnalysisVisualizer(analysis)
+    val visualizer = new ReadOnlyAnalysisVisualizer(analysis, new PrefixApplier())
     visualizer.paramNameClicked += { eventArg =>
 
         val dialog = new PromptDialog("Enter a new name of the parameter")

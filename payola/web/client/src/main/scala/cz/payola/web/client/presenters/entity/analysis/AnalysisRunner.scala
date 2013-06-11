@@ -16,6 +16,7 @@ import cz.payola.common.EvaluationInProgress
 import cz.payola.common.EvaluationError
 import cz.payola.common.EvaluationSuccess
 import cz.payola.web.client.views.VertexEventArgs
+import cz.payola.web.client.presenters.entity.PrefixPresenter
 
 /**
  * Presenter responsible for the logic around running an analysis evaluation.
@@ -32,11 +33,14 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
     var successEventHandler: (EvaluationSuccessEventArgs => Unit) = null
     var evaluationId = ""
     var intervalHandler: Option[Int] = None
+    val prefixPresenter = new PrefixPresenter
 
     private val pollingPeriod = 500
 
     def initialize() {
         blockPage("Loading analysis data...")
+        prefixPresenter.initialize
+
         DomainData.getAnalysisById(analysisId) {
             analysis =>
                 createViewAndInit(analysis)
@@ -47,7 +51,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
     }
 
     private def createViewAndInit(analysis: Analysis, timeout: Int = 30): AnalysisRunnerView = {
-        val view = new AnalysisRunnerView(analysis, timeout)
+        val view = new AnalysisRunnerView(analysis, timeout, prefixPresenter.prefixApplier)
         view.render(parentElement)
         view.tabs.hideTab(1)
 

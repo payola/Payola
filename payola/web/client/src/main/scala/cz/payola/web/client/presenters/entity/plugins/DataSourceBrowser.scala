@@ -140,7 +140,7 @@ class DataSourceBrowser(
             history.remove(historyPosition + 1)
         }
 
-        val uri = prefixPresenter.disapplyPrefix(prefixedUri)
+        val uri = prefixPresenter.prefixApplier.disapplyPrefix(prefixedUri)
 
         // Add the new item.
         history += uri
@@ -153,7 +153,7 @@ class DataSourceBrowser(
 
     private def updateView(clearGraph: Boolean) {
         val uri =  history(historyPosition)
-        view.nodeUriInput.value = prefixPresenter.applyPrefix(uri)
+        view.nodeUriInput.value = prefixPresenter.prefixApplier.applyPrefix(uri)
         view.nodeUriInput.setIsEnabled(false)
 
         blockPage("Fetching the node neighbourhood...")

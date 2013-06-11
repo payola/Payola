@@ -23,6 +23,7 @@ import cz.payola.web.client.views.elements._
 import scala.Some
 import cz.payola.common.rdf.DataCubeVocabulary
 import cz.payola.common.rdf.DataCubeDataStructureDefinition
+import cz.payola.web.client.presenters.entity.PrefixPresenter
 
 /**
  * Presenter responsible for the logic of the Analysis Builder editor.
@@ -42,7 +43,9 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
 
     protected var branches = new ArrayBuffer[PluginInstanceView]
 
-    protected val instanceViewFactory = new PluginInstanceViewFactory
+    protected var instanceViewFactory: PluginInstanceViewFactory = null
+
+    protected val prefixPresenter = new PrefixPresenter
 
     protected var nameComponent = new InputControl(
         "Analysis name",
@@ -50,6 +53,9 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
     )
 
     def initialize() {
+        prefixPresenter.initialize
+        instanceViewFactory = new PluginInstanceViewFactory(prefixPresenter.prefixApplier)
+
         val nameDialog = new Modal("Please, enter the name of the new analysis", List(nameComponent))
         nameDialog.render()
 
@@ -66,7 +72,7 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
                                     () =>
                                         val view = new
                                                 AnalysisEditorView(analysis, Some(nameComponent.field.value), None,
-                                                    "Create analysis")
+                                                    "Create analysis", prefixPresenter.prefixApplier)
                                         view.visualizer.pluginInstanceRendered += {
                                             e => instancesMap.put(e.target.pluginInstance.id, e.target)
                                         }
@@ -129,7 +135,8 @@ class AnalysisBuilder(parentElementId: String) extends Presenter
         AnalysisBuilderData.createPluginInstance(target.id, analysisId) {
             createdInstance =>
                 val mergeInstance = new
-                        EditablePluginInstanceView(createdInstance, buffer.asInstanceOf[Seq[PluginInstanceView]])
+                        EditablePluginInstanceView(createdInstance, buffer.asInstanceOf[Seq[PluginInstanceView]],
+                            prefixPresenter.prefixApplier)
                 view.visualizer.renderPluginInstanceView(mergeInstance)
 
                 mergeInstance.connectButtonClicked += {

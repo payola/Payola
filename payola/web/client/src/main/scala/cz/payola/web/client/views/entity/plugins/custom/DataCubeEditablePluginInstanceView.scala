@@ -20,10 +20,11 @@ import cz.payola.common.EvaluationInProgress
 import cz.payola.common.EvaluationError
 import cz.payola.common.EvaluationSuccess
 import s2js.adapters.browser._
+import cz.payola.web.client.models.PrefixApplier
 
 class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginInstance,
     predecessors: Seq[PluginInstanceView] = List())
-    extends EditablePluginInstanceView(pluginInst, predecessors)
+    extends EditablePluginInstanceView(pluginInst, predecessors, new PrefixApplier())
 {
     private def name = {
         val nameParts = pluginInstance.plugin.name.split("#")

@@ -5,8 +5,9 @@ import cz.payola.common.entities.plugins.PluginInstance
 import collection.Seq
 import cz.payola.common.entities.Analysis
 import s2js.compiler.javascript
+import cz.payola.web.client.models.PrefixApplier
 
-class PluginInstanceViewFactory
+class PluginInstanceViewFactory(prefixApplier: PrefixApplier)
 {
     @javascript(
         """ var defined = eval("typeof(cz.payola.web.client.views.entity.plugins.custom."+name+"EditablePluginInstanceView) !== 'undefined'"); return defined; """)
@@ -27,7 +28,7 @@ class PluginInstanceViewFactory
         pluginInstance.plugin.originalClassName match {
             case "DataCube" => new DataCubeEditablePluginInstanceView(analysis, pluginInstance, predecessors)
             case "AnalysisPlugin" => new AnalysisPluginEditablePluginInstanceView(pluginInstance, predecessors)
-            case _ => new EditablePluginInstanceView(pluginInstance, predecessors)
+            case _ => new EditablePluginInstanceView(pluginInstance, predecessors, prefixApplier)
         }
     }
 
@@ -35,7 +36,7 @@ class PluginInstanceViewFactory
         pluginInstance.plugin.originalClassName match {
             case "DataCube" => new DataCubePluginInstanceView(pluginInstance, predecessors)
             case "AnalysisPlugin" => new AnalysisPluginPluginInstanceView(pluginInstance, predecessors)
-            case _ => new ReadOnlyPluginInstanceView(pluginInstance, predecessors)
+            case _ => new ReadOnlyPluginInstanceView(pluginInstance, predecessors, prefixApplier)
         }
     }
 }
