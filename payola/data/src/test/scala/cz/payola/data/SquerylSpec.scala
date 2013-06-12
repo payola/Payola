@@ -31,7 +31,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     private val groups = List(g1, g2, g3, g4, g5)
 
     // Plugins
-    private val params = List(new StringParameter("EndpointURL", "http://ld.opendata.cz:1111", true))
+    private val params = List(new StringParameter("EndpointURL", "http://ld.opendata.cz:1111", true, false, false, true))
     private val sparqlEndpointPlugin = new SparqlEndpointFetcher("SPARQL Endpoint", 0, params, IDGenerator.newId)
     private val concreteSparqlQueryPlugin = new ConcreteSparqlQuery
     private val propertySelectionPlugin = new PropertySelection
@@ -186,11 +186,16 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
                     assert(persistedParam.name == param.name)
                     assert(persistedParam.defaultValue == param.defaultValue)
 
-                    // Check StringParameter.isMultiline property
+                    // Check additional properties of StringParameter
                     type StringParam = cz.payola.common.entities.plugins.parameters.StringParameter
                     persistedParam match {
-                        case s : StringParam => assert(s.isMultiline == param.asInstanceOf[StringParam].isMultiline)
-                        case _ => // There is no isMultiline property otherwise
+                        case s : StringParam => {
+                            assert(s.isMultiline == param.asInstanceOf[StringParam].isMultiline)
+                            assert(s.isPattern == param.asInstanceOf[StringParam].isPattern)
+                            assert(s.isPassword == param.asInstanceOf[StringParam].isPassword)
+                            assert(s.canContainUrl == param.asInstanceOf[StringParam].canContainUrl)
+                        }
+                        case _ => // There are no additional properties otherwise
                     }
                 }
             }

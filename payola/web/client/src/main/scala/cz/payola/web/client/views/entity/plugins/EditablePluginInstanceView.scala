@@ -42,26 +42,38 @@ class EditablePluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[P
     }
 
     def getParameterViews : Seq[View] = filterParams(getPlugin.parameters).flatMap { param =>
+
         pluginInstance.getParameter(param.name).map { v =>
             val field = param match {
                 case p: BooleanParameter => new CheckBox(param.id, v.asInstanceOf[Boolean], "Enter parameter value")
                 case p: IntParameter => new NumericInput(param.id, v.asInstanceOf[Int], "Enter parameter value")
-                case p: StringParameter if p.isPattern => new TextArea(param.id, prefixApplier.applyPrefix(v.toString), "Enter parameter value")
-                case p: StringParameter if p.isMultiline => new TextArea(param.id, prefixApplier.applyPrefix(v.toString), "Enter parameter value")
-                case _ => new TextInput(param.id, prefixApplier.applyPrefix(v.toString), "Enter parameter value")
+                case p: StringParameter if p.isPattern => new TextArea(param.id, applyPrefix(p, v.toString), "Enter parameter value")
+                case p: StringParameter if p.isMultiline => new TextArea(param.id, applyPrefix(p, v.toString), "Enter parameter value")
+                case p: StringParameter => new TextArea(param.id, applyPrefix(p, v.toString), "Enter parameter value")
+                case _ => new TextInput(param.id, v.toString, "Enter parameter value")
             }
 
             val inputControl = new InputControl(parameterName(param), field, None)
-            inputControl.delayedChanged += { _ =>
-                parameterValueChanged.triggerDirectly(new ParameterValue(getId, param.id, param.name,
-                    prefixApplier.disapplyPrefix(field.value.toString), inputControl))
-            }
+            inputControl.delayedChanged += { _ => {
+                val value = param match {
+                    case p: StringParameter if p.canContainUrl => prefixApplier.disapplyPrefix(field.value.toString)
+                    case _ => field.value.toString
+                }
+
+                parameterValueChanged.triggerDirectly(new ParameterValue(getId, param.id, param.name, value, inputControl))
+            }}
 
             if (!pluginInstance.isEditable) {
                 field.setIsEnabled(false)
             }
 
             inputControl
+        }
+    }
+    def applyPrefix(p: StringParameter, url: String): String = {
+        p match {
+            case s : StringParameter if s.canContainUrl => prefixApplier.applyPrefix(url)
+            case _ => url
         }
     }
 }

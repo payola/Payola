@@ -367,7 +367,7 @@ trait SchemaComponent
                 new IntParameterValue("", null, 0)
             },
             factoryFor(stringParameters) is {
-                new StringParameter("", "", "", false, false, false)
+                new StringParameter("", "", "", false, false, false, false)
             },
             factoryFor(stringParameterValues) is {
                 new StringParameterValue("", null, "")
