@@ -8,8 +8,10 @@ import cz.payola.web.client.views.VertexEventArgs
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.Icon
 import cz.payola.web.client.views.graph.PluginView
+import cz.payola.web.client.models.PrefixApplier
 
-abstract class TablePluginView(name: String) extends PluginView(name)
+abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier] = None)
+    extends PluginView(name, prefixApplier)
 {
     protected val tableWrapper = new Div().setAttribute("style", "padding: 0 20px; min-height: 200px;")
 
@@ -41,7 +43,8 @@ abstract class TablePluginView(name: String) extends PluginView(name)
             vertexBrowsingDataSource.trigger(new VertexEventArgs[this.type](this, vertex))
             false
         }
-        val browsingAnchor = new Anchor(List(new Text(vertex.uri)))
+        val uri = prefixApplier.map(_.applyPrefix(vertex.uri)).getOrElse(vertex.uri)
+        val browsingAnchor = new Anchor(List(new Text(uri)))
         browsingAnchor.mouseClicked += { e =>
             vertexBrowsing.trigger(new VertexEventArgs[this.type](this, vertex))
             false

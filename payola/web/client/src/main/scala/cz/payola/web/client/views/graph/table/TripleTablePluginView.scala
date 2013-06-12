@@ -6,12 +6,13 @@ import cz.payola.common.rdf._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.elements.lists._
 import cz.payola.web.client.views.bootstrap.Icon
+import cz.payola.web.client.models.PrefixApplier
 
 /**
  * A plugin that displays all edges in the graph as a table. The edges are firstly grouped by the edge origins,
  * secondly by the edge types.
  */
-class TripleTablePluginView extends TablePluginView("Triple Table")
+class TripleTablePluginView(prefixApplier: Option[PrefixApplier]) extends TablePluginView("Triple Table", prefixApplier)
 {
 
     private val countOfProperties = 5
@@ -78,7 +79,8 @@ class TripleTablePluginView extends TablePluginView("Triple Table")
 
         // The edge cell.
         val edgeCell = addCell(row)
-        new Text(edgeUri).render(edgeCell)
+        val prefixedEdgeUri = prefixApplier.map(_.applyPrefix(edgeUri)).getOrElse(edgeUri)
+        new Text(prefixedEdgeUri).render(edgeCell)
 
         // The destinations cell.
         val destinationsCell = addCell(row)

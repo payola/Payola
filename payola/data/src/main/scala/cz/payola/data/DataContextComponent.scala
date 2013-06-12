@@ -5,6 +5,7 @@ import cz.payola.common.entities.ShareableEntity
 import cz.payola.domain.entities._
 import cz.payola.domain.entities.plugins._
 import cz.payola.domain.entities.settings.OntologyCustomization
+import cz.payola.domain.entities.Prefix
 
 /**
  * A component that provides access to a storage with persisted entities.
@@ -47,6 +48,11 @@ trait DataContextComponent
     val ontologyCustomizationRepository: OntologyCustomizationRepository
 
     /**
+     * A repository to access persisted prefixes
+     */
+    val prefixRepository: PrefixRepository
+
+    /**
      * A registry that provides repositories by class name of persisted entity
      */
     lazy val repositoryRegistry = new RepositoryRegistry(Map(
@@ -56,7 +62,8 @@ trait DataContextComponent
         classOf[Analysis] -> analysisRepository,
         classOf[Plugin] -> pluginRepository,
         classOf[DataSource] -> dataSourceRepository,
-        classOf[OntologyCustomization] -> ontologyCustomizationRepository
+        classOf[OntologyCustomization] -> ontologyCustomizationRepository,
+        classOf[Prefix] -> prefixRepository
     ))
 
     /**
@@ -272,6 +279,9 @@ trait DataContextComponent
         with OptionallyOwnedEntityRepository[Plugin]
         with ShareableEntityRepository[Plugin]
 
+    /**
+     * Defines operations of repository accessing data sources
+     */
     trait DataSourceRepository
         extends Repository[DataSource]
         with NamedEntityRepository[DataSource]
@@ -283,6 +293,22 @@ trait DataContextComponent
          * @param parameterValue ParameterValue to persist
          */
         def persistParameterValue(parameterValue: ParameterValue[_])
+    }
+
+    /**
+     * Defines operations of repository accessing prefixes
+     */
+    trait PrefixRepository
+        extends Repository[Prefix]
+        with NamedEntityRepository[Prefix]
+        with OptionallyOwnedEntityRepository[Prefix]
+    {
+        /**
+         * Gets all public prefixes available to user - default (unowned) and his own.
+         * @param userId Id of a user to search prefixes for
+         * @return Returns prefixes available to user
+         */
+        def getAllAvailableToUser(userId: Option[String]): Seq[Prefix]
     }
 
     /**

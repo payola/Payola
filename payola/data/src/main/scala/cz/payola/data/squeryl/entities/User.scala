@@ -56,6 +56,10 @@ class User(override val id: String, name: String, pwd: String, mail: String)
 
     private lazy val _ownedCustomizationsQuery = context.schema.customizationOwnership.left(this)
 
+    _availablePrefixes = null
+
+    private lazy val _ownedPrefixesQuery = context.schema.prefixOwnership.left(this)
+
     override def ownedGroups: immutable.Seq[GroupType] = {
         if (_ownedGroups == null) {
             wrapInTransaction {
@@ -116,6 +120,18 @@ class User(override val id: String, name: String, pwd: String, mail: String)
         _ontologyCustomizations.toList
     }
 
+    override def availablePrefixes: immutable.Seq[PrefixType] = {
+        if (_availablePrefixes == null) {
+            wrapInTransaction {
+                _availablePrefixes = mutable.ArrayBuffer(
+                    context.prefixRepository.getAllAvailableToUser(Some(id)): _*
+                )
+            }
+        }
+
+        _availablePrefixes.toList
+    }
+
     override protected def storeOwnedAnalysis(analysis: User#AnalysisType) {
         super.storeOwnedAnalysis(context.schema.associate(Analysis(analysis), _ownedAnalysesQuery))
     }
@@ -138,6 +154,13 @@ class User(override val id: String, name: String, pwd: String, mail: String)
         super.storeOntologyCustomization(
             context.schema.associate(OntologyCustomization(customization), _ownedCustomizationsQuery)
         )
+    }
+
+    override protected def storeOwnedPrefix(prefix: User#PrefixType) {
+        if (prefix.owner == Some(this))
+            context.schema.associate(Prefix(prefix), _ownedPrefixesQuery)
+
+        super.storeOwnedPrefix(prefix)
     }
 
     override protected def discardOwnedAnalysis(analysis: User#AnalysisType) {
@@ -165,5 +188,12 @@ class User(override val id: String, name: String, pwd: String, mail: String)
         context.ontologyCustomizationRepository.removeById(customization.id)
 
         super.discardOntologyCustomization(customization)
+    }
+
+    override protected def discardOwnedPrefix(prefix: User#PrefixType) {
+        if (prefix.owner == Some(this))
+            context.prefixRepository.removeById(prefix.id)
+
+        super.discardOwnedPrefix(prefix)
     }
 }

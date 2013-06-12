@@ -3,10 +3,11 @@ package cz.payola.web.client.views.entity.analysis
 import cz.payola.common.entities.Analysis
 import cz.payola.common.entities.plugins.PluginInstance
 import cz.payola.web.client.views.entity.plugins._
+import cz.payola.web.client.models.PrefixApplier
 
-class ReadOnlyAnalysisVisualizer(analysis: Analysis) extends AnalysisVisualizer(analysis)
+class ReadOnlyAnalysisVisualizer(analysis: Analysis, prefixApplier: PrefixApplier) extends AnalysisVisualizer(analysis)
 {
-    val instanceFactory = new PluginInstanceViewFactory
+    val instanceFactory = new PluginInstanceViewFactory(prefixApplier)
 
     def createPluginInstanceView(instance: PluginInstance): PluginInstanceView = {
         val result = instanceFactory.create(instance, List())

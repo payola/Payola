@@ -198,7 +198,7 @@ object PayolaBuild extends Build
         "data", file("data"),
         settings = payolaSettings ++ Seq(
             libraryDependencies ++= Seq(
-                "org.squeryl" % "squeryl_2.9.0-1" % "0.9.5",
+                "org.squeryl" % "squeryl_2.9.2" % "0.9.5",
                 "com.h2database" % "h2" % "1.3.165",
                 "mysql" % "mysql-connector-java" % "5.1.18",
                 "postgresql" % "postgresql" % "9.1-901.jdbc4",

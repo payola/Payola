@@ -15,32 +15,32 @@ import cz.payola.domain.IDGenerator
 class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSpec with ShouldMatchers
 {
     // Users
-    val u1 = new cz.payola.domain.entities.User("HS")
-    val u2 = new cz.payola.domain.entities.User("ChM")
-    val u3 = new cz.payola.domain.entities.User("JH")
-    val u4 = new cz.payola.domain.entities.User("OK")
-    val u5 = new cz.payola.domain.entities.User("OH")
-    val users = List(u1, u2, u3, u4, u5)
+    private val u1 = new cz.payola.domain.entities.User("HS")
+    private val u2 = new cz.payola.domain.entities.User("ChM")
+    private val u3 = new cz.payola.domain.entities.User("JH")
+    private val u4 = new cz.payola.domain.entities.User("OK")
+    private val u5 = new cz.payola.domain.entities.User("OH")
+    private val users = List(u1, u2, u3, u4, u5)
 
     // Groups
-    val g1 = new cz.payola.domain.entities.Group("group1", u1)
-    val g2 = new cz.payola.domain.entities.Group("group2", u2)
-    val g3 = new cz.payola.domain.entities.Group("group3", u3)
-    val g4 = new cz.payola.domain.entities.Group("group4", u5) // u5 on purpose
-    val g5 = new cz.payola.domain.entities.Group("group5", u5)
-    val groups = List(g1, g2, g3, g4, g5)
+    private val g1 = new cz.payola.domain.entities.Group("group1", u1)
+    private val g2 = new cz.payola.domain.entities.Group("group2", u2)
+    private val g3 = new cz.payola.domain.entities.Group("group3", u3)
+    private val g4 = new cz.payola.domain.entities.Group("group4", u5) // u5 on purpose
+    private val g5 = new cz.payola.domain.entities.Group("group5", u5)
+    private val groups = List(g1, g2, g3, g4, g5)
 
     // Plugins
     private val params = List(new StringParameter("EndpointURL", "http://ld.opendata.cz:1111", true))
-    val sparqlEndpointPlugin = new SparqlEndpointFetcher("SPARQL Endpoint", 0, params, IDGenerator.newId)
-    val concreteSparqlQueryPlugin = new ConcreteSparqlQuery
-    val propertySelectionPlugin = new PropertySelection
-    val filterPlugin = new Filter
-    val typedPlugin = new Typed
-    val join = new Join
-    val unionPlugin = new Union
+    private val sparqlEndpointPlugin = new SparqlEndpointFetcher("SPARQL Endpoint", 0, params, IDGenerator.newId)
+    private val concreteSparqlQueryPlugin = new ConcreteSparqlQuery
+    private val propertySelectionPlugin = new PropertySelection
+    private val filterPlugin = new Filter
+    private val typedPlugin = new Typed
+    private val join = new Join
+    private val unionPlugin = new Union
 
-    val plugins = List(
+    private val plugins = List(
         sparqlEndpointPlugin,
         concreteSparqlQueryPlugin,
         propertySelectionPlugin,
@@ -50,16 +50,21 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         unionPlugin
     )
 
-    private val url = "http://opendata.cz/pco/public-contracts.xml"
-    val customization = OntologyCustomization.empty(url, "Name1", None)
-    val ownedCustomization = OntologyCustomization.empty(url, "Name2", Some(u1))
-    val customizations = List(customization, ownedCustomization)
+    private val urls = List("http://opendata.cz/pco/public-contracts.xml")
+    private val customization = OntologyCustomization.empty(urls, "Name1", None)
+    private val ownedCustomization = OntologyCustomization.empty(urls, "Name2", Some(u1))
+    private val customizations = List(customization, ownedCustomization)
+
+    private val ownedPrefix = new cz.payola.domain.entities.Prefix("prefix1", "p1", urls(0), Some(u1))
+    private val commonPrefix = new cz.payola.domain.entities.Prefix("prefix2", "p2", urls(0), None)
+
+    private var prefixes = List(ownedPrefix, commonPrefix)
 
     "Schema" should "be created" in {
         schema.wrapInTransaction { schema.recreate }
     }
 
-    "Users" should "be persited, loaded and managed by UserRepository" in {
+    "Users" should "be persisted, loaded and managed by UserRepository" in {
         schema.wrapInTransaction { persistUsers }
     }
 
@@ -459,7 +464,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
             val persistedOc = ontologyCustomizationRepository.getById(ontologyCustomization.id).get
                 assert(persistedOc.owner == ontologyCustomization.owner)
                 assert(persistedOc.name == ontologyCustomization.name)
-                assert(persistedOc.ontologyURL == ontologyCustomization.ontologyURL)
+                assert(persistedOc.ontologyURLs == ontologyCustomization.ontologyURLs)
                 assert(persistedOc.classCustomizations.size == ontologyCustomization.classCustomizations.size)
 
             for (classCustomization <- ontologyCustomization.classCustomizations){
@@ -492,7 +497,87 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         assert(analysisRepository.getById(a1.id).get.defaultOntologyCustomization == Some(customization))
     }
 
-    "Pagionation" should "work" in {
+    "Prefixes" should "be stored and loaded properly" in {
+        schema.wrapInTransaction { persistPrefixes }
+    }
+
+    private def persistPrefixes {
+        println("Persisting prefixes")
+
+        prefixRepository.persist(ownedPrefix)
+        prefixRepository.persist(commonPrefix)
+
+        assert(prefixRepository.getCount == prefixes.size)
+
+        // Test persistance
+        prefixes.foreach{ prefix =>
+            val persistedPrefix = prefixRepository.getById(prefix.id).get
+
+            assert(persistedPrefix.url == prefix.url)
+            assert(persistedPrefix.prefix == prefix.prefix)
+            assert(persistedPrefix.name == prefix.name)
+            assert(persistedPrefix.owner.map(_.id) == prefix.owner.map(_.id))
+        }
+
+        // Change data
+        ownedPrefix.url = "newUrl"
+        ownedPrefix.prefix = "newPrefix"
+
+        ownedPrefix.owner = None
+        commonPrefix.owner = Some(u4)
+
+        // Persist saved prefixes
+        prefixRepository.persist(ownedPrefix)
+        prefixRepository.persist(commonPrefix)
+
+        // Assert no more prefixes added or removed
+        assert(prefixRepository.getCount == prefixes.size)
+
+        // Test changes  persistence
+        prefixes.foreach{ prefix =>
+            val persistedPrefix = prefixRepository.getById(prefix.id).get
+
+            assert(persistedPrefix.url == prefix.url)
+            assert(persistedPrefix.prefix == prefix.prefix)
+            assert(persistedPrefix.owner.map(_.id) == prefix.owner.map(_.id))
+        }
+
+        val u1_data = userRepository.getById(u1.id).get
+        val commonURL = "commonURL"
+        val ownedURL = "ownedULR"
+        val generalURL = "generalURL"
+
+        val ownedPrefixes = List(
+            new cz.payola.domain.entities.Prefix("prefix3", "@p3", commonURL, Some(u1)),
+            new cz.payola.domain.entities.Prefix("prefix4", "@p4", ownedURL, Some(u1))
+        )
+
+        ownedPrefixes.foreach(u1_data.addOwnedPrefix(_))
+
+        val generalPrefixes = List(
+            new cz.payola.domain.entities.Prefix("prefix5", "@p5", generalURL, None),
+            new cz.payola.domain.entities.Prefix("prefix6", "@p6", commonURL, None)
+        )
+        generalPrefixes.foreach(prefixRepository.persist(_))
+
+        val available = u1_data.availablePrefixes
+
+        println("     Available prefixes of user1: " + available.length + "/" + prefixRepository.getCount)
+        available.foreach(p => println("         - %s".format(p.name)))
+
+        prefixes ++= generalPrefixes ++ ownedPrefixes
+
+        val prefixesForCommonURL = u1_data.availablePrefixes.filter(_.url == commonURL)
+        val prefixesForGeneralURL = u1_data.availablePrefixes.filter(_.url == generalURL)
+        val prefixesForOwnedURL = u1_data.availablePrefixes.filter(_.url == ownedURL)
+
+        println("     Prefixes for 'commonURL' count: " + prefixesForCommonURL.length)
+        println("     Prefixes for 'generalURL' count: " + prefixesForGeneralURL.length)
+        println("     Prefixes for 'ownedURL' count: " + prefixesForOwnedURL.length)
+
+    }
+
+    "Pagination" should "work" in {
         schema.wrapInTransaction { testPagination }
     }
 
@@ -538,6 +623,10 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
         assert(pluginRepository.getCount == pluginsCount)
 
         val analysis = analysisRepository.getAll()(0)
+
+        // Remove all prefixes
+        prefixes.foreach(p => assert(prefixRepository.removeById(p.id)))
+        assert(prefixRepository.getCount == 0)
 
         // Remove user and all his entities
         users.foreach(u => assert(userRepository.removeById(u.id)))

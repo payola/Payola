@@ -26,7 +26,7 @@ object OntologyCustomization extends EntityConverter[OntologyCustomization]
 /**
  * Provides database persistence to [[cz.payola.domain.entities.settings.OntologyCustomization]] entities.
  * @param id ID of the ontology customization
- * @param u URI of the ontology customization
+ * @param u Coma separated list of URLs of the ontology customization
  * @param n Name of the ontology customization
  * @param o Owner of the ontology customization
  * @param c List of child class customizations

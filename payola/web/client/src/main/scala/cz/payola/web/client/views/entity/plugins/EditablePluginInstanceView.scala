@@ -9,9 +9,10 @@ import cz.payola.web.client.View
 import cz.payola.common.entities.plugins._
 import cz.payola.web.client.views.elements.form.fields._
 import cz.payola.web.client.views.bootstrap.InputControl
+import cz.payola.web.client.models.PrefixApplier
 
-class EditablePluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[PluginInstanceView] = List())
-    extends PluginInstanceView(pluginInst, predecessors)
+class EditablePluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[PluginInstanceView] = List(),
+    prefixApplier: PrefixApplier) extends PluginInstanceView(pluginInst, predecessors, prefixApplier)
 {
 
     val connectButtonClicked = new SimpleUnitEvent[EditablePluginInstanceView]
@@ -45,15 +46,15 @@ class EditablePluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[P
             val field = param match {
                 case p: BooleanParameter => new CheckBox(param.id, v.asInstanceOf[Boolean], "Enter parameter value")
                 case p: IntParameter => new NumericInput(param.id, v.asInstanceOf[Int], "Enter parameter value")
-                case p: StringParameter if p.isPattern => new TextArea(param.id, v.toString, "Enter parameter value")
-                case p: StringParameter if p.isMultiline => new TextArea(param.id, v.toString, "Enter parameter value")
-                case _ => new TextInput(param.id, v.toString, "Enter parameter value")
+                case p: StringParameter if p.isPattern => new TextArea(param.id, prefixApplier.applyPrefix(v.toString), "Enter parameter value")
+                case p: StringParameter if p.isMultiline => new TextArea(param.id, prefixApplier.applyPrefix(v.toString), "Enter parameter value")
+                case _ => new TextInput(param.id, prefixApplier.applyPrefix(v.toString), "Enter parameter value")
             }
 
             val inputControl = new InputControl(parameterName(param), field, None)
             inputControl.delayedChanged += { _ =>
                 parameterValueChanged.triggerDirectly(new ParameterValue(getId, param.id, param.name,
-                    field.value.toString, inputControl))
+                    prefixApplier.disapplyPrefix(field.value.toString), inputControl))
             }
 
             if (!pluginInstance.isEditable) {

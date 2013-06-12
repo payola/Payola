@@ -20,6 +20,7 @@ trait SquerylDataContextComponent
     with DataSourceRepositoryComponent
     with PluginRepositoryComponent
     with OntologyRepositoryComponent
+    with PrefixRepositoryComponent
 {
     self: RdfStorageComponent with PluginCompilerComponent =>
     /**
