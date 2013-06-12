@@ -15,8 +15,8 @@ sealed class VirtuosoSecuredEndpointFetcher(name: String, inputCount: Int, param
 {
     def this() = {
         this("Virtuoso Secured SPARQL Endpoint", 0, List(
-            new StringParameter(VirtuosoSecuredEndpointFetcher.endpointURLParameter, "", false),
-            new StringParameter(VirtuosoSecuredEndpointFetcher.graphURIsParameter, "", true),
+            new StringParameter(VirtuosoSecuredEndpointFetcher.endpointURLParameter, "", false, false, false, true),
+            new StringParameter(VirtuosoSecuredEndpointFetcher.graphURIsParameter, "", true, false, false, true),
             new StringParameter(VirtuosoSecuredEndpointFetcher.usernameParameter, "", false),
             new StringParameter(VirtuosoSecuredEndpointFetcher.passwordParameter, "", false, false, true)
         ), IDGenerator.newId)

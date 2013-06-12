@@ -14,8 +14,8 @@ sealed class SparqlEndpointFetcher(name: String, inputCount: Int, parameters: im
 {
     def this() = {
         this("SPARQL Endpoint", 0, List(
-            new StringParameter(SparqlEndpointFetcher.endpointURLParameter, "", false),
-            new StringParameter(SparqlEndpointFetcher.graphURIsParameter, "", true)
+            new StringParameter(SparqlEndpointFetcher.endpointURLParameter, "", false, false, false, true),
+            new StringParameter(SparqlEndpointFetcher.graphURIsParameter, "", true, false, false, true)
         ), IDGenerator.newId)
     }
 

@@ -14,8 +14,8 @@ sealed class OpenDataCleanStorage(name: String, inputCount: Int, parameters: imm
 {
     def this() = {
         this("Open Data Clean Storage", 0, List(
-            new StringParameter(OpenDataCleanStorage.serviceURLParameter, "", false),
-            new StringParameter(OpenDataCleanStorage.endpointURLParameter, "", false)
+            new StringParameter(OpenDataCleanStorage.serviceURLParameter, "", false, false, false, true),
+            new StringParameter(OpenDataCleanStorage.endpointURLParameter, "", false, false, false, true)
         ), IDGenerator.newId)
     }
 
