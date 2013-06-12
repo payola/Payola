@@ -15,8 +15,9 @@ import cz.payola.web.client.events._
 import cz.payola.web.client.views.elements.lists.ListItem
 import cz.payola.web.client.views.graph.sigma.GraphSigmaPluginView
 import cz.payola.web.client.views.graph.datacube.TimeHeatmap
+import cz.payola.web.client.models.PrefixApplier
 
-class PluginSwitchView extends GraphView with ComposedView
+class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with ComposedView
 {
     /**
      * Event triggered when ontology customization is created.
@@ -47,7 +48,7 @@ class PluginSwitchView extends GraphView with ComposedView
      * List of available visualization plugins.
      */
     private val plugins = List[PluginView](
-        new TripleTablePluginView,
+        new TripleTablePluginView(Some(prefixApplier)),
         new SelectResultPluginView,
         new CircleTechnique,
         new TreeTechnique,

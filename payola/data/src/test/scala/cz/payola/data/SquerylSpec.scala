@@ -55,8 +55,8 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
     private val ownedCustomization = OntologyCustomization.empty(urls, "Name2", Some(u1))
     private val customizations = List(customization, ownedCustomization)
 
-    private val ownedPrefix = new cz.payola.domain.entities.Prefix("prefix1", "@p1", urls(0), Some(u1))
-    private val commonPrefix = new cz.payola.domain.entities.Prefix("prefix2", "@p2", urls(0), None)
+    private val ownedPrefix = new cz.payola.domain.entities.Prefix("prefix1", "p1", urls(0), Some(u1))
+    private val commonPrefix = new cz.payola.domain.entities.Prefix("prefix2", "p2", urls(0), None)
 
     private var prefixes = List(ownedPrefix, commonPrefix)
 

@@ -80,7 +80,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
             view.overviewView.controls.timeoutInfoBar.addCssClass("none")
             view.overviewView.controls.progressBar.setStyleToSuccess()
 
-            graphPresenter = new GraphPresenter(view.resultsView.htmlElement)
+            graphPresenter = new GraphPresenter(view.resultsView.htmlElement, prefixPresenter.prefixApplier)
             graphPresenter.initialize()
             graphPresenter.view.vertexBrowsing += onVertexBrowsing
 

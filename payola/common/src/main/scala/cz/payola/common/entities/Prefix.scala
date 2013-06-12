@@ -32,11 +32,11 @@ trait Prefix extends Entity with OptionallyOwnedEntity with NamedEntity {
      * @return Returns None if prefix doesn't shorten uri, Some(shorted uri) otherwise
      */
     def applyPrefix(uri:String): Option[String] = {
-        replaceInUri(uri, url, prefix)
+        replaceInUri(uri, url, prefix + ":")
     }
 
     def disapplyPrefix(uri:String): Option[String] = {
-        replaceInUri(uri, prefix, url)
+        replaceInUri(uri, prefix + ":", url)
     }
 
     private def replaceInUri(uri: String, lookFor: String, replaceWith: String): Option[String] = {

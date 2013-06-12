@@ -24,7 +24,7 @@ class DataSourceBrowser(
 {
     private val view = new DataSourceBrowserView(dataSourceName)
 
-    private val graphPresenter = new GraphPresenter(view.graphViewSpace.htmlElement)
+    private var graphPresenter: GraphPresenter = null
 
     private var history = mutable.ListBuffer.empty[String]
 
@@ -40,7 +40,9 @@ class DataSourceBrowser(
 
     def initialize() {
         // First init prefixes
-        prefixPresenter.initialize();
+        prefixPresenter.initialize()
+
+        graphPresenter = new GraphPresenter(view.graphViewSpace.htmlElement, prefixPresenter.prefixApplier)
 
         // Initialize the sub presenters.
         graphPresenter.initialize()

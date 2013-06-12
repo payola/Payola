@@ -67,13 +67,13 @@ object Prefix extends PayolaController with Secured
 
             try {
                 val p = prefix.get
-                p.name = data.getOrElse("prefix", Nil).head // Realy use prefix as a name
+                p.name = data.getOrElse("prefix", Nil).head // Really use prefix as a name
                 p.prefix = data.getOrElse("prefix", Nil).head
                 p.url = data.getOrElse("url", Nil).head
 
                 // Validate data here ... ugly
-                if (p.prefix.length < 2 || !p.prefix.startsWith("@"))
-                    throw new ValidationException("prefix", "Prefix has to start with '@' character.")
+                if (p.prefix.length == 0)
+                    throw new ValidationException("prefix", "Prefix has to be specified")
                 if (p.url.length == 0)
                     throw new ValidationException("url", "Url has to be specified.")
 
