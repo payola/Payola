@@ -44,6 +44,7 @@ class GraphPresenter(val viewElement: html.Element) extends Presenter
 
     private def onUserCustomizationEditClicked(e: EventArgs[OntologyCustomization]) {
         editUserCustomization(e.target)
+        onOntologyCustomizationSelected(e)
     }
 
     private def onOntologyCustomizationsChanged(e: EventArgs[_]) {
@@ -76,6 +77,7 @@ class GraphPresenter(val viewElement: html.Element) extends Presenter
 
     private def onOntologyCustomizationEditClicked(e: EventArgs[OntologyCustomization]) {
         editOntologyCustomization(e.target)
+        onOntologyCustomizationSelected(e)
     }
 
     private def onOntologyCustomizationSelected(e: EventArgs[OntologyCustomization]) {
@@ -102,11 +104,7 @@ class GraphPresenter(val viewElement: html.Element) extends Presenter
     }
 
     def onVertexSetMain(e: VertexEventArgs[_]) {
-         e.vertex match  {
-             case i: IdentifiedVertex => {
-                 view.setMainVertex(i)
-             }
-         }
+        view.setMainVertex(e.vertex)
     }
 
     private def editOntologyCustomization(customization: OntologyCustomization) {
@@ -119,10 +117,10 @@ class GraphPresenter(val viewElement: html.Element) extends Presenter
 
     private def editUserCustomization(customization: OntologyCustomization) {
         val editor = new UserCustomizationEditor(view.getCurrentGraph, customization, forceUpdateOntologyCustomizations)
-        if (currentOntologyCustomization.exists(_ == customization)) {
-            editor.customizationValueChanged += { e => view.updateOntologyCustomization(
-                Some(customization)) }
+        editor.customizationChanged += { e =>
+            view.updateOntologyCustomization(Some(e.target.target))
         }
+
         editor.initialize()
     }
 

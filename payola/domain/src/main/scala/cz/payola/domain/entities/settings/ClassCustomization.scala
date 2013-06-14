@@ -10,6 +10,7 @@ class ClassCustomization(
     protected var _fillColor: String,
     protected var _radius: Int,
     protected var _glyph: String,
+    protected var _labels: String,
     protected var _propertyCustomizations: immutable.Seq[PropertyCustomization])
     extends Entity
     with cz.payola.common.entities.settings.ClassCustomization

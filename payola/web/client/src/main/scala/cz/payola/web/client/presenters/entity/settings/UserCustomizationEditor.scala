@@ -16,7 +16,7 @@ import cz.payola.common.rdf.Graph
 class UserCustomizationEditor (currentGraph: Option[Graph], userCustomization: OntologyCustomization, onClose: () => Unit)
     extends Presenter
 {
-    val customizationValueChanged = new SimpleUnitEvent[this.type]
+    val customizationChanged = new SimpleUnitEvent[OntologyCustomizationEventArgs]
 
     private val view = new UserCustomizationEditModal(currentGraph, userCustomization, onClose)
 
@@ -26,9 +26,13 @@ class UserCustomizationEditor (currentGraph: Option[Graph], userCustomization: O
         view.classFillColorChanged += onClassFillColorChanged _
         view.classRadiusDelayedChanged += onClassRadiusChanged _
         view.classGlyphChanged += onClassGlyphChanged _
+        view.classLabelsChanged += onClassLabelsChanged _
         view.propertyStrokeColorChanged += onPropertyStrokeColorChanged _
         view.propertyStrokeWidthDelayedChanged += onPropertyStrokeWidthChanged _
 
+        view.customizationChanged += { e =>
+            customizationChanged.triggerDirectly(new OntologyCustomizationEventArgs(e.target))
+        }
         view.render()
     }
 
@@ -87,6 +91,13 @@ class UserCustomizationEditor (currentGraph: Option[Graph], userCustomization: O
         }(failHandler(_, e.target))
     }
 
+    private def onClassLabelsChanged(e: ClassCustomizationEventArgs[InputControl[_]]) {
+        e.target.isActive = true
+        OntologyCustomizationManager.setClassLabels(userCustomization.id, e.classCustomization.uri, e.newValue){
+            () => successHandler(e, () => e.classCustomization.labels = e.newValue)
+        }(failHandler(_, e.target))
+    }
+
     private def onPropertyStrokeColorChanged(e: PropertyCustomizationEventArgs[InputControl[_]]) {
         e.target.isActive = true
         OntologyCustomizationManager.setPropertyStrokeColor(userCustomization.id, e.classCustomization.uri,
@@ -107,7 +118,7 @@ class UserCustomizationEditor (currentGraph: Option[Graph], userCustomization: O
         e.target.isActive = false
         e.target.setOk()
         valueSetter()
-        customizationValueChanged.triggerDirectly(this)
+        customizationChanged.triggerDirectly(new OntologyCustomizationEventArgs(userCustomization))
     }
 
     /**

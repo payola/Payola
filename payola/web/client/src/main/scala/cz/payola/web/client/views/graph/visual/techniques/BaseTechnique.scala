@@ -8,21 +8,24 @@ import cz.payola.web.client.views.graph.visual.graph._
 import cz.payola.web.client.views.graph.visual.graph.positioning._
 import cz.payola.web.client.views.graph.visual.animation._
 
-abstract class BaseTechnique(mainVertexAvailable: Boolean, name: String) extends VisualPluginView(mainVertexAvailable, name)
+abstract class BaseTechnique(name: String) extends VisualPluginView(name)
 {
     private val treeVerticesDistance = 100
 
     private val circleLevelsDistance = 150
 
-    override def setMainVertex(vertex: IdentifiedVertex) {
+    override def setMainVertex(vertex: Vertex) {
         graphView.foreach{ graph =>
             graph.putVertexToTop(vertex)
             performPositioning(graph)
         }
     }
 
-    override def updateGraph(graph: Option[Graph], contractLiterals: Boolean = true) {
-        super.updateGraph(graph, contractLiterals)
+    override def updateGraph(graph: Option[Graph], contractLiterals: Boolean = true, resultsCount: Option[Int]) {
+        super.updateGraph(graph, contractLiterals, resultsCount)
+    }
+
+    override def drawGraph() {
         graphView.foreach(performPositioning(_))
     }
 

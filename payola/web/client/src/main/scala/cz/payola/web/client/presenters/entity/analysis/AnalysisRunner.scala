@@ -93,7 +93,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
                 true
             }
 
-            graphPresenter.view.updateGraph(Some(evt.graph), true)
+            graphPresenter.view.updateGraph(Some(evt.graph), true, None) //TODO
 
             view.tabs.showTab(1)
             view.tabs.switchTab(1)

@@ -10,7 +10,7 @@ import scala.Some
 /**
  * Visual plug-in technique that places the vertices into a tree structure.
  */
-class TreeTechnique extends BaseTechnique(true, "Tree Visualization")
+class TreeTechnique extends BaseTechnique("Tree Visualization")
 {
     protected def getTechniquePerformer(component: Component,
         animate: Boolean): Animation[_] = {

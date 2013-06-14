@@ -99,7 +99,8 @@ class ColumnChartPluginView extends PluginView("Column Chart")
 
 
         new Graph(List(initialVertex, bar1, bar2, bar2, name1, name2, name3, value1, value2, value3),
-            List(e1, e2, e3, e4, e5, e6, e7, e8, e9)
+            List(e1, e2, e3, e4, e5, e6, e7, e8, e9),
+            None
         )
     }
 
@@ -195,7 +196,7 @@ class ColumnChartPluginView extends PluginView("Column Chart")
         chartWrapper.setAttribute("style", styleString)
     }
 
-    override def updateGraph(graph: Option[Graph], conractLiterals: Boolean = true) {
+    override def updateGraph(graph: Option[Graph], conractLiterals: Boolean = true, resultsCount: Option[Int]) {
         if (graph != currentGraph) {
             // Clear the wrapper
             chartWrapper.removeAllChildNodes()
@@ -215,7 +216,7 @@ class ColumnChartPluginView extends PluginView("Column Chart")
                 }
             }
         }
-        super.updateGraph(graph, true)
+        super.updateGraph(graph, true, resultsCount)
     }
 
     private def validateLiteralVerticesOnEdges(edges: Seq[Edge]): Boolean = {

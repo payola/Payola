@@ -60,7 +60,7 @@ class GraphSigmaPluginView extends SigmaPluginView("Sigma.js") {
 
     }
 
-    private def stopAnimation() {
+    /*private def stopAnimation() {
         if (sigmaInstance.isDefined) {
             sigmaInstance.get.stopForceAtlas2()
             animationStartStopButton.subViews.foreach{ child =>
@@ -99,7 +99,7 @@ class GraphSigmaPluginView extends SigmaPluginView("Sigma.js") {
             }
 
             false
-    }
+    }*/
 
 
 

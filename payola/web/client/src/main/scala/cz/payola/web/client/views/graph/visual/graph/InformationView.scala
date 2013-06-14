@@ -10,7 +10,7 @@ import cz.payola.common.entities.settings.OntologyCustomization
  * Graphical representation of textual data in the drawn graph.
  * @param data that are visualized (by toString function of this object)
  */
-class InformationView(data: Any) extends View[html.elements.CanvasRenderingContext2D] {
+class InformationView(labels: List[Any]) extends View[html.elements.CanvasRenderingContext2D] {
 
     var colorBackground = new Color(255, 255, 255, 0.2)
 
@@ -66,11 +66,11 @@ class InformationView(data: Any) extends View[html.elements.CanvasRenderingConte
      * @param position where the text is drawn
      */
     private def performDrawing(context: elements.CanvasRenderingContext2D, color: Color, position: Point2D) {
-        val textWidth = context.measureText(data.toString).width
+        val textWidth = context.measureText(labels.head.toString).width
         drawRoundedRectangle(context, position + Vector2D(-textWidth / 2, -15), Vector2D(textWidth, 20), 4)
         fillCurrentSpace(context, colorBackground)
         //TODO how come, that the measureText returns different size on the first run??
 
-        drawText(context, data.toString, position, color, font, align)
+        drawText(context, labels.head.toString, position, color, font, align)
     }
 }

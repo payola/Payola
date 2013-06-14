@@ -120,14 +120,14 @@ class PluginSwitchView extends GraphView with ComposedView
 
     def createSubViews = List(toolbar, pluginSpace)
 
-    override def update(graph: Option[Graph], customization: Option[OntologyCustomization]) {
-        super.update(graph, customization)
-        currentPlugin.update(graph, customization)
+    override def update(graph: Option[Graph], customization: Option[OntologyCustomization], resultsCount: Option[Int]) {
+        super.update(graph, customization, resultsCount)
+        currentPlugin.update(graph, customization, resultsCount)
     }
 
-    override def updateGraph(graph: Option[Graph], contractLiterals: Boolean) {
-        super.updateGraph(graph, contractLiterals)
-        currentPlugin.updateGraph(graph, contractLiterals)
+    override def updateGraph(graph: Option[Graph], contractLiterals: Boolean, resultsCount: Option[Int]) {
+        super.updateGraph(graph, contractLiterals, resultsCount)
+        currentPlugin.updateGraph(graph, contractLiterals, resultsCount)
     }
 
     override def updateOntologyCustomization(customization: Option[OntologyCustomization]) {
@@ -135,7 +135,7 @@ class PluginSwitchView extends GraphView with ComposedView
         currentPlugin.updateOntologyCustomization(customization)
     }
 
-    override def setMainVertex(vertex: IdentifiedVertex) {
+    override def setMainVertex(vertex: Vertex) {
         currentPlugin.setMainVertex(vertex)
     }
 
@@ -195,6 +195,20 @@ class PluginSwitchView extends GraphView with ComposedView
     private def createCustomizationListItem(customization: OntologyCustomization, isEditable: Boolean): ListItem = {
         val editButton = new Button(new Text("Edit"), "btn-mini", new Icon(Icon.pencil)).setAttribute(
             "style", "position: absolute; right: 5px;")
+
+        val anchor = new Anchor(List(new Text(customization.name)) ++ (if (isEditable) List(editButton) else Nil))
+
+        val listItem = new ListItem(List(anchor))
+        if (currentCustomization.exists(_ == customization)) {
+            listItem.addCssClass("active")
+        }
+
+        anchor.mouseClicked += { e =>
+            ontologyCustomizationSelected.triggerDirectly(customization)
+            customizationsButton.setActiveItem(listItem)
+            false
+        }
+
         editButton.mouseClicked += { e =>
             if (customization.isUserDefined) {
                 userCustomizationEditClicked.triggerDirectly(customization)
@@ -204,16 +218,6 @@ class PluginSwitchView extends GraphView with ComposedView
             false
         }
 
-        val anchor = new Anchor(List(new Text(customization.name)) ++ (if (isEditable) List(editButton) else Nil))
-        anchor.mouseClicked += { e =>
-            ontologyCustomizationSelected.triggerDirectly(customization)
-            false
-        }
-
-        val listItem = new ListItem(List(anchor))
-        if (currentCustomization.exists(_ == customization)) {
-            listItem.addCssClass("active")
-        }
         listItem
     }
 
@@ -224,7 +228,7 @@ class PluginSwitchView extends GraphView with ComposedView
     private def changePlugin(plugin: PluginView) {
         if (currentPlugin != plugin) {
             // Destroy the current plugin.
-            currentPlugin.update(None, None)
+            currentPlugin.update(None, None, None)
             currentPlugin.destroyControls()
             currentPlugin.destroy()
 
@@ -232,7 +236,8 @@ class PluginSwitchView extends GraphView with ComposedView
             currentPlugin = plugin
             currentPlugin.render(pluginSpace.htmlElement)
             currentPlugin.renderControls(toolbar.htmlElement)
-            currentPlugin.update(currentGraph, currentCustomization)
+            currentPlugin.update(currentGraph, currentCustomization, currentResultsCount)
+            currentPlugin.drawGraph()
         }
     }
 

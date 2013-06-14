@@ -49,7 +49,7 @@ class OntologyCustomizationsByOwnership(
         val propertyCustomizations = propertiesURIs.map { propertyURI =>
             new PropertyCustomization(propertyURI, "", 0)
         }
-        val classCustomization = new ClassCustomization(classURI, "", 0, "", propertyCustomizations.toList)
+        val classCustomization = new ClassCustomization(classURI, "", 0, "", "", propertyCustomizations.toList)
 
         val optCustomization = Payola.model.ontologyCustomizationModel.getAccessibleToUserById(Some(owner), customizationID)
         if (optCustomization.isEmpty){
@@ -135,6 +135,17 @@ class OntologyCustomizationsByOwnership(
         try {
             val int = validateInt(value, "radius")
             setClassAttribute(customizationID, classURI, { _.radius = int }, user, successCallback, failCallback)
+        } catch {
+            case t: Throwable => failCallback(t)
+        }
+    }
+
+    @async @secured def setClassLabels(customizationID: String, classURI: String, value: String, user: User = null)
+        (successCallback: () => Unit)
+        (failCallback: Throwable => Unit) {
+
+        try {
+            setClassAttribute(customizationID, classURI, { _.labels = value }, user, successCallback, failCallback)
         } catch {
             case t: Throwable => failCallback(t)
         }

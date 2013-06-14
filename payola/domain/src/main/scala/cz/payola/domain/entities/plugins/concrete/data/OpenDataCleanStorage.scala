@@ -34,6 +34,7 @@ sealed class OpenDataCleanStorage(name: String, inputCount: Int, parameters: imm
     }
 
     override def getNeighbourhood(instance: PluginInstance, vertexURI: String): Graph = {
+
         usingDefined(getServiceURLParameter(instance)) { serviceURL =>
             val neighbourhoodUrl = serviceURL + "/uri?format=trig&uri=" + URLEncoder.encode(vertexURI, "UTF-8")
             Graph(RdfRepresentation.Trig, new Downloader(neighbourhoodUrl, "application/x-trig").result)

@@ -58,8 +58,8 @@ class GraphView(contractLiterals: Boolean = true) extends View[CanvasPack]
         }.isEmpty
     }
 
-    def putVertexToTop(vertex: IdentifiedVertex) {
-        components.exists(_.moveVertexToTop(vertex.uri))
+    def putVertexToTop(vertex: Vertex) {
+        components.exists(_.moveVertexToTop(vertex))
         //exists function allows to skip the rest of the components, when the component containing the vertex.uri is found
     }
 
@@ -721,6 +721,15 @@ class GraphView(contractLiterals: Boolean = true) extends View[CanvasPack]
                 allSelectedCount += component.getSelectedCount
         }
         allSelectedCount
+    }
+
+    def getAllSelectedVertices: List[VertexView] = {
+        var selectedVertices = List[VertexView]()
+        components.foreach {
+            components =>
+                selectedVertices ++= components.getSelected
+        }
+        selectedVertices
     }
 
     /**

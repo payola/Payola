@@ -45,6 +45,9 @@ class StringOps(val str: java.lang.String) extends s2js.runtime.client.scala.col
     @javascript("return parseFloat(self.x);")
     def toDouble: Double = 0.0
 
+    @javascript("return self.repr().split(pattern);")
+    def split(pattern: String): Any = null
+
     @javascript("return self.x.replace(pattern, replacement);")
     def replaceAllLiterally(pattern: String, replacement: String) = null
 

@@ -468,6 +468,7 @@ class SquerylSpec extends TestDataContextComponent("squeryl", false) with FlatSp
                     assert(persistedCc.fillColor == classCustomization.fillColor)
                     assert(persistedCc.radius == classCustomization.radius)
                     assert(persistedCc.glyph == classCustomization.glyph)
+                    assert(persistedCc.labels == classCustomization.labels)
                     assert(persistedCc.propertyCustomizations.size == classCustomization.propertyCustomizations.size)
 
                 for (propertyCustomization <- classCustomization.propertyCustomizations){

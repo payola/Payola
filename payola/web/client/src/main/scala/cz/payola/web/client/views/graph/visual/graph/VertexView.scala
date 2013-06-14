@@ -8,8 +8,9 @@ import cz.payola.web.client.views.graph.visual.graph.positioning.LocationDescrip
 import cz.payola.common.rdf._
 import scala.collection.mutable
 import cz.payola.web.client.views.elements._
-import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.common.entities.settings._
 import s2js.adapters.html
+import scala.Some
 
 /**
  * Graphical representation of IdentifiedVertex object in the drawn graph.
@@ -35,7 +36,7 @@ class VertexView(val vertexModel: Vertex, var position: Point2D, var rdfType: St
     /**
      * Neighbouring literal vertices of this vertex describing attributes of this vertex.
      */
-    private val literalVertices = new mutable.HashMap[String, Seq[String]]()
+    private var literalVertices = List[(String, Seq[String])]()
 
     /**
      * Count of updates of the parent graphView, that this vertexView was held in memory and was not sent byt the server.
@@ -56,10 +57,7 @@ class VertexView(val vertexModel: Vertex, var position: Point2D, var rdfType: St
     /**
      * Textual data that should be visualized with this vertex ("over this vertex").
      */
-    private var information: Option[InformationView] = vertexModel match {
-        case i: Vertex => Some(new InformationView(i))
-        case _ => None
-    }
+    private var information: Option[InformationView] = Some(new InformationView(List(vertexModel)))
 
     /**
      * Setter of contained informationView's data.
@@ -67,7 +65,7 @@ class VertexView(val vertexModel: Vertex, var position: Point2D, var rdfType: St
      */
     def setInformation(data: Option[Vertex]) {
         if (data.isDefined) {
-            information = Some(new InformationView(data.get))
+            information = Some(new InformationView(List(data.get)))
         }
     }
 
@@ -76,7 +74,7 @@ class VertexView(val vertexModel: Vertex, var position: Point2D, var rdfType: St
      * @return attributes of this identifiedVertex with types of relations (Edge between this identifiedVertex
      *         and the literalVertex)
      */
-    def getLiteralVertices: mutable.HashMap[String, Seq[String]] = {
+    def getLiteralVertices: List[(String, Seq[String])] = {
         literalVertices
     }
 
@@ -85,7 +83,7 @@ class VertexView(val vertexModel: Vertex, var position: Point2D, var rdfType: St
      */
     def addLiteralVertex(typeOfAttribute: Edge, valueOfAttribute: Seq[Vertex]) {
         val values = valueOfAttribute.map(_.toString)
-        literalVertices.put(typeOfAttribute.toString, values)
+        literalVertices ++= List(((typeOfAttribute.toString, values)))
     }
 
     /**
@@ -192,8 +190,29 @@ class VertexView(val vertexModel: Vertex, var position: Point2D, var rdfType: St
     def setConfiguration(newCustomization: Option[OntologyCustomization]) {
         if(newCustomization.isEmpty) {
             resetConfiguration()
+            information = Some(new InformationView(List(vertexModel)))
         } else {
-            val foundCustomization = newCustomization.get.classCustomizations.find{_.uri == rdfType}
+            val foundCustomization =
+                if(newCustomization.get.isUserDefined){
+                    val found = this.vertexModel match {
+                        case i: IdentifiedVertex =>
+                            newCustomization.get.classCustomizations.find(_.uri == i.uri)
+                        case i: LiteralVertex =>
+                            newCustomization.get.classCustomizations.find(_.uri == i.value)
+                        case _ =>
+                            None
+                    }
+                    if(found.isDefined && found.get.labels != null && found.get.labels != "") {
+                        val labels = processLabels(found.get.labelsSplitted)
+                        information = if(labels.isEmpty) { None } else { Some(new InformationView(labels)) }
+                    } else {
+                        information = None
+                    }
+                    found
+                } else {
+                    information = Some(new InformationView(List(vertexModel)))
+                    newCustomization.get.classCustomizations.find{_.uri == rdfType}
+                }
 
             if(foundCustomization.isEmpty) {
                 resetConfiguration()
@@ -219,10 +238,6 @@ class VertexView(val vertexModel: Vertex, var position: Point2D, var rdfType: St
                     setGlyph(None)
                 }
             }
-        }
-
-        if(information.isDefined) {
-            information.get.setConfiguration(newCustomization)
         }
     }
 
@@ -258,7 +273,9 @@ class VertexView(val vertexModel: Vertex, var position: Point2D, var rdfType: St
             (LocationDescriptor.getVertexInformationPosition(position) + positionCorrection).toVector +
                 informationPositionCorrection
 
-        information.get.draw(context, informationPosition)
+        if (information.isDefined) {
+            information.get.draw(context, informationPosition)
+        }
     }
 
     def drawQuick(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
@@ -290,6 +307,24 @@ class VertexView(val vertexModel: Vertex, var position: Point2D, var rdfType: St
             case vv: VertexView =>
                 vv.vertexModel.toString eq vertexModel.toString
             case _ => false
+        }
+    }
+
+    private def processLabels(labels: List[LabelItem]): List[String] = {
+        val acceptedLabels = labels.filter{ label =>
+            label.accepted && (label.userDefined || label.value == "uri" || getLiteralVertices.exists{
+                _.toString().contains(label.value.substring(2))
+            })
+        }
+
+        acceptedLabels.map { label =>
+            if(label.userDefined) {
+                label.value
+            } else if(label.value == "uri") {
+                vertexModel.toString
+            } else {
+                getLiteralVertices.find{ literal => labels.contains(literal._1.substring(2)) }.get.toString
+            }
         }
     }
 }

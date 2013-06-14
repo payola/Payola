@@ -14,7 +14,7 @@ class Button(subView: View, cssClass: String = "", icon: Icon = null)
 {
     setAttribute("type", "button")
 
-    def setIsEnabled(isEnabled: Boolean) {
+    def setIsEnabled(isEnabled: Boolean): this.type = {
         if (isEnabled) {
             removeCssClass("disabled")
             htmlElement.disabled = false
@@ -22,5 +22,7 @@ class Button(subView: View, cssClass: String = "", icon: Icon = null)
             addCssClass("disabled")
             htmlElement.disabled = true
         }
+
+        this
     }
 }

@@ -24,7 +24,7 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
     /**
      * Textual data that should be visualized with this edge ("over this edge").
      */
-    val information: InformationView = new InformationView(edgeModel)
+    val information: InformationView = new InformationView(List(edgeModel))
 
     /**
      * Indicator of selection of this graphs element. Is used during color selection in draw function.
@@ -59,7 +59,12 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
         if(newCustomization.isEmpty) {
             resetConfiguration()
         } else {
-            val foundCustomizationType = newCustomization.get.classCustomizations.find{_.uri == originView.rdfType}
+            val foundCustomizationType =
+                if(newCustomization.get.isUserDefined) {
+                    newCustomization.get.classCustomizations.find(_.uri == "properties")
+                } else {
+                    newCustomization.get.classCustomizations.find{_.uri == originView.rdfType}
+                }
 
             if(foundCustomizationType.isEmpty) {
                 resetConfiguration()

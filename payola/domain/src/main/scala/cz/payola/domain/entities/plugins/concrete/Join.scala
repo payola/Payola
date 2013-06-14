@@ -84,7 +84,7 @@ class Join(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]
             }
         }
 
-        new Graph(resultIdentifiedVertices.keys.toList ++ resultLiteralVertices.toList, resultEdges.toList)
+        new Graph(resultIdentifiedVertices.keys.toList ++ resultLiteralVertices.toList, resultEdges.toList, None)
     }
 }
 

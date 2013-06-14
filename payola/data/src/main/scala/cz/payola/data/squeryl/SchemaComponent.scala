@@ -372,7 +372,7 @@ trait SchemaComponent
                 new OntologyCustomization("", "", "", None, Nil, false)
             },
             factoryFor(classCustomizations) is {
-                new ClassCustomization("", "", "", 0, "", Nil)
+                new ClassCustomization("", "", "", 0, "", "", Nil)
             },
             factoryFor(propertyCustomizations) is {
                 new PropertyCustomization("", "", "", 0)

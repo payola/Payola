@@ -20,8 +20,7 @@ abstract class SigmaPluginView(name: String) extends PluginView(name){
 
     protected var sigmaInstance: Option[sigma.Sigma] = None
 
-    protected val animationStartStopButton = new Button(new Text("Start"), "pull-right",
-        new Icon(Icon.refresh)).setAttribute("style", "margin: 0 5px;")
+    //protected val animationStartStopButton = new Button(new Text("Start"), "pull-right", new Icon(Icon.refresh)).setAttribute("style", "margin: 0 5px;")
 
     def createSubViews = List(sigmaPluginWrapper)
 
@@ -31,12 +30,12 @@ abstract class SigmaPluginView(name: String) extends PluginView(name){
     }
 
     override def renderControls(toolbar: html.Element) {
-        animationStartStopButton.render(toolbar)
-        animationStartStopButton.setIsEnabled(true)
+        //animationStartStopButton.render(toolbar)
+        //animationStartStopButton.setIsEnabled(true)
     }
 
     override def destroyControls() {
-        animationStartStopButton.destroy()
+        //animationStartStopButton.destroy()
     }
 
     private def updateSigmaPluginSize(parent: html.Element) {
@@ -89,7 +88,7 @@ abstract class SigmaPluginView(name: String) extends PluginView(name){
         }
     }
 
-    override def updateGraph(graph: Option[rdf.Graph], contractLiterals: Boolean) {
+    override def updateGraph(graph: Option[rdf.Graph], contractLiterals: Boolean, resultsCount: Option[Int]) {
 
         if (sigmaInstance.isEmpty && graph.isEmpty) {
             renderMessage(sigmaPluginWrapper.htmlElement, "The graph is empty...")
@@ -104,7 +103,7 @@ abstract class SigmaPluginView(name: String) extends PluginView(name){
             sigmaInstance.get.draw()
         }
 
-        super.updateGraph(graph, false)
+        super.updateGraph(graph, false, resultsCount)
     }
 
     def setDrawingProperties()

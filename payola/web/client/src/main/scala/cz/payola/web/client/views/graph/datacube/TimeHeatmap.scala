@@ -18,7 +18,7 @@ class TimeHeatmap extends PluginView("Time heatmap") {
     @javascript(""" return parseInt(str); """)
     def intval(str: String) : Int = 0
 
-    override def updateGraph(graph: Option[Graph], contractLiterals: Boolean = true) {
+    override def updateGraph(graph: Option[Graph], contractLiterals: Boolean = true, resultsCount: Option[Int]) {
 
         graph.map { g =>
 

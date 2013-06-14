@@ -15,6 +15,9 @@ abstract class GraphView
     /** The graph that is currently being visualized. */
     protected var currentGraph: Option[Graph] = None
 
+    /** Count of vertices in the result of current query (equal or more than vertices in currentGraph) */
+    protected var currentResultsCount: Option[Int] = None
+
     /** The ontology customization that is currently used during visualization. */
     protected var currentCustomization: Option[OntologyCustomization] = None
 
@@ -30,25 +33,32 @@ abstract class GraphView
     /** Triggered when a vertex is selected to represent the main vertex in a visualization. */
     val vertexSetMain = new UnitEvent[this.type , VertexEventArgs[this.type]]
 
-    def setMainVertex(vertex: IdentifiedVertex) { }
+    def setMainVertex(vertex: Vertex) { }
 
     /**
      * Updates both the graph that should be visualized and the customization that should be used.
      * @param graph The graph to visualize.
      * @param customization The ontology customization that should be used during visualization.
+     * @param resultsCount Count of vertices in the result of current query (by which was the graph fetched); resultsCount >= graph.get.vertices.length
      */
-    def update(graph: Option[Graph], customization: Option[OntologyCustomization]) {
+    def update(graph: Option[Graph], customization: Option[OntologyCustomization], resultsCount: Option[Int]) {
         updateOntologyCustomization(customization)
-        updateGraph(graph, true)
+        updateGraph(graph, true, resultsCount)
     }
 
     /**
-     * Updates the current graph of the view and re-runs the visualization.
+     * Updates the current graph of the view.
      * @param graph The graph to add to the current graph.
+     * @param resultsCount Count of vertices in the result of current query (by which was the graph fetched); resultsCount >= graph.get.vertices.length
      */
-    def updateGraph(graph: Option[Graph], contractLiterals: Boolean) {
+    def updateGraph(graph: Option[Graph], contractLiterals: Boolean, resultsCount: Option[Int]) {
         currentGraph = graph
     }
+
+    /**
+     * Runs the visualization.
+     */
+    def drawGraph() {}
 
     /**
      * Updates the ontology customization that should be used during graph visualization and re-runs the visualization.
@@ -66,6 +76,6 @@ abstract class GraphView
      * Removes the current graph from the view memory and resets the visualization.
      */
     def clear() {
-        updateGraph(None, true)
+        updateGraph(None, true, None)
     }
 }

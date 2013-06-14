@@ -8,32 +8,108 @@ import cz.payola.web.client.views.VertexEventArgs
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.Icon
 import cz.payola.web.client.views.graph.PluginView
+import form.fields.TextInput
 
 abstract class TablePluginView(name: String) extends PluginView(name)
 {
-    protected val tableWrapper = new Div().setAttribute("style", "padding: 0 20px; min-height: 200px;")
+    protected val tablePluginWrapper = new Div()
+    protected val tableWrapper = new Div().setAttribute("style", "padding: 0 20px; min-height: 200px; margin:0 auto;")
 
-    def createSubViews = List(tableWrapper)
+    protected val allowedLinesOnPage = 50
+    private var currentPage = 0
+    private var pagesCount = 0
 
-    override def updateGraph(graph: Option[Graph], contractLiterals: Boolean = true) {
+    def createSubViews = List(tablePluginWrapper)
+
+    override def updateGraph(graph: Option[Graph], contractLiterals: Boolean = true, resultsCount: Option[Int]) {
         if (graph != currentGraph) {
             // Remove the old table.
             tableWrapper.removeAllChildNodes()
+            tablePluginWrapper.removeAllChildNodes()
 
             if (graph.isEmpty) {
-                renderMessage(tableWrapper.htmlElement, "The graph is empty...")
+                renderMessage(tablePluginWrapper.htmlElement, "The graph is empty...")
             } else {
-                val table = document.createElement[html.Element]("table")
-                table.className = "table table-striped table-bordered table-condensed"
-                tableWrapper.htmlElement.appendChild(table)
-                fillTable(graph, addElement(table, "thead"), addElement(table, "tbody"))
+                tablePluginWrapper.htmlElement.appendChild(tableWrapper.htmlElement)
+
+                renderTablePage(graph, 0)
+                createListingTools().render(tablePluginWrapper.htmlElement)
             }
         }
 
-        super.updateGraph(graph, true)
+        super.updateGraph(graph, true, resultsCount)
     }
 
-    def fillTable(graph: Option[Graph], tableHead: html.Element, tableBody: html.Element)
+    private def renderTablePage(graph: Option[Graph], pageNumber: Int) {
+        tableWrapper.removeAllChildNodes()
+
+        val table = document.createElement[html.Element]("table")
+        table.className = "table table-striped table-bordered table-condensed"
+        tableWrapper.htmlElement.appendChild(table)
+        pagesCount = fillTable(graph, addElement(table, "thead"), addElement(table, "tbody"), pageNumber)
+    }
+
+    protected def createListingTools(): View = {
+        val info = new Text("Page 1 of "+pagesCount)
+
+        val firstPage = new Button(new Text("First"), "", new Icon(Icon.fast_backward))
+        firstPage.mouseClicked += { e =>
+            if (currentPage > 0) {
+                currentPage = 0
+                renderTablePage(currentGraph, currentPage)
+                info.text = "Page 1 of "+pagesCount
+            }
+            false
+        }
+
+        val previousPage = new Button(new Text("Previous"), "", new Icon(Icon.backward))
+        previousPage.mouseClicked += { e =>
+            if (currentPage > 0) {
+                currentPage -= 1
+                renderTablePage(currentGraph, currentPage)
+                info.text = "Page "+(currentPage + 1)+" of "+pagesCount
+            }
+            false
+        }
+
+        val nextPage = new Button(new Text("Next"), "", new Icon(Icon.forward))
+        nextPage.mouseClicked += { e =>
+            if (currentPage < pagesCount - 1) {
+                currentPage += 1
+                renderTablePage(currentGraph, currentPage)
+                info.text = "Page "+(currentPage + 1)+" of "+pagesCount
+            }
+            false
+        }
+
+        val lastPage = new Button(new Text("Last"), "", new Icon(Icon.fast_forward))
+        lastPage.mouseClicked += { e =>
+            if (currentPage < pagesCount - 1) {
+                currentPage = pagesCount - 1
+                renderTablePage(currentGraph, currentPage)
+                info.text = "Page "+(currentPage + 1)+" of "+pagesCount
+            }
+            false
+        }
+
+        val jumpTextArea = new TextInput("jump", "")
+        val jumpButton = new Button(new Text("Go"), "", new Icon(Icon.play))
+        jumpButton.mouseClicked += { e =>
+            val jumpToPageNumber = jumpTextArea.value.toInt - 1
+            if(currentPage != jumpToPageNumber) {
+                currentPage = if(jumpToPageNumber >= 0 && jumpToPageNumber <= pagesCount) {
+                    jumpToPageNumber } else { currentPage }
+                renderTablePage(currentGraph, currentPage)
+                info.text = "Page "+(currentPage + 1)+" of "+pagesCount
+            }
+            false
+        }
+
+        new Div(List(firstPage, previousPage, nextPage, lastPage, info, jumpTextArea, jumpButton)).setAttribute(
+            "style", "width:800px; margin: 0 auto;")
+    }
+
+    def fillTable(graph: Option[Graph], tableHead: html.Element, tableBody: html.Element, pageNumber: Int): Int
 
     protected def createVertexView(vertex: IdentifiedVertex): View = {
         val dataSourceAnchor = new Anchor(List(new Icon(Icon.hdd)))

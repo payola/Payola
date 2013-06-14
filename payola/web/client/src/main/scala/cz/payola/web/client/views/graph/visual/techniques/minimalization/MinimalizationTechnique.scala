@@ -6,7 +6,7 @@ import cz.payola.web.client.views.graph.visual.graph._
 import cz.payola.web.client.views.algebra.Point2D
 import cz.payola.web.client.views.graph.visual.animation.Animation
 
-class MinimalizationTechnique extends BaseTechnique(false, "Tree ECM Visualization")
+class MinimalizationTechnique extends BaseTechnique("Tree ECM Visualization")
 {
     //TODO add some computation branch cutting...this algorithm is quite complex
 

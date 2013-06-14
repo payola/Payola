@@ -10,7 +10,7 @@ import cz.payola.web.client.views.entity.plugins._
 import cz.payola.common.ValidationException
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
 import cz.payola.web.client.events._
-import cz.payola.common.rdf.IdentifiedVertex
+import cz.payola.common.rdf._
 import s2js.adapters.browser.window
 import s2js.compiler.javascript
 
@@ -25,7 +25,7 @@ class DataSourceBrowser(
 
     private val graphPresenter = new GraphPresenter(view.graphViewSpace.htmlElement)
 
-    private var history = mutable.ListBuffer.empty[String]
+    private var history = mutable.ListBuffer.empty[(Option[Vertex], String)]
 
     private var historyPosition = -1
 
@@ -54,21 +54,21 @@ class DataSourceBrowser(
             if (initialVertexUri == "") {
                 blockPage("Fetching the initial graph...")
                 DataSourceManager.getInitialGraph(dataSourceId) { graph =>
-                    graphPresenter.view.updateGraph(graph, true)
+                    graphPresenter.view.updateGraph(graph, true, if(graph.isDefined) graph.get.resultsCount else None) //TODO
                     updateNavigationView()
                     unblockPage()
                 }(fatalErrorHandler(_))
             } else {
-                addToHistoryAndGo(initialVertexUri, false)
+                addToHistoryAndGo(None, initialVertexUri, false)
             }
         } else {
-            addToHistoryAndGo(decodeURIComponent(window.location.hash.substring(1)), false)
+            addToHistoryAndGo(None, decodeURIComponent(window.location.hash.substring(1)), false)
         }
     }
 
     private def onVertexBrowsing(e: VertexEventArgs[_]) {
         e.vertex match {
-            case i: IdentifiedVertex => addToHistoryAndGo(i.uri, false)
+            case i: IdentifiedVertex => addToHistoryAndGo(Some(i), i.uri, false)
         }
     }
 
@@ -89,7 +89,7 @@ class DataSourceBrowser(
     }
 
     private def onGoButtonClicked(e: EventArgs[_]): Boolean = {
-        addToHistoryAndGo(view.nodeUriInput.value, true)
+        addToHistoryAndGo(None, view.nodeUriInput.value, true)
         false
     }
 
@@ -97,16 +97,16 @@ class DataSourceBrowser(
         val modal = new SparqlQueryModal
         modal.confirming += { _ =>
             modal.block("Executing the SPARQL query.")
-            DataSourceManager.executeSparqlQuery(dataSourceId, modal.sparqlQueryInput.value) { g =>
+            DataSourceManager.executeSparqlQuery(dataSourceId, modal.sparqlQueryInput.value) { graph =>
                 modal.unblock()
                 modal.destroy()
 
-                history = mutable.ListBuffer.empty[String]
+                history.clear()
                 historyPosition = -1
                 updateNavigationView()
 
                 graphPresenter.view.clear()
-                graphPresenter.view.updateGraph(g, true)
+                graphPresenter.view.updateGraph(graph, true, if(graph.isDefined) graph.get.resultsCount else None) //TODO
             } { error =>
                 modal.unblock()
                 error match {
@@ -128,14 +128,14 @@ class DataSourceBrowser(
         }
     }
 
-    private def addToHistoryAndGo(uri: String, clearGraph: Boolean) {
+    private def addToHistoryAndGo(vertex: Option[IdentifiedVertex], uri: String, clearGraph: Boolean) {
         // Remove all next items from the history.
         while (historyPosition < history.length - 1) {
             history.remove(historyPosition + 1)
         }
 
         // Add the new item.
-        history += uri
+        history += ((vertex, uri))
         historyPosition += 1
 
         window.location.hash = encodeURIComponent(uri)
@@ -144,7 +144,8 @@ class DataSourceBrowser(
     }
 
     private def updateView(clearGraph: Boolean) {
-        val uri = history(historyPosition)
+        val tuple = history(historyPosition)
+        val uri = tuple._2
         view.nodeUriInput.value = uri
         view.nodeUriInput.setIsEnabled(false)
 
@@ -153,7 +154,11 @@ class DataSourceBrowser(
             if (clearGraph) {
                 graphPresenter.view.clear()
             }
-            graphPresenter.view.updateGraph(graph, true)
+            graphPresenter.view.updateGraph(graph, true, if(graph.isDefined) graph.get.resultsCount else None) //TODO
+            if(tuple._1.isDefined)
+                graphPresenter.view.setMainVertex(tuple._1.get)
+            else
+                graphPresenter.view.drawGraph()
             updateNavigationView()
 
             view.nodeUriInput.setIsEnabled(true)

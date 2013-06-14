@@ -131,7 +131,7 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
                         modal.render()
 
                         val view = new SimpleGraphView(graphPlaceholder, getPlugin.parameters.size)
-                        view.update(Some(s.outputGraph), None)
+                        view.update(Some(s.outputGraph), None, None)
 
                         view.patternUpdated += {
                             args =>

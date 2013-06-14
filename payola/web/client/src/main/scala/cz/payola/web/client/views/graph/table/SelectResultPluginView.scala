@@ -37,7 +37,7 @@ class SelectResultPluginView extends TablePluginView("Select Result Table")
         false
     }
 
-    def fillTable(graph: Option[Graph], tableHead: html.Element, tableBody: html.Element) {
+    def fillTable(graph: Option[Graph], tableHead: html.Element, tableBody: html.Element, tablePageNumber: Int): Int = { //TODO implementuj strankovani
         graph.foreach { g =>
             variables = mutable.ListBuffer.empty[String]
             solutions = mutable.HashMap.empty[String, mutable.ListBuffer[Binding]]
@@ -98,6 +98,7 @@ class SelectResultPluginView extends TablePluginView("Select Result Table")
                 }
             }
         }
+        1
     }
 
     override def renderControls(toolbar: html.Element) {
