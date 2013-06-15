@@ -13,6 +13,7 @@ import cz.payola.web.client.events._
 import cz.payola.common.rdf._
 import s2js.adapters.browser.window
 import s2js.compiler.javascript
+import cz.payola.web.client.presenters.entity.PrefixPresenter
 
 class DataSourceBrowser(
     val viewElement: html.Element,
@@ -23,11 +24,13 @@ class DataSourceBrowser(
 {
     private val view = new DataSourceBrowserView(dataSourceName)
 
-    private val graphPresenter = new GraphPresenter(view.graphViewSpace.htmlElement)
+    private var graphPresenter: GraphPresenter = null
 
     private var history = mutable.ListBuffer.empty[(Option[Vertex], String)]
 
     private var historyPosition = -1
+
+    private val prefixPresenter = new PrefixPresenter()
 
     @javascript("""return encodeURIComponent(uri)""")
     def encodeURIComponent(uri: String) : String = ""
@@ -36,6 +39,11 @@ class DataSourceBrowser(
     def decodeURIComponent(uri: String) : String = ""
 
     def initialize() {
+        // First init prefixes
+        prefixPresenter.initialize()
+
+        graphPresenter = new GraphPresenter(view.graphViewSpace.htmlElement, prefixPresenter.prefixApplier)
+
         // Initialize the sub presenters.
         graphPresenter.initialize()
 
@@ -54,7 +62,7 @@ class DataSourceBrowser(
             if (initialVertexUri == "") {
                 blockPage("Fetching the initial graph...")
                 DataSourceManager.getInitialGraph(dataSourceId) { graph =>
-                    graphPresenter.view.updateGraph(graph, true, if(graph.isDefined) graph.get.resultsCount else None) //TODO
+                    graphPresenter.view.updateGraph(graph, true)
                     updateNavigationView()
                     unblockPage()
                 }(fatalErrorHandler(_))
@@ -97,7 +105,7 @@ class DataSourceBrowser(
         val modal = new SparqlQueryModal
         modal.confirming += { _ =>
             modal.block("Executing the SPARQL query.")
-            DataSourceManager.executeSparqlQuery(dataSourceId, modal.sparqlQueryInput.value) { graph =>
+            DataSourceManager.executeSparqlQuery(dataSourceId, modal.sparqlQueryInput.value) { g =>
                 modal.unblock()
                 modal.destroy()
 
@@ -106,7 +114,7 @@ class DataSourceBrowser(
                 updateNavigationView()
 
                 graphPresenter.view.clear()
-                graphPresenter.view.updateGraph(graph, true, if(graph.isDefined) graph.get.resultsCount else None) //TODO
+                graphPresenter.view.updateGraph(g, true)
             } { error =>
                 modal.unblock()
                 error match {
@@ -128,11 +136,13 @@ class DataSourceBrowser(
         }
     }
 
-    private def addToHistoryAndGo(vertex: Option[IdentifiedVertex], uri: String, clearGraph: Boolean) {
+    private def addToHistoryAndGo(vertex: Option[IdentifiedVertex], prefixedUri: String, clearGraph: Boolean) {
         // Remove all next items from the history.
         while (historyPosition < history.length - 1) {
             history.remove(historyPosition + 1)
         }
+
+        val uri = prefixPresenter.prefixApplier.disapplyPrefix(prefixedUri)
 
         // Add the new item.
         history += ((vertex, uri))
@@ -144,9 +154,9 @@ class DataSourceBrowser(
     }
 
     private def updateView(clearGraph: Boolean) {
-        val tuple = history(historyPosition)
+        val tuple =  history(historyPosition)
         val uri = tuple._2
-        view.nodeUriInput.value = uri
+        view.nodeUriInput.value = prefixPresenter.prefixApplier.applyPrefix(uri)
         view.nodeUriInput.setIsEnabled(false)
 
         blockPage("Fetching the node neighbourhood...")
@@ -154,11 +164,12 @@ class DataSourceBrowser(
             if (clearGraph) {
                 graphPresenter.view.clear()
             }
-            graphPresenter.view.updateGraph(graph, true, if(graph.isDefined) graph.get.resultsCount else None) //TODO
+            graphPresenter.view.updateGraph(graph, true)
             if(tuple._1.isDefined)
                 graphPresenter.view.setMainVertex(tuple._1.get)
             else
                 graphPresenter.view.drawGraph()
+
             updateNavigationView()
 
             view.nodeUriInput.setIsEnabled(true)

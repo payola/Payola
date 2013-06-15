@@ -7,8 +7,9 @@ import cz.payola.common.rdf._
 import cz.payola.web.client.views.graph.visual.graph._
 import cz.payola.web.client.views.graph.visual.graph.positioning._
 import cz.payola.web.client.views.graph.visual.animation._
+import cz.payola.web.client.models.PrefixApplier
 
-abstract class BaseTechnique(name: String) extends VisualPluginView(name)
+abstract class BaseTechnique(name: String, prefixApplier: Option[PrefixApplier]) extends VisualPluginView(name, prefixApplier)
 {
     private val treeVerticesDistance = 100
 
@@ -21,8 +22,8 @@ abstract class BaseTechnique(name: String) extends VisualPluginView(name)
         }
     }
 
-    override def updateGraph(graph: Option[Graph], contractLiterals: Boolean = true, resultsCount: Option[Int]) {
-        super.updateGraph(graph, contractLiterals, resultsCount)
+    override def updateGraph(graph: Option[Graph], contractLiterals: Boolean = true) {
+        super.updateGraph(graph, contractLiterals)
     }
 
     override def drawGraph() {

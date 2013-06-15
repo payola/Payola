@@ -8,9 +8,11 @@ import cz.payola.web.client.views.VertexEventArgs
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.Icon
 import cz.payola.web.client.views.graph.PluginView
+import cz.payola.web.client.models.PrefixApplier
 import form.fields.TextInput
 
-abstract class TablePluginView(name: String) extends PluginView(name)
+abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier])
+    extends PluginView(name, prefixApplier)
 {
     protected val tablePluginWrapper = new Div()
     protected val tableWrapper = new Div().setAttribute("style", "padding: 0 20px; min-height: 200px; margin:0 auto;")
@@ -21,7 +23,7 @@ abstract class TablePluginView(name: String) extends PluginView(name)
 
     def createSubViews = List(tablePluginWrapper)
 
-    override def updateGraph(graph: Option[Graph], contractLiterals: Boolean = true, resultsCount: Option[Int]) {
+    override def updateGraph(graph: Option[Graph], contractLiterals: Boolean = true) {
         if (graph != currentGraph) {
             // Remove the old table.
             tableWrapper.removeAllChildNodes()
@@ -33,11 +35,12 @@ abstract class TablePluginView(name: String) extends PluginView(name)
                 tablePluginWrapper.htmlElement.appendChild(tableWrapper.htmlElement)
 
                 renderTablePage(graph, 0)
-                createListingTools().render(tablePluginWrapper.htmlElement)
+                if(pagesCount != 0)
+                    createListingTools().render(tablePluginWrapper.htmlElement)
             }
         }
 
-        super.updateGraph(graph, true, resultsCount)
+        super.updateGraph(graph, true)
     }
 
     private def renderTablePage(graph: Option[Graph], pageNumber: Int) {
@@ -117,7 +120,8 @@ abstract class TablePluginView(name: String) extends PluginView(name)
             vertexBrowsingDataSource.trigger(new VertexEventArgs[this.type](this, vertex))
             false
         }
-        val browsingAnchor = new Anchor(List(new Text(vertex.uri)))
+        val uri = prefixApplier.map(_.applyPrefix(vertex.uri)).getOrElse(vertex.uri)
+        val browsingAnchor = new Anchor(List(new Text(uri)))
         browsingAnchor.mouseClicked += { e =>
             vertexBrowsing.trigger(new VertexEventArgs[this.type](this, vertex))
             false

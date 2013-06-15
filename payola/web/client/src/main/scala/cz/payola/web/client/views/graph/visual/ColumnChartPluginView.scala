@@ -6,8 +6,9 @@ import s2js.adapters.html
 import cz.payola.web.client.views.graph.PluginView
 import cz.payola.web.client.views.elements._
 import cz.payola.common.rdf._
+import cz.payola.web.client.models.PrefixApplier
 
-class ColumnChartPluginView extends PluginView("Column Chart")
+class ColumnChartPluginView(prefixApplier: Option[PrefixApplier]) extends PluginView("Column Chart", prefixApplier)
 {
     private val chartWrapper = new Div
     chartWrapper.id = "chart-wrapper"
@@ -196,7 +197,7 @@ class ColumnChartPluginView extends PluginView("Column Chart")
         chartWrapper.setAttribute("style", styleString)
     }
 
-    override def updateGraph(graph: Option[Graph], conractLiterals: Boolean = true, resultsCount: Option[Int]) {
+    override def updateGraph(graph: Option[Graph], conractLiterals: Boolean = true) {
         if (graph != currentGraph) {
             // Clear the wrapper
             chartWrapper.removeAllChildNodes()
@@ -216,7 +217,7 @@ class ColumnChartPluginView extends PluginView("Column Chart")
                 }
             }
         }
-        super.updateGraph(graph, true, resultsCount)
+        super.updateGraph(graph, true)
     }
 
     private def validateLiteralVerticesOnEdges(edges: Seq[Edge]): Boolean = {

@@ -4,11 +4,13 @@ import s2js.adapters.html
 import cz.payola.common.visual.Color
 import cz.payola.web.client.views.algebra._
 import s2js.adapters.html._
-import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.common.entities.settings._
+import cz.payola.web.client.models.PrefixApplier
+import cz.payola.common.rdf._
 
 /**
  * Graphical representation of textual data in the drawn graph.
- * @param data that are visualized (by toString function of this object)
+ * @param labels that are visualized (by toString function of this object)
  */
 class InformationView(labels: List[Any]) extends View[html.elements.CanvasRenderingContext2D] {
 
@@ -72,5 +74,58 @@ class InformationView(labels: List[Any]) extends View[html.elements.CanvasRender
         //TODO how come, that the measureText returns different size on the first run??
 
         drawText(context, labels.head.toString, position, color, font, align)
+    }
+}
+
+object InformationView {
+    def constructByMultiple(labels: List[LabelItem], modelObject: Any, literals: List[(String, Seq[String])],
+        prefixApplier: Option[PrefixApplier]): Option[InformationView] = {
+
+        val uriOpt = getUri(modelObject)
+        val uri = if(uriOpt.isDefined && prefixApplier.isDefined) prefixApplier.get.applyPrefix(uriOpt.get) else ""
+        val processedLabels = processLabels(labels, uri, literals)
+        if(labels.isEmpty) { None } else { Some(new InformationView(processedLabels)) }
+    }
+
+    def constructBySingle(modelObject: Any, prefixApplier: Option[PrefixApplier]): InformationView = {
+        val uriOpt = getUri(modelObject)
+        if(uriOpt.isDefined && prefixApplier.isDefined) {
+            new InformationView(List(prefixApplier.get.applyPrefix(uriOpt.get)))
+        } else {
+            new InformationView(List(modelObject.toString()))
+        }
+    }
+
+    private def getUri(modelObject: Any): Option[String] = {
+        modelObject match{
+            case i: IdentifiedVertex =>
+                Some(i.uri)
+            case i: LiteralVertex =>
+                None
+            case i: Edge =>
+                Some(i.uri)
+            case _ =>
+                None
+        }
+    }
+
+    private def processLabels(labels: List[LabelItem], modelObjectUri: String, literals: List[(String, Seq[String])]):
+        List[String] = {
+
+        val acceptedLabels = labels.filter{ label =>
+            label.accepted && (label.userDefined || label.value == "uri" || literals.exists{
+                _.toString().contains(label.value.substring(2))
+            })
+        }
+
+        acceptedLabels.map { label =>
+            if(label.userDefined) {
+                label.value
+            } else if(label.value == "uri") {
+                modelObjectUri
+            } else {
+                literals.find{ literal => labels.contains(literal._1.substring(2)) }.get.toString
+            }
+        }
     }
 }

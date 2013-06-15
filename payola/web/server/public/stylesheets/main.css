@@ -53,6 +53,14 @@ label {
     width: 600px;
 }
 
+.listing-column-medium {
+    width: 300px;
+}
+
+.listing-column-tiny {
+    width: 100px;
+}
+
 .plugin-space {
     position: absolute;
     left: 0;
@@ -494,8 +502,9 @@ noindex:-o-prefocus, .btn-group.share-button {
     top: 0;
     left: 0;
 }
+
 .datacube-preview canvas:first-of-type {
-   position: relative;
+    position: relative;
 }
 
 textarea.datacube {
@@ -508,7 +517,7 @@ button.datacube {
     margin-top: 20px;
 }
 
-.datacube-preview-dialog.modal {
+.preview-dialog.modal {
     position: fixed;
     top: 0px;
     left: 0px;
@@ -517,10 +526,22 @@ button.datacube {
     height: 100%;
 }
 
-.datacube-preview-dialog.modal .modal-body {
+.preview-dialog.modal .modal-body {
     max-height: 200000px;
     padding: 1px;
     position: relative;
+}
+
+.preview-dialog.modal .modal-footer {
+    position: fixed;
+    display: block;
+    bottom: 0px;
+    width: 98%;
+}
+
+.choose-analysis-dialog.modal .modal-body {
+    height: 150px;
+    text-align: center;
 }
 
 .datacube-infobar {
@@ -537,10 +558,14 @@ button.datacube {
     height: 500px;
 }
 
-
 .append-popup {
     padding: 10px !important;
     top: -15px !important;
     left: -574px !important;
     min-height: 340px;
+}
+
+.param-clicked {
+    font-weight: bold;
+    color: black;
 }

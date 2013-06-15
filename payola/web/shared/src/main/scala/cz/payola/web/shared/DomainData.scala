@@ -16,6 +16,12 @@ import cz.payola.common.entities._
         successCallback(users)
     }
 
+    @async def searchAccessibleAnalyses(term: String, user: Option[User] = null)(successCallback: (Seq[Analysis] => Unit))
+        (failCallback: (Throwable => Unit)) {
+        val analyses = Payola.model.analysisModel.getAccessibleToUser(user).filter(_.name.contains(term))
+        successCallback(analyses)
+    }
+
     @async def getAnalysisById(analysisId: String, user: Option[User] = None)(successCallback: (Analysis => Unit))
         (failCallback: (Throwable => Unit)) {
 
@@ -24,5 +30,10 @@ import cz.payola.common.entities._
         }
 
         successCallback(analysis)
+    }
+
+    @async def cloneAnalysis(analysisId: String, user: Option[User] = None)(successCallback: (Analysis => Unit))
+        (failCallback: (Throwable => Unit)) {
+        successCallback(Payola.model.analysisModel.clone(analysisId, user))
     }
 }

@@ -110,16 +110,16 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
         }.mkString("\n")
     }
 
-    override def update(graph: Option[Graph], customization: Option[OntologyCustomization], resultsCount: Option[Int]) {
-        super.update(graph, customization, resultsCount)
-        technique.update(graph, customization, resultsCount)
+    override def update(graph: Option[Graph], customization: Option[OntologyCustomization]) {
+        super.update(graph, customization)
+        technique.update(graph, customization)
 
         showMessage(0)
     }
 
-    override def updateGraph(graph: Option[Graph], contractLiterals: Boolean, resultsCount: Option[Int]) {
-        super.updateGraph(graph, false, resultsCount)
-        technique.updateGraph(graph, false, resultsCount)
+    override def updateGraph(graph: Option[Graph], contractLiterals: Boolean) {
+        super.updateGraph(graph, false)
+        technique.updateGraph(graph, false)
 
         showMessage(0)
     }

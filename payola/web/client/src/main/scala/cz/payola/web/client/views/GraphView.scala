@@ -15,9 +15,6 @@ abstract class GraphView
     /** The graph that is currently being visualized. */
     protected var currentGraph: Option[Graph] = None
 
-    /** Count of vertices in the result of current query (equal or more than vertices in currentGraph) */
-    protected var currentResultsCount: Option[Int] = None
-
     /** The ontology customization that is currently used during visualization. */
     protected var currentCustomization: Option[OntologyCustomization] = None
 
@@ -39,19 +36,17 @@ abstract class GraphView
      * Updates both the graph that should be visualized and the customization that should be used.
      * @param graph The graph to visualize.
      * @param customization The ontology customization that should be used during visualization.
-     * @param resultsCount Count of vertices in the result of current query (by which was the graph fetched); resultsCount >= graph.get.vertices.length
      */
-    def update(graph: Option[Graph], customization: Option[OntologyCustomization], resultsCount: Option[Int]) {
+    def update(graph: Option[Graph], customization: Option[OntologyCustomization]) {
         updateOntologyCustomization(customization)
-        updateGraph(graph, true, resultsCount)
+        updateGraph(graph, true)
     }
 
     /**
      * Updates the current graph of the view.
      * @param graph The graph to add to the current graph.
-     * @param resultsCount Count of vertices in the result of current query (by which was the graph fetched); resultsCount >= graph.get.vertices.length
      */
-    def updateGraph(graph: Option[Graph], contractLiterals: Boolean, resultsCount: Option[Int]) {
+    def updateGraph(graph: Option[Graph], contractLiterals: Boolean) {
         currentGraph = graph
     }
 
@@ -76,6 +71,6 @@ abstract class GraphView
      * Removes the current graph from the view memory and resets the visualization.
      */
     def clear() {
-        updateGraph(None, true, None)
+        updateGraph(None, true)
     }
 }

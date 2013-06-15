@@ -5,8 +5,9 @@ import cz.payola.web.client.views.graph.visual.techniques.BaseTechnique
 import cz.payola.web.client.views.graph.visual.graph._
 import cz.payola.web.client.views.algebra.Point2D
 import cz.payola.web.client.views.graph.visual.animation.Animation
+import cz.payola.web.client.models.PrefixApplier
 
-class MinimalizationTechnique extends BaseTechnique("Tree ECM Visualization")
+class MinimalizationTechnique(prefixApplier: Option[PrefixApplier]) extends BaseTechnique("Tree ECM Visualization", prefixApplier)
 {
     //TODO add some computation branch cutting...this algorithm is quite complex
 

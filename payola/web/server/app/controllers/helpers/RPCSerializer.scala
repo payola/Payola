@@ -123,4 +123,8 @@ class RPCSerializer extends JSONSerializer
     val geoCustomizationRule = new BasicSerializationRule(Some(classOf[Coordinates]))
     this.addSerializationRule(geoCustomizationClass, geoCustomizationRule)
 
+    val prefixClass = new SimpleSerializationClass(classOf[Prefix])
+    val prefixRule = new BasicSerializationRule(Some(classOf[Prefix]))
+    this.addSerializationRule(prefixClass, prefixRule)
+
 }

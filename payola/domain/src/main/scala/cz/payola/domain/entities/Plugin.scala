@@ -4,6 +4,7 @@ import collection.immutable
 import cz.payola.domain.rdf.Graph
 import cz.payola.domain._
 import cz.payola.domain.entities.plugins._
+import cz.payola.domain.Entity
 
 /**
   * @param _name Name of the plugin.
@@ -29,6 +30,8 @@ abstract class Plugin(
     type ParameterType = Parameter[_]
 
     type ParameterValueType = ParameterValue[_]
+
+    val originalClassName = cz.payola.common.Entity.getClassName(getClass)
 
     /**
      * All the plugins have to behave as if they were instances of the plugin class, not their concrete classes.

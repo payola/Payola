@@ -7,8 +7,9 @@ import cz.payola.web.shared.Geo
 import cz.payola.web.client.views.map._
 import cz.payola.common.geo.Coordinates
 import s2js.compiler.javascript
+import cz.payola.web.client.models.PrefixApplier
 
-class TimeHeatmap extends PluginView("Time heatmap") {
+class TimeHeatmap(prefixApplier: Option[PrefixApplier] = None) extends PluginView("Time heatmap", prefixApplier) {
 
     val mapPlaceholder = new Div(List(),"map-placeholder")
 
@@ -18,7 +19,7 @@ class TimeHeatmap extends PluginView("Time heatmap") {
     @javascript(""" return parseInt(str); """)
     def intval(str: String) : Int = 0
 
-    override def updateGraph(graph: Option[Graph], contractLiterals: Boolean = true, resultsCount: Option[Int]) {
+    override def updateGraph(graph: Option[Graph], contractLiterals: Boolean = true) {
 
         graph.map { g =>
 

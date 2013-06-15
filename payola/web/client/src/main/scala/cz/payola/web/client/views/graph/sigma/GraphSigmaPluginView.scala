@@ -7,8 +7,9 @@ import scala.collection.mutable.ListBuffer
 import cz.payola.web.client.views.elements.Text
 import cz.payola.web.client.views.graph.sigma.properties.DrawingProperties
 import s2js.adapters.js.sigma.Node
+import cz.payola.web.client.models.PrefixApplier
 
-class GraphSigmaPluginView extends SigmaPluginView("Sigma.js") {
+class GraphSigmaPluginView(prefixApplier: Option[PrefixApplier]) extends SigmaPluginView("Sigma.js", prefixApplier) {
 
     val popUp: Any = null //used only in the javascript of functions showVertexInfo and hideVertexInfo
     val popUpWidth = 300
@@ -26,7 +27,8 @@ class GraphSigmaPluginView extends SigmaPluginView("Sigma.js") {
             graph.vertices.foreach{ vertex =>
                 vertex match{
                     case i: rdf.IdentifiedVertex =>
-                        createVertexView(i, countEdges(i, graph.edges), getAttributes(i, graph.edges))
+                        createVertexView(prefixApplier.map(_.applyPrefix(i.uri)).getOrElse(i.uri),
+                            i, countEdges(i, graph.edges), getAttributes(i, graph.edges))
                         setRdfType(i.uri, getRdfTypeForVertexView(graph.edges, i.uri))
                         //vertexNum += 1
                 }

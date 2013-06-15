@@ -17,12 +17,13 @@ import bootstrap._
 import cz.payola.common.entities.settings.OntologyCustomization
 import cz.payola.common.visual.Color
 import lists.ListItem
+import models.PrefixApplier
 import scala.Some
 
 /**
  * Representation of visual based output drawing plugin
  */
-abstract class VisualPluginView(name: String) extends PluginView(name)
+abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplier]) extends PluginView(name, prefixApplier)
 {
     /**
      * Value used during vertex selection process.
@@ -308,9 +309,7 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
         redraw()
     }
 
-    override def setMainVertex(vertex: Vertex) {
-
-    }
+    override def setMainVertex(vertex: Vertex) {}
 
     def createSubViews = layerPack.getLayers
 
@@ -350,20 +349,21 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
         currentInfoTable.foreach(_.destroy())
     }
 
-    override def updateGraph(graph: Option[Graph], contractLiterals: Boolean = true, resultsCount: Option[Int]) {
+    override def updateGraph(graph: Option[Graph], contractLiterals: Boolean = true) {
         // If the graph has changed, update the graph view.
         zoomControls.reset()
         if (graph != currentGraph) {
             if (graph.isDefined) {
                 if (graphView.isEmpty) {
-                    graphView = Some(new views.graph.visual.graph.GraphView(contractLiterals))
+                    graphView = Some(new views.graph.visual.graph.GraphView(contractLiterals, prefixApplier))
                 }
-                graphView.get.update(graph.get, topLayer.getCenter)
+                graphView.get.update(graph.get, topLayer.getCenter, prefixApplier: Option[PrefixApplier])
                 graphView.foreach {
                     gV =>
                         gV.setConfiguration(currentCustomization)
                         _parentHtmlElement.foreach(gV.render(_))
                 }
+
             } else {
                 if (graphView.isDefined) {
                     layerPack.getLayers.foreach(_.clear())

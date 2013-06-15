@@ -6,11 +6,12 @@ import cz.payola.web.client.views.graph.visual.graph._
 import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.graph.visual.graph.positioning.GraphPositionHelper
 import scala.Some
+import cz.payola.web.client.models.PrefixApplier
 
 /**
  * Visual plug-in technique that places the vertices into a tree structure.
  */
-class TreeTechnique extends BaseTechnique("Tree Visualization")
+class TreeTechnique(prefixApplier: Option[PrefixApplier] = None) extends BaseTechnique("Tree Visualization", prefixApplier)
 {
     protected def getTechniquePerformer(component: Component,
         animate: Boolean): Animation[_] = {

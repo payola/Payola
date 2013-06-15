@@ -7,11 +7,12 @@ import cz.payola.web.client.views.algebra._
 import cz.payola.common.entities.settings.OntologyCustomization
 import s2js.adapters.html
 import cz.payola.common.visual.Color
+import cz.payola.web.client.models.PrefixApplier
 
 /**
  * Graphical representation of a Graph object.
  */
-class GraphView(contractLiterals: Boolean = true) extends View[CanvasPack]
+class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixApplier]) extends View[CanvasPack]
 {
     /**
      * During update vertices with higher age than this value are removed from this graph.
@@ -70,32 +71,31 @@ class GraphView(contractLiterals: Boolean = true) extends View[CanvasPack]
      * @param graph to update the current representation
      * @param vertexInitPosition positions of newly created vertices
      */
-    def update(graph: Graph, vertexInitPosition: Point2D) {
-        if (graph == null) {
-            return
-        }
+    def update(graph: Graph, vertexInitPosition: Point2D, prefixApplier: Option[PrefixApplier]) {
+        if (graph != null) {
 
-        //create vertexViews from the input
-        val newVertexViews = createVertexViews(graph, vertexInitPosition)
-        //get vertexViews from the current (this) graphView
-        val oldVertexViews = rebuildOldVertices(newVertexViews)
-        val vertexViews = newVertexViews ++ oldVertexViews
+            //create vertexViews from the input
+            val newVertexViews = createVertexViews(graph, vertexInitPosition)
+            //get vertexViews from the current (this) graphView
+            val oldVertexViews = rebuildOldVertices(newVertexViews)
+            val vertexViews = newVertexViews ++ oldVertexViews
 
-        //create edgeViews from the input
-        val newEdgeViews = createEdgeViews(graph, vertexViews)
-        //get edgeViews from the current (this) graphView
-        val oldEdgeViews = rebuildOldEdges(newEdgeViews, vertexViews)
-        val edgeViews = newEdgeViews ++ oldEdgeViews
+            //create edgeViews from the input
+            val newEdgeViews = createEdgeViews(graph, vertexViews)
+            //get edgeViews from the current (this) graphView
+            val oldEdgeViews = rebuildOldEdges(newEdgeViews, vertexViews)
+            val edgeViews = newEdgeViews ++ oldEdgeViews
 
-        fillVertexViewsEdges(vertexViews, edgeViews)
+            fillVertexViewsEdges(vertexViews, edgeViews)
 
-        splitToComponents(vertexViews, edgeViews)
+            splitToComponents(vertexViews, edgeViews)
 
-        //if this is the first drawn graph, make some vertices selected from the start
-        if (oldVertexViews.isEmpty) {
-            components.foreach {
-                component =>
-                    component.selectVertex(component.vertexViews.head)
+            //if this is the first drawn graph, make some vertices selected from the start
+            if (oldVertexViews.isEmpty) {
+                components.foreach {
+                    component =>
+                        component.selectVertex(component.vertexViews.head)
+                }
             }
         }
     }
@@ -187,9 +187,9 @@ class GraphView(contractLiterals: Boolean = true) extends View[CanvasPack]
 
                 vertexModel match {
                     case i: IdentifiedVertex => {
-                        val newVertexView = new VertexView(i, vertexInitPosition, i.uri)
+                        val newVertexView = new VertexView(i, vertexInitPosition, i.uri, prefixApplier)
 
-                        newVertexView.rdfType = getRdfTypeForVertexView(graphModel.edges, i) //TODO proc je tu ohle a ne i.uri !?!?
+                        newVertexView.rdfType = getRdfTypeForVertexView(graphModel.edges, i)
                         newVertexView.setInformation(getInformationForVertexView(graphModel, i))
 
 
@@ -199,7 +199,7 @@ class GraphView(contractLiterals: Boolean = true) extends View[CanvasPack]
                         if (contractLiterals){
                             literalVertices += i
                         }else{
-                            val newVertexView = new VertexView(i, vertexInitPosition, null)
+                            val newVertexView = new VertexView(i, vertexInitPosition, null, prefixApplier)
                             newVertexView.rdfType = "http://payola.cz/property"//getRdfTypeForVertexView(graphModel.edges, i)
 
                             buffer += newVertexView
@@ -387,7 +387,7 @@ class GraphView(contractLiterals: Boolean = true) extends View[CanvasPack]
         val origin = getVertexForEdgeConstruct(edgeModel.origin, vertexViews)
         val destination = getVertexForEdgeConstruct(edgeModel.destination, vertexViews)
         if (destination.isDefined && origin.isDefined) {
-            val createdEdgeView = new EdgeView(edgeModel, origin.get, destination.get)
+            val createdEdgeView = new EdgeView(edgeModel, origin.get, destination.get, prefixApplier)
             destination.get.edges += createdEdgeView
             origin.get.edges += createdEdgeView
             Some(createdEdgeView)

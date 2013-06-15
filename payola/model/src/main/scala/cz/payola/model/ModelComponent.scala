@@ -16,6 +16,7 @@ trait ModelComponent
     with PrivilegeModelComponent
     with DataCubeModelComponent
     with GeocodeModelComponent
+    with PrefixModelComponent
 {
     self: DataContextComponent with RdfStorageComponent with PluginCompilerComponent =>
 

@@ -3,12 +3,13 @@ package cz.payola.web.client.views.graph
 import s2js.adapters.html
 import cz.payola.web.client.views._
 import cz.payola.web.client.views.elements._
+import cz.payola.web.client.models.PrefixApplier
 
 /**
  * A graph visualization plugin view.
  * @param name Name of the plugin.
  */
-abstract class PluginView(val name: String) extends GraphView with ComposedView
+abstract class PluginView(val name: String, private val prefixApplier: Option[PrefixApplier]) extends GraphView with ComposedView
 {
     /**
      * Renders the plugin-specific controls.

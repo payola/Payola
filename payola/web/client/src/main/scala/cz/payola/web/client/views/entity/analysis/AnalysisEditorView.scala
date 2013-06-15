@@ -8,8 +8,9 @@ import cz.payola.web.client.views.elements.lists._
 import cz.payola.web.client.views.elements.form.fields._
 import s2js.adapters.browser.`package`._
 import scala.Some
+import cz.payola.web.client.models.PrefixApplier
 
-class AnalysisEditorView(analysis: Analysis, newName: Option[String], newDesc: Option[String], pageTitle: String) extends ComposedView
+class AnalysisEditorView(analysis: Analysis, newName: Option[String], newDesc: Option[String], pageTitle: String, prefixApplier: PrefixApplier) extends ComposedView
 {
     val name = new InputControl("Analysis name:", new TextInput("name", if(newName.isDefined){newName.get}else{analysis.name}, "Analysis name"), Some("nofloat"))
 
@@ -35,7 +36,7 @@ class AnalysisEditorView(analysis: Analysis, newName: Option[String], newDesc: O
 
     protected val menu = new UnorderedList(List(addPluginLinkLi, addDataSourceLinkLi, mergeBranchesLi))
 
-    val visualizer = new EditableAnalysisVisualizer(analysis)
+    val visualizer = new EditableAnalysisVisualizer(analysis, prefixApplier)
 
     protected val leftColContent = new Div(List(menu, properties), "well")
 

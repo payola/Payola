@@ -3,10 +3,13 @@ package cz.payola.domain.entities
 import scala.collection.mutable
 import cz.payola.domain.entities.analyses._
 import cz.payola.domain.entities.analyses.evaluation.AnalysisEvaluation
-import cz.payola.domain.entities.plugins.PluginInstance
+import plugins._
 import cz.payola.domain.Entity
 import cz.payola.domain.entities.settings.OntologyCustomization
 import cz.payola.domain.entities.plugins.concrete._
+import parameters._
+import scala.Some
+import scala.Some
 
 /**
   * @param _name Name of the analysis.
@@ -42,6 +45,64 @@ class Analysis(protected var _name: String, protected var _owner: Option[User])
         val evaluation = new AnalysisEvaluation(this, timeout)
         evaluation.start()
         evaluation
+    }
+
+    def expand(accessibleAnalyses: Seq[Analysis]) {
+        pluginInstances.foreach{ i =>
+            i.plugin match {
+                case a : AnalysisPlugin => {
+                    val analysisId = i.getStringParameter("Analysis ID")
+
+                    val remappedParamValues = new mutable.HashMap[String, ParameterValue[_]]()
+                    i.parameterValues.filter(_.parameter.name.contains("$")).foreach { p =>
+                        remappedParamValues += (p.parameter.name.split("""\$""").apply(1) -> p)
+                    }
+
+                    def remapParams {
+                        _pluginInstances.foreach{pi =>
+                            pi.parameterValues.map { pv =>
+                                remappedParamValues.get(pv.id).foreach{ paramVal =>
+
+                                    (pv, paramVal) match {
+                                        case (o: StringParameterValue, n: StringParameterValue) => o.value = n.value
+                                        case (o: IntParameterValue, n: IntParameterValue) => o.value = n.value
+                                        case (o: BooleanParameterValue, n: BooleanParameterValue) => o.value = n.value
+                                        case (o: FloatParameterValue, n: FloatParameterValue) => o.value = n.value
+                                        case _ =>
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+
+                    analysisId.map { idParam =>
+                        accessibleAnalyses.find(_.id == idParam).map { analysis =>
+
+                            remapParams
+
+                            analysis.expand(accessibleAnalyses)
+
+                            _pluginInstances ++= analysis.pluginInstances
+                            _pluginInstanceBindings ++= analysis.pluginInstanceBindings
+
+                            pluginInstanceBindings.find(_.sourcePluginInstance == i).map { b =>
+
+                                analysis.outputInstance.map{ o =>
+                                    _pluginInstanceBindings ++= Seq(new PluginInstanceBinding(o, b.targetPluginInstance, b.targetInputIndex))
+                                }
+                            }
+
+                            remapParams
+                        }
+                    }
+
+                    _pluginInstanceBindings --= pluginInstanceBindings.filter(_.sourcePluginInstance == i)
+                    _pluginInstances --= Seq(i)
+                }
+                case _ =>
+            }
+        }
     }
 
     /**

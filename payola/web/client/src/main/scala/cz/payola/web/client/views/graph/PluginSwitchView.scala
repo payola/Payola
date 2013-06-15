@@ -15,8 +15,9 @@ import cz.payola.web.client.events._
 import cz.payola.web.client.views.elements.lists.ListItem
 import cz.payola.web.client.views.graph.sigma.GraphSigmaPluginView
 import cz.payola.web.client.views.graph.datacube.TimeHeatmap
+import cz.payola.web.client.models.PrefixApplier
 
-class PluginSwitchView extends GraphView with ComposedView
+class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with ComposedView
 {
     /**
      * Event triggered when ontology customization is created.
@@ -52,14 +53,14 @@ class PluginSwitchView extends GraphView with ComposedView
      * List of available visualization plugins.
      */
     private val plugins = List[PluginView](
-        new TripleTablePluginView,
-        new SelectResultPluginView,
-        new CircleTechnique,
-        new TreeTechnique,
-        new GravityTechnique,
-        new ColumnChartPluginView,
-        new GraphSigmaPluginView,
-        new TimeHeatmap
+        new TripleTablePluginView(Some(prefixApplier)),
+        new SelectResultPluginView(Some(prefixApplier)),
+        new CircleTechnique(Some(prefixApplier)),
+        new TreeTechnique(Some(prefixApplier)),
+        new GravityTechnique(Some(prefixApplier)),
+        new ColumnChartPluginView(Some(prefixApplier)),
+        new GraphSigmaPluginView(Some(prefixApplier)),
+        new TimeHeatmap(Some(prefixApplier))
     )
 
     /**
@@ -120,14 +121,14 @@ class PluginSwitchView extends GraphView with ComposedView
 
     def createSubViews = List(toolbar, pluginSpace)
 
-    override def update(graph: Option[Graph], customization: Option[OntologyCustomization], resultsCount: Option[Int]) {
-        super.update(graph, customization, resultsCount)
-        currentPlugin.update(graph, customization, resultsCount)
+    override def update(graph: Option[Graph], customization: Option[OntologyCustomization]) {
+        super.update(graph, customization)
+        currentPlugin.update(graph, customization)
     }
 
-    override def updateGraph(graph: Option[Graph], contractLiterals: Boolean, resultsCount: Option[Int]) {
-        super.updateGraph(graph, contractLiterals, resultsCount)
-        currentPlugin.updateGraph(graph, contractLiterals, resultsCount)
+    override def updateGraph(graph: Option[Graph], contractLiterals: Boolean) {
+        super.updateGraph(graph, contractLiterals)
+        currentPlugin.updateGraph(graph, contractLiterals)
     }
 
     override def updateOntologyCustomization(customization: Option[OntologyCustomization]) {
@@ -228,7 +229,7 @@ class PluginSwitchView extends GraphView with ComposedView
     private def changePlugin(plugin: PluginView) {
         if (currentPlugin != plugin) {
             // Destroy the current plugin.
-            currentPlugin.update(None, None, None)
+            currentPlugin.update(None, None)
             currentPlugin.destroyControls()
             currentPlugin.destroy()
 
@@ -236,7 +237,7 @@ class PluginSwitchView extends GraphView with ComposedView
             currentPlugin = plugin
             currentPlugin.render(pluginSpace.htmlElement)
             currentPlugin.renderControls(toolbar.htmlElement)
-            currentPlugin.update(currentGraph, currentCustomization, currentResultsCount)
+            currentPlugin.update(currentGraph, currentCustomization)
             currentPlugin.drawGraph()
         }
     }

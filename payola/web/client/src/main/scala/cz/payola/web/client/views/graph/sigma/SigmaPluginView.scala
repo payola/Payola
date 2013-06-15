@@ -12,8 +12,9 @@ import cz.payola.common.entities.settings._
 import cz.payola.web.client.views.bootstrap.Icon
 import cz.payola.web.client.views.graph.sigma.properties._
 import cz.payola.web.client.views.graph.sigma.PropertiesSetter._
+import cz.payola.web.client.models.PrefixApplier
 
-abstract class SigmaPluginView(name: String) extends PluginView(name){
+abstract class SigmaPluginView(name: String, prefixApplier: Option[PrefixApplier]) extends PluginView(name, prefixApplier){
     protected var sigmaPluginWrapper = new Div().setAttribute("style", "padding: 0 5px; min-width: 200px; min-height: 200px;")
 
     private var edgesNum = 0
@@ -88,7 +89,7 @@ abstract class SigmaPluginView(name: String) extends PluginView(name){
         }
     }
 
-    override def updateGraph(graph: Option[rdf.Graph], contractLiterals: Boolean, resultsCount: Option[Int]) {
+    override def updateGraph(graph: Option[rdf.Graph], contractLiterals: Boolean) {
 
         if (sigmaInstance.isEmpty && graph.isEmpty) {
             renderMessage(sigmaPluginWrapper.htmlElement, "The graph is empty...")
@@ -103,18 +104,19 @@ abstract class SigmaPluginView(name: String) extends PluginView(name){
             sigmaInstance.get.draw()
         }
 
-        super.updateGraph(graph, false, resultsCount)
+        super.updateGraph(graph, false)
     }
 
     def setDrawingProperties()
 
     def fillGraph(graph: Option[rdf.Graph])
 
-    protected def createVertexView(vertex: rdf.IdentifiedVertex, edgesCount: Int, attributes: ListBuffer[(String, _)]) {
+    protected def createVertexView(label: String, vertex: rdf.IdentifiedVertex, edgesCount: Int,
+        attributes: ListBuffer[(String, _)]) {
 
         val props = new NodeProperties
         props.size = scala.math.min(props.size + edgesCount, 20)
-        props.label = vertex.uri
+        props.label = label
         props.value = attributes
         sigmaInstance.get.addNode(vertex.uri, props)
     }

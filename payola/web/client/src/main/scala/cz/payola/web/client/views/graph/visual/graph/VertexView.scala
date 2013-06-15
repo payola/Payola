@@ -6,19 +6,20 @@ import cz.payola.common.visual.Color
 import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.graph.visual.graph.positioning.LocationDescriptor
 import cz.payola.common.rdf._
-import scala.collection.mutable
 import cz.payola.web.client.views.elements._
 import cz.payola.common.entities.settings._
 import s2js.adapters.html
 import scala.Some
+import cz.payola.web.client.models.PrefixApplier
 
 /**
  * Graphical representation of IdentifiedVertex object in the drawn graph.
  * @param vertexModel the vertex object from the model, that is visualized
  * @param position of this graphical representation in drawing space
  * @param rdfType type of the vertex used to identify drawing settings in an ontology
+ * @param prefixApplier labels transformer
  */
-class VertexView(val vertexModel: Vertex, var position: Point2D, var rdfType: String)
+class VertexView(val vertexModel: Vertex, var position: Point2D, var rdfType: String, prefixApplier: Option[PrefixApplier])
     extends View[CanvasRenderingContext2D] {
 
     var radius = 25
@@ -57,7 +58,7 @@ class VertexView(val vertexModel: Vertex, var position: Point2D, var rdfType: St
     /**
      * Textual data that should be visualized with this vertex ("over this vertex").
      */
-    private var information: Option[InformationView] = Some(new InformationView(List(vertexModel)))
+    private var information: Option[InformationView] = Some(InformationView.constructBySingle(vertexModel, prefixApplier))
 
     /**
      * Setter of contained informationView's data.
@@ -65,7 +66,7 @@ class VertexView(val vertexModel: Vertex, var position: Point2D, var rdfType: St
      */
     def setInformation(data: Option[Vertex]) {
         if (data.isDefined) {
-            information = Some(new InformationView(List(data.get)))
+            information = Some(InformationView.constructBySingle(data.get, prefixApplier))
         }
     }
 
@@ -190,7 +191,7 @@ class VertexView(val vertexModel: Vertex, var position: Point2D, var rdfType: St
     def setConfiguration(newCustomization: Option[OntologyCustomization]) {
         if(newCustomization.isEmpty) {
             resetConfiguration()
-            information = Some(new InformationView(List(vertexModel)))
+            information = Some(InformationView.constructBySingle(vertexModel, prefixApplier))
         } else {
             val foundCustomization =
                 if(newCustomization.get.isUserDefined){
@@ -203,14 +204,14 @@ class VertexView(val vertexModel: Vertex, var position: Point2D, var rdfType: St
                             None
                     }
                     if(found.isDefined && found.get.labels != null && found.get.labels != "") {
-                        val labels = processLabels(found.get.labelsSplitted)
-                        information = if(labels.isEmpty) { None } else { Some(new InformationView(labels)) }
+                        information = InformationView.constructByMultiple(
+                            found.get.labelsSplitted, vertexModel, getLiteralVertices, prefixApplier)
                     } else {
                         information = None
                     }
                     found
                 } else {
-                    information = Some(new InformationView(List(vertexModel)))
+                    information = Some(InformationView.constructBySingle(vertexModel, prefixApplier))
                     newCustomization.get.classCustomizations.find{_.uri == rdfType}
                 }
 
@@ -307,24 +308,6 @@ class VertexView(val vertexModel: Vertex, var position: Point2D, var rdfType: St
             case vv: VertexView =>
                 vv.vertexModel.toString eq vertexModel.toString
             case _ => false
-        }
-    }
-
-    private def processLabels(labels: List[LabelItem]): List[String] = {
-        val acceptedLabels = labels.filter{ label =>
-            label.accepted && (label.userDefined || label.value == "uri" || getLiteralVertices.exists{
-                _.toString().contains(label.value.substring(2))
-            })
-        }
-
-        acceptedLabels.map { label =>
-            if(label.userDefined) {
-                label.value
-            } else if(label.value == "uri") {
-                vertexModel.toString
-            } else {
-                getLiteralVertices.find{ literal => labels.contains(literal._1.substring(2)) }.get.toString
-            }
         }
     }
 }
