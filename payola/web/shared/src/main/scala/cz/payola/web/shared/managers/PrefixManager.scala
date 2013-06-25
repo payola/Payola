@@ -3,6 +3,7 @@ package cz.payola.web.shared.managers
 import s2js.compiler._
 import cz.payola.domain.entities._
 import cz.payola.web.shared.Payola
+import cz.payola.domain.net.Downloader
 
 @remote @secured object PrefixManager
 {
@@ -14,5 +15,22 @@ import cz.payola.web.shared.Payola
     def getAvailablePrefixes(user: Option[User] = null) : Seq[Prefix] = {
         // Ensures that first comes the user.defined prefixes, then comes global prefixes (important for translation)
         Payola.model.prefixModel.getAllAvailableToUser(user.map(_.id)).sortBy(p => p.owner.map(_.id)).reverse
+    }
+
+    @async def findUnknownPrefix(prefix: String, user: User = null)(successCallback: String => Unit)(errorCallback: Throwable => Unit) {
+        try
+        {
+            val result = new Downloader("http://prefix.cc/%s.file.txt".format(prefix)).result
+            val url = result.replaceFirst(prefix, "").trim()
+
+            user.addOwnedPrefix(new Prefix(prefix, prefix, url, Some(user)))
+
+            successCallback(url)
+        }
+        catch {
+            case e: Throwable => errorCallback(e)
+        }
+
+
     }
 }
