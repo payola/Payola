@@ -19,7 +19,15 @@ class PrefixPresenter extends Presenter
 
         if (delim > 0)
         {
-            PrefixManager.findUnknownPrefix(prefixedUrl.substring(0, delim))(successCallback)(errorCallback)
+            val newSuccessCallback = {
+                p: String => {
+                    // Update prefixes to contain the new one
+                    prefixApplier.prefixes = PrefixManager.getAvailablePrefixes()
+                    successCallback(p)
+                }
+            }
+
+            PrefixManager.findUnknownPrefix(prefixedUrl.substring(0, delim))(newSuccessCallback)(errorCallback)
         }
     }
 }

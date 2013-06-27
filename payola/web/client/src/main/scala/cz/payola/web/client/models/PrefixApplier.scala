@@ -37,7 +37,7 @@ class PrefixApplier(prefixPresenter: PrefixPresenter = null)
             if (prefixPresenter != null)
             {
                 prefixPresenter.findUnknownPrefix(uri)
-                { p => showDialog(result, Some(p)) }
+                { p =>  }
                 { e => showDialog(result, None) }
             }
         }

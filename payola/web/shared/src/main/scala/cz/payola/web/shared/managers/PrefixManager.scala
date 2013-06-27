@@ -14,7 +14,8 @@ import cz.payola.domain.net.Downloader
      */
     def getAvailablePrefixes(user: Option[User] = null) : Seq[Prefix] = {
         // Ensures that first comes the user.defined prefixes, then comes global prefixes (important for translation)
-        Payola.model.prefixModel.getAllAvailableToUser(user.map(_.id)).sortBy(p => p.owner.map(_.id)).reverse
+        // Secondary are ordered by length descendant to ensure that more specific (longer) uri is used first
+        Payola.model.prefixModel.getAllAvailableToUser(user.map(_.id)).sortBy(p => p.url.length).sortBy(p => p.owner.map(_.id)).reverse
     }
 
     @async def findUnknownPrefix(prefix: String, user: User = null)(successCallback: String => Unit)(errorCallback: Throwable => Unit) {
@@ -23,7 +24,7 @@ import cz.payola.domain.net.Downloader
             val result = new Downloader("http://prefix.cc/%s.file.txt".format(prefix)).result
             val url = result.replaceFirst(prefix, "").trim()
 
-            user.addOwnedPrefix(new Prefix(prefix, prefix, url, Some(user)))
+            Payola.model.prefixModel.create(prefix, url, None)
 
             successCallback(url)
         }
