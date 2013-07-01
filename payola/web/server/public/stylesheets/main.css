@@ -545,7 +545,7 @@ button.datacube {
     padding: 2px;
 }
 
-.map-placeholder {
+.map-placeholder, .map-placeholder .mapview {
     width: 100%;
     height: 500px;
 }
@@ -560,4 +560,23 @@ button.datacube {
 .param-clicked {
     font-weight: bold;
     color: black;
+}
+
+.mapview-filter {
+    position: absolute;
+    right: 15px;
+    top: 50px;
+    border: 1px solid gray;
+    background: rgba(222, 222, 222, 0.6);
+    font-weight: bold;
+}
+
+.mapview-filter ul, .mapview-filter li {
+    list-style-type: none;
+}
+
+.mapview-filter li {
+    display: block;
+    height: 22px;
+    clear: both;
 }

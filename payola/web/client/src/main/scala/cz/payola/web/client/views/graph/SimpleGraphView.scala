@@ -32,6 +32,9 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
 
     val patternUpdated = new UnitEvent[SimpleGraphView, EventArgs[SimpleGraphView]]()
 
+    @javascript("""console.log(x)""")
+    def log(x: Any) = {}
+
     @javascript("""jQuery(".datacube-infobar .message").hide(); jQuery(".datacube-infobar .message").eq(i).show()""")
     def showMessage(i: Int) {}
 
@@ -50,13 +53,15 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
                             g =>
                                 vertices.map {
                                     v =>
-                                        g.getIncomingEdges(e.vertex).find(_.origin == v).map {
-                                            edge =>
-                                                vertices += e.vertex
-                                                technique.updateVertexColor(e.vertex, Some(Color.Green))
-                                                edges += edge
-                                                newPath = false
+                                        val appendEdge = { edge: Edge =>
+                                            vertices += e.vertex
+                                            technique.updateVertexColor(e.vertex, Some(Color.Green))
+                                            edges += edge
+                                            newPath = false
                                         }
+
+                                        g.getIncomingEdges(e.vertex).find(_.origin == v).map(appendEdge)
+                                        g.getOutgoingEdges(e.vertex).find(_.destination == v).map(appendEdge)
                                 }
                         }
                     }
@@ -68,10 +73,15 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
                     } else {
                         currentGraph.map {
                             g =>
-                                if (g.getIncomingEdges(e.vertex).exists(_.origin == last)) {
+                                val appendEdge = { edge: Edge =>
                                     vertices += e.vertex
+                                    edges += edge
                                     technique.updateVertexColor(e.vertex, Some(Color.Green))
                                 }
+
+
+                                g.getIncomingEdges(e.vertex).find(_.origin == last).map(appendEdge)
+                                g.getOutgoingEdges(e.vertex).find(_.destination == last).map(appendEdge)
                         }
                     }
                 }
@@ -80,6 +90,7 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
             showMessage(refVertices.size)
 
             if (verticesCount == refVertices.size) {
+                log("done")
                 patternUpdated.trigger(new EventArgs[SimpleGraphView](this))
             }
     }
@@ -94,8 +105,12 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
     }
 
     def getSignificantVertices = {
-        getPattern
-        refVertices.map("?"+map.get(_).get)
+        log(getPattern)
+
+        refVertices.map{ v =>
+            log(v)
+            "?"+map.get(v).get
+        }
     }
 
     def getPattern: String = {

@@ -38,13 +38,19 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
         val param = getPlugin.parameters.head
 
         val input = new TextArea(param.id, "", "", "tiny datacube")
-        val control = new InputControl[TextArea]("", input, None)
+        val control = new InputControl[TextArea]("Transformation query", input, None)
+
+        val limitInput = new NumericInput("limitCount", 20, "", "")
+        val limitControl = new InputControl[NumericInput]("Preview size", limitInput, None)
 
         val button = new Button(new Text("Choose pattern ..."), "datacube", new Icon(Icon.hand_up))
         button.mouseClicked += {
             evt =>
                 block("Making data preview...")
-                AnalysisRunner.createPartialAnalysis(analysis.id, pluginInstance.id) {
+
+                val limitCount = limitInput.value
+
+                AnalysisRunner.createPartialAnalysis(analysis.id, pluginInstance.id, limitCount) {
                     analysisId =>
                         AnalysisRunner.runAnalysisById(analysisId, 30, "") {
                             evalId =>
@@ -79,7 +85,7 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
                 false
         }
 
-        val div = new Div(List(button, input))
+        val div = new Div(List(button, control, limitControl))
         List(div)
     }
 
@@ -109,7 +115,7 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
                         val messages = getPlugin.parameters.map {
                             p =>
                                 new Div(List(
-                                    new Text("Please, select a vertex corresponding to the " + p.name + " component:")
+                                    new Text("Please, select a vertex corresponding to the " + p.defaultValue.toString+" ("+p.name + ") component:")
                                 ), "message")
                         }
                         val infoBar = new Div(messages, "datacube-infobar")
