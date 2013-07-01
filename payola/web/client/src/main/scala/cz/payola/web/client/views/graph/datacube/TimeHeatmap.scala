@@ -10,7 +10,7 @@ import s2js.compiler.javascript
 import scala.collection._
 import cz.payola.common.geo.Coordinates
 
-class TimeHeatmap(prefixApplier: Option[PrefixApplier] = None) extends PluginView("Time heatmap") {
+class TimeHeatmap(prefixApplier: Option[PrefixApplier] = None) extends PluginView("Time heatmap", prefixApplier) {
 
     val mapPlaceholder = new Div(List(),"map-placeholder")
 

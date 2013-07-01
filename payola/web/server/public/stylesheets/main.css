@@ -577,6 +577,7 @@ button.datacube {
     border: 1px solid gray;
     background: rgba(222, 222, 222, 0.6);
     font-weight: bold;
+    padding-right: 15px;
 }
 
 .mapview-filter ul, .mapview-filter li {
