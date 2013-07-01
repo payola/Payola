@@ -4,23 +4,24 @@ import cz.payola.web.client.views.graph.PluginView
 import cz.payola.common.rdf
 import cz.payola.web.client.views.elements._
 import s2js.adapters.js.sigma
+import s2js.adapters.js.sigma.Node
 import s2js.adapters._
 import s2js.adapters.browser.window
 import scala.collection.mutable.ListBuffer
-import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.common.entities.settings._
 import cz.payola.web.client.views.bootstrap.Icon
 import cz.payola.web.client.views.graph.sigma.properties._
-import scala.Some
+import cz.payola.web.client.views.graph.sigma.PropertiesSetter._
+import cz.payola.web.client.models.PrefixApplier
 
-abstract class SigmaPluginView(name: String) extends PluginView(name){
+abstract class SigmaPluginView(name: String, prefixApplier: Option[PrefixApplier]) extends PluginView(name, prefixApplier){
     protected var sigmaPluginWrapper = new Div().setAttribute("style", "padding: 0 5px; min-width: 200px; min-height: 200px;")
 
     private var edgesNum = 0
 
     protected var sigmaInstance: Option[sigma.Sigma] = None
 
-    protected val animationStartStopButton = new Button(new Text("Start"), "pull-right",
-        new Icon(Icon.refresh)).setAttribute("style", "margin: 0 5px;")
+    //protected val animationStartStopButton = new Button(new Text("Start"), "pull-right", new Icon(Icon.refresh)).setAttribute("style", "margin: 0 5px;")
 
     def createSubViews = List(sigmaPluginWrapper)
 
@@ -30,12 +31,12 @@ abstract class SigmaPluginView(name: String) extends PluginView(name){
     }
 
     override def renderControls(toolbar: html.Element) {
-        animationStartStopButton.render(toolbar)
-        animationStartStopButton.setIsEnabled(true)
+        //animationStartStopButton.render(toolbar)
+        //animationStartStopButton.setIsEnabled(true)
     }
 
     override def destroyControls() {
-        animationStartStopButton.destroy()
+        //animationStartStopButton.destroy()
     }
 
     private def updateSigmaPluginSize(parent: html.Element) {
@@ -55,24 +56,34 @@ abstract class SigmaPluginView(name: String) extends PluginView(name){
         }
     }
 
+    def getRdfType(node: Node): String
+
     override def updateOntologyCustomization(newCustomization: Option[OntologyCustomization]) {
 
         if (sigmaInstance.isDefined) {
-            sigmaInstance.get.iterEdges{ edge =>
-                newCustomization.foreach{ newCust =>
-                    val foundCustomization = newCust.classCustomizations.find{_.uri == edge.label}
+            if(newCustomization.isDefined) {
+                sigmaInstance.get.iterNodes{ node =>
+                    val foundCustomization = newCustomization.get.classCustomizations.find{_.uri == getRdfType(node)}
+                    updateNode(foundCustomization, node) //update configuration of the node
 
-                    foundCustomization.foreach { custom => edge.updateProperties(custom) }
+                    foundCustomization.foreach{ classCustomization =>
+                        sigmaInstance.get.iterEdges{ edge =>
+                            if(edge.id.contains(node.label)){
+                                val propertyCustomization = classCustomization.propertyCustomizations.find(_.uri == edge.label)
+                                updateEdge(propertyCustomization, edge) //update configuration of the edge
+                            }
+                        }
+                    }
+                }
+            } else {
+                sigmaInstance.get.iterNodes{ node =>
+                    updateNode(None, node)
+                }
+                sigmaInstance.get.iterEdges{ edge =>
+                    updateEdge(None, edge)
                 }
             }
-            sigmaInstance.get.iterNodes{ node =>
-                newCustomization.foreach{ newCust =>
-                    val foundCustomization = newCust.classCustomizations.find{_.uri == node.label}
 
-                    foundCustomization.foreach { custom => node.updateProperties(custom) }
-                }
-
-            }
 
             sigmaInstance.get.draw()
         }
@@ -98,25 +109,23 @@ abstract class SigmaPluginView(name: String) extends PluginView(name){
 
     def setDrawingProperties()
 
-    def setGraphProperties()
-
     def fillGraph(graph: Option[rdf.Graph])
 
-    protected def createVertexView(vertex: rdf.IdentifiedVertex, edgesCount: Int, attributes: ListBuffer[(String, _)]) {
+    protected def createVertexView(label: String, vertex: rdf.IdentifiedVertex, edgesCount: Int,
+        attributes: ListBuffer[(String, _)]) {
 
         val props = new NodeProperties
         props.size = scala.math.min(props.size + edgesCount, 20)
-        props.label = vertex.uri
+        props.label = label
         props.value = attributes
         sigmaInstance.get.addNode(vertex.uri, props)
     }
 
-    protected def createEdgeView(edge: rdf.Edge) {
+    protected def createEdgeView(edge: rdf.Edge ) {
         edge.destination match {
             case i: rdf.IdentifiedVertex =>
-                sigmaInstance.get.addEdge(edgesNum+edge.uri, edge.origin.uri, i.uri,
-                    new EdgeProperties())
+                sigmaInstance.get.addEdge(edgesNum+":"+edge.origin.uri+":"+edge.uri, edge.origin.uri, i.uri, new EdgeProperties())
+                edgesNum += 1
         }
-        edgesNum += 1
     }
 }

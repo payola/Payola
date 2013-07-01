@@ -1,0 +1,65 @@
+@(user: Option[cz.payola.domain.entities.User], prefixes: Seq[cz.payola.domain.entities.Prefix], page: Int = 1, title: Option[String] = None)(flash: Flash)
+
+@import tags._
+
+@detailsLinkForID(id: String, prefix: String) = @{
+<a href={routes.Prefix.edit(id).toString}>{prefix}</a>
+}
+
+@editLinkForID(id: String) = @{
+<div class="btn-group">
+    <a href={routes.Prefix.edit(id).toString} class="btn"><i class="icon-pencil"></i> Edit</a>
+</div>
+}
+
+@deleteLinkForID(id: String) = @{
+<div class="btn-group">
+    <a href={routes.Prefix.delete(id).toString} class="btn btn-danger" onclick="return confirm('Are you sure?')"><i class="icon-remove-sign icon-white"></i> Delete</a>
+</div>
+}
+
+@globalPrefixBadge() = @{
+<span class="badge">Global prefix</span>
+}
+
+@render_flash(flash)
+
+@list_entities(user,
+    "prefix",
+    "prefixes",
+    prefixes.size,
+    {
+        case (page, itemsPerPage) =>
+            val subseq = prefixes.drop((page - 1) * itemsPerPage)
+
+            if (itemsPerPage > subseq.size){
+                subseq
+            } else {
+                subseq.take(itemsPerPage)
+        }
+    },
+    {
+        Unit =>
+            val buffer = new scala.xml.NodeBuffer()
+            buffer += <td>Prefix</td>
+            buffer += <td>Url</td>
+
+            buffer
+    },
+    {
+        e: cz.payola.domain.Entity =>
+            <td class="listing-column-tiny">{ e.asInstanceOf[cz.payola.domain.entities.Prefix].prefix }</td>
+            <td class="listing-column-name">{ e.asInstanceOf[cz.payola.domain.entities.Prefix].url }</td>
+            <td>
+                <div class="btn-toolbar">{
+                    if (user != None && e.asInstanceOf[cz.payola.domain.entities.Prefix].owner == user)
+                        editLinkForID(e.id) ++ deleteLinkForID(e.id)
+                    else
+                        globalPrefixBadge()
+                }
+                </div>
+            </td>
+    },
+    routes.Prefix.create(),
+    page
+)

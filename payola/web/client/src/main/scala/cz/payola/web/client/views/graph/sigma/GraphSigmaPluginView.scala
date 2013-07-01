@@ -1,34 +1,36 @@
 package cz.payola.web.client.views.graph.sigma
 
 import cz.payola.common.rdf
+import rdf._
 import s2js.compiler.javascript
 import scala.collection.mutable.ListBuffer
 import cz.payola.web.client.views.elements.Text
 import cz.payola.web.client.views.graph.sigma.properties.DrawingProperties
+import s2js.adapters.js.sigma.Node
+import cz.payola.web.client.models.PrefixApplier
 
-class GraphSigmaPluginView extends SigmaPluginView("Sigma.js") {
+class GraphSigmaPluginView(prefixApplier: Option[PrefixApplier]) extends SigmaPluginView("Sigma.js", prefixApplier) {
 
     val popUp: Any = null //used only in the javascript of functions showVertexInfo and hideVertexInfo
     val popUpWidth = 300
     val popUpHeight = 300
+    private var animationRunning = false
 
     def setDrawingProperties() {
         sigmaInstance.get.drawingProperties(new DrawingProperties)
     }
 
-    def setGraphProperties() {
-
-    }
-
     def fillGraph(graphOpt: Option[rdf.Graph]) {
 
-       graphOpt.foreach{ graph =>
-           var vertexNum = 1
+        graphOpt.foreach{ graph =>
+           //var vertexNum = 1
             graph.vertices.foreach{ vertex =>
                 vertex match{
                     case i: rdf.IdentifiedVertex =>
-                        createVertexView(i, countEdges(i, graph.edges), getAttributes(i, graph.edges))
-                        vertexNum += 1
+                        createVertexView(prefixApplier.map(_.applyPrefix(i.uri)).getOrElse(i.uri),
+                            i, countEdges(i, graph.edges), getAttributes(i, graph.edges))
+                        setRdfType(i.uri, getRdfTypeForVertexView(graph.edges, i.uri))
+                        //vertexNum += 1
                 }
             }
 
@@ -48,9 +50,19 @@ class GraphSigmaPluginView extends SigmaPluginView("Sigma.js") {
         //sigmaInstance.get.startForceAtlas2();
     }
 
-    private var animationRunning = false
+    /**
+     * Gets rdf type to specify the type required for drawing and getting drawing configuration based on an ontology.
+     * @param edges to search for an edge with Edge.rdfTypeEdge uri
+     * @param vertexURI for which the type is being searched
+     * @return the found type or an empty string
+     */
+    private def getRdfTypeForVertexView(edges: Seq[Edge], vertexURI: String): String = {
 
-    private def stopAnimation() {
+        edges.find { e => (e.origin.uri == vertexURI) && (e.uri == Edge.rdfTypeEdge) }.map(_.destination.toString).getOrElse("")
+
+    }
+
+    /*private def stopAnimation() {
         if (sigmaInstance.isDefined) {
             sigmaInstance.get.stopForceAtlas2()
             animationStartStopButton.subViews.foreach{ child =>
@@ -89,7 +101,7 @@ class GraphSigmaPluginView extends SigmaPluginView("Sigma.js") {
             }
 
             false
-    }
+    }*/
 
 
 
@@ -187,6 +199,20 @@ class GraphSigmaPluginView extends SigmaPluginView("Sigma.js") {
         "    }).draw(2,2,2);")
     private def showVertices(event: Unit) {}
 
+
+    @javascript(
+        "   var node = self.sigmaInstance.get().getNodes(uri);\n" +
+        "   node.attr['rdfType'] = rdfType;\n")
+    private def setRdfType(uri: String, rdfType: String) {}
+
+    @javascript(
+        "   var rdfType = node.attr['rdfType'];\n" +
+        "   if(rdfType == null)" +
+        "       return '';\n" +
+        "   return rdfType;"
+    )
+    override def getRdfType(node: Node): String = ""
+
     private def getAttributes(vertex: rdf.IdentifiedVertex, edges: Seq[rdf.Edge]): ListBuffer[(String, _)] = {
 
         val result: ListBuffer[(String, _)] = new ListBuffer[(String, _)]()
@@ -207,7 +233,6 @@ class GraphSigmaPluginView extends SigmaPluginView("Sigma.js") {
     }
 
     private def attributesToString(attr: ListBuffer[(String, Any)]): String = {
-        //TODO je potreba tam nejak dat scroolbar, pro pripad, ze atributu je hodne
         var resultList = "<ul>"
         attr.foreach { record =>
             resultList += "<li>" + record._1 + " : " + record._2 + "</li>"

@@ -13,14 +13,17 @@ import cz.payola.web.client._
 import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.graph.visual.graph._
 import cz.payola.web.client.views._
-import cz.payola.web.client.views.bootstrap.Icon
+import bootstrap._
 import cz.payola.common.entities.settings.OntologyCustomization
 import cz.payola.common.visual.Color
+import lists.ListItem
+import models.PrefixApplier
+import scala.Some
 
 /**
  * Representation of visual based output drawing plugin
  */
-abstract class VisualPluginView(name: String) extends PluginView(name)
+abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplier]) extends PluginView(name, prefixApplier)
 {
     /**
      * Value used during vertex selection process.
@@ -92,8 +95,28 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
     /**
      * Download as PNG image button for graphical visualizations.
      */
-    private val pngDownloadButton = new Button(new Text("Download as PNG"), "pull-right",
-        new Icon(Icon.download)).setAttribute("style", "margin: 0 5px;")
+    private val pngDownloadButton = new Anchor(List(new Icon(Icon.download), new Text("Download as PNG")))
+    private val setMainVertexButton = new Anchor(List(new Icon(Icon.screenshot), new Text("Set main vertex")))
+
+
+    /*private val languageMenu = new DropDownButton( TODO
+        List(new Icon(Icon.globe), new Text("Language")),
+        List(
+            new ListItem(List(new Text("Test"))),
+            new ListItem(List(new Text("Test1"))),
+            new ListItem(List(new Text("Test3")))
+        ),
+        "", "pull-right"
+    ).setAttribute("style", "margin: 0 5px;")*/
+
+    private val visualTools = new DropDownButton(
+        List(new Icon(Icon.eye_open), new Text("Visual tools")),
+        List(
+            new ListItem(List(pngDownloadButton)),
+            new ListItem(List(setMainVertexButton))
+            ),
+        "", "pull-right"
+    ).setAttribute("style", "margin: 0 5px;")
 
     topLayer.mousePressed += {
         e =>
@@ -200,6 +223,15 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
             false
     }
 
+    setMainVertexButton.mouseClicked += { e =>
+        val selectedVertices = graphView.get.getAllSelectedVertices
+        if(selectedVertices.size == 1) {
+            zoomControls.reset()
+            vertexSetMain.trigger(new VertexEventArgs[this.type](this, selectedVertices.head.vertexModel))
+        }
+        false
+    }
+
     /**
      * Function for destroying the current vertex info table.
      */
@@ -214,7 +246,8 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
         if (!vertexView.getLiteralVertices.isEmpty) {
             vertexView.vertexModel match {
                 case vm: IdentifiedVertex => {
-                    val infoTable = new VertexInfoTable(vm, vertexView.getLiteralVertices, Point2D.Zero)
+                    val infoTable =
+                        new VertexInfoTable(vm, vertexView.getLiteralVertices, Point2D.Zero)
 
                     infoTable.vertexBrowsing += {
                         a =>
@@ -276,6 +309,8 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
         redraw()
     }
 
+    override def setMainVertex(vertex: Vertex) {}
+
     def createSubViews = layerPack.getLayers
 
     /**
@@ -320,14 +355,15 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
         if (graph != currentGraph) {
             if (graph.isDefined) {
                 if (graphView.isEmpty) {
-                    graphView = Some(new views.graph.visual.graph.GraphView(contractLiterals))
+                    graphView = Some(new views.graph.visual.graph.GraphView(contractLiterals, prefixApplier))
                 }
-                graphView.get.update(graph.get, topLayer.getCenter)
+                graphView.get.update(graph.get, topLayer.getCenter, prefixApplier: Option[PrefixApplier])
                 graphView.foreach {
                     gV =>
                         gV.setConfiguration(currentCustomization)
                         _parentHtmlElement.foreach(gV.render(_))
                 }
+
             } else {
                 if (graphView.isDefined) {
                     layerPack.getLayers.foreach(_.clear())
@@ -345,13 +381,15 @@ abstract class VisualPluginView(name: String) extends PluginView(name)
         zoomControls.render(toolbar)
         animationStopButton.render(toolbar)
         animationStopButton.setIsEnabled(false)
-        pngDownloadButton.render(toolbar)
+        visualTools.render(toolbar)
+        //languageMenu.render(toolbar) TODO
     }
 
     override def destroyControls() {
         zoomControls.destroy()
         animationStopButton.destroy()
-        pngDownloadButton.destroy()
+        visualTools.destroy()
+        //languageMenu.destroy() TODO
     }
 
     /**

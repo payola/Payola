@@ -2,6 +2,7 @@ package cz.payola.web.client.views.graph.visual
 
 import cz.payola.web.client.View
 import cz.payola.web.client.views.elements._
+import graph.VertexView
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable
 import cz.payola.web.client.views.bootstrap.Icon
@@ -11,8 +12,7 @@ import cz.payola.web.client.events._
 import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.elements.lists._
 
-class VertexInfoTable(vertex: IdentifiedVertex, values: mutable.HashMap[String, Seq[String]], position: Point2D)
-    extends ComposedView
+class VertexInfoTable(vertex: IdentifiedVertex, values: List[(String, Seq[String])], position: Point2D) extends ComposedView
 {
     var vertexBrowsingDataSource = new SimpleUnitEvent[IdentifiedVertex]
 
@@ -41,8 +41,9 @@ class VertexInfoTable(vertex: IdentifiedVertex, values: mutable.HashMap[String, 
             }
         }
 
-        val popoverTitle = new
-                Heading(List(dataSourceAnchor, new Span(List(new Text(" "))), browsingAnchor), 3, "popover-title")
+        val popoverTitle =
+            new Heading(List(dataSourceAnchor, new Span(List(new Text(" "))), browsingAnchor), 3, "popover-title")
+
         val popoverContent = if(!values.isEmpty) {
             new Div(List( new DefinitionList(buffer, "unstyled well")), "popover-content")
         } else {

@@ -20,6 +20,8 @@ trait ClassCustomization extends Entity
 
     protected var _glyph: String
 
+    protected var _labels: String
+
     protected var _propertyCustomizations: immutable.Seq[PropertyCustomizationType]
 
     override def classNameText = "ontology class customization"
@@ -50,14 +52,50 @@ trait ClassCustomization extends Entity
     def glyph = _glyph
 
     /**
-      * Sets the vertex glyph.
-      * @param value New value of the vertex glyph.
-      */
+     * Sets the vertex glyph.
+     * @param value New value of the vertex glyph.
+     */
     def glyph_=(value: String) {
         validate(value.length <= 1, "glyph", "Glyph must be string with maximal lenght 1")
         _glyph = value
     }
 
+    /** Vertex labels splitted. */
+    def labelsSplitted: List[LabelItem] = {
+        if(_labels == null || _labels == "") {
+            List[LabelItem]()
+        } else {
+            val splitted = _labels.split(';').toList
+            splitted.take(splitted.length - 1).map{ value => createLabelItem(value) }
+        }
+    }
+
+    private def createLabelItem(value: String): LabelItem = {
+        val accepted = value.startsWith("T")
+        val userDefined = value.startsWith("FU-") || value.startsWith("TU-")
+        val text = if(value.startsWith("TU-") || value.startsWith("FU-")) {
+            value.substring(3)
+        } else { //if(value.startsWith("T-") || value.startsWith("F-"))
+            value.substring(2)
+        }
+
+        new LabelItem(text, userDefined, accepted)
+
+    }
+
+    /** Vertex labels. */
+    def labels = _labels
+
+    /**
+     * Sets the vertex glyph.
+     * @param value New value of the vertex glyph.
+     */
+    def labels_=(value: String) {
+        _labels = value
+    }
+
     /** Customizations of properties of the class. */
     def propertyCustomizations = _propertyCustomizations
 }
+
+class LabelItem(val value: String, val userDefined: Boolean, val accepted: Boolean) { }

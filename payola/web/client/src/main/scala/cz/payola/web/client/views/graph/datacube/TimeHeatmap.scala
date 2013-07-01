@@ -1,17 +1,16 @@
 package cz.payola.web.client.views.graph.datacube
 
+import cz.payola.web.client.models.PrefixApplier
 import cz.payola.web.client.views.graph.PluginView
 import cz.payola.web.client.views.elements.Div
 import cz.payola.common.rdf._
 import cz.payola.web.shared.Geo
 import cz.payola.web.client.views.map._
-import cz.payola.common.geo.Coordinates
 import s2js.compiler.javascript
 import scala.collection._
 import cz.payola.common.geo.Coordinates
-import cz.payola.common.geo.Coordinates
 
-class TimeHeatmap extends PluginView("Time heatmap") {
+class TimeHeatmap(prefixApplier: Option[PrefixApplier] = None) extends PluginView("Time heatmap") {
 
     val mapPlaceholder = new Div(List(),"map-placeholder")
 

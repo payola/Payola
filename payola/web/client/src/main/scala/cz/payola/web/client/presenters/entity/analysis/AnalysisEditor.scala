@@ -19,10 +19,11 @@ class AnalysisEditor(parentElementId: String, analysisIdParam: String)
 
     override def initialize() {
         blockPage("Loading analysis data...")
+        prefixPresenter.initialize
         AnalysisBuilderData.getAnalysis(analysisId) { analysis =>
 
             lockAnalysisAndLoadPlugins({ () =>
-                val view = new AnalysisEditorView(analysis, None, None, "Edit analysis")
+                val view = new AnalysisEditorView(analysis, None, None, "Edit analysis", prefixPresenter.prefixApplier)
                 view.visualizer.pluginInstanceRendered += { e => instancesMap.put(e.target.pluginInstance.id, e.target)}
                 view.render(parentElement)
                 bindParameterChangedEvent(view.visualizer)

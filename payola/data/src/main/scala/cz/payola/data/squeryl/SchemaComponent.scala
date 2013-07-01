@@ -97,6 +97,9 @@ trait SchemaComponent
         /**Table of [[cz.payola.data.squeryl.entities.settings.PropertyCustomization]]s */
         val propertyCustomizations = table[PropertyCustomization]("propertyCustomizations")
 
+        /**Table of [[cz.payola.data.squeryl.entities.Prefix]]es */
+        val prefixes = table[Prefix]("prefixes")
+
         /**
          * Relation that associates members ([[cz.payola.data.squeryl.entities.User]]s)
          * to [[cz.payola.data.squeryl.entities.Group]]s
@@ -138,6 +141,13 @@ trait SchemaComponent
          */
         lazy val dataSourceOwnership = oneToManyRelation(users, dataSources).via(
             (u, ds) => Option(u.id) === ds.ownerId)
+
+        /**
+         * Relation that associates [[cz.payola.data.squeryl.entities.Prefix]] to its owner
+         * ([[cz.payola.data.squeryl.entities.User]]s)
+         */
+        lazy val prefixOwnership = oneToManyRelation(users, prefixes).via(
+            (u, p) => Option(u.id) === p.ownerId)
 
         /**
          * Relation that associates [[cz.payola.data.squeryl.entities.analyses.PluginDbRepresentation]] to a
@@ -357,7 +367,7 @@ trait SchemaComponent
                 new IntParameterValue("", null, 0)
             },
             factoryFor(stringParameters) is {
-                new StringParameter("", "", "", false, false, false)
+                new StringParameter("", "", "", false, false, false, false)
             },
             factoryFor(stringParameterValues) is {
                 new StringParameterValue("", null, "")
@@ -372,10 +382,13 @@ trait SchemaComponent
                 new OntologyCustomization("", "", "", None, Nil, false)
             },
             factoryFor(classCustomizations) is {
-                new ClassCustomization("", "", "", 0, "", Nil)
+                new ClassCustomization("", "", "", 0, "", "", Nil)
             },
             factoryFor(propertyCustomizations) is {
                 new PropertyCustomization("", "", "", 0)
+            },
+            factoryFor(prefixes) is {
+                new Prefix("", "", "", "", None)
             }
         )
 
@@ -385,9 +398,11 @@ trait SchemaComponent
         private def declareKeys() {
             val COLUMN_TYPE_ID = "varchar(36)"
             val COLUMN_TYPE_TOKEN = "varchar(36)"
+            val COLUMN_TYPE_PREFIX = "varchar(10)"
             val COLUMN_TYPE_NAME = "varchar(128)"
             val COLUMN_TYPE_DESCRIPTION = "text"
-            val COLUMN_TYPE_URI = "text"
+            val COLUMN_TYPE_URIS = "text"
+            val COLUMN_TYPE_URI = "varchar(256)"
             val COLUMN_TYPE_VALUE = "text"
             val COLUMN_TYPE_COLOR = "varchar(128)"
             val COLUMN_TYPE_CLASSNAME = "varchar(64)"
@@ -548,14 +563,14 @@ trait SchemaComponent
                     c.id is(primaryKey, (dbType(COLUMN_TYPE_ID))),
                     c.name is (dbType(COLUMN_TYPE_NAME)),
                     c.ownerId is (dbType(COLUMN_TYPE_ID)),
-                    c.ontologyURLs is (dbType(COLUMN_TYPE_URI)),
+                    c.ontologyURLs is (dbType(COLUMN_TYPE_URIS)),
                     columns(c.name, c.ownerId) are (unique)
                 ))
 
             on(classCustomizations)(c =>
                 declare(
                     c.id is(primaryKey, (dbType(COLUMN_TYPE_ID))),
-                    c.uri is (dbType(COLUMN_TYPE_URI)),
+                    c.uri is (dbType(COLUMN_TYPE_URIS)),
                     c.glyph is (dbType("varchar(1)")),
                     c.fillColor is (dbType(COLUMN_TYPE_COLOR)),
                     c.ontologyCustomizationId is (dbType(COLUMN_TYPE_ID))
@@ -566,7 +581,18 @@ trait SchemaComponent
                     c.id is(primaryKey, (dbType(COLUMN_TYPE_ID))),
                     c.strokeColor is (dbType(COLUMN_TYPE_COLOR)),
                     c.classCustomizationId is (dbType(COLUMN_TYPE_ID)),
-                    c.uri is (dbType(COLUMN_TYPE_URI))
+                    c.uri is (dbType(COLUMN_TYPE_URIS))
+                ))
+
+            on(prefixes)(p =>
+                declare(
+                    p.id is(primaryKey, (dbType(COLUMN_TYPE_ID))),
+                    p.name is (dbType(COLUMN_TYPE_NAME)),
+                    p.prefix is (dbType(COLUMN_TYPE_PREFIX)),
+                    p.url is (dbType(COLUMN_TYPE_URI)),
+                    p.ownerId is (dbType(COLUMN_TYPE_ID)),
+                    columns(p.ownerId, p.prefix) are (unique),
+                    columns(p.ownerId, p.url) are (unique)
                 ))
 
             // When a PluginDbRepresentation is deleted, all of the its instances and data sources will get deleted.

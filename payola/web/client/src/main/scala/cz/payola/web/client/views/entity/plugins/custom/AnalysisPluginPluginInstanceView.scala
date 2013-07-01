@@ -6,10 +6,11 @@ import cz.payola.common.entities.plugins._
 import scala._
 import scala.collection.Seq
 import cz.payola.web.client.views.entity.plugins._
+import cz.payola.web.client.models.PrefixApplier
 
 class AnalysisPluginPluginInstanceView(pluginInst: PluginInstance,
     predecessors: Seq[PluginInstanceView] = List())
-    extends ReadOnlyPluginInstanceView(pluginInst, predecessors)
+    extends ReadOnlyPluginInstanceView(pluginInst, predecessors, new PrefixApplier())
 {
     private def name = pluginInstance.plugin.name.split("_").apply(0)
 

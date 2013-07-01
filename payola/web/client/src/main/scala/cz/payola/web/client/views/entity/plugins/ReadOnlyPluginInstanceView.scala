@@ -4,9 +4,11 @@ import cz.payola.web.client.views.elements._
 import cz.payola.web.client.View
 import cz.payola.common.entities.plugins._
 import cz.payola.web.client.views.elements.lists._
+import cz.payola.web.client.models.PrefixApplier
+import cz.payola.common.entities.plugins.parameters.StringParameter
 
-class ReadOnlyPluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[PluginInstanceView] = List())
-    extends PluginInstanceView(pluginInst, predecessors)
+class ReadOnlyPluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[PluginInstanceView] = List(),
+    prefixApplier: PrefixApplier) extends PluginInstanceView(pluginInst, predecessors, prefixApplier)
 {
     def getAdditionalControlsViews: Seq[View] = List()
 
@@ -34,7 +36,12 @@ class ReadOnlyPluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[P
                                 false
                         }
 
-                        val item = new ListItem(List(strong, new Text(": " + v.toString)))
+                        // If rendering string parameter that can contain url, try to find matchng prefix
+                        val item = param match {
+                            case p : StringParameter if p.canContainUrl => new ListItem(List(strong, new Text(": " + prefixApplier.applyPrefix(v.toString))))
+                            case _ => new ListItem(List(strong, new Text(v.toString)))
+                        }
+
                         item.setAttribute("title", v.toString)
                         item
                 }

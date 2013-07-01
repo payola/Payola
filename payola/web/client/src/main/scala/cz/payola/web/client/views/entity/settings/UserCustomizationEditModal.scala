@@ -2,7 +2,7 @@ package cz.payola.web.client.views.entity.settings
 
 import cz.payola.common.entities.settings._
 import cz.payola.web.client.views.bootstrap._
-import cz.payola.web.client.events.UnitEvent
+import cz.payola.web.client.events._
 import cz.payola.web.client.presenters.entity.settings._
 import cz.payola.web.client.views.elements.form.fields._
 import cz.payola.web.client.views.elements._
@@ -15,16 +15,31 @@ import cz.payola.web.shared.managers.OntologyCustomizationManager
 import cz.payola.common._
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
 import scala.Some
-import scala.Some
 
 class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomization: OntologyCustomization, onClose: () => Unit)
     extends Modal("Edit user customization", Nil, Some("Done"), None, false, "large-modal")
 {
-    private var classCustomizations = userCustomization.classCustomizations.map { userClassCust =>
-        userClassCust.asInstanceOf[ClassCustomization]
+    private var classCustomizations = userCustomization.classCustomizations.filter(_.uri != "properties").map{
+        userClassCust => userClassCust.asInstanceOf[ClassCustomization]
     }
 
-    private var selectedClassCustomization = if(classCustomizations.isEmpty) None else Some(classCustomizations.head)
+    private def propertiesContainer = userCustomization.classCustomizations.find(_.uri == "properties")
+    
+    private var propertyCustomizations = if(propertiesContainer.isDefined) {
+        propertiesContainer.get.propertyCustomizations
+    } else {
+        List[PropertyCustomization]()
+    }
+
+    private var selectedItem: Option[CustomizationItem] =
+        if(classCustomizations.isEmpty) {
+            if(propertyCustomizations.isEmpty) None
+            else Some(CustomizationItem.create(propertyCustomizations.head))
+        } else {
+            Some(CustomizationItem.create(classCustomizations.head))
+        }
+
+    val customizationChanged = new UnitEvent[OntologyCustomization, OntologyCustomizationEventArgs]
 
     val classFillColorChanged = new UnitEvent[InputControl[_], ClassCustomizationEventArgs[InputControl[_]]]
 
@@ -33,6 +48,8 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
     val classGlyphChanged = new UnitEvent[InputControl[_], ClassCustomizationEventArgs[InputControl[_]]]
 
     val propertyStrokeColorChanged = new UnitEvent[InputControl[_], PropertyCustomizationEventArgs[InputControl[_]]]
+
+    val classLabelsChanged = new UnitEvent[InputControl[_], ClassCustomizationEventArgs[InputControl[_]]]
 
     val propertyStrokeWidthDelayedChanged =
         new UnitEvent[InputControl[_], PropertyCustomizationEventArgs[InputControl[_]]]
@@ -57,12 +74,12 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
                 case _ => false
             }
         }.map{vertex => vertex.asInstanceOf[IdentifiedVertex].uri},
-        "Append class", "Classes available in the current graph: ", "", onAppendClass)
+        "Append class", "Vertices available in the current graph: ", "", onAppendClass)
 
     appendClassButton.appendButton.mouseClicked += { e =>
         appendClassButton.availableURIs = currentGraph.get.vertices.filter{ vertex =>
             vertex match {
-                case i: IdentifiedVertex => ! classCustomizations.exists{ classCust => i.uri == classCust.uri }
+                case i: IdentifiedVertex => ! classCustomizations.exists(_.uri == i.uri)
                 case _ => false
             }
         }.map{vertex => vertex.asInstanceOf[IdentifiedVertex].uri}
@@ -71,39 +88,44 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
     }
 
     val appendPropertyButton = new AppendToUserCustButton(classCustomizations.map(_.uri),
-        "Append Property", "Properties available in the current graph: ", "", onAppendProperty)
+        "Append Property", "Attributes available in the current graph: ", "", onAppendProperty)
 
     appendPropertyButton.appendButton.mouseClicked += { e =>
-        if (selectedClassCustomization.isDefined) {
-            val availablePropertyURIs = currentGraph.get.edges.filter{ edge =>
-                //all properties (edges) of the selectedClassCustomization (vertex in graph)
-                //that is not already in its (selectedClassCustomization) propertyCustomizations list
-                edge.origin.uri == selectedClassCustomization.get.uri && !selectedClassCustomization.get.propertyCustomizations.exists(_.uri == edge.uri)
-            }.map(_.uri)
+        val availablePropertyURIs = currentGraph.get.edges.filter{ edge =>
+            //all properties (edges) that are not already in the propertyCustomizations
+            !propertyCustomizations.exists(_.uri == edge.uri)
+        }.map(_.uri)
 
-            appendPropertyButton.availableURIs = availablePropertyURIs
-            appendPropertyButton.openPopup()
-        } else {
-            AlertModal.display("Information", "Select a class customization first.", "", Some(4000))
-        }
+        appendPropertyButton.availableURIs = availablePropertyURIs
+        appendPropertyButton.openPopup()
+
         false
     }
 
-    private var classCustomizationListItems = userCustomization.classCustomizations.map { classCustomization =>
-            val classListItem = new ListItem(List(new Anchor(List(
-                new Icon(Icon.tag),
-                new Text(uriToName(classCustomization.uri)))
-            )))
-            classListItem.mouseClicked += {
-                e =>
-                    onClassCustomizationSelected(classCustomization, classListItem)
-                    false
-            }
-            classListItem
+    private var classCustomizationsListItems = classCustomizations.map { customization =>
+        val listItem = new ListItem(List(new Anchor(List(
+            new Icon(Icon.tag),
+            new Text(uriToName(customization.uri)))
+        )))
+        listItem.mouseClicked += { e => onListItemSelected(customization, listItem, renderClassCustomizationViews)
+            false
+        }
+        listItem
     }
 
-    private val propertiesDiv = new Div(Nil, "span8")
-    private val classesDiv = new Div(List(new UnorderedList(classCustomizationListItems, "nav nav-list")),
+    private var propertyCustomizationsListItems = propertyCustomizations.map { customization =>
+        val listItem = new ListItem(List(new Anchor(List(
+            new Icon(Icon.list),
+            new Text(uriToName(customization.uri)))
+        )))
+        listItem.mouseClicked += { e => onListItemSelected(customization, listItem, renderPropertyCustomizationViews)
+            false
+        }
+        listItem
+    }
+
+    private val settingsDiv = new Div(Nil, "span8")
+    private val listDiv = new Div(List(new UnorderedList(classCustomizationsListItems ++ propertyCustomizationsListItems, "nav nav-list")),
         "span4 modal-inner-view well no-padding").setAttribute("style", "padding: 8px 0;")
 
     override val body = List(
@@ -113,25 +135,23 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
                 new Div(List(appendClassButton,appendPropertyButton, deleteButton), "btn-group inline-block pull-right")),
                 "row-fluid button-row"
             ),
-            new Div(List(classesDiv, propertiesDiv), "row-fluid")),
+            new Div(List(listDiv, settingsDiv), "row-fluid")),
             "container-fluid"
         ).setAttribute("style", "padding: 0;")
     )
 
     override def render(parent: html.Element) {
         super.render(parent)
-        userCustomization.classCustomizations.headOption.foreach {
-            onClassCustomizationSelected(_, classCustomizationListItems.head)
-        }
     }
 
     private def onAppendClass(newClassURI: String): Boolean = {
-        if(!classCustomizations.exists{ customization => //if this name does not already exist
-            customization.uri == newClassURI
-        }) {
-            classCustomizationListItems.foreach(_.removeCssClass("active"))
-            propertiesDiv.removeAllChildNodes()
-            selectedClassCustomization = None
+        if(!classCustomizations.exists(_.uri == newClassURI)) { //if this name does not already exist
+
+            classCustomizationsListItems.foreach(_.removeCssClass("active"))
+            propertyCustomizationsListItems.foreach(_.removeCssClass("active"))
+
+            settingsDiv.removeAllChildNodes()
+            selectedItem = None
             block("Creating class...")
 
             //create the class
@@ -153,35 +173,57 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
     }
 
     private def onAppendProperty(newPropertyURI: String): Boolean = {
-        if(selectedClassCustomization.isDefined) {
-            if(!selectedClassCustomization.get.propertyCustomizations.exists{ propCust => //if this name does not already exist
-                propCust.uri == newPropertyURI
-            }) {
-                propertiesDiv.removeAllChildNodes()
-                block("Creating property...")
+        if(!propertyCustomizations.exists(_.uri == newPropertyURI)) { //if this name does not already exist
 
-                //create the class
-                OntologyCustomizationManager.createPropertyCustomization(
-                    userCustomization.id, selectedClassCustomization.get.uri, newPropertyURI) { ontologyCustomization =>
-                    unblock()
-                    val updatedCurrentClassOpt = ontologyCustomization.classCustomizations.find(_.uri == selectedClassCustomization.get.uri)
-                    if (updatedCurrentClassOpt.isDefined) {
-                        onClassCustomizationSelected(updatedCurrentClassOpt.get,
-                            renderDefinedProperty(updatedCurrentClassOpt.get))
-                    }
+            classCustomizationsListItems.foreach(_.removeCssClass("active"))
+            propertyCustomizationsListItems.foreach(_.removeCssClass("active"))
+
+            settingsDiv.removeAllChildNodes()
+            selectedItem = None
+            block("Creating property...")
+
+            if(propertiesContainer.isEmpty) { //must create the classCustomization container for propertiesCustomizations
+                OntologyCustomizationManager.createClassCustomization(
+                    userCustomization.id, "properties", List[String]()) { ocAddClass =>
+                    val newClass = ocAddClass.classCustomizations.last.asInstanceOf[ClassCustomization]
+                    classCustomizations ++= List(newClass)
+
+                    addPropertyCall(propertiesContainer.get, newPropertyURI)
+
                 }{ error =>
                     unblock()
                     //TODO what shall I do if a class customization can not be created??
                 }
                 true
             } else {
-                AlertModal.display("Information", newPropertyURI + " is already defined.", "", Some(4000))
-                false
+                //create the property
+                addPropertyCall(propertiesContainer.get, newPropertyURI)
+                true
             }
         } else {
-            AlertModal.display("Information", "Select a class customization first.", "", Some(4000))
+            AlertModal.display("Information", "Property " + newPropertyURI + " is already defined.", "", Some(4000))
             false
         }
+    }
+
+    private def addPropertyCall(propertiesContainer: ClassCustomization, newPropertyURI: String) {
+
+        OntologyCustomizationManager.createPropertyCustomization(
+            userCustomization.id, propertiesContainer.uri, newPropertyURI) { ocAddProperty =>
+            unblock()
+            val updatedCurrentClassOpt = ocAddProperty.classCustomizations.find(_.uri == propertiesContainer.uri)
+            if (updatedCurrentClassOpt.isDefined) {
+                val newPropertyCustomizationOpt = updatedCurrentClassOpt.get.propertyCustomizations.find(_.uri == newPropertyURI)
+                if(newPropertyCustomizationOpt.isDefined) {
+                    propertyCustomizations ++= List(newPropertyCustomizationOpt.get)
+                    renderDefinedProperty(newPropertyCustomizationOpt.get, updatedCurrentClassOpt.get)
+                }
+            }
+        }{ error =>
+            unblock()
+            //TODO what shall I do if a class customization can not be created??
+        }
+        true
     }
 
     /**
@@ -196,53 +238,46 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
             new Text(uriToName(definedClass.uri)))
         )))
         classListItem.mouseClicked += { e =>
-            onClassCustomizationSelected(definedClass, classListItem)
+            onListItemSelected(definedClass, classListItem, renderClassCustomizationViews)
             false
         }
 
-        classCustomizationListItems ++= List(classListItem)
-        classesDiv.removeAllChildNodes()
-        val list = new UnorderedList(classCustomizationListItems, "nav nav-list")
-        list.render(classesDiv.htmlElement)
+        classCustomizationsListItems ++= List(classListItem)
+        listDiv.removeAllChildNodes()
+        val list = new UnorderedList(classCustomizationsListItems ++ propertyCustomizationsListItems, "nav nav-list")
+        list.render(listDiv.htmlElement)
     }
 
-    private def renderDefinedProperty(updatedClass: ClassCustomization): ListItem = {
-
+    private def renderDefinedProperty(newProperty: PropertyCustomization, updatedClass: ClassCustomization): ListItem = {
 
         classCustomizations = classCustomizations.filter(_.uri != updatedClass.uri) // remove the old classCustomization (without the new property)
         classCustomizations ++= List(updatedClass) //add the updated classCustomization (with the new property)
 
-
-        val updatedClassListItem = classCustomizationListItems.find(
-            _.subViews.head.asInstanceOf[Anchor].subViews(1).asInstanceOf[Text].text == uriToName(updatedClass.uri))
-
-        if(updatedClassListItem.isEmpty) {
-            throw new PayolaException("Class customization: "+updatedClass.uri+" was not found.")
-        }
-
-        updatedClassListItem.get.mouseClicked.clear()
-        updatedClassListItem.get.mouseClicked += { e =>
-            onClassCustomizationSelected(updatedClass, updatedClassListItem.get)
+        val propertyListItem = new ListItem(List(new Anchor(List(
+            new Icon(Icon.list),
+            new Text(uriToName(newProperty.uri)))
+        )))
+        propertyListItem.mouseClicked += { e =>
+            onListItemSelected(newProperty, propertyListItem, renderPropertyCustomizationViews)
             false
         }
 
-        updatedClassListItem.get
+        propertyCustomizationsListItems ++= List(propertyListItem)
+        listDiv.removeAllChildNodes()
+        val list = new UnorderedList(classCustomizationsListItems ++ propertyCustomizationsListItems, "nav nav-list")
+        list.render(listDiv.htmlElement)
+
+        propertyListItem
     }
 
-    /**
-     * Generates the content of a ClassCustomization and its PropertyCustomizations;
-     * reaction to "ClassCustomization" selected from the list of defined ClassCustomizations
-     * @param classCustomization what customization is selected
-     * @param listItem html container of the selected customization
-     */
-    private def onClassCustomizationSelected(classCustomization: ClassCustomization, listItem: ListItem) {
-        classCustomizationListItems.foreach(_.removeCssClass("active"))
+    private def onListItemSelected[A <: Entity](customization: A, listItem: ListItem, renderSettingsDivFn: A => Unit) {
+        classCustomizationsListItems.foreach(_.removeCssClass("active"))
+        propertyCustomizationsListItems.foreach(_.removeCssClass("active"))
         listItem.addCssClass("active")
-        selectedClassCustomization = Some(classCustomization)
+        selectedItem = Some(CustomizationItem.create(customization))
 
-        propertiesDiv.removeAllChildNodes()
-        renderClassCustomizationViews(classCustomization)
-        classCustomization.propertyCustomizations.foreach(renderPropertyCustomizationViews(classCustomization, _))
+        settingsDiv.removeAllChildNodes()
+        renderSettingsDivFn(customization)
     }
 
     private def renderClassCustomizationViews(classCustomization: ClassCustomization) {
@@ -259,31 +294,48 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
             new GlyphInput("glyph", Some(classCustomization.glyph), "")  , Some("span2")
         )
 
+        val labels = new InputControl(
+            "Labels:",
+            new OrderedItemsList("",
+                if(classCustomization.labels == null || classCustomization.labels == "") {
+                    List(new LabelItem("rdfs:label", false, false), new LabelItem("dcterms:title", false, false),
+                        new LabelItem("skos:prefLabel", false, false), new LabelItem("skod:altLabel", false, false),
+                        new LabelItem("uri", false, false))
+                } else { classCustomization.labelsSplitted }),
+            Some("span2")
+        )
+
         fillColor.delayedChanged += { _ =>
-            classCustomization.fillColor = fillColor.field.value.map(_.toString).getOrElse("")
+            //classCustomization.fillColor = fillColor.field.value.map(_.toString).getOrElse("")
             classFillColorChanged.trigger(new ClassCustomizationEventArgs(fillColor, classCustomization,
                 fillColor.field.value.map(_.toString).getOrElse("")))
+            customizationChanged.trigger(new OntologyCustomizationEventArgs(userCustomization))
         }
         radius.delayedChanged += { _ =>
-            classCustomization.radius = validateInt(radius.field.value.toString, "radius")
+            //classCustomization.radius = validateInt(radius.field.value.toString, "radius")
             classRadiusDelayedChanged.trigger(new ClassCustomizationEventArgs(radius, classCustomization,
                 radius.field.value.toString))
+            customizationChanged.trigger(new OntologyCustomizationEventArgs(userCustomization))
         }
         glyph.field.changed += { _ =>
-            classCustomization.glyph = glyph.field.value.getOrElse("")
+            //classCustomization.glyph = glyph.field.value.getOrElse("")
             classGlyphChanged.trigger(new ClassCustomizationEventArgs(glyph, classCustomization,
                 glyph.field.value.getOrElse("")))
+            customizationChanged.trigger(new OntologyCustomizationEventArgs(userCustomization))
+        }
+        labels.delayedChanged += { _ =>
+            classLabelsChanged.trigger(new ClassCustomizationEventArgs(labels, classCustomization,
+                labels.field.value.getOrElse("")))
+            customizationChanged.trigger(new OntologyCustomizationEventArgs(userCustomization))
         }
 
-        fillColor.render(propertiesDiv.htmlElement)
-        radius.render(propertiesDiv.htmlElement)
-        glyph.render(propertiesDiv.htmlElement)
+        fillColor.render(settingsDiv.htmlElement)
+        radius.render(settingsDiv.htmlElement)
+        glyph.render(settingsDiv.htmlElement)
+        labels.render(settingsDiv.htmlElement)
     }
 
-    private def renderPropertyCustomizationViews(classCustomization: ClassCustomization, propertyCustomization: PropertyCustomization) {
-        val headingDiv = new Div(List(new Text("Class " + uriToName(propertyCustomization.uri))), "label label-info")
-        headingDiv.setAttribute("style", "padding: 5px; margin: 10px 0;")
-
+    private def renderPropertyCustomizationViews(propertyCustomization: PropertyCustomization) {
         val strokeColor = new InputControl(
             "Stroke color:",
             new ColorInput("strokeColor", Color(propertyCustomization.strokeColor), ""), Some("span2")
@@ -293,20 +345,22 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
             new NumericInput("strokeWidth", propertyCustomization.strokeWidth, ""), Some("span2")
         )
 
-        strokeColor.delayedChanged += { _ =>
-            propertyCustomization.strokeColor = strokeColor.field.value.map(_.toString).getOrElse("")
-            propertyStrokeColorChanged.trigger(new PropertyCustomizationEventArgs(strokeColor, classCustomization,
-                propertyCustomization, strokeColor.field.value.map(_.toString).getOrElse("")))
-        }
-        strokeWidth.delayedChanged += { _ =>
-            propertyCustomization.strokeWidth = validateInt(strokeWidth.field.value.toString, "strokeWidth")
-            propertyStrokeWidthDelayedChanged.trigger(new PropertyCustomizationEventArgs(strokeWidth,
-                classCustomization, propertyCustomization, strokeWidth.field.value.toString))
+        val classCustomization = propertiesContainer
+        if(classCustomization.isDefined) {
+            strokeColor.delayedChanged += { _ =>
+                propertyCustomization.strokeColor = strokeColor.field.value.map(_.toString).getOrElse("")
+                propertyStrokeColorChanged.trigger(new PropertyCustomizationEventArgs(strokeColor,
+                    classCustomization.get, propertyCustomization, strokeColor.field.value.map(_.toString).getOrElse("")))
+            }
+            strokeWidth.delayedChanged += { _ =>
+                propertyCustomization.strokeWidth = validateInt(strokeWidth.field.value.toString, "strokeWidth")
+                propertyStrokeWidthDelayedChanged.trigger(new PropertyCustomizationEventArgs(strokeWidth,
+                    classCustomization.get, propertyCustomization, strokeWidth.field.value.toString))
+            }
         }
 
-        headingDiv.render(propertiesDiv.htmlElement)
-        strokeColor.render(propertiesDiv.htmlElement)
-        strokeWidth.render(propertiesDiv.htmlElement)
+        strokeColor.render(settingsDiv.htmlElement)
+        strokeWidth.render(settingsDiv.htmlElement)
     }
 
     private def uriToName(uri: String): String = {
@@ -322,3 +376,22 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
         } catch { case t: Throwable => throw new ValidationException(field, "Value is out of range") }
     }
 }
+
+class CustomizationItem(private var propertyCustomization: Option[PropertyCustomization] = None,
+    private var classCustomization: Option[ClassCustomization] = None) {
+
+    def uri = if (propertyCustomization.isDefined) propertyCustomization.get.uri else classCustomization.get.uri
+}
+
+object CustomizationItem {
+    def create[A <: Entity](cust: A): CustomizationItem = {
+        cust match {
+            case i: ClassCustomization =>
+                new CustomizationItem(None, Some(i))
+            case i: PropertyCustomization =>
+                new CustomizationItem(Some(i), None)
+            case _ => null
+        }
+    }
+}
+

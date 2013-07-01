@@ -15,8 +15,9 @@ import cz.payola.web.client.events._
 import cz.payola.web.client.views.elements.lists.ListItem
 import cz.payola.web.client.views.graph.sigma.GraphSigmaPluginView
 import cz.payola.web.client.views.graph.datacube.TimeHeatmap
+import cz.payola.web.client.models.PrefixApplier
 
-class PluginSwitchView extends GraphView with ComposedView
+class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with ComposedView
 {
     /**
      * Event triggered when ontology customization is created.
@@ -34,6 +35,11 @@ class PluginSwitchView extends GraphView with ComposedView
     val ontologyCustomizationEditClicked = new SimpleUnitEvent[OntologyCustomization]
 
     /**
+     * Event triggered when user customization is selected.
+     */
+    val userCustomizationSelected = new SimpleUnitEvent[OntologyCustomization]
+
+    /**
      * Event triggered when user customization is created.
      */
     val userCustomizationCreateClicked = new SimpleUnitEvent[this.type]
@@ -47,14 +53,14 @@ class PluginSwitchView extends GraphView with ComposedView
      * List of available visualization plugins.
      */
     private val plugins = List[PluginView](
-        new TripleTablePluginView,
-        new SelectResultPluginView,
-        new CircleTechnique,
-        new TreeTechnique,
-        new GravityTechnique,
-        new ColumnChartPluginView,
-        new GraphSigmaPluginView,
-        new TimeHeatmap
+        new TripleTablePluginView(Some(prefixApplier)),
+        new SelectResultPluginView(Some(prefixApplier)),
+        new CircleTechnique(Some(prefixApplier)),
+        new TreeTechnique(Some(prefixApplier)),
+        new GravityTechnique(Some(prefixApplier)),
+        new ColumnChartPluginView(Some(prefixApplier)),
+        new GraphSigmaPluginView(Some(prefixApplier)),
+        new TimeHeatmap(Some(prefixApplier))
     )
 
     /**
@@ -104,6 +110,7 @@ class PluginSwitchView extends GraphView with ComposedView
     plugins.foreach { plugin =>
         plugin.vertexSelected += { e => vertexSelected.trigger(createVertexEventArgs(e.vertex))}
         plugin.vertexBrowsing += { e => vertexBrowsing.trigger(createVertexEventArgs(e.vertex))}
+        plugin.vertexSetMain += { e => vertexSetMain.trigger(createVertexEventArgs(e.vertex))}
         plugin.vertexBrowsingDataSource += { e => vertexBrowsingDataSource.trigger(createVertexEventArgs(e.vertex))}
     }
 
@@ -128,6 +135,11 @@ class PluginSwitchView extends GraphView with ComposedView
         super.updateOntologyCustomization(customization)
         currentPlugin.updateOntologyCustomization(customization)
     }
+
+    override def setMainVertex(vertex: Vertex) {
+        currentPlugin.setMainVertex(vertex)
+    }
+
 
     /**
      * Updates the list of ontology customizations showed in the ontologyCustomizationButton drop-down button.
@@ -184,6 +196,20 @@ class PluginSwitchView extends GraphView with ComposedView
     private def createCustomizationListItem(customization: OntologyCustomization, isEditable: Boolean): ListItem = {
         val editButton = new Button(new Text("Edit"), "btn-mini", new Icon(Icon.pencil)).setAttribute(
             "style", "position: absolute; right: 5px;")
+
+        val anchor = new Anchor(List(new Text(customization.name)) ++ (if (isEditable) List(editButton) else Nil))
+
+        val listItem = new ListItem(List(anchor))
+        if (currentCustomization.exists(_ == customization)) {
+            listItem.addCssClass("active")
+        }
+
+        anchor.mouseClicked += { e =>
+            ontologyCustomizationSelected.triggerDirectly(customization)
+            customizationsButton.setActiveItem(listItem)
+            false
+        }
+
         editButton.mouseClicked += { e =>
             if (customization.isUserDefined) {
                 userCustomizationEditClicked.triggerDirectly(customization)
@@ -193,16 +219,6 @@ class PluginSwitchView extends GraphView with ComposedView
             false
         }
 
-        val anchor = new Anchor(List(new Text(customization.name)) ++ (if (isEditable) List(editButton) else Nil))
-        anchor.mouseClicked += { e =>
-            ontologyCustomizationSelected.triggerDirectly(customization)
-            false
-        }
-
-        val listItem = new ListItem(List(anchor))
-        if (currentCustomization.exists(_ == customization)) {
-            listItem.addCssClass("active")
-        }
         listItem
     }
 
@@ -222,6 +238,7 @@ class PluginSwitchView extends GraphView with ComposedView
             currentPlugin.render(pluginSpace.htmlElement)
             currentPlugin.renderControls(toolbar.htmlElement)
             currentPlugin.update(currentGraph, currentCustomization)
+            currentPlugin.drawGraph()
         }
     }
 

@@ -27,6 +27,11 @@ abstract class GraphView
     /** Triggered when the vertex is selected as a start of browsing in a particular data source. */
     val vertexBrowsingDataSource = new UnitEvent[this.type, VertexEventArgs[this.type]]
 
+    /** Triggered when a vertex is selected to represent the main vertex in a visualization. */
+    val vertexSetMain = new UnitEvent[this.type , VertexEventArgs[this.type]]
+
+    def setMainVertex(vertex: Vertex) { }
+
     /**
      * Updates both the graph that should be visualized and the customization that should be used.
      * @param graph The graph to visualize.
@@ -38,12 +43,17 @@ abstract class GraphView
     }
 
     /**
-     * Updates the current graph of the view and re-runs the visualization.
+     * Updates the current graph of the view.
      * @param graph The graph to add to the current graph.
      */
     def updateGraph(graph: Option[Graph], contractLiterals: Boolean) {
         currentGraph = graph
     }
+
+    /**
+     * Runs the visualization.
+     */
+    def drawGraph() {}
 
     /**
      * Updates the ontology customization that should be used during graph visualization and re-runs the visualization.

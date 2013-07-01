@@ -11,7 +11,7 @@ class  PropertySelection(name: String, inputCount: Int, parameters: immutable.Se
 {
     def this() = {
         this("Property Selection", 1, List(
-            new StringParameter(PropertySelection.propertyURIsParameter, "", true),
+            new StringParameter(PropertySelection.propertyURIsParameter, "", true, false, false, true),
             new BooleanParameter(PropertySelection.selectPropertyInfoParameter, false)
         ), IDGenerator.newId)
     }

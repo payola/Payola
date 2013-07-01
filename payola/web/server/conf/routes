@@ -61,6 +61,13 @@ GET     /profile/edit               controllers.Profile.edit()
 GET     /profile/:username          controllers.Profile.index(username)
 POST    /saveprofile                controllers.Profile.save()
 
+GET     /prefix/create               controllers.Prefix.create()
+GET     /prefix/list                 controllers.Prefix.list()
+GET     /prefix/delete/:id           controllers.Prefix.delete(id)
+GET     /prefix/edit/:id             controllers.Prefix.edit(id)
+POST    /prefix/save-create          controllers.Prefix.saveCreate()
+POST    /prefix/save                 controllers.Prefix.save(id)
+
 GET     /error                      controllers.ErrorHandler.error()
 GET     /404.html                   controllers.ErrorHandler.notFound()
 

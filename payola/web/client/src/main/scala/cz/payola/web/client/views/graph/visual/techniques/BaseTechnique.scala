@@ -3,20 +3,30 @@ package cz.payola.web.client.views.graph.visual.techniques
 import collection.mutable.ListBuffer
 import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.graph.visual.VisualPluginView
-import cz.payola.common.rdf.Graph
+import cz.payola.common.rdf._
 import cz.payola.web.client.views.graph.visual.graph._
 import cz.payola.web.client.views.graph.visual.graph.positioning._
 import cz.payola.web.client.views.graph.visual.animation._
-import scala.Some
+import cz.payola.web.client.models.PrefixApplier
 
-abstract class BaseTechnique(name: String) extends VisualPluginView(name)
+abstract class BaseTechnique(name: String, prefixApplier: Option[PrefixApplier]) extends VisualPluginView(name, prefixApplier)
 {
     private val treeVerticesDistance = 100
 
     private val circleLevelsDistance = 150
 
+    override def setMainVertex(vertex: Vertex) {
+        graphView.foreach{ graph =>
+            graph.putVertexToTop(vertex)
+            performPositioning(graph)
+        }
+    }
+
     override def updateGraph(graph: Option[Graph], contractLiterals: Boolean = true) {
         super.updateGraph(graph, contractLiterals)
+    }
+
+    override def drawGraph() {
         graphView.foreach(performPositioning(_))
     }
 

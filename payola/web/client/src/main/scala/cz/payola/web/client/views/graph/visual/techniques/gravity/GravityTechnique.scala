@@ -7,6 +7,7 @@ import cz.payola.web.client.views.graph.visual.animation.Animation
 import cz.payola.web.client.views.graph.visual.techniques.BaseTechnique
 import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.graph.visual.graph.positioning.GraphPositionHelper
+import cz.payola.web.client.models.PrefixApplier
 
 /**
  * Visual plug-in technique that places the vertices based on their edges.
@@ -16,7 +17,7 @@ import cz.payola.web.client.views.graph.visual.graph.positioning.GraphPositionHe
  * closer. The final positions of the vertices is reached when all vertices
  * have "small enough" velocity.
  */
-class GravityTechnique extends BaseTechnique("Gravity Visualization")
+class GravityTechnique(prefixApplier: Option[PrefixApplier]) extends BaseTechnique("Gravity Visualization", prefixApplier)
 {
     /**
      * How much vertices push away each other

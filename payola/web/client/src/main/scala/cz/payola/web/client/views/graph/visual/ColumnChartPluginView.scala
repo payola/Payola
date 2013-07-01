@@ -6,8 +6,9 @@ import s2js.adapters.html
 import cz.payola.web.client.views.graph.PluginView
 import cz.payola.web.client.views.elements._
 import cz.payola.common.rdf._
+import cz.payola.web.client.models.PrefixApplier
 
-class ColumnChartPluginView extends PluginView("Column Chart")
+class ColumnChartPluginView(prefixApplier: Option[PrefixApplier]) extends PluginView("Column Chart", prefixApplier)
 {
     private val chartWrapper = new Div
     chartWrapper.id = "chart-wrapper"
@@ -99,7 +100,8 @@ class ColumnChartPluginView extends PluginView("Column Chart")
 
 
         new Graph(List(initialVertex, bar1, bar2, bar2, name1, name2, name3, value1, value2, value3),
-            List(e1, e2, e3, e4, e5, e6, e7, e8, e9)
+            List(e1, e2, e3, e4, e5, e6, e7, e8, e9),
+            None
         )
     }
 

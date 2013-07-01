@@ -90,4 +90,28 @@ trait Map[A, B] extends Iterable
             case None => val d = op; this(key) = d; d
         }
     }
+
+    @javascript("""
+        var result = scala.collection.mutable.ListBuffer.get().$apply();
+        for (var key in self.internalJsObject) {
+            if (key === 'length' || !widthRange.hasOwnProperty(key)) {
+                continue;
+            }
+            result.$plus$plus$eq(widthRange[key]);
+        }
+        return result;
+    """)
+    def values(): Iterable = null
+
+    @javascript("""
+        var result = scala.collection.mutable.ListBuffer.get().$apply();
+        for (var key in self.internalJsObject) {
+            if (key === 'length' || !widthRange.hasOwnProperty(key)) {
+                continue;
+            }
+            result.$plus$plus$eq(key);
+        }
+        return result;
+    """)
+    def keys(): Iterable = null
 }

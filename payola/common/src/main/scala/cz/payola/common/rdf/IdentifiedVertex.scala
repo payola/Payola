@@ -13,6 +13,8 @@ class IdentifiedVertex(val uri: String) extends Vertex with IdentifiedObject
         }
     }
 
+    override def toString = uri
+
     override def hashCode: Int = {
         uri.hashCode
     }

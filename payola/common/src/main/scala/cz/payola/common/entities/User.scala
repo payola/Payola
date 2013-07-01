@@ -25,6 +25,9 @@ trait User extends Entity with NamedEntity with PrivilegeableEntity
     /** Type of the ontology visual customizations that the user may own. */
     type OntologyCustomizationType <: OntologyCustomization
 
+    /** Type of the prefixes the user may use. */
+    type PrefixType <: Prefix
+
     protected var _email: String = ""
 
     protected var _password: String = ""
@@ -38,6 +41,8 @@ trait User extends Entity with NamedEntity with PrivilegeableEntity
     protected var _ownedPlugins = mutable.ArrayBuffer[PluginType]()
 
     protected var _ontologyCustomizations = mutable.ArrayBuffer[OntologyCustomizationType]()
+
+    protected var _availablePrefixes = mutable.ArrayBuffer[PrefixType]()
 
     /** Email of the user. */
     def email = _email
@@ -75,6 +80,9 @@ trait User extends Entity with NamedEntity with PrivilegeableEntity
 
     /** Ontology customizations of the user. */
     def ownedOntologyCustomizations: immutable.Seq[OntologyCustomizationType] = _ontologyCustomizations.toList
+
+    /** The prefixes that are available to the user. */
+    def availablePrefixes: immutable.Seq[PrefixType] = _availablePrefixes.toList
 
     /**
       * Stores the specified analysis to the users owned analyses.
@@ -154,5 +162,23 @@ trait User extends Entity with NamedEntity with PrivilegeableEntity
       */
     protected def discardOntologyCustomization(customization: OntologyCustomizationType) {
         _ontologyCustomizations -= customization
+    }
+
+    /**
+      * Stores owned prefix to the user.
+      * @param prefix The prefix to user.
+      */
+    protected def storeOwnedPrefix(prefix: PrefixType) {
+        if (prefix.owner == Some(this))
+            _availablePrefixes += prefix
+    }
+
+    /**
+      * Discards the owned prefix from the user. Complementary operation to store.
+      * @param prefix The prefix to discard.
+      */
+    protected def discardOwnedPrefix(prefix: PrefixType) {
+        if (prefix.owner == Some(this))
+            _availablePrefixes -= prefix
     }
 }

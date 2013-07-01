@@ -107,7 +107,7 @@ import cz.payola.domain.entities.plugins.concrete.DataFetcher
 
 
     @async def getInitialGraph(dataSourceId: String, user: Option[User] = null)
-        (successCallback: Option[Graph] => Unit)
+        (successCallback: Option[Graph] => Unit) //TODO would be better if the s2js supported successCallback: (Option[Graph], Option[Int]) => Unit
         (failCallback: Throwable => Unit) {
 
         val graph = getDataSource(dataSourceId, user).flatMap { dataSource =>
@@ -119,7 +119,7 @@ import cz.payola.domain.entities.plugins.concrete.DataFetcher
     }
 
     @async def getNeighbourhood(dataSourceId: String, vertexURI: String, user: Option[User] = null)
-        (successCallback: Option[Graph] => Unit)
+        (successCallback: Option[Graph] => Unit) //TODO would be better if the s2js supported successCallback: (Option[Graph], Option[Int]) => Unit
         (failCallback: Throwable => Unit) {
 
         val graph = getDataSource(dataSourceId, user).map(_.getNeighbourhood(vertexURI))
@@ -127,11 +127,11 @@ import cz.payola.domain.entities.plugins.concrete.DataFetcher
     }
 
     @async def executeSparqlQuery(dataSourceId: String, query: String, user: Option[User] = null)
-        (successCallback: Option[Graph] => Unit)
+        (successCallback: Option[Graph] => Unit) //TODO would be better if the s2js supported successCallback: (Option[Graph], Option[Int]) => Unit
         (failCallback: Throwable => Unit) {
 
         try {
-            successCallback(getDataSource(dataSourceId, user).map(_.executeQuery(query)))
+            throw new Throwable("3");//successCallback(getDataSource(dataSourceId, user).map(_.executeQuery(query)))
         } catch {
             case d: DataException => throw d
             case t => throw new ValidationException("sparqlQuery", t.getMessage)

@@ -6,18 +6,55 @@ import cz.payola.common.rdf._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.elements.lists._
 import cz.payola.web.client.views.bootstrap.Icon
+import cz.payola.web.client.models.PrefixApplier
 
 /**
  * A plugin that displays all edges in the graph as a table. The edges are firstly grouped by the edge origins,
  * secondly by the edge types.
  */
-class TripleTablePluginView extends TablePluginView("Triple Table")
+class TripleTablePluginView(prefixApplier: Option[PrefixApplier]) extends TablePluginView("Triple Table", prefixApplier)
 {
 
     private val countOfProperties = 5
     private val showMoreLabel = "Show more"
 
-    def fillTable(graph: Option[Graph], tableHead: html.Element, tableBody: html.Element) {
+    /**
+     * Returns number of an edge that is supposed to be the first one on this page of the table
+     * @param tablePageNumber
+     * @param groupedEdges
+     * @return
+     */
+    private def getEdgesForThisPage(tablePageNumber: Int, groupedEdges: Map[String, Map[String, Seq[Edge]]]):
+        (Map[String, Map[String, Seq[Edge]]], Int) = {
+
+        var linesOnPage = 0
+        var currentPageNumber = 0
+
+
+        ((groupedEdges.filter{ gE =>
+            linesOnPage += gE._2.size
+
+            if (linesOnPage > allowedLinesOnPage) {
+                currentPageNumber += 1
+                linesOnPage = gE._2.size
+            }
+
+            if(currentPageNumber != tablePageNumber) {
+                false
+            } else if (linesOnPage < allowedLinesOnPage){
+                true
+            } else {
+                false
+            }
+        }, currentPageNumber + 1))
+    }
+
+    def fillTable(graph: Option[Graph], tableHead: html.Element, tableBody: html.Element, tablePageNumber: Int): Int = {
+        val groupedEdges = groupEdges(graph)
+
+        val tableListing = getEdgesForThisPage(tablePageNumber, groupedEdges)
+        val edgesForThisPage = tableListing._1
+
         // Create the headers.
         val headerRow = addRow(tableHead)
         List("Subject", "Property", "Value").foreach { title =>
@@ -26,7 +63,7 @@ class TripleTablePluginView extends TablePluginView("Triple Table")
         }
 
         // Fill the table with cells.
-        groupEdges(graph).foreach { edgesByOrigin =>
+        edgesForThisPage.foreach { edgesByOrigin =>
             var originCell: html.Element = null
             var originRowCount = 0
 
@@ -72,13 +109,16 @@ class TripleTablePluginView extends TablePluginView("Triple Table")
 
             originCell.setAttribute("rowspan", originRowCount.toString)
         }
+
+        tableListing._2
     }
 
     private def createVertexDetailRow(edgeUri: String, edges: Seq[Edge], row: html.Element) {
 
         // The edge cell.
         val edgeCell = addCell(row)
-        new Text(edgeUri).render(edgeCell)
+        val prefixedEdgeUri = prefixApplier.map(_.applyPrefix(edgeUri)).getOrElse(edgeUri)
+        new Text(prefixedEdgeUri).render(edgeCell)
 
         // The destinations cell.
         val destinationsCell = addCell(row)

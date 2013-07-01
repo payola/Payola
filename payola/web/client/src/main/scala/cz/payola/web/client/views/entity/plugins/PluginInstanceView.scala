@@ -8,10 +8,12 @@ import cz.payola.web.client.View
 import cz.payola.web.client.views.elements.Div
 import cz.payola.common.entities.plugins._
 import cz.payola.web.client.events.SimpleUnitEvent
+import cz.payola.web.client.models.PrefixApplier
 
 abstract class PluginInstanceView(
     val pluginInstance: PluginInstance,
-    var predecessors: Seq[PluginInstanceView] = Nil)
+    var predecessors: Seq[PluginInstanceView] = Nil,
+    prefixApplier: PrefixApplier = new PrefixApplier())
     extends View
 {
     private val heading = getHeading

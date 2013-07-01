@@ -6,25 +6,34 @@ import cz.payola.web.client.events._
 import cz.payola.web.client.views.graph.PluginSwitchView
 import cz.payola.web.client.Presenter
 import cz.payola.web.client.views.VertexEventArgs
-import cz.payola.web.client.models.Model
+import cz.payola.web.client.models._
 import cz.payola.web.client.views.entity.plugins.DataSourceSelector
 import cz.payola.common.entities.settings.OntologyCustomization
 import cz.payola.web.client.presenters.entity.settings._
 import cz.payola.common.rdf.IdentifiedVertex
+import cz.payola.web.client.presenters.entity.PrefixPresenter
+import scala.Some
 
-class GraphPresenter(val viewElement: html.Element) extends Presenter
+class GraphPresenter(val viewElement: html.Element, prefixApplier: PrefixApplier) extends Presenter
 {
-    val view = new PluginSwitchView
+    val view = new PluginSwitchView(prefixApplier)
 
     private var currentOntologyCustomization: Option[OntologyCustomization] = None
 
+    protected val prefixPresenter = new PrefixPresenter()
+
     def initialize() {
+        // Load prefixes first
+        prefixPresenter.initialize()
+
         Model.ontologyCustomizationsChanged += onOntologyCustomizationsChanged _
         view.vertexBrowsingDataSource += onVertexBrowsingDataSource _
+        view.vertexSetMain += onVertexSetMain _
         view.customizationsButton.mouseClicked += onCustomizationsButtonClicked _
         view.ontologyCustomizationSelected += onOntologyCustomizationSelected _
         view.ontologyCustomizationEditClicked += onOntologyCustomizationEditClicked _
         view.ontologyCustomizationCreateClicked += onOntologyCustomizationCreateClicked _
+        view.userCustomizationSelected += onOntologyCustomizationSelected _
         view.userCustomizationCreateClicked += onUserCustomizationCreateClicked _
         view.userCustomizationEditClicked += onUserCustomizationEditClicked _
 
@@ -42,6 +51,7 @@ class GraphPresenter(val viewElement: html.Element) extends Presenter
 
     private def onUserCustomizationEditClicked(e: EventArgs[OntologyCustomization]) {
         editUserCustomization(e.target)
+        onOntologyCustomizationSelected(e)
     }
 
     private def onOntologyCustomizationsChanged(e: EventArgs[_]) {
@@ -74,6 +84,7 @@ class GraphPresenter(val viewElement: html.Element) extends Presenter
 
     private def onOntologyCustomizationEditClicked(e: EventArgs[OntologyCustomization]) {
         editOntologyCustomization(e.target)
+        onOntologyCustomizationSelected(e)
     }
 
     private def onOntologyCustomizationSelected(e: EventArgs[OntologyCustomization]) {
@@ -99,6 +110,10 @@ class GraphPresenter(val viewElement: html.Element) extends Presenter
         }
     }
 
+    def onVertexSetMain(e: VertexEventArgs[_]) {
+        view.setMainVertex(e.vertex)
+    }
+
     private def editOntologyCustomization(customization: OntologyCustomization) {
         val editor = new OntologyCustomizationEditor(customization)
         if (currentOntologyCustomization.exists(_ == customization)) {
@@ -109,10 +124,10 @@ class GraphPresenter(val viewElement: html.Element) extends Presenter
 
     private def editUserCustomization(customization: OntologyCustomization) {
         val editor = new UserCustomizationEditor(view.getCurrentGraph, customization, forceUpdateOntologyCustomizations)
-        if (currentOntologyCustomization.exists(_ == customization)) {
-            editor.customizationValueChanged += { e => view.updateOntologyCustomization(
-                Some(customization)) }
+        editor.customizationChanged += { e =>
+            view.updateOntologyCustomization(Some(e.target.target))
         }
+
         editor.initialize()
     }
 

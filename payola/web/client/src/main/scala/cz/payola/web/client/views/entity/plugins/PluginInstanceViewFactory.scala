@@ -6,8 +6,9 @@ import cz.payola.common.entities.Analysis
 import s2js.compiler.javascript
 import s2js.runtime.shared.DependencyProvider
 import s2js.runtime.client.scala.collection.mutable.HashMap
+import cz.payola.web.client.models.PrefixApplier
 
-class PluginInstanceViewFactory
+class PluginInstanceViewFactory(prefixApplier: PrefixApplier)
 {
     private val registry = new HashMap[String, Boolean]
 
@@ -40,7 +41,7 @@ class PluginInstanceViewFactory
         if (hasEditableOverride(pluginInstance.plugin.originalClassName)) {
             createEditableOverride(pluginInstance.plugin.originalClassName, analysis, pluginInstance, predecessors)
         } else {
-            new EditablePluginInstanceView(pluginInstance, predecessors)
+            new EditablePluginInstanceView(pluginInstance, predecessors, prefixApplier)
         }
     }
 
@@ -51,7 +52,7 @@ class PluginInstanceViewFactory
         if (hasOverride(pluginInstance.plugin.originalClassName)){
             createOverride(pluginInstance.plugin.originalClassName, pluginInstance, predecessors)
         } else {
-            new ReadOnlyPluginInstanceView(pluginInstance, predecessors)
+            new ReadOnlyPluginInstanceView(pluginInstance, predecessors, prefixApplier)
         }
     }
 

@@ -16,26 +16,24 @@ import cz.payola.common.rdf.Graph
 class UserCustomizationEditor (currentGraph: Option[Graph], userCustomization: OntologyCustomization, onClose: () => Unit)
     extends Presenter
 {
-    val customizationValueChanged = new SimpleUnitEvent[this.type]
+    val customizationChanged = new SimpleUnitEvent[OntologyCustomizationEventArgs]
 
     private val view = new UserCustomizationEditModal(currentGraph, userCustomization, onClose)
 
     def initialize() {
-        if(currentGraph.isEmpty) { //user config without a graph is nonsense
-            AlertModal.display("Information", "Can not edit a user configuration without a loaded graph. " +
-                "Please, display a graph via analysis or datasource browsing first", "",
-                Some(4000))
-        } else {
-            view.userCustomizationName.delayedChanged += onUserCustomizationNameChanged _
-            view.deleteButton.mouseClicked += onDeleteButtonClicked _
-            view.classFillColorChanged += onClassFillColorChanged _
-            view.classRadiusDelayedChanged += onClassRadiusChanged _
-            view.classGlyphChanged += onClassGlyphChanged _
-            view.propertyStrokeColorChanged += onPropertyStrokeColorChanged _
-            view.propertyStrokeWidthDelayedChanged += onPropertyStrokeWidthChanged _
+        view.userCustomizationName.delayedChanged += onUserCustomizationNameChanged _
+        view.deleteButton.mouseClicked += onDeleteButtonClicked _
+        view.classFillColorChanged += onClassFillColorChanged _
+        view.classRadiusDelayedChanged += onClassRadiusChanged _
+        view.classGlyphChanged += onClassGlyphChanged _
+        view.classLabelsChanged += onClassLabelsChanged _
+        view.propertyStrokeColorChanged += onPropertyStrokeColorChanged _
+        view.propertyStrokeWidthDelayedChanged += onPropertyStrokeWidthChanged _
 
-            view.render()
+        view.customizationChanged += { e =>
+            customizationChanged.triggerDirectly(new OntologyCustomizationEventArgs(e.target))
         }
+        view.render()
     }
 
     private def onUserCustomizationNameChanged(e: EventArgs[InputControl[_ <: TextInput]]) {
@@ -93,6 +91,13 @@ class UserCustomizationEditor (currentGraph: Option[Graph], userCustomization: O
         }(failHandler(_, e.target))
     }
 
+    private def onClassLabelsChanged(e: ClassCustomizationEventArgs[InputControl[_]]) {
+        e.target.isActive = true
+        OntologyCustomizationManager.setClassLabels(userCustomization.id, e.classCustomization.uri, e.newValue){
+            () => successHandler(e, () => e.classCustomization.labels = e.newValue)
+        }(failHandler(_, e.target))
+    }
+
     private def onPropertyStrokeColorChanged(e: PropertyCustomizationEventArgs[InputControl[_]]) {
         e.target.isActive = true
         OntologyCustomizationManager.setPropertyStrokeColor(userCustomization.id, e.classCustomization.uri,
@@ -113,7 +118,7 @@ class UserCustomizationEditor (currentGraph: Option[Graph], userCustomization: O
         e.target.isActive = false
         e.target.setOk()
         valueSetter()
-        customizationValueChanged.triggerDirectly(this)
+        customizationChanged.triggerDirectly(new OntologyCustomizationEventArgs(userCustomization))
     }
 
     /**

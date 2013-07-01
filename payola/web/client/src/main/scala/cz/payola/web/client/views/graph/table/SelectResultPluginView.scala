@@ -5,8 +5,9 @@ import s2js.adapters.html
 import cz.payola.common.rdf._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.Icon
+import cz.payola.web.client.models.PrefixApplier
 
-class SelectResultPluginView extends TablePluginView("Select Result Table")
+class SelectResultPluginView(prefixApplier: Option[PrefixApplier]) extends TablePluginView("Select Result Table", prefixApplier)
 {
     private var variables = mutable.ListBuffer.empty[String]
 
@@ -37,14 +38,14 @@ class SelectResultPluginView extends TablePluginView("Select Result Table")
         false
     }
 
-    def fillTable(graph: Option[Graph], tableHead: html.Element, tableBody: html.Element) {
-        graph.foreach { g =>
+    def fillTable(graph: Option[Graph], tableHead: html.Element, tableBody: html.Element, tablePageNumber: Int): Int = {
+        if(graph.isDefined) {
             variables = mutable.ListBuffer.empty[String]
             solutions = mutable.HashMap.empty[String, mutable.ListBuffer[Binding]]
             bindings = mutable.HashMap.empty[String, Binding]
 
             // Retrieve the bindings.
-            g.edges.foreach { e =>
+            graph.get.edges.foreach { e =>
                 e.uri match {
                     case u if u.endsWith("#resultVariable") => {
                         variables += e.destination.toString
@@ -65,9 +66,10 @@ class SelectResultPluginView extends TablePluginView("Select Result Table")
                     "The graph isn't a result of a Select SPARQL Query...",
                     "Choose a different visualization plugin."
                 )
+                0 // nothing to show
             } else {
                 // Retrieve the binding values.
-                g.edges.foreach { e =>
+                graph.get.edges.foreach { e =>
                     e.uri match {
                         case u if u.endsWith("#value") => {
                             bindings(e.origin.toString).value = e.destination
@@ -96,8 +98,10 @@ class SelectResultPluginView extends TablePluginView("Select Result Table")
                         }
                     }
                 }
+                1
             }
         }
+        0
     }
 
     override def renderControls(toolbar: html.Element) {

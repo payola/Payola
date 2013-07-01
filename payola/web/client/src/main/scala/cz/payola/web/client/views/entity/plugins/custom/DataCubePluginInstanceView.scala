@@ -8,10 +8,11 @@ import scala._
 import scala.collection.Seq
 import cz.payola.web.client.views.elements.lists._
 import cz.payola.web.client.views.entity.plugins._
+import cz.payola.web.client.models.PrefixApplier
 
 class DataCubePluginInstanceView(pluginInst: PluginInstance,
     predecessors: Seq[PluginInstanceView] = List())
-    extends ReadOnlyPluginInstanceView(pluginInst, predecessors)
+    extends ReadOnlyPluginInstanceView(pluginInst, predecessors, new PrefixApplier())
 {
     private def name = {
         val nameParts = pluginInstance.plugin.name.split("#")

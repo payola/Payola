@@ -7,9 +7,10 @@ import cz.payola.web.client.presenters.models.ParameterValue
 import cz.payola.common.entities.plugins.PluginInstance
 import cz.payola.web.client.views.entity.plugins._
 import custom.DataCubeEditablePluginInstanceView
-import cz.payola.common.entities.plugins.parameters.StringParameter
+import cz.payola.web.client.models.PrefixApplier
 
-class EditableAnalysisVisualizer(analysis: Analysis) extends AnalysisVisualizer(analysis)
+class EditableAnalysisVisualizer(analysis: Analysis, prefixApplier: PrefixApplier)
+    extends AnalysisVisualizer(analysis)
 {
     val parameterValueChanged = new SimpleUnitEvent[ParameterValue]
 
@@ -17,7 +18,7 @@ class EditableAnalysisVisualizer(analysis: Analysis) extends AnalysisVisualizer(
 
     val deleteButtonClicked = new SimpleUnitEvent[EditablePluginInstanceView]
 
-    val instanceFactory = new PluginInstanceViewFactory
+    val instanceFactory = new PluginInstanceViewFactory(prefixApplier)
 
     def createPluginInstanceView(instance: PluginInstance): PluginInstanceView = {
         val view = instanceFactory.createEditable(analysis, instance, List())

@@ -2,6 +2,7 @@ package cz.payola.web.client.views.graph.visual.graph
 
 import collection.mutable.ListBuffer
 import cz.payola.web.client.views.algebra._
+import cz.payola.common.rdf._
 
 /**
  * Representation of a graph component (part of all vertices and edges from which does not exist a path to another
@@ -25,11 +26,42 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
         selectedVertexViews.length
     }
 
+    def getSelected: Seq[VertexView] = {
+        selectedVertexViews
+    }
+
+
     /**
      * @return true if the component contains any vertexViews
      */
     def isEmpty: Boolean = {
         vertexViews.isEmpty
+    }
+
+    def moveVertexToTop(vertex: Vertex): Boolean = {
+
+
+        val res = vertexViews.find{ vertexView =>
+            vertex match {
+                case i: LiteralVertex =>
+                    i == vertexView.vertexModel
+                case i: IdentifiedVertex =>
+                    if(vertexView.vertexModel.isInstanceOf[IdentifiedVertex]) {
+                        vertexView.vertexModel.asInstanceOf[IdentifiedVertex].uri == i.uri
+                    } else {
+                        false
+                    }
+            }
+        }
+
+        if (res.isDefined) {
+            vertexViews -= res.get
+            vertexViews.prepend(res.get)
+            true
+        } else {
+            false
+        }
+
     }
 
     /**

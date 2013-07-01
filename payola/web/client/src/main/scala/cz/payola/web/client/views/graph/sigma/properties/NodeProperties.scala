@@ -11,3 +11,8 @@ class NodeProperties extends sigma.NodeProperties {
     var label: String = ""
     var cluster: Int = 0
 }
+
+object NodeProperties {
+    val size: Int = 5
+    val color: String = "green"
+}

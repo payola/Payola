@@ -7,6 +7,7 @@ import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.graph.visual.graph.positioning.LocationDescriptor
 import s2js.adapters.html._
 import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.web.client.models.PrefixApplier
 
 /**
  * Graphical representation of Edge object in the drawn graph.
@@ -14,7 +15,7 @@ import cz.payola.common.entities.settings.OntologyCustomization
  * @param originView the vertex object representing origin of this edge
  * @param destinationView of this graphical representation in drawing space
  */
-class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationView: VertexView)
+class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationView: VertexView, prefixApplier: Option[PrefixApplier])
     extends View[html.elements.CanvasRenderingContext2D]
 {
     var width = 1
@@ -24,7 +25,7 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
     /**
      * Textual data that should be visualized with this edge ("over this edge").
      */
-    val information: InformationView = new InformationView(edgeModel)
+    val information: InformationView = new InformationView(List(edgeModel))
 
     /**
      * Indicator of selection of this graphs element. Is used during color selection in draw function.
@@ -59,7 +60,12 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
         if(newCustomization.isEmpty) {
             resetConfiguration()
         } else {
-            val foundCustomizationType = newCustomization.get.classCustomizations.find{_.uri == originView.rdfType}
+            val foundCustomizationType =
+                if(newCustomization.get.isUserDefined) {
+                    newCustomization.get.classCustomizations.find(_.uri == "properties")
+                } else {
+                    newCustomization.get.classCustomizations.find{_.uri == originView.rdfType}
+                }
 
             if(foundCustomizationType.isEmpty) {
                 resetConfiguration()
