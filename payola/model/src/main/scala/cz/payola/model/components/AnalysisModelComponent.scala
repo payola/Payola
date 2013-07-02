@@ -313,7 +313,7 @@ trait AnalysisModelComponent extends EntityModelComponent
             }
         }
 
-        def makePartial(analysis: Analysis, pluginInstanceId: String): Option[String] = {
+        def makePartial(analysis: Analysis, pluginInstanceId: String, limitCount: Int = 20): Option[String] = {
             val lastOutput = analysis.pluginInstanceBindings.find(_.targetPluginInstance.id == pluginInstanceId)
 
             lastOutput.map {
@@ -365,7 +365,7 @@ trait AnalysisModelComponent extends EntityModelComponent
 
                             persistedInstances.find(_.id == queryInstance.id).map {
                                 e =>
-                                    setParameterValue(e, ConcreteSparqlQuery.queryParameter, "CONSTRUCT { ?x ?y ?z } WHERE { ?x ?y ?z  } LIMIT 20")
+                                    setParameterValue(e, ConcreteSparqlQuery.queryParameter, "CONSTRUCT { ?x ?y ?z } WHERE { ?x ?y ?z  } LIMIT "+limitCount.toString)
                                     addBinding(partial.id, translateMap.get(o.sourcePluginInstance.id).get, e.id, 0)
                             }
                     }

@@ -101,4 +101,8 @@ class Graph(val vertices: immutable.Seq[Vertex], val edges: immutable.Seq[Edge],
     def getIncomingEdges(vertex: Vertex): immutable.Seq[Edge] = {
         edges.filter(_.destination == vertex)
     }
+
+    def getOutgoingEdges(vertex: Vertex): immutable.Seq[Edge] = {
+        edges.filter(_.origin == vertex)
+    }
 }

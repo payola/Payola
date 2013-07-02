@@ -7,6 +7,7 @@ import play.api.mvc.AnyContentAsFormUrlEncoded
 import s2js.runtime.shared.rpc.RpcException
 import cz.payola.common.ValidationException
 import java.lang.reflect.InvocationTargetException
+import cz.payola.web.shared.Payola
 
 /**
   * The only controller which handles requests from the client side. It receives a POST request with the following

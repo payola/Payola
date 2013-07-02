@@ -114,6 +114,7 @@ import cz.payola.domain.entities.plugins.concrete.DataFetcher
             val uri = dataSource.getFirstTriple.map(_.origin.uri)
             uri.map(dataSource.getNeighbourhood(_))
         }
+
         successCallback(graph)
     }
 

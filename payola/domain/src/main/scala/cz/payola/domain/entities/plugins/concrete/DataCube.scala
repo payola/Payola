@@ -14,9 +14,9 @@ class DataCube(name: String, inputCount: Int, parameters: immutable.Seq[Paramete
     def this(dataStructure: DataCubeDataStructureDefinition) = {
         this(dataStructure.uri, 1,
             (dataStructure.dimensions.map {
-                d => new StringParameter(d.label, "", false, true)
+                d => new StringParameter(d.uri, d.label.getOrElse(""), false, true)
             } ++ dataStructure.measures.map {
-                m => new StringParameter(m.label, "", false, true)
+                m => new StringParameter(m.uri, m.label.getOrElse(""), false, true)
             }).toList
             , IDGenerator.newId)
     }

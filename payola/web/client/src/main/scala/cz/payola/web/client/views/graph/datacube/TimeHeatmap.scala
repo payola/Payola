@@ -1,13 +1,14 @@
 package cz.payola.web.client.views.graph.datacube
 
+import cz.payola.web.client.models.PrefixApplier
 import cz.payola.web.client.views.graph.PluginView
 import cz.payola.web.client.views.elements.Div
-import cz.payola.common.rdf.Graph
+import cz.payola.common.rdf._
 import cz.payola.web.shared.Geo
 import cz.payola.web.client.views.map._
-import cz.payola.common.geo.Coordinates
 import s2js.compiler.javascript
-import cz.payola.web.client.models.PrefixApplier
+import scala.collection._
+import cz.payola.common.geo.Coordinates
 
 class TimeHeatmap(prefixApplier: Option[PrefixApplier] = None) extends PluginView("Time heatmap", prefixApplier) {
 
@@ -21,11 +22,13 @@ class TimeHeatmap(prefixApplier: Option[PrefixApplier] = None) extends PluginVie
 
     override def updateGraph(graph: Option[Graph], contractLiterals: Boolean = true) {
 
+        val hashMap = new mutable.HashMap[String, mutable.ArrayBuffer[TimeObservation]]
+        val max = new mutable.HashMap[String, Int]
+        val yearList = new mutable.ArrayBuffer[String]
+
         graph.map { g =>
 
             val observations = g.getIncomingEdges("http://purl.org/linked-data/cube#Observation").map(_.origin)
-
-            var max = 0
 
             val triples = observations.map { o =>
                 val components = g.getOutgoingEdges(o.uri)
@@ -34,13 +37,32 @@ class TimeHeatmap(prefixApplier: Option[PrefixApplier] = None) extends PluginVie
                 val time = components.find(_.uri == "http://linked.opendata.cz/resource/czso.cz/dataset-definitions#refPeriod").map(_.destination)
                 val population = components.find(_.uri == "http://linked.opendata.cz/resource/czso.cz/dataset-definitions#finalPopulation").map(_.destination)
 
-                val populationInt = population.map{ p => intval(p.toString) }.getOrElse(0)
-
-                if (populationInt > max){
-                    max = populationInt
+                val year = if (!time.isDefined){
+                    "1900"
+                }else{
+                    time.get match {
+                        case x: LiteralVertex => {
+                            val value = x.value.toString.split("-")
+                            if (value.length == 3){
+                                value(0)
+                            }else{
+                                "1900"
+                            }
+                        }
+                    }
                 }
 
-                (place.getOrElse(""), time.getOrElse("0"), populationInt)
+                val populationInt = population.map{ p => intval(p.toString) }.getOrElse(0)
+                if (!max.isDefinedAt(year) || (max.isDefinedAt(year) && max(year) < populationInt)){
+                    if (!max.isDefinedAt(year)){
+                        yearList += year
+                    }
+                    max.put(year, populationInt)
+                    hashMap.put(year, new mutable.ArrayBuffer[TimeObservation]())
+                }
+
+                val tuple = (place.getOrElse(""), year, populationInt)
+                tuple
             }
 
 
@@ -56,7 +78,8 @@ class TimeHeatmap(prefixApplier: Option[PrefixApplier] = None) extends PluginVie
                 var i = 0
                 val list = geo.map { c =>
                     val r = c.map { coords =>
-                        val t = (coords, (triples(i)._3/max*100).toDouble)
+                        val t = new TimeObservation(coords, triples(i)._2, triples(i)._3)
+                        hashMap(triples(i)._2) += t
                         t
                     }
 
@@ -66,10 +89,8 @@ class TimeHeatmap(prefixApplier: Option[PrefixApplier] = None) extends PluginVie
                     r
                 }.filter(_.isDefined).map(_.get)
 
-                                                    log(list.length)
-
                 val center = new Coordinates(0,0)
-                val map = new MapView(center, 3, "satellite", list, mapPlaceholder.htmlElement)
+                val map = new MapView(center, 3, "satellite", list, yearList, hashMap, mapPlaceholder.htmlElement)
                 map.render(mapPlaceholder.htmlElement)
             }{ e => }
         }

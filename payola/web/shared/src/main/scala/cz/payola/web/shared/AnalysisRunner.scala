@@ -26,11 +26,11 @@ import cz.payola.common.EvaluationState
         successCallback(response)
     }
 
-    @async def createPartialAnalysis(analysisId: String, pluginInstanceId: String, user: Option[User] = None)
+    @async def createPartialAnalysis(analysisId: String, pluginInstanceId: String, limitCount: Int, user: Option[User] = None)
         (successCallback: (String => Unit))
         (failCallback: (Throwable => Unit)) {
         val analysis = getAnalysisById(user, analysisId)
-        val partialAnalysisId = Payola.model.analysisModel.makePartial(analysis, pluginInstanceId)
+        val partialAnalysisId = Payola.model.analysisModel.makePartial(analysis, pluginInstanceId, limitCount)
 
         if (partialAnalysisId.isDefined){
             successCallback(partialAnalysisId.get)
