@@ -21,6 +21,7 @@ import cz.payola.common.EvaluationError
 import cz.payola.common.EvaluationSuccess
 import s2js.adapters.browser._
 import cz.payola.web.client.models.PrefixApplier
+import cz.payola.common.entities.plugins.parameters.StringParameter
 
 class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginInstance,
     predecessors: Seq[PluginInstanceView] = List())
@@ -35,10 +36,13 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
         new Paragraph(List(new Text(name))))
 
     override def getParameterViews = {
-        // THE FIRST PARAMETER is used as the pattern carrier  TODO!
-        val param = getPlugin.parameters.head
+        val param = getPlugin.parameters.sortWith(_.ordering.getOrElse(9999) < _.ordering.getOrElse(9999)).head
 
-        val input = new TextArea(param.id, "", "", "tiny datacube")
+        val initValue = pluginInstance.getParameterValue(param.name).map {p =>
+            p.value.toString
+        }.getOrElse("")
+
+        val input = new TextArea(param.id, initValue, "", "tiny datacube")
         val control = new InputControl[TextArea]("Transformation query", input, None)
 
         val limitInput = new NumericInput("limitCount", 20, "", "")

@@ -51,6 +51,10 @@ object DataCubeVocabulary
                 DataCubeMeasure(data._1.destination.toString, data._2, data._3)
             }
 
+            if (!dimensions.exists(_.order.isDefined)){
+                dimensions.head.order = Some(-1)
+            }
+
             new DataCubeDataStructureDefinition(e.origin.toString, e.destination.toString, dimensions, measures)
         }
 

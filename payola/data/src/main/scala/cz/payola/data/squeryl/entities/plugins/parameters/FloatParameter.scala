@@ -22,7 +22,7 @@ class FloatParameter(
     override val id: String,
     name: String,
     defaultVal: Float, ordering: Option[Int])(implicit val context: SquerylDataContextComponent)
-    extends cz.payola.domain.entities.plugins.parameters.FloatParameter(name, defaultVal)
+    extends cz.payola.domain.entities.plugins.parameters.FloatParameter(name, defaultVal, ordering)
     with Parameter[Float]
 {
     private lazy val _valuesQuery = context.schema.valuesOfFloatParameters.left(this)

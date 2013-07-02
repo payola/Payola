@@ -22,7 +22,7 @@ class BooleanParameter(
     override val id: String,
     name: String,
     defaultVal: Boolean, ordering: Option[Int])(implicit val context: SquerylDataContextComponent)
-    extends cz.payola.domain.entities.plugins.parameters.BooleanParameter(name, defaultVal)
+    extends cz.payola.domain.entities.plugins.parameters.BooleanParameter(name, defaultVal, ordering)
     with Parameter[Boolean]
 {
     private lazy val _valuesQuery = context.schema.valuesOfBooleanParameters.left(this)

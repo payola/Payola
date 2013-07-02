@@ -27,6 +27,6 @@ class DataCube(name: String, inputCount: Int, parameters: immutable.Seq[Paramete
      * @return The query.
      */
     def getQuery(instance: PluginInstance): String = {
-        instance.getStringParameter(instance.plugin.parameters.head.name).getOrElse("")
+        instance.getStringParameter(instance.plugin.parameters.sortBy(_.ordering.getOrElse(9999)).head.name).getOrElse("")
     }
 }

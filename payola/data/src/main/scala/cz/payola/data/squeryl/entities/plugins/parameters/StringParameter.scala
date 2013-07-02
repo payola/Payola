@@ -26,7 +26,7 @@ class StringParameter(
     isMultiline: Boolean, isPattern: Boolean, isPassword: Boolean, canContainUrl: Boolean, ordering: Option[Int])
     (implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.plugins.parameters.StringParameter(
-        name, defaultVal, isMultiline, isPattern, isPassword, canContainUrl)
+        name, defaultVal, isMultiline, isPattern, isPassword, canContainUrl, ordering)
     with Parameter[String]
 {
     private lazy val _valuesQuery = context.schema.valuesOfStringParameters.left(this)

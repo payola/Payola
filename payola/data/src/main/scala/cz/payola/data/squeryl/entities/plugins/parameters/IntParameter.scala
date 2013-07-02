@@ -22,7 +22,7 @@ class IntParameter(
     override val id: String,
     name: String,
     defaultVal: Int, ordering: Option[Int])(implicit val context: SquerylDataContextComponent)
-    extends cz.payola.domain.entities.plugins.parameters.IntParameter(name, defaultVal)
+    extends cz.payola.domain.entities.plugins.parameters.IntParameter(name, defaultVal, ordering)
     with Parameter[Int]
 {
     private lazy val _valuesQuery = context.schema.valuesOfIntParameters.left(this)
