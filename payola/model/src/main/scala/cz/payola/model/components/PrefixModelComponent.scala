@@ -17,7 +17,7 @@ trait PrefixModelComponent extends EntityModelComponent
     lazy val prefixModel = new EntityModel(prefixRepository)
     {
         override def persist(entity: Entity) {
-            uniqueKeyCheckedPersist(entity, "name, prefix or url")
+            uniqueKeyCheckedPersist(entity, "prefix or url")
         }
 
         /**

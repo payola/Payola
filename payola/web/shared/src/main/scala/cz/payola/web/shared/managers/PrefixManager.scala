@@ -31,7 +31,5 @@ import cz.payola.domain.net.Downloader
         catch {
             case e: Throwable => errorCallback(e)
         }
-
-
     }
 }

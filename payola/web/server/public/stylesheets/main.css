@@ -589,3 +589,8 @@ button.datacube {
     height: 22px;
     clear: both;
 }
+
+.blockUI.blockMsg {
+    z-index: 1040 !important;
+    top: 55px !important;
+}
