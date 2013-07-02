@@ -39,7 +39,7 @@ object Prefix extends PayolaController with Secured
 
         try {
              // Use prefix as a name
-            val prefix = Payola.model.prefixModel.create(pref, pref, url, user)
+            val prefix = Payola.model.prefixModel.create(pref, url, Some(user))
 
             // If available prefixes are not loaded yet, this will ensure that this prefix will be available too
             if (!user.availablePrefixes.contains(prefix))

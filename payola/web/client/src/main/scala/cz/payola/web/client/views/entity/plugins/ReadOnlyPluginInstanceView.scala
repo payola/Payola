@@ -36,7 +36,7 @@ class ReadOnlyPluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[P
                                 false
                         }
 
-                        // If rendering string parameter that can contain url, try to find matchng prefix
+                        // If rendering string parameter that can contain url, try to find matching prefix
                         val item = param match {
                             case p : StringParameter if p.canContainUrl => new ListItem(List(strong, new Text(": " + prefixApplier.applyPrefix(v.toString))))
                             case _ => new ListItem(List(strong, new Text(v.toString)))

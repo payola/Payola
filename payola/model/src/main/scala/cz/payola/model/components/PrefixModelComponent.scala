@@ -17,19 +17,18 @@ trait PrefixModelComponent extends EntityModelComponent
     lazy val prefixModel = new EntityModel(prefixRepository)
     {
         override def persist(entity: Entity) {
-            uniqueKeyCheckedPersist(entity, "name, prefix or url")
+            uniqueKeyCheckedPersist(entity, "prefix or url")
         }
 
         /**
          * Creates new prefix with specified values
-         * @param name Name for prefix
          * @param prefix Prefix
          * @param url Url
          * @param owner Prefix owner
          * @return Returns persisted prefix
          */
-        def create(name: String, prefix: String, url: String, owner: User): Prefix = {
-            val p = new Prefix(name, prefix, url, Some(owner))
+        def create(prefix: String, url: String, owner: Option[User]): Prefix = {
+            val p = new Prefix(prefix, prefix, url, owner)
             persist(p)
             p
         }
