@@ -11,7 +11,7 @@ sealed class ConcreteSparqlQuery(name: String, inputCount: Int, parameters: immu
 {
     def this() = {
         this("SPARQL Query", 1, List(
-            new StringParameter(ConcreteSparqlQuery.queryParameter, "", true)
+            new StringParameter(ConcreteSparqlQuery.queryParameter, "", true, false, false, false, Some(0))
         ), IDGenerator.newId)
     }
 

@@ -24,7 +24,7 @@ class OntologicalFilter(name: String, inputCount: Int, parameters: immutable.Seq
 {
     def this() = {
         this("Ontological Filter", 1, List(
-            new StringParameter(OntologicalFilter.ontologyURLsParameter, "", false, false, false, true)
+            new StringParameter(OntologicalFilter.ontologyURLsParameter, "", false, false, false, true, Some(0))
         ), IDGenerator.newId)
     }
 

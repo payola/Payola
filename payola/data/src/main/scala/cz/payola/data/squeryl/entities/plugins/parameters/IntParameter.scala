@@ -13,7 +13,7 @@ object IntParameter
         (implicit context: SquerylDataContextComponent): IntParameter = {
         p match {
             case p: IntParameter => p
-            case _ => new IntParameter(p.id, p.name, p.defaultValue)
+            case _ => new IntParameter(p.id, p.name, p.defaultValue, p.ordering)
         }
     }
 }
@@ -21,7 +21,7 @@ object IntParameter
 class IntParameter(
     override val id: String,
     name: String,
-    defaultVal: Int)(implicit val context: SquerylDataContextComponent)
+    defaultVal: Int, ordering: Option[Int])(implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.plugins.parameters.IntParameter(name, defaultVal)
     with Parameter[Int]
 {

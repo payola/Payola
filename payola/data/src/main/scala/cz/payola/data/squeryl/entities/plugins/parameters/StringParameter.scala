@@ -14,7 +14,7 @@ object StringParameter
         p match {
             case param: StringParameter => param
             case _ => new StringParameter(
-                p.id, p.name, p.defaultValue, p.isMultiline, p.isPattern, p.isPassword, p.canContainUrl)
+                p.id, p.name, p.defaultValue, p.isMultiline, p.isPattern, p.isPassword, p.canContainUrl, p.ordering)
         }
     }
 }
@@ -23,7 +23,7 @@ class StringParameter(
     override val id: String,
     name: String,
     defaultVal: String,
-    isMultiline: Boolean, isPattern: Boolean, isPassword: Boolean, canContainUrl: Boolean)
+    isMultiline: Boolean, isPattern: Boolean, isPassword: Boolean, canContainUrl: Boolean, ordering: Option[Int])
     (implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.plugins.parameters.StringParameter(
         name, defaultVal, isMultiline, isPattern, isPassword, canContainUrl)

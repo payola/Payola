@@ -60,7 +60,7 @@ trait DataSourceRepositoryComponent extends TableRepositoryComponent
             // Load DataSource with plugin and its plugin and parameter values (all mapped together)
             loadPluginInstancesByFilter(ds => ds.id === dataSource.id).headOption.map {ds =>
                 dataSource.plugin = ds.asInstanceOf[DataSource].plugin
-                dataSource.parameterValues = ds.asInstanceOf[DataSource].parameterValues
+                dataSource.parameterValues = ds.asInstanceOf[DataSource].parameterValues.sortBy(_.parameter.ordering.getOrElse(9999))
             }
         }
     }

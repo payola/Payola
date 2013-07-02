@@ -6,6 +6,8 @@ import cz.payola.web.client.presenters.models.ParameterValue
 import cz.payola.common.entities.Analysis
 import cz.payola.common.ValidationException
 import s2js.adapters.browser.`package`._
+import cz.payola.web.client.views.entity.plugins.PluginInstanceViewFactory
+import cz.payola.web.client.models.PrefixApplier
 
 /**
  * A variant of AnalysisBuilder for editing an existing analysis. Overrides initialize method.
@@ -21,6 +23,8 @@ class AnalysisEditor(parentElementId: String, analysisIdParam: String)
         blockPage("Loading analysis data...")
         prefixPresenter.initialize
         AnalysisBuilderData.getAnalysis(analysisId) { analysis =>
+
+            instanceViewFactory = new PluginInstanceViewFactory(prefixPresenter.prefixApplier)
 
             lockAnalysisAndLoadPlugins({ () =>
                 val view = new AnalysisEditorView(analysis, None, None, "Edit analysis", prefixPresenter.prefixApplier)

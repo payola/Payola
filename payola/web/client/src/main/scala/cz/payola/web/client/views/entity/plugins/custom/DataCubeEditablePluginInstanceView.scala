@@ -35,7 +35,7 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
         new Paragraph(List(new Text(name))))
 
     override def getParameterViews = {
-        // THE FIRST PARAMETER is used as the pattern carrier
+        // THE FIRST PARAMETER is used as the pattern carrier  TODO!
         val param = getPlugin.parameters.head
 
         val input = new TextArea(param.id, "", "", "tiny datacube")
