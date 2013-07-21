@@ -11,5 +11,5 @@ import cz.payola.domain.entities.plugins.PluginInstance
   */
 case class PluginWithInstance[A <: Plugin](plugin: A, instance: PluginInstance)
 {
-    require(instance.plugin == plugin, "The plugin instance must correspond to the plugin.")
+    //require(instance.plugin == plugin, "The plugin instance must correspond to the plugin.")
 }

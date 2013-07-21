@@ -108,6 +108,7 @@ class AnalysisEvaluation(val analysis: Analysis, private val timeout: Option[Lon
         val optimizer = new AnalysisOptimizer(List(
             new MergeConstructs,
             new MergeJoins,
+            new MergeLimit,
             new MergeFetchersWithQueries
         ))
         optimizer.optimize(analysis)
