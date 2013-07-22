@@ -162,9 +162,9 @@ class Generic(prefixApplier: Option[PrefixApplier] = None) extends PluginView("D
             timeSwitch.mouseClicked += { e =>
                 val was = isTime.isDefinedAt(u) && isTime(u)
                 if (was){
-                    timeSwitch.removeCssClass("success")
+                    timeSwitch.removeCssClass("btn-success")
                 }else{
-                    timeSwitch.addCssClass("success")
+                    timeSwitch.addCssClass("btn-success")
                 }
                 isTime.put(u, !was)
                 parseGraph(graph)

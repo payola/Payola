@@ -134,10 +134,25 @@ trait AnalysisModelComponent extends EntityModelComponent
             val parameterValue = option.get
 
             parameterValue match {
-                case v: BooleanParameterValue => v.value = value.asInstanceOf[Boolean]
-                case v: FloatParameterValue => v.value = value.asInstanceOf[Float]
-                case v: IntParameterValue => v.value = value.asInstanceOf[Int]
-                case v: StringParameterValue => v.value = value.asInstanceOf[String]
+                case v: BooleanParameterValue => v.value = value match {
+                    case x: Boolean => x
+                    case s: String => s.toBoolean
+                    case _ => false
+                }
+                case v: FloatParameterValue => v.value = value match {
+                    case x: Float => x
+                    case s: String => s.toFloat
+                    case _ => 0.toFloat
+                }
+                case v: IntParameterValue => v.value = value match {
+                    case x: Int => x
+                    case s: String => s.toInt
+                    case _ => 0
+                }
+                case v: StringParameterValue => v.value =  value match {
+                    case s: String => s.toString
+                    case _ => ""
+                }
                 case _ => throw new Exception("Unknown parameter type.")
             }
 
