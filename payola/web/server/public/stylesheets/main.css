@@ -594,3 +594,8 @@ button.datacube {
     z-index: 1040 !important;
     top: 55px !important;
 }
+
+.dcv-graphholder {
+    min-height: 500px !important;
+    height: 80%;
+}

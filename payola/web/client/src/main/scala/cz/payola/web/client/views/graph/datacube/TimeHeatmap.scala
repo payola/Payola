@@ -33,9 +33,9 @@ class TimeHeatmap(prefixApplier: Option[PrefixApplier] = None) extends PluginVie
             val triples = observations.map { o =>
                 val components = g.getOutgoingEdges(o.uri)
 
-                val place = components.find(_.uri == "http://linked.opendata.cz/resource/czso.cz/dataset-definitions#refArea").map(_.destination)
-                val time = components.find(_.uri == "http://linked.opendata.cz/resource/czso.cz/dataset-definitions#refPeriod").map(_.destination)
-                val population = components.find(_.uri == "http://linked.opendata.cz/resource/czso.cz/dataset-definitions#finalPopulation").map(_.destination)
+                val place = components.find(_.uri == "http://datacube.payola.cz/dataset-definitions#location").map(_.destination)
+                val time = components.find(_.uri == "http://datacube.payola.cz/dataset-definitions#period").map(_.destination)
+                val population = components.find(_.uri == "http://datacube.payola.cz/dataset-definitions#populationSize").map(_.destination)
 
                 val year = if (!time.isDefined){
                     "1900"

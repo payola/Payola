@@ -128,6 +128,7 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
     override def update(graph: Option[Graph], customization: Option[OntologyCustomization]) {
         super.update(graph, customization)
         technique.update(graph, customization)
+        technique.drawGraph()
 
         showMessage(0)
     }
@@ -135,6 +136,7 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
     override def updateGraph(graph: Option[Graph], contractLiterals: Boolean) {
         super.updateGraph(graph, false)
         technique.updateGraph(graph, false)
+        technique.drawGraph()
 
         showMessage(0)
     }

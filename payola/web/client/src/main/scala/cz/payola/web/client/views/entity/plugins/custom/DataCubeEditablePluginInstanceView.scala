@@ -21,6 +21,8 @@ import cz.payola.common.EvaluationError
 import cz.payola.common.EvaluationSuccess
 import s2js.adapters.browser._
 import cz.payola.web.client.models.PrefixApplier
+import cz.payola.common.entities.plugins.parameters.StringParameter
+import cz.payola.web.client.views.bootstrap.modals.AlertModal
 
 class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginInstance,
     predecessors: Seq[PluginInstanceView] = List())
@@ -35,11 +37,18 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
         new Paragraph(List(new Text(name))))
 
     override def getParameterViews = {
-        // THE FIRST PARAMETER is used as the pattern carrier
-        val param = getPlugin.parameters.head
+        val param = getPlugin.parameters.sortWith(_.ordering.getOrElse(9999) < _.ordering.getOrElse(9999)).head
 
-        val input = new TextArea(param.id, "", "", "tiny datacube")
+        val initValue = pluginInstance.getParameterValue(param.name).map {p =>
+            p.value.toString
+        }.getOrElse("")
+
+        val input = new TextArea(param.id, initValue, "", "tiny datacube")
         val control = new InputControl[TextArea]("Transformation query", input, None)
+        control.delayedChanged += { e =>
+            parameterValueChanged.triggerDirectly(
+                new ParameterValue(getId, param.id, param.name, input.value, control))
+        }
 
         val limitInput = new NumericInput("limitCount", 20, "", "")
         val limitControl = new InputControl[NumericInput]("Preview size", limitInput, None)
@@ -63,7 +72,7 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
                                             "<http://purl.org/linked-data/cube#dataSet> <http://live.payola" +
                                             ".cz/analysis/"+analysis.id+"> ; " +
                                             getPattern(args.target.getSignificantVertices).mkString(" ; ") + " . " +
-                                            "} where { " +
+                                            "} WHERE { " +
                                             "    { " +
                                             "        SELECT DISTINCT " + args.target.getSignificantVertices
                                             .mkString(" ") + " { " +
@@ -77,7 +86,10 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
                                             new ParameterValue(getId, param.id, param.name, query, control))
                                 })
                         } {
-                            error =>
+                            error => {
+                                unblock()
+                                AlertModal.display("Error", "An error occured.")
+                            }
                         }
                 } {
                     error =>
@@ -110,7 +122,10 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
         AnalysisRunner.getEvaluationState(evaluationId) {
             state =>
                 state match {
-                    case s: EvaluationError =>
+                    case s: EvaluationError => {
+                        unblock()
+                        AlertModal.display("Error", "An error occured.")
+                    }
                     case s: EvaluationSuccess => {
 
                         val messages = getPlugin.parameters.map {
@@ -138,7 +153,10 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
 
                         unblock()
                     }
-                    case s: EvaluationTimeout =>
+                    case s: EvaluationTimeout => {
+                        unblock()
+                        AlertModal.display("Error", "Timeout occured.")
+                    }
                 }
 
                 if (state.isInstanceOf[EvaluationInProgress]) {

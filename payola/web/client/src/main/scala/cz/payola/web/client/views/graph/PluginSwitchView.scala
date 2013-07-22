@@ -14,7 +14,7 @@ import cz.payola.web.shared.managers._
 import cz.payola.web.client.events._
 import cz.payola.web.client.views.elements.lists.ListItem
 import cz.payola.web.client.views.graph.sigma.GraphSigmaPluginView
-import cz.payola.web.client.views.graph.datacube.TimeHeatmap
+import cz.payola.web.client.views.graph.datacube._
 import cz.payola.web.client.models.PrefixApplier
 
 class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with ComposedView
@@ -60,7 +60,8 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
         new GravityTechnique(Some(prefixApplier)),
         new ColumnChartPluginView(Some(prefixApplier)),
         new GraphSigmaPluginView(Some(prefixApplier)),
-        new TimeHeatmap(Some(prefixApplier))
+        new TimeHeatmap(Some(prefixApplier)),
+        new Generic(Some(prefixApplier))
     )
 
     /**

@@ -24,7 +24,7 @@ class OntologicalFilter(name: String, inputCount: Int, parameters: immutable.Seq
 {
     def this() = {
         this("Ontological Filter", 1, List(
-            new StringParameter(OntologicalFilter.ontologyURLsParameter, "", false, false, false, true)
+            new StringParameter(OntologicalFilter.ontologyURLsParameter, "", false, false, false, true, Some(0))
         ), IDGenerator.newId)
     }
 
@@ -75,11 +75,14 @@ class OntologicalFilter(name: String, inputCount: Int, parameters: immutable.Seq
     private def getOntologyWithPluginInstance(instance: PluginInstance): Ontology = {
         usingDefined(instance.getStringParameter(OntologicalFilter.ontologyURLsParameter)) { ontologyURLs =>
             // Assume that there can be more ontology urls separated by a newline.
-            val urls = ontologyURLs.split("\n").toList.filter(_.nonEmpty)
+            //val urls = ontologyURLs.split("\n").toList.filter(_.nonEmpty)
+            //val ontology = Ontology(new Downloader(url, accept = "application/rdf+xml").result)
 
             // Download and merge all ontologies in parallel.
-            val ontologies = urls.par.map(url => Ontology(new Downloader(url, accept = "application/rdf+xml").result))
-            ontologies.fold(Ontology.empty)(_ + _)
+            //val ontologies = urls.par.map(url => Ontology(new Downloader(url, accept = "application/rdf+xml").result))
+            //ontologies.fold(Ontology.empty)(_ + _)
+
+            Ontology(new Downloader(ontologyURLs, accept = "application/rdf+xml").result)
         }
     }
 }

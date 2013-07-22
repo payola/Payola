@@ -18,8 +18,8 @@ class ShortestPath(name: String, inputCount: Int, parameters: immutable.Seq[Para
 {
     def this() = {
         this("Shortest Path", 1, List(
-            new StringParameter(ShortestPath.originURIParameter, "", false, false, false, true),
-            new StringParameter(ShortestPath.destinationURIParameter, "", false, false, false, true)
+            new StringParameter(ShortestPath.originURIParameter, "", false, false, false, true, Some(0)),
+            new StringParameter(ShortestPath.destinationURIParameter, "", false, false, false, true, Some(1))
         ), IDGenerator.newId)
     }
 

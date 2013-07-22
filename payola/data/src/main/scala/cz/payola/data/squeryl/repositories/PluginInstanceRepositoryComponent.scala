@@ -84,7 +84,7 @@ trait PluginInstanceRepositoryComponent extends TableRepositoryComponent
 
             val pluginInstances = _getLoadQuery(entityFilter).groupBy(_._1).map {r =>
                 val instance = r._1
-                instance.parameterValues = r._2.flatMap(c => Seq(c._2, c._3, c._4, c._5).flatten).toList
+                instance.parameterValues = r._2.flatMap(c => Seq(c._2, c._3, c._4, c._5).flatten).toList//.sortBy(_.parameter.ordering.getOrElse(9999))
 
                 instance
             }(collection.breakOut)

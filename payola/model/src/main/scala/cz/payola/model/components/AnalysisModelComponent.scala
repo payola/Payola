@@ -107,21 +107,20 @@ trait AnalysisModelComponent extends EntityModelComponent
         }
 
         def setParameterValue(user: User, analysisId: String, pluginInstanceId: String, parameterName: String,
-            value: String) {
+            value: Any) {
             val analysis = user.ownedAnalyses
                 .find(_.id == analysisId)
                 .get
 
             val pluginInstance = analysis.pluginInstances.find(_.id == pluginInstanceId)
             pluginInstance.map {
-                i =>
-                    setParameterValue(i, parameterName, value)
+                i => setParameterValue(i, parameterName, value)
             }.getOrElse {
                 throw new ModelException("Unknown plugin instance ID.")
             }
         }
 
-        def setParameterValue(pluginInstance: PluginInstance, parameterName: String, value: String) {
+        def setParameterValue(pluginInstance: PluginInstance, parameterName: String, value: Any) {
             if (!pluginInstance.isEditable) {
                 throw new ModelException("The plugin instance is not editable.")
             }
@@ -135,10 +134,10 @@ trait AnalysisModelComponent extends EntityModelComponent
             val parameterValue = option.get
 
             parameterValue match {
-                case v: BooleanParameterValue => v.value = value.toBoolean
-                case v: FloatParameterValue => v.value = value.toFloat
-                case v: IntParameterValue => v.value = value.toInt
-                case v: StringParameterValue => v.value = value
+                case v: BooleanParameterValue => v.value = value.asInstanceOf[Boolean]
+                case v: FloatParameterValue => v.value = value.asInstanceOf[Float]
+                case v: IntParameterValue => v.value = value.asInstanceOf[Int]
+                case v: StringParameterValue => v.value = value.asInstanceOf[String]
                 case _ => throw new Exception("Unknown parameter type.")
             }
 
@@ -354,8 +353,8 @@ trait AnalysisModelComponent extends EntityModelComponent
                     //to make a sensible limit, we need to append sparql construct query with a limit param
                     //CONSTRUCT { ?x ?y ?z } WHERE { ?x ?y ?z  } LIMIT 2
 
-                    lazy val sparqlQueryPluginId = pluginRepository.getByName("SPARQL Query").map(_.id).getOrElse("")
-                    val queryInstance = createPluginInstance(sparqlQueryPluginId, partial.id)
+                    lazy val limitPluginId = pluginRepository.getByName("Limit").map(_.id).getOrElse("")
+                    val limitInstance = createPluginInstance(limitPluginId, partial.id)
 
                     val persistedAnalysis = analysisRepository.getById(partial.id)
                     persistedAnalysis.map {
@@ -363,9 +362,9 @@ trait AnalysisModelComponent extends EntityModelComponent
 
                             val persistedInstances = a.pluginInstances
 
-                            persistedInstances.find(_.id == queryInstance.id).map {
+                            persistedInstances.find(_.id == limitInstance.id).map {
                                 e =>
-                                    setParameterValue(e, ConcreteSparqlQuery.queryParameter, "CONSTRUCT { ?x ?y ?z } WHERE { ?x ?y ?z  } LIMIT "+limitCount.toString)
+                                    setParameterValue(e, Limit.limitCountParameter, limitCount)
                                     addBinding(partial.id, translateMap.get(o.sourcePluginInstance.id).get, e.id, 0)
                             }
                     }

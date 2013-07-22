@@ -47,7 +47,7 @@ trait PluginRepositoryComponent extends TableRepositoryComponent
                     results.groupBy(_._1).map {r =>
                         val plugin = r._1
                         plugin.owner = r._2.head._2
-                        plugin.parameters = r._2.flatMap(c => Seq(c._3, c._4, c._5, c._6).flatten)
+                        plugin.parameters = r._2.flatMap(c => Seq(c._3, c._4, c._5, c._6).flatten).sortBy(_.ordering.getOrElse(9999))
 
                         plugin
                     }(collection.breakOut)
