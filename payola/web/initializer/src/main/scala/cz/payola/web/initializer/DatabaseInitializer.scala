@@ -40,6 +40,9 @@ object DatabaseInitializer extends App
         val ontologicalFilterPlugin = new OntologicalFilter
         val shortestPathPlugin = new ShortestPath
         val virtuosoSecuredPlugin = new VirtuosoSecuredEndpointFetcher
+        val dataCube = new DataCube
+        val analyses = new AnalysisPlugin
+        val limit = new Limit
 
         val publicPlugins = List(
             sparqlEndpointPlugin,
@@ -53,7 +56,10 @@ object DatabaseInitializer extends App
             unionPlugin,
             ontologicalFilterPlugin,
             shortestPathPlugin,
-            virtuosoSecuredPlugin
+            virtuosoSecuredPlugin,
+            dataCube,
+            analyses,
+            limit
         )
 
         val privatePlugins = List(
