@@ -4,14 +4,16 @@
     <facet type="scala" name="Scala">
       <configuration>
         <option name="compilerLibraryLevel" value="Project" />
-        <option name="compilerLibraryName" value="scala-2.9.1" />
+        <option name="compilerLibraryName" value="scala-2.9.2" />
+        <option name="deprecationWarnings" value="true" />
         <option name="fsc" value="true" />
+        <option name="uncheckedWarnings" value="true" />
       </configuration>
     </facet>
   </component>
   <component name="NewModuleRootManager" inherit-compiler-output="false">
-    <output url="file://$MODULE_DIR$/../s2js/runtime/shared/target/scala-2.9.1/classes" />
-    <output-test url="file://$MODULE_DIR$/../s2js/runtime/shared/target/scala-2.9.1/test-classes" />
+    <output url="file://$MODULE_DIR$/../s2js/runtime/shared/target/scala-2.9.2/classes" />
+    <output-test url="file://$MODULE_DIR$/../s2js/runtime/shared/target/scala-2.9.2/test-classes" />
     <exclude-output />
     <content url="file://$MODULE_DIR$/../s2js/runtime/shared">
       <sourceFolder url="file://$MODULE_DIR$/../s2js/runtime/shared/src/main/scala" isTestSource="false" />
@@ -24,9 +26,9 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="org.scala-lang_scala-library_2.9.1" level="project" />
-    <orderEntry type="library" name="org.scala-lang_scala-compiler_2.9.1" level="project" />
-    <orderEntry type="library" scope="TEST" name="org.scalatest_scalatest_2.9.1_1.6.1" level="project" />
+    <orderEntry type="library" name="org.scala-lang_scala-library_2.9.2" level="project" />
+    <orderEntry type="library" name="org.scala-lang_scala-compiler_2.9.2" level="project" />
+    <orderEntry type="library" scope="TEST" name="org.scalatest_scalatest_2.9.2_1.6.1_test" level="project" />
     <orderEntry type="module" module-name="adapters" exported="" />
     <orderEntry type="module" module-name="compiler" exported="" />
   </component>

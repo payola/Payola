@@ -4,14 +4,16 @@
     <facet type="scala" name="Scala">
       <configuration>
         <option name="compilerLibraryLevel" value="Project" />
-        <option name="compilerLibraryName" value="scala-2.9.1" />
+        <option name="compilerLibraryName" value="scala-2.9.2" />
+        <option name="deprecationWarnings" value="true" />
         <option name="fsc" value="true" />
+        <option name="uncheckedWarnings" value="true" />
       </configuration>
     </facet>
   </component>
   <component name="NewModuleRootManager" inherit-compiler-output="false">
-    <output url="file://$MODULE_DIR$/../web/shared/target/scala-2.9.1/classes" />
-    <output-test url="file://$MODULE_DIR$/../web/shared/target/scala-2.9.1/test-classes" />
+    <output url="file://$MODULE_DIR$/../web/shared/target/scala-2.9.2/classes" />
+    <output-test url="file://$MODULE_DIR$/../web/shared/target/scala-2.9.2/test-classes" />
     <exclude-output />
     <content url="file://$MODULE_DIR$/../web/shared">
       <sourceFolder url="file://$MODULE_DIR$/../web/shared/src/main/scala" isTestSource="false" />
@@ -24,8 +26,8 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="org.scala-lang_scala-library_2.9.1" level="project" />
-    <orderEntry type="library" name="org.scala-lang_scala-compiler_2.9.1" level="project" />
+    <orderEntry type="library" name="org.scala-lang_scala-library_2.9.2" level="project" />
+    <orderEntry type="library" name="org.scala-lang_scala-compiler_2.9.2" level="project" />
     <orderEntry type="library" name="org.apache.jena_jena-core_2.7.0-incubating" level="project" />
     <orderEntry type="library" name="org.apache.jena_jena-iri_0.9.0-incubating" level="project" />
     <orderEntry type="library" name="com.ibm.icu_icu4j_3.4.4" level="project" />
@@ -35,20 +37,24 @@
     <orderEntry type="library" name="org.slf4j_slf4j-log4j12_1.6.4" level="project" />
     <orderEntry type="library" name="log4j_log4j_1.2.16" level="project" />
     <orderEntry type="library" name="org.apache.jena_jena-arq_2.9.0-incubating" level="project" />
-    <orderEntry type="library" name="commons-codec_commons-codec_1.5" level="project" />
-    <orderEntry type="library" name="org.apache.httpcomponents_httpclient_4.1.2" level="project" />
-    <orderEntry type="library" name="org.apache.httpcomponents_httpcore_4.1.3" level="project" />
-    <orderEntry type="library" name="org.squeryl_squeryl_2.9.0-1_0.9.5" level="project" />
+    <orderEntry type="library" name="org.apache.httpcomponents_httpclient_4.2.4" level="project" />
+    <orderEntry type="library" name="org.apache.httpcomponents_httpcore_4.2.4" level="project" />
+    <orderEntry type="library" name="commons-logging_commons-logging_1.1.1" level="project" />
+    <orderEntry type="library" name="commons-codec_commons-codec_1.6" level="project" />
+    <orderEntry type="library" name="commons-io_commons-io_2.4" level="project" />
+    <orderEntry type="library" name="org.squeryl_squeryl_2.9.2_0.9.5" level="project" />
     <orderEntry type="library" name="cglib_cglib-nodep_2.2" level="project" />
+    <orderEntry type="library" name="org.scala-lang_scalap_2.9.2" level="project" />
     <orderEntry type="library" name="com.h2database_h2_1.3.165" level="project" />
     <orderEntry type="library" name="mysql_mysql-connector-java_5.1.18" level="project" />
     <orderEntry type="library" name="postgresql_postgresql_9.1-901.jdbc4" level="project" />
     <orderEntry type="library" name="org.apache.derby_derby_10.8.2.2" level="project" />
+    <orderEntry type="library" name="org.apache.commons_commons-lang3_3.1" level="project" />
     <orderEntry type="library" name="com.typesafe_config_0.5.0" level="project" />
     <orderEntry type="library" name="org.apache.commons_commons-email_1.2" level="project" />
     <orderEntry type="library" name="javax.mail_mail_1.4.1" level="project" />
     <orderEntry type="library" name="javax.activation_activation_1.1" level="project" />
-    <orderEntry type="library" scope="TEST" name="org.scalatest_scalatest_2.9.1_1.6.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="org.scalatest_scalatest_2.9.2_1.6.1_test" level="project" />
     <orderEntry type="library" name="virtjdbc3.jar" level="project" />
     <orderEntry type="module" module-name="adapters" exported="" />
     <orderEntry type="module" module-name="compiler" exported="" />
