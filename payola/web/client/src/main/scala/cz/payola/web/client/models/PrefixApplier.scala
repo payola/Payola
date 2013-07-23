@@ -12,20 +12,20 @@ class PrefixApplier(prefixPresenter: PrefixPresenter = null)
     var prefixes: Seq[Prefix] = Nil
 
     def applyPrefix(uri: String): String = {
-        /*if (prefixes != Nil)
+        if (prefixes != Nil)
         {
             prefixes.flatMap(_.applyPrefix(uri)).headOption.getOrElse(uri)
         }
         else
-        { */
+        {
             uri
-        //}
+        }
     }
 
     def disapplyPrefix(uri: String): String = {
         var result = uri
 
-        /*if (prefixes != Nil)
+        if (prefixes != Nil)
         {
             result = prefixes.flatMap(_.disapplyPrefix(uri)).headOption.getOrElse(uri)
         }
@@ -39,12 +39,12 @@ class PrefixApplier(prefixPresenter: PrefixPresenter = null)
                 { p => showDialog(result, Some(p))  }
                 { e => showDialog(result, None) }
             }
-        } */
+        }
 
         result
     }
 
-    @javascript(""" $.growlUI(title, message, 1000) """)
+    @javascript(""" $.growlUI(title, message, 5000) """)
     private def showBanner(title: String, message: String) {}
 
     private def showDialog(prefixedUri: String, uri: Option[String]) {
