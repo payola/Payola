@@ -23,7 +23,7 @@ class MapView(center: Coordinates, zoom: Int, mapType: String, heatData: Seq[Tim
             val checkbox = new CheckBox(y, true, y)
             checkbox.mouseClicked += { e =>
                 toggleLayer(y)
-                false
+                true
             }
             val label = new Label(y, checkbox.htmlElement)
             new ListItem(List(label, checkbox))
