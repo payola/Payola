@@ -5,7 +5,7 @@
 
 Purpose of this document is to describe in depth implementation ideas behind the Payola and help the developers, who'd like to extend or modify the application, to get familiar with the project. 
 
-The Payola application consists of several layers and libraries that are all enclosed within a solution project `payola`. The following sections describe structure of the solution, the functionality hidden within the layers and libraries and their relations. For information how to install, compile and run the Payola, please refer to the [Installation Guide](https://raw.github.com/siroky/Payola/develop/docs/installation_guide.md).
+The Payola application consists of several layers and libraries that are all enclosed within a solution project `payola`. The following sections describe structure of the solution, the functionality hidden within the layers and libraries and their relations. For information how to install, compile and run the Payola, please refer to the [Installation Guide](https://raw.github.com/payola/Payola/master/docs/installation_guide.md).
 
 ## Motivation
 
@@ -48,7 +48,7 @@ The solution is defined using the [SBT](https://github.com/harrah/xsbt/wiki/ "SB
 		- [`shared`](#shared)
 		- [`server`](#server)
 
-![Project depedencies](https://raw.github.com/siroky/Payola/develop/docs/img/project_dependencies.png)
+![Project depedencies](https://raw.github.com/payola/Payola/master/docs/img/project_dependencies.png)
 
 Briefly, the project [`payola/project`](#project) defines this structure, dependencies between the projects, external dependencies and the build process, so it can be understood as a Makefile equivalent. Somewhat standalone libraries are the [`payola/scala2json`](#scala2json) project which provides means of Scala object serialization into the JSON format and [`payola/s2js`](#s2js) project which with all its subprojects enables us to write web applications in Scala (to compile Scala code to equivalent JavaScript code).
 
@@ -420,7 +420,7 @@ As the name of the project suggests, common classes that can be accessed from al
 
 This package includes classes representing the basic entities (user, analysis, plugin, etc.) that ensure the core functionality of Payola. Each entity has its own ID (string-based, 128-bit UUID) and can be stored in a relational database (see the [data package](#data) for more information).
 
-![Common entites model](https://raw.github.com/siroky/Payola/develop/docs/img/common_entities.png)
+![Common entites model](https://raw.github.com/payola/Payola/master/docs/img/common_entities.png)
 
 This image captures the most important classes of the `entities` package. The `User` entity stands in the middle of everything - a user can own groups (and be their member as well), plugins, analyses, data sources and ontology customizations. Each `OntologyCustomization` instance consists of several `ClassCustomization`s, each consisting of `PropertyCustomization`s. A `DataSource` is simply a special subclass of `PluginInstance` which fetches data. Then there's the `Plugin` class where it starts to be slightly more complicated.
 
@@ -432,7 +432,7 @@ An `Analysis` forms various plugin instances into a tree-like structure using `P
 
 #### Package cz.payola.common.entities.privileges
 
-![Privilege model](https://raw.github.com/siroky/Payola/develop/docs/img/common_privileges.png)
+![Privilege model](https://raw.github.com/payola/Payola/master/docs/img/common_privileges.png)
 
 To share entities between users, privileges are used. This makes it easy to extend the model in the future, or to change the granularity of privilege granting. Currently, there are only privileges granting access to a resource - analysis, data source, ontology customization and plugin; however, a privilege type that grants a user the right to edit some entity, for instance, can be easily added.
 
@@ -481,6 +481,16 @@ The last piece in the puzzle is the `cz.payola.domain.entities.plugins.PluginCla
 
 There are basically two types of plugins - the data fetchers and the rest. A `DataFetcher` doesn't have any inputs and is capable of SPARQL query execution and node neighborhood fetching, so that it can be used as a plugin of a data source. Implementation of the plugins is quite straightforward, please refer to the user guide on what they do.
 
+As of version 1.1, the DataFetcher plugin was changed to be a ConstructQuery in order to allow some optimizations.
+
+#### DataCube
+
+Also, a new plugin, the `DataCube` was introduced. For every Data Cube Data Structure definition, a new plugin attached to the codebase is created. That is because a variable count of parameters (dimensions, attributes, measures). The evaluation is a combination of a SPARQL query and appending a custom RDF graph. It executes a special query in order to map the input graph to comply with the DCV DSD and appends the DSD.
+
+#### VirtuosoSecuredEndpointFetcher
+
+Based on the [Apache HTTP Client library](http://hc.apache.org/httpclient-3.x/) the plugin provides a way of accessing a secured endpoint ([HTTP Digest Auth](http://www.ietf.org/rfc/rfc2617.txt) is supported). Since this is a Virtuoso-specific feature, it is named as a Virtuoso endpoint fetcher, but it is possible that it would work also with other endpoints.
+
 ### Package cz.payola.domain.entities.analyses
 
 The second big part of the domain package are analyses and the whole process of their validation, optimization and evaluation. An `Analysis` is composed of `PluginInstance`s and `PluginInstanceBindng`s, which specify connections between `PluginInstance`s. Analyses in the system don't necessarily have to be always valid (in order to support interrupted analysis creation).
@@ -489,6 +499,7 @@ The second big part of the domain package are analyses and the whole process of 
 
 Evaluation of an analysis isn't a trivial process, because it introduces parallelism. Everything starts with the `evaluate` method call on an `Analysis` instance which creates a new instance of the `AnalysisEvaluation` and starts it. From now on, the evaluation runs in parallel to the thread which started the evaluation, because it's an [`scala.actors.Actor`](http://www.scala-lang.org/node/242). The `AnalysisEvaluation` object can however be queried about its current state (using methods `getProgress`, `getResult`, `isFinished`). An `AnalysisEvaluation` works in the following steps:
 
+0. The analysis is checked for the presence of an instance derived from the `cz.payola.domain.entities.plugins.concrete.Analysis` plugin. If present, it is expanded with a corresponding plugins of an inner analysis.
 1. Validity of the analysis is checked (whether it's not empty, whether there are any invalid bindings, whether the analysis has one output etc.).
 2. The analysis is optimized using the `AnalysisOptimizer`. It consists of phases, that usually merge plugin instances together. The phases that are sequentially executed and produce an `OptimizedAnalysis`. For more information about the phases and what they do, please refer to the API documentation of the `cz.payola.domain.entities.analyses.optimization` package.
 3. The `Timer` actor is started, so the evaluation is notified in case of timeout.
@@ -501,7 +512,13 @@ Evaluation of an analysis isn't a trivial process, because it introduces paralle
 
 An example of the analysis evaluation process, that succeeds without any errors can found on the following picture. The messages 1, 1.1 and 1.2 can be interleaved with messages 2, 2.1, 2.2, 3, 3.1, 3.2, 3.3, because these two branches of the evaluation can run in parallel.
 
-![Analysis evaluation using actors](https://raw.github.com/siroky/Payola/develop/docs/img/analysis_evaluation_actors.png)
+![Analysis evaluation using actors](https://raw.github.com/payola/Payola/master/docs/img/analysis_evaluation_actors.png)
+
+#### Inner analyses
+
+The Analysis plugin (with its codebase at `cz.payola.domain.entities.plugins.concrete.AnalysisPlugin`) has no implementation at all. Moreover, it rises an exception, if executed. That is, because it needs to be substituted by instances of the inner analysis by invoking `anaylsis.expand()` on the evaluated analysis. The plugin is used only to hold a list of parameters (analysis parameters). Those, separated by the character `$` carries in the name field the name of the plugin and a reference to the plugin instance parameter value that should be subsitited.
+
+The analysis is not persisted after the expansion. The expansion is done in-memory only and that should not take a long time. We also check for recursion and try to avoid it.
 
 ### Package cz.payola.domain.rdf
 
@@ -598,7 +615,7 @@ Every query that fetches any data from the database needs to be wrapped inside a
 
 All higher layers of Payola work with [domain layer](#domain) entities, but those entities aren't persisted in data layer directly. For every domain layer entity class that should be persisted, a class in the data layer that provides database persistence to the corresponding domain layer entity exists, as is shown in the following picture:
 
-![Data layer entities](https://raw.github.com/siroky/Payola/develop/docs/img/data_entities.png) 
+![Data layer entities](https://raw.github.com/payola/Payola/master/docs/img/data_entities.png) 
 
 Every entity in this package extends the trait `Entity`, which provides Squeryl functionality. It could be compared to [Adapter](#http://en.wikipedia.org/wiki/Adapter_pattern) design pattern, where `Entity` from [`common`](#common) package is the Adaptee, `Entity` in this package is the Adapter, and Squeryl functionality is the Target.
 
@@ -615,7 +632,7 @@ Domain layer entities allow adding other entities into collections (e.g. a plugi
 
 Repositories provide entity persistence and fetching (entities must extend `Entity` trait in the [squeryl](#squeryl) package. The API for repositories is defined in the `DataContextComponent` trait in the [data](#data) package. The API is a set of traits, their structure is shown in the next picture:
 
-![Data layer repositories](https://raw.github.com/siroky/Payola/develop/docs/img/data_repositories.png)
+![Data layer repositories](https://raw.github.com/payola/Payola/master/docs/img/data_repositories.png)
 
 For every repository defined in the API a repository component that implements the repository exists. Traits `Repository`, `NamedEntityRepository`, `OptionallyOwnedEntityRepository`, `ShareableEntityRepository` are implemented within the `TableRepositoryComponent` trait. The rest of the API repositories are implemented by the corresponding repository components (e.g. `UserRepository` is implemented by `UserRepositorComponent`).
 
@@ -659,10 +676,24 @@ While utilizing the subcomponents the `ModelComponent` trait is built up to prov
 
 Later on, when you get familiar with the `cz.payola.web.shared` package, you will find out more about an object named `cz.payola.web.shared.Payola`, whicg is an example implementation of the `ModelComponent` trait.
 
+### Interesting features
+#### Partial analyses
+In order to support the Data Cube Vocabulary query-by-example mechanism (pattern selection),
+we had to introduce the mechanism, which creates a sub-analysis from a specified one. It comes from the idea, that when a plugin instance needs a preview, not all the plugins has to be evaluated. Some of them are redundant and its output would not be used. To speed-up the preview proccess and to aquire the ability to obtain a semi-result, we introduce the mechanism. 
+
+The `makePartial` method int the `AnalysisModelComponent` takes the analysis from which the sub-pipeline is extracted as well as the plugin instance. The plugin instance serves as a marker - it tells us, which part of the analysis is needed to be extracted.
+
+![Partial analysis](https://raw.github.com/payola/Payola/master/docs/img/screenshots/dcv_subpipeline.png)
+
+#### Analysis cloning
+The `clone` method of the `AnalysisModelComponent` is designed to clone the analysis, if the specified user has access to it. Moreover, the user that triggered the action, is given a token (via cookie), which might be used in the future to take the ownership of the analysis. The token is a random GUID.
+
+In order to support that feature, we had to implement some other methods, which, in the right order clones parameters, compensate changes in plugin instance bindigns and mainly, makes persistance with SQUERYL. Especially the persistance part is very *fragile* and one is not recommended to change it.
+
 <a name="web"></a>
 ## Package cz.payola.web
 
-![Client-server-structure](https://raw.github.com/siroky/Payola/develop/docs/img/client_server.png)
+![Client-server-structure](https://raw.github.com/payola/Payola/master/docs/img/client_server.png)
 
 All the code connected with the web presentation layer could be found in this package. The web application is, as the rest of the project, written in the Scala language. To make the job easier, we have built up the presentation layer on top of the [Play 2.0 framework](http://www.playframework.org/), which is also completely written in the Scala language, so it was easy to integrate with our application.
 
@@ -801,7 +832,7 @@ val runnableObj = clazz.getField("MODULE$").get(objectName)
 
 What happens if a presenter on client side calls a method of a remote object? Learn more from the following diagram:
 
-![Synchronous RPC call](https://raw.github.com/siroky/Payola/develop/docs/img/rpc_call_sync.png)
+![Synchronous RPC call](https://raw.github.com/payola/Payola/master/docs/img/rpc_call_sync.png)
 
 When you call a remote method from a presenter on the client side, you in fact trigger an XHR request to the server. The request gets parsed by the RPC controller and delegated to the RPC Dispatcher. The dispatcher extracts parameters for the remote method, transforms them into the right data types and gets the method which should be invoked via reflection. While this is being done, it checks, if the method's object has the `@remote` annotation. After that, the `@secured` annotation presence is checked. If present on the method or its object, authorization takes place. If all goes well, the remote method gets executed and the result is returned. By default every XHR request is synchronous, asynchronous call can be triggered using `@async` annotation, more [here](#sync-async). The diagram above shows synchronous call.
 
@@ -1050,6 +1081,11 @@ The package contains e.g. GraphPresenter, AnalysisBuilder, PluginCreator  presen
 
 To see how is the request to the model processed go to [How it works](#how_it_works) in [web](#web).
 
+#### Dynamic PluginInstanceView loading
+The Payola framework now lets you define an override for the default plugin instance visualization in the analysis editor/visualizer. This can be done by creating a custom class in the package `cz.payola.web.client.views.entity.plugins.custom`. An example of such a class is the `cz.payola.web.client.views.entity.plugins.custom.DataCubeEditablePluginInstanceView`, which is currently the most complicated one. 
+
+For each plugin instance type in a rendered analysis, the visualizer queries the remote Dependency provider for the code of an override. The returned code (empty if no code) is evaluated and after that, the `PluginInstanceViewFactory` tries to create an instance of the override. If it succeeds, the override is returned, if it fails, it falls back to the generic visualizer.
+
 <a name="used_libraries"></a>
 ## Used libraries, frameworks & tools
 
@@ -1069,6 +1105,8 @@ While developing the Payola, we used the following technologies:
 - [Select2](http://ivaynberg.github.com/select2/) (JavaScript autocomplete plugin) - [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0.html)
 - [sprintf](http://code.google.com/p/sprintf/) (SprintF implementation for JS) - [BSD License](http://opensource.org/licenses/bsd-license.php)
 - [Flot](http://code.google.com/p/flot/) (JavaScript charts plugin) - [MIT License](http://opensource.org/licenses/mit-license.php)
+- Geocoder (Gisgraphy wrapper by Matej Snoha)
+- [Google Maps](https://developers.google.com/maps/)
 
 ## Unit tests
 
@@ -1100,7 +1138,7 @@ In order to have the code in the repository compilable all the time, we use a [T
 
 This prevents us from situations, when somebody pushes a commit and does not test it properly. It may prevent the application from compiling, so that the rest of the team cannot pull a broken code from the repository. With TeamCity, such a broken commit is revealed in about 2 minutes and the whole team gets noticed about it. It takes us just a few moment to get it right.
 
-![TeamCity](https://raw.github.com/siroky/Payola/develop/docs/img/teamcity.png)
+![TeamCity](https://raw.github.com/payola/Payola/master/docs/img/teamcity.png)
 
 In the future, we will work hard to integrate test suites into the continuous integration process, as well as automatic deployment to our production server.
 
@@ -1209,3 +1247,65 @@ Since there is always something that you can do better or more sophisticated, we
 - Support for other RDF databases besides Virtuoso
 
 > You can find a list of improvements that is currently being worked on at [GitHub](https://github.com/siroky/Payola/issues?sort=updated&state=open).
+
+## Complex/standalone features
+### DataCube support
+
+The Data Cube vocabulary support is quite a complex feature, which introduces a bunch of new mechanisms and features. Some of them are described in corresponding sections. The rest of presented here.
+
+#### Parsing the DCV
+The classic Downloader is used to obtain the TTL DCV graph from the URL specified by the user. The downloaded content is passed to Jena, which builds an RDF graph, if possible.
+
+We introduced a couple of case-classes, which are capable of holding the necessary information. They are capable of describing the interesting parts of the DCV. See `cz.payola.common.rdf.DataCubeVocabulary`. Those are utilited by the object `cz.payola.domain.rdf.DataCubeVocabulary`, which defines an `apply` function. That takes the URL, runs the downloader, queries the graph for predicates from the `http://purl.org/linked-data/cube#` namespace and builds up the object representation of the vocabulary.
+
+#### Pattern selection
+The next interesting part of the DCV implementation is the newly integrated query-by-example principle. A new, very simple graph visualizer was introduced, the `SimpleGraphView`. It has one special event to bind on, the `patternUpdated`. That event is triggered, when the user selected the specified amount of vertices. Only `TreeTechnique` is used to render the graph (becuase it is reasonably fast).
+
+In order to deliver a preview for the pattern selection, the following was done:
+
+- [Partial analyses](#partial-analyses)
+- [Client-side vertex name generator](#lodvis-integration)
+- [Limit plugin with optimizations](https://github.com/payola/Payola/blob/master/docs/user_guide.md#limit) - User guide
+
+When running a preview, a sub-analysis is created, appended with a Limit plugin (to make the preview reasonably fast and large). The sub-analysis is evaluated and results presented to the user via the new `SimpleGraphView` component.
+
+#### Custom plugin instance views
+The [DataCube plugin](#datacube) handles a variable count of parameters, but it uses only a one to obtain a pattern. Therefore, the following was made:
+
+- new flag for `StringParameter`: `isPattern`
+- [Dynamic PluginInstanceView loading](#dynamic-plugininstanceview-loading)
+- parameters ordering - `order` flag
+
+Based on the [Dynamic PluginInstanceView loading](#dynamic-plugininstanceview-loading), we were able to create a custom visual overrides, which handles rendering of an instance derived from the DataCube plugin codebase.
+
+#### DataCube visualizers
+A couple of new visualizers has been implemented, the part interesting from a developer's point of view is that they search the supplied graph for DCV definition and build a UI based on what they find. That is also why the `DataCube` plugin adds the DCV definition to the results. The next level would be to utilize *LDVM input signature*.
+
+[Read more in User Guide](https://github.com/payola/Payola/blob/master/docs/user_guide.md#data-cube-vocabulary)
+
+The [Client-side vertex name generator](#client-side-vertex-name-generator) is used to build up a valid SPARQL pattern.
+
+### Client-side vertex name generator
+A simple class was introduced to generate an endless (+- range of Integer) series of vertex names. Every get triggers an increment, therefore a series v1, v2, ... is the result.
+
+### MapView
+We have integrated the Google Maps API in order to provide a view, which is based on a map of the planet Earth. It has one specific control generated from a passed list of years. Those are used to build a control, which enables and disables layers with heatmaps. In future, it will be further refactored to be more generic. (But you can do it, if you want :-)).
+
+### Geocoding
+With the Java 1.7 (!!!) Geocoder (by Matej Snoha) wrapper, we integrate a mechanism, which enables the developer to translate a location name into GPS coordinates. See `GeocodeModelComponent` and `Geo` shared to use it. Both of them has only simple methods (`geocode(location: String)` or `geocodeBatch(places: Seq[String])`), so no further description is needed.
+
+## Changelog
+### version 1.1 [data-cube by Jiri Helmich]
+- [Inner analyses support](#inner-analyses)
+- [Dynamic PluginInstanceView loading](#dynamic-plugininstanceview-loading)
+- [Partial analyses](#partial-analyses)
+- [Analysis cloning](#analysis-cloning)
+- [DataCube Support](#datacube-support)
+- [Limit plugin with optimizations](https://github.com/payola/Payola/blob/master/docs/user_guide.md#limit) - User guide
+- [Pattern selection](#pattern-selection)
+- [LodVis integration](https://github.com/payola/Payola/blob/master/docs/user_guide.md#lodvis-integration) - User guide
+- [Client-side vertex name generator](#client-side-vertex-name-generator)
+- [MapView](#mapview)
+- [Geocoding](#geocoding)
+- [Virtuoso Secured SPARQL Endpoint Fetcher](#virtuososecuredendpointfetcher)
+- THEAD, TH and TBODY elements support
