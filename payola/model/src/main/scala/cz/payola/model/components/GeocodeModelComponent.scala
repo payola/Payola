@@ -4,6 +4,9 @@ import cz.opendata.tenderstats.Geocoder
 import cz.opendata.tenderstats.Geocoder.GeoProviderFactory
 import cz.payola.common.geo.Coordinates
 
+/**
+ *
+ */
 trait GeocodeModelComponent
 {
     lazy val geocodeModel = new

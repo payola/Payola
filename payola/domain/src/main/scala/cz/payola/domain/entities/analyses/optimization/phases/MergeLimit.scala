@@ -9,8 +9,11 @@ import cz.payola.domain.entities.analyses.optimization.PluginWithInstance
 import cz.payola.domain.entities.plugins.parameters.StringParameterValue
 
 /**
-  * Merges data fetcher plugin instances with SPARQL queries.
-  */
+ * Handle optimalizations of Limit plugin.
+ *
+ * Merges data fetcher plugin instances with SPARQL queries.
+ * @author Jiri Helmich
+ */
 class MergeLimit extends OptimizationPhase
 {
      def run(analysis: OptimizedAnalysis): OptimizedAnalysis = {

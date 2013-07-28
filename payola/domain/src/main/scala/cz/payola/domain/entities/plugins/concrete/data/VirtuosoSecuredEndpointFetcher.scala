@@ -9,6 +9,17 @@ import cz.payola.domain.rdf._
 import com.hp.hpl.jena.query.QueryFactory
 import scala.collection.JavaConversions._
 
+/**
+ * A custom plugin for fetching data from Virtuoso Secured Endpoint.
+ *
+ * (Digest HTTP Auth) The plugin's definition (especially username and PW params).
+ *
+ * @param name
+ * @param inputCount
+ * @param parameters
+ * @param id
+ * @author Jiri Helmich
+ */
 sealed class VirtuosoSecuredEndpointFetcher(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]],
     id: String)
     extends DataFetcher(name, inputCount, parameters, id)

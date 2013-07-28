@@ -28,8 +28,8 @@ class IntParameter(name: String, defaultValue: Int, ordering: Option[Int] = None
 
 class StringParameter(name: String, defaultValue: String,
     protected val _isMultiline: Boolean = false,
-    protected val _isPattern: Boolean = false,
-    protected val _isPassword: Boolean = false,
+    protected val _isPattern: Boolean = false,      // added in order to handle pattern selection [Jjiri Helmich]
+    protected val _isPassword: Boolean = false,     // added in order to handle passwords [Jjiri Helmich]
     protected val _canContainUrl: Boolean = false,
     ordering: Option[Int] = None)
     extends Parameter[String](name, defaultValue, ordering) with cz.payola.common.entities.plugins.parameters.StringParameter

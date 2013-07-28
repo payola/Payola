@@ -7,6 +7,11 @@ import cz.payola.domain.sparql
 import cz.payola.domain.sparql._
 import cz.payola.domain.entities.plugins.parameters.StringParameter
 
+/**
+ * Definition of the Limit plugin, its parameters, input count, etc.
+ *
+ * @author Jiri Helmich
+ */
 class Limit(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
     extends Construct(name, inputCount, parameters, id)
 {

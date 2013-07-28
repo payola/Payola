@@ -2,6 +2,9 @@ package cz.payola.model.components
 
 import cz.payola.domain.rdf.DataCubeVocabulary
 
+/**
+ *
+ */
 trait DataCubeModelComponent
 {
     lazy val dataCubeModel = new

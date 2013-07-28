@@ -40,6 +40,8 @@ object DatabaseInitializer extends App
         val ontologicalFilterPlugin = new OntologicalFilter
         val shortestPathPlugin = new ShortestPath
         val virtuosoSecuredPlugin = new VirtuosoSecuredEndpointFetcher
+
+        /** JH */
         val dataCube = new DataCube
         val analyses = new AnalysisPlugin
         val limit = new Limit
@@ -57,6 +59,7 @@ object DatabaseInitializer extends App
             ontologicalFilterPlugin,
             shortestPathPlugin,
             virtuosoSecuredPlugin,
+            /** JH */
             dataCube,
             analyses,
             limit
