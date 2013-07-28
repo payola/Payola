@@ -485,16 +485,18 @@ In case of outer join, all vertices from the first graph that are origins of edg
 ##### Analysis
 You may create a custom plugin from an existing analysis. That gives you the ability to make an inner analysis, hence use an analysis in another one. That may be used to simplify an existing analysis, avoid repeating parts of analysis in multiple branches and more.
 
+To create a new analysis plugin, just click the button from the following image and follow the instructions, e.g. select a analysis to make the plugin from.
+
+![Inner analysis - create](https://raw.github.com/payola/Payola/master/docs/img/screenshots/inner_analysis_choose.png)
+
+![Inner analysis - create](https://raw.github.com/payola/Payola/master/docs/img/screenshots/inner_analysis_create.png)
+
 To make the feature even more sophisticated we made a special user interfaceto enable the user to parametrize an inner analysis. When inserting an analysisinto another, the user is able to click the names of parameters of plugin instancesin the inner analysis in order to promote them to analysis parameters.
 
 ![Inner analysis - parameter selection](https://raw.github.com/payola/Payola/master/docs/img/screenshots/inner_analysis_parameter_selection.png)
 
 ![Inner analysis - simplified analysis](https://raw.github.com/payola/Payola/master/docs/img/screenshots/inner_analysis.png)
 ![Inner analysis - simplified analysis](https://raw.github.com/payola/Payola/master/docs/img/screenshots/inner_analysis_simplify.png)
-
-To create a new analysis plugin, just click the button from the following image and follow the instructions.
-
-![Inner analysis - create](https://raw.github.com/payola/Payola/master/docs/img/screenshots/inner_analysis_create.png)
 
 ##### Limit
 A simple plugin that limits the resultset of the produced query. Not every scenario is optimized, therefore the plugin might not speed-up analysis execution. But basic scenarios are handled. For instance, we merge a DataFetcher plugin followed by Typed and Filter, terminated with the Limit plugin into a single SPARQL query. We have also implemented a phase which optimizes the query in the case we combine a common SPARQL query with the Limit plugin.
@@ -716,7 +718,7 @@ We have discovered, that the provided features are very conducive though complet
 
 ### Visualising Payola data sources in LodVisWith cooperation of the LodVis team, we have also implemented a reverse mechanism- an API, which allows the user of the LodVis application to browsea dataset in the scope of the Payola application. To make it easy for the Lod-Vis team to integrate a link to the Payola application, we prepared an API verysimilar to theirs. The URL pattern is very similar:
 
-![LodVis integration](https://raw.github.com/payola/Payola/master/docs/img/screenshots/lodvisualization.png)
+![LodVis integration](https://raw.github.com/payola/Payola/master/docs/img/screenshots/lodvis.png)
 > http://live.payola.cz/visualize?endpointUri={endpoint-uri}&graphUri={graph-uri}In addition, we support referencing a list of graph URIs separated by a comma.Since we wanted to avoid any difficulties arising from passing a URI in an URL,we decided to have the parameters encoded with the Base64 algorithm.The only problem was, that Payola was not able to visualize a dataset notregistered within its database. Therefore, when somebody accesses the URL, the application takes the parameters and creates an anonymous analyzer pipeline.The only plugin in the pipeline is a data source specified by the passed parameters. By evaluating such a pipeline, the user is able to visualize the neighbourhoodof the vertex in the given dataset. The vertex is chosen by the SPARQL endpoint backend, e.g. OpenLink Virutoso.To allow an anonymous user to modify the pipeline, we also set a cookie with an authorization token to their browser. When logged into Payola a userhaving such a token can overtake the ownership of the pipeline and fully modify it.
 
 ### Analysis cloning
