@@ -38,6 +38,5 @@ class Prefix(
 
         validate(url.length > 0, "url", "URL has to be specified")
         validate(prefix.length > 0, "prefix", "Prefix has to be specified")
-        validate(name.length > 0, "name", "Name has to be specified")
     }
 }
