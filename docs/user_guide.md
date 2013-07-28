@@ -487,9 +487,9 @@ You may create a custom plugin from an existing analysis. That gives you the abi
 
 To create a new analysis plugin, just click the button from the following image and follow the instructions, e.g. select a analysis to make the plugin from.
 
-![Inner analysis - create](https://raw.github.com/payola/Payola/master/docs/img/screenshots/inner_analysis_choose.png)
-
 ![Inner analysis - create](https://raw.github.com/payola/Payola/master/docs/img/screenshots/inner_analysis_create.png)
+
+![Inner analysis - create](https://raw.github.com/payola/Payola/master/docs/img/screenshots/inner_analysis_choose.png)
 
 To make the feature even more sophisticated we made a special user interfaceto enable the user to parametrize an inner analysis. When inserting an analysisinto another, the user is able to click the names of parameters of plugin instancesin the inner analysis in order to promote them to analysis parameters.
 
