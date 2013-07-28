@@ -1,7 +1,7 @@
 <a name="top"></a>
 <a name="user"></a>
 
-![Payola logo (credits Martin Mraz)](https://raw.github.com/siroky/Payola/develop/docs/img/logo_medium.png)
+![Payola logo (credits Martin Mraz)](https://raw.github.com/payola/Payola/master/docs/img/logo_medium.png)
 
 Payola is an HTML5 web application which lets you work with graph data in a completely new way. You can display [Linked Data](http://linkeddata.org/) using several preinstalled visualization plugins as graphs, tables, etc. This also means, that you no longer need [Pubby](http://www4.wiwiss.fu-berlin.de/pubby/) to browse through a Linked Data storage (via its [SPARQL](http://www.w3.org/TR/rdf-sparql-query/) endpoint). Moreover, you can create an analysis and run it against a set of SPARQL endpoints without a deep knowledge of the SPARQL language itself. Analysis results are processed and visualized using the embedded visualization plugins.
 
@@ -44,7 +44,7 @@ Actually, this is almost a [Turtle](http://www.w3.org/TeamSubmission/turtle/) no
 
 Having this context in mind, we provide a tool that makes it easy to analyze sets of facts (usually stored in a database) and visualize them. As an example of such a visualization, see the following picture, which is a sample visualization of an analysis of relations on social networks for a particular person.
 
-![RDF visualisation example](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/fb_graph.png)
+![RDF visualisation example](https://raw.github.com/payola/Payola/master/docs/img/screenshots/fb_graph.png)
 
 For a more complex and sophisticated description of Linked Data, please visit the following [website](http://linkeddata.org/).
 
@@ -131,11 +131,11 @@ A data fetcher is a subsystem, which is responsible for querying a data source f
 
 You can use Payola both as a guest and a logged-in user. A guest is limited to viewing analyses and data sources marked as public by other users in a read-only mode (i.e. can't edit them). This makes it easier for companies to use Payola in two different modes at a time. In the first one, they internally share data and analyses and control the access to such data. The second mode makes it easy to share any analysis or datasource to the public with a single click.
 
-![Guest Dashboard](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/guest_dashboard.png)
+![Guest Dashboard](https://raw.github.com/payola/Payola/master/docs/img/screenshots/guest_dashboard.png)
 
 To sign in, please, follow the `Sign in` link in the top-right corner of the page. If you have already signed up, simply fill in your email and password and press the `Sign In` button. Otherwise, click `Sign Up` to create a new profile.
 
-![Sign In](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/sign_in.png)
+![Sign In](https://raw.github.com/payola/Payola/master/docs/img/screenshots/sign_in.png)
 
 To sign up, fill in your email and password. This email will be used as your username, as well as the contact email. We will use this email address to reset your password, if necessary, as well. We don't store the password itself, just its hash. Therefore, we will **never** send you your password in a plaintext. That's also the reason why we cannot tell you your password if you accidentally forget it. We just don't know, what the password is.
 
@@ -143,7 +143,7 @@ Payola will make sure that the provided email address is not used already. If it
 
 Currently, there is no integration with any external authorization services in Payola.
 
-![Sign Up](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/sign_up_credentials.png)
+![Sign Up](https://raw.github.com/payola/Payola/master/docs/img/screenshots/sign_up_credentials.png)
 
 After signing up successfully, you will be automatically logged in and redirected to your Dashboard. The dashboard is the initial page. You can see the content shared to you there, as well as the content you have created. Especially analyses and data sources. On the dashboard, there are only first 5 items of each list. If there is more to be displayed, the 'View all' button will appear to make you able to list them all.
 
@@ -151,15 +151,15 @@ By clicking on the name of any of the displayed items, you will display its deta
 
 The listings showing the data shared to you by other users contain the information about the user who has shared the entity with you. On the screenshot below, you can see two sections - 'Accessible analyses' and 'Accessible data sources'. These are the listings of entities shared to you. As you can see, all of these entities are shared by the 'admin@payola.cz' user.
 
-![Logged In Dashboard](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/logged_in_dashboard.png)
+![Logged In Dashboard](https://raw.github.com/payola/Payola/master/docs/img/screenshots/logged_in_dashboard.png)
 
 As a logged-in user, you can now create new data sources, analyses, plugins (you can actually write your own plugin, more about that [later](#plugins)), edit them and share them. You can also upload your own private RDF data (and share it). You can also view your profile page by clicking on your email address in the top-right corner next to the log out link. Please, look into the toolbar for all the possibilities.
 
-![User Page](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/user_page.png)
+![User Page](https://raw.github.com/payola/Payola/master/docs/img/screenshots/user_page.png)
 
 If you forget your password, you can click on the `Forgot Password` link on the login page. Enter your email and a new password - you will be emailed with a confirmation link. When you click on the confirmation link, the new password will be put into effect. Note that the confirmation link is valid for **two hours only**. As stated before, we don't store the original password, just its hash which cannot be decoded back. That's why we cannot send you the lost password and you need to choose a new one instead.
 
-![Password Reset](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/forgot_password.png)
+![Password Reset](https://raw.github.com/payola/Payola/master/docs/img/screenshots/forgot_password.png)
 
 <a name="data-source"></a>
 ### Data Sources
@@ -171,7 +171,7 @@ A data source is - as its name hints - a source of data. Payola needs to know wh
 
 Let's start by creating a new data source. In the toolbar, click on the `My Data Sources` button and select `Create New`. You will need to enter a data source name, a brief description and which 'data fetcher' to use.
 
-![Creating a Data Source](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_data_source.png)
+![Creating a Data Source](https://raw.github.com/payola/Payola/master/docs/img/screenshots/create_data_source.png)
 
 A data fetcher is a plugin which can communicate with a data source of a specific type. For example, `SPARQL Endpoint` is a data fetcher. SPARQL is a query language for fetching data and such a data fetcher can work with any SPARQL endpoint. Select a data fetcher of your choice, fill in the data fetcher's parameters (for example, `EndpointURL` parameter in `SPARQL Endpoint` data fetcher's case) and press the `Create Data Source` button. You have just created your first data source.
 
@@ -206,7 +206,7 @@ This is currently an experimental plugin that communicates with a testing instan
 
 Use the toolbar at the top of the page to list available data sources (click on the `My Data Sources` button and select `View All`).
 
-![Listing Data Sources](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/list_data_sources.png)
+![Listing Data Sources](https://raw.github.com/payola/Payola/master/docs/img/screenshots/list_data_sources.png)
 
 You can view all the data sources available to you. If you wish to edit one (e.g. change its name or description), click on the Edit button on the same row. You'll be redirected to the edit page which contains a delete button as well, for removing the data source. The sharing functionality will be described in the [Sharing section](#sharing).
 
@@ -216,29 +216,29 @@ The same steps to list and edit apply to any other entity in Payola (analyses, p
 
 When on the Dashboard, or listing all available data sources, click on a data source to view its details. In the case of a data source, you will be switched into a browse mode, where you are able to explore the data stored in the data source.
 
-![Loading Initial Vertex](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/loading_initial_vertex.png)
+![Loading Initial Vertex](https://raw.github.com/payola/Payola/master/docs/img/screenshots/loading_initial_vertex.png)
 
 You'll be presented with a neighborhood of an initial vertex. What is an initial vertex depends on the implementation of the underlying data fetcher. Those, which come bundled with Payola simply choose one random entity from the data source and use it as the starting point of the data source exploration.
 
-![Initial Vertex](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/initial_vertex.png)
+![Initial Vertex](https://raw.github.com/payola/Payola/master/docs/img/screenshots/initial_vertex.png)
 
 The initial graph (neighborhood of the initial vertex) can be viewed in many ways. Payola comes bundled with several visualization plugins. By default, a graph is visualized as a table of triples. Each triple represents a relation between two entities. This makes you able to quickly determine the contents of the graph as well as its size. Later, you can switch to a mode which renders a graph on your screen.
 
 You can navigate through the graph by following the vertex links in the table. Click on the 'server' icon in front of the link to view the vertex using a different data source.
 
-![Browse Using a Different Data Source](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/browse_using_data_source.png)
+![Browse Using a Different Data Source](https://raw.github.com/payola/Payola/master/docs/img/screenshots/browse_using_data_source.png)
 
 Alternatively, you may use the `SPARQL` button at the top-right to enter your own custom SPARQL query to be evaluated and displayed.
 
 > *Note:* The DBpedia.org data source puts quite heavy restrictions in place on SPARQL queries that may be executed on the data source. Hence, not all queries may be successfully executed. This applies to analyses as well.
 
-![Entering SPARQL Query](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/enter_sparql_query.png)
+![Entering SPARQL Query](https://raw.github.com/payola/Payola/master/docs/img/screenshots/enter_sparql_query.png)
 
 You can, however, change the visualization plugin using the `Change visualization plugin` button. 
 
 `Select Result Table` requires the current graph to be a result of a SELECT SPARQL query, which typically needs to be a custom query using the `SPARQL` button. Otherwise, only a message telling the user that the graph can't be displayed using this visualization plugin is displayed.
 
-![Select Table](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/select_table_no_result.png)
+![Select Table](https://raw.github.com/payola/Payola/master/docs/img/screenshots/select_table_no_result.png)
 
 `Circle`, `Gravity` and `Tree` visualizations display a regular graph. They represent the entities as circles (identified vertices - entities with a definite URI) interconnected by arrows (relations - oriented edges). Literal vertices (entities not containing a URI) are not displayed, but are identified vertices' attributes and are shown in a table and only if the particular identified vertex is selected. The visualizations also show vertex URIs (or labels if a vertex has such an attribute) and edge URIs (if one of the edge's vertices is selected). The difference between the plugins is only in the initial animated layout. Controls for handling the graph are the same for all three plugins.
 
@@ -252,13 +252,13 @@ Another button specific for these three visualizations is `Download as PNG`. Pre
 
 The reaction time of the controls and speed of the initial animations may be effected by hardware configuration of your computer. It also may be affected by the web browser you are using.
 
-![PNG Download](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/graph_png_download.png)
+![PNG Download](https://raw.github.com/payola/Payola/master/docs/img/screenshots/graph_png_download.png)
 
 The `Column Chart` visualization will display a column bar graph, but works only with graphs of a specific structure. The graph must have one identified vertex, whose incoming edges are of a [`rdf:type`](http://www.w3.org/1999/02/22-rdf-syntax-ns#type) URI - the source of each edge must then have exactly three edges - one going to the aforementioned vertex and then two directed to literal vertices, one with a string value (name of the column), the second one with a numeric value.
 
-![Column Chart Graph Representation](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/column_chart_data.png)
+![Column Chart Graph Representation](https://raw.github.com/payola/Payola/master/docs/img/screenshots/column_chart_data.png)
 
-![Column Chart](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/column_chart.png)
+![Column Chart](https://raw.github.com/payola/Payola/master/docs/img/screenshots/column_chart.png)
 
 #####Data Cube vocabulary
 The new version of the Payola application contains new features related to the [Data Cube vocabulary standard](http://www.w3.org/TR/vocab-data-cube/). While this standard is used to add semantics to the statistical data, Payola builds up on it and brings some new visualizers. Those visualizers are specialized on visualizing statistical data. The visualizer looks for a Data Cube Data Structure definition in the supplied graph. If present, it builds controls, which enables the user to switch used attributes, dimensions and measures. Moreover, it makes the user able to slice the data as known from the OLAP cube theory.
@@ -287,33 +287,33 @@ By default, each vertex and edge is of the same color and has the same size (rad
 
 While viewing a graph, press the `Change appearance using ontologies` button. If you have already saved some customizations, they are listed here - if you haven't created any yet, select the `Create New` menu item.
 
-![Create Ontology Customization](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_customization.png)
+![Create Ontology Customization](https://raw.github.com/payola/Payola/master/docs/img/screenshots/create_customization.png)
 
 Enter the customization name and URL of that ontology, e.g. [http://opendata.cz/pco/public-contracts.xml](http://opendata.cz/pco/public-contracts.xml), and press `Create`.
 
-![Create Ontology Customization Dialog](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_customization_dialog.png)
+![Create Ontology Customization Dialog](https://raw.github.com/payola/Payola/master/docs/img/screenshots/create_customization_dialog.png)
 
 You will be presented with a customization dialog. On the left, ontology classes are listed - select one. On the right, properties of that class are listed. At the very top of the right column, you can customize the appearance of the class itself (in the graph displayed as vertices).
 
-![Editing Customization](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/customization_edit.png)
+![Editing Customization](https://raw.github.com/payola/Payola/master/docs/img/screenshots/customization_edit.png)
 
 Below, you can modify appearance of that class' property (in the graph displayed as edges). You can change color of the vertex or edge:
 
-![Editing Customization - Color](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/customization_edit_color.png)
+![Editing Customization - Color](https://raw.github.com/payola/Payola/master/docs/img/screenshots/customization_edit_color.png)
 
 Or add a glyph to a vertex:
 
-![Editing Customization - Glyph](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/customization_edit_glyph.png)
+![Editing Customization - Glyph](https://raw.github.com/payola/Payola/master/docs/img/screenshots/customization_edit_glyph.png)
 
 > This feature requires your browser to support the FontFace standard.
 
 When done, just press the `Done` button. If you want to modify the customization further, click on the `Edit` button in the `Change appearance using ontologies` button's menu. Now select the ontology using the `Change appearance using ontologies` button.
 
-![Select Ontology Customization](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/select_customization.png)
+![Select Ontology Customization](https://raw.github.com/payola/Payola/master/docs/img/screenshots/select_customization.png)
 
 Your graph will be redrawn automatically according to the customization selected/modified.
 
-![Ontology Customization Graph](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/customization_graph.png)
+![Ontology Customization Graph](https://raw.github.com/payola/Payola/master/docs/img/screenshots/customization_graph.png)
 
 ### Groups
 
@@ -321,15 +321,15 @@ You can create user groups to make sharing easier (as described in the next chap
 
 Enter the group name (e.g. 'My co-workers') and press the `Create Group` button.
 
-![Group Create Dialog](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/group_create_dialog.png)
+![Group Create Dialog](https://raw.github.com/payola/Payola/master/docs/img/screenshots/group_create_dialog.png)
 
 After the group has been created, you can start adding members to the group. To do so, make the `Members` field active and start typing - a suggestion box will appear offering users whose names match the entered text.
 
-![Group Create AutoFill](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/group_create_autofill.png)
+![Group Create AutoFill](https://raw.github.com/payola/Payola/master/docs/img/screenshots/group_create_autofill.png)
 
 Click on the user to add him or her. If you decide to remove a user, click on the `x` button in front of his or her name. Remember to use the `Save Group` button before leaving the edit page, otherwise all changes made will be lost.
 
-![Group Create - User Added](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/group_create_user_added.png)
+![Group Create - User Added](https://raw.github.com/payola/Payola/master/docs/img/screenshots/group_create_user_added.png)
 
 To delete a group, use the `Delete` button at the top-right corner of the edit page, or on the groups listing.
 
@@ -342,13 +342,13 @@ Now that you know how to create a group, let's share a data source. In the toolb
 
 > You can only share entities owned by you.
 
-![Share Button](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/share_button.png)
+![Share Button](https://raw.github.com/payola/Payola/master/docs/img/screenshots/share_button.png)
 
 Then there's the `Share` button. When you click on it, a menu pops up, allowing you to share the data source either to users or groups. When you select the `To Users` menu item, a dialog is shown with a text field which will suggest users as you type just like when you were adding members to a group. 
 
 The other option is to share the data source to groups - again a dialog will appear, letting you select multiple groups using the suggestion box. Add groups you want and confirm the dialog. All users within the selected groups will now be able to use this data source.
 
-![Share to Groups](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/share_to_groups.png)
+![Share to Groups](https://raw.github.com/payola/Payola/master/docs/img/screenshots/share_to_groups.png)
 
 If you no longer want to share a resource with a group or a user, follow the same steps as if you wanted to share it with someone - the dialog which appears will contain the users or groups whom you've shared the resource to previously. Press the `Share` button to confirm the dialog. The list of users and groups allowed to access the resource will be updated accordingly.
 
@@ -366,12 +366,12 @@ Here you are presented with two options: to upload an RDF/XML or TTL file, or lo
 
 Press the `Choose File` button.
 
-![Select File to Upload](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/file_to_upload.png)
+![Select File to Upload](https://raw.github.com/payola/Payola/master/docs/img/screenshots/file_to_upload.png)
 
 Press the `Upload File` button. You will be redirected back to the same page after the upload, with the upload result (denoting either success or failure).
 
-![Successful Upload](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/successful_upload.png)
-![Upload Failed](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/upload_failed.png)
+![Successful Upload](https://raw.github.com/payola/Payola/master/docs/img/screenshots/successful_upload.png)
+![Upload Failed](https://raw.github.com/payola/Payola/master/docs/img/screenshots/upload_failed.png)
 
 If the upload fails, please, use the [RDF validator](http://www.w3.org/RDF/Validator/) to verify that your data is correct and make sure it's UTF-8 encoded as noted above.
 
@@ -379,23 +379,23 @@ If the upload fails, please, use the [RDF validator](http://www.w3.org/RDF/Valid
 
 Creating a new analysis is similar to creating any other resource - in the toolbar, select `Create New` from the `My Analyses` button's menu. You will be prompted to enter a name - enter the analysis' name - you can change it later on.
 
-![Create Analysis Dialog](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_dialog.png)
+![Create Analysis Dialog](https://raw.github.com/payola/Payola/master/docs/img/screenshots/create_analysis_dialog.png)
 
 You will be presented with a blank page with a control box in the top-left corner. Start by filling in the analysis description.
 
-![Create Analysis Page](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_page.png)
+![Create Analysis Page](https://raw.github.com/payola/Payola/master/docs/img/screenshots/create_analysis_page.png)
 
 First, you'll need a data source to start with. You can do so either using the `Add data source` button which will offer you all available existing data sources (including those that are shared to you), or `Add plugin` which lets you add a data fetcher - an anonymous data source (see [Data Source documentation](#data-source) for more information). This can be useful if you decide to use a data source that you don't want to save right away (e.g. you know you'll use it just once).
 
-![Create Analysis - Adding Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_adding_plugin.png)
+![Create Analysis - Adding Plugin](https://raw.github.com/payola/Payola/master/docs/img/screenshots/create_analysis_adding_plugin.png)
 
-![Create Analysis - Filling Plugin Parameters](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_plugin_parameters.png)
+![Create Analysis - Filling Plugin Parameters](https://raw.github.com/payola/Payola/master/docs/img/screenshots/create_analysis_plugin_parameters.png)
 
 Now that you've added a data source, you need to do something with the data. Click on the `Add Connection` button on your data source box. Payola comes with pre-installed plugins, which are described one by one below. Of course, you can add your own plugin (see [section Plugins](#plugins)). Plugins are ordered in a sequence (though more branches can be created, see below) - a plugin always gets the result of the previous one as its input and passes its result to the next one (unless it's the last plugin, then it's the result of the whole analysis).
 
 If you are familiar with the architectonic style 'pipe and filters', our analysis is an instance of this pattern. Each plugin represents a filter which alters the graph it gets on input and returns a resulting graph.
 
-![Create Analysis - Connecting Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_connecting_plugin.png)
+![Create Analysis - Connecting Plugin](https://raw.github.com/payola/Payola/master/docs/img/screenshots/create_analysis_connecting_plugin.png)
 
 > Beware when editing a shared analysis. Currently, Payola does not lock your analysis nor does it duplicate while being edited. Therefore nobody is prevented from running an evaluation of such an analysis. Because of this fact, we strongly recommend you to stop sharing your analysis before editing it.
 
@@ -440,19 +440,19 @@ This is a more advanced plugin letting you perform your own custom SPARQL query 
 
 You can add multiple data sources, creating numerous branches that need to be merged before the analysis can be run (trying to run an analysis with branches that aren't merged will yield in an error). Of course, you can have such an incomplete analysis saved to work on it later.
 
-![Create Analysis - Multiple Branches](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_multiple_branches.png)
+![Create Analysis - Multiple Branches](https://raw.github.com/payola/Payola/master/docs/img/screenshots/create_analysis_multiple_branches.png)
 
 Merging branches can be done using the `Merge branches` button. You will be prompted to select a plugin for merging branches. Since a plugin has a predefined number of inputs, Payola will list all plugins with more than one input. You can, for example, write your own merge plugin which will have 4 inputs, so you can merge 4 branches into one using a single plugin. Currently, Payola comes only with 2 merge plugins so you will be asked to use either Join or Union.
 
-![Create Analysis - Merging Branches Dialog](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_merge_dialog_choose.png)
+![Create Analysis - Merging Branches Dialog](https://raw.github.com/payola/Payola/master/docs/img/screenshots/create_analysis_merge_dialog_choose.png)
 
 After selecting one (each is described below), you need to specify which branches to be merge - at the bottom of the dialog, there are wells for each input of the merge plugin.
 
-![Create Analysis - Merging Branches](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_merge_dialog_initial.png)
+![Create Analysis - Merging Branches](https://raw.github.com/payola/Payola/master/docs/img/screenshots/create_analysis_merge_dialog_initial.png)
 
 At the top of the dialog, you have each branch represented by the name of the last plugin in each branch. If you hover your mouse over the box representing a branch, that particular branch gets highlighted in the background. You need to drag the branch boxes to the input boxes.
 
-![Create Analysis - Merging Branches](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/sample_analysis_merged.png)
+![Create Analysis - Merging Branches](https://raw.github.com/payola/Payola/master/docs/img/screenshots/sample_analysis_merged.png)
 
 All the inputs need to have a branch connected, otherwise, the dialog won't let you to add a merge plugin to your analysis.
 
@@ -478,15 +478,22 @@ On the other hand, if the two joined branches are unrelated, so no optimization 
 
 In case of outer join, all vertices from the first graph that are origins of edges with URI defined in the `Property URI` parameter are included. Moreover, if origin of the edge is included in the second graph, destination of the edge and the edge itself are both included in the result as well.
 
+> *Example:*
+> Using the same graphs as before, merging graph A with graph B will yield just `payola.cz/dog` because the `payola.cz/tree` isn't present in the second graph. Merging B with A will return the same result as in the previous example - `wolf - evolved-to - dog`.
+
+
 ##### Analysis
 You may create a custom plugin from an existing analysis. That gives you the ability to make an inner analysis, hence use an analysis in another one. That may be used to simplify an existing analysis, avoid repeating parts of analysis in multiple branches and more.
 
 To make the feature even more sophisticated we made a special user interfaceto enable the user to parametrize an inner analysis. When inserting an analysisinto another, the user is able to click the names of parameters of plugin instancesin the inner analysis in order to promote them to analysis parameters.
 
 ![Inner analysis - parameter selection](https://raw.github.com/payola/Payola/master/docs/img/screenshots/inner_analysis_parameter_selection.png)
-![Inner analysis - simplified analysis](https://raw.github.com/payola/Payola/master/docs/img/screenshots/inner_analysis_simplified.png)
+
+![Inner analysis - simplified analysis](https://raw.github.com/payola/Payola/master/docs/img/screenshots/inner_analysis.png)
+![Inner analysis - simplified analysis](https://raw.github.com/payola/Payola/master/docs/img/screenshots/inner_analysis_simplify.png)
 
 To create a new analysis plugin, just click the button from the following image and follow the instructions.
+
 ![Inner analysis - create](https://raw.github.com/payola/Payola/master/docs/img/screenshots/inner_analysis_create.png)
 
 ##### Limit
@@ -496,64 +503,68 @@ A simple plugin that limits the resultset of the produced query. Not every scena
 Based on a Data Cube vocabulary, one can create a new plugin. That plugin allows the user to define mapping between an original dataset and the specified Data Cube vocabulary. As a result, the user will get a statistical dataset which is mapped to a format, which complies with the specified DCV. That is usually needed to be done, when one wants to utilitze the Data Cube Vocabulary visualizers (TimeHeatmap, Universal DCV).
 
 To create a new DCV plugin, just click the following button:
-![Inner analysis - simplified analysis](https://raw.github.com/payola/Payola/master/docs/img/screenshots/dcv_create.png)
+
+![DataCube - create a plugin](https://raw.github.com/payola/Payola/master/docs/img/screenshots/dcv_create.png)
 
 After doing that, one is needed to supply a URL of a TTL document containing the DCV definition (at least one Data Structure Definition):
-![Inner analysis - simplified analysis](https://raw.github.com/payola/Payola/master/docs/img/screenshots/dcv_url.png)
+
+![DataCube - supply TTL URL](https://raw.github.com/payola/Payola/master/docs/img/screenshots/dcv_url.png)
 
 The graph is parsed and a list of Data Structure Definitions is made for you. Please, choose one:
-![Inner analysis - simplified analysis](https://raw.github.com/payola/Payola/master/docs/img/screenshots/dcv_dsd.png)
+
+![DataCube - Data Structure Definitions](https://raw.github.com/payola/Payola/master/docs/img/screenshots/dcv_dsd.png)
 
 A new plugin is created and inserted to an existing analytical pipeline. Now, you are needed to select a transformation/mapping pattern. In order to do that, press the Preview button:
-![Inner analysis - simplified analysis](https://raw.github.com/payola/Payola/master/docs/img/screenshots/dcv_editable_pi.png)
+
+![DataCube - Editable plugin instance](https://raw.github.com/payola/Payola/master/docs/img/screenshots/dcv_editable_pi.png)
 
 A sub-pipeline is created and executed with timeout of 30 seconds. In order to fit into this time, one should probably insert the DCV plugin into such a point of analysis
 that the data is refined as much as possible (using OWL, Typed, Filter plugins). To understand, what's happening, see the following picture. A sub-pipeline is created and appended with a Limit plugin.
-![Inner analysis - simplified analysis](https://raw.github.com/payola/Payola/master/docs/img/screenshots/dcv_subpipeline.png)
+
+![Data Cube - created subpipeline](https://raw.github.com/payola/Payola/master/docs/img/screenshots/dcv_subpipeline.png)
 
 After the preview is made, you follow the instructions and selects vertices related to the DCV definition - you should give an example of mapping, for instance, for a population cube, one should select population area, population size and time of measurement. An example is shown in the following picture:
-![Inner analysis - simplified analysis](https://raw.github.com/payola/Payola/master/docs/img/screenshots/dcv_mapping_example.png)
+
+![Data Cube - Mapping example](https://raw.github.com/payola/Payola/master/docs/img/screenshots/dcv_mapping_example.png)
 
 A more theoretical example is presented in this picture:
-![Inner analysis - simplified analysis](https://raw.github.com/payola/Payola/master/docs/img/screenshots/dcv_theory.png)
-![Inner analysis - simplified analysis](https://raw.github.com/payola/Payola/master/docs/img/screenshots/dcv_theory2.png)
 
-> *Example:*
-> Using the same graphs as before, merging graph A with graph B will yield just `payola.cz/dog` because the `payola.cz/tree` isn't present in the second graph. Merging B with A will return the same result as in the previous example - `wolf - evolved-to - dog`.
+![Data Cube - mapping mockup](https://raw.github.com/payola/Payola/master/docs/img/screenshots/dcv_theory.png)
+![Data Cube theory - what is mapped](https://raw.github.com/payola/Payola/master/docs/img/screenshots/dcv_theory2.png)
 
 #### Example
 
 Let's create an analysis which selects all cities with more than 2 million inhabitants. First, add a `DBpedia.org` data source.
 
-![Create Analysis - Adding Data Source](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_adding_data_source.png)
+![Create Analysis - Adding Data Source](https://raw.github.com/payola/Payola/master/docs/img/screenshots/create_analysis_adding_data_source.png)
 
-![Create Analysis - Added Data Source](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/create_analysis_added_data_source.png)
+![Create Analysis - Added Data Source](https://raw.github.com/payola/Payola/master/docs/img/screenshots/create_analysis_added_data_source.png)
 
 Then connect a new `Typed` plugin with `RDF Type URI` `http://dbpedia.org/ontology/City`.
 
-![Typed Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_typed.png)
+![Typed Plugin](https://raw.github.com/payola/Payola/master/docs/img/screenshots/plugin_typed.png)
 
 Continue with a `Property Selection` plugin with `Property URIs` `http://dbpedia.org/ontology/populationTotal`.
 
-![Property Selection Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_projection.png)
+![Property Selection Plugin](https://raw.github.com/payola/Payola/master/docs/img/screenshots/plugin_projection.png)
 
 And a `Filter` plugin with `PropertyURI` `http://dbpedia.org/ontology/populationTotal`, `Operator` `>` and `Value` `2000000`.
 
-![Filter Plugin](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_selection.png)
+![Filter Plugin](https://raw.github.com/payola/Payola/master/docs/img/screenshots/plugin_selection.png)
 
 And that's it: your first analysis. Now let's fetch countries of the cities as well.
 
 Add a one more `DBPedia.org` data source and connect a `Typed` plugin with `http://dbpedia.org/ontology/Country` `RDF Type URI` parameter and a `Property Selection` plugin with `http://dbpedia.org/ontology/areaTotal` `Property URIs` parameter as seen on the picture below.
 
-![Two Branches](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/two_branches.png)
+![Two Branches](https://raw.github.com/payola/Payola/master/docs/img/screenshots/two_branches.png)
 
 Click on the `Merge Branches` link and select `Join`. Place the branches on the input boxes as seen below.
 
-![Create Analysis - Merging](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/sample_analysis_merging.png)
+![Create Analysis - Merging](https://raw.github.com/payola/Payola/master/docs/img/screenshots/sample_analysis_merging.png)
 
 Now fill in the `Join Property URI` with `http://dbpedia.org/ontology/country` and make sure the `Is Inner` checkbox isn't checked.
 
-![Create Analysis - Merged](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/sample_analysis_merged.png)
+![Create Analysis - Merged](https://raw.github.com/payola/Payola/master/docs/img/screenshots/sample_analysis_merged.png)
 
 Now it's really done and ready to be run - scroll up the page and press the `Run` button.
 
@@ -561,7 +572,7 @@ Now it's really done and ready to be run - scroll up the page and press the `Run
 
 Either on your dashboard, or on analyses listing, click on an analysis to display its details. You are then presented with an overview of the analysis (which plugins with which parameters and bindings are going to be used).
 
-![Analysis Overview](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/analysis_overview.png)
+![Analysis Overview](https://raw.github.com/payola/Payola/master/docs/img/screenshots/analysis_overview.png)
 
 As some analyses can take a really long time to finish (some may be theoretically infinite), there's a timeout field in the top-right corner as well as a `Stop` button. By default, an analysis times out in 30 seconds. If you find it's too short to evaluate your analysis, change it to a higher value.
 
@@ -574,19 +585,19 @@ As the evaluation is being executed, the progress is indicated in a two differen
 - red means that there was an error while evaluating the plugin
 - green means that the evaluation of the plugin is done without errors
 
-![Running Analysis](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/analysis_running.png)
+![Running Analysis](https://raw.github.com/payola/Payola/master/docs/img/screenshots/analysis_running.png)
 
 If the analysis succeeds, you will be automatically switched to the result tab - you can browse the resulting graph here just as when browsing a data source.
 
-![Running Analysis](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/analysis_finished.png)
+![Running Analysis](https://raw.github.com/payola/Payola/master/docs/img/screenshots/analysis_finished.png)
 
 Moreover, you can also download the result of the analysis as an RDF/XML or TTL file.
 
-![Downloading Analysis Result](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/analysis_download.png)
+![Downloading Analysis Result](https://raw.github.com/payola/Payola/master/docs/img/screenshots/analysis_download.png)
 
 If the evaluation fails, the plugin boxes turn red and an error description is shown when you hover the mouse cursor over them.
 
-![Analysis Failed](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/analysis_failed.png)
+![Analysis Failed](https://raw.github.com/payola/Payola/master/docs/img/screenshots/analysis_failed.png)
 
 You can then either try to run the analysis again, or to Edit it using the `Edit` button next to the analysis' title.
 
@@ -633,15 +644,15 @@ A plugin must always have two constructors declared:
 
 The second constraint on the plugin is that it must implement the abstract method ```evaluate(instance: PluginInstance, inputs: IndexedSeq[Option[Graph]], progressReporter: Double => Unit)```. The `instance` parameter contains all parameter values, `inputs` is a sequence of `Option[Graph]`'s - in this case just one as defined in `this()`. You can optionally report progress using the `progressReporter` function passed, which reports the progress to the user (0.0 < progress <= 1.0). Refer to the API documentation to explore which methods you can call on the `instance` or within the plugin class scope (e.g. helper methods like `usingDefined`).
 
-![Plugin Source](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_source.png)
+![Plugin Source](https://raw.github.com/payola/Payola/master/docs/img/screenshots/plugin_source.png)
 
 Once you post the plugin source code, it gets compiled to check for syntax errors and that the code is indeed a Plugin subclass.
 
-![Plugin Compiling](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_compiling.png)
+![Plugin Compiling](https://raw.github.com/payola/Payola/master/docs/img/screenshots/plugin_compiling.png)
 
 After that an email is sent to the admin to review the plugin source code for security reasons. After he reviews it, you will receive an email with the admin's decision.
 
-![Plugin Compiling](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/plugin_submitted.png)
+![Plugin Compiling](https://raw.github.com/payola/Payola/master/docs/img/screenshots/plugin_submitted.png)
 
 #### Other plugin types
 
@@ -695,3 +706,20 @@ class TopTriples(name: String, inputCount: Int, parameters: immutable.Seq[Parame
 	}
 }
 ```
+
+# User interface enhancements
+
+## LodVis integration
+We have discovered, that the provided features are very conducive though completely missingin Payola. The application does not offer an overview of a dataset in order to helpdiscover the most used concepts. Since we want the user to know their dataset before choosing the patternin the preview, we find this tool very interesting. It may help the user to locatethe statistical subset of the data. Therefore, we discovered a simple way of implementing a plain kind of interaction between Payola and LodVis.
+
+### Visualising Payola data sources in LodVisWe utilize a simple URL pattern:> http://lodvisualization.appspot.com/?graphUri={graph-uri}&endpointUri={endpoint-uri}The pattern has only two parameters. The first one, the graph-uri designatesthe URI of the graph we want LodVis to visualise. This parameter is not mandatory.The second parameter, endpoint-uri is required and it tells the LodVisapplication, where to fetch the data from. It is not possible to visualize resultsof an analysis in LodVis. 
+
+### Visualising Payola data sources in LodVisWith cooperation of the LodVis team, we have also implemented a reverse mechanism- an API, which allows the user of the LodVis application to browsea dataset in the scope of the Payola application. To make it easy for the Lod-Vis team to integrate a link to the Payola application, we prepared an API verysimilar to theirs. The URL pattern is very similar:
+
+![LodVis integration](https://raw.github.com/payola/Payola/master/docs/img/screenshots/lodvisualization.png)
+> http://live.payola.cz/visualize?endpointUri={endpoint-uri}&graphUri={graph-uri}In addition, we support referencing a list of graph URIs separated by a comma.Since we wanted to avoid any difficulties arising from passing a URI in an URL,we decided to have the parameters encoded with the Base64 algorithm.The only problem was, that Payola was not able to visualize a dataset notregistered within its database. Therefore, when somebody accesses the URL, the application takes the parameters and creates an anonymous analyzer pipeline.The only plugin in the pipeline is a data source specified by the passed parameters. By evaluating such a pipeline, the user is able to visualize the neighbourhoodof the vertex in the given dataset. The vertex is chosen by the SPARQL endpoint backend, e.g. OpenLink Virutoso.To allow an anonymous user to modify the pipeline, we also set a cookie with an authorization token to their browser. When logged into Payola a userhaving such a token can overtake the ownership of the pipeline and fully modify it.
+
+### Analysis cloning
+It enables the user to clone an analysis of another user. After doing that, they get a newly created analysis owned by them. Therefore,they are in a full control of the analysis and may modify it in any way they want.![LodVis integration](https://raw.github.com/payola/Payola/master/docs/img/screenshots/clone.png)
+
+### Data Source browser permalinksAnother minor change was done within the scope of the data source browser. We introduced a mechanism, which enables the user to send a link to a current stateof the triple table data source browser. It detects the specified URI in the URLand fetches an initial vertex based on that. The original behaviour delegates the decision on an underlying engine of the queried data source. We simply adda location hash to the URL that makes the permalink available in the address bar of the user's browser. The implementation was extended with an onload eventhandler, which looks for the location hash and reacts to it.
