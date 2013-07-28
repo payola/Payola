@@ -11,6 +11,12 @@ import scala.collection._
 import cz.payola.common.geo.Coordinates
 import cz.payola.web.client.views.bootstrap.Icon
 
+/**
+ * Time Heatmap visualizer. Based on DCV found in supplied graph, it makes the user able to configure the time dimension,
+ * etc.
+ *
+ * @author Jiri Helmich
+ */
 class TimeHeatmap(prefixApplier: Option[PrefixApplier] = None) extends PluginView("Time heatmap", prefixApplier) {
 
     val mapPlaceholder = new Div(List(),"map-placeholder")
@@ -33,6 +39,11 @@ class TimeHeatmap(prefixApplier: Option[PrefixApplier] = None) extends PluginVie
     var placeUri = ""
     var measureUri = ""
 
+    /**
+     * Find DCV definition
+     * @param graph The graph to add to the current graph.
+     * @param contractLiterals
+     */
     override def updateGraph(graph: Option[Graph], contractLiterals: Boolean = true) {
 
         graph.map { g =>
@@ -51,16 +62,15 @@ class TimeHeatmap(prefixApplier: Option[PrefixApplier] = None) extends PluginVie
         }
     }
 
+    /**
+     * Based on gathered DCV, gather values, build UI, geocode, render
+     * @param g
+     */
     def parseGraph(g: Graph){
 
         hashMap = new mutable.HashMap[String, mutable.ArrayBuffer[TimeObservation]]
         max = new mutable.HashMap[String, Int]
         yearList = new mutable.ArrayBuffer[String]
-
-
-        log(timeUri)
-        log(placeUri)
-        log(measureUri)
 
         val observations = g.getIncomingEdges("http://purl.org/linked-data/cube#Observation").map(_.origin)
 

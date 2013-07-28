@@ -8,6 +8,12 @@ import scala.collection.Seq
 import cz.payola.web.client.views.entity.plugins._
 import cz.payola.web.client.models.PrefixApplier
 
+/**
+ * Analysis plugin instance visualization
+ * @param pluginInst plugin instance to visualize
+ * @param predecessors
+ * @author Jiri Helmich
+ */
 class AnalysisPluginPluginInstanceView(pluginInst: PluginInstance,
     predecessors: Seq[PluginInstanceView] = List())
     extends ReadOnlyPluginInstanceView(pluginInst, predecessors, new PrefixApplier())

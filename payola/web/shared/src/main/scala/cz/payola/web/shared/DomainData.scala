@@ -32,6 +32,14 @@ import cz.payola.common.entities._
         successCallback(analysis)
     }
 
+    /**
+     * Clone analysis button functionality
+     * @param analysisId Analysis to clone
+     * @param user current user
+     * @param successCallback
+     * @param failCallback
+     * @return
+     */
     @async def cloneAnalysis(analysisId: String, user: Option[User] = None)(successCallback: (Analysis => Unit))
         (failCallback: (Throwable => Unit)) {
         successCallback(Payola.model.analysisModel.clone(analysisId, user))

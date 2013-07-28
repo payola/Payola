@@ -14,6 +14,16 @@ import cz.payola.web.client.events._
 import scala.Some
 import s2js.compiler.javascript
 
+/**
+ * Pattern selection view, currently not generic, DataCube only. It offers the patternUpdated Event, which is triggered
+ * when the number of selected vertices reaches the value specified in verticesCount.
+ *
+ * The results is in refVertices and vertices fields.
+ *
+ * @param placeholder element to render to
+ * @param verticesCount number of vertices for selection
+ * @author Jiri Helmich
+ */
 class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) extends GraphView
 {
     val technique = new TreeTechnique()
@@ -35,6 +45,9 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
     @javascript("""jQuery(".datacube-infobar .message").hide(); jQuery(".datacube-infobar .message").eq(i).show()""")
     def showMessage(i: Int) {}
 
+    /**
+     * we need to select a connected component.
+     */
     technique.vertexSelected += {
         e =>
 
@@ -88,6 +101,10 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
         "?" + map.get(vertex).get
     }
 
+    /**
+     * Double-clicked vertices.
+     * @return variables names
+     */
     def getSignificantVertices = {
 
         refVertices.map{ v =>
@@ -95,6 +112,9 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
         }
     }
 
+    /**
+     * @return Selected SPARQL pattern
+     */
     def getPattern: String = {
         val generator = new VertexVariableNameGenerator()
 

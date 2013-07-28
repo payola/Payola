@@ -48,6 +48,13 @@ trait PluginModelComponent extends EntityModelComponent
             plugin
         }
 
+        /**
+         * Creates a DataCube plugin based on DSD. Therefore a plugin in created in the process, if it does not exist.
+         * @param dataCubeDataStructure DSD
+         * @param owner Obsolete. The plugin is always public.
+         * @return Plugin
+         * @author Jiri Helmich
+         */
         def createDataCubeInstance(dataCubeDataStructure: DataCubeDataStructureDefinition, owner: User): Plugin = {
             pluginRepository.getByName(dataCubeDataStructure.uri).getOrElse {
                 val plugin = new DataCube(dataCubeDataStructure)
@@ -58,6 +65,13 @@ trait PluginModelComponent extends EntityModelComponent
             }
         }
 
+        /**
+         * Parameters cloning.
+         * @param parameterValue Value to be cloned
+         * @param name Parameter name
+         * @return Cloned parameter
+         * @author Jiri Helmich
+         */
         def cloneParameter(parameterValue: ParameterValue[_], name: String): Parameter[_] = {
             val parameter = parameterValue.parameter
 
@@ -71,6 +85,9 @@ trait PluginModelComponent extends EntityModelComponent
             }
         }
 
+        /**
+         * @author Jiri Helmich
+         */
         def createAnalysisInstance(paramValIds: Seq[String], analysis: Analysis, owner: Option[User]): Plugin = {
             def iterateParams: Seq[Parameter[_]] = {
                 paramValIds.map(_.split(":~:")).map {

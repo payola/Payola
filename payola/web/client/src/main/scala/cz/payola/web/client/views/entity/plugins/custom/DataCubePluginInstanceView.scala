@@ -10,6 +10,12 @@ import cz.payola.web.client.views.elements.lists._
 import cz.payola.web.client.views.entity.plugins._
 import cz.payola.web.client.models.PrefixApplier
 
+/**
+ * DataCube plugin instance visualization
+ * @param pluginInst plugin instance to visualize
+ * @param predecessors
+ * @author Jiri Helmich
+ */
 class DataCubePluginInstanceView(pluginInst: PluginInstance,
     predecessors: Seq[PluginInstanceView] = List())
     extends ReadOnlyPluginInstanceView(pluginInst, predecessors, new PrefixApplier())

@@ -11,6 +11,10 @@ import cz.payola.web.client.views.elements.form.fields.CheckBox
 import cz.payola.web.client.views.elements.form.Label
 import scala.collection.mutable
 
+/**
+ * Google Maps wrapper, mostly written in JavaScript. Just creates subviews and renders.
+ * @author Jiri Helmich
+ */
 class MapView(center: Coordinates, zoom: Int, mapType: String, heatData: Seq[TimeObservation],
     yearList: mutable.ArrayBuffer[String], hashMap: mutable.HashMap[String, mutable.ArrayBuffer[TimeObservation]],
     element: Element) extends ComposedView
@@ -41,6 +45,10 @@ class MapView(center: Coordinates, zoom: Int, mapType: String, heatData: Seq[Tim
         List(mapDiv, filterDiv)
     }
 
+    /**
+     * Switch a layer on or off
+     * @param year Year of the layer.
+     */
     @javascript(
         """
            var heatmapLayer = window.mapData.yearlyHeatmap[year];
@@ -57,6 +65,9 @@ class MapView(center: Coordinates, zoom: Int, mapType: String, heatData: Seq[Tim
         """)
     def toggleLayer(year: String) {}
 
+    /**
+     * Init GMaps API
+     */
     @javascript(
         """
           window.mapCallback = self.createMap
@@ -68,6 +79,9 @@ class MapView(center: Coordinates, zoom: Int, mapType: String, heatData: Seq[Tim
         """)
     def loadMapsScript {}
 
+    /**
+     * Create map instance.
+     */
     @javascript( """
 
                   var map = new google.maps.Map(window.selfContext.mapDiv.htmlElement, {
@@ -92,6 +106,9 @@ class MapView(center: Coordinates, zoom: Int, mapType: String, heatData: Seq[Tim
                  """)
     def createMap {}
 
+    /**
+     * Gather all data from passed data strucutres.
+     */
     @javascript( """
 
                 var data = [];

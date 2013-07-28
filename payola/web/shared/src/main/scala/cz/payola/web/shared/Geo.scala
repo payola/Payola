@@ -3,6 +3,10 @@ package cz.payola.web.shared
 import s2js.compiler._
 import cz.payola.common.geo.Coordinates
 
+/**
+ * Remote object for using GeoCoder from the client-side.
+ * @author Jiri Helmich
+ */
 @remote object Geo
 {
     @async def geocode(place: String)(successCallback: (Option[Coordinates] => Unit))

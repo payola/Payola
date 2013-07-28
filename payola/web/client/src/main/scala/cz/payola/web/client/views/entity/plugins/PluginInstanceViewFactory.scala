@@ -8,6 +8,18 @@ import s2js.runtime.shared.DependencyProvider
 import s2js.runtime.client.scala.collection.mutable.HashMap
 import cz.payola.web.client.models.PrefixApplier
 
+/**
+ * Dynamic PluginInstance loader. It calls the server and tries to fetch the definition from the
+ * DependencyProvider. Then it tries to make an instance of the needed class. On success, the instance is returned,
+ * fallback generic instance otherwise.
+ *
+ * The needed pattern of the filename:
+ * cz.payola.web.client.views.entity.plugins.custom."+name+"EditablePluginInstanceView
+ * cz.payola.web.client.views.entity.plugins.custom."+name+"PluginInstanceView
+ *
+ * @param prefixApplier
+ * @author Jiri Helmich
+ */
 class PluginInstanceViewFactory(prefixApplier: PrefixApplier)
 {
     private val registry = new HashMap[String, Boolean]

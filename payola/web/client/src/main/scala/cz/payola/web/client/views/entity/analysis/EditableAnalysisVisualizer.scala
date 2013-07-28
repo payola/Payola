@@ -9,6 +9,13 @@ import cz.payola.web.client.views.entity.plugins._
 import custom.DataCubeEditablePluginInstanceView
 import cz.payola.web.client.models.PrefixApplier
 
+/**
+ *
+ * @param analysis
+ * @param prefixApplier
+ * @author Jiri Helmich
+ */
+// Updated by Jiri Helmich to enable dynamic loading of PluginInstanceView
 class EditableAnalysisVisualizer(analysis: Analysis, prefixApplier: PrefixApplier)
     extends AnalysisVisualizer(analysis)
 {

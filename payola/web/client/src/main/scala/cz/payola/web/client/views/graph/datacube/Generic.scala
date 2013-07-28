@@ -14,16 +14,19 @@ import cz.payola.web.client.views.elements.form.fields._
 import s2js.adapters.html.Element
 import cz.payola.web.client.views.bootstrap.Icon
 
+/**
+ * Generic DataCube visualizer. Based on the graph, it searches DCV definition in it and provides
+ * a configurable visualization with the ability to slice a cube.
+ *
+ * TODO: take advantage of prefixApplier when the component is ready.
+ * @param prefixApplier Prefix applier
+ * @author Jiri Helmich
+ */
 class Generic(prefixApplier: Option[PrefixApplier] = None) extends PluginView("DataCube Universal", prefixApplier) {
 
     val controlsHolder = new Div(List(), "span4 dcv-controlsholder")
     val graphHolder = new Div(List(), "span8 dcv-graphholder")
     val placeholder = new Div(List(controlsHolder, graphHolder),"dcv-placeholder")
-
-    @javascript("""console.log(str)""")
-    def log(str: Any) {}
-
-
     var dimensions: List[String] = List()
     var labelUri = ""
     var attrUris: List[String]  = List()
@@ -38,6 +41,17 @@ class Generic(prefixApplier: Option[PrefixApplier] = None) extends PluginView("D
     def allkeys = dimensions++attrUris++List(datasetUri)
     def isTimeDimension(uri: String) = isTime.isDefinedAt(uri) && isTime(uri)
 
+    @javascript("""console.log(str)""")
+    def log(str: Any) {}
+
+    /**
+     * find DCV definition in the supplied graph
+     *
+     * TODO LDVM input signature
+     *
+     * @param graph The graph to add to the current graph.
+     * @param contractLiterals
+     */
     override def updateGraph(graph: Option[Graph], contractLiterals: Boolean = true) {
 
         graph.map { g =>
@@ -52,6 +66,10 @@ class Generic(prefixApplier: Option[PrefixApplier] = None) extends PluginView("D
         }
     }
 
+    /**
+     * Based on detected DCV, it finds values in the graph
+     * @param g
+     */
     def parseGraph(g: Graph) {
 
         val dimensionValues = new mutable.HashMap[String,Seq[String]]
@@ -92,6 +110,12 @@ class Generic(prefixApplier: Option[PrefixApplier] = None) extends PluginView("D
         refresh(g)
     }
 
+    /**
+     * Uniqe values in order to build controls
+     * @param uris values of this predicates
+     * @param map key->value map to fill
+     * @param graph graph to search in
+     */
     def gatherValues(uris: Seq[String], map: mutable.HashMap[String, Seq[String]], graph: Graph){
         uris.map{ u =>
             if (isTimeDimension(u)){
@@ -102,6 +126,15 @@ class Generic(prefixApplier: Option[PrefixApplier] = None) extends PluginView("D
         }
     }
 
+    /**
+     * Build controls
+     * @param keys URIs
+     * @param source values gathered from the graph
+     * @param checkbox checkbox or radio?
+     * @param label description
+     * @param graph processed graph
+     * @return Controls wrapped in div
+     */
     def buildList(keys: Seq[String], source: Map[String, Seq[String]],
         checkbox: Boolean, label: String,
         graph: Graph) = {
@@ -177,6 +210,10 @@ class Generic(prefixApplier: Option[PrefixApplier] = None) extends PluginView("D
         ),"well")
     }
 
+    /**
+     * Refresh data based on current filters
+     * @param graph
+     */
     def refresh(graph: Graph) {
         val observations = graph.getIncomingEdges("http://purl.org/linked-data/cube#Observation").map(_.origin)
         val filtered = observations.filterNot { o =>
@@ -214,6 +251,11 @@ class Generic(prefixApplier: Option[PrefixApplier] = None) extends PluginView("D
         }
     }
 
+    /**
+     * Render graph (pie or bar) into the specified element
+     * @param element Placeholder
+     * @param graphData Data for the graph
+     */
     @javascript(
         """
            var measuresCount = self.measureUris.length;
@@ -281,6 +323,10 @@ class Generic(prefixApplier: Option[PrefixApplier] = None) extends PluginView("D
         flot(graphHolder.blockHtmlElement, graphData)
     }
 
+    /**
+     * Unique for JS impl.
+     * @return "Set"
+     */
     def unique[A](ls: Seq[A]) : Seq[A] = {
 
         val buff = new mutable.ArrayBuffer[A]()

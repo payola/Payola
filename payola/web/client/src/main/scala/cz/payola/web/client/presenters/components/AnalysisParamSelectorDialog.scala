@@ -10,6 +10,10 @@ import s2js.adapters.browser._
 import scala.Some
 import cz.payola.web.client.models.PrefixApplier
 
+/**
+ * A plugin used to select parameters of the newly created analysis plugin.
+ * @author Jiri Helmich
+ */
 class AnalysisParamSelectorDialog(analysis: Analysis)
     extends Modal("Choose analysis params to be dynamic", Nil, Some("OK"), None, false, "preview-dialog")
 {

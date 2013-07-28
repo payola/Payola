@@ -3,8 +3,19 @@ package cz.payola.domain.rdf
 import cz.payola.common.rdf._
 import cz.payola.domain.net.Downloader
 
+/**
+ * DataCubeVocabulary object servest for obtaining an object representation of the vocabulary based on URL.
+ *
+ * The apply method takes a URL as a parameter and downloads its contents (TTL). Based on SPARQL queries, it parses the
+ * supplied graph and builds up the object representation.
+ *
+ * @author Jiri Helmich
+ */
 object DataCubeVocabulary
 {
+    /**
+     * @return An empty definition.
+     */
     def empty: DataCubeVocabulary = new DataCubeVocabulary(List(),"")
 
     private def parseComponent(component: IdentifiedVertex, graph: Graph, componentType: String) = {
@@ -30,6 +41,13 @@ object DataCubeVocabulary
         (dimEdge, label, order)
     }
 
+    /**
+     * Creates the object representation of the vocabulary. Searches the supplied RDF-TTL graph for data structure defintions
+     * and builds up the representation.
+     *
+     * @param vocabularyUrl URL containing TTL graph with DCV.
+     * @return DCV representation
+     */
     def apply(vocabularyUrl: String): DataCubeVocabulary = {
 
         val vocabularyGraph = Graph(RdfRepresentation.Turtle, new Downloader(vocabularyUrl, "text/rdf+n3").result)

@@ -24,6 +24,12 @@ import cz.payola.web.client.models.PrefixApplier
 import cz.payola.common.entities.plugins.parameters.StringParameter
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
 
+/**
+ * DataCube Editable plugin instance visualization
+ * @param pluginInst plugin instance to visualize
+ * @param predecessors
+ * @author Jiri Helmich
+ */
 class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginInstance,
     predecessors: Seq[PluginInstanceView] = List())
     extends EditablePluginInstanceView(pluginInst, predecessors, new PrefixApplier())
@@ -36,6 +42,10 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
     override def getHeading: Seq[View] = List(new Heading(List(new Text("DataCube Vocabulary")), 3),
         new Paragraph(List(new Text(name))))
 
+    /**
+     * Custom parameter views, autosafe for textarea, pattern selection controller
+     * @return
+     */
     override def getParameterViews = {
         val param = getPlugin.parameters.sortWith(_.ordering.getOrElse(9999) < _.ordering.getOrElse(9999)).head
 
@@ -60,11 +70,12 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
 
                 val limitCount = limitInput.value
 
+                // create partial analysis for preview, append limit, set timeout to 30 sec.
                 AnalysisRunner.createPartialAnalysis(analysis.id, pluginInstance.id, limitCount) {
                     analysisId =>
-                        AnalysisRunner.runAnalysisById(analysisId, 30, "") {
+                        AnalysisRunner.runAnalysisById(analysisId, 30, "") {    // run the partial analysis
                             evalId =>
-                                schedulePolling(evalId, {
+                                schedulePolling(evalId, {                       // on evaluation success callback - pattern done
                                     args =>
 
                                         val query = "CONSTRUCT { " +
@@ -118,6 +129,11 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
         }, 500)
     }
 
+    /**
+     * Analysis preview handler
+     * @param evaluationId
+     * @param callback
+     */
     private def pollingHandler(evaluationId: String, callback: (EventArgs[SimpleGraphView] => Unit)) {
         AnalysisRunner.getEvaluationState(evaluationId) {
             state =>
