@@ -177,7 +177,7 @@ A data fetcher is a plugin which can communicate with a data source of a specifi
 
 #### Pre-installed Data Fetchers
 
-Currently, only two data fetchers are shipped with Payola:
+Currently, only three data fetchers are shipped with Payola:
 
 ##### SPARQL Endpoint
 
@@ -185,6 +185,15 @@ The basic data fetcher, which can operate against any public [SPARQL endpoint](h
 
 - **Endpoint URL** - an absolute URL of a SPARQL endpoint - e.g. `http://dbpedia.org/sparql`. This endpoint URL must respond to a `?query=##SPARQL_query##` GET request.
 - **Graph URIs** - URIs of graphs that the queries should be performed on. If you leave the parameter empty, all graphs will be included.
+
+##### Virtuoso Secured SPARQL Endpoint
+
+The basic data fetcher, which can operate against a Virtuoso secured [SPARQL endpoint](http://www.w3.org/wiki/SparqlEndpoints). [Digest HTTP auth](http://www.rfc-editor.org/rfc/rfc2617.txt) is supported. It has the following parameters:
+
+- **Endpoint URL** - an absolute URL of a SPARQL endpoint - e.g. `http://dbpedia.org/sparql`. This endpoint URL must respond to a `?query=##SPARQL_query##` GET request.
+- **Graph URIs** - URIs of graphs that the queries should be performed on. If you leave the parameter empty, all graphs will be included.
+- **Username** - Username used to make auth to the secured endpoint.
+- **Password** - Password used to make auth to the secured endpoint.
 
 ##### Open Data Clean Storage
 
@@ -250,6 +259,27 @@ The `Column Chart` visualization will display a column bar graph, but works only
 ![Column Chart Graph Representation](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/column_chart_data.png)
 
 ![Column Chart](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/column_chart.png)
+
+#####Data Cube vocabulary
+The new version of the Payola application contains new features related to the [Data Cube vocabulary standard](http://www.w3.org/TR/vocab-data-cube/). While this standard is used to add semantics to the statistical data, Payola builds up on it and brings some new visualizers. Those visualizers are specialized on visualizing statistical data. The visualizer looks for a Data Cube Data Structure definition in the supplied graph. If present, it builds controls, which enables the user to switch used attributes, dimensions and measures. Moreover, it makes the user able to slice the data as known from the OLAP cube theory.
+
+######Time Heatmap
+The first available visualization plugin is the Time Heatmap plugin. It allows you to visualize the data on a Google Map.
+
+As the name suggests, this visualizer is able to handle datasets with two kinds of dimensions. The first one will express the time of the measurement, the secondone will cover its location. It will support one measure that has to be a number. We will place a heatmap layer over a standard map layer. The layer willexpress the intensity of the measured value in respect to the others. The scale will go from green to red where the latter represents the largest value measured.
+
+We wrap the map with a custom control. It contains a list of yearsdetected in the dataset. The user is able to select an arbitrary subset of years.The visualizer shows and hides a corresponding layer based on what is selected.In order to deliver an easy-to-use visualizer, we decided to ignore GPS dataand employ places names. With the integration of the Geocoder library of a colleagueof ours, Matej Snoha, the visualizer is now able to translate the namesof the places to GPS coordinates and place them into the map. The librarytakes advantage of a locally installed application Gisgraphy. The installationis maintained by the author of the used library.We tried to make the visualization as easy as possible, therefore we decidedto exert the URI resource itself. It usually contains the name of the placein a way, which is convertible into a form recognized by the Gisgraphy application.For instance, http://dbpedia.org/page/Brasserie_Du_Bocq can be convertedinto Brasserie du Bocq very easily.
+
+![TimeHeatmap Visualizer](https://raw.github.com/payola/Payola/master/docs/img/screenshots/timeheatmap.png)
+
+######Universal DataCube
+While experimenting with Data Cube, we have experienced on our own some discomfort in reading triple tables.That is why we have decided to implement a visualizer, which takes advantage of the idea behind faceted browsers.Therefore we would like to implement a visualizer that will enable the user to slice visualized datasets and prepare usual visualizations of the slices.
+
+We decided to offer a basic set of usual statistical visualisations. We achieve that by giving the user the ability to slice the dataset.We need them to fix values of n-1 dimensions in order to transform the dataset into a two-dimensional one (1 dimension + 1 measure).We took advantage of the chart library Flot and prepared a visualizer, which allows the user to create bar or pie charts. 
+By applying filters, the user slices the dataset. It supports multiple dimensions, attributes and even measures. It is configurableby a Data Cube Vocabulary. We require the user to specify a dimension that gets to be used on x-axis of a bar chart (or defined groups in a pie chart).Based on filters, the visualizer groups DCV measures by the specified dimension (aggregated by applying sum function). In case of a bar chart, multiple measuresare displayed as groups of columns.
+
+![Universal DataCube Visualizer](https://raw.github.com/payola/Payola/master/docs/img/screenshots/unidcv.png)
+![Universal DataCube Visualizer](https://raw.github.com/payola/Payola/master/docs/img/screenshots/unidcv2.png)
 
 ### Ontology Customization
 
@@ -447,6 +477,46 @@ On the other hand, if the two joined branches are unrelated, so no optimization 
 > When tried the other way around - joining graph B with graph A using the `payola.cz/evolved-to` property, the `wolf - evolved-to - dog` triple is included in the result (`payola.cz/dog` is a vertex in graph A).
 
 In case of outer join, all vertices from the first graph that are origins of edges with URI defined in the `Property URI` parameter are included. Moreover, if origin of the edge is included in the second graph, destination of the edge and the edge itself are both included in the result as well.
+
+##### Analysis
+You may create a custom plugin from an existing analysis. That gives you the ability to make an inner analysis, hence use an analysis in another one. That may be used to simplify an existing analysis, avoid repeating parts of analysis in multiple branches and more.
+
+To make the feature even more sophisticated we made a special user interfaceto enable the user to parametrize an inner analysis. When inserting an analysisinto another, the user is able to click the names of parameters of plugin instancesin the inner analysis in order to promote them to analysis parameters.
+
+![Inner analysis - parameter selection](https://raw.github.com/payola/Payola/master/docs/img/screenshots/inner_analysis_parameter_selection.png)
+![Inner analysis - simplified analysis](https://raw.github.com/payola/Payola/master/docs/img/screenshots/inner_analysis_simplified.png)
+
+To create a new analysis plugin, just click the button from the following image and follow the instructions.
+![Inner analysis - create](https://raw.github.com/payola/Payola/master/docs/img/screenshots/inner_analysis_create.png)
+
+##### Limit
+A simple plugin that limits the resultset of the produced query. Not every scenario is optimized, therefore the plugin might not speed-up analysis execution. But basic scenarios are handled. For instance, we merge a DataFetcher plugin followed by Typed and Filter, terminated with the Limit plugin into a single SPARQL query. We have also implemented a phase which optimizes the query in the case we combine a common SPARQL query with the Limit plugin.
+
+##### Data Cube Vocabulary
+Based on a Data Cube vocabulary, one can create a new plugin. That plugin allows the user to define mapping between an original dataset and the specified Data Cube vocabulary. As a result, the user will get a statistical dataset which is mapped to a format, which complies with the specified DCV. That is usually needed to be done, when one wants to utilitze the Data Cube Vocabulary visualizers (TimeHeatmap, Universal DCV).
+
+To create a new DCV plugin, just click the following button:
+![Inner analysis - simplified analysis](https://raw.github.com/payola/Payola/master/docs/img/screenshots/dcv_create.png)
+
+After doing that, one is needed to supply a URL of a TTL document containing the DCV definition (at least one Data Structure Definition):
+![Inner analysis - simplified analysis](https://raw.github.com/payola/Payola/master/docs/img/screenshots/dcv_url.png)
+
+The graph is parsed and a list of Data Structure Definitions is made for you. Please, choose one:
+![Inner analysis - simplified analysis](https://raw.github.com/payola/Payola/master/docs/img/screenshots/dcv_dsd.png)
+
+A new plugin is created and inserted to an existing analytical pipeline. Now, you are needed to select a transformation/mapping pattern. In order to do that, press the Preview button:
+![Inner analysis - simplified analysis](https://raw.github.com/payola/Payola/master/docs/img/screenshots/dcv_editable_pi.png)
+
+A sub-pipeline is created and executed with timeout of 30 seconds. In order to fit into this time, one should probably insert the DCV plugin into such a point of analysis
+that the data is refined as much as possible (using OWL, Typed, Filter plugins). To understand, what's happening, see the following picture. A sub-pipeline is created and appended with a Limit plugin.
+![Inner analysis - simplified analysis](https://raw.github.com/payola/Payola/master/docs/img/screenshots/dcv_subpipeline.png)
+
+After the preview is made, you follow the instructions and selects vertices related to the DCV definition - you should give an example of mapping, for instance, for a population cube, one should select population area, population size and time of measurement. An example is shown in the following picture:
+![Inner analysis - simplified analysis](https://raw.github.com/payola/Payola/master/docs/img/screenshots/dcv_mapping_example.png)
+
+A more theoretical example is presented in this picture:
+![Inner analysis - simplified analysis](https://raw.github.com/payola/Payola/master/docs/img/screenshots/dcv_theory.png)
+![Inner analysis - simplified analysis](https://raw.github.com/payola/Payola/master/docs/img/screenshots/dcv_theory2.png)
 
 > *Example:*
 > Using the same graphs as before, merging graph A with graph B will yield just `payola.cz/dog` because the `payola.cz/tree` isn't present in the second graph. Merging B with A will return the same result as in the previous example - `wolf - evolved-to - dog`.
