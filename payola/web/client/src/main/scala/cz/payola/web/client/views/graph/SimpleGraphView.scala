@@ -36,9 +36,8 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
 
     val edges = new ArrayBuffer[Edge]()
 
-    var newPath = true
-
     val map = new HashMap[Vertex, String]()
+    val generator = new VertexVariableNameGenerator()
 
     val patternUpdated = new UnitEvent[SimpleGraphView, EventArgs[SimpleGraphView]]()
 
@@ -73,7 +72,6 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
                             vertices += e.vertex
                             technique.updateVertexColor(e.vertex, Some(Color.Green))
                             edges += edge
-                            newPath = false
                         }
 
                         vertices.map { v =>
@@ -92,8 +90,7 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
             }
     }
 
-    private def getVertexName(map: HashMap[Vertex, String], vertex: Vertex,
-        generator: VertexVariableNameGenerator): String = {
+    private def getVertexName(map: HashMap[Vertex, String], vertex: Vertex): String = {
         if (!map.isDefinedAt(vertex)) {
             map.put(vertex, generator.nextName)
         }
@@ -106,6 +103,7 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
      * @return variables names
      */
     def getSignificantVertices = {
+        getPattern
 
         refVertices.map{ v =>
             "?"+map.get(v).get
@@ -116,12 +114,11 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
      * @return Selected SPARQL pattern
      */
     def getPattern: String = {
-        val generator = new VertexVariableNameGenerator()
 
         edges.map {
             e =>
-                val originVar = getVertexName(map, e.origin, generator)
-                val destinationVar = getVertexName(map, e.destination, generator)
+                val originVar = getVertexName(map, e.origin)
+                val destinationVar = getVertexName(map, e.destination)
 
                 originVar + " <" + e.uri + "> " + destinationVar + " ."
         }.mkString("\n")

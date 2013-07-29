@@ -23,6 +23,7 @@ import s2js.adapters.browser._
 import cz.payola.web.client.models.PrefixApplier
 import cz.payola.common.entities.plugins.parameters.StringParameter
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
+import s2js.compiler.javascript
 
 /**
  * DataCube Editable plugin instance visualization
@@ -66,7 +67,7 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
         val button = new Button(new Text("Choose pattern ..."), "datacube", new Icon(Icon.hand_up))
         button.mouseClicked += {
             evt =>
-                block("Making data preview...")
+                View.blockPage("Making data preview...")
 
                 val limitCount = limitInput.value
 
@@ -98,7 +99,7 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
                                 })
                         } {
                             error => {
-                                unblock()
+                                View.unblockPage()
                                 AlertModal.display("Error", "An error occured.")
                             }
                         }
@@ -139,7 +140,7 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
             state =>
                 state match {
                     case s: EvaluationError => {
-                        unblock()
+                        View.unblockPage()
                         AlertModal.display("Error", "An error occured.")
                     }
                     case s: EvaluationSuccess => {
@@ -167,10 +168,10 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
                                 modal.destroy()
                         }
 
-                        unblock()
+                        View.unblockPage()
                     }
                     case s: EvaluationTimeout => {
-                        unblock()
+                        View.unblockPage()
                         AlertModal.display("Error", "Timeout occured.")
                     }
                 }
