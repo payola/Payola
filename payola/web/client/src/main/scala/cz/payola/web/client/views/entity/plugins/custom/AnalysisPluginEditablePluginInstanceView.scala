@@ -28,7 +28,7 @@ import cz.payola.web.client.models.PrefixApplier
  * @param predecessors
  * @author Jiri Helmich
  */
-class AnalysisPluginEditablePluginInstanceView(pluginInst: PluginInstance,
+class AnalysisPluginEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginInstance,
     predecessors: Seq[PluginInstanceView] = List())
     extends EditablePluginInstanceView(pluginInst, predecessors, new PrefixApplier())
 {
