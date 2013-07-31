@@ -82,7 +82,6 @@ object DatabaseInitializer extends App
 
         List(
             new Prefix("pc", "pc", "http://purl.org/procurement/public-contracts#", None),
-            new Prefix("http", "http", "http://www.w3.org/2006/http#", None),
             new Prefix("oc", "oc", "http://opencoinage.org/rdf/", None),
             new Prefix("dv", "dv", "http://rdf.data-vocabulary.org/#", None),
             new Prefix("dawgt", "dawgt", "http://www.w3.org/2001/sw/DataAccess/tests/test-dawg#", None),
