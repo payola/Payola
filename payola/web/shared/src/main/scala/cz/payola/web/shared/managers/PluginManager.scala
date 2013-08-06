@@ -86,6 +86,16 @@ import cz.payola.web.shared.Email
         isAdmin
     }
 
+    /**
+     * DataCube plugin from DSD, remote proxy
+     * @param vocabularyURI URI with the vocabulary
+     * @param dataStructureURI DSD identifier
+     * @param owner plugin owner [deprecated]
+     * @param successCallback
+     * @param failCallback
+     * @return
+     * @author Jiri Helmich
+     */
     @async def createDataCubeInstance(vocabularyURI: String, dataStructureURI: String, owner: User = null)
         (successCallback: (cz.payola.common.entities.Plugin => Unit))
         (failCallback: (Throwable => Unit)) {

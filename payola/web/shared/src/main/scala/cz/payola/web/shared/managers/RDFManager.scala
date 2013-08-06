@@ -4,6 +4,10 @@ import s2js.compiler._
 import cz.payola.web.shared._
 import cz.payola.common.rdf.DataCubeVocabulary
 
+/**
+ * Remote proxy for RDF, especially DataCube
+ * @author Jiri Helmich
+ */
 @remote object RDFManager
 {
     @async def parseDataCubeVocabulary(url: String)

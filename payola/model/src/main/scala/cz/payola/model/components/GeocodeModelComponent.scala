@@ -4,10 +4,19 @@ import cz.opendata.tenderstats.Geocoder
 import cz.opendata.tenderstats.Geocoder.GeoProviderFactory
 import cz.payola.common.geo.Coordinates
 
+/**
+ * GeoCoder (by Matej Snoha) wrapper for Payola.
+ * @author Jiri Helmich
+ */
 trait GeocodeModelComponent
 {
     lazy val geocodeModel = new
         {
+            /**
+             * Returns Coordinates based on location name.
+             * @param place Location name
+             * @return Coordinates
+             */
             def geocode(place: String): Option[cz.payola.common.geo.Coordinates] = {
 
                 Geocoder.loadCacheIfEmpty("cache/geocoder.cache");

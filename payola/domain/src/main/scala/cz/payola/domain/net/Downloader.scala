@@ -11,6 +11,7 @@ import org.apache.commons.io.IOUtils
  * @param url The URL to download the content from.
  * @param accept Accepted type of the response.
  * @param encoding Encoding that is used when reading the response.
+ * @param credentials HTTP Auth credentials (added by Jiri Helmich)
  */
 class Downloader(val url: String, val accept: String = "", val encoding: String = "UTF-8", val credentials: Option[(String, String)] = None)
 {
@@ -22,6 +23,7 @@ class Downloader(val url: String, val accept: String = "", val encoding: String 
     def result: String = {
         _content = _content.orElse {
 
+            // if credentials are defined, use secured method [Jiri Helmich]
             if (credentials.isDefined){
                 getSecuredResult
             }else{
@@ -31,6 +33,11 @@ class Downloader(val url: String, val accept: String = "", val encoding: String 
         _content.get
     }
 
+    /**
+     * A method that connects to a secured endpoint while using Apache HTTP client. Utilizing Digest Auth to connect.
+     * @author Jiri Helmich
+     * @return Response of the endpoint.
+     */
     def getSecuredResult : Option[String] = {
         credentials.map { c =>
             val creds = new UsernamePasswordCredentials(c._1, c._2)

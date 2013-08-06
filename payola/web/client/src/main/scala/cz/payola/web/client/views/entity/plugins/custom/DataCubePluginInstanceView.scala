@@ -10,6 +10,12 @@ import cz.payola.web.client.views.elements.lists._
 import cz.payola.web.client.views.entity.plugins._
 import cz.payola.web.client.models.PrefixApplier
 
+/**
+ * DataCube plugin instance visualization
+ * @param pluginInst plugin instance to visualize
+ * @param predecessors
+ * @author Jiri Helmich
+ */
 class DataCubePluginInstanceView(pluginInst: PluginInstance,
     predecessors: Seq[PluginInstanceView] = List())
     extends ReadOnlyPluginInstanceView(pluginInst, predecessors, new PrefixApplier())
@@ -25,10 +31,12 @@ class DataCubePluginInstanceView(pluginInst: PluginInstance,
     override def getParameterViews = {
 
         val list = pluginInstance.plugin.parameters.map{ p =>
-            new ListItem(List(new Text(p.name)))
+            new ListItem(List(new Strong(List(new Text(p.name))), new Paragraph(List(new Text(p.defaultValue.toString.split("~")(1))))))
         }
 
-        val paramVals = pluginInstance.parameterValues.map { v =>
+        val param = getPlugin.parameters.sortWith(_.ordering.getOrElse(9999) < _.ordering.getOrElse(9999)).head
+
+        val paramVals = pluginInstance.parameterValues.filter(_.parameter.name == param.name).map { v =>
             new Text(v.value.toString)
         }
 

@@ -5,13 +5,20 @@ import cz.payola.domain.IDGenerator
 import cz.payola.domain.entities.plugins._
 import cz.payola.domain.sparql
 import cz.payola.domain.sparql._
-import cz.payola.domain.entities.plugins.parameters.StringParameter
+import cz.payola.domain.entities.plugins.parameters._
+import cz.payola.domain.sparql.Variable
+import cz.payola.domain.sparql.TriplePattern
 
+/**
+ * Definition of the Limit plugin, its parameters, input count, etc.
+ *
+ * @author Jiri Helmich
+ */
 class Limit(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
     extends Construct(name, inputCount, parameters, id)
 {
     def this() = {
-        this("Limit", 1, List(new StringParameter(Typed.typeURIParameter, "", false, false, false, true, Some(0))), IDGenerator.newId)
+        this("Limit", 1, List(new IntParameter(Limit.limitCountParameter, 0, Some(0))), IDGenerator.newId)
     }
 
     def getLimitCount(instance: PluginInstance): Option[Int] = {

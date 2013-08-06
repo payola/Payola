@@ -9,6 +9,12 @@ import cz.payola.domain.entities.plugins.concrete.query.Construct
 import cz.payola.common.entities.Analysis
 import cz.payola.domain.IDGenerator
 
+/**
+ * A fake plugin with no implementation. It is used to mark a point in the analysis where another analysis should be
+ * imported and bound.
+ *
+ * @author Jiri Helmich
+ */
 class AnalysisPlugin(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
     extends Plugin(name, inputCount, parameters, id)
 {

@@ -22,7 +22,13 @@ import cz.payola.common.EvaluationSuccess
 import s2js.adapters.browser._
 import cz.payola.web.client.models.PrefixApplier
 
-class AnalysisPluginEditablePluginInstanceView(pluginInst: PluginInstance,
+/**
+ * Analysis Editable plugin instance visualization
+ * @param pluginInst plugin instance to visualize
+ * @param predecessors
+ * @author Jiri Helmich
+ */
+class AnalysisPluginEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginInstance,
     predecessors: Seq[PluginInstanceView] = List())
     extends EditablePluginInstanceView(pluginInst, predecessors, new PrefixApplier())
 {

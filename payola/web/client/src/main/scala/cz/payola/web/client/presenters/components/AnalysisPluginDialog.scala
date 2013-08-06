@@ -8,6 +8,10 @@ import s2js.compiler._
 import s2js.adapters.html
 import s2js.adapters.browser.`package`._
 
+/**
+ * A dialog used to create a plugin of an analysis.
+ * @author Jiri Helmich
+ */
 class AnalysisPluginDialog() extends Modal("Create a new plugin from an existing analysis", Nil, Some("OK"), Some("Cancel"), true, "choose-analysis-dialog")
 {
 

@@ -24,6 +24,7 @@ abstract class DataFetcher(name: String, inputCount: Int, parameters: immutable.
     private val selectFirstTripleQuery = selectEverythingQuery + " LIMIT 1"
 
     def evaluate(instance: PluginInstance, inputs: IndexedSeq[Option[Graph]], progressReporter: Double => Unit) = {
+        // changed to be a construct query in order to enable optimalizations [Jiri Helmich]
         val list = List(TriplePattern(new Variable("s"),new Variable("p"),new Variable("o")))
         evaluateWithQuery(instance, ConstructQuery(GraphPattern(list)).toString, progressReporter)
     }

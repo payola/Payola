@@ -45,6 +45,14 @@ trait AnalysisModelComponent extends EntityModelComponent
             }
         }
 
+        /**
+         * Clones the supplied plugin instances and bind them with the target analysis.
+         * @param original List of plugin instances to be cloned
+         * @param bindings List of original bindings
+         * @param targetAnalysis Analysis to clone to
+         * @return Map with the following structure (originalPluginInstanceID -> clonedPluginInstanceID)
+         * @author Jiri Helmich
+         */
         private def clonePluginInstances(original: Seq[PluginInstance], bindings: Seq[PluginInstanceBinding],
             targetAnalysis: Analysis) : HashMap[String, String] = {
             val translateMap = HashMap[String, String]()
@@ -75,6 +83,13 @@ trait AnalysisModelComponent extends EntityModelComponent
             translateMap
         }
 
+        /**
+         * Clone an analysis
+         * @param analysisId The analysis to be cloned
+         * @param newOwner The owner of the new analysis (need to has access to the original one)
+         * @return cloned analysis
+         * @author Jiri Helmich
+         */
         def clone(analysisId: String, newOwner: Option[User]): Analysis = {
             getAccessibleToUser(newOwner).find(_.id == analysisId).map {
                 a =>
@@ -120,6 +135,9 @@ trait AnalysisModelComponent extends EntityModelComponent
             }
         }
 
+        /**
+         * @author Jiri Helmich
+         */
         def setParameterValue(pluginInstance: PluginInstance, parameterName: String, value: Any) {
             if (!pluginInstance.isEditable) {
                 throw new ModelException("The plugin instance is not editable.")
@@ -134,10 +152,25 @@ trait AnalysisModelComponent extends EntityModelComponent
             val parameterValue = option.get
 
             parameterValue match {
-                case v: BooleanParameterValue => v.value = value.asInstanceOf[Boolean]
-                case v: FloatParameterValue => v.value = value.asInstanceOf[Float]
-                case v: IntParameterValue => v.value = value.asInstanceOf[Int]
-                case v: StringParameterValue => v.value = value.asInstanceOf[String]
+                case v: BooleanParameterValue => v.value = value match {
+                    case x: Boolean => x
+                    case s: String => s.toBoolean
+                    case _ => false
+                }
+                case v: FloatParameterValue => v.value = value match {
+                    case x: Float => x
+                    case s: String => s.toFloat
+                    case _ => 0.toFloat
+                }
+                case v: IntParameterValue => v.value = value match {
+                    case x: Int => x
+                    case s: String => s.toInt
+                    case _ => 0
+                }
+                case v: StringParameterValue => v.value =  value match {
+                    case s: String => s.toString
+                    case _ => ""
+                }
                 case _ => throw new Exception("Unknown parameter type.")
             }
 
@@ -177,6 +210,7 @@ trait AnalysisModelComponent extends EntityModelComponent
                 }
             }
 
+            // Substitute analysis plugin - inner analyses [Jiri Helmich]
             analysis.expand(getAccessibleToUser(user))
 
             val evaluationId = IDGenerator.newId
@@ -244,6 +278,16 @@ trait AnalysisModelComponent extends EntityModelComponent
             }
         }
 
+        /**
+         * Crucial part of the LODVis integration - creating an anonymous analysis. The persistance needs to be split
+         * into several steps due to the current state of the DAL.
+         *
+         * Based on endpoint URI, list of graph URIs and class and/or property URI, an anonymous analysis is created.
+         * Also a token is added in order to make the user able to take the ownership, when logged in.
+         *
+         * @return analysis
+         * @author Jiri Helmich
+         */
         def createAnonymousAnalysis(user: Option[User], endpointUri: String, graphUris: List[String],
             classUri: Option[String], propertyUri: Option[String]) = {
             lazy val endpointPluginId = pluginRepository.getByName("SPARQL Endpoint").map(_.id).getOrElse("")
@@ -299,6 +343,13 @@ trait AnalysisModelComponent extends EntityModelComponent
             analysis
         }
 
+        /**
+         * Changes the ownership of the analysis based on security token from cookie.
+         * @param analysisId ID of the analysis to change owner of.
+         * @param user The new owner.
+         * @param availableTokens List of available tokens.
+         * @author Jiri Helmich
+         */
         def takeOwnership(analysisId: String, user: User, availableTokens: Seq[String]) {
             getById(analysisId).map {
                 a =>
@@ -312,6 +363,19 @@ trait AnalysisModelComponent extends EntityModelComponent
             }
         }
 
+        /**
+         * Make partial analysis. The plugin instance parameter tells us, which plugin instance in the analysis is the
+         * limiting one for the subanalysis. We extract those plugins that are used to prepare data for the supplied
+         * instance (topological order, precceeding).
+         *
+         * The extracted sub-pipeline is appended with an instance of a limit plugin.
+         *
+         * @param analysis The analysis to make partial from.
+         * @param pluginInstanceId Plugin instance to extract analysis to.
+         * @param limitCount Size of the limit
+         * @return Partial analysis
+         * @author Jiri Helmich
+         */
         def makePartial(analysis: Analysis, pluginInstanceId: String, limitCount: Int = 20): Option[String] = {
             val lastOutput = analysis.pluginInstanceBindings.find(_.targetPluginInstance.id == pluginInstanceId)
 
