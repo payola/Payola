@@ -56,8 +56,9 @@ class EditablePluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[P
             val inputControl = new InputControl(parameterName(param), field, None)
             inputControl.delayedChanged += { _ => {
                 val value = param match {
-                    case p: StringParameter if p.canContainUrl => prefixApplier.disapplyPrefix(field.value.toString)
-                    case _ => field.value.toString
+                    case p: StringParameter if p.canContainUrl
+                            => prefixApplier.disapplyPrefix(field.value.toString, p.isMultiline)
+                    case _  => field.value.toString
                 }
 
                 parameterValueChanged.triggerDirectly(new ParameterValue(getId, param.id, param.name, value, inputControl))

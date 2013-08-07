@@ -30,6 +30,7 @@ import cz.payola.domain.net.Downloader
         }
         catch {
             case e: Throwable => errorCallback(e)
+            case _ => errorCallback(new Exception("Failed to download http://prefix.cc/%s.file.txt".format(prefix)))
         }
     }
 }

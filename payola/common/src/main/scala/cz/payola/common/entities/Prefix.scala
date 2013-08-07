@@ -27,31 +27,31 @@ trait Prefix extends Entity with OptionallyOwnedEntity with NamedEntity {
     }
 
     /**
-     * Applies prefix if prefix shortens uri
-     * @param uri Uri to shorten
-     * @return Returns None if prefix doesn't shorten uri, Some(shorted uri) otherwise
+     * Applies prefix in given text
+     * @param text Text that may contain prefixed uri to shorten
+     * @return Returns text with prefixed uris
      */
-    def applyPrefix(uri:String): Option[String] = {
-        replaceInUri(uri, url, prefix + ":")
+    def applyPrefix(text:String): String = {
+        replaceInUri(text, url, prefix + ":")
     }
 
-    def disapplyPrefix(uri:String): Option[String] = {
-        replaceInUri(uri, prefix + ":", url)
+    /**
+     * Disapplies prefix in given text
+     * @param text Text that may contain prefix
+     * @return Returns text with full uris
+     */
+    def disapplyPrefix(text:String): String = {
+        replaceInUri(text, prefix + ":", url)
     }
 
-    private def replaceInUri(uri: String, lookFor: String, replaceWith: String): Option[String] = {
-        if (uri.contains(lookFor))
+    private def replaceInUri(uri: String, lookFor: String, replaceWith: String): String = {
+        // Unable to use replaceAll because s2js limitations
+        var replacedUri = uri
+        while (replacedUri.contains(lookFor))
         {
-            // No replaceAll method in client javascript
-            var replacedUri = uri
-            while (replacedUri.contains(lookFor))
-            {
-                replacedUri = replacedUri.replace(lookFor, replaceWith)
-            }
-
-            Some(replacedUri)
+            replacedUri = replacedUri.replace(lookFor, replaceWith)
         }
-        else
-            None
+
+        replacedUri
     }
 }
