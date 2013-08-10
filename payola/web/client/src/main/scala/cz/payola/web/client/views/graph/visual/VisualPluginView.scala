@@ -18,6 +18,7 @@ import cz.payola.common.entities.settings.OntologyCustomization
 import cz.payola.common.visual.Color
 import lists.ListItem
 import models.PrefixApplier
+import tables._
 import scala.Some
 
 /**
@@ -50,9 +51,10 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
      */
     protected val topLayer = new Canvas()
 
-    topLayer.setAttribute("style", "z-index: 500;")
+    protected var currentLanguage: Option[String] = None
 
-    //^THANKS to this glyphs of VertexViews are visible but are hidden under the topLayer
+    //THANKS to this glyphs of VertexViews are visible but are hidden under the topLayer
+    topLayer.setAttribute("style", "z-index: 500;")
 
     /**
      * Container of all canvases.
@@ -85,7 +87,7 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
     /**
      * Vertex info table currently rendered over the visual plugin view
      */
-    private var currentInfoTable: Option[VertexInfoTable] = None
+    private var currentInfoTable: Option[InfoTable] = None
 
     /**
      * Object responsible for graph visualization zooming.
@@ -97,23 +99,14 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
      */
     private val pngDownloadButton = new Anchor(List(new Icon(Icon.download), new Text("Download as PNG")))
     private val setMainVertexButton = new Anchor(List(new Icon(Icon.screenshot), new Text("Set main vertex")))
-
-
-    /*private val languageMenu = new DropDownButton( TODO
-        List(new Icon(Icon.globe), new Text("Language")),
-        List(
-            new ListItem(List(new Text("Test"))),
-            new ListItem(List(new Text("Test1"))),
-            new ListItem(List(new Text("Test3")))
-        ),
-        "", "pull-right"
-    ).setAttribute("style", "margin: 0 5px;")*/
+    private val groupVertices = new Anchor(List(new Icon(Icon.ccShare), new Text("Group vertices")))
 
     private val visualTools = new DropDownButton(
         List(new Icon(Icon.eye_open), new Text("Visual tools")),
         List(
             new ListItem(List(pngDownloadButton)),
-            new ListItem(List(setMainVertexButton))
+            new ListItem(List(setMainVertexButton)),
+            new ListItem(List(groupVertices))
             ),
         "", "pull-right"
     ).setAttribute("style", "margin: 0 5px;")
@@ -151,10 +144,12 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
             graphView.foreach {
                 g =>
                     val vertex = g.getTouchedVertex(getPosition(event))
-                    vertex.foreach {
-                        v =>
-                            g.selectVertex(v)
-                            vertexBrowsing.trigger(new VertexEventArgs[this.type](this, v.vertexModel))
+                    vertex.foreach { v =>
+                        v match {
+                            case view: VertexView =>
+                                g.selectVertex(view)
+                                vertexBrowsing.trigger(new VertexEventArgs[this.type](this, view.vertexModel))
+                        }
                     }
             }
             false
@@ -227,8 +222,14 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
         val selectedVertices = graphView.get.getAllSelectedVertices
         if(selectedVertices.size == 1) {
             zoomControls.reset()
-            vertexSetMain.trigger(new VertexEventArgs[this.type](this, selectedVertices.head.vertexModel))
+            vertexSetMain.trigger(new VertexEventArgs[this.type](this, selectedVertices.head.getFirstContainedVertex()))
         }
+        false
+    }
+
+    groupVertices.mouseClicked += { e =>
+        graphView.get.createGroup(topLayer.getCenter)
+        redraw()
         false
     }
 
@@ -242,13 +243,42 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
         }
     }
 
-    private def createInfoTable(vertexView: VertexView) {
+    private def createInfoTable(vertexElement: VertexViewElement) {
+        vertexElement match {
+            case group: VertexViewGroup => createVertexGroupInfoTable(group)
+            case view: VertexView => createLiteralsInfoTable(view)
+        }
+    }
+
+    private def createVertexGroupInfoTable(vertexGroup: VertexViewGroup) {
+        val infoTable = new VertexGroupInfoTable(vertexGroup, Point2D.Zero, prefixApplier)
+
+        infoTable.removeVertexFromGroup += { e =>
+            triggerDestroyVertexInfo()
+            graphView.get.removeVertexFromGroup(e.target, topLayer.getCenter)
+            redraw()
+        }
+
+        infoTable.groupNameField.changed += { k =>
+            vertexGroup.setName(infoTable.groupNameField.value)
+            vertexGroup.setConfiguration(currentCustomization)
+            vertexGroup.render(_parentHtmlElement.getOrElse(document.body))
+            true
+        }
+
+        currentInfoTable = Some(infoTable)
+        infoTable.render(_parentHtmlElement.getOrElse(document.body))
+
+        infoTable.setPosition(getVertexInfoTablePosition(vertexGroup, infoTable.getSize))
+    }
+
+    private def createLiteralsInfoTable(vertexView: VertexView) {
         if (!vertexView.getLiteralVertices.isEmpty) {
             vertexView.vertexModel match {
                 case vm: IdentifiedVertex => {
                     val infoTable =
-                        new VertexInfoTable(vm, vertexView.getLiteralVertices, Point2D.Zero)
 
+                        new VertexInfoTable(vm, currentLanguage, vertexView.getLiteralVertices, Point2D.Zero)
                     infoTable.vertexBrowsing += {
                         a =>
                             triggerDestroyVertexInfo()
@@ -264,25 +294,25 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
                     currentInfoTable = Some(infoTable)
                     infoTable.render(_parentHtmlElement.getOrElse(document.body))
 
-                    val tableSize = infoTable.getSize
-
-                    var position = vertexView.position + Vector2D(vertexView.radius, 0)
-                    position = if (position.x - tableSize.x < 0) {
-                        if (position.y - tableSize.y < 0) {
-                            vertexView.position + Vector2D(vertexView.radius, 0)
-                        } else {
-                            vertexView.position + Vector2D(vertexView.radius, -tableSize.y)
-                        }
-                    } else {
-                        if (position.y - tableSize.y < 0) {
-                            vertexView.position + Vector2D(-tableSize.x - vertexView.radius, 0)
-                        } else {
-                            vertexView.position + Vector2D(-tableSize.x - vertexView.radius, -tableSize.y)
-                        }
-                    }
-
-                    infoTable.setPosition(position)
+                    infoTable.setPosition(getVertexInfoTablePosition(vertexView, infoTable.getSize))
                 }
+            }
+        }
+    }
+
+    private def getVertexInfoTablePosition(vertexElement: VertexViewElement, tableSize: Vector2D): Point2D = {
+        val position = vertexElement.position + Vector2D(vertexElement.radius, 0)
+        if (position.x - tableSize.x < 0) {
+            if (position.y - tableSize.y < 0) {
+                vertexElement.position + Vector2D(vertexElement.radius, 0)
+            } else {
+                vertexElement.position + Vector2D(vertexElement.radius, -tableSize.y)
+            }
+        } else {
+            if (position.y - tableSize.y < 0) {
+                vertexElement.position + Vector2D(-tableSize.x - vertexElement.radius, 0)
+            } else {
+                vertexElement.position + Vector2D(-tableSize.x - vertexElement.radius, -tableSize.y)
             }
         }
     }
@@ -309,7 +339,9 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
         redraw()
     }
 
-    override def setMainVertex(vertex: Vertex) {}
+    override def setLanguage(language: Option[String]) {
+        currentLanguage = language
+    }
 
     def createSubViews = layerPack.getLayers
 
@@ -382,14 +414,12 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
         animationStopButton.render(toolbar)
         animationStopButton.setIsEnabled(false)
         visualTools.render(toolbar)
-        //languageMenu.render(toolbar) TODO
     }
 
     override def destroyControls() {
         zoomControls.destroy()
         animationStopButton.destroy()
         visualTools.destroy()
-        //languageMenu.destroy() TODO
     }
 
     /**
@@ -448,7 +478,7 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
             } else {
 
                 //deselect all and select the pressed one
-                if (!vertex.get.selected) {
+                if (!vertex.get.isSelected) {
                     graphView.get.deselectAll()
                 }
                 graphView.get.selectVertex(vertex.get)
@@ -457,11 +487,11 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
 
             vertex.foreach {
                 v =>
-                    if (v.selected && graphView.get.getAllSelectedVerticesCount == 1) {
+                    if (v.isSelected && graphView.get.getAllSelectedVerticesCount == 1) {
 
                         createInfoTable(v)
 
-                        vertexSelected.trigger(new VertexEventArgs[this.type](this, v.vertexModel))
+                        vertexSelected.trigger(new VertexEventArgs[this.type](this, v.getFirstContainedVertex()))
                     }
             }
             mousePressedVertex = true
@@ -479,7 +509,7 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
         val result = mutable.ListBuffer[InformationView]()
         vertexView.edges.foreach {
             edgeView =>
-                if (edgeView.originView.selected && edgeView.destinationView.selected) {
+                if (edgeView.originView.isSelected && edgeView.destinationView.isSelected) {
                     result += edgeView.information
                 }
         }
@@ -491,7 +521,7 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
      */
     private def onMouseUp(eventArgs: MouseEventArgs[Canvas]) {
         val selectedVertices = if (graphView.isDefined) {
-            graphView.get.getAllVertices.filter(_.selected)
+            graphView.get.getAllVertices.filter(_.isSelected)
         } else {
             List()
         }

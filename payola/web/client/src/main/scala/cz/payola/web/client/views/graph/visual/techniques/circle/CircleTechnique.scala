@@ -15,9 +15,9 @@ class CircleTechnique(prefixApplier: Option[PrefixApplier]) extends BaseTechniqu
     protected def getTechniquePerformer(component: Component,
         animate: Boolean): Animation[_] = {
         if (animate) {
-            basicTreeCircledStructure(component.vertexViews, None, redrawQuick, redraw, None)
+            basicTreeCircledStructure(component.vertexViewElements, None, redrawQuick, redraw, None)
         } else {
-            basicTreeCircledStructure(component.vertexViews, None, redrawQuick, redraw, Some(0))
+            basicTreeCircledStructure(component.vertexViewElements, None, redrawQuick, redraw, Some(0))
         }
     }
 }

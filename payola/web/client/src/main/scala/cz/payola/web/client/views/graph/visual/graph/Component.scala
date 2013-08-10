@@ -3,21 +3,28 @@ package cz.payola.web.client.views.graph.visual.graph
 import collection.mutable.ListBuffer
 import cz.payola.web.client.views.algebra._
 import cz.payola.common.rdf._
+import cz.payola.web.client.models.PrefixApplier
 
 /**
  * Representation of a graph component (part of all vertices and edges from which does not exist a path to another
  * component of the graph)
- * @param vertexViews contained in this component
+ * @param vertexViewElements contained in this component
  * @param edgeViews contained in this component
  * @param componentNumber determines position of this component in whole graph (can be
  */
-class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuffer[EdgeView], val componentNumber: Int)
+class Component(private var _vertexViewElements: ListBuffer[VertexViewElement], val edgeViews: ListBuffer[EdgeView],
+    val componentNumber: Int, prefixApplier: Option[PrefixApplier])
 {
     /**
      * vertexViews marked as selected
      */
-    private var selectedVertexViews = vertexViews.filter(_.selected)
+    private var selectedVertexViews = vertexViewElements.filter(_.isSelected)
 
+    def vertexViewElements = _vertexViewElements
+
+    private def vertexViewElements_=(newVerticesList: ListBuffer[VertexViewElement]) {
+        _vertexViewElements = newVerticesList
+    }
     /**
      * Getter of count of selected vertexViews in this component
      * @return selected vertexViews count
@@ -26,8 +33,8 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
         selectedVertexViews.length
     }
 
-    def getSelected: Seq[VertexView] = {
-        selectedVertexViews
+    def getSelected: List[VertexViewElement] = {
+        selectedVertexViews.toList
     }
 
 
@@ -35,33 +42,94 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
      * @return true if the component contains any vertexViews
      */
     def isEmpty: Boolean = {
-        vertexViews.isEmpty
+        vertexViewElements.isEmpty
     }
 
+    /**
+     * Moves the parameter vertex to top of the inner list of vertices. If the vertex is contained in a group
+     * the whole group is moved to the top.
+     * @param vertex
+     * @return
+     */
     def moveVertexToTop(vertex: Vertex): Boolean = {
-
-
-        val res = vertexViews.find{ vertexView =>
-            vertex match {
-                case i: LiteralVertex =>
-                    i == vertexView.vertexModel
-                case i: IdentifiedVertex =>
-                    if(vertexView.vertexModel.isInstanceOf[IdentifiedVertex]) {
-                        vertexView.vertexModel.asInstanceOf[IdentifiedVertex].uri == i.uri
-                    } else {
-                        false
-                    }
-            }
-        }
+        val res = vertexViewElements.find(_.represents(vertex))
 
         if (res.isDefined) {
-            vertexViews -= res.get
-            vertexViews.prepend(res.get)
+            vertexViewElements -= res.get
+            vertexViewElements.prepend(res.get)
             true
         } else {
             false
         }
 
+    }
+
+    def createGroup(newPosition: Point2D): Boolean = {
+
+        var selected = ListBuffer[VertexViewElement]()
+
+        getSelected.foreach { viewElement => selected += viewElement } //clone
+
+        val group = new VertexViewGroup(newPosition, prefixApplier)
+        group.addVertices(selected.toList, edgeViews.toList)
+
+        deselectAll() //empty the selected container
+
+        //replace vertexViewElements with the new group
+        vertexViewElements --= selected
+        vertexViewElements += group
+
+        //all (previously) selected vertexViews are now in the group -> select the group
+        selectVertex(group)
+
+        getSelected.isEmpty
+    }
+
+    def removeFromGroup(vertex: VertexViewElement, newPosition: Point2D): Boolean = {
+        var groupsToRemove = ListBuffer[VertexViewElement]()
+        var verticesToSelect = ListBuffer[VertexViewElement]()
+
+        var allGroups = ListBuffer[VertexViewGroup]()
+        vertexViewElements.foreach (_ match {case i: VertexViewGroup => allGroups += i} )
+
+        val smthRemoved = vertexViewElements.find{ element =>
+            element match {
+                case group: VertexViewGroup =>
+                    val isContained = group.contains(vertex)
+                    if (isContained) {
+                        allGroups -= group
+                        group.vertexViews.foreach (_ match {case i: VertexViewGroup => allGroups += i} )
+
+                        group.removeVertex(vertex, edgeViews.toList, allGroups.toList)
+                        vertex.position = newPosition
+                        vertexViewElements += vertex
+                        verticesToSelect += vertex
+
+                        if (group.vertexViews.length < 2) { //delete group if there is only one vertex
+                            deselectVertex(group) //the group is marked selected and in the container of selected vertices
+
+                            allGroups = ListBuffer[VertexViewGroup]()
+                            group.vertexViews.foreach (_ match {case i: VertexViewGroup => allGroups += i} )
+
+                            val removed = group.removeAll(edgeViews.toList, allGroups.toList)
+                            removed.foreach(_.position = newPosition)
+                            vertexViewElements ++= removed
+
+                            verticesToSelect ++= removed
+
+                            groupsToRemove += group
+                            group.destroy()
+                        }
+                    }
+                    isContained
+                case _ =>
+                    false
+            }
+        }.isDefined
+
+        vertexViewElements --= groupsToRemove
+        verticesToSelect.foreach(vertexToSelect => selectVertex(vertexToSelect))
+        smthRemoved
     }
 
     /**
@@ -71,15 +139,13 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
         var bottom = Double.MinValue
         var right = Double.MinValue
 
-        var vals = ""
-        vertexViews.foreach { vertexView =>
-            if (bottom < vertexView.position.y) {
-                bottom = vertexView.position.y
+        vertexViewElements.foreach { vertexViewElement =>
+            if (bottom < vertexViewElement.position.y) {
+                bottom = vertexViewElement.position.y
             }
-            if (right < vertexView.position.x) {
-                right = vertexView.position.x
+            if (right < vertexViewElement.position.x) {
+                right = vertexViewElement.position.x
             }
-            vals += vertexView.position.toString + " "
         }
 
         Point2D(right, bottom)
@@ -92,12 +158,12 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
         var bottom = Double.MinValue
         var left = Double.MaxValue
 
-        vertexViews.foreach { vertexView =>
-            if (bottom < vertexView.position.y) {
-                bottom = vertexView.position.y
+        vertexViewElements.foreach { vertexViewElement =>
+            if (bottom < vertexViewElement.position.y) {
+                bottom = vertexViewElement.position.y
             }
-            if (left > vertexView.position.x) {
-                left = vertexView.position.x
+            if (left > vertexViewElement.position.x) {
+                left = vertexViewElement.position.x
             }
         }
 
@@ -111,12 +177,12 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
         var top = Double.MaxValue
         var right = Double.MinValue
 
-        vertexViews.foreach { vertexView =>
-            if (top > vertexView.position.y) {
-                top = vertexView.position.y
+        vertexViewElements.foreach { vertexViewElement =>
+            if (top > vertexViewElement.position.y) {
+                top = vertexViewElement.position.y
             }
-            if (right < vertexView.position.x) {
-                right = vertexView.position.x
+            if (right < vertexViewElement.position.x) {
+                right = vertexViewElement.position.x
             }
         }
 
@@ -130,12 +196,12 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
         var top = Double.MaxValue
         var left = Double.MaxValue
 
-        vertexViews.foreach { vertexView =>
-            if (top > vertexView.position.y) {
-                top = vertexView.position.y
+        vertexViewElements.foreach { vertexViewElement =>
+            if (top > vertexViewElement.position.y) {
+                top = vertexViewElement.position.y
             }
-            if (left > vertexView.position.x) {
-                left = vertexView.position.x
+            if (left > vertexViewElement.position.x) {
+                left = vertexViewElement.position.x
             }
         }
 
@@ -146,11 +212,11 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
      * @return vertexView's position with the lowest x-coordinate position
      */
     def getLeftmostPosition(): Point2D = {
-        var result = vertexViews.head.position
+        var result = vertexViewElements.head.position
 
-        vertexViews.foreach { vertexView =>
-            if (result.x > vertexView.position.x) {
-                result = vertexView.position
+        vertexViewElements.foreach { vertexViewElement =>
+            if (result.x > vertexViewElement.position.x) {
+                result = vertexViewElement.position
             }
         }
 
@@ -161,11 +227,11 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
      * @return vertexView's position with the lowest y-coordinate position
      */
     def getTopmostPosition(): Point2D = {
-        var result = vertexViews.head.position
+        var result = vertexViewElements.head.position
 
-        vertexViews.foreach { vertexView =>
-            if (result.y > vertexView.position.y) {
-                result = vertexView.position
+        vertexViewElements.foreach { vertexViewElement =>
+            if (result.y > vertexViewElement.position.y) {
+                result = vertexViewElement.position
             }
         }
 
@@ -176,11 +242,11 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
      * @return vertexView's position with the highest x-coordinate position
      */
     def getRightmostPosition(): Point2D = {
-        var result = vertexViews.head.position
+        var result = vertexViewElements.head.position
 
-        vertexViews.foreach { vertexView =>
-            if (result.x < vertexView.position.x) {
-                result = vertexView.position
+        vertexViewElements.foreach { vertexViewElement =>
+            if (result.x < vertexViewElement.position.x) {
+                result = vertexViewElement.position
             }
         }
 
@@ -191,11 +257,11 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
      * @return vertexView's position with the highest y-coordinate position
      */
     def getBottommostPosition(): Point2D = {
-        var result = vertexViews.head.position
+        var result = vertexViewElements.head.position
 
-        vertexViews.foreach { vertexView =>
-            if (result.y < vertexView.position.y) {
-                result = vertexView.position
+        vertexViewElements.foreach { vertexViewElement =>
+            if (result.y < vertexViewElement.position.y) {
+                result = vertexViewElement.position
             }
         }
 
@@ -214,9 +280,9 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
      * @param difference to move vertexViews by
      */
     def moveAllSelectedVertices(difference: Vector2D) {
-        selectedVertexViews.foreach { vertexView =>
-            if (vertexView.selected) {
-                vertexView.position += difference
+        selectedVertexViews.foreach { vertexViewElement =>
+            if (vertexViewElement.isSelected) {
+                vertexViewElement.position += difference
             }
         }
     }
@@ -226,8 +292,8 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
      * @param difference to move vertexViews by
      */
     def moveAllVertices(difference: Vector2D) {
-        vertexViews.foreach { vertexView =>
-            vertexView.position += difference
+        vertexViewElements.foreach { vertexViewElement =>
+            vertexViewElement.position += difference
         }
     }
 
@@ -241,8 +307,8 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
      * @param point to compare the locations of vertices with
      * @return vertexView, that has the input point "inside", if none is found None
      */
-    def getTouchedVertex(point: Point2D): Option[VertexView] = {
-        vertexViews.find(v => v.isPointInside(point))
+    def getTouchedVertex(point: Point2D): Option[VertexViewElement] = {
+        vertexViewElements.find(v => v.isPointInside(point))
     }
 
     /**
@@ -250,8 +316,10 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
      * @param vertex to change its selected attribute
      * @return true if the vertex is in this component and the selected attribute of the vertex has changed
      */
-    def deselectVertex(vertex: VertexView): Boolean = {
-        if (vertexViews.find(_.vertexModel eq vertex.vertexModel).isDefined) {
+    def deselectVertex(vertex: VertexViewElement): Boolean = {
+        if (vertexViewElements.find{vertexElement =>
+                vertexElement.isEqual(vertex) || vertexElement.contains(vertex)
+            }.isDefined) {
             setVertexSelection(vertex, false)
         } else {
             false
@@ -262,11 +330,9 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
      * Sets all vertexViews attribute selected to false
      * @return vertexViews that were deselected by this
      */
-    def deselectAll(): ListBuffer[VertexView] = {
-        var deselected = ListBuffer[VertexView]()
-        selectedVertexViews.foreach { vertex =>
-            deselected += vertex
-        }
+    def deselectAll(): ListBuffer[VertexViewElement] = {
+        val deselected = ListBuffer[VertexViewElement]()
+        selectedVertexViews.foreach{ element => deselected += element }
 
         while (!selectedVertexViews.isEmpty) {
             deselectVertex(selectedVertexViews.head)
@@ -280,7 +346,7 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
      * @param vertex to change its selected attribute
      * @return true if the vertex is in this component and the selected attribute of the vertex has changed
      */
-    def selectVertex(vertex: VertexView): Boolean = {
+    def selectVertex(vertex: VertexViewElement): Boolean = {
         setVertexSelection(vertex, true)
     }
 
@@ -288,7 +354,7 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
      * @return true is all vertices are selected
      */
     def isSelected: Boolean = {
-        vertexViews.find { vertexView => !vertexView.isSelected}.isEmpty
+        vertexViewElements.find { vertex => !vertex.isSelected}.isEmpty
     }
 
     /**
@@ -296,9 +362,11 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
      * @param vertex to switch its selected attribute
      * @return true if the vertex is in this component and the selected attribute has changed
      */
-    def invertVertexSelection(vertex: VertexView): Boolean = {
-        if (!vertex.selected || vertexViews.find(_.vertexModel eq vertex.vertexModel).isDefined) {
-            setVertexSelection(vertex, !vertex.selected)
+    def invertVertexSelection(vertex: VertexViewElement): Boolean = {
+        if (vertexViewElements.find{vertexElement =>
+                vertexElement.isEqual(vertex) || vertexElement.contains(vertex)
+            }.isDefined) {
+            setVertexSelection(vertex, !vertex.isSelected)
         } else {
             false
         }
@@ -310,17 +378,18 @@ class Component(val vertexViews: ListBuffer[VertexView], val edgeViews: ListBuff
      * @param selected new value to be set to the vertex
      * @return true if the value of the vertex.selected attribute is changed
      */
-    def setVertexSelection(vertex: VertexView, selected: Boolean): Boolean = {
-        if (vertexViews.find(_.vertexModel eq vertex.vertexModel)
-            .isDefined && //check if the vertex is from this component
-            vertex.selected != selected) {
+    def setVertexSelection(vertex: VertexViewElement, selected: Boolean): Boolean = {
+        if (vertexViewElements.find{vertexElement =>
+                vertexElement.isEqual(vertex) || vertexElement.contains(vertex)
+            }.isDefined && //check if the vertex is from this component
+            vertex.isSelected != selected) {
 
             if (selected) {
                 selectedVertexViews += vertex
             } else {
                 selectedVertexViews -= vertex
             }
-            vertex.selected = selected
+            vertex.setSelected(selected)
             true
         } else {
             false

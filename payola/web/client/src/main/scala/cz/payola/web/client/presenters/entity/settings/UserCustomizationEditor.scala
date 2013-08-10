@@ -12,8 +12,9 @@ import cz.payola.web.client.views.bootstrap.modals._
 import cz.payola.web.shared.managers.OntologyCustomizationManager
 import scala.Some
 import cz.payola.common.rdf.Graph
+import cz.payola.web.client.views.graph.visual.graph.GraphView
 
-class UserCustomizationEditor (currentGraph: Option[Graph], userCustomization: OntologyCustomization, onClose: () => Unit)
+class UserCustomizationEditor (currentGraph: Option[GraphView], userCustomization: OntologyCustomization, onClose: () => Unit)
     extends Presenter
 {
     val customizationChanged = new SimpleUnitEvent[OntologyCustomizationEventArgs]

@@ -45,7 +45,7 @@ abstract class BaseTechnique(name: String, prefixApplier: Option[PrefixApplier])
             }
 
             firstAnimation.get.addFollowingAnimation(new Animation(
-                Animation.flipGraph, ((new GraphCenterHelper(graphView.getGraphCenter), component.vertexViews)), None,
+                Animation.flipGraph, ((new GraphCenterHelper(graphView.getGraphCenter), component.vertexViewElements)), None,
                 redrawQuick, redraw, None))
 
             if (graphView.components.length != 1) {
@@ -53,7 +53,7 @@ abstract class BaseTechnique(name: String, prefixApplier: Option[PrefixApplier])
                     component.getCenter, previousComponent)
 
                 firstAnimation.get.addFollowingAnimation(new Animation(
-                    Animation.moveGraphByFunction, (componentPositionDesc, component.vertexViews), None, redrawQuick,
+                    Animation.moveGraphByFunction, (componentPositionDesc, component.vertexViewElements), None, redrawQuick,
                     redraw, None))
             }
 
@@ -88,29 +88,29 @@ abstract class BaseTechnique(name: String, prefixApplier: Option[PrefixApplier])
      * level of the "tree" are vertices connected by one edge to a vertex in the previous level. Vertices
      * in next level have set higher number to the y-coordinate. Vertices in a level have set x-coordinate
      * to appear in a line next to each other. Placed vertices are ignored for next levels construction.
-     * @param vViews vertices to place in the "tree" structure
+     * @param vertexElements vertices to place in the "tree" structure
      * @param nextAnimation that will be launched after this operation is performed
      * @param quickDraw method to redraw the vertices quickly
      * @param finalDraw method to redraw the vertices after the last animation
      * @param animationStepLength defining this parameter with 0 makes the animation to perform the operation instantly
      *                            (skipping the animation)
      */
-    def basicTreeStructure(vViews: ListBuffer[VertexView], nextAnimation: Option[Animation[_]],
+    def basicTreeStructure(vertexElements: ListBuffer[VertexViewElement], nextAnimation: Option[Animation[_]],
         quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
 
-        var levels = ListBuffer[ListBuffer[VertexView]]()
-        var level = ListBuffer[VertexView]()
-        var levelNext = ListBuffer[VertexView]()
-        var alreadyOut = ListBuffer[VertexView]()
+        var levels = ListBuffer[ListBuffer[VertexViewElement]]()
+        var level = ListBuffer[VertexViewElement]()
+        var levelNext = ListBuffer[VertexViewElement]()
+        var alreadyOut = ListBuffer[VertexViewElement]()
 
-        level += vViews.head
+        level += vertexElements.head
 
         //create level structure
         while (level.length != 0) {
 
-            level.foreach { l1: VertexView =>
+            level.foreach { l1: VertexViewElement =>
                 l1.edges.foreach { e: EdgeView =>
-                    if (e.originView.vertexModel eq l1.vertexModel) {
+                    if (e.originView.isEqual(l1)) {
                         if (!existsVertex(e.destinationView, alreadyOut) &&
                             !existsVertex(e.destinationView, levelNext) && !existsVertex(e.destinationView, level)) {
 
@@ -128,16 +128,16 @@ abstract class BaseTechnique(name: String, prefixApplier: Option[PrefixApplier])
             }
 
             levels += level
-            level = ListBuffer[VertexView]()
+            level = ListBuffer[VertexViewElement]()
             level = levelNext
-            levelNext = ListBuffer[VertexView]()
+            levelNext = ListBuffer[VertexViewElement]()
         }
 
-        val origin = vViews.head.position
+        val origin = vertexElements.head.position
         var levelNum = 0
         var vertexNumInLevel = 0
         val lastLevelSize = levels.last.length
-        val toMove = ListBuffer[(VertexView, Point2D)]()
+        val toMove = ListBuffer[(VertexViewElement, Point2D)]()
 
         //build structure of vertices and their destinations
         levels.foreach { elements =>
@@ -175,15 +175,15 @@ abstract class BaseTechnique(name: String, prefixApplier: Option[PrefixApplier])
      * @param animationStepLength defining this parameter with 0 makes the animation to perform the operation instantly
      *                            (skipping the animation)
      */
-    def basicTreeCircledStructure(vViews: ListBuffer[VertexView], nextAnimation: Option[Animation[_]],
+    def basicTreeCircledStructure(vViews: ListBuffer[VertexViewElement], nextAnimation: Option[Animation[_]],
         quickDraw: () => Unit,
-        finalDraw: () => Unit, animationStepLength: Option[Int]): Animation[ListBuffer[(VertexView, Point2D)]] = {
-        var level1 = ListBuffer[(VertexView, Point2D)]()
-        var level2 = ListBuffer[(VertexView, Point2D)]()
-        var alreadyOut = ListBuffer[VertexView]()
+        finalDraw: () => Unit, animationStepLength: Option[Int]): Animation[ListBuffer[(VertexViewElement, Point2D)]] = {
+        var level1 = ListBuffer[(VertexViewElement, Point2D)]()
+        var level2 = ListBuffer[(VertexViewElement, Point2D)]()
+        var alreadyOut = ListBuffer[VertexViewElement]()
         var levelNum = 0
 
-        val toMove = ListBuffer[(VertexView, Point2D)]()
+        val toMove = ListBuffer[(VertexViewElement, Point2D)]()
 
         level1 += ((vViews.head, vViews.head.position))
         //create level structure and for each of them calculate their destinations for moving
@@ -196,7 +196,7 @@ abstract class BaseTechnique(name: String, prefixApplier: Option[PrefixApplier])
             //get vertices in next level
             level1.foreach { l1 =>
                 l1._1.edges.foreach { e: EdgeView =>
-                    if (e.originView.vertexModel eq l1._1.vertexModel) {
+                    if (e.originView.isEqual(l1._1)) {
                         if (!existsVertex(e.destinationView, alreadyOut)
                             && !existsVertexStruct(e.destinationView, level2) &&
                             !existsVertexStruct(e.destinationView, level1)) {
@@ -216,9 +216,9 @@ abstract class BaseTechnique(name: String, prefixApplier: Option[PrefixApplier])
             }
 
             //switch levels
-            level1 = ListBuffer[(VertexView, Point2D)]()
+            level1 = ListBuffer[(VertexViewElement, Point2D)]()
             level1 = level2
-            level2 = ListBuffer[(VertexView, Point2D)]()
+            level2 = ListBuffer[(VertexViewElement, Point2D)]()
             levelNum += 1
         }
 
@@ -226,22 +226,22 @@ abstract class BaseTechnique(name: String, prefixApplier: Option[PrefixApplier])
     }
 
     /**
-     * Support method for basicTreeCircledStructure(..). This method takes all vertices in the vertexViews
+     * Support method for basicTreeCircledStructure(..). This method takes all vertices in the vertexElements
      * container and puts them into one circle.
      * @param rotation modifies angle of the first placed vertex. This is an angle thats is between
-     *                 vertexViews.head.point, [0, 0] and [1, 0].
+     *                 vertexElements.head.point, [0, 0] and [1, 0].
      * @param radius distance of the vertices from center
      * @param center of the circle
-     * @param vertexViews container of the vertices, that are placed to a circle
+     * @param vertexElements container of the vertices, that are placed to a circle
      */
     private def placeVerticesOnCircle(rotation: Double, radius: Double, center: Point2D,
-        vertexViews: ListBuffer[(VertexView, Point2D)]): ListBuffer[(VertexView, Point2D)] = {
-        val resultPositions = ListBuffer[(VertexView, Point2D)]()
-        val angle = 360 / vertexViews.length
+        vertexElements: ListBuffer[(VertexViewElement, Point2D)]): ListBuffer[(VertexViewElement, Point2D)] = {
+        val resultPositions = ListBuffer[(VertexViewElement, Point2D)]()
+        val angle = 360 / vertexElements.length
 
         var counter = 0
         var angleAct: Double = 0
-        vertexViews.foreach { vView =>
+        vertexElements.foreach { vView =>
 
             angleAct = angle * counter + rotation
             if (angleAct > 360) {
@@ -283,8 +283,8 @@ abstract class BaseTechnique(name: String, prefixApplier: Option[PrefixApplier])
      * @param whereToCheck container to search in
      * @return true if the vertex is present in the container
      */
-    private def existsVertex(whatToCheck: VertexView, whereToCheck: ListBuffer[VertexView]): Boolean = {
-        whereToCheck.exists(element => element.vertexModel eq whatToCheck.vertexModel)
+    private def existsVertex(whatToCheck: VertexViewElement, whereToCheck: ListBuffer[VertexViewElement]): Boolean = {
+        whereToCheck.exists(element => element.isEqual(whatToCheck))
     }
 
     /**
@@ -293,7 +293,7 @@ abstract class BaseTechnique(name: String, prefixApplier: Option[PrefixApplier])
      * @param whereToCheck container to search in
      * @return true if the vertex is present in the container
      */
-    private def existsVertexStruct(whatToCheck: VertexView, whereToCheck: ListBuffer[(VertexView, Point2D)]): Boolean = {
-        whereToCheck.exists(element => element._1.vertexModel eq whatToCheck.vertexModel)
+    private def existsVertexStruct(whatToCheck: VertexViewElement, whereToCheck: ListBuffer[(VertexViewElement, Point2D)]): Boolean = {
+        whereToCheck.exists(element => element._1.isEqual(whatToCheck))
     }
 }

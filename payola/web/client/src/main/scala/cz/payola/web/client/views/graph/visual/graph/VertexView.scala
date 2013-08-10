@@ -6,11 +6,8 @@ import cz.payola.common.visual.Color
 import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.graph.visual.graph.positioning.LocationDescriptor
 import cz.payola.common.rdf._
-import cz.payola.web.client.views.elements._
-import cz.payola.common.entities.settings._
-import s2js.adapters.html
-import scala.Some
 import cz.payola.web.client.models.PrefixApplier
+import cz.payola.common.entities.settings.OntologyCustomization
 
 /**
  * Graphical representation of IdentifiedVertex object in the drawn graph.
@@ -19,21 +16,16 @@ import cz.payola.web.client.models.PrefixApplier
  * @param rdfType type of the vertex used to identify drawing settings in an ontology
  * @param prefixApplier labels transformer
  */
-class VertexView(val vertexModel: Vertex, var position: Point2D, var rdfType: String, prefixApplier: Option[PrefixApplier])
-    extends View[CanvasRenderingContext2D] {
+class VertexView(_vertexModel: Vertex, position: Point2D, private var _rdfType: String, prefixApplier: Option[PrefixApplier])
+    extends VertexViewElement(position, prefixApplier) {
 
-    var radius = 25
+    def rdfType = _rdfType
 
-    var borderSize = 2
+    def rdfType_=(newType: String) {
+        _rdfType = newType
+    }
 
-    var borderColor = Color.Black
-
-    var color = new Color(51, 204, 255, 0.25)
-
-    var glyph: String = ""
-
-    private var glyphSpan: Option[Span] = None
-
+    def vertexModel = _vertexModel
     /**
      * Neighbouring literal vertices of this vertex describing attributes of this vertex.
      */
@@ -45,20 +37,21 @@ class VertexView(val vertexModel: Vertex, var position: Point2D, var rdfType: St
     private var age = 0
 
     /**
-     * Indicator of isSelected attribute.
-     */
-    var selected = false
-
-    /**
      * List of edges that this vertex representation has. Allows to Iterate through the graphical representation
      * of the graph.
      */
-    var edges = ListBuffer[EdgeView]()
+    private var _edges = ListBuffer[EdgeView]()
+
+    def edges = _edges
+
+    def edges_=(newEdges: ListBuffer[EdgeView]) {
+        _edges = newEdges
+    }
 
     /**
      * Textual data that should be visualized with this vertex ("over this vertex").
      */
-    private var information: Option[InformationView] = Some(InformationView.constructBySingle(vertexModel, prefixApplier))
+    information = Some(InformationView.constructBySingle(vertexModel, prefixApplier))
 
     /**
      * Setter of contained informationView's data.
@@ -75,24 +68,16 @@ class VertexView(val vertexModel: Vertex, var position: Point2D, var rdfType: St
      * @return attributes of this identifiedVertex with types of relations (Edge between this identifiedVertex
      *         and the literalVertex)
      */
-    def getLiteralVertices: List[(String, Seq[String])] = {
+    def getLiteralVertices(): List[(String, Seq[String])] = {
         literalVertices
     }
 
     /**
      * Appends a literalVertex (attribute of this identifiedVertex) identifying types of relations (Edges)
      */
-    def addLiteralVertex(typeOfAttribute: Edge, valueOfAttribute: Seq[Vertex]) {
+    def addLiteralVertex(typeOfAttribute: Edge, valueOfAttribute: Seq[Vertex], identNeighborVertex: IdentifiedVertex) {
         val values = valueOfAttribute.map(_.toString)
         literalVertices ++= List(((typeOfAttribute.toString, values)))
-    }
-
-    /**
-     * IsSelected attribute getter
-     * @return true if marked as selected.
-     */
-    def isSelected: Boolean = {
-        selected
     }
 
     /**
@@ -124,122 +109,10 @@ class VertexView(val vertexModel: Vertex, var position: Point2D, var rdfType: St
         age = newAge
     }
 
-    /**
-     * Determines if the point is (geometrically) inside of this vertexView (rectangle represented byt this vertexView).
-     * Should be used in vertexView selection process.
-     * @param point to be decided if is inside or not
-     * @return true if this.position - radius <= point <= this.position + radius
-     */
     def isPointInside(point: Point2D): Boolean = {
         val radiusVector = Vector2D.One * radius
         isPointInRect(point, position + (-radiusVector),
             position + radiusVector)
-    }
-
-    def setRadius(newRadius: Option[Int]) {
-        radius = newRadius.getOrElse(25)
-    }
-
-    def setBorderSize(newBorderSize: Option[Int]) {
-        borderSize = newBorderSize.getOrElse(2)
-    }
-
-    def setBorderColor(newColor: Option[Color]) {
-        borderColor = newColor.getOrElse(Color.Black)
-    }
-
-    def setColor(newColor: Option[Color]) {
-        color = newColor.getOrElse(new Color(51, 204, 255, 0.25))
-    }
-
-    def render(parent: html.Element) {
-        glyphSpan.foreach{ gS =>
-            gS.render(parent)
-            gS.hide()
-        }
-    }
-
-    def destroy() {
-        glyphSpan.foreach(_.destroy())
-    }
-
-    def setGlyph(newGlyph: Option[String]) {
-
-        glyph = newGlyph.getOrElse("")
-
-        if(glyph == "" && glyphSpan.isDefined) {
-            glyphSpan.get.destroy()
-            glyphSpan = None
-        } else if(glyph != "") {
-            if(glyphSpan.isDefined) {
-                glyphSpan.get.destroy()
-                glyphSpan = None
-            }
-
-            glyphSpan = Some(new Span(List(new Text(glyph)), "glyphed-element"))
-        }
-    }
-
-    def resetConfiguration() {
-        setRadius(None)
-        setBorderSize(None)
-        setBorderColor(None)
-        setColor(None)
-        setGlyph(None)
-    }
-
-    def setConfiguration(newCustomization: Option[OntologyCustomization]) {
-        if(newCustomization.isEmpty) {
-            resetConfiguration()
-            information = Some(InformationView.constructBySingle(vertexModel, prefixApplier))
-        } else {
-            val foundCustomization =
-                if(newCustomization.get.isUserDefined){
-                    val found = this.vertexModel match {
-                        case i: IdentifiedVertex =>
-                            newCustomization.get.classCustomizations.find(_.uri == i.uri)
-                        case i: LiteralVertex =>
-                            newCustomization.get.classCustomizations.find(_.uri == i.value)
-                        case _ =>
-                            None
-                    }
-                    if(found.isDefined && found.get.labels != null && found.get.labels != "") {
-                        information = InformationView.constructByMultiple(
-                            found.get.labelsSplitted, vertexModel, getLiteralVertices, prefixApplier)
-                    } else {
-                        information = None
-                    }
-                    found
-                } else {
-                    information = Some(InformationView.constructBySingle(vertexModel, prefixApplier))
-                    newCustomization.get.classCustomizations.find{_.uri == rdfType}
-                }
-
-            if(foundCustomization.isEmpty) {
-                resetConfiguration()
-            } else {
-                //radius
-                if(foundCustomization.get.radius != 0) {
-                    setRadius(Some(foundCustomization.get.radius))
-                } else {
-                    setRadius(None)
-                }
-
-                //color
-                if(foundCustomization.get.fillColor.length != 0) {
-                    setColor(Color(foundCustomization.get.fillColor))
-                } else {
-                    setColor(None)
-                }
-
-                //glyph
-                if(foundCustomization.get.glyph.length != 0) {
-                    setGlyph(Some(foundCustomization.get.glyph))
-                } else {
-                    setGlyph(None)
-                }
-            }
-        }
     }
 
     def draw(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
@@ -290,9 +163,11 @@ class VertexView(val vertexModel: Vertex, var position: Point2D, var rdfType: St
         }
     }
 
-    override def toString: String = {
-        this.position.toString
-        //"["+vertexModel.toString+"]"
+    def setConfiguration(newCustomization: Option[OntologyCustomization]) {
+        setVisualConfiguration(newCustomization, vertexModel match {
+            case i: IdentifiedVertex => i.uri
+            case i: LiteralVertex => i.value.toString()
+        }, rdfType, getLiteralVertices)
     }
 
     /**
@@ -300,14 +175,27 @@ class VertexView(val vertexModel: Vertex, var position: Point2D, var rdfType: St
      * @param vertexView
      * @return
      */
-    def isEqual(vertexView: Any): Boolean = {
+    override def isEqual(vertexView: Any): Boolean = {
         if (vertexView == null) {
             false
         }
         vertexView match {
             case vv: VertexView =>
-                vv.vertexModel.toString eq vertexModel.toString
+                this.represents(vv.vertexModel)
             case _ => false
         }
     }
+
+    def contains(vertex: VertexViewElement): Boolean = {
+        vertex match {
+            case view: VertexView =>
+                represents(view.vertexModel)
+        }
+    }
+
+    def represents(vertex: Vertex): Boolean = {
+        vertexModel.toString eq vertex.toString
+    }
+
+    def getFirstContainedVertex(): Vertex = vertexModel
 }

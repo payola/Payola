@@ -32,6 +32,8 @@ abstract class GraphView
 
     def setMainVertex(vertex: Vertex) { }
 
+    def setLanguage(language: Option[String]) { }
+
     /**
      * Updates both the graph that should be visualized and the customization that should be used.
      * @param graph The graph to visualize.

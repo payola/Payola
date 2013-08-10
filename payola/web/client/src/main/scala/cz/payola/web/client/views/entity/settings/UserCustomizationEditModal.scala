@@ -14,14 +14,42 @@ import cz.payola.common.rdf._
 import cz.payola.web.shared.managers.OntologyCustomizationManager
 import cz.payola.common._
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
-import scala.Some
+import cz.payola.web.client.views.graph.visual.graph._
+import scala.collection.mutable.ListBuffer
 
-class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomization: OntologyCustomization, onClose: () => Unit)
+class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userCustomization: OntologyCustomization, onClose: () => Unit)
     extends Modal("Edit user customization", Nil, Some("Done"), None, false, "large-modal")
 {
-    private var classCustomizations = userCustomization.classCustomizations.filter(_.uri != "properties").map{
+    private val currentGraphVertices: List[Vertex] = if(currentGraphView.isDefined) {
+        val vertices = ListBuffer[Vertex]()
+        currentGraphView.get.getAllVertices.foreach{ _ match {
+            case group: VertexViewGroup => vertices ++= group.getAllVertices
+            case view: VertexView => vertices += view.vertexModel
+        }}
+        vertices.toList
+    } else { List[Vertex]() }
+
+    private val currentGraphEdges: List[Edge] = if(currentGraphView.isDefined) {
+        val edges = ListBuffer[Edge]()
+        currentGraphView.get.getAllEdges.foreach{ edge => edges += edge.edgeModel }
+        edges.toList
+    } else { List[Edge]() }
+
+    private val currentGraphGroups: List[VertexViewGroup] = if(currentGraphView.isDefined) {
+        val groups = ListBuffer[VertexViewGroup]()
+        currentGraphView.get.getAllVertices.foreach{ _ match {
+            case group: VertexViewGroup => groups += group
+        }}
+        groups.toList
+    } else { List[VertexViewGroup]() }
+
+    private var classCustomizations = userCustomization.classCustomizations.filter(e =>
+        e.uri != "properties" && !e.isGroupCustomization).map{
         userClassCust => userClassCust.asInstanceOf[ClassCustomization]
     }
+
+    private var groupCustomizations = userCustomization.classCustomizations.filter(e =>
+        e.isGroupCustomization).map{ userClassCust => userClassCust.asInstanceOf[ClassCustomization] }
 
     private def propertiesContainer = userCustomization.classCustomizations.find(_.uri == "properties")
     
@@ -33,8 +61,10 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
 
     private var selectedItem: Option[CustomizationItem] =
         if(classCustomizations.isEmpty) {
-            if(propertyCustomizations.isEmpty) None
-            else Some(CustomizationItem.create(propertyCustomizations.head))
+            if(groupCustomizations.isEmpty) {
+                if(propertyCustomizations.isEmpty) None
+                else Some(CustomizationItem.create(propertyCustomizations.head))
+            } else { Some(CustomizationItem.create(groupCustomizations.head))}
         } else {
             Some(CustomizationItem.create(classCustomizations.head))
         }
@@ -68,7 +98,7 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
     val deleteButton = new Button(new Text("Delete"), "btn-danger", new Icon(Icon.remove))
 
     val appendClassButton = new AppendToUserCustButton(
-        currentGraph.get.vertices.filter{ vertex =>
+        currentGraphVertices.filter{ vertex =>
             vertex match {
                 case i: IdentifiedVertex => ! classCustomizations.exists{ classCust => i.uri == classCust.uri }
                 case _ => false
@@ -77,7 +107,7 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
         "Append class", "Vertices available in the current graph: ", "", onAppendClass)
 
     appendClassButton.appendButton.mouseClicked += { e =>
-        appendClassButton.availableURIs = currentGraph.get.vertices.filter{ vertex =>
+        appendClassButton.availableValues = currentGraphVertices.filter{ vertex =>
             vertex match {
                 case i: IdentifiedVertex => ! classCustomizations.exists(_.uri == i.uri)
                 case _ => false
@@ -87,16 +117,28 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
         false
     }
 
+    val appendGroupClassButton = new AppendToUserCustButton(
+        currentGraphGroups.filter{ group =>
+            group.getName != null && group.getName != "" && !groupCustomizations.exists(_.uri == group.getName) }.map(_.getName),
+        "Append group", "Groups available in current graph: ", "", onAppendGroup, "Custom group name")
+
+    appendGroupClassButton.appendButton.mouseClicked += { e =>
+        appendGroupClassButton.availableValues = currentGraphGroups.filter{ group => group.getName != null && group.getName != ""
+        }.map(_.getName)
+        appendGroupClassButton.openPopup()
+        false
+    }
+
     val appendPropertyButton = new AppendToUserCustButton(classCustomizations.map(_.uri),
         "Append Property", "Attributes available in the current graph: ", "", onAppendProperty)
 
     appendPropertyButton.appendButton.mouseClicked += { e =>
-        val availablePropertyURIs = currentGraph.get.edges.filter{ edge =>
+        val availablePropertyURIs = currentGraphEdges.filter{ edge =>
             //all properties (edges) that are not already in the propertyCustomizations
             !propertyCustomizations.exists(_.uri == edge.uri)
         }.map(_.uri)
 
-        appendPropertyButton.availableURIs = availablePropertyURIs
+        appendPropertyButton.availableValues = availablePropertyURIs
         appendPropertyButton.openPopup()
 
         false
@@ -108,6 +150,17 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
             new Text(uriToName(customization.uri)))
         )))
         listItem.mouseClicked += { e => onListItemSelected(customization, listItem, renderClassCustomizationViews)
+            false
+        }
+        listItem
+    }
+
+    private var groupCustomizationListItems = groupCustomizations.map { customization =>
+        val listItem = new ListItem(List(new Anchor(List(
+            new Icon(Icon.ccShare),
+            new Text(customization.uri.substring(6)))
+        )))
+        listItem.mouseClicked += { e => onListItemSelected(customization, listItem, renderGroupCustomizationViews)
             false
         }
         listItem
@@ -125,14 +178,15 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
     }
 
     private val settingsDiv = new Div(Nil, "span8")
-    private val listDiv = new Div(List(new UnorderedList(classCustomizationsListItems ++ propertyCustomizationsListItems, "nav nav-list")),
+    private val listDiv = new Div(List(new UnorderedList(
+        classCustomizationsListItems ++ groupCustomizationListItems ++ propertyCustomizationsListItems, "nav nav-list")),
         "span4 modal-inner-view well no-padding").setAttribute("style", "padding: 8px 0;")
 
     override val body = List(
         new Div(List(
             new Div(List(
                 userCustomizationName,
-                new Div(List(appendClassButton,appendPropertyButton, deleteButton), "btn-group inline-block pull-right")),
+                new Div(List(appendClassButton, appendGroupClassButton, appendPropertyButton, deleteButton), "btn-group inline-block pull-right")),
                 "row-fluid button-row"
             ),
             new Div(List(listDiv, settingsDiv), "row-fluid")),
@@ -148,6 +202,7 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
         if(!classCustomizations.exists(_.uri == newClassURI)) { //if this name does not already exist
 
             classCustomizationsListItems.foreach(_.removeCssClass("active"))
+            groupCustomizationListItems.foreach(_.removeCssClass("active"))
             propertyCustomizationsListItems.foreach(_.removeCssClass("active"))
 
             settingsDiv.removeAllChildNodes()
@@ -172,10 +227,40 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
         }
     }
 
+    private def onAppendGroup(groupName: String): Boolean = {
+        if(!groupCustomizations.exists(_.uri == groupName)) { //if this name does not already exist
+
+            groupCustomizationListItems.foreach(_.removeCssClass("active"))
+            groupCustomizationListItems.foreach(_.removeCssClass("active"))
+            propertyCustomizationsListItems.foreach(_.removeCssClass("active"))
+
+            settingsDiv.removeAllChildNodes()
+            selectedItem = None
+            block("Creating group class...")
+
+            //create the class
+            OntologyCustomizationManager.createGroupCustomization(
+                userCustomization.id, groupName, List[String]()) { ontologyCustomization =>
+                unblock()
+                val newClass = ontologyCustomization.classCustomizations.last.asInstanceOf[ClassCustomization]
+                groupCustomizations ++= List(newClass)
+                renderDefinedGroup(newClass)
+            }{ error =>
+                unblock()
+                //TODO what shall I do if a class customization can not be created??
+            }
+            true
+        } else {
+            AlertModal.display("Information", groupName + " is already defined.", "", Some(4000))
+            false
+        }
+    }
+
     private def onAppendProperty(newPropertyURI: String): Boolean = {
         if(!propertyCustomizations.exists(_.uri == newPropertyURI)) { //if this name does not already exist
 
             classCustomizationsListItems.foreach(_.removeCssClass("active"))
+            groupCustomizationListItems.foreach(_.removeCssClass("active"))
             propertyCustomizationsListItems.foreach(_.removeCssClass("active"))
 
             settingsDiv.removeAllChildNodes()
@@ -244,7 +329,23 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
 
         classCustomizationsListItems ++= List(classListItem)
         listDiv.removeAllChildNodes()
-        val list = new UnorderedList(classCustomizationsListItems ++ propertyCustomizationsListItems, "nav nav-list")
+        val list = new UnorderedList(classCustomizationsListItems ++ groupCustomizationListItems ++ propertyCustomizationsListItems, "nav nav-list")
+        list.render(listDiv.htmlElement)
+    }
+
+    private def renderDefinedGroup(definedGroup: ClassCustomization) {
+        val gorupListItem = new ListItem(List(new Anchor(List(
+            new Icon(Icon.ccShare),
+            new Text(uriToName(definedGroup.uri.substring(6))))
+        )))
+        gorupListItem.mouseClicked += { e =>
+            onListItemSelected(definedGroup, gorupListItem, renderGroupCustomizationViews)
+            false
+        }
+
+        groupCustomizationListItems ++= List(gorupListItem)
+        listDiv.removeAllChildNodes()
+        val list = new UnorderedList(classCustomizationsListItems ++ groupCustomizationListItems ++ propertyCustomizationsListItems, "nav nav-list")
         list.render(listDiv.htmlElement)
     }
 
@@ -264,7 +365,7 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
 
         propertyCustomizationsListItems ++= List(propertyListItem)
         listDiv.removeAllChildNodes()
-        val list = new UnorderedList(classCustomizationsListItems ++ propertyCustomizationsListItems, "nav nav-list")
+        val list = new UnorderedList(classCustomizationsListItems ++ groupCustomizationListItems ++ propertyCustomizationsListItems, "nav nav-list")
         list.render(listDiv.htmlElement)
 
         propertyListItem
@@ -272,6 +373,7 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
 
     private def onListItemSelected[A <: Entity](customization: A, listItem: ListItem, renderSettingsDivFn: A => Unit) {
         classCustomizationsListItems.foreach(_.removeCssClass("active"))
+        groupCustomizationListItems.foreach(_.removeCssClass("active"))
         propertyCustomizationsListItems.foreach(_.removeCssClass("active"))
         listItem.addCssClass("active")
         selectedItem = Some(CustomizationItem.create(customization))
@@ -300,7 +402,7 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
                 if(classCustomization.labels == null || classCustomization.labels == "") {
                     List(new LabelItem("rdfs:label", false, false), new LabelItem("dcterms:title", false, false),
                         new LabelItem("skos:prefLabel", false, false), new LabelItem("skod:altLabel", false, false),
-                        new LabelItem("uri", false, false))
+                        new LabelItem("URI", false, false))
                 } else { classCustomization.labelsSplitted }),
             Some("span2")
         )
@@ -319,6 +421,59 @@ class UserCustomizationEditModal (currentGraph: Option[Graph], var userCustomiza
         }
         glyph.field.changed += { _ =>
             //classCustomization.glyph = glyph.field.value.getOrElse("")
+            classGlyphChanged.trigger(new ClassCustomizationEventArgs(glyph, classCustomization,
+                glyph.field.value.getOrElse("")))
+            customizationChanged.trigger(new OntologyCustomizationEventArgs(userCustomization))
+        }
+        labels.delayedChanged += { _ =>
+            classLabelsChanged.trigger(new ClassCustomizationEventArgs(labels, classCustomization,
+                labels.field.value.getOrElse("")))
+            customizationChanged.trigger(new OntologyCustomizationEventArgs(userCustomization))
+        }
+
+        fillColor.render(settingsDiv.htmlElement)
+        radius.render(settingsDiv.htmlElement)
+        glyph.render(settingsDiv.htmlElement)
+        labels.render(settingsDiv.htmlElement)
+    }
+
+    private def renderGroupCustomizationViews(classCustomization: ClassCustomization) {
+        val fillColor = new InputControl(
+            "Fill color:",
+            new ColorInput("fillColor", Color(classCustomization.fillColor), ""), Some("span2")
+        )
+        val radius = new InputControl(
+            "Radius:",
+            new NumericInput("radius", classCustomization.radius, "")   , Some("span2")
+        )
+        val glyph = new InputControl(
+            "Glyph:",
+            new GlyphInput("glyph", Some(classCustomization.glyph), "")  , Some("span2")
+        )
+
+        val labels = new InputControl(
+            "Labels:",
+            new OrderedItemsList("",
+                if(classCustomization.labels == null || classCustomization.labels == "") {
+                    List(new LabelItem("Group name", false, false))
+                } else { classCustomization.labelsSplitted }),
+            Some("span2")
+        )
+
+        fillColor.delayedChanged += { _ =>
+        //classCustomization.fillColor = fillColor.field.value.map(_.toString).getOrElse("")
+            classFillColorChanged.trigger(new ClassCustomizationEventArgs(fillColor, classCustomization,
+                fillColor.field.value.map(_.toString).getOrElse("")))
+            customizationChanged.trigger(new OntologyCustomizationEventArgs(userCustomization))
+        }
+        radius.delayedChanged += { _ =>
+        //classCustomization.radius = validateInt(radius.field.value.toString, "radius")
+            classRadiusDelayedChanged.trigger(new ClassCustomizationEventArgs(radius, classCustomization,
+                radius.field.value.toString))
+            customizationChanged.trigger(new OntologyCustomizationEventArgs(userCustomization))
+        }
+        glyph.field.changed += { _ =>
+        //classCustomization.glyph = glyph.field.value.getOrElse("")
             classGlyphChanged.trigger(new ClassCustomizationEventArgs(glyph, classCustomization,
                 glyph.field.value.getOrElse("")))
             customizationChanged.trigger(new OntologyCustomizationEventArgs(userCustomization))

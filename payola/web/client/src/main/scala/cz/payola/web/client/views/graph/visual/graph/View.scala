@@ -227,6 +227,21 @@ trait View[A]
         context.stroke()
     }
 
+    protected def drawSquare(context: elements.CanvasRenderingContext2D, center: Point2D, size: Double,
+        lineWidth: Double, color: Color) {
+
+        context.lineWidth = lineWidth
+        context.strokeStyle = color.toString
+
+        context.beginPath()
+        context.moveTo(center.x - size/2, center.y - size/2)
+        context.lineTo(center.x + size/2, center.y - size/2)
+        context.lineTo(center.x + size/2, center.y + size/2)
+        context.lineTo(center.x - size/2, center.y + size/2)
+        context.lineTo(center.x - size/2, center.y - size/2 - lineWidth/2)
+        context.stroke()
+    }
+
     /**
      * Draws a straight line between origin and destination points closed by an arrow at the destination side.
      * @param context to which to draw

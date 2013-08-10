@@ -1,7 +1,8 @@
 package cz.payola.web.client.views.graph.visual.techniques.minimalization
 
 import collection.mutable.ListBuffer
-import cz.payola.web.client.views.graph.visual.graph.VertexView
+import cz.payola.web.client.views.graph.visual.graph._
+import scala.Some
 
 /**
  * Representation of a VertexView object used in MinimalizationTechnique perform routine.
@@ -9,7 +10,7 @@ import cz.payola.web.client.views.graph.visual.graph.VertexView
  * @param children vertices, that have an edge with this contained vertexView without parent
  * @param parent vertexView higher in the vertices tree structure
  */
-class VertexViewPack(var value: VertexView, var children: ListBuffer[VertexViewPack],
+class VertexViewPack(var value: VertexViewElement, var children: ListBuffer[VertexViewPack],
     var parent: Option[VertexViewPack])
 {
     /**
@@ -142,7 +143,7 @@ class VertexViewPack(var value: VertexView, var children: ListBuffer[VertexViewP
         var result = topmostParent //in case that this == topmostParent
         while (!gotPreviousBrother) {
             level.foreach { element =>
-                if ((element.value.vertexModel eq this.value.vertexModel) && !gotPreviousBrother) {
+                if ((element.value.isEqual(this.value)) && !gotPreviousBrother) {
                     result = previousElement
                     gotPreviousBrother = true
                 }
@@ -169,7 +170,7 @@ class VertexViewPack(var value: VertexView, var children: ListBuffer[VertexViewP
         var lastElement = this //if the graph consists of only 2 vertices
         var previousBrother = getPreviousBrother
         while (previousBrother.children.length < 2 &&
-            (lastElement.value.vertexModel ne previousBrother.value.vertexModel)) {
+            (!(lastElement.value.isEqual(previousBrother.value)))) {
 
             lastElement = previousBrother
             previousBrother = previousBrother.getPreviousBrother
@@ -225,7 +226,7 @@ class VertexViewPack(var value: VertexView, var children: ListBuffer[VertexViewP
      */
     def isEqual(pack: VertexViewPack): Boolean = {
         var equal = true
-        if (this.value.vertexModel ne pack.value.vertexModel) {
+        if (!(this.value.isEqual(pack.value))) {
             equal = false
         } else {
             var level = this.getLevel(0)
@@ -250,7 +251,7 @@ class VertexViewPack(var value: VertexView, var children: ListBuffer[VertexViewP
                             elementsThis.foreach { elementThis =>
                                 val elementRecord = elementsRecord(pointerElement)
 
-                                if (elementThis.value.vertexModel ne elementRecord.value.vertexModel) {
+                                if (!(elementThis.value.isEqual(elementRecord.value))) {
                                     equal = false
                                 }
                                 pointerElement += 1
@@ -289,7 +290,7 @@ class VertexViewPack(var value: VertexView, var children: ListBuffer[VertexViewP
             level.foreach { parent =>
 
                 parent.children.foreach { child =>
-                    val found = processed.find(element => element.value.vertexModel eq child.value.vertexModel)
+                    val found = processed.find(element => element.value.isEqual(child.value))
                     if (found == None) {
                         levelNext += child
                         processed += child
@@ -327,7 +328,7 @@ class VertexViewPack(var value: VertexView, var children: ListBuffer[VertexViewP
 
                     var pom = ListBuffer[VertexViewPack]()
                     parent.children.foreach { child =>
-                        val found = levelNext.find(element => element.value.vertexModel eq child.value.vertexModel)
+                        val found = levelNext.find(element => element.value.isEqual(child.value))
                         if (found == None) {
                             levelNext += child
                         }

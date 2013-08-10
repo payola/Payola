@@ -157,6 +157,16 @@ input[type="checkbox"].active:after {
     background-position: 0px !important;
 }
 
+.icon-cc-share {
+    background-image: url(cc-share.png) !important;
+    background-position: 0px !important;
+}
+
+.icon-cc-share.icon-white {
+    background-image: url(cc-share-white.png) !important;
+    background-position: 0px !important;
+}
+
 .icon-group {
     background-image: url(group.png) !important;
     background-position: 0px !important;

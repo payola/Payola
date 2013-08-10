@@ -42,6 +42,13 @@ class OntologyCustomizationsByOwnership(
             successCallback(Payola.model.ontologyCustomizationModel.create(name, Some(ontologyURLs.split(",")), owner))
     }
 
+    @async def createGroupCustomization(customizationID: String, classURI: String, propertiesURIs: collection.immutable.Seq[String], owner: User = null)
+        (successCallback: cz.payola.common.entities.settings.OntologyCustomization => Unit)
+        (failCallback: Throwable => Unit)
+    {
+        createClassCustomization(customizationID, "group_" + classURI, propertiesURIs, owner)(successCallback)(failCallback)
+    }
+
     @async def createClassCustomization(customizationID: String, classURI: String, propertiesURIs: collection.immutable.Seq[String], owner: User = null)
         (successCallback: cz.payola.common.entities.settings.OntologyCustomization => Unit)
         (failCallback: Throwable => Unit)

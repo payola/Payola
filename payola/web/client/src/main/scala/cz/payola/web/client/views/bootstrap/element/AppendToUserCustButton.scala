@@ -9,8 +9,8 @@ import cz.payola.web.client.views.bootstrap.modals.AlertModal
 import cz.payola.web.client.View
 import cz.payola.web.client.views.ComposedView
 
-class AppendToUserCustButton (var availableURIs: Seq[String], title: String, listTitle: String, cssClass: String = "",
-    onAppendFunction: (String) => Boolean) extends ComposedView
+class AppendToUserCustButton (var availableValues: Seq[String], title: String, listTitle: String, cssClass: String = "",
+    onAppendFunction: (String) => Boolean, customLabel: String = "Custom URI:") extends ComposedView
 {
 
     private var forbidPopupClose = false
@@ -38,8 +38,7 @@ class AppendToUserCustButton (var availableURIs: Seq[String], title: String, lis
         val addButton = new Button(new Text("Add"))
         val inputField = new TextInput("name", "", "", "span6")
         inputField.mouseClicked += { e => forbidPopupClose = true; false }
-        val classNameInput = new Div(List(
-            new Label("Custom URI:", inputField.formHtmlElement, ""), inputField, addButton))
+        val classNameInput = new Div(List(new Label(customLabel, inputField.formHtmlElement, ""), inputField, addButton))
 
         addButton.mouseClicked += { e =>
             if(inputField.value != null && inputField.value != "") {
@@ -59,7 +58,7 @@ class AppendToUserCustButton (var availableURIs: Seq[String], title: String, lis
             "style", "padding-top: 5px; padding-bottom: 5px;").render(classDiv.htmlElement)
 
 
-        availableURIs.foreach{ newClass => //list of classes available in the current graph
+        availableValues.foreach{ newClass => //list of classes available in the current graph
 
             val availableClassAnch = new Div(List(
                 new Anchor(List(new Div(List(new Text(uriToName(newClass))),
@@ -75,7 +74,7 @@ class AppendToUserCustButton (var availableURIs: Seq[String], title: String, lis
             availableClassAnch.render(classDiv.htmlElement)
         }
 
-        classDiv.setAttribute("style","display: block")
+        classDiv.setAttribute("style","left: -419px !important; display: block")
     }
 
     private def uriToName(uri: String): String = {

@@ -32,6 +32,8 @@ class DataSourceBrowser(
 
     private val prefixPresenter = new PrefixPresenter()
 
+    private var languagesLoaded = false
+
     @javascript("""return encodeURIComponent(uri)""")
     def encodeURIComponent(uri: String) : String = ""
 
@@ -53,6 +55,7 @@ class DataSourceBrowser(
         view.goButton.mouseClicked += onGoButtonClicked _
         view.sparqlQueryButton.mouseClicked += onSparqlQueryButtonClicked _
         view.nodeUriInput.keyPressed += onNodeUriKeyPressed _
+        graphPresenter.view.languagesButton.mouseClicked += onLanguagesButtonClicked _
         graphPresenter.view.vertexBrowsing += onVertexBrowsing _
 
         view.render(viewElement)
@@ -72,6 +75,18 @@ class DataSourceBrowser(
         } else {
             addToHistoryAndGo(None, decodeURIComponent(window.location.hash.substring(1)), false)
         }
+    }
+
+    private def onLanguagesButtonClicked(e: EventArgs[_]): Boolean = {
+        if(!languagesLoaded){
+            blockPage("Fetching available languages...")
+            DataSourceManager.getLanguages(dataSourceId) { o =>
+                o.foreach(res => graphPresenter.view.updateLanguages(res))
+                languagesLoaded = true
+                unblockPage()
+            } (fatalErrorHandler(_))
+        }
+        true
     }
 
     private def onVertexBrowsing(e: VertexEventArgs[_]) {

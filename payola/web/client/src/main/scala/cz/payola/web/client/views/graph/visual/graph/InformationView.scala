@@ -12,7 +12,7 @@ import cz.payola.common.rdf._
  * Graphical representation of textual data in the drawn graph.
  * @param labels that are visualized (by toString function of this object)
  */
-class InformationView(labels: List[Any]) extends View[html.elements.CanvasRenderingContext2D] {
+class InformationView(private var _labels: List[Any]) extends View[html.elements.CanvasRenderingContext2D] {
 
     var colorBackground = new Color(255, 255, 255, 0.2)
 
@@ -21,6 +21,12 @@ class InformationView(labels: List[Any]) extends View[html.elements.CanvasRender
     var font = "12px Sans"
 
     var align  = "center"
+
+    def labels =_labels
+
+    def labels_=(newLabels: List[Any]) {
+        _labels = newLabels
+    }
 
     def isSelected: Boolean = {
         false //information can not be selected
@@ -82,9 +88,9 @@ object InformationView {
         prefixApplier: Option[PrefixApplier]): Option[InformationView] = {
 
         val uriOpt = getUri(modelObject)
-        val uri = if(uriOpt.isDefined && prefixApplier.isDefined) prefixApplier.get.applyPrefix(uriOpt.get) else ""
+        val uri = if(uriOpt.isDefined && prefixApplier.isDefined) prefixApplier.get.applyPrefix(uriOpt.get) else modelObject.toString()
         val processedLabels = processLabels(labels, uri, literals)
-        if(labels.isEmpty) { None } else { Some(new InformationView(processedLabels)) }
+        if(processedLabels.isEmpty) { None } else { Some(new InformationView(processedLabels)) }
     }
 
     def constructBySingle(modelObject: Any, prefixApplier: Option[PrefixApplier]): InformationView = {
@@ -113,7 +119,7 @@ object InformationView {
         List[String] = {
 
         val acceptedLabels = labels.filter{ label =>
-            label.accepted && (label.userDefined || label.value == "uri" || literals.exists{
+            label.accepted && (label.userDefined || label.value == "uri" || label.value == "groupName" || literals.exists{
                 _.toString().contains(label.value.substring(2))
             })
         }
@@ -121,7 +127,7 @@ object InformationView {
         acceptedLabels.map { label =>
             if(label.userDefined) {
                 label.value
-            } else if(label.value == "uri") {
+            } else if(label.value == "uri" || label.value == "groupName") {
                 modelObjectUri
             } else {
                 literals.find{ literal => labels.contains(literal._1.substring(2)) }.get.toString

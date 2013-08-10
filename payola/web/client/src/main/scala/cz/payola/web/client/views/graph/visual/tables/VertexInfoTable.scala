@@ -1,10 +1,8 @@
-package cz.payola.web.client.views.graph.visual
+package cz.payola.web.client.views.graph.visual.tables
 
 import cz.payola.web.client.View
 import cz.payola.web.client.views.elements._
-import graph.VertexView
 import scala.collection.mutable.ArrayBuffer
-import scala.collection.mutable
 import cz.payola.web.client.views.bootstrap.Icon
 import cz.payola.web.client.views._
 import cz.payola.common.rdf.IdentifiedVertex
@@ -12,7 +10,8 @@ import cz.payola.web.client.events._
 import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.elements.lists._
 
-class VertexInfoTable(vertex: IdentifiedVertex, values: List[(String, Seq[String])], position: Point2D) extends ComposedView
+class VertexInfoTable(vertex: IdentifiedVertex, language: Option[String], values: List[(String, Seq[String])], position: Point2D)
+    extends InfoTable
 {
     var vertexBrowsingDataSource = new SimpleUnitEvent[IdentifiedVertex]
 
@@ -33,7 +32,9 @@ class VertexInfoTable(vertex: IdentifiedVertex, values: List[(String, Seq[String
             false
         }
 
-        values.foreach { x =>
+        values.filter{value =>
+            language.isEmpty || !value._1.contains("language") || value._1.contains("language=\""+language)
+        }.foreach { x =>
             buffer += new DefinitionTerm(List(new Text(x._1)))
 
             x._2.foreach { string =>

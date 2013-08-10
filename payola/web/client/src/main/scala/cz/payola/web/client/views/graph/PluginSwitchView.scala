@@ -6,7 +6,7 @@ import cz.payola.web.client.views._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap._
 import cz.payola.web.client.views.graph.table._
-import cz.payola.web.client.views.graph.visual.ColumnChartPluginView
+import cz.payola.web.client.views.graph.visual._
 import cz.payola.web.client.views.graph.visual.techniques.circle.CircleTechnique
 import cz.payola.web.client.views.graph.visual.techniques.tree.TreeTechnique
 import cz.payola.web.client.views.graph.visual.techniques.gravity.GravityTechnique
@@ -16,6 +16,7 @@ import cz.payola.web.client.views.elements.lists.ListItem
 import cz.payola.web.client.views.graph.sigma.GraphSigmaPluginView
 import cz.payola.web.client.views.graph.datacube.TimeHeatmap
 import cz.payola.web.client.models.PrefixApplier
+import scala.Some
 
 class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with ComposedView
 {
@@ -100,10 +101,16 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
         Nil
     )
 
+    val languagesButton = new DropDownButton(
+        List(new Icon(Icon.globe), new Text("Language")),
+        Nil,
+        "", "pull-right"
+    ).setAttribute("style", "margin: 0 5px;")
+
     /**
      * Toolbar containing  pluginChange ontology customization buttons
      */
-    val toolbar = new Div(List(pluginChangeButton, customizationsButton), "btn-toolbar").setAttribute(
+    val toolbar = new Div(List(pluginChangeButton, customizationsButton, languagesButton), "btn-toolbar").setAttribute(
         "style", "margin-bottom: 15px;")
 
     // Re-trigger all events when the corresponding events are triggered in the plugins.
@@ -139,6 +146,8 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
     override def setMainVertex(vertex: Vertex) {
         currentPlugin.setMainVertex(vertex)
     }
+
+    override def setLanguage(language: Option[String]) {}
 
 
     /**
@@ -185,6 +194,20 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
         }
 
         customizationsButton.items = items
+    }
+
+    def updateLanguages(languagesList: Seq[String]) {
+        val listItems = languagesList.map { language =>
+            val langText = new Text(language)
+            val langListItem = new ListItem(List(new Anchor(List(langText))))
+            langListItem.mouseClicked += { _ =>
+                setLanguage(Some(langText.text)) //TODO
+                languagesButton.setActiveItem(langListItem)
+                false
+            }
+            langListItem
+        }
+        languagesButton.items = listItems
     }
 
     /**
@@ -247,4 +270,10 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
     }
 
     def getCurrentGraph = this.currentGraph
+
+    def getCurrentGraphView = currentPlugin match {
+        case visual: VisualPluginView =>
+            visual.graphView
+        case _ => None
+    }
 }

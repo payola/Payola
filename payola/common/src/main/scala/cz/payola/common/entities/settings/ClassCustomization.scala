@@ -94,6 +94,15 @@ trait ClassCustomization extends Entity
         _labels = value
     }
 
+    def isGroupCustomization: Boolean = {
+        uri.startsWith("group_")
+    }
+
+    def hasId(id: String): Boolean = {
+        if(isGroupCustomization) uri.substring(6) == id
+        else uri == id
+    }
+
     /** Customizations of properties of the class. */
     def propertyCustomizations = _propertyCustomizations
 }

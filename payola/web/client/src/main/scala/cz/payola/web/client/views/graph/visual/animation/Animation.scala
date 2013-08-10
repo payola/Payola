@@ -92,7 +92,7 @@ object Animation
      *                            if it is set to 0: animation is skipped
      *                            otherwise the animation is performed normally
      */
-    def moveVertices(verticesToMove: ListBuffer[(VertexView, Point2D)], nextAnimation: Option[Animation[_]],
+    def moveVertices(verticesToMove: ListBuffer[(VertexViewElement, Point2D)], nextAnimation: Option[Animation[_]],
         quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
         val animationVViews = ListBuffer[AnimationVertexView]()
         verticesToMove.foreach { vToMove =>
@@ -114,7 +114,7 @@ object Animation
      *                            if it is set to 0: animation is skipped
      *                            otherwise the animation is performed normally
      */
-    def moveGraphByFunction(move: (PositionHelper, ListBuffer[VertexView]), nextAnimation: Option[Animation[_]],
+    def moveGraphByFunction(move: (PositionHelper, ListBuffer[VertexViewElement]), nextAnimation: Option[Animation[_]],
         quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
         moveGraphByVector(((move._1.getPositionCorrection(), move._2)), nextAnimation, quickDraw, finalDraw,
             animationStepLength)
@@ -130,7 +130,7 @@ object Animation
      *                            if it is set to 0: animation is skipped
      *                            otherwise the animation is performed normally
      */
-    def moveGraphByVector(move: (Vector2D, ListBuffer[VertexView]), nextAnimation: Option[Animation[_]],
+    def moveGraphByVector(move: (Vector2D, ListBuffer[VertexViewElement]), nextAnimation: Option[Animation[_]],
         quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
         val animationVViews = ListBuffer[AnimationVertexView]()
         move._2.foreach {
@@ -151,7 +151,7 @@ object Animation
      *                            if it is set to 0: animation is skipped
      *                            otherwise the animation is performed normally
      */
-    def moveGraphToUpperLeftCorner(vViews: ListBuffer[VertexView], nextAnimation: Option[Animation[_]],
+    def moveGraphToUpperLeftCorner(vViews: ListBuffer[VertexViewElement], nextAnimation: Option[Animation[_]],
         quickDraw: () => Unit, finalDraw: () => Unit, animationStepLength: Option[Int]) {
         moveGraphByVector((Point2D(50, 25).toVector, vViews), nextAnimation, quickDraw, finalDraw, animationStepLength)
     }
@@ -167,7 +167,7 @@ object Animation
      *                            if it is set to 0: animation is skipped
      *                            otherwise the animation is performed normally
      */
-    def flipGraph(move: (PositionHelper, ListBuffer[VertexView]), nextAnimation: Option[Animation[_]],
+    def flipGraph(move: (PositionHelper, ListBuffer[VertexViewElement]), nextAnimation: Option[Animation[_]],
         quickDraw: () => Unit,
         finalDraw: () => Unit, animationStepLength: Option[Int]) {
         var maxX: Double = Double.MinValue
@@ -176,19 +176,18 @@ object Animation
         var minY: Double = Double.MaxValue
 
         //find out if flipping the graph helps anything...
-        move._2.foreach {
-            v: VertexView =>
-                if (v.position.x > maxX) {
-                    maxX = v.position.x
-                } else if (v.position.x < minX) {
-                    minX = v.position.x
-                }
+        move._2.foreach { v =>
+            if (v.position.x > maxX) {
+                maxX = v.position.x
+            } else if (v.position.x < minX) {
+                minX = v.position.x
+            }
 
-                if (v.position.y > maxY) {
-                    maxY = v.position.y
-                } else if (v.position.y < minY) {
-                    minY = v.position.y
-                }
+            if (v.position.y > maxY) {
+                maxY = v.position.y
+            } else if (v.position.y < minY) {
+                minY = v.position.y
+            }
         }
 
         if (maxX - minX < maxY - minY) {

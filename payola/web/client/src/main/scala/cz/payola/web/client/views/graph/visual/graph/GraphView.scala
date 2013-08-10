@@ -47,7 +47,7 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
     def setVertexColor(vertex: Vertex, color: Option[Color]) {
         getAllVertices.foreach { v =>
 
-            if (v.vertexModel == vertex) {
+            if (v.represents(vertex)) {
                 v.setColor(color)
             }
         }
@@ -62,6 +62,30 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
     def putVertexToTop(vertex: Vertex) {
         components.exists(_.moveVertexToTop(vertex))
         //exists function allows to skip the rest of the components, when the component containing the vertex.uri is found
+    }
+
+    def createGroup(newPosition: Point2D) {
+        var groupingComponent: Option[Component] = None //grouping available only for vertices from one component
+        var groupingAvailable = true
+
+        //search if there are some selected vertices to group and if those vertices are in the same component
+        components.foreach { component =>
+            val selected = component.getSelected
+            if (!selected.isEmpty && groupingComponent.isEmpty) {
+                groupingComponent = Some(component)
+                if (selected.length < 2)
+                    groupingAvailable = false //makes sense to group only 2 or more vertices
+            } else if (!selected.isEmpty)
+                groupingAvailable = false
+        }
+
+        if (groupingAvailable && groupingComponent.isDefined) {
+            groupingComponent.get.createGroup(newPosition)
+        }
+    }
+
+    def removeVertexFromGroup(vertexToRemove: VertexViewElement, newPosition: Point2D) {
+        components.foreach {_.removeFromGroup(vertexToRemove, newPosition)}
     }
 
     /**
@@ -94,7 +118,7 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
             if (oldVertexViews.isEmpty) {
                 components.foreach {
                     component =>
-                        component.selectVertex(component.vertexViews.head)
+                        component.selectVertex(component.vertexViewElements.head)
                 }
             }
         }
@@ -107,7 +131,7 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
      * @param vertexViews to split
      * @param edgeViews to split
      */
-    private def splitToComponents(vertexViews: ListBuffer[VertexView], edgeViews: ListBuffer[EdgeView]) {
+    private def splitToComponents(vertexViews: ListBuffer[VertexViewElement], edgeViews: ListBuffer[EdgeView]) {
         components = ListBuffer[Component]()
 
         var remainingVertices = vertexViews
@@ -118,8 +142,8 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
             var currentVertex = remainingVertices.head
             remainingVertices -= currentVertex
 
-            var currentNeighbours = ListBuffer[VertexView]()
-            var currentComponentsVertices = ListBuffer[VertexView]()
+            var currentNeighbours = ListBuffer[VertexViewElement]()
+            var currentComponentsVertices = ListBuffer[VertexViewElement]()
             var currentComponentsEdges = ListBuffer[EdgeView]()
 
             var run = true
@@ -146,7 +170,7 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
                 }
             }
 
-            components += new Component(currentComponentsVertices, currentComponentsEdges, componentNumber)
+            components += new Component(currentComponentsVertices, currentComponentsEdges, componentNumber, prefixApplier)
             componentNumber += 1
         }
     }
@@ -156,13 +180,13 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
      * @param ofVertex to search neighbours of
      * @return list of vertices, that are neighbours to the ofVertex
      */
-    private def getNeighbours(ofVertex: VertexView): ListBuffer[VertexView] = {
-        var neighbours = ListBuffer[VertexView]()
+    private def getNeighbours(ofVertex: VertexViewElement): ListBuffer[VertexViewElement] = {
+        var neighbours = ListBuffer[VertexViewElement]()
 
         ofVertex.edges.foreach {
             edgeOfCurrentVertex =>
 
-                if (edgeOfCurrentVertex.originView.vertexModel eq ofVertex.vertexModel) {
+                if (edgeOfCurrentVertex.originView.isEqual(ofVertex)) {
                     neighbours += edgeOfCurrentVertex.destinationView
                 } else {
                     neighbours += edgeOfCurrentVertex.originView
@@ -178,8 +202,8 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
      * @param vertexInitPosition where created vertices are positioned
      * @return container with packed Vertex objects in VertexView objects
      */
-    protected def createVertexViews(graphModel: Graph, vertexInitPosition: Point2D): ListBuffer[VertexView] = {
-        val buffer = ListBuffer[VertexView]()
+    protected def createVertexViews(graphModel: Graph, vertexInitPosition: Point2D): ListBuffer[VertexViewElement] = {
+        val buffer = ListBuffer[VertexViewElement]()
         val literalVertices = ListBuffer[LiteralVertex]()
 
         graphModel.vertices.foreach {
@@ -249,8 +273,9 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
      * @param literalVertices available for setting to identifiedVertices
      * @return vertexViews (identifiedVertices) with configured literalVertices neighbours
      */
-    private def addLiteralVerticesToVertexViews(graphModel: Graph,
-        vertexViews: ListBuffer[VertexView], literalVertices: ListBuffer[LiteralVertex]): ListBuffer[VertexView] = {
+    private def addLiteralVerticesToVertexViews(graphModel: Graph, vertexViews: ListBuffer[VertexViewElement],
+        literalVertices: ListBuffer[LiteralVertex]): ListBuffer[VertexViewElement] = {
+
         literalVertices.foreach {
             literalVertex =>
             // find edge by which the vertex is connected to the rest of the graph and add it to the identified vertex
@@ -283,10 +308,10 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
                     //find the vertexView of the identified vertex neighbour
                     val identNeighbourVertexView =
                         vertexViews.find {
-                            vertexView => vertexView.vertexModel == identNeighborVertex
+                            vertexView => vertexView.represents(identNeighborVertex)
                         }
 
-                    identNeighbourVertexView.map(_.addLiteralVertex(edgeToIdentVertex.get, literals))
+                    identNeighbourVertexView.map(_.addLiteralVertex(edgeToIdentVertex.get, literals, identNeighborVertex))
                 }
         }
         vertexViews
@@ -300,8 +325,8 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
      * @param newVertexViews to refresh the already present vertices
      * @return rebuilt vertexViews
      */
-    private def rebuildOldVertices(newVertexViews: ListBuffer[VertexView]): ListBuffer[VertexView] = {
-        var newOldVertexViews = ListBuffer[VertexView]()
+    private def rebuildOldVertices(newVertexViews: ListBuffer[VertexViewElement]): ListBuffer[VertexViewElement] = {
+        var newOldVertexViews = ListBuffer[VertexViewElement]()
         var allVertices = newVertexViews ++ newOldVertexViews
 
         getAllVertices.foreach {
@@ -312,14 +337,20 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
                 }
 
                 if (vertexInNews.isDefined) {
-                    vertexInNews.get.selected = oldVertexView.selected
+                    vertexInNews.get.setSelected(oldVertexView.isSelected)
                     vertexInNews.get.position = oldVertexView.position
-                } else if (vertexInNews.isEmpty && oldVertexView.getCurrentAge + 1 <= vertexHighestAge) {
-                    //filter out too old vertices
+                } else {
+                    oldVertexView match {
+                        case oldView: VertexView =>
+                            if (vertexInNews.isEmpty && oldView.getCurrentAge + 1 <= vertexHighestAge) {
+                                //filter out too old vertices
 
-                    oldVertexView.increaseCurrentAge()
-                    newOldVertexViews += oldVertexView
-                    allVertices += oldVertexView
+                                oldView.increaseCurrentAge()
+                                newOldVertexViews += oldView
+                                allVertices += oldView
+                            }
+                        case oldGroup: VertexViewGroup =>  //TODO when grouping is supported on the server-side
+                    }
                 }
         }
 
@@ -333,7 +364,7 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
      *                    that are supposed to be connected by the created edgeViews
      * @return container with packed
      */
-    private def createEdgeViews(newGraphModel: Graph, vertexViews: ListBuffer[VertexView]): ListBuffer[EdgeView] = {
+    private def createEdgeViews(newGraphModel: Graph, vertexViews: ListBuffer[VertexViewElement]): ListBuffer[EdgeView] = {
         if (vertexViews.isEmpty) {
             ListBuffer[EdgeView]()
         }
@@ -357,7 +388,7 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
      * @param vertexViews to search for origins and destinations of vertices
      * @return renewed edges
      */
-    private def rebuildOldEdges(newEdgeViews: ListBuffer[EdgeView], vertexViews: ListBuffer[VertexView]):
+    private def rebuildOldEdges(newEdgeViews: ListBuffer[EdgeView], vertexViews: ListBuffer[VertexViewElement]):
     ListBuffer[EdgeView] = {
         if (vertexViews.isEmpty) {
             ListBuffer[EdgeView]()
@@ -383,7 +414,7 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
      * @param vertexViews to search for origin and destination of the edge
      * @return EdgeView if origin and destination vertexViews are found
      */
-    private def createEdgeView(edgeModel: Edge, vertexViews: ListBuffer[VertexView]): Option[EdgeView] = {
+    private def createEdgeView(edgeModel: Edge, vertexViews: ListBuffer[VertexViewElement]): Option[EdgeView] = {
         val origin = getVertexForEdgeConstruct(edgeModel.origin, vertexViews)
         val destination = getVertexForEdgeConstruct(edgeModel.destination, vertexViews)
         if (destination.isDefined && origin.isDefined) {
@@ -402,9 +433,9 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
      * @param vertexViews to seach in
      * @return found VertexView or None
      */
-    private def getVertexForEdgeConstruct(vertex: Vertex, vertexViews: ListBuffer[VertexView]): Option[VertexView] = {
+    private def getVertexForEdgeConstruct(vertex: Vertex, vertexViews: ListBuffer[VertexViewElement]): Option[VertexViewElement] = {
         val foundVertices = vertexViews.filter {
-            _.vertexModel.toString eq vertex.toString
+            _.represents(vertex)
         }
 
         foundVertices.length match {
@@ -413,7 +444,10 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
             case 1 =>
                 Some(foundVertices(0))
             case _ =>
-                foundVertices(0).vertexModel match {
+                foundVertices.find {
+                    _.edges.length == 0
+                }
+                /*foundVertices(0).vertexModel match {
                     case i: LiteralVertex =>
                         foundVertices.find {
                             _.edges.length == 0
@@ -424,7 +458,7 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
                         None
                     case _ => /*ADD Vertex class children, that may be multiple times present in the graph*/
                         None
-                }
+                }*/
         }
     }
 
@@ -434,7 +468,7 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
      * @param vertexViews to set edgeViews to
      * @param edgeViews awailable for setting
      */
-    private def fillVertexViewsEdges(vertexViews: ListBuffer[VertexView], edgeViews: ListBuffer[EdgeView]) {
+    private def fillVertexViewsEdges(vertexViews: ListBuffer[VertexViewElement], edgeViews: ListBuffer[EdgeView]) {
         vertexViews.foreach {
             vertexView =>
                 vertexView.edges = getEdgesOfVertex(vertexView, edgeViews)
@@ -448,11 +482,11 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
      * @param edgeViews container of edges to search in
      * @return container with found edges
      */
-    private def getEdgesOfVertex(vertexView: VertexView, edgeViews: ListBuffer[EdgeView]): ListBuffer[EdgeView] = {
+    private def getEdgesOfVertex(vertexView: VertexViewElement, edgeViews: ListBuffer[EdgeView]): ListBuffer[EdgeView] = {
         edgeViews.filter {
             edgeView =>
-                ((edgeView.originView.vertexModel.toString eq vertexView.vertexModel.toString) ||
-                    (edgeView.destinationView.vertexModel.toString eq vertexView.vertexModel.toString))
+                ((edgeView.originView.contains(vertexView)) ||
+                    (edgeView.destinationView.contains(vertexView)))
         }
     }
 
@@ -461,8 +495,8 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
      * @param position to compare vertexViews' positions with
      * @return found vertexView or None
      */
-    def getTouchedVertex(position: Point2D): Option[VertexView] = {
-        var result: Option[VertexView] = None
+    def getTouchedVertex(position: Point2D): Option[VertexViewElement] = {
+        var result: Option[VertexViewElement] = None
         var componentsPointer = 0
 
         while (result.isEmpty && componentsPointer < components.length) {
@@ -478,7 +512,7 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
      * @param vertexView to invert the selection attribute
      * @return if the selection was inverted
      */
-    def invertVertexSelection(vertexView: VertexView): Boolean = {
+    def invertVertexSelection(vertexView: VertexViewElement): Boolean = {
         var componentPointer = 0
         var selectionInverted = false
 
@@ -495,7 +529,7 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
      * @param vertexView to mark
      * @return true if the selection status of the vertex has changed
      */
-    def selectVertex(vertexView: VertexView): Boolean = {
+    def selectVertex(vertexView: VertexViewElement): Boolean = {
         var componentPointer = 0
         var selectionChanged = false
 
@@ -688,11 +722,11 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
     /**
      * @return all vetexViews in this graphView
      */
-    def getAllVertices: ListBuffer[VertexView] = {
-        var allVertices = ListBuffer[VertexView]()
+    def getAllVertices: ListBuffer[VertexViewElement] = {
+        var allVertices = ListBuffer[VertexViewElement]()
         components.foreach {
             component =>
-                allVertices ++= component.vertexViews
+                allVertices ++= component.vertexViewElements
         }
 
         allVertices
@@ -723,8 +757,8 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
         allSelectedCount
     }
 
-    def getAllSelectedVertices: List[VertexView] = {
-        var selectedVertices = List[VertexView]()
+    def getAllSelectedVertices: List[VertexViewElement] = {
+        var selectedVertices = List[VertexViewElement]()
         components.foreach {
             components =>
                 selectedVertices ++= components.getSelected
