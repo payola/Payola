@@ -30,6 +30,7 @@ import cz.payola.domain.net.Downloader
         }
         catch {
             case e: Throwable => errorCallback(e)
+            case _ => errorCallback(new Exception("Prefix %s not found on prefix.cc".format(prefix)))
         }
     }
 }
