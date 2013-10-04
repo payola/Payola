@@ -4,7 +4,7 @@ import scala.io.Source
 import scala.tools.nsc.io
 import sbt._
 import Keys._
-import PlayProject._
+import play.Project._
 import scala.util.matching.Regex
 
 object PayolaBuild extends Build
@@ -16,7 +16,7 @@ object PayolaBuild extends Build
     /** Common settings of all projects. */
     object Settings
     {
-        val scalaVersion = "2.9.2"
+        val scalaVersion = "2.10.2"
 
         val libDir = file("lib")
 
@@ -66,7 +66,7 @@ object PayolaBuild extends Build
             "-encoding", "utf8"
         ),
         libraryDependencies ++= Seq(
-            "org.scalatest" %% "scalatest" % "1.6.1" % "test"
+            "org.scalatest" %% "scalatest" % "1.9.2" % "test"
         ),
         resolvers ++= Seq(
             DefaultMavenRepository
@@ -254,8 +254,8 @@ object PayolaBuild extends Build
         webSharedProject
     ).settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
 
-    lazy val webServerProject = PlayProject(
-        "server", PayolaSettings.version, Nil, path = file("web/server"), mainLang = SCALA
+    lazy val webServerProject = play.Project(
+        "server", PayolaSettings.version, Nil, path = file("web/server")
     ).settings(
         compileAndPackage <<= (packageBin in Compile).dependsOn(clean).map { jarFile: File =>
             // Retrieve the dependencies.
@@ -308,11 +308,11 @@ object PayolaBuild extends Build
             val dependencyBuffer = ListBuffer.empty[String]
             fileProvides.keys.foreach{file =>
                 dependencyBuffer += "'%s': [".format(file)
-                dependencyBuffer += fileProvides.get(file).flatten.mkString(",")
+                fileProvides.get(file).map{x => dependencyBuffer += x.mkString(",")}
                 dependencyBuffer += "] ["
-                dependencyBuffer += fileDeclarationRequires.get(file).flatten.mkString(",")
+                fileDeclarationRequires.get(file).map{x => dependencyBuffer += x.mkString(",")}
                 dependencyBuffer += "] ["
-                dependencyBuffer += fileRuntimeRequires.get(file).flatten.mkString(",")
+                fileRuntimeRequires.get(file).map{x => dependencyBuffer += x.mkString(",")}
                 dependencyBuffer += "]\n"
             }
             new io.File(dependencyFile).writeAll(dependencyBuffer.mkString)
