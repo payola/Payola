@@ -16,4 +16,6 @@ addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.6.0")
 
 addSbtPlugin("play" % "sbt-plugin" % "2.1-09142012")
 
+addSbtPlugin("com.typesafe.sbt" % "sbt-start-script" % "0.10.0")
+
 libraryDependencies += "play" %% "play" % "2.1-09142012"
