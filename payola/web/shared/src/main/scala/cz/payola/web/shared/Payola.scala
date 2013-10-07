@@ -18,6 +18,11 @@ import cz.payola.domain.entities.plugins.compiler.PluginCompiler
         with RdfStorageComponent
         with PluginCompilerComponent
     {
+
+        override val maxStoredAnalyses: Long = settings.maxStoredAnalyses
+
+        override val maxStoredAnalysesPerUser: Long = settings.maxStoredAnalysesPerUser
+
         lazy val schema = new Schema(
             settings.databaseLocation,
             settings.databaseUser,

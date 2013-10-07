@@ -100,6 +100,9 @@ trait SchemaComponent
         /**Table of [[cz.payola.data.squeryl.entities.Prefix]]es */
         val prefixes = table[Prefix]("prefixes")
 
+        /**Table of [[cz.payola.data.squeryl.entities.AnalysisResult]]s */
+        val analysesResults = table[AnalysisResult]("analysesResults")
+
         /**
          * Relation that associates members ([[cz.payola.data.squeryl.entities.User]]s)
          * to [[cz.payola.data.squeryl.entities.Group]]s
@@ -389,6 +392,9 @@ trait SchemaComponent
             },
             factoryFor(prefixes) is {
                 new Prefix("", "", "", "", None)
+            },
+            factoryFor(analysesResults) is {
+                new AnalysisResult("", None, "", false, "", 0, new java.util.Date(System.currentTimeMillis()))
             }
         )
 
@@ -593,6 +599,12 @@ trait SchemaComponent
                     p.ownerId is (dbType(COLUMN_TYPE_ID)),
                     columns(p.ownerId, p.prefix) are (unique),
                     columns(p.ownerId, p.url) are (unique)
+                ))
+
+            on(analysesResults)(analysisRes =>
+                declare(
+                    analysisRes.analysisId is(dbType(COLUMN_TYPE_ID)),
+                    analysisRes.userId is(dbType(COLUMN_TYPE_ID))
                 ))
 
             // When a PluginDbRepresentation is deleted, all of the its instances and data sources will get deleted.

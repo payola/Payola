@@ -9,6 +9,7 @@ trait ModelComponent
     extends UserModelComponent
     with GroupModelComponent
     with AnalysisModelComponent
+    with AnalysisResultStorageModelComponent
     with PluginModelComponent
     with DataSourceModelComponent
     with OntologyCustomizationModelComponent

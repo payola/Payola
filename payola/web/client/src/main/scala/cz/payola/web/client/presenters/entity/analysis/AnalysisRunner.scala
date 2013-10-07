@@ -32,6 +32,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
     var graphPresenter: GraphPresenter = null
     var successEventHandler: (EvaluationSuccessEventArgs => Unit) = null
     var evaluationId = ""
+    var storeHandler: Boolean = false
     var intervalHandler: Option[Int] = None
     val prefixPresenter = new PrefixPresenter
 
@@ -97,6 +98,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
                 true
             }
 
+            graphPresenter.view.setAnalysisId(analysis.id)
             graphPresenter.view.updateGraph(Some(evt.graph), true)
 
             view.tabs.showTab(1)
@@ -118,9 +120,10 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
             uiAdaptAnalysisRunning(view, createViewAndInit _, analysis)
             var timeout = view.overviewView.controls.timeoutControl.field.value
+            val persistInAnalysisStorage = view.overviewView.controls.persistInStore.field.value
             view.overviewView.controls.timeoutInfo.text = timeout.toString
 
-            AnalysisRunner.runAnalysisById(analysisId, timeout, evaluationId) { id =>
+            AnalysisRunner.runAnalysisById(analysisId, timeout, evaluationId, false /*TODO true*/) { id =>
                 unblockPage()
 
                 intervalHandler = Some(window.setInterval(() => {
@@ -139,7 +142,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
                 evaluationId = id
                 view.overviewView.controls.progressBar.setProgress(0.02)
-                schedulePolling(view, analysis)
+                schedulePolling(view, analysis, persistInAnalysisStorage)
             } {
                 error => fatalErrorHandler(error)
             }
@@ -175,9 +178,10 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         }
     }
 
-    private def schedulePolling(view: AnalysisRunnerView, analysis: Analysis) = {
+    private def schedulePolling(view: AnalysisRunnerView, analysis: Analysis,
+        persistInAnalysisStorage: Boolean) = {
         window.setTimeout(() => {
-            pollingHandler(view, analysis)
+            pollingHandler(view, analysis, persistInAnalysisStorage)
         }, pollingPeriod)
     }
 
@@ -207,8 +211,8 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         downloadResultAs("ttl")
     }
 
-    private def pollingHandler(view: AnalysisRunnerView, analysis: Analysis) {
-        AnalysisRunner.getEvaluationState(evaluationId) {
+    private def pollingHandler(view: AnalysisRunnerView, analysis: Analysis, persistInAnalysisStorage: Boolean) {
+        AnalysisRunner.getEvaluationState(evaluationId, analysis.id, false, persistInAnalysisStorage, false) {
             state =>
                 state match {
                     case s: EvaluationInProgress => renderEvaluationProgress(s, view)
@@ -218,7 +222,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
                 }
 
                 if (state.isInstanceOf[EvaluationInProgress]) {
-                    schedulePolling(view, analysis)
+                    schedulePolling(view, analysis, persistInAnalysisStorage)
                 }
         } {
             error => fatalErrorHandler(error)

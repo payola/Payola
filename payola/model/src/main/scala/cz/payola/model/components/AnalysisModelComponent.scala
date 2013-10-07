@@ -20,6 +20,7 @@ import cz.payola.domain.entities.analyses.evaluation.Success
 import cz.payola.common.EvaluationInProgress
 import cz.payola.domain.entities.analyses.evaluation.Error
 import cz.payola.common.EvaluationSuccess
+import cz.payola.data.squeryl.entities.AnalysisResult
 
 trait AnalysisModelComponent extends EntityModelComponent
 {
@@ -202,7 +203,7 @@ trait AnalysisModelComponent extends EntityModelComponent
             }
         }
 
-        def getEvaluationState(evaluationId: String, user: Option[User] = None) = {
+        def getEvaluationState(evaluationId: String, user: Option[User] = None) : EvaluationState = {
             val evaluationTuple = getEvaluationTupleForIDAndPerformSecurityChecks(evaluationId, user)
 
             runningEvaluations.put(evaluationId, (evaluationTuple._1, evaluationTuple._2, (new java.util.Date).getTime))
@@ -214,7 +215,8 @@ trait AnalysisModelComponent extends EntityModelComponent
                     r.instanceErrors.toList.map {
                         e => (e._1, transformException(e._2))
                     })
-                case r: Success => EvaluationSuccess(r.outputGraph,
+                case r: Success =>
+                    EvaluationSuccess(r.outputGraph,
                     r.instanceErrors.toList.map {
                         e => (e._1, transformException(e._2))
                     })

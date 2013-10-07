@@ -53,6 +53,11 @@ trait DataContextComponent
     val prefixRepository: PrefixRepository
 
     /**
+     * A repository to access stored analyses results
+     */
+    val analysisResultRepository: AnalysisResultRepository
+
+    /**
      * A registry that provides repositories by class name of persisted entity
      */
     lazy val repositoryRegistry = new RepositoryRegistry(Map(
@@ -309,6 +314,27 @@ trait DataContextComponent
          * @return Returns prefixes available to user
          */
         def getAllAvailableToUser(userId: Option[String]): Seq[Prefix]
+    }
+
+    trait AnalysisResultRepository extends Repository[AnalysisResult]
+    {
+        def storeAnalysis(analysisDescription: AnalysisResult)
+
+        def getNumberOfStoredAnalyses(): Long
+
+        def getNumberOfStoredForUser(userId: String): Long
+
+        def getStoredAnalysis(userId: String, analysisId: String): Option[AnalysisResult]
+
+        def deleteStoredAnalysis(userId: String, analysisId: String)
+
+        def updateTimestamp(userId: String, analysisId: String)
+
+        def getEvaluationId(userId: String, analysisId: String): Option[String]
+
+        def deleteOldest()
+
+        def deleteOldest(userId: String)
     }
 
     /**

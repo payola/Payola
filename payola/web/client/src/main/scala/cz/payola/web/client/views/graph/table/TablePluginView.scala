@@ -10,6 +10,8 @@ import cz.payola.web.client.views.bootstrap.Icon
 import cz.payola.web.client.views.graph.PluginView
 import cz.payola.web.client.models.PrefixApplier
 import form.fields.TextInput
+import cz.payola.web.shared.AnalysisCache
+import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
 
 abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier])
     extends PluginView(name, prefixApplier)
@@ -24,7 +26,12 @@ abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier
     def createSubViews = List(tablePluginWrapper)
 
     override def updateGraph(graph: Option[Graph], contractLiterals: Boolean = true) {
+        updateGraphPage(graph, contractLiterals)
+    }
+
+    def updateGraphPage(graph: Option[Graph], contractLiterals: Boolean = true, page: Int = 0) {
         if (graph != currentGraph) {
+            currentPage = page
             // Remove the old table.
             tableWrapper.removeAllChildNodes()
             tablePluginWrapper.removeAllChildNodes()
@@ -48,19 +55,24 @@ abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier
 
         val table = document.createElement[html.Element]("table")
         table.className = "table table-striped table-bordered table-condensed"
+
         tableWrapper.htmlElement.appendChild(table)
         pagesCount = fillTable(graph, addElement(table, "thead"), addElement(table, "tbody"), pageNumber)
     }
 
     protected def createListingTools(): View = {
-        val info = new Text("Page 1 of "+pagesCount)
+        val info = new Text("Page "+(currentPage + 1)+" of "+pagesCount)
 
         val firstPage = new Button(new Text("First"), "", new Icon(Icon.fast_backward))
         firstPage.mouseClicked += { e =>
             if (currentPage > 0) {
-                currentPage = 0
-                renderTablePage(currentGraph, currentPage)
-                info.text = "Page 1 of "+pagesCount
+                if(analysisId.isDefined) {
+                    paginateToPage(0)
+                } else {
+                    currentPage = 0
+                    renderTablePage(currentGraph, currentPage)
+                    info.text = "Page "+(currentPage + 1)+" of "+pagesCount
+                }
             }
             false
         }
@@ -68,9 +80,13 @@ abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier
         val previousPage = new Button(new Text("Previous"), "", new Icon(Icon.backward))
         previousPage.mouseClicked += { e =>
             if (currentPage > 0) {
-                currentPage -= 1
-                renderTablePage(currentGraph, currentPage)
-                info.text = "Page "+(currentPage + 1)+" of "+pagesCount
+                if(analysisId.isDefined) {
+                    paginateToPage(currentPage - 1)
+                } else {
+                    currentPage -= 1
+                    renderTablePage(currentGraph, currentPage)
+                    info.text = "Page "+(currentPage + 1)+" of "+pagesCount
+                }
             }
             false
         }
@@ -78,9 +94,13 @@ abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier
         val nextPage = new Button(new Text("Next"), "", new Icon(Icon.forward))
         nextPage.mouseClicked += { e =>
             if (currentPage < pagesCount - 1) {
-                currentPage += 1
-                renderTablePage(currentGraph, currentPage)
-                info.text = "Page "+(currentPage + 1)+" of "+pagesCount
+                if(analysisId.isDefined) {
+                    paginateToPage(currentPage + 1)
+                } else {
+                    currentPage += 1
+                    renderTablePage(currentGraph, currentPage)
+                    info.text = "Page "+(currentPage + 1)+" of "+pagesCount
+                }
             }
             false
         }
@@ -88,9 +108,13 @@ abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier
         val lastPage = new Button(new Text("Last"), "", new Icon(Icon.fast_forward))
         lastPage.mouseClicked += { e =>
             if (currentPage < pagesCount - 1) {
-                currentPage = pagesCount - 1
-                renderTablePage(currentGraph, currentPage)
-                info.text = "Page "+(currentPage + 1)+" of "+pagesCount
+                if(analysisId.isDefined) {
+                    paginateToPage(pagesCount - 1)
+                } else {
+                    currentPage = pagesCount - 1
+                    renderTablePage(currentGraph, currentPage)
+                    info.text = "Page "+(currentPage + 1)+" of "+pagesCount
+                }
             }
             false
         }
@@ -100,16 +124,31 @@ abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier
         jumpButton.mouseClicked += { e =>
             val jumpToPageNumber = jumpTextArea.value.toInt - 1
             if(currentPage != jumpToPageNumber) {
-                currentPage = if(jumpToPageNumber >= 0 && jumpToPageNumber <= pagesCount) {
+                val goingToPage = if(jumpToPageNumber >= 0 && jumpToPageNumber <= pagesCount) {
                     jumpToPageNumber } else { currentPage }
-                renderTablePage(currentGraph, currentPage)
-                info.text = "Page "+(currentPage + 1)+" of "+pagesCount
+
+                if(analysisId.isDefined) {
+                    paginateToPage(goingToPage)
+                } else {
+                    currentPage = goingToPage
+                    renderTablePage(currentGraph, currentPage)
+                    info.text = "Page "+(currentPage + 1)+" of "+pagesCount
+                }
             }
             false
         }
 
         new Div(List(firstPage, previousPage, nextPage, lastPage, info, jumpTextArea, jumpButton)).setAttribute(
             "style", "width:800px; margin: 0 auto;")
+    }
+
+    private def paginateToPage(goingToPage: Int) {
+        AnalysisCache.paginate(analysisId.get, Some(goingToPage), Some(50)) { paginated =>
+            updateGraphPage(Some(paginated), true, goingToPage)
+        } { error =>
+            val modal = new FatalErrorModal(error.toString())
+            modal.render()
+        }
     }
 
     def fillTable(graph: Option[Graph], tableHead: html.Element, tableBody: html.Element, pageNumber: Int): Int

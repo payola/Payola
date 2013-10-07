@@ -17,6 +17,7 @@ import cz.payola.web.client.views.graph.sigma.GraphSigmaPluginView
 import cz.payola.web.client.views.graph.datacube.TimeHeatmap
 import cz.payola.web.client.models.PrefixApplier
 import scala.Some
+import cz.payola.web.shared.AnalysisCache
 
 class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with ComposedView
 {
@@ -134,6 +135,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
     }
 
     override def updateGraph(graph: Option[Graph], contractLiterals: Boolean) {
+
         super.updateGraph(graph, contractLiterals)
         currentPlugin.updateGraph(graph, contractLiterals)
     }

@@ -17,6 +17,10 @@ import s2js.compiler.remote
 
     val virtuosoSqlPassword = config.getString("virtuoso.sql.password")
 
+    val maxStoredAnalyses = config.getInt("virtuoso.astore.capacity.total")
+
+    val maxStoredAnalysesPerUser = config.getInt("virtuoso.astore.capacity.peruser")
+
     val databaseLocation = config.getString("database.location")
 
     val databaseUser = config.getString("database.user")
