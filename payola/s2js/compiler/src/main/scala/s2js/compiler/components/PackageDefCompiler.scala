@@ -3,7 +3,7 @@ package s2js.compiler.components
 import scala.tools.nsc.Global
 import scala.collection._
 import scala.tools.nsc.io.AbstractFile
-import reflect.NoType
+import scala.reflect.api.Types
 import s2js.compiler.ScalaToJsException
 
 /** A compiler of PackageDef objects */
@@ -242,7 +242,7 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
       * @param tpe The type to check.
       * @return True if the type is empty, false otherwise.
       */
-    def typeIsEmpty(tpe: Global#Type): Boolean = {
+    def typeIsEmpty(tpe: Type): Boolean = {
         tpe == NoType || tpe.typeSymbol.fullName == "scala.Unit"
     }
 

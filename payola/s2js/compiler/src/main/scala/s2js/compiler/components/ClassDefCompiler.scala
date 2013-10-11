@@ -461,7 +461,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
                     case _: String | _: Char => {
                         buffer += toJsString(value.toString)
                     }
-                    case r: Global#UniqueTypeRef => {
+                    case r: Global#Type => {
                         // The result of classOf[X].
                         packageDefCompiler.dependencies.addRequiredSymbol(r.typeSymbol)
                         buffer += "%s.prototype.__class__".format(packageDefCompiler.getSymbolFullJsName(r.typeSymbol))
@@ -716,7 +716,7 @@ abstract class ClassDefCompiler(val packageDefCompiler: PackageDefCompiler, val 
         typeApply.fun match {
             case Select(qualifier, name) if name.toString.matches("(is|as)InstanceOf") => {
                 typeApply.args.head.tpe match {
-                    case uniqueTypeRef: Global#UniqueTypeRef => {
+                    case uniqueTypeRef: Global#Type => {
                         compileInstanceOf(uniqueTypeRef.typeSymbol, name.toString.take(2) == "is", qualifier)
                     }
                     case tpe => throw new ScalaToJsException("Unsupported type check/conversion: " + tpe.toString)
