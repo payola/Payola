@@ -5,6 +5,7 @@ import scala.collection._
 import scala.tools.nsc.io.AbstractFile
 import scala.reflect.api.Types
 import s2js.compiler.ScalaToJsException
+import javax.lang.model.`type`.NoType
 
 /** A compiler of PackageDef objects */
 class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFile, val packageDef: Global#PackageDef)
@@ -242,8 +243,13 @@ class PackageDefCompiler(val global: Global, private val sourceFile: AbstractFil
       * @param tpe The type to check.
       * @return True if the type is empty, false otherwise.
       */
-    def typeIsEmpty(tpe: Type): Boolean = {
-        tpe == NoType || tpe.typeSymbol.fullName == "scala.Unit"
+    def typeIsEmpty(tpe: Global#Type): Boolean = {
+        tpe match {
+            case x: NoType => true
+            case _ => {
+                if (tpe.typeSymbol.fullName == "scala.Unit") { true } else { false }
+            }
+        }
     }
 
     /**

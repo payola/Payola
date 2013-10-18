@@ -130,7 +130,7 @@ object PayolaBuild extends Build
     /** A project that is compiled to JavaScript using Scala to JavaScript compiler (beside standard compilation). */
     object ScalaToJsProject
     {
-        val compilerJar = Settings.targetDir / S2JsSettings.compilerJarName
+        val compilerJar = Settings.targetDir / "compiler_2.10-0.2.jar" //S2JsSettings.compilerJarName
 
         def apply(name: String, path: String, outputDir: File, settings: Seq[Project.Setting[_]]) = {
             raw(name, path, outputDir, settings).dependsOn(
