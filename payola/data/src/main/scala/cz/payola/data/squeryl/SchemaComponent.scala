@@ -394,7 +394,7 @@ trait SchemaComponent
                 new Prefix("", "", "", "", None)
             },
             factoryFor(analysesResults) is {
-                new AnalysisResult("", None, "", false, "", 0, new java.util.Date(System.currentTimeMillis()))
+                new AnalysisResult("", None, "", false, 0, new java.util.Date(System.currentTimeMillis()))
             }
         )
 
@@ -605,7 +605,7 @@ trait SchemaComponent
             on(analysesResults)(analysisRes =>
                 declare(
                     analysisRes.analysisId is(dbType(COLUMN_TYPE_ID)),
-                    analysisRes.userId is(dbType(COLUMN_TYPE_ID))
+                    analysisRes.evaluationId is(dbType(COLUMN_TYPE_ID))
                 ))
 
             // When a PluginDbRepresentation is deleted, all of the its instances and data sources will get deleted.

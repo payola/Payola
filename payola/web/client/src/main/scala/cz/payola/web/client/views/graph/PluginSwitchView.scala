@@ -17,7 +17,7 @@ import cz.payola.web.client.views.graph.sigma.GraphSigmaPluginView
 import cz.payola.web.client.views.graph.datacube.TimeHeatmap
 import cz.payola.web.client.models.PrefixApplier
 import scala.Some
-import cz.payola.web.shared.AnalysisCache
+import cz.payola.web.shared.AnalysisEvaluationResultsManager
 import scala.Some
 
 class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with ComposedView
@@ -132,12 +132,14 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
 
     override def update(graph: Option[Graph], customization: Option[DefinedCustomization]) {
         super.update(graph, customization)
+        currentPlugin.setEvaluationId(evaluationId)
         currentPlugin.update(graph, customization)
     }
 
     override def updateGraph(graph: Option[Graph], contractLiterals: Boolean) {
 
         super.updateGraph(graph, contractLiterals)
+        currentPlugin.setEvaluationId(evaluationId)
         currentPlugin.updateGraph(graph, contractLiterals)
     }
 
@@ -295,11 +297,20 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
             currentPlugin.destroy()
 
             // Switch to the new plugin.
+
             currentPlugin = plugin
+            currentPlugin.setEvaluationId(None)
             currentPlugin.render(pluginSpace.htmlElement)
             currentPlugin.renderControls(toolbar.htmlElement)
-            currentPlugin.update(currentGraph, currentCustomization)
-            currentPlugin.drawGraph()
+            //the default visualization is TripleTableView, which has implemented a server-side caching, support for other visualizations will be added with transformation layer
+            //now the whole graph has to fetched, this will be taken care of in transformation layer in next cache release iteration
+            if(evaluationId.isDefined) {
+                AnalysisEvaluationResultsManager.getCompleteAnalysisResult(evaluationId.get) { g =>
+                    currentGraph = g
+                    update(g, currentCustomization)
+                    currentPlugin.drawGraph()
+                } { err => }
+            }
         }
     }
 

@@ -110,7 +110,7 @@ class TripleTablePluginView(prefixApplier: Option[PrefixApplier]) extends TableP
             originCell.setAttribute("rowspan", originRowCount.toString)
         }
 
-        tableListing._2
+        if(graph.isDefined && graph.get.resultsCount.isDefined) graph.get.resultsCount.get else tableListing._2
     }
 
     private def createVertexDetailRow(edgeUri: String, edges: Seq[Edge], row: html.Element) {

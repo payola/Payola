@@ -16,7 +16,7 @@ abstract class GraphView
     protected var currentGraph: Option[Graph] = None
 
     /** The id of the analysis, which this graphView represents. */
-    protected val analysisId: Option[String] = None //TODO will be used with cache layer
+    protected var evaluationId: Option[String] = None
 
     /** The ontology customization that is currently used during visualization. */
     protected var currentCustomization: Option[DefinedCustomization] = None
@@ -79,7 +79,7 @@ abstract class GraphView
         updateGraph(None, true)
     }
 
-    def setAnalysisId(newId: String) {     //TODO will be used with cache layer
-        //analysisId = Some(newId)
+    def setEvaluationId(newEvaluationId: Option[String]) {
+        evaluationId = newEvaluationId
     }
 }

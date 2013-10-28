@@ -10,22 +10,15 @@ object AnalysisResult extends EntityConverter[AnalysisResult]
             case e: AnalysisResult => Some(e)
             case e: cz.payola.common.entities.AnalysisResult =>
                 Some(new AnalysisResult(e.analysisId, e.owner.map(User(_)), e.evaluationId, e.storedIn,
-                    e.userId, e.verticesCount, e.touchedTime))
+                    e.verticesCount, e.touched))
             case _ => None
         }
     }
 }
 
-class AnalysisResult (val AnalysisID: String, val o: Option[User], val EvaluationID: String, val Persist: Boolean,
-    val UserID: String, val VerticesCount: Int,
-    val Touched: java.util.Date)(implicit val context: SquerylDataContextComponent)
-    extends cz.payola.domain.entities.AnalysisResult(AnalysisID, o, EvaluationID, Persist, UserID, VerticesCount, Touched)
+class AnalysisResult (AnalysisID: String, o: Option[User], EvaluationID: String, Persist: Boolean,
+    VerticesCount: Int, Touched: java.util.Date)
+    (implicit val context: SquerylDataContextComponent)
+    extends cz.payola.domain.entities.AnalysisResult(AnalysisID, o, EvaluationID, Persist, VerticesCount, Touched)
     with Entity with OptionallyOwnedEntity
-{
-    evaluationid = EvaluationID
-    stored = Persist
-    analysisid = AnalysisID
-    userid = if(_owner.isDefined) _owner.get.id else UserID
-    verticescount = VerticesCount
-    touchedtime = Touched
-}
+{ }

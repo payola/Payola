@@ -98,7 +98,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
                 true
             }
 
-            graphPresenter.view.setAnalysisId(analysis.id)
+            graphPresenter.view.setEvaluationId(getAnalysisEvaluationID)
             graphPresenter.view.updateGraph(Some(evt.graph), true)
 
             view.tabs.showTab(1)
@@ -123,7 +123,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
             val persistInAnalysisStorage = view.overviewView.controls.persistInStore.field.value
             view.overviewView.controls.timeoutInfo.text = timeout.toString
 
-            AnalysisRunner.runAnalysisById(analysisId, timeout, evaluationId, false /*TODO true*/) { id =>
+            AnalysisRunner.runAnalysisById(analysisId, timeout, evaluationId, true) { id =>
                 unblockPage()
 
                 intervalHandler = Some(window.setInterval(() => {
@@ -212,7 +212,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
     }
 
     private def pollingHandler(view: AnalysisRunnerView, analysis: Analysis, persistInAnalysisStorage: Boolean) {
-        AnalysisRunner.getEvaluationState(evaluationId, analysis.id, false, persistInAnalysisStorage, false) {
+        AnalysisRunner.getEvaluationState(evaluationId, analysis.id, true, persistInAnalysisStorage, false) {
             state =>
                 state match {
                     case s: EvaluationInProgress => renderEvaluationProgress(s, view)

@@ -10,7 +10,7 @@ import cz.payola.web.client.views.bootstrap.Icon
 import cz.payola.web.client.views.graph.PluginView
 import cz.payola.web.client.models.PrefixApplier
 import form.fields.TextInput
-import cz.payola.web.shared.AnalysisCache
+import cz.payola.web.shared.AnalysisEvaluationResultsManager
 import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
 
 abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier])
@@ -66,7 +66,7 @@ abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier
         val firstPage = new Button(new Text("First"), "", new Icon(Icon.fast_backward))
         firstPage.mouseClicked += { e =>
             if (currentPage > 0) {
-                if(analysisId.isDefined) {
+                if(evaluationId.isDefined) {
                     paginateToPage(0)
                 } else {
                     currentPage = 0
@@ -80,7 +80,7 @@ abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier
         val previousPage = new Button(new Text("Previous"), "", new Icon(Icon.backward))
         previousPage.mouseClicked += { e =>
             if (currentPage > 0) {
-                if(analysisId.isDefined) {
+                if(evaluationId.isDefined) {
                     paginateToPage(currentPage - 1)
                 } else {
                     currentPage -= 1
@@ -94,7 +94,7 @@ abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier
         val nextPage = new Button(new Text("Next"), "", new Icon(Icon.forward))
         nextPage.mouseClicked += { e =>
             if (currentPage < pagesCount - 1) {
-                if(analysisId.isDefined) {
+                if(evaluationId.isDefined) {
                     paginateToPage(currentPage + 1)
                 } else {
                     currentPage += 1
@@ -108,7 +108,7 @@ abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier
         val lastPage = new Button(new Text("Last"), "", new Icon(Icon.fast_forward))
         lastPage.mouseClicked += { e =>
             if (currentPage < pagesCount - 1) {
-                if(analysisId.isDefined) {
+                if(evaluationId.isDefined) {
                     paginateToPage(pagesCount - 1)
                 } else {
                     currentPage = pagesCount - 1
@@ -127,7 +127,7 @@ abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier
                 val goingToPage = if(jumpToPageNumber >= 0 && jumpToPageNumber <= pagesCount) {
                     jumpToPageNumber } else { currentPage }
 
-                if(analysisId.isDefined) {
+                if(evaluationId.isDefined) {
                     paginateToPage(goingToPage)
                 } else {
                     currentPage = goingToPage
@@ -143,11 +143,13 @@ abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier
     }
 
     private def paginateToPage(goingToPage: Int) {
-        AnalysisCache.paginate(analysisId.get, Some(goingToPage), Some(50)) { paginated =>
-            updateGraphPage(Some(paginated), true, goingToPage)
-        } { error =>
-            val modal = new FatalErrorModal(error.toString())
-            modal.render()
+        if(evaluationId.isDefined) {
+            AnalysisEvaluationResultsManager.paginate(goingToPage, 50, evaluationId.get) { paginated =>
+                updateGraphPage(Some(paginated), true, goingToPage)
+            } { error =>
+                val modal = new FatalErrorModal(error.toString())
+                modal.render()
+            }
         }
     }
 

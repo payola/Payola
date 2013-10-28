@@ -318,23 +318,17 @@ trait DataContextComponent
 
     trait AnalysisResultRepository extends Repository[AnalysisResult]
     {
-        def storeAnalysis(analysisDescription: AnalysisResult)
+        def storeResult(analysisDescription: AnalysisResult)
 
-        def getNumberOfStoredAnalyses(): Long
+        def getResultsCount(): Long
 
-        def getNumberOfStoredForUser(userId: String): Long
+        def getResult(evaluationId: String, analysisId: String): Option[AnalysisResult]
 
-        def getStoredAnalysis(userId: String, analysisId: String): Option[AnalysisResult]
+        def deleteResult(evaluationId: String, analysisId: String)
 
-        def deleteStoredAnalysis(userId: String, analysisId: String)
+        def updateTimestamp(evaluationId: String)
 
-        def updateTimestamp(userId: String, analysisId: String)
-
-        def getEvaluationId(userId: String, analysisId: String): Option[String]
-
-        def deleteOldest()
-
-        def deleteOldest(userId: String)
+        def purge()
     }
 
     /**

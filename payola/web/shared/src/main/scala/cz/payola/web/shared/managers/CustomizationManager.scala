@@ -345,7 +345,7 @@ class CustomizationByOwnership(
 
         val optClassCustomization = getClassCustomizationOfCustomization(customizationID, classURI, conditionValue, user, failCallback)
         if (optClassCustomization.isDefined){
-            Console.println("setting to: "+optClassCustomization.get.uri+" value: "+optClassCustomization.get.conditionalValue)
+            //Console.println("setting to: "+optClassCustomization.get.uri+" value: "+optClassCustomization.get.conditionalValue)
             setter(optClassCustomization.get)
             Payola.model.userCustomizationModel.persistClassCustomization(optClassCustomization.get)
             successCallback()
