@@ -6,8 +6,9 @@ import cz.payola.common.visual.Color
 import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.graph.visual.graph.positioning.LocationDescriptor
 import s2js.adapters.html._
-import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.common.entities.settings._
 import cz.payola.web.client.models.PrefixApplier
+import scala.Some
 
 /**
  * Graphical representation of Edge object in the drawn graph.
@@ -86,15 +87,16 @@ class EdgeView(val edgeModel: Edge, private var _originView: VertexViewElement, 
         setColor(None)
     }
 
-    def setConfiguration(newCustomization: Option[OntologyCustomization]) {
+    def setConfiguration(newCustomization: Option[DefinedCustomization]) {
         if(newCustomization.isEmpty) {
             resetConfiguration()
         } else {
             val foundCustomizationType =
-                if(newCustomization.get.isUserDefined) {
-                    newCustomization.get.classCustomizations.find(_.uri == "properties")
-                } else {
-                    newCustomization.get.classCustomizations.find{ cust =>
+                newCustomization.get match {
+                    case uc: UserCustomization =>
+                        uc.classCustomizations.find(_.uri == "properties")
+                    case oc: OntologyCustomization =>
+                        oc.classCustomizations.find{ cust =>
                         originView match {
                             case view: VertexView => cust.uri == view.rdfType
                             case _ => false
@@ -131,6 +133,13 @@ class EdgeView(val edgeModel: Edge, private var _originView: VertexViewElement, 
     }
 
     def draw(context: elements.CanvasRenderingContext2D, positionCorrection: Vector2D) {
+        if(!isHidden) {
+            drawInner(context, positionCorrection)
+        }
+    }
+
+    private def drawInner(context: elements.CanvasRenderingContext2D, positionCorrection: Vector2D) {
+
         if(!_originView.isEqual(_destinationView)) {
             drawQuick(context, positionCorrection)
             if (isSelected) {
@@ -141,6 +150,13 @@ class EdgeView(val edgeModel: Edge, private var _originView: VertexViewElement, 
     }
 
     def drawQuick(context: elements.CanvasRenderingContext2D, positionCorrection: Vector2D) {
+        if(!isHidden) {
+            drawQuickInner(context, positionCorrection)
+        }
+    }
+
+    private def drawQuickInner(context: elements.CanvasRenderingContext2D, positionCorrection: Vector2D) {
+
         val colorToUse = if(isSelected) {
             new Color(color.red, color.green, color.blue)
         } else {

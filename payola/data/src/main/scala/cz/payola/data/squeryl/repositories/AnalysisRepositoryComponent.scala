@@ -5,7 +5,8 @@ import cz.payola.data.squeryl.entities.analyses._
 import org.squeryl.PrimitiveTypeMode._
 import cz.payola.data.squeryl.entities._
 import cz.payola.data.squeryl.entities.plugins._
-import cz.payola.domain.entities.settings.OntologyCustomization
+import cz.payola.domain.entities.settings._
+import scala.Some
 
 /**
  * Provides repository to access persisted analyses
@@ -108,13 +109,12 @@ trait AnalysisRepositoryComponent extends TableRepositoryComponent
                 // Set loaded plugins, plugin instances and its bindings to analysis, load default customization
                 analysis.pluginInstances = pluginInstancesByIds.values.toSeq
                 analysis.pluginInstanceBindings = instanceBindings
-                analysis.defaultOntologyCustomization = _getDefaultOntologyCustomization(analysis
-                    .defaultCustomizationId)
+                analysis.defaultOntologyCustomization = _getDefaultOntologyCustomization(analysis.defaultCustomizationId)
             }
         }
 
         private def _getDefaultOntologyCustomization(id: Option[String]): Option[OntologyCustomization] = {
-            id.flatMap(ontologyCustomizationRepository.getById(_))
+            id.flatMap(customizationRepository.getById(_)).flatMap(_.toOntologyCustomization())
         }
     }
 

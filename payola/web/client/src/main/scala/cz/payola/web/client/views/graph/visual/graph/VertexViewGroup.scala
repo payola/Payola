@@ -6,8 +6,9 @@ import s2js.adapters.html.elements.CanvasRenderingContext2D
 import cz.payola.common.visual.Color
 import collection.mutable.ListBuffer
 import cz.payola.common.rdf._
-import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.common.entities.settings._
 import cz.payola.web.client.models.PrefixApplier
+import scala.Some
 
 class VertexViewGroup(position: Point2D, prefixApplier: Option[PrefixApplier])
     extends VertexViewElement(position, prefixApplier) {
@@ -236,7 +237,7 @@ class VertexViewGroup(position: Point2D, prefixApplier: Option[PrefixApplier])
         }
     }
 
-    def setConfiguration(newCustomization: Option[OntologyCustomization]) {
+    def setConfiguration(newCustomization: Option[DefinedCustomization]) {
         val name = getName
         setVisualConfiguration(newCustomization, name, name, () => List[(String, Seq[String])]())
     }

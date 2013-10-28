@@ -1,6 +1,6 @@
 package cz.payola.domain.entities.settings
 
-import cz.payola.domain.Entity
+import cz.payola.domain._
 import scala.collection.immutable
 import cz.payola.common.visual.Color
 import cz.payola.common.ValidationException
@@ -11,7 +11,9 @@ class ClassCustomization(
     protected var _radius: Int,
     protected var _glyph: String,
     protected var _labels: String,
-    protected var _propertyCustomizations: immutable.Seq[PropertyCustomization])
+    protected var _conditionalValue: String,
+    protected var _propertyCustomizations: immutable.Seq[PropertyCustomization],
+    override val id: String = IDGenerator.newId)
     extends Entity
     with cz.payola.common.entities.settings.ClassCustomization
 {

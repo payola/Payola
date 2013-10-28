@@ -2,7 +2,7 @@ package cz.payola.web.client.views
 
 import cz.payola.common.rdf._
 import cz.payola.web.client.events._
-import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.common.entities.settings._
 import cz.payola.common.visual.Color
 
 class VertexEventArgs[+A](target: A, val vertex: Vertex) extends EventArgs[A](target)
@@ -19,7 +19,7 @@ abstract class GraphView
     protected val analysisId: Option[String] = None //TODO will be used with cache layer
 
     /** The ontology customization that is currently used during visualization. */
-    protected var currentCustomization: Option[OntologyCustomization] = None
+    protected var currentCustomization: Option[DefinedCustomization] = None
 
     /** Triggered when a vertex is selected. */
     val vertexSelected = new UnitEvent[this.type, VertexEventArgs[this.type]]
@@ -42,8 +42,8 @@ abstract class GraphView
      * @param graph The graph to visualize.
      * @param customization The ontology customization that should be used during visualization.
      */
-    def update(graph: Option[Graph], customization: Option[OntologyCustomization]) {
-        updateOntologyCustomization(customization)
+    def update(graph: Option[Graph], customization: Option[DefinedCustomization]) {
+        updateCustomization(customization)
         updateGraph(graph, true)
     }
 
@@ -64,7 +64,7 @@ abstract class GraphView
      * Updates the ontology customization that should be used during graph visualization and re-runs the visualization.
      * @param customization The ontology customization that should be used.
      */
-    def updateOntologyCustomization(customization: Option[OntologyCustomization]) {
+    def updateCustomization(customization: Option[DefinedCustomization]) {
         currentCustomization = customization
     }
 

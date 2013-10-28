@@ -4,7 +4,8 @@ import cz.payola.data.squeryl.entities.plugins.DataSource
 import scala.collection.immutable
 import scala.collection.mutable
 import cz.payola.data.squeryl._
-import cz.payola.data.squeryl.entities.settings.OntologyCustomization
+import cz.payola.data.squeryl.entities.settings._
+import scala.Some
 
 /**
  * This object converts [[cz.payola.common.entities.User]] to [[cz.payola.common.entities.User]].
@@ -52,7 +53,7 @@ class User(override val id: String, name: String, pwd: String, mail: String)
 
     private lazy val _ownedDataSourcesQuery = context.schema.dataSourceOwnership.left(this)
 
-    _ontologyCustomizations = null
+    _customizations = null
 
     private lazy val _ownedCustomizationsQuery = context.schema.customizationOwnership.left(this)
 
@@ -108,16 +109,16 @@ class User(override val id: String, name: String, pwd: String, mail: String)
         _ownedPlugins.toList
     }
 
-    override def ownedOntologyCustomizations: immutable.Seq[OntologyCustomizationType] = {
-        if (_ontologyCustomizations == null) {
+    override def ownedCustomizations: immutable.Seq[CustomizationType] = {
+        if (_customizations == null || _customizations.isEmpty) {
+
             wrapInTransaction {
-                _ontologyCustomizations = mutable.ArrayBuffer(
-                    context.ontologyCustomizationRepository.getAllByOwnerId(Some(id)): _*
+                _customizations = mutable.ArrayBuffer(
+                    context.customizationRepository.getAllByOwnerId(Some(id)): _*
                 )
             }
         }
-
-        _ontologyCustomizations.toList
+        _customizations.toList
     }
 
     override def availablePrefixes: immutable.Seq[PrefixType] = {
@@ -150,9 +151,9 @@ class User(override val id: String, name: String, pwd: String, mail: String)
         super.storeOwnedPlugin(plugin)
     }
 
-    override protected def storeOntologyCustomization(customization: User#OntologyCustomizationType) {
-        super.storeOntologyCustomization(
-            context.schema.associate(OntologyCustomization(customization), _ownedCustomizationsQuery)
+    override protected def storeCustomization(customization: User#CustomizationType) {
+        super.storeCustomization(
+            context.schema.associate(Customization(customization), _ownedCustomizationsQuery)
         )
     }
 
@@ -184,10 +185,10 @@ class User(override val id: String, name: String, pwd: String, mail: String)
         super.discardOwnedPlugin(plugin)
     }
 
-    override protected def discardOntologyCustomization(customization: User#OntologyCustomizationType) {
-        context.ontologyCustomizationRepository.removeById(customization.id)
+    override protected def discardCustomization(customization: User#CustomizationType) {
+        context.customizationRepository.removeById(customization.id)
 
-        super.discardOntologyCustomization(customization)
+        super.discardCustomization(customization)
     }
 
     override protected def discardOwnedPrefix(prefix: User#PrefixType) {

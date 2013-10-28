@@ -55,8 +55,8 @@ class InformationView(private var _labels: List[Any]) extends View[html.elements
         setAlign(None)
     }
 
-    def setConfiguration(newCustomization: Option[OntologyCustomization]) {
-        //ontologies do not contain text configuration
+    def setConfiguration(newCustomization: Option[DefinedCustomization]) {
+        //no configuration fot InfoView
     }
 
     def draw(context: elements.CanvasRenderingContext2D, positionCorrection: Vector2D) {

@@ -58,7 +58,7 @@ abstract class SigmaPluginView(name: String, prefixApplier: Option[PrefixApplier
 
     def getRdfType(node: Node): String
 
-    override def updateOntologyCustomization(newCustomization: Option[OntologyCustomization]) {
+    override def updateCustomization(newCustomization: Option[DefinedCustomization]) {
 
         if (sigmaInstance.isDefined) {
             if(newCustomization.isDefined) {

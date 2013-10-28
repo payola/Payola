@@ -1,23 +1,24 @@
 package cz.payola.web.client.presenters.entity.settings
 
-import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.common.entities.settings._
 import cz.payola.web.client.Presenter
 import cz.payola.web.client.events._
 import cz.payola.web.client.views.entity.settings.UserCustomizationEditModal
-import cz.payola.web.client.views.bootstrap.InputControl
+import cz.payola.web.client.views.bootstrap._
 import cz.payola.web.client.views.elements.form.fields.TextInput
-import cz.payola.web.client.models.Model
+import cz.payola.web.client.models._
 import cz.payola.common.ValidationException
 import cz.payola.web.client.views.bootstrap.modals._
-import cz.payola.web.shared.managers.OntologyCustomizationManager
+import cz.payola.web.shared.managers.CustomizationManager
 import scala.Some
 import cz.payola.common.rdf.Graph
 import cz.payola.web.client.views.graph.visual.graph.GraphView
+import scala.Some
+import scala.Some
 
-class UserCustomizationEditor (currentGraph: Option[GraphView], userCustomization: OntologyCustomization, onClose: () => Unit)
-    extends Presenter
+class UserCustomizationEditor (currentGraph: Option[GraphView], userCustomization: UserCustomization, onClose: () => Unit) extends Presenter
 {
-    val customizationChanged = new SimpleUnitEvent[OntologyCustomizationEventArgs]
+    val customizationChanged = new SimpleUnitEvent[DefinedCustomizationEventArgs]
 
     private val view = new UserCustomizationEditModal(currentGraph, userCustomization, onClose)
 
@@ -28,18 +29,19 @@ class UserCustomizationEditor (currentGraph: Option[GraphView], userCustomizatio
         view.classRadiusDelayedChanged += onClassRadiusChanged _
         view.classGlyphChanged += onClassGlyphChanged _
         view.classLabelsChanged += onClassLabelsChanged _
+        view.classConditionChanged += onClassConditionChanged _
         view.propertyStrokeColorChanged += onPropertyStrokeColorChanged _
         view.propertyStrokeWidthDelayedChanged += onPropertyStrokeWidthChanged _
 
         view.customizationChanged += { e =>
-            customizationChanged.triggerDirectly(new OntologyCustomizationEventArgs(e.target))
+            customizationChanged.triggerDirectly(new DefinedCustomizationEventArgs(e.target))
         }
         view.render()
     }
 
     private def onUserCustomizationNameChanged(e: EventArgs[InputControl[_ <: TextInput]]) {
         e.target.isActive = true
-        Model.changeOntologyCustomizationName(
+        Model.changeCustomizationName(
             userCustomization, e.target.field.value) { () =>
 
             e.target.isActive = false
@@ -59,7 +61,7 @@ class UserCustomizationEditor (currentGraph: Option[GraphView], userCustomizatio
 
         promptModal.confirming += { e =>
             view.block("Deleting the user customization")
-            Model.deleteOntologyCustomization(userCustomization.asInstanceOf[OntologyCustomization]) { () =>
+            Model.deleteUserCustomization(userCustomization) { () =>
                 view.destroy()
                 AlertModal.display("Success", "The user customization was successfully deleted.", "alert-success",
                     Some(4000))
@@ -73,44 +75,56 @@ class UserCustomizationEditor (currentGraph: Option[GraphView], userCustomizatio
 
     private def onClassFillColorChanged(e: ClassCustomizationEventArgs[InputControl[_]]) {
         e.target.isActive = true
-        OntologyCustomizationManager.setClassFillColor(userCustomization.id, e.classCustomization.uri, e.newValue) {
+        CustomizationManager.setClassFillColor(userCustomization.id, e.classCustomization.uri,
+            e.classCustomization.conditionalValue, e.newValue) {
             () => successHandler(e, () => e.classCustomization.fillColor = e.newValue)
         }(failHandler(_, e.target))
     }
 
     private def onClassGlyphChanged(e: ClassCustomizationEventArgs[InputControl[_]]) {
         e.target.isActive = true
-        OntologyCustomizationManager.setClassGlyph(userCustomization.id, e.classCustomization.uri, e.newValue){
+        CustomizationManager.setClassGlyph(userCustomization.id, e.classCustomization.uri,
+            e.classCustomization.conditionalValue, e.newValue){
             () => successHandler(e, () => e.classCustomization.glyph = e.newValue)
         }(failHandler(_, e.target))
     }
 
     private def onClassRadiusChanged(e: ClassCustomizationEventArgs[InputControl[_]]) {
         e.target.isActive = true
-        OntologyCustomizationManager.setClassRadius(userCustomization.id, e.classCustomization.uri, e.newValue){
+        CustomizationManager.setClassRadius(userCustomization.id, e.classCustomization.uri,
+            e.classCustomization.conditionalValue, e.newValue){
             () => successHandler(e, () => e.classCustomization.radius = e.newValue.toInt)
         }(failHandler(_, e.target))
     }
 
     private def onClassLabelsChanged(e: ClassCustomizationEventArgs[InputControl[_]]) {
         e.target.isActive = true
-        OntologyCustomizationManager.setClassLabels(userCustomization.id, e.classCustomization.uri, e.newValue){
+        CustomizationManager.setClassLabels(userCustomization.id, e.classCustomization.uri,
+            e.classCustomization.conditionalValue, e.newValue){
             () => successHandler(e, () => e.classCustomization.labels = e.newValue)
+        }(failHandler(_, e.target))
+    }
+
+    private def onClassConditionChanged(e: ClassCustomizationEventArgs[InputControl[_]]) {
+        e.target.isActive = true
+        CustomizationManager.setClassCondition(userCustomization.id, e.classCustomization.uri,
+            e.classCustomization.conditionalValue, e.newValue){
+            () => successHandler(e, () => e.classCustomization.conditionalValue = e.newValue)
         }(failHandler(_, e.target))
     }
 
     private def onPropertyStrokeColorChanged(e: PropertyCustomizationEventArgs[InputControl[_]]) {
         e.target.isActive = true
-        OntologyCustomizationManager.setPropertyStrokeColor(userCustomization.id, e.classCustomization.uri,
-            e.propertyCustomization.uri, e.newValue) { () =>
+        CustomizationManager.setPropertyStrokeColor(userCustomization.id, e.classCustomization.uri,
+            e.classCustomization.conditionalValue, e.propertyCustomization.uri, e.newValue) { () =>
             successHandler(e, () => e.propertyCustomization.strokeColor = e.newValue)
         }(failHandler(_, e.target))
     }
 
     private def onPropertyStrokeWidthChanged(e: PropertyCustomizationEventArgs[InputControl[_]]) {
         e.target.isActive = true
-        OntologyCustomizationManager.setPropertyStrokeWidth(userCustomization.id, e.classCustomization.uri,
-            e.propertyCustomization.uri, e.newValue) { () =>
+        CustomizationManager.setPropertyStrokeWidth(userCustomization.id, e.classCustomization.uri,
+            e.classCustomization.conditionalValue, e.propertyCustomization.uri, e.newValue) { () =>
             successHandler(e, () => e.propertyCustomization.strokeWidth = e.newValue.toInt)
         }(failHandler(_, e.target))
     }
@@ -119,7 +133,7 @@ class UserCustomizationEditor (currentGraph: Option[GraphView], userCustomizatio
         e.target.isActive = false
         e.target.setOk()
         valueSetter()
-        customizationChanged.triggerDirectly(new OntologyCustomizationEventArgs(userCustomization))
+        customizationChanged.triggerDirectly(new DefinedCustomizationEventArgs(userCustomization))
     }
 
     /**

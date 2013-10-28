@@ -9,8 +9,9 @@ import cz.payola.common.rdf._
 import collection.mutable.ListBuffer
 import scala.Some
 import scala.Some
-import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.common.entities.settings._
 import cz.payola.web.client.models.PrefixApplier
+import scala.Some
 
 abstract class VertexViewElement(var position: Point2D, prefixApplier: Option[PrefixApplier])
     extends View[CanvasRenderingContext2D] {
@@ -101,6 +102,16 @@ abstract class VertexViewElement(var position: Point2D, prefixApplier: Option[Pr
         }
     }
 
+    override def hide() {
+        destroy()
+        hidden = true
+    }
+
+    override def show(parent: html.Element) {
+        render(parent)
+        hidden = false
+    }
+
     def render(parent: html.Element) {
         glyphSpan.foreach{ gS =>
             gS.render(parent)
@@ -120,60 +131,118 @@ abstract class VertexViewElement(var position: Point2D, prefixApplier: Option[Pr
         setGlyph(None)
     }
 
-    def setVisualConfiguration(newCustomization: Option[OntologyCustomization], uniId: String, rdfType: String,
+    def setVisualConfiguration(newCustomization: Option[DefinedCustomization], uniId: String, rdfType: String,
         getLiterals: () => List[(String, Seq[String])]) {
 
         if(newCustomization.isEmpty) {
             resetConfiguration()
             information = Some(InformationView.constructBySingle(uniId, prefixApplier))
         } else {
+            var valuesSetByCondition = (false, false, false, false)
             val foundCustomization =
-                if(newCustomization.get.isUserDefined){
-                    val found = newCustomization.get.classCustomizations.find(_.hasId(uniId))
+                newCustomization.get match {
+                    case uc: UserCustomization => {
+                        val found = uc.classCustomizations.find(_.hasId(uniId))
 
-                    if(found.isDefined && found.get.labels != null && found.get.labels != "") {
-                        information = InformationView.constructByMultiple(
-                            found.get.labelsSplitted, uniId, getLiterals(), prefixApplier)
-                    } else {
-                        information = None
+                        valuesSetByCondition = applyConditionalClassCustomizations(
+                            uc.classCustomizations.filter(_.isConditionalCustomization), uniId, getLiterals)
+
+                        if(found.isDefined && found.get.labels != null && found.get.labels != "") {
+                            information = InformationView.constructByMultiple(
+                                found.get.labelsSplitted, uniId, getLiterals(), prefixApplier)
+                        } else if(!valuesSetByCondition._1) {
+                            information = None
+                        }
+
+                        found
                     }
-                    found
-                } else {
-                    information = Some(InformationView.constructBySingle(uniId, prefixApplier))
-                    newCustomization.get.classCustomizations.find{_.uri == rdfType}
+                    case oc: OntologyCustomization => {
+                        information = Some(InformationView.constructBySingle(uniId, prefixApplier))
+                        oc.classCustomizations.find{_.uri == rdfType}
+                    }
                 }
 
             if(foundCustomization.isEmpty) {
-                resetConfiguration()
+                if(!valuesSetByCondition._1 && !valuesSetByCondition._2 && !valuesSetByCondition._3
+                    && !valuesSetByCondition._4) { //there was no conditionalClass that modified this vertex
+                    resetConfiguration()
+                }
             } else {
                 //radius
                 if(foundCustomization.get.radius != 0) {
                     setRadius(Some(foundCustomization.get.radius))
-                } else {
+                } else if(!valuesSetByCondition._2) {
                     setRadius(None)
                 }
 
                 //color
                 if(foundCustomization.get.fillColor.length != 0) {
                     setColor(Color(foundCustomization.get.fillColor))
-                } else {
+                } else if(!valuesSetByCondition._3) {
                     setColor(None)
                 }
 
                 //glyph
                 if(foundCustomization.get.glyph.length != 0) {
                     setGlyph(Some(foundCustomization.get.glyph))
-                } else {
+                } else if(!valuesSetByCondition._4) {
                     setGlyph(None)
                 }
             }
         }
     }
 
-    override def toString: String = {
-        this.position.toString
-        //"["+vertexModel.toString+"]"
+    private def applyConditionalClassCustomizations(customizations: Seq[ClassCustomization], uniId: String,
+        getLiterals: () => List[(String, Seq[String])]): (Boolean, Boolean, Boolean, Boolean) = {
+
+        var valuesSet = (false, false, false, false)
+        customizations.foreach{ custo =>
+            if(edges.exists( e => e.edgeModel.uri == custo.getUri && e.originView.isEqual(this)
+                && (custo.conditionalValue == null || custo.conditionalValue == ""
+                || custo.conditionalValue == e.destinationView.getFirstContainedVertex().toString))) {
+
+                if(custo.labels != "") {
+                    val splittedLabels = custo.labelsSplitted
+                    if(splittedLabels(0).userDefined) { //use the definition
+                        information = Some(InformationView.constructBySingle(splittedLabels(0).value, prefixApplier))
+                    } else { //use the property value
+                        val edgeOpt = edges.find(_.edgeModel.uri == custo.getUri)
+                        edgeOpt.foreach{ edge =>
+                            information = Some(InformationView.constructBySingle(
+                                edge.destinationView.getFirstContainedVertex(), prefixApplier))
+                        }
+                    }
+                    valuesSet = (true, false, false, false)
+                } else {
+                    if(!valuesSet._1) {
+                        information = None //if this customization does not define (has not defined yet) a label
+                    }
+                }
+
+                //radius
+                if(custo.radius != 0) {
+                    setRadius(Some(custo.radius))
+                    valuesSet = (valuesSet._1, true, false, false)
+                }
+
+                //color
+                if(custo.fillColor.length != 0) {
+                    setColor(Color(custo.fillColor))
+                    valuesSet = (valuesSet._1, valuesSet._2, true, false)
+                }
+
+                //glyph
+                if(custo.glyph.length != 0) {
+                    setGlyph(Some(custo.glyph))
+                    valuesSet = (valuesSet._1, valuesSet._2, valuesSet._3, true)
+                }
+            }
+        }
+
+        valuesSet
     }
+
+    override def toString = this.position.toString //"["+vertexModel.toString+"]"
 
     def isEqual(vertexElement: Any): Boolean
 

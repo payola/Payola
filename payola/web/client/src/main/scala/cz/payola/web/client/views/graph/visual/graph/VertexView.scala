@@ -7,13 +7,13 @@ import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.graph.visual.graph.positioning.LocationDescriptor
 import cz.payola.common.rdf._
 import cz.payola.web.client.models.PrefixApplier
-import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.common.entities.settings.DefinedCustomization
 
 /**
  * Graphical representation of IdentifiedVertex object in the drawn graph.
  * @param vertexModel the vertex object from the model, that is visualized
  * @param position of this graphical representation in drawing space
- * @param rdfType type of the vertex used to identify drawing settings in an ontology
+ * @param rdfType type of the vertex used to identify drawing settings in a customization
  * @param prefixApplier labels transformer
  */
 class VertexView(_vertexModel: Vertex, position: Point2D, private var _rdfType: String, prefixApplier: Option[PrefixApplier])
@@ -110,12 +110,21 @@ class VertexView(_vertexModel: Vertex, position: Point2D, private var _rdfType: 
     }
 
     def isPointInside(point: Point2D): Boolean = {
-        val radiusVector = Vector2D.One * radius
-        isPointInRect(point, position + (-radiusVector),
-            position + radiusVector)
+        if(isHidden) {
+            false
+        } else {
+            val radiusVector = Vector2D.One * radius
+            isPointInRect(point, position + (-radiusVector), position + radiusVector)
+        }
     }
 
     def draw(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
+        if(!isHidden) {
+            drawInner(context, positionCorrection)
+        }
+    }
+
+    private def drawInner(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
 
         drawQuick(context, positionCorrection)
 
@@ -153,6 +162,13 @@ class VertexView(_vertexModel: Vertex, position: Point2D, private var _rdfType: 
     }
 
     def drawQuick(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
+        if(!isHidden) {
+            drawQuickInner(context, positionCorrection)
+        }
+    }
+
+    private def drawQuickInner(context: CanvasRenderingContext2D, positionCorrection: Vector2D) {
+
         val correctedPosition = this.position + positionCorrection
 
         drawCircle(context, correctedPosition, radius, borderSize, borderColor)
@@ -163,7 +179,7 @@ class VertexView(_vertexModel: Vertex, position: Point2D, private var _rdfType: 
         }
     }
 
-    def setConfiguration(newCustomization: Option[OntologyCustomization]) {
+    def setConfiguration(newCustomization: Option[DefinedCustomization]) {
         setVisualConfiguration(newCustomization, vertexModel match {
             case i: IdentifiedVertex => i.uri
             case i: LiteralVertex => i.value.toString()

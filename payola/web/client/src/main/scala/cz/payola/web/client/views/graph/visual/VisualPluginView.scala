@@ -14,7 +14,7 @@ import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.graph.visual.graph._
 import cz.payola.web.client.views._
 import bootstrap._
-import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.common.entities.settings.DefinedCustomization
 import cz.payola.common.visual.Color
 import lists.ListItem
 import models.PrefixApplier
@@ -261,6 +261,7 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
 
         infoTable.groupNameField.changed += { k =>
             vertexGroup.setName(infoTable.groupNameField.value)
+            hideByCustomization(currentCustomization)
             vertexGroup.setConfiguration(currentCustomization)
             vertexGroup.render(_parentHtmlElement.getOrElse(document.body))
             true
@@ -317,11 +318,12 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
         }
     }
 
-    override def updateOntologyCustomization(newCustomization: Option[OntologyCustomization]) {
+    override def updateCustomization(newCustomization: Option[DefinedCustomization]) {
         currentCustomization = newCustomization
 
         graphView.foreach {
             gV =>
+                hideByCustomization(currentCustomization)
                 gV.setConfiguration(newCustomization)
                 _parentHtmlElement.foreach(gV.render(_))
         }
@@ -392,6 +394,7 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
                 graphView.get.update(graph.get, topLayer.getCenter, prefixApplier: Option[PrefixApplier])
                 graphView.foreach {
                     gV =>
+                        hideByCustomization(currentCustomization)
                         gV.setConfiguration(currentCustomization)
                         _parentHtmlElement.foreach(gV.render(_))
                 }
@@ -562,6 +565,22 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
             }
         }
         mouseDownPosition = end
+    }
+
+    private def hideByCustomization(customization: Option[DefinedCustomization]) {
+        graphView.foreach{ g =>
+            g.getAllEdges.foreach{ edge =>
+                if(customization.isDefined && customization.get.classCustomizations.exists{cc =>
+                    cc.isConditionalCustomization && cc.getUri == edge.edgeModel.uri}) {
+
+                    edge.hide()
+                    edge.destinationView.hide()
+                } else {
+                    edge.show(_parentHtmlElement.getOrElse(document.body))
+                    edge.destinationView.show(_parentHtmlElement.getOrElse(document.body))
+                }
+            }
+        }
     }
 
     /**

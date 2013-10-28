@@ -1,7 +1,7 @@
 package cz.payola.common.entities.privileges
 
 import cz.payola.common.entities._
-import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.common.entities.settings._
 import cz.payola.common.entities.plugins.DataSource
 
 /**
@@ -21,6 +21,6 @@ trait AccessDataSourcePrivilege extends Privilege[DataSource]
 trait UsePluginPrivilege extends Privilege[Plugin]
 
 /**
-  * The user may apply the specified ontology customization to the results of analyses.
-  */
-trait UseOntologyCustomizationPrivilege extends Privilege[OntologyCustomization]
+ * The user may apply the specified user customization to the results of analyses.
+ */
+trait UseCustomizationPrivilege extends Privilege[Customization]

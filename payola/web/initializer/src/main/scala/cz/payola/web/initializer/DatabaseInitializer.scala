@@ -213,7 +213,7 @@ object DatabaseInitializer extends App
             }
         }
 
-        model.ontologyCustomizationRepository.persist(customization)
+        model.customizationRepository.persist(customization)
     }
 
     /*

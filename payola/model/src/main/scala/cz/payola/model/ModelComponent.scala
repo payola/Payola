@@ -13,6 +13,7 @@ trait ModelComponent
     with PluginModelComponent
     with DataSourceModelComponent
     with OntologyCustomizationModelComponent
+    with UserCustomizationModelComponent
     with PayolaStorageModelComponent
     with PrivilegeModelComponent
     with DataCubeModelComponent

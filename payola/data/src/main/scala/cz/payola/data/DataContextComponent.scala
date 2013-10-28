@@ -4,7 +4,7 @@ import cz.payola.common.Entity
 import cz.payola.common.entities.ShareableEntity
 import cz.payola.domain.entities._
 import cz.payola.domain.entities.plugins._
-import cz.payola.domain.entities.settings.OntologyCustomization
+import cz.payola.domain.entities.settings.Customization
 import cz.payola.domain.entities.Prefix
 
 /**
@@ -45,7 +45,7 @@ trait DataContextComponent
     /**
      * A repository to access persisted ontology customizations
      */
-    val ontologyCustomizationRepository: OntologyCustomizationRepository
+    val customizationRepository: CustomizationRepository
 
     /**
      * A repository to access persisted prefixes
@@ -67,7 +67,7 @@ trait DataContextComponent
         classOf[Analysis] -> analysisRepository,
         classOf[Plugin] -> pluginRepository,
         classOf[DataSource] -> dataSourceRepository,
-        classOf[OntologyCustomization] -> ontologyCustomizationRepository,
+        classOf[Customization] -> customizationRepository,
         classOf[Prefix] -> prefixRepository
     ))
 
@@ -256,11 +256,11 @@ trait DataContextComponent
     /**
      * Defines operations of repository accessing ontology customizations
      */
-    trait OntologyCustomizationRepository
-        extends Repository[OntologyCustomization]
-        with NamedEntityRepository[OntologyCustomization]
-        with OptionallyOwnedEntityRepository[OntologyCustomization]
-        with ShareableEntityRepository[OntologyCustomization]
+    trait CustomizationRepository
+        extends Repository[Customization]
+        with NamedEntityRepository[Customization]
+        with OptionallyOwnedEntityRepository[Customization]
+        with ShareableEntityRepository[Customization]
     {
         /**
          * Persists given ClassCustomization

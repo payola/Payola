@@ -6,7 +6,7 @@ import cz.payola.domain.entities._
 import cz.payola.domain.entities.Analysis
 import cz.payola.domain.entities.privileges._
 import cz.payola.domain.entities.plugins.DataSource
-import cz.payola.domain.entities.settings.OntologyCustomization
+import cz.payola.domain.entities.settings._
 import cz.payola.data.DataContextComponent
 import cz.payola.model._
 
@@ -55,7 +55,7 @@ trait PrivilegeModelComponent extends EntityModelComponent
                 Entity.getClassName(classOf[Analysis]) -> classOf[AccessAnalysisPrivilege],
                 Entity.getClassName(classOf[Plugin]) -> classOf[UsePluginPrivilege],
                 Entity.getClassName(classOf[DataSource]) -> classOf[AccessDataSourcePrivilege],
-                Entity.getClassName(classOf[OntologyCustomization]) -> classOf[UseOntologyCustomizationPrivilege]
+                Entity.getClassName(classOf[Customization]) -> classOf[UseCustomizationPrivilege]
             ).getOrElse(Entity.getClassName(objectEntityClass), throw new ModelException(
                 "The entity of class %s doesn't have a sharing privilege.".format(objectEntityClass.getName))
             )
@@ -76,7 +76,7 @@ trait PrivilegeModelComponent extends EntityModelComponent
                 case a: Analysis => new AccessAnalysisPrivilege(granter, grantee, a)
                 case p: Plugin => new UsePluginPrivilege(granter, grantee, p)
                 case d: DataSource => new AccessDataSourcePrivilege(granter, grantee, d)
-                case o: OntologyCustomization => new UseOntologyCustomizationPrivilege(granter, grantee, o)
+                case c: Customization => new UseCustomizationPrivilege(granter, grantee, c)
                 case _ => {
                     throw new ModelException("The entity of class %s doesn't have a sharing privilege.".format(
                         objectEntity.getClass.getName))
