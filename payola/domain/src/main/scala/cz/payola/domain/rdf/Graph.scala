@@ -16,7 +16,7 @@ object Graph
     /**
      * Returns a new empty graph.
      */
-    def empty: Graph = new Graph(Nil, Nil)
+    def empty: Graph = new Graph(Nil, Nil, None)
 
     /**
      * Takes a string representing a RDF data and returns an instance of Graph representing that particular graph.
@@ -85,12 +85,12 @@ object Graph
             }
         }
 
-        new Graph(literalVertices.toList ++ identifiedVertices.values, edges.toList)
+        new Graph(literalVertices.toList ++ identifiedVertices.values, edges.toList, None)
     }
 }
 
-class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge])
-    extends cz.payola.common.rdf.Graph(vertices, edges)
+class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge], resultCount: Option[Int])
+    extends cz.payola.common.rdf.Graph(vertices, edges, resultCount)
 {
     /**
      * Creates a new graph with contents of this graph and the specified other graph.
@@ -107,7 +107,7 @@ class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge])
             val destination = mergedVertices.find(_ == e.destination).get
             new Edge(origin, destination, e.uri)
         }
-        new Graph(mergedVertices, mergedEdges)
+        new Graph(mergedVertices, mergedEdges, None)
     }
 
     /**

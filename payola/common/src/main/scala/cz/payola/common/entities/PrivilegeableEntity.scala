@@ -36,8 +36,8 @@ trait PrivilegeableEntity extends NamedEntity
     }
 
     /** Returns the ontology customizations that are accessible for the entity directly via his privileges. */
-    def grantedOntologyCustomizations: immutable.Seq[settings.OntologyCustomization] = {
-        privileges.toList.collect { case p: UseOntologyCustomizationPrivilege => p.obj }
+    def grantedCustomizations: immutable.Seq[settings.Customization] = {
+        privileges.toList.collect { case p: UseCustomizationPrivilege => p.obj }
     }
 
     /**

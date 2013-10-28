@@ -10,14 +10,24 @@ import cz.payola.data.squeryl._
  */
 object ClassCustomization extends EntityConverter[ClassCustomization]
 {
+
     def convert(entity: AnyRef)(implicit context: SquerylDataContextComponent): Option[ClassCustomization] = {
         entity match {
             case c: ClassCustomization => Some(c)
             case c: cz.payola.common.entities.settings.ClassCustomization => {
                 val customizations = c.propertyCustomizations.map(PropertyCustomization(_))
-                Some(new ClassCustomization(c.id, c.uri, c.fillColor, c.radius, c.glyph, customizations))
+                Some(new ClassCustomization(c.id, c.uri, c.fillColor, c.radius, c.glyph, c.labels, c.conditionalValue,
+                    customizations))
             }
-            case _ => None
+            case c: Some[_] =>
+                c.get match {
+                    case d: ClassCustomization =>
+                        Some(d) //in case, there is nothing to convert
+                    case _ =>
+                        None
+                }
+            case _ =>
+                None
         }
     }
 }
@@ -27,20 +37,22 @@ object ClassCustomization extends EntityConverter[ClassCustomization]
  * @param id ID of the class customization
  * @param uri URI of the class customization
  * @param fillColor Fill color of the class customization
+ * @param conditionalValue if this is conditional ClassCustomization this contains aditional specification to uri
  * @param radius Radius of the class customization
  * @param glyph Glyph of the class customization
+ * @param labels List of labels representing the class
  * @param customizations List of child property customizations
  * @param context Implicit context
  */
 class ClassCustomization(
     override val id: String, uri: String, fillColor: String, radius: Int,
-    glyph: String, customizations: immutable.Seq[PropertyCustomization])
+    glyph: String, labels: String, conditionalValue: String, customizations: immutable.Seq[PropertyCustomization])
     (implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.settings.ClassCustomization(
-        uri, fillColor, radius, glyph, customizations)
+        uri, fillColor, radius, glyph, labels, conditionalValue, customizations)
     with Entity
 {
-    var ontologyCustomizationId: String = null
+    var customizationId: String = null
 
     def propertyCustomizations_=(value: Seq[PropertyCustomizationType]) {
         _propertyCustomizations = value.toList

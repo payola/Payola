@@ -10,9 +10,10 @@ import cz.payola.web.client.views.entity.plugins._
 import cz.payola.common.ValidationException
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
 import cz.payola.web.client.events._
-import cz.payola.common.rdf.IdentifiedVertex
+import cz.payola.common.rdf._
 import s2js.adapters.browser.window
 import s2js.compiler.javascript
+import cz.payola.web.client.presenters.entity.PrefixPresenter
 
 class DataSourceBrowser(
     val viewElement: html.Element,
@@ -23,11 +24,15 @@ class DataSourceBrowser(
 {
     private val view = new DataSourceBrowserView(dataSourceName)
 
-    private val graphPresenter = new GraphPresenter(view.graphViewSpace.htmlElement)
+    private var graphPresenter: GraphPresenter = null
 
-    private var history = mutable.ListBuffer.empty[String]
+    private var history = mutable.ListBuffer.empty[(Option[Vertex], String)]
 
     private var historyPosition = -1
+
+    private val prefixPresenter = new PrefixPresenter()
+
+    private var languagesLoaded = false
 
     @javascript("""return encodeURIComponent(uri)""")
     def encodeURIComponent(uri: String) : String = ""
@@ -36,6 +41,11 @@ class DataSourceBrowser(
     def decodeURIComponent(uri: String) : String = ""
 
     def initialize() {
+        // First init prefixes
+        prefixPresenter.initialize()
+
+        graphPresenter = new GraphPresenter(view.graphViewSpace.htmlElement, prefixPresenter.prefixApplier)
+
         // Initialize the sub presenters.
         graphPresenter.initialize()
 
@@ -45,6 +55,7 @@ class DataSourceBrowser(
         view.goButton.mouseClicked += onGoButtonClicked _
         view.sparqlQueryButton.mouseClicked += onSparqlQueryButtonClicked _
         view.nodeUriInput.keyPressed += onNodeUriKeyPressed _
+        graphPresenter.view.languagesButton.mouseClicked += onLanguagesButtonClicked _
         graphPresenter.view.vertexBrowsing += onVertexBrowsing _
 
         view.render(viewElement)
@@ -59,16 +70,28 @@ class DataSourceBrowser(
                     unblockPage()
                 }(fatalErrorHandler(_))
             } else {
-                addToHistoryAndGo(initialVertexUri, false)
+                addToHistoryAndGo(None, initialVertexUri, false)
             }
         } else {
-            addToHistoryAndGo(decodeURIComponent(window.location.hash.substring(1)), false)
+            addToHistoryAndGo(None, decodeURIComponent(window.location.hash.substring(1)), false)
         }
+    }
+
+    private def onLanguagesButtonClicked(e: EventArgs[_]): Boolean = {
+        if(!languagesLoaded){
+            blockPage("Fetching available languages...")
+            DataSourceManager.getLanguages(dataSourceId) { o =>
+                o.foreach(res => graphPresenter.view.updateLanguages(res))
+                languagesLoaded = true
+                unblockPage()
+            } (fatalErrorHandler(_))
+        }
+        true
     }
 
     private def onVertexBrowsing(e: VertexEventArgs[_]) {
         e.vertex match {
-            case i: IdentifiedVertex => addToHistoryAndGo(i.uri, false)
+            case i: IdentifiedVertex => addToHistoryAndGo(Some(i), i.uri, false)
         }
     }
 
@@ -89,7 +112,7 @@ class DataSourceBrowser(
     }
 
     private def onGoButtonClicked(e: EventArgs[_]): Boolean = {
-        addToHistoryAndGo(view.nodeUriInput.value, true)
+        addToHistoryAndGo(None, view.nodeUriInput.value, true)
         false
     }
 
@@ -101,7 +124,7 @@ class DataSourceBrowser(
                 modal.unblock()
                 modal.destroy()
 
-                history = mutable.ListBuffer.empty[String]
+                history.clear()
                 historyPosition = -1
                 updateNavigationView()
 
@@ -128,14 +151,16 @@ class DataSourceBrowser(
         }
     }
 
-    private def addToHistoryAndGo(uri: String, clearGraph: Boolean) {
+    private def addToHistoryAndGo(vertex: Option[IdentifiedVertex], prefixedUri: String, clearGraph: Boolean) {
         // Remove all next items from the history.
         while (historyPosition < history.length - 1) {
             history.remove(historyPosition + 1)
         }
 
+        val uri = prefixPresenter.prefixApplier.disapplyPrefix(prefixedUri)
+
         // Add the new item.
-        history += uri
+        history += ((vertex, uri))
         historyPosition += 1
 
         window.location.hash = encodeURIComponent(uri)
@@ -144,8 +169,9 @@ class DataSourceBrowser(
     }
 
     private def updateView(clearGraph: Boolean) {
-        val uri = history(historyPosition)
-        view.nodeUriInput.value = uri
+        val tuple =  history(historyPosition)
+        val uri = tuple._2
+        view.nodeUriInput.value = prefixPresenter.prefixApplier.applyPrefix(uri)
         view.nodeUriInput.setIsEnabled(false)
 
         blockPage("Fetching the node neighbourhood...")
@@ -154,6 +180,11 @@ class DataSourceBrowser(
                 graphPresenter.view.clear()
             }
             graphPresenter.view.updateGraph(graph, true)
+            if(tuple._1.isDefined)
+                graphPresenter.view.setMainVertex(tuple._1.get)
+            else
+                graphPresenter.view.drawGraph()
+
             updateNavigationView()
 
             view.nodeUriInput.setIsEnabled(true)

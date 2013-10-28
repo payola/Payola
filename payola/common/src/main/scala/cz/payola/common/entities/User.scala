@@ -2,8 +2,9 @@ package cz.payola.common.entities
 
 import scala.collection._
 import cz.payola.common.entities.plugins.DataSource
-import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.common.entities.settings._
 import cz.payola.common.Entity
+import scala.Some
 
 /**
   * An user of the application.
@@ -22,8 +23,11 @@ trait User extends Entity with NamedEntity with PrivilegeableEntity
     /** Type of the plugins that the user can own. */
     type PluginType <: Plugin
 
-    /** Type of the ontology visual customizations that the user may own. */
-    type OntologyCustomizationType <: OntologyCustomization
+    /** Type of the visual customizations that the user may own. */
+    type CustomizationType <: Customization
+
+    /** Type of the prefixes the user may use. */
+    type PrefixType <: Prefix
 
     protected var _email: String = ""
 
@@ -37,7 +41,9 @@ trait User extends Entity with NamedEntity with PrivilegeableEntity
 
     protected var _ownedPlugins = mutable.ArrayBuffer[PluginType]()
 
-    protected var _ontologyCustomizations = mutable.ArrayBuffer[OntologyCustomizationType]()
+    protected var _customizations = mutable.ArrayBuffer[CustomizationType]()
+
+    protected var _availablePrefixes = mutable.ArrayBuffer[PrefixType]()
 
     /** Email of the user. */
     def email = _email
@@ -73,8 +79,11 @@ trait User extends Entity with NamedEntity with PrivilegeableEntity
     /** The plugins that are owned by the user. */
     def ownedPlugins: immutable.Seq[PluginType] = _ownedPlugins.toList
 
-    /** Ontology customizations of the user. */
-    def ownedOntologyCustomizations: immutable.Seq[OntologyCustomizationType] = _ontologyCustomizations.toList
+    /** Visual customizations of the user. */
+    def ownedCustomizations: immutable.Seq[CustomizationType] = immutable.Seq[CustomizationType]()
+
+    /** The prefixes that are available to the user. */
+    def availablePrefixes: immutable.Seq[PrefixType] = _availablePrefixes.toList
 
     /**
       * Stores the specified analysis to the users owned analyses.
@@ -144,15 +153,33 @@ trait User extends Entity with NamedEntity with PrivilegeableEntity
       * Stores the specified customization to the users.
       * @param customization The customization to store.
       */
-    protected def storeOntologyCustomization(customization: OntologyCustomizationType) {
-        _ontologyCustomizations += customization
+    protected def storeCustomization(customization: CustomizationType) {
+        _customizations += customization
     }
 
     /**
       * Discards the customization from the user. Complementary operation to store.
       * @param customization The customization to discard.
       */
-    protected def discardOntologyCustomization(customization: OntologyCustomizationType) {
-        _ontologyCustomizations -= customization
+    protected def discardCustomization(customization: CustomizationType) {
+        _customizations -= customization
+    }
+
+    /**
+      * Stores owned prefix to the user.
+      * @param prefix The prefix to user.
+      */
+    protected def storeOwnedPrefix(prefix: PrefixType) {
+        if (prefix.owner == Some(this))
+            _availablePrefixes += prefix
+    }
+
+    /**
+      * Discards the owned prefix from the user. Complementary operation to store.
+      * @param prefix The prefix to discard.
+      */
+    protected def discardOwnedPrefix(prefix: PrefixType) {
+        if (prefix.owner == Some(this))
+            _availablePrefixes -= prefix
     }
 }

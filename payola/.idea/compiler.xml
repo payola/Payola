@@ -26,7 +26,7 @@
   </component>
   <component name="SbtSettings">
     <option name="sbtLauncherJarPath" value="$PROJECT_DIR$/sbt-launch.jar" />
-    <option name="sbtLauncherVmParameters" value="-Xmx1024M -XX:MaxPermSize=512M -Xss2M    " />
+    <option name="sbtLauncherVmParameters" value="-Xmx1024M -XX:MaxPermSize=256M -Xss2M    " />
     <option name="useApplicationSettings" value="false" />
   </component>
 </project>

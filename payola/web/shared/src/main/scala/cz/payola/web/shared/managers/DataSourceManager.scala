@@ -4,15 +4,21 @@ import s2js.compiler._
 import cz.payola.domain.entities.plugins.DataSource
 import cz.payola.web.shared.Payola
 import cz.payola.domain.entities.User
-import cz.payola.common.rdf.Graph
 import cz.payola.data.DataException
 import cz.payola.common._
 import cz.payola.domain.entities.plugins.concrete.DataFetcher
+import rdf._
+import cz.payola.domain.sparql._
+import evaluation._
+import evaluation.SuccessResult
+import scala.Some
 
 @remote @secured object DataSourceManager
     extends ShareableEntityManager[DataSource, cz.payola.common.entities.plugins.DataSource](
         Payola.model.dataSourceModel)
 {
+
+    private val defaultLanguages = Seq("en","fr","de","ru","ja","cs","sp")
 
     private def getOwnedDataSourceByIDSync(dataSourceID: String, user: User): DataSource = {
         // See is the user has access to the data source
@@ -107,9 +113,17 @@ import cz.payola.domain.entities.plugins.concrete.DataFetcher
 
 
     @async def getInitialGraph(dataSourceId: String, user: Option[User] = null)
-        (successCallback: Option[Graph] => Unit)
+        (successCallback: Option[Graph] => Unit) //TODO would be better if the s2js supported successCallback: (Option[Graph], Option[Int]) => Unit
         (failCallback: Throwable => Unit) {
 
+        /*val vertex1 = new IdentifiedVertex("ver1")
+        val vertex2 = new IdentifiedVertex("ver2")
+        val vertex3 = new IdentifiedVertex("ver3")
+        val edge1 = new Edge(vertex1, vertex2, "edg1")
+        val edge2 = new Edge(vertex2, vertex3, "edg2")
+        val edge3 = new Edge(vertex3, vertex1, "edg3")
+        val graph = new Graph(List(vertex1, vertex2, vertex3), List(edge1, edge2, edge3), None)
+        successCallback(Some(graph))*/
         val graph = getDataSource(dataSourceId, user).flatMap { dataSource =>
             val uri = dataSource.getFirstTriple.map(_.origin.uri)
             uri.map(dataSource.getNeighbourhood(_))
@@ -118,19 +132,64 @@ import cz.payola.domain.entities.plugins.concrete.DataFetcher
     }
 
     @async def getNeighbourhood(dataSourceId: String, vertexURI: String, user: Option[User] = null)
-        (successCallback: Option[Graph] => Unit)
+        (successCallback: Option[Graph] => Unit) //TODO would be better if the s2js supported successCallback: (Option[Graph], Option[Int]) => Unit
         (failCallback: Throwable => Unit) {
 
         val graph = getDataSource(dataSourceId, user).map(_.getNeighbourhood(vertexURI))
         successCallback(graph)
     }
 
+    @async def getLanguages(dataSourceId: String, user: Option[User] = null)
+        (successCallback: Option[Seq[String]] => Unit)(failCallback: Throwable => Unit) {
+
+        val languagesQuery = """
+            SELECT distinct ?language
+            WHERE {
+                ?a ?b ?label BIND (lang(?label) AS ?language)
+            } LIMIT 20
+                             """
+        val dataSource = getDataSource(dataSourceId, user)
+        val runner = dataSource.map{d =>
+            val runnerLauncher = new SimpleTimeoutQueryRunner(languagesQuery, d, Some(10000)) //10 seconds
+            runnerLauncher.start()
+            runnerLauncher
+        }
+        while(runner.isDefined && !runner.get.isFinished) {
+            Thread.sleep(5000)
+        }
+
+        val result = if(runner.isDefined) {
+            runner.get.getResult
+        } else {
+            None
+        }
+
+        if (result.isDefined) {
+            result.get match {
+                case e: SuccessResult =>
+                    val languages = if(e.outputGraph.isDefined) {
+                        val verticesInStrings = e.outputGraph.get.vertices.map(_.toString())
+                        Some(verticesInStrings.filter(_.length == 2))
+                    } else {
+                        Some(defaultLanguages)
+                    }
+                    successCallback(languages)
+                case _ =>
+                    successCallback(Some(defaultLanguages))
+            }
+        } else {
+            successCallback(Some(defaultLanguages))
+        }
+
+        runner.foreach(_.finish)
+    }
+
     @async def executeSparqlQuery(dataSourceId: String, query: String, user: Option[User] = null)
-        (successCallback: Option[Graph] => Unit)
+        (successCallback: Option[Graph] => Unit) //TODO would be better if the s2js supported successCallback: (Option[Graph], Option[Int]) => Unit
         (failCallback: Throwable => Unit) {
 
         try {
-            successCallback(getDataSource(dataSourceId, user).map(_.executeQuery(query)))
+            throw new Throwable("3");//successCallback(getDataSource(dataSourceId, user).map(_.executeQuery(query)))
         } catch {
             case d: DataException => throw d
             case t => throw new ValidationException("sparqlQuery", t.getMessage)

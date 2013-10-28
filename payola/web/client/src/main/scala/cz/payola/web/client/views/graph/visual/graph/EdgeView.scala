@@ -6,7 +6,9 @@ import cz.payola.common.visual.Color
 import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.graph.visual.graph.positioning.LocationDescriptor
 import s2js.adapters.html._
-import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.common.entities.settings._
+import cz.payola.web.client.models.PrefixApplier
+import scala.Some
 
 /**
  * Graphical representation of Edge object in the drawn graph.
@@ -14,24 +16,54 @@ import cz.payola.common.entities.settings.OntologyCustomization
  * @param originView the vertex object representing origin of this edge
  * @param destinationView of this graphical representation in drawing space
  */
-class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationView: VertexView)
-    extends View[html.elements.CanvasRenderingContext2D]
+class EdgeView(val edgeModel: Edge, private var _originView: VertexViewElement, private var _destinationView: VertexViewElement,
+    prefixApplier: Option[PrefixApplier]) extends View[html.elements.CanvasRenderingContext2D]
 {
+    def originView = originBackup.getOrElse(_originView)
+    def destinationView = destinationBackup.getOrElse(_destinationView)
+
     var width = 1
 
     var color = new Color(150, 150, 150, 0.4)
 
+    private var originBackup: Option[VertexViewElement] = None
+    private var destinationBackup: Option[VertexViewElement] = None
+
     /**
      * Textual data that should be visualized with this edge ("over this edge").
      */
-    val information: InformationView = new InformationView(edgeModel)
+    val information: InformationView = new InformationView(List(edgeModel))
 
     /**
      * Indicator of selection of this graphs element. Is used during color selection in draw function.
      * @return true if one of the edges vertices is selected.
      */
     def isSelected: Boolean = {
-        originView.selected || destinationView.selected
+        _originView.isSelected || _destinationView.isSelected
+    }
+
+    def redirectOrigin(redirection: Option[VertexViewElement]) {
+        if (redirection.isDefined && originBackup.isDefined) {
+            _originView = redirection.get
+        } else if (redirection.isDefined && originBackup.isEmpty) {
+            originBackup = Some(_originView)
+            _originView = redirection.get
+        } else if(originBackup.isDefined) {
+            _originView = originBackup.get
+            originBackup = None
+        }
+    }
+
+    def redirectDestination(redirection: Option[VertexViewElement]) {
+        if (redirection.isDefined && destinationBackup.isDefined) {
+            _destinationView = redirection.get
+        } else if (redirection.isDefined && destinationBackup.isEmpty) {
+            destinationBackup = Some(_destinationView)
+            _destinationView = redirection.get
+        } else if(destinationBackup.isDefined) {
+            _destinationView = destinationBackup.get
+            destinationBackup = None
+        }
     }
 
     /**
@@ -39,7 +71,7 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
      * @return true if both edges vertices are selected.
      */
     def areBothVerticesSelected: Boolean = {
-        originView.selected && destinationView.selected
+        originView.isSelected && destinationView.isSelected
     }
 
     def setWidth(newWidth: Option[Int]) {
@@ -55,11 +87,21 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
         setColor(None)
     }
 
-    def setConfiguration(newCustomization: Option[OntologyCustomization]) {
+    def setConfiguration(newCustomization: Option[DefinedCustomization]) {
         if(newCustomization.isEmpty) {
             resetConfiguration()
         } else {
-            val foundCustomizationType = newCustomization.get.classCustomizations.find{_.uri == originView.rdfType}
+            val foundCustomizationType =
+                newCustomization.get match {
+                    case uc: UserCustomization =>
+                        uc.classCustomizations.find(_.uri == "properties")
+                    case oc: OntologyCustomization =>
+                        oc.classCustomizations.find{ cust =>
+                        originView match {
+                            case view: VertexView => cust.uri == view.rdfType
+                            case _ => false
+                        }}
+                }
 
             if(foundCustomizationType.isEmpty) {
                 resetConfiguration()
@@ -91,22 +133,45 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
     }
 
     def draw(context: elements.CanvasRenderingContext2D, positionCorrection: Vector2D) {
-        drawQuick(context, positionCorrection)
-        if (isSelected) {
-            information.draw(context, (LocationDescriptor.getEdgeInformationPosition(originView.position,
-                destinationView.position) + positionCorrection).toVector)
+        if(!isHidden) {
+            drawInner(context, positionCorrection)
+        }
+    }
+
+    private def drawInner(context: elements.CanvasRenderingContext2D, positionCorrection: Vector2D) {
+
+        if(!_originView.isEqual(_destinationView)) {
+            drawQuick(context, positionCorrection)
+            if (isSelected) {
+                information.draw(context, (LocationDescriptor.getEdgeInformationPosition(_originView.position,
+                    _destinationView.position) + positionCorrection).toVector)
+            }
         }
     }
 
     def drawQuick(context: elements.CanvasRenderingContext2D, positionCorrection: Vector2D) {
+        if(!isHidden) {
+            drawQuickInner(context, positionCorrection)
+        }
+    }
+
+    private def drawQuickInner(context: elements.CanvasRenderingContext2D, positionCorrection: Vector2D) {
+
         val colorToUse = if(isSelected) {
             new Color(color.red, color.green, color.blue)
         } else {
             color
         }
 
-        drawArrow(context, originView.position, destinationView.position,
-            originView.radius  + 5, destinationView.radius + 5, width, colorToUse)
+        val spacingDestination =
+            if(_destinationView.isInstanceOf[VertexViewGroup]) { scala.math.sqrt(2) * _destinationView.radius + 5 }
+            else { _destinationView.radius + 5 }
+        val spacingOrigin =
+            if(_originView.isInstanceOf[VertexViewGroup]) { scala.math.sqrt(2) * _originView.radius + 5 }
+            else { _originView.radius + 5}
+
+        drawArrow(context, _originView.position, _destinationView.position,
+            spacingOrigin, spacingDestination, width, colorToUse)
     }
 
     override def toString: String = {
@@ -130,5 +195,15 @@ class EdgeView(val edgeModel: Edge, val originView: VertexView, val destinationV
                     && (edgeModel.toString eq ev.edgeModel.toString))
             case _ => false
         }
+    }
+
+    def isOrigin(vertex: VertexViewElement): Boolean = {
+        _originView.isEqual(vertex) || (if(originBackup.isDefined) {
+            originBackup.get.isEqual(vertex) } else { false })
+    }
+
+    def isDestination(vertex: VertexViewElement): Boolean = {
+        _destinationView.isEqual(vertex) || (if(destinationBackup.isDefined) {
+            destinationBackup.get.isEqual(vertex) } else { false })
     }
 }

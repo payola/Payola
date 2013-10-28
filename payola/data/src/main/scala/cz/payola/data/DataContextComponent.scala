@@ -4,7 +4,8 @@ import cz.payola.common.Entity
 import cz.payola.common.entities.ShareableEntity
 import cz.payola.domain.entities._
 import cz.payola.domain.entities.plugins._
-import cz.payola.domain.entities.settings.OntologyCustomization
+import cz.payola.domain.entities.settings.Customization
+import cz.payola.domain.entities.Prefix
 
 /**
  * A component that provides access to a storage with persisted entities.
@@ -44,7 +45,17 @@ trait DataContextComponent
     /**
      * A repository to access persisted ontology customizations
      */
-    val ontologyCustomizationRepository: OntologyCustomizationRepository
+    val customizationRepository: CustomizationRepository
+
+    /**
+     * A repository to access persisted prefixes
+     */
+    val prefixRepository: PrefixRepository
+
+    /**
+     * A repository to access stored analyses results
+     */
+    val analysisResultRepository: AnalysisResultRepository
 
     /**
      * A registry that provides repositories by class name of persisted entity
@@ -56,7 +67,8 @@ trait DataContextComponent
         classOf[Analysis] -> analysisRepository,
         classOf[Plugin] -> pluginRepository,
         classOf[DataSource] -> dataSourceRepository,
-        classOf[OntologyCustomization] -> ontologyCustomizationRepository
+        classOf[Customization] -> customizationRepository,
+        classOf[Prefix] -> prefixRepository
     ))
 
     /**
@@ -244,11 +256,11 @@ trait DataContextComponent
     /**
      * Defines operations of repository accessing ontology customizations
      */
-    trait OntologyCustomizationRepository
-        extends Repository[OntologyCustomization]
-        with NamedEntityRepository[OntologyCustomization]
-        with OptionallyOwnedEntityRepository[OntologyCustomization]
-        with ShareableEntityRepository[OntologyCustomization]
+    trait CustomizationRepository
+        extends Repository[Customization]
+        with NamedEntityRepository[Customization]
+        with OptionallyOwnedEntityRepository[Customization]
+        with ShareableEntityRepository[Customization]
     {
         /**
          * Persists given ClassCustomization
@@ -272,6 +284,9 @@ trait DataContextComponent
         with OptionallyOwnedEntityRepository[Plugin]
         with ShareableEntityRepository[Plugin]
 
+    /**
+     * Defines operations of repository accessing data sources
+     */
     trait DataSourceRepository
         extends Repository[DataSource]
         with NamedEntityRepository[DataSource]
@@ -283,6 +298,37 @@ trait DataContextComponent
          * @param parameterValue ParameterValue to persist
          */
         def persistParameterValue(parameterValue: ParameterValue[_])
+    }
+
+    /**
+     * Defines operations of repository accessing prefixes
+     */
+    trait PrefixRepository
+        extends Repository[Prefix]
+        with NamedEntityRepository[Prefix]
+        with OptionallyOwnedEntityRepository[Prefix]
+    {
+        /**
+         * Gets all public prefixes available to user - default (unowned) and his own.
+         * @param userId Id of a user to search prefixes for
+         * @return Returns prefixes available to user
+         */
+        def getAllAvailableToUser(userId: Option[String]): Seq[Prefix]
+    }
+
+    trait AnalysisResultRepository extends Repository[AnalysisResult]
+    {
+        def storeResult(analysisDescription: AnalysisResult)
+
+        def getResultsCount(): Long
+
+        def getResult(evaluationId: String, analysisId: String): Option[AnalysisResult]
+
+        def deleteResult(evaluationId: String, analysisId: String)
+
+        def updateTimestamp(evaluationId: String)
+
+        def purge()
     }
 
     /**

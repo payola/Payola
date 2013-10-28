@@ -18,8 +18,8 @@ class ShortestPath(name: String, inputCount: Int, parameters: immutable.Seq[Para
 {
     def this() = {
         this("Shortest Path", 1, List(
-            new StringParameter(ShortestPath.originURIParameter, "", false),
-            new StringParameter(ShortestPath.destinationURIParameter, "", false)
+            new StringParameter(ShortestPath.originURIParameter, "", false, false, false, true),
+            new StringParameter(ShortestPath.destinationURIParameter, "", false, false, false, true)
         ), IDGenerator.newId)
     }
 
@@ -103,7 +103,7 @@ class ShortestPath(name: String, inputCount: Int, parameters: immutable.Seq[Para
         // Need to add origin
         vertices += origin
 
-        new Graph(vertices.toList, edges.toList)
+        new Graph(vertices.toList, edges.toList, None)
     }
 
     /** Creates a new instance of a graph that contains only vertices along the shortest path from

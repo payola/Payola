@@ -20,7 +20,7 @@ abstract class TestDataContextComponent(name: String, trace: Boolean = false)
         ""
     )
 
-    lazy val rdfStorage = new VirtuosoStorage()
+    lazy val rdfStorage = VirtuosoStorage.virtuosoLocalhost
 
     lazy val pluginCompiler = new PluginCompiler(new java.io.File(""), new java.io.File(""))
 

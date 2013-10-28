@@ -53,14 +53,13 @@ trait TableRepositoryComponent
         Seq[A] = wrapInTransaction {
             // Define select query
             val query = select(getSelectQuery(entityFilter))
-
             // Simple pagination
             pagination.map(p => query.drop(p.skip).take(p.limit)).getOrElse(query)
         }
 
         /**
          * Selects the first entity that passes the specified entity filter.
-         * @param entityFilter A filter that excludes entites from the result.
+         * @param entityFilter A filter that excludes entities from the result.
          * @return The selected entity.
          */
         private[squeryl] def selectOneWhere(entityFilter: A => LogicalBoolean): Option[A] = {
@@ -114,7 +113,7 @@ trait TableRepositoryComponent
     }
 
     /**
-     * Repository that fetches entites with name
+     * Repository that fetches entities with name
      * @tparam A Type of the named entities in the repository.
      */
     trait NamedEntityTableRepository[A <: Entity with NamedEntity]
@@ -133,7 +132,9 @@ trait TableRepositoryComponent
         extends OptionallyOwnedEntityRepository[A]
     {
         self: TableRepository[A, B] =>
-        def getAllByOwnerId(ownerId: Option[String]): Seq[A] = selectWhere(_.ownerId === ownerId).sortBy(_.name)
+        def getAllByOwnerId(ownerId: Option[String]): Seq[A] = {
+            selectWhere(_.ownerId === ownerId).sortBy(_.name)
+        }
     }
 
     /**

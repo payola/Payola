@@ -4,13 +4,15 @@ import s2js.adapters.html
 import cz.payola.common.visual.Color
 import cz.payola.web.client.views.algebra._
 import s2js.adapters.html._
-import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.common.entities.settings._
+import cz.payola.web.client.models.PrefixApplier
+import cz.payola.common.rdf._
 
 /**
  * Graphical representation of textual data in the drawn graph.
- * @param data that are visualized (by toString function of this object)
+ * @param labels that are visualized (by toString function of this object)
  */
-class InformationView(data: Any) extends View[html.elements.CanvasRenderingContext2D] {
+class InformationView(private var _labels: List[Any]) extends View[html.elements.CanvasRenderingContext2D] {
 
     var colorBackground = new Color(255, 255, 255, 0.2)
 
@@ -19,6 +21,12 @@ class InformationView(data: Any) extends View[html.elements.CanvasRenderingConte
     var font = "12px Sans"
 
     var align  = "center"
+
+    def labels =_labels
+
+    def labels_=(newLabels: List[Any]) {
+        _labels = newLabels
+    }
 
     def isSelected: Boolean = {
         false //information can not be selected
@@ -47,8 +55,8 @@ class InformationView(data: Any) extends View[html.elements.CanvasRenderingConte
         setAlign(None)
     }
 
-    def setConfiguration(newCustomization: Option[OntologyCustomization]) {
-        //ontologies do not contain text configuration
+    def setConfiguration(newCustomization: Option[DefinedCustomization]) {
+        //no configuration fot InfoView
     }
 
     def draw(context: elements.CanvasRenderingContext2D, positionCorrection: Vector2D) {
@@ -66,11 +74,64 @@ class InformationView(data: Any) extends View[html.elements.CanvasRenderingConte
      * @param position where the text is drawn
      */
     private def performDrawing(context: elements.CanvasRenderingContext2D, color: Color, position: Point2D) {
-        val textWidth = context.measureText(data.toString).width
+        val textWidth = context.measureText(labels.head.toString).width
         drawRoundedRectangle(context, position + Vector2D(-textWidth / 2, -15), Vector2D(textWidth, 20), 4)
         fillCurrentSpace(context, colorBackground)
         //TODO how come, that the measureText returns different size on the first run??
 
-        drawText(context, data.toString, position, color, font, align)
+        drawText(context, labels.head.toString, position, color, font, align)
+    }
+}
+
+object InformationView {
+    def constructByMultiple(labels: List[LabelItem], modelObject: Any, literals: List[(String, Seq[String])],
+        prefixApplier: Option[PrefixApplier]): Option[InformationView] = {
+
+        val uriOpt = getUri(modelObject)
+        val uri = if(uriOpt.isDefined && prefixApplier.isDefined) prefixApplier.get.applyPrefix(uriOpt.get) else modelObject.toString()
+        val processedLabels = processLabels(labels, uri, literals)
+        if(processedLabels.isEmpty) { None } else { Some(new InformationView(processedLabels)) }
+    }
+
+    def constructBySingle(modelObject: Any, prefixApplier: Option[PrefixApplier]): InformationView = {
+        val uriOpt = getUri(modelObject)
+        if(uriOpt.isDefined && prefixApplier.isDefined) {
+            new InformationView(List(prefixApplier.get.applyPrefix(uriOpt.get)))
+        } else {
+            new InformationView(List(modelObject.toString()))
+        }
+    }
+
+    private def getUri(modelObject: Any): Option[String] = {
+        modelObject match{
+            case i: IdentifiedVertex =>
+                Some(i.uri)
+            case i: LiteralVertex =>
+                None
+            case i: Edge =>
+                Some(i.uri)
+            case _ =>
+                None
+        }
+    }
+
+    private def processLabels(labels: List[LabelItem], modelObjectUri: String, literals: List[(String, Seq[String])]):
+        List[String] = {
+
+        val acceptedLabels = labels.filter{ label =>
+            label.accepted && (label.userDefined || label.value == "uri" || label.value == "groupName" || literals.exists{
+                _.toString().contains(label.value.substring(2))
+            })
+        }
+
+        acceptedLabels.map { label =>
+            if(label.userDefined) {
+                label.value
+            } else if(label.value == "uri" || label.value == "groupName") {
+                modelObjectUri
+            } else {
+                literals.find{ literal => labels.contains(literal._1.substring(2)) }.get.toString
+            }
+        }
     }
 }

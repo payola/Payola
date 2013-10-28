@@ -9,13 +9,16 @@ trait ModelComponent
     extends UserModelComponent
     with GroupModelComponent
     with AnalysisModelComponent
+    with AnalysisResultStorageModelComponent
     with PluginModelComponent
     with DataSourceModelComponent
     with OntologyCustomizationModelComponent
+    with UserCustomizationModelComponent
     with PayolaStorageModelComponent
     with PrivilegeModelComponent
     with DataCubeModelComponent
     with GeocodeModelComponent
+    with PrefixModelComponent
 {
     self: DataContextComponent with RdfStorageComponent with PluginCompilerComponent =>
 

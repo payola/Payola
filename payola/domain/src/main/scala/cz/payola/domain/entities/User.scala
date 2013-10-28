@@ -1,11 +1,13 @@
 package cz.payola.domain.entities
 
 import scala.collection._
-import cz.payola.common.Entity
+import cz.payola.common._
 import cz.payola.common.entities.ShareableEntity
 import cz.payola.domain.entities.plugins.DataSource
-import cz.payola.domain.entities.settings.OntologyCustomization
+import cz.payola.domain.entities.settings._
 import cz.payola.domain.DomainException
+import scala.Some
+import scala.Some
 
 /**
   * @param _name Name of the user.
@@ -26,7 +28,9 @@ class User(protected var _name: String)
 
     type PluginType = Plugin
 
-    type OntologyCustomizationType = OntologyCustomization
+    type CustomizationType = Customization
+
+    type PrefixType = Prefix
 
     /**
       * Adds the analysis to the users owned analyses. The analysis has to be owned by the user.
@@ -95,6 +99,23 @@ class User(protected var _name: String)
     def removeOwnedGroup(group: GroupType): Option[GroupType] = {
         removeRelatedEntity(group, ownedGroups, discardOwnedGroup)
     }
+    
+    /**
+      * Adds the prefix to the users prefixes. The prefix has to be owned by the user.
+      * @param prefix The prefix to be added.
+      */
+    def addOwnedPrefix(prefix: PrefixType) {
+        addOwnedEntity(prefix, availablePrefixes, storeOwnedPrefix)
+    }
+
+    /**
+      * Removes the specified prefix from the users owned prefixes.
+      * @param prefix The prefix to be removed.
+      * @return The removed prefix.
+      */
+    def removeOwnedPrefix(prefix: PrefixType): Option[PrefixType] = {
+        removeRelatedEntity(prefix, availablePrefixes, discardOwnedPrefix)
+    }
 
     /**
      * Returns the users owned entities of the specified class.
@@ -104,8 +125,9 @@ class User(protected var _name: String)
             Entity.getClassName(classOf[Analysis]) -> ownedAnalyses,
             Entity.getClassName(classOf[DataSource]) -> ownedDataSources,
             Entity.getClassName(classOf[Plugin]) -> ownedPlugins,
-            Entity.getClassName(classOf[OntologyCustomization]) -> ownedOntologyCustomizations,
-            Entity.getClassName(classOf[Group]) -> ownedGroups
+            Entity.getClassName(classOf[Customization]) -> ownedCustomizations,
+            Entity.getClassName(classOf[Group]) -> ownedGroups,
+            Entity.getClassName(classOf[Prefix]) -> availablePrefixes
         ).getOrElse(entityClassName, throw new DomainException("The user doesn't own entities of class " +
             entityClassName + "."))
     }

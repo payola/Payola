@@ -8,6 +8,4 @@ trait Node {
     var value: Any = null
     var label: String = ""
     //val attr: List[(String, String)] = null //hidden for javascript only
-
-    def updateProperties(newConfiguration: Any)
 }

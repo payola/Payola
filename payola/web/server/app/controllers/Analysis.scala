@@ -29,7 +29,7 @@ object Analysis extends PayolaController with Secured
     }
 
     def cloneAndEdit(id: String) = authenticated { user =>
-        val analysis = Payola.model.analysisModel.cloneAndEdit(id, user)
+        val analysis = Payola.model.analysisModel.clone(id, Some(user))
         Redirect(routes.Analysis.edit(analysis.id))
     }
 

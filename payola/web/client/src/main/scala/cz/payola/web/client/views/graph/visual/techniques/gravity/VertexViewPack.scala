@@ -1,13 +1,13 @@
 package cz.payola.web.client.views.graph.visual.techniques.gravity
 
-import cz.payola.web.client.views.graph.visual.graph.VertexView
+import cz.payola.web.client.views.graph.visual.graph._
 import cz.payola.web.client.views.algebra.Vector2D
 
 /**
  * Representation of a VertexView object used in GravityTechnique perform routine.
  * @param value contained vertexView
  */
-class VertexViewPack(val value: VertexView)
+class VertexViewPack(val value: VertexViewElement)
 {
     /**
      * Force by which the vertex is being pushed in some direction.

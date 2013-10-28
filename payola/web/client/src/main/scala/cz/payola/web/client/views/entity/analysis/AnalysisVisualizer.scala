@@ -8,13 +8,14 @@ import scala.collection.mutable.ArrayBuffer
 import cz.payola.common.entities
 import scala.collection.mutable.HashMap
 import cz.payola.web.client.events.SimpleUnitEvent
-import cz.payola.common.entities.plugins.PluginInstance
+import entities.plugins._
 import cz.payola.web.client.views.ComposedView
 import cz.payola.web.client.views.entity.plugins.PluginInstanceView
 
 abstract class AnalysisVisualizer(analysis: Analysis) extends ComposedView
 {
     val pluginInstanceRendered = new SimpleUnitEvent[PluginInstanceView]
+    val paramNameClicked = new SimpleUnitEvent[ParameterValue[_]]
 
     private val pluginCanvas = new Div(Nil, "plugin-canvas")
 
@@ -98,6 +99,7 @@ abstract class AnalysisVisualizer(analysis: Analysis) extends ComposedView
 
     def renderPluginInstanceView(v: PluginInstanceView) {
         v.render(pluginCanvas.htmlElement)
+        v.parameterNameClicked += { e => paramNameClicked.triggerDirectly(e.target) }
         pluginInstanceRendered.triggerDirectly(v)
     }
 }

@@ -7,8 +7,9 @@ import cz.payola.web.shared.Geo
 import cz.payola.web.client.views.map._
 import cz.payola.common.geo.Coordinates
 import s2js.compiler.javascript
+import cz.payola.web.client.models.PrefixApplier
 
-class TimeHeatmap extends PluginView("Time heatmap") {
+class TimeHeatmap(prefixApplier: Option[PrefixApplier] = None) extends PluginView("Time heatmap", prefixApplier) {
 
     val mapPlaceholder = new Div(List(),"map-placeholder")
 

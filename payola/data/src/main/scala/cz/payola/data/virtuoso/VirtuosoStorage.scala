@@ -129,3 +129,7 @@ class VirtuosoStorage(
         value.replaceAllLiterally("\\", "\\\\").replaceAllLiterally("'", "\\'")
     }
 }
+
+object VirtuosoStorage {
+    def virtuosoLocalhost = new VirtuosoStorage("localhost", 8890, false, 1111, "dba", "dba")
+}

@@ -3,9 +3,10 @@ package cz.payola.web.client.models
 import cz.payola.common.entities._
 import cz.payola.common.entities.plugins.DataSource
 import cz.payola.web.shared.managers._
-import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.common.entities.settings._
 import cz.payola.web.client.events.SimpleUnitEvent
 import scala.collection.mutable
+import scala.Some
 
 /**
  * Model object which contains calls to the remote objects on server. Most of the calls are provided with caching
@@ -14,7 +15,7 @@ import scala.collection.mutable
  */
 object Model
 {
-    val ontologyCustomizationsChanged = new SimpleUnitEvent[this.type]
+    val customizationsChanged = new SimpleUnitEvent[this.type]
 
     private var _accessibleDataSources: Option[Seq[DataSource]] = None
 
@@ -24,9 +25,15 @@ object Model
 
     private var _ownedOntologyCustomizations: Option[mutable.ListBuffer[OntologyCustomization]] = None
 
+    private var _ownedUserCustomizations: Option[mutable.ListBuffer[UserCustomization]] = None
+
     private var _othersOntologyCustomizations: Seq[OntologyCustomization] = Nil
 
+    private var _othersUserCustomizations: Seq[UserCustomization] = Nil
+
     private var _ontologyCustomizationsAreLoaded = false
+
+    private var _userCustomizationsAreLoaded = false
 
     def accessibleDataSources(successCallback: Seq[DataSource] => Unit)(errorCallback: Throwable => Unit) {
         if (_accessibleDataSources.isEmpty) {
@@ -80,14 +87,56 @@ object Model
         }(errorCallback)
     }
 
-    def changeOntologyCustomizationName(customization: OntologyCustomization, newName: String)
+    def userCustomizationsByOwnership(successCallback: UserCustomizationsByOwnership => Unit)
+        (errorCallback: Throwable => Unit) {
+
+        fetchUserCustomizations { () =>
+            successCallback(new UserCustomizationsByOwnership(
+                _ownedUserCustomizations,
+                _othersUserCustomizations
+            ))
+        }(errorCallback)
+    }
+
+    def forceCustomizationsByOwnershipUpdate
+        (successCallback: (UserCustomizationsByOwnership, OntologyCustomizationsByOwnership) => Unit)
+        (errorCallback: Throwable => Unit) {
+
+        _userCustomizationsAreLoaded = false
+        _ontologyCustomizationsAreLoaded = false
+
+        fetchUserCustomizations {() => ()}(errorCallback)
+        fetchOntologyCustomizations {() => ()}(errorCallback)
+
+        successCallback(
+            new UserCustomizationsByOwnership(_ownedUserCustomizations, _othersUserCustomizations),
+            new OntologyCustomizationsByOwnership(_ownedOntologyCustomizations, _othersOntologyCustomizations)
+        )
+    }
+
+    def changeCustomizationName(customization: DefinedCustomization, newName: String)
         (successCallback: () => Unit)
         (errorCallback: Throwable => Unit) {
 
-        OntologyCustomizationManager.rename(customization.id, newName) { () =>
+        CustomizationManager.rename(customization.id, newName) { () =>
             customization.name = newName
-            ontologyCustomizationsChanged.triggerDirectly(this)
+            customizationsChanged.triggerDirectly(this)
             successCallback()
+        }(errorCallback)
+    }
+
+    def createUserCustomization(name: String)
+        (successCallback: UserCustomization => Unit)
+        (errorCallback: Throwable => Unit) {
+
+        fetchUserCustomizations { () =>
+            _ownedUserCustomizations.foreach { ownedCustomizations =>
+                CustomizationManager.createByUser(name) { newCustomization =>
+                    ownedCustomizations += newCustomization
+                    customizationsChanged.triggerDirectly(this)
+                    successCallback(newCustomization)
+                }(errorCallback)
+            }
         }(errorCallback)
     }
 
@@ -97,9 +146,9 @@ object Model
 
         fetchOntologyCustomizations { () =>
             _ownedOntologyCustomizations.foreach { ownedCustomizations =>
-                OntologyCustomizationManager.create(name, ontologyURLs) { newCustomization =>
+                CustomizationManager.createByOntology(name, ontologyURLs) { newCustomization =>
                     ownedCustomizations += newCustomization
-                    ontologyCustomizationsChanged.triggerDirectly(this)
+                    customizationsChanged.triggerDirectly(this)
                     successCallback(newCustomization)
                 }(errorCallback)
             }
@@ -110,27 +159,89 @@ object Model
         (successCallback: () => Unit)
         (errorCallback: Throwable => Unit) {
 
-        OntologyCustomizationManager.delete(ontologyCustomization.id) { () =>
+        CustomizationManager.delete(ontologyCustomization.id) { () =>
             _ownedOntologyCustomizations.foreach(_ -= ontologyCustomization)
-            ontologyCustomizationsChanged.triggerDirectly(this)
+            customizationsChanged.triggerDirectly(this)
+            successCallback()
+        }(errorCallback)
+    }
+
+    def deleteUserCustomization(customization: UserCustomization)
+        (successCallback: () => Unit)
+        (errorCallback: Throwable => Unit) {
+
+        CustomizationManager.delete(customization.id) { () =>
+            _ownedUserCustomizations.foreach(_ -= customization)
+            customizationsChanged.triggerDirectly(this)
             successCallback()
         }(errorCallback)
     }
 
     private def fetchOntologyCustomizations(successCallback: () => Unit)(errorCallback: Throwable => Unit) {
         if (!_ontologyCustomizationsAreLoaded) {
-            OntologyCustomizationManager.getByOwnership() { customizationsByOwnership =>
-                customizationsByOwnership.ownedCustomizations.foreach { owned =>
+            CustomizationManager.getOntologyCustomizationsByOwnership() { ontoCustomizations =>
+                ontoCustomizations.ownedCustomizations.foreach { owned =>
                     val c = mutable.ListBuffer.empty[OntologyCustomization]
                     owned.foreach(c += _)
                     _ownedOntologyCustomizations = Some(c)
                 }
-                _othersOntologyCustomizations = customizationsByOwnership.othersCustomizations
+                _othersOntologyCustomizations = ontoCustomizations.othersCustomizations
                 _ontologyCustomizationsAreLoaded = true
+
                 successCallback()
             }(errorCallback)
         } else {
             successCallback()
         }
+    }
+
+    private def fetchUserCustomizations(successCallback: () => Unit)(errorCallback: Throwable => Unit) {
+        if (!_userCustomizationsAreLoaded) {
+            CustomizationManager.getUserCustomizationsByOwnership() { userCustomization =>
+                userCustomization.ownedCustomizations.foreach { owned =>
+                    val c = mutable.ListBuffer.empty[UserCustomization]
+                    owned.foreach(c += _)
+                    _ownedUserCustomizations = Some(c)
+                }
+                _othersUserCustomizations = userCustomization.othersCustomizations
+                _userCustomizationsAreLoaded = true
+                successCallback()
+            }(errorCallback)
+        } else {
+            successCallback()
+        }
+    }
+
+    def customizationsByOwnership(successCallback: (OntologyCustomizationsByOwnership, UserCustomizationsByOwnership) => Unit)
+        (errorCallback: Throwable => Unit) {
+
+        if (!_ontologyCustomizationsAreLoaded || !_userCustomizationsAreLoaded) {
+            CustomizationManager.getCustomizationsByOwnership() { customizations =>
+                customizations.ontologyCustomizations.ownedCustomizations.foreach { owned =>
+                    val c = mutable.ListBuffer.empty[OntologyCustomization]
+                    owned.foreach(c += _)
+                    _ownedOntologyCustomizations = Some(c)
+                }
+                _othersOntologyCustomizations = customizations.ontologyCustomizations.othersCustomizations
+                _ontologyCustomizationsAreLoaded = true
+
+                customizations.userCustomizations.ownedCustomizations.foreach { owned =>
+                    val c = mutable.ListBuffer.empty[UserCustomization]
+                    owned.foreach(c += _)
+                    _ownedUserCustomizations = Some(c)
+                }
+                _othersUserCustomizations = customizations.userCustomizations.othersCustomizations
+                _userCustomizationsAreLoaded = true
+
+                successCallback(
+                    new OntologyCustomizationsByOwnership(_ownedOntologyCustomizations, _othersOntologyCustomizations),
+                    new UserCustomizationsByOwnership(_ownedUserCustomizations, _othersUserCustomizations))
+
+            }(errorCallback)
+        }
+
+        successCallback(
+            new OntologyCustomizationsByOwnership(_ownedOntologyCustomizations, _othersOntologyCustomizations),
+            new UserCustomizationsByOwnership(_ownedUserCustomizations, _othersUserCustomizations))
     }
 }

@@ -1,6 +1,6 @@
 package cz.payola.web.initializer
 
-import cz.payola.domain.entities.Analysis
+import cz.payola.domain.entities._
 import cz.payola.domain.entities.plugins.DataSource
 import cz.payola.domain.entities.plugins.concrete._
 import cz.payola.domain.entities.plugins.concrete.data._
@@ -8,6 +8,7 @@ import cz.payola.domain.entities.plugins.concrete.query._
 import cz.payola.domain.entities.settings.OntologyCustomization
 import cz.payola.data.squeryl.SquerylDataContextComponent
 import cz.payola.web.shared.Payola
+import scala.Some
 
 /**
  * Running this object will drop the existing database, create a new one and fill it with the initial data.
@@ -38,6 +39,7 @@ object DatabaseInitializer extends App
         val unionPlugin = new Union
         val ontologicalFilterPlugin = new OntologicalFilter
         val shortestPathPlugin = new ShortestPath
+        val virtuosoSecuredPlugin = new VirtuosoSecuredEndpointFetcher
 
         val publicPlugins = List(
             sparqlEndpointPlugin,
@@ -50,7 +52,8 @@ object DatabaseInitializer extends App
             join,
             unionPlugin,
             ontologicalFilterPlugin,
-            shortestPathPlugin
+            shortestPathPlugin,
+            virtuosoSecuredPlugin
         )
 
         val privatePlugins = List(
@@ -72,6 +75,15 @@ object DatabaseInitializer extends App
 
         // Create the admin.
         val admin = Payola.model.userModel.create(Payola.settings.adminEmail, "payola!")
+
+        List(
+            new Prefix("prefix 1", "pc", "http://purl.org/procurement/public-contracts#", None),
+            new Prefix("prefix 2", "pcOwn", "http://purl.org/procurement/public-contracts#", Some(admin)),
+            new Prefix("prefix 3", "dbp", "http://dbpedia.org/", Some(admin)),
+            new Prefix("prefix 6", "ld", "http://ld.opendata.cz:8894/", Some(admin)),
+            new Prefix("prefix 4", "olFormat", "http://www.openlinksw.com/virtrdf-data-formats#", Some(admin)),
+            new Prefix("prefix 5", "olSchema", "http://www.openlinksw.com/schemas/virtrdf#", Some(admin))
+        ).foreach(model.prefixRepository.persist(_))
 
         // Persist the data sources.
         List(
@@ -201,7 +213,7 @@ object DatabaseInitializer extends App
             }
         }
 
-        model.ontologyCustomizationRepository.persist(customization)
+        model.customizationRepository.persist(customization)
     }
 
     /*

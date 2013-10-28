@@ -14,7 +14,7 @@ sealed class PayolaStorage(name: String, inputCount: Int, parameters: immutable.
 {
     def this() = {
         this(PayolaStorage.pluginName, 0, List(
-            new StringParameter(PayolaStorage.groupURIParameter, "", false)
+            new StringParameter(PayolaStorage.groupURIParameter, "", false, false, false, true)
         ), IDGenerator.newId)(null)
         isPublic = false
     }

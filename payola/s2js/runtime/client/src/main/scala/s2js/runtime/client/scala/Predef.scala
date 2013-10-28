@@ -14,5 +14,7 @@ object Predef
         }
     }
 
+    def refArrayOps(x: Array[Any]): Array[Any] = x
+
     def fallbackStringCanBuildFrom = true
 }

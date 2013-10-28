@@ -111,6 +111,12 @@ class RPCSerializer extends JSONSerializer
     this.addSerializationRule(ontologyCustomizationClass, ontologyCustomizationRule)
     this.addSerializationRule(ontologyCustomizationClass, ontologyCustomizationAdditionalFieldRule)
 
+    val userCustomizationClass = new SimpleSerializationClass(classOf[UserCustomization])
+    val userCustomizationClassRule = new BasicSerializationRule(Some(classOf[UserCustomization]), Some(List("_classCustomizations")))
+    val userCustomizationAdditionalClassFieldRule = new CustomValueSerializationRule[UserCustomization]("_classCustomizations", { case (serializer, customization) => customization.classCustomizations })
+    this.addSerializationRule(userCustomizationClass, userCustomizationClassRule)
+    this.addSerializationRule(userCustomizationClass, userCustomizationAdditionalClassFieldRule)
+
     val classCustomizationClass = new SimpleSerializationClass(classOf[ClassCustomization])
     val classCustomizationRule = new BasicSerializationRule(Some(classOf[ClassCustomization]))
     this.addSerializationRule(classCustomizationClass, classCustomizationRule)
@@ -122,5 +128,9 @@ class RPCSerializer extends JSONSerializer
     val geoCustomizationClass = new SimpleSerializationClass(classOf[Coordinates])
     val geoCustomizationRule = new BasicSerializationRule(Some(classOf[Coordinates]))
     this.addSerializationRule(geoCustomizationClass, geoCustomizationRule)
+
+    val prefixClass = new SimpleSerializationClass(classOf[Prefix])
+    val prefixRule = new BasicSerializationRule(Some(classOf[Prefix]))
+    this.addSerializationRule(prefixClass, prefixRule)
 
 }

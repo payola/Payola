@@ -5,7 +5,8 @@ import s2js.adapters.html
 import s2js.adapters.html.elements
 import cz.payola.common.visual.Color
 import cz.payola.web.client.views.algebra._
-import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.common.entities.settings._
+import s2js.adapters.html
 
 /**
  * Structure used during draw function of EdgeView. Helps to indicate position of vertices to each other.
@@ -30,6 +31,22 @@ trait View[A]
     def isSelected: Boolean
 
     /**
+     * Indicator if the View is drawn and can be selected
+     * @return true if hidden
+     */
+    def isHidden = hidden
+
+    def hide() {
+        hidden = true
+    }
+
+    def show(parent: html.Element) {
+        hidden = false
+    }
+
+    protected var hidden = false
+
+    /**
      * Routine for drawing the graphical representation of graphs objects.
      * @param context to which container to draw
      * @param positionCorrection to modify the position of the drawn object
@@ -52,7 +69,7 @@ trait View[A]
      * Setter of the ontology visual configuration.
      * @param newCustomization new configuration for drawing
      */
-    def setConfiguration(newCustomization: Option[OntologyCustomization])
+    def setConfiguration(newOntoCustomization: Option[DefinedCustomization])
 
     /**
      * Draws a rectangle with rounded corners, depending on the radius parameter to the input canvas context.
@@ -224,6 +241,21 @@ trait View[A]
 
         context.beginPath()
         context.arc(center.x, center.y, radius, 0, scala.math.Pi * 2, true)
+        context.stroke()
+    }
+
+    protected def drawSquare(context: elements.CanvasRenderingContext2D, center: Point2D, size: Double,
+        lineWidth: Double, color: Color) {
+
+        context.lineWidth = lineWidth
+        context.strokeStyle = color.toString
+
+        context.beginPath()
+        context.moveTo(center.x - size/2, center.y - size/2)
+        context.lineTo(center.x + size/2, center.y - size/2)
+        context.lineTo(center.x + size/2, center.y + size/2)
+        context.lineTo(center.x - size/2, center.y + size/2)
+        context.lineTo(center.x - size/2, center.y - size/2 - lineWidth/2)
         context.stroke()
     }
 

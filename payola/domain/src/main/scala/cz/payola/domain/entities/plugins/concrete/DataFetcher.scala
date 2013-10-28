@@ -63,23 +63,25 @@ abstract class DataFetcher(name: String, inputCount: Int, parameters: immutable.
       * @return The neighbourhood graph.
       */
     def getNeighbourhood(instance: PluginInstance, vertexURI: String): Graph = {
+
         val uri = vertexURI.trim
 
         if (uri.nonEmpty) {
             val subjectVariable = Variable("s1")
             val objectVariable = Variable("o1")
+
             val patterns = List(
-                GraphPattern(
-                    List(TriplePattern(subjectVariable, Variable("sp0"), Uri(vertexURI))),
+                GraphPattern(List(TriplePattern(subjectVariable, Variable("sp0"), Uri(vertexURI))),
                     GraphPattern.optionalProperties(subjectVariable)
                 ),
-                GraphPattern(
-                    List(TriplePattern(Uri(vertexURI), Variable("op0"), objectVariable)),
+                GraphPattern(List(TriplePattern(Uri(vertexURI), Variable("op0"), objectVariable)),
                     GraphPattern.optionalProperties(objectVariable)
                 )
             )
 
-            patterns.par.map(p => executeQuery(instance, ConstructQuery(p).toString)).reduce(_ + _)
+            patterns.par.map(p => executeQuery(instance, SelectCountQuery(p).toString)).reduce(_ + _)
+            //graphSize.
+            //patterns.par.map(p => executeQuery(instance, ConstructQuery(p).toString)).reduce(_ + _)
         } else {
             Graph.empty
         }

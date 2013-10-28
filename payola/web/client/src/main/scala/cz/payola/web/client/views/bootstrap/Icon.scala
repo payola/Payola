@@ -10,6 +10,8 @@ class Icon(iconName: String, isWhite: Boolean = false) extends Italic(List(), (i
 
 object Icon
 {
+    val ccShare = "cc-share"
+
     val group = "group"
 
     val bar = "bar"

@@ -5,19 +5,20 @@ import cz.payola.web.client.views.graph.visual.techniques.BaseTechnique
 import cz.payola.web.client.views.graph.visual.graph._
 import cz.payola.web.client.views.algebra.Point2D
 import cz.payola.web.client.views.graph.visual.animation.Animation
+import cz.payola.web.client.models.PrefixApplier
 
-class MinimalizationTechnique extends BaseTechnique("Tree ECM Visualization")
+class MinimalizationTechnique(prefixApplier: Option[PrefixApplier]) extends BaseTechnique("Tree ECM Visualization", prefixApplier)
 {
     //TODO add some computation branch cutting...this algorithm is quite complex
 
     protected def getTechniquePerformer(component: Component,
         animate: Boolean): Animation[_] = {
-        minimizeEdgeCrossing(component.vertexViews) //TODO this is impossible to combine with animation
+        minimizeEdgeCrossing(component.vertexViewElements) //TODO this is impossible to combine with animation
 
         if (animate) {
-            new Animation(basicTreeStructure, component.vertexViews, None, redrawQuick, redraw, None)
+            new Animation(basicTreeStructure, component.vertexViewElements, None, redrawQuick, redraw, None)
         } else {
-            new Animation(basicTreeStructure, component.vertexViews, None, redrawQuick, redraw, Some(0))
+            new Animation(basicTreeStructure, component.vertexViewElements, None, redrawQuick, redraw, Some(0))
         }
     }
 
@@ -26,12 +27,12 @@ class MinimalizationTechnique extends BaseTechnique("Tree ECM Visualization")
      * @param rootVertexView
      * @return
      */
-    private def buildUtilityStructure(rootVertexView: VertexView): VertexViewPack = {
+    private def buildUtilityStructure(rootVertexView: VertexViewElement): VertexViewPack = {
         val structureRoot = new VertexViewPack(rootVertexView, ListBuffer[VertexViewPack](), None)
         var level = ListBuffer[ListBuffer[VertexViewPack]](
             ListBuffer[VertexViewPack](structureRoot))
         var levelNext = ListBuffer[ListBuffer[VertexViewPack]]()
-        var alreadyProcessed = ListBuffer[VertexView](rootVertexView)
+        var alreadyProcessed = ListBuffer[VertexViewElement](rootVertexView)
         //^list of vertices, for which a vertexViewPack was already created
 
         //in every whyle-cycle iteration is build a list of children to the level2Records with parent set parent
@@ -45,12 +46,12 @@ class MinimalizationTechnique extends BaseTechnique("Tree ECM Visualization")
                     var children = ListBuffer[VertexViewPack]()
                     parent.value.edges.foreach { parentsEdge =>
 
-                        val child = if (parent.value.vertexModel eq parentsEdge.originView.vertexModel) {
+                        val child = if (parent.value.isEqual(parentsEdge.originView)) {
                             parentsEdge.destinationView
                         } else {
                             parentsEdge.originView
                         }
-                        if (alreadyProcessed.find(element => element.vertexModel eq child.vertexModel) == None) {
+                        if (alreadyProcessed.find(element => element.isEqual(child)) == None) {
 
                             children += new VertexViewPack(child, ListBuffer[VertexViewPack](), Some(parent))
                         }
@@ -97,8 +98,8 @@ class MinimalizationTechnique extends BaseTechnique("Tree ECM Visualization")
                 parent.children.foreach { parentsChild =>
 
                     val foundEdge = parent.value.edges.find { element =>
-                        (element.originView.vertexModel eq parentsChild.value.vertexModel) ||
-                            (element.destinationView.vertexModel eq parentsChild.value.vertexModel)
+                        (element.originView.isEqual(parentsChild.value)) ||
+                            (element.destinationView.isEqual(parentsChild.value))
                     }.get //finds edge in the parent.value.edges that connects parent.value and parentsChild.value
 
                     orderedEdges += foundEdge
@@ -109,8 +110,8 @@ class MinimalizationTechnique extends BaseTechnique("Tree ECM Visualization")
                 //if a grandparent exist and an edge to it in parent.edges container it is also added
                 if (parent.parent != None) {
                     val edgeToGrandParent = parent.value.edges.find { element =>
-                        (element.originView.vertexModel eq parent.parent.get.value.vertexModel) ||
-                            (element.destinationView.vertexModel eq parent.parent.get.value.vertexModel)
+                        (element.originView.isEqual(parent.parent.get.value)) ||
+                            (element.destinationView.isEqual(parent.parent.get.value))
                     }
                     if (edgeToGrandParent != None) {
                         orderedEdges += edgeToGrandParent.get
@@ -133,7 +134,7 @@ class MinimalizationTechnique extends BaseTechnique("Tree ECM Visualization")
      * (see rotate(..)). The found drawing is then set by the sorthEdgeViewList method.
      * @param vertexViews
      */
-    private def minimizeEdgeCrossing(vertexViews: ListBuffer[VertexView]) {
+    private def minimizeEdgeCrossing(vertexViews: ListBuffer[VertexViewElement]) {
         val originalStructure = buildUtilityStructure(vertexViews.head)
         var minCrossings = Double.MaxValue
         var memory: VertexViewPack = originalStructure.clone() //best drawing so far
@@ -233,12 +234,12 @@ class MinimalizationTechnique extends BaseTechnique("Tree ECM Visualization")
 
         while (pointer < processedVertexGroups.length) {
             ignoreList += processedVertexGroups(pointer)
-            if (processedVertexGroups(pointer).value.vertexModel eq addedElement.value.vertexModel) {
+            if (processedVertexGroups(pointer).value.isEqual(addedElement.value)) {
                 pointer += 1
                 count = 0
                 while (pointer < processedVertexGroups.length) {
                     val p = ignoreList.find(element =>
-                        element.value.vertexModel eq processedVertexGroups(pointer).value.vertexModel)
+                        element.value.isEqual(processedVertexGroups(pointer).value))
 
                     if (p == None) {
                         count += 1

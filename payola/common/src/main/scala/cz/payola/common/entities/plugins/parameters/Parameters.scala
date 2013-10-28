@@ -24,9 +24,13 @@ trait StringParameter extends Parameter[String]
 {
     protected val _isMultiline: Boolean
     protected val _isPattern: Boolean
+    protected val _isPassword: Boolean
+    protected val _canContainUrl: Boolean
     
     def isPattern: Boolean = _isPattern
     def isMultiline: Boolean = _isMultiline
+    def isPassword: Boolean = _isPassword
+    def canContainUrl: Boolean = _canContainUrl
 }
 
 

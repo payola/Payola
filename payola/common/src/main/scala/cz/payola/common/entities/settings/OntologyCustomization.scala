@@ -7,18 +7,18 @@ import scala.collection.immutable
 /**
   * Customization of a graph appearance based on an ontology.
   */
-trait OntologyCustomization extends Entity with NamedEntity with OptionallyOwnedEntity with ShareableEntity
+trait OntologyCustomization extends DefinedCustomization
 {
+    override def classNameText = "ontology customization"
+
+    /** URL that is used for customization. */
+    val URLs: String
+
     /** Type of the class customizations in the ontology customization. */
     type ClassCustomizationType <: ClassCustomization
 
-    /** URL of the ontology that is used for customization. */
-    val ontologyURLs: String
-
     protected var _classCustomizations: immutable.Seq[ClassCustomizationType]
 
-    override def classNameText = "ontology customization"
-
     /** Customizations of classes in the ontology. */
-    def classCustomizations = _classCustomizations
+    override def classCustomizations = _classCustomizations.filter(!_.isConditionalCustomization)
 }

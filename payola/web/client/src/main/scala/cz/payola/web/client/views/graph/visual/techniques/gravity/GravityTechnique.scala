@@ -7,6 +7,7 @@ import cz.payola.web.client.views.graph.visual.animation.Animation
 import cz.payola.web.client.views.graph.visual.techniques.BaseTechnique
 import cz.payola.web.client.views.algebra._
 import cz.payola.web.client.views.graph.visual.graph.positioning.GraphPositionHelper
+import cz.payola.web.client.models.PrefixApplier
 
 /**
  * Visual plug-in technique that places the vertices based on their edges.
@@ -16,7 +17,7 @@ import cz.payola.web.client.views.graph.visual.graph.positioning.GraphPositionHe
  * closer. The final positions of the vertices is reached when all vertices
  * have "small enough" velocity.
  */
-class GravityTechnique extends BaseTechnique("Gravity Visualization")
+class GravityTechnique(prefixApplier: Option[PrefixApplier]) extends BaseTechnique("Gravity Visualization", prefixApplier)
 {
     /**
      * How much vertices push away each other
@@ -43,9 +44,9 @@ class GravityTechnique extends BaseTechnique("Gravity Visualization")
 
             val graphCenterCorrector = new GraphPositionHelper(() => topLayer.size, component.getCenter)
             val centeringAnimation = new Animation(Animation.moveGraphByFunction,
-                (graphCenterCorrector, component.vertexViews), Some(animationOfThis), redrawQuick, redraw, None)
+                (graphCenterCorrector, component.vertexViewElements), Some(animationOfThis), redrawQuick, redraw, None)
 
-            new Animation(basicTreeStructure, component.vertexViews, Some(centeringAnimation),
+            new Animation(basicTreeStructure, component.vertexViewElements, Some(centeringAnimation),
                 redrawQuick, redraw, None)
         } else {
             val animationOfThis = new Animation(
@@ -53,17 +54,17 @@ class GravityTechnique extends BaseTechnique("Gravity Visualization")
 
             val graphCenterCorrector = new GraphPositionHelper(() => topLayer.size, component.getCenter)
             val centeringAnimation = new Animation(Animation.moveGraphByFunction,
-                (graphCenterCorrector, component.vertexViews), Some(animationOfThis), redrawQuick, redraw,
+                (graphCenterCorrector, component.vertexViewElements), Some(animationOfThis), redrawQuick, redraw,
                 Some(0))
 
-            new Animation(basicTreeStructure, component.vertexViews, Some(centeringAnimation), redrawQuick, redraw, Some(0))
+            new Animation(basicTreeStructure, component.vertexViewElements, Some(centeringAnimation), redrawQuick, redraw, Some(0))
         }
     }
 
     private def runningAnimation(componentToAnimate: Component, followingAnimation: Option[Animation[_]],
         redrawQuick: () => Unit, redrawFinal: () => Unit, animationStepLength: Option[Int]) {
 
-        val vertexViewPacks = buildVertexViewsWorkingStructure(componentToAnimate.vertexViews)
+        val vertexViewPacks = buildVertexViewsWorkingStructure(componentToAnimate.vertexViewElements)
         val edgeViewPacks = buildEdgeViewsWorkingStructure(vertexViewPacks, componentToAnimate.edgeViews)
 
         vertexViewPacks.foreach { vPack =>
@@ -88,7 +89,7 @@ class GravityTechnique extends BaseTechnique("Gravity Visualization")
             currentTime = new Date()
         }
 
-        val toMove = ListBuffer[(VertexView, Point2D)]()
+        val toMove = ListBuffer[(VertexViewElement, Point2D)]()
         vertexViewPacks.foreach { vVPack =>
             toMove += ((vVPack.value, vVPack.currentPosition))
         }
@@ -96,7 +97,7 @@ class GravityTechnique extends BaseTechnique("Gravity Visualization")
         //create animation to center the graph
         val graphCenterCorrector = new GraphPositionHelper(() => topLayer.size, componentToAnimate.getCenter)
         val centeringAnimation = new Animation(Animation.moveGraphByFunction,
-            (graphCenterCorrector, componentToAnimate.vertexViews), followingAnimation, redrawQuick, redraw, None)
+            (graphCenterCorrector, componentToAnimate.vertexViewElements), followingAnimation, redrawQuick, redraw, None)
 
         val moveVerticesAnimation =
             new Animation(Animation.moveVertices, toMove, Some(centeringAnimation), redrawQuick, redrawQuick,
@@ -107,7 +108,7 @@ class GravityTechnique extends BaseTechnique("Gravity Visualization")
             //center the graph
             val graphCenterCorrector = new GraphPositionHelper(() => topLayer.size, componentToAnimate.getCenter)
             val nextRoundAnimation = new Animation(Animation.moveGraphByFunction,
-                    (graphCenterCorrector, componentToAnimate.vertexViews), None, redrawQuick, redraw, None)
+                    (graphCenterCorrector, componentToAnimate.vertexViewElements), None, redrawQuick, redraw, None)
             //add next round of gravity animation
             nextRoundAnimation.addFollowingAnimation(
                 new Animation(runningAnimation, componentToAnimate, followingAnimation,
@@ -122,14 +123,14 @@ class GravityTechnique extends BaseTechnique("Gravity Visualization")
 
     /**
      * Constructus a structure of vertexViewPacks, that the gravity algorithm works with.
-     * @param vertexViews to create vertexViewPacks from
+     * @param vertices to create vertexViewPacks from
      * @return created vertexViewPacks
      */
-    private def buildVertexViewsWorkingStructure(vertexViews: ListBuffer[VertexView]): ListBuffer[VertexViewPack] = {
+    private def buildVertexViewsWorkingStructure(vertices: ListBuffer[VertexViewElement]): ListBuffer[VertexViewPack] = {
         var workingStructure = ListBuffer[VertexViewPack]()
 
-        vertexViews.foreach { view =>
-            workingStructure += new VertexViewPack(view)
+        vertices.foreach { vertex =>
+            workingStructure += new VertexViewPack(vertex)
         }
 
         workingStructure
@@ -146,10 +147,10 @@ class GravityTechnique extends BaseTechnique("Gravity Visualization")
         var workingStructure = ListBuffer[EdgeViewPack]()
         edgeViews.foreach { view =>
             val origin = vertexViewPacks.find { element =>
-                element.value.vertexModel eq view.originView.vertexModel
+                element.value.isEqual(view.originView)
             }
             val destination = vertexViewPacks.find { element =>
-                element.value.vertexModel eq view.destinationView.vertexModel
+                element.value.isEqual(view.destinationView)
             }
             workingStructure += new EdgeViewPack(view, origin.get, destination.get)
         }
@@ -173,7 +174,7 @@ class GravityTechnique extends BaseTechnique("Gravity Visualization")
 
             //set repulsion by all other vertices
             vertexViewPacks.foreach { pushing =>
-                if (pushed.value.vertexModel ne pushing.value.vertexModel) {
+                if (!(pushed.value.isEqual(pushing.value))) {
 
                     //minus repulsion of vertices
                     val forceElimination = repulsion / (
@@ -200,7 +201,7 @@ class GravityTechnique extends BaseTechnique("Gravity Visualization")
 
         //move vertices by the calculated vertices
         vertexViewPacks.foreach { moved =>
-            if (!moved.value.selected) {
+            if (!moved.value.isSelected) {
                 moved.velocity = (moved.force + moved.velocity) / (vertexViewPacks.length - moved.value.edges.length)
 
                 stabilization += scala.math.abs(moved.velocity.x) + scala.math.abs(moved.velocity.y)

@@ -9,6 +9,7 @@
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/select2.css")"/>
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/bootstrap-responsive.css")"/>
         <link rel="stylesheet" href="@routes.Assets.at("stylesheets/colorpicker.css")" />
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/sigma.css")" />
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")"/>
         <title>@title</title>
         <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/jquery.min.js")"></script>
@@ -21,8 +22,9 @@
         <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/jquery-plugins/jquery.livequery.min.js")"></script>
         <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/sprintf-0.7-beta1.js")"></script>
         <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/flot/jquery.flot.min.js")"></script>
-        <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/sigma.min.js")"></script>
-        <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/sigma.fisheye.js")"></script>
+        <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/sigma/sigma.min.js")"></script>
+        <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/sigma/sigma.fisheye.js")"></script>
+        <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/sigma/sigma.forceatlas2.js")"></script>
         <script type="text/javascript" src="@routes.Assets.at("javascripts/common.js")"></script>
     </head>
     <body>
@@ -50,6 +52,7 @@
                                             <li><a href="@routes.Analysis.create()"><i class="icon-plus"></i> Create New</a></li>
                                         </ul>
                                     </li>
+
                                     <li class="dropdown">
                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                             <i class="icon-hdd icon-white"></i> My Data Sources<b class="caret"></b>
@@ -59,6 +62,7 @@
                                             <li><a href="@routes.DataSource.create()"><i class="icon-plus"></i> Create New</a></li>
                                         </ul>
                                     </li>
+
                                     <li class="dropdown">
                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                             <i class="icon-file icon-white"></i> My Plugins<b class="caret"></b>
@@ -68,6 +72,18 @@
                                             <li><a href="@routes.Plugin.createPlugin()"><i class="icon-upload"></i> Upload New</a></li>
                                         </ul>
                                     </li>
+
+                                    <li class="dropdown">
+                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                            <i class="icon-list icon-white"></i>
+                                            Prefixes<b class="caret"></b>
+                                        </a>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="@routes.Prefix.list()"><i class="icon-list"></i> View All</a></li>
+                                            <li><a href="@routes.Prefix.create()"><i class="icon-plus"></i> Create New</a></li>
+                                        </ul>
+                                    </li>
+
                                     <li class="dropdown">
                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                             <i class="icon-rdf icon-white"></i> Private RDF Storage<b class="caret"></b>
@@ -76,6 +92,7 @@
                                             <li><a href="@routes.PrivateDataStorage.add()"><i class="icon-upload"></i> Upload Data</a></li>
                                         </ul>
                                     </li>
+
                                     <li class="dropdown">
                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                             <i class="icon-group icon-white"></i>

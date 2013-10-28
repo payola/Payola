@@ -26,11 +26,11 @@ object OntologyCustomization
                      val propertyCustomizations = c.properties.values.map { p =>
                          new PropertyCustomization(p.uri, "", 0)
                      }
-                     new ClassCustomization(c.uri, "", 0, "", propertyCustomizations.toList)
+                     new ClassCustomization(c.uri, "", 0, "", "", "", propertyCustomizations.toList)
                  }
              }.flatten
 
-             new OntologyCustomization(ontologyURLs.mkString(","), name, owner, classCustomizations.toList)
+             new OntologyCustomization("", ontologyURLs.mkString(","), name, owner, classCustomizations.toList)
         } catch {
             case _ => throw new ValidationException("ontologyURL", "Couldn't fetch an ontology from one of the specified URLs.")
         }
@@ -38,7 +38,8 @@ object OntologyCustomization
 }
 
 class OntologyCustomization(
-    val ontologyURLs: String,
+    override val id: String,
+    val URLs: String,
     protected var _name: String,
     protected var _owner: Option[User],
     protected var _classCustomizations: immutable.Seq[ClassCustomization])

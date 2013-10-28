@@ -4,6 +4,7 @@ import collection.immutable
 import cz.payola.domain.rdf.Graph
 import cz.payola.domain._
 import cz.payola.domain.entities.plugins._
+import cz.payola.domain.Entity
 
 /**
   * @param _name Name of the plugin.
@@ -29,6 +30,8 @@ abstract class Plugin(
     type ParameterType = Parameter[_]
 
     type ParameterValueType = ParameterValue[_]
+
+    val originalClassName = cz.payola.common.Entity.getClassName(getClass)
 
     /**
      * All the plugins have to behave as if they were instances of the plugin class, not their concrete classes.
@@ -125,6 +128,11 @@ abstract class Plugin(
       */
     protected final def usingDefined[A, B, C, R](p1: Option[A], p2: Option[B], p3: Option[C])(f: (A, B, C) => R): R = {
         p1.flatMap(value1 => p2.flatMap(value2 => p3.map(value3 => f(value1, value2, value3)))).getOrElse {
+            throw new PluginException("One of the used values isn't defined.")
+        }
+    }
+    protected final def usingDefined[A, B, C, D, R](p1: Option[A], p2: Option[B], p3: Option[C], p4: Option[D])(f: (A, B, C, D) => R): R = {
+        p1.flatMap(value1 => p2.flatMap(value2 => p3.flatMap(value3 => p4.map(value4 => f(value1, value2, value3, value4))))).getOrElse {
             throw new PluginException("One of the used values isn't defined.")
         }
     }

@@ -14,8 +14,8 @@ sealed class OpenDataCleanStorage(name: String, inputCount: Int, parameters: imm
 {
     def this() = {
         this("Open Data Clean Storage", 0, List(
-            new StringParameter(OpenDataCleanStorage.serviceURLParameter, "", false),
-            new StringParameter(OpenDataCleanStorage.endpointURLParameter, "", false)
+            new StringParameter(OpenDataCleanStorage.serviceURLParameter, "", false, false, false, true),
+            new StringParameter(OpenDataCleanStorage.endpointURLParameter, "", false, false, false, true)
         ), IDGenerator.newId)
     }
 
@@ -34,6 +34,7 @@ sealed class OpenDataCleanStorage(name: String, inputCount: Int, parameters: imm
     }
 
     override def getNeighbourhood(instance: PluginInstance, vertexURI: String): Graph = {
+
         usingDefined(getServiceURLParameter(instance)) { serviceURL =>
             val neighbourhoodUrl = serviceURL + "/uri?format=trig&uri=" + URLEncoder.encode(vertexURI, "UTF-8")
             Graph(RdfRepresentation.Trig, new Downloader(neighbourhoodUrl, "application/x-trig").result)

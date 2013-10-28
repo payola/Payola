@@ -4,7 +4,8 @@ import cz.payola.data.squeryl.entities.plugins.DataSource
 import scala.collection.immutable
 import scala.collection.mutable
 import cz.payola.data.squeryl._
-import cz.payola.data.squeryl.entities.settings.OntologyCustomization
+import cz.payola.data.squeryl.entities.settings._
+import scala.Some
 
 /**
  * This object converts [[cz.payola.common.entities.User]] to [[cz.payola.common.entities.User]].
@@ -52,9 +53,13 @@ class User(override val id: String, name: String, pwd: String, mail: String)
 
     private lazy val _ownedDataSourcesQuery = context.schema.dataSourceOwnership.left(this)
 
-    _ontologyCustomizations = null
+    _customizations = null
 
     private lazy val _ownedCustomizationsQuery = context.schema.customizationOwnership.left(this)
+
+    _availablePrefixes = null
+
+    private lazy val _ownedPrefixesQuery = context.schema.prefixOwnership.left(this)
 
     override def ownedGroups: immutable.Seq[GroupType] = {
         if (_ownedGroups == null) {
@@ -104,16 +109,28 @@ class User(override val id: String, name: String, pwd: String, mail: String)
         _ownedPlugins.toList
     }
 
-    override def ownedOntologyCustomizations: immutable.Seq[OntologyCustomizationType] = {
-        if (_ontologyCustomizations == null) {
+    override def ownedCustomizations: immutable.Seq[CustomizationType] = {
+        if (_customizations == null || _customizations.isEmpty) {
+
             wrapInTransaction {
-                _ontologyCustomizations = mutable.ArrayBuffer(
-                    context.ontologyCustomizationRepository.getAllByOwnerId(Some(id)): _*
+                _customizations = mutable.ArrayBuffer(
+                    context.customizationRepository.getAllByOwnerId(Some(id)): _*
+                )
+            }
+        }
+        _customizations.toList
+    }
+
+    override def availablePrefixes: immutable.Seq[PrefixType] = {
+        if (_availablePrefixes == null) {
+            wrapInTransaction {
+                _availablePrefixes = mutable.ArrayBuffer(
+                    context.prefixRepository.getAllAvailableToUser(Some(id)): _*
                 )
             }
         }
 
-        _ontologyCustomizations.toList
+        _availablePrefixes.toList
     }
 
     override protected def storeOwnedAnalysis(analysis: User#AnalysisType) {
@@ -134,10 +151,17 @@ class User(override val id: String, name: String, pwd: String, mail: String)
         super.storeOwnedPlugin(plugin)
     }
 
-    override protected def storeOntologyCustomization(customization: User#OntologyCustomizationType) {
-        super.storeOntologyCustomization(
-            context.schema.associate(OntologyCustomization(customization), _ownedCustomizationsQuery)
+    override protected def storeCustomization(customization: User#CustomizationType) {
+        super.storeCustomization(
+            context.schema.associate(Customization(customization), _ownedCustomizationsQuery)
         )
+    }
+
+    override protected def storeOwnedPrefix(prefix: User#PrefixType) {
+        if (prefix.owner == Some(this))
+            context.schema.associate(Prefix(prefix), _ownedPrefixesQuery)
+
+        super.storeOwnedPrefix(prefix)
     }
 
     override protected def discardOwnedAnalysis(analysis: User#AnalysisType) {
@@ -161,9 +185,16 @@ class User(override val id: String, name: String, pwd: String, mail: String)
         super.discardOwnedPlugin(plugin)
     }
 
-    override protected def discardOntologyCustomization(customization: User#OntologyCustomizationType) {
-        context.ontologyCustomizationRepository.removeById(customization.id)
+    override protected def discardCustomization(customization: User#CustomizationType) {
+        context.customizationRepository.removeById(customization.id)
 
-        super.discardOntologyCustomization(customization)
+        super.discardCustomization(customization)
+    }
+
+    override protected def discardOwnedPrefix(prefix: User#PrefixType) {
+        if (prefix.owner == Some(this))
+            context.prefixRepository.removeById(prefix.id)
+
+        super.discardOwnedPrefix(prefix)
     }
 }

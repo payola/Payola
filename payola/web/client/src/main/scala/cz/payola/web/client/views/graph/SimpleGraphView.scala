@@ -3,7 +3,7 @@ package cz.payola.web.client.views.graph
 import cz.payola.web.client.views._
 import cz.payola.web.client.views.graph.visual.techniques.tree.TreeTechnique
 import cz.payola.common.rdf._
-import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.common.entities.settings._
 import s2js.adapters.html.Element
 import scala.collection.mutable.ArrayBuffer
 import cz.payola.common.visual.Color
@@ -13,6 +13,7 @@ import cz.payola.common.rdf.Vertex
 import cz.payola.web.client.events._
 import scala.Some
 import s2js.compiler.javascript
+import scala.Some
 
 class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) extends GraphView
 {
@@ -110,7 +111,7 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
         }.mkString("\n")
     }
 
-    override def update(graph: Option[Graph], customization: Option[OntologyCustomization]) {
+    override def update(graph: Option[Graph], customization: Option[DefinedCustomization]) {
         super.update(graph, customization)
         technique.update(graph, customization)
 
@@ -124,9 +125,9 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
         showMessage(0)
     }
 
-    override def updateOntologyCustomization(customization: Option[OntologyCustomization]) {
-        super.updateOntologyCustomization(customization)
-        technique.updateOntologyCustomization(customization)
+    override def updateCustomization(customization: Option[DefinedCustomization]) {
+        super.updateCustomization(customization)
+        technique.updateCustomization(customization)
 
         showMessage(0)
     }

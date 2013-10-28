@@ -1,0 +1,21 @@
+.resizable {
+    border: 1px solid black;
+    overflow: hidden;
+    resize: both;
+}
+
+.vertex-info {
+    display: inline-block;
+    border-radius: 3;
+    padding: 5;
+    background: #fff;
+    color: #000;
+    box-shadow: 0 0 4px #666;
+    position: absolute;
+    overflow: auto;
+    opacity: 0.2;
+}
+
+.visible {
+    opacity: 1;
+}

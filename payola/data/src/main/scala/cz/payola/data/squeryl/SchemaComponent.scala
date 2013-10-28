@@ -88,14 +88,20 @@ trait SchemaComponent
         /**Table of [[cz.payola.data.squeryl.entities.privileges.PrivilegeDbRepresentation]]s */
         val privileges = table[PrivilegeDbRepresentation]("privileges")
 
-        /**Table of [[cz.payola.data.squeryl.entities.settings.OntologyCustomization]]s */
-        val ontologyCustomizations = table[OntologyCustomization]("ontologyCustomizations")
+        /**Table of [[cz.payola.data.squeryl.entities.settings.Customization]]s */
+        val customizations = table[Customization]("ontologyCustomizations")
 
         /**Table of [[cz.payola.data.squeryl.entities.settings.ClassCustomization]]s */
         val classCustomizations = table[ClassCustomization]("classCustomizations")
 
         /**Table of [[cz.payola.data.squeryl.entities.settings.PropertyCustomization]]s */
         val propertyCustomizations = table[PropertyCustomization]("propertyCustomizations")
+
+        /**Table of [[cz.payola.data.squeryl.entities.Prefix]]es */
+        val prefixes = table[Prefix]("prefixes")
+
+        /**Table of [[cz.payola.data.squeryl.entities.AnalysisResult]]s */
+        val analysesResults = table[AnalysisResult]("analysesResults")
 
         /**
          * Relation that associates members ([[cz.payola.data.squeryl.entities.User]]s)
@@ -119,10 +125,10 @@ trait SchemaComponent
             (u, a) => Option(u.id) === a.ownerId)
 
         /**
-         * Relation that associates [[cz.payola.data.squeryl.entities.settings.OntologyCustomization]] to its owner
+         * Relation that associates [[cz.payola.data.squeryl.entities.settings.Customization]] to its owner
          * ([[cz.payola.data.squeryl.entities.User]]s)
          */
-        lazy val customizationOwnership = oneToManyRelation(users, ontologyCustomizations).via(
+        lazy val customizationOwnership = oneToManyRelation(users, customizations).via(
             (u, c) => Option(u.id) === c.ownerId)
 
         /**
@@ -138,6 +144,13 @@ trait SchemaComponent
          */
         lazy val dataSourceOwnership = oneToManyRelation(users, dataSources).via(
             (u, ds) => Option(u.id) === ds.ownerId)
+
+        /**
+         * Relation that associates [[cz.payola.data.squeryl.entities.Prefix]] to its owner
+         * ([[cz.payola.data.squeryl.entities.User]]s)
+         */
+        lazy val prefixOwnership = oneToManyRelation(users, prefixes).via(
+            (u, p) => Option(u.id) === p.ownerId)
 
         /**
          * Relation that associates [[cz.payola.data.squeryl.entities.analyses.PluginDbRepresentation]] to a
@@ -295,18 +308,18 @@ trait SchemaComponent
             (ds, spv) => Option(ds.id) === spv.dataSourceId)
 
         /**
-         * Relation that associates [[cz.payola.data.squeryl.entities.settings.OntologyCustomization]]s
+         * Relation that associates [[cz.payola.data.squeryl.entities.settings.Customization]]s
          * to a [[cz.payola.data.squeryl.entities.Analysis]]
          */
-        lazy val ontologyCustomizationsOfAnalyses = oneToManyRelation(ontologyCustomizations, analyses).via(
+        lazy val customizationsOfAnalyses = oneToManyRelation(customizations, analyses).via(
             (o, a) => a.defaultCustomizationId === Some(o.id))
 
         /**
          * Relation that associates [[cz.payola.data.squeryl.entities.settings.ClassCustomization]]s
-         * to a [[cz.payola.data.squeryl.entities.settings.OntologyCustomization]]
+         * to a [[cz.payola.data.squeryl.entities.settings.Customization]]
          */
-        lazy val classCustomizationsOfOntologies = oneToManyRelation(ontologyCustomizations, classCustomizations).via(
-            (o, c) => o.id === c.ontologyCustomizationId)
+        lazy val classCustomizationsOfCustomizations = oneToManyRelation(customizations, classCustomizations).via(
+            (cust, cls) => cust.id === cls.customizationId)
 
         /**
          * Relation that associates [[cz.payola.data.squeryl.entities.settings.PropertyCustomization]]s
@@ -357,7 +370,7 @@ trait SchemaComponent
                 new IntParameterValue("", null, 0)
             },
             factoryFor(stringParameters) is {
-                new StringParameter("", "", "", false, false)
+                new StringParameter("", "", "", false, false, false, false)
             },
             factoryFor(stringParameterValues) is {
                 new StringParameterValue("", null, "")
@@ -368,14 +381,20 @@ trait SchemaComponent
             factoryFor(privileges) is {
                 new PrivilegeDbRepresentation("", "", "", "", "", "", "")
             },
-            factoryFor(ontologyCustomizations) is {
-                new OntologyCustomization("", "", "", None, Nil, false)
+            factoryFor(customizations) is {
+                new Customization("", None, "", "", None, Nil, false)
             },
             factoryFor(classCustomizations) is {
-                new ClassCustomization("", "", "", 0, "", Nil)
+                new ClassCustomization("", "", "", 0, "", "", "", Nil)
             },
             factoryFor(propertyCustomizations) is {
                 new PropertyCustomization("", "", "", 0)
+            },
+            factoryFor(prefixes) is {
+                new Prefix("", "", "", "", None)
+            },
+            factoryFor(analysesResults) is {
+                new AnalysisResult("", None, "", false, 0, new java.util.Date(System.currentTimeMillis()))
             }
         )
 
@@ -385,9 +404,11 @@ trait SchemaComponent
         private def declareKeys() {
             val COLUMN_TYPE_ID = "varchar(36)"
             val COLUMN_TYPE_TOKEN = "varchar(36)"
+            val COLUMN_TYPE_PREFIX = "varchar(10)"
             val COLUMN_TYPE_NAME = "varchar(128)"
             val COLUMN_TYPE_DESCRIPTION = "text"
-            val COLUMN_TYPE_URI = "text"
+            val COLUMN_TYPE_URIS = "text"
+            val COLUMN_TYPE_URI = "varchar(256)"
             val COLUMN_TYPE_VALUE = "text"
             val COLUMN_TYPE_COLOR = "varchar(128)"
             val COLUMN_TYPE_CLASSNAME = "varchar(64)"
@@ -543,22 +564,23 @@ trait SchemaComponent
                     columns(p.granteeId, p.privilegeClass, p.objectId) are (unique)
                 ))
 
-            on(ontologyCustomizations)(c =>
+            on(customizations)(c =>
                 declare(
                     c.id is(primaryKey, (dbType(COLUMN_TYPE_ID))),
                     c.name is (dbType(COLUMN_TYPE_NAME)),
                     c.ownerId is (dbType(COLUMN_TYPE_ID)),
-                    c.ontologyURLs is (dbType(COLUMN_TYPE_URI)),
+                    c.URLs is (dbType(COLUMN_TYPE_URIS)),
                     columns(c.name, c.ownerId) are (unique)
                 ))
 
             on(classCustomizations)(c =>
                 declare(
                     c.id is(primaryKey, (dbType(COLUMN_TYPE_ID))),
-                    c.uri is (dbType(COLUMN_TYPE_URI)),
+                    c.uri is (dbType(COLUMN_TYPE_URIS)),
+                    c.conditionalValue is (dbType(COLUMN_TYPE_URIS)),
                     c.glyph is (dbType("varchar(1)")),
                     c.fillColor is (dbType(COLUMN_TYPE_COLOR)),
-                    c.ontologyCustomizationId is (dbType(COLUMN_TYPE_ID))
+                    c.customizationId is (dbType(COLUMN_TYPE_ID))
                 ))
 
             on(propertyCustomizations)(c =>
@@ -566,7 +588,24 @@ trait SchemaComponent
                     c.id is(primaryKey, (dbType(COLUMN_TYPE_ID))),
                     c.strokeColor is (dbType(COLUMN_TYPE_COLOR)),
                     c.classCustomizationId is (dbType(COLUMN_TYPE_ID)),
-                    c.uri is (dbType(COLUMN_TYPE_URI))
+                    c.uri is (dbType(COLUMN_TYPE_URIS))
+                ))
+
+            on(prefixes)(p =>
+                declare(
+                    p.id is(primaryKey, (dbType(COLUMN_TYPE_ID))),
+                    p.name is (dbType(COLUMN_TYPE_NAME)),
+                    p.prefix is (dbType(COLUMN_TYPE_PREFIX)),
+                    p.url is (dbType(COLUMN_TYPE_URI)),
+                    p.ownerId is (dbType(COLUMN_TYPE_ID)),
+                    columns(p.ownerId, p.prefix) are (unique),
+                    columns(p.ownerId, p.url) are (unique)
+                ))
+
+            on(analysesResults)(analysisRes =>
+                declare(
+                    analysisRes.analysisId is(dbType(COLUMN_TYPE_ID)),
+                    analysisRes.evaluationId is(dbType(COLUMN_TYPE_ID))
                 ))
 
             // When a PluginDbRepresentation is deleted, all of the its instances and data sources will get deleted.
@@ -616,8 +655,8 @@ trait SchemaComponent
             dataSourceOwnership.foreignKeyDeclaration.constrainReference(onDelete cascade)
             pluginOwnership.foreignKeyDeclaration.constrainReference(onDelete cascade)
 
-            // When ontology customization is removed, remove all sub-customizations
-            classCustomizationsOfOntologies.foreignKeyDeclaration.constrainReference(onDelete cascade)
+            // When customization is removed, remove all sub-customizations
+            classCustomizationsOfCustomizations.foreignKeyDeclaration.constrainReference(onDelete cascade)
             propertyCustomizationsOfClasses.foreignKeyDeclaration.constrainReference(onDelete cascade)
         }
 
