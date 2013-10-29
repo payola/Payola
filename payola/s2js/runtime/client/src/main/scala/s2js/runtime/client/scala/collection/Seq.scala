@@ -22,6 +22,19 @@ trait Seq extends Iterable
     }
 
     @javascript("""
+        var u = {}, a = [];
+        for(var i = 0, l = self.getInternalJsArray().length; i < l; ++i){
+            if(u.hasOwnProperty(self.getInternalJsArray()[i])) {
+                continue;
+            }
+            a.push(self.getInternalJsArray()[i]);
+            u[self.getInternalJsArray()[i]] = 1;
+        }
+        return a;
+                """)
+    def distinct(): ArrayBuffer = null
+
+    @javascript("""
         return self.getInternalJsArray().sort(function(a,b){
             if (f(a,b)){ return -1; }
             return 1;

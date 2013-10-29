@@ -1,7 +1,7 @@
 package cz.payola.web.client.views.graph
 
 import cz.payola.common.rdf._
-import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.common.entities.settings._
 import cz.payola.web.client.views._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap._
@@ -17,7 +17,8 @@ import cz.payola.web.client.views.graph.sigma.GraphSigmaPluginView
 import cz.payola.web.client.views.graph.datacube._
 import cz.payola.web.client.models.PrefixApplier
 import scala.Some
-import cz.payola.web.shared.AnalysisCache
+import cz.payola.web.shared.AnalysisEvaluationResultsManager
+import scala.Some
 
 class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with ComposedView
 {
@@ -39,7 +40,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
     /**
      * Event triggered when user customization is selected.
      */
-    val userCustomizationSelected = new SimpleUnitEvent[OntologyCustomization]
+    val userCustomizationSelected = new SimpleUnitEvent[UserCustomization]
 
     /**
      * Event triggered when user customization is created.
@@ -49,7 +50,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
     /**
      * Event triggered when user customization is edited.
      */
-    val userCustomizationEditClicked = new SimpleUnitEvent[OntologyCustomization]
+    val userCustomizationEditClicked = new SimpleUnitEvent[UserCustomization]
 
     /**
      * List of available visualization plugins.
@@ -110,7 +111,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
     ).setAttribute("style", "margin: 0 5px;")
 
     /**
-     * Toolbar containing  pluginChange ontology customization buttons
+     * Toolbar containing pluginChange, customization buttons
      */
     val toolbar = new Div(List(pluginChangeButton, customizationsButton, languagesButton), "btn-toolbar").setAttribute(
         "style", "margin-bottom: 15px;")
@@ -130,20 +131,22 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
 
     def createSubViews = List(toolbar, pluginSpace)
 
-    override def update(graph: Option[Graph], customization: Option[OntologyCustomization]) {
+    override def update(graph: Option[Graph], customization: Option[DefinedCustomization]) {
         super.update(graph, customization)
+        currentPlugin.setEvaluationId(evaluationId)
         currentPlugin.update(graph, customization)
     }
 
     override def updateGraph(graph: Option[Graph], contractLiterals: Boolean) {
 
         super.updateGraph(graph, contractLiterals)
+        currentPlugin.setEvaluationId(evaluationId)
         currentPlugin.updateGraph(graph, contractLiterals)
     }
 
-    override def updateOntologyCustomization(customization: Option[OntologyCustomization]) {
-        super.updateOntologyCustomization(customization)
-        currentPlugin.updateOntologyCustomization(customization)
+    override def updateCustomization(customization: Option[DefinedCustomization]) {
+        super.updateCustomization(customization)
+        currentPlugin.updateCustomization(customization)
     }
 
     override def setMainVertex(vertex: Vertex) {
@@ -157,37 +160,53 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
      * Updates the list of ontology customizations showed in the ontologyCustomizationButton drop-down button.
      * @param customizations customizations to set to the drop-down button
      */
-    def updateOntologyCustomizations(customizations: OntologyCustomizationsByOwnership) {
+    def updateAvailableCustomizations(userCustomizations: UserCustomizationsByOwnership,
+        ontoCustomizations: OntologyCustomizationsByOwnership) {
+
         // The owned customizations that are editable.
-        val owned = customizations.ownedCustomizations.getOrElse(Nil).map(createCustomizationListItem(_, true))
+        val ownedOnto = ontoCustomizations.ownedCustomizations.getOrElse(Nil).map(oo =>
+            createOntologyCustomizationListItem(oo, true))
+        val ownedUser = userCustomizations.ownedCustomizations.getOrElse(Nil).map(ou =>
+            createUserCustomizationListItem(ou, true))
 
         // The customizations of other users.
-        val others = customizations.othersCustomizations.map(createCustomizationListItem(_, false))
+        val othersOnto = ontoCustomizations.othersCustomizations.map(oo =>
+            createOntologyCustomizationListItem(oo, false))
+        val othersUser = userCustomizations.othersCustomizations.map(ou =>
+            createUserCustomizationListItem(ou, false))
 
         // A separator between owned and others customizations.
-        val separator1 = if (owned.nonEmpty && others.nonEmpty) List(new ListItem(Nil, "divider")) else Nil
+        val separator1 = if ((ownedOnto.nonEmpty || ownedUser.nonEmpty) && (othersOnto.nonEmpty || othersUser.nonEmpty))
+            List(new ListItem(Nil, "divider")) else Nil
 
         // The create new ontology based button.
-        val createButtonByOntology = new Anchor(List(new Icon(Icon.plus), new Text("Create New Ontology Customization")))
-        createButtonByOntology.mouseClicked += { e =>
+        val createButtonByOntologyCustomization =
+            new Anchor(List(new Icon(Icon.plus), new Text("Create New Ontology Customization")))
+        createButtonByOntologyCustomization.mouseClicked += { e =>
             ontologyCustomizationCreateClicked.triggerDirectly(this)
             false
         }
 
         // The create new user defined customization button.
-        val createButtonCustom = new Anchor(List(new Icon(Icon.plus), new Text("Create New User Customization")))
-        createButtonCustom.mouseClicked += { e =>
+        val createButtonByUserCustomization =
+            new Anchor(List(new Icon(Icon.plus), new Text("Create New User Customization")))
+        createButtonByUserCustomization.mouseClicked += { e =>
             userCustomizationCreateClicked.triggerDirectly(this)
             false
         }
 
-        val createNewCustomization = customizations.ownedCustomizations.map { _ =>
-            val separator2 = if (owned.nonEmpty || others.nonEmpty) List(new ListItem(Nil, "divider")) else Nil
-            separator2 ++ List(new ListItem(List(createButtonByOntology)), new ListItem(List(createButtonCustom)))
-        }.getOrElse(Nil)
+        val createNewCustomization =
+            if(userCustomizations.ownedCustomizations.isDefined || ontoCustomizations.ownedCustomizations.isDefined) {
+                val separator2 =
+                    if ((ownedOnto.nonEmpty || ownedUser.nonEmpty) && (othersOnto.nonEmpty || othersUser.nonEmpty))
+                        List(new ListItem(Nil, "divider")) else Nil
+                separator2 ++ List(
+                    new ListItem(List(createButtonByOntologyCustomization)),
+                    new ListItem(List(createButtonByUserCustomization)))
+            } else { Nil }
 
         // All the items merged together.
-        val allItems = owned ++ separator1 ++ others ++ createNewCustomization
+        val allItems = ownedOnto ++ ownedUser ++ separator1 ++ othersOnto ++ othersUser ++ createNewCustomization
         val items = if (allItems.nonEmpty) {
             allItems
         } else {
@@ -219,10 +238,9 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
      * @param isEditable if true the Edit button will be added to the created listItem
      * @return listItem representing the ontology customization
      */
-    private def createCustomizationListItem(customization: OntologyCustomization, isEditable: Boolean): ListItem = {
+    private def createOntologyCustomizationListItem(customization: OntologyCustomization, isEditable: Boolean): ListItem = {
         val editButton = new Button(new Text("Edit"), "btn-mini", new Icon(Icon.pencil)).setAttribute(
             "style", "position: absolute; right: 5px;")
-
         val anchor = new Anchor(List(new Text(customization.name)) ++ (if (isEditable) List(editButton) else Nil))
 
         val listItem = new ListItem(List(anchor))
@@ -237,11 +255,31 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
         }
 
         editButton.mouseClicked += { e =>
-            if (customization.isUserDefined) {
-                userCustomizationEditClicked.triggerDirectly(customization)
-            } else {
-                ontologyCustomizationEditClicked.triggerDirectly(customization)
-            }
+            ontologyCustomizationEditClicked.triggerDirectly(customization)
+            false
+        }
+
+        listItem
+    }
+
+    private def createUserCustomizationListItem(customization: UserCustomization, isEditable: Boolean): ListItem = {
+        val editButton = new Button(new Text("Edit"), "btn-mini", new Icon(Icon.pencil)).setAttribute(
+            "style", "position: absolute; right: 5px;")
+        val anchor = new Anchor(List(new Text(customization.name)) ++ (if (isEditable) List(editButton) else Nil))
+
+        val listItem = new ListItem(List(anchor))
+        if (currentCustomization.exists(_ == customization)) {
+            listItem.addCssClass("active")
+        }
+
+        anchor.mouseClicked += { e =>
+            userCustomizationSelected.triggerDirectly(customization)
+            customizationsButton.setActiveItem(listItem)
+            false
+        }
+
+        editButton.mouseClicked += { e =>
+            userCustomizationEditClicked.triggerDirectly(customization)
             false
         }
 
@@ -260,11 +298,20 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
             currentPlugin.destroy()
 
             // Switch to the new plugin.
+
             currentPlugin = plugin
+            currentPlugin.setEvaluationId(None)
             currentPlugin.render(pluginSpace.htmlElement)
             currentPlugin.renderControls(toolbar.htmlElement)
-            currentPlugin.update(currentGraph, currentCustomization)
-            currentPlugin.drawGraph()
+            //the default visualization is TripleTableView, which has implemented a server-side caching, support for other visualizations will be added with transformation layer
+            //now the whole graph has to fetched, this will be taken care of in transformation layer in next cache release iteration
+            if(evaluationId.isDefined) {
+                AnalysisEvaluationResultsManager.getCompleteAnalysisResult(evaluationId.get) { g =>
+                    currentGraph = g
+                    update(g, currentCustomization)
+                    currentPlugin.drawGraph()
+                } { err => }
+            }
         }
     }
 

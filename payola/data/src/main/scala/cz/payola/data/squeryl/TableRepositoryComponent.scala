@@ -53,7 +53,6 @@ trait TableRepositoryComponent
         Seq[A] = wrapInTransaction {
             // Define select query
             val query = select(getSelectQuery(entityFilter))
-
             // Simple pagination
             pagination.map(p => query.drop(p.skip).take(p.limit)).getOrElse(query)
         }
@@ -133,7 +132,9 @@ trait TableRepositoryComponent
         extends OptionallyOwnedEntityRepository[A]
     {
         self: TableRepository[A, B] =>
-        def getAllByOwnerId(ownerId: Option[String]): Seq[A] = selectWhere(_.ownerId === ownerId).sortBy(_.name)
+        def getAllByOwnerId(ownerId: Option[String]): Seq[A] = {
+            selectWhere(_.ownerId === ownerId).sortBy(_.name)
+        }
     }
 
     /**

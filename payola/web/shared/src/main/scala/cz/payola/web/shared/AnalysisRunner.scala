@@ -15,20 +15,8 @@ import cz.payola.common._
         (successCallback: (String => Unit))
         (failCallback: (Throwable => Unit)) {
 
-        //Console.println("About to start analysis.")
-        val evaluationFromStore =
-            if(user.isDefined && checkAnalysisStore) {
-                //Console.println("Searching the analysis store.")
-                Payola.model.analysisResultStorageModel.getEvaluationId(user.get, id)
-            } else {
-                //Console.println("Skipping analysis store search.")
-                None
-            }
-
-        val evaluationId = evaluationFromStore.getOrElse{
-            val analysis = getAnalysisById(user, id)
-            Payola.model.analysisModel.run(analysis, timeoutSeconds, oldEvaluationId, user)
-        }
+        val analysis = getAnalysisById(user, id)
+        val evaluationId = Payola.model.analysisModel.run(analysis, timeoutSeconds, oldEvaluationId, user)
 
         successCallback(evaluationId)
     }
@@ -44,21 +32,23 @@ import cz.payola.common._
                 val response = Payola.model.analysisModel.getEvaluationState(evaluationId, user)
 
                 //Console.println("Getting evaluation state.")
-                if(user.isDefined && storeAnalysis) {
+                if(storeAnalysis) {
                     response match {
                         case r: EvaluationSuccess =>
                             //Console.println("About to store analysis result.")
                             Payola.model.analysisResultStorageModel.saveGraph(
-                                r.outputGraph, user.get, analysisId, evaluationId, persistInAnalysisStorage)
+                                r.outputGraph, analysisId, evaluationId, persistInAnalysisStorage, user)
+                            //Console.println("saved")
                             EvaluationSuccess(
                                 Payola.model.analysisResultStorageModel.paginate(r.outputGraph),
                                 r.instanceErrors)
 
                         case _ =>
+                            //Console.println("2")
                             response
                     }
                 } else {
-                    Console.println("3")
+                    //Console.println("3")
                     response
                 }
             } catch {
@@ -66,7 +56,7 @@ import cz.payola.common._
                     //Console.println("Error Occured.")
                     if(user.isDefined) {
                         //Console.println("About to load analysis result.")
-                        val graph = Payola.model.analysisResultStorageModel.getGraph(user.get, analysisId)
+                        val graph = Payola.model.analysisResultStorageModel.getGraph(evaluationId)
 
                         if(paginate) {
                             val paginated = Payola.model.analysisResultStorageModel.paginate(graph)
@@ -78,7 +68,7 @@ import cz.payola.common._
                         throw e
                     }
                 case p =>  {
-                    //Console.println("Error Occured.")//TODO remove debug outputs
+                    //Console.println("Error Occured.")
                     throw p
                 }
             }

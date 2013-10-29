@@ -13,6 +13,8 @@ class VertexGroup(val uri: String, var content: Seq[VertexLink]) extends VertexL
         }
     }
 
+    override def toString = uri
+
     def contains(vertex: Vertex): Boolean = {
         content.exists(_.equals(vertex))
     }

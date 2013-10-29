@@ -4,10 +4,11 @@ import collection.mutable.ListBuffer
 import cz.payola.common.rdf._
 import cz.payola.web.client.views.graph.visual._
 import cz.payola.web.client.views.algebra._
-import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.common.entities.settings._
 import s2js.adapters.html
 import cz.payola.common.visual.Color
 import cz.payola.web.client.models.PrefixApplier
+import scala.Some
 
 /**
  * Graphical representation of a Graph object.
@@ -39,7 +40,7 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
         getAllVertices.foreach(_.resetConfiguration())
     }
 
-    def setConfiguration(newCustomization: Option[OntologyCustomization]) {
+    def setConfiguration(newCustomization: Option[DefinedCustomization]) {
         getAllEdges.foreach(_.setConfiguration(newCustomization))
         getAllVertices.foreach(_.setConfiguration(newCustomization))
     }

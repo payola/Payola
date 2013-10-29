@@ -3,14 +3,11 @@ package cz.payola.web.client.views.bootstrap.element
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.elements.form.fields.TextInput
 import cz.payola.web.client.views.elements.form.Label
-import cz.payola.web.shared.managers.OntologyCustomizationManager
-import cz.payola.common.entities.settings.ClassCustomization
-import cz.payola.web.client.views.bootstrap.modals.AlertModal
-import cz.payola.web.client.View
 import cz.payola.web.client.views.ComposedView
 
 class AppendToUserCustButton (var availableValues: Seq[String], title: String, listTitle: String, cssClass: String = "",
-    onAppendFunction: (String) => Boolean, customLabel: String = "Custom URI:") extends ComposedView
+    onAppendFunction: (String) => Boolean, customLabel: String = "Custom:",
+    leftLocation: Int = -419, topLocation: Int = 0, width: Int = 740, height: Int = 340) extends ComposedView
 {
 
     private var forbidPopupClose = false
@@ -74,7 +71,8 @@ class AppendToUserCustButton (var availableValues: Seq[String], title: String, l
             availableClassAnch.render(classDiv.htmlElement)
         }
 
-        classDiv.setAttribute("style","left: -419px !important; display: block")
+        classDiv.setAttribute("style","left: "+leftLocation+"px !important; top: "+topLocation+
+            "px !important; display: block; width:"+width+"px; height:"+height+";")
     }
 
     private def uriToName(uri: String): String = {

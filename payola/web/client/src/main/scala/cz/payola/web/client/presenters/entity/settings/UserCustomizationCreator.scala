@@ -9,7 +9,7 @@ import cz.payola.common._
 
 class UserCustomizationCreator extends Presenter
 {
-    val userCustomizationCreated = new SimpleUnitEvent[OntologyCustomization]
+    val userCustomizationCreated = new SimpleUnitEvent[UserCustomization]
 
     def initialize() {
         val modal = new UserCustomizationCreateModal

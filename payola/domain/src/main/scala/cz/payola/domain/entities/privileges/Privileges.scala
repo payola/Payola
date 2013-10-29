@@ -3,7 +3,7 @@ package cz.payola.domain.entities.privileges
 import cz.payola.domain.IDGenerator
 import cz.payola.domain.Entity
 import cz.payola.domain.entities._
-import cz.payola.domain.entities.settings.OntologyCustomization
+import cz.payola.domain.entities.settings._
 import cz.payola.domain.entities.plugins.DataSource
 
 class AccessAnalysisPrivilege(granter: User, grantee: Entity with PrivilegeableEntity, analysis: Analysis,
@@ -21,7 +21,7 @@ class UsePluginPrivilege(granter: User, grantee: Entity with PrivilegeableEntity
     extends Privilege[Plugin](granter, grantee, plugin, id)
     with cz.payola.common.entities.privileges.UsePluginPrivilege
 
-class UseOntologyCustomizationPrivilege(granter: User, grantee: Entity with PrivilegeableEntity,
-    customization: OntologyCustomization, id: String = IDGenerator.newId)
-    extends Privilege[OntologyCustomization](granter, grantee, customization, id)
-    with cz.payola.common.entities.privileges.UseOntologyCustomizationPrivilege
+class UseCustomizationPrivilege(granter: User, grantee: Entity with PrivilegeableEntity,
+    customization: Customization, id: String = IDGenerator.newId)
+    extends Privilege[Customization](granter, grantee, customization, id)
+    with cz.payola.common.entities.privileges.UseCustomizationPrivilege

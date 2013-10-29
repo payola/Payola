@@ -4,6 +4,7 @@ import cz.payola.data.squeryl._
 import cz.payola.data.squeryl.entities.AnalysisResult
 
 import org.squeryl.PrimitiveTypeMode._
+import s2js.runtime.shared.rpc.RpcException
 
 trait AnalysisResultRepositoryComponent extends TableRepositoryComponent {
     self: SquerylDataContextComponent =>
@@ -17,63 +18,53 @@ trait AnalysisResultRepositoryComponent extends TableRepositoryComponent {
         extends OptionallyOwnedEntityDefaultTableRepository[AnalysisResult](schema.analysesResults, AnalysisResult)
         with AnalysisResultRepository
     {
-        def storeAnalysis(analysisDescription: cz.payola.domain.entities.AnalysisResult) {
+        def storeResult(analysisDescription: cz.payola.domain.entities.AnalysisResult) {
             val converted = entityConverter(analysisDescription)
-            table.insert(converted)
-        }
-
-        def getNumberOfStoredAnalyses(): Long = {
-            selectWhere(_.Persist === false).size
-        }
-
-        def getNumberOfStoredForUser(userId: String): Long = {
-            selectWhere(_.UserID === userId).size
-        }
-
-        def getStoredAnalysis(userId: String, analysisId: String): Option[AnalysisResult] = {
-            selectOneWhere(anRes => anRes.AnalysisID === analysisId and anRes.UserID === userId)
-        }
-
-        def deleteStoredAnalysis(userId: String, analysisId: String) {
-            table.deleteWhere(anRes => anRes.AnalysisID === analysisId and anRes.UserID === userId)
-        }
-
-        def updateTimestamp(userId: String, analysisId: String) {
-            table.update(anRes =>
-                where(anRes.AnalysisID === analysisId and anRes.UserID === userId)
-                set(anRes.Touched := new java.util.Date(System.currentTimeMillis))
-            )
-        }
-
-        def getEvaluationId(userId: String, analysisId: String): Option[String] = {
-            val result = selectWhere(sel => sel.UserID === userId and sel.AnalysisID === analysisId)
-            if(result.isEmpty) {
-                None
-            } else {
-                Some(result.head.evaluationId)
+            //Console.println("inserting converted graph")
+            wrapInTransaction{
+                persist(converted)
             }
         }
 
-        def deleteOldest() {
-            val minTime: Option[java.util.Date] =
-                from(table)(a => where(a.Persist === true) compute(min(a.Touched)))
+        def getResultsCount(): Long = {
+            selectWhere(_.persist === false).size
+        }
 
-            if(minTime.isDefined) {
-                table.deleteWhere(anRes =>
-                    anRes.Touched === minTime.get and anRes.Persist === true
+        def getResult(evaluationId: String, analysisId: String): Option[AnalysisResult] = {
+            selectOneWhere(anRes => anRes.analysisId === analysisId and anRes.evaluationId === evaluationId)
+        }
+
+        def deleteResult(evaluationId: String, analysisId: String) {
+            wrapInTransaction{
+                table.deleteWhere(anRes => anRes.analysisId === analysisId and anRes.evaluationId === evaluationId)
+            }
+        }
+
+        def updateTimestamp(evaluationId: String) {
+            wrapInTransaction{
+                table.update(anRes =>
+                    where(anRes.evaluationId === evaluationId)
+                    set(anRes.touched := new java.util.Date(System.currentTimeMillis))
                 )
             }
         }
 
-        def deleteOldest(userId: String) {
-            val minTime: Option[java.util.Date] =
-                from(table)(a => where(a.UserID === userId and a.Persist === true) compute(min(a.Touched)))
+        def purge() {      //TODO make conditional and proper delete based on analysisResult.touched
+
+            wrapInTransaction{
+                table.deleteWhere(_.persist === false)
+            }
+            /*val qResult = select(from(table)(a => where(a.persist === true) compute(min(a.touched))))
+
+            val minTime = if(qResult.isEmpty) None else Some(qResult(0).touched)
 
             if(minTime.isDefined) {
-                table.deleteWhere(anRes =>
-                    anRes.UserID === userId and anRes.Touched === minTime.get and anRes.Persist === true
-                )
-            }
+                wrapInTransaction{
+                    table.deleteWhere(anRes =>
+                        anRes.touched === minTime.get and anRes.persist === true
+                    )
+                }
+            }*/
         }
     }
 }

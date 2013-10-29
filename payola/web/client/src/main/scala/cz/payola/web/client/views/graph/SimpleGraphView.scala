@@ -3,7 +3,7 @@ package cz.payola.web.client.views.graph
 import cz.payola.web.client.views._
 import cz.payola.web.client.views.graph.visual.techniques.tree.TreeTechnique
 import cz.payola.common.rdf._
-import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.common.entities.settings._
 import s2js.adapters.html.Element
 import scala.collection.mutable.ArrayBuffer
 import cz.payola.common.visual.Color
@@ -11,7 +11,6 @@ import s2js.runtime.client.scala.collection.mutable.HashMap
 import cz.payola.web.client.models.VertexVariableNameGenerator
 import cz.payola.common.rdf.Vertex
 import cz.payola.web.client.events._
-import scala.Some
 import s2js.compiler.javascript
 
 /**
@@ -36,6 +35,8 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
 
     val edges = new ArrayBuffer[Edge]()
 
+    var newPath = true
+
     val map = new HashMap[Vertex, String]()
     val generator = new VertexVariableNameGenerator()
 
@@ -52,6 +53,7 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
 
             if (vertices.size == 0) {
                 vertices += e.vertex
+                newPath = false
                 technique.updateVertexColor(e.vertex, Some(Color.Green))
             } else {
 
@@ -90,7 +92,8 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
             }
     }
 
-    private def getVertexName(map: HashMap[Vertex, String], vertex: Vertex): String = {
+    private def getVertexName(map: HashMap[Vertex, String], vertex: Vertex,
+        generator: VertexVariableNameGenerator): String = {
         if (!map.isDefinedAt(vertex)) {
             map.put(vertex, generator.nextName)
         }
@@ -104,27 +107,25 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
      */
     def getSignificantVertices = {
         getPattern
-
-        refVertices.map{ v =>
-            "?"+map.get(v).get
-        }
+        refVertices.map("?"+map.get(_).get)
     }
 
     /**
      * @return Selected SPARQL pattern
      */
     def getPattern: String = {
+        val generator = new VertexVariableNameGenerator()
 
         edges.map {
             e =>
-                val originVar = getVertexName(map, e.origin)
-                val destinationVar = getVertexName(map, e.destination)
+                val originVar = getVertexName(map, e.origin, generator)
+                val destinationVar = getVertexName(map, e.destination, generator)
 
                 originVar + " <" + e.uri + "> " + destinationVar + " ."
         }.mkString("\n")
     }
 
-    override def update(graph: Option[Graph], customization: Option[OntologyCustomization]) {
+    override def update(graph: Option[Graph], customization: Option[DefinedCustomization]) {
         super.update(graph, customization)
         technique.update(graph, customization)
         technique.drawGraph()
@@ -140,9 +141,9 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
         showMessage(0)
     }
 
-    override def updateOntologyCustomization(customization: Option[OntologyCustomization]) {
-        super.updateOntologyCustomization(customization)
-        technique.updateOntologyCustomization(customization)
+    override def updateCustomization(customization: Option[DefinedCustomization]) {
+        super.updateCustomization(customization)
+        technique.updateCustomization(customization)
 
         showMessage(0)
     }

@@ -2,43 +2,29 @@ package cz.payola.model.components
 
 import cz.payola.data._
 import cz.payola.domain.RdfStorageComponent
-import cz.payola.domain.entities.privileges._
-import cz.payola.domain.entities.settings._
 import cz.payola.model.EntityModelComponent
 import cz.payola.domain.entities.User
-import cz.payola.domain.entities.settings.OntologyCustomization
-import scala.Some
+import cz.payola.domain.entities.settings._
+import scala.collection.mutable
 
 trait OntologyCustomizationModelComponent extends EntityModelComponent
 {
     self: DataContextComponent with RdfStorageComponent with PrivilegeModelComponent =>
 
-    lazy val ontologyCustomizationModel = new ShareableEntityModel(ontologyCustomizationRepository,
-        classOf[OntologyCustomization])
+    lazy val ontologyCustomizationModel = new ShareableEntityModel(customizationRepository,
+        classOf[Customization])
     {
-        def create(name: String, ontologyURLs: Option[Seq[String]], owner: User): OntologyCustomization = {
+        def createOntologyBased(name: String, ontologyURLs: Seq[String], owner: User): OntologyCustomization = {
 
-            val customization =
-                if(ontologyURLs.isDefined) {
-                    OntologyCustomization.empty(ontologyURLs.get, name, Some(owner))
-                }
-                else
-                    OntologyCustomization.userDefined(name, Some(owner))
+            val customization = OntologyCustomization.empty(ontologyURLs, name, Some(owner))
 
             persist(customization)
             customization
         }
 
-        def persistUserDefined(userCustomization: OntologyCustomization) {
-            persist(userCustomization)
-        }
-
-        def persistClassCustomization(customization: ClassCustomization) {
-            ontologyCustomizationRepository.persistClassCustomization(customization)
-        }
-
-        def persistPropertyCustomization(customization: PropertyCustomization) {
-            ontologyCustomizationRepository.persistPropertyCustomization(customization)
+        def getAccessibleCustomizationsToUserById(user: Option[User], id: String): Option[OntologyCustomization] = {
+            val customization = getAccessibleToUser(user).find(_.id == id)
+            if(customization.isDefined) { customization.get.toOntologyCustomization().asInstanceOf[Option[OntologyCustomization]] } else { None }
         }
 
     }

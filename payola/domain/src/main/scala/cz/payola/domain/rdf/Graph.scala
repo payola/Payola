@@ -107,8 +107,7 @@ class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge], resultC
             val destination = mergedVertices.find(_ == e.destination).get
             new Edge(origin, destination, e.uri)
         }
-        new Graph(mergedVertices, mergedEdges,
-            Some(this.resultCount.getOrElse(this.vertices.size) + otherGraph.resultsCount.getOrElse(otherGraph.vertices.size)))
+        new Graph(mergedVertices, mergedEdges, None)
     }
 
     /**

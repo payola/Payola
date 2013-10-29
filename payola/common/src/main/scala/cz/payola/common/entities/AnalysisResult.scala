@@ -3,29 +3,34 @@ package cz.payola.common.entities
 import cz.payola.common.Entity
 
 trait AnalysisResult extends Entity with OptionallyOwnedEntity with NamedEntity {
-    protected var touchedtime: java.util.Date
+    protected var _touched: java.util.Date
     protected var verticescount: Int
     protected var analysisid: String
-    protected var userid: String
     protected var evaluationid: String
-    protected var stored: Boolean
+    protected var _persist: Boolean
 
-    def storedIn = stored
+    def storedIn = persist
 
     def storedIn_=(value: Boolean) {
-        stored = value
+        persist = value
+    }
+
+    def touched = _touched
+
+    def touched_=(value: java.util.Date) {
+        _touched = value
+    }
+
+    def persist = _persist
+
+    def persist_=(value: Boolean) {
+        _persist = value
     }
 
     def evaluationId = evaluationid
 
     def evaluationId_=(value: String) {
         evaluationid = value
-    }
-
-    def touchedTime = touchedtime
-
-    def touchedTime_=(value: java.util.Date) {
-        touchedtime = value
     }
 
     def verticesCount = verticescount
@@ -38,11 +43,5 @@ trait AnalysisResult extends Entity with OptionallyOwnedEntity with NamedEntity 
 
     def analysisId_=(value: String) {
         analysisid = value
-    }
-
-    def userId = userid
-
-    def userId_=(value: String) {
-        userid = value
     }
 }

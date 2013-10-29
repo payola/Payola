@@ -55,6 +55,7 @@ trait EntityModelComponent
             val public = repository.getAllPublic
             val owned = getOwnedByUser(user)
             val granted = getGrantedToUser(user, groupRepository.getAll())
+
             (public ++ owned ++ granted).distinct.sortBy(_.name)
         }
 

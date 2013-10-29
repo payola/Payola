@@ -19,7 +19,7 @@ trait SquerylDataContextComponent
     with AnalysisRepositoryComponent
     with DataSourceRepositoryComponent
     with PluginRepositoryComponent
-    with OntologyRepositoryComponent
+    with CustomizationRepositoryComponent
     with PrefixRepositoryComponent
     with AnalysisResultRepositoryComponent
 {

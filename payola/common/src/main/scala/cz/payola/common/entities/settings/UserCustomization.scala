@@ -1,15 +1,13 @@
 package cz.payola.common.entities.settings
 
-import cz.payola.common.entities._
-import cz.payola.common.Entity
 import scala.collection.immutable
 
 /**
-  * Customization of a graph appearance based on an ontology.
-  */
-trait OntologyCustomization extends DefinedCustomization
+* Customization of a graph appearance based on an user configuration.
+*/
+trait UserCustomization extends DefinedCustomization
 {
-    override def classNameText = "ontology customization"
+    override def classNameText = "user customization"
 
     /** URL that is used for customization. */
     val URLs: String
@@ -20,5 +18,5 @@ trait OntologyCustomization extends DefinedCustomization
     protected var _classCustomizations: immutable.Seq[ClassCustomizationType]
 
     /** Customizations of classes in the ontology. */
-    override def classCustomizations = _classCustomizations.filter(!_.isConditionalCustomization)
+    override def classCustomizations = _classCustomizations
 }

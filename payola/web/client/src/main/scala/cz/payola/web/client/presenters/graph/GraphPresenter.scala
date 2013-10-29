@@ -8,17 +8,16 @@ import cz.payola.web.client.Presenter
 import cz.payola.web.client.views.VertexEventArgs
 import cz.payola.web.client.models._
 import cz.payola.web.client.views.entity.plugins.DataSourceSelector
-import cz.payola.common.entities.settings.OntologyCustomization
+import cz.payola.common.entities.settings._
 import cz.payola.web.client.presenters.entity.settings._
 import cz.payola.common.rdf.IdentifiedVertex
 import cz.payola.web.client.presenters.entity.PrefixPresenter
-import scala.Some
 
 class GraphPresenter(val viewElement: html.Element, prefixApplier: PrefixApplier) extends Presenter
 {
     val view = new PluginSwitchView(prefixApplier)
 
-    private var currentOntologyCustomization: Option[OntologyCustomization] = None
+    private var currentCustomization: Option[DefinedCustomization] = None
 
     protected val prefixPresenter = new PrefixPresenter()
 
@@ -26,14 +25,14 @@ class GraphPresenter(val viewElement: html.Element, prefixApplier: PrefixApplier
         // Load prefixes first
         prefixPresenter.initialize()
 
-        Model.ontologyCustomizationsChanged += onOntologyCustomizationsChanged _
+        Model.customizationsChanged += onCustomizationsChanged _
         view.vertexBrowsingDataSource += onVertexBrowsingDataSource _
         view.vertexSetMain += onVertexSetMain _
         view.customizationsButton.mouseClicked += onCustomizationsButtonClicked _
-        view.ontologyCustomizationSelected += onOntologyCustomizationSelected _
+        view.ontologyCustomizationSelected += onCustomizationSelected _
         view.ontologyCustomizationEditClicked += onOntologyCustomizationEditClicked _
         view.ontologyCustomizationCreateClicked += onOntologyCustomizationCreateClicked _
-        view.userCustomizationSelected += onOntologyCustomizationSelected _
+        view.userCustomizationSelected += onCustomizationSelected _
         view.userCustomizationCreateClicked += onUserCustomizationCreateClicked _
         view.userCustomizationEditClicked += onUserCustomizationEditClicked _
 
@@ -43,31 +42,32 @@ class GraphPresenter(val viewElement: html.Element, prefixApplier: PrefixApplier
     private def onUserCustomizationCreateClicked(e: EventArgs[_]) {
         val creator = new UserCustomizationCreator()
         creator.userCustomizationCreated += { e =>
-            onOntologyCustomizationSelected(e.asInstanceOf[EventArgs[OntologyCustomization]])
+            onCustomizationSelected(e.asInstanceOf[EventArgs[OntologyCustomization]])
             editUserCustomization(e.target)
         }
         creator.initialize()
     }
 
-    private def onUserCustomizationEditClicked(e: EventArgs[OntologyCustomization]) {
+    private def onUserCustomizationEditClicked(e: EventArgs[UserCustomization]) {
         editUserCustomization(e.target)
-        onOntologyCustomizationSelected(e)
+        onCustomizationSelected(e)
     }
 
-    private def onOntologyCustomizationsChanged(e: EventArgs[_]) {
-        Model.ontologyCustomizationsByOwnership { o =>
-            view.updateOntologyCustomizations(o)
-            if (currentOntologyCustomization.exists(c => !o.ownedCustomizations.exists(_.contains(c)))) {
-                currentOntologyCustomization = None
-                view.updateOntologyCustomization(None)
+    private def onCustomizationsChanged(e: EventArgs[_]) {
+        Model.customizationsByOwnership{ (ontoCustomization, userCustomization) =>
+            view.updateAvailableCustomizations(userCustomization, ontoCustomization)
+            if (currentCustomization.exists(c => !ontoCustomization.ownedCustomizations.exists(_.contains(c)))
+                && currentCustomization.exists(c => !userCustomization.ownedCustomizations.exists(_.contains(c)))) {
+                currentCustomization = None
+                view.updateCustomization(None)
             }
         }(fatalErrorHandler(_))
     }
 
     private def onCustomizationsButtonClicked(e: EventArgs[_]): Boolean = {
         blockPage("Fetching accessible customizations...")
-        Model.ontologyCustomizationsByOwnership { o =>
-            view.updateOntologyCustomizations(o)
+        Model.customizationsByOwnership { (ontoCustomization, userCustomization) =>
+            view.updateAvailableCustomizations(userCustomization, ontoCustomization)
             unblockPage()
         }(fatalErrorHandler(_))
         true
@@ -76,7 +76,7 @@ class GraphPresenter(val viewElement: html.Element, prefixApplier: PrefixApplier
     private def onOntologyCustomizationCreateClicked(e: EventArgs[_]) {
         val creator = new OntologyCustomizationCreator()
         creator.ontologyCustomizationCreated += { e =>
-            onOntologyCustomizationSelected(e)
+            onCustomizationSelected(e)
             editOntologyCustomization(e.target)
         }
         creator.initialize()
@@ -84,12 +84,13 @@ class GraphPresenter(val viewElement: html.Element, prefixApplier: PrefixApplier
 
     private def onOntologyCustomizationEditClicked(e: EventArgs[OntologyCustomization]) {
         editOntologyCustomization(e.target)
-        onOntologyCustomizationSelected(e)
+        onCustomizationSelected(e)
     }
 
-    private def onOntologyCustomizationSelected(e: EventArgs[OntologyCustomization]) {
-        currentOntologyCustomization = Some(e.target)
-        view.updateOntologyCustomization(Some(e.target))
+    private def onCustomizationSelected(e: EventArgs[DefinedCustomization]) {
+
+        currentCustomization = Some(e.target)
+        view.updateCustomization(Some(e.target))
     }
 
     def onVertexBrowsingDataSource(e: VertexEventArgs[_]) {
@@ -116,16 +117,17 @@ class GraphPresenter(val viewElement: html.Element, prefixApplier: PrefixApplier
 
     private def editOntologyCustomization(customization: OntologyCustomization) {
         val editor = new OntologyCustomizationEditor(customization)
-        if (currentOntologyCustomization.exists(_ == customization)) {
-            editor.customizationValueChanged += { e => view.updateOntologyCustomization(Some(customization)) }
+        if (currentCustomization.exists(_ == customization)) {
+            editor.customizationValueChanged += { e => view.updateCustomization(Some(customization)) }
         }
         editor.initialize()
     }
 
-    private def editUserCustomization(customization: OntologyCustomization) {
-        val editor = new UserCustomizationEditor(view.getCurrentGraphView, customization, forceUpdateOntologyCustomizations)
+    private def editUserCustomization(customization: UserCustomization) {
+        val editor = new UserCustomizationEditor(view.getCurrentGraphView, customization,
+            forceUpdateOntologyCustomizations)
         editor.customizationChanged += { e =>
-            view.updateOntologyCustomization(Some(e.target.target))
+            view.updateCustomization(Some(e.target.target))
         }
 
         editor.initialize()
@@ -133,8 +135,8 @@ class GraphPresenter(val viewElement: html.Element, prefixApplier: PrefixApplier
 
     private def forceUpdateOntologyCustomizations() {
         blockPage("Updating accessible customizations...")
-        Model.forceOntologyCustomizationsByOwnershipUpdate { o =>
-            view.updateOntologyCustomizations(o)
+        Model.forceCustomizationsByOwnershipUpdate { (u, o) =>
+            view.updateAvailableCustomizations(u, o)
             unblockPage()
         }(fatalErrorHandler(_))
     }

@@ -4,8 +4,9 @@ import scala.collection._
 import cz.payola.common._
 import cz.payola.common.entities.ShareableEntity
 import cz.payola.domain.entities.plugins.DataSource
-import cz.payola.domain.entities.settings.OntologyCustomization
+import cz.payola.domain.entities.settings._
 import cz.payola.domain.DomainException
+import scala.Some
 import scala.Some
 
 /**
@@ -27,7 +28,7 @@ class User(protected var _name: String)
 
     type PluginType = Plugin
 
-    type OntologyCustomizationType = OntologyCustomization
+    type CustomizationType = Customization
 
     type PrefixType = Prefix
 
@@ -124,7 +125,7 @@ class User(protected var _name: String)
             Entity.getClassName(classOf[Analysis]) -> ownedAnalyses,
             Entity.getClassName(classOf[DataSource]) -> ownedDataSources,
             Entity.getClassName(classOf[Plugin]) -> ownedPlugins,
-            Entity.getClassName(classOf[OntologyCustomization]) -> ownedOntologyCustomizations,
+            Entity.getClassName(classOf[Customization]) -> ownedCustomizations,
             Entity.getClassName(classOf[Group]) -> ownedGroups,
             Entity.getClassName(classOf[Prefix]) -> availablePrefixes
         ).getOrElse(entityClassName, throw new DomainException("The user doesn't own entities of class " +
