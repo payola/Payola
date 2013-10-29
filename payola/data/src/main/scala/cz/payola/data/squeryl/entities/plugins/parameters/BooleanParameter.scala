@@ -13,7 +13,7 @@ object BooleanParameter
         (implicit context: SquerylDataContextComponent): BooleanParameter = {
         p match {
             case p: BooleanParameter => p
-            case _ => new BooleanParameter(p.id, p.name, p.defaultValue)
+            case _ => new BooleanParameter(p.id, p.name, p.defaultValue, p.ordering)
         }
     }
 }
@@ -21,8 +21,8 @@ object BooleanParameter
 class BooleanParameter(
     override val id: String,
     name: String,
-    defaultVal: Boolean)(implicit val context: SquerylDataContextComponent)
-    extends cz.payola.domain.entities.plugins.parameters.BooleanParameter(name, defaultVal)
+    defaultVal: Boolean, ordering: Option[Int])(implicit val context: SquerylDataContextComponent)
+    extends cz.payola.domain.entities.plugins.parameters.BooleanParameter(name, defaultVal, ordering)
     with Parameter[Boolean]
 {
     private lazy val _valuesQuery = context.schema.valuesOfBooleanParameters.left(this)

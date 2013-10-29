@@ -41,6 +41,9 @@ object DatabaseInitializer extends App
         val shortestPathPlugin = new ShortestPath
         val virtuosoSecuredPlugin = new VirtuosoSecuredEndpointFetcher
 
+        /** JH */
+        val limit = new Limit
+
         val publicPlugins = List(
             sparqlEndpointPlugin,
             cleanStoragePlugin,
@@ -53,7 +56,8 @@ object DatabaseInitializer extends App
             unionPlugin,
             ontologicalFilterPlugin,
             shortestPathPlugin,
-            virtuosoSecuredPlugin
+            virtuosoSecuredPlugin,
+            limit
         )
 
         val privatePlugins = List(
@@ -77,12 +81,28 @@ object DatabaseInitializer extends App
         val admin = Payola.model.userModel.create(Payola.settings.adminEmail, "payola!")
 
         List(
-            new Prefix("prefix 1", "pc", "http://purl.org/procurement/public-contracts#", None),
-            new Prefix("prefix 2", "pcOwn", "http://purl.org/procurement/public-contracts#", Some(admin)),
-            new Prefix("prefix 3", "dbp", "http://dbpedia.org/", Some(admin)),
-            new Prefix("prefix 6", "ld", "http://ld.opendata.cz:8894/", Some(admin)),
-            new Prefix("prefix 4", "olFormat", "http://www.openlinksw.com/virtrdf-data-formats#", Some(admin)),
-            new Prefix("prefix 5", "olSchema", "http://www.openlinksw.com/schemas/virtrdf#", Some(admin))
+            new Prefix("pc", "pc", "http://purl.org/procurement/public-contracts#", None),
+            new Prefix("oc", "oc", "http://opencoinage.org/rdf/", None),
+            new Prefix("dv", "dv", "http://rdf.data-vocabulary.org/#", None),
+            new Prefix("dawgt", "dawgt", "http://www.w3.org/2001/sw/DataAccess/tests/test-dawg#", None),
+            new Prefix("dbpprop", "dbpprop", "http://dbpedia.org/property/", None),
+            new Prefix("dbpedia", "dbpedia", "http://dbpedia.org/resource/", None),
+            new Prefix("dc", "dc", "http://purl.org/dc/elements/1.1/", None),
+            new Prefix("fn", "fn", "http://www.w3.org/2005/xpath-functions/#", None),
+            new Prefix("foaf", "foaf", "http://xmlns.com/foaf/0.1/", None),
+            new Prefix("geo", "geo", "http://www.w3.org/2003/01/geo/wgs84_pos#", None),
+            new Prefix("go", "go", "http://purl.org/obo/owl/GO#", None),
+            new Prefix("math", "math", "http://www.w3.org/2000/10/swap/math#", None),
+            new Prefix("mesh", "mesh", "http://purl.org/commons/record/mesh/", None),
+            new Prefix("mf", "mf", "http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#", None),
+            new Prefix("nci", "nci", "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#", None),
+            new Prefix("obo", "obo", "http://www.geneontology.org/formats/oboInOwl#", None),
+            new Prefix("owl", "owl", "http://www.w3.org/2002/07/owl#", None),
+            new Prefix("product", "product", "http://www.buy.com/rss/module/productV2/", None),
+            new Prefix("protseq", "protseq", "http://purl.org/science/protein/bysequence/", None),
+            new Prefix("rdf", "rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#", None),
+            new Prefix("rdfa", "rdfa", "http://www.w3.org/ns/rdfa#", None),
+            new Prefix("rdfdf", "rdfdf", "http://www.openlinksw.com/virtrdf-data-formats#", None)
         ).foreach(model.prefixRepository.persist(_))
 
         // Persist the data sources.

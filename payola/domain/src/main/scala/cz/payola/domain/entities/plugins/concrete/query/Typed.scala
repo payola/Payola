@@ -11,7 +11,7 @@ class Typed(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_
     extends Construct(name, inputCount, parameters, id)
 {
     def this() = {
-        this("Typed", 1, List(new StringParameter(Typed.typeURIParameter, "", false, false, false, true)), IDGenerator.newId)
+        this("Typed", 1, List(new StringParameter(Typed.typeURIParameter, "", false, false, false, true, Some(0))), IDGenerator.newId)
     }
 
     def getTypeURI(instance: PluginInstance): Option[String] = {

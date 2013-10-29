@@ -28,6 +28,10 @@ trait Analysis extends Entity with NamedEntity with OptionallyOwnedEntity with S
 
     protected var _defaultCustomization: Option[OntologyCustomizationType] = None
 
+    /**
+     * Ownership overtake token
+     * @author Jiri Helmich
+     */
     var token: Option[String] = None
 
     /** Analytical plugin instances the analysis consists of.*/

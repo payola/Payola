@@ -352,25 +352,25 @@ trait SchemaComponent
                 new PluginInstanceBinding("", null, null, 0)
             },
             factoryFor(booleanParameters) is {
-                new BooleanParameter("", "", false)
+                new BooleanParameter("", "", false, None)
             },
             factoryFor(booleanParameterValues) is {
                 new BooleanParameterValue("", null, false)
             },
             factoryFor(floatParameters) is {
-                new FloatParameter("", "", 0)
+                new FloatParameter("", "", 0, None)
             },
             factoryFor(floatParameterValues) is {
                 new FloatParameterValue("", null, 0)
             },
             factoryFor(intParameters) is {
-                new IntParameter("", "", 0)
+                new IntParameter("", "", 0, None)
             },
             factoryFor(intParameterValues) is {
                 new IntParameterValue("", null, 0)
             },
             factoryFor(stringParameters) is {
-                new StringParameter("", "", "", false, false, false, false)
+                new StringParameter("", "", "", false, false, false, false, None)
             },
             factoryFor(stringParameterValues) is {
                 new StringParameterValue("", null, "")

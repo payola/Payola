@@ -563,9 +563,9 @@ button.datacube {
     padding: 2px;
 }
 
-.map-placeholder {
+.map-placeholder, .map-placeholder .mapview {
     width: 100%;
-    height: 500px;
+    height: 800px;
 }
 
 .append-popup {
@@ -578,4 +578,54 @@ button.datacube {
 .param-clicked {
     font-weight: bold;
     color: black;
+}
+
+.mapview-filter {
+    position: absolute;
+    right: 15px;
+    top: 50px;
+    border-radius: 8px;
+    background: rgba(222, 222, 222, 0.6);
+    font-weight: bold;
+    padding-right: 15px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+.mapview-filter ul, .mapview-filter li {
+    list-style-type: none;
+}
+
+.mapview-filter li {
+    display: block;
+    height: 22px;
+    clear: both;
+}
+
+.blockUI.blockMsg {
+    z-index: 1040 !important;
+    top: 55px !important;
+}
+
+.dcv-graphholder {
+    min-height: 500px !important;
+    height: 80%;
+}
+
+.map-placeholder img {
+    max-width: none;
+}
+
+.heatmap-settings-table {
+    position: absolute;
+    z-index: 10000;
+    background: rgba(255,255,255,0.5);
+    padding: 10px;
+    bottom: 19px;
+    right: 0px;
+}
+
+.heatmap-settings-table table {
+    background: white;
+    margin-top: 5px;
 }

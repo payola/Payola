@@ -86,11 +86,22 @@ import cz.payola.common._
         successCallback(resultResponse)
     }
 
-    @async def createPartialAnalysis(analysisId: String, pluginInstanceId: String, user: Option[User] = None)
+    /**
+     * Partial analysis remote proxy
+     * @param analysisId Analysis to make partial from
+     * @param pluginInstanceId Plugin instance which makes the cutting point of the analysis
+     * @param limitCount Limit plugin parameter value
+     * @param user owner
+     * @param successCallback
+     * @param failCallback
+     * @return
+     * @author Jiri Helmich
+     */
+    @async def createPartialAnalysis(analysisId: String, pluginInstanceId: String, limitCount: Int, user: Option[User] = None)
         (successCallback: (String => Unit))
         (failCallback: (Throwable => Unit)) {
         val analysis = getAnalysisById(user, analysisId)
-        val partialAnalysisId = Payola.model.analysisModel.makePartial(analysis, pluginInstanceId)
+        val partialAnalysisId = Payola.model.analysisModel.makePartial(analysis, pluginInstanceId, limitCount)
 
         if (partialAnalysisId.isDefined){
             successCallback(partialAnalysisId.get)

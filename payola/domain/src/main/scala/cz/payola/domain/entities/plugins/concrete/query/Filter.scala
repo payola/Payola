@@ -12,9 +12,9 @@ class Filter(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[
 {
     def this() = {
         this("Filter", 1, List(
-            new StringParameter(Filter.propertyURIParameter, "", false, false, false, true),
-            new StringParameter(Filter.operatorParameter, "", false),
-            new StringParameter(Filter.valueParameter, "", false)
+            new StringParameter(Filter.propertyURIParameter, "", false, false, false, true, Some(0)),
+            new StringParameter(Filter.operatorParameter, "", false, false, false, false, Some(1)),
+            new StringParameter(Filter.valueParameter, "", false, false, false, false, Some(2))
         ), IDGenerator.newId)
     }
 

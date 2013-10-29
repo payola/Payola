@@ -128,6 +128,7 @@ import scala.Some
             val uri = dataSource.getFirstTriple.map(_.origin.uri)
             uri.map(dataSource.getNeighbourhood(_))
         }
+
         successCallback(graph)
     }
 

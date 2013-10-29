@@ -21,7 +21,14 @@ class MergeFetchersWithQueries extends OptimizationPhase
                          analysis.collapseBinding(binding, new FetcherQueryPluginInstance(
                              PluginWithInstance(dataFetcher, source), PluginWithInstance(sparqlQuery, target)))
                      }
-                     case _ =>
+                     case _ => target match { // added by Jiri Helmich, handle already merged Query with Limit plugin
+                         case limitedQuery: LimitedQueryPluginInstance => {
+                             analysis.collapseBinding(binding, new FetcherLimitedQueryPluginInstance(
+                                 PluginWithInstance(dataFetcher, source), PluginWithInstance(new LimitedQueryPlugin, target)
+                             ))
+                         }
+                         case _ =>
+                     }
                  }
                  case _ =>
              }

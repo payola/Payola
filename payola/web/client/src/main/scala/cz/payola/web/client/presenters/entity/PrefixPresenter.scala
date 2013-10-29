@@ -7,16 +7,34 @@ import cz.payola.web.client.models.PrefixApplier
 
 class PrefixPresenter extends Presenter
 {
-    val prefixApplier = new PrefixApplier()
+    val prefixApplier = new PrefixApplier(this)
+    val falseHitPrefixes = List("http")
 
     def initialize {
         // Gets properly ordered prefixes
         prefixApplier.prefixes = PrefixManager.getAvailablePrefixes()
     }
 
-    /*
-    def applyPrefix(uri: String): String = prefixApplier.applyPrefix(uri)
+    def findUnknownPrefix(prefixedUrl: String)(successCallback: String => Unit)(errorCallback: Throwable => Unit) {
+        val delim = prefixedUrl.indexOf(":")
 
-    def disapplyPrefix(uri: String): String = prefixApplier.disapplyPrefix(uri)
-    */
+        if (delim > 0)
+        {
+            val prefix = prefixedUrl.substring(0, delim)
+
+            // Eliminate false-hit prefixes
+            if (!falseHitPrefixes.find(prefix.startsWith(_)).isDefined)
+            {
+                val newSuccessCallback = {
+                    p: String => {
+                        // Update prefixes to contain the new one
+                        prefixApplier.prefixes = PrefixManager.getAvailablePrefixes()
+                        successCallback(p)
+                    }
+                }
+
+                PrefixManager.findUnknownPrefix(prefix)(newSuccessCallback)(errorCallback)
+            }
+        }
+    }
 }

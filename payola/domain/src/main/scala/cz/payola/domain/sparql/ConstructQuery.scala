@@ -2,8 +2,20 @@ package cz.payola.domain.sparql
 
 import scala.collection.immutable
 
+/**
+ * Modified by Jiri Helmich in order to provide limit functionality.
+ */
+
 object ConstructQuery
 {
+    def apply(graphPattern: GraphPattern, limit: Limit): ConstructQuery = {
+        ConstructQuery(graphPattern.triplePatterns, Some(graphPattern), Some(limit))
+    }
+
+    def apply(graphPattern: GraphPattern, limit: Option[Limit]): ConstructQuery = {
+        ConstructQuery(graphPattern.triplePatterns, Some(graphPattern), limit)
+    }
+
     def apply(graphPattern: GraphPattern): ConstructQuery = {
         ConstructQuery(graphPattern.triplePatterns, Some(graphPattern))
     }
@@ -21,7 +33,7 @@ object ConstructQuery
     }
 }
 
-case class ConstructQuery(template: immutable.Seq[TriplePattern], pattern: Option[GraphPattern])
+case class ConstructQuery(template: immutable.Seq[TriplePattern], pattern: Option[GraphPattern], limit: Option[Limit] = None)
 {
     def isEmpty: Boolean = {
         template.isEmpty && pattern.isEmpty
@@ -33,9 +45,11 @@ case class ConstructQuery(template: immutable.Seq[TriplePattern], pattern: Optio
             %s
         }
         %s
+        %s
         """.format(
             template.mkString("\n"),
-            pattern.map(p => "WHERE { %s }".format(p)).getOrElse("")
+            pattern.map(p => "WHERE { %s }".format(p)).getOrElse(""),
+            limit.map(l => l).getOrElse("")
         )
     }
 
@@ -47,6 +61,17 @@ case class ConstructQuery(template: immutable.Seq[TriplePattern], pattern: Optio
         } else {
             None
         }
-        ConstructQuery(margedTemplate, mergedPattern)
+
+        // handle limit, take maximum of both (if defined)
+        val l = if (limit.isDefined){
+            if (constructQuery.limit.isDefined){
+                Some(Limit(Math.max(limit.get.limit,constructQuery.limit.get.limit)))
+            }else{
+                limit
+            }
+        }else{
+            constructQuery.limit
+        }
+        ConstructQuery(margedTemplate, mergedPattern, l)
     }
 }

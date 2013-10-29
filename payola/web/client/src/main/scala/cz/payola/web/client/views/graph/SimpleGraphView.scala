@@ -14,6 +14,16 @@ import cz.payola.web.client.events._
 import scala.Some
 import s2js.compiler.javascript
 
+/**
+ * Pattern selection view, currently not generic, DataCube only. It offers the patternUpdated Event, which is triggered
+ * when the number of selected vertices reaches the value specified in verticesCount.
+ *
+ * The results is in refVertices and vertices fields.
+ *
+ * @param placeholder element to render to
+ * @param verticesCount number of vertices for selection
+ * @author Jiri Helmich
+ */
 class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) extends GraphView
 {
     val technique = new TreeTechnique()
@@ -26,55 +36,51 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
 
     val edges = new ArrayBuffer[Edge]()
 
-    var newPath = true
-
     val map = new HashMap[Vertex, String]()
+    val generator = new VertexVariableNameGenerator()
 
     val patternUpdated = new UnitEvent[SimpleGraphView, EventArgs[SimpleGraphView]]()
 
     @javascript("""jQuery(".datacube-infobar .message").hide(); jQuery(".datacube-infobar .message").eq(i).show()""")
     def showMessage(i: Int) {}
 
+    /**
+     * we need to select a connected component.
+     */
     technique.vertexSelected += {
         e =>
 
             if (vertices.size == 0) {
                 vertices += e.vertex
-                newPath = false
                 technique.updateVertexColor(e.vertex, Some(Color.Green))
             } else {
-                val last = vertices.last
-                if (newPath == true) {
-                    if (e.vertex != last) {
-                        currentGraph.map {
-                            g =>
-                                vertices.map {
-                                    v =>
-                                        g.getIncomingEdges(e.vertex).find(_.origin == v).map {
-                                            edge =>
-                                                vertices += e.vertex
-                                                technique.updateVertexColor(e.vertex, Some(Color.Green))
-                                                edges += edge
-                                                newPath = false
-                                        }
-                                }
-                        }
-                    }
-                } else {
-                    if (e.vertex == last) {
+
+                val addRef = { () =>
+                    if (!refVertices.contains(e.vertex)){
                         refVertices += e.vertex
                         technique.updateVertexColor(e.vertex, Some(Color.Red))
-                        newPath = true
-                    } else {
-                        currentGraph.map {
-                            g =>
-                                if (g.getIncomingEdges(e.vertex).exists(_.origin == last)) {
-                                    vertices += e.vertex
-                                    technique.updateVertexColor(e.vertex, Some(Color.Green))
-                                }
+                    }
+                }
+
+                if (vertices.contains(e.vertex)) {
+
+                    addRef()
+
+                } else {
+                    currentGraph.map { g =>
+                        val appendEdge = { edge: Edge =>
+                            vertices += e.vertex
+                            technique.updateVertexColor(e.vertex, Some(Color.Green))
+                            edges += edge
+                        }
+
+                        vertices.map { v =>
+                            g.getIncomingEdges(e.vertex).find(_.origin == v).map(appendEdge)
+                            g.getOutgoingEdges(e.vertex).find(_.destination == v).map(appendEdge)
                         }
                     }
                 }
+
             }
 
             showMessage(refVertices.size)
@@ -84,8 +90,7 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
             }
     }
 
-    private def getVertexName(map: HashMap[Vertex, String], vertex: Vertex,
-        generator: VertexVariableNameGenerator): String = {
+    private def getVertexName(map: HashMap[Vertex, String], vertex: Vertex): String = {
         if (!map.isDefinedAt(vertex)) {
             map.put(vertex, generator.nextName)
         }
@@ -93,18 +98,27 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
         "?" + map.get(vertex).get
     }
 
+    /**
+     * Double-clicked vertices.
+     * @return variables names
+     */
     def getSignificantVertices = {
         getPattern
-        refVertices.map("?"+map.get(_).get)
+
+        refVertices.map{ v =>
+            "?"+map.get(v).get
+        }
     }
 
+    /**
+     * @return Selected SPARQL pattern
+     */
     def getPattern: String = {
-        val generator = new VertexVariableNameGenerator()
 
         edges.map {
             e =>
-                val originVar = getVertexName(map, e.origin, generator)
-                val destinationVar = getVertexName(map, e.destination, generator)
+                val originVar = getVertexName(map, e.origin)
+                val destinationVar = getVertexName(map, e.destination)
 
                 originVar + " <" + e.uri + "> " + destinationVar + " ."
         }.mkString("\n")
@@ -113,6 +127,7 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
     override def update(graph: Option[Graph], customization: Option[OntologyCustomization]) {
         super.update(graph, customization)
         technique.update(graph, customization)
+        technique.drawGraph()
 
         showMessage(0)
     }
@@ -120,6 +135,7 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
     override def updateGraph(graph: Option[Graph], contractLiterals: Boolean) {
         super.updateGraph(graph, false)
         technique.updateGraph(graph, false)
+        technique.drawGraph()
 
         showMessage(0)
     }

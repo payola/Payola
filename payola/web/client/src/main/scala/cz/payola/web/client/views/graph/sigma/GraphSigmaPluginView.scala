@@ -107,30 +107,24 @@ class GraphSigmaPluginView(prefixApplier: Option[PrefixApplier]) extends SigmaPl
 
     //TODO javascript -> scala
     @javascript(
-        "self.popUp && self.popUp.remove(); "+
-        " var node;\n "+
-        " self.sigmaInstance.get().iterNodes(function(n){ node = n; },[event.content[0]]);\n "+
-        " var nodeContent = node['attr']['value']; \n" +
-
-        " if(typeof nodeContent == 'undefined' || nodeContent == null || nodeContent.isEmpty())\n" +
-        "   return; \n" +
-
-        " var popUpX = self.getPopUpX(node.displayX);\n" +
-        " var popUpY = self.getPopUpY(node.displayY);\n" +
-
-        " self.popUp = $( '<div class=\"node-info-popup\" onclick=" +
-            "\"cz.payola.web.client.views.graph.sigma.GraphSigmaPluginView.prototype.showFixedVertexInfo(this);\"" +
-            "></div>').append(\n"+
-        " self.attributesToString(nodeContent)).attr(\n"+
-        " 'class', 'resizable vertex-info').attr(\n" +
-        " 'id', 'node-info'+self.sigmaInstance.get().getID()).css({\n" +
-        "'left': popUpX,'top': popUpY, 'width': self.popUpWidth+'px', 'height': self.popUpHeight+'px',});\n" +
-        "$('ul',self.popUp).css('margin','0 0 0 20px');$(self.sigmaPluginWrapper.htmlElement).append(self.popUp);\n\n")
+        """self.popUp && self.popUp.remove();
+         var node;
+         self.sigmaInstance.get().iterNodes(function(n){ node = n; },[event.content[0]]);
+         var nodeContent = node['attr']['value']; 
+        if(typeof nodeContent == 'undefined' || nodeContent == null || nodeContent.isEmpty())
+          return;
+        var popUpX = self.getPopUpX(node.displayX);
+        var popUpY = self.getPopUpY(node.displayY);
+        self.popUp = $( '<div class=\"node-info-popup\" onclick="cz.payola.web.client.views.graph.sigma.GraphSigmaPluginView.prototype.showFixedVertexInfo(this);></div>').append(
+        self.attributesToString(nodeContent)).attr(
+        'class', 'resizable vertex-info').attr(
+        'id', 'node-info'+self.sigmaInstance.get().getID()).css({
+       'left': popUpX,'top': popUpY, 'width': self.popUpWidth+'px', 'height': self.popUpHeight+'px'});
+        $('ul',self.popUp).css('margin','0 0 0 20px');$(self.sigmaPluginWrapper.htmlElement).append(self.popUp);""")
     private def showVertexInfo(event: Unit) {}
 
 
-    @javascript("if(element.className.indexOf(\" visible\") == -1) {\n" +
-        "element.className += \" visible\"; }\n")
+    @javascript("""if(element.className.indexOf("visible") == -1) {element.className += " visible"; }""")
     private def showFixedVertexInfo(element: Unit) {}
 
     private def getPopUpX(nodeLocationX: Int): Int = {
@@ -150,66 +144,64 @@ class GraphSigmaPluginView(prefixApplier: Option[PrefixApplier]) extends SigmaPl
     }
 
     //TODO javascript -> scala
-    @javascript("if(self.popUp) self.popUp.attr('class', self.popUp.attr('class').replace(\" visible\", \"\"));\n"+
-        "  self.hideVertexInfo(event);\n")
+    @javascript("""if(self.popUp) self.popUp.attr('class', self.popUp.attr('class').replace(" visible", "")); self.hideVertexInfo(event);""")
     private def hideFixedVertexInfo(event: Unit) {}
 
     //TODO javascript -> scala
-    @javascript("if(self.popUp && self.popUp.attr('class').indexOf(\" visible\") == -1) { self.popUp.remove(); self.popUp = false; }\n")
+    @javascript("""if(self.popUp && self.popUp.attr('class').indexOf(" visible") == -1) { self.popUp.remove(); self.popUp = false; }""")
     private def hideVertexInfo(event: Unit) {}
 
     //TODO javascript -> scala
     @javascript(
-        "var nodes = event.content;\n" +
-            "    var neighbors = {};\n" +
-            "    self.sigmaInstance.get().iterEdges(function(e){\n" +
-            "      if(nodes.indexOf(e.source)<0 && nodes.indexOf(e.target)<0){\n" +
-            "        if(!e.attr['grey']){\n" +
-            "          e.attr['true_color'] = e.color;\n" +
-            "          e.color = 'grey';\n" +
-            "          e.attr['grey'] = 1;\n" +
-            "        }\n" +
-            "      }else{\n" +
-            "        e.color = e.attr['grey'] ? e.attr['true_color'] : e.color;\n" +
-            "        e.attr['grey'] = 0;\n\n" +
-            "        neighbors[e.source] = 1;\n" +
-            "        neighbors[e.target] = 1;\n      }\n" +
-            "    });\n" +
-            "   self.sigmaInstance.get().iterNodes(function(n){\n" +
-            "      if(!neighbors[n.id]){\n" +
-            "        if(!n.attr['grey']){\n" +
-            "          n.attr['true_color'] = n.color;\n" +
-            "          n.color = 'grey';\n" +
-            "          n.attr['grey'] = 1;\n        }\n" +
-            "      }else{\n" +
-            "        n.color = n.attr['grey'] ? n.attr['true_color'] : n.color;\n" +
-            "        n.attr['grey'] = 0;\n      }\n" +
-            "    });\n" +
-            "   self.sigmaInstance.get().draw(5,5,5);")
+        """var nodes = event.content;
+            var neighbors = {};
+            self.sigmaInstance.get().iterEdges(function(e){
+              if(nodes.indexOf(e.source)<0 && nodes.indexOf(e.target)<0){
+                if(!e.attr['grey']){
+                  e.attr['true_color'] = e.color;
+                  e.color = 'grey';
+                  e.attr['grey'] = 1;
+                }
+              }else{
+                e.color = e.attr['grey'] ? e.attr['true_color'] : e.color;
+                e.attr['grey'] = 0;
+                neighbors[e.source] = 1;
+                neighbors[e.target] = 1; }
+            });
+           self.sigmaInstance.get().iterNodes(function(n){
+              if(!neighbors[n.id]){
+                if(!n.attr['grey']){
+                  n.attr['true_color'] = n.color;
+                  n.color = 'grey';
+                  n.attr['grey'] = 1;        }
+              }else{
+                n.color = n.attr['grey'] ? n.attr['true_color'] : n.color;
+                n.attr['grey'] = 0;      }
+            });
+           self.sigmaInstance.get().draw(5,5,5);""")
     private def hideVertices(event: Unit) {}
 
     //TODO javascript -> scala
     @javascript(
-        "    self.sigmaInstance.get().iterEdges(function(e){\n" +
-        "      e.color = e.attr['grey'] ? e.attr['true_color'] : e.color;\n" +
-        "      e.attr['grey'] = 0;\n" +
-        "    }).iterNodes(function(n){\n" +
-        "      n.color = n.attr['grey'] ? n.attr['true_color'] : n.color;\n" +
-        "      n.attr['grey'] = 0;\n" +
-        "    }).draw(2,2,2);")
+        """    self.sigmaInstance.get().iterEdges(function(e){
+              e.color = e.attr['grey'] ? e.attr['true_color'] : e.color;
+              e.attr['grey'] = 0;
+            }).iterNodes(function(n){
+              n.color = n.attr['grey'] ? n.attr['true_color'] : n.color;
+              n.attr['grey'] = 0;
+            }).draw(2,2,2); """)
     private def showVertices(event: Unit) {}
 
 
     @javascript(
-        "   var node = self.sigmaInstance.get().getNodes(uri);\n" +
-        "   node.attr['rdfType'] = rdfType;\n")
+        """   var node = self.sigmaInstance.get().getNodes(uri); node.attr['rdfType'] = rdfType; """)
     private def setRdfType(uri: String, rdfType: String) {}
 
     @javascript(
-        "   var rdfType = node.attr['rdfType'];\n" +
-        "   if(rdfType == null)" +
-        "       return '';\n" +
-        "   return rdfType;"
+        """   var rdfType = node.attr['rdfType'];
+           if(rdfType == null) 
+               return ''; 
+           return rdfType;"""
     )
     override def getRdfType(node: Node): String = ""
 

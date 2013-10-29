@@ -12,6 +12,7 @@ import cz.payola.scala2json.classes.SimpleSerializationClass
 import cz.payola.scala2json.rules.CustomValueSerializationRule
 import cz.payola.common.geo.Coordinates
 
+// Updated to handle DataCube and connected features [by Jiri Helmich]
 class RPCSerializer extends JSONSerializer
 {
     val graphClass = new SimpleSerializationClass(classOf[Graph])
@@ -80,7 +81,9 @@ class RPCSerializer extends JSONSerializer
 
     val stringParamClass = new SimpleSerializationClass(classOf[StringParameter])
     val stringParamRule = new BasicSerializationRule(Some(classOf[StringParameter]))
+    val defaultValueStringParamRule = new CustomValueSerializationRule[StringParameter]("_defaultValue", (s,v) => v.defaultValue)
     this.addSerializationRule(stringParamClass, stringParamRule)
+    this.addSerializationRule(stringParamClass, defaultValueStringParamRule)
 
     val boolParamClass = new SimpleSerializationClass(classOf[BooleanParameter])
     val boolParamRule = new BasicSerializationRule(Some(classOf[BooleanParameter]))
