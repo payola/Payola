@@ -30,32 +30,22 @@ import cz.payola.common._
         val resultResponse =
             try{
                 val response = Payola.model.analysisModel.getEvaluationState(evaluationId, user)
-
-                //Console.println("Getting evaluation state.")
                 if(storeAnalysis) {
                     response match {
                         case r: EvaluationSuccess =>
-                            //Console.println("About to store analysis result.")
-                            Payola.model.analysisResultStorageModel.saveGraph(
-                                r.outputGraph, analysisId, evaluationId, persistInAnalysisStorage, user)
-                            //Console.println("saved")
-                            EvaluationSuccess(
-                                Payola.model.analysisResultStorageModel.paginate(r.outputGraph),
-                                r.instanceErrors)
+                            Payola.model.analysisResultStorageModel.saveGraph(r.outputGraph, analysisId, evaluationId, persistInAnalysisStorage, user)
+                            EvaluationSuccess(Payola.model.analysisResultStorageModel.paginate(r.outputGraph),r.instanceErrors)
 
                         case _ =>
-                            //Console.println("2")
                             response
                     }
                 } else {
-                    //Console.println("3")
                     response
                 }
             } catch {
-                case e: ModelException => // the evaluation was never started, the result is in resultStorage
-                    //Console.println("Error Occured.")
+                // the evaluation was never started, the result is in resultStorage
+                case e: ModelException =>
                     if(user.isDefined) {
-                        //Console.println("About to load analysis result.")
                         val graph = Payola.model.analysisResultStorageModel.getGraph(evaluationId)
 
                         if(paginate) {
@@ -68,7 +58,6 @@ import cz.payola.common._
                         throw e
                     }
                 case p =>  {
-                    //Console.println("Error Occured.")
                     throw p
                 }
             }

@@ -1,6 +1,8 @@
 package cz.payola.model.components
 
 import cz.payola.domain.rdf.DataCubeVocabulary
+import cz.payola.data.DataContextComponent
+import cz.payola.domain.RdfStorageComponent
 
 /**
  * Model component for Data Cube Vocabulary
@@ -8,6 +10,8 @@ import cz.payola.domain.rdf.DataCubeVocabulary
  */
 trait DataCubeModelComponent
 {
+    self: DataContextComponent with RdfStorageComponent =>
+
     lazy val dataCubeModel = new
         {
             /**
@@ -17,6 +21,10 @@ trait DataCubeModelComponent
              */
             def loadVocabulary(url: String): cz.payola.common.rdf.DataCubeVocabulary = {
                 DataCubeVocabulary(url)
+            }
+
+            def queryForCubeDSD(evaluationId: String, entityType: String) = {
+                rdfStorage.executeSPARQLQuery("CONSTRUCT { ?s ?p ?o . } WHERE { ?s a <http://purl.org/linked-data/cube#DataStructureDefinition> ; ?p ?o . }","http://"+evaluationId)
             }
         }
 }

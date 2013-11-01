@@ -36,7 +36,7 @@ class AnalysisControls(timeoutSeconds: Int) extends ComposedView
     private val wrap = new Div(List(runBtn, stopButton, progressBar,
         new Table(List(
             new TableRow(List(new TableCell(List(timeoutControl, timeoutInfoBar)))),
-            new TableRow(List(new TableCell(List(persistInStore))))))), //TODO show only when user is logged in
+            new TableRow(List(new TableCell(List(persistInStore))))))),
         "well analysis-controls").setAttribute("style", "min-height: 60px;")
 
     def createSubViews = List(wrap)
