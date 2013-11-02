@@ -6,7 +6,6 @@ import cz.payola.domain.rdf.RdfRepresentation
 import cz.payola.common.rdf._
 import cz.payola.domain.entities.AnalysisResult
 import cz.payola.data.DataContextComponent
-import scala.Some
 import scala.collection._
 
 trait AnalysisResultStorageModelComponent

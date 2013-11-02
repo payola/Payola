@@ -91,7 +91,8 @@ class CustomizationByOwnership(
         (successCallback: cz.payola.common.entities.settings.UserCustomization => Unit)
         (failCallback: Throwable => Unit)
     {
-        createClassCustomization(customizationID, "group_" + classURI, List[String](), owner)(successCallback)(failCallback)
+        createClassCustomization(customizationID, "group_" + classURI, List[String](),
+            owner)(successCallback)(failCallback)
     }
 
     @async def createClassCustomization(customizationID: String, classURI: String, propertiesURIs: collection.immutable.Seq[String], owner: User = null)
@@ -118,7 +119,8 @@ class CustomizationByOwnership(
         (successCallback: cz.payola.common.entities.settings.UserCustomization => Unit)
         (failCallback: Throwable => Unit)
     {
-        createClassCustomization(customizationID, "condition_" + classURI, List[String](), owner)(successCallback)(failCallback)
+        createClassCustomization(customizationID, "condition_" + classURI, List[String](),
+            owner)(successCallback)(failCallback)
     }
 
     @async def createPropertyCustomization(customizationID: String, classURI: String, propertyURI: String, owner: User = null)
@@ -211,7 +213,7 @@ class CustomizationByOwnership(
         }
     }
 
-    @async @secured def setClassCondition(customizationID: String, conditionValue: String, classURI: String, value: String, user: User = null)
+    @async @secured def setClassCondition(customizationID: String, classURI: String, conditionValue: String, value: String, user: User = null)
         (successCallback: () => Unit)(failCallback: Throwable => Unit) {
 
         try {

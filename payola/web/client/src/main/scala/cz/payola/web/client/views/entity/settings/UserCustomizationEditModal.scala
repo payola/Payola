@@ -17,9 +17,10 @@ import cz.payola.web.client.views.bootstrap.modals.AlertModal
 import cz.payola.web.client.views.graph.visual.graph._
 import scala.collection.mutable.ListBuffer
 import scala.Some
+import cz.payola.web.client.models.PrefixApplier
 
 class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userCustomization: UserCustomization,
-    onClose: () => Unit)
+    onClose: () => Unit, prefixApplier: PrefixApplier)
     extends Modal("Edit user customization", Nil, Some("Done"), None, false, "large-modal")
 {
     private val currentGraphVertices: List[Vertex] = if(currentGraphView.isDefined) {
@@ -110,7 +111,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
                 case _ => false
             }
         }.map{vertex => vertex.asInstanceOf[IdentifiedVertex].uri},
-        "Class", "Vertices available in the current graph: ", "", onAppendClass)
+        "Class", "Vertices available in the current graph: ", "", onAppendClass, prefixApplier)
 
     appendClassButton.appendButton.mouseClicked += { e =>
         appendClassButton.availableValues = currentGraphVertices.filter{ vertex =>
@@ -126,7 +127,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
     val appendGroupClassButton = new AppendToUserCustButton(
         currentGraphGroups.filter{ group =>
             group.getName != null && group.getName != "" && !groupCustomizations.exists(_.uri == group.getName) }.map(_.getName),
-        "Group", "Groups available in current graph: ", "", onAppendGroup, "Custom group name")
+        "Group", "Groups available in current graph: ", "", onAppendGroup, prefixApplier, "Custom group name")
 
     appendGroupClassButton.appendButton.mouseClicked += { e =>
         appendGroupClassButton.availableValues = currentGraphGroups.filter{ group => group.getName != null && group.getName != ""
@@ -136,7 +137,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
     }
 
     val appendPropertyButton = new AppendToUserCustButton(classCustomizations.map(_.uri),
-        "Property", "Attributes available in the current graph: ", "", onAppendProperty)
+        "Property", "Attributes available in the current graph: ", "", onAppendProperty, prefixApplier)
 
     appendPropertyButton.appendButton.mouseClicked += { e =>
         val availablePropertyURIs = currentGraphEdges.filter{ edge =>
@@ -151,7 +152,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
     }
 
     val appendConditionalClassButton = new AppendToUserCustButton(classCustomizations.map(_.uri),
-        "Global Property", "Attributes available in the current graph: ", "", onAppendConditionalClass)
+        "Global Property", "Attributes available in the current graph: ", "", onAppendConditionalClass, prefixApplier)
 
     appendConditionalClassButton.appendButton.mouseClicked += { e =>
         val availablePropertyURIs = currentGraphEdges.filter{ edge =>
@@ -478,8 +479,9 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
     }
 
     private def uriToName(uri: String): String = {
+        val prefxedUri = prefixApplier.applyPrefix(uri)
         val nameParts = uri.split("#")
-        if (nameParts.length > 1) nameParts(1) else uri
+        if(prefxedUri == uri) {if (nameParts.length > 1) { nameParts(1) } else { uri } } else prefxedUri
     }
 
     def renderClassCustomizationViews(classCustomization: ClassCustomization) {
@@ -543,7 +545,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
             "Property value:",
             new ConditionTextInput(
                 currentGraphEdges.filter(_.uri == conClassCustomization.getUri).map(_.destination.toString).distinct,
-                "Select value", conClassCustomization.conditionalValue),
+                "Select value", conClassCustomization.conditionalValue, prefixApplier),
             Some("span2")
         )
         val labelField = new InputControl(
@@ -572,7 +574,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
         }
         labelField.delayedChanged += { _ =>
             classLabelsChanged.trigger(new ClassCustomizationEventArgs(labelField, conClassCustomization,
-                "TU-"+labelField.field.value))
+            "TU-"+ labelField.field.value))
             customizationChanged.trigger(new UserCustomizationEventArgs(userCustomization))
         }
         fillColor.delayedChanged += { _ =>
@@ -617,7 +619,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
                 case _ => {
                     labelField.field.enable()
                     classLabelsChanged.trigger(new ClassCustomizationEventArgs(labelField, conClassCustomization,
-                        "TU-"+labelField.field.value))
+                        "TU-" + labelField.field.value))
                 }
             }
             customizationChanged.trigger(new UserCustomizationEventArgs(userCustomization))

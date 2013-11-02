@@ -16,11 +16,12 @@ import cz.payola.web.client.views.graph.visual.graph.GraphView
 import scala.Some
 import scala.Some
 
-class UserCustomizationEditor (currentGraph: Option[GraphView], userCustomization: UserCustomization, onClose: () => Unit) extends Presenter
+class UserCustomizationEditor (currentGraph: Option[GraphView], userCustomization: UserCustomization,
+    onClose: () => Unit, prefixApplier: PrefixApplier) extends Presenter
 {
     val customizationChanged = new SimpleUnitEvent[DefinedCustomizationEventArgs]
 
-    private val view = new UserCustomizationEditModal(currentGraph, userCustomization, onClose)
+    private val view = new UserCustomizationEditModal(currentGraph, userCustomization, onClose, prefixApplier)
 
     def initialize() {
         view.userCustomizationName.delayedChanged += onUserCustomizationNameChanged _
