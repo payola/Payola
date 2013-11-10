@@ -223,7 +223,7 @@ trait AnalysisModelComponent extends EntityModelComponent
         }
 
         private def getEvaluationTupleForID(id: String) = {
-            val date = new java.util.Date
+            val date = new java.sql.Timestamp(System.currentTimeMillis)
             runningEvaluations.foreach {
                 tuple =>
                     if (tuple._2._3 + (20 * 60 * 1000) < date.getTime) {
@@ -239,7 +239,7 @@ trait AnalysisModelComponent extends EntityModelComponent
         def getEvaluationState(evaluationId: String, user: Option[User] = None) : EvaluationState = {
             val evaluationTuple = getEvaluationTupleForIDAndPerformSecurityChecks(evaluationId, user)
 
-            runningEvaluations.put(evaluationId, (evaluationTuple._1, evaluationTuple._2, (new java.util.Date).getTime))
+            runningEvaluations.put(evaluationId, (evaluationTuple._1, evaluationTuple._2, System.currentTimeMillis))
 
             val evaluation = evaluationTuple._2
 

@@ -385,7 +385,7 @@ trait SchemaComponent
                 new Customization("", None, "", "", None, Nil, false)
             },
             factoryFor(classCustomizations) is {
-                new ClassCustomization("", "", "", 0, "", "", "", Nil)
+                new ClassCustomization("", "", "", 0, "", "", "", 0, Nil)
             },
             factoryFor(propertyCustomizations) is {
                 new PropertyCustomization("", "", "", 0)
@@ -394,7 +394,7 @@ trait SchemaComponent
                 new Prefix("", "", "", "", None)
             },
             factoryFor(analysesResults) is {
-                new AnalysisResult("", None, "", false, 0, new java.util.Date(System.currentTimeMillis()))
+                new AnalysisResult("", None, "", false, 0, new java.sql.Timestamp(System.currentTimeMillis()))
             }
         )
 

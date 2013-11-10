@@ -102,7 +102,7 @@ class CustomizationByOwnership(
         val propertyCustomizations = propertiesURIs.map { propertyURI =>
             new PropertyCustomization(propertyURI, "", 0)
         }
-        val classCustomization = new ClassCustomization(classURI, "", 0, "", "", "", propertyCustomizations.toList)
+        val classCustomization = new ClassCustomization(classURI, "", 0, "", "", "", propertyCustomizations.toList, 0)
 
         val optCustomization =
             Payola.model.userCustomizationModel.getAccessibleCustomizationsToUserById(Some(owner), customizationID)
@@ -218,6 +218,17 @@ class CustomizationByOwnership(
 
         try {
             setClassAttribute(customizationID, classURI, conditionValue, { _.conditionalValue = value }, user, successCallback, failCallback)
+        } catch {
+            case t: Throwable => failCallback(t)
+        }
+    }
+
+    @async @secured def setClassOrder(customizationID: String, classURI: String, conditionValue: String, value: String, user: User = null)
+        (successCallback: () => Unit)(failCallback: Throwable => Unit) {
+
+        try {
+            val int = validateInt(value, "order number")
+            setClassAttribute(customizationID, classURI, conditionValue, { _.orderNumber = int }, user, successCallback, failCallback)
         } catch {
             case t: Throwable => failCallback(t)
         }

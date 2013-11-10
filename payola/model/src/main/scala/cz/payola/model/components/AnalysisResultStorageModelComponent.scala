@@ -30,7 +30,7 @@ trait AnalysisResultStorageModelComponent
                 //store control in DB
                 analysisResultRepository.storeResult(new AnalysisResult(
                     analysisId, user, evaluationId, persist, graph.vertices.size,
-                    new java.util.Date(System.currentTimeMillis)))
+                    new java.sql.Timestamp(System.currentTimeMillis)))
 
                 val uri = constructUri(evaluationId)
                 val serializedGraph = domainGraph.toStringRepresentation(RdfRepresentation.RdfXml)

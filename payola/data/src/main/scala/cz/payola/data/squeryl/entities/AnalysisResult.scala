@@ -1,7 +1,7 @@
 package cz.payola.data.squeryl.entities
 
 import cz.payola.data.squeryl._
-import scala.Some
+import java.sql.Timestamp
 
 object AnalysisResult extends EntityConverter[AnalysisResult]
 {
@@ -10,14 +10,14 @@ object AnalysisResult extends EntityConverter[AnalysisResult]
             case e: AnalysisResult => Some(e)
             case e: cz.payola.common.entities.AnalysisResult =>
                 Some(new AnalysisResult(e.analysisId, e.owner.map(User(_)), e.evaluationId, e.storedIn,
-                    e.verticesCount, e.touched))
+                    e.verticesCount, new Timestamp(e.touched.getTime())))
             case _ => None
         }
     }
 }
 
 class AnalysisResult (AnalysisID: String, o: Option[User], EvaluationID: String, Persist: Boolean,
-    VerticesCount: Int, Touched: java.util.Date)
+    VerticesCount: Int, Touched: java.sql.Timestamp)
     (implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.AnalysisResult(AnalysisID, o, EvaluationID, Persist, VerticesCount, Touched)
     with Entity with OptionallyOwnedEntity

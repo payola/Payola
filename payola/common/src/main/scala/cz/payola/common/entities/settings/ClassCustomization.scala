@@ -4,8 +4,8 @@ import scala.collection.immutable
 import cz.payola.common.Entity
 
 /**
-  * Customization of appearance of a vertex with particular type.
-  */
+ * Customization of appearance of a vertex with particular type.
+ */
 trait ClassCustomization extends Entity
 {
     /** Type of the property customizations in the class customization. */
@@ -28,6 +28,8 @@ trait ClassCustomization extends Entity
 
     protected var _conditionalValue: String
 
+    protected var _orderNum: Int
+
     //following vals should be in an object, but that creates a too deep call resulting a maximum callstack size exceeded JS error
     private val acceptedLabelPrefix = "T"
     private val notAcceptedLabelPrefix = "F"
@@ -43,8 +45,8 @@ trait ClassCustomization extends Entity
     def isConditionalCustomization = uri.startsWith("condition_")
 
     def getUri = if(isGroupCustomization) { uri.substring(6) }
-        else if(isConditionalCustomization) { uri.substring(10) }
-        else { uri }
+    else if(isConditionalCustomization) { uri.substring(10) }
+    else { uri }
 
     def hasId(id: String): Boolean = {
         uri == id
@@ -107,6 +109,12 @@ trait ClassCustomization extends Entity
      */
     def conditionalValue_=(value: String) {
         _conditionalValue = value
+    }
+
+    def orderNumber = _orderNum
+
+    def orderNumber_=(value: Int) {
+        _orderNum = value
     }
 
     /** Vertex labels splitted. */

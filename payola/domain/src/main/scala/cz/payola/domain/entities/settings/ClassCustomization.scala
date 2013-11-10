@@ -13,6 +13,7 @@ class ClassCustomization(
     protected var _labels: String,
     protected var _conditionalValue: String,
     protected var _propertyCustomizations: immutable.Seq[PropertyCustomization],
+    protected var _orderNum: Int,
     override val id: String = IDGenerator.newId)
     extends Entity
     with cz.payola.common.entities.settings.ClassCustomization

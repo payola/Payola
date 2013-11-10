@@ -1,6 +1,7 @@
 package cz.payola.domain.entities
 
 import cz.payola.domain.Entity
+import java.sql.Timestamp
 
 class AnalysisResult(
     protected override var analysisid: String,
@@ -8,7 +9,7 @@ class AnalysisResult(
     protected override var evaluationid: String,
     protected override var _persist: Boolean,
     protected override var verticescount: Int,
-    protected override var _touched: java.util.Date)
+    protected var _touched: Timestamp)
     extends Entity with cz.payola.common.entities.AnalysisResult
     with OptionallyOwnedEntity with NamedEntity
 {
@@ -19,6 +20,12 @@ class AnalysisResult(
 
     override def name_=(value: String) {
         //ain't gonna do a thing
+    }
+
+    override def touched = new java.util.Date(_touched.getTime())
+
+    override def touched_=(value: java.util.Date) {
+        _touched = new java.sql.Timestamp(value.getTime)
     }
 
     /**

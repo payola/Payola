@@ -16,7 +16,7 @@ import cz.payola.common._
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
 import cz.payola.web.client.views.graph.visual.graph._
 import scala.collection.mutable.ListBuffer
-import scala.Some
+import s2js.compiler.javascript
 import cz.payola.web.client.models.PrefixApplier
 
 class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userCustomization: UserCustomization,
@@ -62,7 +62,8 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
         List[PropertyCustomization]()
     }
 
-    private var conditionalClassCustomizations = userCustomization.classCustomizations.filter(_.isConditionalCustomization).map(_.asInstanceOf[ClassCustomization])
+    private var conditionalClassCustomizations = userCustomization.classCustomizations.filter(
+        _.isConditionalCustomization).map(_.asInstanceOf[ClassCustomization]).sortWith((a, b) => a.orderNumber < b.orderNumber)
 
     private var selectedItem: Option[CustomizationItem[Entity]] =
         if(classCustomizations.isEmpty) {
@@ -87,6 +88,8 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
     val classLabelsChanged = new UnitEvent[InputControl[_], ClassCustomizationEventArgs[InputControl[_]]]
 
     val classConditionChanged = new UnitEvent[InputControl[_], ClassCustomizationEventArgs[InputControl[_]]]
+
+    val classConditionalOrderChanged = new UnitEvent[InputControl[_], ClassCustomizationEventArgs[InputControl[_]]]
 
     val propertyStrokeWidthDelayedChanged =
         new UnitEvent[InputControl[_], PropertyCustomizationEventArgs[InputControl[_]]]
@@ -194,7 +197,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
         val listItem = new ListItem(List(new Anchor(List(
             new Icon(Icon.tag),
             new Text(uriToName(customization.getUri)))
-        )))
+        ))).setAttribute("orderNumber", ""+customization.orderNumber)
         listItem.mouseClicked += { e =>
             onConditionalListItemSelected(customization, listItem, renderConditionalClassCustomizationViews)
             false
@@ -216,7 +219,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
 
     private val settingsDiv = new Div(Nil, "span8").setAttribute("style","width:100%;").setAttribute("rowspan", "2")
     private val conditionalClassListDiv = new Div(List(new UnorderedList(
-        conditionalClassCustomizationListItems, "nav nav-list")),  //TODO draggable
+        conditionalClassCustomizationListItems, "nav nav-list").setAttribute("id", "sortableConditionalClasses")),
         "span4 modal-inner-view well no-padding").setAttribute("style", "padding: 8px 0; width:100%; max-width: 260px;")
 
     private val listDiv = new Div(List(new UnorderedList(
@@ -244,6 +247,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
 
     override def render(parent: html.Element) {
         super.render(parent)
+        initSortable()
     }
 
     private def onAppendClass(newClassURI: String): Boolean = {
@@ -398,7 +402,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
         val classListItem = new ListItem(List(new Anchor(List(
             new Icon(Icon.tag),
             new Text(uriToName(definedClass.getUri)))
-        )))
+        ))).setAttribute("orderNumber", ""+definedClass.orderNumber)
         classListItem.mouseClicked += { e =>
             onListItemSelected(definedClass, classListItem, renderConditionalClassCustomizationViews)
             false
@@ -449,8 +453,9 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
 
     private def updateConditionalClassListDiv() {
         conditionalClassListDiv.removeAllChildNodes()
-        val list = new UnorderedList(conditionalClassCustomizationListItems, "nav nav-list")
+        val list = new UnorderedList(conditionalClassCustomizationListItems, "nav nav-list").setAttribute("id", "sortable")
         list.render(conditionalClassListDiv.htmlElement)
+        initSortable()
     }
 
     private def onListItemSelected[A <: Entity](customization: A, listItem: ListItem, renderSettingsDivFn: A => Unit) {
@@ -722,6 +727,54 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
         try {
             value.toInt
         } catch { case t: Throwable => throw new ValidationException(field, "Value is out of range") }
+    }
+
+    @javascript (
+        """
+          $(function() {
+              $( "#sortableConditionalClasses" ).sortable();
+              $( "#sortableConditionalClasses" ).disableSelection();
+              $( "#sortableConditionalClasses" ).on( "sortupdate", function( event, ui ) {
+                var customizationsOrder = scala.collection.mutable.ListBuffer.get().$apply();
+                var listElements = document.getElementById("sortableConditionalClasses").children;
+                for(var i = 0; i < listElements.length; ++i) {
+                    customizationsOrder.$plus$eq(listElements[i].attributes["orderNumber"].value)
+                }
+                self.updateConditionalClassCustomizationsOrder(customizationsOrder.toList());
+              } );
+          });
+        """)
+    private def initSortable(){}
+
+    private def updateConditionalClassCustomizationsOrder(order: List[Int]) {
+        //update conditionalClasses list
+
+        val reorderedList = new ListBuffer[ClassCustomization]()
+        order.foreach{ orderNumber =>
+            val foundCust = conditionalClassCustomizations.filter(_.orderNumber == orderNumber)
+
+            foundCust.foreach{ orderedCust =>
+                orderedCust.orderNumber = reorderedList.size
+                reorderedList += orderedCust
+                classConditionalOrderChanged.trigger(new ClassCustomizationEventArgs(null, orderedCust,
+                    ""+orderedCust.orderNumber))
+            }
+        }
+
+        //update itemList
+        conditionalClassCustomizationListItems = conditionalClassCustomizations.map { customization =>
+            val listItem = new ListItem(List(new Anchor(List(
+                new Icon(Icon.tag),
+                new Text(uriToName(customization.getUri)))
+            ))).setAttribute("orderNumber", ""+customization.orderNumber)
+            listItem.mouseClicked += { e =>
+                onConditionalListItemSelected(customization, listItem, renderConditionalClassCustomizationViews)
+                false
+            }
+            listItem
+        }
+
+        customizationChanged.trigger(new UserCustomizationEventArgs(userCustomization))
     }
 }
 

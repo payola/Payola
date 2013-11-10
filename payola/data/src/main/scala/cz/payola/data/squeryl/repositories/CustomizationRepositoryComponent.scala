@@ -46,13 +46,9 @@ trait CustomizationRepositoryComponent extends TableRepositoryComponent
                         o.classCustomizations.foreach { classCustomization =>
 
                             val inDbClassCustomization =
-                                if(inDbCustOpt.isDefined) {
-                                    inDbCustOpt.get.classCustomizations.find{
-                                        inDbClassCust => classCustomization.id == inDbClassCust.id
-                                    }
-                                } else {
-                                    None
-                                }
+                                inDbCustOpt.map(_.classCustomizations.find{ inDbClassCust =>
+                                    classCustomization.id == inDbClassCust.id
+                                }).getOrElse(None)
                             val persistedClassCustomization = if(inDbClassCustomization.isDefined) {
                                 ClassCustomization.convert(inDbClassCustomization).get
                             } else {
