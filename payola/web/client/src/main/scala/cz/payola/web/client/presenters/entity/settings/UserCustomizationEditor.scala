@@ -116,7 +116,7 @@ class UserCustomizationEditor (currentGraph: Option[GraphView], userCustomizatio
     private def onClassOrderChanged(e: ClassCustomizationEventArgs[_]) {
         CustomizationManager.setClassOrder(userCustomization.id, e.classCustomization.uri,
             e.classCustomization.conditionalValue, e.newValue){
-            () => e.classCustomization.conditionalValue = e.newValue
+            () => e.classCustomization.orderNumber = e.newValue.toInt
         }{ t => view.destroy()
             fatalErrorHandler(t)}
     }

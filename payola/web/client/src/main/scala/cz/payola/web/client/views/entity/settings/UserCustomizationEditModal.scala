@@ -5,6 +5,7 @@ import cz.payola.web.client.views.bootstrap._
 import cz.payola.web.client.events._
 import cz.payola.web.client.presenters.entity.settings._
 import cz.payola.web.client.views.elements.form.fields._
+import cz.payola.web.client.View
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.elements.lists._
 import s2js.adapters.html
@@ -54,7 +55,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
     private var groupCustomizations = userCustomization.classCustomizations.filter(e =>
         e.isGroupCustomization).map{ userClassCust => userClassCust.asInstanceOf[ClassCustomization] }
 
-    private def propertiesContainer = userCustomization.classCustomizations.find(_.uri == "properties")
+    private def propertiesContainer = classCustomizations.find(_.uri == "properties")
     
     private var propertyCustomizations = if(propertiesContainer.isDefined) {
         propertiesContainer.get.propertyCustomizations
@@ -169,49 +170,81 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
         false
     }
 
-    private var classCustomizationsListItems = classCustomizations.map { customization =>
-        val listItem = new ListItem(List(new Anchor(List(
-            new Icon(Icon.tag),
-            new Text(uriToName(customization.uri)))
-        )))
-        listItem.mouseClicked += { e =>
+    private var classCustomizationsListItems: Seq[ButtonedListItem] = classCustomizations.map { customization =>
+        val a = new Anchor(List(new Icon(Icon.tag), new Text(uriToName(customization.uri))))
+        val listItem = new ButtonedListItem(Icon.remove, List(a))
+        a.mouseClicked += { e =>
             onListItemSelected(customization, listItem, renderClassCustomizationViews)
             false
         }
+        listItem.buttonEvent += { e =>
+            removeFromCustomization(customization, { userCust =>
+                classCustomizationsListItems = classCustomizationsListItems.filter(_ != listItem)
+                classCustomizations = classCustomizations.filter(_ != customization)
+                customizationChanged.trigger(new UserCustomizationEventArgs(userCust))
+
+                updateListDiv()
+            })
+            true
+        }
         listItem
     }
 
-    private var groupCustomizationListItems = groupCustomizations.map { customization =>
-        val listItem = new ListItem(List(new Anchor(List(
-            new Icon(Icon.ccShare),
-            new Text(customization.getUri))
-        )))
-        listItem.mouseClicked += { e =>
+    private var groupCustomizationListItems: Seq[ButtonedListItem] = groupCustomizations.map { customization =>
+        val a = new Anchor(List(new Icon(Icon.tag), new Text(uriToName(customization.uri))))
+        val listItem = new ButtonedListItem(Icon.remove, List(a))
+        a.mouseClicked += { e =>
             onListItemSelected(customization, listItem, renderGroupCustomizationViews)
             false
         }
-        listItem
-    }
+        listItem.buttonEvent += { e =>
+            removeFromCustomization(customization, { userCust =>
+                groupCustomizationListItems = groupCustomizationListItems.filter(_ != listItem)
+                groupCustomizations = groupCustomizations.filter(_ != customization)
+                customizationChanged.trigger(new UserCustomizationEventArgs(userCust))
 
-    private var conditionalClassCustomizationListItems = conditionalClassCustomizations.map { customization =>
-        val listItem = new ListItem(List(new Anchor(List(
-            new Icon(Icon.tag),
-            new Text(uriToName(customization.getUri)))
-        ))).setAttribute("orderNumber", ""+customization.orderNumber)
-        listItem.mouseClicked += { e =>
-            onConditionalListItemSelected(customization, listItem, renderConditionalClassCustomizationViews)
+                updateListDiv()
+            })
             false
         }
         listItem
     }
 
-    private var propertyCustomizationsListItems = propertyCustomizations.map { customization =>
-        val listItem = new ListItem(List(new Anchor(List(
-            new Icon(Icon.list),
-            new Text(uriToName(customization.uri)))
-        )))
-        listItem.mouseClicked += { e =>
+    private var conditionalClassCustomizationListItems: Seq[ButtonedListItem] = conditionalClassCustomizations.map { customization =>
+        val a = new Anchor(List(new Icon(Icon.tag), new Text(uriToName(customization.uri))))
+        val listItem = new ButtonedListItem(Icon.remove, List(a)).setAttribute("orderNumber", ""+customization.orderNumber)
+        a.mouseClicked += { e =>
+            onConditionalListItemSelected(customization, listItem, renderConditionalClassCustomizationViews)
+            false
+        }
+        listItem.buttonEvent += { e =>
+            removeFromCustomization(customization, { userCust =>
+                conditionalClassCustomizationListItems = conditionalClassCustomizationListItems.filter(_ != listItem)
+                conditionalClassCustomizations = conditionalClassCustomizations.filter(_ != customization)
+                customizationChanged.trigger(new UserCustomizationEventArgs(userCust))
+
+                updateConditionalClassListDiv()
+            })
+            false
+        }
+        listItem
+    }
+
+    private var propertyCustomizationsListItems: Seq[ButtonedListItem] = propertyCustomizations.map { customization =>
+        val a = new Anchor(List(new Icon(Icon.tag), new Text(uriToName(customization.uri))))
+        val listItem = new ButtonedListItem(Icon.remove, List(a))
+        a.mouseClicked += { e =>
             onListItemSelected(customization, listItem, renderPropertyCustomizationViews)
+            false
+        }
+        listItem.buttonEvent += { e =>
+            removeFromCustomization(customization, { userCust =>
+                propertyCustomizationsListItems = propertyCustomizationsListItems.filter(_ != listItem)
+                propertyCustomizations = propertyCustomizations.filter(_ != customization)
+                customizationChanged.trigger(new UserCustomizationEventArgs(userCust))
+
+                updateListDiv()
+            })
             false
         }
         listItem
@@ -219,11 +252,11 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
 
     private val settingsDiv = new Div(Nil, "span8").setAttribute("style","width:100%;").setAttribute("rowspan", "2")
     private val conditionalClassListDiv = new Div(List(new UnorderedList(
-        conditionalClassCustomizationListItems, "nav nav-list").setAttribute("id", "sortableConditionalClasses")),
+        conditionalClassCustomizationListItems, "nav-deep nav-deep-list").setAttribute("id", "sortableConditionalClasses")),
         "span4 modal-inner-view well no-padding").setAttribute("style", "padding: 8px 0; width:100%; max-width: 260px;")
 
     private val listDiv = new Div(List(new UnorderedList(
-        classCustomizationsListItems ++ groupCustomizationListItems ++ propertyCustomizationsListItems, "nav nav-list")),
+        classCustomizationsListItems ++ groupCustomizationListItems ++ propertyCustomizationsListItems, "nav-deep nav-deep-list")),
         "span4 modal-inner-view well no-padding").setAttribute("style", "padding: 8px 0; width:100%; max-width: 260px;")
 
     override val body = List(
@@ -251,21 +284,20 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
     }
 
     private def onAppendClass(newClassURI: String): Boolean = {
-        if(!classCustomizations.exists(_.uri == newClassURI)) { //if this name does not already exist
+        if(!classCustomizations.exists(_.getUri == newClassURI)) { //if this name does not already exist
 
             deactivateAll()
 
-            settingsDiv.removeAllChildNodes()
-            selectedItem = None
             block("Creating class...")
 
             //create the class
             CustomizationManager.createClassCustomization(
-                userCustomization.id, newClassURI, List[String]()) { ontologyCustomization =>
+                userCustomization.id, newClassURI, List[String]()) { userCustomization =>
                 unblock()
-                val newClass = ontologyCustomization.classCustomizations.last.asInstanceOf[ClassCustomization]
+                val newClass = userCustomization.classCustomizations.find(_.getUri == newClassURI).get.asInstanceOf[ClassCustomization]
                 classCustomizations ++= List(newClass)
                 renderDefinedClass(newClass)
+                customizationChanged.trigger(new UserCustomizationEventArgs(userCustomization))
             }{ error =>
                 unblock()
                 AlertModal.display("Error", "Failed to create class customization.")
@@ -278,20 +310,19 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
     }
 
     private def onAppendGroup(groupName: String): Boolean = {
-        if(!groupCustomizations.exists(_.uri == groupName)) { //if this name does not already exist
+        if(!groupCustomizations.exists(_.getUri == groupName)) { //if this name does not already exist
 
             deactivateAll()
 
-            settingsDiv.removeAllChildNodes()
-            selectedItem = None
             block("Creating group class...")
 
             //create the class
-            CustomizationManager.createGroupCustomization(userCustomization.id, groupName) { ontologyCustomization =>
+            CustomizationManager.createGroupCustomization(userCustomization.id, groupName) { userCustomization =>
                 unblock()
-                val newClass = ontologyCustomization.classCustomizations.last.asInstanceOf[ClassCustomization]
+                val newClass = userCustomization.classCustomizations.find(_.getUri == groupName).get.asInstanceOf[ClassCustomization]
                 groupCustomizations ++= List(newClass)
                 renderDefinedGroup(newClass)
+                customizationChanged.trigger(new UserCustomizationEventArgs(userCustomization))
             }{ error =>
                 AlertModal.display("Error", "Failed to create group customization.")
             }
@@ -307,16 +338,15 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
         //conditionalClassCustomization may contain multiple customizations with one uri
         deactivateAll()
 
-        settingsDiv.removeAllChildNodes()
-        selectedItem = None
         block("Creating global property...")
 
         //create the class
         CustomizationManager.createConditionalCustomization(userCustomization.id, newClassURI) { updatedCust =>
             unblock()
-            val newClass = updatedCust.classCustomizations.last.asInstanceOf[ClassCustomization]
+            val newClass = updatedCust.classCustomizations.find(_.getUri == newClassURI).get.asInstanceOf[ClassCustomization]
             conditionalClassCustomizations ++= List(newClass)
             renderDefinedConditionalClass(newClass)
+            customizationChanged.trigger(new UserCustomizationEventArgs(updatedCust))
         }{ error =>
             unblock()
             AlertModal.display("Error", "Failed to create conditional class customization.")
@@ -329,18 +359,16 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
 
             deactivateAll()
 
-            settingsDiv.removeAllChildNodes()
-            selectedItem = None
             block("Creating property...")
 
             if(propertiesContainer.isEmpty) { //must create the classCustomization container for propertiesCustomizations
                 CustomizationManager.createClassCustomization(
                     userCustomization.id, "properties", List[String]()) { ocAddClass =>
-                    val newClass = ocAddClass.classCustomizations.last.asInstanceOf[ClassCustomization]
+                    val newClass = ocAddClass.classCustomizations.find(_.getUri == "properties").get.asInstanceOf[ClassCustomization]
                     classCustomizations ++= List(newClass)
 
                     addPropertyCall(propertiesContainer.get, newPropertyURI)
-
+                    customizationChanged.trigger(new UserCustomizationEventArgs(userCustomization))
                 }{ error =>
                     unblock()
                     AlertModal.display("Error", "Failed to create property customization.")
@@ -369,6 +397,9 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
                     propertyCustomizations ++= List(newPropertyCustomizationOpt.get)
                     renderDefinedProperty(newPropertyCustomizationOpt.get, updatedCurrentClassOpt.get)
                 }
+            } else {
+                unblock()
+                AlertModal.display("Error", "Failed to create property customization container.")
             }
         }{ error =>
             unblock()
@@ -383,13 +414,20 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
      * @param definedClass new ClassCustomization to add
      */
     private def renderDefinedClass(definedClass: ClassCustomization) {
-
-        val classListItem = new ListItem(List(new Anchor(List(
-            new Icon(Icon.tag),
-            new Text(uriToName(definedClass.uri)))
-        )))
-        classListItem.mouseClicked += { e =>
+        val a = new Anchor(List(new Icon(Icon.tag), new Text(uriToName(definedClass.uri))))
+        val classListItem = new ButtonedListItem(Icon.remove, List(a))
+        a.mouseClicked += { e =>
             onListItemSelected(definedClass, classListItem, renderClassCustomizationViews)
+            false
+        }
+        classListItem.buttonEvent += { e =>
+            removeFromCustomization(definedClass, { userCust =>
+                classCustomizationsListItems = classCustomizationsListItems.filter(_ != classListItem)
+                classCustomizations = classCustomizations.filter(_ != definedClass)
+                customizationChanged.trigger(new UserCustomizationEventArgs(userCust))
+
+                updateListDiv()
+            })
             false
         }
 
@@ -398,27 +436,43 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
     }
 
     private def renderDefinedConditionalClass(definedClass: ClassCustomization) {
-
-        val classListItem = new ListItem(List(new Anchor(List(
-            new Icon(Icon.tag),
-            new Text(uriToName(definedClass.getUri)))
-        ))).setAttribute("orderNumber", ""+definedClass.orderNumber)
-        classListItem.mouseClicked += { e =>
+        val a = new Anchor(List(new Icon(Icon.tag), new Text(uriToName(definedClass.uri))))
+        val classListItem = new ButtonedListItem(Icon.remove, List(a)).setAttribute("orderNumber", ""+definedClass.orderNumber)
+        a.mouseClicked += { e =>
             onListItemSelected(definedClass, classListItem, renderConditionalClassCustomizationViews)
+            false
+        }
+        classListItem.buttonEvent += { e =>
+            removeFromCustomization(definedClass, {userCust =>
+                conditionalClassCustomizationListItems = conditionalClassCustomizationListItems.filter(_ != classListItem)
+                conditionalClassCustomizations = conditionalClassCustomizations.filter(_ != definedClass)
+                customizationChanged.trigger(new UserCustomizationEventArgs(userCust))
+
+                updateConditionalClassListDiv()
+            })
             false
         }
 
         conditionalClassCustomizationListItems ++= List(classListItem)
+        //TODO call jquery update
         updateConditionalClassListDiv()
     }
 
     private def renderDefinedGroup(definedGroup: ClassCustomization) {
-        val groupListItem = new ListItem(List(new Anchor(List(
-            new Icon(Icon.ccShare),
-            new Text(uriToName(definedGroup.uri)))
-        )))
-        groupListItem.mouseClicked += { e =>
+        val a = new Anchor(List(new Icon(Icon.tag), new Text(uriToName(definedGroup.uri))))
+        val groupListItem = new ButtonedListItem(Icon.remove, List(a))
+        a.mouseClicked += { e =>
             onListItemSelected(definedGroup, groupListItem, renderGroupCustomizationViews)
+            false
+        }
+        groupListItem.buttonEvent += { e =>
+            removeFromCustomization(definedGroup, { userCust =>
+                groupCustomizationListItems = groupCustomizationListItems.filter(_ != groupListItem)
+                groupCustomizations = groupCustomizations.filter(_ != definedGroup)
+                customizationChanged.trigger(new UserCustomizationEventArgs(userCust))
+
+                updateListDiv()
+            })
             false
         }
 
@@ -426,17 +480,25 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
         updateListDiv()
     }
 
-    private def renderDefinedProperty(newProperty: PropertyCustomization, updatedClass: ClassCustomization): ListItem = {
+    private def renderDefinedProperty(newProperty: PropertyCustomization, updatedClass: ClassCustomization): ButtonedListItem = {
 
         classCustomizations = classCustomizations.filter(_.uri != updatedClass.uri) // remove the old classCustomization (without the new property)
         classCustomizations ++= List(updatedClass) //add the updated classCustomization (with the new property)
 
-        val propertyListItem = new ListItem(List(new Anchor(List(
-            new Icon(Icon.list),
-            new Text(uriToName(newProperty.uri)))
-        )))
-        propertyListItem.mouseClicked += { e =>
+        val a = new Anchor(List(new Icon(Icon.tag), new Text(uriToName(newProperty.uri))))
+        val propertyListItem = new ButtonedListItem(Icon.remove, List(a))
+        a.mouseClicked += { e =>
             onListItemSelected(newProperty, propertyListItem, renderPropertyCustomizationViews)
+            false
+        }
+        propertyListItem.buttonEvent += { e =>
+            removeFromCustomization(newProperty, { userCust =>
+                propertyCustomizationsListItems = propertyCustomizationsListItems.filter(_ != propertyListItem)
+                propertyCustomizations = propertyCustomizations.filter(_ != newProperty)
+                customizationChanged.trigger(new UserCustomizationEventArgs(userCust))
+
+                updateListDiv()
+            })
             false
         }
 
@@ -447,18 +509,19 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
 
     private def updateListDiv() {
         listDiv.removeAllChildNodes()
-        val list = new UnorderedList(classCustomizationsListItems ++ groupCustomizationListItems ++ propertyCustomizationsListItems, "nav nav-list")
+        val list = new UnorderedList(classCustomizationsListItems ++ groupCustomizationListItems ++ propertyCustomizationsListItems, "nav-deep nav-deep-list")
         list.render(listDiv.htmlElement)
     }
 
     private def updateConditionalClassListDiv() {
+        disableSortable()
         conditionalClassListDiv.removeAllChildNodes()
-        val list = new UnorderedList(conditionalClassCustomizationListItems, "nav nav-list").setAttribute("id", "sortable")
+        val list = new UnorderedList(conditionalClassCustomizationListItems, "nav-deep nav-deep-list").setAttribute("id", "sortableConditionalClasses")
         list.render(conditionalClassListDiv.htmlElement)
         initSortable()
     }
 
-    private def onListItemSelected[A <: Entity](customization: A, listItem: ListItem, renderSettingsDivFn: A => Unit) {
+    private def onListItemSelected[A <: Entity](customization: A, listItem: ButtonedListItem, renderSettingsDivFn: A => Unit) {
         deactivateAll()
         listItem.addCssClass("active")
         selectedItem = Some(new CustomizationItem(customization))
@@ -467,7 +530,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
         renderSettingsDivFn(customization)
     }
 
-    private def onConditionalListItemSelected[A <: Entity](customization: A, listItem: ListItem, renderSettingsDivFn: A => Unit) {
+    private def onConditionalListItemSelected[A <: Entity](customization: A, listItem: ButtonedListItem, renderSettingsDivFn: A => Unit) {
         deactivateAll()
         listItem.addCssClass("active")
         selectedItem = Some(new CustomizationItem(customization))
@@ -481,6 +544,9 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
         classCustomizationsListItems.foreach(_.removeCssClass("active"))
         groupCustomizationListItems.foreach(_.removeCssClass("active"))
         propertyCustomizationsListItems.foreach(_.removeCssClass("active"))
+
+        settingsDiv.removeAllChildNodes()
+        selectedItem = None
     }
 
     private def uriToName(uri: String): String = {
@@ -731,50 +797,92 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
 
     @javascript (
         """
-          $(function() {
-              $( "#sortableConditionalClasses" ).sortable();
-              $( "#sortableConditionalClasses" ).disableSelection();
-              $( "#sortableConditionalClasses" ).on( "sortupdate", function( event, ui ) {
-                var customizationsOrder = scala.collection.mutable.ListBuffer.get().$apply();
-                var listElements = document.getElementById("sortableConditionalClasses").children;
-                for(var i = 0; i < listElements.length; ++i) {
-                    customizationsOrder.$plus$eq(listElements[i].attributes["orderNumber"].value)
-                }
-                self.updateConditionalClassCustomizationsOrder(customizationsOrder.toList());
-              } );
-          });
+          $( "#sortableConditionalClasses" ).sortable();
+          $( "#sortableConditionalClasses" ).disableSelection();
+          $( "#sortableConditionalClasses" ).on( "sortupdate", function( event, ui ) {
+            var customizationsOrder = scala.collection.mutable.ListBuffer.get().$apply();
+            var listElements = document.getElementById("sortableConditionalClasses").children;
+            for(var i = 0; i < listElements.length; ++i) {
+                customizationsOrder.$plus$eq(listElements[i].attributes["orderNumber"].value)
+            }
+            self.updateConditionalClassCustomizationsOrder(customizationsOrder.toList());
+          } );
         """)
     private def initSortable(){}
 
-    private def updateConditionalClassCustomizationsOrder(order: List[Int]) {
-        //update conditionalClasses list
+    @javascript (
+        """
+          $( "#sortableConditionalClasses" ).sortable('cancel');
+        """)
+    private def disableSortable(){}
 
+    private def updateConditionalClassCustomizationsOrder(order: List[Int]) {
+
+        //update conditionalClasses list
         val reorderedList = new ListBuffer[ClassCustomization]()
+        val reorderedItemsList = new ListBuffer[ButtonedListItem]()
+
+
         order.foreach{ orderNumber =>
             val foundCust = conditionalClassCustomizations.filter(_.orderNumber == orderNumber)
+            val foundListItem = conditionalClassCustomizationListItems.filter(_.getAttribute("orderNumber") == orderNumber)
 
             foundCust.foreach{ orderedCust =>
-                orderedCust.orderNumber = reorderedList.size
+                //orderedCust.orderNumber = positionNumber
                 reorderedList += orderedCust
-                classConditionalOrderChanged.trigger(new ClassCustomizationEventArgs(null, orderedCust,
-                    ""+orderedCust.orderNumber))
+            }
+            foundListItem.foreach{ listItem =>
+                reorderedItemsList += listItem
             }
         }
 
-        //update itemList
-        conditionalClassCustomizationListItems = conditionalClassCustomizations.map { customization =>
-            val listItem = new ListItem(List(new Anchor(List(
-                new Icon(Icon.tag),
-                new Text(uriToName(customization.getUri)))
-            ))).setAttribute("orderNumber", ""+customization.orderNumber)
-            listItem.mouseClicked += { e =>
-                onConditionalListItemSelected(customization, listItem, renderConditionalClassCustomizationViews)
-                false
-            }
-            listItem
+        var positionNumber = 0
+        reorderedList.foreach{ item =>
+            classConditionalOrderChanged.trigger(
+                new ClassCustomizationEventArgs(null, item, ""+positionNumber))
+            positionNumber += 1
         }
+
+        positionNumber = 0
+        reorderedItemsList.foreach{ item =>
+            item.setAttribute("orderNumber", ""+positionNumber)
+            positionNumber += 1
+        }
+
+        conditionalClassCustomizations = reorderedList.toList
 
         customizationChanged.trigger(new UserCustomizationEventArgs(userCustomization))
+    }
+
+    private def removeFromCustomization(customization: Entity, success: UserCustomization => Unit) {
+        deactivateAll()
+
+        customization match {
+            case cc: ClassCustomization =>
+                block("Deleting class...")
+                CustomizationManager.deleteClassCustomization(userCustomization.id, cc.id)
+                { userCust =>
+                    unblock()
+                    success(userCust)
+                }
+                { error =>
+                    unblock()
+                    AlertModal.display("Error", "Failed to remove class customization.")
+                }
+            case pc: PropertyCustomization =>
+                block("Deleting property...")
+                CustomizationManager.deletePropertyCustomization(userCustomization.id, pc.id)
+                { userCust =>
+                    unblock()
+                    success(userCust)
+                }
+                { error =>
+                    unblock()
+                    AlertModal.display("Error", "Failed to remove property customization.")
+                }
+        }
+
+
     }
 }
 

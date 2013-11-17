@@ -273,6 +273,20 @@ trait DataContextComponent
          * @param propertyCustomization PropertyCustomization to persist
          */
         def persistPropertyCustomization(propertyCustomization: AnyRef)
+
+        /**
+         * Removes an entity with the specified ID from the repository.
+         * @param id Id of the entity to remove.
+         * @return True if the entity was removed, false otherwise.
+         */
+        def removeClassCustomizationById(id: String): Boolean
+
+        /**
+         * Removes an entity with the specified ID from the repository.
+         * @param id Id of the entity to remove.
+         * @return True if the entity was removed, false otherwise.
+         */
+        def removePropertyCustomizationById(id: String): Boolean
     }
 
     /**

@@ -3234,6 +3234,24 @@ input[type="submit"].btn.btn-mini {
   margin-top: 9px;
 }
 
+.nav-deep {
+  margin-bottom: 18px;
+  margin-left: 0;
+  list-style: none;
+}
+
+.nav-deep > li {
+  display: block;
+}
+
+.nav-deep > li > div > a:hover {
+  text-decoration: none;
+}
+
+.nav-deep > li:hover {
+  background-color: #eeeeee;
+}
+
 .nav-list {
   padding-right: 15px;
   padding-left: 15px;
@@ -3262,14 +3280,21 @@ input[type="submit"].btn.btn-mini {
   margin-right: 2px;
 }
 
-.nav-list .divider {
-  *width: 100%;
-  height: 1px;
-  margin: 8px 1px;
-  *margin: -5px 0 5px;
-  overflow: hidden;
-  background-color: #e5e5e5;
-  border-bottom: 1px solid #ffffff;
+.nav-deep-list {
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-bottom: 0;
+}
+
+.nav-deep-list > li,
+.nav-deep-list .nav-header {
+  margin-right: -15px;
+  margin-left: -15px;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.nav-deep-list > li {
+  padding: 3px 15px;
 }
 
 .nav-tabs,

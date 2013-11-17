@@ -95,7 +95,8 @@ class CustomizationByOwnership(
             owner)(successCallback)(failCallback)
     }
 
-    @async def createClassCustomization(customizationID: String, classURI: String, propertiesURIs: collection.immutable.Seq[String], owner: User = null)
+    @async def createClassCustomization(customizationID: String, classURI: String,
+        propertiesURIs: collection.immutable.Seq[String], owner: User = null)
         (successCallback: cz.payola.common.entities.settings.UserCustomization => Unit)
         (failCallback: Throwable => Unit)
     {
@@ -114,6 +115,26 @@ class CustomizationByOwnership(
             successCallback(optCustomization.get)
         }
     }
+
+    @async def deleteClassCustomization(customizationID: String, classId: String, owner: User = null)
+        (successCallback: cz.payola.common.entities.settings.UserCustomization => Unit)
+        (failCallback: Throwable => Unit)
+    {
+        val customOpt = getUserCustomizationForIDWithSecurityChecks(customizationID, owner, failCallback)
+        customOpt.foreach { customization =>
+            if(customization.classCustomizations.exists(_.id == classId)) {
+                Payola.model.userCustomizationModel.removeClassCustomization(classId)
+                successCallback(
+                    getUserCustomizationForIDWithSecurityChecks(customizationID, owner, failCallback).get) //get the updated customization
+            } else {
+                failCallback(new RpcException("No such class customization found!"))
+            }
+        }
+
+        failCallback(new RpcException("No such customization found!"))
+    }
+
+
 
     @async def createConditionalCustomization(customizationID: String, classURI: String, owner: User = null)
         (successCallback: cz.payola.common.entities.settings.UserCustomization => Unit)
@@ -141,9 +162,28 @@ class CustomizationByOwnership(
                 classCustomizationOpt.get.appendPropertyCustomization(propertyCustomization)
 
                 Payola.model.userCustomizationModel.persistUserDefined(optCustomization.get) //add the extended userCustomization
-                successCallback(optCustomization.get)
+                successCallback(Payola.model.userCustomizationModel.getAccessibleCustomizationsToUserById(Some(owner), customizationID).get)
             }
         }
+    }
+
+    @async def deletePropertyCustomization(customizationID: String, propertyId: String, owner: User = null)
+        (successCallback: cz.payola.common.entities.settings.UserCustomization => Unit)
+        (failCallback: Throwable => Unit)
+    {
+        val customOpt = getUserCustomizationForIDWithSecurityChecks(customizationID, owner, failCallback)
+        customOpt.foreach { customization =>
+
+            if(customization.classCustomizations.exists(_.propertyCustomizations.exists(_.id == propertyId))) {
+                Payola.model.userCustomizationModel.removePropertyCustomization(propertyId)
+                successCallback(
+                    getUserCustomizationForIDWithSecurityChecks(customizationID, owner, failCallback).get) //get the updated customization
+            } else {
+                failCallback(new RpcException("No such property customization found!"))
+            }
+        }
+
+        failCallback(new RpcException("No such customization found!"))
     }
 
     @async @secured def getOntologyCustomizationByID(id: String, user: User = null)
@@ -324,7 +364,7 @@ class CustomizationByOwnership(
                 } else { None }
 
             if (classCustomizationOntoOpt.isEmpty && classCustomizationUserOpt.isEmpty) {
-                failCallback(new RpcException("Class cannot be found in this ontology customization!"))
+                failCallback(new RpcException("Class cannot be found in any ontology/user customization!"))
                 None
             } else {
                 if(classCustomizationOntoOpt.isDefined) {

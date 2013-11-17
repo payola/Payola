@@ -87,6 +87,18 @@ trait CustomizationRepositoryComponent extends TableRepositoryComponent
                 persist(PropertyCustomization(propertyCustomization), schema.propertyCustomizations)
             }
 
+            def removeClassCustomizationById(id: String) = {
+                wrapInTransaction {
+                    schema.classCustomizations.deleteWhere(e => id === e.id) == 1
+                }
+            }
+
+            def removePropertyCustomizationById(id: String) = {
+                wrapInTransaction {
+                    schema.propertyCustomizations.deleteWhere(e => id === e.id) == 1
+                }
+            }
+
             protected def getSelectQuery(entityFilter: (Customization) => LogicalBoolean) = {
 
                 join(table, schema.users.leftOuter, schema.classCustomizations.leftOuter,
