@@ -1,0 +1,1 @@
+alter table classcustomizations add column _ordernum integer default 0 not null
