@@ -22,7 +22,7 @@ import cz.payola.common.PayolaException
         successCallback(result)
     }
 
-    @async def paginate(page: Int, allowedLinesOnPage: Int, evaluationId: String, user: User = null)
+    @async def paginate(page: Int, allowedLinesOnPage: Int, evaluationId: String, user: Option[User] = None)
         (successCallback: (Graph => Unit))(failCallback: (Throwable => Unit)) {
 
         val pageNumber = if(page > -1) page else tripleTableDefaultPage
