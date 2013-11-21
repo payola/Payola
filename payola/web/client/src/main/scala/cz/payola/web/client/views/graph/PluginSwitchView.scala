@@ -41,6 +41,11 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
     val userCustomizationSelected = new SimpleUnitEvent[UserCustomization]
 
     /**
+     * Event triggered when user customization is cleared (switched to "do not use any customization")
+     */
+    val userCustomizationCleared = new SimpleUnitEvent[UserCustomization]
+
+    /**
      * Event triggered when user customization is created.
      */
     val userCustomizationCreateClicked = new SimpleUnitEvent[this.type]
@@ -177,6 +182,9 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
         val separator1 = if ((ownedOnto.nonEmpty || ownedUser.nonEmpty) && (othersOnto.nonEmpty || othersUser.nonEmpty))
             List(new ListItem(Nil, "divider")) else Nil
 
+        val emptyCustomization = List(createEmptyCustomization())
+        val separator2 = List(new ListItem(Nil, "divider"))
+
         // The create new ontology based button.
         val createButtonByOntologyCustomization =
             new Anchor(List(new Icon(Icon.plus), new Text("Create New Ontology Customization")))
@@ -204,7 +212,8 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
             } else { Nil }
 
         // All the items merged together.
-        val allItems = ownedOnto ++ ownedUser ++ separator1 ++ othersOnto ++ othersUser ++ createNewCustomization
+        val allItems = ownedOnto ++ ownedUser ++ separator1 ++ othersOnto ++ othersUser ++ separator2 ++
+            emptyCustomization ++ createNewCustomization
         val items = if (allItems.nonEmpty) {
             allItems
         } else {
@@ -278,6 +287,19 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
 
         editButton.mouseClicked += { e =>
             userCustomizationEditClicked.triggerDirectly(customization)
+            false
+        }
+
+        listItem
+    }
+
+    private def createEmptyCustomization(): ListItem = { //TODO
+        val anchor = new Anchor(List(new Text("Disable customization")))
+        val listItem = new ListItem(List(anchor))
+
+        anchor.mouseClicked += { e =>
+            userCustomizationCleared.triggerDirectly(null)
+            customizationsButton.setActiveItem(listItem)
             false
         }
 

@@ -6,7 +6,7 @@ import cz.payola.web.client.views.elements.form.Label
 import cz.payola.web.client.views.ComposedView
 import cz.payola.web.client.models.PrefixApplier
 
-class AppendToUserCustButton (var availableValues: Seq[String], title: String, listTitle: String, cssClass: String = "",
+class AppendToUserCustButton (var availableValues: Seq[String], title: String, title2: String, listTitle: String, cssClass: String = "",
     onAppendFunction: (String) => Boolean, prefixApplier: PrefixApplier, customLabel: String = "Custom:",
     leftLocation: Int = -419, topLocation: Int = 0, width: Int = 740, height: Int = 340) extends ComposedView
 {
@@ -15,7 +15,7 @@ class AppendToUserCustButton (var availableValues: Seq[String], title: String, l
 
     private val classDiv = new Div(Nil,"append-popup dropdown-menu")
 
-    val appendButton = new Button(new Text(title), cssClass)
+    val appendButton = new Button(new Text(title), cssClass).setAttribute("title", title2)
 
     classDiv.mouseClicked += { e =>
         closePopup()

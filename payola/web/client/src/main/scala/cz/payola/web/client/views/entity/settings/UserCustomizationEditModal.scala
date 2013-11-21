@@ -55,7 +55,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
     private var groupCustomizations = userCustomization.classCustomizations.filter(e =>
         e.isGroupCustomization).map{ userClassCust => userClassCust.asInstanceOf[ClassCustomization] }
 
-    private def propertiesContainer = classCustomizations.find(_.uri == "properties")
+    private def propertiesContainer = userCustomization.classCustomizations.find(_.uri == "properties")
     
     private var propertyCustomizations = if(propertiesContainer.isDefined) {
         propertiesContainer.get.propertyCustomizations
@@ -115,7 +115,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
                 case _ => false
             }
         }.map{vertex => vertex.asInstanceOf[IdentifiedVertex].uri},
-        "Class", "Vertices available in the current graph: ", "", onAppendClass, prefixApplier)
+        "Node", "description TODO", "Nodes available in the current graph: ", "", onAppendClass, prefixApplier)
 
     appendClassButton.appendButton.mouseClicked += { e =>
         appendClassButton.availableValues = currentGraphVertices.filter{ vertex =>
@@ -131,7 +131,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
     val appendGroupClassButton = new AppendToUserCustButton(
         currentGraphGroups.filter{ group =>
             group.getName != null && group.getName != "" && !groupCustomizations.exists(_.uri == group.getName) }.map(_.getName),
-        "Group", "Groups available in current graph: ", "", onAppendGroup, prefixApplier, "Custom group name")
+        "Group", "TODO", "Groups available in current graph: ", "", onAppendGroup, prefixApplier, "Custom group name")
 
     appendGroupClassButton.appendButton.mouseClicked += { e =>
         appendGroupClassButton.availableValues = currentGraphGroups.filter{ group => group.getName != null && group.getName != ""
@@ -141,7 +141,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
     }
 
     val appendPropertyButton = new AppendToUserCustButton(classCustomizations.map(_.uri),
-        "Property", "Attributes available in the current graph: ", "", onAppendProperty, prefixApplier)
+        "Edge", "TODO", "Edges available in the current graph: ", "", onAppendProperty, prefixApplier)  //TODO vyplnit TODO
 
     appendPropertyButton.appendButton.mouseClicked += { e =>
         val availablePropertyURIs = currentGraphEdges.filter{ edge =>
@@ -156,7 +156,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
     }
 
     val appendConditionalClassButton = new AppendToUserCustButton(classCustomizations.map(_.uri),
-        "Global Property", "Attributes available in the current graph: ", "", onAppendConditionalClass, prefixApplier)
+        "Node based on edge", "TODO", "Edges available in the current graph: ", "", onAppendConditionalClass, prefixApplier)
 
     appendConditionalClassButton.appendButton.mouseClicked += { e =>
         val availablePropertyURIs = currentGraphEdges.filter{ edge =>
@@ -191,7 +191,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
     }
 
     private var groupCustomizationListItems: Seq[ButtonedListItem] = groupCustomizations.map { customization =>
-        val a = new Anchor(List(new Icon(Icon.tag), new Text(uriToName(customization.uri))))
+        val a = new Anchor(List(new Icon(Icon.ccShare), new Text(uriToName(customization.getUri))))
         val listItem = new ButtonedListItem(Icon.remove, List(a))
         a.mouseClicked += { e =>
             onListItemSelected(customization, listItem, renderGroupCustomizationViews)
@@ -211,7 +211,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
     }
 
     private var conditionalClassCustomizationListItems: Seq[ButtonedListItem] = conditionalClassCustomizations.map { customization =>
-        val a = new Anchor(List(new Icon(Icon.tag), new Text(uriToName(customization.uri))))
+        val a = new Anchor(List(new Icon(Icon.tag), new Text(uriToName(customization.getUri))))
         val listItem = new ButtonedListItem(Icon.remove, List(a)).setAttribute("orderNumber", ""+customization.orderNumber)
         a.mouseClicked += { e =>
             onConditionalListItemSelected(customization, listItem, renderConditionalClassCustomizationViews)
@@ -231,7 +231,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
     }
 
     private var propertyCustomizationsListItems: Seq[ButtonedListItem] = propertyCustomizations.map { customization =>
-        val a = new Anchor(List(new Icon(Icon.tag), new Text(uriToName(customization.uri))))
+        val a = new Anchor(List(new Icon(Icon.list), new Text(uriToName(customization.uri))))
         val listItem = new ButtonedListItem(Icon.remove, List(a))
         a.mouseClicked += { e =>
             onListItemSelected(customization, listItem, renderPropertyCustomizationViews)
@@ -436,7 +436,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
     }
 
     private def renderDefinedConditionalClass(definedClass: ClassCustomization) {
-        val a = new Anchor(List(new Icon(Icon.tag), new Text(uriToName(definedClass.uri))))
+        val a = new Anchor(List(new Icon(Icon.tag), new Text(uriToName(definedClass.getUri))))
         val classListItem = new ButtonedListItem(Icon.remove, List(a)).setAttribute("orderNumber", ""+definedClass.orderNumber)
         a.mouseClicked += { e =>
             onListItemSelected(definedClass, classListItem, renderConditionalClassCustomizationViews)
@@ -459,7 +459,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
     }
 
     private def renderDefinedGroup(definedGroup: ClassCustomization) {
-        val a = new Anchor(List(new Icon(Icon.tag), new Text(uriToName(definedGroup.uri))))
+        val a = new Anchor(List(new Icon(Icon.ccShare), new Text(uriToName(definedGroup.getUri))))
         val groupListItem = new ButtonedListItem(Icon.remove, List(a))
         a.mouseClicked += { e =>
             onListItemSelected(definedGroup, groupListItem, renderGroupCustomizationViews)
@@ -485,7 +485,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
         classCustomizations = classCustomizations.filter(_.uri != updatedClass.uri) // remove the old classCustomization (without the new property)
         classCustomizations ++= List(updatedClass) //add the updated classCustomization (with the new property)
 
-        val a = new Anchor(List(new Icon(Icon.tag), new Text(uriToName(newProperty.uri))))
+        val a = new Anchor(List(new Icon(Icon.list), new Text(uriToName(newProperty.uri))))
         val propertyListItem = new ButtonedListItem(Icon.remove, List(a))
         a.mouseClicked += { e =>
             onListItemSelected(newProperty, propertyListItem, renderPropertyCustomizationViews)

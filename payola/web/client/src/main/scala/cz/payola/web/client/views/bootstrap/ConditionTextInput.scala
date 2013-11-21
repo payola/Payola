@@ -23,7 +23,7 @@ class ConditionTextInput(availableValues: Seq[String], name: String, initialValu
     private val textInput = new TextInput(name, initialValue)
 
     private val setButton = new AppendToUserCustButton(availableValues, "Select",
-        "Values available in current graph: ", "", setValue, prefixApplier, "Custom:", 61, 81, 765, 340)
+        "Values available in current graph: ", "", "", setValue, prefixApplier, "Custom:", 61, 81, 765, 340)
 
     setButton.appendButton.mouseClicked += { e =>
         setButton.openPopup()

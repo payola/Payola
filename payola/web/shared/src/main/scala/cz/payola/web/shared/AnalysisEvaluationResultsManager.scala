@@ -15,7 +15,7 @@ import cz.payola.common.PayolaException
     private val tripleTableDefaultRecordsOnPage = 50
 
 
-    @async def getCompleteAnalysisResult(evaluationId: String, user: User = null)
+    @async def getCompleteAnalysisResult(evaluationId: String, user: Option[User] = None)
         (successCallback: (Option[Graph] => Unit))(failCallback: (Throwable => Unit)) {
 
         val result = Some(Payola.model.analysisResultStorageModel.getGraph(evaluationId))
