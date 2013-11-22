@@ -6,8 +6,8 @@ import scala.io.Source
 import java.io._
 import com.hp.hpl.jena.query._
 import com.hp.hpl.jena.rdf.model._
-import org.openjena.riot._
-import org.openjena.riot.lang._
+import org.apache.jena.riot._
+import org.apache.jena.riot.lang._
 import cz.payola.domain._
 import cz.payola.common.rdf._
 
@@ -25,26 +25,16 @@ object Graph
      * @return A new graph instance.
      */
     def apply(representation: RdfRepresentation.Type, data: String): Graph = {
-        val dataInputStream = new ByteArrayInputStream(data.getBytes("UTF-8"))
-        val jenaLanguage = representation match {
-            case RdfRepresentation.RdfXml => Lang.RDFXML
-            case RdfRepresentation.Turtle => Lang.TURTLE
-            case RdfRepresentation.Trig => Lang.TRIG
-        }
+        rdf2Jena(representation, data).map(g => Graph(ModelFactory.createModelForGraph(g))).fold(Graph.empty)(_ + _)
+    }
 
-        val jenaGraphs = representation match {
-            case RdfRepresentation.Trig => {
-                val dataSetGraph = DatasetFactory.createMem().asDatasetGraph()
-                RiotLoader.readQuads(dataInputStream, jenaLanguage, "", new SinkQuadsToDataset(dataSetGraph))
-                dataSetGraph.listGraphNodes().asScala.toList.map(dataSetGraph.getGraph(_))
-            }
-            case _ => {
-                val graph = com.hp.hpl.jena.graph.Factory.createDefaultGraph()
-                RiotLoader.readTriples(dataInputStream, jenaLanguage, "", new SinkTriplesToGraph(graph))
-                List(graph)
-            }
-        }
-        jenaGraphs.map(g => Graph(ModelFactory.createModelForGraph(g))).fold(Graph.empty)(_ + _)
+    def rdf2JenaDataset(representation: RdfRepresentation.Type, data: String): com.hp.hpl.jena.query.Dataset = {
+        val dataInputStream = new ByteArrayInputStream(data.getBytes("UTF-8"))
+        val jenaLanguage = representationToJenaLanguage(representation)
+
+        val dataSet = DatasetFactory.createMem()
+        RDFDataMgr.read(dataSet, dataInputStream, jenaLanguage)
+        dataSet
     }
 
     /**
@@ -86,6 +76,22 @@ object Graph
         }
 
         new Graph(literalVertices.toList ++ identifiedVertices.values, edges.toList, None)
+    }
+
+    private def rdf2Jena(representation: RdfRepresentation.Type, data: String): scala.collection.Seq[com.hp.hpl.jena.graph.Graph] = {
+        val dataSet = rdf2JenaDataset(representation, data)
+        val dataSetGraph = dataSet.asDatasetGraph()
+        List(dataSetGraph.getDefaultGraph()) ++ dataSetGraph.listGraphNodes().asScala.toList.map { n =>
+            dataSetGraph.getGraph(n)
+        }
+    }
+
+    private def representationToJenaLanguage(representation: RdfRepresentation.Type) = {
+        representation match {
+            case RdfRepresentation.RdfXml => Lang.RDFXML
+            case RdfRepresentation.Turtle => Lang.TURTLE
+            case RdfRepresentation.Trig => Lang.TRIG
+        }
     }
 }
 

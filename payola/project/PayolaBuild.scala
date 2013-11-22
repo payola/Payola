@@ -3,7 +3,7 @@ import mutable.ListBuffer
 import scala.io.Source
 import scala.tools.nsc.io
 import sbt._
-import Keys._
+import sbt.Keys._
 import PlayProject._
 import scala.util.matching.Regex
 
@@ -184,8 +184,8 @@ object PayolaBuild extends Build
         "domain", file("domain"),
         settings = payolaSettings ++ Seq(
             libraryDependencies ++= Seq(
-                "org.apache.jena" % "jena-core" % "2.7.0-incubating",
-                "org.apache.jena" % "jena-arq" % "2.9.0-incubating",
+                "org.apache.jena" % "jena-core" % "2.11.0",
+                "org.apache.jena" % "jena-arq" % "2.11.0",
                 "org.apache.httpcomponents" % "httpclient" % "4.2.4",
                 "commons-io" % "commons-io" % "2.4"
             )
@@ -212,7 +212,12 @@ object PayolaBuild extends Build
     lazy val modelProject = Project(
         "model", file("model"),
         settings = payolaSettings ++ Seq(
-            libraryDependencies ++= Seq("org.apache.commons" % "commons-lang3" % "3.1")
+            libraryDependencies ++= Seq(
+                "org.apache.commons" % "commons-lang3" % "3.1",
+                "com.fasterxml.jackson.core" % "jackson-core" % "2.3.0-rc1",
+                "com.fasterxml.jackson.core" % "jackson-databind" % "2.3.0-rc1",
+                "com.fasterxml.jackson.core" % "jackson-annotations" % "2.3.0-rc1"
+            )
         )
     ).dependsOn(
         commonProject, domainProject, dataProject

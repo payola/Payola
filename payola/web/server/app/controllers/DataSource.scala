@@ -1,6 +1,7 @@
 package controllers
 
 import helpers.Secured
+import play.api.mvc._
 import cz.payola.domain.entities._
 import cz.payola.web.shared.Payola
 import cz.payola.domain.entities.plugins.concrete.DataFetcher
@@ -194,5 +195,9 @@ object DataSource extends PayolaController with Secured
             List()
         }
         Ok(views.html.datasource.list(user, analyses, page))
+    }
+
+    def getDSD(evaluationId: String) = Action {
+        Ok(Payola.model.dataCubeModel.queryForCubeDSD(evaluationId, "JSON-LD"))
     }
 }

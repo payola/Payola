@@ -6,17 +6,30 @@ import cz.payola.domain.net.Downloader
 
 class SparqlEndpoint(val endpointURL: String)
 {
-    def executeQuery(query: String): Graph = {
-        val queryUrl = endpointURL + "?query=" + java.net.URLEncoder.encode(query, "UTF-8")
+    def queryUrl(query: String) = endpointURL + "?query=" + java.net.URLEncoder.encode(query, "UTF-8")
+
+    private def _executeQuery[B](query: String)(inflector: ((RdfRepresentation.Type, String) => B)): B = {
         QueryFactory.create(query).getQueryType match {
             case Query.QueryTypeConstruct => {
-                Graph(RdfRepresentation.RdfXml, new Downloader(queryUrl, "application/rdf+xml").result)
+                inflector(RdfRepresentation.RdfXml, new Downloader(queryUrl(query), "application/rdf+xml").result)
             }
             case Query.QueryTypeSelect => {
-                Graph(RdfRepresentation.Turtle, new Downloader(queryUrl, "text/rdf+n3").result)
+                inflector(RdfRepresentation.Turtle, new Downloader(queryUrl(query), "text/rdf+n3").result)
             }
             case _ => throw new DomainException(
                 "Unsupported query type. The only supported query types are CONSTRUCT and SELECT.")
+        }
+    }
+
+    def executeQuery(query: String): Graph = {
+        _executeQuery[Graph](query){ (representation, data) =>
+            Graph(representation, data)
+        }
+    }
+
+    def executeQueryJena(query: String): com.hp.hpl.jena.query.Dataset = {
+        _executeQuery[com.hp.hpl.jena.query.Dataset](query){ (representation, data) =>
+            Graph.rdf2JenaDataset(representation, data)
         }
     }
 }

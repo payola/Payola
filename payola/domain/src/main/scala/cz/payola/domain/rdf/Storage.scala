@@ -69,6 +69,8 @@ trait Storage
       */
     def executeSPARQLQuery(query: String): Graph
 
+    def executeSPARQLQueryJena(query: String): com.hp.hpl.jena.query.Dataset
+
     /**
       * Executes the specified SPARQL query over data in the specifed group.
       * @param query The query to execute.
@@ -79,5 +81,11 @@ trait Storage
         val sparqlQuery = QueryFactory.create(query)
         sparqlQuery.addGraphURI(groupURI)
         executeSPARQLQuery(sparqlQuery.toString)
+    }
+
+    def executeSPARQLQueryJena(query: String, groupURI: String): com.hp.hpl.jena.query.Dataset = {
+        val sparqlQuery = QueryFactory.create(query)
+        sparqlQuery.addGraphURI(groupURI)
+        executeSPARQLQueryJena(sparqlQuery.toString)
     }
 }
