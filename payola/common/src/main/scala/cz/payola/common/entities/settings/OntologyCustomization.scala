@@ -7,7 +7,7 @@ import scala.collection.immutable
 /**
   * Customization of a graph appearance based on an ontology.
   */
-trait OntologyCustomization extends DefinedCustomization
+trait OntologyCustomization extends DefinedCustomization with OptionallyOwnedEntity with ShareableEntity
 {
     override def classNameText = "ontology customization"
 

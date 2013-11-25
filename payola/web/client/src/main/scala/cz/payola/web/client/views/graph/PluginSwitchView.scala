@@ -182,8 +182,10 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
         val separator1 = if ((ownedOnto.nonEmpty || ownedUser.nonEmpty) && (othersOnto.nonEmpty || othersUser.nonEmpty))
             List(new ListItem(Nil, "divider")) else Nil
 
-        val emptyCustomization = List(createEmptyCustomization())
-        val separator2 = List(new ListItem(Nil, "divider"))
+        val emptyCustomization =
+            if (ownedOnto.nonEmpty || ownedUser.nonEmpty || othersOnto.nonEmpty || othersUser.nonEmpty)
+                List(new ListItem(Nil, "divider"), createEmptyCustomization())
+            else Nil
 
         // The create new ontology based button.
         val createButtonByOntologyCustomization =
@@ -212,7 +214,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
             } else { Nil }
 
         // All the items merged together.
-        val allItems = ownedOnto ++ ownedUser ++ separator1 ++ othersOnto ++ othersUser ++ separator2 ++
+        val allItems = ownedOnto ++ ownedUser ++ separator1 ++ othersOnto ++ othersUser ++
             emptyCustomization ++ createNewCustomization
         val items = if (allItems.nonEmpty) {
             allItems
@@ -321,18 +323,21 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
 
             currentPlugin = plugin
             currentPlugin.setEvaluationId(None)
-            currentPlugin.render(pluginSpace.htmlElement)
-            currentPlugin.renderControls(toolbar.htmlElement)
+
             //the default visualization is TripleTableView, which has implemented a server-side caching, support for other visualizations will be added with transformation layer
             //now the whole graph has to fetched, this will be taken care of in transformation layer in next cache release iteration
             if(evaluationId.isDefined) {
                 AnalysisEvaluationResultsManager.getCompleteAnalysisResult(evaluationId.get) { g =>
                     currentGraph = g
                     update(g, currentCustomization)
+                    currentPlugin.render(pluginSpace.htmlElement)
+                    currentPlugin.renderControls(toolbar.htmlElement)
                     currentPlugin.drawGraph()
                 } { err => }
             } else {
                 update(currentGraph, currentCustomization)
+                currentPlugin.render(pluginSpace.htmlElement)
+                currentPlugin.renderControls(toolbar.htmlElement)
                 currentPlugin.drawGraph()
             }
         }

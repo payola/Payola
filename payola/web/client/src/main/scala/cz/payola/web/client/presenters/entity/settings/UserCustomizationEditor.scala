@@ -13,6 +13,7 @@ import cz.payola.web.shared.managers.CustomizationManager
 import cz.payola.common.rdf.Graph
 import cz.payola.web.client.views.graph.visual.graph.GraphView
 import cz.payola.web.client.views.elements.lists.ListItem
+import cz.payola.web.client.presenters.entity.ShareButtonPresenter
 
 class UserCustomizationEditor (currentGraph: Option[GraphView], userCustomization: UserCustomization,
     onClose: () => Unit, prefixApplier: PrefixApplier) extends Presenter
@@ -21,7 +22,16 @@ class UserCustomizationEditor (currentGraph: Option[GraphView], userCustomizatio
 
     private val view = new UserCustomizationEditModal(currentGraph, userCustomization, onClose, prefixApplier)
 
+    private val shareButtonPresenter = new ShareButtonPresenter(
+        view.shareButtonViewSpace.htmlElement,
+        "Customization", userCustomization.id, userCustomization.name, userCustomization.isPublic,
+        Some(view)
+    )
+
     def initialize() {
+        shareButtonPresenter.publicityChanged += { e => userCustomization.isPublic = e.target }
+        shareButtonPresenter.initialize()
+
         view.userCustomizationName.delayedChanged += onUserCustomizationNameChanged _
         view.deleteButton.mouseClicked += onDeleteButtonClicked _
         view.classFillColorChanged += onClassFillColorChanged _

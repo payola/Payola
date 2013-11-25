@@ -576,14 +576,14 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
                     edge.hide()
                     edge.destinationView.hide()
                 } else {
-                    edge.show(_parentHtmlElement.getOrElse(document.body))
-                    edge.destinationView.show(_parentHtmlElement.getOrElse(document.body))
+                    edge.show()
+                    edge.destinationView.show()
                 }
             }
 
             g.getAllEdges.foreach{ edge =>
                 if(!edge.originView.isHidden && !edge.destinationView.isHidden) {
-                    edge.show(_parentHtmlElement.getOrElse(document.body))
+                    edge.show()
                 }
             }
         }

@@ -7,27 +7,28 @@ import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.ComposedView
 import scala.collection.mutable.ListBuffer
 
-class ButtonedListItem(icon: String, content: Seq[View], cssClass: String = "") extends ComposedView {
+class ButtonedListItem(icon: String, content: Seq[View], buttonEnabled: Boolean = true, cssClass: String = "") extends ComposedView {
 
     val buttonEvent = new SimpleUnitEvent[this.type]
+    private val button = new Anchor(List(new Icon(icon)), "#", "pull-right")
 
     val extendedContent = new ListBuffer[View]()
     extendedContent ++= content
-    extendedContent += button
+    if(buttonEnabled) { extendedContent += button }
 
     val listItem = new ListItem(List(new Div(extendedContent.toList)), cssClass)
 
-    listItem.mouseOut += { e =>
-        button.hide()
-        false
-    }
+    if(buttonEnabled) {
+        listItem.mouseOut += { e =>
+            button.hide()
+            false
+        }
 
-    listItem.mouseMoved += { e =>
-        button.show("")
-        false
+        listItem.mouseMoved += { e =>
+            button.show("")
+            false
+        }
     }
-
-    private val button = new Anchor(List(new Icon(icon)))
 
     button.hide()
 
@@ -42,8 +43,6 @@ class ButtonedListItem(icon: String, content: Seq[View], cssClass: String = "") 
         listItem.setAttribute(name, value)
         this
     }
-
-    //def createSubViews = List(listItem)
 
     def createSubViews = List(listItem)
 

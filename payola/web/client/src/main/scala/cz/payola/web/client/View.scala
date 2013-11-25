@@ -23,7 +23,7 @@ object View
             message: self.messageToHtml(message),
             fadeIn: 100,
             css: {
-                padding: 20,
+                padding: 0,
                 border: '0'
             },
             overlayCSS: {

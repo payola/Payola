@@ -1,11 +1,12 @@
 package cz.payola.common.entities.settings
 
 import scala.collection.immutable
+import cz.payola.common.entities._
 
 /**
 * Customization of a graph appearance based on an user configuration.
 */
-trait UserCustomization extends DefinedCustomization
+trait UserCustomization extends DefinedCustomization with OptionallyOwnedEntity with ShareableEntity
 {
     override def classNameText = "user customization"
 

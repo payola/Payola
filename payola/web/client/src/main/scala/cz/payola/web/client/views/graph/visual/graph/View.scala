@@ -40,7 +40,7 @@ trait View[A]
         hidden = true
     }
 
-    def show(parent: html.Element) {
+    def show() {
         hidden = false
     }
 
