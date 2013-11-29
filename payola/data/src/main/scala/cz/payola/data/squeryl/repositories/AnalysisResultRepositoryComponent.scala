@@ -44,7 +44,7 @@ trait AnalysisResultRepositoryComponent extends TableRepositoryComponent {
             wrapInTransaction{
                 table.update(anRes =>
                     where(anRes.evaluationId === evaluationId)
-                    set(anRes.touched := new java.util.Date(System.currentTimeMillis))
+                    set(anRes.touched := new java.sql.Timestamp(System.currentTimeMillis))
                 )
             }
         }

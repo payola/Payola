@@ -16,9 +16,7 @@ import cz.payola.web.client.views.elements.lists.ListItem
 import cz.payola.web.client.views.graph.sigma.GraphSigmaPluginView
 import cz.payola.web.client.views.graph.datacube._
 import cz.payola.web.client.models.PrefixApplier
-import scala.Some
 import cz.payola.web.shared.AnalysisEvaluationResultsManager
-import scala.Some
 
 class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with ComposedView
 {
@@ -311,6 +309,9 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
                     update(g, currentCustomization)
                     currentPlugin.drawGraph()
                 } { err => }
+            } else {
+                update(currentGraph, currentCustomization)
+                currentPlugin.drawGraph()
             }
         }
     }

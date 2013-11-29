@@ -10,17 +10,16 @@ import cz.payola.web.client.models._
 import cz.payola.common.ValidationException
 import cz.payola.web.client.views.bootstrap.modals._
 import cz.payola.web.shared.managers.CustomizationManager
-import scala.Some
 import cz.payola.common.rdf.Graph
 import cz.payola.web.client.views.graph.visual.graph.GraphView
-import scala.Some
-import scala.Some
+import cz.payola.web.client.views.elements.lists.ListItem
 
-class UserCustomizationEditor (currentGraph: Option[GraphView], userCustomization: UserCustomization, onClose: () => Unit) extends Presenter
+class UserCustomizationEditor (currentGraph: Option[GraphView], userCustomization: UserCustomization,
+    onClose: () => Unit, prefixApplier: PrefixApplier) extends Presenter
 {
     val customizationChanged = new SimpleUnitEvent[DefinedCustomizationEventArgs]
 
-    private val view = new UserCustomizationEditModal(currentGraph, userCustomization, onClose)
+    private val view = new UserCustomizationEditModal(currentGraph, userCustomization, onClose, prefixApplier)
 
     def initialize() {
         view.userCustomizationName.delayedChanged += onUserCustomizationNameChanged _
@@ -32,6 +31,7 @@ class UserCustomizationEditor (currentGraph: Option[GraphView], userCustomizatio
         view.classConditionChanged += onClassConditionChanged _
         view.propertyStrokeColorChanged += onPropertyStrokeColorChanged _
         view.propertyStrokeWidthDelayedChanged += onPropertyStrokeWidthChanged _
+        view.classConditionalOrderChanged += onClassOrderChanged _
 
         view.customizationChanged += { e =>
             customizationChanged.triggerDirectly(new DefinedCustomizationEventArgs(e.target))
@@ -111,6 +111,14 @@ class UserCustomizationEditor (currentGraph: Option[GraphView], userCustomizatio
             e.classCustomization.conditionalValue, e.newValue){
             () => successHandler(e, () => e.classCustomization.conditionalValue = e.newValue)
         }(failHandler(_, e.target))
+    }
+
+    private def onClassOrderChanged(e: ClassCustomizationEventArgs[_]) {
+        CustomizationManager.setClassOrder(userCustomization.id, e.classCustomization.uri,
+            e.classCustomization.conditionalValue, e.newValue){
+            () => e.classCustomization.orderNumber = e.newValue.toInt
+        }{ t => view.destroy()
+            fatalErrorHandler(t)}
     }
 
     private def onPropertyStrokeColorChanged(e: PropertyCustomizationEventArgs[InputControl[_]]) {

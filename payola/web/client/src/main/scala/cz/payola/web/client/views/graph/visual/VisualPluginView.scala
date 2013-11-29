@@ -580,6 +580,12 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
                     edge.destinationView.show(_parentHtmlElement.getOrElse(document.body))
                 }
             }
+
+            g.getAllEdges.foreach{ edge =>
+                if(!edge.originView.isHidden && !edge.destinationView.isHidden) {
+                    edge.show(_parentHtmlElement.getOrElse(document.body))
+                }
+            }
         }
     }
 

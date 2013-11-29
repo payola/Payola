@@ -12,7 +12,8 @@ import cz.payola.common.rdf._
  * Graphical representation of textual data in the drawn graph.
  * @param labels that are visualized (by toString function of this object)
  */
-class InformationView(private var _labels: List[Any]) extends View[html.elements.CanvasRenderingContext2D] {
+class InformationView(private var _labels: List[Any])
+    extends View[html.elements.CanvasRenderingContext2D] {
 
     var colorBackground = new Color(255, 255, 255, 0.2)
 
@@ -88,18 +89,16 @@ object InformationView {
         prefixApplier: Option[PrefixApplier]): Option[InformationView] = {
 
         val uriOpt = getUri(modelObject)
-        val uri = if(uriOpt.isDefined && prefixApplier.isDefined) prefixApplier.get.applyPrefix(uriOpt.get) else modelObject.toString()
-        val processedLabels = processLabels(labels, uri, literals)
+        val uri = if(uriOpt.isDefined) uriOpt.get else modelObject.toString()
+        val processedLabels = processLabels(labels, uri, literals, prefixApplier)
         if(processedLabels.isEmpty) { None } else { Some(new InformationView(processedLabels)) }
     }
 
     def constructBySingle(modelObject: Any, prefixApplier: Option[PrefixApplier]): InformationView = {
         val uriOpt = getUri(modelObject)
-        if(uriOpt.isDefined && prefixApplier.isDefined) {
-            new InformationView(List(prefixApplier.get.applyPrefix(uriOpt.get)))
-        } else {
-            new InformationView(List(modelObject.toString()))
-        }
+        val uri = uriOpt.getOrElse(modelObject.toString())
+
+        new InformationView(List(prefixApplier.map(_.applyPrefix(uri)).getOrElse(uri)))
     }
 
     private def getUri(modelObject: Any): Option[String] = {
@@ -115,8 +114,8 @@ object InformationView {
         }
     }
 
-    private def processLabels(labels: List[LabelItem], modelObjectUri: String, literals: List[(String, Seq[String])]):
-        List[String] = {
+    private def processLabels(labels: List[LabelItem], modelObjectUri: String, literals: List[(String, Seq[String])],
+        prefixApplier: Option[PrefixApplier]): List[String] = {
 
         val acceptedLabels = labels.filter{ label =>
             label.accepted && (label.userDefined || label.value == "uri" || label.value == "groupName" || literals.exists{
@@ -128,7 +127,7 @@ object InformationView {
             if(label.userDefined) {
                 label.value
             } else if(label.value == "uri" || label.value == "groupName") {
-                modelObjectUri
+                prefixApplier.map{_.applyPrefix(modelObjectUri)}.getOrElse(modelObjectUri)
             } else {
                 literals.find{ literal => labels.contains(literal._1.substring(2)) }.get.toString
             }

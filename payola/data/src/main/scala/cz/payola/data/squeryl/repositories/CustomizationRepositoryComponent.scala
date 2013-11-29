@@ -46,13 +46,9 @@ trait CustomizationRepositoryComponent extends TableRepositoryComponent
                         o.classCustomizations.foreach { classCustomization =>
 
                             val inDbClassCustomization =
-                                if(inDbCustOpt.isDefined) {
-                                    inDbCustOpt.get.classCustomizations.find{
-                                        inDbClassCust => classCustomization.id == inDbClassCust.id
-                                    }
-                                } else {
-                                    None
-                                }
+                                inDbCustOpt.map(_.classCustomizations.find{ inDbClassCust =>
+                                    classCustomization.id == inDbClassCust.id
+                                }).getOrElse(None)
                             val persistedClassCustomization = if(inDbClassCustomization.isDefined) {
                                 ClassCustomization.convert(inDbClassCustomization).get
                             } else {
@@ -89,6 +85,18 @@ trait CustomizationRepositoryComponent extends TableRepositoryComponent
 
             def persistPropertyCustomization(propertyCustomization: AnyRef) {
                 persist(PropertyCustomization(propertyCustomization), schema.propertyCustomizations)
+            }
+
+            def removeClassCustomizationById(id: String) = {
+                wrapInTransaction {
+                    schema.classCustomizations.deleteWhere(e => id === e.id) == 1
+                }
+            }
+
+            def removePropertyCustomizationById(id: String) = {
+                wrapInTransaction {
+                    schema.propertyCustomizations.deleteWhere(e => id === e.id) == 1
+                }
             }
 
             protected def getSelectQuery(entityFilter: (Customization) => LogicalBoolean) = {

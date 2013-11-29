@@ -6,7 +6,6 @@ import cz.payola.domain.rdf.RdfRepresentation
 import cz.payola.common.rdf._
 import cz.payola.domain.entities.AnalysisResult
 import cz.payola.data.DataContextComponent
-import scala.Some
 import scala.collection._
 
 trait AnalysisResultStorageModelComponent
@@ -31,7 +30,7 @@ trait AnalysisResultStorageModelComponent
                 //store control in DB
                 analysisResultRepository.storeResult(new AnalysisResult(
                     analysisId, user, evaluationId, persist, graph.vertices.size,
-                    new java.util.Date(System.currentTimeMillis)))
+                    new java.sql.Timestamp(System.currentTimeMillis)))
 
                 val uri = constructUri(evaluationId)
                 val serializedGraph = domainGraph.toStringRepresentation(RdfRepresentation.RdfXml)

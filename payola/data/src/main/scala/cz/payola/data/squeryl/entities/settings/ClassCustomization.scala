@@ -17,7 +17,7 @@ object ClassCustomization extends EntityConverter[ClassCustomization]
             case c: cz.payola.common.entities.settings.ClassCustomization => {
                 val customizations = c.propertyCustomizations.map(PropertyCustomization(_))
                 Some(new ClassCustomization(c.id, c.uri, c.fillColor, c.radius, c.glyph, c.labels, c.conditionalValue,
-                    customizations))
+                    c.orderNumber, customizations))
             }
             case c: Some[_] =>
                 c.get match {
@@ -46,10 +46,10 @@ object ClassCustomization extends EntityConverter[ClassCustomization]
  */
 class ClassCustomization(
     override val id: String, uri: String, fillColor: String, radius: Int,
-    glyph: String, labels: String, conditionalValue: String, customizations: immutable.Seq[PropertyCustomization])
+    glyph: String, labels: String, conditionalValue: String, orderNum: Int, customizations: immutable.Seq[PropertyCustomization])
     (implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.settings.ClassCustomization(
-        uri, fillColor, radius, glyph, labels, conditionalValue, customizations)
+        uri, fillColor, radius, glyph, labels, conditionalValue, customizations, orderNum)
     with Entity
 {
     var customizationId: String = null

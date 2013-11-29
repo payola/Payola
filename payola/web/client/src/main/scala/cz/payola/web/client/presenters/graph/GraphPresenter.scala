@@ -125,7 +125,7 @@ class GraphPresenter(val viewElement: html.Element, prefixApplier: PrefixApplier
 
     private def editUserCustomization(customization: UserCustomization) {
         val editor = new UserCustomizationEditor(view.getCurrentGraphView, customization,
-            forceUpdateOntologyCustomizations)
+            forceUpdateOntologyCustomizations, prefixApplier)
         editor.customizationChanged += { e =>
             view.updateCustomization(Some(e.target.target))
         }

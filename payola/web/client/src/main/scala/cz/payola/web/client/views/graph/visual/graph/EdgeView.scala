@@ -32,7 +32,8 @@ class EdgeView(val edgeModel: Edge, private var _originView: VertexViewElement, 
     /**
      * Textual data that should be visualized with this edge ("over this edge").
      */
-    val information: InformationView = new InformationView(List(edgeModel))
+    val information: InformationView = new InformationView(
+        List(prefixApplier.map(_.applyPrefix(edgeModel.uri)).getOrElse(edgeModel.uri)))
 
     /**
      * Indicator of selection of this graphs element. Is used during color selection in draw function.

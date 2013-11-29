@@ -39,5 +39,12 @@ trait UserCustomizationModelComponent extends EntityModelComponent
             if(customization.isDefined) { customization.get.toUserCustomization() } else { None }
         }
 
+        def removeClassCustomization(id: String) {
+            customizationRepository.removeClassCustomizationById(id)
+        }
+
+        def removePropertyCustomization(id: String) {
+            customizationRepository.removePropertyCustomizationById(id)
+        }
     }
 }

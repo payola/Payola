@@ -4,8 +4,8 @@ import scala.collection.immutable
 import cz.payola.common.Entity
 
 /**
-  * Customization of appearance of a vertex with particular type.
-  */
+ * Customization of appearance of a vertex with particular type.
+ */
 trait ClassCustomization extends Entity
 {
     /** Type of the property customizations in the class customization. */
@@ -28,11 +28,25 @@ trait ClassCustomization extends Entity
 
     protected var _conditionalValue: String
 
+    protected var _orderNum: Int
+
+    //following vals should be in an object, but that creates a too deep call resulting a maximum callstack size exceeded JS error
+    private val acceptedLabelPrefix = "T"
+    private val notAcceptedLabelPrefix = "F"
+    private val userDefinedLabelPrefix = "U"
+    private val labelValuePrefixEnd = "-"
+    private val labelsDelimiter = ";"
+    private val userDefinedAcceptedLabelPrefix = acceptedLabelPrefix + userDefinedLabelPrefix + labelValuePrefixEnd
+    private val userDefinedIgnoredLabelPrefix = notAcceptedLabelPrefix + userDefinedLabelPrefix + labelValuePrefixEnd
+
+
     def isGroupCustomization = uri.startsWith("group_")
 
     def isConditionalCustomization = uri.startsWith("condition_")
 
-    def getUri = if(isGroupCustomization) { uri.substring(6) } else if(isConditionalCustomization) { uri.substring(10) } else { uri }
+    def getUri = if(isGroupCustomization) { uri.substring(6) }
+    else if(isConditionalCustomization) { uri.substring(10) }
+    else { uri }
 
     def hasId(id: String): Boolean = {
         uri == id
@@ -97,21 +111,27 @@ trait ClassCustomization extends Entity
         _conditionalValue = value
     }
 
+    def orderNumber = _orderNum
+
+    def orderNumber_=(value: Int) {
+        _orderNum = value
+    }
+
     /** Vertex labels splitted. */
     def labelsSplitted: List[LabelItem] = {
         if(_labels == null || _labels == "") {
             List[LabelItem]()
         } else {
-            val splitted = _labels.split(';').toList
+            val splitted = _labels.split(labelsDelimiter).toList
             splitted.map{ value => createLabelItem(value) }
         }
     }
 
     private def createLabelItem(value: String): LabelItem = {
-        val accepted = value.startsWith("T")
-        val userDefined = value.startsWith("FU-") || value.startsWith("TU-")
-        val text = if(value.startsWith("TU-") || value.startsWith("FU-")) {
-            value.substring(3)
+        val accepted = isLabelAccepted(value)
+        val userDefined = isLabelUserDefined(value)
+        val text = if(isLabelUserDefined(value)) {
+            value.substring(userDefinedAcceptedLabelPrefix.length)
         } else { //if(value.startsWith("T-") || value.startsWith("F-"))
             value.substring(2)
         }
@@ -119,6 +139,12 @@ trait ClassCustomization extends Entity
         new LabelItem(text, userDefined, accepted)
 
     }
+
+    private def isLabelUserDefined(value: String) =
+        value.startsWith(userDefinedAcceptedLabelPrefix) || value.startsWith(userDefinedIgnoredLabelPrefix)
+
+    private def isLabelAccepted(value: String) = value.startsWith(acceptedLabelPrefix)
+
 }
 
 class LabelItem(val value: String, val userDefined: Boolean, val accepted: Boolean) { }

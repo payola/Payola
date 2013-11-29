@@ -18,5 +18,5 @@ trait UserCustomization extends DefinedCustomization
     protected var _classCustomizations: immutable.Seq[ClassCustomizationType]
 
     /** Customizations of classes in the ontology. */
-    override def classCustomizations = _classCustomizations
+    override def classCustomizations = _classCustomizations.sortWith((a, b) => a.orderNumber < b.orderNumber)
 }

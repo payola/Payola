@@ -56,6 +56,10 @@ trait Seq extends Iterable
         append(x)
     }
 
+    def :+(x: Any) {
+        append(x)
+    }
+
     // From TraversableLike
     def reversed: Iterable = {
         val elems: Iterable = newInstance

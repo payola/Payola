@@ -4,9 +4,10 @@ import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.elements.form.fields.TextInput
 import cz.payola.web.client.views.elements.form.Label
 import cz.payola.web.client.views.ComposedView
+import cz.payola.web.client.models.PrefixApplier
 
 class AppendToUserCustButton (var availableValues: Seq[String], title: String, listTitle: String, cssClass: String = "",
-    onAppendFunction: (String) => Boolean, customLabel: String = "Custom:",
+    onAppendFunction: (String) => Boolean, prefixApplier: PrefixApplier, customLabel: String = "Custom:",
     leftLocation: Int = -419, topLocation: Int = 0, width: Int = 740, height: Int = 340) extends ComposedView
 {
 
@@ -76,7 +77,8 @@ class AppendToUserCustButton (var availableValues: Seq[String], title: String, l
     }
 
     private def uriToName(uri: String): String = {
+        val prefxedUri = prefixApplier.applyPrefix(uri)
         val nameParts = uri.split("#")
-        if (nameParts.length > 1) nameParts(1) else uri
+        if(prefxedUri == uri) {if (nameParts.length > 1) { nameParts(1) } else { uri } } else prefxedUri
     }
 }

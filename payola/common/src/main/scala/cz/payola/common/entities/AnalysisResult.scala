@@ -3,7 +3,6 @@ package cz.payola.common.entities
 import cz.payola.common.Entity
 
 trait AnalysisResult extends Entity with OptionallyOwnedEntity with NamedEntity {
-    protected var _touched: java.util.Date
     protected var verticescount: Int
     protected var analysisid: String
     protected var evaluationid: String
@@ -15,11 +14,9 @@ trait AnalysisResult extends Entity with OptionallyOwnedEntity with NamedEntity 
         persist = value
     }
 
-    def touched = _touched
+    def touched: java.util.Date = null
 
-    def touched_=(value: java.util.Date) {
-        _touched = value
-    }
+    def touched_=(value: java.util.Date) {}
 
     def persist = _persist
 
