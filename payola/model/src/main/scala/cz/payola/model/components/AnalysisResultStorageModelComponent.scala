@@ -63,8 +63,7 @@ trait AnalysisResultStorageModelComponent
                 val edgesByOrigin = new mutable.HashMap[String, mutable.HashMap[String, mutable.ListBuffer[Edge]]]
                 graph.edges.foreach { edge =>
                     //get or create grouping by origin vertex
-                    val edgesByEdgeType = edgesByOrigin.getOrElseUpdate(edge.origin.uri,
-                        new mutable.HashMap[String, mutable.ListBuffer[Edge]])
+                    val edgesByEdgeType = edgesByOrigin.getOrElseUpdate(edge.origin.uri, new mutable.HashMap[String, mutable.ListBuffer[Edge]])
                     //get or create grouping by edge and add edge
                     edgesByEdgeType.getOrElseUpdate(edge.uri, new mutable.ListBuffer[Edge]) += edge
                 }

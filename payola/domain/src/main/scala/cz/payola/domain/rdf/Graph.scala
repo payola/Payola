@@ -47,7 +47,7 @@ object Graph
         val edges = mutable.HashSet.empty[Edge]
         val identifiedVertices = mutable.HashMap.empty[String, IdentifiedVertex]
         def getIdentifiedVertex(node: RDFNode) = {
-            val uri = Option(node.asResource.getURI).getOrElse(node.toString)
+            val uri = Option(node.asResource.getURI).getOrElse("nodeId://blank/"+node.toString)
             identifiedVertices.getOrElseUpdate(uri, new IdentifiedVertex(uri))
         }
 

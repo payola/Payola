@@ -7,7 +7,7 @@ import cz.payola.web.shared.managers.ShareableEntityManager
 import cz.payola.common._
 
 @remote
-@secured object AnalysisRunner
+@secured object  AnalysisRunner
     extends ShareableEntityManager[Analysis, cz.payola.common.entities.Analysis](Payola.model.analysisModel)
 {
     @async def runAnalysisById(id: String, timeoutSeconds: Long, oldEvaluationId: String,
