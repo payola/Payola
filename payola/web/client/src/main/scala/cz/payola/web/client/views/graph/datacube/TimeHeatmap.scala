@@ -184,7 +184,7 @@ class TimeHeatmap(prefixApplier: Option[PrefixApplier] = None) extends PluginVie
                 false
             }
 
-            val map = new MapView(center, 3, "satellite", list, yearList, hashMap, mapPlaceholder.htmlElement)
+            val map = new HeatMapView(center, 3, "satellite", list, yearList, hashMap, mapPlaceholder.htmlElement)
 
             mapPlaceholder.removeAllChildNodes()
             wrap.render(mapPlaceholder.htmlElement)

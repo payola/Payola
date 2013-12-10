@@ -62,7 +62,8 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
         new ColumnChartPluginView(Some(prefixApplier)),
         new GraphSigmaPluginView(Some(prefixApplier)),
         new TimeHeatmap(Some(prefixApplier)), // [Jiri Helmich]
-        new Generic(Some(prefixApplier))  // [Jiri Helmich]
+        new Generic(Some(prefixApplier)),  // [Jiri Helmich]
+        new GoogleMap(Some(prefixApplier))
     )
 
     /**

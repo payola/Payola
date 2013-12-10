@@ -41,7 +41,10 @@ GET     /datasource/edit/:id        controllers.DataSource.edit(id)
 GET     /datasource/delete/:id      controllers.DataSource.delete(id)
 POST    /datasource/save/:id        controllers.DataSource.saveEdited(id)
 
-GET    /datasource/dsd/:evalid        controllers.DataSource.getDSD(evalid: String)
+GET    /datacube/:evaluationId/list-dsds              controllers.DataCube.findDataStructureDefinitions(evaluationId: String)
+GET    /datacube/:evaluationId/list-dimensions        controllers.DataCube.listDimensions(evaluationId: String, dsdUri: String)
+GET    /datacube/:evaluationId/list-measures          controllers.DataCube.listMeasures(evaluationId: String, dsdUri: String)
+GET    /datacube/:evaluationId/list-attributes        controllers.DataCube.listAttributes(evaluationId: String, dsdUri: String)
 
 GET     /virtuoso/add               controllers.PrivateDataStorage.add()
 POST     /virtuoso/upload/file           controllers.PrivateDataStorage.saveFromFile()

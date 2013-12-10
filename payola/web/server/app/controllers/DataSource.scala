@@ -196,8 +196,4 @@ object DataSource extends PayolaController with Secured
         }
         Ok(views.html.datasource.list(user, analyses, page))
     }
-
-    def getDSD(evaluationId: String) = Action {
-        Ok(Payola.model.dataCubeModel.queryForCubeDSD(evaluationId, "JSON-LD"))
-    }
 }
