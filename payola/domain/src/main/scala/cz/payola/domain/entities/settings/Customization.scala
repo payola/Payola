@@ -38,7 +38,9 @@ class Customization(
         if(isUserDefined)
             throw new UnsupportedOperationException("Can not cast User customization to Ontology customization.")
 
-        new OntologyCustomization(id, URLs, _name, _owner, _classCustomizations)
+        val result = new OntologyCustomization(id, URLs, _name, _owner, _classCustomizations)
+        result.isPublic = isPublic
+        result
     }
 
     def toOntologyCustomization(): Option[OntologyCustomization] = {
@@ -52,8 +54,9 @@ class Customization(
         if(!isUserDefined)
             throw new UnsupportedOperationException("Can not cast Ontology customization to User customization.")
 
-
-        new UserCustomization(id, URLs, _name, _owner, immutable.Seq(_classCustomizations: _*))
+        val result = new UserCustomization(id, URLs, _name, _owner, immutable.Seq(_classCustomizations: _*))
+        result.isPublic = isPublic
+        result
     }
 
 
@@ -70,8 +73,10 @@ object Customization
 {
     def convertToUserCustomization(customization: Customization): UserCustomization = {
 
-        new UserCustomization(customization.id, customization.URLs, customization.name, customization.owner,
+        val result = new UserCustomization(customization.id, customization.URLs, customization.name, customization.owner,
             immutable.Seq(customization.classCustomizations: _*))
+        result.isPublic = customization.isPublic
+        result
     }
 
 
@@ -84,8 +89,10 @@ object Customization
     }
 
     def convertToOntologyCustomization(customization: Customization): OntologyCustomization = {
-        new OntologyCustomization(customization.id, customization.URLs, customization.name,
+        val result = new OntologyCustomization(customization.id, customization.URLs, customization.name,
             customization.owner, customization.classCustomizations)
+        result.isPublic = customization.isPublic
+        result
     }
 
     def toOntologyCustomization(customization: Customization): Option[OntologyCustomization] = {

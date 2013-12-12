@@ -56,7 +56,8 @@ trait EntityModelComponent
             val owned = getOwnedByUser(user)
             val granted = getGrantedToUser(user, groupRepository.getAll())
 
-            (public ++ owned ++ granted).distinct.sortBy(_.name)
+            (public ++ owned ++ granted).foldLeft(Nil: List[A]) {(acc, next) =>
+                if (acc.exists(_.id == next.id)) acc else next :: acc }.reverse.sortBy(_.name)
         }
 
         def getAccessibleToUserById(user: Option[User], id: String): Option[A] = {

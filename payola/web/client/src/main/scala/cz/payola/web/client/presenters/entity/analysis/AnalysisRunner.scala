@@ -98,7 +98,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
                 true
             }
 
-            graphPresenter.view.setEvaluationId(getAnalysisEvaluationID)
+            graphPresenter.view.setEvaluationId(getAnalysisEvaluationID) //TODO 2/2 this disables cache
             graphPresenter.view.updateGraph(Some(evt.graph), true)
 
             view.tabs.showTab(1)
@@ -212,7 +212,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
     }
 
     private def pollingHandler(view: AnalysisRunnerView, analysis: Analysis, persistInAnalysisStorage: Boolean) {
-        AnalysisRunner.getEvaluationState(evaluationId, analysis.id, true, persistInAnalysisStorage, false) {
+        AnalysisRunner.getEvaluationState(evaluationId, analysis.id, true /*TODO 1/2 this disables cache*/, persistInAnalysisStorage, false) {
             state =>
                 state match {
                     case s: EvaluationInProgress => renderEvaluationProgress(s, view)

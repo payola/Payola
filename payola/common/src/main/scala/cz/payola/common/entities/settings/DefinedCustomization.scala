@@ -4,7 +4,7 @@ import cz.payola.common.Entity
 import cz.payola.common.entities._
 import scala.collection.immutable
 
-trait DefinedCustomization extends Entity with NamedEntity with OptionallyOwnedEntity with ShareableEntity
+trait DefinedCustomization extends Entity with NamedEntity
 {
     /** URL that is used for customization. */
     val URLs: String

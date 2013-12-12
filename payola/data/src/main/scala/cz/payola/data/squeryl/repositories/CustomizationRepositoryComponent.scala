@@ -28,15 +28,9 @@ trait CustomizationRepositoryComponent extends TableRepositoryComponent
             override def persist(entity: AnyRef) = wrapInTransaction {
 
                 val convertedEntity = Customization.convert(entity).get
+                val persistedCustomization = super.persist(convertedEntity)
 
-                val inDbCustOpt = convertedEntity match {
-                    case c: cz.payola.common.entities.settings.Customization => {
-                        getById(c.id)
-                    }
-                    case _ => None
-                }
 
-                val persistedCustomization = inDbCustOpt.getOrElse( super.persist(convertedEntity) )
 
                 convertedEntity match {
                     //case o: Customization =>
@@ -46,9 +40,9 @@ trait CustomizationRepositoryComponent extends TableRepositoryComponent
                         o.classCustomizations.foreach { classCustomization =>
 
                             val inDbClassCustomization =
-                                inDbCustOpt.map(_.classCustomizations.find{ inDbClassCust =>
+                                persistedCustomization.classCustomizations.find{ inDbClassCust =>
                                     classCustomization.id == inDbClassCust.id
-                                }).getOrElse(None)
+                                }
                             val persistedClassCustomization = if(inDbClassCustomization.isDefined) {
                                 ClassCustomization.convert(inDbClassCustomization).get
                             } else {
