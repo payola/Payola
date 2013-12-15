@@ -25,7 +25,7 @@ class GoogleMap(prefixApplier: Option[PrefixApplier] = None) extends PluginView(
     val latUri = "http://schema.org/latitude"
     val lngUri = "http://schema.org/longitude"
     val descUri = "http://schema.org/description"
-    val nameUri = "http://schema.org/name"
+    val nameUri = "http://schema.org/title"
 
     def toDouble(obj: Any) : Double = {
         obj match {
@@ -44,14 +44,16 @@ class GoogleMap(prefixApplier: Option[PrefixApplier] = None) extends PluginView(
     override def updateGraph(graph: Option[Graph], contractLiterals: Boolean = true) {
 
         graph.map { g =>
-            val geoData = g.edges.filter(_.uri == coordsUri).map(_.destination)
-            val markers = geoData.map{ c =>
-                val markerData = g.getOutgoingEdges(c)
+            val hasGeo = g.edges.filter(_.uri == coordsUri)
+            val markers = hasGeo.map{ e =>
+
+                val markerData = g.getOutgoingEdges(e.destination)
+                val placeData = g.getOutgoingEdges(e.origin)
 
                 val lat = markerData.find(_.uri == latUri).map{ v => toDouble(v.destination)}.getOrElse(0.0)
                 val lng = markerData.find(_.uri == lngUri).map{ v => toDouble(v.destination)}.getOrElse(0.0)
-                val title = markerData.find(_.uri == descUri).map{ v => toString(v.destination)}.getOrElse("")
-                val desc = markerData.find(_.uri == nameUri).map{ v => toString(v.destination)}.getOrElse("")
+                val title = placeData.find(_.uri == nameUri).map{ v => toString(v.destination)}.getOrElse("")
+                val desc = placeData.find(_.uri == descUri).map{ v => toString(v.destination)}.getOrElse("")
 
                 new MapMarker(new Coordinates(lat, lng), title, desc)
             }

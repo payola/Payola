@@ -59,6 +59,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
      * List of available visualization plugins.
      */
     private val plugins = List[PluginView](
+        new GoogleMap(Some(prefixApplier)),
         new TripleTablePluginView(Some(prefixApplier)),
         new SelectResultPluginView(Some(prefixApplier)),
         new CircleTechnique(Some(prefixApplier)),
@@ -67,8 +68,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
         new ColumnChartPluginView(Some(prefixApplier)),
         new GraphSigmaPluginView(Some(prefixApplier)),
         new TimeHeatmap(Some(prefixApplier)), // [Jiri Helmich]
-        new Generic(Some(prefixApplier)),  // [Jiri Helmich]
-        new GoogleMap(Some(prefixApplier))
+        new Generic(Some(prefixApplier))  // [Jiri Helmich]
     )
 
     /**

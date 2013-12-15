@@ -42,22 +42,31 @@ class MapView(center: Coordinates, zoom: Int, mapType: String, markerData: Seq[M
      * Create map instance.
      */
     @javascript( """
-
                     var map = new google.maps.Map(window.selfContext.mapDiv.htmlElement, {
                         center: new google.maps.LatLng(0,0),
                         zoom: window.selfContext.zoom,
                         mapTypeId: window.selfContext.mapType
                     });
 
+                    var infowindow = new google.maps.InfoWindow();
+
                     for (var k in window.selfContext.markerData.getInternalJsArray()) {
                        var item = window.selfContext.markerData.getInternalJsArray()[k];
 
                        var marker = new google.maps.Marker({
                           position: new google.maps.LatLng(item.coordinates.lat, item.coordinates.lng),
-                          title: '<p><strong>'+item.name+'</strong></p><p>'+item.description+'</p>'
-                      });
+                          map: map,
+                          title: item.title+': '+item.description
+                       });
 
-                       marker.setMap(map);
+                       var contentString = '<h5>'+item.title+'</h5><p>'+item.description+'</p>';
+
+                       google.maps.event.addListener(marker, 'click', function(content) {
+                            return function(){
+                                infowindow.setContent(content);//set the content
+                                infowindow.open(map,this);
+                            }
+                       }(contentString));
                     }
 
                  """)
