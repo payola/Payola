@@ -186,8 +186,10 @@ object PayolaBuild extends Build
             libraryDependencies ++= Seq(
                 "org.apache.jena" % "jena-core" % "2.11.0",
                 "org.apache.jena" % "jena-arq" % "2.11.0",
+                "org.apache.jena" % "jena" % "2.11.0",
                 "org.apache.httpcomponents" % "httpclient" % "4.2.4",
-                "commons-io" % "commons-io" % "2.4"
+                "commons-io" % "commons-io" % "2.4",
+                "commons-lang" % "commons-lang" % "2.4"
             )
         )
     ).dependsOn(

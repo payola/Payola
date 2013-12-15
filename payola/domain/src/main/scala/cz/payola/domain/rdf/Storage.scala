@@ -1,7 +1,7 @@
 package cz.payola.domain.rdf
 
 import com.hp.hpl.jena.query.QueryFactory
-import java.io.File
+import java.io._
 
 trait Storage
 {

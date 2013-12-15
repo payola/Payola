@@ -151,7 +151,8 @@ class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge], resultC
             case RdfRepresentation.Turtle => getModel.write(outputStream, "TURTLE")
         }
 
-        Source.fromInputStream(new ByteArrayInputStream(outputStream.toByteArray), "UTF-8").mkString
+        val s = Source.fromInputStream(new ByteArrayInputStream(outputStream.toByteArray), "UTF-8").mkString
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"+s
     }
 
     /**

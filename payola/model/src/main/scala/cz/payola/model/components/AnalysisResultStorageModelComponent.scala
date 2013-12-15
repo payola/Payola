@@ -7,6 +7,7 @@ import cz.payola.common.rdf._
 import cz.payola.domain.entities.AnalysisResult
 import cz.payola.data.DataContextComponent
 import scala.collection._
+import java.io._
 
 trait AnalysisResultStorageModelComponent
 {
@@ -33,7 +34,9 @@ trait AnalysisResultStorageModelComponent
                     new java.sql.Timestamp(System.currentTimeMillis)))
 
                 val uri = constructUri(evaluationId)
+
                 val serializedGraph = domainGraph.toStringRepresentation(RdfRepresentation.RdfXml)
+
                 //store graph in virtuoso
                 rdfStorage.storeGraph(uri, serializedGraph)
             }

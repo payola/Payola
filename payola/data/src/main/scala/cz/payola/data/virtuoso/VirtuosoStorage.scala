@@ -84,7 +84,7 @@ class VirtuosoStorage(
      * Creates a connection to the Virtuoso SQL database.
      */
     private def createSQLConnection(): Connection = {
-        DriverManager.getConnection("jdbc:virtuoso://" + server + ":" + sqlPort, sqlUsername, sqlPassword)
+        DriverManager.getConnection("jdbc:virtuoso://" + server + ":" + sqlPort+"/charset=UTF-8", sqlUsername, sqlPassword)
     }
 
     /**
