@@ -102,16 +102,6 @@ abstract class VertexViewElement(var position: Point2D, prefixApplier: Option[Pr
         }
     }
 
-    override def hide() {
-        destroy()
-        hidden = true
-    }
-
-    override def show(parent: html.Element) {
-        render(parent)
-        hidden = false
-    }
-
     def render(parent: html.Element) {
         glyphSpan.foreach{ gS =>
             gS.render(parent)

@@ -11,7 +11,7 @@ import cz.payola.common.ValidationException
 import cz.payola.web.client.models.PrefixApplier
 
 class ConditionTextInput(availableValues: Seq[String], name: String, initialValue: String,
-    prefixApplier: PrefixApplier, cssClass: String = "")
+    prefixApplier: PrefixApplier, cssClass: String = "", style: String = "")
     extends ComposedView with Field[String]
 {
     val delayedChanged = new SimpleUnitEvent[this.type]
@@ -20,10 +20,11 @@ class ConditionTextInput(availableValues: Seq[String], name: String, initialValu
 
     private val infoText = new Text("")
 
-    private val textInput = new TextInput(name, initialValue)
+    private val textInput = new TextInput(name, initialValue).setAttribute("style", style)
 
     private val setButton = new AppendToUserCustButton(availableValues, "Select",
-        "Values available in current graph: ", "", setValue, prefixApplier, "Custom:", 61, 81, 765, 340)
+        "Specify value of the property", "Property values", "Values available in current graph: ",
+        "", setValue, prefixApplier, "Custom:")
 
     setButton.appendButton.mouseClicked += { e =>
         setButton.openPopup()

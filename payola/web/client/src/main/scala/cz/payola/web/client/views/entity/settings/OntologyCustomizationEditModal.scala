@@ -12,7 +12,7 @@ import cz.payola.web.client.views.elements.form.fields._
 import cz.payola.common.visual.Color
 
 class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomization)
-    extends Modal("Edit ontology customization", Nil, Some("Done"), None, false, "large-modal")
+    extends Modal("Edit ontology customization", Nil, Some("Done"), None, true, "large-modal")
 {
     val classFillColorChanged = new UnitEvent[InputControl[_], ClassCustomizationEventArgs[InputControl[_]]]
 

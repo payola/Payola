@@ -15,14 +15,14 @@ import cz.payola.common.PayolaException
     private val tripleTableDefaultRecordsOnPage = 50
 
 
-    @async def getCompleteAnalysisResult(evaluationId: String, user: User = null)
+    @async def getCompleteAnalysisResult(evaluationId: String, user: Option[User] = None)
         (successCallback: (Option[Graph] => Unit))(failCallback: (Throwable => Unit)) {
 
         val result = Some(Payola.model.analysisResultStorageModel.getGraph(evaluationId))
         successCallback(result)
     }
 
-    @async def paginate(page: Int, allowedLinesOnPage: Int, evaluationId: String, user: User = null)
+    @async def paginate(page: Int, allowedLinesOnPage: Int, evaluationId: String, user: Option[User] = None)
         (successCallback: (Graph => Unit))(failCallback: (Throwable => Unit)) {
 
         val pageNumber = if(page > -1) page else tripleTableDefaultPage

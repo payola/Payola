@@ -33,6 +33,7 @@ class GraphPresenter(val viewElement: html.Element, prefixApplier: PrefixApplier
         view.ontologyCustomizationEditClicked += onOntologyCustomizationEditClicked _
         view.ontologyCustomizationCreateClicked += onOntologyCustomizationCreateClicked _
         view.userCustomizationSelected += onCustomizationSelected _
+        view.userCustomizationCleared += onCustomizationClear _
         view.userCustomizationCreateClicked += onUserCustomizationCreateClicked _
         view.userCustomizationEditClicked += onUserCustomizationEditClicked _
 
@@ -91,6 +92,11 @@ class GraphPresenter(val viewElement: html.Element, prefixApplier: PrefixApplier
 
         currentCustomization = Some(e.target)
         view.updateCustomization(Some(e.target))
+    }
+
+    private def onCustomizationClear(e: EventArgs[DefinedCustomization]) {
+        currentCustomization = None
+        view.updateCustomization(None)
     }
 
     def onVertexBrowsingDataSource(e: VertexEventArgs[_]) {

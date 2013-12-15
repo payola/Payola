@@ -6,57 +6,34 @@ import cz.payola.web.client.views.elements.form.Label
 import cz.payola.web.client.views.ComposedView
 import cz.payola.web.client.models.PrefixApplier
 
-class AppendToUserCustButton (var availableValues: Seq[String], title: String, listTitle: String, cssClass: String = "",
-    onAppendFunction: (String) => Boolean, prefixApplier: PrefixApplier, customLabel: String = "Custom:",
-    leftLocation: Int = -419, topLocation: Int = 0, width: Int = 740, height: Int = 340) extends ComposedView
+class AppendToUserCustButton (var availableValues: Seq[String], buttonLabel: String, buttonTitle: String,
+    listHeader: String, listTitle: String, cssClass: String = "",
+    onAppendFunction: (String) => Unit,
+    prefixApplier: PrefixApplier, customLabel: String = "Custom:") extends ComposedView
 {
+    private val heading = new Heading(List(new Text(listTitle))).setAttribute(
+        "style", "padding-top: 5px; padding-bottom: 5px;")
 
-    private var forbidPopupClose = false
+    private val inputField = new TextInput("name", "", "Input custom", "span6")
 
-    private val classDiv = new Div(Nil,"append-popup dropdown-menu")
-
-    val appendButton = new Button(new Text(title), cssClass)
-
-    classDiv.mouseClicked += { e =>
-        closePopup()
+    private val addButton = new Button(new Text("Add"))
+    addButton.mouseClicked += { e =>
+        if(inputField.value != null && inputField.value != "") {
+            closePopup()
+            //create the class
+            onAppendFunction(inputField.value)
+        }
         false
     }
+    private val closeButton = new Button(new Text("x"), "close")
+    closeButton.mouseClicked += { e => closePopup(); false}
 
-    def createSubViews = List(appendButton, classDiv)
+    private val classNameInput = new Div(List(
+        new Div(List(closeButton, new Heading(List(new Text(listHeader)))), "modal-header"),
+        new Label(customLabel, inputField.formHtmlElement, ""), inputField, addButton))
 
-    def closePopup() {
-        if (!forbidPopupClose) {
-            classDiv.setAttribute("style","display: none")
-            classDiv.removeAllChildNodes()
-        }
-        forbidPopupClose = false
-    }
-
-    def openPopup() {
-        val addButton = new Button(new Text("Add"))
-        val inputField = new TextInput("name", "", "", "span6")
-        inputField.mouseClicked += { e => forbidPopupClose = true; false }
-        val classNameInput = new Div(List(new Label(customLabel, inputField.formHtmlElement, ""), inputField, addButton))
-
-        addButton.mouseClicked += { e =>
-            if(inputField.value != null && inputField.value != "") {
-                //create the class
-                if (!onAppendFunction(inputField.value))
-                    forbidPopupClose = true
-            } else {
-                forbidPopupClose = true
-            }
-            false
-        }
-
-        classNameInput.render(classDiv.htmlElement)
-
-
-        new Heading(List(new Text(listTitle))).setAttribute(
-            "style", "padding-top: 5px; padding-bottom: 5px;").render(classDiv.htmlElement)
-
-
-        availableValues.foreach{ newClass => //list of classes available in the current graph
+    private val valuesDiv = new Div(
+        availableValues.map{ newClass => //list of classes available in the current graph
 
             val availableClassAnch = new Div(List(
                 new Anchor(List(new Div(List(new Text(uriToName(newClass))),
@@ -69,11 +46,25 @@ class AppendToUserCustButton (var availableValues: Seq[String], title: String, l
                 onAppendFunction(newClass)
                 false
             }
-            availableClassAnch.render(classDiv.htmlElement)
-        }
+            availableClassAnch
+        }).setAttribute("style", "overflow: auto; height: 350px;")
 
-        classDiv.setAttribute("style","left: "+leftLocation+"px !important; top: "+topLocation+
-            "px !important; display: block; width:"+width+"px; height:"+height+";")
+    private val classDiv = new Div(List(classNameInput, heading, valuesDiv),"append-popup dropdown-menu").setAttribute(
+        "style","position: fixed !important; left: 50% !important; top: 50% !important;"+
+        " display: none; width: 740px; height: 500px; margin: -250px 0 0 -370px;")
+
+    val appendButton = new Button(new Text(buttonLabel), cssClass).setAttribute("title", buttonTitle)
+
+    def createSubViews = List(appendButton, classDiv)
+
+    def closePopup() {
+        classDiv.setAttribute("style","display: none")
+    }
+
+    def openPopup() {
+        classDiv.setAttribute(
+            "style","position: fixed !important; left: 50% !important; top: 50% !important;"+
+                " display: block; width: 740px; height: 500px; margin: -250px 0 0 -370px;")
     }
 
     private def uriToName(uri: String): String = {
