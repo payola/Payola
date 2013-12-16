@@ -50,16 +50,28 @@ class MapView(center: Coordinates, zoom: Int, mapType: String, markerData: Seq[M
 
                     var infowindow = new google.maps.InfoWindow();
 
+                    function getTitle(item){
+                        var t = "";
+                        if (item.title) {
+                            t += item.title;
+                        }
+                        if (item.description){
+                            if (t.length > 0) t += ": ";
+                            t += item.description;
+                        }
+                        return t;
+                    }
+
                     for (var k in window.selfContext.markerData.getInternalJsArray()) {
                        var item = window.selfContext.markerData.getInternalJsArray()[k];
 
                        var marker = new google.maps.Marker({
                           position: new google.maps.LatLng(item.coordinates.lat, item.coordinates.lng),
                           map: map,
-                          title: item.title+': '+item.description
+                          title: getTitle(item)
                        });
 
-                       var contentString = '<h5>'+item.title+'</h5><p>'+item.description+'</p>';
+                       var contentString = '<h5>'+item.title+'</h5><p>'+item.description.replace("\n","<br />")+'</p>';
 
                        google.maps.event.addListener(marker, 'click', function(content) {
                             return function(){
