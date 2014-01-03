@@ -19,6 +19,8 @@ import cz.payola.web.client.views.bootstrap.Icon
  */
 class TimeHeatmap(prefixApplier: Option[PrefixApplier] = None) extends PluginView("Time heatmap", prefixApplier) {
 
+    def supportedDataFormat: String = "PayolaObj"
+
     val mapPlaceholder = new Div(List(),"map-placeholder")
 
     @javascript("""console.log(str)""")

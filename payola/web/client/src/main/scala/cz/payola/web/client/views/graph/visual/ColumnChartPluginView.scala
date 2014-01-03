@@ -10,6 +10,8 @@ import cz.payola.web.client.models.PrefixApplier
 
 class ColumnChartPluginView(prefixApplier: Option[PrefixApplier]) extends PluginView("Column Chart", prefixApplier)
 {
+    def supportedDataFormat: String = "PayolaObj"
+
     private val chartWrapper = new Div
     chartWrapper.id = "chart-wrapper"
 

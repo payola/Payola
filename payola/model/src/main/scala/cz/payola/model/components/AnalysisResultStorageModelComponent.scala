@@ -9,6 +9,13 @@ import cz.payola.data.DataContextComponent
 import scala.collection._
 import java.io._
 
+
+
+import com.hp.hpl.jena.query._
+import com.hp.hpl.jena.rdf.model._
+import org.apache.jena.riot._
+import org.apache.jena.riot.lang._
+
 trait AnalysisResultStorageModelComponent
 {
     self: DataContextComponent with RdfStorageComponent =>
@@ -47,8 +54,23 @@ trait AnalysisResultStorageModelComponent
                 val graph = rdfStorage.executeSPARQLQuery(
                     "CONSTRUCT { ?s ?p ?o } WHERE {?s ?p ?o.}", constructUri(evaluationId))
                 analysisResultRepository.updateTimestamp(evaluationId)
-                //Console.println("Im done")
                 graph
+            }
+
+            def getGraphJena(evaluationId: String, format: String = "RDF/JSON"): String = {
+                val dataset = rdfStorage.executeSPARQLQueryJena("CONSTRUCT { ?s ?p ?o } WHERE {?s ?p ?o.}", constructUri(evaluationId))
+                analysisResultRepository.updateTimestamp(evaluationId)
+
+                val outputStream = new java.io.ByteArrayOutputStream()
+                if (format.toLowerCase == "json-ld"){
+                    com.github.jsonldjava.jena.JenaJSONLD.init()
+                    RDFDataMgr.write(outputStream, dataset, com.github.jsonldjava.jena.JenaJSONLD.JSONLD)
+                }else{
+                    dataset.getDefaultModel().write(outputStream, format)
+                }
+
+                new String(outputStream.toByteArray(),"UTF-8")
+
             }
 
             def removeGraph(evaluationId: String, analysisId: String) {

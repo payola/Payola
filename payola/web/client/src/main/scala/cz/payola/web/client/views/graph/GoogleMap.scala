@@ -12,6 +12,8 @@ import s2js.compiler.javascript
  */
 class GoogleMap(prefixApplier: Option[PrefixApplier] = None) extends PluginView("Google map", prefixApplier) {
 
+    def supportedDataFormat: String = "RDF/JSON"
+
     val mapPlaceholder = new Div(List(),"map-placeholder")
 
     @javascript("""console.log(str)""")
@@ -41,22 +43,9 @@ class GoogleMap(prefixApplier: Option[PrefixApplier] = None) extends PluginView(
         }
     }
 
-    override def updateGraph(graph: Option[Graph], contractLiterals: Boolean = true) {
-
-        graph.map { g =>
-            val hasGeo = g.edges.filter(_.uri == coordsUri)
-            val markers = hasGeo.map{ e =>
-
-                val markerData = g.getOutgoingEdges(e.destination)
-                val placeData = g.getOutgoingEdges(e.origin)
-
-                val lat = markerData.find(_.uri == latUri).map{ v => toDouble(v.destination)}.getOrElse(0.0)
-                val lng = markerData.find(_.uri == lngUri).map{ v => toDouble(v.destination)}.getOrElse(0.0)
-                val title = placeData.find(_.uri == nameUri).map{ v => toString(v.destination)}.getOrElse("")
-                val desc = placeData.find(_.uri == descUri).map{ v => toString(v.destination)}.getOrElse("")
-
-                new MapMarker(new Coordinates(lat, lng), title, desc)
-            }
+    override def updateSerializedGraph(serializedGraph: Option[String]) {
+        serializedGraph.map{ sg =>
+            val markers = fromJSON(sg)
 
             val center = new Coordinates(0,0)
             val map = new MapView(center, 3, "satellite", markers, mapPlaceholder.htmlElement)
@@ -65,6 +54,32 @@ class GoogleMap(prefixApplier: Option[PrefixApplier] = None) extends PluginView(
             map.render(mapPlaceholder.htmlElement)
         }
     }
+
+    @javascript(
+        """
+           var places = [];
+
+           for (var uri in json){
+                var entity = json[uri];
+                if (entity["http://schema.org/geo"] && entity["http://schema.org/geo"].length > 0){
+                    var coordsUriObject = entity["http://schema.org/geo"][0]
+                    if (coordsUriObject["type"] && coordsUriObject["type"] == "uri"){
+                        var coords = json[coordsUriObject["value"]];
+
+                        if (coords){
+                            var coordinates = new cz.payola.common.geo.Coordinates(coords["http://schema.org/latitude"][0]["value"],coords["http://schema.org/longitude"][0]["value"]);
+                            var marker = new cz.payola.web.client.views.map.MapMarker(coordinates, entity["http://schema.org/title"][0]["value"], "");
+                            places.push(marker);
+                        }
+                    }
+                }
+           }
+
+           var coll = new scala.collection.Seq();
+           coll.internalJsArray = places;
+           return coll;
+        """)
+    def fromJSON(json: String): Seq[MapMarker] = List()
 
     def createSubViews = {
         List(mapPlaceholder)

@@ -6,7 +6,7 @@ import cz.payola.domain.entities.User
 import scala.Some
 import scala.collection.immutable
 import scala.collection.mutable
-import cz.payola.common.PayolaException
+import cz.payola.common._
 
 @remote
 @secured object AnalysisEvaluationResultsManager
@@ -20,6 +20,12 @@ import cz.payola.common.PayolaException
 
         val result = Some(Payola.model.analysisResultStorageModel.getGraph(evaluationId))
         successCallback(result)
+    }
+
+    @async def getCompleteAnalysisResultSerialized(evaluationId: String, format: String, user: Option[User] = None)
+        (successCallback: (String => Unit))(failCallback: (Throwable => Unit)) {
+        val string = Payola.model.analysisResultStorageModel.getGraphJena(evaluationId, format)
+        successCallback("#!json~*"+string)
     }
 
     @async def paginate(page: Int, allowedLinesOnPage: Int, evaluationId: String, user: Option[User] = None)

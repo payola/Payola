@@ -11,6 +11,8 @@ import cz.payola.web.client.models.PrefixApplier
 
 abstract class BaseTechnique(name: String, prefixApplier: Option[PrefixApplier]) extends VisualPluginView(name, prefixApplier)
 {
+    def supportedDataFormat: String = "PayolaObj"
+
     private val treeVerticesDistance = 100
 
     private val circleLevelsDistance = 150

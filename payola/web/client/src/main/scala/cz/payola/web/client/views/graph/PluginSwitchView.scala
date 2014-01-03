@@ -135,10 +135,10 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
 
     def createSubViews = List(toolbar, pluginSpace)
 
-    override def update(graph: Option[Graph], customization: Option[DefinedCustomization]) {
-        super.update(graph, customization)
+    override def update(graph: Option[Graph], customization: Option[DefinedCustomization], serializedGraph: Option[String]) {
+        super.update(graph, customization, serializedGraph)
         currentPlugin.setEvaluationId(evaluationId)
-        currentPlugin.update(graph, customization)
+        currentPlugin.update(graph, customization, serializedGraph)
     }
 
     override def updateGraph(graph: Option[Graph], contractLiterals: Boolean) {
@@ -146,6 +146,13 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
         super.updateGraph(graph, contractLiterals)
         currentPlugin.setEvaluationId(evaluationId)
         currentPlugin.updateGraph(graph, contractLiterals)
+    }
+
+    override def updateSerializedGraph(serializedGraph: Option[String]) {
+
+        super.updateSerializedGraph(serializedGraph)
+        currentPlugin.setEvaluationId(evaluationId)
+        currentPlugin.updateSerializedGraph(serializedGraph)
     }
 
     override def updateCustomization(customization: Option[DefinedCustomization]) {
@@ -316,7 +323,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
     private def changePlugin(plugin: PluginView) {
         if (currentPlugin != plugin) {
             // Destroy the current plugin.
-            currentPlugin.update(None, None)
+            currentPlugin.update(None, None, None)
             currentPlugin.destroyControls()
             currentPlugin.destroy()
 
@@ -328,18 +335,41 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
             //the default visualization is TripleTableView, which has implemented a server-side caching, support for other visualizations will be added with transformation layer
             //now the whole graph has to fetched, this will be taken care of in transformation layer in next cache release iteration
             if(evaluationId.isDefined) {
-                AnalysisEvaluationResultsManager.getCompleteAnalysisResult(evaluationId.get) { g =>
-                    currentGraph = g
-                    update(g, currentCustomization)
+                if (currentPlugin.supportedDataFormat == "PayolaObj"){
+                    AnalysisEvaluationResultsManager.getCompleteAnalysisResult(evaluationId.get) { g =>
+                        currentGraph = g
+                        currentSerializedGraph = None
+                        update(g, currentCustomization, None)
+                        currentPlugin.render(pluginSpace.htmlElement)
+                        currentPlugin.renderControls(toolbar.htmlElement)
+                    } { err => }
+                }else{
+                    AnalysisEvaluationResultsManager.getCompleteAnalysisResultSerialized(evaluationId.get, currentPlugin.supportedDataFormat){ s =>
+                        currentGraph = None
+                        currentSerializedGraph = Some(s)
+                        update(None, currentCustomization, currentSerializedGraph)
+                        currentPlugin.render(pluginSpace.htmlElement)
+                        currentPlugin.renderControls(toolbar.htmlElement)
+                        currentPlugin.drawGraph()
+                    }{e => }
+                }
+            } else {
+                if (currentPlugin.supportedDataFormat == "PayolaObj"){
+                    update(currentGraph, currentCustomization, None)
+                    currentSerializedGraph = None
                     currentPlugin.render(pluginSpace.htmlElement)
                     currentPlugin.renderControls(toolbar.htmlElement)
                     currentPlugin.drawGraph()
-                } { err => }
-            } else {
-                update(currentGraph, currentCustomization)
-                currentPlugin.render(pluginSpace.htmlElement)
-                currentPlugin.renderControls(toolbar.htmlElement)
-                currentPlugin.drawGraph()
+                }else{
+                    AnalysisEvaluationResultsManager.getCompleteAnalysisResultSerialized(evaluationId.get, currentPlugin.supportedDataFormat){ s =>
+                        currentGraph = None
+                        currentSerializedGraph = Some(s)
+                        update(None, currentCustomization, currentSerializedGraph)
+                        currentPlugin.render(pluginSpace.htmlElement)
+                        currentPlugin.renderControls(toolbar.htmlElement)
+                        currentPlugin.drawGraph()
+                    }{e => }
+                }
             }
         }
     }

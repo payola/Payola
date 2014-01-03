@@ -328,7 +328,13 @@ class JSONSerializer
             }
         } else {
             result = obj match {
-                case _: String => JSONUtilities.escapeString(obj.asInstanceOf[String])
+                case s: String => {
+                    if (s.startsWith("#!json~*")){
+                        s.replace("#!json~*","")
+                    }else{
+                        JSONUtilities.escapeString(obj.asInstanceOf[String])
+                    }
+                }
                 case _: java.lang.Number => obj.asInstanceOf[java.lang.Number].toString
                 case _: java.lang.Boolean => if (obj.asInstanceOf[java.lang.Boolean].booleanValue) "true" else "false"
                 case _: java.lang.Character => JSONUtilities

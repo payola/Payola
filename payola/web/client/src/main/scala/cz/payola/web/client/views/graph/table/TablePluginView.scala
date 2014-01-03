@@ -25,6 +25,8 @@ abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier
 
     def createSubViews = List(tablePluginWrapper)
 
+    def supportedDataFormat: String = "PayolaObj"
+
     override def updateGraph(graph: Option[Graph], contractLiterals: Boolean = true) {
         updateGraphPage(graph, contractLiterals)
     }

@@ -17,6 +17,8 @@ abstract class PluginView(val name: String, private val prefixApplier: Option[Pr
      */
     def renderControls(toolbar: html.Element) {}
 
+    def supportedDataFormat: String
+
     /**
      * Destroys the plugin-specific controls.
      */

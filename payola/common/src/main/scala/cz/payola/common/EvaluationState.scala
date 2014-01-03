@@ -26,7 +26,7 @@ case class EvaluationError(error: String, instanceErrors: Seq[(PluginInstance, S
  * @param outputGraph The output graph returned by the output plugin instance.
  * @param instanceErrors The plugin instances, whose evaluations caused errors with the error objects.
  */
-case class EvaluationSuccess(outputGraph: Graph, instanceErrors: Seq[(PluginInstance, String)]) extends EvaluationState
+case class EvaluationSuccess(outputGraph: Graph, instanceErrors: Seq[(PluginInstance, String)], string: String = "") extends EvaluationState
 
 /**
  * A result meaning that the analysis evaluation hasn't finished in the specified time limit.
