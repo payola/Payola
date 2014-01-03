@@ -50,6 +50,8 @@ class GoogleMap(prefixApplier: Option[PrefixApplier] = None) extends PluginView(
             val center = new Coordinates(0,0)
             val map = new MapView(center, 3, "satellite", markers, mapPlaceholder.htmlElement)
 
+            new MapMarker(center,"","") //just to load it
+
             mapPlaceholder.removeAllChildNodes()
             map.render(mapPlaceholder.htmlElement)
         }
@@ -62,14 +64,24 @@ class GoogleMap(prefixApplier: Option[PrefixApplier] = None) extends PluginView(
            for (var uri in json){
                 var entity = json[uri];
                 if (entity["http://schema.org/geo"] && entity["http://schema.org/geo"].length > 0){
-                    var coordsUriObject = entity["http://schema.org/geo"][0]
+                    var coordsUriObject = entity["http://schema.org/geo"][0];
                     if (coordsUriObject["type"] && coordsUriObject["type"] == "uri"){
                         var coords = json[coordsUriObject["value"]];
 
                         if (coords){
-                            var coordinates = new cz.payola.common.geo.Coordinates(coords["http://schema.org/latitude"][0]["value"],coords["http://schema.org/longitude"][0]["value"]);
-                            var marker = new cz.payola.web.client.views.map.MapMarker(coordinates, entity["http://schema.org/title"][0]["value"], "");
-                            places.push(marker);
+                            var latObj = coords["http://schema.org/latitude"];
+                            var longObj = coords["http://schema.org/longitude"];
+                            if (latObj && longObj && latObj[0] && latObj[0]["value"] && longObj[0] && longObj[0]["value"]){
+                                var coordinates = new cz.payola.common.geo.Coordinates(latObj[0]["value"],longObj[0]["value"]);
+
+                                var titleObj = entity["http://schema.org/title"];
+                                var descObj = entity["http://schema.org/description"];
+                                var title = (titleObj && titleObj[0] && titleObj[0]["value"] ? titleObj[0]["value"] : "");
+                                var desc = (descObj && descObj[0] && descObj[0]["value"] ? descObj[0]["value"] : "");
+
+                                var marker = new cz.payola.web.client.views.map.MapMarker(coordinates, title, desc);
+                                places.push(marker);
+                            }
                         }
                     }
                 }
