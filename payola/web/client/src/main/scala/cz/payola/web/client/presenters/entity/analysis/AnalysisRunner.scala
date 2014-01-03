@@ -17,6 +17,7 @@ import cz.payola.common.EvaluationError
 import cz.payola.common.EvaluationSuccess
 import cz.payola.web.client.views.VertexEventArgs
 import cz.payola.web.client.presenters.entity.PrefixPresenter
+import s2js.compiler.javascript
 
 /**
  * Presenter responsible for the logic around running an analysis evaluation.
@@ -38,6 +39,28 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
     private val pollingPeriod = 500
 
+    @javascript(
+        """
+          if (window.location.hash){
+            var id = window.location.hash.substr(1);
+            if (id.length > 0){
+                jQuery(".analysis-controls .btn-success").click();
+            }
+          }
+        """)
+    def autorun() {}
+
+    @javascript(
+        """
+          if (window.location.hash){
+            var id = window.location.hash.substr(1);
+            if (id.length > 0){
+                jQuery(".dropdown-menu ."+id+" a").click();
+            }
+          }
+        """)
+    def autoswitch() {}
+
     def initialize() {
         blockPage("Loading analysis data...")
         prefixPresenter.initialize
@@ -46,6 +69,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
             analysis =>
                 createViewAndInit(analysis)
                 unblockPage()
+                autorun()
         } {
             err => fatalErrorHandler(err)
         }
@@ -103,6 +127,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
             view.tabs.showTab(1)
             view.tabs.switchTab(1)
+            autoswitch()
 
             analysisEvaluationSuccess -= successEventHandler
 

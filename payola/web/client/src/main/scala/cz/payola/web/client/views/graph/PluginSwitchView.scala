@@ -17,6 +17,7 @@ import cz.payola.web.client.views.graph.sigma.GraphSigmaPluginView
 import cz.payola.web.client.views.graph.datacube._
 import cz.payola.web.client.models.PrefixApplier
 import cz.payola.web.shared.AnalysisEvaluationResultsManager
+import s2js.compiler.javascript
 
 class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with ComposedView
 {
@@ -81,6 +82,9 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
      */
     private val pluginSpace = new Div(Nil, "plugin-space")
 
+    @javascript(""" return x.replace(/\./g,"_"); """)
+    def replace(x: String): String = ""
+
     /**
      * Drop down button for selection of graph visualization.
      */
@@ -89,7 +93,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
         new Text("Change visualization plugin")),
         plugins.map { plugin =>
             val pluginAnchor = new Anchor(List(new Text(plugin.name)))
-            val listItem = new ListItem(List(pluginAnchor))
+            val listItem = new ListItem(List(pluginAnchor), replace(plugin.getClass.getName))
             pluginAnchor.mouseClicked += { e =>
                 pluginChangeButton.setActiveItem(listItem)
                 changePlugin(plugin)
