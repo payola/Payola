@@ -25,7 +25,14 @@ object Graph
      * @return A new graph instance.
      */
     def apply(representation: RdfRepresentation.Type, data: String): Graph = {
-        rdf2Jena(representation, data).map(g => Graph(ModelFactory.createModelForGraph(g))).fold(Graph.empty)(_ + _)
+
+        val result = rdf2Jena(representation, data).map(g => Graph(ModelFactory.createModelForGraph(g)))
+
+        result.size match {
+            case 0 => Graph.empty
+            case 1 => result.head
+            case _ => result.fold(Graph.empty)(_ + _)
+        }
     }
 
     def rdf2JenaDataset(representation: RdfRepresentation.Type, data: String): com.hp.hpl.jena.query.Dataset = {
@@ -43,6 +50,7 @@ object Graph
      * @return A new graph instance.
      */
     private def apply(model: Model): Graph = {
+
         val literalVertices = mutable.ListBuffer.empty[LiteralVertex]
         val edges = mutable.HashSet.empty[Edge]
         val identifiedVertices = mutable.HashMap.empty[String, IdentifiedVertex]
