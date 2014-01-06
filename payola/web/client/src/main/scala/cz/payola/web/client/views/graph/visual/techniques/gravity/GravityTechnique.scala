@@ -36,8 +36,7 @@ class GravityTechnique(prefixApplier: Option[PrefixApplier]) extends BaseTechniq
      */
     private val velocitiesStabilization = 3
 
-    protected def getTechniquePerformer(component: Component,
-        animate: Boolean): Animation[_] = {
+    protected def getTechniquePerformer(component: Component, animate: Boolean): Animation[_] = {
         if (animate) {
             val animationOfThis = new Animation(
                 runningAnimation, component, None, redrawQuick, redrawQuick, Some(70))

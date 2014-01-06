@@ -26,6 +26,7 @@ abstract class BaseTechnique(name: String, prefixApplier: Option[PrefixApplier])
 
     override def updateGraph(graph: Option[Graph], contractLiterals: Boolean = true) {
         super.updateGraph(graph, contractLiterals)
+        graphView.foreach(performPositioning(_))
     }
 
     override def drawGraph() {
