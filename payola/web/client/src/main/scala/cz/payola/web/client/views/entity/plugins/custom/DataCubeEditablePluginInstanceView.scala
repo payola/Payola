@@ -74,7 +74,7 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
                 // create partial analysis for preview, append limit, set timeout to 30 sec.
                 AnalysisRunner.createPartialAnalysis(analysis.id, pluginInstance.id, limitCount) {
                     analysisId =>
-                        AnalysisRunner.runAnalysisById(analysisId, 30, "") {    // run the partial analysis
+                        AnalysisRunner.runAnalysisById(analysisId, "") {    // run the partial analysis
                             evalId =>
                                 schedulePolling(evalId, {                       // on evaluation success callback - pattern done
                                     args =>

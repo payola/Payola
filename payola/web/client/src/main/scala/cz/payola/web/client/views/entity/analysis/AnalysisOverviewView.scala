@@ -5,9 +5,9 @@ import cz.payola.web.client.views.ComposedView
 import cz.payola.common.entities.Analysis
 import cz.payola.web.client.models.PrefixApplier
 
-class AnalysisOverviewView(analysis: Analysis, timeoutSeconds: Int, prefixApplier: PrefixApplier) extends ComposedView
+class AnalysisOverviewView(analysis: Analysis, prefixApplier: PrefixApplier) extends ComposedView
 {
-    val controls = new AnalysisControls(timeoutSeconds)
+    val controls = new AnalysisControls()
 
     val analysisVisualizer = new ReadOnlyAnalysisVisualizer(analysis, prefixApplier)
 

@@ -26,6 +26,7 @@ import s2js.compiler.javascript
  */
 class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presenter
 {
+    var elapsed = 0
     val parentElement = document.getElementById(elementToDrawIn)
     var analysisEvaluationSuccess = new UnitEvent[Analysis, EvaluationSuccessEventArgs]
     var analysisRunning = false
@@ -75,12 +76,10 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         }
     }
 
-    private def createViewAndInit(analysis: Analysis, timeout: Int = 30): AnalysisRunnerView = {
-        val view = new AnalysisRunnerView(analysis, timeout, prefixPresenter.prefixApplier)
+    private def createViewAndInit(analysis: Analysis): AnalysisRunnerView = {
+        val view = new AnalysisRunnerView(analysis, prefixPresenter.prefixApplier)
         view.render(parentElement)
         view.tabs.hideTab(1)
-
-        view.overviewView.controls.timeoutControl.field.value = timeout
 
         successEventHandler = getSuccessEventHandler(analysis, view)
         analysisEvaluationSuccess = new UnitEvent[Analysis, EvaluationSuccessEventArgs]
@@ -101,7 +100,6 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
             analysisRunning = false
             intervalHandler.foreach(window.clearInterval(_))
             view.overviewView.controls.stopButton.setIsEnabled(false)
-            view.overviewView.controls.timeoutControl.controlGroup.removeCssClass("none")
             view.overviewView.controls.timeoutInfoBar.addCssClass("none")
             view.overviewView.controls.progressBar.setStyleToSuccess()
 
@@ -144,25 +142,16 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
             blockPage("Starting analysis...")
 
             uiAdaptAnalysisRunning(view, createViewAndInit _, analysis)
-            var timeout = view.overviewView.controls.timeoutControl.field.value
             val persistInAnalysisStorage = view.overviewView.controls.persistInStore.field.value
-            view.overviewView.controls.timeoutInfo.text = timeout.toString
+            view.overviewView.controls.timeoutInfo.text = "0"
 
-            AnalysisRunner.runAnalysisById(analysisId, timeout, evaluationId, true) { id =>
+            AnalysisRunner.runAnalysisById(analysisId, evaluationId, true) { id =>
                 unblockPage()
+                elapsed = 0
 
                 intervalHandler = Some(window.setInterval(() => {
-                    if (timeout >= 0) {
-                        view.overviewView.controls.timeoutInfo.text = timeout.toString
-                    }
-
-                    if (timeout < -10) {
-                        fatalErrorHandler(new PayolaException("The connection to the server has been lost."))
-                        intervalHandler.map(window.clearInterval(_))
-                        intervalHandler = None
-                    }
-
-                    timeout -= 1
+                    elapsed += 1
+                    view.overviewView.controls.timeoutInfo.text = elapsed.toString
                 }, 1000))
 
                 evaluationId = id
@@ -179,11 +168,10 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         false
     }
 
-    private def uiAdaptAnalysisRunning(view: AnalysisRunnerView, initUI: (Analysis, Int) => Unit, analysis: Analysis) {
+    private def uiAdaptAnalysisRunning(view: AnalysisRunnerView, initUI: (Analysis) => Unit, analysis: Analysis) {
         view.overviewView.controls.runBtn.setIsEnabled(false)
         view.overviewView.controls.runBtnCaption.text = "Running Analysis..."
         view.overviewView.controls.stopButton.setIsEnabled(true)
-        view.overviewView.controls.timeoutControl.controlGroup.addCssClass("none")
         view.overviewView.controls.timeoutInfoBar.removeCssClass("none")
         view.overviewView.controls.stopButton.mouseClicked += { e =>
             onStopClick(view, initUI, analysis)
@@ -191,14 +179,13 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         }
     }
 
-    private def onStopClick(view: AnalysisRunnerView, initUI: (Analysis, Int) => Unit, analysis: Analysis) {
+    private def onStopClick(view: AnalysisRunnerView, initUI: (Analysis) => Unit, analysis: Analysis) {
         if (!analysisDone) {
             analysisRunning = false
             analysisDone = false
             intervalHandler.foreach(window.clearInterval(_))
-            val timeout = view.overviewView.controls.timeoutControl.field.value
             view.destroy()
-            initUI(analysis, timeout)
+            initUI(analysis)
             window.onunload = null
         }
     }
@@ -277,7 +264,6 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         analysisDone = true
         view.overviewView.controls.stopButton.setIsEnabled(false)
         intervalHandler.foreach(window.clearInterval(_))
-        view.overviewView.controls.timeoutControl.controlGroup.removeCssClass("none")
         view.overviewView.controls.timeoutInfoBar.hide()
 
         AlertModal.display("Time out", "The analysis evaluation has timed out.")
@@ -297,7 +283,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
             analysisDone = false
             analysisRunning = false
 
-            val newView = createViewAndInit(analysis, view.overviewView.controls.timeoutControl.field.value)
+            val newView = createViewAndInit(analysis)
             runButtonClickHandler(newView, analysis)
         }
         successEventHandler = getSuccessEventHandler(analysis, view)

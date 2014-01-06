@@ -6,9 +6,9 @@ import cz.payola.web.client.views.bootstrap.Tabs
 import cz.payola.common.entities.Analysis
 import cz.payola.web.client.models.PrefixApplier
 
-class AnalysisRunnerView(analysis: Analysis, timeoutSeconds: Int, prefixApplier: PrefixApplier) extends ComposedView
+class AnalysisRunnerView(analysis: Analysis, prefixApplier: PrefixApplier) extends ComposedView
 {
-    val overviewView = new AnalysisOverviewView(analysis, timeoutSeconds, prefixApplier)
+    val overviewView = new AnalysisOverviewView(analysis, prefixApplier)
 
     val resultsView = new Div
 

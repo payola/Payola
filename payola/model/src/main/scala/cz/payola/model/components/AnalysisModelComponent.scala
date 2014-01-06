@@ -204,7 +204,7 @@ trait AnalysisModelComponent extends EntityModelComponent
             analysis.pluginInstanceBindings.contains(binding)
         }
 
-        def run(analysis: Analysis, timeoutSeconds: Long, oldEvaluationId: String, user: Option[User] = None) = {
+        def run(analysis: Analysis, oldEvaluationId: String, user: Option[User] = None) = {
             if (runningEvaluations.isDefinedAt(oldEvaluationId)) {
                 if (!runningEvaluations.get(oldEvaluationId).filter(_._2.analysis.id == analysis.id).isEmpty) {
                     runningEvaluations.remove(oldEvaluationId)
@@ -215,9 +215,8 @@ trait AnalysisModelComponent extends EntityModelComponent
             analysis.expand(getAccessibleToUser(user))
 
             val evaluationId = IDGenerator.newId
-            val timeout = scala.math.min(1800, timeoutSeconds)
             runningEvaluations
-                .put(evaluationId, (user, analysis.evaluate(Some(timeout * 1000)), (new java.util.Date).getTime))
+                .put(evaluationId, (user, analysis.evaluate(), (new java.util.Date).getTime))
 
             evaluationId
         }
