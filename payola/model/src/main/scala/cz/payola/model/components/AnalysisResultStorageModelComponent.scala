@@ -40,16 +40,11 @@ trait AnalysisResultStorageModelComponent
                     analysisId, user, evaluationId, persist, graph.vertices.size,
                     new java.sql.Timestamp(System.currentTimeMillis)))
 
-                try{
+                val uri = constructUri(evaluationId)
 
-                    val uri = constructUri(evaluationId)
-
-                    val serializedGraph = domainGraph.toStringRepresentation(RdfRepresentation.RdfXml)
-                    //store graph in virtuoso
-                    rdfStorage.storeGraph(uri, serializedGraph)
-                }catch{
-                    case e: Exception => println(e.getMessage)
-                }
+                val serializedGraph = domainGraph.toStringRepresentation(RdfRepresentation.RdfXml)
+                //store graph in virtuoso
+                rdfStorage.storeGraph(uri, serializedGraph)
             }
 
             def getGraph(evaluationId: String): Graph = {
