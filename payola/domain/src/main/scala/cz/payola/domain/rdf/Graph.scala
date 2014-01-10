@@ -10,6 +10,7 @@ import org.apache.jena.riot._
 import org.apache.jena.riot.lang._
 import cz.payola.domain._
 import cz.payola.common.rdf._
+import java.util.UUID
 
 object Graph
 {
@@ -122,10 +123,12 @@ class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge], resultC
             new Edge(origin, destination, e.uri)
         }
         new Graph(mergedVertices, mergedEdges, None)
-        /*val model = getModel
-        model.add(otherGraph.getModel)
+    }
 
-        Graph(model)*/
+    def ++(otherGraph: Graph): Graph = {
+        val model = getModel
+        model.add(otherGraph.getModel)
+        Graph(model)
     }
 
     /**
