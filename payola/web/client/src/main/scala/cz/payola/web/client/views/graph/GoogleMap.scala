@@ -62,7 +62,6 @@ class GoogleMap(prefixApplier: Option[PrefixApplier] = None) extends PluginView(
            var places = [];
 
            for (var uri in json){
-           console.log(uri);
                 var entity = json[uri];
                 if (entity["http://schema.org/geo"] && entity["http://schema.org/geo"].length > 0){
                     var coordsUriObject = entity["http://schema.org/geo"][0];
