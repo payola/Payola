@@ -56,7 +56,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
           if (window.location.hash){
             var id = window.location.hash.substr(1);
             if (id.length > 0){
-                jQuery("#analysis-tabs .dropdown-menu ."+id+" a").click();
+                jQuery("#tab-2 .dropdown-menu ."+id+" a").click();
             }
           }else{
             window.location.hash = "cz_payola_web_client_views_graph_table_TripleTablePluginView"

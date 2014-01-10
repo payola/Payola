@@ -48,7 +48,7 @@ class GoogleMap(prefixApplier: Option[PrefixApplier] = None) extends PluginView(
             val markers = fromJSON(sg)
 
             val center = new Coordinates(0,0)
-            val map = new HeatMapView(center, 3, "satellite", markers, mapPlaceholder.htmlElement)
+            val map = new MapView(center, 3, "satellite", markers, mapPlaceholder.htmlElement)
 
             new MapMarker(center,"","") //just to load it
 
