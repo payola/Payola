@@ -28,8 +28,8 @@ import cz.payola.domain.rdf.Graph
         (successCallback: (EvaluationState => Unit))
         (failCallback: (Throwable => Unit)) {
 
-        val host = "live.payola.cz"
-        //val host = "localhost:9000"
+        //val host = "live.payola.cz"
+        val host = "localhost:9000"
 
         val resultResponse =
             try{

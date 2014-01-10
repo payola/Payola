@@ -71,7 +71,7 @@ class MapView(center: Coordinates, zoom: Int, mapType: String, markerData: Seq[M
                           title: getTitle(item)
                        });
 
-                       var contentString = '<p>'+item.description..replace(/\n/g, "<br />")+'</p>';
+                       var contentString = '<p>'+item.description.replace(/\n/g, "<br />")+'</p>';
 
                        google.maps.event.addListener(marker, 'click', function(content) {
                             return function(){
