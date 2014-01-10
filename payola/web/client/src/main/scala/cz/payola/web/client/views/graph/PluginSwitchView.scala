@@ -85,6 +85,9 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
     @javascript(""" return x.replace(/\./g,"_"); """)
     def replace(x: String): String = ""
 
+    @javascript(""" window.location.hash = hash """)
+    def setLocationHash(hash: String) {}
+
     /**
      * Drop down button for selection of graph visualization.
      */
@@ -97,6 +100,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
             pluginAnchor.mouseClicked += { e =>
                 pluginChangeButton.setActiveItem(listItem)
                 changePlugin(plugin)
+                setLocationHash(replace(plugin.getClass.getName))
                 false
             }
             listItem
