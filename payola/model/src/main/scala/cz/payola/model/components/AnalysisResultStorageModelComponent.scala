@@ -8,6 +8,7 @@ import cz.payola.domain.entities.AnalysisResult
 import cz.payola.data.DataContextComponent
 import scala.collection._
 import java.io._
+import scala.actors.Futures._
 
 
 
@@ -22,7 +23,12 @@ trait AnalysisResultStorageModelComponent
 
     lazy val analysisResultStorageModel = new
         {
-            def saveGraph(graph: Graph, analysisId: String, evaluationId: String, persist: Boolean, user: Option[User] = None) {
+            private def printToFile(f: java.io.File)(op: java.io.PrintWriter => Unit) {
+                val p = new java.io.PrintWriter(f)
+                try { op(p) } finally { p.close() }
+            }
+
+            def saveGraph(graph: Graph, analysisId: String, evaluationId: String, persist: Boolean, host: String, user: Option[User] = None) {
 
                 if(!graph.isInstanceOf[cz.payola.domain.rdf.Graph]) {
                     return
@@ -43,8 +49,16 @@ trait AnalysisResultStorageModelComponent
                 val uri = constructUri(evaluationId)
 
                 val serializedGraph = domainGraph.toStringRepresentation(RdfRepresentation.RdfXml)
+
+                printToFile(new File("/tmp/"+evaluationId+".rdf"))(p => {
+                    p.println(serializedGraph)
+                })
+
                 //store graph in virtuoso
-                rdfStorage.storeGraph(uri, serializedGraph)
+                //rdfStorage.storeGraph(uri, serializedGraph)
+                rdfStorage.storeGraphAtURL(uri, "http://"+host+"/evaluation/"+evaluationId+".rdf")
+
+                //rdfStorage.storeGraphFromFile(uri, new File("/tmp/"+evaluationId+".rdf"), RdfRepresentation.RdfXml)
             }
 
             def getGraph(evaluationId: String): Graph = {

@@ -4,6 +4,8 @@ import helpers.Secured
 import cz.payola.domain.entities.User
 import cz.payola.web.shared.Payola
 import play.mvc.Security.Authenticated
+import java.io.FileInputStream
+import cz.payola.domain.rdf.RdfRepresentation
 
 object Evaluation extends PayolaController with Secured
 {
@@ -20,6 +22,14 @@ object Evaluation extends PayolaController with Secured
             NotFound(views.html.errors.err404("The analysis does not exist."))
         }*/
     } */
+
+    def rdf(evaluationId: String) = {
+        maybeAuthenticated { u: Option[User] =>
+            Ok(scala.io.Source.fromFile("/tmp/"+evaluationId+".rdf").map(_.toString).mkString).as("application/rdf+xml").withHeaders {
+                CONTENT_DISPOSITION -> "attachment; filename=%s.%s".format(evaluationId, "rdf")
+            }
+        }
+    }
 
     def delete(id: String) = authenticatedWithRequest { (user, request) =>
         user.ownedAnalyses.find(_.id == id).map(Payola.model.analysisModel.remove(_))

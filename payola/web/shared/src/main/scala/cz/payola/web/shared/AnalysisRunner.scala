@@ -28,13 +28,15 @@ import cz.payola.domain.rdf.Graph
         (successCallback: (EvaluationState => Unit))
         (failCallback: (Throwable => Unit)) {
 
+        val host = "live.payola.cz"
+
         val resultResponse =
             try{
                 val response = Payola.model.analysisModel.getEvaluationState(evaluationId, user)
                 if(storeAnalysis) {
                     response match {
                         case r: EvaluationSuccess =>
-                            Payola.model.analysisResultStorageModel.saveGraph(r.outputGraph, analysisId, evaluationId, persistInAnalysisStorage, user)
+                            Payola.model.analysisResultStorageModel.saveGraph(r.outputGraph, analysisId, evaluationId, persistInAnalysisStorage, host, user)
                             EvaluationSuccess(Payola.model.analysisResultStorageModel.paginate(r.outputGraph),r.instanceErrors)
 
                         case _ =>

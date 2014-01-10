@@ -76,5 +76,7 @@ POST    /prefix/save                 controllers.Prefix.save(id)
 GET     /error                      controllers.ErrorHandler.error()
 GET     /404.html                   controllers.ErrorHandler.notFound()
 
+GET     /evaluation/:evaluationId.rdf       controllers.Evaluation.rdf(evaluationId)
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
