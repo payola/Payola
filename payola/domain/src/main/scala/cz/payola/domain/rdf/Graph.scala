@@ -122,6 +122,10 @@ class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge], resultC
             new Edge(origin, destination, e.uri)
         }
         new Graph(mergedVertices, mergedEdges, None)
+        /*val model = getModel
+        model.add(otherGraph.getModel)
+
+        Graph(model)*/
     }
 
     /**

@@ -24,7 +24,7 @@ trait AnalysisResultStorageModelComponent
     lazy val analysisResultStorageModel = new
         {
             private def printToFile(f: java.io.File)(op: java.io.PrintWriter => Unit) {
-                val p = new java.io.PrintWriter(f)
+                val p = new java.io.PrintWriter(f, "UTF-8")
                 try { op(p) } finally { p.close() }
             }
 
@@ -50,15 +50,17 @@ trait AnalysisResultStorageModelComponent
 
                 val serializedGraph = domainGraph.toStringRepresentation(RdfRepresentation.RdfXml)
 
-                printToFile(new File("/tmp/"+evaluationId+".rdf"))(p => {
+                val tmpFile = new File("/tmp/"+evaluationId+".rdf")
+                printToFile(tmpFile)(p => {
                     p.println(serializedGraph)
                 })
 
                 //store graph in virtuoso
                 //rdfStorage.storeGraph(uri, serializedGraph)
+                //rdfStorage.storeGraphFromFile(uri, new File("/tmp/"+evaluationId+".rdf"), RdfRepresentation.RdfXml)
                 rdfStorage.storeGraphAtURL(uri, "http://"+host+"/evaluation/"+evaluationId+".rdf")
 
-                //rdfStorage.storeGraphFromFile(uri, new File("/tmp/"+evaluationId+".rdf"), RdfRepresentation.RdfXml)
+                tmpFile.delete()
             }
 
             def getGraph(evaluationId: String): Graph = {
