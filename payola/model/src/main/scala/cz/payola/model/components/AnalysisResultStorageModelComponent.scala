@@ -9,6 +9,13 @@ import cz.payola.data.DataContextComponent
 import scala.collection._
 import cz.payola.domain.entities.plugins.concrete.data.PayolaStorage
 import cz.payola.common.rdf.Graph
+import java.io._
+import scala.actors.Futures._
+
+import com.hp.hpl.jena.query._
+import com.hp.hpl.jena.rdf.model._
+import org.apache.jena.riot._
+import org.apache.jena.riot.lang._
 
 trait AnalysisResultStorageModelComponent
 {
@@ -16,7 +23,13 @@ trait AnalysisResultStorageModelComponent
 
     lazy val analysisResultStorageModel = new
         {
-            def saveGraph(graph: Graph, analysisId: String, evaluationId: String, persist: Boolean, user: Option[User] = None) {
+            private def printToFile(f: java.io.File)(op: java.io.PrintWriter => Unit) {
+                val p = new java.io.PrintWriter(f, "UTF-8")
+                try { op(p) } finally { p.close() }
+            }
+
+            def saveGraph(graph: Graph, analysisId: String, evaluationId: String/*, persist: Boolean*/, host: String, user: Option[User] = None) {
+
                 if(!graph.isInstanceOf[cz.payola.domain.rdf.Graph]) {
                     return
                 }
@@ -30,13 +43,24 @@ trait AnalysisResultStorageModelComponent
 
                 //store control in DB
                 analysisResultRepository.storeResult(new AnalysisResult(
-                    analysisId, user, evaluationId, persist, graph.vertices.size,
+                    analysisId, user, evaluationId, true, graph.vertices.size, //persisting all
                     new java.sql.Timestamp(System.currentTimeMillis)))
 
                 val uri = constructUri(evaluationId)
+
                 val serializedGraph = domainGraph.toStringRepresentation(RdfRepresentation.RdfXml)
+
+                val tmpFile = new File("/opt/www/virtuoso/evaluation/"+evaluationId+".rdf")
+                printToFile(tmpFile)(p => {
+                    p.println(serializedGraph)
+                })
+
                 //store graph in virtuoso
-                rdfStorage.storeGraph(uri, serializedGraph)
+                //rdfStorage.storeGraph(uri, serializedGraph)
+                //rdfStorage.storeGraphFromFile(uri, new File("/tmp/"+evaluationId+".rdf"), RdfRepresentation.RdfXml)
+                rdfStorage.storeGraphAtURL(uri, "http://"+host+"/evaluation/"+evaluationId+".rdf")
+
+                tmpFile.delete()
             }
 
             /**
@@ -53,6 +77,22 @@ trait AnalysisResultStorageModelComponent
                 val graph = rdfStorage.executeSPARQLQuery(sparqlQuery, constructUri(evaluationId), graphVerticesCount)
                 analysisResultRepository.updateTimestamp(evaluationId)
                 graph
+            }
+
+            def getGraphJena(evaluationId: String, format: String = "RDF/JSON"): String = {
+                val dataset = rdfStorage.executeSPARQLQueryJena("CONSTRUCT { ?s ?p ?o } WHERE {?s ?p ?o.}", constructUri(evaluationId))
+                analysisResultRepository.updateTimestamp(evaluationId)
+
+                val outputStream = new java.io.ByteArrayOutputStream()
+                if (format.toLowerCase == "json-ld"){
+                    com.github.jsonldjava.jena.JenaJSONLD.init()
+                    RDFDataMgr.write(outputStream, dataset, com.github.jsonldjava.jena.JenaJSONLD.JSONLD)
+                }else{
+                    dataset.getDefaultModel().write(outputStream, format)
+                }
+
+                new String(outputStream.toByteArray(),"UTF-8")
+
             }
 
             def getGraph(sparqlQueryList: List[String], evaluationId: String): Graph = {

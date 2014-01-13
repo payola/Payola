@@ -24,7 +24,7 @@ import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
  * @param prefixApplier Prefix applier
  * @author Jiri Helmich
  */
-class Generic(prefixApplier: Option[PrefixApplier] = None) extends PluginView("DataCube Universal", prefixApplier) {
+class Generic(prefixApplier: Option[PrefixApplier] = None) extends PluginView[Graph]("DataCube Universal", prefixApplier) {
 
     val controlsHolder = new Div(List(), "span4 dcv-controlsholder")
     val graphHolder = new Div(List(), "span8 dcv-graphholder")

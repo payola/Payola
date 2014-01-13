@@ -19,7 +19,7 @@ import cz.payola.web.shared.transformators.IdentityTransformator
  *
  * @author Jiri Helmich
  */
-class TimeHeatmap(prefixApplier: Option[PrefixApplier] = None) extends PluginView("Time heatmap", prefixApplier) {
+class TimeHeatmap(prefixApplier: Option[PrefixApplier] = None) extends PluginView[Graph]("Time heatmap", prefixApplier) {
 
     val mapPlaceholder = new Div(List(),"map-placeholder")
 
@@ -186,7 +186,7 @@ class TimeHeatmap(prefixApplier: Option[PrefixApplier] = None) extends PluginVie
                 false
             }
 
-            val map = new MapView(center, 3, "satellite", list, yearList, hashMap, mapPlaceholder.htmlElement)
+            val map = new TimeHeatMapView(center, 3, "satellite", list, yearList, hashMap, mapPlaceholder.htmlElement)
 
             mapPlaceholder.removeAllChildNodes()
             wrap.render(mapPlaceholder.htmlElement)

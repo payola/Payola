@@ -26,7 +26,7 @@ import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
 /**
  * Representation of visual based output drawing plugin
  */
-abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplier]) extends PluginView(name, prefixApplier)
+abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplier]) extends PluginView[Graph](name, prefixApplier)
 {
     /**
      * Value used during vertex selection process.

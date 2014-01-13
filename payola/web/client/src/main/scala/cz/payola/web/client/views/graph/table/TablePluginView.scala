@@ -14,7 +14,7 @@ import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
 import cz.payola.web.shared.transformators.TripleTableTransformator
 
 abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier])
-    extends PluginView(name, prefixApplier)
+    extends PluginView[Graph](name, prefixApplier)
 {
     protected val tablePluginWrapper = new Div()
     protected val tableWrapper = new Div().setAttribute("style", "padding: 0 20px; min-height: 200px; margin:0 auto;")

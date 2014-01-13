@@ -16,7 +16,7 @@ import cz.payola.web.client.models.PrefixApplier
 import cz.payola.web.shared.transformators.IdentityTransformator
 import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
 
-abstract class SigmaPluginView(name: String, prefixApplier: Option[PrefixApplier]) extends PluginView(name, prefixApplier){
+abstract class SigmaPluginView(name: String, prefixApplier: Option[PrefixApplier]) extends PluginView[rdf.Graph](name, prefixApplier){
     protected var sigmaPluginWrapper = new Div().setAttribute("style", "padding: 0 5px; min-width: 200px; min-height: 200px;")
 
     private var edgesNum = 0

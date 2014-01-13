@@ -5,47 +5,44 @@ import cz.payola.model.ModelException
 import cz.payola.domain.entities._
 import cz.payola.web.shared.managers._
 import cz.payola.common._
+import cz.payola.domain.rdf.Graph
 import cz.payola.common.EvaluationSuccess
 
 @remote
-@secured object AnalysisRunner
+@secured object  AnalysisRunner
     extends ShareableEntityManager[Analysis, cz.payola.common.entities.Analysis](Payola.model.analysisModel)
 {
-    @async def runAnalysisById(id: String, timeoutSeconds: Long, oldEvaluationId: String,
+    @async def runAnalysisById(id: String, oldEvaluationId: String,
         checkAnalysisStore: Boolean = false, user: Option[User] = None)
         (successCallback: (String => Unit))
         (failCallback: (Throwable => Unit)) {
 
         val analysis = getAnalysisById(user, id)
-        val evaluationId = Payola.model.analysisModel.run(analysis, timeoutSeconds, oldEvaluationId, user)
+        val evaluationId = Payola.model.analysisModel.run(analysis, oldEvaluationId, user)
 
         successCallback(evaluationId)
     }
 
-    @async def getEvaluationState(evaluationId: String, analysisId: String,
-        storeAnalysis: Boolean = false, persistInAnalysisStorage: Boolean = false,
-        user: Option[User] = None)
+    @async def getEvaluationState(evaluationId: String, analysisId: String, user: Option[User] = None)
         (successCallback: (EvaluationState => Unit))
         (failCallback: (Throwable => Unit)) {
+
+        //val host = "live.payola.cz"
+        val host = "localhost:9000"
 
         val resultResponse =
             try{
                 val response = Payola.model.analysisModel.getEvaluationState(evaluationId, user)
+                response match {
+                    case r: EvaluationSuccess =>
+                        Payola.model.analysisResultStorageModel.saveGraph(
+                            r.outputGraph, analysisId, evaluationId, host, user)
+                        val availableTransformators: List[String] =
+                            TransformationManager.getAvailableTransformations(r.outputGraph)
+                        EvaluationCompleted(availableTransformators, r.instanceErrors)
 
-                if(storeAnalysis) {
-                    response match {
-                        case r: EvaluationSuccess =>
-                            Payola.model.analysisResultStorageModel.saveGraph(
-                                r.outputGraph, analysisId, evaluationId, persistInAnalysisStorage, user)
-                            val availableTransformators: List[String] =
-                                TransformationManager.getAvailableTransformations(r.outputGraph)
-                            EvaluationCompleted(availableTransformators, r.instanceErrors)
-
-                        case _ =>
-                            response
-                    }
-                } else {
-                    response
+                    case _ =>
+                        response
                 }
             } catch {
                 case e: ModelException => // the evaluation was never started, the result is in resultStorage

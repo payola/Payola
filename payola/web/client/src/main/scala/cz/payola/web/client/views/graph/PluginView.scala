@@ -10,7 +10,7 @@ import cz.payola.common.rdf.Graph
  * A graph visualization plugin view.
  * @param name Name of the plugin.
  */
-abstract class PluginView(val name: String, private val prefixApplier: Option[PrefixApplier]) extends GraphView with ComposedView
+abstract class PluginView[B](val name: String, private val prefixApplier: Option[PrefixApplier]) extends GraphView with ComposedView
 {
     /**
      * Renders the plugin-specific controls.
@@ -30,5 +30,5 @@ abstract class PluginView(val name: String, private val prefixApplier: Option[Pr
 
     def isAvailable(availableTransformators: List[String], evaluationId: String, success: () => Unit, fail: () => Unit) {}
 
-    def loadDefaultCachedGraph(evaluationId: String, updateGraph: Graph => Unit) {}
+    def loadDefaultCachedGraph(evaluationId: String, updateGraph: B => Unit) {}
 }
