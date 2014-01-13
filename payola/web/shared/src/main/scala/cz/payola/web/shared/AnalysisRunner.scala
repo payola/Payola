@@ -3,8 +3,9 @@ package cz.payola.web.shared
 import s2js.compiler._
 import cz.payola.model.ModelException
 import cz.payola.domain.entities._
-import cz.payola.web.shared.managers.ShareableEntityManager
+import cz.payola.web.shared.managers._
 import cz.payola.common._
+import cz.payola.common.EvaluationSuccess
 
 @remote
 @secured object AnalysisRunner
@@ -22,7 +23,7 @@ import cz.payola.common._
     }
 
     @async def getEvaluationState(evaluationId: String, analysisId: String,
-        storeAnalysis: Boolean = false, persistInAnalysisStorage: Boolean = false, paginate: Boolean = false,
+        storeAnalysis: Boolean = false, persistInAnalysisStorage: Boolean = false,
         user: Option[User] = None)
         (successCallback: (EvaluationState => Unit))
         (failCallback: (Throwable => Unit)) {
@@ -31,44 +32,27 @@ import cz.payola.common._
             try{
                 val response = Payola.model.analysisModel.getEvaluationState(evaluationId, user)
 
-                //Console.println("Getting evaluation state.")
                 if(storeAnalysis) {
                     response match {
                         case r: EvaluationSuccess =>
-                            //Console.println("About to store analysis result.")
                             Payola.model.analysisResultStorageModel.saveGraph(
                                 r.outputGraph, analysisId, evaluationId, persistInAnalysisStorage, user)
-                            //Console.println("saved")
-                            EvaluationSuccess(
-                                Payola.model.analysisResultStorageModel.paginate(r.outputGraph),
-                                r.instanceErrors)
+                            val availableTransformators: List[String] =
+                                TransformationManager.getAvailableTransformations(r.outputGraph)
+                            EvaluationCompleted(availableTransformators, r.instanceErrors)
 
                         case _ =>
-                            //Console.println("2")
                             response
                     }
                 } else {
-                    //Console.println("3")
                     response
                 }
             } catch {
                 case e: ModelException => // the evaluation was never started, the result is in resultStorage
-                    //Console.println("Error Occured.")
-                    if(user.isDefined) {
-                        //Console.println("About to load analysis result.")
-                        val graph = Payola.model.analysisResultStorageModel.getGraph(evaluationId)
-
-                        if(paginate) {
-                            val paginated = Payola.model.analysisResultStorageModel.paginate(graph)
-                            EvaluationSuccess(paginated, List())
-                        } else {
-                            EvaluationSuccess(graph, List())
-                        }
-                    } else {
-                        throw e
-                    }
+                    val graph = Payola.model.analysisResultStorageModel.getGraph(evaluationId)
+                    val availableTransformators: List[String] = TransformationManager.getAvailableTransformations(graph)
+                    EvaluationCompleted(availableTransformators, List())
                 case p =>  {
-                    //Console.println("Error Occured.")
                     throw p
                 }
             }

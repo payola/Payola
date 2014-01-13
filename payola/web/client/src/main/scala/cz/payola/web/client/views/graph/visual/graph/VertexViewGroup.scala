@@ -32,6 +32,19 @@ class VertexViewGroup(position: Point2D, prefixApplier: Option[PrefixApplier])
         vertices.toList
     }
 
+    def getAllVertexViews: List[VertexView] = {
+        val vertices = ListBuffer[VertexView]()
+        vertexViews.foreach {
+            _ match {
+                case group: VertexViewGroup =>
+                    vertices ++= group.getAllVertexViews
+                case view: VertexView =>
+                    vertices += view
+            }
+        }
+        vertices.toList
+    }
+
     def getFirstContainedVertex(): Vertex = {
         vertexViews(0) match {
             case group: VertexViewGroup =>

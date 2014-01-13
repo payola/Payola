@@ -4,6 +4,7 @@ import s2js.adapters.html
 import cz.payola.web.client.views._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.models.PrefixApplier
+import cz.payola.common.rdf.Graph
 
 /**
  * A graph visualization plugin view.
@@ -26,4 +27,8 @@ abstract class PluginView(val name: String, private val prefixApplier: Option[Pr
         new Div(List(new Text(message)), "plugin-message large").render(parent)
         new Div(List(new Text(description)), "plugin-message small").render(parent)
     }
+
+    def isAvailable(availableTransformators: List[String], evaluationId: String, success: () => Unit, fail: () => Unit) {}
+
+    def loadDefaultCachedGraph(evaluationId: String, updateGraph: Graph => Unit) {}
 }

@@ -10,8 +10,8 @@ import cz.payola.web.client.views.bootstrap.Icon
 import cz.payola.web.client.views.graph.PluginView
 import cz.payola.web.client.models.PrefixApplier
 import form.fields.TextInput
-import cz.payola.web.shared.AnalysisEvaluationResultsManager
 import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
+import cz.payola.web.shared.transformators.TripleTableTransformator
 
 abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier])
     extends PluginView(name, prefixApplier)
@@ -20,7 +20,7 @@ abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier
     protected val tableWrapper = new Div().setAttribute("style", "padding: 0 20px; min-height: 200px; margin:0 auto;")
 
     protected val allowedLinesOnPage = 50
-    private var currentPage = 0
+    protected var currentPage = 0
     private var pagesCount = 0
 
     def createSubViews = List(tablePluginWrapper)
@@ -144,7 +144,7 @@ abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier
 
     private def paginateToPage(goingToPage: Int) {
         if(evaluationId.isDefined) {
-            AnalysisEvaluationResultsManager.paginate(goingToPage, 50, evaluationId.get) { paginated =>
+            TripleTableTransformator.getCachedPage(evaluationId.get, goingToPage, allowedLinesOnPage) { paginated =>
                 updateGraphPage(Some(paginated), true, goingToPage)
             } { error =>
                 val modal = new FatalErrorModal(error.toString())

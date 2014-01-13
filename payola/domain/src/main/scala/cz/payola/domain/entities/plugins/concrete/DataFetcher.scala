@@ -81,9 +81,9 @@ abstract class DataFetcher(name: String, inputCount: Int, parameters: immutable.
                 )
             )
 
-            patterns.par.map(p => executeQuery(instance, SelectCountQuery(p).toString)).reduce(_ + _)
-            //graphSize.
-            //patterns.par.map(p => executeQuery(instance, ConstructQuery(p).toString)).reduce(_ + _)
+            patterns.par.map{p =>
+                executeQuery(instance, SelectCountQuery(p).toString)
+            }.reduce(_ + _)
         } else {
             Graph.empty
         }

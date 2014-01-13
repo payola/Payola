@@ -4,6 +4,7 @@ import collection.mutable.ListBuffer
 import cz.payola.web.client.views.algebra._
 import cz.payola.common.rdf._
 import cz.payola.web.client.models.PrefixApplier
+import cz.payola.domain.sparql.Literal
 
 /**
  * Representation of a graph component (part of all vertices and edges from which does not exist a path to another
@@ -85,9 +86,13 @@ class Component(private var _vertexViewElements: ListBuffer[VertexViewElement], 
         getSelected.isEmpty
     }
 
-    def removeFromGroup(vertex: VertexViewElement, newPosition: Point2D): Boolean = {
+    /**
+     * returns true if the vertex was found in this component; and count of vertexViews containing VertexLinks
+     */
+    def removeFromGroup(vertex: VertexViewElement, newPosition: Point2D): (Boolean, List[String]) = {
         var groupsToRemove = ListBuffer[VertexViewElement]()
         var verticesToSelect = ListBuffer[VertexViewElement]()
+        var vertexLinks = List[String]()
 
         var allGroups = ListBuffer[VertexViewGroup]()
         vertexViewElements.foreach (_ match {case i: VertexViewGroup => allGroups += i} )
@@ -101,6 +106,11 @@ class Component(private var _vertexViewElements: ListBuffer[VertexViewElement], 
                         group.vertexViews.foreach (_ match {case i: VertexViewGroup => allGroups += i} )
 
                         group.removeVertex(vertex, edgeViews.toList, allGroups.toList)
+
+                        //if removed vertex contains vertexLink, increase the counter
+                        vertex match { case v: VertexView => v.vertexModel match {
+                            case vLink: VertexLink => vertexLinks = List(vLink.vertexLinkURI) }}
+
                         vertex.position = newPosition
                         vertexViewElements += vertex
                         verticesToSelect += vertex
@@ -108,14 +118,20 @@ class Component(private var _vertexViewElements: ListBuffer[VertexViewElement], 
                         if (group.vertexViews.length < 2) { //delete group if there is only one vertex
                             deselectVertex(group) //the group is marked selected and in the container of selected vertices
 
-                            allGroups = ListBuffer[VertexViewGroup]()
+                            allGroups = ListBuffer[VertexViewGroup]() //groups contained in the deleted group
                             group.vertexViews.foreach (_ match {case i: VertexViewGroup => allGroups += i} )
 
                             val removed = group.removeAll(edgeViews.toList, allGroups.toList)
-                            removed.foreach(_.position = newPosition)
-                            vertexViewElements ++= removed
+                            if(!removed.isEmpty) { // in case group.vertexViews.length == 0
+                                removed(0) match {
+                                    case v: VertexView => v.vertexModel match {
+                                        case vLink: VertexLink => vertexLinks = vertexLinks ++ List(vLink.vertexLinkURI) }}
 
-                            verticesToSelect ++= removed
+                                removed.foreach(_.position = newPosition)
+                                vertexViewElements ++= removed
+
+                                verticesToSelect ++= removed
+                            }
 
                             groupsToRemove += group
                             group.destroy()
@@ -129,7 +145,7 @@ class Component(private var _vertexViewElements: ListBuffer[VertexViewElement], 
 
         vertexViewElements --= groupsToRemove
         verticesToSelect.foreach(vertexToSelect => selectVertex(vertexToSelect))
-        smthRemoved
+        ((smthRemoved, vertexLinks))
     }
 
     /**
@@ -297,10 +313,6 @@ class Component(private var _vertexViewElements: ListBuffer[VertexViewElement], 
         }
     }
 
-    //###################################################################################################################
-    //selection and stuff################################################################################################
-    //###################################################################################################################
-
     /**
      * Finds a vertex in this graphs vertexViews container, that has the input point inside its graphical
      * (rectangular) representation.
@@ -393,6 +405,75 @@ class Component(private var _vertexViewElements: ListBuffer[VertexViewElement], 
             true
         } else {
             false
+        }
+    }
+
+    def extend(vertex: VertexView, groups: List[VertexGroup], modelGraph: Graph, newPosition: Point2D) {
+
+        val extensionVertexModel = vertex.getFirstContainedVertex()
+        val newEdgeViews = new ListBuffer[EdgeView]()
+        val groupsOfNewVertexLinks = groups.filter{ modelGroup => !(modelGroup.content.filter{ vertexLinkModel =>
+            !vertexViewElements.exists(_.represents(vertexLinkModel))}.isEmpty)
+        }.map{ modelGroup =>
+            //create vertexLinks for all vertices in groups, that do not exist in this graphView
+            val newVertexLinkViews = modelGroup.content.filter{ vertexLinkModel =>
+                !(vertexViewElements.exists(_.represents(vertexLinkModel)))}.map(
+                    new VertexView(_, Point2D.Zero, "", prefixApplier)).toList
+
+            //create edges for all created vertexLinkViews
+            val newEdgeViewsToGroup = modelGraph.edges.filter{ edgeModel =>
+                newVertexLinkViews.exists{ newLink =>
+                    newLink.vertexModel.toString() == edgeModel.origin.toString() || newLink.vertexModel.toString() ==
+                        edgeModel.destination.toString()
+                }}.map{ edgeModel =>
+                    val originView = newVertexLinkViews.find(_.represents(edgeModel.origin)).getOrElse(vertex)
+                    val destinationView = newVertexLinkViews.find(_.represents(edgeModel.destination)).getOrElse(vertex)
+                    new EdgeView(edgeModel, originView, destinationView, prefixApplier)
+                }.toList
+
+                val newGroupView = new VertexViewGroup(newPosition, prefixApplier)
+                newGroupView.addVertices(newVertexLinkViews, newEdgeViewsToGroup)
+                newEdgeViews ++= newEdgeViewsToGroup
+                newGroupView
+        }
+
+        //replace the vertexLink and add groups
+        _vertexViewElements = _vertexViewElements.filter{ oldVertexViews =>
+            !oldVertexViews.represents(extensionVertexModel)} ++ groupsOfNewVertexLinks
+        _vertexViewElements += vertex
+
+        //redirect edges
+        edgeViews.foreach{ edgeView =>
+            if(edgeView.edgeModel.origin.uri == extensionVertexModel.toString()) {
+                edgeView.redirectOrigin(Some(vertex)) //TODO force
+            } else if(edgeView.edgeModel.destination.toString() == extensionVertexModel.toString()) {
+                edgeView.redirectDestination(Some(vertex)) //TODO force
+            }
+        }
+
+        //add edgeViews to theGroups
+        edgeViews ++= newEdgeViews
+        //add edges, that have one of their vertices existing in the old graph
+        edgeViews ++= modelGraph.edges.filter{ edge => //filter out edges to LiteralVertices and edges that already have an edgeView in this graph
+            edge.destination.isInstanceOf[IdentifiedVertex] && !(edgeViews.exists{ edgeView =>
+                edgeView.edgeModel.uri == edge.uri && edgeView.edgeModel.origin.uri ==
+                    edge.origin.uri && edgeView.edgeModel.destination.toString == edge.destination.toString
+            })
+        }.map{ edge =>
+            val originView = _vertexViewElements.find(_.represents(edge.origin)).get
+            val destinationView = _vertexViewElements.find(_.represents(edge.destination)).get
+            new EdgeView(edge, originView, destinationView, prefixApplier)
+        }
+
+        //and set the edges to the new created vertexViews
+        vertex.edges = getEdgesOfVertex(vertex, edgeViews)
+    }
+
+    private def getEdgesOfVertex(vertexView: VertexViewElement, edgeViews: ListBuffer[EdgeView]): ListBuffer[EdgeView] = {
+        edgeViews.filter {
+            edgeView =>
+                ((edgeView.originView.contains(vertexView)) ||
+                    (edgeView.destinationView.contains(vertexView)))
         }
     }
 }

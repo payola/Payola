@@ -13,6 +13,8 @@ import cz.payola.web.client.views.bootstrap.Icon
 import cz.payola.web.client.views.graph.sigma.properties._
 import cz.payola.web.client.views.graph.sigma.PropertiesSetter._
 import cz.payola.web.client.models.PrefixApplier
+import cz.payola.web.shared.transformators.IdentityTransformator
+import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
 
 abstract class SigmaPluginView(name: String, prefixApplier: Option[PrefixApplier]) extends PluginView(name, prefixApplier){
     protected var sigmaPluginWrapper = new Div().setAttribute("style", "padding: 0 5px; min-width: 200px; min-height: 200px;")
@@ -126,6 +128,29 @@ abstract class SigmaPluginView(name: String, prefixApplier: Option[PrefixApplier
             case i: rdf.IdentifiedVertex =>
                 sigmaInstance.get.addEdge(edgesNum+":"+edge.origin.uri+":"+edge.uri, edge.origin.uri, i.uri, new EdgeProperties())
                 edgesNum += 1
+        }
+    }
+
+    override def isAvailable(availableTransformators: List[String], evaluationId: String,
+        success: () => Unit, fail: () => Unit) {
+
+        IdentityTransformator.getSmapleGraph(evaluationId) { sample =>
+            if(sample.isEmpty && availableTransformators.exists(_.contains("IdentityTransformator"))) {
+                success()
+            }
+        }
+        { error =>
+            fail()
+            val modal = new FatalErrorModal(error.toString())
+            modal.render()
+        }
+    }
+
+    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: rdf.Graph => Unit) {
+        IdentityTransformator.transform(evaluationId)(updateGraph(_))
+        { error =>
+            val modal = new FatalErrorModal(error.toString())
+            modal.render()
         }
     }
 }

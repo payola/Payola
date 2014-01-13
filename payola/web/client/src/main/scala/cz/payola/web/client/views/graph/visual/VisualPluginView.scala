@@ -20,6 +20,8 @@ import lists.ListItem
 import models.PrefixApplier
 import tables._
 import scala.Some
+import cz.payola.web.shared.transformators.VisualTransformator
+import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
 
 /**
  * Representation of visual based output drawing plugin
@@ -255,8 +257,11 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
 
         infoTable.removeVertexFromGroup += { e =>
             triggerDestroyVertexInfo()
-            graphView.get.removeVertexFromGroup(e.target, topLayer.getCenter)
-            redraw()
+            val vertexLinks = graphView.get.removeVertexFromGroup(e.target, topLayer.getCenter)
+            if(e.target.getFirstContainedVertex().isInstanceOf[VertexLink]) {
+               vertexLinks.foreach(_.foreach(link => fetchVertexLink(link)))
+            }
+            true
         }
 
         infoTable.groupNameField.changed += { k =>
@@ -271,6 +276,23 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
         infoTable.render(_parentHtmlElement.getOrElse(document.body))
 
         infoTable.setPosition(getVertexInfoTablePosition(vertexGroup, infoTable.getSize))
+    }
+
+    private def fetchVertexLink(uriLink: String) {
+
+        evaluationId.foreach(VisualTransformator.getVertexDetail(_, uriLink){ paginated =>
+            zoomControls.reset()
+            graphView.foreach { gV =>
+                gV.extend(paginated, topLayer.getCenter)
+                hideByCustomization(currentCustomization)
+                gV.setConfiguration(currentCustomization)
+                _parentHtmlElement.foreach(gV.render(_))
+            }
+            redraw()
+        } { error =>
+            val modal = new FatalErrorModal(error.toString())
+            modal.render()
+        })
     }
 
     private def createLiteralsInfoTable(vertexView: VertexView) {
@@ -633,5 +655,28 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
     private def updateCanvasSize() {
         layerPack.size = Vector2D(window.innerWidth, window.innerHeight) - (topLayer.offset - Vector2D(0,
             window.scrollY))
+    }
+
+    override def isAvailable(availableTransformators: List[String], evaluationId: String,
+        success: () => Unit, fail: () => Unit) {
+
+        VisualTransformator.getSmapleGraph(evaluationId) { sample =>
+            if(sample.isEmpty && availableTransformators.exists(_.contains("VisualTransformator"))) {
+                success()
+            }
+        }
+        { error =>
+            fail()
+            val modal = new FatalErrorModal(error.toString())
+            modal.render()
+        }
+    }
+
+    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Graph => Unit) {
+        VisualTransformator.transform(evaluationId)(updateGraph(_))
+        { error =>
+            val modal = new FatalErrorModal(error.toString())
+            modal.render()
+        }
     }
 }

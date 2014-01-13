@@ -7,6 +7,8 @@ import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.elements.lists._
 import cz.payola.web.client.views.bootstrap.Icon
 import cz.payola.web.client.models.PrefixApplier
+import cz.payola.web.shared.transformators.TripleTableTransformator
+import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
 
 /**
  * A plugin that displays all edges in the graph as a table. The edges are firstly grouped by the edge origins,
@@ -110,7 +112,9 @@ class TripleTablePluginView(prefixApplier: Option[PrefixApplier]) extends TableP
             originCell.setAttribute("rowspan", originRowCount.toString)
         }
 
-        if(graph.isDefined && graph.get.resultsCount.isDefined) graph.get.resultsCount.get else tableListing._2
+        if(graph.isDefined && graph.get.resultsCount.isDefined) {
+            math.ceil(graph.get.resultsCount.get / allowedLinesOnPage).toInt
+        } else { tableListing._2 }
     }
 
     private def createVertexDetailRow(edgeUri: String, edges: Seq[Edge], row: html.Element) {
@@ -145,5 +149,32 @@ class TripleTablePluginView(prefixApplier: Option[PrefixApplier]) extends TableP
         }
 
         edgesByOrigin
+    }
+
+    override def isAvailable(availableTransformators: List[String], evaluationId: String,
+        success: () => Unit, fail: () => Unit) {
+
+        TripleTableTransformator.getSmapleGraph(evaluationId) { sample =>
+        //TripleTableTransformator.getClass.getName does not work after s2js
+            if(sample.isEmpty && availableTransformators.exists(_.contains("TripleTableTransformator"))) {
+                success()
+            }
+        }
+        { error =>
+            fail()
+            val modal = new FatalErrorModal(error.toString())
+            modal.render()
+        }
+    }
+
+    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Graph => Unit) {
+        TripleTableTransformator.getCachedPage(evaluationId, currentPage, allowedLinesOnPage)
+        { pageOfGraph =>
+            updateGraph(pageOfGraph)
+        }
+        { error =>
+            val modal = new FatalErrorModal(error.toString())
+            modal.render()
+        }
     }
 }

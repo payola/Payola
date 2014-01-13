@@ -27,7 +27,7 @@ class VertexGroupInfoTable(group: VertexViewGroup, position: Point2D, prefixAppl
                     case idVertex: IdentifiedVertex =>
                         prefixApplier.map(_.applyPrefix(idVertex.uri)).getOrElse(vertex.toString())
                     case _ =>
-                        vertex.toString()
+                        view.vertexModel.toString()
                 }
                 case _ =>
                     vertex.toString()

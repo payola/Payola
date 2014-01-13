@@ -180,10 +180,7 @@ class VertexView(_vertexModel: Vertex, position: Point2D, private var _rdfType: 
     }
 
     def setConfiguration(newCustomization: Option[DefinedCustomization]) {
-        setVisualConfiguration(newCustomization, vertexModel match {
-            case i: IdentifiedVertex => i.uri
-            case i: LiteralVertex => i.value.toString()
-        }, rdfType, getLiteralVertices)
+        setVisualConfiguration(newCustomization, vertexModel.toString(), rdfType, getLiteralVertices)
     }
 
     /**

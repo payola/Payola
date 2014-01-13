@@ -56,7 +56,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
     private var groupCustomizations = userCustomization.classCustomizations.filter(e =>
         e.isGroupCustomization).map{ userClassCust => userClassCust.asInstanceOf[ClassCustomization] }
 
-    private def propertiesContainer = userCustomization.classCustomizations.find(_.uri == "properties")
+    private var propertiesContainer = userCustomization.classCustomizations.find(_.uri == "properties").map(_.asInstanceOf[ClassCustomization])
     
     private var propertyCustomizations = if(propertiesContainer.isDefined) {
         propertiesContainer.get.propertyCustomizations
@@ -367,7 +367,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
                 CustomizationManager.createClassCustomization(
                     userCustomization.id, "properties", List[String]()) { ocAddClass =>
                     val newClass = ocAddClass.classCustomizations.find(_.getUri == "properties").get.asInstanceOf[ClassCustomization]
-                    classCustomizations ++= List(newClass)
+                    propertiesContainer = Some(newClass)
 
                     addPropertyCall(propertiesContainer.get, newPropertyURI)
                     customizationChanged.trigger(new UserCustomizationEventArgs(userCustomization))
