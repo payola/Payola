@@ -85,8 +85,13 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
         }
     }
 
-    def removeVertexFromGroup(vertexToRemove: VertexViewElement, newPosition: Point2D) {
-        components.foreach {_.removeFromGroup(vertexToRemove, newPosition)}
+    def removeVertexFromGroup(vertexToRemove: VertexViewElement, newPosition: Point2D): Option[List[String]] = {
+        var vertexLinks: Option[List[String]] = None
+        components.foreach { component =>
+            val links = component.removeFromGroup(vertexToRemove, newPosition)._2
+            vertexLinks = Some(vertexLinks.getOrElse(List[String]()) ++ links)
+        }
+        vertexLinks
     }
 
     /**
@@ -123,6 +128,25 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
                 }
             }
         }
+    }
+
+    /**
+     * Replaces vertexLink in this graphView with identifiedVertex in the input graph and adds the rest of the input
+     * graph to the this graphView. (Supposed to be called after vertex neighbourhood fetch from VisualTransformator.)
+     * @param graph Only one vertex (identifiedVertex) with its literalVertices and edges to its neighbours all grouped
+     *              in a vertexGroup
+     * @param vertexInitPosition position of the replaced vertex
+     */
+    def extend(graph: Graph, vertexInitPosition: Point2D) {
+        val identifiedVertices = createVertexViews(graph, vertexInitPosition)
+        val firstVertex = identifiedVertices.find(_.isInstanceOf[VertexView]).get.asInstanceOf[VertexView]
+        val groups = graph.vertices.filter(_.isInstanceOf[VertexGroup]).map(_.asInstanceOf[VertexGroup]).toList
+
+        val containedComponent = components.find{component =>
+            component.vertexViewElements.exists{ ve: VertexViewElement =>
+                ve.represents(firstVertex.getFirstContainedVertex()) }}.get //the vertex must exist in one of the components
+
+        containedComponent.extend(firstVertex, groups, graph, vertexInitPosition)
     }
 
     /**
@@ -207,30 +231,38 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
         val buffer = ListBuffer[VertexViewElement]()
         val literalVertices = ListBuffer[LiteralVertex]()
 
-        graphModel.vertices.foreach {
-            vertexModel =>
+        graphModel.vertices.foreach { vertexModel =>
 
-                vertexModel match {
-                    case i: IdentifiedVertex => {
-                        val newVertexView = new VertexView(i, vertexInitPosition, i.uri, prefixApplier)
+            vertexModel match {
+                case i: IdentifiedVertex => {
+                    val newVertexView = new VertexView(i, vertexInitPosition, i.uri, prefixApplier)
 
+                    newVertexView.rdfType = getRdfTypeForVertexView(graphModel.edges, i)
+                    newVertexView.setInformation(getInformationForVertexView(graphModel, i))
+
+
+                    buffer += newVertexView
+                }
+                case i: LiteralVertex => {
+                    if (contractLiterals){
+                        literalVertices += i
+                    }else{
+                        val newVertexView = new VertexView(i, vertexInitPosition, null, prefixApplier)
                         newVertexView.rdfType = getRdfTypeForVertexView(graphModel.edges, i)
-                        newVertexView.setInformation(getInformationForVertexView(graphModel, i))
-
 
                         buffer += newVertexView
                     }
-                    case i: LiteralVertex => {
-                        if (contractLiterals){
-                            literalVertices += i
-                        }else{
-                            val newVertexView = new VertexView(i, vertexInitPosition, null, prefixApplier)
-                            newVertexView.rdfType = "http://payola.cz/property"//getRdfTypeForVertexView(graphModel.edges, i)
-
-                            buffer += newVertexView
-                        }
-                    }
                 }
+                case group: VertexGroup => {
+                    val newVertexGroup = new VertexViewGroup(vertexInitPosition, prefixApplier)
+                    group.content.foreach { vertexLink =>
+                        newVertexGroup.addVertex(
+                            new VertexView(vertexLink, vertexInitPosition, vertexLink.toString(), prefixApplier),
+                            List())
+                    }
+                    buffer += newVertexGroup
+                }
+            }
         }
 
         addLiteralVerticesToVertexViews(graphModel, buffer, literalVertices)
@@ -277,43 +309,40 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
     private def addLiteralVerticesToVertexViews(graphModel: Graph, vertexViews: ListBuffer[VertexViewElement],
         literalVertices: ListBuffer[LiteralVertex]): ListBuffer[VertexViewElement] = {
 
-        literalVertices.foreach {
-            literalVertex =>
+        literalVertices.foreach { literalVertex =>
             // find edge by which the vertex is connected to the rest of the graph and add it to the identified vertex
             // on the other side of the edge
 
-                val edgeToIdentVertex =
-                    graphModel.edges.find {
-                        edge => (edge.origin == literalVertex || edge.destination == literalVertex)
+            val edgeToIdentVertex =
+                graphModel.edges.find { edge => (edge.origin == literalVertex || edge.destination == literalVertex) }
+
+            edgeToIdentVertex.foreach { e =>
+                //get identified vertex neighbour
+                val identNeighborVertex =
+                    e.origin match {
+                        case i: LiteralVertex => e.destination.asInstanceOf[IdentifiedVertex]
+                        case i: IdentifiedVertex => i
                     }
 
-                edgeToIdentVertex.map { e =>
-                    //get identified vertex neighbour
-                    val identNeighborVertex =
-                        e.origin match {
-                            case i: LiteralVertex => e.destination.asInstanceOf[IdentifiedVertex]
-                            case i: IdentifiedVertex => i
-                        }
-
-                    // get all edges that are with the same uri as the edgeToIdentVertex and are connected to the
-                    // identNeighbourVertex
-                    val edgesToTheIdentVertex = graphModel.edges.filter {
-                        edge =>
-                            edge.uri == e.uri && (
-                                edge.destination == identNeighborVertex || edge.origin == identNeighborVertex)
-                    }
-
-
-                    val literals = edgesToTheIdentVertex.map(_.destination)
-
-                    //find the vertexView of the identified vertex neighbour
-                    val identNeighbourVertexView =
-                        vertexViews.find {
-                            vertexView => vertexView.represents(identNeighborVertex)
-                        }
-
-                    identNeighbourVertexView.map(_.addLiteralVertex(edgeToIdentVertex.get, literals, identNeighborVertex))
+                // get all edges that are with the same uri as the edgeToIdentVertex and are connected to the
+                // identNeighbourVertex
+                val edgesToTheIdentVertex = graphModel.edges.filter {
+                    edge =>
+                        edge.uri == e.uri && (
+                            edge.destination == identNeighborVertex || edge.origin == identNeighborVertex)
                 }
+
+
+                val literals = edgesToTheIdentVertex.map(_.destination)
+
+                //find the vertexView of the identified vertex neighbour
+                val identNeighbourVertexView =
+                    vertexViews.find {
+                        vertexView => vertexView.represents(identNeighborVertex)
+                    }
+
+                identNeighbourVertexView.map(_.addLiteralVertex(edgeToIdentVertex.get, literals, identNeighborVertex))
+            }
         }
         vertexViews
     }
@@ -420,6 +449,12 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
         val destination = getVertexForEdgeConstruct(edgeModel.destination, vertexViews)
         if (destination.isDefined && origin.isDefined) {
             val createdEdgeView = new EdgeView(edgeModel, origin.get, destination.get, prefixApplier)
+
+            vertexViews.filter{ vv => //if the input contains vertexGroups, redirect the new edge if necessary
+                vv.isInstanceOf[VertexViewGroup] && (vv.contains(origin.get) || vv.contains(destination.get))}.foreach{ vv =>
+                if(vv.contains(origin.get)) { createdEdgeView.redirectOrigin(Some(vv)) }
+                else { createdEdgeView.redirectDestination(Some(vv)) }
+            }
             destination.get.edges += createdEdgeView
             origin.get.edges += createdEdgeView
             Some(createdEdgeView)
@@ -429,15 +464,18 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
     }
 
     /**
-     * Search routine for getting vertexViews based on vertex from model.
+     * Searches for vertexViews based on vertex from model.
      * @param vertex to search for
      * @param vertexViews to seach in
      * @return found VertexView or None
      */
     private def getVertexForEdgeConstruct(vertex: Vertex, vertexViews: ListBuffer[VertexViewElement]): Option[VertexViewElement] = {
-        val foundVertices = vertexViews.filter {
-            _.represents(vertex)
-        }
+        /*val groupLessList = new ListBuffer[VertexViewElement]() //TODO error with vertexGroup animation
+        vertexViews.filter(_.isInstanceOf[VertexViewGroup]).foreach(
+            groupLessList ++= _.asInstanceOf[VertexViewGroup].getAllVertexViews)
+        groupLessList ++= vertexViews.filter(!_.isInstanceOf[VertexViewGroup])*/
+
+        val foundVertices = vertexViews.filter(_.represents(vertex))
 
         foundVertices.length match {
             case 0 =>
@@ -448,18 +486,6 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
                 foundVertices.find {
                     _.edges.length == 0
                 }
-                /*foundVertices(0).vertexModel match {
-                    case i: LiteralVertex =>
-                        foundVertices.find {
-                            _.edges.length == 0
-                        }
-                    case i: IdentifiedVertex =>
-                        /*THIS SHOULD NEVER HAPPEN, entering this means, that server sent few identical
-                 identifiedVertices that are supposed to be uniquely identified*/
-                        None
-                    case _ => /*ADD Vertex class children, that may be multiple times present in the graph*/
-                        None
-                }*/
         }
     }
 

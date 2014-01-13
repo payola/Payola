@@ -13,6 +13,8 @@ import cz.payola.web.client.views.elements.lists._
 import cz.payola.web.client.views.elements.form.fields._
 import s2js.adapters.html.Element
 import cz.payola.web.client.views.bootstrap.Icon
+import cz.payola.web.shared.transformators.IdentityTransformator
+import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
 
 /**
  * Generic DataCube visualizer. Based on the graph, it searches DCV definition in it and provides
@@ -344,5 +346,35 @@ class Generic(prefixApplier: Option[PrefixApplier] = None) extends PluginView("D
 
     def createSubViews = {
         List(placeholder)
+    }
+
+
+    override def isAvailable(availableTransformators: List[String], evaluationId: String,
+        success: () => Unit, fail: () => Unit) {
+
+        //TODO
+
+        IdentityTransformator.getSmapleGraph(evaluationId) { sample =>
+            if(sample.isEmpty && availableTransformators.exists(_.contains("IdentityTransformator"))) {
+                success()
+            }
+        }
+        { error =>
+            fail()
+            val modal = new FatalErrorModal(error.toString())
+            modal.render()
+        }
+    }
+
+    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Graph => Unit) {
+        //TODO
+        IdentityTransformator.transform(evaluationId)
+        { pageOfGraph =>
+            updateGraph(pageOfGraph)
+        }
+        { error =>
+            val modal = new FatalErrorModal(error.toString())
+            modal.render()
+        }
     }
 }

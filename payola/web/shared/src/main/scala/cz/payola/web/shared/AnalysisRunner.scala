@@ -5,19 +5,18 @@ import cz.payola.model.ModelException
 import cz.payola.domain.entities._
 import cz.payola.web.shared.managers.ShareableEntityManager
 import cz.payola.common._
-import cz.payola.domain.rdf.Graph
 
 @remote
-@secured object  AnalysisRunner
+@secured object AnalysisRunner
     extends ShareableEntityManager[Analysis, cz.payola.common.entities.Analysis](Payola.model.analysisModel)
 {
-    @async def runAnalysisById(id: String, oldEvaluationId: String,
+    @async def runAnalysisById(id: String, timeoutSeconds: Long, oldEvaluationId: String,
         checkAnalysisStore: Boolean = false, user: Option[User] = None)
         (successCallback: (String => Unit))
         (failCallback: (Throwable => Unit)) {
 
         val analysis = getAnalysisById(user, id)
-        val evaluationId = Payola.model.analysisModel.run(analysis, oldEvaluationId, user)
+        val evaluationId = Payola.model.analysisModel.run(analysis, timeoutSeconds, oldEvaluationId, user)
 
         successCallback(evaluationId)
     }
@@ -28,28 +27,35 @@ import cz.payola.domain.rdf.Graph
         (successCallback: (EvaluationState => Unit))
         (failCallback: (Throwable => Unit)) {
 
-        //val host = "live.payola.cz"
-        val host = "localhost:9000"
-
         val resultResponse =
             try{
                 val response = Payola.model.analysisModel.getEvaluationState(evaluationId, user)
+
+                //Console.println("Getting evaluation state.")
                 if(storeAnalysis) {
                     response match {
                         case r: EvaluationSuccess =>
-                            Payola.model.analysisResultStorageModel.saveGraph(r.outputGraph, analysisId, evaluationId, persistInAnalysisStorage, host, user)
-                            EvaluationSuccess(Payola.model.analysisResultStorageModel.paginate(r.outputGraph),r.instanceErrors)
+                            //Console.println("About to store analysis result.")
+                            Payola.model.analysisResultStorageModel.saveGraph(
+                                r.outputGraph, analysisId, evaluationId, persistInAnalysisStorage, user)
+                            //Console.println("saved")
+                            EvaluationSuccess(
+                                Payola.model.analysisResultStorageModel.paginate(r.outputGraph),
+                                r.instanceErrors)
 
                         case _ =>
+                            //Console.println("2")
                             response
                     }
                 } else {
+                    //Console.println("3")
                     response
                 }
             } catch {
-                // the evaluation was never started, the result is in resultStorage
-                case e: ModelException =>
+                case e: ModelException => // the evaluation was never started, the result is in resultStorage
+                    //Console.println("Error Occured.")
                     if(user.isDefined) {
+                        //Console.println("About to load analysis result.")
                         val graph = Payola.model.analysisResultStorageModel.getGraph(evaluationId)
 
                         if(paginate) {
@@ -62,6 +68,7 @@ import cz.payola.domain.rdf.Graph
                         throw e
                     }
                 case p =>  {
+                    //Console.println("Error Occured.")
                     throw p
                 }
             }

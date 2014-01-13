@@ -275,6 +275,7 @@ input[type="checkbox"].active:after {
 }
 
 .plugin-message.large {
+    height: 50px;
     padding-top: 150px;
     font-size: 32pt;
     color: #333;

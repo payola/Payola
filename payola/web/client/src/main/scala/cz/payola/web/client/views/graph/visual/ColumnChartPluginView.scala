@@ -7,6 +7,8 @@ import cz.payola.web.client.views.graph.PluginView
 import cz.payola.web.client.views.elements._
 import cz.payola.common.rdf._
 import cz.payola.web.client.models.PrefixApplier
+import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
+import cz.payola.web.shared.transformators.IdentityTransformator
 
 class ColumnChartPluginView(prefixApplier: Option[PrefixApplier]) extends PluginView("Column Chart", prefixApplier)
 {
@@ -240,5 +242,20 @@ class ColumnChartPluginView(prefixApplier: Option[PrefixApplier]) extends Plugin
     @javascript("return (typeof str == 'string');")
     private def variableIsString(str: Any): Boolean = {
         false
+    }
+
+    override def isAvailable(availableTransformators: List[String], evaluationId: String,
+        success: () => Unit, fail: () => Unit) {
+
+        IdentityTransformator.getSmapleGraph(evaluationId) { sample =>
+            if(sample.isEmpty && availableTransformators.exists(_.contains("IdentityTransformator"))) {
+                success()
+            }
+        }
+        { error =>
+            fail()
+            val modal = new FatalErrorModal(error.toString())
+            modal.render()
+        }
     }
 }

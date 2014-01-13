@@ -8,6 +8,8 @@ import cz.payola.web.client.views.elements.Text
 import cz.payola.web.client.views.graph.sigma.properties.DrawingProperties
 import s2js.adapters.js.sigma.Node
 import cz.payola.web.client.models.PrefixApplier
+import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
+import cz.payola.web.shared.transformators.IdentityTransformator
 
 class GraphSigmaPluginView(prefixApplier: Option[PrefixApplier]) extends SigmaPluginView("Sigma.js", prefixApplier) {
 
@@ -233,5 +235,20 @@ class GraphSigmaPluginView(prefixApplier: Option[PrefixApplier]) extends SigmaPl
         }
         resultList += "</ul>"
         resultList
+    }
+
+    override def isAvailable(availableTransformators: List[String], evaluationId: String,
+        success: () => Unit, fail: () => Unit) {
+
+            IdentityTransformator.getSmapleGraph(evaluationId) { sample =>
+                if(sample.isEmpty && availableTransformators.exists(_.contains("IdentityTransformator"))) {
+                    success()
+                }
+            }
+            { error =>
+                fail()
+                val modal = new FatalErrorModal(error.toString())
+                modal.render()
+            }
     }
 }

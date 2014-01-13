@@ -16,8 +16,8 @@ import cz.payola.web.client.views.elements.lists.ListItem
 import cz.payola.web.client.views.graph.sigma.GraphSigmaPluginView
 import cz.payola.web.client.views.graph.datacube._
 import cz.payola.web.client.models.PrefixApplier
-import cz.payola.web.shared.AnalysisEvaluationResultsManager
 import s2js.compiler.javascript
+import cz.payola.web.client.views.graph.empty.EmptyPluginView
 
 class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with ComposedView
 {
@@ -75,7 +75,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
     /**
      * Currently used visualization plugin.
      */
-    private var currentPlugin = plugins.head
+    private var currentPlugin: PluginView = new EmptyPluginView()
 
     /**
      * Parent to the visualization plugin View object.
@@ -137,7 +137,6 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
     }
 
     // Display the first plugin.
-    pluginChangeButton.setActiveItem(pluginChangeButton.items.head)
     currentPlugin.render(pluginSpace.htmlElement)
     currentPlugin.renderControls(toolbar.htmlElement)
 
@@ -343,41 +342,18 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
             //the default visualization is TripleTableView, which has implemented a server-side caching, support for other visualizations will be added with transformation layer
             //now the whole graph has to fetched, this will be taken care of in transformation layer in next cache release iteration
             if(evaluationId.isDefined) {
-                if (currentPlugin.supportedDataFormat == "PayolaObj"){
-                    AnalysisEvaluationResultsManager.getCompleteAnalysisResult(evaluationId.get) { g =>
-                        currentGraph = g
-                        currentSerializedGraph = None
-                        update(g, currentCustomization, None)
-                        currentPlugin.render(pluginSpace.htmlElement)
-                        currentPlugin.renderControls(toolbar.htmlElement)
-                    } { err => }
-                }else{
-                    AnalysisEvaluationResultsManager.getCompleteAnalysisResultSerialized(evaluationId.get, currentPlugin.supportedDataFormat){ s =>
-                        currentGraph = None
-                        currentSerializedGraph = Some(s)
-                        update(None, currentCustomization, currentSerializedGraph)
-                        currentPlugin.render(pluginSpace.htmlElement)
-                        currentPlugin.renderControls(toolbar.htmlElement)
-                        currentPlugin.drawGraph()
-                    }{e => }
-                }
-            } else {
-                if (currentPlugin.supportedDataFormat == "PayolaObj"){
-                    update(currentGraph, currentCustomization, None)
-                    currentSerializedGraph = None
+                AnalysisEvaluationResultsManager.getCompleteAnalysisResult(evaluationId.get) { g =>
+                    currentGraph = g
+                    update(g, currentCustomization)
                     currentPlugin.render(pluginSpace.htmlElement)
                     currentPlugin.renderControls(toolbar.htmlElement)
                     currentPlugin.drawGraph()
-                }else{
-                    AnalysisEvaluationResultsManager.getCompleteAnalysisResultSerialized(evaluationId.get, currentPlugin.supportedDataFormat){ s =>
-                        currentGraph = None
-                        currentSerializedGraph = Some(s)
-                        update(None, currentCustomization, currentSerializedGraph)
-                        currentPlugin.render(pluginSpace.htmlElement)
-                        currentPlugin.renderControls(toolbar.htmlElement)
-                        currentPlugin.drawGraph()
-                    }{e => }
-                }
+                } { err => }
+            } else {
+                update(currentGraph, currentCustomization)
+                currentPlugin.render(pluginSpace.htmlElement)
+                currentPlugin.renderControls(toolbar.htmlElement)
+                currentPlugin.drawGraph()
             }
         }
     }
@@ -392,5 +368,33 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
         case visual: VisualPluginView =>
             visual.graphView
         case _ => None
+    }
+
+    def setAvailablePlugins(availableTransformations: List[String], evaluationId: Option[String]) {
+        setEvaluationId(evaluationId)
+
+        if(evaluationId.isDefined) {
+            pluginChangeButton.items = plugins.map { plugin =>
+                val pluginAnchor = new Anchor(List(new Text(plugin.name)))
+                val listItem = new ListItem(List(pluginAnchor))
+                pluginAnchor.mouseClicked += { e =>
+                    pluginChangeButton.setActiveItem(listItem)
+                    changePlugin(plugin)
+                    false
+                }
+                listItem
+            }
+
+            plugins.foreach{ plugin =>
+                plugin.isAvailable(availableTransformations, evaluationId.get, { () => {} }, { () =>
+                    pluginChangeButton.items.find(_.subViews(0).asInstanceOf[Anchor].subViews(0).asInstanceOf[Text].text == plugin.name).map(
+                        _.hide())
+                new Div(List(new Text("No visualization plugin is available...")), "plugin-message large").render(
+                    pluginSpace.htmlElement)
+                })}
+        } else {
+            new Div(List(new Text("No visualization plugin is available...")), "plugin-message large").render(
+                pluginSpace.htmlElement)
+        }
     }
 }

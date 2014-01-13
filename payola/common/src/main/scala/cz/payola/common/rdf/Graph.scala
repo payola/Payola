@@ -7,8 +7,11 @@ import scala.collection.immutable
   * @param vertices Vertices of the graph.
   * @param edges Edges connecting vertices of the graph.
   */
-class Graph(val vertices: immutable.Seq[Vertex], val edges: immutable.Seq[Edge], val resultsCount: Option[Int])
+class Graph(val vertices: immutable.Seq[Vertex], val edges: immutable.Seq[Edge], protected var _resultsCount: Option[Int])
 {
+
+    def resultsCount = _resultsCount
+
     /**
       * Returns whether the graph is empty (i.e. contains no vertices).
       */

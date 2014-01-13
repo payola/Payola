@@ -6,6 +6,8 @@ import cz.payola.common.rdf._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.Icon
 import cz.payola.web.client.models.PrefixApplier
+import cz.payola.web.shared.transformators.IdentityTransformator
+import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
 
 class SelectResultPluginView(prefixApplier: Option[PrefixApplier]) extends TablePluginView("Select Result Table", prefixApplier)
 {
@@ -110,6 +112,22 @@ class SelectResultPluginView(prefixApplier: Option[PrefixApplier]) extends Table
 
     override def destroyControls() {
         csvDownloadButton.destroy()
+    }
+
+    override def isAvailable(availableTransformators: List[String], evaluationId: String,
+        success: () => Unit, fail: () => Unit) {
+
+            IdentityTransformator.getSmapleGraph(evaluationId) { sample =>
+            //TripleTableTransformator.getClass.getName does not work after s2js
+                if(sample.isEmpty && availableTransformators.exists(_.contains("IdentityTransformator"))) {
+                    success()
+                }
+            }
+            { error =>
+                fail()
+                val modal = new FatalErrorModal(error.toString())
+                modal.render()
+            }
     }
 }
 

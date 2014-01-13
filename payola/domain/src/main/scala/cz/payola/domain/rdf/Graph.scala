@@ -104,8 +104,8 @@ object Graph
     }
 }
 
-class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge], resultCount: Option[Int])
-    extends cz.payola.common.rdf.Graph(vertices, edges, resultCount)
+class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge], _resultCount: Option[Int])
+    extends cz.payola.common.rdf.Graph(vertices, edges, _resultCount)
 {
     /**
      * Creates a new graph with contents of this graph and the specified other graph.
@@ -122,7 +122,7 @@ class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge], resultC
             val destination = mergedVertices.find(_ == e.destination).get
             new Edge(origin, destination, e.uri)
         }
-        new Graph(mergedVertices, mergedEdges, None)
+        new Graph(mergedVertices, mergedEdges, resultsCount)
     }
 
     def ++(otherGraph: Graph): Graph = {
@@ -227,5 +227,9 @@ class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge], resultC
         }
 
         model
+    }
+
+    def resultsCount_=(newSize: Option[Int]) {
+        _resultsCount = newSize
     }
 }

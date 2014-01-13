@@ -18,6 +18,7 @@ import cz.payola.common.EvaluationSuccess
 import cz.payola.web.client.views.VertexEventArgs
 import cz.payola.web.client.presenters.entity.PrefixPresenter
 import s2js.compiler.javascript
+import cz.payola.web.shared.managers.TransformationManager
 
 /**
  * Presenter responsible for the logic around running an analysis evaluation.
@@ -107,6 +108,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
             graphPresenter = new GraphPresenter(view.resultsView.htmlElement, prefixPresenter.prefixApplier)
             graphPresenter.initialize()
+            graphPresenter.view.setAvailablePlugins(evt.availableTransformators, getAnalysisEvaluationID)
             graphPresenter.view.vertexBrowsing += onVertexBrowsing
 
             val downloadButtonView = new DownloadButtonView()
@@ -226,12 +228,13 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
     }
 
     private def pollingHandler(view: AnalysisRunnerView, analysis: Analysis, persistInAnalysisStorage: Boolean) {
-        AnalysisRunner.getEvaluationState(evaluationId, analysis.id, true /*TODO 1/2 this disables cache*/, persistInAnalysisStorage, false) {
+        AnalysisRunner.getEvaluationState(evaluationId, analysis.id, true /*TODO 1/2 this disables cache*/, persistInAnalysisStorage) {
             state =>
                 state match {
                     case s: EvaluationInProgress => renderEvaluationProgress(s, view)
                     case s: EvaluationError => evaluationErrorHandler(s, view, analysis)
-                    case s: EvaluationSuccess => evaluationSuccessHandler(s, analysis, view)
+                    case s: EvaluationCompleted => evaluationCompletedHandler(s, analysis, view)
+                    //case s: EvaluationCompleted =>  evaluationSuccessHandler(s, analysis, view)
                     case s: EvaluationTimeout => evaluationTimeout(view, analysis)
                 }
 
@@ -291,7 +294,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         successEventHandler = getSuccessEventHandler(analysis, view)
     }
 
-    private def evaluationSuccessHandler(success: EvaluationSuccess, analysis: Analysis, view: AnalysisRunnerView) {
+    private def evaluationCompletedHandler(success: EvaluationCompleted, analysis: Analysis, view: AnalysisRunnerView) {
         view.overviewView.controls.progressBar.setStyleToSuccess()
         view.overviewView.controls.progressBar.setProgress(1.0)
         analysisDone = true
@@ -312,7 +315,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         view.overviewView.controls.runBtn.addCssClass("btn-success")
         view.overviewView.controls.progressBar.setActive(false)
 
-        analysisEvaluationSuccess.trigger(new EvaluationSuccessEventArgs(analysis, success.outputGraph))
+        analysisEvaluationSuccess.trigger(new EvaluationSuccessEventArgs(analysis, success.availableVisualTransformators))
     }
 
     private def renderEvaluationProgress(progress: EvaluationInProgress, view: AnalysisRunnerView) {

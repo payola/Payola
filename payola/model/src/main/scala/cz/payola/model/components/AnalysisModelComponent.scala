@@ -249,9 +249,9 @@ trait AnalysisModelComponent extends EntityModelComponent
                     })
                 case r: Success =>
                     EvaluationSuccess(r.outputGraph,
-                    r.instanceErrors.toList.map {
-                        e => (e._1, transformException(e._2))
-                    })
+                        r.instanceErrors.toList.map {
+                            e => (e._1, transformException(e._2))
+                        })
                 case Timeout => new EvaluationTimeout
                 case _ => throw new Exception("Unhandled evaluation state")
             }.getOrElse {

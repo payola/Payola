@@ -10,6 +10,8 @@ import s2js.compiler.javascript
 import scala.collection._
 import cz.payola.common.geo.Coordinates
 import cz.payola.web.client.views.bootstrap.Icon
+import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
+import cz.payola.web.shared.transformators.IdentityTransformator
 
 /**
  * Time Heatmap visualizer. Based on DCV found in supplied graph, it makes the user able to configure the time dimension,
@@ -196,5 +198,31 @@ class TimeHeatmap(prefixApplier: Option[PrefixApplier] = None) extends PluginVie
 
     def createSubViews = {
         List(mapPlaceholder)
+    }
+
+    override def isAvailable(availableTransformators: List[String], evaluationId: String,
+        success: () => Unit, fail: () => Unit) {
+
+        //TODO
+
+        IdentityTransformator.getSmapleGraph(evaluationId) { sample =>
+            if(sample.isEmpty && availableTransformators.exists(_.contains("IdentityTransformator"))) {
+                success()
+            }
+        }
+        { error =>
+            fail()
+            val modal = new FatalErrorModal(error.toString())
+            modal.render()
+        }
+    }
+
+    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Graph => Unit) {
+        //TODO
+        IdentityTransformator.transform(evaluationId)(updateGraph(_))
+        { error =>
+            val modal = new FatalErrorModal(error.toString())
+            modal.render()
+        }
     }
 }
