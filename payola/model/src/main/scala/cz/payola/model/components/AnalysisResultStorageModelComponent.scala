@@ -50,15 +50,15 @@ trait AnalysisResultStorageModelComponent
 
                 val serializedGraph = domainGraph.toStringRepresentation(RdfRepresentation.RdfXml)
 
-                val tmpFile = new File("/tmp/"+evaluationId+".rdf")
+                val tmpFile = new File("/opt/www/virtuoso/evaluation/"+evaluationId+".rdf")
                 printToFile(tmpFile)(p => {
                     p.println(serializedGraph)
                 })
 
                 //store graph in virtuoso
                 //rdfStorage.storeGraph(uri, serializedGraph)
-                rdfStorage.storeGraphFromFile(uri, new File("/tmp/"+evaluationId+".rdf"), RdfRepresentation.RdfXml)
-                //rdfStorage.storeGraphAtURL(uri, "http://"+host+"/evaluation/"+evaluationId+".rdf")
+                //rdfStorage.storeGraphFromFile(uri, new File("/tmp/"+evaluationId+".rdf"), RdfRepresentation.RdfXml)
+                rdfStorage.storeGraphAtURL(uri, "http://"+host+"/evaluation/"+evaluationId+".rdf")
 
                 tmpFile.delete()
             }
