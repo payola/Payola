@@ -57,8 +57,8 @@ trait AnalysisResultStorageModelComponent
 
                 //store graph in virtuoso
                 //rdfStorage.storeGraph(uri, serializedGraph)
-                //rdfStorage.storeGraphFromFile(uri, new File("/tmp/"+evaluationId+".rdf"), RdfRepresentation.RdfXml)
-                rdfStorage.storeGraphAtURL(uri, "http://"+host+"/evaluation/"+evaluationId+".rdf")
+                rdfStorage.storeGraphFromFile(uri, new File("/tmp/"+evaluationId+".rdf"), RdfRepresentation.Turtle)
+                //rdfStorage.storeGraphAtURL(uri, "http://"+host+"/evaluation/"+evaluationId+".rdf")
 
                 tmpFile.delete()
             }
