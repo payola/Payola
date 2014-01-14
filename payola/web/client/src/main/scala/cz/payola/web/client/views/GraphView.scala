@@ -15,6 +15,8 @@ abstract class GraphView
     /** The graph that is currently being visualized. */
     protected var currentGraph: Option[Graph] = None
 
+    protected var currentSerializedGraph: Option[String] = None
+
     /** The id of the analysis, which this graphView represents. */
     protected var evaluationId: Option[String] = None
 
@@ -42,9 +44,10 @@ abstract class GraphView
      * @param graph The graph to visualize.
      * @param customization The ontology customization that should be used during visualization.
      */
-    def update(graph: Option[Graph], customization: Option[DefinedCustomization]) {
+    def update(graph: Option[Graph], customization: Option[DefinedCustomization], serializedGraph: Option[String]) {
         updateCustomization(customization)
         updateGraph(graph, true)
+        updateSerializedGraph(serializedGraph)
     }
 
     /**
@@ -53,6 +56,12 @@ abstract class GraphView
      */
     def updateGraph(graph: Option[Graph], contractLiterals: Boolean) {
         currentGraph = graph
+        graph.foreach { g => updateSerializedGraph(None) }
+    }
+
+    def updateSerializedGraph(serializedGraph: Option[String]){
+        currentSerializedGraph = serializedGraph
+        serializedGraph.foreach { g => updateGraph(None, true) }
     }
 
     /**

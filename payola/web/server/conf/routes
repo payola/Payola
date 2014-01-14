@@ -41,6 +41,11 @@ GET     /datasource/edit/:id        controllers.DataSource.edit(id)
 GET     /datasource/delete/:id      controllers.DataSource.delete(id)
 POST    /datasource/save/:id        controllers.DataSource.saveEdited(id)
 
+GET    /datacube/:evaluationId/list-dsds              controllers.DataCube.findDataStructureDefinitions(evaluationId: String)
+GET    /datacube/:evaluationId/list-dimensions        controllers.DataCube.listDimensions(evaluationId: String, dsdUri: String)
+GET    /datacube/:evaluationId/list-measures          controllers.DataCube.listMeasures(evaluationId: String, dsdUri: String)
+GET    /datacube/:evaluationId/list-attributes        controllers.DataCube.listAttributes(evaluationId: String, dsdUri: String)
+
 GET     /virtuoso/add               controllers.PrivateDataStorage.add()
 POST     /virtuoso/upload/file           controllers.PrivateDataStorage.saveFromFile()
 POST     /virtuoso/upload/url           controllers.PrivateDataStorage.saveFromURL()
@@ -70,6 +75,8 @@ POST    /prefix/save                 controllers.Prefix.save(id)
 
 GET     /error                      controllers.ErrorHandler.error()
 GET     /404.html                   controllers.ErrorHandler.notFound()
+
+GET     /evaluation/:evaluationId.rdf       controllers.Evaluation.rdf(evaluationId)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

@@ -13,6 +13,8 @@ import cz.payola.web.shared.transformators.IdentityTransformator
 
 class GraphSigmaPluginView(prefixApplier: Option[PrefixApplier]) extends SigmaPluginView("Sigma.js", prefixApplier) {
 
+    def supportedDataFormat: String = "PayolaObj"
+
     val popUp: Any = null //used only in the javascript of functions showVertexInfo and hideVertexInfo
     val popUpWidth = 300
     val popUpHeight = 300

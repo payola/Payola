@@ -1,6 +1,7 @@
 package controllers
 
 import helpers.Secured
+import play.api.mvc._
 import cz.payola.domain.entities._
 import cz.payola.web.shared.Payola
 import cz.payola.domain.entities.plugins.concrete.DataFetcher

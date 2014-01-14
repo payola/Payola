@@ -6,10 +6,11 @@ import scala.io.Source
 import java.io._
 import com.hp.hpl.jena.query._
 import com.hp.hpl.jena.rdf.model._
-import org.openjena.riot._
-import org.openjena.riot.lang._
+import org.apache.jena.riot._
+import org.apache.jena.riot.lang._
 import cz.payola.domain._
 import cz.payola.common.rdf._
+import java.util.UUID
 
 object Graph
 {
@@ -25,26 +26,23 @@ object Graph
      * @return A new graph instance.
      */
     def apply(representation: RdfRepresentation.Type, data: String): Graph = {
-        val dataInputStream = new ByteArrayInputStream(data.getBytes("UTF-8"))
-        val jenaLanguage = representation match {
-            case RdfRepresentation.RdfXml => Lang.RDFXML
-            case RdfRepresentation.Turtle => Lang.TURTLE
-            case RdfRepresentation.Trig => Lang.TRIG
-        }
 
-        val jenaGraphs = representation match {
-            case RdfRepresentation.Trig => {
-                val dataSetGraph = DatasetFactory.createMem().asDatasetGraph()
-                RiotLoader.readQuads(dataInputStream, jenaLanguage, "", new SinkQuadsToDataset(dataSetGraph))
-                dataSetGraph.listGraphNodes().asScala.toList.map(dataSetGraph.getGraph(_))
-            }
-            case _ => {
-                val graph = com.hp.hpl.jena.graph.Factory.createDefaultGraph()
-                RiotLoader.readTriples(dataInputStream, jenaLanguage, "", new SinkTriplesToGraph(graph))
-                List(graph)
-            }
+        val result = rdf2Jena(representation, data).map(g => Graph(ModelFactory.createModelForGraph(g)))
+
+        result.size match {
+            case 0 => Graph.empty
+            case 1 => result.head
+            case _ => result.fold(Graph.empty)(_ + _)
         }
-        jenaGraphs.map(g => Graph(ModelFactory.createModelForGraph(g))).fold(Graph.empty)(_ + _)
+    }
+
+    def rdf2JenaDataset(representation: RdfRepresentation.Type, data: String): com.hp.hpl.jena.query.Dataset = {
+        val dataInputStream = new ByteArrayInputStream(data.getBytes("UTF-8"))
+        val jenaLanguage = representationToJenaLanguage(representation)
+
+        val dataSet = DatasetFactory.createMem()
+        RDFDataMgr.read(dataSet, dataInputStream, jenaLanguage)
+        dataSet
     }
 
     /**
@@ -53,11 +51,12 @@ object Graph
      * @return A new graph instance.
      */
     private def apply(model: Model): Graph = {
+
         val literalVertices = mutable.ListBuffer.empty[LiteralVertex]
         val edges = mutable.HashSet.empty[Edge]
         val identifiedVertices = mutable.HashMap.empty[String, IdentifiedVertex]
         def getIdentifiedVertex(node: RDFNode) = {
-            val uri = Option(node.asResource.getURI).getOrElse(node.toString)
+            val uri = Option(node.asResource.getURI).getOrElse("nodeId://blank/"+node.toString)
             identifiedVertices.getOrElseUpdate(uri, new IdentifiedVertex(uri))
         }
 
@@ -87,6 +86,22 @@ object Graph
 
         new Graph(literalVertices.toList ++ identifiedVertices.values, edges.toList, None)
     }
+
+    private def rdf2Jena(representation: RdfRepresentation.Type, data: String): scala.collection.Seq[com.hp.hpl.jena.graph.Graph] = {
+        val dataSet = rdf2JenaDataset(representation, data)
+        val dataSetGraph = dataSet.asDatasetGraph()
+        List(dataSetGraph.getDefaultGraph()) ++ dataSetGraph.listGraphNodes().asScala.toList.map { n =>
+            dataSetGraph.getGraph(n)
+        }
+    }
+
+    private def representationToJenaLanguage(representation: RdfRepresentation.Type) = {
+        representation match {
+            case RdfRepresentation.RdfXml => Lang.RDFXML
+            case RdfRepresentation.Turtle => Lang.TURTLE
+            case RdfRepresentation.Trig => Lang.TRIG
+        }
+    }
 }
 
 class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge], _resultCount: Option[Int])
@@ -108,6 +123,12 @@ class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge], _result
             new Edge(origin, destination, e.uri)
         }
         new Graph(mergedVertices, mergedEdges, resultsCount)
+    }
+
+    def ++(otherGraph: Graph): Graph = {
+        val model = getModel
+        model.add(otherGraph.getModel)
+        Graph(model)
     }
 
     /**
@@ -145,7 +166,8 @@ class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge], _result
             case RdfRepresentation.Turtle => getModel.write(outputStream, "TURTLE")
         }
 
-        Source.fromInputStream(new ByteArrayInputStream(outputStream.toByteArray), "UTF-8").mkString
+        val s = Source.fromInputStream(new ByteArrayInputStream(outputStream.toByteArray), "UTF-8").mkString
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"+s
     }
 
     /**

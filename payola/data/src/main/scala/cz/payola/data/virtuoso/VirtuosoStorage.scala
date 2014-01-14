@@ -76,11 +76,15 @@ class VirtuosoStorage(
         sparqlEndpoint.executeQuery(query)
     }
 
+    def executeSPARQLQueryJena(query: String): com.hp.hpl.jena.query.Dataset = {
+        sparqlEndpoint.executeQueryJena(query)
+    }
+
     /**
      * Creates a connection to the Virtuoso SQL database.
      */
     private def createSQLConnection(): Connection = {
-        DriverManager.getConnection("jdbc:virtuoso://" + server + ":" + sqlPort, sqlUsername, sqlPassword)
+        DriverManager.getConnection("jdbc:virtuoso://" + server + ":" + sqlPort+"/charset=UTF-8", sqlUsername, sqlPassword)
     }
 
     /**

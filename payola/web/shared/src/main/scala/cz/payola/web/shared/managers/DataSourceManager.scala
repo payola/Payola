@@ -74,7 +74,7 @@ import scala.Some
         successCallback()
     }
 
-        @async def create(name: String, description: String, pluginId: String, parameters: Seq[String], user: User = null)
+    @async def create(name: String, description: String, pluginId: String, parameters: Seq[String], user: User = null)
         (successCallback: () => Unit)
         (failCallback: Throwable => Unit) {
 

@@ -1,7 +1,7 @@
 package cz.payola.domain.rdf
 
 import com.hp.hpl.jena.query.QueryFactory
-import java.io.File
+import java.io._
 
 trait Storage
 {
@@ -69,6 +69,8 @@ trait Storage
       */
     def executeSPARQLQuery(query: String): Graph
 
+    def executeSPARQLQueryJena(query: String): com.hp.hpl.jena.query.Dataset
+
     /**
       * Executes the specified SPARQL query over data in the specifed group.
       * @param query The query to execute.
@@ -84,5 +86,11 @@ trait Storage
         }
 
         graph
+    }
+
+    def executeSPARQLQueryJena(query: String, groupURI: String): com.hp.hpl.jena.query.Dataset = {
+        val sparqlQuery = QueryFactory.create(query)
+        sparqlQuery.addGraphURI(groupURI)
+        executeSPARQLQueryJena(sparqlQuery.toString)
     }
 }

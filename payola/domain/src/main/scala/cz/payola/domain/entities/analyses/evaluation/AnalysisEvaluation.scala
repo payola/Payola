@@ -122,7 +122,6 @@ class AnalysisEvaluation(val analysis: Analysis, private val timeout: Option[Lon
       */
     private def bindingOutputProcessor(targetEvaluation: InstanceEvaluation, targetInputIndex: Int)
         (output: Option[Graph]) {
-
         targetEvaluation ! InstanceEvaluationInput(targetInputIndex, output)
     }
 

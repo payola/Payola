@@ -1,0 +1,59 @@
+@(user: Option[cz.payola.domain.entities.User], analyses: Seq[cz.payola.domain.entities.Analysis], page: Int = 1, title: Option[String] = None)
+
+@import tags._
+
+@detailsLinkForID(id: String, name: String) = @{
+<a href={routes.Analysis.detail(id).toString}>{name}</a>
+}
+
+@editLinkForID(id: String) = @{
+<div class="btn-group">
+    <a href={routes.Analysis.edit(id).toString} class="btn"><i class="icon-pencil"></i> Edit</a>
+</div>
+}
+@deleteLinkForID(id: String) = @{
+<div class="btn-group">
+    <a href={routes.Analysis.delete(id).toString} class="btn btn-danger" onclick="return confirm('Are you sure?')"><i class="icon-remove-sign icon-white"></i> Delete</a>
+</div>
+}
+@shareLinkForID(id: String, name: String, isPublic: Boolean) = @{
+    <div class="btn-group share-button-placeholder"
+         data-id={id}
+         data-name={name}
+         data-is-public={isPublic.toString}>
+     </div>
+}
+
+@list_entities(user, "analysis", "analyses", analyses.size, {(page, countPerPage) =>
+    analyses.drop((page-1)*countPerPage).take(countPerPage)
+},{ Unit =>
+new scala.xml.NodeBuffer() +=
+<td>Name</td>
+}, { e: cz.payola.domain.Entity =>
+val analysis = e.asInstanceOf[cz.payola.domain.entities.Analysis]
+<td class="listing-name">{
+    detailsLinkForID(e.id, analysis.name)
+    }
+</td>
+<td>{
+        if (analysis.owner.isDefined && (user == analysis.owner)){
+            <div class="btn-toolbar">
+                {val buff = new scala.xml.NodeBuffer() += (editLinkForID(e.id),{<span> </span>})
+                buff ++= shareLinkForID(e.id, analysis.name, analysis.isPublic)
+                buff += ({<span> </span>},deleteLinkForID(e.id))}
+            </div>
+        }else{
+            <span class="badge badge-inverse">Not editable</span>
+        }
+    }
+</td>
+},
+routes.Analysis.create(), page, title)
+
+<script language="javascript" type="text/javascript" src="/javaScriptPackage/cz.payola.web.client.presenters.entity.SharingPresenter"></script>
+<script type="text/javascript">
+    new cz.payola.web.client.presenters.entity.SharingPresenter(
+        document.getElementsByClassName("share-button-placeholder"),
+        "@cz.payola.common.Entity.getClassName(classOf[cz.payola.common.entities.Analysis])"
+    ).initialize();
+</script>
