@@ -21,8 +21,6 @@ import cz.payola.web.shared.transformators.IdentityTransformator
  */
 class TimeHeatmap(prefixApplier: Option[PrefixApplier] = None) extends PluginView[Graph]("Time heatmap", prefixApplier) {
 
-    def supportedDataFormat: String = "PayolaObj"
-
     val mapPlaceholder = new Div(List(),"map-placeholder")
 
     @javascript("""console.log(str)""")

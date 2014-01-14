@@ -12,8 +12,6 @@ import cz.payola.common.rdf.Graph
 import java.io._
 import scala.actors.Futures._
 
-
-
 import com.hp.hpl.jena.query._
 import com.hp.hpl.jena.rdf.model._
 import org.apache.jena.riot._

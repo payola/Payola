@@ -26,8 +26,6 @@ import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
  */
 class Generic(prefixApplier: Option[PrefixApplier] = None) extends PluginView[Graph]("DataCube Universal", prefixApplier) {
 
-    def supportedDataFormat: String = "PayolaObj"
-
     val controlsHolder = new Div(List(), "span4 dcv-controlsholder")
     val graphHolder = new Div(List(), "span8 dcv-graphholder")
     val placeholder = new Div(List(controlsHolder, graphHolder),"dcv-placeholder")

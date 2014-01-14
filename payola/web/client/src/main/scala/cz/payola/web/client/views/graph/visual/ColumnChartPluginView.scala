@@ -12,8 +12,6 @@ import cz.payola.web.shared.transformators.IdentityTransformator
 
 class ColumnChartPluginView(prefixApplier: Option[PrefixApplier]) extends PluginView("Column Chart", prefixApplier)
 {
-    def supportedDataFormat: String = "PayolaObj"
-
     private val chartWrapper = new Div
     chartWrapper.id = "chart-wrapper"
 

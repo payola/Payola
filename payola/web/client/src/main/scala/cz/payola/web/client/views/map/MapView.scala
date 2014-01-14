@@ -2,13 +2,17 @@ package cz.payola.web.client.views.map
 
 import cz.payola.common.geo.Coordinates
 import cz.payola.web.client.views.ComposedView
+import s2js.compiler.javascript
+import s2js.adapters.dom.Element
 import cz.payola.web.client.views.elements.Div
 import cz.payola.web.client.views.elements.form.Label
 import cz.payola.web.client.views.elements.form.fields.CheckBox
 import cz.payola.web.client.views.elements.lists._
+import cz.payola.common.geo.Coordinates
 import cz.payola.web.client.views.graph.datacube.TimeObservation
-import s2js.adapters.dom.Element
-import s2js.compiler.javascript
+import cz.payola.web.client.views.elements.form.fields.CheckBox
+import cz.payola.web.client.views.elements.form.Label
+import scala.collection.mutable
 
 /**
  * Google Maps wrapper, mostly written in JavaScript. Just creates subviews and renders.
