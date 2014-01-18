@@ -111,7 +111,7 @@ abstract class BaseTechnique(name: String, prefixApplier: Option[PrefixApplier])
 
             level.foreach { l1: VertexViewElement =>
                 l1.edges.foreach { e: EdgeView =>
-                    if (e.originView.isEqual(l1)) {
+                    if (e.originView.represents(l1.getFirstContainedVertex)) {
                         if (!existsVertex(e.destinationView, alreadyOut) &&
                             !existsVertex(e.destinationView, levelNext) && !existsVertex(e.destinationView, level)) {
 
@@ -197,7 +197,7 @@ abstract class BaseTechnique(name: String, prefixApplier: Option[PrefixApplier])
             //get vertices in next level
             level1.foreach { l1 =>
                 l1._1.edges.foreach { e: EdgeView =>
-                    if (e.originView.isEqual(l1._1)) {
+                    if (e.originView.represents(l1._1.getFirstContainedVertex)) {
                         if (!existsVertex(e.destinationView, alreadyOut)
                             && !existsVertexStruct(e.destinationView, level2) &&
                             !existsVertexStruct(e.destinationView, level1)) {
@@ -285,7 +285,7 @@ abstract class BaseTechnique(name: String, prefixApplier: Option[PrefixApplier])
      * @return true if the vertex is present in the container
      */
     private def existsVertex(whatToCheck: VertexViewElement, whereToCheck: ListBuffer[VertexViewElement]): Boolean = {
-        whereToCheck.exists(element => element.isEqual(whatToCheck))
+        whereToCheck.exists(element => element.represents(whatToCheck.getFirstContainedVertex))
     }
 
     /**
@@ -295,6 +295,6 @@ abstract class BaseTechnique(name: String, prefixApplier: Option[PrefixApplier])
      * @return true if the vertex is present in the container
      */
     private def existsVertexStruct(whatToCheck: VertexViewElement, whereToCheck: ListBuffer[(VertexViewElement, Point2D)]): Boolean = {
-        whereToCheck.exists(element => element._1.isEqual(whatToCheck))
+        whereToCheck.exists(element => element._1.represents(whatToCheck.getFirstContainedVertex))
     }
 }

@@ -305,7 +305,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
         listItem
     }
 
-    private def createEmptyCustomization(): ListItem = { //TODO
+    private def createEmptyCustomization(): ListItem = {
         val anchor = new Anchor(List(new Text("Disable customization")))
         val listItem = new ListItem(List(anchor))
 
