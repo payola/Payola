@@ -121,6 +121,8 @@ class SelectResultPluginView(prefixApplier: Option[PrefixApplier]) extends Table
             //TripleTableTransformator.getClass.getName does not work after s2js
                 if(sample.isEmpty && availableTransformators.exists(_.contains("IdentityTransformator"))) {
                     success()
+                } else {
+                    fail()
                 }
             }
             { error =>

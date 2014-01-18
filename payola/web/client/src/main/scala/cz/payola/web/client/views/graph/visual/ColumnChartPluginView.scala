@@ -248,6 +248,8 @@ class ColumnChartPluginView(prefixApplier: Option[PrefixApplier]) extends Plugin
         IdentityTransformator.getSmapleGraph(evaluationId) { sample =>
             if(sample.isEmpty && availableTransformators.exists(_.contains("IdentityTransformator"))) {
                 success()
+            } else {
+                fail()
             }
         }
         { error =>

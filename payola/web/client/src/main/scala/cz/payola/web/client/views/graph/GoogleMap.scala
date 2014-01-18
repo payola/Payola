@@ -7,7 +7,7 @@ import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.map._
 import s2js.compiler.javascript
 import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
-import cz.payola.web.shared.transformators.GoogleMapTransformatorextends
+import cz.payola.web.shared.transformators.GoogleMapTransformator
 
 /**
  * @author Jiri Helmich
@@ -102,9 +102,11 @@ class GoogleMap(prefixApplier: Option[PrefixApplier] = None) extends PluginView[
 
         //TODO
 
-        GoogleMapTransformatorextends.getSmapleGraph(evaluationId) { sample =>
-            if(sample.isEmpty && availableTransformators.exists(_.contains("GoogleMapTransformatorextends"))) {
+        GoogleMapTransformator.getSmapleGraph(evaluationId) { sample =>
+            if(sample.isEmpty && availableTransformators.exists(_.contains("GoogleMapTransformator"))) {
                 success()
+            } else {
+                fail()
             }
         }
         { error =>
@@ -117,7 +119,7 @@ class GoogleMap(prefixApplier: Option[PrefixApplier] = None) extends PluginView[
     override def loadDefaultCachedGraph(evaluationId: String, updateGraph: String => Unit) {
         //TODO
 
-        GoogleMapTransformatorextends.getCompleteGraph(evaluationId, "RDF/JSON")(updateGraph(_))
+        GoogleMapTransformator.getCompleteGraph(evaluationId, "RDF/JSON")(updateGraph(_))
         { error =>
             val modal = new FatalErrorModal(error.toString())
             modal.render()

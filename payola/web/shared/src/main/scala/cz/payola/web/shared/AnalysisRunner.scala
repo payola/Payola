@@ -57,6 +57,13 @@ import cz.payola.common.EvaluationSuccess
         successCallback(resultResponse)
     }
 
+    @async def evaluationExists(evaluationId: String, user: Option[User] = None)(successCallback: (Boolean => Unit))
+        (failCallback: (Throwable => Unit)) {
+
+        successCallback(Payola.model.analysisResultStorageModel.exists(evaluationId))
+    }
+
+
     /**
      * Partial analysis remote proxy
      * @param analysisId Analysis to make partial from

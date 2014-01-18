@@ -50,7 +50,9 @@ import cz.payola.common.rdf._
 
 
     private def getGraphPage(evaluationId: String, pageNumber: Int, recordsOnPage: Int): Graph = {
-        Payola.model.analysisResultStorageModel.getGraph(
+        //Console.println("CONSTRUCT { ?s ?p ?o } WHERE {?s ?p ?o.} ORDER BY ?s OFFSET "+((pageNumber)*recordsOnPage) + " LIMIT "+recordsOnPage)
+        //TODO
+        Payola.model.analysisResultStorageModel.getGraph( //TODO pri listovani tabulkou se pri offsetu 10000 odehraje nejaka chyba
             "CONSTRUCT { ?s ?p ?o } WHERE {?s ?p ?o.} ORDER BY ?s OFFSET "+((pageNumber)*recordsOnPage) + " LIMIT "+recordsOnPage,
             evaluationId)
     }

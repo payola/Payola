@@ -64,6 +64,11 @@ trait AnalysisResultStorageModelComponent
             }
 
             /**
+             * Checks if the evaluation if stored.
+             */
+            def exists(evaluationId: String) = analysisResultRepository.exists(evaluationId)
+
+            /**
              * Get whole graph
              */
             def getGraph(evaluationId: String): Graph = {

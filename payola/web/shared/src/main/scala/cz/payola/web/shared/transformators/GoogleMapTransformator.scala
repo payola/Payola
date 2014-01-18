@@ -5,7 +5,7 @@ import s2js.compiler._
 import cz.payola.web.shared.Payola
 import cz.payola.common.PayolaException
 
-@remote object GoogleMapTransformatorextends extends GraphTransformator
+@remote object GoogleMapTransformator extends GraphTransformator
 {
     protected def performTransformation(input: Graph) = input
 

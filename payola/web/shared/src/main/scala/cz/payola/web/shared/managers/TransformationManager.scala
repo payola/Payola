@@ -7,9 +7,10 @@ import s2js.compiler._
 @remote object TransformationManager
 {
     private val transformators = List[GraphTransformator](
-        IdentityTransformator,
         TripleTableTransformator,
-        VisualTransformator
+        IdentityTransformator,
+        VisualTransformator,
+        GoogleMapTransformator
     )
 
     /**
@@ -26,4 +27,9 @@ import s2js.compiler._
     def getAvailableTransformations(input: Graph): List[String] = {
         transformators.filter(_.isAvailable(input)).map(_.getClass.getName.split("\\$").last)
     }
+
+    /**
+     * Retuns list of all transformators classes names
+     */
+    def allTransformations = transformators.map(_.getClass.getName.split("\\$").last)
 }

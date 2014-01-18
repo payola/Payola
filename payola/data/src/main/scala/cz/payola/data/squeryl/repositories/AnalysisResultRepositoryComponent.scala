@@ -49,6 +49,10 @@ trait AnalysisResultRepositoryComponent extends TableRepositoryComponent {
             }
         }
 
+        def exists(evaluationId: String): Boolean = {
+            selectOneWhere(anRes => anRes.evaluationId === evaluationId).isDefined
+        }
+
         def purge() {      //TODO make conditional and proper delete based on analysisResult.touched
 
             wrapInTransaction{

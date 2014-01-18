@@ -342,6 +342,8 @@ trait DataContextComponent
 
         def updateTimestamp(evaluationId: String)
 
+        def exists(evaluationId: String): Boolean
+
         def purge()
     }
 

@@ -137,6 +137,8 @@ abstract class SigmaPluginView(name: String, prefixApplier: Option[PrefixApplier
         IdentityTransformator.getSmapleGraph(evaluationId) { sample =>
             if(sample.isEmpty && availableTransformators.exists(_.contains("IdentityTransformator"))) {
                 success()
+            } else {
+                fail()
             }
         }
         { error =>

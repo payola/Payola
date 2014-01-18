@@ -82,11 +82,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
      */
     private val pluginSpace = new Div(Nil, "plugin-space")
 
-    @javascript(""" return x.replace(/\./g,"_"); """)
-    def replace(x: String): String = ""
-
-    @javascript(""" window.location.hash = hash """)
-    def setLocationHash(hash: String) {}
+    def noramlizeClassName(x: String) = x.replaceAll(".", "_")
 
     /**
      * Drop down button for selection of graph visualization.
@@ -96,19 +92,12 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
         new Text("Change visualization plugin")),
         //GoogleMap should not be available for browsing mode
         plugins.take(plugins.length -1).map { plugin =>
-            val pluginAnchor = new Anchor(List(new Text(plugin.name)))
-            val listItem = new ListItem(List(pluginAnchor), replace(plugin.getClass.getName))
-            pluginAnchor.mouseClicked += { e =>
-                pluginChangeButton.setActiveItem(listItem)
-                changePlugin(plugin)
-                setLocationHash(replace(plugin.getClass.getName))
-                false
-            }
-            listItem
+            createPluginSwitchButtonItem(plugin)
+
         } ++ plugins.takeRight(1).map { googleMapPlugin =>
             val pluginAnchor = new Anchor(List(new Text(googleMapPlugin.name))).setAttribute(
                 "title", "Available only in analysis mode").setAttribute("style", "color: black; background-color: white;")
-            val listItem = new ListItem(List(pluginAnchor), replace(googleMapPlugin.getClass.getName))
+            val listItem = new ListItem(List(pluginAnchor), noramlizeClassName(googleMapPlugin.getClass.getName))
             listItem
         }
     )
@@ -387,31 +376,86 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
         case _ => None
     }
 
-    def setAvailablePlugins(availableTransformations: List[String], evaluationId: Option[String]) {
+    /**
+     * Each pluginView checks for its pair transformator in availableTransformations and if it is present in the list
+     * and the pluginView is able to visualize the transformed graph (check by plugin.isAvailable)
+     * a link to that pluginView is added to the PluginSwitchButton (thus the plugin is available for user).
+     *
+     * Additionally if preferredPlugin is available (transformator is available and the plugin can process
+     * the transformation result), the pluginSwitchView switches to it.
+     * @param availableTransformations
+     * @param evaluationId
+     * @param preferedPlugin
+     */
+    def setAvailablePlugins(availableTransformations: List[String], evaluationId: Option[String], preferredPlugin: String) {
         setEvaluationId(evaluationId)
 
         if(evaluationId.isDefined) {
             pluginChangeButton.items = plugins.map { plugin =>
-                val pluginAnchor = new Anchor(List(new Text(plugin.name)))
-                val listItem = new ListItem(List(pluginAnchor))
-                pluginAnchor.mouseClicked += { e =>
-                    pluginChangeButton.setActiveItem(listItem)
-                    changePlugin(plugin)
-                    false
-                }
-                listItem
+                createPluginSwitchButtonItem(plugin)
             }
 
             plugins.foreach{ plugin =>
-                plugin.isAvailable(availableTransformations, evaluationId.get, { () => {} }, { () =>
+                plugin.isAvailable(availableTransformations, evaluationId.get, { () =>
+                    if(noramlizeClassName(plugin.getClass.getName) == preferredPlugin) {
+                        autoSwitchPlugin(noramlizeClassName(plugin.getClass.getName))
+                    }
+                }, { () =>
                     pluginChangeButton.items.find(_.subViews(0).asInstanceOf[Anchor].subViews(0).asInstanceOf[Text].text == plugin.name).map(
                         _.hide())
-                new Div(List(new Text("No visualization plugin is available...")), "plugin-message large").render(
-                    pluginSpace.htmlElement)
                 })}
         } else {
             new Div(List(new Text("No visualization plugin is available...")), "plugin-message large").render(
                 pluginSpace.htmlElement)
         }
     }
+
+    private def createPluginSwitchButtonItem(plugin: PluginView[_]): ListItem = {
+        val pluginAnchor = new Anchor(List(new Text(plugin.name)))
+        val listItem = new ListItem(List(pluginAnchor), noramlizeClassName(plugin.getClass.getName))
+        pluginAnchor.mouseClicked += { e =>
+            pluginChangeButton.setActiveItem(listItem)
+            changePlugin(plugin)
+            setUriParameter("viewPlugin", noramlizeClassName(plugin.getClass.getName))
+            false
+        }
+        listItem
+    }
+
+    @javascript("""
+          if (normalizedPluginName.length > 0){
+            jQuery(".dropdown-menu ."+normalizedPluginName+" a").click();
+          }
+                """)
+    private def autoSwitchPlugin(normalizedPluginName: String) {}
+
+    @javascript("""
+          var currentHash = window.location.hash;
+          window.location.hash = "";
+
+          var params = currentHash.substr(1).split('&');
+          for(i = 0; i < params.length; ++i) {
+            if(params[i].split('=')[0] != "" && params[i].split('=')[0] != name ) {
+                if(window.location.hash.length != 0) {
+                    window.location.hash = window.location.hash + '&';
+                }
+                window.location.hash = window.location.hash + params[i]
+            }
+          }
+          window.location.hash = '#' + (window.location.hash + '&' + name + "=" + value).substring(1);
+        """)
+    private def setUriParameter(name: String, value: String) {}
+
+    @javascript("""
+          if (window.location.hash){
+            var params = window.location.hash.substr(1).split('&');
+            for(i = 0; i < params.length; ++i) {
+                if(params[i].split('=')[0] == name) {
+                    return params[i].split('=')[1]
+                }
+            }
+          }
+          return '';
+        """)
+    private def getUriParameter(name: String) : String = null
 }

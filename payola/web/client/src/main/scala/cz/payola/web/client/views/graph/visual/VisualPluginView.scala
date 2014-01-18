@@ -663,6 +663,8 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
         VisualTransformator.getSmapleGraph(evaluationId) { sample =>
             if(sample.isEmpty && availableTransformators.exists(_.contains("VisualTransformator"))) {
                 success()
+            } else {
+                fail()
             }
         }
         { error =>

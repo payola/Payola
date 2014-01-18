@@ -43,27 +43,27 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
     @javascript(
         """
-          if (window.location.hash){
-            var id = window.location.hash.substr(1);
-            if (id.length > 0){
-                jQuery(".analysis-controls .btn-success").click();
-            }
-          }
+          cz.payola.web.client.views.graph.PluginSwitchView.prototype.setUriParameter(name, value);
         """)
-    def autorun() {}
+    private def setUriParametr(name: String, value: String) {}
 
     @javascript(
         """
-          if (window.location.hash){
-            var id = window.location.hash.substr(1);
-            if (id.length > 0){
-                jQuery("#tab-2 .dropdown-menu ."+id+" a").click();
-            }
-          }else{
-            window.location.hash = "cz_payola_web_client_views_graph_table_TripleTablePluginView"
+          var id = cz.payola.web.client.views.graph.PluginSwitchView.prototype.getUriParameter("viewPlugin");
+          if (id.length > 0){
+            jQuery(".analysis-controls .btn-success").click();
           }
         """)
-    def autoswitch() {}
+    private def autorun() {}
+
+    @javascript("""return cz.payola.web.client.views.graph.PluginSwitchView.prototype.getUriParameter("evaluation");""")
+    private def getEvaluationId() = ""
+
+    @javascript(
+        """
+          return cz.payola.web.client.views.graph.PluginSwitchView.prototype.getUriParameter("viewPlugin");
+        """)
+    private def getViewPlugin() = ""
 
     def initialize() {
         blockPage("Loading analysis data...")
@@ -71,9 +71,17 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
         DomainData.getAnalysisById(analysisId) {
             analysis =>
-                createViewAndInit(analysis)
-                unblockPage()
-                autorun()
+                val uriEvaluationId = getEvaluationId()
+                if(uriEvaluationId != "") {
+                    AnalysisRunner.evaluationExists(uriEvaluationId) {exists =>
+                            if(exists) skipEvaluationAndLoadFromCache(uriEvaluationId, analysis)
+                            else fatalErrorHandler(new PayolaException("The analysis evaluation does not exist."))}
+                    {e => fatalErrorHandler(e)}
+                } else {
+                    createViewAndInit(analysis)
+                    unblockPage()
+                    autorun()
+                }
         } {
             err => fatalErrorHandler(err)
         }
@@ -95,6 +103,32 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         view
     }
 
+    private def skipEvaluationAndLoadFromCache(uriEvaluationId: String, analysis: Analysis) {
+        //render analysis control page
+        val view = new AnalysisRunnerView(analysis, prefixPresenter.prefixApplier)
+        view.render(parentElement)
+
+        successEventHandler = getSuccessEventHandler(analysis, view)
+        analysisEvaluationSuccess = new UnitEvent[Analysis, EvaluationSuccessEventArgs]
+        analysisEvaluationSuccess += successEventHandler
+
+        view.overviewView.controls.runBtn.mouseClicked += {
+            evt => runButtonClickHandler(view, analysis)
+        }
+
+        evaluationId = uriEvaluationId
+        analysisDone = true
+        view.overviewView.controls.stopButton.setIsEnabled(false)
+        intervalHandler.foreach(window.clearInterval(_))
+
+        initReRun(view, analysis)
+        window.onunload = null
+        view.overviewView.analysisVisualizer.setAllDone()
+
+        //load all transformations and visualize the graph from cache (it is loaded from the view directly by it's transformation)
+        analysisEvaluationSuccess.trigger(new EvaluationSuccessEventArgs(analysis, TransformationManager.allTransformations))
+    }
+
     private def getSuccessEventHandler(analysis: Analysis, view: AnalysisRunnerView): (EvaluationSuccessEventArgs => Unit) = {
         evt: EvaluationSuccessEventArgs =>
             blockPage("Loading result...")
@@ -106,9 +140,11 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
             view.overviewView.controls.timeoutInfoBar.addCssClass("none")
             view.overviewView.controls.progressBar.setStyleToSuccess()
 
+            getAnalysisEvaluationID.foreach(setUriParametr("evaluation", _))
+
             graphPresenter = new GraphPresenter(view.resultsView.htmlElement, prefixPresenter.prefixApplier)
             graphPresenter.initialize()
-            graphPresenter.view.setAvailablePlugins(evt.availableTransformators, getAnalysisEvaluationID)
+            graphPresenter.view.setAvailablePlugins(evt.availableTransformators, getAnalysisEvaluationID, getViewPlugin())
             graphPresenter.view.vertexBrowsing += onVertexBrowsing
 
             val downloadButtonView = new DownloadButtonView()
@@ -126,7 +162,6 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
             view.tabs.showTab(1)
             view.tabs.switchTab(1)
-            autoswitch()
 
             analysisEvaluationSuccess -= successEventHandler
 
@@ -229,7 +264,6 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
                     case s: EvaluationInProgress => renderEvaluationProgress(s, view)
                     case s: EvaluationError => evaluationErrorHandler(s, view, analysis)
                     case s: EvaluationCompleted => evaluationCompletedHandler(s, analysis, view)
-                    //case s: EvaluationCompleted =>  evaluationSuccessHandler(s, analysis, view)
                     case s: EvaluationTimeout => evaluationTimeout(view, analysis)
                 }
 

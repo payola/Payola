@@ -158,6 +158,8 @@ class TripleTablePluginView(prefixApplier: Option[PrefixApplier]) extends TableP
         //TripleTableTransformator.getClass.getName does not work after s2js
             if(sample.isEmpty && availableTransformators.exists(_.contains("TripleTableTransformator"))) {
                 success()
+            } else {
+                fail()
             }
         }
         { error =>
