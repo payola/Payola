@@ -5,7 +5,6 @@ import cz.payola.model.ModelException
 import cz.payola.domain.entities._
 import cz.payola.web.shared.managers.ShareableEntityManager
 import cz.payola.common._
-import cz.payola.domain.rdf.PayolaGraph
 
 @remote
 @secured object  AnalysisRunner

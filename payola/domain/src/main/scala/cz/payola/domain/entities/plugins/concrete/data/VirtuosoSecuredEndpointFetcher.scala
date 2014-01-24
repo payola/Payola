@@ -49,7 +49,7 @@ sealed class VirtuosoSecuredEndpointFetcher(name: String, inputCount: Int, param
         instance.getStringParameter(VirtuosoSecuredEndpointFetcher.passwordParameter)
     }
 
-    def executeQuery(instance: PluginInstance, query: String): PayolaGraph = {
+    def executeQuery(instance: PluginInstance, query: String): Graph = {
         usingDefined(getEndpointURL(instance), getGraphURIs(instance), getUsername(instance), getPassword(instance)) {
             (endpointURL, endpointGraphURIs, username, password) =>
                 val sparqlQuery = QueryFactory.create(query)
@@ -76,7 +76,7 @@ sealed class VirtuosoSecuredEndpointFetcher(name: String, inputCount: Int, param
                         new VirtuosoSecuredEndpoint(endpointURL, username, password).executeQuery(sparqlQuery.toString)
                 }
 
-                result.getOrElse(PayolaGraph.empty)
+                result.getOrElse(JenaGraph.empty)
         }
     }
 }
