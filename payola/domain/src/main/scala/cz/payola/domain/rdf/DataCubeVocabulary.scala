@@ -50,7 +50,7 @@ object DataCubeVocabulary
      */
     def apply(vocabularyUrl: String): DataCubeVocabulary = {
 
-        val vocabularyGraph = Graph(RdfRepresentation.Turtle, new Downloader(vocabularyUrl, "text/rdf+n3").result)
+        val vocabularyGraph = JenaGraph(RdfRepresentation.Turtle, new Downloader(vocabularyUrl, "text/rdf+n3").result)
 
         val definitionsGraph = vocabularyGraph.executeSPARQLQuery("CONSTRUCT { ?d <http://www.w3.org/2000/01/rdf-schema#label> ?l } WHERE { ?d a <http://purl.org/linked-data/cube#DataStructureDefinition>; <http://www.w3.org/2000/01/rdf-schema#label> ?l . }")
 

@@ -15,6 +15,6 @@ class Union(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_
 
     def evaluate(instance: PluginInstance, inputs: IndexedSeq[Option[Graph]], progressReporter: Double => Unit) = {
         // Currently the Union behaves as a strict union which means that all inputs have to be defined.
-        getDefinedInputs(inputs).reduce(_ ++ _)
+        getDefinedInputs(inputs).reduce(_ + _)
     }
 }

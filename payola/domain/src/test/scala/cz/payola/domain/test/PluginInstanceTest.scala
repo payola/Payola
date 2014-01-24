@@ -2,14 +2,14 @@ package cz.payola.domain.test
 
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
-import cz.payola.domain.rdf.Graph
+import cz.payola.domain.rdf.PayolaGraph
 import cz.payola.domain.entities.Plugin
 import cz.payola.domain.entities.plugins.PluginInstance
 import cz.payola.domain.entities.plugins.parameters._
 
 class PseudoPlugin(name: String) extends Plugin(name, 1, List(new StringParameter("Time", ""))) {
-    def evaluate(instance: PluginInstance, inputs: IndexedSeq[Option[Graph]], progressReporter: Double => Unit) = {
-        Graph.empty
+    def evaluate(instance: PluginInstance, inputs: IndexedSeq[Option[PayolaGraph]], progressReporter: Double => Unit) = {
+        PayolaGraph.empty
     }
 }
 

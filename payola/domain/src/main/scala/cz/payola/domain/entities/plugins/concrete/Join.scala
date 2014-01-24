@@ -7,6 +7,7 @@ import cz.payola.domain.IDGenerator
 import cz.payola.domain.entities.Plugin
 import cz.payola.domain.entities.plugins._
 import cz.payola.domain.entities.plugins.parameters._
+import cz.payola.domain.rdf._
 import cz.payola.domain.rdf.Graph
 
 class Join(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]], id: String)
@@ -50,6 +51,7 @@ class Join(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]
       *                included in the result, but only those edges, that satisfy the condition of inner join mentioned
       *                above are included).
       * @return The joined graph.
+      * TODO: use Jena Model
       */
     private def joinGraphs(graph1: Graph, graph2: Graph, propertyURI: String, isInner: Boolean): Graph = {
         val mergedGraph = graph1 + graph2
@@ -84,7 +86,8 @@ class Join(name: String, inputCount: Int, parameters: immutable.Seq[Parameter[_]
             }
         }
 
-        new Graph(resultIdentifiedVertices.keys.toList ++ resultLiteralVertices.toList, resultEdges.toList, None)
+        val payolaGraph = new PayolaGraph(resultIdentifiedVertices.keys.toList ++ resultLiteralVertices.toList, resultEdges.toList, None)
+        JenaGraph(payolaGraph)
     }
 }
 

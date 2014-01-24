@@ -30,11 +30,11 @@ trait AnalysisResultStorageModelComponent
 
             def saveGraph(graph: Graph, analysisId: String, evaluationId: String, persist: Boolean, host: String, user: Option[User] = None) {
 
-                if(!graph.isInstanceOf[cz.payola.domain.rdf.Graph]) {
+                if(!graph.isInstanceOf[cz.payola.domain.rdf.PayolaGraph]) {
                     return
                 }
 
-                val domainGraph = graph.asInstanceOf[cz.payola.domain.rdf.Graph]
+                val domainGraph = graph.asInstanceOf[cz.payola.domain.rdf.PayolaGraph]
 
                 val inDB = analysisResultRepository.getResultsCount()
                 if(inDB >= maxStoredAnalyses) {

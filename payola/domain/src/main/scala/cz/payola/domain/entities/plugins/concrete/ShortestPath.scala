@@ -6,6 +6,8 @@ import cz.payola.domain.IDGenerator
 import cz.payola.domain.entities.Plugin
 import cz.payola.domain.entities.plugins._
 import cz.payola.domain.entities.plugins.parameters.StringParameter
+import cz.payola.domain.rdf.PayolaGraph
+import cz.payola.domain.rdf.JenaGraph
 import cz.payola.domain.rdf.Graph
 
 /** This filter returns a graph that consist of vertices that lie on the shortest
@@ -103,7 +105,7 @@ class ShortestPath(name: String, inputCount: Int, parameters: immutable.Seq[Para
         // Need to add origin
         vertices += origin
 
-        new Graph(vertices.toList, edges.toList, None)
+        JenaGraph(new PayolaGraph(vertices.toList, edges.toList, None))
     }
 
     /** Creates a new instance of a graph that contains only vertices along the shortest path from
@@ -126,7 +128,7 @@ class ShortestPath(name: String, inputCount: Int, parameters: immutable.Seq[Para
                 createGraphWithShortestPath(g, origin, destination)
             } else {
                 // Either origin or destination isn't present in the graph => return empty graph
-                Graph.empty
+                JenaGraph.empty
             }
         }
     }

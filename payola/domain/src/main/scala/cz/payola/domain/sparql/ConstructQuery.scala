@@ -65,7 +65,7 @@ case class ConstructQuery(template: immutable.Seq[TriplePattern], pattern: Optio
         // handle limit, take maximum of both (if defined)
         val l = if (limit.isDefined){
             if (constructQuery.limit.isDefined){
-                Some(Limit(Math.max(limit.get.limit,constructQuery.limit.get.limit)))
+                Some(Limit(scala.math.max(limit.get.limit,constructQuery.limit.get.limit)))
             }else{
                 limit
             }

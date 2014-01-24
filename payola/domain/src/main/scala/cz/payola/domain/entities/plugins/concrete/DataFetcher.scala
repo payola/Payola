@@ -4,6 +4,7 @@ import collection.immutable
 import cz.payola.domain.entities.Plugin
 import cz.payola.domain.entities.plugins._
 import cz.payola.domain.rdf.Graph
+import cz.payola.domain.rdf.JenaGraph
 import cz.payola.domain.sparql._
 import cz.payola.domain.entities.plugins.concrete.query.Construct
 
@@ -82,10 +83,8 @@ abstract class DataFetcher(name: String, inputCount: Int, parameters: immutable.
             )
 
             patterns.par.map(p => executeQuery(instance, SelectCountQuery(p).toString)).reduce(_ + _)
-            //graphSize.
-            //patterns.par.map(p => executeQuery(instance, ConstructQuery(p).toString)).reduce(_ + _)
         } else {
-            Graph.empty
+            JenaGraph.empty
         }
     }
 }

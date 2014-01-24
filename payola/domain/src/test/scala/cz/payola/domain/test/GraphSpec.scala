@@ -4,7 +4,7 @@ import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import cz.payola.common.rdf._
 import cz.payola.domain.rdf._
-import cz.payola.domain.rdf.Graph
+import cz.payola.domain.rdf.PayolaGraph
 import cz.payola.common.rdf.LiteralVertex
 
 class GraphSpec extends FlatSpec with ShouldMatchers
@@ -83,12 +83,12 @@ class GraphSpec extends FlatSpec with ShouldMatchers
                 odcs:result <http://opendata.cz/infrastructure/odcleanstore/query/results/1> ;
                 odcs:result <http://opendata.cz/infrastructure/odcleanstore/query/results/2> .
             }"""
-        val graph = Graph(RdfRepresentation.Trig, trig)
+        val graph = PayolaGraph(RdfRepresentation.Trig, trig)
         assert(graph.vertices.nonEmpty)
         assert(graph.edges.nonEmpty)
     }
 
-    private def graph1: Graph = {
+    private def graph1: PayolaGraph = {
         val n1 = new IdentifiedVertex("URI1")
         val n2 = new IdentifiedVertex("URI2")
         val n3 = new LiteralVertex("Hello", None)
@@ -96,10 +96,10 @@ class GraphSpec extends FlatSpec with ShouldMatchers
         val e1 = new Edge(n1, n2, "Edge1")
         val e2 = new Edge(n1, n3, "Edge2")
 
-        new Graph(List(n1, n2, n3), List(e1, e2))
+        new PayolaGraph(List(n1, n2, n3), List(e1, e2))
     }
 
-    private def graph2: Graph = {
+    private def graph2: PayolaGraph = {
         val n1 = new IdentifiedVertex("URI1")
         val n2 = new IdentifiedVertex("URI3")
         val n3 = new LiteralVertex("Hello444", None)
@@ -109,6 +109,6 @@ class GraphSpec extends FlatSpec with ShouldMatchers
         val e2 = new Edge(n1, n3, "EdgeY")
         val e3 = new Edge(n1, n4, "Edge1")
 
-        new Graph(List(n1, n2, n3, n4), List(e1, e2, e3))
+        new PayolaGraph(List(n1, n2, n3, n4), List(e1, e2, e3))
     }
 }

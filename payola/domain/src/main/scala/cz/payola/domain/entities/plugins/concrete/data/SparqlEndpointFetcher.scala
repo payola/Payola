@@ -52,7 +52,7 @@ sealed class SparqlEndpointFetcher(name: String, inputCount: Int, parameters: im
                 new SparqlEndpoint(endpointURL).executeQuery(sparqlQuery.toString)
             }
 
-            result.getOrElse(Graph.empty)
+            result.getOrElse(JenaGraph.empty)
         }
     }
 }

@@ -1,41 +1,18 @@
 package cz.payola.domain.rdf
 
-import scala.collection._
-import scala.collection.JavaConverters._
-import scala.io.Source
-import java.io._
-import com.hp.hpl.jena.query._
-import com.hp.hpl.jena.rdf.model._
-import org.apache.jena.riot._
-import org.apache.jena.riot.lang._
-import cz.payola.domain._
 import cz.payola.common.rdf._
-import java.util.UUID
+import java.io._
+import scala.io._
+import com.hp.hpl.jena.rdf.model._
+import com.hp.hpl.jena.query.ResultSetFormatter
+import com.hp.hpl.jena.query._
+import scala.collection.JavaConverters._
+import org.apache.jena.riot._
+import scala.collection.immutable
+import cz.payola.domain.DomainException
 
 object Graph
 {
-    /**
-     * Returns a new empty graph.
-     */
-    def empty: Graph = new Graph(Nil, Nil, None)
-
-    /**
-     * Takes a string representing a RDF data and returns an instance of Graph representing that particular graph.
-     * @param representation Type of the RDF data representation.
-     * @param data The RDF data of the graph.
-     * @return A new graph instance.
-     */
-    def apply(representation: RdfRepresentation.Type, data: String): Graph = {
-
-        val result = rdf2Jena(representation, data).map(g => Graph(ModelFactory.createModelForGraph(g)))
-
-        result.size match {
-            case 0 => Graph.empty
-            case 1 => result.head
-            case _ => result.fold(Graph.empty)(_ + _)
-        }
-    }
-
     def rdf2JenaDataset(representation: RdfRepresentation.Type, data: String): com.hp.hpl.jena.query.Dataset = {
         val dataInputStream = new ByteArrayInputStream(data.getBytes("UTF-8"))
         val jenaLanguage = representationToJenaLanguage(representation)
@@ -45,49 +22,7 @@ object Graph
         dataSet
     }
 
-    /**
-     * Creates a new Graph instance from an instance of [[com.hp.hpl.jena.rdf.model.Model]].
-     * @param model The model to create the graph from.
-     * @return A new graph instance.
-     */
-    private def apply(model: Model): Graph = {
-
-        val literalVertices = mutable.ListBuffer.empty[LiteralVertex]
-        val edges = mutable.HashSet.empty[Edge]
-        val identifiedVertices = mutable.HashMap.empty[String, IdentifiedVertex]
-        def getIdentifiedVertex(node: RDFNode) = {
-            val uri = Option(node.asResource.getURI).getOrElse("nodeId://blank/"+node.toString)
-            identifiedVertices.getOrElseUpdate(uri, new IdentifiedVertex(uri))
-        }
-
-        // Process the vertices.
-        val subjectIterator = model.listSubjects
-        while (subjectIterator.hasNext) {
-            val subject = subjectIterator.nextResource
-            val origin = getIdentifiedVertex(subject)
-
-            // Process the edges that originate in the current vertex.
-            val propertyIterator = subject.listProperties
-            while (propertyIterator.hasNext) {
-                val statement = propertyIterator.nextStatement
-                val predicate = statement.getPredicate
-                val obj = statement.getObject
-                val destination = if (obj.isLiteral) {
-                    val lv = LiteralVertex(obj.asLiteral, statement)
-                    literalVertices += lv
-                    lv
-                } else {
-                    getIdentifiedVertex(obj)
-                }
-
-                edges += new Edge(origin, destination, predicate.getURI)
-            }
-        }
-
-        new Graph(literalVertices.toList ++ identifiedVertices.values, edges.toList, None)
-    }
-
-    private def rdf2Jena(representation: RdfRepresentation.Type, data: String): scala.collection.Seq[com.hp.hpl.jena.graph.Graph] = {
+    def rdf2Jena(representation: RdfRepresentation.Type, data: String): scala.collection.Seq[com.hp.hpl.jena.graph.Graph] = {
         val dataSet = rdf2JenaDataset(representation, data)
         val dataSetGraph = dataSet.asDatasetGraph()
         List(dataSetGraph.getDefaultGraph()) ++ dataSetGraph.listGraphNodes().asScala.toList.map { n =>
@@ -102,9 +37,10 @@ object Graph
             case RdfRepresentation.Trig => Lang.TRIG
         }
     }
+
 }
 
-class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge], resultCount: Option[Int])
+abstract class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge], resultCount: Option[Int])
     extends cz.payola.common.rdf.Graph(vertices, edges, resultCount)
 {
     /**
@@ -112,23 +48,22 @@ class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge], resultC
      * @param otherGraph The graph to be merged.
      * @return A new Graph instance.
      */
-    def +(otherGraph: Graph): Graph = {
-        val mergedVertices = (vertices.toSet ++ otherGraph.vertices).toList
-        val mergedEdges = (edges.toSet ++ otherGraph.edges).toList.map { e =>
-        // We have to make sure that all edges reference vertices from the mergedVertices collection. It's sure
-        // that vertices equal to origin and destination would be found in the mergedVertices, because edges in the
-        // original graphs surely had origin and destination present in the graph vertices.
-            val origin = mergedVertices.find(_ == e.origin).get.asInstanceOf[IdentifiedVertex]
-            val destination = mergedVertices.find(_ == e.destination).get
-            new Edge(origin, destination, e.uri)
-        }
-        new Graph(mergedVertices, mergedEdges, None)
-    }
+    def +(otherGraph: Graph): Graph
 
-    def ++(otherGraph: Graph): Graph = {
-        val model = getModel
-        model.add(otherGraph.getModel)
-        Graph(model)
+
+    /**
+     * Returns a string representation of the graph - either in RDF/XML or TTL.
+     * @param representationFormat Output format.
+     */
+    def toStringRepresentation(representationFormat: RdfRepresentation.Type): String = {
+        val outputStream = new ByteArrayOutputStream()
+        representationFormat match {
+            case RdfRepresentation.RdfXml => getModel.write(outputStream)
+            case RdfRepresentation.Turtle => getModel.write(outputStream, "TURTLE")
+        }
+
+        val s = Source.fromInputStream(new ByteArrayInputStream(outputStream.toByteArray), "UTF-8").mkString
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + s
     }
 
     /**
@@ -156,76 +91,32 @@ class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge], resultC
     }
 
     /**
-     * Returns a string representation of the graph - either in RDF/XML or TTL.
-     * @param representationFormat Output format.
+     * Creates a Jena model out of the graph. The model has to be closed using the 'close' method, after working with
+     * it is done.
+     * @return Model representing this graph.
      */
-    def toStringRepresentation(representationFormat: RdfRepresentation.Type): String = {
-        val outputStream = new ByteArrayOutputStream()
-        representationFormat match {
-            case RdfRepresentation.RdfXml => getModel.write(outputStream)
-            case RdfRepresentation.Turtle => getModel.write(outputStream, "TURTLE")
-        }
+    private[rdf] def getModel : Model
 
-        val s = Source.fromInputStream(new ByteArrayInputStream(outputStream.toByteArray), "UTF-8").mkString
-        "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"+s
-    }
 
     /**
      * Processes a query execution corresponding to a SPARQL select query.
      * @param execution The query execution to process.
      * @return A graph containing the result of the query.
      */
-    private def processSelectQueryExecution(execution: QueryExecution): Graph = {
+    protected def processSelectQueryExecution(execution: QueryExecution): Graph = {
         val results = execution.execSelect
         val output = new java.io.ByteArrayOutputStream()
         ResultSetFormatter.outputAsRDF(output, "", results)
-        Graph(RdfRepresentation.RdfXml, new String(output.toByteArray))
+        makeGraph(RdfRepresentation.RdfXml, new String(output.toByteArray))
     }
+
+    protected def makeGraph(representation: RdfRepresentation.Type, rdf: String): Graph
 
     /**
      * Processes a query execution corresponding to a SPARQL construct query.
      * @param execution The query execution to process.
      * @return A graph containing the result of the query.
      */
-    private def processConstructQueryExecution(execution: QueryExecution): Graph = {
-        Graph(execution.execConstruct)
-    }
+    protected def processConstructQueryExecution(execution: QueryExecution): Graph
 
-    /**
-     * Creates a Jena model out of the graph. The model has to be closed using the 'close' method, after working with
-     * it is done.
-     * @return Model representing this graph.
-     */
-    private def getModel: Model = {
-        val model = ModelFactory.createDefaultModel()
-
-        // A map of resources identified by their URIs.
-        val resources = mutable.HashMap.empty[String, Resource]
-        def getResource(uri: String): Resource = resources.getOrElseUpdate(uri, model.createResource(uri))
-
-        // Add all identified vertices.
-        vertices.foreach {
-            case iv: IdentifiedVertex => getResource(iv.uri)
-            case _ => // NOOP
-        }
-
-        // Add all the edges
-        edges.foreach { e =>
-            val origin = getResource(e.origin.uri)
-            val property = ResourceFactory.createProperty(e.uri)
-            val statement = e.destination match {
-                case iv: IdentifiedVertex => {
-                    val destination = getResource(iv.uri)
-                    origin.addProperty(property, destination)
-                    model.createStatement(origin, property, destination)
-                }
-                case lv: LiteralVertex => {
-                    model.createStatement(origin, property, lv.value.toString, lv.language.getOrElse(""))
-                }
-            }
-            model.add(statement)
-        }
-
-        model
-    }
 }
