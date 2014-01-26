@@ -9,9 +9,9 @@ import cz.payola.web.shared.Payola
     protected def performTransformation(input: Graph) = input
 
     @async def transform(evaluationId: String)
-        (successCallback: Graph => Unit)(errorCallback: Throwable => Unit) {
-
-        successCallback(Payola.model.analysisResultStorageModel.getGraph(evaluationId))
+        (successCallback: Option[Graph] => Unit)(errorCallback: Throwable => Unit) {
+        val identityGraph = Payola.model.analysisResultStorageModel.getGraph(evaluationId)
+        successCallback(if(identityGraph.isEmpty) { None } else { Some(identityGraph) })
     }
 
     @async

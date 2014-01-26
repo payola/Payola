@@ -9,7 +9,7 @@ import s2js.compiler._
      * Loads graph (or its part) from the cache and transforms it to the form that its (pair) view-plugin requires.
      */
     @async def transform(evaluationId: String)
-        (successCallback: Graph => Unit)(errorCallback: Throwable => Unit)
+        (successCallback: Option[Graph] => Unit)(errorCallback: Throwable => Unit)
 
     /**
      * Checks if the input graph can be transformed with this transformator

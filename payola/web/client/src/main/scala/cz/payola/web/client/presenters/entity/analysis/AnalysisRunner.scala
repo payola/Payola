@@ -41,11 +41,11 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
     private val pollingPeriod = 500
 
-    @javascript(
-        """
-          cz.payola.web.client.views.graph.PluginSwitchView.prototype.setUriParameter(name, value);
-        """)
-    private def setUriParametr(name: String, value: String) {}
+        @javascript(
+            """
+              cz.payola.web.client.views.graph.PluginSwitchView.prototype.setUriParameter(name, value);
+            """)
+        private def setUriParametr(name: String, value: String) {}
 
     @javascript(
         """
@@ -142,9 +142,9 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
             getAnalysisEvaluationID.foreach(setUriParametr("evaluation", _))
 
-            graphPresenter = new GraphPresenter(view.resultsView.htmlElement, prefixPresenter.prefixApplier)
+            graphPresenter = new GraphPresenter(view.resultsView.htmlElement, prefixPresenter.prefixApplier, getAnalysisEvaluationID)
             graphPresenter.initialize()
-            graphPresenter.view.setAvailablePlugins(evt.availableTransformators, getAnalysisEvaluationID, getViewPlugin())
+            graphPresenter.view.setAvailablePlugins(evt.availableTransformators, getViewPlugin())
             graphPresenter.view.vertexBrowsing += onVertexBrowsing
 
             val downloadButtonView = new DownloadButtonView()

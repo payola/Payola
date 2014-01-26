@@ -60,7 +60,7 @@ class DataSourceBrowser(
 
         view.render(viewElement)
 
-        if (window.location.hash.size == 0) {
+        if (getBrowsingURI() == 0) {
             // If the default URI isn't specified, display the initial graph.
             if (initialVertexUri == "") {
                 blockPage("Fetching the initial graph...")
@@ -73,9 +73,15 @@ class DataSourceBrowser(
                 addToHistoryAndGo(None, initialVertexUri, false)
             }
         } else {
-            addToHistoryAndGo(None, decodeURIComponent(window.location.hash.substring(1)), false)
+            addToHistoryAndGo(None, decodeURIComponent(getBrowsingURI()), false)
         }
     }
+
+    @javascript(
+        """
+          return cz.payola.web.client.views.graph.PluginSwitchView.prototype.getUriParameter("browseUri");
+        """)
+    private def getBrowsingURI() = ""
 
     private def onLanguagesButtonClicked(e: EventArgs[_]): Boolean = {
         if(!languagesLoaded){
@@ -163,10 +169,16 @@ class DataSourceBrowser(
         history += ((vertex, uri))
         historyPosition += 1
 
-        window.location.hash = encodeURIComponent(uri)
+        setBrowsingUri(encodeURIComponent(uri))
 
         updateView(clearGraph)
     }
+
+    @javascript(
+        """
+          cz.payola.web.client.views.graph.PluginSwitchView.prototype.setUriParameter("browseUri", uri);
+        """)
+    private def setBrowsingUri(uri: String) {}
 
     private def updateView(clearGraph: Boolean) {
         val tuple =  history(historyPosition)

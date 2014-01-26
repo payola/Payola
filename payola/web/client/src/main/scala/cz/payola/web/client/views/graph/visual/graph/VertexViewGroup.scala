@@ -268,7 +268,7 @@ class VertexViewGroup(position: Point2D, prefixApplier: Option[PrefixApplier])
                 vertexViews.exists{
                     _ match {
                         case thisInnerGroup: VertexViewGroup =>
-                            thisInnerGroup.isEqual(thatGroup) || thisInnerGroup.contains(thatGroup)
+                            thisInnerGroup.contains(thatGroup) || thisInnerGroup.isEqual(thatGroup)
                     }
                 }
             case thatVertex: VertexView =>

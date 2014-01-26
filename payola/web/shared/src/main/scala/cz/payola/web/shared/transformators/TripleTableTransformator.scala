@@ -12,7 +12,7 @@ import cz.payola.common.rdf._
     private val tripleTableDefaultRecordsOnPage = 50
 
     @async
-    def transform(evaluationId: String)(successCallback: Graph => Unit)(errorCallback: Throwable => Unit) {
+    def transform(evaluationId: String)(successCallback: Option[Graph] => Unit)(errorCallback: Throwable => Unit) {
         successCallback(getGraphPage(evaluationId, tripleTableDefaultPage, tripleTableDefaultRecordsOnPage))
     }
 
@@ -34,7 +34,7 @@ import cz.payola.common.rdf._
 
 
     @async def getCachedPage(evaluationId: String, page: Int = tripleTableDefaultPage, tripplesOnPage: Int = tripleTableDefaultRecordsOnPage)
-        (successCallback: Graph => Unit)(errorCallback: Throwable => Unit) {
+        (successCallback: Option[Graph] => Unit)(errorCallback: Throwable => Unit) {
 
         val pageNumber = if(page > -1) page else tripleTableDefaultPage
         val recordsOnPage = if(tripplesOnPage > -1) tripplesOnPage else tripleTableDefaultRecordsOnPage
@@ -44,16 +44,21 @@ import cz.payola.common.rdf._
     /**
      * Returns first page of the graph using default count of records on page
      */
-    private def getGraph(evaluationId: String): Graph = {
+    private def getGraph(evaluationId: String): Option[Graph] = {
         getGraphPage(evaluationId, tripleTableDefaultPage, tripleTableDefaultRecordsOnPage)
     }
 
 
-    private def getGraphPage(evaluationId: String, pageNumber: Int, recordsOnPage: Int): Graph = {
+    private def getGraphPage(evaluationId: String, pageNumber: Int, recordsOnPage: Int): Option[Graph] = {
         //Console.println("CONSTRUCT { ?s ?p ?o } WHERE {?s ?p ?o.} ORDER BY ?s OFFSET "+((pageNumber)*recordsOnPage) + " LIMIT "+recordsOnPage)
         //TODO
-        Payola.model.analysisResultStorageModel.getGraph( //TODO pri listovani tabulkou se pri offsetu 10000 odehraje nejaka chyba
+        val resultGraph = Payola.model.analysisResultStorageModel.getGraph( //TODO pri listovani tabulkou se pri offsetu 10000 odehraje nejaka chyba
             "CONSTRUCT { ?s ?p ?o } WHERE {?s ?p ?o.} ORDER BY ?s OFFSET "+((pageNumber)*recordsOnPage) + " LIMIT "+recordsOnPage,
             evaluationId)
+        if(resultGraph.isEmpty) {
+            None
+        } else {
+            Some(resultGraph)
+        }
     }
 }

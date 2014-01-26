@@ -217,7 +217,7 @@ class TimeHeatmap(prefixApplier: Option[PrefixApplier] = None) extends PluginVie
         }
     }
 
-    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Graph => Unit) {
+    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Option[Graph] => Unit) {
         //TODO
         IdentityTransformator.transform(evaluationId)(updateGraph(_))
         { error =>

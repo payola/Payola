@@ -7,7 +7,7 @@ import cz.payola.web.shared.Payola
 @remote object VisualTransformator extends GraphTransformator
 {
     @async
-    def transform(evaluationId: String)(successCallback: Graph => Unit)(errorCallback: Throwable => Unit) {
+    def transform(evaluationId: String)(successCallback: Option[Graph] => Unit)(errorCallback: Throwable => Unit) {
         successCallback(getOrigin(evaluationId))
     }
 
@@ -28,44 +28,57 @@ import cz.payola.web.shared.Payola
 
     @async
     def getVertexDetail(evaluationId: String, vertexUri: String)
-        (successCallback: Graph => Unit)(errorCallback: Throwable => Unit) {
+        (successCallback: Option[Graph] => Unit)(errorCallback: Throwable => Unit) {
 
         successCallback(getVertexNeighbourhood(evaluationId, vertexUri))
     }
 
-    private def getOrigin(evaluationId: String): Graph = {
+    private def getOrigin(evaluationId: String): Option[Graph] = {
         //this hopefully gets always the same vertex
         val originVertexGraph = Payola.model.analysisResultStorageModel.getGraph(
             "CONSTRUCT { ?v ?p ?o . } WHERE { ?v ?p ?o .} LIMIT 1", evaluationId)
-
-        getVertexNeighbourhood(evaluationId, originVertexGraph.vertices(0).toString)
+        if(originVertexGraph.isEmpty) {
+            None
+        } else {
+            getVertexNeighbourhood(evaluationId, originVertexGraph.vertices(0).toString)
+        }
     }
 
-    private def getVertexNeighbourhood(evaluationId: String, uri: String): Graph = {
+    private def getVertexNeighbourhood(evaluationId: String, uri: String): Option[Graph] = {
 
         val queryList = List("CONSTRUCT { <%s> ?p ?o . } WHERE { <%s> ?p ?o .}",
             "CONSTRUCT { ?o ?p <%s> . } WHERE { ?o ?p <%s> . }").map(_.format(uri, uri, uri, uri))
         val vertexNeighbourhood = Payola.model.analysisResultStorageModel.getGraph(queryList, evaluationId)
-
-        separetaIntoGroups(uri, vertexNeighbourhood)
+        if(vertexNeighbourhood.isEmpty) {
+            None
+        } else {
+            Some(separetaIntoGroups(uri, vertexNeighbourhood))
+        }
     }
 
     private def separetaIntoGroups(mainVertexURI: String, graph: Graph): Graph = {
         val mainVertex: IdentifiedVertex = graph.getVertexWithURI(mainVertexURI).get
-        //TODO separate to more than one group by edges
-        val edges = graph.edges//.filter{ edge => edge.origin.toString == mainVertex.uri || edge.destination.toString == mainVertex.uri } there should not be any other edges
-        val splittedVertices = graph.vertices.partition{ vertex =>
+
+        val edges = graph.edges
+        val (identifiedVertices, literalVertices) = graph.vertices.partition{ vertex =>
                 vertex != mainVertex && vertex.isInstanceOf[IdentifiedVertex]
-                /*vertex match {
-                case idVertex: IdentifiedVertex => true
-                    //edges.exists{ edge => edge.origin.uri == idVertex.uri || edge.destination.toString == idVertex.uri } there should not be any other vertices
-                case _ => false
-            }*/
         }
 
-        val toGroup = splittedVertices._1.map{neighbourVertex => new VertexLink(neighbourVertex.toString())}
-        val group = new VertexGroup("", toGroup)
+        //separate identified vertices by the type of edge
+        val validEdges = edges.filter{ edge =>
+            edge.destination.isInstanceOf[IdentifiedVertex] && (edge.destination.toString() != mainVertexURI || edge.origin.uri !=  mainVertexURI)
+        }
 
-        new Graph(List(mainVertex, group) ++ splittedVertices._2.filter(_ != mainVertex), edges, None)
+        val groups = validEdges.map(_.uri).distinct.map{ uniqueEdgeName =>
+            val verticesToGroup = validEdges.filter(_.uri == uniqueEdgeName).map{ validEdge =>
+                if(validEdge.origin.uri !=  mainVertexURI) {
+                    new VertexLink(validEdge.origin.uri) }
+                else {
+                    new VertexLink(validEdge.destination.toString()) }
+            }
+            new VertexGroup("", verticesToGroup)
+        }
+
+        new Graph(List(mainVertex) ++ groups ++ literalVertices.filter(_ != mainVertex), edges, None)
     }
 }

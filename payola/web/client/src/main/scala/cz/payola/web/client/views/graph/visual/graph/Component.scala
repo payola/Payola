@@ -62,7 +62,19 @@ class Component(private var _vertexViewElements: ListBuffer[VertexViewElement], 
         } else {
             false
         }
+    }
 
+    def existsGroupWithOneVertex: Option[VertexViewElement] = {
+        var singleVertex: Option[VertexViewElement] = None
+        vertexViewElements.foreach{ element =>
+            element match {
+                case group: VertexViewGroup =>
+                    if(group.vertexViews.size == 1) {
+                        singleVertex = Some(group.vertexViews(0))
+                    }
+            }
+        }
+        singleVertex
     }
 
     def createGroup(newPosition: Point2D): Boolean = {
@@ -445,9 +457,11 @@ class Component(private var _vertexViewElements: ListBuffer[VertexViewElement], 
         //redirect edges
         edgeViews.foreach{ edgeView =>
             if(edgeView.edgeModel.origin.uri == extensionVertexModel.toString()) {
-                edgeView.redirectOrigin(Some(vertex)) //TODO force
+                edgeView.forceRedirectOrigin(vertex)
+                vertex.edges += edgeView
             } else if(edgeView.edgeModel.destination.toString() == extensionVertexModel.toString()) {
-                edgeView.redirectDestination(Some(vertex)) //TODO force
+                edgeView.forceRedirectDestination(vertex)
+                vertex.edges += edgeView
             }
         }
 

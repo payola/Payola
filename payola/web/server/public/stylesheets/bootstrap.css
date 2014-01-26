@@ -791,7 +791,6 @@ input[type="color"],
   display: inline-block;
   height: 18px;
   padding: 4px;
-  margin-bottom: 9px;
   font-size: 13px;
   line-height: 18px;
   color: #555555;
@@ -4458,7 +4457,8 @@ input[type="submit"].btn.btn-mini {
 }
 
 .popover-content {
-  padding: 14px;
+  padding-left: 14px;
+  padding-right: 14px;
   background-color: #ffffff;
   -webkit-border-radius: 0 0 3px 3px;
      -moz-border-radius: 0 0 3px 3px;

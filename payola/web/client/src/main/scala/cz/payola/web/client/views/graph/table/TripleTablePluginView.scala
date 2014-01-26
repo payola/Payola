@@ -21,16 +21,16 @@ class TripleTablePluginView(prefixApplier: Option[PrefixApplier]) extends TableP
     private val showMoreLabel = "Show more"
 
     /**
-     * Returns number of an edge that is supposed to be the first one on this page of the table
-     * @param tablePageNumber
-     * @param groupedEdges
-     * @return
+     * Returns edges, that will be shown on the page (according to tablPageNumber); number of pages requred to show
+     * the whole graph; count of triples (records) for the current page; count of all triples (records)
      */
     private def getEdgesForThisPage(tablePageNumber: Int, groupedEdges: Map[String, Map[String, Seq[Edge]]]):
-        (Map[String, Map[String, Seq[Edge]]], Int) = {
+        (Map[String, Map[String, Seq[Edge]]], Int, Int, Int) = {
 
         var linesOnPage = 0
         var currentPageNumber = 0
+        var currentPageTriplesCount = 0
+        var otherTriplesCount = 0
 
 
         ((groupedEdges.filter{ gE =>
@@ -42,16 +42,19 @@ class TripleTablePluginView(prefixApplier: Option[PrefixApplier]) extends TableP
             }
 
             if(currentPageNumber != tablePageNumber) {
+                gE._2.foreach(otherTriplesCount += _._2.size)
                 false
-            } else if (linesOnPage < allowedLinesOnPage){
+            } else if (linesOnPage <= allowedLinesOnPage){
+                gE._2.foreach(currentPageTriplesCount += _._2.size)
                 true
             } else {
+                gE._2.foreach(otherTriplesCount += _._2.size)
                 false
             }
-        }, currentPageNumber + 1))
+        }, currentPageNumber + 1, currentPageTriplesCount, currentPageTriplesCount + otherTriplesCount))
     }
 
-    def fillTable(graph: Option[Graph], tableHead: html.Element, tableBody: html.Element, tablePageNumber: Int): Int = {
+    def fillTable(graph: Option[Graph], tableHead: html.Element, tableBody: html.Element, tablePageNumber: Int): (Int, Int, Int) = {
         val groupedEdges = groupEdges(graph)
 
         val tableListing = getEdgesForThisPage(tablePageNumber, groupedEdges)
@@ -113,8 +116,9 @@ class TripleTablePluginView(prefixApplier: Option[PrefixApplier]) extends TableP
         }
 
         if(graph.isDefined && graph.get.resultsCount.isDefined) {
-            math.ceil(graph.get.resultsCount.get / allowedLinesOnPage).toInt
-        } else { tableListing._2 }
+            ((tableListing._3, math.ceil(graph.get.resultsCount.get / allowedLinesOnPage).toInt,
+                graph.get.resultsCount.get.toInt))
+        } else { ((tableListing._3, tableListing._2, tableListing._4)) }
     }
 
     private def createVertexDetailRow(edgeUri: String, edges: Seq[Edge], row: html.Element) {
@@ -169,7 +173,7 @@ class TripleTablePluginView(prefixApplier: Option[PrefixApplier]) extends TableP
         }
     }
 
-    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Graph => Unit) {
+    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Option[Graph] => Unit) {
         TripleTableTransformator.getCachedPage(evaluationId, currentPage, allowedLinesOnPage)
         { pageOfGraph =>
             updateGraph(pageOfGraph)

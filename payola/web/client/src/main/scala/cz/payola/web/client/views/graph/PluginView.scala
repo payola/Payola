@@ -30,5 +30,5 @@ abstract class PluginView[B](val name: String, private val prefixApplier: Option
 
     def isAvailable(availableTransformators: List[String], evaluationId: String, success: () => Unit, fail: () => Unit) {}
 
-    def loadDefaultCachedGraph(evaluationId: String, updateGraph: B => Unit) {}
+    def loadDefaultCachedGraph(evaluationId: String, updateGraph: Option[B] => Unit) {}
 }

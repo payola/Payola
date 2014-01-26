@@ -116,7 +116,7 @@ class GoogleMap(prefixApplier: Option[PrefixApplier] = None) extends PluginView[
         }
     }
 
-    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: String => Unit) {
+    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Option[String] => Unit) {
         //TODO
 
         GoogleMapTransformator.getCompleteGraph(evaluationId, "RDF/JSON")(updateGraph(_))

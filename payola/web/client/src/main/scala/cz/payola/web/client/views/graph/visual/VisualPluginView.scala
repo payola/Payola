@@ -46,7 +46,9 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
     /**
      * Graph visualized by the plugin.
      */
-    var graphView: Option[views.graph.visual.graph.GraphView] = None
+    protected var graphView: Option[views.graph.visual.graph.GraphView] = None
+
+    def getGraphView = graphView
 
     /**
      * Canvas with binded event listeners.
@@ -283,12 +285,17 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
         evaluationId.foreach(VisualTransformator.getVertexDetail(_, uriLink){ paginated =>
             zoomControls.reset()
             graphView.foreach { gV =>
-                gV.extend(paginated, topLayer.getCenter)
+                paginated.foreach(gV.extend(_, topLayer.getCenter))
                 hideByCustomization(currentCustomization)
                 gV.setConfiguration(currentCustomization)
                 _parentHtmlElement.foreach(gV.render(_))
             }
-            redraw()
+            val singleVertexOpt = graphView.map(_.existsGroupWithOneVertex).getOrElse(None)
+            if(singleVertexOpt.isDefined) {
+                fetchVertexLink(singleVertexOpt.get.getFirstContainedVertex.toString) //if there is a group with only one vertex repeat the process
+            } else {
+                redraw()
+            }
         } { error =>
             val modal = new FatalErrorModal(error.toString())
             modal.render()
@@ -674,8 +681,26 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
         }
     }
 
-    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Graph => Unit) {
-        VisualTransformator.transform(evaluationId)(updateGraph(_))
+    override def loadDefaultCachedGraph(evaluationId: String, updateGraphFnc: Option[Graph] => Unit) {
+        VisualTransformator.transform(evaluationId)
+        { graph =>
+            updateGraphFnc(graph)
+            if(graphView.isEmpty) {
+                _parentHtmlElement.foreach{ htmlParent =>
+                    htmlParent.innerHTML = ""
+                    htmlParent.setAttribute("style", "height: 300px;")
+                    renderMessage(htmlParent, "The graph is empty...")
+                }
+            } else {
+                var vertexOpt = graphView.get.existsGroupWithOneVertex
+                while(vertexOpt.isDefined) {
+                    val vertexLinks = graphView.get.removeVertexFromGroup(vertexOpt.get, topLayer.getCenter)
+                    vertexLinks.foreach(_.foreach(link => fetchVertexLink(link)))
+                    vertexOpt = graphView.get.existsGroupWithOneVertex
+                }
+                drawGraph
+            }
+        }
         { error =>
             val modal = new FatalErrorModal(error.toString())
             modal.render()

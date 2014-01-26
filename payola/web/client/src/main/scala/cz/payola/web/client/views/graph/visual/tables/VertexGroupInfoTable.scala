@@ -43,7 +43,8 @@ class VertexGroupInfoTable(group: VertexViewGroup, position: Point2D, prefixAppl
         }
 
         val popoverTitle =
-            new Heading(List(new Text("Group: "), groupNameField), 3, "popover-title")
+            new Heading(List(new Text("Group: "), groupNameField,
+                new Heading(List(new Text("count: "+group.vertexViews.size)), 5)), 3, "popover-title")
 
         val popoverContent = if(!buffer.isEmpty) {
             new Div(List( new DefinitionList(buffer, "unstyled well")), "popover-content")

@@ -19,7 +19,7 @@ import cz.payola.web.client.models.PrefixApplier
 import s2js.compiler.javascript
 import cz.payola.web.client.views.graph.empty.EmptyPluginView
 
-class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with ComposedView
+class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[String] = None) extends GraphView with ComposedView
 {
     /**
      * Event triggered when ontology customization is created.
@@ -75,7 +75,16 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
     /**
      * Currently used visualization plugin.
      */
-    private var currentPlugin: PluginView[_] = new EmptyPluginView()
+    private var currentPlugin: PluginView[_] = getInitialPlugin
+
+    private def getInitialPlugin: PluginView[_] = {
+        if(startEvaluationId.isDefined) {
+            setEvaluationId(startEvaluationId)
+        }
+        plugins.find{ plugin =>
+            evaluationId.isEmpty && noramlizeClassName(plugin.getClass.getName) == getUriParameter("viewPlugin")
+        }.getOrElse(new EmptyPluginView())
+    }
 
     /**
      * Parent to the visualization plugin View object.
@@ -131,7 +140,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
         plugin.vertexBrowsingDataSource += { e => vertexBrowsingDataSource.trigger(createVertexEventArgs(e.vertex))}
     }
 
-    // Display the first plugin.
+    // Display the plugin.
     currentPlugin.render(pluginSpace.htmlElement)
     currentPlugin.renderControls(toolbar.htmlElement)
 
@@ -160,6 +169,10 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
     override def updateCustomization(customization: Option[DefinedCustomization]) {
         super.updateCustomization(customization)
         currentPlugin.updateCustomization(customization)
+    }
+
+    override def drawGraph() {
+        currentPlugin.drawGraph()
     }
 
     override def setMainVertex(vertex: Vertex) {
@@ -340,21 +353,28 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
                 currentPlugin.setEvaluationId(evaluationId)
                 currentPlugin.loadDefaultCachedGraph(evaluationId.get, {toUpdate =>
                     toUpdate match {
-                        case graph: Graph =>
-                            currentGraph = Some(graph)
-                            update(currentGraph, currentCustomization, None)
+                        case smth: Some[_] =>
+                            smth.get match {
+                                case graph: Graph =>
+                                    currentGraph = Some(graph)
+                                    update(currentGraph, currentCustomization, None)
 
-                        case str: String =>
+                                case str: String =>
+                                    currentGraph = None
+                                    currentSerializedGraph = Some(str)
+                                    update(None, currentCustomization, currentSerializedGraph)
+                            }
+                        case _ =>
                             currentGraph = None
-                            currentSerializedGraph = Some(str)
-                            update(None, currentCustomization, currentSerializedGraph)
+                            currentSerializedGraph = None
+                            update(None, currentCustomization, None)
                     }
                     currentPlugin.render(pluginSpace.htmlElement)
                     currentPlugin.renderControls(toolbar.htmlElement)
                     currentPlugin.drawGraph()
                 })
             } else {
-                //this is correct, since googleMap plugin is not available in browsing mode
+                //this is correct, since googleMap (which uses serialized graph) plugin is not available in browsing mode
                 update(currentGraph, currentCustomization, None)
                 currentSerializedGraph = None
                 currentPlugin.render(pluginSpace.htmlElement)
@@ -372,7 +392,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
 
     def getCurrentGraphView = currentPlugin match {
         case visual: VisualPluginView =>
-            visual.graphView
+            visual.getGraphView
         case _ => None
     }
 
@@ -387,8 +407,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
      * @param evaluationId
      * @param preferedPlugin
      */
-    def setAvailablePlugins(availableTransformations: List[String], evaluationId: Option[String], preferredPlugin: String) {
-        setEvaluationId(evaluationId)
+    def setAvailablePlugins(availableTransformations: List[String], preferredPlugin: String) {
 
         if(evaluationId.isDefined) {
             pluginChangeButton.items = plugins.map { plugin =>

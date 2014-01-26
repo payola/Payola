@@ -9,7 +9,7 @@ import cz.payola.common.PayolaException
 {
     protected def performTransformation(input: Graph) = input
 
-    @async def transform(evaluationId: String)(successCallback: Graph => Unit)(errorCallback: Throwable => Unit) {
+    @async def transform(evaluationId: String)(successCallback: Option[Graph] => Unit)(errorCallback: Throwable => Unit) {
         errorCallback(new PayolaException("Transform is not supported for Google Map Transformator"))
     }
 
@@ -31,9 +31,9 @@ import cz.payola.common.PayolaException
 
     @async
     def getCompleteGraph(evaluationId: String, format: String)
-        (successCallback: String => Unit)(errorCallback: Throwable => Unit) {
+        (successCallback: Option[String] => Unit)(errorCallback: Throwable => Unit) {
 
-        val string = Payola.model.analysisResultStorageModel.getGraphJena(evaluationId, format)
-        successCallback("#!json~*"+string)
+        val serializedJenaGraph = Payola.model.analysisResultStorageModel.getGraphJena(evaluationId, format)
+        successCallback(Some("#!json~*"+serializedJenaGraph))
     }
 }

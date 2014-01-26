@@ -22,6 +22,8 @@ abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier
     protected val allowedLinesOnPage = 50
     protected var currentPage = 0
     private var pagesCount = 0
+    private var allRecordsCount = 0
+    private var currentRecordsCount = 0
 
     def createSubViews = List(tablePluginWrapper)
 
@@ -30,15 +32,17 @@ abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier
     }
 
     def updateGraphPage(graph: Option[Graph], contractLiterals: Boolean = true, page: Int = 0) {
-        if (graph != currentGraph) {
-            currentPage = page
-            // Remove the old table.
-            tableWrapper.removeAllChildNodes()
-            tablePluginWrapper.removeAllChildNodes()
+        if (graph.isEmpty) {
+            tablePluginWrapper.setAttribute("style", "height: 300px;")
+            renderMessage(tablePluginWrapper.htmlElement, "The graph is empty...")
+        } else {
+            tablePluginWrapper.setAttribute("style", "")
+            if (graph != currentGraph) {
+                currentPage = page
+                // Remove the old table.
+                tableWrapper.removeAllChildNodes()
+                tablePluginWrapper.removeAllChildNodes()
 
-            if (graph.isEmpty) {
-                renderMessage(tablePluginWrapper.htmlElement, "The graph is empty...")
-            } else {
                 tablePluginWrapper.htmlElement.appendChild(tableWrapper.htmlElement)
 
                 renderTablePage(graph, 0)
@@ -57,11 +61,14 @@ abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier
         table.className = "table table-striped table-bordered table-condensed"
 
         tableWrapper.htmlElement.appendChild(table)
-        pagesCount = fillTable(graph, addElement(table, "thead"), addElement(table, "tbody"), pageNumber)
+        val counts = fillTable(graph, addElement(table, "thead"), addElement(table, "tbody"), pageNumber)
+        currentRecordsCount = counts._1
+        pagesCount = counts._2
+        allRecordsCount = counts._3
     }
 
     protected def createListingTools(): View = {
-        val info = new Text("Page "+(currentPage + 1)+" of "+pagesCount)
+        val info = new Text(getPageInfoText)
 
         val firstPage = new Button(new Text("First"), "", new Icon(Icon.fast_backward))
         firstPage.mouseClicked += { e =>
@@ -71,13 +78,13 @@ abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier
                 } else {
                     currentPage = 0
                     renderTablePage(currentGraph, currentPage)
-                    info.text = "Page "+(currentPage + 1)+" of "+pagesCount
+                    info.text = getPageInfoText
                 }
             }
             false
         }
 
-        val previousPage = new Button(new Text("Previous"), "", new Icon(Icon.backward))
+        val previousPage = new Button(new Text("Previous"), "", new Icon(Icon.step_backward))
         previousPage.mouseClicked += { e =>
             if (currentPage > 0) {
                 if(evaluationId.isDefined) {
@@ -85,13 +92,13 @@ abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier
                 } else {
                     currentPage -= 1
                     renderTablePage(currentGraph, currentPage)
-                    info.text = "Page "+(currentPage + 1)+" of "+pagesCount
+                    info.text = getPageInfoText
                 }
             }
             false
         }
 
-        val nextPage = new Button(new Text("Next"), "", new Icon(Icon.forward))
+        val nextPage = new Button(new Text("Next"), "", new Icon(Icon.step_forward))
         nextPage.mouseClicked += { e =>
             if (currentPage < pagesCount - 1) {
                 if(evaluationId.isDefined) {
@@ -99,7 +106,7 @@ abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier
                 } else {
                     currentPage += 1
                     renderTablePage(currentGraph, currentPage)
-                    info.text = "Page "+(currentPage + 1)+" of "+pagesCount
+                    info.text = getPageInfoText
                 }
             }
             false
@@ -113,7 +120,7 @@ abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier
                 } else {
                     currentPage = pagesCount - 1
                     renderTablePage(currentGraph, currentPage)
-                    info.text = "Page "+(currentPage + 1)+" of "+pagesCount
+                    info.text = getPageInfoText
                 }
             }
             false
@@ -132,7 +139,7 @@ abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier
                 } else {
                     currentPage = goingToPage
                     renderTablePage(currentGraph, currentPage)
-                    info.text = "Page "+(currentPage + 1)+" of "+pagesCount
+                    info.text = getPageInfoText
                 }
             }
             false
@@ -142,10 +149,14 @@ abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier
             "style", "width:800px; margin: 0 auto;")
     }
 
+    private def getPageInfoText: String = {
+        "Page "+(currentPage + 1)+" of "+pagesCount +" ("+currentRecordsCount+" of "+allRecordsCount+" triples)"
+    }
+
     private def paginateToPage(goingToPage: Int) {
         if(evaluationId.isDefined) {
             TripleTableTransformator.getCachedPage(evaluationId.get, goingToPage, allowedLinesOnPage) { paginated =>
-                updateGraphPage(Some(paginated), true, goingToPage)
+                updateGraphPage(paginated, true, goingToPage)
             } { error =>
                 val modal = new FatalErrorModal(error.toString())
                 modal.render()
@@ -153,7 +164,10 @@ abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier
         }
     }
 
-    def fillTable(graph: Option[Graph], tableHead: html.Element, tableBody: html.Element, pageNumber: Int): Int
+    /**
+     * @return (records on page, pages count, all records count)
+     */
+    def fillTable(graph: Option[Graph], tableHead: html.Element, tableBody: html.Element, pageNumber: Int): (Int, Int, Int)
 
     protected def createVertexView(vertex: IdentifiedVertex): View = {
         val dataSourceAnchor = new Anchor(List(new Icon(Icon.hdd)))

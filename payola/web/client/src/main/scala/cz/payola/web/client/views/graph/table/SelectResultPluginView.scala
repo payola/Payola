@@ -40,7 +40,7 @@ class SelectResultPluginView(prefixApplier: Option[PrefixApplier]) extends Table
         false
     }
 
-    def fillTable(graph: Option[Graph], tableHead: html.Element, tableBody: html.Element, tablePageNumber: Int): Int = {
+    def fillTable(graph: Option[Graph], tableHead: html.Element, tableBody: html.Element, tablePageNumber: Int): (Int, Int, Int) = {
         if(graph.isDefined) {
             variables = mutable.ListBuffer.empty[String]
             solutions = mutable.HashMap.empty[String, mutable.ListBuffer[Binding]]
@@ -103,7 +103,7 @@ class SelectResultPluginView(prefixApplier: Option[PrefixApplier]) extends Table
                 1
             }
         }
-        0
+        ((graph.get.edges.size, 0, 0))
     }
 
     override def renderControls(toolbar: html.Element) {

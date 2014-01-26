@@ -366,7 +366,7 @@ class Generic(prefixApplier: Option[PrefixApplier] = None) extends PluginView[Gr
         }
     }
 
-    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Graph => Unit) {
+    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Option[Graph] => Unit) {
         //TODO
         IdentityTransformator.transform(evaluationId)
         { pageOfGraph =>

@@ -148,7 +148,7 @@ abstract class SigmaPluginView(name: String, prefixApplier: Option[PrefixApplier
         }
     }
 
-    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: rdf.Graph => Unit) {
+    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Option[rdf.Graph] => Unit) {
         IdentityTransformator.transform(evaluationId)(updateGraph(_))
         { error =>
             val modal = new FatalErrorModal(error.toString())

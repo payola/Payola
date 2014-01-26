@@ -65,6 +65,16 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
         //exists function allows to skip the rest of the components, when the component containing the vertex.uri is found
     }
 
+    def existsGroupWithOneVertex: Option[VertexViewElement] = {
+        var singleVertexUri: Option[VertexViewElement] = None
+        components.foreach { component =>
+            val singleOpt = component.existsGroupWithOneVertex
+            if(singleOpt.isDefined)
+                singleVertexUri = singleOpt
+        }
+        singleVertexUri
+    }
+
     def createGroup(newPosition: Point2D) {
         var groupingComponent: Option[Component] = None //grouping available only for vertices from one component
         var groupingAvailable = true
@@ -161,6 +171,7 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
 
         var remainingVertices = vertexViews
         var componentNumber = 0
+        var groups = vertexViews.filter(_.isInstanceOf[VertexViewGroup]).map(_.asInstanceOf[VertexViewGroup])
 
         while (!remainingVertices.isEmpty) {
 
@@ -174,7 +185,7 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
             var run = true
             while (run) {
 
-                val neighbours = getNeighbours(currentVertex)
+                val neighbours = getNeighbours(currentVertex, groups)
 
                 currentNeighbours ++= neighbours
 
@@ -205,20 +216,14 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
      * @param ofVertex to search neighbours of
      * @return list of vertices, that are neighbours to the ofVertex
      */
-    private def getNeighbours(ofVertex: VertexViewElement): ListBuffer[VertexViewElement] = {
-        var neighbours = ListBuffer[VertexViewElement]()
+    private def getNeighbours(ofVertex: VertexViewElement, groups: ListBuffer[VertexViewGroup]): ListBuffer[VertexViewElement] = {
 
-        ofVertex.edges.foreach {
-            edgeOfCurrentVertex =>
-
-                if (edgeOfCurrentVertex.originView.isEqual(ofVertex)) {
-                    neighbours += edgeOfCurrentVertex.destinationView
-                } else {
-                    neighbours += edgeOfCurrentVertex.originView
-                }
+        ofVertex.edges.map{ edgeOfCurrentVertex =>
+            val toAdd =
+                if (edgeOfCurrentVertex.originView.isEqual(ofVertex)) { edgeOfCurrentVertex.destinationView}
+                else { edgeOfCurrentVertex.originView }
+            groups.find(_.contains(toAdd)).getOrElse(toAdd)
         }
-
-        neighbours
     }
 
     /**
@@ -469,13 +474,13 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
      * @param vertexViews to seach in
      * @return found VertexView or None
      */
-    private def getVertexForEdgeConstruct(vertex: Vertex, vertexViews: ListBuffer[VertexViewElement]): Option[VertexViewElement] = {
-        /*val groupLessList = new ListBuffer[VertexViewElement]() //TODO error with vertexGroup animation
+    private def getVertexForEdgeConstruct(vertex: Vertex, vertexViews: ListBuffer[VertexViewElement]): Option[VertexView] = {
+        val groupLessList = new ListBuffer[VertexView]()
         vertexViews.filter(_.isInstanceOf[VertexViewGroup]).foreach(
             groupLessList ++= _.asInstanceOf[VertexViewGroup].getAllVertexViews)
-        groupLessList ++= vertexViews.filter(!_.isInstanceOf[VertexViewGroup])*/
+        groupLessList ++= vertexViews.filter(!_.isInstanceOf[VertexViewGroup]).map(_.asInstanceOf[VertexView])
 
-        val foundVertices = vertexViews.filter(_.represents(vertex))
+        val foundVertices = groupLessList.filter(_.represents(vertex))
 
         foundVertices.length match {
             case 0 =>
