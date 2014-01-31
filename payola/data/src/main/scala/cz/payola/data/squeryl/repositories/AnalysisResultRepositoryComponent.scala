@@ -20,14 +20,9 @@ trait AnalysisResultRepositoryComponent extends TableRepositoryComponent {
     {
         def storeResult(analysisDescription: cz.payola.domain.entities.AnalysisResult) {
             val converted = entityConverter(analysisDescription)
-            //Console.println("inserting converted graph")
             wrapInTransaction{
                 persist(converted)
             }
-        }
-
-        def getResultsCount(): Long = {
-            selectWhere(_.persist === false).size
         }
 
         def getResult(evaluationId: String, analysisId: String): Option[AnalysisResult] = {
@@ -47,24 +42,6 @@ trait AnalysisResultRepositoryComponent extends TableRepositoryComponent {
                     set(anRes.touched := new java.sql.Timestamp(System.currentTimeMillis))
                 )
             }
-        }
-
-        def purge() {      //TODO make conditional and proper delete based on analysisResult.touched
-
-            wrapInTransaction{
-                table.deleteWhere(_.persist === false)
-            }
-            /*val qResult = select(from(table)(a => where(a.persist === true) compute(min(a.touched))))
-
-            val minTime = if(qResult.isEmpty) None else Some(qResult(0).touched)
-
-            if(minTime.isDefined) {
-                wrapInTransaction{
-                    table.deleteWhere(anRes =>
-                        anRes.touched === minTime.get and anRes.persist === true
-                    )
-                }
-            }*/
         }
     }
 }

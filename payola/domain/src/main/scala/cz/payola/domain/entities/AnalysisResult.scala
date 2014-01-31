@@ -7,7 +7,6 @@ class AnalysisResult(
     protected override var analysisid: String,
     protected override var _owner: Option[User],
     protected override var evaluationid: String,
-    protected override var _persist: Boolean,
     protected override var verticescount: Int,
     protected var _touched: Timestamp)
     extends Entity with cz.payola.common.entities.AnalysisResult

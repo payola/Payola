@@ -21,17 +21,9 @@ class AnalysisControls() extends ComposedView
 
     private val timeoutInfoCaptionPre = new Text("Elapsed [sec.]: ")
     val timeoutInfo = new Text("0")
-    val timeoutInfoBar = new Span(List(timeoutInfoCaptionPre, timeoutInfo), "none span3").setAttribute("style", "width: 100%; height: 20px;")
-    val persistInStore = new InputControl(
-        "Persist result",
-        new CheckBox("persist", false, "Persist"),
-        None
-    )
-    private val wrap = new Div(List(runBtn, stopButton, progressBar,
-        new Table(List(
-            new TableRow(List(new TableCell(List(timeoutInfoBar)))),
-            new TableRow(List(new TableCell(List(persistInStore))))))),
-        "well analysis-controls").setAttribute("style", "min-height: 60px;")
+    val timeoutInfoBar = new Span(List(timeoutInfoCaptionPre, timeoutInfo), "none span3")
+
+    private val wrap = new Div(List(runBtn, stopButton, progressBar, timeoutInfoBar), "well analysis-controls")
 
     def createSubViews = List(wrap)
 }

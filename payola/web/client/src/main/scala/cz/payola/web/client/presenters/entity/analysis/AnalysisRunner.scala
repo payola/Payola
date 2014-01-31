@@ -144,7 +144,6 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
             blockPage("Starting analysis...")
 
             uiAdaptAnalysisRunning(view, createViewAndInit _, analysis)
-            val persistInAnalysisStorage = view.overviewView.controls.persistInStore.field.value
             view.overviewView.controls.timeoutInfo.text = "0"
 
             AnalysisRunner.runAnalysisById(analysisId, evaluationId, true) { id =>
@@ -158,7 +157,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
                 evaluationId = id
                 view.overviewView.controls.progressBar.setProgress(0.02)
-                schedulePolling(view, analysis, persistInAnalysisStorage)
+                schedulePolling(view, analysis)
             } {
                 error => fatalErrorHandler(error)
             }
@@ -192,10 +191,9 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         }
     }
 
-    private def schedulePolling(view: AnalysisRunnerView, analysis: Analysis,
-        persistInAnalysisStorage: Boolean) = {
+    private def schedulePolling(view: AnalysisRunnerView, analysis: Analysis) = {
         window.setTimeout(() => {
-            pollingHandler(view, analysis, persistInAnalysisStorage)
+            pollingHandler(view, analysis)
         }, pollingPeriod)
     }
 
@@ -225,8 +223,8 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         downloadResultAs("ttl")
     }
 
-    private def pollingHandler(view: AnalysisRunnerView, analysis: Analysis, persistInAnalysisStorage: Boolean) {
-        AnalysisRunner.getEvaluationState(evaluationId, analysis.id, true /*TODO 1/2 this disables cache*/, persistInAnalysisStorage, false) {
+    private def pollingHandler(view: AnalysisRunnerView, analysis: Analysis) {
+        AnalysisRunner.getEvaluationState(evaluationId, analysis.id, false) {
             state =>
                 state match {
                     case s: EvaluationInProgress => renderEvaluationProgress(s, view)
@@ -236,7 +234,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
                 }
 
                 if (state.isInstanceOf[EvaluationInProgress]) {
-                    schedulePolling(view, analysis, persistInAnalysisStorage)
+                    schedulePolling(view, analysis)
                 }
         } {
             error => fatalErrorHandler(error)

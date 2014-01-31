@@ -394,7 +394,7 @@ trait SchemaComponent
                 new Prefix("", "", "", "", None)
             },
             factoryFor(analysesResults) is {
-                new AnalysisResult("", None, "", false, 0, new java.sql.Timestamp(System.currentTimeMillis()))
+                new AnalysisResult("", None, "", 0, new java.sql.Timestamp(System.currentTimeMillis()))
             }
         )
 
