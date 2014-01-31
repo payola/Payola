@@ -14,12 +14,17 @@ import cz.payola.domain.DomainException
 object Graph
 {
     def rdf2JenaDataset(representation: RdfRepresentation.Type, data: String): com.hp.hpl.jena.query.Dataset = {
-        val dataInputStream = new ByteArrayInputStream(data.getBytes("UTF-8"))
-        val jenaLanguage = representationToJenaLanguage(representation)
+        try {
+            val dataInputStream = new ByteArrayInputStream(data.getBytes("UTF-8"))
+            val jenaLanguage = representationToJenaLanguage(representation)
 
-        val dataSet = DatasetFactory.createMem()
-        RDFDataMgr.read(dataSet, dataInputStream, jenaLanguage)
-        dataSet
+            val dataSet = DatasetFactory.createMem()
+            RDFDataMgr.read(dataSet, dataInputStream, jenaLanguage)
+            dataSet
+        }catch {
+            case e: org.apache.jena.riot.RiotException => throw new IllegalArgumentException("Query failed, returned non-XML data: "+data.substring(0, 500))
+            case e: Exception => throw new IllegalArgumentException(e.getMessage)
+        }
     }
 
     def rdf2Jena(representation: RdfRepresentation.Type, data: String): scala.collection.Seq[com.hp.hpl.jena.graph.Graph] = {
