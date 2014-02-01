@@ -371,7 +371,6 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
                     }
                     currentPlugin.render(pluginSpace.htmlElement)
                     currentPlugin.renderControls(toolbar.htmlElement)
-                    currentPlugin.drawGraph()
                 })
             } else {
                 //this is correct, since googleMap (which uses serialized graph) plugin is not available in browsing mode

@@ -95,13 +95,12 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
         }
     }
 
-    def removeVertexFromGroup(vertexToRemove: VertexViewElement, newPosition: Point2D): Option[List[String]] = {
-        var vertexLinks: Option[List[String]] = None
+    def removeVertexFromGroup(vertexToRemove: VertexViewElement): List[(String, Point2D)] = {
+        val vertexLinks = new ListBuffer[(String, Point2D)]()
         components.foreach { component =>
-            val links = component.removeFromGroup(vertexToRemove, newPosition)._2
-            vertexLinks = Some(vertexLinks.getOrElse(List[String]()) ++ links)
+            vertexLinks ++= component.removeFromGroup(vertexToRemove)._2
         }
-        vertexLinks
+        vertexLinks.toList
     }
 
     /**

@@ -99,12 +99,12 @@ class Component(private var _vertexViewElements: ListBuffer[VertexViewElement], 
     }
 
     /**
-     * returns true if the vertex was found in this component; and count of vertexViews containing VertexLinks
+     * returns true if the vertex was found in this component; and list of removed VertexLinks' URIs
      */
-    def removeFromGroup(vertex: VertexViewElement, newPosition: Point2D): (Boolean, List[String]) = {
+    def removeFromGroup(vertex: VertexViewElement): (Boolean, List[(String, Point2D)]) = {
         var groupsToRemove = ListBuffer[VertexViewElement]()
         var verticesToSelect = ListBuffer[VertexViewElement]()
-        var vertexLinks = List[String]()
+        var vertexLinks = List[(String, Point2D)]()
 
         var allGroups = ListBuffer[VertexViewGroup]()
         vertexViewElements.foreach (_ match {case i: VertexViewGroup => allGroups += i} )
@@ -112,8 +112,7 @@ class Component(private var _vertexViewElements: ListBuffer[VertexViewElement], 
         val smthRemoved = vertexViewElements.find{ element =>
             element match {
                 case group: VertexViewGroup =>
-                    val isContained = group.contains(vertex)
-                    if (isContained) {
+                    if (group.contains(vertex)) {
                         allGroups -= group
                         group.vertexViews.foreach (_ match {case i: VertexViewGroup => allGroups += i} )
 
@@ -121,13 +120,13 @@ class Component(private var _vertexViewElements: ListBuffer[VertexViewElement], 
 
                         //if removed vertex contains vertexLink, increase the counter
                         vertex match { case v: VertexView => v.vertexModel match {
-                            case vLink: VertexLink => vertexLinks = List(vLink.vertexLinkURI) }}
+                            case vLink: VertexLink => vertexLinks = List((vLink.vertexLinkURI, group.position)) }}
 
-                        vertex.position = newPosition
+                        vertex.position = group.position
                         vertexViewElements += vertex
                         verticesToSelect += vertex
 
-                        if (group.vertexViews.length < 2) { //delete group if there is only one vertex
+                        if (group.vertexViews.length < 2) { //delete group if there is only one vertex left
                             deselectVertex(group) //the group is marked selected and in the container of selected vertices
 
                             allGroups = ListBuffer[VertexViewGroup]() //groups contained in the deleted group
@@ -137,9 +136,9 @@ class Component(private var _vertexViewElements: ListBuffer[VertexViewElement], 
                             if(!removed.isEmpty) { // in case group.vertexViews.length == 0
                                 removed(0) match {
                                     case v: VertexView => v.vertexModel match {
-                                        case vLink: VertexLink => vertexLinks = vertexLinks ++ List(vLink.vertexLinkURI) }}
+                                        case vLink: VertexLink => vertexLinks = vertexLinks ++ List((vLink.vertexLinkURI, group.position)) }}
 
-                                removed.foreach(_.position = newPosition)
+                                removed.foreach(_.position = group.position)
                                 vertexViewElements ++= removed
 
                                 verticesToSelect ++= removed
@@ -148,8 +147,10 @@ class Component(private var _vertexViewElements: ListBuffer[VertexViewElement], 
                             groupsToRemove += group
                             group.destroy()
                         }
+                        true
+                    } else {
+                        false
                     }
-                    isContained
                 case _ =>
                     false
             }

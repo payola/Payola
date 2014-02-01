@@ -16,18 +16,18 @@ class TreeTechnique(prefixApplier: Option[PrefixApplier] = None) extends BaseTec
     protected def getTechniquePerformer(component: Component,
         animate: Boolean): Animation[_] = {
 
-        val graphCenterCorrector = new GraphPositionHelper(
+        /*val graphCenterCorrector = new GraphPositionHelper(
             () => Vector2D(topLayer.size.x, 50), component.getCenter)
         val animation = new Animation(Animation.moveGraphByFunction,
-            (graphCenterCorrector, component.vertexViewElements), None, redrawQuick, redraw, None)
+            (graphCenterCorrector, component.vertexViewElements), None, redrawQuick, redraw, None)*/
 
-        if (animate) {
-            animation.addFollowingAnimation(
-                new Animation(basicTreeStructure, component.vertexViewElements, None, redrawQuick, redraw, None))
+        val animation = if (animate) {
+            //animation.addFollowingAnimation(
+                new Animation(basicTreeStructure, component.vertexViewElements, None, redrawQuick, redraw, None)//)
             //basicTreeStructure(component.vertexViewElements, None, redrawQuick, redraw, None))
         } else {
-            animation.addFollowingAnimation(
-                new Animation(basicTreeStructure, component.vertexViewElements, None, redrawQuick, redraw, Some(0)))
+            //animation.addFollowingAnimation(
+                new Animation(basicTreeStructure, component.vertexViewElements, None, redrawQuick, redraw, Some(0))//)
             //basicTreeStructure(component.vertexViewElements, None, redrawQuick, redraw, Some(0)))
         }
         animation

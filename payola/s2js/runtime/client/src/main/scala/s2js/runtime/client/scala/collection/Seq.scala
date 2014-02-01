@@ -114,6 +114,9 @@ trait Seq extends Iterable
     """)
     def -=(x: Any) {}
 
+    @javascript("""return self.getInternalJsArray().slice(0);""")
+    override def clone: ArrayBuffer = null
+
     // From SeqLike
     def indexWhere(p: Double => Boolean, from: Int = 0): Int = {
         var i = from

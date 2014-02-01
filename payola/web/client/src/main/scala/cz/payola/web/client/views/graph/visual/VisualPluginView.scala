@@ -259,12 +259,31 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
 
         infoTable.removeVertexFromGroup += { e =>
             triggerDestroyVertexInfo()
-            val vertexLinks = graphView.get.removeVertexFromGroup(e.target, topLayer.getCenter)
+            val vertexLinks = graphView.get.removeVertexFromGroup(e.target)
             if(e.target.getFirstContainedVertex().isInstanceOf[VertexLink]) {
-               vertexLinks.foreach(_.foreach(link => fetchVertexLink(link)))
+                View.blockPage("Fetching data")
+               fetchVertexLinks(vertexLinks)
+            } else {
+                drawGraph()
             }
             true
         }
+
+        infoTable.removeAllFromGroup += { e =>
+            triggerDestroyVertexInfo()
+            val links = new mutable.ListBuffer[(String, Point2D)]()
+            e.target.foreach{ vertexView =>
+                links ++= graphView.get.removeVertexFromGroup(vertexView)
+            }
+            if(!e.target.isEmpty && e.target(0).getFirstContainedVertex().isInstanceOf[VertexLink]) {
+                View.blockPage("Fetching data")
+                fetchVertexLinks(links.toList)
+            } else {
+                drawGraph()
+            }
+            true
+        }
+
 
         infoTable.groupNameField.changed += { k =>
             vertexGroup.setName(infoTable.groupNameField.value)
@@ -280,21 +299,25 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
         infoTable.setPosition(getVertexInfoTablePosition(vertexGroup, infoTable.getSize))
     }
 
-    private def fetchVertexLink(uriLink: String) {
-
-        evaluationId.foreach(VisualTransformator.getVertexDetail(_, uriLink){ paginated =>
+    private def fetchVertexLinks(uriLinks: List[(String, Point2D)]) {
+        evaluationId.foreach(VisualTransformator.getVertexDetail(_, uriLinks.head._1){ paginated =>
             zoomControls.reset()
             graphView.foreach { gV =>
-                paginated.foreach(gV.extend(_, topLayer.getCenter))
+                paginated.foreach(gV.extend(_, uriLinks.head._2))
                 hideByCustomization(currentCustomization)
                 gV.setConfiguration(currentCustomization)
                 _parentHtmlElement.foreach(gV.render(_))
             }
-            val singleVertexOpt = graphView.map(_.existsGroupWithOneVertex).getOrElse(None)
-            if(singleVertexOpt.isDefined) {
-                fetchVertexLink(singleVertexOpt.get.getFirstContainedVertex.toString) //if there is a group with only one vertex repeat the process
+            if(!uriLinks.tail.isEmpty) {
+                fetchVertexLinks(uriLinks.tail)
             } else {
-                redraw()
+                val singleVertexOpt = graphView.map(_.existsGroupWithOneVertex).getOrElse(None)
+                if(singleVertexOpt.isDefined) {
+                    fetchVertexLinks(List((singleVertexOpt.get.getFirstContainedVertex.toString, singleVertexOpt.get.position))) //if there is a group with only one vertex repeat the process
+                } else {
+                    View.unblockPage()
+                    drawGraph()
+                }
             }
         } { error =>
             val modal = new FatalErrorModal(error.toString())
@@ -684,6 +707,7 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
     override def loadDefaultCachedGraph(evaluationId: String, updateGraphFnc: Option[Graph] => Unit) {
         VisualTransformator.transform(evaluationId)
         { graph =>
+            View.blockPage("Loading initial graph")
             updateGraphFnc(graph)
             if(graphView.isEmpty) {
                 _parentHtmlElement.foreach{ htmlParent =>
@@ -693,17 +717,20 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
                 }
             } else {
                 var vertexOpt = graphView.get.existsGroupWithOneVertex
-                while(vertexOpt.isDefined) {
-                    val vertexLinks = graphView.get.removeVertexFromGroup(vertexOpt.get, topLayer.getCenter)
-                    vertexLinks.foreach(_.foreach(link => fetchVertexLink(link)))
+                if(vertexOpt.isDefined) {
+                    val vertexLinks = graphView.get.removeVertexFromGroup(vertexOpt.get)
+                    fetchVertexLinks(vertexLinks)
                     vertexOpt = graphView.get.existsGroupWithOneVertex
+                } else {
+                    View.unblockPage()
+                    drawGraph
                 }
-                drawGraph
             }
         }
         { error =>
             val modal = new FatalErrorModal(error.toString())
             modal.render()
+            View.unblockPage()
         }
     }
 }
