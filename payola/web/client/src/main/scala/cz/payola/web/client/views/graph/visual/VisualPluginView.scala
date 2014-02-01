@@ -22,6 +22,7 @@ import tables._
 import scala.Some
 import cz.payola.web.shared.transformators.VisualTransformator
 import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
+import cz.payola.web.client.views.graph.visual.techniques.gravity.GravityTechnique
 
 /**
  * Representation of visual based output drawing plugin
@@ -248,6 +249,7 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
     }
 
     private def createInfoTable(vertexElement: VertexViewElement) {
+        triggerDestroyVertexInfo
         vertexElement match {
             case group: VertexViewGroup => createVertexGroupInfoTable(group)
             case view: VertexView => createLiteralsInfoTable(view)
@@ -255,6 +257,7 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
     }
 
     private def createVertexGroupInfoTable(vertexGroup: VertexViewGroup) {
+        triggerDestroyVertexInfo
         val infoTable = new VertexGroupInfoTable(vertexGroup, Point2D.Zero, prefixApplier)
 
         infoTable.removeVertexFromGroup += { e =>
@@ -262,9 +265,10 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
             val vertexLinks = graphView.get.removeVertexFromGroup(e.target)
             if(e.target.getFirstContainedVertex().isInstanceOf[VertexLink]) {
                 View.blockPage("Fetching data")
-               fetchVertexLinks(vertexLinks)
+               fetchVertexLinks(vertexLinks, !this.isInstanceOf[GravityTechnique])
             } else {
-                drawGraph()
+                if(!this.isInstanceOf[GravityTechnique]) drawGraph() //redrawing with gravity technique makes the graph quite messy
+                else redraw()
             }
             true
         }
@@ -277,9 +281,10 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
             }
             if(!e.target.isEmpty && e.target(0).getFirstContainedVertex().isInstanceOf[VertexLink]) {
                 View.blockPage("Fetching data")
-                fetchVertexLinks(links.toList)
+                fetchVertexLinks(links.toList, !this.isInstanceOf[GravityTechnique])
             } else {
-                drawGraph()
+                if(!this.isInstanceOf[GravityTechnique]) drawGraph() //redrawing with gravity technique ruins the positioning
+                else redraw()
             }
             true
         }
@@ -299,7 +304,7 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
         infoTable.setPosition(getVertexInfoTablePosition(vertexGroup, infoTable.getSize))
     }
 
-    private def fetchVertexLinks(uriLinks: List[(String, Point2D)]) {
+    private def fetchVertexLinks(uriLinks: List[(String, Point2D)], rerunPositioningTechnique: Boolean) {
         evaluationId.foreach(VisualTransformator.getVertexDetail(_, uriLinks.head._1){ paginated =>
             zoomControls.reset()
             graphView.foreach { gV =>
@@ -309,14 +314,16 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
                 _parentHtmlElement.foreach(gV.render(_))
             }
             if(!uriLinks.tail.isEmpty) {
-                fetchVertexLinks(uriLinks.tail)
+                fetchVertexLinks(uriLinks.tail, rerunPositioningTechnique)
             } else {
                 val singleVertexOpt = graphView.map(_.existsGroupWithOneVertex).getOrElse(None)
                 if(singleVertexOpt.isDefined) {
-                    fetchVertexLinks(List((singleVertexOpt.get.getFirstContainedVertex.toString, singleVertexOpt.get.position))) //if there is a group with only one vertex repeat the process
+                    fetchVertexLinks(
+                        List((singleVertexOpt.get.getFirstContainedVertex.toString, singleVertexOpt.get.position)),
+                        rerunPositioningTechnique) //if there is a group with only one vertex repeat the process
                 } else {
                     View.unblockPage()
-                    drawGraph()
+                    if(rerunPositioningTechnique) drawGraph() else redraw()
                 }
             }
         } { error =>
@@ -719,7 +726,7 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
                 var vertexOpt = graphView.get.existsGroupWithOneVertex
                 if(vertexOpt.isDefined) {
                     val vertexLinks = graphView.get.removeVertexFromGroup(vertexOpt.get)
-                    fetchVertexLinks(vertexLinks)
+                    fetchVertexLinks(vertexLinks, true)
                     vertexOpt = graphView.get.existsGroupWithOneVertex
                 } else {
                     View.unblockPage()
