@@ -30,7 +30,6 @@
 new scala.xml.NodeBuffer() ++=
 <td>Name</td>
 <td>Actions</td>
-<td>Owner</td>
 }, { e: cz.payola.domain.Entity =>
 val analysis = e.asInstanceOf[cz.payola.domain.entities.Analysis]
 <td class="listing-name">{
@@ -45,15 +44,10 @@ val analysis = e.asInstanceOf[cz.payola.domain.entities.Analysis]
                 buff += ({<span> </span>},deleteLinkForID(e.id))}
             </div>
         }else{
-            <span class="badge badge-inverse">Not editable</span>
+            <span class="badge badge-inverse">Not editable, owned by @analysis.owner.get.name</span>
         }
     }
 </td>
-<td>{
-    if (analysis.owner.isDefined && (user != analysis.owner)){
-        analysis.owner.get.name
-    }
-}</td>
 },
 routes.Analysis.create(), page, title)
 
