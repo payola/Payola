@@ -27,8 +27,10 @@
 @list_entities(user, "analysis", "analyses", analyses.size, {(page, countPerPage) =>
     analyses.drop((page-1)*countPerPage).take(countPerPage)
 },{ Unit =>
-new scala.xml.NodeBuffer() +=
+new scala.xml.NodeBuffer() ++=
 <td>Name</td>
+<td>Actions</td>
+<td>Owner</td>
 }, { e: cz.payola.domain.Entity =>
 val analysis = e.asInstanceOf[cz.payola.domain.entities.Analysis]
 <td class="listing-name">{
@@ -47,6 +49,11 @@ val analysis = e.asInstanceOf[cz.payola.domain.entities.Analysis]
         }
     }
 </td>
+<td>{
+    if (analysis.owner.isDefined && (user != analysis.owner)){
+        analysis.owner.get.name
+    }
+}</td>
 },
 routes.Analysis.create(), page, title)
 
