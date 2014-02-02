@@ -24,6 +24,10 @@
      </div>
 }
 
+@ownedBy(owner: String) = @{
+    <span class="badge badge-inverse">Not editable, owned by {owner}</span>
+}
+
 @list_entities(user, "analysis", "analyses", analyses.size, {(page, countPerPage) =>
     analyses.drop((page-1)*countPerPage).take(countPerPage)
 },{ Unit =>
@@ -43,8 +47,10 @@ val analysis = e.asInstanceOf[cz.payola.domain.entities.Analysis]
                 buff ++= shareLinkForID(e.id, analysis.name, analysis.isPublic)
                 buff += ({<span> </span>},deleteLinkForID(e.id))}
             </div>
-        }else{
-            <span class="badge badge-inverse">Not editable, owned by @analysis.owner.get.name</span>
+        } else if(analysis.owner.isDefined) {
+            ownedBy(analysis.owner.get.name)
+        } else {
+            <span class="badge badge-inverse">Not editable</span>
         }
     }
 </td>
