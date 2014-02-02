@@ -5,11 +5,12 @@ import cz.payola.web.client.models.PrefixApplier
 import cz.payola.web.client.views.map.libwrappers._
 import cz.payola.common.geo.Coordinates
 import s2js.adapters.dom.Element
+import cz.payola.web.client.views.map.facets.MapFacet
 
 /**
  * @author Jiri Helmich
  */
-class GoogleHeatMapView(prefixApplier: Option[PrefixApplier] = None) extends MapView {
+class GoogleHeatMapView(prefixApplier: Option[PrefixApplier] = None, facets: Seq[MapFacet] = List()) extends MapView(prefixApplier, facets) {
 
     override val name = "Google HeatMap"
 

@@ -19,6 +19,7 @@ import cz.payola.web.client.models.PrefixApplier
 import cz.payola.web.shared.AnalysisEvaluationResultsManager
 import s2js.compiler.javascript
 import cz.payola.web.client.views.map._
+import cz.payola.web.client.views.map.facets.GroupingMapFacet
 
 class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with ComposedView
 {
@@ -70,7 +71,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
         new GraphSigmaPluginView(Some(prefixApplier)),
         new TimeHeatmap(Some(prefixApplier)),
         new Generic(Some(prefixApplier)),
-        new GoogleMapView(Some(prefixApplier)),
+        new GoogleMapView(Some(prefixApplier), List(new GroupingMapFacet())),
         new GoogleHeatMapView(Some(prefixApplier)),
         new ArcGisMapView(Some(prefixApplier))
     )

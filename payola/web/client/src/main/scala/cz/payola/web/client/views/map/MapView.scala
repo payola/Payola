@@ -8,11 +8,12 @@ import cz.payola.web.client.views.graph.PluginView
 import s2js.compiler.javascript
 import s2js.adapters.dom.Element
 import cz.payola.web.client.View
+import cz.payola.web.client.views.map.facets.MapFacet
 
 /**
  * @author Jiri Helmich
  */
-abstract class MapView(prefixApplier: Option[PrefixApplier] = None) extends PluginView("Map", prefixApplier) {
+abstract class MapView(prefixApplier: Option[PrefixApplier] = None, facets: Seq[MapFacet] = List()) extends PluginView("Map", prefixApplier) {
 
     def createLibWrapper(markers: Seq[Marker], element: Element) : View
 
@@ -62,6 +63,7 @@ abstract class MapView(prefixApplier: Option[PrefixApplier] = None) extends Plug
     @javascript(
         """
            var places = [];
+           var facets = self.facets.getInternalJsArray();
 
            for (var uri in json){
                 var entity = json[uri];
@@ -87,6 +89,11 @@ abstract class MapView(prefixApplier: Option[PrefixApplier] = None) extends Plug
                         }
                     }
                 }
+
+
+                for (var mf in facets){
+                    facets[mf].registerUri(uri, json);
+                }
            }
 
            var coll = new scala.collection.Seq();
@@ -96,6 +103,7 @@ abstract class MapView(prefixApplier: Option[PrefixApplier] = None) extends Plug
     def fromJSON(json: String): Seq[Marker] = List()
 
     def createSubViews = {
+        facets.foreach(_.createSubViews.foreach( v => mapPlaceholder.blockHtmlElement.appendChild(v.blockHtmlElement)))
         List(mapPlaceholder)
     }
 }
