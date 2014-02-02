@@ -10,8 +10,12 @@ trait ShareableEntity extends Entity with NamedEntity
 {
     protected var _isPublic: Boolean = false
 
+    protected var _isVisibleInListings: Boolean = true
+
     /** Whether the entity is public. */
     def isPublic = _isPublic
+
+    def isVisibleInListings = _isVisibleInListings
 
     /**
       * Sets whether the entity is public.
@@ -19,5 +23,9 @@ trait ShareableEntity extends Entity with NamedEntity
       */
     def isPublic_=(value: Boolean) {
         _isPublic = value
+    }
+
+    def isVisibleInListings_=(value: Boolean) {
+        _isVisibleInListings = value
     }
 }

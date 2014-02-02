@@ -15,7 +15,7 @@ object Analysis extends EntityConverter[Analysis]
         entity match {
             case e: Analysis => Some(e)
             case e: cz.payola.common.entities.Analysis
-            => Some(new Analysis(e.id, e.name, e.owner.map(User(_)), e.isPublic, e.description, e.token))
+            => Some(new Analysis(e.id, e.name, e.owner.map(User(_)), e.isPublic, e.description, e.token, e.isVisibleInListings))
             case _ => None
         }
     }
@@ -30,7 +30,7 @@ object Analysis extends EntityConverter[Analysis]
  * @param _desc Description of the analysis
  * @param context Implicit context
  */
-class Analysis(override val id: String, name: String, o: Option[User], var _isPub: Boolean, var _desc: String, var _token: Option[String])
+class Analysis(override val id: String, name: String, o: Option[User], var _isPub: Boolean, var _desc: String, var _token: Option[String], var __isVisibleInListings: Boolean)
     (implicit val context: SquerylDataContextComponent)
     extends cz.payola.domain.entities.Analysis(name, o)
     with Entity with OptionallyOwnedEntity with ShareableEntity with DescribedEntity
@@ -38,6 +38,8 @@ class Analysis(override val id: String, name: String, o: Option[User], var _isPu
     type DomainParameterValueType = plugins.ParameterValue[_]
 
     _pluginInstances = null
+
+    _isVisibleInListings = __isVisibleInListings
 
     private lazy val _pluginInstancesQuery = context.schema.analysesPluginInstances.left(this)
 

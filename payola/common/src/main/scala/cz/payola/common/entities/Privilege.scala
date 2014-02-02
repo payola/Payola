@@ -11,7 +11,7 @@ trait Privilege[+A <: Entity] extends Entity
     /** Type of the users who may be granters of the privilege. */
     type UserType <: User
 
-    /** Type of the entities that may be grated the privilege. */
+    /** Type of the entities that may be granted the privilege. */
     type PrivilegeableEntityType <: Entity with PrivilegeableEntity
 
     /** The user who granted the privilege. */

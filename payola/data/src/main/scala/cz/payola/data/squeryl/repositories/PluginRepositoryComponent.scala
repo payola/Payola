@@ -66,7 +66,7 @@ trait PluginRepositoryComponent extends TableRepositoryComponent
             representationRepository.getAll(pagination).map(_.toPlugin).sortBy(_.name)
         }
 
-        def getAllPublic: Seq[Plugin] = {
+        def getAllPublic(forListing: Boolean = false): Seq[Plugin] = {
             representationRepository.selectWhere(_.isPublic === true).map(_.toPlugin).sortBy(_.name)
         }
 

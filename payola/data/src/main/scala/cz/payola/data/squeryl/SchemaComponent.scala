@@ -340,7 +340,7 @@ trait SchemaComponent
                 new Group("", "", null)
             },
             factoryFor(analyses) is {
-                new Analysis("", "", None, false, "", None)
+                new Analysis("", "", None, false, "", None, true)
             },
             factoryFor(plugins) is {
                 new PluginDbRepresentation("", "", "", 0, None, false)

@@ -155,7 +155,7 @@ trait DataContextComponent
         /**
          * Returns all public entities.
          */
-        def getAllPublic: Seq[A]
+        def getAllPublic(forListing: Boolean = false): Seq[A]
 
         /**
          * Returns all public entities with the specified owner.
