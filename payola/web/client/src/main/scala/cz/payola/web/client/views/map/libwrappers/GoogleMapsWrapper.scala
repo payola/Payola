@@ -56,10 +56,6 @@ class GoogleMapsWrapper(center: Coordinates, zoom: Int, mapType: String, markerD
                         if (item.title) {
                             t += item.title;
                         }
-                        if (item.description){
-                            if (t.length > 0) t += ": ";
-                            t += item.description;
-                        }
                         return t;
                     }
 
