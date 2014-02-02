@@ -40,6 +40,7 @@ object DatabaseInitializer extends App
         val ontologicalFilterPlugin = new OntologicalFilter
         val shortestPathPlugin = new ShortestPath
         val virtuosoSecuredPlugin = new VirtuosoSecuredEndpointFetcher
+        val preparedQuery = new PreparedSparqlQuery
 
         /** JH */
         val limit = new Limit
@@ -57,7 +58,8 @@ object DatabaseInitializer extends App
             ontologicalFilterPlugin,
             shortestPathPlugin,
             virtuosoSecuredPlugin,
-            limit
+            limit,
+            preparedQuery
         )
 
         val privatePlugins = List(
