@@ -110,7 +110,6 @@ class ArcGisMapsWrapper(center: Coordinates, markerData: Seq[Marker], element: E
                        var wgs = new SpatialReference({
                          "wkid": 4326
                        });
-                                                                                            console.log(markers.getInternalJsArray().length);
 
                        info.data = arrayUtils.map(markers.getInternalJsArray(), function(m) {
                          var latlng = new  Point(parseFloat(m.coordinates.lng), parseFloat(m.coordinates.lat), wgs);
