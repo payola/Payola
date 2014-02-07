@@ -20,7 +20,9 @@ abstract class MapView(prefixApplier: Option[PrefixApplier] = None, facets: Seq[
 
     def supportedDataFormat: String = "RDF/JSON"
 
-    val mapPlaceholder = new Div(List(),"map-placeholder")
+    val facetPlaceholder = new Div(List(),"facet-placeholder span3")
+    val mapPlaceholder = new Div(List(),"map-placeholder span9")
+
     var markerData : Seq[Marker] = List()
 
     @javascript("""console.log(str)""")
@@ -104,7 +106,7 @@ abstract class MapView(prefixApplier: Option[PrefixApplier] = None, facets: Seq[
     def parseJSON(json: String) {}
 
     def createSubViews = {
-        facets.foreach(_.createSubViews.foreach( v => v.render(mapPlaceholder.blockHtmlElement) ))
-        List(mapPlaceholder)
+        facets.foreach(_.createSubViews.foreach( v => v.render(facetPlaceholder.blockHtmlElement) ))
+        List(facetPlaceholder, mapPlaceholder)
     }
 }

@@ -106,10 +106,10 @@ trait Map[A, B] extends Iterable
     @javascript("""
         var result = scala.collection.mutable.ListBuffer.get().$apply();
         for (var key in self.internalJsObject) {
-            if (key === 'length' || !widthRange.hasOwnProperty(key)) {
+            if (key === 'length' || !self.internalJsObject.hasOwnProperty(key)) {
                 continue;
             }
-            result.$plus$plus$eq(key);
+            result.$plus$eq(key);
         }
         return result;
     """)

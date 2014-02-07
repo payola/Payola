@@ -2,7 +2,7 @@ package cz.payola.web.client.views.map.facets
 
 import cz.payola.web.client.views.ComposedView
 import cz.payola.web.client.views.map.Marker
-import s2js.runtime.client.scala.collection.immutable.HashMap
+import scala.collection.mutable
 
 trait MapFacet extends ComposedView
 {
@@ -10,5 +10,5 @@ trait MapFacet extends ComposedView
 
     def groupsCount : Int
 
-    def namedMarkerGroups : HashMap[String, Seq[Marker]]
+    def namedMarkerGroups : mutable.HashMap[String, mutable.ArrayBuffer[Marker]]
 }
