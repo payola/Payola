@@ -14,8 +14,8 @@ class ArcGisMapView(prefixApplier: Option[PrefixApplier] = None, facets: Seq[Map
 
     override val name = "ArcGis Map"
 
-    def createLibWrapper(markers: Seq[Marker], element: Element) = {
+    def createLibWrapper(element: Element) = {
         val center = new Coordinates(0,0)
-        new ArcGisMapsWrapper(center, markers, element)
+        new ArcGisMapsWrapper(center, facets, markerData, element)
     }
 }

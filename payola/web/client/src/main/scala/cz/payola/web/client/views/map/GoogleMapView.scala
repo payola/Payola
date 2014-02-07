@@ -13,8 +13,8 @@ class GoogleMapView(prefixApplier: Option[PrefixApplier] = None, facets: Seq[Map
 
     override val name = "Google Map"
 
-    def createLibWrapper(markers: Seq[Marker], element: Element) = {
+    def createLibWrapper(element: Element) = {
         val center = new Coordinates(0,0)
-        new GoogleMapsWrapper(center, 3, "satellite", markers, element)
+        new GoogleMapsWrapper(center, 3, "satellite", facets, markerData, element)
     }
 }

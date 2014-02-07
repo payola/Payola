@@ -6,12 +6,13 @@ import cz.payola.web.client.views.elements.Div
 import cz.payola.web.client.views.map.Marker
 import s2js.adapters.dom.Element
 import s2js.compiler.javascript
+import cz.payola.web.client.views.map.facets.MapFacet
 
 /**
  * Google Maps wrapper, mostly written in JavaScript. Just creates subviews and renders.
  * @author Jiri Helmich
  */
-class ArcGisMapsWrapper(center: Coordinates, markerData: Seq[Marker], element: Element) extends ComposedView
+class ArcGisMapsWrapper(center: Coordinates, facets: Seq[MapFacet], markerData: Seq[Marker], element: Element) extends ComposedView
 {
     val mapPlaceholder = new Div(List(), "map")
         .setAttribute("data-dojo-type", "dijit/layout/ContentPane")

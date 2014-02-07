@@ -9,17 +9,19 @@ import s2js.compiler.javascript
 import s2js.adapters.dom.Element
 import cz.payola.web.client.View
 import cz.payola.web.client.views.map.facets.MapFacet
+import scala.collection.mutable.ArrayBuffer
 
 /**
  * @author Jiri Helmich
  */
 abstract class MapView(prefixApplier: Option[PrefixApplier] = None, facets: Seq[MapFacet] = List()) extends PluginView("Map", prefixApplier) {
 
-    def createLibWrapper(markers: Seq[Marker], element: Element) : View
+    def createLibWrapper(element: Element) : View
 
     def supportedDataFormat: String = "RDF/JSON"
 
     val mapPlaceholder = new Div(List(),"map-placeholder")
+    var markerData : Seq[Marker] = List()
 
     @javascript("""console.log(str)""")
     def log(str: Any) {}
@@ -49,9 +51,9 @@ abstract class MapView(prefixApplier: Option[PrefixApplier] = None, facets: Seq[
 
     override def updateSerializedGraph(serializedGraph: Option[String]) {
         serializedGraph.map{ sg =>
-            val markers = fromJSON(sg)
+            parseJSON(sg)
 
-            val map = createLibWrapper(markers, mapPlaceholder.htmlElement)
+            val map = createLibWrapper(mapPlaceholder.htmlElement)
 
             new Marker(new Coordinates(0,0), "", "") //J4F
 
@@ -85,25 +87,24 @@ abstract class MapView(prefixApplier: Option[PrefixApplier] = None, facets: Seq[
 
                                 var marker = new cz.payola.web.client.views.map.Marker(coordinates, title, desc);
                                 places.push(marker);
+
+                                for (var mf in facets){
+                                    facets[mf].registerUri(uri, json, marker);
+                                }
                             }
                         }
                     }
                 }
-
-
-                for (var mf in facets){
-                    facets[mf].registerUri(uri, json);
-                }
            }
 
-           var coll = new scala.collection.Seq();
-           coll.internalJsArray = places;
-           return coll;
+          var coll = new scala.collection.Seq();
+          coll.internalJsArray = places;
+          self.markerData = coll;
         """)
-    def fromJSON(json: String): Seq[Marker] = List()
+    def parseJSON(json: String) {}
 
     def createSubViews = {
-        facets.foreach(_.createSubViews.foreach( v => mapPlaceholder.blockHtmlElement.appendChild(v.blockHtmlElement)))
+        facets.foreach(_.createSubViews.foreach( v => v.render(mapPlaceholder.blockHtmlElement) ))
         List(mapPlaceholder)
     }
 }

@@ -6,12 +6,13 @@ import cz.payola.web.client.views.elements.Div
 import cz.payola.web.client.views.map.Marker
 import s2js.adapters.dom.Element
 import s2js.compiler.javascript
+import cz.payola.web.client.views.map.facets.MapFacet
 
 /**
  * Google Maps wrapper, mostly written in JavaScript. Just creates subviews and renders.
  * @author Jiri Helmich
  */
-class GoogleHeatMapWrapper(center: Coordinates, zoom: Int, mapType: String, markerData: Seq[Marker], element: Element) extends ComposedView
+class GoogleHeatMapWrapper(center: Coordinates, zoom: Int, mapType: String, facets: Seq[MapFacet], markerData: Seq[Marker], element: Element) extends ComposedView
 {
 
     val mapDiv = new Div(List(), "mapview")

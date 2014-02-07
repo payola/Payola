@@ -14,8 +14,8 @@ class GoogleHeatMapView(prefixApplier: Option[PrefixApplier] = None, facets: Seq
 
     override val name = "Google HeatMap"
 
-    def createLibWrapper(markers: Seq[Marker], element: Element) = {
+    def createLibWrapper(element: Element) = {
         val center = new Coordinates(0,0)
-        new GoogleHeatMapWrapper(center, 3, "satellite", markers, element)
+        new GoogleHeatMapWrapper(center, 3, "satellite", facets, markerData, element)
     }
 }

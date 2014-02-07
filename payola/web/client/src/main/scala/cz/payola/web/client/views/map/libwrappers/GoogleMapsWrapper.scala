@@ -10,12 +10,13 @@ import cz.payola.web.client.views.graph.datacube.TimeObservation
 import cz.payola.web.client.views.map.Marker
 import s2js.adapters.dom.Element
 import s2js.compiler.javascript
+import cz.payola.web.client.views.map.facets.MapFacet
 
 /**
  * Google Maps wrapper, mostly written in JavaScript. Just creates subviews and renders.
  * @author Jiri Helmich
  */
-class GoogleMapsWrapper(center: Coordinates, zoom: Int, mapType: String, markerData: Seq[Marker], element: Element) extends ComposedView
+class GoogleMapsWrapper(center: Coordinates, zoom: Int, mapType: String, facets: Seq[MapFacet], markerData: Seq[Marker], element: Element) extends ComposedView
 {
 
     val mapDiv = new Div(List(), "mapview")
@@ -68,6 +69,8 @@ class GoogleMapsWrapper(center: Coordinates, zoom: Int, mapType: String, markerD
                           title: getTitle(item)
                        });
 
+                       window.selfContext.addVisibilityListener(item, marker);
+
                        var contentString = '<p>'+item.description.replace(/\n/g, "<br />")+'</p>';
 
                        google.maps.event.addListener(marker, 'click', function(content) {
@@ -80,5 +83,15 @@ class GoogleMapsWrapper(center: Coordinates, zoom: Int, mapType: String, markerD
 
                  """)
     def createMap {}
+
+    @javascript(""" customMarker.setVisible(visible); """)
+    private def changeCustomMarkerVisibility(customMarker: Any, visible: Boolean) {}
+
+    private def addVisibilityListener(payolaMarker: Marker, customMarker: Any) = {
+        payolaMarker.visibilityChanged += { e =>
+            changeCustomMarkerVisibility(customMarker, e.target)
+            false
+        }
+    }
 
 }
