@@ -76,7 +76,7 @@ sealed class VirtuosoSecuredEndpointFetcher(name: String, inputCount: Int, param
                         new VirtuosoSecuredEndpoint(endpointURL, username, password).executeQuery(sparqlQuery.toString)
                 }
 
-                result.getOrElse(Graph.empty)
+                result.getOrElse(JenaGraph.empty)
         }
     }
 }

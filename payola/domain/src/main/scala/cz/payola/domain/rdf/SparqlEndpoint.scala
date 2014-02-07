@@ -22,8 +22,8 @@ class SparqlEndpoint(val endpointURL: String)
     }
 
     def executeQuery(query: String): Graph = {
-        _executeQuery[Graph](query){ (representation, data) =>
-            Graph(representation, data)
+        _executeQuery[JenaGraph](query){ (representation, data) =>
+            JenaGraph(representation, data)
         }
     }
 

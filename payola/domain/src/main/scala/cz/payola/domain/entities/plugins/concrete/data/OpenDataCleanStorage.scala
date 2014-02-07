@@ -37,7 +37,7 @@ sealed class OpenDataCleanStorage(name: String, inputCount: Int, parameters: imm
 
         usingDefined(getServiceURLParameter(instance)) { serviceURL =>
             val neighbourhoodUrl = serviceURL + "/uri?format=trig&uri=" + URLEncoder.encode(vertexURI, "UTF-8")
-            Graph(RdfRepresentation.Trig, new Downloader(neighbourhoodUrl, "application/x-trig").result)
+            JenaGraph(RdfRepresentation.Trig, new Downloader(neighbourhoodUrl, "application/x-trig").result)
         }
     }
 }

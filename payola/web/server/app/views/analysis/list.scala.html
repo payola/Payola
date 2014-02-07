@@ -24,11 +24,16 @@
      </div>
 }
 
+@ownedBy(owner: String) = @{
+    <span class="badge badge-inverse">Not editable, owned by {owner}</span>
+}
+
 @list_entities(user, "analysis", "analyses", analyses.size, {(page, countPerPage) =>
     analyses.drop((page-1)*countPerPage).take(countPerPage)
 },{ Unit =>
-new scala.xml.NodeBuffer() +=
+new scala.xml.NodeBuffer() ++=
 <td>Name</td>
+<td>Actions</td>
 }, { e: cz.payola.domain.Entity =>
 val analysis = e.asInstanceOf[cz.payola.domain.entities.Analysis]
 <td class="listing-name">{
@@ -42,7 +47,9 @@ val analysis = e.asInstanceOf[cz.payola.domain.entities.Analysis]
                 buff ++= shareLinkForID(e.id, analysis.name, analysis.isPublic)
                 buff += ({<span> </span>},deleteLinkForID(e.id))}
             </div>
-        }else{
+        } else if(analysis.owner.isDefined) {
+            ownedBy(analysis.owner.get.name)
+        } else {
             <span class="badge badge-inverse">Not editable</span>
         }
     }

@@ -340,7 +340,7 @@ trait SchemaComponent
                 new Group("", "", null)
             },
             factoryFor(analyses) is {
-                new Analysis("", "", None, false, "", None)
+                new Analysis("", "", None, false, "", None, true)
             },
             factoryFor(plugins) is {
                 new PluginDbRepresentation("", "", "", 0, None, false)
@@ -394,7 +394,7 @@ trait SchemaComponent
                 new Prefix("", "", "", "", None)
             },
             factoryFor(analysesResults) is {
-                new AnalysisResult("", None, "", false, 0, new java.sql.Timestamp(System.currentTimeMillis()))
+                new AnalysisResult("", None, "", 0, new java.sql.Timestamp(System.currentTimeMillis()))
             }
         )
 

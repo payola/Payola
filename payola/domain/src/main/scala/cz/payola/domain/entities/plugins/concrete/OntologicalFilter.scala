@@ -6,7 +6,6 @@ import cz.payola.domain.IDGenerator
 import cz.payola.domain.entities.Plugin
 import cz.payola.domain.entities.plugins._
 import cz.payola.domain.entities.plugins.parameters.StringParameter
-import cz.payola.domain.rdf.Graph
 import cz.payola.domain.rdf.ontology.Ontology
 import cz.payola.domain.net.Downloader
 import cz.payola.common.rdf._

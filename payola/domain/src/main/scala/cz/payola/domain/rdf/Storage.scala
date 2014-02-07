@@ -77,10 +77,11 @@ trait Storage
       * @param groupURI URI of the group whose data should be queried.
       * @return The resulting graph.
       */
-    def executeSPARQLQuery(query: String, groupURI: String, setResultsCount: Option[Int] = None): Graph = {
+    def executeSPARQLQuery(query: String, groupURI: String, setResultsCount: Option[Long] = None): Graph = {
         val sparqlQuery = QueryFactory.create(query)
         sparqlQuery.addGraphURI(groupURI)
         val graph: Graph = executeSPARQLQuery(sparqlQuery.toString)
+
         if(setResultsCount.isDefined) {
             graph.resultsCount = setResultsCount
         }

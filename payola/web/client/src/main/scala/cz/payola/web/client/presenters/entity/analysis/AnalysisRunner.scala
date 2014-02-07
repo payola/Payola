@@ -41,11 +41,11 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
     private val pollingPeriod = 500
 
-        @javascript(
-            """
-              cz.payola.web.client.views.graph.PluginSwitchView.prototype.setUriParameter(name, value);
-            """)
-        private def setUriParametr(name: String, value: String) {}
+    @javascript(
+        """
+          cz.payola.web.client.views.graph.PluginSwitchView.prototype.setUriParameter(name, value);
+        """)
+    private def setUriParametr(name: String, value: String) {}
 
     @javascript(
         """

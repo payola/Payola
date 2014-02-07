@@ -11,6 +11,10 @@
         <link rel="stylesheet" href="@routes.Assets.at("stylesheets/colorpicker.css")" />
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/sigma.css")" />
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")"/>
+
+        <link rel="stylesheet" href="http://js.arcgis.com/3.8/js/dojo/dijit/themes/tundra/tundra.css">
+        <link rel="stylesheet" href="http://js.arcgis.com/3.8/js/esri/css/esri.css">
+
         <title>@title</title>
         <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/jquery.min.js")"></script>
         <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/jquery-ui.min.js")"></script>
@@ -28,6 +32,19 @@
         <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/sigma/sigma.forceatlas2.js")"></script>
         <script type="text/javascript" src="@routes.Assets.at("javascripts/common.js")"></script>
         <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCesJn7XyQUzK78CRLwJusuLUR1-Wy8fVc&sensor=false&libraries=visualization"></script>
+
+
+
+        <script>
+            // helpful for understanding dojoConfig.packages vs. dojoConfig.paths:
+            // http://www.sitepen.com/blog/2013/06/20/dojo-faq-what-is-the-difference-packages-vs-paths-vs-aliases/
+            var dojoConfig = {
+                paths: {
+                    extras: "@routes.Assets.at("javascripts/lib/map")"
+                }
+            };
+        </script>
+        <script src="http://js.arcgis.com/3.8/"></script>
     </head>
     <body>
             <div class="navbar navbar-fixed-top">

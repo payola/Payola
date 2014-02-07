@@ -46,7 +46,7 @@ object Analysis extends PayolaController with Secured
 
     def listAccessible(page: Int = 1) = maybeAuthenticated { user: Option[User] =>
         Ok(views.html.analysis
-            .list(user, Payola.model.analysisModel.getAccessibleToUser(user), page, Some("Accessible analyses")))
+            .list(user, Payola.model.analysisModel.getAccessibleToUser(user, forListing = true), page, Some("Accessible analyses")))
     }
 
     def listAccessibleByOwner(ownerId: String, page: Int = 1) = maybeAuthenticated { user: Option[User] =>

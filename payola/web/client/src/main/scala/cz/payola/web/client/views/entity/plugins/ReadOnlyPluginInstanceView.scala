@@ -12,17 +12,6 @@ class ReadOnlyPluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[P
 {
     def getAdditionalControlsViews: Seq[View] = List()
 
-    def getFooterViews: Seq[View] = {
-        if (pluginInstance.plugin.name == "SPARQL Endpoint") {
-            val graphUris = pluginInstance.getParameter("Graph URIs").get.toString
-            val endpointURL = pluginInstance.getParameter("Endpoint URL").get.toString
-            List(new Anchor(List(new Span(List(new Text("LODVis")), "label label-inverse")),
-                "http://lodvisualization.appspot.com/?graphUri=" + graphUris + "&endpointUri=" + endpointURL))
-        } else {
-            List()
-        }
-    }
-
     def getParameterViews: Seq[View] = {
         val listItems = filterParams(getPlugin.parameters).flatMap {
             param =>
@@ -39,7 +28,8 @@ class ReadOnlyPluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[P
                         // If rendering string parameter that can contain url, try to find matching prefix
                         val item = param match {
                             case p : StringParameter if p.canContainUrl => new ListItem(List(strong, new Text(": " + prefixApplier.applyPrefix(v.toString))))
-                            case _ => new ListItem(List(strong, new Text(v.toString)))
+                            case p : StringParameter if p.isPassword => new ListItem(List(strong, new Text(": ***")))
+                            case _ => new ListItem(List(strong, new Text(": "+v.toString)))
                         }
 
                         item.setAttribute("title", v.toString)

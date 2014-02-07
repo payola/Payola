@@ -148,7 +148,13 @@ trait TableRepositoryComponent
         with ShareableEntityRepository[A]
     {
         self: TableRepository[A, B] =>
-        def getAllPublic: Seq[A] = selectWhere(_.isPublic === true).sortBy(_.name)
+        def getAllPublic(forListing: Boolean = false): Seq[A] = {
+            if (forListing){
+                selectWhere{ e => e.isPublic === true and e.isVisibleInListings === true }.sortBy(_.name)
+            } else {
+                selectWhere(_.isPublic === true).sortBy(_.name)
+            }
+        }
     }
 
     /**

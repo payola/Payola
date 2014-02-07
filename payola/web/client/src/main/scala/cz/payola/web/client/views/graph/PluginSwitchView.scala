@@ -17,6 +17,8 @@ import cz.payola.web.client.views.graph.sigma.GraphSigmaPluginView
 import cz.payola.web.client.views.graph.datacube._
 import cz.payola.web.client.models.PrefixApplier
 import s2js.compiler.javascript
+import cz.payola.web.client.views.map._
+import cz.payola.web.client.views.map.facets.GroupingMapFacet
 import cz.payola.web.client.views.graph.empty.EmptyPluginView
 
 class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[String] = None) extends GraphView with ComposedView
@@ -67,9 +69,11 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
         new GravityTechnique(Some(prefixApplier)),
         new ColumnChartPluginView(Some(prefixApplier)),
         new GraphSigmaPluginView(Some(prefixApplier)),
-        new TimeHeatmap(Some(prefixApplier)), // [Jiri Helmich]
-        new Generic(Some(prefixApplier)),  // [Jiri Helmich]
-        new GoogleMap(Some(prefixApplier))
+        new TimeHeatmap(Some(prefixApplier)),
+        new Generic(Some(prefixApplier)),
+        new GoogleMapView(Some(prefixApplier), List(new GroupingMapFacet())),
+        new GoogleHeatMapView(Some(prefixApplier)),
+        new ArcGisMapView(Some(prefixApplier))
     )
 
     /**

@@ -95,6 +95,8 @@ trait AnalysisModelComponent extends EntityModelComponent
             getAccessibleToUser(newOwner).find(_.id == analysisId).map {
                 a =>
                     val newAnalysis = new Analysis(a.name +"_"+ IDGenerator.newId, newOwner)
+                    newAnalysis.description = a.description
+                    newAnalysis.isVisibleInListings = a.isVisibleInListings
                     persist(newAnalysis)
                     clonePluginInstances(a.pluginInstances, a.pluginInstanceBindings, newAnalysis)
                     getById(newAnalysis.id).get
@@ -298,6 +300,7 @@ trait AnalysisModelComponent extends EntityModelComponent
             val analysis = new Analysis(IDGenerator.newId, user)
             analysis.isPublic = true
             analysis.token = Some(IDGenerator.newId)
+            analysis.isVisibleInListings = false
             persist(analysis)
 
             val endpointInstance = createPluginInstance(endpointPluginId, analysis.id)

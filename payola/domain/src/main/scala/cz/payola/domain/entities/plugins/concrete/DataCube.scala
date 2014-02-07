@@ -57,7 +57,7 @@ class DataCube(name: String, inputCount: Int, parameters: immutable.Seq[Paramete
         val definedInputs = getDefinedInputs(inputs)
         val query = getQuery(instance)
 
-        definedInputs(0).executeSPARQLQuery(query) + Graph(RdfRepresentation.Turtle, getDCVDefinitionQuery(instance))
+        definedInputs(0).executeSPARQLQuery(query) + JenaGraph(RdfRepresentation.Turtle, getDCVDefinitionQuery(instance))
     }
 
     /**

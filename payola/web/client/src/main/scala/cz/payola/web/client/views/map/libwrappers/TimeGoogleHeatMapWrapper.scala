@@ -1,21 +1,21 @@
-package cz.payola.web.client.views.map
+package cz.payola.web.client.views.map.libwrappers
 
-import cz.payola.web.client.views.ComposedView
-import s2js.compiler.javascript
-import s2js.adapters.dom.Element
-import cz.payola.web.client.views.elements.Div
-import cz.payola.web.client.views.elements.lists._
 import cz.payola.common.geo.Coordinates
-import cz.payola.web.client.views.graph.datacube.TimeObservation
-import cz.payola.web.client.views.elements.form.fields.CheckBox
+import cz.payola.web.client.views.ComposedView
+import cz.payola.web.client.views.elements.Div
 import cz.payola.web.client.views.elements.form.Label
+import cz.payola.web.client.views.elements.form.fields.CheckBox
+import cz.payola.web.client.views.elements.lists._
+import cz.payola.web.client.views.graph.datacube.TimeObservation
+import s2js.adapters.dom.Element
+import s2js.compiler.javascript
 import scala.collection.mutable
 
 /**
  * Google Maps wrapper, mostly written in JavaScript. Just creates subviews and renders.
  * @author Jiri Helmich
  */
-class TimeHeatMapView(center: Coordinates, zoom: Int, mapType: String, heatData: Seq[TimeObservation],
+class TimeGoogleHeatMapWrapper(center: Coordinates, zoom: Int, mapType: String, heatData: Seq[TimeObservation],
     yearList: mutable.ArrayBuffer[String], hashMap: mutable.HashMap[String, mutable.ArrayBuffer[TimeObservation]],
     element: Element) extends ComposedView
 {

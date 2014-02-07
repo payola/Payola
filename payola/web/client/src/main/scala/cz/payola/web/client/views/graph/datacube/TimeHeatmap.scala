@@ -10,6 +10,7 @@ import s2js.compiler.javascript
 import scala.collection._
 import cz.payola.common.geo.Coordinates
 import cz.payola.web.client.views.bootstrap.Icon
+import cz.payola.web.client.views.map.libwrappers.TimeGoogleHeatMapWrapper
 import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
 import cz.payola.web.shared.transformators.IdentityTransformator
 
@@ -186,7 +187,7 @@ class TimeHeatmap(prefixApplier: Option[PrefixApplier] = None) extends PluginVie
                 false
             }
 
-            val map = new TimeHeatMapView(center, 3, "satellite", list, yearList, hashMap, mapPlaceholder.htmlElement)
+            val map = new TimeGoogleHeatMapWrapper(center, 3, "satellite", list, yearList, hashMap, mapPlaceholder.htmlElement)
 
             mapPlaceholder.removeAllChildNodes()
             wrap.render(mapPlaceholder.htmlElement)

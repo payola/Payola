@@ -9,16 +9,16 @@ object AnalysisResult extends EntityConverter[AnalysisResult]
         entity match {
             case e: AnalysisResult => Some(e)
             case e: cz.payola.common.entities.AnalysisResult =>
-                Some(new AnalysisResult(e.analysisId, e.owner.map(User(_)), e.evaluationId, e.storedIn,
+                Some(new AnalysisResult(e.analysisId, e.owner.map(User(_)), e.evaluationId,
                     e.verticesCount, new Timestamp(e.touched.getTime())))
             case _ => None
         }
     }
 }
 
-class AnalysisResult (AnalysisID: String, o: Option[User], EvaluationID: String, Persist: Boolean,
+class AnalysisResult (AnalysisID: String, o: Option[User], EvaluationID: String,
     VerticesCount: Int, Touched: java.sql.Timestamp)
     (implicit val context: SquerylDataContextComponent)
-    extends cz.payola.domain.entities.AnalysisResult(AnalysisID, o, EvaluationID, Persist, VerticesCount, Touched)
+    extends cz.payola.domain.entities.AnalysisResult(AnalysisID, o, EvaluationID, VerticesCount, Touched)
     with Entity with OptionallyOwnedEntity
 { }

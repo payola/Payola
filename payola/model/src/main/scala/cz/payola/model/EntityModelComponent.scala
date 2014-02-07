@@ -51,8 +51,8 @@ trait EntityModelComponent
             uniqueKeyCheckedPersist(entity, "name")
         }
 
-        def getAccessibleToUser(user: Option[User]): Seq[A] = {
-            val public = repository.getAllPublic
+        def getAccessibleToUser(user: Option[User], forListing : Boolean = false): Seq[A] = {
+            val public = repository.getAllPublic(forListing)
             val owned = getOwnedByUser(user)
             val granted = getGrantedToUser(user, groupRepository.getAll())
 

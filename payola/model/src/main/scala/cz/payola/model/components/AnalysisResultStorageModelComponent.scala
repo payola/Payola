@@ -2,7 +2,6 @@ package cz.payola.model.components
 
 import cz.payola.domain.RdfStorageComponent
 import cz.payola.domain.entities.User
-import cz.payola.domain.rdf._
 import cz.payola.common.rdf._
 import cz.payola.domain.entities.AnalysisResult
 import cz.payola.data.DataContextComponent
@@ -16,6 +15,7 @@ import com.hp.hpl.jena.query._
 import com.hp.hpl.jena.rdf.model._
 import org.apache.jena.riot._
 import org.apache.jena.riot.lang._
+import cz.payola.domain.rdf._
 
 trait AnalysisResultStorageModelComponent
 {
@@ -28,7 +28,7 @@ trait AnalysisResultStorageModelComponent
                 try { op(p) } finally { p.close() }
             }
 
-            def saveGraph(graph: Graph, analysisId: String, evaluationId: String/*, persist: Boolean*/, host: String, user: Option[User] = None) {
+            def saveGraph(graph: Graph, analysisId: String, evaluationId: String, host: String, user: Option[User] = None) {
 
                 if(!graph.isInstanceOf[cz.payola.domain.rdf.Graph]) {
                     return
@@ -36,14 +36,9 @@ trait AnalysisResultStorageModelComponent
 
                 val domainGraph = graph.asInstanceOf[cz.payola.domain.rdf.Graph]
 
-                val inDB = analysisResultRepository.getResultsCount()
-                if(inDB >= maxStoredAnalyses) {
-                    analysisResultRepository.purge()      //TODO use removeGraph, this way the virtuoso might get filled up
-                }
-
                 //store control in DB
                 analysisResultRepository.storeResult(new AnalysisResult(
-                    analysisId, user, evaluationId, true, graph.vertices.size, //persisting all
+                    analysisId, user, evaluationId, graph.vertices.size,
                     new java.sql.Timestamp(System.currentTimeMillis)))
 
                 val uri = constructUri(evaluationId)
@@ -55,9 +50,6 @@ trait AnalysisResultStorageModelComponent
                     p.println(serializedGraph)
                 })
 
-                //store graph in virtuoso
-                //rdfStorage.storeGraph(uri, serializedGraph)
-                //rdfStorage.storeGraphFromFile(uri, new File("/tmp/"+evaluationId+".rdf"), RdfRepresentation.RdfXml)
                 rdfStorage.storeGraphAtURL(uri, "http://"+host+"/evaluation/"+evaluationId+".rdf")
 
                 tmpFile.delete()
@@ -77,7 +69,7 @@ trait AnalysisResultStorageModelComponent
 
             def getGraph(sparqlQuery: String, evaluationId: String): Graph = {
                 val graphSize = rdfStorage.executeSPARQLQuery("SELECT (COUNT(*) as ?graphsize) WHERE {?s ?p ?o.}", constructUri(evaluationId))
-                val graphVerticesCount = graphSize.edges.find(_.uri.contains("value")).map(_.destination.toString().toInt)
+                val graphVerticesCount = graphSize.edges.find(_.uri.contains("value")).map(_.destination.toString().toLong)
 
                 val graph = rdfStorage.executeSPARQLQuery(sparqlQuery, constructUri(evaluationId), graphVerticesCount)
                 analysisResultRepository.updateTimestamp(evaluationId)
@@ -102,7 +94,7 @@ trait AnalysisResultStorageModelComponent
 
             def getGraph(sparqlQueryList: List[String], evaluationId: String): Graph = {
                 val graphSize = rdfStorage.executeSPARQLQuery("SELECT (COUNT(*) as ?graphsize) WHERE {?s ?p ?o.}", constructUri(evaluationId))
-                val graphVerticesCount = graphSize.edges.find(_.uri.contains("value")).map(_.destination.toString().toInt)
+                val graphVerticesCount = graphSize.edges.find(_.uri.contains("value")).map(_.destination.toString().toLong)
 
                 val graph = sparqlQueryList.map{ query =>
                     rdfStorage.executeSPARQLQuery(query, constructUri(evaluationId), graphVerticesCount)
@@ -121,7 +113,7 @@ trait AnalysisResultStorageModelComponent
             }
 
             def getEmptyGraph(): Graph = {
-                Graph.empty
+                JenaGraph.empty
             }
         }
 
