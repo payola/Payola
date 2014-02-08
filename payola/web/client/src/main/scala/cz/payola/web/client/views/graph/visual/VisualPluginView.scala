@@ -19,7 +19,6 @@ import cz.payola.common.visual.Color
 import lists.ListItem
 import models.PrefixApplier
 import tables._
-import scala.Some
 import cz.payola.web.shared.transformators.VisualTransformator
 import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
 import cz.payola.web.client.views.graph.visual.techniques.gravity.GravityTechnique

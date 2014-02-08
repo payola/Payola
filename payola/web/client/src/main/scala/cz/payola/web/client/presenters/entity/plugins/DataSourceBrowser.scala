@@ -14,6 +14,7 @@ import cz.payola.common.rdf._
 import s2js.adapters.browser.window
 import s2js.compiler.javascript
 import cz.payola.web.client.presenters.entity.PrefixPresenter
+import cz.payola.web.client.util.UriHashTools
 
 class DataSourceBrowser(
     val viewElement: html.Element,
@@ -26,23 +27,16 @@ class DataSourceBrowser(
 
     private var graphPresenter: GraphPresenter = null
 
-    private var history = mutable.ListBuffer.empty[(Option[Vertex], String)]
-
-    private var historyPosition = -1
-
     private val prefixPresenter = new PrefixPresenter()
 
     private var languagesLoaded = false
 
-    @javascript("""return encodeURIComponent(uri)""")
-    def encodeURIComponent(uri: String) : String = ""
-
-    @javascript("""return decodeURIComponent(uri)""")
-    def decodeURIComponent(uri: String) : String = ""
+    private var allowInitialGraphHistoryReload = false
 
     def initialize() {
         // First init prefixes
         prefixPresenter.initialize()
+        initHistory()
 
         graphPresenter = new GraphPresenter(view.graphViewSpace.htmlElement, prefixPresenter.prefixApplier)
 
@@ -50,8 +44,6 @@ class DataSourceBrowser(
         graphPresenter.initialize()
 
         // Register the event handlers.
-        view.backButton.mouseClicked += onBackButtonClicked _
-        view.nextButton.mouseClicked += onNextButtonClicked _
         view.goButton.mouseClicked += onGoButtonClicked _
         view.sparqlQueryButton.mouseClicked += onSparqlQueryButtonClicked _
         view.nodeUriInput.keyPressed += onNodeUriKeyPressed _
@@ -60,28 +52,26 @@ class DataSourceBrowser(
 
         view.render(viewElement)
 
-        if (getBrowsingURI() == 0) {
+        if (UriHashTools.getUriParameter("browseUri") == 0) {
             // If the default URI isn't specified, display the initial graph.
             if (initialVertexUri == "") {
-                blockPage("Fetching the initial graph...")
-                DataSourceManager.getInitialGraph(dataSourceId) { graph =>
-                    graphPresenter.view.updateGraph(graph, true)
-                    updateNavigationView()
-                    unblockPage()
-                }(fatalErrorHandler(_))
+                allowInitialGraphHistoryReload = false
+                loadInitialGraph()
             } else {
-                addToHistoryAndGo(None, initialVertexUri, false)
+                addToHistoryAndGo(initialVertexUri)//, false)
             }
         } else {
-            addToHistoryAndGo(None, decodeURIComponent(getBrowsingURI()), false)
+            addToHistoryAndGo(UriHashTools.decodeURIComponent(UriHashTools.getUriParameter("browseUri")))//, false)
         }
     }
 
-    @javascript(
-        """
-          return cz.payola.web.client.views.graph.PluginSwitchView.prototype.getUriParameter("browseUri");
-        """)
-    private def getBrowsingURI() = ""
+    private def loadInitialGraph() {
+        blockPage("Fetching the initial graph...")
+        DataSourceManager.getInitialGraph(dataSourceId) { graph =>
+            graphPresenter.view.updateGraph(graph, true)
+            unblockPage()
+        }(fatalErrorHandler(_))
+    }
 
     private def onLanguagesButtonClicked(e: EventArgs[_]): Boolean = {
         if(!languagesLoaded){
@@ -97,28 +87,12 @@ class DataSourceBrowser(
 
     private def onVertexBrowsing(e: VertexEventArgs[_]) {
         e.vertex match {
-            case i: IdentifiedVertex => addToHistoryAndGo(Some(i), i.uri, false)
+            case i: IdentifiedVertex => addToHistoryAndGo(i.uri)//, false)
         }
-    }
-
-    private def onBackButtonClicked(e: EventArgs[_]): Boolean = {
-        if (canGoBack) {
-            historyPosition -= 1
-            updateView(true)
-        }
-        false
-    }
-
-    private def onNextButtonClicked(e: EventArgs[_]): Boolean = {
-        if (canGoNext) {
-            historyPosition += 1
-            updateView(true)
-        }
-        false
     }
 
     private def onGoButtonClicked(e: EventArgs[_]): Boolean = {
-        addToHistoryAndGo(None, view.nodeUriInput.value, true)
+        addToHistoryAndGo(view.nodeUriInput.value)//, true)
         false
     }
 
@@ -129,10 +103,6 @@ class DataSourceBrowser(
             DataSourceManager.executeSparqlQuery(dataSourceId, modal.sparqlQueryInput.value) { g =>
                 modal.unblock()
                 modal.destroy()
-
-                history.clear()
-                historyPosition = -1
-                updateNavigationView()
 
                 graphPresenter.view.clear()
                 graphPresenter.view.updateGraph(g, true)
@@ -157,32 +127,19 @@ class DataSourceBrowser(
         }
     }
 
-    private def addToHistoryAndGo(vertex: Option[IdentifiedVertex], prefixedUri: String, clearGraph: Boolean) {
-        // Remove all next items from the history.
-        while (historyPosition < history.length - 1) {
-            history.remove(historyPosition + 1)
-        }
+    private def addToHistoryAndGo(prefixedUri: String) {
 
         val uri = prefixPresenter.prefixApplier.disapplyPrefix(prefixedUri)
+        UriHashTools.setUriParameter("browseUri", UriHashTools.encodeURIComponent(uri))
+        allowInitialGraphHistoryReload = true
 
-        // Add the new item.
-        history += ((vertex, uri))
-        historyPosition += 1
-
-        setBrowsingUri(encodeURIComponent(uri))
-
-        updateView(clearGraph)
+        //binded JQuery action calls updateView after hash in URI is changed
     }
 
-    @javascript(
-        """
-          cz.payola.web.client.views.graph.PluginSwitchView.prototype.setUriParameter("browseUri", uri);
-        """)
-    private def setBrowsingUri(uri: String) {}
-
-    private def updateView(clearGraph: Boolean) {
-        val tuple =  history(historyPosition)
-        val uri = tuple._2
+    /**
+     * Is called via event binded to URI hash parameter change (@see initHistory())
+     */
+    private def updateView(clearGraph: Boolean, uri: String) {
         view.nodeUriInput.value = prefixPresenter.prefixApplier.applyPrefix(uri)
         view.nodeUriInput.setIsEnabled(false)
 
@@ -192,27 +149,25 @@ class DataSourceBrowser(
                 graphPresenter.view.clear()
             }
             graphPresenter.view.updateGraph(graph, true)
-            if(tuple._1.isDefined)
-                graphPresenter.view.setMainVertex(tuple._1.get)
-            else
-                graphPresenter.view.drawGraph()
-
-            updateNavigationView()
+            graphPresenter.view.drawGraph()
 
             view.nodeUriInput.setIsEnabled(true)
             unblockPage()
         }(fatalErrorHandler(_))
     }
 
-    private def updateNavigationView() {
-        view.backButton.setIsEnabled(canGoBack)
-        view.nextButton.setIsEnabled(canGoNext)
-        if (historyPosition < 0) {
-            view.nodeUriInput.value = ""
-        }
-    }
-
-    private def canGoBack = history.nonEmpty && historyPosition > 0
-
-    private def canGoNext = history.nonEmpty && historyPosition < (history.length - 1)
+    @javascript("""
+                  $(window).bind( 'hashchange', function(e) {
+                        var uri = cz.payola.web.client.util.UriHashTools.get().getUriParameter("browseUri");
+                        uri = cz.payola.web.client.util.UriHashTools.get().decodeURIComponent(uri);
+                        if(uri != "") {
+                            self.updateView(true, uri);
+                        } else if(self.allowInitialGraphHistoryReload) {
+                            self.view.nodeUriInput.updateValue("");
+                            self.allowInitialGraphHistoryReload = false;
+                            self.loadInitialGraph();
+                        }
+                  });
+                """)
+    private def initHistory(){}
 }

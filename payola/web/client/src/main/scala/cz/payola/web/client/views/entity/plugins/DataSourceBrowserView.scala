@@ -9,10 +9,6 @@ class DataSourceBrowserView(dataSourceName: String) extends ComposedView
 {
     val heading = new Heading(List(new Text("Data source: " + dataSourceName)), 2)
 
-    val backButton = new Button(new Icon(Icon.arrow_left))
-
-    val nextButton = new Button(new Icon(Icon.arrow_right))
-
     val nodeUriInput = new TextInput("nodeUri", "", "Node URI", "input-xlarge")
 
     val goButton = new Button(new Text("Go!"))
@@ -20,8 +16,6 @@ class DataSourceBrowserView(dataSourceName: String) extends ComposedView
     val sparqlQueryButton = new Button(new Text("SPARQL"), "", new Icon(Icon.asterisk))
 
     val navigation = new Div(List(
-        backButton,
-        nextButton,
         nodeUriInput,
         goButton,
         sparqlQueryButton),

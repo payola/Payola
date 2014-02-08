@@ -20,6 +20,7 @@ import s2js.compiler.javascript
 import cz.payola.web.client.views.map._
 import cz.payola.web.client.views.map.facets.GroupingMapFacet
 import cz.payola.web.client.views.graph.empty.EmptyPluginView
+import cz.payola.web.client.util.UriHashTools
 
 class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[String] = None) extends GraphView with ComposedView
 {
@@ -86,7 +87,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
             setEvaluationId(startEvaluationId)
         }
         plugins.find{ plugin =>
-            evaluationId.isEmpty && noramlizeClassName(plugin.getClass.getName) == getUriParameter("viewPlugin")
+            evaluationId.isEmpty && noramlizeClassName(plugin.getClass.getName) == UriHashTools.getUriParameter("viewPlugin")
         }.getOrElse(new EmptyPluginView())
     }
 
@@ -438,7 +439,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
         pluginAnchor.mouseClicked += { e =>
             pluginChangeButton.setActiveItem(listItem)
             changePlugin(plugin)
-            setUriParameter("viewPlugin", noramlizeClassName(plugin.getClass.getName))
+            UriHashTools.setUriParameter("viewPlugin", noramlizeClassName(plugin.getClass.getName))
             false
         }
         listItem
@@ -450,34 +451,4 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
           }
                 """)
     private def autoSwitchPlugin(normalizedPluginName: String) {}
-
-    @javascript("""
-          var currentHash = window.location.hash;
-          window.location.hash = "";
-
-          var params = currentHash.substr(1).split('&');
-          for(i = 0; i < params.length; ++i) {
-            if(params[i].split('=')[0] != "" && params[i].split('=')[0] != name ) {
-                if(window.location.hash.length != 0) {
-                    window.location.hash = window.location.hash + '&';
-                }
-                window.location.hash = window.location.hash + params[i]
-            }
-          }
-          window.location.hash = '#' + (window.location.hash + '&' + name + "=" + value).substring(1);
-        """)
-    private def setUriParameter(name: String, value: String) {}
-
-    @javascript("""
-          if (window.location.hash){
-            var params = window.location.hash.substr(1).split('&');
-            for(i = 0; i < params.length; ++i) {
-                if(params[i].split('=')[0] == name) {
-                    return params[i].split('=')[1]
-                }
-            }
-          }
-          return '';
-        """)
-    private def getUriParameter(name: String) : String = null
 }
