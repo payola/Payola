@@ -20,6 +20,9 @@ abstract class GraphView
     /** The id of the analysis, which this graphView represents. */
     protected var evaluationId: Option[String] = None
 
+    /** The uri currently browsed vertex. */
+    protected var browsingURI: Option[String] = None
+
     /** The ontology customization that is currently used during visualization. */
     protected var currentCustomization: Option[DefinedCustomization] = None
 
@@ -90,5 +93,9 @@ abstract class GraphView
 
     def setEvaluationId(newEvaluationId: Option[String]) {
         evaluationId = newEvaluationId
+    }
+
+    def setBrowsingURI(newBrowsingURI: Option[String]) {
+        browsingURI = newBrowsingURI
     }
 }

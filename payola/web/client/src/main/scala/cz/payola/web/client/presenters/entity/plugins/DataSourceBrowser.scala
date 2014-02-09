@@ -58,18 +58,22 @@ class DataSourceBrowser(
                 allowInitialGraphHistoryReload = false
                 loadInitialGraph()
             } else {
-                addToHistoryAndGo(initialVertexUri)//, false)
+                addToHistoryAndGo(initialVertexUri, false)
             }
         } else {
-            addToHistoryAndGo(UriHashTools.decodeURIComponent(UriHashTools.getUriParameter("browseUri")))//, false)
+            addToHistoryAndGo(UriHashTools.decodeURIComponent(UriHashTools.getUriParameter("browseUri")), true)
         }
     }
 
     private def loadInitialGraph() {
         blockPage("Fetching the initial graph...")
-        DataSourceManager.getInitialGraph(dataSourceId) { graph =>
-            graphPresenter.view.updateGraph(graph, true)
-            unblockPage()
+        DataSourceManager.getInitialGraphFirstTripleUri(dataSourceId) { firstUri =>
+            graphPresenter.view.setBrowsingURI(firstUri)
+            DataSourceManager.getInitialGraph(dataSourceId) { graph =>
+                graphPresenter.view.updateGraph(graph, true)
+                unblockPage()
+            }(fatalErrorHandler(_))
+
         }(fatalErrorHandler(_))
     }
 
@@ -87,17 +91,18 @@ class DataSourceBrowser(
 
     private def onVertexBrowsing(e: VertexEventArgs[_]) {
         e.vertex match {
-            case i: IdentifiedVertex => addToHistoryAndGo(i.uri)//, false)
+            case i: IdentifiedVertex => addToHistoryAndGo(i.uri, false)
         }
     }
 
     private def onGoButtonClicked(e: EventArgs[_]): Boolean = {
-        addToHistoryAndGo(view.nodeUriInput.value)//, true)
+        addToHistoryAndGo(view.nodeUriInput.value, false)
         false
     }
 
     private def onSparqlQueryButtonClicked(e: EventArgs[_]): Boolean = {
         val modal = new SparqlQueryModal
+        graphPresenter.view.setBrowsingURI(None)
         modal.confirming += { _ =>
             modal.block("Executing the SPARQL query.")
             DataSourceManager.executeSparqlQuery(dataSourceId, modal.sparqlQueryInput.value) { g =>
@@ -127,13 +132,16 @@ class DataSourceBrowser(
         }
     }
 
-    private def addToHistoryAndGo(prefixedUri: String) {
+    private def addToHistoryAndGo(prefixedUri: String, forceUpdate: Boolean) {
 
         val uri = prefixPresenter.prefixApplier.disapplyPrefix(prefixedUri)
         UriHashTools.setUriParameter("browseUri", UriHashTools.encodeURIComponent(uri))
         allowInitialGraphHistoryReload = true
 
         //binded JQuery action calls updateView after hash in URI is changed
+        //if browsing Uri is set on datastourceBrowser initialization, that the jquery binding does not fire any event
+        if(forceUpdate)
+            updateView(true, uri)
     }
 
     /**
@@ -142,6 +150,7 @@ class DataSourceBrowser(
     private def updateView(clearGraph: Boolean, uri: String) {
         view.nodeUriInput.value = prefixPresenter.prefixApplier.applyPrefix(uri)
         view.nodeUriInput.setIsEnabled(false)
+        graphPresenter.view.setBrowsingURI(Some(uri))
 
         blockPage("Fetching the node neighbourhood...")
         DataSourceManager.getNeighbourhood(dataSourceId, uri) { graph =>

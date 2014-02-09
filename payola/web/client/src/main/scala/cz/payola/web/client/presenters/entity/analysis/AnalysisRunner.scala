@@ -19,6 +19,7 @@ import cz.payola.web.client.views.VertexEventArgs
 import cz.payola.web.client.presenters.entity.PrefixPresenter
 import s2js.compiler.javascript
 import cz.payola.web.shared.managers.TransformationManager
+import cz.payola.web.client.util.UriHashTools
 
 /**
  * Presenter responsible for the logic around running an analysis evaluation.
@@ -43,27 +44,11 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
     @javascript(
         """
-          cz.payola.web.client.views.graph.PluginSwitchView.prototype.setUriParameter(name, value);
-        """)
-    private def setUriParametr(name: String, value: String) {}
-
-    @javascript(
-        """
-          var id = cz.payola.web.client.views.graph.PluginSwitchView.prototype.getUriParameter("viewPlugin");
-          if (id.length > 0){
+          if (pluginView.length > 0){
             jQuery(".analysis-controls .btn-success").click();
           }
         """)
-    private def autorun() {}
-
-    @javascript("""return cz.payola.web.client.views.graph.PluginSwitchView.prototype.getUriParameter("evaluation");""")
-    private def getEvaluationId() = ""
-
-    @javascript(
-        """
-          return cz.payola.web.client.views.graph.PluginSwitchView.prototype.getUriParameter("viewPlugin");
-        """)
-    private def getViewPlugin() = ""
+    private def autorun(pluginView: String) {}
 
     def initialize() {
         blockPage("Loading analysis data...")
@@ -71,7 +56,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
         DomainData.getAnalysisById(analysisId) {
             analysis =>
-                val uriEvaluationId = getEvaluationId()
+                val uriEvaluationId = UriHashTools.getUriParameter("evaluation")
                 if(uriEvaluationId != "") {
                     AnalysisRunner.evaluationExists(uriEvaluationId) {exists =>
                             if(exists) skipEvaluationAndLoadFromCache(uriEvaluationId, analysis)
@@ -80,7 +65,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
                 } else {
                     createViewAndInit(analysis)
                     unblockPage()
-                    autorun()
+                    autorun(UriHashTools.getUriParameter("viewPlugin"))
                 }
         } {
             err => fatalErrorHandler(err)
@@ -140,11 +125,11 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
             view.overviewView.controls.timeoutInfoBar.addCssClass("none")
             view.overviewView.controls.progressBar.setStyleToSuccess()
 
-            getAnalysisEvaluationID.foreach(setUriParametr("evaluation", _))
+            getAnalysisEvaluationID.foreach(UriHashTools.setUriParameter("evaluation", _))
 
             graphPresenter = new GraphPresenter(view.resultsView.htmlElement, prefixPresenter.prefixApplier, getAnalysisEvaluationID)
             graphPresenter.initialize()
-            graphPresenter.view.setAvailablePlugins(evt.availableTransformators, getViewPlugin())
+            graphPresenter.view.setAvailablePlugins(evt.availableTransformators, UriHashTools.getUriParameter("viewPlugin"))
             graphPresenter.view.vertexBrowsing += onVertexBrowsing
 
             val downloadButtonView = new DownloadButtonView()

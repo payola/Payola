@@ -22,20 +22,14 @@ class VertexGroupInfoTable(group: VertexViewGroup, position: Point2D, prefixAppl
     def createSubViews: Seq[client.View] = {
         val buffer = new ArrayBuffer[ElementView[_]]()
 
-        group.vertexViews.foreach { vertex =>
-            val label = vertex match {
-                case view: VertexView =>
-                    prefixApplier.map(_.applyPrefix(view.vertexModel.toString())).getOrElse(view.vertexModel.toString())
-                case _ =>
-                    vertex.toString()
-            }
-            val removeVertexIcon = new Anchor(List(new Icon(Icon.share)), "#", "", "Unpack "+label)
+        group.vertexViewsLabels.foreach { vertexTuple =>
+            val removeVertexIcon = new Anchor(List(new Icon(Icon.share)), "#", "", "Unpack "+vertexTuple._2)
             removeVertexIcon.mouseClicked += { e =>
-                removeVertexFromGroup.triggerDirectly(vertex)
+                removeVertexFromGroup.triggerDirectly(vertexTuple._1)
                 false
             }
 
-            buffer += new DefinitionTerm(List(removeVertexIcon, new Text(label)))
+            buffer += new DefinitionTerm(List(removeVertexIcon, new Text(vertexTuple._2)))
         }
 
         val removeAll = new Anchor(List(new Icon(Icon.share_alt), new Text("Unpack all")))

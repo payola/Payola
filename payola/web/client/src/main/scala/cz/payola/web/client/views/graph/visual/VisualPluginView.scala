@@ -22,6 +22,8 @@ import tables._
 import cz.payola.web.shared.transformators.VisualTransformator
 import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
 import cz.payola.web.client.views.graph.visual.techniques.gravity.GravityTechnique
+import cz.payola.web.client.views.elements.form.fields.CheckBox
+import cz.payola.web.client.views.elements.form.Label
 
 /**
  * Representation of visual based output drawing plugin
@@ -70,6 +72,13 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
      */
     protected val animationStopButton = new Button(new Text("Stop animation"), "pull-right",
         new Icon(Icon.stop)).setAttribute("style", "margin: 0 5px;")
+
+    protected val animateAfterGroupsChange = new CheckBox("repositionAfterGroupChange", true,
+        "Reset positioning after group un/packing", "pull-right").setAttribute("style", "margin-top: 5px;")
+
+    protected val animateAfterGroupPacking = new Div(List(
+        new Label("Reposition when group changed", animateAfterGroupsChange.formHtmlElement),
+        new Div(List(animateAfterGroupsChange), "pull-right")), "pull-right")
 
     /**
      * This is set to true if the animationStopButton is pressed.
@@ -233,7 +242,11 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
 
     groupVertices.mouseClicked += { e =>
         graphView.get.createGroup(topLayer.getCenter)
-        redraw()
+        if(animateAfterGroupsChange.value) {
+            drawGraph()
+        } else {
+            redraw()
+        }
         false
     }
 
@@ -264,7 +277,7 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
             val vertexLinks = graphView.get.removeVertexFromGroup(e.target)
             if(e.target.getFirstContainedVertex().isInstanceOf[VertexLink]) {
                 View.blockPage("Fetching data")
-               fetchVertexLinks(vertexLinks, !this.isInstanceOf[GravityTechnique])
+               fetchVertexLinks(vertexLinks, !this.isInstanceOf[GravityTechnique] && animateAfterGroupsChange.value)
             } else {
                 if(!this.isInstanceOf[GravityTechnique]) drawGraph() //redrawing with gravity technique makes the graph quite messy
                 else redraw()
@@ -280,9 +293,10 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
             }
             if(!e.target.isEmpty && e.target(0).getFirstContainedVertex().isInstanceOf[VertexLink]) {
                 View.blockPage("Fetching data")
-                fetchVertexLinks(links.toList, !this.isInstanceOf[GravityTechnique])
+                fetchVertexLinks(links.toList, !this.isInstanceOf[GravityTechnique] && animateAfterGroupsChange.value)
             } else {
-                if(!this.isInstanceOf[GravityTechnique]) drawGraph() //redrawing with gravity technique ruins the positioning
+                //redrawing with gravity technique ruins the positioning
+                if(!this.isInstanceOf[GravityTechnique] && animateAfterGroupsChange.value) drawGraph()
                 else redraw()
             }
             true
@@ -475,12 +489,14 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
         animationStopButton.render(toolbar)
         animationStopButton.setIsEnabled(false)
         visualTools.render(toolbar)
+        animateAfterGroupPacking.render(toolbar)
     }
 
     override def destroyControls() {
         zoomControls.destroy()
         animationStopButton.destroy()
         visualTools.destroy()
+        animateAfterGroupPacking.destroy()
     }
 
     /**
@@ -725,7 +741,7 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
                 var vertexOpt = graphView.get.existsGroupWithOneVertex
                 if(vertexOpt.isDefined) {
                     val vertexLinks = graphView.get.removeVertexFromGroup(vertexOpt.get)
-                    fetchVertexLinks(vertexLinks, true)
+                    fetchVertexLinks(vertexLinks, animateAfterGroupsChange.value)
                     vertexOpt = graphView.get.existsGroupWithOneVertex
                 } else {
                     View.unblockPage()

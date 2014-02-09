@@ -75,7 +75,7 @@ class OrderedItemsList(name: String, listElements: Seq[LabelItem] = Nil, cssClas
     def createSubViews: Seq[View] = {
 
         List(new Div(List(itemsList),
-            "modal-inner-view well no-padding").setAttribute("style", "padding: 8px 0;"))
+            "modal-inner-view well no-padding").setAttribute("style", "height:100%; padding: 8px 0;"))
     }
 
     def formHtmlElement = allListItems(0).formHtmlElement

@@ -124,6 +124,17 @@ import scala.Some
         successCallback(graph)
     }
 
+    @async def getInitialGraphFirstTripleUri(dataSourceId: String, user: Option[User] = null)
+        (successCallback: Option[String] => Unit)
+        (failCallback: Throwable => Unit) {
+
+        val uri = getDataSource(dataSourceId, user).flatMap { dataSource =>
+            dataSource.getFirstTriple.map(_.origin.uri)
+        }
+
+        successCallback(uri)
+    }
+
     @async def getNeighbourhood(dataSourceId: String, vertexURI: String, user: Option[User] = null)
         (successCallback: Option[Graph] => Unit) //TODO would be better if the s2js supported successCallback: (Option[Graph], Option[Int]) => Unit
         (failCallback: Throwable => Unit) {

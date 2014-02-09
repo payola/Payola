@@ -134,7 +134,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
     /**
      * Toolbar containing pluginChange, customization buttons
      */
-    val toolbar = new Div(List(pluginChangeButton, customizationsButton, languagesButton), "btn-toolbar").setAttribute(
+    val toolbar = new Div(List(pluginChangeButton, customizationsButton), "btn-toolbar").setAttribute(
         "style", "margin-bottom: 15px;")
 
     // Re-trigger all events when the corresponding events are triggered in the plugins.
@@ -147,6 +147,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
 
     // Display the plugin.
     currentPlugin.render(pluginSpace.htmlElement)
+    languagesButton.render(toolbar.htmlElement)
     currentPlugin.renderControls(toolbar.htmlElement)
 
     def createSubViews = List(toolbar, pluginSpace)
@@ -154,6 +155,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
     override def update(graph: Option[Graph], customization: Option[DefinedCustomization], serializedGraph: Option[String]) {
         super.update(graph, customization, serializedGraph)
         currentPlugin.setEvaluationId(evaluationId)
+        currentPlugin.setBrowsingURI(browsingURI)
         currentPlugin.update(graph, customization, serializedGraph)
     }
 
@@ -161,13 +163,17 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
 
         super.updateGraph(graph, contractLiterals)
         currentPlugin.setEvaluationId(evaluationId)
+        currentPlugin.setBrowsingURI(browsingURI)
         currentPlugin.updateGraph(graph, contractLiterals)
+
+        drawGraph()
     }
 
     override def updateSerializedGraph(serializedGraph: Option[String]) {
 
         super.updateSerializedGraph(serializedGraph)
         currentPlugin.setEvaluationId(evaluationId)
+        currentPlugin.setBrowsingURI(browsingURI)
         currentPlugin.updateSerializedGraph(serializedGraph)
     }
 
@@ -346,16 +352,19 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
             currentPlugin.update(None, None, None)
             currentPlugin.destroyControls()
             currentPlugin.destroy()
+            languagesButton.destroy()
 
             // Switch to the new plugin.
 
             currentPlugin = plugin
             currentPlugin.setEvaluationId(None)
+            currentPlugin.setBrowsingURI(None)
 
             //the default visualization is TripleTableView, which has implemented a server-side caching, support for other visualizations will be added with transformation layer
             //now the whole graph has to fetched, this will be taken care of in transformation layer in next cache release iteration
             if(evaluationId.isDefined) {
                 currentPlugin.setEvaluationId(evaluationId)
+                currentPlugin.setEvaluationId(browsingURI)
                 currentPlugin.loadDefaultCachedGraph(evaluationId.get, {toUpdate =>
                     toUpdate match {
                         case smth: Some[_] =>
@@ -375,6 +384,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
                             update(None, currentCustomization, None)
                     }
                     currentPlugin.render(pluginSpace.htmlElement)
+                    languagesButton.render(toolbar.htmlElement)
                     currentPlugin.renderControls(toolbar.htmlElement)
                 })
             } else {
@@ -382,6 +392,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
                 update(currentGraph, currentCustomization, None)
                 currentSerializedGraph = None
                 currentPlugin.render(pluginSpace.htmlElement)
+                languagesButton.render(toolbar.htmlElement)
                 currentPlugin.renderControls(toolbar.htmlElement)
                 currentPlugin.drawGraph()
             }

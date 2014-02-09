@@ -185,6 +185,12 @@ abstract class TablePluginView(name: String, prefixApplier: Option[PrefixApplier
         new Span(List(dataSourceAnchor, new Span(List(new Text(" "))), browsingAnchor))
     }
 
+    protected def createHighlightedVertexView(vertex: IdentifiedVertex, title: String): View = {
+
+        val uri = prefixApplier.map(_.applyPrefix(vertex.uri)).getOrElse(vertex.uri)
+        new Span(List(new Icon(Icon.map_marker), new Span(List(new Text(" "))), new Text(uri))).setAttribute("title", title)
+    }
+
     protected def addRow(table: html.Element): html.Element = addElement(table, "tr")
 
     protected def insertRow(table: html.Element, insertBefore: html.Element): html.Element = insertElement(table, insertBefore, "tr")

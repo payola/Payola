@@ -276,10 +276,12 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
 
             new Table(List(new TableRow(List(
                 new TableCell(List(
-                    new Table(List(new TableRow(List(new TableCell(List(listDiv)))),
+                    new Table(List(new TableRow(List(new TableCell(List(new Text("Node, edge, group customizations:"))))),
+                        new TableRow(List(new TableCell(List(listDiv)))),
+                        new TableRow(List(new TableCell(List(new Text("Edge Based node customizations:"))))),
                         new TableRow(List(new TableCell(List(conditionalClassListDiv))))),
                         "row-fluid").setAttribute("style", "height: 100%;"))
-                ).setAttribute("style", "vertical-align: top;"),
+                ).setAttribute("style", "vertical-align: top; width: 30%"),
                 new TableCell(List(settingsDiv), "span8 row-fluid").setAttribute("style", "width: 100%; padding-top: 20px;"))))
                 , "row-fluid")), "container-fluid"
         ).setAttribute("style", "padding: 0;")
@@ -666,7 +668,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
                 new CheckBox("useValue",
                     conClassCustomization.labels != null
                         && conClassCustomization.labels != ""
-                        && !conClassCustomization.labelsSplitted(0).userDefined, "UseValue"),
+                        && !conClassCustomization.labelsSplitted(0).userDefined, "User label of destination vertex"),
                 None
             )
         if(conClassCustomization.labels != null && conClassCustomization.labels != ""
