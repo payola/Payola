@@ -8,6 +8,8 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import cz.payola.web.client.views.bootstrap._
 import cz.payola.web.client.views.elements.form.fields._
+import cz.payola.web.client.events.EventArgs
+import cz.payola.common.visual.Color
 
 class GroupingMapFacet(typeUri: String = "http://www.w3.org/2000/01/rdf-schema#type") extends MapFacet
 {
@@ -15,7 +17,18 @@ class GroupingMapFacet(typeUri: String = "http://www.w3.org/2000/01/rdf-schema#t
     val panelContent = new Div(List())
     val panelBody = new Div(List(panelContent), "panel-body")
     val panelHeading = new Div(List(new Strong(List(new Text("Filter by values of <"+shortenTypeUri(typeUri,38)+">:")))), "panel-heading")
-    val panel = new Div(List(panelHeading, panelBody),"panel panel-default")
+
+    val primaryButton = Button("Set facet as primary", "btn btn-primary btn-xs")
+    primaryButton.mouseClicked += { e =>
+        primaryRequested.trigger(new EventArgs[Boolean](true))
+        false
+    }
+
+    val toggleAll = Button("Toggle all", "btn btn-default btn-xs")
+    val randomColors = Button("Randomize colors", "btn btn-default btn-xs")
+
+    val panelFooter = new Div(List(primaryButton, toggleAll, randomColors), "panel-footer")
+    val panel = new Div(List(panelHeading, panelBody, panelFooter),"panel panel-default")
 
     val facetContainer = new Div(List(panel), "facetContainer")
     val groups = new mutable.HashMap[String, ArrayBuffer[Marker]]
@@ -28,6 +41,9 @@ class GroupingMapFacet(typeUri: String = "http://www.w3.org/2000/01/rdf-schema#t
             typeUri
         }
     }
+
+    @javascript(""" return "#" + (Math.round(Math.random() * 0XFFFFFF)).toString(16); """)
+    def randomColor() : String = "#AF54D7"
 
     @javascript(""" console.log(x) """)
     def log(x: Any) {}
@@ -77,6 +93,18 @@ class GroupingMapFacet(typeUri: String = "http://www.w3.org/2000/01/rdf-schema#t
 
             cbox.changed += { e =>
                 groups.get(k).foreach(_.foreach{ _.isVisible = e.target.value } )
+            }
+
+            toggleAll.mouseClicked += { e =>
+                cbox.value = !cbox.value
+                false
+            }
+
+            randomColors.mouseClicked += { e =>
+                val color = randomColor()
+                colorInput.updateValue(color)
+                groups.get(k).foreach(_.foreach{ _.setColor(color.replace("#","")) })
+                false
             }
 
             colorInput.changed += { e =>
