@@ -42,7 +42,7 @@ class GroupingMapFacet(typeUri: String = "http://www.w3.org/2000/01/rdf-schema#t
         }
     }
 
-    @javascript(""" return "#" + (Math.round(Math.random() * 0XFFFFFF)).toString(16); """)
+    @javascript(""" return "#" + ('00000'+(Math.random()*(1<<24)|0).toString(16)).slice(-6); """)
     def randomColor() : String = "#AF54D7"
 
     @javascript(""" console.log(x) """)
