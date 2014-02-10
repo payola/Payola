@@ -3,13 +3,13 @@
 @main(Some(user), "Data source :: Payola!") {
 
 <div class="container-fluid">
-    <div class="row-fluid" style="padding-bottom: 20px;">
-        <h1 class="span8">Edit data source: @dataSource.name</h1>
-        <a href="@routes.DataSource.delete(dataSource.id)" onclick="return confirm('Are you sure?');" class="btn btn-danger span2"><i class="icon-remove-circle icon-white"></i> Delete</a>
-        <a href="@routes.DataSource.detail(dataSource.id, None)" class="btn span2"><i class="icon-globe"></i> Browse</a>
+    <div class="row" style="padding-bottom: 20px;">
+        <h1 class="col-lg-8">Edit data source: @dataSource.name</h1>
+        <a href="@routes.DataSource.delete(dataSource.id)" onclick="return confirm('Are you sure?');" class="btn btn-danger col-lg-2"><i class="glyphicon-remove-circle glyphicon"></i> Delete</a>
+        <a href="@routes.DataSource.detail(dataSource.id, None)" class="btn col-lg-2"><i class="glyphicon-globe"></i> Browse</a>
     </div>
 
-    <div id="data-source-properties" class="row-fluid">
+    <div id="data-source-properties" class="row">
     </div>
 </div>
 <script src="/javaScriptPackage/cz.payola.web.client.presenters.entity.plugins.DataSourceEditor" type="text/javascript"></script>

@@ -3,8 +3,8 @@
 @main(Some(user), "Edit group "+ group.name + " :: Payola!") {
 <div class="container">
 
-    <div class="row-fluid">
-        <h1 class="span7">Edit group @group.name</h1><span class="span5" style="text-align: right;"><a href="@routes.Group.delete(group.id)" onclick="return confirm('Are you sure?');" class="btn btn-danger"><i class="icon-remove-circle icon-white"></i> Delete '@group.name'</a></span>
+    <div class="row">
+        <h1 class="col-lg-7">Edit group @group.name</h1><span class="col-lg-5" style="text-align: right;"><a href="@routes.Group.delete(group.id)" onclick="return confirm('Are you sure?');" class="btn btn-danger"><i class="glyphicon-remove-circle glyphicon"></i> Delete '@group.name'</a></span>
     </div>
 
     <form action="@routes.Group.save(group.id)" method="post">
@@ -14,7 +14,7 @@
                 <div class="control-group">
                     <label class="control-label" for="name">Name</label>
                     <span class="controls">
-                        <input type="text" name="name" placeholder="Group name" id="name" value="@group.name" class="input span3">
+                        <input type="text" name="name" placeholder="Group name" id="name" value="@group.name" class="input col-lg-3">
                     </span>
                 </div>
                 <div class="control-group">

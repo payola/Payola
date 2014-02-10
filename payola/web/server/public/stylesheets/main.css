@@ -231,9 +231,8 @@ input[type="checkbox"].active:after {
     background: #FFFEE2;
 }
 
-.large-modal {
+.large-modal .modal-dialog {
     width: 900px !important;
-    margin-left: -450px !important;
 }
 
 .inline-display {
@@ -302,7 +301,7 @@ input[type="checkbox"].active:after {
 }
 
 .analysis-controls {
-    padding-bottom: 27px !important;
+    padding-bottom: 10px !important;
 }
 
 .popover-content p {
@@ -313,8 +312,8 @@ input[type="checkbox"].active:after {
     border: 2px solid #3A87AD;
     height: 90%;
     position: absolute;
-    top: 0px;
-    z-index: 0;
+    top: 0;
+    z-index: -1;
 }
 
 .plumb {
@@ -333,9 +332,8 @@ input[type="checkbox"].active:after {
     position: relative !important;
 }
 
-.successors .alert {
-    z-index: 1;
-    margin-bottom: 0px;
+.successors .panel {
+    margin-bottom: 0;
 }
 
 .vitable {
@@ -460,11 +458,10 @@ pre#editor {
 
 table .btn-toolbar .badge {
     margin-right: 10px;
-    top: -9px;
     position: relative;
 }
 
-.dashboard .row-fluid .span3.btn {
+.dashboard .row .col-lg-3.btn {
     min-height: 0px !important;
 }
 

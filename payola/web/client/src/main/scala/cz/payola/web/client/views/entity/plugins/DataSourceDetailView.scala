@@ -18,15 +18,15 @@ class DataSourceDetailView(plugins: Seq[Plugin], pluginFieldEditable: Boolean, a
 
     val parameterValueChanged = new UnitEvent[InputControl[TextInput], PluginParameterEventArgs[InputControl[TextInput]]]
 
-    val name = new InputControl("Name", new TextInput("name", "", ""), Some("span2"))
+    val name = new InputControl("Name", new TextInput("name", "", ""), Some("col-lg-2"))
     name.delayedChanged += {e => nameChanged.triggerDirectly(name)}
 
-    val description = new InputControl("Description", new TextInput("description", "", ""), Some("span2"))
+    val description = new InputControl("Description", new TextInput("description", "", ""), Some("col-lg-2"))
     description.delayedChanged += {e => descriptionChanged.triggerDirectly(description)}
 
     val plugin = new InputControl(
         "Plugin",
-        new Select("", "", "", plugins.map(p => new SelectOption(p.name, p.id))), Some("span2")
+        new Select("", "", "", plugins.map(p => new SelectOption(p.name, p.id))), Some("col-lg-2")
     )
 
     val parameterInputsSpace = new Div
@@ -66,7 +66,7 @@ class DataSourceDetailView(plugins: Seq[Plugin], pluginFieldEditable: Boolean, a
     private def renderPluginParameters(plugin: Plugin) {
         parameters.foreach(_.destroy())
         parameters = plugin.parameters.map { p =>
-            val ic = new InputControl(p.name, new TextInput(p.id, p.defaultValue.toString, ""), Some("span2"))
+            val ic = new InputControl(p.name, new TextInput(p.id, p.defaultValue.toString, ""), Some("col-lg-2"))
             ic.delayedChanged += { e =>
                 parameterValueChanged.trigger(new PluginParameterEventArgs[InputControl[TextInput]](ic, p))
             }

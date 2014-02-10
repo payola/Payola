@@ -8,7 +8,7 @@ class DropDownButton(buttonViews: Seq[View], private var _items: Seq[ListItem], 
     extends Div(Nil, divCssClass + " btn-group")
 {
     val toggleAnchor = new Button(new Span(buttonViews ++ List(new Span(Nil, "caret"))),
-        "btn dropdown-toggle " + buttonCssClass).setAttribute("data-toggle", "dropdown")
+        "btn btn-default dropdown-toggle " + buttonCssClass).setAttribute("data-toggle", "dropdown")
 
     val menu = new UnorderedList(items, "dropdown-menu")
 

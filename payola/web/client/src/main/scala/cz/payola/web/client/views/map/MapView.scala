@@ -8,20 +8,24 @@ import cz.payola.web.client.views.graph.PluginView
 import s2js.compiler.javascript
 import s2js.adapters.dom.Element
 import cz.payola.web.client.View
-import cz.payola.web.client.views.map.facets.MapFacet
+import cz.payola.web.client.views.map.facets._
 import scala.collection.mutable.ArrayBuffer
+import cz.payola.web.shared.AnalysisEvaluationResultsManager
+import cz.payola.common.geo.Coordinates
 
 /**
  * @author Jiri Helmich
  */
-abstract class MapView(prefixApplier: Option[PrefixApplier] = None, facets: Seq[MapFacet] = List()) extends PluginView("Map", prefixApplier) {
+abstract class MapView(prefixApplier: Option[PrefixApplier] = None) extends PluginView("Map", prefixApplier) {
+
+    protected var facets: Seq[MapFacet] = List()
 
     def createLibWrapper(element: Element) : View
 
     def supportedDataFormat: String = "RDF/JSON"
 
-    val facetPlaceholder = new Div(List(),"facet-placeholder span3")
-    val mapPlaceholder = new Div(List(),"map-placeholder span9")
+    val facetPlaceholder = new Div(List(),"facet-placeholder col-lg-3")
+    val mapPlaceholder = new Div(List(),"map-placeholder col-lg-9")
 
     var markerData : Seq[Marker] = List()
 
@@ -52,16 +56,23 @@ abstract class MapView(prefixApplier: Option[PrefixApplier] = None, facets: Seq[
     }
 
     override def updateSerializedGraph(serializedGraph: Option[String]) {
-        serializedGraph.map{ sg =>
-            parseJSON(sg)
+        AnalysisEvaluationResultsManager.queryProperties(evaluationId.get, "select distinct ?p where {[] <http://schema.org/geo> []; ?p [] .}"){ properties =>
 
-            val map = createLibWrapper(mapPlaceholder.htmlElement)
+            facets = properties.map(new GroupingMapFacet(_))
+            facetPlaceholder.removeAllChildNodes()
 
-            new Marker(new Coordinates(0,0), "", "") //J4F
+            serializedGraph.map{ sg =>
+                parseJSON(sg)
+                facets.foreach(_.createSubViews.foreach( v => v.render(facetPlaceholder.blockHtmlElement) ))
 
-            mapPlaceholder.removeAllChildNodes()
-            map.render(mapPlaceholder.htmlElement)
-        }
+                val map = createLibWrapper(mapPlaceholder.htmlElement)
+
+                new Marker(new Coordinates(0,0), "", "") //J4F
+
+                mapPlaceholder.removeAllChildNodes()
+                map.render(mapPlaceholder.htmlElement)
+            }
+        }  { err => }
     }
 
     @javascript(
@@ -106,7 +117,6 @@ abstract class MapView(prefixApplier: Option[PrefixApplier] = None, facets: Seq[
     def parseJSON(json: String) {}
 
     def createSubViews = {
-        facets.foreach(_.createSubViews.foreach( v => v.render(facetPlaceholder.blockHtmlElement) ))
         List(facetPlaceholder, mapPlaceholder)
     }
 }

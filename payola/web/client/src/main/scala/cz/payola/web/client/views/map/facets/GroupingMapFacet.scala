@@ -6,18 +6,28 @@ import s2js.compiler.javascript
 import cz.payola.web.client.views.map.Marker
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
-import cz.payola.web.client.views.bootstrap.Icon
-import cz.payola.web.client.views.elements.form.fields.CheckBox
+import cz.payola.web.client.views.bootstrap._
+import cz.payola.web.client.views.elements.form.fields._
 
 class GroupingMapFacet(typeUri: String = "http://www.w3.org/2000/01/rdf-schema#type") extends MapFacet
 {
 
     val panelContent = new Div(List())
-    val panel = new Div(List(new Strong(List(new Text("Filter by value of <"+typeUri+">:"))), panelContent),"well")
+    val panelBody = new Div(List(panelContent), "panel-body")
+    val panelHeading = new Div(List(new Strong(List(new Text("Filter by values of <"+shortenTypeUri(typeUri,38)+">:")))), "panel-heading")
+    val panel = new Div(List(panelHeading, panelBody),"panel panel-default")
 
     val facetContainer = new Div(List(panel), "facetContainer")
     val groups = new mutable.HashMap[String, ArrayBuffer[Marker]]
     val markers = new ArrayBuffer[Marker]()
+
+    def shortenTypeUri(typeUri: String, maxLength: Int = 20) : String = {
+        if (typeUri.length > maxLength){
+            typeUri.substring(0,maxLength/2)+"..."+typeUri.substring(typeUri.length-(maxLength/2))
+        } else {
+            typeUri
+        }
+    }
 
     @javascript(""" console.log(x) """)
     def log(x: Any) {}
@@ -26,6 +36,15 @@ class GroupingMapFacet(typeUri: String = "http://www.w3.org/2000/01/rdf-schema#t
         """
            var entity = jsonGraphRepresentation[uri];
            if (entity[self.typeUri]){
+                var dereferenced = jsonGraphRepresentation[entity[self.typeUri][0].value];
+
+                if(dereferenced && dereferenced["http://www.w3.org/2004/02/skos/core#prefLabel"]){
+                    return new scala.Some(dereferenced["http://www.w3.org/2004/02/skos/core#prefLabel"][0].value);
+                }
+
+                if(dereferenced && dereferenced["http://www.w3.org/2000/01/rdf-schema#label"]){
+                    return new scala.Some(dereferenced["http://www.w3.org/2000/01/rdf-schema#label"][0].value);
+                }
                 return new scala.Some(entity[self.typeUri][0].value);
            }
            return scala.None.get();
@@ -50,11 +69,18 @@ class GroupingMapFacet(typeUri: String = "http://www.w3.org/2000/01/rdf-schema#t
     def createSubViews = {
 
         groups.keys.foreach{ k =>
-            val cbox = new CheckBox(k,true)
-            val span = new Div(List(cbox, new Text(k)))
+            val cbox = new CheckBox(k,true,"")
+            val colorInput = new ColorHTML5Input("markerColor")
+            colorInput.value = "#FF0000"
+
+            val span = new Div(List(colorInput, cbox, new Text(k)))
 
             cbox.changed += { e =>
                 groups.get(k).foreach(_.foreach{ _.isVisible = e.target.value } )
+            }
+
+            colorInput.changed += { e =>
+                groups.get(k).foreach(_.foreach{ _.setColor(e.target.value.replace("#","")) })
             }
 
             span.render(panelContent.blockHtmlElement)

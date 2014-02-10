@@ -14,7 +14,7 @@ abstract class Input[A <: html.Element with html.elements.Input, B](
 }
 
 class TextInput(name: String, initialValue: String, title: String = "", cssClass: String = "")
-    extends Input[html.elements.TextInput, String]("text", name, initialValue, title, cssClass)
+    extends Input[html.elements.TextInput, String]("text", name, initialValue, title, "form-control "+cssClass)
 {
     triggerChangedOnKeyReleased()
 
@@ -35,6 +35,16 @@ class TextInput(name: String, initialValue: String, title: String = "", cssClass
 
 class FileInput(name: String, title: String = "", cssClass: String = "")
     extends Input[html.elements.Input, String]("file", name, "", title, cssClass)
+{
+    def value = htmlElement.value
+
+    def updateValue(newValue: String) {
+        htmlElement.value = newValue
+    }
+}
+
+class ColorHTML5Input(name: String, title: String = "", cssClass: String = "")
+    extends Input[html.elements.Input, String]("color", name, "", title, cssClass)
 {
     def value = htmlElement.value
 

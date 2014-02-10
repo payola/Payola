@@ -5,9 +5,9 @@
     <head>
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("fonts/font-face/stylesheet.css")"/>
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")"/>
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/bootstrap.css")"/>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/bootstrap/bootstrap.min.css")"/>
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/select2.css")"/>
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/bootstrap-responsive.css")"/>
+        <!--<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/bootstrap/bootstrap-theme.min.css")"/>-->
         <link rel="stylesheet" href="@routes.Assets.at("stylesheets/colorpicker.css")" />
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/sigma.css")" />
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")"/>
@@ -19,7 +19,7 @@
         <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/jquery.min.js")"></script>
         <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/jquery-ui.min.js")"></script>
         <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/jquery-plugins/jquery.blockUI.js")"></script>
-        <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/twitter.bootstrap/bootstrap.js")"></script>
+        <script type="text/javascript" src="@routes.Assets.at("javascripts/bootstrap/bootstrap.min.js")"></script>
         <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/twitter.bootstrap/bootstrap-colorpicker.js")"></script>
         <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/select2/select2.min.js")"></script>
         <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/jquery-plugins/jquery.autosize-min.js")"></script>
@@ -47,103 +47,106 @@
         <script src="http://js.arcgis.com/3.8/"></script>
     </head>
     <body>
-            <div class="navbar navbar-fixed-top">
-                <div class="navbar-inner">
-                    <div class="container-fluid">
-                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                        </a>
-                        <a class="brand" href="@routes.Application.dashboard"><img src="@routes.Assets.at("img/payola-logo-small.png")" /></a>
-                        <div class="nav-collapse">
-                            <ul class="nav">
-                                <li>
-                                    <a href="@routes.Application.dashboard"><i class="icon-home icon-white"></i> Dashboard</a>
-                                </li>
-                                @if(user.isDefined){
-                                    <li class="dropdown">
-                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                            <i class="icon-search icon-white"></i> My Analyses<b class="caret"></b>
-                                        </a>
-                                        <ul class="dropdown-menu">
-                                            <li><a href="@routes.Analysis.list()"><i class="icon-list"></i> View All</a></li>
-                                            <li><a href="@routes.Analysis.create()"><i class="icon-plus"></i> Create New</a></li>
-                                        </ul>
-                                    </li>
+        <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="container-fluid">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="glyphicon glyphicon-bar"></span>
+                        <span class="glyphicon glyphicon-bar"></span>
+                        <span class="glyphicon glyphicon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="@routes.Application.dashboard"><img src="@routes.Assets.at("img/payola-logo-small.png")" /></a>
+                </div>
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+                        <li>
+                            <a href="@routes.Application.dashboard"><i class="glyphicon-home glyphicon"></i> Dashboard</a>
+                        </li>
+                        @if(user.isDefined){
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                    <i class="glyphicon-search glyphicon"></i> My Analyses<b class="caret"></b>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="@routes.Analysis.list()"><i class="glyphicon glyphicon-list"></i> View All</a></li>
+                                    <li><a href="@routes.Analysis.create()"><i class="glyphicon glyphicon-plus"></i> Create New</a></li>
+                                </ul>
+                            </li>
 
-                                    <li class="dropdown">
-                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                            <i class="icon-hdd icon-white"></i> My Data Sources<b class="caret"></b>
-                                        </a>
-                                        <ul class="dropdown-menu">
-                                            <li><a href="@routes.DataSource.list()"><i class="icon-list"></i> View All</a></li>
-                                            <li><a href="@routes.DataSource.create()"><i class="icon-plus"></i> Create New</a></li>
-                                        </ul>
-                                    </li>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                    <i class="glyphicon-hdd glyphicon"></i> My Data Sources<b class="caret"></b>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="@routes.DataSource.list()"><i class="glyphicon glyphicon-list"></i> View All</a></li>
+                                    <li><a href="@routes.DataSource.create()"><i class="glyphicon glyphicon-plus"></i> Create New</a></li>
+                                </ul>
+                            </li>
 
-                                    <li class="dropdown">
-                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                            <i class="icon-file icon-white"></i> My Plugins<b class="caret"></b>
-                                        </a>
-                                        <ul class="dropdown-menu">
-                                            <li><a href="@routes.Plugin.listPlugins(1)"><i class="icon-list"></i> View All</a></li>
-                                            <li><a href="@routes.Plugin.createPlugin()"><i class="icon-upload"></i> Upload New</a></li>
-                                        </ul>
-                                    </li>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                    <i class="glyphicon-file glyphicon"></i> My Plugins<b class="caret"></b>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="@routes.Plugin.listPlugins(1)"><i class="glyphicon glyphicon-list"></i> View All</a></li>
+                                    <li><a href="@routes.Plugin.createPlugin()"><i class="glyphicon glyphicon-upload"></i> Upload New</a></li>
+                                </ul>
+                            </li>
 
-                                    <li class="dropdown">
-                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                            <i class="icon-list icon-white"></i>
-                                            Prefixes<b class="caret"></b>
-                                        </a>
-                                        <ul class="dropdown-menu">
-                                            <li><a href="@routes.Prefix.list()"><i class="icon-list"></i> View All</a></li>
-                                            <li><a href="@routes.Prefix.create()"><i class="icon-plus"></i> Create New</a></li>
-                                        </ul>
-                                    </li>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                    <i class="glyphicon-list glyphicon"></i>
+                                    Prefixes<b class="caret"></b>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="@routes.Prefix.list()"><i class="glyphicon glyphicon-list"></i> View All</a></li>
+                                    <li><a href="@routes.Prefix.create()"><i class="glyphicon glyphicon-plus"></i> Create New</a></li>
+                                </ul>
+                            </li>
 
-                                    <li class="dropdown">
-                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                            <i class="icon-rdf icon-white"></i> Private RDF Storage<b class="caret"></b>
-                                        </a>
-                                        <ul class="dropdown-menu">
-                                            <li><a href="@routes.PrivateDataStorage.add()"><i class="icon-upload"></i> Upload Data</a></li>
-                                        </ul>
-                                    </li>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                    <i class="glyphicon-rdf glyphicon"></i> Private RDF Storage<b class="caret"></b>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="@routes.PrivateDataStorage.add()"><i class="glyphicon glyphicon-upload"></i> Upload Data</a></li>
+                                </ul>
+                            </li>
 
-                                    <li class="dropdown">
-                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                            <i class="icon-group icon-white"></i>
-                                            User Groups<b class="caret"></b>
-                                        </a>
-                                        <ul class="dropdown-menu">
-                                            <li><a href="@routes.Group.list()"><i class="icon-list"></i> View All</a></li>
-                                            <li><a href="@routes.Group.create()"><i class="icon-plus"></i> Create New</a></li>
-                                        </ul>
-                                    </li>
-                                }
-                            </ul>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                    <i class="glyphicon-group glyphicon"></i>
+                                    User Groups<b class="caret"></b>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="@routes.Group.list()"><i class="glyphicon glyphicon-list"></i> View All</a></li>
+                                    <li><a href="@routes.Group.create()"><i class="glyphicon glyphicon-plus"></i> Create New</a></li>
+                                </ul>
+                            </li>
+                        }
+                    </ul>
 
-                            <p class="navbar-text pull-right">
-                                @if(user.isDefined){
-                                    Logged in as <a href="@routes.Profile.index(user.get.name)">@user.get.name</a>
-                                    (<a href="@routes.Application.logout">Sign out</a>)
-                                }else{
-                                    <a href="@routes.Application.login">Sign in</a>
-                                }
-                            </p>
-                        </div><!--/.nav-collapse -->
-                    </div>
+                    <p class="navbar-text navbar-right">
+                    @if(user.isDefined){
+                        Logged in as <a href="@routes.Profile.index(user.get.name)">@user.get.name</a>
+                        (<a href="@routes.Application.logout">Sign out</a>)
+                    }else{
+                        <a href="@routes.Application.login">Sign in</a>
+                    }
+                    </p>
                 </div>
             </div>
-
-            @heading.map { str =>
-                <div class="main-header" id="main-header-div"><h1 id="main-header">@str</h1></div>
-            }
+        </nav>
 
 
-            @content
+        @heading.map { str =>
+            <div class="main-header" id="main-header-div"><h1 id="main-header">@str</h1></div>
+        }
 
-        </body>
+
+        @content
+
+    </body>
 </html>

@@ -28,14 +28,14 @@ class DataSourceBrowserView(dataSourceName: String) extends ComposedView
         "form-inline pull-right"
     )
 
-    val graphViewSpace = new Div(Nil, "row-fluid")
+    val graphViewSpace = new Div(Nil, "row")
 
     def createSubViews = {
         List(
             new Div(List(
-                new Div(List(heading), "span4"),
-                new Div(List(navigation), "span8")),
-                "row-fluid"
+                new Div(List(heading), "col-lg-4"),
+                new Div(List(navigation), "col-lg-8")),
+                "row"
             ),
             graphViewSpace
         )

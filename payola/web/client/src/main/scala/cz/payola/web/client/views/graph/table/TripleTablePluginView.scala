@@ -130,7 +130,7 @@ class TripleTablePluginView(prefixApplier: Option[PrefixApplier]) extends TableP
             }
             new ListItem(List(vertexElement))
         }
-        new UnorderedList(destinationListItems, "unstyled").render(destinationsCell)
+        new UnorderedList(destinationListItems, "list-unstyled").render(destinationsCell)
     }
 
     private def groupEdges(graph: Option[Graph]): Map[String, Map[String, Seq[Edge]]] = {

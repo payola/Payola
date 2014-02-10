@@ -14,7 +14,7 @@ class AppendToUserCustButton (var availableValues: Seq[String], buttonLabel: Str
     private val heading = new Heading(List(new Text(listTitle))).setAttribute(
         "style", "padding-top: 5px; padding-bottom: 5px;")
 
-    private val inputField = new TextInput("name", "", "Input custom", "span6")
+    private val inputField = new TextInput("name", "", "Input custom", "col-lg-6")
 
     private val addButton = new Button(new Text("Add"))
     addButton.mouseClicked += { e =>

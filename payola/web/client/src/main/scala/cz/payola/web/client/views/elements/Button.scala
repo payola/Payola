@@ -10,7 +10,7 @@ class Button(subView: View, cssClass: String = "", icon: Icon = null)
         List(subView)
     } else {
         List(icon, subView)
-    }, cssClass + " btn")
+    }, cssClass + " btn btn-default")
 {
     setAttribute("type", "button")
 

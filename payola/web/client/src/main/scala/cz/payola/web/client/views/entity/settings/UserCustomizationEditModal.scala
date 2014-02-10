@@ -89,7 +89,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
     val userCustomizationName = new InputControl(
         "Name:",
         new TextInput("name", userCustomization.name, "", ""),
-        Some("span2")
+        Some("col-lg-2")
     )
 
     saveButton.mouseClicked += { e =>
@@ -254,15 +254,15 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
         listItem
     }
 
-    private val settingsDiv = new Div(Nil, "span8").setAttribute("style","width:100%;").setAttribute("rowspan", "2")
+    private val settingsDiv = new Div(Nil, "col-lg-8").setAttribute("style","width:100%;").setAttribute("rowspan", "2")
     private val conditionalClassListDiv = new Div(List(new UnorderedList(
         conditionalClassCustomizationListItems, "nav-deep nav-deep-list").setAttribute("id", "sortableConditionalClasses")),
-        "span4 well no-padding").setAttribute("style", "padding: 8px 0; width:100%; max-width: 260px; min-height: 150px;" +
+        "col-lg-4 well no-padding").setAttribute("style", "padding: 8px 0; width:100%; max-width: 260px; min-height: 150px;" +
         "")
 
     private val listDiv = new Div(List(new UnorderedList(
         classCustomizationsListItems ++ groupCustomizationListItems ++ propertyCustomizationsListItems, "nav-deep nav-deep-list")),
-        "span4 well no-padding").setAttribute("style", "padding: 8px 0; width:100%; max-width: 260px; min-height: 150px;")
+        "col-lg-4 well no-padding").setAttribute("style", "padding: 8px 0; width:100%; max-width: 260px; min-height: 150px;")
 
     override val body = List(
         new Div(List(
@@ -272,16 +272,16 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
                 new Div(List(shareButtonViewSpace), "btn-group inline-block pull-right"),
                 new Div(List(appendClassButton, appendGroupClassButton, appendPropertyButton, appendConditionalClassButton),
                     "btn-group inline-block pull-right")),
-                "row-fluid button-row"),
+                "row button-row"),
 
             new Table(List(new TableRow(List(
                 new TableCell(List(
                     new Table(List(new TableRow(List(new TableCell(List(listDiv)))),
                         new TableRow(List(new TableCell(List(conditionalClassListDiv))))),
-                        "row-fluid").setAttribute("style", "height: 100%;"))
+                        "row").setAttribute("style", "height: 100%;"))
                 ).setAttribute("style", "vertical-align: top;"),
-                new TableCell(List(settingsDiv), "span8 row-fluid").setAttribute("style", "width: 100%; padding-top: 20px;"))))
-                , "row-fluid")), "container-fluid"
+                new TableCell(List(settingsDiv), "col-lg-8 row").setAttribute("style", "width: 100%; padding-top: 20px;"))))
+                , "row")), "container-fluid"
         ).setAttribute("style", "padding: 0;")
     )
 
@@ -553,15 +553,15 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
     def renderClassCustomizationViews(classCustomization: ClassCustomization) {
         val fillColor = new InputControl(
             "Fill color:",
-            new ColorInput("fillColor", Color(classCustomization.fillColor), ""), Some("span2")
+            new ColorInput("fillColor", Color(classCustomization.fillColor), ""), Some("col-lg-2")
         )
         val radius = new InputControl(
             "Radius:",
-            new NumericInput("radius", classCustomization.radius, "")   , Some("span2")
+            new NumericInput("radius", classCustomization.radius, "")   , Some("col-lg-2")
         )
         val glyph = new InputControl(
             "Glyph:",
-            new GlyphInput("glyph", Some(classCustomization.glyph), "")  , Some("span2")
+            new GlyphInput("glyph", Some(classCustomization.glyph), "")  , Some("col-lg-2")
         )
 
         val labels = new InputControl(
@@ -572,7 +572,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
                         new LabelItem("skos:prefLabel", false, false), new LabelItem("skod:altLabel", false, false),
                         new LabelItem("URI", false, false))
                 } else { classCustomization.labelsSplitted }),
-            Some("span2")
+            Some("col-lg-2")
         )
 
         fillColor.delayedChanged += { _ =>
@@ -617,19 +617,19 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
             "Custom label:",
             new TextInput("customLabel",
                 if(conClassCustomization.labels == null || conClassCustomization.labels == "") { "" }
-                else { conClassCustomization.labelsSplitted(0).value }), Some("span2")
+                else { conClassCustomization.labelsSplitted(0).value }), Some("col-lg-2")
         )
         val fillColor = new InputControl(
             "Fill color:",
-            new ColorInput("fillColor", Color(conClassCustomization.fillColor), ""), Some("span2")
+            new ColorInput("fillColor", Color(conClassCustomization.fillColor), ""), Some("col-lg-2")
         )
         val radius = new InputControl(
             "Radius:",
-            new NumericInput("radius", conClassCustomization.radius, "")   , Some("span2")
+            new NumericInput("radius", conClassCustomization.radius, "")   , Some("col-lg-2")
         )
         val glyph = new InputControl(
             "Glyph:",
-            new GlyphInput("glyph", Some(conClassCustomization.glyph), "")  , Some("span2")
+            new GlyphInput("glyph", Some(conClassCustomization.glyph), "")  , Some("col-lg-2")
         )
 
         conditionValueField.delayedChanged += { _ =>
@@ -703,15 +703,15 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
     def renderGroupCustomizationViews(classCustomization: ClassCustomization) {
         val fillColor = new InputControl(
             "Fill color:",
-            new ColorInput("fillColor", Color(classCustomization.fillColor), ""), Some("span2")
+            new ColorInput("fillColor", Color(classCustomization.fillColor), ""), Some("col-lg-2")
         )
         val radius = new InputControl(
             "Radius:",
-            new NumericInput("radius", classCustomization.radius, "")   , Some("span2")
+            new NumericInput("radius", classCustomization.radius, "")   , Some("col-lg-2")
         )
         val glyph = new InputControl(
             "Glyph:",
-            new GlyphInput("glyph", Some(classCustomization.glyph), "")  , Some("span2")
+            new GlyphInput("glyph", Some(classCustomization.glyph), "")  , Some("col-lg-2")
         )
 
         val labels = new InputControl(
@@ -720,7 +720,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
                 if(classCustomization.labels == null || classCustomization.labels == "") {
                     List(new LabelItem("Group name", false, false))
                 } else { classCustomization.labelsSplitted }),
-            Some("span2")
+            Some("col-lg-2")
         )
 
         fillColor.delayedChanged += { _ =>
@@ -756,11 +756,11 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
     def renderPropertyCustomizationViews(propertyCustomization: PropertyCustomization) {
         val strokeColor = new InputControl(
             "Stroke color:",
-            new ColorInput("strokeColor", Color(propertyCustomization.strokeColor), ""), Some("span2")
+            new ColorInput("strokeColor", Color(propertyCustomization.strokeColor), ""), Some("col-lg-2")
         )
         val strokeWidth = new InputControl(
             "Stroke width:",
-            new NumericInput("strokeWidth", propertyCustomization.strokeWidth, ""), Some("span2")
+            new NumericInput("strokeWidth", propertyCustomization.strokeWidth, ""), Some("col-lg-2")
         )
 
         val classCustomization = propertiesContainer

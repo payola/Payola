@@ -33,13 +33,14 @@ class ColorInput(name: String, initialValue: Option[Color], cssClass: String = "
 
     def formHtmlElement = colorInput.htmlElement
 
-    def createSubViews = List(
+
+    def createSubViews = List(new Div(List(
         new Div(List(
             colorInput,
             new Span(List(colorPreview), "add-on"),
             clearButton),
             "input-append color"
-        )
+        )),"input-group")
     )
 
     def value: Option[Color] = {

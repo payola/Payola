@@ -84,12 +84,21 @@ class GoogleMapsWrapper(center: Coordinates, zoom: Int, mapType: String, facets:
                  """)
     def createMap {}
 
+
+    @javascript(""" customMarker.setIcon('http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|'+hexColor) """)
+    private def changeCustomMarkerColor(customMarker: Any, hexColor: String) {}
+
     @javascript(""" customMarker.setVisible(visible); """)
     private def changeCustomMarkerVisibility(customMarker: Any, visible: Boolean) {}
 
     private def addVisibilityListener(payolaMarker: Marker, customMarker: Any) = {
         payolaMarker.visibilityChanged += { e =>
             changeCustomMarkerVisibility(customMarker, e.target)
+            false
+        }
+
+        payolaMarker.colorChanged += { e =>
+            changeCustomMarkerColor(customMarker, e.target)
             false
         }
     }

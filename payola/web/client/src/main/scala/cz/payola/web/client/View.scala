@@ -38,12 +38,14 @@ object View
             null
         } else {
             """
-                <div class="row-fluid">
+                <div class="row">
                     <h3 style="padding: 20px;">%s</h3>
                 </div>
-                <div class="row-fluid">
+                <div class="row">
                     <div class="progress progress-striped active">
-                        <div class="bar" style="width: 100%%"></div>
+                     <div class="progress-bar" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%%">
+                       <span class="sr-only">45%% Complete</span>
+                     </div>
                     </div>
                 </div>
             """.format(message)

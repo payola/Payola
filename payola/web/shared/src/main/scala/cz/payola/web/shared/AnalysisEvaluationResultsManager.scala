@@ -14,6 +14,12 @@ import cz.payola.common._
     private val tripleTableDefaultPage = 0
     private val tripleTableDefaultRecordsOnPage = 50
 
+    @async def queryProperties(evaluationId: String, query: String, user: Option[User] = None)
+        (successCallback: (Seq[String] => Unit))(failCallback: (Throwable => Unit)) {
+
+        val result = Payola.model.analysisResultStorageModel.queryProperties(evaluationId, query)
+        successCallback(result)
+    }
 
     @async def getCompleteAnalysisResult(evaluationId: String, user: Option[User] = None)
         (successCallback: (Option[Graph] => Unit))(failCallback: (Throwable => Unit)) {

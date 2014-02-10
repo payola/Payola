@@ -38,7 +38,7 @@ class Modal(
 
     protected val saveButton = new Button(new Text(confirmText.getOrElse("")), "btn-primary")
 
-    protected val cancelButton = new Button(new Text(cancelText.getOrElse("")))
+    protected val cancelButton = new Button(new Text(cancelText.getOrElse("")), "btn-default")
 
     protected val closeButton = new Button(new Text("x"), "close")
 
@@ -47,21 +47,31 @@ class Modal(
         cancelButton.mouseClicked += { e => buttonClickedHandler(closing)}
         closeButton.mouseClicked += { e => buttonClickedHandler(closing)}
 
-        List(new Div(List(
-            new Div(
-                (if (hasCloseButton) List(closeButton) else Nil) ++ List(new Heading(List(new Text(header)))),
-                "modal-header"
-            ),
-            new Div(
-                body,
-                "modal-body"
-            ),
-            new Div(
-                (if (cancelText.isDefined) List(cancelButton) else Nil) ++
-                    (if (confirmText.isDefined) List(saveButton) else Nil),
-                "modal-footer"
-            )
-        ), "modal hide " + cssClass))
+        val modalHeader = new Div(
+            (if (hasCloseButton) List(closeButton) else Nil) ++ List(new Heading(List(new Text(header)))),
+            "modal-header"
+        )
+
+        val modalBody = new Div(
+            body,
+            "modal-body"
+        )
+
+        val modalFooter = new Div(
+            (if (cancelText.isDefined) List(cancelButton) else Nil) ++
+                (if (confirmText.isDefined) List(saveButton) else Nil),
+            "modal-footer"
+        )
+
+        val modalContent = new Div(List(modalHeader, modalBody, modalFooter), "modal-content")
+        val modalDialog = new Div(List(modalContent), "modal-dialog")
+        val modal = new Div(List(modalDialog), "modal fade " + cssClass)
+        modal.setAttribute("tabindex","-1")
+        modal.setAttribute("role","dialog")
+        modal.setAttribute("aria-labelledby","myModalLabel")
+        modal.setAttribute("aria-hidden","true")
+
+        List(modal)
     }
 
     override def render(parent: html.Element = document.body) {

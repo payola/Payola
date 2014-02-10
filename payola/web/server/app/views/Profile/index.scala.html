@@ -7,24 +7,24 @@ analyses: Seq[cz.payola.domain.entities.Analysis], dataSources: Seq[cz.payola.do
 <div class="container">
 
     @if(user.isDefined && (user.get.id == owner.id)){
-    <div class="row-fluid profile-edit-div">
-        <a href="@routes.Profile.edit()" class="btn btn-primary input pull-right"><i class="icon-white icon-pencil"></i> Edit profile</a>
+    <div class="row profile-edit-div">
+        <a href="@routes.Profile.edit()" class="btn btn-primary input pull-right"><i class="glyphicon glyphicon-pencil"></i> Edit profile</a>
     </div>
     }
 
     <div class="hero-unit">
-        <div class="row-fluid">
-            <span class="span3">
+        <div class="row">
+            <span class="col-lg-3">
                 <img src="http://www.gravatar.com/avatar/@md5(owner.email)?s=200" />
             </span>
             <h1>@owner.name</h1>
-            <p><i class="icon-envelope"></i>@owner.email</p>
+            <p><i class="glyphicon-envelope"></i>@owner.email</p>
         </div>
     </div>
 
     @if(!user.isDefined || (user.isDefined && (user.get.id != owner.id))){
 
-        <div class="row-fluid">
+        <div class="row">
 
             @tags.dashboardList("Analyses shared to you by the user", "analyses", analyses, None,
             { e: cz.payola.domain.Entity =>

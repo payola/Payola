@@ -28,6 +28,14 @@ trait AnalysisResultStorageModelComponent
                 try { op(p) } finally { p.close() }
             }
 
+            def queryProperties(evaluationId: String, query: String) : scala.collection.Seq[String] = {
+
+                val graph = rdfStorage.executeSPARQLQuery(query, constructUri(evaluationId))
+                graph.edges
+                    .filter(_.uri == "http://www.w3.org/2005/sparql-results#value").map(_.destination.toString)
+                    .filterNot(_.startsWith("http://schema.org"))
+            }
+
             def saveGraph(graph: Graph, analysisId: String, evaluationId: String, host: String, user: Option[User] = None) {
 
                 if(!graph.isInstanceOf[cz.payola.domain.rdf.Graph]) {
@@ -58,8 +66,7 @@ trait AnalysisResultStorageModelComponent
             def getGraph(evaluationId: String): Graph = {
 
                 //Console.println("Trying to load graph")
-                val graph = rdfStorage.executeSPARQLQuery(
-                    "CONSTRUCT { ?s ?p ?o } WHERE {?s ?p ?o.}", constructUri(evaluationId))
+                val graph = rdfStorage.executeSPARQLQuery("CONSTRUCT { ?s ?p ?o } WHERE {?s ?p ?o.}", constructUri(evaluationId))
                 analysisResultRepository.updateTimestamp(evaluationId)
                 graph
             }

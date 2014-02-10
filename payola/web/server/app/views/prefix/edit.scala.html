@@ -7,8 +7,8 @@
 
     @render_flash(flash)
 
-    <div class="row-fluid">
-        <h1 class="span7">Edit prefix @prefix.prefix</h1><span class="span5" style="text-align: right;"><a href="@routes.Prefix.delete(prefix.id)" onclick="return confirm('Are you sure?');" class="btn btn-danger"><i class="icon-remove-circle icon-white"></i> Delete '@prefix.prefix'</a></span>
+    <div class="row">
+        <h1 class="col-lg-7">Edit prefix @prefix.prefix</h1><span class="col-lg-5" style="text-align: right;"><a href="@routes.Prefix.delete(prefix.id)" onclick="return confirm('Are you sure?');" class="btn btn-danger"><i class="glyphicon-remove-circle glyphicon"></i> Delete '@prefix.prefix'</a></span>
     </div>
 
     <form action="@routes.Prefix.save(prefix.id)" method="post">
@@ -18,13 +18,13 @@
                 <div class="control-group">
                     <label class="control-label" for="prefix">Prefix</label>
                     <span class="controls">
-                        <input type="text" name="prefix" placeholder="Prefix prefix" id="prefix" value="@prefix.prefix" class="input span3">
+                        <input type="text" name="prefix" placeholder="Prefix prefix" id="prefix" value="@prefix.prefix" class="input col-lg-3">
                     </span>
                 </div>
                 <div class="control-group">
                     <label class="control-label" for="url">URL</label>
                     <span class="controls">
-                        <input type="text" name="url" placeholder="Prefix url" id="url" value="@prefix.url" class="input span3">
+                        <input type="text" name="url" placeholder="Prefix url" id="url" value="@prefix.url" class="input col-lg-3">
                     </span>
                 </div>
                 <div class="control-group">

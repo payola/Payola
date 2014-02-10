@@ -10,7 +10,7 @@ import cz.payola.web.client.views.map.facets.MapFacet
 /**
  * @author Jiri Helmich
  */
-class ArcGisMapView(prefixApplier: Option[PrefixApplier] = None, facets: Seq[MapFacet] = List()) extends MapView(prefixApplier, facets) {
+class ArcGisMapView(prefixApplier: Option[PrefixApplier] = None) extends MapView(prefixApplier) {
 
     override val name = "ArcGis Map"
 

@@ -27,8 +27,8 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
 
     val ontologyCustomizationName = new InputControl(
         "Name:",
-        new TextInput("name", ontologyCustomization.name, "", "span6"),
-        Some("span2")
+        new TextInput("name", ontologyCustomization.name, "", "col-lg-6"),
+        Some("col-lg-2")
     )
 
     val shareButtonViewSpace = new Span(Nil)
@@ -49,7 +49,7 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
             classListItem
     }
 
-    private val propertiesDiv = new Div(Nil, "span8")
+    private val propertiesDiv = new Div(Nil, "col-lg-8")
 
     override val body = List(
         new Div(List(
@@ -57,15 +57,15 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
                 ontologyCustomizationName,
                 new Div(List(shareButtonViewSpace), "btn-group inline-block pull-right"),
                 new Div(List(deleteButton), "btn-group inline-block pull-right")),
-                "row-fluid button-row"
+                "row button-row"
             ),
             new Div(List(
                 new Div(
                     List(new UnorderedList(classCustomizationListItems, "nav nav-list")),
-                    "span4 modal-inner-view well no-padding"
+                    "col-lg-4 modal-inner-view well no-padding"
                 ).setAttribute("style", "padding: 8px 0;"),
                 propertiesDiv),
-                "row-fluid"
+                "row"
             )),
             "container-fluid"
         ).setAttribute("style", "padding: 0;")
@@ -90,15 +90,15 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
     private def renderClassCustomizationViews(classCustomization: ClassCustomization) {
         val fillColor = new InputControl(
             "Fill color:",
-            new ColorInput("fillColor", Color(classCustomization.fillColor), ""), Some("span2")
+            new ColorInput("fillColor", Color(classCustomization.fillColor), ""), Some("col-lg-2")
         )
         val radius = new InputControl(
             "Radius:",
-            new NumericInput("radius", classCustomization.radius, "")   , Some("span2")
+            new NumericInput("radius", classCustomization.radius, "")   , Some("col-lg-2")
         )
         val glyph = new InputControl(
             "Glyph:",
-            new GlyphInput("glyph", Some(classCustomization.glyph), "")  , Some("span2")
+            new GlyphInput("glyph", Some(classCustomization.glyph), "")  , Some("col-lg-2")
         )
 
         fillColor.delayedChanged += { _ =>
@@ -126,11 +126,11 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
 
         val strokeColor = new InputControl(
             "Stroke color:",
-            new ColorInput("strokeColor", Color(propertyCustomization.strokeColor), ""), Some("span2")
+            new ColorInput("strokeColor", Color(propertyCustomization.strokeColor), ""), Some("col-lg-2")
         )
         val strokeWidth = new InputControl(
             "Stroke width:",
-            new NumericInput("strokeWidth", propertyCustomization.strokeWidth, ""), Some("span2")
+            new NumericInput("strokeWidth", propertyCustomization.strokeWidth, ""), Some("col-lg-2")
         )
 
         strokeColor.delayedChanged += { _ =>

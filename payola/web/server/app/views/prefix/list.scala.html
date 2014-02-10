@@ -8,13 +8,13 @@
 
 @editLinkForID(id: String) = @{
 <div class="btn-group">
-    <a href={routes.Prefix.edit(id).toString} class="btn"><i class="icon-pencil"></i> Edit</a>
+    <a href={routes.Prefix.edit(id).toString} class="btn"><i class="glyphicon-pencil"></i> Edit</a>
 </div>
 }
 
 @deleteLinkForID(id: String) = @{
 <div class="btn-group">
-    <a href={routes.Prefix.delete(id).toString} class="btn btn-danger" onclick="return confirm('Are you sure?')"><i class="icon-remove-sign icon-white"></i> Delete</a>
+    <a href={routes.Prefix.delete(id).toString} class="btn btn-danger" onclick="return confirm('Are you sure?')"><i class="glyphicon-remove-sign glyphicon"></i> Delete</a>
 </div>
 }
 

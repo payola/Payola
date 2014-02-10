@@ -26,8 +26,8 @@ class Generic(prefixApplier: Option[PrefixApplier] = None) extends PluginView("D
 
     def supportedDataFormat: String = "PayolaObj"
 
-    val controlsHolder = new Div(List(), "span4 dcv-controlsholder")
-    val graphHolder = new Div(List(), "span8 dcv-graphholder")
+    val controlsHolder = new Div(List(), "col-lg-4 dcv-controlsholder")
+    val graphHolder = new Div(List(), "col-lg-8 dcv-graphholder")
     val placeholder = new Div(List(controlsHolder, graphHolder),"dcv-placeholder")
     var dimensions: List[String] = List()
     var labelUri = ""

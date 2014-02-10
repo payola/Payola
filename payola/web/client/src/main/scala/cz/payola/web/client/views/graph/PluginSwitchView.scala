@@ -71,7 +71,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
         new GraphSigmaPluginView(Some(prefixApplier)),
         new TimeHeatmap(Some(prefixApplier)),
         new Generic(Some(prefixApplier)),
-        new GoogleMapView(Some(prefixApplier), List(new GroupingMapFacet("http://payola.cz/nonsense"))),
+        new GoogleMapView(Some(prefixApplier)),
         new GoogleHeatMapView(Some(prefixApplier)),
         new ArcGisMapView(Some(prefixApplier))
     )
@@ -130,7 +130,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
      * Toolbar containing pluginChange, customization buttons
      */
     val toolbar = new Div(List(pluginChangeButton, customizationsButton, languagesButton), "btn-toolbar").setAttribute(
-        "style", "margin-bottom: 15px;")
+        "style", "margin-left: 0; margin-top: 15px; margin-bottom: 15px;")
 
     // Re-trigger all events when the corresponding events are triggered in the plugins.
     plugins.foreach { plugin =>

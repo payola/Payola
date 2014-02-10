@@ -3,10 +3,10 @@ package cz.payola.web.client.views.bootstrap
 import cz.payola.web.client.views.elements.Italic
 
 class Icon(iconName: String, isWhite: Boolean = false) extends Italic(List(), (if (isWhite) {
-    "icon-white "
+    "glyphicon "
 } else {
-    ""
-}) + "icon-" + iconName)
+    "glyphicon "
+}) + "glyphicon-" + iconName)
 
 object Icon
 {

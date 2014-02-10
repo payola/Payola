@@ -20,7 +20,7 @@ class MergeAnalysisBranchesDialog(instances: ArrayBuffer[PluginInstanceView], in
 
     var id = 1
     instances.map{instance =>
-        val div = new Div(List(new Text(instance.pluginInstance.plugin.name)), "alert alert-danger span2 draggable")
+        val div = new Div(List(new Text(instance.pluginInstance.plugin.name)), "alert alert-danger col-lg-2 draggable")
 
         div.mouseMoved += { e =>
             instance.addCssClass("highlight")

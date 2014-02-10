@@ -9,7 +9,7 @@
     entitiesToDisplay: Int = 5
 )
 
-<div class="span6">
+<div class="col-lg-6">
 
     @if(entities.isEmpty){
         <div class="alert alert-warning">
@@ -19,37 +19,39 @@
                 @if(createCall.isDefined){
                 No stress! You can create one by hitting
                 <a class="btn btn-success" href="@createCall">
-                    <i class="icon-plus icon-white"></i> Create
+                    <i class="glyphicon-plus glyphicon"></i> Create
                 </a>
                 }
             </div>
         </div>
     }else{
-        <div class="@boxClass">
-            <div class="row-fluid">
-                <h2 class="span@if(createCall.isDefined){6}else{9}">@title</h2>
+        <div class="panel @boxClass">
+            <div class="panel-heading">
+                <h3 class="panel-title">@title</h3>
+            </div>
+            <div class="panel-body">
+                <table class="table table-striped">
+                @entities.take(5).map{e =>
+                    <tr>
+                        @entityLister(e)
+                    </tr>
+                }
+                </table>
+            </div>
+            <div class="panel-footer">
                 @if(entities.size > 5){
-                    <a class="btn btn-primary span3" href="@listCall"><i class="icon-list icon-white"></i> View all &raquo;</a>
+                    <a class="btn btn-primary btn-xs" href="@listCall"><i class="glyphicon-list glyphicon"></i> View all &raquo;</a>
                 }else{
                     @if(createCall.isDefined){
-                        <span class="span3"></span>
+                        <span class=""></span>
                     }
                 }
 
                 @if(createCall.isDefined){
-                    <a class="btn btn-success span3" href="@createCall">
-                        <i class="icon-plus icon-white"></i> Create
+                    <a class="btn btn-success btn-xs" href="@createCall">
+                        <i class="glyphicon-plus glyphicon"></i> Create
                     </a>
                 }
-            </div>
-            <div class="row-fluid">
-                <table class="table table-striped">
-                    @entities.take(5).map{e =>
-                    <tr>
-                        @entityLister(e)
-                    </tr>
-                    }
-                </table>
             </div>
         </div>
     }
