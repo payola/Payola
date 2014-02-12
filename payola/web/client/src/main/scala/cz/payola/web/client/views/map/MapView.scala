@@ -66,20 +66,27 @@ abstract class MapView(prefixApplier: Option[PrefixApplier] = None) extends Plug
             facets = properties.map{ p =>
                 val facet = new GroupingMapFacet(p)
                 facet.primaryRequested += { e =>
-                    primaryFacet = Some(e.target)
                     primaryFacetChanged.trigger(new EventArgs[MapFacet](e.target))
                     false
                 }
 
                 primaryFacetChanged += { e =>
+                    primaryFacet = Some(e.target)
                     if(e.target == facet){
                         facet.becamePrimary()
+                    }else{
+                        facet.unsetPrimary()
                     }
                     false
                 }
 
                 facet
             }
+
+            facets.headOption.map{ f =>
+                primaryFacetChanged.trigger(new EventArgs[MapFacet](f))
+            }
+
             facetPlaceholder.removeAllChildNodes()
 
             serializedGraph.map{ sg =>

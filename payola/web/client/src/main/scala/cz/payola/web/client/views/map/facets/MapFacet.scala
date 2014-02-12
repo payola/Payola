@@ -16,4 +16,6 @@ trait MapFacet extends ComposedView
     def namedMarkerGroups : mutable.HashMap[String, mutable.ArrayBuffer[Marker]]
 
     def becamePrimary()
+
+    def unsetPrimary()
 }

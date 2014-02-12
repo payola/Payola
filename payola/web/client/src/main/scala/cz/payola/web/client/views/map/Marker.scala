@@ -16,7 +16,7 @@ class Marker(coordinates: Coordinates, title: String, description: String){
     def visibility: Int = _visibility
 
     def visibility_=(value: Int){
-        _visibility += value
+        _visibility = value
         visibilityChanged.trigger(new EventArgs[Boolean](_visibility == 0))
     }
 

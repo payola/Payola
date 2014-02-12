@@ -95,6 +95,17 @@ class GroupingMapFacet(typeUri: String = "http://www.w3.org/2000/01/rdf-schema#t
     def becamePrimary(){
         colorGroups.keys.foreach{ k =>
             groups.get(k).foreach(_.foreach{ _.setColor(colorGroups.get(k).map{ i => i.value.replace("#","")}.getOrElse("0000000")) })
+            colorGroups.get(k).map{ i => i.show("inline-block") }
+        }
+        primaryButton.hide()
+        randomColors.show("inline-block")
+    }
+
+    def unsetPrimary(){
+        primaryButton.show("inline-block")
+        randomColors.hide()
+        colorGroups.keys.foreach{ k =>
+            colorGroups.get(k).map{ i => i.hide() }
         }
     }
 
@@ -115,7 +126,9 @@ class GroupingMapFacet(typeUri: String = "http://www.w3.org/2000/01/rdf-schema#t
 
             cbox.changed += { e =>
                 val add = if(e.target.value){ 1 }else{ -1 }
-                groups.get(k).foreach(_.foreach{ _.visibility += add } )
+                groups.get(k).foreach(_.foreach{ m =>
+                    m.visibility += add
+                } )
             }
 
             toggleAll.mouseClicked += { e =>
