@@ -7,11 +7,13 @@ import cz.payola.web.client.events.SimpleBooleanEvent
 
 trait MapFacet extends ComposedView
 {
-    val primaryRequested = new SimpleBooleanEvent[Boolean]
+    val primaryRequested = new SimpleBooleanEvent[MapFacet]
 
     def registerUri(uri: String, jsonGraphRepresentation: String, marker: Marker)
 
     def groupsCount : Int
 
     def namedMarkerGroups : mutable.HashMap[String, mutable.ArrayBuffer[Marker]]
+
+    def becamePrimary()
 }

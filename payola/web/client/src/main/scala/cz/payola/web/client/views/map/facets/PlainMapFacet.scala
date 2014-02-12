@@ -18,6 +18,8 @@ class PlainMapFacet(typeUri: String = "http://www.w3.org/2000/01/rdf-schema#type
         markers += marker
     }
 
+    def becamePrimary(){}
+
     def groupsCount = 1
 
     def namedMarkerGroups = {

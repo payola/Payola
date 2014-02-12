@@ -20,7 +20,7 @@ class GroupingMapFacet(typeUri: String = "http://www.w3.org/2000/01/rdf-schema#t
 
     val primaryButton = Button("Set facet as primary", "btn btn-primary btn-xs")
     primaryButton.mouseClicked += { e =>
-        primaryRequested.trigger(new EventArgs[Boolean](true))
+        primaryRequested.trigger(new EventArgs[MapFacet](this))
         false
     }
 
@@ -31,7 +31,9 @@ class GroupingMapFacet(typeUri: String = "http://www.w3.org/2000/01/rdf-schema#t
     val panel = new Div(List(panelHeading, panelBody, panelFooter),"panel panel-default")
 
     val facetContainer = new Div(List(panel), "facetContainer")
+
     val groups = new mutable.HashMap[String, ArrayBuffer[Marker]]
+    val colorGroups = new mutable.HashMap[String, ColorHTML5Input]
     val markers = new ArrayBuffer[Marker]()
 
     def shortenTypeUri(typeUri: String, maxLength: Int = 20) : String = {
@@ -52,14 +54,26 @@ class GroupingMapFacet(typeUri: String = "http://www.w3.org/2000/01/rdf-schema#t
         """
            var entity = jsonGraphRepresentation[uri];
            if (entity[self.typeUri]){
-                var dereferenced = jsonGraphRepresentation[entity[self.typeUri][0].value];
 
-                if(dereferenced && dereferenced["http://www.w3.org/2004/02/skos/core#prefLabel"]){
-                    return new scala.Some(dereferenced["http://www.w3.org/2004/02/skos/core#prefLabel"][0].value);
+                var property = entity[self.typeUri][0];
+
+                if(property){
+                    if(property["datatype"] && property["datatype"] == "http://www.w3.org/2001/XMLSchema#dateTime"){
+                        return new scala.Some(property.value.split("-")[0]);
+                    }
                 }
 
-                if(dereferenced && dereferenced["http://www.w3.org/2000/01/rdf-schema#label"]){
-                    return new scala.Some(dereferenced["http://www.w3.org/2000/01/rdf-schema#label"][0].value);
+                var dereferenced = jsonGraphRepresentation[entity[self.typeUri][0].value];
+
+                if(dereferenced){
+
+                    if(dereferenced["http://www.w3.org/2004/02/skos/core#prefLabel"]){
+                        return new scala.Some(dereferenced["http://www.w3.org/2004/02/skos/core#prefLabel"][0].value);
+                    }
+
+                    if(dereferenced["http://www.w3.org/2000/01/rdf-schema#label"]){
+                        return new scala.Some(dereferenced["http://www.w3.org/2000/01/rdf-schema#label"][0].value);
+                    }
                 }
                 return new scala.Some(entity[self.typeUri][0].value);
            }
@@ -78,6 +92,12 @@ class GroupingMapFacet(typeUri: String = "http://www.w3.org/2000/01/rdf-schema#t
         markers += marker
     }
 
+    def becamePrimary(){
+        colorGroups.keys.foreach{ k =>
+            groups.get(k).foreach(_.foreach{ _.setColor(colorGroups.get(k).map{ i => i.value.replace("#","")}.getOrElse("0000000")) })
+        }
+    }
+
     def groupsCount = groups.size
 
     def namedMarkerGroups = groups
@@ -89,10 +109,13 @@ class GroupingMapFacet(typeUri: String = "http://www.w3.org/2000/01/rdf-schema#t
             val colorInput = new ColorHTML5Input("markerColor")
             colorInput.value = "#FF0000"
 
+            colorGroups.put(k, colorInput)
+
             val span = new Div(List(colorInput, cbox, new Text(k)))
 
             cbox.changed += { e =>
-                groups.get(k).foreach(_.foreach{ _.isVisible = e.target.value } )
+                val add = if(e.target.value){ 1 }else{ -1 }
+                groups.get(k).foreach(_.foreach{ _.visibility += add } )
             }
 
             toggleAll.mouseClicked += { e =>
