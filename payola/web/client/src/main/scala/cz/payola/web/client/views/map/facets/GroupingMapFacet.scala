@@ -24,6 +24,8 @@ class GroupingMapFacet(typeUri: String = "http://www.w3.org/2000/01/rdf-schema#t
         false
     }
 
+    private var _isPrimary: Boolean = false
+
     val toggleAll = Button("Toggle all", "btn btn-default btn-xs")
     val randomColors = Button("Randomize colors", "btn btn-default btn-xs")
 
@@ -93,6 +95,7 @@ class GroupingMapFacet(typeUri: String = "http://www.w3.org/2000/01/rdf-schema#t
     }
 
     def becamePrimary(){
+        _isPrimary = true
         colorGroups.keys.foreach{ k =>
             groups.get(k).foreach(_.foreach{ _.setColor(colorGroups.get(k).map{ i => i.value.replace("#","")}.getOrElse("0000000")) })
             colorGroups.get(k).map{ i => i.show("inline-block") }
@@ -102,6 +105,7 @@ class GroupingMapFacet(typeUri: String = "http://www.w3.org/2000/01/rdf-schema#t
     }
 
     def unsetPrimary(){
+        _isPrimary = false
         primaryButton.show("inline-block")
         randomColors.hide()
         colorGroups.keys.foreach{ k =>
@@ -119,6 +123,9 @@ class GroupingMapFacet(typeUri: String = "http://www.w3.org/2000/01/rdf-schema#t
             val cbox = new CheckBox(k,true,"")
             val colorInput = new ColorHTML5Input("markerColor")
             colorInput.value = "#FF0000"
+            if(!_isPrimary){
+                colorInput.hide()
+            }
 
             colorGroups.put(k, colorInput)
 
