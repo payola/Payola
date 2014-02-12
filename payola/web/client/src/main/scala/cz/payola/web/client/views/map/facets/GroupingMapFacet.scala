@@ -77,7 +77,7 @@ class GroupingMapFacet(typeUri: String = "http://www.w3.org/2000/01/rdf-schema#t
                 }
                 return new scala.Some(entity[self.typeUri][0].value);
            }
-           return scala.None.get();
+           return new scala.Some("not set");
         """)
     def getGroupValue(uri: String, jsonGraphRepresentation: String): Option[String] = None
 
