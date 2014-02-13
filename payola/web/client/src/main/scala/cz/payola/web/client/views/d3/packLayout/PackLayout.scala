@@ -5,6 +5,7 @@ import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.graph.PluginView
 import s2js.compiler.javascript
 import s2js.adapters.browser.`package`._
+import s2js.adapters.html
 
 /**
  * @author Jiri Helmich
@@ -14,8 +15,10 @@ class PackLayout(prefixApplier: Option[PrefixApplier] = None) extends PluginView
     def supportedDataFormat: String = "RDF/JSON"
 
     val d3Placeholder = new Div(List())
-    val placeholder = new Div(List())
+    val placeholder = new Div(List(d3Placeholder))
     d3Placeholder.setAttribute("id","d3-placeholder")
+
+    private var _serializedGraph = ""
 
     @javascript("""console.log(str)""")
     def log(str: Any) {}
@@ -26,10 +29,9 @@ class PackLayout(prefixApplier: Option[PrefixApplier] = None) extends PluginView
 
     override def updateSerializedGraph(serializedGraph: Option[String]) {
         serializedGraph.map{ sg =>
-            placeholder.removeAllChildNodes()
-            d3Placeholder.render(placeholder.blockHtmlElement)
-            placeholder.render(document.body)
-            parseJSON(sg)
+            _serializedGraph = sg
+            d3Placeholder.removeAllChildNodes()
+            parseJSON(_serializedGraph)
         }
     }
 
@@ -57,14 +59,15 @@ class PackLayout(prefixApplier: Option[PrefixApplier] = None) extends PluginView
 
                     var o = {
                         name: getName(entity),
-                        children: []
                     };
 
                     if(entity[skos("broader")]){
                         for(var n in entity[skos("broader")]){
-                            queue.push(function(){
-                                objMap[entity[skos("broader")][n].value].children.push(o);
-                            });
+                            queue.push({entity:entity, child: o, callback: function(entity, child){
+                                var obj = objMap[entity[skos("broader")][n].value];
+                                if(!obj.children) { obj.children = []; }
+                                obj.children.push(child);
+                            }});
                         }
                     }
 
@@ -72,27 +75,18 @@ class PackLayout(prefixApplier: Option[PrefixApplier] = None) extends PluginView
                         o.size = (((entity[rdf("value")] || [{value:0}])[0]) || {value: 0}).value;
                     }
 
-                    /*if (!entity[skos("broader")] && !entity[rdf("value")]){
-                        console.log("a");
+                    if (!entity[skos("broader")] && !entity[rdf("value")]){
                         data = o;
-                    }*/
+                    }
 
                     objMap[i] = o;
-
                 }
             };
 
-            for (var c in queue){ queue[c](); }
-
-            //if(data == null) { alert("Invalid hierarchy."); }
-
-            for(var i in objMap){
-                if(objMap[i].children.length > 0){
-                    console.log(objMap[i]);
-                    data = objMap[i];
-                }
+            for (var c in queue){
+                var q = queue[c];
+                q.callback(q.entity, q.child);
             }
-
 
           var w = 1280,
               h = 800,
@@ -106,7 +100,7 @@ class PackLayout(prefixApplier: Option[PrefixApplier] = None) extends PluginView
               .size([r, r])
               .value(function(d) { return d.size; })
 
-          var vis = d3.select("#d3-placeholder").insert("svg:svg", "h2")
+          var vis = d3.select(self.d3Placeholder.blockHtmlElement()).insert("svg:svg", "h2")
               .attr("width", w)
               .attr("height", h)
             .append("svg:g")
@@ -166,7 +160,5 @@ class PackLayout(prefixApplier: Option[PrefixApplier] = None) extends PluginView
         """)
     def parseJSON(json: String) {}
 
-    def createSubViews = {
-        List()
-    }
+    def createSubViews = List(placeholder)
 }
