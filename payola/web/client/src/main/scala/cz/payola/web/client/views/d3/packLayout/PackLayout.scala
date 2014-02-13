@@ -48,8 +48,15 @@ class PackLayout(prefixApplier: Option[PrefixApplier] = None) extends PluginView
 
                 if (entity[rdf("type")] && (entity[rdf("type")][0].value == skos("Concept"))){
 
+                    function getName(entity){
+                        if(entity[skos("prefLabel")] && entity[skos("prefLabel")][0] && entity[skos("prefLabel")].value){
+                            return entity[skos("prefLabel")][0].value;
+                        }
+                        return "no name";
+                    }
+
                     var o = {
-                        name: entity[skos("prefLabel")][0].value || "no name",
+                        name: getName(entity),
                         children: []
                     };
 
