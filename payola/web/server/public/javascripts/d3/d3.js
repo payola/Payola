@@ -631,7 +631,7 @@
         while (i > 0) t.push(value.substring(i -= 3, i + 3));
         return t.reverse().join(",") + f;
     }
-    var d3_formatPrefixes = ["y","z","a","f","p","n","μ","m","","k","M","G","T","P","E","Z","Y"].map(d3_formatPrefix);
+    var d3_formatPrefixes = ["y","z","a","f","p","n","\u03BC","m","","k","M","G","T","P","E","Z","Y"].map(d3_formatPrefix);
 
     d3.formatPrefix = function(value, precision) {
         var i = 0;
@@ -3235,7 +3235,6 @@
         d3_svg_lineBasisBezier2 = [0, 1/3, 2/3, 0],
         d3_svg_lineBasisBezier3 = [0, 1/6, 2/3, 1/6];
 
-// Pushes a "C" Bézier curve onto the specified path array, given the
 // two specified four-element arrays which define the control points.
     function d3_svg_lineBasisBezier(path, x, y) {
         path.push(
@@ -3285,7 +3284,7 @@
         // 1. Compute the slopes of the secant lines between successive points.
         // 2. Initialize the tangents at every point as the average of the secants.
 
-        // Then, for each segment…
+        // Then, for each segment...
         while (++i < j) {
             d = d3_svg_lineSlope(points[i], points[i + 1]);
 
