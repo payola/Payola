@@ -72,7 +72,9 @@ class PackLayout(prefixApplier: Option[PrefixApplier] = None) extends PluginView
                     }
 
                     if(entity[rdf("value")]){
-                        o.size = (((entity[rdf("value")] || [{value:0}])[0]) || {value: 0}).value;
+                        o.size = (((entity[rdf("value")] || [{value:1}])[0]) || {value: 1}).value;
+                    }else{
+                        o.size = 1;
                     }
 
                     if (!entity[skos("broader")] && !entity[rdf("value")]){
