@@ -49,7 +49,7 @@ class PackLayout(prefixApplier: Option[PrefixApplier] = None) extends PluginView
                 if (entity[rdf("type")] && (entity[rdf("type")][0].value == skos("Concept"))){
 
                     function getName(entity){
-                        if(entity[skos("prefLabel")] && entity[skos("prefLabel")][0] && entity[skos("prefLabel")].value){
+                        if(entity[skos("prefLabel")] && entity[skos("prefLabel")][0] && entity[skos("prefLabel")][0].value){
                             return entity[skos("prefLabel")][0].value;
                         }
                         return "no name";
@@ -66,13 +66,16 @@ class PackLayout(prefixApplier: Option[PrefixApplier] = None) extends PluginView
                                 objMap[entity[skos("broader")][n].value].children.push(o);
                             });
                         }
-                    }else{
-                        data = o;
                     }
 
                     if(entity[rdf("value")]){
-                        o.size = entity[rdf("value")];
+                        o.size = (((entity[rdf("value")] || [{value:0}])[0]) || {value: 0}).value;
                     }
+
+                    /*if (!entity[skos("broader")] && !entity[rdf("value")]){
+                        console.log("a");
+                        data = o;
+                    }*/
 
                     objMap[i] = o;
 
@@ -81,7 +84,14 @@ class PackLayout(prefixApplier: Option[PrefixApplier] = None) extends PluginView
 
             for (var c in queue){ queue[c](); }
 
-            if(data == null) { alert("Invalid hierarchy."); }
+            //if(data == null) { alert("Invalid hierarchy."); }
+
+            for(var i in objMap){
+                if(objMap[i].children.length > 0){
+                    console.log(objMap[i]);
+                    data = objMap[i];
+                }
+            }
 
 
           var w = 1280,
