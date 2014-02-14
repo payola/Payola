@@ -526,9 +526,9 @@ button.datacube {
 
 .preview-dialog.modal {
     position: fixed;
-    top: 0px;
-    left: 0px;
-    margin: 0px;
+    top: 0;
+    left: 0;
+    margin: 0;
     width: 100%;
     height: 100%;
 }
@@ -539,11 +539,25 @@ button.datacube {
     position: relative;
 }
 
+.preview-dialog.modal .modal-body>div{
+    padding-bottom: 65px;
+}
+
 .preview-dialog.modal .modal-footer {
     position: fixed;
     display: block;
-    bottom: 0px;
+    bottom: 0;
     width: 98%;
+    z-index: 1;
+}
+
+.preview-dialog .modal-dialog{
+    width: 100%;
+    margin: 0;
+}
+
+.preview-dialog .connector{
+    margin-left: 47%;
 }
 
 .choose-analysis-dialog.modal .modal-body {
@@ -641,3 +655,5 @@ button.datacube {
     max-height: 250px;
     overflow: scroll;
 }
+
+
