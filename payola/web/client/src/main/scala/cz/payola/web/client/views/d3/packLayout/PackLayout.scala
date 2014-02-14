@@ -66,6 +66,7 @@ class PackLayout(prefixApplier: Option[PrefixApplier] = None) extends PluginView
                         for(var n in entity[skos("broader")]){
                             queue.push({entity:entity, child: o, callback: function(entity, child){
                                 var obj = objMap[entity[skos("broader")][n].value];
+                                if(!obj) return;
                                 if(!obj.children) { obj.children = []; }
                                 obj.children.push(child);
                             }});
