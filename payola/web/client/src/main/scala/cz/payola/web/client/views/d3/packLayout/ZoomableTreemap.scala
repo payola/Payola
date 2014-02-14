@@ -120,9 +120,12 @@ class ZoomableTreemap(prefixApplier: Option[PrefixApplier] = None) extends Plugi
             var nodes = treemap.nodes(root)
                 .filter(function(d) { return !d.children; }).getInternalJsArray();
 
+                                            /*console.log(svg.selectAll("g"));
+                                            console.log(svg.selectAll("g").data(nodes).enter().append("svg:g"));*/
+
             var cell = svg.selectAll("g")
                 .data(nodes)
-              .enter().append("svg:g")
+                .enter().append("svg:g")
                 .attr("class", "cell")
                 .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
                 .on("click", function(d) { return zoom(node == d.parent ? root : d.parent); });
