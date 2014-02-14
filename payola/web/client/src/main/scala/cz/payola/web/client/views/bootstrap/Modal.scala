@@ -94,6 +94,6 @@ class Modal(
     @javascript("$(self.subViews().head().htmlElement).modal({ show: true, keyboard: false, backdrop: 'static' })")
     private def show() {}
 
-    @javascript("jQuery(self.subViews().head().htmlElement).modal('hide')")
+    @javascript("jQuery(self.subViews().head().htmlElement).modal('hide'); jQuery(body).removeClass('modal-open'); ")
     private def hide() {}
 }
