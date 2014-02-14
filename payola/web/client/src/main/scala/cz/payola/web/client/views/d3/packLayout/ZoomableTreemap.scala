@@ -4,13 +4,12 @@ import cz.payola.web.client.models.PrefixApplier
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.graph.PluginView
 import s2js.compiler.javascript
-import s2js.adapters.browser.`package`._
 import s2js.adapters.html
 
 /**
  * @author Jiri Helmich
  */
-class PackLayout(prefixApplier: Option[PrefixApplier] = None) extends PluginView("Pack Layout", prefixApplier) {
+class ZoomableTreemap(prefixApplier: Option[PrefixApplier] = None) extends PluginView("Zoomable Treemap", prefixApplier) {
 
     def supportedDataFormat: String = "RDF/JSON"
 
@@ -59,7 +58,7 @@ class PackLayout(prefixApplier: Option[PrefixApplier] = None) extends PluginView
                     }
 
                     var o = {
-                        name: getName(entity),
+                        name: getName(entity)
                     };
 
                     if(entity[skos("broader")]){
@@ -91,74 +90,92 @@ class PackLayout(prefixApplier: Option[PrefixApplier] = None) extends PluginView
                 q.callback(q.entity, q.child);
             }
 
-          var w = 1280,
-              h = 800,
-              r = 720,
-              x = d3.scale.linear().range([0, r]),
-              y = d3.scale.linear().range([0, r]),
-              node,
-              root;
 
-          var pack = d3.layout.pack()
-              .size([r, r])
-              .value(function(d) { return d.size; })
+          var w = 1280 - 80,
+              h = 800 - 180,
+              x = d3.scale.linear().range([0, w]),
+              y = d3.scale.linear().range([0, h]),
+              color = d3.scale.category20c(),
+              root,
+              node;
 
-          var vis = d3.select(self.d3Placeholder.blockHtmlElement()).insert("svg:svg", "h2")
+          var treemap = d3.layout.treemap()
+              .round(false)
+              .size([w, h])
+              .sticky(true)
+              .value(function(d) { return d.size; });
+
+          var svg = d3.select(self.d3Placeholder.blockHtmlElement()).append("div")
+              .attr("class", "chart")
+              .style("width", w + "px")
+              .style("height", h + "px")
+            .append("svg:svg")
               .attr("width", w)
               .attr("height", h)
             .append("svg:g")
-              .attr("transform", "translate(" + (w - r) / 2 + "," + (h - r) / 2 + ")");
+              .attr("transform", "translate(.5,.5)");
 
-          //d3.json("flare.json", function(data) {
             node = root = data;
 
-            var nodes = pack.nodes(root);
+            var nodes = treemap.nodes(root)
+                .filter(function(d) { return !d.children; }).getInternalJsArray();
 
-            vis.selectAll("circle")
+            var cell = svg.selectAll("g")
                 .data(nodes)
-              .enter().append("svg:circle")
-                .attr("class", function(d) { return d.children ? "parent" : "child"; })
-                .attr("cx", function(d) { return d.x; })
-                .attr("cy", function(d) { return d.y; })
-                .attr("r", function(d) { return d.r; })
-                .on("click", function(d) { return zoom(node == d ? root : d); });
+              .enter().append("svg:g")
+                .attr("class", "cell")
+                .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+                .on("click", function(d) { return zoom(node == d.parent ? root : d.parent); });
 
-            vis.selectAll("text")
-                .data(nodes)
-              .enter().append("svg:text")
-                .attr("class", function(d) { return d.children ? "parent" : "child"; })
-                .attr("x", function(d) { return d.x; })
-                .attr("y", function(d) { return d.y; })
+            cell.append("svg:rect")
+                .attr("width", function(d) { return d.dx - 1; })
+                .attr("height", function(d) { return d.dy - 1; })
+                .style("fill", function(d) { return color(d.parent.name); });
+
+            cell.append("svg:text")
+                .attr("x", function(d) { return d.dx / 2; })
+                .attr("y", function(d) { return d.dy / 2; })
                 .attr("dy", ".35em")
                 .attr("text-anchor", "middle")
-                .style("opacity", function(d) { return d.r > 20 ? 1 : 0; })
-                .text(function(d) { return d.name; });
+                .text(function(d) { return d.name; })
+                .style("opacity", function(d) { d.w = this.getComputedTextLength(); return d.dx > d.w ? 1 : 0; });
 
             d3.select(window).on("click", function() { zoom(root); });
-          //});
 
-          function zoom(d, i) {
-            var k = r / d.r / 2;
-            x.domain([d.x - d.r, d.x + d.r]);
-            y.domain([d.y - d.r, d.y + d.r]);
+            d3.select("select").on("change", function() {
+              treemap.value(this.value == "size" ? size : count).nodes(root);
+              zoom(node);
+            });
 
-            var t = vis.transition()
-                .duration(d3.event.altKey ? 7500 : 750);
+          function size(d) {
+            return d.size;
+          }
 
-            t.selectAll("circle")
-                .attr("cx", function(d) { return x(d.x); })
-                .attr("cy", function(d) { return y(d.y); })
-                .attr("r", function(d) { return k * d.r; });
+          function count(d) {
+            return 1;
+          }
 
-            t.selectAll("text")
-                .attr("x", function(d) { return x(d.x); })
-                .attr("y", function(d) { return y(d.y); })
-                .style("opacity", function(d) { return k * d.r > 20 ? 1 : 0; });
+          function zoom(d) {
+            var kx = w / d.dx, ky = h / d.dy;
+            x.domain([d.x, d.x + d.dx]);
+            y.domain([d.y, d.y + d.dy]);
+
+            var t = svg.selectAll("g.cell").transition()
+                .duration(d3.event.altKey ? 7500 : 750)
+                .attr("transform", function(d) { return "translate(" + x(d.x) + "," + y(d.y) + ")"; });
+
+            t.select("rect")
+                .attr("width", function(d) { return kx * d.dx - 1; })
+                .attr("height", function(d) { return ky * d.dy - 1; })
+
+            t.select("text")
+                .attr("x", function(d) { return kx * d.dx / 2; })
+                .attr("y", function(d) { return ky * d.dy / 2; })
+                .style("opacity", function(d) { return kx * d.dx > d.w ? 1 : 0; });
 
             node = d;
             d3.event.stopPropagation();
           }
-
 
         """)
     def parseJSON(json: String) {}

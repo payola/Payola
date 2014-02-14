@@ -4,6 +4,7 @@ import cz.payola.web.client.models.PrefixApplier
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.graph.PluginView
 import s2js.compiler.javascript
+import s2js.adapters.html
 
 /**
  * @author Jiri Helmich
@@ -17,6 +18,7 @@ class ZoomableSunburst(prefixApplier: Option[PrefixApplier] = None) extends Plug
     d3Placeholder.setAttribute("id","d3-placeholder")
 
     private var _serializedGraph = ""
+    private var _rendered = false
 
     @javascript("""console.log(str)""")
     def log(str: Any) {}
@@ -29,7 +31,7 @@ class ZoomableSunburst(prefixApplier: Option[PrefixApplier] = None) extends Plug
         serializedGraph.map{ sg =>
             _serializedGraph = sg
             d3Placeholder.removeAllChildNodes()
-            parseJSON(_serializedGraph)
+            if(_rendered) { parseJSON(_serializedGraph) }
         }
     }
 
@@ -122,8 +124,8 @@ class ZoomableSunburst(prefixApplier: Option[PrefixApplier] = None) extends Plug
               .text("Click to zoom!");
 
           var partition = d3.layout.partition()
-              .sort(null)
-              .value(function(d) { return 5.8 - d.depth; });
+              .sort(function(d) { return d.size; })
+              .value(function(d) { return d.size; });
 
           var arc = d3.svg.arc()
               .startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x))); })
@@ -245,4 +247,13 @@ class ZoomableSunburst(prefixApplier: Option[PrefixApplier] = None) extends Plug
     def parseJSON(json: String) {}
 
     def createSubViews = List(placeholder)
+
+    override def render(parent: html.Element) {
+        subViews.foreach { v =>
+            new Text(" ").render(parent)
+            v.render(parent)
+        }
+        parseJSON(_serializedGraph)
+        _rendered = true
+    }
 }

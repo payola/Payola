@@ -4,6 +4,7 @@ import cz.payola.web.client.models.PrefixApplier
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.graph.PluginView
 import s2js.compiler.javascript
+import s2js.adapters.html
 
 /**
  * @author Jiri Helmich
@@ -17,6 +18,7 @@ class Sunburst(prefixApplier: Option[PrefixApplier] = None) extends PluginView("
     d3Placeholder.setAttribute("id","d3-placeholder")
 
     private var _serializedGraph = ""
+    private var _rendered = false
 
     @javascript("""console.log(str)""")
     def log(str: Any) {}
@@ -29,7 +31,7 @@ class Sunburst(prefixApplier: Option[PrefixApplier] = None) extends PluginView("
         serializedGraph.map{ sg =>
             _serializedGraph = sg
             d3Placeholder.removeAllChildNodes()
-            parseJSON(_serializedGraph)
+            if(_rendered) { parseJSON(_serializedGraph) }
         }
     }
 
@@ -104,7 +106,7 @@ class Sunburst(prefixApplier: Option[PrefixApplier] = None) extends PluginView("
           var partition = d3.layout.partition()
               .sort(null)
               .size([2 * Math.PI, radius * radius])
-              .value(function(d) { return 1; });
+              .value(function(d) { return d.size; });
 
           var arc = d3.svg.arc()
               .startAngle(function(d) { return d.x; })
@@ -161,4 +163,13 @@ class Sunburst(prefixApplier: Option[PrefixApplier] = None) extends PluginView("
     def parseJSON(json: String) {}
 
     def createSubViews = List(placeholder)
+
+    override def render(parent: html.Element) {
+        subViews.foreach { v =>
+            new Text(" ").render(parent)
+            v.render(parent)
+        }
+        parseJSON(_serializedGraph)
+        _rendered = true
+    }
 }

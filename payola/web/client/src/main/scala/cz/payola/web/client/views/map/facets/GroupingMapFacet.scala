@@ -60,7 +60,7 @@ class GroupingMapFacet(typeUri: String = "http://www.w3.org/2000/01/rdf-schema#t
                 var property = entity[self.typeUri][0];
 
                 if(property){
-                    if(property["datatype"] && property["datatype"] == "http://www.w3.org/2001/XMLSchema#dateTime"){
+                    if(property["datatype"] && (property["datatype"] == "http://www.w3.org/2001/XMLSchema#dateTime" || property["datatype"] == "http://www.w3.org/2001/XMLSchema#date")){
                         return new scala.Some(property.value.split("-")[0]);
                     }
                 }

@@ -77,7 +77,8 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
         new ArcGisMapView(Some(prefixApplier)),
         new PackLayout(Some(prefixApplier)),
         new Sunburst(Some(prefixApplier)),
-        new ZoomableSunburst(Some(prefixApplier))
+        new ZoomableSunburst(Some(prefixApplier)),
+        new ZoomableTreemap(Some(prefixApplier))
     )
 
     /**
