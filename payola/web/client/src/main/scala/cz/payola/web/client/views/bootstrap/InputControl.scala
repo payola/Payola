@@ -7,7 +7,7 @@ import cz.payola.common.ValidationException
 import cz.payola.web.client.events.SimpleUnitEvent
 import cz.payola.web.client.views.elements.form._
 
-class InputControl[A <: Field[_]](val label: String, val field: A, labelClass: Option[String])
+class InputControl[A <: Field[_]](val label: String, val field: A, labelClass: Option[String], controlClass: Option[String])
     extends ComposedView
 {
     val delayedChanged = new SimpleUnitEvent[this.type]
@@ -17,13 +17,13 @@ class InputControl[A <: Field[_]](val label: String, val field: A, labelClass: O
     private val infoText = new Text("")
 
     val controlGroup = new Div(List(
-        new Label(label, field.formHtmlElement, labelClass.getOrElse("")),
+        new Label(label, field.formHtmlElement, labelClass.getOrElse("")+" control-label"),
         new Div(List(
             field,
             new Span(List(infoText), "help-inline")),
-            "controls"
+            controlClass.getOrElse("")
         )),
-        "control-group "
+        "form-group "
     )
 
     field.changed += { _ =>

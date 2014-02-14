@@ -196,7 +196,7 @@ input[type="checkbox"].active:after {
     overflow-x: hidden;
 }
 
-@media screen and (-webkit-min-device-pixel-ratio:0) {
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
     .params-wrapper {
         display: table !important;
         width: 100%
@@ -208,7 +208,7 @@ input[type="checkbox"].active:after {
     }
 }
 
-.successors+.successors {
+.successors + .successors {
     margin-left: 10px;
 }
 
@@ -310,7 +310,7 @@ input[type="checkbox"].active:after {
 
 .connector {
     border: 2px solid #3A87AD;
-    height: 90%;
+    height: 100%;
     position: absolute;
     top: 0;
     z-index: -1;
@@ -616,7 +616,7 @@ button.datacube {
 .heatmap-settings-table {
     position: absolute;
     z-index: 10000;
-    background: rgba(255,255,255,0.5);
+    background: rgba(255, 255, 255, 0.5);
     padding: 10px;
     bottom: 19px;
     right: 0px;
@@ -625,4 +625,19 @@ button.datacube {
 .heatmap-settings-table table {
     background: white;
     margin-top: 5px;
+}
+
+
+
+.form-group label {
+    margin: 0;
+}
+
+.instance.panel .panel-body .parameters p {
+    margin: 0;
+}
+
+.parameters ul.readonly {
+    max-height: 250px;
+    overflow: scroll;
 }

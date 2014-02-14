@@ -42,6 +42,6 @@ class ReadOnlyPluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[P
                 }
         }
 
-        List(new UnorderedList(listItems))
+        List(new UnorderedList(listItems, "list-unstyled readonly"))
     }
 }

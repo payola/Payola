@@ -17,7 +17,7 @@ class ShareModal(
 
     val granteeSelection = new InputControl(
         "Share to %ss".format(granteeClassNameText),
-        new TextInput("", "init", "Enter name") , Some("col-lg-2")
+        new TextInput("", "init", "Enter name") , Some("col-lg-2"), Some("col-lg-10")
     )
 
     override val body = List(granteeSelection)

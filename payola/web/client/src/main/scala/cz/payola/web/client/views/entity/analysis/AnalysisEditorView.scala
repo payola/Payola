@@ -12,9 +12,9 @@ import cz.payola.web.client.models.PrefixApplier
 
 class AnalysisEditorView(analysis: Analysis, newName: Option[String], newDesc: Option[String], pageTitle: String, prefixApplier: PrefixApplier) extends ComposedView
 {
-    val name = new InputControl("Analysis name:", new TextInput("name", if(newName.isDefined){newName.get}else{analysis.name}, "Analysis name"), Some("nofloat"))
+    val name = new InputControl("Analysis name:", new TextInput("name", if(newName.isDefined){newName.get}else{analysis.name}, "Analysis name"), Some("nofloat"), None)
 
-    val description = new InputControl("Description:", new TextArea("description",  if(newDesc.isDefined){newDesc.get}else{analysis.description}, "Anaylsis description"), Some("nofloat"))
+    val description = new InputControl("Description:", new TextArea("description",  if(newDesc.isDefined){newDesc.get}else{analysis.description}, "Anaylsis description"), Some("nofloat"), None)
 
     protected val properties = new Div(List(name, description))
 

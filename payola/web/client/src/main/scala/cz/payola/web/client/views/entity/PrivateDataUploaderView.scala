@@ -12,11 +12,11 @@ class PrivateDataUploaderView(fileUploaderDivID: String,
     urlUploaderDivID: String) extends ComposedView
 {
     val fileUploadDiv = document.getElementById(fileUploaderDivID)
-    val fileInput = new InputControl("File: ", new FileInput("graphFile", "", "col-lg-10"), Some("col-lg-10"))
+    val fileInput = new InputControl("File: ", new FileInput("graphFile", "", "col-lg-10"), Some("col-lg-10"), Some("col-lg-2"))
     val fileUploadButton = new Button(new Text(" Upload File"), "btn-primary input", new Icon(Icon.upload, true))
 
     val urlUploadDiv = document.getElementById(urlUploaderDivID)
-    val urlField = new InputControl("Graph URL:", new TextInput("graphURL", "", "", "col-lg-10"), Some("col-lg-2"))
+    val urlField = new InputControl("Graph URL:", new TextInput("graphURL", "", "", "col-lg-10"), Some("col-lg-2"), Some("col-lg-10"))
     val urlUploadButton = new Button(new Span(List(new Icon(Icon.upload, true), new Text(" Upload from URL"))), "btn-primary input")
 
     def createSubViews = {
