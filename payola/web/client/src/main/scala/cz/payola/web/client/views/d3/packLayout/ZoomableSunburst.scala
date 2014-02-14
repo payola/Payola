@@ -141,7 +141,9 @@ class ZoomableSunburst(prefixApplier: Option[PrefixApplier] = None) extends Plug
                 .attr("d", arc)
                 .attr("fill-rule", "evenodd")
                 .style("fill", colour)
-                .on("click", click);
+                .on("click", click)
+                .append("svg:title")
+                .text(function(d){return d.name+": "+d.size;});
 
             var text = vis.selectAll("text").data(nodes);
             var textEnter = text.enter().append("text")

@@ -116,13 +116,16 @@ class Sunburst(prefixApplier: Option[PrefixApplier] = None) extends PluginView("
 
             var path = svg.datum(root).selectAll("path")
                 .data(partition.nodes)
-              .enter().append("path")
+                .enter().append("path")
                 .attr("display", function(d) { return d.depth ? null : "none"; }) // hide inner ring
                 .attr("d", arc)
                 .style("stroke", "#fff")
                 .style("fill", function(d) { return color((d.children ? d : d.parent).name); })
                 .style("fill-rule", "evenodd")
                 .each(stash);
+
+            path.append("svg:title")
+                .text(function(d){return d.name+": "+d.size;});
 
             /*d3.selectAll("input").on("change", function change() {
               var value = this.value === "count"
