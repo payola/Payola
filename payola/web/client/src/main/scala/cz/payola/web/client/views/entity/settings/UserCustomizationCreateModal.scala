@@ -8,7 +8,7 @@ class UserCustomizationCreateModal extends Modal("Create a new user customizatio
 {
     val name = new InputControl("Name",
         new TextInput("customizationName", "", "").setAttribute("style", "margin-bottom:55px;"),
-        Some("col-lg-2"))
+        Some("col-lg-2"), Some("col-lg-10"))
 
     override val body = List(name)
 }

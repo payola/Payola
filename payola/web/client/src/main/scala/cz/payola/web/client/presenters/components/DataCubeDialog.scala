@@ -14,7 +14,7 @@ import cz.payola.web.client.views.elements.form.fields.TextInput
 class DataCubeDialog() extends Modal("Create a DataCube Vocabulary plugin", Nil)
 {
 
-    val dcvUrlField = new InputControl[TextInput]("Vocabulary URL", new TextInput("url", "", "Vocabulary URL"), None)
+    val dcvUrlField = new InputControl[TextInput]("Vocabulary URL", new TextInput("url", "", "Vocabulary URL"), None, None)
     val placeholder = new Div(List(dcvUrlField))
 
     override val body = List(placeholder)

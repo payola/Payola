@@ -6,6 +6,7 @@ import cz.payola.common.entities.plugins._
 import cz.payola.web.client.views.elements.lists._
 import cz.payola.web.client.models.PrefixApplier
 import cz.payola.common.entities.plugins.parameters.StringParameter
+import s2js.compiler.javascript
 
 class ReadOnlyPluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[PluginInstanceView] = List(),
     prefixApplier: PrefixApplier) extends PluginInstanceView(pluginInst, predecessors, prefixApplier)
@@ -13,6 +14,7 @@ class ReadOnlyPluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[P
     def getAdditionalControlsViews: Seq[View] = List()
 
     def getParameterViews: Seq[View] = {
+
         val listItems = filterParams(getPlugin.parameters).flatMap {
             param =>
                 pluginInstance.getParameter(param.name).map {
@@ -29,6 +31,9 @@ class ReadOnlyPluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[P
                         val item = param match {
                             case p : StringParameter if p.canContainUrl => new ListItem(List(strong, new Text(": " + prefixApplier.applyPrefix(v.toString))))
                             case p : StringParameter if p.isPassword => new ListItem(List(strong, new Text(": ***")))
+                            case p : StringParameter if p.isMultiline => {
+                                new ListItem(List(strong, new Text(": "))++v.toString.split("\n").toList.map{ t => new Paragraph(List(new Text(t))) })
+                            }
                             case _ => new ListItem(List(strong, new Text(": "+v.toString)))
                         }
 
@@ -37,6 +42,6 @@ class ReadOnlyPluginInstanceView(pluginInst: PluginInstance, predecessors: Seq[P
                 }
         }
 
-        List(new UnorderedList(listItems))
+        List(new UnorderedList(listItems, "list-unstyled readonly"))
     }
 }

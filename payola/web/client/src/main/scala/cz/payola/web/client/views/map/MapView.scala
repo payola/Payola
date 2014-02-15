@@ -12,13 +12,18 @@ import cz.payola.web.client.views.map.facets._
 import scala.collection.mutable.ArrayBuffer
 import cz.payola.web.shared.AnalysisEvaluationResultsManager
 import cz.payola.common.geo.Coordinates
+import cz.payola.web.client.events._
+import cz.payola.common.geo.Coordinates
 
 /**
  * @author Jiri Helmich
  */
 abstract class MapView(prefixApplier: Option[PrefixApplier] = None) extends PluginView("Map", prefixApplier) {
 
+    val primaryFacetChanged = new SimpleBooleanEvent[MapFacet]
+
     protected var facets: Seq[MapFacet] = List()
+    protected var primaryFacet: Option[MapFacet] = None
 
     def createLibWrapper(element: Element) : View
 
@@ -58,7 +63,30 @@ abstract class MapView(prefixApplier: Option[PrefixApplier] = None) extends Plug
     override def updateSerializedGraph(serializedGraph: Option[String]) {
         AnalysisEvaluationResultsManager.queryProperties(evaluationId.get, "select distinct ?p where {[] <http://schema.org/geo> []; ?p [] .}"){ properties =>
 
-            facets = properties.map(new GroupingMapFacet(_))
+            facets = properties.map{ p =>
+                val facet = new GroupingMapFacet(p)
+                facet.primaryRequested += { e =>
+                    primaryFacetChanged.trigger(new EventArgs[MapFacet](e.target))
+                    false
+                }
+
+                primaryFacetChanged += { e =>
+                    primaryFacet = Some(e.target)
+                    if(e.target == facet){
+                        facet.becamePrimary()
+                    }else{
+                        facet.unsetPrimary()
+                    }
+                    false
+                }
+
+                facet
+            }
+
+            facets.headOption.map{ f =>
+                primaryFacetChanged.trigger(new EventArgs[MapFacet](f))
+            }
+
             facetPlaceholder.removeAllChildNodes()
 
             serializedGraph.map{ sg =>

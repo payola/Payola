@@ -89,7 +89,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
     val userCustomizationName = new InputControl(
         "Name:",
         new TextInput("name", userCustomization.name, "", ""),
-        Some("col-lg-2")
+        Some("col-lg-2"), Some("col-lg-10")
     )
 
     saveButton.mouseClicked += { e =>
@@ -553,15 +553,15 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
     def renderClassCustomizationViews(classCustomization: ClassCustomization) {
         val fillColor = new InputControl(
             "Fill color:",
-            new ColorInput("fillColor", Color(classCustomization.fillColor), ""), Some("col-lg-2")
+            new ColorInput("fillColor", Color(classCustomization.fillColor), ""), Some("col-lg-2"), Some("col-lg-10")
         )
         val radius = new InputControl(
             "Radius:",
-            new NumericInput("radius", classCustomization.radius, "")   , Some("col-lg-2")
+            new NumericInput("radius", classCustomization.radius, "")   , Some("col-lg-2"), Some("col-lg-10")
         )
         val glyph = new InputControl(
             "Glyph:",
-            new GlyphInput("glyph", Some(classCustomization.glyph), "")  , Some("col-lg-2")
+            new GlyphInput("glyph", Some(classCustomization.glyph), "")  , Some("col-lg-2") , Some("col-lg-10")
         )
 
         val labels = new InputControl(
@@ -572,7 +572,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
                         new LabelItem("skos:prefLabel", false, false), new LabelItem("skod:altLabel", false, false),
                         new LabelItem("URI", false, false))
                 } else { classCustomization.labelsSplitted }),
-            Some("col-lg-2")
+            Some("col-lg-2"), Some("col-lg-10")
         )
 
         fillColor.delayedChanged += { _ =>
@@ -611,25 +611,25 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
             "Property value:",
             new ConditionTextInput(
                 currentGraphEdges.filter(_.uri == conClassCustomization.getUri).map(_.destination.toString).distinct,
-                "Select value", conClassCustomization.conditionalValue, prefixApplier, "", "margin: 0px"), None
+                "Select value", conClassCustomization.conditionalValue, prefixApplier, "", "margin: 0px"), None, None
         )
         val labelField = new InputControl(
             "Custom label:",
             new TextInput("customLabel",
                 if(conClassCustomization.labels == null || conClassCustomization.labels == "") { "" }
-                else { conClassCustomization.labelsSplitted(0).value }), Some("col-lg-2")
+                else { conClassCustomization.labelsSplitted(0).value }), Some("col-lg-2"), Some("col-lg-10")
         )
         val fillColor = new InputControl(
             "Fill color:",
-            new ColorInput("fillColor", Color(conClassCustomization.fillColor), ""), Some("col-lg-2")
+            new ColorInput("fillColor", Color(conClassCustomization.fillColor), ""), Some("col-lg-2"), Some("col-lg-10")
         )
         val radius = new InputControl(
             "Radius:",
-            new NumericInput("radius", conClassCustomization.radius, "")   , Some("col-lg-2")
+            new NumericInput("radius", conClassCustomization.radius, "")   , Some("col-lg-2"), Some("col-lg-10")
         )
         val glyph = new InputControl(
             "Glyph:",
-            new GlyphInput("glyph", Some(conClassCustomization.glyph), "")  , Some("col-lg-2")
+            new GlyphInput("glyph", Some(conClassCustomization.glyph), "")  , Some("col-lg-2"), Some("col-lg-10")
         )
 
         conditionValueField.delayedChanged += { _ =>
@@ -667,7 +667,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
                     conClassCustomization.labels != null
                         && conClassCustomization.labels != ""
                         && !conClassCustomization.labelsSplitted(0).userDefined, "UseValue"),
-                None
+                None, None
             )
         if(conClassCustomization.labels != null && conClassCustomization.labels != ""
             && !conClassCustomization.labelsSplitted(0).userDefined) {
@@ -703,15 +703,15 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
     def renderGroupCustomizationViews(classCustomization: ClassCustomization) {
         val fillColor = new InputControl(
             "Fill color:",
-            new ColorInput("fillColor", Color(classCustomization.fillColor), ""), Some("col-lg-2")
+            new ColorInput("fillColor", Color(classCustomization.fillColor), ""), Some("col-lg-2"), Some("col-lg-10")
         )
         val radius = new InputControl(
             "Radius:",
-            new NumericInput("radius", classCustomization.radius, "")   , Some("col-lg-2")
+            new NumericInput("radius", classCustomization.radius, "")   , Some("col-lg-2"), Some("col-lg-10")
         )
         val glyph = new InputControl(
             "Glyph:",
-            new GlyphInput("glyph", Some(classCustomization.glyph), "")  , Some("col-lg-2")
+            new GlyphInput("glyph", Some(classCustomization.glyph), "")  , Some("col-lg-2"), Some("col-lg-10")
         )
 
         val labels = new InputControl(
@@ -720,7 +720,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
                 if(classCustomization.labels == null || classCustomization.labels == "") {
                     List(new LabelItem("Group name", false, false))
                 } else { classCustomization.labelsSplitted }),
-            Some("col-lg-2")
+            Some("col-lg-2"), Some("col-lg-10")
         )
 
         fillColor.delayedChanged += { _ =>
@@ -756,11 +756,11 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
     def renderPropertyCustomizationViews(propertyCustomization: PropertyCustomization) {
         val strokeColor = new InputControl(
             "Stroke color:",
-            new ColorInput("strokeColor", Color(propertyCustomization.strokeColor), ""), Some("col-lg-2")
+            new ColorInput("strokeColor", Color(propertyCustomization.strokeColor), ""), Some("col-lg-2"), Some("col-lg-10")
         )
         val strokeWidth = new InputControl(
             "Stroke width:",
-            new NumericInput("strokeWidth", propertyCustomization.strokeWidth, ""), Some("col-lg-2")
+            new NumericInput("strokeWidth", propertyCustomization.strokeWidth, ""), Some("col-lg-2"), Some("col-lg-10")
         )
 
         val classCustomization = propertiesContainer

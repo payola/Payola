@@ -33,6 +33,16 @@ class TextInput(name: String, initialValue: String, title: String = "", cssClass
     }
 }
 
+class Hidden(name: String, initialValue: String, title: String = "", cssClass: String = "")
+    extends Input[html.elements.TextInput, String]("text", name, initialValue, title, cssClass)
+{
+    def value = htmlElement.value
+
+    def updateValue(newValue: String) {
+        htmlElement.value = newValue
+    }
+}
+
 class FileInput(name: String, title: String = "", cssClass: String = "")
     extends Input[html.elements.Input, String]("file", name, "", title, cssClass)
 {

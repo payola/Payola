@@ -55,14 +55,14 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
         }.getOrElse("")
 
         val input = new TextArea(param.id, initValue, "", "tiny datacube")
-        val control = new InputControl[TextArea]("Transformation query", input, None)
+        val control = new InputControl[TextArea]("Transformation query", input, None, None)
         control.delayedChanged += { e =>
             parameterValueChanged.triggerDirectly(
                 new ParameterValue(getId, param.id, param.name, input.value, control))
         }
 
         val limitInput = new NumericInput("limitCount", 20, "", "")
-        val limitControl = new InputControl[NumericInput]("Preview size", limitInput, None)
+        val limitControl = new InputControl[NumericInput]("Preview size", limitInput, None, None)
 
         val button = new Button(new Text("Choose pattern ..."), "datacube", new Icon(Icon.hand_up))
         button.mouseClicked += {

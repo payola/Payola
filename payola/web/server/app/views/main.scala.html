@@ -15,6 +15,38 @@
         <link rel="stylesheet" href="http://js.arcgis.com/3.8/js/dojo/dijit/themes/tundra/tundra.css">
         <link rel="stylesheet" href="http://js.arcgis.com/3.8/js/esri/css/esri.css">
 
+        <style>
+        text {
+        font-size: 11px;
+        pointer-events: none;
+        }
+
+        text.parent {
+        fill: #1f77b4;
+        }
+
+        circle {
+        fill: SandyBrown;
+        stroke: #999;
+        pointer-events: all;
+        }
+
+        circle.parent {
+        fill: #1f77b4;
+        fill-opacity: .1;
+        stroke: steelblue;
+        }
+
+        circle.parent:hover {
+        stroke: #ff7f0e;
+        stroke-width: .5px;
+        }
+
+        circle.child {
+        pointer-events: none;
+        }
+        </style>
+
         <title>@title</title>
         <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/jquery.min.js")"></script>
         <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/jquery-ui.min.js")"></script>
@@ -31,9 +63,9 @@
         <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/sigma/sigma.fisheye.js")"></script>
         <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/sigma/sigma.forceatlas2.js")"></script>
         <script type="text/javascript" src="@routes.Assets.at("javascripts/common.js")"></script>
+        <script type="text/javascript" src="@routes.Assets.at("javascripts/d3/d3.js")"></script>
+        <!--<script src="http://mbostock.github.io/d3/talk/20111116/d3/d3.layout.js" charset="utf-8"></script>-->
         <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCesJn7XyQUzK78CRLwJusuLUR1-Wy8fVc&sensor=false&libraries=visualization"></script>
-
-
 
         <script>
             // helpful for understanding dojoConfig.packages vs. dojoConfig.paths:

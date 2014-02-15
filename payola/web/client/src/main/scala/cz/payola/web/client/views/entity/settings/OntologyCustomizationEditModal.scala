@@ -28,7 +28,7 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
     val ontologyCustomizationName = new InputControl(
         "Name:",
         new TextInput("name", ontologyCustomization.name, "", "col-lg-6"),
-        Some("col-lg-2")
+        Some("col-lg-2"), Some("col-lg-10")
     )
 
     val shareButtonViewSpace = new Span(Nil)
@@ -90,15 +90,15 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
     private def renderClassCustomizationViews(classCustomization: ClassCustomization) {
         val fillColor = new InputControl(
             "Fill color:",
-            new ColorInput("fillColor", Color(classCustomization.fillColor), ""), Some("col-lg-2")
+            new ColorInput("fillColor", Color(classCustomization.fillColor), ""), Some("col-lg-2"), Some("col-lg-10")
         )
         val radius = new InputControl(
             "Radius:",
-            new NumericInput("radius", classCustomization.radius, "")   , Some("col-lg-2")
+            new NumericInput("radius", classCustomization.radius, "")   , Some("col-lg-2"), Some("col-lg-10")
         )
         val glyph = new InputControl(
             "Glyph:",
-            new GlyphInput("glyph", Some(classCustomization.glyph), "")  , Some("col-lg-2")
+            new GlyphInput("glyph", Some(classCustomization.glyph), "")  , Some("col-lg-2"), Some("col-lg-10")
         )
 
         fillColor.delayedChanged += { _ =>
@@ -126,11 +126,11 @@ class OntologyCustomizationEditModal(ontologyCustomization: OntologyCustomizatio
 
         val strokeColor = new InputControl(
             "Stroke color:",
-            new ColorInput("strokeColor", Color(propertyCustomization.strokeColor), ""), Some("col-lg-2")
+            new ColorInput("strokeColor", Color(propertyCustomization.strokeColor), ""), Some("col-lg-2"), Some("col-lg-10")
         )
         val strokeWidth = new InputControl(
             "Stroke width:",
-            new NumericInput("strokeWidth", propertyCustomization.strokeWidth, ""), Some("col-lg-2")
+            new NumericInput("strokeWidth", propertyCustomization.strokeWidth, ""), Some("col-lg-2"), Some("col-lg-10")
         )
 
         strokeColor.delayedChanged += { _ =>
