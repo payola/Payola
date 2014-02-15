@@ -129,7 +129,7 @@ class GroupingMapFacet(typeUri: String = "http://www.w3.org/2000/01/rdf-schema#t
 
             colorGroups.put(k, colorInput)
 
-            val span = new Div(List(colorInput, cbox, new Text(k)))
+            val span = new Div(List(colorInput, cbox, new Text(k + (" ("+groups.get(k).size+") "))))
 
             cbox.changed += { e =>
                 val add = if(e.target.value){ 1 }else{ -1 }
