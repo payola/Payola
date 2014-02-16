@@ -8,5 +8,5 @@ class DrawingProperties extends sigma.DrawingProperties{
     //val defaultLabelBGColor = "#ffffff"
     //val defaultLabelHoverColor = "#000000"
     val labelThreshold = 6
-    val defaultEdgeType = "curve"
+    //val defaultEdgeType = "curve"
 }

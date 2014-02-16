@@ -87,7 +87,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
             setEvaluationId(startEvaluationId)
         }
         plugins.find{ plugin =>
-            evaluationId.isEmpty && noramlizeClassName(plugin.getClass.getName) == UriHashTools.getUriParameter("viewPlugin")
+            evaluationId.isEmpty && normalizeClassName(plugin.getClass.getName) == UriHashTools.getUriParameter("viewPlugin")
         }.getOrElse(new EmptyPluginView())
     }
 
@@ -96,7 +96,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
      */
     private val pluginSpace = new Div(Nil, "plugin-space")
 
-    def noramlizeClassName(x: String) = x.replaceAll(".", "_")
+    def normalizeClassName(x: String) = x.replaceAll(".", "_")
 
     /**
      * Drop down button for selection of graph visualization.
@@ -111,7 +111,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
         } ++ plugins.takeRight(1).map { googleMapPlugin =>
             val pluginAnchor = new Anchor(List(new Text(googleMapPlugin.name))).setAttribute(
                 "title", "Available only in analysis mode").setAttribute("style", "color: black; background-color: white;")
-            val listItem = new ListItem(List(pluginAnchor), noramlizeClassName(googleMapPlugin.getClass.getName))
+            val listItem = new ListItem(List(pluginAnchor), normalizeClassName(googleMapPlugin.getClass.getName))
             listItem
         }
     )
@@ -383,17 +383,17 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
                             currentSerializedGraph = None
                             update(None, currentCustomization, None)
                     }
-                    currentPlugin.render(pluginSpace.htmlElement)
                     languagesButton.render(toolbar.htmlElement)
                     currentPlugin.renderControls(toolbar.htmlElement)
+                    currentPlugin.render(pluginSpace.htmlElement)
                 })
             } else {
                 //this is correct, since googleMap (which uses serialized graph) plugin is not available in browsing mode
-                update(currentGraph, currentCustomization, None)
                 currentSerializedGraph = None
-                currentPlugin.render(pluginSpace.htmlElement)
                 languagesButton.render(toolbar.htmlElement)
                 currentPlugin.renderControls(toolbar.htmlElement)
+                currentPlugin.render(pluginSpace.htmlElement)
+                update(currentGraph, currentCustomization, None)
                 currentPlugin.drawGraph()
             }
         }
@@ -431,8 +431,8 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
 
             plugins.foreach{ plugin =>
                 plugin.isAvailable(availableTransformations, evaluationId.get, { () =>
-                    if(noramlizeClassName(plugin.getClass.getName) == preferredPlugin) {
-                        autoSwitchPlugin(noramlizeClassName(plugin.getClass.getName))
+                    if(normalizeClassName(plugin.getClass.getName) == preferredPlugin) {
+                        autoSwitchPlugin(normalizeClassName(plugin.getClass.getName))
                     }
                 }, { () =>
                     pluginChangeButton.items.find(_.subViews(0).asInstanceOf[Anchor].subViews(0).asInstanceOf[Text].text == plugin.name).map(
@@ -446,11 +446,11 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
 
     private def createPluginSwitchButtonItem(plugin: PluginView[_]): ListItem = {
         val pluginAnchor = new Anchor(List(new Text(plugin.name)))
-        val listItem = new ListItem(List(pluginAnchor), noramlizeClassName(plugin.getClass.getName))
+        val listItem = new ListItem(List(pluginAnchor), normalizeClassName(plugin.getClass.getName))
         pluginAnchor.mouseClicked += { e =>
             pluginChangeButton.setActiveItem(listItem)
             changePlugin(plugin)
-            UriHashTools.setUriParameter("viewPlugin", noramlizeClassName(plugin.getClass.getName))
+            UriHashTools.setUriParameter("viewPlugin", normalizeClassName(plugin.getClass.getName))
             false
         }
         listItem

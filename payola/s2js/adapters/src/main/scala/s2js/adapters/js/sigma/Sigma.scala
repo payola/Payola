@@ -7,7 +7,7 @@ class Sigma {
 
     @native def kill()
 
-    @native def getID: String
+    @native var id: String = ""
 
     // Config:
     /*def configProperties(a1, a2): {
@@ -65,11 +65,10 @@ class Sigma {
 
     @native def resize(w: Int, h: Int): Sigma
 
-    @native def draw(): Sigma
-
-    @native def draw(nodes: Array[Node], edges: Array[Edge], labels: Array[String], safe: Boolean): Sigma
-
-    @native def refresh: Sigma
+    /**
+     * Redraws the sigma plugin.
+     */
+    @native def refresh(): Sigma
 
     // Tasks methods:
     /*def addGenerator(id, task, condition): Sigma = null {
