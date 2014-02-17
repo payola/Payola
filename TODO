@@ -1,0 +1,2 @@
+- RPC promises in order to serve more requests at once
+- migrate as many visualizers to RDF/JSON as possible
