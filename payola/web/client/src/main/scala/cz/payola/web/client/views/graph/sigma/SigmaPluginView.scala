@@ -37,7 +37,7 @@ abstract class SigmaPluginView(name: String, prefixApplier: Option[PrefixApplier
 
     private var parentElement: Option[html.Element] = None
 
-    protected val animationStartStopButton = new Button(new Text("Start"), "pull-right", new Icon(Icon.refresh)).setAttribute("style", "margin: 0 5px;")
+    protected val animationStartStopButton = new Button(new Text("Start positioning"), "pull-right", new Icon(Icon.refresh)).setAttribute("style", "margin: 0 5px;")
 
     def createSubViews = List(sigmaPluginWrapper)
 

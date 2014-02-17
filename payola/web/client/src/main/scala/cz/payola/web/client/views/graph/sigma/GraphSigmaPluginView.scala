@@ -131,7 +131,8 @@ class GraphSigmaPluginView(prefixApplier: Option[PrefixApplier]) extends SigmaPl
     @javascript("""
           if(self.popUp && self.popUp.htmlElement.className.indexOf("visible") == -1) {
             self.popUp.htmlElement.className += " visible";
-            $(self.popUp.htmlElement).draggable();
+            //TODO uncomment after jQuery bug is resolved - scrollbar and resizable corner can not be pressed in FF and in IE mouse cursor sticks to scrollbar after scrolling
+            //$(self.popUp.htmlElement).draggable();
           }""")
     private def showFixedVertexInfo(element: Unit) {}
 
