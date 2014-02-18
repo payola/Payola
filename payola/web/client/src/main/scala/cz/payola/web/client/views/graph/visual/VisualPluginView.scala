@@ -597,11 +597,8 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
      * Description of mouse-released event.
      */
     private def onMouseUp(eventArgs: MouseEventArgs[Canvas]) {
-        val selectedVertices = if (graphView.isDefined) {
-            graphView.get.getAllVertices.filter(_.isSelected)
-        } else {
-            List()
-        }
+        val selectedVertices =
+            graphView.map{gv => gv.getAllVertices.filter(_.isSelected)}.getOrElse(List())
 
         if (!mouseIsDragging && !mousePressedVertex && !eventArgs.shiftKey) {
             //deselect all
