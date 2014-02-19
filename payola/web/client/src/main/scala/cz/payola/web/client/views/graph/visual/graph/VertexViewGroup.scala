@@ -15,9 +15,24 @@ class VertexViewGroup(position: Point2D, prefixApplier: Option[PrefixApplier])
 
     private var containedElements = ListBuffer[VertexViewElement]()
 
+    private var containedElementsLabels = ListBuffer[(VertexViewElement, String)]()
+
     private var groupName: Option[String] = None
 
     def vertexViews = containedElements
+
+    def vertexViewsLabels: ListBuffer[(VertexViewElement, String)] = if(containedElementsLabels.isEmpty) {
+        containedElements.map{ element =>
+            element match {
+                case view: VertexView =>
+                    ((element, prefixApplier.map(_.applyPrefix(view.vertexModel.toString())).getOrElse(view.vertexModel.toString())))
+                case _ =>
+                    ((element, element.toString()))
+            }
+        }
+    } else {
+        containedElementsLabels
+    }
 
     def getAllVertices: List[Vertex] = {
         val vertices = ListBuffer[Vertex]()
@@ -27,6 +42,19 @@ class VertexViewGroup(position: Point2D, prefixApplier: Option[PrefixApplier])
                     vertices ++= group.getAllVertices
                 case view: VertexView =>
                     vertices += view.vertexModel
+            }
+        }
+        vertices.toList
+    }
+
+    def getAllVertexViews: List[VertexView] = {
+        val vertices = ListBuffer[VertexView]()
+        vertexViews.foreach {
+            _ match {
+                case group: VertexViewGroup =>
+                    vertices ++= group.getAllVertexViews
+                case view: VertexView =>
+                    vertices += view
             }
         }
         vertices.toList
@@ -237,9 +265,89 @@ class VertexViewGroup(position: Point2D, prefixApplier: Option[PrefixApplier])
         }
     }
 
-    def setConfiguration(newCustomization: Option[DefinedCustomization]) {
+    override def setConfiguration(newCustomization: Option[DefinedCustomization]) {
         val name = getName
+        //apply customization labels to group content
+        containedElementsLabels = if(newCustomization.isDefined) {
+            containedElements.map{ element =>
+                element match {
+                    case vertexView: VertexView =>
+                        val uri = vertexView.vertexModel.toString()
+                        newCustomization.get match {
+                            case uCust: UserCustomization => {
+                                val custOpt = uCust.classCustomizations.find{uc => uri == uc.getUri}
+
+                                val valuesSetByCondition = applyConditionalClassCustomizationsForGroup(
+                                    vertexView, uCust.classCustomizations.filter(_.isConditionalCustomization), uri)
+
+                                if(valuesSetByCondition.isDefined) {
+                                    ((vertexView, prefixApplier.map{_.applyPrefix(valuesSetByCondition.get)}.getOrElse(valuesSetByCondition.get)))
+                                } else if(custOpt.isDefined && custOpt.get.labels != null && custOpt.get.labels != "") {
+                                    val processedLabel = processLabels(
+                                        custOpt.get.labelsSplitted, uri, vertexView.getLiteralVertices(), prefixApplier).head
+                                    ((vertexView, prefixApplier.map{_.applyPrefix(processedLabel)}.getOrElse(processedLabel)))
+                                } else if(valuesSetByCondition.isEmpty) {
+                                    ((vertexView, prefixApplier.map{_.applyPrefix(uri)}.getOrElse(uri)))
+                                } else {
+                                    ((vertexView, prefixApplier.map{_.applyPrefix(uri)}.getOrElse(uri)))
+                                }
+                            }
+                            case oc: OntologyCustomization => {
+                                ((vertexView, prefixApplier.map{_.applyPrefix(uri)}.getOrElse(uri)))
+                            }
+                        }
+                    case _ =>
+                        ((element, element.toString()))
+                }
+            }
+        } else { new ListBuffer[(VertexViewElement, String)]() }
         setVisualConfiguration(newCustomization, name, name, () => List[(String, Seq[String])]())
+    }
+
+    private def applyConditionalClassCustomizationsForGroup(vertexView: VertexView, customizations: Seq[ClassCustomization],
+        uniId: String): Option[String] = {
+
+        var valuesSet: Option[String] = None
+        customizations.foreach{ custo =>
+            if(vertexView.edges.exists( e => e.edgeModel.uri == custo.getUri && e.originView.isEqual(vertexView)
+                && (custo.conditionalValue == null || custo.conditionalValue == ""
+                || custo.conditionalValue == e.destinationView.getFirstContainedVertex().toString))) {
+
+                if(custo.labels != "") {
+                    val splittedLabels = custo.labelsSplitted
+                    if(splittedLabels(0).userDefined) { //use the definition
+                        valuesSet = Some(splittedLabels(0).value)
+                    } else { //use the property value
+                        val edgeOpt = vertexView.edges.find(_.edgeModel.uri == custo.getUri)
+                        edgeOpt.foreach{ edge =>
+                            valuesSet = Some(edge.destinationView.getFirstContainedVertex().toString())
+                        }
+                    }
+                }
+            }
+        }
+
+        valuesSet
+    }
+
+    private def processLabels(labels: List[LabelItem], modelObjectUri: String, literals: List[(String, Seq[String])],
+        prefixApplier: Option[PrefixApplier]): List[String] = {
+
+        val acceptedLabels = labels.filter{ label =>
+            label.accepted && (label.userDefined || label.value == "uri" || label.value == "groupName" || literals.exists{
+                _.toString().contains(label.value.substring(2))
+            })
+        }
+
+        acceptedLabels.map { label =>
+            if(label.userDefined) {
+                label.value
+            } else if(label.value == "uri" || label.value == "groupName") {
+                prefixApplier.map{_.applyPrefix(modelObjectUri)}.getOrElse(modelObjectUri)
+            } else {
+                literals.find{ literal => labels.contains(literal._1.substring(2)) }.get.toString
+            }
+        }
     }
 
     override def toString: String = {
@@ -255,7 +363,7 @@ class VertexViewGroup(position: Point2D, prefixApplier: Option[PrefixApplier])
                 vertexViews.exists{
                     _ match {
                         case thisInnerGroup: VertexViewGroup =>
-                            thisInnerGroup.isEqual(thatGroup) || thisInnerGroup.contains(thatGroup)
+                            thisInnerGroup.contains(thatGroup) || thisInnerGroup.isEqual(thatGroup)
                     }
                 }
             case thatVertex: VertexView =>

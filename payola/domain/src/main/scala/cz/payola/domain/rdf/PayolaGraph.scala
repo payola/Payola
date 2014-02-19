@@ -75,12 +75,12 @@ object PayolaGraph
             }
         }
 
-        new PayolaGraph(literalVertices.toList ++ identifiedVertices.values, edges.toList, None)
+        new PayolaGraph(literalVertices.toList ++ identifiedVertices.values, edges.toList, Some(model.size()))
     }
 }
 
-class PayolaGraph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge], resultCount: Option[Int])
-    extends Graph(vertices, edges, resultCount)
+class PayolaGraph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge], _resultCount: Option[Long])
+    extends Graph(vertices, edges, _resultCount)
 {
     def +(otherGraph: Graph): PayolaGraph = {
         val model = getModel

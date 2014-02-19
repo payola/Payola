@@ -220,7 +220,10 @@ object Model
                 customizations.ontologyCustomizations.ownedCustomizations.foreach { owned =>
                     val c = mutable.ListBuffer.empty[OntologyCustomization]
                     owned.foreach(c += _)
-                    _ownedOntologyCustomizations = Some(c)
+                    if(!c.isEmpty)
+                        _ownedOntologyCustomizations = Some(c)
+                    else
+                        _ownedOntologyCustomizations = None
                 }
                 _othersOntologyCustomizations = customizations.ontologyCustomizations.othersCustomizations
                 _ontologyCustomizationsAreLoaded = true
@@ -228,7 +231,10 @@ object Model
                 customizations.userCustomizations.ownedCustomizations.foreach { owned =>
                     val c = mutable.ListBuffer.empty[UserCustomization]
                     owned.foreach(c += _)
-                    _ownedUserCustomizations = Some(c)
+                    if(!c.isEmpty)
+                        _ownedUserCustomizations = Some(c)
+                    else
+                        _ownedUserCustomizations = None
                 }
                 _othersUserCustomizations = customizations.userCustomizations.othersCustomizations
                 _userCustomizationsAreLoaded = true
@@ -238,10 +244,10 @@ object Model
                     new UserCustomizationsByOwnership(_ownedUserCustomizations, _othersUserCustomizations))
 
             }(errorCallback)
+        } else {
+            successCallback(
+                new OntologyCustomizationsByOwnership(_ownedOntologyCustomizations, _othersOntologyCustomizations),
+                new UserCustomizationsByOwnership(_ownedUserCustomizations, _othersUserCustomizations))
         }
-
-        successCallback(
-            new OntologyCustomizationsByOwnership(_ownedOntologyCustomizations, _othersOntologyCustomizations),
-            new UserCustomizationsByOwnership(_ownedUserCustomizations, _othersUserCustomizations))
     }
 }

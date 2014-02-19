@@ -51,7 +51,7 @@ class JenaGraph(model: Model)
 
     override val edges = toPayolaGraph().edges
     override val vertices = toPayolaGraph().vertices
-    override val resultsCount = toPayolaGraph().resultsCount
+    override val resultsCount = Some(model.size)
 
     def +(otherGraph: Graph): JenaGraph = {
         val model = getModel

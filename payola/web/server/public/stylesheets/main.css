@@ -167,6 +167,16 @@ input[type="checkbox"].active:after {
     background-position: 0px !important;
 }
 
+.icon-play-back {
+    background-image: url(play-back.png) !important;
+    background-position: 0px !important;
+}
+
+.icon-play-back.icon-white {
+    background-image: url(play-back-white.png) !important;
+    background-position: 0px !important;
+}
+
 .icon-group {
     background-image: url(group.png) !important;
     background-position: 0px !important;
@@ -274,6 +284,7 @@ input[type="checkbox"].active:after {
 }
 
 .plugin-message.large {
+    height: 50px;
     padding-top: 150px;
     font-size: 32pt;
     color: #333;

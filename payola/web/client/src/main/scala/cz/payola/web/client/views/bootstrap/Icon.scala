@@ -160,6 +160,8 @@ object Icon
 
     val play = "play"
 
+    val play_backward = "play-back"
+
     val pause = "pause"
 
     val stop = "stop"

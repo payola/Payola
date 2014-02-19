@@ -16,34 +16,32 @@ import form.fields._
 class VertexGroupInfoTable(group: VertexViewGroup, position: Point2D, prefixApplier: Option[PrefixApplier]) extends InfoTable
 {
     var removeVertexFromGroup = new SimpleUnitEvent[VertexViewElement]
+    var removeAllFromGroup = new SimpleUnitEvent[List[VertexViewElement]]
     val groupNameField = new TextInput("GroupName", group.getName)
 
     def createSubViews: Seq[client.View] = {
         val buffer = new ArrayBuffer[ElementView[_]]()
 
-        group.vertexViews.foreach { vertex =>
-            val label = vertex match {
-                case view: VertexView => view.vertexModel match {
-                    case idVertex: IdentifiedVertex =>
-                        prefixApplier.map(_.applyPrefix(idVertex.uri)).getOrElse(vertex.toString())
-                    case _ =>
-                        vertex.toString()
-                }
-                case _ =>
-                    vertex.toString()
-
-            }
-            val removeVertexIcon = new Anchor(List(new Icon(Icon.remove)))
+        group.vertexViewsLabels.foreach { vertexTuple =>
+            val removeVertexIcon = new Anchor(List(new Icon(Icon.share)), "#", "", "Unpack "+vertexTuple._2)
             removeVertexIcon.mouseClicked += { e =>
-                removeVertexFromGroup.triggerDirectly(vertex)
+                removeVertexFromGroup.triggerDirectly(vertexTuple._1)
                 false
             }
 
-            buffer += new DefinitionTerm(List(removeVertexIcon, new Text(label)))
+            buffer += new DefinitionTerm(List(removeVertexIcon, new Text(vertexTuple._2)))
+        }
+
+        val removeAll = new Anchor(List(new Icon(Icon.share_alt), new Text("Unpack all")))
+        removeAll.mouseClicked += { e =>
+
+            removeAllFromGroup.triggerDirectly(group.vertexViews.clone.toList)
+            false
         }
 
         val popoverTitle =
-            new Heading(List(new Text("Group: "), groupNameField), 3, "popover-title")
+            new Heading(List(new Text("Group: "), groupNameField,
+                new Heading(List(new Text("count: "+group.vertexViews.size), removeAll), 5)), 3, "popover-title")
 
         val popoverContent = if(!buffer.isEmpty) {
             new Div(List( new DefinitionList(buffer, "unstyled well")), "popover-content")

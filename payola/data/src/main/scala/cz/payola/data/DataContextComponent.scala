@@ -339,6 +339,8 @@ trait DataContextComponent
         def deleteResult(evaluationId: String, analysisId: String)
 
         def updateTimestamp(evaluationId: String)
+
+        def exists(evaluationId: String): Boolean
     }
 
     /**

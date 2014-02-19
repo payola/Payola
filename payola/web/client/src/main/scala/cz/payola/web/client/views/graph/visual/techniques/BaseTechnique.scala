@@ -11,8 +11,6 @@ import cz.payola.web.client.models.PrefixApplier
 
 abstract class BaseTechnique(name: String, prefixApplier: Option[PrefixApplier]) extends VisualPluginView(name, prefixApplier)
 {
-    def supportedDataFormat: String = "PayolaObj"
-
     private val treeVerticesDistance = 100
 
     private val circleLevelsDistance = 150
@@ -26,7 +24,6 @@ abstract class BaseTechnique(name: String, prefixApplier: Option[PrefixApplier])
 
     override def updateGraph(graph: Option[Graph], contractLiterals: Boolean = true) {
         super.updateGraph(graph, contractLiterals)
-        graphView.foreach(performPositioning(_))
     }
 
     override def drawGraph() {
@@ -105,6 +102,7 @@ abstract class BaseTechnique(name: String, prefixApplier: Option[PrefixApplier])
         var level = ListBuffer[VertexViewElement]()
         var levelNext = ListBuffer[VertexViewElement]()
         var alreadyOut = ListBuffer[VertexViewElement]()
+        val availableGroups = vertexElements.filter(_.isInstanceOf[VertexViewGroup]).map(_.asInstanceOf[VertexViewGroup])
 
         level += vertexElements.head
 
@@ -113,17 +111,19 @@ abstract class BaseTechnique(name: String, prefixApplier: Option[PrefixApplier])
 
             level.foreach { l1: VertexViewElement =>
                 l1.edges.foreach { e: EdgeView =>
-                    if (e.originView.isEqual(l1)) {
-                        if (!existsVertex(e.destinationView, alreadyOut) &&
-                            !existsVertex(e.destinationView, levelNext) && !existsVertex(e.destinationView, level)) {
+                    if (e.originView.represents(l1.getFirstContainedVertex)) {
+                        val toAdd = availableGroups.find(_.contains(e.destinationView)).getOrElse(e.destinationView)
+                        if (!existsVertex(toAdd, alreadyOut) &&
+                            !existsVertex(toAdd, levelNext) && !existsVertex(toAdd, level)) {
 
-                            levelNext += e.destinationView
+                            levelNext += toAdd
                         }
                     } else {
-                        if (!existsVertex(e.originView, alreadyOut) &&
-                            !existsVertex(e.originView, levelNext) && !existsVertex(e.originView, level)) {
+                        val toAdd = availableGroups.find(_.contains(e.originView)).getOrElse(e.originView)
+                        if (!existsVertex(toAdd, alreadyOut) &&
+                            !existsVertex(toAdd, levelNext) && !existsVertex(toAdd, level)) {
 
-                            levelNext += e.originView
+                            levelNext += toAdd
                         }
                     }
                 }
@@ -185,6 +185,7 @@ abstract class BaseTechnique(name: String, prefixApplier: Option[PrefixApplier])
         var level2 = ListBuffer[(VertexViewElement, Point2D)]()
         var alreadyOut = ListBuffer[VertexViewElement]()
         var levelNum = 0
+        val availableGroups = vViews.filter(_.isInstanceOf[VertexViewGroup]).map(_.asInstanceOf[VertexViewGroup])
 
         val toMove = ListBuffer[(VertexViewElement, Point2D)]()
 
@@ -199,19 +200,21 @@ abstract class BaseTechnique(name: String, prefixApplier: Option[PrefixApplier])
             //get vertices in next level
             level1.foreach { l1 =>
                 l1._1.edges.foreach { e: EdgeView =>
-                    if (e.originView.isEqual(l1._1)) {
-                        if (!existsVertex(e.destinationView, alreadyOut)
-                            && !existsVertexStruct(e.destinationView, level2) &&
-                            !existsVertexStruct(e.destinationView, level1)) {
+                    if (e.originView.represents(l1._1.getFirstContainedVertex)) {
+                        val toAdd = availableGroups.find(_.contains(e.destinationView)).getOrElse(e.destinationView)
+                        if (!existsVertex(toAdd, alreadyOut)
+                            && !existsVertexStruct(toAdd, level2) &&
+                            !existsVertexStruct(toAdd, level1)) {
 
-                            level2 += ((e.destinationView, e.destinationView.position))
+                            level2 += ((toAdd, toAdd.position))
                         }
                     } else {
-                        if (!existsVertex(e.originView, alreadyOut)
-                            && !existsVertexStruct(e.originView, level2) &&
-                            !existsVertexStruct(e.originView, level1)) {
+                        val toAdd = availableGroups.find(_.contains(e.originView)).getOrElse(e.originView)
+                        if (!existsVertex(toAdd, alreadyOut)
+                            && !existsVertexStruct(toAdd, level2) &&
+                            !existsVertexStruct(toAdd, level1)) {
 
-                            level2 += ((e.originView, e.originView.position))
+                            level2 += ((toAdd, toAdd.position))
                         }
                     }
                 }
@@ -287,7 +290,7 @@ abstract class BaseTechnique(name: String, prefixApplier: Option[PrefixApplier])
      * @return true if the vertex is present in the container
      */
     private def existsVertex(whatToCheck: VertexViewElement, whereToCheck: ListBuffer[VertexViewElement]): Boolean = {
-        whereToCheck.exists(element => element.isEqual(whatToCheck))
+        whereToCheck.exists(element => element.represents(whatToCheck.getFirstContainedVertex))
     }
 
     /**
@@ -297,6 +300,6 @@ abstract class BaseTechnique(name: String, prefixApplier: Option[PrefixApplier])
      * @return true if the vertex is present in the container
      */
     private def existsVertexStruct(whatToCheck: VertexViewElement, whereToCheck: ListBuffer[(VertexViewElement, Point2D)]): Boolean = {
-        whereToCheck.exists(element => element._1.isEqual(whatToCheck))
+        whereToCheck.exists(element => element._1.represents(whatToCheck.getFirstContainedVertex))
     }
 }

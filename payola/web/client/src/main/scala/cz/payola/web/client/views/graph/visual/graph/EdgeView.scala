@@ -43,6 +43,11 @@ class EdgeView(val edgeModel: Edge, private var _originView: VertexViewElement, 
         _originView.isSelected || _destinationView.isSelected
     }
 
+    def forceRedirectOrigin(redirection: VertexViewElement) {
+        originBackup = None
+        _originView = redirection
+    }
+
     def redirectOrigin(redirection: Option[VertexViewElement]) {
         if (redirection.isDefined && originBackup.isDefined) {
             _originView = redirection.get
@@ -53,6 +58,11 @@ class EdgeView(val edgeModel: Edge, private var _originView: VertexViewElement, 
             _originView = originBackup.get
             originBackup = None
         }
+    }
+
+    def forceRedirectDestination(redirection: VertexViewElement) {
+        destinationBackup = None
+        _destinationView = redirection
     }
 
     def redirectDestination(redirection: Option[VertexViewElement]) {

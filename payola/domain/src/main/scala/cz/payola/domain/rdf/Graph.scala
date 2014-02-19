@@ -12,7 +12,7 @@ import scala.collection.immutable
 import cz.payola.domain.DomainException
 
 object Graph
-{
+{    
     def rdf2JenaDataset(representation: RdfRepresentation.Type, data: String): com.hp.hpl.jena.query.Dataset = {
         try {
             val dataInputStream = new ByteArrayInputStream(data.getBytes("UTF-8"))
@@ -21,7 +21,7 @@ object Graph
             val dataSet = DatasetFactory.createMem()
             RDFDataMgr.read(dataSet, dataInputStream, jenaLanguage)
             dataSet
-        }catch {
+        } catch {
             case e: org.apache.jena.riot.RiotException => throw new IllegalArgumentException("Query failed, returned non-XML data: "+data.substring(0, 500))
             case e: Exception => throw new IllegalArgumentException(e.getMessage)
         }
@@ -42,11 +42,10 @@ object Graph
             case RdfRepresentation.Trig => Lang.TRIG
         }
     }
-
 }
 
-abstract class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge], resultCount: Option[Int])
-    extends cz.payola.common.rdf.Graph(vertices, edges, resultCount)
+abstract class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge], _resultCount: Option[Long])
+    extends cz.payola.common.rdf.Graph(vertices, edges, _resultCount)
 {
     /**
      * Creates a new graph with contents of this graph and the specified other graph.
@@ -55,6 +54,21 @@ abstract class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge]
      */
     def +(otherGraph: Graph): Graph
 
+    /**
+     * Creates a Jena model out of the graph. The model has to be closed using the 'close' method, after working with
+     * it is done.
+     * @return Model representing this graph.
+     */
+    private[rdf] def getModel : Model
+
+    protected def makeGraph(representation: RdfRepresentation.Type, rdf: String): Graph
+
+    /**
+     * Processes a query execution corresponding to a SPARQL construct query.
+     * @param execution The query execution to process.
+     * @return A graph containing the result of the query.
+     */
+    protected def processConstructQueryExecution(execution: QueryExecution): Graph
 
     /**
      * Returns a string representation of the graph - either in RDF/XML or TTL.
@@ -95,13 +109,6 @@ abstract class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge]
         }
     }
 
-    /**
-     * Creates a Jena model out of the graph. The model has to be closed using the 'close' method, after working with
-     * it is done.
-     * @return Model representing this graph.
-     */
-    private[rdf] def getModel : Model
-
 
     /**
      * Processes a query execution corresponding to a SPARQL select query.
@@ -114,14 +121,4 @@ abstract class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge]
         ResultSetFormatter.outputAsRDF(output, "", results)
         makeGraph(RdfRepresentation.RdfXml, new String(output.toByteArray))
     }
-
-    protected def makeGraph(representation: RdfRepresentation.Type, rdf: String): Graph
-
-    /**
-     * Processes a query execution corresponding to a SPARQL construct query.
-     * @param execution The query execution to process.
-     * @return A graph containing the result of the query.
-     */
-    protected def processConstructQueryExecution(execution: QueryExecution): Graph
-
 }

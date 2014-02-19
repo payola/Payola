@@ -56,7 +56,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
     private var groupCustomizations = userCustomization.classCustomizations.filter(e =>
         e.isGroupCustomization).map{ userClassCust => userClassCust.asInstanceOf[ClassCustomization] }
 
-    private def propertiesContainer = userCustomization.classCustomizations.find(_.uri == "properties")
+    private var propertiesContainer = userCustomization.classCustomizations.find(_.uri == "properties").map(_.asInstanceOf[ClassCustomization])
     
     private var propertyCustomizations = if(propertiesContainer.isDefined) {
         propertiesContainer.get.propertyCustomizations
@@ -276,10 +276,12 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
 
             new Table(List(new TableRow(List(
                 new TableCell(List(
-                    new Table(List(new TableRow(List(new TableCell(List(listDiv)))),
+                    new Table(List(new TableRow(List(new TableCell(List(new Text("Node, edge, group customizations:"))))),
+                        new TableRow(List(new TableCell(List(listDiv)))),
+                        new TableRow(List(new TableCell(List(new Text("Edge Based node customizations:"))))),
                         new TableRow(List(new TableCell(List(conditionalClassListDiv))))),
                         "row").setAttribute("style", "height: 100%;"))
-                ).setAttribute("style", "vertical-align: top;"),
+                ).setAttribute("style", "vertical-align: top; width: 30%"),
                 new TableCell(List(settingsDiv), "col-lg-8 row").setAttribute("style", "width: 100%; padding-top: 20px;"))))
                 , "row")), "container-fluid"
         ).setAttribute("style", "padding: 0;")
@@ -367,7 +369,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
                 CustomizationManager.createClassCustomization(
                     userCustomization.id, "properties", List[String]()) { ocAddClass =>
                     val newClass = ocAddClass.classCustomizations.find(_.getUri == "properties").get.asInstanceOf[ClassCustomization]
-                    classCustomizations ++= List(newClass)
+                    propertiesContainer = Some(newClass)
 
                     addPropertyCall(propertiesContainer.get, newPropertyURI)
                     customizationChanged.trigger(new UserCustomizationEventArgs(userCustomization))
@@ -666,7 +668,7 @@ class UserCustomizationEditModal (currentGraphView: Option[GraphView], var userC
                 new CheckBox("useValue",
                     conClassCustomization.labels != null
                         && conClassCustomization.labels != ""
-                        && !conClassCustomization.labelsSplitted(0).userDefined, "UseValue"),
+                        && !conClassCustomization.labelsSplitted(0).userDefined, "User label of destination vertex"),
                 None, None
             )
         if(conClassCustomization.labels != null && conClassCustomization.labels != ""

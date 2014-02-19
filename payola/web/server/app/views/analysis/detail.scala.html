@@ -2,23 +2,23 @@
 
 @main(user, "Analysis "+analysis.name+" :: Payola!") {
 <div class="container-fluid">
-        <div class="pull-right">
-            <div class="btn-group">
-                @if(analysis.owner != None && analysis.owner == user) {
-                    <a href="@routes.Analysis.edit(analysis.id)" class="btn btn-default btn-small"><i class="glyphicon glyphicon-pencil"></i> Edit</a>
-                }
-                @if(canTakeOwnership){
-                    <a href="@routes.Analysis.takeOwnership(analysis.id)" class="btn btn-default btn-small"><i class="glyphicon glyphicon-magnet"></i> Take ownership</a>
-                }
-                @if(user.isDefined){
-                    <a href="@routes.Analysis.cloneAndEdit(analysis.id)" class="btn btn-default btn-small"><i class="glyphicon glyphicon-retweet"></i> Clone &amp; edit</a>
-                }
-            </div>
+    <div class="pull-right">
+        <div class="btn-group">
+            @if(analysis.owner != None && analysis.owner == user) {
+                <a href="@routes.Analysis.edit(analysis.id)" class="btn btn-default btn-small"><i class="glyphicon glyphicon-pencil"></i> Edit</a>
+            }
+            @if(canTakeOwnership){
+                <a href="@routes.Analysis.takeOwnership(analysis.id)" class="btn btn-default btn-small"><i class="glyphicon glyphicon-magnet"></i> Take ownership</a>
+            }
+            @if(user.isDefined){
+                <a href="@routes.Analysis.cloneAndEdit(analysis.id)" class="btn btn-default btn-small"><i class="glyphicon glyphicon-retweet"></i> Clone &amp; edit</a>
+            }
         </div>
-        <h1>
-            Detail of analysis: @analysis.name
-        </h1>
-        <p>@analysis.description</p>
+    </div>
+    <h1>
+        Detail of analysis: @analysis.name
+    </h1>
+    <p>@analysis.description</p>
 
     <div class="row" id="client-canvas">
 
