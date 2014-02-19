@@ -2,7 +2,7 @@
 
 @main(None, "Sign in :: Payola!", Some("Sign in")) {
     <div class="container">
-        <form action="@routes.Application.authenticate" class="form-horizontal" method="post">
+        <form action="@routes.Application.authenticate" role="form" method="post">
 
             @form.globalError.map { error =>
             <p class="alert alert-error">
@@ -10,27 +10,21 @@
             </p>
             }
 
-            <div class="well">
-                <fieldset>
-                    <legend>Sign in to Payola</legend>
-                    <div class="control-group">
-                        <label class="control-label" for="email">Email</label>
-                        <div class="controls">
-                            <input type="email" name="email" placeholder="Email" id="email" value="@form("email").value" class="input-large">
+            <div class="well row">
+                <div class="col-lg-4">
+                    <fieldset>
+                        <legend>Sign in to Payola</legend>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" name="email" class="form-control" placeholder="Email" id="email" value="@form("email").value" />
                         </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="password">Password</label>
-                        <div class="controls">
-                            <input type="password" name="password" id="password" placeholder="Password" class="input-large">
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" name="password" class="form-control" id="password" placeholder="Password" />
                         </div>
-                    </div>
-                    <div>
-                        <span class="controls">
-                            <button type="submit" id="loginbutton" class="input btn btn-primary">Sign in</button>
-                        </span>
-                    </div>
-                </fieldset>
+                        <button type="submit" id="loginbutton" class="btn btn-primary">Sign in</button>
+                    </fieldset>
+                </div>
             </div>
 
             <p class="alert alert-info">Don't have an account? <a href="@routes.Application.signup()">Sign up</a>!</p>

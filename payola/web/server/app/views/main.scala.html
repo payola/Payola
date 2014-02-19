@@ -2,20 +2,20 @@
 
 <!DOCTYPE html>
 <html>
-<head>
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("fonts/font-face/stylesheet.css")"/>
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")"/>
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/bootstrap/bootstrap.min.css")"/>
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/select2.css")"/>
-    <!--<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/bootstrap/bootstrap-theme.min.css")"/>-->
-    <link rel="stylesheet" href="@routes.Assets.at("stylesheets/colorpicker.css")" />
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/sigma.css")" />
-    <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")"/>
+    <head>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("fonts/font-face/stylesheet.css")"/>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")"/>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/bootstrap/bootstrap.min.css")"/>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/select2.css")"/>
+        <!--<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/bootstrap/bootstrap-theme.min.css")"/>-->
+        <link rel="stylesheet" href="@routes.Assets.at("stylesheets/colorpicker.css")" />
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/sigma.css")" />
+        <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")"/>
 
-    <link rel="stylesheet" href="http://js.arcgis.com/3.8/js/dojo/dijit/themes/tundra/tundra.css">
-    <link rel="stylesheet" href="http://js.arcgis.com/3.8/js/esri/css/esri.css">
+        <link rel="stylesheet" href="http://js.arcgis.com/3.8/js/dojo/dijit/themes/tundra/tundra.css">
+        <link rel="stylesheet" href="http://js.arcgis.com/3.8/js/esri/css/esri.css">
 
-    <style>
+        <style>
         text {
         font-size: 11px;
         pointer-events: none;
@@ -45,7 +45,7 @@
         circle.child {
         pointer-events: none;
         }
-    </style>
+        </style>
 
     <title>@title</title>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/jquery.min.js")"></script>
@@ -67,118 +67,129 @@
     <!--<script src="http://mbostock.github.io/d3/talk/20111116/d3/d3.layout.js" charset="utf-8"></script>-->
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCesJn7XyQUzK78CRLwJusuLUR1-Wy8fVc&sensor=false&libraries=visualization"></script>
 
-    <script>
-        // helpful for understanding dojoConfig.packages vs. dojoConfig.paths:
-        // http://www.sitepen.com/blog/2013/06/20/dojo-faq-what-is-the-difference-packages-vs-paths-vs-aliases/
-        var dojoConfig = {
-        paths: {
-        extras: "@routes.Assets.at("javascripts/lib/map")"
+        <script>
+            // helpful for understanding dojoConfig.packages vs. dojoConfig.paths:
+            // http://www.sitepen.com/blog/2013/06/20/dojo-faq-what-is-the-difference-packages-vs-paths-vs-aliases/
+            var dojoConfig = {
+                paths: {
+                    extras: "@routes.Assets.at("javascripts/lib/map")"
+                }
+            };
+        </script>
+        <script src="http://js.arcgis.com/3.8/"></script>
+    </head>
+    <body>
+        <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="container-fluid">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="glyphicon glyphicon-bar"></span>
+                        <span class="glyphicon glyphicon-bar"></span>
+                        <span class="glyphicon glyphicon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="@routes.Application.dashboard"><img src="@routes.Assets.at("img/payola-logo-small.png")" /></a>
+                </div>
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+                        <li>
+                            <a href="@routes.Application.dashboard"><i class="glyphicon-home glyphicon"></i> Dashboard</a>
+                        </li>
+                        @if(user.isDefined){
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                    <i class="glyphicon-search glyphicon"></i> My Analyses<b class="caret"></b>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="@routes.Analysis.list()"><i class="glyphicon glyphicon-list"></i> View All</a></li>
+                                    <li><a href="@routes.Analysis.create()"><i class="glyphicon glyphicon-plus"></i> Create New</a></li>
+                                </ul>
+                            </li>
+
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                    <i class="glyphicon-hdd glyphicon"></i> My Data Sources<b class="caret"></b>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="@routes.DataSource.list()"><i class="glyphicon glyphicon-list"></i> View All</a></li>
+                                    <li><a href="@routes.DataSource.create()"><i class="glyphicon glyphicon-plus"></i> Create New</a></li>
+                                </ul>
+                            </li>
+
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                    <i class="glyphicon-file glyphicon"></i> My Plugins<b class="caret"></b>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="@routes.Plugin.listPlugins(1)"><i class="glyphicon glyphicon-list"></i> View All</a></li>
+                                    <li><a href="@routes.Plugin.createPlugin()"><i class="glyphicon glyphicon-upload"></i> Upload New</a></li>
+                                </ul>
+                            </li>
+
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                    <i class="glyphicon-list glyphicon"></i>
+                                    Prefixes<b class="caret"></b>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="@routes.Prefix.list()"><i class="glyphicon glyphicon-list"></i> View All</a></li>
+                                    <li><a href="@routes.Prefix.create()"><i class="glyphicon glyphicon-plus"></i> Create New</a></li>
+                                </ul>
+                            </li>
+
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                    <i class="glyphicon-rdf glyphicon"></i> Private RDF Storage<b class="caret"></b>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="@routes.PrivateDataStorage.add()"><i class="glyphicon glyphicon-upload"></i> Upload Data</a></li>
+                                </ul>
+                            </li>
+
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                    <i class="glyphicon-group glyphicon"></i>
+                                    User Groups<b class="caret"></b>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="@routes.Group.list()"><i class="glyphicon glyphicon-list"></i> View All</a></li>
+                                    <li><a href="@routes.Group.create()"><i class="glyphicon glyphicon-plus"></i> Create New</a></li>
+                                </ul>
+                            </li>
+                        }
+                    </ul>
+
+                    <p class="navbar-text navbar-right">
+                    @if(user.isDefined){
+                        Logged in as <a href="@routes.Profile.index(user.get.name)">@user.get.name</a>
+                        (<a href="@routes.Application.logout">Sign out</a>)
+                    }else{
+                        <a href="@routes.Application.login">Sign in</a>
+                    }
+                    </p>
+                </div>
+            </div>
+        </nav>
+
+
+        @heading.map { str =>
+            <div class="main-header" id="main-header-div"><h1 id="main-header">@str</h1></div>
         }
-        };
-    </script>
-    <script src="http://js.arcgis.com/3.8/"></script>
-</head>
-<body>
-<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-    <div class="container-fluid">
-        <!-- Brand and toggle get grouped for better mobile display -->
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="glyphicon glyphicon-bar"></span>
-                <span class="glyphicon glyphicon-bar"></span>
-                <span class="glyphicon glyphicon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="@routes.Application.dashboard"><img src="@routes.Assets.at("img/payola-logo-small.png")" /></a>
-        </div>
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-            <ul class="nav navbar-nav">
-                <li>
-                    <a href="@routes.Application.dashboard"><i class="glyphicon-home glyphicon"></i> Dashboard</a>
-                </li>
-                @if(user.isDefined){
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                        <i class="glyphicon-search glyphicon"></i> My Analyses<b class="caret"></b>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a href="@routes.Analysis.list()"><i class="glyphicon glyphicon-list"></i> View All</a></li>
-                        <li><a href="@routes.Analysis.create()"><i class="glyphicon glyphicon-plus"></i> Create New</a></li>
-                    </ul>
-                </li>
-
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                        <i class="glyphicon-hdd glyphicon"></i> My Data Sources<b class="caret"></b>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a href="@routes.DataSource.list()"><i class="glyphicon glyphicon-list"></i> View All</a></li>
-                        <li><a href="@routes.DataSource.create()"><i class="glyphicon glyphicon-plus"></i> Create New</a></li>
-                    </ul>
-                </li>
-
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                        <i class="glyphicon-file glyphicon"></i> My Plugins<b class="caret"></b>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a href="@routes.Plugin.listPlugins(1)"><i class="glyphicon glyphicon-list"></i> View All</a></li>
-                        <li><a href="@routes.Plugin.createPlugin()"><i class="glyphicon glyphicon-upload"></i> Upload New</a></li>
-                    </ul>
-                </li>
-
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                        <i class="glyphicon-list glyphicon"></i>
-                        Prefixes<b class="caret"></b>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a href="@routes.Prefix.list()"><i class="glyphicon glyphicon-list"></i> View All</a></li>
-                        <li><a href="@routes.Prefix.create()"><i class="glyphicon glyphicon-plus"></i> Create New</a></li>
-                    </ul>
-                </li>
-
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                        <i class="glyphicon-rdf glyphicon"></i> Private RDF Storage<b class="caret"></b>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a href="@routes.PrivateDataStorage.add()"><i class="glyphicon glyphicon-upload"></i> Upload Data</a></li>
-                    </ul>
-                </li>
-
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                        <i class="glyphicon-group glyphicon"></i>
-                        User Groups<b class="caret"></b>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a href="@routes.Group.list()"><i class="glyphicon glyphicon-list"></i> View All</a></li>
-                        <li><a href="@routes.Group.create()"><i class="glyphicon glyphicon-plus"></i> Create New</a></li>
-                    </ul>
-                </li>
-                }
-            </ul>
-
-            <p class="navbar-text navbar-right">
-                @if(user.isDefined){
-                Logged in as <a href="@routes.Profile.index(user.get.name)">@user.get.name</a>
-                (<a href="@routes.Application.logout">Sign out</a>)
-                }else{
-                <a href="@routes.Application.login">Sign in</a>
-                }
-            </p>
-        </div>
-    </div>
-</nav>
 
 
-@heading.map { str =>
-<div class="main-header" id="main-header-div"><h1 id="main-header">@str</h1></div>
-}
+        @content
+        
 
+        <script>
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-@content
+            ga('create', 'UA-27033152-2', 'payola.cz');
+            ga('send', 'pageview');
 
-</body>
+        </script>
+    </body>
 </html>

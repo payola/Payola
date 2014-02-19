@@ -17,7 +17,7 @@ class InputControl[A <: Field[_]](val label: String, val field: A, labelClass: O
     private val infoText = new Text("")
 
     val controlGroup = new Div(List(
-        new Label(label, field.formHtmlElement, labelClass.getOrElse("")+" control-label"),
+        new Label(label, field.formHtmlElement, labelClass.getOrElse("")),
         new Div(List(
             field,
             new Span(List(infoText), "help-inline")),
