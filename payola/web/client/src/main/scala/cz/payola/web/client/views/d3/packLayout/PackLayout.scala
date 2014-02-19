@@ -6,13 +6,13 @@ import cz.payola.web.client.views.graph.PluginView
 import s2js.compiler.javascript
 import s2js.adapters.browser.`package`._
 import s2js.adapters.html
+import cz.payola.web.shared.transformators.RdfJsonTransformator
+import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
 
 /**
  * @author Jiri Helmich
  */
-class PackLayout(prefixApplier: Option[PrefixApplier] = None) extends PluginView("Pack Layout", prefixApplier) {
-
-    def supportedDataFormat: String = "RDF/JSON"
+class PackLayout(prefixApplier: Option[PrefixApplier] = None) extends PluginView[String]("Pack Layout", prefixApplier) {
 
     val d3Placeholder = new Div(List())
     val placeholder = new Div(List(d3Placeholder))
@@ -173,5 +173,19 @@ class PackLayout(prefixApplier: Option[PrefixApplier] = None) extends PluginView
         }
         parseJSON(_serializedGraph)
         _rendered = true
+    }
+
+    override def isAvailable(availableTransformators: List[String], evaluationId: String,
+        success: () => Unit, fail: () => Unit) {
+
+        true //TODO whe is available????
+    }
+
+    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Option[String] => Unit) {
+        RdfJsonTransformator.getCompleteGraph(evaluationId)(updateGraph(_)) //TODO default graph and paginating
+        { error =>
+            val modal = new FatalErrorModal(error.toString())
+            modal.render()
+        }
     }
 }

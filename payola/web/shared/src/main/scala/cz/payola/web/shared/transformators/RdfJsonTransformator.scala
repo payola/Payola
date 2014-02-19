@@ -5,12 +5,12 @@ import s2js.compiler._
 import cz.payola.web.shared.Payola
 import cz.payola.common.PayolaException
 
-@remote object GoogleMapTransformator extends GraphTransformator
+@remote object RdfJsonTransformator extends GraphTransformator
 {
     protected def performTransformation(input: Graph) = input
 
     @async def transform(evaluationId: String)(successCallback: Option[Graph] => Unit)(errorCallback: Throwable => Unit) {
-        errorCallback(new PayolaException("Transform is not supported for Google Map Transformator"))
+        errorCallback(new PayolaException("Transform is not supported for RDF/JSON Transformator"))
     }
 
     @async
@@ -30,10 +30,10 @@ import cz.payola.common.PayolaException
     }
 
     @async
-    def getCompleteGraph(evaluationId: String, format: String)
+    def getCompleteGraph(evaluationId: String)
         (successCallback: Option[String] => Unit)(errorCallback: Throwable => Unit) {
 
-        val serializedJenaGraph = Payola.model.analysisResultStorageModel.getGraphJena(evaluationId, format)
+        val serializedJenaGraph = Payola.model.analysisResultStorageModel.getGraphJena(evaluationId)
         successCallback(Some("#!json~*"+serializedJenaGraph))
     }
 }

@@ -9,8 +9,9 @@ import cz.payola.common.rdf._
 import cz.payola.web.client.models.PrefixApplier
 import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
 import cz.payola.web.shared.transformators.IdentityTransformator
+import cz.payola.common.rdf
 
-class ColumnChartPluginView(prefixApplier: Option[PrefixApplier]) extends PluginView("Column Chart", prefixApplier)
+class ColumnChartPluginView(prefixApplier: Option[PrefixApplier]) extends PluginView[rdf.Graph]("Column Chart", prefixApplier)
 {
     private val chartWrapper = new Div
     chartWrapper.id = "chart-wrapper"
@@ -254,6 +255,14 @@ class ColumnChartPluginView(prefixApplier: Option[PrefixApplier]) extends Plugin
         }
         { error =>
             fail()
+            val modal = new FatalErrorModal(error.toString())
+            modal.render()
+        }
+    }
+
+    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Option[rdf.Graph] => Unit) {
+        IdentityTransformator.transform(evaluationId)(updateGraph(_))
+        { error =>
             val modal = new FatalErrorModal(error.toString())
             modal.render()
         }
