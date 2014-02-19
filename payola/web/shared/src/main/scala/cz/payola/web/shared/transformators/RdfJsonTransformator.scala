@@ -36,4 +36,11 @@ import cz.payola.common.PayolaException
         val serializedJenaGraph = Payola.model.analysisResultStorageModel.getGraphJena(evaluationId)
         successCallback(Some("#!json~*"+serializedJenaGraph))
     }
+
+    @async def queryProperties(evaluationId: String, query: String)
+        (successCallback: (Seq[String] => Unit))(failCallback: (Throwable => Unit)) {
+
+        val result = Payola.model.analysisResultStorageModel.queryProperties(evaluationId, query)
+        successCallback(result)
+    }
 }

@@ -10,7 +10,6 @@ import s2js.adapters.dom.Element
 import cz.payola.web.client.View
 import cz.payola.web.client.views.map.facets._
 import scala.collection.mutable.ArrayBuffer
-import cz.payola.web.shared.AnalysisEvaluationResultsManager
 import cz.payola.common.geo.Coordinates
 import cz.payola.web.client.events._
 import cz.payola.common.geo.Coordinates
@@ -61,7 +60,7 @@ abstract class MapView(prefixApplier: Option[PrefixApplier] = None) extends Plug
     }
 
     override def updateSerializedGraph(serializedGraph: Option[String]) {
-        AnalysisEvaluationResultsManager.queryProperties(evaluationId.get, "select distinct ?p where {[] <http://schema.org/geo> []; ?p [] .}"){ properties =>
+        RdfJsonTransformator.queryProperties(evaluationId.get, "select distinct ?p where {[] <http://schema.org/geo> []; ?p [] .}"){ properties =>
 
             facets = properties.map{ p =>
                 val facet = new GroupingMapFacet(p)
