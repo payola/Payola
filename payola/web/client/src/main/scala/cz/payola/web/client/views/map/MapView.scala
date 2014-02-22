@@ -150,7 +150,7 @@ abstract class MapView(prefixApplier: Option[PrefixApplier] = None) extends Plug
     override def isAvailable(availableTransformators: List[String], evaluationId: String,
         success: () => Unit, fail: () => Unit) {
 
-        true //TODO whe is available????
+         success() //TODO when is available????
     }
 
     override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Option[String] => Unit) {

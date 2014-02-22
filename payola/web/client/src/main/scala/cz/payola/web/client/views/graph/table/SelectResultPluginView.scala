@@ -131,6 +131,14 @@ class SelectResultPluginView(prefixApplier: Option[PrefixApplier]) extends Table
                 modal.render()
             }
     }
+
+    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Option[Graph] => Unit) {
+        IdentityTransformator.transform(evaluationId)(updateGraph(_))
+        { error =>
+            val modal = new FatalErrorModal(error.toString())
+            modal.render()
+        }
+    }
 }
 
 class Binding

@@ -11,4 +11,12 @@ class EmptyPluginView extends PluginView[Graph]("Empty", None)
 {
     def createSubViews = List(new Div(List(new Text("Select a visualization plugin...")),
         "plugin-message large").setAttribute("style", "height: 300px;"))
+
+    override def isAvailable(availableTransformators: List[String], evaluationId: String,
+        success: () => Unit, fail: () => Unit) {
+
+        success()
+    }
+
+    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Option[Graph] => Unit) {}
 }

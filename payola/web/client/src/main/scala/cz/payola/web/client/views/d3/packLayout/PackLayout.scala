@@ -178,7 +178,7 @@ class PackLayout(prefixApplier: Option[PrefixApplier] = None) extends PluginView
     override def isAvailable(availableTransformators: List[String], evaluationId: String,
         success: () => Unit, fail: () => Unit) {
 
-        true //TODO whe is available????
+        success() //TODO whe is available????
     }
 
     override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Option[String] => Unit) {

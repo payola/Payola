@@ -42,12 +42,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
     private val pollingPeriod = 500
 
-    @javascript(
-        """
-          if (pluginView.length > 0){
-            jQuery(".analysis-controls .btn-success").click();
-          }
-        """)
+    @javascript("""jQuery(".analysis-controls .btn-success").click();""")
     private def autorun(pluginView: String) {}
 
     def initialize() {
@@ -65,7 +60,12 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
                 } else {
                     createViewAndInit(analysis)
                     unblockPage()
-                    autorun(UriHashTools.getUriParameter("viewPlugin"))
+
+                    if(UriHashTools.getUriParameter("viewPlugin") != "") {
+                        autorun(UriHashTools.getUriParameter("viewPlugin"))
+                    } else if(!UriHashTools.isAnyParameterInUri() && UriHashTools.getUriHash() != "") {
+                        autorun(UriHashTools.getUriHash())
+                    }
                 }
         } {
             err => fatalErrorHandler(err)
@@ -125,12 +125,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
             view.overviewView.controls.timeoutInfoBar.addCssClass("none")
             view.overviewView.controls.progressBar.setStyleToSuccess()
 
-            getAnalysisEvaluationID.foreach(UriHashTools.setUriParameter("evaluation", _))
-
-            graphPresenter = new GraphPresenter(view.resultsView.htmlElement, prefixPresenter.prefixApplier, getAnalysisEvaluationID)
-            graphPresenter.initialize()
-            graphPresenter.view.setAvailablePlugins(evt.availableTransformators, UriHashTools.getUriParameter("viewPlugin"))
-            graphPresenter.view.vertexBrowsing += onVertexBrowsing
+            preparePresenter(view, evt)
 
             val downloadButtonView = new DownloadButtonView()
             downloadButtonView.render(graphPresenter.view.toolbar.htmlElement)
@@ -151,6 +146,21 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
             analysisEvaluationSuccess -= successEventHandler
 
             unblockPage()
+    }
+
+    private def preparePresenter(view: AnalysisRunnerView, succEvent: EvaluationSuccessEventArgs) {
+
+        val viewPlugin = if(!UriHashTools.isAnyParameterInUri() && UriHashTools.getUriHash() != "") {
+            UriHashTools.getUriHash()
+        } else { UriHashTools.getUriParameter("viewPlugin") }
+
+        getAnalysisEvaluationID.foreach(UriHashTools.setUriParameter("evaluation", _)) //this changes the UriHash
+
+        graphPresenter = new GraphPresenter(view.resultsView.htmlElement, prefixPresenter.prefixApplier, getAnalysisEvaluationID)
+        graphPresenter.initialize()
+        graphPresenter.view.setAvailablePlugins(succEvent.availableTransformators, viewPlugin)
+
+        graphPresenter.view.vertexBrowsing += onVertexBrowsing
     }
 
     private def onVertexBrowsing(e: VertexEventArgs[_]) {

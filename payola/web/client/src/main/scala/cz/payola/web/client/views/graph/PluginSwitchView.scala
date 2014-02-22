@@ -110,15 +110,15 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
         new Icon(Icon.eye_open),
         new Text("Change visualization plugin")),
         //GoogleMap should not be available for browsing mode
-        plugins.take(plugins.length -1).map { plugin =>
+        plugins.map { plugin =>
             createPluginSwitchButtonItem(plugin)
 
-        } ++ plugins.takeRight(1).map { googleMapPlugin =>
+        } /*++ plugins.takeRight(1).map { googleMapPlugin =>
             val pluginAnchor = new Anchor(List(new Text(googleMapPlugin.name))).setAttribute(
                 "title", "Available only in analysis mode").setAttribute("style", "color: black; background-color: white;")
             val listItem = new ListItem(List(pluginAnchor), normalizeClassName(googleMapPlugin.getClass.getName))
-            listItem
-        }
+            listItem //TODO which plugins are not available for browsing???
+        }*/
     )
 
     /**
@@ -369,7 +369,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
             //now the whole graph has to fetched, this will be taken care of in transformation layer in next cache release iteration
             if(evaluationId.isDefined) {
                 currentPlugin.setEvaluationId(evaluationId)
-                currentPlugin.setEvaluationId(browsingURI)
+                currentPlugin.setBrowsingURI(browsingURI)
                 currentPlugin.loadDefaultCachedGraph(evaluationId.get, {toUpdate =>
                     toUpdate match {
                         case smth: Some[_] =>

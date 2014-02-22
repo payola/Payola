@@ -28,7 +28,7 @@ abstract class PluginView[B](val name: String, private val prefixApplier: Option
         new Div(List(new Text(description)), "plugin-message small").render(parent)
     }
 
-    def isAvailable(availableTransformators: List[String], evaluationId: String, success: () => Unit, fail: () => Unit) {}
+    def isAvailable(availableTransformators: List[String], evaluationId: String, success: () => Unit, fail: () => Unit)
 
-    def loadDefaultCachedGraph(evaluationId: String, updateGraph: Option[B] => Unit) {}
+    def loadDefaultCachedGraph(evaluationId: String, updateGraph: Option[B] => Unit)
 }
