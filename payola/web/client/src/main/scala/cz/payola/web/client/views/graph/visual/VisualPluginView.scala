@@ -287,13 +287,11 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
 
         infoTable.removeAllFromGroup += { e =>
             triggerDestroyVertexInfo()
-            val links = new mutable.ListBuffer[(String, Point2D)]()
-            e.target.foreach{ vertexView =>
-                links ++= graphView.get.removeVertexFromGroup(vertexView)
-            }
+            val links = graphView.get.removeVerticesFromGroup(e.target)
+
             if(!e.target.isEmpty && e.target(0).getFirstContainedVertex().isInstanceOf[VertexLink]) {
                 View.blockPage("Fetching data")
-                fetchVertexLinks(links.toList, !this.isInstanceOf[GravityTechnique] && animateAfterGroupsChange.value)
+                fetchVertexLinks(links, !this.isInstanceOf[GravityTechnique] && animateAfterGroupsChange.value)
             } else {
                 //redrawing with gravity technique ruins the positioning
                 if(!this.isInstanceOf[GravityTechnique] && animateAfterGroupsChange.value) drawGraph()
@@ -318,7 +316,7 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
     }
 
     private def fetchVertexLinks(uriLinks: List[(String, Point2D)], rerunPositioningTechnique: Boolean) {
-        evaluationId.foreach(VisualTransformator.getVertexDetail(_, uriLinks.head._1){ paginated =>
+        evaluationId.foreach(VisualTransformator.getVerticesDetail(_, uriLinks.map(_._1)){ paginated =>
             zoomControls.reset()
             graphView.foreach { gV =>
                 paginated.foreach(gV.extend(_, uriLinks.head._2))
@@ -326,18 +324,14 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
                 gV.setConfiguration(currentCustomization)
                 _parentHtmlElement.foreach(gV.render(_))
             }
-            if(!uriLinks.tail.isEmpty) {
-                fetchVertexLinks(uriLinks.tail, rerunPositioningTechnique)
+            val singleVertices = graphView.map(_.existsGroupWithOneVertex).getOrElse(List())
+            if(!singleVertices.isEmpty) {
+                fetchVertexLinks(
+                    singleVertices.map{ singleV => ((singleV.getFirstContainedVertex.toString, singleV.position)) },
+                    rerunPositioningTechnique) //if there is a group with only one vertex repeat the process
             } else {
-                val singleVertexOpt = graphView.map(_.existsGroupWithOneVertex).getOrElse(None)
-                if(singleVertexOpt.isDefined) {
-                    fetchVertexLinks(
-                        List((singleVertexOpt.get.getFirstContainedVertex.toString, singleVertexOpt.get.position)),
-                        rerunPositioningTechnique) //if there is a group with only one vertex repeat the process
-                } else {
-                    View.unblockPage()
-                    if(rerunPositioningTechnique) drawGraph() else redraw()
-                }
+                View.unblockPage()
+                if(rerunPositioningTechnique) drawGraph() else redraw()
             }
         } { error =>
             val modal = new FatalErrorModal(error.toString())
@@ -735,11 +729,10 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
                     renderMessage(htmlParent, "The graph is empty...")
                 }
             } else {
-                var vertexOpt = graphView.get.existsGroupWithOneVertex
-                if(vertexOpt.isDefined) {
-                    val vertexLinks = graphView.get.removeVertexFromGroup(vertexOpt.get)
+                var singleVertices = graphView.get.existsGroupWithOneVertex
+                if(!singleVertices.isEmpty) {
+                    var vertexLinks = graphView.get.removeVerticesFromGroup(singleVertices)
                     fetchVertexLinks(vertexLinks, animateAfterGroupsChange.value)
-                    vertexOpt = graphView.get.existsGroupWithOneVertex
                 } else {
                     View.unblockPage()
                     drawGraph

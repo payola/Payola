@@ -65,14 +65,12 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
         //exists function allows to skip the rest of the components, when the component containing the vertex.uri is found
     }
 
-    def existsGroupWithOneVertex: Option[VertexViewElement] = {
-        var singleVertexUri: Option[VertexViewElement] = None
+    def existsGroupWithOneVertex: List[VertexViewElement] = {
+        var singleVertices = List[VertexViewElement]()
         components.foreach { component =>
-            val singleOpt = component.existsGroupWithOneVertex
-            if(singleOpt.isDefined)
-                singleVertexUri = singleOpt
+            singleVertices ++= component.existsGroupWithOneVertex
         }
-        singleVertexUri
+        singleVertices
     }
 
     def createGroup(newPosition: Point2D) {
@@ -95,12 +93,21 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
         }
     }
 
-    def removeVertexFromGroup(vertexToRemove: VertexViewElement): List[(String, Point2D)] = {
-        val vertexLinks = new ListBuffer[(String, Point2D)]()
+    def removeVertexFromGroup(verticesToRemove: VertexViewElement): List[(String, Point2D)] = {
+        var vertexLinks = List[(String, Point2D)]()
         components.foreach { component =>
-            vertexLinks ++= component.removeFromGroup(vertexToRemove)._2
+            vertexLinks ++= component.removeFromGroup(verticesToRemove)._2
         }
-        vertexLinks.toList
+        vertexLinks
+    }
+
+    def removeVerticesFromGroup(verticesToRemove: List[VertexViewElement]): List[(String, Point2D)] = {
+        var vertexLinks = List[(String, Point2D)]()
+        verticesToRemove.foreach{ vertex =>
+            vertexLinks ++= removeVertexFromGroup(vertex);
+        }
+
+        vertexLinks
     }
 
     /**
@@ -148,14 +155,14 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
      */
     def extend(graph: Graph, vertexInitPosition: Point2D) {
         val identifiedVertices = createVertexViews(graph, vertexInitPosition)
-        val firstVertex = identifiedVertices.find(_.isInstanceOf[VertexView]).get.asInstanceOf[VertexView]
+        val firstVertex = identifiedVertices.filter(_.isInstanceOf[VertexView]).map(_.asInstanceOf[VertexView]).toList
         val groups = graph.vertices.filter(_.isInstanceOf[VertexGroup]).map(_.asInstanceOf[VertexGroup]).toList
 
         val containedComponent = components.find{component =>
             component.vertexViewElements.exists{ ve: VertexViewElement =>
-                ve.represents(firstVertex.getFirstContainedVertex()) }}.get //the vertex must exist in one of the components
+                ve.represents(firstVertex.head.getFirstContainedVertex()) }}.get //the vertex must exist in one of the components
 
-        containedComponent.extend(firstVertex, groups, graph, vertexInitPosition)
+        containedComponent.extend(firstVertex, groups, graph.edges.toList, vertexInitPosition)
     }
 
     /**

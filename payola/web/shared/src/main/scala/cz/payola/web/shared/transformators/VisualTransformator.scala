@@ -25,6 +25,20 @@ import cz.payola.web.shared.Payola
         successCallback(Payola.model.analysisResultStorageModel.getEmptyGraph())
     }
 
+    @async def getVerticesDetail(evaluationId: String, vertexURIs: List[String])
+        (successCallback: Option[Graph] => Unit)(errorCallback: Throwable => Unit) {
+
+        val queries = List("CONSTRUCT { <%s> ?p ?o . } WHERE { <%s> ?p ?o .}",
+            "CONSTRUCT { ?o ?p <%s> . } WHERE { ?o ?p <%s> . }")
+        val queryList: List[String] = queries.map{ query => vertexURIs.map{ uri => query.format(uri, uri) } }.reduce(_ ++ _)
+
+        val vertexNeighbourhood = Payola.model.analysisResultStorageModel.getGraph(queryList, evaluationId)
+        successCallback(if(vertexNeighbourhood.isEmpty) {
+            None
+        } else {
+            Some(separetaIntoGroups(vertexURIs, vertexNeighbourhood))
+        })
+    }
 
     @async
     def getVertexDetail(evaluationId: String, vertexUri: String)
@@ -52,33 +66,38 @@ import cz.payola.web.shared.Payola
         if(vertexNeighbourhood.isEmpty) {
             None
         } else {
-            Some(separetaIntoGroups(uri, vertexNeighbourhood))
+            Some(separetaIntoGroups(List(uri), vertexNeighbourhood))
         }
     }
 
-    private def separetaIntoGroups(mainVertexURI: String, graph: Graph): Graph = {
-        val mainVertex: IdentifiedVertex = graph.getVertexWithURI(mainVertexURI).get
+    private def separetaIntoGroups(mainVertexURIs: List[String], graph: Graph): Graph = {
+        val mainVertices = graph.vertices.collect{
+            case iv: IdentifiedVertex if mainVertexURIs.exists(_ == iv.uri) => iv
+        }
 
         val edges = graph.edges
-        val (identifiedVertices, literalVertices) = graph.vertices.partition{ vertex =>
-                vertex != mainVertex && vertex.isInstanceOf[IdentifiedVertex]
+        val (identifiedVertices, literalVertices) = graph.vertices.filter{
+            vertex =>
+                !mainVertexURIs.exists(_ == vertex.toString)}.partition{
+            vertex =>
+                vertex.isInstanceOf[IdentifiedVertex]
         }
 
         //separate identified vertices by the type of edge
         val validEdges = edges.filter{ edge =>
-            edge.destination.isInstanceOf[IdentifiedVertex] && (edge.destination.toString() != mainVertexURI || edge.origin.uri !=  mainVertexURI)
+            edge.destination.isInstanceOf[IdentifiedVertex] &&
+                (!mainVertexURIs.exists(_ == edge.destination.toString) || !mainVertexURIs.exists(_ == edge.origin.toString))
         }
 
-        val groups = validEdges.map(_.uri).distinct.map{ uniqueEdgeName =>
-            val verticesToGroup = validEdges.filter(_.uri == uniqueEdgeName).map{ validEdge =>
-                if(validEdge.origin.uri !=  mainVertexURI) {
+        val groups = validEdges.map(_.destination.toString).distinct.map{ uniqueDestinationName =>
+            val verticesToGroup = validEdges.filter(_.destination.toString == uniqueDestinationName).map{ validEdge =>
+                if(!mainVertexURIs.exists(_ == validEdge.origin.uri)) {
                     new VertexLink(validEdge.origin.uri) }
                 else {
                     new VertexLink(validEdge.destination.toString()) }
             }
             new VertexGroup("", verticesToGroup)
         }
-
-        new Graph(List(mainVertex) ++ groups ++ literalVertices.filter(_ != mainVertex), edges, None)
+        new Graph(mainVertices ++ groups ++ literalVertices, edges, None)
     }
 }

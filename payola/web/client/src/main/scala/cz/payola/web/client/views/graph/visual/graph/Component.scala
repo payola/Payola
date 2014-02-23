@@ -64,17 +64,17 @@ class Component(private var _vertexViewElements: ListBuffer[VertexViewElement], 
         }
     }
 
-    def existsGroupWithOneVertex: Option[VertexViewElement] = {
-        var singleVertex: Option[VertexViewElement] = None
+    def existsGroupWithOneVertex: List[VertexViewElement] = {
+        var singleVertices = List[VertexViewElement]()
         vertexViewElements.foreach{ element =>
             element match {
                 case group: VertexViewGroup =>
                     if(group.vertexViews.size == 1) {
-                        singleVertex = Some(group.vertexViews(0))
+                        singleVertices ++= List(group.vertexViews(0))
                     }
             }
         }
-        singleVertex
+        singleVertices
     }
 
     def createGroup(newPosition: Point2D): Boolean = {
@@ -421,9 +421,8 @@ class Component(private var _vertexViewElements: ListBuffer[VertexViewElement], 
         }
     }
 
-    def extend(vertex: VertexView, groups: List[VertexGroup], modelGraph: Graph, newPosition: Point2D) {
-
-        val extensionVertexModel = vertex.getFirstContainedVertex()
+    def extend(extensionVertices: List[VertexView], groups: List[VertexGroup], edges: List[Edge], newPosition: Point2D) {
+        //TODO rewrite this insane code when got nothing else to work on
         val newEdgeViews = new ListBuffer[EdgeView]()
         val groupsOfNewVertexLinks = groups.filter{ modelGroup => !(modelGroup.content.filter{ vertexLinkModel =>
             !vertexViewElements.exists(_.represents(vertexLinkModel))}.isEmpty)
@@ -434,42 +433,48 @@ class Component(private var _vertexViewElements: ListBuffer[VertexViewElement], 
                     new VertexView(_, Point2D.Zero, "", prefixApplier)).toList
 
             //create edges for all created vertexLinkViews
-            val newEdgeViewsToGroup = modelGraph.edges.filter{ edgeModel =>
+            val newEdgeViewsToGroup = edges.filter{ edgeModel =>
                 newVertexLinkViews.exists{ newLink =>
                     newLink.vertexModel.toString() == edgeModel.origin.toString() || newLink.vertexModel.toString() ==
                         edgeModel.destination.toString()
                 }}.map{ edgeModel =>
-                    val originView = newVertexLinkViews.find(_.represents(edgeModel.origin)).getOrElse(vertex)
-                    val destinationView = newVertexLinkViews.find(_.represents(edgeModel.destination)).getOrElse(vertex)
+                    val originView = newVertexLinkViews.find(_.represents(edgeModel.origin)).getOrElse(
+                        extensionVertices.find(_.represents(edgeModel.origin)).getOrElse(extensionVertices.head))//the last OrElse is just for s2js and should never happen
+                    val destinationView = newVertexLinkViews.find(_.represents(edgeModel.destination)).getOrElse(
+                        extensionVertices.find(_.represents(edgeModel.origin)).getOrElse(extensionVertices.head))//the last OrElse is just for s2js and should never happen
                     new EdgeView(edgeModel, originView, destinationView, prefixApplier)
                 }.toList
 
-                val newGroupView = new VertexViewGroup(newPosition, prefixApplier)
-                newGroupView.addVertices(newVertexLinkViews, newEdgeViewsToGroup)
-                newEdgeViews ++= newEdgeViewsToGroup
-                newGroupView
+            val newGroupView = new VertexViewGroup(newPosition, prefixApplier)
+            newGroupView.addVertices(newVertexLinkViews, newEdgeViewsToGroup)
+            newEdgeViews ++= newEdgeViewsToGroup
+            newGroupView
         }
 
         //replace the vertexLink and add groups
         _vertexViewElements = _vertexViewElements.filter{ oldVertexViews =>
-            !oldVertexViews.represents(extensionVertexModel)} ++ groupsOfNewVertexLinks
-        _vertexViewElements += vertex
+            !extensionVertices.exists{extVertex => oldVertexViews.represents(extVertex.vertexModel)}} ++ groupsOfNewVertexLinks
+        _vertexViewElements ++= extensionVertices
 
         //redirect edges
         edgeViews.foreach{ edgeView =>
-            if(edgeView.edgeModel.origin.uri == extensionVertexModel.toString()) {
-                edgeView.forceRedirectOrigin(vertex)
-                vertex.edges += edgeView
-            } else if(edgeView.edgeModel.destination.toString() == extensionVertexModel.toString()) {
-                edgeView.forceRedirectDestination(vertex)
-                vertex.edges += edgeView
+            val originVertex = extensionVertices.find(_.vertexModel.toString == edgeView.edgeModel.origin.uri)
+            if(originVertex.isDefined) {
+                edgeView.forceRedirectOrigin(originVertex.get)
+                originVertex.get.edges += edgeView
+            } else {
+                val destinationVertex = extensionVertices.find(_.vertexModel.toString() == edgeView.edgeModel.destination.toString())
+                if(destinationVertex.isDefined) {
+                    edgeView.forceRedirectDestination(destinationVertex.get)
+                    destinationVertex.get.edges += edgeView
+                }
             }
         }
 
         //add edgeViews to theGroups
         edgeViews ++= newEdgeViews
         //add edges, that have one of their vertices existing in the old graph
-        edgeViews ++= modelGraph.edges.filter{ edge => //filter out edges to LiteralVertices and edges that already have an edgeView in this graph
+        edgeViews ++= edges.filter{ edge => //filter out edges to LiteralVertices and edges that already have an edgeView in this graph
             edge.destination.isInstanceOf[IdentifiedVertex] && !(edgeViews.exists{ edgeView =>
                 edgeView.edgeModel.uri == edge.uri && edgeView.edgeModel.origin.uri ==
                     edge.origin.uri && edgeView.edgeModel.destination.toString == edge.destination.toString
@@ -481,7 +486,9 @@ class Component(private var _vertexViewElements: ListBuffer[VertexViewElement], 
         }
 
         //and set the edges to the new created vertexViews
-        vertex.edges = getEdgesOfVertex(vertex, edgeViews)
+        extensionVertices.foreach{ vertex =>
+            vertex.edges = getEdgesOfVertex(vertex, edgeViews)
+        }
     }
 
     private def getEdgesOfVertex(vertexView: VertexViewElement, edgeViews: ListBuffer[EdgeView]): ListBuffer[EdgeView] = {
