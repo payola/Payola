@@ -407,6 +407,6 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
         case _ => None
     }
 
-    @javascript(""" _gaq.push(['_trackEvent', 'Visualization', 'Show', visualizationName]); """)
+    @javascript(""" ga('send', 'event', 'Visualization', 'Show', visualizationName); """)
     def analyticsHit(visualizationName: String) {}
 }
