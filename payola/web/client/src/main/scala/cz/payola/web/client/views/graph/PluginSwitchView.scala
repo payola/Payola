@@ -359,6 +359,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
                         update(g, currentCustomization, None)
                         currentPlugin.render(pluginSpace.htmlElement)
                         currentPlugin.renderControls(toolbar.htmlElement)
+                        analyticsHit(currentPlugin.name)
                     } { err => }
                 }else{
                     AnalysisEvaluationResultsManager.getCompleteAnalysisResultSerialized(evaluationId.get, currentPlugin.supportedDataFormat){ s =>
@@ -368,6 +369,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
                         currentPlugin.render(pluginSpace.htmlElement)
                         currentPlugin.renderControls(toolbar.htmlElement)
                         currentPlugin.drawGraph()
+                        analyticsHit(currentPlugin.name)
                     }{e => }
                 }
             } else {
@@ -377,6 +379,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
                     currentPlugin.render(pluginSpace.htmlElement)
                     currentPlugin.renderControls(toolbar.htmlElement)
                     currentPlugin.drawGraph()
+                    analyticsHit(currentPlugin.name)
                 }else{
                     AnalysisEvaluationResultsManager.getCompleteAnalysisResultSerialized(evaluationId.get, currentPlugin.supportedDataFormat){ s =>
                         currentGraph = None
@@ -385,6 +388,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
                         currentPlugin.render(pluginSpace.htmlElement)
                         currentPlugin.renderControls(toolbar.htmlElement)
                         currentPlugin.drawGraph()
+                        analyticsHit(currentPlugin.name)
                     }{e => }
                 }
             }
@@ -402,4 +406,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
             visual.graphView
         case _ => None
     }
+
+    @javascript(""" _gaq.push(['_trackEvent', 'Visualization', 'Show', visualizationName]); """)
+    def analyticsHit(visualizationName: String) {}
 }
