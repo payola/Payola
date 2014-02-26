@@ -52,7 +52,7 @@ Voilà! Your Payola server is running. The initializer project sets up your data
 
 ### Project lead
 
-- [Jirka Helmich](https://github.com/teuzz)
+- [Jirka Helmich](https://github.com/jirihelmich)
 - [Jakub Klímek](https://github.com/jakubklimek)
 - [Martin Nečaský](http://www.ksi.mff.cuni.cz/~necasky)
  
