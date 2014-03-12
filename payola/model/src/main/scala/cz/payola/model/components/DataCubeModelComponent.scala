@@ -116,8 +116,7 @@ trait DataCubeModelComponent
                       | SELECT DISTINCT ?o ?l WHERE {
                       |     [] <%s> ?o .
                       |
-                      |     OPTIONAL { ?o rdfs:label ?l . }
-                      |     FILTER (LANG(?l) = 'en')
+                      |     OPTIONAL { ?o rdfs:label ?l . FILTER (LANG(?l) = 'en') }
                       |
                       | } ORDER BY(?o)
                       | """.stripMargin, property)
@@ -168,6 +167,7 @@ trait DataCubeModelComponent
                   |
                   | CONSTRUCT {
                   |     ?d a qb:DataStructureDefinition ;
+                  |        rdfs:label ?dsdLabel ;
                   |        qb:component ?c ;
                   |        qb:component ?c2 .
                   |     ?c qb:dimension ?dim ;
@@ -184,6 +184,8 @@ trait DataCubeModelComponent
                   |             rdfs:label ?l2 .
                   |
                   |     bind (iri(concat('http://example.org/id/', md5(concat(str(?x), str(?l))))) as ?id)
+                  |
+                  |     OPTIONAL { ?d rdfs:label ?dsdLabel . }
                   | }
                 """.stripMargin
         }

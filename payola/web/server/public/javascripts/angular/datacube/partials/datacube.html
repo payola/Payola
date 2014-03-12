@@ -14,7 +14,7 @@
             </div>
             <div class="panel-footer"></div>
         </div>
-
+-->
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h3 class="panel-title">Available data structures</h3>
@@ -22,11 +22,11 @@
             <div class="panel-body">
                 <p ng-show="dataStructures.length == 0">No data structures found in the supplied datasource.</p>
                 <ul class="list-unstyled" ng-show="dataStructures.length > 0">
-                    <li ng-repeat="ds in dataStructures">{{ds.label}}</li>
+                    <li ng-repeat="ds in dataStructures"><input type="checkbox" ng-model="ds.active" ng-change="switchDSD($index)" />&nbsp;{{ds.label}}</li>
                 </ul>
             </div>
             <div class="panel-footer"></div>
-        </div>-->
+        </div>
 
         <div class="panel panel-default">
             <div class="panel-heading">
@@ -35,7 +35,7 @@
             <div class="panel-body">
                 <ul class="list-unstyled">
                     <li ng-repeat="(uri, dimension) in dataStructures[selectedDataStructure].dimensions">
-                        {{uri}}
+                        {{dimension.label || uri}} <button class="btn-default btn btn-xs" ng-click="setXAxis(uri)" ng-show="dimension != filteringDimension">X axis</button>
                         <ul style="max-height: 200px; overflow: scroll;">
                             <li ng-repeat="v in dimension.values"><input type="checkbox" ng-model="v.active" ng-change="setActiveValue(dimension,$index)" />&nbsp;{{v.label || v.uri || v.value}}</li>
                         </ul>
