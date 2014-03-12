@@ -117,7 +117,7 @@ class SelectResultPluginView(prefixApplier: Option[PrefixApplier]) extends Table
     override def isAvailable(availableTransformators: List[String], evaluationId: String,
         success: () => Unit, fail: () => Unit) {
 
-            IdentityTransformator.getSmapleGraph(evaluationId) { sample =>
+            IdentityTransformator.getSampleGraph(evaluationId) { sample =>
             //TripleTableTransformator.getClass.getName does not work after s2js
                 if(sample.isEmpty && availableTransformators.exists(_.contains("IdentityTransformator"))) {
                     success()

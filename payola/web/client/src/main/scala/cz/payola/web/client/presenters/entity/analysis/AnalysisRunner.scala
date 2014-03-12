@@ -175,7 +175,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
             uiAdaptAnalysisRunning(view, createViewAndInit _, analysis)
             view.overviewView.controls.timeoutInfo.text = "0"
 
-            AnalysisRunner.runAnalysisById(analysisId, evaluationId, true) { id =>
+            AnalysisRunner.runAnalysisById(analysisId, evaluationId) { id =>
                 unblockPage()
                 elapsed = 0
 

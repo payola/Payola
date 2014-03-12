@@ -703,7 +703,7 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
     override def isAvailable(availableTransformators: List[String], evaluationId: String,
         success: () => Unit, fail: () => Unit) {
 
-        VisualTransformator.getSmapleGraph(evaluationId) { sample =>
+        VisualTransformator.getSampleGraph(evaluationId) { sample =>
             if(sample.isEmpty && availableTransformators.exists(_.contains("VisualTransformator"))) {
                 success()
             } else {

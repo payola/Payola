@@ -12,8 +12,7 @@ import cz.payola.common.EvaluationSuccess
 @secured object  AnalysisRunner
     extends ShareableEntityManager[Analysis, cz.payola.common.entities.Analysis](Payola.model.analysisModel)
 {
-    @async def runAnalysisById(id: String, oldEvaluationId: String,
-        checkAnalysisStore: Boolean = false, user: Option[User] = None)
+    @async def runAnalysisById(id: String, oldEvaluationId: String, user: Option[User] = None)
         (successCallback: (String => Unit))
         (failCallback: (Throwable => Unit)) {
 

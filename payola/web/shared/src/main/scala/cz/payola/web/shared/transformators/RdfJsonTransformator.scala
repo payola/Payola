@@ -18,7 +18,7 @@ import cz.payola.common.PayolaException
         successCallback(isAvailable(input))
     }
 
-    @async def getSmapleGraph(evaluationId: String)
+    @async def getSampleGraph(evaluationId: String)
         (successCallback: Graph => Unit)(errorCallback: Throwable => Unit) {
         //TODO is it possible to get a sample graph and to perform a "visual plugin is able to process result graph" check?
         successCallback(Payola.model.analysisResultStorageModel.getEmptyGraph())

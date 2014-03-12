@@ -1,0 +1,30 @@
+@(user: Option[cz.payola.domain.entities.User], analysisId: String, evaluationId: String)
+
+@scripts = {
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/angular/angular.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/angular/angular-resource.min.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/angular/angular-route.min.js")"></script>
+
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/angular/datacube/app.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/angular/datacube/controllers.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/angular/datacube/directives.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/angular/datacube/filters.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/angular/datacube/services.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/highcharts-all.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/angular/highcharts-ng.min.js")"></script>
+
+    <script type="text/javascript">
+        angular.module('dataCube.runtimeServices', []).
+                value('analysisId', '@analysisId').
+                value('evaluationId', '@evaluationId');
+    </script>
+
+}
+
+@main(user, "DataCube visualizations :: Payola!", None, scripts, "dataCube") {
+<div class="container-fluid">
+
+    <div class="ng-view"></div>
+
+</div><!-- /.container-fluid -->
+}

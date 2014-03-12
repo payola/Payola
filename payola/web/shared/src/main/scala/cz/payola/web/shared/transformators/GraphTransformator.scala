@@ -21,7 +21,7 @@ import s2js.compiler._
      * Returns a small graph that represents the structure of the whole graph. This should be used to determine if
      * a visual plugin can process the result of this transformation.
      */
-    @async def getSmapleGraph(evaluationId: String)
+    @async def getSampleGraph(evaluationId: String)
         (successCallback: Graph => Unit)(errorCallback: Throwable => Unit)
 
     /**

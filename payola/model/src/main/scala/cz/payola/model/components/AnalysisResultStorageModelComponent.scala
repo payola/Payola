@@ -68,6 +68,10 @@ trait AnalysisResultStorageModelComponent
              */
             def exists(evaluationId: String) = analysisResultRepository.exists(evaluationId)
 
+            def analysisId(evaluationId: String) : String = {
+                analysisResultRepository.byEvaluationId(evaluationId).map{r => r.analysisId}.getOrElse("")
+            }
+
             /**
              * Get whole graph
              */

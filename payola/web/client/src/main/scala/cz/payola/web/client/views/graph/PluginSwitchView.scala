@@ -22,8 +22,9 @@ import cz.payola.web.client.views.map.facets.GroupingMapFacet
 import cz.payola.web.client.views.graph.empty.EmptyPluginView
 import cz.payola.web.client.util.UriHashTools
 import cz.payola.web.client.views.d3.packLayout._
+import cz.payola.web.client.views.datacube.DataCubeVisualizer
 
-class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[String] = None) extends GraphView with ComposedView
+class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[String] = None, analysisId: Option[String]) extends GraphView with ComposedView
 {
     /**
      * Event triggered when ontology customization is created.
@@ -79,7 +80,8 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
         new PackLayout(Some(prefixApplier)),
         new Sunburst(Some(prefixApplier)),
         new ZoomableSunburst(Some(prefixApplier)),
-        new ZoomableTreemap(Some(prefixApplier))
+        new ZoomableTreemap(Some(prefixApplier)),
+        new DataCubeVisualizer(Some(prefixApplier))
     )
 
     /**

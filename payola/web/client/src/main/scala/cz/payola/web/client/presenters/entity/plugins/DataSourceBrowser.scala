@@ -38,7 +38,7 @@ class DataSourceBrowser(
         prefixPresenter.initialize()
         initHistory()
 
-        graphPresenter = new GraphPresenter(view.graphViewSpace.htmlElement, prefixPresenter.prefixApplier)
+        graphPresenter = new GraphPresenter(view.graphViewSpace.htmlElement, prefixPresenter.prefixApplier, None, None)
 
         // Initialize the sub presenters.
         graphPresenter.initialize()
