@@ -183,8 +183,6 @@ trait DataCubeModelComponent
                   |         ?c2 qb:measure ?m ;
                   |             rdfs:label ?l2 .
                   |
-                  |     bind (iri(concat('http://example.org/id/', md5(concat(str(?x), str(?l))))) as ?id)
-                  |
                   |     OPTIONAL { ?d rdfs:label ?dsdLabel . }
                   | }
                 """.stripMargin
