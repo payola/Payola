@@ -59,28 +59,29 @@ trait DataCubeModelComponent
             }
 
             private def buildDatasetQuery(measure: String, dimension: String, filters: List[String]): String = {
-
                 val gen = new VariableGenerator
 
                 var additionalWhere = ""
                 val positiveFilters = filters.filter(_.startsWith("+")).map {
                     f =>
                         val parts = f.substring(1).split("\\$:\\$:\\$")
-                        if(parts(2) == "true"){
+                        if (parts(2) == "true") {
                             val dateVar = gen.apply()
-                            additionalWhere += String.format(" BIND(SUBSTR(str(%s),1,4) AS ?y) FILTER(?y = %s) ", dateVar, parts(1))
-                            String.format("""   <%s>    %s """.stripMargin, parts(0), dateVar)
-                        }else{
+                            additionalWhere += String
+                                .format(" BIND(SUBSTR(str(%s),1,4) AS ?y) FILTER(?y = %s) ", dateVar, parts(1))
+                            String.format( """   <%s>    %s """.stripMargin, parts(0), dateVar)
+                        } else {
                             String.format( """   <%s>    %s""", parts(0), parts(1))
                         }
-                }.mkString( """ ;\n""") + " ."
+                }.mkString( """ ;""") + " ."
 
                 val negativeFilters = filters.filter(_.startsWith("-")).map {
                     f =>
                         val parts = f.substring(1).split("\\$:\\$:\\$")
                         val v = gen.apply()
-                        String.format( """ OPTIONAL { %s <%s> %s . FILTER (?x = %s) } FILTER ( !BOUND(%s) ) """, v, parts(0), parts(1), v, v)
-                }.mkString(""" """)
+                        String.format( """ OPTIONAL { %s <%s> %s . FILTER (?x = %s) } FILTER ( !BOUND(%s) ) """, v,
+                            parts(0), parts(1), v, v)
+                }.mkString( """ """)
 
                 val q = String.format(
                     """
@@ -93,18 +94,23 @@ trait DataCubeModelComponent
                       |     %s
                       | }
                     """, measure, dimension, positiveFilters, additionalWhere, negativeFilters).stripMargin
-
                 q
             }
 
             private def distinctDateValuesQuery(property: String): String = {
                 String.format(
                     """
-                      |SELECT DISTINCT ?o
-                      |WHERE {
-                      |?x <%s> ?date .
-                      |BIND(substr(str(?date),1,4) AS ?o)
-                      |} ORDER BY ?o
+                      | PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+                      | PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                      |
+                      | SELECT DISTINCT ?o ?spl ?l ?sn ?date
+                      | WHERE {
+                      |    ?x <%s> ?date .
+                      |    OPTIONAL { ?date skos:prefLabel ?spl . }
+                      |    OPTIONAL { ?date rdfs:label ?l . FILTER (LANG(?l) = 'en') }
+                      |    OPTIONAL { ?date skos:notion ?sn . }
+                      |    BIND(substr(str(?date),1,4) AS ?o)
+                      | }
                     """.stripMargin, property)
             }
 
@@ -112,11 +118,14 @@ trait DataCubeModelComponent
                 String.format(
                     """
                       | PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                      | PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
                       |
-                      | SELECT DISTINCT ?o ?l WHERE {
+                      | SELECT DISTINCT ?o ?l ?spl ?sn WHERE {
                       |     [] <%s> ?o .
                       |
+                      |     OPTIONAL { ?o skos:prefLabel ?spl . }
                       |     OPTIONAL { ?o rdfs:label ?l . FILTER (LANG(?l) = 'en') }
+                      |     OPTIONAL { ?o skos:notion ?sn . }
                       |
                       | } ORDER BY(?o)
                       | """.stripMargin, property)
@@ -169,21 +178,37 @@ trait DataCubeModelComponent
                   |     ?d a qb:DataStructureDefinition ;
                   |        rdfs:label ?dsdLabel ;
                   |        qb:component ?c ;
-                  |        qb:component ?c2 .
+                  |        qb:component ?c2 ;
+                  |        qb:component ?c3 .
                   |     ?c qb:dimension ?dim ;
-                  |        rdfs:label ?l .
+                  |        rdfs:label ?l ;
+                  |        qb:order ?dimOrder .
+                  |     ?c2 qb:measure ?m ;
+                  |         rdfs:label ?l2 ;
+                  |         qb:order ?mOrder .
+                  |     ?c3 qb:attribute ?a ;
+                  |         rdfs:label ?lattr ;
+                  |         qb:order ?aOrder .
+                  | } WHERE {
+                  |     ?d a qb:DataStructureDefinition ;
+                  |         rdfs:label ?dsdLabel .
+                  |     ?d qb:component ?c .
+                  |     ?c qb:dimension ?dim ;
+                  |         rdfs:label ?l ;
+                  |         qb:order ?dimOrder .
+                  |     ?d qb:component ?c2 .
                   |     ?c2 qb:measure ?m ;
                   |         rdfs:label ?l2 .
-                  | } WHERE {
-                  |     ?d a qb:DataStructureDefinition .
-                  |         ?d qb:component ?c .
-                  |         ?c qb:dimension ?dim ;
-                  |             rdfs:label ?l .
-                  |         ?d qb:component ?c2 .
-                  |         ?c2 qb:measure ?m ;
-                  |             rdfs:label ?l2 .
                   |
-                  |     OPTIONAL { ?d rdfs:label ?dsdLabel . }
+                  |     OPTIONAL { ?m qb:order ?mOrder . }
+                  |     OPTIONAL {
+                  |         ?d qb:component ?c3 .
+                  |         ?c3 qb:attribute ?a ;
+                  |             rdfs:label ?lattr ;
+                  |             qb:order ?aOrder .
+                  |     }
+                  |
+                  |     FILTER(LANG(?dsdLabel) = 'en')
                   | }
                 """.stripMargin
         }

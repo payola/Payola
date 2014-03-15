@@ -10,6 +10,7 @@ angular.module('dataCube.controllers', []).
             const URI_component = "http://purl.org/linked-data/cube#component";
             const URI_dimension = "http://purl.org/linked-data/cube#dimension";
             const URI_measure = "http://purl.org/linked-data/cube#measure";
+            const URI_QB_ORDER = "http://purl.org/linked-data/cube#order";
             const URI_attribute = "http://purl.org/linked-data/cube#attribute";
             const URI_label = "http://www.w3.org/2000/01/rdf-schema#label";
             const URI_sparqlResultValue = "http://www.w3.org/2005/sparql-results#value";
@@ -21,19 +22,26 @@ angular.module('dataCube.controllers', []).
             $scope.dataStructures = [];
             $scope.evaluationId = evaluationId;
             $scope.selectedDataStructure = null;
-            $scope.filteringDimension = null;
+            $scope.XAxisDimension = null;
             $scope.activeMeasure = null;
+            $scope.error = null;
 
             $scope.highcharts = {
                 options: {
                     chart: {
-                        type: 'line'
+                        type: 'line',
+                        height: 650
                     }
                 },
                 series: [
                 ],
                 title: {
                     text: 'DataCube'
+                },
+                yAxis: {
+                    title: {
+                        text: ""
+                    }
                 },
                 loading: false
             };
@@ -58,6 +66,8 @@ angular.module('dataCube.controllers', []).
 
                 var promises = [];
 
+                $scope.labelsMap = {};
+
                 angular.forEach([
                     $scope.dataStructures[$scope.selectedDataStructure].dimensions,
                     $scope.dataStructures[$scope.selectedDataStructure].attributes
@@ -68,8 +78,6 @@ angular.module('dataCube.controllers', []).
 
                             promises.push(DataCubeService.get({queryName: "distinct-values", evaluationId: evaluationId, property: uri, isDate: def.isDate},
                                 function (data) {
-
-                                    $scope.labelsMap = {};
 
                                     angular.forEach(data, function (value) {
 
@@ -87,14 +95,24 @@ angular.module('dataCube.controllers', []).
                                                     }
                                                     res.o = solution[URI_value][0];
                                                 }
+                                                if (solution[URI_variable][0].value == "date") {
+                                                    var o = solution[URI_value][0];
+                                                    res.uri = o.value;
+                                                }
+                                                if (solution[URI_variable][0].value == "spl") {
+                                                    res.prefLabel = solution[URI_value][0].value;
+                                                }
                                                 if (solution[URI_variable][0].value == "l") {
                                                     res.label = solution[URI_value][0].value;
                                                 }
+                                                if (solution[URI_variable][0].value == "sn") {
+                                                    res.notion = solution[URI_value][0].value;
+                                                }
                                             });
-                                            res.active = (!def.isDimension || (def == $scope.filteringDimension));
+                                            res.active = (!def.isDimension || (def == $scope.XAxisDimension));
                                             def.values.push(res);
 
-                                            $scope.labelsMap[res.uri] = res.label;
+                                            $scope.labelsMap[res.uri] = res.prefLabel || res.label || res.notion || res.uri;
                                         }
                                     });
 
@@ -114,10 +132,14 @@ angular.module('dataCube.controllers', []).
             };
 
             $scope.switchDSD = function ($index, force) {
+
                 if (force || $scope.selectedDataStructure != $index) {
                     $scope.selectedDataStructure = $index;
-                    $scope.filteringDimension = $scope.dataStructures[$index].dimensions[Object.getOwnPropertyNames($scope.dataStructures[$index].dimensions)[0]];
-                    $scope.activeMeasure = $scope.dataStructures[$index].measures[Object.getOwnPropertyNames($scope.dataStructures[$index].measures)[0]];
+                    $scope.XAxisDimension = $scope.dataStructures[$index].dimensionsOrdered[0] || $scope.dataStructures[$index].dimensionsOrdered[1];
+                    $scope.activeMeasure = $scope.dataStructures[$index].measuresOrdered[0] || $scope.dataStructures[$index].measuresOrdered[1];
+
+                    $scope.highcharts.title.text = $scope.dataStructures[$index].label;
+                    $scope.highcharts.yAxis.title.text = $scope.activeMeasure.label.substring(0,25)+"...";
 
                     angular.forEach($scope.dataStructures, function (dsd, i) {
                         if (i != $index) {
@@ -131,22 +153,22 @@ angular.module('dataCube.controllers', []).
             }
 
             $scope.setXAxis = function (uri) {
-                $scope.filteringDimension = $scope.dataStructures[$scope.selectedDataStructure].dimensions[uri];
+                /*$scope.XAxisDimension = $scope.dataStructures[$scope.selectedDataStructure].dimensions[uri];
 
-                console.log(uri);
+                 console.log(uri);
 
-                angular.forEach($scope.dataStructures[$scope.selectedDataStructure].dimensions, function (dim, dimUri) {
-                    var i = 0;
-                    angular.forEach(dim.values, function (val, valUri) {
-                        if (dimUri != uri) {
-                            val.active = i == 0;
-                        } else {
-                            val.active = true;
-                        }
+                 angular.forEach($scope.dataStructures[$scope.selectedDataStructure].dimensions, function (dim, dimUri) {
+                 var i = 0;
+                 angular.forEach(dim.values, function (val, valUri) {
+                 if (dimUri != uri) {
+                 val.active = i == 0;
+                 } else {
+                 val.active = true;
+                 }
 
-                        ++i;
-                    });
-                });
+                 ++i;
+                 });
+                 });*/
 
             };
 
@@ -157,53 +179,54 @@ angular.module('dataCube.controllers', []).
                 var filters = [];
 
                 filters = filters.concat(computeFilters($scope.dataStructures[$scope.selectedDataStructure].attributes));
-                filters = filters.concat(computeFilters([$scope.filteringDimension]));
+                var filtersFrom = $scope.dataStructures[$scope.selectedDataStructure].dimensionsOrdered.slice(-($scope.dataStructures[$scope.selectedDataStructure].dimensionsOrdered.length - 3));
+                filters = filters.concat(computeFilters(filtersFrom, true));
+                filters = filters.concat(computeFilters([$scope.XAxisDimension]));
 
-                var i = 0;
                 $scope.highcharts.series = [];
                 $scope.highcharts.xAxis = {categories: []};
 
-                angular.forEach($scope.dataStructures[$scope.selectedDataStructure].dimensions, function (dim) {
-                    if (dim != $scope.filteringDimension) {
+                var cycleDim = 1;
+                if (!$scope.dataStructures[$scope.selectedDataStructure].dimensionsOrdered[0]) {
+                    cycleDim = 2;
+                }
 
-                        angular.forEach(dim.values, function (v, k) {
+                var dim = $scope.dataStructures[$scope.selectedDataStructure].dimensionsOrdered[cycleDim];
+                angular.forEach(dim.values, function (v, k) {
 
-                            if (!v.active) return;
+                    if (!v.active) return;
 
-                            var localFilters = filters.concat(computeFilters([
-                                {uri: dim.uri, isDate: dim.isDate, values: [v]}
-                            ], true));
+                    var localFilters = filters.concat(computeFilters([
+                        {uri: dim.uri, isDate: dim.isDate, values: [v]}
+                    ], true));
 
-                            DataCubeService.get({queryName: "data", evaluationId: evaluationId, measure: measureUri, dimension: $scope.filteringDimension.uri, filters: localFilters.map(function (x) {
-                                return (x.positive ? "+" : "-") + x.component + "$:$:$" + x.value + "$:$:$" + x.isDate;
-                            })}, function (data) {
+                    DataCubeService.get({queryName: "data", evaluationId: evaluationId, measure: measureUri, dimension: $scope.XAxisDimension.uri, filters: localFilters.map(function (x) {
+                        return (x.positive ? "+" : "-") + x.component + "$:$:$" + x.value + "$:$:$" + x.isDate;
+                    })}, function (data) {
 
-                                $scope.highcharts.series[i] = {name: v.value, data: []};
+                        var serie = {name: v.prefLabel || v.uri || v.value, data: []};
+                        $scope.highcharts.series.push(serie);
 
-                                angular.forEach(data, function (val, key) {
-                                    if (key.substr(0, 1) != '$') {
-                                        if (val[URI_binding]) {
-                                            var res = {};
-                                            angular.forEach(val[URI_binding], function (b) {
-                                                var solution = data[b.value];
-                                                if (solution[URI_variable][0].value == "m") {
-                                                    res.m = solution[URI_value][0];
-                                                }
-                                                if (solution[URI_variable][0].value == "d") {
-                                                    res.d = solution[URI_value][0];
-                                                }
-                                            });
-
-                                            $scope.highcharts.series[i].data.push({name: $scope.labelsMap[res.d.value] || res.d.value, y: parseInt(res.m.value) });
-                                            $scope.highcharts.xAxis.categories.push($scope.labelsMap[res.d.value]);
+                        angular.forEach(data, function (val, key) {
+                            if (key.substr(0, 1) != '$') {
+                                if (val[URI_binding]) {
+                                    var res = {};
+                                    angular.forEach(val[URI_binding], function (b) {
+                                        var solution = data[b.value];
+                                        if (solution[URI_variable][0].value == "m") {
+                                            res.m = solution[URI_value][0];
                                         }
-                                    }
-                                });
+                                        if (solution[URI_variable][0].value == "d") {
+                                            res.d = solution[URI_value][0];
+                                        }
+                                    });
 
-                                i++;
-                            });
+                                    serie.data.push({name: $scope.labelsMap[res.d.value] || res.d.value, y: parseInt(res.m.value) });
+                                    $scope.highcharts.xAxis.categories.push($scope.labelsMap[res.d.value]);
+                                }
+                            }
                         });
-                    }
+                    });
                 });
 
             };
@@ -212,9 +235,9 @@ angular.module('dataCube.controllers', []).
                 $scope.loadData();
             };
 
-            $scope.setActiveValue = function (dimension, $valueIndex) {
+            $scope.setActiveValue = function (v) {
                 /*var currentValue = dimension.values[$valueIndex].active;
-                 if (dimension != $scope.filteringDimension) {
+                 if (dimension != $scope.XAxisDimension) {
                  if (currentValue == false) {
                  dimension.values[$valueIndex].active = true;
                  return;
@@ -227,6 +250,7 @@ angular.module('dataCube.controllers', []).
 
             $scope.loadingDataDone = function () {
                 if ($scope.dataStructures.length < 1) {
+                    $scope.error = "No DSDs found.";
                     return;
                 }
 
@@ -242,7 +266,7 @@ angular.module('dataCube.controllers', []).
                     angular.forEach(component.values, function (componentVal) {
                         if ((positive && componentVal.active) || (!positive && !componentVal.active)) {
                             var val = (componentVal.uri ? "<" + componentVal.uri + ">" : "'" + componentVal.value + "'" + (componentVal.datatype ? "^^<" + componentVal.datatype + ">" : ""));
-                            filters.push({component: component.uri, value: val, positive: positive, isDate: component.isDate});
+                            filters.push({component: component.uri, value: val, positive: positive, isDate: component.isDate && !componentVal.uri});
                         }
                     });
                 });
@@ -265,12 +289,13 @@ angular.module('dataCube.controllers', []).
             }
 
             function parseDSD(node, data, uri) {
-                var dsdRef = {label: "Unlabeled DSD", uri: uri, dimensions: {}, measures: {}, attributes: {}};
+
+                var dsdRef = {label: "Unlabeled DSD", uri: uri, dimensions: {}, measures: {}, attributes: {}, dimensionsOrdered: [], measuresOrdered: [], attributesOrdered: []};
 
                 var queue = [
-                    [URI_measure, 'measures'],
-                    [URI_dimension, 'dimensions'],
-                    [URI_attribute, 'attributes']
+                    {uri: URI_measure, field: 'measures', arrayIdx: 'measuresOrdered'},
+                    {uri: URI_dimension, field: 'dimensions', arrayIdx: 'dimensionsOrdered'},
+                    {uri: URI_attribute, field: 'attributes', arrayIdx: 'attributesOrdered'}
                 ];
 
                 if (node[URI_component]) {
@@ -280,25 +305,34 @@ angular.module('dataCube.controllers', []).
                     }
 
                     angular.forEach(node[URI_component], function (component) {
-                        if (component.type == "bnode" || component.type == "uri") {
-                            var componentValue = data[component.value];
+                            if (component.type == "bnode" || component.type == "uri") {
+                                var componentValue = data[component.value];
 
-                            angular.forEach(queue, function (queueItem) {
-                                if (componentValue[queueItem[0]]) {
-                                    dsdRef[queueItem[1]][componentValue[queueItem[0]][0].value] = {
-                                        uri: componentValue[queueItem[0]][0].value,
-                                        label: componentValue[URI_label][0].value,
-                                        values: [],
-                                        isDimension: queueItem[0] == URI_dimension,
-                                        isDate: (componentValue[queueItem[0]][0].value.substr(-6).toLowerCase() == "period")
-                                    };
-                                }
-                            });
+                                angular.forEach(queue, function (queueItem) {
+                                        if (componentValue[queueItem.uri]) {
+                                            var c = {
+                                                uri: componentValue[queueItem.uri][0].value,
+                                                label: componentValue[URI_label][0].value,
+                                                values: [],
+                                                isDimension: queueItem.uri == URI_dimension,
+                                                isDate: (componentValue[queueItem.uri][0].value.substr(-6).toLowerCase() == "period"),
+                                                order: parseInt((componentValue[URI_QB_ORDER] || [
+                                                    {value: dsdRef[queueItem.arrayIdx].length + 1}
+                                                ])[0].value)
+                                            };
+
+                                            dsdRef[queueItem.field][componentValue[queueItem.uri][0].value] = c;
+                                            dsdRef[queueItem.arrayIdx][c.order] = c; //TODO: a QB DSD with some orders defined and some not
+                                        }
+                                    }
+                                );
+                            }
                         }
-                    });
+                    );
                 }
 
                 $scope.dataStructures.push(dsdRef);
             }
 
-        }]);
+        }])
+;
