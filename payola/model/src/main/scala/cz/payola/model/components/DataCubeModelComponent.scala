@@ -105,11 +105,12 @@ trait DataCubeModelComponent
                       |
                       | SELECT DISTINCT ?o ?spl ?l ?sn ?date
                       | WHERE {
-                      |    ?x <%s> ?date .
-                      |    OPTIONAL { ?date skos:prefLabel ?spl . }
-                      |    OPTIONAL { ?date rdfs:label ?l . FILTER (LANG(?l) = 'en') }
-                      |    OPTIONAL { ?date skos:notion ?sn . }
-                      |    BIND(substr(str(?date),1,4) AS ?o)
+                      |    ?x <%s> ?d .
+                      |    OPTIONAL { ?d skos:prefLabel ?spl . }
+                      |    OPTIONAL { ?d rdfs:label ?l . FILTER (LANG(?l) = 'en') }
+                      |    OPTIONAL { ?d skos:notion ?sn . }
+                      |    BIND(substr(str(?d),1,4) AS ?o)
+                      |    BIND(IF(isUri(?d),?d,"") AS ?date)
                       | }
                     """.stripMargin, property)
             }
@@ -190,8 +191,7 @@ trait DataCubeModelComponent
                   |         rdfs:label ?lattr ;
                   |         qb:order ?aOrder .
                   | } WHERE {
-                  |     ?d a qb:DataStructureDefinition ;
-                  |         rdfs:label ?dsdLabel .
+                  |     ?d a qb:DataStructureDefinition .
                   |     ?d qb:component ?c .
                   |     ?c qb:dimension ?dim ;
                   |         rdfs:label ?l ;
@@ -208,7 +208,7 @@ trait DataCubeModelComponent
                   |             qb:order ?aOrder .
                   |     }
                   |
-                  |     FILTER(LANG(?dsdLabel) = 'en')
+                  |     OPTIONAL { ?d rdfs:label ?dsdLabel . FILTER(LANG(?dsdLabel) = 'en') }
                   | }
                 """.stripMargin
         }

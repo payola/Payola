@@ -50,7 +50,7 @@
                     <li ng-repeat="dimension in dataStructures[selectedDataStructure].dimensionsOrdered | orderBy:'order'">
                         {{dimension.label || dimension.uri}}
                         <ul style="max-height: 200px; overflow: scroll;">
-                            <li ng-repeat="v in dimension.values | orderBy:'prefLabel'"><input type="checkbox" ng-model="v.active" ng-change="setActiveValue(v)" />&nbsp;{{v.prefLabel || v.label || v.notion || v.uri || v.value}}</li>
+                            <li ng-repeat="v in dimension.values | orderBy:['prefLabel', 'label', 'notion', 'uri', 'value']"><input type="checkbox" ng-model="v.active" ng-change="setActiveValue(v)" />&nbsp;{{v.prefLabel || v.label || v.notion || v.uri || v.value}}</li>
                         </ul>
                         <p class="alert alert-danger" ng-show="dimension.values.length == 0">This dimension has no values. That's why your chart is empty.</p>
                     </li>

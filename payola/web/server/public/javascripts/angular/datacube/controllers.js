@@ -179,7 +179,11 @@ angular.module('dataCube.controllers', []).
                 var filters = [];
 
                 filters = filters.concat(computeFilters($scope.dataStructures[$scope.selectedDataStructure].attributes));
-                var filtersFrom = $scope.dataStructures[$scope.selectedDataStructure].dimensionsOrdered.slice(-($scope.dataStructures[$scope.selectedDataStructure].dimensionsOrdered.length - 3));
+                var filtersFrom = []
+                var dimCount = $scope.dataStructures[$scope.selectedDataStructure].dimensionsOrdered.length;
+                if(dimCount > 3){
+                    filtersFrom = $scope.dataStructures[$scope.selectedDataStructure].dimensionsOrdered.slice(-(dimCount - 3));
+                }
                 filters = filters.concat(computeFilters(filtersFrom, true));
                 filters = filters.concat(computeFilters([$scope.XAxisDimension]));
 
@@ -332,6 +336,8 @@ angular.module('dataCube.controllers', []).
                 }
 
                 $scope.dataStructures.push(dsdRef);
+
+                console.log(dsdRef);
             }
 
         }])
